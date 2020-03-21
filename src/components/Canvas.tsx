@@ -1,23 +1,37 @@
-import React, { useRef, useContext, useEffect } from 'react';
+import React, { useRef, useContext, useEffect, ReactElement } from 'react';
 import { store } from '../store';
-import paper from 'paper';
+import renderCanvas from '../canvas';
 
-const Canvas = () => {
-  const canvas = useRef<HTMLCanvasElement>(null);
+const Canvas = (): ReactElement => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const globalState = useContext(store);
-  const { sketchDocument } = globalState;
+  const { sketchPages, dispatch, canvas, theme } = globalState;
+
+  const onResize = (): void => {
+    canvasRef.current.width = window.innerWidth;
+    canvasRef.current.height = window.innerHeight;
+  }
 
   useEffect(() => {
-    canvas.current.width = window.innerWidth;
-    canvas.current.height = window.innerHeight;
-    paper.setup(canvas.current);
-    console.log(sketchDocument);
+    window.addEventListener('resize', onResize);
+    canvasRef.current.width = window.innerWidth;
+    canvasRef.current.height = window.innerHeight;
+    renderCanvas({
+      sketchPages: sketchPages,
+      canvas: canvasRef.current
+    })
+    .then(() => {
+      console.log('done');
+    });
   }, []);
 
   return (
     <canvas
       id='c-canvas'
-      ref={canvas} />
+      ref={canvasRef}
+      style={{
+        background: theme.background.z0
+      }} />
   );
 }
 

@@ -11,6 +11,12 @@ const reducers = (state: any, action: any): any => {
         ready: action.ready
       };
     }
+    case 'set-canvas': {
+      return {
+        ...state,
+        canvas: action.canvas
+      };
+    }
     default:
       throw new Error('Action not found');
   }

@@ -1,7 +1,7 @@
-import React, { useRef, useContext, useEffect } from 'react';
+import React, { useRef, useContext, useEffect, ReactElement } from 'react';
+import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import Canvas from './Canvas';
 import { store } from '../store';
-import FileFormat from '@sketch-hq/sketch-file-format-ts';
 
 interface AppProps {
   sketchDocument: FileFormat.Document;
@@ -13,7 +13,7 @@ interface AppProps {
   };
 }
 
-const App = (props: AppProps) => {
+const App = (props: AppProps): ReactElement => {
   const app = useRef<HTMLDivElement>(null);
   const globalState = useContext(store);
   const { dispatch, ready } = globalState;
