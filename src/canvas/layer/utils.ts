@@ -69,7 +69,7 @@ interface GetBooleanOperation {
   operation: FileFormat.BooleanOperation;
 }
 
-export const getBooleanOperation = ({ operation }: GetBooleanOperation): paper.Style.booleanOperation | null => {
+export const getBooleanOperation = ({ operation }: GetBooleanOperation): string | null => {
   switch(operation) {
     case 0:
       return 'unite';
@@ -86,13 +86,22 @@ export const getBooleanOperation = ({ operation }: GetBooleanOperation): paper.S
 
 interface ApplyBooleanOperation {
   operation: FileFormat.BooleanOperation;
-  a: paper.Path;
-  b: paper.Path;
+  a: paper.PathItem;
+  b: paper.PathItem;
 }
 
-export const applyBooleanOperation = ({ a, b, operation }: ApplyBooleanOperation): void => {
+export const applyBooleanOperation = ({ a, b, operation }: ApplyBooleanOperation): paper.PathItem => {
   const booleanOperation = getBooleanOperation({operation});
   if (booleanOperation) {
-    return a[booleanOperation](b);
+    switch(booleanOperation) {
+      case 'unite':
+        return a.unite(b);
+      case 'subtract':
+        return a.subtract(b);
+      case 'intersect':
+        return a.intersect(b);
+      case 'exclude':
+        return a.exclude(b);
+    }
   }
 };
