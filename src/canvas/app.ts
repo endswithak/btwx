@@ -4,7 +4,7 @@ interface RenderApp {
   canvas: HTMLCanvasElement;
 }
 
-const renderApp = async ({ canvas }: RenderApp): Promise<void> => {
+const renderApp = ({ canvas }: RenderApp): void => {
   paper.setup(canvas);
 };
 

@@ -7,18 +7,26 @@ interface RenderShapePath {
   container: paper.Group;
 }
 
-const renderShapePath = async ({ layer, container }: RenderShapePath): Promise<paper.Layer> => {
-  const shapePath = new Layer();
-  shapePath.name = layer.do_objectID;
-  shapePath.data.name = layer.name;
-  shapePath.visible = layer.isVisible;
-  shapePath.locked = layer.isLocked;
-  shapePath.parent = container;
-  const layerPath = drawLayerPath({layer});
-  layerPath.parent = shapePath;
-  layerPath.closed = layer.isClosed;
-  layerPath.fillColor = Color.random();
-  layerPath.parent = shapePath;
+const renderShapePath = ({ layer, container }: RenderShapePath): paper.Layer => {
+  const shapePath = new Layer({
+    name: layer.do_objectID,
+    data: { name: layer.name },
+    locked: layer.isLocked,
+    visible: layer.isVisible,
+    parent: container
+  });
+  const layerPath = drawLayerPath({
+    layer: layer,
+    opts: {
+      insert: false,
+      closed: layer.isClosed
+    }
+  });
+  const fill = layerPath.clone();
+  fill.parent = shapePath;
+  fill.fillColor = Color.random();
+  fill.strokeWidth = 2;
+  fill.strokeColor = Color.random();
   shapePath.position.x += layer.frame.x;
   shapePath.position.y += layer.frame.y;
   return shapePath;

@@ -5,7 +5,7 @@ import renderCanvas from '../canvas';
 const Canvas = (): ReactElement => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const globalState = useContext(store);
-  const { sketchPages, dispatch, canvas, theme } = globalState;
+  const { sketchDocument, sketchPages, dispatch, canvas, theme } = globalState;
 
   const onResize = (): void => {
     canvasRef.current.width = window.innerWidth;
@@ -17,6 +17,7 @@ const Canvas = (): ReactElement => {
     canvasRef.current.width = window.innerWidth;
     canvasRef.current.height = window.innerHeight;
     renderCanvas({
+      sketchDocument: sketchDocument,
       sketchPages: sketchPages,
       canvas: canvasRef.current
     })

@@ -5,17 +5,19 @@ import renderLayer from './layer';
 interface RenderLayers {
   layers: FileFormat.AnyLayer[];
   container: paper.Group;
+  symbols: FileFormat.SymbolMaster[] | null;
+  overrides?: FileFormat.OverrideValue[];
 }
 
-const renderLayers = async ({ layers, container }: RenderLayers): Promise<void> => {
-  const layerPromises: Promise<any>[] = [];
+const renderLayers = ({ layers, container, symbols, overrides }: RenderLayers): void => {
   layers.forEach((layer) => {
-    layerPromises.push(renderLayer({
+    renderLayer({
       layer: layer,
-      container: container
-    }));
+      container: container,
+      symbols: symbols,
+      overrides: overrides
+    });
   });
-  await Promise.all(layerPromises);
 };
 
 export default renderLayers;

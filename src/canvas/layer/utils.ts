@@ -42,22 +42,52 @@ export const getAbsPoint = ({point, frame}: GetAbsPoint): any => {
   }
 };
 
-interface DrawLayerPath {
-  layer: FileFormat.ShapePath | FileFormat.Rectangle | FileFormat.Star | FileFormat.Polygon | FileFormat.Oval;
+interface GetRelPoint {
+  point: FileFormat.CurvePoint;
+  frame: FileFormat.Rect;
 }
 
-export const drawLayerPath = ({ layer }: DrawLayerPath): paper.Path => {
-  const path = new Path({insert: false});
+export const getRelPoint = ({point, frame}: GetRelPoint): any => {
+  const absPoint = getAbsPoint({point, frame});
+  const p = absPoint.point;
+  const cf = absPoint.curveFrom;
+  const ct = absPoint.curveTo;
+  const cfxDiff = cf.x - p.x;
+  const cfyDiff = cf.y - p.y;
+  const ctxDiff = ct.x - p.x;
+  const ctyDiff = ct.y - p.y;
+  return {
+    ...absPoint,
+    curveFrom: {
+      ...cf,
+      x: cfxDiff,
+      y: cfyDiff
+    },
+    curveTo: {
+      ...ct,
+      x: ctxDiff,
+      y: ctyDiff
+    }
+  }
+};
+
+interface DrawLayerPath {
+  layer: FileFormat.ShapePath | FileFormat.Rectangle | FileFormat.Star | FileFormat.Polygon | FileFormat.Oval;
+  opts: any;
+}
+
+export const drawLayerPath = ({ layer, opts }: DrawLayerPath): paper.Path => {
+  const path = new Path(opts);
   const segments: paper.Segment[] = [];
   layer.points.forEach((point) => {
-    const absPoint = getAbsPoint({point: point, frame: layer.frame});
+    const absPoint = getRelPoint({point: point, frame: layer.frame});
     const segmentPoint = new Point(absPoint.point.x, absPoint.point.y);
-    const segmentHandleIn = new Point(segmentPoint.x - absPoint.curveFrom.x, segmentPoint.y - absPoint.curveFrom.y);
-    const segmentHandleOut = new Point(segmentPoint.x - absPoint.curveTo.x, segmentPoint.y - absPoint.curveTo.y);
+    const segmentHandleIn = new Point(absPoint.curveTo.x, absPoint.curveTo.y);
+    const segmentHandleOut = new Point(absPoint.curveFrom.x, absPoint.curveFrom.y);
     const segment = new Segment({
       point: segmentPoint,
-      handleOut: point.hasCurveFrom ? segmentHandleOut : null,
-      handleIn: point.hasCurveTo ? segmentHandleIn : null
+      handleIn: point.hasCurveTo ? segmentHandleIn : null,
+      handleOut: point.hasCurveFrom ? segmentHandleOut : null
     });
     segments.push(segment);
   });
@@ -103,5 +133,42 @@ export const applyBooleanOperation = ({ a, b, operation }: ApplyBooleanOperation
       case 'exclude':
         return a.exclude(b);
     }
+  } else {
+    return b;
   }
+};
+
+interface GetSymbolMaster {
+  instanceId: string;
+  symbolId: string;
+  symbols: FileFormat.SymbolMaster[];
+  overrides?: FileFormat.OverrideValue[];
+}
+
+export const getSymbolMaster = ({ instanceId, symbolId, symbols, overrides }: GetSymbolMaster): FileFormat.SymbolMaster => {
+  const originalSymbol = symbols.find((symbolMaster) => {
+    return symbolMaster.symbolID === symbolId;
+  });
+  const overrideSymbol = overrides ? overrides.find((override) => {
+    return override.overrideName.includes(`${instanceId}_symbolID`);
+  }) : null;
+  if (overrideSymbol) {
+    return symbols.find((symbolMaster) => {
+      return symbolMaster.symbolID === overrideSymbol.value;
+    });
+  } else {
+    return originalSymbol;
+  }
+};
+
+interface GetOverrideString {
+  textId: string;
+  overrides?: FileFormat.OverrideValue[];
+}
+
+export const getOverrideString = ({ textId, overrides }: GetOverrideString): FileFormat.OverrideValue => {
+  const overrideString = overrides ? overrides.find((override) => {
+    return override.overrideName.includes(`${textId}_stringValue`);
+  }) : null;
+  return overrideString;
 };

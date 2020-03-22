@@ -2,36 +2,55 @@ import paper, { Group, Rectangle, view, Shape, Layer } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import renderLayers from './layers';
 
-interface RenderArtboard {
+interface RenderArtboardBackground {
   artboard: FileFormat.Artboard;
+  container: paper.Group;
 }
 
-const renderArtboard = async ({ artboard }: RenderArtboard): Promise<paper.Group> => {
-  console.log(artboard);
-  const artboardContainer = new Group();
-  const artboardBackground = new Layer();
+const renderArtboardBackground = ({ artboard, container }: RenderArtboardBackground): void => {
+  // artboard background
+  const artboardBackground = new Layer({
+    parent: container
+  });
+  // artboard rectangle
   const artboardRectangle = new Rectangle({
     x: 0,
     y: 0,
     width: artboard.frame.width,
     height: artboard.frame.height
   });
-  const artboardBackgroundCanvas = new Shape.Rectangle({
+  // artboard canvas
+  new Shape.Rectangle({
     rectangle: artboardRectangle,
-    fillColor: '#ffffff'
+    fillColor: '#ffffff',
+    parent: artboardBackground
   });
-  artboardBackground.addChild(artboardBackgroundCanvas);
+  // artboard backgroundColor
   if (artboard.hasBackgroundColor) {
-    const artboardBackgroundColor = new Shape.Rectangle({
+    new Shape.Rectangle({
       rectangle: artboardRectangle,
-      fillColor: artboard.backgroundColor
+      fillColor: artboard.backgroundColor,
+      parent: artboardBackground
     });
-    artboardBackground.addChild(artboardBackgroundColor);
   }
-  artboardContainer.addChild(artboardBackground);
-  await renderLayers({
-    layers: artboard.layers,
+};
+
+interface RenderArtboard {
+  artboard: FileFormat.Artboard;
+  symbols: FileFormat.SymbolMaster[] | null;
+}
+
+const renderArtboard = ({ artboard, symbols }: RenderArtboard): paper.Group => {
+  console.log(artboard);
+  const artboardContainer = new Group();
+  renderArtboardBackground({
+    artboard: artboard,
     container: artboardContainer
+  });
+  renderLayers({
+    layers: artboard.layers,
+    container: artboardContainer,
+    symbols: symbols
   });
   artboardContainer.position = view.center;
   artboardContainer.position.x += artboard.frame.x;
