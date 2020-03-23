@@ -1,4 +1,4 @@
-import paper, { Group, Layer, Shape, Rectangle, Point, Color, PointText } from 'paper';
+import paper, { Group, Layer, view, Shape, Rectangle, Point, Color, PointText } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { getOverrideString, getTextJustification, getTextPoint } from './utils';
 
@@ -8,25 +8,7 @@ interface RenderText {
   overrides?: FileFormat.OverrideValue[];
 }
 
-const renderText = ({ layer, container, overrides }: RenderText): paper.Group => {
-  const textArea = new Group({
-    parent: container,
-    bounds: new Rectangle({
-      x: 0,
-      y: 0,
-      width: layer.frame.width,
-      height: layer.frame.height
-    })
-  });
-  const textAreaBg = new Shape.Rectangle({
-    parent: textArea,
-    rectangle: new Rectangle({
-      x: 0,
-      y: 0,
-      width: layer.frame.width,
-      height: layer.frame.height
-    })
-  });
+const renderText = ({ layer, container, overrides }: RenderText): paper.PointText => {
   const textStyles = layer.style.textStyle;
   const paragraphStyles = textStyles.encodedAttributes.paragraphStyle;
   const fontSize = textStyles.encodedAttributes.MSAttributedStringFontAttribute.attributes.size;
@@ -39,40 +21,92 @@ const renderText = ({ layer, container, overrides }: RenderText): paper.Group =>
     alignment: paragraphStyles.alignment
   });
   const textPoint = getTextPoint({
-    textBehaviour: layer.textBehaviour,
     justfication: textJustification,
-    width: layer.frame.width,
-    lineHeight: lineHeight,
-    verticalAlignment: textStyles.verticalAlignment,
-    height: layer.frame.height
+    width: layer.frame.width
   });
   const text = new PointText({
     point: textPoint,
+    parent: container,
     content: textOverride ? textOverride.value : layer.attributedString.string,
     fillColor: Color.random(),
+    // strokeColor: Color.random(),
+    // strokeWidth: 1,
+    fontFamily: 'Helvetica',
     justification: textJustification,
     fontSize: fontSize,
     leading: lineHeight
   });
+  text.position.x += layer.frame.x;
+  text.position.y += layer.frame.y;
   if (layer.textBehaviour === 2) {
     switch(textStyles.verticalAlignment) {
-      case 0:
-        text.position.y += textArea.bounds.topLeft.y - text.bounds.topLeft.y;
-        break;
       case 1:
-        text.position.y += textArea.bounds.center.y - text.bounds.center.y;
+        text.position.y += (layer.frame.height - text.bounds.height) / 2;
         break;
       case 2:
-        text.position.y += textArea.bounds.bottomLeft.y - text.bounds.bottomLeft.y;
+        text.position.y += layer.frame.height - text.bounds.height;
         break;
     }
-  } else {
-    text.position.y += textArea.bounds.center.y - text.bounds.center.y;
   }
-  textArea.addChild(text);
-  textArea.position.x += layer.frame.x;
-  textArea.position.y += layer.frame.y;
-  return textArea;
+  return text;
 };
 
 export default renderText;
+
+// updated paper PointText snippet ref
+
+// _draw: function(ctx, param, viewMatrix) {
+//   if (!this._content)
+//     return;
+//   this._setStyles(ctx, param, viewMatrix);
+//   var lines = this._lines,
+//     style = this._style,
+//     hasFill = style.hasFill(),
+//     hasStroke = style.hasStroke(),
+//     leading = style.getLeading(),
+//     shadowColor = ctx.shadowColor;
+//   ctx.font = style.getFontStyle();
+//   ctx.textAlign = style.getJustification();
+
+// New
+
+//   var measure = ctx.measureText('Abcdefghijklmnop');
+//   var diff = leading - (measure.actualBoundingBoxAscent + measure.actualBoundingBoxDescent);
+//   var textY = (diff / 2) + measure.actualBoundingBoxAscent;
+
+// end new
+
+//   for (var i = 0, l = lines.length; i < l; i++) {
+//     ctx.shadowColor = shadowColor;
+//     var line = lines[i];
+//     if (hasFill) {
+//       ctx.fillText(line, 0, textY);
+//       ctx.shadowColor = 'rgba(0,0,0,0)';
+//     }
+//     if (hasStroke)
+//       ctx.strokeText(line, 0, textY);
+//     ctx.translate(0, leading);
+//   }
+// },
+
+// _getBounds: function(matrix, options) {
+//   var style = this._style,
+//     lines = this._lines,
+//     numLines = lines.length,
+//     justification = style.getJustification(),
+//     leading = style.getLeading(),
+//     width = this.getView().getTextWidth(style.getFontStyle(), lines),
+//     x = 0;
+//   if (justification !== 'left')
+//     x -= width / (justification === 'center' ? 2: 1);
+//   var rect = new Rectangle(x,
+
+// New
+
+//         0,
+
+// end new
+
+//         width, numLines * leading);
+//   return matrix ? matrix._transformBounds(rect, rect) : rect;
+// }

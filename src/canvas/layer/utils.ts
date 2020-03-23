@@ -218,40 +218,13 @@ export const getTextPointX = ({ justfication, width }: GetTextPointX): number =>
   }
 };
 
-// interface GetTextPointY {
-//   textBehaviour: number;
-//   lineHeight: number;
-//   verticalAlignment: number;
-//   height: number;
-// }
-
-// export const getTextPointY = ({ textBehaviour, lineHeight, verticalAlignment, height }: GetTextPointY): number => {
-//   if (textBehaviour === 2) {
-//     switch(verticalAlignment) {
-//       case 0:
-//         return 0;
-//       case 1:
-//         return height / 2;
-//       case 2:
-//         return height;
-//     }
-//   } else {
-//     return height;
-//   }
-// };
-
 interface GetTextPoint {
   justfication: string;
   width: number;
-  textBehaviour: number;
-  lineHeight: number;
-  verticalAlignment: number;
-  height: number;
 }
 
-export const getTextPoint = ({ justfication, width, textBehaviour, verticalAlignment, lineHeight, height }: GetTextPoint): number[] => {
+export const getTextPoint = ({ justfication, width }: GetTextPoint): number[] => {
   const x = getTextPointX({justfication, width});
-  //const y = getTextPointY({textBehaviour, lineHeight, verticalAlignment, height});
   return [x, 0];
 };
 
