@@ -218,27 +218,27 @@ export const getTextPointX = ({ justfication, width }: GetTextPointX): number =>
   }
 };
 
-interface GetTextPointY {
-  textBehaviour: number;
-  lineHeight: number;
-  verticalAlignment: number;
-  height: number;
-}
+// interface GetTextPointY {
+//   textBehaviour: number;
+//   lineHeight: number;
+//   verticalAlignment: number;
+//   height: number;
+// }
 
-export const getTextPointY = ({ textBehaviour, lineHeight, verticalAlignment, height }: GetTextPointY): number => {
-  if (textBehaviour === 2) {
-    switch(verticalAlignment) {
-      case 0:
-        return 0;
-      case 1:
-        return height / 2;
-      case 2:
-        return height;
-    }
-  } else {
-    return 0;
-  }
-};
+// export const getTextPointY = ({ textBehaviour, lineHeight, verticalAlignment, height }: GetTextPointY): number => {
+//   if (textBehaviour === 2) {
+//     switch(verticalAlignment) {
+//       case 0:
+//         return 0;
+//       case 1:
+//         return height / 2;
+//       case 2:
+//         return height;
+//     }
+//   } else {
+//     return height;
+//   }
+// };
 
 interface GetTextPoint {
   justfication: string;
@@ -251,8 +251,8 @@ interface GetTextPoint {
 
 export const getTextPoint = ({ justfication, width, textBehaviour, verticalAlignment, lineHeight, height }: GetTextPoint): number[] => {
   const x = getTextPointX({justfication, width});
-  const y = getTextPointY({textBehaviour, lineHeight, verticalAlignment, height});
-  return [x, y];
+  //const y = getTextPointY({textBehaviour, lineHeight, verticalAlignment, height});
+  return [x, 0];
 };
 
 interface GetNestedPathItem {

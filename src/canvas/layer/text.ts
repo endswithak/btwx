@@ -25,8 +25,7 @@ const renderText = ({ layer, container, overrides }: RenderText): paper.Group =>
       y: 0,
       width: layer.frame.width,
       height: layer.frame.height
-    }),
-    fillColor: 'red'
+    })
   });
   const textStyles = layer.style.textStyle;
   const paragraphStyles = textStyles.encodedAttributes.paragraphStyle;
@@ -49,7 +48,6 @@ const renderText = ({ layer, container, overrides }: RenderText): paper.Group =>
   });
   const text = new PointText({
     point: textPoint,
-    parent: textArea,
     content: textOverride ? textOverride.value : layer.attributedString.string,
     fillColor: Color.random(),
     justification: textJustification,
@@ -59,23 +57,19 @@ const renderText = ({ layer, container, overrides }: RenderText): paper.Group =>
   if (layer.textBehaviour === 2) {
     switch(textStyles.verticalAlignment) {
       case 0:
-        text.pivot = new Point(0, 0);
-        text.position.y = text.bounds.height / 2;
+        text.position.y += textArea.bounds.topLeft.y - text.bounds.topLeft.y;
         break;
       case 1:
-        text.position.y = 0;
-        text.pivot = new Point(0, 0);
-        text.position.y = textArea.bounds.height / 2;
+        text.position.y += textArea.bounds.center.y - text.bounds.center.y;
         break;
       case 2:
-        text.pivot = new Point(0, 0);
-        text.position.y = textArea.bounds.height - (text.bounds.height / 2);
+        text.position.y += textArea.bounds.bottomLeft.y - text.bounds.bottomLeft.y;
         break;
     }
   } else {
-    text.pivot = new Point(0, textArea.bounds.center.y);
-    text.position.y = textArea.bounds.height - text.bounds.height;
+    text.position.y += textArea.bounds.center.y - text.bounds.center.y;
   }
+  textArea.addChild(text);
   textArea.position.x += layer.frame.x;
   textArea.position.y += layer.frame.y;
   return textArea;
