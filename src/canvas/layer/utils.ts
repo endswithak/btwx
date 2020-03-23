@@ -246,3 +246,26 @@ export const getNestedPathItem = ({ layer }: GetNestedPathItem): paper.PathItem 
     }
   }
 };
+
+interface GetFontWeight {
+  fontWeight: string;
+}
+
+export const getFontWeight = ({ fontWeight }: GetFontWeight): number => {
+  switch(fontWeight) {
+    case 'thin':
+      return 100;
+    case 'light':
+      return 300;
+    case 'regular':
+      return 400;
+    case 'medium':
+      return 500;
+    case 'bold':
+      return 700;
+    case 'black':
+      return 900;
+    default:
+      return 400;
+  }
+};

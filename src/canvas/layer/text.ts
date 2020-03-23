@@ -1,6 +1,6 @@
 import paper, { Group, Layer, view, Shape, Rectangle, Point, Color, PointText } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { getOverrideString, getTextJustification, getTextPoint } from './utils';
+import { getOverrideString, getTextJustification, getTextPoint, getFontWeight } from './utils';
 
 interface RenderText {
   layer: FileFormat.Text;
@@ -11,6 +11,11 @@ interface RenderText {
 const renderText = ({ layer, container, overrides }: RenderText): paper.PointText => {
   const textStyles = layer.style.textStyle;
   const paragraphStyles = textStyles.encodedAttributes.paragraphStyle;
+  const fontPostScript = textStyles.encodedAttributes.MSAttributedStringFontAttribute.attributes.name;
+  const fontPostScriptHyphen = fontPostScript.indexOf('-');
+  const fontWeightPostScript = fontPostScriptHyphen !== -1 ? fontPostScript.substring(fontPostScriptHyphen + 1, fontPostScript.length ).replace(/([A-Z])/g, ' $1').trim().toLowerCase().split(' ') : null;
+  const fontFamily = fontPostScriptHyphen !== -1 ? fontPostScript.substring(0, fontPostScriptHyphen).replace(/([A-Z])/g, ' $1').trim() : fontPostScript.replace(/([A-Z])/g, ' $1').trim();
+  const fontWeight = fontWeightPostScript ? fontWeightPostScript[0] : 'regular';
   const fontSize = textStyles.encodedAttributes.MSAttributedStringFontAttribute.attributes.size;
   const lineHeight = paragraphStyles.minimumLineHeight ? paragraphStyles.minimumLineHeight : fontSize * 1.2;
   const textOverride = getOverrideString({
@@ -31,7 +36,8 @@ const renderText = ({ layer, container, overrides }: RenderText): paper.PointTex
     fillColor: Color.random(),
     // strokeColor: Color.random(),
     // strokeWidth: 1,
-    fontFamily: 'Helvetica',
+    fontWeight: getFontWeight({fontWeight}),
+    fontFamily: fontFamily,
     justification: textJustification,
     fontSize: fontSize,
     leading: lineHeight
