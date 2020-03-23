@@ -80,10 +80,10 @@ export const drawLayerPath = ({ layer, opts }: DrawLayerPath): paper.Path => {
   const path = new Path(opts);
   const segments: paper.Segment[] = [];
   layer.points.forEach((point) => {
-    const absPoint = getRelPoint({point: point, frame: layer.frame});
-    const segmentPoint = new Point(absPoint.point.x, absPoint.point.y);
-    const segmentHandleIn = new Point(absPoint.curveTo.x, absPoint.curveTo.y);
-    const segmentHandleOut = new Point(absPoint.curveFrom.x, absPoint.curveFrom.y);
+    const relPoint = getRelPoint({point: point, frame: layer.frame});
+    const segmentPoint = new Point(relPoint.point.x, relPoint.point.y);
+    const segmentHandleIn = new Point(relPoint.curveTo.x, relPoint.curveTo.y);
+    const segmentHandleOut = new Point(relPoint.curveFrom.x, relPoint.curveFrom.y);
     const segment = new Segment({
       point: segmentPoint,
       handleIn: point.hasCurveTo ? segmentHandleIn : null,
@@ -101,6 +101,8 @@ interface GetBooleanOperation {
 
 export const getBooleanOperation = ({ operation }: GetBooleanOperation): string | null => {
   switch(operation) {
+    case -1:
+      return 'exclude';
     case 0:
       return 'unite';
     case 1:
@@ -109,8 +111,6 @@ export const getBooleanOperation = ({ operation }: GetBooleanOperation): string 
       return 'intersect';
     case 3:
       return 'exclude';
-    default:
-      return null;
   }
 };
 
@@ -118,23 +118,22 @@ interface ApplyBooleanOperation {
   operation: FileFormat.BooleanOperation;
   a: paper.PathItem;
   b: paper.PathItem;
+  insert?: boolean;
 }
 
-export const applyBooleanOperation = ({ a, b, operation }: ApplyBooleanOperation): paper.PathItem => {
+export const applyBooleanOperation = ({ a, b, operation, insert }: ApplyBooleanOperation): paper.PathItem => {
   const booleanOperation = getBooleanOperation({operation});
-  if (booleanOperation) {
-    switch(booleanOperation) {
-      case 'unite':
-        return a.unite(b);
-      case 'subtract':
-        return a.subtract(b);
-      case 'intersect':
-        return a.intersect(b);
-      case 'exclude':
-        return a.exclude(b);
-    }
-  } else {
-    return b;
+  switch(booleanOperation) {
+    case 'normal':
+      return b;
+    case 'unite':
+      return a.unite(b, {insert});
+    case 'subtract':
+      return a.subtract(b, {insert});
+    case 'intersect':
+      return a.intersect(b, {insert});
+    case 'exclude':
+      return a.exclude(b, {insert});
   }
 };
 
@@ -171,4 +170,106 @@ export const getOverrideString = ({ textId, overrides }: GetOverrideString): Fil
     return override.overrideName.includes(`${textId}_stringValue`);
   }) : null;
   return overrideString;
+};
+
+interface GetTextJustification {
+  alignment: number;
+}
+
+export const getTextJustification = ({ alignment }: GetTextJustification): string => {
+  switch(alignment) {
+    case 1:
+      return 'right';
+    case 2:
+      return 'center';
+    default:
+      return 'left';
+  }
+};
+
+interface GetVerticalAlignment {
+  verticalAlignment: number;
+}
+
+export const getTextVerticalAlignment = ({ verticalAlignment }: GetVerticalAlignment): string => {
+  switch(verticalAlignment) {
+    case 0:
+      return 'top';
+    case 1:
+      return 'center';
+    case 2:
+      return 'bottom';
+  }
+};
+
+interface GetTextPointX {
+  justfication: string;
+  width: number;
+}
+
+export const getTextPointX = ({ justfication, width }: GetTextPointX): number => {
+  switch(justfication) {
+    case 'left':
+      return 0;
+    case 'center':
+      return width / 2;
+    case 'right':
+      return width;
+  }
+};
+
+interface GetTextPointY {
+  textBehaviour: number;
+  lineHeight: number;
+  verticalAlignment: number;
+  height: number;
+}
+
+export const getTextPointY = ({ textBehaviour, lineHeight, verticalAlignment, height }: GetTextPointY): number => {
+  if (textBehaviour === 2) {
+    switch(verticalAlignment) {
+      case 0:
+        return 0;
+      case 1:
+        return height / 2;
+      case 2:
+        return height;
+    }
+  } else {
+    return 0;
+  }
+};
+
+interface GetTextPoint {
+  justfication: string;
+  width: number;
+  textBehaviour: number;
+  lineHeight: number;
+  verticalAlignment: number;
+  height: number;
+}
+
+export const getTextPoint = ({ justfication, width, textBehaviour, verticalAlignment, lineHeight, height }: GetTextPoint): number[] => {
+  const x = getTextPointX({justfication, width});
+  const y = getTextPointY({textBehaviour, lineHeight, verticalAlignment, height});
+  return [x, y];
+};
+
+interface GetNestedPathItem {
+  layer: paper.PathItem | paper.Layer;
+}
+
+export const getNestedPathItem = ({ layer }: GetNestedPathItem): paper.PathItem => {
+  switch(layer.className) {
+    case 'Path':
+    case 'CompoundPath':
+      return layer as paper.PathItem;
+    case 'Layer': {
+      let lastChild = layer.lastChild;
+      while(lastChild.className === 'Layer') {
+        lastChild = lastChild.lastChild;
+      }
+      return lastChild as paper.PathItem;
+    }
+  }
 };
