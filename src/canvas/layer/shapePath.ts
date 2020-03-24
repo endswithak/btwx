@@ -1,6 +1,6 @@
-import paper, { Layer, Rectangle, Point, Color } from 'paper';
+import paper, { Layer, Color } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { drawLayerPath } from './utils';
+import { shapePathUtils } from './utils';
 
 interface RenderShapePath {
   layer: FileFormat.ShapePath | FileFormat.Rectangle;
@@ -13,9 +13,10 @@ const renderShapePath = ({ layer, container }: RenderShapePath): paper.Layer => 
     data: { name: layer.name },
     locked: layer.isLocked,
     visible: layer.isVisible,
+    clipMask: layer.hasClippingMask,
     parent: container
   });
-  const layerPath = drawLayerPath({
+  const layerPath = shapePathUtils.drawShapePath({
     layer: layer,
     opts: {
       insert: false,

@@ -1,6 +1,6 @@
-import paper, { Group, Layer, view, Shape, Rectangle, Point, Color, PointText } from 'paper';
+import paper, { Layer, PointText } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { getOverrideString, getTextJustification, getTextPoint, getTextTransformString, getTextPosition, getFontStyleWeight } from './utils';
+import { textUtils } from './utils';
 
 interface RenderText {
   layer: FileFormat.Text;
@@ -16,47 +16,33 @@ const renderText = ({ layer, container, overrides }: RenderText): paper.Layer =>
     visible: layer.isVisible,
     parent: container
   });
-  const textStyles = layer.style.textStyle;
-  const paragraphStyles = textStyles.encodedAttributes.paragraphStyle;
-  const postScript = textStyles.encodedAttributes.MSAttributedStringFontAttribute.attributes.name;
-  const hyphenIndex = postScript.indexOf('-');
-  const fontAttrs = hyphenIndex !== -1 ? postScript.substring(hyphenIndex + 1, postScript.length ).replace(/([A-Z])/g, ' $1').trim().toLowerCase().split(' ') : null;
-  const fontFamily = hyphenIndex !== -1 ? postScript.substring(0, hyphenIndex).replace(/([A-Z])/g, ' $1').trim() : postScript.replace(/([A-Z])/g, ' $1').trim();
-  const fontSize = textStyles.encodedAttributes.MSAttributedStringFontAttribute.attributes.size;
-  const fontColor = textStyles.encodedAttributes.MSAttributedStringColorAttribute;
-  const leading = paragraphStyles.minimumLineHeight ? paragraphStyles.minimumLineHeight : fontSize * 1.2;
-  const textTransform = textStyles.encodedAttributes.MSAttributedStringTextTransformAttribute;
-  const override = getOverrideString({
+  const override = textUtils.getOverrideString({
     textId: layer.do_objectID,
     overrides: overrides
   });
-  const textJustification = getTextJustification({
-    alignment: paragraphStyles.alignment
-  });
-  const textPoint = getTextPoint({
-    justfication: textJustification,
-    width: layer.frame.width
-  });
-  const textContent = getTextTransformString({
-    str: override ? override.value as string : layer.attributedString.string,
-    textTransform: textTransform
+  const fontAttrs = textUtils.getFontAttributes({
+    textStyle: layer.style.textStyle
   });
   const text = new PointText({
-    point: textPoint,
+    point: textUtils.getTextPoint({
+      justfication: fontAttrs.justification,
+      width: layer.frame.width
+    }),
+    content: textUtils.getTextTransformString({
+      str: override ? override.value as string : layer.attributedString.string,
+      textTransform: fontAttrs.textTransform
+    }),
     parent: textContainer,
-    content: textContent,
-    fillColor: fontColor,
-    // strokeColor: Color.random(),
-    // strokeWidth: 1,
-    fontWeight: getFontStyleWeight({fontAttrs}),
-    fontFamily: fontFamily,
-    justification: textJustification,
-    fontSize: fontSize,
-    leading: leading
+    fillColor: fontAttrs.color,
+    fontWeight: fontAttrs.fontWeight,
+    fontFamily: fontAttrs.fontFamily,
+    justification: fontAttrs.justification,
+    fontSize: fontAttrs.fontSize,
+    leading: fontAttrs.leading
   });
-  textContainer.position = getTextPosition({
+  textContainer.position = textUtils.getTextPosition({
     textBehaviour: layer.textBehaviour,
-    verticalAlignment: textStyles.verticalAlignment,
+    verticalAlignment: layer.style.textStyle.verticalAlignment,
     frame: layer.frame,
     text: text
   });

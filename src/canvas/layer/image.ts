@@ -1,6 +1,6 @@
 import paper, { Layer, Raster, Rectangle, Shape, Point, Color } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { getImage, getOverrideImage } from './utils';
+import { imageUtils } from './utils';
 
 interface RenderImage {
   layer: FileFormat.Bitmap;
@@ -19,11 +19,11 @@ const renderImage = ({ layer, container, images, overrides }: RenderImage): pape
     visible: layer.isVisible,
     parent: container
   });
-  const override = getOverrideImage({
+  const override = imageUtils.getOverrideImage({
     instanceId: layer.do_objectID,
     overrides: overrides
   });
-  const bitmap = new Raster(getImage({
+  const bitmap = new Raster(imageUtils.getImage({
     ref: override ? (override.value as FileFormat.ImageFileRef)._ref : layer.image._ref,
     images: images
   }));

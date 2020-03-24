@@ -13,12 +13,14 @@ interface RenderGroup {
 }
 
 const renderGroup = ({ layer, container, symbols, images, overrides }: RenderGroup): paper.Group => {
-  const groupLayer = new Group();
-  groupLayer.name = layer.do_objectID;
-  groupLayer.data.name = layer.name;
-  groupLayer.visible = layer.isVisible;
-  groupLayer.locked = layer.isLocked;
-  groupLayer.parent = container;
+  const groupLayer = new Group({
+    name: layer.do_objectID,
+    data: { name: layer.name },
+    locked: layer.isLocked,
+    visible: layer.isVisible,
+    clipMask: layer.hasClippingMask,
+    parent: container
+  });
   renderLayers({
     layers: layer.layers,
     container: groupLayer,

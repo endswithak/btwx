@@ -1,7 +1,7 @@
-import paper, { Group, Layer, Rectangle, Point, Color } from 'paper';
+import paper, { Group } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { getSymbolMaster } from './utils';
 import renderLayers from '../layers';
+import { symbolUtils } from './utils';
 
 interface RenderSymbolInstance {
   layer: FileFormat.SymbolInstance;
@@ -22,7 +22,7 @@ const renderSymbolInstance = ({ layer, container, symbols, images, overrides }: 
     parent: container
   });
   const symboleOverrides = overrides ? [...overrides, ...layer.overrideValues] : layer.overrideValues;
-  const master = getSymbolMaster({
+  const master = symbolUtils.getSymbolMaster({
     instanceId: layer.do_objectID,
     symbolId: layer.symbolID,
     symbols: symbols,

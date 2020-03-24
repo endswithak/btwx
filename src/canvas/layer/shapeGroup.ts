@@ -1,6 +1,6 @@
 import paper, { Layer, Rectangle, Point, Group, CompoundPath, Path, Color } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { applyBooleanOperation, drawLayerPath, getNestedPathItem } from './utils';
+import { shapePathUtils, shapeGroupUtils } from './utils';
 
 interface RenderShapeGroupLayer {
   layer: FileFormat.ShapePath | FileFormat.Rectangle | FileFormat.Star | FileFormat.Polygon;
@@ -8,7 +8,7 @@ interface RenderShapeGroupLayer {
 }
 
 const renderShapeGroupLayer = ({ layer, container }: RenderShapeGroupLayer): void => {
-  const layerPath = drawLayerPath({
+  const layerPath = shapePathUtils.drawShapePath({
     layer: layer,
     opts: {
       name: layer.do_objectID,
@@ -23,8 +23,8 @@ const renderShapeGroupLayer = ({ layer, container }: RenderShapeGroupLayer): voi
   layerPath.position.y += layer.frame.y;
   if (container.children.length > 1) {
     const prevBoolResult = container.children[container.children.length - 2];
-    const boolResult = applyBooleanOperation({
-      a: getNestedPathItem({layer: prevBoolResult as paper.Layer}) as paper.PathItem,
+    const boolResult = shapeGroupUtils.applyBooleanOperation({
+      a: shapeGroupUtils.getNestedPathItem({layer: prevBoolResult as paper.Layer}) as paper.PathItem,
       b: layerPath,
       operation: layer.booleanOperation
     });
@@ -85,9 +85,9 @@ const renderShapeGroup = ({ layer, container }: RenderShapeGroup): paper.Layer =
   shape.position.x += layer.frame.x;
   shape.position.y += layer.frame.y;
   if (container.children.length > 1) {
-    const boolResult = applyBooleanOperation({
-      a: getNestedPathItem({layer: container.children[container.children.length - 2] as paper.PathItem}) as paper.PathItem,
-      b: getNestedPathItem({layer: shape as paper.Layer}) as paper.PathItem,
+    const boolResult = shapeGroupUtils.applyBooleanOperation({
+      a: shapeGroupUtils.getNestedPathItem({layer: container.children[container.children.length - 2] as paper.PathItem}) as paper.PathItem,
+      b: shapeGroupUtils.getNestedPathItem({layer: shape as paper.Layer}) as paper.PathItem,
       operation: layer.booleanOperation
     });
     boolResult.parent = container;
