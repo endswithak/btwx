@@ -1,6 +1,6 @@
 import paper, { Group, Layer, view, Shape, Rectangle, Point, Color, PointText } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { getOverrideString, getTextJustification, getTextPoint, getFontWeight } from './utils';
+import { getOverrideString, getTextJustification, getTextPoint, getTextTransformString, getTextPosition, getFontStyleWeight } from './utils';
 
 interface RenderText {
   layer: FileFormat.Text;
@@ -11,13 +11,13 @@ interface RenderText {
 const renderText = ({ layer, container, overrides }: RenderText): paper.PointText => {
   const textStyles = layer.style.textStyle;
   const paragraphStyles = textStyles.encodedAttributes.paragraphStyle;
-  const fontPostScript = textStyles.encodedAttributes.MSAttributedStringFontAttribute.attributes.name;
-  const fontPostScriptHyphen = fontPostScript.indexOf('-');
-  const fontWeightPostScript = fontPostScriptHyphen !== -1 ? fontPostScript.substring(fontPostScriptHyphen + 1, fontPostScript.length ).replace(/([A-Z])/g, ' $1').trim().toLowerCase().split(' ') : null;
-  const fontFamily = fontPostScriptHyphen !== -1 ? fontPostScript.substring(0, fontPostScriptHyphen).replace(/([A-Z])/g, ' $1').trim() : fontPostScript.replace(/([A-Z])/g, ' $1').trim();
-  const fontWeight = fontWeightPostScript ? fontWeightPostScript[0] : 'regular';
+  const postScript = textStyles.encodedAttributes.MSAttributedStringFontAttribute.attributes.name;
+  const hyphenIndex = postScript.indexOf('-');
+  const fontAttrs = hyphenIndex !== -1 ? postScript.substring(hyphenIndex + 1, postScript.length ).replace(/([A-Z])/g, ' $1').trim().toLowerCase().split(' ') : null;
+  const fontFamily = hyphenIndex !== -1 ? postScript.substring(0, hyphenIndex).replace(/([A-Z])/g, ' $1').trim() : postScript.replace(/([A-Z])/g, ' $1').trim();
   const fontSize = textStyles.encodedAttributes.MSAttributedStringFontAttribute.attributes.size;
-  const lineHeight = paragraphStyles.minimumLineHeight ? paragraphStyles.minimumLineHeight : fontSize * 1.2;
+  const leading = paragraphStyles.minimumLineHeight ? paragraphStyles.minimumLineHeight : fontSize * 1.2;
+  const textTransform = textStyles.encodedAttributes.MSAttributedStringTextTransformAttribute;
   const textOverride = getOverrideString({
     textId: layer.do_objectID,
     overrides: overrides
@@ -29,31 +29,29 @@ const renderText = ({ layer, container, overrides }: RenderText): paper.PointTex
     justfication: textJustification,
     width: layer.frame.width
   });
+  const textContent = getTextTransformString({
+    str: textOverride ? textOverride.value as string : layer.attributedString.string,
+    textTransform: textTransform
+  });
   const text = new PointText({
     point: textPoint,
     parent: container,
-    content: textOverride ? textOverride.value : layer.attributedString.string,
+    content: textContent,
     fillColor: Color.random(),
     // strokeColor: Color.random(),
     // strokeWidth: 1,
-    fontWeight: getFontWeight({fontWeight}),
+    fontWeight: getFontStyleWeight({fontAttrs}),
     fontFamily: fontFamily,
     justification: textJustification,
     fontSize: fontSize,
-    leading: lineHeight
+    leading: leading
   });
-  text.position.x += layer.frame.x;
-  text.position.y += layer.frame.y;
-  if (layer.textBehaviour === 2) {
-    switch(textStyles.verticalAlignment) {
-      case 1:
-        text.position.y += (layer.frame.height - text.bounds.height) / 2;
-        break;
-      case 2:
-        text.position.y += layer.frame.height - text.bounds.height;
-        break;
-    }
-  }
+  text.position = getTextPosition({
+    textBehaviour: layer.textBehaviour,
+    verticalAlignment: textStyles.verticalAlignment,
+    frame: layer.frame,
+    text: text
+  });
   return text;
 };
 

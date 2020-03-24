@@ -266,6 +266,81 @@ export const getFontWeight = ({ fontWeight }: GetFontWeight): number => {
     case 'black':
       return 900;
     default:
-      return 400;
+      return null;
   }
+};
+
+interface GetFontStyle {
+  fontStyle: string;
+}
+
+export const getFontStyle = ({ fontStyle }: GetFontStyle): string => {
+  switch(fontStyle) {
+    case 'italic':
+    case 'oblique':
+      return fontStyle;
+    default:
+      return null;
+  }
+};
+
+interface GetFontStyleWeight {
+  fontAttrs: string[] | null;
+}
+
+export const getFontStyleWeight = ({ fontAttrs }: GetFontStyleWeight): string => {
+  if (fontAttrs) {
+    const weightIndex = fontAttrs.findIndex((attr) => {
+      return getFontWeight({fontWeight: attr});
+    });
+    const styleIndex = fontAttrs.findIndex((attr) => {
+      return getFontStyle({fontStyle: attr});
+    });
+    const weight = weightIndex !== -1 ? getFontWeight({fontWeight: fontAttrs[weightIndex]}) : 'normal';
+    const style = styleIndex !== -1 ? getFontStyle({fontStyle: fontAttrs[styleIndex]}) : 'normal';
+    return `${style} ${weight}`;
+  } else {
+    return '';
+  }
+};
+
+interface GetTextTransformString {
+  str: string;
+  textTransform: number;
+}
+
+export const getTextTransformString = ({ str, textTransform }: GetTextTransformString): string => {
+  switch(textTransform) {
+    case 0:
+      return str;
+    case 1:
+      return str.toUpperCase();
+    case 2:
+      return str.toLowerCase();
+    default:
+      return str;
+  }
+};
+
+interface GetTextPosition {
+  textBehaviour: number;
+  verticalAlignment: number;
+  frame: FileFormat.Rect;
+  text: paper.PointText;
+}
+
+export const getTextPosition = ({ textBehaviour, verticalAlignment, frame, text }: GetTextPosition): paper.Point => {
+  const x = text.position.x += frame.x;
+  let y = text.position.y += frame.y;
+  if (textBehaviour === 2) {
+    switch(verticalAlignment) {
+      case 1:
+        y += (frame.height - text.bounds.height) / 2;
+        break;
+      case 2:
+        y += frame.height - text.bounds.height;
+        break;
+    }
+  }
+  return new paper.Point(x, y);
 };
