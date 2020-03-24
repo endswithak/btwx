@@ -50,6 +50,7 @@ const renderLayer = ({ layer, container, symbols, images, overrides }: RenderLay
         layer: layer,
         container: container,
         symbols: symbols,
+        images: images,
         overrides: overrides
       });
       break;

@@ -172,6 +172,18 @@ export const getOverrideString = ({ textId, overrides }: GetOverrideString): Fil
   return overrideString;
 };
 
+interface GetOverrideImage {
+  instanceId: string;
+  overrides?: FileFormat.OverrideValue[];
+}
+
+export const getOverrideImage = ({ instanceId, overrides }: GetOverrideImage): FileFormat.OverrideValue => {
+  const overrideString = overrides ? overrides.find((override) => {
+    return override.overrideName.includes(`${instanceId}_image`);
+  }) : null;
+  return overrideString;
+};
+
 interface GetTextJustification {
   alignment: number;
 }

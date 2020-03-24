@@ -26,7 +26,7 @@ const renderText = ({ layer, container, overrides }: RenderText): paper.Layer =>
   const fontColor = textStyles.encodedAttributes.MSAttributedStringColorAttribute;
   const leading = paragraphStyles.minimumLineHeight ? paragraphStyles.minimumLineHeight : fontSize * 1.2;
   const textTransform = textStyles.encodedAttributes.MSAttributedStringTextTransformAttribute;
-  const textOverride = getOverrideString({
+  const override = getOverrideString({
     textId: layer.do_objectID,
     overrides: overrides
   });
@@ -38,7 +38,7 @@ const renderText = ({ layer, container, overrides }: RenderText): paper.Layer =>
     width: layer.frame.width
   });
   const textContent = getTextTransformString({
-    str: textOverride ? textOverride.value as string : layer.attributedString.string,
+    str: override ? override.value as string : layer.attributedString.string,
     textTransform: textTransform
   });
   const text = new PointText({

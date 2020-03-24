@@ -7,10 +7,13 @@ interface RenderSymbolInstance {
   layer: FileFormat.SymbolInstance;
   container: paper.Group;
   symbols: FileFormat.SymbolMaster[];
+  images: {
+    [id: string]: string;
+  };
   overrides?: FileFormat.OverrideValue[];
 }
 
-const renderSymbolInstance = ({ layer, container, symbols, overrides }: RenderSymbolInstance): paper.Group => {
+const renderSymbolInstance = ({ layer, container, symbols, images, overrides }: RenderSymbolInstance): paper.Group => {
   const symbol = new Group({
     name: layer.do_objectID,
     data: { name: layer.name },
@@ -30,6 +33,7 @@ const renderSymbolInstance = ({ layer, container, symbols, overrides }: RenderSy
       layers: master.layers,
       container: symbol,
       symbols: symbols,
+      images: images,
       overrides: symboleOverrides
     });
   }
