@@ -11,10 +11,13 @@ interface RenderLayer {
   layer: FileFormat.AnyLayer;
   container: paper.Group;
   symbols: FileFormat.SymbolMaster[] | null;
+  images: {
+    [id: string]: string;
+  };
   overrides?: FileFormat.OverrideValue[];
 }
 
-const renderLayer = ({ layer, container, symbols, overrides }: RenderLayer): void => {
+const renderLayer = ({ layer, container, symbols, images, overrides }: RenderLayer): void => {
   switch(layer._class) {
     case 'shapePath':
     case 'rectangle':
@@ -38,6 +41,7 @@ const renderLayer = ({ layer, container, symbols, overrides }: RenderLayer): voi
         layer: layer as FileFormat.Group,
         container: container,
         symbols: symbols,
+        images: images,
         overrides: overrides
       });
       break;
@@ -60,6 +64,7 @@ const renderLayer = ({ layer, container, symbols, overrides }: RenderLayer): voi
       renderImage({
         layer: layer,
         container: container,
+        images: images,
         overrides: overrides
       });
       break;

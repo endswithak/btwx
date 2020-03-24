@@ -6,15 +6,19 @@ interface RenderLayers {
   layers: FileFormat.AnyLayer[];
   container: paper.Group;
   symbols: FileFormat.SymbolMaster[] | null;
+  images: {
+    [id: string]: string;
+  };
   overrides?: FileFormat.OverrideValue[];
 }
 
-const renderLayers = ({ layers, container, symbols, overrides }: RenderLayers): void => {
+const renderLayers = ({ layers, container, symbols, images, overrides }: RenderLayers): void => {
   layers.forEach((layer) => {
     renderLayer({
       layer: layer,
       container: container,
       symbols: symbols,
+      images: images,
       overrides: overrides
     });
   });

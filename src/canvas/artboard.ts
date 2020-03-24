@@ -38,9 +38,12 @@ const renderArtboardBackground = ({ artboard, container }: RenderArtboardBackgro
 interface RenderArtboard {
   artboard: FileFormat.Artboard;
   symbols: FileFormat.SymbolMaster[] | null;
+  images: {
+    [id: string]: string;
+  };
 }
 
-const renderArtboard = ({ artboard, symbols }: RenderArtboard): paper.Group => {
+const renderArtboard = ({ artboard, symbols, images }: RenderArtboard): paper.Group => {
   console.log(artboard);
   const artboardContainer = new Group();
   renderArtboardBackground({
@@ -50,7 +53,8 @@ const renderArtboard = ({ artboard, symbols }: RenderArtboard): paper.Group => {
   renderLayers({
     layers: artboard.layers,
     container: artboardContainer,
-    symbols: symbols
+    symbols: symbols,
+    images: images
   });
   artboardContainer.position = view.center;
   artboardContainer.position.x += artboard.frame.x;

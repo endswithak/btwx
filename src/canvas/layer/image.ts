@@ -1,14 +1,17 @@
 import paper, { Layer, Rectangle, Shape, Point, Color } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { drawLayerPath } from './utils';
+import { getImage } from './utils';
 
 interface RenderImage {
   layer: FileFormat.Bitmap;
   container: paper.Group;
+  images: {
+    [id: string]: string;
+  };
   overrides?: FileFormat.OverrideValue[];
 }
 
-const renderImage = ({ layer, container, overrides }: RenderImage): paper.Layer => {
+const renderImage = ({ layer, container, images, overrides }: RenderImage): paper.Layer => {
   const image = new Layer({
     name: layer.do_objectID,
     data: { name: layer.name },
@@ -16,16 +19,16 @@ const renderImage = ({ layer, container, overrides }: RenderImage): paper.Layer 
     visible: layer.isVisible,
     parent: container
   });
-  const imageBackground = new Shape.Rectangle({
-    rectangle: new Rectangle({
-      x: 0,
-      y: 0,
-      width: layer.frame.width,
-      height: layer.frame.height
-    }),
-    fillColor: Color.random(),
-    parent: image
+  const base64Image = getImage({
+    ref: layer.image._ref,
+    images: images
   });
+  const raster = new paper.Raster(base64Image);
+  raster.width = layer.frame.width;
+  raster.height = layer.frame.height;
+  raster.parent = image;
+  raster.position.x += layer.frame.width / 2;
+  raster.position.y += layer.frame.height / 2;
   image.position.x += layer.frame.x;
   image.position.y += layer.frame.y;
   return image;

@@ -8,7 +8,14 @@ interface RenderText {
   overrides?: FileFormat.OverrideValue[];
 }
 
-const renderText = ({ layer, container, overrides }: RenderText): paper.PointText => {
+const renderText = ({ layer, container, overrides }: RenderText): paper.Layer => {
+  const textContainer = new Layer({
+    name: layer.do_objectID,
+    data: { name: layer.name },
+    locked: layer.isLocked,
+    visible: layer.isVisible,
+    parent: container
+  });
   const textStyles = layer.style.textStyle;
   const paragraphStyles = textStyles.encodedAttributes.paragraphStyle;
   const postScript = textStyles.encodedAttributes.MSAttributedStringFontAttribute.attributes.name;
@@ -16,6 +23,7 @@ const renderText = ({ layer, container, overrides }: RenderText): paper.PointTex
   const fontAttrs = hyphenIndex !== -1 ? postScript.substring(hyphenIndex + 1, postScript.length ).replace(/([A-Z])/g, ' $1').trim().toLowerCase().split(' ') : null;
   const fontFamily = hyphenIndex !== -1 ? postScript.substring(0, hyphenIndex).replace(/([A-Z])/g, ' $1').trim() : postScript.replace(/([A-Z])/g, ' $1').trim();
   const fontSize = textStyles.encodedAttributes.MSAttributedStringFontAttribute.attributes.size;
+  const fontColor = textStyles.encodedAttributes.MSAttributedStringColorAttribute;
   const leading = paragraphStyles.minimumLineHeight ? paragraphStyles.minimumLineHeight : fontSize * 1.2;
   const textTransform = textStyles.encodedAttributes.MSAttributedStringTextTransformAttribute;
   const textOverride = getOverrideString({
@@ -35,9 +43,9 @@ const renderText = ({ layer, container, overrides }: RenderText): paper.PointTex
   });
   const text = new PointText({
     point: textPoint,
-    parent: container,
+    parent: textContainer,
     content: textContent,
-    fillColor: Color.random(),
+    fillColor: fontColor,
     // strokeColor: Color.random(),
     // strokeWidth: 1,
     fontWeight: getFontStyleWeight({fontAttrs}),
@@ -46,13 +54,13 @@ const renderText = ({ layer, container, overrides }: RenderText): paper.PointTex
     fontSize: fontSize,
     leading: leading
   });
-  text.position = getTextPosition({
+  textContainer.position = getTextPosition({
     textBehaviour: layer.textBehaviour,
     verticalAlignment: textStyles.verticalAlignment,
     frame: layer.frame,
     text: text
   });
-  return text;
+  return textContainer;
 };
 
 export default renderText;

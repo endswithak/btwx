@@ -344,3 +344,15 @@ export const getTextPosition = ({ textBehaviour, verticalAlignment, frame, text 
   }
   return new paper.Point(x, y);
 };
+
+interface GetImage {
+  ref: string;
+  images: {
+    [id: string]: string;
+  };
+}
+
+export const getImage = ({ ref, images }: GetImage): string => {
+  const imageId = ref.substring(ref.indexOf('/') + 1, ref.indexOf('.'));
+  return images[imageId];
+};

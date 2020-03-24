@@ -6,10 +6,13 @@ interface RenderGroup {
   layer: FileFormat.Group;
   container: paper.Group;
   symbols: FileFormat.SymbolMaster[] | null;
+  images: {
+    [id: string]: string;
+  };
   overrides?: FileFormat.OverrideValue[];
 }
 
-const renderGroup = ({ layer, container, symbols, overrides }: RenderGroup): paper.Group => {
+const renderGroup = ({ layer, container, symbols, images, overrides }: RenderGroup): paper.Group => {
   const groupLayer = new Group();
   groupLayer.name = layer.do_objectID;
   groupLayer.data.name = layer.name;
@@ -20,6 +23,7 @@ const renderGroup = ({ layer, container, symbols, overrides }: RenderGroup): pap
     layers: layer.layers,
     container: groupLayer,
     symbols: symbols,
+    images: images,
     overrides: overrides
   });
   groupLayer.position.x += layer.frame.x;
