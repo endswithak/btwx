@@ -23,15 +23,16 @@ const renderImage = ({ layer, container, images, overrides }: RenderImage): pape
     instanceId: layer.do_objectID,
     overrides: overrides
   });
-  const bitmap = new Raster(imageUtils.getImage({
-    ref: override ? (override.value as FileFormat.ImageFileRef)._ref : layer.image._ref,
-    images: images
-  }));
-  bitmap.width = layer.frame.width;
-  bitmap.height = layer.frame.height;
-  bitmap.parent = image;
-  bitmap.position.x += layer.frame.width / 2;
-  bitmap.position.y += layer.frame.height / 2;
+  const bitmap = new Raster({
+    source: imageUtils.getImage({
+      ref: override ? (override.value as FileFormat.ImageFileRef)._ref : layer.image._ref,
+      images: images
+    }),
+    width: layer.frame.width,
+    height: layer.frame.height,
+    parent: image,
+    position: new Point(layer.frame.width / 2, layer.frame.height / 2)
+  });
   image.position.x += layer.frame.x;
   image.position.y += layer.frame.y;
   return image;

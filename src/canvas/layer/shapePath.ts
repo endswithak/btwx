@@ -1,14 +1,18 @@
 import paper, { Layer, Color } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { shapePathUtils } from './utils';
+import { shapePathUtils, fillUtils } from './utils';
 
 interface RenderShapePath {
   layer: FileFormat.ShapePath | FileFormat.Rectangle;
   container: paper.Group;
+  images: {
+    [id: string]: string;
+  };
 }
 
-const renderShapePath = ({ layer, container }: RenderShapePath): paper.Layer => {
-  const shapePath = new Layer({
+const renderShapePath = ({ layer, images, container }: RenderShapePath): paper.Layer => {
+  console.log(layer.style.fills[0].patternFillType);
+  const shapePathContainer = new Layer({
     name: layer.do_objectID,
     data: { name: layer.name },
     locked: layer.isLocked,
@@ -16,21 +20,23 @@ const renderShapePath = ({ layer, container }: RenderShapePath): paper.Layer => 
     clipMask: layer.hasClippingMask,
     parent: container
   });
-  const layerPath = shapePathUtils.drawShapePath({
+  const shapePath = shapePathUtils.drawShapePath({
     layer: layer,
     opts: {
       insert: false,
       closed: layer.isClosed
     }
   });
-  const fill = layerPath.clone();
-  fill.parent = shapePath;
-  fill.fillColor = Color.random();
-  fill.strokeWidth = 2;
-  fill.strokeColor = Color.random();
-  shapePath.position.x += layer.frame.x;
-  shapePath.position.y += layer.frame.y;
-  return shapePath;
+  fillUtils.renderFills({
+    shapePath: shapePath,
+    fills: layer.style.fills,
+    images: images,
+    container: shapePathContainer
+  });
+  console.log(shapePathContainer);
+  shapePathContainer.position.x += layer.frame.x;
+  shapePathContainer.position.y += layer.frame.y;
+  return shapePathContainer;
 };
 
 export default renderShapePath;

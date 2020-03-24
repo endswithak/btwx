@@ -27,7 +27,8 @@ const renderLayer = ({ layer, container, symbols, images, overrides }: RenderLay
     case 'oval':
       renderShapePath({
         layer: layer as FileFormat.ShapePath,
-        container: container
+        container: container,
+        images: images
       });
       break;
     case 'shapeGroup':
