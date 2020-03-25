@@ -11,7 +11,6 @@ interface RenderShapePath {
 }
 
 const renderShapePath = ({ layer, images, container }: RenderShapePath): paper.Layer => {
-  console.log(layer.style.fills[0].patternFillType);
   const shapePathContainer = new Layer({
     name: layer.do_objectID,
     data: { name: layer.name },
@@ -33,7 +32,6 @@ const renderShapePath = ({ layer, images, container }: RenderShapePath): paper.L
     images: images,
     container: shapePathContainer
   });
-  console.log(shapePathContainer);
   shapePathContainer.position.x += layer.frame.x;
   shapePathContainer.position.y += layer.frame.y;
   return shapePathContainer;

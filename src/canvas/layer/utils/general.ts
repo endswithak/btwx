@@ -53,15 +53,6 @@ export const getFitSize = ({ layerWidth, layerHeight, containerWidth, containerH
       height: containerWidth * layerRatio
     }
   }
-
-
-  // if (maxRatio > layerRatio) {
-  //   // height is the constraining dimension
-  //   return maxHeight / layerHeight;
-  // } else {
-  //   // width is the constraining dimension
-  //   return maxWidth / layerWidth;
-  // }
 };
 
 interface PaperColor {
