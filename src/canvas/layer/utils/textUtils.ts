@@ -106,23 +106,63 @@ export const getFontStyle = ({ fontStyle }: GetFontStyle): string => {
   }
 };
 
-interface GetFontStyleWeight {
+interface GetFontStretch {
+  fontStretch: string;
+}
+
+export const getFontStretch = ({ fontStretch }: GetFontStretch): number => {
+  switch(fontStretch) {
+    case 'condensed':
+      return 0.75;
+    case 'expanded;':
+      return 1.25;
+    default:
+      return null;
+  }
+};
+
+interface FindFontStretch {
   fontAttrs: string[] | null;
 }
 
-export const getFontStyleWeight = ({ fontAttrs }: GetFontStyleWeight): string => {
+export const findFontStretch = ({ fontAttrs }: FindFontStretch): number => {
   if (fontAttrs) {
-    const weightIndex = fontAttrs.findIndex((attr) => {
+    const stretchIndex = fontAttrs.findIndex((attr) => {
+      return getFontStretch({fontStretch: attr});
+    });
+    return stretchIndex !== -1 ? getFontStretch({fontStretch: fontAttrs[stretchIndex]}) : 1;
+  } else {
+    return 1;
+  }
+};
+
+interface FindFontWeight {
+  fontAttrs: string[] | null;
+}
+
+export const findFontWeight = ({ fontAttrs }: FindFontWeight): string | number => {
+  if (fontAttrs) {
+    const fontWeightIndex = fontAttrs.findIndex((attr) => {
       return getFontWeight({fontWeight: attr});
     });
-    const styleIndex = fontAttrs.findIndex((attr) => {
+    return fontWeightIndex !== -1 ? getFontWeight({fontWeight: fontAttrs[fontWeightIndex]}) : 'normal';
+  } else {
+    return 'normal';
+  }
+};
+
+interface FindFontStyle {
+  fontAttrs: string[] | null;
+}
+
+export const findFontStyle = ({ fontAttrs }: FindFontStyle): string => {
+  if (fontAttrs) {
+    const fontStyleIndex = fontAttrs.findIndex((attr) => {
       return getFontStyle({fontStyle: attr});
     });
-    const weight = weightIndex !== -1 ? getFontWeight({fontWeight: fontAttrs[weightIndex]}) : 'normal';
-    const style = styleIndex !== -1 ? getFontStyle({fontStyle: fontAttrs[styleIndex]}) : 'normal';
-    return `${style} ${weight}`;
+    return fontStyleIndex !== -1 ? getFontStyle({fontStyle: fontAttrs[fontStyleIndex]}) : 'normal';
   } else {
-    return '';
+    return 'normal';
   }
 };
 
@@ -133,7 +173,9 @@ interface GetFontAttributes {
 interface FontAttributes {
   fontFamily: string;
   fontSize: number;
-  fontWeight: string;
+  fontWeight: string | number;
+  fontStyle: string;
+  fontStretch: number;
   color: FileFormat.Color;
   leading: number;
   textTransform: number;
@@ -148,7 +190,9 @@ export const getFontAttributes = ({ textStyle }: GetFontAttributes): FontAttribu
   const fontAttrs = hyphenIndex !== -1 ? postScript.substring(hyphenIndex + 1, postScript.length ).replace(/([A-Z])/g, ' $1').trim().toLowerCase().split(' ') : null;
   const fontFamily = hyphenIndex !== -1 ? postScript.substring(0, hyphenIndex).replace(/([A-Z])/g, ' $1').trim() : postScript.replace(/([A-Z])/g, ' $1').trim();
   const fontSize = encodedAttributes.MSAttributedStringFontAttribute.attributes.size;
-  const fontWeight = getFontStyleWeight({fontAttrs});
+  const fontWeight = findFontWeight({fontAttrs});
+  const fontStyle = findFontStyle({fontAttrs});
+  const fontStretch = findFontStretch({fontAttrs});
   const color = encodedAttributes.MSAttributedStringColorAttribute;
   const leading = paragraphStyles.minimumLineHeight ? paragraphStyles.minimumLineHeight : fontSize * 1.2;
   const textTransform = encodedAttributes.MSAttributedStringTextTransformAttribute;
@@ -159,6 +203,8 @@ export const getFontAttributes = ({ textStyle }: GetFontAttributes): FontAttribu
     fontFamily,
     fontSize,
     fontWeight,
+    fontStyle,
+    fontStretch,
     color,
     leading,
     textTransform,
@@ -182,27 +228,4 @@ export const getTextTransformString = ({ str, textTransform }: GetTextTransformS
     default:
       return str;
   }
-};
-
-interface GetTextPosition {
-  textBehaviour: number;
-  verticalAlignment: number;
-  frame: FileFormat.Rect;
-  text: paper.PointText;
-}
-
-export const getTextPosition = ({ textBehaviour, verticalAlignment, frame, text }: GetTextPosition): paper.Point => {
-  const x = text.position.x += frame.x;
-  let y = text.position.y += frame.y;
-  if (textBehaviour === 2) {
-    switch(verticalAlignment) {
-      case 1:
-        y += (frame.height - text.bounds.height) / 2;
-        break;
-      case 2:
-        y += frame.height - text.bounds.height;
-        break;
-    }
-  }
-  return new paper.Point(x, y);
 };
