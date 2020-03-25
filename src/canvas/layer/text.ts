@@ -44,9 +44,11 @@ const renderText = ({ layer, container, overrides }: RenderText): paper.Layer =>
   let text: paper.AreaText | paper.PointText;
   let textAreaMask: paper.Shape | null = null;
   switch(layer.textBehaviour) {
+    // auto width
     case 0:
       text = new PointText(textAttrs);
       break;
+    // auto height
     case 1:
       text = new AreaText({
         verticalAlignment: 0,
@@ -55,8 +57,8 @@ const renderText = ({ layer, container, overrides }: RenderText): paper.Layer =>
         ...textAttrs
       });
       break;
+    // fixed size
     case 2: {
-      // mask
       textAreaMask = new Shape.Rectangle({
         rectangle: new Rectangle({
           x: 0,
