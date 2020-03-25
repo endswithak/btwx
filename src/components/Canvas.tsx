@@ -22,7 +22,11 @@ const Canvas = (): ReactElement => {
       sketchImages: sketchImages,
       canvas: canvasRef.current
     })
-    .then(() => {
+    .then((paperView) => {
+      canvasRef.current.addEventListener('wheel', (e: WheelEvent) => {
+        e.preventDefault();
+        paperView.emit('wheel', e);
+      });
       console.log('done');
     });
   }, []);

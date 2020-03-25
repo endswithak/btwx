@@ -1,4 +1,5 @@
 import React, {createContext, useReducer} from 'react';
+import paper from 'paper';
 import reducers from './reducers';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import getTheme from './theme';
@@ -17,7 +18,7 @@ interface AppState {
   sketchImages: {
     [id: string]: Buffer;
   };
-  canvas: HTMLCanvasElement;
+  canvas: paper.View;
   dispatch(reducer: any): any;
 }
 

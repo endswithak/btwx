@@ -13,7 +13,7 @@ interface RenderCanvas {
   canvas: HTMLCanvasElement;
 }
 
-const renderCanvas = async ({ sketchDocument, sketchImages, sketchPages, canvas }: RenderCanvas): Promise<void> => {
+const renderCanvas = async ({ sketchDocument, sketchImages, sketchPages, canvas }: RenderCanvas): Promise<paper.View> => {
   const page = sketchPages[0];
   const symbolsPage = getSymbolsPage({sketchPages});
   const symbols = symbolsPage ? symbolsPage.layers as FileFormat.SymbolMaster[] : null;
@@ -21,6 +21,7 @@ const renderCanvas = async ({ sketchDocument, sketchImages, sketchPages, canvas 
   const images = getBase64Images({sketchImages});
   renderApp({canvas});
   renderArtboard({artboard, symbols, images});
+  return paper.view;
 };
 
 export default renderCanvas;
