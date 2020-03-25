@@ -116,19 +116,20 @@ export default renderText;
 // 				shadowColor = ctx.shadowColor;
 // 		ctx.font = style.getFontStyle();
 // 		ctx.textAlign = style.getJustification();
-// 		var measure = ctx.measureText('Abcdefghijklmnop');
-// 		var diff = leading - (measure.actualBoundingBoxAscent + measure.actualBoundingBoxDescent);
-// 		var textY = (diff / 2) + measure.actualBoundingBoxAscent;
+// 		var baselineMeasure = ctx.measureText('Abcdefghijklmnop');
+// 		var boundingHeight = baselineMeasure.actualBoundingBoxAscent + baselineMeasure.actualBoundingBoxDescent;
+// 		var boundingWhitespace = leading - boundingHeight;
+// 		var baseline = (boundingWhitespace / 2) + baselineMeasure.actualBoundingBoxAscent;
 // 		for (var i = 0, l = lines.length; i < l; i++) {
 // 			ctx.shadowColor = shadowColor;
 // 			var line = lines[i].trim();
-// 			var metrics = ctx.measureText(line);
+// 			var maxLineWidth = ctx.measureText(line).width * this.fontStretch;
 // 			if (hasFill) {
-// 				ctx.fillText(line, 0, textY, metrics.width * this.fontStretch);
+// 				ctx.fillText(line, 0, baseline, maxLineWidth);
 // 				ctx.shadowColor = 'rgba(0,0,0,0)';
 // 			}
 // 			if (hasStroke) {
-// 				ctx.strokeText(line, 0, textY, metrics.width * this.fontStretch);
+// 				ctx.strokeText(line, 0, baseline, maxLineWidth);
 // 			}
 // 			ctx.translate(0, leading);
 // 		}
@@ -180,33 +181,49 @@ export default renderText;
 //         shadowColor = ctx.shadowColor;
 // 		ctx.font = style.getFontStyle();
 // 		ctx.textAlign = style.getJustification();
-// 		// calculate base y offset
-// 		var measure = ctx.measureText('Abcdefghijklmnop');
-// 		var diff = leading - (measure.actualBoundingBoxAscent + measure.actualBoundingBoxDescent);
-// 		var textY = (diff / 2) + measure.actualBoundingBoxAscent;
 //     // calculate wrapped lines
-//     var wrappedLines = [];
+// 		var wrappedLines = [];
 //     for (var i = 0, l = lines.length; i < l; i++) {
-//       var words = lines[i].split(' '),
-//           line = '';
-//       for(var n = 0; n < words.length; n++) {
-//         var testLine = line + words[n] + ' ';
-//         var metrics = ctx.measureText(testLine);
-//         var testWidth = metrics.width;
-//         if (testWidth > this.maxWidth + 12 && n > 0) {
-//           wrappedLines.push(line.trim());
-//           line = words[n] + ' ';
-//         }
-//         else {
-//           line = testLine;
-//         }
-//       }
-// 			wrappedLines.push(line.trim());
+// 			var baseLine = lines[i],
+// 					words = baseLine.split(' '),
+// 					maxWidth = this.maxWidth,
+// 					line = "";
+// 			if (ctx.measureText(baseLine).width < maxWidth) {
+// 				wrappedLines.push(baseLine);
+// 			} else {
+// 				while (words.length > 0) {
+// 					var split = false;
+// 					while (ctx.measureText(words[0]).width >= maxWidth) {
+// 						var tmp = words[0];
+// 						words[0] = tmp.slice(0, -1);
+// 						if (!split) {
+// 							split = true;
+// 							words.splice(1, 0, tmp.slice(-1));
+// 						} else {
+// 							words[1] = tmp.slice(-1) + words[1];
+// 						}
+// 					}
+// 					if (ctx.measureText(line + words[0]).width < maxWidth) {
+// 						line += words.shift() + " ";
+// 					} else {
+// 						wrappedLines.push(line.trim());
+// 						line = "";
+// 					}
+// 					if (words.length === 0) {
+// 						wrappedLines.push(line.trim());
+// 					}
+// 				}
+// 			}
 // 		}
+// 		// calculate baseline y position
+// 		var baselineMeasure = ctx.measureText('Abcdefghijklmnop');
+// 		var boundingHeight = baselineMeasure.actualBoundingBoxAscent + baselineMeasure.actualBoundingBoxDescent;
+// 		var boundingWhitespace = leading - boundingHeight;
+// 		var baseline = (boundingWhitespace / 2) + baselineMeasure.actualBoundingBoxAscent;
 // 		// calculate verticalAlignment offset
 // 		var textHeight = wrappedLines.length * leading;
 // 		var areaHeight = this.maxHeight;
-// 		var getVerticalAlignmentLineOffset = () => {
+// 		var getVerticalAlignment = () => {
 // 			switch(this.verticalAlignment) {
 // 				case 0:
 // 					return 0;
@@ -216,18 +233,19 @@ export default renderText;
 // 					return areaHeight - textHeight;
 // 			}
 // 		};
-// 		var verticalAlignmentLineOffset = getVerticalAlignmentLineOffset();
+// 		var verticalAlignment = getVerticalAlignment();
 // 		// draw final lines
 //     for (var i = 0, l = wrappedLines.length; i < l; i++) {
 // 			ctx.shadowColor = shadowColor;
 // 			var line = wrappedLines[i];
-// 			var metrics = ctx.measureText(line.trim());
+// 			var maxLineWidth = ctx.measureText(line.trim()).width * this.fontStretch ;
+// 			var y = verticalAlignment + baseline;
 // 			if (hasFill) {
-// 				ctx.fillText(line, 0, textY + verticalAlignmentLineOffset, metrics.width * this.fontStretch);
+// 				ctx.fillText(line, 0, y, maxLineWidth);
 // 				ctx.shadowColor = 'rgba(0,0,0,0)';
 // 			}
 // 			if (hasStroke) {
-//         ctx.strokeText(line, 0, textY + verticalAlignmentLineOffset, metrics.width * this.fontStretch);
+//         ctx.strokeText(line, 0, y, maxLineWidth);
 //       }
 // 			ctx.translate(0, leading);
 // 		}
