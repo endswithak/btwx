@@ -1,4 +1,4 @@
-import paper from 'paper';
+import paper, { PointText, AreaText, Layer, Shape, Rectangle } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 
 interface GetOverrideString {
@@ -19,7 +19,7 @@ interface GetTextJustification {
   alignment: number;
 }
 
-export const getTextJustification = ({ alignment }: GetTextJustification): string => {
+export const getTextAlignment = ({ alignment }: GetTextJustification): string => {
   switch(alignment) {
     case 1:
       return 'right';
@@ -179,9 +179,9 @@ interface FontAttributes {
   fontStyle: string;
   fontStretch: number;
   color: FileFormat.Color;
-  leading: number;
+  lineHeight: number;
   textTransform: number;
-  justification: string;
+  alignment: string;
   letterSpacing: number;
 }
 
@@ -198,9 +198,9 @@ export const getFontAttributes = ({ textStyle }: GetFontAttributes): FontAttribu
   const fontStretch = findFontStretch({fontAttrs});
   const letterSpacing = textStyle.encodedAttributes.kerning;
   const color = encodedAttributes.MSAttributedStringColorAttribute;
-  const leading = paragraphStyles.minimumLineHeight ? paragraphStyles.minimumLineHeight : fontSize * 1.2;
+  const lineHeight = paragraphStyles.minimumLineHeight ? paragraphStyles.minimumLineHeight : fontSize * 1.2;
   const textTransform = encodedAttributes.MSAttributedStringTextTransformAttribute;
-  const justification = getTextJustification({
+  const alignment = getTextAlignment({
     alignment: paragraphStyles.alignment
   });
   return {
@@ -210,9 +210,9 @@ export const getFontAttributes = ({ textStyle }: GetFontAttributes): FontAttribu
     fontStyle,
     fontStretch,
     color,
-    leading,
+    lineHeight,
     textTransform,
-    justification,
+    alignment,
     letterSpacing
   }
 };
@@ -233,4 +233,59 @@ export const getTextTransformString = ({ str, textTransform }: GetTextTransformS
     default:
       return str;
   }
+};
+
+interface DrawText {
+  layer: FileFormat.Text;
+  layerOptions: any;
+  textOptions: any;
+}
+
+export const drawText = ({ layer, layerOptions, textOptions }: DrawText): paper.Layer => {
+  const textContainer = new Layer({
+    name: 'text',
+    ...layerOptions
+  });
+  switch(layer.textBehaviour) {
+    // auto width
+    case 0:
+      new PointText({
+        parent: textContainer,
+        ...textOptions,
+      });
+      break;
+    // auto height
+    case 1:
+      new AreaText({
+        verticalAlignment: 0,
+        maxHeight: layer.frame.height,
+        maxWidth: layer.frame.width,
+        parent: textContainer,
+        ...textOptions
+      });
+      break;
+    // fixed size
+    case 2: {
+      new Shape.Rectangle({
+        rectangle: new Rectangle({
+          x: 0,
+          y: 0,
+          width: layer.frame.width,
+          height: layer.frame.height
+        }),
+        fillColor: '#ffffff',
+        parent: textContainer,
+        clipMask: true
+      });
+      new AreaText({
+        verticalAlignment: layer.style.textStyle.verticalAlignment,
+        maxHeight: layer.frame.height,
+        maxWidth: layer.frame.width,
+        parent: textContainer,
+        ...textOptions
+      });
+      break;
+    }
+  }
+  return textContainer;
 };

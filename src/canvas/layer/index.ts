@@ -35,7 +35,8 @@ const renderLayer = ({ layer, container, symbols, images, overrides, symbolPath 
     case 'shapeGroup':
       renderShapeGroup({
         layer: layer as FileFormat.ShapeGroup,
-        container: container
+        container: container,
+        images: images
       });
       break;
     case 'group':
@@ -63,7 +64,8 @@ const renderLayer = ({ layer, container, symbols, images, overrides, symbolPath 
         layer: layer,
         container: container,
         overrides: overrides,
-        symbolPath: symbolPath
+        symbolPath: symbolPath,
+        images: images,
       });
       break;
     case 'bitmap':

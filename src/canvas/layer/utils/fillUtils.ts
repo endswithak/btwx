@@ -5,42 +5,37 @@ import { getImage } from './imageUtils';
 import { convertPointString } from './shapePathUtils';
 
 interface RenderPatternFill {
-  shapePath: paper.Path | paper.CompoundPath;
+  shapePath: paper.Path | paper.CompoundPath | paper.PointText | paper.AreaText;
   fill: FileFormat.Fill;
-  fillIndex: number;
   images: {
     [id: string]: string;
   };
   container: paper.Group;
 }
 
-export const renderPatternFill = ({ shapePath, fill, fillIndex, images, container }: RenderPatternFill): void => {
-  const patternFillContainer = new Layer({
-    name: `fill-${fillIndex}`,
-    parent: container
-  });
-  const patternFillShape = shapePath.clone();
-  patternFillShape.parent = patternFillContainer;
-  patternFillShape.clipMask = true;
-  patternFillShape.name = 'fill-shape';
-  const bitmap = new Raster(getImage({
+export const renderPatternFill = ({ shapePath, fill, images, container }: RenderPatternFill): void => {
+  const patternMask = shapePath.clone();
+  patternMask.name = 'mask';
+  patternMask.parent = container;
+  patternMask.clipMask = true;
+  const pattern = new Raster(getImage({
     ref: fill.image._ref,
     images: images
   }));
-  bitmap.name = 'fill-pattern';
-  bitmap.onLoad = (): void => {
+  pattern.name = 'pattern';
+  pattern.onLoad = (): void => {
     switch(fill.patternFillType) {
       // tile
       case 0: {
-        const bitmapSymbol = new SymbolDefinition(bitmap);
-        const rows = Math.ceil(patternFillShape.bounds.height / bitmap.height);
-        const columns = Math.ceil(patternFillShape.bounds.width / bitmap.width);
+        const bitmapSymbol = new SymbolDefinition(pattern);
+        const rows = Math.ceil(patternMask.bounds.height / pattern.height);
+        const columns = Math.ceil(patternMask.bounds.width / pattern.width);
         for(let i = 0; i < rows; i++) {
           for(let j = 0; j < columns; j++) {
             const bitmapInstance = bitmapSymbol.place();
-            bitmapInstance.parent = patternFillContainer;
-            bitmapInstance.position.x = (patternFillShape.bounds.topLeft.x + bitmap.width / 2) + (bitmap.width * i);
-            bitmapInstance.position.y = (patternFillShape.bounds.topLeft.y + bitmap.height / 2) + (bitmap.height * j);
+            bitmapInstance.parent = container;
+            bitmapInstance.position.x = (patternMask.bounds.topLeft.x + pattern.width / 2) + (pattern.width * j);
+            bitmapInstance.position.y = (patternMask.bounds.topLeft.y + pattern.height / 2) + (pattern.height * i);
           }
         }
         break;
@@ -48,36 +43,36 @@ export const renderPatternFill = ({ shapePath, fill, fillIndex, images, containe
       // fill
       case 1: {
         const fillSize = getFillSize({
-          layerWidth: bitmap.width,
-          layerHeight: bitmap.height,
-          containerWidth: patternFillShape.bounds.width,
-          containerHeight: patternFillShape.bounds.height
+          layerWidth: pattern.width,
+          layerHeight: pattern.height,
+          containerWidth: patternMask.bounds.width,
+          containerHeight: patternMask.bounds.height
         });
-        bitmap.parent = patternFillContainer;
-        bitmap.width = fillSize.width;
-        bitmap.height = fillSize.height;
-        bitmap.position = patternFillShape.bounds.center;
+        pattern.parent = container;
+        pattern.width = fillSize.width;
+        pattern.height = fillSize.height;
+        pattern.position = patternMask.bounds.center;
         break;
       }
       // stretch
       case 2:
-        bitmap.parent = patternFillContainer;
-        bitmap.width = patternFillShape.bounds.width;
-        bitmap.height = patternFillShape.bounds.height;
-        bitmap.position = patternFillShape.bounds.center;
+        pattern.parent = container;
+        pattern.width = patternMask.bounds.width;
+        pattern.height = patternMask.bounds.height;
+        pattern.position = patternMask.bounds.center;
         break;
       // fit
       case 3: {
         const fitSize = getFitSize({
-          layerWidth: bitmap.width,
-          layerHeight: bitmap.height,
-          containerWidth: patternFillShape.bounds.width,
-          containerHeight: patternFillShape.bounds.height
+          layerWidth: pattern.width,
+          layerHeight: pattern.height,
+          containerWidth: patternMask.bounds.width,
+          containerHeight: patternMask.bounds.height
         });
-        bitmap.parent = patternFillContainer;
-        bitmap.width = fitSize.width;
-        bitmap.height = fitSize.height;
-        bitmap.position = patternFillShape.bounds.center;
+        pattern.parent = container;
+        pattern.width = fitSize.width;
+        pattern.height = fitSize.height;
+        pattern.position = patternMask.bounds.center;
         break;
       }
     }
@@ -85,22 +80,21 @@ export const renderPatternFill = ({ shapePath, fill, fillIndex, images, containe
 };
 
 interface RenderGradientFill {
-  shapePath: paper.Path | paper.CompoundPath;
+  shapePath: paper.Path | paper.CompoundPath | paper.PointText | paper.AreaText;
   fill: FileFormat.Fill;
-  fillIndex: number;
   container: paper.Group;
 }
 
-export const renderGradientFill = ({ shapePath, fill, fillIndex, container }: RenderGradientFill): void => {
-  const linearGradientFill = shapePath.clone();
-  linearGradientFill.parent = container;
+export const renderGradientFill = ({ shapePath, fill, container }: RenderGradientFill): void => {
+  const gradientFill = shapePath.clone();
+  gradientFill.name = `gradient`;
+  gradientFill.parent = container;
   const from = convertPointString({point: fill.gradient.from});
   const to = convertPointString({point: fill.gradient.to});
   const gradientStops = fill.gradient.stops.map((gradientStop) => {
-    return new GradientStop(new Color(gradientStop.color), gradientStop.position);
+    return new GradientStop(getPaperColor({color: gradientStop.color}), gradientStop.position);
   }) as paper.GradientStop[];
-  linearGradientFill.name = `fill-${fillIndex}`;
-  linearGradientFill.fillColor = {
+  gradientFill.fillColor = {
     gradient: {
       stops: gradientStops,
       radial: fill.gradient.gradientType === 1
@@ -111,45 +105,43 @@ export const renderGradientFill = ({ shapePath, fill, fillIndex, container }: Re
 };
 
 interface RenderColorFill {
-  shapePath: paper.Path | paper.CompoundPath;
+  shapePath: paper.Path | paper.CompoundPath | paper.PointText | paper.AreaText;
   fill: FileFormat.Fill;
-  fillIndex: number;
   container: paper.Group;
 }
 
-export const renderColorFill = ({ shapePath, fill, fillIndex, container }: RenderColorFill): void => {
+export const renderColorFill = ({ shapePath, fill, container }: RenderColorFill): void => {
   const colorFill = shapePath.clone();
-  colorFill.name = `fill-${fillIndex}`;
+  colorFill.name = `color`;
   colorFill.parent = container;
   colorFill.fillColor = getPaperColor({color: fill.color});
 };
 
 interface RenderFill {
-  shapePath: paper.Path | paper.CompoundPath;
+  shapePath: paper.Path | paper.CompoundPath | paper.PointText | paper.AreaText;
   fill: FileFormat.Fill;
-  fillIndex: number;
   images: {
     [id: string]: string;
   };
   container: paper.Group;
 }
 
-export const renderFill = ({ shapePath, fill, fillIndex, images, container }: RenderFill): void => {
+export const renderFill = ({ shapePath, fill, images, container }: RenderFill): void => {
   switch(fill.fillType) {
     case 0:
-      renderColorFill({shapePath, fill, fillIndex, container});
+      renderColorFill({shapePath, fill, container});
       break;
     case 1:
-      renderGradientFill({shapePath, fill, fillIndex, container});
+      renderGradientFill({shapePath, fill, container});
       break;
     case 4:
-      renderPatternFill({shapePath, fill, fillIndex, images, container});
+      renderPatternFill({shapePath, fill, images, container});
       break;
   }
 };
 
 interface RenderFills {
-  shapePath: paper.Path | paper.CompoundPath;
+  shapePath: paper.Path | paper.CompoundPath | paper.PointText | paper.AreaText;
   fills: FileFormat.Fill[];
   images: {
     [id: string]: string;
@@ -165,11 +157,14 @@ export const renderFills = ({ shapePath, fills, images, container }: RenderFills
     });
     fills.forEach((fill, fillIndex) => {
       if (fill.isEnabled) {
+        const fillLayer = new Layer({
+          name: `fill-${fillIndex}`,
+          parent: fillsContainer
+        });
         renderFill({
           shapePath: shapePath,
           fill: fill,
-          fillIndex: fillIndex,
-          container: fillsContainer,
+          container: fillLayer,
           images: images
         });
       }

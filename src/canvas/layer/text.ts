@@ -1,15 +1,18 @@
 import paper, { Layer, PointText, AreaText, Rectangle, Shape } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { textUtils } from './utils';
+import { textUtils, fillUtils } from './utils';
 
 interface RenderText {
   layer: FileFormat.Text;
   container: paper.Group;
+  images: {
+    [id: string]: string;
+  };
   overrides?: FileFormat.OverrideValue[];
   symbolPath?: string;
 }
 
-const renderText = ({ layer, container, overrides, symbolPath }: RenderText): paper.Layer => {
+const renderText = ({ layer, container, images, overrides, symbolPath }: RenderText): paper.Layer => {
   const textContainer = new Layer({
     name: layer.do_objectID,
     data: { name: layer.name },
@@ -27,7 +30,7 @@ const renderText = ({ layer, container, overrides, symbolPath }: RenderText): pa
   });
   const textAttrs = {
     point: textUtils.getTextPoint({
-      justfication: fontAttrs.justification,
+      justfication: fontAttrs.alignment,
       width: layer.frame.width
     }),
     content: textUtils.getTextTransformString({
@@ -39,49 +42,57 @@ const renderText = ({ layer, container, overrides, symbolPath }: RenderText): pa
     fontWeight: `${fontAttrs.fontStyle} ${fontAttrs.fontWeight}`,
     fontStretch: fontAttrs.fontStretch,
     fontFamily: fontAttrs.fontFamily,
-    justification: fontAttrs.justification,
+    justification: fontAttrs.alignment,
     fontSize: fontAttrs.fontSize,
-    leading: fontAttrs.leading,
+    leading: fontAttrs.letterSpacing,
     letterSpacing: fontAttrs.letterSpacing
   }
-  let text: paper.AreaText | paper.PointText;
-  let textAreaMask: paper.Shape | null = null;
-  switch(layer.textBehaviour) {
-    // auto width
-    case 0:
-      text = new PointText(textAttrs);
-      break;
-    // auto height
-    case 1:
-      text = new AreaText({
-        verticalAlignment: 0,
-        maxHeight: layer.frame.height,
-        maxWidth: layer.frame.width,
-        ...textAttrs
-      });
-      break;
-    // fixed size
-    case 2: {
-      textAreaMask = new Shape.Rectangle({
-        rectangle: new Rectangle({
-          x: 0,
-          y: 0,
-          width: layer.frame.width,
-          height: layer.frame.height
-        }),
-        fillColor: '#ffffff',
-        parent: textContainer,
-        clipMask: true
-      });
-      text = new AreaText({
-        verticalAlignment: layer.style.textStyle.verticalAlignment,
-        maxHeight: layer.frame.height,
-        maxWidth: layer.frame.width,
-        ...textAttrs
-      });
-      break;
+  // render base text
+  textUtils.drawText({
+    layer: layer,
+    textOptions: textAttrs,
+    layerOptions: {
+      parent: textContainer
     }
-  }
+  });
+  // let text: paper.AreaText | paper.PointText;
+  // let textAreaMask: paper.Shape | null = null;
+  // switch(layer.textBehaviour) {
+  //   // auto width
+  //   case 0:
+  //     text = new PointText(textAttrs);
+  //     break;
+  //   // auto height
+  //   case 1:
+  //     text = new AreaText({
+  //       verticalAlignment: 0,
+  //       maxHeight: layer.frame.height,
+  //       maxWidth: layer.frame.width,
+  //       ...textAttrs
+  //     });
+  //     break;
+  //   // fixed size
+  //   case 2: {
+  //     textAreaMask = new Shape.Rectangle({
+  //       rectangle: new Rectangle({
+  //         x: 0,
+  //         y: 0,
+  //         width: layer.frame.width,
+  //         height: layer.frame.height
+  //       }),
+  //       fillColor: '#ffffff',
+  //       parent: textContainer,
+  //       clipMask: true
+  //     });
+  //     text = new AreaText({
+  //       verticalAlignment: layer.style.textStyle.verticalAlignment,
+  //       maxHeight: layer.frame.height,
+  //       maxWidth: layer.frame.width,
+  //       ...textAttrs
+  //     });
+  //     break;
+  //   }
+  // }
   textContainer.position.x += layer.frame.x;
   textContainer.position.y += layer.frame.y;
   return textContainer;

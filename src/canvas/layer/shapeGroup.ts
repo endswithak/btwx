@@ -1,6 +1,6 @@
 import paper, { Layer, Rectangle, Point, Group, CompoundPath, Path, Color } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { shapePathUtils, shapeGroupUtils } from './utils';
+import { shapePathUtils, shapeGroupUtils, fillUtils, borderUtils } from './utils';
 
 interface RenderShapeGroupLayer {
   layer: FileFormat.ShapePath | FileFormat.Rectangle | FileFormat.Star | FileFormat.Polygon;
@@ -98,9 +98,12 @@ const renderShapeGroup = ({ layer, container }: RenderShapeGroup): paper.Layer =
 interface RenderShape {
   layer: FileFormat.ShapeGroup;
   container: paper.Group;
+  images: {
+    [id: string]: string;
+  };
 }
 
-const renderShape = ({ layer, container }: RenderShape): paper.Layer => {
+const renderShape = ({ layer, container, images }: RenderShape): paper.Layer => {
   const shape = new Layer({
     parent: container,
     name: layer.do_objectID,
@@ -112,11 +115,21 @@ const renderShape = ({ layer, container }: RenderShape): paper.Layer => {
     layer: layer,
     container: shape
   });
+  const shapePath = shape.lastChild as paper.Path | paper.CompoundPath;
+  fillUtils.renderFills({
+    shapePath: shapePath,
+    fills: layer.style.fills,
+    images: images,
+    container: shape
+  });
+  borderUtils.renderBorders({
+    shapePath: shapePath,
+    borders: layer.style.borders,
+    borderOptions: layer.style.borderOptions,
+    container: shape
+  });
   shape.position.x += layer.frame.x;
   shape.position.y += layer.frame.y;
-  shape.lastChild.fillColor = Color.random();
-  shape.lastChild.strokeWidth = 2;
-  shape.lastChild.strokeColor = Color.random();
   return shape;
 };
 

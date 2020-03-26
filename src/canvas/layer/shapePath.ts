@@ -1,6 +1,6 @@
 import paper, { Layer, Color } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { shapePathUtils, fillUtils } from './utils';
+import { shapePathUtils, fillUtils, borderUtils } from './utils';
 
 interface RenderShapePath {
   layer: FileFormat.ShapePath | FileFormat.Rectangle;
@@ -30,6 +30,12 @@ const renderShapePath = ({ layer, images, container }: RenderShapePath): paper.L
     shapePath: shapePath,
     fills: layer.style.fills,
     images: images,
+    container: shapePathContainer
+  });
+  borderUtils.renderBorders({
+    shapePath: shapePath,
+    borders: layer.style.borders,
+    borderOptions: layer.style.borderOptions,
     container: shapePathContainer
   });
   shapePathContainer.position.x += layer.frame.x;

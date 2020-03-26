@@ -5,6 +5,7 @@ import * as shapeGroup from './shapeGroupUtils';
 import * as shapePath from './shapePathUtils';
 
 import * as fill from './fillUtils';
+import * as border from './borderUtils';
 
 export const textUtils = text;
 export const imageUtils = image;
@@ -13,6 +14,7 @@ export const shapeGroupUtils = shapeGroup;
 export const shapePathUtils = shapePath;
 
 export const fillUtils = fill;
+export const borderUtils = border;
 
 export default {
   text,
@@ -20,5 +22,6 @@ export default {
   symbol,
   shapeGroup,
   shapePath,
-  fillUtils
+  fillUtils,
+  borderUtils
 };

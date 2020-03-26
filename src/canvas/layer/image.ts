@@ -1,6 +1,6 @@
-import paper, { Layer, Raster, Rectangle, Shape, Point, Color } from 'paper';
+import paper, { Layer, Raster, Rectangle, Path, Point, Color } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { imageUtils } from './utils';
+import { imageUtils, fillUtils, borderUtils } from './utils';
 
 interface RenderImage {
   layer: FileFormat.Bitmap;
@@ -13,31 +13,55 @@ interface RenderImage {
 }
 
 const renderImage = ({ layer, container, images, overrides, symbolPath }: RenderImage): paper.Layer => {
-  const image = new Layer({
+  const imageContainer = new Layer({
     name: layer.do_objectID,
     data: { name: layer.name },
     locked: layer.isLocked,
     visible: layer.isVisible,
     parent: container
   });
+  // render bitmap
   const override = imageUtils.getOverrideImage({
     layerId: layer.do_objectID,
     overrides: overrides,
     symbolPath: symbolPath
   });
-  const bitmap = new Raster({
-    source: imageUtils.getImage({
-      ref: override ? (override.value as FileFormat.ImageFileRef)._ref : layer.image._ref,
-      images: images
-    }),
-    width: layer.frame.width,
-    height: layer.frame.height,
-    parent: image,
-    position: new Point(layer.frame.width / 2, layer.frame.height / 2)
+  const bitmapContainer = new Layer({
+    name: 'bitmap',
+    parent: imageContainer
   });
-  image.position.x += layer.frame.x;
-  image.position.y += layer.frame.y;
-  return image;
+  const bitmap = new Raster(imageUtils.getImage({
+    ref: override ? (override.value as FileFormat.ImageFileRef)._ref : layer.image._ref,
+    images: images
+  }));
+  bitmap.width = layer.frame.width;
+  bitmap.height = layer.frame.height;
+  bitmap.parent = bitmapContainer;
+  bitmap.position = new Point(layer.frame.width / 2, layer.frame.height / 2);
+  // create shape ref for styles
+  const imageShape = new Path.Rectangle({
+    point: [0, 0],
+    size: [layer.frame.width, layer.frame.height],
+    insert: false
+  });
+  // render fills
+  fillUtils.renderFills({
+    shapePath: imageShape,
+    fills: layer.style.fills,
+    images: images,
+    container: imageContainer
+  });
+  // render borders
+  borderUtils.renderBorders({
+    shapePath: imageShape,
+    borders: layer.style.borders,
+    borderOptions: layer.style.borderOptions,
+    container: imageContainer
+  });
+  // position container
+  imageContainer.position.x += layer.frame.x;
+  imageContainer.position.y += layer.frame.y;
+  return imageContainer;
 };
 
 export default renderImage;
