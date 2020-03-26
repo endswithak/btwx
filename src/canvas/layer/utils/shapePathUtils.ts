@@ -5,7 +5,7 @@ interface ConvertPointString {
   point: string;
 }
 
-const convertPointString = ({ point }: ConvertPointString): {x: number; y: number} => {
+export const convertPointString = ({ point }: ConvertPointString): {x: number; y: number} => {
   const str = point.replace(/\s/g, '');
   const commaPos = str.indexOf(',');
   const x = Number(str.substring(1, commaPos));
