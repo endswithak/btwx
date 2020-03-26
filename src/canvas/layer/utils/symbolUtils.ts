@@ -1,18 +1,20 @@
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 
 interface GetSymbolMaster {
-  instanceId: string;
+  layerId: string;
   symbolId: string;
   symbols: FileFormat.SymbolMaster[];
   overrides?: FileFormat.OverrideValue[];
+  symbolPath?: string;
 }
 
-export const getSymbolMaster = ({ instanceId, symbolId, symbols, overrides }: GetSymbolMaster): FileFormat.SymbolMaster => {
+export const getSymbolMaster = ({ layerId, symbolId, symbols, overrides, symbolPath }: GetSymbolMaster): FileFormat.SymbolMaster => {
   const originalSymbol = symbols.find((symbolMaster) => {
     return symbolMaster.symbolID === symbolId;
   });
   const overrideSymbol = overrides ? overrides.find((override) => {
-    return override.overrideName.includes(`${instanceId}_symbolID`);
+    const overridePath = symbolPath ? `${symbolPath}/${layerId}_symbolID` : `${layerId}_symbolID`;
+    return overridePath.includes(override.overrideName);
   }) : null;
   if (overrideSymbol) {
     return symbols.find((symbolMaster) => {

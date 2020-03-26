@@ -10,16 +10,18 @@ interface RenderLayers {
     [id: string]: string;
   };
   overrides?: FileFormat.OverrideValue[];
+  symbolPath?: string;
 }
 
-const renderLayers = ({ layers, container, symbols, images, overrides }: RenderLayers): void => {
+const renderLayers = ({ layers, container, symbols, images, overrides, symbolPath }: RenderLayers): void => {
   layers.forEach((layer) => {
     renderLayer({
       layer: layer,
       container: container,
       symbols: symbols,
       images: images,
-      overrides: overrides
+      overrides: overrides,
+      symbolPath: symbolPath
     });
   });
 };

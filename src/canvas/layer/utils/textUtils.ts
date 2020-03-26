@@ -2,13 +2,15 @@ import paper from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 
 interface GetOverrideString {
-  textId: string;
+  layerId: string;
   overrides?: FileFormat.OverrideValue[];
+  symbolPath?: string;
 }
 
-export const getOverrideString = ({ textId, overrides }: GetOverrideString): FileFormat.OverrideValue => {
+export const getOverrideString = ({ layerId, overrides, symbolPath }: GetOverrideString): FileFormat.OverrideValue => {
   const overrideString = overrides ? overrides.find((override) => {
-    return override.overrideName.includes(`${textId}_stringValue`);
+    const overridePath = symbolPath ? `${symbolPath}/${layerId}_stringValue` : `${layerId}_stringValue`;
+    return overridePath.includes(override.overrideName);
   }) : null;
   return overrideString;
 };
@@ -180,6 +182,7 @@ interface FontAttributes {
   leading: number;
   textTransform: number;
   justification: string;
+  letterSpacing: number;
 }
 
 export const getFontAttributes = ({ textStyle }: GetFontAttributes): FontAttributes => {
@@ -193,6 +196,7 @@ export const getFontAttributes = ({ textStyle }: GetFontAttributes): FontAttribu
   const fontWeight = findFontWeight({fontAttrs});
   const fontStyle = findFontStyle({fontAttrs});
   const fontStretch = findFontStretch({fontAttrs});
+  const letterSpacing = textStyle.encodedAttributes.kerning;
   const color = encodedAttributes.MSAttributedStringColorAttribute;
   const leading = paragraphStyles.minimumLineHeight ? paragraphStyles.minimumLineHeight : fontSize * 1.2;
   const textTransform = encodedAttributes.MSAttributedStringTextTransformAttribute;
@@ -208,7 +212,8 @@ export const getFontAttributes = ({ textStyle }: GetFontAttributes): FontAttribu
     color,
     leading,
     textTransform,
-    justification
+    justification,
+    letterSpacing
   }
 };
 

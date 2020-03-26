@@ -6,7 +6,6 @@ interface RenderApp {
 
 const renderApp = ({ canvas }: RenderApp): void => {
   paper.setup(canvas);
-  //console.log(paper.view.center.x);
   paper.view.on('wheel', (e: WheelEvent) => {
     if (e.ctrlKey) {
       e.preventDefault();

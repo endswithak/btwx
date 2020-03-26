@@ -15,9 +15,10 @@ interface RenderLayer {
     [id: string]: string;
   };
   overrides?: FileFormat.OverrideValue[];
+  symbolPath?: string;
 }
 
-const renderLayer = ({ layer, container, symbols, images, overrides }: RenderLayer): void => {
+const renderLayer = ({ layer, container, symbols, images, overrides, symbolPath }: RenderLayer): void => {
   switch(layer._class) {
     case 'shapePath':
     case 'rectangle':
@@ -43,7 +44,8 @@ const renderLayer = ({ layer, container, symbols, images, overrides }: RenderLay
         container: container,
         symbols: symbols,
         images: images,
-        overrides: overrides
+        overrides: overrides,
+        symbolPath: symbolPath
       });
       break;
     case 'symbolInstance':
@@ -52,14 +54,16 @@ const renderLayer = ({ layer, container, symbols, images, overrides }: RenderLay
         container: container,
         symbols: symbols,
         images: images,
-        overrides: overrides
+        overrides: overrides,
+        symbolPath: symbolPath
       });
       break;
     case 'text':
       renderText({
         layer: layer,
         container: container,
-        overrides: overrides
+        overrides: overrides,
+        symbolPath: symbolPath
       });
       break;
     case 'bitmap':
@@ -67,7 +71,8 @@ const renderLayer = ({ layer, container, symbols, images, overrides }: RenderLay
         layer: layer,
         container: container,
         images: images,
-        overrides: overrides
+        overrides: overrides,
+        symbolPath: symbolPath
       });
       break;
     default:

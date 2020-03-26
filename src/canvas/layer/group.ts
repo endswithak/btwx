@@ -10,9 +10,10 @@ interface RenderGroup {
     [id: string]: string;
   };
   overrides?: FileFormat.OverrideValue[];
+  symbolPath?: string;
 }
 
-const renderGroup = ({ layer, container, symbols, images, overrides }: RenderGroup): paper.Group => {
+const renderGroup = ({ layer, container, symbols, images, overrides, symbolPath }: RenderGroup): paper.Group => {
   const groupLayer = new Group({
     name: layer.do_objectID,
     data: { name: layer.name },
@@ -26,7 +27,8 @@ const renderGroup = ({ layer, container, symbols, images, overrides }: RenderGro
     container: groupLayer,
     symbols: symbols,
     images: images,
-    overrides: overrides
+    overrides: overrides,
+    symbolPath: symbolPath
   });
   groupLayer.position.x += layer.frame.x;
   groupLayer.position.y += layer.frame.y;

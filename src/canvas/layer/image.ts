@@ -9,9 +9,10 @@ interface RenderImage {
     [id: string]: string;
   };
   overrides?: FileFormat.OverrideValue[];
+  symbolPath: string;
 }
 
-const renderImage = ({ layer, container, images, overrides }: RenderImage): paper.Layer => {
+const renderImage = ({ layer, container, images, overrides, symbolPath }: RenderImage): paper.Layer => {
   const image = new Layer({
     name: layer.do_objectID,
     data: { name: layer.name },
@@ -20,8 +21,9 @@ const renderImage = ({ layer, container, images, overrides }: RenderImage): pape
     parent: container
   });
   const override = imageUtils.getOverrideImage({
-    instanceId: layer.do_objectID,
-    overrides: overrides
+    layerId: layer.do_objectID,
+    overrides: overrides,
+    symbolPath: symbolPath
   });
   const bitmap = new Raster({
     source: imageUtils.getImage({

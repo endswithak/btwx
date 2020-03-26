@@ -17,7 +17,7 @@ const renderCanvas = async ({ sketchDocument, sketchImages, sketchPages, canvas 
   const page = sketchPages[0];
   const symbolsPage = getSymbolsPage({sketchPages});
   const symbols = symbolsPage ? symbolsPage.layers as FileFormat.SymbolMaster[] : null;
-  const artboard = page.layers[0] as FileFormat.Artboard;
+  const artboard = page.layers.find((layer) => layer._class === 'artboard') as FileFormat.Artboard;
   const images = getBase64Images({sketchImages});
   renderApp({canvas});
   renderArtboard({artboard, symbols, images});

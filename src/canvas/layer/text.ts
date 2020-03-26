@@ -6,9 +6,10 @@ interface RenderText {
   layer: FileFormat.Text;
   container: paper.Group;
   overrides?: FileFormat.OverrideValue[];
+  symbolPath?: string;
 }
 
-const renderText = ({ layer, container, overrides }: RenderText): paper.Layer => {
+const renderText = ({ layer, container, overrides, symbolPath }: RenderText): paper.Layer => {
   const textContainer = new Layer({
     name: layer.do_objectID,
     data: { name: layer.name },
@@ -17,8 +18,9 @@ const renderText = ({ layer, container, overrides }: RenderText): paper.Layer =>
     parent: container
   });
   const override = textUtils.getOverrideString({
-    textId: layer.do_objectID,
-    overrides: overrides
+    layerId: layer.do_objectID,
+    overrides: overrides,
+    symbolPath: symbolPath
   });
   const fontAttrs = textUtils.getFontAttributes({
     textStyle: layer.style.textStyle
@@ -39,7 +41,8 @@ const renderText = ({ layer, container, overrides }: RenderText): paper.Layer =>
     fontFamily: fontAttrs.fontFamily,
     justification: fontAttrs.justification,
     fontSize: fontAttrs.fontSize,
-    leading: fontAttrs.leading
+    leading: fontAttrs.leading,
+    letterSpacing: fontAttrs.letterSpacing
   }
   let text: paper.AreaText | paper.PointText;
   let textAreaMask: paper.Shape | null = null;
@@ -107,6 +110,11 @@ export default renderText;
 // 		if (!this._content) {
 // 			return;
 // 		}
+//    if (this.letterSpacing) {
+//      this.project.view.element.style.letterSpacing = `${this.letterSpacing}px`;
+//    } else {
+//      this.project.view.element.style.letterSpacing = 'normal';
+//    }
 // 		this._setStyles(ctx, param, viewMatrix);
 // 		var lines = this._lines,
 // 				style = this._style,
@@ -172,6 +180,11 @@ export default renderText;
 // 		if (!this._content) {
 //       return;
 //     }
+//    if (this.letterSpacing) {
+//      this.project.view.element.style.letterSpacing = `${this.letterSpacing}px`;
+//    } else {
+//      this.project.view.element.style.letterSpacing = 'normal';
+//    }
 // 		this._setStyles(ctx, param, viewMatrix);
 //     var lines = this._lines,
 //         style = this._style,
