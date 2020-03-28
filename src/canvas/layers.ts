@@ -9,18 +9,20 @@ interface RenderLayers {
   images: {
     [id: string]: string;
   };
+  groupShadows?: FileFormat.Shadow[];
   path?: string;
   overrides?: FileFormat.OverrideValue[];
   symbolPath?: string;
 }
 
-const renderLayers = ({ layers, container, symbols, images, path, overrides, symbolPath }: RenderLayers): void => {
+const renderLayers = ({ layers, container, symbols, images, groupShadows, path, overrides, symbolPath }: RenderLayers): void => {
   layers.forEach((layer) => {
     renderLayer({
       layer: layer,
       container: container,
       symbols: symbols,
       images: images,
+      groupShadows: groupShadows,
       path: path,
       overrides: overrides,
       symbolPath: symbolPath

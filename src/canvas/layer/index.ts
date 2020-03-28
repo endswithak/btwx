@@ -6,7 +6,7 @@ import renderGroup from './group';
 import renderSymbolInstance from './symbolInstance';
 import renderText from './text';
 import renderImage from './image';
-import { generalUtils, symbolUtils } from './utils';
+import { generalUtils, symbolUtils, shadowUtils } from './utils';
 
 interface RenderLayer {
   layer: FileFormat.AnyLayer;
@@ -16,14 +16,16 @@ interface RenderLayer {
     [id: string]: string;
   };
   path: string;
+  groupShadows?: FileFormat.Shadow[];
   overrides?: FileFormat.OverrideValue[];
   symbolPath?: string;
 }
 
-const renderLayer = ({ layer, container, symbols, images, path, overrides, symbolPath }: RenderLayer): void => {
+const renderLayer = ({ layer, container, symbols, images, path, groupShadows, overrides, symbolPath }: RenderLayer): void => {
   path = generalUtils.getLayerPath({layer, path});
   overrides = symbolUtils.getCompiledOverrides({layer, overrides});
   symbolPath = symbolUtils.getSymbolPath({layer, symbolPath});
+  groupShadows = shadowUtils.getGroupShadows({layer, groupShadows});
   switch(layer._class) {
     case 'shapePath':
     case 'rectangle':
@@ -36,6 +38,7 @@ const renderLayer = ({ layer, container, symbols, images, path, overrides, symbo
         container: container,
         images: images,
         path: path,
+        groupShadows: groupShadows,
         overrides: overrides,
         symbolPath: symbolPath
       });
@@ -46,6 +49,7 @@ const renderLayer = ({ layer, container, symbols, images, path, overrides, symbo
         container: container,
         images: images,
         path: path,
+        groupShadows: groupShadows,
         overrides: overrides,
         symbolPath: symbolPath
       });
@@ -57,6 +61,7 @@ const renderLayer = ({ layer, container, symbols, images, path, overrides, symbo
         symbols: symbols,
         images: images,
         path: path,
+        groupShadows: groupShadows,
         overrides: overrides,
         symbolPath: symbolPath
       });
@@ -68,6 +73,7 @@ const renderLayer = ({ layer, container, symbols, images, path, overrides, symbo
         symbols: symbols,
         images: images,
         path: path,
+        groupShadows: groupShadows,
         overrides: overrides,
         symbolPath: symbolPath
       });
@@ -77,6 +83,7 @@ const renderLayer = ({ layer, container, symbols, images, path, overrides, symbo
         layer: layer,
         container: container,
         path: path,
+        groupShadows: groupShadows,
         overrides: overrides,
         symbolPath: symbolPath,
         images: images
@@ -88,6 +95,7 @@ const renderLayer = ({ layer, container, symbols, images, path, overrides, symbo
         container: container,
         images: images,
         path: path,
+        groupShadows: groupShadows,
         overrides: overrides,
         symbolPath: symbolPath
       });

@@ -1,10 +1,10 @@
 import paper, { Layer, Rectangle, Point, Group, CompoundPath, Path, Color } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { shapePathUtils, shapeGroupUtils, fillUtils, borderUtils } from './utils';
+import { shapePathUtils, shapeGroupUtils, fillUtils, borderUtils, shadowUtils, innerShadowUtils } from './utils';
 
 interface RenderShapeGroupLayer {
   layer: FileFormat.ShapePath | FileFormat.Rectangle | FileFormat.Star | FileFormat.Polygon;
-  container: paper.Layer;
+  container: paper.Layer | paper.Group;
 }
 
 const renderShapeGroupLayer = ({ layer, container }: RenderShapeGroupLayer): void => {
@@ -16,7 +16,8 @@ const renderShapeGroupLayer = ({ layer, container }: RenderShapeGroupLayer): voi
       visible: layer.isVisible,
       locked: layer.isLocked,
       closed: layer.isClosed,
-      parent: container
+      parent: container,
+      windingRule: shapePathUtils.getWindingRule({windingRule: layer.style.windingRule})
     }
   });
   layerPath.position.x += layer.frame.x;
@@ -36,7 +37,7 @@ const renderShapeGroupLayer = ({ layer, container }: RenderShapeGroupLayer): voi
 
 interface RenderShapeGroupLayers {
   layer: FileFormat.ShapeGroup;
-  container: paper.Layer;
+  container: paper.Layer | paper.Group;
 }
 
 const renderShapeGroupLayers = ({ layer, container }: RenderShapeGroupLayers): void => {
@@ -102,38 +103,53 @@ interface RenderShape {
     [id: string]: string;
   };
   path: string;
+  groupShadows?: FileFormat.Shadow[];
   overrides?: FileFormat.OverrideValue[];
   symbolPath?: string;
 }
 
-const renderShape = ({ layer, container, images, path }: RenderShape): paper.Layer => {
-  const shape = new Layer({
+const renderShape = ({ layer, container, images, path, groupShadows }: RenderShape): paper.Layer => {
+  const shapeContainer = new Layer({
     parent: container,
     name: layer.do_objectID,
     data: { name: layer.name },
     visible: layer.isVisible,
     locked: layer.isLocked
   });
+  const shapeLayers = new Group({
+    name: 'layers',
+    container: shapeContainer
+  });
   renderShapeGroupLayers({
     layer: layer,
-    container: shape
+    container: shapeLayers
   });
-  const shapePath = shape.lastChild as paper.Path | paper.CompoundPath;
+  const shapePath = shapeLayers.lastChild as paper.Path | paper.CompoundPath;
+  shadowUtils.renderShadows({
+    shapePath: shapePath,
+    shadows: groupShadows ? [...groupShadows, ...layer.style.shadows] : layer.style.shadows,
+    container: shapeContainer
+  });
   fillUtils.renderFills({
     shapePath: shapePath,
     fills: layer.style.fills,
     images: images,
-    container: shape
+    container: shapeContainer
   });
   borderUtils.renderBorders({
     shapePath: shapePath,
     borders: layer.style.borders,
     borderOptions: layer.style.borderOptions,
-    container: shape
+    container: shapeContainer
   });
-  shape.position.x += layer.frame.x;
-  shape.position.y += layer.frame.y;
-  return shape;
+  innerShadowUtils.renderInnerShadows({
+    shapePath: shapePath,
+    innerShadows: layer.style.innerShadows,
+    container: shapeContainer
+  });
+  shapeContainer.position.x += layer.frame.x;
+  shapeContainer.position.y += layer.frame.y;
+  return shapeContainer;
 };
 
 export default renderShape;

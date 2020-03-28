@@ -10,12 +10,13 @@ interface RenderGroup {
     [id: string]: string;
   };
   path: string;
+  groupShadows?: FileFormat.Shadow[];
   overrides?: FileFormat.OverrideValue[];
   symbolPath?: string;
 }
 
-const renderGroup = ({ layer, container, symbols, images, path, overrides, symbolPath }: RenderGroup): paper.Group => {
-  const groupLayer = new Group({
+const renderGroup = ({ layer, container, symbols, images, path, groupShadows, overrides, symbolPath }: RenderGroup): paper.Group => {
+  const groupContainer = new Group({
     name: layer.do_objectID,
     data: { name: layer.name },
     locked: layer.isLocked,
@@ -25,16 +26,17 @@ const renderGroup = ({ layer, container, symbols, images, path, overrides, symbo
   });
   renderLayers({
     layers: layer.layers,
-    container: groupLayer,
+    container: groupContainer,
     symbols: symbols,
     images: images,
     path: path,
+    groupShadows: groupShadows,
     overrides: overrides,
     symbolPath: symbolPath
   });
-  groupLayer.position.x += layer.frame.x;
-  groupLayer.position.y += layer.frame.y;
-  return groupLayer;
+  groupContainer.position.x += layer.frame.x;
+  groupContainer.position.y += layer.frame.y;
+  return groupContainer;
 };
 
 export default renderGroup;

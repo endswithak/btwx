@@ -1,6 +1,6 @@
 import paper, { Layer, Color } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { shapePathUtils, fillUtils, borderUtils, imageUtils } from './utils';
+import { shapePathUtils, fillUtils, borderUtils, imageUtils, shadowUtils, innerShadowUtils } from './utils';
 
 interface RenderShapePath {
   layer: FileFormat.ShapePath | FileFormat.Rectangle;
@@ -9,11 +9,12 @@ interface RenderShapePath {
     [id: string]: string;
   };
   path: string;
+  groupShadows?: FileFormat.Shadow[];
   overrides?: FileFormat.OverrideValue[];
   symbolPath?: string;
 }
 
-const renderShapePath = ({ layer, images, container, path, overrides, symbolPath }: RenderShapePath): paper.Layer => {
+const renderShapePath = ({ layer, images, container, path, groupShadows, overrides, symbolPath }: RenderShapePath): paper.Layer => {
   const shapePathContainer = new Layer({
     name: layer.do_objectID,
     data: { name: layer.name },
@@ -34,7 +35,11 @@ const renderShapePath = ({ layer, images, container, path, overrides, symbolPath
       windingRule: shapePathUtils.getWindingRule({windingRule: layer.style.windingRule})
     }
   });
-  console.log(shapePath);
+  shadowUtils.renderShadows({
+    shapePath: shapePath,
+    shadows: groupShadows ? [...groupShadows, ...layer.style.shadows] : layer.style.shadows,
+    container: shapePathContainer
+  });
   fillUtils.renderFills({
     shapePath: shapePath,
     fills: layer.style.fills,
@@ -46,6 +51,11 @@ const renderShapePath = ({ layer, images, container, path, overrides, symbolPath
     shapePath: shapePath,
     borders: layer.style.borders,
     borderOptions: layer.style.borderOptions,
+    container: shapePathContainer
+  });
+  innerShadowUtils.renderInnerShadows({
+    shapePath: shapePath,
+    innerShadows: layer.style.innerShadows,
     container: shapePathContainer
   });
   shapePathContainer.position.x += layer.frame.x;

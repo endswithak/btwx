@@ -11,12 +11,13 @@ interface RenderSymbolInstance {
     [id: string]: string;
   };
   path: string;
+  groupShadows?: FileFormat.Shadow[];
   overrides?: FileFormat.OverrideValue[];
   symbolPath?: string;
 }
 
-const renderSymbolInstance = ({ layer, container, symbols, images, path, overrides, symbolPath }: RenderSymbolInstance): paper.Group => {
-  const symbol = new Group({
+const renderSymbolInstance = ({ layer, container, symbols, images, path, groupShadows, overrides, symbolPath }: RenderSymbolInstance): paper.Group => {
+  const symbolContainer = new Group({
     name: layer.do_objectID,
     data: { name: layer.name },
     locked: layer.isLocked,
@@ -32,17 +33,18 @@ const renderSymbolInstance = ({ layer, container, symbols, images, path, overrid
   if (master) {
     renderLayers({
       layers: master.layers,
-      container: symbol,
+      container: symbolContainer,
       symbols: symbols,
       images: images,
       path: path,
+      groupShadows: groupShadows,
       overrides: overrides,
       symbolPath: symbolPath
     });
   }
-  symbol.position.x += layer.frame.x;
-  symbol.position.y += layer.frame.y;
-  return symbol;
+  symbolContainer.position.x += layer.frame.x;
+  symbolContainer.position.y += layer.frame.y;
+  return symbolContainer;
 };
 
 export default renderSymbolInstance;

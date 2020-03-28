@@ -9,11 +9,12 @@ interface RenderText {
     [id: string]: string;
   };
   path: string;
+  groupShadows?: FileFormat.Shadow[];
   overrides?: FileFormat.OverrideValue[];
   symbolPath?: string;
 }
 
-const renderText = ({ layer, container, images, path, overrides, symbolPath }: RenderText): paper.Layer => {
+const renderText = ({ layer, container, images, path, groupShadows, overrides, symbolPath }: RenderText): paper.Layer => {
   const textContainer = new Layer({
     name: layer.do_objectID,
     data: { name: layer.name },
