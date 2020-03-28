@@ -2,15 +2,13 @@ import paper, { PointText, AreaText, Layer, Shape, Rectangle } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 
 interface GetOverrideString {
-  layerId: string;
   overrides?: FileFormat.OverrideValue[];
   symbolPath?: string;
 }
 
-export const getOverrideString = ({ layerId, overrides, symbolPath }: GetOverrideString): FileFormat.OverrideValue => {
+export const getOverrideString = ({ overrides, symbolPath }: GetOverrideString): FileFormat.OverrideValue => {
   const overrideString = overrides ? overrides.find((override) => {
-    const overridePath = symbolPath ? `${symbolPath}/${layerId}_stringValue` : `${layerId}_stringValue`;
-    return overridePath.includes(override.overrideName);
+    return `${symbolPath}_stringValue`.includes(override.overrideName);
   }) : null;
   return overrideString;
 };

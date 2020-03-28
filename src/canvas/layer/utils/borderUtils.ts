@@ -98,6 +98,7 @@ export const renderGradientBorder = ({ shapePath, border, borderOptions, contain
   const gradientStops = border.gradient.stops.map((gradientStop) => {
     return new GradientStop(new Color(gradientStop.color), gradientStop.position);
   }) as paper.GradientStop[];
+  gradientBorder.dashArray = borderOptions.dashPattern;
   gradientBorder.strokeWidth = getBorderThickness({border});
   gradientBorder.strokeJoin = getBorderLineJoin({borderOptions});
   gradientBorder.strokeCap = getBorderLineCap({borderOptions});
@@ -123,6 +124,7 @@ export const renderColorBorder = ({ shapePath, border, borderOptions, container 
   const colorBorder = shapePath.clone();
   colorBorder.name = 'color';
   colorBorder.parent = container;
+  colorBorder.dashArray = borderOptions.dashPattern;
   colorBorder.strokeWidth = getBorderThickness({border});
   colorBorder.strokeJoin = getBorderLineJoin({borderOptions});
   colorBorder.strokeCap = getBorderLineCap({borderOptions});

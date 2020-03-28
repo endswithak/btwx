@@ -8,11 +8,12 @@ interface RenderText {
   images: {
     [id: string]: string;
   };
+  path: string;
   overrides?: FileFormat.OverrideValue[];
   symbolPath?: string;
 }
 
-const renderText = ({ layer, container, images, overrides, symbolPath }: RenderText): paper.Layer => {
+const renderText = ({ layer, container, images, path, overrides, symbolPath }: RenderText): paper.Layer => {
   const textContainer = new Layer({
     name: layer.do_objectID,
     data: { name: layer.name },
@@ -21,7 +22,6 @@ const renderText = ({ layer, container, images, overrides, symbolPath }: RenderT
     parent: container
   });
   const override = textUtils.getOverrideString({
-    layerId: layer.do_objectID,
     overrides: overrides,
     symbolPath: symbolPath
   });

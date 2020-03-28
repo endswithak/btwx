@@ -101,9 +101,12 @@ interface RenderShape {
   images: {
     [id: string]: string;
   };
+  path: string;
+  overrides?: FileFormat.OverrideValue[];
+  symbolPath?: string;
 }
 
-const renderShape = ({ layer, container, images }: RenderShape): paper.Layer => {
+const renderShape = ({ layer, container, images, path }: RenderShape): paper.Layer => {
   const shape = new Layer({
     parent: container,
     name: layer.do_objectID,

@@ -62,3 +62,12 @@ interface PaperColor {
 export const getPaperColor = ({ color }: PaperColor): paper.Color => {
   return new Color(color.red, color.green, color.blue, color.alpha);
 };
+
+interface GetLayerPath {
+  path: string;
+  layer: FileFormat.AnyLayer;
+}
+
+export const getLayerPath = ({ path, layer }: GetLayerPath): string => {
+  return path ? `${path}/${layer.do_objectID}` : layer.do_objectID;
+};

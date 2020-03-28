@@ -13,15 +13,13 @@ export const getImage = ({ ref, images }: GetImage): string => {
 };
 
 interface GetOverrideImage {
-  layerId: string;
   overrides?: FileFormat.OverrideValue[];
   symbolPath?: string;
 }
 
-export const getOverrideImage = ({ layerId, overrides, symbolPath }: GetOverrideImage): FileFormat.OverrideValue => {
+export const getOverrideImage = ({ overrides, symbolPath }: GetOverrideImage): FileFormat.OverrideValue => {
   const overrideString = overrides ? overrides.find((override) => {
-    const overridePath = symbolPath ? `${symbolPath}/${layerId}_image` : `${layerId}_image`;
-    return overridePath.includes(override.overrideName);
+    return `${symbolPath}_image`.includes(override.overrideName);
   }) : null;
   return overrideString;
 };

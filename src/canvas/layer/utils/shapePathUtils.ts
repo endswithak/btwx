@@ -94,3 +94,16 @@ export const drawShapePath = ({ layer, opts }: DrawShapePath): paper.Path => {
   path.addSegments(segments);
   return path;
 };
+
+interface GetWindingRule {
+  windingRule: number;
+}
+
+export const getWindingRule = ({ windingRule }: GetWindingRule): string => {
+  switch(windingRule) {
+    case 0:
+      return 'nonzero';
+    case 1:
+      return 'evenodd';
+  }
+};

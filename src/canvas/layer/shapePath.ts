@@ -1,6 +1,6 @@
 import paper, { Layer, Color } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { shapePathUtils, fillUtils, borderUtils } from './utils';
+import { shapePathUtils, fillUtils, borderUtils, imageUtils } from './utils';
 
 interface RenderShapePath {
   layer: FileFormat.ShapePath | FileFormat.Rectangle;
@@ -8,9 +8,12 @@ interface RenderShapePath {
   images: {
     [id: string]: string;
   };
+  path: string;
+  overrides?: FileFormat.OverrideValue[];
+  symbolPath?: string;
 }
 
-const renderShapePath = ({ layer, images, container }: RenderShapePath): paper.Layer => {
+const renderShapePath = ({ layer, images, container, path, overrides, symbolPath }: RenderShapePath): paper.Layer => {
   const shapePathContainer = new Layer({
     name: layer.do_objectID,
     data: { name: layer.name },
@@ -19,17 +22,24 @@ const renderShapePath = ({ layer, images, container }: RenderShapePath): paper.L
     clipMask: layer.hasClippingMask,
     parent: container
   });
+  const override = imageUtils.getOverrideImage({
+    overrides: overrides,
+    symbolPath: symbolPath
+  });
   const shapePath = shapePathUtils.drawShapePath({
     layer: layer,
     opts: {
       insert: false,
-      closed: layer.isClosed
+      closed: layer.isClosed,
+      windingRule: shapePathUtils.getWindingRule({windingRule: layer.style.windingRule})
     }
   });
+  console.log(shapePath);
   fillUtils.renderFills({
     shapePath: shapePath,
     fills: layer.style.fills,
     images: images,
+    override: override,
     container: shapePathContainer
   });
   borderUtils.renderBorders({

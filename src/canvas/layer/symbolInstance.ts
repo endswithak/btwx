@@ -10,11 +10,12 @@ interface RenderSymbolInstance {
   images: {
     [id: string]: string;
   };
+  path: string;
   overrides?: FileFormat.OverrideValue[];
   symbolPath?: string;
 }
 
-const renderSymbolInstance = ({ layer, container, symbols, images, overrides, symbolPath }: RenderSymbolInstance): paper.Group => {
+const renderSymbolInstance = ({ layer, container, symbols, images, path, overrides, symbolPath }: RenderSymbolInstance): paper.Group => {
   const symbol = new Group({
     name: layer.do_objectID,
     data: { name: layer.name },
@@ -22,12 +23,10 @@ const renderSymbolInstance = ({ layer, container, symbols, images, overrides, sy
     visible: layer.isVisible,
     parent: container
   });
-  const symboleOverrides = overrides ? [...overrides, ...layer.overrideValues] : layer.overrideValues;
   const master = symbolUtils.getSymbolMaster({
-    layerId: layer.do_objectID,
     symbolId: layer.symbolID,
     symbols: symbols,
-    overrides: symboleOverrides,
+    overrides: overrides,
     symbolPath: symbolPath
   });
   if (master) {
@@ -36,8 +35,9 @@ const renderSymbolInstance = ({ layer, container, symbols, images, overrides, sy
       container: symbol,
       symbols: symbols,
       images: images,
-      overrides: symboleOverrides,
-      symbolPath: symbolPath ? `${symbolPath}/${layer.do_objectID}` : layer.do_objectID
+      path: path,
+      overrides: overrides,
+      symbolPath: symbolPath
     });
   }
   symbol.position.x += layer.frame.x;

@@ -11,15 +11,17 @@ interface RenderPatternFill {
     [id: string]: string;
   };
   container: paper.Group;
+  topPatternFill: boolean;
+  override?: FileFormat.OverrideValue;
 }
 
-export const renderPatternFill = ({ shapePath, fill, images, container }: RenderPatternFill): void => {
+export const renderPatternFill = ({ shapePath, fill, images, container, topPatternFill, override }: RenderPatternFill): void => {
   const patternMask = shapePath.clone();
   patternMask.name = 'mask';
   patternMask.parent = container;
   patternMask.clipMask = true;
   const pattern = new Raster(getImage({
-    ref: fill.image._ref,
+    ref: override && topPatternFill ? (override.value as FileFormat.ImageFileRef)._ref : fill.image._ref,
     images: images
   }));
   pattern.name = 'pattern';
@@ -124,9 +126,11 @@ interface RenderFill {
     [id: string]: string;
   };
   container: paper.Group;
+  topPatternFill: boolean;
+  override?: FileFormat.OverrideValue;
 }
 
-export const renderFill = ({ shapePath, fill, images, container }: RenderFill): void => {
+export const renderFill = ({ shapePath, fill, images, container, topPatternFill, override }: RenderFill): void => {
   switch(fill.fillType) {
     case 0:
       renderColorFill({shapePath, fill, container});
@@ -135,7 +139,7 @@ export const renderFill = ({ shapePath, fill, images, container }: RenderFill): 
       renderGradientFill({shapePath, fill, container});
       break;
     case 4:
-      renderPatternFill({shapePath, fill, images, container});
+      renderPatternFill({shapePath, fill, images, container, topPatternFill, override});
       break;
   }
 };
@@ -147,14 +151,18 @@ interface RenderFills {
     [id: string]: string;
   };
   container: paper.Group;
+  override?: FileFormat.OverrideValue;
 }
 
-export const renderFills = ({ shapePath, fills, images, container }: RenderFills): void => {
+export const renderFills = ({ shapePath, fills, images, container, override }: RenderFills): void => {
   if (fills.some((fill) => fill.isEnabled)) {
     const fillsContainer = new Group({
       name: 'fills',
       parent: container
     });
+    const topPatternFillIndex = fills.reduce((topIndex, fill, fillIndex) => {
+      return fill.fillType === 4 && fill.isEnabled ? fillIndex : topIndex;
+    }, null);
     fills.forEach((fill, fillIndex) => {
       if (fill.isEnabled) {
         const fillLayer = new Layer({
@@ -165,7 +173,9 @@ export const renderFills = ({ shapePath, fills, images, container }: RenderFills
           shapePath: shapePath,
           fill: fill,
           container: fillLayer,
-          images: images
+          images: images,
+          override: override,
+          topPatternFill: topPatternFillIndex === fillIndex
         });
       }
     });

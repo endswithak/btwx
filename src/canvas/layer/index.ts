@@ -6,6 +6,7 @@ import renderGroup from './group';
 import renderSymbolInstance from './symbolInstance';
 import renderText from './text';
 import renderImage from './image';
+import { generalUtils, symbolUtils } from './utils';
 
 interface RenderLayer {
   layer: FileFormat.AnyLayer;
@@ -14,11 +15,15 @@ interface RenderLayer {
   images: {
     [id: string]: string;
   };
+  path: string;
   overrides?: FileFormat.OverrideValue[];
   symbolPath?: string;
 }
 
-const renderLayer = ({ layer, container, symbols, images, overrides, symbolPath }: RenderLayer): void => {
+const renderLayer = ({ layer, container, symbols, images, path, overrides, symbolPath }: RenderLayer): void => {
+  path = generalUtils.getLayerPath({layer, path});
+  overrides = symbolUtils.getCompiledOverrides({layer, overrides});
+  symbolPath = symbolUtils.getSymbolPath({layer, symbolPath});
   switch(layer._class) {
     case 'shapePath':
     case 'rectangle':
@@ -29,14 +34,20 @@ const renderLayer = ({ layer, container, symbols, images, overrides, symbolPath 
       renderShapePath({
         layer: layer as FileFormat.ShapePath,
         container: container,
-        images: images
+        images: images,
+        path: path,
+        overrides: overrides,
+        symbolPath: symbolPath
       });
       break;
     case 'shapeGroup':
       renderShapeGroup({
         layer: layer as FileFormat.ShapeGroup,
         container: container,
-        images: images
+        images: images,
+        path: path,
+        overrides: overrides,
+        symbolPath: symbolPath
       });
       break;
     case 'group':
@@ -45,6 +56,7 @@ const renderLayer = ({ layer, container, symbols, images, overrides, symbolPath 
         container: container,
         symbols: symbols,
         images: images,
+        path: path,
         overrides: overrides,
         symbolPath: symbolPath
       });
@@ -55,6 +67,7 @@ const renderLayer = ({ layer, container, symbols, images, overrides, symbolPath 
         container: container,
         symbols: symbols,
         images: images,
+        path: path,
         overrides: overrides,
         symbolPath: symbolPath
       });
@@ -63,9 +76,10 @@ const renderLayer = ({ layer, container, symbols, images, overrides, symbolPath 
       renderText({
         layer: layer,
         container: container,
+        path: path,
         overrides: overrides,
         symbolPath: symbolPath,
-        images: images,
+        images: images
       });
       break;
     case 'bitmap':
@@ -73,6 +87,7 @@ const renderLayer = ({ layer, container, symbols, images, overrides, symbolPath 
         layer: layer,
         container: container,
         images: images,
+        path: path,
         overrides: overrides,
         symbolPath: symbolPath
       });

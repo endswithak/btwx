@@ -8,11 +8,12 @@ interface RenderImage {
   images: {
     [id: string]: string;
   };
+  path: string;
   overrides?: FileFormat.OverrideValue[];
   symbolPath: string;
 }
 
-const renderImage = ({ layer, container, images, overrides, symbolPath }: RenderImage): paper.Layer => {
+const renderImage = ({ layer, container, images, path, overrides, symbolPath }: RenderImage): paper.Layer => {
   const imageContainer = new Layer({
     name: layer.do_objectID,
     data: { name: layer.name },
@@ -22,7 +23,6 @@ const renderImage = ({ layer, container, images, overrides, symbolPath }: Render
   });
   // render bitmap
   const override = imageUtils.getOverrideImage({
-    layerId: layer.do_objectID,
     overrides: overrides,
     symbolPath: symbolPath
   });

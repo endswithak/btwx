@@ -9,11 +9,12 @@ interface RenderGroup {
   images: {
     [id: string]: string;
   };
+  path: string;
   overrides?: FileFormat.OverrideValue[];
   symbolPath?: string;
 }
 
-const renderGroup = ({ layer, container, symbols, images, overrides, symbolPath }: RenderGroup): paper.Group => {
+const renderGroup = ({ layer, container, symbols, images, path, overrides, symbolPath }: RenderGroup): paper.Group => {
   const groupLayer = new Group({
     name: layer.do_objectID,
     data: { name: layer.name },
@@ -27,6 +28,7 @@ const renderGroup = ({ layer, container, symbols, images, overrides, symbolPath 
     container: groupLayer,
     symbols: symbols,
     images: images,
+    path: path,
     overrides: overrides,
     symbolPath: symbolPath
   });
