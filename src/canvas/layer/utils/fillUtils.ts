@@ -3,6 +3,7 @@ import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { getPaperColor, getFitSize, getFillSize } from './general';
 import { getImage } from './imageUtils';
 import { convertPointString } from './shapePathUtils';
+import { drawText } from './textUtils';
 
 interface RenderPatternFill {
   shapePath: paper.Path | paper.CompoundPath | paper.PointText | paper.AreaText;
@@ -176,6 +177,101 @@ export const renderFills = ({ shapePath, fills, images, container, override }: R
           images: images,
           override: override,
           topPatternFill: topPatternFillIndex === fillIndex
+        });
+      }
+    });
+  }
+};
+
+interface RenderTextGradientFill {
+  layer: FileFormat.Text;
+  textOptions: any;
+  layerOptions: any;
+  fill: FileFormat.Fill;
+}
+
+export const renderTextGradientFill = ({ layer, textOptions, layerOptions, fill }: RenderTextGradientFill): void => {
+  const from = convertPointString({point: fill.gradient.from});
+  const to = convertPointString({point: fill.gradient.to});
+  const gradientStops = fill.gradient.stops.map((gradientStop) => {
+    return new GradientStop(getPaperColor({color: gradientStop.color}), gradientStop.position);
+  }) as paper.GradientStop[];
+  drawText({
+    layer: layer,
+    textOptions: {
+      ...textOptions,
+      fillColor: {
+        gradient: {
+          stops: gradientStops,
+          radial: fill.gradient.gradientType === 1
+        },
+        origin: new Point(layer.frame.width * from.x, layer.frame.height * from.y),
+        destination: new Point(layer.frame.width * to.x, layer.frame.height * to.y)
+      }
+    },
+    layerOptions: layerOptions
+  });
+};
+
+interface RenderTextColorFill {
+  layer: FileFormat.Text;
+  textOptions: any;
+  layerOptions: any;
+  fill: FileFormat.Fill;
+}
+
+export const renderTextColorFill = ({ layer, textOptions, layerOptions, fill }: RenderTextColorFill): void => {
+  drawText({
+    layer: layer,
+    textOptions: {
+      ...textOptions,
+      fillColor: getPaperColor({color: fill.color})
+    },
+    layerOptions: layerOptions
+  });
+};
+
+interface RenderTextFill {
+  layer: FileFormat.Text;
+  textOptions: any;
+  layerOptions: any;
+  fill: FileFormat.Fill;
+}
+
+export const renderTextFill = ({ layer, textOptions, layerOptions, fill }: RenderTextFill): void => {
+  switch(fill.fillType) {
+    case 0:
+      renderTextColorFill({layer, textOptions, layerOptions, fill});
+      break;
+    case 1:
+      renderTextGradientFill({layer, textOptions, layerOptions, fill});
+      break;
+  }
+};
+
+interface RenderTextFills {
+  layer: FileFormat.Text;
+  textAttrs: any;
+  fills: FileFormat.Fill[];
+  container: paper.Group;
+}
+
+export const renderTextFills = ({ layer, fills, textAttrs, container }: RenderTextFills): void => {
+  if (fills.some((fill) => fill.isEnabled)) {
+    const fillsContainer = new Group({
+      name: 'fills',
+      parent: container
+    });
+    fills.forEach((fill, fillIndex) => {
+      if (fill.isEnabled) {
+        renderTextFill({
+          layer: layer,
+          textOptions: textAttrs,
+          layerOptions: {
+            parent: fillsContainer,
+            name: `fill-${fillIndex}`
+          },
+          fill: fill
         });
       }
     });

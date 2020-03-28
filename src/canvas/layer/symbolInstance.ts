@@ -1,4 +1,4 @@
-import paper, { Group } from 'paper';
+import paper, { Group, Layer } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import renderLayers from '../layers';
 import { symbolUtils } from './utils';
@@ -16,10 +16,13 @@ interface RenderSymbolInstance {
   symbolPath?: string;
 }
 
-const renderSymbolInstance = ({ layer, container, symbols, images, path, groupShadows, overrides, symbolPath }: RenderSymbolInstance): paper.Group => {
-  const symbolContainer = new Group({
+const renderSymbolInstance = ({ layer, container, symbols, images, path, groupShadows, overrides, symbolPath }: RenderSymbolInstance): paper.Layer => {
+  const symbolContainer = new Layer({
     name: layer.do_objectID,
-    data: { name: layer.name },
+    data: {
+      name: layer.name,
+      path: path
+    },
     locked: layer.isLocked,
     visible: layer.isVisible,
     parent: container

@@ -17,7 +17,10 @@ interface RenderImage {
 const renderImage = ({ layer, container, images, path, groupShadows, overrides, symbolPath }: RenderImage): paper.Layer => {
   const imageContainer = new Layer({
     name: layer.do_objectID,
-    data: { name: layer.name },
+    data: {
+      name: layer.name,
+      path: path
+    },
     locked: layer.isLocked,
     visible: layer.isVisible,
     parent: container
@@ -28,7 +31,7 @@ const renderImage = ({ layer, container, images, path, groupShadows, overrides, 
     symbolPath: symbolPath
   });
   const bitmapContainer = new Layer({
-    name: 'bitmap',
+    name: 'image',
     parent: imageContainer
   });
   const bitmap = new Raster(imageUtils.getImage({
@@ -58,17 +61,17 @@ const renderImage = ({ layer, container, images, path, groupShadows, overrides, 
     images: images,
     container: imageContainer
   });
+  // render inner shadows
+  innerShadowUtils.renderInnerShadows({
+    shapePath: imageShape,
+    innerShadows: layer.style.innerShadows,
+    container: imageContainer
+  });
   // render borders
   borderUtils.renderBorders({
     shapePath: imageShape,
     borders: layer.style.borders,
     borderOptions: layer.style.borderOptions,
-    container: imageContainer
-  });
-  // render inner shadows
-  innerShadowUtils.renderInnerShadows({
-    shapePath: imageShape,
-    innerShadows: layer.style.innerShadows,
     container: imageContainer
   });
   // position container

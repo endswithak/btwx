@@ -1,5 +1,8 @@
-import paper, { PointText, AreaText, Layer, Shape, Rectangle } from 'paper';
+import paper, { PointText, AreaText, Layer, Shape, Group, Rectangle, GradientStop, Point } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
+import { getPaperColor } from './general';
+import { convertPointString } from './shapePathUtils';
+import { getBorderLineCap, getBorderLineJoin, getBorderThickness } from './borderUtils'
 
 interface GetOverrideString {
   overrides?: FileFormat.OverrideValue[];

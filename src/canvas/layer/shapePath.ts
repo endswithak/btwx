@@ -17,7 +17,10 @@ interface RenderShapePath {
 const renderShapePath = ({ layer, images, container, path, groupShadows, overrides, symbolPath }: RenderShapePath): paper.Layer => {
   const shapePathContainer = new Layer({
     name: layer.do_objectID,
-    data: { name: layer.name },
+    data: {
+      name: layer.name,
+      path: path
+    },
     locked: layer.isLocked,
     visible: layer.isVisible,
     clipMask: layer.hasClippingMask,
@@ -47,15 +50,15 @@ const renderShapePath = ({ layer, images, container, path, groupShadows, overrid
     override: override,
     container: shapePathContainer
   });
+  innerShadowUtils.renderInnerShadows({
+    shapePath: shapePath,
+    innerShadows: layer.style.innerShadows,
+    container: shapePathContainer
+  });
   borderUtils.renderBorders({
     shapePath: shapePath,
     borders: layer.style.borders,
     borderOptions: layer.style.borderOptions,
-    container: shapePathContainer
-  });
-  innerShadowUtils.renderInnerShadows({
-    shapePath: shapePath,
-    innerShadows: layer.style.innerShadows,
     container: shapePathContainer
   });
   shapePathContainer.position.x += layer.frame.x;

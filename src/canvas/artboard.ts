@@ -1,6 +1,22 @@
-import paper, { Group, Rectangle, view, Shape, Layer } from 'paper';
+import paper, { Group, Rectangle, Path, view, Shape, Layer } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import renderLayers from './layers';
+
+interface RenderArtboardLayersMask {
+  artboard: FileFormat.Artboard;
+  container: paper.Group;
+}
+
+const renderArtboardLayersMask = ({ artboard, container }: RenderArtboardLayersMask): void => {
+  new Path.Rectangle({
+    name: 'layers-mask',
+    position: [artboard.frame.width / 2, artboard.frame.height / 2],
+    size: [artboard.frame.width, artboard.frame.height],
+    fillColor: '#ffffff',
+    parent: container,
+    clipMask: true
+  });
+};
 
 interface RenderArtboardBackground {
   artboard: FileFormat.Artboard;
@@ -8,29 +24,23 @@ interface RenderArtboardBackground {
 }
 
 const renderArtboardBackground = ({ artboard, container }: RenderArtboardBackground): void => {
-  // artboard background
-  const artboardBackground = new Layer({
-    parent: container
-  });
   // artboard rectangle
   const artboardRectangle = new Rectangle({
-    x: 0,
-    y: 0,
-    width: artboard.frame.width,
-    height: artboard.frame.height
+    position: [0,0],
+    size: [artboard.frame.width, artboard.frame.height]
   });
   // artboard canvas
   new Shape.Rectangle({
     rectangle: artboardRectangle,
     fillColor: '#ffffff',
-    parent: artboardBackground
+    parent: container
   });
   // artboard backgroundColor
   if (artboard.hasBackgroundColor) {
     new Shape.Rectangle({
       rectangle: artboardRectangle,
       fillColor: artboard.backgroundColor,
-      parent: artboardBackground
+      parent: container
     });
   }
 };
@@ -43,16 +53,31 @@ interface RenderArtboard {
   };
 }
 
-const renderArtboard = ({ artboard, symbols, images }: RenderArtboard): paper.Group => {
+const renderArtboard = ({ artboard, symbols, images }: RenderArtboard): paper.Layer => {
   console.log(artboard);
-  const artboardContainer = new Group();
+  const artboardContainer = new Layer({
+    name: artboard.do_objectID,
+    data: { name: artboard.name },
+  });
+  const artboardBackground = new Group({
+    name: 'background',
+    parent: artboardContainer
+  });
+  const artboardLayers = new Group({
+    name: 'layers',
+    parent: artboardContainer
+  });
   renderArtboardBackground({
+    artboard: artboard,
+    container: artboardBackground
+  });
+  renderArtboardLayersMask({
     artboard: artboard,
     container: artboardContainer
   });
   renderLayers({
     layers: artboard.layers,
-    container: artboardContainer,
+    container: artboardLayers,
     symbols: symbols,
     images: images
   });

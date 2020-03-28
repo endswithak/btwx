@@ -1,6 +1,6 @@
 import paper, { Layer, PointText, AreaText, Rectangle, Shape } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { textUtils, fillUtils } from './utils';
+import { textUtils, fillUtils, borderUtils, shadowUtils } from './utils';
 
 interface RenderText {
   layer: FileFormat.Text;
@@ -17,7 +17,10 @@ interface RenderText {
 const renderText = ({ layer, container, images, path, groupShadows, overrides, symbolPath }: RenderText): paper.Layer => {
   const textContainer = new Layer({
     name: layer.do_objectID,
-    data: { name: layer.name },
+    data: {
+      name: layer.name,
+      path: path
+    },
     locked: layer.isLocked,
     visible: layer.isVisible,
     parent: container
@@ -45,10 +48,15 @@ const renderText = ({ layer, container, images, path, groupShadows, overrides, s
     fontFamily: fontAttrs.fontFamily,
     justification: fontAttrs.alignment,
     fontSize: fontAttrs.fontSize,
-    leading: fontAttrs.letterSpacing,
+    leading: fontAttrs.lineHeight,
     letterSpacing: fontAttrs.letterSpacing
   }
-  // render base text
+  shadowUtils.renderTextShadows({
+    layer: layer,
+    shadows: groupShadows ? [...groupShadows, ...layer.style.shadows] : layer.style.shadows,
+    textAttrs: textAttrs,
+    container: textContainer
+  });
   textUtils.drawText({
     layer: layer,
     textOptions: textAttrs,
@@ -56,44 +64,19 @@ const renderText = ({ layer, container, images, path, groupShadows, overrides, s
       parent: textContainer
     }
   });
-  // let text: paper.AreaText | paper.PointText;
-  // let textAreaMask: paper.Shape | null = null;
-  // switch(layer.textBehaviour) {
-  //   // auto width
-  //   case 0:
-  //     text = new PointText(textAttrs);
-  //     break;
-  //   // auto height
-  //   case 1:
-  //     text = new AreaText({
-  //       verticalAlignment: 0,
-  //       maxHeight: layer.frame.height,
-  //       maxWidth: layer.frame.width,
-  //       ...textAttrs
-  //     });
-  //     break;
-  //   // fixed size
-  //   case 2: {
-  //     textAreaMask = new Shape.Rectangle({
-  //       rectangle: new Rectangle({
-  //         x: 0,
-  //         y: 0,
-  //         width: layer.frame.width,
-  //         height: layer.frame.height
-  //       }),
-  //       fillColor: '#ffffff',
-  //       parent: textContainer,
-  //       clipMask: true
-  //     });
-  //     text = new AreaText({
-  //       verticalAlignment: layer.style.textStyle.verticalAlignment,
-  //       maxHeight: layer.frame.height,
-  //       maxWidth: layer.frame.width,
-  //       ...textAttrs
-  //     });
-  //     break;
-  //   }
-  // }
+  fillUtils.renderTextFills({
+    layer: layer,
+    fills: layer.style.fills,
+    textAttrs: textAttrs,
+    container: textContainer
+  })
+  borderUtils.renderTextBorders({
+    layer: layer,
+    borders: layer.style.borders,
+    borderOptions: layer.style.borderOptions,
+    textAttrs: textAttrs,
+    container: textContainer
+  });
   textContainer.position.x += layer.frame.x;
   textContainer.position.y += layer.frame.y;
   return textContainer;

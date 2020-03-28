@@ -1,6 +1,7 @@
 import paper, { Layer, Color, Point, Group } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { getPaperColor } from './general';
+import { drawText } from './textUtils';
 
 interface GetGroupShadows {
   layer: FileFormat.AnyLayer;
@@ -53,6 +54,40 @@ export const renderShadows = ({ shapePath, shadows, container }: RenderShadows):
           shapePath: shapePath,
           shadow: shadow,
           container: shadowLayer
+        });
+      }
+    });
+  }
+};
+
+interface RenderTextShadows {
+  layer: FileFormat.Text;
+  textAttrs: any;
+  shadows: FileFormat.Shadow[];
+  container: paper.Group;
+}
+
+export const renderTextShadows = ({ layer, textAttrs, shadows, container }: RenderTextShadows): void => {
+  if (shadows.some((shadow) => shadow.isEnabled)) {
+    const shadowsContainer = new Group({
+      name: 'shadows',
+      parent: container
+    });
+    shadows.forEach((shadow, shadowIndex) => {
+      if (shadow.isEnabled) {
+        drawText({
+          layer: layer,
+          textOptions: {
+            ...textAttrs,
+            fillColor: new Color(255,255,255),
+            shadowColor: getPaperColor({color: shadow.color}),
+            shadowBlur: shadow.blurRadius,
+            shadowOffset: new Point(shadow.offsetX, shadow.offsetY)
+          },
+          layerOptions: {
+            parent: shadowsContainer,
+            name: `shadow-${shadowIndex}`
+          }
         });
       }
     });

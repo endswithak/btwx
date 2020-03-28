@@ -2,6 +2,7 @@ import paper, { Layer, Color, Raster, Path, Rectangle, Point, Size, SymbolDefini
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { getPaperColor } from './general';
 import { convertPointString } from './shapePathUtils';
+import { drawText } from './textUtils';
 
 interface GetBorderLineCap {
   borderOptions: FileFormat.BorderOptions;
@@ -173,6 +174,129 @@ export const renderBorders = ({ shapePath, borders, borderOptions, container }: 
           border: border,
           borderOptions: borderOptions,
           container: borderLayer
+        });
+      }
+    });
+  }
+};
+
+interface RenderTextGradientBorder {
+  layer: FileFormat.Text;
+  textOptions: any;
+  layerOptions: any;
+  border: FileFormat.Border;
+  borderOptions: FileFormat.BorderOptions;
+}
+
+export const renderTextGradientBorder = ({ layer, textOptions, layerOptions, border, borderOptions }: RenderTextGradientBorder): void => {
+  const from = convertPointString({point: border.gradient.from});
+  const to = convertPointString({point: border.gradient.to});
+  const gradientStops = border.gradient.stops.map((gradientStop) => {
+    return new GradientStop(getPaperColor({color: gradientStop.color}), gradientStop.position);
+  }) as paper.GradientStop[];
+  drawText({
+    layer: layer,
+    textOptions: {
+      ...textOptions,
+      strokeColor: {
+        gradient: {
+          stops: gradientStops,
+          radial: border.gradient.gradientType === 1
+        },
+        origin: new Point(layer.frame.width * from.x, layer.frame.height * from.y),
+        destination: new Point(layer.frame.width * to.x, layer.frame.height * to.y)
+      },
+      dashArray: borderOptions.dashPattern,
+      strokeWidth: getBorderThickness({border}),
+      strokeJoin: getBorderLineJoin({borderOptions}),
+      strokeCap: getBorderLineCap({borderOptions}),
+    },
+    layerOptions: layerOptions
+  });
+};
+
+interface RenderTextColorBorder {
+  layer: FileFormat.Text;
+  textOptions: any;
+  layerOptions: any;
+  border: FileFormat.Border;
+  borderOptions: FileFormat.BorderOptions;
+}
+
+export const renderTextColorBorder = ({ layer, textOptions, layerOptions, border, borderOptions }: RenderTextColorBorder): void => {
+  drawText({
+    layer: layer,
+    textOptions: {
+      ...textOptions,
+      strokeColor: getPaperColor({color: border.color}),
+      dashArray: borderOptions.dashPattern,
+      strokeWidth: getBorderThickness({border}),
+      strokeJoin: getBorderLineJoin({borderOptions}),
+      strokeCap: getBorderLineCap({borderOptions}),
+    },
+    layerOptions: layerOptions
+  });
+};
+
+interface RenderTextBorder {
+  layer: FileFormat.Text;
+  textOptions: any;
+  layerOptions: any,
+  border: FileFormat.Border;
+  borderOptions: FileFormat.BorderOptions;
+}
+
+export const renderTextBorder = ({ layer, textOptions, layerOptions, border, borderOptions }: RenderTextBorder): void => {
+  switch(border.fillType) {
+    case 0:
+      renderTextColorBorder({
+        layer,
+        textOptions,
+        layerOptions,
+        border,
+        borderOptions
+      });
+      break;
+    case 1:
+      renderTextGradientBorder({
+        layer,
+        textOptions,
+        layerOptions,
+        border,
+        borderOptions
+      });
+      break;
+  }
+};
+
+interface RenderTextBorders {
+  layer: FileFormat.Text;
+  textAttrs: any;
+  borders: FileFormat.Border[];
+  borderOptions: FileFormat.BorderOptions;
+  container: paper.Group;
+}
+
+export const renderTextBorders = ({ layer, textAttrs, borders, borderOptions,  container }: RenderTextBorders): void => {
+  if (borders.some((border) => border.isEnabled)) {
+    const bordersContainer = new Group({
+      name: 'borders',
+      parent: container
+    });
+    borders.forEach((border, borderIndex) => {
+      if (border.isEnabled) {
+        renderTextBorder({
+          layer: layer,
+          textOptions: {
+            ...textAttrs,
+            fillColor: new Color(0,0,0,0)
+          },
+          layerOptions: {
+            parent: bordersContainer,
+            name: `border-${borderIndex}`
+          },
+          border: border,
+          borderOptions: borderOptions
         });
       }
     });

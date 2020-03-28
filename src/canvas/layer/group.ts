@@ -1,4 +1,4 @@
-import paper, { Group, Rectangle, Point, Color } from 'paper';
+import paper, { Layer } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import renderLayers from '../layers';
 
@@ -15,10 +15,13 @@ interface RenderGroup {
   symbolPath?: string;
 }
 
-const renderGroup = ({ layer, container, symbols, images, path, groupShadows, overrides, symbolPath }: RenderGroup): paper.Group => {
-  const groupContainer = new Group({
+const renderGroup = ({ layer, container, symbols, images, path, groupShadows, overrides, symbolPath }: RenderGroup): paper.Layer => {
+  const groupContainer = new Layer({
     name: layer.do_objectID,
-    data: { name: layer.name },
+    data: {
+      name: layer.name,
+      path: path
+    },
     locked: layer.isLocked,
     visible: layer.isVisible,
     clipMask: layer.hasClippingMask,

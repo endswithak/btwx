@@ -112,7 +112,10 @@ const renderShape = ({ layer, container, images, path, groupShadows }: RenderSha
   const shapeContainer = new Layer({
     parent: container,
     name: layer.do_objectID,
-    data: { name: layer.name },
+    data: {
+      name: layer.name,
+      path: path
+    },
     visible: layer.isVisible,
     locked: layer.isLocked
   });
@@ -136,15 +139,15 @@ const renderShape = ({ layer, container, images, path, groupShadows }: RenderSha
     images: images,
     container: shapeContainer
   });
+  innerShadowUtils.renderInnerShadows({
+    shapePath: shapePath,
+    innerShadows: layer.style.innerShadows,
+    container: shapeContainer
+  });
   borderUtils.renderBorders({
     shapePath: shapePath,
     borders: layer.style.borders,
     borderOptions: layer.style.borderOptions,
-    container: shapeContainer
-  });
-  innerShadowUtils.renderInnerShadows({
-    shapePath: shapePath,
-    innerShadows: layer.style.innerShadows,
     container: shapeContainer
   });
   shapeContainer.position.x += layer.frame.x;
