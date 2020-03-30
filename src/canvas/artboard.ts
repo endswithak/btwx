@@ -82,8 +82,8 @@ const renderArtboard = ({ artboard, symbols, images }: RenderArtboard): paper.La
     images: images
   });
   artboardContainer.position = view.center;
-  artboardContainer.position.x += artboard.frame.x;
-  artboardContainer.position.y += artboard.frame.y;
+  //artboardContainer.position.x += artboard.frame.x;
+  //artboardContainer.position.y += artboard.frame.y;
   return artboardContainer;
 };
 

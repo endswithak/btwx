@@ -14,13 +14,15 @@ interface RenderCanvas {
 }
 
 const renderCanvas = async ({ sketchDocument, sketchImages, sketchPages, canvas }: RenderCanvas): Promise<paper.View> => {
-  const page = sketchPages[0];
+  const page = sketchPages.find((sketchPage) => sketchPage.name === 'sketch-animate');
   const symbolsPage = getSymbolsPage({sketchPages});
   const symbols = symbolsPage ? symbolsPage.layers as FileFormat.SymbolMaster[] : null;
-  const artboard = page.layers.find((layer) => layer._class === 'artboard') as FileFormat.Artboard;
+  const artboards = page.layers.filter((layer) => layer._class === 'artboard') as FileFormat.Artboard[];
   const images = getBase64Images({sketchImages});
   renderApp({canvas});
-  renderArtboard({artboard, symbols, images});
+  artboards.forEach((artboard) => {
+    renderArtboard({artboard, symbols, images});
+  });
   return paper.view;
 };
 

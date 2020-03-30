@@ -235,10 +235,15 @@ interface RenderTextFill {
   layer: FileFormat.Text;
   textOptions: any;
   layerOptions: any;
+  images: {
+    [id: string]: string;
+  };
+  topPatternFill: boolean;
   fill: FileFormat.Fill;
+  override?: FileFormat.OverrideValue;
 }
 
-export const renderTextFill = ({ layer, textOptions, layerOptions, fill }: RenderTextFill): void => {
+export const renderTextFill = ({ layer, textOptions, layerOptions, topPatternFill, images, fill, override }: RenderTextFill): void => {
   switch(fill.fillType) {
     case 0:
       renderTextColorFill({layer, textOptions, layerOptions, fill});
@@ -253,25 +258,33 @@ interface RenderTextFills {
   layer: FileFormat.Text;
   textAttrs: any;
   fills: FileFormat.Fill[];
+  images: {
+    [id: string]: string;
+  };
   container: paper.Group;
 }
 
-export const renderTextFills = ({ layer, fills, textAttrs, container }: RenderTextFills): void => {
+export const renderTextFills = ({ layer, fills, textAttrs, images, container }: RenderTextFills): void => {
   if (fills.some((fill) => fill.isEnabled)) {
     const fillsContainer = new Group({
       name: 'fills',
       parent: container
     });
+    const topPatternFillIndex = fills.reduce((topIndex, fill, fillIndex) => {
+      return fill.fillType === 4 && fill.isEnabled ? fillIndex : topIndex;
+    }, null);
     fills.forEach((fill, fillIndex) => {
       if (fill.isEnabled) {
         renderTextFill({
           layer: layer,
           textOptions: textAttrs,
+          images: images,
           layerOptions: {
             parent: fillsContainer,
             name: `fill-${fillIndex}`
           },
-          fill: fill
+          fill: fill,
+          topPatternFill: topPatternFillIndex === fillIndex
         });
       }
     });

@@ -67,6 +67,7 @@ const renderText = ({ layer, container, images, path, groupShadows, overrides, s
   fillUtils.renderTextFills({
     layer: layer,
     fills: layer.style.fills,
+    images: images,
     textAttrs: textAttrs,
     container: textContainer
   })

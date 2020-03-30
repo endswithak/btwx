@@ -42,7 +42,7 @@ const renderSymbolInstance = ({ layer, container, symbols, images, path, groupSh
       path: path,
       groupShadows: groupShadows,
       overrides: overrides,
-      symbolPath: symbolPath
+      symbolPath: symbolPath,
     });
   }
   symbolContainer.position.x += layer.frame.x;

@@ -25,7 +25,7 @@ const renderLayers = ({ layers, container, symbols, images, groupShadows, path, 
       groupShadows: groupShadows,
       path: path,
       overrides: overrides,
-      symbolPath: symbolPath
+      symbolPath: symbolPath,
     });
   });
 };
