@@ -1,6 +1,7 @@
 import paper, { Layer, Color, Point, Group, Path } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { getPaperColor } from './general';
+import { getBlendMode } from './contextUtils';
 
 interface RenderInnerShadow {
   shapePath: paper.Path | paper.CompoundPath | paper.PointText | paper.AreaText;
@@ -46,7 +47,10 @@ export const renderInnerShadows = ({ shapePath, innerShadows, container }: Rende
       if (innerShadow.isEnabled) {
         const innerShadowLayer = new Layer({
           name: `inner-shadow-${innerShadowIndex}`,
-          parent: innerShadowsContainer
+          parent: innerShadowsContainer,
+          blendMode: getBlendMode({
+            blendMode: innerShadow.contextSettings.blendMode
+          })
         });
         renderInnerShadow({
           shapePath: shapePath,

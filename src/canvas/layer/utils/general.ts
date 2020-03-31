@@ -71,3 +71,12 @@ interface GetLayerPath {
 export const getLayerPath = ({ path, layer }: GetLayerPath): string => {
   return path ? `${path}/${layer.do_objectID}` : layer.do_objectID;
 };
+
+interface GetChildByName {
+  layer: paper.Layer | paper.Group;
+  name: string;
+}
+
+export const getChildByName = ({layer, name}: GetChildByName): paper.Item => {
+  return layer.children.find((child) => child.name === name);
+}

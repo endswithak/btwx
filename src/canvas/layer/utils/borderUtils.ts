@@ -3,6 +3,7 @@ import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { getPaperColor } from './general';
 import { convertPointString } from './shapePathUtils';
 import { drawText } from './textUtils';
+import { getBlendMode } from './contextUtils';
 
 interface GetBorderLineCap {
   borderOptions: FileFormat.BorderOptions;
@@ -167,7 +168,10 @@ export const renderBorders = ({ shapePath, borders, borderOptions, container }: 
       if (border.isEnabled) {
         const borderLayer = new Layer({
           name: `border-${borderIndex}`,
-          parent: bordersContainer
+          parent: bordersContainer,
+          blendMode: getBlendMode({
+            blendMode: border.contextSettings.blendMode
+          })
         });
         renderBorder({
           shapePath: shapePath,
@@ -293,7 +297,10 @@ export const renderTextBorders = ({ layer, textAttrs, borders, borderOptions,  c
           },
           layerOptions: {
             parent: bordersContainer,
-            name: `border-${borderIndex}`
+            name: `border-${borderIndex}`,
+            blendMode: getBlendMode({
+              blendMode: border.contextSettings.blendMode
+            })
           },
           border: border,
           borderOptions: borderOptions

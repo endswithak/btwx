@@ -1,6 +1,7 @@
 import paper, { Layer } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import renderLayers from '../layers';
+import { contextUtils } from './utils';
 
 interface RenderGroup {
   layer: FileFormat.Group;
@@ -25,7 +26,11 @@ const renderGroup = ({ layer, container, symbols, images, path, groupShadows, ov
     locked: layer.isLocked,
     visible: layer.isVisible,
     clipMask: layer.hasClippingMask,
-    parent: container
+    parent: container,
+    blendMode: contextUtils.getBlendMode({
+      blendMode: layer.style.contextSettings.blendMode
+    }),
+    opacity: layer.style.contextSettings.opacity
   });
   renderLayers({
     layers: layer.layers,

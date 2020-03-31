@@ -1,6 +1,15 @@
 import paper, { Layer, Color } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { shapePathUtils, fillUtils, borderUtils, imageUtils, shadowUtils, innerShadowUtils } from './utils';
+import {
+  shapePathUtils,
+  fillUtils,
+  borderUtils,
+  imageUtils,
+  shadowUtils,
+  innerShadowUtils,
+  contextUtils,
+  frameUtils
+} from './utils';
 
 interface RenderShapePath {
   layer: FileFormat.ShapePath | FileFormat.Rectangle;
@@ -24,7 +33,11 @@ const renderShapePath = ({ layer, images, container, path, groupShadows, overrid
     locked: layer.isLocked,
     visible: layer.isVisible,
     clipMask: layer.hasClippingMask,
-    parent: container
+    parent: container,
+    blendMode: contextUtils.getBlendMode({
+      blendMode: layer.style.contextSettings.blendMode
+    }),
+    opacity: layer.style.contextSettings.opacity
   });
   const override = imageUtils.getOverrideImage({
     overrides: overrides,
@@ -61,8 +74,20 @@ const renderShapePath = ({ layer, images, container, path, groupShadows, overrid
     borderOptions: layer.style.borderOptions,
     container: shapePathContainer
   });
-  shapePathContainer.position.x += layer.frame.x;
-  shapePathContainer.position.y += layer.frame.y;
+  frameUtils.setFramePosition({
+    container: shapePathContainer,
+    x: layer.frame.x,
+    y: layer.frame.y
+  });
+  frameUtils.setFrameRotation({
+    container: shapePathContainer,
+    rotation: layer.rotation
+  });
+  frameUtils.setFrameScale({
+    container: shapePathContainer,
+    isFlippedVertical: layer.isFlippedVertical,
+    isFlippedHorizontal: layer.isFlippedHorizontal
+  });
   return shapePathContainer;
 };
 

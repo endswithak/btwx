@@ -95,6 +95,7 @@
     "@types/chroma-js": "^2.0.0",
     "chroma-js": "^2.1.0",
     "electron-squirrel-startup": "^1.0.0",
+    "gsap": "^3.2.6",
     "paper": "^0.12.4",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",

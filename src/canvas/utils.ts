@@ -80,3 +80,12 @@ export const getBase64Images = ({sketchImages}: GetBase64Images) => {
   });
   return images;
 }
+
+interface GetChildByName {
+  layer: paper.Layer | paper.Group;
+  name: string;
+}
+
+export const getChildByName = ({layer, name}: GetChildByName): paper.Item => {
+  return layer.children.find((child) => child.name === name);
+}

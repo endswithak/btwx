@@ -5,6 +5,8 @@ import * as shapeGroup from './shapeGroupUtils';
 import * as shapePath from './shapePathUtils';
 import * as general from './general';
 
+import * as frame from './frameUtils';
+import * as context from './contextUtils';
 import * as shadow from './shadowUtils';
 import * as fill from './fillUtils';
 import * as border from './borderUtils';
@@ -17,6 +19,8 @@ export const shapeGroupUtils = shapeGroup;
 export const shapePathUtils = shapePath;
 export const generalUtils = general;
 
+export const frameUtils = frame;
+export const contextUtils = context;
 export const shadowUtils = shadow;
 export const fillUtils = fill;
 export const borderUtils = border;
@@ -28,6 +32,8 @@ export default {
   symbol,
   shapeGroup,
   shapePath,
+  frameUtils,
+  contextUtils,
   shadowUtils,
   fillUtils,
   borderUtils,

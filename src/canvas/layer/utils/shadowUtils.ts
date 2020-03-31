@@ -2,6 +2,7 @@ import paper, { Layer, Color, Point, Group } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { getPaperColor } from './general';
 import { drawText } from './textUtils';
+import { getBlendMode } from './contextUtils';
 
 interface GetGroupShadows {
   layer: FileFormat.AnyLayer;
@@ -48,7 +49,10 @@ export const renderShadows = ({ shapePath, shadows, container }: RenderShadows):
       if (shadow.isEnabled) {
         const shadowLayer = new Layer({
           name: `shadow-${shadowIndex}`,
-          parent: shadowsContainer
+          parent: shadowsContainer,
+          blendMode: getBlendMode({
+            blendMode: shadow.contextSettings.blendMode
+          })
         });
         renderShadow({
           shapePath: shapePath,
@@ -86,7 +90,10 @@ export const renderTextShadows = ({ layer, textAttrs, shadows, container }: Rend
           },
           layerOptions: {
             parent: shadowsContainer,
-            name: `shadow-${shadowIndex}`
+            name: `shadow-${shadowIndex}`,
+            blendMode: getBlendMode({
+              blendMode: shadow.contextSettings.blendMode
+            })
           }
         });
       }

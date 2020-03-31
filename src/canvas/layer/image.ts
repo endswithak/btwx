@@ -1,6 +1,6 @@
 import paper, { Layer, Raster, Rectangle, Path, Point, Color } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { imageUtils, fillUtils, borderUtils, shadowUtils, innerShadowUtils } from './utils';
+import { imageUtils, fillUtils, borderUtils, shadowUtils, innerShadowUtils, contextUtils, frameUtils } from './utils';
 
 interface RenderImage {
   layer: FileFormat.Bitmap;
@@ -23,7 +23,11 @@ const renderImage = ({ layer, container, images, path, groupShadows, overrides, 
     },
     locked: layer.isLocked,
     visible: layer.isVisible,
-    parent: container
+    parent: container,
+    blendMode: contextUtils.getBlendMode({
+      blendMode: layer.style.contextSettings.blendMode
+    }),
+    opacity: layer.style.contextSettings.opacity
   });
   // render bitmap
   const override = imageUtils.getOverrideImage({
@@ -75,8 +79,20 @@ const renderImage = ({ layer, container, images, path, groupShadows, overrides, 
     container: imageContainer
   });
   // position container
-  imageContainer.position.x += layer.frame.x;
-  imageContainer.position.y += layer.frame.y;
+  frameUtils.setFramePosition({
+    container: imageContainer,
+    x: layer.frame.x,
+    y: layer.frame.y
+  });
+  frameUtils.setFrameRotation({
+    container: imageContainer,
+    rotation: layer.rotation
+  });
+  frameUtils.setFrameScale({
+    container: imageContainer,
+    isFlippedVertical: layer.isFlippedVertical,
+    isFlippedHorizontal: layer.isFlippedHorizontal
+  });
   return imageContainer;
 };
 

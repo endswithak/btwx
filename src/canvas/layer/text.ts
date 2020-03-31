@@ -1,6 +1,6 @@
 import paper, { Layer, PointText, AreaText, Rectangle, Shape } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { textUtils, fillUtils, borderUtils, shadowUtils } from './utils';
+import { textUtils, fillUtils, borderUtils, shadowUtils, contextUtils, frameUtils } from './utils';
 
 interface RenderText {
   layer: FileFormat.Text;
@@ -23,7 +23,11 @@ const renderText = ({ layer, container, images, path, groupShadows, overrides, s
     },
     locked: layer.isLocked,
     visible: layer.isVisible,
-    parent: container
+    parent: container,
+    blendMode: contextUtils.getBlendMode({
+      blendMode: layer.style.contextSettings.blendMode
+    }),
+    opacity: layer.style.contextSettings.opacity
   });
   const override = textUtils.getOverrideString({
     overrides: overrides,
@@ -78,8 +82,20 @@ const renderText = ({ layer, container, images, path, groupShadows, overrides, s
     textAttrs: textAttrs,
     container: textContainer
   });
-  textContainer.position.x += layer.frame.x;
-  textContainer.position.y += layer.frame.y;
+  frameUtils.setFramePosition({
+    container: textContainer,
+    x: layer.frame.x,
+    y: layer.frame.y
+  });
+  frameUtils.setFrameRotation({
+    container: textContainer,
+    rotation: layer.rotation
+  });
+  frameUtils.setFrameScale({
+    container: textContainer,
+    isFlippedVertical: layer.isFlippedVertical,
+    isFlippedHorizontal: layer.isFlippedHorizontal
+  });
   return textContainer;
 };
 

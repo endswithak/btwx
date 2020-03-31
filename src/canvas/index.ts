@@ -3,6 +3,8 @@ import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import renderApp from './app';
 import renderArtboard from './artboard';
 import { getSymbolsPage, getBase64Images } from './utils';
+import gsap from 'gsap';
+import chroma from 'chroma-js';
 
 interface RenderCanvas {
   sketchDocument: FileFormat.Document;

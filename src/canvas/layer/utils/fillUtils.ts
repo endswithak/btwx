@@ -4,6 +4,7 @@ import { getPaperColor, getFitSize, getFillSize } from './general';
 import { getImage } from './imageUtils';
 import { convertPointString } from './shapePathUtils';
 import { drawText } from './textUtils';
+import { getBlendMode } from './contextUtils';
 
 interface RenderPatternFill {
   shapePath: paper.Path | paper.CompoundPath | paper.PointText | paper.AreaText;
@@ -168,7 +169,10 @@ export const renderFills = ({ shapePath, fills, images, container, override }: R
       if (fill.isEnabled) {
         const fillLayer = new Layer({
           name: `fill-${fillIndex}`,
-          parent: fillsContainer
+          parent: fillsContainer,
+          blendMode: getBlendMode({
+            blendMode: fill.contextSettings.blendMode
+          })
         });
         renderFill({
           shapePath: shapePath,
@@ -281,7 +285,10 @@ export const renderTextFills = ({ layer, fills, textAttrs, images, container }: 
           images: images,
           layerOptions: {
             parent: fillsContainer,
-            name: `fill-${fillIndex}`
+            name: `fill-${fillIndex}`,
+            blendMode: getBlendMode({
+              blendMode: fill.contextSettings.blendMode
+            })
           },
           fill: fill,
           topPatternFill: topPatternFillIndex === fillIndex
