@@ -28,6 +28,7 @@ const renderShape = ({ layer, container, images, path, groupShadows }: RenderSha
     name: layer.do_objectID,
     data: {
       name: layer.name,
+      type: 'shapeGroup',
       path: path
     },
     visible: layer.isVisible,

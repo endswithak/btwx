@@ -19,6 +19,7 @@ const renderImage = ({ layer, container, images, path, groupShadows, overrides, 
     name: layer.do_objectID,
     data: {
       name: layer.name,
+      type: 'image',
       path: path
     },
     locked: layer.isLocked,

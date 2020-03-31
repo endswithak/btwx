@@ -28,6 +28,7 @@ const renderShapePath = ({ layer, images, container, path, groupShadows, overrid
     name: layer.do_objectID,
     data: {
       name: layer.name,
+      type: 'shapePath',
       path: path
     },
     locked: layer.isLocked,

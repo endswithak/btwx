@@ -18,6 +18,11 @@ interface AppState {
   sketchImages: {
     [id: string]: Buffer;
   };
+  selectedPage: FileFormat.Page;
+  selectedPageArtboards: FileFormat.Artboard[];
+  selectedArtboard: FileFormat.Artboard;
+  selectedLayer: FileFormat.AnyLayer;
+  selectedLayerPath: string;
   canvas: paper.View;
   dispatch(reducer: any): any;
 }
@@ -30,6 +35,11 @@ const initialState: AppState = {
   sketchUser: null,
   sketchPages: null,
   sketchImages: null,
+  selectedPage: null,
+  selectedPageArtboards: null,
+  selectedArtboard: null,
+  selectedLayer: null,
+  selectedLayerPath: null,
   canvas: null,
   dispatch: () => {
     return null;

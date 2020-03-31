@@ -1,4 +1,4 @@
-import paper, { Layer } from 'paper';
+import paper, { Layer, Shape, Color } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import renderLayers from '../layers';
 import { contextUtils } from './utils';
@@ -21,6 +21,7 @@ const renderGroup = ({ layer, container, symbols, images, path, groupShadows, ov
     name: layer.do_objectID,
     data: {
       name: layer.name,
+      type: 'group',
       path: path
     },
     locked: layer.isLocked,
@@ -31,6 +32,14 @@ const renderGroup = ({ layer, container, symbols, images, path, groupShadows, ov
       blendMode: layer.style.contextSettings.blendMode
     }),
     opacity: layer.style.contextSettings.opacity
+  });
+  const groupBounds = new Layer({
+    name: 'bounds',
+    parent: groupContainer,
+    children: [new Shape.Rectangle({
+      size: [layer.frame.width, layer.frame.height],
+      fillColor: new Color(255,255,255,0)
+    })]
   });
   renderLayers({
     layers: layer.layers,

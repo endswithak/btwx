@@ -57,7 +57,10 @@ const renderArtboard = ({ artboard, symbols, images }: RenderArtboard): paper.La
   console.log(artboard);
   const artboardContainer = new Layer({
     name: artboard.do_objectID,
-    data: { name: artboard.name },
+    data: {
+      name: artboard.name,
+      type: 'artboard'
+    },
   });
   const artboardBackground = new Group({
     name: 'background',

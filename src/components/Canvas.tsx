@@ -5,7 +5,7 @@ import renderCanvas from '../canvas';
 const Canvas = (): ReactElement => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const globalState = useContext(store);
-  const { sketchDocument, sketchPages, sketchImages, dispatch, canvas, theme } = globalState;
+  const { selectedPage, selectedPageArtboards, selectedArtboard, selectedLayer, selectedLayerPath, sketchDocument, sketchPages, sketchImages, dispatch, canvas, theme } = globalState;
 
   const onResize = (): void => {
     canvasRef.current.width = window.innerWidth;
@@ -20,16 +20,38 @@ const Canvas = (): ReactElement => {
       sketchDocument: sketchDocument,
       sketchPages: sketchPages,
       sketchImages: sketchImages,
+      selectedPage: selectedPage,
+      selectedPageArtboards: selectedPageArtboards,
+      selectedArtboard: selectedArtboard,
       canvas: canvasRef.current
     })
     .then((paperView) => {
-      canvasRef.current.addEventListener('wheel', (e: WheelEvent) => {
-        e.preventDefault();
-        paperView.emit('wheel', e);
+      dispatch({
+        type: 'set-canvas',
+        canvas: paperView
       });
       console.log('done');
     });
   }, []);
+
+  useEffect(() => {
+    if (canvas) {
+      canvasRef.current.addEventListener('wheel', (e: WheelEvent) => {
+        e.preventDefault();
+        canvas.emit('wheel', e);
+      });
+    }
+  }, [canvas]);
+
+  useEffect(() => {
+    if (canvas) {
+      canvas.emit('selected-layer-update', {
+        artboard: selectedArtboard.do_objectID,
+        layer: selectedLayer.do_objectID,
+        path: selectedLayerPath
+      });
+    }
+  }, [selectedLayer]);
 
   return (
     <canvas

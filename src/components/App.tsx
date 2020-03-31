@@ -1,6 +1,7 @@
 import React, { useRef, useContext, useEffect, ReactElement } from 'react';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import Canvas from './Canvas';
+import LayersSidebar from './LayersSidebar';
 import { store } from '../store';
 
 interface AppProps {
@@ -16,13 +17,18 @@ interface AppProps {
 const App = (props: AppProps): ReactElement => {
   const app = useRef<HTMLDivElement>(null);
   const globalState = useContext(store);
-  const { dispatch, ready } = globalState;
+  const { dispatch, ready, selectedLayerPath } = globalState;
 
   useEffect(() => {
+    const selectedPage = props.sketchPages.find((sketchPage) => sketchPage.name === 'sketch-animate');
+    const selectedPageArtboards = selectedPage.layers.filter((layer) => layer._class === 'artboard');
     dispatch({
       type: 'initialize-app',
+      ...props,
       ready: true,
-      ...props
+      selectedPage: selectedPage,
+      selectedPageArtboards: selectedPageArtboards,
+      selectedArtboard: selectedPageArtboards[0]
     });
   }, []);
 
@@ -30,6 +36,11 @@ const App = (props: AppProps): ReactElement => {
     <div
       className='c-app'
       ref={app}>
+        {
+          ready
+          ? <LayersSidebar />
+          : null
+        }
         {
           ready
           ? <Canvas />

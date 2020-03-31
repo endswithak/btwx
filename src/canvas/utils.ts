@@ -82,10 +82,26 @@ export const getBase64Images = ({sketchImages}: GetBase64Images) => {
 }
 
 interface GetChildByName {
-  layer: paper.Layer | paper.Group;
+  layer: paper.Item;
   name: string;
 }
 
 export const getChildByName = ({layer, name}: GetChildByName): paper.Item => {
   return layer.children.find((child) => child.name === name);
+}
+
+interface GetLayerByPath {
+  layer: paper.Layer | paper.Group;
+  path: string;
+}
+
+export const getLayerByPath = ({layer, path}: GetLayerByPath): paper.Item => {
+  const layers = path.split('/');
+  let selectedLayer: paper.Item = layer;
+  let i = 0;
+  while(i < layers.length) {
+    selectedLayer = getChildByName({layer: selectedLayer, name: layers[i]});
+    i++;
+  }
+  return selectedLayer;
 }

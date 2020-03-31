@@ -3,12 +3,22 @@ const reducers = (state: any, action: any): any => {
     case 'initialize-app': {
       return {
         ...state,
+        ready: action.ready,
         sketchDocument: action.sketchDocument,
         sketchMeta: action.sketchMeta,
         sketchUser: action.sketchUser,
         sketchPages: action.sketchPages,
         sketchImages: action.sketchImages,
-        ready: action.ready
+        selectedPage: action.selectedPage,
+        selectedPageArtboards: action.selectedPageArtboards,
+        selectedArtboard: action.selectedArtboard
+      };
+    }
+    case 'set-selected-layer': {
+      return {
+        ...state,
+        selectedLayer: action.layer,
+        selectedLayerPath: action.path
       };
     }
     case 'set-canvas': {

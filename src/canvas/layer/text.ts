@@ -19,6 +19,7 @@ const renderText = ({ layer, container, images, path, groupShadows, overrides, s
     name: layer.do_objectID,
     data: {
       name: layer.name,
+      type: 'text',
       path: path
     },
     locked: layer.isLocked,
