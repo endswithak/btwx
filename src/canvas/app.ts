@@ -1,5 +1,5 @@
 import paper, { Point } from 'paper';
-import { getLayerByPath, getChildByName } from './utils';
+import { getLayerByPath, getChildByName, setSelection } from './utils';
 
 interface RenderApp {
   canvas: HTMLCanvasElement;
@@ -25,11 +25,10 @@ const renderApp = ({ canvas }: RenderApp): void => {
     }
   });
   paper.view.on('selected-layer-update', (e: any) => {
-    paper.project.deselectAll();
-    const paperArtboard = paper.project.layers.find((layer) => layer.name = e.artboard)  as paper.Group;
-    const paperArtboardLayers = getChildByName({layer: paperArtboard, name: 'layers'}) as paper.Group;
-    const selectedLayer = getLayerByPath({layer: paperArtboardLayers, path: e.path});
-    selectedLayer.selected = true;
+    setSelection({
+      artboard: e.artboard,
+      path: e.path
+    });
   });
 };
 

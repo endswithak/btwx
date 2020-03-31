@@ -79,6 +79,11 @@ const renderImage = ({ layer, container, images, path, groupShadows, overrides, 
     borderOptions: layer.style.borderOptions,
     container: imageContainer
   });
+  // render selection frame
+  frameUtils.renderSelectionFrame({
+    shapePath: imageShape,
+    container: imageContainer
+  });
   // position container
   frameUtils.setFramePosition({
     container: imageContainer,

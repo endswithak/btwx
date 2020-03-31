@@ -188,19 +188,27 @@ export const getFontAttributes = ({ textStyle }: GetFontAttributes): FontAttribu
   const paragraphStyles = encodedAttributes.paragraphStyle;
   const postScript = encodedAttributes.MSAttributedStringFontAttribute.attributes.name;
   const hyphenIndex = postScript.indexOf('-');
-  const fontAttrs = hyphenIndex !== -1 ? postScript.substring(hyphenIndex + 1, postScript.length ).replace(/([A-Z])/g, ' $1').trim().toLowerCase().split(' ') : null;
-  const fontFamily = hyphenIndex !== -1 ? postScript.substring(0, hyphenIndex).replace(/([A-Z])/g, ' $1').trim() : postScript.replace(/([A-Z])/g, ' $1').trim();
+  const fontAttrs = hyphenIndex !== -1
+                    ? postScript.substring(hyphenIndex + 1, postScript.length ).replace(/([A-Z])/g, ' $1').trim().toLowerCase().split(' ')
+                    : null;
+  const fontFamily = hyphenIndex !== -1
+                     ? postScript.substring(0, hyphenIndex).replace(/([A-Z])/g, ' $1').trim()
+                     : postScript.replace(/([A-Z])/g, ' $1').trim();
   const fontSize = encodedAttributes.MSAttributedStringFontAttribute.attributes.size;
   const fontWeight = findFontWeight({fontAttrs});
   const fontStyle = findFontStyle({fontAttrs});
   const fontStretch = findFontStretch({fontAttrs});
   const letterSpacing = textStyle.encodedAttributes.kerning;
   const color = encodedAttributes.MSAttributedStringColorAttribute;
-  const lineHeight = paragraphStyles.minimumLineHeight ? paragraphStyles.minimumLineHeight : fontSize * 1.2;
+  const lineHeight = paragraphStyles && paragraphStyles.minimumLineHeight
+                     ? paragraphStyles.minimumLineHeight
+                     : fontSize * 1.2;
   const textTransform = encodedAttributes.MSAttributedStringTextTransformAttribute;
-  const alignment = getTextAlignment({
-    alignment: paragraphStyles.alignment
-  });
+  const alignment = paragraphStyles && paragraphStyles.alignment
+                    ? getTextAlignment({
+                        alignment: paragraphStyles.alignment
+                      })
+                    : 'left';
   return {
     fontFamily,
     fontSize,

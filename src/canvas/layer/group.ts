@@ -1,7 +1,7 @@
-import paper, { Layer, Shape, Color } from 'paper';
+import paper, { Layer, Shape, Color, Path } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import renderLayers from '../layers';
-import { contextUtils } from './utils';
+import { contextUtils, frameUtils } from './utils';
 
 interface RenderGroup {
   layer: FileFormat.Group;
@@ -33,14 +33,6 @@ const renderGroup = ({ layer, container, symbols, images, path, groupShadows, ov
     }),
     opacity: layer.style.contextSettings.opacity
   });
-  const groupBounds = new Layer({
-    name: 'bounds',
-    parent: groupContainer,
-    children: [new Shape.Rectangle({
-      size: [layer.frame.width, layer.frame.height],
-      fillColor: new Color(255,255,255,0)
-    })]
-  });
   renderLayers({
     layers: layer.layers,
     container: groupContainer,
@@ -51,8 +43,27 @@ const renderGroup = ({ layer, container, symbols, images, path, groupShadows, ov
     overrides: overrides,
     symbolPath: symbolPath
   });
-  groupContainer.position.x += layer.frame.x;
-  groupContainer.position.y += layer.frame.y;
+  frameUtils.renderSelectionFrame({
+    shapePath: new Path.Rectangle({
+      size: [layer.frame.width, layer.frame.height],
+      fillColor: new Color(255,255,255,0)
+    }),
+    container: groupContainer
+  });
+  frameUtils.setFramePosition({
+    container: groupContainer,
+    x: layer.frame.x,
+    y: layer.frame.y
+  });
+  frameUtils.setFrameRotation({
+    container: groupContainer,
+    rotation: layer.rotation
+  });
+  frameUtils.setFrameScale({
+    container: groupContainer,
+    isFlippedVertical: layer.isFlippedVertical,
+    isFlippedHorizontal: layer.isFlippedHorizontal
+  });
   return groupContainer;
 };
 

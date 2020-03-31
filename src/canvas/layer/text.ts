@@ -1,4 +1,4 @@
-import paper, { Layer, PointText, AreaText, Rectangle, Shape } from 'paper';
+import paper, { Layer, PointText, AreaText, Rectangle, Shape, Color, Path } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { textUtils, fillUtils, borderUtils, shadowUtils, contextUtils, frameUtils } from './utils';
 
@@ -81,6 +81,13 @@ const renderText = ({ layer, container, images, path, groupShadows, overrides, s
     borders: layer.style.borders,
     borderOptions: layer.style.borderOptions,
     textAttrs: textAttrs,
+    container: textContainer
+  });
+  frameUtils.renderSelectionFrame({
+    shapePath: new Path.Rectangle({
+      size: [layer.frame.width, layer.frame.height],
+      fillColor: new Color(255,255,255,0)
+    }),
     container: textContainer
   });
   frameUtils.setFramePosition({

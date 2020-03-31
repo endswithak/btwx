@@ -75,6 +75,10 @@ const renderShapePath = ({ layer, images, container, path, groupShadows, overrid
     borderOptions: layer.style.borderOptions,
     container: shapePathContainer
   });
+  frameUtils.renderSelectionFrame({
+    shapePath: shapePath,
+    container: shapePathContainer
+  });
   frameUtils.setFramePosition({
     container: shapePathContainer,
     x: layer.frame.x,

@@ -1,3 +1,4 @@
+import paper from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 
 interface GetSymbolsPage {
@@ -104,4 +105,18 @@ export const getLayerByPath = ({layer, path}: GetLayerByPath): paper.Item => {
     i++;
   }
   return selectedLayer;
+}
+
+interface SetSelection {
+  artboard: string;
+  path: string;
+}
+
+export const setSelection = ({artboard, path}: SetSelection): void => {
+  paper.project.deselectAll();
+  const paperArtboard = paper.project.layers.find((layer) => layer.name === artboard)  as paper.Group;
+  const paperArtboardLayers = getChildByName({layer: paperArtboard, name: 'layers'}) as paper.Group;
+  const selectedLayer = getLayerByPath({layer: paperArtboardLayers, path: path});
+  const selectedLayerFrame = getChildByName({layer: selectedLayer, name: 'selection-frame'});
+  selectedLayerFrame.selected = true;
 }
