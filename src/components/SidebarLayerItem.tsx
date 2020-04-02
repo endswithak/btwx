@@ -60,7 +60,7 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
               style={{
                 fill: isSelected
                 ? theme.text.onPrimary
-                : theme.text.base
+                : theme.text.lighter
               }}>
               {
                 isOpen

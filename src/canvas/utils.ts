@@ -120,7 +120,6 @@ export const setSelection = ({artboard, path, dispatch}: SetSelection): void => 
   const paperArtboard = paper.project.layers.find((layer) => layer.name === artboard)  as paper.Group;
   const paperArtboardLayers = getChildByName({layer: paperArtboard, name: 'layers'}) as paper.Group;
   const selectedLayer = getLayerByPath({layer: paperArtboardLayers, path: path});
-  console.log(selectedLayer);
   const selectionFrame = new Shape.Rectangle({
     name: 'selection-frame',
     size: [selectedLayer.data.frame.width, selectedLayer.data.frame.height],

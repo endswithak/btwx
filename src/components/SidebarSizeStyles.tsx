@@ -1,21 +1,24 @@
 import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
 import { store } from '../store';
+import SidebarStylesInput from './SidebarStylesInput';
 
 const SidebarSizeStyles = (): ReactElement => {
   const globalState = useContext(store);
-  const { selectedPaperLayer, theme, dispatch } = globalState;
+  const { selectedLayer, theme, dispatch } = globalState;
 
-  const width = selectedPaperLayer ? selectedPaperLayer.bounds.width : '';
-  const height = selectedPaperLayer ? selectedPaperLayer.bounds.height : '';
+  const width = selectedLayer ? selectedLayer.frame.width : '';
+  const height = selectedLayer ? selectedLayer.frame.height : '';
 
   return (
-    <div className='c-sidebar-frame-styles__size'>
-      <div className='c-sidebar-frame-styles__input-wrap'>
-        <input value={width} readOnly className='c-sidebar-frame-styles__input' />
-      </div>
-      <div className='c-sidebar-frame-styles__input-wrap'>
-        <input value={height} readOnly className='c-sidebar-frame-styles__input' />
-      </div>
+    <div className='c-sidebar-frame-styles__section'>
+      <SidebarStylesInput
+        value={width}
+        readOnly={true}
+        label={'W'} />
+      <SidebarStylesInput
+        value={height}
+        readOnly={true}
+        label={'H'} />
     </div>
   );
 }

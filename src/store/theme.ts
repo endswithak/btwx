@@ -6,6 +6,9 @@ const createScale = (min: string, max: string, count: number) => {
   return chroma.scale([min, max]).mode('lch').colors(count);
 }
 
+const primary = chroma('cyan').css();
+const accent = chroma('magenta').css();
+
 const darkBgMin = '#1a1a1a';
 const darkBgMax = '#555';
 const darkBgScale = createScale(darkBgMin, darkBgMax, 7);
@@ -27,27 +30,31 @@ const textOnColor = (color: string | chroma.Color) => {
   return contrast > 3 ? darkTextMax : lightTextMax;
 }
 
-const createPalette = (avgColor: Color) => {
-  // let primary: Color = chroma(avgColor).set('hsl.h', '+180').set('lch.c', 700).saturate(100);
-  // if (chroma(primary).get('hsl.l') >= 0.5) {
-  //   primary = primary.darken();
-  // } else if (chroma(primary).get('hsl.l') <= 0.3) {
-  //   primary = primary.brighten();
-  // }
-  // let primaryHover: Color = chroma(primary).darken(0.5);
-  // let accent: Color = chroma(primary).set('hsl.h', '+180');
-  // let accentHover: Color = chroma(accent).darken(0.5);
-  const primary = chroma('cyan').css();
-  const accent = chroma('magenta').css();
-  return {
-    primary: primary,
-    primaryHover: chroma(primary).darken().css(),
-    accent: chroma(accent).css(),
-    accentHover: chroma(accent).darken().css()
-  }
+interface Palette {
+  primary: string;
+  primaryHover: string;
+  accent: string;
+  accentHover: string;
 }
 
-const createDarkBackgrounds = (scale: string[]) => ({
+const createPalette = (): Palette => ({
+  primary: primary,
+  primaryHover: chroma(primary).darken().css(),
+  accent: chroma(accent).css(),
+  accentHover: chroma(accent).darken().css()
+});
+
+interface BackgroundScale {
+  z6: string;
+  z5: string;
+  z4: string;
+  z3: string;
+  z2: string;
+  z1: string;
+  z0: string;
+}
+
+const createDarkBackgrounds = (scale: string[]): BackgroundScale => ({
   z6: scale[6],
   z5: scale[5],
   z4: scale[4],
@@ -57,7 +64,7 @@ const createDarkBackgrounds = (scale: string[]) => ({
   z0: scale[0]
 });
 
-const createLightBackgrounds = (scale: string[]) => ({
+const createLightBackgrounds = (scale: string[]): BackgroundScale => ({
   z6: scale[6],
   z5: scale[4],
   z4: scale[5],
@@ -67,7 +74,16 @@ const createLightBackgrounds = (scale: string[]) => ({
   z0: scale[0]
 });
 
-const createText = (scale: string[], palette: any) => ({
+interface TextScale {
+  base: string;
+  light: string;
+  lighter: string;
+  lightest: string;
+  onPrimary: string;
+  onAccent: string;
+}
+
+const createText = (scale: string[], palette: Palette): TextScale => ({
   base: scale[3],
   light: scale[2],
   lighter: scale[1],
@@ -76,22 +92,33 @@ const createText = (scale: string[], palette: any) => ({
   onAccent: textOnColor(palette.accent),
 });
 
-const getTheme = (theme: st.Theme, avgColor?: Color) => {
-  const palette = createPalette(avgColor ? avgColor : SRM_DEFAULT_PRIMARY);
+type ThemeName = 'light' | 'dark';
+
+interface Theme {
+  name: ThemeName;
+  palette: Palette;
+  background: BackgroundScale;
+  backgroundInverse: BackgroundScale;
+  text: TextScale;
+}
+
+const getTheme = (theme: ThemeName): Theme => {
   switch(theme) {
     case 'dark':
       return {
         name: theme,
-        palette: palette,
+        palette: createPalette(),
         background: createDarkBackgrounds(darkBgScale),
-        text: createText(darkTextScale, palette)
+        backgroundInverse: createLightBackgrounds(lightBgScale),
+        text: createText(darkTextScale, createPalette())
       }
     case 'light':
       return {
         name: theme,
-        palette: palette,
+        palette: createPalette(),
         background: createLightBackgrounds(lightBgScale),
-        text: createText(lightTextScale, palette)
+        backgroundInverse: createDarkBackgrounds(lightBgScale),
+        text: createText(lightTextScale, createPalette())
       }
   }
 };

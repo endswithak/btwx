@@ -1,6 +1,7 @@
 import React, { useContext, ReactElement } from 'react';
 import { store } from '../store';
 import Sidebar from './Sidebar';
+import SidebarSectionHead from './SidebarSectionHead';
 import SidebarLayers from './SidebarLayers';
 
 let lsDeltaX = 0;
@@ -30,10 +31,14 @@ const LayersSidebar = (): ReactElement => {
       position={'left'}
       onDrag={handleDrag}
       onDragStart={handleDragStart}>
-      <SidebarLayers
-        layers={selectedArtboard.layers}
-        depth={0}
-        path={''} />
+      <div>
+        <SidebarSectionHead
+          text={'layers'} />
+        <SidebarLayers
+          layers={selectedArtboard.layers}
+          depth={0}
+          path={''} />
+      </div>
     </Sidebar>
   );
 }
