@@ -8,13 +8,14 @@ interface RenderText {
   images: {
     [id: string]: string;
   };
+  dispatch: any;
   path: string;
   groupShadows?: FileFormat.Shadow[];
   overrides?: FileFormat.OverrideValue[];
   symbolPath?: string;
 }
 
-const renderText = ({ layer, container, images, path, groupShadows, overrides, symbolPath }: RenderText): paper.Layer => {
+const renderText = ({ layer, container, images, dispatch, path, groupShadows, overrides, symbolPath }: RenderText): paper.Layer => {
   const textContainer = new Layer({
     name: layer.do_objectID,
     data: {
@@ -28,7 +29,8 @@ const renderText = ({ layer, container, images, path, groupShadows, overrides, s
     blendMode: contextUtils.getBlendMode({
       blendMode: layer.style.contextSettings.blendMode
     }),
-    opacity: layer.style.contextSettings.opacity
+    opacity: layer.style.contextSettings.opacity,
+    applyMatrix: false
   });
   const override = textUtils.getOverrideString({
     overrides: overrides,
@@ -81,13 +83,6 @@ const renderText = ({ layer, container, images, path, groupShadows, overrides, s
     borders: layer.style.borders,
     borderOptions: layer.style.borderOptions,
     textAttrs: textAttrs,
-    container: textContainer
-  });
-  frameUtils.renderSelectionFrame({
-    shapePath: new Path.Rectangle({
-      size: [layer.frame.width, layer.frame.height],
-      fillColor: new Color(255,255,255,0)
-    }),
     container: textContainer
   });
   frameUtils.setFramePosition({

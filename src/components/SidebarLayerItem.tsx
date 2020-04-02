@@ -13,8 +13,9 @@ interface SidebarLayerItemProps {
 
 const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
   const globalState = useContext(store);
-  const { dispatch } = globalState;
+  const { dispatch, selectedLayer, theme } = globalState;
   const { layer, path, depth, isGroup, isOpen, setIsOpen } = props;
+  const isSelected = selectedLayer && layer.do_objectID === selectedLayer.do_objectID;
 
   const handleNameClick = (): void => {
     dispatch({
@@ -29,10 +30,21 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
   }
 
   return (
-    <div className='c-layers-sidebar__layer-item'>
+    <div
+      className='c-layers-sidebar__layer-item'
+      style={{
+        background: isSelected
+        ? theme.palette.primary
+        : theme.background.z1
+      }}>
       <span
         className='c-sidebar-layer__name'
-        style={{paddingLeft: depth * 16}}
+        style={{
+          paddingLeft: depth * 16,
+          color: isSelected
+          ? theme.text.onPrimary
+          : theme.text.base
+        }}
         onClick={handleNameClick}>
         {layer.name}
       </span>
@@ -41,11 +53,19 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
         ? <span
             className='c-sidebar-layer__chevron'
             onClick={handleChevronClick}>
-            <svg width="24" height="24" viewBox="0 0 24 24">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              style={{
+                fill: isSelected
+                ? theme.text.onPrimary
+                : theme.text.base
+              }}>
               {
                 isOpen
-                ? <path fill="#000" d="M7 10l5 5 5-5H7z"/>
-                : <path fill="#000" d='M10 17l5-5-5-5v10z' />
+                ? <path d="M7 10l5 5 5-5H7z"/>
+                : <path d='M10 17l5-5-5-5v10z' />
               }
             </svg>
           </span>

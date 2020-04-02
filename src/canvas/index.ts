@@ -13,18 +13,19 @@ interface RenderCanvas {
   selectedPage: FileFormat.Page;
   selectedPageArtboards: FileFormat.Artboard[];
   selectedArtboard: FileFormat.Artboard;
+  dispatch: any;
   canvas: HTMLCanvasElement;
 }
 
-const renderCanvas = async ({ sketchDocument, sketchImages, sketchPages, selectedPage, selectedPageArtboards, selectedArtboard, canvas }: RenderCanvas): Promise<paper.View> => {
+const renderCanvas = async ({ sketchDocument, sketchImages, sketchPages, selectedPage, selectedPageArtboards, selectedArtboard, canvas, dispatch }: RenderCanvas): Promise<paper.View> => {
   //const page = sketchPages.find((sketchPage) => sketchPage.name === 'sketch-animate');
   const symbolsPage = getSymbolsPage({sketchPages});
   const symbols = symbolsPage ? symbolsPage.layers as FileFormat.SymbolMaster[] : null;
   //const artboards = page.layers.filter((layer) => layer._class === 'artboard') as FileFormat.Artboard[];
   const images = getBase64Images({sketchImages});
-  renderApp({canvas});
+  renderApp({canvas, dispatch});
   selectedPageArtboards.forEach((artboard) => {
-    renderArtboard({artboard, symbols, images});
+    renderArtboard({artboard, symbols, images, dispatch});
   });
   return paper.view;
 };

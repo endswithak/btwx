@@ -21,7 +21,7 @@ interface SetFrameRotation {
 }
 
 export const setFrameRotation = ({ rotation, container }: SetFrameRotation): void => {
-  container.rotation = 360 - rotation;
+  container.rotate(-1 * rotation);
 };
 
 interface SetFrameScale {
@@ -32,15 +32,4 @@ interface SetFrameScale {
 
 export const setFrameScale = ({ isFlippedHorizontal, isFlippedVertical, container }: SetFrameScale): void => {
   container.scale(isFlippedHorizontal ? -1 : 1, isFlippedVertical ? -1 : 1);
-};
-
-interface RenderSelectionFrame {
-  shapePath: paper.Path | paper.CompoundPath;
-  container: paper.Layer | paper.Group;
-}
-
-export const renderSelectionFrame = ({ shapePath, container }: RenderSelectionFrame): void => {
-  const selectionFrame = shapePath.clone();
-  selectionFrame.parent = container;
-  selectionFrame.name = 'selection-frame';
 };

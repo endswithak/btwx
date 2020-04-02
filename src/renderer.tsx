@@ -32,21 +32,31 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './components/App';
+import Preview from './components/Preview';
 import { StateProvider } from './store';
 import { readSketchFile } from 'sketch-file';
 
 import './styles/index.sass';
 
-readSketchFile('/Users/erik/Desktop/e-sketch-test.sketch').then((file)=> {
+window.renderMainWindow = () => {
+  readSketchFile('/Users/erik/Desktop/e-sketch-test.sketch').then((file)=> {
+    ReactDOM.render(
+      <StateProvider>
+        <App
+          sketchDocument={file.document}
+          sketchMeta={file.meta}
+          sketchUser={file.user}
+          sketchPages={file.pages}
+          sketchImages={file.images} />
+      </StateProvider>,
+      document.getElementById('root')
+    );
+  });
+}
+
+window.renderPreviewWindow = (globalState) => {
   ReactDOM.render(
-    <StateProvider>
-      <App
-        sketchDocument={file.document}
-        sketchMeta={file.meta}
-        sketchUser={file.user}
-        sketchPages={file.pages}
-        sketchImages={file.images} />
-    </StateProvider>,
+    <Preview globalState={globalState} />,
     document.getElementById('root')
   );
-});
+}

@@ -1,4 +1,4 @@
-import paper from 'paper';
+import paper, { Shape } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 
 interface GetSymbolsPage {
@@ -110,13 +110,25 @@ export const getLayerByPath = ({layer, path}: GetLayerByPath): paper.Item => {
 interface SetSelection {
   artboard: string;
   path: string;
+  dispatch: any;
 }
 
-export const setSelection = ({artboard, path}: SetSelection): void => {
-  paper.project.deselectAll();
+export const setSelection = ({artboard, path, dispatch}: SetSelection): void => {
+  paper.project.selectedItems.forEach((selectedItem) => {
+    selectedItem.remove();
+  });
   const paperArtboard = paper.project.layers.find((layer) => layer.name === artboard)  as paper.Group;
   const paperArtboardLayers = getChildByName({layer: paperArtboard, name: 'layers'}) as paper.Group;
   const selectedLayer = getLayerByPath({layer: paperArtboardLayers, path: path});
-  const selectedLayerFrame = getChildByName({layer: selectedLayer, name: 'selection-frame'});
-  selectedLayerFrame.selected = true;
+  console.log(selectedLayer);
+  const selectionFrame = new Shape.Rectangle({
+    name: 'selection-frame',
+    size: [selectedLayer.data.frame.width, selectedLayer.data.frame.height],
+    parent: selectedLayer
+  });
+  dispatch({
+    type: 'set-selected-paper-layer',
+    selectedPaperLayer: selectedLayer
+  });
+  selectionFrame.selected = true;
 }

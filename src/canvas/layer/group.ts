@@ -10,19 +10,21 @@ interface RenderGroup {
   images: {
     [id: string]: string;
   };
+  dispatch: any;
   path: string;
   groupShadows?: FileFormat.Shadow[];
   overrides?: FileFormat.OverrideValue[];
   symbolPath?: string;
 }
 
-const renderGroup = ({ layer, container, symbols, images, path, groupShadows, overrides, symbolPath }: RenderGroup): paper.Layer => {
+const renderGroup = ({ layer, container, symbols, images, dispatch, path, groupShadows, overrides, symbolPath }: RenderGroup): paper.Layer => {
   const groupContainer = new Layer({
     name: layer.do_objectID,
     data: {
       name: layer.name,
       type: 'group',
-      path: path
+      path: path,
+      frame: layer.frame
     },
     locked: layer.isLocked,
     visible: layer.isVisible,
@@ -31,24 +33,19 @@ const renderGroup = ({ layer, container, symbols, images, path, groupShadows, ov
     blendMode: contextUtils.getBlendMode({
       blendMode: layer.style.contextSettings.blendMode
     }),
-    opacity: layer.style.contextSettings.opacity
+    opacity: layer.style.contextSettings.opacity,
+    applyMatrix: false
   });
   renderLayers({
     layers: layer.layers,
     container: groupContainer,
     symbols: symbols,
     images: images,
+    dispatch: dispatch,
     path: path,
     groupShadows: groupShadows,
     overrides: overrides,
     symbolPath: symbolPath
-  });
-  frameUtils.renderSelectionFrame({
-    shapePath: new Path.Rectangle({
-      size: [layer.frame.width, layer.frame.height],
-      fillColor: new Color(255,255,255,0)
-    }),
-    container: groupContainer
   });
   frameUtils.setFramePosition({
     container: groupContainer,

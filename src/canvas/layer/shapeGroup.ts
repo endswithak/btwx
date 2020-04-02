@@ -16,27 +16,30 @@ interface RenderShape {
   images: {
     [id: string]: string;
   };
+  dispatch: any;
   path: string;
   groupShadows?: FileFormat.Shadow[];
   overrides?: FileFormat.OverrideValue[];
   symbolPath?: string;
 }
 
-const renderShape = ({ layer, container, images, path, groupShadows }: RenderShape): paper.Layer => {
+const renderShape = ({ layer, container, images, dispatch, path, groupShadows }: RenderShape): paper.Layer => {
   const shapeContainer = new Layer({
     parent: container,
     name: layer.do_objectID,
     data: {
       name: layer.name,
       type: 'shapeGroup',
-      path: path
+      path: path,
+      frame: layer.frame
     },
     visible: layer.isVisible,
     locked: layer.isLocked,
     blendMode: contextUtils.getBlendMode({
       blendMode: layer.style.contextSettings.blendMode
     }),
-    opacity: layer.style.contextSettings.opacity
+    opacity: layer.style.contextSettings.opacity,
+    applyMatrix: false
   });
   const shapeLayers = new Group({
     name: 'layers',
@@ -67,10 +70,6 @@ const renderShape = ({ layer, container, images, path, groupShadows }: RenderSha
     shapePath: shapePath,
     borders: layer.style.borders,
     borderOptions: layer.style.borderOptions,
-    container: shapeContainer
-  });
-  frameUtils.renderSelectionFrame({
-    shapePath: shapePath,
     container: shapeContainer
   });
   frameUtils.setFramePosition({

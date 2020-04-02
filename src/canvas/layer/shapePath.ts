@@ -17,19 +17,21 @@ interface RenderShapePath {
   images: {
     [id: string]: string;
   };
+  dispatch: any;
   path: string;
   groupShadows?: FileFormat.Shadow[];
   overrides?: FileFormat.OverrideValue[];
   symbolPath?: string;
 }
 
-const renderShapePath = ({ layer, images, container, path, groupShadows, overrides, symbolPath }: RenderShapePath): paper.Layer => {
+const renderShapePath = ({ layer, images, container, dispatch, path, groupShadows, overrides, symbolPath }: RenderShapePath): paper.Layer => {
   const shapePathContainer = new Layer({
     name: layer.do_objectID,
     data: {
       name: layer.name,
       type: 'shapePath',
-      path: path
+      path: path,
+      frame: layer.frame
     },
     locked: layer.isLocked,
     visible: layer.isVisible,
@@ -38,7 +40,8 @@ const renderShapePath = ({ layer, images, container, path, groupShadows, overrid
     blendMode: contextUtils.getBlendMode({
       blendMode: layer.style.contextSettings.blendMode
     }),
-    opacity: layer.style.contextSettings.opacity
+    opacity: layer.style.contextSettings.opacity,
+    applyMatrix: false
   });
   const override = imageUtils.getOverrideImage({
     overrides: overrides,
@@ -73,10 +76,6 @@ const renderShapePath = ({ layer, images, container, path, groupShadows, overrid
     shapePath: shapePath,
     borders: layer.style.borders,
     borderOptions: layer.style.borderOptions,
-    container: shapePathContainer
-  });
-  frameUtils.renderSelectionFrame({
-    shapePath: shapePath,
     container: shapePathContainer
   });
   frameUtils.setFramePosition({

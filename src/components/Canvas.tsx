@@ -3,19 +3,14 @@ import { store } from '../store';
 import renderCanvas from '../canvas';
 
 const Canvas = (): ReactElement => {
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const globalState = useContext(store);
-  const { selectedPage, selectedPageArtboards, selectedArtboard, selectedLayer, selectedLayerPath, sketchDocument, sketchPages, sketchImages, dispatch, canvas, theme } = globalState;
-
-  const onResize = (): void => {
-    canvasRef.current.width = window.innerWidth;
-    canvasRef.current.height = window.innerHeight;
-  }
+  const { selectedPage, selectedPageArtboards, selectedArtboard, selectedLayer, selectedLayerPath, sketchDocument, sketchPages, sketchImages, dispatch, canvas, theme, layersSidebarWidth, stylesSidebarWidth } = globalState;
 
   useEffect(() => {
-    window.addEventListener('resize', onResize);
-    canvasRef.current.width = window.innerWidth;
-    canvasRef.current.height = window.innerHeight;
+    canvasRef.current.width = canvasContainerRef.current.clientWidth;
+    canvasRef.current.height = canvasContainerRef.current.clientHeight;
     renderCanvas({
       sketchDocument: sketchDocument,
       sketchPages: sketchPages,
@@ -23,6 +18,7 @@ const Canvas = (): ReactElement => {
       selectedPage: selectedPage,
       selectedPageArtboards: selectedPageArtboards,
       selectedArtboard: selectedArtboard,
+      dispatch: dispatch,
       canvas: canvasRef.current
     })
     .then((paperView) => {
@@ -40,8 +36,19 @@ const Canvas = (): ReactElement => {
         e.preventDefault();
         canvas.emit('wheel', e);
       });
+      window.addEventListener('resize', (e) => {
+        canvas.viewSize.width = canvasContainerRef.current.clientWidth;
+        canvas.viewSize.height = canvasContainerRef.current.clientHeight;
+      });
     }
   }, [canvas]);
+
+  useEffect(() => {
+    if (canvas) {
+      canvas.viewSize.width = canvasContainerRef.current.clientWidth;
+      canvas.viewSize.height = canvasContainerRef.current.clientHeight;
+    }
+  }, [layersSidebarWidth, stylesSidebarWidth]);
 
   useEffect(() => {
     if (canvas) {
@@ -54,12 +61,16 @@ const Canvas = (): ReactElement => {
   }, [selectedLayer]);
 
   return (
-    <canvas
-      id='c-canvas'
-      ref={canvasRef}
-      style={{
-        background: theme.background.z0
-      }} />
+    <div
+      className='c-canvas'
+      ref={canvasContainerRef}>
+      <canvas
+        id='canvas-main'
+        ref={canvasRef}
+        style={{
+          background: theme.background.z0
+        }} />
+    </div>
   );
 }
 

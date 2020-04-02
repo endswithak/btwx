@@ -1,11 +1,12 @@
-import paper, { Point } from 'paper';
+import paper, { Point, Size } from 'paper';
 import { getLayerByPath, getChildByName, setSelection } from './utils';
 
 interface RenderApp {
   canvas: HTMLCanvasElement;
+  dispatch: any;
 }
 
-const renderApp = ({ canvas }: RenderApp): void => {
+const renderApp = ({ canvas, dispatch }: RenderApp): void => {
   paper.setup(canvas);
   paper.view.on('wheel', (e: WheelEvent) => {
     if (e.ctrlKey) {
@@ -27,7 +28,8 @@ const renderApp = ({ canvas }: RenderApp): void => {
   paper.view.on('selected-layer-update', (e: any) => {
     setSelection({
       artboard: e.artboard,
-      path: e.path
+      path: e.path,
+      dispatch: dispatch
     });
   });
 };

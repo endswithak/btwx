@@ -15,13 +15,14 @@ interface RenderLayer {
   images: {
     [id: string]: string;
   };
+  dispatch: any;
   path: string;
   groupShadows?: FileFormat.Shadow[];
   overrides?: FileFormat.OverrideValue[];
   symbolPath?: string;
 }
 
-const renderLayer = ({ layer, container, symbols, images, path, groupShadows, overrides, symbolPath }: RenderLayer): void => {
+const renderLayer = ({ layer, container, symbols, images, dispatch, path, groupShadows, overrides, symbolPath }: RenderLayer): void => {
   path = generalUtils.getLayerPath({layer, path});
   overrides = symbolUtils.getCompiledOverrides({layer, overrides});
   symbolPath = symbolUtils.getSymbolPath({layer, symbolPath});
@@ -37,6 +38,7 @@ const renderLayer = ({ layer, container, symbols, images, path, groupShadows, ov
         layer: layer as FileFormat.ShapePath,
         container: container,
         images: images,
+        dispatch: dispatch,
         path: path,
         groupShadows: groupShadows,
         overrides: overrides,
@@ -48,6 +50,7 @@ const renderLayer = ({ layer, container, symbols, images, path, groupShadows, ov
         layer: layer as FileFormat.ShapeGroup,
         container: container,
         images: images,
+        dispatch: dispatch,
         path: path,
         groupShadows: groupShadows,
         overrides: overrides,
@@ -60,6 +63,7 @@ const renderLayer = ({ layer, container, symbols, images, path, groupShadows, ov
         container: container,
         symbols: symbols,
         images: images,
+        dispatch: dispatch,
         path: path,
         groupShadows: groupShadows,
         overrides: overrides,
@@ -72,6 +76,7 @@ const renderLayer = ({ layer, container, symbols, images, path, groupShadows, ov
         container: container,
         symbols: symbols,
         images: images,
+        dispatch: dispatch,
         path: path,
         groupShadows: groupShadows,
         overrides: overrides,
@@ -82,6 +87,7 @@ const renderLayer = ({ layer, container, symbols, images, path, groupShadows, ov
       renderText({
         layer: layer,
         container: container,
+        dispatch: dispatch,
         path: path,
         groupShadows: groupShadows,
         overrides: overrides,
@@ -94,6 +100,7 @@ const renderLayer = ({ layer, container, symbols, images, path, groupShadows, ov
         layer: layer,
         container: container,
         images: images,
+        dispatch: dispatch,
         path: path,
         groupShadows: groupShadows,
         overrides: overrides,

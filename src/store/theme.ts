@@ -28,20 +28,22 @@ const textOnColor = (color: string | chroma.Color) => {
 }
 
 const createPalette = (avgColor: Color) => {
-  let primary: Color = chroma(avgColor).set('hsl.h', '+180').set('lch.c', 700).saturate(100);
-  if (chroma(primary).get('hsl.l') >= 0.5) {
-    primary = primary.darken();
-  } else if (chroma(primary).get('hsl.l') <= 0.3) {
-    primary = primary.brighten();
-  }
-  let primaryHover: Color = chroma(primary).darken(0.5);
-  let accent: Color = chroma(primary).set('hsl.h', '+180');
-  let accentHover: Color = chroma(accent).darken(0.5);
+  // let primary: Color = chroma(avgColor).set('hsl.h', '+180').set('lch.c', 700).saturate(100);
+  // if (chroma(primary).get('hsl.l') >= 0.5) {
+  //   primary = primary.darken();
+  // } else if (chroma(primary).get('hsl.l') <= 0.3) {
+  //   primary = primary.brighten();
+  // }
+  // let primaryHover: Color = chroma(primary).darken(0.5);
+  // let accent: Color = chroma(primary).set('hsl.h', '+180');
+  // let accentHover: Color = chroma(accent).darken(0.5);
+  const primary = chroma('cyan').css();
+  const accent = chroma('magenta').css();
   return {
-    primary: chroma(primary).css(),
-    primaryHover: chroma(primaryHover).css(),
+    primary: primary,
+    primaryHover: chroma(primary).darken().css(),
     accent: chroma(accent).css(),
-    accentHover: chroma(accentHover).css()
+    accentHover: chroma(accent).darken().css()
   }
 }
 
@@ -74,7 +76,7 @@ const createText = (scale: string[], palette: any) => ({
   onAccent: textOnColor(palette.accent),
 });
 
-const getTheme = (theme: srm.Theme, avgColor?: Color) => {
+const getTheme = (theme: st.Theme, avgColor?: Color) => {
   const palette = createPalette(avgColor ? avgColor : SRM_DEFAULT_PRIMARY);
   switch(theme) {
     case 'dark':

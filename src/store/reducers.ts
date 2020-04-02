@@ -4,6 +4,7 @@ const reducers = (state: any, action: any): any => {
       return {
         ...state,
         ready: action.ready,
+        appWindow: action.appWindow,
         sketchDocument: action.sketchDocument,
         sketchMeta: action.sketchMeta,
         sketchUser: action.sketchUser,
@@ -21,10 +22,28 @@ const reducers = (state: any, action: any): any => {
         selectedLayerPath: action.path
       };
     }
+    case 'set-selected-paper-layer': {
+      return {
+        ...state,
+        selectedPaperLayer: action.selectedPaperLayer
+      };
+    }
     case 'set-canvas': {
       return {
         ...state,
         canvas: action.canvas
+      };
+    }
+    case 'set-layers-sidebar-width': {
+      return {
+        ...state,
+        layersSidebarWidth: action.layersSidebarWidth
+      };
+    }
+    case 'set-styles-sidebar-width': {
+      return {
+        ...state,
+        stylesSidebarWidth: action.stylesSidebarWidth
       };
     }
     default:

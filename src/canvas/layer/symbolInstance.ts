@@ -10,13 +10,14 @@ interface RenderSymbolInstance {
   images: {
     [id: string]: string;
   };
+  dispatch: any;
   path: string;
   groupShadows?: FileFormat.Shadow[];
   overrides?: FileFormat.OverrideValue[];
   symbolPath?: string;
 }
 
-const renderSymbolInstance = ({ layer, container, symbols, images, path, groupShadows, overrides, symbolPath }: RenderSymbolInstance): paper.Layer => {
+const renderSymbolInstance = ({ layer, container, symbols, images, dispatch, path, groupShadows, overrides, symbolPath }: RenderSymbolInstance): paper.Layer => {
   const symbolContainer = new Layer({
     name: layer.do_objectID,
     data: {
@@ -25,7 +26,8 @@ const renderSymbolInstance = ({ layer, container, symbols, images, path, groupSh
     },
     locked: layer.isLocked,
     visible: layer.isVisible,
-    parent: container
+    parent: container,
+    applyMatrix: false
   });
   const master = symbolUtils.getSymbolMaster({
     symbolId: layer.symbolID,
@@ -39,6 +41,7 @@ const renderSymbolInstance = ({ layer, container, symbols, images, path, groupSh
       container: symbolContainer,
       symbols: symbols,
       images: images,
+      dispatch: dispatch,
       path: path,
       groupShadows: groupShadows,
       overrides: overrides,

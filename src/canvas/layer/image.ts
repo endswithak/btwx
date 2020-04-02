@@ -8,13 +8,14 @@ interface RenderImage {
   images: {
     [id: string]: string;
   };
+  dispatch: any;
   path: string;
   groupShadows?: FileFormat.Shadow[];
   overrides?: FileFormat.OverrideValue[];
   symbolPath: string;
 }
 
-const renderImage = ({ layer, container, images, path, groupShadows, overrides, symbolPath }: RenderImage): paper.Layer => {
+const renderImage = ({ layer, container, images, dispatch, path, groupShadows, overrides, symbolPath }: RenderImage): paper.Layer => {
   const imageContainer = new Layer({
     name: layer.do_objectID,
     data: {
@@ -28,7 +29,8 @@ const renderImage = ({ layer, container, images, path, groupShadows, overrides, 
     blendMode: contextUtils.getBlendMode({
       blendMode: layer.style.contextSettings.blendMode
     }),
-    opacity: layer.style.contextSettings.opacity
+    opacity: layer.style.contextSettings.opacity,
+    applyMatrix: false
   });
   // render bitmap
   const override = imageUtils.getOverrideImage({
@@ -77,11 +79,6 @@ const renderImage = ({ layer, container, images, path, groupShadows, overrides, 
     shapePath: imageShape,
     borders: layer.style.borders,
     borderOptions: layer.style.borderOptions,
-    container: imageContainer
-  });
-  // render selection frame
-  frameUtils.renderSelectionFrame({
-    shapePath: imageShape,
     container: imageContainer
   });
   // position container

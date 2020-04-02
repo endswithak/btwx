@@ -12,8 +12,7 @@ interface SidebarLayersProps {
 const SidebarLayers = (props: SidebarLayersProps): ReactElement => {
   const globalState = useContext(store);
   return (
-    <div
-      className='c-layers-sidebar__layers'>
+    <div>
       {
         props.layers.map((layer: FileFormat.AnyLayer, index: number) => (
           <SidebarLayer

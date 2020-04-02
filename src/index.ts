@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import electron, { app, BrowserWindow, ipcMain } from 'electron';
 declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -21,6 +21,10 @@ const createWindow = (): void => {
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
+
+  mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow.webContents.executeJavaScript(`renderMainWindow()`);
+  });
 };
 
 // This method will be called when Electron has finished
@@ -47,3 +51,21 @@ app.on('activate', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
+ipcMain.on('openPreview', (event, globalState) => {
+  const previewWindow = new BrowserWindow({
+    height: 600,
+    width: 800,
+    webPreferences: {
+      nodeIntegration: true
+    }
+  });
+
+  previewWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+
+  // Open the DevTools.
+  previewWindow.webContents.openDevTools();
+
+  previewWindow.webContents.on('did-finish-load', () => {
+    previewWindow.webContents.executeJavaScript(`renderPreviewWindow(${globalState})`);
+  });
+});

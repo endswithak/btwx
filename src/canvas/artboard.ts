@@ -51,9 +51,10 @@ interface RenderArtboard {
   images: {
     [id: string]: string;
   };
+  dispatch: any;
 }
 
-const renderArtboard = ({ artboard, symbols, images }: RenderArtboard): paper.Layer => {
+const renderArtboard = ({ artboard, symbols, images, dispatch }: RenderArtboard): paper.Layer => {
   console.log(artboard);
   const artboardContainer = new Layer({
     name: artboard.do_objectID,
@@ -82,7 +83,8 @@ const renderArtboard = ({ artboard, symbols, images }: RenderArtboard): paper.La
     layers: artboard.layers,
     container: artboardLayers,
     symbols: symbols,
-    images: images
+    images: images,
+    dispatch: dispatch
   });
   artboardContainer.position = view.center;
   //artboardContainer.position.x += artboard.frame.x;
