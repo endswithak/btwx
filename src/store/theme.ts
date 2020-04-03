@@ -6,7 +6,7 @@ const createScale = (min: string, max: string, count: number) => {
   return chroma.scale([min, max]).mode('lch').colors(count);
 }
 
-const primary = chroma('cyan').css();
+const primary = chroma('#3C88FD').css();
 const accent = chroma('magenta').css();
 
 const darkBgMin = '#1a1a1a';

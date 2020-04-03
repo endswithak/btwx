@@ -2,12 +2,14 @@ import React, { useContext, ReactElement, useRef, useEffect, useState } from 're
 import { store } from '../store';
 import Sidebar from './Sidebar';
 import SidebarSectionHead from './SidebarSectionHead';
+import SidebarSectionWrap from './SidebarSectionWrap';
+import SidebarSection from './SidebarSection';
+import SidebarSectionRow from './SidebarSectionRow';
 import SidebarFrameStyles from './SidebarFrameStyles';
 import SidebarContextStyles from './SidebarContextStyles';
+import SidebarFillStyles from './SidebarFillStyles';
 
-//let ssDeltaX = 0;
-
-const LayersSidebar = (): ReactElement => {
+const StylesSidebar = (): ReactElement => {
   const globalState = useContext(store);
   const { theme, dispatch, stylesSidebarWidth } = globalState;
 
@@ -16,16 +18,18 @@ const LayersSidebar = (): ReactElement => {
       width={stylesSidebarWidth}
       position={'right'}
       resizable={false}>
-      <div>
-        <SidebarSectionHead
-          text={'position'} />
-        <SidebarFrameStyles />
-        <SidebarSectionHead
-          text={'appearance'} />
-        <SidebarContextStyles />
-      </div>
+      <SidebarFrameStyles />
+      <SidebarContextStyles />
+      <SidebarSectionWrap>
+        <SidebarSection>
+          <SidebarSectionRow>
+            <SidebarSectionHead text={'style'} />
+          </SidebarSectionRow>
+        </SidebarSection>
+      </SidebarSectionWrap>
+      <SidebarFillStyles />
     </Sidebar>
   );
 }
 
-export default LayersSidebar;
+export default StylesSidebar;

@@ -166,23 +166,39 @@ export const renderFills = ({ shapePath, fills, images, container, override }: R
       return fill.fillType === 4 && fill.isEnabled ? fillIndex : topIndex;
     }, null);
     fills.forEach((fill, fillIndex) => {
-      if (fill.isEnabled) {
-        const fillLayer = new Layer({
-          name: `fill-${fillIndex}`,
-          parent: fillsContainer,
-          blendMode: getBlendMode({
-            blendMode: fill.contextSettings.blendMode
-          })
-        });
-        renderFill({
-          shapePath: shapePath,
-          fill: fill,
-          container: fillLayer,
-          images: images,
-          override: override,
-          topPatternFill: topPatternFillIndex === fillIndex
-        });
-      }
+      // if (fill.isEnabled) {
+      //   const fillLayer = new Layer({
+      //     name: `fill-${fillIndex}`,
+      //     parent: fillsContainer,
+      //     blendMode: getBlendMode({
+      //       blendMode: fill.contextSettings.blendMode
+      //     })
+      //   });
+      //   renderFill({
+      //     shapePath: shapePath,
+      //     fill: fill,
+      //     container: fillLayer,
+      //     images: images,
+      //     override: override,
+      //     topPatternFill: topPatternFillIndex === fillIndex
+      //   });
+      // }
+      const fillLayer = new Layer({
+        name: `fill-${fillIndex}`,
+        parent: fillsContainer,
+        blendMode: getBlendMode({
+          blendMode: fill.contextSettings.blendMode
+        }),
+        visible: fill.isEnabled
+      });
+      renderFill({
+        shapePath: shapePath,
+        fill: fill,
+        container: fillLayer,
+        images: images,
+        override: override,
+        topPatternFill: topPatternFillIndex === fillIndex
+      });
     });
   }
 };
@@ -278,22 +294,37 @@ export const renderTextFills = ({ layer, fills, textAttrs, images, container }: 
       return fill.fillType === 4 && fill.isEnabled ? fillIndex : topIndex;
     }, null);
     fills.forEach((fill, fillIndex) => {
-      if (fill.isEnabled) {
-        renderTextFill({
-          layer: layer,
-          textOptions: textAttrs,
-          images: images,
-          layerOptions: {
-            parent: fillsContainer,
-            name: `fill-${fillIndex}`,
-            blendMode: getBlendMode({
-              blendMode: fill.contextSettings.blendMode
-            })
-          },
-          fill: fill,
-          topPatternFill: topPatternFillIndex === fillIndex
-        });
-      }
+      // if (fill.isEnabled) {
+      //   renderTextFill({
+      //     layer: layer,
+      //     textOptions: textAttrs,
+      //     images: images,
+      //     layerOptions: {
+      //       parent: fillsContainer,
+      //       name: `fill-${fillIndex}`,
+      //       blendMode: getBlendMode({
+      //         blendMode: fill.contextSettings.blendMode
+      //       })
+      //     },
+      //     fill: fill,
+      //     topPatternFill: topPatternFillIndex === fillIndex
+      //   });
+      // }
+      renderTextFill({
+        layer: layer,
+        textOptions: textAttrs,
+        images: images,
+        layerOptions: {
+          parent: fillsContainer,
+          name: `fill-${fillIndex}`,
+          blendMode: getBlendMode({
+            blendMode: fill.contextSettings.blendMode
+          }),
+          visible: fill.isEnabled
+        },
+        fill: fill,
+        topPatternFill: topPatternFillIndex === fillIndex
+      });
     });
   }
 };

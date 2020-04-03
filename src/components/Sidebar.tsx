@@ -3,7 +3,7 @@ import { store } from '../store';
 import SidebarDragHandle from './SidebarDragHandle';
 
 interface SidebarProps {
-  children: ReactElement;
+  children: ReactElement | ReactElement[];
   width: number;
   onDragStart?(e: DragEvent): void;
   onDrag?(e: DragEvent): void;

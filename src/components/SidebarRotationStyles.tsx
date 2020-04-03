@@ -1,6 +1,8 @@
 import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
 import { store } from '../store';
-import SidebarStylesInput from './SidebarStylesInput';
+import SidebarInput from './SidebarInput';
+import SidebarSectionRow from './SidebarSectionRow';
+import SidebarSectionColumn from './SidebarSectionColumn';
 
 const SidebarRotationStyles = (): ReactElement => {
   const globalState = useContext(store);
@@ -9,12 +11,14 @@ const SidebarRotationStyles = (): ReactElement => {
   const rotation = selectedLayer ? selectedLayer.rotation * -1 : '';
 
   return (
-    <div className='c-sidebar-frame-styles__section'>
-      <SidebarStylesInput
-        value={rotation}
-        readOnly={true}
-        label={'°'} />
-    </div>
+    <SidebarSectionRow>
+      <SidebarSectionColumn>
+        <SidebarInput
+          value={rotation}
+          readOnly={true}
+          label={'°'} />
+      </SidebarSectionColumn>
+    </SidebarSectionRow>
   );
 }
 

@@ -1,6 +1,8 @@
 import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
 import { store } from '../store';
-import SidebarStylesInput from './SidebarStylesInput';
+import SidebarInput from './SidebarInput';
+import SidebarSectionRow from './SidebarSectionRow';
+import SidebarSectionColumn from './SidebarSectionColumn';
 
 const SidebarSizeStyles = (): ReactElement => {
   const globalState = useContext(store);
@@ -10,16 +12,20 @@ const SidebarSizeStyles = (): ReactElement => {
   const height = selectedLayer ? selectedLayer.frame.height : '';
 
   return (
-    <div className='c-sidebar-frame-styles__section'>
-      <SidebarStylesInput
-        value={width}
-        readOnly={true}
-        label={'W'} />
-      <SidebarStylesInput
-        value={height}
-        readOnly={true}
-        label={'H'} />
-    </div>
+    <SidebarSectionRow>
+      <SidebarSectionColumn>
+        <SidebarInput
+          value={width}
+          readOnly={true}
+          label={'W'} />
+      </SidebarSectionColumn>
+      <SidebarSectionColumn>
+        <SidebarInput
+          value={height}
+          readOnly={true}
+          label={'H'} />
+      </SidebarSectionColumn>
+    </SidebarSectionRow>
   );
 }
 

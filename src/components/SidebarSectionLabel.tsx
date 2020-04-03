@@ -1,24 +1,24 @@
 import React, { useContext, ReactElement } from 'react';
 import { store } from '../store';
 
-interface SidebarSectionHeadProps {
+interface SidebarSectionLabelProps {
   text: string;
 }
 
-const SidebarSectionHead = (props: SidebarSectionHeadProps): ReactElement => {
+const SidebarSectionLabel = (props: SidebarSectionLabelProps): ReactElement => {
   const globalState = useContext(store);
   const { theme } = globalState;
 
   return (
     <div
-      className='c-sidebar-section__head'
+      className='c-sidebar-section__label'
       style={{
         background: theme.background.z1,
-        color: theme.text.lighter
+        color: theme.text.base
       }}>
       { props.text }
     </div>
   );
 }
 
-export default SidebarSectionHead;
+export default SidebarSectionLabel;

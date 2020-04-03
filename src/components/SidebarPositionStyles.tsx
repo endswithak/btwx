@@ -1,7 +1,9 @@
 import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
 import { store } from '../store';
 import { getAbsLayerByPath } from '../utils';
-import SidebarStylesInput from './SidebarStylesInput';
+import SidebarInput from './SidebarInput';
+import SidebarSectionRow from './SidebarSectionRow';
+import SidebarSectionColumn from './SidebarSectionColumn';
 
 const SidebarPositionStyles = (): ReactElement => {
   const globalState = useContext(store);
@@ -12,16 +14,20 @@ const SidebarPositionStyles = (): ReactElement => {
   const y = absLayer ? absLayer.absPosition.y : '';
 
   return (
-    <div className='c-sidebar-frame-styles__section'>
-      <SidebarStylesInput
-        value={x}
-        readOnly={true}
-        label={'X'} />
-      <SidebarStylesInput
-        value={y}
-        readOnly={true}
-        label={'Y'} />
-    </div>
+    <SidebarSectionRow>
+      <SidebarSectionColumn>
+        <SidebarInput
+          value={x}
+          readOnly={true}
+          label={'X'} />
+      </SidebarSectionColumn>
+      <SidebarSectionColumn>
+        <SidebarInput
+          value={y}
+          readOnly={true}
+          label={'Y'} />
+      </SidebarSectionColumn>
+    </SidebarSectionRow>
   );
 }
 
