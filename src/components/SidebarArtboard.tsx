@@ -3,21 +3,21 @@ import { store } from '../store';
 import SidebarLayerItem from './SidebarLayerItem';
 import SidebarLayers from './SidebarLayers';
 
-interface SidebarLayerGroupProps {
-  group: paper.Group;
+interface SidebarArtboardProps {
+  artboard: paper.Group;
   path: string;
   depth: number;
 }
 
-const SidebarLayerGroup = (props: SidebarLayerGroupProps): ReactElement => {
+const SidebarArtboard = (props: SidebarArtboardProps): ReactElement => {
   const globalState = useContext(store);
   const [isOpen, setIsOpen] = useState(false);
-  const { group, depth, path } = props;
+  const { artboard, depth, path } = props;
 
   return (
     <div>
       <SidebarLayerItem
-        layer={group}
+        layer={artboard}
         depth={depth}
         isGroup
         isOpen={isOpen}
@@ -26,7 +26,7 @@ const SidebarLayerGroup = (props: SidebarLayerGroupProps): ReactElement => {
       {
         isOpen
         ? <SidebarLayers
-            layers={group.children}
+            layers={artboard.children.find((child) => child.name === 'layers').children}
             depth={depth + 1}
             path={path} />
         : null
@@ -35,4 +35,4 @@ const SidebarLayerGroup = (props: SidebarLayerGroupProps): ReactElement => {
   );
 }
 
-export default SidebarLayerGroup;
+export default SidebarArtboard;

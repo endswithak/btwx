@@ -54,14 +54,22 @@ interface RenderArtboard {
   dispatch: any;
 }
 
-const renderArtboard = ({ artboard, symbols, images, dispatch }: RenderArtboard): paper.Layer => {
+const renderArtboard = ({ artboard, symbols, images, dispatch }: RenderArtboard): paper.Group => {
   console.log(artboard);
-  const artboardContainer = new Layer({
-    name: artboard.do_objectID,
+  const artboardContainer = new Group({
+    name: artboard.name,
     data: {
-      name: artboard.name,
-      type: 'artboard'
-    },
+      frame: {
+        width: artboard.frame.width,
+        height: artboard.frame.height,
+      },
+      sketch: {
+        name: artboard.name,
+        id: artboard.do_objectID,
+        type: 'shapePath',
+        frame: artboard.frame
+      }
+    }
   });
   const artboardBackground = new Group({
     name: 'background',
@@ -75,10 +83,10 @@ const renderArtboard = ({ artboard, symbols, images, dispatch }: RenderArtboard)
     artboard: artboard,
     container: artboardBackground
   });
-  renderArtboardLayersMask({
-    artboard: artboard,
-    container: artboardContainer
-  });
+  // renderArtboardLayersMask({
+  //   artboard: artboard,
+  //   container: artboardContainer
+  // });
   renderLayers({
     layers: artboard.layers,
     container: artboardLayers,
@@ -89,6 +97,10 @@ const renderArtboard = ({ artboard, symbols, images, dispatch }: RenderArtboard)
   artboardContainer.position = view.center;
   //artboardContainer.position.x += artboard.frame.x;
   //artboardContainer.position.y += artboard.frame.y;
+  dispatch({
+    type: 'add-artboard',
+    artboard: artboardContainer
+  });
   return artboardContainer;
 };
 

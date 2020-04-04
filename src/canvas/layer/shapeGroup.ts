@@ -26,12 +26,19 @@ interface RenderShape {
 const renderShape = ({ layer, container, images, dispatch, path, groupShadows }: RenderShape): paper.Layer => {
   const shapeContainer = new Layer({
     parent: container,
-    name: layer.do_objectID,
+    name: layer.name,
     data: {
-      name: layer.name,
-      type: 'shapeGroup',
-      path: path,
-      frame: layer.frame
+      frame: {
+        width: layer.frame.width,
+        height: layer.frame.height,
+      },
+      sketch: {
+        name: layer.name,
+        id: layer.do_objectID,
+        type: 'shapeGroup',
+        frame: layer.frame
+      },
+      path: path
     },
     visible: layer.isVisible,
     locked: layer.isLocked,

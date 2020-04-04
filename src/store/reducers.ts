@@ -1,25 +1,31 @@
+import paper, { Shape } from 'paper';
+
 const reducers = (state: any, action: any): any => {
   switch(action.type) {
     case 'initialize-app': {
       return {
         ...state,
         ready: action.ready,
-        appWindow: action.appWindow,
         sketchDocument: action.sketchDocument,
         sketchMeta: action.sketchMeta,
         sketchUser: action.sketchUser,
         sketchPages: action.sketchPages,
-        sketchImages: action.sketchImages,
-        selectedPage: action.selectedPage,
-        selectedPageArtboards: action.selectedPageArtboards,
-        selectedArtboard: action.selectedArtboard
+        sketchImages: action.sketchImages
       };
     }
     case 'set-selected-layer': {
+      paper.project.deselectAll();
+      action.layer.selected = true;
       return {
         ...state,
         selectedLayer: action.layer,
         selectedLayerPath: action.path
+      };
+    }
+    case 'set-selected-artboard': {
+      return {
+        ...state,
+        selectedArtboard: action.selectedArtboard,
       };
     }
     case 'set-selected-paper-layer': {
@@ -34,6 +40,12 @@ const reducers = (state: any, action: any): any => {
         canvas: action.canvas
       };
     }
+    case 'set-project': {
+      return {
+        ...state,
+        project: action.project
+      };
+    }
     case 'set-layers-sidebar-width': {
       return {
         ...state,
@@ -46,8 +58,14 @@ const reducers = (state: any, action: any): any => {
         stylesSidebarWidth: action.stylesSidebarWidth
       };
     }
+    case 'add-artboard': {
+      return {
+        ...state,
+        artboards: [...state.artboards, action.artboard]
+      };
+    }
     default:
-      throw new Error('Action not found');
+      throw new Error(`Action not found ${action.type}`);
   }
 };
 

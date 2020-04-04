@@ -1,10 +1,9 @@
 import React, { useContext, ReactElement } from 'react';
-import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { store } from '../store';
 import SidebarLayer from './SidebarLayer';
 
 interface SidebarLayersProps {
-  layers: FileFormat.AnyLayer[];
+  layers: paper.Item[];
   depth: number;
   path: string;
 }
@@ -14,7 +13,7 @@ const SidebarLayers = (props: SidebarLayersProps): ReactElement => {
   return (
     <div>
       {
-        props.layers.map((layer: FileFormat.AnyLayer, index: number) => (
+        props.layers.map((layer: paper.Item, index: number) => (
           <SidebarLayer
             key={index}
             layer={layer}

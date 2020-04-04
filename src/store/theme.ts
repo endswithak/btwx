@@ -100,6 +100,7 @@ interface Theme {
   background: BackgroundScale;
   backgroundInverse: BackgroundScale;
   text: TextScale;
+  unit: number;
 }
 
 const getTheme = (theme: ThemeName): Theme => {
@@ -110,7 +111,8 @@ const getTheme = (theme: ThemeName): Theme => {
         palette: createPalette(),
         background: createDarkBackgrounds(darkBgScale),
         backgroundInverse: createLightBackgrounds(lightBgScale),
-        text: createText(darkTextScale, createPalette())
+        text: createText(darkTextScale, createPalette()),
+        unit: 4
       }
     case 'light':
       return {
@@ -118,7 +120,8 @@ const getTheme = (theme: ThemeName): Theme => {
         palette: createPalette(),
         background: createLightBackgrounds(lightBgScale),
         backgroundInverse: createDarkBackgrounds(lightBgScale),
-        text: createText(lightTextScale, createPalette())
+        text: createText(lightTextScale, createPalette()),
+        unit: 4
       }
   }
 };

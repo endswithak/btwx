@@ -7,11 +7,13 @@ import SidebarSectionColumn from './SidebarSectionColumn';
 
 const SidebarPositionStyles = (): ReactElement => {
   const globalState = useContext(store);
-  const { selectedArtboard, selectedLayer, theme, dispatch, selectedLayerPath } = globalState;
+  const { selectedArtboard, selectedLayer, selectedPaperLayer, theme, dispatch, selectedLayerPath } = globalState;
 
-  const absLayer = selectedLayer ? getAbsLayerByPath({layer: selectedArtboard, path: selectedLayerPath}) : null;
-  const x = absLayer ? absLayer.absPosition.x : '';
-  const y = absLayer ? absLayer.absPosition.y : '';
+  //const absLayer = selectedLayer ? getAbsLayerByPath({layer: selectedArtboard, path: selectedLayerPath}) : null;
+  // const x = absLayer ? absLayer.absPosition.x : '';
+  // const y = absLayer ? absLayer.absPosition.y : '';
+  const x = selectedLayer.position.x;
+  const y = selectedLayer.position.y;
 
   return (
     <SidebarSectionRow>

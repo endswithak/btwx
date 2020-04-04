@@ -3,13 +3,13 @@ import { store } from '../store';
 import Sidebar from './Sidebar';
 import SidebarSectionHead from './SidebarSectionHead';
 import SidebarSectionWrap from './SidebarSectionWrap';
-import SidebarLayers from './SidebarLayers';
+import SidebarArtboards from './SidebarArtboards';
 
 let lsDeltaX = 0;
 
 const LayersSidebar = (): ReactElement => {
   const globalState = useContext(store);
-  const { selectedArtboard, theme, dispatch, layersSidebarWidth } = globalState;
+  const { selectedArtboard, theme, dispatch, layersSidebarWidth, artboards, canvas } = globalState;
 
   const handleDragStart = (e) => {
     lsDeltaX = e.clientX;
@@ -36,10 +36,7 @@ const LayersSidebar = (): ReactElement => {
         <SidebarSectionHead
           text={'layers'} />
       </SidebarSectionWrap>
-      <SidebarLayers
-        layers={selectedArtboard.layers}
-        depth={0}
-        path={''} />
+      <SidebarArtboards />
     </Sidebar>
   );
 }

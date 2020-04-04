@@ -17,15 +17,23 @@ interface RenderImage {
 
 const renderImage = ({ layer, container, images, dispatch, path, groupShadows, overrides, symbolPath }: RenderImage): paper.Layer => {
   const imageContainer = new Layer({
-    name: layer.do_objectID,
+    parent: container,
+    name: layer.name,
     data: {
-      name: layer.name,
-      type: 'image',
+      frame: {
+        width: layer.frame.width,
+        height: layer.frame.height,
+      },
+      sketch: {
+        name: layer.name,
+        id: layer.do_objectID,
+        type: 'image',
+        frame: layer.frame
+      },
       path: path
     },
     locked: layer.isLocked,
     visible: layer.isVisible,
-    parent: container,
     blendMode: contextUtils.getBlendMode({
       blendMode: layer.style.contextSettings.blendMode
     }),

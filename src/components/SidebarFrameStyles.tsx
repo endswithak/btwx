@@ -12,7 +12,7 @@ import SidebarSectionColumn from './SidebarSectionColumn';
 
 const SidebarFrameStyles = (): ReactElement => {
   const globalState = useContext(store);
-  const { selectedLayer, theme, dispatch } = globalState;
+  const { selectedLayer, theme, dispatch, selectedPaperLayer } = globalState;
 
   return (
     <SidebarSectionWrap>
@@ -20,16 +20,20 @@ const SidebarFrameStyles = (): ReactElement => {
         <SidebarSectionRow>
           <SidebarSectionHead text={'position'} />
         </SidebarSectionRow>
-        <SidebarSectionRow>
-          <SidebarSectionColumn width={'66%'}>
-            <SidebarPositionStyles />
-            <SidebarSizeStyles />
-          </SidebarSectionColumn>
-          <SidebarSectionColumn width={'33%'}>
-            <SidebarRotationStyles />
-            <SidebarFlippedStyles />
-          </SidebarSectionColumn>
-        </SidebarSectionRow>
+        {
+          selectedLayer
+          ? <SidebarSectionRow>
+              <SidebarSectionColumn width={'66%'}>
+                <SidebarPositionStyles />
+                <SidebarSizeStyles />
+              </SidebarSectionColumn>
+              <SidebarSectionColumn width={'33%'}>
+                <SidebarRotationStyles />
+                <SidebarFlippedStyles />
+              </SidebarSectionColumn>
+            </SidebarSectionRow>
+          : null
+        }
       </SidebarSection>
     </SidebarSectionWrap>
   );

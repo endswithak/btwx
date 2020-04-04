@@ -6,7 +6,7 @@ import SidebarSectionColumn from './SidebarSectionColumn';
 interface SidebarFlippedButtonProps {
   text: string | number;
   active: boolean;
-  disabled: boolean;
+  disabled?: boolean;
 }
 
 const SidebarFlippedButton = (props: SidebarFlippedButtonProps): ReactElement => {
@@ -29,25 +29,25 @@ const SidebarFlippedButton = (props: SidebarFlippedButtonProps): ReactElement =>
 
 const SidebarFlippedStyles = (): ReactElement => {
   const globalState = useContext(store);
-  const { selectedLayer, theme, dispatch } = globalState;
+  const { selectedLayer, theme, dispatch, selectedPaperLayer } = globalState;
 
-  const isDisabled = selectedLayer === null;
-  const isFlippedHorizontal = selectedLayer ? selectedLayer.isFlippedHorizontal : false;
-  const isFlippedVertical = selectedLayer ? selectedLayer.isFlippedVertical : false;
+  // const isDisabled = selectedLayer === null;
+  // const isFlippedHorizontal = selectedLayer ? selectedLayer.isFlippedHorizontal : false;
+  // const isFlippedVertical = selectedLayer ? selectedLayer.isFlippedVertical : false;
+  const isFlippedHorizontal = selectedLayer.scaling.y === -1;
+  const isFlippedVertical = selectedLayer.scaling.x === -1;
 
   return (
     <SidebarSectionRow>
       <SidebarSectionColumn>
         <SidebarFlippedButton
           text={'|'}
-          active={isFlippedHorizontal}
-          disabled={isDisabled} />
+          active={isFlippedHorizontal} />
       </SidebarSectionColumn>
       <SidebarSectionColumn>
         <SidebarFlippedButton
           text={'—'}
-          active={isFlippedVertical}
-          disabled={isDisabled} />
+          active={isFlippedVertical} />
       </SidebarSectionColumn>
     </SidebarSectionRow>
   );

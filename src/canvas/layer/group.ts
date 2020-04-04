@@ -1,4 +1,4 @@
-import paper, { Layer, Shape, Color, Path } from 'paper';
+import paper, { Group, Shape, Color, Path } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import renderLayers from '../layers';
 import { contextUtils, frameUtils } from './utils';
@@ -17,19 +17,26 @@ interface RenderGroup {
   symbolPath?: string;
 }
 
-const renderGroup = ({ layer, container, symbols, images, dispatch, path, groupShadows, overrides, symbolPath }: RenderGroup): paper.Layer => {
-  const groupContainer = new Layer({
-    name: layer.do_objectID,
+const renderGroup = ({ layer, container, symbols, images, dispatch, path, groupShadows, overrides, symbolPath }: RenderGroup): paper.Group => {
+  const groupContainer = new Group({
+    parent: container,
+    name: layer.name,
     data: {
-      name: layer.name,
-      type: 'group',
-      path: path,
-      frame: layer.frame
+      frame: {
+        width: layer.frame.width,
+        height: layer.frame.height,
+      },
+      sketch: {
+        name: layer.name,
+        id: layer.do_objectID,
+        type: 'group',
+        frame: layer.frame
+      },
+      path: path
     },
     locked: layer.isLocked,
     visible: layer.isVisible,
     clipMask: layer.hasClippingMask,
-    parent: container,
     blendMode: contextUtils.getBlendMode({
       blendMode: layer.style.contextSettings.blendMode
     }),

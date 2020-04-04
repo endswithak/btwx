@@ -1,7 +1,6 @@
 import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
 import SidebarSelect from './SidebarSelect';
 import { store } from '../store';
-import { getBlendMode } from '../canvas/layer/utils/contextUtils';
 
 
 const SidebarBlendModeStyles = (): ReactElement => {
@@ -29,9 +28,7 @@ const SidebarBlendModeStyles = (): ReactElement => {
     { value: 'lighter', label: 'Plus Lighter' },
   ];
 
-  const blendMode = selectedLayer ? options.find((option) => {
-    return option.value === getBlendMode({blendMode: selectedLayer.style.contextSettings.blendMode});
-  }) : null;
+  const blendMode = selectedLayer ? options.find((option) => option.value === selectedLayer.blendMode) : null;
 
   const [selected, setSelected] = useState(blendMode);
 

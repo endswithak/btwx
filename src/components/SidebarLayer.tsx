@@ -5,7 +5,7 @@ import SidebarLayerGroup from './SidebarLayerGroup';
 import SidebarLayerItem from './SidebarLayerItem';
 
 interface SidebarLayerProps {
-  layer: FileFormat.AnyLayer;
+  layer: paper.Item;
   depth: number;
   path: string;
 }
@@ -13,20 +13,20 @@ interface SidebarLayerProps {
 const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
   const globalState = useContext(store);
   const { layer, depth, path } = props;
-  const layerPath = path ? path + '/' + layer.do_objectID : layer.do_objectID;
+  const layerPath = path ? `${path}/${layer.id}` : `${layer.id}`;
 
-  switch(layer._class) {
-    case 'group':
+  switch(layer.className) {
+    case 'Group':
       return (
         <SidebarLayerGroup
-          group={layer}
+          group={layer as paper.Group}
           depth={depth}
           path={layerPath} />
       );
-    default:
+    case 'Layer':
       return (
         <SidebarLayerItem
-          layer={layer}
+          layer={layer as paper.Layer}
           depth={depth}
           path={layerPath} />
       );

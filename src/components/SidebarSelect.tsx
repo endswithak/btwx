@@ -31,7 +31,8 @@ const SidebarSelect = (props: SidebarSelectProps): ReactElement => {
       styles={{
         container: (provided, state) => {
           const width = '100%';
-          return { ...provided, width };
+          const cursor = 'pointer';
+          return { ...provided, width, cursor };
         },
         control: (provided, state) => {
           const background = theme.background.z1;
@@ -41,7 +42,8 @@ const SidebarSelect = (props: SidebarSelectProps): ReactElement => {
           const minHeight = 32;
           const paddingLeft = 4;
           const paddingRight = 4;
-          return { ...provided, background, color, border, boxShadow, minHeight, paddingLeft, paddingRight };
+          const cursor = 'pointer';
+          return { ...provided, background, color, border, boxShadow, minHeight, paddingLeft, paddingRight, cursor };
         },
         singleValue: (provided, state) => {
           const color = theme.text.base;

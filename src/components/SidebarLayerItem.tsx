@@ -3,7 +3,7 @@ import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { store } from '../store';
 
 interface SidebarLayerItemProps {
-  layer: FileFormat.AnyLayer;
+  layer: paper.Layer | paper.Group;
   path: string;
   depth: number;
   isGroup?: boolean;
@@ -15,7 +15,7 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
   const globalState = useContext(store);
   const { dispatch, selectedLayer, theme } = globalState;
   const { layer, path, depth, isGroup, isOpen, setIsOpen } = props;
-  const isSelected = selectedLayer && layer.do_objectID === selectedLayer.do_objectID;
+  const isSelected = selectedLayer && layer.id === selectedLayer.id;
 
   const handleNameClick = (): void => {
     dispatch({

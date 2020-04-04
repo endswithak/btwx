@@ -3,7 +3,6 @@ import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import Canvas from './Canvas';
 import LayersSidebar from './LayersSidebar';
 import StylesSidebar from './StylesSidebar';
-import OpenPreview from './OpenPreview';
 import { store } from '../store';
 
 interface AppProps {
@@ -19,18 +18,13 @@ interface AppProps {
 const App = (props: AppProps): ReactElement => {
   const app = useRef<HTMLDivElement>(null);
   const globalState = useContext(store);
-  const { dispatch, ready, selectedLayerPath, theme } = globalState;
+  const { dispatch, ready, selectedLayerPath, theme, canvas } = globalState;
 
   useEffect(() => {
-    const selectedPage = props.sketchPages.find((sketchPage) => sketchPage.name === 'sketch-animate');
-    const selectedPageArtboards = selectedPage.layers.filter((layer) => layer._class === 'artboard');
     dispatch({
       type: 'initialize-app',
       ...props,
-      ready: true,
-      selectedPage: selectedPage,
-      selectedPageArtboards: selectedPageArtboards,
-      selectedArtboard: selectedPageArtboards[0]
+      ready: true
     });
   }, []);
 

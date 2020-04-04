@@ -10,26 +10,43 @@ import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarSwatch from './SidebarSwatch';
 
 interface SidebarFillStyleProps {
-  fill: FileFormat.Fill;
+  fill: paper.Layer;
+  index: number;
 }
 
 const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
   const globalState = useContext(store);
-  const { selectedLayer, theme, dispatch } = globalState;
+  const { selectedLayer, selectedPaperLayer, theme, dispatch } = globalState;
+  const [enabled, setEnabled] = useState<boolean>(false);
   const { fill } = props;
+  const fillLayer = fill.lastChild as paper.Path | paper.CompoundPath;
 
-  const color = `rgba(${Math.round(fill.color.red * 255)}, ${Math.round(fill.color.green * 255)}, ${Math.round(fill.color.blue * 255)}, ${fill.color.alpha})`;
+  // const color = `rgba(${Math.round(fill.color.red * 255)}, ${Math.round(fill.color.green * 255)}, ${Math.round(fill.color.blue * 255)}, ${fill.color.alpha})`;
+  // const hex = chroma(color).hex();
+  // const opacity = fill.color.alpha * 100;
+  // const blendMode = fill.contextSettings.blendMode;
+
+  const color = `rgba(${Math.round(fillLayer.fillColor.red * 255)}, ${Math.round(fillLayer.fillColor.green * 255)}, ${Math.round(fillLayer.fillColor.blue * 255)}, ${fillLayer.fillColor.alpha})`;
   const hex = chroma(color).hex();
-  const opacity = fill.color.alpha * 100;
-  const blendMode = fill.contextSettings.blendMode;
+  const opacity = fillLayer.fillColor.alpha * 100;
+  const blendMode = fillLayer.blendMode;
+
+  const handleChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
+    const target = e.target as HTMLInputElement;
+    setEnabled(target.checked);
+  };
+
+  useEffect(() => {
+    setEnabled(fill.visible);
+  }, [selectedLayer]);
 
   return (
     <SidebarSectionRow alignItems='center'>
       <SidebarSectionColumn width={'10%'} justifyContent={'center'}>
-        <input
-          type='checkbox'
-          name='enabled'
-          checked={fill.isEnabled} />
+        <SidebarCheckbox
+          id={`fill-${props.index}`}
+          onChange={handleChange}
+          checked={enabled} />
       </SidebarSectionColumn>
       <SidebarSectionColumn width={'23%'}>
         <SidebarSwatch

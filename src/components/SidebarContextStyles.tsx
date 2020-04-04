@@ -11,7 +11,7 @@ import SidebarBlendModeStyles from './SidebarBlendModeStyles';
 
 const SidebarContextStyles = (): ReactElement => {
   const globalState = useContext(store);
-  const { selectedLayer, theme, dispatch } = globalState;
+  const { selectedLayer, theme, dispatch, selectedPaperLayer } = globalState;
 
   return (
     <SidebarSectionWrap>
@@ -19,18 +19,24 @@ const SidebarContextStyles = (): ReactElement => {
         <SidebarSectionRow>
           <SidebarSectionHead text={'appearance'} />
         </SidebarSectionRow>
-        <SidebarSectionRow alignItems={'center'}>
-          <SidebarSectionColumn width={'25%'}>
-            <SidebarSectionLabel text={'Opacity'} />
-          </SidebarSectionColumn>
-          <SidebarSectionColumn width={'75%'}>
-            <SidebarBlendModeStyles />
-          </SidebarSectionColumn>
-        </SidebarSectionRow>
-        <SidebarSectionRow>
-          <SidebarOpacityStyles />
-        </SidebarSectionRow>
       </SidebarSection>
+      {
+        selectedLayer
+        ? <SidebarSection>
+            <SidebarSectionRow alignItems={'center'}>
+              <SidebarSectionColumn width={'25%'}>
+                <SidebarSectionLabel text={'Opacity'} />
+              </SidebarSectionColumn>
+              <SidebarSectionColumn width={'75%'}>
+                <SidebarBlendModeStyles />
+              </SidebarSectionColumn>
+            </SidebarSectionRow>
+            <SidebarSectionRow>
+              <SidebarOpacityStyles />
+            </SidebarSectionRow>
+          </SidebarSection>
+        : null
+      }
     </SidebarSectionWrap>
   );
 }

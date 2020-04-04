@@ -17,15 +17,23 @@ interface RenderText {
 
 const renderText = ({ layer, container, images, dispatch, path, groupShadows, overrides, symbolPath }: RenderText): paper.Layer => {
   const textContainer = new Layer({
-    name: layer.do_objectID,
+    parent: container,
+    name: layer.name,
     data: {
-      name: layer.name,
-      type: 'text',
+      frame: {
+        width: layer.frame.width,
+        height: layer.frame.height,
+      },
+      sketch: {
+        name: layer.name,
+        id: layer.do_objectID,
+        type: 'text',
+        frame: layer.frame
+      },
       path: path
     },
     locked: layer.isLocked,
     visible: layer.isVisible,
-    parent: container,
     blendMode: contextUtils.getBlendMode({
       blendMode: layer.style.contextSettings.blendMode
     }),

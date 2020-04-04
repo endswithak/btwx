@@ -6,7 +6,7 @@ const Canvas = (): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const globalState = useContext(store);
-  const { selectedPage, selectedPageArtboards, selectedArtboard, selectedLayer, selectedLayerPath, sketchDocument, sketchPages, sketchImages, dispatch, canvas, theme, layersSidebarWidth, stylesSidebarWidth } = globalState;
+  const { selectedArtboard, selectedLayer, selectedLayerPath, sketchDocument, sketchPages, sketchImages, dispatch, project, theme, layersSidebarWidth, stylesSidebarWidth } = globalState;
 
   useEffect(() => {
     canvasRef.current.width = canvasContainerRef.current.clientWidth;
@@ -15,50 +15,37 @@ const Canvas = (): ReactElement => {
       sketchDocument: sketchDocument,
       sketchPages: sketchPages,
       sketchImages: sketchImages,
-      selectedPage: selectedPage,
-      selectedPageArtboards: selectedPageArtboards,
-      selectedArtboard: selectedArtboard,
       dispatch: dispatch,
       canvas: canvasRef.current
     })
-    .then((paperView) => {
+    .then((paperProject) => {
       dispatch({
-        type: 'set-canvas',
-        canvas: paperView
+        type: 'set-project',
+        project: paperProject
       });
       console.log('done');
     });
   }, []);
 
   useEffect(() => {
-    if (canvas) {
+    if (project) {
       canvasRef.current.addEventListener('wheel', (e: WheelEvent) => {
         e.preventDefault();
-        canvas.emit('wheel', e);
+        project.view.emit('wheel', e);
       });
       window.addEventListener('resize', (e) => {
-        canvas.viewSize.width = canvasContainerRef.current.clientWidth;
-        canvas.viewSize.height = canvasContainerRef.current.clientHeight;
+        project.view.viewSize.width = canvasContainerRef.current.clientWidth;
+        project.view.viewSize.height = canvasContainerRef.current.clientHeight;
       });
     }
-  }, [canvas]);
+  }, [project]);
 
   useEffect(() => {
-    if (canvas) {
-      canvas.viewSize.width = canvasContainerRef.current.clientWidth;
-      canvas.viewSize.height = canvasContainerRef.current.clientHeight;
+    if (project) {
+      project.view.viewSize.width = canvasContainerRef.current.clientWidth;
+      project.view.viewSize.height = canvasContainerRef.current.clientHeight;
     }
   }, [layersSidebarWidth, stylesSidebarWidth]);
-
-  useEffect(() => {
-    if (canvas) {
-      canvas.emit('selected-layer-update', {
-        artboard: selectedArtboard.do_objectID,
-        layer: selectedLayer.do_objectID,
-        path: selectedLayerPath
-      });
-    }
-  }, [selectedLayer]);
 
   return (
     <div

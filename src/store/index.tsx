@@ -22,13 +22,13 @@ interface AppState {
   sketchImages: {
     [id: string]: Buffer;
   };
-  selectedPage: FileFormat.Page;
-  selectedPageArtboards: FileFormat.Artboard[];
-  selectedArtboard: FileFormat.Artboard;
-  selectedLayer: FileFormat.AnyLayer;
+  artboards: paper.Group[];
+  selectedArtboard: paper.Layer;
+  selectedLayer: paper.Layer;
   selectedPaperLayer: paper.Item;
   selectedLayerPath: string;
   canvas: paper.View;
+  project: paper.Project;
   dispatch(reducer: any): any;
 }
 
@@ -44,13 +44,13 @@ const initialState: AppState = {
   sketchUser: null,
   sketchPages: null,
   sketchImages: null,
-  selectedPage: null,
-  selectedPageArtboards: null,
+  artboards: [],
   selectedArtboard: null,
   selectedLayer: null,
   selectedPaperLayer: null,
   selectedLayerPath: null,
   canvas: null,
+  project: null,
   dispatch: () => {
     return null;
   }

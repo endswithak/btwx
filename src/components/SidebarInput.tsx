@@ -3,6 +3,7 @@ import { store } from '../store';
 
 interface SidebarInputProps {
   value: string | number;
+  onChange(e: React.SyntheticEvent<HTMLInputElement>): void;
   readOnly?: boolean;
   label?: string;
 }
@@ -16,7 +17,7 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
       <div className='c-sidebar-input__inner'>
         <input
           value={props.value}
-          readOnly={props.readOnly}
+          onChange={props.onChange}
           className='c-sidebar-input__field'
           style={{
             background: theme.background.z4,

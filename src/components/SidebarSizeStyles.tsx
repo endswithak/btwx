@@ -6,10 +6,12 @@ import SidebarSectionColumn from './SidebarSectionColumn';
 
 const SidebarSizeStyles = (): ReactElement => {
   const globalState = useContext(store);
-  const { selectedLayer, theme, dispatch } = globalState;
+  const { selectedLayer, theme, dispatch, selectedPaperLayer } = globalState;
 
-  const width = selectedLayer ? selectedLayer.frame.width : '';
-  const height = selectedLayer ? selectedLayer.frame.height : '';
+  // const width = selectedLayer ? selectedLayer.frame.width : '';
+  // const height = selectedLayer ? selectedLayer.frame.height : '';
+  const width = selectedLayer.bounds.width;
+  const height = selectedLayer.bounds.height;
 
   return (
     <SidebarSectionRow>

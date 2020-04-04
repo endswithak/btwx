@@ -1,11 +1,44 @@
-import React, { useContext, ReactElement } from 'react';
+import React, { useContext, ReactElement, SyntheticEvent } from 'react';
 import { store } from '../store';
-import Slider from 'rc-slider';
+import styled from 'styled-components';
 
 interface SidebarSliderProps {
-  value: number;
-  onChange(value: number): void;
+  value: number | string;
+  step?: number;
+  min?: number;
+  max?: number;
+  onChange(e: React.SyntheticEvent<HTMLInputElement>): void;
 }
+
+const Slider = styled.input`
+  -webkit-appearance: none;
+  margin: 0;
+  background: none;
+  width: 100%;
+  :focus {
+    outline: none;
+  }
+  ::-webkit-slider-runnable-track {
+    width: 100%;
+    height: ${props => props.theme.unit}px;
+    cursor: pointer;
+    background: linear-gradient(to right, ${props => props.theme.palette.primary} ${props => props.value}%, ${props => props.theme.background.z4} ${props => props.value}%);
+    border-radius: ${props => props.theme.unit * 2}px;
+  }
+  ::-webkit-slider-thumb {
+    box-shadow: 0px 0px 5px ${props => props.theme.background.z0};
+    height: ${props => props.theme.unit * 3}px;
+    width: ${props => props.theme.unit * 3}px;
+    border-radius: 100%;
+    background: ${props => props.theme.backgroundInverse.z6};
+    cursor: pointer;
+    -webkit-appearance: none;
+    transform: translateY(-36%);
+  }
+  :hover::-webkit-slider-thumb {
+    background: ${props => props.theme.backgroundInverse.z3};
+  }
+`;
 
 const SidebarSlider = (props: SidebarSliderProps): ReactElement => {
   const globalState = useContext(store);
@@ -13,20 +46,12 @@ const SidebarSlider = (props: SidebarSliderProps): ReactElement => {
 
   return (
     <div className='c-sidebar-input'>
-      <Slider
-        value={props.value}
-        onChange={props.onChange}
-        handleStyle={[{
-          background: theme.backgroundInverse.z6,
-          borderColor: theme.backgroundInverse.z6,
-          boxShadow: `0 0 5px ${theme.background.z0}`
-        }]}
-        trackStyle={[{
-          background: theme.palette.primary
-        }]}
-        railStyle={{
-          background: theme.background.z4
-        }} />
+      <div className='c-sidebar-input__inner'>
+        <Slider
+          {...props}
+          type='range'
+          theme={theme} />
+      </div>
     </div>
   );
 }

@@ -26,17 +26,24 @@ interface RenderShapePath {
 
 const renderShapePath = ({ layer, images, container, dispatch, path, groupShadows, overrides, symbolPath }: RenderShapePath): paper.Layer => {
   const shapePathContainer = new Layer({
-    name: layer.do_objectID,
+    parent: container,
+    name: layer.name,
     data: {
-      name: layer.name,
-      type: 'shapePath',
-      path: path,
-      frame: layer.frame
+      frame: {
+        width: layer.frame.width,
+        height: layer.frame.height,
+      },
+      sketch: {
+        name: layer.name,
+        id: layer.do_objectID,
+        type: 'shapePath',
+        frame: layer.frame
+      },
+      path: path
     },
     locked: layer.isLocked,
     visible: layer.isVisible,
     clipMask: layer.hasClippingMask,
-    parent: container,
     blendMode: contextUtils.getBlendMode({
       blendMode: layer.style.contextSettings.blendMode
     }),

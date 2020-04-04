@@ -157,50 +157,51 @@ interface RenderFills {
 }
 
 export const renderFills = ({ shapePath, fills, images, container, override }: RenderFills): void => {
-  if (fills.some((fill) => fill.isEnabled)) {
-    const fillsContainer = new Group({
-      name: 'fills',
-      parent: container
+  const fillsContainer = new Group({
+    name: 'fills',
+    parent: container
+  });
+  const topPatternFillIndex = fills.reduce((topIndex, fill, fillIndex) => {
+    return fill.fillType === 4 && fill.isEnabled ? fillIndex : topIndex;
+  }, null);
+  fills.forEach((fill, fillIndex) => {
+    // if (fill.isEnabled) {
+    //   const fillLayer = new Layer({
+    //     name: `fill-${fillIndex}`,
+    //     parent: fillsContainer,
+    //     blendMode: getBlendMode({
+    //       blendMode: fill.contextSettings.blendMode
+    //     })
+    //   });
+    //   renderFill({
+    //     shapePath: shapePath,
+    //     fill: fill,
+    //     container: fillLayer,
+    //     images: images,
+    //     override: override,
+    //     topPatternFill: topPatternFillIndex === fillIndex
+    //   });
+    // }
+    const fillLayer = new Layer({
+      name: `fill-${fillIndex}`,
+      data: {
+        type: fill.fillType
+      },
+      parent: fillsContainer,
+      blendMode: getBlendMode({
+        blendMode: fill.contextSettings.blendMode
+      }),
+      visible: fill.isEnabled
     });
-    const topPatternFillIndex = fills.reduce((topIndex, fill, fillIndex) => {
-      return fill.fillType === 4 && fill.isEnabled ? fillIndex : topIndex;
-    }, null);
-    fills.forEach((fill, fillIndex) => {
-      // if (fill.isEnabled) {
-      //   const fillLayer = new Layer({
-      //     name: `fill-${fillIndex}`,
-      //     parent: fillsContainer,
-      //     blendMode: getBlendMode({
-      //       blendMode: fill.contextSettings.blendMode
-      //     })
-      //   });
-      //   renderFill({
-      //     shapePath: shapePath,
-      //     fill: fill,
-      //     container: fillLayer,
-      //     images: images,
-      //     override: override,
-      //     topPatternFill: topPatternFillIndex === fillIndex
-      //   });
-      // }
-      const fillLayer = new Layer({
-        name: `fill-${fillIndex}`,
-        parent: fillsContainer,
-        blendMode: getBlendMode({
-          blendMode: fill.contextSettings.blendMode
-        }),
-        visible: fill.isEnabled
-      });
-      renderFill({
-        shapePath: shapePath,
-        fill: fill,
-        container: fillLayer,
-        images: images,
-        override: override,
-        topPatternFill: topPatternFillIndex === fillIndex
-      });
+    renderFill({
+      shapePath: shapePath,
+      fill: fill,
+      container: fillLayer,
+      images: images,
+      override: override,
+      topPatternFill: topPatternFillIndex === fillIndex
     });
-  }
+  });
 };
 
 interface RenderTextGradientFill {
@@ -285,46 +286,47 @@ interface RenderTextFills {
 }
 
 export const renderTextFills = ({ layer, fills, textAttrs, images, container }: RenderTextFills): void => {
-  if (fills.some((fill) => fill.isEnabled)) {
-    const fillsContainer = new Group({
-      name: 'fills',
-      parent: container
-    });
-    const topPatternFillIndex = fills.reduce((topIndex, fill, fillIndex) => {
-      return fill.fillType === 4 && fill.isEnabled ? fillIndex : topIndex;
-    }, null);
-    fills.forEach((fill, fillIndex) => {
-      // if (fill.isEnabled) {
-      //   renderTextFill({
-      //     layer: layer,
-      //     textOptions: textAttrs,
-      //     images: images,
-      //     layerOptions: {
-      //       parent: fillsContainer,
-      //       name: `fill-${fillIndex}`,
-      //       blendMode: getBlendMode({
-      //         blendMode: fill.contextSettings.blendMode
-      //       })
-      //     },
-      //     fill: fill,
-      //     topPatternFill: topPatternFillIndex === fillIndex
-      //   });
-      // }
-      renderTextFill({
-        layer: layer,
-        textOptions: textAttrs,
-        images: images,
-        layerOptions: {
-          parent: fillsContainer,
-          name: `fill-${fillIndex}`,
-          blendMode: getBlendMode({
-            blendMode: fill.contextSettings.blendMode
-          }),
-          visible: fill.isEnabled
+  const fillsContainer = new Group({
+    name: 'fills',
+    parent: container
+  });
+  const topPatternFillIndex = fills.reduce((topIndex, fill, fillIndex) => {
+    return fill.fillType === 4 && fill.isEnabled ? fillIndex : topIndex;
+  }, null);
+  fills.forEach((fill, fillIndex) => {
+    // if (fill.isEnabled) {
+    //   renderTextFill({
+    //     layer: layer,
+    //     textOptions: textAttrs,
+    //     images: images,
+    //     layerOptions: {
+    //       parent: fillsContainer,
+    //       name: `fill-${fillIndex}`,
+    //       blendMode: getBlendMode({
+    //         blendMode: fill.contextSettings.blendMode
+    //       })
+    //     },
+    //     fill: fill,
+    //     topPatternFill: topPatternFillIndex === fillIndex
+    //   });
+    // }
+    renderTextFill({
+      layer: layer,
+      textOptions: textAttrs,
+      images: images,
+      layerOptions: {
+        parent: fillsContainer,
+        name: `fill-${fillIndex}`,
+        data: {
+          type: fill.fillType
         },
-        fill: fill,
-        topPatternFill: topPatternFillIndex === fillIndex
-      });
+        blendMode: getBlendMode({
+          blendMode: fill.contextSettings.blendMode
+        }),
+        visible: fill.isEnabled
+      },
+      fill: fill,
+      topPatternFill: topPatternFillIndex === fillIndex
     });
-  }
+  });
 };

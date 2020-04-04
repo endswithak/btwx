@@ -78,6 +78,7 @@
     "@types/react-dom": "^16.9.5",
     "@types/react-select": "^3.0.11",
     "@types/react-slider": "^1.0.0",
+    "@types/styled-components": "^5.0.1",
     "@typescript-eslint/eslint-plugin": "^2.23.0",
     "@typescript-eslint/parser": "^2.23.0",
     "babel-loader": "^8.0.6",
@@ -97,6 +98,7 @@
   },
   "dependencies": {
     "@types/chroma-js": "^2.0.0",
+    "@types/uuid": "^7.0.2",
     "chroma-js": "^2.1.0",
     "electron-squirrel-startup": "^1.0.0",
     "flatted": "^2.0.2",
@@ -110,6 +112,8 @@
     "react-draggable": "^4.2.0",
     "react-select": "^3.1.0",
     "react-slider": "^1.0.3",
-    "sketch-file": "^0.3.3"
+    "sketch-file": "^0.3.3",
+    "styled-components": "^5.0.1",
+    "uuid": "^7.0.3"
   }
 }

@@ -4,30 +4,37 @@ import { store } from '../store';
 import SidebarSectionWrap from './SidebarSectionWrap';
 import SidebarSection from './SidebarSection';
 import SidebarSectionRow from './SidebarSectionRow';
-import SidebarSectionLabel from './SidebarSectionLabel';
+import SidebarSectionHead from './SidebarSectionHead';
 import SidebarFillStyle from './SidebarFillStyle';
 
 const SidebarFillStyles = (): ReactElement => {
   const globalState = useContext(store);
-  const { selectedLayer, theme, dispatch } = globalState;
+  const { selectedLayer, theme, dispatch, selectedPaperLayer } = globalState;
 
-  const fills = selectedLayer ? selectedLayer.style.fills : null;
+  const fills = selectedLayer ? selectedLayer.children.find((child) => child.name === 'fills') : null;
 
   return (
     <SidebarSectionWrap>
       <SidebarSection>
         <SidebarSectionRow>
-          <SidebarSectionLabel text={'Fills'} />
+          <SidebarSectionHead text={'fills'} />
         </SidebarSectionRow>
-        <SidebarSection>
-          {
-            fills
-            ? fills.map((fill: FileFormat.Fill, index: number) => (
-                <SidebarFillStyle fill={fill} key={index} />
-              ))
-            : null
-          }
-        </SidebarSection>
+        {
+          selectedLayer
+          ? <SidebarSection>
+              {
+                fills
+                ? fills.children.reverse().map((fill: paper.Layer, index: number) => (
+                    <SidebarFillStyle
+                      fill={fill}
+                      index={index}
+                      key={index} />
+                  ))
+                : null
+              }
+            </SidebarSection>
+          : null
+        }
       </SidebarSection>
     </SidebarSectionWrap>
   );
