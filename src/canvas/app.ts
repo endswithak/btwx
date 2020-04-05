@@ -8,7 +8,7 @@ interface RenderApp {
 
 const drawing: {
   active: boolean;
-  shape: 'rectangle' | 'ellipse' | 'rounded' | 'polygon' | 'star'
+  shape: 'rectangle' | 'ellipse' | 'rounded' | 'polygon' | 'star';
   outline: paper.Path;
   tooltip: paper.PointText;
   from: paper.Point;
