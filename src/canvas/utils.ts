@@ -1,4 +1,4 @@
-import paper, { Shape } from 'paper';
+import paper, { Shape, Point, Path, Color, PointText } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 
 interface GetSymbolsPage {
@@ -130,4 +130,123 @@ export const setSelection = ({artboard, path, dispatch}: SetSelection): void => 
     selectedPaperLayer: selectedLayer
   });
   selectionFrame.selected = true;
+}
+
+interface GetDrawingMetrics {
+  to: paper.Point;
+  from: paper.Point;
+}
+
+interface DrawingMetrics {
+  diff: {
+    x: number;
+    y: number;
+  };
+  dims: {
+    width: number;
+    height: number;
+    max: number;
+  };
+  constrain: {
+    x: number;
+    y: number;
+  };
+  center: {
+    x: number;
+    y: number;
+  };
+}
+
+export const getDrawingMetrics = ({to, from}: GetDrawingMetrics): DrawingMetrics => {
+  const diff = {
+    x: to.x - from.x,
+    y: to.y - from.y
+  };
+  const width = diff.x < 0 ? diff.x * -1 : diff.x;
+  const height = diff.y < 0 ? diff.y * -1 : diff.y;
+  const max = Math.max(width, height);
+  const constrain = {
+    x: diff.x < 0 ? from.x - max : from.x + max,
+    y: diff.y < 0 ? from.y - max : from.y + max
+  }
+  const center = {
+    x: (from.x + to.x) / 2,
+    y: (from.y + to.y) / 2
+  }
+  return {
+    diff,
+    constrain,
+    center,
+    dims: {
+      width,
+      height,
+      max
+    }
+  }
+};
+
+interface RenderDrawingShape {
+  shape: 'rectangle' | 'ellipse' | 'rounded' | 'polygon' | 'star';
+  to: paper.Point;
+  from: paper.Point;
+  shiftModifier: boolean;
+  shapeOpts?: any;
+}
+
+export const renderDrawingShape = ({shape, to, from, shiftModifier, shapeOpts}: RenderDrawingShape) => {
+  const metrics = getDrawingMetrics({to, from});
+  switch(shape) {
+    case 'rectangle':
+      return new Path.Rectangle({
+        from: from,
+        to: shiftModifier ? new Point(metrics.constrain.x, metrics.constrain.y) : to,
+        ...shapeOpts
+      });
+    case 'ellipse':
+      return new Path.Ellipse({
+        from: from,
+        to: shiftModifier ? new Point(metrics.constrain.x, metrics.constrain.y) : to,
+        ...shapeOpts
+      });
+    case 'rounded':
+      return new Path.Rectangle({
+        from: from,
+        to: shiftModifier ? new Point(metrics.constrain.x, metrics.constrain.y) : to,
+        radius: 8,
+        ...shapeOpts
+      });
+    case 'polygon':
+      return new Path.RegularPolygon({
+        center: new Point(metrics.center.x, metrics.center.y),
+        radius: metrics.dims.max / 2,
+        sides: 5,
+        ...shapeOpts
+      });
+    case 'star':
+      return new Path.Star({
+        center: new Point(metrics.center.x, metrics.center.y),
+        radius1: metrics.dims.max / 2,
+        radius2: (metrics.dims.max / 2) / 2,
+        points: 5,
+        ...shapeOpts
+      });
+  }
+}
+
+interface RenderDrawingTooltip {
+  to: paper.Point;
+  from: paper.Point;
+  shiftModifier: boolean;
+  zoom: number;
+}
+
+export const renderDrawingTooltip = ({ to, from, shiftModifier, zoom }: RenderDrawingTooltip) => {
+  const metrics = getDrawingMetrics({to, from});
+  return new PointText({
+    point: [to.x + (30 / zoom), to.y + (30 / zoom)],
+    content: `${Math.round(shiftModifier ? metrics.dims.max : metrics.dims.width)} x ${Math.round(shiftModifier ? metrics.dims.max : metrics.dims.height)}`,
+    fillColor: 'white',
+    fontFamily: 'Space Mono',
+    fontSize: 12 / zoom
+  });
 }

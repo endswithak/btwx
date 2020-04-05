@@ -58,6 +58,13 @@ const reducers = (state: any, action: any): any => {
         stylesSidebarWidth: action.stylesSidebarWidth
       };
     }
+    case 'set-drawing': {
+      return {
+        ...state,
+        drawing: action.drawing,
+        drawingShape: action.drawingShape
+      };
+    }
     case 'add-artboard': {
       return {
         ...state,

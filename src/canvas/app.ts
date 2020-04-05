@@ -1,9 +1,27 @@
-import paper, { Point, Size } from 'paper';
-import { getLayerByPath, getChildByName, setSelection } from './utils';
+import paper, { Point, Size, tool, Shape, Rectangle, Path, Color, PointText } from 'paper';
+import { getLayerByPath, getChildByName, setSelection, renderDrawingShape, renderDrawingTooltip } from './utils';
 
 interface RenderApp {
   canvas: HTMLCanvasElement;
   dispatch: any;
+}
+
+const drawing: {
+  active: boolean;
+  shape: 'rectangle' | 'ellipse' | 'rounded' | 'polygon' | 'star'
+  outline: paper.Path;
+  tooltip: paper.PointText;
+  from: paper.Point;
+  to: paper.Point;
+  shiftModifier: boolean;
+} = {
+  active: false,
+  shape: null,
+  outline: null,
+  tooltip: null,
+  from: null,
+  to: null,
+  shiftModifier: false
 }
 
 const renderApp = ({ canvas, dispatch }: RenderApp): void => {
@@ -31,6 +49,117 @@ const renderApp = ({ canvas, dispatch }: RenderApp): void => {
       path: e.path,
       dispatch: dispatch
     });
+  });
+  paper.view.on('mousedown', (event: paper.MouseEvent) => {
+    if (drawing.active) {
+      drawing.from = event.point;
+    }
+  });
+  paper.view.on('keydown', (event: paper.KeyEvent) => {
+    if (event.key === 'shift' && drawing.active) {
+      drawing.shiftModifier = true;
+      if (drawing.tooltip) {
+        drawing.tooltip.remove();
+      }
+      if (drawing.outline) {
+        drawing.outline.remove();
+        drawing.tooltip = renderDrawingTooltip({
+          to: drawing.to,
+          from: drawing.from,
+          shiftModifier: drawing.shiftModifier,
+          zoom: paper.view.zoom
+        });
+        drawing.outline = renderDrawingShape({
+          shape: drawing.shape,
+          to: drawing.to,
+          from: drawing.from,
+          shiftModifier: drawing.shiftModifier,
+          shapeOpts: {
+            selected: true
+          }
+        });
+      }
+    }
+  });
+  paper.view.on('keyup', (event: paper.KeyEvent) => {
+    if (drawing.shiftModifier && drawing.active) {
+      drawing.shiftModifier = false;
+      if (drawing.tooltip) {
+        drawing.tooltip.remove();
+      }
+      if (drawing.outline) {
+        drawing.outline.remove();
+        drawing.tooltip = renderDrawingTooltip({
+          to: drawing.to,
+          from: drawing.from,
+          shiftModifier: drawing.shiftModifier,
+          zoom: paper.view.zoom
+        });
+        drawing.outline = renderDrawingShape({
+          shape: drawing.shape,
+          to: drawing.to,
+          from: drawing.from,
+          shiftModifier: drawing.shiftModifier,
+          shapeOpts: {
+            selected: true
+          }
+        });
+      }
+    }
+  });
+  paper.view.on('mousedrag', (event: paper.MouseEvent) => {
+    if (drawing.active) {
+      if (drawing.tooltip) {
+        drawing.tooltip.remove();
+      }
+      if (drawing.outline) {
+        drawing.outline.remove();
+      }
+      drawing.to = event.point;
+      drawing.tooltip = renderDrawingTooltip({
+        to: drawing.to,
+        from: drawing.from,
+        shiftModifier: drawing.shiftModifier,
+        zoom: paper.view.zoom
+      });
+      drawing.outline = renderDrawingShape({
+        shape: drawing.shape,
+        to: drawing.to,
+        from: drawing.from,
+        shiftModifier: drawing.shiftModifier,
+        shapeOpts: {
+          selected: true
+        }
+      });
+    }
+  });
+  paper.view.on('mouseup', (event: paper.MouseEvent) => {
+    if (drawing.active) {
+      if (drawing.tooltip) {
+        drawing.tooltip.remove();
+      }
+      if (drawing.outline) {
+        drawing.outline.remove();
+      }
+      renderDrawingShape({
+        shape: drawing.shape,
+        to: drawing.to,
+        from: drawing.from,
+        shiftModifier: drawing.shiftModifier,
+        shapeOpts: {
+          fillColor: Color.random()
+        }
+      });
+      dispatch({
+        type: 'set-drawing',
+        drawing: false,
+        shape: null
+      });
+    }
+  });
+  paper.view.on('drawing', (e) => {
+    drawing.active = e.drawing;
+    drawing.shape = e.drawingShape;
   });
 };
 

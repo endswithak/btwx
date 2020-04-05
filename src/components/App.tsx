@@ -3,6 +3,7 @@ import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import Canvas from './Canvas';
 import LayersSidebar from './LayersSidebar';
 import StylesSidebar from './StylesSidebar';
+import Topbar from './Topbar';
 import { store } from '../store';
 
 interface AppProps {
@@ -35,22 +36,28 @@ const App = (props: AppProps): ReactElement => {
       style={{
         background: theme.background.z0
       }}>
-        {/* <OpenPreview /> */}
         {
           ready
-          ? <LayersSidebar />
+          ? <Topbar />
           : null
         }
-        {
-          ready
-          ? <Canvas />
-          : null
-        }
-        {
-          ready
-          ? <StylesSidebar />
-          : null
-        }
+        <div className='c-app__canvas'>
+          {
+            ready
+            ? <LayersSidebar />
+            : null
+          }
+          {
+            ready
+            ? <Canvas />
+            : null
+          }
+          {
+            ready
+            ? <StylesSidebar />
+            : null
+          }
+        </div>
     </div>
   );
 }

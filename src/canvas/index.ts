@@ -1,4 +1,4 @@
-import paper from 'paper';
+import paper, { Path, Color, Point, PointText } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import renderApp from './app';
 import renderArtboard from './artboard';
@@ -15,15 +15,15 @@ interface RenderCanvas {
 }
 
 const renderCanvas = async ({ sketchDocument, sketchImages, sketchPages, canvas, dispatch }: RenderCanvas): Promise<paper.Project> => {
-  const page = sketchPages.find((sketchPage) => sketchPage.name === 'sketch-animate');
-  const symbolsPage = getSymbolsPage({sketchPages});
-  const symbols = symbolsPage ? symbolsPage.layers as FileFormat.SymbolMaster[] : null;
-  const artboards = page.layers.filter((layer) => layer._class === 'artboard') as FileFormat.Artboard[];
-  const images = getBase64Images({sketchImages});
+  // const page = sketchPages.find((sketchPage) => sketchPage.name === 'sketch-animate');
+  // const symbolsPage = getSymbolsPage({sketchPages});
+  // const symbols = symbolsPage ? symbolsPage.layers as FileFormat.SymbolMaster[] : null;
+  // const artboards = page.layers.filter((layer) => layer._class === 'artboard') as FileFormat.Artboard[];
+  // const images = getBase64Images({sketchImages});
   renderApp({canvas, dispatch});
-  artboards.forEach((artboard) => {
-    renderArtboard({artboard, symbols, images, dispatch});
-  });
+  // artboards.forEach((artboard) => {
+  //   renderArtboard({artboard, symbols, images, dispatch});
+  // });
   return paper.project;
 };
 
