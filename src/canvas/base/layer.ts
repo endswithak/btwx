@@ -1,38 +1,79 @@
 import paper, { Layer, Group } from 'paper';
 
 interface RenderLayer {
-  container: paper.Group | paper.Layer;
   shape: paper.Path | paper.CompoundPath;
-  name: string;
   dispatch: any;
-  path: string;
+  isGroup: boolean;
+  layerOpts?: any;
 }
 
-const renderLayer = ({ container, name, path }: RenderLayer): void => {
+interface ELayer extends paper.Layer {
+  isGroup: boolean;
+  layers(): paper.Layer[];
+  styles(): paper.Layer[];
+  shadows(): paper.Layer[];
+  fills(): paper.Layer[];
+  innerShadows(): paper.Layer[];
+  borders(): paper.Layer[];
+}
+
+const renderLayer = ({ shape, layerOpts, isGroup }: RenderLayer): ELayer => {
   const layerContainer = new Layer({
-    parent: container,
-    name: name,
-    data: {
-      path: path
+    children: [shape],
+    isGroup: isGroup,
+    layersGroup: function() {
+      return this.children.find((child: paper.Layer) => child.name === 'layers');
     },
-    applyMatrix: false
+    layers: function() {
+      const layersGroup = this.layersGroup();
+      return layersGroup.children;
+    },
+    styles: function() {
+      return this.children.find((child: paper.Layer) => child.name === 'styles').children;
+    },
+    shadows: function() {
+      const styles = this.styles();
+      styles.find((child: paper.Layer) => child.name === 'shadows').children;
+    },
+    fills: function() {
+      const styles = this.styles();
+      styles.find((child: paper.Layer) => child.name === 'fills').children;
+    },
+    innerShadows: function() {
+      const styles = this.styles();
+      styles.find((child: paper.Layer) => child.name === 'inner-shadows').children;
+    },
+    borders: function() {
+      const styles = this.styles();
+      styles.find((child: paper.Layer) => child.name === 'borders').children;
+    },
+    ...layerOpts
+  });
+  const stylesContainer = new Group({
+    parent: layerContainer,
+    name: 'styles'
   });
   const shadowsContainer = new Group({
-    parent: layerContainer,
+    parent: stylesContainer,
     name: 'shadows'
   });
   const fillsContainer = new Group({
-    parent: layerContainer,
+    parent: stylesContainer,
     name: 'fills'
   });
   const innerShadowsContainer = new Group({
-    parent: layerContainer,
+    parent: stylesContainer,
     name: 'inner-shadows'
   });
   const bordersContainer = new Group({
-    parent: layerContainer,
+    parent: stylesContainer,
     name: 'borders'
   });
+  const layersContainer = new Group({
+    parent: layerContainer,
+    name: 'layers'
+  });
+  return layerContainer;
 };
 
 export default renderLayer;

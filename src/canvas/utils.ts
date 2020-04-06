@@ -187,8 +187,8 @@ export const getDrawingMetrics = ({to, from}: GetDrawingMetrics): DrawingMetrics
 
 interface RenderDrawingShape {
   shape: 'rectangle' | 'ellipse' | 'rounded' | 'polygon' | 'star';
-  to: paper.Point;
   from: paper.Point;
+  to: paper.Point;
   shiftModifier: boolean;
   shapeOpts?: any;
 }
@@ -234,19 +234,48 @@ export const renderDrawingShape = ({shape, to, from, shiftModifier, shapeOpts}: 
 }
 
 interface RenderDrawingTooltip {
+  shape: 'rectangle' | 'ellipse' | 'rounded' | 'polygon' | 'star';
   to: paper.Point;
   from: paper.Point;
   shiftModifier: boolean;
   zoom: number;
 }
 
-export const renderDrawingTooltip = ({ to, from, shiftModifier, zoom }: RenderDrawingTooltip) => {
+export const renderDrawingTooltip = ({ shape, to, from, shiftModifier, zoom }: RenderDrawingTooltip) => {
   const metrics = getDrawingMetrics({to, from});
-  return new PointText({
+  const baseProps = {
     point: [to.x + (30 / zoom), to.y + (30 / zoom)],
-    content: `${Math.round(shiftModifier ? metrics.dims.max : metrics.dims.width)} x ${Math.round(shiftModifier ? metrics.dims.max : metrics.dims.height)}`,
     fillColor: 'white',
     fontFamily: 'Space Mono',
     fontSize: 12 / zoom
-  });
+  }
+  switch(shape) {
+    case 'rectangle':
+    case 'ellipse':
+    case 'rounded':
+      return new PointText({
+        ...baseProps,
+        content: `${Math.round(shiftModifier ? metrics.dims.max : metrics.dims.width)} x ${Math.round(shiftModifier ? metrics.dims.max : metrics.dims.height)}`,
+      });
+    case 'polygon':
+    case 'star':
+      return new PointText({
+        ...baseProps,
+        content: `${Math.round(metrics.dims.max)} x ${Math.round(metrics.dims.max)}`
+      });
+  }
+}
+
+interface GetParent {
+  item: paper.Item;
+}
+
+export const getParent = ({ item }: GetParent) => {
+  if (item) {
+    let currentItem = item;
+    while(!currentItem.isGroup) {
+      currentItem = currentItem.parent;
+    }
+    return currentItem.layersGroup();
+  }
 }

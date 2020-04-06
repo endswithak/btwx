@@ -1,7 +1,7 @@
-import paper, { Path, Color, Point, PointText } from 'paper';
+import paper, { Path, Color, Point, PointText, Size } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import renderApp from './app';
-import renderArtboard from './artboard';
+import renderArtboard from './base/artboard';
 import { getSymbolsPage, getBase64Images } from './utils';
 
 interface RenderCanvas {
@@ -21,9 +21,15 @@ const renderCanvas = async ({ sketchDocument, sketchImages, sketchPages, canvas,
   // const artboards = page.layers.filter((layer) => layer._class === 'artboard') as FileFormat.Artboard[];
   // const images = getBase64Images({sketchImages});
   renderApp({canvas, dispatch});
+  const artboard = renderArtboard({
+    size: new Size(375, 812),
+    dispatch: dispatch,
+    position: paper.view.center
+  });
   // artboards.forEach((artboard) => {
   //   renderArtboard({artboard, symbols, images, dispatch});
   // });
+  console.log(paper.project);
   return paper.project;
 };
 

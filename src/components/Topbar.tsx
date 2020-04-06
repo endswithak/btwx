@@ -3,20 +3,17 @@ import { store } from '../store';
 
 const Topbar = (): ReactElement => {
   const globalState = useContext(store);
-  const { theme, dispatch, drawing } = globalState;
+  const { theme, dispatch, drawShape } = globalState;
 
   const handleClick = (shape: string) => {
-    if (!drawing) {
+    if (drawShape) {
       dispatch({
-        type: 'set-drawing',
-        drawing: true,
-        drawingShape: shape,
+        type: 'disable-draw-shape'
       });
     } else {
       dispatch({
-        type: 'set-drawing',
-        drawing: false,
-        drawingShape: null
+        type: 'enable-draw-shape',
+        drawShapeType: shape
       });
     }
   }

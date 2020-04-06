@@ -29,8 +29,8 @@ interface AppState {
   selectedLayerPath: string;
   canvas: paper.View;
   project: paper.Project;
-  drawing: boolean;
-  drawingShape: 'artboard' | 'rectangle' | 'rounded' | 'ellipse' | 'polygon' | 'star';
+  drawShape: boolean;
+  drawShapeType: 'artboard' | 'rectangle' | 'rounded' | 'ellipse' | 'polygon' | 'star';
   dispatch(reducer: any): any;
 }
 
@@ -53,8 +53,8 @@ const initialState: AppState = {
   selectedLayerPath: null,
   canvas: null,
   project: null,
-  drawing: false,
-  drawingShape: null,
+  drawShape: false,
+  drawShapeType: null,
   dispatch: () => {
     return null;
   }

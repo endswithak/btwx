@@ -5,6 +5,7 @@ import SidebarLayers from './SidebarLayers';
 
 interface SidebarLayerGroupProps {
   group: paper.Group;
+  layers: paper.Item[];
   path: string;
   depth: number;
 }
@@ -12,7 +13,7 @@ interface SidebarLayerGroupProps {
 const SidebarLayerGroup = (props: SidebarLayerGroupProps): ReactElement => {
   const globalState = useContext(store);
   const [isOpen, setIsOpen] = useState(false);
-  const { group, depth, path } = props;
+  const { group, depth, path, layers } = props;
 
   return (
     <div>
@@ -26,7 +27,7 @@ const SidebarLayerGroup = (props: SidebarLayerGroupProps): ReactElement => {
       {
         isOpen
         ? <SidebarLayers
-            layers={group.children}
+            layers={layers}
             depth={depth + 1}
             path={path} />
         : null

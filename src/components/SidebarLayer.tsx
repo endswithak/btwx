@@ -15,21 +15,21 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
   const { layer, depth, path } = props;
   const layerPath = path ? `${path}/${layer.id}` : `${layer.id}`;
 
-  switch(layer.className) {
-    case 'Group':
-      return (
-        <SidebarLayerGroup
-          group={layer as paper.Group}
-          depth={depth}
-          path={layerPath} />
-      );
-    case 'Layer':
-      return (
-        <SidebarLayerItem
-          layer={layer as paper.Layer}
-          depth={depth}
-          path={layerPath} />
-      );
+  if (layer.isGroup) {
+    return (
+      <SidebarLayerGroup
+        group={layer as paper.Layer}
+        layers={layer.layers() as paper.Item[]}
+        depth={depth}
+        path={layerPath} />
+    );
+  } else {
+    return (
+      <SidebarLayerItem
+        layer={layer as paper.Layer}
+        depth={depth}
+        path={layerPath} />
+    );
   }
 }
 

@@ -6,7 +6,7 @@ const Canvas = (): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const globalState = useContext(store);
-  const { selectedArtboard, selectedLayer, selectedLayerPath, sketchDocument, sketchPages, sketchImages, dispatch, project, theme, layersSidebarWidth, stylesSidebarWidth, drawing, drawingShape } = globalState;
+  const { selectedArtboard, selectedLayer, selectedLayerPath, sketchDocument, sketchPages, sketchImages, dispatch, project, theme, layersSidebarWidth, stylesSidebarWidth, drawShape, drawShapeType } = globalState;
 
   useEffect(() => {
     canvasRef.current.width = canvasContainerRef.current.clientWidth;
@@ -49,16 +49,13 @@ const Canvas = (): ReactElement => {
 
   useEffect(() => {
     if (project) {
-      project.view.emit('drawing', {
-        drawing: drawing,
-        drawingShape: drawingShape
-      });
+      project.view.emit('draw-shape', { drawShape, drawShapeType });
     }
-  }, [drawing]);
+  }, [drawShape]);
 
   return (
     <div
-      className={`c-canvas ${drawing ? 'c-canvas--drawing' : ''}`}
+      className={`c-canvas ${drawShape ? 'c-canvas--drawing' : ''}`}
       ref={canvasContainerRef}>
       <canvas
         id='canvas-main'

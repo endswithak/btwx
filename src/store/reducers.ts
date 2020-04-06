@@ -58,11 +58,18 @@ const reducers = (state: any, action: any): any => {
         stylesSidebarWidth: action.stylesSidebarWidth
       };
     }
-    case 'set-drawing': {
+    case 'enable-draw-shape': {
       return {
         ...state,
-        drawing: action.drawing,
-        drawingShape: action.drawingShape
+        drawShape: true,
+        drawShapeType: action.drawShapeType
+      };
+    }
+    case 'disable-draw-shape': {
+      return {
+        ...state,
+        drawShape: false,
+        drawShapeType: null
       };
     }
     case 'add-artboard': {
