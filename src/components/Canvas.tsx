@@ -6,7 +6,7 @@ const Canvas = (): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const globalState = useContext(store);
-  const { selectedArtboard, selectedLayer, selectedLayerPath, sketchDocument, sketchPages, sketchImages, dispatch, project, theme, layersSidebarWidth, stylesSidebarWidth, drawShape, drawShapeType } = globalState;
+  const { selectedArtboard, selectedLayer, selectedLayerPath, sketchDocument, sketchPages, sketchImages, dispatch, paperApp, theme, layersSidebarWidth, stylesSidebarWidth, drawShape, drawShapeType } = globalState;
 
   useEffect(() => {
     canvasRef.current.width = canvasContainerRef.current.clientWidth;
@@ -18,38 +18,42 @@ const Canvas = (): ReactElement => {
       dispatch: dispatch,
       canvas: canvasRef.current
     })
-    .then((paperProject) => {
+    .then((paperApp) => {
       dispatch({
-        type: 'set-project',
-        project: paperProject
+        type: 'set-paper-app',
+        paperApp: paperApp
       });
       console.log('done');
     });
   }, []);
 
   useEffect(() => {
-    if (project) {
+    if (paperApp) {
       canvasRef.current.addEventListener('wheel', (e: WheelEvent) => {
         e.preventDefault();
-        project.view.emit('wheel', e);
+        paperApp.onWheel(e);
       });
       window.addEventListener('resize', (e) => {
-        project.view.viewSize.width = canvasContainerRef.current.clientWidth;
-        project.view.viewSize.height = canvasContainerRef.current.clientHeight;
+        paperApp.scope.view.viewSize.width = canvasContainerRef.current.clientWidth;
+        paperApp.scope.view.viewSize.height = canvasContainerRef.current.clientHeight;
       });
     }
-  }, [project]);
+  }, [paperApp]);
 
   useEffect(() => {
-    if (project) {
-      project.view.viewSize.width = canvasContainerRef.current.clientWidth;
-      project.view.viewSize.height = canvasContainerRef.current.clientHeight;
+    if (paperApp) {
+      paperApp.scope.view.viewSize.width = canvasContainerRef.current.clientWidth;
+      paperApp.scope.view.viewSize.height = canvasContainerRef.current.clientHeight;
     }
   }, [layersSidebarWidth, stylesSidebarWidth]);
 
   useEffect(() => {
-    if (project) {
-      project.view.emit('draw-shape', { drawShape, drawShapeType });
+    if (paperApp) {
+      if (drawShape) {
+        paperApp.enableDrawTool(drawShapeType);
+      } else {
+        paperApp.disableDrawTool();
+      }
     }
   }, [drawShape]);
 

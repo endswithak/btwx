@@ -14,9 +14,9 @@ const StylesSidebar = (): ReactElement => {
       width={stylesSidebarWidth}
       position={'right'}
       resizable={false}>
-      <SidebarFrameStyles />
+      {/* <SidebarFrameStyles />
       <SidebarContextStyles />
-      <SidebarFillStyles />
+      <SidebarFillStyles /> */}
     </Sidebar>
   );
 }

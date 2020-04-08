@@ -1,79 +1,60 @@
 import paper, { Layer, Group } from 'paper';
+import PaperStyle from './style/style';
+import PaperLayers from './layers';
 
-interface RenderLayer {
+interface PaperLayerProps {
   shape: paper.Path | paper.CompoundPath;
+  isGroup: boolean;
+  layerOpts: any;
   dispatch: any;
-  isGroup: boolean;
-  layerOpts?: any;
+  style?: {
+    shadows?: em.Shadow[];
+    fills?: em.Fill[];
+    innerShadows?: em.Shadow[];
+    borders?: em.Border[];
+  };
 }
 
-interface ELayer extends paper.Layer {
+class PaperLayer {
+  layer: paper.Layer;
+  style: PaperStyle;
+  type: 'Layer' | 'Artboard' | 'Group';
+  shape: paper.Path | paper.CompoundPath;
   isGroup: boolean;
-  layers(): paper.Layer[];
-  styles(): paper.Layer[];
-  shadows(): paper.Layer[];
-  fills(): paper.Layer[];
-  innerShadows(): paper.Layer[];
-  borders(): paper.Layer[];
+  selected: boolean;
+  layers: PaperLayers;
+  dispatch: any;
+  constructor({shape, isGroup, layerOpts, dispatch, style}: PaperLayerProps) {
+    this.dispatch = dispatch;
+    this.shape = shape;
+    this.isGroup = isGroup;
+    this.type = isGroup ? 'Group' : 'Layer';
+    this.layer = new Layer({
+      children: [shape],
+      name: 'layer',
+      ...layerOpts
+    });
+    this.style = new PaperStyle({
+      shape: this.shape,
+      dispatch: this.dispatch,
+      fills: style.fills ? style.fills : [],
+      layerOpts: {
+        parent: this.layer
+      }
+    })
+    if (this.isGroup) {
+      this.layers = new PaperLayers({
+        dispatch: dispatch,
+        layerOpts: {
+          parent: this.layer
+        }
+      });
+    }
+    dispatch({
+      type: 'add-layer',
+      layer: this
+    });
+  }
 }
 
-const renderLayer = ({ shape, layerOpts, isGroup }: RenderLayer): ELayer => {
-  const layerContainer = new Layer({
-    children: [shape],
-    isGroup: isGroup,
-    layersGroup: function() {
-      return this.children.find((child: paper.Layer) => child.name === 'layers');
-    },
-    layers: function() {
-      const layersGroup = this.layersGroup();
-      return layersGroup.children;
-    },
-    styles: function() {
-      return this.children.find((child: paper.Layer) => child.name === 'styles').children;
-    },
-    shadows: function() {
-      const styles = this.styles();
-      styles.find((child: paper.Layer) => child.name === 'shadows').children;
-    },
-    fills: function() {
-      const styles = this.styles();
-      styles.find((child: paper.Layer) => child.name === 'fills').children;
-    },
-    innerShadows: function() {
-      const styles = this.styles();
-      styles.find((child: paper.Layer) => child.name === 'inner-shadows').children;
-    },
-    borders: function() {
-      const styles = this.styles();
-      styles.find((child: paper.Layer) => child.name === 'borders').children;
-    },
-    ...layerOpts
-  });
-  const stylesContainer = new Group({
-    parent: layerContainer,
-    name: 'styles'
-  });
-  const shadowsContainer = new Group({
-    parent: stylesContainer,
-    name: 'shadows'
-  });
-  const fillsContainer = new Group({
-    parent: stylesContainer,
-    name: 'fills'
-  });
-  const innerShadowsContainer = new Group({
-    parent: stylesContainer,
-    name: 'inner-shadows'
-  });
-  const bordersContainer = new Group({
-    parent: stylesContainer,
-    name: 'borders'
-  });
-  const layersContainer = new Group({
-    parent: layerContainer,
-    name: 'layers'
-  });
-  return layerContainer;
-};
-
-export default renderLayer;
+export default PaperLayer;

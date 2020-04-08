@@ -1,9 +1,11 @@
 import React, { useContext, ReactElement } from 'react';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { store } from '../store';
+import PaperLayer from '../canvas/base/layer';
+import PaperFill, { Fill } from '../canvas/base/style/fill';
 
 interface SidebarLayerItemProps {
-  layer: paper.Layer | paper.Group;
+  layer: PaperLayer;
   path: string;
   depth: number;
   isGroup?: boolean;
@@ -15,7 +17,7 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
   const globalState = useContext(store);
   const { dispatch, selectedLayer, theme } = globalState;
   const { layer, path, depth, isGroup, isOpen, setIsOpen } = props;
-  const isSelected = selectedLayer && layer.id === selectedLayer.id;
+  const isSelected = selectedLayer && layer.layer.id === selectedLayer.id;
 
   const handleNameClick = (): void => {
     dispatch({
@@ -46,7 +48,7 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
           : theme.text.base
         }}
         onClick={handleNameClick}>
-        {layer.name}
+        {layer.layer.name}
       </span>
       {
         isGroup

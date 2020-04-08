@@ -40,10 +40,10 @@ const reducers = (state: any, action: any): any => {
         canvas: action.canvas
       };
     }
-    case 'set-project': {
+    case 'set-paper-app': {
       return {
         ...state,
-        project: action.project
+        paperApp: action.paperApp
       };
     }
     case 'set-layers-sidebar-width': {
@@ -76,6 +76,12 @@ const reducers = (state: any, action: any): any => {
       return {
         ...state,
         artboards: [...state.artboards, action.artboard]
+      };
+    }
+    case 'add-layer': {
+      return {
+        ...state,
+        layers: [...state.layers, action.layer]
       };
     }
     default:

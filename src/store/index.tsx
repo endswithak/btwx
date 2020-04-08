@@ -3,6 +3,7 @@ import paper from 'paper';
 import reducers from './reducers';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import getTheme from './theme';
+import PaperApp from '../canvas/app';
 
 interface StateProviderProps {
   children: React.ReactNode;
@@ -28,9 +29,10 @@ interface AppState {
   selectedPaperLayer: paper.Item;
   selectedLayerPath: string;
   canvas: paper.View;
-  project: paper.Project;
+  paperApp: PaperApp;
   drawShape: boolean;
   drawShapeType: 'artboard' | 'rectangle' | 'rounded' | 'ellipse' | 'polygon' | 'star';
+  layers: paper.Item[];
   dispatch(reducer: any): any;
 }
 
@@ -52,9 +54,10 @@ const initialState: AppState = {
   selectedPaperLayer: null,
   selectedLayerPath: null,
   canvas: null,
-  project: null,
+  paperApp: null,
   drawShape: false,
   drawShapeType: null,
+  layers: [],
   dispatch: () => {
     return null;
   }
