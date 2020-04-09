@@ -14,12 +14,9 @@ const reducers = (state: any, action: any): any => {
       };
     }
     case 'set-selected-layer': {
-      paper.project.deselectAll();
-      action.layer.selected = true;
       return {
         ...state,
         selectedLayer: action.layer,
-        selectedLayerPath: action.path
       };
     }
     case 'set-selected-artboard': {

@@ -1,5 +1,8 @@
 import paper, { Layer, Color, Raster, Point, SymbolDefinition, Group, GradientStop } from 'paper';
 import chroma from 'chroma-js';
+import PaperLayer from '../layer';
+import PaperFills from './fills';
+import PaperShape from '../shape';
 
 export class Fill {
   fillType?: em.FillType;
@@ -31,67 +34,59 @@ export class Fill {
 interface PaperFillProps {
   fill: Fill;
   shape: paper.Path | paper.CompoundPath;
-  layerProps: any;
+  parent: any;
 }
 
-class PaperFill {
+class PaperFill extends PaperLayer {
+  paperItemShape: paper.Path | paper.CompoundPath;
   fill: Fill;
-  shape: paper.Path | paper.CompoundPath;
-  layer: paper.Layer;
-  fillLayer: paper.Path | paper.CompoundPath | paper.Raster;
-  constructor({fill, shape, layerProps}: PaperFillProps) {
+  constructor({fill, shape, parent}: PaperFillProps) {
+    super({parent});
     this.fill = fill;
-    this.shape = shape;
-    this.layer = new Layer({
-      name: 'fill',
-      visible: fill.enabled,
-      ...layerProps
-    });
+    this.interactive = false;
     switch(fill.fillType) {
       case 'Color':
-        this.colorFill();
+        this.colorFill(shape);
         break;
       case 'Gradient':
-        this.gradientFill();
+        this.gradientFill(shape);
         break;
       case 'Pattern':
-        this.patternFill();
+        this.patternFill(shape);
         break;
     }
   }
-  colorFill() {
-    this.fillLayer = this.shape.clone() as paper.Path | paper.CompoundPath;
-    this.fillLayer.parent = this.layer;
-    this.fillLayer.fillColor = new Color(this.fill.color);
+  colorFill(shape: paper.Path | paper.CompoundPath) {
+    this.paperItem = shape.clone() as paper.Path | paper.CompoundPath;
+    this.paperItem.fillColor = new Color(this.fill.color);
   }
-  updateColor(color: string) {
-    if (chroma.valid(color)) {
-      this.fill.color = color;
-      this.fillLayer.fillColor = new Color(this.fill.color);
-    } else {
-      throw new Error(`Invalid Fill Color: ${color}`);
-    }
-  }
-  gradientFill() {
-    this.fillLayer = this.shape.clone() as paper.Path | paper.CompoundPath;
-    this.fillLayer.parent = this.layer;
+  // updateColor(color: string) {
+  //   if (chroma.valid(color)) {
+  //     this.fill.color = color;
+  //     this.paperItemFill.fillColor = new Color(this.fill.color);
+  //   } else {
+  //     throw new Error(`Invalid Fill Color: ${color}`);
+  //   }
+  // }
+  gradientFill(shape: paper.Path | paper.CompoundPath) {
+    this.paperItem = this.paperItemShape.clone() as paper.Path | paper.CompoundPath;
     const from = this.fill.gradient.from;
     const to = this.fill.gradient.to;
     const gradientStops = this.fill.gradient.stops.map((gradientStop) => {
       return new GradientStop(new Color(gradientStop.color), gradientStop.position);
     }) as paper.GradientStop[];
-    this.fillLayer.fillColor = {
+    this.paperItem.fillColor = {
       gradient: {
         stops: gradientStops,
         radial: this.fill.gradient.gradientType === 'Radial'
       },
-      origin: new Point(this.fillLayer.bounds.width * from.x, this.fillLayer.bounds.height * from.y),
-      destination: new Point(this.fillLayer.bounds.width * to.x, this.fillLayer.bounds.height * to.y)
+      origin: new Point(this.paperItem.bounds.width * from.x, this.paperItem.bounds.height * from.y),
+      destination: new Point(this.paperItem.bounds.width * to.x, this.paperItem.bounds.height * to.y)
     };
   }
-  patternFill() {
+  patternFill(shape: paper.Path | paper.CompoundPath) {
     const patternGroup = new Group();
-    const patternMask = this.shape.clone();
+    const patternMask = this.paperItemShape.clone();
     patternMask.parent = patternGroup;
     patternMask.name = 'mask';
     patternMask.clipMask = true;
@@ -146,8 +141,7 @@ class PaperFill {
           break;
         }
       }
-      this.fillLayer = patternGroup.rasterize();
-      this.fillLayer.parent = this.layer;
+      this.paperItem = patternGroup.rasterize();
     }
   }
   getFillSize({imageWidth, imageHeight, shapeWidth, shapeHeight}: {imageWidth: number; imageHeight: number; shapeWidth: number; shapeHeight: number}) {

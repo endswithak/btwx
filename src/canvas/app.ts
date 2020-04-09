@@ -1,15 +1,37 @@
 import paper, { Point } from 'paper';
 import DrawTool from './drawTool';
+import PaperPage from './base/page';
+import PaperArtboard from './base/artboard';
+import PaperGroup from './base/group';
+import PaperShape from './base/shape';
+
+interface PaperAppProps {
+  canvas: HTMLCanvasElement;
+  dispatch: any;
+  page?: PaperPage;
+}
 
 class PaperApp {
   dispatch: any;
   scope: paper.PaperScope;
   drawTool: DrawTool;
-  constructor(canvas: HTMLCanvasElement, dispatch: any) {
+  page: PaperPage;
+  selectedLayer: PaperArtboard | PaperGroup | PaperShape;
+  constructor({canvas, dispatch, page}: PaperAppProps) {
     paper.setup(canvas);
     this.scope = paper;
+    this.selectedLayer = null;
     this.dispatch = dispatch;
     this.drawTool = null;
+    this.page = page ? page : new PaperPage({dispatch});
+    this.scope.view.on('click', (e: paper.ToolEvent) => {
+      if (!this.page.paperItem.hitTest(e.point)) {
+        dispatch({
+          type: 'set-selected-layer',
+          layer: null
+        });
+      }
+    });
   }
   onWheel(e: WheelEvent): void {
     if (e.ctrlKey) {
@@ -29,12 +51,23 @@ class PaperApp {
     }
   }
   enableDrawTool(shape: em.ShapeType): void {
-    this.drawTool = new DrawTool(shape, this.dispatch);
+    this.drawTool = new DrawTool({
+      drawShapeType: shape,
+      dispatch: this.dispatch,
+      selectedLayer: this.selectedLayer,
+      page: this.page
+    });
   }
   disableDrawTool(): void {
     if (this.drawTool) {
       this.drawTool.destroy();
       this.drawTool = null;
+    }
+  }
+  setSelectedLayer(layer: PaperArtboard | PaperGroup | PaperShape): void {
+    this.selectedLayer = layer;
+    if (this.drawTool) {
+      this.drawTool.selectedLayer = this.selectedLayer;
     }
   }
 }

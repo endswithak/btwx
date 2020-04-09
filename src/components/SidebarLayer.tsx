@@ -3,10 +3,12 @@ import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { store } from '../store';
 import SidebarLayerGroup from './SidebarLayerGroup';
 import SidebarLayerItem from './SidebarLayerItem';
-import PaperLayer from '../canvas/base/layer';
+import PaperArtboard from '../canvas/base/artboard';
+import PaperGroup from '../canvas/base/group';
+import PaperShape from '../canvas/base/shape';
 
 interface SidebarLayerProps {
-  layer: PaperLayer;
+  layer: PaperArtboard | PaperGroup | PaperShape;
   depth: number;
   path: string;
 }
@@ -14,21 +16,18 @@ interface SidebarLayerProps {
 const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
   const globalState = useContext(store);
   const { layer, depth, path } = props;
-  const layerPath = path ? `${path}/${layer.layer.id}` : `${layer.layer.id}`;
 
-  if (layer.isGroup) {
+  if (layer.type === 'Group' || layer.type === 'Artboard') {
     return (
       <SidebarLayerGroup
-        group={layer as PaperLayer}
-        depth={depth}
-        path={layerPath} />
+        group={layer as PaperGroup | PaperArtboard}
+        depth={depth} />
     );
   } else {
     return (
       <SidebarLayerItem
-        layer={layer as PaperLayer}
-        depth={depth}
-        path={layerPath} />
+        layer={layer as PaperShape}
+        depth={depth} />
     );
   }
 }

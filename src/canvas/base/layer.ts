@@ -1,59 +1,31 @@
-import paper, { Layer, Group } from 'paper';
-import PaperStyle from './style/style';
-import PaperLayers from './layers';
+import { v4 as uuidv4 } from 'uuid';
+import PaperGroup from './group';
+import PaperArtboard from './artboard';
+import PaperPage from './page';
+import PaperShape from './shape';
+import PaperStyle from './style';
+import PaperFills from './style/fills';
 
 interface PaperLayerProps {
-  shape: paper.Path | paper.CompoundPath;
-  isGroup: boolean;
-  layerOpts: any;
-  dispatch: any;
-  style?: {
-    shadows?: em.Shadow[];
-    fills?: em.Fill[];
-    innerShadows?: em.Shadow[];
-    borders?: em.Border[];
-  };
+  dispatch?: any;
+  parent: any;
 }
 
 class PaperLayer {
-  layer: paper.Layer;
-  style: PaperStyle;
-  type: 'Layer' | 'Artboard' | 'Group';
-  shape: paper.Path | paper.CompoundPath;
-  isGroup: boolean;
-  selected: boolean;
-  layers: PaperLayers;
+  id: string;
+  index: number;
+  interactive: boolean;
+  name: string;
+  path: string;
+  parent: PaperPage | PaperGroup | PaperArtboard | PaperShape | PaperStyle | PaperFills;
+  paperItem: paper.Layer | paper.Group | paper.Path | paper.CompoundPath | paper.Raster;
+  type: 'Page' | 'Artboard' | 'Group' | 'Shape';
   dispatch: any;
-  constructor({shape, isGroup, layerOpts, dispatch, style}: PaperLayerProps) {
+  constructor({dispatch, parent}: PaperLayerProps) {
+    this.id = uuidv4();
+    this.parent = parent;
+    this.path = this.parent ? `${this.parent.path}/${this.id}` : `${this.id}`;
     this.dispatch = dispatch;
-    this.shape = shape;
-    this.isGroup = isGroup;
-    this.type = isGroup ? 'Group' : 'Layer';
-    this.layer = new Layer({
-      children: [shape],
-      name: 'layer',
-      ...layerOpts
-    });
-    this.style = new PaperStyle({
-      shape: this.shape,
-      dispatch: this.dispatch,
-      fills: style.fills ? style.fills : [],
-      layerOpts: {
-        parent: this.layer
-      }
-    })
-    if (this.isGroup) {
-      this.layers = new PaperLayers({
-        dispatch: dispatch,
-        layerOpts: {
-          parent: this.layer
-        }
-      });
-    }
-    dispatch({
-      type: 'add-layer',
-      layer: this
-    });
   }
 }
 

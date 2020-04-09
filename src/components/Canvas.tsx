@@ -57,6 +57,12 @@ const Canvas = (): ReactElement => {
     }
   }, [drawShape]);
 
+  useEffect(() => {
+    if (paperApp) {
+      paperApp.setSelectedLayer(selectedLayer);
+    }
+  }, [selectedLayer]);
+
   return (
     <div
       className={`c-canvas ${drawShape ? 'c-canvas--drawing' : ''}`}

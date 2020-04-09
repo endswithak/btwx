@@ -1,6 +1,10 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import PaperLayer from './base/layer';
 import { Fill } from './base/style/fill';
+import PaperArtboard from './base/artboard';
+import PaperGroup from './base/group';
+import PaperShape from './base/shape';
+import PaperPage from './base/page';
 
 class DrawTool {
   tool: paper.Tool;
@@ -14,10 +18,11 @@ class DrawTool {
   maxDim: number;
   constrainedDims: paper.Point;
   centerPoint: paper.Point;
-  parent: paper.Layer;
+  page: PaperPage;
+  selectedLayer: PaperArtboard | PaperGroup | PaperShape;
   shiftModifier: boolean;
   dispatch: any;
-  constructor(drawShapeType: em.ShapeType, dispatch: any) {
+  constructor({drawShapeType, dispatch, selectedLayer, page}: {drawShapeType: em.ShapeType; dispatch: any; selectedLayer: PaperArtboard | PaperGroup | PaperShape; page: PaperPage}) {
     this.tool = new Tool();
     this.tool.onKeyDown = (e) => this.onKeyDown(e);
     this.tool.onKeyUp = (e) => this.onKeyUp(e);
@@ -34,7 +39,8 @@ class DrawTool {
     this.maxDim = 0;
     this.constrainedDims = new Point(0, 0);
     this.centerPoint = new Point(0, 0);
-    this.parent = null;
+    this.selectedLayer = selectedLayer;
+    this.page = page;
     this.shiftModifier = false;
     this.dispatch = dispatch;
   }
@@ -172,22 +178,52 @@ class DrawTool {
   }
   onMouseUp(event: paper.ToolEvent): void {
     if (this.to) {
-      paper.project.deselectAll();
-      new PaperLayer({
-        shape: this.renderShape({
-          fillColor: Color.random(),
-          name: this.drawShapeType
-        }),
-        isGroup: false,
-        layerOpts: {
-          name: this.drawShapeType,
-          parent: this.parent
-        },
-        dispatch: this.dispatch,
-        style: {
-          fills: [new Fill({})]
-        }
-      });
+      if (this.selectedLayer && (this.selectedLayer.type === 'Group' || this.selectedLayer.type === 'Artboard')) {
+        (this.selectedLayer as PaperGroup | PaperArtboard).addLayer({
+          layer: new PaperShape({
+            parent: this.selectedLayer,
+            shape: this.renderShape({
+              fillColor: Color.random(),
+              name: this.drawShapeType
+            }),
+            dispatch: this.dispatch,
+            name: this.drawShapeType,
+            style: {
+              fills: [new Fill({})]
+            }
+          })
+        });
+      } else if (this.selectedLayer && (this.selectedLayer.parent.type === 'Group' || this.selectedLayer.parent.type === 'Artboard')) {
+        (this.selectedLayer.parent as PaperGroup | PaperArtboard).addLayer({
+          layer: new PaperShape({
+            parent: this.selectedLayer.parent,
+            shape: this.renderShape({
+              fillColor: Color.random(),
+              name: this.drawShapeType
+            }),
+            dispatch: this.dispatch,
+            name: this.drawShapeType,
+            style: {
+              fills: [new Fill({})]
+            }
+          })
+        });
+      } else {
+        this.page.addLayer({
+          layer: new PaperShape({
+            parent: this.page,
+            shape: this.renderShape({
+              fillColor: Color.random(),
+              name: this.drawShapeType
+            }),
+            dispatch: this.dispatch,
+            name: this.drawShapeType,
+            style: {
+              fills: [new Fill({})]
+            }
+          })
+        });
+      }
       this.destroy();
     }
   }

@@ -6,12 +6,6 @@ interface PaperStyleProps {
   dispatch: any;
   layerOpts: any;
   fills: em.Fill[];
-  // style?: {
-  //   shadows?: em.Shadow[];
-  //   fills?: em.Fill[];
-  //   innerShadows?: em.Shadow[];
-  //   borders?: em.Border[];
-  // };
 }
 
 class PaperStyle {

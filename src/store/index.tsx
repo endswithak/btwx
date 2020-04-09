@@ -4,6 +4,9 @@ import reducers from './reducers';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import getTheme from './theme';
 import PaperApp from '../canvas/app';
+import PaperGroup from '../canvas/base/group';
+import PaperShape from '../canvas/base/shape';
+import PaperArtboard from '../canvas/base/artboard';
 
 interface StateProviderProps {
   children: React.ReactNode;
@@ -25,7 +28,7 @@ interface AppState {
   };
   artboards: paper.Group[];
   selectedArtboard: paper.Layer;
-  selectedLayer: paper.Layer;
+  selectedLayer: PaperGroup | PaperShape | PaperArtboard;
   selectedPaperLayer: paper.Item;
   selectedLayerPath: string;
   canvas: paper.View;
