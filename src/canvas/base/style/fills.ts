@@ -13,7 +13,6 @@ class PaperFills extends PaperGroup {
   constructor({fills, shape, parent}: PaperFillsProps) {
     super({parent});
     this.interactive = false;
-    this.paperItem.data.interactive = this.interactive;
     this.name = 'Fills';
     if (fills.length > 0) {
       fills.forEach((fill: em.Fill) => {

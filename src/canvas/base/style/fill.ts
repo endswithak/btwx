@@ -59,6 +59,7 @@ class PaperFill extends PaperLayer {
   colorFill(shape: paper.Path | paper.CompoundPath) {
     this.paperItem = shape.clone() as paper.Path | paper.CompoundPath;
     this.paperItem.fillColor = new Color(this.fill.color);
+    this.paperItem.data.layer = this;
   }
   // updateColor(color: string) {
   //   if (chroma.valid(color)) {
@@ -83,6 +84,7 @@ class PaperFill extends PaperLayer {
       origin: new Point(this.paperItem.bounds.width * from.x, this.paperItem.bounds.height * from.y),
       destination: new Point(this.paperItem.bounds.width * to.x, this.paperItem.bounds.height * to.y)
     };
+    this.paperItem.data.layer = this;
   }
   patternFill(shape: paper.Path | paper.CompoundPath) {
     const patternGroup = new Group();
@@ -142,6 +144,7 @@ class PaperFill extends PaperLayer {
         }
       }
       this.paperItem = patternGroup.rasterize();
+      this.paperItem.data.layer = this;
     }
   }
   getFillSize({imageWidth, imageHeight, shapeWidth, shapeHeight}: {imageWidth: number; imageHeight: number; shapeWidth: number; shapeHeight: number}) {

@@ -15,7 +15,6 @@ class PaperStyle extends PaperGroup {
     super({dispatch, parent});
     this.interactive = false;
     this.paperItem.parent = this.parent.paperItem;
-    this.paperItem.data.interactive = this.interactive;
     this.name = 'Style';
     this.addLayer({
       layer: new PaperFills({

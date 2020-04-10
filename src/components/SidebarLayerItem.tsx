@@ -1,5 +1,4 @@
-import React, { useContext, ReactElement } from 'react';
-import FileFormat from '@sketch-hq/sketch-file-format-ts';
+import React, { useContext, ReactElement, useEffect } from 'react';
 import { store } from '../store';
 import PaperArtboard from '../canvas/base/artboard';
 import PaperGroup from '../canvas/base/group';
@@ -17,14 +16,12 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
   const globalState = useContext(store);
   const { dispatch, selectedLayer, theme } = globalState;
   const { layer, depth, isGroup, isOpen, setIsOpen } = props;
-  const isSelected = selectedLayer && layer.id === selectedLayer.id;
 
   const handleNameClick = (): void => {
-    console.log(layer);
-    dispatch({
-      type: 'set-selected-layer',
-      layer: layer
-    });
+    // dispatch({
+    //   type: 'set-selected-layer',
+    //   layer: layer
+    // });
   }
 
   const handleChevronClick = (): void => {
@@ -35,7 +32,7 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
     <div
       className='c-layers-sidebar__layer-item'
       style={{
-        background: isSelected
+        background: layer.selected
         ? theme.palette.primary
         : theme.background.z1
       }}>
@@ -43,7 +40,7 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
         className='c-sidebar-layer__name'
         style={{
           paddingLeft: depth * 16,
-          color: isSelected
+          color: layer.selected
           ? theme.text.onPrimary
           : theme.text.base
         }}
@@ -60,7 +57,7 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
               height="24"
               viewBox="0 0 24 24"
               style={{
-                fill: isSelected
+                fill: layer.selected
                 ? theme.text.onPrimary
                 : theme.text.lighter
               }}>

@@ -31,6 +31,7 @@ interface AppState {
   selectedLayer: PaperGroup | PaperShape | PaperArtboard;
   selectedPaperLayer: paper.Item;
   selectedLayerPath: string;
+  selection: (PaperGroup | PaperShape)[];
   canvas: paper.View;
   paperApp: PaperApp;
   drawShape: boolean;
@@ -56,6 +57,7 @@ const initialState: AppState = {
   selectedLayer: null,
   selectedPaperLayer: null,
   selectedLayerPath: null,
+  selection: [],
   canvas: null,
   paperApp: null,
   drawShape: false,

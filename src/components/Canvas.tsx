@@ -47,25 +47,9 @@ const Canvas = (): ReactElement => {
     }
   }, [layersSidebarWidth, stylesSidebarWidth]);
 
-  useEffect(() => {
-    if (paperApp) {
-      if (drawShape) {
-        paperApp.enableDrawTool(drawShapeType);
-      } else {
-        paperApp.disableDrawTool();
-      }
-    }
-  }, [drawShape]);
-
-  useEffect(() => {
-    if (paperApp) {
-      paperApp.setSelectedLayer(selectedLayer);
-    }
-  }, [selectedLayer]);
-
   return (
     <div
-      className={`c-canvas ${drawShape ? 'c-canvas--drawing' : ''}`}
+      className={`c-canvas ${paperApp && paperApp.drawTool.enabled ? 'c-canvas--drawing' : ''}`}
       ref={canvasContainerRef}>
       <canvas
         id='canvas-main'

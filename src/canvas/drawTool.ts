@@ -1,13 +1,14 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
-import PaperLayer from './base/layer';
 import { Fill } from './base/style/fill';
-import PaperArtboard from './base/artboard';
-import PaperGroup from './base/group';
 import PaperShape from './base/shape';
 import PaperPage from './base/page';
+import SelectionTool from './selectionTool';
+import PaperApp from './app';
 
 class DrawTool {
+  app: PaperApp;
   tool: paper.Tool;
+  enabled: boolean;
   drawShapeType: em.ShapeType;
   outline: paper.Path;
   tooltip: paper.PointText;
@@ -18,18 +19,17 @@ class DrawTool {
   maxDim: number;
   constrainedDims: paper.Point;
   centerPoint: paper.Point;
-  page: PaperPage;
-  selectedLayer: PaperArtboard | PaperGroup | PaperShape;
   shiftModifier: boolean;
-  dispatch: any;
-  constructor({drawShapeType, dispatch, selectedLayer, page}: {drawShapeType: em.ShapeType; dispatch: any; selectedLayer: PaperArtboard | PaperGroup | PaperShape; page: PaperPage}) {
+  constructor({app}: {app: PaperApp}) {
+    this.app = app;
     this.tool = new Tool();
+    this.enabled = false;
     this.tool.onKeyDown = (e) => this.onKeyDown(e);
     this.tool.onKeyUp = (e) => this.onKeyUp(e);
     this.tool.onMouseDown = (e) => this.onMouseDown(e);
     this.tool.onMouseDrag = (e) => this.onMouseDrag(e);
     this.tool.onMouseUp = (e) => this.onMouseUp(e);
-    this.drawShapeType = drawShapeType;
+    this.drawShapeType = 'rectangle';
     this.outline = null;
     this.tooltip = null;
     this.from = null;
@@ -39,26 +39,22 @@ class DrawTool {
     this.maxDim = 0;
     this.constrainedDims = new Point(0, 0);
     this.centerPoint = new Point(0, 0);
-    this.selectedLayer = selectedLayer;
-    this.page = page;
     this.shiftModifier = false;
-    this.dispatch = dispatch;
   }
-  destroy(): void {
+  enable(shape: em.ShapeType): void {
+    this.tool.activate();
+    this.drawShapeType = shape;
+    this.enabled = true;
+  }
+  disable(): void {
+    this.app.selectionTool.tool.activate();
     if (this.tooltip) {
       this.tooltip.remove();
     }
     if (this.outline) {
       this.outline.remove();
     }
-    if (this.tool) {
-      this.tool.remove();
-    }
-    if (this.dispatch) {
-      this.dispatch({
-        type: 'disable-draw-shape'
-      });
-    }
+    this.enabled = false;
   }
   renderShape(shapeOpts: any) {
     switch(this.drawShapeType) {
@@ -146,7 +142,8 @@ class DrawTool {
         break;
       }
       case 'escape': {
-        this.destroy();
+        this.disable();
+        break;
       }
     }
   }
@@ -178,53 +175,21 @@ class DrawTool {
   }
   onMouseUp(event: paper.ToolEvent): void {
     if (this.to) {
-      if (this.selectedLayer && (this.selectedLayer.type === 'Group' || this.selectedLayer.type === 'Artboard')) {
-        (this.selectedLayer as PaperGroup | PaperArtboard).addLayer({
-          layer: new PaperShape({
-            parent: this.selectedLayer,
-            shape: this.renderShape({
-              fillColor: Color.random(),
-              name: this.drawShapeType
-            }),
-            dispatch: this.dispatch,
-            name: this.drawShapeType,
-            style: {
-              fills: [new Fill({})]
-            }
-          })
-        });
-      } else if (this.selectedLayer && (this.selectedLayer.parent.type === 'Group' || this.selectedLayer.parent.type === 'Artboard')) {
-        (this.selectedLayer.parent as PaperGroup | PaperArtboard).addLayer({
-          layer: new PaperShape({
-            parent: this.selectedLayer.parent,
-            shape: this.renderShape({
-              fillColor: Color.random(),
-              name: this.drawShapeType
-            }),
-            dispatch: this.dispatch,
-            name: this.drawShapeType,
-            style: {
-              fills: [new Fill({})]
-            }
-          })
-        });
-      } else {
-        this.page.addLayer({
-          layer: new PaperShape({
-            parent: this.page,
-            shape: this.renderShape({
-              fillColor: Color.random(),
-              name: this.drawShapeType
-            }),
-            dispatch: this.dispatch,
-            name: this.drawShapeType,
-            style: {
-              fills: [new Fill({})]
-            }
-          })
-        });
-      }
-      this.destroy();
+      this.app.page.addLayer({
+        layer: new PaperShape({
+          parent: this.app.page,
+          shape: this.renderShape({
+            fillColor: Color.random(),
+            name: this.drawShapeType
+          }),
+          dispatch: this.app.dispatch,
+          name: this.drawShapeType,
+          style: {
+            fills: [new Fill({})]
+          }
+        })
+      });
+      this.disable();
     }
   }
 }

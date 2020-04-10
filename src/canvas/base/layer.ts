@@ -15,6 +15,7 @@ class PaperLayer {
   id: string;
   index: number;
   interactive: boolean;
+  selected: boolean;
   name: string;
   path: string;
   parent: PaperPage | PaperGroup | PaperArtboard | PaperShape | PaperStyle | PaperFills;
@@ -26,6 +27,7 @@ class PaperLayer {
     this.parent = parent;
     this.path = this.parent ? `${this.parent.path}/${this.id}` : `${this.id}`;
     this.dispatch = dispatch;
+    this.selected = false;
   }
 }
 

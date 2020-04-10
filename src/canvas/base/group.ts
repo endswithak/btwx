@@ -26,10 +26,7 @@ class PaperGroup extends PaperLayer {
     this.interactive = true;
     this.paperItem = new Group({
       data: {
-        interactive: this.interactive,
-        path: this.path,
-        type: this.type,
-        id: this.id
+        layer: this
       }
     });
   }

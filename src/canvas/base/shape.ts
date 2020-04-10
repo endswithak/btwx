@@ -28,10 +28,7 @@ class PaperShape extends PaperLayer {
     this.paperItem = new Layer({
       children: [shape],
       data: {
-        interactive: this.interactive,
-        path: this.path,
-        type: this.type,
-        id: this.id
+        layer: this
       }
     });
     this.style = new PaperStyle({

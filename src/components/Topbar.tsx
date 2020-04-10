@@ -1,20 +1,22 @@
-import React, { useContext, ReactElement } from 'react';
+import React, { useContext, ReactElement, useEffect } from 'react';
 import { store } from '../store';
 
 const Topbar = (): ReactElement => {
   const globalState = useContext(store);
-  const { theme, dispatch, drawShape } = globalState;
+  const { theme, dispatch, drawShape, paperApp, drawShapeType } = globalState;
 
-  const handleClick = (shape: string) => {
-    if (drawShape) {
+  const handleClick = (shape: em.ShapeType) => {
+    if (drawShapeType === shape) {
       dispatch({
         type: 'disable-draw-shape'
       });
+      paperApp.drawTool.disable();
     } else {
       dispatch({
         type: 'enable-draw-shape',
         drawShapeType: shape
       });
+      paperApp.drawTool.enable(shape);
     }
   }
 
