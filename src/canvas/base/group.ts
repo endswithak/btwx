@@ -6,39 +6,39 @@ import PaperArtboard from './artboard';
 import PaperFill from './style/fill';
 import PaperFills from './style/fills';
 import PaperPage from './page';
+import TreeNode from './treeNode';
 
 interface PaperGroupProps {
-  parent: any;
+  //parent: any;
+  //layers?: (PaperShape | PaperGroup)[];
+  layers?: TreeNode[];
   dispatch?: any;
   name?: string;
-  style?: {
-    fills?: em.Fill[];
-  };
+  // style?: {
+  //   fills?: em.Fill[];
+  // };
 }
 
-class PaperGroup extends PaperLayer {
-  layers: (PaperShape | PaperGroup | PaperArtboard | PaperFill | PaperFills)[];
-  constructor({dispatch, name, style, parent}: PaperGroupProps) {
-    super({dispatch, parent});
-    this.type = 'Group';
-    this.name = name ? name : 'Group';
-    this.layers = [];
+class PaperGroup extends TreeNode {
+  //layers: (PaperShape | PaperGroup | PaperArtboard | PaperFill | PaperFills)[];
+  constructor({dispatch, name, layers}: PaperGroupProps) {
+    super({name, type: 'Group'});
     this.interactive = true;
+    // this.type = 'Group';
+    // this.name = name ? name : 'Group';
+    //this.layers = [];
+    //this.interactive = true;
     this.paperItem = new Group({
       data: {
-        layer: this
+        node: this
       }
     });
-  }
-  addLayer({layer, index}: {layer: PaperShape | PaperGroup | PaperArtboard | PaperFill | PaperFills; index?: number}) {
-    if (index) {
-      layer.index = index;
-      this.paperItem.insertChild(index, layer.paperItem);
-      this.layers.splice(index, 0, layer);
-    } else {
-      layer.index = this.layers.length;
-      this.paperItem.addChild(layer.paperItem);
-      this.layers.push(layer);
+    if (layers && layers.length > 0) {
+      layers.forEach((layer) => {
+        this.addChild({
+          node: layer
+        });
+      });
     }
   }
 }

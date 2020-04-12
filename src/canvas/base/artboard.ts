@@ -1,27 +1,40 @@
 import paper, { Layer, Group, Path, Point, Size, } from 'paper';
-import PaperLayer from './layer';
 import PaperPage from './page';
-import PaperShape from './shape';
-import PaperGroup from './group';
+import PaperLayer from './layer';
+import {Fill} from './style/fill';
+import PaperStyle from './style';
+import TreeNode from './treeNode';
 
 interface PaperArtboardProps {
   size: {width: number; height: number};
   position: {x: number; y: number};
-  dispatch: any;
-  parent: PaperPage;
+  dispatch?: any;
+  //parent: PaperPage;
   name?: string;
 }
 
-class PaperArtboard extends PaperGroup {
-  constructor({size, position, name, dispatch, parent}: PaperArtboardProps) {
-    super({dispatch, parent});
-    this.type = 'Artboard';
-    this.name = name ? name : 'Artboard';
-    this.paperItem.children = [new Path.Rectangle({
+class PaperArtboard extends TreeNode {
+  style: PaperStyle;
+  constructor({size, position, name, dispatch}: PaperArtboardProps) {
+    super({name, type: 'Artboard'});
+    this.interactive = true;
+    this.paperItem = new Group({
+      data: {
+        node: this
+      }
+    });
+    const shape = new Path.Rectangle({
       point: new Point(position.x, position.y),
       size: new Size(size.width, size.height),
-      fillColor: 'white'
-    })];
+      fillColor: 'white',
+      insert: false
+    });
+    this.style = new PaperStyle({
+      style: {
+        fills: [new Fill({fillType: 'Color', color: '#fff'})],
+      },
+      shape: shape
+    });
   }
 }
 

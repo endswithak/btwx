@@ -1,41 +1,36 @@
 import { v4 as uuidv4 } from 'uuid';
 import paper, { Layer, Group } from 'paper';
-import PaperLayer from './layer';
 import PaperStyle from './style';
-import PaperGroup from './group';
-import PaperPage from './page';
-import PaperArtboard from './artboard';
+import TreeNode from './treeNode';
 
 interface PaperShapeProps {
-  dispatch: any;
   shape: paper.Path | paper.CompoundPath;
-  parent: any;
+  dispatch?: any;
   name?: string;
   style?: {
     fills?: em.Fill[];
   };
 }
 
-class PaperShape extends PaperLayer {
+class PaperShape extends TreeNode {
   shape: paper.Path | paper.CompoundPath;
   style: PaperStyle;
-  constructor({shape, dispatch, style, name, parent}: PaperShapeProps) {
-    super({dispatch, parent});
-    this.shape = shape;
+  constructor({shape, style, name}: PaperShapeProps) {
+    super({name, type: 'Shape'});
     this.interactive = true;
-    this.type = 'Shape';
-    this.name = name ? name : 'Shape';
+    this.shape = shape;
     this.paperItem = new Layer({
-      children: [shape],
       data: {
-        layer: this
+        node: this
       }
     });
-    this.style = new PaperStyle({
-      dispatch: this.dispatch,
-      fills: style.fills ? style.fills : [],
-      parent: this,
-      shape: this.shape
+    this.style = this.addChild({
+      node: new PaperStyle({
+        style: {
+          fills: style.fills ? style.fills : [],
+        },
+        shape: this.shape
+      })
     });
   }
 }

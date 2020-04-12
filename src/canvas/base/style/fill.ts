@@ -3,6 +3,7 @@ import chroma from 'chroma-js';
 import PaperLayer from '../layer';
 import PaperFills from './fills';
 import PaperShape from '../shape';
+import TreeNode from '../treeNode';
 
 export class Fill {
   fillType?: em.FillType;
@@ -34,16 +35,14 @@ export class Fill {
 interface PaperFillProps {
   fill: Fill;
   shape: paper.Path | paper.CompoundPath;
-  parent: any;
 }
 
-class PaperFill extends PaperLayer {
+class PaperFill extends TreeNode {
   paperItemShape: paper.Path | paper.CompoundPath;
   fill: Fill;
-  constructor({fill, shape, parent}: PaperFillProps) {
-    super({parent});
+  constructor({fill, shape}: PaperFillProps) {
+    super({name: 'Fill', type: 'Style'});
     this.fill = fill;
-    this.interactive = false;
     switch(fill.fillType) {
       case 'Color':
         this.colorFill(shape);
@@ -59,7 +58,7 @@ class PaperFill extends PaperLayer {
   colorFill(shape: paper.Path | paper.CompoundPath) {
     this.paperItem = shape.clone() as paper.Path | paper.CompoundPath;
     this.paperItem.fillColor = new Color(this.fill.color);
-    this.paperItem.data.layer = this;
+    this.paperItem.data.node = this;
   }
   // updateColor(color: string) {
   //   if (chroma.valid(color)) {

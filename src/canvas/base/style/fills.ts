@@ -2,25 +2,27 @@ import paper, { Layer, Color, Raster, Point, SymbolDefinition, Group, GradientSt
 import PaperFill from './fill';
 import PaperStyle from '../style';
 import PaperGroup from '../group';
+import TreeNode from '../treeNode';
 
 interface PaperFillsProps {
   fills: em.Fill[];
   shape: paper.Path | paper.CompoundPath;
-  parent: any;
 }
 
-class PaperFills extends PaperGroup {
-  constructor({fills, shape, parent}: PaperFillsProps) {
-    super({parent});
-    this.interactive = false;
-    this.name = 'Fills';
+class PaperFills extends TreeNode {
+  constructor({fills, shape}: PaperFillsProps) {
+    super({name: 'Fills', type: 'Style'});
+    this.paperItem = new Group({
+      data: {
+        node: this
+      }
+    });
     if (fills.length > 0) {
       fills.forEach((fill: em.Fill) => {
-        this.addLayer({
-          layer: new PaperFill({
+        this.addChild({
+          node: new PaperFill({
             fill: fill,
-            shape: shape,
-            parent: this
+            shape: shape
           })
         });
       });

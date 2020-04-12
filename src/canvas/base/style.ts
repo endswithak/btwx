@@ -1,26 +1,27 @@
 import paper, { Layer, Group } from 'paper';
 import PaperFills from './style/fills';
-import PaperGroup from './group';
+import TreeNode from './treeNode';
 
 interface PaperStyleProps {
-  dispatch: any;
-  fills: em.Fill[];
+  style: {
+    fills: em.Fill[];
+  };
   shape: paper.Path | paper.CompoundPath;
-  parent?: any;
 }
 
-class PaperStyle extends PaperGroup {
-  fills: PaperFills;
-  constructor({parent, dispatch, fills, shape}: PaperStyleProps) {
-    super({dispatch, parent});
-    this.interactive = false;
-    this.paperItem.parent = this.parent.paperItem;
-    this.name = 'Style';
-    this.addLayer({
-      layer: new PaperFills({
-        fills: fills,
-        shape: shape,
-        parent: this
+class PaperStyle extends TreeNode {
+  fills?: PaperFills;
+  constructor({style, shape}: PaperStyleProps) {
+    super({name: 'Style', type: 'Style'});
+    this.paperItem = new Group({
+      data: {
+        node: this
+      }
+    });
+    this.fills = this.addChild({
+      node: new PaperFills({
+        fills: style.fills,
+        shape: shape
       })
     });
   }

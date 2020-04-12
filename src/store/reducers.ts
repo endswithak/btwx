@@ -13,30 +13,6 @@ const reducers = (state: any, action: any): any => {
         sketchImages: action.sketchImages
       };
     }
-    case 'set-selected-layer': {
-      return {
-        ...state,
-        selectedLayer: action.layer,
-      };
-    }
-    case 'set-selected-artboard': {
-      return {
-        ...state,
-        selectedArtboard: action.selectedArtboard,
-      };
-    }
-    case 'set-selected-paper-layer': {
-      return {
-        ...state,
-        selectedPaperLayer: action.selectedPaperLayer
-      };
-    }
-    case 'set-canvas': {
-      return {
-        ...state,
-        canvas: action.canvas
-      };
-    }
     case 'set-paper-app': {
       return {
         ...state,
@@ -55,30 +31,45 @@ const reducers = (state: any, action: any): any => {
         stylesSidebarWidth: action.stylesSidebarWidth
       };
     }
-    case 'enable-draw-shape': {
+    case 'enable-draw-tool': {
+      state.paperApp.drawTool.enable(action.shape);
       return {
         ...state,
-        drawShape: true,
-        drawShapeType: action.drawShapeType
+        drawing: true,
+        drawShape: action.shape
       };
     }
-    case 'disable-draw-shape': {
+    case 'disable-draw-tool': {
+      state.paperApp.drawTool.disable();
       return {
         ...state,
-        drawShape: false,
-        drawShapeType: null
+        drawing: false,
+        drawShape: null
       };
     }
-    case 'add-artboard': {
+    case 'add-to-selection': {
       return {
         ...state,
-        artboards: [...state.artboards, action.artboard]
+        selection: state.paperApp.selectionTool.addToSelection(action.layer)
       };
     }
-    case 'add-layer': {
+    case 'remove-from-selection': {
       return {
         ...state,
-        layers: [...state.layers, action.layer]
+        selection: state.paperApp.selectionTool.removeFromSelection(action.layer)
+      };
+    }
+    case 'clear-selection': {
+      return {
+        ...state,
+        selection: state.paperApp.selectionTool.clearSelection()
+      };
+    }
+    case 'new-selection': {
+      state.paperApp.selectionTool.clearSelection();
+      return {
+        ...state,
+        selection: state.paperApp.selectionTool.addToSelection(action.layer)
       };
     }
     default:

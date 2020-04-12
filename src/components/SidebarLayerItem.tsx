@@ -14,14 +14,26 @@ interface SidebarLayerItemProps {
 
 const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
   const globalState = useContext(store);
-  const { dispatch, selectedLayer, theme } = globalState;
+  const { dispatch, theme } = globalState;
   const { layer, depth, isGroup, isOpen, setIsOpen } = props;
 
-  const handleNameClick = (): void => {
-    // dispatch({
-    //   type: 'set-selected-layer',
-    //   layer: layer
-    // });
+  const handleNameClick = (e: MouseEvent): void => {
+    if (layer.selected && e.metaKey) {
+      dispatch({
+        type: 'remove-from-selection',
+        layer: layer
+      });
+    } else if (e.metaKey) {
+      dispatch({
+        type: 'add-to-selection',
+        layer: layer
+      });
+    } else {
+      dispatch({
+        type: 'new-selection',
+        layer: layer
+      });
+    }
   }
 
   const handleChevronClick = (): void => {

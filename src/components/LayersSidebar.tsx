@@ -9,7 +9,7 @@ let lsDeltaX = 0;
 
 const LayersSidebar = (): ReactElement => {
   const globalState = useContext(store);
-  const { selectedArtboard, theme, dispatch, layersSidebarWidth, artboards, paperApp } = globalState;
+  const { theme, dispatch, layersSidebarWidth,  paperApp } = globalState;
 
   const handleDragStart = (e) => {
     lsDeltaX = e.clientX;
@@ -39,7 +39,7 @@ const LayersSidebar = (): ReactElement => {
       {
         paperApp
         ? <SidebarLayers
-            layers={paperApp.page.layers}
+            layers={paperApp.page.children}
             depth={0} />
         : null
       }

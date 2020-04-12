@@ -25,7 +25,7 @@ const SidebarLayerGroup = (props: SidebarLayerGroupProps): ReactElement => {
       {
         isOpen
         ? <SidebarLayers
-            layers={group.layers}
+            layers={group.children}
             depth={depth + 1} />
         : null
       }

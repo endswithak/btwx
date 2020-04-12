@@ -40,20 +40,29 @@ import './styles/index.sass';
 import 'rc-slider/assets/index.css';
 import 'rc-checkbox/assets/index.css';
 
+// window.renderMainWindow = () => {
+//   readSketchFile('/Users/erik/Desktop/e-sketch-test.sketch').then((file)=> {
+//     ReactDOM.render(
+//       <StateProvider>
+//         <App
+//           sketchDocument={file.document}
+//           sketchMeta={file.meta}
+//           sketchUser={file.user}
+//           sketchPages={file.pages}
+//           sketchImages={file.images} />
+//       </StateProvider>,
+//       document.getElementById('root')
+//     );
+//   });
+// }
+
 window.renderMainWindow = () => {
-  readSketchFile('/Users/erik/Desktop/e-sketch-test.sketch').then((file)=> {
-    ReactDOM.render(
-      <StateProvider>
-        <App
-          sketchDocument={file.document}
-          sketchMeta={file.meta}
-          sketchUser={file.user}
-          sketchPages={file.pages}
-          sketchImages={file.images} />
-      </StateProvider>,
-      document.getElementById('root')
-    );
-  });
+  ReactDOM.render(
+    <StateProvider>
+      <App />
+    </StateProvider>,
+    document.getElementById('root')
+  );
 }
 
 window.renderPreviewWindow = (globalState) => {

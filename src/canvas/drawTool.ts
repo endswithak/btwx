@@ -1,8 +1,6 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import { Fill } from './base/style/fill';
 import PaperShape from './base/shape';
-import PaperPage from './base/page';
-import SelectionTool from './selectionTool';
 import PaperApp from './app';
 
 class DrawTool {
@@ -41,19 +39,33 @@ class DrawTool {
     this.centerPoint = new Point(0, 0);
     this.shiftModifier = false;
   }
-  enable(shape: em.ShapeType): void {
-    this.tool.activate();
-    this.drawShapeType = shape;
-    this.enabled = true;
-  }
-  disable(): void {
-    this.app.selectionTool.tool.activate();
+  clearProps(): void {
     if (this.tooltip) {
       this.tooltip.remove();
     }
     if (this.outline) {
       this.outline.remove();
     }
+    this.outline = null;
+    this.tooltip = null;
+    this.from = null;
+    this.to = null;
+    this.pointDiff = new Point(0, 0);
+    this.dims = new Size(0, 0);
+    this.maxDim = 0;
+    this.constrainedDims = new Point(0, 0);
+    this.centerPoint = new Point(0, 0);
+    this.shiftModifier = false;
+  }
+  enable(shape: em.ShapeType): void {
+    this.clearProps();
+    this.tool.activate();
+    this.drawShapeType = shape;
+    this.enabled = true;
+  }
+  disable(): void {
+    this.clearProps();
+    this.app.selectionTool.tool.activate();
     this.enabled = false;
   }
   renderShape(shapeOpts: any) {
@@ -142,7 +154,10 @@ class DrawTool {
         break;
       }
       case 'escape': {
-        this.disable();
+        //this.disable();
+        this.app.dispatch({
+          type: 'disable-draw-tool'
+        });
         break;
       }
     }
@@ -175,21 +190,21 @@ class DrawTool {
   }
   onMouseUp(event: paper.ToolEvent): void {
     if (this.to) {
-      this.app.page.addLayer({
-        layer: new PaperShape({
-          parent: this.app.page,
+      this.app.page.addChild({
+        node: new PaperShape({
           shape: this.renderShape({
-            fillColor: Color.random(),
-            name: this.drawShapeType
+            name: this.drawShapeType,
+            insert: false
           }),
-          dispatch: this.app.dispatch,
           name: this.drawShapeType,
           style: {
             fills: [new Fill({})]
           }
         })
       });
-      this.disable();
+      this.app.dispatch({
+        type: 'disable-draw-tool'
+      });
     }
   }
 }

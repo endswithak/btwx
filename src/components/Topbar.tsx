@@ -3,21 +3,23 @@ import { store } from '../store';
 
 const Topbar = (): ReactElement => {
   const globalState = useContext(store);
-  const { theme, dispatch, drawShape, paperApp, drawShapeType } = globalState;
+  const { theme, dispatch, paperApp, drawShape } = globalState;
 
-  const handleClick = (shape: em.ShapeType) => {
-    if (drawShapeType === shape) {
+  const handleDrawClick = (shape: em.ShapeType) => {
+    if (drawShape === shape) {
       dispatch({
-        type: 'disable-draw-shape'
+        type: 'disable-draw-tool'
       });
-      paperApp.drawTool.disable();
     } else {
       dispatch({
-        type: 'enable-draw-shape',
-        drawShapeType: shape
+        type: 'enable-draw-tool',
+        shape: shape
       });
-      paperApp.drawTool.enable(shape);
     }
+  }
+
+  const handleGroupClick = () => {
+
   }
 
   return (
@@ -28,28 +30,33 @@ const Topbar = (): ReactElement => {
       }}>
       <button
         className='c-topbar__button'
-        onClick={() => handleClick('rectangle')}>
+        onClick={() => handleDrawClick('rectangle')}>
         R
       </button>
       <button
         className='c-topbar__button'
-        onClick={() => handleClick('rounded')}>
+        onClick={() => handleDrawClick('rounded')}>
         D
       </button>
       <button
         className='c-topbar__button'
-        onClick={() => handleClick('ellipse')}>
+        onClick={() => handleDrawClick('ellipse')}>
         E
       </button>
       <button
         className='c-topbar__button'
-        onClick={() => handleClick('star')}>
+        onClick={() => handleDrawClick('star')}>
         S
       </button>
       <button
         className='c-topbar__button'
-        onClick={() => handleClick('polygon')}>
+        onClick={() => handleDrawClick('polygon')}>
         P
+      </button>
+      <button
+        className='c-topbar__button c-topbar__button--blue'
+        onClick={() => handleGroupClick()}>
+        G
       </button>
     </div>
   );

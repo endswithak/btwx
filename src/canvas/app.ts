@@ -5,11 +5,13 @@ import PaperPage from './base/page';
 import PaperArtboard from './base/artboard';
 import PaperGroup from './base/group';
 import PaperShape from './base/shape';
+import Tree from './base/tree';
+import PaperDocument from './base/document';
+import TreeNode from './base/treeNode';
 
 interface PaperAppProps {
   canvas: HTMLCanvasElement;
   dispatch: any;
-  page?: PaperPage;
 }
 
 class PaperApp {
@@ -17,13 +19,17 @@ class PaperApp {
   scope: paper.PaperScope;
   drawTool: DrawTool;
   selectionTool: SelectionTool;
+  pageTree: Tree;
   page: PaperPage;
-  selection: (PaperGroup | PaperShape)[];
-  constructor({canvas, dispatch, page}: PaperAppProps) {
+  selection: TreeNode[];
+  constructor({canvas, dispatch}: PaperAppProps) {
     paper.setup(canvas);
     this.scope = paper;
     this.dispatch = dispatch;
-    this.page = page ? page : new PaperPage({dispatch});
+    this.pageTree = new Tree({
+      rootNode: new PaperPage({})
+    });
+    this.page = this.pageTree.root;
     this.selection = [];
     this.selectionTool = new SelectionTool({
       app: this
@@ -31,14 +37,6 @@ class PaperApp {
     this.drawTool = new DrawTool({
       app: this
     });
-    // this.scope.view.on('click', (e: paper.ToolEvent) => {
-    //   if (!this.page.paperItem.hitTest(e.point)) {
-    //     dispatch({
-    //       type: 'set-selected-layer',
-    //       layer: null
-    //     });
-    //   }
-    // });
   }
   onWheel(e: WheelEvent): void {
     if (e.ctrlKey) {

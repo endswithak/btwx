@@ -1,33 +1,24 @@
 import { v4 as uuidv4 } from 'uuid';
-import PaperGroup from './group';
-import PaperArtboard from './artboard';
-import PaperPage from './page';
-import PaperShape from './shape';
-import PaperStyle from './style';
-import PaperFills from './style/fills';
 
 interface PaperLayerProps {
+  type: 'Page' | 'Artboard' | 'Group' | 'Shape' | 'Document';
+  name?: string;
   dispatch?: any;
-  parent: any;
 }
 
 class PaperLayer {
   id: string;
-  index: number;
-  interactive: boolean;
   selected: boolean;
   name: string;
-  path: string;
-  parent: PaperPage | PaperGroup | PaperArtboard | PaperShape | PaperStyle | PaperFills;
   paperItem: paper.Layer | paper.Group | paper.Path | paper.CompoundPath | paper.Raster;
-  type: 'Page' | 'Artboard' | 'Group' | 'Shape';
+  type: 'Page' | 'Artboard' | 'Group' | 'Shape' | 'Document';
   dispatch: any;
-  constructor({dispatch, parent}: PaperLayerProps) {
+  constructor({type, name, dispatch}: PaperLayerProps) {
     this.id = uuidv4();
-    this.parent = parent;
-    this.path = this.parent ? `${this.parent.path}/${this.id}` : `${this.id}`;
-    this.dispatch = dispatch;
     this.selected = false;
+    this.type = type;
+    this.name = name ? name : this.type;
+    this.dispatch = dispatch;
   }
 }
 

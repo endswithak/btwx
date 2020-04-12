@@ -6,25 +6,14 @@ import StylesSidebar from './StylesSidebar';
 import Topbar from './Topbar';
 import { store } from '../store';
 
-interface AppProps {
-  sketchDocument: FileFormat.Document;
-  sketchMeta: FileFormat.Meta;
-  sketchUser: FileFormat.User;
-  sketchPages: FileFormat.Page[];
-  sketchImages: {
-    [id: string]: Buffer;
-  };
-}
-
-const App = (props: AppProps): ReactElement => {
+const App = (): ReactElement => {
   const app = useRef<HTMLDivElement>(null);
   const globalState = useContext(store);
-  const { dispatch, ready, selectedLayerPath, theme, canvas } = globalState;
+  const { dispatch, ready, theme } = globalState;
 
   useEffect(() => {
     dispatch({
       type: 'initialize-app',
-      ...props,
       ready: true
     });
   }, []);

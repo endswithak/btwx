@@ -1,17 +1,21 @@
 import paper, { Layer, Group, Path } from 'paper';
 import PaperLayer from './layer';
-import PaperShape from './shape';
-import PaperGroup from './group';
+import TreeNode from './treeNode';
 
 interface PaperPageProps {
-  dispatch: any;
+  dispatch?: any;
+  name?: string;
 }
 
-class PaperPage extends PaperGroup {
+class PaperPage extends TreeNode {
   constructor({dispatch}: PaperPageProps) {
-    super({dispatch, parent: null});
-    this.type = 'Page';
-    this.name = 'Page';
+    super({name, type: 'Page'});
+    this.interactive = true;
+    this.paperItem = new Group({
+      data: {
+        node: this
+      }
+    });
   }
 }
 

@@ -6,24 +6,14 @@ const Canvas = (): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const globalState = useContext(store);
-  const { selectedArtboard, selectedLayer, selectedLayerPath, sketchDocument, sketchPages, sketchImages, dispatch, paperApp, theme, layersSidebarWidth, stylesSidebarWidth, drawShape, drawShapeType } = globalState;
+  const { drawing, dispatch, paperApp, theme, layersSidebarWidth, stylesSidebarWidth } = globalState;
 
   useEffect(() => {
     canvasRef.current.width = canvasContainerRef.current.clientWidth;
     canvasRef.current.height = canvasContainerRef.current.clientHeight;
     renderCanvas({
-      sketchDocument: sketchDocument,
-      sketchPages: sketchPages,
-      sketchImages: sketchImages,
       dispatch: dispatch,
       canvas: canvasRef.current
-    })
-    .then((paperApp) => {
-      dispatch({
-        type: 'set-paper-app',
-        paperApp: paperApp
-      });
-      console.log('done');
     });
   }, []);
 
@@ -49,7 +39,7 @@ const Canvas = (): ReactElement => {
 
   return (
     <div
-      className={`c-canvas ${paperApp && paperApp.drawTool.enabled ? 'c-canvas--drawing' : ''}`}
+      className={`c-canvas ${drawing ? 'c-canvas--drawing' : ''}`}
       ref={canvasContainerRef}>
       <canvas
         id='canvas-main'
