@@ -98,8 +98,12 @@ class SelectionTool {
         break;
       }
       case 'backspace': {
-        this.app.selection.forEach((layer) => {
-          (layer as TreeNode).remove();
+        this.app.selection.forEach((node) => {
+          this.app.dispatch({
+            type: 'remove-node',
+            node: node,
+            fromNode: node.parent
+          });
         });
         this.app.dispatch({
           type: 'clear-selection'

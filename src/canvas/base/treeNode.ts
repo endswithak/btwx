@@ -15,6 +15,7 @@ class TreeNode {
   type: 'Page' | 'Artboard' | 'Group' | 'Shape' | 'Document' | 'Style';
   parent: TreeNode;
   children: TreeNode[];
+  title: string;
   tree: Tree;
   constructor({type, name}: TreeNodeProps) {
     this.id = uuidv4();
@@ -22,6 +23,7 @@ class TreeNode {
     this.interactive = false;
     this.type = type;
     this.name = name ? name : this.type;
+    this.title = name ? name : this.type;
     this.parent = null;
     this.children = [];
   }

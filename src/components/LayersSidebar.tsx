@@ -4,12 +4,13 @@ import Sidebar from './Sidebar';
 import SidebarSectionHead from './SidebarSectionHead';
 import SidebarSectionWrap from './SidebarSectionWrap';
 import SidebarLayers from './SidebarLayers';
+import SortableTree from 'react-sortable-tree';
 
 let lsDeltaX = 0;
 
 const LayersSidebar = (): ReactElement => {
   const globalState = useContext(store);
-  const { theme, dispatch, layersSidebarWidth,  paperApp } = globalState;
+  const { theme, dispatch, layersSidebarWidth,  paperApp, treeData } = globalState;
 
   const handleDragStart = (e) => {
     lsDeltaX = e.clientX;
@@ -25,6 +26,13 @@ const LayersSidebar = (): ReactElement => {
     }
   }
 
+  const handleChange = (treeData) => {
+    dispatch({
+      type: 'update-tree-data',
+      treeData: treeData
+    });
+  }
+
   return (
     <Sidebar
       resizable
@@ -36,13 +44,17 @@ const LayersSidebar = (): ReactElement => {
         <SidebarSectionHead
           text={'layers'} />
       </SidebarSectionWrap>
-      {
+      {/* {
         paperApp
         ? <SidebarLayers
             layers={paperApp.page.children}
             depth={0} />
         : null
-      }
+      } */}
+      <SortableTree
+        treeData={treeData}
+        onChange={treeData => handleChange(treeData)}
+      />
     </Sidebar>
   );
 }

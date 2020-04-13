@@ -18,6 +18,13 @@ class DrawTool {
   constrainedDims: paper.Point;
   centerPoint: paper.Point;
   shiftModifier: boolean;
+  shapeCount: {
+    rectangle: number;
+    rounded: number;
+    ellipse: number;
+    polygon: number;
+    star: number;
+  };
   constructor({app}: {app: PaperApp}) {
     this.app = app;
     this.tool = new Tool();
@@ -38,6 +45,13 @@ class DrawTool {
     this.constrainedDims = new Point(0, 0);
     this.centerPoint = new Point(0, 0);
     this.shiftModifier = false;
+    this.shapeCount = {
+      rectangle: 0,
+      rounded: 0,
+      ellipse: 0,
+      polygon: 0,
+      star: 0
+    };
   }
   clearProps(): void {
     if (this.tooltip) {
@@ -67,6 +81,39 @@ class DrawTool {
     this.clearProps();
     this.app.selectionTool.tool.activate();
     this.enabled = false;
+  }
+  updateShapeCount() {
+    switch(this.drawShapeType) {
+      case 'rectangle':
+        this.shapeCount.rectangle++
+        break;
+      case 'ellipse':
+        this.shapeCount.ellipse++
+        break;
+      case 'rounded':
+        this.shapeCount.rounded++
+        break;
+      case 'polygon':
+        this.shapeCount.polygon++
+        break;
+      case 'star':
+        this.shapeCount.star++
+        break;
+    }
+  }
+  getShapeCount() {
+    switch(this.drawShapeType) {
+      case 'rectangle':
+        return this.shapeCount.rectangle;
+      case 'ellipse':
+        return this.shapeCount.ellipse;
+      case 'rounded':
+        return this.shapeCount.rounded;
+      case 'polygon':
+        return this.shapeCount.polygon;
+      case 'star':
+        return this.shapeCount.star;
+    }
   }
   renderShape(shapeOpts: any) {
     switch(this.drawShapeType) {
@@ -202,6 +249,7 @@ class DrawTool {
       //     }
       //   })
       // });
+      this.updateShapeCount();
       this.app.dispatch({
         type: 'add-node',
         node: new PaperShape({
@@ -209,7 +257,7 @@ class DrawTool {
             name: this.drawShapeType,
             insert: false
           }),
-          name: this.drawShapeType,
+          name: `${this.drawShapeType}-${this.getShapeCount()}`,
           style: {
             fills: [new Fill({})]
           }

@@ -54,13 +54,30 @@ const reducers = (state: any, action: any): any => {
         selection: state.paperApp.selectionTool.addToSelection(action.layer)
       };
     }
+    case 'update-tree-data': {
+      return {
+        ...state,
+        treeData: action.treeData
+      };
+    }
     case 'add-node': {
       state.paperApp.pageTree.addNode({
         node: action.node,
         toNode: action.toNode
       });
       return {
-        ...state
+        ...state,
+        treeData: [...state.paperApp.page.children]
+      };
+    }
+    case 'remove-node': {
+      state.paperApp.pageTree.removeNode({
+        node: action.node,
+        fromNode: action.fromNode
+      });
+      return {
+        ...state,
+        treeData: [...state.paperApp.page.children]
       };
     }
     case 'add-nodes': {
@@ -71,7 +88,20 @@ const reducers = (state: any, action: any): any => {
         });
       });
       return {
-        ...state
+        ...state,
+        treeData: [...state.paperApp.page.children]
+      };
+    }
+    case 'remove-nodes': {
+      action.nodes.forEach((node: TreeNode) => {
+        state.paperApp.pageTree.removeNode({
+          node: node,
+          fromNode: action.fromNode
+        });
+      });
+      return {
+        ...state,
+        treeData: [...state.paperApp.page.children]
       };
     }
     case 'add-node-at': {
@@ -81,7 +111,8 @@ const reducers = (state: any, action: any): any => {
         index: action.index
       });
       return {
-        ...state
+        ...state,
+        treeData: [...state.paperApp.page.children]
       };
     }
     case 'remove-from-selection': {

@@ -17,6 +17,7 @@ interface AppState {
   stylesSidebarWidth: number;
   theme: any;
   selection: TreeNode[];
+  treeData: TreeNode[];
   paperApp: PaperApp;
   drawing: boolean;
   drawShape: em.ShapeType;
@@ -29,6 +30,7 @@ const initialState: AppState = {
   stylesSidebarWidth: 260,
   theme: getTheme('dark'),
   selection: [],
+  treeData: [],
   paperApp: null,
   drawing: false,
   drawShape: null,
