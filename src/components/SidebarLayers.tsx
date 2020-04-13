@@ -1,12 +1,10 @@
 import React, { useContext, ReactElement } from 'react';
 import { store } from '../store';
 import SidebarLayer from './SidebarLayer';
-import PaperArtboard from '../canvas/base/artboard';
-import PaperGroup from '../canvas/base/group';
-import PaperShape from '../canvas/base/shape';
+import TreeNode from '../canvas/base/treeNode';
 
 interface SidebarLayersProps {
-  layers: (PaperArtboard | PaperGroup | PaperShape)[];
+  layers: TreeNode[];
   depth: number;
 }
 
@@ -15,7 +13,7 @@ const SidebarLayers = (props: SidebarLayersProps): ReactElement => {
   return (
     <div>
       {
-        props.layers.map((layer: PaperArtboard | PaperGroup | PaperShape, index: number) => (
+        props.layers.map((layer: TreeNode, index: number) => (
           <SidebarLayer
             key={index}
             layer={layer}

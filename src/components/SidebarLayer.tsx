@@ -3,32 +3,33 @@ import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { store } from '../store';
 import SidebarLayerGroup from './SidebarLayerGroup';
 import SidebarLayerItem from './SidebarLayerItem';
-import PaperArtboard from '../canvas/base/artboard';
-import PaperGroup from '../canvas/base/group';
-import PaperShape from '../canvas/base/shape';
+import TreeNode from '../canvas/base/treeNode';
 
 interface SidebarLayerProps {
-  layer: PaperArtboard | PaperGroup | PaperShape;
+  layer: TreeNode;
   depth: number;
-  path: string;
 }
 
 const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
   const globalState = useContext(store);
-  const { layer, depth, path } = props;
+  const { layer, depth } = props;
 
-  if (layer.type === 'Group' || layer.type === 'Artboard') {
-    return (
-      <SidebarLayerGroup
-        group={layer as PaperGroup | PaperArtboard}
-        depth={depth} />
-    );
-  } else {
-    return (
-      <SidebarLayerItem
-        layer={layer as PaperShape}
-        depth={depth} />
-    );
+  switch(layer.type) {
+    case 'Group':
+    case 'Artboard':
+      return (
+        <SidebarLayerGroup
+          group={layer as TreeNode}
+          depth={depth} />
+      );
+    case 'Shape':
+      return (
+        <SidebarLayerItem
+          layer={layer as TreeNode}
+          depth={depth} />
+      );
+    default:
+      return <div></div>
   }
 }
 

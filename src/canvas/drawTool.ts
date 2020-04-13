@@ -190,7 +190,20 @@ class DrawTool {
   }
   onMouseUp(event: paper.ToolEvent): void {
     if (this.to) {
-      this.app.page.addChild({
+      // this.app.page.addChild({
+      //   node: new PaperShape({
+      //     shape: this.renderShape({
+      //       name: this.drawShapeType,
+      //       insert: false
+      //     }),
+      //     name: this.drawShapeType,
+      //     style: {
+      //       fills: [new Fill({})]
+      //     }
+      //   })
+      // });
+      this.app.dispatch({
+        type: 'add-node',
         node: new PaperShape({
           shape: this.renderShape({
             name: this.drawShapeType,
@@ -200,7 +213,8 @@ class DrawTool {
           style: {
             fills: [new Fill({})]
           }
-        })
+        }),
+        toNode: this.app.page
       });
       this.app.dispatch({
         type: 'disable-draw-tool'

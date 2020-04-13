@@ -9,25 +9,15 @@ import PaperPage from './page';
 import TreeNode from './treeNode';
 
 interface PaperGroupProps {
-  //parent: any;
-  //layers?: (PaperShape | PaperGroup)[];
   layers?: TreeNode[];
   dispatch?: any;
   name?: string;
-  // style?: {
-  //   fills?: em.Fill[];
-  // };
 }
 
 class PaperGroup extends TreeNode {
-  //layers: (PaperShape | PaperGroup | PaperArtboard | PaperFill | PaperFills)[];
   constructor({dispatch, name, layers}: PaperGroupProps) {
     super({name, type: 'Group'});
     this.interactive = true;
-    // this.type = 'Group';
-    // this.name = name ? name : 'Group';
-    //this.layers = [];
-    //this.interactive = true;
     this.paperItem = new Group({
       data: {
         node: this

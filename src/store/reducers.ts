@@ -1,4 +1,5 @@
 import paper, { Shape } from 'paper';
+import TreeNode from '../canvas/base/treeNode';
 
 const reducers = (state: any, action: any): any => {
   switch(action.type) {
@@ -51,6 +52,36 @@ const reducers = (state: any, action: any): any => {
       return {
         ...state,
         selection: state.paperApp.selectionTool.addToSelection(action.layer)
+      };
+    }
+    case 'add-node': {
+      state.paperApp.pageTree.addNode({
+        node: action.node,
+        toNode: action.toNode
+      });
+      return {
+        ...state
+      };
+    }
+    case 'add-nodes': {
+      action.nodes.forEach((node: TreeNode) => {
+        state.paperApp.pageTree.addNode({
+          node: node,
+          toNode: action.toNode
+        });
+      });
+      return {
+        ...state
+      };
+    }
+    case 'add-node-at': {
+      state.paperApp.pageTree.addNodeAt({
+        node: action.node,
+        toNode: action.toNode,
+        index: action.index
+      });
+      return {
+        ...state
       };
     }
     case 'remove-from-selection': {

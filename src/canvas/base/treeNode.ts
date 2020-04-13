@@ -18,6 +18,7 @@ class TreeNode {
   tree: Tree;
   constructor({type, name}: TreeNodeProps) {
     this.id = uuidv4();
+    this.selected = false;
     this.interactive = false;
     this.type = type;
     this.name = name ? name : this.type;
@@ -39,47 +40,21 @@ class TreeNode {
     });
   }
   addChild({node}: {node: TreeNode}) {
+    if (node.parent) {
+      node.parent.removeChild({node});
+    }
     this.children.push(node);
     this.paperItem.addChild(node.paperItem);
     node.parent = this;
     return node;
   }
   addChildAt({node, index}: {node: TreeNode; index: number}) {
+    if (node.parent) {
+      node.parent.removeChild({node});
+    }
     this.children.splice(index, 0, node);
     this.paperItem.insertChild(index, node.paperItem);
     node.parent = this;
-    return node;
-  }
-  addChildAbove({node, above}: {node: TreeNode; above: TreeNode}) {
-    const aboveIndex = this.children.findIndex((child) => child.id === above.id);
-    if (aboveIndex) {
-      node.parent = this;
-      if (aboveIndex !== 0) {
-        this.children.splice(aboveIndex, 0, node);
-        this.paperItem.insertChild(aboveIndex, node.paperItem);
-      } else {
-        this.children.unshift(node);
-        this.paperItem.addChild(node.paperItem);
-      }
-    } else {
-      throw new Error('Reference node does not exist.');
-    }
-    return node;
-  }
-  addChildBelow({node, below}: {node: TreeNode; below: TreeNode}) {
-    const belowIndex = this.children.findIndex((child) => child.id === below.id);
-    if (belowIndex) {
-      node.parent = this;
-      if (belowIndex !== this.children.length - 1) {
-        this.children.splice(belowIndex + 1, 0, node);
-        this.paperItem.insertChild(belowIndex + 1, node.paperItem);
-      } else {
-        this.children.push(node);
-        this.paperItem.addChild(node.paperItem);
-      }
-    } else {
-      throw new Error('Reference node does not exist.');
-    }
     return node;
   }
   removeChild({node}: {node: TreeNode}) {

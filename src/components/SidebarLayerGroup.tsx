@@ -2,10 +2,10 @@ import React, { useContext, ReactElement, useState } from 'react';
 import { store } from '../store';
 import SidebarLayerItem from './SidebarLayerItem';
 import SidebarLayers from './SidebarLayers';
-import PaperGroup from '../canvas/base/group';
+import TreeNode from '../canvas/base/treeNode';
 
 interface SidebarLayerGroupProps {
-  group: PaperGroup;
+  group: TreeNode;
   depth: number;
 }
 

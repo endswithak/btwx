@@ -1,11 +1,9 @@
 import React, { useContext, ReactElement, useEffect } from 'react';
 import { store } from '../store';
-import PaperArtboard from '../canvas/base/artboard';
-import PaperGroup from '../canvas/base/group';
-import PaperShape from '../canvas/base/shape';
+import TreeNode from '../canvas/base/treeNode';
 
 interface SidebarLayerItemProps {
-  layer: PaperArtboard | PaperGroup | PaperShape;
+  layer: TreeNode;
   depth: number;
   isGroup?: boolean;
   isOpen?: boolean;

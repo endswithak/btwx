@@ -10,12 +10,12 @@ interface RenderCanvas {
 
 const renderCanvas = async ({ canvas, dispatch }: RenderCanvas): void => {
   const app = new PaperApp({canvas, dispatch});
-  app.page.addChild({
-    node: new PaperArtboard({
-      size: {width: 375, height: 812},
-      position: {x: 0, y: 0}
-    })
-  });
+  // app.page.addChild({
+  //   node: new PaperArtboard({
+  //     size: {width: 375, height: 812},
+  //     position: {x: 0, y: 0}
+  //   })
+  // });
   dispatch({
     type: 'set-paper-app',
     paperApp: app

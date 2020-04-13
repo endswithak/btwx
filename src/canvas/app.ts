@@ -8,6 +8,7 @@ import PaperShape from './base/shape';
 import Tree from './base/tree';
 import PaperDocument from './base/document';
 import TreeNode from './base/treeNode';
+import PaperHistory from './history';
 
 interface PaperAppProps {
   canvas: HTMLCanvasElement;
@@ -21,6 +22,7 @@ class PaperApp {
   selectionTool: SelectionTool;
   pageTree: Tree;
   page: PaperPage;
+  undoIndex: number;
   selection: TreeNode[];
   constructor({canvas, dispatch}: PaperAppProps) {
     paper.setup(canvas);
@@ -37,6 +39,7 @@ class PaperApp {
     this.drawTool = new DrawTool({
       app: this
     });
+    this.undoIndex = 0;
   }
   onWheel(e: WheelEvent): void {
     if (e.ctrlKey) {

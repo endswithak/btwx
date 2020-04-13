@@ -61,18 +61,28 @@ class SelectionTool {
     switch(event.key) {
       case 'g': {
         if (event.modifiers.meta) {
-          const topSelection = this.app.selection[0];
-          const newGroup = topSelection.parent.addChildAbove({
+          const topSelection = [...this.app.selection].reduce((total, current) => {
+            const topGroup = this.getTopParentGroup(current);
+            return topGroup.getIndex() <= total.getIndex() ? current : total;
+          }, this.app.selection[0]);
+          const topSelectionParent = topSelection.parent;
+          const topSelectionIndex = topSelection.getIndex();
+          this.app.dispatch({
+            type: 'add-node-at',
             node: new PaperGroup({}),
-            above: topSelection
+            toNode: topSelectionParent,
+            index: topSelectionIndex
           });
-          this.app.selection.forEach((item) => {
-            item.remove();
-            newGroup.addChild({
-              node: item
-            });
+          const newGroup = topSelectionParent.children[topSelectionIndex];
+          this.app.dispatch({
+            type: 'add-nodes',
+            nodes: this.app.selection,
+            toNode: newGroup
           });
-          this.clearSelection();
+          this.app.dispatch({
+            type: 'new-selection',
+            layer: newGroup
+          });
         }
         break;
       }
@@ -113,9 +123,6 @@ class SelectionTool {
   onMouseDown(event: paper.ToolEvent): void {
     const hitTest = this.app.page.paperItem.hitTest(event.point);
     if (hitTest && this.getInteractiveParent(hitTest.item.data.node).type !== 'Artboard') {
-      // const layer = hitTest.item.data.layer;
-      // this.updateSelection(layer);
-      //console.log(this.getParentGroup(hitTest.item.data.layer));
       if (this.shiftModifier) {
         this.updateSelection(this.getInteractiveParent(hitTest.item.data.node));
       } else {
@@ -149,7 +156,8 @@ class SelectionTool {
       this.areaSelect.active = false;
       this.app.page.paperItem.getItems({
         data: (value: any) => {
-          return value.node && value.node.interactive;
+          const topParent = this.getTopParentGroup(value.node);
+          return topParent.id === value.node.id;
         },
         overlapping: this.areaSelect.shape.bounds
       }).forEach((item: paper.Item) => {
@@ -178,19 +186,19 @@ class SelectionTool {
       });
     }
   }
-  getInteractiveParent(item: PaperShape | PaperGroup) {
-    let parent = item;
+  getInteractiveParent(node: PaperShape | PaperGroup) {
+    let parent = node;
     while(!parent.interactive) {
       parent = parent.parent;
     }
     return parent;
   }
-  getParentGroup(item: PaperShape | PaperGroup) {
-    let parent = this.getInteractiveParent(item);
-    while(parent.type === 'Shape') {
-      parent = parent.parent;
+  getTopParentGroup(node: PaperShape | PaperGroup) {
+    let currentNode = this.getInteractiveParent(node);
+    while(currentNode.parent.type === 'Group') {
+      currentNode = currentNode.parent;
     }
-    return parent;
+    return currentNode;
   }
   isSelected(id: string): boolean {
     if (this.app.selection.find(item => item.id === id)) {

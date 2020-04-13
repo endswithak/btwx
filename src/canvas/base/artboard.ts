@@ -29,11 +29,13 @@ class PaperArtboard extends TreeNode {
       fillColor: 'white',
       insert: false
     });
-    this.style = new PaperStyle({
-      style: {
-        fills: [new Fill({fillType: 'Color', color: '#fff'})],
-      },
-      shape: shape
+    this.style = this.addChild({
+      node: new PaperStyle({
+        style: {
+          fills: [new Fill({fillType: 'Color', color: '#fff'})],
+        },
+        shape: shape
+      })
     });
   }
 }
