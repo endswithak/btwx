@@ -6,6 +6,7 @@ import PaperApp from '../canvas/app';
 import PaperGroup from '../canvas/base/group';
 import PaperShape from '../canvas/base/shape';
 import TreeNode from '../canvas/base/treeNode';
+import Tree from '../canvas/base/tree';
 
 interface StateProviderProps {
   children: React.ReactNode;
@@ -15,12 +16,15 @@ interface AppState {
   ready: boolean;
   layersSidebarWidth: number;
   stylesSidebarWidth: number;
-  theme: any;
+  theme: em.Theme;
   selection: TreeNode[];
-  treeData: TreeNode[];
+  treeData: Tree;
   paperApp: PaperApp;
   drawing: boolean;
   drawShape: em.ShapeType;
+  dragLayer: TreeNode;
+  dragEnterLayer: TreeNode;
+  dropzone: 'top' | 'center' | 'bottom';
   dispatch(reducer: any): any;
 }
 
@@ -30,10 +34,13 @@ const initialState: AppState = {
   stylesSidebarWidth: 260,
   theme: getTheme('dark'),
   selection: [],
-  treeData: [],
+  treeData: null,
   paperApp: null,
   drawing: false,
   drawShape: null,
+  dragLayer: null,
+  dragEnterLayer: null,
+  dropzone: null,
   dispatch: () => {
     return null;
   }

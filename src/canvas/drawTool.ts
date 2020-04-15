@@ -34,7 +34,7 @@ class DrawTool {
     this.tool.onMouseDown = (e) => this.onMouseDown(e);
     this.tool.onMouseDrag = (e) => this.onMouseDrag(e);
     this.tool.onMouseUp = (e) => this.onMouseUp(e);
-    this.drawShapeType = 'rectangle';
+    this.drawShapeType = 'Rectangle';
     this.outline = null;
     this.tooltip = null;
     this.from = null;
@@ -84,66 +84,66 @@ class DrawTool {
   }
   updateShapeCount() {
     switch(this.drawShapeType) {
-      case 'rectangle':
+      case 'Rectangle':
         this.shapeCount.rectangle++
         break;
-      case 'ellipse':
+      case 'Ellipse':
         this.shapeCount.ellipse++
         break;
-      case 'rounded':
+      case 'Rounded':
         this.shapeCount.rounded++
         break;
-      case 'polygon':
+      case 'Polygon':
         this.shapeCount.polygon++
         break;
-      case 'star':
+      case 'Star':
         this.shapeCount.star++
         break;
     }
   }
   getShapeCount() {
     switch(this.drawShapeType) {
-      case 'rectangle':
+      case 'Rectangle':
         return this.shapeCount.rectangle;
-      case 'ellipse':
+      case 'Ellipse':
         return this.shapeCount.ellipse;
-      case 'rounded':
+      case 'Rounded':
         return this.shapeCount.rounded;
-      case 'polygon':
+      case 'Polygon':
         return this.shapeCount.polygon;
-      case 'star':
+      case 'Star':
         return this.shapeCount.star;
     }
   }
   renderShape(shapeOpts: any) {
     switch(this.drawShapeType) {
-      case 'rectangle':
+      case 'Rectangle':
         return new Path.Rectangle({
           from: this.from,
           to: this.shiftModifier ? this.constrainedDims : this.to,
           ...shapeOpts
         });
-      case 'ellipse':
+      case 'Ellipse':
         return new Path.Ellipse({
           from: this.from,
           to: this.shiftModifier ? this.constrainedDims : this.to,
           ...shapeOpts
         });
-      case 'rounded':
+      case 'Rounded':
         return new Path.Rectangle({
           from: this.from,
           to: this.shiftModifier ? this.constrainedDims : this.to,
           radius: 8,
           ...shapeOpts
         });
-      case 'polygon':
+      case 'Polygon':
         return new Path.RegularPolygon({
           center: this.centerPoint,
           radius: this.maxDim / 2,
           sides: 5,
           ...shapeOpts
         });
-      case 'star':
+      case 'Star':
         return new Path.Star({
           center: this.centerPoint,
           radius1: this.maxDim / 2,
@@ -161,15 +161,15 @@ class DrawTool {
       fontSize: 12 / paper.view.zoom
     }
     switch(this.drawShapeType) {
-      case 'rectangle':
-      case 'ellipse':
-      case 'rounded':
+      case 'Rectangle':
+      case 'Ellipse':
+      case 'Rounded':
         return new PointText({
           ...baseProps,
           content: `${Math.round(this.shiftModifier ? this.maxDim : this.dims.width)} x ${Math.round(this.shiftModifier ? this.maxDim : this.dims.height)}`,
         });
-      case 'polygon':
-      case 'star':
+      case 'Polygon':
+      case 'Star':
         return new PointText({
           ...baseProps,
           content: `${Math.round(this.maxDim)} x ${Math.round(this.maxDim)}`

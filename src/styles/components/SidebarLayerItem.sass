@@ -1,6 +1,7 @@
-$layersSidebarCellHeight: $unit * 8 // 40
+$layersSidebarCellHeight: $unit * 8 // 32
 
 .c-layers-sidebar__layer-item
+  position: relative
   display: flex
   align-items: center
   height: $layersSidebarCellHeight
@@ -11,8 +12,11 @@ $layersSidebarCellHeight: $unit * 8 // 40
   line-height: $layersSidebarCellHeight
   flex-grow: 2
   cursor: pointer
+  padding-left: $unit
 
-.c-sidebar-layer__chevron
+.c-sidebar-layer__chevron,
+.c-sidebar-layer__folder,
+.c-sidebar-layer__shape
   display: flex
   align-items: center
   justify-content: center

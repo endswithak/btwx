@@ -6,9 +6,7 @@ import PaperArtboard from './base/artboard';
 import PaperGroup from './base/group';
 import PaperShape from './base/shape';
 import Tree from './base/tree';
-import PaperDocument from './base/document';
 import TreeNode from './base/treeNode';
-import PaperHistory from './history';
 
 interface PaperAppProps {
   canvas: HTMLCanvasElement;

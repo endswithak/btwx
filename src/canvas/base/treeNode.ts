@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import Tree from "./tree";
+import Queue from './queue';
 
 interface TreeNodeProps {
   type: 'Page' | 'Artboard' | 'Group' | 'Shape' | 'Document' | 'Style';
@@ -14,8 +15,10 @@ class TreeNode {
   paperItem: paper.Layer | paper.Group | paper.Path | paper.CompoundPath | paper.Raster;
   type: 'Page' | 'Artboard' | 'Group' | 'Shape' | 'Document' | 'Style';
   parent: TreeNode;
+  canHaveChildren: boolean;
   children: TreeNode[];
-  title: string;
+  expanded: boolean;
+  preview: string;
   tree: Tree;
   constructor({type, name}: TreeNodeProps) {
     this.id = uuidv4();
@@ -23,9 +26,26 @@ class TreeNode {
     this.interactive = false;
     this.type = type;
     this.name = name ? name : this.type;
-    this.title = name ? name : this.type;
+    this.canHaveChildren = true;
     this.parent = null;
+    this.expanded = false;
+    this.preview = null;
     this.children = [];
+  }
+  traverse(callback: any) {
+    const queue = new Queue();
+    queue.enqueue(this);
+    let currentTree = queue.dequeue();
+    while(currentTree){
+      for (let i = 0, length = currentTree.children.length; i < length; i++) {
+        queue.enqueue(currentTree.children[i]);
+      }
+      callback(currentTree);
+      currentTree = queue.dequeue();
+    }
+  }
+  contains(callback: any) {
+    this.traverse(callback);
   }
   getIndex(): number {
     return this.parent.children.findIndex((child) => child.id === this.id);
@@ -48,6 +68,15 @@ class TreeNode {
     this.children.push(node);
     this.paperItem.addChild(node.paperItem);
     node.parent = this;
+    return node;
+  }
+  addChildBelow({node}: {node: TreeNode}) {
+    const index = this.parent.children.findIndex((child) => child.id === this.id);
+    if (index === this.parent.children.length - 1) {
+      this.parent.addChild({node});
+    } else {
+      this.parent.addChildAt({node, index: index + 1});
+    }
     return node;
   }
   addChildAt({node, index}: {node: TreeNode; index: number}) {

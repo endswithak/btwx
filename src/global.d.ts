@@ -1,5 +1,43 @@
 declare namespace em {
-  type ShapeType = 'artboard' | 'rectangle' | 'ellipse' | 'rounded' | 'polygon' | 'star';
+
+  interface Palette {
+    primary: string;
+    primaryHover: string;
+    accent: string;
+    accentHover: string;
+  }
+
+  interface BackgroundScale {
+    z6: string;
+    z5: string;
+    z4: string;
+    z3: string;
+    z2: string;
+    z1: string;
+    z0: string;
+  }
+
+  interface TextScale {
+    base: string;
+    light: string;
+    lighter: string;
+    lightest: string;
+    onPrimary: string;
+    onAccent: string;
+  }
+
+  type ThemeName = 'light' | 'dark';
+
+  interface Theme {
+    name: ThemeName;
+    palette: Palette;
+    background: BackgroundScale;
+    backgroundInverse: BackgroundScale;
+    text: TextScale;
+    unit: number;
+  }
+
+  type ShapeType = 'Artboard' | 'Rectangle' | 'Ellipse' | 'Rounded' | 'Polygon' | 'Star';
 
   // Models / Style
 

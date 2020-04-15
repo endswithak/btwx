@@ -14,6 +14,27 @@ const reducers = (state: any, action: any): any => {
         sketchImages: action.sketchImages
       };
     }
+    case 'set-drag-layer': {
+      return {
+        ...state,
+        dragLayer: action.dragLayer
+      };
+    }
+    case 'set-dropzone': {
+      return {
+        ...state,
+        dragEnterLayer: action.dragEnterLayer,
+        dropzone: action.dropzone
+      };
+    }
+    case 'clear-layer-drag-drop': {
+      return {
+        ...state,
+        dragLayer: null,
+        dragEnterLayer: null,
+        dropzone: null
+      };
+    }
     case 'set-paper-app': {
       return {
         ...state,
@@ -57,7 +78,14 @@ const reducers = (state: any, action: any): any => {
     case 'update-tree-data': {
       return {
         ...state,
-        treeData: action.treeData
+        treeData: state.paperApp.pageTree
+      };
+    }
+    case 'expand-node': {
+      action.node.expanded = !action.node.expanded;
+      return {
+        ...state,
+        treeData: state.paperApp.pageTree
       };
     }
     case 'add-node': {
@@ -67,7 +95,28 @@ const reducers = (state: any, action: any): any => {
       });
       return {
         ...state,
-        treeData: [...state.paperApp.page.children]
+        treeData: state.paperApp.pageTree
+      };
+    }
+    case 'add-node-at': {
+      state.paperApp.pageTree.addNodeAt({
+        node: action.node,
+        toNode: action.toNode,
+        index: action.index
+      });
+      return {
+        ...state,
+        treeData: state.paperApp.pageTree
+      };
+    }
+    case 'add-node-below': {
+      state.paperApp.pageTree.addNodeBelow({
+        node: action.node,
+        belowNode: action.belowNode
+      });
+      return {
+        ...state,
+        treeData: state.paperApp.pageTree
       };
     }
     case 'remove-node': {
@@ -77,7 +126,7 @@ const reducers = (state: any, action: any): any => {
       });
       return {
         ...state,
-        treeData: [...state.paperApp.page.children]
+        treeData: state.paperApp.pageTree
       };
     }
     case 'add-nodes': {
@@ -89,7 +138,7 @@ const reducers = (state: any, action: any): any => {
       });
       return {
         ...state,
-        treeData: [...state.paperApp.page.children]
+        treeData: state.paperApp.pageTree
       };
     }
     case 'remove-nodes': {
@@ -101,18 +150,7 @@ const reducers = (state: any, action: any): any => {
       });
       return {
         ...state,
-        treeData: [...state.paperApp.page.children]
-      };
-    }
-    case 'add-node-at': {
-      state.paperApp.pageTree.addNodeAt({
-        node: action.node,
-        toNode: action.toNode,
-        index: action.index
-      });
-      return {
-        ...state,
-        treeData: [...state.paperApp.page.children]
+        treeData: state.paperApp.pageTree
       };
     }
     case 'remove-from-selection': {

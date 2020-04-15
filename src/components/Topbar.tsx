@@ -30,27 +30,27 @@ const Topbar = (): ReactElement => {
       }}>
       <button
         className='c-topbar__button'
-        onClick={() => handleDrawClick('rectangle')}>
+        onClick={() => handleDrawClick('Rectangle')}>
         R
       </button>
       <button
         className='c-topbar__button'
-        onClick={() => handleDrawClick('rounded')}>
+        onClick={() => handleDrawClick('Rounded')}>
         D
       </button>
       <button
         className='c-topbar__button'
-        onClick={() => handleDrawClick('ellipse')}>
+        onClick={() => handleDrawClick('Ellipse')}>
         E
       </button>
       <button
         className='c-topbar__button'
-        onClick={() => handleDrawClick('star')}>
+        onClick={() => handleDrawClick('Star')}>
         S
       </button>
       <button
         className='c-topbar__button'
-        onClick={() => handleDrawClick('polygon')}>
+        onClick={() => handleDrawClick('Polygon')}>
         P
       </button>
       <button

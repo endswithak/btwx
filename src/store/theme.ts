@@ -30,31 +30,14 @@ const textOnColor = (color: string | chroma.Color) => {
   return contrast > 3 ? darkTextMax : lightTextMax;
 }
 
-interface Palette {
-  primary: string;
-  primaryHover: string;
-  accent: string;
-  accentHover: string;
-}
-
-const createPalette = (): Palette => ({
+const createPalette = (): em.Palette => ({
   primary: primary,
   primaryHover: chroma(primary).darken().css(),
   accent: chroma(accent).css(),
   accentHover: chroma(accent).darken().css()
 });
 
-interface BackgroundScale {
-  z6: string;
-  z5: string;
-  z4: string;
-  z3: string;
-  z2: string;
-  z1: string;
-  z0: string;
-}
-
-const createDarkBackgrounds = (scale: string[]): BackgroundScale => ({
+const createDarkBackgrounds = (scale: string[]): em.BackgroundScale => ({
   z6: scale[6],
   z5: scale[5],
   z4: scale[4],
@@ -64,7 +47,7 @@ const createDarkBackgrounds = (scale: string[]): BackgroundScale => ({
   z0: scale[0]
 });
 
-const createLightBackgrounds = (scale: string[]): BackgroundScale => ({
+const createLightBackgrounds = (scale: string[]): em.BackgroundScale => ({
   z6: scale[6],
   z5: scale[4],
   z4: scale[5],
@@ -74,16 +57,7 @@ const createLightBackgrounds = (scale: string[]): BackgroundScale => ({
   z0: scale[0]
 });
 
-interface TextScale {
-  base: string;
-  light: string;
-  lighter: string;
-  lightest: string;
-  onPrimary: string;
-  onAccent: string;
-}
-
-const createText = (scale: string[], palette: Palette): TextScale => ({
+const createText = (scale: string[], palette: em.Palette): em.TextScale => ({
   base: scale[3],
   light: scale[2],
   lighter: scale[1],
@@ -92,18 +66,7 @@ const createText = (scale: string[], palette: Palette): TextScale => ({
   onAccent: textOnColor(palette.accent),
 });
 
-type ThemeName = 'light' | 'dark';
-
-interface Theme {
-  name: ThemeName;
-  palette: Palette;
-  background: BackgroundScale;
-  backgroundInverse: BackgroundScale;
-  text: TextScale;
-  unit: number;
-}
-
-const getTheme = (theme: ThemeName): Theme => {
+const getTheme = (theme: em.ThemeName): em.Theme => {
   switch(theme) {
     case 'dark':
       return {

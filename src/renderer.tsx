@@ -37,7 +37,6 @@ import { StateProvider } from './store';
 import { readSketchFile } from 'sketch-file';
 
 import './styles/index.sass';
-import 'react-sortable-tree/style.css';
 
 // window.renderMainWindow = () => {
 //   readSketchFile('/Users/erik/Desktop/e-sketch-test.sketch').then((file)=> {

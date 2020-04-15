@@ -16,6 +16,7 @@ const SidebarLayers = (props: SidebarLayersProps): ReactElement => {
         props.layers.map((layer: TreeNode, index: number) => (
           <SidebarLayer
             key={index}
+            index={index}
             layer={layer}
             depth={props.depth} />
         ))

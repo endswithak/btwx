@@ -1,5 +1,4 @@
 import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
-import chroma from 'chroma-js';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { store } from '../store';
 import SidebarSwatchBlendMode from './SidebarSwatchBlendMode';
