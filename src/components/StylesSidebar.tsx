@@ -7,16 +7,16 @@ import SidebarFillStyles from './SidebarFillStyles';
 
 const StylesSidebar = (): ReactElement => {
   const globalState = useContext(store);
-  const { theme, dispatch, stylesSidebarWidth, canvas } = globalState;
+  const { theme, dispatch, stylesSidebarWidth, selection } = globalState;
 
   return (
     <Sidebar
       width={stylesSidebarWidth}
       position={'right'}
       resizable={false}>
-      {/* <SidebarFrameStyles />
+      <SidebarFrameStyles />
       <SidebarContextStyles />
-      <SidebarFillStyles /> */}
+      <SidebarFillStyles />
     </Sidebar>
   );
 }

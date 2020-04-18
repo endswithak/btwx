@@ -2,48 +2,47 @@ import React, { useContext, ReactElement, useState, useLayoutEffect, useRef, use
 import { store } from '../store';
 import SidebarDropzone from './SidebarDropzone';
 import SidebarLayerItem from './SidebarLayerItem';
-import TreeNode from '../canvas/base/treeNode';
+import LayerNode from '../canvas/base/layerNode';
 
 interface SidebarLayerProps {
-  layer: TreeNode;
-  index: number;
+  layer: LayerNode;
+  dragLayer: LayerNode;
+  dragEnterLayer: LayerNode;
+  dropzone: em.Dropzone;
   depth: number;
 }
 
 const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
-  const globalState = useContext(store);
-  const { theme, dispatch, paperApp, treeData, dragLayer } = globalState;
-  const { layer, depth } = props;
+  const { layer, depth, dragLayer, dragEnterLayer, dropzone } = props;
 
   return (
     <div
       id={layer.id}
       draggable
-      className='c-sidebar-layer'
-      style={{
-        background: layer.selected
-        ? theme.palette.primary
-        : 'none'
-      }}>
+      className='c-sidebar-layer'>
       <SidebarLayerItem
         layer={layer}
         depth={depth} />
       {
         dragLayer
         ? <SidebarDropzone
-            id={layer.id}
+            layer={layer}
             depth={depth}
-            canHaveChildren={layer.canHaveChildren} />
+            dragLayer={dragLayer}
+            dragEnterLayer={dragEnterLayer}
+            dropzone={dropzone} />
         : null
       }
       {
         layer.expanded
-        ? layer.children.map((layer: TreeNode, index: number) => (
+        ? layer.children.map((layer: LayerNode, index: number) => (
             <SidebarLayer
               key={index}
-              index={index}
               layer={layer}
-              depth={depth + 1} />
+              depth={depth + 1}
+              dragLayer={dragLayer}
+              dragEnterLayer={dragEnterLayer}
+              dropzone={dropzone} />
           ))
         : null
       }

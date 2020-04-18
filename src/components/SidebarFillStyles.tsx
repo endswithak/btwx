@@ -1,41 +1,41 @@
 import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
-import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { store } from '../store';
 import SidebarSectionWrap from './SidebarSectionWrap';
 import SidebarSection from './SidebarSection';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionHead from './SidebarSectionHead';
 import SidebarFillStyle from './SidebarFillStyle';
+import ShapeNode from '../canvas/base/shapeNode';
+import SortableTree from './SortableTree';
 
 const SidebarFillStyles = (): ReactElement => {
   const globalState = useContext(store);
-  const { selectedLayer, theme, dispatch, selectedPaperLayer } = globalState;
+  const { selection } = globalState;
 
-  const fills = selectedLayer ? selectedLayer.children.find((child) => child.name === 'fills') : null;
+  const fills = selection.length === 1 && selection[0].layerType === 'Shape' ? (selection[0] as ShapeNode).fills : null;
 
   return (
     <SidebarSectionWrap>
-      <SidebarSection>
-        <SidebarSectionRow>
-          <SidebarSectionHead text={'fills'} />
-        </SidebarSectionRow>
-        {
-          selectedLayer
-          ? <SidebarSection>
+      {
+        selection.length === 1 && selection[0].layerType === 'Shape'
+        ? <SidebarSection>
+            <SidebarSectionRow>
+              <SidebarSectionHead text={'fills'} />
+            </SidebarSectionRow>
+            <SidebarSection>
               {
                 fills
-                ? fills.children.reverse().map((fill: paper.Layer, index: number) => (
-                    <SidebarFillStyle
-                      fill={fill}
-                      index={index}
-                      key={index} />
-                  ))
+                ? <SortableTree
+                    treeData={fills}
+                    nodeComponent={
+                      <SidebarFillStyle />
+                    } />
                 : null
               }
             </SidebarSection>
-          : null
-        }
-      </SidebarSection>
+          </SidebarSection>
+        : null
+      }
     </SidebarSectionWrap>
   );
 }

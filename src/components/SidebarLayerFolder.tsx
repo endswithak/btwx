@@ -1,9 +1,9 @@
 import React, { useContext, ReactElement, useEffect } from 'react';
 import { store } from '../store';
-import TreeNode from '../canvas/base/treeNode';
+import LayerNode from '../canvas/base/layerNode';
 
 interface SidebarLayerFolderProps {
-  layer: TreeNode;
+  layer: LayerNode;
 }
 
 const SidebarLayerFolder = (props: SidebarLayerFolderProps): ReactElement => {
@@ -12,7 +12,7 @@ const SidebarLayerFolder = (props: SidebarLayerFolderProps): ReactElement => {
   const { layer } = props;
 
   return (
-    layer.canHaveChildren
+    layer.canHaveLayers
     ? <div
         className='c-sidebar-layer__folder'>
         <svg

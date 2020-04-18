@@ -1,9 +1,9 @@
 import React, { useContext, ReactElement, useEffect } from 'react';
 import { store } from '../store';
-import TreeNode from '../canvas/base/treeNode';
+import ShapeNode from '../canvas/base/shapeNode';
 
 interface SidebarLayerShapeProps {
-  layer: TreeNode;
+  layer: ShapeNode;
 }
 
 const SidebarLayerShape = (props: SidebarLayerShapeProps): ReactElement => {
@@ -12,7 +12,7 @@ const SidebarLayerShape = (props: SidebarLayerShapeProps): ReactElement => {
   const { layer } = props;
 
   return (
-    layer.preview
+    layer.shapeIcon
     ? <div className='c-sidebar-layer__shape'>
         <svg
           width="18"
@@ -25,7 +25,7 @@ const SidebarLayerShape = (props: SidebarLayerShapeProps): ReactElement => {
             : theme.text.lighter,
             fill: theme.text.lightest
           }}>
-            <path d={layer.preview} />
+            <path d={layer.shapeIcon} />
           </svg>
       </div>
     : null

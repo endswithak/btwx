@@ -2,6 +2,7 @@ import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import { Fill } from './base/style/fill';
 import PaperShape from './base/shape';
 import PaperApp from './app';
+import ShapeNode from './base/shapeNode';
 
 class DrawTool {
   app: PaperApp;
@@ -252,15 +253,13 @@ class DrawTool {
       this.updateShapeCount();
       this.app.dispatch({
         type: 'add-node',
-        node: new PaperShape({
-          shape: this.renderShape({
+        node: new ShapeNode({
+          shapeType: this.drawShapeType,
+          paperPath: this.renderShape({
             name: this.drawShapeType,
             insert: false
           }),
-          name: `${this.drawShapeType}-${this.getShapeCount()}`,
-          style: {
-            fills: [new Fill({})]
-          }
+          name: `${this.drawShapeType}-${this.getShapeCount()}`
         }),
         toNode: this.app.page
       });

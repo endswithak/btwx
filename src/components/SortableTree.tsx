@@ -1,15 +1,24 @@
 import React, { useContext, ReactElement, useState, useEffect, useRef } from 'react';
 import { store } from '../store';
-import SidebarLayer from './SidebarLayer';
+import LayerNode from '../canvas/base/layerNode';
 import TreeNode from '../canvas/base/treeNode';
 import SidebarDropzone from './SidebarDropzone';
+import StyleNode from '../canvas/base/styleNode';
 
-const SidebarTree = (): ReactElement => {
-  const treeRef = useRef<HTMLDivElement>(null);
+interface SidebarTreeProps {
+  treeData: TreeNode;
+  nodeComponent: ReactElement;
+}
+
+const SidebarTree = (props: SidebarTreeProps): ReactElement => {
+  const [dragLayer, setDragLayer] = useState(null);
+  const [dragEnterLayer, setDragEnterLayer] = useState(null);
+  const [dropzone, setDropzone] = useState(null);
   const globalState = useContext(store);
-  const { dispatch, paperApp, treeData, dragLayer, dragEnterLayer, dropzone } = globalState;
+  const { dispatch } = globalState;
+  const { treeData, nodeComponent } = props;
 
-  const canAddLayer = (layer: TreeNode) => {
+  const canAddLayer = (layer: TreeNode): boolean => {
     let contains = false;
     dragLayer.contains((child: TreeNode) => {
       if (child.id === layer.id) {
@@ -19,53 +28,47 @@ const SidebarTree = (): ReactElement => {
     return contains ? false : true;
   }
 
-  const handleDragStart = (e) => {
+  const handleDragStart = (e: any): void => {
     if (e.target.id) {
       e.target.style.opacity = 0.5;
       treeData.contains((layer: TreeNode) => {
         if (layer.id === e.target.id) {
-          dispatch({
-            type: 'set-drag-layer',
-            dragLayer: layer
-          });
+          setDragLayer(layer);
         }
       });
     }
   }
 
-  const handleDragEnd = (e) => {
+  const handleDragEnd = (e: any): void => {
     e.target.style.opacity = 1;
-    dispatch({
-      type: 'clear-layer-drag-drop'
-    });
+    setDragLayer(null);
+    setDragEnterLayer(null);
+    setDropzone(null);
   }
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e: any): void => {
     e.preventDefault();
   }
 
-  const handleDragEnter = (e) => {
+  const handleDragEnter = (e: any): void => {
     if (e.target.dataset.dropzone) {
       treeData.contains((layer: TreeNode) => {
         if (layer.id === e.target.dataset.id) {
-          dispatch({
-            type: 'set-dropzone',
-            dragEnterLayer: canAddLayer(layer) ? layer : null,
-            dropzone: e.target.dataset.dropzone
-          });
+          setDragEnterLayer(canAddLayer(layer) ? layer : null);
+          setDropzone(e.target.dataset.dropzone);
         }
       });
     }
   }
 
-  const handleDragLeave = (e) => {
+  const handleDragLeave = (e: any): void => {
   }
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: any): void => {
     e.preventDefault();
     if (dragLayer && dragEnterLayer) {
       switch(dropzone) {
-        case 'top':
+        case 'Top':
           dispatch({
             type: 'add-node-at',
             node: dragLayer,
@@ -73,14 +76,14 @@ const SidebarTree = (): ReactElement => {
             index: dragEnterLayer.getIndex()
           });
           break;
-        case 'center':
+        case 'Center':
           dispatch({
             type: 'add-node',
             node: dragLayer,
             toNode: dragEnterLayer
           });
           break;
-        case 'bottom':
+        case 'Bottom':
           dispatch({
             type: 'add-node-below',
             node: dragLayer,
@@ -89,15 +92,14 @@ const SidebarTree = (): ReactElement => {
           break;
       }
     }
-    dispatch({
-      type: 'clear-layer-drag-drop'
-    });
+    setDragLayer(null);
+    setDragEnterLayer(null);
+    setDropzone(null);
   }
 
   return (
     <div
-      ref={treeRef}
-      id={paperApp.page.id}
+      id={treeData.id}
       onDragStart={handleDragStart}
       onDrop={handleDrop}
       onDragEnter={handleDragEnter}
@@ -107,18 +109,23 @@ const SidebarTree = (): ReactElement => {
       {
         dragLayer
         ? <SidebarDropzone
-            id={paperApp.page.id}
+            layer={treeData as LayerNode | StyleNode}
             depth={0}
-            canHaveChildren={paperApp.page.canHaveChildren} />
+            dragLayer={dragLayer}
+            dragEnterLayer={dragEnterLayer}
+            dropzone={dropzone} />
         : null
       }
       {
-        treeData.root.children.map((layer: TreeNode, index: number) => (
-          <SidebarLayer
-            key={index}
-            index={index}
-            layer={layer}
-            depth={0} />
+        treeData.children.map((layer: LayerNode | StyleNode, index: number) => (
+          React.cloneElement(nodeComponent, {
+            key: index,
+            layer: layer,
+            dragLayer: dragLayer,
+            dragEnterLayer: dragEnterLayer,
+            dropzone: dropzone,
+            depth: 0
+          })
         ))
       }
     </div>

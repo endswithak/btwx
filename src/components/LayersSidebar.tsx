@@ -3,11 +3,11 @@ import { store } from '../store';
 import Sidebar from './Sidebar';
 import SidebarSectionHead from './SidebarSectionHead';
 import SidebarSectionWrap from './SidebarSectionWrap';
-import SidebarTree from './SidebarTree';
+import SidebarLayers from './SidebarLayers';
 
 const LayersSidebar = (): ReactElement => {
   const globalState = useContext(store);
-  const { theme, dispatch, layersSidebarWidth,  paperApp, treeData } = globalState;
+  const { theme, dispatch, layersSidebarWidth,  treeData } = globalState;
 
   return (
     <Sidebar
@@ -23,7 +23,7 @@ const LayersSidebar = (): ReactElement => {
       </SidebarSectionWrap>
       {
         treeData
-        ? <SidebarTree />
+        ? <SidebarLayers />
         : null
       }
     </Sidebar>

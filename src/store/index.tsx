@@ -1,12 +1,19 @@
+// import { createStore } from 'redux';
+// import getTheme from './theme';
+// import rootReducer from './reducers';
+
+// export default createStore(rootReducer, {
+//   theme: getTheme('dark'),
+//   layersSidebarWidth: 320,
+//   stylesSidebarWidth: 260
+// });
+
 import React, {createContext, useReducer} from 'react';
-import paper from 'paper';
 import reducers from './reducers';
 import getTheme from './theme';
 import PaperApp from '../canvas/app';
-import PaperGroup from '../canvas/base/group';
-import PaperShape from '../canvas/base/shape';
-import TreeNode from '../canvas/base/treeNode';
 import Tree from '../canvas/base/tree';
+import LayerNode from '../canvas/base/layerNode';
 
 interface StateProviderProps {
   children: React.ReactNode;
@@ -17,14 +24,11 @@ interface AppState {
   layersSidebarWidth: number;
   stylesSidebarWidth: number;
   theme: em.Theme;
-  selection: TreeNode[];
+  selection: LayerNode[];
   treeData: Tree;
   paperApp: PaperApp;
   drawing: boolean;
   drawShape: em.ShapeType;
-  dragLayer: TreeNode;
-  dragEnterLayer: TreeNode;
-  dropzone: 'top' | 'center' | 'bottom';
   dispatch(reducer: any): any;
 }
 
@@ -38,9 +42,6 @@ const initialState: AppState = {
   paperApp: null,
   drawing: false,
   drawShape: null,
-  dragLayer: null,
-  dragEnterLayer: null,
-  dropzone: null,
   dispatch: () => {
     return null;
   }

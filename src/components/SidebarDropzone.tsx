@@ -1,37 +1,43 @@
 import React, { useContext, ReactElement, useState, useLayoutEffect, useRef, useEffect } from 'react';
-import { store } from '../store';
 import SidebarDropzoneTop from './SidebarDropzoneTop';
 import SidebarDropzoneCenter from './SidebarDropzoneCenter';
 import SidebarDropzoneBottom from './SidebarDropzoneBottom';
+import LayerNode from '../canvas/base/layerNode';
 
 interface SidebarLayerDropzoneProps {
-  id: string;
+  layer: LayerNode;
   depth: number;
-  canHaveChildren: boolean;
+  dragLayer: LayerNode;
+  dragEnterLayer: LayerNode;
+  dropzone: em.Dropzone;
 }
 
 const SidebarLayerDropzone = (props: SidebarLayerDropzoneProps): ReactElement => {
-  const layerRef = useRef<HTMLDivElement>(null);
-  const globalState = useContext(store);
-  const { theme, dropzone, dragEnterLayer } = globalState;
-  const {id, depth, canHaveChildren} = props;
+  const {layer, depth, dragLayer, dragEnterLayer, dropzone} = props;
 
   return (
     <div className='c-sidebar-dropzone'>
       {
-        canHaveChildren
+        layer.canHaveLayers
         ? <SidebarDropzoneCenter
-            id={id} />
+            layer={layer}
+            dragLayer={dragLayer}
+            dragEnterLayer={dragEnterLayer}
+            dropzone={dropzone} />
         : null
       }
       <SidebarDropzoneTop
-        id={id}
+        layer={layer}
         depth={depth}
-        canHaveChildren={canHaveChildren} />
+        dragLayer={dragLayer}
+        dragEnterLayer={dragEnterLayer}
+        dropzone={dropzone} />
       <SidebarDropzoneBottom
-        id={id}
+        layer={layer}
         depth={depth}
-        canHaveChildren={canHaveChildren} />
+        dragLayer={dragLayer}
+        dragEnterLayer={dragEnterLayer}
+        dropzone={dropzone} />
     </div>
   );
 }

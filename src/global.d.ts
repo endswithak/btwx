@@ -1,5 +1,14 @@
 declare namespace em {
 
+  type Dropzone = 'Top' | 'Center' | 'Bottom';
+
+  interface Frame {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }
+
   interface Palette {
     primary: string;
     primaryHover: string;
@@ -37,7 +46,7 @@ declare namespace em {
     unit: number;
   }
 
-  type ShapeType = 'Artboard' | 'Rectangle' | 'Ellipse' | 'Rounded' | 'Polygon' | 'Star';
+  type ShapeType = 'Rectangle' | 'Ellipse' | 'Rounded' | 'Polygon' | 'Star';
 
   // Models / Style
 

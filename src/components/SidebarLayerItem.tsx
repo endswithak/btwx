@@ -5,9 +5,10 @@ import SidebarLayerTitle from './SidebarLayerTitle';
 import SidebarLayerChevron from './SidebarLayerChevron';
 import SidebarLayerShape from './SidebarLayerShape';
 import SidebarLayerFolder from './SidebarLayerFolder';
+import LayerNode from '../canvas/base/layerNode';
 
 interface SidebarLayerItemProps {
-  layer: TreeNode;
+  layer: LayerNode;
   depth: number;
 }
 
@@ -20,6 +21,9 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
     <div
       className='c-layers-sidebar__layer-item'
       style={{
+        background: layer.selected
+        ? theme.palette.primary
+        : 'none',
         paddingLeft: depth * (theme.unit * 6)
       }}>
       <SidebarLayerChevron

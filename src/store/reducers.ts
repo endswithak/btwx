@@ -38,7 +38,9 @@ const reducers = (state: any, action: any): any => {
     case 'set-paper-app': {
       return {
         ...state,
-        paperApp: action.paperApp
+        paperApp: action.paperApp,
+        treeData: action.paperApp.pageTree,
+        selection: action.paperApp.selection
       };
     }
     case 'set-layers-sidebar-width': {
@@ -69,23 +71,10 @@ const reducers = (state: any, action: any): any => {
         drawShape: null
       };
     }
-    case 'add-to-selection': {
-      return {
-        ...state,
-        selection: state.paperApp.selectionTool.addToSelection(action.layer)
-      };
-    }
-    case 'update-tree-data': {
-      return {
-        ...state,
-        treeData: state.paperApp.pageTree
-      };
-    }
     case 'expand-node': {
       action.node.expanded = !action.node.expanded;
       return {
-        ...state,
-        treeData: state.paperApp.pageTree
+        ...state
       };
     }
     case 'add-node': {
@@ -94,8 +83,7 @@ const reducers = (state: any, action: any): any => {
         toNode: action.toNode
       });
       return {
-        ...state,
-        treeData: state.paperApp.pageTree
+        ...state
       };
     }
     case 'add-node-at': {
@@ -105,8 +93,7 @@ const reducers = (state: any, action: any): any => {
         index: action.index
       });
       return {
-        ...state,
-        treeData: state.paperApp.pageTree
+        ...state
       };
     }
     case 'add-node-below': {
@@ -115,8 +102,7 @@ const reducers = (state: any, action: any): any => {
         belowNode: action.belowNode
       });
       return {
-        ...state,
-        treeData: state.paperApp.pageTree
+        ...state
       };
     }
     case 'remove-node': {
@@ -125,8 +111,7 @@ const reducers = (state: any, action: any): any => {
         fromNode: action.fromNode
       });
       return {
-        ...state,
-        treeData: state.paperApp.pageTree
+        ...state
       };
     }
     case 'add-nodes': {
@@ -137,8 +122,7 @@ const reducers = (state: any, action: any): any => {
         });
       });
       return {
-        ...state,
-        treeData: state.paperApp.pageTree
+        ...state
       };
     }
     case 'remove-nodes': {
@@ -149,27 +133,66 @@ const reducers = (state: any, action: any): any => {
         });
       });
       return {
+        ...state
+      };
+    }
+    case 'add-to-selection': {
+      state.paperApp.selectionTool.addToSelection(action.layer);
+      return {
         ...state,
-        treeData: state.paperApp.pageTree
+        selection: state.paperApp.selection
       };
     }
     case 'remove-from-selection': {
+      state.paperApp.selectionTool.removeFromSelection(action.layer);
       return {
         ...state,
-        selection: state.paperApp.selectionTool.removeFromSelection(action.layer)
+        selection: state.paperApp.selection
       };
     }
     case 'clear-selection': {
+      state.paperApp.selectionTool.clearSelection();
       return {
         ...state,
-        selection: state.paperApp.selectionTool.clearSelection()
+        selection: state.paperApp.selection
       };
     }
     case 'new-selection': {
       state.paperApp.selectionTool.clearSelection();
+      state.paperApp.selectionTool.addToSelection(action.layer);
       return {
         ...state,
-        selection: state.paperApp.selectionTool.addToSelection(action.layer)
+        selection: state.paperApp.selection
+      };
+    }
+    case 'enable-visibility': {
+      action.layer.enableVisibility();
+      return {
+        ...state
+      };
+    }
+    case 'disable-visibility': {
+      action.layer.disableVisibility();
+      return {
+        ...state
+      };
+    }
+    case 'enable-style': {
+      action.layer.enableStyle();
+      return {
+        ...state
+      };
+    }
+    case 'disable-style': {
+      action.layer.disableStyle();
+      return {
+        ...state
+      };
+    }
+    case 'change-fill-opacity': {
+      action.layer.changeFillOpacity(action.opacity);
+      return {
+        ...state
       };
     }
     default:

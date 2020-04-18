@@ -1,9 +1,8 @@
-import React, { useContext, ReactElement, useState, useLayoutEffect, useRef, useEffect } from 'react';
-import { store } from '../store';
+import React, { ReactElement } from 'react';
 
 interface SidebarDropzoneAreaProps {
   id: string;
-  dz: 'top' | 'center' | 'bottom';
+  dz: em.Dropzone;
   style: any;
 }
 
@@ -12,7 +11,7 @@ const SidebarDropzoneArea = (props: SidebarDropzoneAreaProps): ReactElement => {
 
   return (
     <div
-      className={`c-sidebar-dropzone__zone c-sidebar-dropzone__zone--${dz}`}
+      className={`c-sidebar-dropzone__zone c-sidebar-dropzone__zone--${dz.toLowerCase()}`}
       data-dropzone={dz}
       data-id={id}
       style={style} />

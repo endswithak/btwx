@@ -1,33 +1,17 @@
-import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
-import { store } from '../store';
-import { getAbsLayerByPath } from '../utils';
-import SidebarInput from './SidebarInput';
+import React, { ReactElement } from 'react';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
+import XInput from './XInput';
+import YInput from './YInput';
 
 const SidebarPositionStyles = (): ReactElement => {
-  const globalState = useContext(store);
-  const { selectedArtboard, selectedLayer, selectedPaperLayer, theme, dispatch, selectedLayerPath } = globalState;
-
-  //const absLayer = selectedLayer ? getAbsLayerByPath({layer: selectedArtboard, path: selectedLayerPath}) : null;
-  // const x = absLayer ? absLayer.absPosition.x : '';
-  // const y = absLayer ? absLayer.absPosition.y : '';
-  const x = selectedLayer.position.x;
-  const y = selectedLayer.position.y;
-
   return (
     <SidebarSectionRow>
       <SidebarSectionColumn>
-        <SidebarInput
-          value={x}
-          readOnly={true}
-          label={'X'} />
+        <XInput />
       </SidebarSectionColumn>
       <SidebarSectionColumn>
-        <SidebarInput
-          value={y}
-          readOnly={true}
-          label={'Y'} />
+        <YInput />
       </SidebarSectionColumn>
     </SidebarSectionRow>
   );

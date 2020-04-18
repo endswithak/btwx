@@ -5,7 +5,7 @@ import { store } from '../store';
 
 const SidebarBlendModeStyles = (): ReactElement => {
   const globalState = useContext(store);
-  const { selectedLayer, theme, dispatch } = globalState;
+  const { selection } = globalState;
 
   const options: { value: string; label: string }[] = [
     { value: 'normal', label: 'Normal' },
@@ -28,7 +28,7 @@ const SidebarBlendModeStyles = (): ReactElement => {
     { value: 'lighter', label: 'Plus Lighter' },
   ];
 
-  const blendMode = selectedLayer ? options.find((option) => option.value === selectedLayer.blendMode) : null;
+  const blendMode = selection.length > 0 ? selection.length > 1 ? null : options.find((option) => option.value === selection[0].paperItem.blendMode) : null;
 
   const [selected, setSelected] = useState(blendMode);
 
@@ -38,7 +38,7 @@ const SidebarBlendModeStyles = (): ReactElement => {
 
   useEffect(() => {
     setSelected(blendMode);
-  }, [selectedLayer]);
+  }, [selection]);
 
   return (
     <SidebarSelect

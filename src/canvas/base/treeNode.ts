@@ -1,35 +1,20 @@
 import { v4 as uuidv4 } from 'uuid';
-import Tree from "./tree";
 import Queue from './queue';
 
 interface TreeNodeProps {
-  type: 'Page' | 'Artboard' | 'Group' | 'Shape' | 'Document' | 'Style';
-  name?: string;
+  type: 'Style' | 'Layer';
 }
 
 class TreeNode {
   id: string;
-  selected: boolean;
-  interactive: boolean;
-  name: string;
   paperItem: paper.Layer | paper.Group | paper.Path | paper.CompoundPath | paper.Raster;
-  type: 'Page' | 'Artboard' | 'Group' | 'Shape' | 'Document' | 'Style';
+  type: 'Style' | 'Layer';
   parent: TreeNode;
-  canHaveChildren: boolean;
   children: TreeNode[];
-  expanded: boolean;
-  preview: string;
-  tree: Tree;
-  constructor({type, name}: TreeNodeProps) {
+  constructor({type}: TreeNodeProps) {
     this.id = uuidv4();
-    this.selected = false;
-    this.interactive = false;
     this.type = type;
-    this.name = name ? name : this.type;
-    this.canHaveChildren = true;
     this.parent = null;
-    this.expanded = false;
-    this.preview = null;
     this.children = [];
   }
   traverse(callback: any) {

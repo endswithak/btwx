@@ -1,9 +1,9 @@
 import React, { useContext, ReactElement, useState, useLayoutEffect, useRef, useEffect } from 'react';
 import { store } from '../store';
-import TreeNode from '../canvas/base/treeNode';
+import LayerNode from '../canvas/base/layerNode';
 
 interface SidebarLayerTitleProps {
-  layer: TreeNode;
+  layer: LayerNode;
 }
 
 const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {

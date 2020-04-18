@@ -7,6 +7,7 @@ import PaperGroup from './base/group';
 import PaperShape from './base/shape';
 import Tree from './base/tree';
 import TreeNode from './base/treeNode';
+import LayerNode from './base/layerNode';
 
 interface PaperAppProps {
   canvas: HTMLCanvasElement;
@@ -21,13 +22,13 @@ class PaperApp {
   pageTree: Tree;
   page: PaperPage;
   undoIndex: number;
-  selection: TreeNode[];
+  selection: LayerNode[];
   constructor({canvas, dispatch}: PaperAppProps) {
     paper.setup(canvas);
     this.scope = paper;
     this.dispatch = dispatch;
     this.pageTree = new Tree({
-      rootNode: new PaperPage({})
+      rootNode: new LayerNode({layerType: 'Page'})
     });
     this.page = this.pageTree.root;
     this.selection = [];

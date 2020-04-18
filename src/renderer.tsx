@@ -34,7 +34,6 @@ import ReactDOM from 'react-dom';
 import App from './components/App';
 import Preview from './components/Preview';
 import { StateProvider } from './store';
-import { readSketchFile } from 'sketch-file';
 
 import './styles/index.sass';
 

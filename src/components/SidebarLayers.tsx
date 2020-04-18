@@ -1,27 +1,15 @@
 import React, { useContext, ReactElement } from 'react';
 import { store } from '../store';
 import SidebarLayer from './SidebarLayer';
-import TreeNode from '../canvas/base/treeNode';
+import SortableTree from './SortableTree';
 
-interface SidebarLayersProps {
-  layers: TreeNode[];
-  depth: number;
-}
-
-const SidebarLayers = (props: SidebarLayersProps): ReactElement => {
+const SidebarLayers = (): ReactElement => {
   const globalState = useContext(store);
+  const { treeData } = globalState;
   return (
-    <div>
-      {
-        props.layers.map((layer: TreeNode, index: number) => (
-          <SidebarLayer
-            key={index}
-            index={index}
-            layer={layer}
-            depth={props.depth} />
-        ))
-      }
-    </div>
+    <SortableTree
+      treeData={treeData.root}
+      nodeComponent={<SidebarLayer/>} />
   )
 }
 

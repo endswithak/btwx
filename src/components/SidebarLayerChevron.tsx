@@ -1,9 +1,9 @@
 import React, { useContext, ReactElement, useEffect } from 'react';
 import { store } from '../store';
-import TreeNode from '../canvas/base/treeNode';
+import LayerNode from '../canvas/base/layerNode';
 
 interface SidebarLayerChevronProps {
-  layer: TreeNode;
+  layer: LayerNode;
 }
 
 const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
@@ -19,7 +19,7 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
   }
 
   return (
-    layer.canHaveChildren
+    layer.canHaveLayers
     ? <div
         className='c-sidebar-layer__chevron'
         onClick={handleChevronClick}>
