@@ -12,11 +12,10 @@ const Canvas = (): ReactElement => {
   useEffect(() => {
     canvasRef.current.width = canvasContainerRef.current.clientWidth;
     canvasRef.current.height = canvasContainerRef.current.clientHeight;
-    paper.setup(canvasRef.current);
-    // renderCanvas({
-    //   dispatch: dispatch,
-    //   canvas: canvasRef.current
-    // });
+    renderCanvas({
+      dispatch: dispatch,
+      canvas: canvasRef.current
+    });
   }, []);
 
   // useEffect(() => {
