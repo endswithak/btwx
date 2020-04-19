@@ -14,27 +14,6 @@ const reducers = (state: any, action: any): any => {
         sketchImages: action.sketchImages
       };
     }
-    case 'set-drag-layer': {
-      return {
-        ...state,
-        dragLayer: action.dragLayer
-      };
-    }
-    case 'set-dropzone': {
-      return {
-        ...state,
-        dragEnterLayer: action.dragEnterLayer,
-        dropzone: action.dropzone
-      };
-    }
-    case 'clear-layer-drag-drop': {
-      return {
-        ...state,
-        dragLayer: null,
-        dragEnterLayer: null,
-        dropzone: null
-      };
-    }
     case 'set-paper-app': {
       return {
         ...state,

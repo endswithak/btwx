@@ -1,12 +1,7 @@
 import paper, { Point } from 'paper';
 import DrawTool from './drawTool';
 import SelectionTool from './selectionTool';
-import PaperPage from './base/page';
-import PaperArtboard from './base/artboard';
-import PaperGroup from './base/group';
-import PaperShape from './base/shape';
 import Tree from './base/tree';
-import TreeNode from './base/treeNode';
 import LayerNode from './base/layerNode';
 
 interface PaperAppProps {

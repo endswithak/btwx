@@ -1,6 +1,4 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
-import { Fill } from './base/style/fill';
-import PaperShape from './base/shape';
 import PaperApp from './app';
 import ShapeNode from './base/shapeNode';
 
@@ -19,13 +17,6 @@ class DrawTool {
   constrainedDims: paper.Point;
   centerPoint: paper.Point;
   shiftModifier: boolean;
-  shapeCount: {
-    rectangle: number;
-    rounded: number;
-    ellipse: number;
-    polygon: number;
-    star: number;
-  };
   constructor({app}: {app: PaperApp}) {
     this.app = app;
     this.tool = new Tool();
@@ -46,13 +37,6 @@ class DrawTool {
     this.constrainedDims = new Point(0, 0);
     this.centerPoint = new Point(0, 0);
     this.shiftModifier = false;
-    this.shapeCount = {
-      rectangle: 0,
-      rounded: 0,
-      ellipse: 0,
-      polygon: 0,
-      star: 0
-    };
   }
   clearProps(): void {
     if (this.tooltip) {
@@ -82,39 +66,6 @@ class DrawTool {
     this.clearProps();
     this.app.selectionTool.tool.activate();
     this.enabled = false;
-  }
-  updateShapeCount() {
-    switch(this.drawShapeType) {
-      case 'Rectangle':
-        this.shapeCount.rectangle++
-        break;
-      case 'Ellipse':
-        this.shapeCount.ellipse++
-        break;
-      case 'Rounded':
-        this.shapeCount.rounded++
-        break;
-      case 'Polygon':
-        this.shapeCount.polygon++
-        break;
-      case 'Star':
-        this.shapeCount.star++
-        break;
-    }
-  }
-  getShapeCount() {
-    switch(this.drawShapeType) {
-      case 'Rectangle':
-        return this.shapeCount.rectangle;
-      case 'Ellipse':
-        return this.shapeCount.ellipse;
-      case 'Rounded':
-        return this.shapeCount.rounded;
-      case 'Polygon':
-        return this.shapeCount.polygon;
-      case 'Star':
-        return this.shapeCount.star;
-    }
   }
   renderShape(shapeOpts: any) {
     switch(this.drawShapeType) {
@@ -250,7 +201,6 @@ class DrawTool {
       //     }
       //   })
       // });
-      this.updateShapeCount();
       this.app.dispatch({
         type: 'add-node',
         node: new ShapeNode({
@@ -259,7 +209,7 @@ class DrawTool {
             name: this.drawShapeType,
             insert: false
           }),
-          name: `${this.drawShapeType}-${this.getShapeCount()}`
+          name: this.drawShapeType
         }),
         toNode: this.app.page
       });

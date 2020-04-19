@@ -1,3 +1,4 @@
+import paper from 'paper';
 import React, { useRef, useContext, useEffect, ReactElement } from 'react';
 import { store } from '../store';
 import renderCanvas from '../canvas';
@@ -11,10 +12,11 @@ const Canvas = (): ReactElement => {
   useEffect(() => {
     canvasRef.current.width = canvasContainerRef.current.clientWidth;
     canvasRef.current.height = canvasContainerRef.current.clientHeight;
-    renderCanvas({
-      dispatch: dispatch,
-      canvas: canvasRef.current
-    });
+    paper.setup(canvasRef.current);
+    // renderCanvas({
+    //   dispatch: dispatch,
+    //   canvas: canvasRef.current
+    // });
   }, []);
 
   // useEffect(() => {

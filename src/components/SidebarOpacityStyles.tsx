@@ -18,7 +18,7 @@ const SidebarOpacityStyles = (): ReactElement => {
       case 1:
         return selection[0].paperItem.opacity * 100;
       default:
-        return 0;
+        return 'multi';
     }
   }
 
