@@ -7,7 +7,7 @@ import SidebarLayers from './SidebarLayers';
 
 const LayersSidebar = (): ReactElement => {
   const globalState = useContext(store);
-  const { theme, dispatch, layersSidebarWidth,  treeData } = globalState;
+  const { theme, dispatch, layersSidebarWidth, layers } = globalState;
 
   return (
     <Sidebar
@@ -22,7 +22,7 @@ const LayersSidebar = (): ReactElement => {
           text={'layers'} />
       </SidebarSectionWrap>
       {
-        treeData
+        layers.length > 0
         ? <SidebarLayers />
         : null
       }

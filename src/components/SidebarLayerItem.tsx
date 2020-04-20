@@ -14,7 +14,7 @@ interface SidebarLayerItemProps {
 
 const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
   const globalState = useContext(store);
-  const { dispatch, theme, dragLayer } = globalState;
+  const { dispatch, theme } = globalState;
   const { layer, depth } = props;
 
   return (
@@ -30,8 +30,8 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
         layer={layer} />
       <SidebarLayerFolder
         layer={layer} />
-      <SidebarLayerShape
-        layer={layer} />
+      {/* <SidebarLayerShape
+        layer={layer} /> */}
       <SidebarLayerTitle
         layer={layer} />
     </div>

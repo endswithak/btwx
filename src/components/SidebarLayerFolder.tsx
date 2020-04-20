@@ -12,7 +12,7 @@ const SidebarLayerFolder = (props: SidebarLayerFolderProps): ReactElement => {
   const { layer } = props;
 
   return (
-    layer.canHaveLayers
+    layer.children
     ? <div
         className='c-sidebar-layer__folder'>
         <svg

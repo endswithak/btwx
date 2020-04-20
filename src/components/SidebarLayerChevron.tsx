@@ -19,7 +19,7 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
   }
 
   return (
-    layer.canHaveLayers
+    layer.children
     ? <div
         className='c-sidebar-layer__chevron'
         onClick={handleChevronClick}>

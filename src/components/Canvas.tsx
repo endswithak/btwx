@@ -1,21 +1,36 @@
 import paper from 'paper';
 import React, { useRef, useContext, useEffect, ReactElement } from 'react';
-import { store } from '../store';
-import renderCanvas from '../canvas';
+import { connect } from 'react-redux';
+import { addPage } from '../store/actions/layers';
+import { ThemeContext } from './ThemeProvider';
+//import renderCanvas from '../canvas';
 
-const Canvas = (): ReactElement => {
+interface CanvasProps {
+  addPage(): any;
+}
+
+const Canvas = ({addPage}: CanvasProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const globalState = useContext(store);
-  const { drawing, dispatch, paperApp, theme, layersSidebarWidth, stylesSidebarWidth } = globalState;
+  const theme = useContext(ThemeContext);
+  //const { drawing, dispatch, theme, layersSidebarWidth, stylesSidebarWidth } = globalState;
 
   useEffect(() => {
     canvasRef.current.width = canvasContainerRef.current.clientWidth;
     canvasRef.current.height = canvasContainerRef.current.clientHeight;
-    renderCanvas({
-      dispatch: dispatch,
-      canvas: canvasRef.current
-    });
+    paper.setup(canvasRef.current);
+    addPage();
+    // dispatch({
+    //   type: 'add-page'
+    // });
+    // dispatch({
+    //   type: 'add-draw-tool',
+    //   dispatch: dispatch
+    // });
+    // renderCanvas({
+    //   dispatch: dispatch,
+    //   canvas: canvasRef.current
+    // });
   }, []);
 
   // useEffect(() => {
@@ -40,7 +55,7 @@ const Canvas = (): ReactElement => {
 
   return (
     <div
-      className={`c-canvas ${drawing ? 'c-canvas--drawing' : ''}`}
+      className={`c-canvas`}
       ref={canvasContainerRef}>
       <canvas
         id='canvas-main'
@@ -52,4 +67,7 @@ const Canvas = (): ReactElement => {
   );
 }
 
-export default Canvas;
+export default connect(
+  null,
+  { addPage }
+)(Canvas);

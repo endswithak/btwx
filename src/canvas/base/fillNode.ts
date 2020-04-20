@@ -3,13 +3,13 @@ import chroma from 'chroma-js';
 import StyleNode from './styleNode';
 
 interface FillNodeProps {
+  parent: string;
   fillType: em.FillType;
   color?: string;
   opacity?: number;
   gradient?: em.Gradient;
   pattern?: em.Pattern;
   blendMode?: em.BlendingMode;
-  paperPath: paper.Path | paper.CompoundPath;
 }
 
 class FillNode extends StyleNode {
@@ -18,57 +18,58 @@ class FillNode extends StyleNode {
   opacity: number;
   gradient: em.Gradient;
   blendMode: em.BlendingMode;
-  constructor({fillType, color, opacity, gradient, paperPath}: FillNodeProps) {
-    super({styleType: 'Fill', paperPath: paperPath});
+  constructor({fillType, color, opacity, gradient, parent}: FillNodeProps) {
+    super({styleType: 'Fill', parent: parent});
     this.fillType = fillType;
     this.color = color ? chroma(color).alpha(1).hex() : '#999999';
     this.opacity = opacity ? color ? chroma(color).alpha() : 1 : 1;
     this.gradient = gradient;
-    switch(this.fillType) {
-      case 'Color':
-        this.createColorFill();
-        break;
-      case 'Gradient':
-        this.createGradientFill();
-        break;
-    }
+    this.children = null;
+    // switch(this.fillType) {
+    //   case 'Color':
+    //     this.createColorFill();
+    //     break;
+    //   case 'Gradient':
+    //     this.createGradientFill();
+    //     break;
+    // }
   }
-  createColorFill() {
-    this.paperItem.fillColor = new Color(this.color);
-  }
-  createGradientFill() {
-    const from = this.gradient.from;
-    const to = this.gradient.to;
-    const gradientStops = this.gradient.stops.map((gradientStop) => {
-      return new GradientStop(new Color(gradientStop.color), gradientStop.position);
-    }) as paper.GradientStop[];
-    this.paperItem.fillColor = {
-      gradient: {
-        stops: gradientStops,
-        radial: this.gradient.gradientType === 'Radial'
-      },
-      origin: new Point(this.paperItem.bounds.width * from.x, this.paperItem.bounds.height * from.y),
-      destination: new Point(this.paperItem.bounds.width * to.x, this.paperItem.bounds.height * to.y)
-    };
-  }
-  changeFillColor(color: string) {
-    if (chroma.valid(color)) {
-      this.color = color;
-      this.paperItem.fillColor = color;
-    }
-  }
-  changeFillOpacity(opacity: number) {
-    if (opacity > 1) {
-      this.opacity = 1;
-      this.paperItem.opacity = 1;
-    } else if (opacity < 0) {
-      this.opacity = 0;
-      this.paperItem.opacity = 0;
-    } else {
-      this.opacity = opacity;
-      this.paperItem.opacity = opacity;
-    }
-  }
+  // createColorFill() {
+  //   this.paperItem.fillColor = new Color(this.color);
+  // }
+  // createGradientFill() {
+  //   const from = this.gradient.from;
+  //   const to = this.gradient.to;
+  //   const gradientStops = this.gradient.stops.map((gradientStop) => {
+  //     return new GradientStop(new Color(gradientStop.color), gradientStop.position);
+  //   }) as paper.GradientStop[];
+  //   this.paperItem.fillColor = {
+  //     gradient: {
+  //       stops: gradientStops,
+  //       radial: this.gradient.gradientType === 'Radial'
+  //     },
+  //     origin: new Point(this.paperItem.bounds.width * from.x, this.paperItem.bounds.height * from.y),
+  //     destination: new Point(this.paperItem.bounds.width * to.x, this.paperItem.bounds.height * to.y)
+  //   };
+  // }
+  // changeFillColor(color: string) {
+  //   if (chroma.valid(color)) {
+  //     this.color = color;
+  //     this.paperItem.fillColor = color;
+  //   }
+  // }
+  // changeFillOpacity(opacity: number) {
+  //   if (opacity > 1) {
+  //     this.opacity = 1;
+  //     this.paperItem.opacity = 1;
+  //   } else if (opacity < 0) {
+  //     this.opacity = 0;
+  //     this.paperItem.opacity = 0;
+  //   } else {
+  //     this.opacity = opacity;
+  //     this.paperItem.opacity = opacity;
+  //   }
+  // }
 }
 
 export default FillNode;

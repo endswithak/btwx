@@ -2,19 +2,15 @@ import paper from 'paper';
 import TreeNode from './treeNode';
 
 interface StyleGroupNodeProps {
+  parent: string;
   styleGroupType: 'Fills' | 'Borders' | 'Shadows';
 }
 
 class StyleGroupNode extends TreeNode {
   styleGroupType: 'Fills' | 'Borders' | 'Shadows';
-  constructor({styleGroupType}: StyleGroupNodeProps) {
-    super({type: 'Style'});
+  constructor({styleGroupType, parent}: StyleGroupNodeProps) {
+    super({type: 'Style', parent: parent});
     this.styleGroupType = styleGroupType;
-    this.paperItem = new paper.Group({
-      data: {
-        node: this
-      }
-    });
   }
 }
 

@@ -32,39 +32,27 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './components/App';
-import Preview from './components/Preview';
-import { StateProvider } from './store';
+//import Preview from './components/Preview';
+import { ThemeProvider } from './components/ThemeProvider';
+import { Provider } from 'react-redux';
+import store from './store';
 
 import './styles/index.sass';
 
-// window.renderMainWindow = () => {
-//   readSketchFile('/Users/erik/Desktop/e-sketch-test.sketch').then((file)=> {
-//     ReactDOM.render(
-//       <StateProvider>
-//         <App
-//           sketchDocument={file.document}
-//           sketchMeta={file.meta}
-//           sketchUser={file.user}
-//           sketchPages={file.pages}
-//           sketchImages={file.images} />
-//       </StateProvider>,
-//       document.getElementById('root')
-//     );
-//   });
-// }
-
 window.renderMainWindow = () => {
   ReactDOM.render(
-    <StateProvider>
-      <App />
-    </StateProvider>,
+    <Provider store={store}>
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    </Provider>,
     document.getElementById('root')
   );
 }
 
-window.renderPreviewWindow = (globalState) => {
-  ReactDOM.render(
-    <Preview globalState={globalState} />,
-    document.getElementById('root')
-  );
-}
+// window.renderPreviewWindow = (globalState) => {
+//   ReactDOM.render(
+//     <Preview globalState={globalState} />,
+//     document.getElementById('root')
+//   );
+// }

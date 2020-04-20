@@ -6,7 +6,7 @@ import SidebarDropzone from './SidebarDropzone';
 import StyleNode from '../canvas/base/styleNode';
 
 interface SidebarTreeProps {
-  treeData: TreeNode;
+  treeData: TreeNode[];
   nodeComponent: ReactElement;
 }
 
@@ -99,14 +99,14 @@ const SidebarTree = (props: SidebarTreeProps): ReactElement => {
 
   return (
     <div
-      id={treeData.id}
+      //id={treeData.id}
       onDragStart={handleDragStart}
       onDrop={handleDrop}
       onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDragEnd={handleDragEnd}>
-      {
+      {/* {
         dragLayer
         ? <SidebarDropzone
             layer={treeData as LayerNode | StyleNode}
@@ -115,9 +115,9 @@ const SidebarTree = (props: SidebarTreeProps): ReactElement => {
             dragEnterLayer={dragEnterLayer}
             dropzone={dropzone} />
         : null
-      }
+      } */}
       {
-        treeData.children.map((layer: LayerNode | StyleNode, index: number) => (
+        treeData.map((layer: LayerNode | StyleNode, index: number) => (
           React.cloneElement(nodeComponent, {
             key: index,
             layer: layer,

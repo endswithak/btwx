@@ -13,7 +13,9 @@ interface SidebarLayerProps {
 }
 
 const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
+  const globalState = useContext(store);
   const { layer, depth, dragLayer, dragEnterLayer, dropzone } = props;
+  const { layers } = globalState;
 
   return (
     <div
@@ -35,10 +37,10 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
       }
       {
         layer.expanded
-        ? layer.children.map((layer: LayerNode, index: number) => (
+        ? layer.children.map((child: string, index: number) => (
             <SidebarLayer
               key={index}
-              layer={layer}
+              layer={layers.find((layer) => layer.id === child)}
               depth={depth + 1}
               dragLayer={dragLayer}
               dragEnterLayer={dragEnterLayer}

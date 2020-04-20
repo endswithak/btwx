@@ -14,25 +14,25 @@ class PaperApp {
   scope: paper.PaperScope;
   drawTool: DrawTool;
   selectionTool: SelectionTool;
-  pageTree: Tree;
-  page: PaperPage;
+  //pageTree: Tree;
+  //page: PaperPage;
   undoIndex: number;
   selection: LayerNode[];
   constructor({canvas, dispatch}: PaperAppProps) {
     paper.setup(canvas);
     this.scope = paper;
     this.dispatch = dispatch;
-    this.pageTree = new Tree({
-      rootNode: new LayerNode({layerType: 'Page'})
-    });
-    this.page = this.pageTree.root;
+    // this.pageTree = new Tree({
+    //   rootNode: new LayerNode({layerType: 'Page'})
+    // });
+    // this.page = this.pageTree.root;
     this.selection = [];
-    this.selectionTool = new SelectionTool({
-      app: this
-    });
-    this.drawTool = new DrawTool({
-      app: this
-    });
+    // this.selectionTool = new SelectionTool({
+    //   app: this
+    // });
+    // this.drawTool = new DrawTool({
+    //   app: this
+    // });
     this.undoIndex = 0;
   }
   onWheel(e: WheelEvent): void {

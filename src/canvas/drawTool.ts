@@ -1,11 +1,11 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
-import PaperApp from './app';
-import ShapeNode from './base/shapeNode';
+import store from '../store';
+import { disableDrawTool } from '../store/actions/drawTool';
+import { addShape } from '../store/actions/layers';
 
 class DrawTool {
-  app: PaperApp;
+  store: any;
   tool: paper.Tool;
-  enabled: boolean;
   drawShapeType: em.ShapeType;
   outline: paper.Path;
   tooltip: paper.PointText;
@@ -17,16 +17,15 @@ class DrawTool {
   constrainedDims: paper.Point;
   centerPoint: paper.Point;
   shiftModifier: boolean;
-  constructor({app}: {app: PaperApp}) {
-    this.app = app;
+  constructor({drawShapeType}: {drawShapeType: em.ShapeType}) {
+    this.store = store;
     this.tool = new Tool();
-    this.enabled = false;
-    this.tool.onKeyDown = (e) => this.onKeyDown(e);
-    this.tool.onKeyUp = (e) => this.onKeyUp(e);
-    this.tool.onMouseDown = (e) => this.onMouseDown(e);
-    this.tool.onMouseDrag = (e) => this.onMouseDrag(e);
-    this.tool.onMouseUp = (e) => this.onMouseUp(e);
-    this.drawShapeType = 'Rectangle';
+    this.tool.onKeyDown = (e: paper.KeyEvent) => this.onKeyDown(e);
+    this.tool.onKeyUp = (e: paper.KeyEvent) => this.onKeyUp(e);
+    this.tool.onMouseDown = (e: paper.ToolEvent) => this.onMouseDown(e);
+    this.tool.onMouseDrag = (e: paper.ToolEvent) => this.onMouseDrag(e);
+    this.tool.onMouseUp = (e: paper.ToolEvent) => this.onMouseUp(e);
+    this.drawShapeType = drawShapeType;
     this.outline = null;
     this.tooltip = null;
     this.from = null;
@@ -38,35 +37,17 @@ class DrawTool {
     this.centerPoint = new Point(0, 0);
     this.shiftModifier = false;
   }
-  clearProps(): void {
-    if (this.tooltip) {
-      this.tooltip.remove();
-    }
-    if (this.outline) {
-      this.outline.remove();
-    }
-    this.outline = null;
-    this.tooltip = null;
-    this.from = null;
-    this.to = null;
-    this.pointDiff = new Point(0, 0);
-    this.dims = new Size(0, 0);
-    this.maxDim = 0;
-    this.constrainedDims = new Point(0, 0);
-    this.centerPoint = new Point(0, 0);
-    this.shiftModifier = false;
-  }
-  enable(shape: em.ShapeType): void {
-    this.clearProps();
-    this.tool.activate();
-    this.drawShapeType = shape;
-    this.enabled = true;
-  }
-  disable(): void {
-    this.clearProps();
-    this.app.selectionTool.tool.activate();
-    this.enabled = false;
-  }
+  // enable(shape: em.ShapeType): void {
+  //   this.clearProps();
+  //   this.tool.activate();
+  //   this.drawShapeType = shape;
+  //   this.enabled = true;
+  // }
+  // disable(): void {
+  //   this.clearProps();
+  //   this.app.selectionTool.tool.activate();
+  //   this.enabled = false;
+  // }
   renderShape(shapeOpts: any) {
     switch(this.drawShapeType) {
       case 'Rectangle':
@@ -153,10 +134,13 @@ class DrawTool {
         break;
       }
       case 'escape': {
-        //this.disable();
-        this.app.dispatch({
-          type: 'disable-draw-tool'
-        });
+        if (this.tooltip) {
+          this.tooltip.remove();
+        }
+        if (this.outline) {
+          this.outline.remove();
+        }
+        this.store.dispatch(disableDrawTool());
         break;
       }
     }
@@ -174,7 +158,6 @@ class DrawTool {
     }
   }
   onMouseDown(event: paper.ToolEvent): void {
-    //this.parent = getParent({item: event.item});
     this.from = event.point;
   }
   onMouseDrag(event: paper.ToolEvent): void {
@@ -189,33 +172,22 @@ class DrawTool {
   }
   onMouseUp(event: paper.ToolEvent): void {
     if (this.to) {
-      // this.app.page.addChild({
-      //   node: new PaperShape({
-      //     shape: this.renderShape({
-      //       name: this.drawShapeType,
-      //       insert: false
-      //     }),
-      //     name: this.drawShapeType,
-      //     style: {
-      //       fills: [new Fill({})]
-      //     }
-      //   })
-      // });
-      this.app.dispatch({
-        type: 'add-node',
-        node: new ShapeNode({
-          shapeType: this.drawShapeType,
-          paperPath: this.renderShape({
-            name: this.drawShapeType,
-            insert: false
-          }),
-          name: this.drawShapeType
+      if (this.tooltip) {
+        this.tooltip.remove();
+      }
+      if (this.outline) {
+        this.outline.remove();
+      }
+      this.store.dispatch(addShape({
+        shapeType: this.drawShapeType,
+        paperShape: this.renderShape({
+          name: this.drawShapeType,
+          insert: false
         }),
-        toNode: this.app.page
-      });
-      this.app.dispatch({
-        type: 'disable-draw-tool'
-      });
+        name: this.drawShapeType,
+        parent: null
+      }));
+      this.store.dispatch(disableDrawTool());
     }
   }
 }

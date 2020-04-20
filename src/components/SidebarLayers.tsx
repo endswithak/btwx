@@ -1,14 +1,17 @@
-import React, { useContext, ReactElement } from 'react';
+import React, { useContext, ReactElement, useEffect } from 'react';
 import { store } from '../store';
 import SidebarLayer from './SidebarLayer';
 import SortableTree from './SortableTree';
 
 const SidebarLayers = (): ReactElement => {
   const globalState = useContext(store);
-  const { treeData } = globalState;
+  const { layers } = globalState;
+  useEffect(() => {
+    console.log(layers);
+  }, [layers])
   return (
     <SortableTree
-      treeData={treeData.root}
+      treeData={layers}
       nodeComponent={<SidebarLayer/>} />
   )
 }
