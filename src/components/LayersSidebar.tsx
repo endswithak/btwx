@@ -1,18 +1,14 @@
 import React, { useContext, ReactElement, useEffect } from 'react';
-import { store } from '../store';
 import Sidebar from './Sidebar';
 import SidebarSectionHead from './SidebarSectionHead';
 import SidebarSectionWrap from './SidebarSectionWrap';
 import SidebarLayers from './SidebarLayers';
 
 const LayersSidebar = (): ReactElement => {
-  const globalState = useContext(store);
-  const { theme, dispatch, layersSidebarWidth, layers } = globalState;
-
   return (
     <Sidebar
       //resizable
-      width={layersSidebarWidth}
+      width={320}
       position={'left'}
       //onDrag={handleDrag}
       //onDragStart={handleDragStart}
@@ -21,11 +17,7 @@ const LayersSidebar = (): ReactElement => {
         <SidebarSectionHead
           text={'layers'} />
       </SidebarSectionWrap>
-      {
-        layers.length > 0
-        ? <SidebarLayers />
-        : null
-      }
+      <SidebarLayers />
     </Sidebar>
   );
 }

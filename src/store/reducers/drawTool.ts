@@ -1,13 +1,13 @@
 import { ENABLE_DRAW_TOOL, DISABLE_DRAW_TOOL, DrawToolActions } from '../actionTypes/drawTool';
 import DrawTool from '../../canvas/drawTool';
 
-interface InitialState {
+export interface DrawToolState {
   drawTool: DrawTool;
   drawing: boolean;
   drawShape: em.ShapeType;
 }
 
-const initialState: InitialState = {
+const initialState: DrawToolState = {
   drawTool: null,
   drawing: false,
   drawShape: null

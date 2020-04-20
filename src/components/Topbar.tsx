@@ -1,17 +1,17 @@
-import paper from 'paper';
 import React, { useContext, ReactElement, useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { enableDrawTool, disableDrawTool } from '../store/actions/drawTool';
 import { ThemeContext } from './ThemeProvider';
 
-interface TopbarProps {
+interface TopbarStateProps {
   disableDrawTool(): any;
   enableDrawTool(payload: {drawShapeType: em.ShapeType}): any;
 }
 
-const Topbar = ({disableDrawTool, enableDrawTool}: TopbarProps): ReactElement => {
+const Topbar = (state: TopbarStateProps): ReactElement => {
   const [drawShapeType, setDrawShapeType] = useState(null);
   const theme = useContext(ThemeContext);
+  const { enableDrawTool, disableDrawTool } = state;
 
   const handleDrawClick = (shape: em.ShapeType) => {
     if (drawShapeType === shape) {

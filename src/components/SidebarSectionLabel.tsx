@@ -1,13 +1,12 @@
 import React, { useContext, ReactElement } from 'react';
-import { store } from '../store';
+import { ThemeContext } from './ThemeProvider';
 
 interface SidebarSectionLabelProps {
   text: string;
 }
 
 const SidebarSectionLabel = (props: SidebarSectionLabelProps): ReactElement => {
-  const globalState = useContext(store);
-  const { theme } = globalState;
+  const theme = useContext(ThemeContext);
 
   return (
     <div

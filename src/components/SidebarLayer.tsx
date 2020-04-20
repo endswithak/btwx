@@ -1,34 +1,34 @@
 import React, { useContext, ReactElement, useState, useLayoutEffect, useRef, useEffect } from 'react';
-import { store } from '../store';
+import { RootState } from '../store/reducers';
+import { connect } from 'react-redux';
 import SidebarDropzone from './SidebarDropzone';
 import SidebarLayerItem from './SidebarLayerItem';
 import LayerNode from '../canvas/base/layerNode';
 
 interface SidebarLayerProps {
-  layer: LayerNode;
+  layer: string;
   dragLayer: LayerNode;
   dragEnterLayer: LayerNode;
   dropzone: em.Dropzone;
   depth: number;
+  layerItem?: LayerNode;
 }
 
 const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
-  const globalState = useContext(store);
-  const { layer, depth, dragLayer, dragEnterLayer, dropzone } = props;
-  const { layers } = globalState;
+  const { layer, depth, dragLayer, dragEnterLayer, dropzone, layerItem } = props;
 
   return (
     <div
-      id={layer.id}
+      id={layer}
       draggable
       className='c-sidebar-layer'>
       <SidebarLayerItem
-        layer={layer}
+        layer={layerItem}
         depth={depth} />
       {
         dragLayer
         ? <SidebarDropzone
-            layer={layer}
+            layer={layerItem}
             depth={depth}
             dragLayer={dragLayer}
             dragEnterLayer={dragEnterLayer}
@@ -36,11 +36,11 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
         : null
       }
       {
-        layer.expanded
-        ? layer.children.map((child: string, index: number) => (
+        layerItem.expanded
+        ? layerItem.children.map((child: string, index: number) => (
             <SidebarLayer
               key={index}
-              layer={layers.find((layer) => layer.id === child)}
+              layer={child}
               depth={depth + 1}
               dragLayer={dragLayer}
               dragEnterLayer={dragEnterLayer}
@@ -52,4 +52,10 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
   );
 }
 
-export default SidebarLayer;
+const mapStateToProps = (state: RootState, ownProps: SidebarLayerProps) => {
+  const { layers } = state;
+  const layerItem = layers.byId[ownProps.layer];
+  return { layerItem };
+};
+
+export default connect(mapStateToProps)(SidebarLayer);

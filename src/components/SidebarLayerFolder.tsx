@@ -1,5 +1,5 @@
 import React, { useContext, ReactElement, useEffect } from 'react';
-import { store } from '../store';
+import { ThemeContext } from './ThemeProvider';
 import LayerNode from '../canvas/base/layerNode';
 
 interface SidebarLayerFolderProps {
@@ -7,8 +7,7 @@ interface SidebarLayerFolderProps {
 }
 
 const SidebarLayerFolder = (props: SidebarLayerFolderProps): ReactElement => {
-  const globalState = useContext(store);
-  const { dispatch, theme } = globalState;
+  const theme = useContext(ThemeContext);
   const { layer } = props;
 
   return (

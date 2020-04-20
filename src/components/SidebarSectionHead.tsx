@@ -1,14 +1,12 @@
 import React, { useContext, ReactElement } from 'react';
-import { store } from '../store';
+import { ThemeContext } from './ThemeProvider';
 
 interface SidebarSectionHeadProps {
   text: string;
 }
 
 const SidebarSectionHead = (props: SidebarSectionHeadProps): ReactElement => {
-  const globalState = useContext(store);
-  const { theme } = globalState;
-
+  const theme = useContext(ThemeContext);
   return (
     <div
       className='c-sidebar-section__head'

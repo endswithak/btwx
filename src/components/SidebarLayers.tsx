@@ -1,19 +1,26 @@
 import React, { useContext, ReactElement, useEffect } from 'react';
-import { store } from '../store';
+import { RootState } from '../store/reducers';
+import { connect } from 'react-redux';
 import SidebarLayer from './SidebarLayer';
 import SortableTree from './SortableTree';
 
-const SidebarLayers = (): ReactElement => {
-  const globalState = useContext(store);
-  const { layers } = globalState;
-  useEffect(() => {
-    console.log(layers);
-  }, [layers])
+interface SidebarLayersStateProps {
+  layers: any;
+}
+
+const SidebarLayers = (props: SidebarLayersStateProps): ReactElement => {
   return (
-    <SortableTree
-      treeData={layers}
-      nodeComponent={<SidebarLayer/>} />
+    props.layers.activePage
+    ? <SortableTree
+        treeData={props.layers.byId[props.layers.activePage]}
+        nodeComponent={<SidebarLayer/>} />
+    : null
   )
 }
 
-export default SidebarLayers;
+const mapStateToProps = (state: RootState) => {
+  const { layers } = state;
+  return { layers };
+};
+
+export default connect(mapStateToProps)(SidebarLayers);

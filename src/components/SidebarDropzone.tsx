@@ -18,7 +18,7 @@ const SidebarLayerDropzone = (props: SidebarLayerDropzoneProps): ReactElement =>
   return (
     <div className='c-sidebar-dropzone'>
       {
-        layer.canHaveLayers
+        layer.children
         ? <SidebarDropzoneCenter
             layer={layer}
             dragLayer={dragLayer}

@@ -1,5 +1,5 @@
 import React, { useContext, ReactElement, useEffect } from 'react';
-import { store } from '../store';
+import { ThemeContext } from './ThemeProvider';
 import LayerNode from '../canvas/base/layerNode';
 
 interface SidebarLayerChevronProps {
@@ -7,22 +7,22 @@ interface SidebarLayerChevronProps {
 }
 
 const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
-  const globalState = useContext(store);
-  const { dispatch, theme } = globalState;
+  const theme = useContext(ThemeContext);
   const { layer } = props;
 
-  const handleChevronClick = (): void => {
-    dispatch({
-      type: 'expand-node',
-      node: layer
-    });
-  }
+  // const handleChevronClick = (): void => {
+  //   dispatch({
+  //     type: 'expand-node',
+  //     node: layer
+  //   });
+  // }
 
   return (
     layer.children
     ? <div
         className='c-sidebar-layer__chevron'
-        onClick={handleChevronClick}>
+        //onClick={handleChevronClick}
+        >
         <svg
           width="24"
           height="24"

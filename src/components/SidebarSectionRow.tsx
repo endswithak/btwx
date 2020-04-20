@@ -1,5 +1,4 @@
 import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
-import { store } from '../store';
 
 interface SidebarSectionRowProps {
   children: ReactElement | ReactElement[];
@@ -8,9 +7,6 @@ interface SidebarSectionRowProps {
 }
 
 const SidebarSectionRow = (props: SidebarSectionRowProps): ReactElement => {
-  const globalState = useContext(store);
-  const { selectedLayer, theme, dispatch } = globalState;
-
   return (
     <div
       className='c-sidebar-section__row'

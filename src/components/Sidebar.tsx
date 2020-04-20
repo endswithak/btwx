@@ -1,5 +1,5 @@
 import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
-import { store } from '../store';
+import { ThemeContext } from './ThemeProvider';
 import SidebarDragHandle from './SidebarDragHandle';
 
 interface SidebarProps {
@@ -12,8 +12,7 @@ interface SidebarProps {
 }
 
 const Sidebar = (props: SidebarProps): ReactElement => {
-  const globalState = useContext(store);
-  const { theme } = globalState;
+  const theme = useContext(ThemeContext);
 
   return (
     <div

@@ -18,6 +18,7 @@ const App = (): ReactElement => {
       }}>
         <Topbar />
         <div className='c-app__canvas'>
+          <LayersSidebar />
           <Canvas />
         </div>
     </div>

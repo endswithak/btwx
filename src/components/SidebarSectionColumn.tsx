@@ -1,5 +1,4 @@
 import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
-import { store } from '../store';
 
 interface SidebarSectionColumnProps {
   children: ReactElement | ReactElement[];
@@ -9,9 +8,6 @@ interface SidebarSectionColumnProps {
 }
 
 const SidebarSectionColumn = (props: SidebarSectionColumnProps): ReactElement => {
-  const globalState = useContext(store);
-  const { selectedLayer, theme, dispatch } = globalState;
-
   return (
     <div
       className='c-sidebar-section__column'

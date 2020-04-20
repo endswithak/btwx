@@ -1,5 +1,5 @@
 import React, { useContext, ReactElement, useState, useLayoutEffect, useRef, useEffect } from 'react';
-import { store } from '../store';
+import { ThemeContext } from './ThemeProvider';
 import SidebarDropzoneArea from './SidebarDropzoneArea';
 import LayerNode from '../canvas/base/layerNode';
 
@@ -12,8 +12,7 @@ interface SidebarDropzoneCenterProps {
 
 const SidebarDropzoneCenter = (props: SidebarDropzoneCenterProps): ReactElement => {
   const dz = 'Center';
-  const globalState = useContext(store);
-  const { theme } = globalState;
+  const theme = useContext(ThemeContext);
   const {layer, dragLayer, dragEnterLayer, dropzone} = props;
   const isActive = dragEnterLayer && dragEnterLayer.id === layer.id && dropzone === dz;
 

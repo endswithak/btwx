@@ -37,17 +37,6 @@ class DrawTool {
     this.centerPoint = new Point(0, 0);
     this.shiftModifier = false;
   }
-  // enable(shape: em.ShapeType): void {
-  //   this.clearProps();
-  //   this.tool.activate();
-  //   this.drawShapeType = shape;
-  //   this.enabled = true;
-  // }
-  // disable(): void {
-  //   this.clearProps();
-  //   this.app.selectionTool.tool.activate();
-  //   this.enabled = false;
-  // }
   renderShape(shapeOpts: any) {
     switch(this.drawShapeType) {
       case 'Rectangle':

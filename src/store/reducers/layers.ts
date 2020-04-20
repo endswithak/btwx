@@ -5,24 +5,26 @@ import FillNode from '../../canvas/base/fillNode';
 import ShapeNode from '../../canvas/base/shapeNode';
 import StyleGroupNode from '../../canvas/base/styleGroupNode';
 
-interface InitialState {
+export interface LayersState {
   activePage: string;
-  layers: {
+  allIds: string[];
+  byId: {
     [id: string]: LayerNode;
   };
-  paperLayers: {
+  paper: {
     [id: string]: paper.Item;
   };
-  paperShapes: {
+  paperShape: {
     [id: string]: paper.Path | paper.CompoundPath;
   };
 }
 
-const initialState: InitialState = {
+const initialState: LayersState = {
   activePage: null,
-  layers: {},
-  paperLayers: {},
-  paperShapes: {}
+  allIds: [],
+  byId: {},
+  paper: {},
+  paperShape: {}
 };
 
 export default (state = initialState, action: {type: LayerActions; payload: any}) => {
@@ -42,12 +44,13 @@ export default (state = initialState, action: {type: LayerActions; payload: any}
       });
       return {
         ...state,
-        layers: {
-          ...state.layers,
+        allIds: [...state.allIds, page.id],
+        byId: {
+          ...state.byId,
           [page.id]: page
         },
-        paperLayers: {
-          ...state.paperLayers,
+        paper: {
+          ...state.paper,
           [page.id]: paperPage
         },
         activePage: page.id
@@ -61,7 +64,7 @@ export default (state = initialState, action: {type: LayerActions; payload: any}
         name: action.payload.name
       });
       // update parnet with new shape
-      const updatedParent = state.layers[shape.parent].children.push(shape.id);
+      const updatedParent = state.byId[shape.parent].children.push(shape.id);
       // create fill group
       const fillGroup = new StyleGroupNode({
         styleGroupType: 'Fills',
@@ -76,7 +79,7 @@ export default (state = initialState, action: {type: LayerActions; payload: any}
       fillGroup.children.push(fill.id);
       // create paper layer
       const paperLayer = new paper.Group({
-        parent: state.paperLayers[shape.parent],
+        parent: state.paper[shape.parent],
         data: {
           id: shape.id,
           layerId: shape.id
@@ -100,21 +103,22 @@ export default (state = initialState, action: {type: LayerActions; payload: any}
       paperFill.parent = paperFillGroup;
       return {
         ...state,
-        layers: {
-          ...state.layers,
+        allIds: [...state.allIds, shape.id, fillGroup.id, fill.id],
+        byId: {
+          ...state.byId,
           [action.payload.parent]: updatedParent,
           [shape.id]: shape,
           [fillGroup.id]: fillGroup,
           [fill.id]: fill
         },
-        paperLayers: {
-          ...state.paperLayers,
+        paper: {
+          ...state.paper,
           [shape.id]: paperLayer,
           [fillGroup.id]: paperFillGroup,
           [fill.id]: paperFill
         },
-        paperShapes: {
-          ...state.paperShapes,
+        paperShape: {
+          ...state.paperShape,
           [shape.id]: action.payload.paperShape
         }
       };

@@ -1,6 +1,5 @@
 import React, { useContext, ReactElement, useEffect } from 'react';
-import { store } from '../store';
-import TreeNode from '../canvas/base/treeNode';
+import { ThemeContext } from './ThemeProvider';
 import SidebarLayerTitle from './SidebarLayerTitle';
 import SidebarLayerChevron from './SidebarLayerChevron';
 import SidebarLayerShape from './SidebarLayerShape';
@@ -13,8 +12,7 @@ interface SidebarLayerItemProps {
 }
 
 const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
-  const globalState = useContext(store);
-  const { dispatch, theme } = globalState;
+  const theme = useContext(ThemeContext);
   const { layer, depth } = props;
 
   return (
