@@ -12,7 +12,7 @@ const SidebarLayers = (props: SidebarLayersStateProps): ReactElement => {
   return (
     props.layers.activePage
     ? <SortableTree
-        treeData={props.layers.byId[props.layers.activePage]}
+        treeData={props.layers.layerById[props.layers.activePage]}
         nodeComponent={<SidebarLayer/>} />
     : null
   )

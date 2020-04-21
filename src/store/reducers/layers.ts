@@ -1,33 +1,40 @@
 import paper from 'paper';
-import { ADD_SHAPE, ADD_PAGE, LayerActions } from '../actionTypes/layers';
+import {
+  ADD_SHAPE,
+  ADD_PAGE,
+  ADD_TO_SELECTION,
+  REMOVE_FROM_SELECTION,
+  CLEAR_SELECTION,
+  NEW_SELECTION,
+  LayersTypes
+} from '../actionTypes/layers';
 import LayerNode from '../../canvas/base/layerNode';
 import FillNode from '../../canvas/base/fillNode';
 import ShapeNode from '../../canvas/base/shapeNode';
 import StyleGroupNode from '../../canvas/base/styleGroupNode';
+import StyleNode from '../../canvas/base/styleNode';
 
 export interface LayersState {
   activePage: string;
-  allIds: string[];
-  byId: {
-    [id: string]: LayerNode;
+  selection: string[];
+  layerById: {
+    [id: string]: LayerNode | StyleNode | ShapeNode | FillNode | StyleGroupNode;
   };
-  paper: {
+  paperLayers: {
     [id: string]: paper.Item;
   };
-  paperShape: {
-    [id: string]: paper.Path | paper.CompoundPath;
-  };
+  allIds: string[];
 }
 
 const initialState: LayersState = {
   activePage: null,
-  allIds: [],
-  byId: {},
-  paper: {},
-  paperShape: {}
+  selection: [],
+  layerById: {},
+  paperLayers: {},
+  allIds: []
 };
 
-export default (state = initialState, action: {type: LayerActions; payload: any}) => {
+export default (state = initialState, action: LayersTypes): LayersState => {
   switch (action.type) {
     case ADD_PAGE: {
       // create shape node
@@ -44,16 +51,16 @@ export default (state = initialState, action: {type: LayerActions; payload: any}
       });
       return {
         ...state,
-        allIds: [...state.allIds, page.id],
-        byId: {
-          ...state.byId,
+        activePage: page.id,
+        layerById: {
+          ...state.layerById,
           [page.id]: page
         },
-        paper: {
-          ...state.paper,
+        allIds: [...state.allIds, page.id],
+        paperLayers: {
+          ...state.paperLayers,
           [page.id]: paperPage
-        },
-        activePage: page.id
+        }
       };
     }
     case ADD_SHAPE: {
@@ -64,7 +71,7 @@ export default (state = initialState, action: {type: LayerActions; payload: any}
         name: action.payload.name
       });
       // update parnet with new shape
-      const updatedParent = state.byId[shape.parent].children.push(shape.id);
+      state.layerById[shape.parent].children.push(shape.id);
       // create fill group
       const fillGroup = new StyleGroupNode({
         styleGroupType: 'Fills',
@@ -79,7 +86,7 @@ export default (state = initialState, action: {type: LayerActions; payload: any}
       fillGroup.children.push(fill.id);
       // create paper layer
       const paperLayer = new paper.Group({
-        parent: state.paper[shape.parent],
+        parent: state.paperLayers[shape.parent],
         data: {
           id: shape.id,
           layerId: shape.id
@@ -95,7 +102,7 @@ export default (state = initialState, action: {type: LayerActions; payload: any}
       });
       // create fill paper item
       const paperFill = action.payload.paperShape.clone() as paper.Path | paper.CompoundPath;
-      paperFill.fillColor = fill.color;
+      paperFill.fillColor = new paper.Color(fill.color);
       paperFill.data = {
         id: fill.id,
         layerId: shape.id
@@ -103,24 +110,58 @@ export default (state = initialState, action: {type: LayerActions; payload: any}
       paperFill.parent = paperFillGroup;
       return {
         ...state,
-        allIds: [...state.allIds, shape.id, fillGroup.id, fill.id],
-        byId: {
-          ...state.byId,
-          [action.payload.parent]: updatedParent,
+        layerById: {
+          ...state.layerById,
           [shape.id]: shape,
           [fillGroup.id]: fillGroup,
           [fill.id]: fill
         },
-        paper: {
-          ...state.paper,
+        paperLayers: {
+          ...state.paperLayers,
           [shape.id]: paperLayer,
           [fillGroup.id]: paperFillGroup,
-          [fill.id]: paperFill
+          [fill.id]: paperFill,
+          [`[shape]${[shape.id]}`]: action.payload.paperShape
         },
-        paperShape: {
-          ...state.paperShape,
-          [shape.id]: action.payload.paperShape
-        }
+        allIds: [...state.allIds, shape.id, fillGroup.id, fill.id]
+      };
+    }
+    case ADD_TO_SELECTION: {
+      (state.layerById[action.payload.id] as LayerNode).selected = true;
+      (state.paperLayers[action.payload.id] as paper.Item).selected = true;
+      return {
+        ...state,
+        selection: [...state.selection, action.payload.id]
+      };
+    }
+    case REMOVE_FROM_SELECTION: {
+      (state.layerById[action.payload.id] as LayerNode).selected = false;
+      (state.paperLayers[action.payload.id] as paper.Item).selected = false;
+      return {
+        ...state,
+        selection: state.selection.filter((id) => id !== action.payload.id)
+      };
+    }
+    case CLEAR_SELECTION: {
+      state.selection.forEach((id) => {
+        (state.layerById[id] as LayerNode).selected = false;
+        (state.paperLayers[id] as paper.Item).selected = false;
+      });
+      return {
+        ...state,
+        selection: []
+      };
+    }
+    case NEW_SELECTION: {
+      state.selection.forEach((id) => {
+        (state.layerById[id] as LayerNode).selected = false;
+        (state.paperLayers[id] as paper.Item).selected = false;
+      });
+      (state.layerById[action.payload.id] as LayerNode).selected = true;
+      (state.paperLayers[action.payload.id] as paper.Item).selected = true;
+      return {
+        ...state,
+        selection: [action.payload.id]
       };
     }
     default:

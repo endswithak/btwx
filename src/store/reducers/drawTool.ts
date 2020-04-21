@@ -1,4 +1,4 @@
-import { ENABLE_DRAW_TOOL, DISABLE_DRAW_TOOL, DrawToolActions } from '../actionTypes/drawTool';
+import { ENABLE_DRAW_TOOL, DISABLE_DRAW_TOOL, DrawToolTypes } from '../actionTypes/drawTool';
 import DrawTool from '../../canvas/drawTool';
 
 export interface DrawToolState {
@@ -13,7 +13,7 @@ const initialState: DrawToolState = {
   drawShape: null
 };
 
-export default (state = initialState, action: {type: DrawToolActions; payload: any}) => {
+export default (state = initialState, action: DrawToolTypes): DrawToolState => {
   switch (action.type) {
     case ENABLE_DRAW_TOOL: {
       return {

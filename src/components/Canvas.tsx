@@ -2,14 +2,16 @@ import paper from 'paper';
 import React, { useRef, useContext, useEffect, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { addPage } from '../store/actions/layers';
+import { enableSelectionTool } from '../store/actions/selectionTool';
 import { ThemeContext } from './ThemeProvider';
 //import renderCanvas from '../canvas';
 
 interface CanvasProps {
   addPage(): any;
+  enableSelectionTool(): any;
 }
 
-const Canvas = ({addPage}: CanvasProps): ReactElement => {
+const Canvas = ({addPage, enableSelectionTool}: CanvasProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useContext(ThemeContext);
@@ -20,6 +22,7 @@ const Canvas = ({addPage}: CanvasProps): ReactElement => {
     canvasRef.current.height = canvasContainerRef.current.clientHeight;
     paper.setup(canvasRef.current);
     addPage();
+    enableSelectionTool();
     // dispatch({
     //   type: 'add-page'
     // });
@@ -69,5 +72,5 @@ const Canvas = ({addPage}: CanvasProps): ReactElement => {
 
 export default connect(
   null,
-  { addPage }
+  { addPage, enableSelectionTool }
 )(Canvas);

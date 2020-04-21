@@ -1,22 +1,27 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
-import PaperGroup from './base/group';
-import PaperShape from './base/shape';
-import PaperApp from './app';
+import { Store } from 'redux';
+import { getLayer, getPaperLayer, getActivePage, getParentLayer, getActivePagePaperLayer } from '../store/selectors';
+import { clearSelection, addToSelection, removeFromSelection, newSelection } from '../store/actions/layers';
+import store, { StoreDispatch, StoreGetState } from '../store';
 import LayerNode from './base/layerNode';
 import StyleNode from './base/styleNode';
 
 class SelectionTool {
-  app: PaperApp;
+  getState: StoreGetState;
+  dispatch: StoreDispatch;
   tool: paper.Tool;
   shiftModifier: boolean;
   metaModifier: boolean;
+  hitResult: paper.HitResult;
   areaSelect: {
     active: boolean;
     from: paper.Point;
     to: paper.Point;
     shape: paper.Path;
   };
-  constructor({app}: {app: PaperApp}) {
+  constructor() {
+    this.getState = store.getState;
+    this.dispatch = store.dispatch;
     this.tool = new Tool();
     this.tool.activate();
     this.tool.onKeyDown = (e) => this.onKeyDown(e);
@@ -24,7 +29,6 @@ class SelectionTool {
     this.tool.onMouseDown = (e) => this.onMouseDown(e);
     this.tool.onMouseDrag = (e) => this.onMouseDrag(e);
     this.tool.onMouseUp = (e) => this.onMouseUp(e);
-    this.app = app;
     this.areaSelect = {
       active: false,
       to: null,
@@ -33,6 +37,7 @@ class SelectionTool {
     };
     this.shiftModifier = false;
     this.metaModifier = false;
+    this.hitResult = null;
   }
   clearProps(): void {
     if (this.areaSelect.shape) {
@@ -59,30 +64,30 @@ class SelectionTool {
   onKeyDown(event: paper.KeyEvent): void {
     switch(event.key) {
       case 'g': {
-        if (event.modifiers.meta) {
-          const topSelection = [...this.app.selection].reduce((total, current) => {
-            const topGroup = this.getTopParentGroup(current);
-            return topGroup.getIndex() <= total.getIndex() ? current : total;
-          }, this.app.selection[0]);
-          const topSelectionParent = topSelection.parent;
-          const topSelectionIndex = topSelection.getIndex();
-          this.app.dispatch({
-            type: 'add-node-at',
-            node: new LayerNode({layerType: 'Group'}),
-            toNode: topSelectionParent,
-            index: topSelectionIndex
-          });
-          const newGroup = topSelectionParent.children[topSelectionIndex];
-          this.app.dispatch({
-            type: 'add-nodes',
-            nodes: this.app.selection,
-            toNode: newGroup
-          });
-          this.app.dispatch({
-            type: 'new-selection',
-            layer: newGroup
-          });
-        }
+        // if (event.modifiers.meta) {
+        //   const topSelection = [...this.app.selection].reduce((total, current) => {
+        //     const topGroup = this.getTopParentGroup(current);
+        //     return topGroup.getIndex() <= total.getIndex() ? current : total;
+        //   }, this.app.selection[0]);
+        //   const topSelectionParent = topSelection.parent;
+        //   const topSelectionIndex = topSelection.getIndex();
+        //   this.app.dispatch({
+        //     type: 'add-node-at',
+        //     node: new LayerNode({layerType: 'Group'}),
+        //     toNode: topSelectionParent,
+        //     index: topSelectionIndex
+        //   });
+        //   const newGroup = topSelectionParent.children[topSelectionIndex];
+        //   this.app.dispatch({
+        //     type: 'add-nodes',
+        //     nodes: this.app.selection,
+        //     toNode: newGroup
+        //   });
+        //   this.app.dispatch({
+        //     type: 'new-selection',
+        //     layer: newGroup
+        //   });
+        // }
         break;
       }
       case 'shift': {
@@ -124,23 +129,22 @@ class SelectionTool {
     }
   }
   onMouseDown(event: paper.ToolEvent): void {
-    const hitTest = this.app.page.paperItem.hitTest(event.point);
-    if (hitTest && this.getInteractiveParent(hitTest.item.data.node).layerType !== 'Artboard') {
+    const state = this.getState();
+    this.hitResult = getPaperLayer(state, state.layers.activePage).hitTest(event.point);
+    if (this.hitResult) {
+      const hitLayerId = this.hitResult.item.data.layerId;
       if (this.shiftModifier) {
-        this.updateSelection(this.getInteractiveParent(hitTest.item.data.node));
+        this.updateSelection(hitLayerId);
       } else {
-        this.app.dispatch({
-          type: 'new-selection',
-          layer: this.getInteractiveParent(hitTest.item.data.node)
-        });
+        this.dispatch(newSelection({
+          id: hitLayerId
+        }));
       }
     } else {
       this.areaSelect.active = true;
       this.areaSelect.from = event.point;
       if (!this.shiftModifier) {
-        this.app.dispatch({
-          type: 'clear-selection'
-        });
+        this.dispatch(clearSelection());
       }
     }
   }
@@ -157,15 +161,15 @@ class SelectionTool {
         this.areaSelect.to = null;
       }
       this.areaSelect.active = false;
-      this.app.page.paperItem.getItems({
+      getActivePagePaperLayer(this.getState()).getItems({
         data: (value: any) => {
-          const topParent = this.getTopParentGroup(value.node);
-          return topParent.id === value.node.id;
+          const topParent = this.getTopParentGroup(value.layerId);
+          return topParent.id === value.layerId;
         },
         overlapping: this.areaSelect.shape.bounds
       }).forEach((item: paper.Item) => {
-        const node = item.data.node;
-        if (node.type === 'Artboard') {
+        const node = item.data.layerId;
+        if (getLayer(this.getState(), node).layerType === 'Artboard') {
           if (item.isInside(this.areaSelect.shape.bounds)) {
             this.updateSelection(node);
           }
@@ -176,62 +180,26 @@ class SelectionTool {
     }
     this.clearProps();
   }
-  updateSelection(layer: PaperShape | PaperGroup): void {
-    if (this.isSelected(layer.id)) {
-      this.app.dispatch({
-        type: 'remove-from-selection',
-        layer: layer
-      });
+  updateSelection(id: string): void {
+    if (this.isSelected(id)) {
+      this.dispatch(removeFromSelection({ id }));
     } else {
-      this.app.dispatch({
-        type: 'add-to-selection',
-        layer: layer
-      });
+      this.dispatch(addToSelection({ id }));
     }
   }
-  getInteractiveParent(node: StyleNode | LayerNode): LayerNode {
-    let parent = node;
-    while(parent.type === 'Style') {
-      parent = parent.parent;
-    }
-    return parent as LayerNode;
-  }
-  getTopParentGroup(node: LayerNode) {
-    let currentNode = this.getInteractiveParent(node);
-    while(currentNode.parent.layerType === 'Group') {
-      currentNode = currentNode.parent;
+  getTopParentGroup(id: string) {
+    let currentNode = getLayer(this.getState(), id);
+    while(getParentLayer(this.getState(), currentNode.id).layerType === 'Group') {
+      currentNode = getParentLayer(this.getState(), currentNode.id);
     }
     return currentNode;
   }
   isSelected(id: string): boolean {
-    if (this.app.selection.find(item => item.id === id)) {
+    if (this.getState().layers.selection.includes(id)) {
       return true;
     } else {
       return false;
     }
-  }
-  getIndex(id: string): number {
-    return this.app.selection.findIndex(layer => layer.id === id);
-  }
-  addToSelection(layer: LayerNode): LayerNode[] {
-    layer.selected = true;
-    layer.paperItem.selected = true;
-    this.app.selection.push(layer);
-    return this.app.selection;
-  }
-  removeFromSelection(layer: LayerNode): LayerNode[] {
-    layer.selected = false;
-    layer.paperItem.selected = false;
-    this.app.selection.splice(this.getIndex(layer.id), 1);
-    return this.app.selection;
-  }
-  clearSelection(): LayerNode[] {
-    this.app.selection.forEach((item) => {
-      item.selected = false;
-      item.paperItem.selected = false;
-    });
-    this.app.selection = [];
-    return this.app.selection;
   }
 }
 

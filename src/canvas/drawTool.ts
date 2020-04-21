@@ -1,10 +1,12 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
-import store from '../store';
+import store, { StoreDispatch, StoreGetState } from '../store';
 import { disableDrawTool } from '../store/actions/drawTool';
+import { enableSelectionTool } from '../store/actions/selectionTool';
 import { addShape } from '../store/actions/layers';
 
 class DrawTool {
-  store: any;
+  getState: StoreGetState;
+  dispatch: StoreDispatch;
   tool: paper.Tool;
   drawShapeType: em.ShapeType;
   outline: paper.Path;
@@ -18,8 +20,10 @@ class DrawTool {
   centerPoint: paper.Point;
   shiftModifier: boolean;
   constructor({drawShapeType}: {drawShapeType: em.ShapeType}) {
-    this.store = store;
+    this.getState = store.getState;
+    this.dispatch = store.dispatch;
     this.tool = new Tool();
+    this.tool.activate();
     this.tool.onKeyDown = (e: paper.KeyEvent) => this.onKeyDown(e);
     this.tool.onKeyUp = (e: paper.KeyEvent) => this.onKeyUp(e);
     this.tool.onMouseDown = (e: paper.ToolEvent) => this.onMouseDown(e);
@@ -129,7 +133,8 @@ class DrawTool {
         if (this.outline) {
           this.outline.remove();
         }
-        this.store.dispatch(disableDrawTool());
+        this.dispatch(disableDrawTool());
+        this.dispatch(enableSelectionTool());
         break;
       }
     }
@@ -167,7 +172,7 @@ class DrawTool {
       if (this.outline) {
         this.outline.remove();
       }
-      this.store.dispatch(addShape({
+      this.dispatch(addShape({
         shapeType: this.drawShapeType,
         paperShape: this.renderShape({
           name: this.drawShapeType,
@@ -176,7 +181,8 @@ class DrawTool {
         name: this.drawShapeType,
         parent: null
       }));
-      this.store.dispatch(disableDrawTool());
+      this.dispatch(disableDrawTool());
+      this.dispatch(enableSelectionTool());
     }
   }
 }

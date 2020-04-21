@@ -54,8 +54,9 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
 
 const mapStateToProps = (state: RootState, ownProps: SidebarLayerProps) => {
   const { layers } = state;
-  const layerItem = layers.byId[ownProps.layer];
-  return { layerItem };
+  const layerItem = layers.layerById[ownProps.layer];
+  const selection = layers.selection;
+  return { layerItem, selection };
 };
 
 export default connect(mapStateToProps)(SidebarLayer);

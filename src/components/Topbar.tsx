@@ -1,23 +1,32 @@
 import React, { useContext, ReactElement, useState, useEffect } from 'react';
+import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
 import { enableDrawTool, disableDrawTool } from '../store/actions/drawTool';
+import { enableSelectionTool, disableSelectionTool } from '../store/actions/selectionTool';
 import { ThemeContext } from './ThemeProvider';
 
 interface TopbarStateProps {
+  drawShapeType: em.ShapeType;
+  drawing: boolean;
   disableDrawTool(): any;
   enableDrawTool(payload: {drawShapeType: em.ShapeType}): any;
+  enableSelectionTool(): any;
+  disableSelectionTool(): any;
 }
 
-const Topbar = (state: TopbarStateProps): ReactElement => {
-  const [drawShapeType, setDrawShapeType] = useState(null);
+const Topbar = (props: TopbarStateProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { enableDrawTool, disableDrawTool } = state;
+  const { enableDrawTool, disableDrawTool, enableSelectionTool, disableSelectionTool, drawShapeType, drawing } = props;
 
   const handleDrawClick = (shape: em.ShapeType) => {
     if (drawShapeType === shape) {
       disableDrawTool();
+      enableSelectionTool();
     } else {
-      setDrawShapeType(shape);
+      if (drawing) {
+        disableDrawTool();
+      }
+      disableSelectionTool();
       enableDrawTool({
         drawShapeType: shape
       });
@@ -68,7 +77,14 @@ const Topbar = (state: TopbarStateProps): ReactElement => {
   );
 }
 
+const mapStateToProps = (state: RootState) => {
+  const { drawTool } = state;
+  const drawShapeType = drawTool.drawShape;
+  const drawing = drawTool.drawing;
+  return { drawShapeType, drawing };
+};
+
 export default connect(
-  null,
-  { enableDrawTool, disableDrawTool }
+  mapStateToProps,
+  { enableDrawTool, disableDrawTool, enableSelectionTool, disableSelectionTool }
 )(Topbar);
