@@ -1,6 +1,7 @@
 export const ADD_SHAPE = 'ADD_SHAPE';
 export const ADD_GROUP = 'ADD_GROUP';
 export const ADD_PAGE = 'ADD_PAGE';
+export const REMOVE_LAYER = 'REMOVE_LAYER';
 
 export const EXPAND_GROUP = 'EXPAND_GROUP';
 export const COLLAPSE_GROUP = 'COLLAPSE_GROUP';
@@ -13,6 +14,8 @@ export const ADD_TO_SELECTION = 'ADD_TO_SELECTION';
 export const REMOVE_FROM_SELECTION = 'REMOVE_FROM_SELECTION';
 export const CLEAR_SELECTION = 'CLEAR_SELECTION';
 export const NEW_SELECTION = 'NEW_SELECTION';
+export const GROUP_SELECTION = 'GROUP_SELECTION';
+export const UNGROUP_SELECTION = 'UNGROUP_SELECTION';
 
 // Add
 
@@ -48,6 +51,15 @@ export interface AddPagePayload {
 interface AddPage {
   type: typeof ADD_PAGE;
   payload: AddPagePayload;
+}
+
+export interface RemoveLayerPayload {
+  id: string;
+}
+
+interface RemoveLayer {
+  type: typeof REMOVE_LAYER;
+  payload: RemoveLayerPayload;
 }
 
 // Insert
@@ -123,4 +135,12 @@ interface NewSelection {
   payload: SelectionPayload;
 }
 
-export type LayersTypes = AddShape | AddGroup | AddPage | InsertChild | InsertAbove | InsertBelow | ExpandGroup | CollapseGroup | AddToSelection | RemoveFromSelection | ClearSelection | NewSelection;
+interface GroupSelection {
+  type: typeof GROUP_SELECTION;
+}
+
+interface UngroupSelection {
+  type: typeof UNGROUP_SELECTION;
+}
+
+export type LayersTypes = AddShape | AddGroup | AddPage | RemoveLayer | InsertChild | InsertAbove | InsertBelow | ExpandGroup | CollapseGroup | AddToSelection | RemoveFromSelection | ClearSelection | NewSelection | GroupSelection | UngroupSelection;

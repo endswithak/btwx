@@ -2,6 +2,7 @@ import {
   ADD_SHAPE,
   ADD_GROUP,
   ADD_PAGE,
+  REMOVE_LAYER,
   INSERT_CHILD,
   INSERT_ABOVE,
   INSERT_BELOW,
@@ -11,15 +12,18 @@ import {
   REMOVE_FROM_SELECTION,
   CLEAR_SELECTION,
   NEW_SELECTION,
+  GROUP_SELECTION,
+  UNGROUP_SELECTION,
   AddPagePayload,
   AddShapePayload,
   AddGroupPayload,
+  RemoveLayerPayload,
   InsertChildPayload,
   InsertAbovePayload,
   InsertBelowPayload,
   ShowChildrenPayload,
   SelectionPayload,
-  LayersTypes,
+  LayersTypes
 } from '../actionTypes/layers';
 
 // Add
@@ -36,6 +40,11 @@ export const addGroup = (content: AddGroupPayload): LayersTypes => ({
 
 export const addPage = (content: AddPagePayload): LayersTypes => ({
   type: ADD_PAGE,
+  payload: content
+});
+
+export const removeLayer = (content: RemoveLayerPayload): LayersTypes => ({
+  type: REMOVE_LAYER,
   payload: content
 });
 
@@ -87,4 +96,12 @@ export const clearSelection = (): LayersTypes => ({
 export const newSelection = (selection: SelectionPayload): LayersTypes => ({
   type: NEW_SELECTION,
   payload: selection
+});
+
+export const groupSelection = (): LayersTypes => ({
+  type: GROUP_SELECTION
+});
+
+export const ungroupSelection = (): LayersTypes => ({
+  type: UNGROUP_SELECTION
 });

@@ -38,3 +38,11 @@ export const getActivePagePaperLayer = (store: LayersState): paper.Item => {
   const activePage = store.activePage;
   return getPaperLayer(store, activePage);
 }
+
+export const getTopParentGroup = (store: LayerState, id: string) => {
+  let currentNode = getLayer(store, id);
+  while(getParentLayer(store, currentNode.id).type === 'Group') {
+    currentNode = getParentLayer(store, currentNode.id);
+  }
+  return currentNode;
+}

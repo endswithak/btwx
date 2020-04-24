@@ -1,6 +1,6 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
-import { getLayer, getPaperLayer, getActivePage, getParentLayer, getActivePagePaperLayer, getLayerByPaperId, getLayerIndex } from '../store/selectors/layers';
-import { clearSelection, addToSelection, removeFromSelection, newSelection, addGroup, insertChild, insertAbove, insertBelow} from '../store/actions/layers';
+import { getLayer, getPaperLayer, getActivePage, getParentLayer, getActivePagePaperLayer, getLayerByPaperId, getLayerIndex, getTopParentGroup } from '../store/selectors/layers';
+import { clearSelection, addToSelection, removeFromSelection, newSelection, addGroup, insertChild, insertAbove, removeLayer, groupSelection } from '../store/actions/layers';
 import store, { StoreDispatch, StoreGetState } from '../store';
 
 class SelectionTool {
@@ -62,24 +62,11 @@ class SelectionTool {
     switch(event.key) {
       case 'g': {
         if (event.modifiers.meta && this.getState().layers.selection.length > 0) {
-          const state = this.getState().layers;
-          const topSelection = [...state.selection].reduce((total, current) => {
-            const topGroup = this.getTopParentGroup(current);
-            return getLayerIndex(state, topGroup.id) <= getLayerIndex(state, total) ? current : total;
-          }, state.selection[0]);
-          this.dispatch(addGroup({}));
-          const groupId = this.getState().layers.allIds[this.getState().layers.allIds.length - 1];
-          this.dispatch(insertAbove({
-            layer: groupId,
-            above: topSelection
-          }));
-          state.selection.forEach((id) => {
-            this.dispatch(insertChild({
-              layer: id,
-              parent: groupId
-            }));
-          });
-          this.dispatch(newSelection({id: groupId}));
+          if (event.modifiers.shift) {
+            //this.ungroupSelection();
+          } else {
+            this.dispatch(groupSelection());
+          }
         }
         break;
       }
@@ -159,7 +146,7 @@ class SelectionTool {
       const overlappedItems = getActivePagePaperLayer(state).getItems({
         id: (paperId: number) => {
           const layerId = getLayerByPaperId(state, paperId).id;
-          const topParent = this.getTopParentGroup(layerId);
+          const topParent = getTopParentGroup(state, layerId);
           return topParent.paperLayer === paperId;
         },
         overlapping: this.areaSelect.shape.bounds
@@ -185,14 +172,6 @@ class SelectionTool {
       this.dispatch(addToSelection({ id }));
     }
   }
-  getTopParentGroup(id: string) {
-    const state = this.getState().layers;
-    let currentNode = getLayer(state, id);
-    while(getParentLayer(state, currentNode.id).type === 'Group') {
-      currentNode = getParentLayer(state, currentNode.id);
-    }
-    return currentNode;
-  }
   isSelected(id: string): boolean {
     if (this.getState().layers.selection.includes(id)) {
       return true;
@@ -200,6 +179,44 @@ class SelectionTool {
       return false;
     }
   }
+  // groupSelection() {
+  //   const state = this.getState().layers;
+  //   const topSelection = [...state.selection].reduce((total, current) => {
+  //     const topGroup = getTopParentGroup(state, current);
+  //     return getLayerIndex(state, topGroup.id) <= getLayerIndex(state, total) ? current : total;
+  //   }, state.selection[0]);
+  //   this.dispatch(addGroup({}));
+  //   const groupId = this.getState().layers.allIds[this.getState().layers.allIds.length - 1];
+  //   this.dispatch(insertAbove({
+  //     layer: groupId,
+  //     above: topSelection
+  //   }));
+  //   state.selection.forEach((id) => {
+  //     this.dispatch(insertChild({
+  //       layer: id,
+  //       parent: groupId
+  //     }));
+  //   });
+  //   this.dispatch(newSelection({id: groupId}));
+  // }
+  // ungroupSelection() {
+  //   const state = this.getState().layers;
+  //   state.selection.forEach((id) => {
+  //     if (state.layerById[id].type === 'Group') {
+  //       this.dispatch(removeFromSelection({ id }));
+  //       state.layerById[id].children.forEach((child) => {
+  //         this.dispatch(insertAbove({
+  //           layer: child,
+  //           above: id
+  //         }));
+  //         this.updateSelection(child);
+  //       });
+  //       this.dispatch(removeLayer({ id }));
+  //     } else {
+  //       return;
+  //     }
+  //   });
+  // }
 }
 
 export default SelectionTool;

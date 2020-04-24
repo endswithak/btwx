@@ -4,6 +4,7 @@ import {
   ADD_SHAPE,
   ADD_GROUP,
   ADD_PAGE,
+  REMOVE_LAYER,
   INSERT_CHILD,
   INSERT_ABOVE,
   INSERT_BELOW,
@@ -13,9 +14,12 @@ import {
   REMOVE_FROM_SELECTION,
   CLEAR_SELECTION,
   NEW_SELECTION,
+  GROUP_SELECTION,
+  UNGROUP_SELECTION,
   LayersTypes
 } from '../actionTypes/layers';
 import { removeItem, insertItem } from '../utils/layers';
+import { getLayerIndex, getParentLayer, getTopParentGroup } from '../selectors/layers';
 
 export interface LayersState {
   activePage: string;
@@ -43,23 +47,22 @@ export default (state = initialState, action: LayersTypes): LayersState => {
       const paperParentId = state.layerById[layerParentId].paperLayer;
       const paperParentLayer = paper.project.getItem({id: paperParentId});
       action.payload.paperShape.parent = paperParentLayer;
-      const shape: em.Shape = {
-        type: 'Shape',
-        shapeType: action.payload.shapeType,
-        id: shapeId,
-        name: action.payload.name ? action.payload.name : action.payload.shapeType,
-        parent: layerParentId,
-        paperParent: state.layerById[layerParentId].paperLayer,
-        paperLayer: action.payload.paperShape.id,
-        selected: false,
-        children: null
-      }
       return {
         ...state,
         allIds: [...state.allIds, shapeId],
         layerById: {
           ...state.layerById,
-          [shapeId]: shape,
+          [shapeId]: {
+            type: 'Shape',
+            shapeType: action.payload.shapeType,
+            id: shapeId,
+            name: action.payload.name ? action.payload.name : action.payload.shapeType,
+            parent: layerParentId,
+            paperParent: state.layerById[layerParentId].paperLayer,
+            paperLayer: action.payload.paperShape.id,
+            selected: false,
+            children: null
+          },
           [layerParentId]: {
             ...state.layerById[layerParentId],
             children: [...(state.layerById[layerParentId] as em.Group).children, shapeId]
@@ -75,23 +78,22 @@ export default (state = initialState, action: LayersTypes): LayersState => {
       const paperGroup = new paper.Group({
         parent: paperParentLayer
       });
-      const group: em.Group = {
-        type: 'Group',
-        id: groupId,
-        name: action.payload.name ? action.payload.name : 'Group',
-        parent: layerParentId,
-        paperParent: state.layerById[layerParentId].paperLayer,
-        paperLayer: paperGroup.id,
-        children: [],
-        selected: false,
-        expanded: false
-      }
       return {
         ...state,
         allIds: [...state.allIds, groupId],
         layerById: {
           ...state.layerById,
-          [groupId]: group,
+          [groupId]: {
+            type: 'Group',
+            id: groupId,
+            name: action.payload.name ? action.payload.name : 'Group',
+            parent: layerParentId,
+            paperParent: state.layerById[layerParentId].paperLayer,
+            paperLayer: paperGroup.id,
+            children: [],
+            selected: false,
+            expanded: false
+          },
           [layerParentId]: {
             ...state.layerById[layerParentId],
             children: [...(state.layerById[layerParentId] as em.Group).children, groupId]
@@ -103,24 +105,49 @@ export default (state = initialState, action: LayersTypes): LayersState => {
     case ADD_PAGE: {
       const pageId = uuidv4();
       const paperPage = new paper.Group();
-      const page: em.Page = {
-        type: 'Page',
-        id: pageId,
-        name: action.payload.name ? action.payload.name : 'Page',
-        parent: null,
-        paperParent: null,
-        paperLayer: paperPage.id,
-        children: [],
-        selected: false
-      }
       return {
         ...state,
         allIds: [...state.allIds, pageId],
         layerById: {
           ...state.layerById,
-          [pageId]: page
+          [pageId]: {
+            type: 'Page',
+            id: pageId,
+            name: action.payload.name ? action.payload.name : 'Page',
+            parent: null,
+            paperParent: null,
+            paperLayer: paperPage.id,
+            children: [],
+            selected: false
+          }
         },
         activePage: pageId
+      };
+    }
+    case REMOVE_LAYER: {
+      const layer = state.layerById[action.payload.id];
+      paper.project.getItem({id: layer.paperLayer}).remove();
+      let updatedIds;
+      if (layer.children) {
+        updatedIds = state.allIds.filter((child) => !layer.children.includes(child));
+      } else {
+        updatedIds = removeItem(state.allIds, action.payload.id);
+      }
+      return {
+        ...state,
+        allIds: updatedIds,
+        layerById: {
+          ...Object.keys(state.layerById).reduce((result: any, key) => {
+            if (key !== action.payload.id) {
+              result[key] = state.layerById[key];
+            }
+            return result;
+          }, {}),
+          [layer.parent]: {
+            ...state.layerById[layer.parent],
+            children: removeItem(state.layerById[layer.parent].children, action.payload.id)
+          }
+        }
       };
     }
     case INSERT_CHILD: {
@@ -308,6 +335,107 @@ export default (state = initialState, action: LayersTypes): LayersState => {
         selection: [action.payload.id]
       };
     }
+    case GROUP_SELECTION: {
+      const topSelection = [...state.selection].reduce((total, current) => {
+        const topGroup = getTopParentGroup(state, current);
+        return getLayerIndex(state, topGroup.id) <= getLayerIndex(state, total) ? current : total;
+      }, state.selection[0]);
+      const groupId = uuidv4();
+      const layerParentId = state.layerById[topSelection].parent;
+      const paperParentId = state.layerById[layerParentId].paperLayer;
+      const paperParentLayer = paper.project.getItem({id: paperParentId});
+      const paperGroup = new paper.Group({
+        parent: paperParentLayer,
+        selected: true
+      });
+      state.selection.forEach((id) => {
+        const layer = state.layerById[id] as em.Layer;
+        const paperLayer = paper.project.getItem({id: layer.paperLayer});
+        paperLayer.selected = false;
+        paperGroup.addChild(paperLayer);
+      });
+      return {
+        ...state,
+        allIds: [...state.allIds, groupId],
+        layerById: {
+          ...state.layerById,
+          ...Object.keys(state.layerById).reduce((result: any, key) => {
+            if (state.selection.includes(key)) {
+              result[key] = {
+                ...state.layerById[key],
+                parent: groupId,
+                selected: false
+              };
+            }
+            return result;
+          }, {}),
+          [layerParentId]: {
+            ...state.layerById[layerParentId],
+            children: insertItem((state.layerById[layerParentId] as em.Group).children, groupId, getLayerIndex(state, topSelection)).filter((id) => {
+              return !state.selection.includes(id);
+            })
+          },
+          [groupId]: {
+            type: 'Group',
+            id: groupId,
+            name: 'Group',
+            parent: layerParentId,
+            paperParent: paperParentId,
+            paperLayer: paperGroup.id,
+            children: [...state.selection],
+            selected: true,
+            expanded: false
+          }
+        },
+        selection: [groupId]
+      };
+    }
+    // case UNGROUP_SELECTION: {
+    //   //let newSelection = [];
+    //   state.selection.forEach((id) => {
+    //     const layer = state.layerById[id] as em.Layer;
+    //     //const parent = state.layerById[layer.parent];
+    //     const paperLayer = paper.project.getItem({id: layer.paperLayer});
+    //     //const paperLayerParent = paper.project.getItem({id: parent.paperLayer});
+    //     if (layer.type === 'Group') {
+    //       layer.children.forEach((child) => {
+    //         const childLayer = state.layerById[child] as em.Layer;
+    //         const paperChildLayer = paper.project.getItem({id: childLayer.paperLayer});
+    //         paperChildLayer.insertAbove(paperLayer);
+    //         //newSelection.push(childLayer.id);
+    //       });
+    //     }
+    //   });
+    //   return {
+    //     ...state,
+    //     allIds: [...state.allIds].filter((id) => {
+    //       if (state.selection.includes(id) && state.layerById[id].type === 'Group') {
+    //         return false;
+    //       } else {
+    //         return true;
+    //       }
+    //     }),
+    //     layerById: {
+    //       ...state.layerById,
+    //       ...state.selection.reduce((result, selection) => {
+    //         if (state.layerById[selection].type === 'Group') {
+
+    //         }
+    //         return result;
+    //       }, {}),
+    //       ...Object.keys(state.layerById).reduce((result: any, key) => {
+    //         if (state.selection.includes(key)) {
+    //           result[key] = {
+    //             ...state.layerById[key],
+    //             parent: groupId,
+    //             selected: false
+    //           };
+    //         }
+    //         return result;
+    //       }, {})
+    //     }
+    //   };
+    // }
     default:
       return state;
   }
