@@ -1,28 +1,44 @@
 import React, { useContext, ReactElement, useEffect } from 'react';
+import { RootState } from '../store/reducers';
+import { connect } from 'react-redux';
 import Sidebar from './Sidebar';
 import SidebarSectionHead from './SidebarSectionHead';
 import SidebarSectionWrap from './SidebarSectionWrap';
-import SidebarLayers from './SidebarLayers';
+import SortableTree from './SortableTree';
+import SidebarLayer from './SidebarLayer';
+import { LayersState } from '../store/reducers/layers';
 
-const LayersSidebar = (): ReactElement => {
+interface LayersSidebarStateProps {
+  layers: LayersState;
+}
+
+const LayersSidebar = (props: LayersSidebarStateProps): ReactElement => {
   return (
     <Sidebar
-      //resizable
       width={320}
       position={'left'}
-      //onDrag={handleDrag}
-      //onDragStart={handleDragStart}
       >
       <SidebarSectionWrap>
         <SidebarSectionHead
           text={'layers'} />
       </SidebarSectionWrap>
-      <SidebarLayers />
+      {
+        props.layers.activePage
+        ? <SortableTree
+            treeData={props.layers.layerById[props.layers.activePage] as em.Group}
+            nodeComponent={<SidebarLayer/>} />
+        : null
+      }
     </Sidebar>
   );
 }
 
-export default LayersSidebar;
+const mapStateToProps = (state: RootState) => {
+  const { layers } = state;
+  return { layers };
+};
+
+export default connect(mapStateToProps)(LayersSidebar);
 
 // let lsDeltaX = 0;
 

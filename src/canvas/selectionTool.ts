@@ -1,10 +1,7 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
-import { Store } from 'redux';
-import { getLayer, getPaperLayer, getActivePage, getParentLayer, getActivePagePaperLayer } from '../store/selectors';
-import { clearSelection, addToSelection, removeFromSelection, newSelection } from '../store/actions/layers';
+import { getLayer, getPaperLayer, getActivePage, getParentLayer, getActivePagePaperLayer, getLayerByPaperId, getLayerIndex } from '../store/selectors/layers';
+import { clearSelection, addToSelection, removeFromSelection, newSelection, addGroup, insertChild, insertAbove, insertBelow} from '../store/actions/layers';
 import store, { StoreDispatch, StoreGetState } from '../store';
-import LayerNode from './base/layerNode';
-import StyleNode from './base/styleNode';
 
 class SelectionTool {
   getState: StoreGetState;
@@ -64,30 +61,26 @@ class SelectionTool {
   onKeyDown(event: paper.KeyEvent): void {
     switch(event.key) {
       case 'g': {
-        // if (event.modifiers.meta) {
-        //   const topSelection = [...this.app.selection].reduce((total, current) => {
-        //     const topGroup = this.getTopParentGroup(current);
-        //     return topGroup.getIndex() <= total.getIndex() ? current : total;
-        //   }, this.app.selection[0]);
-        //   const topSelectionParent = topSelection.parent;
-        //   const topSelectionIndex = topSelection.getIndex();
-        //   this.app.dispatch({
-        //     type: 'add-node-at',
-        //     node: new LayerNode({layerType: 'Group'}),
-        //     toNode: topSelectionParent,
-        //     index: topSelectionIndex
-        //   });
-        //   const newGroup = topSelectionParent.children[topSelectionIndex];
-        //   this.app.dispatch({
-        //     type: 'add-nodes',
-        //     nodes: this.app.selection,
-        //     toNode: newGroup
-        //   });
-        //   this.app.dispatch({
-        //     type: 'new-selection',
-        //     layer: newGroup
-        //   });
-        // }
+        if (event.modifiers.meta && this.getState().layers.selection.length > 0) {
+          const state = this.getState().layers;
+          const topSelection = [...state.selection].reduce((total, current) => {
+            const topGroup = this.getTopParentGroup(current);
+            return getLayerIndex(state, topGroup.id) <= getLayerIndex(state, total) ? current : total;
+          }, state.selection[0]);
+          this.dispatch(addGroup({}));
+          const groupId = this.getState().layers.allIds[this.getState().layers.allIds.length - 1];
+          this.dispatch(insertAbove({
+            layer: groupId,
+            above: topSelection
+          }));
+          state.selection.forEach((id) => {
+            this.dispatch(insertChild({
+              layer: id,
+              parent: groupId
+            }));
+          });
+          this.dispatch(newSelection({id: groupId}));
+        }
         break;
       }
       case 'shift': {
@@ -129,10 +122,11 @@ class SelectionTool {
     }
   }
   onMouseDown(event: paper.ToolEvent): void {
-    const state = this.getState();
-    this.hitResult = getPaperLayer(state, state.layers.activePage).hitTest(event.point);
+    const state = this.getState().layers;
+    this.hitResult = getActivePagePaperLayer(state).hitTest(event.point);
     if (this.hitResult) {
-      const hitLayerId = this.hitResult.item.data.layerId;
+      const hitLayerPaperId = this.hitResult.item.id;
+      const hitLayerId = getLayerByPaperId(state, hitLayerPaperId).id;
       if (this.shiftModifier) {
         this.updateSelection(hitLayerId);
       } else {
@@ -161,22 +155,25 @@ class SelectionTool {
         this.areaSelect.to = null;
       }
       this.areaSelect.active = false;
-      const overlappedItems = getActivePagePaperLayer(this.getState()).getItems({
-        data: (value: any) => {
-          const topParent = this.getTopParentGroup(value.layerId);
-          return topParent.id === value.id;
+      const state = this.getState().layers;
+      const overlappedItems = getActivePagePaperLayer(state).getItems({
+        id: (paperId: number) => {
+          const layerId = getLayerByPaperId(state, paperId).id;
+          const topParent = this.getTopParentGroup(layerId);
+          return topParent.paperLayer === paperId;
         },
         overlapping: this.areaSelect.shape.bounds
       });
       overlappedItems.forEach((item: paper.Item) => {
-        const node = item.data.layerId;
-        if (getLayer(this.getState(), node).layerType === 'Artboard') {
-          if (item.isInside(this.areaSelect.shape.bounds)) {
-            this.updateSelection(node);
-          }
-        } else {
-          this.updateSelection(node);
-        }
+        const layerId = getLayerByPaperId(state, item.id).id;
+        this.updateSelection(layerId);
+        // if (getLayer(state, node).layerType === 'Artboard') {
+        //   if (item.isInside(this.areaSelect.shape.bounds)) {
+        //     this.updateSelection(node);
+        //   }
+        // } else {
+        //   this.updateSelection(node);
+        // }
       });
     }
     this.clearProps();
@@ -189,9 +186,10 @@ class SelectionTool {
     }
   }
   getTopParentGroup(id: string) {
-    let currentNode = getLayer(this.getState(), id);
-    while(getParentLayer(this.getState(), currentNode.id).layerType === 'Group') {
-      currentNode = getParentLayer(this.getState(), currentNode.id);
+    const state = this.getState().layers;
+    let currentNode = getLayer(state, id);
+    while(getParentLayer(state, currentNode.id).type === 'Group') {
+      currentNode = getParentLayer(state, currentNode.id);
     }
     return currentNode;
   }

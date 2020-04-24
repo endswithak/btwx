@@ -24,11 +24,11 @@ class DrawTool {
     this.dispatch = store.dispatch;
     this.tool = new Tool();
     this.tool.activate();
-    this.tool.onKeyDown = (e: paper.KeyEvent) => this.onKeyDown(e);
-    this.tool.onKeyUp = (e: paper.KeyEvent) => this.onKeyUp(e);
-    this.tool.onMouseDown = (e: paper.ToolEvent) => this.onMouseDown(e);
-    this.tool.onMouseDrag = (e: paper.ToolEvent) => this.onMouseDrag(e);
-    this.tool.onMouseUp = (e: paper.ToolEvent) => this.onMouseUp(e);
+    this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
+    this.tool.onKeyUp = (e: paper.KeyEvent): void => this.onKeyUp(e);
+    this.tool.onMouseDown = (e: paper.ToolEvent): void => this.onMouseDown(e);
+    this.tool.onMouseDrag = (e: paper.ToolEvent): void => this.onMouseDrag(e);
+    this.tool.onMouseUp = (e: paper.ToolEvent): void => this.onMouseUp(e);
     this.drawShapeType = drawShapeType;
     this.outline = null;
     this.tooltip = null;
@@ -176,7 +176,9 @@ class DrawTool {
         shapeType: this.drawShapeType,
         paperShape: this.renderShape({
           name: this.drawShapeType,
-          insert: false
+          fillColor: '#ccc',
+          strokeColor: '#999',
+          strokeWidth: 1
         }),
         name: this.drawShapeType,
         parent: null

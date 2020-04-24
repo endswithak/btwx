@@ -1,18 +1,16 @@
 import React, { useContext, ReactElement, useEffect } from 'react';
-import { store } from '../store';
-import ShapeNode from '../canvas/base/shapeNode';
+import { ThemeContext } from './ThemeProvider';
 
 interface SidebarLayerShapeProps {
-  layer: ShapeNode;
+  layer: em.Layer;
 }
 
 const SidebarLayerShape = (props: SidebarLayerShapeProps): ReactElement => {
-  const globalState = useContext(store);
-  const { dispatch, theme } = globalState;
+  const theme = useContext(ThemeContext);
   const { layer } = props;
 
   return (
-    layer.shapeIcon
+    layer.type === 'Shape'
     ? <div className='c-sidebar-layer__shape'>
         <svg
           width="18"

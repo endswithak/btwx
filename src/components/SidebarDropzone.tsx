@@ -2,13 +2,12 @@ import React, { useContext, ReactElement, useState, useLayoutEffect, useRef, use
 import SidebarDropzoneTop from './SidebarDropzoneTop';
 import SidebarDropzoneCenter from './SidebarDropzoneCenter';
 import SidebarDropzoneBottom from './SidebarDropzoneBottom';
-import LayerNode from '../canvas/base/layerNode';
 
 interface SidebarLayerDropzoneProps {
-  layer: LayerNode;
+  layer: em.Layer;
   depth: number;
-  dragLayer: LayerNode;
-  dragEnterLayer: LayerNode;
+  dragLayer: em.Layer;
+  dragEnterLayer: em.Layer;
   dropzone: em.Dropzone;
 }
 
@@ -17,15 +16,11 @@ const SidebarLayerDropzone = (props: SidebarLayerDropzoneProps): ReactElement =>
 
   return (
     <div className='c-sidebar-dropzone'>
-      {
-        layer.children
-        ? <SidebarDropzoneCenter
-            layer={layer}
-            dragLayer={dragLayer}
-            dragEnterLayer={dragEnterLayer}
-            dropzone={dropzone} />
-        : null
-      }
+      <SidebarDropzoneCenter
+        layer={layer}
+        dragLayer={dragLayer}
+        dragEnterLayer={dragEnterLayer}
+        dropzone={dropzone} />
       <SidebarDropzoneTop
         layer={layer}
         depth={depth}

@@ -1,33 +1,31 @@
 import React, { useContext, ReactElement, useState, useLayoutEffect, useRef, useEffect } from 'react';
+import { connect } from 'react-redux';
+import { addToSelection, newSelection, removeFromSelection } from '../store/actions/layers';
 import { ThemeContext } from './ThemeProvider';
-import LayerNode from '../canvas/base/layerNode';
+import { SelectionPayload, LayersTypes } from '../store/actionTypes/layers';
 
 interface SidebarLayerTitleProps {
-  layer: LayerNode;
+  layer: em.Layer;
+  addToSelection?(payload: SelectionPayload): LayersTypes;
+  removeFromSelection?(payload: SelectionPayload): LayersTypes;
+  newSelection?(payload: SelectionPayload): LayersTypes;
 }
 
 const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const {layer} = props;
+  const { layer, addToSelection, removeFromSelection, newSelection } = props;
 
-  // const handleNameClick = (e: any): void => {
-  //   if (layer.selected && e.metaKey) {
-  //     dispatch({
-  //       type: 'remove-from-selection',
-  //       layer: layer
-  //     });
-  //   } else if (e.metaKey) {
-  //     dispatch({
-  //       type: 'add-to-selection',
-  //       layer: layer
-  //     });
-  //   } else {
-  //     dispatch({
-  //       type: 'new-selection',
-  //       layer: layer
-  //     });
-  //   }
-  // }
+  const handleClick = (e: React.MouseEvent) => {
+    if (e.shiftKey) {
+      if (layer.selected) {
+        removeFromSelection({id: layer.id});
+      } else {
+        addToSelection({id: layer.id});
+      }
+    } else {
+      newSelection({id: layer.id});
+    }
+  }
 
   return (
     <div
@@ -37,11 +35,14 @@ const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
         ? theme.text.onPrimary
         : theme.text.base
       }}
-      //onClick={handleNameClick}
+      onClick={handleClick}
       >
       {layer.name}
     </div>
   );
 }
 
-export default SidebarLayerTitle;
+export default connect(
+  null,
+  { addToSelection, removeFromSelection, newSelection }
+)(SidebarLayerTitle);

@@ -1,13 +1,12 @@
 import React, { useContext, ReactElement, useState, useLayoutEffect, useRef, useEffect } from 'react';
 import { ThemeContext } from './ThemeProvider';
 import SidebarDropzoneArea from './SidebarDropzoneArea';
-import LayerNode from '../canvas/base/layerNode';
 
 interface SidebarDropzoneBottomProps {
-  layer: LayerNode;
+  layer: em.Layer;
   depth: number;
-  dragLayer: LayerNode;
-  dragEnterLayer: LayerNode;
+  dragLayer: em.Layer;
+  dragEnterLayer: em.Layer;
   dropzone: em.Dropzone;
 }
 
@@ -25,7 +24,7 @@ const SidebarDropzoneBottom = (props: SidebarDropzoneBottomProps): ReactElement 
         //width: layersSidebarWidth - (depth * (theme.unit * 4)),
         width: '100%',
         boxShadow: isActive ? `0 -${theme.unit / 2}px 0 0 ${theme.palette.primary} inset` : '',
-        height: layer.canHaveLayers ? theme.unit * 2 : theme.unit * 4
+        height: layer.children ? theme.unit * 2 : theme.unit * 4
       }} />
   );
 }

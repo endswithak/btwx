@@ -4,10 +4,9 @@ import SidebarLayerTitle from './SidebarLayerTitle';
 import SidebarLayerChevron from './SidebarLayerChevron';
 import SidebarLayerShape from './SidebarLayerShape';
 import SidebarLayerFolder from './SidebarLayerFolder';
-import LayerNode from '../canvas/base/layerNode';
 
 interface SidebarLayerItemProps {
-  layer: LayerNode;
+  layer: em.Layer;
   depth: number;
 }
 

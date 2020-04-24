@@ -3,7 +3,7 @@ import { ThemeContext } from './ThemeProvider';
 import LayerNode from '../canvas/base/layerNode';
 
 interface SidebarLayerFolderProps {
-  layer: LayerNode;
+  layer: em.Layer;
 }
 
 const SidebarLayerFolder = (props: SidebarLayerFolderProps): ReactElement => {
@@ -11,7 +11,7 @@ const SidebarLayerFolder = (props: SidebarLayerFolderProps): ReactElement => {
   const { layer } = props;
 
   return (
-    layer.children
+    layer.type === 'Group'
     ? <div
         className='c-sidebar-layer__folder'>
         <svg

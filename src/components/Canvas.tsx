@@ -4,10 +4,11 @@ import { connect } from 'react-redux';
 import { addPage } from '../store/actions/layers';
 import { enableSelectionTool } from '../store/actions/selectionTool';
 import { ThemeContext } from './ThemeProvider';
+import { AddPagePayload, LayersTypes } from '../store/actionTypes/layers';
 //import renderCanvas from '../canvas';
 
 interface CanvasProps {
-  addPage(): any;
+  addPage(payload: AddPagePayload): LayersTypes;
   enableSelectionTool(): any;
 }
 
@@ -21,7 +22,9 @@ const Canvas = ({addPage, enableSelectionTool}: CanvasProps): ReactElement => {
     canvasRef.current.width = canvasContainerRef.current.clientWidth;
     canvasRef.current.height = canvasContainerRef.current.clientHeight;
     paper.setup(canvasRef.current);
-    addPage();
+    addPage({
+      name: 'Page 1'
+    });
     enableSelectionTool();
     // dispatch({
     //   type: 'add-page'

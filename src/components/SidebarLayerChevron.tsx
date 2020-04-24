@@ -1,27 +1,34 @@
 import React, { useContext, ReactElement, useEffect } from 'react';
+import { connect } from 'react-redux';
+import { expandGroup, collapseGroup } from '../store/actions/layers';
 import { ThemeContext } from './ThemeProvider';
-import LayerNode from '../canvas/base/layerNode';
+import { ShowChildrenPayload, LayersTypes } from '../store/actionTypes/layers';
 
 interface SidebarLayerChevronProps {
-  layer: LayerNode;
+  layer: em.Layer;
+  expandGroup(payload: ShowChildrenPayload): LayersTypes;
+  collapseGroup(payload: ShowChildrenPayload): LayersTypes;
 }
 
 const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layer } = props;
+  const { layer, expandGroup, collapseGroup } = props;
 
-  // const handleChevronClick = (): void => {
-  //   dispatch({
-  //     type: 'expand-node',
-  //     node: layer
-  //   });
-  // }
+  const handleChevronClick = (): void => {
+    if (layer.type === 'Group') {
+      if ((layer as em.Group).expanded) {
+        collapseGroup({id: layer.id});
+      } else {
+        expandGroup({id: layer.id});
+      }
+    }
+  }
 
   return (
-    layer.children
+    layer.type === 'Group'
     ? <div
         className='c-sidebar-layer__chevron'
-        //onClick={handleChevronClick}
+        onClick={handleChevronClick}
         >
         <svg
           width="24"
@@ -33,7 +40,7 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
             : theme.text.lighter
           }}>
           {
-            layer.expanded
+            (layer as em.Group).expanded
             ? <path d="M7 10l5 5 5-5H7z"/>
             : <path d='M10 17l5-5-5-5v10z' />
           }
@@ -43,4 +50,7 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
   );
 }
 
-export default SidebarLayerChevron;
+export default connect(
+  null,
+  { expandGroup, collapseGroup }
+)(SidebarLayerChevron);

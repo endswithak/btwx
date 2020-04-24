@@ -3,19 +3,23 @@ import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
 import SidebarDropzone from './SidebarDropzone';
 import SidebarLayerItem from './SidebarLayerItem';
-import LayerNode from '../canvas/base/layerNode';
+import { SelectionPayload, LayersTypes } from '../store/actionTypes/layers';
+import SidebarLayers from './SidebarLayers';
 
 interface SidebarLayerProps {
   layer: string;
-  dragLayer: LayerNode;
-  dragEnterLayer: LayerNode;
+  dragLayer: em.Layer;
+  dragEnterLayer: em.Layer;
   dropzone: em.Dropzone;
   depth: number;
-  layerItem?: LayerNode;
+  layerItem?: em.Layer;
+  addToSelection?(payload: SelectionPayload): LayersTypes;
+  removeFromSelection?(payload: SelectionPayload): LayersTypes;
+  newSelection?(payload: SelectionPayload): LayersTypes;
 }
 
 const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
-  const { layer, depth, dragLayer, dragEnterLayer, dropzone, layerItem } = props;
+  const { layer, depth, dragLayer, dragEnterLayer, dropzone, layerItem, addToSelection, removeFromSelection, newSelection } = props;
 
   return (
     <div
@@ -36,16 +40,13 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
         : null
       }
       {
-        layerItem.expanded
-        ? layerItem.children.map((child: string, index: number) => (
-            <SidebarLayer
-              key={index}
-              layer={child}
-              depth={depth + 1}
-              dragLayer={dragLayer}
-              dragEnterLayer={dragEnterLayer}
-              dropzone={dropzone} />
-          ))
+        layerItem.type === 'Group' && (layerItem as em.Group).expanded
+        ? <SidebarLayers
+            layers={(layerItem as em.Group).children}
+            depth={depth + 1}
+            dragLayer={dragLayer}
+            dragEnterLayer={dragEnterLayer}
+            dropzone={dropzone} />
         : null
       }
     </div>
@@ -59,4 +60,6 @@ const mapStateToProps = (state: RootState, ownProps: SidebarLayerProps) => {
   return { layerItem, selection };
 };
 
-export default connect(mapStateToProps)(SidebarLayer);
+export default connect(
+  mapStateToProps
+)(SidebarLayer);

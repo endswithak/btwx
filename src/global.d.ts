@@ -1,5 +1,33 @@
 declare namespace em {
 
+  interface Layer {
+    type: 'Group' | 'Shape' | 'Page';
+    id: string;
+    name: string;
+    parent: string;
+    paperLayer: number;
+    paperParent: number;
+    selected: boolean;
+    children: string[] | null;
+  }
+
+  interface Group extends Layer {
+    type: 'Group';
+    children: string[];
+    expanded: boolean;
+  }
+
+  interface Page extends Layer {
+    type: 'Page';
+    children: string[];
+  }
+
+  interface Shape extends Layer {
+    type: 'Shape';
+    shapeType: em.ShapeType;
+    children: null;
+  }
+
   type Dropzone = 'Top' | 'Center' | 'Bottom';
 
   interface Frame {

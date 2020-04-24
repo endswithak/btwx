@@ -1,30 +1,25 @@
-export const ADD_LAYER = 'ADD_LAYER';
 export const ADD_SHAPE = 'ADD_SHAPE';
+export const ADD_GROUP = 'ADD_GROUP';
 export const ADD_PAGE = 'ADD_PAGE';
+
+export const EXPAND_GROUP = 'EXPAND_GROUP';
+export const COLLAPSE_GROUP = 'COLLAPSE_GROUP';
+
+export const INSERT_CHILD = 'INSERT_CHILD';
+export const INSERT_ABOVE = 'INSERT_ABOVE';
+export const INSERT_BELOW = 'INSERT_BELOW';
 
 export const ADD_TO_SELECTION = 'ADD_TO_SELECTION';
 export const REMOVE_FROM_SELECTION = 'REMOVE_FROM_SELECTION';
 export const CLEAR_SELECTION = 'CLEAR_SELECTION';
 export const NEW_SELECTION = 'NEW_SELECTION';
 
-export interface AddLayerPayload {
-  type: 'Page' | 'Group' | 'Shape' | 'Artboard';
-  parent?: string;
-  shapeType?: em.ShapeType;
-  paperShape?: paper.Path | paper.CompoundPath;
-  name?: string;
-}
-
-interface AddLayer {
-  type: typeof ADD_LAYER;
-  payload: AddLayerPayload;
-}
+// Add
 
 export interface AddShapePayload {
-  parent: string;
-  paperParent: number;
   shapeType: em.ShapeType;
   paperShape: paper.Path | paper.CompoundPath;
+  parent?: string;
   name?: string;
 }
 
@@ -33,9 +28,20 @@ interface AddShape {
   payload: AddShapePayload;
 }
 
+export interface AddGroupPayload {
+  parent?: string;
+  name?: string;
+  children?: string[] | number[];
+}
+
+interface AddGroup {
+  type: typeof ADD_GROUP;
+  payload: AddGroupPayload;
+}
+
 export interface AddPagePayload {
-  parent: string;
-  paperParent: number;
+  parent?: string;
+  paperParent?: number;
   name?: string;
 }
 
@@ -43,6 +49,56 @@ interface AddPage {
   type: typeof ADD_PAGE;
   payload: AddPagePayload;
 }
+
+// Insert
+
+export interface InsertChildPayload {
+  layer: string;
+  parent: string;
+}
+
+interface InsertChild {
+  type: typeof INSERT_CHILD;
+  payload: InsertChildPayload;
+}
+
+export interface InsertAbovePayload {
+  layer: string;
+  above: string;
+}
+
+interface InsertAbove {
+  type: typeof INSERT_ABOVE;
+  payload: InsertAbovePayload;
+}
+
+export interface InsertBelowPayload {
+  layer: string;
+  below: string;
+}
+
+interface InsertBelow {
+  type: typeof INSERT_BELOW;
+  payload: InsertBelowPayload;
+}
+
+// Other
+
+export interface ShowChildrenPayload {
+  id: string;
+}
+
+interface ExpandGroup {
+  type: typeof EXPAND_GROUP;
+  payload: ShowChildrenPayload;
+}
+
+interface CollapseGroup {
+  type: typeof COLLAPSE_GROUP;
+  payload: ShowChildrenPayload;
+}
+
+// Select
 
 export interface SelectionPayload {
   id: string;
@@ -67,4 +123,4 @@ interface NewSelection {
   payload: SelectionPayload;
 }
 
-export type LayersTypes = AddLayer | AddShape | AddPage | AddToSelection | RemoveFromSelection | ClearSelection | NewSelection;
+export type LayersTypes = AddShape | AddGroup | AddPage | InsertChild | InsertAbove | InsertBelow | ExpandGroup | CollapseGroup | AddToSelection | RemoveFromSelection | ClearSelection | NewSelection;
