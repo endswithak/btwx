@@ -1,5 +1,7 @@
+import { v4 as uuidv4 } from 'uuid';
 import paper from 'paper';
 import {
+  ADD_LAYER,
   ADD_SHAPE,
   ADD_PAGE,
   ADD_TO_SELECTION,
@@ -16,38 +18,75 @@ import StyleNode from '../../canvas/base/styleNode';
 
 export interface LayersState {
   activePage: string;
-  selection: string[];
   layerById: {
     [id: string]: LayerNode | StyleNode | ShapeNode | FillNode | StyleGroupNode;
   };
-  paperLayers: {
-    [id: string]: paper.Item;
-  };
   allIds: string[];
+  selection: string[];
 }
 
 const initialState: LayersState = {
   activePage: null,
-  selection: [],
   layerById: {},
-  paperLayers: {},
-  allIds: []
+  allIds: [],
+  selection: []
 };
+
+interface Layer {
+  type: 'Page' | 'Group' | 'Shape' | 'Artboard';
+  id: string;
+  name: string;
+  parent: string;
+  paperLayer: number;
+  paperParent: number;
+  children: number[];
+  fillsContainer: string;
+  fills: string[];
+}
 
 export default (state = initialState, action: LayersTypes): LayersState => {
   switch (action.type) {
+    case ADD_LAYER: {
+      const layerId = uuidv4();
+      const fillsId = uuidv4();
+      const layerParentId = action.payload.parent ? action.payload.parent : state.activePage;
+      const paperParentId = state.layerById[layerParentId].paper;
+      const paperParentLayer = paper.project.getItem({id: paperParentId});
+      const paperLayer = new paper.Layer({
+        parent: paperParentLayer,
+        data: {
+          id: layerId,
+          layerId: layerId
+        }
+      });
+      const fillsContainer = new paper.Group({
+        parent: paperLayer,
+        data: {
+          id: fillsId,
+          layerId: layerId
+        }
+      });
+      const layer: Layer = {
+        type: action.payload.type,
+        id: layerId,
+        name: action.payload.name ? action.payload.name : action.payload.type,
+        parent: layerParentId,
+        paperParent: state.layerById[layerParentId].paper,
+        paperLayer: paperLayer.id,
+        children: [],
+        fills: [],
+        borders: [],
+        shadows: []
+      }
+      return {
+        ...state
+      };
+    }
     case ADD_PAGE: {
-      // create shape node
       const page = new LayerNode({
         parent: null,
+        paperParent: null,
         layerType: 'Page'
-      });
-      // create paper layer
-      const paperPage = new paper.Group({
-        data: {
-          id: page.id,
-          layerId: page.id
-        }
       });
       return {
         ...state,
@@ -56,114 +95,81 @@ export default (state = initialState, action: LayersTypes): LayersState => {
           ...state.layerById,
           [page.id]: page
         },
-        allIds: [...state.allIds, page.id],
-        paperLayers: {
-          ...state.paperLayers,
-          [page.id]: paperPage
-        }
+        allIds: [...state.allIds, page.id]
       };
     }
     case ADD_SHAPE: {
-      // create shape node
+      const parent = action.payload.parent ? action.payload.parent : state.activePage;
       const shape = new ShapeNode({
-        parent: action.payload.parent ? action.payload.parent : state.activePage,
+        parent: parent,
+        paperParent: state.layerById[parent].paper,
         shapeType: action.payload.shapeType,
-        name: action.payload.name
+        name: action.payload.name,
+        paperShape: action.payload.paperShape
       });
-      // update parnet with new shape
       state.layerById[shape.parent].children.push(shape.id);
-      // create fill group
-      const fillGroup = new StyleGroupNode({
-        styleGroupType: 'Fills',
-        parent: shape.id
-      });
-      shape.fills = fillGroup.id;
-      // create new fill
-      const fill = new FillNode({
+      const baseFill = new FillNode({
         fillType: 'Color',
-        parent: fillGroup.id
+        layer: shape.id,
+        paperShape: shape.paperShape,
+        parent: shape.style.fills.id,
+        paperParent: shape.style.fills.paper
       });
-      fillGroup.children.push(fill.id);
-      // create paper layer
-      const paperLayer = new paper.Group({
-        parent: state.paperLayers[shape.parent],
-        data: {
-          id: shape.id,
-          layerId: shape.id
-        }
-      });
-      // create paper fill group layer
-      const paperFillGroup = new paper.Group({
-        parent: paperLayer,
-        data: {
-          id: fillGroup.id,
-          layerId: shape.id
-        }
-      });
-      // create fill paper item
-      const paperFill = action.payload.paperShape.clone() as paper.Path | paper.CompoundPath;
-      paperFill.fillColor = new paper.Color(fill.color);
-      paperFill.data = {
-        id: fill.id,
-        layerId: shape.id
-      };
-      paperFill.parent = paperFillGroup;
+      shape.style.fills.children.push(baseFill.id);
       return {
         ...state,
         layerById: {
           ...state.layerById,
+          [shape.parent]: state.layerById[shape.parent],
           [shape.id]: shape,
-          [fillGroup.id]: fillGroup,
-          [fill.id]: fill
+          [baseFill.id]: baseFill
         },
-        paperLayers: {
-          ...state.paperLayers,
-          [shape.id]: paperLayer,
-          [fillGroup.id]: paperFillGroup,
-          [fill.id]: paperFill,
-          [`[shape]${[shape.id]}`]: action.payload.paperShape
-        },
-        allIds: [...state.allIds, shape.id, fillGroup.id, fill.id]
+        allIds: [...state.allIds, shape.id, baseFill.id]
       };
     }
-    case ADD_TO_SELECTION: {
-      (state.layerById[action.payload.id] as LayerNode).selected = true;
-      (state.paperLayers[action.payload.id] as paper.Item).selected = true;
-      return {
-        ...state,
-        selection: [...state.selection, action.payload.id]
-      };
-    }
-    case REMOVE_FROM_SELECTION: {
-      (state.layerById[action.payload.id] as LayerNode).selected = false;
-      (state.paperLayers[action.payload.id] as paper.Item).selected = false;
-      return {
-        ...state,
-        selection: state.selection.filter((id) => id !== action.payload.id)
-      };
-    }
-    case CLEAR_SELECTION: {
-      state.selection.forEach((id) => {
-        (state.layerById[id] as LayerNode).selected = false;
-        (state.paperLayers[id] as paper.Item).selected = false;
-      });
-      return {
-        ...state,
-        selection: []
-      };
-    }
-    case NEW_SELECTION: {
-      state.selection.forEach((id) => {
-        (state.layerById[id] as LayerNode).selected = false;
-        (state.paperLayers[id] as paper.Item).selected = false;
-      });
-      (state.layerById[action.payload.id] as LayerNode).selected = true;
-      (state.paperLayers[action.payload.id] as paper.Item).selected = true;
-      return {
-        ...state,
-        selection: [action.payload.id]
-      };
-    }
+    // case ADD_TO_SELECTION: {
+    //   const layer = state.layerById[action.payload.id] as LayerNode;
+    //   layer.selected = true;
+    //   layer.paperItem().selected = true;
+    //   return {
+    //     ...state,
+    //     selection: [...state.selection, action.payload.id]
+    //   };
+    // }
+    // case REMOVE_FROM_SELECTION: {
+    //   const layer = state.layerById[action.payload.id] as LayerNode;
+    //   layer.selected = false;
+    //   layer.paperItem().selected = false;
+    //   return {
+    //     ...state,
+    //     selection: state.selection.filter(id => id !== action.payload.id)
+    //   };
+    // }
+    // case CLEAR_SELECTION: {
+    //   state.selection.forEach((id) => {
+    //     const layer = state.layerById[id] as LayerNode;
+    //     layer.selected = false;
+    //     layer.paperItem().selected = false;
+    //   });
+    //   return {
+    //     ...state,
+    //     selection: []
+    //   };
+    // }
+    // case NEW_SELECTION: {
+    //   state.selection.forEach((id) => {
+    //     const layer = state.layerById[id] as LayerNode;
+    //     layer.selected = false;
+    //     layer.paperItem().selected = false;
+    //   });
+    //   const layer = state.layerById[action.payload.id] as LayerNode;
+    //   layer.selected = true;
+    //   layer.paperItem().selected = true;
+    //   return {
+    //     ...state,
+    //     selection: [action.payload.id]
+    //   };
+    // }
     default:
       return state;
   }

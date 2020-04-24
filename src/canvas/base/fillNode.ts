@@ -4,6 +4,9 @@ import StyleNode from './styleNode';
 
 interface FillNodeProps {
   parent: string;
+  paperParent: number;
+  layer: string;
+  paperShape: number;
   fillType: em.FillType;
   color?: string;
   opacity?: number;
@@ -18,25 +21,25 @@ class FillNode extends StyleNode {
   opacity: number;
   gradient: em.Gradient;
   blendMode: em.BlendingMode;
-  constructor({fillType, color, opacity, gradient, parent}: FillNodeProps) {
-    super({styleType: 'Fill', parent: parent});
+  constructor({fillType, color, opacity, gradient, parent, layer, paperShape, paperParent}: FillNodeProps) {
+    super({styleType: 'Fill', parent, layer, paperShape, paperParent});
     this.fillType = fillType;
     this.color = color ? chroma(color).alpha(1).hex() : '#999999';
     this.opacity = opacity ? color ? chroma(color).alpha() : 1 : 1;
     this.gradient = gradient;
     this.children = null;
-    // switch(this.fillType) {
-    //   case 'Color':
-    //     this.createColorFill();
-    //     break;
-    //   case 'Gradient':
-    //     this.createGradientFill();
-    //     break;
-    // }
+    switch(this.fillType) {
+      case 'Color':
+        this.createColorFill();
+        break;
+      // case 'Gradient':
+      //   this.createGradientFill();
+      //   break;
+    }
   }
-  // createColorFill() {
-  //   this.paperItem.fillColor = new Color(this.color);
-  // }
+  createColorFill() {
+    this.paperItem().fillColor = new Color(this.color);
+  }
   // createGradientFill() {
   //   const from = this.gradient.from;
   //   const to = this.gradient.to;

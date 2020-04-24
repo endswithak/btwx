@@ -1,29 +1,34 @@
+import paper from 'paper';
 import TreeNode from './treeNode';
-import LayerNode from './layerNode';
 
 interface StyleNodeProps {
   parent: string;
+  paperParent: number;
+  layer: string;
+  paperShape: number;
   styleType: 'Fill' | 'Border' | 'Shadow';
 }
 
 class StyleNode extends TreeNode {
+  layer: string;
+  paperShape: number;
   styleType: 'Fill' | 'Border' | 'Shadow';
   enabled: boolean;
-  constructor({styleType, parent}: StyleNodeProps) {
-    super({type: 'Style', parent: parent});
+  constructor({styleType, parent, paperParent, layer, paperShape}: StyleNodeProps) {
+    super({type: 'Style', parent, paperParent});
     this.styleType = styleType;
-    //this.paperItem = paperPath.clone() as paper.Path | paper.CompoundPath;
-    //this.paperItem.data.node = this;
+    this.layer = layer;
+    this.paperShape = paperShape;
     this.enabled = true;
+    const paperShapeItem = paper.project.getItem({id: this.paperShape}).clone();
+    const paperParentItem = paper.project.getItem({id: this.paperParent});
+    paperShapeItem.data = {
+      id: this.id,
+      layerId: layer
+    }
+    paperShapeItem.parent = paperParentItem;
+    this.paper = paperShapeItem.id;
   }
-  // enableStyle() {
-  //   this.enabled = true;
-  //   this.paperItem.visible = true;
-  // }
-  // disableStyle() {
-  //   this.enabled = false;
-  //   this.paperItem.visible = false;
-  // }
 }
 
 export default StyleNode;

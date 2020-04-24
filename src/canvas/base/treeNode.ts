@@ -1,9 +1,11 @@
+import paper from 'paper';
 import { v4 as uuidv4 } from 'uuid';
 import Queue from './queue';
 
 interface TreeNodeProps {
   type: 'Style' | 'Layer';
   parent: string;
+  paperParent: number;
 }
 
 class TreeNode {
@@ -11,11 +13,20 @@ class TreeNode {
   type: 'Style' | 'Layer';
   parent: string;
   children: string[];
-  constructor({type, parent}: TreeNodeProps) {
+  paper: number;
+  paperParent: number;
+  constructor({type, parent, paperParent}: TreeNodeProps) {
     this.id = uuidv4();
     this.type = type;
     this.parent = parent;
+    this.paperParent = paperParent;
     this.children = [];
+  }
+  paperItem() {
+    return paper.project.getItem({id: this.paper});
+  }
+  paperItemParent() {
+    return paper.project.getItem({id: this.paperParent});
   }
   // traverse(callback: any) {
   //   const queue = new Queue();

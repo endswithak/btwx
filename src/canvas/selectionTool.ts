@@ -161,13 +161,14 @@ class SelectionTool {
         this.areaSelect.to = null;
       }
       this.areaSelect.active = false;
-      getActivePagePaperLayer(this.getState()).getItems({
+      const overlappedItems = getActivePagePaperLayer(this.getState()).getItems({
         data: (value: any) => {
           const topParent = this.getTopParentGroup(value.layerId);
-          return topParent.id === value.layerId;
+          return topParent.id === value.id;
         },
         overlapping: this.areaSelect.shape.bounds
-      }).forEach((item: paper.Item) => {
+      });
+      overlappedItems.forEach((item: paper.Item) => {
         const node = item.data.layerId;
         if (getLayer(this.getState(), node).layerType === 'Artboard') {
           if (item.isInside(this.areaSelect.shape.bounds)) {

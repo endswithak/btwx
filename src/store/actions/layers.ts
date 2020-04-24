@@ -1,15 +1,22 @@
 import {
+  ADD_LAYER,
   ADD_SHAPE,
   ADD_PAGE,
   ADD_TO_SELECTION,
   REMOVE_FROM_SELECTION,
   CLEAR_SELECTION,
   NEW_SELECTION,
+  SelectionPayload,
   LayersTypes,
+  AddLayerPayload,
   AddPagePayload,
-  AddShapePayload,
-  SelectionPayload
+  AddShapePayload
 } from '../actionTypes/layers';
+
+export const addLayer = (content: AddLayerPayload): LayersTypes => ({
+  type: ADD_LAYER,
+  payload: content
+});
 
 export const addShape = (content: AddShapePayload): LayersTypes => ({
   type: ADD_SHAPE,
