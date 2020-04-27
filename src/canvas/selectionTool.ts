@@ -1,7 +1,8 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
-import { getActivePagePaperLayer, getLayerByPaperId, getTopParentGroup } from '../store/selectors/layers';
-import { addLayerToSelection, removeLayerFromSelection, newSelection, clearSelection, groupSelection, ungroupSelection, deleteSelection } from '../store/actions/selection';
+import { getActivePagePaperLayer, getLayerByPaperId } from '../store/selectors/layers';
+import { newSelection, clearSelection, groupSelection, ungroupSelection, deleteSelection, toggleLayerSelection } from '../store/actions/selection';
 import store, { StoreDispatch, StoreGetState } from '../store';
+import AreaSelect from './areaSelect';
 
 class SelectionTool {
   getState: StoreGetState;
@@ -10,12 +11,7 @@ class SelectionTool {
   shiftModifier: boolean;
   metaModifier: boolean;
   hitResult: paper.HitResult;
-  areaSelect: {
-    active: boolean;
-    from: paper.Point;
-    to: paper.Point;
-    shape: paper.Path;
-  };
+  areaSelect: AreaSelect;
   constructor() {
     this.getState = store.getState;
     this.dispatch = store.dispatch;
@@ -26,37 +22,10 @@ class SelectionTool {
     this.tool.onMouseDown = (e) => this.onMouseDown(e);
     this.tool.onMouseDrag = (e) => this.onMouseDrag(e);
     this.tool.onMouseUp = (e) => this.onMouseUp(e);
-    this.areaSelect = {
-      active: false,
-      to: null,
-      from: null,
-      shape: null
-    };
+    this.areaSelect = null;
     this.shiftModifier = false;
     this.metaModifier = false;
     this.hitResult = null;
-  }
-  clearProps(): void {
-    if (this.areaSelect.shape) {
-      this.areaSelect.shape.remove();
-    }
-    this.areaSelect = {
-      active: false,
-      to: null,
-      from: null,
-      shape: null
-    };
-  }
-  renderAreaSelectShape(shapeOpts: any) {
-    if (this.areaSelect.shape) {
-      this.areaSelect.shape.remove();
-    }
-    return new Path.Rectangle({
-      from: this.areaSelect.from,
-      to: this.areaSelect.to,
-      selected: true,
-      ...shapeOpts
-    });
   }
   onKeyDown(event: paper.KeyEvent): void {
     switch(event.key) {
@@ -75,6 +44,10 @@ class SelectionTool {
         break;
       }
       case 'escape': {
+        if (this.areaSelect) {
+          this.areaSelect.clear();
+          this.areaSelect = null;
+        }
         this.dispatch(clearSelection());
         break;
       }
@@ -107,66 +80,31 @@ class SelectionTool {
       const hitLayerPaperId = this.hitResult.item.id;
       const id = getLayerByPaperId(state, hitLayerPaperId).id;
       if (this.shiftModifier) {
-        this.updateSelection(id);
+        this.dispatch(toggleLayerSelection(id));
       } else {
         this.dispatch(newSelection(id));
       }
     } else {
-      this.areaSelect.active = true;
-      this.areaSelect.from = event.point;
+      this.areaSelect = new AreaSelect(event.point);
       if (!this.shiftModifier) {
         this.dispatch(clearSelection());
       }
     }
   }
   onMouseDrag(event: paper.ToolEvent): void {
-    if (this.areaSelect.active) {
-      this.areaSelect.to = event.point;
-      this.areaSelect.shape = this.renderAreaSelectShape({});
+    if (this.areaSelect) {
+      this.areaSelect.update(event.point);
     }
   }
   onMouseUp(event: paper.ToolEvent): void {
-    if (this.areaSelect.active && this.areaSelect.to) {
-      if (this.areaSelect.shape) {
-        this.areaSelect.shape.remove();
-        this.areaSelect.to = null;
+    if (this.areaSelect) {
+      if (this.areaSelect.to) {
+        this.areaSelect.layers().forEach((id: string) => {
+          this.dispatch(toggleLayerSelection(id));
+        });
       }
-      this.areaSelect.active = false;
-      const state = this.getState().layers;
-      const overlappedItems = getActivePagePaperLayer(state).getItems({
-        id: (paperId: number) => {
-          const layerId = getLayerByPaperId(state, paperId).id;
-          const topParent = getTopParentGroup(state, layerId);
-          return topParent.paperLayer === paperId;
-        },
-        overlapping: this.areaSelect.shape.bounds
-      });
-      overlappedItems.forEach((item: paper.Item) => {
-        const layerId = getLayerByPaperId(state, item.id).id;
-        this.updateSelection(layerId);
-        // if (getLayer(state, node).layerType === 'Artboard') {
-        //   if (item.isInside(this.areaSelect.shape.bounds)) {
-        //     this.updateSelection(node);
-        //   }
-        // } else {
-        //   this.updateSelection(node);
-        // }
-      });
-    }
-    this.clearProps();
-  }
-  updateSelection(id: string): void {
-    if (this.isSelected(id)) {
-      this.dispatch(removeLayerFromSelection(id));
-    } else {
-      this.dispatch(addLayerToSelection(id));
-    }
-  }
-  isSelected(id: string): boolean {
-    if (this.getState().selection.includes(id)) {
-      return true;
-    } else {
-      return false;
+      this.areaSelect.clear();
+      this.areaSelect = null;
     }
   }
 }

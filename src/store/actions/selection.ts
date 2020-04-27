@@ -42,6 +42,17 @@ export const removeLayerFromSelection = (id: string): any => {
   }
 }
 
+export const toggleLayerSelection = (id: string): any => {
+  return (dispatch: StoreDispatch, getState: StoreGetState) => {
+    const selection = getState().selection;
+    if (selection.includes(id)) {
+      dispatch(removeLayerFromSelection(id));
+    } else {
+      dispatch(addLayerToSelection(id));
+    }
+  }
+}
+
 export const newSelection = (id: string): any => {
   return (dispatch: StoreDispatch, getState: StoreGetState) => {
     const state = getState();
