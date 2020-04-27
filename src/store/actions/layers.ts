@@ -8,12 +8,8 @@ import {
   INSERT_BELOW,
   EXPAND_GROUP,
   COLLAPSE_GROUP,
-  ADD_TO_SELECTION,
-  REMOVE_FROM_SELECTION,
-  CLEAR_SELECTION,
-  NEW_SELECTION,
-  GROUP_SELECTION,
-  UNGROUP_SELECTION,
+  SELECT_LAYER,
+  DESELECT_LAYER,
   AddPagePayload,
   AddShapePayload,
   AddGroupPayload,
@@ -79,29 +75,12 @@ export const collapseGroup = (content: ShowChildrenPayload): LayersTypes => ({
 
 // Select
 
-export const addToSelection = (selection: SelectionPayload): LayersTypes => ({
-  type: ADD_TO_SELECTION,
+export const selectLayer = (selection: SelectionPayload): LayersTypes => ({
+  type: SELECT_LAYER,
   payload: selection
 });
 
-export const removeFromSelection = (selection: SelectionPayload): LayersTypes => ({
-  type: REMOVE_FROM_SELECTION,
+export const deselectLayer = (selection: SelectionPayload): LayersTypes => ({
+  type: DESELECT_LAYER,
   payload: selection
-});
-
-export const clearSelection = (): LayersTypes => ({
-  type: CLEAR_SELECTION
-});
-
-export const newSelection = (selection: SelectionPayload): LayersTypes => ({
-  type: NEW_SELECTION,
-  payload: selection
-});
-
-export const groupSelection = (): LayersTypes => ({
-  type: GROUP_SELECTION
-});
-
-export const ungroupSelection = (): LayersTypes => ({
-  type: UNGROUP_SELECTION
 });

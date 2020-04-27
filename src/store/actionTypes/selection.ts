@@ -1,7 +1,5 @@
 export const ADD_TO_SELECTION = 'ADD_TO_SELECTION';
 export const REMOVE_FROM_SELECTION = 'REMOVE_FROM_SELECTION';
-export const CLEAR_SELECTION = 'CLEAR_SELECTION';
-export const NEW_SELECTION = 'NEW_SELECTION';
 
 export interface SelectionPayload {
   id: string;
@@ -17,13 +15,4 @@ interface RemoveFromSelection {
   payload: SelectionPayload;
 }
 
-interface ClearSelection {
-  type: typeof CLEAR_SELECTION;
-}
-
-interface NewSelection {
-  type: typeof NEW_SELECTION;
-  payload: SelectionPayload;
-}
-
-export type SelectionTypes = AddToSelection | RemoveFromSelection | ClearSelection | NewSelection;
+export type SelectionTypes = AddToSelection | RemoveFromSelection;

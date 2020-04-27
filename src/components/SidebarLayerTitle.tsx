@@ -1,29 +1,28 @@
 import React, { useContext, ReactElement, useState, useLayoutEffect, useRef, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { addToSelection, newSelection, removeFromSelection } from '../store/actions/layers';
+import { addLayerToSelection, newSelection, removeLayerFromSelection } from '../store/actions/selection';
 import { ThemeContext } from './ThemeProvider';
-import { SelectionPayload, LayersTypes } from '../store/actionTypes/layers';
 
 interface SidebarLayerTitleProps {
   layer: em.Layer;
-  addToSelection?(payload: SelectionPayload): LayersTypes;
-  removeFromSelection?(payload: SelectionPayload): LayersTypes;
-  newSelection?(payload: SelectionPayload): LayersTypes;
+  addLayerToSelection?(id: string): any;
+  removeLayerFromSelection?(id: string): any;
+  newSelection?(id: string): any;
 }
 
 const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layer, addToSelection, removeFromSelection, newSelection } = props;
+  const { layer, addLayerToSelection, removeLayerFromSelection, newSelection } = props;
 
   const handleClick = (e: React.MouseEvent) => {
     if (e.shiftKey) {
       if (layer.selected) {
-        removeFromSelection({id: layer.id});
+        removeLayerFromSelection(layer.id);
       } else {
-        addToSelection({id: layer.id});
+        addLayerToSelection(layer.id);
       }
     } else {
-      newSelection({id: layer.id});
+      newSelection(layer.id);
     }
   }
 
@@ -44,5 +43,5 @@ const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
 
 export default connect(
   null,
-  { addToSelection, removeFromSelection, newSelection }
+  { addLayerToSelection, newSelection, removeLayerFromSelection }
 )(SidebarLayerTitle);

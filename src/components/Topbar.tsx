@@ -25,11 +25,15 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
     } else {
       if (drawing) {
         disableDrawTool();
+        enableDrawTool({
+          drawShapeType: shape
+        });
+      } else {
+        disableSelectionTool();
+        enableDrawTool({
+          drawShapeType: shape
+        });
       }
-      disableSelectionTool();
-      enableDrawTool({
-        drawShapeType: shape
-      });
     }
   }
 

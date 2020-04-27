@@ -13,13 +13,10 @@ interface SidebarLayerProps {
   dropzone: em.Dropzone;
   depth: number;
   layerItem?: em.Layer;
-  addToSelection?(payload: SelectionPayload): LayersTypes;
-  removeFromSelection?(payload: SelectionPayload): LayersTypes;
-  newSelection?(payload: SelectionPayload): LayersTypes;
 }
 
 const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
-  const { layer, depth, dragLayer, dragEnterLayer, dropzone, layerItem, addToSelection, removeFromSelection, newSelection } = props;
+  const { layer, depth, dragLayer, dragEnterLayer, dropzone, layerItem } = props;
 
   return (
     <div
@@ -56,8 +53,7 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
 const mapStateToProps = (state: RootState, ownProps: SidebarLayerProps) => {
   const { layers } = state;
   const layerItem = layers.layerById[ownProps.layer];
-  const selection = layers.selection;
-  return { layerItem, selection };
+  return { layerItem };
 };
 
 export default connect(

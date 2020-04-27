@@ -78,6 +78,7 @@
     "@types/react-dom": "^16.9.5",
     "@types/react-redux": "^7.1.7",
     "@types/react-select": "^3.0.11",
+    "@types/redux-logger": "^3.0.7",
     "@types/styled-components": "^5.0.1",
     "@types/uuid": "^7.0.2",
     "@typescript-eslint/eslint-plugin": "^2.23.0",
@@ -108,6 +109,8 @@
     "react-redux": "^7.2.0",
     "react-select": "^3.1.0",
     "redux": "^4.0.5",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.3.0",
     "sketch-file": "^0.3.3",
     "styled-components": "^5.0.1",
     "uuid": "^7.0.3"
