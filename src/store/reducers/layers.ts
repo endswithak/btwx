@@ -10,6 +10,8 @@ import {
   COLLAPSE_GROUP,
   SELECT_LAYER,
   DESELECT_LAYER,
+  HOVER_ENTER,
+  HOVER_LEAVE,
   LayersTypes
 } from '../actionTypes/layers';
 
@@ -24,12 +26,12 @@ import {
   expandGroup,
   collapseGroup,
   selectLayer,
-  deselectLayer
+  deselectLayer,
+  hoverEnter,
+  hoverLeave
 } from '../utils/layers';
 
 export interface LayersState {
-  activePage: string;
-  activeGroup: string;
   layerById: {
     [id: string]: em.Shape | em.Group | em.Page;
   };
@@ -37,8 +39,6 @@ export interface LayersState {
 }
 
 const initialState: LayersState = {
-  activePage: null,
-  activeGroup: null,
   layerById: {},
   allIds: []
 };
@@ -67,6 +67,10 @@ export default (state = initialState, action: LayersTypes): LayersState => {
       return selectLayer(state, action);
     case DESELECT_LAYER:
       return deselectLayer(state, action);
+    case HOVER_ENTER:
+      return hoverEnter(state, action);
+    case HOVER_LEAVE:
+      return hoverLeave(state, action);
     default:
       return state;
   }

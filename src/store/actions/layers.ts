@@ -10,6 +10,8 @@ import {
   COLLAPSE_GROUP,
   SELECT_LAYER,
   DESELECT_LAYER,
+  HOVER_ENTER,
+  HOVER_LEAVE,
   AddPagePayload,
   AddShapePayload,
   AddGroupPayload,
@@ -19,6 +21,7 @@ import {
   InsertBelowPayload,
   ShowChildrenPayload,
   SelectionPayload,
+  HoverPayload,
   LayersTypes
 } from '../actionTypes/layers';
 
@@ -83,4 +86,16 @@ export const selectLayer = (selection: SelectionPayload): LayersTypes => ({
 export const deselectLayer = (selection: SelectionPayload): LayersTypes => ({
   type: DESELECT_LAYER,
   payload: selection
+});
+
+// Hover
+
+export const hoverEnter = (hover: HoverPayload): LayersTypes => ({
+  type: HOVER_ENTER,
+  payload: hover
+});
+
+export const hoverLeave = (hover: HoverPayload): LayersTypes => ({
+  type: HOVER_LEAVE,
+  payload: hover
 });

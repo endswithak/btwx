@@ -1,5 +1,6 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import { getActivePagePaperLayer, getLayerByPaperId } from '../store/selectors/layers';
+import { setActiveGroup } from '../store/actions/layers';
 import { newSelection, clearSelection, groupSelection, ungroupSelection, deleteSelection, toggleLayerSelection } from '../store/actions/selection';
 import store, { StoreDispatch, StoreGetState } from '../store';
 import AreaSelect from './areaSelect';
@@ -44,11 +45,17 @@ class SelectionTool {
         break;
       }
       case 'escape': {
+        const state = this.getState();
         if (this.areaSelect) {
           this.areaSelect.clear();
           this.areaSelect = null;
         }
-        this.dispatch(clearSelection());
+        if (state.layers.activeGroup) {
+          this.dispatch(setActiveGroup({id: null}));
+        }
+        if (state.selection.length > 0) {
+          this.dispatch(clearSelection());
+        }
         break;
       }
       case 'meta': {
@@ -74,11 +81,30 @@ class SelectionTool {
     }
   }
   onMouseDown(event: paper.ToolEvent): void {
-    const state = this.getState().layers;
-    this.hitResult = getActivePagePaperLayer(state).hitTest(event.point);
+    // if (state.activeGroup) {
+    //   this.hitResult = getPaperLayer(state, state.activeGroup).getItem({
+    //     id: (paperId: number) => {
+    //       const layerId = getLayerByPaperId(state, paperId).id;
+    //       const topParent = getTopParentGroup(state, layerId);
+    //       return topParent.paperLayer === paperId;
+    //     },
+    //     overlapping: new paper.Rectangle(event.point, new paper.Size(1,1))
+    //   });
+    // } else {
+    //   this.hitResult = getActivePagePaperLayer(state).getItem({
+    //     id: (paperId: number) => {
+    //       const layerId = getLayerByPaperId(state, paperId).id;
+    //       const topParent = getTopParentGroup(state, layerId);
+    //       return topParent.paperLayer === paperId;
+    //     },
+    //     overlapping: new paper.Rectangle(event.point, new paper.Size(1,1))
+    //   });
+    // }
+    const state = this.getState();
+    this.hitResult = getActivePagePaperLayer(state.layers).hitTest(event.point);
     if (this.hitResult) {
       const hitLayerPaperId = this.hitResult.item.id;
-      const id = getLayerByPaperId(state, hitLayerPaperId).id;
+      const id = getLayerByPaperId(state.layers, hitLayerPaperId).id;
       if (this.shiftModifier) {
         this.dispatch(toggleLayerSelection(id));
       } else {
@@ -87,7 +113,12 @@ class SelectionTool {
     } else {
       this.areaSelect = new AreaSelect(event.point);
       if (!this.shiftModifier) {
-        this.dispatch(clearSelection());
+        if (state.selection.length > 0) {
+          this.dispatch(clearSelection());
+        }
+        if (state.layers.activeGroup) {
+          this.dispatch(setActiveGroup({id: null}));
+        }
       }
     }
   }

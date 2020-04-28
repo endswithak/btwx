@@ -25,9 +25,18 @@ export const getLayerIndex = (store: LayersState, id: string): number => {
   return parent.children.indexOf(id);
 }
 
+export const getLayerType = (store: LayersState, id: string): em.LayerTypes => {
+  const layer = getLayer(store, id);
+  return layer.type;
+}
+
 export const getPaperLayer = (store: LayersState, id: string): paper.Item => {
   const layer = getLayer(store, id);
   return paper.project.getItem({id: layer.paperLayer});
+}
+
+export const getActiveGroup = (store: LayersState): em.Group => {
+  return store.layerById[store.activeGroup] as em.Group;
 }
 
 export const getActivePage = (store: LayersState): em.Page => {

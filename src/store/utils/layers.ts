@@ -1,7 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import paper from 'paper';
 import { LayersState } from '../reducers/layers';
-import { AddShape, AddGroup, AddPage, RemoveLayer, InsertChild, InsertAbove, InsertBelow, ExpandGroup, CollapseGroup, SelectLayer, DeselectLayer } from '../actionTypes/layers';
+import { setHoverLayer, clearHoverLayer } from '../actions/hover';
+import { newSelection } from '../actions/selection';
+import { AddShape, AddGroup, AddPage, RemoveLayer, InsertChild, InsertAbove, InsertBelow, ExpandGroup, CollapseGroup, SelectLayer, DeselectLayer, HoverEnter, HoverLeave } from '../actionTypes/layers';
+import store, { StoreDispatch, StoreGetState } from '../index';
 
 export const insertItem = (array: string[], item: string, index: number): string[] => {
   const newArray = array.slice();
@@ -23,6 +26,12 @@ export const addShape = (state: LayersState, action: AddShape): LayersState  => 
   const paperParentId = state.layerById[layerParentId].paperLayer;
   const paperParentLayer = paper.project.getItem({id: paperParentId});
   action.payload.paperShape.parent = paperParentLayer;
+  action.payload.paperShape.onMouseEnter = (e: paper.MouseEvent) => {
+    store.dispatch(setHoverLayer(shapeId));
+  }
+  action.payload.paperShape.onMouseLeave = () => {
+    store.dispatch(clearHoverLayer());
+  }
   return {
     ...state,
     allIds: [...state.allIds, shapeId],
@@ -37,7 +46,8 @@ export const addShape = (state: LayersState, action: AddShape): LayersState  => 
         paperParent: state.layerById[layerParentId].paperLayer,
         paperLayer: action.payload.paperShape.id,
         selected: false,
-        children: null
+        children: null,
+        hover: false
       },
       [layerParentId]: {
         ...state.layerById[layerParentId],
@@ -53,7 +63,17 @@ export const addGroup = (state: LayersState, action: AddGroup): LayersState  => 
   const paperParentId = state.layerById[layerParentId].paperLayer;
   const paperParentLayer = paper.project.getItem({id: paperParentId});
   const paperGroup = new paper.Group({
-    parent: paperParentLayer
+    parent: paperParentLayer,
+    onDoubleClick: function(e: paper.MouseEvent) {
+      e.stopPropagation();
+      console.log((this as paper.Group).hitTest(e.point));
+    },
+    onMouseEnter: (e: paper.MouseEvent) => {
+      store.dispatch(setHoverLayer(groupId));
+    },
+    onMouseLeave: () => {
+      store.dispatch(clearHoverLayer());
+    }
   });
   return {
     ...state,
@@ -69,20 +89,21 @@ export const addGroup = (state: LayersState, action: AddGroup): LayersState  => 
         paperLayer: paperGroup.id,
         children: [],
         selected: false,
-        expanded: false
+        expanded: false,
+        hover: false
       },
       [layerParentId]: {
         ...state.layerById[layerParentId],
         children: [...(state.layerById[layerParentId] as em.Group).children, groupId]
       } as em.Group
-    },
-    activeGroup: groupId
+    }
   };
 }
 
 export const addPage = (state: LayersState, action: AddPage): LayersState  => {
   const pageId = uuidv4();
   const paperPage = new paper.Group();
+
   return {
     ...state,
     allIds: [...state.allIds, pageId],
@@ -96,7 +117,8 @@ export const addPage = (state: LayersState, action: AddPage): LayersState  => {
         paperParent: null,
         paperLayer: paperPage.id,
         children: [],
-        selected: false
+        selected: false,
+        hover: false
       }
     },
     activePage: pageId
@@ -302,6 +324,36 @@ export const deselectLayer = (state: LayersState, action: DeselectLayer): Layers
       [action.payload.id]: {
         ...state.layerById[action.payload.id],
         selected: false
+      }
+    }
+  };
+}
+
+export const hoverEnter = (state: LayersState, action: HoverEnter): LayersState  => {
+  const layer = state.layerById[action.payload.id] as em.Layer;
+  //paper.project.getItem({id: layer.paperLayer}).selected = true;
+  return {
+    ...state,
+    layerById: {
+      ...state.layerById,
+      [action.payload.id]: {
+        ...state.layerById[action.payload.id],
+        hover: true
+      }
+    }
+  };
+}
+
+export const hoverLeave = (state: LayersState, action: HoverLeave): LayersState  => {
+  const layer = state.layerById[action.payload.id] as em.Layer;
+  //paper.project.getItem({id: layer.paperLayer}).selected = false;
+  return {
+    ...state,
+    layerById: {
+      ...state.layerById,
+      [action.payload.id]: {
+        ...state.layerById[action.payload.id],
+        hover: false
       }
     }
   };

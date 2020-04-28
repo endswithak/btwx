@@ -1,13 +1,15 @@
 declare namespace em {
 
+  type LayerTypes = 'Group' | 'Shape' | 'Page';
+
   interface Layer {
-    type: 'Group' | 'Shape' | 'Page';
+    type: LayerTypes;
     id: string;
     name: string;
     parent: string;
     paperLayer: number;
-    paperParent: number;
     selected: boolean;
+    hover: boolean;
     children: string[] | null;
   }
 
@@ -20,6 +22,7 @@ declare namespace em {
   interface Page extends Layer {
     type: 'Page';
     children: string[];
+    active: boolean;
   }
 
   interface Shape extends Layer {

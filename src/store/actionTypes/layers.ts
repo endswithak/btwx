@@ -13,6 +13,9 @@ export const INSERT_BELOW = 'INSERT_BELOW';
 export const SELECT_LAYER = 'SELECT_LAYER';
 export const DESELECT_LAYER = 'DESELECT_LAYER';
 
+export const HOVER_ENTER = 'HOVER_ENTER';
+export const HOVER_LEAVE = 'HOVER_LEAVE';
+
 // Add
 
 export interface AddShapePayload {
@@ -122,4 +125,20 @@ export interface DeselectLayer {
   payload: SelectionPayload;
 }
 
-export type LayersTypes = AddShape | AddGroup | AddPage | RemoveLayer | InsertChild | InsertAbove | InsertBelow | ExpandGroup | CollapseGroup | SelectLayer | DeselectLayer;
+// Hover
+
+export interface HoverPayload {
+  id: string;
+}
+
+export interface HoverEnter {
+  type: typeof HOVER_ENTER;
+  payload: HoverPayload;
+}
+
+export interface HoverLeave {
+  type: typeof HOVER_LEAVE;
+  payload: HoverPayload;
+}
+
+export type LayersTypes = AddShape | AddGroup | AddPage | RemoveLayer | InsertChild | InsertAbove | InsertBelow | ExpandGroup | CollapseGroup | SelectLayer | DeselectLayer | HoverEnter | HoverLeave;

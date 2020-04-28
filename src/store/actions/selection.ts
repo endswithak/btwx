@@ -1,6 +1,7 @@
 import {
   ADD_TO_SELECTION,
   REMOVE_FROM_SELECTION,
+  SET_GROUP_SCOPE,
   SelectionPayload,
   SelectionTypes
 } from '../actionTypes/selection';
@@ -11,7 +12,7 @@ import {
   addGroup,
   insertAbove,
   insertChild,
-  removeLayer
+  removeLayer,
 } from '../actions/layers';
 
 import { getLayerIndex, getTopParentGroup } from '../selectors/layers';
@@ -25,6 +26,11 @@ export const addToSelection = (selection: SelectionPayload): SelectionTypes => (
 
 export const removeFromSelection = (selection: SelectionPayload): SelectionTypes => ({
   type: REMOVE_FROM_SELECTION,
+  payload: selection
+});
+
+export const setGroupScope = (selection: SelectionPayload): SelectionTypes => ({
+  type: SET_GROUP_SCOPE,
   payload: selection
 });
 
@@ -45,7 +51,7 @@ export const removeLayerFromSelection = (id: string): any => {
 export const toggleLayerSelection = (id: string): any => {
   return (dispatch: StoreDispatch, getState: StoreGetState) => {
     const selection = getState().selection;
-    if (selection.includes(id)) {
+    if (selection.allIds.includes(id)) {
       dispatch(removeLayerFromSelection(id));
     } else {
       dispatch(addLayerToSelection(id));
@@ -57,7 +63,7 @@ export const newSelection = (id: string): any => {
   return (dispatch: StoreDispatch, getState: StoreGetState) => {
     const state = getState();
     const currentSelection = state.selection;
-    currentSelection.forEach((id) => {
+    currentSelection.allIds.forEach((id) => {
       dispatch(removeFromSelection({id}));
       dispatch(deselectLayer({id}));
     });
@@ -70,7 +76,7 @@ export const clearSelection = (): any => {
   return (dispatch: StoreDispatch, getState: StoreGetState) => {
     const state = getState();
     const currentSelection = state.selection;
-    currentSelection.forEach((id) => {
+    currentSelection.allIds.forEach((id) => {
       dispatch(removeFromSelection({id}));
       dispatch(deselectLayer({id}));
     });
@@ -81,7 +87,7 @@ export const deleteSelection = (): any => {
   return (dispatch: StoreDispatch, getState: StoreGetState) => {
     const state = getState();
     const currentSelection = state.selection;
-    currentSelection.forEach((id) => {
+    currentSelection.allIds.forEach((id) => {
       dispatch(removeFromSelection({id}));
       dispatch(removeLayer({id}));
     });
@@ -91,10 +97,10 @@ export const deleteSelection = (): any => {
 export const groupSelection = (): any => {
   return (dispatch: StoreDispatch, getState: StoreGetState) => {
     const state = getState();
-    const topSelection = [...state.selection].reduce((total, current) => {
+    const topSelection = [...state.selection.allIds].reduce((total, current) => {
       const topGroup = getTopParentGroup(state.layers, current);
       return getLayerIndex(state.layers, topGroup.id) <= getLayerIndex(state.layers, total) ? current : total;
-    }, state.selection[0]);
+    }, state.selection.allIds[0]);
     dispatch(addGroup({}));
     const stateWithGroup = getState();
     const groupId = stateWithGroup.layers.allIds[stateWithGroup.layers.allIds.length - 1];
@@ -102,7 +108,7 @@ export const groupSelection = (): any => {
       layer: groupId,
       above: topSelection
     }));
-    state.selection.forEach((id) => {
+    state.selection.allIds.forEach((id) => {
       dispatch(insertChild({
         layer: id,
         parent: groupId
@@ -115,7 +121,7 @@ export const groupSelection = (): any => {
 export const ungroupSelection = (): any => {
   return (dispatch: StoreDispatch, getState: StoreGetState) => {
     const state = getState();
-    state.selection.forEach((id) => {
+    state.selection.allIds.forEach((id) => {
       if (state.layers.layerById[id].type === 'Group') {
         dispatch(removeFromSelection({ id }));
         state.layers.layerById[id].children.forEach((child) => {
