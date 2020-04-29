@@ -6,28 +6,28 @@ import SidebarLayerChevron from './SidebarLayerChevron';
 import SidebarLayerShape from './SidebarLayerShape';
 import SidebarLayerFolder from './SidebarLayerFolder';
 import { setHover } from '../store/actions/hover';
-import { hoverEnter, hoverLeave } from '../store/actions/layers';
+import { enableLayerHover, disableLayerHover } from '../store/actions/layer';
 
 interface SidebarLayerItemProps {
   layer: em.Layer;
   depth: number;
   setHover?: any;
-  hoverEnter?: any;
-  hoverLeave?: any;
+  enableLayerHover?: any;
+  disableLayerHover?: any;
 }
 
 const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layer, depth, setHover, hoverEnter, hoverLeave } = props;
+  const { layer, depth, setHover, enableLayerHover, disableLayerHover } = props;
 
   const handleMouseEnter = () => {
     setHover({id: layer.id});
-    hoverEnter({id: layer.id});
+    enableLayerHover({id: layer.id});
   }
 
   const handleMouseLeave = () => {
     setHover({id: null});
-    hoverLeave({id: layer.id});
+    disableLayerHover({id: layer.id});
   }
 
   return (
@@ -56,5 +56,5 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
 
 export default connect(
   null,
-  { setHover, hoverEnter, hoverLeave }
+  { setHover, enableLayerHover, disableLayerHover }
 )(SidebarLayerItem);

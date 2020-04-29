@@ -10,12 +10,12 @@ import {
   selectLayer,
   deselectLayer,
   addGroup,
-  insertAbove,
-  insertChild,
+  insertLayerAbove,
+  addLayerChild,
   removeLayer,
-} from '../actions/layers';
+} from '../actions/layer';
 
-import { getLayerIndex, getTopParentGroup } from '../selectors/layers';
+import { getLayerIndex, getTopParentGroup } from '../selectors/layer';
 
 import { StoreGetState, StoreDispatch } from '../index';
 
@@ -98,20 +98,20 @@ export const groupSelection = (): any => {
   return (dispatch: StoreDispatch, getState: StoreGetState) => {
     const state = getState();
     const topSelection = [...state.selection.allIds].reduce((total, current) => {
-      const topGroup = getTopParentGroup(state.layers, current);
-      return getLayerIndex(state.layers, topGroup.id) <= getLayerIndex(state.layers, total) ? current : total;
+      const topGroup = getTopParentGroup(state.layer, current);
+      return getLayerIndex(state.layer, topGroup.id) <= getLayerIndex(state.layer, total) ? current : total;
     }, state.selection.allIds[0]);
     dispatch(addGroup({}));
     const stateWithGroup = getState();
-    const groupId = stateWithGroup.layers.allIds[stateWithGroup.layers.allIds.length - 1];
-    dispatch(insertAbove({
-      layer: groupId,
+    const groupId = stateWithGroup.layer.allIds[stateWithGroup.layer.allIds.length - 1];
+    dispatch(insertLayerAbove({
+      id: groupId,
       above: topSelection
     }));
     state.selection.allIds.forEach((id) => {
-      dispatch(insertChild({
-        layer: id,
-        parent: groupId
+      dispatch(addLayerChild({
+        id: groupId,
+        child: id
       }));
     });
     dispatch(newSelection(groupId));
@@ -122,11 +122,11 @@ export const ungroupSelection = (): any => {
   return (dispatch: StoreDispatch, getState: StoreGetState) => {
     const state = getState();
     state.selection.allIds.forEach((id) => {
-      if (state.layers.layerById[id].type === 'Group') {
+      if (state.layer.byId[id].type === 'Group') {
         dispatch(removeFromSelection({ id }));
-        state.layers.layerById[id].children.forEach((child) => {
-          dispatch(insertAbove({
-            layer: child,
+        state.layer.byId[id].children.forEach((child) => {
+          dispatch(insertLayerAbove({
+            id: child,
             above: id
           }));
         });

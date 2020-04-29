@@ -22,7 +22,6 @@ declare namespace em {
   interface Page extends Layer {
     type: 'Page';
     children: string[];
-    active: boolean;
   }
 
   interface Shape extends Layer {

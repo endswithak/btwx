@@ -1,14 +1,14 @@
 import paper from 'paper';
 import React, { useRef, useContext, useEffect, ReactElement } from 'react';
 import { connect } from 'react-redux';
-import { addPage } from '../store/actions/layers';
+import { addPage } from '../store/actions/layer';
 import { enableSelectionTool } from '../store/actions/selectionTool';
 import { ThemeContext } from './ThemeProvider';
-import { AddPagePayload, LayersTypes } from '../store/actionTypes/layers';
+import { AddPagePayload, LayerTypes } from '../store/actionTypes/layer';
 //import renderCanvas from '../canvas';
 
 interface CanvasProps {
-  addPage(payload: AddPagePayload): LayersTypes;
+  addPage(payload: AddPagePayload): LayerTypes;
   enableSelectionTool(): any;
 }
 

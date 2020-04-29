@@ -6,10 +6,10 @@ import SidebarSectionHead from './SidebarSectionHead';
 import SidebarSectionWrap from './SidebarSectionWrap';
 import SortableTree from './SortableTree';
 import SidebarLayer from './SidebarLayer';
-import { LayersState } from '../store/reducers/layers';
+import { LayerState } from '../store/reducers/layer';
 
 interface LayersSidebarStateProps {
-  layers: LayersState;
+  layer: LayerState;
 }
 
 const LayersSidebar = (props: LayersSidebarStateProps): ReactElement => {
@@ -23,9 +23,9 @@ const LayersSidebar = (props: LayersSidebarStateProps): ReactElement => {
           text={'layers'} />
       </SidebarSectionWrap>
       {
-        props.layers.activePage
+        props.layer.activePage
         ? <SortableTree
-            treeData={props.layers.layerById[props.layers.activePage] as em.Group}
+            treeData={props.layer.byId[props.layer.activePage] as em.Group}
             nodeComponent={<SidebarLayer/>} />
         : null
       }
@@ -34,8 +34,8 @@ const LayersSidebar = (props: LayersSidebarStateProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layers } = state;
-  return { layers };
+  const { layer } = state;
+  return { layer };
 };
 
 export default connect(mapStateToProps)(LayersSidebar);

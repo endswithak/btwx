@@ -3,7 +3,6 @@ import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
 import SidebarDropzone from './SidebarDropzone';
 import SidebarLayerItem from './SidebarLayerItem';
-import { SelectionPayload, LayersTypes } from '../store/actionTypes/layers';
 import SidebarLayers from './SidebarLayers';
 
 interface SidebarLayerProps {
@@ -51,8 +50,8 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState, ownProps: SidebarLayerProps) => {
-  const { layers } = state;
-  const layerItem = layers.layerById[ownProps.layer];
+  const { layer } = state;
+  const layerItem = layer.byId[ownProps.layer];
   return { layerItem };
 };
 

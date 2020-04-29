@@ -1,6 +1,5 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
-import { getActivePagePaperLayer, getLayerByPaperId } from '../store/selectors/layers';
-import { setActiveGroup } from '../store/actions/layers';
+import { getActivePagePaperLayer, getLayerByPaperId } from '../store/selectors/layer';
 import { newSelection, clearSelection, groupSelection, ungroupSelection, deleteSelection, toggleLayerSelection } from '../store/actions/selection';
 import store, { StoreDispatch, StoreGetState } from '../store';
 import AreaSelect from './areaSelect';
@@ -31,7 +30,7 @@ class SelectionTool {
   onKeyDown(event: paper.KeyEvent): void {
     switch(event.key) {
       case 'g': {
-        if (event.modifiers.meta && this.getState().selection.length > 0) {
+        if (event.modifiers.meta && this.getState().selection.allIds.length > 0) {
           if (event.modifiers.shift) {
             this.dispatch(ungroupSelection());
           } else {
@@ -50,10 +49,10 @@ class SelectionTool {
           this.areaSelect.clear();
           this.areaSelect = null;
         }
-        if (state.layers.activeGroup) {
-          this.dispatch(setActiveGroup({id: null}));
-        }
-        if (state.selection.length > 0) {
+        // if (state.layers.activeGroup) {
+        //   this.dispatch(setActiveGroup({id: null}));
+        // }
+        if (state.selection.allIds.length > 0) {
           this.dispatch(clearSelection());
         }
         break;
@@ -101,10 +100,10 @@ class SelectionTool {
     //   });
     // }
     const state = this.getState();
-    this.hitResult = getActivePagePaperLayer(state.layers).hitTest(event.point);
+    this.hitResult = getActivePagePaperLayer(state.layer).hitTest(event.point);
     if (this.hitResult) {
       const hitLayerPaperId = this.hitResult.item.id;
-      const id = getLayerByPaperId(state.layers, hitLayerPaperId).id;
+      const id = getLayerByPaperId(state.layer, hitLayerPaperId).id;
       if (this.shiftModifier) {
         this.dispatch(toggleLayerSelection(id));
       } else {
@@ -113,12 +112,12 @@ class SelectionTool {
     } else {
       this.areaSelect = new AreaSelect(event.point);
       if (!this.shiftModifier) {
-        if (state.selection.length > 0) {
+        if (state.selection.allIds.length > 0) {
           this.dispatch(clearSelection());
         }
-        if (state.layers.activeGroup) {
-          this.dispatch(setActiveGroup({id: null}));
-        }
+        // if (state.layer.activeGroup) {
+        //   this.dispatch(setActiveGroup({id: null}));
+        // }
       }
     }
   }

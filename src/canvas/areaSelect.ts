@@ -1,5 +1,5 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
-import { getActivePagePaperLayer, getLayerByPaperId, getTopParentGroup } from '../store/selectors/layers';
+import { getActivePagePaperLayer, getLayerByPaperId, getTopParentGroup } from '../store/selectors/layer';
 import store, { StoreGetState, StoreDispatch } from '../store';
 
 class AreaSelect {
@@ -39,7 +39,7 @@ class AreaSelect {
     });
   }
   paperLayers() {
-    const state = this.getState().layers;
+    const state = this.getState().layer;
     return getActivePagePaperLayer(state).getItems({
       id: (paperId: number) => {
         const layerId = getLayerByPaperId(state, paperId).id;
@@ -50,7 +50,7 @@ class AreaSelect {
     });
   }
   layers() {
-    const state = this.getState().layers;
+    const state = this.getState().layer;
     const paperLayers = this.paperLayers();
     return paperLayers.map((paperLayer) => {
       return getLayerByPaperId(state, paperLayer.id).id;

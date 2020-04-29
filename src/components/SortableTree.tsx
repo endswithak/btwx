@@ -2,34 +2,34 @@ import React, { useContext, ReactElement, useState, useEffect, useRef } from 're
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
 import SidebarDropzone from './SidebarDropzone';
-import { insertAbove, insertBelow, insertChild } from '../store/actions/layers';
-import { InsertAbovePayload, InsertBelowPayload, InsertChildPayload } from '../store/actionTypes/layers';
-import { LayersTypes } from '../store/actionTypes/layers';
+import { insertLayerAbove, insertLayerBelow, addLayerChild } from '../store/actions/layer';
+import { InsertLayerAbovePayload, InsertLayerBelowPayload, AddLayerChildPayload } from '../store/actionTypes/layer';
+import { LayerTypes } from '../store/actionTypes/layer';
 
 interface SidebarTreeProps {
   treeData: em.Group;
   nodeComponent: ReactElement;
-  layers: {
+  layerById: {
     [id: string]: em.Layer;
   };
-  insertAbove(payload: InsertAbovePayload): LayersTypes;
-  insertBelow(payload: InsertBelowPayload): LayersTypes;
-  insertChild(payload: InsertChildPayload): LayersTypes;
+  insertLayerAbove(payload: InsertLayerAbovePayload): LayerTypes;
+  insertLayerBelow(payload: InsertLayerBelowPayload): LayerTypes;
+  addLayerChild(payload: AddLayerChildPayload): LayerTypes;
 }
 
 const SidebarTree = (props: SidebarTreeProps): ReactElement => {
   const [dragLayer, setDragLayer] = useState(null);
   const [dragEnterLayer, setDragEnterLayer] = useState(null);
   const [dropzone, setDropzone] = useState(null);
-  const { treeData, nodeComponent, layers, insertAbove, insertBelow, insertChild } = props;
+  const { treeData, nodeComponent, layerById, insertLayerAbove, insertLayerBelow, addLayerChild } = props;
 
   const canMoveLayer = (layer: em.Layer): boolean => {
     if (dragLayer.id !== layer.id) {
       if (dragLayer.children) {
         let canInclude = true;
         let currentNode = layer;
-        while(layers[currentNode.parent] && layers[currentNode.parent].type === 'Group') {
-          currentNode = layers[currentNode.parent];
+        while(layerById[currentNode.parent] && layerById[currentNode.parent].type === 'Group') {
+          currentNode = layerById[currentNode.parent];
           if (currentNode.id === dragLayer.id) {
             canInclude = false;
           }
@@ -46,7 +46,7 @@ const SidebarTree = (props: SidebarTreeProps): ReactElement => {
   const handleDragStart = (e: any): void => {
     if (e.target.id) {
       e.target.style.opacity = 0.5;
-      setDragLayer(layers[e.target.id]);
+      setDragLayer(layerById[e.target.id]);
     }
   }
 
@@ -63,7 +63,7 @@ const SidebarTree = (props: SidebarTreeProps): ReactElement => {
 
   const handleDragEnter = (e: any): void => {
     if (e.target.dataset.dropzone) {
-      const layer = layers[e.target.dataset.id];
+      const layer = layerById[e.target.dataset.id];
       setDragEnterLayer(canMoveLayer(layer) ? layer : null);
       setDropzone(e.target.dataset.dropzone);
     }
@@ -77,20 +77,20 @@ const SidebarTree = (props: SidebarTreeProps): ReactElement => {
     if (dragLayer && dragEnterLayer) {
       switch(dropzone) {
         case 'Top':
-          insertAbove({
-            layer: dragLayer.id,
+          insertLayerAbove({
+            id: dragLayer.id,
             above: dragEnterLayer.id
           });
           break;
         case 'Center':
-          insertChild({
-            layer: dragLayer.id,
-            parent: dragEnterLayer.id
+          addLayerChild({
+            id: dragEnterLayer.id,
+            child: dragLayer.id
           });
           break;
         case 'Bottom':
-          insertBelow({
-            layer: dragLayer.id,
+          insertLayerBelow({
+            id: dragLayer.id,
             below: dragEnterLayer.id
           });
           break;
@@ -138,13 +138,13 @@ const SidebarTree = (props: SidebarTreeProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layers } = state;
+  const { layer } = state;
   return {
-    layers: layers.layerById
+    layerById: layer.byId
   };
 };
 
 export default connect(
   mapStateToProps,
-  { insertAbove, insertBelow, insertChild }
+  { insertLayerAbove, insertLayerBelow, addLayerChild }
 )(SidebarTree);

@@ -2,7 +2,7 @@ import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import store, { StoreDispatch, StoreGetState } from '../store';
 import { disableDrawTool } from '../store/actions/drawTool';
 import { enableSelectionTool } from '../store/actions/selectionTool';
-import { addShape } from '../store/actions/layers';
+import { addShape } from '../store/actions/layer';
 
 class DrawTool {
   getState: StoreGetState;
@@ -174,14 +174,11 @@ class DrawTool {
       }
       this.dispatch(addShape({
         shapeType: this.drawShapeType,
-        paperShape: this.renderShape({
-          name: this.drawShapeType,
+        paperLayer: this.renderShape({
           fillColor: '#ccc',
           strokeColor: '#999',
           strokeWidth: 1
-        }),
-        name: this.drawShapeType,
-        parent: null
+        })
       }));
       this.dispatch(disableDrawTool());
       this.dispatch(enableSelectionTool());

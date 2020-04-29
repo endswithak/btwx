@@ -1,25 +1,25 @@
 import React, { useContext, ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { expandGroup, collapseGroup } from '../store/actions/layers';
+import { expandLayer, collapseLayer } from '../store/actions/layer';
 import { ThemeContext } from './ThemeProvider';
-import { ShowChildrenPayload, LayersTypes } from '../store/actionTypes/layers';
+import { ExpandLayerPayload, CollapseLayerPayload, LayerTypes } from '../store/actionTypes/layer';
 
 interface SidebarLayerChevronProps {
   layer: em.Layer;
-  expandGroup(payload: ShowChildrenPayload): LayersTypes;
-  collapseGroup(payload: ShowChildrenPayload): LayersTypes;
+  expandLayer(payload: ExpandLayerPayload): LayerTypes;
+  collapseLayer(payload: CollapseLayerPayload): LayerTypes;
 }
 
 const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layer, expandGroup, collapseGroup } = props;
+  const { layer, expandLayer, collapseLayer } = props;
 
   const handleChevronClick = (): void => {
     if (layer.type === 'Group') {
       if ((layer as em.Group).expanded) {
-        collapseGroup({id: layer.id});
+        collapseLayer({id: layer.id});
       } else {
-        expandGroup({id: layer.id});
+        expandLayer({id: layer.id});
       }
     }
   }
@@ -52,5 +52,5 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
 
 export default connect(
   null,
-  { expandGroup, collapseGroup }
+  { expandLayer, collapseLayer }
 )(SidebarLayerChevron);

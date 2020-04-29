@@ -1,43 +1,61 @@
 import paper from 'paper';
-import { RootState } from '../reducers';
+import { LayerState } from '../reducers/layer';
 
-export const getLayerByPaperId = (store: RootState, id: number): em.Layer => {
+export const getLayerByPaperId = (store: LayerState, id: number): em.Layer => {
   let layer: em.Layer;
-  Object.keys(store.page.byId).forEach((layerId) => {
-    if (store.page.byId[layerId].paperLayer === id) {
-      layer = store.page.byId[layerId];
+  Object.keys(store.byId).forEach((layerId) => {
+    if (store.byId[layerId].paperLayer === id) {
+      layer = store.byId[layerId];
     }
   });
-  if (!layer) {
-    Object.keys(store.shape.byId).forEach((layerId) => {
-      if (store.shape.byId[layerId].paperLayer === id) {
-        layer = store.shape.byId[layerId];
-      }
-    });
-  }
   return layer;
 }
 
-export const getLayer = (store: RootState, id: string): em.Layer => {
-  switch(true) {
-    case store.shape.allIds.includes(id):
-      return store.shape.byId[id];
-    case store.page.allIds.includes(id):
-      return store.page.byId[id];
-  }
+export const getLayer = (store: LayerState, id: string): em.Layer => {
+  return store.byId[id] as em.Layer;
 }
 
-export const getParentLayer = (store: RootState, id: string): em.Layer => {
+export const getParentLayer = (store: LayerState, id: string): em.Group => {
   const layer = getLayer(store, id);
-  switch(true) {
-    case store.shape.allIds.includes(layer.parent):
-      return store.shape.byId[layer.parent];
-    case store.page.allIds.includes(layer.parent):
-      return store.page.byId[layer.parent];
-  }
+  return store.byId[layer.parent] as em.Group;
 }
 
-export const getPaperLayer = (store: RootState, id: string): paper.Item => {
+export const getLayerIndex = (store: LayerState, id: string): number => {
+  const parent = getParentLayer(store, id);
+  return parent.children.indexOf(id);
+}
+
+export const getLayerType = (store: LayerState, id: string): em.LayerTypes => {
   const layer = getLayer(store, id);
-  return paper.project.getItem({id: layer.paperLayer});
+  return layer.type;
+}
+
+export const getPaperLayerByPaperId = (id: number): paper.Item => {
+  return paper.project.getItem({ id });
+}
+
+export const getPaperLayer = (store: LayerState, id: string): paper.Item => {
+  const layer = getLayer(store, id);
+  return getPaperLayerByPaperId(layer.paperLayer);
+}
+
+// export const getActiveGroup = (store: LayerState): em.Group => {
+//   return store.byId[store.activeGroup] as em.Group;
+// }
+
+export const getActivePage = (store: LayerState): em.Page => {
+  return store.byId[store.activePage] as em.Page;
+}
+
+export const getActivePagePaperLayer = (store: LayerState): paper.Item => {
+  const activePage = store.activePage;
+  return getPaperLayer(store, activePage);
+}
+
+export const getTopParentGroup = (store: LayerState, id: string) => {
+  let currentNode = getLayer(store, id);
+  while(getParentLayer(store, currentNode.id).type === 'Group') {
+    currentNode = getParentLayer(store, currentNode.id);
+  }
+  return currentNode;
 }
