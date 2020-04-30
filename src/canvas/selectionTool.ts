@@ -1,6 +1,6 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import { getActivePagePaperLayer, getLayerByPaperId } from '../store/selectors/layer';
-import { newSelection, clearSelection, groupSelection, ungroupSelection, deleteSelection, toggleLayerSelection } from '../store/actions/selection';
+import { groupLayers, ungroupLayers, selectLayer, deselectLayer, deselectAllLayers, removeLayers } from '../store/actions/layer';
 import store, { StoreDispatch, StoreGetState } from '../store';
 import AreaSelect from './areaSelect';
 
@@ -28,13 +28,14 @@ class SelectionTool {
     this.hitResult = null;
   }
   onKeyDown(event: paper.KeyEvent): void {
+    const state = this.getState();
     switch(event.key) {
       case 'g': {
-        if (event.modifiers.meta && this.getState().selection.allIds.length > 0) {
+        if (event.modifiers.meta && state.layer.selected.length > 0) {
           if (event.modifiers.shift) {
-            this.dispatch(ungroupSelection());
+            this.dispatch(ungroupLayers({layers: state.layer.selected}));
           } else {
-            this.dispatch(groupSelection());
+            this.dispatch(groupLayers({layers: state.layer.selected}));
           }
         }
         break;
@@ -44,7 +45,6 @@ class SelectionTool {
         break;
       }
       case 'escape': {
-        const state = this.getState();
         if (this.areaSelect) {
           this.areaSelect.clear();
           this.areaSelect = null;
@@ -52,8 +52,8 @@ class SelectionTool {
         // if (state.layers.activeGroup) {
         //   this.dispatch(setActiveGroup({id: null}));
         // }
-        if (state.selection.allIds.length > 0) {
-          this.dispatch(clearSelection());
+        if (state.layer.selected.length > 0) {
+          this.dispatch(deselectAllLayers());
         }
         break;
       }
@@ -62,7 +62,7 @@ class SelectionTool {
         break;
       }
       case 'backspace': {
-        this.dispatch(deleteSelection());
+        this.dispatch(removeLayers({layers: state.layer.selected}));
         break;
       }
     }
@@ -105,15 +105,15 @@ class SelectionTool {
       const hitLayerPaperId = this.hitResult.item.id;
       const id = getLayerByPaperId(state.layer, hitLayerPaperId).id;
       if (this.shiftModifier) {
-        this.dispatch(toggleLayerSelection(id));
+        this.toggleLayerSelection(id);
       } else {
-        this.dispatch(newSelection(id));
+        this.dispatch(selectLayer({id, newSelection: true}));
       }
     } else {
       this.areaSelect = new AreaSelect(event.point);
       if (!this.shiftModifier) {
-        if (state.selection.allIds.length > 0) {
-          this.dispatch(clearSelection());
+        if (state.layer.selected.length > 0) {
+          this.dispatch(deselectAllLayers());
         }
         // if (state.layer.activeGroup) {
         //   this.dispatch(setActiveGroup({id: null}));
@@ -130,11 +130,19 @@ class SelectionTool {
     if (this.areaSelect) {
       if (this.areaSelect.to) {
         this.areaSelect.layers().forEach((id: string) => {
-          this.dispatch(toggleLayerSelection(id));
+          this.toggleLayerSelection(id);
         });
       }
       this.areaSelect.clear();
       this.areaSelect = null;
+    }
+  }
+  toggleLayerSelection(id: string): void {
+    const state = this.getState();
+    if (state.layer.selected.includes(id)) {
+      this.dispatch(deselectLayer({id}));
+    } else {
+      this.dispatch(selectLayer({id}));
     }
   }
 }

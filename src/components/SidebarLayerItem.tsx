@@ -21,12 +21,12 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
   const { layer, depth, setHover, enableLayerHover, disableLayerHover } = props;
 
   const handleMouseEnter = () => {
-    setHover({id: layer.id});
+    //setHover({id: layer.id});
     enableLayerHover({id: layer.id});
   }
 
   const handleMouseLeave = () => {
-    setHover({id: null});
+    //setHover({id: null});
     disableLayerHover({id: layer.id});
   }
 

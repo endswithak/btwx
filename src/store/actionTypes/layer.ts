@@ -1,10 +1,13 @@
 export const ADD_PAGE = 'ADD_PAGE';
 export const ADD_GROUP = 'ADD_GROUP';
 export const ADD_SHAPE = 'ADD_SHAPE';
+
 export const REMOVE_LAYER = 'REMOVE_LAYER';
+export const REMOVE_LAYERS = 'REMOVE_LAYERS';
 
 export const SELECT_LAYER = 'SELECT_LAYER';
 export const DESELECT_LAYER = 'DESELECT_LAYER';
+export const DESELECT_ALL_LAYERS = 'DESELECT_ALL_LAYERS';
 
 export const ENABLE_LAYER_HOVER = 'ENABLE_LAYER_HOVER';
 export const DISABLE_LAYER_HOVER = 'DISABLE_LAYER_HOVER';
@@ -17,6 +20,11 @@ export const INSERT_LAYER_BELOW = 'INSERT_LAYER_BELOW';
 
 export const EXPAND_LAYER = 'EXPAND_LAYER';
 export const COLLAPSE_LAYER = 'COLLAPSE_LAYER';
+
+export const GROUP_LAYERS = 'GROUP_LAYERS';
+export const UNGROUP_LAYER = 'UNGROUP_LAYER';
+export const UNGROUP_LAYERS = 'UNGROUP_LAYERS';
+export const SET_GROUP_SCOPE = 'SET_GROUP_SCOPE';
 
 // Page
 
@@ -84,10 +92,20 @@ export interface RemoveLayer {
   payload: RemoveLayerPayload;
 }
 
+export interface RemoveLayersPayload {
+  layers: string[];
+}
+
+export interface RemoveLayers {
+  type: typeof REMOVE_LAYERS;
+  payload: RemoveLayersPayload;
+}
+
 // Select
 
 export interface SelectLayerPayload {
   id: string;
+  newSelection?: boolean;
 }
 
 export interface SelectLayer {
@@ -102,6 +120,10 @@ export interface DeselectLayerPayload {
 export interface DeselectLayer {
   type: typeof DESELECT_LAYER;
   payload: DeselectLayerPayload;
+}
+
+export interface DeselectAllLayers {
+  type: typeof DESELECT_ALL_LAYERS;
 }
 
 // Hover
@@ -189,4 +211,43 @@ export interface CollapseLayer {
   payload: CollapseLayerPayload;
 }
 
-export type LayerTypes = AddPage | AddGroup | AddShape | RemoveLayer | SelectLayer | DeselectLayer | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | InsertLayerAbove | InsertLayerBelow | ExpandLayer | CollapseLayer;
+// Group
+
+export interface GroupLayersPayload {
+  layers: string[];
+}
+
+export interface GroupLayers {
+  type: typeof GROUP_LAYERS;
+  payload: GroupLayersPayload;
+}
+
+export interface UngroupLayerPayload {
+  id: string;
+}
+
+export interface UngroupLayer {
+  type: typeof UNGROUP_LAYER;
+  payload: UngroupLayerPayload;
+}
+
+export interface UngroupLayersPayload {
+  layers: string[];
+}
+
+export interface UngroupLayers {
+  type: typeof UNGROUP_LAYERS;
+  payload: UngroupLayersPayload;
+}
+
+export interface SetGroupScopePayload {
+  id: string;
+}
+
+export interface SetGroupScope {
+  type: typeof SET_GROUP_SCOPE;
+  payload: SetGroupScopePayload;
+}
+
+
+export type LayerTypes = AddPage | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeselectLayer | DeselectAllLayers | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | InsertLayerAbove | InsertLayerBelow | ExpandLayer | CollapseLayer | GroupLayers | UngroupLayer | UngroupLayers | SetGroupScope;

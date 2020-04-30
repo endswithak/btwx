@@ -59,3 +59,13 @@ export const getTopParentGroup = (store: LayerState, id: string) => {
   }
   return currentNode;
 }
+
+export const getLayerDepth = (store: LayerState, id: string) => {
+  let currentNode = getLayer(store, id);
+  let depth = 0;
+  while(getParentLayer(store, currentNode.id).type === 'Group') {
+    currentNode = getParentLayer(store, currentNode.id);
+    depth++;
+  }
+  return depth;
+}
