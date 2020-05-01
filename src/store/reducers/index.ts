@@ -1,14 +1,10 @@
 import { combineReducers } from 'redux';
 import layer from './layer';
-import hover from './hover';
-import drawTool from './drawTool';
-import selectionTool from './selectionTool';
+import tool from './tool';
 
 const rootReducer = combineReducers({
   layer,
-  drawTool,
-  selectionTool,
-  hover
+  tool
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

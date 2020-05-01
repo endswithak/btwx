@@ -5,7 +5,6 @@ import SidebarLayerTitle from './SidebarLayerTitle';
 import SidebarLayerChevron from './SidebarLayerChevron';
 import SidebarLayerShape from './SidebarLayerShape';
 import SidebarLayerFolder from './SidebarLayerFolder';
-import { setHover } from '../store/actions/hover';
 import { setLayerHover } from '../store/actions/layer';
 import { SetLayerHoverPayload, LayerTypes } from '../store/actionTypes/layer';
 import { RootState } from '../store/reducers';
@@ -61,5 +60,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { setHover, setLayerHover }
+  { setLayerHover }
 )(SidebarLayerItem);

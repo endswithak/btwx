@@ -1,44 +1,46 @@
 import React, { useContext, ReactElement, useState, useEffect } from 'react';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
-import { enableDrawTool, disableDrawTool } from '../store/actions/drawTool';
-import { enableSelectionTool, disableSelectionTool } from '../store/actions/selectionTool';
+import { enableSelectionTool, enableRectangleDrawTool, enableEllipseDrawTool, enableStarDrawTool, enablePolygonDrawTool, enableRoundedDrawTool } from '../store/actions/tool';
+import { ToolTypes } from '../store/actionTypes/tool';
 import { ThemeContext } from './ThemeProvider';
 
 interface TopbarStateProps {
   drawShapeType: em.ShapeType;
-  drawing: boolean;
-  disableDrawTool(): any;
-  enableDrawTool(payload: {drawShapeType: em.ShapeType}): any;
-  enableSelectionTool(): any;
-  disableSelectionTool(): any;
+  enableRectangleDrawTool(): ToolTypes;
+  enableEllipseDrawTool(): ToolTypes;
+  enableStarDrawTool(): ToolTypes;
+  enablePolygonDrawTool(): ToolTypes;
+  enableRoundedDrawTool(): ToolTypes;
+  enableSelectionTool(): ToolTypes;
 }
 
 const Topbar = (props: TopbarStateProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { enableDrawTool, disableDrawTool, enableSelectionTool, disableSelectionTool, drawShapeType, drawing } = props;
+  const { enableRectangleDrawTool, enableEllipseDrawTool, enableSelectionTool, enableStarDrawTool, drawShapeType, enablePolygonDrawTool, enableRoundedDrawTool } = props;
 
   const handleDrawClick = (shape: em.ShapeType) => {
     if (drawShapeType === shape) {
-      disableDrawTool();
       enableSelectionTool();
     } else {
-      if (drawing) {
-        disableDrawTool();
-        enableDrawTool({
-          drawShapeType: shape
-        });
-      } else {
-        disableSelectionTool();
-        enableDrawTool({
-          drawShapeType: shape
-        });
+      switch(shape) {
+        case 'Rectangle':
+          enableRectangleDrawTool();
+          break;
+        case 'Ellipse':
+          enableEllipseDrawTool();
+          break;
+        case 'Star':
+          enableStarDrawTool();
+          break;
+        case 'Polygon':
+          enablePolygonDrawTool();
+          break;
+        case 'Rounded':
+          enableRoundedDrawTool();
+          break;
       }
     }
-  }
-
-  const handleGroupClick = () => {
-
   }
 
   return (
@@ -72,23 +74,17 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
         onClick={() => handleDrawClick('Polygon')}>
         P
       </button>
-      <button
-        className='c-topbar__button c-topbar__button--blue'
-        onClick={() => handleGroupClick()}>
-        G
-      </button>
     </div>
   );
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { drawTool } = state;
-  const drawShapeType = drawTool.drawShape;
-  const drawing = drawTool.drawing;
-  return { drawShapeType, drawing };
+  const { tool } = state;
+  const drawShapeType = tool.drawShape;
+  return { drawShapeType };
 };
 
 export default connect(
   mapStateToProps,
-  { enableDrawTool, disableDrawTool, enableSelectionTool, disableSelectionTool }
+  { enableRectangleDrawTool, enableEllipseDrawTool, enableStarDrawTool, enablePolygonDrawTool, enableRoundedDrawTool, enableSelectionTool }
 )(Topbar);

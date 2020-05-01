@@ -42,8 +42,6 @@ export interface AddPagePayload {
   selected?: boolean;
   hover?: boolean;
   children?: string[];
-  active: boolean;
-  selectedLayers: string[];
 }
 
 export interface AddPage {

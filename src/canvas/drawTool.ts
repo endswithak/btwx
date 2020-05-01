@@ -1,7 +1,6 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import store, { StoreDispatch, StoreGetState } from '../store';
-import { disableDrawTool } from '../store/actions/drawTool';
-import { enableSelectionTool } from '../store/actions/selectionTool';
+import { enableSelectionTool, enableRectangleDrawTool, enableEllipseDrawTool, enableRoundedDrawTool } from '../store/actions/tool';
 import { addShape } from '../store/actions/layer';
 
 class DrawTool {
@@ -104,6 +103,9 @@ class DrawTool {
     }
   }
   updateTooltip(): void {
+    if (this.tooltip) {
+      this.tooltip.remove();
+    }
     this.tooltip = this.renderTooltip({});
     this.tooltip.removeOn({
       drag: true,
@@ -111,6 +113,9 @@ class DrawTool {
     });
   }
   updateOutline(): void {
+    if (this.outline) {
+      this.outline.remove();
+    }
     this.outline = this.renderShape({
       selected: true,
     });
@@ -136,7 +141,6 @@ class DrawTool {
         if (this.outline) {
           this.outline.remove();
         }
-        this.dispatch(disableDrawTool());
         this.dispatch(enableSelectionTool());
         break;
       }
@@ -185,7 +189,6 @@ class DrawTool {
           }
         })
       }));
-      this.dispatch(disableDrawTool());
       this.dispatch(enableSelectionTool());
     }
   }

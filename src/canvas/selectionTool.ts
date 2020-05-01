@@ -1,8 +1,9 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import { getPagePaperLayer, getLayerByPaperId, getLayerDepth, getParentLayer, getNearestScopeAncestor, isScopeGroupLayer, getLayer } from '../store/selectors/layer';
-import { groupLayers, ungroupLayers, selectLayer, deselectLayer, deselectAllLayers, removeLayers, increaseLayerScope, decreaseLayerScope, clearLayerScope, disableLayerHover, enableLayerHover, setLayerHover, newLayerScope } from '../store/actions/layer';
+import { groupLayers, ungroupLayers, selectLayer, deselectLayer, deselectAllLayers, removeLayers, increaseLayerScope, decreaseLayerScope, clearLayerScope, setLayerHover, newLayerScope } from '../store/actions/layer';
 import store, { StoreDispatch, StoreGetState } from '../store';
 import AreaSelect from './areaSelect';
+import { enableRectangleDrawTool, enableEllipseDrawTool } from '../store/actions/tool';
 
 class SelectionTool {
   getState: StoreGetState;
@@ -126,6 +127,7 @@ class SelectionTool {
       this.areaSelect.layers().forEach((id: string) => {
         this.toggleLayerSelection(id);
       });
+      this.areaSelect = null;
     }
   }
   onDoubleClick(event: paper.MouseEvent): void {

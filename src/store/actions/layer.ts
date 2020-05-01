@@ -57,9 +57,7 @@ export const addPage = (payload: AddPagePayload): LayerTypes => ({
     parent: null,
     paperLayer: new paper.Group(),
     children: [],
-    selected: false,
-    active: false,
-    selectedLayers: []
+    selected: false
   }
 });
 

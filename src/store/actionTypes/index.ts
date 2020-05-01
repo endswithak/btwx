@@ -1,6 +1,4 @@
 import { LayerTypes } from './layer';
-import { DrawToolTypes } from './drawTool';
-import { SelectionToolTypes } from './selectionTool';
-import { HoverTypes } from './hover';
+import { ToolTypes } from './tool';
 
-export type RootAction = LayerTypes | DrawToolTypes | SelectionToolTypes | HoverTypes;
+export type RootAction = LayerTypes | ToolTypes;

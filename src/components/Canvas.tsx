@@ -2,7 +2,7 @@ import paper from 'paper';
 import React, { useRef, useContext, useEffect, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { addPage } from '../store/actions/layer';
-import { enableSelectionTool } from '../store/actions/selectionTool';
+import { enableSelectionTool } from '../store/actions/tool';
 import { ThemeContext } from './ThemeProvider';
 import { AddPagePayload, LayerTypes } from '../store/actionTypes/layer';
 //import renderCanvas from '../canvas';
