@@ -23,9 +23,9 @@ const LayersSidebar = (props: LayersSidebarStateProps): ReactElement => {
           text={'layers'} />
       </SidebarSectionWrap>
       {
-        props.layer.activePage
+        props.layer.page
         ? <SortableTree
-            treeData={props.layer.byId[props.layer.activePage] as em.Group}
+            treeData={props.layer.byId[props.layer.page] as em.Group}
             nodeComponent={<SidebarLayer/>} />
         : null
       }

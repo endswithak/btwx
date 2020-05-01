@@ -7,18 +7,20 @@ import {
   SELECT_LAYER,
   DESELECT_LAYER,
   DESELECT_ALL_LAYERS,
-  ENABLE_LAYER_HOVER,
-  DISABLE_LAYER_HOVER,
+  SET_LAYER_HOVER,
   ADD_LAYER_CHILD,
   INSERT_LAYER_CHILD,
+  SHOW_LAYER_CHILDREN,
+  HIDE_LAYER_CHILDREN,
   INSERT_LAYER_ABOVE,
   INSERT_LAYER_BELOW,
-  EXPAND_LAYER,
-  COLLAPSE_LAYER,
+  INCREASE_LAYER_SCOPE,
+  DECREASE_LAYER_SCOPE,
+  CLEAR_LAYER_SCOPE,
+  NEW_LAYER_SCOPE,
   GROUP_LAYERS,
   UNGROUP_LAYER,
   UNGROUP_LAYERS,
-  SET_GROUP_SCOPE,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -30,18 +32,20 @@ import {
   selectLayer,
   deselectLayer,
   deselectAllLayers,
-  enableLayerHover,
-  disableLayerHover,
+  setLayerHover,
   addLayerChild,
   insertLayerChild,
+  showLayerChildren,
+  hideLayerChildren,
   insertLayerAbove,
   insertLayerBelow,
-  expandLayer,
-  collapseLayer,
+  increaseLayerScope,
+  decreaseLayerScope,
+  newLayerScope,
+  clearLayerScope,
   groupLayers,
   ungroupLayer,
-  ungroupLayers,
-  setGroupScope
+  ungroupLayers
 } from '../utils/layer';
 
 export interface LayerState {
@@ -49,17 +53,19 @@ export interface LayerState {
     [id: string]: em.Page | em.Group | em.Shape;
   };
   allIds: string[];
-  activePage: string;
+  page: string;
   selected: string[];
-  groupScope: string;
+  scope: string[];
+  hover: string;
 }
 
 const initialState: LayerState = {
   byId: {},
   allIds: [],
-  activePage: null,
+  page: null,
   selected: [],
-  groupScope: null
+  scope: [],
+  hover: null
 };
 
 export default (state = initialState, action: LayerTypes): LayerState => {
@@ -79,30 +85,34 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return deselectLayer(state, action);
     case DESELECT_ALL_LAYERS:
       return deselectAllLayers(state, action);
-    case ENABLE_LAYER_HOVER:
-      return enableLayerHover(state, action);
-    case DISABLE_LAYER_HOVER:
-      return disableLayerHover(state, action);
+    case SET_LAYER_HOVER:
+      return setLayerHover(state, action);
     case ADD_LAYER_CHILD:
       return addLayerChild(state, action);
     case INSERT_LAYER_CHILD:
       return insertLayerChild(state, action);
+    case SHOW_LAYER_CHILDREN:
+      return showLayerChildren(state, action);
+    case HIDE_LAYER_CHILDREN:
+      return hideLayerChildren(state, action);
     case INSERT_LAYER_ABOVE:
       return insertLayerAbove(state, action);
     case INSERT_LAYER_BELOW:
       return insertLayerBelow(state, action);
-    case EXPAND_LAYER:
-      return expandLayer(state, action);
-    case COLLAPSE_LAYER:
-      return collapseLayer(state, action);
+    case INCREASE_LAYER_SCOPE:
+      return increaseLayerScope(state, action);
+    case DECREASE_LAYER_SCOPE:
+      return decreaseLayerScope(state, action);
+    case NEW_LAYER_SCOPE:
+      return newLayerScope(state, action);
+    case CLEAR_LAYER_SCOPE:
+      return clearLayerScope(state, action);
     case GROUP_LAYERS:
       return groupLayers(state, action);
     case UNGROUP_LAYER:
       return ungroupLayer(state, action);
     case UNGROUP_LAYERS:
       return ungroupLayers(state, action);
-    case SET_GROUP_SCOPE:
-      return setGroupScope(state, action);
     default:
       return state;
   }

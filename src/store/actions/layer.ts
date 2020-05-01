@@ -10,18 +10,20 @@ import {
   SELECT_LAYER,
   DESELECT_LAYER,
   DESELECT_ALL_LAYERS,
-  ENABLE_LAYER_HOVER,
-  DISABLE_LAYER_HOVER,
+  SET_LAYER_HOVER,
   ADD_LAYER_CHILD,
   INSERT_LAYER_CHILD,
+  SHOW_LAYER_CHILDREN,
+  HIDE_LAYER_CHILDREN,
   INSERT_LAYER_ABOVE,
   INSERT_LAYER_BELOW,
-  EXPAND_LAYER,
-  COLLAPSE_LAYER,
+  INCREASE_LAYER_SCOPE,
+  DECREASE_LAYER_SCOPE,
+  NEW_LAYER_SCOPE,
+  CLEAR_LAYER_SCOPE,
   GROUP_LAYERS,
   UNGROUP_LAYER,
   UNGROUP_LAYERS,
-  SET_GROUP_SCOPE,
   AddPagePayload,
   AddGroupPayload,
   AddShapePayload,
@@ -29,23 +31,20 @@ import {
   RemoveLayersPayload,
   SelectLayerPayload,
   DeselectLayerPayload,
-  EnableLayerHoverPayload,
-  DisableLayerHoverPayload,
+  SetLayerHoverPayload,
   AddLayerChildPayload,
   InsertLayerChildPayload,
+  ShowLayerChildrenPayload,
+  HideLayerChildrenPayload,
   InsertLayerAbovePayload,
   InsertLayerBelowPayload,
-  ExpandLayerPayload,
-  CollapseLayerPayload,
+  IncreaseLayerScopePayload,
+  NewLayerScopePayload,
   GroupLayersPayload,
   UngroupLayerPayload,
   UngroupLayersPayload,
-  SetGroupScopePayload,
   LayerTypes
 } from '../actionTypes/layer';
-
-
-import store, { StoreDispatch } from '..';
 
 // Page
 
@@ -59,7 +58,8 @@ export const addPage = (payload: AddPagePayload): LayerTypes => ({
     paperLayer: new paper.Group(),
     children: [],
     selected: false,
-    hover: false
+    active: false,
+    selectedLayers: []
   }
 });
 
@@ -75,19 +75,18 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
       name: payload.name ? payload.name : 'Group',
       parent: payload.parent ? payload.parent : null,
       paperLayer: new paper.Group({
-        onMouseEnter: (e: paper.MouseEvent) => {
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
-          store.dispatch(enableLayerHover({id: id}));
-        },
-        onMouseLeave: (e: paper.MouseEvent) => {
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
-          store.dispatch(disableLayerHover({id: id}));
-        }
+        // onMouseEnter: (e: paper.MouseEvent) => {
+        //   // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        //   paper.tools[0].emit('mouseenter', e);
+        // },
+        // onMouseLeave: (e: paper.MouseEvent) => {
+        //   // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        //   paper.tools[0].emit('mouseleave', e);
+        // }
       }),
       children: [],
       selected: false,
-      hover: false,
-      expanded: false
+      showChildren: false
     }
   }
 };
@@ -96,14 +95,6 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
 
 export const addShape = (payload: AddShapePayload): LayerTypes => {
   const id = uuidv4();
-  payload.paperLayer.onMouseEnter = (e: paper.MouseEvent) => {
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    store.dispatch(enableLayerHover({id: id}));
-  }
-  payload.paperLayer.onMouseLeave = (e: paper.MouseEvent) => {
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    store.dispatch(disableLayerHover({id: id}));
-  }
   return {
     type: ADD_SHAPE,
     payload: {
@@ -114,7 +105,6 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
       shapeType: payload.shapeType,
       paperLayer: payload.paperLayer,
       selected: false,
-      hover: false
     }
   }
 };
@@ -149,13 +139,8 @@ export const deselectAllLayers = (): LayerTypes => ({
 
 // Hover
 
-export const enableLayerHover = (payload: EnableLayerHoverPayload): LayerTypes => ({
-  type: ENABLE_LAYER_HOVER,
-  payload
-});
-
-export const disableLayerHover = (payload: DisableLayerHoverPayload): LayerTypes => ({
-  type: DISABLE_LAYER_HOVER,
+export const setLayerHover = (payload: SetLayerHoverPayload): LayerTypes => ({
+  type: SET_LAYER_HOVER,
   payload
 });
 
@@ -171,6 +156,16 @@ export const insertLayerChild = (payload: InsertLayerChildPayload): LayerTypes =
   payload
 });
 
+export const showLayerChildren = (payload: ShowLayerChildrenPayload): LayerTypes => ({
+  type: SHOW_LAYER_CHILDREN,
+  payload
+});
+
+export const hideLayerChildren = (payload: HideLayerChildrenPayload): LayerTypes => ({
+  type: HIDE_LAYER_CHILDREN,
+  payload
+});
+
 // Insert
 
 export const insertLayerAbove = (payload: InsertLayerAbovePayload): LayerTypes => ({
@@ -183,15 +178,23 @@ export const insertLayerBelow = (payload: InsertLayerBelowPayload): LayerTypes =
   payload
 });
 
-// Expand
+// Scope
 
-export const expandLayer = (payload: ExpandLayerPayload): LayerTypes => ({
-  type: EXPAND_LAYER,
+export const increaseLayerScope = (payload: IncreaseLayerScopePayload): LayerTypes => ({
+  type: INCREASE_LAYER_SCOPE,
   payload
 });
 
-export const collapseLayer = (payload: CollapseLayerPayload): LayerTypes => ({
-  type: COLLAPSE_LAYER,
+export const decreaseLayerScope = (): LayerTypes => ({
+  type: DECREASE_LAYER_SCOPE
+});
+
+export const clearLayerScope = (): LayerTypes => ({
+  type: CLEAR_LAYER_SCOPE
+});
+
+export const newLayerScope = (payload: NewLayerScopePayload): LayerTypes => ({
+  type: NEW_LAYER_SCOPE,
   payload
 });
 
@@ -209,10 +212,5 @@ export const ungroupLayer = (payload: UngroupLayerPayload): LayerTypes => ({
 
 export const ungroupLayers = (payload: UngroupLayersPayload): LayerTypes => ({
   type: UNGROUP_LAYERS,
-  payload
-});
-
-export const setGroupScope = (payload: SetGroupScopePayload): LayerTypes => ({
-  type: SET_GROUP_SCOPE,
   payload
 });

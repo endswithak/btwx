@@ -6,28 +6,27 @@ import SidebarLayerChevron from './SidebarLayerChevron';
 import SidebarLayerShape from './SidebarLayerShape';
 import SidebarLayerFolder from './SidebarLayerFolder';
 import { setHover } from '../store/actions/hover';
-import { enableLayerHover, disableLayerHover } from '../store/actions/layer';
+import { setLayerHover } from '../store/actions/layer';
+import { SetLayerHoverPayload, LayerTypes } from '../store/actionTypes/layer';
+import { RootState } from '../store/reducers';
 
 interface SidebarLayerItemProps {
   layer: em.Layer;
   depth: number;
-  setHover?: any;
-  enableLayerHover?: any;
-  disableLayerHover?: any;
+  hover?: string;
+  setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
 }
 
 const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layer, depth, setHover, enableLayerHover, disableLayerHover } = props;
+  const { layer, depth, hover, setLayerHover } = props;
 
   const handleMouseEnter = () => {
-    //setHover({id: layer.id});
-    enableLayerHover({id: layer.id});
+    setLayerHover({id: layer.id});
   }
 
   const handleMouseLeave = () => {
-    //setHover({id: null});
-    disableLayerHover({id: layer.id});
+    setLayerHover({id: null});
   }
 
   return (
@@ -40,7 +39,7 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
         ? theme.palette.primary
         : 'none',
         paddingLeft: depth * (theme.unit * 6),
-        boxShadow: layer.hover ? `0 0 0 ${theme.unit / 2}px ${theme.background.z3} inset` : ''
+        boxShadow: hover === layer.id ? `0 0 0 ${theme.unit / 2}px ${theme.background.z3} inset` : ''
       }}>
       <SidebarLayerChevron
         layer={layer} />
@@ -54,7 +53,13 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
   );
 }
 
+const mapStateToProps = (state: RootState) => {
+  const { layer } = state;
+  const hover = layer.hover;
+  return { hover };
+};
+
 export default connect(
-  null,
-  { setHover, enableLayerHover, disableLayerHover }
+  mapStateToProps,
+  { setHover, setLayerHover }
 )(SidebarLayerItem);

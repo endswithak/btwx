@@ -36,7 +36,7 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
         : null
       }
       {
-        layerItem.type === 'Group' && (layerItem as em.Group).expanded
+        layerItem.type === 'Group' && (layerItem as em.Group).showChildren
         ? <SidebarLayers
             layers={(layerItem as em.Group).children}
             depth={depth + 1}

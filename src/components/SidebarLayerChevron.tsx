@@ -1,25 +1,25 @@
 import React, { useContext, ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { expandLayer, collapseLayer } from '../store/actions/layer';
+import { showLayerChildren, hideLayerChildren } from '../store/actions/layer';
 import { ThemeContext } from './ThemeProvider';
-import { ExpandLayerPayload, CollapseLayerPayload, LayerTypes } from '../store/actionTypes/layer';
+import { ShowLayerChildrenPayload, HideLayerChildrenPayload, LayerTypes } from '../store/actionTypes/layer';
 
 interface SidebarLayerChevronProps {
   layer: em.Layer;
-  expandLayer(payload: ExpandLayerPayload): LayerTypes;
-  collapseLayer(payload: CollapseLayerPayload): LayerTypes;
+  showLayerChildren(payload: ShowLayerChildrenPayload): LayerTypes;
+  hideLayerChildren(payload: HideLayerChildrenPayload): LayerTypes;
 }
 
 const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layer, expandLayer, collapseLayer } = props;
+  const { layer, showLayerChildren, hideLayerChildren } = props;
 
   const handleChevronClick = (): void => {
     if (layer.type === 'Group') {
-      if ((layer as em.Group).expanded) {
-        collapseLayer({id: layer.id});
+      if ((layer as em.Group).showChildren) {
+        hideLayerChildren({id: layer.id});
       } else {
-        expandLayer({id: layer.id});
+        showLayerChildren({id: layer.id});
       }
     }
   }
@@ -40,7 +40,7 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
             : theme.text.lighter
           }}>
           {
-            (layer as em.Group).expanded
+            (layer as em.Group).showChildren
             ? <path d="M7 10l5 5 5-5H7z"/>
             : <path d='M10 17l5-5-5-5v10z' />
           }
@@ -52,5 +52,5 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
 
 export default connect(
   null,
-  { expandLayer, collapseLayer }
+  { showLayerChildren, hideLayerChildren }
 )(SidebarLayerChevron);

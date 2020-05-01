@@ -1,5 +1,5 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
-import { getActivePagePaperLayer, getLayerByPaperId, getTopParentGroup } from '../store/selectors/layer';
+import { getPagePaperLayer, getLayerByPaperId, getTopParentGroup } from '../store/selectors/layer';
 import store, { StoreGetState, StoreDispatch } from '../store';
 
 class AreaSelect {
@@ -28,19 +28,21 @@ class AreaSelect {
     this.shape = this.renderAreaSelectShape({});
   }
   renderAreaSelectShape(shapeOpts: any) {
-    if (this.shape) {
-      this.shape.remove();
-    }
-    return new Path.Rectangle({
+    const selectAreaShape = new Path.Rectangle({
       from: this.from,
       to: this.to,
       selected: true,
       ...shapeOpts
     });
+    selectAreaShape.removeOn({
+      drag: true,
+      up: true
+    });
+    return selectAreaShape;
   }
   paperLayers() {
     const state = this.getState().layer;
-    return getActivePagePaperLayer(state).getItems({
+    return getPagePaperLayer(state).getItems({
       id: (paperId: number) => {
         const layerId = getLayerByPaperId(state, paperId).id;
         const topParent = getTopParentGroup(state, layerId);

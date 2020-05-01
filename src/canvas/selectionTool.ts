@@ -1,6 +1,6 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
-import { getActivePagePaperLayer, getLayerByPaperId } from '../store/selectors/layer';
-import { groupLayers, ungroupLayers, selectLayer, deselectLayer, deselectAllLayers, removeLayers } from '../store/actions/layer';
+import { getPagePaperLayer, getLayerByPaperId, getLayerDepth, getParentLayer, getNearestScopeAncestor, isScopeGroupLayer, getLayer } from '../store/selectors/layer';
+import { groupLayers, ungroupLayers, selectLayer, deselectLayer, deselectAllLayers, removeLayers, increaseLayerScope, decreaseLayerScope, clearLayerScope, disableLayerHover, enableLayerHover, setLayerHover, newLayerScope } from '../store/actions/layer';
 import store, { StoreDispatch, StoreGetState } from '../store';
 import AreaSelect from './areaSelect';
 
@@ -17,15 +17,17 @@ class SelectionTool {
     this.dispatch = store.dispatch;
     this.tool = new Tool();
     this.tool.activate();
-    this.tool.onKeyDown = (e) => this.onKeyDown(e);
-    this.tool.onKeyUp = (e) => this.onKeyUp(e);
-    this.tool.onMouseDown = (e) => this.onMouseDown(e);
-    this.tool.onMouseDrag = (e) => this.onMouseDrag(e);
-    this.tool.onMouseUp = (e) => this.onMouseUp(e);
+    this.tool.on('mouseenter', (e: { paperLayer: paper.Item; event: paper.ToolEvent }) => this.onMouseEnter(e));
+    this.tool.on('mouseleave', (e: { paperLayer: paper.Item; event: paper.ToolEvent }) => this.onMouseLeave(e));
+    this.tool.onKeyDown = (e: paper.KeyEvent) => this.onKeyDown(e);
+    this.tool.onKeyUp = (e: paper.KeyEvent) => this.onKeyUp(e);
+    this.tool.onMouseDown = (e: paper.ToolEvent) => this.onMouseDown(e);
+    this.tool.onMouseDrag = (e: paper.ToolEvent) => this.onMouseDrag(e);
+    this.tool.onMouseUp = (e: paper.ToolEvent) => this.onMouseUp(e);
+    paper.view.onDoubleClick = (e: paper.MouseEvent) => this.onDoubleClick(e);
     this.areaSelect = null;
     this.shiftModifier = false;
     this.metaModifier = false;
-    this.hitResult = null;
   }
   onKeyDown(event: paper.KeyEvent): void {
     const state = this.getState();
@@ -49,11 +51,13 @@ class SelectionTool {
           this.areaSelect.clear();
           this.areaSelect = null;
         }
-        // if (state.layers.activeGroup) {
-        //   this.dispatch(setActiveGroup({id: null}));
-        // }
         if (state.layer.selected.length > 0) {
-          this.dispatch(deselectAllLayers());
+          if (state.layer.scope.length !== 0) {
+            this.dispatch(selectLayer({id: state.layer.scope[state.layer.scope.length - 1], newSelection: true}));
+          } else {
+            this.dispatch(deselectAllLayers());
+          }
+          this.dispatch(decreaseLayerScope());
         }
         break;
       }
@@ -79,45 +83,36 @@ class SelectionTool {
       }
     }
   }
-  onMouseDown(event: paper.ToolEvent): void {
-    // if (state.activeGroup) {
-    //   this.hitResult = getPaperLayer(state, state.activeGroup).getItem({
-    //     id: (paperId: number) => {
-    //       const layerId = getLayerByPaperId(state, paperId).id;
-    //       const topParent = getTopParentGroup(state, layerId);
-    //       return topParent.paperLayer === paperId;
-    //     },
-    //     overlapping: new paper.Rectangle(event.point, new paper.Size(1,1))
-    //   });
-    // } else {
-    //   this.hitResult = getActivePagePaperLayer(state).getItem({
-    //     id: (paperId: number) => {
-    //       const layerId = getLayerByPaperId(state, paperId).id;
-    //       const topParent = getTopParentGroup(state, layerId);
-    //       return topParent.paperLayer === paperId;
-    //     },
-    //     overlapping: new paper.Rectangle(event.point, new paper.Size(1,1))
-    //   });
-    // }
+  onMouseEnter(e: { paperLayer: paper.Item; event: paper.ToolEvent }) {
     const state = this.getState();
-    this.hitResult = getActivePagePaperLayer(state.layer).hitTest(event.point);
-    if (this.hitResult) {
-      const hitLayerPaperId = this.hitResult.item.id;
+    const hitLayerPaperId = e.paperLayer.id;
+    const id = getLayerByPaperId(state.layer, hitLayerPaperId).id;
+    const nearestScopeAncestor = getNearestScopeAncestor(state.layer, id);
+    this.dispatch(setLayerHover({id: nearestScopeAncestor.id}));
+  }
+  onMouseLeave(e: { paperLayer: paper.Item; event: paper.ToolEvent }) {
+    this.dispatch(setLayerHover({id: null}));
+  }
+  onMouseDown(event: paper.ToolEvent): void {
+    const state = this.getState();
+    const hitResult = getPagePaperLayer(state.layer).hitTest(event.point);
+    if (hitResult) {
+      const hitLayerPaperId = hitResult.item.id;
       const id = getLayerByPaperId(state.layer, hitLayerPaperId).id;
+      const nearestScopeAncestor = getNearestScopeAncestor(state.layer, id);
+      this.dispatch(newLayerScope({id: nearestScopeAncestor.id}));
       if (this.shiftModifier) {
-        this.toggleLayerSelection(id);
+        this.toggleLayerSelection(nearestScopeAncestor.id);
       } else {
-        this.dispatch(selectLayer({id, newSelection: true}));
+        this.dispatch(selectLayer({id: nearestScopeAncestor.id, newSelection: true}));
       }
     } else {
       this.areaSelect = new AreaSelect(event.point);
       if (!this.shiftModifier) {
         if (state.layer.selected.length > 0) {
+          this.dispatch(clearLayerScope());
           this.dispatch(deselectAllLayers());
         }
-        // if (state.layer.activeGroup) {
-        //   this.dispatch(setActiveGroup({id: null}));
-        // }
       }
     }
   }
@@ -127,14 +122,26 @@ class SelectionTool {
     }
   }
   onMouseUp(event: paper.ToolEvent): void {
-    if (this.areaSelect) {
-      if (this.areaSelect.to) {
-        this.areaSelect.layers().forEach((id: string) => {
-          this.toggleLayerSelection(id);
-        });
+    if (this.areaSelect && this.areaSelect.to) {
+      this.areaSelect.layers().forEach((id: string) => {
+        this.toggleLayerSelection(id);
+      });
+    }
+  }
+  onDoubleClick(event: paper.MouseEvent): void {
+    let state = this.getState();
+    const hitResult = getPagePaperLayer(state.layer).hitTest(event.point);
+    if (hitResult) {
+      const layer = getLayerByPaperId(state.layer, hitResult.item.id);
+      let nearestScopeAncestor = getNearestScopeAncestor(state.layer, layer.id);
+      if (isScopeGroupLayer(state.layer, nearestScopeAncestor.id)) {
+        this.tool.emit('mouseleave', { paperLayer: hitResult.item, event: event });
+        this.dispatch(increaseLayerScope({id: nearestScopeAncestor.id}));
+        state = this.getState();
+        nearestScopeAncestor = getNearestScopeAncestor(state.layer, layer.id);
+        this.dispatch(selectLayer({id: nearestScopeAncestor.id, newSelection: true}));
+        this.tool.emit('mouseenter', { paperLayer: hitResult.item, event: event });
       }
-      this.areaSelect.clear();
-      this.areaSelect = null;
     }
   }
   toggleLayerSelection(id: string): void {

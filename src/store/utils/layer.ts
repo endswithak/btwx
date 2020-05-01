@@ -1,9 +1,9 @@
 import paper from 'paper';
 import { LayerState } from '../reducers/layer';
 import * as layerActions from '../actions/layer';
-import { AddPage, AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer, AddLayerChild, InsertLayerChild, EnableLayerHover, DisableLayerHover, InsertLayerAbove, InsertLayerBelow, ExpandLayer, CollapseLayer, GroupLayers, UngroupLayers, UngroupLayer, DeselectAllLayers, RemoveLayers, SetGroupScope } from '../actionTypes/layer';
+import { AddPage, AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer, AddLayerChild, InsertLayerChild, EnableLayerHover, DisableLayerHover, InsertLayerAbove, InsertLayerBelow, GroupLayers, UngroupLayers, UngroupLayer, DeselectAllLayers, RemoveLayers, SetGroupScope, HideLayerChildren, ShowLayerChildren, DecreaseLayerScope, NewLayerScope, SetLayerHover, ClearLayerScope, IncreaseLayerScope } from '../actionTypes/layer';
 import { addItem, removeItem, insertItem } from './general';
-import { getLayerIndex, getLayer, getLayerDepth } from '../selectors/layer';
+import { getLayerIndex, getLayer, getLayerDepth, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor, getNearestScopeGroupAncestor, getParentLayer, getLayerScope } from '../selectors/layer';
 
 const removeLayerAndChildren = (state: LayerState, layer: string): string[] => {
   const groups: string[] = [layer];
@@ -36,15 +36,14 @@ export const addPage = (state: LayerState, action: AddPage): LayerState => {
         paperLayer: action.payload.paperLayer.id
       } as em.Page
     },
-    activePage: action.payload.id,
-    groupScope: action.payload.id
+    page: action.payload.id
   }
 };
 
 export const addLayer = (state: LayerState, action: AddGroup | AddShape): LayerState => {
-  const layerParent = action.payload.parent ? action.payload.parent : state.activePage;
+  const layerParent = action.payload.parent ? action.payload.parent : state.page;
   action.payload.paperLayer.parent = paper.project.getItem({id: state.byId[layerParent].paperLayer});
-  return {
+  const stateWithLayer = {
     ...state,
     allIds: addItem(state.allIds, action.payload.id),
     byId: {
@@ -60,6 +59,24 @@ export const addLayer = (state: LayerState, action: AddGroup | AddShape): LayerS
       } as em.Group
     }
   }
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
+  return selectLayer(stateWithLayer, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  // return {
+  //   ...state,
+  //   allIds: addItem(state.allIds, action.payload.id),
+  //   byId: {
+  //     ...state.byId,
+  //     [action.payload.id]: {
+  //       ...action.payload,
+  //       paperLayer: action.payload.paperLayer.id,
+  //       parent: layerParent
+  //     } as em.Page | em.Group | em.Shape,
+  //     [layerParent]: {
+  //       ...state.byId[layerParent],
+  //       children: addItem((state.byId[layerParent] as em.Group).children, action.payload.id)
+  //     } as em.Group
+  //   }
+  // }
 };
 
 export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState => {
@@ -82,7 +99,8 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
       }
       return result;
     }, {}),
-    selected: state.selected.filter((layer) => !layersToRemove.includes(layer))
+    selected: state.selected.filter((layer) => !layersToRemove.includes(layer)),
+    scope: state.scope.filter((layer) => !layersToRemove.includes(layer))
   }
 };
 
@@ -150,40 +168,22 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
   }
 };
 
-export const enableLayerHover = (state: LayerState, action: EnableLayerHover): LayerState => {
+export const setLayerHover = (state: LayerState, action: SetLayerHover): LayerState => {
   return {
     ...state,
-    byId: {
-      ...state.byId,
-      [action.payload.id]: {
-        ...state.byId[action.payload.id],
-        hover: true
-      }
-    }
-  }
-};
-
-export const disableLayerHover = (state: LayerState, action: DisableLayerHover): LayerState => {
-  return {
-    ...state,
-    byId: {
-      ...state.byId,
-      [action.payload.id]: {
-        ...state.byId[action.payload.id],
-        hover: false
-      }
-    }
+    hover: action.payload.id
   }
 };
 
 export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerState => {
+  let stateWithChild;
   const layer = state.byId[action.payload.id];
   const child = state.byId[action.payload.child];
   const paperLayer = paper.project.getItem({id: layer.paperLayer});
   const childPaperLayer = paper.project.getItem({id: child.paperLayer});
   paperLayer.addChild(childPaperLayer);
   if (child.parent === action.payload.id) {
-    return {
+    stateWithChild = {
       ...state,
       byId: {
         ...state.byId,
@@ -194,7 +194,7 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
       }
     };
   } else {
-    return {
+    stateWithChild = {
       ...state,
       byId: {
         ...state.byId,
@@ -213,9 +213,12 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
       }
     };
   }
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
+  return selectLayer(stateWithChild, layerActions.selectLayer({id: action.payload.child, newSelection: true}) as SelectLayer);
 };
 
 export const insertLayerChild = (state: LayerState, action: InsertLayerChild): LayerState => {
+  let stateWithChild;
   const layer = state.byId[action.payload.id];
   const child = state.byId[action.payload.child];
   const paperLayer = paper.project.getItem({id: layer.paperLayer});
@@ -224,7 +227,7 @@ export const insertLayerChild = (state: LayerState, action: InsertLayerChild): L
   const updatedChildren = state.byId[action.payload.id].children.slice();
   updatedChildren.splice(action.payload.index, 0, action.payload.id);
   if (child.parent === action.payload.id) {
-    return {
+    stateWithChild = {
       ...state,
       byId: {
         ...state.byId,
@@ -235,7 +238,7 @@ export const insertLayerChild = (state: LayerState, action: InsertLayerChild): L
       }
     };
   } else {
-    return {
+    stateWithChild = {
       ...state,
       byId: {
         ...state.byId,
@@ -254,9 +257,38 @@ export const insertLayerChild = (state: LayerState, action: InsertLayerChild): L
       }
     };
   }
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
+  return selectLayer(stateWithChild, layerActions.selectLayer({id: action.payload.child, newSelection: true}) as SelectLayer);
+};
+
+export const showLayerChildren = (state: LayerState, action: ShowLayerChildren): LayerState => {
+  return {
+    ...state,
+    byId: {
+      ...state.byId,
+      [action.payload.id]: {
+        ...state.byId[action.payload.id],
+        showChildren: true
+      } as em.Group
+    }
+  }
+};
+
+export const hideLayerChildren = (state: LayerState, action: HideLayerChildren): LayerState => {
+  return {
+    ...state,
+    byId: {
+      ...state.byId,
+      [action.payload.id]: {
+        ...state.byId[action.payload.id],
+        showChildren: false
+      } as em.Group
+    }
+  }
 };
 
 export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): LayerState => {
+  let stateWithMovedLayer;
   const layer = state.byId[action.payload.id];
   const above = state.byId[action.payload.above];
   const aboveParent = state.byId[above.parent] as em.Group;
@@ -265,7 +297,7 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
   const abovePaperLayer = paper.project.getItem({id: above.paperLayer});
   paperLayer.insertAbove(abovePaperLayer);
   if (layer.parent !== above.parent) {
-    return {
+    stateWithMovedLayer = {
       ...state,
       byId: {
         ...state.byId,
@@ -284,7 +316,7 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
       }
     };
   } else {
-    return {
+    stateWithMovedLayer = {
       ...state,
       byId: {
         ...state.byId,
@@ -295,9 +327,12 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
       }
     };
   }
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
+  return selectLayer(stateWithMovedLayer, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
 };
 
 export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): LayerState => {
+  let stateWithMovedLayer;
   const layer = state.byId[action.payload.id];
   const below = state.byId[action.payload.below];
   const belowParent = state.byId[below.parent] as em.Group;
@@ -306,7 +341,7 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
   const abovePaperLayer = paper.project.getItem({id: below.paperLayer});
   paperLayer.insertBelow(abovePaperLayer);
   if (layer.parent !== below.parent) {
-    return {
+    stateWithMovedLayer = {
       ...state,
       byId: {
         ...state.byId,
@@ -325,7 +360,7 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
       }
     };
   } else {
-    return {
+    stateWithMovedLayer = {
       ...state,
       byId: {
         ...state.byId,
@@ -336,31 +371,63 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
       }
     };
   }
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
+  return selectLayer(stateWithMovedLayer, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
 };
 
-export const expandLayer = (state: LayerState, action: ExpandLayer): LayerState => {
-  return {
-    ...state,
-    byId: {
-      ...state.byId,
-      [action.payload.id]: {
-        ...state.byId[action.payload.id],
-        expanded: true
-      } as em.Group
+export const increaseLayerScope = (state: LayerState, action: IncreaseLayerScope): LayerState => {
+  if (isScopeLayer(state, action.payload.id) && isScopeGroupLayer(state, action.payload.id)) {
+    // let currentState = state;
+    // const currentScope = currentState.scope[state.scope.length - 1];
+    // const currentScopeLayer = getLayer(currentState, currentScope);
+    // while(currentState.scope.length > 0) {
+    //   if (currentScopeLayer.children.includes(action.payload.id)) {
+    //     break;
+    //   }
+    //   // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    //   currentState = decreaseLayerScope(currentState, layerActions.decreaseLayerScope() as DecreaseLayerScope);
+    // }
+    // const selectedLayerState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+    // const showLayerChildrenState =  showLayerChildren(selectedLayerState, layerActions.showLayerChildren({id: action.payload.id}) as ShowLayerChildren);
+    return {
+      ...showLayerChildren(state, layerActions.showLayerChildren({id: action.payload.id}) as ShowLayerChildren),
+      scope: addItem(state.scope, action.payload.id)
     }
+  } else {
+    return state;
   }
 };
 
-export const collapseLayer = (state: LayerState, action: CollapseLayer): LayerState => {
+export const decreaseLayerScope = (state: LayerState, action: DecreaseLayerScope): LayerState => {
+  // let selection;
+  // const updatedScope = state.scope.filter((id, index) => index !== state.scope.length - 1);
+  // if (state.scope.length - 1 !== 0) {
+  //   selection = selectLayer(state, layerActions.selectLayer({id: state.scope[state.scope.length - 2], newSelection: true}) as SelectLayer);
+  // } else {
+  //   selection = deselectAllLayers(state, layerActions.deselectAllLayers() as DeselectAllLayers);
+  // }
+  // return {
+  //   ...selection,
+  //   scope: updatedScope
+  // }
   return {
     ...state,
-    byId: {
-      ...state.byId,
-      [action.payload.id]: {
-        ...state.byId[action.payload.id],
-        expanded: false
-      } as em.Group
-    }
+    scope: state.scope.filter((id, index) => index !== state.scope.length - 1)
+  }
+};
+
+export const clearLayerScope = (state: LayerState, action: ClearLayerScope): LayerState => {
+  return {
+    //...deselectAllLayers(state, layerActions.deselectAllLayers() as DeselectAllLayers),
+    ...state,
+    scope: []
+  }
+};
+
+export const newLayerScope = (state: LayerState, action: NewLayerScope): LayerState => {
+  return {
+    ...state,
+    scope: getLayerScope(state, action.payload.id)
   }
 };
 
@@ -420,17 +487,4 @@ export const ungroupLayers = (state: LayerState, action: UngroupLayers): LayerSt
   return action.payload.layers.reduce((result, current) => {
     return ungroupLayer(result, layerActions.ungroupLayer({id: current}) as UngroupLayer);
   }, state);
-};
-
-export const setGroupScope = (state: LayerState, action: SetGroupScope): LayerState => {
-  const layer = getLayer(state, action.payload.id);
-  const groupScopeLayer = getLayer(state, state.groupScope);
-  if (groupScopeLayer.children.includes(action.payload.id) && layer.type === 'Group') {
-    return {
-      ...state,
-      groupScope: layer.type === 'Group' ? action.payload.id : state.groupScope
-    }
-  } else {
-    return state;
-  }
 };

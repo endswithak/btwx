@@ -9,14 +9,13 @@ declare namespace em {
     parent: string;
     paperLayer: number;
     selected: boolean;
-    hover: boolean;
     children: string[] | null;
   }
 
   interface Group extends Layer {
     type: 'Group';
     children: string[];
-    expanded: boolean;
+    showChildren: boolean;
   }
 
   interface Page extends Layer {

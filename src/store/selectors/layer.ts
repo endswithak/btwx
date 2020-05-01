@@ -43,13 +43,13 @@ export const getPaperLayer = (store: LayerState, id: string): paper.Item => {
 //   return store.byId[store.activeGroup] as em.Group;
 // }
 
-export const getActivePage = (store: LayerState): em.Page => {
-  return store.byId[store.activePage] as em.Page;
+export const getPage = (store: LayerState): em.Page => {
+  return store.byId[store.page] as em.Page;
 }
 
-export const getActivePagePaperLayer = (store: LayerState): paper.Item => {
-  const activePage = store.activePage;
-  return getPaperLayer(store, activePage);
+export const getPagePaperLayer = (store: LayerState): paper.Item => {
+  const page = store.page;
+  return getPaperLayer(store, page);
 }
 
 export const getTopParentGroup = (store: LayerState, id: string) => {
@@ -68,4 +68,62 @@ export const getLayerDepth = (store: LayerState, id: string) => {
     depth++;
   }
   return depth;
+}
+
+export const getScopeLayers = (store: LayerState) => {
+  const rootItems = getPage(store).children;
+  const expandedItems = store.scope.reduce((result, current) => {
+    const layer = getLayer(store, current);
+    result = [...result, ...layer.children];
+    return result;
+  }, []);
+  return [...rootItems, ...expandedItems];
+}
+
+export const getScopeGroupLayers = (store: LayerState) => {
+  const expandedLayers = getScopeLayers(store);
+  return expandedLayers.reduce((result, current) => {
+    const layer = getLayer(store, current);
+    if (layer.type === 'Group') {
+      result = [...result, current];
+    }
+    return result;
+  }, []);
+}
+
+export const isScopeLayer = (store: LayerState, id: string) => {
+  const expandedLayers = getScopeLayers(store);
+  return expandedLayers.includes(id);
+}
+
+export const isScopeGroupLayer = (store: LayerState, id: string) => {
+  const expandableLayers = getScopeGroupLayers(store);
+  return expandableLayers.includes(id);
+}
+
+export const getNearestScopeAncestor = (store: LayerState, id: string) => {
+  let currentNode = getLayer(store, id);
+  while(!isScopeLayer(store, currentNode.id)) {
+    currentNode = getParentLayer(store, currentNode.id);
+  }
+  return currentNode;
+}
+
+export const getNearestScopeGroupAncestor = (store: LayerState, id: string) => {
+  let currentNode = getLayer(store, id);
+  while(!isScopeGroupLayer(store, currentNode.id)) {
+    currentNode = getParentLayer(store, currentNode.id);
+  }
+  return currentNode;
+}
+
+export const getLayerScope = (store: LayerState, id: string) => {
+  const newScope = [];
+  let currentLayer = id;
+  while(getParentLayer(store, currentLayer).type === 'Group') {
+    const parentGroup = getParentLayer(store, currentLayer);
+    newScope.push(parentGroup.id);
+    currentLayer = parentGroup.id;
+  }
+  return newScope;
 }
