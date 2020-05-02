@@ -1,6 +1,6 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import { getPagePaperLayer, getLayerByPaperId, getLayerDepth, getParentLayer, getNearestScopeAncestor, isScopeGroupLayer, getLayer } from '../store/selectors/layer';
-import { groupLayers, ungroupLayers, selectLayer, deselectLayer, deselectAllLayers, removeLayers, increaseLayerScope, decreaseLayerScope, clearLayerScope, setLayerHover, newLayerScope } from '../store/actions/layer';
+import { groupLayers, ungroupLayers, selectLayer, deselectLayer, deselectAllLayers, removeLayers, increaseLayerScope, decreaseLayerScope, clearLayerScope, setLayerHover, newLayerScope, copyLayerToClipboard, copyLayersToClipboard, pasteLayersFromClipboard } from '../store/actions/layer';
 import store, { StoreDispatch, StoreGetState } from '../store';
 import AreaSelect from './areaSelect';
 import { enableRectangleDrawTool, enableEllipseDrawTool } from '../store/actions/tool';
@@ -39,6 +39,22 @@ class SelectionTool {
             this.dispatch(ungroupLayers({layers: state.layer.selected}));
           } else {
             this.dispatch(groupLayers({layers: state.layer.selected}));
+          }
+        }
+        break;
+      }
+      case 'c': {
+        if (event.modifiers.meta && state.layer.selected.length > 0) {
+          this.dispatch(copyLayersToClipboard({layers: state.layer.selected}));
+        }
+        break;
+      }
+      case 'v': {
+        if (event.modifiers.meta && state.layer.clipboard.length > 0) {
+          if (event.modifiers.shift) {
+            this.dispatch(pasteLayersFromClipboard({overSelection: true}));
+          } else {
+            this.dispatch(pasteLayersFromClipboard({overSelection: false}));
           }
         }
         break;
@@ -127,8 +143,8 @@ class SelectionTool {
       this.areaSelect.layers().forEach((id: string) => {
         this.toggleLayerSelection(id);
       });
-      this.areaSelect = null;
     }
+    this.areaSelect = null;
   }
   onDoubleClick(event: paper.MouseEvent): void {
     let state = this.getState();

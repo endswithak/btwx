@@ -21,6 +21,9 @@ import {
   GROUP_LAYERS,
   UNGROUP_LAYER,
   UNGROUP_LAYERS,
+  COPY_LAYER_TO_CLIPBOARD,
+  COPY_LAYERS_TO_CLIPBOARD,
+  PASTE_LAYERS_FROM_CLIPBOARD,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -45,6 +48,9 @@ import {
   clearLayerScope,
   groupLayers,
   ungroupLayer,
+  copyLayerToClipboard,
+  copyLayersToClipboard,
+  pasteLayersFromClipboard,
   ungroupLayers
 } from '../utils/layer';
 
@@ -57,6 +63,7 @@ export interface LayerState {
   selected: string[];
   scope: string[];
   hover: string;
+  clipboard: string[];
 }
 
 const initialState: LayerState = {
@@ -65,7 +72,8 @@ const initialState: LayerState = {
   page: null,
   selected: [],
   scope: [],
-  hover: null
+  hover: null,
+  clipboard: []
 };
 
 export default (state = initialState, action: LayerTypes): LayerState => {
@@ -113,6 +121,12 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return ungroupLayer(state, action);
     case UNGROUP_LAYERS:
       return ungroupLayers(state, action);
+    case COPY_LAYER_TO_CLIPBOARD:
+      return copyLayerToClipboard(state, action);
+    case COPY_LAYERS_TO_CLIPBOARD:
+      return copyLayersToClipboard(state, action);
+    case PASTE_LAYERS_FROM_CLIPBOARD:
+      return pasteLayersFromClipboard(state, action);
     default:
       return state;
   }

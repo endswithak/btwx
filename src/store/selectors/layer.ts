@@ -127,3 +127,19 @@ export const getLayerScope = (store: LayerState, id: string) => {
   }
   return newScope;
 }
+
+export const getSelectionTopLeft = (store: LayerState): paper.Point => {
+  const paperLayerPoints = store.selected.reduce((result, current) => {
+    const paperLayer = getPaperLayer(store, current);
+    return [...result, paperLayer.bounds.topLeft];
+  }, []);
+  return paperLayerPoints.reduce(paper.Point.min);
+}
+
+export const getClipboardTopLeft = (store: LayerState): paper.Point => {
+  const paperLayerPoints = store.clipboard.reduce((result, current) => {
+    const paperLayer = getPaperLayer(store, current);
+    return [...result, paperLayer.bounds.topLeft];
+  }, []);
+  return paperLayerPoints.reduce(paper.Point.min);
+}

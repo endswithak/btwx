@@ -31,6 +31,10 @@ export const UNGROUP_LAYER = 'UNGROUP_LAYER';
 export const UNGROUP_LAYERS = 'UNGROUP_LAYERS';
 export const SET_GROUP_SCOPE = 'SET_GROUP_SCOPE';
 
+export const COPY_LAYER_TO_CLIPBOARD = 'COPY_LAYER_TO_CLIPBOARD';
+export const COPY_LAYERS_TO_CLIPBOARD = 'COPY_LAYERS_TO_CLIPBOARD';
+export const PASTE_LAYERS_FROM_CLIPBOARD = 'PASTE_LAYERS_FROM_CLIPBOARD'
+
 // Page
 
 export interface AddPagePayload {
@@ -38,7 +42,7 @@ export interface AddPagePayload {
   id?: string;
   name?: string;
   parent?: string;
-  paperLayer?: paper.Group;
+  paperLayer?: number;
   selected?: boolean;
   hover?: boolean;
   children?: string[];
@@ -56,7 +60,7 @@ export interface AddGroupPayload {
   id?: string;
   name?: string;
   parent?: string;
-  paperLayer?: paper.Group;
+  paperLayer?: number;
   selected?: boolean;
   hover?: boolean;
   children?: string[];
@@ -76,7 +80,7 @@ export interface AddShapePayload {
   name?: string;
   parent?: string;
   shapeType?: em.ShapeType;
-  paperLayer?: paper.Path | paper.CompoundPath;
+  paperLayer?: number;
   selected?: boolean;
   hover?: boolean;
 }
@@ -289,5 +293,34 @@ export interface SetGroupScope {
   payload: SetGroupScopePayload;
 }
 
+// Clipboard
 
-export type LayerTypes = AddPage | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeselectLayer | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | GroupLayers | UngroupLayer | UngroupLayers;
+export interface CopyLayerToClipboardPayload {
+  id: string;
+}
+
+export interface CopyLayerToClipboard {
+  type: typeof COPY_LAYER_TO_CLIPBOARD;
+  payload: CopyLayerToClipboardPayload;
+}
+
+export interface CopyLayersToClipboardPayload {
+  layers: string[];
+}
+
+export interface CopyLayersToClipboard {
+  type: typeof COPY_LAYERS_TO_CLIPBOARD;
+  payload: CopyLayersToClipboardPayload;
+}
+
+export interface PasteLayersFromClipboardPayload {
+  overSelection?: boolean;
+}
+
+export interface PasteLayersFromClipboard {
+  type: typeof PASTE_LAYERS_FROM_CLIPBOARD;
+  payload: PasteLayersFromClipboardPayload;
+}
+
+
+export type LayerTypes = AddPage | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeselectLayer | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard;

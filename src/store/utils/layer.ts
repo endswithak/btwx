@@ -1,9 +1,11 @@
+import { v4 as uuidv4 } from 'uuid';
 import paper from 'paper';
 import { LayerState } from '../reducers/layer';
 import * as layerActions from '../actions/layer';
-import { AddPage, AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer, AddLayerChild, InsertLayerChild, EnableLayerHover, DisableLayerHover, InsertLayerAbove, InsertLayerBelow, GroupLayers, UngroupLayers, UngroupLayer, DeselectAllLayers, RemoveLayers, SetGroupScope, HideLayerChildren, ShowLayerChildren, DecreaseLayerScope, NewLayerScope, SetLayerHover, ClearLayerScope, IncreaseLayerScope } from '../actionTypes/layer';
+import { AddPage, AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer, AddLayerChild, InsertLayerChild, EnableLayerHover, DisableLayerHover, InsertLayerAbove, InsertLayerBelow, GroupLayers, UngroupLayers, UngroupLayer, DeselectAllLayers, RemoveLayers, SetGroupScope, HideLayerChildren, ShowLayerChildren, DecreaseLayerScope, NewLayerScope, SetLayerHover, ClearLayerScope, IncreaseLayerScope, CopyLayerToClipboard, CopyLayersToClipboard, PasteLayersFromClipboard } from '../actionTypes/layer';
 import { addItem, removeItem, insertItem } from './general';
-import { getLayerIndex, getLayer, getLayerDepth, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor, getNearestScopeGroupAncestor, getParentLayer, getLayerScope } from '../selectors/layer';
+import { getLayerIndex, getLayer, getLayerDepth, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor, getNearestScopeGroupAncestor, getParentLayer, getLayerScope, getPaperLayer, getSelectionTopLeft, getPaperLayerByPaperId, getClipboardTopLeft } from '../selectors/layer';
+import { clipboard } from 'electron';
 
 const removeLayerAndChildren = (state: LayerState, layer: string): string[] => {
   const groups: string[] = [layer];
@@ -32,8 +34,7 @@ export const addPage = (state: LayerState, action: AddPage): LayerState => {
     byId: {
       ...state.byId,
       [action.payload.id]: {
-        ...action.payload,
-        paperLayer: action.payload.paperLayer.id
+        ...action.payload
       } as em.Page
     },
     page: action.payload.id
@@ -42,7 +43,8 @@ export const addPage = (state: LayerState, action: AddPage): LayerState => {
 
 export const addLayer = (state: LayerState, action: AddGroup | AddShape): LayerState => {
   const layerParent = action.payload.parent ? action.payload.parent : state.page;
-  action.payload.paperLayer.parent = paper.project.getItem({id: state.byId[layerParent].paperLayer});
+  const paperLayer = getPaperLayerByPaperId(action.payload.paperLayer);
+  paperLayer.parent = getPaperLayerByPaperId(state.byId[layerParent].paperLayer);
   const stateWithLayer = {
     ...state,
     allIds: addItem(state.allIds, action.payload.id),
@@ -50,7 +52,6 @@ export const addLayer = (state: LayerState, action: AddGroup | AddShape): LayerS
       ...state.byId,
       [action.payload.id]: {
         ...action.payload,
-        paperLayer: action.payload.paperLayer.id,
         parent: layerParent
       } as em.Page | em.Group | em.Shape,
       [layerParent]: {
@@ -61,22 +62,6 @@ export const addLayer = (state: LayerState, action: AddGroup | AddShape): LayerS
   }
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   return selectLayer(stateWithLayer, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
-  // return {
-  //   ...state,
-  //   allIds: addItem(state.allIds, action.payload.id),
-  //   byId: {
-  //     ...state.byId,
-  //     [action.payload.id]: {
-  //       ...action.payload,
-  //       paperLayer: action.payload.paperLayer.id,
-  //       parent: layerParent
-  //     } as em.Page | em.Group | em.Shape,
-  //     [layerParent]: {
-  //       ...state.byId[layerParent],
-  //       children: addItem((state.byId[layerParent] as em.Group).children, action.payload.id)
-  //     } as em.Group
-  //   }
-  // }
 };
 
 export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState => {
@@ -377,18 +362,6 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
 
 export const increaseLayerScope = (state: LayerState, action: IncreaseLayerScope): LayerState => {
   if (isScopeLayer(state, action.payload.id) && isScopeGroupLayer(state, action.payload.id)) {
-    // let currentState = state;
-    // const currentScope = currentState.scope[state.scope.length - 1];
-    // const currentScopeLayer = getLayer(currentState, currentScope);
-    // while(currentState.scope.length > 0) {
-    //   if (currentScopeLayer.children.includes(action.payload.id)) {
-    //     break;
-    //   }
-    //   // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    //   currentState = decreaseLayerScope(currentState, layerActions.decreaseLayerScope() as DecreaseLayerScope);
-    // }
-    // const selectedLayerState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
-    // const showLayerChildrenState =  showLayerChildren(selectedLayerState, layerActions.showLayerChildren({id: action.payload.id}) as ShowLayerChildren);
     return {
       ...showLayerChildren(state, layerActions.showLayerChildren({id: action.payload.id}) as ShowLayerChildren),
       scope: addItem(state.scope, action.payload.id)
@@ -399,17 +372,6 @@ export const increaseLayerScope = (state: LayerState, action: IncreaseLayerScope
 };
 
 export const decreaseLayerScope = (state: LayerState, action: DecreaseLayerScope): LayerState => {
-  // let selection;
-  // const updatedScope = state.scope.filter((id, index) => index !== state.scope.length - 1);
-  // if (state.scope.length - 1 !== 0) {
-  //   selection = selectLayer(state, layerActions.selectLayer({id: state.scope[state.scope.length - 2], newSelection: true}) as SelectLayer);
-  // } else {
-  //   selection = deselectAllLayers(state, layerActions.deselectAllLayers() as DeselectAllLayers);
-  // }
-  // return {
-  //   ...selection,
-  //   scope: updatedScope
-  // }
   return {
     ...state,
     scope: state.scope.filter((id, index) => index !== state.scope.length - 1)
@@ -418,7 +380,6 @@ export const decreaseLayerScope = (state: LayerState, action: DecreaseLayerScope
 
 export const clearLayerScope = (state: LayerState, action: ClearLayerScope): LayerState => {
   return {
-    //...deselectAllLayers(state, layerActions.deselectAllLayers() as DeselectAllLayers),
     ...state,
     scope: []
   }
@@ -487,4 +448,146 @@ export const ungroupLayers = (state: LayerState, action: UngroupLayers): LayerSt
   return action.payload.layers.reduce((result, current) => {
     return ungroupLayer(result, layerActions.ungroupLayer({id: current}) as UngroupLayer);
   }, state);
+};
+
+export const copyLayerToClipboard = (state: LayerState, action: CopyLayerToClipboard): LayerState => {
+  if (!state.clipboard.includes(action.payload.id)) {
+    return {
+      ...state,
+      clipboard: addItem(state.clipboard, action.payload.id)
+    }
+  } else {
+    return state;
+  }
+};
+
+export const copyLayersToClipboard = (state: LayerState, action: CopyLayersToClipboard): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return copyLayerToClipboard(result, layerActions.copyLayerToClipboard({id: current}) as CopyLayerToClipboard);
+  }, {...state, clipboard: []});
+};
+
+const getLayerCloneMap = (state: LayerState, id: string) => {
+  const groups: string[] = [id];
+  const layerCloneMap: {[id: string]: string} = {
+    [id]: uuidv4()
+  };
+  let i = 0;
+  while(i < groups.length) {
+    const layer = state.byId[groups[i]];
+    if (layer.children) {
+      layer.children.forEach((child) => {
+        const childLayer = state.byId[child];
+        if (childLayer.children && childLayer.children.length > 0) {
+          groups.push(child);
+        }
+        layerCloneMap[child] = uuidv4();
+      });
+    }
+    i++;
+  }
+  return layerCloneMap;
+}
+
+const getPaperLayerCloneMap = (state: LayerState, id: string) => {
+  const paperLayer = getPaperLayer(state, id);
+  const paperLayerClone = paperLayer.clone({deep: false, insert: true});
+  const groups: string[] = [id];
+  const paperLayerCloneMap: {[id: number]: number} = {
+    [paperLayer.id]: paperLayerClone.id
+  };
+  let i = 0;
+  while(i < groups.length) {
+    const layer = state.byId[groups[i]];
+    if (layer.children) {
+      layer.children.forEach((child) => {
+        const childLayer = state.byId[child];
+        const childPaperLayer = getPaperLayer(state, childLayer.id);
+        const childPaperLayerClone = childPaperLayer.clone({deep: false, insert: true});
+        if (childLayer.children && childLayer.children.length > 0) {
+          groups.push(child);
+        }
+        paperLayerCloneMap[childPaperLayer.id] = childPaperLayerClone.id;
+      });
+    }
+    i++;
+  }
+  return paperLayerCloneMap;
+}
+
+const cloneLayerAndChildren = (state: LayerState, id: string) => {
+  const layerCloneMap = getLayerCloneMap(state, id);
+  const paperLayerCloneMap = getPaperLayerCloneMap(state, id);
+  const rootLayer = getLayer(state, Object.keys(layerCloneMap)[0]);
+  const rootParent = getLayer(state, state.scope.length > 0 ? state.scope[state.scope.length - 1] : state.page);
+  return Object.keys(layerCloneMap).reduce((result: any, key) => {
+    const layer = state.byId[key];
+    const cloneId = layerCloneMap[key];
+    return {
+      ...result,
+      allIds: [...result.allIds, cloneId],
+      byId: {
+        ...result.byId,
+        [cloneId]: {
+          ...layer,
+          id: layerCloneMap[key],
+          parent: key === rootLayer.id ? rootParent.id : layerCloneMap[layer.parent],
+          paperLayer: paperLayerCloneMap[layer.paperLayer],
+          children: layer.children ? layer.children.reduce((childResult, current) => {
+            return [...childResult, layerCloneMap[current]];
+          }, []) : null
+        }
+      }
+    };
+  }, {allIds: [], byId: {}});
+}
+
+export const pasteLayerFromClipboard = (state: LayerState, id: string, pasteOverSelection?: boolean): LayerState => {
+  const clonedLayerAndChildren = cloneLayerAndChildren(state, id);
+  const rootLayer = clonedLayerAndChildren.byId[clonedLayerAndChildren.allIds[0]];
+  const rootLayerPaperLayer = getPaperLayerByPaperId(rootLayer.paperLayer);
+  if (pasteOverSelection && state.selected.length > 0) {
+    const selectionTopLeft = getSelectionTopLeft(state);
+    const clipboardTopLeft = getClipboardTopLeft(state);
+    clonedLayerAndChildren.allIds.forEach((layer: string) => {
+      const paperLayer = getPaperLayerByPaperId(clonedLayerAndChildren.byId[layer].paperLayer);
+      const paperLayerTopLeft = paperLayer.bounds.topLeft;
+      paperLayer.bounds.topLeft = new paper.Point(selectionTopLeft.x + (clipboardTopLeft.x - paperLayerTopLeft.x), selectionTopLeft.y + (clipboardTopLeft.y - paperLayerTopLeft.y));
+    });
+  }
+  const stateWithPastedLayer = clonedLayerAndChildren.allIds.reduce((result: LayerState, current: string, index: number) => {
+    const layer = clonedLayerAndChildren.byId[current];
+    const layerParent = getLayer(result, layer.parent);
+    const paperLayer = getPaperLayerByPaperId(layer.paperLayer);
+    paperLayer.parent = getPaperLayerByPaperId(layerParent.paperLayer);
+    return {
+      ...result,
+      allIds: addItem(result.allIds, current),
+      byId: {
+        ...result.byId,
+        [current]: layer,
+        [layerParent.id]: {
+          ...result.byId[layerParent.id],
+          children: index === 0 ? addItem(result.byId[layerParent.id].children, current) : result.byId[layerParent.id].children
+        }
+      }
+    }
+  }, state);
+  return selectLayer(stateWithPastedLayer, layerActions.selectLayer({id: rootLayer.id}) as SelectLayer);
+};
+
+export const pasteLayersFromClipboard = (state: LayerState, action: PasteLayersFromClipboard): LayerState => {
+  if (state.clipboard.length > 0) {
+    const selectionBeforePaste = state.selected;
+    const stateWithPastedLayers = state.clipboard.reduce((result: LayerState, current: string) => {
+      return pasteLayerFromClipboard(result, current, action.payload.overSelection);
+    }, state);
+    if (selectionBeforePaste.length > 0) {
+      return selectionBeforePaste.reduce((result: LayerState, current: string) => {
+        return deselectLayer(result, layerActions.deselectLayer({id: current}) as DeselectLayer);
+      }, stateWithPastedLayers);
+    }
+  } else {
+    return state;
+  }
 };

@@ -24,6 +24,9 @@ import {
   GROUP_LAYERS,
   UNGROUP_LAYER,
   UNGROUP_LAYERS,
+  COPY_LAYER_TO_CLIPBOARD,
+  COPY_LAYERS_TO_CLIPBOARD,
+  PASTE_LAYERS_FROM_CLIPBOARD,
   AddPagePayload,
   AddGroupPayload,
   AddShapePayload,
@@ -43,28 +46,44 @@ import {
   GroupLayersPayload,
   UngroupLayerPayload,
   UngroupLayersPayload,
+  CopyLayerToClipboardPayload,
+  CopyLayersToClipboardPayload,
+  PasteLayersFromClipboardPayload,
   LayerTypes
 } from '../actionTypes/layer';
 
 // Page
 
-export const addPage = (payload: AddPagePayload): LayerTypes => ({
-  type: ADD_PAGE,
-  payload: {
-    type: 'Page',
-    id: uuidv4(),
-    name: payload.name ? payload.name : 'Page',
-    parent: null,
-    paperLayer: new paper.Group(),
-    children: [],
-    selected: false
+export const addPage = (payload: AddPagePayload): LayerTypes => {
+  const paperLayer = new paper.Group();
+  return {
+    type: ADD_PAGE,
+    payload: {
+      type: 'Page',
+      id: uuidv4(),
+      name: payload.name ? payload.name : 'Page',
+      parent: null,
+      paperLayer: paperLayer.id,
+      children: [],
+      selected: false
+    }
   }
-});
+};
 
 // Group
 
 export const addGroup = (payload: AddGroupPayload): LayerTypes => {
   const id = uuidv4();
+  const paperLayer = new paper.Group({
+    // onMouseEnter: (e: paper.MouseEvent) => {
+    //   // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    //   paper.tools[0].emit('mouseenter', e);
+    // },
+    // onMouseLeave: (e: paper.MouseEvent) => {
+    //   // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    //   paper.tools[0].emit('mouseleave', e);
+    // }
+  });
   return {
     type: ADD_GROUP,
     payload: {
@@ -72,16 +91,7 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
       id: id,
       name: payload.name ? payload.name : 'Group',
       parent: payload.parent ? payload.parent : null,
-      paperLayer: new paper.Group({
-        // onMouseEnter: (e: paper.MouseEvent) => {
-        //   // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        //   paper.tools[0].emit('mouseenter', e);
-        // },
-        // onMouseLeave: (e: paper.MouseEvent) => {
-        //   // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        //   paper.tools[0].emit('mouseleave', e);
-        // }
-      }),
+      paperLayer: paperLayer.id,
       children: [],
       selected: false,
       showChildren: false
@@ -210,5 +220,22 @@ export const ungroupLayer = (payload: UngroupLayerPayload): LayerTypes => ({
 
 export const ungroupLayers = (payload: UngroupLayersPayload): LayerTypes => ({
   type: UNGROUP_LAYERS,
+  payload
+});
+
+// Clipboard
+
+export const copyLayerToClipboard = (payload: CopyLayerToClipboardPayload): LayerTypes => ({
+  type: COPY_LAYER_TO_CLIPBOARD,
+  payload
+});
+
+export const copyLayersToClipboard = (payload: CopyLayersToClipboardPayload): LayerTypes => ({
+  type: COPY_LAYERS_TO_CLIPBOARD,
+  payload
+});
+
+export const pasteLayersFromClipboard = (payload: PasteLayersFromClipboardPayload): LayerTypes => ({
+  type: PASTE_LAYERS_FROM_CLIPBOARD,
   payload
 });

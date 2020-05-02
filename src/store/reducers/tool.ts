@@ -20,15 +20,21 @@ export interface ToolState {
 }
 
 const initialState: ToolState = {
-  tool: 'Selection',
+  tool: null,
   drawing: false,
   drawShape: null
 };
 
+const removeActiveTool = () => {
+  if (paper.tools[0]) {
+    paper.tools[0].remove();
+  }
+}
+
 export default (state = initialState, action: ToolTypes): ToolState => {
   switch (action.type) {
     case ENABLE_RECTANGLE_DRAW_TOOL: {
-      paper.tools[0].remove();
+      removeActiveTool();
       new DrawTool({drawShapeType: 'Rectangle'});
       return {
         ...state,
@@ -38,7 +44,7 @@ export default (state = initialState, action: ToolTypes): ToolState => {
       };
     }
     case ENABLE_ELLIPSE_DRAW_TOOL: {
-      paper.tools[0].remove();
+      removeActiveTool();
       new DrawTool({drawShapeType: 'Ellipse'});
       return {
         ...state,
@@ -48,7 +54,7 @@ export default (state = initialState, action: ToolTypes): ToolState => {
       };
     }
     case ENABLE_STAR_DRAW_TOOL: {
-      paper.tools[0].remove();
+      removeActiveTool();
       new DrawTool({drawShapeType: 'Star'});
       return {
         ...state,
@@ -58,7 +64,7 @@ export default (state = initialState, action: ToolTypes): ToolState => {
       };
     }
     case ENABLE_POLYGON_DRAW_TOOL: {
-      paper.tools[0].remove();
+      removeActiveTool();
       new DrawTool({drawShapeType: 'Polygon'});
       return {
         ...state,
@@ -68,7 +74,7 @@ export default (state = initialState, action: ToolTypes): ToolState => {
       };
     }
     case ENABLE_ROUNDED_DRAW_TOOL: {
-      paper.tools[0].remove();
+      removeActiveTool();
       new DrawTool({drawShapeType: 'Rounded'});
       return {
         ...state,
@@ -78,9 +84,7 @@ export default (state = initialState, action: ToolTypes): ToolState => {
       };
     }
     case ENABLE_SELECTION_TOOL: {
-      if (paper.tools[0]) {
-        paper.tools[0].remove();
-      }
+      removeActiveTool();
       new SelectionTool();
       return {
         ...state,

@@ -174,20 +174,21 @@ class DrawTool {
   onMouseUp(event: paper.ToolEvent): void {
     if (this.to) {
       const state = this.getState();
+      const newPaperLayer = this.renderShape({
+        fillColor: '#ccc',
+        strokeColor: '#999',
+        strokeWidth: 1,
+        onMouseEnter: function(e: paper.MouseEvent) {
+          paper.tools[0].emit('mouseenter', { paperLayer: this, event: e });
+        },
+        onMouseLeave: function(e: paper.MouseEvent) {
+          paper.tools[0].emit('mouseleave', { paperLayer: this, event: e });
+        }
+      });
       this.dispatch(addShape({
         parent: state.layer.scope.length > 0 ? state.layer.scope[state.layer.scope.length - 1] : state.layer.page,
         shapeType: this.drawShapeType,
-        paperLayer: this.renderShape({
-          fillColor: '#ccc',
-          strokeColor: '#999',
-          strokeWidth: 1,
-          onMouseEnter: function(e: paper.MouseEvent) {
-            paper.tools[0].emit('mouseenter', { paperLayer: this, event: e });
-          },
-          onMouseLeave: function(e: paper.MouseEvent) {
-            paper.tools[0].emit('mouseleave', { paperLayer: this, event: e });
-          }
-        })
+        paperLayer: newPaperLayer.id
       }));
       this.dispatch(enableSelectionTool());
     }
