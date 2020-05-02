@@ -1,7 +1,8 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import store, { StoreDispatch, StoreGetState } from '../store';
 import { enableSelectionTool, enableRectangleDrawTool, enableEllipseDrawTool, enableRoundedDrawTool } from '../store/actions/tool';
-import { addShape } from '../store/actions/layer';
+import { addShape, setLayerHover, increaseLayerScope, selectLayer, newLayerScope, deselectLayer } from '../store/actions/layer';
+import { getNearestScopeAncestor, getLayerByPaperId, isScopeGroupLayer } from '../store/selectors/layer';
 
 class DrawTool {
   getState: StoreGetState;
@@ -179,10 +180,41 @@ class DrawTool {
         strokeColor: '#999',
         strokeWidth: 1,
         onMouseEnter: function(e: paper.MouseEvent) {
-          paper.tools[0].emit('mouseenter', { paperLayer: this, event: e });
+          const state = store.getState();
+          const layer = getLayerByPaperId(state.layer, this.id);
+          const nearestScopeAncestor = getNearestScopeAncestor(state.layer, layer.id);
+          store.dispatch(setLayerHover({id: nearestScopeAncestor.id}));
         },
         onMouseLeave: function(e: paper.MouseEvent) {
-          paper.tools[0].emit('mouseleave', { paperLayer: this, event: e });
+          store.dispatch(setLayerHover({id: null}));
+        },
+        onDoubleClick: function(e: paper.MouseEvent) {
+          let state = store.getState();
+          const layer = getLayerByPaperId(state.layer, this.id);
+          let nearestScopeAncestor = getNearestScopeAncestor(state.layer, layer.id);
+          if (isScopeGroupLayer(state.layer, nearestScopeAncestor.id)) {
+            store.dispatch(setLayerHover({id: null}));
+            store.dispatch(increaseLayerScope({id: nearestScopeAncestor.id}));
+            state = store.getState();
+            nearestScopeAncestor = getNearestScopeAncestor(state.layer, layer.id);
+            store.dispatch(selectLayer({id: nearestScopeAncestor.id, newSelection: true}));
+            store.dispatch(setLayerHover({id: nearestScopeAncestor.id}));
+          }
+        },
+        onClick: function(e: paper.MouseEvent) {
+          const state = store.getState();
+          const layer = getLayerByPaperId(state.layer, this.id);
+          const nearestScopeAncestor = getNearestScopeAncestor(state.layer, layer.id);
+          store.dispatch(newLayerScope({id: nearestScopeAncestor.id}));
+          if (e.modifiers.shift) {
+            if (layer.selected) {
+              store.dispatch(deselectLayer({id: nearestScopeAncestor.id}));
+            } else {
+              store.dispatch(selectLayer({id: nearestScopeAncestor.id}));
+            }
+          } else {
+            store.dispatch(selectLayer({id: nearestScopeAncestor.id, newSelection: true}));
+          }
         }
       });
       this.dispatch(addShape({
