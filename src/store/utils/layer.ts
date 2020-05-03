@@ -114,7 +114,7 @@ export const removeLayers = (state: LayerState, action: RemoveLayers): LayerStat
   }, state);
 }
 
-const updateSelectionFrame = (state: LayerState) => {
+export const updateSelectionFrame = (state: LayerState) => {
   const selectionFrame = paper.project.getItem({ data: { id: 'selectionFrame' } });
   if (selectionFrame) {
     selectionFrame.remove();
@@ -206,7 +206,7 @@ export const selectLayers = (state: LayerState, action: SelectLayers): LayerStat
   }, currentState);
 };
 
-export const setLayerHover = (state: LayerState, action: SetLayerHover): LayerState => {
+export const updateHoverFrame = (state: LayerState) => {
   const hoverFrame = paper.project.getItem({ data: { id: 'hoverFrame' } });
   const hoverFrameConstants = {
     strokeColor: '#009DEC',
@@ -218,27 +218,32 @@ export const setLayerHover = (state: LayerState, action: SetLayerHover): LayerSt
   if (hoverFrame) {
     hoverFrame.remove();
   }
-  if (action.payload.id) {
-    const layer = getLayer(state, action.payload.id);
-    const paperLayer = getPaperLayer(state, layer.id);
-    if (paperLayer.className === ('Path' || 'CompoundPath')) {
+  if (state.hover) {
+    const hoverLayer = getLayer(state, state.hover);
+    const paperHoverLayer = getPaperLayer(state, hoverLayer.id);
+    if (paperHoverLayer.className === ('Path' || 'CompoundPath')) {
       new paper.Path({
         ...hoverFrameConstants,
-        closed: (paperLayer as paper.Path).closed,
-        segments: [...(paperLayer as paper.Path).segments]
+        closed: (paperHoverLayer as paper.Path).closed,
+        segments: [...(paperHoverLayer as paper.Path).segments]
       });
     } else {
       new paper.Path.Rectangle({
         ...hoverFrameConstants,
-        point: paperLayer.bounds.topLeft,
-        size: [paperLayer.bounds.width, paperLayer.bounds.height]
+        point: paperHoverLayer.bounds.topLeft,
+        size: [paperHoverLayer.bounds.width, paperHoverLayer.bounds.height]
       });
     }
   }
-  return {
+}
+
+export const setLayerHover = (state: LayerState, action: SetLayerHover): LayerState => {
+  const stateWithNewHover = {
     ...state,
     hover: action.payload.id
-  }
+  };
+  updateHoverFrame(stateWithNewHover);
+  return stateWithNewHover;
 };
 
 export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerState => {
@@ -620,6 +625,7 @@ const getPaperLayerCloneMap = (state: LayerState, id: string) => {
   paperLayerClone.onDoubleClick = paperLayer.onDoubleClick;
   paperLayerClone.onMouseEnter = paperLayer.onMouseEnter;
   paperLayerClone.onMouseLeave = paperLayer.onMouseLeave;
+  paperLayerClone.onMouseDrag = paperLayer.onMouseDrag;
   const groups: string[] = [id];
   const paperLayerCloneMap: {[id: number]: number} = {
     [paperLayer.id]: paperLayerClone.id
@@ -638,6 +644,7 @@ const getPaperLayerCloneMap = (state: LayerState, id: string) => {
         childPaperLayerClone.onDoubleClick = childPaperLayer.onDoubleClick;
         childPaperLayerClone.onMouseEnter = childPaperLayer.onMouseEnter;
         childPaperLayerClone.onMouseLeave = childPaperLayer.onMouseLeave;
+        childPaperLayerClone.onMouseDrag = childPaperLayer.onMouseDrag;
         if (childLayer.children && childLayer.children.length > 0) {
           groups.push(child);
         }
