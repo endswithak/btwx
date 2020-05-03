@@ -26,6 +26,24 @@ const Canvas = ({addPage, enableSelectionTool}: CanvasProps): ReactElement => {
       name: 'Page 1'
     });
     enableSelectionTool();
+    canvasRef.current.addEventListener('wheel', (e: WheelEvent) => {
+      e.preventDefault();
+      if (e.ctrlKey) {
+        e.preventDefault();
+        const nextZoom = paper.view.zoom - e.deltaY * 0.01;
+        // paper.view.center.x = e.clientX;
+        // paper.view.center.y = e.clientY;
+        if (e.deltaY < 0 && nextZoom < 30) {
+          paper.view.zoom = nextZoom;
+        } else if (e.deltaY > 0 && nextZoom > 0) {
+          paper.view.zoom = nextZoom;
+        } else if (e.deltaY > 0 && nextZoom < 0) {
+          paper.view.zoom = 0.001;
+        }
+      } else {
+        paper.view.translate(new paper.Point(e.deltaX * -1, e.deltaY * -1));
+      }
+    });
     // dispatch({
     //   type: 'add-page'
     // });
@@ -38,19 +56,6 @@ const Canvas = ({addPage, enableSelectionTool}: CanvasProps): ReactElement => {
     //   canvas: canvasRef.current
     // });
   }, []);
-
-  // useEffect(() => {
-  //   if (paperApp) {
-  //     canvasRef.current.addEventListener('wheel', (e: WheelEvent) => {
-  //       e.preventDefault();
-  //       paperApp.onWheel(e);
-  //     });
-  //     window.addEventListener('resize', (e) => {
-  //       paperApp.scope.view.viewSize.width = canvasContainerRef.current.clientWidth;
-  //       paperApp.scope.view.viewSize.height = canvasContainerRef.current.clientHeight;
-  //     });
-  //   }
-  // }, [paperApp]);
 
   // useEffect(() => {
   //   if (paperApp) {

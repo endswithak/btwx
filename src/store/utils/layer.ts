@@ -218,7 +218,7 @@ export const updateHoverFrame = (state: LayerState) => {
   if (hoverFrame) {
     hoverFrame.remove();
   }
-  if (state.hover) {
+  if (state.hover && !state.selected.includes(state.hover)) {
     const hoverLayer = getLayer(state, state.hover);
     const paperHoverLayer = getPaperLayer(state, hoverLayer.id);
     if (paperHoverLayer.className === ('Path' || 'CompoundPath')) {
@@ -626,6 +626,8 @@ const getPaperLayerCloneMap = (state: LayerState, id: string) => {
   paperLayerClone.onMouseEnter = paperLayer.onMouseEnter;
   paperLayerClone.onMouseLeave = paperLayer.onMouseLeave;
   paperLayerClone.onMouseDrag = paperLayer.onMouseDrag;
+  paperLayerClone.onMouseDown = paperLayer.onMouseDown;
+  paperLayerClone.onMouseUp = paperLayer.onMouseUp;
   const groups: string[] = [id];
   const paperLayerCloneMap: {[id: number]: number} = {
     [paperLayer.id]: paperLayerClone.id
@@ -645,6 +647,8 @@ const getPaperLayerCloneMap = (state: LayerState, id: string) => {
         childPaperLayerClone.onMouseEnter = childPaperLayer.onMouseEnter;
         childPaperLayerClone.onMouseLeave = childPaperLayer.onMouseLeave;
         childPaperLayerClone.onMouseDrag = childPaperLayer.onMouseDrag;
+        childPaperLayerClone.onMouseDown = childPaperLayer.onMouseDown;
+        childPaperLayerClone.onMouseUp = childPaperLayer.onMouseUp;
         if (childLayer.children && childLayer.children.length > 0) {
           groups.push(child);
         }

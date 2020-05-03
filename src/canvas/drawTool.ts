@@ -202,11 +202,14 @@ class DrawTool {
             store.dispatch(setLayerHover({id: nearestScopeAncestor.id}));
           }
         },
-        onClick: function(e: paper.MouseEvent) {
+        onMouseDown: function(e: paper.MouseEvent) {
           const state = store.getState();
           const layer = getLayerByPaperId(state.layer, this.id);
           const nearestScopeAncestor = getNearestScopeAncestor(state.layer, layer.id);
-          store.dispatch(newLayerScope({id: nearestScopeAncestor.id}));
+          const hoverFrame = paper.project.getItem({ data: { id: 'hoverFrame' } });
+          if (hoverFrame) {
+            hoverFrame.remove();
+          }
           if (e.modifiers.shift) {
             if (layer.selected) {
               store.dispatch(deselectLayer({id: nearestScopeAncestor.id}));
@@ -214,24 +217,22 @@ class DrawTool {
               store.dispatch(selectLayer({id: nearestScopeAncestor.id}));
             }
           } else {
-            store.dispatch(selectLayer({id: nearestScopeAncestor.id, newSelection: true}));
+            if (!state.layer.selected.includes(nearestScopeAncestor.id)) {
+              store.dispatch(newLayerScope({id: nearestScopeAncestor.id}));
+              store.dispatch(selectLayer({id: nearestScopeAncestor.id, newSelection: true}));
+            }
           }
         },
         onMouseDrag: function(e: paper.MouseEvent) {
-          const selectionFrame = paper.project.getItem({ data: { id: 'selectionFrame' } });
-          const hoverFrame = paper.project.getItem({ data: { id: 'hoverFrame' } });
-          if (selectionFrame) {
-            selectionFrame.remove();
-          }
-          if (hoverFrame) {
-            hoverFrame.remove();
-          }
           const state = store.getState();
-          const layer = getLayerByPaperId(state.layer, this.id);
-          const nearestScopeAncestor = getNearestScopeAncestor(state.layer, layer.id);
-          const nearestScopeAncestorPaperLayer = getPaperLayer(state.layer, nearestScopeAncestor.id);
-          nearestScopeAncestorPaperLayer.position.x += e.delta.x;
-          nearestScopeAncestorPaperLayer.position.y += e.delta.y;
+          if (state.layer.selected.length > 0) {
+            updateSelectionFrame(state.layer);
+            state.layer.selected.forEach((id) => {
+              const layer = getPaperLayer(state.layer, id);
+              layer.position.x += e.delta.x;
+              layer.position.y += e.delta.y;
+            });
+          }
         },
         onMouseUp: function(e: paper.MouseEvent) {
           const state = store.getState();
