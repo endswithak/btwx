@@ -5,7 +5,9 @@ import {
   REMOVE_LAYER,
   REMOVE_LAYERS,
   SELECT_LAYER,
+  SELECT_LAYERS,
   DESELECT_LAYER,
+  DESELECT_LAYERS,
   DESELECT_ALL_LAYERS,
   SET_LAYER_HOVER,
   ADD_LAYER_CHILD,
@@ -33,7 +35,9 @@ import {
   removeLayer,
   removeLayers,
   selectLayer,
+  selectLayers,
   deselectLayer,
+  deselectLayers,
   deselectAllLayers,
   setLayerHover,
   addLayerChild,
@@ -63,7 +67,13 @@ export interface LayerState {
   selected: string[];
   scope: string[];
   hover: string;
-  clipboard: string[];
+  clipboard: {
+    main: string[];
+    allIds: string[];
+    byId: {
+      [id: string]: em.ClipboardLayer;
+    };
+  };
 }
 
 const initialState: LayerState = {
@@ -73,7 +83,11 @@ const initialState: LayerState = {
   selected: [],
   scope: [],
   hover: null,
-  clipboard: []
+  clipboard: {
+    main: [],
+    allIds: [],
+    byId: {}
+  }
 };
 
 export default (state = initialState, action: LayerTypes): LayerState => {
@@ -89,8 +103,12 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return removeLayers(state, action);
     case SELECT_LAYER:
       return selectLayer(state, action);
+    case SELECT_LAYERS:
+      return selectLayers(state, action);
     case DESELECT_LAYER:
       return deselectLayer(state, action);
+    case DESELECT_LAYERS:
+      return deselectLayers(state, action);
     case DESELECT_ALL_LAYERS:
       return deselectAllLayers(state, action);
     case SET_LAYER_HOVER:

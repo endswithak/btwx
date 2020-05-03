@@ -8,7 +8,9 @@ import {
   REMOVE_LAYER,
   REMOVE_LAYERS,
   SELECT_LAYER,
+  SELECT_LAYERS,
   DESELECT_LAYER,
+  DESELECT_LAYERS,
   DESELECT_ALL_LAYERS,
   SET_LAYER_HOVER,
   ADD_LAYER_CHILD,
@@ -33,7 +35,9 @@ import {
   RemoveLayerPayload,
   RemoveLayersPayload,
   SelectLayerPayload,
+  SelectLayersPayload,
   DeselectLayerPayload,
+  DeselectLayersPayload,
   SetLayerHoverPayload,
   AddLayerChildPayload,
   InsertLayerChildPayload,
@@ -136,8 +140,18 @@ export const selectLayer = (payload: SelectLayerPayload): LayerTypes => ({
   payload
 });
 
+export const selectLayers = (payload: SelectLayersPayload): LayerTypes => ({
+  type: SELECT_LAYERS,
+  payload
+});
+
 export const deselectLayer = (payload: DeselectLayerPayload): LayerTypes => ({
   type: DESELECT_LAYER,
+  payload
+});
+
+export const deselectLayers = (payload: DeselectLayersPayload): LayerTypes => ({
+  type: DESELECT_LAYERS,
   payload
 });
 

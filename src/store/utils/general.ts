@@ -11,3 +11,9 @@ export const removeItem = (array: string[], item: string): string[] => {
 export const addItem = (array: string[], item: string): string[] => {
   return [...array, item];
 }
+
+export const addItems = (array: string[], items: string[]): string[] => {
+  return items.reduce((result, current) => {
+    return addItem(result, current);
+  }, array);
+}

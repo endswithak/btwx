@@ -1,5 +1,5 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
-import { getPagePaperLayer, getLayerByPaperId, getLayerDepth, getParentLayer, getNearestScopeAncestor, isScopeGroupLayer, getLayer } from '../store/selectors/layer';
+import { getPagePaperLayer, getLayerByPaperId, getLayerDepth, getParentLayer, getNearestScopeAncestor, isScopeGroupLayer, getLayer, getPaperLayer } from '../store/selectors/layer';
 import { groupLayers, ungroupLayers, selectLayer, deselectLayer, deselectAllLayers, removeLayers, increaseLayerScope, decreaseLayerScope, clearLayerScope, setLayerHover, newLayerScope, copyLayerToClipboard, copyLayersToClipboard, pasteLayersFromClipboard } from '../store/actions/layer';
 import store, { StoreDispatch, StoreGetState } from '../store';
 import AreaSelect from './areaSelect';
@@ -41,13 +41,13 @@ class SelectionTool {
         break;
       }
       case 'c': {
-        if (event.modifiers.meta && state.layer.selected.length > 0) {
+        if (event.modifiers.meta) {
           this.dispatch(copyLayersToClipboard({layers: state.layer.selected}));
         }
         break;
       }
       case 'v': {
-        if (event.modifiers.meta && state.layer.clipboard.length > 0) {
+        if (event.modifiers.meta && state.layer.clipboard.allIds.length > 0) {
           if (event.modifiers.shift) {
             this.dispatch(pasteLayersFromClipboard({overSelection: true}));
           } else {
@@ -72,6 +72,10 @@ class SelectionTool {
             this.dispatch(deselectAllLayers());
           }
           this.dispatch(decreaseLayerScope());
+          if (state.layer.hover) {
+            const paperLayer = getPaperLayer(state.layer, state.layer.hover);
+            paperLayer.emit('mouseenter', event);
+          }
         }
         break;
       }
@@ -116,20 +120,17 @@ class SelectionTool {
     }
   }
   onMouseUp(event: paper.ToolEvent): void {
+    const state = this.getState();
     if (this.areaSelect && this.areaSelect.to) {
       this.areaSelect.layers().forEach((id: string) => {
-        this.toggleLayerSelection(id);
+        if (state.layer.selected.includes(id)) {
+          this.dispatch(deselectLayer({id}));
+        } else {
+          this.dispatch(selectLayer({id}));
+        }
       });
     }
     this.areaSelect = null;
-  }
-  toggleLayerSelection(id: string): void {
-    const state = this.getState();
-    if (state.layer.selected.includes(id)) {
-      this.dispatch(deselectLayer({id}));
-    } else {
-      this.dispatch(selectLayer({id}));
-    }
   }
 }
 

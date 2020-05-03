@@ -12,6 +12,16 @@ declare namespace em {
     children: string[] | null;
   }
 
+  interface ClipboardLayer {
+    type: LayerTypes;
+    id: string;
+    name: string;
+    parent: string;
+    paperLayer: paper.Item;
+    selected: boolean;
+    children: string[] | null;
+  }
+
   interface Group extends Layer {
     type: 'Group';
     children: string[];

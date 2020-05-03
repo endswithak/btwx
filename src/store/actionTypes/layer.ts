@@ -6,7 +6,9 @@ export const REMOVE_LAYER = 'REMOVE_LAYER';
 export const REMOVE_LAYERS = 'REMOVE_LAYERS';
 
 export const SELECT_LAYER = 'SELECT_LAYER';
+export const SELECT_LAYERS = 'SELECT_LAYERS';
 export const DESELECT_LAYER = 'DESELECT_LAYER';
+export const DESELECT_LAYERS = 'DESELECT_LAYERS';
 export const DESELECT_ALL_LAYERS = 'DESELECT_ALL_LAYERS';
 
 export const SET_LAYER_HOVER = 'SET_LAYER_HOVER';
@@ -122,6 +124,16 @@ export interface SelectLayer {
   payload: SelectLayerPayload;
 }
 
+export interface SelectLayersPayload {
+  layers: string[];
+  newSelection?: boolean;
+}
+
+export interface SelectLayers {
+  type: typeof SELECT_LAYERS;
+  payload: SelectLayersPayload;
+}
+
 export interface DeselectLayerPayload {
   id: string;
 }
@@ -129,6 +141,15 @@ export interface DeselectLayerPayload {
 export interface DeselectLayer {
   type: typeof DESELECT_LAYER;
   payload: DeselectLayerPayload;
+}
+
+export interface DeselectLayersPayload {
+  layers: string[];
+}
+
+export interface DeselectLayers {
+  type: typeof DESELECT_LAYERS;
+  payload: DeselectLayersPayload;
 }
 
 export interface DeselectAllLayers {
@@ -323,4 +344,4 @@ export interface PasteLayersFromClipboard {
 }
 
 
-export type LayerTypes = AddPage | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeselectLayer | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard;
+export type LayerTypes = AddPage | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard;
