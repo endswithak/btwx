@@ -125,7 +125,7 @@ export const getLayerScope = (store: LayerState, id: string) => {
     newScope.push(parentGroup.id);
     currentLayer = parentGroup.id;
   }
-  return newScope;
+  return newScope.reverse();
 }
 
 export const getSelectionTopLeft = (store: LayerState): paper.Point => {

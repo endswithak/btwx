@@ -5,6 +5,7 @@ import {
   REMOVE_LAYER,
   REMOVE_LAYERS,
   SELECT_LAYER,
+  DEEP_SELECT_LAYER,
   SELECT_LAYERS,
   DESELECT_LAYER,
   DESELECT_LAYERS,
@@ -20,12 +21,19 @@ import {
   DECREASE_LAYER_SCOPE,
   CLEAR_LAYER_SCOPE,
   NEW_LAYER_SCOPE,
+  ESCAPE_LAYER_SCOPE,
   GROUP_LAYERS,
   UNGROUP_LAYER,
   UNGROUP_LAYERS,
   COPY_LAYER_TO_CLIPBOARD,
   COPY_LAYERS_TO_CLIPBOARD,
   PASTE_LAYERS_FROM_CLIPBOARD,
+  MOVE_LAYER_TO,
+  MOVE_LAYER_BY,
+  MOVE_LAYERS_TO,
+  MOVE_LAYERS_BY,
+  ENABLE_LAYER_DRAG,
+  DISABLE_LAYER_DRAG,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -35,6 +43,7 @@ import {
   removeLayer,
   removeLayers,
   selectLayer,
+  deepSelectLayer,
   selectLayers,
   deselectLayer,
   deselectLayers,
@@ -50,12 +59,19 @@ import {
   decreaseLayerScope,
   newLayerScope,
   clearLayerScope,
+  escapeLayerScope,
   groupLayers,
   ungroupLayer,
   copyLayerToClipboard,
   copyLayersToClipboard,
   pasteLayersFromClipboard,
-  ungroupLayers
+  moveLayerTo,
+  moveLayerBy,
+  moveLayersTo,
+  moveLayersBy,
+  ungroupLayers,
+  enableLayerDrag,
+  disableLayerDrag
 } from '../utils/layer';
 
 export interface LayerState {
@@ -74,6 +90,7 @@ export interface LayerState {
       [id: string]: em.ClipboardLayer;
     };
   };
+  dragging: boolean;
 }
 
 const initialState: LayerState = {
@@ -87,7 +104,8 @@ const initialState: LayerState = {
     main: [],
     allIds: [],
     byId: {}
-  }
+  },
+  dragging: false
 };
 
 export default (state = initialState, action: LayerTypes): LayerState => {
@@ -103,6 +121,8 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return removeLayers(state, action);
     case SELECT_LAYER:
       return selectLayer(state, action);
+    case DEEP_SELECT_LAYER:
+      return deepSelectLayer(state, action);
     case SELECT_LAYERS:
       return selectLayers(state, action);
     case DESELECT_LAYER:
@@ -133,6 +153,8 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return newLayerScope(state, action);
     case CLEAR_LAYER_SCOPE:
       return clearLayerScope(state, action);
+    case ESCAPE_LAYER_SCOPE:
+      return escapeLayerScope(state, action);
     case GROUP_LAYERS:
       return groupLayers(state, action);
     case UNGROUP_LAYER:
@@ -145,6 +167,18 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return copyLayersToClipboard(state, action);
     case PASTE_LAYERS_FROM_CLIPBOARD:
       return pasteLayersFromClipboard(state, action);
+    case MOVE_LAYER_TO:
+      return moveLayerTo(state, action);
+    case MOVE_LAYERS_TO:
+      return moveLayersTo(state, action);
+    case MOVE_LAYER_BY:
+      return moveLayerBy(state, action);
+    case MOVE_LAYERS_BY:
+      return moveLayersBy(state, action);
+    case ENABLE_LAYER_DRAG:
+      return enableLayerDrag(state, action);
+    case DISABLE_LAYER_DRAG:
+      return disableLayerDrag(state, action);
     default:
       return state;
   }

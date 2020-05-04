@@ -8,6 +8,7 @@ import {
   REMOVE_LAYER,
   REMOVE_LAYERS,
   SELECT_LAYER,
+  DEEP_SELECT_LAYER,
   SELECT_LAYERS,
   DESELECT_LAYER,
   DESELECT_LAYERS,
@@ -23,18 +24,26 @@ import {
   DECREASE_LAYER_SCOPE,
   NEW_LAYER_SCOPE,
   CLEAR_LAYER_SCOPE,
+  ESCAPE_LAYER_SCOPE,
   GROUP_LAYERS,
   UNGROUP_LAYER,
   UNGROUP_LAYERS,
   COPY_LAYER_TO_CLIPBOARD,
   COPY_LAYERS_TO_CLIPBOARD,
   PASTE_LAYERS_FROM_CLIPBOARD,
+  MOVE_LAYER_TO,
+  MOVE_LAYERS_TO,
+  MOVE_LAYER_BY,
+  MOVE_LAYERS_BY,
+  ENABLE_LAYER_DRAG,
+  DISABLE_LAYER_DRAG,
   AddPagePayload,
   AddGroupPayload,
   AddShapePayload,
   RemoveLayerPayload,
   RemoveLayersPayload,
   SelectLayerPayload,
+  DeepSelectLayerPayload,
   SelectLayersPayload,
   DeselectLayerPayload,
   DeselectLayersPayload,
@@ -53,6 +62,10 @@ import {
   CopyLayerToClipboardPayload,
   CopyLayersToClipboardPayload,
   PasteLayersFromClipboardPayload,
+  MoveLayerToPayload,
+  MoveLayersToPayload,
+  MoveLayerByPayload,
+  MoveLayersByPayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -93,6 +106,7 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
     payload: {
       type: 'Group',
       id: id,
+      frame: payload.frame,
       name: payload.name ? payload.name : 'Group',
       parent: payload.parent ? payload.parent : null,
       paperLayer: paperLayer.id,
@@ -112,6 +126,7 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
     payload: {
       type: 'Shape',
       id: id,
+      frame: payload.frame,
       name: payload.name ? payload.name : payload.shapeType,
       parent: payload.parent ? payload.parent : null,
       shapeType: payload.shapeType,
@@ -137,6 +152,11 @@ export const removeLayers = (payload: RemoveLayersPayload): LayerTypes => ({
 
 export const selectLayer = (payload: SelectLayerPayload): LayerTypes => ({
   type: SELECT_LAYER,
+  payload
+});
+
+export const deepSelectLayer = (payload: DeepSelectLayerPayload): LayerTypes => ({
+  type: DEEP_SELECT_LAYER,
   payload
 });
 
@@ -220,6 +240,10 @@ export const newLayerScope = (payload: NewLayerScopePayload): LayerTypes => ({
   payload
 });
 
+export const escapeLayerScope = (): LayerTypes => ({
+  type: ESCAPE_LAYER_SCOPE
+});
+
 // Group
 
 export const groupLayers = (payload: GroupLayersPayload): LayerTypes => ({
@@ -252,4 +276,36 @@ export const copyLayersToClipboard = (payload: CopyLayersToClipboardPayload): La
 export const pasteLayersFromClipboard = (payload: PasteLayersFromClipboardPayload): LayerTypes => ({
   type: PASTE_LAYERS_FROM_CLIPBOARD,
   payload
+});
+
+// Move
+
+export const moveLayerTo = (payload: MoveLayerToPayload): LayerTypes => ({
+  type: MOVE_LAYER_TO,
+  payload
+});
+
+export const moveLayersTo = (payload: MoveLayersToPayload): LayerTypes => ({
+  type: MOVE_LAYERS_TO,
+  payload
+});
+
+export const moveLayerBy = (payload: MoveLayerByPayload): LayerTypes => ({
+  type: MOVE_LAYER_BY,
+  payload
+});
+
+export const moveLayersBy = (payload: MoveLayersByPayload): LayerTypes => ({
+  type: MOVE_LAYERS_BY,
+  payload
+});
+
+// Drag
+
+export const enableLayerDrag = (): LayerTypes => ({
+  type: ENABLE_LAYER_DRAG
+});
+
+export const disableLayerDrag = (): LayerTypes => ({
+  type: DISABLE_LAYER_DRAG
 });

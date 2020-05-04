@@ -5,6 +5,7 @@ declare namespace em {
   interface Layer {
     type: LayerTypes;
     id: string;
+    frame: em.Frame;
     name: string;
     parent: string;
     paperLayer: number;

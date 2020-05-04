@@ -6,6 +6,8 @@ export const ENABLE_ROUNDED_DRAW_TOOL = 'ENABLE_ROUNDED_DRAW_TOOL';
 
 export const ENABLE_SELECTION_TOOL = 'ENABLE_SELECTION_TOOL';
 
+export const ENABLE_DRAG_TOOL = 'ENABLE_DRAG_TOOL';
+
 interface EnableRectangleDrawTool {
   type: typeof ENABLE_RECTANGLE_DRAW_TOOL;
 }
@@ -30,4 +32,8 @@ interface EnableSelectionTool {
   type: typeof ENABLE_SELECTION_TOOL;
 }
 
-export type ToolTypes = EnableRectangleDrawTool | EnableEllipseDrawTool | EnableStarDrawTool | EnablePolygonDrawTool | EnableRoundedDrawTool | EnableSelectionTool;
+interface EnableDragTool {
+  type: typeof ENABLE_DRAG_TOOL;
+}
+
+export type ToolTypes = EnableRectangleDrawTool | EnableEllipseDrawTool | EnableStarDrawTool | EnablePolygonDrawTool | EnableRoundedDrawTool | EnableSelectionTool | EnableDragTool;

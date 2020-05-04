@@ -6,6 +6,7 @@ export const REMOVE_LAYER = 'REMOVE_LAYER';
 export const REMOVE_LAYERS = 'REMOVE_LAYERS';
 
 export const SELECT_LAYER = 'SELECT_LAYER';
+export const DEEP_SELECT_LAYER = 'DEEP_SELECT_LAYER';
 export const SELECT_LAYERS = 'SELECT_LAYERS';
 export const DESELECT_LAYER = 'DESELECT_LAYER';
 export const DESELECT_LAYERS = 'DESELECT_LAYERS';
@@ -27,6 +28,7 @@ export const INCREASE_LAYER_SCOPE = 'INCREASE_LAYER_SCOPE';
 export const DECREASE_LAYER_SCOPE = 'DECREASE_LAYER_SCOPE';
 export const CLEAR_LAYER_SCOPE = 'CLEAR_LAYER_SCOPE';
 export const NEW_LAYER_SCOPE = 'NEW_LAYER_SCOPE';
+export const ESCAPE_LAYER_SCOPE = 'ESCAPE_LAYER_SCOPE';
 
 export const GROUP_LAYERS = 'GROUP_LAYERS';
 export const UNGROUP_LAYER = 'UNGROUP_LAYER';
@@ -35,7 +37,15 @@ export const SET_GROUP_SCOPE = 'SET_GROUP_SCOPE';
 
 export const COPY_LAYER_TO_CLIPBOARD = 'COPY_LAYER_TO_CLIPBOARD';
 export const COPY_LAYERS_TO_CLIPBOARD = 'COPY_LAYERS_TO_CLIPBOARD';
-export const PASTE_LAYERS_FROM_CLIPBOARD = 'PASTE_LAYERS_FROM_CLIPBOARD'
+export const PASTE_LAYERS_FROM_CLIPBOARD = 'PASTE_LAYERS_FROM_CLIPBOARD';
+
+export const MOVE_LAYER_TO = 'MOVE_LAYER_TO';
+export const MOVE_LAYER_BY = 'MOVE_LAYER_BY';
+export const MOVE_LAYERS_TO = 'MOVE_LAYERS_TO';
+export const MOVE_LAYERS_BY = 'MOVE_LAYERS_BY';
+
+export const ENABLE_LAYER_DRAG = 'ENABLE_LAYER_DRAG';
+export const DISABLE_LAYER_DRAG = 'DISABLE_LAYER_DRAG';
 
 // Page
 
@@ -60,6 +70,7 @@ export interface AddPage {
 export interface AddGroupPayload {
   type?: 'Group';
   id?: string;
+  frame?: em.Frame;
   name?: string;
   parent?: string;
   paperLayer?: number;
@@ -79,6 +90,7 @@ export interface AddGroup {
 export interface AddShapePayload {
   type?: 'Shape';
   id?: string;
+  frame?: em.Frame;
   name?: string;
   parent?: string;
   shapeType?: em.ShapeType;
@@ -122,6 +134,15 @@ export interface SelectLayerPayload {
 export interface SelectLayer {
   type: typeof SELECT_LAYER;
   payload: SelectLayerPayload;
+}
+
+export interface DeepSelectLayerPayload {
+  id: string;
+}
+
+export interface DeepSelectLayer {
+  type: typeof DEEP_SELECT_LAYER;
+  payload: DeepSelectLayerPayload;
 }
 
 export interface SelectLayersPayload {
@@ -276,6 +297,10 @@ export interface NewLayerScope {
   payload: NewLayerScopePayload;
 }
 
+export interface EscapeLayerScope {
+  type: typeof ESCAPE_LAYER_SCOPE;
+}
+
 // Group
 
 export interface GroupLayersPayload {
@@ -343,5 +368,60 @@ export interface PasteLayersFromClipboard {
   payload: PasteLayersFromClipboardPayload;
 }
 
+// Move
 
-export type LayerTypes = AddPage | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard;
+export interface MoveLayerToPayload {
+  id: string;
+  x: number;
+  y: number;
+}
+
+export interface MoveLayerTo {
+  type: typeof MOVE_LAYER_TO;
+  payload: MoveLayerToPayload;
+}
+
+export interface MoveLayerByPayload {
+  id: string;
+  x: number;
+  y: number;
+}
+
+export interface MoveLayerBy {
+  type: typeof MOVE_LAYER_BY;
+  payload: MoveLayerByPayload;
+}
+
+export interface MoveLayersToPayload {
+  layers: string[];
+  x: number;
+  y: number;
+}
+
+export interface MoveLayersTo {
+  type: typeof MOVE_LAYERS_TO;
+  payload: MoveLayersToPayload;
+}
+
+export interface MoveLayersByPayload {
+  layers: string[];
+  x: number;
+  y: number;
+}
+
+export interface MoveLayersBy {
+  type: typeof MOVE_LAYERS_BY;
+  payload: MoveLayersByPayload;
+}
+
+// Drag
+
+export interface EnableLayerDrag {
+  type: typeof ENABLE_LAYER_DRAG;
+}
+
+export interface DisableLayerDrag {
+  type: typeof DISABLE_LAYER_DRAG;
+}
+
+export type LayerTypes = AddPage | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag;

@@ -44,17 +44,6 @@ const Canvas = ({addPage, enableSelectionTool}: CanvasProps): ReactElement => {
         paper.view.translate(new paper.Point(e.deltaX * -1, e.deltaY * -1));
       }
     });
-    // dispatch({
-    //   type: 'add-page'
-    // });
-    // dispatch({
-    //   type: 'add-draw-tool',
-    //   dispatch: dispatch
-    // });
-    // renderCanvas({
-    //   dispatch: dispatch,
-    //   canvas: canvasRef.current
-    // });
   }, []);
 
   // useEffect(() => {
