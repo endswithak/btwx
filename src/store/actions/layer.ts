@@ -72,15 +72,18 @@ import {
 // Page
 
 export const addPage = (payload: AddPagePayload): LayerTypes => {
-  const paperLayer = new paper.Group();
+  const layerId = uuidv4();
+  const paperLayer = new paper.Group({
+    data: { id: layerId, type: 'Page' }
+  });
   return {
     type: ADD_PAGE,
     payload: {
       type: 'Page',
-      id: uuidv4(),
+      id: layerId,
       name: payload.name ? payload.name : 'Page',
       parent: null,
-      paperLayer: paperLayer.id,
+      //paperLayer: paperLayer.id,
       children: [],
       selected: false
     }
@@ -90,26 +93,19 @@ export const addPage = (payload: AddPagePayload): LayerTypes => {
 // Group
 
 export const addGroup = (payload: AddGroupPayload): LayerTypes => {
-  const id = uuidv4();
+  const layerId = uuidv4();
   const paperLayer = new paper.Group({
-    // onMouseEnter: (e: paper.MouseEvent) => {
-    //   // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    //   paper.tools[0].emit('mouseenter', e);
-    // },
-    // onMouseLeave: (e: paper.MouseEvent) => {
-    //   // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    //   paper.tools[0].emit('mouseleave', e);
-    // }
+    data: { id: layerId, type: 'Page' }
   });
   return {
     type: ADD_GROUP,
     payload: {
       type: 'Group',
-      id: id,
+      id: layerId,
       frame: payload.frame,
       name: payload.name ? payload.name : 'Group',
       parent: payload.parent ? payload.parent : null,
-      paperLayer: paperLayer.id,
+      //paperLayer: paperLayer.id,
       children: [],
       selected: false,
       showChildren: false
@@ -121,6 +117,8 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
 
 export const addShape = (payload: AddShapePayload): LayerTypes => {
   const id = uuidv4();
+  payload.paperLayer.data.id = id;
+  payload.paperLayer.data.type = 'Shape';
   return {
     type: ADD_SHAPE,
     payload: {
@@ -130,7 +128,7 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
       name: payload.name ? payload.name : payload.shapeType,
       parent: payload.parent ? payload.parent : null,
       shapeType: payload.shapeType,
-      paperLayer: payload.paperLayer,
+      //paperLayer: payload.paperLayer.id,
       selected: false,
     }
   }

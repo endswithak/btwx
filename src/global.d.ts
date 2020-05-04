@@ -8,7 +8,7 @@ declare namespace em {
     frame: em.Frame;
     name: string;
     parent: string;
-    paperLayer: number;
+    //paperLayer: number;
     selected: boolean;
     children: string[] | null;
   }

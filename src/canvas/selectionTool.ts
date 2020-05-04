@@ -4,6 +4,7 @@ import { groupLayers, ungroupLayers, selectLayer, deselectLayer, deselectAllLaye
 import store, { StoreDispatch, StoreGetState } from '../store';
 import AreaSelect from './areaSelect';
 import { enableRectangleDrawTool, enableEllipseDrawTool, enableDragTool } from '../store/actions/tool';
+import { ActionCreators } from 'redux-undo';
 
 class SelectionTool {
   tool: paper.Tool;
@@ -26,24 +27,38 @@ class SelectionTool {
   onKeyDown(event: paper.KeyEvent): void {
     const state = store.getState();
     switch(event.key) {
-      case 'g': {
-        if (event.modifiers.meta && state.layer.selected.length > 0) {
+      case 'z': {
+        if (event.modifiers.meta) {
           if (event.modifiers.shift) {
-            store.dispatch(ungroupLayers({layers: state.layer.selected}));
+            store.dispatch(ActionCreators.redo());
+            paper.project.clear();
+            paper.project.importJSON(store.getState().layer.present.paperProject);
           } else {
-            store.dispatch(groupLayers({layers: state.layer.selected}));
+            store.dispatch(ActionCreators.undo());
+            paper.project.clear();
+            paper.project.importJSON(store.getState().layer.present.paperProject);
+          }
+        }
+        break;
+      }
+      case 'g': {
+        if (event.modifiers.meta && state.layer.present.selected.length > 0) {
+          if (event.modifiers.shift) {
+            store.dispatch(ungroupLayers({layers: state.layer.present.selected}));
+          } else {
+            store.dispatch(groupLayers({layers: state.layer.present.selected}));
           }
         }
         break;
       }
       case 'c': {
         if (event.modifiers.meta) {
-          store.dispatch(copyLayersToClipboard({layers: state.layer.selected}));
+          store.dispatch(copyLayersToClipboard({layers: state.layer.present.selected}));
         }
         break;
       }
       case 'v': {
-        if (event.modifiers.meta && state.layer.clipboard.allIds.length > 0) {
+        if (event.modifiers.meta && state.layer.present.clipboard.allIds.length > 0) {
           if (event.modifiers.shift) {
             store.dispatch(pasteLayersFromClipboard({overSelection: true}));
           } else {
@@ -62,8 +77,8 @@ class SelectionTool {
           this.areaSelect = null;
         }
         store.dispatch(escapeLayerScope());
-        if (state.layer.hover) {
-          const paperLayer = getPaperLayer(state.layer, state.layer.hover);
+        if (state.layer.present.hover) {
+          const paperLayer = getPaperLayer(state.layer.present.hover);
           paperLayer.emit('mouseenter', event);
         }
         break;
@@ -73,7 +88,7 @@ class SelectionTool {
         break;
       }
       case 'backspace': {
-        store.dispatch(removeLayers({layers: state.layer.selected}));
+        store.dispatch(removeLayers({layers: state.layer.present.selected}));
         break;
       }
     }
@@ -92,20 +107,19 @@ class SelectionTool {
   }
   onMouseDown(event: paper.ToolEvent): void {
     const state = store.getState();
-    const hitResult = getPagePaperLayer(state.layer).hitTest(event.point);
+    const hitResult = getPaperLayer(state.layer.present.page).hitTest(event.point);
     if (hitResult) {
       //store.dispatch(enableDragTool());
     } else {
       this.areaSelect = new AreaSelect(event.point);
       if (!this.shiftModifier) {
-        if (state.layer.selected.length > 0) {
+        if (state.layer.present.selected.length > 0) {
           store.dispatch(deselectAllLayers());
         }
       }
     }
   }
   onMouseDrag(event: paper.ToolEvent): void {
-    const state = store.getState();
     if (this.areaSelect) {
       this.areaSelect.update(event.point);
     }
@@ -114,7 +128,7 @@ class SelectionTool {
     const state = store.getState();
     if (this.areaSelect && this.areaSelect.to) {
       this.areaSelect.layers().forEach((id: string) => {
-        if (state.layer.selected.includes(id)) {
+        if (state.layer.present.selected.includes(id)) {
           store.dispatch(deselectLayer({id}));
         } else {
           store.dispatch(selectLayer({id}));

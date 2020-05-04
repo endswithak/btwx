@@ -54,7 +54,7 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
 
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
-  const hover = layer.hover;
+  const hover = layer.present.hover;
   return { hover };
 };
 

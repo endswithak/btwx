@@ -42,20 +42,18 @@ class AreaSelect {
   }
   paperLayers() {
     const state = this.getState().layer;
-    return getPagePaperLayer(state).getItems({
-      id: (paperId: number) => {
-        const layerId = getLayerByPaperId(state, paperId).id;
-        const topParent = getTopParentGroup(state, layerId);
-        return topParent.paperLayer === paperId;
+    return getPagePaperLayer(state.present).getItems({
+      data: (data: any) => {
+        const topParent = getTopParentGroup(state.present, data.id);
+        return topParent.id === data.id;
       },
       overlapping: this.shape.bounds
     });
   }
   layers() {
-    const state = this.getState().layer;
     const paperLayers = this.paperLayers();
     return paperLayers.map((paperLayer) => {
-      return getLayerByPaperId(state, paperLayer.id).id;
+      return paperLayer.data.id;
     });
   }
 }

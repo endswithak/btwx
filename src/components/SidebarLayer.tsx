@@ -51,7 +51,7 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
 
 const mapStateToProps = (state: RootState, ownProps: SidebarLayerProps) => {
   const { layer } = state;
-  const layerItem = layer.byId[ownProps.layer];
+  const layerItem = layer.present.byId[ownProps.layer];
   return { layerItem };
 };
 

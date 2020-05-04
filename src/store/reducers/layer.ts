@@ -90,6 +90,7 @@ export interface LayerState {
       [id: string]: em.ClipboardLayer;
     };
   };
+  paperProject: string;
   dragging: boolean;
 }
 
@@ -105,6 +106,7 @@ const initialState: LayerState = {
     allIds: [],
     byId: {}
   },
+  paperProject: null,
   dragging: false
 };
 

@@ -35,7 +35,7 @@ const LayersSidebar = (props: LayersSidebarStateProps): ReactElement => {
 
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
-  return { layer };
+  return { layer: layer.present };
 };
 
 export default connect(mapStateToProps)(LayersSidebar);

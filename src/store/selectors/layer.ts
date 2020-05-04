@@ -30,13 +30,12 @@ export const getLayerType = (store: LayerState, id: string): em.LayerTypes => {
   return layer.type;
 }
 
-export const getPaperLayerByPaperId = (id: number): paper.Item => {
-  return paper.project.getItem({ id });
+export const getPaperLayerByPaperId = (id: string): paper.Item => {
+  return paper.project.getItem({ data: { id } });
 }
 
-export const getPaperLayer = (store: LayerState, id: string): paper.Item => {
-  const layer = getLayer(store, id);
-  return getPaperLayerByPaperId(layer.paperLayer);
+export const getPaperLayer = (id: string): paper.Item => {
+  return paper.project.getItem({ data: { id } });
 }
 
 // export const getActiveGroup = (store: LayerState): em.Group => {
@@ -49,7 +48,7 @@ export const getPage = (store: LayerState): em.Page => {
 
 export const getPagePaperLayer = (store: LayerState): paper.Item => {
   const page = store.page;
-  return getPaperLayer(store, page);
+  return getPaperLayer(page);
 }
 
 export const getTopParentGroup = (store: LayerState, id: string) => {
@@ -130,7 +129,7 @@ export const getLayerScope = (store: LayerState, id: string) => {
 
 export const getSelectionTopLeft = (store: LayerState): paper.Point => {
   const paperLayerPoints = store.selected.reduce((result, current) => {
-    const paperLayer = getPaperLayer(store, current);
+    const paperLayer = getPaperLayer(current);
     return [...result, paperLayer.bounds.topLeft];
   }, []);
   return paperLayerPoints.reduce(paper.Point.min);
@@ -138,7 +137,7 @@ export const getSelectionTopLeft = (store: LayerState): paper.Point => {
 
 export const getSelectionBottomRight = (store: LayerState): paper.Point => {
   const paperLayerPoints = store.selected.reduce((result, current) => {
-    const paperLayer = getPaperLayer(store, current);
+    const paperLayer = getPaperLayer(current);
     return [...result, paperLayer.bounds.bottomRight];
   }, []);
   return paperLayerPoints.reduce(paper.Point.max);

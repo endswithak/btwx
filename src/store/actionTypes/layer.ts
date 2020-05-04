@@ -94,7 +94,7 @@ export interface AddShapePayload {
   name?: string;
   parent?: string;
   shapeType?: em.ShapeType;
-  paperLayer?: number;
+  paperLayer?: paper.Item;
   selected?: boolean;
   hover?: boolean;
 }

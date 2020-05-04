@@ -140,7 +140,7 @@ const SidebarTree = (props: SidebarTreeProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   return {
-    layerById: layer.byId
+    layerById: layer.present.byId
   };
 };
 
