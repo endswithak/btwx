@@ -1,5 +1,6 @@
 import {
   ADD_PAGE,
+  ADD_ARTBOARD,
   ADD_GROUP,
   ADD_SHAPE,
   REMOVE_LAYER,
@@ -28,6 +29,8 @@ import {
   COPY_LAYER_TO_CLIPBOARD,
   COPY_LAYERS_TO_CLIPBOARD,
   PASTE_LAYERS_FROM_CLIPBOARD,
+  MOVE_LAYER,
+  MOVE_LAYERS,
   MOVE_LAYER_TO,
   MOVE_LAYER_BY,
   MOVE_LAYERS_TO,
@@ -39,6 +42,7 @@ import {
 
 import {
   addPage,
+  addArtboard,
   addLayer,
   removeLayer,
   removeLayers,
@@ -65,6 +69,8 @@ import {
   copyLayerToClipboard,
   copyLayersToClipboard,
   pasteLayersFromClipboard,
+  moveLayer,
+  moveLayers,
   moveLayerTo,
   moveLayerBy,
   moveLayersTo,
@@ -76,7 +82,7 @@ import {
 
 export interface LayerState {
   byId: {
-    [id: string]: em.Page | em.Group | em.Shape;
+    [id: string]: em.Page | em.Group | em.Shape | em.Artboard | em.ArtboardBackground;
   };
   allIds: string[];
   page: string;
@@ -114,6 +120,8 @@ export default (state = initialState, action: LayerTypes): LayerState => {
   switch (action.type) {
     case ADD_PAGE:
       return addPage(state, action);
+    case ADD_ARTBOARD:
+      return addArtboard(state, action);
     case ADD_GROUP:
     case ADD_SHAPE:
       return addLayer(state, action);
@@ -169,6 +177,10 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return copyLayersToClipboard(state, action);
     case PASTE_LAYERS_FROM_CLIPBOARD:
       return pasteLayersFromClipboard(state, action);
+    case MOVE_LAYER:
+      return moveLayer(state, action);
+    case MOVE_LAYERS:
+      return moveLayers(state, action);
     case MOVE_LAYER_TO:
       return moveLayerTo(state, action);
     case MOVE_LAYERS_TO:

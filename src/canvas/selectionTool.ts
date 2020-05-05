@@ -1,17 +1,49 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import { getPagePaperLayer, getLayerByPaperId, getLayerDepth, getParentLayer, getNearestScopeAncestor, isScopeGroupLayer, getLayer, getPaperLayer } from '../store/selectors/layer';
-import { groupLayers, ungroupLayers, selectLayer, deselectLayer, deselectAllLayers, removeLayers, increaseLayerScope, decreaseLayerScope, clearLayerScope, setLayerHover, newLayerScope, copyLayerToClipboard, copyLayersToClipboard, pasteLayersFromClipboard, moveLayerBy, moveLayersBy, escapeLayerScope } from '../store/actions/layer';
+import { groupLayers, ungroupLayers, selectLayer, deselectLayer, deselectAllLayers, removeLayers, increaseLayerScope, decreaseLayerScope, clearLayerScope, setLayerHover, newLayerScope, copyLayerToClipboard, copyLayersToClipboard, pasteLayersFromClipboard, moveLayerBy, moveLayersBy, escapeLayerScope, deepSelectLayer } from '../store/actions/layer';
 import store, { StoreDispatch, StoreGetState } from '../store';
-import AreaSelect from './areaSelect';
+import AreaSelectTool from './areaSelectTool';
 import { enableRectangleDrawTool, enableEllipseDrawTool, enableDragTool } from '../store/actions/tool';
 import { ActionCreators } from 'redux-undo';
+import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
+import { applyShapeMethods } from './utils';
+import DragTool from './dragTool';
+
+const redo = () => {
+  store.dispatch(ActionCreators.redo());
+  paper.project.clear();
+  const state = store.getState();
+  paper.project.importJSON(state.layer.present.paperProject);
+  Object.keys(state.layer.present.byId).forEach((key) => {
+    if (state.layer.present.byId[key].type === 'Shape') {
+      applyShapeMethods(getPaperLayer(key));
+    }
+  });
+  updateHoverFrame(state.layer.present);
+  updateSelectionFrame(state.layer.present);
+}
+
+const undo = () => {
+  store.dispatch(ActionCreators.undo());
+  paper.project.clear();
+  const state = store.getState();
+  paper.project.importJSON(state.layer.present.paperProject);
+  Object.keys(state.layer.present.byId).forEach((key) => {
+    if (state.layer.present.byId[key].type === 'Shape') {
+      applyShapeMethods(getPaperLayer(key));
+    }
+  });
+  updateHoverFrame(state.layer.present);
+  updateSelectionFrame(state.layer.present);
+}
 
 class SelectionTool {
   tool: paper.Tool;
   shiftModifier: boolean;
   metaModifier: boolean;
   hitResult: paper.HitResult;
-  areaSelect: AreaSelect;
+  areaSelectTool: AreaSelectTool;
+  dragTool: DragTool;
   constructor() {
     this.tool = new Tool();
     this.tool.activate();
@@ -20,7 +52,8 @@ class SelectionTool {
     this.tool.onMouseDown = (e: paper.ToolEvent) => this.onMouseDown(e);
     this.tool.onMouseDrag = (e: paper.ToolEvent) => this.onMouseDrag(e);
     this.tool.onMouseUp = (e: paper.ToolEvent) => this.onMouseUp(e);
-    this.areaSelect = null;
+    this.areaSelectTool = new AreaSelectTool();
+    this.dragTool = new DragTool();
     this.shiftModifier = false;
     this.metaModifier = false;
   }
@@ -30,13 +63,9 @@ class SelectionTool {
       case 'z': {
         if (event.modifiers.meta) {
           if (event.modifiers.shift) {
-            store.dispatch(ActionCreators.redo());
-            paper.project.clear();
-            paper.project.importJSON(store.getState().layer.present.paperProject);
+            redo();
           } else {
-            store.dispatch(ActionCreators.undo());
-            paper.project.clear();
-            paper.project.importJSON(store.getState().layer.present.paperProject);
+            undo();
           }
         }
         break;
@@ -68,14 +97,14 @@ class SelectionTool {
         break;
       }
       case 'shift': {
+        this.areaSelectTool.shiftModifier = true;
+        this.dragTool.shiftModifier = true;
         this.shiftModifier = true;
         break;
       }
       case 'escape': {
-        if (this.areaSelect) {
-          this.areaSelect.clear();
-          this.areaSelect = null;
-        }
+        this.areaSelectTool.onEscape();
+        this.dragTool.onEscape();
         store.dispatch(escapeLayerScope());
         if (state.layer.present.hover) {
           const paperLayer = getPaperLayer(state.layer.present.hover);
@@ -84,6 +113,8 @@ class SelectionTool {
         break;
       }
       case 'meta': {
+        this.areaSelectTool.metaModifier = true;
+        this.dragTool.metaModifier = true;
         this.metaModifier = true;
         break;
       }
@@ -96,10 +127,14 @@ class SelectionTool {
   onKeyUp(event: paper.KeyEvent): void {
     switch(event.key) {
       case 'shift': {
+        this.areaSelectTool.shiftModifier = false;
+        this.dragTool.shiftModifier = false;
         this.shiftModifier = false;
         break;
       }
       case 'meta': {
+        this.areaSelectTool.metaModifier = false;
+        this.dragTool.metaModifier = false;
         this.metaModifier = false;
         break;
       }
@@ -109,33 +144,20 @@ class SelectionTool {
     const state = store.getState();
     const hitResult = getPaperLayer(state.layer.present.page).hitTest(event.point);
     if (hitResult) {
-      //store.dispatch(enableDragTool());
+      this.dragTool.enable();
+      this.dragTool.onMouseDown(event);
     } else {
-      this.areaSelect = new AreaSelect(event.point);
-      if (!this.shiftModifier) {
-        if (state.layer.present.selected.length > 0) {
-          store.dispatch(deselectAllLayers());
-        }
-      }
+      this.areaSelectTool.enable();
+      this.areaSelectTool.onMouseDown(event);
     }
   }
   onMouseDrag(event: paper.ToolEvent): void {
-    if (this.areaSelect) {
-      this.areaSelect.update(event.point);
-    }
+    this.areaSelectTool.onMouseDrag(event);
+    this.dragTool.onMouseDrag(event);
   }
   onMouseUp(event: paper.ToolEvent): void {
-    const state = store.getState();
-    if (this.areaSelect && this.areaSelect.to) {
-      this.areaSelect.layers().forEach((id: string) => {
-        if (state.layer.present.selected.includes(id)) {
-          store.dispatch(deselectLayer({id}));
-        } else {
-          store.dispatch(selectLayer({id}));
-        }
-      });
-    }
-    this.areaSelect = null;
+    this.areaSelectTool.onMouseUp(event);
+    this.dragTool.onMouseUp(event);
   }
 }
 

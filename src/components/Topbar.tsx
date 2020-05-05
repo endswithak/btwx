@@ -1,7 +1,7 @@
 import React, { useContext, ReactElement, useState, useEffect } from 'react';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
-import { enableSelectionTool, enableRectangleDrawTool, enableEllipseDrawTool, enableStarDrawTool, enablePolygonDrawTool, enableRoundedDrawTool } from '../store/actions/tool';
+import { enableSelectionTool, enableRectangleDrawTool, enableEllipseDrawTool, enableStarDrawTool, enablePolygonDrawTool, enableRoundedDrawTool, enableArtboardTool } from '../store/actions/tool';
 import { ToolTypes } from '../store/actionTypes/tool';
 import { ThemeContext } from './ThemeProvider';
 
@@ -13,17 +13,21 @@ interface TopbarStateProps {
   enablePolygonDrawTool(): ToolTypes;
   enableRoundedDrawTool(): ToolTypes;
   enableSelectionTool(): ToolTypes;
+  enableArtboardTool(): ToolTypes;
 }
 
 const Topbar = (props: TopbarStateProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { enableRectangleDrawTool, enableEllipseDrawTool, enableSelectionTool, enableStarDrawTool, drawShapeType, enablePolygonDrawTool, enableRoundedDrawTool } = props;
+  const { enableRectangleDrawTool, enableEllipseDrawTool, enableSelectionTool, enableStarDrawTool, drawShapeType, enablePolygonDrawTool, enableRoundedDrawTool, enableArtboardTool } = props;
 
-  const handleDrawClick = (shape: em.ShapeType) => {
+  const handleDrawClick = (shape: em.ShapeType | 'Artboard') => {
     if (drawShapeType === shape) {
       enableSelectionTool();
     } else {
       switch(shape) {
+        case 'Artboard':
+          enableArtboardTool();
+          break;
         case 'Rectangle':
           enableRectangleDrawTool();
           break;
@@ -49,6 +53,11 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
       style={{
         background: theme.background.z3
       }}>
+      <button
+        className='c-topbar__button'
+        onClick={() => handleDrawClick('Artboard')}>
+        A
+      </button>
       <button
         className='c-topbar__button'
         onClick={() => handleDrawClick('Rectangle')}>
@@ -86,5 +95,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { enableRectangleDrawTool, enableEllipseDrawTool, enableStarDrawTool, enablePolygonDrawTool, enableRoundedDrawTool, enableSelectionTool }
+  { enableRectangleDrawTool, enableEllipseDrawTool, enableStarDrawTool, enablePolygonDrawTool, enableRoundedDrawTool, enableSelectionTool, enableArtboardTool }
 )(Topbar);

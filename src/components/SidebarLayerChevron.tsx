@@ -15,17 +15,15 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
   const { layer, showLayerChildren, hideLayerChildren } = props;
 
   const handleChevronClick = (): void => {
-    if (layer.type === 'Group') {
-      if ((layer as em.Group).showChildren) {
-        hideLayerChildren({id: layer.id});
-      } else {
-        showLayerChildren({id: layer.id});
-      }
+    if ((layer as em.Group).showChildren) {
+      hideLayerChildren({id: layer.id});
+    } else {
+      showLayerChildren({id: layer.id});
     }
   }
 
   return (
-    layer.type === 'Group'
+    layer.type === 'Group' || layer.type === 'Artboard'
     ? <div
         className='c-sidebar-layer__chevron'
         onClick={handleChevronClick}

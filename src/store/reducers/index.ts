@@ -4,7 +4,6 @@ import layer from './layer';
 import tool from './tool';
 
 import {
-  ADD_PAGE,
   ADD_GROUP,
   ADD_SHAPE,
   REMOVE_LAYER,

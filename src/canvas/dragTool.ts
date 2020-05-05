@@ -6,39 +6,73 @@ import { getNearestScopeAncestor, getLayerByPaperId, isScopeGroupLayer, getPaper
 import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
 
 class DragTool {
-  tool: paper.Tool;
-  from: paper.Point;
-  to: paper.Point;
+  enabled: boolean;
+  x: number;
+  y: number;
   shiftModifier: boolean;
+  metaModifier: boolean;
   constructor() {
-    this.tool = new Tool();
-    this.tool.activate();
-    this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
-    this.tool.onKeyUp = (e: paper.KeyEvent): void => this.onKeyUp(e);
-    this.tool.onMouseDown = (e: paper.ToolEvent): void => this.onMouseDown(e);
-    this.tool.onMouseDrag = (e: paper.ToolEvent): void => this.onMouseDrag(e);
-    this.tool.onMouseUp = (e: paper.ToolEvent): void => this.onMouseUp(e);
-    this.from = null;
-    this.to = null;
+    this.enabled = false;
+    this.x = null;
+    this.y = null;
     this.shiftModifier = false;
+    this.metaModifier = false;
   }
-  onKeyDown(event: paper.KeyEvent): void {
-
+  enable() {
+    this.enabled = true;
   }
-  onKeyUp(event: paper.KeyEvent): void {
-
+  disable() {
+    this.enabled = false;
+    this.x = null;
+    this.y = null;
+  }
+  onEscape() {
+    if (this.enabled) {
+      if (this.x || this.y) {
+        const state = store.getState();
+        if (state.layer.present.selected.length > 0) {
+          state.layer.present.selected.forEach((layer) => {
+            const paperLayer = getPaperLayer(layer);
+            paperLayer.position.x -= this.x;
+            paperLayer.position.y -= this.y;
+          });
+        }
+      }
+    }
+    this.disable();
   }
   onMouseDown(event: paper.ToolEvent): void {
-
+    if (this.enabled) {
+      if (paper.project.getItem({ data: { id: 'hoverFrame' } })) {
+        paper.project.getItem({ data: { id: 'hoverFrame' } }).remove();
+      }
+    }
   }
   onMouseDrag(event: paper.ToolEvent): void {
-    const state = store.getState();
-    if (state.layer.selected.length > 0) {
-      store.dispatch(moveLayersBy({layers: state.layer.selected, x: event.delta.x, y: event.delta.y}));
+    if (this.enabled) {
+      const state = store.getState();
+      updateSelectionFrame(state.layer.present);
+      if (state.layer.present.selected.length > 0) {
+        state.layer.present.selected.forEach((layer) => {
+          const paperLayer = getPaperLayer(layer);
+          paperLayer.position.x += event.delta.x;
+          this.x += event.delta.x;
+          paperLayer.position.y += event.delta.y;
+          this.y += event.delta.y;
+        });
+      }
     }
   }
   onMouseUp(event: paper.ToolEvent): void {
-    store.dispatch(enableSelectionTool());
+    if (this.enabled) {
+      if (this.x || this.y) {
+        const state = store.getState();
+        if (state.layer.present.selected.length > 0) {
+          store.dispatch(moveLayersBy({layers: state.layer.present.selected, x: this.x, y: this.y}));
+        }
+      }
+    }
+    this.disable();
   }
 }
 

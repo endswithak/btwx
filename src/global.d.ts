@@ -1,6 +1,6 @@
 declare namespace em {
 
-  type LayerTypes = 'Group' | 'Shape' | 'Page';
+  type LayerTypes = 'Group' | 'Shape' | 'Page' | 'Artboard' | 'ArtboardBackground';
 
   interface Layer {
     type: LayerTypes;
@@ -27,6 +27,17 @@ declare namespace em {
     type: 'Group';
     children: string[];
     showChildren: boolean;
+  }
+
+  interface Artboard extends Layer {
+    type: 'Artboard';
+    children: string[];
+    showChildren: boolean;
+  }
+
+  interface ArtboardBackground {
+    type: 'ArtboardBackground';
+    parent: string;
   }
 
   interface Page extends Layer {

@@ -1,15 +1,14 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import store, { StoreDispatch, StoreGetState } from '../store';
 import { enableSelectionTool, enableRectangleDrawTool, enableEllipseDrawTool, enableRoundedDrawTool, enableDragTool } from '../store/actions/tool';
-import { addShape, setLayerHover, increaseLayerScope, selectLayer, newLayerScope, deselectLayer, moveLayerBy, moveLayersBy, enableLayerDrag, disableLayerDrag, deepSelectLayer } from '../store/actions/layer';
-import { getNearestScopeAncestor, getLayerByPaperId, isScopeGroupLayer, getPaperLayer, getLayer, getPagePaperLayer } from '../store/selectors/layer';
+import { addShape, setLayerHover, increaseLayerScope, selectLayer, newLayerScope, deselectLayer, moveLayerBy, moveLayersBy, enableLayerDrag, disableLayerDrag, deepSelectLayer, addArtboard } from '../store/actions/layer';
+import { getNearestScopeAncestor, getLayerByPaperId, isScopeGroupLayer, getPaperLayer, getLayer } from '../store/selectors/layer';
 import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
 
 class DrawTool {
   getState: StoreGetState;
   dispatch: StoreDispatch;
   tool: paper.Tool;
-  drawShapeType: em.ShapeType;
   outline: paper.Path;
   tooltip: paper.PointText;
   from: paper.Point;
@@ -20,7 +19,7 @@ class DrawTool {
   constrainedDims: paper.Point;
   centerPoint: paper.Point;
   shiftModifier: boolean;
-  constructor({drawShapeType}: {drawShapeType: em.ShapeType}) {
+  constructor() {
     this.getState = store.getState;
     this.dispatch = store.dispatch;
     this.tool = new Tool();
@@ -30,7 +29,6 @@ class DrawTool {
     this.tool.onMouseDown = (e: paper.ToolEvent): void => this.onMouseDown(e);
     this.tool.onMouseDrag = (e: paper.ToolEvent): void => this.onMouseDrag(e);
     this.tool.onMouseUp = (e: paper.ToolEvent): void => this.onMouseUp(e);
-    this.drawShapeType = drawShapeType;
     this.outline = null;
     this.tooltip = null;
     this.from = null;
@@ -43,42 +41,11 @@ class DrawTool {
     this.shiftModifier = false;
   }
   renderShape(shapeOpts: any) {
-    switch(this.drawShapeType) {
-      case 'Rectangle':
-        return new Path.Rectangle({
-          from: this.from,
-          to: this.shiftModifier ? this.constrainedDims : this.to,
-          ...shapeOpts
-        });
-      case 'Ellipse':
-        return new Path.Ellipse({
-          from: this.from,
-          to: this.shiftModifier ? this.constrainedDims : this.to,
-          ...shapeOpts
-        });
-      case 'Rounded':
-        return new Path.Rectangle({
-          from: this.from,
-          to: this.shiftModifier ? this.constrainedDims : this.to,
-          radius: 8,
-          ...shapeOpts
-        });
-      case 'Polygon':
-        return new Path.RegularPolygon({
-          center: this.centerPoint,
-          radius: this.maxDim / 2,
-          sides: 5,
-          ...shapeOpts
-        });
-      case 'Star':
-        return new Path.Star({
-          center: this.centerPoint,
-          radius1: this.maxDim / 2,
-          radius2: (this.maxDim / 2) / 2,
-          points: 5,
-          ...shapeOpts
-        });
-    }
+    return new Path.Rectangle({
+      from: this.from,
+      to: this.shiftModifier ? this.constrainedDims : this.to,
+      ...shapeOpts
+    });
   }
   renderTooltip(tooltipOpts: any) {
     const baseProps = {
@@ -88,21 +55,10 @@ class DrawTool {
       fontSize: 12 / paper.view.zoom,
       ...tooltipOpts
     }
-    switch(this.drawShapeType) {
-      case 'Rectangle':
-      case 'Ellipse':
-      case 'Rounded':
-        return new PointText({
-          ...baseProps,
-          content: `${Math.round(this.shiftModifier ? this.maxDim : this.dims.width)} x ${Math.round(this.shiftModifier ? this.maxDim : this.dims.height)}`,
-        });
-      case 'Polygon':
-      case 'Star':
-        return new PointText({
-          ...baseProps,
-          content: `${Math.round(this.maxDim)} x ${Math.round(this.maxDim)}`
-        });
-    }
+    return new PointText({
+      ...baseProps,
+      content: `${Math.round(this.shiftModifier ? this.maxDim : this.dims.width)} x ${Math.round(this.shiftModifier ? this.maxDim : this.dims.height)}`,
+    });
   }
   updateTooltip(): void {
     if (this.tooltip) {
@@ -177,23 +133,21 @@ class DrawTool {
     if (this.to) {
       const state = this.getState();
       const newPaperLayer = this.renderShape({
-        fillColor: '#ccc',
-        strokeColor: '#999',
-        strokeWidth: 1,
-        onMouseEnter: function(e: paper.MouseEvent) {
-          const state = store.getState();
-          const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, this.data.id);
-          store.dispatch(setLayerHover({id: nearestScopeAncestor.id}));
-        },
-        onMouseLeave: function(e: paper.MouseEvent) {
-          store.dispatch(setLayerHover({id: null}));
-        },
-        onDoubleClick: function(e: paper.MouseEvent) {
-          store.dispatch(deepSelectLayer({id: this.data.id}));
-        },
+        fillColor: '#fff',
+        // onMouseEnter: function(e: paper.MouseEvent) {
+        //   const state = store.getState();
+        //   const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, this.data.id);
+        //   store.dispatch(setLayerHover({id: nearestScopeAncestor.id}));
+        // },
+        // onMouseLeave: function(e: paper.MouseEvent) {
+        //   store.dispatch(setLayerHover({id: null}));
+        // },
+        // onDoubleClick: function(e: paper.MouseEvent) {
+        //   store.dispatch(deepSelectLayer({id: this.data.id}));
+        // },
         onMouseDown: function(e: paper.MouseEvent) {
           const state = store.getState();
-          const layer = getLayer(state.layer.present, this.data.id);
+          const layer = getLayer(state.layer.present, this.data.artboard);
           const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, layer.id);
           if (e.modifiers.shift) {
             if (layer.selected) {
@@ -208,30 +162,14 @@ class DrawTool {
           }
         }
       });
-      const overlappedLayers = getPagePaperLayer(state.layer.present).getItems({
-        data: (data: any) => {
-          const topParent = getNearestScopeAncestor(state.layer.present, data.id);
-          return topParent.id === data.id;
-        },
-        overlapping: this.outline.bounds
-      });
-      const artboardOverlapped = () => {
-        if (overlappedLayers.length > 0 && overlappedLayers.some((item) => item.data.type === 'Artboard')) {
-          const firstArtboard = overlappedLayers.find((item) => item.data.type === 'Artboard');
-          return firstArtboard.data.id;
-        } else {
-          return false;
-        }
-      }
-      this.dispatch(addShape({
-        parent: state.layer.present.scope.length > 0 ? state.layer.present.scope[state.layer.present.scope.length - 1] : artboardOverlapped() ? artboardOverlapped() : state.layer.present.page,
+      this.dispatch(addArtboard({
+        parent: state.layer.present.page,
         frame: {
           x: newPaperLayer.position.x,
           y: newPaperLayer.position.y,
           width: newPaperLayer.bounds.width,
           height: newPaperLayer.bounds.height
         },
-        shapeType: this.drawShapeType,
         paperLayer: newPaperLayer
       }));
       this.dispatch(enableSelectionTool());

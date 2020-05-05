@@ -3,6 +3,7 @@ import paper from 'paper';
 
 import {
   ADD_PAGE,
+  ADD_ARTBOARD,
   ADD_GROUP,
   ADD_SHAPE,
   REMOVE_LAYER,
@@ -31,6 +32,8 @@ import {
   COPY_LAYER_TO_CLIPBOARD,
   COPY_LAYERS_TO_CLIPBOARD,
   PASTE_LAYERS_FROM_CLIPBOARD,
+  MOVE_LAYER,
+  MOVE_LAYERS,
   MOVE_LAYER_TO,
   MOVE_LAYERS_TO,
   MOVE_LAYER_BY,
@@ -38,6 +41,7 @@ import {
   ENABLE_LAYER_DRAG,
   DISABLE_LAYER_DRAG,
   AddPagePayload,
+  AddArtboardPayload,
   AddGroupPayload,
   AddShapePayload,
   RemoveLayerPayload,
@@ -62,6 +66,8 @@ import {
   CopyLayerToClipboardPayload,
   CopyLayersToClipboardPayload,
   PasteLayersFromClipboardPayload,
+  MoveLayerPayload,
+  MoveLayersPayload,
   MoveLayerToPayload,
   MoveLayersToPayload,
   MoveLayerByPayload,
@@ -73,7 +79,7 @@ import {
 
 export const addPage = (payload: AddPagePayload): LayerTypes => {
   const layerId = uuidv4();
-  const paperLayer = new paper.Group({
+  new paper.Group({
     data: { id: layerId, type: 'Page' }
   });
   return {
@@ -90,12 +96,38 @@ export const addPage = (payload: AddPagePayload): LayerTypes => {
   }
 };
 
+// Artboard
+
+export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
+  const layerId = uuidv4();
+  const backgroundId = uuidv4();
+  payload.paperLayer.data = { id: backgroundId, type: 'ArtboardBackground', artboard: layerId };
+  new paper.Group({
+    data: { id: layerId, type: 'Artboard' },
+    children: [payload.paperLayer]
+  });
+  return {
+    type: ADD_ARTBOARD,
+    payload: {
+      type: 'Artboard',
+      id: layerId,
+      frame: payload.frame,
+      name: payload.name ? payload.name : 'Artboard',
+      parent: null,
+      //paperLayer: paperLayer.id,
+      children: [backgroundId],
+      selected: false,
+      showChildren: false
+    }
+  }
+};
+
 // Group
 
 export const addGroup = (payload: AddGroupPayload): LayerTypes => {
   const layerId = uuidv4();
-  const paperLayer = new paper.Group({
-    data: { id: layerId, type: 'Page' }
+  new paper.Group({
+    data: { id: layerId, type: 'Group' }
   });
   return {
     type: ADD_GROUP,
@@ -117,8 +149,10 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
 
 export const addShape = (payload: AddShapePayload): LayerTypes => {
   const id = uuidv4();
-  payload.paperLayer.data.id = id;
-  payload.paperLayer.data.type = 'Shape';
+  payload.paperLayer.data = {
+    id: id,
+    type: 'Shape'
+  }
   return {
     type: ADD_SHAPE,
     payload: {
@@ -277,6 +311,16 @@ export const pasteLayersFromClipboard = (payload: PasteLayersFromClipboardPayloa
 });
 
 // Move
+
+export const moveLayer = (payload: MoveLayerPayload): LayerTypes => ({
+  type: MOVE_LAYER,
+  payload
+});
+
+export const moveLayers = (payload: MoveLayersPayload): LayerTypes => ({
+  type: MOVE_LAYERS,
+  payload
+});
 
 export const moveLayerTo = (payload: MoveLayerToPayload): LayerTypes => ({
   type: MOVE_LAYER_TO,

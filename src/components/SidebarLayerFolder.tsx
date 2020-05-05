@@ -11,7 +11,7 @@ const SidebarLayerFolder = (props: SidebarLayerFolderProps): ReactElement => {
   const { layer } = props;
 
   return (
-    layer.type === 'Group'
+    layer.type === 'Group' || layer.type === 'Artboard'
     ? <div
         className='c-sidebar-layer__folder'>
         <svg

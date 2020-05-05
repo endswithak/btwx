@@ -1,5 +1,10 @@
 import paper, { Shape, Point, Path, Color, PointText } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
+import store, { StoreDispatch, StoreGetState } from '../store';
+import { enableSelectionTool, enableRectangleDrawTool, enableEllipseDrawTool, enableRoundedDrawTool, enableDragTool } from '../store/actions/tool';
+import { addShape, setLayerHover, increaseLayerScope, selectLayer, newLayerScope, deselectLayer, moveLayerBy, moveLayersBy, enableLayerDrag, disableLayerDrag, deepSelectLayer } from '../store/actions/layer';
+import { getNearestScopeAncestor, getLayerByPaperId, isScopeGroupLayer, getPaperLayer, getLayer } from '../store/selectors/layer';
+import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
 
 interface GetSymbolsPage {
   sketchPages: FileFormat.Page[];
@@ -143,5 +148,35 @@ export const getParent = ({ item }: GetParent) => {
       currentItem = currentItem.parent;
     }
     return currentItem.layersGroup();
+  }
+}
+
+export const applyShapeMethods = (shape: paper.Item) => {
+  shape.onMouseEnter = function(e: paper.MouseEvent) {
+    const state = store.getState();
+    const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, this.data.id);
+    store.dispatch(setLayerHover({id: nearestScopeAncestor.id}));
+  },
+  shape.onMouseLeave = function(e: paper.MouseEvent) {
+    store.dispatch(setLayerHover({id: null}));
+  },
+  shape.onDoubleClick = function(e: paper.MouseEvent) {
+    store.dispatch(deepSelectLayer({id: this.data.id}));
+  },
+  shape.onMouseDown = function(e: paper.MouseEvent) {
+    const state = store.getState();
+    const layer = getLayer(state.layer.present, this.data.id);
+    const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, layer.id);
+    if (e.modifiers.shift) {
+      if (layer.selected) {
+        store.dispatch(deselectLayer({id: nearestScopeAncestor.id}));
+      } else {
+        store.dispatch(selectLayer({id: nearestScopeAncestor.id}));
+      }
+    } else {
+      if (!state.layer.present.selected.includes(nearestScopeAncestor.id)) {
+        store.dispatch(selectLayer({id: nearestScopeAncestor.id, newSelection: true}));
+      }
+    }
   }
 }

@@ -36,7 +36,9 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
       style={{
         background: layer.selected
         ? theme.palette.primary
-        : 'none',
+        : layer.type === 'Artboard'
+          ? theme.background.z4
+          : 'none',
         paddingLeft: depth * (theme.unit * 6),
         boxShadow: hover === layer.id ? `0 0 0 ${theme.unit / 2}px ${theme.background.z3} inset` : ''
       }}>

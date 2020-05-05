@@ -1,6 +1,7 @@
 export const ADD_PAGE = 'ADD_PAGE';
 export const ADD_GROUP = 'ADD_GROUP';
 export const ADD_SHAPE = 'ADD_SHAPE';
+export const ADD_ARTBOARD = 'ADD_ARTBOARD';
 
 export const REMOVE_LAYER = 'REMOVE_LAYER';
 export const REMOVE_LAYERS = 'REMOVE_LAYERS';
@@ -39,6 +40,8 @@ export const COPY_LAYER_TO_CLIPBOARD = 'COPY_LAYER_TO_CLIPBOARD';
 export const COPY_LAYERS_TO_CLIPBOARD = 'COPY_LAYERS_TO_CLIPBOARD';
 export const PASTE_LAYERS_FROM_CLIPBOARD = 'PASTE_LAYERS_FROM_CLIPBOARD';
 
+export const MOVE_LAYER = 'MOVE_LAYER';
+export const MOVE_LAYERS = 'MOVE_LAYERS';
 export const MOVE_LAYER_TO = 'MOVE_LAYER_TO';
 export const MOVE_LAYER_BY = 'MOVE_LAYER_BY';
 export const MOVE_LAYERS_TO = 'MOVE_LAYERS_TO';
@@ -63,6 +66,26 @@ export interface AddPagePayload {
 export interface AddPage {
   type: typeof ADD_PAGE;
   payload: AddPagePayload;
+}
+
+// Artboard
+
+export interface AddArtboardPayload {
+  type?: 'Artboard';
+  id?: string;
+  frame?: em.Frame;
+  name?: string;
+  parent?: string;
+  paperLayer?: paper.Item;
+  selected?: boolean;
+  hover?: boolean;
+  children?: string[];
+  showChildren?: boolean;
+}
+
+export interface AddArtboard {
+  type: typeof ADD_ARTBOARD;
+  payload: AddArtboardPayload;
 }
 
 // Group
@@ -370,6 +393,24 @@ export interface PasteLayersFromClipboard {
 
 // Move
 
+export interface MoveLayerPayload {
+  id: string;
+}
+
+export interface MoveLayer {
+  type: typeof MOVE_LAYER;
+  payload: MoveLayerPayload;
+}
+
+export interface MoveLayersPayload {
+  layers: string[];
+}
+
+export interface MoveLayers {
+  type: typeof MOVE_LAYERS;
+  payload: MoveLayersPayload;
+}
+
 export interface MoveLayerToPayload {
   id: string;
   x: number;
@@ -424,4 +465,4 @@ export interface DisableLayerDrag {
   type: typeof DISABLE_LAYER_DRAG;
 }
 
-export type LayerTypes = AddPage | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag;
+export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag;

@@ -38,10 +38,6 @@ export const getPaperLayer = (id: string): paper.Item => {
   return paper.project.getItem({ data: { id } });
 }
 
-// export const getActiveGroup = (store: LayerState): em.Group => {
-//   return store.byId[store.activeGroup] as em.Group;
-// }
-
 export const getPage = (store: LayerState): em.Page => {
   return store.byId[store.page] as em.Page;
 }
@@ -51,18 +47,11 @@ export const getPagePaperLayer = (store: LayerState): paper.Item => {
   return getPaperLayer(page);
 }
 
-export const getTopParentGroup = (store: LayerState, id: string) => {
-  let currentNode = getLayer(store, id);
-  while(getParentLayer(store, currentNode.id).type === 'Group') {
-    currentNode = getParentLayer(store, currentNode.id);
-  }
-  return currentNode;
-}
-
 export const getLayerDepth = (store: LayerState, id: string) => {
   let currentNode = getLayer(store, id);
   let depth = 0;
-  while(getParentLayer(store, currentNode.id).type === 'Group') {
+  const parent = getParentLayer(store, currentNode.id);
+  while(parent.type === 'Group' || parent.type === 'Artboard') {
     currentNode = getParentLayer(store, currentNode.id);
     depth++;
   }
@@ -83,7 +72,7 @@ export const getScopeGroupLayers = (store: LayerState) => {
   const expandedLayers = getScopeLayers(store);
   return expandedLayers.reduce((result, current) => {
     const layer = getLayer(store, current);
-    if (layer.type === 'Group') {
+    if (layer.type === 'Group' || layer.type === 'Artboard') {
       result = [...result, current];
     }
     return result;
@@ -118,11 +107,10 @@ export const getNearestScopeGroupAncestor = (store: LayerState, id: string) => {
 
 export const getLayerScope = (store: LayerState, id: string) => {
   const newScope = [];
-  let currentLayer = id;
-  while(getParentLayer(store, currentLayer).type === 'Group') {
-    const parentGroup = getParentLayer(store, currentLayer);
-    newScope.push(parentGroup.id);
-    currentLayer = parentGroup.id;
+  let parent = getParentLayer(store, id);
+  while(parent.type === 'Group' || parent.type === 'Artboard') {
+    newScope.push(parent.id);
+    parent = getParentLayer(store, parent.id);;
   }
   return newScope.reverse();
 }

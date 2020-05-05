@@ -7,26 +7,24 @@ import {
   ENABLE_POLYGON_DRAW_TOOL,
   ENABLE_ROUNDED_DRAW_TOOL,
   ENABLE_SELECTION_TOOL,
-  ENABLE_DRAG_TOOL,
+  ENABLE_ARTBOARD_TOOL,
   ToolTypes,
 } from '../actionTypes/tool';
 
 import DrawTool from '../../canvas/drawTool';
 import SelectionTool from '../../canvas/selectionTool';
-import DragTool from '../../canvas/dragTool';
+import ArtboardTool from '../../canvas/artboardTool';
 
 export interface ToolState {
-  tool: 'Draw' | 'Selection' | 'Drag';
+  tool: 'Draw' | 'Selection' | 'Artboard';
   drawing: boolean;
   drawShape: em.ShapeType;
-  dragging: boolean;
 }
 
 const initialState: ToolState = {
   tool: null,
   drawing: false,
-  drawShape: null,
-  dragging: false
+  drawShape: null
 };
 
 const removeActiveTool = () => {
@@ -97,15 +95,14 @@ export default (state = initialState, action: ToolTypes): ToolState => {
         drawShape: null
       };
     }
-    case ENABLE_DRAG_TOOL: {
+    case ENABLE_ARTBOARD_TOOL: {
       removeActiveTool();
-      new DragTool();
+      new ArtboardTool();
       return {
         ...state,
-        tool: 'Drag',
+        tool: 'Artboard',
         drawing: false,
-        drawShape: null,
-        dragging: true
+        drawShape: null
       };
     }
     default:

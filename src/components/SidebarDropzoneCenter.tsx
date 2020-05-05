@@ -16,7 +16,7 @@ const SidebarDropzoneCenter = (props: SidebarDropzoneCenterProps): ReactElement 
   const isActive = dragEnterLayer && dragEnterLayer.id === layer.id && dropzone === dz;
 
   return (
-    layer.children
+    layer.type === 'Group' && dragLayer.type !== 'Artboard'
     ? <SidebarDropzoneArea
         id={layer.id}
         dz={dz}

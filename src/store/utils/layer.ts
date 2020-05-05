@@ -3,8 +3,8 @@ import { v4 as uuidv4 } from 'uuid';
 import paper from 'paper';
 import { LayerState } from '../reducers/layer';
 import * as layerActions from '../actions/layer';
-import { AddPage, AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer, AddLayerChild, InsertLayerChild, EnableLayerHover, DisableLayerHover, InsertLayerAbove, InsertLayerBelow, GroupLayers, UngroupLayers, UngroupLayer, DeselectAllLayers, RemoveLayers, SetGroupScope, HideLayerChildren, ShowLayerChildren, DecreaseLayerScope, NewLayerScope, SetLayerHover, ClearLayerScope, IncreaseLayerScope, CopyLayerToClipboard, CopyLayersToClipboard, PasteLayersFromClipboard, SelectLayers, DeselectLayers, MoveLayerTo, MoveLayerBy, EnableLayerDrag, DisableLayerDrag, MoveLayersTo, MoveLayersBy, DeepSelectLayer, EscapeLayerScope } from '../actionTypes/layer';
-import { addItem, removeItem, insertItem } from './general';
+import { AddPage, AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer, AddLayerChild, InsertLayerChild, EnableLayerHover, DisableLayerHover, InsertLayerAbove, InsertLayerBelow, GroupLayers, UngroupLayers, UngroupLayer, DeselectAllLayers, RemoveLayers, SetGroupScope, HideLayerChildren, ShowLayerChildren, DecreaseLayerScope, NewLayerScope, SetLayerHover, ClearLayerScope, IncreaseLayerScope, CopyLayerToClipboard, CopyLayersToClipboard, PasteLayersFromClipboard, SelectLayers, DeselectLayers, MoveLayerTo, MoveLayerBy, EnableLayerDrag, DisableLayerDrag, MoveLayersTo, MoveLayersBy, DeepSelectLayer, EscapeLayerScope, MoveLayer, MoveLayers, AddArtboard } from '../actionTypes/layer';
+import { addItem, removeItem, insertItem, addItems } from './general';
 import { getLayerIndex, getLayer, getLayerDepth, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor, getNearestScopeGroupAncestor, getParentLayer, getLayerScope, getPaperLayer, getSelectionTopLeft, getPaperLayerByPaperId, getClipboardTopLeft, getSelectionBottomRight, getPagePaperLayer, getClipboardBottomRight } from '../selectors/layer';
 
 const removeLayerAndChildren = (state: LayerState, layer: string): string[] => {
@@ -38,6 +38,34 @@ export const addPage = (state: LayerState, action: AddPage): LayerState => {
       } as em.Page
     },
     page: action.payload.id,
+    paperProject: paper.project.exportJSON()
+  }
+};
+
+export const addArtboard = (state: LayerState, action: AddArtboard): LayerState => {
+  const paperLayer = getPaperLayer(action.payload.id);
+  paperLayer.parent = getPaperLayer(state.page);
+  return {
+    ...state,
+    allIds: addItems(state.allIds, [action.payload.id, action.payload.children[0]]),
+    byId: {
+      ...state.byId,
+      [action.payload.id]: {
+        ...action.payload,
+        parent: state.page
+      } as em.Artboard,
+      [action.payload.children[0]]: {
+        type: 'ArtboardBackground',
+        id: action.payload.children[0],
+        name: 'ArtboardBackground',
+        parent: action.payload.id,
+        children: null
+      } as em.ArtboardBackground,
+      [state.page]: {
+        ...state.byId[state.page],
+        children: addItem(state.byId[state.page].children, action.payload.id)
+      } as em.Page
+    },
     paperProject: paper.project.exportJSON()
   }
 };
@@ -780,6 +808,7 @@ export const updateParentBounds = (state: LayerState, id: string): LayerState =>
     return {
       ...result,
       byId: {
+        ...result.byId,
         [current]: {
           ...result.byId[current],
           frame: {
@@ -793,6 +822,33 @@ export const updateParentBounds = (state: LayerState, id: string): LayerState =>
   }, state);
 };
 
+export const moveLayer = (state: LayerState, action: MoveLayer): LayerState => {
+  let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        frame: {
+          ...currentState.byId[action.payload.id].frame,
+          x: paperLayer.position.x,
+          y: paperLayer.position.y
+        }
+      }
+    },
+    paperProject: paper.project.exportJSON()
+  }
+  return updateParentBounds(currentState, action.payload.id);
+};
+
+export const moveLayers = (state: LayerState, action: MoveLayers): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return moveLayer(result, layerActions.moveLayer({id: current}) as MoveLayer);
+  }, state);
+};
+
 export const moveLayerTo = (state: LayerState, action: MoveLayerTo): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
@@ -802,6 +858,7 @@ export const moveLayerTo = (state: LayerState, action: MoveLayerTo): LayerState 
   currentState = {
     ...currentState,
     byId: {
+      ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
         frame: {
@@ -825,8 +882,8 @@ export const moveLayersTo = (state: LayerState, action: MoveLayersTo): LayerStat
 export const moveLayerBy = (state: LayerState, action: MoveLayerBy): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
-  paperLayer.position.x += action.payload.x;
-  paperLayer.position.y += action.payload.y;
+  // paperLayer.position.x += action.payload.x;
+  // paperLayer.position.y += action.payload.y;
   updateSelectionFrame(currentState);
   currentState = {
     ...state,
