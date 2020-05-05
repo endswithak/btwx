@@ -48,10 +48,9 @@ export const getPagePaperLayer = (store: LayerState): paper.Item => {
 }
 
 export const getLayerDepth = (store: LayerState, id: string) => {
-  let currentNode = getLayer(store, id);
   let depth = 0;
-  const parent = getParentLayer(store, currentNode.id);
-  while(parent.type === 'Group' || parent.type === 'Artboard') {
+  let currentNode = getParentLayer(store, id);
+  while(currentNode.type === 'Group' || currentNode.type === 'Artboard') {
     currentNode = getParentLayer(store, currentNode.id);
     depth++;
   }
@@ -110,7 +109,7 @@ export const getLayerScope = (store: LayerState, id: string) => {
   let parent = getParentLayer(store, id);
   while(parent.type === 'Group' || parent.type === 'Artboard') {
     newScope.push(parent.id);
-    parent = getParentLayer(store, parent.id);;
+    parent = getParentLayer(store, parent.id);
   }
   return newScope.reverse();
 }

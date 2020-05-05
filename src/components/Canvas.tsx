@@ -60,6 +60,7 @@ const Canvas = ({addPage, enableSelectionTool}: CanvasProps): ReactElement => {
       <canvas
         id='canvas-main'
         ref={canvasRef}
+        onClick={() => (document.activeElement as HTMLElement).blur()}
         style={{
           background: theme.background.z0
         }} />

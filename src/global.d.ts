@@ -33,11 +33,12 @@ declare namespace em {
     type: 'Artboard';
     children: string[];
     showChildren: boolean;
+    background: string;
   }
 
-  interface ArtboardBackground {
+  interface ArtboardBackground extends Layer {
     type: 'ArtboardBackground';
-    parent: string;
+    children: null;
   }
 
   interface Page extends Layer {

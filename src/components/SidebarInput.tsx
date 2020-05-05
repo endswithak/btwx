@@ -1,5 +1,5 @@
 import React, { useContext, ReactElement, useState, useRef, useEffect } from 'react';
-import { store } from '../store';
+import { ThemeContext } from './ThemeProvider';
 
 interface SidebarInputProps {
   value: string | number;
@@ -7,17 +7,28 @@ interface SidebarInputProps {
   onSubmit(value: string | number): void;
   label?: string;
   disabled?: boolean;
+  selectOnMount?: boolean;
 }
 
 const SidebarInput = (props: SidebarInputProps): ReactElement => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const globalState = useContext(store);
-  const { theme } = globalState;
+  const theme = useContext(ThemeContext);
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>) => {
     e.preventDefault();
     props.onSubmit(props.value);
   };
+
+  const handleChange = (e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>) => {
+    props.onChange(e);
+  };
+
+  useEffect(() => {
+    if (props.selectOnMount) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, []);
 
   return (
     <div className='c-sidebar-input'>
@@ -26,7 +37,7 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
           <input
             ref={inputRef}
             value={props.value}
-            onChange={props.onChange}
+            onChange={handleChange}
             onBlur={handleSubmit}
             className='c-sidebar-input__field'
             style={{

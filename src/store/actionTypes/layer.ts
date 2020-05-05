@@ -50,6 +50,8 @@ export const MOVE_LAYERS_BY = 'MOVE_LAYERS_BY';
 export const ENABLE_LAYER_DRAG = 'ENABLE_LAYER_DRAG';
 export const DISABLE_LAYER_DRAG = 'DISABLE_LAYER_DRAG';
 
+export const SET_LAYER_NAME = 'SET_LAYER_NAME';
+
 // Page
 
 export interface AddPagePayload {
@@ -81,6 +83,7 @@ export interface AddArtboardPayload {
   hover?: boolean;
   children?: string[];
   showChildren?: boolean;
+  background: string;
 }
 
 export interface AddArtboard {
@@ -465,4 +468,16 @@ export interface DisableLayerDrag {
   type: typeof DISABLE_LAYER_DRAG;
 }
 
-export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag;
+// Set layer name
+
+export interface SetLayerNamePayload {
+  id: string;
+  name: string;
+}
+
+export interface SetLayerName {
+  type: typeof SET_LAYER_NAME;
+  payload: SetLayerNamePayload;
+}
+
+export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName;

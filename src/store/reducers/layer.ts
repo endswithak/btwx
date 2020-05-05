@@ -37,6 +37,7 @@ import {
   MOVE_LAYERS_BY,
   ENABLE_LAYER_DRAG,
   DISABLE_LAYER_DRAG,
+  SET_LAYER_NAME,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -77,7 +78,8 @@ import {
   moveLayersBy,
   ungroupLayers,
   enableLayerDrag,
-  disableLayerDrag
+  disableLayerDrag,
+  setLayerName
 } from '../utils/layer';
 
 export interface LayerState {
@@ -193,6 +195,8 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return enableLayerDrag(state, action);
     case DISABLE_LAYER_DRAG:
       return disableLayerDrag(state, action);
+    case SET_LAYER_NAME:
+      return setLayerName(state, action);
     default:
       return state;
   }

@@ -40,6 +40,7 @@ import {
   MOVE_LAYERS_BY,
   ENABLE_LAYER_DRAG,
   DISABLE_LAYER_DRAG,
+  SET_LAYER_NAME,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
@@ -72,6 +73,7 @@ import {
   MoveLayersToPayload,
   MoveLayerByPayload,
   MoveLayersByPayload,
+  SetLayerNamePayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -116,6 +118,7 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
       parent: null,
       //paperLayer: paperLayer.id,
       children: [backgroundId],
+      background: backgroundId,
       selected: false,
       showChildren: false
     }
@@ -350,4 +353,11 @@ export const enableLayerDrag = (): LayerTypes => ({
 
 export const disableLayerDrag = (): LayerTypes => ({
   type: DISABLE_LAYER_DRAG
+});
+
+// Name
+
+export const setLayerName = (payload: SetLayerNamePayload): LayerTypes => ({
+  type: SET_LAYER_NAME,
+  payload
 });

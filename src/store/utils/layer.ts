@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import paper from 'paper';
 import { LayerState } from '../reducers/layer';
 import * as layerActions from '../actions/layer';
-import { AddPage, AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer, AddLayerChild, InsertLayerChild, EnableLayerHover, DisableLayerHover, InsertLayerAbove, InsertLayerBelow, GroupLayers, UngroupLayers, UngroupLayer, DeselectAllLayers, RemoveLayers, SetGroupScope, HideLayerChildren, ShowLayerChildren, DecreaseLayerScope, NewLayerScope, SetLayerHover, ClearLayerScope, IncreaseLayerScope, CopyLayerToClipboard, CopyLayersToClipboard, PasteLayersFromClipboard, SelectLayers, DeselectLayers, MoveLayerTo, MoveLayerBy, EnableLayerDrag, DisableLayerDrag, MoveLayersTo, MoveLayersBy, DeepSelectLayer, EscapeLayerScope, MoveLayer, MoveLayers, AddArtboard } from '../actionTypes/layer';
+import { AddPage, AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer, AddLayerChild, InsertLayerChild, EnableLayerHover, DisableLayerHover, InsertLayerAbove, InsertLayerBelow, GroupLayers, UngroupLayers, UngroupLayer, DeselectAllLayers, RemoveLayers, SetGroupScope, HideLayerChildren, ShowLayerChildren, DecreaseLayerScope, NewLayerScope, SetLayerHover, ClearLayerScope, IncreaseLayerScope, CopyLayerToClipboard, CopyLayersToClipboard, PasteLayersFromClipboard, SelectLayers, DeselectLayers, MoveLayerTo, MoveLayerBy, EnableLayerDrag, DisableLayerDrag, MoveLayersTo, MoveLayersBy, DeepSelectLayer, EscapeLayerScope, MoveLayer, MoveLayers, AddArtboard, SetLayerName } from '../actionTypes/layer';
 import { addItem, removeItem, insertItem, addItems } from './general';
 import { getLayerIndex, getLayer, getLayerDepth, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor, getNearestScopeGroupAncestor, getParentLayer, getLayerScope, getPaperLayer, getSelectionTopLeft, getPaperLayerByPaperId, getClipboardTopLeft, getSelectionBottomRight, getPagePaperLayer, getClipboardBottomRight } from '../selectors/layer';
 
@@ -47,16 +47,16 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
   paperLayer.parent = getPaperLayer(state.page);
   return {
     ...state,
-    allIds: addItems(state.allIds, [action.payload.id, action.payload.children[0]]),
+    allIds: addItems(state.allIds, [action.payload.id, action.payload.background]),
     byId: {
       ...state.byId,
       [action.payload.id]: {
         ...action.payload,
         parent: state.page
       } as em.Artboard,
-      [action.payload.children[0]]: {
+      [action.payload.background]: {
         type: 'ArtboardBackground',
-        id: action.payload.children[0],
+        id: action.payload.background,
         name: 'ArtboardBackground',
         parent: action.payload.id,
         children: null
@@ -305,6 +305,7 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
         ...state.byId,
         [action.payload.id]: {
           ...state.byId[action.payload.id],
+          showChildren: true,
           children: addItem(removeItem((state.byId[action.payload.id] as em.Group).children, action.payload.child), action.payload.child)
         } as em.Group
       },
@@ -325,6 +326,7 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
         },
         [action.payload.id]: {
           ...state.byId[action.payload.id],
+          showChildren: true,
           children: addItem((state.byId[action.payload.id] as em.Group).children, action.payload.child)
         } as em.Group
       },
@@ -926,5 +928,18 @@ export const disableLayerDrag = (state: LayerState, action: DisableLayerDrag): L
   return {
     ...state,
     dragging: false
+  }
+};
+
+export const setLayerName = (state: LayerState, action: SetLayerName): LayerState => {
+  return {
+    ...state,
+    byId: {
+      ...state.byId,
+      [action.payload.id]: {
+        ...state.byId[action.payload.id],
+        name: action.payload.name
+      }
+    }
   }
 };

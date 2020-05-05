@@ -4,6 +4,7 @@ import layer from './layer';
 import tool from './tool';
 
 import {
+  ADD_ARTBOARD,
   ADD_GROUP,
   ADD_SHAPE,
   REMOVE_LAYER,
@@ -26,6 +27,7 @@ import {
 
 const rootReducer = combineReducers({
   layer: undoable(layer, { filter: includeAction([
+    ADD_ARTBOARD,
     ADD_GROUP,
     ADD_SHAPE,
     REMOVE_LAYER,

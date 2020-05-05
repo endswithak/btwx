@@ -23,20 +23,34 @@ const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
   const [dropzone, setDropzone] = useState(null);
   const { page, layerById, insertLayerAbove, insertLayerBelow, addLayerChild } = props;
 
-  const canMoveLayer = (layer: em.Layer): boolean => {
+  const canMoveLayer = (layer: em.Layer, dropzone: em.Dropzone): boolean => {
     if (dragLayer.id !== layer.id) {
-      if (dragLayer.children) {
-        let canInclude = true;
-        let currentNode = layer;
-        while(layerById[currentNode.parent] && layerById[currentNode.parent].type === 'Group') {
-          currentNode = layerById[currentNode.parent];
-          if (currentNode.id === dragLayer.id) {
-            canInclude = false;
+      if (dragLayer.type === 'Artboard') {
+        if (layer.id === page.id) {
+          return true;
+        } else if (layer.parent === page.id) {
+          if (dropzone === 'Center') {
+            return false;
+          } else {
+            return true;
           }
+        } else {
+          return false;
         }
-        return canInclude;
       } else {
-        return true;
+        if (dragLayer.children) {
+          let canInclude = true;
+          let currentNode = layer;
+          while(layerById[currentNode.parent] && layerById[currentNode.parent].type === 'Group') {
+            currentNode = layerById[currentNode.parent];
+            if (currentNode.id === dragLayer.id) {
+              canInclude = false;
+            }
+          }
+          return canInclude;
+        } else {
+          return true;
+        }
       }
     } else {
       return false;
@@ -64,7 +78,7 @@ const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
   const handleDragEnter = (e: any): void => {
     if (e.target.dataset.dropzone) {
       const layer = layerById[e.target.dataset.id];
-      setDragEnterLayer(canMoveLayer(layer) ? layer : null);
+      setDragEnterLayer(canMoveLayer(layer, e.target.dataset.dropzone) ? layer : null);
       setDropzone(e.target.dataset.dropzone);
     }
   }
