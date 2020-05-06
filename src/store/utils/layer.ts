@@ -3,9 +3,9 @@ import { v4 as uuidv4 } from 'uuid';
 import paper from 'paper';
 import { LayerState } from '../reducers/layer';
 import * as layerActions from '../actions/layer';
-import { AddPage, AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer, AddLayerChild, InsertLayerChild, EnableLayerHover, DisableLayerHover, InsertLayerAbove, InsertLayerBelow, GroupLayers, UngroupLayers, UngroupLayer, DeselectAllLayers, RemoveLayers, SetGroupScope, HideLayerChildren, ShowLayerChildren, DecreaseLayerScope, NewLayerScope, SetLayerHover, ClearLayerScope, IncreaseLayerScope, CopyLayerToClipboard, CopyLayersToClipboard, PasteLayersFromClipboard, SelectLayers, DeselectLayers, MoveLayerTo, MoveLayerBy, EnableLayerDrag, DisableLayerDrag, MoveLayersTo, MoveLayersBy, DeepSelectLayer, EscapeLayerScope, MoveLayer, MoveLayers, AddArtboard, SetLayerName } from '../actionTypes/layer';
+import { AddPage, AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer, AddLayerChild, InsertLayerChild, EnableLayerHover, DisableLayerHover, InsertLayerAbove, InsertLayerBelow, GroupLayers, UngroupLayers, UngroupLayer, DeselectAllLayers, RemoveLayers, SetGroupScope, HideLayerChildren, ShowLayerChildren, DecreaseLayerScope, NewLayerScope, SetLayerHover, ClearLayerScope, IncreaseLayerScope, CopyLayerToClipboard, CopyLayersToClipboard, PasteLayersFromClipboard, SelectLayers, DeselectLayers, MoveLayerTo, MoveLayerBy, EnableLayerDrag, DisableLayerDrag, MoveLayersTo, MoveLayersBy, DeepSelectLayer, EscapeLayerScope, MoveLayer, MoveLayers, AddArtboard, SetLayerName, SetActiveArtboard } from '../actionTypes/layer';
 import { addItem, removeItem, insertItem, addItems } from './general';
-import { getLayerIndex, getLayer, getLayerDepth, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor, getNearestScopeGroupAncestor, getParentLayer, getLayerScope, getPaperLayer, getSelectionTopLeft, getPaperLayerByPaperId, getClipboardTopLeft, getSelectionBottomRight, getPagePaperLayer, getClipboardBottomRight } from '../selectors/layer';
+import { getLayerIndex, getLayer, getLayerDepth, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor, getNearestScopeGroupAncestor, getParentLayer, getLayerScope, getPaperLayer, getSelectionTopLeft, getPaperLayerByPaperId, getClipboardTopLeft, getSelectionBottomRight, getPagePaperLayer, getClipboardBottomRight, getClipboardCenter, getSelectionCenter } from '../selectors/layer';
 
 const removeLayerAndChildren = (state: LayerState, layer: string): string[] => {
   const groups: string[] = [layer];
@@ -47,16 +47,16 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
   paperLayer.parent = getPaperLayer(state.page);
   return {
     ...state,
-    allIds: addItems(state.allIds, [action.payload.id, action.payload.background]),
+    allIds: addItems(state.allIds, [action.payload.id, action.payload.children[0]]),
     byId: {
       ...state.byId,
       [action.payload.id]: {
         ...action.payload,
         parent: state.page
       } as em.Artboard,
-      [action.payload.background]: {
+      [action.payload.children[0]]: {
         type: 'ArtboardBackground',
-        id: action.payload.background,
+        id: action.payload.children[0],
         name: 'ArtboardBackground',
         parent: action.payload.id,
         children: null
@@ -66,6 +66,7 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
         children: addItem(state.byId[state.page].children, action.payload.id)
       } as em.Page
     },
+    activeArtboard: action.payload.id,
     paperProject: paper.project.exportJSON()
   }
 };
@@ -707,6 +708,9 @@ const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any) => 
         const childLayer = state.clipboard.byId[child];
         const childPaperLayer = childLayer.paperLayer;
         const childPaperLayerClone = childPaperLayer.clone({deep: false, insert: true});
+        if (layer.type === 'Artboard') {
+          childPaperLayerClone.data.artboard = layerCloneMap[layer.id];
+        }
         childPaperLayerClone.data.id = layerCloneMap[child];
         childPaperLayerClone.parent = groupClonePaperLayer;
         childPaperLayerClone.onClick = childPaperLayer.onClick;
@@ -742,7 +746,6 @@ const cloneLayerAndChildren = (state: LayerState, id: string) => {
           ...layer,
           id: layerCloneMap[key],
           parent: key === rootLayer.id ? rootParent.id : layerCloneMap[layer.parent],
-          //paperLayer: paperLayerCloneMap[layer.paperLayer.id],
           children: layer.children ? layer.children.reduce((childResult, current) => {
             return [...childResult, layerCloneMap[current]];
           }, []) : null
@@ -753,21 +756,10 @@ const cloneLayerAndChildren = (state: LayerState, id: string) => {
 }
 
 export const pasteLayerFromClipboard = (state: LayerState, id: string, pasteOverSelection?: boolean): LayerState => {
-  const clonedLayerAndChildren = cloneLayerAndChildren(state, id);
+  let currentState = state;
+  const clonedLayerAndChildren = cloneLayerAndChildren(currentState, id);
   const rootLayer = clonedLayerAndChildren.byId[clonedLayerAndChildren.allIds[0]];
-  const rootLayerPaperLayer = getPaperLayerByPaperId(rootLayer.paperLayer);
-  if (pasteOverSelection && state.selected.length > 0) {
-    const selectionTopLeft = getSelectionTopLeft(state);
-    const clipboardTopLeft = getClipboardTopLeft(state);
-    clonedLayerAndChildren.allIds.forEach((layer: string) => {
-      const paperLayer = getPaperLayer(layer);
-      const paperLayerTopLeft = paperLayer.bounds.topLeft;
-      if (paperLayer.className !== 'Group') {
-        paperLayer.bounds.topLeft = new paper.Point(selectionTopLeft.x + (paperLayerTopLeft.x - clipboardTopLeft.x), selectionTopLeft.y + (paperLayerTopLeft.y - clipboardTopLeft.y));
-      }
-    });
-  }
-  const stateWithPastedLayer = clonedLayerAndChildren.allIds.reduce((result: LayerState, current: string, index: number) => {
+  currentState = clonedLayerAndChildren.allIds.reduce((result: LayerState, current: string, index: number) => {
     const layer = clonedLayerAndChildren.byId[current];
     const layerParent = getLayer(result, layer.parent);
     return {
@@ -784,7 +776,19 @@ export const pasteLayerFromClipboard = (state: LayerState, id: string, pasteOver
       paperProject: paper.project.exportJSON()
     }
   }, state);
-  return selectLayer(stateWithPastedLayer, layerActions.selectLayer({id: rootLayer.id}) as SelectLayer);
+  currentState = selectLayer(currentState, layerActions.selectLayer({id: rootLayer.id}) as SelectLayer);
+  if (pasteOverSelection && state.selected.length > 0) {
+    const selectionCenter = getSelectionCenter(state);
+    const clipboardCenter = getClipboardCenter(state);
+    currentState = clonedLayerAndChildren.allIds.reduce((result: LayerState, current: string) => {
+      const paperLayer = getPaperLayer(current);
+      const paperLayerCenter = paperLayer.position;
+      paperLayer.position.x = selectionCenter.x + (paperLayerCenter.x - clipboardCenter.x);
+      paperLayer.position.y = selectionCenter.y + (paperLayerCenter.y - clipboardCenter.y);
+      return moveLayerTo(result, layerActions.moveLayerTo({id: current, x: paperLayer.position.x, y: paperLayer.position.y}) as MoveLayerTo);
+    }, currentState);
+  }
+  return currentState;
 };
 
 export const pasteLayersFromClipboard = (state: LayerState, action: PasteLayersFromClipboard): LayerState => {
@@ -819,7 +823,8 @@ export const updateParentBounds = (state: LayerState, id: string): LayerState =>
             height: paperLayer.bounds.height
           }
         }
-      }
+      },
+      paperProject: paper.project.exportJSON()
     }
   }, state);
 };
@@ -854,8 +859,8 @@ export const moveLayers = (state: LayerState, action: MoveLayers): LayerState =>
 export const moveLayerTo = (state: LayerState, action: MoveLayerTo): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
-  paperLayer.position.x = action.payload.x;
-  paperLayer.position.y = action.payload.y;
+  // paperLayer.position.x = action.payload.x;
+  // paperLayer.position.y = action.payload.y;
   updateSelectionFrame(currentState);
   currentState = {
     ...currentState,
@@ -941,5 +946,12 @@ export const setLayerName = (state: LayerState, action: SetLayerName): LayerStat
         name: action.payload.name
       }
     }
+  }
+};
+
+export const setActiveArtboard = (state: LayerState, action: SetActiveArtboard): LayerState => {
+  return {
+    ...state,
+    activeArtboard: action.payload.id
   }
 };

@@ -33,7 +33,7 @@ declare namespace em {
     type: 'Artboard';
     children: string[];
     showChildren: boolean;
-    background: string;
+    //background: string;
   }
 
   interface ArtboardBackground extends Layer {
@@ -49,6 +49,7 @@ declare namespace em {
   interface Shape extends Layer {
     type: 'Shape';
     shapeType: em.ShapeType;
+    pathData: string;
     children: null;
   }
 

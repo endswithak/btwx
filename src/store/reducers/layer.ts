@@ -38,6 +38,7 @@ import {
   ENABLE_LAYER_DRAG,
   DISABLE_LAYER_DRAG,
   SET_LAYER_NAME,
+  SET_ACTIVE_ARTBOARD,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -79,6 +80,7 @@ import {
   ungroupLayers,
   enableLayerDrag,
   disableLayerDrag,
+  setActiveArtboard,
   setLayerName
 } from '../utils/layer';
 
@@ -88,6 +90,7 @@ export interface LayerState {
   };
   allIds: string[];
   page: string;
+  activeArtboard: string;
   selected: string[];
   scope: string[];
   hover: string;
@@ -106,6 +109,7 @@ const initialState: LayerState = {
   byId: {},
   allIds: [],
   page: null,
+  activeArtboard: null,
   selected: [],
   scope: [],
   hover: null,
@@ -197,6 +201,8 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return disableLayerDrag(state, action);
     case SET_LAYER_NAME:
       return setLayerName(state, action);
+    case SET_ACTIVE_ARTBOARD:
+      return setActiveArtboard(state, action);
     default:
       return state;
   }

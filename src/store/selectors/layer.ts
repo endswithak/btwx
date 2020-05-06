@@ -130,6 +130,14 @@ export const getSelectionBottomRight = (store: LayerState): paper.Point => {
   return paperLayerPoints.reduce(paper.Point.max);
 }
 
+export const getSelectionCenter = (store: LayerState): paper.Point => {
+  const topLeft = getSelectionTopLeft(store);
+  const bottomRight = getSelectionBottomRight(store);
+  const xMid = (topLeft.x + bottomRight.x) / 2;
+  const yMid = (topLeft.y + bottomRight.y) / 2;
+  return new paper.Point(xMid, yMid);
+}
+
 export const getClipboardTopLeft = (store: LayerState): paper.Point => {
   const paperLayerPoints = store.clipboard.allIds.reduce((result, current) => {
     const paperLayer = store.clipboard.byId[current].paperLayer;
@@ -144,4 +152,12 @@ export const getClipboardBottomRight = (store: LayerState): paper.Point => {
     return [...result, paperLayer.bounds.bottomRight];
   }, []);
   return paperLayerPoints.reduce(paper.Point.max);
+}
+
+export const getClipboardCenter = (store: LayerState): paper.Point => {
+  const topLeft = getClipboardTopLeft(store);
+  const bottomRight = getClipboardBottomRight(store);
+  const xMid = (topLeft.x + bottomRight.x) / 2;
+  const yMid = (topLeft.y + bottomRight.y) / 2;
+  return new paper.Point(xMid, yMid);
 }

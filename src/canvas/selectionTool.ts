@@ -119,7 +119,9 @@ class SelectionTool {
         break;
       }
       case 'backspace': {
-        store.dispatch(removeLayers({layers: state.layer.present.selected}));
+        if (state.layer.present.selected.length > 0) {
+          store.dispatch(removeLayers({layers: state.layer.present.selected}));
+        }
         break;
       }
     }

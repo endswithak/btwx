@@ -4,9 +4,11 @@ import { connect } from 'react-redux';
 import { enableSelectionTool, enableRectangleDrawTool, enableEllipseDrawTool, enableStarDrawTool, enablePolygonDrawTool, enableRoundedDrawTool, enableArtboardTool } from '../store/actions/tool';
 import { ToolTypes } from '../store/actionTypes/tool';
 import { ThemeContext } from './ThemeProvider';
+import { ipcRenderer } from 'electron';
 
 interface TopbarStateProps {
   drawShapeType: em.ShapeType;
+  activeArtboard: em.Artboard;
   enableRectangleDrawTool(): ToolTypes;
   enableEllipseDrawTool(): ToolTypes;
   enableStarDrawTool(): ToolTypes;
@@ -18,7 +20,7 @@ interface TopbarStateProps {
 
 const Topbar = (props: TopbarStateProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { enableRectangleDrawTool, enableEllipseDrawTool, enableSelectionTool, enableStarDrawTool, drawShapeType, enablePolygonDrawTool, enableRoundedDrawTool, enableArtboardTool } = props;
+  const { enableRectangleDrawTool, enableEllipseDrawTool, enableSelectionTool, enableStarDrawTool, drawShapeType, enablePolygonDrawTool, enableRoundedDrawTool, enableArtboardTool, activeArtboard } = props;
 
   const handleDrawClick = (shape: em.ShapeType | 'Artboard') => {
     if (drawShapeType === shape) {
@@ -45,6 +47,10 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
           break;
       }
     }
+  }
+
+  const handlePreviewClick = () => {
+    ipcRenderer.send('openPreview', JSON.stringify(activeArtboard));
   }
 
   return (
@@ -83,14 +89,20 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
         onClick={() => handleDrawClick('Polygon')}>
         P
       </button>
+      <button
+        className='c-topbar__button'
+        onClick={handlePreviewClick}>
+        Preview
+      </button>
     </div>
   );
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { tool } = state;
+  const { tool, layer } = state;
   const drawShapeType = tool.drawShape;
-  return { drawShapeType };
+  const activeArtboard = layer.present.byId[layer.present.activeArtboard];
+  return { drawShapeType, activeArtboard };
 };
 
 export default connect(

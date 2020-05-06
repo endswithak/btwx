@@ -32,7 +32,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './components/App';
-//import Preview from './components/Preview';
+import Preview from './components/Preview';
 import { ThemeProvider } from './components/ThemeProvider';
 import { Provider } from 'react-redux';
 import store from './store';
@@ -50,9 +50,13 @@ window.renderMainWindow = () => {
   );
 }
 
-// window.renderPreviewWindow = (globalState) => {
-//   ReactDOM.render(
-//     <Preview globalState={globalState} />,
-//     document.getElementById('root')
-//   );
-// }
+window.renderPreviewWindow = () => {
+  ReactDOM.render(
+    <Provider store={store}>
+      <ThemeProvider>
+        <Preview />
+      </ThemeProvider>
+    </Provider>,
+    document.getElementById('root')
+  );
+}

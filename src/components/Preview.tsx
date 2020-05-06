@@ -1,15 +1,21 @@
 import React, { useRef, useContext, useEffect, ReactElement } from 'react';
+import { ThemeContext } from './ThemeProvider';
+import PreviewCanvas from './PreviewCanvas';
 
-interface PreviewProps {
-  globalState: any;
-}
+const Preview = (): ReactElement => {
+  const preview = useRef<HTMLDivElement>(null);
+  const theme = useContext(ThemeContext);
 
-const Preview = (props: PreviewProps): ReactElement => {
-  //const test = parse(props.globalState);
   return (
     <div
-      className='c-preview'>
-      <h1>Hello</h1>
+      className='c-app'
+      ref={preview}
+      style={{
+        background: theme.background.z0
+      }}>
+      <div className='c-app__canvas'>
+        <PreviewCanvas />
+      </div>
     </div>
   );
 }

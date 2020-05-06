@@ -1,12 +1,11 @@
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { useContext, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
-import SidebarLayerTitle from './SidebarLayerTitle';
 import SidebarLayerTitleInput from './SidebarLayerTitleInput';
 import SidebarLayerChevron from './SidebarLayerChevron';
 import SidebarLayerShape from './SidebarLayerShape';
 import SidebarLayerFolder from './SidebarLayerFolder';
-import { setLayerHover, deselectAllLayers } from '../store/actions/layer';
+import { setLayerHover } from '../store/actions/layer';
 import { SetLayerHoverPayload, LayerTypes } from '../store/actionTypes/layer';
 import { RootState } from '../store/reducers';
 
@@ -16,13 +15,12 @@ interface SidebarLayerItemProps {
   hover?: string;
   setDraggable?(draggable: boolean): void;
   setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
-  deselectAllLayers?(): LayerTypes;
 }
 
 const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
   const [editing, setEditing] = useState(false);
   const theme = useContext(ThemeContext);
-  const { layer, depth, hover, setLayerHover, setDraggable, deselectAllLayers } = props;
+  const { layer, depth, hover, setLayerHover, setDraggable } = props;
 
   const handleMouseEnter = () => {
     setLayerHover({id: layer.id});
@@ -32,17 +30,11 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
     setLayerHover({id: null});
   }
 
-  const handleDoubleClick = () => {
-    deselectAllLayers();
-    setEditing(true);
-  }
-
   return (
     <div
       className='c-layers-sidebar__layer-item'
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onDoubleClick={handleDoubleClick}
       style={{
         background: layer.selected || editing
         ? theme.palette.primary
@@ -58,14 +50,11 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
         layer={layer} />
       <SidebarLayerShape
         layer={layer} />
-      {
-        editing
-        ? <SidebarLayerTitleInput
-            layer={layer}
-            setDraggable={setDraggable}
-            setEditing={setEditing} />
-        : <SidebarLayerTitle layer={layer} />
-      }
+      <SidebarLayerTitleInput
+        layer={layer}
+        setDraggable={setDraggable}
+        editing={editing}
+        setEditing={setEditing} />
     </div>
   );
 }
@@ -78,5 +67,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { setLayerHover, deselectAllLayers }
+  { setLayerHover }
 )(SidebarLayerItem);

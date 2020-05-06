@@ -1,7 +1,7 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import store, { StoreDispatch, StoreGetState } from '../store';
 import { enableSelectionTool, enableRectangleDrawTool, enableEllipseDrawTool, enableRoundedDrawTool, enableDragTool } from '../store/actions/tool';
-import { addShape, setLayerHover, increaseLayerScope, selectLayer, newLayerScope, deselectLayer, moveLayerBy, moveLayersBy, enableLayerDrag, disableLayerDrag, deepSelectLayer, addArtboard } from '../store/actions/layer';
+import { addShape, setLayerHover, increaseLayerScope, selectLayer, newLayerScope, deselectLayer, moveLayerBy, moveLayersBy, enableLayerDrag, disableLayerDrag, deepSelectLayer, addArtboard, setActiveArtboard } from '../store/actions/layer';
 import { getNearestScopeAncestor, getLayerByPaperId, isScopeGroupLayer, getPaperLayer, getLayer } from '../store/selectors/layer';
 import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
 
@@ -149,6 +149,7 @@ class DrawTool {
           const state = store.getState();
           const layer = getLayer(state.layer.present, this.data.artboard);
           const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, layer.id);
+          store.dispatch(setActiveArtboard({id: this.data.artboard}));
           if (e.modifiers.shift) {
             if (layer.selected) {
               store.dispatch(deselectLayer({id: nearestScopeAncestor.id}));

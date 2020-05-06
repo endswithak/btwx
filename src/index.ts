@@ -6,9 +6,11 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
   app.quit();
 }
 
+let mainWindow: electron.BrowserWindow;
+
 const createWindow = (): void => {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     height: 600,
     width: 800,
     webPreferences: {
@@ -51,10 +53,13 @@ app.on('activate', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
-ipcMain.on('openPreview', (event, globalState) => {
+ipcMain.on('openPreview', (event, activeArtboard) => {
+  const artboard = JSON.parse(activeArtboard);
+
   const previewWindow = new BrowserWindow({
-    height: 600,
-    width: 800,
+    parent: mainWindow,
+    width: artboard.frame.width,
+    height: artboard.frame.height,
     webPreferences: {
       nodeIntegration: true
     }
@@ -66,6 +71,6 @@ ipcMain.on('openPreview', (event, globalState) => {
   previewWindow.webContents.openDevTools();
 
   previewWindow.webContents.on('did-finish-load', () => {
-    previewWindow.webContents.executeJavaScript(`renderPreviewWindow(${globalState})`);
+    previewWindow.webContents.executeJavaScript(`renderPreviewWindow()`);
   });
 });

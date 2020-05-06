@@ -52,6 +52,8 @@ export const DISABLE_LAYER_DRAG = 'DISABLE_LAYER_DRAG';
 
 export const SET_LAYER_NAME = 'SET_LAYER_NAME';
 
+export const SET_ACTIVE_ARTBOARD = 'SET_ACTIVE_ARTBOARD';
+
 // Page
 
 export interface AddPagePayload {
@@ -83,7 +85,6 @@ export interface AddArtboardPayload {
   hover?: boolean;
   children?: string[];
   showChildren?: boolean;
-  background: string;
 }
 
 export interface AddArtboard {
@@ -120,6 +121,7 @@ export interface AddShapePayload {
   name?: string;
   parent?: string;
   shapeType?: em.ShapeType;
+  pathData?: string;
   paperLayer?: paper.Item;
   selected?: boolean;
   hover?: boolean;
@@ -480,4 +482,15 @@ export interface SetLayerName {
   payload: SetLayerNamePayload;
 }
 
-export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName;
+// Artboard
+
+export interface SetActiveArtboardPayload {
+  id: string;
+}
+
+export interface SetActiveArtboard {
+  type: typeof SET_ACTIVE_ARTBOARD;
+  payload: SetActiveArtboardPayload;
+}
+
+export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard;

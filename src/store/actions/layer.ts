@@ -41,6 +41,7 @@ import {
   ENABLE_LAYER_DRAG,
   DISABLE_LAYER_DRAG,
   SET_LAYER_NAME,
+  SET_ACTIVE_ARTBOARD,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
@@ -74,6 +75,7 @@ import {
   MoveLayerByPayload,
   MoveLayersByPayload,
   SetLayerNamePayload,
+  SetActiveArtboardPayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -91,7 +93,6 @@ export const addPage = (payload: AddPagePayload): LayerTypes => {
       id: layerId,
       name: payload.name ? payload.name : 'Page',
       parent: null,
-      //paperLayer: paperLayer.id,
       children: [],
       selected: false
     }
@@ -116,9 +117,7 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
       frame: payload.frame,
       name: payload.name ? payload.name : 'Artboard',
       parent: null,
-      //paperLayer: paperLayer.id,
       children: [backgroundId],
-      background: backgroundId,
       selected: false,
       showChildren: false
     }
@@ -140,7 +139,6 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
       frame: payload.frame,
       name: payload.name ? payload.name : 'Group',
       parent: payload.parent ? payload.parent : null,
-      //paperLayer: paperLayer.id,
       children: [],
       selected: false,
       showChildren: false
@@ -156,6 +154,11 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
     id: id,
     type: 'Shape'
   }
+  const clone = payload.paperLayer.clone({insert: false}) as paper.PathItem;
+  clone.fitBounds(new paper.Rectangle({
+    point: new paper.Point(0,0),
+    size: new paper.Size(16,16)
+  }));
   return {
     type: ADD_SHAPE,
     payload: {
@@ -165,7 +168,7 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
       name: payload.name ? payload.name : payload.shapeType,
       parent: payload.parent ? payload.parent : null,
       shapeType: payload.shapeType,
-      //paperLayer: payload.paperLayer.id,
+      pathData: clone.pathData,
       selected: false,
     }
   }
@@ -359,5 +362,12 @@ export const disableLayerDrag = (): LayerTypes => ({
 
 export const setLayerName = (payload: SetLayerNamePayload): LayerTypes => ({
   type: SET_LAYER_NAME,
+  payload
+});
+
+// Artboard
+
+export const setActiveArtboard = (payload: SetActiveArtboardPayload): LayerTypes => ({
+  type: SET_ACTIVE_ARTBOARD,
   payload
 });

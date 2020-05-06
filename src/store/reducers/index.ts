@@ -1,5 +1,6 @@
 import { combineReducers } from 'redux';
 import undoable, { includeAction, excludeAction } from 'redux-undo';
+import { withReduxStateSync } from 'redux-state-sync';
 import layer from './layer';
 import tool from './tool';
 
@@ -22,7 +23,8 @@ import {
   MOVE_LAYER_TO,
   MOVE_LAYER_BY,
   MOVE_LAYERS_TO,
-  MOVE_LAYERS_BY
+  MOVE_LAYERS_BY,
+  SET_LAYER_NAME
 } from '../actionTypes/layer';
 
 const rootReducer = combineReducers({
@@ -45,11 +47,12 @@ const rootReducer = combineReducers({
     MOVE_LAYER_TO,
     MOVE_LAYER_BY,
     MOVE_LAYERS_TO,
-    MOVE_LAYERS_BY
+    MOVE_LAYERS_BY,
+    SET_LAYER_NAME
   ])}),
   tool
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
 
-export default rootReducer;
+export default withReduxStateSync(rootReducer);
