@@ -1,6 +1,5 @@
 import { combineReducers } from 'redux';
 import undoable, { includeAction, excludeAction } from 'redux-undo';
-import { withReduxStateSync } from 'redux-state-sync';
 import layer from './layer';
 import tool from './tool';
 
@@ -55,4 +54,4 @@ const rootReducer = combineReducers({
 
 export type RootState = ReturnType<typeof rootReducer>;
 
-export default withReduxStateSync(rootReducer);
+export default rootReducer;

@@ -2,14 +2,14 @@ import paper from 'paper';
 import { connect } from 'react-redux';
 import React, { useRef, useContext, useEffect, ReactElement } from 'react';
 import { ThemeContext } from './ThemeProvider';
-import { getPaperLayer } from '../store/selectors/layer';
 import { RootState } from '../store/reducers';
+import { paperPreview } from '../canvas';
 
 interface PreviewCanvasProps {
-  layer: any;
-  paperProject: string;
-  activeArtboard: string;
-  page: string;
+  layer?: any;
+  paperProject?: string;
+  activeArtboard?: string;
+  page?: string;
 }
 
 const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
@@ -21,25 +21,19 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
   useEffect(() => {
     canvasRef.current.width = canvasContainerRef.current.clientWidth;
     canvasRef.current.height = canvasContainerRef.current.clientHeight;
-    paper.setup(canvasRef.current);
+    paperPreview.setup(canvasRef.current);
+    paperPreview.activate();
   }, []);
 
   useEffect(() => {
-    paper.project.clear();
-    paper.project.importJSON(paperProject);
-    const pagePaperLayer = getPaperLayer(page);
-    const activeArtboardPaperLayer = getPaperLayer(activeArtboard);
-    //const activeArtboardJSON = activeArtboardPaperLayer.exportJSON();
-    pagePaperLayer.removeChildren();
-    pagePaperLayer.addChild(activeArtboardPaperLayer);
-    pagePaperLayer.position = paper.view.center;
-    //const pagePaperLayerJSON = pagePaperLayer.exportJSON();
-    // paper.project.clear();
-    // const rootLayer = new paper.Layer();
-    // paper.project.addLayer(rootLayer);
-    // test.parent = rootLayer;
-    // test.position = paper.view.center;
-    console.log(paper);
+    paperPreview.project.clear();
+    paperPreview.project.importJSON(paperProject);
+    const activeArtboardPaperLayer = paperPreview.project.getItem({ data: { id: activeArtboard } });
+    paperPreview.project.clear();
+    const rootLayer = new paper.Layer();
+    paperPreview.project.addLayer(rootLayer);
+    activeArtboardPaperLayer.parent = rootLayer;
+    activeArtboardPaperLayer.position = paperPreview.view.center;
   }, [paperProject]);
 
   return (
@@ -47,7 +41,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
       className={`c-canvas`}
       ref={canvasContainerRef}>
       <canvas
-        id='canvas-main'
+        id='canvas-preview'
         ref={canvasRef}
         onClick={() => (document.activeElement as HTMLElement).blur()}
         style={{

@@ -8,9 +8,10 @@ declare namespace em {
     frame: em.Frame;
     name: string;
     parent: string;
-    //paperLayer: number;
+    //paperLayer: string;
     selected: boolean;
     children: string[] | null;
+    animation: string;
   }
 
   interface ClipboardLayer {
@@ -52,6 +53,17 @@ declare namespace em {
     pathData: string;
     children: null;
   }
+
+  interface Animation {
+    id: string;
+    layer: string;
+    event: AnimationEvent;
+    artboard: string;
+    destination: string;
+    duration: number;
+  }
+
+  type AnimationEvent = 'click' | 'doubleclick' | 'mouseenter' | 'mouseleave';
 
   type Dropzone = 'Top' | 'Center' | 'Bottom';
 

@@ -5,7 +5,6 @@ import { addPage } from '../store/actions/layer';
 import { enableSelectionTool } from '../store/actions/tool';
 import { ThemeContext } from './ThemeProvider';
 import { AddPagePayload, LayerTypes } from '../store/actionTypes/layer';
-//import renderCanvas from '../canvas';
 
 interface CanvasProps {
   addPage(payload: AddPagePayload): LayerTypes;
@@ -46,6 +45,15 @@ const Canvas = ({addPage, enableSelectionTool}: CanvasProps): ReactElement => {
     });
   }, []);
 
+  const handleClick = (e) => {
+    (document.activeElement as HTMLElement).blur();
+    // canvasRef.current.tabIndex = 0;
+    // canvasRef.current.focus();
+    // paper.projects[0].activate();
+    // //enableSelectionTool();
+    // console.log(paper);
+  }
+
   // useEffect(() => {
   //   if (paperApp) {
   //     paperApp.scope.view.viewSize.width = canvasContainerRef.current.clientWidth;
@@ -60,7 +68,7 @@ const Canvas = ({addPage, enableSelectionTool}: CanvasProps): ReactElement => {
       <canvas
         id='canvas-main'
         ref={canvasRef}
-        onClick={() => (document.activeElement as HTMLElement).blur()}
+        onClick={handleClick}
         style={{
           background: theme.background.z0
         }} />

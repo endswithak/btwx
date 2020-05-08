@@ -1,7 +1,7 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import { getPagePaperLayer, getLayerByPaperId, getPaperLayer, getNearestScopeAncestor } from '../store/selectors/layer';
 import { deselectAllLayers, deselectLayer, selectLayer } from '../store/actions/layer';
-import store, { StoreGetState, StoreDispatch } from '../store';
+import store from '../store';
 
 class AreaSelectTool {
   enabled: boolean;

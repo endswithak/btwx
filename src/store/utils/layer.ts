@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import paper from 'paper';
 import { LayerState } from '../reducers/layer';
 import * as layerActions from '../actions/layer';
-import { AddPage, AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer, AddLayerChild, InsertLayerChild, EnableLayerHover, DisableLayerHover, InsertLayerAbove, InsertLayerBelow, GroupLayers, UngroupLayers, UngroupLayer, DeselectAllLayers, RemoveLayers, SetGroupScope, HideLayerChildren, ShowLayerChildren, DecreaseLayerScope, NewLayerScope, SetLayerHover, ClearLayerScope, IncreaseLayerScope, CopyLayerToClipboard, CopyLayersToClipboard, PasteLayersFromClipboard, SelectLayers, DeselectLayers, MoveLayerTo, MoveLayerBy, EnableLayerDrag, DisableLayerDrag, MoveLayersTo, MoveLayersBy, DeepSelectLayer, EscapeLayerScope, MoveLayer, MoveLayers, AddArtboard, SetLayerName, SetActiveArtboard } from '../actionTypes/layer';
+import { AddPage, AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer, AddLayerChild, InsertLayerChild, EnableLayerHover, DisableLayerHover, InsertLayerAbove, InsertLayerBelow, GroupLayers, UngroupLayers, UngroupLayer, DeselectAllLayers, RemoveLayers, SetGroupScope, HideLayerChildren, ShowLayerChildren, DecreaseLayerScope, NewLayerScope, SetLayerHover, ClearLayerScope, IncreaseLayerScope, CopyLayerToClipboard, CopyLayersToClipboard, PasteLayersFromClipboard, SelectLayers, DeselectLayers, MoveLayerTo, MoveLayerBy, EnableLayerDrag, DisableLayerDrag, MoveLayersTo, MoveLayersBy, DeepSelectLayer, EscapeLayerScope, MoveLayer, MoveLayers, AddArtboard, SetLayerName, SetActiveArtboard, OpenAnimationSelect, CloseAnimationSelect } from '../actionTypes/layer';
 import { addItem, removeItem, insertItem, addItems } from './general';
 import { getLayerIndex, getLayer, getLayerDepth, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor, getNearestScopeGroupAncestor, getParentLayer, getLayerScope, getPaperLayer, getSelectionTopLeft, getPaperLayerByPaperId, getClipboardTopLeft, getSelectionBottomRight, getPagePaperLayer, getClipboardBottomRight, getClipboardCenter, getSelectionCenter } from '../selectors/layer';
 
@@ -45,7 +45,7 @@ export const addPage = (state: LayerState, action: AddPage): LayerState => {
 export const addArtboard = (state: LayerState, action: AddArtboard): LayerState => {
   const paperLayer = getPaperLayer(action.payload.id);
   paperLayer.parent = getPaperLayer(state.page);
-  return {
+  const stateWithLayer = {
     ...state,
     allIds: addItems(state.allIds, [action.payload.id, action.payload.children[0]]),
     byId: {
@@ -69,6 +69,7 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
     activeArtboard: action.payload.id,
     paperProject: paper.project.exportJSON()
   }
+  return selectLayer(stateWithLayer, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
 };
 
 export const addLayer = (state: LayerState, action: AddGroup | AddShape): LayerState => {
@@ -87,7 +88,8 @@ export const addLayer = (state: LayerState, action: AddGroup | AddShape): LayerS
       } as em.Page | em.Group | em.Shape,
       [layerParent]: {
         ...state.byId[layerParent],
-        children: addItem((state.byId[layerParent] as em.Group).children, action.payload.id)
+        children: addItem((state.byId[layerParent] as em.Group).children, action.payload.id),
+        showChildren: true
       } as em.Group
     },
     paperProject: paper.project.exportJSON()
@@ -748,7 +750,8 @@ const cloneLayerAndChildren = (state: LayerState, id: string) => {
           parent: key === rootLayer.id ? rootParent.id : layerCloneMap[layer.parent],
           children: layer.children ? layer.children.reduce((childResult, current) => {
             return [...childResult, layerCloneMap[current]];
-          }, []) : null
+          }, []) : null,
+          animation: null
         }
       }
     };
@@ -953,5 +956,29 @@ export const setActiveArtboard = (state: LayerState, action: SetActiveArtboard):
   return {
     ...state,
     activeArtboard: action.payload.id
+  }
+};
+
+export const openAnimationSelect = (state: LayerState, action: OpenAnimationSelect): LayerState => {
+  return {
+    ...state,
+    animationSelect: {
+      isOpen: true,
+      layer: action.payload.id,
+      x: action.payload.position.x,
+      y: action.payload.position.y
+    }
+  }
+};
+
+export const closeAnimationSelect = (state: LayerState, action: CloseAnimationSelect): LayerState => {
+  return {
+    ...state,
+    animationSelect: {
+      isOpen: false,
+      layer: null,
+      x: null,
+      y: null
+    }
   }
 };

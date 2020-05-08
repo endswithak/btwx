@@ -42,6 +42,8 @@ import {
   DISABLE_LAYER_DRAG,
   SET_LAYER_NAME,
   SET_ACTIVE_ARTBOARD,
+  OPEN_ANIMATION_SELECT,
+  CLOSE_ANIMATION_SELECT,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
@@ -76,6 +78,7 @@ import {
   MoveLayersByPayload,
   SetLayerNamePayload,
   SetActiveArtboardPayload,
+  OpenAnimationSelectPayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -83,7 +86,7 @@ import {
 
 export const addPage = (payload: AddPagePayload): LayerTypes => {
   const layerId = uuidv4();
-  new paper.Group({
+  const paperLayer = new paper.Group({
     data: { id: layerId, type: 'Page' }
   });
   return {
@@ -94,6 +97,7 @@ export const addPage = (payload: AddPagePayload): LayerTypes => {
       name: payload.name ? payload.name : 'Page',
       parent: null,
       children: [],
+      //paperLayer: paperLayer.exportJSON(),
       selected: false
     }
   }
@@ -105,7 +109,7 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
   const layerId = uuidv4();
   const backgroundId = uuidv4();
   payload.paperLayer.data = { id: backgroundId, type: 'ArtboardBackground', artboard: layerId };
-  new paper.Group({
+  const paperLayer = new paper.Group({
     data: { id: layerId, type: 'Artboard' },
     children: [payload.paperLayer]
   });
@@ -119,6 +123,7 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
       parent: null,
       children: [backgroundId],
       selected: false,
+      //paperLayer: paperLayer.exportJSON(),
       showChildren: false
     }
   }
@@ -128,7 +133,7 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
 
 export const addGroup = (payload: AddGroupPayload): LayerTypes => {
   const layerId = uuidv4();
-  new paper.Group({
+  const paperLayer = new paper.Group({
     data: { id: layerId, type: 'Group' }
   });
   return {
@@ -141,6 +146,7 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
       parent: payload.parent ? payload.parent : null,
       children: [],
       selected: false,
+      //paperLayer: paperLayer.exportJSON(),
       showChildren: false
     }
   }
@@ -169,6 +175,7 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
       parent: payload.parent ? payload.parent : null,
       shapeType: payload.shapeType,
       pathData: clone.pathData,
+      //paperLayer: payload.paperLayer.exportJSON(),
       selected: false,
     }
   }
@@ -370,4 +377,15 @@ export const setLayerName = (payload: SetLayerNamePayload): LayerTypes => ({
 export const setActiveArtboard = (payload: SetActiveArtboardPayload): LayerTypes => ({
   type: SET_ACTIVE_ARTBOARD,
   payload
+});
+
+// Animation
+
+export const openAnimationSelect = (payload: OpenAnimationSelectPayload): LayerTypes => ({
+  type: OPEN_ANIMATION_SELECT,
+  payload
+});
+
+export const closeAnimationSelect = (): LayerTypes => ({
+  type: CLOSE_ANIMATION_SELECT
 });

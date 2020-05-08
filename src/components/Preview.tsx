@@ -1,4 +1,4 @@
-import React, { useRef, useContext, useEffect, ReactElement } from 'react';
+import React, { useRef, useContext, useEffect, ReactElement, useState } from 'react';
 import { ThemeContext } from './ThemeProvider';
 import PreviewCanvas from './PreviewCanvas';
 

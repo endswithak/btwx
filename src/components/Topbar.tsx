@@ -107,5 +107,12 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { enableRectangleDrawTool, enableEllipseDrawTool, enableStarDrawTool, enablePolygonDrawTool, enableRoundedDrawTool, enableSelectionTool, enableArtboardTool }
+  { enableRectangleDrawTool,
+    enableEllipseDrawTool,
+    enableStarDrawTool,
+    enablePolygonDrawTool,
+    enableRoundedDrawTool,
+    enableSelectionTool,
+    enableArtboardTool
+  }
 )(Topbar);

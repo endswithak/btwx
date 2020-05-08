@@ -35,16 +35,19 @@ import App from './components/App';
 import Preview from './components/Preview';
 import { ThemeProvider } from './components/ThemeProvider';
 import { Provider } from 'react-redux';
-import store from './store';
+import store, { persistor } from './store';
+import { PersistGate } from 'redux-persist/integration/react'
 
 import './styles/index.sass';
 
 window.renderMainWindow = () => {
   ReactDOM.render(
     <Provider store={store}>
-      <ThemeProvider>
-        <App />
-      </ThemeProvider>
+      <PersistGate loading={null} persistor={persistor}>
+        <ThemeProvider>
+          <App />
+        </ThemeProvider>
+      </PersistGate>
     </Provider>,
     document.getElementById('root')
   );
@@ -53,9 +56,11 @@ window.renderMainWindow = () => {
 window.renderPreviewWindow = () => {
   ReactDOM.render(
     <Provider store={store}>
-      <ThemeProvider>
-        <Preview />
-      </ThemeProvider>
+      <PersistGate loading={null} persistor={persistor}>
+        <ThemeProvider>
+          <Preview />
+        </ThemeProvider>
+      </PersistGate>
     </Provider>,
     document.getElementById('root')
   );

@@ -1,6 +1,6 @@
 import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
 import { ThemeContext } from './ThemeProvider';
-import SidebarDragHandle from './SidebarDragHandle';
+//import SidebarDragHandle from './SidebarDragHandle';
 
 interface SidebarProps {
   children: ReactElement | ReactElement[];
@@ -21,7 +21,7 @@ const Sidebar = (props: SidebarProps): ReactElement => {
         width: props.width,
         background: theme.background.z1
       }}>
-      {
+      {/* {
         props.resizable
         ? <SidebarDragHandle
             onDrag={props.onDrag}
@@ -30,7 +30,7 @@ const Sidebar = (props: SidebarProps): ReactElement => {
               order: props.position === 'left' ? 1 : 0
             }} />
         : null
-      }
+      } */}
       <div className='c-sidebar__scroll'>
         {props.children}
       </div>

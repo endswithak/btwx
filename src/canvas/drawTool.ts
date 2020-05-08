@@ -1,13 +1,11 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
-import store, { StoreDispatch, StoreGetState } from '../store';
+import store from '../store';
 import { enableSelectionTool, enableRectangleDrawTool, enableEllipseDrawTool, enableRoundedDrawTool, enableDragTool } from '../store/actions/tool';
-import { addShape, setLayerHover, increaseLayerScope, selectLayer, newLayerScope, deselectLayer, moveLayerBy, moveLayersBy, enableLayerDrag, disableLayerDrag, deepSelectLayer } from '../store/actions/layer';
+import { addShape, setLayerHover, increaseLayerScope, selectLayer, newLayerScope, deselectLayer, moveLayerBy, moveLayersBy, enableLayerDrag, disableLayerDrag, deepSelectLayer, openAnimationSelect, closeAnimationSelect } from '../store/actions/layer';
 import { getNearestScopeAncestor, getLayerByPaperId, isScopeGroupLayer, getPaperLayer, getLayer, getPagePaperLayer } from '../store/selectors/layer';
 import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
 
 class DrawTool {
-  getState: StoreGetState;
-  dispatch: StoreDispatch;
   tool: paper.Tool;
   drawShapeType: em.ShapeType;
   outline: paper.Path;
@@ -21,8 +19,6 @@ class DrawTool {
   centerPoint: paper.Point;
   shiftModifier: boolean;
   constructor({drawShapeType}: {drawShapeType: em.ShapeType}) {
-    this.getState = store.getState;
-    this.dispatch = store.dispatch;
     this.tool = new Tool();
     this.tool.activate();
     this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
@@ -143,7 +139,7 @@ class DrawTool {
         if (this.outline) {
           this.outline.remove();
         }
-        this.dispatch(enableSelectionTool());
+        store.dispatch(enableSelectionTool());
         break;
       }
     }
@@ -175,7 +171,7 @@ class DrawTool {
   }
   onMouseUp(event: paper.ToolEvent): void {
     if (this.to) {
-      const state = this.getState();
+      const state = store.getState();
       const newPaperLayer = this.renderShape({
         fillColor: '#ccc',
         strokeColor: '#999',
@@ -195,6 +191,11 @@ class DrawTool {
           const state = store.getState();
           const layer = getLayer(state.layer.present, this.data.id);
           const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, layer.id);
+          if (e.event.which === 3) {
+            if (nearestScopeAncestor.id === this.data.id) {
+              store.dispatch(openAnimationSelect({id: this.data.id, position: {x: e.event.clientX, y: e.event.clientY}}));
+            }
+          }
           if (e.modifiers.shift) {
             if (layer.selected) {
               store.dispatch(deselectLayer({id: nearestScopeAncestor.id}));
@@ -208,7 +209,7 @@ class DrawTool {
           }
         }
       });
-      const overlappedLayers = getPagePaperLayer(state.layer.present).getItems({
+      const overlappedLayers = getPaperLayer(state.layer.present.page).getItems({
         data: (data: any) => {
           const topParent = getNearestScopeAncestor(state.layer.present, data.id);
           return topParent.id === data.id;
@@ -223,7 +224,7 @@ class DrawTool {
           return false;
         }
       }
-      this.dispatch(addShape({
+      store.dispatch(addShape({
         parent: state.layer.present.scope.length > 0 ? state.layer.present.scope[state.layer.present.scope.length - 1] : artboardOverlapped() ? artboardOverlapped() : state.layer.present.page,
         frame: {
           x: newPaperLayer.position.x,
@@ -234,7 +235,7 @@ class DrawTool {
         shapeType: this.drawShapeType,
         paperLayer: newPaperLayer
       }));
-      this.dispatch(enableSelectionTool());
+      store.dispatch(enableSelectionTool());
     }
   }
 }

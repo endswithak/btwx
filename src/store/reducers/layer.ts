@@ -39,6 +39,8 @@ import {
   DISABLE_LAYER_DRAG,
   SET_LAYER_NAME,
   SET_ACTIVE_ARTBOARD,
+  OPEN_ANIMATION_SELECT,
+  CLOSE_ANIMATION_SELECT,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -81,6 +83,8 @@ import {
   enableLayerDrag,
   disableLayerDrag,
   setActiveArtboard,
+  openAnimationSelect,
+  closeAnimationSelect,
   setLayerName
 } from '../utils/layer';
 
@@ -102,7 +106,15 @@ export interface LayerState {
     };
   };
   paperProject: string;
-  dragging: boolean;
+  animations: {
+    [id: string]: em.Animation;
+  };
+  animationSelect: {
+    isOpen: boolean;
+    layer: string;
+    x: number;
+    y: number;
+  };
 }
 
 const initialState: LayerState = {
@@ -119,7 +131,13 @@ const initialState: LayerState = {
     byId: {}
   },
   paperProject: null,
-  dragging: false
+  animations: {},
+  animationSelect: {
+    isOpen: false,
+    layer: null,
+    x: null,
+    y: null
+  }
 };
 
 export default (state = initialState, action: LayerTypes): LayerState => {
@@ -203,6 +221,10 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setLayerName(state, action);
     case SET_ACTIVE_ARTBOARD:
       return setActiveArtboard(state, action);
+    case OPEN_ANIMATION_SELECT:
+      return openAnimationSelect(state, action);
+    case CLOSE_ANIMATION_SELECT:
+      return closeAnimationSelect(state, action);
     default:
       return state;
   }

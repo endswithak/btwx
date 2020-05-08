@@ -3,6 +3,7 @@ import Canvas from './Canvas';
 import LayersSidebar from './LayersSidebar';
 import StylesSidebar from './StylesSidebar';
 import Topbar from './Topbar';
+import AnimationSelect from './AnimationSelect';
 import { ThemeContext } from './ThemeProvider';
 
 const App = (): ReactElement => {
@@ -21,6 +22,7 @@ const App = (): ReactElement => {
           <LayersSidebar />
           <Canvas />
         </div>
+        <AnimationSelect />
     </div>
   );
 }

@@ -1,0 +1,30 @@
+.c-animation-select-wrap
+  +absolute-full
+
+.c-animation-select__overlay
+  +absolute-full
+  position: fixed
+  background: none
+
+.c-animation-select
+  position: absolute
+  padding: 0
+  border: none
+  display: flex
+  flex-direction: column
+  outline: none
+
+  &::selection
+    background: none
+
+.c-animation-select__item
+  width: 100%
+  height: $unit * 8
+  line-height: $unit * 8
+  font-family: $fontFamily
+  padding-left: $unit * 2
+  font-size: $fontSizeMd
+  cursor: pointer
+
+  &::selection
+    background: none

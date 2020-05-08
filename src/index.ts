@@ -7,6 +7,7 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 }
 
 let mainWindow: electron.BrowserWindow;
+let previewWindow: electron.BrowserWindow;
 
 const createWindow = (): void => {
   // Create the browser window.
@@ -56,7 +57,7 @@ app.on('activate', () => {
 ipcMain.on('openPreview', (event, activeArtboard) => {
   const artboard = JSON.parse(activeArtboard);
 
-  const previewWindow = new BrowserWindow({
+  previewWindow = new BrowserWindow({
     parent: mainWindow,
     width: artboard.frame.width,
     height: artboard.frame.height,
@@ -72,5 +73,9 @@ ipcMain.on('openPreview', (event, activeArtboard) => {
 
   previewWindow.webContents.on('did-finish-load', () => {
     previewWindow.webContents.executeJavaScript(`renderPreviewWindow()`);
+  });
+
+  previewWindow.on('close', () => {
+    previewWindow = null;
   });
 });
