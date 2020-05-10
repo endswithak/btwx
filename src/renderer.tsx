@@ -35,15 +35,21 @@ import App from './components/App';
 import Preview from './components/Preview';
 import { ThemeProvider } from './components/ThemeProvider';
 import { Provider } from 'react-redux';
-import store, { persistor } from './store';
-import { PersistGate } from 'redux-persist/integration/react'
+import store, { persistor, persistConfig } from './store';
+import persist from './store/utils/persist';
+import { PersistGate } from 'redux-persist/integration/react';
+import { remote } from 'electron';
 
 import './styles/index.sass';
+
+window.addEventListener('storage', persist(store, persistConfig));
 
 window.renderMainWindow = () => {
   ReactDOM.render(
     <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
+      <PersistGate
+        loading={null}
+        persistor={persistor}>
         <ThemeProvider>
           <App />
         </ThemeProvider>

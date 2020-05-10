@@ -25,8 +25,12 @@ const createWindow = (): void => {
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
 
+  mainWindow.webContents.session.clearStorageData();
+
   mainWindow.webContents.on('did-finish-load', () => {
-    mainWindow.webContents.executeJavaScript(`renderMainWindow()`);
+    mainWindow.webContents.session.clearStorageData().then(() => {
+      mainWindow.webContents.executeJavaScript(`renderMainWindow()`);
+    });
   });
 };
 

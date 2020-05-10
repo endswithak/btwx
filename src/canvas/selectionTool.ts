@@ -6,7 +6,7 @@ import AreaSelectTool from './areaSelectTool';
 import { enableRectangleDrawTool, enableEllipseDrawTool, enableDragTool } from '../store/actions/tool';
 import { ActionCreators } from 'redux-undo';
 import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
-import { applyShapeMethods } from './utils';
+import { applyShapeMethods } from './shapeUtils';
 import DragTool from './dragTool';
 
 const redo = () => {

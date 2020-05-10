@@ -3,7 +3,8 @@ import Canvas from './Canvas';
 import LayersSidebar from './LayersSidebar';
 import StylesSidebar from './StylesSidebar';
 import Topbar from './Topbar';
-import AnimationSelect from './AnimationSelect';
+import AnimationSelectMenu from './AnimationSelectMenu';
+import ArtboardSelectMenu from './ArtboardSelectMenu';
 import { ThemeContext } from './ThemeProvider';
 
 const App = (): ReactElement => {
@@ -12,6 +13,7 @@ const App = (): ReactElement => {
 
   return (
     <div
+      id='app'
       className='c-app'
       ref={app}
       style={{
@@ -22,7 +24,8 @@ const App = (): ReactElement => {
           <LayersSidebar />
           <Canvas />
         </div>
-        <AnimationSelect />
+        <AnimationSelectMenu />
+        <ArtboardSelectMenu />
     </div>
   );
 }

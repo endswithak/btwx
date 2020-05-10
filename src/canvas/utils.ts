@@ -150,33 +150,3 @@ export const getParent = ({ item }: GetParent) => {
     return currentItem.layersGroup();
   }
 }
-
-export const applyShapeMethods = (shape: paper.Item) => {
-  shape.onMouseEnter = function(e: paper.MouseEvent) {
-    const state = store.getState();
-    const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, this.data.id);
-    store.dispatch(setLayerHover({id: nearestScopeAncestor.id}));
-  },
-  shape.onMouseLeave = function(e: paper.MouseEvent) {
-    store.dispatch(setLayerHover({id: null}));
-  },
-  shape.onDoubleClick = function(e: paper.MouseEvent) {
-    store.dispatch(deepSelectLayer({id: this.data.id}));
-  },
-  shape.onMouseDown = function(e: paper.MouseEvent) {
-    const state = store.getState();
-    const layer = getLayer(state.layer.present, this.data.id);
-    const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, layer.id);
-    if (e.modifiers.shift) {
-      if (layer.selected) {
-        store.dispatch(deselectLayer({id: nearestScopeAncestor.id}));
-      } else {
-        store.dispatch(selectLayer({id: nearestScopeAncestor.id}));
-      }
-    } else {
-      if (!state.layer.present.selected.includes(nearestScopeAncestor.id)) {
-        store.dispatch(selectLayer({id: nearestScopeAncestor.id, newSelection: true}));
-      }
-    }
-  }
-}

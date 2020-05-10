@@ -34,7 +34,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
     paperPreview.project.addLayer(rootLayer);
     activeArtboardPaperLayer.parent = rootLayer;
     activeArtboardPaperLayer.position = paperPreview.view.center;
-  }, [paperProject]);
+  }, [paperProject, activeArtboard]);
 
   return (
     <div

@@ -2,6 +2,7 @@ import { combineReducers } from 'redux';
 import undoable, { includeAction, excludeAction } from 'redux-undo';
 import layer from './layer';
 import tool from './tool';
+import contextMenu from './contextMenu';
 
 import {
   ADD_ARTBOARD,
@@ -23,7 +24,9 @@ import {
   MOVE_LAYER_BY,
   MOVE_LAYERS_TO,
   MOVE_LAYERS_BY,
-  SET_LAYER_NAME
+  SET_LAYER_NAME,
+  ADD_LAYER_ANIMATION,
+  REMOVE_LAYER_ANIMATION
 } from '../actionTypes/layer';
 
 const rootReducer = combineReducers({
@@ -47,9 +50,12 @@ const rootReducer = combineReducers({
     MOVE_LAYER_BY,
     MOVE_LAYERS_TO,
     MOVE_LAYERS_BY,
-    SET_LAYER_NAME
+    SET_LAYER_NAME,
+    ADD_LAYER_ANIMATION,
+    REMOVE_LAYER_ANIMATION
   ])}),
-  tool
+  tool,
+  contextMenu
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

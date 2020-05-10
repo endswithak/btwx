@@ -1,6 +1,7 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import store from '../store';
 import { enableSelectionTool, enableRectangleDrawTool, enableEllipseDrawTool, enableRoundedDrawTool, enableDragTool } from '../store/actions/tool';
+import { openContextMenu, closeContextMenu } from '../store/actions/contextMenu';
 import { addShape, setLayerHover, increaseLayerScope, selectLayer, newLayerScope, deselectLayer, moveLayerBy, moveLayersBy, enableLayerDrag, disableLayerDrag, deepSelectLayer, addArtboard, setActiveArtboard, openAnimationSelect } from '../store/actions/layer';
 import { getNearestScopeAncestor, getLayerByPaperId, isScopeGroupLayer, getPaperLayer, getLayer } from '../store/selectors/layer';
 import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
@@ -150,7 +151,7 @@ class DrawTool {
           store.dispatch(setActiveArtboard({id: this.data.artboard}));
           if (e.event.which === 3) {
             if (nearestScopeAncestor.id === this.data.artboard) {
-              store.dispatch(openAnimationSelect({id: this.data.artboard, position: {x: e.event.clientX, y: e.event.clientY}}));
+              store.dispatch(openContextMenu({type: 'AnimationEventSelect', id: this.data.artboard, x: e.event.clientX, y: e.event.clientY}));
             }
           }
           if (e.modifiers.shift) {

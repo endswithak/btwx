@@ -42,8 +42,8 @@ import {
   DISABLE_LAYER_DRAG,
   SET_LAYER_NAME,
   SET_ACTIVE_ARTBOARD,
-  OPEN_ANIMATION_SELECT,
-  CLOSE_ANIMATION_SELECT,
+  ADD_LAYER_ANIMATION,
+  REMOVE_LAYER_ANIMATION,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
@@ -78,7 +78,8 @@ import {
   MoveLayersByPayload,
   SetLayerNamePayload,
   SetActiveArtboardPayload,
-  OpenAnimationSelectPayload,
+  AddLayerAnimationPayload,
+  RemoveLayerAnimationPayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -98,7 +99,8 @@ export const addPage = (payload: AddPagePayload): LayerTypes => {
       parent: null,
       children: [],
       //paperLayer: paperLayer.exportJSON(),
-      selected: false
+      selected: false,
+      animations: []
     }
   }
 };
@@ -124,7 +126,8 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
       children: [backgroundId],
       selected: false,
       //paperLayer: paperLayer.exportJSON(),
-      showChildren: false
+      showChildren: false,
+      animations: []
     }
   }
 };
@@ -147,7 +150,8 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
       children: [],
       selected: false,
       //paperLayer: paperLayer.exportJSON(),
-      showChildren: false
+      showChildren: false,
+      animations: []
     }
   }
 };
@@ -177,6 +181,7 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
       pathData: clone.pathData,
       //paperLayer: payload.paperLayer.exportJSON(),
       selected: false,
+      animations: []
     }
   }
 };
@@ -381,11 +386,15 @@ export const setActiveArtboard = (payload: SetActiveArtboardPayload): LayerTypes
 
 // Animation
 
-export const openAnimationSelect = (payload: OpenAnimationSelectPayload): LayerTypes => ({
-  type: OPEN_ANIMATION_SELECT,
-  payload
+export const addLayerAnimation = (payload: AddLayerAnimationPayload): LayerTypes => ({
+  type: ADD_LAYER_ANIMATION,
+  payload: {
+    ...payload,
+    id: uuidv4()
+  }
 });
 
-export const closeAnimationSelect = (): LayerTypes => ({
-  type: CLOSE_ANIMATION_SELECT
+export const removeLayerAnimation = (payload: RemoveLayerAnimationPayload): LayerTypes => ({
+  type: REMOVE_LAYER_ANIMATION,
+  payload
 });

@@ -1,5 +1,9 @@
 declare namespace em {
 
+  type AnimationEvent = 'click' | 'doubleClick' | 'mouseenter' | 'mouseleave';
+
+  type ContextMenu = 'AnimationEventSelect' | 'AnimationArtboardSelect';
+
   type LayerTypes = 'Group' | 'Shape' | 'Page' | 'Artboard' | 'ArtboardBackground';
 
   interface Layer {
@@ -11,7 +15,7 @@ declare namespace em {
     //paperLayer: string;
     selected: boolean;
     children: string[] | null;
-    animation: string;
+    animations: string[];
   }
 
   interface ClipboardLayer {
@@ -61,6 +65,7 @@ declare namespace em {
     artboard: string;
     destination: string;
     duration: number;
+    ease: string;
   }
 
   type AnimationEvent = 'click' | 'doubleclick' | 'mouseenter' | 'mouseleave';

@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import paper from 'paper';
 import { LayerState } from '../reducers/layer';
 import * as layerActions from '../actions/layer';
-import { AddPage, AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer, AddLayerChild, InsertLayerChild, EnableLayerHover, DisableLayerHover, InsertLayerAbove, InsertLayerBelow, GroupLayers, UngroupLayers, UngroupLayer, DeselectAllLayers, RemoveLayers, SetGroupScope, HideLayerChildren, ShowLayerChildren, DecreaseLayerScope, NewLayerScope, SetLayerHover, ClearLayerScope, IncreaseLayerScope, CopyLayerToClipboard, CopyLayersToClipboard, PasteLayersFromClipboard, SelectLayers, DeselectLayers, MoveLayerTo, MoveLayerBy, EnableLayerDrag, DisableLayerDrag, MoveLayersTo, MoveLayersBy, DeepSelectLayer, EscapeLayerScope, MoveLayer, MoveLayers, AddArtboard, SetLayerName, SetActiveArtboard, OpenAnimationSelect, CloseAnimationSelect } from '../actionTypes/layer';
+import { AddPage, AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer, AddLayerChild, InsertLayerChild, EnableLayerHover, DisableLayerHover, InsertLayerAbove, InsertLayerBelow, GroupLayers, UngroupLayers, UngroupLayer, DeselectAllLayers, RemoveLayers, SetGroupScope, HideLayerChildren, ShowLayerChildren, DecreaseLayerScope, NewLayerScope, SetLayerHover, ClearLayerScope, IncreaseLayerScope, CopyLayerToClipboard, CopyLayersToClipboard, PasteLayersFromClipboard, SelectLayers, DeselectLayers, MoveLayerTo, MoveLayerBy, EnableLayerDrag, DisableLayerDrag, MoveLayersTo, MoveLayersBy, DeepSelectLayer, EscapeLayerScope, MoveLayer, MoveLayers, AddArtboard, SetLayerName, SetActiveArtboard, EnableAnimationSelect, DisableAnimationSelect, AddLayerAnimation, RemoveLayerAnimation } from '../actionTypes/layer';
 import { addItem, removeItem, insertItem, addItems } from './general';
 import { getLayerIndex, getLayer, getLayerDepth, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor, getNearestScopeGroupAncestor, getParentLayer, getLayerScope, getPaperLayer, getSelectionTopLeft, getPaperLayerByPaperId, getClipboardTopLeft, getSelectionBottomRight, getPagePaperLayer, getClipboardBottomRight, getClipboardCenter, getSelectionCenter } from '../selectors/layer';
 
@@ -66,6 +66,7 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
         children: addItem(state.byId[state.page].children, action.payload.id)
       } as em.Page
     },
+    artboards: addItem(state.artboards, action.payload.id),
     activeArtboard: action.payload.id,
     paperProject: paper.project.exportJSON()
   }
@@ -105,11 +106,22 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
   // check selected
   if (state.selected.includes(action.payload.id)) {
     currentState = layersToRemove.reduce((result, current) => {
-      if (result.selected.includes(current)) {
-        return deselectLayer(result, layerActions.deselectLayer({id: current}) as DeselectLayer);
-      } else {
-        return result;
+      const layer = getLayer(result, current);
+      if (layer.type === 'Artboard') {
+        result = {
+          ...result,
+          artboards: removeItem(result.artboards, current)
+        }
       }
+      if (layer.animations.length > 0) {
+        result = layer.animations.reduce((animResult, animCurrent) => {
+          return removeLayerAnimation(animResult, layerActions.removeLayerAnimation({id: animCurrent}) as RemoveLayerAnimation);
+        }, result);
+      }
+      if (result.selected.includes(current)) {
+        result = deselectLayer(result, layerActions.deselectLayer({id: current}) as DeselectLayer);
+      }
+      return result;
     }, currentState);
   }
   // check hover
@@ -197,8 +209,16 @@ export const deselectAllLayers = (state: LayerState, action: DeselectAllLayers):
 
 export const selectLayer = (state: LayerState, action: SelectLayer): LayerState => {
   let currentState = state;
+  const layerScope = getLayerScope(state, action.payload.id);
+  const layerRoot = state.byId[layerScope[0]];
+  if (layerRoot && layerRoot.type === 'Artboard' && layerRoot.id !== state.activeArtboard) {
+    currentState = {
+      ...state,
+      activeArtboard: layerRoot.id
+    }
+  }
   if (action.payload.newSelection) {
-    const deselectAll = deselectAllLayers(state, layerActions.deselectAllLayers() as DeselectAllLayers)
+    const deselectAll = deselectAllLayers(currentState, layerActions.deselectAllLayers() as DeselectAllLayers)
     currentState = {
       ...deselectAll,
       byId: {
@@ -751,7 +771,7 @@ const cloneLayerAndChildren = (state: LayerState, id: string) => {
           children: layer.children ? layer.children.reduce((childResult, current) => {
             return [...childResult, layerCloneMap[current]];
           }, []) : null,
-          animation: null
+          animations: []
         }
       }
     };
@@ -778,8 +798,18 @@ export const pasteLayerFromClipboard = (state: LayerState, id: string, pasteOver
       },
       paperProject: paper.project.exportJSON()
     }
-  }, state);
+  }, currentState);
   currentState = selectLayer(currentState, layerActions.selectLayer({id: rootLayer.id}) as SelectLayer);
+  if (rootLayer.type === 'Artboard') {
+    const paperLayer = getPaperLayer(rootLayer.id);
+    currentState = {
+      ...currentState,
+      artboards: addItem(currentState.artboards, rootLayer.id),
+      activeArtboard: rootLayer.id
+    }
+    paperLayer.position.x += paperLayer.bounds.width + 48;
+    currentState = moveLayerBy(currentState, layerActions.moveLayerBy({id: rootLayer.id, x: paperLayer.bounds.width + 48, y: 0}) as MoveLayerBy);
+  }
   if (pasteOverSelection && state.selected.length > 0) {
     const selectionCenter = getSelectionCenter(state);
     const clipboardCenter = getClipboardCenter(state);
@@ -919,26 +949,6 @@ export const moveLayersBy = (state: LayerState, action: MoveLayersBy): LayerStat
   }, state);
 };
 
-export const enableLayerDrag = (state: LayerState, action: EnableLayerDrag): LayerState => {
-  const hoverFrame = paper.project.getItem({ data: { id: 'hoverFrame' } });
-  if (hoverFrame) {
-    hoverFrame.remove();
-  }
-  return {
-    ...state,
-    dragging: true
-  }
-};
-
-export const disableLayerDrag = (state: LayerState, action: DisableLayerDrag): LayerState => {
-  updateSelectionFrame(state);
-  updateHoverFrame(state);
-  return {
-    ...state,
-    dragging: false
-  }
-};
-
 export const setLayerName = (state: LayerState, action: SetLayerName): LayerState => {
   return {
     ...state,
@@ -959,26 +969,45 @@ export const setActiveArtboard = (state: LayerState, action: SetActiveArtboard):
   }
 };
 
-export const openAnimationSelect = (state: LayerState, action: OpenAnimationSelect): LayerState => {
+export const addLayerAnimation = (state: LayerState, action: AddLayerAnimation): LayerState => {
   return {
     ...state,
-    animationSelect: {
-      isOpen: true,
-      layer: action.payload.id,
-      x: action.payload.position.x,
-      y: action.payload.position.y
+    byId: {
+      ...state.byId,
+      [action.payload.layer]: {
+        ...state.byId[action.payload.layer],
+        animations: addItem(state.byId[action.payload.layer].animations, action.payload.id)
+      }
+    },
+    allAnimationIds: addItem(state.allAnimationIds, action.payload.id),
+    animationById: {
+      ...state.animationById,
+      [action.payload.id]: {
+        ...action.payload,
+        ease: 'ease-in',
+        duration: 0.25
+      }
     }
   }
 };
 
-export const closeAnimationSelect = (state: LayerState, action: CloseAnimationSelect): LayerState => {
+export const removeLayerAnimation = (state: LayerState, action: RemoveLayerAnimation): LayerState => {
+  const layerId = state.animationById[action.payload.id].layer;
   return {
     ...state,
-    animationSelect: {
-      isOpen: false,
-      layer: null,
-      x: null,
-      y: null
-    }
+    byId: {
+      ...state.byId,
+      [layerId]: {
+        ...state.byId[layerId],
+        animations: removeItem(state.byId[layerId].animations, action.payload.id)
+      }
+    },
+    allAnimationIds: removeItem(state.allAnimationIds, action.payload.id),
+    animationById: Object.keys(state.animationById).reduce((result: any, key) => {
+      if (key !== action.payload.id) {
+        result[key] = state.animationById[key];
+      }
+      return result;
+    }, {})
   }
 };

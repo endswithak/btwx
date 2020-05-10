@@ -35,12 +35,10 @@ import {
   MOVE_LAYER_BY,
   MOVE_LAYERS_TO,
   MOVE_LAYERS_BY,
-  ENABLE_LAYER_DRAG,
-  DISABLE_LAYER_DRAG,
   SET_LAYER_NAME,
   SET_ACTIVE_ARTBOARD,
-  OPEN_ANIMATION_SELECT,
-  CLOSE_ANIMATION_SELECT,
+  ADD_LAYER_ANIMATION,
+  REMOVE_LAYER_ANIMATION,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -80,11 +78,9 @@ import {
   moveLayersTo,
   moveLayersBy,
   ungroupLayers,
-  enableLayerDrag,
-  disableLayerDrag,
   setActiveArtboard,
-  openAnimationSelect,
-  closeAnimationSelect,
+  addLayerAnimation,
+  removeLayerAnimation,
   setLayerName
 } from '../utils/layer';
 
@@ -96,6 +92,7 @@ export interface LayerState {
   page: string;
   activeArtboard: string;
   selected: string[];
+  artboards: string[];
   scope: string[];
   hover: string;
   clipboard: {
@@ -106,14 +103,9 @@ export interface LayerState {
     };
   };
   paperProject: string;
-  animations: {
+  allAnimationIds: string[];
+  animationById: {
     [id: string]: em.Animation;
-  };
-  animationSelect: {
-    isOpen: boolean;
-    layer: string;
-    x: number;
-    y: number;
   };
 }
 
@@ -123,6 +115,7 @@ const initialState: LayerState = {
   page: null,
   activeArtboard: null,
   selected: [],
+  artboards: [],
   scope: [],
   hover: null,
   clipboard: {
@@ -131,13 +124,8 @@ const initialState: LayerState = {
     byId: {}
   },
   paperProject: null,
-  animations: {},
-  animationSelect: {
-    isOpen: false,
-    layer: null,
-    x: null,
-    y: null
-  }
+  allAnimationIds: [],
+  animationById: {}
 };
 
 export default (state = initialState, action: LayerTypes): LayerState => {
@@ -213,18 +201,14 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return moveLayerBy(state, action);
     case MOVE_LAYERS_BY:
       return moveLayersBy(state, action);
-    case ENABLE_LAYER_DRAG:
-      return enableLayerDrag(state, action);
-    case DISABLE_LAYER_DRAG:
-      return disableLayerDrag(state, action);
     case SET_LAYER_NAME:
       return setLayerName(state, action);
     case SET_ACTIVE_ARTBOARD:
       return setActiveArtboard(state, action);
-    case OPEN_ANIMATION_SELECT:
-      return openAnimationSelect(state, action);
-    case CLOSE_ANIMATION_SELECT:
-      return closeAnimationSelect(state, action);
+    case ADD_LAYER_ANIMATION:
+      return addLayerAnimation(state, action);
+    case REMOVE_LAYER_ANIMATION:
+      return removeLayerAnimation(state, action);
     default:
       return state;
   }

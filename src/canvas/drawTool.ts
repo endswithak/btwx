@@ -4,6 +4,7 @@ import { enableSelectionTool, enableRectangleDrawTool, enableEllipseDrawTool, en
 import { addShape, setLayerHover, increaseLayerScope, selectLayer, newLayerScope, deselectLayer, moveLayerBy, moveLayersBy, enableLayerDrag, disableLayerDrag, deepSelectLayer, openAnimationSelect, closeAnimationSelect } from '../store/actions/layer';
 import { getNearestScopeAncestor, getLayerByPaperId, isScopeGroupLayer, getPaperLayer, getLayer, getPagePaperLayer } from '../store/selectors/layer';
 import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
+import { applyShapeMethods } from './shapeUtils';
 
 class DrawTool {
   tool: paper.Tool;
@@ -175,40 +176,9 @@ class DrawTool {
       const newPaperLayer = this.renderShape({
         fillColor: '#ccc',
         strokeColor: '#999',
-        strokeWidth: 1,
-        onMouseEnter: function(e: paper.MouseEvent) {
-          const state = store.getState();
-          const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, this.data.id);
-          store.dispatch(setLayerHover({id: nearestScopeAncestor.id}));
-        },
-        onMouseLeave: function(e: paper.MouseEvent) {
-          store.dispatch(setLayerHover({id: null}));
-        },
-        onDoubleClick: function(e: paper.MouseEvent) {
-          store.dispatch(deepSelectLayer({id: this.data.id}));
-        },
-        onMouseDown: function(e: paper.MouseEvent) {
-          const state = store.getState();
-          const layer = getLayer(state.layer.present, this.data.id);
-          const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, layer.id);
-          if (e.event.which === 3) {
-            if (nearestScopeAncestor.id === this.data.id) {
-              store.dispatch(openAnimationSelect({id: this.data.id, position: {x: e.event.clientX, y: e.event.clientY}}));
-            }
-          }
-          if (e.modifiers.shift) {
-            if (layer.selected) {
-              store.dispatch(deselectLayer({id: nearestScopeAncestor.id}));
-            } else {
-              store.dispatch(selectLayer({id: nearestScopeAncestor.id}));
-            }
-          } else {
-            if (!state.layer.present.selected.includes(nearestScopeAncestor.id)) {
-              store.dispatch(selectLayer({id: nearestScopeAncestor.id, newSelection: true}));
-            }
-          }
-        }
+        strokeWidth: 1
       });
+      applyShapeMethods(newPaperLayer);
       const overlappedLayers = getPaperLayer(state.layer.present.page).getItems({
         data: (data: any) => {
           const topParent = getNearestScopeAncestor(state.layer.present, data.id);
