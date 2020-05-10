@@ -5,8 +5,9 @@ import store from '../store';
 import AreaSelectTool from './areaSelectTool';
 import { enableRectangleDrawTool, enableEllipseDrawTool, enableDragTool } from '../store/actions/tool';
 import { ActionCreators } from 'redux-undo';
-import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
+import { updateHoverFrame, updateSelectionFrame, updateActiveArtboardFrame } from '../store/utils/layer';
 import { applyShapeMethods } from './shapeUtils';
+import { applyArtboardMethods } from './artboardUtils';
 import DragTool from './dragTool';
 
 const redo = () => {
@@ -18,9 +19,13 @@ const redo = () => {
     if (state.layer.present.byId[key].type === 'Shape') {
       applyShapeMethods(getPaperLayer(key));
     }
+    if (state.layer.present.byId[key].type === 'ArtboardBackground') {
+      applyArtboardMethods(getPaperLayer(key));
+    }
   });
   updateHoverFrame(state.layer.present);
   updateSelectionFrame(state.layer.present);
+  updateActiveArtboardFrame(state.layer.present);
 }
 
 const undo = () => {
@@ -32,9 +37,13 @@ const undo = () => {
     if (state.layer.present.byId[key].type === 'Shape') {
       applyShapeMethods(getPaperLayer(key));
     }
+    if (state.layer.present.byId[key].type === 'ArtboardBackground') {
+      applyArtboardMethods(getPaperLayer(key));
+    }
   });
   updateHoverFrame(state.layer.present);
   updateSelectionFrame(state.layer.present);
+  updateActiveArtboardFrame(state.layer.present);
 }
 
 class SelectionTool {

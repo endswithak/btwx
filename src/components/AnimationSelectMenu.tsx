@@ -43,7 +43,31 @@ const AnimationSelectMenu = (props: ContextMenuProps): ReactElement => {
         ...contextMenu,
         type: 'AnimationArtboardSelect',
         data: {
-          animationEvent: 'doubleClick'
+          animationEvent: 'doubleclick'
+        }
+      });
+    }
+  },{
+    text: 'Mouse Enter',
+    onClick: () => {
+      closeContextMenu();
+      openContextMenu({
+        ...contextMenu,
+        type: 'AnimationArtboardSelect',
+        data: {
+          animationEvent: 'mouseenter'
+        }
+      });
+    }
+  },{
+    text: 'Mouse Leave',
+    onClick: () => {
+      closeContextMenu();
+      openContextMenu({
+        ...contextMenu,
+        type: 'AnimationArtboardSelect',
+        data: {
+          animationEvent: 'mouseleave'
         }
       });
     }

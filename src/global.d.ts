@@ -1,6 +1,8 @@
 declare namespace em {
 
-  type AnimationEvent = 'click' | 'doubleClick' | 'mouseenter' | 'mouseleave';
+  type AnimationEvent = 'click' | 'doubleclick' | 'mouseenter' | 'mouseleave';
+
+  type AnimationEase = 'linear' | 'easeInQuad' | 'easeOutQuad' | 'easeInOutQuad' | 'easeInCubic' | 'easeOutCubic' | 'easeInOutCubic' | 'easeInQuart' | 'easeOutQuart' | 'easeInOutQuart' | 'easeInQuint' | 'easeOutQuint' | 'easeInOutQuint';
 
   type ContextMenu = 'AnimationEventSelect' | 'AnimationArtboardSelect';
 

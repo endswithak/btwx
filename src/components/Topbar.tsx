@@ -3,12 +3,15 @@ import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
 import { enableSelectionTool, enableRectangleDrawTool, enableEllipseDrawTool, enableStarDrawTool, enablePolygonDrawTool, enableRoundedDrawTool, enableArtboardTool } from '../store/actions/tool';
 import { ToolTypes } from '../store/actionTypes/tool';
+import { openAnimationDrawer, closeAnimationDrawer } from '../store/actions/animationDrawer';
+import { AnimationDrawerTypes } from '../store/actionTypes/animationDrawer';
 import { ThemeContext } from './ThemeProvider';
 import { ipcRenderer } from 'electron';
 
 interface TopbarStateProps {
   drawShapeType: em.ShapeType;
   activeArtboard: em.Artboard;
+  isAnimationDrawerOpen: boolean;
   enableRectangleDrawTool(): ToolTypes;
   enableEllipseDrawTool(): ToolTypes;
   enableStarDrawTool(): ToolTypes;
@@ -16,11 +19,26 @@ interface TopbarStateProps {
   enableRoundedDrawTool(): ToolTypes;
   enableSelectionTool(): ToolTypes;
   enableArtboardTool(): ToolTypes;
+  openAnimationDrawer(): AnimationDrawerTypes;
+  closeAnimationDrawer(): AnimationDrawerTypes;
 }
 
 const Topbar = (props: TopbarStateProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { enableRectangleDrawTool, enableEllipseDrawTool, enableSelectionTool, enableStarDrawTool, drawShapeType, enablePolygonDrawTool, enableRoundedDrawTool, enableArtboardTool, activeArtboard } = props;
+  const {
+    isAnimationDrawerOpen,
+    enableRectangleDrawTool,
+    enableEllipseDrawTool,
+    enableSelectionTool,
+    enableStarDrawTool,
+    drawShapeType,
+    enablePolygonDrawTool,
+    enableRoundedDrawTool,
+    enableArtboardTool,
+    activeArtboard,
+    openAnimationDrawer,
+    closeAnimationDrawer
+  } = props;
 
   const handleDrawClick = (shape: em.ShapeType | 'Artboard') => {
     if (drawShapeType === shape) {
@@ -51,6 +69,14 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
 
   const handlePreviewClick = () => {
     ipcRenderer.send('openPreview', JSON.stringify(activeArtboard));
+  }
+
+  const handleAnimationDrawerClick = () => {
+    if (isAnimationDrawerOpen) {
+      closeAnimationDrawer();
+    } else {
+      openAnimationDrawer();
+    }
   }
 
   return (
@@ -91,28 +117,43 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
       </button>
       <button
         className='c-topbar__button'
-        onClick={handlePreviewClick}>
-        Preview
+        onClick={handlePreviewClick}
+        style={{
+          background: 'green'
+        }}>
+        P
+      </button>
+      <button
+        className='c-topbar__button'
+        onClick={handleAnimationDrawerClick}
+        style={{
+          background: 'yellow'
+        }}>
+        A
       </button>
     </div>
   );
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { tool, layer } = state;
+  const { tool, layer, animationDrawer } = state;
   const drawShapeType = tool.drawShape;
   const activeArtboard = layer.present.byId[layer.present.activeArtboard];
-  return { drawShapeType, activeArtboard };
+  const isAnimationDrawerOpen = animationDrawer.isOpen;
+  return { drawShapeType, activeArtboard, isAnimationDrawerOpen };
 };
 
 export default connect(
   mapStateToProps,
-  { enableRectangleDrawTool,
+  {
+    enableRectangleDrawTool,
     enableEllipseDrawTool,
     enableStarDrawTool,
     enablePolygonDrawTool,
     enableRoundedDrawTool,
     enableSelectionTool,
-    enableArtboardTool
+    enableArtboardTool,
+    openAnimationDrawer,
+    closeAnimationDrawer
   }
 )(Topbar);

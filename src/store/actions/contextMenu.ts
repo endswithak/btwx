@@ -5,8 +5,6 @@ import {
   ContextMenuTypes
 } from '../actionTypes/contextMenu';
 
-// Animation
-
 export const openContextMenu = (payload: OpenContextMenuPayload): ContextMenuTypes => ({
   type: OPEN_CONTEXT_MENU,
   payload

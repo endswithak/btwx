@@ -4,8 +4,8 @@ import { connect } from 'react-redux';
 import Modal from 'react-modal';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
-import { ContextMenuTypes, OpenContextMenuPayload } from '../store/actionTypes/contextMenu';
-import { closeContextMenu, openContextMenu } from '../store/actions/contextMenu';
+import { ContextMenuTypes } from '../store/actionTypes/contextMenu';
+import { closeContextMenu } from '../store/actions/contextMenu';
 import ContextMenuItem from './ContextMenuItem';
 
 Modal.setAppElement('#root');
@@ -17,13 +17,12 @@ interface ContextMenuProps {
     onClick(): void;
   }[];
   contextMenu?: {
-    type: em.ContextMenu,
+    type: em.ContextMenu;
     id: string;
     isOpen: boolean;
     x: number;
     y: number;
   };
-  openContextMenu?(payload: OpenContextMenuPayload): ContextMenuTypes;
   closeContextMenu?(): ContextMenuTypes;
   onClose?(): void;
   onOpen?(): void;
@@ -31,11 +30,7 @@ interface ContextMenuProps {
 
 const ContextMenu = (props: ContextMenuProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { options, contextMenu, openContextMenu, closeContextMenu, onClose, onOpen } = props;
-
-  const handleAfterOpen = () => {
-
-  }
+  const { options, contextMenu, closeContextMenu, onClose, onOpen } = props;
 
   const handleCloseRequest = () => {
     closeContextMenu();
@@ -56,6 +51,7 @@ const ContextMenu = (props: ContextMenuProps): ReactElement => {
           background: theme.background.z4,
           width: 200,
           height: (theme.unit * 8) * options.length,
+          minHeight: (theme.unit * 8) * 3,
           top: contextMenu.y,
           left: contextMenu.x
         }
@@ -80,5 +76,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { openContextMenu, closeContextMenu }
+  { closeContextMenu }
 )(ContextMenu);

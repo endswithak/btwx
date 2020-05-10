@@ -4,8 +4,8 @@ import { connect } from 'react-redux';
 import Modal from 'react-modal';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
-import { ContextMenuTypes, OpenContextMenuPayload } from '../store/actionTypes/contextMenu';
-import { closeContextMenu, openContextMenu } from '../store/actions/contextMenu';
+import { ContextMenuTypes } from '../store/actionTypes/contextMenu';
+import { closeContextMenu } from '../store/actions/contextMenu';
 import { AddLayerAnimationPayload, LayerTypes } from '../store/actionTypes/layer';
 import { addLayerAnimation } from '../store/actions/layer';
 import ContextMenu from './ContextMenu';
@@ -21,14 +21,13 @@ interface ContextMenuProps {
     y: number;
     data: any;
   };
-  openContextMenu?(payload: OpenContextMenuPayload): ContextMenuTypes;
   closeContextMenu?(): ContextMenuTypes;
   addLayerAnimation?(payload: AddLayerAnimationPayload): LayerTypes;
 }
 
 const ArtboardSelectMenu = (props: ContextMenuProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { activeArtboard, artboards, contextMenu, openContextMenu, closeContextMenu, addLayerAnimation } = props;
+  const { activeArtboard, artboards, contextMenu, closeContextMenu, addLayerAnimation } = props;
 
   const animationSelectOptions = artboards.reduce((result, current) => {
     if (current.id !== activeArtboard) {
@@ -77,5 +76,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { openContextMenu, closeContextMenu, addLayerAnimation }
+  { closeContextMenu, addLayerAnimation }
 )(ArtboardSelectMenu);

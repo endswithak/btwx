@@ -42,14 +42,18 @@ class DragTool {
     this.disable();
   }
   onMouseDown(event: paper.ToolEvent): void {
-    if (this.enabled) {
-      if (paper.project.getItem({ data: { id: 'hoverFrame' } })) {
-        paper.project.getItem({ data: { id: 'hoverFrame' } }).remove();
-      }
-    }
+
   }
   onMouseDrag(event: paper.ToolEvent): void {
     if (this.enabled) {
+      if (this.x || this.y) {
+        if (paper.project.getItem({ data: { id: 'activeArtboardFrame' } })) {
+          paper.project.getItem({ data: { id: 'activeArtboardFrame' } }).remove();
+        }
+        if (paper.project.getItem({ data: { id: 'hoverFrame' } })) {
+          paper.project.getItem({ data: { id: 'hoverFrame' } }).remove();
+        }
+      }
       const state = store.getState();
       updateSelectionFrame(state.layer.present);
       if (state.layer.present.selected.length > 0) {

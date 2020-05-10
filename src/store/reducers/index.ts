@@ -3,6 +3,7 @@ import undoable, { includeAction, excludeAction } from 'redux-undo';
 import layer from './layer';
 import tool from './tool';
 import contextMenu from './contextMenu';
+import animationDrawer from './animationDrawer';
 
 import {
   ADD_ARTBOARD,
@@ -55,7 +56,8 @@ const rootReducer = combineReducers({
     REMOVE_LAYER_ANIMATION
   ])}),
   tool,
-  contextMenu
+  contextMenu,
+  animationDrawer
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

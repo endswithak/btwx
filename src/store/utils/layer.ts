@@ -59,7 +59,8 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
         id: action.payload.children[0],
         name: 'ArtboardBackground',
         parent: action.payload.id,
-        children: null
+        children: null,
+        animations: []
       } as em.ArtboardBackground,
       [state.page]: {
         ...state.byId[state.page],
@@ -67,11 +68,32 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
       } as em.Page
     },
     artboards: addItem(state.artboards, action.payload.id),
-    activeArtboard: action.payload.id,
     paperProject: paper.project.exportJSON()
   }
   return selectLayer(stateWithLayer, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
 };
+
+export const updateActiveArtboardFrame = (state: LayerState) => {
+  const activeArtboardFrame = paper.project.getItem({ data: { id: 'activeArtboardFrame' } });
+  const activeArtboardFrameConstants = {
+    strokeColor: '#009DEC',
+    strokeWidth: 4,
+    data: {
+      id: 'activeArtboardFrame'
+    }
+  }
+  if (activeArtboardFrame) {
+    activeArtboardFrame.remove();
+  }
+  if (state.activeArtboard) {
+    const paperActiveArtboardLayer = getPaperLayer(state.activeArtboard);
+    new paper.Path.Rectangle({
+      ...activeArtboardFrameConstants,
+      point: [paperActiveArtboardLayer.bounds.topLeft.x - 8, paperActiveArtboardLayer.bounds.topLeft.y - 8],
+      size: [paperActiveArtboardLayer.bounds.width + 16, paperActiveArtboardLayer.bounds.height + 16]
+    });
+  }
+}
 
 export const addLayer = (state: LayerState, action: AddGroup | AddShape): LayerState => {
   const layerParent = action.payload.parent ? action.payload.parent : state.page;
@@ -112,6 +134,9 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
           ...result,
           artboards: removeItem(result.artboards, current)
         }
+      }
+      if (layer.id === result.activeArtboard) {
+        result = setActiveArtboard(result, layerActions.setActiveArtboard({id: null}) as SetActiveArtboard);
       }
       if (layer.animations.length > 0) {
         result = layer.animations.reduce((animResult, animCurrent) => {
@@ -209,13 +234,14 @@ export const deselectAllLayers = (state: LayerState, action: DeselectAllLayers):
 
 export const selectLayer = (state: LayerState, action: SelectLayer): LayerState => {
   let currentState = state;
-  const layerScope = getLayerScope(state, action.payload.id);
-  const layerRoot = state.byId[layerScope[0]];
-  if (layerRoot && layerRoot.type === 'Artboard' && layerRoot.id !== state.activeArtboard) {
-    currentState = {
-      ...state,
-      activeArtboard: layerRoot.id
-    }
+  const layer = getLayer(currentState, action.payload.id);
+  const layerScope = getLayerScope(currentState, action.payload.id);
+  const layerScopeRoot = layerScope[0];
+  if (layer.type === 'Artboard') {
+    currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: action.payload.id}) as SetActiveArtboard);
+  }
+  if (layerScopeRoot && currentState.byId[layerScopeRoot].type === 'Artboard' && layerScopeRoot !== currentState.activeArtboard) {
+    currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: layerScopeRoot}) as SetActiveArtboard);
   }
   if (action.payload.newSelection) {
     const deselectAll = deselectAllLayers(currentState, layerActions.deselectAllLayers() as DeselectAllLayers)
@@ -232,17 +258,17 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
     }
     currentState = newLayerScope(currentState, layerActions.newLayerScope({id: action.payload.id}) as NewLayerScope);
   } else {
-    if (!state.selected.includes(action.payload.id)) {
+    if (!currentState.selected.includes(action.payload.id)) {
       currentState = {
-        ...state,
+        ...currentState,
         byId: {
-          ...state.byId,
+          ...currentState.byId,
           [action.payload.id]: {
-            ...state.byId[action.payload.id],
+            ...currentState.byId[action.payload.id],
             selected: true
           }
         },
-        selected: addItem(state.selected, action.payload.id)
+        selected: addItem(currentState.selected, action.payload.id)
       }
     }
   }
@@ -804,9 +830,9 @@ export const pasteLayerFromClipboard = (state: LayerState, id: string, pasteOver
     const paperLayer = getPaperLayer(rootLayer.id);
     currentState = {
       ...currentState,
-      artboards: addItem(currentState.artboards, rootLayer.id),
-      activeArtboard: rootLayer.id
+      artboards: addItem(currentState.artboards, rootLayer.id)
     }
+    currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: rootLayer.id}) as SetActiveArtboard);
     paperLayer.position.x += paperLayer.bounds.width + 48;
     currentState = moveLayerBy(currentState, layerActions.moveLayerBy({id: rootLayer.id, x: paperLayer.bounds.width + 48, y: 0}) as MoveLayerBy);
   }
@@ -894,6 +920,7 @@ export const moveLayerTo = (state: LayerState, action: MoveLayerTo): LayerState 
   const paperLayer = getPaperLayer(action.payload.id);
   // paperLayer.position.x = action.payload.x;
   // paperLayer.position.y = action.payload.y;
+  updateActiveArtboardFrame(currentState);
   updateSelectionFrame(currentState);
   currentState = {
     ...currentState,
@@ -924,6 +951,7 @@ export const moveLayerBy = (state: LayerState, action: MoveLayerBy): LayerState 
   const paperLayer = getPaperLayer(action.payload.id);
   // paperLayer.position.x += action.payload.x;
   // paperLayer.position.y += action.payload.y;
+  updateActiveArtboardFrame(currentState);
   updateSelectionFrame(currentState);
   currentState = {
     ...state,
@@ -963,10 +991,12 @@ export const setLayerName = (state: LayerState, action: SetLayerName): LayerStat
 };
 
 export const setActiveArtboard = (state: LayerState, action: SetActiveArtboard): LayerState => {
-  return {
+  const activeArtboardState = {
     ...state,
     activeArtboard: action.payload.id
   }
+  updateActiveArtboardFrame(activeArtboardState);
+  return activeArtboardState;
 };
 
 export const addLayerAnimation = (state: LayerState, action: AddLayerAnimation): LayerState => {
@@ -984,9 +1014,9 @@ export const addLayerAnimation = (state: LayerState, action: AddLayerAnimation):
       ...state.animationById,
       [action.payload.id]: {
         ...action.payload,
-        ease: 'ease-in',
+        ease: 'linear',
         duration: 0.25
-      }
+      } as em.Animation
     }
   }
 };
