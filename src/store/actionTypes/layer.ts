@@ -54,8 +54,11 @@ export const SET_LAYER_NAME = 'SET_LAYER_NAME';
 
 export const SET_ACTIVE_ARTBOARD = 'SET_ACTIVE_ARTBOARD';
 
-export const ADD_LAYER_ANIMATION = 'ADD_LAYER_ANIMATION';
-export const REMOVE_LAYER_ANIMATION = 'REMOVE_LAYER_ANIMATION';
+export const ADD_LAYER_ANIMATION_EVENT = 'ADD_LAYER_ANIMATION_EVENT';
+export const REMOVE_LAYER_ANIMATION_EVENT = 'REMOVE_LAYER_ANIMATION_EVENT';
+
+export const ADD_LAYER_TWEEN = 'ADD_LAYER_TWEEN';
+export const REMOVE_LAYER_TWEEN = 'REMOVE_LAYER_TWEEN';
 
 // Page
 
@@ -68,7 +71,8 @@ export interface AddPagePayload {
   selected?: boolean;
   hover?: boolean;
   children?: string[];
-  animations?: [];
+  animationEvents?: [];
+  tweens?: [];
 }
 
 export interface AddPage {
@@ -89,7 +93,8 @@ export interface AddArtboardPayload {
   hover?: boolean;
   children?: string[];
   showChildren?: boolean;
-  animations?: [];
+  animationEvents?: [];
+  tweens?: [];
 }
 
 export interface AddArtboard {
@@ -110,7 +115,8 @@ export interface AddGroupPayload {
   hover?: boolean;
   children?: string[];
   showChildren?: boolean;
-  animations?: [];
+  animationEvents?: [];
+  tweens?: [];
 }
 
 export interface AddGroup {
@@ -131,7 +137,8 @@ export interface AddShapePayload {
   paperLayer?: paper.Item;
   selected?: boolean;
   hover?: boolean;
-  animations?: [];
+  animationEvents?: [];
+  tweens?: [];
 }
 
 export interface AddShape {
@@ -500,29 +507,56 @@ export interface SetActiveArtboard {
   payload: SetActiveArtboardPayload;
 }
 
-// Animation
+// Animation Event
 
-export interface AddLayerAnimationPayload {
-  layer: string;
+export interface AddLayerAnimationEventPayload {
+  layer?: string;
   id?: string;
-  event: em.AnimationEvent;
-  artboard: string;
-  destination: string;
+  event?: em.AnimationEvent;
+  artboard?: string;
+  destinationArtboard?: string;
+  tweens: string[];
 }
 
-export interface AddLayerAnimation {
-  type: typeof ADD_LAYER_ANIMATION;
-  payload: AddLayerAnimationPayload;
+export interface AddLayerAnimationEvent {
+  type: typeof ADD_LAYER_ANIMATION_EVENT;
+  payload: AddLayerAnimationEventPayload;
 }
 
-export interface RemoveLayerAnimationPayload {
+export interface RemoveLayerAnimationEventPayload {
   id: string;
 }
 
-export interface RemoveLayerAnimation {
-  type: typeof REMOVE_LAYER_ANIMATION;
-  payload: RemoveLayerAnimationPayload;
+export interface RemoveLayerAnimationEvent {
+  type: typeof REMOVE_LAYER_ANIMATION_EVENT;
+  payload: RemoveLayerAnimationEventPayload;
+}
+
+// Tween
+
+export interface AddLayerTweenPayload {
+  id?: string;
+  prop?: em.TweenPropTypes;
+  layer?: string;
+  destinationLayer?: string;
+  event?: string;
+  ease?: em.AnimationEase;
+  duration?: number;
+}
+
+export interface AddLayerTween {
+  type: typeof ADD_LAYER_TWEEN;
+  payload: em.Tween;
+}
+
+export interface RemoveLayerTweenPayload {
+  id: string;
+}
+
+export interface RemoveLayerTween {
+  type: typeof REMOVE_LAYER_TWEEN;
+  payload: RemoveLayerTweenPayload;
 }
 
 
-export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerAnimation | RemoveLayerAnimation;
+export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerAnimationEvent | RemoveLayerAnimationEvent | AddLayerTween | RemoveLayerTween;

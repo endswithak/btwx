@@ -6,8 +6,8 @@ import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { ContextMenuTypes } from '../store/actionTypes/contextMenu';
 import { closeContextMenu } from '../store/actions/contextMenu';
-import { AddLayerAnimationPayload, LayerTypes } from '../store/actionTypes/layer';
-import { addLayerAnimation } from '../store/actions/layer';
+import { AddLayerAnimationEventPayload, LayerTypes } from '../store/actionTypes/layer';
+import { addLayerAnimationEvent } from '../store/actions/layer';
 import ContextMenu from './ContextMenu';
 
 interface ContextMenuProps {
@@ -22,12 +22,12 @@ interface ContextMenuProps {
     data: any;
   };
   closeContextMenu?(): ContextMenuTypes;
-  addLayerAnimation?(payload: AddLayerAnimationPayload): LayerTypes;
+  addLayerAnimationEvent?(payload: AddLayerAnimationEventPayload): LayerTypes;
 }
 
 const ArtboardSelectMenu = (props: ContextMenuProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { activeArtboard, artboards, contextMenu, closeContextMenu, addLayerAnimation } = props;
+  const { activeArtboard, artboards, contextMenu, closeContextMenu, addLayerAnimationEvent } = props;
 
   const animationSelectOptions = artboards.reduce((result, current) => {
     if (current.id !== activeArtboard) {
@@ -36,11 +36,12 @@ const ArtboardSelectMenu = (props: ContextMenuProps): ReactElement => {
         {
           text: current.name,
           onClick: () => {
-            addLayerAnimation({
+            addLayerAnimationEvent({
               artboard: activeArtboard,
-              destination: current.id,
+              destinationArtboard: current.id,
               event: contextMenu.data.animationEvent,
-              layer: contextMenu.id
+              layer: contextMenu.id,
+              tweens: []
             });
             closeContextMenu();
           }
@@ -76,5 +77,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { closeContextMenu, addLayerAnimation }
+  { closeContextMenu, addLayerAnimationEvent }
 )(ArtboardSelectMenu);

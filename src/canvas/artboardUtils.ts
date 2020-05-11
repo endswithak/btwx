@@ -6,7 +6,6 @@ import { getNearestScopeAncestor, getLayer } from '../store/selectors/layer';
 
 export const applyArtboardMethods = (artboard: paper.Item) => {
   artboard.onMouseDown = function(e: paper.MouseEvent) {
-    console.log(this);
     const state = store.getState();
     const layer = getLayer(state.layer.present, this.data.artboard);
     const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, layer.id);

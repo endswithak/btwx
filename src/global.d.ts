@@ -1,10 +1,12 @@
 declare namespace em {
 
-  type AnimationEvent = 'click' | 'doubleclick' | 'mouseenter' | 'mouseleave';
+  type AnimationEventType = 'click' | 'doubleclick' | 'mouseenter' | 'mouseleave';
 
   type AnimationEase = 'linear' | 'easeInQuad' | 'easeOutQuad' | 'easeInOutQuad' | 'easeInCubic' | 'easeOutCubic' | 'easeInOutCubic' | 'easeInQuart' | 'easeOutQuart' | 'easeInOutQuart' | 'easeInQuint' | 'easeOutQuint' | 'easeInOutQuint';
 
   type ContextMenu = 'AnimationEventSelect' | 'AnimationArtboardSelect';
+
+  type TweenPropTypes = 'fillColor' | 'x' | 'y' | 'rotation' | 'width' | 'height' | 'strokeColor' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity';
 
   type LayerTypes = 'Group' | 'Shape' | 'Page' | 'Artboard' | 'ArtboardBackground';
 
@@ -17,7 +19,8 @@ declare namespace em {
     //paperLayer: string;
     selected: boolean;
     children: string[] | null;
-    animations: string[];
+    animationEvents: string[];
+    tweens: string[];
   }
 
   interface ClipboardLayer {
@@ -60,17 +63,40 @@ declare namespace em {
     children: null;
   }
 
-  interface Animation {
+  interface AnimationEvent {
     id: string;
     layer: string;
-    event: AnimationEvent;
+    event: AnimationEventType;
     artboard: string;
-    destination: string;
-    duration: number;
-    ease: string;
+    destinationArtboard: string;
+    tweens: string[];
   }
 
-  type AnimationEvent = 'click' | 'doubleclick' | 'mouseenter' | 'mouseleave';
+  interface Tween {
+    id: string;
+    prop: TweenPropTypes;
+    layer: string;
+    destinationLayer: string;
+    event: string;
+    ease: AnimationEase;
+    duration: number;
+  }
+
+  interface TweenPropMap {
+    fillColor: boolean;
+    x: boolean;
+    y: boolean;
+    rotation: boolean;
+    width: boolean;
+    height: boolean;
+    strokeColor: boolean;
+    strokeWidth: boolean;
+    shadowColor: boolean;
+    shadowOffsetX: boolean;
+    shadowOffsetY: boolean;
+    shadowBlur: boolean;
+    opacity: boolean;
+  }
 
   type Dropzone = 'Top' | 'Center' | 'Bottom';
 

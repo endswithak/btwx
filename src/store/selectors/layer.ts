@@ -47,6 +47,31 @@ export const getPagePaperLayer = (store: LayerState): paper.Item => {
   return getPaperLayer(page);
 }
 
+export const getAllLayerChildren = (state: LayerState, layer: string): string[] => {
+  const groups: string[] = [layer];
+  const layers: string[] = [];
+  let i = 0;
+  while(i < groups.length) {
+    const layer = state.byId[groups[i]];
+    if (layer.children) {
+      layer.children.forEach((child) => {
+        const childLayer = state.byId[child];
+        if (childLayer.children && childLayer.children.length > 0) {
+          groups.push(child);
+        }
+        layers.push(child);
+      });
+    }
+    i++;
+  }
+  return layers;
+};
+
+export const getLayerAndAllChildren = (state: LayerState, layer: string): string[] => {
+  const children = getAllLayerChildren(state, layer);
+  return [layer, ...children];
+};
+
 export const getLayerDepth = (store: LayerState, id: string) => {
   let depth = 0;
   let currentNode = getParentLayer(store, id);
@@ -160,4 +185,129 @@ export const getClipboardCenter = (store: LayerState): paper.Point => {
   const xMid = (topLeft.x + bottomRight.x) / 2;
   const yMid = (topLeft.y + bottomRight.y) / 2;
   return new paper.Point(xMid, yMid);
+}
+
+export const getDestinationEquivalent = (store: LayerState, layer: string, destinationChildren: string[]): em.Layer => {
+  let equivalent = null;
+  const layerItem = store.byId[layer];
+  for(let i = 0; i < destinationChildren.length; i++) {
+    const childLayer = store.byId[destinationChildren[i]];
+    if (childLayer.name === layerItem.name && childLayer.type === layerItem.type) {
+      equivalent = childLayer;
+      break;
+    }
+  }
+  return equivalent;
+}
+
+export const getPositionInArtboard = (layer: paper.Item, artboard: paper.Item): paper.Point => {
+  const xDiff = artboard.position.x - layer.position.x;
+  const yDiff = artboard.position.y - layer.position.y;
+  return new paper.Point(xDiff, yDiff);
+}
+
+export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Item, artboard: paper.Item, destinationArtboard: paper.Item): em.TweenPropMap => {
+  const layerArtboardPosition = getPositionInArtboard(layer, artboard);
+  const equivalentArtboardPosition = getPositionInArtboard(equivalent, destinationArtboard);
+  const tweenPropMap: em.TweenPropMap = {
+    fillColor: false,
+    x: false,
+    y: false,
+    rotation: false,
+    width: false,
+    height: false,
+    strokeColor: false,
+    strokeWidth: false,
+    shadowColor: false,
+    shadowOffsetX: false,
+    shadowOffsetY: false,
+    shadowBlur: false,
+    opacity: false
+  }
+  Object.keys(tweenPropMap).forEach((key) => {
+    switch(key) {
+      case 'fillColor':
+        if (layer.fillColor && equivalent.fillColor && !layer.fillColor.equals(equivalent.fillColor)) {
+          tweenPropMap[key] = true;
+        } else if (!layer.fillColor && equivalent.fillColor) {
+          tweenPropMap[key] = true;
+        }
+        break;
+      case 'x':
+        if (layerArtboardPosition.x !== equivalentArtboardPosition.x && layer.data.type !== 'ArtboardBackground') {
+          tweenPropMap[key] = true;
+        }
+        break;
+      case 'y':
+        if (layerArtboardPosition.y !== equivalentArtboardPosition.y && layer.data.type !== 'ArtboardBackground') {
+          tweenPropMap[key] = true;
+        }
+        break;
+      case 'rotation':
+        if (layer.rotation !== equivalent.rotation && layer.data.type !== 'ArtboardBackground') {
+          tweenPropMap[key] = true;
+        }
+        break;
+      case 'width':
+        if (layer.bounds.width !== equivalent.bounds.width && layer.data.type !== 'ArtboardBackground') {
+          tweenPropMap[key] = true;
+        }
+        break;
+      case 'height':
+        if (layer.bounds.height !== equivalent.bounds.height && layer.data.type !== 'ArtboardBackground') {
+          tweenPropMap[key] = true;
+        }
+        break;
+      case 'strokeColor':
+        if (layer.strokeColor && equivalent.strokeColor && !layer.strokeColor.equals(equivalent.strokeColor)) {
+          tweenPropMap[key] = true;
+        } else if (!layer.strokeColor && equivalent.strokeColor) {
+          tweenPropMap[key] = true;
+        }
+        break;
+      case 'strokeWidth':
+        if (layer.strokeWidth !== equivalent.strokeWidth) {
+          tweenPropMap[key] = true;
+        }
+        break;
+      case 'shadowColor':
+        if (layer.shadowColor && equivalent.shadowColor && !layer.shadowColor.equals(equivalent.shadowColor)) {
+          tweenPropMap[key] = true;
+        } else if (!layer.shadowColor && equivalent.shadowColor) {
+          tweenPropMap[key] = true;
+        }
+        break;
+      case 'shadowOffsetX':
+        if (layer.shadowOffset.x !== equivalent.shadowOffset.x) {
+          tweenPropMap[key] = true;
+        }
+        break;
+      case 'shadowOffsetY':
+        if (layer.shadowOffset.y !== equivalent.shadowOffset.y) {
+          tweenPropMap[key] = true;
+        }
+        break;
+      case 'shadowBlur':
+        if (layer.shadowBlur !== equivalent.shadowBlur) {
+          tweenPropMap[key] = true;
+        }
+        break;
+      case 'opacity':
+        if (layer.opacity !== equivalent.opacity) {
+          tweenPropMap[key] = true;
+        }
+        break;
+    }
+  });
+  return tweenPropMap;
+}
+
+export const getLongestEventTween = (tweensById: {[id: string]: em.Tween}): em.Tween => {
+  return Object.keys(tweensById).reduce((result: em.Tween, current: string) => {
+    if (tweensById[current].duration >= result.duration) {
+      return tweensById[current];
+    } else {
+      return result;
+    }
+  }, tweensById[Object.keys(tweensById)[0]]);
 }

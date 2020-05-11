@@ -37,8 +37,10 @@ import {
   MOVE_LAYERS_BY,
   SET_LAYER_NAME,
   SET_ACTIVE_ARTBOARD,
-  ADD_LAYER_ANIMATION,
-  REMOVE_LAYER_ANIMATION,
+  ADD_LAYER_ANIMATION_EVENT,
+  REMOVE_LAYER_ANIMATION_EVENT,
+  ADD_LAYER_TWEEN,
+  REMOVE_LAYER_TWEEN,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -79,8 +81,10 @@ import {
   moveLayersBy,
   ungroupLayers,
   setActiveArtboard,
-  addLayerAnimation,
-  removeLayerAnimation,
+  addLayerAnimationEvent,
+  removeLayerAnimationEvent,
+  addLayerTween,
+  removeLayerTween,
   setLayerName
 } from '../utils/layer';
 
@@ -103,9 +107,13 @@ export interface LayerState {
     };
   };
   paperProject: string;
-  allAnimationIds: string[];
-  animationById: {
-    [id: string]: em.Animation;
+  allAnimationEventIds: string[];
+  animationEventById: {
+    [id: string]: em.AnimationEvent;
+  };
+  allTweenIds: string[];
+  tweenById: {
+    [id: string]: em.Tween;
   };
 }
 
@@ -124,8 +132,10 @@ const initialState: LayerState = {
     byId: {}
   },
   paperProject: null,
-  allAnimationIds: [],
-  animationById: {}
+  allAnimationEventIds: [],
+  animationEventById: {},
+  allTweenIds: [],
+  tweenById: {}
 };
 
 export default (state = initialState, action: LayerTypes): LayerState => {
@@ -205,10 +215,14 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setLayerName(state, action);
     case SET_ACTIVE_ARTBOARD:
       return setActiveArtboard(state, action);
-    case ADD_LAYER_ANIMATION:
-      return addLayerAnimation(state, action);
-    case REMOVE_LAYER_ANIMATION:
-      return removeLayerAnimation(state, action);
+    case ADD_LAYER_ANIMATION_EVENT:
+      return addLayerAnimationEvent(state, action);
+    case REMOVE_LAYER_ANIMATION_EVENT:
+      return removeLayerAnimationEvent(state, action);
+    case ADD_LAYER_TWEEN:
+      return addLayerTween(state, action);
+    case REMOVE_LAYER_TWEEN:
+      return removeLayerTween(state, action);
     default:
       return state;
   }

@@ -5,17 +5,19 @@ import { addPage } from '../store/actions/layer';
 import { enableSelectionTool } from '../store/actions/tool';
 import { ThemeContext } from './ThemeProvider';
 import { AddPagePayload, LayerTypes } from '../store/actionTypes/layer';
+import { RootState } from '../store/reducers';
+import { updateActiveArtboardFrame } from '../store/utils/layer';
 
 interface CanvasProps {
   addPage(payload: AddPagePayload): LayerTypes;
   enableSelectionTool(): any;
+  activeArtboard?: string;
 }
 
-const Canvas = ({addPage, enableSelectionTool}: CanvasProps): ReactElement => {
+const Canvas = ({addPage, enableSelectionTool, activeArtboard}: CanvasProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useContext(ThemeContext);
-  //const { drawing, dispatch, theme, layersSidebarWidth, stylesSidebarWidth } = globalState;
 
   useEffect(() => {
     canvasRef.current.width = canvasContainerRef.current.clientWidth;
@@ -54,12 +56,9 @@ const Canvas = ({addPage, enableSelectionTool}: CanvasProps): ReactElement => {
     // console.log(paper);
   }
 
-  // useEffect(() => {
-  //   if (paperApp) {
-  //     paperApp.scope.view.viewSize.width = canvasContainerRef.current.clientWidth;
-  //     paperApp.scope.view.viewSize.height = canvasContainerRef.current.clientHeight;
-  //   }
-  // }, [layersSidebarWidth, stylesSidebarWidth]);
+  useEffect(() => {
+    updateActiveArtboardFrame(activeArtboard);
+  }, [activeArtboard]);
 
   return (
     <div
@@ -76,7 +75,14 @@ const Canvas = ({addPage, enableSelectionTool}: CanvasProps): ReactElement => {
   );
 }
 
+const mapStateToProps = (state: RootState) => {
+  const { layer } = state;
+  return {
+    activeArtboard: layer.present.activeArtboard
+  };
+};
+
 export default connect(
-  null,
+  mapStateToProps,
   { addPage, enableSelectionTool }
 )(Canvas);
