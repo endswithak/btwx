@@ -5,7 +5,7 @@ import { LayerState } from '../reducers/layer';
 import * as layerActions from '../actions/layer';
 import { AddPage, AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer, AddLayerChild, InsertLayerChild, EnableLayerHover, DisableLayerHover, InsertLayerAbove, InsertLayerBelow, GroupLayers, UngroupLayers, UngroupLayer, DeselectAllLayers, RemoveLayers, SetGroupScope, HideLayerChildren, ShowLayerChildren, DecreaseLayerScope, NewLayerScope, SetLayerHover, ClearLayerScope, IncreaseLayerScope, CopyLayerToClipboard, CopyLayersToClipboard, PasteLayersFromClipboard, SelectLayers, DeselectLayers, MoveLayerTo, MoveLayerBy, EnableLayerDrag, DisableLayerDrag, MoveLayersTo, MoveLayersBy, DeepSelectLayer, EscapeLayerScope, MoveLayer, MoveLayers, AddArtboard, SetLayerName, SetActiveArtboard, AddLayerTween, RemoveLayerAnimationEvent, AddLayerAnimationEvent, RemoveLayerTween } from '../actionTypes/layer';
 import { addItem, removeItem, insertItem, addItems } from './general';
-import { getLayerIndex, getLayer, getLayerDepth, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor, getNearestScopeGroupAncestor, getParentLayer, getLayerScope, getPaperLayer, getSelectionTopLeft, getPaperLayerByPaperId, getClipboardTopLeft, getSelectionBottomRight, getPagePaperLayer, getClipboardBottomRight, getClipboardCenter, getSelectionCenter, getLayerAndAllChildren, getAllLayerChildren, getDestinationEquivalent, getEquivalentTweenProps } from '../selectors/layer';
+import { getLayerIndex, getLayer, getLayerDepth, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor, getNearestScopeGroupAncestor, getParentLayer, getLayerScope, getPaperLayer, getSelectionTopLeft, getPaperLayerByPaperId, getClipboardTopLeft, getSelectionBottomRight, getPagePaperLayer, getClipboardBottomRight, getClipboardCenter, getSelectionCenter, getLayerAndAllChildren, getAllLayerChildren, getDestinationEquivalent, getEquivalentTweenProps, isTweenDestinationLayer } from '../selectors/layer';
 
 export const addPage = (state: LayerState, action: AddPage): LayerState => {
   return {
@@ -38,7 +38,8 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
         name: 'ArtboardBackground',
         parent: action.payload.id,
         children: null,
-        animationEvents: []
+        animationEvents: [],
+        tweens: []
       } as em.ArtboardBackground,
       [state.page]: {
         ...state.byId[state.page],
@@ -897,8 +898,6 @@ export const moveLayers = (state: LayerState, action: MoveLayers): LayerState =>
 export const moveLayerTo = (state: LayerState, action: MoveLayerTo): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
-  // paperLayer.position.x = action.payload.x;
-  // paperLayer.position.y = action.payload.y;
   updateActiveArtboardFrame(currentState.activeArtboard);
   updateSelectionFrame(currentState);
   currentState = {
@@ -928,18 +927,16 @@ export const moveLayersTo = (state: LayerState, action: MoveLayersTo): LayerStat
 export const moveLayerBy = (state: LayerState, action: MoveLayerBy): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
-  // paperLayer.position.x += action.payload.x;
-  // paperLayer.position.y += action.payload.y;
   updateActiveArtboardFrame(currentState.activeArtboard);
   updateSelectionFrame(currentState);
   currentState = {
-    ...state,
+    ...currentState,
     byId: {
-      ...state.byId,
+      ...currentState.byId,
       [action.payload.id]: {
-        ...state.byId[action.payload.id],
+        ...currentState.byId[action.payload.id],
         frame: {
-          ...state.byId[action.payload.id].frame,
+          ...currentState.byId[action.payload.id].frame,
           x: paperLayer.position.x,
           y: paperLayer.position.y
         }
@@ -982,13 +979,9 @@ export const setActiveArtboard = (state: LayerState, action: SetActiveArtboard):
 
 export const addLayerAnimationEvent = (state: LayerState, action: AddLayerAnimationEvent): LayerState => {
   let currentState = state;
-  const artboardChildren = getAllLayerChildren(state, action.payload.artboard);
-  const artboardPaperLayer = getPaperLayer(action.payload.artboard);
-  const destinationArtboardChildren = getAllLayerChildren(state, action.payload.destinationArtboard);
-  const destinationArtboardPaperLayer = getPaperLayer(action.payload.destinationArtboard);
   // add animation event
   currentState = {
-    ...state,
+    ...currentState,
     byId: {
       ...currentState.byId,
       [action.payload.layer]: {
@@ -1004,8 +997,16 @@ export const addLayerAnimationEvent = (state: LayerState, action: AddLayerAnimat
     paperProject: paper.project.exportJSON()
   }
   // add animation event tweens
-  currentState = artboardChildren.reduce((result, current) => {
-    const destinationEquivalent = getDestinationEquivalent(state, current, destinationArtboardChildren);
+  return addEventLayerTweens(currentState, action);
+};
+
+export const addEventLayerTweens = (state: LayerState, action: AddLayerAnimationEvent): LayerState => {
+  const artboardChildren = getAllLayerChildren(state, action.payload.artboard);
+  const artboardPaperLayer = getPaperLayer(action.payload.artboard);
+  const destinationArtboardChildren = getAllLayerChildren(state, action.payload.destinationArtboard);
+  const destinationArtboardPaperLayer = getPaperLayer(action.payload.destinationArtboard);
+  return artboardChildren.reduce((result, current) => {
+    const destinationEquivalent = getDestinationEquivalent(result, current, destinationArtboardChildren);
     if (destinationEquivalent) {
       const currentPaperLayer = getPaperLayer(current);
       const equivalentPaperLayer = getPaperLayer(destinationEquivalent.id);
@@ -1019,6 +1020,7 @@ export const addLayerAnimationEvent = (state: LayerState, action: AddLayerAnimat
             event: action.payload.id,
             ease: 'linear',
             duration: 0.25,
+            delay: 0
           }) as AddLayerTween);
         } else {
           return;
@@ -1026,9 +1028,7 @@ export const addLayerAnimationEvent = (state: LayerState, action: AddLayerAnimat
       });
     }
     return result;
-  }, currentState);
-  // return final state
-  return currentState;
+  }, state);
 };
 
 export const removeLayerAnimationEvent = (state: LayerState, action: RemoveLayerAnimationEvent): LayerState => {
@@ -1076,6 +1076,10 @@ export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerSt
       [action.payload.layer]: {
         ...state.byId[action.payload.layer],
         tweens: addItem(state.byId[action.payload.layer].tweens, action.payload.id)
+      },
+      [action.payload.destinationLayer]: {
+        ...state.byId[action.payload.destinationLayer],
+        tweens: addItem(state.byId[action.payload.destinationLayer].tweens, action.payload.id)
       }
     },
     allTweenIds: addItem(state.allTweenIds, action.payload.id),
@@ -1103,6 +1107,43 @@ export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): L
       [tween.layer]: {
         ...state.byId[tween.layer],
         tweens: removeItem(state.byId[tween.layer].tweens, action.payload.id)
+      },
+      [tween.destinationLayer]: {
+        ...state.byId[tween.destinationLayer],
+        tweens: removeItem(state.byId[tween.destinationLayer].tweens, action.payload.id)
+      }
+    },
+    allTweenIds: removeItem(state.allTweenIds, action.payload.id),
+    tweenById: Object.keys(state.tweenById).reduce((result: any, key) => {
+      if (key !== action.payload.id) {
+        result[key] = state.tweenById[key];
+      }
+      return result;
+    }, {}),
+    paperProject: paper.project.exportJSON()
+  }
+};
+
+export const updateLayerTween = (state: LayerState, action: {payload: {id: string}}): LayerState => {
+  const tween = state.tweenById[action.payload.id];
+  return {
+    ...state,
+    animationEventById: {
+      ...state.animationEventById,
+      [tween.event]: {
+        ...state.animationEventById[tween.event],
+        tweens: removeItem(state.animationEventById[tween.event].tweens, action.payload.id)
+      }
+    },
+    byId: {
+      ...state.byId,
+      [tween.layer]: {
+        ...state.byId[tween.layer],
+        tweens: removeItem(state.byId[tween.layer].tweens, action.payload.id)
+      },
+      [tween.destinationLayer]: {
+        ...state.byId[tween.destinationLayer],
+        tweens: removeItem(state.byId[tween.destinationLayer].tweens, action.payload.id)
       }
     },
     allTweenIds: removeItem(state.allTweenIds, action.payload.id),

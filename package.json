@@ -104,7 +104,7 @@
     "chroma-js": "^2.1.0",
     "electron-redux": "^1.5.2",
     "electron-squirrel-startup": "^1.0.0",
-    "gsap": "^3.2.6",
+    "gsap": "file:gsap-bonus.tgz",
     "paper": "^0.12.4",
     "react": "^16.13.0",
     "react-color": "^2.18.0",

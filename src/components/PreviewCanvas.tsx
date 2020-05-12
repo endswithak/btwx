@@ -7,7 +7,10 @@ import { paperPreview } from '../canvas';
 import { setActiveArtboard } from '../store/actions/layer';
 import { SetActiveArtboardPayload, LayerTypes } from '../store/actionTypes/layer';
 import { getLongestEventTween, getPositionInArtboard } from '../store/selectors/layer';
-//import { getLongestAnimationByDestination, getDestinationAnimations, getPositionInArtboard } from '../store/selectors/preview';
+import { gsap } from 'gsap';
+import { MorphSVGPlugin } from "gsap/MorphSVGPlugin";
+
+gsap.registerPlugin(MorphSVGPlugin);
 
 interface PreviewCanvasProps {
   layer?: any;
@@ -56,11 +59,8 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
     // add animation events
     allAnimationEventIds.forEach((eventId) => {
       const animationEvent = animationEventById[eventId];
-      const eventArtboard = layerById[animationEvent.artboard];
       const eventArtboardPaperLayer = paperLayersById[animationEvent.artboard];
-      const eventDestinationArtboard = layerById[animationEvent.destinationArtboard];
       const eventDestinationArtboardPaperLayer = paperLayersById[animationEvent.destinationArtboard];
-      const eventLayer = layerById[animationEvent.layer];
       const eventPaperLayer = paperLayersById[animationEvent.layer];
       const eventTweenById = animationEvent.tweens.reduce((result: {[id: string]: em.Tween}, current) => {
         result[current] = tweenById[current];
@@ -70,7 +70,8 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
       // add tweens for each animation event
       eventPaperLayer.on(animationEvent.event, (e) => {
         Object.keys(eventTweenById).forEach((tweenId) => {
-          let paperTween: paper.Tween;
+          let paperTween: gsap.core.Tween;
+          let animateProp: any = {};
           const tween = eventTweenById[tweenId];
           const tweenPaperLayer = paperLayersById[tween.layer];
           const tweenPaperLayerArtboardPosition = getPositionInArtboard(tweenPaperLayer, eventArtboardPaperLayer);
@@ -79,71 +80,193 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
           const tweenPaperLayerPositionDiffX = tweenDestinationLayerArtboardPosition.x - tweenPaperLayerArtboardPosition.x;
           const tweenPaperLayerPositionDiffY = tweenDestinationLayerArtboardPosition.y - tweenPaperLayerArtboardPosition.y;
           switch(tween.prop) {
-            case 'fillColor':
-              paperTween = tweenPaperLayer.tweenTo({
-                fillColor: tweenDestinationLayerPaperLayer.fillColor
-              }, tween.duration * 1000);
+            case 'shapePath': {
+              const morphData = [
+                (tweenPaperLayer as paper.Path).pathData,
+                (tweenDestinationLayerPaperLayer as paper.Path).pathData
+              ];
+              MorphSVGPlugin.pathFilter(morphData);
+              animateProp[tween.prop] = morphData[0];
+              paperTween = gsap.to(animateProp, {
+                duration: tween.duration,
+                [tween.prop]: morphData[1],
+                onUpdate: () => {
+                  (tweenPaperLayer as paper.Path).pathData = animateProp[tween.prop];
+                },
+                ease: tween.ease,
+                delay: tween.delay
+              });
               break;
-            case 'strokeColor':
-              paperTween = tweenPaperLayer.tweenTo({
-                strokeColor: tweenDestinationLayerPaperLayer.strokeColor
-              }, tween.duration * 1000);
+            }
+            case 'fillColor': {
+              animateProp[tween.prop] = tweenPaperLayer.fillColor.toCSS(true);
+              paperTween = gsap.to(animateProp, {
+                duration: tween.duration,
+                [tween.prop]: tweenDestinationLayerPaperLayer.fillColor.toCSS(true),
+                onUpdate: () => {
+                  tweenPaperLayer.fillColor = animateProp[tween.prop];
+                },
+                ease: tween.ease,
+                delay: tween.delay
+              });
               break;
-            case 'strokeWidth':
-              paperTween = tweenPaperLayer.tweenTo({
-                strokeWidth: tweenDestinationLayerPaperLayer.strokeWidth
-              }, tween.duration * 1000);
+            }
+            case 'strokeColor': {
+              animateProp[tween.prop] = tweenPaperLayer.strokeColor.toCSS(true);
+              paperTween = gsap.to(animateProp, {
+                duration: tween.duration,
+                [tween.prop]: tweenDestinationLayerPaperLayer.strokeColor.toCSS(true),
+                onUpdate: () => {
+                  tweenPaperLayer.strokeColor = animateProp[tween.prop];
+                },
+                ease: tween.ease,
+                delay: tween.delay
+              });
               break;
-            case 'x':
-              paperTween = tweenPaperLayer.tweenTo({
-                'position.x': `-=${tweenPaperLayerPositionDiffX}`,
-              }, tween.duration * 1000);
+            }
+            case 'strokeWidth': {
+              animateProp[tween.prop] = tweenPaperLayer.strokeWidth;
+              paperTween = gsap.to(animateProp, {
+                duration: tween.duration,
+                [tween.prop]: tweenDestinationLayerPaperLayer.strokeWidth,
+                onUpdate: () => {
+                  tweenPaperLayer.strokeWidth = animateProp[tween.prop];
+                },
+                ease: tween.ease,
+                delay: tween.delay
+              });
               break;
-            case 'y':
-              paperTween = tweenPaperLayer.tweenTo({
-                'position.y': `-=${tweenPaperLayerPositionDiffY}`,
-              }, tween.duration * 1000);
+            }
+            case 'x': {
+              animateProp[tween.prop] = tweenPaperLayer.position.x;
+              paperTween = gsap.to(animateProp, {
+                duration: tween.duration,
+                [tween.prop]: `-=${tweenPaperLayerPositionDiffX}`,
+                onUpdate: () => {
+                  tweenPaperLayer.position.x = animateProp[tween.prop];
+                },
+                ease: tween.ease,
+                delay: tween.delay
+              });
               break;
-            case 'width':
-              paperTween = tweenPaperLayer.tweenTo({
-                'bounds.width': tweenDestinationLayerPaperLayer.bounds.width,
-              }, tween.duration * 1000);
+            }
+            case 'y': {
+              animateProp[tween.prop] = tweenPaperLayer.position.y;
+              paperTween = gsap.to(animateProp, {
+                duration: tween.duration,
+                [tween.prop]: `-=${tweenPaperLayerPositionDiffY}`,
+                onUpdate: () => {
+                  tweenPaperLayer.position.y = animateProp[tween.prop];
+                },
+                ease: tween.ease,
+                delay: tween.delay
+              });
               break;
-            case 'height':
-              paperTween = tweenPaperLayer.tweenTo({
-                'bounds.height': tweenDestinationLayerPaperLayer.bounds.height,
-              }, tween.duration * 1000);
+            }
+            case 'width': {
+              animateProp[tween.prop] = tweenPaperLayer.bounds.width;
+              paperTween = gsap.to(animateProp, {
+                duration: tween.duration,
+                [tween.prop]: tweenDestinationLayerPaperLayer.bounds.width,
+                onUpdate: () => {
+                  tweenPaperLayer.bounds.width = animateProp[tween.prop];
+                },
+                ease: tween.ease,
+                delay: tween.delay
+              });
               break;
-            case 'rotation':
-              paperTween = tweenPaperLayer.tweenTo({
-                rotation: tweenDestinationLayerPaperLayer.rotation,
-              }, tween.duration * 1000);
+            }
+            case 'height': {
+              animateProp[tween.prop] = tweenPaperLayer.bounds.height;
+              paperTween = gsap.to(animateProp, {
+                duration: tween.duration,
+                [tween.prop]: tweenDestinationLayerPaperLayer.bounds.height,
+                onUpdate: () => {
+                  tweenPaperLayer.bounds.height = animateProp[tween.prop];
+                },
+                ease: tween.ease,
+                delay: tween.delay
+              });
               break;
-            case 'shadowColor':
-              paperTween = tweenPaperLayer.tweenTo({
-                shadowColor: tweenDestinationLayerPaperLayer.shadowColor,
-              }, tween.duration * 1000);
+            }
+            case 'rotation': {
+              animateProp[tween.prop] = tweenPaperLayer.rotation;
+              paperTween = gsap.to(animateProp, {
+                duration: tween.duration,
+                [tween.prop]: tweenDestinationLayerPaperLayer.rotation,
+                onUpdate: () => {
+                  tweenPaperLayer.rotation = animateProp[tween.prop];
+                },
+                ease: tween.ease,
+                delay: tween.delay
+              });
               break;
-            case 'shadowOffsetX':
-              paperTween = tweenPaperLayer.tweenTo({
-                'shadowOffset.x': tweenDestinationLayerPaperLayer.shadowOffset.x,
-              }, tween.duration * 1000);
+            }
+            case 'shadowColor': {
+              animateProp[tween.prop] = tweenPaperLayer.shadowColor;
+              paperTween = gsap.to(animateProp, {
+                duration: tween.duration,
+                [tween.prop]: tweenDestinationLayerPaperLayer.shadowColor,
+                onUpdate: () => {
+                  tweenPaperLayer.shadowColor = animateProp[tween.prop];
+                },
+                ease: tween.ease,
+                delay: tween.delay
+              });
               break;
-            case 'shadowOffsetY':
-              paperTween = tweenPaperLayer.tweenTo({
-                'shadowOffset.y': tweenDestinationLayerPaperLayer.shadowOffset.y,
-              }, tween.duration * 1000);
+            }
+            case 'shadowOffsetX': {
+              animateProp[tween.prop] = tweenPaperLayer.shadowOffset.x;
+              paperTween = gsap.to(animateProp, {
+                duration: tween.duration,
+                [tween.prop]: tweenDestinationLayerPaperLayer.shadowOffset.x,
+                onUpdate: () => {
+                  tweenPaperLayer.shadowOffset.x = animateProp[tween.prop];
+                },
+                ease: tween.ease,
+                delay: tween.delay
+              });
               break;
-            case 'shadowBlur':
-              paperTween = tweenPaperLayer.tweenTo({
-                shadowBlur: tweenDestinationLayerPaperLayer.shadowBlur,
-              }, tween.duration * 1000);
+            }
+            case 'shadowOffsetY': {
+              animateProp[tween.prop] = tweenPaperLayer.shadowOffset.y;
+              paperTween = gsap.to(animateProp, {
+                duration: tween.duration,
+                [tween.prop]: tweenDestinationLayerPaperLayer.shadowOffset.y,
+                onUpdate: () => {
+                  tweenPaperLayer.shadowOffset.y = animateProp[tween.prop];
+                },
+                ease: tween.ease,
+                delay: tween.delay
+              });
               break;
-            case 'opacity':
-              paperTween = tweenPaperLayer.tweenTo({
-                opacity: tweenDestinationLayerPaperLayer.opacity,
-              }, tween.duration * 1000);
+            }
+            case 'shadowBlur': {
+              animateProp[tween.prop] = tweenPaperLayer.shadowBlur;
+              paperTween = gsap.to(animateProp, {
+                duration: tween.duration,
+                [tween.prop]: tweenDestinationLayerPaperLayer.shadowBlur,
+                onUpdate: () => {
+                  tweenPaperLayer.shadowBlur = animateProp[tween.prop];
+                },
+                ease: tween.ease,
+                delay: tween.delay
+              });
               break;
+            }
+            case 'opacity': {
+              animateProp[tween.prop] = tweenPaperLayer.opacity;
+              paperTween = gsap.to(animateProp, {
+                duration: tween.duration,
+                [tween.prop]: tweenDestinationLayerPaperLayer.opacity,
+                onUpdate: () => {
+                  tweenPaperLayer.opacity = animateProp[tween.prop];
+                },
+                ease: tween.ease,
+                delay: tween.delay
+              });
+              break;
+            }
           }
           if (tween.id === longestTween.id) {
             paperTween.then(() => {

@@ -542,6 +542,7 @@ export interface AddLayerTweenPayload {
   event?: string;
   ease?: em.AnimationEase;
   duration?: number;
+  delay?: number;
 }
 
 export interface AddLayerTween {

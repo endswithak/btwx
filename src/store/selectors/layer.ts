@@ -210,6 +210,7 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
   const layerArtboardPosition = getPositionInArtboard(layer, artboard);
   const equivalentArtboardPosition = getPositionInArtboard(equivalent, destinationArtboard);
   const tweenPropMap: em.TweenPropMap = {
+    shapePath: false,
     fillColor: false,
     x: false,
     y: false,
@@ -226,6 +227,11 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
   }
   Object.keys(tweenPropMap).forEach((key) => {
     switch(key) {
+      case 'shapePath':
+        if (layer.data.type !== 'ArtboardBackground' && layer.className === 'Path' && equivalent.className === 'Path' && !(layer as paper.Path).compare(equivalent as paper.Path)) {
+          tweenPropMap[key] = true;
+        }
+        break;
       case 'fillColor':
         if (layer.fillColor && equivalent.fillColor && !layer.fillColor.equals(equivalent.fillColor)) {
           tweenPropMap[key] = true;
@@ -304,10 +310,16 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
 
 export const getLongestEventTween = (tweensById: {[id: string]: em.Tween}): em.Tween => {
   return Object.keys(tweensById).reduce((result: em.Tween, current: string) => {
-    if (tweensById[current].duration >= result.duration) {
+    if (tweensById[current].duration + tweensById[current].delay >= result.duration + result.delay) {
       return tweensById[current];
     } else {
       return result;
     }
   }, tweensById[Object.keys(tweensById)[0]]);
+}
+
+export const isTweenDestinationLayer = (store: LayerState, layer: string): boolean => {
+  const layerItem = getLayer(store, layer);
+  const layerTweens = layerItem.tweens;
+  return layerTweens.length > 0 && layerTweens.some((tween) => store.tweenById[tween].destinationLayer === layer);
 }

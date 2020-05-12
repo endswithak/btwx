@@ -6,7 +6,7 @@ declare namespace em {
 
   type ContextMenu = 'AnimationEventSelect' | 'AnimationArtboardSelect';
 
-  type TweenPropTypes = 'fillColor' | 'x' | 'y' | 'rotation' | 'width' | 'height' | 'strokeColor' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity';
+  type TweenPropTypes = 'shapePath' | 'fillColor' | 'x' | 'y' | 'rotation' | 'width' | 'height' | 'strokeColor' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity';
 
   type LayerTypes = 'Group' | 'Shape' | 'Page' | 'Artboard' | 'ArtboardBackground';
 
@@ -80,9 +80,11 @@ declare namespace em {
     event: string;
     ease: AnimationEase;
     duration: number;
+    delay: number;
   }
 
   interface TweenPropMap {
+    shapePath: boolean;
     fillColor: boolean;
     x: boolean;
     y: boolean;
