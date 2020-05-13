@@ -6,7 +6,7 @@ import { RootState } from '../store/reducers';
 import { paperPreview } from '../canvas';
 import { setActiveArtboard } from '../store/actions/layer';
 import { SetActiveArtboardPayload, LayerTypes } from '../store/actionTypes/layer';
-import { getLongestEventTween, getPositionInArtboard } from '../store/selectors/layer';
+import { getLongestEventTween, getPositionInArtboard, getAllArtboardTweenEvents, getAllArtboardTweenEventDestinations, getAllArtboardTweens, getAllArtboardTweenLayers, getAllArtboardTweenLayerDestinations } from '../store/selectors/layer';
 import { gsap } from 'gsap';
 import { MorphSVGPlugin } from "gsap/MorphSVGPlugin";
 
@@ -15,19 +15,37 @@ gsap.registerPlugin(MorphSVGPlugin);
 interface PreviewCanvasProps {
   layer?: any;
   paperProject?: string;
-  activeArtboard?: string;
+  activeArtboard?: em.Artboard;
   page?: string;
-  allAnimationEventIds: string[];
-  animationEventById?: {
-    [id: string]: em.AnimationEvent;
+  tweenEvents: {
+    allIds: string[];
+    byId: {
+      [id: string]: em.TweenEvent;
+    };
   };
-  allTweenIds?: string[];
-  tweenById?: {
-    [id: string]: em.Tween;
+  destinations: {
+    allIds: string[];
+    byId: {
+      [id: string]: em.Artboard;
+    };
   };
-  allLayerIds?: string[];
-  layerById?: {
-    [id: string]: em.Layer;
+  tweens: {
+    allIds: string[];
+    byId: {
+      [id: string]: em.Tween;
+    };
+  };
+  layers: {
+    allIds: string[];
+    byId: {
+      [id: string]: em.Layer;
+    };
+  };
+  destinationLayers: {
+    allIds: string[];
+    byId: {
+      [id: string]: em.Layer;
+    };
   };
   setActiveArtboard?(payload: SetActiveArtboardPayload): LayerTypes;
 }
@@ -36,7 +54,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useContext(ThemeContext);
-  const { paperProject, activeArtboard, page, allAnimationEventIds, animationEventById, allTweenIds, tweenById, allLayerIds, layerById, setActiveArtboard } = props;
+  const { paperProject, activeArtboard, page, tweenEvents, destinations, tweens, layers, destinationLayers, setActiveArtboard } = props;
 
   useEffect(() => {
     canvasRef.current.width = canvasContainerRef.current.clientWidth;
@@ -47,36 +65,44 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
   useEffect(() => {
     paperPreview.project.clear();
     paperPreview.project.importJSON(paperProject);
-    const paperLayersById = allLayerIds.reduce((result: {[id: string]: paper.Item}, current) => {
+    const paperActiveArtboard = paperPreview.project.getItem({ data: { id: activeArtboard.id } });
+    const paperDestinationsById = destinations.allIds.reduce((result: {[id: string]: paper.Item}, current) => {
+      result[current] = paperPreview.project.getItem({ data: { id: current } });
+      return result;
+    }, {});
+    const paperLayersById = layers.allIds.reduce((result: {[id: string]: paper.Item}, current) => {
+      result[current] = paperPreview.project.getItem({ data: { id: current } });
+      return result;
+    }, {});
+    const paperDestinationLayersById = destinationLayers.allIds.reduce((result: {[id: string]: paper.Item}, current) => {
       result[current] = paperPreview.project.getItem({ data: { id: current } });
       return result;
     }, {});
     paperPreview.project.clear();
     const rootLayer = new paper.Layer();
     paperPreview.project.addLayer(rootLayer);
-    paperLayersById[activeArtboard].parent = rootLayer;
-    paperLayersById[activeArtboard].position = paperPreview.view.center;
+    paperActiveArtboard.parent = rootLayer;
+    paperActiveArtboard.position = paperPreview.view.center;
     // add animation events
-    allAnimationEventIds.forEach((eventId) => {
-      const animationEvent = animationEventById[eventId];
-      const eventArtboardPaperLayer = paperLayersById[animationEvent.artboard];
-      const eventDestinationArtboardPaperLayer = paperLayersById[animationEvent.destinationArtboard];
-      const eventPaperLayer = paperLayersById[animationEvent.layer];
-      const eventTweenById = animationEvent.tweens.reduce((result: {[id: string]: em.Tween}, current) => {
-        result[current] = tweenById[current];
+    tweenEvents.allIds.forEach((eventId) => {
+      const tweenEvent = tweenEvents.byId[eventId];
+      const tweenEventDestinationArtboardPaperLayer = paperDestinationsById[tweenEvent.destinationArtboard];
+      const tweenEventPaperLayer = paperLayersById[tweenEvent.layer];
+      const tweenEventTweensById = tweenEvent.tweens.reduce((result: { [id: string]: em.Tween }, current) => {
+        result[current] = tweens.byId[current];
         return result;
       }, {});
-      const longestTween = getLongestEventTween(eventTweenById);
+      const longestTween = getLongestEventTween(tweenEventTweensById);
       // add tweens for each animation event
-      eventPaperLayer.on(animationEvent.event, (e) => {
-        Object.keys(eventTweenById).forEach((tweenId) => {
+      tweenEventPaperLayer.on(tweenEvent.event, (e) => {
+        Object.keys(tweenEventTweensById).forEach((tweenId) => {
           let paperTween: gsap.core.Tween;
-          let animateProp: any = {};
-          const tween = eventTweenById[tweenId];
+          const tweenProp: any = {};
+          const tween = tweenEventTweensById[tweenId];
           const tweenPaperLayer = paperLayersById[tween.layer];
-          const tweenPaperLayerArtboardPosition = getPositionInArtboard(tweenPaperLayer, eventArtboardPaperLayer);
-          const tweenDestinationLayerPaperLayer = paperLayersById[tween.destinationLayer];
-          const tweenDestinationLayerArtboardPosition = getPositionInArtboard(tweenDestinationLayerPaperLayer, eventDestinationArtboardPaperLayer);
+          const tweenPaperLayerArtboardPosition = getPositionInArtboard(tweenPaperLayer, paperActiveArtboard);
+          const tweenDestinationLayerPaperLayer = paperDestinationLayersById[tween.destinationLayer];
+          const tweenDestinationLayerArtboardPosition = getPositionInArtboard(tweenDestinationLayerPaperLayer, tweenEventDestinationArtboardPaperLayer);
           const tweenPaperLayerPositionDiffX = tweenDestinationLayerArtboardPosition.x - tweenPaperLayerArtboardPosition.x;
           const tweenPaperLayerPositionDiffY = tweenDestinationLayerArtboardPosition.y - tweenPaperLayerArtboardPosition.y;
           switch(tween.prop) {
@@ -86,12 +112,12 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 (tweenDestinationLayerPaperLayer as paper.Path).pathData
               ];
               MorphSVGPlugin.pathFilter(morphData);
-              animateProp[tween.prop] = morphData[0];
-              paperTween = gsap.to(animateProp, {
+              tweenProp[tween.prop] = morphData[0];
+              paperTween = gsap.to(tweenProp, {
                 duration: tween.duration,
                 [tween.prop]: morphData[1],
                 onUpdate: () => {
-                  (tweenPaperLayer as paper.Path).pathData = animateProp[tween.prop];
+                  (tweenPaperLayer as paper.Path).pathData = tweenProp[tween.prop];
                 },
                 ease: tween.ease,
                 delay: tween.delay
@@ -99,12 +125,12 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
               break;
             }
             case 'fillColor': {
-              animateProp[tween.prop] = tweenPaperLayer.fillColor.toCSS(true);
-              paperTween = gsap.to(animateProp, {
+              tweenProp[tween.prop] = tweenPaperLayer.fillColor.toCSS(true);
+              paperTween = gsap.to(tweenProp, {
                 duration: tween.duration,
                 [tween.prop]: tweenDestinationLayerPaperLayer.fillColor.toCSS(true),
                 onUpdate: () => {
-                  tweenPaperLayer.fillColor = animateProp[tween.prop];
+                  tweenPaperLayer.fillColor = tweenProp[tween.prop];
                 },
                 ease: tween.ease,
                 delay: tween.delay
@@ -112,12 +138,12 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
               break;
             }
             case 'strokeColor': {
-              animateProp[tween.prop] = tweenPaperLayer.strokeColor.toCSS(true);
-              paperTween = gsap.to(animateProp, {
+              tweenProp[tween.prop] = tweenPaperLayer.strokeColor.toCSS(true);
+              paperTween = gsap.to(tweenProp, {
                 duration: tween.duration,
                 [tween.prop]: tweenDestinationLayerPaperLayer.strokeColor.toCSS(true),
                 onUpdate: () => {
-                  tweenPaperLayer.strokeColor = animateProp[tween.prop];
+                  tweenPaperLayer.strokeColor = tweenProp[tween.prop];
                 },
                 ease: tween.ease,
                 delay: tween.delay
@@ -125,12 +151,12 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
               break;
             }
             case 'strokeWidth': {
-              animateProp[tween.prop] = tweenPaperLayer.strokeWidth;
-              paperTween = gsap.to(animateProp, {
+              tweenProp[tween.prop] = tweenPaperLayer.strokeWidth;
+              paperTween = gsap.to(tweenProp, {
                 duration: tween.duration,
                 [tween.prop]: tweenDestinationLayerPaperLayer.strokeWidth,
                 onUpdate: () => {
-                  tweenPaperLayer.strokeWidth = animateProp[tween.prop];
+                  tweenPaperLayer.strokeWidth = tweenProp[tween.prop];
                 },
                 ease: tween.ease,
                 delay: tween.delay
@@ -138,12 +164,12 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
               break;
             }
             case 'x': {
-              animateProp[tween.prop] = tweenPaperLayer.position.x;
-              paperTween = gsap.to(animateProp, {
+              tweenProp[tween.prop] = tweenPaperLayer.position.x;
+              paperTween = gsap.to(tweenProp, {
                 duration: tween.duration,
                 [tween.prop]: `-=${tweenPaperLayerPositionDiffX}`,
                 onUpdate: () => {
-                  tweenPaperLayer.position.x = animateProp[tween.prop];
+                  tweenPaperLayer.position.x = tweenProp[tween.prop];
                 },
                 ease: tween.ease,
                 delay: tween.delay
@@ -151,12 +177,12 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
               break;
             }
             case 'y': {
-              animateProp[tween.prop] = tweenPaperLayer.position.y;
-              paperTween = gsap.to(animateProp, {
+              tweenProp[tween.prop] = tweenPaperLayer.position.y;
+              paperTween = gsap.to(tweenProp, {
                 duration: tween.duration,
                 [tween.prop]: `-=${tweenPaperLayerPositionDiffY}`,
                 onUpdate: () => {
-                  tweenPaperLayer.position.y = animateProp[tween.prop];
+                  tweenPaperLayer.position.y = tweenProp[tween.prop];
                 },
                 ease: tween.ease,
                 delay: tween.delay
@@ -164,12 +190,12 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
               break;
             }
             case 'width': {
-              animateProp[tween.prop] = tweenPaperLayer.bounds.width;
-              paperTween = gsap.to(animateProp, {
+              tweenProp[tween.prop] = tweenPaperLayer.bounds.width;
+              paperTween = gsap.to(tweenProp, {
                 duration: tween.duration,
                 [tween.prop]: tweenDestinationLayerPaperLayer.bounds.width,
                 onUpdate: () => {
-                  tweenPaperLayer.bounds.width = animateProp[tween.prop];
+                  tweenPaperLayer.bounds.width = tweenProp[tween.prop];
                 },
                 ease: tween.ease,
                 delay: tween.delay
@@ -177,12 +203,12 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
               break;
             }
             case 'height': {
-              animateProp[tween.prop] = tweenPaperLayer.bounds.height;
-              paperTween = gsap.to(animateProp, {
+              tweenProp[tween.prop] = tweenPaperLayer.bounds.height;
+              paperTween = gsap.to(tweenProp, {
                 duration: tween.duration,
                 [tween.prop]: tweenDestinationLayerPaperLayer.bounds.height,
                 onUpdate: () => {
-                  tweenPaperLayer.bounds.height = animateProp[tween.prop];
+                  tweenPaperLayer.bounds.height = tweenProp[tween.prop];
                 },
                 ease: tween.ease,
                 delay: tween.delay
@@ -190,12 +216,12 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
               break;
             }
             case 'rotation': {
-              animateProp[tween.prop] = tweenPaperLayer.rotation;
-              paperTween = gsap.to(animateProp, {
+              tweenProp[tween.prop] = tweenPaperLayer.rotation;
+              paperTween = gsap.to(tweenProp, {
                 duration: tween.duration,
                 [tween.prop]: tweenDestinationLayerPaperLayer.rotation,
                 onUpdate: () => {
-                  tweenPaperLayer.rotation = animateProp[tween.prop];
+                  tweenPaperLayer.rotation = tweenProp[tween.prop];
                 },
                 ease: tween.ease,
                 delay: tween.delay
@@ -203,12 +229,12 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
               break;
             }
             case 'shadowColor': {
-              animateProp[tween.prop] = tweenPaperLayer.shadowColor;
-              paperTween = gsap.to(animateProp, {
+              tweenProp[tween.prop] = tweenPaperLayer.shadowColor;
+              paperTween = gsap.to(tweenProp, {
                 duration: tween.duration,
                 [tween.prop]: tweenDestinationLayerPaperLayer.shadowColor,
                 onUpdate: () => {
-                  tweenPaperLayer.shadowColor = animateProp[tween.prop];
+                  tweenPaperLayer.shadowColor = tweenProp[tween.prop];
                 },
                 ease: tween.ease,
                 delay: tween.delay
@@ -216,12 +242,12 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
               break;
             }
             case 'shadowOffsetX': {
-              animateProp[tween.prop] = tweenPaperLayer.shadowOffset.x;
-              paperTween = gsap.to(animateProp, {
+              tweenProp[tween.prop] = tweenPaperLayer.shadowOffset.x;
+              paperTween = gsap.to(tweenProp, {
                 duration: tween.duration,
                 [tween.prop]: tweenDestinationLayerPaperLayer.shadowOffset.x,
                 onUpdate: () => {
-                  tweenPaperLayer.shadowOffset.x = animateProp[tween.prop];
+                  tweenPaperLayer.shadowOffset.x = tweenProp[tween.prop];
                 },
                 ease: tween.ease,
                 delay: tween.delay
@@ -229,12 +255,12 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
               break;
             }
             case 'shadowOffsetY': {
-              animateProp[tween.prop] = tweenPaperLayer.shadowOffset.y;
-              paperTween = gsap.to(animateProp, {
+              tweenProp[tween.prop] = tweenPaperLayer.shadowOffset.y;
+              paperTween = gsap.to(tweenProp, {
                 duration: tween.duration,
                 [tween.prop]: tweenDestinationLayerPaperLayer.shadowOffset.y,
                 onUpdate: () => {
-                  tweenPaperLayer.shadowOffset.y = animateProp[tween.prop];
+                  tweenPaperLayer.shadowOffset.y = tweenProp[tween.prop];
                 },
                 ease: tween.ease,
                 delay: tween.delay
@@ -242,12 +268,12 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
               break;
             }
             case 'shadowBlur': {
-              animateProp[tween.prop] = tweenPaperLayer.shadowBlur;
-              paperTween = gsap.to(animateProp, {
+              tweenProp[tween.prop] = tweenPaperLayer.shadowBlur;
+              paperTween = gsap.to(tweenProp, {
                 duration: tween.duration,
                 [tween.prop]: tweenDestinationLayerPaperLayer.shadowBlur,
                 onUpdate: () => {
-                  tweenPaperLayer.shadowBlur = animateProp[tween.prop];
+                  tweenPaperLayer.shadowBlur = tweenProp[tween.prop];
                 },
                 ease: tween.ease,
                 delay: tween.delay
@@ -255,12 +281,12 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
               break;
             }
             case 'opacity': {
-              animateProp[tween.prop] = tweenPaperLayer.opacity;
-              paperTween = gsap.to(animateProp, {
+              tweenProp[tween.prop] = tweenPaperLayer.opacity;
+              paperTween = gsap.to(tweenProp, {
                 duration: tween.duration,
                 [tween.prop]: tweenDestinationLayerPaperLayer.opacity,
                 onUpdate: () => {
-                  tweenPaperLayer.opacity = animateProp[tween.prop];
+                  tweenPaperLayer.opacity = tweenProp[tween.prop];
                 },
                 ease: tween.ease,
                 delay: tween.delay
@@ -270,13 +296,13 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
           }
           if (tween.id === longestTween.id) {
             paperTween.then(() => {
-              setActiveArtboard({id: animationEvent.destinationArtboard});
+              setActiveArtboard({id: tweenEvent.destinationArtboard});
             });
           }
         });
       });
     });
-  }, [paperProject, activeArtboard, allAnimationEventIds, animationEventById]);
+  }, [paperProject, activeArtboard, tweens, tweenEvents]);
 
   return (
     <div
@@ -295,51 +321,20 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
 
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
-  const allAnimationEventIds: string[] = [];
-  const animationEventById = Object.keys(layer.present.animationEventById).reduce((result: {[id: string]: em.AnimationEvent}, current) => {
-    if (layer.present.animationEventById[current].artboard === layer.present.activeArtboard) {
-      result[current] = layer.present.animationEventById[current];
-      allAnimationEventIds.push(current);
-    }
-    return result;
-  }, {});
-  const allTweenIds: string[] = [];
-  const tweenById = Object.keys(animationEventById).reduce((result: {[id: string]: em.Tween}, current) => {
-    animationEventById[current].tweens.forEach((tween) => {
-      result[tween] = layer.present.tweenById[tween];
-      allTweenIds.push(tween);
-    });
-    return result;
-  }, {});
-  const allLayerIds: string[] = [layer.present.activeArtboard];
-  const layerById = {
-    [layer.present.activeArtboard]: layer.present.byId[layer.present.activeArtboard]
-  }
-  Object.keys(tweenById).forEach((current) => {
-    if (!allLayerIds.includes(tweenById[current].layer)) {
-      layerById[tweenById[current].layer] = layer.present.byId[tweenById[current].layer];
-      allLayerIds.push(tweenById[current].layer);
-    } else if (!allLayerIds.includes(tweenById[current].destinationLayer)) {
-      layerById[tweenById[current].destinationLayer] = layer.present.byId[tweenById[current].destinationLayer];
-      allLayerIds.push(tweenById[current].destinationLayer);
-    } else if (!allLayerIds.includes(animationEventById[tweenById[current].event].artboard)) {
-      layerById[animationEventById[tweenById[current].event].artboard] = layer.present.byId[animationEventById[tweenById[current].event].artboard];
-      allLayerIds.push(animationEventById[tweenById[current].event].artboard);
-    } else if (!allLayerIds.includes(animationEventById[tweenById[current].event].destinationArtboard)) {
-      layerById[animationEventById[tweenById[current].event].destinationArtboard] = layer.present.byId[animationEventById[tweenById[current].event].destinationArtboard];
-      allLayerIds.push(animationEventById[tweenById[current].event].destinationArtboard);
-    }
-  });
+  const tweenEvents = getAllArtboardTweenEvents(layer.present, layer.present.activeArtboard);
+  const destinations = getAllArtboardTweenEventDestinations(layer.present, layer.present.activeArtboard);
+  const tweens = getAllArtboardTweens(layer.present, layer.present.activeArtboard);
+  const layers = getAllArtboardTweenLayers(layer.present, layer.present.activeArtboard);
+  const destinationLayers = getAllArtboardTweenLayerDestinations(layer.present, layer.present.activeArtboard);
   return {
     paperProject: layer.present.paperProject,
-    activeArtboard: layer.present.activeArtboard,
+    activeArtboard: layer.present.byId[layer.present.activeArtboard],
     page: layer.present.page,
-    allAnimationEventIds,
-    animationEventById,
-    allTweenIds,
-    tweenById,
-    allLayerIds,
-    layerById
+    tweenEvents,
+    destinations,
+    tweens,
+    layers,
+    destinationLayers
   };
 };
 

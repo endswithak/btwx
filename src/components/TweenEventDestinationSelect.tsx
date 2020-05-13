@@ -1,16 +1,15 @@
 import paper from 'paper';
 import React, { useRef, useContext, useEffect, ReactElement } from 'react';
 import { connect } from 'react-redux';
-import Modal from 'react-modal';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { ContextMenuTypes } from '../store/actionTypes/contextMenu';
 import { closeContextMenu } from '../store/actions/contextMenu';
-import { AddLayerAnimationEventPayload, LayerTypes } from '../store/actionTypes/layer';
-import { addLayerAnimationEvent } from '../store/actions/layer';
+import { AddLayerTweenEventPayload, LayerTypes } from '../store/actionTypes/layer';
+import { addLayerTweenEvent } from '../store/actions/layer';
 import ContextMenu from './ContextMenu';
 
-interface ContextMenuProps {
+interface TweenEventDestinationSelectProps {
   activeArtboard: string;
   artboards: em.Artboard[];
   contextMenu?: {
@@ -22,24 +21,24 @@ interface ContextMenuProps {
     data: any;
   };
   closeContextMenu?(): ContextMenuTypes;
-  addLayerAnimationEvent?(payload: AddLayerAnimationEventPayload): LayerTypes;
+  addLayerTweenEvent?(payload: AddLayerTweenEventPayload): LayerTypes;
 }
 
-const ArtboardSelectMenu = (props: ContextMenuProps): ReactElement => {
+const TweenEventDestinationSelect = (props: TweenEventDestinationSelectProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { activeArtboard, artboards, contextMenu, closeContextMenu, addLayerAnimationEvent } = props;
+  const { activeArtboard, artboards, contextMenu, closeContextMenu, addLayerTweenEvent } = props;
 
-  const animationSelectOptions = artboards.reduce((result, current) => {
+  const tweenDestinationSelectOptions = artboards.reduce((result, current) => {
     if (current.id !== activeArtboard) {
       result = [
         ...result,
         {
           text: current.name,
           onClick: () => {
-            addLayerAnimationEvent({
+            addLayerTweenEvent({
               artboard: activeArtboard,
               destinationArtboard: current.id,
-              event: contextMenu.data.animationEvent,
+              event: contextMenu.data.tweenEvent,
               layer: contextMenu.id,
               tweens: []
             });
@@ -53,8 +52,8 @@ const ArtboardSelectMenu = (props: ContextMenuProps): ReactElement => {
 
   return (
     <ContextMenu
-      options={animationSelectOptions}
-      type='AnimationArtboardSelect' />
+      options={tweenDestinationSelectOptions}
+      type='TweenEventDestination' />
   );
 }
 
@@ -77,5 +76,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { closeContextMenu, addLayerAnimationEvent }
-)(ArtboardSelectMenu);
+  { closeContextMenu, addLayerTweenEvent }
+)(TweenEventDestinationSelect);

@@ -3,15 +3,15 @@ import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
 import { enableSelectionTool, enableRectangleDrawTool, enableEllipseDrawTool, enableStarDrawTool, enablePolygonDrawTool, enableRoundedDrawTool, enableArtboardTool } from '../store/actions/tool';
 import { ToolTypes } from '../store/actionTypes/tool';
-import { openAnimationDrawer, closeAnimationDrawer } from '../store/actions/animationDrawer';
-import { AnimationDrawerTypes } from '../store/actionTypes/animationDrawer';
+import { openTweenDrawer, closeTweenDrawer } from '../store/actions/tweenDrawer';
+import { AnimationDrawerTypes } from '../store/actionTypes/tweenDrawer';
 import { ThemeContext } from './ThemeProvider';
 import { ipcRenderer } from 'electron';
 
 interface TopbarStateProps {
   drawShapeType: em.ShapeType;
   activeArtboard: em.Artboard;
-  isAnimationDrawerOpen: boolean;
+  isTweenDrawerOpen: boolean;
   enableRectangleDrawTool(): ToolTypes;
   enableEllipseDrawTool(): ToolTypes;
   enableStarDrawTool(): ToolTypes;
@@ -19,14 +19,14 @@ interface TopbarStateProps {
   enableRoundedDrawTool(): ToolTypes;
   enableSelectionTool(): ToolTypes;
   enableArtboardTool(): ToolTypes;
-  openAnimationDrawer(): AnimationDrawerTypes;
-  closeAnimationDrawer(): AnimationDrawerTypes;
+  openTweenDrawer(): AnimationDrawerTypes;
+  closeTweenDrawer(): AnimationDrawerTypes;
 }
 
 const Topbar = (props: TopbarStateProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const {
-    isAnimationDrawerOpen,
+    isTweenDrawerOpen,
     enableRectangleDrawTool,
     enableEllipseDrawTool,
     enableSelectionTool,
@@ -36,8 +36,8 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
     enableRoundedDrawTool,
     enableArtboardTool,
     activeArtboard,
-    openAnimationDrawer,
-    closeAnimationDrawer
+    openTweenDrawer,
+    closeTweenDrawer
   } = props;
 
   const handleDrawClick = (shape: em.ShapeType | 'Artboard') => {
@@ -71,11 +71,11 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
     ipcRenderer.send('openPreview', JSON.stringify(activeArtboard));
   }
 
-  const handleAnimationDrawerClick = () => {
-    if (isAnimationDrawerOpen) {
-      closeAnimationDrawer();
+  const handleTweenDrawerClick = () => {
+    if (isTweenDrawerOpen) {
+      closeTweenDrawer();
     } else {
-      openAnimationDrawer();
+      openTweenDrawer();
     }
   }
 
@@ -83,7 +83,7 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
     <div
       className='c-topbar'
       style={{
-        background: theme.background.z3
+        background: theme.background.z2
       }}>
       <button
         className='c-topbar__button'
@@ -125,7 +125,7 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
       </button>
       <button
         className='c-topbar__button'
-        onClick={handleAnimationDrawerClick}
+        onClick={handleTweenDrawerClick}
         style={{
           background: 'yellow'
         }}>
@@ -136,11 +136,11 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { tool, layer, animationDrawer } = state;
+  const { tool, layer, tweenDrawer } = state;
   const drawShapeType = tool.drawShape;
   const activeArtboard = layer.present.byId[layer.present.activeArtboard];
-  const isAnimationDrawerOpen = animationDrawer.isOpen;
-  return { drawShapeType, activeArtboard, isAnimationDrawerOpen };
+  const isTweenDrawerOpen = tweenDrawer.isOpen;
+  return { drawShapeType, activeArtboard, isTweenDrawerOpen };
 };
 
 export default connect(
@@ -153,7 +153,7 @@ export default connect(
     enableRoundedDrawTool,
     enableSelectionTool,
     enableArtboardTool,
-    openAnimationDrawer,
-    closeAnimationDrawer
+    openTweenDrawer,
+    closeTweenDrawer
   }
 )(Topbar);

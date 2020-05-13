@@ -42,6 +42,8 @@ import { remote } from 'electron';
 
 import './styles/index.sass';
 
+persistor.purge();
+
 window.addEventListener('storage', persist(store, persistConfig));
 
 window.renderMainWindow = () => {

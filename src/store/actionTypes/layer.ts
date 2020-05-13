@@ -54,8 +54,8 @@ export const SET_LAYER_NAME = 'SET_LAYER_NAME';
 
 export const SET_ACTIVE_ARTBOARD = 'SET_ACTIVE_ARTBOARD';
 
-export const ADD_LAYER_ANIMATION_EVENT = 'ADD_LAYER_ANIMATION_EVENT';
-export const REMOVE_LAYER_ANIMATION_EVENT = 'REMOVE_LAYER_ANIMATION_EVENT';
+export const ADD_LAYER_TWEEN_EVENT = 'ADD_LAYER_TWEEN_EVENT';
+export const REMOVE_LAYER_TWEEN_EVENT = 'REMOVE_LAYER_TWEEN_EVENT';
 
 export const ADD_LAYER_TWEEN = 'ADD_LAYER_TWEEN';
 export const REMOVE_LAYER_TWEEN = 'REMOVE_LAYER_TWEEN';
@@ -71,7 +71,7 @@ export interface AddPagePayload {
   selected?: boolean;
   hover?: boolean;
   children?: string[];
-  animationEvents?: [];
+  tweenEvents?: [];
   tweens?: [];
 }
 
@@ -93,7 +93,7 @@ export interface AddArtboardPayload {
   hover?: boolean;
   children?: string[];
   showChildren?: boolean;
-  animationEvents?: [];
+  tweenEvents?: [];
   tweens?: [];
 }
 
@@ -115,7 +115,7 @@ export interface AddGroupPayload {
   hover?: boolean;
   children?: string[];
   showChildren?: boolean;
-  animationEvents?: [];
+  tweenEvents?: [];
   tweens?: [];
 }
 
@@ -137,7 +137,7 @@ export interface AddShapePayload {
   paperLayer?: paper.Item;
   selected?: boolean;
   hover?: boolean;
-  animationEvents?: [];
+  tweenEvents?: [];
   tweens?: [];
 }
 
@@ -507,29 +507,29 @@ export interface SetActiveArtboard {
   payload: SetActiveArtboardPayload;
 }
 
-// Animation Event
+// Tween Event
 
-export interface AddLayerAnimationEventPayload {
+export interface AddLayerTweenEventPayload {
   layer?: string;
   id?: string;
-  event?: em.AnimationEvent;
+  event?: em.TweenEvent;
   artboard?: string;
   destinationArtboard?: string;
   tweens: string[];
 }
 
-export interface AddLayerAnimationEvent {
-  type: typeof ADD_LAYER_ANIMATION_EVENT;
-  payload: AddLayerAnimationEventPayload;
+export interface AddLayerTweenEvent {
+  type: typeof ADD_LAYER_TWEEN_EVENT;
+  payload: AddLayerTweenEventPayload;
 }
 
-export interface RemoveLayerAnimationEventPayload {
+export interface RemoveLayerTweenEventPayload {
   id: string;
 }
 
-export interface RemoveLayerAnimationEvent {
-  type: typeof REMOVE_LAYER_ANIMATION_EVENT;
-  payload: RemoveLayerAnimationEventPayload;
+export interface RemoveLayerTweenEvent {
+  type: typeof REMOVE_LAYER_TWEEN_EVENT;
+  payload: RemoveLayerTweenEventPayload;
 }
 
 // Tween
@@ -560,4 +560,4 @@ export interface RemoveLayerTween {
 }
 
 
-export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerAnimationEvent | RemoveLayerAnimationEvent | AddLayerTween | RemoveLayerTween;
+export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween;

@@ -1,10 +1,10 @@
 declare namespace em {
 
-  type AnimationEventType = 'click' | 'doubleclick' | 'mouseenter' | 'mouseleave';
+  type TweenEventType = 'click' | 'doubleclick' | 'mouseenter' | 'mouseleave';
 
   type AnimationEase = 'linear' | 'easeInQuad' | 'easeOutQuad' | 'easeInOutQuad' | 'easeInCubic' | 'easeOutCubic' | 'easeInOutCubic' | 'easeInQuart' | 'easeOutQuart' | 'easeInOutQuart' | 'easeInQuint' | 'easeOutQuint' | 'easeInOutQuint';
 
-  type ContextMenu = 'AnimationEventSelect' | 'AnimationArtboardSelect';
+  type ContextMenu = 'TweenEvent' | 'TweenEventDestination';
 
   type TweenPropTypes = 'shapePath' | 'fillColor' | 'x' | 'y' | 'rotation' | 'width' | 'height' | 'strokeColor' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity';
 
@@ -19,7 +19,7 @@ declare namespace em {
     //paperLayer: string;
     selected: boolean;
     children: string[] | null;
-    animationEvents: string[];
+    tweenEvents: string[];
     tweens: string[];
   }
 
@@ -63,10 +63,10 @@ declare namespace em {
     children: null;
   }
 
-  interface AnimationEvent {
+  interface TweenEvent {
     id: string;
     layer: string;
-    event: AnimationEventType;
+    event: TweenEventType;
     artboard: string;
     destinationArtboard: string;
     tweens: string[];

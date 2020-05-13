@@ -3,7 +3,7 @@ import undoable, { includeAction, excludeAction } from 'redux-undo';
 import layer from './layer';
 import tool from './tool';
 import contextMenu from './contextMenu';
-import animationDrawer from './animationDrawer';
+import tweenDrawer from './tweenDrawer';
 
 import {
   ADD_ARTBOARD,
@@ -26,8 +26,10 @@ import {
   MOVE_LAYERS_TO,
   MOVE_LAYERS_BY,
   SET_LAYER_NAME,
-  ADD_LAYER_ANIMATION,
-  REMOVE_LAYER_ANIMATION
+  ADD_LAYER_TWEEN_EVENT,
+  REMOVE_LAYER_TWEEN_EVENT,
+  ADD_LAYER_TWEEN,
+  REMOVE_LAYER_TWEEN
 } from '../actionTypes/layer';
 
 const rootReducer = combineReducers({
@@ -52,12 +54,14 @@ const rootReducer = combineReducers({
     MOVE_LAYERS_TO,
     MOVE_LAYERS_BY,
     SET_LAYER_NAME,
-    ADD_LAYER_ANIMATION,
-    REMOVE_LAYER_ANIMATION
+    ADD_LAYER_TWEEN_EVENT,
+    REMOVE_LAYER_TWEEN_EVENT,
+    ADD_LAYER_TWEEN,
+    REMOVE_LAYER_TWEEN
   ])}),
   tool,
   contextMenu,
-  animationDrawer
+  tweenDrawer
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

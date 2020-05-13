@@ -22,7 +22,7 @@ export const applyShapeMethods = (shape: paper.Item) => {
     const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, layer.id);
     if (e.event.which === 3) {
       if (nearestScopeAncestor.id === this.data.id) {
-        store.dispatch(openContextMenu({type: 'AnimationEventSelect', id: this.data.id, x: e.event.clientX, y: e.event.clientY}));
+        store.dispatch(openContextMenu({type: 'TweenEvent', id: this.data.id, x: e.event.clientX, y: e.event.clientY}));
       }
     }
     if (e.modifiers.shift) {

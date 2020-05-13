@@ -12,7 +12,7 @@ export const applyArtboardMethods = (artboard: paper.Item) => {
     //store.dispatch(setActiveArtboard({id: this.data.artboard}));
     if (e.event.which === 3) {
       if (nearestScopeAncestor.id === this.data.artboard) {
-        store.dispatch(openContextMenu({type: 'AnimationEventSelect', id: this.data.artboard, x: e.event.clientX, y: e.event.clientY}));
+        store.dispatch(openContextMenu({type: 'TweenEvent', id: this.data.artboard, x: e.event.clientX, y: e.event.clientY}));
       }
     }
     if (e.modifiers.shift) {

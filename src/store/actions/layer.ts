@@ -42,8 +42,8 @@ import {
   DISABLE_LAYER_DRAG,
   SET_LAYER_NAME,
   SET_ACTIVE_ARTBOARD,
-  ADD_LAYER_ANIMATION_EVENT,
-  REMOVE_LAYER_ANIMATION_EVENT,
+  ADD_LAYER_TWEEN_EVENT,
+  REMOVE_LAYER_TWEEN_EVENT,
   ADD_LAYER_TWEEN,
   REMOVE_LAYER_TWEEN,
   AddPagePayload,
@@ -80,8 +80,8 @@ import {
   MoveLayersByPayload,
   SetLayerNamePayload,
   SetActiveArtboardPayload,
-  AddLayerAnimationEventPayload,
-  RemoveLayerAnimationEventPayload,
+  AddLayerTweenEventPayload,
+  RemoveLayerTweenEventPayload,
   AddLayerTweenPayload,
   RemoveLayerTweenPayload,
   LayerTypes
@@ -104,7 +104,7 @@ export const addPage = (payload: AddPagePayload): LayerTypes => {
       children: [],
       //paperLayer: paperLayer.exportJSON(),
       selected: false,
-      animationEvents: [],
+      tweenEvents: [],
       tweens: []
     }
   }
@@ -134,7 +134,7 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
       selected: false,
       //paperLayer: paperLayer.exportJSON(),
       showChildren: false,
-      animationEvents: [],
+      tweenEvents: [],
       tweens: []
     }
   }
@@ -160,7 +160,7 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
       selected: false,
       //paperLayer: paperLayer.exportJSON(),
       showChildren: false,
-      animationEvents: [],
+      tweenEvents: [],
       tweens: []
     }
   }
@@ -192,7 +192,7 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
       pathData: clone.pathData,
       //paperLayer: payload.paperLayer.exportJSON(),
       selected: false,
-      animationEvents: [],
+      tweenEvents: [],
       tweens: []
     }
   }
@@ -398,16 +398,16 @@ export const setActiveArtboard = (payload: SetActiveArtboardPayload): LayerTypes
 
 // Animation Event
 
-export const addLayerAnimationEvent = (payload: AddLayerAnimationEventPayload): LayerTypes => ({
-  type: ADD_LAYER_ANIMATION_EVENT,
+export const addLayerTweenEvent = (payload: AddLayerTweenEventPayload): LayerTypes => ({
+  type: ADD_LAYER_TWEEN_EVENT,
   payload: {
     ...payload,
     id: uuidv4()
   }
 });
 
-export const removeLayerAnimationEvent = (payload: RemoveLayerAnimationEventPayload): LayerTypes => ({
-  type: REMOVE_LAYER_ANIMATION_EVENT,
+export const removeLayerTweenEvent = (payload: RemoveLayerTweenEventPayload): LayerTypes => ({
+  type: REMOVE_LAYER_TWEEN_EVENT,
   payload
 });
 

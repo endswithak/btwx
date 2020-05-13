@@ -7,7 +7,7 @@ import { ContextMenuTypes, OpenContextMenuPayload } from '../store/actionTypes/c
 import { closeContextMenu, openContextMenu } from '../store/actions/contextMenu';
 import ContextMenu from './ContextMenu';
 
-interface ContextMenuProps {
+interface TweenSelectProps {
   contextMenu?: {
     id: string;
     isOpen: boolean;
@@ -19,19 +19,19 @@ interface ContextMenuProps {
   closeContextMenu?(): ContextMenuTypes;
 }
 
-const AnimationSelectMenu = (props: ContextMenuProps): ReactElement => {
+const TweenEventSelect = (props: TweenSelectProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { contextMenu, openContextMenu, closeContextMenu } = props;
 
-  const animationSelectOptions = [{
+  const tweenEventSelectOptions = [{
     text: 'Click',
     onClick: () => {
       closeContextMenu();
       openContextMenu({
         ...contextMenu,
-        type: 'AnimationArtboardSelect',
+        type: 'TweenEventDestination',
         data: {
-          animationEvent: 'click'
+          tweenEvent: 'click'
         }
       });
     }
@@ -41,9 +41,9 @@ const AnimationSelectMenu = (props: ContextMenuProps): ReactElement => {
       closeContextMenu();
       openContextMenu({
         ...contextMenu,
-        type: 'AnimationArtboardSelect',
+        type: 'TweenEventDestination',
         data: {
-          animationEvent: 'doubleclick'
+          tweenEvent: 'doubleclick'
         }
       });
     }
@@ -53,9 +53,9 @@ const AnimationSelectMenu = (props: ContextMenuProps): ReactElement => {
       closeContextMenu();
       openContextMenu({
         ...contextMenu,
-        type: 'AnimationArtboardSelect',
+        type: 'TweenEventDestination',
         data: {
-          animationEvent: 'mouseenter'
+          tweenEvent: 'mouseenter'
         }
       });
     }
@@ -65,9 +65,9 @@ const AnimationSelectMenu = (props: ContextMenuProps): ReactElement => {
       closeContextMenu();
       openContextMenu({
         ...contextMenu,
-        type: 'AnimationArtboardSelect',
+        type: 'TweenEventDestination',
         data: {
-          animationEvent: 'mouseleave'
+          tweenEvent: 'mouseleave'
         }
       });
     }
@@ -75,8 +75,8 @@ const AnimationSelectMenu = (props: ContextMenuProps): ReactElement => {
 
   return (
     <ContextMenu
-      options={animationSelectOptions}
-      type='AnimationEventSelect' />
+      options={tweenEventSelectOptions}
+      type='TweenEvent' />
   );
 }
 
@@ -88,4 +88,4 @@ const mapStateToProps = (state: RootState) => {
 export default connect(
   mapStateToProps,
   { openContextMenu, closeContextMenu }
-)(AnimationSelectMenu);
+)(TweenEventSelect);

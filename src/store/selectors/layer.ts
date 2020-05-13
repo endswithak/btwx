@@ -323,3 +323,86 @@ export const isTweenDestinationLayer = (store: LayerState, layer: string): boole
   const layerTweens = layerItem.tweens;
   return layerTweens.length > 0 && layerTweens.some((tween) => store.tweenById[tween].destinationLayer === layer);
 }
+
+export const getAllArtboardTweenEvents = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: em.TweenEvent } } => {
+  const allIds: string[] = [];
+  const byId = Object.keys(store.tweenEventById).reduce((result: {[id: string]: em.TweenEvent}, current) => {
+    if (store.tweenEventById[current].artboard === artboard) {
+      result[current] = store.tweenEventById[current];
+      allIds.push(current);
+    }
+    return result;
+  }, {});
+  return {
+    allIds,
+    byId
+  };
+};
+
+export const getAllArtboardTweenEventDestinations = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: em.Artboard } } => {
+  const allArtboardAnimationEvents = getAllArtboardTweenEvents(store, artboard);
+  const allIds: string[] = [];
+  const byId = Object.keys(allArtboardAnimationEvents.byId).reduce((result: { [id: string]: em.Artboard }, current) => {
+    const event = allArtboardAnimationEvents.byId[current];
+    if (!allIds.includes(event.destinationArtboard)) {
+      result[event.destinationArtboard] = store.byId[event.destinationArtboard] as em.Artboard;
+      allIds.push(event.destinationArtboard);
+    }
+    return result;
+  }, {});
+  return {
+    allIds,
+    byId
+  };
+};
+
+export const getAllArtboardTweens = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: em.Tween } } => {
+  const allArtboardAnimationEvents = getAllArtboardTweenEvents(store, artboard);
+  const allIds: string[] = [];
+  const byId = Object.keys(allArtboardAnimationEvents.byId).reduce((result: { [id: string]: em.Tween }, current) => {
+    const event = allArtboardAnimationEvents.byId[current];
+    event.tweens.forEach((tween) => {
+      result[tween] = store.tweenById[tween];
+      allIds.push(tween);
+    });
+    return result;
+  }, {});
+  return {
+    allIds,
+    byId
+  };
+};
+
+export const getAllArtboardTweenLayers = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: em.Layer } } => {
+  const allArtboardTweens = getAllArtboardTweens(store, artboard);
+  const allIds: string[] = [];
+  const byId = Object.keys(allArtboardTweens.byId).reduce((result: { [id: string]: em.Layer }, current) => {
+    const layerId = allArtboardTweens.byId[current].layer;
+    if (!allIds.includes(layerId)) {
+      result[layerId] = store.byId[layerId];
+      allIds.push(layerId);
+    }
+    return result;
+  }, {});
+  return {
+    allIds,
+    byId
+  };
+};
+
+export const getAllArtboardTweenLayerDestinations = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: em.Layer } } => {
+  const allArtboardTweens = getAllArtboardTweens(store, artboard);
+  const allIds: string[] = [];
+  const byId = Object.keys(allArtboardTweens.byId).reduce((result: { [id: string]: em.Layer }, current) => {
+    const layerId = allArtboardTweens.byId[current].destinationLayer;
+    if (!allIds.includes(layerId)) {
+      result[layerId] = store.byId[layerId];
+      allIds.push(layerId);
+    }
+    return result;
+  }, {});
+  return {
+    allIds,
+    byId
+  };
+};
