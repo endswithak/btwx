@@ -14,7 +14,14 @@ import {
   DeselectLayers, MoveLayerTo, MoveLayerBy, EnableLayerDrag, DisableLayerDrag, MoveLayersTo,
   MoveLayersBy, DeepSelectLayer, EscapeLayerScope, MoveLayer, MoveLayers, AddArtboard,
   SetLayerName, SetActiveArtboard, AddLayerTween, RemoveLayerTween, AddLayerTweenEvent,
-  RemoveLayerTweenEvent
+  RemoveLayerTweenEvent,
+  SetLayerTweenDuration,
+  SetLayerTweenDelay,
+  IncrementLayerTweenDuration,
+  DecrementLayerTweenDuration,
+  IncrementLayerTweenDelay,
+  DecrementLayerTweenDelay,
+  SetLayerTweenEase
 } from '../actionTypes/layer';
 import {
   getLayerIndex, getLayer, getLayerDepth, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor,
@@ -1037,7 +1044,8 @@ export const addTweenEventTweens = (state: LayerState, action: AddLayerTweenEven
             event: action.payload.id,
             ease: 'linear',
             duration: 0.25,
-            delay: 0
+            delay: 0,
+            frozen: false
           }) as AddLayerTween);
         } else {
           return;
@@ -1170,6 +1178,104 @@ export const updateLayerTween = (state: LayerState, action: {payload: {id: strin
       }
       return result;
     }, {}),
+    paperProject: paper.project.exportJSON()
+  }
+};
+
+export const setLayerTweenDuration = (state: LayerState, action: SetLayerTweenDuration): LayerState => {
+  return {
+    ...state,
+    tweenById: {
+      ...state.tweenById,
+      [action.payload.id]: {
+        ...state.tweenById[action.payload.id],
+        duration: action.payload.duration
+      }
+    },
+    paperProject: paper.project.exportJSON()
+  }
+};
+
+export const incrementLayerTweenDuration = (state: LayerState, action: IncrementLayerTweenDuration): LayerState => {
+  return {
+    ...state,
+    tweenById: {
+      ...state.tweenById,
+      [action.payload.id]: {
+        ...state.tweenById[action.payload.id],
+        duration: state.tweenById[action.payload.id].duration + (0.01 * (action.payload.factor ? action.payload.factor : 1))
+      }
+    },
+    paperProject: paper.project.exportJSON()
+  }
+};
+
+export const decrementLayerTweenDuration = (state: LayerState, action: DecrementLayerTweenDuration): LayerState => {
+  return {
+    ...state,
+    tweenById: {
+      ...state.tweenById,
+      [action.payload.id]: {
+        ...state.tweenById[action.payload.id],
+        duration: state.tweenById[action.payload.id].duration - (0.01 * (action.payload.factor ? action.payload.factor : 1))
+      }
+    },
+    paperProject: paper.project.exportJSON()
+  }
+};
+
+export const setLayerTweenDelay = (state: LayerState, action: SetLayerTweenDelay): LayerState => {
+  return {
+    ...state,
+    tweenById: {
+      ...state.tweenById,
+      [action.payload.id]: {
+        ...state.tweenById[action.payload.id],
+        delay: action.payload.delay
+      }
+    },
+    paperProject: paper.project.exportJSON()
+  }
+};
+
+export const incrementLayerTweenDelay = (state: LayerState, action: IncrementLayerTweenDelay): LayerState => {
+  return {
+    ...state,
+    tweenById: {
+      ...state.tweenById,
+      [action.payload.id]: {
+        ...state.tweenById[action.payload.id],
+        delay: state.tweenById[action.payload.id].delay + (0.01 * (action.payload.factor ? action.payload.factor : 1))
+      }
+    },
+    paperProject: paper.project.exportJSON()
+  }
+};
+
+export const decrementLayerTweenDelay = (state: LayerState, action: DecrementLayerTweenDelay): LayerState => {
+  return {
+    ...state,
+    tweenById: {
+      ...state.tweenById,
+      [action.payload.id]: {
+        ...state.tweenById[action.payload.id],
+        delay: state.tweenById[action.payload.id].delay - (0.01 * (action.payload.factor ? action.payload.factor : 1))
+      }
+    },
+    paperProject: paper.project.exportJSON()
+  }
+};
+
+export const setLayerTweenEase = (state: LayerState, action: SetLayerTweenEase): LayerState => {
+  return {
+    ...state,
+    tweenById: {
+      ...state.tweenById,
+      [action.payload.id]: {
+        ...state.tweenById[action.payload.id],
+        ease: action.payload.ease
+      }
+    },
     paperProject: paper.project.exportJSON()
   }
 };

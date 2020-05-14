@@ -1,0 +1,78 @@
+.c-tween-drawer-event
+  position: relative
+  height: 100%
+  width: 100%
+  max-width: 100%
+  display: flex
+
+.c-tween-drawer-event__layers
+  height: 100%
+  width: 20%
+  display: flex
+  flex-direction: column
+  flex-shrink: 0
+
+.c-tween-drawer-event-layers__header,
+.c-tween-drawer-event-layers-timeline__header
+  display: flex
+  height: $unit * 8
+  max-height: $unit * 8
+  flex-shrink: 0
+  width: 100%
+
+.c-tween-drawer-event-layers__layers,
+.c-tween-drawer-event-layers-timeline__layers
+  height: 100%
+  width: 100%
+  display: flex
+  overflow: scroll
+  flex-direction: column
+  flex-grow: 2
+
+.c-tween-drawer-event__layers-timeline
+  height: 100%
+  width: 80%
+  display: flex
+  overflow-y: scroll
+  overflow-x: scroll
+  flex-direction: column
+  flex-grow: 2
+
+.c-tween-drawer-event__layer,
+.c-tween-drawer-event__tweens
+  display: flex
+  flex-direction: column
+  flex-shrink: 0
+  flex-grow: 2
+  width: 100%
+
+.c-tween-drawer-event__layer-timeline,
+.c-tween-drawer-event__tweens-timeline
+  display: flex
+  flex-direction: column
+  flex-shrink: 0
+  flex-grow: 2
+  width: $unit * 3000 // 12000 // 30 sec max
+
+.c-tween-drawer-event-layer__tween
+  display: flex
+  height: $unit * 8
+  max-height: $unit * 8
+  flex-grow: 2
+  width: 100%
+  font-size: $fontSizeSm
+  align-items: center
+  padding: 0 $unit * 2
+
+.c-tween-drawer-event-layer__tween--right
+  justify-content: flex-end
+
+.c-tween-drawer-event-layer__tween-timeline
+  position: relative
+  display: flex
+  height: $unit * 8
+  max-height: $unit * 8
+  flex-grow: 2
+  width: 100%
+  font-size: $fontSizeSm
+  align-items: center

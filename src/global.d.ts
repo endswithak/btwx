@@ -65,6 +65,7 @@ declare namespace em {
 
   interface TweenEvent {
     id: string;
+    name: string;
     layer: string;
     event: TweenEventType;
     artboard: string;
@@ -81,6 +82,7 @@ declare namespace em {
     ease: AnimationEase;
     duration: number;
     delay: number;
+    frozen: boolean;
   }
 
   interface TweenPropMap {

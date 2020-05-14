@@ -46,6 +46,13 @@ import {
   REMOVE_LAYER_TWEEN_EVENT,
   ADD_LAYER_TWEEN,
   REMOVE_LAYER_TWEEN,
+  SET_LAYER_TWEEN_DURATION,
+  INCREMENT_LAYER_TWEEN_DURATION,
+  DECREMENT_LAYER_TWEEN_DURATION,
+  SET_LAYER_TWEEN_DELAY,
+  INCREMENT_LAYER_TWEEN_DELAY,
+  DECREMENT_LAYER_TWEEN_DELAY,
+  SET_LAYER_TWEEN_EASE,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
@@ -84,6 +91,13 @@ import {
   RemoveLayerTweenEventPayload,
   AddLayerTweenPayload,
   RemoveLayerTweenPayload,
+  SetLayerTweenDurationPayload,
+  IncrementLayerTweenDurationPayload,
+  DecrementLayerTweenDurationPayload,
+  SetLayerTweenDelayPayload,
+  IncrementLayerTweenDelayPayload,
+  DecrementLayerTweenDelayPayload,
+  SetLayerTweenEasePayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -423,5 +437,40 @@ export const addLayerTween = (payload: AddLayerTweenPayload): LayerTypes => ({
 
 export const removeLayerTween = (payload: RemoveLayerTweenPayload): LayerTypes => ({
   type: REMOVE_LAYER_TWEEN,
+  payload
+});
+
+export const setLayerTweenDuration = (payload: SetLayerTweenDurationPayload): LayerTypes => ({
+  type: SET_LAYER_TWEEN_DURATION,
+  payload
+});
+
+export const incrementLayerTweenDuration = (payload: IncrementLayerTweenDurationPayload): LayerTypes => ({
+  type: INCREMENT_LAYER_TWEEN_DURATION,
+  payload
+});
+
+export const decrementLayerTweenDuration = (payload: DecrementLayerTweenDurationPayload): LayerTypes => ({
+  type: DECREMENT_LAYER_TWEEN_DURATION,
+  payload
+});
+
+export const setLayerTweenDelay = (payload: SetLayerTweenDelayPayload): LayerTypes => ({
+  type: SET_LAYER_TWEEN_DELAY,
+  payload
+});
+
+export const incrementLayerTweenDelay = (payload: IncrementLayerTweenDelayPayload): LayerTypes => ({
+  type: INCREMENT_LAYER_TWEEN_DELAY,
+  payload
+});
+
+export const decrementLayerTweenDelay = (payload: DecrementLayerTweenDelayPayload): LayerTypes => ({
+  type: DECREMENT_LAYER_TWEEN_DELAY,
+  payload
+});
+
+export const setLayerTweenEase = (payload: SetLayerTweenEasePayload): LayerTypes => ({
+  type: SET_LAYER_TWEEN_EASE,
   payload
 });

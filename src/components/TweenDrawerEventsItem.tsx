@@ -1,5 +1,4 @@
-import paper from 'paper';
-import React, { useRef, useContext, useEffect, ReactElement, useState } from 'react';
+import React, { useContext, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
@@ -7,8 +6,8 @@ import { setTweenDrawerEvent } from '../store/actions/tweenDrawer';
 import { SetTweenDrawerEventPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
 import { setLayerHover } from '../store/actions/layer';
 import { SetLayerHoverPayload, LayerTypes } from '../store/actionTypes/layer';
-import TweenDrawerEventItemEdit from './TweenDrawerEventItemEdit';
-import TweenDrawerEventItemRemove from './TweenDrawerEventItemRemove';
+import TweenDrawerEventsItemEdit from './TweenDrawerEventsItemEdit';
+import TweenDrawerEventsItemRemove from './TweenDrawerEventsItemRemove';
 
 interface TweenDrawerEventItemProps {
   id: string;
@@ -40,7 +39,7 @@ const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement =>
 
   return (
     <div
-      className={`c-tween-drawer-event-item`}
+      className={`c-tween-drawer-events__item`}
       onDoubleClick={handleDoubleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -48,18 +47,18 @@ const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement =>
         color: theme.text.base,
         boxShadow: hover ? `0 0 0 ${theme.unit / 2}px ${theme.background.z4} inset` : ''
       }}>
-      <div className='c-tween-drawer-event-item__module'>
+      <div className='c-tween-drawer-events-item__module'>
         {layerItem.name}
       </div>
-      <div className='c-tween-drawer-event-item__module'>
+      <div className='c-tween-drawer-events-item__module'>
         {destinationItem.name}
       </div>
-      <div className='c-tween-drawer-event-item__module'>
+      <div className='c-tween-drawer-events-item__module'>
         {tweenEvent.event}
       </div>
-      <div className='c-tween-drawer-event-item__module'>
-        <TweenDrawerEventItemEdit id={id} />
-        <TweenDrawerEventItemRemove id={id} />
+      <div className='c-tween-drawer-events-item__module'>
+        <TweenDrawerEventsItemEdit id={id} />
+        <TweenDrawerEventsItemRemove id={id} />
       </div>
     </div>
   );

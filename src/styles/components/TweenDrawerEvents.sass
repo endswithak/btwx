@@ -6,12 +6,12 @@
   display: flex
   flex-direction: column
 
-.c-tween-drawer-events__labels
+.c-tween-drawer-events__header
   width: 100%
   max-width: 100%
   flex-shrink: 0
 
-.c-tween-drawer-events__scroll
+.c-tween-drawer-events__items
   display: flex
   flex-direction: column
   position: relative
@@ -20,3 +20,35 @@
   overflow: scroll
   flex-grow: 2
   height: 100%
+
+.c-tween-drawer-events__item
+  display: flex
+  flex-grow: 2
+  width: 100%
+  max-width: 100%
+  height: $unit * 8
+  max-height: $unit * 8
+  font-size: $fontSizeSm
+  padding: 0 $unit * 2
+  cursor: pointer
+
+.c-tween-drawer-events__item--labels
+  cursor: default
+
+.c-tween-drawer-events-item__module
+  display: flex
+  flex-grow: 1
+  flex-shrink: 1
+  align-items: center
+  justify-content: flex-start
+  width: 25%
+  max-width: 25%
+
+.c-tween-drawer-events-item__module--label
+  text-transform: uppercase
+
+.c-tween-drawer-events-item__action
+  width: 25%
+  display: flex
+  align-items: center
+

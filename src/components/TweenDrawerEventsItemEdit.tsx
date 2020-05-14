@@ -6,12 +6,12 @@ import { RootState } from '../store/reducers';
 import { setTweenDrawerEvent } from '../store/actions/tweenDrawer';
 import { SetTweenDrawerEventPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
 
-interface TweenDrawerEventItemEditProps {
+interface TweenDrawerEventsItemEditProps {
   id: string;
   setTweenDrawerEvent?(payload: SetTweenDrawerEventPayload): TweenDrawerTypes;
 }
 
-const TweenDrawerEventItemEdit = (props: TweenDrawerEventItemEditProps): ReactElement => {
+const TweenDrawerEventsItemEdit = (props: TweenDrawerEventsItemEditProps): ReactElement => {
   const [hover, setHover] = useState(false);
   const theme = useContext(ThemeContext);
   const { id, setTweenDrawerEvent } = props;
@@ -30,7 +30,7 @@ const TweenDrawerEventItemEdit = (props: TweenDrawerEventItemEditProps): ReactEl
 
   return (
     <div
-      className={`c-tween-drawer-event-item__action c-tween-drawer-event-item__action--edit`}
+      className={`c-tween-drawer-events-item__action c-tween-drawer-events-item__action--edit`}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -56,4 +56,4 @@ const TweenDrawerEventItemEdit = (props: TweenDrawerEventItemEditProps): ReactEl
 export default connect(
   null,
   { setTweenDrawerEvent }
-)(TweenDrawerEventItemEdit);
+)(TweenDrawerEventsItemEdit);

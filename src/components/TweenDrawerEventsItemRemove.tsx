@@ -5,12 +5,12 @@ import { ThemeContext } from './ThemeProvider';
 import { removeLayerTweenEvent } from '../store/actions/layer';
 import { RemoveLayerTweenEventPayload, LayerTypes } from '../store/actionTypes/layer';
 
-interface TweenDrawerEventItemRemoveProps {
+interface TweenDrawerEventsItemRemoveProps {
   id: string;
   removeLayerTweenEvent?(payload: RemoveLayerTweenEventPayload): LayerTypes;
 }
 
-const TweenDrawerEventItemRemove = (props: TweenDrawerEventItemRemoveProps): ReactElement => {
+const TweenDrawerEventsItemRemove = (props: TweenDrawerEventsItemRemoveProps): ReactElement => {
   const [hover, setHover] = useState(false);
   const theme = useContext(ThemeContext);
   const { id, removeLayerTweenEvent } = props;
@@ -29,7 +29,7 @@ const TweenDrawerEventItemRemove = (props: TweenDrawerEventItemRemoveProps): Rea
 
   return (
     <div
-      className={`c-tween-drawer-event-item__action c-tween-drawer-event-item__action--remove`}
+      className={`c-tween-drawer-events-item__action c-tween-drawer-events-item__action--remove`}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -55,4 +55,4 @@ const TweenDrawerEventItemRemove = (props: TweenDrawerEventItemRemoveProps): Rea
 export default connect(
   null,
   { removeLayerTweenEvent }
-)(TweenDrawerEventItemRemove);
+)(TweenDrawerEventsItemRemove);

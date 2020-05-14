@@ -406,3 +406,37 @@ export const getAllArtboardTweenLayerDestinations = (store: LayerState, artboard
     byId
   };
 };
+
+export const getTweenEventLayers = (store: LayerState, eventId: string): { allIds: string[]; byId: { [id: string]: em.Layer } } => {
+  const tweenEvent = store.tweenEventById[eventId];
+  const allIds: string[] = [];
+  const byId = tweenEvent.tweens.reduce((result: { [id: string]: em.Layer }, current) => {
+    const tween = store.tweenById[current];
+    if (!allIds.includes(tween.layer)) {
+      result[tween.layer] = store.byId[tween.layer];
+      allIds.push(tween.layer);
+    }
+    return result;
+  }, {});
+  return {
+    allIds,
+    byId
+  };
+};
+
+export const getTweenEventLayerTweens = (store: LayerState, eventId: string, layerId: string): { allIds: string[]; byId: { [id: string]: em.Tween } } => {
+  const tweenEvent = store.tweenEventById[eventId];
+  const allIds: string[] = [];
+  const byId = tweenEvent.tweens.reduce((result: { [id: string]: em.Tween }, current) => {
+    const tween = store.tweenById[current];
+    if (tween.layer === layerId) {
+      result[current] = tween;
+      allIds.push(current);
+    }
+    return result;
+  }, {});
+  return {
+    allIds,
+    byId
+  };
+};

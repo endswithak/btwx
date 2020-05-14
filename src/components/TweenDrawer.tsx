@@ -6,7 +6,8 @@ import { RootState } from '../store/reducers';
 import { setTweenDrawerEvent } from '../store/actions/tweenDrawer';
 import { SetTweenDrawerEventPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
 import TweenDrawerEvents from './TweenDrawerEvents';
-import TweenDrawerTweens from './TweenDrawerTweens';
+import TweenDrawerEvent from './TweenDrawerEvent';
+import TweenDrawerEventLayerEase from './TweenDrawerEventLayerEase';
 
 interface TweenDrawerProps {
   activeArtboard: string;
@@ -38,9 +39,10 @@ const TweenDrawer = (props: TweenDrawerProps): ReactElement => {
         }}>
         {
           tweenEvent
-          ? <TweenDrawerTweens />
+          ? <TweenDrawerEvent />
           : <TweenDrawerEvents />
         }
+        <TweenDrawerEventLayerEase />
       </div>
     : null
   );

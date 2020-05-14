@@ -59,6 +59,13 @@ export const REMOVE_LAYER_TWEEN_EVENT = 'REMOVE_LAYER_TWEEN_EVENT';
 
 export const ADD_LAYER_TWEEN = 'ADD_LAYER_TWEEN';
 export const REMOVE_LAYER_TWEEN = 'REMOVE_LAYER_TWEEN';
+export const SET_LAYER_TWEEN_DURATION = 'SET_LAYER_TWEEN_DURATION';
+export const INCREMENT_LAYER_TWEEN_DURATION = 'INCREMENT_LAYER_TWEEN_DURATION';
+export const DECREMENT_LAYER_TWEEN_DURATION = 'DECREMENT_LAYER_TWEEN_DURATION';
+export const SET_LAYER_TWEEN_DELAY = 'SET_LAYER_TWEEN_DELAY';
+export const INCREMENT_LAYER_TWEEN_DELAY = 'INCREMENT_LAYER_TWEEN_DELAY';
+export const DECREMENT_LAYER_TWEEN_DELAY = 'DECREMENT_LAYER_TWEEN_DELAY';
+export const SET_LAYER_TWEEN_EASE = 'SET_LAYER_TWEEN_EASE';
 
 // Page
 
@@ -511,6 +518,7 @@ export interface SetActiveArtboard {
 
 export interface AddLayerTweenEventPayload {
   layer?: string;
+  name?: string;
   id?: string;
   event?: em.TweenEvent;
   artboard?: string;
@@ -543,6 +551,7 @@ export interface AddLayerTweenPayload {
   ease?: em.AnimationEase;
   duration?: number;
   delay?: number;
+  frozen?: boolean;
 }
 
 export interface AddLayerTween {
@@ -559,5 +568,75 @@ export interface RemoveLayerTween {
   payload: RemoveLayerTweenPayload;
 }
 
+export interface SetLayerTweenDurationPayload {
+  id: string;
+  duration: number;
+}
 
-export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween;
+export interface SetLayerTweenDuration {
+  type: typeof SET_LAYER_TWEEN_DURATION;
+  payload: SetLayerTweenDurationPayload;
+}
+
+export interface IncrementLayerTweenDurationPayload {
+  id: string;
+  factor?: number;
+}
+
+export interface IncrementLayerTweenDuration {
+  type: typeof INCREMENT_LAYER_TWEEN_DURATION;
+  payload: IncrementLayerTweenDurationPayload;
+}
+
+export interface DecrementLayerTweenDurationPayload {
+  id: string;
+  factor?: number;
+}
+
+export interface DecrementLayerTweenDuration {
+  type: typeof DECREMENT_LAYER_TWEEN_DURATION;
+  payload: DecrementLayerTweenDurationPayload;
+}
+
+export interface SetLayerTweenDelayPayload {
+  id: string;
+  delay: number;
+}
+
+export interface SetLayerTweenDelay {
+  type: typeof SET_LAYER_TWEEN_DELAY;
+  payload: SetLayerTweenDelayPayload;
+}
+
+export interface IncrementLayerTweenDelayPayload {
+  id: string;
+  factor?: number;
+}
+
+export interface IncrementLayerTweenDelay {
+  type: typeof INCREMENT_LAYER_TWEEN_DELAY;
+  payload: IncrementLayerTweenDelayPayload;
+}
+
+export interface DecrementLayerTweenDelayPayload {
+  id: string;
+  factor?: number;
+}
+
+export interface DecrementLayerTweenDelay {
+  type: typeof DECREMENT_LAYER_TWEEN_DELAY;
+  payload: DecrementLayerTweenDelayPayload;
+}
+
+export interface SetLayerTweenEasePayload {
+  id: string;
+  ease: em.AnimationEase;
+}
+
+export interface SetLayerTweenEase {
+  type: typeof SET_LAYER_TWEEN_EASE;
+  payload: SetLayerTweenEasePayload;
+}
+
+
+export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase;
