@@ -2,7 +2,9 @@ declare namespace em {
 
   type TweenEventType = 'click' | 'doubleclick' | 'mouseenter' | 'mouseleave';
 
-  type AnimationEase = 'linear' | 'easeInQuad' | 'easeOutQuad' | 'easeInOutQuad' | 'easeInCubic' | 'easeOutCubic' | 'easeInOutCubic' | 'easeInQuart' | 'easeOutQuart' | 'easeInOutQuart' | 'easeInQuint' | 'easeOutQuint' | 'easeInOutQuint';
+  type TweenEaseTypes = 'linear' | 'power1' | 'power2' | 'power3' | 'power4' | 'back' | 'elastic' | 'bounce' | 'rough' | 'slow' | 'steps' | 'circ' | 'expo' | 'sine' | 'custom';
+
+  type TweenEasePowerTypes = 'in' | 'inOut' | 'out';
 
   type ContextMenu = 'TweenEvent' | 'TweenEventDestination';
 
@@ -21,6 +23,8 @@ declare namespace em {
     children: string[] | null;
     tweenEvents: string[];
     tweens: string[];
+    frozen: boolean;
+    showTweens: boolean;
   }
 
   interface ClipboardLayer {
@@ -79,7 +83,9 @@ declare namespace em {
     layer: string;
     destinationLayer: string;
     event: string;
-    ease: AnimationEase;
+    ease: TweenEaseTypes;
+    power: TweenEasePowerTypes;
+    custom?: string;
     duration: number;
     delay: number;
     frozen: boolean;

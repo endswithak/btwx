@@ -1,0 +1,121 @@
+.c-ease-editor
+  position: absolute
+  padding: 0
+  border: none
+  display: flex
+  outline: none
+  overflow: hidden
+  padding: $unit * 4
+
+  &::selection
+    background: none
+
+.c-ease-editor__visualizer
+  display: flex
+  flex-direction: column
+
+.c-ease-editor-visualizer__top
+  display: flex
+  position: relative
+  align-items: flex-end
+
+.c-ease-editor-visualizer__bottom
+  display: flex
+  position: relative
+  justify-content: center
+  height: $unit * 12
+
+.c-ease-editor__progress-bar
+  display: flex
+  position: relative
+  width: 100%
+  align-items: center
+  height: 100%
+  flex-grow: 2
+
+.c-ease-editor-progress-bar__base,
+.c-ease-editor-progress-bar__progress
+  position: absolute
+  height: $unit / 2
+  width: 100%
+
+.c-ease-editor-progress-bar__progress
+  transform-origin: left center
+
+.c-ease-editor__progress-time
+  display: flex
+  align-items: center
+  justify-content: center
+  height: 100%
+  width: $unit * 12
+  line-height: $unit * 12
+  font-size: $fontSizeSm
+  font-family: $fontFamily
+  text-align: center
+
+.c-ease-editor__graph
+  flex-grow: 0
+  position: relative
+
+.c-ease-editor__value
+  position: relative
+  flex-grow: 0
+  width: $unit * 12
+  display: flex
+  justify-content: center
+  align-items: flex-start
+
+.c-ease-editor-value__bar,
+.c-ease-editor-value__progress,
+.c-ease-editor-value__progress-head
+  position: absolute
+
+.c-ease-editor-value__bar
+  height: 100%
+  width: $unit / 2
+  z-index: 2
+
+.c-ease-editor-value__progress
+  width: $unit / 2
+  height: 100%
+  z-index: 4
+  transform-origin: center bottom
+
+.c-ease-editor-value__progress-head
+  width: $unit * 4
+  height: $unit * 4
+  z-index: 8
+  transform: translateY(-50%)
+  border-radius: 100%
+
+.c-ease-editor__presets
+  display: flex
+  flex-direction: column
+  flex-grow: 2
+
+.c-ease-editor__preset-group
+  display: flex
+  flex-direction: column
+
+.c-ease-editor__preset
+  display: flex
+  width: 100%
+  height: $unit * 8
+  line-height: $unit * 8
+  align-items: center
+  padding: $unit * 2
+  font-size: $fontSizeSm
+  font-family: $fontFamily
+  cursor: pointer
+
+.c-ease-editor__preset--label
+  text-transform: uppercase
+  cursor: default
+
+.c-ease-editor__overlay
+  +absolute-full
+  position: fixed
+  background: none
+  display: flex
+  align-items: center
+  justify-content: center

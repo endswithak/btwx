@@ -52,12 +52,13 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
             incrementLayerTweenDelay({id: tweenId, factor: factor});
           }
           gsap.set([leftHandleRef.current, rightHandleRef.current], {x: `+=${theme.unit * factor}`});
-          Draggable.get(rightHandleRef.current).update();
+          Draggable.get(rightHandleRef.current).update().applyBounds({ minX: Draggable.get(leftHandleRef.current).x, maxX: timelineRef.current.clientWidth - theme.unit, minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight });
           Draggable.get(leftHandleRef.current).update().applyBounds({ minX: theme.unit, maxX: Draggable.get(rightHandleRef.current).x, minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight });
         }
       });
       Draggable.create(leftHandleRef.current, {
         type: 'x',
+        zIndexBoost: false,
         bounds: { minX: theme.unit, maxX: Draggable.get(rightHandleRef.current) ? Draggable.get(rightHandleRef.current).x : rightHandleInitialPos, minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight },
         minX: theme.unit,
         liveSnap: {
@@ -74,11 +75,13 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
             incrementLayerTweenDelay({id: tweenId, factor: factor});
           }
           gsap.set(tweenRef.current, {x: `+=${theme.unit * factor}`, width: `-=${theme.unit * factor}`});
-          Draggable.get(tweenRef.current).update(true, false);
+          Draggable.get(tweenRef.current).update();
+          Draggable.get(rightHandleRef.current).update().applyBounds({ minX: Draggable.get(leftHandleRef.current).x, maxX: timelineRef.current.clientWidth - theme.unit, minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight });
         }
       });
       Draggable.create(rightHandleRef.current, {
         type: 'x',
+        zIndexBoost: false,
         bounds: { minX: Draggable.get(leftHandleRef.current) ? Draggable.get(leftHandleRef.current).x : leftHandleInitialPos, maxX: timelineRef.current.clientWidth - theme.unit, minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight },
         liveSnap: {
           x: function(value) {
@@ -93,7 +96,8 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
             incrementLayerTweenDuration({id: tweenId, factor: factor});
           }
           gsap.set(tweenRef.current, {width: `+=${theme.unit * factor}`});
-          Draggable.get(tweenRef.current).update(true, false);
+          Draggable.get(tweenRef.current).update();
+          Draggable.get(leftHandleRef.current).update().applyBounds({ minX: theme.unit, maxX: Draggable.get(rightHandleRef.current).x, minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight });
         }
       });
     }
@@ -120,6 +124,7 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
           position: 'absolute',
           height: theme.unit * 2,
           width: theme.unit * 2,
+          padding: theme.unit,
           background: theme.text.base
         }} />
       <div
@@ -128,6 +133,7 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
           position: 'absolute',
           height: theme.unit * 2,
           width: theme.unit * 2,
+          padding: theme.unit,
           background: theme.text.base
         }} />
     </div>

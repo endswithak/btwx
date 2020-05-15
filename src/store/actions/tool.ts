@@ -5,6 +5,7 @@ import {
   ENABLE_POLYGON_DRAW_TOOL,
   ENABLE_ROUNDED_DRAW_TOOL,
   ENABLE_SELECTION_TOOL,
+  DISABLE_SELECTION_TOOL,
   ENABLE_DRAG_TOOL,
   ENABLE_ARTBOARD_TOOL,
   ToolTypes
@@ -32,6 +33,10 @@ export const enableRoundedDrawTool = (): ToolTypes => ({
 
 export const enableSelectionTool = (): ToolTypes => ({
   type: ENABLE_SELECTION_TOOL
+});
+
+export const disableSelectionTool = (): ToolTypes => ({
+  type: DISABLE_SELECTION_TOOL
 });
 
 export const enableDragTool = (): ToolTypes => ({

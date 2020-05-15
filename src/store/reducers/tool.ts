@@ -7,6 +7,7 @@ import {
   ENABLE_POLYGON_DRAW_TOOL,
   ENABLE_ROUNDED_DRAW_TOOL,
   ENABLE_SELECTION_TOOL,
+  DISABLE_SELECTION_TOOL,
   ENABLE_ARTBOARD_TOOL,
   ToolTypes,
 } from '../actionTypes/tool';
@@ -93,6 +94,13 @@ export default (state = initialState, action: ToolTypes): ToolState => {
         tool: 'Selection',
         drawing: false,
         drawShape: null
+      };
+    }
+    case DISABLE_SELECTION_TOOL: {
+      removeActiveTool();
+      return {
+        ...state,
+        ...initialState
       };
     }
     case ENABLE_ARTBOARD_TOOL: {

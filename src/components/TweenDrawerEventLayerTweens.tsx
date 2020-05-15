@@ -25,7 +25,8 @@ const TweenDrawerEventLayerTweens = (props: TweenDrawerEventLayerTweensProps): R
         tweenEventLayerTweens.allIds.map((tween, index) => (
           <TweenDrawerEventLayerTween
             key={index}
-            tweenId={tween} />
+            tweenId={tween}
+            index={index} />
         ))
       }
     </div>

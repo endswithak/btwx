@@ -4,6 +4,7 @@ import layer from './layer';
 import tool from './tool';
 import contextMenu from './contextMenu';
 import tweenDrawer from './tweenDrawer';
+import easeEditor from './easeEditor';
 
 import {
   ADD_ARTBOARD,
@@ -61,7 +62,8 @@ const rootReducer = combineReducers({
   ])}),
   tool,
   contextMenu,
-  tweenDrawer
+  tweenDrawer,
+  easeEditor
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

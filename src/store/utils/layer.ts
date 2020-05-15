@@ -21,7 +21,8 @@ import {
   DecrementLayerTweenDuration,
   IncrementLayerTweenDelay,
   DecrementLayerTweenDelay,
-  SetLayerTweenEase
+  SetLayerTweenEase,
+  SetLayerTweenPower
 } from '../actionTypes/layer';
 import {
   getLayerIndex, getLayer, getLayerDepth, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor,
@@ -143,7 +144,7 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
       }
       if (layer.tweenEvents.length > 0) {
         result = layer.tweenEvents.reduce((animResult, animCurrent) => {
-          return removeLayerAnimationEvent(animResult, layerActions.removeLayerAnimationEvent({id: animCurrent}) as RemoveLayerAnimationEvent);
+          return removeLayerTweenEvent(animResult, layerActions.removeLayerTweenEvent({id: animCurrent}) as RemoveLayerTweenEvent);
         }, result);
       }
       if (result.selected.includes(current)) {
@@ -1042,8 +1043,10 @@ export const addTweenEventTweens = (state: LayerState, action: AddLayerTweenEven
             destinationLayer: destinationEquivalent.id,
             prop: key,
             event: action.payload.id,
-            ease: 'linear',
-            duration: 0.25,
+            ease: 'power1',
+            power: 'out',
+            custom: null,
+            duration: 0.5,
             delay: 0,
             frozen: false
           }) as AddLayerTween);
@@ -1273,7 +1276,22 @@ export const setLayerTweenEase = (state: LayerState, action: SetLayerTweenEase):
       ...state.tweenById,
       [action.payload.id]: {
         ...state.tweenById[action.payload.id],
-        ease: action.payload.ease
+        ease: action.payload.ease,
+        custom: action.payload.custom ? action.payload.custom : state.tweenById[action.payload.id].custom
+      }
+    },
+    paperProject: paper.project.exportJSON()
+  }
+};
+
+export const setLayerTweenPower = (state: LayerState, action: SetLayerTweenPower): LayerState => {
+  return {
+    ...state,
+    tweenById: {
+      ...state.tweenById,
+      [action.payload.id]: {
+        ...state.tweenById[action.payload.id],
+        power: action.payload.power
       }
     },
     paperProject: paper.project.exportJSON()

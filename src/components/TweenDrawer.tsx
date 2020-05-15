@@ -1,4 +1,3 @@
-import paper from 'paper';
 import React, { useRef, useContext, useEffect, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
@@ -7,12 +6,11 @@ import { setTweenDrawerEvent } from '../store/actions/tweenDrawer';
 import { SetTweenDrawerEventPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
 import TweenDrawerEvents from './TweenDrawerEvents';
 import TweenDrawerEvent from './TweenDrawerEvent';
-import TweenDrawerEventLayerEase from './TweenDrawerEventLayerEase';
 
 interface TweenDrawerProps {
   activeArtboard: string;
   isOpen: boolean;
-  tweenEvent: string;
+  tweenEvent: em.TweenEvent;
   setTweenDrawerEvent?(payload: SetTweenDrawerEventPayload): TweenDrawerTypes;
 }
 
@@ -42,7 +40,6 @@ const TweenDrawer = (props: TweenDrawerProps): ReactElement => {
           ? <TweenDrawerEvent />
           : <TweenDrawerEvents />
         }
-        <TweenDrawerEventLayerEase />
       </div>
     : null
   );
@@ -52,7 +49,7 @@ const mapStateToProps = (state: RootState) => {
   const { layer, tweenDrawer } = state;
   const activeArtboard = layer.present.activeArtboard;
   const isOpen = tweenDrawer.isOpen;
-  const tweenEvent = tweenDrawer.event;
+  const tweenEvent = layer.present.tweenEventById[tweenDrawer.event];
   return { activeArtboard, isOpen, tweenEvent };
 };
 

@@ -53,6 +53,7 @@ import {
   INCREMENT_LAYER_TWEEN_DELAY,
   DECREMENT_LAYER_TWEEN_DELAY,
   SET_LAYER_TWEEN_EASE,
+  SET_LAYER_TWEEN_POWER,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
@@ -98,6 +99,7 @@ import {
   IncrementLayerTweenDelayPayload,
   DecrementLayerTweenDelayPayload,
   SetLayerTweenEasePayload,
+  SetLayerTweenPowerPayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -119,7 +121,9 @@ export const addPage = (payload: AddPagePayload): LayerTypes => {
       //paperLayer: paperLayer.exportJSON(),
       selected: false,
       tweenEvents: [],
-      tweens: []
+      tweens: [],
+      frozen: false,
+      showTweens: true
     }
   }
 };
@@ -149,7 +153,9 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
       //paperLayer: paperLayer.exportJSON(),
       showChildren: false,
       tweenEvents: [],
-      tweens: []
+      tweens: [],
+      frozen: false,
+      showTweens: true
     }
   }
 };
@@ -175,7 +181,9 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
       //paperLayer: paperLayer.exportJSON(),
       showChildren: false,
       tweenEvents: [],
-      tweens: []
+      tweens: [],
+      frozen: false,
+      showTweens: true
     }
   }
 };
@@ -207,7 +215,9 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
       //paperLayer: payload.paperLayer.exportJSON(),
       selected: false,
       tweenEvents: [],
-      tweens: []
+      tweens: [],
+      frozen: false,
+      showTweens: true
     }
   }
 };
@@ -472,5 +482,10 @@ export const decrementLayerTweenDelay = (payload: DecrementLayerTweenDelayPayloa
 
 export const setLayerTweenEase = (payload: SetLayerTweenEasePayload): LayerTypes => ({
   type: SET_LAYER_TWEEN_EASE,
+  payload
+});
+
+export const setLayerTweenPower = (payload: SetLayerTweenPowerPayload): LayerTypes => ({
+  type: SET_LAYER_TWEEN_POWER,
   payload
 });

@@ -5,6 +5,7 @@ export const ENABLE_POLYGON_DRAW_TOOL = 'ENABLE_POLYGON_DRAW_TOOL';
 export const ENABLE_ROUNDED_DRAW_TOOL = 'ENABLE_ROUNDED_DRAW_TOOL';
 
 export const ENABLE_SELECTION_TOOL = 'ENABLE_SELECTION_TOOL';
+export const DISABLE_SELECTION_TOOL = 'DISABLE_SELECTION_TOOL';
 
 export const ENABLE_DRAG_TOOL = 'ENABLE_DRAG_TOOL';
 
@@ -34,6 +35,10 @@ interface EnableSelectionTool {
   type: typeof ENABLE_SELECTION_TOOL;
 }
 
+interface DisableSelectionTool {
+  type: typeof DISABLE_SELECTION_TOOL;
+}
+
 interface EnableDragTool {
   type: typeof ENABLE_DRAG_TOOL;
 }
@@ -42,4 +47,4 @@ interface EnableArtboardTool {
   type: typeof ENABLE_ARTBOARD_TOOL;
 }
 
-export type ToolTypes = EnableRectangleDrawTool | EnableEllipseDrawTool | EnableStarDrawTool | EnablePolygonDrawTool | EnableRoundedDrawTool | EnableSelectionTool | EnableDragTool | EnableArtboardTool;
+export type ToolTypes = EnableRectangleDrawTool | EnableEllipseDrawTool | EnableStarDrawTool | EnablePolygonDrawTool | EnableRoundedDrawTool | EnableSelectionTool | DisableSelectionTool | EnableDragTool | EnableArtboardTool;

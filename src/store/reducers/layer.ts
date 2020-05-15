@@ -48,6 +48,7 @@ import {
   INCREMENT_LAYER_TWEEN_DELAY,
   DECREMENT_LAYER_TWEEN_DELAY,
   SET_LAYER_TWEEN_EASE,
+  SET_LAYER_TWEEN_POWER,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -99,7 +100,8 @@ import {
   setLayerTweenDelay,
   incrementLayerTweenDelay,
   decrementLayerTweenDelay,
-  setLayerTweenEase
+  setLayerTweenEase,
+  setLayerTweenPower
 } from '../utils/layer';
 
 export interface LayerState {
@@ -251,6 +253,8 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return decrementLayerTweenDelay(state, action);
     case SET_LAYER_TWEEN_EASE:
       return setLayerTweenEase(state, action);
+    case SET_LAYER_TWEEN_POWER:
+      return setLayerTweenPower(state, action);
     default:
       return state;
   }

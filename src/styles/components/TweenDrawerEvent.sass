@@ -43,7 +43,6 @@
   display: flex
   flex-direction: column
   flex-shrink: 0
-  flex-grow: 2
   width: 100%
 
 .c-tween-drawer-event__layer-timeline,
@@ -51,7 +50,6 @@
   display: flex
   flex-direction: column
   flex-shrink: 0
-  flex-grow: 2
   width: $unit * 3000 // 12000 // 30 sec max
 
 .c-tween-drawer-event-layer__tween
@@ -63,6 +61,10 @@
   font-size: $fontSizeSm
   align-items: center
   padding: 0 $unit * 2
+
+.c-tween-drawer-event-layer-tween__name
+  flex-grow: 2
+  width: 100%
 
 .c-tween-drawer-event-layer__tween--right
   justify-content: flex-end

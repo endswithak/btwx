@@ -6,6 +6,7 @@ import Topbar from './Topbar';
 import TweenDrawer from './TweenDrawer';
 import TweenEventSelect from './TweenEventSelect';
 import TweenEventDestinationSelect from './TweenEventDestinationSelect';
+import EaseEditor from './EaseEditor';
 import { ThemeContext } from './ThemeProvider';
 
 const App = (): ReactElement => {
@@ -30,6 +31,7 @@ const App = (): ReactElement => {
         </div>
         <TweenEventSelect />
         <TweenEventDestinationSelect />
+        <EaseEditor />
     </div>
   );
 }
