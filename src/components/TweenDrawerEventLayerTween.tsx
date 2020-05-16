@@ -22,7 +22,7 @@ const TweenDrawerEventLayerTween = (props: TweenDrawerEventLayerTweenProps): Rea
       <div
         className='c-tween-drawer-event-layer-tween__name'
         style={{
-          color: theme.text.light
+          color: theme.text.lighter
         }}>
         {tween.prop}
       </div>

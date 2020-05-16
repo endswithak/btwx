@@ -33,18 +33,15 @@ interface EaseEditorProps {
 }
 
 const EaseEditor = (props: EaseEditorProps): ReactElement => {
-  const customPathRef = useRef<SVGPathElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
   const pathRevealRef = useRef<SVGPathElement>(null);
   const valueBarRef = useRef<HTMLDivElement>(null);
   const valueHeadRef = useRef<HTMLDivElement>(null);
-  const progressTimeRef = useRef<HTMLDivElement>(null);
-  const progressBarRef = useRef<HTMLDivElement>(null);
   const visualizerRef = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
   const { tween, easeEditor, closeEaseEditor, setLayerTweenEase, setLayerTweenPower, disableSelectionTool, enableSelectionTool } = props;
 
-  const easeTypes = ['linear', 'power1', 'power2', 'power3', 'power4', 'back', 'bounce', 'circ', 'expo', 'sine', 'custom'];
+  const easeTypes = ['linear', 'power1', 'power2', 'power3', 'power4', 'back', 'bounce', 'circ', 'expo', 'sine'];
   const easePowerTypes = ['in', 'inOut', 'out'];
 
   const handleCloseRequest = () => {
@@ -52,12 +49,7 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
   }
 
   const handleTypePresetClick = (preset: em.TweenEaseTypes) => {
-    if (preset === 'custom') {
-      const startPath = pathRef.current.getAttribute('d');
-      setLayerTweenEase({id: tween.id, ease: preset, custom: startPath});
-    } else {
-      setLayerTweenEase({id: tween.id, ease: preset});
-    }
+    setLayerTweenEase({id: tween.id, ease: preset});
   }
 
   const handlePowerPresetClick = (preset: em.TweenEasePowerTypes) => {
@@ -69,45 +61,15 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
     gsap.set(pathRevealRef.current, {clearProps: 'all'});
     gsap.set(valueBarRef.current, {clearProps: 'scale'});
     gsap.set(valueHeadRef.current, {clearProps: 'y'});
-    gsap.set(progressBarRef.current, {clearProps: 'scale'});
-    if (tween.ease === 'custom') {
-      CustomEase.getSVGData(tween.custom, {width: 400, height: 400, path: pathRef.current});
-      CustomEase.getSVGData(tween.custom, {width: 400, height: 400, path: pathRevealRef.current});
-      gsap.from(valueBarRef.current, {scaleY: 0, duration: tween.duration, ease: tween.custom });
-      gsap.from(valueHeadRef.current, {y: 400, duration: tween.duration, ease: tween.custom });
-      gsap.from(pathRevealRef.current, {
-        duration: tween.duration,
-        drawSVG: 0,
-        ease: tween.custom,
-        onUpdate: function() {
-          gsap.set(progressBarRef.current, {scaleX: this.progress()});
-          progressTimeRef.current.innerText = this.progress().toFixed(2);
-        }
-      });
-      // const pathHelper = MotionPathHelper.create(customPathRef.current, {
-      //   path: tween.custom,
-      //   pathWidth: 2,
-      //   pathColor: theme.palette.primary,
-      //   selected: true
-      // });
-      // pathHelper.editor._draggable._onMove = null;
-      // pathHelper.editor._anchors[0].editor._draggable._onMove = null;
-      // pathHelper.editor._anchors[pathHelper.editor._anchors.length - 1].editor._draggable._onMove = null;
-    } else {
-      CustomEase.getSVGData(`${tween.ease}.${tween.power}`, {width: 400, height: 400, path: pathRef.current});
-      CustomEase.getSVGData(`${tween.ease}.${tween.power}`, {width: 400, height: 400, path: pathRevealRef.current});
-      gsap.from(valueBarRef.current, {scaleY: 0, duration: tween.duration, ease: `${tween.ease}.${tween.power}` });
-      gsap.from(valueHeadRef.current, {y: 400, duration: tween.duration, ease: `${tween.ease}.${tween.power}` });
-      gsap.from(pathRevealRef.current, {
-        duration: tween.duration,
-        drawSVG: 0,
-        ease: `${tween.ease}.${tween.power}`,
-        onUpdate: function() {
-          gsap.set(progressBarRef.current, {scaleX: this.progress()});
-          progressTimeRef.current.innerText = this.progress().toFixed(2);
-        }
-      });
-    }
+    CustomEase.getSVGData(`${tween.ease}.${tween.power}`, {width: 400, height: 400, path: pathRef.current});
+    CustomEase.getSVGData(`${tween.ease}.${tween.power}`, {width: 400, height: 400, path: pathRevealRef.current});
+    gsap.from(valueBarRef.current, {scaleY: 0, duration: tween.duration, ease: `${tween.ease}.${tween.power}` });
+    gsap.to(valueHeadRef.current, {y: `-=400`, duration: tween.duration, ease: `${tween.ease}.${tween.power}` });
+    gsap.from(pathRevealRef.current, {
+      duration: tween.duration,
+      drawSVG: 0,
+      ease: `${tween.ease}.${tween.power}`
+    });
   }
 
   const handleAfterOpen = () => {
@@ -139,7 +101,7 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
         content: {
           background: theme.background.z4,
           width: 700,
-          height: 650,
+          height: 576,
         }
       }}
       contentLabel='ease-editor'>
@@ -153,7 +115,7 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
               position: 'relative',
               background: theme.background.z3,
               width: 400,
-              height: 512
+              height: 544
             }}>
             <svg
               viewBox='0 0 400 400'
@@ -164,71 +126,40 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
                 position: 'absolute',
                 overflow: 'visible',
                 maxHeight: 400,
-                bottom: 0
+                bottom: 72
               }}>
               <line x1="0" y1="0" x2="400" y2="0" stroke={theme.text.lightest}></line>
               <path ref={pathRef} strokeWidth='1' stroke={theme.text.lightest} fill='none'></path>
               <path ref={pathRevealRef} strokeWidth='1' stroke={theme.text.base} fill='none'></path>
+              <line x1="0" y1="400" x2="400" y2="400" stroke={theme.text.lightest}></line>
             </svg>
-            {
-              tween && tween.ease === 'custom'
-              ? <svg
-                  viewBox='0 0 400 400'
-                  preserveAspectRatio='xMidYMid meet'
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    position: 'absolute',
-                    overflow: 'visible',
-                    maxHeight: 400,
-                    bottom: 0
-                  }}>
-                  <path ref={customPathRef} />
-                </svg>
-              : null
-            }
           </div>
-          <div className='c-ease-editor__value' style={{height: 400}}>
+          <div
+            className='c-ease-editor__value'
+            style={{
+              height: 544
+            }}>
             <div
               className='c-ease-editor-value__bar'
               style={{
-                background: theme.background.z6
+                background: theme.background.z6,
+                height: 544
               }} />
             <div
               ref={valueBarRef}
               className='c-ease-editor-value__progress'
               style={{
-                background: theme.palette.primary
+                background: theme.palette.primary,
+                height: 400,
+                bottom: 72
               }} />
             <div
               ref={valueHeadRef}
               className='c-ease-editor-value__progress-head'
               style={{
-                background: theme.palette.primary
+                background: theme.palette.primary,
+                bottom: 72
               }} />
-          </div>
-        </div>
-        <div className='c-ease-editor-visualizer__bottom'>
-          <div className='c-ease-editor__progress-bar' style={{maxWidth: 400}}>
-            <div
-              className='c-ease-editor-progress-bar__base'
-              style={{
-                background: theme.background.z6
-              }} />
-            <div
-              ref={progressBarRef}
-              className='c-ease-editor-progress-bar__progress'
-              style={{
-                background: theme.palette.primary
-              }} />
-          </div>
-          <div
-            ref={progressTimeRef}
-            className='c-ease-editor__progress-time'
-            style={{
-              color: theme.text.base
-            }}>
-            1
           </div>
         </div>
       </div>
@@ -239,7 +170,7 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
             style={{
               color: theme.text.lighter
             }}>
-            Type
+            Cubic Bezier
           </div>
           {
             easeTypes.map((preset: em.TweenEaseTypes, index) => (
@@ -266,7 +197,7 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
             style={{
               color: theme.text.lighter
             }}>
-            Power
+            Type
           </div>
           {
             easePowerTypes.map((preset: em.TweenEasePowerTypes, index) => (
@@ -286,6 +217,23 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
               </div>
             ))
           }
+        </div>
+        <div className='c-ease-editor__preset-group'>
+          <div
+            className='c-ease-editor__preset c-ease-editor__preset--label'
+            style={{
+              color: theme.text.lighter
+            }}>
+            Duration
+          </div>
+          <div
+            className='c-ease-editor__preset'
+            style={{
+              background: theme.background.z3,
+              color: theme.text.base
+            }}>
+            {tween ? tween.duration : 0}
+          </div>
         </div>
       </div>
     </Modal>

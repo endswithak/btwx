@@ -54,6 +54,8 @@ import {
   DECREMENT_LAYER_TWEEN_DELAY,
   SET_LAYER_TWEEN_EASE,
   SET_LAYER_TWEEN_POWER,
+  FREEZE_LAYER_TWEEN,
+  UNFREEZE_LAYER_TWEEN,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
@@ -100,6 +102,8 @@ import {
   DecrementLayerTweenDelayPayload,
   SetLayerTweenEasePayload,
   SetLayerTweenPowerPayload,
+  FreezeLayerTweenPayload,
+  UnFreezeLayerTweenPayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -121,9 +125,7 @@ export const addPage = (payload: AddPagePayload): LayerTypes => {
       //paperLayer: paperLayer.exportJSON(),
       selected: false,
       tweenEvents: [],
-      tweens: [],
-      frozen: false,
-      showTweens: true
+      tweens: []
     }
   }
 };
@@ -153,9 +155,7 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
       //paperLayer: paperLayer.exportJSON(),
       showChildren: false,
       tweenEvents: [],
-      tweens: [],
-      frozen: false,
-      showTweens: true
+      tweens: []
     }
   }
 };
@@ -181,9 +181,7 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
       //paperLayer: paperLayer.exportJSON(),
       showChildren: false,
       tweenEvents: [],
-      tweens: [],
-      frozen: false,
-      showTweens: true
+      tweens: []
     }
   }
 };
@@ -215,9 +213,7 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
       //paperLayer: payload.paperLayer.exportJSON(),
       selected: false,
       tweenEvents: [],
-      tweens: [],
-      frozen: false,
-      showTweens: true
+      tweens: []
     }
   }
 };
@@ -487,5 +483,15 @@ export const setLayerTweenEase = (payload: SetLayerTweenEasePayload): LayerTypes
 
 export const setLayerTweenPower = (payload: SetLayerTweenPowerPayload): LayerTypes => ({
   type: SET_LAYER_TWEEN_POWER,
+  payload
+});
+
+export const freezeLayerTween = (payload: FreezeLayerTweenPayload): LayerTypes => ({
+  type: FREEZE_LAYER_TWEEN,
+  payload
+});
+
+export const unFreezeLayerTween = (payload: UnFreezeLayerTweenPayload): LayerTypes => ({
+  type: UNFREEZE_LAYER_TWEEN,
   payload
 });

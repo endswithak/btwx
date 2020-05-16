@@ -6,6 +6,7 @@ import { getTweenEventLayers } from '../store/selectors/layer';
 import TweenDrawerEventLayer from './TweenDrawerEventLayer';
 import { setTweenDrawerEvent } from '../store/actions/tweenDrawer';
 import { SetTweenDrawerEventPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
+import TweenDrawerIcon from './TweenDrawerIcon';
 
 interface TweenDrawerEventLayersProps {
   tweenEventLayers?: {
@@ -22,7 +23,11 @@ const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElemen
   const { tweenEventLayers, setTweenDrawerEvent } = props;
 
   return (
-    <div className={`c-tween-drawer-event__layers`}>
+    <div
+      className={`c-tween-drawer-event__layers`}
+      style={{
+        boxShadow: `-1px 0 0 0 ${theme.background.z3} inset`
+      }}>
       <div
         className='c-tween-drawer-event-layers__header'>
         <div
@@ -30,18 +35,16 @@ const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElemen
           style={{
             color: theme.text.base
           }}>
+          <TweenDrawerIcon
+            onClick={() => setTweenDrawerEvent({id: null})}
+            iconPath='M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z' />
           <div
-            className='c-tween-drawer__icon'
-            onClick={() => setTweenDrawerEvent({id: null})}>
-            <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
+            className='c-tween-drawer-event-layer-tween__name'
             style={{
-              fill: theme.text.lighter
+              color: theme.text.lighter,
+              textTransform: 'uppercase'
             }}>
-              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-            </svg>
+            Tweens
           </div>
         </div>
       </div>

@@ -22,7 +22,10 @@ import {
   IncrementLayerTweenDelay,
   DecrementLayerTweenDelay,
   SetLayerTweenEase,
-  SetLayerTweenPower
+  SetLayerTweenPower,
+  FreezeLayerTween,
+  UnFreezeLayerTween,
+  FreezeLayerTweens
 } from '../actionTypes/layer';
 import {
   getLayerIndex, getLayer, getLayerDepth, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor,
@@ -1276,8 +1279,7 @@ export const setLayerTweenEase = (state: LayerState, action: SetLayerTweenEase):
       ...state.tweenById,
       [action.payload.id]: {
         ...state.tweenById[action.payload.id],
-        ease: action.payload.ease,
-        custom: action.payload.custom ? action.payload.custom : state.tweenById[action.payload.id].custom
+        ease: action.payload.ease
       }
     },
     paperProject: paper.project.exportJSON()
@@ -1292,6 +1294,48 @@ export const setLayerTweenPower = (state: LayerState, action: SetLayerTweenPower
       [action.payload.id]: {
         ...state.tweenById[action.payload.id],
         power: action.payload.power
+      }
+    },
+    paperProject: paper.project.exportJSON()
+  }
+};
+
+export const freezeLayerTween = (state: LayerState, action: FreezeLayerTween): LayerState => {
+  return {
+    ...state,
+    tweenById: {
+      ...state.tweenById,
+      [action.payload.id]: {
+        ...state.tweenById[action.payload.id],
+        frozen: true
+      }
+    },
+    paperProject: paper.project.exportJSON()
+  }
+};
+
+export const unFreezeLayerTween = (state: LayerState, action: UnFreezeLayerTween): LayerState => {
+  return {
+    ...state,
+    tweenById: {
+      ...state.tweenById,
+      [action.payload.id]: {
+        ...state.tweenById[action.payload.id],
+        frozen: false
+      }
+    },
+    paperProject: paper.project.exportJSON()
+  }
+};
+
+export const freezeLayerTweens = (state: LayerState, action: FreezeLayerTweens): LayerState => {
+  return {
+    ...state,
+    tweenById: {
+      ...state.tweenById,
+      [action.payload.id]: {
+        ...state.tweenById[action.payload.id],
+        frozen: true
       }
     },
     paperProject: paper.project.exportJSON()

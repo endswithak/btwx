@@ -8,13 +8,16 @@ const TweenDrawerEventsHeader = (): ReactElement => {
     <div
       className='c-tween-drawer-events__header'
       style={{
-        background: theme.background.z2
+        background: theme.background.z1
       }}>
       <div
         className='c-tween-drawer-events__item c-tween-drawer-events__item--labels'
         style={{
           color: theme.text.lighter
         }}>
+        <div className='c-tween-drawer-events-item__module c-tween-drawer-events-item__module--label'>
+          name
+        </div>
         <div className='c-tween-drawer-events-item__module c-tween-drawer-events-item__module--label'>
           layer
         </div>

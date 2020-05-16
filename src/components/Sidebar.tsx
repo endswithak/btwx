@@ -19,7 +19,8 @@ const Sidebar = (props: SidebarProps): ReactElement => {
       className='c-sidebar'
       style={{
         width: props.width,
-        background: theme.background.z1
+        background: theme.background.z1,
+        boxShadow: props.position === 'left' ? `-1px 0 0 0 ${theme.background.z3} inset` : `1px 0 0 0 ${theme.background.z3} inset`
       }}>
       {/* {
         props.resizable

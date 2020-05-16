@@ -115,7 +115,9 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
         style={{
           height: theme.unit * 4,
           position: 'relative',
-          background: theme.palette.primary
+          background: tween.frozen
+          ? theme.background.z6
+          : theme.palette.primary
         }}>
       </div>
       <div

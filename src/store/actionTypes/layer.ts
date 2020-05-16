@@ -68,6 +68,11 @@ export const DECREMENT_LAYER_TWEEN_DELAY = 'DECREMENT_LAYER_TWEEN_DELAY';
 export const SET_LAYER_TWEEN_EASE = 'SET_LAYER_TWEEN_EASE';
 export const SET_LAYER_TWEEN_POWER = 'SET_LAYER_TWEEN_POWER';
 
+export const FREEZE_LAYER_TWEEN = 'FREEZE_LAYER_TWEEN';
+export const UNFREEZE_LAYER_TWEEN = 'UNFREEZE_LAYER_TWEEN';
+export const FREEZE_LAYER_TWEENS = 'FREEZE_LAYER_TWEENS';
+export const UNFREEZE_LAYER_TWEENS = 'UNFREEZE_LAYER_TWEENS';
+
 // Page
 
 export interface AddPagePayload {
@@ -81,8 +86,6 @@ export interface AddPagePayload {
   children?: string[];
   tweenEvents?: [];
   tweens?: [];
-  frozen?: boolean;
-  showTweens: boolean;
 }
 
 export interface AddPage {
@@ -105,8 +108,6 @@ export interface AddArtboardPayload {
   showChildren?: boolean;
   tweenEvents?: [];
   tweens?: [];
-  frozen?: boolean;
-  showTweens: boolean;
 }
 
 export interface AddArtboard {
@@ -129,8 +130,6 @@ export interface AddGroupPayload {
   showChildren?: boolean;
   tweenEvents?: [];
   tweens?: [];
-  frozen?: boolean;
-  showTweens: boolean;
 }
 
 export interface AddGroup {
@@ -153,8 +152,6 @@ export interface AddShapePayload {
   hover?: boolean;
   tweenEvents?: [];
   tweens?: [];
-  frozen?: boolean;
-  showTweens: boolean;
 }
 
 export interface AddShape {
@@ -642,7 +639,6 @@ export interface DecrementLayerTweenDelay {
 export interface SetLayerTweenEasePayload {
   id: string;
   ease: em.TweenEaseTypes;
-  custom?: string;
 }
 
 export interface SetLayerTweenEase {
@@ -660,5 +656,23 @@ export interface SetLayerTweenPower {
   payload: SetLayerTweenPowerPayload;
 }
 
+export interface FreezeLayerTweenPayload {
+  id: string;
+}
 
-export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower;
+export interface FreezeLayerTween {
+  type: typeof FREEZE_LAYER_TWEEN;
+  payload: FreezeLayerTweenPayload;
+}
+
+export interface UnFreezeLayerTweenPayload {
+  id: string;
+}
+
+export interface UnFreezeLayerTween {
+  type: typeof UNFREEZE_LAYER_TWEEN;
+  payload: UnFreezeLayerTweenPayload;
+}
+
+
+export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower | FreezeLayerTween | UnFreezeLayerTween;

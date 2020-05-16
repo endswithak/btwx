@@ -83,7 +83,8 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
     <div
       className='c-topbar'
       style={{
-        background: theme.background.z2
+        background: theme.background.z1,
+        boxShadow: `0 -1px 0 0 ${theme.background.z3} inset`
       }}>
       <button
         className='c-topbar__button'

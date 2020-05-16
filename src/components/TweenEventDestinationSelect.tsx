@@ -36,6 +36,7 @@ const TweenEventDestinationSelect = (props: TweenEventDestinationSelectProps): R
           text: current.name,
           onClick: () => {
             addLayerTweenEvent({
+              name: `Tween Event`,
               artboard: activeArtboard,
               destinationArtboard: current.id,
               event: contextMenu.data.tweenEvent,

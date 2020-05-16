@@ -17,11 +17,11 @@ const SidebarLayerShape = (props: SidebarLayerShapeProps): ReactElement => {
           height="18"
           viewBox="-1 -1 18 18"
           style={{
-            strokeWidth: 1,
-            stroke: layer.selected
-            ? theme.text.onPrimary
-            : theme.text.lighter,
-            fill: theme.text.lightest
+            // strokeWidth: 1,
+            // stroke: layer.selected
+            // ? theme.text.onPrimary
+            // : theme.text.lighter,
+            fill: theme.text.lighter
           }}>
             <path d={(layer as em.Shape).pathData} />
           </svg>

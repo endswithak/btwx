@@ -23,8 +23,6 @@ declare namespace em {
     children: string[] | null;
     tweenEvents: string[];
     tweens: string[];
-    frozen: boolean;
-    showTweens: boolean;
   }
 
   interface ClipboardLayer {
@@ -85,7 +83,6 @@ declare namespace em {
     event: string;
     ease: TweenEaseTypes;
     power: TweenEasePowerTypes;
-    custom?: string;
     duration: number;
     delay: number;
     frozen: boolean;

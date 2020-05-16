@@ -33,7 +33,7 @@ const TweenDrawer = (props: TweenDrawerProps): ReactElement => {
         className={`c-tween-drawer`}
         ref={elementRef}
         style={{
-          background: theme.background.z2
+          background: theme.background.z1
         }}>
         {
           tweenEvent

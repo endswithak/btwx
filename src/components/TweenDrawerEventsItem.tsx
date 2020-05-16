@@ -48,6 +48,9 @@ const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement =>
         boxShadow: hover ? `0 0 0 ${theme.unit / 2}px ${theme.background.z4} inset` : ''
       }}>
       <div className='c-tween-drawer-events-item__module'>
+        {tweenEvent.name}
+      </div>
+      <div className='c-tween-drawer-events-item__module'>
         {layerItem.name}
       </div>
       <div className='c-tween-drawer-events-item__module'>

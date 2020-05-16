@@ -22,7 +22,20 @@ const TweenDrawerEventLayersTimeline = (props: TweenDrawerEventLayersTimelinePro
     <div className={`c-tween-drawer-event__layers-timeline`}>
       <div
         className='c-tween-drawer-event-layers-timeline__header'>
-
+        {
+          [...Array(120).keys()].map((item, index) => (
+            <div
+              key={index}
+              style={{
+                width: theme.unit * 25,
+                minWidth: theme.unit * 25,
+                height: '100%',
+                background: theme.background.z1,
+                boxShadow: `-1px 0 0 ${theme.background.z3} inset`,
+                flexShrink: 0
+              }} />
+          ))
+        }
       </div>
       <div className='c-tween-drawer-event-layers-timeline__layers'>
         {
