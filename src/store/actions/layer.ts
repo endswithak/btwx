@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import paper from 'paper';
+import { paperMain } from '../../canvas';
 
 import {
   ADD_PAGE,
@@ -111,7 +111,7 @@ import {
 
 export const addPage = (payload: AddPagePayload): LayerTypes => {
   const layerId = uuidv4();
-  const paperLayer = new paper.Group({
+  const paperLayer = new paperMain.Group({
     data: { id: layerId, type: 'Page' }
   });
   return {
@@ -137,7 +137,7 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
   const backgroundId = uuidv4();
   payload.paperLayer.name = 'ArtboardBackground';
   payload.paperLayer.data = { id: backgroundId, type: 'ArtboardBackground', artboard: layerId };
-  const paperLayer = new paper.Group({
+  const paperLayer = new paperMain.Group({
     name: payload.name ? payload.name : 'Artboard',
     data: { id: layerId, type: 'Artboard' },
     children: [payload.paperLayer]
@@ -164,7 +164,7 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
 
 export const addGroup = (payload: AddGroupPayload): LayerTypes => {
   const layerId = uuidv4();
-  const paperLayer = new paper.Group({
+  const paperLayer = new paperMain.Group({
     name: payload.name ? payload.name : 'Group',
     data: { id: layerId, type: 'Group' }
   });
@@ -196,9 +196,9 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
     type: 'Shape'
   }
   const clone = payload.paperLayer.clone({insert: false}) as paper.PathItem;
-  clone.fitBounds(new paper.Rectangle({
-    point: new paper.Point(0,0),
-    size: new paper.Size(16,16)
+  clone.fitBounds(new paperMain.Rectangle({
+    point: new paperMain.Point(0,0),
+    size: new paperMain.Size(16,16)
   }));
   return {
     type: ADD_SHAPE,

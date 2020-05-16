@@ -30,8 +30,8 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
 
   useEffect(() => {
     if (tweenRef.current) {
-      const rightHandleInitialPos = ((tween.delay * 100) * theme.unit) + ((tween.duration * 100) * theme.unit) - theme.unit * 3;
-      const leftHandleInitialPos = ((tween.delay * 100) * theme.unit) + theme.unit;
+      const rightHandleInitialPos = ((tween.delay * 100) * theme.unit) + ((tween.duration * 100) * theme.unit) - theme.unit * 4;
+      const leftHandleInitialPos = ((tween.delay * 100) * theme.unit);
       gsap.set(leftHandleRef.current, {x: leftHandleInitialPos});
       gsap.set(rightHandleRef.current, {x: rightHandleInitialPos});
       gsap.set(tweenRef.current, {x: (tween.delay * 100) * theme.unit, width: (tween.duration * 100) * theme.unit});
@@ -46,20 +46,20 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
         },
         onDrag: function() {
           const factor = this.deltaX / 4;
-          if (this.deltaX < 0) {
-            decrementLayerTweenDelay({id: tweenId, factor: factor * -1});
-          } else {
-            incrementLayerTweenDelay({id: tweenId, factor: factor});
-          }
           gsap.set([leftHandleRef.current, rightHandleRef.current], {x: `+=${theme.unit * factor}`});
           Draggable.get(rightHandleRef.current).update().applyBounds({ minX: Draggable.get(leftHandleRef.current).x, maxX: timelineRef.current.clientWidth - theme.unit, minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight });
-          Draggable.get(leftHandleRef.current).update().applyBounds({ minX: theme.unit, maxX: Draggable.get(rightHandleRef.current).x, minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight });
+          Draggable.get(leftHandleRef.current).update().applyBounds({ minX: 0, maxX: Draggable.get(rightHandleRef.current).x, minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight });
+        },
+        onDragEnd: function() {
+          const leftHandlePos = Draggable.get(leftHandleRef.current).x;
+          const delay = (leftHandlePos / 4) / 100;
+          setLayerTweenDelay({id: tweenId, delay });
         }
       });
       Draggable.create(leftHandleRef.current, {
         type: 'x',
         zIndexBoost: false,
-        bounds: { minX: theme.unit, maxX: Draggable.get(rightHandleRef.current) ? Draggable.get(rightHandleRef.current).x : rightHandleInitialPos, minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight },
+        bounds: { minX: 0, maxX: Draggable.get(rightHandleRef.current) ? Draggable.get(rightHandleRef.current).x : rightHandleInitialPos, minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight },
         minX: theme.unit,
         liveSnap: {
           x: function(value) {
@@ -68,15 +68,16 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
         },
         onDrag: function() {
           const factor = this.deltaX / 4;
-          if (this.deltaX < 0) {
-            incrementLayerTweenDuration({id: tweenId, factor: factor * -1});
-          } else {
-            decrementLayerTweenDuration({id: tweenId, factor: factor});
-            incrementLayerTweenDelay({id: tweenId, factor: factor});
-          }
           gsap.set(tweenRef.current, {x: `+=${theme.unit * factor}`, width: `-=${theme.unit * factor}`});
           Draggable.get(tweenRef.current).update();
           Draggable.get(rightHandleRef.current).update().applyBounds({ minX: Draggable.get(leftHandleRef.current).x, maxX: timelineRef.current.clientWidth - theme.unit, minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight });
+        },
+        onDragEnd: function() {
+          const rightHandlePos = Draggable.get(rightHandleRef.current).x;
+          const duration = (((rightHandlePos + theme.unit * 4) - this.x) / 4) / 100;
+          const delay = (this.x / 4) / 100;
+          setLayerTweenDuration({id: tweenId, duration });
+          setLayerTweenDelay({id: tweenId, delay });
         }
       });
       Draggable.create(rightHandleRef.current, {
@@ -90,14 +91,14 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
         },
         onDrag: function() {
           const factor = this.deltaX / 4;
-          if (this.deltaX < 0) {
-            decrementLayerTweenDuration({id: tweenId, factor: factor * -1});
-          } else {
-            incrementLayerTweenDuration({id: tweenId, factor: factor});
-          }
           gsap.set(tweenRef.current, {width: `+=${theme.unit * factor}`});
           Draggable.get(tweenRef.current).update();
-          Draggable.get(leftHandleRef.current).update().applyBounds({ minX: theme.unit, maxX: Draggable.get(rightHandleRef.current).x, minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight });
+          Draggable.get(leftHandleRef.current).update().applyBounds({ minX: 0, maxX: Draggable.get(rightHandleRef.current).x, minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight });
+        },
+        onDragEnd: function() {
+          const leftHandlePos = Draggable.get(leftHandleRef.current).x;
+          const duration = (((this.x + theme.unit * 4) - leftHandlePos) / 4) / 100;
+          setLayerTweenDuration({id: tweenId, duration });
         }
       });
     }
@@ -123,21 +124,37 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
       <div
         ref={leftHandleRef}
         style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           position: 'absolute',
-          height: theme.unit * 2,
-          width: theme.unit * 2,
-          padding: theme.unit,
-          background: theme.text.base
-        }} />
+          height: theme.unit * 4,
+          width: theme.unit * 4
+        }}>
+        <div
+          style={{
+            height: theme.unit * 2,
+            width: theme.unit * 2,
+            background: theme.text.base
+          }} />
+      </div>
       <div
         ref={rightHandleRef}
         style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           position: 'absolute',
-          height: theme.unit * 2,
-          width: theme.unit * 2,
-          padding: theme.unit,
-          background: theme.text.base
-        }} />
+          height: theme.unit * 4,
+          width: theme.unit * 4
+        }}>
+        <div
+          style={{
+            height: theme.unit * 2,
+            width: theme.unit * 2,
+            background: theme.text.base
+          }} />
+      </div>
     </div>
   );
 }

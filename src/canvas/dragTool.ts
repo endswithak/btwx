@@ -4,6 +4,7 @@ import { enableSelectionTool, enableRectangleDrawTool, enableEllipseDrawTool, en
 import { addShape, setLayerHover, increaseLayerScope, selectLayer, newLayerScope, deselectLayer, moveLayerBy, moveLayersBy, enableLayerDrag, disableLayerDrag } from '../store/actions/layer';
 import { getNearestScopeAncestor, getLayerByPaperId, isScopeGroupLayer, getPaperLayer } from '../store/selectors/layer';
 import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
+import { paperMain } from './index';
 
 class DragTool {
   enabled: boolean;
@@ -47,11 +48,11 @@ class DragTool {
   onMouseDrag(event: paper.ToolEvent): void {
     if (this.enabled) {
       if (this.x || this.y) {
-        if (paper.project.getItem({ data: { id: 'activeArtboardFrame' } })) {
-          paper.project.getItem({ data: { id: 'activeArtboardFrame' } }).remove();
+        if (paperMain.project.getItem({ data: { id: 'activeArtboardFrame' } })) {
+          paperMain.project.getItem({ data: { id: 'activeArtboardFrame' } }).remove();
         }
-        if (paper.project.getItem({ data: { id: 'hoverFrame' } })) {
-          paper.project.getItem({ data: { id: 'hoverFrame' } }).remove();
+        if (paperMain.project.getItem({ data: { id: 'hoverFrame' } })) {
+          paperMain.project.getItem({ data: { id: 'hoverFrame' } }).remove();
         }
       }
       const state = store.getState();

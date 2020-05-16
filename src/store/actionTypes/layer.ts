@@ -513,6 +513,7 @@ export interface SetLayerName {
 
 export interface SetActiveArtboardPayload {
   id: string;
+  scope: number;
 }
 
 export interface SetActiveArtboard {

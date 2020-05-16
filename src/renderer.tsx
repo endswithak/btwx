@@ -38,11 +38,8 @@ import { Provider } from 'react-redux';
 import store, { persistor, persistConfig } from './store';
 import persist from './store/utils/persist';
 import { PersistGate } from 'redux-persist/integration/react';
-import { remote } from 'electron';
 
 import './styles/index.sass';
-
-persistor.purge();
 
 window.addEventListener('storage', persist(store, persistConfig));
 

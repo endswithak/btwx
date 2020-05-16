@@ -63,6 +63,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
   }, []);
 
   useEffect(() => {
+    console.log('re-render');
     paperPreview.project.clear();
     paperPreview.project.importJSON(paperProject);
     const paperActiveArtboard = paperPreview.project.getItem({ data: { id: activeArtboard.id } });
@@ -79,7 +80,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
       return result;
     }, {});
     paperPreview.project.clear();
-    const rootLayer = new paper.Layer();
+    const rootLayer = new paperPreview.Layer();
     paperPreview.project.addLayer(rootLayer);
     paperActiveArtboard.parent = rootLayer;
     paperActiveArtboard.position = paperPreview.view.center;
@@ -296,13 +297,13 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
           }
           if (tween.id === longestTween.id) {
             paperTween.then(() => {
-              setActiveArtboard({id: tweenEvent.destinationArtboard});
+              setActiveArtboard({id: tweenEvent.destinationArtboard, scope: 2});
             });
           }
         });
       });
     });
-  }, [paperProject, activeArtboard, tweens, tweenEvents]);
+  }, [paperProject, activeArtboard]);
 
   return (
     <div

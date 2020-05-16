@@ -1,5 +1,6 @@
 import paper from 'paper';
 import { LayerState } from '../reducers/layer';
+import { paperMain } from '../../canvas';
 
 export const getLayerByPaperId = (store: LayerState, id: number): em.Layer => {
   let layer: em.Layer;
@@ -31,11 +32,11 @@ export const getLayerType = (store: LayerState, id: string): em.LayerTypes => {
 }
 
 export const getPaperLayerByPaperId = (id: string): paper.Item => {
-  return paper.project.getItem({ data: { id } });
+  return paperMain.project.getItem({ data: { id } });
 }
 
 export const getPaperLayer = (id: string): paper.Item => {
-  return paper.project.getItem({ data: { id } });
+  return paperMain.project.getItem({ data: { id } });
 }
 
 export const getPage = (store: LayerState): em.Page => {

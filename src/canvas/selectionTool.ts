@@ -9,12 +9,13 @@ import { updateHoverFrame, updateSelectionFrame, updateActiveArtboardFrame } fro
 import { applyShapeMethods } from './shapeUtils';
 import { applyArtboardMethods } from './artboardUtils';
 import DragTool from './dragTool';
+import { paperMain } from './index';
 
 const redo = () => {
   store.dispatch(ActionCreators.redo());
-  paper.project.clear();
+  paperMain.project.clear();
   const state = store.getState();
-  paper.project.importJSON(state.layer.present.paperProject);
+  paperMain.project.importJSON(state.layer.present.paperProject);
   Object.keys(state.layer.present.byId).forEach((key) => {
     if (state.layer.present.byId[key].type === 'Shape') {
       applyShapeMethods(getPaperLayer(key));
@@ -25,14 +26,14 @@ const redo = () => {
   });
   updateHoverFrame(state.layer.present);
   updateSelectionFrame(state.layer.present);
-  updateActiveArtboardFrame(state.layer.present);
+  updateActiveArtboardFrame(state.layer.present.activeArtboard);
 }
 
 const undo = () => {
   store.dispatch(ActionCreators.undo());
-  paper.project.clear();
+  paperMain.project.clear();
   const state = store.getState();
-  paper.project.importJSON(state.layer.present.paperProject);
+  paperMain.project.importJSON(state.layer.present.paperProject);
   Object.keys(state.layer.present.byId).forEach((key) => {
     if (state.layer.present.byId[key].type === 'Shape') {
       applyShapeMethods(getPaperLayer(key));
@@ -43,7 +44,7 @@ const undo = () => {
   });
   updateHoverFrame(state.layer.present);
   updateSelectionFrame(state.layer.present);
-  updateActiveArtboardFrame(state.layer.present);
+  updateActiveArtboardFrame(state.layer.present.activeArtboard);
 }
 
 class SelectionTool {

@@ -138,9 +138,20 @@ export interface LayerState {
 }
 
 const initialState: LayerState = {
-  byId: {},
-  allIds: [],
-  page: null,
+  byId: {
+    'page': {
+      type: 'Page',
+      id: 'page',
+      name: 'Page',
+      parent: null,
+      children: [],
+      selected: false,
+      tweenEvents: [],
+      tweens: []
+    } as em.Page
+  },
+  allIds: ['page'],
+  page: 'page',
   activeArtboard: null,
   selected: [],
   artboards: [],
@@ -151,7 +162,7 @@ const initialState: LayerState = {
     allIds: [],
     byId: {}
   },
-  paperProject: null,
+  paperProject: '[["Layer",{"applyMatrix":true,"children":[["Group",{"applyMatrix":true,"data":{"id":"page","type":"Page"}}]]}]]',
   allTweenEventIds: [],
   tweenEventById: {},
   allTweenIds: [],

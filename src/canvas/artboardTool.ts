@@ -6,6 +6,7 @@ import { addShape, setLayerHover, increaseLayerScope, selectLayer, newLayerScope
 import { getNearestScopeAncestor, getLayerByPaperId, isScopeGroupLayer, getPaperLayer, getLayer } from '../store/selectors/layer';
 import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
 import { applyArtboardMethods } from './artboardUtils';
+import { paperMain } from './index';
 
 class DrawTool {
   getState: any;
@@ -41,7 +42,7 @@ class DrawTool {
     this.shiftModifier = false;
   }
   renderShape(shapeOpts: any) {
-    return new Path.Rectangle({
+    return new paperMain.Path.Rectangle({
       from: this.from,
       to: this.shiftModifier ? this.constrainedDims : this.to,
       ...shapeOpts
@@ -49,13 +50,13 @@ class DrawTool {
   }
   renderTooltip(tooltipOpts: any) {
     const baseProps = {
-      point: [this.to.x + (30 / paper.view.zoom), this.to.y + (30 / paper.view.zoom)],
+      point: [this.to.x + (30 / paperMain.view.zoom), this.to.y + (30 / paperMain.view.zoom)],
       fillColor: 'white',
       fontFamily: 'Space Mono',
-      fontSize: 12 / paper.view.zoom,
+      fontSize: 12 / paperMain.view.zoom,
       ...tooltipOpts
     }
-    return new PointText({
+    return new paperMain.PointText({
       ...baseProps,
       content: `${Math.round(this.shiftModifier ? this.maxDim : this.dims.width)} x ${Math.round(this.shiftModifier ? this.maxDim : this.dims.height)}`,
     });

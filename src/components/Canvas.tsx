@@ -1,20 +1,22 @@
 import paper from 'paper';
 import React, { useRef, useContext, useEffect, ReactElement } from 'react';
 import { connect } from 'react-redux';
-import { addPage } from '../store/actions/layer';
+import { selectLayer } from '../store/actions/layer';
 import { enableSelectionTool } from '../store/actions/tool';
 import { ThemeContext } from './ThemeProvider';
-import { AddPagePayload, LayerTypes } from '../store/actionTypes/layer';
+import { SelectLayerPayload, LayerTypes } from '../store/actionTypes/layer';
 import { RootState } from '../store/reducers';
 import { updateActiveArtboardFrame } from '../store/utils/layer';
+import { paperMain } from '../canvas';
 
 interface CanvasProps {
-  addPage(payload: AddPagePayload): LayerTypes;
+  selectLayer(payload: SelectLayerPayload): LayerTypes;
   enableSelectionTool(): any;
   activeArtboard?: string;
+  paperProject?: string;
 }
 
-const Canvas = ({addPage, enableSelectionTool, activeArtboard}: CanvasProps): ReactElement => {
+const Canvas = ({selectLayer, enableSelectionTool, activeArtboard, paperProject}: CanvasProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useContext(ThemeContext);
@@ -22,27 +24,26 @@ const Canvas = ({addPage, enableSelectionTool, activeArtboard}: CanvasProps): Re
   useEffect(() => {
     canvasRef.current.width = canvasContainerRef.current.clientWidth;
     canvasRef.current.height = canvasContainerRef.current.clientHeight;
-    paper.setup(canvasRef.current);
-    addPage({
-      name: 'Page 1'
-    });
+    paperMain.setup(canvasRef.current);
+    paperMain.project.clear();
+    paperMain.project.importJSON(paperProject);
     enableSelectionTool();
     canvasRef.current.addEventListener('wheel', (e: WheelEvent) => {
       e.preventDefault();
       if (e.ctrlKey) {
         e.preventDefault();
-        const nextZoom = paper.view.zoom - e.deltaY * 0.01;
+        const nextZoom = paperMain.view.zoom - e.deltaY * 0.01;
         // paper.view.center.x = e.clientX;
         // paper.view.center.y = e.clientY;
         if (e.deltaY < 0 && nextZoom < 30) {
-          paper.view.zoom = nextZoom;
+          paperMain.view.zoom = nextZoom;
         } else if (e.deltaY > 0 && nextZoom > 0) {
-          paper.view.zoom = nextZoom;
+          paperMain.view.zoom = nextZoom;
         } else if (e.deltaY > 0 && nextZoom < 0) {
-          paper.view.zoom = 0.001;
+          paperMain.view.zoom = 0.001;
         }
       } else {
-        paper.view.translate(new paper.Point(e.deltaX * -1, e.deltaY * -1));
+        paperMain.view.translate(new paper.Point(e.deltaX * -1, e.deltaY * -1));
       }
     });
   }, []);
@@ -57,7 +58,11 @@ const Canvas = ({addPage, enableSelectionTool, activeArtboard}: CanvasProps): Re
   }
 
   useEffect(() => {
-    updateActiveArtboardFrame(activeArtboard);
+    if (paperMain.project.getItem({data: { id: activeArtboard }})) {
+      if (paperMain.project.getItem({data: { id: 'activeArtboardFrame' }}) && paperMain.project.getItem({data: { id: 'activeArtboardFrame' }}).data.artboard !== activeArtboard) {
+        selectLayer({id: activeArtboard, newSelection: true});
+      }
+    }
   }, [activeArtboard]);
 
   return (
@@ -78,11 +83,12 @@ const Canvas = ({addPage, enableSelectionTool, activeArtboard}: CanvasProps): Re
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   return {
-    activeArtboard: layer.present.activeArtboard
+    activeArtboard: layer.present.activeArtboard,
+    paperProject: layer.present.paperProject
   };
 };
 
 export default connect(
   mapStateToProps,
-  { addPage, enableSelectionTool }
+  { selectLayer, enableSelectionTool }
 )(Canvas);

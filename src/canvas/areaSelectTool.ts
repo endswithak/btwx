@@ -2,6 +2,7 @@ import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import { getPagePaperLayer, getLayerByPaperId, getPaperLayer, getNearestScopeAncestor } from '../store/selectors/layer';
 import { deselectAllLayers, deselectLayer, selectLayer } from '../store/actions/layer';
 import store from '../store';
+import { paperMain } from './index';
 
 class AreaSelectTool {
   enabled: boolean;
@@ -38,7 +39,7 @@ class AreaSelectTool {
     this.shape = this.renderAreaSelectShape({});
   }
   renderAreaSelectShape(shapeOpts: any) {
-    const selectAreaShape = new Path.Rectangle({
+    const selectAreaShape = new paperMain.Path.Rectangle({
       from: this.from,
       to: this.to,
       selected: true,

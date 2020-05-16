@@ -5,6 +5,7 @@ import { addShape, setLayerHover, increaseLayerScope, selectLayer, newLayerScope
 import { getNearestScopeAncestor, getLayerByPaperId, isScopeGroupLayer, getPaperLayer, getLayer, getPagePaperLayer } from '../store/selectors/layer';
 import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
 import { applyShapeMethods } from './shapeUtils';
+import { paperMain } from './index';
 
 class DrawTool {
   tool: paper.Tool;
@@ -42,33 +43,33 @@ class DrawTool {
   renderShape(shapeOpts: any) {
     switch(this.drawShapeType) {
       case 'Rectangle':
-        return new Path.Rectangle({
+        return new paperMain.Path.Rectangle({
           from: this.from,
           to: this.shiftModifier ? this.constrainedDims : this.to,
           ...shapeOpts
         });
       case 'Ellipse':
-        return new Path.Ellipse({
+        return new paperMain.Path.Ellipse({
           from: this.from,
           to: this.shiftModifier ? this.constrainedDims : this.to,
           ...shapeOpts
         });
       case 'Rounded':
-        return new Path.Rectangle({
+        return new paperMain.Path.Rectangle({
           from: this.from,
           to: this.shiftModifier ? this.constrainedDims : this.to,
           radius: 8,
           ...shapeOpts
         });
       case 'Polygon':
-        return new Path.RegularPolygon({
+        return new paperMain.Path.RegularPolygon({
           center: this.centerPoint,
           radius: this.maxDim / 2,
           sides: 5,
           ...shapeOpts
         });
       case 'Star':
-        return new Path.Star({
+        return new paperMain.Path.Star({
           center: this.centerPoint,
           radius1: this.maxDim / 2,
           radius2: (this.maxDim / 2) / 2,
@@ -79,23 +80,23 @@ class DrawTool {
   }
   renderTooltip(tooltipOpts: any) {
     const baseProps = {
-      point: [this.to.x + (30 / paper.view.zoom), this.to.y + (30 / paper.view.zoom)],
+      point: [this.to.x + (30 / paperMain.view.zoom), this.to.y + (30 / paperMain.view.zoom)],
       fillColor: 'white',
       fontFamily: 'Space Mono',
-      fontSize: 12 / paper.view.zoom,
+      fontSize: 12 / paperMain.view.zoom,
       ...tooltipOpts
     }
     switch(this.drawShapeType) {
       case 'Rectangle':
       case 'Ellipse':
       case 'Rounded':
-        return new PointText({
+        return new paperMain.PointText({
           ...baseProps,
           content: `${Math.round(this.shiftModifier ? this.maxDim : this.dims.width)} x ${Math.round(this.shiftModifier ? this.maxDim : this.dims.height)}`,
         });
       case 'Polygon':
       case 'Star':
-        return new PointText({
+        return new paperMain.PointText({
           ...baseProps,
           content: `${Math.round(this.maxDim)} x ${Math.round(this.maxDim)}`
         });
