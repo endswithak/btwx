@@ -27,7 +27,7 @@ const TweenDrawerEventLayerTween = (props: TweenDrawerEventLayerTweenProps): Rea
         {tween.prop}
       </div>
       <TweenDrawerEditEase tweenId={tweenId} />
-      <TweenDrawerFreezeTween tweenId={tweenId} />
+      {/* <TweenDrawerFreezeTween tweenId={tweenId} /> */}
     </div>
   );
 }
