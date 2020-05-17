@@ -8,7 +8,7 @@ declare namespace em {
 
   type ContextMenu = 'TweenEvent' | 'TweenEventDestination';
 
-  type TweenPropTypes = 'shapePath' | 'fillColor' | 'x' | 'y' | 'rotation' | 'width' | 'height' | 'strokeColor' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity';
+  type TweenPropTypes = 'shape' | 'fillColor' | 'x' | 'y' | 'rotation' | 'width' | 'height' | 'strokeColor' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity';
 
   type LayerTypes = 'Group' | 'Shape' | 'Page' | 'Artboard' | 'ArtboardBackground';
 
@@ -89,7 +89,7 @@ declare namespace em {
   }
 
   interface TweenPropMap {
-    shapePath: boolean;
+    shape: boolean;
     fillColor: boolean;
     x: boolean;
     y: boolean;

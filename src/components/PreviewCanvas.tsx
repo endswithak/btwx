@@ -107,7 +107,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
           const tweenPaperLayerPositionDiffX = tweenDestinationLayerArtboardPosition.x - tweenPaperLayerArtboardPosition.x;
           const tweenPaperLayerPositionDiffY = tweenDestinationLayerArtboardPosition.y - tweenPaperLayerArtboardPosition.y;
           switch(tween.prop) {
-            case 'shapePath': {
+            case 'shape': {
               const morphData = [
                 (tweenPaperLayer as paper.Path).pathData,
                 (tweenDestinationLayerPaperLayer as paper.Path).pathData
@@ -118,7 +118,10 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 duration: tween.duration,
                 [tween.prop]: morphData[1],
                 onUpdate: () => {
-                  (tweenPaperLayer as paper.Path).pathData = tweenProp[tween.prop];
+                  const clone = tweenPaperLayer.clone({insert: false});
+                  clone.pathData = tweenProp[tween.prop];
+                  clone.fitBounds(tweenPaperLayer.bounds);
+                  (tweenPaperLayer as paper.Path).pathData = clone.pathData;
                 },
                 ease: tween.ease,
                 delay: tween.delay
