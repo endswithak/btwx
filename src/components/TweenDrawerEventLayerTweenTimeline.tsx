@@ -5,19 +5,19 @@ import gsap from 'gsap';
 import { Draggable } from "gsap/Draggable";
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
-import { SetLayerTweenDurationPayload, SetLayerTweenDelayPayload, IncrementLayerTweenDurationPayload, DecrementLayerTweenDurationPayload, IncrementLayerTweenDelayPayload, DecrementLayerTweenDelayPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setTweenDrawerTweenHover } from '../store/actions/tweenDrawer';
+import { SetTweenDrawerTweenHoverPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
+import { SetLayerTweenDurationPayload, SetLayerTweenDelayPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setLayerTweenDuration, setLayerTweenDelay, incrementLayerTweenDuration, decrementLayerTweenDuration, incrementLayerTweenDelay, decrementLayerTweenDelay } from '../store/actions/layer';
 gsap.registerPlugin(Draggable);
 
 interface TweenDrawerEventLayerTweenTimelineProps {
   tweenId: string;
   tween?: em.Tween;
+  tweenHover?: string;
   setLayerTweenDuration?(payload: SetLayerTweenDurationPayload): LayerTypes;
   setLayerTweenDelay?(payload: SetLayerTweenDelayPayload): LayerTypes;
-  incrementLayerTweenDuration?(payload: IncrementLayerTweenDurationPayload): LayerTypes;
-  decrementLayerTweenDuration?(payload: DecrementLayerTweenDurationPayload): LayerTypes;
-  incrementLayerTweenDelay?(payload: IncrementLayerTweenDelayPayload): LayerTypes;
-  decrementLayerTweenDelay?(payload: DecrementLayerTweenDelayPayload): LayerTypes;
+  setTweenDrawerTweenHover?(payload: SetTweenDrawerTweenHoverPayload): TweenDrawerTypes;
 }
 
 const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTimelineProps): ReactElement => {
@@ -26,7 +26,7 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
   const leftHandleRef = useRef<HTMLDivElement>(null);
   const rightHandleRef = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
-  const { tweenId, tween, setLayerTweenDuration, setLayerTweenDelay, incrementLayerTweenDuration, decrementLayerTweenDuration, incrementLayerTweenDelay, decrementLayerTweenDelay } = props;
+  const { tweenId, tween, tweenHover, setLayerTweenDuration, setLayerTweenDelay, setTweenDrawerTweenHover } = props;
 
   useEffect(() => {
     if (tweenRef.current) {
@@ -39,6 +39,7 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
         type: 'x',
         zIndexBoost: false,
         bounds: timelineRef.current,
+        autoScroll: 1,
         liveSnap: {
           x: function(value) {
             return Math.round(value / theme.unit) * theme.unit;
@@ -47,18 +48,21 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
         onDrag: function() {
           const factor = this.deltaX / 4;
           gsap.set([leftHandleRef.current, rightHandleRef.current], {x: `+=${theme.unit * factor}`});
-          Draggable.get(rightHandleRef.current).update().applyBounds({ minX: Draggable.get(leftHandleRef.current).x, maxX: timelineRef.current.clientWidth - theme.unit, minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight });
-          Draggable.get(leftHandleRef.current).update().applyBounds({ minX: 0, maxX: Draggable.get(rightHandleRef.current).x, minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight });
+          Draggable.get(leftHandleRef.current).update();
+          Draggable.get(rightHandleRef.current).update();
         },
         onDragEnd: function() {
           const leftHandlePos = Draggable.get(leftHandleRef.current).x;
           const delay = (leftHandlePos / 4) / 100;
           setLayerTweenDelay({id: tweenId, delay });
+          Draggable.get(rightHandleRef.current).update().applyBounds({ minX: Draggable.get(leftHandleRef.current).x, maxX: timelineRef.current.clientWidth - theme.unit, minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight });
+          Draggable.get(leftHandleRef.current).update().applyBounds({ minX: 0, maxX: Draggable.get(rightHandleRef.current).x, minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight });
         }
       });
       Draggable.create(leftHandleRef.current, {
         type: 'x',
         zIndexBoost: false,
+        autoScroll: 1,
         bounds: { minX: 0, maxX: Draggable.get(rightHandleRef.current) ? Draggable.get(rightHandleRef.current).x : rightHandleInitialPos, minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight },
         minX: theme.unit,
         liveSnap: {
@@ -83,6 +87,7 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
       Draggable.create(rightHandleRef.current, {
         type: 'x',
         zIndexBoost: false,
+        autoScroll: 1,
         bounds: { minX: Draggable.get(leftHandleRef.current) ? Draggable.get(leftHandleRef.current).x : leftHandleInitialPos, maxX: timelineRef.current.clientWidth - theme.unit, minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight },
         liveSnap: {
           x: function(value) {
@@ -104,13 +109,26 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
     }
   }, []);
 
+  const handleMouseEnter = () => {
+    setTweenDrawerTweenHover({id: tweenId});
+  }
+
+  const handleMouseLeave = () => {
+    setTweenDrawerTweenHover({id: null});
+  }
+
   return (
     <div
+      ref={timelineRef}
       className={`c-tween-drawer-event-layer__tween-timeline`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       style={{
-        color: theme.text.lighter
-      }}
-      ref={timelineRef}>
+        color: theme.text.lighter,
+        background: tweenId === tweenHover
+        ? theme.background.z3
+        : 'none'
+      }}>
       <div
         ref={tweenRef}
         style={{
@@ -160,12 +178,13 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
 }
 
 const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventLayerTweenTimelineProps) => {
-  const { layer } = state;
+  const { layer, tweenDrawer } = state;
   const tween = layer.present.tweenById[ownProps.tweenId];
-  return { tween };
+  const tweenHover = tweenDrawer.tweenHover;
+  return { tween, tweenHover };
 };
 
 export default connect(
   mapStateToProps,
-  {setLayerTweenDuration, setLayerTweenDelay, incrementLayerTweenDuration, decrementLayerTweenDuration, incrementLayerTweenDelay, decrementLayerTweenDelay}
+  {setLayerTweenDuration, setLayerTweenDelay, setTweenDrawerTweenHover}
 )(TweenDrawerEventLayerTweenTimeline);

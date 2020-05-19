@@ -1129,11 +1129,7 @@ export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerSt
       [action.payload.layer]: {
         ...state.byId[action.payload.layer],
         tweens: addItem(state.byId[action.payload.layer].tweens, action.payload.id)
-      },
-      // [action.payload.destinationLayer]: {
-      //   ...state.byId[action.payload.destinationLayer],
-      //   tweens: addItem(state.byId[action.payload.destinationLayer].tweens, action.payload.id)
-      // }
+      }
     },
     allTweenIds: addItem(state.allTweenIds, action.payload.id),
     tweenById: {
@@ -1160,11 +1156,7 @@ export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): L
       [tween.layer]: {
         ...state.byId[tween.layer],
         tweens: removeItem(state.byId[tween.layer].tweens, action.payload.id)
-      },
-      // [tween.destinationLayer]: {
-      //   ...state.byId[tween.destinationLayer],
-      //   tweens: removeItem(state.byId[tween.destinationLayer].tweens, action.payload.id)
-      // }
+      }
     },
     allTweenIds: removeItem(state.allTweenIds, action.payload.id),
     tweenById: Object.keys(state.tweenById).reduce((result: any, key) => {

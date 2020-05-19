@@ -19,6 +19,7 @@
   max-height: $unit * 8
   flex-shrink: 0
   width: 100%
+  position: relative
 
 .c-tween-drawer-event-layers__layers,
 .c-tween-drawer-event-layers-timeline__layers
@@ -29,12 +30,18 @@
   flex-direction: column
   flex-grow: 2
 
-.c-tween-drawer-event__layers-timeline
+.c-tween-drawer-event__layers-timeline-wrap
   height: 100%
   width: 80%
   display: flex
-  overflow-y: scroll
-  overflow-x: scroll
+  flex-grow: 2
+  overflow: scroll
+
+.c-tween-drawer-event__layers-timeline
+  height: 100%
+  min-width: $unit * 1000
+  width: $unit * 1000 // 4000 // 10 sec max
+  display: flex
   flex-direction: column
   flex-grow: 2
 
@@ -50,7 +57,7 @@
   display: flex
   flex-direction: column
   flex-shrink: 0
-  width: $unit * 3000 // 12000 // 30 sec max
+  width: 100%
 
 .c-tween-drawer-event-layer__tween
   display: flex

@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement } from 'react';
+import React, { useContext, ReactElement, useRef } from 'react';
 import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
@@ -19,8 +19,14 @@ interface TweenDrawerEventLayersProps {
 }
 
 const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElement => {
+  const scrollRef = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
   const { tweenEventLayers, setTweenDrawerEvent } = props;
+
+  const handleScroll = (e) => {
+    const layersTimeline = document.getElementById('tween-drawer-event-layers-timeline');
+    layersTimeline.scrollTop = scrollRef.current.scrollTop;
+  }
 
   return (
     <div
@@ -48,7 +54,11 @@ const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElemen
           </div>
         </div>
       </div>
-      <div className='c-tween-drawer-event-layers__layers'>
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        id='tween-drawer-event-layers'
+        className='c-tween-drawer-event-layers__layers'>
         {
           tweenEventLayers.allIds.map((layer, index) => (
             <TweenDrawerEventLayer

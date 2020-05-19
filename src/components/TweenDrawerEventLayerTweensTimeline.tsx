@@ -20,7 +20,7 @@ const TweenDrawerEventLayerTweensTimeline = (props: TweenDrawerEventLayerTweensT
   const { tweenEventLayerTweens } = props;
 
   return (
-    <div className={`c-tween-drawer-event-layer__tweens-timeline`}>
+    <>
       {
         tweenEventLayerTweens.allIds.map((tween, index) => (
           <TweenDrawerEventLayerTweenTimeline
@@ -28,7 +28,7 @@ const TweenDrawerEventLayerTweensTimeline = (props: TweenDrawerEventLayerTweensT
             tweenId={tween} />
         ))
       }
-    </div>
+    </>
   );
 }
 

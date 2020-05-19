@@ -2,17 +2,20 @@ import {
   OPEN_TWEEN_DRAWER,
   CLOSE_TWEEN_DRAWER,
   SET_TWEEN_DRAWER_EVENT,
+  SET_TWEEN_DRAWER_TWEEN_HOVER,
   TweenDrawerTypes,
 } from '../actionTypes/tweenDrawer';
 
 export interface TweenDrawerState {
   isOpen: boolean;
   event: string;
+  tweenHover: string;
 }
 
 const initialState: TweenDrawerState = {
   isOpen: false,
-  event: null
+  event: null,
+  tweenHover: null
 };
 
 export default (state = initialState, action: TweenDrawerTypes): TweenDrawerState => {
@@ -26,13 +29,21 @@ export default (state = initialState, action: TweenDrawerTypes): TweenDrawerStat
     case CLOSE_TWEEN_DRAWER: {
       return {
         ...state,
-        isOpen: false
+        isOpen: false,
+        tweenHover: null
       };
     }
     case SET_TWEEN_DRAWER_EVENT: {
       return {
         ...state,
-        event: action.payload.id
+        event: action.payload.id,
+        tweenHover: null
+      };
+    }
+    case SET_TWEEN_DRAWER_TWEEN_HOVER: {
+      return {
+        ...state,
+        tweenHover: action.payload.id
       };
     }
     default:

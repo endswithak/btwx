@@ -1,6 +1,7 @@
 export const OPEN_TWEEN_DRAWER = 'OPEN_TWEEN_DRAWER';
 export const CLOSE_TWEEN_DRAWER = 'CLOSE_TWEEN_DRAWER';
 export const SET_TWEEN_DRAWER_EVENT = 'SET_TWEEN_DRAWER_EVENT';
+export const SET_TWEEN_DRAWER_TWEEN_HOVER = 'SET_TWEEN_DRAWER_TWEEN_HOVER';
 
 export interface OpenTweenDrawer {
   type: typeof OPEN_TWEEN_DRAWER;
@@ -19,4 +20,13 @@ export interface SetTweenDrawerEvent {
   payload: SetTweenDrawerEventPayload;
 }
 
-export type TweenDrawerTypes = OpenTweenDrawer | CloseTweenDrawer | SetTweenDrawerEvent;
+export interface SetTweenDrawerTweenHoverPayload {
+  id: string;
+}
+
+export interface SetTweenDrawerTweenHover {
+  type: typeof SET_TWEEN_DRAWER_TWEEN_HOVER;
+  payload: SetTweenDrawerTweenHoverPayload;
+}
+
+export type TweenDrawerTypes = OpenTweenDrawer | CloseTweenDrawer | SetTweenDrawerEvent | SetTweenDrawerTweenHover;
