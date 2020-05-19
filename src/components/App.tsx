@@ -28,6 +28,7 @@ const App = (): ReactElement => {
             <Canvas />
             <TweenDrawer />
           </div>
+          <StylesSidebar />
         </div>
         <TweenEventSelect />
         <TweenEventDestinationSelect />

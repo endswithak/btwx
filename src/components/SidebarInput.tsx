@@ -3,11 +3,14 @@ import { ThemeContext } from './ThemeProvider';
 
 interface SidebarInputProps {
   value: string | number;
-  onChange: any;
-  onSubmit(value: string | number): void;
+  onChange(e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>): void;
+  onSubmit(e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>): void;
+  onFocus?(e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>): void;
+  onBlur?(e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>): void;
   label?: string;
   disabled?: boolean;
   selectOnMount?: boolean;
+  blurOnSubmit?: boolean;
 }
 
 const SidebarInput = (props: SidebarInputProps): ReactElement => {
@@ -16,11 +19,23 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>) => {
     e.preventDefault();
-    props.onSubmit(props.value);
+    props.onSubmit(e);
+    if (props.blurOnSubmit) {
+      inputRef.current.blur();
+    }
   };
 
   const handleChange = (e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>) => {
     props.onChange(e);
+  };
+
+  const handleFocus = (e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>) => {
+    props.onFocus(e);
+    inputRef.current.select();
+  };
+
+  const handleBlur = (e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>) => {
+    props.onBlur(e);
   };
 
   useEffect(() => {
@@ -37,8 +52,10 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
           <input
             ref={inputRef}
             value={props.value}
+            onFocus={handleFocus}
             onChange={handleChange}
-            onBlur={handleSubmit}
+            onBlur={handleBlur}
+            disabled={props.disabled}
             className='c-sidebar-input__field'
             style={{
               background: theme.background.z4,

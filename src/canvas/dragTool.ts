@@ -47,16 +47,18 @@ class DragTool {
   }
   onMouseDrag(event: paper.ToolEvent): void {
     if (this.enabled) {
+      const state = store.getState();
       if (this.x || this.y) {
-        if (paperMain.project.getItem({ data: { id: 'activeArtboardFrame' } })) {
+        if (paperMain.project.getItem({ data: { id: 'activeArtboardFrame' } }) && state.layer.present.selected.includes(state.layer.present.activeArtboard)) {
           paperMain.project.getItem({ data: { id: 'activeArtboardFrame' } }).remove();
         }
         if (paperMain.project.getItem({ data: { id: 'hoverFrame' } })) {
           paperMain.project.getItem({ data: { id: 'hoverFrame' } }).remove();
         }
+        if (paperMain.project.getItem({ data: { id: 'selectionFrame' } })) {
+          paperMain.project.getItem({ data: { id: 'selectionFrame' } }).remove();
+        }
       }
-      const state = store.getState();
-      updateSelectionFrame(state.layer.present);
       if (state.layer.present.selected.length > 0) {
         state.layer.present.selected.forEach((layer) => {
           const paperLayer = getPaperLayer(layer);
@@ -65,6 +67,7 @@ class DragTool {
           paperLayer.position.y += event.delta.y;
           this.y += event.delta.y;
         });
+        updateSelectionFrame(state.layer.present);
       }
     }
   }

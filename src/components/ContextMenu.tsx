@@ -1,4 +1,3 @@
-import paper from 'paper';
 import React, { useRef, useContext, useEffect, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import Modal from 'react-modal';

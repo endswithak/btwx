@@ -23,7 +23,7 @@ class DrawTool {
   centerPoint: paper.Point;
   shiftModifier: boolean;
   constructor() {
-    this.tool = new Tool();
+    this.tool = new paperMain.Tool();
     this.tool.activate();
     this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
     this.tool.onKeyUp = (e: paper.KeyEvent): void => this.onKeyUp(e);

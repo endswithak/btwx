@@ -55,7 +55,7 @@ class SelectionTool {
   areaSelectTool: AreaSelectTool;
   dragTool: DragTool;
   constructor() {
-    this.tool = new Tool();
+    this.tool = new paperMain.Tool();
     this.tool.activate();
     this.tool.onKeyDown = (e: paper.KeyEvent) => this.onKeyDown(e);
     this.tool.onKeyUp = (e: paper.KeyEvent) => this.onKeyUp(e);

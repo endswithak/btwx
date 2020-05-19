@@ -917,6 +917,8 @@ export const updateParentBounds = (state: LayerState, id: string): LayerState =>
 export const moveLayer = (state: LayerState, action: MoveLayer): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
+  updateActiveArtboardFrame(currentState.activeArtboard);
+  updateSelectionFrame(currentState);
   currentState = {
     ...currentState,
     byId: {

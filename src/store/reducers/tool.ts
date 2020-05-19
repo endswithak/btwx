@@ -1,4 +1,4 @@
-import paper from 'paper';
+import { paperMain } from '../../canvas';
 
 import {
   ENABLE_RECTANGLE_DRAW_TOOL,
@@ -29,9 +29,9 @@ const initialState: ToolState = {
 };
 
 const removeActiveTool = () => {
-  if (paper.tools[0]) {
-    paper.tools[0].remove();
-  }
+  paperMain.tools.forEach((tool) => {
+    tool.remove();
+  });
 }
 
 export default (state = initialState, action: ToolTypes): ToolState => {
