@@ -361,6 +361,23 @@ export const getAllArtboardTweenEventDestinations = (store: LayerState, artboard
   };
 };
 
+export const getAllArtboardTweenEventLayers = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: em.Layer } } => {
+  const allArtboardAnimationEvents = getAllArtboardTweenEvents(store, artboard);
+  const allIds: string[] = [];
+  const byId = Object.keys(allArtboardAnimationEvents.byId).reduce((result: { [id: string]: em.Layer }, current) => {
+    const event = allArtboardAnimationEvents.byId[current];
+    if (!allIds.includes(event.layer)) {
+      result[event.layer] = store.byId[event.layer] as em.Artboard;
+      allIds.push(event.layer);
+    }
+    return result;
+  }, {});
+  return {
+    allIds,
+    byId
+  };
+};
+
 export const getAllArtboardTweens = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: em.Tween } } => {
   const allArtboardAnimationEvents = getAllArtboardTweenEvents(store, artboard);
   const allIds: string[] = [];
@@ -445,3 +462,56 @@ export const getTweenEventLayerTweens = (store: LayerState, eventId: string, lay
     byId
   };
 };
+
+export const getTweensByDestinationLayer = (store: LayerState, layerId: string): { allIds: string[]; byId: { [id: string]: em.Tween } } => {
+  const allIds: string[] = [];
+  const byId = Object.keys(store.tweenById).reduce((result: { [id: string]: em.Tween }, current) => {
+    const tween = store.tweenById[current];
+    if (tween.destinationLayer === layerId) {
+      allIds.push(current);
+      result[current] = tween;
+    }
+    return result;
+  }, {});
+  return {
+    allIds,
+    byId
+  };
+};
+
+export const getTweensByLayer = (store: LayerState, layerId: string): { allIds: string[]; byId: { [id: string]: em.Tween } } => {
+  const allIds: string[] = [];
+  const byId = Object.keys(store.tweenById).reduce((result: { [id: string]: em.Tween }, current) => {
+    const tween = store.tweenById[current];
+    if (tween.layer === layerId) {
+      allIds.push(current);
+      result[current] = tween;
+    }
+    return result;
+  }, {});
+  return {
+    allIds,
+    byId
+  };
+};
+
+export const getTweensEventsByDestinationArtboard = (store: LayerState, artboardId: string): { allIds: string[]; byId: { [id: string]: em.TweenEvent } } => {
+  const allIds: string[] = [];
+  const byId = Object.keys(store.tweenEventById).reduce((result: { [id: string]: em.TweenEvent }, current) => {
+    const tweenEvent = store.tweenEventById[current];
+    if (tweenEvent.destinationArtboard === artboardId) {
+      allIds.push(current);
+      result[current] = tweenEvent;
+    }
+    return result;
+  }, {});
+  return {
+    allIds,
+    byId
+  };
+};
+
+// change layer name
+// check all tweens with layer as destination
+// remove if no name equivilant
+// set new tweens if name equivilant

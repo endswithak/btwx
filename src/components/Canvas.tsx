@@ -6,7 +6,10 @@ import { enableSelectionTool } from '../store/actions/tool';
 import { ThemeContext } from './ThemeProvider';
 import { SelectLayerPayload, LayerTypes } from '../store/actionTypes/layer';
 import { RootState } from '../store/reducers';
+import { getPaperLayer } from '../store/selectors/layer';
 import { updateActiveArtboardFrame } from '../store/utils/layer';
+import { applyShapeMethods } from '../canvas/shapeUtils';
+import { applyArtboardMethods } from '../canvas/artboardUtils';
 import { paperMain } from '../canvas';
 
 interface CanvasProps {
@@ -14,9 +17,12 @@ interface CanvasProps {
   enableSelectionTool(): any;
   activeArtboard?: string;
   paperProject?: string;
+  layerById?: {
+    [id: string]: em.Layer;
+  }
 }
 
-const Canvas = ({selectLayer, enableSelectionTool, activeArtboard, paperProject}: CanvasProps): ReactElement => {
+const Canvas = ({selectLayer, enableSelectionTool, activeArtboard, paperProject, layerById}: CanvasProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useContext(ThemeContext);
@@ -44,6 +50,14 @@ const Canvas = ({selectLayer, enableSelectionTool, activeArtboard, paperProject}
         }
       } else {
         paperMain.view.translate(new paper.Point(e.deltaX * -1, e.deltaY * -1));
+      }
+    });
+    Object.keys(layerById).forEach((key) => {
+      if (layerById[key].type === 'Shape') {
+        applyShapeMethods(getPaperLayer(key));
+      }
+      if (layerById[key].type === 'ArtboardBackground') {
+        applyArtboardMethods(getPaperLayer(key));
       }
     });
   }, []);
@@ -84,7 +98,8 @@ const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   return {
     activeArtboard: layer.present.activeArtboard,
-    paperProject: layer.present.paperProject
+    paperProject: layer.present.paperProject,
+    layerById: layer.present.byId
   };
 };
 

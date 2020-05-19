@@ -30,7 +30,9 @@ import {
   ADD_LAYER_TWEEN_EVENT,
   REMOVE_LAYER_TWEEN_EVENT,
   ADD_LAYER_TWEEN,
-  REMOVE_LAYER_TWEEN
+  REMOVE_LAYER_TWEEN,
+  SET_LAYER_TWEEN_EASE,
+  SET_LAYER_TWEEN_POWER
 } from '../actionTypes/layer';
 
 const rootReducer = combineReducers({
@@ -58,7 +60,9 @@ const rootReducer = combineReducers({
     ADD_LAYER_TWEEN_EVENT,
     REMOVE_LAYER_TWEEN_EVENT,
     ADD_LAYER_TWEEN,
-    REMOVE_LAYER_TWEEN
+    REMOVE_LAYER_TWEEN,
+    SET_LAYER_TWEEN_EASE,
+    SET_LAYER_TWEEN_POWER
   ])}),
   tool,
   contextMenu,

@@ -31,7 +31,9 @@ import {
   getNearestScopeGroupAncestor, getParentLayer, getLayerScope, getPaperLayer, getSelectionTopLeft,
   getPaperLayerByPaperId, getClipboardTopLeft, getSelectionBottomRight, getPagePaperLayer,
   getClipboardBottomRight, getClipboardCenter, getSelectionCenter, getLayerAndAllChildren,
-  getAllLayerChildren, getDestinationEquivalent, getEquivalentTweenProps, isTweenDestinationLayer
+  getAllLayerChildren, getDestinationEquivalent, getEquivalentTweenProps, isTweenDestinationLayer,
+  getTweensByDestinationLayer, getAllArtboardTweenEventDestinations, getAllArtboardTweenLayerDestinations,
+  getAllArtboardTweenEvents, getTweensEventsByDestinationArtboard, getTweensByLayer
 } from '../selectors/layer';
 
 import { paperMain } from '../../canvas';
@@ -104,29 +106,32 @@ export const updateActiveArtboardFrame = (activeArtboard: string, scope = 1) => 
 }
 
 export const addLayer = (state: LayerState, action: AddGroup | AddShape): LayerState => {
-  const layerParent = action.payload.parent ? action.payload.parent : state.page;
+  let currentState = state;
+  const layerParent = action.payload.parent ? action.payload.parent : currentState.page;
   const paperLayer = getPaperLayer(action.payload.id);
   paperLayer.parent = getPaperLayer(layerParent);
   // add layer
-  const stateWithLayer = {
-    ...state,
-    allIds: addItem(state.allIds, action.payload.id),
+  currentState = {
+    ...currentState,
+    allIds: addItem(currentState.allIds, action.payload.id),
     byId: {
-      ...state.byId,
+      ...currentState.byId,
       [action.payload.id]: {
         ...action.payload,
         parent: layerParent
       } as em.Page | em.Group | em.Shape,
       [layerParent]: {
-        ...state.byId[layerParent],
-        children: addItem((state.byId[layerParent] as em.Group).children, action.payload.id),
+        ...currentState.byId[layerParent],
+        children: addItem((currentState.byId[layerParent] as em.Group).children, action.payload.id),
         showChildren: true
       } as em.Group
     },
     paperProject: paperMain.project.exportJSON()
   }
+  // update tweens
+  currentState = updateLayerTweens(currentState, action.payload.id);
   // select layer
-  return selectLayer(stateWithLayer, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
 };
 
 export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState => {
@@ -136,6 +141,8 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
   // check selected
   if (state.selected.includes(action.payload.id)) {
     currentState = layersToRemove.reduce((result, current) => {
+      const tweensByDestinationLayer = getTweensByDestinationLayer(result, current);
+      const tweensByLayer = getTweensByLayer(result, current);
       const layer = getLayer(result, current);
       if (layer.type === 'Artboard') {
         result = {
@@ -146,9 +153,19 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
       if (layer.id === result.activeArtboard) {
         result = setActiveArtboard(result, layerActions.setActiveArtboard({id: null, scope: 1}) as SetActiveArtboard);
       }
+      if (tweensByDestinationLayer.allIds.length > 0) {
+        result = tweensByDestinationLayer.allIds.reduce((tweenResult, tweenCurrent) => {
+          return removeLayerTween(tweenResult, layerActions.removeLayerTween({id: tweenCurrent}) as RemoveLayerTween);
+        }, result);
+      }
+      if (tweensByLayer.allIds.length > 0) {
+        result = tweensByLayer.allIds.reduce((tweenResult, tweenCurrent) => {
+          return removeLayerTween(tweenResult, layerActions.removeLayerTween({id: tweenCurrent}) as RemoveLayerTween);
+        }, result);
+      }
       if (layer.tweenEvents.length > 0) {
-        result = layer.tweenEvents.reduce((animResult, animCurrent) => {
-          return removeLayerTweenEvent(animResult, layerActions.removeLayerTweenEvent({id: animCurrent}) as RemoveLayerTweenEvent);
+        result = layer.tweenEvents.reduce((tweenResult, tweenCurrent) => {
+          return removeLayerTweenEvent(tweenResult, layerActions.removeLayerTweenEvent({id: tweenCurrent}) as RemoveLayerTweenEvent);
         }, result);
       }
       if (result.selected.includes(current)) {
@@ -915,6 +932,7 @@ export const moveLayer = (state: LayerState, action: MoveLayer): LayerState => {
     },
     paperProject: paperMain.project.exportJSON()
   }
+  currentState = updateLayerTweens(currentState, action.payload.id);
   return updateParentBounds(currentState, action.payload.id);
 };
 
@@ -944,6 +962,7 @@ export const moveLayerTo = (state: LayerState, action: MoveLayerTo): LayerState 
     },
     paperProject: paperMain.project.exportJSON()
   }
+  currentState = updateLayerTweens(currentState, action.payload.id);
   return updateParentBounds(currentState, action.payload.id);
 };
 
@@ -973,6 +992,7 @@ export const moveLayerBy = (state: LayerState, action: MoveLayerBy): LayerState 
     },
     paperProject: paperMain.project.exportJSON()
   }
+  currentState = updateLayerTweens(currentState, action.payload.id);
   return updateParentBounds(currentState, action.payload.id);
 };
 
@@ -983,19 +1003,19 @@ export const moveLayersBy = (state: LayerState, action: MoveLayersBy): LayerStat
 };
 
 export const setLayerName = (state: LayerState, action: SetLayerName): LayerState => {
-  const paperLayer = getPaperLayer(action.payload.id);
-  paperLayer.name = action.payload.name;
-  return {
-    ...state,
+  let currentState = state;
+  // update layer name
+  currentState = {
+    ...currentState,
     byId: {
-      ...state.byId,
+      ...currentState.byId,
       [action.payload.id]: {
-        ...state.byId[action.payload.id],
+        ...currentState.byId[action.payload.id],
         name: action.payload.name
       }
-    },
-    paperProject: paperMain.project.exportJSON()
+    }
   }
+  return updateLayerTweens(currentState, action.payload.id);
 };
 
 export const setActiveArtboard = (state: LayerState, action: SetActiveArtboard): LayerState => {
@@ -1008,6 +1028,7 @@ export const setActiveArtboard = (state: LayerState, action: SetActiveArtboard):
 };
 
 export const addLayerTweenEvent = (state: LayerState, action: AddLayerTweenEvent): LayerState => {
+  const artboardChildren = getAllLayerChildren(state, action.payload.artboard);
   let currentState = state;
   // add animation event
   currentState = {
@@ -1027,41 +1048,40 @@ export const addLayerTweenEvent = (state: LayerState, action: AddLayerTweenEvent
     paperProject: paperMain.project.exportJSON()
   }
   // add animation event tweens
-  return addTweenEventTweens(currentState, action);
+  return artboardChildren.reduce((result, current) => {
+    return addTweenEventLayerTweens(result, action.payload.id, current);
+  }, currentState);
 };
 
-export const addTweenEventTweens = (state: LayerState, action: AddLayerTweenEvent): LayerState => {
-  const artboardChildren = getAllLayerChildren(state, action.payload.artboard);
-  const artboardPaperLayer = getPaperLayer(action.payload.artboard);
-  const destinationArtboardChildren = getAllLayerChildren(state, action.payload.destinationArtboard);
-  const destinationArtboardPaperLayer = getPaperLayer(action.payload.destinationArtboard);
-  return artboardChildren.reduce((result, current) => {
-    const destinationEquivalent = getDestinationEquivalent(result, current, destinationArtboardChildren);
-    if (destinationEquivalent) {
-      const currentPaperLayer = getPaperLayer(current);
-      const equivalentPaperLayer = getPaperLayer(destinationEquivalent.id);
-      const equivalentTweenProps = getEquivalentTweenProps(currentPaperLayer, equivalentPaperLayer, artboardPaperLayer, destinationArtboardPaperLayer);
-      Object.keys(equivalentTweenProps).forEach((key: em.TweenPropTypes) => {
-        if (equivalentTweenProps[key]) {
-          result = addLayerTween(result, layerActions.addLayerTween({
-            layer: current,
-            destinationLayer: destinationEquivalent.id,
-            prop: key,
-            event: action.payload.id,
-            ease: 'power1',
-            power: 'out',
-            custom: null,
-            duration: 0.5,
-            delay: 0,
-            frozen: false
-          }) as AddLayerTween);
-        } else {
-          return;
-        }
-      });
-    }
-    return result;
-  }, state);
+export const addTweenEventLayerTweens = (state: LayerState, eventId: string, layerId: string): LayerState => {
+  let currentState = state;
+  const tweenEvent = currentState.tweenEventById[eventId];
+  const artboardPaperLayer = getPaperLayer(tweenEvent.artboard);
+  const destinationArtboardChildren = getAllLayerChildren(currentState, tweenEvent.destinationArtboard);
+  const destinationArtboardPaperLayer = getPaperLayer(tweenEvent.destinationArtboard);
+  const destinationEquivalent = getDestinationEquivalent(currentState, layerId, destinationArtboardChildren);
+  if (destinationEquivalent) {
+    const currentPaperLayer = getPaperLayer(layerId);
+    const equivalentPaperLayer = getPaperLayer(destinationEquivalent.id);
+    const equivalentTweenProps = getEquivalentTweenProps(currentPaperLayer, equivalentPaperLayer, artboardPaperLayer, destinationArtboardPaperLayer);
+    currentState = Object.keys(equivalentTweenProps).reduce((result, key: em.TweenPropTypes) => {
+      if (equivalentTweenProps[key]) {
+        result = addLayerTween(result, layerActions.addLayerTween({
+          layer: layerId,
+          destinationLayer: destinationEquivalent.id,
+          prop: key,
+          event: eventId,
+          ease: 'power1',
+          power: 'out',
+          duration: 0.5,
+          delay: 0,
+          frozen: false
+        }) as AddLayerTween);
+      }
+      return result;
+    }, currentState);
+  }
+  return currentState;
 };
 
 export const removeLayerTweenEvent = (state: LayerState, action: RemoveLayerTweenEvent): LayerState => {
@@ -1157,37 +1177,51 @@ export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): L
   }
 };
 
-export const updateLayerTween = (state: LayerState, action: {payload: {id: string}}): LayerState => {
-  const tween = state.tweenById[action.payload.id];
-  return {
-    ...state,
-    tweenEventById: {
-      ...state.tweenEventById,
-      [tween.event]: {
-        ...state.tweenEventById[tween.event],
-        tweens: removeItem(state.tweenEventById[tween.event].tweens, action.payload.id)
+export const updateLayerTweens = (state: LayerState, layerId: string): LayerState => {
+  let currentState = state;
+  const layer = currentState.byId[layerId];
+  if (layer.type !== 'Artboard' && layer.type !== 'ArtboardBackground') {
+    const tweensByLayerDestination = getTweensByDestinationLayer(currentState, layerId);
+    const layerScope = getLayerScope(currentState, layerId);
+    // remove layer tweens
+    if (layer.tweens.length > 0) {
+      currentState = layer.tweens.reduce((result, current) => {
+        result = removeLayerTween(result, layerActions.removeLayerTween({id: current}) as RemoveLayerTween);
+        return result;
+      }, currentState);
+    }
+    // remove layer tweens that have layer as destination
+    if (tweensByLayerDestination.allIds.length > 0) {
+      currentState = tweensByLayerDestination.allIds.reduce((result, current) => {
+        result = removeLayerTween(result, layerActions.removeLayerTween({id: current}) as RemoveLayerTween);
+        return result;
+      }, currentState);
+    }
+    // check if layer has artboard parent
+    if (currentState.byId[layerScope[0]].type === 'Artboard') {
+      const allArtboardTweenEvents = getAllArtboardTweenEvents(currentState, layerScope[0]);
+      const tweensEventsByDestinationArtboard = getTweensEventsByDestinationArtboard(currentState, layerScope[0]);
+      // add new layer tweens to all parent artboard tween events
+      if (allArtboardTweenEvents.allIds.length > 0) {
+        currentState = allArtboardTweenEvents.allIds.reduce((result, current) => {
+          return addTweenEventLayerTweens(result, current, layerId);
+        }, currentState);
       }
-    },
-    byId: {
-      ...state.byId,
-      [tween.layer]: {
-        ...state.byId[tween.layer],
-        tweens: removeItem(state.byId[tween.layer].tweens, action.payload.id)
-      },
-      // [tween.destinationLayer]: {
-      //   ...state.byId[tween.destinationLayer],
-      //   tweens: removeItem(state.byId[tween.destinationLayer].tweens, action.payload.id)
-      // }
-    },
-    allTweenIds: removeItem(state.allTweenIds, action.payload.id),
-    tweenById: Object.keys(state.tweenById).reduce((result: any, key) => {
-      if (key !== action.payload.id) {
-        result[key] = state.tweenById[key];
+      // add new layer tweens to tween events with parent artboard as destination
+      if (tweensEventsByDestinationArtboard.allIds.length > 0) {
+        currentState = tweensEventsByDestinationArtboard.allIds.reduce((result, current) => {
+          const tweenEvent = currentState.tweenEventById[current];
+          const artboardChildren = getAllLayerChildren(currentState, tweenEvent.artboard);
+          const destinationEquivalent = getDestinationEquivalent(currentState, layerId, artboardChildren);
+          if (destinationEquivalent) {
+            result = addTweenEventLayerTweens(result, current, destinationEquivalent.id);
+          }
+          return result;
+        }, currentState);
       }
-      return result;
-    }, {}),
-    paperProject: paperMain.project.exportJSON()
+    }
   }
+  return currentState;
 };
 
 export const setLayerTweenDuration = (state: LayerState, action: SetLayerTweenDuration): LayerState => {
@@ -1302,44 +1336,44 @@ export const setLayerTweenPower = (state: LayerState, action: SetLayerTweenPower
   }
 };
 
-export const freezeLayerTween = (state: LayerState, action: FreezeLayerTween): LayerState => {
-  return {
-    ...state,
-    tweenById: {
-      ...state.tweenById,
-      [action.payload.id]: {
-        ...state.tweenById[action.payload.id],
-        frozen: true
-      }
-    },
-    paperProject: paperMain.project.exportJSON()
-  }
-};
+// export const freezeLayerTween = (state: LayerState, action: FreezeLayerTween): LayerState => {
+//   return {
+//     ...state,
+//     tweenById: {
+//       ...state.tweenById,
+//       [action.payload.id]: {
+//         ...state.tweenById[action.payload.id],
+//         frozen: true
+//       }
+//     },
+//     paperProject: paperMain.project.exportJSON()
+//   }
+// };
 
-export const unFreezeLayerTween = (state: LayerState, action: UnFreezeLayerTween): LayerState => {
-  return {
-    ...state,
-    tweenById: {
-      ...state.tweenById,
-      [action.payload.id]: {
-        ...state.tweenById[action.payload.id],
-        frozen: false
-      }
-    },
-    paperProject: paperMain.project.exportJSON()
-  }
-};
+// export const unFreezeLayerTween = (state: LayerState, action: UnFreezeLayerTween): LayerState => {
+//   return {
+//     ...state,
+//     tweenById: {
+//       ...state.tweenById,
+//       [action.payload.id]: {
+//         ...state.tweenById[action.payload.id],
+//         frozen: false
+//       }
+//     },
+//     paperProject: paperMain.project.exportJSON()
+//   }
+// };
 
-export const freezeLayerTweens = (state: LayerState, action: FreezeLayerTweens): LayerState => {
-  return {
-    ...state,
-    tweenById: {
-      ...state.tweenById,
-      [action.payload.id]: {
-        ...state.tweenById[action.payload.id],
-        frozen: true
-      }
-    },
-    paperProject: paperMain.project.exportJSON()
-  }
-};
+// export const freezeLayerTweens = (state: LayerState, action: FreezeLayerTweens): LayerState => {
+//   return {
+//     ...state,
+//     tweenById: {
+//       ...state.tweenById,
+//       [action.payload.id]: {
+//         ...state.tweenById[action.payload.id],
+//         frozen: true
+//       }
+//     },
+//     paperProject: paperMain.project.exportJSON()
+//   }
+// };
