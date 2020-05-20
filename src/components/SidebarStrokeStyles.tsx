@@ -4,15 +4,15 @@ import SidebarSectionWrap from './SidebarSectionWrap';
 import SidebarSection from './SidebarSection';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionHead from './SidebarSectionHead';
-import SidebarFillStyle from './SidebarFillStyle';
+import SidebarStrokeStyle from './SidebarStrokeStyle';
 import { RootState } from '../store/reducers';
 
-interface SidebarFillStylesProps {
+interface SidebarStrokeStylesProps {
   selected?: string[];
   selectedType?: string;
 }
 
-const SidebarFillStyles = (props: SidebarFillStylesProps): ReactElement => {
+const SidebarStrokeStyles = (props: SidebarStrokeStylesProps): ReactElement => {
   const { selected, selectedType } = props;
   return (
     <SidebarSectionWrap>
@@ -20,10 +20,10 @@ const SidebarFillStyles = (props: SidebarFillStylesProps): ReactElement => {
         selected.length === 1 && selectedType === 'Shape'
         ? <SidebarSection>
             <SidebarSectionRow>
-              <SidebarSectionHead text={'fill'} />
+              <SidebarSectionHead text={'stroke'} />
             </SidebarSectionRow>
             <SidebarSection>
-              <SidebarFillStyle />
+              <SidebarStrokeStyle />
             </SidebarSection>
           </SidebarSection>
         : null
@@ -41,4 +41,4 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps
-)(SidebarFillStyles);
+)(SidebarStrokeStyles);

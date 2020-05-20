@@ -3,46 +3,23 @@ import { connect } from 'react-redux';
 import { evaluate } from 'mathjs';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
-import { MoveLayerToPayload, LayerTypes } from '../store/actionTypes/layer';
-import { moveLayerTo } from '../store/actions/layer';
-import { ToolTypes } from '../store/actionTypes/tool';
-import { enableSelectionTool, disableSelectionTool } from '../store/actions/tool';
+import { SetLayerXPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayerX } from '../store/actions/layer';
 import { getPaperLayer } from '../store/selectors/layer';
 
 interface XInputProps {
   selected?: string[];
   xValue?: number | string;
-  moveLayerTo?(payload: MoveLayerToPayload): LayerTypes;
-  enableSelectionTool?(): ToolTypes;
-  disableSelectionTool?(): ToolTypes;
+  setLayerX?(payload: SetLayerXPayload): LayerTypes;
 }
 
 const XInput = (props: XInputProps): ReactElement => {
-  const { selected, moveLayerTo, enableSelectionTool, disableSelectionTool, xValue } = props;
+  const { selected, setLayerX, xValue } = props;
   const [x, setX] = useState<string | number>(props.xValue);
-
-  // const getX = () => {
-  //   switch(selected.allIds.length) {
-  //     case 0:
-  //       return '';
-  //     case 1:
-  //       return Math.round(getPaperLayer(selected.allIds[0]).position.x);
-  //     default:
-  //       return 'multi';
-  //   }
-  // }
 
   useEffect(() => {
     setX(xValue);
-  }, [xValue]);
-
-  const handleFocus = () => {
-    disableSelectionTool();
-  };
-
-  const handleBlur = () => {
-    enableSelectionTool();
-  };
+  }, [xValue, selected]);
 
   const handleChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
     const target = e.target as HTMLInputElement;
@@ -52,14 +29,13 @@ const XInput = (props: XInputProps): ReactElement => {
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
     const paperLayer = getPaperLayer(selected[0]);
     paperLayer.position.x = evaluate(`${x}`);
-    moveLayerTo({id: selected[0], x: evaluate(`${x}`), y: paperLayer.position.y});
+    setLayerX({id: selected[0], x: evaluate(`${x}`)});
+    setX(evaluate(`${x}`));
   }
 
   return (
     <SidebarInput
       value={x}
-      onFocus={handleFocus}
-      onBlur={handleBlur}
       onChange={handleChange}
       onSubmit={handleSubmit}
       blurOnSubmit
@@ -86,5 +62,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { moveLayerTo, enableSelectionTool, disableSelectionTool }
+  { setLayerX }
 )(XInput);

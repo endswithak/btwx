@@ -73,6 +73,33 @@ export const UNFREEZE_LAYER_TWEEN = 'UNFREEZE_LAYER_TWEEN';
 export const FREEZE_LAYER_TWEENS = 'FREEZE_LAYER_TWEENS';
 export const UNFREEZE_LAYER_TWEENS = 'UNFREEZE_LAYER_TWEENS';
 
+export const SET_LAYER_X = 'SET_LAYER_X';
+export const SET_LAYER_Y = 'SET_LAYER_Y';
+export const SET_LAYER_WIDTH = 'SET_LAYER_WIDTH';
+export const SET_LAYER_HEIGHT = 'SET_LAYER_HEIGHT';
+export const SET_LAYER_ROTATION = 'SET_LAYER_ROTATION';
+
+export const SET_LAYER_HORIZONTAL_FLIP = 'SET_LAYER_HORIZONTAL_FLIP';
+export const SET_LAYER_VERTICAL_FLIP = 'SET_LAYER_VERTICAL_FLIP';
+
+export const SET_LAYER_OPACITY = 'SET_LAYER_OPACITY';
+
+export const ENABLE_LAYER_FILL = 'ENABLE_LAYER_FILL';
+export const DISABLE_LAYER_FILL = 'DISABLE_LAYER_FILL';
+export const SET_LAYER_FILL_COLOR = 'SET_LAYER_FILL_COLOR';
+
+export const ENABLE_LAYER_STROKE = 'ENABLE_LAYER_STROKE';
+export const DISABLE_LAYER_STROKE = 'DISABLE_LAYER_STROKE';
+export const SET_LAYER_STROKE_COLOR = 'SET_LAYER_STROKE_COLOR';
+export const SET_LAYER_STROKE_WIDTH = 'SET_LAYER_STROKE_WIDTH';
+
+export const ENABLE_LAYER_SHADOW = 'ENABLE_LAYER_SHADOW';
+export const DISABLE_LAYER_SHADOW = 'DISABLE_LAYER_SHADOW';
+export const SET_LAYER_SHADOW_COLOR = 'SET_LAYER_SHADOW_COLOR';
+export const SET_LAYER_SHADOW_BLUR = 'SET_LAYER_SHADOW_BLUR';
+export const SET_LAYER_SHADOW_X_OFFSET = 'SET_LAYER_SHADOW_X_OFFSET';
+export const SET_LAYER_SHADOW_Y_OFFSET = 'SET_LAYER_SHADOW_Y_OFFSET';
+
 // Page
 
 export interface AddPagePayload {
@@ -108,6 +135,30 @@ export interface AddArtboardPayload {
   showChildren?: boolean;
   tweenEvents?: [];
   tweens?: [];
+  style?: {
+    fill: {
+      enabled: boolean;
+      color: string;
+    };
+    stroke: {
+      enabled: boolean;
+      color: string;
+      width: number;
+    };
+    opacity: number;
+    rotation: number;
+    horizontalFlip: number;
+    verticalFlip: number;
+    shadow: {
+      enabled: boolean;
+      color: string;
+      blur: number;
+      offset: {
+        x: number;
+        y: number;
+      };
+    };
+  };
 }
 
 export interface AddArtboard {
@@ -130,6 +181,30 @@ export interface AddGroupPayload {
   showChildren?: boolean;
   tweenEvents?: [];
   tweens?: [];
+  style?: {
+    fill: {
+      enabled: boolean;
+      color: string;
+    };
+    stroke: {
+      enabled: boolean;
+      color: string;
+      width: number;
+    };
+    opacity: number;
+    rotation: number;
+    horizontalFlip: number;
+    verticalFlip: number;
+    shadow: {
+      enabled: boolean;
+      color: string;
+      blur: number;
+      offset: {
+        x: number;
+        y: number;
+      };
+    };
+  };
 }
 
 export interface AddGroup {
@@ -152,6 +227,30 @@ export interface AddShapePayload {
   hover?: boolean;
   tweenEvents?: [];
   tweens?: [];
+  style?: {
+    fill: {
+      enabled: boolean;
+      color: string;
+    };
+    stroke: {
+      enabled: boolean;
+      color: string;
+      width: number;
+    };
+    opacity: number;
+    rotation: number;
+    horizontalFlip: number;
+    verticalFlip: number;
+    shadow: {
+      enabled: boolean;
+      color: string;
+      blur: number;
+      offset: {
+        x: number;
+        y: number;
+      };
+    };
+  };
 }
 
 export interface AddShape {
@@ -675,5 +774,209 @@ export interface UnFreezeLayerTween {
   payload: UnFreezeLayerTweenPayload;
 }
 
+export interface SetLayerXPayload {
+  id: string;
+  x: number;
+}
 
-export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower | FreezeLayerTween | UnFreezeLayerTween;
+export interface SetLayerX {
+  type: typeof SET_LAYER_X;
+  payload: SetLayerXPayload;
+}
+
+export interface SetLayerYPayload {
+  id: string;
+  y: number;
+}
+
+export interface SetLayerY {
+  type: typeof SET_LAYER_Y;
+  payload: SetLayerYPayload;
+}
+
+export interface SetLayerWidthPayload {
+  id: string;
+  width: number;
+}
+
+export interface SetLayerWidth {
+  type: typeof SET_LAYER_WIDTH;
+  payload: SetLayerWidthPayload;
+}
+
+export interface SetLayerHeightPayload {
+  id: string;
+  height: number;
+}
+
+export interface SetLayerHeight {
+  type: typeof SET_LAYER_HEIGHT;
+  payload: SetLayerHeightPayload;
+}
+
+export interface SetLayerRotationPayload {
+  id: string;
+  rotation: number;
+}
+
+export interface SetLayerRotation {
+  type: typeof SET_LAYER_ROTATION;
+  payload: SetLayerRotationPayload;
+}
+
+export interface SetLayerOpacityPayload {
+  id: string;
+  opacity: number;
+}
+
+export interface SetLayerOpacity {
+  type: typeof SET_LAYER_OPACITY;
+  payload: SetLayerOpacityPayload;
+}
+
+export interface SetLayerHorizontalFlipPayload {
+  id: string;
+  horizontalFlip: number;
+}
+
+export interface SetLayerHorizontalFlip {
+  type: typeof SET_LAYER_HORIZONTAL_FLIP;
+  payload: SetLayerHorizontalFlipPayload;
+}
+
+export interface SetLayerVerticalFlipPayload {
+  id: string;
+  verticalFlip: number;
+}
+
+export interface SetLayerVerticalFlip {
+  type: typeof SET_LAYER_VERTICAL_FLIP;
+  payload: SetLayerVerticalFlipPayload;
+}
+
+export interface EnableLayerFillPayload {
+  id: string;
+}
+
+export interface EnableLayerFill {
+  type: typeof ENABLE_LAYER_FILL;
+  payload: EnableLayerFillPayload;
+}
+
+export interface DisableLayerFillPayload {
+  id: string;
+}
+
+export interface DisableLayerFill {
+  type: typeof DISABLE_LAYER_FILL;
+  payload: DisableLayerFillPayload;
+}
+
+export interface SetLayerFillColorPayload {
+  id: string;
+  fillColor: string;
+}
+
+export interface SetLayerFillColor {
+  type: typeof SET_LAYER_FILL_COLOR;
+  payload: SetLayerFillColorPayload;
+}
+
+export interface EnableLayerStrokePayload {
+  id: string;
+}
+
+export interface EnableLayerStroke {
+  type: typeof ENABLE_LAYER_STROKE;
+  payload: EnableLayerStrokePayload;
+}
+
+export interface DisableLayerStrokePayload {
+  id: string;
+}
+
+export interface DisableLayerStroke {
+  type: typeof DISABLE_LAYER_STROKE;
+  payload: DisableLayerStrokePayload;
+}
+
+export interface SetLayerStrokeColorPayload {
+  id: string;
+  strokeColor: string;
+}
+
+export interface SetLayerStrokeColor {
+  type: typeof SET_LAYER_STROKE_COLOR;
+  payload: SetLayerStrokeColorPayload;
+}
+
+export interface SetLayerStrokeWidthPayload {
+  id: string;
+  strokeWidth: number;
+}
+
+export interface SetLayerStrokeWidth {
+  type: typeof SET_LAYER_STROKE_WIDTH;
+  payload: SetLayerStrokeWidthPayload;
+}
+
+export interface EnableLayerShadowPayload {
+  id: string;
+}
+
+export interface EnableLayerShadow {
+  type: typeof ENABLE_LAYER_SHADOW;
+  payload: EnableLayerShadowPayload;
+}
+
+export interface DisableLayerShadowPayload {
+  id: string;
+}
+
+export interface DisableLayerShadow {
+  type: typeof DISABLE_LAYER_SHADOW;
+  payload: DisableLayerShadowPayload;
+}
+
+export interface SetLayerShadowColorPayload {
+  id: string;
+  shadowColor: string;
+}
+
+export interface SetLayerShadowColor {
+  type: typeof SET_LAYER_SHADOW_COLOR;
+  payload: SetLayerShadowColorPayload;
+}
+
+export interface SetLayerShadowBlurPayload {
+  id: string;
+  shadowBlur: number;
+}
+
+export interface SetLayerShadowBlur {
+  type: typeof SET_LAYER_SHADOW_BLUR;
+  payload: SetLayerShadowBlurPayload;
+}
+
+export interface SetLayerShadowXOffsetPayload {
+  id: string;
+  shadowXOffset: number;
+}
+
+export interface SetLayerShadowXOffset {
+  type: typeof SET_LAYER_SHADOW_X_OFFSET;
+  payload: SetLayerShadowXOffsetPayload;
+}
+
+export interface SetLayerShadowYOffsetPayload {
+  id: string;
+  shadowYOffset: number;
+}
+
+export interface SetLayerShadowYOffset {
+  type: typeof SET_LAYER_SHADOW_Y_OFFSET;
+  payload: SetLayerShadowYOffsetPayload;
+}
+
+
+export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower | FreezeLayerTween | UnFreezeLayerTween | SetLayerX | SetLayerY | SetLayerWidth | SetLayerHeight | SetLayerRotation | SetLayerOpacity | SetLayerHorizontalFlip | SetLayerVerticalFlip | EnableLayerFill | DisableLayerFill | SetLayerFillColor | EnableLayerStroke | DisableLayerStroke | SetLayerStrokeColor | SetLayerStrokeWidth | EnableLayerShadow | DisableLayerShadow | SetLayerShadowColor | SetLayerShadowBlur | SetLayerShadowXOffset | SetLayerShadowYOffset;

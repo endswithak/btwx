@@ -19,11 +19,11 @@ const SidebarFrameStyles = (): ReactElement => {
         <SidebarSectionRow>
           <SidebarSectionColumn width={'66%'}>
             <SidebarPositionStyles />
-            {/* <SidebarSizeStyles /> */}
+            <SidebarSizeStyles />
           </SidebarSectionColumn>
           <SidebarSectionColumn width={'33%'}>
-            {/* <SidebarRotationStyles />
-            <SidebarFlippedStyles /> */}
+            <SidebarRotationStyles />
+            <SidebarFlippedStyles />
           </SidebarSectionColumn>
         </SidebarSectionRow>
       </SidebarSection>

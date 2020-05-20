@@ -56,6 +56,27 @@ import {
   SET_LAYER_TWEEN_POWER,
   FREEZE_LAYER_TWEEN,
   UNFREEZE_LAYER_TWEEN,
+  SET_LAYER_X,
+  SET_LAYER_Y,
+  SET_LAYER_WIDTH,
+  SET_LAYER_HEIGHT,
+  SET_LAYER_ROTATION,
+  SET_LAYER_OPACITY,
+  SET_LAYER_HORIZONTAL_FLIP,
+  SET_LAYER_VERTICAL_FLIP,
+  ENABLE_LAYER_FILL,
+  DISABLE_LAYER_FILL,
+  SET_LAYER_FILL_COLOR,
+  ENABLE_LAYER_STROKE,
+  DISABLE_LAYER_STROKE,
+  SET_LAYER_STROKE_COLOR,
+  SET_LAYER_STROKE_WIDTH,
+  ENABLE_LAYER_SHADOW,
+  DISABLE_LAYER_SHADOW,
+  SET_LAYER_SHADOW_COLOR,
+  SET_LAYER_SHADOW_BLUR,
+  SET_LAYER_SHADOW_X_OFFSET,
+  SET_LAYER_SHADOW_Y_OFFSET,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
@@ -104,6 +125,27 @@ import {
   SetLayerTweenPowerPayload,
   FreezeLayerTweenPayload,
   UnFreezeLayerTweenPayload,
+  SetLayerXPayload,
+  SetLayerYPayload,
+  SetLayerWidthPayload,
+  SetLayerHeightPayload,
+  SetLayerRotationPayload,
+  SetLayerOpacityPayload,
+  SetLayerHorizontalFlipPayload,
+  SetLayerVerticalFlipPayload,
+  EnableLayerFillPayload,
+  DisableLayerFillPayload,
+  SetLayerFillColorPayload,
+  EnableLayerStrokePayload,
+  DisableLayerStrokePayload,
+  SetLayerStrokeColorPayload,
+  SetLayerStrokeWidthPayload,
+  EnableLayerShadowPayload,
+  DisableLayerShadowPayload,
+  SetLayerShadowColorPayload,
+  SetLayerShadowBlurPayload,
+  SetLayerShadowXOffsetPayload,
+  SetLayerShadowYOffsetPayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -122,7 +164,6 @@ export const addPage = (payload: AddPagePayload): LayerTypes => {
       name: payload.name ? payload.name : 'Page',
       parent: null,
       children: [],
-      //paperLayer: paperLayer.exportJSON(),
       selected: false,
       tweenEvents: [],
       tweens: []
@@ -152,10 +193,33 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
       parent: null,
       children: [backgroundId],
       selected: false,
-      //paperLayer: paperLayer.exportJSON(),
       showChildren: false,
       tweenEvents: [],
-      tweens: []
+      tweens: [],
+      style: {
+        fill: {
+          enabled: true,
+          color: '#ffffff'
+        },
+        stroke: {
+          enabled: false,
+          color: '#999999',
+          width: 1
+        },
+        opacity: 1,
+        rotation: 0,
+        horizontalFlip: 1,
+        verticalFlip: 1,
+        shadow: {
+          enabled: false,
+          color: '#000000',
+          blur: 10,
+          offset: {
+            x: 0,
+            y: 0,
+          }
+        }
+      },
     }
   }
 };
@@ -178,10 +242,33 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
       parent: payload.parent ? payload.parent : null,
       children: [],
       selected: false,
-      //paperLayer: paperLayer.exportJSON(),
       showChildren: false,
       tweenEvents: [],
-      tweens: []
+      tweens: [],
+      style: {
+        fill: {
+          enabled: false,
+          color: '#cccccc'
+        },
+        stroke: {
+          enabled: false,
+          color: '#999999',
+          width: 1
+        },
+        opacity: 1,
+        rotation: 0,
+        horizontalFlip: 1,
+        verticalFlip: 1,
+        shadow: {
+          enabled: false,
+          color: '#000000',
+          blur: 10,
+          offset: {
+            x: 0,
+            y: 0,
+          }
+        }
+      },
     }
   }
 };
@@ -210,8 +297,31 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
       parent: payload.parent ? payload.parent : null,
       shapeType: payload.shapeType,
       pathData: clone.pathData,
-      //paperLayer: payload.paperLayer.exportJSON(),
       selected: false,
+      style: {
+        fill: {
+          enabled: true,
+          color: '#cccccc'
+        },
+        stroke: {
+          enabled: true,
+          color: '#999999',
+          width: 1
+        },
+        opacity: 1,
+        rotation: 0,
+        horizontalFlip: 1,
+        verticalFlip: 1,
+        shadow: {
+          enabled: false,
+          color: '#000000',
+          blur: 10,
+          offset: {
+            x: 0,
+            y: 0,
+          }
+        }
+      },
       tweenEvents: [],
       tweens: []
     }
@@ -493,5 +603,110 @@ export const freezeLayerTween = (payload: FreezeLayerTweenPayload): LayerTypes =
 
 export const unFreezeLayerTween = (payload: UnFreezeLayerTweenPayload): LayerTypes => ({
   type: UNFREEZE_LAYER_TWEEN,
+  payload
+});
+
+export const setLayerX = (payload: SetLayerXPayload): LayerTypes => ({
+  type: SET_LAYER_X,
+  payload
+});
+
+export const setLayerY = (payload: SetLayerYPayload): LayerTypes => ({
+  type: SET_LAYER_Y,
+  payload
+});
+
+export const setLayerWidth = (payload: SetLayerWidthPayload): LayerTypes => ({
+  type: SET_LAYER_WIDTH,
+  payload
+});
+
+export const setLayerHeight = (payload: SetLayerHeightPayload): LayerTypes => ({
+  type: SET_LAYER_HEIGHT,
+  payload
+});
+
+export const setLayerRotation = (payload: SetLayerRotationPayload): LayerTypes => ({
+  type: SET_LAYER_ROTATION,
+  payload
+});
+
+export const setLayerOpacity = (payload: SetLayerOpacityPayload): LayerTypes => ({
+  type: SET_LAYER_OPACITY,
+  payload
+});
+
+export const setLayerHorizontalFlip = (payload: SetLayerHorizontalFlipPayload): LayerTypes => ({
+  type: SET_LAYER_HORIZONTAL_FLIP,
+  payload
+});
+
+export const setLayerVerticalFlip = (payload: SetLayerVerticalFlipPayload): LayerTypes => ({
+  type: SET_LAYER_VERTICAL_FLIP,
+  payload
+});
+
+export const enableLayerFill = (payload: EnableLayerFillPayload): LayerTypes => ({
+  type: ENABLE_LAYER_FILL,
+  payload
+});
+
+export const disableLayerFill = (payload: DisableLayerFillPayload): LayerTypes => ({
+  type: DISABLE_LAYER_FILL,
+  payload
+});
+
+export const setLayerFillColor = (payload: SetLayerFillColorPayload): LayerTypes => ({
+  type: SET_LAYER_FILL_COLOR,
+  payload
+});
+
+export const enableLayerStroke = (payload: EnableLayerStrokePayload): LayerTypes => ({
+  type: ENABLE_LAYER_STROKE,
+  payload
+});
+
+export const disableLayerStroke = (payload: DisableLayerStrokePayload): LayerTypes => ({
+  type: DISABLE_LAYER_STROKE,
+  payload
+});
+
+export const setLayerStrokeColor = (payload: SetLayerStrokeColorPayload): LayerTypes => ({
+  type: SET_LAYER_STROKE_COLOR,
+  payload
+});
+
+export const setLayerStrokeWidth = (payload: SetLayerStrokeWidthPayload): LayerTypes => ({
+  type: SET_LAYER_STROKE_WIDTH,
+  payload
+});
+
+export const enableLayerShadow = (payload: EnableLayerShadowPayload): LayerTypes => ({
+  type: ENABLE_LAYER_SHADOW,
+  payload
+});
+
+export const disableLayerShadow = (payload: DisableLayerShadowPayload): LayerTypes => ({
+  type: DISABLE_LAYER_SHADOW,
+  payload
+});
+
+export const setLayerShadowColor = (payload: SetLayerShadowColorPayload): LayerTypes => ({
+  type: SET_LAYER_SHADOW_COLOR,
+  payload
+});
+
+export const setLayerShadowBlur = (payload: SetLayerShadowBlurPayload): LayerTypes => ({
+  type: SET_LAYER_SHADOW_BLUR,
+  payload
+});
+
+export const setLayerShadowXOffset = (payload: SetLayerShadowXOffsetPayload): LayerTypes => ({
+  type: SET_LAYER_SHADOW_X_OFFSET,
+  payload
+});
+
+export const setLayerShadowYOffset = (payload: SetLayerShadowYOffsetPayload): LayerTypes => ({
+  type: SET_LAYER_SHADOW_Y_OFFSET,
   payload
 });

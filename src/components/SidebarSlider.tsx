@@ -1,5 +1,5 @@
 import React, { useContext, ReactElement, SyntheticEvent } from 'react';
-import { store } from '../store';
+import { ThemeContext } from './ThemeProvider';
 import styled from 'styled-components';
 
 interface SidebarSliderProps {
@@ -8,6 +8,7 @@ interface SidebarSliderProps {
   min?: number;
   max?: number;
   onChange(e: React.SyntheticEvent<HTMLInputElement>): void;
+  onMouseUp?(e: React.SyntheticEvent<HTMLInputElement>): void;
 }
 
 const Slider = styled.input`
@@ -41,8 +42,7 @@ const Slider = styled.input`
 `;
 
 const SidebarSlider = (props: SidebarSliderProps): ReactElement => {
-  const globalState = useContext(store);
-  const { theme } = globalState;
+  const theme = useContext(ThemeContext);
 
   return (
     <div className='c-sidebar-input'>

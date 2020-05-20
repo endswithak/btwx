@@ -9,43 +9,47 @@ import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarSwatch from './SidebarSwatch';
 import { RootState } from '../store/reducers';
-import { EnableLayerFillPayload, DisableLayerFillPayload, SetLayerFillColorPayload, LayerTypes } from '../store/actionTypes/layer';
-import { enableLayerFill, disableLayerFill, setLayerFillColor } from '../store/actions/layer';
+import { EnableLayerStrokePayload, DisableLayerStrokePayload, SetLayerStrokeColorPayload, SetLayerStrokeWidthPayload, LayerTypes } from '../store/actionTypes/layer';
+import { enableLayerStroke, disableLayerStroke, setLayerStrokeColor, setLayerStrokeWidth } from '../store/actions/layer';
 import { getPaperLayer } from '../store/selectors/layer';
 
-interface SidebarFillStyleProps {
-  fill?: {
+interface SidebarStrokeStyleProps {
+  stroke?: {
     enabled: boolean;
     color: string;
+    width: number;
   };
-  fillOpacity?: number;
+  strokeOpacity?: number;
   selected: string[];
-  enableLayerFill?(payload: EnableLayerFillPayload): LayerTypes;
-  disableLayerFill?(payload: DisableLayerFillPayload): LayerTypes;
-  setLayerFillColor?(payload: SetLayerFillColorPayload): LayerTypes;
+  enableLayerStroke?(payload: EnableLayerStrokePayload): LayerTypes;
+  disableLayerStroke?(payload: DisableLayerStrokePayload): LayerTypes;
+  setLayerStrokeColor?(payload: SetLayerStrokeColorPayload): LayerTypes;
+  setLayerStrokeWidth?(payload: SetLayerStrokeWidthPayload): LayerTypes;
 }
 
-const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
-  const { fill, fillOpacity, selected, enableLayerFill, disableLayerFill, setLayerFillColor } = props;
-  const [enabled, setEnabled] = useState<boolean>(fill.enabled);
-  const [color, setColor] = useState<string>(fill.color);
-  const [opacity, setOpacity] = useState<number | string>(fillOpacity);
+const SidebarStrokeStyle = (props: SidebarStrokeStyleProps): ReactElement => {
+  const { stroke, strokeOpacity, selected, enableLayerStroke, disableLayerStroke, setLayerStrokeColor, setLayerStrokeWidth } = props;
+  const [enabled, setEnabled] = useState<boolean>(stroke.enabled);
+  const [color, setColor] = useState<string>(stroke.color);
+  const [opacity, setOpacity] = useState<number | string>(strokeOpacity);
+  const [width, setWidth] = useState<number | string>(stroke.width);
 
   useEffect(() => {
-    setEnabled(fill.enabled);
-    setColor(chroma(fill.color).alpha(1).hex());
-    setOpacity(fillOpacity);
-  }, [fill, selected]);
+    setEnabled(stroke.enabled);
+    setColor(chroma(stroke.color).alpha(1).hex());
+    setOpacity(strokeOpacity);
+    setWidth(stroke.width);
+  }, [stroke, selected]);
 
   const handleCheckChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
     const target = e.target as HTMLInputElement;
     const paperLayer = getPaperLayer(selected[0]);
     if (target.checked) {
-      enableLayerFill({id: selected[0]});
-      paperLayer.fillColor = new paper.Color(fill.color);
+      enableLayerStroke({id: selected[0]});
+      paperLayer.strokeColor = new paper.Color(stroke.color);
     } else {
-      disableLayerFill({id: selected[0]});
-      paperLayer.fillColor = null;
+      disableLayerStroke({id: selected[0]});
+      paperLayer.strokeColor = null;
     }
   };
 
@@ -59,6 +63,11 @@ const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
     setColor(target.value);
   };
 
+  const handleWidthChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
+    const target = e.target as HTMLInputElement;
+    setWidth(target.value);
+  };
+
   const handleOpacitySubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     const paperLayer = getPaperLayer(selected[0]);
     let nextOpacity = evaluate(`${opacity}`);
@@ -69,20 +78,27 @@ const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
       nextOpacity = 0;
     }
     const newColor = chroma(color).alpha(evaluate(`${nextOpacity} / 100`)).hex();
-    paperLayer.fillColor = new paper.Color(newColor);
-    setLayerFillColor({id: selected[0], fillColor: newColor});
+    paperLayer.strokeColor = new paper.Color(newColor);
+    setLayerStrokeColor({id: selected[0], strokeColor: newColor});
     setColor(chroma(newColor).alpha(1).hex());
   }
 
   const handleColorSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     if (chroma.valid(color)) {
       const paperLayer = getPaperLayer(selected[0]);
-      paperLayer.fillColor = new paper.Color(color);
-      setLayerFillColor({id: selected[0], fillColor: chroma(color).hex()});
+      paperLayer.strokeColor = new paper.Color(color);
+      setLayerStrokeColor({id: selected[0], strokeColor: chroma(color).hex()});
       setColor(chroma(color).alpha(1).hex());
     } else {
-      setColor(chroma(fill.color).alpha(1).hex());
+      setColor(chroma(stroke.color).alpha(1).hex());
     }
+  };
+
+  const handleWidthSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
+    const paperLayer = getPaperLayer(selected[0]);
+    paperLayer.strokeWidth = evaluate(`${width}`);
+    setLayerStrokeWidth({id: selected[0], strokeWidth: evaluate(`${width}`)});
+    setWidth(evaluate(`${width}`));
   };
 
   return (
@@ -91,13 +107,13 @@ const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
       <SidebarSectionRow alignItems='center'>
         <SidebarSectionColumn width={'10%'} justifyContent={'center'}>
           <SidebarCheckbox
-            id={`fillColor`}
+            id={`strokeColor`}
             onChange={handleCheckChange}
             checked={enabled} />
         </SidebarSectionColumn>
         <SidebarSectionColumn width={'23%'}>
           <SidebarSwatch
-            color={fill.color} />
+            color={stroke.color} />
         </SidebarSectionColumn>
         <SidebarSectionColumn width={'47%'}>
           <SidebarInput
@@ -109,11 +125,11 @@ const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
         </SidebarSectionColumn>
         <SidebarSectionColumn width={'20%'}>
           <SidebarInput
-            value={opacity}
-            onChange={handleOpacityChange}
-            onSubmit={handleOpacitySubmit}
+            value={width}
+            onChange={handleWidthChange}
+            onSubmit={handleWidthSubmit}
             blurOnSubmit
-            label={'%'}
+            label={'W'}
             disabled={selected.length > 1 || selected.length === 0 || !enabled} />
         </SidebarSectionColumn>
       </SidebarSectionRow>
@@ -124,12 +140,12 @@ const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const fill = layer.present.byId[layer.present.selected[0]].style.fill;
-  const fillOpacity = chroma(fill.color).alpha() * 100;
-  return { selected, fill, fillOpacity };
+  const stroke = layer.present.byId[layer.present.selected[0]].style.stroke;
+  const strokeOpacity = chroma(stroke.color).alpha() * 100;
+  return { selected, stroke, strokeOpacity };
 };
 
 export default connect(
   mapStateToProps,
-  { enableLayerFill, disableLayerFill, setLayerFillColor }
-)(SidebarFillStyle);
+  { enableLayerStroke, disableLayerStroke, setLayerStrokeColor, setLayerStrokeWidth }
+)(SidebarStrokeStyle);

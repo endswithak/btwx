@@ -1,38 +1,58 @@
 import React, { useContext, ReactElement, useEffect, useState } from 'react';
-import { store } from '../store';
+import { connect } from 'react-redux';
 import SidebarFlippedButton from './SidebarFlippedButton';
+import { RootState } from '../store/reducers';
+import { SetLayerVerticalFlipPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayerVerticalFlip } from '../store/actions/layer';
+import { getPaperLayer } from '../store/selectors/layer';
 
-const XFlipInput = (): ReactElement => {
-  const globalState = useContext(store);
-  const [flipped, setFlipped] = useState<boolean>(false);
-  const { selection } = globalState;
+interface XFlipInputProps {
+  selected?: string[];
+  verticalFlipValue?: boolean;
+  setLayerVerticalFlip?(payload: SetLayerVerticalFlipPayload): LayerTypes;
+}
 
-  const getFlipped = () => {
-    switch(selection.length) {
-      case 0:
-        return false;
-      case 1:
-        return selection[0].paperItem.scaling.x === -1;
-      default:
-        return false;
-    }
-  }
-
-  const handleClick = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    setFlipped(!flipped);
-  };
+const XFlipInput = (props: XFlipInputProps): ReactElement => {
+  const { selected, setLayerVerticalFlip, verticalFlipValue } = props;
+  const [verticalFlip, setVerticalFlip] = useState<boolean>(verticalFlipValue);
 
   useEffect(() => {
-    setFlipped(getFlipped());
-  }, [selection]);
+    setVerticalFlip(verticalFlipValue);
+  }, [verticalFlipValue]);
+
+  const handleClick = (e: React.SyntheticEvent<HTMLInputElement>) => {
+    setVerticalFlip(!verticalFlip);
+    const paperLayer = getPaperLayer(selected[0]);
+    paperLayer.scale(1, -1);
+    setLayerVerticalFlip({id: selected[0], verticalFlip: !verticalFlip ? -1 : 1});
+  };
 
   return (
     <SidebarFlippedButton
       text={'—'}
-      active={flipped}
+      active={verticalFlip}
       onClick={handleClick}
-      disabled={selection.length > 1 || selection.length === 0} />
+      disabled={selected.length > 1 || selected.length === 0} />
   );
 }
 
-export default XFlipInput;
+const mapStateToProps = (state: RootState) => {
+  const { layer } = state;
+  const selected = layer.present.selected;
+  const verticalFlipValue = (() => {
+    switch(layer.present.selected.length) {
+      case 0:
+        return false;
+      case 1:
+        return layer.present.byId[layer.present.selected[0]].style.verticalFlip === -1;
+      default:
+        return false;
+    }
+  })();
+  return { selected, verticalFlipValue };
+};
+
+export default connect(
+  mapStateToProps,
+  { setLayerVerticalFlip }
+)(XFlipInput);

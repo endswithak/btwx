@@ -49,8 +49,27 @@ import {
   DECREMENT_LAYER_TWEEN_DELAY,
   SET_LAYER_TWEEN_EASE,
   SET_LAYER_TWEEN_POWER,
-  FREEZE_LAYER_TWEEN,
-  UNFREEZE_LAYER_TWEEN,
+  SET_LAYER_X,
+  SET_LAYER_Y,
+  SET_LAYER_WIDTH,
+  SET_LAYER_HEIGHT,
+  SET_LAYER_ROTATION,
+  SET_LAYER_OPACITY,
+  SET_LAYER_HORIZONTAL_FLIP,
+  SET_LAYER_VERTICAL_FLIP,
+  ENABLE_LAYER_FILL,
+  DISABLE_LAYER_FILL,
+  SET_LAYER_FILL_COLOR,
+  ENABLE_LAYER_STROKE,
+  DISABLE_LAYER_STROKE,
+  SET_LAYER_STROKE_COLOR,
+  SET_LAYER_STROKE_WIDTH,
+  ENABLE_LAYER_SHADOW,
+  DISABLE_LAYER_SHADOW,
+  SET_LAYER_SHADOW_COLOR,
+  SET_LAYER_SHADOW_BLUR,
+  SET_LAYER_SHADOW_X_OFFSET,
+  SET_LAYER_SHADOW_Y_OFFSET,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -104,8 +123,27 @@ import {
   decrementLayerTweenDelay,
   setLayerTweenEase,
   setLayerTweenPower,
-  freezeLayerTween,
-  unFreezeLayerTween
+  setLayerX,
+  setLayerY,
+  setLayerWidth,
+  setLayerHeight,
+  setLayerRotation,
+  setLayerOpacity,
+  setLayerHorizontalFlip,
+  setLayerVerticalFlip,
+  enableLayerFill,
+  disableLayerFill,
+  setLayerFillColor,
+  enableLayerStroke,
+  disableLayerStroke,
+  setLayerStrokeColor,
+  setLayerStrokeWidth,
+  enableLayerShadow,
+  disableLayerShadow,
+  setLayerShadowColor,
+  setLayerShadowBlur,
+  setLayerShadowXOffset,
+  setLayerShadowYOffset
 } from '../utils/layer';
 
 export interface LayerState {
@@ -270,10 +308,48 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setLayerTweenEase(state, action);
     case SET_LAYER_TWEEN_POWER:
       return setLayerTweenPower(state, action);
-    case FREEZE_LAYER_TWEEN:
-      return freezeLayerTween(state, action);
-    case UNFREEZE_LAYER_TWEEN:
-      return unFreezeLayerTween(state, action);
+    case SET_LAYER_X:
+      return setLayerX(state, action);
+    case SET_LAYER_Y:
+      return setLayerY(state, action);
+    case SET_LAYER_WIDTH:
+      return setLayerWidth(state, action);
+    case SET_LAYER_HEIGHT:
+      return setLayerHeight(state, action);
+    case SET_LAYER_ROTATION:
+      return setLayerRotation(state, action);
+    case SET_LAYER_OPACITY:
+      return setLayerOpacity(state, action);
+    case SET_LAYER_HORIZONTAL_FLIP:
+      return setLayerHorizontalFlip(state, action);
+    case SET_LAYER_VERTICAL_FLIP:
+      return setLayerVerticalFlip(state, action);
+    case ENABLE_LAYER_FILL:
+      return enableLayerFill(state, action);
+    case DISABLE_LAYER_FILL:
+      return disableLayerFill(state, action);
+    case SET_LAYER_FILL_COLOR:
+      return setLayerFillColor(state, action);
+    case ENABLE_LAYER_STROKE:
+      return enableLayerStroke(state, action);
+    case DISABLE_LAYER_STROKE:
+      return disableLayerStroke(state, action);
+    case SET_LAYER_STROKE_COLOR:
+      return setLayerStrokeColor(state, action);
+    case SET_LAYER_STROKE_WIDTH:
+      return setLayerStrokeWidth(state, action);
+    case ENABLE_LAYER_SHADOW:
+      return enableLayerShadow(state, action);
+    case DISABLE_LAYER_SHADOW:
+      return disableLayerShadow(state, action);
+    case SET_LAYER_SHADOW_COLOR:
+      return setLayerShadowColor(state, action);
+    case SET_LAYER_SHADOW_BLUR:
+      return setLayerShadowBlur(state, action);
+    case SET_LAYER_SHADOW_X_OFFSET:
+      return setLayerShadowXOffset(state, action);
+    case SET_LAYER_SHADOW_Y_OFFSET:
+      return setLayerShadowYOffset(state, action);
     default:
       return state;
   }

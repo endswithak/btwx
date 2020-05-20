@@ -13,18 +13,10 @@ const SidebarContextStyles = (): ReactElement => {
     <SidebarSectionWrap>
       <SidebarSection>
         <SidebarSectionRow>
-          <SidebarSectionHead text={'appearance'} />
+          <SidebarSectionHead text={'opacity'} />
         </SidebarSectionRow>
       </SidebarSection>
       <SidebarSection>
-        <SidebarSectionRow alignItems={'center'}>
-          <SidebarSectionColumn width={'25%'}>
-            <SidebarSectionLabel text={'Opacity'} />
-          </SidebarSectionColumn>
-          <SidebarSectionColumn width={'75%'}>
-            <SidebarBlendModeStyles />
-          </SidebarSectionColumn>
-        </SidebarSectionRow>
         <SidebarSectionRow>
           <SidebarOpacityStyles />
         </SidebarSectionRow>

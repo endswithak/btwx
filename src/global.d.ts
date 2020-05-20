@@ -23,6 +23,30 @@ declare namespace em {
     children: string[] | null;
     tweenEvents: string[];
     tweens: string[];
+    style: {
+      fill: {
+        enabled: boolean;
+        color: string;
+      };
+      stroke: {
+        enabled: boolean;
+        color: string;
+        width: number;
+      };
+      opacity: number;
+      rotation: number;
+      horizontalFlip: number;
+      verticalFlip: number;
+      shadow: {
+        enabled: boolean;
+        color: string;
+        blur: number;
+        offset: {
+          x: number;
+          y: number;
+        };
+      };
+    };
   }
 
   interface ClipboardLayer {

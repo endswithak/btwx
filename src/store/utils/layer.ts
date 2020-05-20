@@ -24,7 +24,28 @@ import {
   SetLayerTweenEase,
   SetLayerTweenPower,
   FreezeLayerTween,
-  UnFreezeLayerTween
+  UnFreezeLayerTween,
+  SetLayerX,
+  SetLayerY,
+  SetLayerWidth,
+  SetLayerHeight,
+  SetLayerOpacity,
+  SetLayerHorizontalFlip,
+  SetLayerVerticalFlip,
+  SetLayerFillColor,
+  SetLayerStrokeColor,
+  SetLayerStrokeWidth,
+  SetLayerShadowColor,
+  SetLayerShadowBlur,
+  SetLayerShadowXOffset,
+  SetLayerShadowYOffset,
+  SetLayerRotation,
+  EnableLayerFill,
+  DisableLayerFill,
+  EnableLayerStroke,
+  DisableLayerStroke,
+  DisableLayerShadow,
+  EnableLayerShadow
 } from '../actionTypes/layer';
 import {
   getLayerIndex, getLayer, getLayerDepth, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor,
@@ -1330,44 +1351,456 @@ export const setLayerTweenPower = (state: LayerState, action: SetLayerTweenPower
   }
 };
 
-// export const freezeLayerTween = (state: LayerState, action: FreezeLayerTween): LayerState => {
-//   return {
-//     ...state,
-//     tweenById: {
-//       ...state.tweenById,
-//       [action.payload.id]: {
-//         ...state.tweenById[action.payload.id],
-//         frozen: true
-//       }
-//     },
-//     paperProject: paperMain.project.exportJSON()
-//   }
-// };
+export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        frame: {
+          ...currentState.byId[action.payload.id].frame,
+          x: action.payload.x
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  updateActiveArtboardFrame(currentState.activeArtboard);
+  updateSelectionFrame(currentState);
+  return updateParentBounds(currentState, action.payload.id);
+};
 
-// export const unFreezeLayerTween = (state: LayerState, action: UnFreezeLayerTween): LayerState => {
-//   return {
-//     ...state,
-//     tweenById: {
-//       ...state.tweenById,
-//       [action.payload.id]: {
-//         ...state.tweenById[action.payload.id],
-//         frozen: false
-//       }
-//     },
-//     paperProject: paperMain.project.exportJSON()
-//   }
-// };
+export const setLayerY = (state: LayerState, action: SetLayerY): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        frame: {
+          ...currentState.byId[action.payload.id].frame,
+          y: action.payload.y
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  updateActiveArtboardFrame(currentState.activeArtboard);
+  updateSelectionFrame(currentState);
+  return updateParentBounds(currentState, action.payload.id);
+};
 
-// export const freezeLayerTweens = (state: LayerState, action: FreezeLayerTweens): LayerState => {
-//   return {
-//     ...state,
-//     tweenById: {
-//       ...state.tweenById,
-//       [action.payload.id]: {
-//         ...state.tweenById[action.payload.id],
-//         frozen: true
-//       }
-//     },
-//     paperProject: paperMain.project.exportJSON()
-//   }
-// };
+export const setLayerWidth = (state: LayerState, action: SetLayerWidth): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        frame: {
+          ...currentState.byId[action.payload.id].frame,
+          width: action.payload.width
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  updateActiveArtboardFrame(currentState.activeArtboard);
+  updateSelectionFrame(currentState);
+  return updateParentBounds(currentState, action.payload.id);
+};
+
+export const setLayerHeight = (state: LayerState, action: SetLayerHeight): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        frame: {
+          ...currentState.byId[action.payload.id].frame,
+          height: action.payload.height
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  updateActiveArtboardFrame(currentState.activeArtboard);
+  updateSelectionFrame(currentState);
+  return updateParentBounds(currentState, action.payload.id);
+};
+
+export const setLayerOpacity = (state: LayerState, action: SetLayerOpacity): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          opacity: action.payload.opacity
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const setLayerRotation = (state: LayerState, action: SetLayerRotation): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          rotation: action.payload.rotation
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  updateActiveArtboardFrame(currentState.activeArtboard);
+  updateSelectionFrame(currentState);
+  return updateParentBounds(currentState, action.payload.id);
+};
+
+export const setLayerHorizontalFlip = (state: LayerState, action: SetLayerHorizontalFlip): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          horizontalFlip: action.payload.horizontalFlip
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return updateParentBounds(currentState, action.payload.id);
+};
+
+export const setLayerVerticalFlip = (state: LayerState, action: SetLayerVerticalFlip): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          verticalFlip: action.payload.verticalFlip
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return updateParentBounds(currentState, action.payload.id);
+};
+
+export const enableLayerFill = (state: LayerState, action: EnableLayerFill): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          fill: {
+            ...currentState.byId[action.payload.id].style.fill,
+            enabled: true
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const disableLayerFill = (state: LayerState, action: DisableLayerFill): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          fill: {
+            ...currentState.byId[action.payload.id].style.fill,
+            enabled: false
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const setLayerFillColor = (state: LayerState, action: SetLayerFillColor): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          fill: {
+            ...currentState.byId[action.payload.id].style.fill,
+            color: action.payload.fillColor
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const enableLayerStroke = (state: LayerState, action: EnableLayerStroke): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          stroke: {
+            ...currentState.byId[action.payload.id].style.stroke,
+            enabled: true
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const disableLayerStroke = (state: LayerState, action: DisableLayerStroke): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          stroke: {
+            ...currentState.byId[action.payload.id].style.stroke,
+            enabled: false
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const setLayerStrokeColor = (state: LayerState, action: SetLayerStrokeColor): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          stroke: {
+            ...currentState.byId[action.payload.id].style.stroke,
+            color: action.payload.strokeColor
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const setLayerStrokeWidth = (state: LayerState, action: SetLayerStrokeWidth): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          stroke: {
+            ...currentState.byId[action.payload.id].style.stroke,
+            width: action.payload.strokeWidth
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const enableLayerShadow = (state: LayerState, action: EnableLayerShadow): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          shadow: {
+            ...currentState.byId[action.payload.id].style.shadow,
+            enabled: true
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const disableLayerShadow = (state: LayerState, action: DisableLayerShadow): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          shadow: {
+            ...currentState.byId[action.payload.id].style.shadow,
+            enabled: false
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const setLayerShadowColor = (state: LayerState, action: SetLayerShadowColor): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          shadow: {
+            ...currentState.byId[action.payload.id].style.shadow,
+            color: action.payload.shadowColor
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const setLayerShadowBlur = (state: LayerState, action: SetLayerShadowBlur): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          shadow: {
+            ...currentState.byId[action.payload.id].style.shadow,
+            blur: action.payload.shadowBlur
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const setLayerShadowXOffset = (state: LayerState, action: SetLayerShadowXOffset): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          shadow: {
+            ...currentState.byId[action.payload.id].style.shadow,
+            offset: {
+              ...currentState.byId[action.payload.id].style.shadow.offset,
+              x: action.payload.shadowXOffset
+            }
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const setLayerShadowYOffset = (state: LayerState, action: SetLayerShadowYOffset): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          shadow: {
+            ...currentState.byId[action.payload.id].style.shadow,
+            offset: {
+              ...currentState.byId[action.payload.id].style.shadow.offset,
+              y: action.payload.shadowYOffset
+            }
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};

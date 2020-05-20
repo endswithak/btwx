@@ -1,5 +1,5 @@
 import React, { useContext, ReactElement, SyntheticEvent } from 'react';
-import { store } from '../store';
+import { ThemeContext } from './ThemeProvider';
 import styled from 'styled-components';
 
 interface SidebarCheckboxProps {
@@ -46,8 +46,7 @@ const Checkbox = styled.input`
 `;
 
 const SidebarCheckbox = (props: SidebarCheckboxProps): ReactElement => {
-  const globalState = useContext(store);
-  const { theme } = globalState;
+  const theme = useContext(ThemeContext);
 
   return (
     <div className='c-sidebar-input'>

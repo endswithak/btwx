@@ -175,10 +175,8 @@ class DrawTool {
     if (this.to) {
       const state = store.getState();
       const newPaperLayer = this.renderShape({
-        //fillColor: new Color('#ccc'),
-        fillColor: paper.Color.random(),
-        //strokeColor: new Color('#999'),
-        strokeColor: paper.Color.random(),
+        fillColor: new Color('#cccccc'),
+        strokeColor: new Color('#999999'),
         strokeWidth: 1
       });
       applyShapeMethods(newPaperLayer);

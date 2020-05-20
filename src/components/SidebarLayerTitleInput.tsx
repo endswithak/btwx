@@ -72,6 +72,8 @@ const SidebarLayerTitleInput = (props: SidebarLayerTitleProps): ReactElement => 
             onChange={handleChange}
             value={nameInput}
             onSubmit={handleSubmit}
+            onBlur={handleSubmit}
+            blurOnSubmit
             selectOnMount />
         : layer.name
       }

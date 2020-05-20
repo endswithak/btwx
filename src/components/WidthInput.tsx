@@ -1,40 +1,66 @@
-import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
-import { store } from '../store';
+import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import { connect } from 'react-redux';
+import { evaluate } from 'mathjs';
 import SidebarInput from './SidebarInput';
-import SidebarSectionColumn from './SidebarSectionColumn';
+import { RootState } from '../store/reducers';
+import { SetLayerWidthPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayerWidth } from '../store/actions/layer';
+import { getPaperLayer } from '../store/selectors/layer';
 
-const WidthInput = (): ReactElement => {
-  const globalState = useContext(store);
-  const [width, setWidth] = useState<string | number>(0);
-  const { selection } = globalState;
+interface WidthInputProps {
+  selected?: string[];
+  widthValue?: number | string;
+  setLayerWidth?(payload: SetLayerWidthPayload): LayerTypes;
+}
 
-  const getWidth = () => {
-    switch(selection.length) {
-      case 0:
-        return '';
-      case 1:
-        return Math.round(selection[0].paperItem.bounds.width);
-      default:
-        return 'multi';
-    }
-  }
+const WidthInput = (props: WidthInputProps): ReactElement => {
+  const { selected, setLayerWidth, widthValue } = props;
+  const [width, setWidth] = useState<string | number>(widthValue);
+
+  useEffect(() => {
+    setWidth(widthValue);
+  }, [widthValue, selected]);
 
   const handleChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
     const target = e.target as HTMLInputElement;
     setWidth(target.value);
   };
 
-  useEffect(() => {
-    setWidth(getWidth());
-  }, [selection]);
+  const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
+    const paperLayer = getPaperLayer(selected[0]);
+    paperLayer.bounds.width = evaluate(`${width}`);
+    setLayerWidth({id: selected[0], width: evaluate(`${width}`)});
+    setWidth(evaluate(`${width}`));
+  }
 
   return (
     <SidebarInput
       value={width}
       onChange={handleChange}
+      onSubmit={handleSubmit}
+      blurOnSubmit
       label={'W'}
-      disabled={selection.length > 1 || selection.length === 0} />
+      disabled={selected.length > 1 || selected.length === 0} />
   );
 }
 
-export default WidthInput;
+const mapStateToProps = (state: RootState) => {
+  const { layer } = state;
+  const selected = layer.present.selected;
+  const widthValue = (() => {
+    switch(layer.present.selected.length) {
+      case 0:
+        return '';
+      case 1:
+        return Math.round(layer.present.byId[layer.present.selected[0]].frame.width);
+      default:
+        return 'multi';
+    }
+  })();
+  return { selected, widthValue };
+};
+
+export default connect(
+  mapStateToProps,
+  { setLayerWidth }
+)(WidthInput);

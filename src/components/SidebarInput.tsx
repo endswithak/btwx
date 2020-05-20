@@ -1,5 +1,8 @@
 import React, { useContext, ReactElement, useState, useRef, useEffect } from 'react';
+import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
+import { ToolTypes } from '../store/actionTypes/tool';
+import { enableSelectionTool, disableSelectionTool } from '../store/actions/tool';
 
 interface SidebarInputProps {
   value: string | number;
@@ -11,35 +14,44 @@ interface SidebarInputProps {
   disabled?: boolean;
   selectOnMount?: boolean;
   blurOnSubmit?: boolean;
+  enableSelectionTool?(): ToolTypes;
+  disableSelectionTool?(): ToolTypes;
 }
 
 const SidebarInput = (props: SidebarInputProps): ReactElement => {
   const inputRef = useRef<HTMLInputElement>(null);
   const theme = useContext(ThemeContext);
+  const { value, onChange, onSubmit, onFocus, onBlur, label, disabled, selectOnMount, blurOnSubmit, enableSelectionTool, disableSelectionTool } = props;
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>) => {
     e.preventDefault();
-    props.onSubmit(e);
-    if (props.blurOnSubmit) {
+    onSubmit(e);
+    if (blurOnSubmit) {
       inputRef.current.blur();
     }
   };
 
   const handleChange = (e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>) => {
-    props.onChange(e);
+    onChange(e);
   };
 
   const handleFocus = (e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>) => {
-    props.onFocus(e);
+    if (onFocus) {
+      onFocus(e);
+    }
     inputRef.current.select();
+    disableSelectionTool();
   };
 
   const handleBlur = (e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>) => {
-    props.onBlur(e);
+    if (onBlur) {
+      onBlur(e);
+    }
+    enableSelectionTool();
   };
 
   useEffect(() => {
-    if (props.selectOnMount) {
+    if (selectOnMount) {
       inputRef.current.focus();
       inputRef.current.select();
     }
@@ -51,11 +63,11 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
         <form onSubmit={handleSubmit}>
           <input
             ref={inputRef}
-            value={props.value}
+            value={value}
             onFocus={handleFocus}
             onChange={handleChange}
             onBlur={handleBlur}
-            disabled={props.disabled}
+            disabled={disabled}
             className='c-sidebar-input__field'
             style={{
               background: theme.background.z4,
@@ -63,14 +75,14 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
             }} />
         </form>
         {
-          props.label
+          label
           ? <div
               className='c-sidebar-input__label'
               style={{
                 background: theme.background.z4,
                 color: theme.text.lighter
               }}>
-              { props.label }
+              { label }
             </div>
           : null
         }
@@ -79,4 +91,7 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
   );
 }
 
-export default SidebarInput;
+export default connect(
+  null,
+  { enableSelectionTool, disableSelectionTool }
+)(SidebarInput);

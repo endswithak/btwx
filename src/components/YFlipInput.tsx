@@ -1,38 +1,58 @@
 import React, { useContext, ReactElement, useEffect, useState } from 'react';
-import { store } from '../store';
+import { connect } from 'react-redux';
 import SidebarFlippedButton from './SidebarFlippedButton';
+import { RootState } from '../store/reducers';
+import { SetLayerHorizontalFlipPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayerHorizontalFlip } from '../store/actions/layer';
+import { getPaperLayer } from '../store/selectors/layer';
 
-const YFlipInput = (): ReactElement => {
-  const globalState = useContext(store);
-  const [flipped, setFlipped] = useState<boolean>(false);
-  const { selection } = globalState;
+interface YFlipInputProps {
+  selected?: string[];
+  horizontalFlipValue?: boolean;
+  setLayerHorizontalFlip?(payload: SetLayerHorizontalFlipPayload): LayerTypes;
+}
 
-  const getFlipped = () => {
-    switch(selection.length) {
-      case 0:
-        return false;
-      case 1:
-        return selection[0].paperItem.scaling.y === -1;
-      default:
-        return false;
-    }
-  }
-
-  const handleClick = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    setFlipped(!flipped);
-  };
+const YFlipInput = (props: YFlipInputProps): ReactElement => {
+  const { selected, setLayerHorizontalFlip, horizontalFlipValue } = props;
+  const [horizontalFlip, setHorizontalFlip] = useState<boolean>(horizontalFlipValue);
 
   useEffect(() => {
-    setFlipped(getFlipped());
-  }, [selection]);
+    setHorizontalFlip(horizontalFlipValue);
+  }, [horizontalFlipValue]);
+
+  const handleClick = (e: React.SyntheticEvent<HTMLInputElement>) => {
+    setHorizontalFlip(!horizontalFlip);
+    const paperLayer = getPaperLayer(selected[0]);
+    paperLayer.scale(paperLayer.scaling.x, -1);
+    setLayerHorizontalFlip({id: selected[0], horizontalFlip: !horizontalFlip ? -1 : 1});
+  };
 
   return (
     <SidebarFlippedButton
       text={'|'}
-      active={flipped}
+      active={horizontalFlip}
       onClick={handleClick}
-      disabled={selection.length > 1 || selection.length === 0} />
+      disabled={selected.length > 1 || selected.length === 0} />
   );
 }
 
-export default YFlipInput;
+const mapStateToProps = (state: RootState) => {
+  const { layer } = state;
+  const selected = layer.present.selected;
+  const horizontalFlipValue = (() => {
+    switch(layer.present.selected.length) {
+      case 0:
+        return false;
+      case 1:
+        return layer.present.byId[layer.present.selected[0]].style.horizontalFlip === -1;
+      default:
+        return false;
+    }
+  })();
+  return { selected, horizontalFlipValue };
+};
+
+export default connect(
+  mapStateToProps,
+  { setLayerHorizontalFlip }
+)(YFlipInput);
