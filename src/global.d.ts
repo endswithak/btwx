@@ -12,6 +12,10 @@ declare namespace em {
 
   type LayerTypes = 'Group' | 'Shape' | 'Page' | 'Artboard' | 'ArtboardBackground';
 
+  type StrokeCapTypes = 'round' | 'square' | 'butt';
+
+  type StrokeJoinTypes = 'miter' | 'round' | 'bevel';
+
   interface Layer {
     type: LayerTypes;
     id: string;
@@ -23,6 +27,9 @@ declare namespace em {
     children: string[] | null;
     tweenEvents: string[];
     tweens: string[];
+    points: {
+      closed: boolean;
+    };
     style: {
       fill: {
         enabled: boolean;
@@ -32,6 +39,12 @@ declare namespace em {
         enabled: boolean;
         color: string;
         width: number;
+      };
+      strokeOptions: {
+        cap: StrokeCapTypes;
+        join: StrokeJoinTypes;
+        dashArray: number[];
+        miterLimit: number;
       };
       opacity: number;
       rotation: number;

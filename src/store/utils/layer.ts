@@ -45,7 +45,11 @@ import {
   EnableLayerStroke,
   DisableLayerStroke,
   DisableLayerShadow,
-  EnableLayerShadow
+  EnableLayerShadow,
+  SetLayerStrokeCap,
+  SetLayerStrokeJoin,
+  SetLayerStrokeDashArray,
+  SetLayerStrokeMiterLimit
 } from '../actionTypes/layer';
 import {
   getLayerIndex, getLayer, getLayerDepth, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor,
@@ -91,7 +95,39 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
         parent: action.payload.id,
         children: null,
         tweenEvents: [],
-        tweens: []
+        tweens: [],
+        points: {
+          closed: true,
+        },
+        style: {
+          fill: {
+            enabled: true,
+            color: '#ffffff'
+          },
+          stroke: {
+            enabled: false,
+            color: '#999999',
+            width: 1
+          },
+          strokeOptions: {
+            cap: 'butt',
+            join: 'miter',
+            dashArray: [0,0]
+          },
+          opacity: 1,
+          rotation: 0,
+          horizontalFlip: 1,
+          verticalFlip: 1,
+          shadow: {
+            enabled: false,
+            color: '#000000',
+            blur: 10,
+            offset: {
+              x: 0,
+              y: 0,
+            }
+          }
+        },
       } as em.ArtboardBackground,
       [state.page]: {
         ...state.byId[state.page],
@@ -1658,6 +1694,94 @@ export const setLayerStrokeWidth = (state: LayerState, action: SetLayerStrokeWid
           stroke: {
             ...currentState.byId[action.payload.id].style.stroke,
             width: action.payload.strokeWidth
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const setLayerStrokeCap = (state: LayerState, action: SetLayerStrokeCap): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          strokeOptions: {
+            ...currentState.byId[action.payload.id].style.strokeOptions,
+            cap: action.payload.strokeCap
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const setLayerStrokeJoin = (state: LayerState, action: SetLayerStrokeJoin): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          strokeOptions: {
+            ...currentState.byId[action.payload.id].style.strokeOptions,
+            join: action.payload.strokeJoin
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const setLayerStrokeDashArray = (state: LayerState, action: SetLayerStrokeDashArray): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          strokeOptions: {
+            ...currentState.byId[action.payload.id].style.strokeOptions,
+            dashArray: action.payload.strokeDashArray
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const setLayerStrokeMiterLimit = (state: LayerState, action: SetLayerStrokeMiterLimit): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          strokeOptions: {
+            ...currentState.byId[action.payload.id].style.strokeOptions,
+            miterLimit: action.payload.miterLimit
           }
         }
       }

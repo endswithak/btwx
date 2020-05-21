@@ -71,6 +71,10 @@ import {
   DISABLE_LAYER_STROKE,
   SET_LAYER_STROKE_COLOR,
   SET_LAYER_STROKE_WIDTH,
+  SET_LAYER_STROKE_CAP,
+  SET_LAYER_STROKE_JOIN,
+  SET_LAYER_STROKE_DASH_ARRAY,
+  SET_LAYER_STROKE_MITER_LIMIT,
   ENABLE_LAYER_SHADOW,
   DISABLE_LAYER_SHADOW,
   SET_LAYER_SHADOW_COLOR,
@@ -140,6 +144,10 @@ import {
   DisableLayerStrokePayload,
   SetLayerStrokeColorPayload,
   SetLayerStrokeWidthPayload,
+  SetLayerStrokeCapPayload,
+  SetLayerStrokeJoinPayload,
+  SetLayerStrokeDashArrayPayload,
+  SetLayerStrokeMiterLimitPayload,
   EnableLayerShadowPayload,
   DisableLayerShadowPayload,
   SetLayerShadowColorPayload,
@@ -196,6 +204,9 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
       showChildren: false,
       tweenEvents: [],
       tweens: [],
+      points: {
+        closed: true,
+      },
       style: {
         fill: {
           enabled: true,
@@ -205,6 +216,12 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
           enabled: false,
           color: '#999999',
           width: 1
+        },
+        strokeOptions: {
+          cap: 'butt',
+          join: 'miter',
+          dashArray: [0,0],
+          miterLimit: 10
         },
         opacity: 1,
         rotation: 0,
@@ -245,6 +262,9 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
       showChildren: false,
       tweenEvents: [],
       tweens: [],
+      points: {
+        closed: true,
+      },
       style: {
         fill: {
           enabled: false,
@@ -254,6 +274,12 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
           enabled: false,
           color: '#999999',
           width: 1
+        },
+        strokeOptions: {
+          cap: 'butt',
+          join: 'miter',
+          dashArray: [0,0],
+          miterLimit: 10
         },
         opacity: 1,
         rotation: 0,
@@ -298,6 +324,9 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
       shapeType: payload.shapeType,
       pathData: clone.pathData,
       selected: false,
+      points: {
+        closed: true,
+      },
       style: {
         fill: {
           enabled: true,
@@ -307,6 +336,12 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
           enabled: true,
           color: '#999999',
           width: 1
+        },
+        strokeOptions: {
+          cap: 'butt',
+          join: 'miter',
+          dashArray: [0,0],
+          miterLimit: 10
         },
         opacity: 1,
         rotation: 0,
@@ -678,6 +713,26 @@ export const setLayerStrokeColor = (payload: SetLayerStrokeColorPayload): LayerT
 
 export const setLayerStrokeWidth = (payload: SetLayerStrokeWidthPayload): LayerTypes => ({
   type: SET_LAYER_STROKE_WIDTH,
+  payload
+});
+
+export const setLayerStrokeCap = (payload: SetLayerStrokeCapPayload): LayerTypes => ({
+  type: SET_LAYER_STROKE_CAP,
+  payload
+});
+
+export const setLayerStrokeJoin = (payload: SetLayerStrokeJoinPayload): LayerTypes => ({
+  type: SET_LAYER_STROKE_JOIN,
+  payload
+});
+
+export const setLayerStrokeDashArray = (payload: SetLayerStrokeDashArrayPayload): LayerTypes => ({
+  type: SET_LAYER_STROKE_DASH_ARRAY,
+  payload
+});
+
+export const setLayerStrokeMiterLimit = (payload: SetLayerStrokeMiterLimitPayload): LayerTypes => ({
+  type: SET_LAYER_STROKE_MITER_LIMIT,
   payload
 });
 

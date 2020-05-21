@@ -1,6 +1,6 @@
 import React, { useContext, ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import SidebarFlippedButton from './SidebarFlippedButton';
+import SidebarToggleButton from './SidebarToggleButton';
 import { RootState } from '../store/reducers';
 import { SetLayerVerticalFlipPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setLayerVerticalFlip } from '../store/actions/layer';
@@ -28,7 +28,7 @@ const XFlipInput = (props: XFlipInputProps): ReactElement => {
   };
 
   return (
-    <SidebarFlippedButton
+    <SidebarToggleButton
       text={'—'}
       active={verticalFlip}
       onClick={handleClick}

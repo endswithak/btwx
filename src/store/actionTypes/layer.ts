@@ -92,6 +92,10 @@ export const ENABLE_LAYER_STROKE = 'ENABLE_LAYER_STROKE';
 export const DISABLE_LAYER_STROKE = 'DISABLE_LAYER_STROKE';
 export const SET_LAYER_STROKE_COLOR = 'SET_LAYER_STROKE_COLOR';
 export const SET_LAYER_STROKE_WIDTH = 'SET_LAYER_STROKE_WIDTH';
+export const SET_LAYER_STROKE_CAP = 'SET_LAYER_STROKE_CAP';
+export const SET_LAYER_STROKE_JOIN = 'SET_LAYER_STROKE_JOIN';
+export const SET_LAYER_STROKE_DASH_ARRAY = 'SET_LAYER_STROKE_DASH_ARRAY';
+export const SET_LAYER_STROKE_MITER_LIMIT = 'SET_LAYER_STROKE_MITER_LIMIT';
 
 export const ENABLE_LAYER_SHADOW = 'ENABLE_LAYER_SHADOW';
 export const DISABLE_LAYER_SHADOW = 'DISABLE_LAYER_SHADOW';
@@ -135,6 +139,9 @@ export interface AddArtboardPayload {
   showChildren?: boolean;
   tweenEvents?: [];
   tweens?: [];
+  points?: {
+    closed: boolean;
+  };
   style?: {
     fill: {
       enabled: boolean;
@@ -144,6 +151,12 @@ export interface AddArtboardPayload {
       enabled: boolean;
       color: string;
       width: number;
+    };
+    strokeOptions: {
+      cap: em.StrokeCapTypes;
+      join: em.StrokeJoinTypes;
+      dashArray: number[];
+      miterLimit: number;
     };
     opacity: number;
     rotation: number;
@@ -181,6 +194,9 @@ export interface AddGroupPayload {
   showChildren?: boolean;
   tweenEvents?: [];
   tweens?: [];
+  points?: {
+    closed: boolean;
+  };
   style?: {
     fill: {
       enabled: boolean;
@@ -190,6 +206,12 @@ export interface AddGroupPayload {
       enabled: boolean;
       color: string;
       width: number;
+    };
+    strokeOptions: {
+      cap: em.StrokeCapTypes;
+      join: em.StrokeJoinTypes;
+      dashArray: number[];
+      miterLimit: number;
     };
     opacity: number;
     rotation: number;
@@ -227,6 +249,9 @@ export interface AddShapePayload {
   hover?: boolean;
   tweenEvents?: [];
   tweens?: [];
+  points?: {
+    closed: boolean;
+  };
   style?: {
     fill: {
       enabled: boolean;
@@ -236,6 +261,12 @@ export interface AddShapePayload {
       enabled: boolean;
       color: string;
       width: number;
+    };
+    strokeOptions: {
+      cap: em.StrokeCapTypes;
+      join: em.StrokeJoinTypes;
+      dashArray: number[];
+      miterLimit: number;
     };
     opacity: number;
     rotation: number;
@@ -920,6 +951,46 @@ export interface SetLayerStrokeWidth {
   payload: SetLayerStrokeWidthPayload;
 }
 
+export interface SetLayerStrokeCapPayload {
+  id: string;
+  strokeCap: em.StrokeCapTypes;
+}
+
+export interface SetLayerStrokeCap {
+  type: typeof SET_LAYER_STROKE_CAP;
+  payload: SetLayerStrokeCapPayload;
+}
+
+export interface SetLayerStrokeJoinPayload {
+  id: string;
+  strokeJoin: em.StrokeJoinTypes;
+}
+
+export interface SetLayerStrokeJoin {
+  type: typeof SET_LAYER_STROKE_JOIN;
+  payload: SetLayerStrokeJoinPayload;
+}
+
+export interface SetLayerStrokeDashArrayPayload {
+  id: string;
+  strokeDashArray: number[];
+}
+
+export interface SetLayerStrokeDashArray {
+  type: typeof SET_LAYER_STROKE_DASH_ARRAY;
+  payload: SetLayerStrokeDashArrayPayload;
+}
+
+export interface SetLayerStrokeMiterLimitPayload {
+  id: string;
+  miterLimit: number;
+}
+
+export interface SetLayerStrokeMiterLimit {
+  type: typeof SET_LAYER_STROKE_MITER_LIMIT;
+  payload: SetLayerStrokeMiterLimitPayload;
+}
+
 export interface EnableLayerShadowPayload {
   id: string;
 }
@@ -979,4 +1050,4 @@ export interface SetLayerShadowYOffset {
 }
 
 
-export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower | FreezeLayerTween | UnFreezeLayerTween | SetLayerX | SetLayerY | SetLayerWidth | SetLayerHeight | SetLayerRotation | SetLayerOpacity | SetLayerHorizontalFlip | SetLayerVerticalFlip | EnableLayerFill | DisableLayerFill | SetLayerFillColor | EnableLayerStroke | DisableLayerStroke | SetLayerStrokeColor | SetLayerStrokeWidth | EnableLayerShadow | DisableLayerShadow | SetLayerShadowColor | SetLayerShadowBlur | SetLayerShadowXOffset | SetLayerShadowYOffset;
+export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower | FreezeLayerTween | UnFreezeLayerTween | SetLayerX | SetLayerY | SetLayerWidth | SetLayerHeight | SetLayerRotation | SetLayerOpacity | SetLayerHorizontalFlip | SetLayerVerticalFlip | EnableLayerFill | DisableLayerFill | SetLayerFillColor | EnableLayerStroke | DisableLayerStroke | SetLayerStrokeColor | SetLayerStrokeWidth | SetLayerStrokeCap | SetLayerStrokeJoin | SetLayerStrokeDashArray | SetLayerStrokeMiterLimit | EnableLayerShadow | DisableLayerShadow | SetLayerShadowColor | SetLayerShadowBlur | SetLayerShadowXOffset | SetLayerShadowYOffset;

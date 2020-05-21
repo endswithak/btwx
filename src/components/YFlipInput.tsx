@@ -1,6 +1,6 @@
 import React, { useContext, ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import SidebarFlippedButton from './SidebarFlippedButton';
+import SidebarToggleButton from './SidebarToggleButton';
 import { RootState } from '../store/reducers';
 import { SetLayerHorizontalFlipPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setLayerHorizontalFlip } from '../store/actions/layer';
@@ -28,7 +28,7 @@ const YFlipInput = (props: YFlipInputProps): ReactElement => {
   };
 
   return (
-    <SidebarFlippedButton
+    <SidebarToggleButton
       text={'|'}
       active={horizontalFlip}
       onClick={handleClick}

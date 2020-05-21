@@ -64,6 +64,10 @@ import {
   DISABLE_LAYER_STROKE,
   SET_LAYER_STROKE_COLOR,
   SET_LAYER_STROKE_WIDTH,
+  SET_LAYER_STROKE_CAP,
+  SET_LAYER_STROKE_JOIN,
+  SET_LAYER_STROKE_DASH_ARRAY,
+  SET_LAYER_STROKE_MITER_LIMIT,
   ENABLE_LAYER_SHADOW,
   DISABLE_LAYER_SHADOW,
   SET_LAYER_SHADOW_COLOR,
@@ -138,6 +142,10 @@ import {
   disableLayerStroke,
   setLayerStrokeColor,
   setLayerStrokeWidth,
+  setLayerStrokeCap,
+  setLayerStrokeJoin,
+  setLayerStrokeDashArray,
+  setLayerStrokeMiterLimit,
   enableLayerShadow,
   disableLayerShadow,
   setLayerShadowColor,
@@ -338,6 +346,14 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setLayerStrokeColor(state, action);
     case SET_LAYER_STROKE_WIDTH:
       return setLayerStrokeWidth(state, action);
+    case SET_LAYER_STROKE_CAP:
+      return setLayerStrokeCap(state, action);
+    case SET_LAYER_STROKE_JOIN:
+      return setLayerStrokeJoin(state, action);
+    case SET_LAYER_STROKE_DASH_ARRAY:
+      return setLayerStrokeDashArray(state, action);
+    case SET_LAYER_STROKE_MITER_LIMIT:
+      return setLayerStrokeMiterLimit(state, action);
     case ENABLE_LAYER_SHADOW:
       return enableLayerShadow(state, action);
     case DISABLE_LAYER_SHADOW:
