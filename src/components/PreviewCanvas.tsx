@@ -243,10 +243,10 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 break;
               }
               case 'shadowColor': {
-                tweenProp[tween.prop] = tweenPaperLayer.shadowColor;
+                tweenProp[tween.prop] = tweenPaperLayer.shadowColor.toCSS(true);
                 paperTween = gsap.to(tweenProp, {
                   duration: tween.duration,
-                  [tween.prop]: tweenDestinationLayerPaperLayer.shadowColor,
+                  [tween.prop]: tweenDestinationLayerPaperLayer.shadowColor.toCSS(true),
                   onUpdate: () => {
                     tweenPaperLayer.shadowColor = tweenProp[tween.prop];
                   },

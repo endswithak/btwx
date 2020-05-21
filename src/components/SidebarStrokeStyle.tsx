@@ -30,15 +30,17 @@ interface SidebarStrokeStyleProps {
 const SidebarStrokeStyle = (props: SidebarStrokeStyleProps): ReactElement => {
   const { stroke, strokeOpacity, selected, enableLayerStroke, disableLayerStroke, setLayerStrokeColor, setLayerStrokeWidth } = props;
   const [enabled, setEnabled] = useState<boolean>(stroke.enabled);
-  const [color, setColor] = useState<string>(stroke.color);
+  const [color, setColor] = useState<string>(chroma(stroke.color).alpha(1).hex());
   const [opacity, setOpacity] = useState<number | string>(strokeOpacity);
   const [width, setWidth] = useState<number | string>(stroke.width);
+  const [swatchColor, setSwatchColor] = useState<string>(stroke.color);
 
   useEffect(() => {
     setEnabled(stroke.enabled);
     setColor(chroma(stroke.color).alpha(1).hex());
     setOpacity(strokeOpacity);
     setWidth(stroke.width);
+    setSwatchColor(stroke.color);
   }, [stroke, selected]);
 
   const handleCheckChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
@@ -89,6 +91,7 @@ const SidebarStrokeStyle = (props: SidebarStrokeStyleProps): ReactElement => {
       paperLayer.strokeColor = new paper.Color(color);
       setLayerStrokeColor({id: selected[0], strokeColor: chroma(color).hex()});
       setColor(chroma(color).alpha(1).hex());
+      setSwatchColor(chroma(color).hex());
     } else {
       setColor(chroma(stroke.color).alpha(1).hex());
     }
@@ -99,6 +102,22 @@ const SidebarStrokeStyle = (props: SidebarStrokeStyleProps): ReactElement => {
     paperLayer.strokeWidth = evaluate(`${width}`);
     setLayerStrokeWidth({id: selected[0], strokeWidth: evaluate(`${width}`)});
     setWidth(evaluate(`${width}`));
+  };
+
+  const handleSwatchChange = (editorColor: string) => {
+    setColor(chroma(editorColor).alpha(1).hex());
+    setOpacity(chroma(editorColor).alpha() * 100);
+    setSwatchColor(editorColor);
+    const paperLayer = getPaperLayer(selected[0]);
+    paperLayer.strokeColor = new paper.Color(editorColor);
+  };
+
+  const handleSwatchClick = (): void => {
+    if (!enabled) {
+      const paperLayer = getPaperLayer(selected[0]);
+      enableLayerStroke({id: selected[0]});
+      paperLayer.strokeColor = new paper.Color(stroke.color);
+    }
   };
 
   return (
@@ -113,7 +132,11 @@ const SidebarStrokeStyle = (props: SidebarStrokeStyleProps): ReactElement => {
         </SidebarSectionColumn>
         <SidebarSectionColumn width={'23%'}>
           <SidebarSwatch
-            color={stroke.color} />
+            layer={selected[0]}
+            prop={'strokeColor'}
+            color={swatchColor}
+            onChange={handleSwatchChange}
+            onClick={handleSwatchClick} />
         </SidebarSectionColumn>
         <SidebarSectionColumn width={'47%'}>
           <SidebarInput

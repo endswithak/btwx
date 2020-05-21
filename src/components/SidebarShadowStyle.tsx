@@ -36,11 +36,12 @@ interface SidebarShadowStyleProps {
 const SidebarShadowStyle = (props: SidebarShadowStyleProps): ReactElement => {
   const { shadow, shadowOpacity, selected, enableLayerShadow, disableLayerShadow, setLayerShadowColor, setLayerShadowBlur, setLayerShadowXOffset, setLayerShadowYOffset } = props;
   const [enabled, setEnabled] = useState<boolean>(shadow.enabled);
-  const [color, setColor] = useState<string>(shadow.color);
+  const [color, setColor] = useState<string>(chroma(shadow.color).alpha(1).hex());
   const [opacity, setOpacity] = useState<number | string>(shadowOpacity);
   const [blur, setBlur] = useState<number | string>(shadow.blur);
   const [x, setX] = useState<number | string>(shadow.offset.x);
   const [y, setY] = useState<number | string>(shadow.offset.y);
+  const [swatchColor, setSwatchColor] = useState<string>(shadow.color);
 
   useEffect(() => {
     setEnabled(shadow.enabled);
@@ -49,6 +50,7 @@ const SidebarShadowStyle = (props: SidebarShadowStyleProps): ReactElement => {
     setBlur(shadow.blur);
     setX(shadow.offset.x);
     setY(shadow.offset.y);
+    setSwatchColor(shadow.color);
   }, [shadow, selected]);
 
   const handleCheckChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
@@ -137,6 +139,22 @@ const SidebarShadowStyle = (props: SidebarShadowStyleProps): ReactElement => {
     setBlur(evaluate(`${blur}`));
   };
 
+  const handleSwatchChange = (editorColor: string) => {
+    setColor(chroma(editorColor).alpha(1).hex());
+    setOpacity(chroma(editorColor).alpha() * 100);
+    setSwatchColor(editorColor);
+    const paperLayer = getPaperLayer(selected[0]);
+    paperLayer.shadowColor = new paper.Color(editorColor);
+  };
+
+  const handleSwatchClick = (): void => {
+    if (!enabled) {
+      const paperLayer = getPaperLayer(selected[0]);
+      enableLayerShadow({id: selected[0]});
+      paperLayer.shadowColor = new paper.Color(shadow.color);
+    }
+  };
+
   return (
     <div
       className='c-sidebar-layer'>
@@ -149,7 +167,11 @@ const SidebarShadowStyle = (props: SidebarShadowStyleProps): ReactElement => {
         </SidebarSectionColumn>
         <SidebarSectionColumn width={'23%'}>
           <SidebarSwatch
-            color={shadow.color} />
+            layer={selected[0]}
+            prop={'shadowColor'}
+            color={swatchColor}
+            onChange={handleSwatchChange}
+            onClick={handleSwatchClick} />
         </SidebarSectionColumn>
         {/* <SidebarSectionColumn width={'47%'}>
           <SidebarInput

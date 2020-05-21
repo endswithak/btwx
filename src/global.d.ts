@@ -12,6 +12,8 @@ declare namespace em {
 
   type LayerTypes = 'Group' | 'Shape' | 'Page' | 'Artboard' | 'ArtboardBackground';
 
+  type ColorEditorPropTypes = 'fillColor' | 'strokeColor' | 'shadowColor';
+
   type StrokeCapTypes = 'round' | 'square' | 'butt';
 
   type StrokeJoinTypes = 'miter' | 'round' | 'bevel';

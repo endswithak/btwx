@@ -5,6 +5,7 @@ import tool from './tool';
 import contextMenu from './contextMenu';
 import tweenDrawer from './tweenDrawer';
 import easeEditor from './easeEditor';
+import colorEditor from './colorEditor';
 
 import {
   ADD_ARTBOARD,
@@ -48,6 +49,9 @@ import {
   DISABLE_LAYER_STROKE,
   SET_LAYER_STROKE_COLOR,
   SET_LAYER_STROKE_WIDTH,
+  SET_LAYER_STROKE_CAP,
+  SET_LAYER_STROKE_JOIN,
+  SET_LAYER_STROKE_DASH_ARRAY,
   ENABLE_LAYER_SHADOW,
   DISABLE_LAYER_SHADOW,
   SET_LAYER_SHADOW_COLOR,
@@ -99,6 +103,9 @@ const rootReducer = combineReducers({
     DISABLE_LAYER_STROKE,
     SET_LAYER_STROKE_COLOR,
     SET_LAYER_STROKE_WIDTH,
+    SET_LAYER_STROKE_CAP,
+    SET_LAYER_STROKE_JOIN,
+    SET_LAYER_STROKE_DASH_ARRAY,
     ENABLE_LAYER_SHADOW,
     DISABLE_LAYER_SHADOW,
     SET_LAYER_SHADOW_COLOR,
@@ -109,7 +116,8 @@ const rootReducer = combineReducers({
   tool,
   contextMenu,
   tweenDrawer,
-  easeEditor
+  easeEditor,
+  colorEditor
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

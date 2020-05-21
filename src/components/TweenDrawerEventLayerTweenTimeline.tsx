@@ -8,7 +8,7 @@ import { RootState } from '../store/reducers';
 import { setTweenDrawerTweenHover } from '../store/actions/tweenDrawer';
 import { SetTweenDrawerTweenHoverPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
 import { SetLayerTweenDurationPayload, SetLayerTweenDelayPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayerTweenDuration, setLayerTweenDelay, incrementLayerTweenDuration, decrementLayerTweenDuration, incrementLayerTweenDelay, decrementLayerTweenDelay } from '../store/actions/layer';
+import { setLayerTweenDuration, setLayerTweenDelay } from '../store/actions/layer';
 gsap.registerPlugin(Draggable);
 
 interface TweenDrawerEventLayerTweenTimelineProps {
@@ -134,6 +134,7 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
         style={{
           height: theme.unit * 4,
           position: 'relative',
+          borderRadius: theme.unit * 2,
           background: tween.frozen
           ? theme.background.z6
           : theme.palette.primary
@@ -153,6 +154,7 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
           style={{
             height: theme.unit * 2,
             width: theme.unit * 2,
+            borderRadius: '100%',
             background: theme.text.base
           }} />
       </div>
@@ -170,6 +172,7 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
           style={{
             height: theme.unit * 2,
             width: theme.unit * 2,
+            borderRadius: '100%',
             background: theme.text.base
           }} />
       </div>

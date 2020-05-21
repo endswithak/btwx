@@ -28,13 +28,15 @@ interface SidebarFillStyleProps {
 const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
   const { fill, fillOpacity, selected, enableLayerFill, disableLayerFill, setLayerFillColor } = props;
   const [enabled, setEnabled] = useState<boolean>(fill.enabled);
-  const [color, setColor] = useState<string>(fill.color);
+  const [color, setColor] = useState<string>(chroma(fill.color).alpha(1).hex());
   const [opacity, setOpacity] = useState<number | string>(fillOpacity);
+  const [swatchColor, setSwatchColor] = useState<string>(fill.color);
 
   useEffect(() => {
     setEnabled(fill.enabled);
     setColor(chroma(fill.color).alpha(1).hex());
     setOpacity(fillOpacity);
+    setSwatchColor(fill.color);
   }, [fill, selected]);
 
   const handleCheckChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
@@ -72,6 +74,7 @@ const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
     paperLayer.fillColor = new paper.Color(newColor);
     setLayerFillColor({id: selected[0], fillColor: newColor});
     setColor(chroma(newColor).alpha(1).hex());
+    setSwatchColor(newColor);
   }
 
   const handleColorSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
@@ -80,8 +83,25 @@ const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
       paperLayer.fillColor = new paper.Color(color);
       setLayerFillColor({id: selected[0], fillColor: chroma(color).hex()});
       setColor(chroma(color).alpha(1).hex());
+      setSwatchColor(chroma(color).hex());
     } else {
       setColor(chroma(fill.color).alpha(1).hex());
+    }
+  };
+
+  const handleSwatchChange = (editorColor: string): void => {
+    setColor(chroma(editorColor).alpha(1).hex());
+    setOpacity(chroma(editorColor).alpha() * 100);
+    setSwatchColor(editorColor);
+    const paperLayer = getPaperLayer(selected[0]);
+    paperLayer.fillColor = new paper.Color(editorColor);
+  };
+
+  const handleSwatchClick = (): void => {
+    if (!enabled) {
+      const paperLayer = getPaperLayer(selected[0]);
+      enableLayerFill({id: selected[0]});
+      paperLayer.fillColor = new paper.Color(fill.color);
     }
   };
 
@@ -97,7 +117,11 @@ const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
         </SidebarSectionColumn>
         <SidebarSectionColumn width={'23%'}>
           <SidebarSwatch
-            color={fill.color} />
+            layer={selected[0]}
+            prop={'fillColor'}
+            color={swatchColor}
+            onChange={handleSwatchChange}
+            onClick={handleSwatchClick} />
         </SidebarSectionColumn>
         <SidebarSectionColumn width={'47%'}>
           <SidebarInput
