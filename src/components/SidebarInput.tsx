@@ -69,7 +69,9 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
   return (
     <div className={`c-sidebar-input ${disabled ? 'c-sidebar-input--disabled' : null}`}>
       <div className='c-sidebar-input__inner'>
-        <form onSubmit={handleSubmit}>
+        <form
+          className='c-sidebar-input__form'
+          onSubmit={handleSubmit}>
           <Input
             ref={inputRef}
             value={value}

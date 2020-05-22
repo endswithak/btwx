@@ -49,9 +49,6 @@ class DragTool {
     if (this.enabled) {
       const state = store.getState();
       if (this.x || this.y) {
-        if (paperMain.project.getItem({ data: { id: 'activeArtboardFrame' } }) && state.layer.present.selected.includes(state.layer.present.activeArtboard)) {
-          paperMain.project.getItem({ data: { id: 'activeArtboardFrame' } }).remove();
-        }
         if (paperMain.project.getItem({ data: { id: 'hoverFrame' } })) {
           paperMain.project.getItem({ data: { id: 'hoverFrame' } }).remove();
         }

@@ -17,6 +17,9 @@
 .c-sidebar-input--slider
   margin: 0 $unit
 
+.c-sidebar-input__form
+  width: 100%
+
 .c-sidebar-input__field
   font-family: $fontFamily
   font-size: $fontSizeSm
@@ -28,6 +31,9 @@
   margin: 0
   padding: 0 $unit
   border-radius: $unit
+
+  &::selection
+    background: $selectionColor
 
 .c-sidebar-input__field--disabled
   cursor: default

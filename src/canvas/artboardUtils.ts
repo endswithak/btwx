@@ -7,12 +7,12 @@ import { getNearestScopeAncestor, getLayer } from '../store/selectors/layer';
 export const applyArtboardMethods = (artboard: paper.Item) => {
   artboard.onMouseDown = function(e: paper.MouseEvent) {
     const state = store.getState();
-    const layer = getLayer(state.layer.present, this.data.artboard);
+    const layer = getLayer(state.layer.present, this.parent.data.id);
     const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, layer.id);
     //store.dispatch(setActiveArtboard({id: this.data.artboard}));
     if (e.event.which === 3) {
-      if (nearestScopeAncestor.id === this.data.artboard) {
-        store.dispatch(openContextMenu({type: 'TweenEvent', id: this.data.artboard, x: e.event.clientX, y: e.event.clientY}));
+      if (nearestScopeAncestor.id === this.parent.data.id) {
+        store.dispatch(openContextMenu({type: 'TweenEvent', id: this.parent.data.id, x: e.event.clientX, y: e.event.clientY}));
       }
     }
     if (e.modifiers.shift) {

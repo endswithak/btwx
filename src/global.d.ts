@@ -69,7 +69,7 @@ declare namespace em {
     id: string;
     name: string;
     parent: string;
-    paperLayer: paper.Item;
+    paperLayer: string;
     selected: boolean;
     children: string[] | null;
   }

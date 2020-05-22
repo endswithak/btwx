@@ -9,6 +9,7 @@ import { updateHoverFrame, updateSelectionFrame, updateActiveArtboardFrame } fro
 import { applyShapeMethods } from './shapeUtils';
 import { applyArtboardMethods } from './artboardUtils';
 import DragTool from './dragTool';
+import ResizeTool from './resizeTool';
 import { paperMain } from './index';
 
 const redo = () => {
@@ -20,13 +21,13 @@ const redo = () => {
     if (state.layer.present.byId[key].type === 'Shape') {
       applyShapeMethods(getPaperLayer(key));
     }
-    if (state.layer.present.byId[key].type === 'ArtboardBackground') {
-      applyArtboardMethods(getPaperLayer(key));
+    if (state.layer.present.byId[key].type === 'Artboard') {
+      const artboardBackground = getPaperLayer(key).getItem({data: {id: 'ArtboardBackground'}});
+      applyArtboardMethods(artboardBackground);
     }
   });
   updateHoverFrame(state.layer.present);
   updateSelectionFrame(state.layer.present);
-  updateActiveArtboardFrame(state.layer.present.activeArtboard);
 }
 
 const undo = () => {
@@ -38,13 +39,13 @@ const undo = () => {
     if (state.layer.present.byId[key].type === 'Shape') {
       applyShapeMethods(getPaperLayer(key));
     }
-    if (state.layer.present.byId[key].type === 'ArtboardBackground') {
-      applyArtboardMethods(getPaperLayer(key));
+    if (state.layer.present.byId[key].type === 'Artboard') {
+      const artboardBackground = getPaperLayer(key).getItem({data: {id: 'ArtboardBackground'}});
+      applyArtboardMethods(artboardBackground);
     }
   });
   updateHoverFrame(state.layer.present);
   updateSelectionFrame(state.layer.present);
-  updateActiveArtboardFrame(state.layer.present.activeArtboard);
 }
 
 class SelectionTool {
@@ -54,6 +55,7 @@ class SelectionTool {
   hitResult: paper.HitResult;
   areaSelectTool: AreaSelectTool;
   dragTool: DragTool;
+  resizeTool: ResizeTool;
   constructor() {
     this.tool = new paperMain.Tool();
     this.tool.activate();
@@ -64,6 +66,7 @@ class SelectionTool {
     this.tool.onMouseUp = (e: paper.ToolEvent) => this.onMouseUp(e);
     this.areaSelectTool = new AreaSelectTool();
     this.dragTool = new DragTool();
+    this.resizeTool = new ResizeTool();
     this.shiftModifier = false;
     this.metaModifier = false;
   }
@@ -109,12 +112,14 @@ class SelectionTool {
       case 'shift': {
         this.areaSelectTool.shiftModifier = true;
         this.dragTool.shiftModifier = true;
+        this.resizeTool.shiftModifier = true;
         this.shiftModifier = true;
         break;
       }
       case 'escape': {
         this.areaSelectTool.onEscape();
         this.dragTool.onEscape();
+        this.resizeTool.onEscape();
         store.dispatch(escapeLayerScope());
         if (state.layer.present.hover) {
           const paperLayer = getPaperLayer(state.layer.present.hover);
@@ -125,6 +130,7 @@ class SelectionTool {
       case 'meta': {
         this.areaSelectTool.metaModifier = true;
         this.dragTool.metaModifier = true;
+        this.resizeTool.metaModifier = true;
         this.metaModifier = true;
         break;
       }
@@ -141,12 +147,14 @@ class SelectionTool {
       case 'shift': {
         this.areaSelectTool.shiftModifier = false;
         this.dragTool.shiftModifier = false;
+        this.resizeTool.shiftModifier = false;
         this.shiftModifier = false;
         break;
       }
       case 'meta': {
         this.areaSelectTool.metaModifier = false;
         this.dragTool.metaModifier = false;
+        this.resizeTool.metaModifier = false;
         this.metaModifier = false;
         break;
       }
@@ -154,10 +162,15 @@ class SelectionTool {
   }
   onMouseDown(event: paper.ToolEvent): void {
     const state = store.getState();
-    const hitResult = getPaperLayer(state.layer.present.page).hitTest(event.point);
+    const hitResult = paperMain.project.hitTest(event.point);
     if (hitResult) {
-      this.dragTool.enable();
-      this.dragTool.onMouseDown(event);
+      if (hitResult.item.data.id === 'selectionFrameHandle') {
+        this.resizeTool.enable(hitResult.item.data.handle);
+        this.resizeTool.onMouseDown(event);
+      } else {
+        this.dragTool.enable();
+        this.dragTool.onMouseDown(event);
+      }
     } else {
       this.areaSelectTool.enable();
       this.areaSelectTool.onMouseDown(event);
@@ -166,10 +179,12 @@ class SelectionTool {
   onMouseDrag(event: paper.ToolEvent): void {
     this.areaSelectTool.onMouseDrag(event);
     this.dragTool.onMouseDrag(event);
+    this.resizeTool.onMouseDrag(event);
   }
   onMouseUp(event: paper.ToolEvent): void {
     this.areaSelectTool.onMouseUp(event);
     this.dragTool.onMouseUp(event);
+    this.resizeTool.onMouseUp(event);
   }
 }
 

@@ -183,13 +183,13 @@ export const addPage = (payload: AddPagePayload): LayerTypes => {
 
 export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
   const layerId = uuidv4();
-  const backgroundId = uuidv4();
-  payload.paperLayer.name = 'ArtboardBackground';
-  payload.paperLayer.data = { id: backgroundId, type: 'ArtboardBackground', artboard: layerId };
+  payload.paperLayer.data = { id: 'ArtboardBackground' };
+  //payload.paperLayer.applyMatrix = false;
   const paperLayer = new paperMain.Group({
     name: payload.name ? payload.name : 'Artboard',
     data: { id: layerId, type: 'Artboard' },
-    children: [payload.paperLayer]
+    children: [payload.paperLayer],
+    //applyMatrix: false
   });
   return {
     type: ADD_ARTBOARD,
@@ -199,7 +199,7 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
       frame: payload.frame,
       name: payload.name ? payload.name : 'Artboard',
       parent: null,
-      children: [backgroundId],
+      children: [],
       selected: false,
       showChildren: false,
       tweenEvents: [],
@@ -247,7 +247,8 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
   const layerId = uuidv4();
   const paperLayer = new paperMain.Group({
     name: payload.name ? payload.name : 'Group',
-    data: { id: layerId, type: 'Group' }
+    data: { id: layerId, type: 'Group' },
+    //applyMatrix: false
   });
   return {
     type: ADD_GROUP,
@@ -309,6 +310,7 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
     type: 'Shape'
   }
   const clone = payload.paperLayer.clone({insert: false}) as paper.PathItem;
+  //clone.applyMatrix = true;
   clone.fitBounds(new paperMain.Rectangle({
     point: new paperMain.Point(0,0),
     size: new paperMain.Size(16,16)

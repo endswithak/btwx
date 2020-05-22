@@ -13,7 +13,7 @@ class DrawTool {
   dispatch: any;
   tool: paper.Tool;
   outline: paper.Path;
-  tooltip: paper.PointText;
+  tooltip: paper.Group;
   from: paper.Point;
   to: paper.Point;
   pointDiff: paper.Point;
@@ -49,17 +49,23 @@ class DrawTool {
     });
   }
   renderTooltip(tooltipOpts: any) {
-    const baseProps = {
-      point: [this.to.x + (30 / paperMain.view.zoom), this.to.y + (30 / paperMain.view.zoom)],
+    const tooltip = new paperMain.PointText({
       fillColor: 'white',
       fontFamily: 'Space Mono',
       fontSize: 12 / paperMain.view.zoom,
-      ...tooltipOpts
-    }
-    return new paperMain.PointText({
-      ...baseProps,
       content: `${Math.round(this.shiftModifier ? this.maxDim : this.dims.width)} x ${Math.round(this.shiftModifier ? this.maxDim : this.dims.height)}`,
+      ...tooltipOpts
     });
+    const tooltipBackground = new paperMain.Path.Rectangle({
+      point: [this.to.x + (30 / paperMain.view.zoom), this.to.y + (30 / paperMain.view.zoom)],
+      size: [tooltip.bounds.width + 8, tooltip.bounds.height + 8],
+      fillColor: new paperMain.Color(0,0,0,0.75)
+    });
+    tooltip.position = tooltipBackground.position;
+    const tooltipGroup = new paperMain.Group({
+      children: [tooltipBackground, tooltip]
+    });
+    return tooltipGroup;
   }
   updateTooltip(): void {
     if (this.tooltip) {

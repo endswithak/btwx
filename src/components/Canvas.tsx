@@ -48,6 +48,15 @@ const Canvas = ({selectLayer, enableSelectionTool, activeArtboard, paperProject,
         } else if (e.deltaY > 0 && nextZoom < 0) {
           paperMain.view.zoom = 0.001;
         }
+        if (paperMain.project.getItem({data: {id: 'selectionFrame'}})) {
+          const selectionFrameHandles = paperMain.project.getItems({data: {id: 'selectionFrameHandle'}});
+          const selectionFrameBase = paperMain.project.getItem({data: {id: 'selectionFrameBase'}});
+          //selectionFrameBase.strokeWidth = 1 / paperMain.view.zoom;
+          // selectionFrameHandles.forEach((handle) => {
+          //   handle.scaling.x = (1 / paperMain.view.zoom) / handle.viewMatrix.scaling.x;
+          //   handle.scaling.y = (1 / paperMain.view.zoom) / handle.viewMatrix.scaling.y;
+          // });
+        }
       } else {
         paperMain.view.translate(new paper.Point(e.deltaX * -1, e.deltaY * -1));
       }
@@ -56,28 +65,31 @@ const Canvas = ({selectLayer, enableSelectionTool, activeArtboard, paperProject,
       if (layerById[key].type === 'Shape') {
         applyShapeMethods(getPaperLayer(key));
       }
-      if (layerById[key].type === 'ArtboardBackground') {
-        applyArtboardMethods(getPaperLayer(key));
+      if (layerById[key].type === 'Artboard') {
+        applyArtboardMethods(getPaperLayer(key).getItem({data: {id: 'ArtboardBackground'}}));
       }
     });
   }, []);
 
-  const handleClick = (e) => {
-    (document.activeElement as HTMLElement).blur();
-    // canvasRef.current.tabIndex = 0;
-    // canvasRef.current.focus();
-    // paper.projects[0].activate();
-    // //enableSelectionTool();
-    // console.log(paper);
-  }
+  // const handleClick = (e) => {
+  //   (document.activeElement as HTMLElement).blur();
+  //   // canvasRef.current.tabIndex = 0;
+  //   // canvasRef.current.focus();
+  //   // paper.projects[0].activate();
+  //   // //enableSelectionTool();
+  //   // console.log(paper);
+  // }
 
-  useEffect(() => {
-    if (paperMain.project.getItem({data: { id: activeArtboard }})) {
-      if (paperMain.project.getItem({data: { id: 'activeArtboardFrame' }}) && paperMain.project.getItem({data: { id: 'activeArtboardFrame' }}).data.artboard !== activeArtboard) {
-        selectLayer({id: activeArtboard, newSelection: true});
-      }
-    }
-  }, [activeArtboard]);
+  // useEffect(() => {
+  //   if (paperMain.project.getItem({data: { id: activeArtboard }})) {
+  //     const activeArtboardFrames = paperMain.project.getItems({ data: { id: 'ArtboardFrame' } });
+  //     if (activeArtboardFrames && activeArtboardFrames.length > 0) {
+  //       activeArtboardFrames.forEach((item) => item.visible = false);
+  //     }
+  //     const paperActiveArtboardLayer = getPaperLayer(activeArtboard);
+  //     paperActiveArtboardLayer.getItem({ data: { id: 'ArtboardFrame' } }).visible = true;
+  //   }
+  // }, [activeArtboard]);
 
   return (
     <div
@@ -86,7 +98,7 @@ const Canvas = ({selectLayer, enableSelectionTool, activeArtboard, paperProject,
       <canvas
         id='canvas-main'
         ref={canvasRef}
-        onClick={handleClick}
+        //onClick={handleClick}
         style={{
           background: theme.background.z0
         }} />

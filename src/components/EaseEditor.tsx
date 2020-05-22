@@ -1,5 +1,6 @@
-import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
+import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
 import Modal from 'react-modal';
+import { evaluate } from 'mathjs';
 import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
@@ -7,8 +8,9 @@ import { closeEaseEditor } from '../store/actions/easeEditor';
 import { EaseEditorTypes } from '../store/actionTypes/easeEditor';
 import { enableSelectionTool, disableSelectionTool } from '../store/actions/tool';
 import { ToolTypes } from '../store/actionTypes/tool';
-import { setLayerTweenEase, setLayerTweenPower } from '../store/actions/layer';
-import { SetLayerTweenEasePayload, SetLayerTweenPowerPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayerTweenEase, setLayerTweenPower, setLayerTweenDuration } from '../store/actions/layer';
+import { SetLayerTweenEasePayload, SetLayerTweenPowerPayload, SetLayerTweenDurationPayload, LayerTypes } from '../store/actionTypes/layer';
+import SidebarInput from './SidebarInput';
 import gsap from 'gsap';
 import CustomEase from 'gsap/CustomEase';
 import MotionPathPlugin from 'gsap/MotionPathPlugin';
@@ -28,6 +30,7 @@ interface EaseEditorProps {
   closeEaseEditor?(): EaseEditorTypes;
   setLayerTweenEase?(payload: SetLayerTweenEasePayload): LayerTypes;
   setLayerTweenPower?(payload: SetLayerTweenPowerPayload): LayerTypes;
+  setLayerTweenDuration?(payload: SetLayerTweenDurationPayload): LayerTypes;
   disableSelectionTool?(): ToolTypes;
   enableSelectionTool?(): ToolTypes;
 }
@@ -39,7 +42,8 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
   const valueHeadRef = useRef<HTMLDivElement>(null);
   const visualizerRef = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
-  const { tween, easeEditor, closeEaseEditor, setLayerTweenEase, setLayerTweenPower, disableSelectionTool, enableSelectionTool } = props;
+  const { tween, easeEditor, closeEaseEditor, setLayerTweenEase, setLayerTweenPower, disableSelectionTool, enableSelectionTool, setLayerTweenDuration } = props;
+  const [duration, setDuration] = useState<string | number>(null);
 
   const easeTypes = ['linear', 'power1', 'power2', 'power3', 'power4', 'back', 'bounce', 'circ', 'expo', 'sine'];
   const easePowerTypes = ['in', 'inOut', 'out'];
@@ -75,6 +79,7 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
   const handleAfterOpen = () => {
     disableSelectionTool();
     setAndAnimate();
+    setDuration(tween.duration);
   }
 
   const handleAfterClose = () => {
@@ -86,6 +91,21 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
       setAndAnimate();
     }
   }, [tween]);
+
+  const handleDurationChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
+    const target = e.target as HTMLInputElement;
+    setDuration(target.value);
+  };
+
+  const handleDurationSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
+    const durationRounded = Math.round((evaluate(`${duration}`) + Number.EPSILON) * 100) / 100
+    if (durationRounded <= 10) {
+      setLayerTweenDuration({id: tween.id, duration: durationRounded});
+      setDuration(durationRounded);
+    } else {
+      setDuration(tween.duration);
+    }
+  }
 
   return (
     <Modal
@@ -99,9 +119,11 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
       onRequestClose={handleCloseRequest}
       style={{
         content: {
-          background: theme.background.z4,
+          background: theme.background.z2,
           width: 700,
           height: 576,
+          boxShadow: `0 0 0 1px ${theme.background.z4} inset`,
+          borderRadius: theme.unit
         }
       }}
       contentLabel='ease-editor'>
@@ -113,7 +135,7 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
             className='c-ease-editor__graph'
             style={{
               position: 'relative',
-              background: theme.background.z3,
+              background: theme.background.z1,
               width: 400,
               height: 544
             }}>
@@ -128,10 +150,10 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
                 maxHeight: 400,
                 bottom: 72
               }}>
-              <line x1="0" y1="0" x2="400" y2="0" stroke={theme.text.lightest}></line>
-              <path ref={pathRef} strokeWidth='1' stroke={theme.text.lightest} fill='none'></path>
+              <line x1="0" y1="0" x2="400" y2="0" stroke={theme.background.z4}></line>
+              <path ref={pathRef} strokeWidth='1' stroke={theme.background.z4} fill='none'></path>
               <path ref={pathRevealRef} strokeWidth='1' stroke={theme.text.base} fill='none'></path>
-              <line x1="0" y1="400" x2="400" y2="400" stroke={theme.text.lightest}></line>
+              <line x1="0" y1="400" x2="400" y2="400" stroke={theme.background.z4}></line>
             </svg>
           </div>
           <div
@@ -142,7 +164,7 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
             <div
               className='c-ease-editor-value__bar'
               style={{
-                background: theme.background.z6,
+                background: theme.background.z4,
                 height: 544
               }} />
             <div
@@ -226,14 +248,11 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
             }}>
             Duration
           </div>
-          <div
-            className='c-ease-editor__preset'
-            style={{
-              background: theme.background.z3,
-              color: theme.text.base
-            }}>
-            {tween ? tween.duration : 0}
-          </div>
+          <SidebarInput
+            value={duration}
+            onChange={handleDurationChange}
+            onSubmit={handleDurationSubmit}
+            blurOnSubmit />
         </div>
       </div>
     </Modal>
@@ -248,5 +267,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { closeEaseEditor, setLayerTweenEase, setLayerTweenPower, enableSelectionTool, disableSelectionTool }
+  { closeEaseEditor, setLayerTweenEase, setLayerTweenPower, enableSelectionTool, disableSelectionTool, setLayerTweenDuration }
 )(EaseEditor);

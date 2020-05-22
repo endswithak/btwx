@@ -55,8 +55,12 @@ class AreaSelectTool {
     const state = store.getState().layer;
     return getPagePaperLayer(state.present).getItems({
       data: (data: any) => {
-        const topParent = getNearestScopeAncestor(state.present, data.id);
-        return topParent.id === data.id;
+        if (data.id === 'ArtboardBackground') {
+          return true;
+        } else {
+          const topParent = getNearestScopeAncestor(state.present, data.id);
+          return topParent.id === data.id;
+        }
       },
       overlapping: this.shape.bounds
     });
@@ -64,7 +68,11 @@ class AreaSelectTool {
   layers() {
     const paperLayers = this.paperLayers();
     return paperLayers.map((paperLayer) => {
-      return paperLayer.data.id;
+      if (paperLayer.data.id === 'ArtboardBackground') {
+        return paperLayer.parent.data.id;
+      } else {
+        return paperLayer.data.id;
+      }
     });
   }
   onEscape() {

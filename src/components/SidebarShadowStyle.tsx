@@ -152,6 +152,8 @@ const SidebarShadowStyle = (props: SidebarShadowStyleProps): ReactElement => {
       const paperLayer = getPaperLayer(selected[0]);
       enableLayerShadow({id: selected[0]});
       paperLayer.shadowColor = new paper.Color(shadow.color);
+      paperLayer.shadowBlur = shadow.blur;
+      paperLayer.shadowOffset = new paper.Point(shadow.offset.x, shadow.offset.y);
     }
   };
 

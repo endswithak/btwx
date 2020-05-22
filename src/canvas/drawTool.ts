@@ -11,7 +11,7 @@ class DrawTool {
   tool: paper.Tool;
   drawShapeType: em.ShapeType;
   outline: paper.Path;
-  tooltip: paper.PointText;
+  tooltip: paper.Group;
   from: paper.Point;
   to: paper.Point;
   pointDiff: paper.Point;
@@ -46,12 +46,14 @@ class DrawTool {
         return new paperMain.Path.Rectangle({
           from: this.from,
           to: this.shiftModifier ? this.constrainedDims : this.to,
+          //applyMatrix: false,
           ...shapeOpts
         });
       case 'Ellipse':
         return new paperMain.Path.Ellipse({
           from: this.from,
           to: this.shiftModifier ? this.constrainedDims : this.to,
+          //applyMatrix: false,
           ...shapeOpts
         });
       case 'Rounded':
@@ -59,6 +61,7 @@ class DrawTool {
           from: this.from,
           to: this.shiftModifier ? this.constrainedDims : this.to,
           radius: 8,
+          //applyMatrix: false,
           ...shapeOpts
         });
       case 'Polygon':
@@ -66,6 +69,7 @@ class DrawTool {
           center: this.centerPoint,
           radius: this.maxDim / 2,
           sides: 5,
+          //applyMatrix: false,
           ...shapeOpts
         });
       case 'Star':
@@ -74,33 +78,44 @@ class DrawTool {
           radius1: this.maxDim / 2,
           radius2: (this.maxDim / 2) / 2,
           points: 5,
+          //applyMatrix: false,
           ...shapeOpts
         });
     }
   }
   renderTooltip(tooltipOpts: any) {
-    const baseProps = {
-      point: [this.to.x + (30 / paperMain.view.zoom), this.to.y + (30 / paperMain.view.zoom)],
-      fillColor: 'white',
-      fontFamily: 'Space Mono',
-      fontSize: 12 / paperMain.view.zoom,
-      ...tooltipOpts
-    }
+    let tooltipContent;
     switch(this.drawShapeType) {
       case 'Rectangle':
       case 'Ellipse':
       case 'Rounded':
-        return new paperMain.PointText({
-          ...baseProps,
-          content: `${Math.round(this.shiftModifier ? this.maxDim : this.dims.width)} x ${Math.round(this.shiftModifier ? this.maxDim : this.dims.height)}`,
-        });
+        tooltipContent = `${Math.round(this.shiftModifier ? this.maxDim : this.dims.width)} x ${Math.round(this.shiftModifier ? this.maxDim : this.dims.height)}`;
+        break;
       case 'Polygon':
       case 'Star':
-        return new paperMain.PointText({
-          ...baseProps,
-          content: `${Math.round(this.maxDim)} x ${Math.round(this.maxDim)}`
-        });
+        tooltipContent = `${Math.round(this.maxDim)} x ${Math.round(this.maxDim)}`;
+        break;
     }
+    const tooltip = new paperMain.PointText({
+      fillColor: 'white',
+      fontFamily: 'Space Mono',
+      fontSize: 12 / paperMain.view.zoom,
+      content: tooltipContent,
+      //applyMatrix: false,
+      ...tooltipOpts
+    });
+    const tooltipBackground = new paperMain.Path.Rectangle({
+      point: [this.to.x + (30 / paperMain.view.zoom), this.to.y + (30 / paperMain.view.zoom)],
+      size: [tooltip.bounds.width + 8, tooltip.bounds.height + 8],
+      fillColor: new paperMain.Color(0,0,0,0.75),
+      //applyMatrix: false,
+    });
+    tooltip.position = tooltipBackground.position;
+    const tooltipGroup = new paperMain.Group({
+      children: [tooltipBackground, tooltip],
+      //applyMatrix: false
+    });
+    return tooltipGroup;
   }
   updateTooltip(): void {
     if (this.tooltip) {
@@ -182,15 +197,19 @@ class DrawTool {
       applyShapeMethods(newPaperLayer);
       const overlappedLayers = getPaperLayer(state.layer.present.page).getItems({
         data: (data: any) => {
-          const topParent = getNearestScopeAncestor(state.layer.present, data.id);
-          return topParent.id === data.id;
+          if (data.id === 'ArtboardBackground') {
+            return true;
+          } else {
+            const topParent = getNearestScopeAncestor(state.layer.present, data.id);
+            return topParent.id === data.id;
+          }
         },
         overlapping: this.outline.bounds
       });
       const artboardOverlapped = () => {
-        if (overlappedLayers.length > 0 && overlappedLayers.some((item) => item.data.type === 'Artboard')) {
-          const firstArtboard = overlappedLayers.find((item) => item.data.type === 'Artboard');
-          return firstArtboard.data.id;
+        if (overlappedLayers.length > 0 && overlappedLayers.some((item) => item.data.id === 'ArtboardBackground')) {
+          const firstArtboard = overlappedLayers.find((item) => item.data.id === 'ArtboardBackground');
+          return firstArtboard.parent.data.id;
         } else {
           return false;
         }

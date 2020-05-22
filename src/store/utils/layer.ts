@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { v4 as uuidv4 } from 'uuid';
-import paper from 'paper';
 import { LayerState } from '../reducers/layer';
 import * as layerActions from '../actions/layer';
 import { addItem, removeItem, insertItem, addItems } from './general';
+
 import {
   AddPage, AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer,
   AddLayerChild, InsertLayerChild, EnableLayerHover, DisableLayerHover,
@@ -14,43 +14,16 @@ import {
   DeselectLayers, MoveLayerTo, MoveLayerBy, EnableLayerDrag, DisableLayerDrag, MoveLayersTo,
   MoveLayersBy, DeepSelectLayer, EscapeLayerScope, MoveLayer, MoveLayers, AddArtboard,
   SetLayerName, SetActiveArtboard, AddLayerTween, RemoveLayerTween, AddLayerTweenEvent,
-  RemoveLayerTweenEvent,
-  SetLayerTweenDuration,
-  SetLayerTweenDelay,
-  IncrementLayerTweenDuration,
-  DecrementLayerTweenDuration,
-  IncrementLayerTweenDelay,
-  DecrementLayerTweenDelay,
-  SetLayerTweenEase,
-  SetLayerTweenPower,
-  FreezeLayerTween,
-  UnFreezeLayerTween,
-  SetLayerX,
-  SetLayerY,
-  SetLayerWidth,
-  SetLayerHeight,
-  SetLayerOpacity,
-  SetLayerHorizontalFlip,
-  SetLayerVerticalFlip,
-  SetLayerFillColor,
-  SetLayerStrokeColor,
-  SetLayerStrokeWidth,
-  SetLayerShadowColor,
-  SetLayerShadowBlur,
-  SetLayerShadowXOffset,
-  SetLayerShadowYOffset,
-  SetLayerRotation,
-  EnableLayerFill,
-  DisableLayerFill,
-  EnableLayerStroke,
-  DisableLayerStroke,
-  DisableLayerShadow,
-  EnableLayerShadow,
-  SetLayerStrokeCap,
-  SetLayerStrokeJoin,
-  SetLayerStrokeDashArray,
-  SetLayerStrokeMiterLimit
+  RemoveLayerTweenEvent, SetLayerTweenDuration, SetLayerTweenDelay, IncrementLayerTweenDuration,
+  DecrementLayerTweenDuration, IncrementLayerTweenDelay, DecrementLayerTweenDelay, SetLayerTweenEase,
+  SetLayerTweenPower, FreezeLayerTween, UnFreezeLayerTween, SetLayerX, SetLayerY, SetLayerWidth,
+  SetLayerHeight, SetLayerOpacity, SetLayerHorizontalFlip, SetLayerVerticalFlip, SetLayerFillColor,
+  SetLayerStrokeColor, SetLayerStrokeWidth, SetLayerShadowColor, SetLayerShadowBlur, SetLayerShadowXOffset,
+  SetLayerShadowYOffset, SetLayerRotation, EnableLayerFill, DisableLayerFill, EnableLayerStroke,
+  DisableLayerStroke, DisableLayerShadow, EnableLayerShadow, SetLayerStrokeCap, SetLayerStrokeJoin,
+  SetLayerStrokeDashArray, SetLayerStrokeMiterLimit
 } from '../actionTypes/layer';
+
 import {
   getLayerIndex, getLayer, getLayerDepth, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor,
   getNearestScopeGroupAncestor, getParentLayer, getLayerScope, getPaperLayer, getSelectionTopLeft,
@@ -62,6 +35,9 @@ import {
 } from '../selectors/layer';
 
 import { paperMain } from '../../canvas';
+
+import { applyShapeMethods } from '../../canvas/shapeUtils';
+import { applyArtboardMethods } from '../../canvas/artboardUtils';
 
 export const addPage = (state: LayerState, action: AddPage): LayerState => {
   return {
@@ -81,54 +57,13 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
   paperLayer.parent = getPaperLayer(state.page);
   const stateWithLayer = {
     ...state,
-    allIds: addItems(state.allIds, [action.payload.id, action.payload.children[0]]),
+    allIds: addItem(state.allIds, action.payload.id),
     byId: {
       ...state.byId,
       [action.payload.id]: {
         ...action.payload,
         parent: state.page
       } as em.Artboard,
-      [action.payload.children[0]]: {
-        type: 'ArtboardBackground',
-        id: action.payload.children[0],
-        name: 'ArtboardBackground',
-        parent: action.payload.id,
-        children: null,
-        tweenEvents: [],
-        tweens: [],
-        points: {
-          closed: true,
-        },
-        style: {
-          fill: {
-            enabled: true,
-            color: '#ffffff'
-          },
-          stroke: {
-            enabled: false,
-            color: '#999999',
-            width: 1
-          },
-          strokeOptions: {
-            cap: 'butt',
-            join: 'miter',
-            dashArray: [0,0]
-          },
-          opacity: 1,
-          rotation: 0,
-          horizontalFlip: 1,
-          verticalFlip: 1,
-          shadow: {
-            enabled: false,
-            color: '#000000',
-            blur: 10,
-            offset: {
-              x: 0,
-              y: 0,
-            }
-          }
-        },
-      } as em.ArtboardBackground,
       [state.page]: {
         ...state.byId[state.page],
         children: addItem(state.byId[state.page].children, action.payload.id)
@@ -142,22 +77,14 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
 
 export const updateActiveArtboardFrame = (activeArtboard: string, scope = 1) => {
   if (scope === 1) {
-    const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'activeArtboardFrame' } });
-    if (activeArtboardFrame) {
-      activeArtboardFrame.remove();
+    const activeArtboardFrames = paperMain.project.getItems({ data: { id: 'ArtboardFrame' } });
+    if (activeArtboardFrames && activeArtboardFrames.length > 0) {
+      activeArtboardFrames.forEach((item) => item.visible = false);
+      //activeArtboardFrame.remove();
     }
     if (activeArtboard) {
       const paperActiveArtboardLayer = getPaperLayer(activeArtboard);
-      new paperMain.Path.Rectangle({
-        strokeColor: '#009DEC',
-        strokeWidth: 4,
-        data: {
-          id: 'activeArtboardFrame',
-          artboard: activeArtboard,
-        },
-        point: [paperActiveArtboardLayer.bounds.topLeft.x - 8, paperActiveArtboardLayer.bounds.topLeft.y - 8],
-        size: [paperActiveArtboardLayer.bounds.width + 16, paperActiveArtboardLayer.bounds.height + 16]
-      });
+      paperActiveArtboardLayer.getItem({ data: { id: 'ArtboardFrame' } }).visible = true;
     }
   }
 }
@@ -186,7 +113,7 @@ export const addLayer = (state: LayerState, action: AddGroup | AddShape): LayerS
     paperProject: paperMain.project.exportJSON()
   }
   // update tweens
-  currentState = updateLayerTweens(currentState, action.payload.id);
+  //currentState = updateLayerTweens(currentState, action.payload.id);
   // select layer
   return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
 };
@@ -273,10 +200,108 @@ export const updateSelectionFrame = (state: LayerState) => {
   if (state.selected.length > 0) {
     const selectionTopLeft = getSelectionTopLeft(state);
     const selectionBottomRight = getSelectionBottomRight(state);
-    new paperMain.Path.Rectangle({
+    const baseProps = {
+      point: selectionTopLeft,
+      size: [8, 8],
+      fillColor: '#fff',
+      strokeColor: '#009DEC',
+      strokeWidth: 1,
+      insert: false,
+      //applyMatrix: false
+    }
+    const baseFrame = new paperMain.Path.Rectangle({
       from: selectionTopLeft,
       to: selectionBottomRight,
-      selected: true,
+      strokeColor: '#009DEC',
+      strokeWidth: 1 / paperMain.view.zoom,
+      insert: false,
+      //applyMatrix: false,
+      data: {
+        id: 'selectionFrameBase'
+      }
+    });
+    const topLeftHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      data: {
+        id: 'selectionFrameHandle',
+        handle: 'topLeft'
+      }
+    });
+    topLeftHandle.position = baseFrame.bounds.topLeft;
+    topLeftHandle.scaling.x = 1 / paperMain.view.zoom;
+    topLeftHandle.scaling.y = 1 / paperMain.view.zoom;
+    const topCenterHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      data: {
+        id: 'selectionFrameHandle',
+        handle: 'topCenter'
+      }
+    });
+    topCenterHandle.position = baseFrame.bounds.topCenter;
+    topCenterHandle.scaling.x = 1 / paperMain.view.zoom;
+    topCenterHandle.scaling.y = 1 / paperMain.view.zoom;
+    const topRightHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      data: {
+        id: 'selectionFrameHandle',
+        handle: 'topRight'
+      }
+    });
+    topRightHandle.position = baseFrame.bounds.topRight;
+    topRightHandle.scaling.x = 1 / paperMain.view.zoom;
+    topRightHandle.scaling.y = 1 / paperMain.view.zoom;
+    const bottomLeftHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      data: {
+        id: 'selectionFrameHandle',
+        handle: 'bottomLeft'
+      }
+    });
+    bottomLeftHandle.position = baseFrame.bounds.bottomLeft;
+    bottomLeftHandle.scaling.x = 1 / paperMain.view.zoom;
+    bottomLeftHandle.scaling.y = 1 / paperMain.view.zoom;
+    const bottomCenterHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      data: {
+        id: 'selectionFrameHandle',
+        handle: 'bottomCenter'
+      }
+    });
+    bottomCenterHandle.position = baseFrame.bounds.bottomCenter;
+    bottomCenterHandle.scaling.x = 1 / paperMain.view.zoom;
+    bottomCenterHandle.scaling.y = 1 / paperMain.view.zoom;
+    const bottomRightHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      data: {
+        id: 'selectionFrameHandle',
+        handle: 'bottomRight'
+      }
+    });
+    bottomRightHandle.position = baseFrame.bounds.bottomRight;
+    bottomRightHandle.scaling.x = 1 / paperMain.view.zoom;
+    bottomRightHandle.scaling.y = 1 / paperMain.view.zoom;
+    const rightCenterHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      data: {
+        id: 'selectionFrameHandle',
+        handle: 'rightCenter'
+      }
+    });
+    rightCenterHandle.position = baseFrame.bounds.rightCenter;
+    rightCenterHandle.scaling.x = 1 / paperMain.view.zoom;
+    rightCenterHandle.scaling.y = 1 / paperMain.view.zoom;
+    const leftCenterHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      data: {
+        id: 'selectionFrameHandle',
+        handle: 'leftCenter'
+      }
+    });
+    leftCenterHandle.position = baseFrame.bounds.leftCenter;
+    leftCenterHandle.scaling.x = 1 / paperMain.view.zoom;
+    leftCenterHandle.scaling.y = 1 / paperMain.view.zoom;
+    const selectionFrame = new paperMain.Group({
+      children: [baseFrame, topLeftHandle, topCenterHandle, topRightHandle, bottomLeftHandle, bottomCenterHandle, bottomRightHandle, leftCenterHandle, rightCenterHandle],
       data: {
         id: 'selectionFrame'
       }
@@ -388,6 +413,7 @@ export const updateHoverFrame = (state: LayerState) => {
   const hoverFrameConstants = {
     strokeColor: '#009DEC',
     strokeWidth: 1,
+    //applyMatrix: false,
     data: {
       id: 'hoverFrame'
     }
@@ -744,7 +770,7 @@ const getClipboardLayerDescendants = (state: LayerState, id: string) => {
     byId: {
       [id]: {
         ...layer,
-        paperLayer: paperLayer
+        paperLayer: paperLayer.exportJSON()
       }
     }
   };
@@ -761,7 +787,7 @@ const getClipboardLayerDescendants = (state: LayerState, id: string) => {
         clipboardLayerDescendants.allIds.push(child);
         clipboardLayerDescendants.byId[child] = {
           ...childLayer,
-          paperLayer: childPaperLayer
+          paperLayer: childPaperLayer.exportJSON()
         }
       });
     }
@@ -815,19 +841,21 @@ const getLayerCloneMap = (state: LayerState, id: string) => {
 }
 
 const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any) => {
-  const paperLayer = state.clipboard.byId[id].paperLayer;
+  const paperLayer = paperMain.project.importJSON(state.clipboard.byId[id].paperLayer);
   const parentLayer = getLayer(state, state.scope.length > 0 ? state.scope[state.scope.length - 1] : state.page);
   const paperParentLayer = getPaperLayer(parentLayer.id);
   const paperLayerClone = paperLayer.clone({deep: false, insert: true});
+  if (paperLayer.data.type === 'Artboard') {
+    const artboardBackground = paperLayer.getItem({ data: { id: 'ArtboardBackground' }});
+    const artboardBackgroundClone = artboardBackground.clone({deep: false, insert: true});
+    artboardBackgroundClone.parent = paperLayerClone;
+    applyArtboardMethods(artboardBackgroundClone);
+  }
+  if (paperLayer.data.type === 'Shape') {
+    applyShapeMethods(paperLayerClone);
+  }
   paperLayerClone.data.id = layerCloneMap[id];
   paperLayerClone.parent = paperParentLayer;
-  paperLayerClone.onClick = paperLayer.onClick;
-  paperLayerClone.onDoubleClick = paperLayer.onDoubleClick;
-  paperLayerClone.onMouseEnter = paperLayer.onMouseEnter;
-  paperLayerClone.onMouseLeave = paperLayer.onMouseLeave;
-  paperLayerClone.onMouseDrag = paperLayer.onMouseDrag;
-  paperLayerClone.onMouseDown = paperLayer.onMouseDown;
-  paperLayerClone.onMouseUp = paperLayer.onMouseUp;
   const groups: string[] = [id];
   let i = 0;
   while(i < groups.length) {
@@ -836,20 +864,13 @@ const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any) => 
     if (layer.children) {
       layer.children.forEach((child) => {
         const childLayer = state.clipboard.byId[child];
-        const childPaperLayer = childLayer.paperLayer;
+        const childPaperLayer = paperMain.project.importJSON(childLayer.paperLayer);
         const childPaperLayerClone = childPaperLayer.clone({deep: false, insert: true});
-        if (layer.type === 'Artboard') {
-          childPaperLayerClone.data.artboard = layerCloneMap[layer.id];
-        }
         childPaperLayerClone.data.id = layerCloneMap[child];
         childPaperLayerClone.parent = groupClonePaperLayer;
-        childPaperLayerClone.onClick = childPaperLayer.onClick;
-        childPaperLayerClone.onDoubleClick = childPaperLayer.onDoubleClick;
-        childPaperLayerClone.onMouseEnter = childPaperLayer.onMouseEnter;
-        childPaperLayerClone.onMouseLeave = childPaperLayer.onMouseLeave;
-        childPaperLayerClone.onMouseDrag = childPaperLayer.onMouseDrag;
-        childPaperLayerClone.onMouseDown = childPaperLayer.onMouseDown;
-        childPaperLayerClone.onMouseUp = childPaperLayer.onMouseUp;
+        if (childPaperLayer.data.type === 'Shape') {
+          applyShapeMethods(childPaperLayerClone);
+        }
         if (childLayer.children && childLayer.children.length > 0) {
           groups.push(child);
         }
@@ -974,7 +995,7 @@ export const updateParentBounds = (state: LayerState, id: string): LayerState =>
 export const moveLayer = (state: LayerState, action: MoveLayer): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
-  updateActiveArtboardFrame(currentState.activeArtboard);
+  //updateActiveArtboardFrame(currentState.activeArtboard);
   updateSelectionFrame(currentState);
   currentState = {
     ...currentState,
@@ -991,7 +1012,7 @@ export const moveLayer = (state: LayerState, action: MoveLayer): LayerState => {
     },
     paperProject: paperMain.project.exportJSON()
   }
-  currentState = updateLayerTweens(currentState, action.payload.id);
+  //currentState = updateLayerTweens(currentState, action.payload.id);
   return updateParentBounds(currentState, action.payload.id);
 };
 
@@ -1004,7 +1025,7 @@ export const moveLayers = (state: LayerState, action: MoveLayers): LayerState =>
 export const moveLayerTo = (state: LayerState, action: MoveLayerTo): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
-  updateActiveArtboardFrame(currentState.activeArtboard);
+  //updateActiveArtboardFrame(currentState.activeArtboard);
   updateSelectionFrame(currentState);
   currentState = {
     ...currentState,
@@ -1021,7 +1042,7 @@ export const moveLayerTo = (state: LayerState, action: MoveLayerTo): LayerState 
     },
     paperProject: paperMain.project.exportJSON()
   }
-  currentState = updateLayerTweens(currentState, action.payload.id);
+  //currentState = updateLayerTweens(currentState, action.payload.id);
   return updateParentBounds(currentState, action.payload.id);
 };
 
@@ -1034,7 +1055,7 @@ export const moveLayersTo = (state: LayerState, action: MoveLayersTo): LayerStat
 export const moveLayerBy = (state: LayerState, action: MoveLayerBy): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
-  updateActiveArtboardFrame(currentState.activeArtboard);
+  //updateActiveArtboardFrame(currentState.activeArtboard);
   updateSelectionFrame(currentState);
   currentState = {
     ...currentState,
@@ -1051,7 +1072,7 @@ export const moveLayerBy = (state: LayerState, action: MoveLayerBy): LayerState 
     },
     paperProject: paperMain.project.exportJSON()
   }
-  currentState = updateLayerTweens(currentState, action.payload.id);
+  //currentState = updateLayerTweens(currentState, action.payload.id);
   return updateParentBounds(currentState, action.payload.id);
 };
 
@@ -1082,7 +1103,7 @@ export const setActiveArtboard = (state: LayerState, action: SetActiveArtboard):
     ...state,
     activeArtboard: action.payload.id
   }
-  updateActiveArtboardFrame(action.payload.id, action.payload.scope);
+  //updateActiveArtboardFrame(action.payload.id, action.payload.scope);
   return activeArtboardState;
 };
 
@@ -1231,7 +1252,7 @@ export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): L
 export const updateLayerTweens = (state: LayerState, layerId: string): LayerState => {
   let currentState = state;
   const layer = currentState.byId[layerId];
-  if (layer.type !== 'Artboard' && layer.type !== 'ArtboardBackground') {
+  if (layer.type !== 'Artboard') {
     const tweensByLayerDestination = getTweensByDestinationLayer(currentState, layerId);
     const layerScope = getLayerScope(currentState, layerId);
     // remove layer tweens
@@ -1403,7 +1424,7 @@ export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
     },
     paperProject: paperMain.project.exportJSON()
   }
-  updateActiveArtboardFrame(currentState.activeArtboard);
+  //updateActiveArtboardFrame(currentState.activeArtboard);
   updateSelectionFrame(currentState);
   return updateParentBounds(currentState, action.payload.id);
 };
@@ -1424,7 +1445,7 @@ export const setLayerY = (state: LayerState, action: SetLayerY): LayerState => {
     },
     paperProject: paperMain.project.exportJSON()
   }
-  updateActiveArtboardFrame(currentState.activeArtboard);
+  //updateActiveArtboardFrame(currentState.activeArtboard);
   updateSelectionFrame(currentState);
   return updateParentBounds(currentState, action.payload.id);
 };
@@ -1445,7 +1466,7 @@ export const setLayerWidth = (state: LayerState, action: SetLayerWidth): LayerSt
     },
     paperProject: paperMain.project.exportJSON()
   }
-  updateActiveArtboardFrame(currentState.activeArtboard);
+  //updateActiveArtboardFrame(currentState.activeArtboard);
   updateSelectionFrame(currentState);
   return updateParentBounds(currentState, action.payload.id);
 };
@@ -1466,7 +1487,7 @@ export const setLayerHeight = (state: LayerState, action: SetLayerHeight): Layer
     },
     paperProject: paperMain.project.exportJSON()
   }
-  updateActiveArtboardFrame(currentState.activeArtboard);
+  //updateActiveArtboardFrame(currentState.activeArtboard);
   updateSelectionFrame(currentState);
   return updateParentBounds(currentState, action.payload.id);
 };
@@ -1506,7 +1527,7 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
     },
     paperProject: paperMain.project.exportJSON()
   }
-  updateActiveArtboardFrame(currentState.activeArtboard);
+  //updateActiveArtboardFrame(currentState.activeArtboard);
   updateSelectionFrame(currentState);
   return updateParentBounds(currentState, action.payload.id);
 };
