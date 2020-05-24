@@ -48,15 +48,10 @@ const Canvas = ({selectLayer, enableSelectionTool, activeArtboard, paperProject,
         } else if (e.deltaY > 0 && nextZoom < 0) {
           paperMain.view.zoom = 0.001;
         }
-        if (paperMain.project.getItem({data: {id: 'selectionFrame'}})) {
-          const selectionFrameHandles = paperMain.project.getItems({data: {id: 'selectionFrameHandle'}});
-          const selectionFrameBase = paperMain.project.getItem({data: {id: 'selectionFrameBase'}});
-          //selectionFrameBase.strokeWidth = 1 / paperMain.view.zoom;
-          // selectionFrameHandles.forEach((handle) => {
-          //   handle.scaling.x = (1 / paperMain.view.zoom) / handle.viewMatrix.scaling.x;
-          //   handle.scaling.y = (1 / paperMain.view.zoom) / handle.viewMatrix.scaling.y;
-          // });
-        }
+        // if (paperMain.project.getItem({data: {id: 'selectionFrame'}})) {
+        //   const selectionFrameHandles = paperMain.project.getItems({data: {id: 'selectionFrameHandle'}});
+        //   const selectionFrameBase = paperMain.project.getItem({data: {id: 'selectionFrameBase'}});
+        // }
       } else {
         paperMain.view.translate(new paper.Point(e.deltaX * -1, e.deltaY * -1));
       }

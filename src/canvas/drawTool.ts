@@ -192,7 +192,8 @@ class DrawTool {
       const newPaperLayer = this.renderShape({
         fillColor: new Color('#cccccc'),
         strokeColor: new Color('#999999'),
-        strokeWidth: 1
+        strokeWidth: 1,
+        //applyMatrix: false
       });
       applyShapeMethods(newPaperLayer);
       const overlappedLayers = getPaperLayer(state.layer.present.page).getItems({

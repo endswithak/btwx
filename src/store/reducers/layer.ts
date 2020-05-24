@@ -74,6 +74,8 @@ import {
   SET_LAYER_SHADOW_BLUR,
   SET_LAYER_SHADOW_X_OFFSET,
   SET_LAYER_SHADOW_Y_OFFSET,
+  RESIZE_LAYER_BY,
+  RESIZE_LAYERS_BY,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -151,7 +153,9 @@ import {
   setLayerShadowColor,
   setLayerShadowBlur,
   setLayerShadowXOffset,
-  setLayerShadowYOffset
+  setLayerShadowYOffset,
+  resizeLayerBy,
+  resizeLayersBy
 } from '../utils/layer';
 
 export interface LayerState {
@@ -366,6 +370,10 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setLayerShadowXOffset(state, action);
     case SET_LAYER_SHADOW_Y_OFFSET:
       return setLayerShadowYOffset(state, action);
+    case RESIZE_LAYER_BY:
+      return resizeLayerBy(state, action);
+    case RESIZE_LAYERS_BY:
+      return resizeLayersBy(state, action);
     default:
       return state;
   }

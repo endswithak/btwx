@@ -81,6 +81,8 @@ import {
   SET_LAYER_SHADOW_BLUR,
   SET_LAYER_SHADOW_X_OFFSET,
   SET_LAYER_SHADOW_Y_OFFSET,
+  RESIZE_LAYER_BY,
+  RESIZE_LAYERS_BY,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
@@ -154,6 +156,8 @@ import {
   SetLayerShadowBlurPayload,
   SetLayerShadowXOffsetPayload,
   SetLayerShadowYOffsetPayload,
+  ResizeLayerByPayload,
+  ResizeLayersByPayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -765,5 +769,15 @@ export const setLayerShadowXOffset = (payload: SetLayerShadowXOffsetPayload): La
 
 export const setLayerShadowYOffset = (payload: SetLayerShadowYOffsetPayload): LayerTypes => ({
   type: SET_LAYER_SHADOW_Y_OFFSET,
+  payload
+});
+
+export const resizeLayerBy = (payload: ResizeLayerByPayload): LayerTypes => ({
+  type: RESIZE_LAYER_BY,
+  payload
+});
+
+export const resizeLayersBy = (payload: ResizeLayersByPayload): LayerTypes => ({
+  type: RESIZE_LAYERS_BY,
   payload
 });

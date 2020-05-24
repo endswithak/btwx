@@ -140,7 +140,8 @@ class DrawTool {
     if (this.to) {
       const state = store.getState();
       const newPaperLayer = this.renderShape({
-        fillColor: new Color('#fff')
+        fillColor: new Color('#fff'),
+        //applyMatrix: false
       });
       applyArtboardMethods(newPaperLayer);
       store.dispatch(addArtboard({

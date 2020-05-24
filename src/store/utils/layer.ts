@@ -21,7 +21,7 @@ import {
   SetLayerStrokeColor, SetLayerStrokeWidth, SetLayerShadowColor, SetLayerShadowBlur, SetLayerShadowXOffset,
   SetLayerShadowYOffset, SetLayerRotation, EnableLayerFill, DisableLayerFill, EnableLayerStroke,
   DisableLayerStroke, DisableLayerShadow, EnableLayerShadow, SetLayerStrokeCap, SetLayerStrokeJoin,
-  SetLayerStrokeDashArray, SetLayerStrokeMiterLimit
+  SetLayerStrokeDashArray, SetLayerStrokeMiterLimit, ResizeLayerBy, ResizeLayersBy
 } from '../actionTypes/layer';
 
 import {
@@ -192,7 +192,7 @@ export const removeLayers = (state: LayerState, action: RemoveLayers): LayerStat
   }, state);
 }
 
-export const updateSelectionFrame = (state: LayerState) => {
+export const updateSelectionFrame = (state: LayerState, visibleHandles = 'all') => {
   const selectionFrame = paperMain.project.getItem({ data: { id: 'selectionFrame' } });
   if (selectionFrame) {
     selectionFrame.remove();
@@ -222,6 +222,7 @@ export const updateSelectionFrame = (state: LayerState) => {
     });
     const topLeftHandle = new paperMain.Path.Rectangle({
       ...baseProps,
+      visible: visibleHandles === 'all' || visibleHandles === 'topLeft',
       data: {
         id: 'selectionFrameHandle',
         handle: 'topLeft'
@@ -232,6 +233,7 @@ export const updateSelectionFrame = (state: LayerState) => {
     topLeftHandle.scaling.y = 1 / paperMain.view.zoom;
     const topCenterHandle = new paperMain.Path.Rectangle({
       ...baseProps,
+      visible: visibleHandles === 'all' || visibleHandles === 'topCenter',
       data: {
         id: 'selectionFrameHandle',
         handle: 'topCenter'
@@ -242,6 +244,7 @@ export const updateSelectionFrame = (state: LayerState) => {
     topCenterHandle.scaling.y = 1 / paperMain.view.zoom;
     const topRightHandle = new paperMain.Path.Rectangle({
       ...baseProps,
+      visible: visibleHandles === 'all' || visibleHandles === 'topRight',
       data: {
         id: 'selectionFrameHandle',
         handle: 'topRight'
@@ -252,6 +255,7 @@ export const updateSelectionFrame = (state: LayerState) => {
     topRightHandle.scaling.y = 1 / paperMain.view.zoom;
     const bottomLeftHandle = new paperMain.Path.Rectangle({
       ...baseProps,
+      visible: visibleHandles === 'all' || visibleHandles === 'bottomLeft',
       data: {
         id: 'selectionFrameHandle',
         handle: 'bottomLeft'
@@ -262,6 +266,7 @@ export const updateSelectionFrame = (state: LayerState) => {
     bottomLeftHandle.scaling.y = 1 / paperMain.view.zoom;
     const bottomCenterHandle = new paperMain.Path.Rectangle({
       ...baseProps,
+      visible: visibleHandles === 'all' || visibleHandles === 'bottomCenter',
       data: {
         id: 'selectionFrameHandle',
         handle: 'bottomCenter'
@@ -272,6 +277,7 @@ export const updateSelectionFrame = (state: LayerState) => {
     bottomCenterHandle.scaling.y = 1 / paperMain.view.zoom;
     const bottomRightHandle = new paperMain.Path.Rectangle({
       ...baseProps,
+      visible: visibleHandles === 'all' || visibleHandles === 'bottomRight',
       data: {
         id: 'selectionFrameHandle',
         handle: 'bottomRight'
@@ -282,6 +288,7 @@ export const updateSelectionFrame = (state: LayerState) => {
     bottomRightHandle.scaling.y = 1 / paperMain.view.zoom;
     const rightCenterHandle = new paperMain.Path.Rectangle({
       ...baseProps,
+      visible: visibleHandles === 'all' || visibleHandles === 'rightCenter',
       data: {
         id: 'selectionFrameHandle',
         handle: 'rightCenter'
@@ -292,6 +299,7 @@ export const updateSelectionFrame = (state: LayerState) => {
     rightCenterHandle.scaling.y = 1 / paperMain.view.zoom;
     const leftCenterHandle = new paperMain.Path.Rectangle({
       ...baseProps,
+      visible: visibleHandles === 'all' || visibleHandles === 'leftCenter',
       data: {
         id: 'selectionFrameHandle',
         handle: 'leftCenter'
@@ -1948,4 +1956,32 @@ export const setLayerShadowYOffset = (state: LayerState, action: SetLayerShadowY
     paperProject: paperMain.project.exportJSON()
   }
   return currentState;
+};
+
+export const resizeLayerBy = (state: LayerState, action: ResizeLayerBy): LayerState => {
+  let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        frame: {
+          x: paperLayer.position.x,
+          y: paperLayer.position.y,
+          width: paperLayer.bounds.width,
+          height: paperLayer.bounds.height
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return updateParentBounds(currentState, action.payload.id);
+};
+
+export const resizeLayersBy = (state: LayerState, action: ResizeLayersBy): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return resizeLayerBy(result, layerActions.resizeLayerBy({id: current, width: action.payload.width, height: action.payload.height, x: action.payload.x, y: action.payload.y}) as ResizeLayerBy);
+  }, state);
 };

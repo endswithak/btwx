@@ -156,6 +156,15 @@ export const getSelectionBottomRight = (store: LayerState): paper.Point => {
   return paperLayerPoints.reduce(paper.Point.max);
 }
 
+export const getSelectionBounds = (store: LayerState): paper.Rectangle => {
+  const topLeft = getSelectionTopLeft(store);
+  const bottomRight = getSelectionBottomRight(store);
+  return new paper.Rectangle({
+    from: topLeft,
+    to: bottomRight
+  });
+}
+
 export const getSelectionCenter = (store: LayerState): paper.Point => {
   const topLeft = getSelectionTopLeft(store);
   const bottomRight = getSelectionBottomRight(store);
