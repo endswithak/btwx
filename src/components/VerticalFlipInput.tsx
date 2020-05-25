@@ -2,18 +2,19 @@ import React, { useContext, ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import SidebarToggleButton from './SidebarToggleButton';
 import { RootState } from '../store/reducers';
-import { SetLayerVerticalFlipPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayerVerticalFlip } from '../store/actions/layer';
+import { EnableLayerVerticalFlipPayload, DisableLayerVerticalFlipPayload, LayerTypes } from '../store/actionTypes/layer';
+import { enableLayerVerticalFlip, disableLayerVerticalFlip } from '../store/actions/layer';
 import { getPaperLayer } from '../store/selectors/layer';
 
-interface XFlipInputProps {
+interface VerticalFlipInputProps {
   selected?: string[];
   verticalFlipValue?: boolean;
-  setLayerVerticalFlip?(payload: SetLayerVerticalFlipPayload): LayerTypes;
+  enableLayerVerticalFlip?(payload: EnableLayerVerticalFlipPayload): LayerTypes;
+  disableLayerVerticalFlip?(payload: DisableLayerVerticalFlipPayload): LayerTypes;
 }
 
-const XFlipInput = (props: XFlipInputProps): ReactElement => {
-  const { selected, setLayerVerticalFlip, verticalFlipValue } = props;
+const VerticalFlipInput = (props: VerticalFlipInputProps): ReactElement => {
+  const { selected, verticalFlipValue, enableLayerVerticalFlip, disableLayerVerticalFlip } = props;
   const [verticalFlip, setVerticalFlip] = useState<boolean>(verticalFlipValue);
 
   useEffect(() => {
@@ -21,10 +22,14 @@ const XFlipInput = (props: XFlipInputProps): ReactElement => {
   }, [verticalFlipValue]);
 
   const handleClick = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    setVerticalFlip(!verticalFlip);
     const paperLayer = getPaperLayer(selected[0]);
     paperLayer.scale(1, -1);
-    setLayerVerticalFlip({id: selected[0], verticalFlip: !verticalFlip ? -1 : 1});
+    if (verticalFlip) {
+      disableLayerVerticalFlip({id: selected[0]});
+    } else {
+      enableLayerVerticalFlip({id: selected[0]});
+    }
+    setVerticalFlip(!verticalFlip);
   };
 
   return (
@@ -44,7 +49,7 @@ const mapStateToProps = (state: RootState) => {
       case 0:
         return false;
       case 1:
-        return layer.present.byId[layer.present.selected[0]].style.verticalFlip === -1;
+        return layer.present.byId[layer.present.selected[0]].style.verticalFlip;
       default:
         return false;
     }
@@ -54,5 +59,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { setLayerVerticalFlip }
-)(XFlipInput);
+  { enableLayerVerticalFlip, disableLayerVerticalFlip }
+)(VerticalFlipInput);

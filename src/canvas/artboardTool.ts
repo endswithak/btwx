@@ -7,13 +7,14 @@ import { getNearestScopeAncestor, getLayerByPaperId, isScopeGroupLayer, getPaper
 import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
 import { applyArtboardMethods } from './artboardUtils';
 import { paperMain } from './index';
+import Tooltip from './tooltip';
 
 class DrawTool {
   getState: any;
   dispatch: any;
   tool: paper.Tool;
   outline: paper.Path;
-  tooltip: paper.Group;
+  tooltip: Tooltip;
   from: paper.Point;
   to: paper.Point;
   pointDiff: paper.Point;
@@ -48,34 +49,11 @@ class DrawTool {
       ...shapeOpts
     });
   }
-  renderTooltip(tooltipOpts: any) {
-    const tooltip = new paperMain.PointText({
-      fillColor: 'white',
-      fontFamily: 'Space Mono',
-      fontSize: 12 / paperMain.view.zoom,
-      content: `${Math.round(this.shiftModifier ? this.maxDim : this.dims.width)} x ${Math.round(this.shiftModifier ? this.maxDim : this.dims.height)}`,
-      ...tooltipOpts
-    });
-    const tooltipBackground = new paperMain.Path.Rectangle({
-      point: [this.to.x + (30 / paperMain.view.zoom), this.to.y + (30 / paperMain.view.zoom)],
-      size: [tooltip.bounds.width + 8, tooltip.bounds.height + 8],
-      fillColor: new paperMain.Color(0,0,0,0.75)
-    });
-    tooltip.position = tooltipBackground.position;
-    const tooltipGroup = new paperMain.Group({
-      children: [tooltipBackground, tooltip]
-    });
-    return tooltipGroup;
-  }
   updateTooltip(): void {
     if (this.tooltip) {
-      this.tooltip.remove();
+      this.tooltip.paperLayer.remove();
     }
-    this.tooltip = this.renderTooltip({});
-    this.tooltip.removeOn({
-      drag: true,
-      up: true
-    });
+    this.tooltip = new Tooltip(`${Math.round(this.shiftModifier ? this.maxDim : this.dims.width)} x ${Math.round(this.shiftModifier ? this.maxDim : this.dims.height)}`, this.to, {drag: true, up: true});
   }
   updateOutline(): void {
     if (this.outline) {
@@ -101,7 +79,7 @@ class DrawTool {
       }
       case 'escape': {
         if (this.tooltip) {
-          this.tooltip.remove();
+          this.tooltip.paperLayer.remove();
         }
         if (this.outline) {
           this.outline.remove();

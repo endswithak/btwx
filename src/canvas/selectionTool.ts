@@ -114,7 +114,6 @@ class SelectionTool {
         this.dragTool.shiftModifier = true;
         this.resizeTool.shiftModifier = true;
         this.shiftModifier = true;
-        this.resizeTool.onShiftDown();
         break;
       }
       case 'escape': {
@@ -150,7 +149,6 @@ class SelectionTool {
         this.dragTool.shiftModifier = false;
         this.resizeTool.shiftModifier = false;
         this.shiftModifier = false;
-        this.resizeTool.onShiftUp();
         break;
       }
       case 'meta': {

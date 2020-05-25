@@ -1,35 +1,28 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import store from '../store';
-import { resizeLayersBy } from '../store/actions/layer';
-import { getNearestScopeAncestor, getLayerByPaperId, isScopeGroupLayer, getPaperLayer, getSelectionBounds } from '../store/selectors/layer';
+import { resizeLayers } from '../store/actions/layer';
+import { getNearestScopeAncestor, getLayerByPaperId, isScopeGroupLayer, getPaperLayer, getSelectionBounds, getSelectionCenter } from '../store/selectors/layer';
 import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
 import { paperMain } from './index';
+import Tooltip from './tooltip';
 
 class ResizeTool {
   enabled: boolean;
-  to: paper.Rectangle;
-  from: paper.Rectangle;
-  ref: paper.Path;
-  diffY: number;
-  diffX: number;
-  width: number;
-  x: number;
-  y: number;
-  height: number;
+  tooltip: Tooltip;
+  scaleXDiff: number;
+  scaleYDiff: number;
+  verticalFlip: boolean;
+  horizontalFlip: boolean;
   handle: string;
   shiftModifier: boolean;
   metaModifier: boolean;
   constructor() {
     this.enabled = false;
-    this.to = null;
-    this.from = null;
-    this.width = null;
-    this.height = null;
-    this.x = null;
-    this.y = null;
-    this.diffX = null;
-    this.diffY = null;
-    this.ref = null;
+    this.tooltip = null;
+    this.scaleXDiff = null;
+    this.scaleYDiff = null;
+    this.verticalFlip = false;
+    this.horizontalFlip = false;
     this.shiftModifier = false;
     this.metaModifier = false;
   }
@@ -37,45 +30,38 @@ class ResizeTool {
     const state = store.getState();
     this.enabled = true;
     this.handle = handle;
-    this.from = getSelectionBounds(state.layer.present);
-    this.to = getSelectionBounds(state.layer.present);
     updateSelectionFrame(state.layer.present, this.handle);
   }
   disable() {
+    if (this.tooltip) {
+      this.tooltip.paperLayer.remove();
+    }
     this.enabled = false;
-    this.to = null;
-    this.from = null;
-    this.width = null;
-    this.height = null;
-    this.handle = null;
-    this.diffX = null;
-    this.diffY = null;
-    this.ref = null;
-    this.x = null;
-    this.y = null;
+    this.tooltip = null;
+    this.scaleXDiff = null;
+    this.scaleYDiff = null;
+    this.verticalFlip = false;
+    this.horizontalFlip = false;
+    this.shiftModifier = false;
+    this.metaModifier = false;
   }
   onEscape() {
     if (this.enabled) {
-      if (this.width || this.height) {
+      if (this.scaleXDiff || this.scaleYDiff) {
         const state = store.getState();
         if (state.layer.present.selected.length > 0) {
           state.layer.present.selected.forEach((layer) => {
             const paperLayer = getPaperLayer(layer);
-            paperLayer.bounds.width -= this.width;
-            paperLayer.bounds.height -= this.height;
-            paperLayer.position.x -= this.x;
-            paperLayer.position.y -= this.y;
+            const layerItem = state.layer.present.byId[layer];
+            paperLayer.bounds.width = layerItem.frame.width;
+            paperLayer.bounds.height = layerItem.frame.height;
+            paperLayer.position.x = layerItem.frame.x;
+            paperLayer.position.y = layerItem.frame.y;
           });
         }
       }
     }
     this.disable();
-  }
-  onShiftDown() {
-
-  }
-  onShiftUp() {
-
   }
   onMouseDown(event: paper.ToolEvent): void {
 
@@ -83,7 +69,7 @@ class ResizeTool {
   onMouseDrag(event: paper.ToolEvent): void {
     if (this.enabled) {
       const state = store.getState();
-      if (this.width || this.height) {
+      if (this.scaleXDiff || this.scaleYDiff) {
         if (paperMain.project.getItem({ data: { id: 'hoverFrame' } })) {
           paperMain.project.getItem({ data: { id: 'hoverFrame' } }).remove();
         }
@@ -91,326 +77,261 @@ class ResizeTool {
           paperMain.project.getItem({ data: { id: 'selectionFrame' } }).remove();
         }
       }
+      const selectionBounds = getSelectionBounds(state.layer.present);
+      const newSelectionBounds = selectionBounds.clone();
       if (state.layer.present.selected.length > 0) {
-        if (this.ref) {
-          this.ref.remove();
-        }
         switch(this.handle) {
           case 'topLeft': {
-            const oldTo = this.to;
-            const newTo = this.to.clone();
-            if (newTo.width - event.delta.x <= 0) {
+            if (newSelectionBounds.width - event.delta.x <= 0) {
               this.handle = 'topRight';
-              newTo.width += event.delta.x;
+              newSelectionBounds.width += event.delta.x;
+              this.horizontalFlip = !this.horizontalFlip;
+              state.layer.present.selected.forEach((layer) => {
+                const paperLayer = getPaperLayer(layer);
+                paperLayer.scale(-1, 1);
+              });
             } else {
-              newTo.width -= event.delta.x;
+              newSelectionBounds.width -= event.delta.x;
             }
-            if (newTo.height - event.delta.y <= 0) {
+            if (newSelectionBounds.height - event.delta.y <= 0) {
               this.handle = 'bottomLeft';
-              newTo.height += event.delta.y;
+              newSelectionBounds.height += event.delta.y;
+              this.verticalFlip = !this.verticalFlip;
+              state.layer.present.selected.forEach((layer) => {
+                const paperLayer = getPaperLayer(layer);
+                paperLayer.scale(1, -1);
+              });
             } else {
-              newTo.height -= event.delta.y;
+              newSelectionBounds.height -= event.delta.y;
             }
-            this.diffX = newTo.width / oldTo.width;
-            this.diffY = newTo.height / oldTo.height;
-            this.to = newTo;
+            this.scaleXDiff = newSelectionBounds.width / selectionBounds.width;
+            this.scaleYDiff = newSelectionBounds.height / selectionBounds.height;
             break;
           }
           case 'topCenter': {
-            const oldTo = this.to;
-            const newTo = this.to.clone();
-            if (newTo.height - event.delta.y <= 0) {
+            if (newSelectionBounds.height - event.delta.y <= 0) {
               this.handle = 'bottomCenter';
-              newTo.height += event.delta.y;
+              newSelectionBounds.height += event.delta.y;
+              this.verticalFlip = !this.verticalFlip;
+              state.layer.present.selected.forEach((layer) => {
+                const paperLayer = getPaperLayer(layer);
+                paperLayer.scale(1, -1);
+              });
             } else {
-              newTo.height -= event.delta.y;
-              newTo.y += event.delta.y;
+              newSelectionBounds.height -= event.delta.y;
             }
-            this.diffY = newTo.height / oldTo.height;
-            this.to = newTo;
+            this.scaleYDiff = newSelectionBounds.height / selectionBounds.height;
+            this.scaleXDiff = 0;
             break;
           }
           case 'topRight': {
-            const oldTo = this.to;
-            const newTo = this.to.clone();
-            if (newTo.width + event.delta.x <= 0) {
+            if (newSelectionBounds.width + event.delta.x <= 0) {
               this.handle = 'topLeft';
-              newTo.width -= event.delta.x;
+              newSelectionBounds.width -= event.delta.x;
+              this.horizontalFlip = !this.horizontalFlip;
+              state.layer.present.selected.forEach((layer) => {
+                const paperLayer = getPaperLayer(layer);
+                paperLayer.scale(-1, 1);
+              });
             } else {
-              newTo.width += event.delta.x;
+              newSelectionBounds.width += event.delta.x;
             }
-            if (newTo.height - event.delta.y <= 0) {
+            if (newSelectionBounds.height - event.delta.y <= 0) {
               this.handle = 'bottomRight';
-              newTo.height += event.delta.y;
+              newSelectionBounds.height += event.delta.y;
+              this.verticalFlip = !this.verticalFlip;
+              state.layer.present.selected.forEach((layer) => {
+                const paperLayer = getPaperLayer(layer);
+                paperLayer.scale(1, -1);
+              });
             } else {
-              newTo.height -= event.delta.y;
+              newSelectionBounds.height -= event.delta.y;
             }
-            this.diffX = newTo.width / oldTo.width;
-            this.diffY = newTo.height / oldTo.height;
-            this.to = newTo;
+            this.scaleXDiff = newSelectionBounds.width / selectionBounds.width;
+            this.scaleYDiff = newSelectionBounds.height / selectionBounds.height;
             break;
           }
           case 'bottomLeft': {
-            const oldTo = this.to;
-            const newTo = this.to.clone();
-            if (newTo.width - event.delta.x <= 0) {
+            if (newSelectionBounds.width - event.delta.x <= 0) {
               this.handle = 'bottomRight';
-              newTo.width += event.delta.x;
+              newSelectionBounds.width += event.delta.x;
+              this.horizontalFlip = !this.horizontalFlip;
+              state.layer.present.selected.forEach((layer) => {
+                const paperLayer = getPaperLayer(layer);
+                paperLayer.scale(-1, 1);
+              });
             } else {
-              newTo.width -= event.delta.x;
+              newSelectionBounds.width -= event.delta.x;
             }
-            if (newTo.height + event.delta.y <= 0) {
+            if (newSelectionBounds.height + event.delta.y <= 0) {
               this.handle = 'topLeft';
-              newTo.height -= event.delta.y;
+              newSelectionBounds.height -= event.delta.y;
+              this.verticalFlip = !this.verticalFlip;
+              state.layer.present.selected.forEach((layer) => {
+                const paperLayer = getPaperLayer(layer);
+                paperLayer.scale(1, -1);
+              });
             } else {
-              newTo.height += event.delta.y;
+              newSelectionBounds.height += event.delta.y;
             }
-            this.diffX = newTo.width / oldTo.width;
-            this.diffY = newTo.height / oldTo.height;
-            this.to = newTo;
+            this.scaleXDiff = newSelectionBounds.width / selectionBounds.width;
+            this.scaleYDiff = newSelectionBounds.height / selectionBounds.height;
             break;
           }
           case 'bottomCenter': {
-            const oldTo = this.to;
-            const newTo = this.to.clone();
-            if (newTo.height + event.delta.y <= 0) {
+            if (newSelectionBounds.height + event.delta.y <= 0) {
               this.handle = 'topCenter';
-              newTo.height -= event.delta.y;
+              newSelectionBounds.height -= event.delta.y;
+              this.verticalFlip = !this.verticalFlip;
+              state.layer.present.selected.forEach((layer) => {
+                const paperLayer = getPaperLayer(layer);
+                paperLayer.scale(1, -1);
+              });
             } else {
-              newTo.height += event.delta.y;
+              newSelectionBounds.height += event.delta.y;
             }
-            this.diffY = newTo.height / oldTo.height;
-            this.to = newTo;
+            this.scaleYDiff = newSelectionBounds.height / selectionBounds.height;
+            this.scaleXDiff = 0;
             break;
           }
           case 'bottomRight': {
-            const oldTo = this.to;
-            const newTo = this.to.clone();
-            if (newTo.width + event.delta.x <= 0) {
+            if (newSelectionBounds.width + event.delta.x <= 0) {
               this.handle = 'bottomLeft';
-              newTo.width -= event.delta.x;
+              newSelectionBounds.width -= event.delta.x;
+              this.horizontalFlip = !this.horizontalFlip;
+              state.layer.present.selected.forEach((layer) => {
+                const paperLayer = getPaperLayer(layer);
+                paperLayer.scale(-1, 1);
+              });
             } else {
-              newTo.width += event.delta.x;
+              newSelectionBounds.width += event.delta.x;
             }
-            if (newTo.height + event.delta.y <= 0) {
+            if (newSelectionBounds.height + event.delta.y <= 0) {
               this.handle = 'topRight';
-              newTo.height -= event.delta.y;
+              newSelectionBounds.height -= event.delta.y;
+              this.verticalFlip = !this.verticalFlip;
+              state.layer.present.selected.forEach((layer) => {
+                const paperLayer = getPaperLayer(layer);
+                paperLayer.scale(1, -1);
+              });
             } else {
-              newTo.height += event.delta.y;
+              newSelectionBounds.height += event.delta.y;
             }
-            this.diffX = newTo.width / oldTo.width;
-            this.diffY = newTo.height / oldTo.height;
-            this.to = newTo;
+            this.scaleXDiff = newSelectionBounds.width / selectionBounds.width;
+            this.scaleYDiff = newSelectionBounds.height / selectionBounds.height;
             break;
           }
           case 'leftCenter': {
-            const oldTo = this.to;
-            const newTo = this.to.clone();
-            if (newTo.width - event.delta.x <= 0) {
+            if (newSelectionBounds.width - event.delta.x <= 0) {
               this.handle = 'rightCenter';
-              newTo.width += event.delta.x;
+              newSelectionBounds.width += event.delta.x;
+              this.horizontalFlip = !this.horizontalFlip;
+              state.layer.present.selected.forEach((layer) => {
+                const paperLayer = getPaperLayer(layer);
+                paperLayer.scale(-1, 1);
+              });
             } else {
-              newTo.width -= event.delta.x;
+              newSelectionBounds.width -= event.delta.x;
             }
-            this.diffX = newTo.width / oldTo.width;
-            this.to = newTo;
+            this.scaleXDiff = newSelectionBounds.width / selectionBounds.width;
+            this.scaleYDiff = 0;
             break;
           }
           case 'rightCenter': {
-            const oldTo = this.to;
-            const newTo = this.to.clone();
-            if (newTo.width + event.delta.x <= 0) {
+            if (newSelectionBounds.width + event.delta.x <= 0) {
               this.handle = 'leftCenter';
-              newTo.width -= event.delta.x;
+              newSelectionBounds.width -= event.delta.x;
+              this.horizontalFlip = !this.horizontalFlip;
+              state.layer.present.selected.forEach((layer) => {
+                const paperLayer = getPaperLayer(layer);
+                paperLayer.scale(-1, 1);
+              });
             } else {
-              newTo.width += event.delta.x;
+              newSelectionBounds.width += event.delta.x;
             }
-            this.diffX = newTo.width / oldTo.width;
-            this.to = newTo;
+            this.scaleXDiff = newSelectionBounds.width / selectionBounds.width;
+            this.scaleYDiff = 0;
             break;
           }
         }
-        //const diffPercentage = this.to.height / this.from.height;
         state.layer.present.selected.forEach((layer) => {
-          const layerItem = state.layer.present.byId[layer];
           const paperLayer = getPaperLayer(layer);
+          switch(this.handle) {
+            case 'topLeft': {
+              paperLayer.pivot = selectionBounds.bottomRight;
+              break;
+            }
+            case 'topCenter': {
+              paperLayer.pivot = selectionBounds.bottomCenter;
+              break;
+            }
+            case 'topRight': {
+              paperLayer.pivot = selectionBounds.bottomLeft;
+              break;
+            }
+            case 'bottomLeft': {
+              paperLayer.pivot = selectionBounds.topRight;
+              break;
+            }
+            case 'bottomCenter': {
+              paperLayer.pivot = selectionBounds.topCenter;
+              break;
+            }
+            case 'bottomRight': {
+              paperLayer.pivot = selectionBounds.topLeft;
+              break;
+            }
+            case 'leftCenter': {
+              paperLayer.pivot = selectionBounds.rightCenter;
+              break;
+            }
+            case 'rightCenter': {
+              paperLayer.pivot = selectionBounds.leftCenter;
+              break;
+            }
+          }
           if (this.shiftModifier) {
-            // switch(this.handle) {
-            //   case 'topLeft': {
-            //     paperLayer.bounds.width -= event.delta.x;
-            //     paperLayer.bounds.height -= event.delta.x;
-            //     paperLayer.position.y += event.delta.x;
-            //     paperLayer.position.x += event.delta.x;
-            //     this.width -= event.delta.x;
-            //     this.height -= event.delta.x;
-            //     this.x += event.delta.x;
-            //     this.y += event.delta.x;
-            //     break;
-            //   }
-            //   case 'topCenter': {
-            //     paperLayer.bounds.width -= event.delta.y;
-            //     paperLayer.bounds.height -= event.delta.y;
-            //     paperLayer.position.y += event.delta.y;
-            //     this.width -= event.delta.y;
-            //     this.height -= event.delta.y;
-            //     this.y += event.delta.y;
-            //     break;
-            //   }
-            //   case 'topRight': {
-            //     paperLayer.bounds.width += event.delta.x;
-            //     paperLayer.bounds.height += event.delta.x;
-            //     paperLayer.position.y -= event.delta.x;
-            //     this.width += event.delta.x;
-            //     this.height += event.delta.x;
-            //     this.y -= event.delta.x;
-            //     break;
-            //   }
-            //   case 'bottomLeft': {
-            //     paperLayer.bounds.width -= event.delta.x;
-            //     paperLayer.bounds.height -= event.delta.x;
-            //     paperLayer.position.x += event.delta.x;
-            //     this.width -= event.delta.x;
-            //     this.height -= event.delta.x;
-            //     this.x += event.delta.x;
-            //     break;
-            //   }
-            //   case 'bottomCenter': {
-            //     paperLayer.bounds.height += event.delta.y;
-            //     paperLayer.bounds.width += event.delta.y;
-            //     this.width += event.delta.y;
-            //     this.height += event.delta.y;
-            //     break;
-            //   }
-            //   case 'bottomRight': {
-            //     paperLayer.bounds.width += event.delta.x;
-            //     paperLayer.bounds.height += event.delta.x;
-            //     this.width += event.delta.x;
-            //     this.height += event.delta.x;
-            //     break;
-            //   }
-            //   case 'leftCenter': {
-            //     paperLayer.bounds.width -= event.delta.x;
-            //     paperLayer.bounds.height -= event.delta.x;
-            //     paperLayer.position.x += event.delta.x;
-            //     this.width -= event.delta.x;
-            //     this.height -= event.delta.x;
-            //     this.x += event.delta.x;
-            //     break;
-            //   }
-            //   case 'rightCenter': {
-            //     paperLayer.bounds.width += event.delta.x;
-            //     paperLayer.bounds.height += event.delta.x;
-            //     this.width += event.delta.x;
-            //     this.height += event.delta.x;
-            //     break;
-            //   }
-            // }
+            paperLayer.scale(this.scaleXDiff);
           } else {
             switch(this.handle) {
-              case 'topLeft': {
-                // paperLayer.bounds.width -= event.delta.x;
-                // paperLayer.bounds.height -= event.delta.y;
-                // paperLayer.position.y += event.delta.y;
-                // paperLayer.position.x += event.delta.x;
-                // this.width -= event.delta.x;
-                // this.height -= event.delta.y;
-                // this.x += event.delta.x;
-                // this.y += event.delta.y;
-                paperLayer.pivot = paperLayer.bounds.bottomRight;
-                paperLayer.scale(this.diffX, this.diffY);
-                break;
-              }
-              case 'topCenter': {
-                // paperLayer.bounds.height -= event.delta.y;
-                // paperLayer.position.y += event.delta.y;
-                // this.height -= event.delta.y;
-                // this.y += event.delta.y;
-                paperLayer.pivot = paperLayer.bounds.bottomCenter;
-                paperLayer.scale(1, this.diffY);
-                if (Math.round(paperLayer.bounds.center.y) !== Math.round(this.to.center.y)) {
-                  paperLayer.translate(new paper.Point(0, this.to.center.y / paperLayer.bounds.center.y));
-                }
-                break;
-              }
-              case 'topRight': {
-                // paperLayer.bounds.width += event.delta.x;
-                // paperLayer.bounds.height -= event.delta.y;
-                // paperLayer.position.y += event.delta.y;
-                // this.width += event.delta.x;
-                // this.height -= event.delta.y;
-                // this.y += event.delta.y;
-                paperLayer.pivot = paperLayer.bounds.bottomLeft;
-                paperLayer.scale(this.diffX, this.diffY);
-                break;
-              }
-              case 'bottomLeft': {
-                // paperLayer.bounds.width -= event.delta.x;
-                // paperLayer.bounds.height += event.delta.y;
-                // paperLayer.position.x += event.delta.x;
-                // this.width -= event.delta.x;
-                // this.height += event.delta.y;
-                // this.x += event.delta.x;
-                paperLayer.pivot = paperLayer.bounds.topRight;
-                paperLayer.scale(this.diffX, this.diffY);
-                break;
-              }
-              case 'bottomCenter': {
-                paperLayer.pivot = paperLayer.bounds.topCenter;
-                // paperLayer.bounds.height += event.delta.y;
-                // this.height += event.delta.y;
-                paperLayer.scale(1, this.diffY);
-                break;
-              }
+              case 'topLeft':
+              case 'topRight':
+              case 'bottomLeft':
               case 'bottomRight': {
-                // paperLayer.bounds.width += event.delta.x;
-                // paperLayer.bounds.height += event.delta.y;
-                // this.width += event.delta.x;
-                // this.height += event.delta.y;
-                paperLayer.pivot = paperLayer.bounds.topLeft;
-                paperLayer.scale(this.diffX, this.diffY);
+                paperLayer.scale(this.scaleXDiff, this.scaleYDiff);
                 break;
               }
-              case 'leftCenter': {
-                // paperLayer.bounds.width -= event.delta.x;
-                // paperLayer.position.x += event.delta.x;
-                // this.width -= event.delta.x;
-                // this.x += event.delta.x;
-                paperLayer.pivot = paperLayer.bounds.rightCenter;
-                paperLayer.scale(this.diffX, 1);
+              case 'topCenter':
+              case 'bottomCenter': {
+                paperLayer.scale(1, this.scaleYDiff);
                 break;
               }
+              case 'leftCenter':
               case 'rightCenter': {
-                // paperLayer.bounds.width += event.delta.x;
-                // this.width += event.delta.x;
-                paperLayer.pivot = paperLayer.bounds.leftCenter;
-                paperLayer.scale(this.diffX, 1);
+                paperLayer.scale(this.scaleXDiff, 1);
                 break;
               }
             }
           }
+          paperLayer.pivot = paperLayer.bounds.center;
         });
         updateSelectionFrame(state.layer.present, this.handle);
-        this.ref = new paperMain.Path.Rectangle({
-          point: this.to.point,
-          size: this.to.size,
-          strokeWidth: 5,
-          strokeColor: 'red'
-        });
+        if (this.tooltip) {
+          this.tooltip.paperLayer.remove();
+        }
+        this.tooltip = new Tooltip(`${Math.round(selectionBounds.width)} x ${Math.round(selectionBounds.height)}`, event.point, {drag: true, up: true});
       }
     }
   }
   onMouseUp(event: paper.ToolEvent): void {
     if (this.enabled) {
-      if (this.width || this.height) {
+      if (this.scaleXDiff || this.scaleYDiff) {
         const state = store.getState();
         if (state.layer.present.selected.length > 0) {
-          store.dispatch(resizeLayersBy({layers: state.layer.present.selected, width: this.width, height: this.height, x: this.x, y: this.y}));
+          store.dispatch(resizeLayers({layers: state.layer.present.selected, verticalFlip: this.verticalFlip, horizontalFlip: this.horizontalFlip}));
         }
         updateSelectionFrame(state.layer.present);
       }
-    }
-    if (this.ref) {
-      this.ref.remove();
     }
     this.disable();
   }

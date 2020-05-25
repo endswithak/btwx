@@ -55,8 +55,10 @@ import {
   SET_LAYER_HEIGHT,
   SET_LAYER_ROTATION,
   SET_LAYER_OPACITY,
-  SET_LAYER_HORIZONTAL_FLIP,
-  SET_LAYER_VERTICAL_FLIP,
+  ENABLE_LAYER_HORIZONTAL_FLIP,
+  DISABLE_LAYER_HORIZONTAL_FLIP,
+  ENABLE_LAYER_VERTICAL_FLIP,
+  DISABLE_LAYER_VERTICAL_FLIP,
   ENABLE_LAYER_FILL,
   DISABLE_LAYER_FILL,
   SET_LAYER_FILL_COLOR,
@@ -74,8 +76,8 @@ import {
   SET_LAYER_SHADOW_BLUR,
   SET_LAYER_SHADOW_X_OFFSET,
   SET_LAYER_SHADOW_Y_OFFSET,
-  RESIZE_LAYER_BY,
-  RESIZE_LAYERS_BY,
+  RESIZE_LAYER,
+  RESIZE_LAYERS,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -135,8 +137,10 @@ import {
   setLayerHeight,
   setLayerRotation,
   setLayerOpacity,
-  setLayerHorizontalFlip,
-  setLayerVerticalFlip,
+  enableLayerHorizontalFlip,
+  disableLayerHorizontalFlip,
+  enableLayerVerticalFlip,
+  disableLayerVerticalFlip,
   enableLayerFill,
   disableLayerFill,
   setLayerFillColor,
@@ -154,8 +158,8 @@ import {
   setLayerShadowBlur,
   setLayerShadowXOffset,
   setLayerShadowYOffset,
-  resizeLayerBy,
-  resizeLayersBy
+  resizeLayer,
+  resizeLayers
 } from '../utils/layer';
 
 export interface LayerState {
@@ -332,10 +336,14 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setLayerRotation(state, action);
     case SET_LAYER_OPACITY:
       return setLayerOpacity(state, action);
-    case SET_LAYER_HORIZONTAL_FLIP:
-      return setLayerHorizontalFlip(state, action);
-    case SET_LAYER_VERTICAL_FLIP:
-      return setLayerVerticalFlip(state, action);
+    case ENABLE_LAYER_HORIZONTAL_FLIP:
+      return enableLayerHorizontalFlip(state, action);
+    case DISABLE_LAYER_HORIZONTAL_FLIP:
+      return disableLayerHorizontalFlip(state, action);
+    case ENABLE_LAYER_VERTICAL_FLIP:
+      return enableLayerVerticalFlip(state, action);
+    case DISABLE_LAYER_VERTICAL_FLIP:
+      return disableLayerVerticalFlip(state, action);
     case ENABLE_LAYER_FILL:
       return enableLayerFill(state, action);
     case DISABLE_LAYER_FILL:
@@ -370,10 +378,10 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setLayerShadowXOffset(state, action);
     case SET_LAYER_SHADOW_Y_OFFSET:
       return setLayerShadowYOffset(state, action);
-    case RESIZE_LAYER_BY:
-      return resizeLayerBy(state, action);
-    case RESIZE_LAYERS_BY:
-      return resizeLayersBy(state, action);
+    case RESIZE_LAYER:
+      return resizeLayer(state, action);
+    case RESIZE_LAYERS:
+      return resizeLayers(state, action);
     default:
       return state;
   }

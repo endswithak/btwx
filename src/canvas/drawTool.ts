@@ -6,12 +6,13 @@ import { getNearestScopeAncestor, getLayerByPaperId, isScopeGroupLayer, getPaper
 import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
 import { applyShapeMethods } from './shapeUtils';
 import { paperMain } from './index';
+import Tooltip from './tooltip';
 
 class DrawTool {
   tool: paper.Tool;
   drawShapeType: em.ShapeType;
   outline: paper.Path;
-  tooltip: paper.Group;
+  tooltip: Tooltip;
   from: paper.Point;
   to: paper.Point;
   pointDiff: paper.Point;
@@ -83,7 +84,7 @@ class DrawTool {
         });
     }
   }
-  renderTooltip(tooltipOpts: any) {
+  updateTooltip(): void {
     let tooltipContent;
     switch(this.drawShapeType) {
       case 'Rectangle':
@@ -96,36 +97,10 @@ class DrawTool {
         tooltipContent = `${Math.round(this.maxDim)} x ${Math.round(this.maxDim)}`;
         break;
     }
-    const tooltip = new paperMain.PointText({
-      fillColor: 'white',
-      fontFamily: 'Space Mono',
-      fontSize: 12 / paperMain.view.zoom,
-      content: tooltipContent,
-      //applyMatrix: false,
-      ...tooltipOpts
-    });
-    const tooltipBackground = new paperMain.Path.Rectangle({
-      point: [this.to.x + (30 / paperMain.view.zoom), this.to.y + (30 / paperMain.view.zoom)],
-      size: [tooltip.bounds.width + 8, tooltip.bounds.height + 8],
-      fillColor: new paperMain.Color(0,0,0,0.75),
-      //applyMatrix: false,
-    });
-    tooltip.position = tooltipBackground.position;
-    const tooltipGroup = new paperMain.Group({
-      children: [tooltipBackground, tooltip],
-      //applyMatrix: false
-    });
-    return tooltipGroup;
-  }
-  updateTooltip(): void {
     if (this.tooltip) {
-      this.tooltip.remove();
+      this.tooltip.paperLayer.remove();
     }
-    this.tooltip = this.renderTooltip({});
-    this.tooltip.removeOn({
-      drag: true,
-      up: true
-    });
+    this.tooltip = new Tooltip(tooltipContent, this.to, {drag: true, up: true});
   }
   updateOutline(): void {
     if (this.outline) {
@@ -151,7 +126,7 @@ class DrawTool {
       }
       case 'escape': {
         if (this.tooltip) {
-          this.tooltip.remove();
+          this.tooltip.paperLayer.remove();
         }
         if (this.outline) {
           this.outline.remove();

@@ -2,18 +2,19 @@ import React, { useContext, ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import SidebarToggleButton from './SidebarToggleButton';
 import { RootState } from '../store/reducers';
-import { SetLayerHorizontalFlipPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayerHorizontalFlip } from '../store/actions/layer';
+import { EnableLayerHorizontalFlipPayload, DisableLayerHorizontalFlipPayload, LayerTypes } from '../store/actionTypes/layer';
+import { enableLayerHorizontalFlip, disableLayerHorizontalFlip } from '../store/actions/layer';
 import { getPaperLayer } from '../store/selectors/layer';
 
-interface YFlipInputProps {
+interface HorizontalFlipInputProps {
   selected?: string[];
   horizontalFlipValue?: boolean;
-  setLayerHorizontalFlip?(payload: SetLayerHorizontalFlipPayload): LayerTypes;
+  enableLayerHorizontalFlip?(payload: EnableLayerHorizontalFlipPayload): LayerTypes;
+  disableLayerHorizontalFlip?(payload: DisableLayerHorizontalFlipPayload): LayerTypes;
 }
 
-const YFlipInput = (props: YFlipInputProps): ReactElement => {
-  const { selected, setLayerHorizontalFlip, horizontalFlipValue } = props;
+const HorizontalFlipInput = (props: HorizontalFlipInputProps): ReactElement => {
+  const { selected, horizontalFlipValue, enableLayerHorizontalFlip, disableLayerHorizontalFlip } = props;
   const [horizontalFlip, setHorizontalFlip] = useState<boolean>(horizontalFlipValue);
 
   useEffect(() => {
@@ -21,10 +22,14 @@ const YFlipInput = (props: YFlipInputProps): ReactElement => {
   }, [horizontalFlipValue]);
 
   const handleClick = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    setHorizontalFlip(!horizontalFlip);
     const paperLayer = getPaperLayer(selected[0]);
-    paperLayer.scale(paperLayer.scaling.x, -1);
-    setLayerHorizontalFlip({id: selected[0], horizontalFlip: !horizontalFlip ? -1 : 1});
+    paperLayer.scale(-1, 1);
+    if (horizontalFlip) {
+      disableLayerHorizontalFlip({id: selected[0]});
+    } else {
+      enableLayerHorizontalFlip({id: selected[0]});
+    }
+    setHorizontalFlip(!horizontalFlip);
   };
 
   return (
@@ -44,7 +49,7 @@ const mapStateToProps = (state: RootState) => {
       case 0:
         return false;
       case 1:
-        return layer.present.byId[layer.present.selected[0]].style.horizontalFlip === -1;
+        return layer.present.byId[layer.present.selected[0]].style.horizontalFlip;
       default:
         return false;
     }
@@ -54,5 +59,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { setLayerHorizontalFlip }
-)(YFlipInput);
+  { enableLayerHorizontalFlip, disableLayerHorizontalFlip }
+)(HorizontalFlipInput);

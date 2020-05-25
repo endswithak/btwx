@@ -50,8 +50,8 @@ declare namespace em {
       };
       opacity: number;
       rotation: number;
-      horizontalFlip: number;
-      verticalFlip: number;
+      horizontalFlip: boolean;
+      verticalFlip: boolean;
       shadow: {
         enabled: boolean;
         color: string;

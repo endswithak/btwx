@@ -21,7 +21,7 @@ import {
   SetLayerStrokeColor, SetLayerStrokeWidth, SetLayerShadowColor, SetLayerShadowBlur, SetLayerShadowXOffset,
   SetLayerShadowYOffset, SetLayerRotation, EnableLayerFill, DisableLayerFill, EnableLayerStroke,
   DisableLayerStroke, DisableLayerShadow, EnableLayerShadow, SetLayerStrokeCap, SetLayerStrokeJoin,
-  SetLayerStrokeDashArray, SetLayerStrokeMiterLimit, ResizeLayerBy, ResizeLayersBy
+  SetLayerStrokeDashArray, SetLayerStrokeMiterLimit, ResizeLayerBy, ResizeLayersBy, ResizeLayer, ResizeLayers, EnableLayerHorizontalFlip, DisableLayerHorizontalFlip, EnableLayerVerticalFlip, DisableLayerVerticalFlip
 } from '../actionTypes/layer';
 
 import {
@@ -1540,7 +1540,7 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
   return updateParentBounds(currentState, action.payload.id);
 };
 
-export const setLayerHorizontalFlip = (state: LayerState, action: SetLayerHorizontalFlip): LayerState => {
+export const enableLayerHorizontalFlip = (state: LayerState, action: EnableLayerHorizontalFlip): LayerState => {
   let currentState = state;
   currentState = {
     ...currentState,
@@ -1550,7 +1550,7 @@ export const setLayerHorizontalFlip = (state: LayerState, action: SetLayerHorizo
         ...currentState.byId[action.payload.id],
         style: {
           ...currentState.byId[action.payload.id].style,
-          horizontalFlip: action.payload.horizontalFlip
+          horizontalFlip: true
         }
       }
     },
@@ -1559,7 +1559,7 @@ export const setLayerHorizontalFlip = (state: LayerState, action: SetLayerHorizo
   return updateParentBounds(currentState, action.payload.id);
 };
 
-export const setLayerVerticalFlip = (state: LayerState, action: SetLayerVerticalFlip): LayerState => {
+export const disableLayerHorizontalFlip = (state: LayerState, action: DisableLayerHorizontalFlip): LayerState => {
   let currentState = state;
   currentState = {
     ...currentState,
@@ -1569,7 +1569,45 @@ export const setLayerVerticalFlip = (state: LayerState, action: SetLayerVertical
         ...currentState.byId[action.payload.id],
         style: {
           ...currentState.byId[action.payload.id].style,
-          verticalFlip: action.payload.verticalFlip
+          horizontalFlip: false
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return updateParentBounds(currentState, action.payload.id);
+};
+
+export const enableLayerVerticalFlip = (state: LayerState, action: EnableLayerVerticalFlip): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          verticalFlip: true
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return updateParentBounds(currentState, action.payload.id);
+};
+
+export const disableLayerVerticalFlip = (state: LayerState, action: DisableLayerVerticalFlip): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          verticalFlip: true
         }
       }
     },
@@ -1958,7 +1996,7 @@ export const setLayerShadowYOffset = (state: LayerState, action: SetLayerShadowY
   return currentState;
 };
 
-export const resizeLayerBy = (state: LayerState, action: ResizeLayerBy): LayerState => {
+export const resizeLayer = (state: LayerState, action: ResizeLayer): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
   currentState = {
@@ -1972,6 +2010,11 @@ export const resizeLayerBy = (state: LayerState, action: ResizeLayerBy): LayerSt
           y: paperLayer.position.y,
           width: paperLayer.bounds.width,
           height: paperLayer.bounds.height
+        },
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          horizontalFlip: action.payload.horizontalFlip ? !currentState.byId[action.payload.id].style.horizontalFlip : currentState.byId[action.payload.id].style.horizontalFlip,
+          verticalFlip: action.payload.verticalFlip ? !currentState.byId[action.payload.id].style.verticalFlip : currentState.byId[action.payload.id].style.verticalFlip
         }
       }
     },
@@ -1980,8 +2023,8 @@ export const resizeLayerBy = (state: LayerState, action: ResizeLayerBy): LayerSt
   return updateParentBounds(currentState, action.payload.id);
 };
 
-export const resizeLayersBy = (state: LayerState, action: ResizeLayersBy): LayerState => {
+export const resizeLayers = (state: LayerState, action: ResizeLayers): LayerState => {
   return action.payload.layers.reduce((result, current) => {
-    return resizeLayerBy(result, layerActions.resizeLayerBy({id: current, width: action.payload.width, height: action.payload.height, x: action.payload.x, y: action.payload.y}) as ResizeLayerBy);
+    return resizeLayer(result, layerActions.resizeLayer({id: current, verticalFlip: action.payload.verticalFlip, horizontalFlip: action.payload.horizontalFlip}) as ResizeLayerBy);
   }, state);
 };

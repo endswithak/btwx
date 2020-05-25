@@ -62,8 +62,10 @@ import {
   SET_LAYER_HEIGHT,
   SET_LAYER_ROTATION,
   SET_LAYER_OPACITY,
-  SET_LAYER_HORIZONTAL_FLIP,
-  SET_LAYER_VERTICAL_FLIP,
+  ENABLE_LAYER_HORIZONTAL_FLIP,
+  DISABLE_LAYER_HORIZONTAL_FLIP,
+  ENABLE_LAYER_VERTICAL_FLIP,
+  DISABLE_LAYER_VERTICAL_FLIP,
   ENABLE_LAYER_FILL,
   DISABLE_LAYER_FILL,
   SET_LAYER_FILL_COLOR,
@@ -81,8 +83,8 @@ import {
   SET_LAYER_SHADOW_BLUR,
   SET_LAYER_SHADOW_X_OFFSET,
   SET_LAYER_SHADOW_Y_OFFSET,
-  RESIZE_LAYER_BY,
-  RESIZE_LAYERS_BY,
+  RESIZE_LAYER,
+  RESIZE_LAYERS,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
@@ -137,8 +139,10 @@ import {
   SetLayerHeightPayload,
   SetLayerRotationPayload,
   SetLayerOpacityPayload,
-  SetLayerHorizontalFlipPayload,
-  SetLayerVerticalFlipPayload,
+  EnableLayerHorizontalFlipPayload,
+  DisableLayerHorizontalFlipPayload,
+  EnableLayerVerticalFlipPayload,
+  DisableLayerVerticalFlipPayload,
   EnableLayerFillPayload,
   DisableLayerFillPayload,
   SetLayerFillColorPayload,
@@ -156,8 +160,8 @@ import {
   SetLayerShadowBlurPayload,
   SetLayerShadowXOffsetPayload,
   SetLayerShadowYOffsetPayload,
-  ResizeLayerByPayload,
-  ResizeLayersByPayload,
+  ResizeLayerPayload,
+  ResizeLayersPayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -229,8 +233,8 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
         },
         opacity: 1,
         rotation: 0,
-        horizontalFlip: 1,
-        verticalFlip: 1,
+        horizontalFlip: false,
+        verticalFlip: false,
         shadow: {
           enabled: false,
           color: '#000000',
@@ -288,8 +292,8 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
         },
         opacity: 1,
         rotation: 0,
-        horizontalFlip: 1,
-        verticalFlip: 1,
+        horizontalFlip: false,
+        verticalFlip: false,
         shadow: {
           enabled: false,
           color: '#000000',
@@ -351,8 +355,8 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
         },
         opacity: 1,
         rotation: 0,
-        horizontalFlip: 1,
-        verticalFlip: 1,
+        horizontalFlip: false,
+        verticalFlip: false,
         shadow: {
           enabled: false,
           color: '#000000',
@@ -677,13 +681,23 @@ export const setLayerOpacity = (payload: SetLayerOpacityPayload): LayerTypes => 
   payload
 });
 
-export const setLayerHorizontalFlip = (payload: SetLayerHorizontalFlipPayload): LayerTypes => ({
-  type: SET_LAYER_HORIZONTAL_FLIP,
+export const enableLayerHorizontalFlip = (payload: EnableLayerHorizontalFlipPayload): LayerTypes => ({
+  type: ENABLE_LAYER_HORIZONTAL_FLIP,
   payload
 });
 
-export const setLayerVerticalFlip = (payload: SetLayerVerticalFlipPayload): LayerTypes => ({
-  type: SET_LAYER_VERTICAL_FLIP,
+export const disableLayerHorizontalFlip = (payload: DisableLayerHorizontalFlipPayload): LayerTypes => ({
+  type: DISABLE_LAYER_HORIZONTAL_FLIP,
+  payload
+});
+
+export const enableLayerVerticalFlip = (payload: EnableLayerVerticalFlipPayload): LayerTypes => ({
+  type: ENABLE_LAYER_VERTICAL_FLIP,
+  payload
+});
+
+export const disableLayerVerticalFlip = (payload: DisableLayerVerticalFlipPayload): LayerTypes => ({
+  type: DISABLE_LAYER_VERTICAL_FLIP,
   payload
 });
 
@@ -772,12 +786,12 @@ export const setLayerShadowYOffset = (payload: SetLayerShadowYOffsetPayload): La
   payload
 });
 
-export const resizeLayerBy = (payload: ResizeLayerByPayload): LayerTypes => ({
-  type: RESIZE_LAYER_BY,
+export const resizeLayer = (payload: ResizeLayerPayload): LayerTypes => ({
+  type: RESIZE_LAYER,
   payload
 });
 
-export const resizeLayersBy = (payload: ResizeLayersByPayload): LayerTypes => ({
-  type: RESIZE_LAYERS_BY,
+export const resizeLayers = (payload: ResizeLayersPayload): LayerTypes => ({
+  type: RESIZE_LAYERS,
   payload
 });

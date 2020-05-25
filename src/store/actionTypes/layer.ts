@@ -79,8 +79,10 @@ export const SET_LAYER_WIDTH = 'SET_LAYER_WIDTH';
 export const SET_LAYER_HEIGHT = 'SET_LAYER_HEIGHT';
 export const SET_LAYER_ROTATION = 'SET_LAYER_ROTATION';
 
-export const SET_LAYER_HORIZONTAL_FLIP = 'SET_LAYER_HORIZONTAL_FLIP';
-export const SET_LAYER_VERTICAL_FLIP = 'SET_LAYER_VERTICAL_FLIP';
+export const ENABLE_LAYER_HORIZONTAL_FLIP = 'ENABLE_LAYER_HORIZONTAL_FLIP';
+export const DISABLE_LAYER_HORIZONTAL_FLIP = 'DISABLE_LAYER_HORIZONTAL_FLIP';
+export const ENABLE_LAYER_VERTICAL_FLIP = 'ENABLE_LAYER_VERTICAL_FLIP';
+export const DISABLE_LAYER_VERTICAL_FLIP = 'DISABLE_LAYER_VERTICAL_FLIP';
 
 export const SET_LAYER_OPACITY = 'SET_LAYER_OPACITY';
 
@@ -104,8 +106,8 @@ export const SET_LAYER_SHADOW_BLUR = 'SET_LAYER_SHADOW_BLUR';
 export const SET_LAYER_SHADOW_X_OFFSET = 'SET_LAYER_SHADOW_X_OFFSET';
 export const SET_LAYER_SHADOW_Y_OFFSET = 'SET_LAYER_SHADOW_Y_OFFSET';
 
-export const RESIZE_LAYER_BY = 'RESIZE_LAYER_BY';
-export const RESIZE_LAYERS_BY = 'RESIZE_LAYERS_BY';
+export const RESIZE_LAYER = 'RESIZE_LAYER';
+export const RESIZE_LAYERS = 'RESIZE_LAYERS';
 
 // Page
 
@@ -163,8 +165,8 @@ export interface AddArtboardPayload {
     };
     opacity: number;
     rotation: number;
-    horizontalFlip: number;
-    verticalFlip: number;
+    horizontalFlip: boolean;
+    verticalFlip: boolean;
     shadow: {
       enabled: boolean;
       color: string;
@@ -218,8 +220,8 @@ export interface AddGroupPayload {
     };
     opacity: number;
     rotation: number;
-    horizontalFlip: number;
-    verticalFlip: number;
+    horizontalFlip: boolean;
+    verticalFlip: boolean;
     shadow: {
       enabled: boolean;
       color: string;
@@ -273,8 +275,8 @@ export interface AddShapePayload {
     };
     opacity: number;
     rotation: number;
-    horizontalFlip: number;
-    verticalFlip: number;
+    horizontalFlip: boolean;
+    verticalFlip: boolean;
     shadow: {
       enabled: boolean;
       color: string;
@@ -868,24 +870,40 @@ export interface SetLayerOpacity {
   payload: SetLayerOpacityPayload;
 }
 
-export interface SetLayerHorizontalFlipPayload {
+export interface EnableLayerHorizontalFlipPayload {
   id: string;
-  horizontalFlip: number;
 }
 
-export interface SetLayerHorizontalFlip {
-  type: typeof SET_LAYER_HORIZONTAL_FLIP;
-  payload: SetLayerHorizontalFlipPayload;
+export interface EnableLayerHorizontalFlip {
+  type: typeof ENABLE_LAYER_HORIZONTAL_FLIP;
+  payload: EnableLayerHorizontalFlipPayload;
 }
 
-export interface SetLayerVerticalFlipPayload {
+export interface DisableLayerHorizontalFlipPayload {
   id: string;
-  verticalFlip: number;
 }
 
-export interface SetLayerVerticalFlip {
-  type: typeof SET_LAYER_VERTICAL_FLIP;
-  payload: SetLayerVerticalFlipPayload;
+export interface DisableLayerHorizontalFlip {
+  type: typeof DISABLE_LAYER_HORIZONTAL_FLIP;
+  payload: DisableLayerHorizontalFlipPayload;
+}
+
+export interface EnableLayerVerticalFlipPayload {
+  id: string;
+}
+
+export interface EnableLayerVerticalFlip {
+  type: typeof ENABLE_LAYER_VERTICAL_FLIP;
+  payload: EnableLayerVerticalFlipPayload;
+}
+
+export interface DisableLayerVerticalFlipPayload {
+  id: string;
+}
+
+export interface DisableLayerVerticalFlip {
+  type: typeof DISABLE_LAYER_VERTICAL_FLIP;
+  payload: DisableLayerVerticalFlipPayload;
 }
 
 export interface EnableLayerFillPayload {
@@ -1052,31 +1070,27 @@ export interface SetLayerShadowYOffset {
   payload: SetLayerShadowYOffsetPayload;
 }
 
-export interface ResizeLayerByPayload {
+export interface ResizeLayerPayload {
   id: string;
-  width: number;
-  height: number;
-  x: number;
-  y: number;
+  verticalFlip: boolean;
+  horizontalFlip: boolean;
 }
 
-export interface ResizeLayerBy {
-  type: typeof RESIZE_LAYER_BY;
-  payload: ResizeLayerByPayload;
+export interface ResizeLayer {
+  type: typeof RESIZE_LAYER;
+  payload: ResizeLayerPayload;
 }
 
-export interface ResizeLayersByPayload {
+export interface ResizeLayersPayload {
   layers: string[];
-  width: number;
-  height: number;
-  x: number;
-  y: number;
+  verticalFlip: boolean;
+  horizontalFlip: boolean;
 }
 
-export interface ResizeLayersBy {
-  type: typeof RESIZE_LAYERS_BY;
-  payload: ResizeLayersByPayload;
+export interface ResizeLayers {
+  type: typeof RESIZE_LAYERS;
+  payload: ResizeLayersPayload;
 }
 
 
-export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower | FreezeLayerTween | UnFreezeLayerTween | SetLayerX | SetLayerY | SetLayerWidth | SetLayerHeight | SetLayerRotation | SetLayerOpacity | SetLayerHorizontalFlip | SetLayerVerticalFlip | EnableLayerFill | DisableLayerFill | SetLayerFillColor | EnableLayerStroke | DisableLayerStroke | SetLayerStrokeColor | SetLayerStrokeWidth | SetLayerStrokeCap | SetLayerStrokeJoin | SetLayerStrokeDashArray | SetLayerStrokeMiterLimit | EnableLayerShadow | DisableLayerShadow | SetLayerShadowColor | SetLayerShadowBlur | SetLayerShadowXOffset | SetLayerShadowYOffset | ResizeLayerBy | ResizeLayersBy;
+export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower | FreezeLayerTween | UnFreezeLayerTween | SetLayerX | SetLayerY | SetLayerWidth | SetLayerHeight | SetLayerRotation | SetLayerOpacity | EnableLayerHorizontalFlip | DisableLayerHorizontalFlip | EnableLayerVerticalFlip | DisableLayerVerticalFlip | EnableLayerFill | DisableLayerFill | SetLayerFillColor | EnableLayerStroke | DisableLayerStroke | SetLayerStrokeColor | SetLayerStrokeWidth | SetLayerStrokeCap | SetLayerStrokeJoin | SetLayerStrokeDashArray | SetLayerStrokeMiterLimit | EnableLayerShadow | DisableLayerShadow | SetLayerShadowColor | SetLayerShadowBlur | SetLayerShadowXOffset | SetLayerShadowYOffset | ResizeLayer | ResizeLayers;
