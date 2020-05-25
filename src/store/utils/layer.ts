@@ -17,11 +17,12 @@ import {
   RemoveLayerTweenEvent, SetLayerTweenDuration, SetLayerTweenDelay, IncrementLayerTweenDuration,
   DecrementLayerTweenDuration, IncrementLayerTweenDelay, DecrementLayerTweenDelay, SetLayerTweenEase,
   SetLayerTweenPower, FreezeLayerTween, UnFreezeLayerTween, SetLayerX, SetLayerY, SetLayerWidth,
-  SetLayerHeight, SetLayerOpacity, SetLayerHorizontalFlip, SetLayerVerticalFlip, SetLayerFillColor,
+  SetLayerHeight, SetLayerOpacity, SetLayerFillColor,
   SetLayerStrokeColor, SetLayerStrokeWidth, SetLayerShadowColor, SetLayerShadowBlur, SetLayerShadowXOffset,
   SetLayerShadowYOffset, SetLayerRotation, EnableLayerFill, DisableLayerFill, EnableLayerStroke,
   DisableLayerStroke, DisableLayerShadow, EnableLayerShadow, SetLayerStrokeCap, SetLayerStrokeJoin,
-  SetLayerStrokeDashArray, SetLayerStrokeMiterLimit, ResizeLayerBy, ResizeLayersBy, ResizeLayer, ResizeLayers, EnableLayerHorizontalFlip, DisableLayerHorizontalFlip, EnableLayerVerticalFlip, DisableLayerVerticalFlip
+  SetLayerStrokeDashArray, SetLayerStrokeMiterLimit, ResizeLayer, ResizeLayers, EnableLayerHorizontalFlip,
+  DisableLayerHorizontalFlip, EnableLayerVerticalFlip, DisableLayerVerticalFlip
 } from '../actionTypes/layer';
 
 import {
