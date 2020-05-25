@@ -205,7 +205,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandles = 'all') 
       size: [8, 8],
       fillColor: '#fff',
       strokeColor: '#009DEC',
-      strokeWidth: 1,
+      strokeWidth: 1 / paperMain.view.zoom,
       insert: false,
       //applyMatrix: false
     }

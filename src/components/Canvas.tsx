@@ -19,7 +19,7 @@ interface CanvasProps {
   paperProject?: string;
   layerById?: {
     [id: string]: em.Layer;
-  }
+  };
 }
 
 const Canvas = ({selectLayer, enableSelectionTool, activeArtboard, paperProject, layerById}: CanvasProps): ReactElement => {
@@ -38,6 +38,7 @@ const Canvas = ({selectLayer, enableSelectionTool, activeArtboard, paperProject,
       e.preventDefault();
       if (e.ctrlKey) {
         e.preventDefault();
+        const prevZoom = paperMain.view.zoom;
         const nextZoom = paperMain.view.zoom - e.deltaY * 0.01;
         // paper.view.center.x = e.clientX;
         // paper.view.center.y = e.clientY;
@@ -48,10 +49,17 @@ const Canvas = ({selectLayer, enableSelectionTool, activeArtboard, paperProject,
         } else if (e.deltaY > 0 && nextZoom < 0) {
           paperMain.view.zoom = 0.001;
         }
-        // if (paperMain.project.getItem({data: {id: 'selectionFrame'}})) {
-        //   const selectionFrameHandles = paperMain.project.getItems({data: {id: 'selectionFrameHandle'}});
-        //   const selectionFrameBase = paperMain.project.getItem({data: {id: 'selectionFrameBase'}});
-        // }
+        const zoomDiff = paperMain.view.zoom - prevZoom;
+        const scale = 1 / paperMain.view.zoom;
+        if (paperMain.project.getItem({data: {id: 'selectionFrame'}})) {
+          const selectionFrameHandles = paperMain.project.getItems({data: {id: 'selectionFrameHandle'}});
+          const selectionFrameBase = paperMain.project.getItem({data: {id: 'selectionFrameBase'}});
+          selectionFrameHandles.forEach((handle) => {
+            handle.scale(1 - scale * zoomDiff);
+            handle.strokeWidth = scale;
+          });
+          selectionFrameBase.strokeWidth = scale;
+        }
       } else {
         paperMain.view.translate(new paper.Point(e.deltaX * -1, e.deltaY * -1));
       }
