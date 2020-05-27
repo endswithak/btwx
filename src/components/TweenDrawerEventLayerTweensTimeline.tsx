@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement } from 'react';
+import React, { useContext, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
@@ -18,6 +18,7 @@ interface TweenDrawerEventLayerTweensTimelineProps {
 const TweenDrawerEventLayerTweensTimeline = (props: TweenDrawerEventLayerTweensTimelineProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { tweenEventLayerTweens } = props;
+  const [editing, setEditing] = useState(null);
 
   return (
     <>
@@ -25,7 +26,9 @@ const TweenDrawerEventLayerTweensTimeline = (props: TweenDrawerEventLayerTweensT
         tweenEventLayerTweens.allIds.map((tween, index) => (
           <TweenDrawerEventLayerTweenTimeline
             key={index}
-            tweenId={tween} />
+            tweenId={tween}
+            editing={editing}
+            setEditing={setEditing} />
         ))
       }
     </>

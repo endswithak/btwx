@@ -9,23 +9,27 @@ import {
   ENABLE_SELECTION_TOOL,
   DISABLE_SELECTION_TOOL,
   ENABLE_ARTBOARD_TOOL,
+  ENABLE_TEXT_TOOL,
   ToolTypes,
 } from '../actionTypes/tool';
 
 import DrawTool from '../../canvas/drawTool';
 import SelectionTool from '../../canvas/selectionTool';
 import ArtboardTool from '../../canvas/artboardTool';
+import TextTool from '../../canvas/textTool';
 
 export interface ToolState {
-  tool: 'Draw' | 'Selection' | 'Artboard';
+  tool: 'Draw' | 'Selection' | 'Artboard' | 'Text';
   drawing: boolean;
   drawShape: em.ShapeType;
+  typing: boolean;
 }
 
 const initialState: ToolState = {
   tool: null,
   drawing: false,
-  drawShape: null
+  drawShape: null,
+  typing: false
 };
 
 const removeActiveTool = () => {
@@ -111,6 +115,17 @@ export default (state = initialState, action: ToolTypes): ToolState => {
         tool: 'Artboard',
         drawing: false,
         drawShape: null
+      };
+    }
+    case ENABLE_TEXT_TOOL: {
+      removeActiveTool();
+      new TextTool();
+      return {
+        ...state,
+        tool: 'Text',
+        drawing: false,
+        drawShape: null,
+        typing: true
       };
     }
     default:

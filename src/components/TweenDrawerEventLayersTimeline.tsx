@@ -50,13 +50,14 @@ const TweenDrawerEventLayersTimeline = (props: TweenDrawerEventLayersTimelinePro
                   background: theme.background.z1,
                   boxShadow: `-1px 0 0 ${theme.background.z4} inset`,
                   flexShrink: 0,
-                  position: 'relative'
+                  position: 'relative',
+                  display: 'flex',
+                  alignSelf: 'flex-end'
                 }}>
                 <span style={{
                   position: 'absolute',
-                  top: theme.unit * 4,
-                  left: '100%',
-                  transform: `translateX(${theme.unit}px)`,
+                  bottom: theme.unit * 4,
+                  right: theme.unit,
                   color: theme.text.lighter,
                   fontSize: 10
                 }}>

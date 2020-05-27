@@ -8,6 +8,7 @@ import {
   DISABLE_SELECTION_TOOL,
   ENABLE_DRAG_TOOL,
   ENABLE_ARTBOARD_TOOL,
+  ENABLE_TEXT_TOOL,
   ToolTypes
 } from '../actionTypes/tool';
 
@@ -45,4 +46,8 @@ export const enableDragTool = (): ToolTypes => ({
 
 export const enableArtboardTool = (): ToolTypes => ({
   type: ENABLE_ARTBOARD_TOOL
+});
+
+export const enableTextTool = (): ToolTypes => ({
+  type: ENABLE_TEXT_TOOL
 });

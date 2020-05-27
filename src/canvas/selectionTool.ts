@@ -1,11 +1,9 @@
-import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
-import { getPagePaperLayer, getLayerByPaperId, getLayerDepth, getParentLayer, getNearestScopeAncestor, isScopeGroupLayer, getLayer, getPaperLayer } from '../store/selectors/layer';
-import { groupLayers, ungroupLayers, selectLayer, deselectLayer, deselectAllLayers, removeLayers, increaseLayerScope, decreaseLayerScope, clearLayerScope, setLayerHover, newLayerScope, copyLayerToClipboard, copyLayersToClipboard, pasteLayersFromClipboard, moveLayerBy, moveLayersBy, escapeLayerScope, deepSelectLayer } from '../store/actions/layer';
+import { getPaperLayer } from '../store/selectors/layer';
+import { groupLayers, ungroupLayers, removeLayers, copyLayersToClipboard, pasteLayersFromClipboard, escapeLayerScope } from '../store/actions/layer';
 import store from '../store';
 import AreaSelectTool from './areaSelectTool';
-import { enableRectangleDrawTool, enableEllipseDrawTool, enableDragTool } from '../store/actions/tool';
 import { ActionCreators } from 'redux-undo';
-import { updateHoverFrame, updateSelectionFrame, updateActiveArtboardFrame } from '../store/utils/layer';
+import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
 import { applyShapeMethods } from './shapeUtils';
 import { applyArtboardMethods } from './artboardUtils';
 import DragTool from './dragTool';
@@ -163,7 +161,6 @@ class SelectionTool {
     }
   }
   onMouseDown(event: paper.ToolEvent): void {
-    const state = store.getState();
     const hitResult = paperMain.project.hitTest(event.point);
     if (hitResult) {
       if (hitResult.item.data.id === 'selectionFrameHandle') {

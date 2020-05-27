@@ -1999,27 +1999,58 @@ export const setLayerShadowYOffset = (state: LayerState, action: SetLayerShadowY
 
 export const resizeLayer = (state: LayerState, action: ResizeLayer): LayerState => {
   let currentState = state;
+  const layer = currentState.byId[action.payload.id];
   const paperLayer = getPaperLayer(action.payload.id);
-  currentState = {
-    ...currentState,
-    byId: {
-      ...currentState.byId,
-      [action.payload.id]: {
-        ...currentState.byId[action.payload.id],
-        frame: {
-          x: paperLayer.position.x,
-          y: paperLayer.position.y,
-          width: paperLayer.bounds.width,
-          height: paperLayer.bounds.height
-        },
-        style: {
-          ...currentState.byId[action.payload.id].style,
-          horizontalFlip: action.payload.horizontalFlip ? !currentState.byId[action.payload.id].style.horizontalFlip : currentState.byId[action.payload.id].style.horizontalFlip,
-          verticalFlip: action.payload.verticalFlip ? !currentState.byId[action.payload.id].style.verticalFlip : currentState.byId[action.payload.id].style.verticalFlip
+  if (layer.type === 'Shape') {
+    const clone = paperLayer.clone({insert: false}) as paper.PathItem;
+    clone.fitBounds(new paperMain.Rectangle({
+      point: new paperMain.Point(0,0),
+      size: new paperMain.Size(16,16)
+    }));
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          frame: {
+            x: paperLayer.position.x,
+            y: paperLayer.position.y,
+            width: paperLayer.bounds.width,
+            height: paperLayer.bounds.height
+          },
+          pathData: clone.pathData,
+          style: {
+            ...currentState.byId[action.payload.id].style,
+            horizontalFlip: action.payload.horizontalFlip ? !currentState.byId[action.payload.id].style.horizontalFlip : currentState.byId[action.payload.id].style.horizontalFlip,
+            verticalFlip: action.payload.verticalFlip ? !currentState.byId[action.payload.id].style.verticalFlip : currentState.byId[action.payload.id].style.verticalFlip
+          }
+        } as em.Shape
+      },
+      paperProject: paperMain.project.exportJSON()
+    }
+  } else {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          frame: {
+            x: paperLayer.position.x,
+            y: paperLayer.position.y,
+            width: paperLayer.bounds.width,
+            height: paperLayer.bounds.height
+          },
+          style: {
+            ...currentState.byId[action.payload.id].style,
+            horizontalFlip: action.payload.horizontalFlip ? !currentState.byId[action.payload.id].style.horizontalFlip : currentState.byId[action.payload.id].style.horizontalFlip,
+            verticalFlip: action.payload.verticalFlip ? !currentState.byId[action.payload.id].style.verticalFlip : currentState.byId[action.payload.id].style.verticalFlip
+          }
         }
-      }
-    },
-    paperProject: paperMain.project.exportJSON()
+      },
+      paperProject: paperMain.project.exportJSON()
+    }
   }
   return updateParentBounds(currentState, action.payload.id);
 };
