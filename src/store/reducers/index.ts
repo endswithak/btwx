@@ -6,11 +6,13 @@ import contextMenu from './contextMenu';
 import tweenDrawer from './tweenDrawer';
 import easeEditor from './easeEditor';
 import colorEditor from './colorEditor';
+import textEditor from './textEditor';
 
 import {
   ADD_ARTBOARD,
   ADD_GROUP,
   ADD_SHAPE,
+  ADD_TEXT,
   REMOVE_LAYER,
   REMOVE_LAYERS,
   ADD_LAYER_CHILD,
@@ -69,6 +71,7 @@ const rootReducer = combineReducers({
     ADD_ARTBOARD,
     ADD_GROUP,
     ADD_SHAPE,
+    ADD_TEXT,
     REMOVE_LAYER,
     REMOVE_LAYERS,
     ADD_LAYER_CHILD,
@@ -125,7 +128,8 @@ const rootReducer = combineReducers({
   contextMenu,
   tweenDrawer,
   easeEditor,
-  colorEditor
+  colorEditor,
+  textEditor
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

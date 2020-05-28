@@ -1,0 +1,25 @@
+.c-text-editor
+  +absolute-full
+  overflow: hidden
+
+.c-text-editor__overlay
+  +absolute-full
+
+.c-text-editor__textarea
+  //position: fixed
+  padding: 0
+  outline: none
+  border: none
+  margin: 0
+  resize: none
+  background: none
+  //background: rgba(255,0,255,0.5)
+
+  &::selection
+    background: $selectionColor
+
+.c-text-editor__span
+  white-space: pre
+  position: absolute
+  opacity: 0
+  z-index: -999999999999

@@ -47,6 +47,7 @@ export default (state = initialState, action: ToolTypes): ToolState => {
         ...state,
         tool: 'Draw',
         drawing: true,
+        typing: false,
         drawShape: 'Rectangle'
       };
     }
@@ -57,6 +58,7 @@ export default (state = initialState, action: ToolTypes): ToolState => {
         ...state,
         tool: 'Draw',
         drawing: true,
+        typing: false,
         drawShape: 'Ellipse'
       };
     }
@@ -67,6 +69,7 @@ export default (state = initialState, action: ToolTypes): ToolState => {
         ...state,
         tool: 'Draw',
         drawing: true,
+        typing: false,
         drawShape: 'Star'
       };
     }
@@ -77,6 +80,7 @@ export default (state = initialState, action: ToolTypes): ToolState => {
         ...state,
         tool: 'Draw',
         drawing: true,
+        typing: false,
         drawShape: 'Polygon'
       };
     }
@@ -87,6 +91,7 @@ export default (state = initialState, action: ToolTypes): ToolState => {
         ...state,
         tool: 'Draw',
         drawing: true,
+        typing: false,
         drawShape: 'Rounded'
       };
     }
@@ -97,6 +102,7 @@ export default (state = initialState, action: ToolTypes): ToolState => {
         ...state,
         tool: 'Selection',
         drawing: false,
+        typing: false,
         drawShape: null
       };
     }
@@ -114,6 +120,7 @@ export default (state = initialState, action: ToolTypes): ToolState => {
         ...state,
         tool: 'Artboard',
         drawing: false,
+        typing: false,
         drawShape: null
       };
     }

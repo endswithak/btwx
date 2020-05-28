@@ -6,6 +6,7 @@ import { ActionCreators } from 'redux-undo';
 import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
 import { applyShapeMethods } from './shapeUtils';
 import { applyArtboardMethods } from './artboardUtils';
+import { applyTextMethods } from './textUtils';
 import DragTool from './dragTool';
 import ResizeTool from './resizeTool';
 import { paperMain } from './index';
@@ -22,6 +23,9 @@ const redo = () => {
     if (state.layer.present.byId[key].type === 'Artboard') {
       const artboardBackground = getPaperLayer(key).getItem({data: {id: 'ArtboardBackground'}});
       applyArtboardMethods(artboardBackground);
+    }
+    if (state.layer.present.byId[key].type === 'Text') {
+      applyTextMethods(getPaperLayer(key));
     }
   });
   updateHoverFrame(state.layer.present);
@@ -40,6 +44,9 @@ const undo = () => {
     if (state.layer.present.byId[key].type === 'Artboard') {
       const artboardBackground = getPaperLayer(key).getItem({data: {id: 'ArtboardBackground'}});
       applyArtboardMethods(artboardBackground);
+    }
+    if (state.layer.present.byId[key].type === 'Text') {
+      applyTextMethods(getPaperLayer(key));
     }
   });
   updateHoverFrame(state.layer.present);

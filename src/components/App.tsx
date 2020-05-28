@@ -8,6 +8,7 @@ import TweenEventSelect from './TweenEventSelect';
 import TweenEventDestinationSelect from './TweenEventDestinationSelect';
 import EaseEditor from './EaseEditor';
 import ColorEditor from './ColorEditor';
+import TextEditor from './TextEditor';
 import { ThemeContext } from './ThemeProvider';
 
 const App = (): ReactElement => {
@@ -28,6 +29,7 @@ const App = (): ReactElement => {
           <div className='c-app__main'>
             <Canvas />
             <TweenDrawer />
+            <TextEditor />
           </div>
           <StylesSidebar />
         </div>

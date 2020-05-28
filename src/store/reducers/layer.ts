@@ -3,6 +3,7 @@ import {
   ADD_ARTBOARD,
   ADD_GROUP,
   ADD_SHAPE,
+  ADD_TEXT,
   REMOVE_LAYER,
   REMOVE_LAYERS,
   SELECT_LAYER,
@@ -78,6 +79,7 @@ import {
   SET_LAYER_SHADOW_Y_OFFSET,
   RESIZE_LAYER,
   RESIZE_LAYERS,
+  SET_LAYER_TEXT,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -85,6 +87,7 @@ import {
   addPage,
   addArtboard,
   addLayer,
+  addText,
   removeLayer,
   removeLayers,
   selectLayer,
@@ -159,12 +162,13 @@ import {
   setLayerShadowXOffset,
   setLayerShadowYOffset,
   resizeLayer,
-  resizeLayers
+  resizeLayers,
+  setLayerText
 } from '../utils/layer';
 
 export interface LayerState {
   byId: {
-    [id: string]: em.Page | em.Group | em.Shape | em.Artboard | em.ArtboardBackground;
+    [id: string]: em.LayerTypes;
   };
   allIds: string[];
   page: string;
@@ -232,6 +236,8 @@ export default (state = initialState, action: LayerTypes): LayerState => {
     case ADD_GROUP:
     case ADD_SHAPE:
       return addLayer(state, action);
+    case ADD_TEXT:
+      return addText(state, action);
     case REMOVE_LAYER:
       return removeLayer(state, action);
     case REMOVE_LAYERS:
@@ -382,6 +388,8 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return resizeLayer(state, action);
     case RESIZE_LAYERS:
       return resizeLayers(state, action);
+    case SET_LAYER_TEXT:
+      return setLayerText(state, action);
     default:
       return state;
   }

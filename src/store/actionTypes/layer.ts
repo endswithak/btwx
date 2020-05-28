@@ -2,6 +2,7 @@ export const ADD_PAGE = 'ADD_PAGE';
 export const ADD_GROUP = 'ADD_GROUP';
 export const ADD_SHAPE = 'ADD_SHAPE';
 export const ADD_ARTBOARD = 'ADD_ARTBOARD';
+export const ADD_TEXT = 'ADD_TEXT';
 
 export const REMOVE_LAYER = 'REMOVE_LAYER';
 export const REMOVE_LAYERS = 'REMOVE_LAYERS';
@@ -109,6 +110,8 @@ export const SET_LAYER_SHADOW_Y_OFFSET = 'SET_LAYER_SHADOW_Y_OFFSET';
 export const RESIZE_LAYER = 'RESIZE_LAYER';
 export const RESIZE_LAYERS = 'RESIZE_LAYERS';
 
+export const SET_LAYER_TEXT = 'SET_LAYER_TEXT';
+
 // Page
 
 export interface AddPagePayload {
@@ -147,36 +150,7 @@ export interface AddArtboardPayload {
   points?: {
     closed: boolean;
   };
-  style?: {
-    fill: {
-      enabled: boolean;
-      color: string;
-    };
-    stroke: {
-      enabled: boolean;
-      color: string;
-      width: number;
-    };
-    strokeOptions: {
-      cap: em.StrokeCapTypes;
-      join: em.StrokeJoinTypes;
-      dashArray: number[];
-      miterLimit: number;
-    };
-    opacity: number;
-    rotation: number;
-    horizontalFlip: boolean;
-    verticalFlip: boolean;
-    shadow: {
-      enabled: boolean;
-      color: string;
-      blur: number;
-      offset: {
-        x: number;
-        y: number;
-      };
-    };
-  };
+  style?: em.Style;
 }
 
 export interface AddArtboard {
@@ -202,36 +176,7 @@ export interface AddGroupPayload {
   points?: {
     closed: boolean;
   };
-  style?: {
-    fill: {
-      enabled: boolean;
-      color: string;
-    };
-    stroke: {
-      enabled: boolean;
-      color: string;
-      width: number;
-    };
-    strokeOptions: {
-      cap: em.StrokeCapTypes;
-      join: em.StrokeJoinTypes;
-      dashArray: number[];
-      miterLimit: number;
-    };
-    opacity: number;
-    rotation: number;
-    horizontalFlip: boolean;
-    verticalFlip: boolean;
-    shadow: {
-      enabled: boolean;
-      color: string;
-      blur: number;
-      offset: {
-        x: number;
-        y: number;
-      };
-    };
-  };
+  style?: em.Style;
 }
 
 export interface AddGroup {
@@ -257,41 +202,38 @@ export interface AddShapePayload {
   points?: {
     closed: boolean;
   };
-  style?: {
-    fill: {
-      enabled: boolean;
-      color: string;
-    };
-    stroke: {
-      enabled: boolean;
-      color: string;
-      width: number;
-    };
-    strokeOptions: {
-      cap: em.StrokeCapTypes;
-      join: em.StrokeJoinTypes;
-      dashArray: number[];
-      miterLimit: number;
-    };
-    opacity: number;
-    rotation: number;
-    horizontalFlip: boolean;
-    verticalFlip: boolean;
-    shadow: {
-      enabled: boolean;
-      color: string;
-      blur: number;
-      offset: {
-        x: number;
-        y: number;
-      };
-    };
-  };
+  style?: em.Style;
 }
 
 export interface AddShape {
   type: typeof ADD_SHAPE;
   payload: AddShapePayload;
+}
+
+// Text
+
+export interface AddTextPayload {
+  type?: 'Text';
+  id?: string;
+  frame?: em.Frame;
+  name?: string;
+  parent?: string;
+  paperLayer?: paper.Item;
+  selected?: boolean;
+  hover?: boolean;
+  tweenEvents?: [];
+  tweens?: [];
+  points?: {
+    closed: boolean;
+  };
+  text?: string;
+  style?: em.Style;
+  textStyle?: em.TextStyle;
+}
+
+export interface AddText {
+  type: typeof ADD_TEXT;
+  payload: AddTextPayload;
 }
 
 // Remove
@@ -1092,5 +1034,15 @@ export interface ResizeLayers {
   payload: ResizeLayersPayload;
 }
 
+export interface SetLayerTextPayload {
+  id: string;
+  text: string;
+}
 
-export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower | FreezeLayerTween | UnFreezeLayerTween | SetLayerX | SetLayerY | SetLayerWidth | SetLayerHeight | SetLayerRotation | SetLayerOpacity | EnableLayerHorizontalFlip | DisableLayerHorizontalFlip | EnableLayerVerticalFlip | DisableLayerVerticalFlip | EnableLayerFill | DisableLayerFill | SetLayerFillColor | EnableLayerStroke | DisableLayerStroke | SetLayerStrokeColor | SetLayerStrokeWidth | SetLayerStrokeCap | SetLayerStrokeJoin | SetLayerStrokeDashArray | SetLayerStrokeMiterLimit | EnableLayerShadow | DisableLayerShadow | SetLayerShadowColor | SetLayerShadowBlur | SetLayerShadowXOffset | SetLayerShadowYOffset | ResizeLayer | ResizeLayers;
+export interface SetLayerText {
+  type: typeof SET_LAYER_TEXT;
+  payload: SetLayerTextPayload;
+}
+
+
+export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | AddText | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower | FreezeLayerTween | UnFreezeLayerTween | SetLayerX | SetLayerY | SetLayerWidth | SetLayerHeight | SetLayerRotation | SetLayerOpacity | EnableLayerHorizontalFlip | DisableLayerHorizontalFlip | EnableLayerVerticalFlip | DisableLayerVerticalFlip | EnableLayerFill | DisableLayerFill | SetLayerFillColor | EnableLayerStroke | DisableLayerStroke | SetLayerStrokeColor | SetLayerStrokeWidth | SetLayerStrokeCap | SetLayerStrokeJoin | SetLayerStrokeDashArray | SetLayerStrokeMiterLimit | EnableLayerShadow | DisableLayerShadow | SetLayerShadowColor | SetLayerShadowBlur | SetLayerShadowXOffset | SetLayerShadowYOffset | ResizeLayer | ResizeLayers | SetLayerText;

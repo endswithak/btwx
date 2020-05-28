@@ -107,7 +107,7 @@
     "electron-squirrel-startup": "^1.0.0",
     "gsap": "file:gsap-bonus.tgz",
     "mathjs": "^7.0.0",
-    "paper": "^0.12.4",
+    "paper": "^0.12.7",
     "react": "^16.13.0",
     "react-color": "^2.18.1",
     "react-dom": "^16.13.0",

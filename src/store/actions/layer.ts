@@ -6,6 +6,7 @@ import {
   ADD_ARTBOARD,
   ADD_GROUP,
   ADD_SHAPE,
+  ADD_TEXT,
   REMOVE_LAYER,
   REMOVE_LAYERS,
   SELECT_LAYER,
@@ -85,10 +86,12 @@ import {
   SET_LAYER_SHADOW_Y_OFFSET,
   RESIZE_LAYER,
   RESIZE_LAYERS,
+  SET_LAYER_TEXT,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
   AddShapePayload,
+  AddTextPayload,
   RemoveLayerPayload,
   RemoveLayersPayload,
   SelectLayerPayload,
@@ -162,6 +165,7 @@ import {
   SetLayerShadowYOffsetPayload,
   ResizeLayerPayload,
   ResizeLayersPayload,
+  SetLayerTextPayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -366,6 +370,72 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
             y: 0,
           }
         }
+      },
+      tweenEvents: [],
+      tweens: []
+    }
+  }
+};
+
+// Text
+
+export const addText = (payload: AddTextPayload): LayerTypes => {
+  const id = uuidv4();
+  payload.paperLayer.name = payload.name ? payload.name : 'Text';
+  payload.paperLayer.data = {
+    id: id,
+    type: 'Text'
+  }
+  return {
+    type: ADD_TEXT,
+    payload: {
+      type: 'Text',
+      id: id,
+      frame: payload.frame,
+      name: payload.text ? payload.text : 'Type Something',
+      parent: payload.parent ? payload.parent : null,
+      selected: false,
+      points: {
+        closed: true,
+      },
+      text: payload.text ? payload.text : 'Type Something',
+      style: {
+        fill: {
+          enabled: false,
+          color: '#cccccc'
+        },
+        stroke: {
+          enabled: false,
+          color: '#999999',
+          width: 1
+        },
+        strokeOptions: {
+          cap: 'butt',
+          join: 'miter',
+          dashArray: [0,0],
+          miterLimit: 10
+        },
+        opacity: 1,
+        rotation: 0,
+        horizontalFlip: false,
+        verticalFlip: false,
+        shadow: {
+          enabled: false,
+          color: '#000000',
+          blur: 10,
+          offset: {
+            x: 0,
+            y: 0,
+          }
+        }
+      },
+      textStyle: {
+        fontSize: 12,
+        fillColor: '#000000',
+        leading: 16,
+        fontWeight: 'normal',
+        fontFamily: 'Helvetica',
+        justification: 'left'
       },
       tweenEvents: [],
       tweens: []
@@ -793,5 +863,10 @@ export const resizeLayer = (payload: ResizeLayerPayload): LayerTypes => ({
 
 export const resizeLayers = (payload: ResizeLayersPayload): LayerTypes => ({
   type: RESIZE_LAYERS,
+  payload
+});
+
+export const setLayerText = (payload: SetLayerTextPayload): LayerTypes => ({
+  type: SET_LAYER_TEXT,
   payload
 });

@@ -9,10 +9,13 @@ import { RootState } from '../store/reducers';
 import { getPaperLayer } from '../store/selectors/layer';
 import { updateActiveArtboardFrame } from '../store/utils/layer';
 import { applyShapeMethods } from '../canvas/shapeUtils';
+import { applyTextMethods } from '../canvas/textUtils';
 import { applyArtboardMethods } from '../canvas/artboardUtils';
 import { paperMain } from '../canvas';
 
 interface CanvasProps {
+  drawing: boolean;
+  typing: boolean;
   selectLayer(payload: SelectLayerPayload): LayerTypes;
   enableSelectionTool(): any;
   activeArtboard?: string;
@@ -22,10 +25,11 @@ interface CanvasProps {
   };
 }
 
-const Canvas = ({selectLayer, enableSelectionTool, activeArtboard, paperProject, layerById}: CanvasProps): ReactElement => {
+const Canvas = (props: CanvasProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useContext(ThemeContext);
+  const {drawing, typing, selectLayer, enableSelectionTool, activeArtboard, paperProject, layerById} = props;
 
   useEffect(() => {
     canvasRef.current.width = canvasContainerRef.current.clientWidth;
@@ -61,12 +65,15 @@ const Canvas = ({selectLayer, enableSelectionTool, activeArtboard, paperProject,
           selectionFrameBase.strokeWidth = scale;
         }
       } else {
-        paperMain.view.translate(new paper.Point(e.deltaX * -1, e.deltaY * -1));
+        paperMain.view.translate(new paper.Point((e.deltaX * ( 1 / paperMain.view.zoom)) * -1, (e.deltaY * ( 1 / paperMain.view.zoom)) * -1));
       }
     });
     Object.keys(layerById).forEach((key) => {
       if (layerById[key].type === 'Shape') {
         applyShapeMethods(getPaperLayer(key));
+      }
+      if (layerById[key].type === 'Text') {
+        applyTextMethods(getPaperLayer(key));
       }
       if (layerById[key].type === 'Artboard') {
         applyArtboardMethods(getPaperLayer(key).getItem({data: {id: 'ArtboardBackground'}}));
@@ -96,7 +103,7 @@ const Canvas = ({selectLayer, enableSelectionTool, activeArtboard, paperProject,
 
   return (
     <div
-      className={`c-canvas`}
+      className={`c-canvas ${drawing ? 'c-canvas--drawing' : null} ${typing ? 'c-canvas--typing' : null}`}
       ref={canvasContainerRef}>
       <canvas
         id='canvas-main'
@@ -110,11 +117,13 @@ const Canvas = ({selectLayer, enableSelectionTool, activeArtboard, paperProject,
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
+  const { layer, tool } = state;
   return {
     activeArtboard: layer.present.activeArtboard,
     paperProject: layer.present.paperProject,
-    layerById: layer.present.byId
+    layerById: layer.present.byId,
+    drawing: tool.drawing,
+    typing: tool.typing
   };
 };
 

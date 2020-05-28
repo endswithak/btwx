@@ -22,7 +22,7 @@ import {
   SetLayerShadowYOffset, SetLayerRotation, EnableLayerFill, DisableLayerFill, EnableLayerStroke,
   DisableLayerStroke, DisableLayerShadow, EnableLayerShadow, SetLayerStrokeCap, SetLayerStrokeJoin,
   SetLayerStrokeDashArray, SetLayerStrokeMiterLimit, ResizeLayer, ResizeLayers, EnableLayerHorizontalFlip,
-  DisableLayerHorizontalFlip, EnableLayerVerticalFlip, DisableLayerVerticalFlip
+  DisableLayerHorizontalFlip, EnableLayerVerticalFlip, DisableLayerVerticalFlip, AddText, SetLayerText
 } from '../actionTypes/layer';
 
 import {
@@ -38,6 +38,7 @@ import {
 import { paperMain } from '../../canvas';
 
 import { applyShapeMethods } from '../../canvas/shapeUtils';
+import { applyTextMethods } from '../../canvas/textUtils';
 import { applyArtboardMethods } from '../../canvas/artboardUtils';
 
 export const addPage = (state: LayerState, action: AddPage): LayerState => {
@@ -105,6 +106,36 @@ export const addLayer = (state: LayerState, action: AddGroup | AddShape): LayerS
         ...action.payload,
         parent: layerParent
       } as em.Page | em.Group | em.Shape,
+      [layerParent]: {
+        ...currentState.byId[layerParent],
+        children: addItem((currentState.byId[layerParent] as em.Group).children, action.payload.id),
+        showChildren: true
+      } as em.Group
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  // update tweens
+  //currentState = updateLayerTweens(currentState, action.payload.id);
+  // select layer
+  return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+};
+
+export const addText = (state: LayerState, action: AddText): LayerState => {
+  let currentState = state;
+  const layerParent = action.payload.parent ? action.payload.parent : currentState.page;
+  const paperLayer = getPaperLayer(action.payload.id);
+  paperLayer.parent = getPaperLayer(layerParent);
+  // add layer
+  currentState = {
+    ...currentState,
+    allIds: addItem(currentState.allIds, action.payload.id),
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...action.payload,
+        parent: layerParent,
+        children: null
+      } as em.Text,
       [layerParent]: {
         ...currentState.byId[layerParent],
         children: addItem((currentState.byId[layerParent] as em.Group).children, action.payload.id),
@@ -863,6 +894,9 @@ const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any) => 
   if (paperLayer.data.type === 'Shape') {
     applyShapeMethods(paperLayerClone);
   }
+  if (paperLayer.data.type === 'Text') {
+    applyTextMethods(paperLayerClone);
+  }
   paperLayerClone.data.id = layerCloneMap[id];
   paperLayerClone.parent = paperParentLayer;
   const groups: string[] = [id];
@@ -879,6 +913,9 @@ const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any) => 
         childPaperLayerClone.parent = groupClonePaperLayer;
         if (childPaperLayer.data.type === 'Shape') {
           applyShapeMethods(childPaperLayerClone);
+        }
+        if (childPaperLayer.data.type === 'Text') {
+          applyTextMethods(childPaperLayerClone);
         }
         if (childLayer.children && childLayer.children.length > 0) {
           groups.push(child);
@@ -2059,4 +2096,22 @@ export const resizeLayers = (state: LayerState, action: ResizeLayers): LayerStat
   return action.payload.layers.reduce((result, current) => {
     return resizeLayer(result, layerActions.resizeLayer({id: current, verticalFlip: action.payload.verticalFlip, horizontalFlip: action.payload.horizontalFlip}) as ResizeLayerBy);
   }, state);
+};
+
+export const setLayerText = (state: LayerState, action: SetLayerText): LayerState => {
+  let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id) as paper.PointText;
+  paperLayer.content = action.payload.text;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        text: action.payload.text
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
 };
