@@ -12,7 +12,7 @@ import SidebarSectionColumn from './SidebarSectionColumn';
 
 interface StrokeJoinInputProps {
   selected?: string[];
-  strokeJoinValue?: em.StrokeJoinTypes;
+  strokeJoinValue?: em.StrokeJoin;
   disabled?: boolean;
   setLayerStrokeJoin?(payload: SetLayerStrokeJoinPayload): LayerTypes;
 }
@@ -20,13 +20,13 @@ interface StrokeJoinInputProps {
 const StrokeJoinInput = (props: StrokeJoinInputProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { selected, strokeJoinValue, setLayerStrokeJoin, disabled } = props;
-  const [strokeJoin, setStrokeJoin] = useState<em.StrokeJoinTypes>(strokeJoinValue);
+  const [strokeJoin, setStrokeJoin] = useState<em.StrokeJoin>(strokeJoinValue);
 
   useEffect(() => {
     setStrokeJoin(strokeJoinValue);
   }, [strokeJoinValue, disabled, selected]);
 
-  const handleClick = (strokeJoinType: em.StrokeJoinTypes) => {
+  const handleClick = (strokeJoinType: em.StrokeJoin) => {
     const paperLayer = getPaperLayer(selected[0]);
     paperLayer.strokeJoin = strokeJoinType;
     setLayerStrokeJoin({id: selected[0], strokeJoin: strokeJoinType})

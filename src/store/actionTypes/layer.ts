@@ -114,18 +114,9 @@ export const SET_LAYER_TEXT = 'SET_LAYER_TEXT';
 
 // Page
 
-export interface AddPagePayload {
-  type?: 'Page';
-  id?: string;
-  name?: string;
-  parent?: string;
-  paperLayer?: paper.Item;
-  selected?: boolean;
-  hover?: boolean;
-  children?: string[];
-  tweenEvents?: [];
-  tweens?: [];
-}
+export type AddPagePayload = {
+  [P in keyof em.Page]?: em.Page[P];
+} & { paperLayer?: paper.Item }
 
 export interface AddPage {
   type: typeof ADD_PAGE;
@@ -134,24 +125,9 @@ export interface AddPage {
 
 // Artboard
 
-export interface AddArtboardPayload {
-  type?: 'Artboard';
-  id?: string;
-  frame?: em.Frame;
-  name?: string;
-  parent?: string;
-  paperLayer?: paper.Item;
-  selected?: boolean;
-  hover?: boolean;
-  children?: string[];
-  showChildren?: boolean;
-  tweenEvents?: [];
-  tweens?: [];
-  points?: {
-    closed: boolean;
-  };
-  style?: em.Style;
-}
+export type AddArtboardPayload = {
+  [P in keyof em.Artboard]?: em.Artboard[P];
+} & { paperLayer?: paper.Item }
 
 export interface AddArtboard {
   type: typeof ADD_ARTBOARD;
@@ -160,24 +136,9 @@ export interface AddArtboard {
 
 // Group
 
-export interface AddGroupPayload {
-  type?: 'Group';
-  id?: string;
-  frame?: em.Frame;
-  name?: string;
-  parent?: string;
-  paperLayer?: paper.Item;
-  selected?: boolean;
-  hover?: boolean;
-  children?: string[];
-  showChildren?: boolean;
-  tweenEvents?: [];
-  tweens?: [];
-  points?: {
-    closed: boolean;
-  };
-  style?: em.Style;
-}
+export type AddGroupPayload = {
+  [P in keyof em.Group]?: em.Group[P];
+} & { paperLayer?: paper.Item }
 
 export interface AddGroup {
   type: typeof ADD_GROUP;
@@ -186,24 +147,9 @@ export interface AddGroup {
 
 // Shape
 
-export interface AddShapePayload {
-  type?: 'Shape';
-  id?: string;
-  frame?: em.Frame;
-  name?: string;
-  parent?: string;
-  shapeType?: em.ShapeType;
-  pathData?: string;
-  paperLayer?: paper.Item;
-  selected?: boolean;
-  hover?: boolean;
-  tweenEvents?: [];
-  tweens?: [];
-  points?: {
-    closed: boolean;
-  };
-  style?: em.Style;
-}
+export type AddShapePayload = {
+  [P in keyof em.Shape]?: em.Shape[P];
+} & { paperLayer?: paper.Item }
 
 export interface AddShape {
   type: typeof ADD_SHAPE;
@@ -212,24 +158,9 @@ export interface AddShape {
 
 // Text
 
-export interface AddTextPayload {
-  type?: 'Text';
-  id?: string;
-  frame?: em.Frame;
-  name?: string;
-  parent?: string;
-  paperLayer?: paper.Item;
-  selected?: boolean;
-  hover?: boolean;
-  tweenEvents?: [];
-  tweens?: [];
-  points?: {
-    closed: boolean;
-  };
-  text?: string;
-  style?: em.Style;
-  textStyle?: em.TextStyle;
-}
+export type AddTextPayload = {
+  [P in keyof em.Text]?: em.Text[P];
+} & { paperLayer?: paper.Item }
 
 export interface AddText {
   type: typeof ADD_TEXT;
@@ -600,14 +531,8 @@ export interface SetActiveArtboard {
 
 // Tween Event
 
-export interface AddLayerTweenEventPayload {
-  layer?: string;
-  name?: string;
-  id?: string;
-  event?: em.TweenEvent;
-  artboard?: string;
-  destinationArtboard?: string;
-  tweens: string[];
+export type AddLayerTweenEventPayload = {
+  [P in keyof em.TweenEvent]?: em.TweenEvent[P];
 }
 
 export interface AddLayerTweenEvent {
@@ -626,23 +551,13 @@ export interface RemoveLayerTweenEvent {
 
 // Tween
 
-export interface AddLayerTweenPayload {
-  id?: string;
-  prop?: em.TweenPropTypes;
-  layer?: string;
-  destinationLayer?: string;
-  event?: string;
-  ease?: em.TweenEaseTypes;
-  power?: em.TweenEasePowerTypes;
-  custom?: string;
-  duration?: number;
-  delay?: number;
-  frozen?: boolean;
+export type AddLayerTweenPayload = {
+  [P in keyof em.Tween]?: em.Tween[P];
 }
 
 export interface AddLayerTween {
   type: typeof ADD_LAYER_TWEEN;
-  payload: em.Tween;
+  payload: AddLayerTweenPayload;
 }
 
 export interface RemoveLayerTweenPayload {
@@ -716,7 +631,7 @@ export interface DecrementLayerTweenDelay {
 
 export interface SetLayerTweenEasePayload {
   id: string;
-  ease: em.TweenEaseTypes;
+  ease: em.CubicBezier;
 }
 
 export interface SetLayerTweenEase {
@@ -726,7 +641,7 @@ export interface SetLayerTweenEase {
 
 export interface SetLayerTweenPowerPayload {
   id: string;
-  power: em.TweenEasePowerTypes;
+  power: em.CubicBezierType;
 }
 
 export interface SetLayerTweenPower {
@@ -916,7 +831,7 @@ export interface SetLayerStrokeWidth {
 
 export interface SetLayerStrokeCapPayload {
   id: string;
-  strokeCap: em.StrokeCapTypes;
+  strokeCap: em.StrokeCap;
 }
 
 export interface SetLayerStrokeCap {
@@ -926,7 +841,7 @@ export interface SetLayerStrokeCap {
 
 export interface SetLayerStrokeJoinPayload {
   id: string;
-  strokeJoin: em.StrokeJoinTypes;
+  strokeJoin: em.StrokeJoin;
 }
 
 export interface SetLayerStrokeJoin {

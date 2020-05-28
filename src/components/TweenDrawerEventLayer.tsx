@@ -5,7 +5,7 @@ import { RootState } from '../store/reducers';
 import TweenDrawerEventLayerTweens from './TweenDrawerEventLayerTweens';
 import { setLayerHover, selectLayer } from '../store/actions/layer';
 import { SetLayerHoverPayload, SelectLayerPayload, LayerTypes } from '../store/actionTypes/layer';
-import SidebarLayerShape from './SidebarLayerShape';
+import SidebarLayerIcon from './SidebarLayerIcon';
 
 interface TweenDrawerEventLayerProps {
   id: string;
@@ -48,7 +48,7 @@ const TweenDrawerEventLayer = (props: TweenDrawerEventLayerProps): ReactElement 
           cursor: 'pointer'
         }}>
         <div className='c-tween-drawer__icon'>
-          <SidebarLayerShape
+          <SidebarLayerIcon
             layer={layer} />
         </div>
         <div

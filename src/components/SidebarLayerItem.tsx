@@ -3,8 +3,7 @@ import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
 import SidebarLayerTitleInput from './SidebarLayerTitleInput';
 import SidebarLayerChevron from './SidebarLayerChevron';
-import SidebarLayerShape from './SidebarLayerShape';
-import SidebarLayerFolder from './SidebarLayerFolder';
+import SidebarLayerIcon from './SidebarLayerIcon';
 import { setLayerHover } from '../store/actions/layer';
 import { SetLayerHoverPayload, LayerTypes } from '../store/actionTypes/layer';
 import { RootState } from '../store/reducers';
@@ -46,9 +45,7 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
       }}>
       <SidebarLayerChevron
         layer={layer} />
-      <SidebarLayerFolder
-        layer={layer} />
-      <SidebarLayerShape
+      <SidebarLayerIcon
         layer={layer} />
       <SidebarLayerTitleInput
         layer={layer}

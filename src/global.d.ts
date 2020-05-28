@@ -2,23 +2,25 @@ declare namespace em {
 
   type TweenEventType = 'click' | 'doubleclick' | 'mouseenter' | 'mouseleave';
 
-  type TweenEaseTypes = 'linear' | 'power1' | 'power2' | 'power3' | 'power4' | 'back' | 'elastic' | 'bounce' | 'rough' | 'slow' | 'steps' | 'circ' | 'expo' | 'sine' | 'custom';
+  type CubicBezier = 'linear' | 'power1' | 'power2' | 'power3' | 'power4' | 'back' | 'elastic' | 'bounce' | 'rough' | 'slow' | 'steps' | 'circ' | 'expo' | 'sine' | 'custom';
 
-  type TweenEasePowerTypes = 'in' | 'inOut' | 'out';
+  type CubicBezierType = 'in' | 'inOut' | 'out';
 
   type ContextMenu = 'TweenEvent' | 'TweenEventDestination';
 
-  type TweenPropTypes = 'shape' | 'fillColor' | 'x' | 'y' | 'rotation' | 'width' | 'height' | 'strokeColor' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity';
+  type TweenProp = 'shape' | 'fillColor' | 'x' | 'y' | 'rotation' | 'width' | 'height' | 'strokeColor' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity';
 
-  type LayerTypes = 'Group' | 'Shape' | 'Page' | 'Artboard' | 'ArtboardBackground' | 'Text';
+  type TweenPropMap = { [K in TweenProp]: boolean; }
 
-  type ColorEditorPropTypes = 'fillColor' | 'strokeColor' | 'shadowColor';
+  type LayerType = 'Group' | 'Shape' | 'Page' | 'Artboard' | 'ArtboardBackground' | 'Text';
 
-  type StrokeCapTypes = 'round' | 'square' | 'butt';
+  type ColorEditorProp = 'fillColor' | 'strokeColor' | 'shadowColor';
 
-  type StrokeJoinTypes = 'miter' | 'round' | 'bevel';
+  type StrokeCap = 'round' | 'square' | 'butt';
 
-  type JusftificationTypes = 'left' | 'center' | 'right';
+  type StrokeJoin = 'miter' | 'round' | 'bevel';
+
+  type Jusftification = 'left' | 'center' | 'right';
 
   interface Style {
     fill: Fill;
@@ -65,11 +67,11 @@ declare namespace em {
     leading: number;
     fontWeight: number | string;
     fontFamily: string;
-    justification: JusftificationTypes;
+    justification: Jusftification;
   }
 
   interface Layer {
-    type: LayerTypes;
+    type: LayerType;
     id: string;
     frame: em.Frame;
     name: string;
@@ -86,7 +88,7 @@ declare namespace em {
   }
 
   interface ClipboardLayer {
-    type: LayerTypes;
+    type: LayerType;
     id: string;
     name: string;
     parent: string;
@@ -126,7 +128,7 @@ declare namespace em {
 
   interface Shape extends Layer {
     type: 'Shape';
-    shapeType: em.ShapeType;
+    shapeType: ShapeType;
     pathData: string;
     children: null;
   }
@@ -143,32 +145,15 @@ declare namespace em {
 
   interface Tween {
     id: string;
-    prop: TweenPropTypes;
+    prop: TweenProp;
     layer: string;
     destinationLayer: string;
     event: string;
-    ease: TweenEaseTypes;
-    power: TweenEasePowerTypes;
+    ease: CubicBezier;
+    power: CubicBezierType;
     duration: number;
     delay: number;
     frozen: boolean;
-  }
-
-  interface TweenPropMap {
-    shape: boolean;
-    fillColor: boolean;
-    x: boolean;
-    y: boolean;
-    rotation: boolean;
-    width: boolean;
-    height: boolean;
-    strokeColor: boolean;
-    strokeWidth: boolean;
-    shadowColor: boolean;
-    shadowOffsetX: boolean;
-    shadowOffsetY: boolean;
-    shadowBlur: boolean;
-    opacity: boolean;
   }
 
   type Dropzone = 'Top' | 'Center' | 'Bottom';

@@ -5,7 +5,8 @@ import { openTextEditor } from '../store/actions/textEditor';
 import { addText } from '../store/actions/layer';
 import { getNearestScopeAncestor, getLayerByPaperId, isScopeGroupLayer, getPaperLayer, getLayer } from '../store/selectors/layer';
 import { paperMain } from './index';
-import { applyShapeMethods } from './shapeUtils';
+import { applyTextMethods } from './textUtils';
+import { DEFAULT_TEXT_VALUE } from '../constants';
 
 class TextTool {
   tool: paper.Tool;
@@ -35,10 +36,10 @@ class TextTool {
     const textEditor = state.textEditor;
     const newPaperLayer = new paperMain.PointText({
       point: event.point,
-      content: 'Type Something',
+      content: DEFAULT_TEXT_VALUE,
       ...textEditor.textStyle
     });
-    applyShapeMethods(newPaperLayer);
+    applyTextMethods(newPaperLayer);
     const overlappedLayers = getPaperLayer(state.layer.present.page).getItems({
       data: (data: any) => {
         if (data.id === 'ArtboardBackground') {
@@ -59,6 +60,7 @@ class TextTool {
       }
     }
     store.dispatch(addText({
+      text: DEFAULT_TEXT_VALUE,
       parent: state.layer.present.scope.length > 0 ? state.layer.present.scope[state.layer.present.scope.length - 1] : artboardOverlapped() ? artboardOverlapped() : state.layer.present.page,
       frame: {
         x: newPaperLayer.position.x,
@@ -71,9 +73,9 @@ class TextTool {
     state = store.getState();
     store.dispatch(openTextEditor({
       layer: state.layer.present.allIds[state.layer.present.allIds.length - 1],
-      text: 'Type Something',
-      x: event.event.layerX,
-      y: event.event.layerY,
+      text: DEFAULT_TEXT_VALUE,
+      x: newPaperLayer.viewMatrix.tx,
+      y: newPaperLayer.viewMatrix.ty,
       scale: paperMain.view.zoom
     }));
     //store.dispatch(enableSelectionTool());

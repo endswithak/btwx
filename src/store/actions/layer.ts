@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { paperMain } from '../../canvas';
+import { DEFAULT_STYLE, DEFAULT_TEXT_STYLE, DEFAULT_TEXT_VALUE } from '../../constants';
 
 import {
   ADD_PAGE,
@@ -219,36 +220,7 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
       points: {
         closed: true,
       },
-      style: {
-        fill: {
-          enabled: true,
-          color: '#ffffff'
-        },
-        stroke: {
-          enabled: false,
-          color: '#999999',
-          width: 1
-        },
-        strokeOptions: {
-          cap: 'butt',
-          join: 'miter',
-          dashArray: [0,0],
-          miterLimit: 10
-        },
-        opacity: 1,
-        rotation: 0,
-        horizontalFlip: false,
-        verticalFlip: false,
-        shadow: {
-          enabled: false,
-          color: '#000000',
-          blur: 10,
-          offset: {
-            x: 0,
-            y: 0,
-          }
-        }
-      },
+      style: DEFAULT_STYLE,
     }
   }
 };
@@ -279,34 +251,15 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
         closed: true,
       },
       style: {
+        ...DEFAULT_STYLE,
         fill: {
-          enabled: false,
-          color: '#cccccc'
+          ...DEFAULT_STYLE.fill,
+          enabled: false
         },
         stroke: {
-          enabled: false,
-          color: '#999999',
-          width: 1
+          ...DEFAULT_STYLE.stroke,
+          enabled: false
         },
-        strokeOptions: {
-          cap: 'butt',
-          join: 'miter',
-          dashArray: [0,0],
-          miterLimit: 10
-        },
-        opacity: 1,
-        rotation: 0,
-        horizontalFlip: false,
-        verticalFlip: false,
-        shadow: {
-          enabled: false,
-          color: '#000000',
-          blur: 10,
-          offset: {
-            x: 0,
-            y: 0,
-          }
-        }
       },
     }
   }
@@ -325,7 +278,7 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
   //clone.applyMatrix = true;
   clone.fitBounds(new paperMain.Rectangle({
     point: new paperMain.Point(0,0),
-    size: new paperMain.Size(16,16)
+    size: new paperMain.Size(24,24)
   }));
   return {
     type: ADD_SHAPE,
@@ -341,38 +294,9 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
       points: {
         closed: true,
       },
-      style: {
-        fill: {
-          enabled: true,
-          color: '#cccccc'
-        },
-        stroke: {
-          enabled: true,
-          color: '#999999',
-          width: 1
-        },
-        strokeOptions: {
-          cap: 'butt',
-          join: 'miter',
-          dashArray: [0,0],
-          miterLimit: 10
-        },
-        opacity: 1,
-        rotation: 0,
-        horizontalFlip: false,
-        verticalFlip: false,
-        shadow: {
-          enabled: false,
-          color: '#000000',
-          blur: 10,
-          offset: {
-            x: 0,
-            y: 0,
-          }
-        }
-      },
       tweenEvents: [],
-      tweens: []
+      tweens: [],
+      style: DEFAULT_STYLE
     }
   }
 };
@@ -392,53 +316,17 @@ export const addText = (payload: AddTextPayload): LayerTypes => {
       type: 'Text',
       id: id,
       frame: payload.frame,
-      name: payload.text ? payload.text : 'Type Something',
+      name: payload.name ? payload.name : DEFAULT_TEXT_VALUE,
       parent: payload.parent ? payload.parent : null,
       selected: false,
       points: {
         closed: true,
       },
-      text: payload.text ? payload.text : 'Type Something',
-      style: {
-        fill: {
-          enabled: false,
-          color: '#cccccc'
-        },
-        stroke: {
-          enabled: false,
-          color: '#999999',
-          width: 1
-        },
-        strokeOptions: {
-          cap: 'butt',
-          join: 'miter',
-          dashArray: [0,0],
-          miterLimit: 10
-        },
-        opacity: 1,
-        rotation: 0,
-        horizontalFlip: false,
-        verticalFlip: false,
-        shadow: {
-          enabled: false,
-          color: '#000000',
-          blur: 10,
-          offset: {
-            x: 0,
-            y: 0,
-          }
-        }
-      },
-      textStyle: {
-        fontSize: 12,
-        fillColor: '#000000',
-        leading: 16,
-        fontWeight: 'normal',
-        fontFamily: 'Helvetica',
-        justification: 'left'
-      },
+      text: payload.text ? payload.text : DEFAULT_TEXT_VALUE,
       tweenEvents: [],
-      tweens: []
+      tweens: [],
+      style: DEFAULT_STYLE,
+      textStyle: DEFAULT_TEXT_STYLE
     }
   }
 };

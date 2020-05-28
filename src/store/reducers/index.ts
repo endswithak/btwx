@@ -63,7 +63,8 @@ import {
   SET_LAYER_SHADOW_X_OFFSET,
   SET_LAYER_SHADOW_Y_OFFSET,
   RESIZE_LAYER,
-  RESIZE_LAYERS
+  RESIZE_LAYERS,
+  SET_LAYER_TEXT
 } from '../actionTypes/layer';
 
 const rootReducer = combineReducers({
@@ -122,7 +123,8 @@ const rootReducer = combineReducers({
     SET_LAYER_SHADOW_X_OFFSET,
     SET_LAYER_SHADOW_Y_OFFSET,
     RESIZE_LAYER,
-    RESIZE_LAYERS
+    RESIZE_LAYERS,
+    SET_LAYER_TEXT
   ])}),
   tool,
   contextMenu,

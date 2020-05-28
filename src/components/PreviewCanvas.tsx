@@ -103,7 +103,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
         return result;
       }, {});
       // add tweens for each animation event
-      tweenEventPaperLayer.on(tweenEvent.event, (e) => {
+      tweenEventPaperLayer.on(tweenEvent.event, (e: paper.MouseEvent | paper.KeyEvent) => {
         if (tweenEvent.tweens.length > 0) {
           const longestTween = getLongestEventTween(tweenEventTweensById);
           Object.keys(tweenEventTweensById).forEach((tweenId) => {
@@ -128,7 +128,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                   duration: tween.duration,
                   [tween.prop]: morphData[1],
                   onUpdate: () => {
-                    const clone = tweenPaperLayer.clone({insert: false});
+                    const clone = tweenPaperLayer.clone({insert: false}) as paper.Path;
                     clone.pathData = tweenProp[tween.prop];
                     clone.fitBounds(tweenPaperLayer.bounds);
                     (tweenPaperLayer as paper.Path).pathData = clone.pathData;

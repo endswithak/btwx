@@ -12,7 +12,7 @@ import SidebarSectionColumn from './SidebarSectionColumn';
 
 interface StrokeCapInputProps {
   selected?: string[];
-  strokeCapValue?: em.StrokeCapTypes;
+  strokeCapValue?: em.StrokeCap;
   disabled?: boolean;
   setLayerStrokeCap?(payload: SetLayerStrokeCapPayload): LayerTypes;
 }
@@ -20,13 +20,13 @@ interface StrokeCapInputProps {
 const StrokeCapInput = (props: StrokeCapInputProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { selected, strokeCapValue, setLayerStrokeCap, disabled } = props;
-  const [strokeCap, setStrokeCap] = useState<em.StrokeCapTypes>(strokeCapValue);
+  const [strokeCap, setStrokeCap] = useState<em.StrokeCap>(strokeCapValue);
 
   useEffect(() => {
     setStrokeCap(strokeCapValue);
   }, [strokeCapValue, disabled, selected]);
 
-  const handleClick = (strokeCapType: em.StrokeCapTypes) => {
+  const handleClick = (strokeCapType: em.StrokeCap) => {
     const paperLayer = getPaperLayer(selected[0]);
     paperLayer.strokeCap = strokeCapType;
     setLayerStrokeCap({id: selected[0], strokeCap: strokeCapType})

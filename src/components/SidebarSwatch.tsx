@@ -6,7 +6,7 @@ import { openColorEditor } from '../store/actions/colorEditor';
 interface SidebarSwatchProps {
   color: string;
   onClick?(): void;
-  prop?: em.ColorEditorPropTypes;
+  prop?: em.ColorEditorProp;
   layer?: string;
   openColorEditor?(payload: OpenColorEditorPayload): ColorEditorTypes;
   disabled?: boolean;

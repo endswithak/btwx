@@ -4,7 +4,7 @@ export const CLOSE_COLOR_EDITOR = 'CLOSE_COLOR_EDITOR';
 export interface OpenColorEditorPayload {
   layer: string;
   color: string;
-  prop: em.ColorEditorPropTypes;
+  prop: em.ColorEditorProp;
   x: number;
   y: number;
   onChange?(color: string): void;

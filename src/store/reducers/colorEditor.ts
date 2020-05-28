@@ -8,7 +8,7 @@ export interface ColorEditorState {
   isOpen: boolean;
   layer: string;
   color: string;
-  prop: em.ColorEditorPropTypes;
+  prop: em.ColorEditorProp;
   x: number;
   y: number;
   onChange?(color: string): void;

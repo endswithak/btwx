@@ -18,5 +18,7 @@ const store = createStore(persistedReducer, applyMiddleware(thunk, logger));
 export const persistor = persistStore(store);
 export type StoreDispatch = typeof store.dispatch;
 export type StoreGetState = typeof store.getState;
+export type PersistConfig = typeof persistConfig;
+export type Store = typeof store;
 
 export default store;

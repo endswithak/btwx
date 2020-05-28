@@ -25,7 +25,7 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
   return (
     layer.type === 'Group' || layer.type === 'Artboard'
     ? <div
-        className='c-sidebar-layer__chevron'
+        className='c-sidebar-layer__icon'
         onClick={handleChevronClick}
         >
         <svg
@@ -44,7 +44,7 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
           }
         </svg>
       </div>
-    : <div className='c-sidebar-layer__chevron' />
+    : <div className='c-sidebar-layer__icon' />
   );
 }
 

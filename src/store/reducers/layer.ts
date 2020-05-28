@@ -1,3 +1,5 @@
+import { DEFAULT_STYLE } from '../../constants';
+
 import {
   ADD_PAGE,
   ADD_ARTBOARD,
@@ -168,7 +170,7 @@ import {
 
 export interface LayerState {
   byId: {
-    [id: string]: em.LayerTypes;
+    [id: string]: em.Page | em.Artboard | em.Group | em.Shape | em.Text;
   };
   allIds: string[];
   page: string;

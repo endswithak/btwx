@@ -47,7 +47,7 @@ export const addPage = (state: LayerState, action: AddPage): LayerState => {
     allIds: addItem(state.allIds, action.payload.id),
     byId: {
       ...state.byId,
-      [action.payload.id]: action.payload
+      [action.payload.id]: action.payload as em.Page
     },
     page: action.payload.id,
     paperProject: paperMain.project.exportJSON()
@@ -1169,7 +1169,7 @@ export const addLayerTweenEvent = (state: LayerState, action: AddLayerTweenEvent
     allTweenEventIds: addItem(currentState.allTweenEventIds, action.payload.id),
     tweenEventById: {
       ...currentState.tweenEventById,
-      [action.payload.id]: action.payload
+      [action.payload.id]: action.payload as em.TweenEvent
     },
     paperProject: paperMain.project.exportJSON()
   }
@@ -1190,7 +1190,7 @@ export const addTweenEventLayerTweens = (state: LayerState, eventId: string, lay
     const currentPaperLayer = getPaperLayer(layerId);
     const equivalentPaperLayer = getPaperLayer(destinationEquivalent.id);
     const equivalentTweenProps = getEquivalentTweenProps(currentPaperLayer, equivalentPaperLayer, artboardPaperLayer, destinationArtboardPaperLayer);
-    currentState = Object.keys(equivalentTweenProps).reduce((result, key: em.TweenPropTypes) => {
+    currentState = Object.keys(equivalentTweenProps).reduce((result, key: em.TweenProp) => {
       if (equivalentTweenProps[key]) {
         result = addLayerTween(result, layerActions.addLayerTween({
           layer: layerId,
@@ -1260,7 +1260,7 @@ export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerSt
     allTweenIds: addItem(state.allTweenIds, action.payload.id),
     tweenById: {
       ...state.tweenById,
-      [action.payload.id]: action.payload
+      [action.payload.id]: action.payload as em.Tween
     },
     paperProject: paperMain.project.exportJSON()
   }
@@ -2042,7 +2042,7 @@ export const resizeLayer = (state: LayerState, action: ResizeLayer): LayerState 
     const clone = paperLayer.clone({insert: false}) as paper.PathItem;
     clone.fitBounds(new paperMain.Rectangle({
       point: new paperMain.Point(0,0),
-      size: new paperMain.Size(16,16)
+      size: new paperMain.Size(24,24)
     }));
     currentState = {
       ...currentState,
@@ -2094,7 +2094,7 @@ export const resizeLayer = (state: LayerState, action: ResizeLayer): LayerState 
 
 export const resizeLayers = (state: LayerState, action: ResizeLayers): LayerState => {
   return action.payload.layers.reduce((result, current) => {
-    return resizeLayer(result, layerActions.resizeLayer({id: current, verticalFlip: action.payload.verticalFlip, horizontalFlip: action.payload.horizontalFlip}) as ResizeLayerBy);
+    return resizeLayer(result, layerActions.resizeLayer({id: current, verticalFlip: action.payload.verticalFlip, horizontalFlip: action.payload.horizontalFlip}) as ResizeLayer);
   }, state);
 };
 
@@ -2109,7 +2109,7 @@ export const setLayerText = (state: LayerState, action: SetLayerText): LayerStat
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
         text: action.payload.text
-      }
+      } as em.Text
     },
     paperProject: paperMain.project.exportJSON()
   }

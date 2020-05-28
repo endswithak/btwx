@@ -235,7 +235,7 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
     shadowBlur: false,
     opacity: false
   }
-  Object.keys(tweenPropMap).forEach((key) => {
+  Object.keys(tweenPropMap).forEach((key: em.TweenProp) => {
     switch(key) {
       case 'shape':
         if (layer.data.type !== 'ArtboardBackground' && layer.className === 'Path' && equivalent.className === 'Path') {

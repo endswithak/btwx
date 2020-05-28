@@ -1,6 +1,8 @@
 import paper, { Shape, Point, Path, Color, PointText } from 'paper';
 import store, { StoreDispatch, StoreGetState } from '../store';
+import { disableSelectionTool } from '../store/actions/tool';
 import { openContextMenu, closeContextMenu } from '../store/actions/contextMenu';
+import { openTextEditor } from '../store/actions/textEditor';
 import { setLayerHover, selectLayer, deselectLayer, deepSelectLayer } from '../store/actions/layer';
 import { getNearestScopeAncestor, getLayer } from '../store/selectors/layer';
 
@@ -14,7 +16,14 @@ export const applyTextMethods = (text: paper.Item) => {
     store.dispatch(setLayerHover({id: null}));
   },
   text.onDoubleClick = function(e: paper.MouseEvent) {
-    store.dispatch(deepSelectLayer({id: this.data.id}));
+    //store.dispatch(deepSelectLayer({id: this.data.id}));
+    store.dispatch(openTextEditor({
+      layer: this.data.id,
+      text: this.content,
+      x: this.viewMatrix.tx,
+      y: this.viewMatrix.ty,
+      scale: this.view.zoom
+    }));
   },
   text.onMouseDown = function(e: paper.MouseEvent) {
     const state = store.getState();
