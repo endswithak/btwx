@@ -88,6 +88,11 @@ import {
   RESIZE_LAYER,
   RESIZE_LAYERS,
   SET_LAYER_TEXT,
+  SET_LAYER_FONT_SIZE,
+  SET_LAYER_LEADING,
+  SET_LAYER_FONT_WEIGHT,
+  SET_LAYER_FONT_FAMILY,
+  SET_LAYER_JUSTIFICATION,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
@@ -167,6 +172,11 @@ import {
   ResizeLayerPayload,
   ResizeLayersPayload,
   SetLayerTextPayload,
+  SetLayerFontSizePayload,
+  SetLayerLeadingPayload,
+  SetLayerFontWeightPayload,
+  SetLayerFontFamilyPayload,
+  SetLayerJustificationPayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -325,8 +335,14 @@ export const addText = (payload: AddTextPayload): LayerTypes => {
       text: payload.text ? payload.text : DEFAULT_TEXT_VALUE,
       tweenEvents: [],
       tweens: [],
-      style: DEFAULT_STYLE,
-      textStyle: DEFAULT_TEXT_STYLE
+      style: {
+        ...DEFAULT_STYLE,
+        ...payload.style
+      },
+      textStyle: {
+        ...DEFAULT_TEXT_STYLE,
+        ...payload.textStyle
+      }
     }
   }
 };
@@ -756,5 +772,30 @@ export const resizeLayers = (payload: ResizeLayersPayload): LayerTypes => ({
 
 export const setLayerText = (payload: SetLayerTextPayload): LayerTypes => ({
   type: SET_LAYER_TEXT,
+  payload
+});
+
+export const setLayerFontSize = (payload: SetLayerFontSizePayload): LayerTypes => ({
+  type: SET_LAYER_FONT_SIZE,
+  payload
+});
+
+export const setLayerLeading = (payload: SetLayerLeadingPayload): LayerTypes => ({
+  type: SET_LAYER_LEADING,
+  payload
+});
+
+export const setLayerFontWeight = (payload: SetLayerFontWeightPayload): LayerTypes => ({
+  type: SET_LAYER_FONT_WEIGHT,
+  payload
+});
+
+export const setLayerFontFamily = (payload: SetLayerFontFamilyPayload): LayerTypes => ({
+  type: SET_LAYER_FONT_FAMILY,
+  payload
+});
+
+export const setLayerJustification = (payload: SetLayerJustificationPayload): LayerTypes => ({
+  type: SET_LAYER_JUSTIFICATION,
   payload
 });

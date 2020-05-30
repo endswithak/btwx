@@ -10,11 +10,12 @@ import { getPaperLayer } from '../store/selectors/layer';
 interface StrokeDashInputProps {
   selected?: string[];
   dashArrayValue?: number[];
+  disabled?: boolean;
   setLayerStrokeDashArray?(payload: SetLayerStrokeDashArrayPayload): LayerTypes;
 }
 
 const StrokeDashInput = (props: StrokeDashInputProps): ReactElement => {
-  const { selected, setLayerStrokeDashArray, dashArrayValue } = props;
+  const { selected, setLayerStrokeDashArray, dashArrayValue, disabled } = props;
   const [dash, setDash] = useState<string | number>(dashArrayValue[0]);
 
   useEffect(() => {
@@ -39,13 +40,23 @@ const StrokeDashInput = (props: StrokeDashInputProps): ReactElement => {
       onChange={handleChange}
       onSubmit={handleSubmit}
       blurOnSubmit
-      disabled={selected.length > 1 || selected.length === 0} />
+      disabled={disabled} />
   );
 }
 
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
+  const disabled = (() => {
+    switch(layer.present.selected.length) {
+      case 0:
+        return true;
+      case 1:
+        return !layer.present.byId[layer.present.selected[0]].style.stroke.enabled;
+      default:
+        return true;
+    }
+  })();
   const dashArrayValue = (() => {
     switch(layer.present.selected.length) {
       case 0:
@@ -56,7 +67,7 @@ const mapStateToProps = (state: RootState) => {
         return '';
     }
   })();
-  return { selected, dashArrayValue };
+  return { selected, dashArrayValue, disabled };
 };
 
 export default connect(

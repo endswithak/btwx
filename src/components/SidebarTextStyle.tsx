@@ -11,26 +11,22 @@ import SidebarSwatch from './SidebarSwatch';
 import { RootState } from '../store/reducers';
 import { EnableLayerFillPayload, DisableLayerFillPayload, SetLayerFillColorPayload, LayerTypes } from '../store/actionTypes/layer';
 import { enableLayerFill, disableLayerFill, setLayerFillColor } from '../store/actions/layer';
-import { SetTextSettingsFillColorPayload, TextSettingsTypes } from '../store/actionTypes/textSettings';
-import { setTextSettingsFillColor } from '../store/actions/textSettings';
 import { getPaperLayer } from '../store/selectors/layer';
 
-interface SidebarFillStyleProps {
+interface SidebarTextStyleProps {
   fill?: {
     enabled: boolean;
     color: string;
   };
   fillOpacity?: number;
   selected: string[];
-  selectedType?: em.LayerType;
   enableLayerFill?(payload: EnableLayerFillPayload): LayerTypes;
   disableLayerFill?(payload: DisableLayerFillPayload): LayerTypes;
   setLayerFillColor?(payload: SetLayerFillColorPayload): LayerTypes;
-  setTextSettingsFillColor?(payload: SetTextSettingsFillColorPayload): TextSettingsTypes;
 }
 
-const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
-  const { fill, fillOpacity, selected, selectedType, enableLayerFill, disableLayerFill, setLayerFillColor, setTextSettingsFillColor } = props;
+const SidebarTextStyle = (props: SidebarTextStyleProps): ReactElement => {
+  const { fill, fillOpacity, selected, enableLayerFill, disableLayerFill, setLayerFillColor } = props;
   const [enabled, setEnabled] = useState<boolean>(fill.enabled);
   const [color, setColor] = useState<string>(chroma(fill.color).alpha(1).hex());
   const [opacity, setOpacity] = useState<number | string>(fillOpacity);
@@ -85,9 +81,6 @@ const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
     if (chroma.valid(color)) {
       const paperLayer = getPaperLayer(selected[0]);
       paperLayer.fillColor = new paper.Color(color);
-      if (selectedType === 'Text') {
-        setTextSettingsFillColor({fillColor: chroma(color).hex()});
-      }
       setLayerFillColor({id: selected[0], fillColor: chroma(color).hex()});
       setColor(chroma(color).alpha(1).hex());
       setSwatchColor(chroma(color).hex());
@@ -155,13 +148,12 @@ const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const selectedType = layer.present.selected.length === 1 ? layer.present.byId[layer.present.selected[0]].type : null;
   const fill = layer.present.byId[layer.present.selected[0]].style.fill;
   const fillOpacity = chroma(fill.color).alpha() * 100;
-  return { selected, fill, fillOpacity, selectedType };
+  return { selected, fill, fillOpacity };
 };
 
 export default connect(
   mapStateToProps,
-  { enableLayerFill, disableLayerFill, setLayerFillColor, setTextSettingsFillColor }
-)(SidebarFillStyle);
+  { enableLayerFill, disableLayerFill, setLayerFillColor }
+)(SidebarTextStyle);

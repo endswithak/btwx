@@ -21,18 +21,22 @@ export const applyShapeMethods = (shape: paper.Item) => {
     const layer = getLayer(state.layer.present, this.data.id);
     const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, layer.id);
     if (e.event.which === 3) {
-      if (nearestScopeAncestor.id === this.data.id) {
-        store.dispatch(openContextMenu({type: 'TweenEvent', id: this.data.id, x: e.event.clientX, y: e.event.clientY}));
-      }
+      store.dispatch(openContextMenu({type: 'TweenEvent', id: nearestScopeAncestor.id, x: e.event.clientX, y: e.event.clientY}));
     }
     if (e.modifiers.shift) {
-      if (nearestScopeAncestor.type === 'Artboard') {
-        if (layer.selected) {
-          store.dispatch(deselectLayer({id: nearestScopeAncestor.id}));
-        } else {
-          store.dispatch(deepSelectLayer({id: this.data.id}));
-          //store.dispatch(selectLayer({id: nearestScopeAncestor.id}));
-        }
+      // if (nearestScopeAncestor.type === 'Artboard') {
+      //   if (layer.selected) {
+      //     store.dispatch(deselectLayer({id: nearestScopeAncestor.id}));
+      //   } else {
+      //     store.dispatch(deepSelectLayer({id: this.data.id}));
+      //     //store.dispatch(selectLayer({id: nearestScopeAncestor.id}));
+      //   }
+      // }
+      if (layer.selected) {
+        store.dispatch(deselectLayer({id: nearestScopeAncestor.id}));
+      } else {
+        //store.dispatch(deepSelectLayer({id: this.data.id}));
+        store.dispatch(selectLayer({id: nearestScopeAncestor.id}));
       }
     } else {
       if (nearestScopeAncestor.type === 'Artboard') {

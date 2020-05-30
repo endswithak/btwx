@@ -2,16 +2,6 @@ import paper from 'paper';
 import { LayerState } from '../reducers/layer';
 import { paperMain } from '../../canvas';
 
-export const getLayerByPaperId = (store: LayerState, id: number): em.Layer => {
-  let layer: em.Layer;
-  Object.keys(store.byId).forEach((layerId) => {
-    if (store.byId[layerId].paperLayer === id) {
-      layer = store.byId[layerId];
-    }
-  });
-  return layer;
-}
-
 export const getLayer = (store: LayerState, id: string): em.Layer => {
   return store.byId[id] as em.Layer;
 }
@@ -26,7 +16,7 @@ export const getLayerIndex = (store: LayerState, id: string): number => {
   return parent.children.indexOf(id);
 }
 
-export const getLayerType = (store: LayerState, id: string): em.LayerTypes => {
+export const getLayerType = (store: LayerState, id: string): em.LayerType => {
   const layer = getLayer(store, id);
   return layer.type;
 }
@@ -140,6 +130,31 @@ export const getLayerScope = (store: LayerState, id: string) => {
   return newScope.reverse();
 }
 
+export const getLayersTopLeft = (layers: string[]): paper.Point => {
+  const paperLayerPoints = layers.reduce((result, current) => {
+    const paperLayer = getPaperLayer(current);
+    return [...result, paperLayer.bounds.topLeft];
+  }, []);
+  return paperLayerPoints.reduce(paper.Point.min);
+}
+
+export const getLayersBottomRight = (layers: string[]): paper.Point => {
+  const paperLayerPoints = layers.reduce((result, current) => {
+    const paperLayer = getPaperLayer(current);
+    return [...result, paperLayer.bounds.bottomRight];
+  }, []);
+  return paperLayerPoints.reduce(paper.Point.max);
+}
+
+export const getLayersBounds = (layers: string[]): paper.Rectangle => {
+  const topLeft = getLayersTopLeft(layers);
+  const bottomRight = getLayersBottomRight(layers);
+  return new paper.Rectangle({
+    from: topLeft,
+    to: bottomRight
+  });
+}
+
 export const getSelectionTopLeft = (store: LayerState): paper.Point => {
   const paperLayerPoints = store.selected.reduce((result, current) => {
     const paperLayer = getPaperLayer(current);
@@ -175,7 +190,7 @@ export const getSelectionCenter = (store: LayerState): paper.Point => {
 
 export const getClipboardTopLeft = (store: LayerState): paper.Point => {
   const paperLayerPoints = store.clipboard.allIds.reduce((result, current) => {
-    const paperLayer = store.clipboard.byId[current].paperLayer;
+    const paperLayer = paperMain.project.importJSON(store.clipboard.byId[current].paperLayer);
     return [...result, paperLayer.bounds.topLeft];
   }, []);
   return paperLayerPoints.reduce(paper.Point.min);
@@ -183,7 +198,7 @@ export const getClipboardTopLeft = (store: LayerState): paper.Point => {
 
 export const getClipboardBottomRight = (store: LayerState): paper.Point => {
   const paperLayerPoints = store.clipboard.allIds.reduce((result, current) => {
-    const paperLayer = store.clipboard.byId[current].paperLayer;
+    const paperLayer = paperMain.project.importJSON(store.clipboard.byId[current].paperLayer);
     return [...result, paperLayer.bounds.bottomRight];
   }, []);
   return paperLayerPoints.reduce(paper.Point.max);

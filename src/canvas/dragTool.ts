@@ -2,7 +2,7 @@ import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import store from '../store';
 import { enableSelectionTool, enableRectangleDrawTool, enableEllipseDrawTool, enableRoundedDrawTool } from '../store/actions/tool';
 import { addShape, setLayerHover, increaseLayerScope, selectLayer, newLayerScope, deselectLayer, moveLayerBy, moveLayersBy, enableLayerDrag, disableLayerDrag } from '../store/actions/layer';
-import { getNearestScopeAncestor, getLayerByPaperId, isScopeGroupLayer, getPaperLayer } from '../store/selectors/layer';
+import { getNearestScopeAncestor, isScopeGroupLayer, getPaperLayer } from '../store/selectors/layer';
 import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
 import { paperMain } from './index';
 

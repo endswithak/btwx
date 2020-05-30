@@ -4,26 +4,27 @@ import SidebarSectionWrap from './SidebarSectionWrap';
 import SidebarSection from './SidebarSection';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionHead from './SidebarSectionHead';
-import SidebarFillStyle from './SidebarFillStyle';
+import SidebarTextStyle from './SidebarTextStyle';
+import FontFamilySelector from './FontFamilySelector';
 import { RootState } from '../store/reducers';
 
-interface SidebarFillStylesProps {
+interface SidebarTextStylesProps {
   selected?: string[];
   selectedType?: string;
 }
 
-const SidebarFillStyles = (props: SidebarFillStylesProps): ReactElement => {
+const SidebarTextStyles = (props: SidebarTextStylesProps): ReactElement => {
   const { selected, selectedType } = props;
   return (
     <SidebarSectionWrap>
       {
-        selected.length === 1 && (selectedType === 'Shape' || selectedType === 'Text')
+        selected.length === 1 && selectedType === 'Text'
         ? <SidebarSection>
             <SidebarSectionRow>
-              <SidebarSectionHead text={'fill'} />
+              <SidebarSectionHead text={'Text'} />
             </SidebarSectionRow>
             <SidebarSection>
-              <SidebarFillStyle />
+              <FontFamilySelector />
             </SidebarSection>
           </SidebarSection>
         : null
@@ -41,4 +42,4 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps
-)(SidebarFillStyles);
+)(SidebarTextStyles);

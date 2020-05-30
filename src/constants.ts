@@ -39,9 +39,10 @@ export const DEFAULT_STYLE: em.Style = {
 
 export const DEFAULT_TEXT_VALUE = 'Type Something';
 
+export const DEFAULT_TEXT_FILL_COLOR = '#000000';
+
 export const DEFAULT_TEXT_STYLE: em.TextStyle = {
   fontSize: 12,
-  fillColor: '#000000',
   leading: 16,
   fontWeight: 'normal',
   fontFamily: 'Helvetica',

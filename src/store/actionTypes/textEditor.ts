@@ -3,11 +3,8 @@ export const CLOSE_TEXT_EDITOR = 'CLOSE_TEXT_EDITOR';
 
 export interface OpenTextEditorPayload {
   layer: string;
-  text: string;
-  scale: number;
   x: number;
   y: number;
-  //textStyle: em.TextStyle;
 }
 
 export interface OpenTextEditor {

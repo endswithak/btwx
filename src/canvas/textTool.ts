@@ -3,10 +3,11 @@ import store from '../store';
 import { enableSelectionTool, enableRectangleDrawTool, enableEllipseDrawTool, enableRoundedDrawTool, enableDragTool } from '../store/actions/tool';
 import { openTextEditor } from '../store/actions/textEditor';
 import { addText } from '../store/actions/layer';
-import { getNearestScopeAncestor, getLayerByPaperId, isScopeGroupLayer, getPaperLayer, getLayer } from '../store/selectors/layer';
+import { getNearestScopeAncestor, getPaperLayer } from '../store/selectors/layer';
 import { paperMain } from './index';
 import { applyTextMethods } from './textUtils';
-import { DEFAULT_TEXT_VALUE } from '../constants';
+import { DEFAULT_TEXT_VALUE, DEFAULT_STYLE } from '../constants';
+import textSettings from 'src/store/reducers/textSettings';
 
 class TextTool {
   tool: paper.Tool;
@@ -33,11 +34,10 @@ class TextTool {
   }
   onMouseUp(event: paper.ToolEvent): void {
     let state = store.getState();
-    const textEditor = state.textEditor;
     const newPaperLayer = new paperMain.PointText({
       point: event.point,
       content: DEFAULT_TEXT_VALUE,
-      ...textEditor.textStyle
+      ...state.textSettings
     });
     applyTextMethods(newPaperLayer);
     const overlappedLayers = getPaperLayer(state.layer.present.page).getItems({
@@ -60,7 +60,7 @@ class TextTool {
       }
     }
     store.dispatch(addText({
-      text: DEFAULT_TEXT_VALUE,
+      text: newPaperLayer.content,
       parent: state.layer.present.scope.length > 0 ? state.layer.present.scope[state.layer.present.scope.length - 1] : artboardOverlapped() ? artboardOverlapped() : state.layer.present.page,
       frame: {
         x: newPaperLayer.position.x,
@@ -68,17 +68,32 @@ class TextTool {
         width: newPaperLayer.bounds.width,
         height: newPaperLayer.bounds.height
       },
-      paperLayer: newPaperLayer
+      paperLayer: newPaperLayer,
+      style: {
+        ...DEFAULT_STYLE,
+        fill: {
+          ...DEFAULT_STYLE.fill,
+          color: state.textSettings.fillColor
+        },
+        stroke: {
+          ...DEFAULT_STYLE.stroke,
+          enabled: false
+        }
+      },
+      textStyle: {
+        fontSize: state.textSettings.fontSize,
+        leading: state.textSettings.leading,
+        fontWeight: state.textSettings.fontWeight,
+        fontFamily: state.textSettings.fontFamily,
+        justification: state.textSettings.justification
+      }
     }));
     state = store.getState();
     store.dispatch(openTextEditor({
       layer: state.layer.present.allIds[state.layer.present.allIds.length - 1],
-      text: DEFAULT_TEXT_VALUE,
       x: newPaperLayer.viewMatrix.tx,
-      y: newPaperLayer.viewMatrix.ty,
-      scale: paperMain.view.zoom
+      y: newPaperLayer.viewMatrix.ty
     }));
-    //store.dispatch(enableSelectionTool());
   }
 }
 

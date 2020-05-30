@@ -12,6 +12,8 @@ import { enableSelectionTool, disableSelectionTool } from '../store/actions/tool
 import { ToolTypes } from '../store/actionTypes/tool';
 import { setLayerFillColor, setLayerStrokeColor, setLayerShadowColor } from '../store/actions/layer';
 import { SetLayerFillColorPayload, SetLayerStrokeColorPayload, SetLayerShadowColorPayload, LayerTypes } from '../store/actionTypes/layer';
+import { SetTextSettingsFillColorPayload, TextSettingsTypes } from '../store/actionTypes/textSettings';
+import { setTextSettingsFillColor } from '../store/actions/textSettings';
 
 Modal.setAppElement('#root');
 
@@ -25,12 +27,14 @@ interface ColorEditorProps {
     y: number;
     onChange?(color: string): void;
   };
+  layerType?: em.LayerType;
   closeColorEditor?(): ColorEditorTypes;
   setLayerFillColor?(payload: SetLayerFillColorPayload): LayerTypes;
   setLayerStrokeColor?(payload: SetLayerStrokeColorPayload): LayerTypes;
   setLayerShadowColor?(payload: SetLayerShadowColorPayload): LayerTypes;
   disableSelectionTool?(): ToolTypes;
   enableSelectionTool?(): ToolTypes;
+  setTextSettingsFillColor?(payload: SetTextSettingsFillColorPayload): TextSettingsTypes;
 }
 
 const Editor = styled.div`
@@ -68,13 +72,16 @@ const Editor = styled.div`
 
 const ColorEditor = (props: ColorEditorProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { colorEditor, closeColorEditor, setLayerFillColor, setLayerStrokeColor, setLayerShadowColor, disableSelectionTool, enableSelectionTool } = props;
+  const { colorEditor, layerType, closeColorEditor, setLayerFillColor, setLayerStrokeColor, setLayerShadowColor, disableSelectionTool, enableSelectionTool, setTextSettingsFillColor } = props;
   const [color, setColor] = useState(colorEditor.color);
 
   const handleCloseRequest = () => {
     switch(colorEditor.prop) {
       case 'fillColor': {
         setLayerFillColor({id: colorEditor.layer, fillColor: color});
+        if (layerType === 'Text') {
+          setTextSettingsFillColor({fillColor: color});
+        }
         break;
       }
       case 'strokeColor': {
@@ -142,11 +149,12 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { colorEditor } = state;
-  return { colorEditor };
+  const { colorEditor, layer } = state;
+  const layerType = colorEditor.layer ? layer.present.byId[colorEditor.layer].type : null;
+  return { colorEditor, layerType };
 };
 
 export default connect(
   mapStateToProps,
-  { closeColorEditor, setLayerFillColor, setLayerStrokeColor, setLayerShadowColor, disableSelectionTool, enableSelectionTool }
+  { closeColorEditor, setLayerFillColor, setLayerStrokeColor, setLayerShadowColor, disableSelectionTool, enableSelectionTool, setTextSettingsFillColor }
 )(ColorEditor);

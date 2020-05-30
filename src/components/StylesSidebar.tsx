@@ -5,6 +5,7 @@ import SidebarContextStyles from './SidebarContextStyles';
 import SidebarFillStyles from './SidebarFillStyles';
 import SidebarStrokeStyles from './SidebarStrokeStyles';
 import SidebarShadowStyles from './SidebarShadowStyles';
+import SidebarTextStyles from './SidebarTextStyles';
 
 const StylesSidebar = (): ReactElement => {
   return (
@@ -14,6 +15,7 @@ const StylesSidebar = (): ReactElement => {
       resizable={false}>
       <SidebarFrameStyles />
       <SidebarContextStyles />
+      <SidebarTextStyles />
       <SidebarFillStyles />
       <SidebarStrokeStyles />
       <SidebarShadowStyles />

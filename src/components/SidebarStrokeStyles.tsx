@@ -23,7 +23,7 @@ const SidebarStrokeStyles = (props: SidebarStrokeStylesProps): ReactElement => {
   return (
     <SidebarSectionWrap>
       {
-        selected.length === 1 && selectedType === 'Shape'
+        selected.length === 1 && (selectedType === 'Shape' || selectedType === 'Text')
         ? <>
             <SidebarSection>
               <SidebarSectionRow>

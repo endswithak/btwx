@@ -22,7 +22,7 @@ import {
   SetLayerShadowYOffset, SetLayerRotation, EnableLayerFill, DisableLayerFill, EnableLayerStroke,
   DisableLayerStroke, DisableLayerShadow, EnableLayerShadow, SetLayerStrokeCap, SetLayerStrokeJoin,
   SetLayerStrokeDashArray, SetLayerStrokeMiterLimit, ResizeLayer, ResizeLayers, EnableLayerHorizontalFlip,
-  DisableLayerHorizontalFlip, EnableLayerVerticalFlip, DisableLayerVerticalFlip, AddText, SetLayerText
+  DisableLayerHorizontalFlip, EnableLayerVerticalFlip, DisableLayerVerticalFlip, AddText, SetLayerText, SetLayerFontSize, SetLayerFontWeight, SetLayerFontFamily, SetLayerLeading, SetLayerJustification
 } from '../actionTypes/layer';
 
 import {
@@ -32,7 +32,7 @@ import {
   getClipboardBottomRight, getClipboardCenter, getSelectionCenter, getLayerAndAllChildren,
   getAllLayerChildren, getDestinationEquivalent, getEquivalentTweenProps, isTweenDestinationLayer,
   getTweensByDestinationLayer, getAllArtboardTweenEventDestinations, getAllArtboardTweenLayerDestinations,
-  getAllArtboardTweenEvents, getTweensEventsByDestinationArtboard, getTweensByLayer
+  getAllArtboardTweenEvents, getTweensEventsByDestinationArtboard, getTweensByLayer, getLayersBounds
 } from '../selectors/layer';
 
 import { paperMain } from '../../canvas';
@@ -154,42 +154,39 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
   let currentState = state;
   const layer = state.byId[action.payload.id];
   const layersToRemove = getLayerAndAllChildren(state, action.payload.id);
-  // check selected
-  if (state.selected.includes(action.payload.id)) {
-    currentState = layersToRemove.reduce((result, current) => {
-      const tweensByDestinationLayer = getTweensByDestinationLayer(result, current);
-      const tweensByLayer = getTweensByLayer(result, current);
-      const layer = getLayer(result, current);
-      if (layer.type === 'Artboard') {
-        result = {
-          ...result,
-          artboards: removeItem(result.artboards, current)
-        }
+  currentState = layersToRemove.reduce((result, current) => {
+    const tweensByDestinationLayer = getTweensByDestinationLayer(result, current);
+    const tweensByLayer = getTweensByLayer(result, current);
+    const layer = getLayer(result, current);
+    if (layer.type === 'Artboard') {
+      result = {
+        ...result,
+        artboards: removeItem(result.artboards, current)
       }
-      if (layer.id === result.activeArtboard) {
-        result = setActiveArtboard(result, layerActions.setActiveArtboard({id: null, scope: 1}) as SetActiveArtboard);
-      }
-      if (tweensByDestinationLayer.allIds.length > 0) {
-        result = tweensByDestinationLayer.allIds.reduce((tweenResult, tweenCurrent) => {
-          return removeLayerTween(tweenResult, layerActions.removeLayerTween({id: tweenCurrent}) as RemoveLayerTween);
-        }, result);
-      }
-      if (tweensByLayer.allIds.length > 0) {
-        result = tweensByLayer.allIds.reduce((tweenResult, tweenCurrent) => {
-          return removeLayerTween(tweenResult, layerActions.removeLayerTween({id: tweenCurrent}) as RemoveLayerTween);
-        }, result);
-      }
-      if (layer.tweenEvents.length > 0) {
-        result = layer.tweenEvents.reduce((tweenResult, tweenCurrent) => {
-          return removeLayerTweenEvent(tweenResult, layerActions.removeLayerTweenEvent({id: tweenCurrent}) as RemoveLayerTweenEvent);
-        }, result);
-      }
-      if (result.selected.includes(current)) {
-        result = deselectLayer(result, layerActions.deselectLayer({id: current}) as DeselectLayer);
-      }
-      return result;
-    }, currentState);
-  }
+    }
+    if (layer.id === result.activeArtboard) {
+      result = setActiveArtboard(result, layerActions.setActiveArtboard({id: null, scope: 1}) as SetActiveArtboard);
+    }
+    if (tweensByDestinationLayer.allIds.length > 0) {
+      result = tweensByDestinationLayer.allIds.reduce((tweenResult, tweenCurrent) => {
+        return removeLayerTween(tweenResult, layerActions.removeLayerTween({id: tweenCurrent}) as RemoveLayerTween);
+      }, result);
+    }
+    if (tweensByLayer.allIds.length > 0) {
+      result = tweensByLayer.allIds.reduce((tweenResult, tweenCurrent) => {
+        return removeLayerTween(tweenResult, layerActions.removeLayerTween({id: tweenCurrent}) as RemoveLayerTween);
+      }, result);
+    }
+    if (layer.tweenEvents.length > 0) {
+      result = layer.tweenEvents.reduce((tweenResult, tweenCurrent) => {
+        return removeLayerTweenEvent(tweenResult, layerActions.removeLayerTweenEvent({id: tweenCurrent}) as RemoveLayerTweenEvent);
+      }, result);
+    }
+    if (result.selected.includes(current)) {
+      result = deselectLayer(result, layerActions.deselectLayer({id: current}) as DeselectLayer);
+    }
+    return result;
+  }, currentState);
   // check hover
   if (state.hover === action.payload.id) {
     currentState = setLayerHover(currentState, layerActions.setLayerHover({id: null}) as SetLayerHover);
@@ -384,6 +381,12 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
   const layer = getLayer(currentState, action.payload.id);
   const layerScope = getLayerScope(currentState, action.payload.id);
   const layerScopeRoot = layerScope[0];
+  if (layer.type === 'Artboard' || layer.type === 'Group') {
+    if (state.selected.some((selectedItem) => layer.children.includes(selectedItem))) {
+      const layersToDeselect = state.selected.filter((selectedItem) => layer.children.includes(selectedItem));
+      currentState = deselectLayers(currentState, layerActions.deselectLayers({layers:layersToDeselect }) as DeselectLayers);
+    }
+  }
   if (layer.type === 'Artboard') {
     currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: action.payload.id, scope: 1}) as SetActiveArtboard);
   }
@@ -741,6 +744,7 @@ export const escapeLayerScope = (state: LayerState, action: EscapeLayerScope): L
 };
 
 export const groupLayers = (state: LayerState, action: GroupLayers): LayerState => {
+  const layersBounds = getLayersBounds(action.payload.layers);
   const topLayer = action.payload.layers.reduce((result, current) => {
     const layerDepth = getLayerDepth(state, current);
     const layerIndex = getLayerIndex(state, current);
@@ -768,7 +772,7 @@ export const groupLayers = (state: LayerState, action: GroupLayers): LayerState 
     index: getLayerIndex(state, action.payload.layers[0]),
     depth: getLayerDepth(state, action.payload.layers[0])
   });
-  const addGroup = addLayer(state, layerActions.addGroup({selected: true}) as AddGroup);
+  const addGroup = addLayer(state, layerActions.addGroup({selected: true, frame: {x: layersBounds.center.x, y: layersBounds.center.y, width: layersBounds.width, height: layersBounds.height}}) as AddGroup);
   const groupId = addGroup.allIds[addGroup.allIds.length - 1];
   const insertGroup = insertLayerAbove(addGroup, layerActions.insertLayerAbove({id: groupId, above: topLayer.id}) as InsertLayerAbove);
   const groupedLayers = action.payload.layers.reduce((result: LayerState, current: string) => {
@@ -1036,6 +1040,54 @@ export const updateParentBounds = (state: LayerState, id: string): LayerState =>
       paperProject: paperMain.project.exportJSON()
     }
   }, state);
+};
+
+export const updateChildrenBounds = (state: LayerState, id: string): LayerState => {
+  const layerChildren = getAllLayerChildren(state, id);
+  return layerChildren.reduce((result, current) => {
+    const paperLayer = getPaperLayer(current);
+    return {
+      ...result,
+      byId: {
+        ...result.byId,
+        [current]: {
+          ...result.byId[current],
+          frame: {
+            ...result.byId[current].frame,
+            width: paperLayer.bounds.width,
+            height: paperLayer.bounds.height
+          }
+        }
+      },
+      paperProject: paperMain.project.exportJSON()
+    }
+  }, state);
+};
+
+export const updateLayerBounds = (state: LayerState, id: string): LayerState => {
+  let currentState = state;
+  const paperLayer = getPaperLayer(id);
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [id]: {
+        ...currentState.byId[id],
+        frame: {
+          x: paperLayer.bounds.x,
+          y: paperLayer.bounds.y,
+          width: paperLayer.bounds.width,
+          height: paperLayer.bounds.height
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  currentState = updateParentBounds(currentState, id);
+  if (state.byId[id].type === 'Group') {
+    currentState = updateChildrenBounds(currentState, id);
+  }
+  return currentState;
 };
 
 export const moveLayer = (state: LayerState, action: MoveLayer): LayerState => {
@@ -2089,7 +2141,11 @@ export const resizeLayer = (state: LayerState, action: ResizeLayer): LayerState 
       paperProject: paperMain.project.exportJSON()
     }
   }
-  return updateParentBounds(currentState, action.payload.id);
+  currentState = updateParentBounds(currentState, action.payload.id);
+  if (layer.type === 'Group') {
+    currentState = updateChildrenBounds(currentState, action.payload.id);
+  }
+  return currentState;
 };
 
 export const resizeLayers = (state: LayerState, action: ResizeLayers): LayerState => {
@@ -2113,5 +2169,115 @@ export const setLayerText = (state: LayerState, action: SetLayerText): LayerStat
     },
     paperProject: paperMain.project.exportJSON()
   }
-  return currentState;
+  return updateLayerBounds(currentState, action.payload.id);
+};
+
+export const setLayerFontSize = (state: LayerState, action: SetLayerFontSize): LayerState => {
+  let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id) as paper.PointText;
+  paperLayer.fontSize = action.payload.fontSize;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        textStyle: {
+          ...(currentState.byId[action.payload.id] as em.Text).textStyle,
+          fontSize: action.payload.fontSize
+        }
+      } as em.Text
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  updateSelectionFrame(currentState);
+  return updateLayerBounds(currentState, action.payload.id);
+};
+
+export const setLayerFontWeight = (state: LayerState, action: SetLayerFontWeight): LayerState => {
+  let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id) as paper.PointText;
+  paperLayer.fontWeight = action.payload.fontWeight;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        textStyle: {
+          ...(currentState.byId[action.payload.id] as em.Text).textStyle,
+          fontWeight: action.payload.fontWeight
+        }
+      } as em.Text
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  updateSelectionFrame(currentState);
+  return updateLayerBounds(currentState, action.payload.id);
+};
+
+export const setLayerFontFamily = (state: LayerState, action: SetLayerFontFamily): LayerState => {
+  let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id) as paper.PointText;
+  paperLayer.fontFamily = action.payload.fontFamily;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        textStyle: {
+          ...(currentState.byId[action.payload.id] as em.Text).textStyle,
+          fontFamily: action.payload.fontFamily
+        }
+      } as em.Text
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  updateSelectionFrame(currentState);
+  return updateLayerBounds(currentState, action.payload.id);
+};
+
+export const setLayerLeading = (state: LayerState, action: SetLayerLeading): LayerState => {
+  let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id) as paper.PointText;
+  paperLayer.leading = action.payload.leading;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        textStyle: {
+          ...(currentState.byId[action.payload.id] as em.Text).textStyle,
+          leading: action.payload.leading
+        }
+      } as em.Text
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  updateSelectionFrame(currentState);
+  return updateLayerBounds(currentState, action.payload.id);
+};
+
+export const setLayerJustification = (state: LayerState, action: SetLayerJustification): LayerState => {
+  let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id) as paper.PointText;
+  paperLayer.justification = action.payload.justification;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        textStyle: {
+          ...(currentState.byId[action.payload.id] as em.Text).textStyle,
+          justification: action.payload.justification
+        }
+      } as em.Text
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  updateSelectionFrame(currentState);
+  return updateLayerBounds(currentState, action.payload.id);
 };

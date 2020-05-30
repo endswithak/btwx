@@ -1,5 +1,3 @@
-import { DEFAULT_STYLE } from '../../constants';
-
 import {
   ADD_PAGE,
   ADD_ARTBOARD,
@@ -82,6 +80,11 @@ import {
   RESIZE_LAYER,
   RESIZE_LAYERS,
   SET_LAYER_TEXT,
+  SET_LAYER_FONT_SIZE,
+  SET_LAYER_LEADING,
+  SET_LAYER_FONT_WEIGHT,
+  SET_LAYER_FONT_FAMILY,
+  SET_LAYER_JUSTIFICATION,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -165,6 +168,11 @@ import {
   setLayerShadowYOffset,
   resizeLayer,
   resizeLayers,
+  setLayerFontSize,
+  setLayerLeading,
+  setLayerFontWeight,
+  setLayerFontFamily,
+  setLayerJustification,
   setLayerText
 } from '../utils/layer';
 
@@ -392,6 +400,16 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return resizeLayers(state, action);
     case SET_LAYER_TEXT:
       return setLayerText(state, action);
+    case SET_LAYER_FONT_SIZE:
+      return setLayerFontSize(state, action);
+    case SET_LAYER_FONT_WEIGHT:
+      return setLayerFontWeight(state, action);
+    case SET_LAYER_FONT_FAMILY:
+      return setLayerFontFamily(state, action);
+    case SET_LAYER_LEADING:
+      return setLayerLeading(state, action);
+    case SET_LAYER_JUSTIFICATION:
+      return setLayerJustification(state, action);
     default:
       return state;
   }

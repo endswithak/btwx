@@ -9,18 +9,16 @@ import { ToolTypes } from '../store/actionTypes/tool';
 import { setLayerText, selectLayer } from '../store/actions/layer';
 import { SetLayerTextPayload, SelectLayerPayload, LayerTypes } from '../store/actionTypes/layer';
 import { paperMain } from '../canvas';
+import { TextEditorState } from '../store/reducers/textEditor';
+import { TextSettingsState } from '../store/reducers/textSettings';
+import { CanvasSettingsState } from '../store/reducers/canvasSettings';
 import gsap from 'gsap';
 
 interface TextEditorInputProps {
-  textEditor?: {
-    isOpen: boolean;
-    layer: string;
-    text: string;
-    scale: number;
-    x: number;
-    y: number;
-    textStyle: em.TextStyle;
-  };
+  textEditor?: TextEditorState;
+  textSettings?: TextSettingsState;
+  canvasSettings?: CanvasSettingsState;
+  layerText?: string;
   closeTextEditor?(): TextEditorTypes;
   disableSelectionTool?(): ToolTypes;
   enableSelectionTool?(): ToolTypes;
@@ -32,8 +30,8 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const textSpanRef = useRef<HTMLTextAreaElement>(null);
   const theme = useContext(ThemeContext);
-  const { textEditor, closeTextEditor, disableSelectionTool, enableSelectionTool, setLayerText, selectLayer } = props;
-  const [text, setText] = useState(textEditor.text);
+  const { textEditor, textSettings, canvasSettings, layerText, closeTextEditor, disableSelectionTool, enableSelectionTool, setLayerText, selectLayer } = props;
+  const [text, setText] = useState(layerText);
 
   const handleTextChange = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
     const target = e.target as HTMLTextAreaElement;
@@ -59,19 +57,19 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
       paperMain.project.getItem({data: { id: textEditor.layer }}).visible = false;
       textAreaRef.current.focus();
       textAreaRef.current.select();
-      textAreaRef.current.style.minHeight = `${textEditor.textStyle.leading}px`;
+      textAreaRef.current.style.minHeight = `${textSettings.leading}px`;
       textAreaRef.current.style.width = 'auto';
       textAreaRef.current.style.width = `${textSpanRef.current.clientWidth + 4}px`;
       textAreaRef.current.style.height = 'auto';
       textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
       const canvas = document.getElementById('canvas-main') as HTMLCanvasElement;
       const ctx = canvas.getContext('2d');
-      ctx.font = `${textEditor.textStyle.fontSize}px ${textEditor.textStyle.fontFamily}`;
-      const textMetrics = ctx.measureText(textEditor.text);
+      ctx.font = `${textSettings.fontSize}px ${textSettings.fontFamily}`;
+      const textMetrics = ctx.measureText(layerText);
       const boundingHeight = textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent;
-      const boundingWhitespace = textEditor.textStyle.leading - boundingHeight;
+      const boundingWhitespace = textSettings.leading - boundingHeight;
       const baseline = (boundingWhitespace / 2) + textMetrics.actualBoundingBoxAscent + (textMetrics.actualBoundingBoxDescent / 2);
-      gsap.set(textAreaRef.current, {x: textEditor.x, y: textEditor.y - (baseline * textEditor.scale), scale: textEditor.scale});
+      gsap.set(textAreaRef.current, {x: textEditor.x, y: textEditor.y - (baseline * canvasSettings.zoom), scale: canvasSettings.zoom});
       disableSelectionTool();
     }
   }, []);
@@ -99,22 +97,22 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
         rows={1}
         style={{
           position: 'absolute',
-          fontFamily: textEditor.textStyle.fontFamily,
-          fontSize: textEditor.textStyle.fontSize,
-          lineHeight: `${textEditor.textStyle.leading}px`,
-          color: textEditor.textStyle.fillColor,
-          textAlign: textEditor.textStyle.justification,
+          fontFamily: textSettings.fontFamily,
+          fontSize: textSettings.fontSize,
+          lineHeight: `${textSettings.leading}px`,
+          color: textSettings.fillColor,
+          textAlign: textSettings.justification,
           transformOrigin: 'top left'
         }} />
       <span
         className='c-text-editor__span'
         ref={textSpanRef}
         style={{
-          fontFamily: textEditor.textStyle.fontFamily,
-          fontSize: textEditor.textStyle.fontSize,
-          lineHeight: `${textEditor.textStyle.leading}px`,
-          color: textEditor.textStyle.fillColor,
-          textAlign: textEditor.textStyle.justification
+          fontFamily: textSettings.fontFamily,
+          fontSize: textSettings.fontSize,
+          lineHeight: `${textSettings.leading}px`,
+          color: textSettings.fillColor,
+          textAlign: textSettings.justification
         }}>
         {text}
       </span>
@@ -123,8 +121,9 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { textEditor } = state;
-  return { textEditor };
+  const { textEditor, textSettings, layer, canvasSettings } = state;
+  const layerText = (layer.present.byId[textEditor.layer] as em.Text).text;
+  return { textEditor, textSettings, layerText, canvasSettings };
 };
 
 export default connect(

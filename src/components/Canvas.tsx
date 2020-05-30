@@ -12,12 +12,15 @@ import { applyShapeMethods } from '../canvas/shapeUtils';
 import { applyTextMethods } from '../canvas/textUtils';
 import { applyArtboardMethods } from '../canvas/artboardUtils';
 import { paperMain } from '../canvas';
+import { SetCanvasZoomPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
+import { setCanvasZoom } from '../store/actions/canvasSettings';
 
 interface CanvasProps {
   drawing: boolean;
   typing: boolean;
   selectLayer(payload: SelectLayerPayload): LayerTypes;
   enableSelectionTool(): any;
+  setCanvasZoom(payload: SetCanvasZoomPayload): CanvasSettingsTypes;
   activeArtboard?: string;
   paperProject?: string;
   layerById?: {
@@ -29,7 +32,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useContext(ThemeContext);
-  const {drawing, typing, selectLayer, enableSelectionTool, activeArtboard, paperProject, layerById} = props;
+  const { drawing, typing, selectLayer, enableSelectionTool, activeArtboard, paperProject, layerById, setCanvasZoom } = props;
 
   useEffect(() => {
     canvasRef.current.width = canvasContainerRef.current.clientWidth;
@@ -47,11 +50,14 @@ const Canvas = (props: CanvasProps): ReactElement => {
         // paper.view.center.x = e.clientX;
         // paper.view.center.y = e.clientY;
         if (e.deltaY < 0 && nextZoom < 30) {
-          paperMain.view.zoom = nextZoom;
+          setCanvasZoom({zoom: nextZoom});
+          //paperMain.view.zoom = nextZoom;
         } else if (e.deltaY > 0 && nextZoom > 0) {
-          paperMain.view.zoom = nextZoom;
+          //paperMain.view.zoom = nextZoom;
+          setCanvasZoom({zoom: nextZoom});
         } else if (e.deltaY > 0 && nextZoom < 0) {
-          paperMain.view.zoom = 0.001;
+          //paperMain.view.zoom = 0.001;
+          setCanvasZoom({zoom: 0.001});
         }
         const zoomDiff = paperMain.view.zoom - prevZoom;
         const scale = 1 / paperMain.view.zoom;
@@ -129,5 +135,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { selectLayer, enableSelectionTool }
+  { selectLayer, enableSelectionTool, setCanvasZoom }
 )(Canvas);

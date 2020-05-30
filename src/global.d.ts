@@ -22,6 +22,8 @@ declare namespace em {
 
   type Jusftification = 'left' | 'center' | 'right';
 
+  type FontWeight = 'normal' | 'italic' | 'bold' | 'bold italic';
+
   interface Style {
     fill: Fill;
     stroke: Stroke;
@@ -31,6 +33,14 @@ declare namespace em {
     horizontalFlip: boolean;
     verticalFlip: boolean;
     shadow: Shadow;
+  }
+
+  interface TextStyle {
+    fontSize: number;
+    leading: number;
+    fontWeight: FontWeight;
+    fontFamily: string;
+    justification: Jusftification;
   }
 
   interface Fill {
@@ -61,22 +71,12 @@ declare namespace em {
     };
   }
 
-  interface TextStyle {
-    fontSize: number;
-    fillColor: string;
-    leading: number;
-    fontWeight: number | string;
-    fontFamily: string;
-    justification: Jusftification;
-  }
-
   interface Layer {
     type: LayerType;
     id: string;
     frame: em.Frame;
     name: string;
     parent: string;
-    //paperLayer: string;
     selected: boolean;
     children: string[] | null;
     tweenEvents: string[];

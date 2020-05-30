@@ -7,6 +7,8 @@ import tweenDrawer from './tweenDrawer';
 import easeEditor from './easeEditor';
 import colorEditor from './colorEditor';
 import textEditor from './textEditor';
+import textSettings from './textSettings';
+import canvasSettings from './canvasSettings';
 
 import {
   ADD_ARTBOARD,
@@ -131,7 +133,9 @@ const rootReducer = combineReducers({
   tweenDrawer,
   easeEditor,
   colorEditor,
-  textEditor
+  textEditor,
+  textSettings,
+  canvasSettings
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

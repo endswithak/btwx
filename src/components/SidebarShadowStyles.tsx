@@ -18,7 +18,7 @@ const SidebarShadowStyles = (props: SidebarShadowStylesProps): ReactElement => {
   return (
     <SidebarSectionWrap>
       {
-        selected.length === 1 && selectedType === 'Shape'
+        selected.length === 1 && (selectedType === 'Shape' || selectedType === 'Text')
         ? <SidebarSection>
             <SidebarSectionRow>
               <SidebarSectionHead text={'shadow'} />
