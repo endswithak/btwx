@@ -3,8 +3,10 @@ import { connect } from 'react-redux';
 import SidebarSectionWrap from './SidebarSectionWrap';
 import SidebarSection from './SidebarSection';
 import SidebarSectionRow from './SidebarSectionRow';
+import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarSectionHead from './SidebarSectionHead';
-import SidebarFillStyle from './SidebarFillStyle';
+import FillColorInput from './FillColorInput';
+import FillToggle from './FillToggle';
 import { RootState } from '../store/reducers';
 
 interface SidebarFillStylesProps {
@@ -15,20 +17,27 @@ interface SidebarFillStylesProps {
 const SidebarFillStyles = (props: SidebarFillStylesProps): ReactElement => {
   const { selected, selectedType } = props;
   return (
-    <SidebarSectionWrap>
-      {
-        selected.length === 1 && (selectedType === 'Shape' || selectedType === 'Text')
-        ? <SidebarSection>
-            <SidebarSectionRow>
-              <SidebarSectionHead text={'fill'} />
-            </SidebarSectionRow>
-            <SidebarSection>
-              <SidebarFillStyle />
-            </SidebarSection>
+    selected.length === 1 && (selectedType === 'Shape' || selectedType === 'Text')
+    ? <SidebarSectionWrap topBorder>
+        <SidebarSection>
+          <SidebarSectionRow>
+            <SidebarSectionColumn width='50%'>
+              <SidebarSectionRow>
+                <SidebarSectionHead text={'fill'} />
+              </SidebarSectionRow>
+            </SidebarSectionColumn>
+            <SidebarSectionColumn width='50%'>
+              <SidebarSectionRow justifyContent='flex-end'>
+                <FillToggle />
+              </SidebarSectionRow>
+            </SidebarSectionColumn>
+          </SidebarSectionRow>
+          <SidebarSection>
+            <FillColorInput />
           </SidebarSection>
-        : null
-      }
-    </SidebarSectionWrap>
+        </SidebarSection>
+      </SidebarSectionWrap>
+    : null
   );
 }
 

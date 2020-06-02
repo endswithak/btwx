@@ -307,6 +307,19 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 });
                 break;
               }
+              case 'fontSize': {
+                tweenProp[tween.prop] = (tweenPaperLayer as paper.PointText).fontSize;
+                paperTween = gsap.to(tweenProp, {
+                  duration: tween.duration,
+                  [tween.prop]: (tweenDestinationLayerPaperLayer as paper.PointText).fontSize,
+                  onUpdate: () => {
+                    (tweenPaperLayer as paper.PointText).fontSize = tweenProp[tween.prop];
+                  },
+                  ease: tween.ease,
+                  delay: tween.delay
+                });
+                break;
+              }
             }
             if (tween.id === longestTween.id) {
               paperTween.then(() => {

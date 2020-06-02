@@ -615,7 +615,8 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
   const aboveIndex = aboveParent.children.indexOf(action.payload.above);
   const paperLayer = getPaperLayer(action.payload.id);
   const abovePaperLayer = getPaperLayer(action.payload.above);
-  paperLayer.insertAbove(abovePaperLayer);
+  // array index and layer zindex are opposite for now
+  paperLayer.insertBelow(abovePaperLayer);
   if (layer.parent !== above.parent) {
     stateWithMovedLayer = {
       ...state,
@@ -660,7 +661,8 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
   const belowIndex = belowParent.children.indexOf(action.payload.below);
   const paperLayer = getPaperLayer(action.payload.id);
   const abovePaperLayer = getPaperLayer(action.payload.below);
-  paperLayer.insertBelow(abovePaperLayer);
+  // array index and layer zindex are opposite for now
+  paperLayer.insertAbove(abovePaperLayer);
   if (layer.parent !== below.parent) {
     stateWithMovedLayer = {
       ...state,
@@ -755,7 +757,7 @@ export const groupLayers = (state: LayerState, action: GroupLayers): LayerState 
         depth: layerDepth
       }
     } else if (layerDepth === result.depth) {
-      if (layerIndex < result.index) {
+      if (layerIndex > result.index) {
         return {
           id: current,
           index: layerIndex,

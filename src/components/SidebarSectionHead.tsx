@@ -11,7 +11,6 @@ const SidebarSectionHead = (props: SidebarSectionHeadProps): ReactElement => {
     <div
       className='c-sidebar-section__head'
       style={{
-        background: theme.background.z1,
         color: theme.text.lighter
       }}>
       { props.text }

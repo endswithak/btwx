@@ -60,13 +60,13 @@ const SidebarOpacityStyles = (props: SidebarOpacityStylesProps): ReactElement =>
   return (
     <SidebarSection>
       <SidebarSectionRow alignItems={'center'}>
-        <SidebarSectionColumn width={'80%'}>
+        <SidebarSectionColumn width={'66.66%'}>
           <SidebarSlider
             value={opacity}
             onChange={handleSliderChange}
             onMouseUp={handleSubmit} />
         </SidebarSectionColumn>
-        <SidebarSectionColumn width={'20%'}>
+        <SidebarSectionColumn width={'33.33%'}>
           <SidebarInput
             value={opacity}
             onChange={handleChange}

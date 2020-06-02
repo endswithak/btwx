@@ -3,23 +3,21 @@ import React, { useContext, ReactElement, useRef, useEffect, useState } from 're
 import { connect } from 'react-redux';
 import { evaluate } from 'mathjs';
 import chroma from 'chroma-js';
-import SidebarInput from './SidebarInput';
-import SidebarCheckbox from './SidebarCheckbox';
-import SidebarSectionRow from './SidebarSectionRow';
-import SidebarSectionColumn from './SidebarSectionColumn';
-import SidebarSwatch from './SidebarSwatch';
+// import SidebarInput from './SidebarInput';
+// import SidebarCheckbox from './SidebarCheckbox';
+// import SidebarSectionRow from './SidebarSectionRow';
+// import SidebarSectionColumn from './SidebarSectionColumn';
+// import SidebarSwatch from './SidebarSwatch';
 import { RootState } from '../store/reducers';
 import { EnableLayerFillPayload, DisableLayerFillPayload, SetLayerFillColorPayload, LayerTypes } from '../store/actionTypes/layer';
 import { enableLayerFill, disableLayerFill, setLayerFillColor } from '../store/actions/layer';
 import { SetTextSettingsFillColorPayload, TextSettingsTypes } from '../store/actionTypes/textSettings';
 import { setTextSettingsFillColor } from '../store/actions/textSettings';
 import { getPaperLayer } from '../store/selectors/layer';
+import ColorInput from './ColorInput';
 
 interface SidebarFillStyleProps {
-  fill?: {
-    enabled: boolean;
-    color: string;
-  };
+  fill?: em.Fill;
   fillOpacity?: number;
   selected: string[];
   selectedType?: em.LayerType;
@@ -43,17 +41,17 @@ const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
     setSwatchColor(fill.color);
   }, [fill, selected]);
 
-  const handleCheckChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const target = e.target as HTMLInputElement;
-    const paperLayer = getPaperLayer(selected[0]);
-    if (target.checked) {
-      enableLayerFill({id: selected[0]});
-      paperLayer.fillColor = new paper.Color(fill.color);
-    } else {
-      disableLayerFill({id: selected[0]});
-      paperLayer.fillColor = null;
-    }
-  };
+  // const handleCheckChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
+  //   const target = e.target as HTMLInputElement;
+  //   const paperLayer = getPaperLayer(selected[0]);
+  //   if (target.checked) {
+  //     enableLayerFill({id: selected[0]});
+  //     paperLayer.fillColor = new paper.Color(fill.color);
+  //   } else {
+  //     disableLayerFill({id: selected[0]});
+  //     paperLayer.fillColor = null;
+  //   }
+  // };
 
   const handleOpacityChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     const target = e.target as HTMLInputElement;
@@ -113,42 +111,55 @@ const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
   };
 
   return (
-    <div
-      className='c-sidebar-layer'>
-      <SidebarSectionRow alignItems='center'>
-        <SidebarSectionColumn width={'10%'} justifyContent={'center'}>
-          <SidebarCheckbox
-            id={`fillColor`}
-            onChange={handleCheckChange}
-            checked={enabled} />
-        </SidebarSectionColumn>
-        <SidebarSectionColumn width={'23%'}>
-          <SidebarSwatch
-            layer={selected[0]}
-            prop={'fillColor'}
-            color={swatchColor}
-            onChange={handleSwatchChange}
-            onClick={handleSwatchClick} />
-        </SidebarSectionColumn>
-        <SidebarSectionColumn width={'47%'}>
-          <SidebarInput
-            value={color}
-            onChange={handleColorChange}
-            onSubmit={handleColorSubmit}
-            blurOnSubmit
-            disabled={selected.length > 1 || selected.length === 0 || !enabled} />
-        </SidebarSectionColumn>
-        <SidebarSectionColumn width={'20%'}>
-          <SidebarInput
-            value={opacity}
-            onChange={handleOpacityChange}
-            onSubmit={handleOpacitySubmit}
-            blurOnSubmit
-            label={'%'}
-            disabled={selected.length > 1 || selected.length === 0 || !enabled} />
-        </SidebarSectionColumn>
-      </SidebarSectionRow>
-    </div>
+    <ColorInput
+      layer={selected[0]}
+      colorValue={color}
+      swatchColorValue={swatchColor}
+      prop='fillColor'
+      opacityValue={opacity}
+      onColorChange={handleColorChange}
+      onColorSubmit={handleColorSubmit}
+      onOpacityChange={handleOpacityChange}
+      onOpacitySubmit={handleOpacitySubmit}
+      onSwatchChange={handleSwatchChange}
+      onSwatchClick={handleSwatchClick}
+      disabled={selected.length > 1 || selected.length === 0 || !enabled} />
+    // <div
+    //   className='c-sidebar-layer'>
+    //   <SidebarSectionRow alignItems='center'>
+    //     <SidebarSectionColumn width={'10%'} justifyContent={'center'}>
+    //       <SidebarCheckbox
+    //         id={`fillColor`}
+    //         onChange={handleCheckChange}
+    //         checked={enabled} />
+    //     </SidebarSectionColumn>
+    //     <SidebarSectionColumn width={'23%'}>
+    //       <SidebarSwatch
+    //         layer={selected[0]}
+    //         prop={'fillColor'}
+    //         color={swatchColor}
+    //         onChange={handleSwatchChange}
+    //         onClick={handleSwatchClick} />
+    //     </SidebarSectionColumn>
+    //     <SidebarSectionColumn width={'47%'}>
+    //       <SidebarInput
+    //         value={color}
+    //         onChange={handleColorChange}
+    //         onSubmit={handleColorSubmit}
+    //         blurOnSubmit
+    //         disabled={selected.length > 1 || selected.length === 0 || !enabled} />
+    //     </SidebarSectionColumn>
+    //     <SidebarSectionColumn width={'20%'}>
+    //       <SidebarInput
+    //         value={opacity}
+    //         onChange={handleOpacityChange}
+    //         onSubmit={handleOpacitySubmit}
+    //         blurOnSubmit
+    //         label={'%'}
+    //         disabled={selected.length > 1 || selected.length === 0 || !enabled} />
+    //     </SidebarSectionColumn>
+    //   </SidebarSectionRow>
+    // </div>
   );
 }
 

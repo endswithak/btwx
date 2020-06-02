@@ -40,7 +40,8 @@ const StrokeDashInput = (props: StrokeDashInputProps): ReactElement => {
       onChange={handleChange}
       onSubmit={handleSubmit}
       blurOnSubmit
-      disabled={disabled} />
+      disabled={disabled}
+      bottomLabel={'Dash'} />
   );
 }
 

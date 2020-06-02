@@ -14,19 +14,19 @@ const SidebarStrokeOptionStyles = (): ReactElement => {
     <SidebarSection>
       <SidebarSectionRow>
         <SidebarSectionColumn width='50%'>
-          <SidebarSectionRow>
+          {/* <SidebarSectionRow>
             <SidebarSectionHead text={'cap'} />
-          </SidebarSectionRow>
+          </SidebarSectionRow> */}
           <StrokeCapInput />
         </SidebarSectionColumn>
         <SidebarSectionColumn width='50%'>
-          <SidebarSectionRow>
+          {/* <SidebarSectionRow>
             <SidebarSectionHead text={'join'} />
-          </SidebarSectionRow>
+          </SidebarSectionRow> */}
           <StrokeJoinInput />
         </SidebarSectionColumn>
       </SidebarSectionRow>
-      <SidebarSectionRow>
+      {/* <SidebarSectionRow>
         <SidebarSectionColumn width='50%'>
           <SidebarSectionRow>
             <SidebarSectionColumn width='50%'>
@@ -47,22 +47,7 @@ const SidebarStrokeOptionStyles = (): ReactElement => {
             </SidebarSectionColumn>
           </SidebarSectionRow>
         </SidebarSectionColumn>
-        <SidebarSectionColumn width='50%'>
-          {/* <SidebarSectionRow>
-            <SidebarSectionColumn width='50%'>
-              <SidebarSectionRow>
-                <SidebarSectionHead text={'Miter'} />
-              </SidebarSectionRow>
-              <SidebarSectionRow>
-                <StrokeMiterLimitInput />
-              </SidebarSectionRow>
-            </SidebarSectionColumn>
-            <SidebarSectionColumn width='50%'>
-
-            </SidebarSectionColumn>
-          </SidebarSectionRow> */}
-        </SidebarSectionColumn>
-      </SidebarSectionRow>
+      </SidebarSectionRow> */}
     </SidebarSection>
   );
 }

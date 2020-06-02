@@ -63,6 +63,7 @@ const FontFamilySelector = (props: FontFamilySelectorProps): ReactElement => {
       options={options}
       placeholder={'Font Family'}
       type='fontFamily'
+      bottomLabel='Family'
     />
   );
 }

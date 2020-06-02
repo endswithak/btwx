@@ -12,6 +12,7 @@ interface SidebarInputProps {
   onFocus?(e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>): void;
   onBlur?(e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>): void;
   label?: string;
+  bottomLabel?: string;
   disabled?: boolean;
   selectOnMount?: boolean;
   blurOnSubmit?: boolean;
@@ -30,7 +31,7 @@ const Input = styled.input`
 const SidebarInput = (props: SidebarInputProps): ReactElement => {
   const inputRef = useRef<HTMLInputElement>(null);
   const theme = useContext(ThemeContext);
-  const { value, onChange, onSubmit, onFocus, onBlur, label, disabled, selectOnMount, blurOnSubmit, enableSelectionTool, disableSelectionTool } = props;
+  const { value, onChange, onSubmit, onFocus, onBlur, label, bottomLabel, disabled, selectOnMount, blurOnSubmit, enableSelectionTool, disableSelectionTool } = props;
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -80,7 +81,10 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
             onBlur={handleBlur}
             disabled={disabled}
             className='c-sidebar-input__field'
-            theme={theme} />
+            theme={theme}
+            style={{
+              opacity: disabled ? 0.5 : 1
+            }} />
         </form>
         {
           label
@@ -88,9 +92,21 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
               className='c-sidebar-input__label'
               style={{
                 background: theme.background.z4,
-                color: theme.text.lighter
+                color: theme.text.lighter,
+                opacity: disabled ? 0.5 : 1
               }}>
               { label }
+            </div>
+          : null
+        }
+        {
+          bottomLabel
+          ? <div
+              className='c-sidebar-input__bottom-label'
+              style={{
+                color: theme.text.base
+              }}>
+              { bottomLabel }
             </div>
           : null
         }

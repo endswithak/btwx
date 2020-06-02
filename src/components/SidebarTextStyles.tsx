@@ -3,9 +3,14 @@ import { connect } from 'react-redux';
 import SidebarSectionWrap from './SidebarSectionWrap';
 import SidebarSection from './SidebarSection';
 import SidebarSectionRow from './SidebarSectionRow';
+import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarSectionHead from './SidebarSectionHead';
 import SidebarTextStyle from './SidebarTextStyle';
 import FontFamilySelector from './FontFamilySelector';
+import FontWeightSelector from './FontWeightSelector';
+import FontSizeInput from './FontSizeInput';
+import LeadingInput from './LeadingInput';
+import JustificationInput from './JustificationInput';
 import { RootState } from '../store/reducers';
 
 interface SidebarTextStylesProps {
@@ -16,20 +21,36 @@ interface SidebarTextStylesProps {
 const SidebarTextStyles = (props: SidebarTextStylesProps): ReactElement => {
   const { selected, selectedType } = props;
   return (
-    <SidebarSectionWrap>
-      {
-        selected.length === 1 && selectedType === 'Text'
-        ? <SidebarSection>
+    selected.length === 1 && selectedType === 'Text'
+    ? <SidebarSectionWrap topBorder>
+        <SidebarSection>
+          <SidebarSectionRow>
+            <SidebarSectionHead text={'Text'} />
+          </SidebarSectionRow>
+          <SidebarSection>
             <SidebarSectionRow>
-              <SidebarSectionHead text={'Text'} />
+              <SidebarSectionColumn width='66.66%'>
+                <FontFamilySelector />
+              </SidebarSectionColumn>
+              <SidebarSectionColumn width='33.33%'>
+                <FontWeightSelector />
+              </SidebarSectionColumn>
             </SidebarSectionRow>
-            <SidebarSection>
-              <FontFamilySelector />
-            </SidebarSection>
+            <SidebarSectionRow>
+              <SidebarSectionColumn width='33.33%'>
+                <FontSizeInput />
+              </SidebarSectionColumn>
+              <SidebarSectionColumn width='33.33%'>
+                <LeadingInput />
+              </SidebarSectionColumn>
+              <SidebarSectionColumn width='33.33%'>
+                <JustificationInput />
+              </SidebarSectionColumn>
+            </SidebarSectionRow>
           </SidebarSection>
-        : null
-      }
-    </SidebarSectionWrap>
+        </SidebarSection>
+      </SidebarSectionWrap>
+    : null
   );
 }
 

@@ -40,7 +40,8 @@ const StrokeGapInput = (props: StrokeGapInputProps): ReactElement => {
       onChange={handleChange}
       onSubmit={handleSubmit}
       blurOnSubmit
-      disabled={disabled} />
+      disabled={disabled}
+      bottomLabel={'Gap'} />
   );
 }
 

@@ -13,9 +13,9 @@ const SidebarToggleButton = (props: SidebarToggleButtonProps): ReactElement => {
   const theme = useContext(ThemeContext);
 
   return (
-    <div className={`c-sidebar-input ${props.disabled ? 'c-sidebar-input--disabled' : null}`}>
+    <div className={`c-sidebar-input c-sidebar-input--button ${props.disabled ? 'c-sidebar-input--disabled' : null}`}>
       <button
-        className={`c-sidebar-input__field ${props.disabled ? 'c-sidebar-input__field--disabled' : null}`}
+        className={`c-sidebar-input__field c-sidebar-input__field--button ${props.disabled ? 'c-sidebar-input__field--disabled' : null}`}
         onClick={props.onClick}
         style={{
           background: props.active ? theme.palette.primary : theme.background.z4,

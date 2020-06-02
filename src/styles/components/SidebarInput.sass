@@ -5,11 +5,11 @@
 
 .c-sidebar-input--disabled
   cursor: default
-  opacity: 0.5
 
 .c-sidebar-input__inner
   display: flex
   align-items: center
+  flex-wrap: wrap
   position: relative
   width: 100%
   height: 100%
@@ -35,12 +35,18 @@
   &::selection
     background: $selectionColor
 
+.c-sidebar-input__field--button
+  display: flex
+  align-items: center
+  justify-content: center
+
 .c-sidebar-input__field--disabled
   cursor: default
 
 .c-sidebar-input__label
   position: absolute
   right: 0
+  top: 0
   font-family: $fontFamily
   font-size: $fontSizeXs
   text-align: center
@@ -49,3 +55,18 @@
   height: $unit * 6
   line-height: $unit * 6
   border-radius: $unit
+
+.c-sidebar-input__bottom-label
+  right: 0
+  flex-grow: 2
+  font-family: $fontFamily
+  font-size: $fontSizeXs
+  text-align: right
+  width: $unit * 4
+  height: $unit * 4
+  line-height: $unit * 4
+  border-radius: $unit
+  padding: 0 $unit
+  margin-top: $unit * 2
+  text-transform: uppercase
+  justify-content: center

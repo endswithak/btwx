@@ -248,7 +248,8 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
     shadowOffsetX: false,
     shadowOffsetY: false,
     shadowBlur: false,
-    opacity: false
+    opacity: false,
+    fontSize: false
   }
   Object.keys(tweenPropMap).forEach((key: em.TweenProp) => {
     switch(key) {
@@ -284,12 +285,12 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
         }
         break;
       case 'width':
-        if (layer.bounds.width !== equivalent.bounds.width && layer.data.type !== 'ArtboardBackground') {
+        if (layer.bounds.width !== equivalent.bounds.width && layer.data.type !== 'ArtboardBackground' && layer.data.type !== 'Text') {
           tweenPropMap[key] = true;
         }
         break;
       case 'height':
-        if (layer.bounds.height !== equivalent.bounds.height && layer.data.type !== 'ArtboardBackground') {
+        if (layer.bounds.height !== equivalent.bounds.height && layer.data.type !== 'ArtboardBackground' && layer.data.type !== 'Text') {
           tweenPropMap[key] = true;
         }
         break;
@@ -330,6 +331,13 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
       case 'opacity':
         if (layer.opacity !== equivalent.opacity) {
           tweenPropMap[key] = true;
+        }
+        break;
+      case 'fontSize':
+        if (layer.className === 'PointText' && equivalent.className === 'PointText') {
+          if ((layer as paper.PointText).fontSize !== (equivalent as paper.PointText).fontSize) {
+            tweenPropMap[key] = true;
+          }
         }
         break;
     }

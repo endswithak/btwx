@@ -66,7 +66,12 @@ import {
   SET_LAYER_SHADOW_Y_OFFSET,
   RESIZE_LAYER,
   RESIZE_LAYERS,
-  SET_LAYER_TEXT
+  SET_LAYER_TEXT,
+  SET_LAYER_FONT_SIZE,
+  SET_LAYER_LEADING,
+  SET_LAYER_FONT_WEIGHT,
+  SET_LAYER_FONT_FAMILY,
+  SET_LAYER_JUSTIFICATION
 } from '../actionTypes/layer';
 
 const rootReducer = combineReducers({
@@ -126,7 +131,12 @@ const rootReducer = combineReducers({
     SET_LAYER_SHADOW_Y_OFFSET,
     RESIZE_LAYER,
     RESIZE_LAYERS,
-    SET_LAYER_TEXT
+    SET_LAYER_TEXT,
+    SET_LAYER_FONT_SIZE,
+    SET_LAYER_LEADING,
+    SET_LAYER_FONT_WEIGHT,
+    SET_LAYER_FONT_FAMILY,
+    SET_LAYER_JUSTIFICATION
   ])}),
   tool,
   contextMenu,

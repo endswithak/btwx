@@ -3,57 +3,54 @@ import React, { useContext, ReactElement, useRef, useEffect, useState } from 're
 import { connect } from 'react-redux';
 import { evaluate } from 'mathjs';
 import chroma from 'chroma-js';
-import SidebarInput from './SidebarInput';
-import SidebarCheckbox from './SidebarCheckbox';
-import SidebarSectionRow from './SidebarSectionRow';
-import SidebarSectionColumn from './SidebarSectionColumn';
-import SidebarSwatch from './SidebarSwatch';
+// import SidebarInput from './SidebarInput';
+// import SidebarCheckbox from './SidebarCheckbox';
+// import SidebarSectionRow from './SidebarSectionRow';
+// import SidebarSectionColumn from './SidebarSectionColumn';
+// import SidebarSwatch from './SidebarSwatch';
 import { RootState } from '../store/reducers';
 import { EnableLayerStrokePayload, DisableLayerStrokePayload, SetLayerStrokeColorPayload, SetLayerStrokeWidthPayload, LayerTypes } from '../store/actionTypes/layer';
 import { enableLayerStroke, disableLayerStroke, setLayerStrokeColor, setLayerStrokeWidth } from '../store/actions/layer';
 import { getPaperLayer } from '../store/selectors/layer';
+import ColorInput from './ColorInput';
 
-interface SidebarStrokeStyleProps {
-  stroke?: {
-    enabled: boolean;
-    color: string;
-    width: number;
-  };
+interface StrokeColorInputProps {
+  stroke?: em.Stroke;
   strokeOpacity?: number;
   selected: string[];
   enableLayerStroke?(payload: EnableLayerStrokePayload): LayerTypes;
   disableLayerStroke?(payload: DisableLayerStrokePayload): LayerTypes;
   setLayerStrokeColor?(payload: SetLayerStrokeColorPayload): LayerTypes;
-  setLayerStrokeWidth?(payload: SetLayerStrokeWidthPayload): LayerTypes;
+  //setLayerStrokeWidth?(payload: SetLayerStrokeWidthPayload): LayerTypes;
 }
 
-const SidebarStrokeStyle = (props: SidebarStrokeStyleProps): ReactElement => {
+const StrokeColorInput = (props: StrokeColorInputProps): ReactElement => {
   const { stroke, strokeOpacity, selected, enableLayerStroke, disableLayerStroke, setLayerStrokeColor, setLayerStrokeWidth } = props;
   const [enabled, setEnabled] = useState<boolean>(stroke.enabled);
   const [color, setColor] = useState<string>(chroma(stroke.color).alpha(1).hex());
   const [opacity, setOpacity] = useState<number | string>(strokeOpacity);
-  const [width, setWidth] = useState<number | string>(stroke.width);
+  // const [width, setWidth] = useState<number | string>(stroke.width);
   const [swatchColor, setSwatchColor] = useState<string>(stroke.color);
 
   useEffect(() => {
     setEnabled(stroke.enabled);
     setColor(chroma(stroke.color).alpha(1).hex());
     setOpacity(strokeOpacity);
-    setWidth(stroke.width);
+    //setWidth(stroke.width);
     setSwatchColor(stroke.color);
   }, [stroke, selected]);
 
-  const handleCheckChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const target = e.target as HTMLInputElement;
-    const paperLayer = getPaperLayer(selected[0]);
-    if (target.checked) {
-      enableLayerStroke({id: selected[0]});
-      paperLayer.strokeColor = new paper.Color(stroke.color);
-    } else {
-      disableLayerStroke({id: selected[0]});
-      paperLayer.strokeColor = null;
-    }
-  };
+  // const handleCheckChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
+  //   const target = e.target as HTMLInputElement;
+  //   const paperLayer = getPaperLayer(selected[0]);
+  //   if (target.checked) {
+  //     enableLayerStroke({id: selected[0]});
+  //     paperLayer.strokeColor = new paper.Color(stroke.color);
+  //   } else {
+  //     disableLayerStroke({id: selected[0]});
+  //     paperLayer.strokeColor = null;
+  //   }
+  // };
 
   const handleOpacityChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     const target = e.target as HTMLInputElement;
@@ -65,10 +62,10 @@ const SidebarStrokeStyle = (props: SidebarStrokeStyleProps): ReactElement => {
     setColor(target.value);
   };
 
-  const handleWidthChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
-    const target = e.target as HTMLInputElement;
-    setWidth(target.value);
-  };
+  // const handleWidthChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
+  //   const target = e.target as HTMLInputElement;
+  //   setWidth(target.value);
+  // };
 
   const handleOpacitySubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     const paperLayer = getPaperLayer(selected[0]);
@@ -97,12 +94,12 @@ const SidebarStrokeStyle = (props: SidebarStrokeStyleProps): ReactElement => {
     }
   };
 
-  const handleWidthSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
-    const paperLayer = getPaperLayer(selected[0]);
-    paperLayer.strokeWidth = evaluate(`${width}`);
-    setLayerStrokeWidth({id: selected[0], strokeWidth: evaluate(`${width}`)});
-    setWidth(evaluate(`${width}`));
-  };
+  // const handleWidthSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
+  //   const paperLayer = getPaperLayer(selected[0]);
+  //   paperLayer.strokeWidth = evaluate(`${width}`);
+  //   setLayerStrokeWidth({id: selected[0], strokeWidth: evaluate(`${width}`)});
+  //   setWidth(evaluate(`${width}`));
+  // };
 
   const handleSwatchChange = (editorColor: string) => {
     setColor(chroma(editorColor).alpha(1).hex());
@@ -121,42 +118,55 @@ const SidebarStrokeStyle = (props: SidebarStrokeStyleProps): ReactElement => {
   };
 
   return (
-    <div
-      className='c-sidebar-layer'>
-      <SidebarSectionRow alignItems='center'>
-        <SidebarSectionColumn width={'10%'} justifyContent={'center'}>
-          <SidebarCheckbox
-            id={`strokeColor`}
-            onChange={handleCheckChange}
-            checked={enabled} />
-        </SidebarSectionColumn>
-        <SidebarSectionColumn width={'23%'}>
-          <SidebarSwatch
-            layer={selected[0]}
-            prop={'strokeColor'}
-            color={swatchColor}
-            onChange={handleSwatchChange}
-            onClick={handleSwatchClick} />
-        </SidebarSectionColumn>
-        <SidebarSectionColumn width={'47%'}>
-          <SidebarInput
-            value={color}
-            onChange={handleColorChange}
-            onSubmit={handleColorSubmit}
-            blurOnSubmit
-            disabled={selected.length > 1 || selected.length === 0 || !enabled} />
-        </SidebarSectionColumn>
-        <SidebarSectionColumn width={'20%'}>
-          <SidebarInput
-            value={width}
-            onChange={handleWidthChange}
-            onSubmit={handleWidthSubmit}
-            blurOnSubmit
-            label={'W'}
-            disabled={selected.length > 1 || selected.length === 0 || !enabled} />
-        </SidebarSectionColumn>
-      </SidebarSectionRow>
-    </div>
+    <ColorInput
+      layer={selected[0]}
+      colorValue={color}
+      swatchColorValue={swatchColor}
+      prop='strokeColor'
+      opacityValue={opacity}
+      onColorChange={handleColorChange}
+      onColorSubmit={handleColorSubmit}
+      onOpacityChange={handleOpacityChange}
+      onOpacitySubmit={handleOpacitySubmit}
+      onSwatchChange={handleSwatchChange}
+      onSwatchClick={handleSwatchClick}
+      disabled={selected.length > 1 || selected.length === 0 || !enabled} />
+    // <div
+    //   className='c-sidebar-layer'>
+    //   <SidebarSectionRow alignItems='center'>
+    //     <SidebarSectionColumn width={'10%'} justifyContent={'center'}>
+    //       <SidebarCheckbox
+    //         id={`strokeColor`}
+    //         onChange={handleCheckChange}
+    //         checked={enabled} />
+    //     </SidebarSectionColumn>
+    //     <SidebarSectionColumn width={'23%'}>
+    //       <SidebarSwatch
+    //         layer={selected[0]}
+    //         prop={'strokeColor'}
+    //         color={swatchColor}
+    //         onChange={handleSwatchChange}
+    //         onClick={handleSwatchClick} />
+    //     </SidebarSectionColumn>
+    //     <SidebarSectionColumn width={'47%'}>
+    //       <SidebarInput
+    //         value={color}
+    //         onChange={handleColorChange}
+    //         onSubmit={handleColorSubmit}
+    //         blurOnSubmit
+    //         disabled={selected.length > 1 || selected.length === 0 || !enabled} />
+    //     </SidebarSectionColumn>
+    //     <SidebarSectionColumn width={'20%'}>
+    //       <SidebarInput
+    //         value={width}
+    //         onChange={handleWidthChange}
+    //         onSubmit={handleWidthSubmit}
+    //         blurOnSubmit
+    //         label={'W'}
+    //         disabled={selected.length > 1 || selected.length === 0 || !enabled} />
+    //     </SidebarSectionColumn>
+    //   </SidebarSectionRow>
+    // </div>
   );
 }
 
@@ -171,4 +181,4 @@ const mapStateToProps = (state: RootState) => {
 export default connect(
   mapStateToProps,
   { enableLayerStroke, disableLayerStroke, setLayerStrokeColor, setLayerStrokeWidth }
-)(SidebarStrokeStyle);
+)(StrokeColorInput);
