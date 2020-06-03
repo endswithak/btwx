@@ -55,25 +55,18 @@ export const applyTextMethods = (text: paper.Item) => {
       store.dispatch(openContextMenu({type: 'TweenEvent', id: nearestScopeAncestor.id, x: e.event.clientX, y: e.event.clientY}));
     }
     if (e.modifiers.shift) {
-      // if (nearestScopeAncestor.type === 'Artboard') {
-      //   if (layer.selected) {
-      //     store.dispatch(deselectLayer({id: nearestScopeAncestor.id}));
-      //   } else {
-      //     //store.dispatch(deepSelectLayer({id: this.data.id}));
-      //     store.dispatch(selectLayer({id: nearestScopeAncestor.id}));
-      //   }
-      // }
       if (layer.selected) {
         store.dispatch(deselectLayer({id: nearestScopeAncestor.id}));
       } else {
-        //store.dispatch(deepSelectLayer({id: this.data.id}));
         store.dispatch(selectLayer({id: nearestScopeAncestor.id}));
       }
     } else {
-      if (nearestScopeAncestor.type === 'Artboard') {
-        store.dispatch(deepSelectLayer({id: this.data.id}));
-      } else {
-        store.dispatch(selectLayer({id: nearestScopeAncestor.id, newSelection: true}));
+      if (!layer.selected) {
+        if (nearestScopeAncestor.type === 'Artboard') {
+          store.dispatch(deepSelectLayer({id: this.data.id}));
+        } else {
+          store.dispatch(selectLayer({id: nearestScopeAncestor.id, newSelection: true}));
+        }
       }
     }
   }

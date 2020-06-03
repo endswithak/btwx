@@ -64,6 +64,7 @@ class SelectionTool {
   constructor() {
     this.tool = new paperMain.Tool();
     this.tool.activate();
+    this.tool.minDistance = 1;
     this.tool.onKeyDown = (e: paper.KeyEvent) => this.onKeyDown(e);
     this.tool.onKeyUp = (e: paper.KeyEvent) => this.onKeyUp(e);
     this.tool.onMouseDown = (e: paper.ToolEvent) => this.onMouseDown(e);

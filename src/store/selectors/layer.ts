@@ -38,7 +38,7 @@ export const getPagePaperLayer = (store: LayerState): paper.Item => {
   return getPaperLayer(page);
 }
 
-export const getAllLayerChildren = (state: LayerState, layer: string): string[] => {
+export const getLayerDescendants = (state: LayerState, layer: string): string[] => {
   const groups: string[] = [layer];
   const layers: string[] = [];
   let i = 0;
@@ -58,8 +58,8 @@ export const getAllLayerChildren = (state: LayerState, layer: string): string[] 
   return layers;
 };
 
-export const getLayerAndAllChildren = (state: LayerState, layer: string): string[] => {
-  const children = getAllLayerChildren(state, layer);
+export const getLayerAndDescendants = (state: LayerState, layer: string): string[] => {
+  const children = getLayerDescendants(state, layer);
   return [layer, ...children];
 };
 
@@ -542,8 +542,3 @@ export const getTweensEventsByDestinationArtboard = (store: LayerState, artboard
     byId
   };
 };
-
-// change layer name
-// check all tweens with layer as destination
-// remove if no name equivilant
-// set new tweens if name equivilant

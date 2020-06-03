@@ -1,5 +1,5 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
-import { getPagePaperLayer, getLayerByPaperId, getPaperLayer, getNearestScopeAncestor } from '../store/selectors/layer';
+import { getPagePaperLayer, getNearestScopeAncestor } from '../store/selectors/layer';
 import { deselectAllLayers, deselectLayer, selectLayer } from '../store/actions/layer';
 import store from '../store';
 import { paperMain } from './index';
@@ -51,9 +51,7 @@ class AreaSelectTool {
     });
     return selectAreaShape;
   }
-  hitTestLayers() {
-    // get paperlayers overlapped by area select shape
-    const state = store.getState().layer;
+  hitTestLayers(state) {
     const layers: string[] = [];
     // get overlapped page layers
     const overlappedLayers = getPagePaperLayer(state.present).getItems({
@@ -88,7 +86,7 @@ class AreaSelectTool {
         layers.push(item.data.id);
       }
     });
-    // return fully overlapped artboards and overlapped layers of partially overlapped artboards
+    // return final layers array
     return layers;
   }
   onEscape() {
@@ -114,7 +112,7 @@ class AreaSelectTool {
       if (this.to) {
         const state = store.getState();
         // get hit test layers
-        const hitTestLayers = this.hitTestLayers();
+        const hitTestLayers = this.hitTestLayers(state.layer);
         // loop through hit test layers
         hitTestLayers.forEach((id: string) => {
           // process layer if not included in overlapped

@@ -29,8 +29,8 @@ import {
   getLayerIndex, getLayer, getLayerDepth, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor,
   getNearestScopeGroupAncestor, getParentLayer, getLayerScope, getPaperLayer, getSelectionTopLeft,
   getPaperLayerByPaperId, getClipboardTopLeft, getSelectionBottomRight, getPagePaperLayer,
-  getClipboardBottomRight, getClipboardCenter, getSelectionCenter, getLayerAndAllChildren,
-  getAllLayerChildren, getDestinationEquivalent, getEquivalentTweenProps, isTweenDestinationLayer,
+  getClipboardBottomRight, getClipboardCenter, getSelectionCenter, getLayerAndDescendants,
+  getLayerDescendants, getDestinationEquivalent, getEquivalentTweenProps, isTweenDestinationLayer,
   getTweensByDestinationLayer, getAllArtboardTweenEventDestinations, getAllArtboardTweenLayerDestinations,
   getAllArtboardTweenEvents, getTweensEventsByDestinationArtboard, getTweensByLayer, getLayersBounds
 } from '../selectors/layer';
@@ -153,42 +153,48 @@ export const addText = (state: LayerState, action: AddText): LayerState => {
 export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState => {
   let currentState = state;
   const layer = state.byId[action.payload.id];
-  const layersToRemove = getLayerAndAllChildren(state, action.payload.id);
+  const layersToRemove = getLayerAndDescendants(state, action.payload.id);
   currentState = layersToRemove.reduce((result, current) => {
     const tweensByDestinationLayer = getTweensByDestinationLayer(result, current);
     const tweensByLayer = getTweensByLayer(result, current);
     const layer = getLayer(result, current);
+    // if layer is an artboard, remove it from artboards
     if (layer.type === 'Artboard') {
       result = {
         ...result,
         artboards: removeItem(result.artboards, current)
       }
     }
+    // if layer is the active artboard, set active artboard to null
     if (layer.id === result.activeArtboard) {
       result = setActiveArtboard(result, layerActions.setActiveArtboard({id: null, scope: 1}) as SetActiveArtboard);
     }
+    // if layer is a destination layer for any tween, remove that tween
     if (tweensByDestinationLayer.allIds.length > 0) {
       result = tweensByDestinationLayer.allIds.reduce((tweenResult, tweenCurrent) => {
         return removeLayerTween(tweenResult, layerActions.removeLayerTween({id: tweenCurrent}) as RemoveLayerTween);
       }, result);
     }
+    // if layer is a layer for any tween, remove that tween
     if (tweensByLayer.allIds.length > 0) {
       result = tweensByLayer.allIds.reduce((tweenResult, tweenCurrent) => {
         return removeLayerTween(tweenResult, layerActions.removeLayerTween({id: tweenCurrent}) as RemoveLayerTween);
       }, result);
     }
+    // if layer has any tween events, remove those events
     if (layer.tweenEvents.length > 0) {
       result = layer.tweenEvents.reduce((tweenResult, tweenCurrent) => {
         return removeLayerTweenEvent(tweenResult, layerActions.removeLayerTweenEvent({id: tweenCurrent}) as RemoveLayerTweenEvent);
       }, result);
     }
+    // if selection includes layer, remove layer from selection
     if (result.selected.includes(current)) {
       result = deselectLayer(result, layerActions.deselectLayer({id: current}) as DeselectLayer);
     }
     return result;
   }, currentState);
-  // check hover
-  if (state.hover === action.payload.id) {
+  // if layer is the active hover layer, set hover to null
+  if (currentState.hover === action.payload.id) {
     currentState = setLayerHover(currentState, layerActions.setLayerHover({id: null}) as SetLayerHover);
   }
   // remove paper layer
@@ -337,7 +343,17 @@ export const updateSelectionFrame = (state: LayerState, visibleHandles = 'all') 
     leftCenterHandle.position = baseFrame.bounds.leftCenter;
     leftCenterHandle.scaling.x = 1 / paperMain.view.zoom;
     leftCenterHandle.scaling.y = 1 / paperMain.view.zoom;
-    const selectionFrame = new paperMain.Group({
+    if (state.selected.length === 1 && state.byId[state.selected[0]].type === 'Text' || state.selected.length > 1 && state.selected.every((id) => state.byId[id].type === 'Text')) {
+      topLeftHandle.opacity = 0.5;
+      topCenterHandle.opacity = 0.5;
+      topRightHandle.opacity = 0.5;
+      bottomLeftHandle.opacity = 0.5;
+      bottomCenterHandle.opacity = 0.5;
+      bottomRightHandle.opacity = 0.5;
+      leftCenterHandle.opacity = 0.5;
+      rightCenterHandle.opacity = 0.5;
+    }
+    new paperMain.Group({
       children: [baseFrame, topLeftHandle, topCenterHandle, topRightHandle, bottomLeftHandle, bottomCenterHandle, bottomRightHandle, leftCenterHandle, rightCenterHandle],
       data: {
         id: 'selectionFrame'
@@ -381,18 +397,32 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
   const layer = getLayer(currentState, action.payload.id);
   const layerScope = getLayerScope(currentState, action.payload.id);
   const layerScopeRoot = layerScope[0];
-  if (layer.type === 'Artboard' || layer.type === 'Group') {
-    if (state.selected.some((selectedItem) => layer.children.includes(selectedItem))) {
-      const layersToDeselect = state.selected.filter((selectedItem) => layer.children.includes(selectedItem));
+  // if layer has a scope, and any of those scope layers are selected,
+  // deselect the scope layers
+  if (layerScope.length > 0) {
+    if (state.selected.some((selectedItem) => layerScope.includes(selectedItem))) {
+      const layersToDeselect = state.selected.filter((selectedItem) => layerScope.includes(selectedItem));
       currentState = deselectLayers(currentState, layerActions.deselectLayers({layers:layersToDeselect }) as DeselectLayers);
     }
   }
+  // if layer is an artboard or group and current selection includes...
+  // any of its descendants, deselect those descendants
+  if (layer.type === 'Artboard' || layer.type === 'Group') {
+    const layerDescendants = getLayerDescendants(currentState, action.payload.id);
+    if (state.selected.some((selectedItem) => layerDescendants.includes(selectedItem))) {
+      const layersToDeselect = state.selected.filter((selectedItem) => layerDescendants.includes(selectedItem));
+      currentState = deselectLayers(currentState, layerActions.deselectLayers({layers:layersToDeselect }) as DeselectLayers);
+    }
+  }
+  // if layer is an artboard, make it the active artboard
   if (layer.type === 'Artboard') {
     currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: action.payload.id, scope: 1}) as SetActiveArtboard);
   }
+  // if layer scope root is an artboard, make the layer scope root the active artboard
   if (layerScopeRoot && currentState.byId[layerScopeRoot].type === 'Artboard' && layerScopeRoot !== currentState.activeArtboard) {
     currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: layerScopeRoot, scope: 1}) as SetActiveArtboard);
   }
+  // if new selection, create selection with just that layer
   if (action.payload.newSelection) {
     const deselectAll = deselectAllLayers(currentState, layerActions.deselectAllLayers() as DeselectAllLayers)
     currentState = {
@@ -407,7 +437,9 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
       selected: [action.payload.id]
     }
     currentState = newLayerScope(currentState, layerActions.newLayerScope({id: action.payload.id}) as NewLayerScope);
-  } else {
+  }
+  // else, add layer to current selection
+  else {
     if (!currentState.selected.includes(action.payload.id)) {
       currentState = {
         ...currentState,
@@ -422,7 +454,11 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
       }
     }
   }
+  // update selection frame
   updateSelectionFrame(currentState);
+  // update hover frame
+  updateHoverFrame(currentState);
+  // return final state
   return currentState;
 };
 
@@ -1045,8 +1081,8 @@ export const updateParentBounds = (state: LayerState, id: string): LayerState =>
 };
 
 export const updateChildrenBounds = (state: LayerState, id: string): LayerState => {
-  const layerChildren = getAllLayerChildren(state, id);
-  return layerChildren.reduce((result, current) => {
+  const layerDescendants = getLayerDescendants(state, id);
+  return layerDescendants.reduce((result, current) => {
     const paperLayer = getPaperLayer(current);
     return {
       ...result,
@@ -1208,7 +1244,7 @@ export const setActiveArtboard = (state: LayerState, action: SetActiveArtboard):
 };
 
 export const addLayerTweenEvent = (state: LayerState, action: AddLayerTweenEvent): LayerState => {
-  const artboardChildren = getAllLayerChildren(state, action.payload.artboard);
+  const artboardChildren = getLayerDescendants(state, action.payload.artboard);
   let currentState = state;
   // add animation event
   currentState = {
@@ -1237,7 +1273,7 @@ export const addTweenEventLayerTweens = (state: LayerState, eventId: string, lay
   let currentState = state;
   const tweenEvent = currentState.tweenEventById[eventId];
   const artboardPaperLayer = getPaperLayer(tweenEvent.artboard);
-  const destinationArtboardChildren = getAllLayerChildren(currentState, tweenEvent.destinationArtboard);
+  const destinationArtboardChildren = getLayerDescendants(currentState, tweenEvent.destinationArtboard);
   const destinationArtboardPaperLayer = getPaperLayer(tweenEvent.destinationArtboard);
   const destinationEquivalent = getDestinationEquivalent(currentState, layerId, destinationArtboardChildren);
   if (destinationEquivalent) {
@@ -1383,7 +1419,7 @@ export const updateLayerTweens = (state: LayerState, layerId: string): LayerStat
       if (tweensEventsByDestinationArtboard.allIds.length > 0) {
         currentState = tweensEventsByDestinationArtboard.allIds.reduce((result, current) => {
           const tweenEvent = currentState.tweenEventById[current];
-          const artboardChildren = getAllLayerChildren(currentState, tweenEvent.artboard);
+          const artboardChildren = getLayerDescendants(currentState, tweenEvent.artboard);
           const destinationEquivalent = getDestinationEquivalent(currentState, layerId, artboardChildren);
           if (destinationEquivalent) {
             result = addTweenEventLayerTweens(result, current, destinationEquivalent.id);

@@ -71,9 +71,22 @@ class ResizeTool {
   flipLayers(hor = 1, ver = 1) {
     const state = store.getState();
     state.layer.present.selected.forEach((layer) => {
-      const paperLayer = getPaperLayer(layer);
-      paperLayer.scale(hor, ver);
+      // const paperLayer = getPaperLayer(layer);
+      // paperLayer.scale(hor, ver);
+      this.scaleLayer(layer, hor, ver);
     });
+  }
+  scaleLayer(id: string, hor: number, ver: number) {
+    const paperLayer = getPaperLayer(id);
+    if (paperLayer.data.type !== 'Text') {
+      paperLayer.scale(hor, ver);
+    }
+  }
+  setLayerPivot(id: string) {
+    const paperLayer = getPaperLayer(id);
+    if (paperLayer.data.type !== 'Text') {
+      paperLayer.pivot = this.from;
+    }
   }
   updateTooltip() {
     if (this.tooltip) {
@@ -89,8 +102,11 @@ class ResizeTool {
       const maxDim = Math.max(this.scaleX, this.scaleY);
       const scaleDelta = maxDim === this.scaleX ? this.scaleXDelta : this.scaleYDelta;
       state.layer.present.selected.forEach((layer: string) => {
-        const paperLayer = getPaperLayer(layer);
-        paperLayer.scale(scaleDelta);
+        this.scaleLayer(layer, scaleDelta, scaleDelta);
+        // const paperLayer = getPaperLayer(layer);
+        // if (paperLayer.data.type !== 'Text') {
+        //   paperLayer.scale(scaleDelta);
+        // }
       });
     } else {
       switch(this.handle) {
@@ -99,24 +115,33 @@ class ResizeTool {
         case 'bottomLeft':
         case 'bottomRight': {
           state.layer.present.selected.forEach((layer: string) => {
-            const paperLayer = getPaperLayer(layer);
-            paperLayer.scale(this.scaleXDelta, this.scaleYDelta);
+            // const paperLayer = getPaperLayer(layer);
+            // if (paperLayer.data.type !== 'Text') {
+            //   paperLayer.scale(this.scaleXDelta, this.scaleYDelta);
+            // }
+            this.scaleLayer(layer, this.scaleXDelta, this.scaleYDelta);
           });
           break;
         }
         case 'topCenter':
         case 'bottomCenter': {
           state.layer.present.selected.forEach((layer: string) => {
-            const paperLayer = getPaperLayer(layer);
-            paperLayer.scale(1, this.scaleYDelta);
+            // const paperLayer = getPaperLayer(layer);
+            // if (paperLayer.data.type !== 'Text') {
+            //   paperLayer.scale(1, this.scaleYDelta);
+            // }
+            this.scaleLayer(layer, 1, this.scaleYDelta);
           });
           break;
         }
         case 'leftCenter':
         case 'rightCenter': {
           state.layer.present.selected.forEach((layer: string) => {
-            const paperLayer = getPaperLayer(layer);
-            paperLayer.scale(this.scaleXDelta, 1);
+            // const paperLayer = getPaperLayer(layer);
+            // if (paperLayer.data.type !== 'Text') {
+            //   paperLayer.scale(this.scaleXDelta, 1);
+            // }
+            this.scaleLayer(layer, this.scaleXDelta, 1);
           });
           break;
         }
@@ -220,13 +245,15 @@ class ResizeTool {
     if (state.layer.present.selected.length > 0) {
       state.layer.present.selected.forEach((layer) => {
         const paperLayer = getPaperLayer(layer);
-        const layerItem = state.layer.present.byId[layer];
-        paperLayer.pivot = paperLayer.bounds.center;
-        paperLayer.bounds.width = layerItem.frame.width;
-        paperLayer.bounds.height = layerItem.frame.height;
-        paperLayer.position.x = layerItem.frame.x;
-        paperLayer.position.y = layerItem.frame.y;
-        paperLayer.scale(this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
+        if (paperLayer.data.type !== 'Text') {
+          const layerItem = state.layer.present.byId[layer];
+          paperLayer.pivot = paperLayer.bounds.center;
+          paperLayer.bounds.width = layerItem.frame.width;
+          paperLayer.bounds.height = layerItem.frame.height;
+          paperLayer.position.x = layerItem.frame.x;
+          paperLayer.position.y = layerItem.frame.y;
+          paperLayer.scale(this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
+        }
       });
     }
   }
@@ -244,10 +271,13 @@ class ResizeTool {
       // apply constrained scale based on largest scale
       const maxDim = Math.max(this.scaleX, this.scaleY);
       state.layer.present.selected.forEach((layer: string) => {
-        const paperLayer = getPaperLayer(layer);
-        paperLayer.pivot = this.from;
-        paperLayer.scale(this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
-        paperLayer.scale(maxDim);
+        // const paperLayer = getPaperLayer(layer);
+        // paperLayer.pivot = this.from;
+        // paperLayer.scale(this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
+        // paperLayer.scale(maxDim);
+        this.setLayerPivot(layer);
+        this.scaleLayer(layer, this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
+        this.scaleLayer(layer, maxDim, maxDim);
       });
       // update selection frame
       updateSelectionFrame(state.layer.present, this.handle);
@@ -269,30 +299,39 @@ class ResizeTool {
         case 'bottomLeft':
         case 'bottomRight': {
           state.layer.present.selected.forEach((layer: string) => {
-            const paperLayer = getPaperLayer(layer);
-            paperLayer.pivot = this.from;
-            paperLayer.scale(this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
-            paperLayer.scale(this.scaleX, this.scaleY);
+            // const paperLayer = getPaperLayer(layer);
+            // paperLayer.pivot = this.from;
+            // paperLayer.scale(this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
+            // paperLayer.scale(this.scaleX, this.scaleY);
+            this.setLayerPivot(layer);
+            this.scaleLayer(layer, this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
+            this.scaleLayer(layer, this.scaleX, this.scaleY);
           });
           break;
         }
         case 'topCenter':
         case 'bottomCenter': {
           state.layer.present.selected.forEach((layer: string) => {
-            const paperLayer = getPaperLayer(layer);
-            paperLayer.pivot = this.from;
-            paperLayer.scale(this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
-            paperLayer.scale(1, this.scaleY);
+            // const paperLayer = getPaperLayer(layer);
+            // paperLayer.pivot = this.from;
+            // paperLayer.scale(this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
+            // paperLayer.scale(1, this.scaleY);
+            this.setLayerPivot(layer);
+            this.scaleLayer(layer, this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
+            this.scaleLayer(layer, 1, this.scaleY);
           });
           break;
         }
         case 'leftCenter':
         case 'rightCenter': {
           state.layer.present.selected.forEach((layer: string) => {
-            const paperLayer = getPaperLayer(layer);
-            paperLayer.pivot = this.from;
-            paperLayer.scale(this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
-            paperLayer.scale(this.scaleX, 1);
+            // const paperLayer = getPaperLayer(layer);
+            // paperLayer.pivot = this.from;
+            // paperLayer.scale(this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
+            // paperLayer.scale(this.scaleX, 1);
+            this.setLayerPivot(layer);
+            this.scaleLayer(layer, this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
+            this.scaleLayer(layer, this.scaleX, 1);
           });
           break;
         }
@@ -339,7 +378,9 @@ class ResizeTool {
       // set selected layer pivots
       state.layer.present.selected.forEach((layer) => {
         const paperLayer = getPaperLayer(layer);
-        paperLayer.pivot = this.from;
+        if (paperLayer.data.type !== 'Text') {
+          paperLayer.pivot = this.from;
+        }
       });
       // set from bounds
       this.fromBounds = selectionBounds;
@@ -392,7 +433,9 @@ class ResizeTool {
           // needs to be before resize dispatch to correctly set layer position
           state.layer.present.selected.forEach((layer) => {
             const paperLayer = getPaperLayer(layer);
-            paperLayer.pivot = paperLayer.bounds.center;
+            if (paperLayer.data.type !== 'Text') {
+              paperLayer.pivot = paperLayer.bounds.center;
+            }
           });
           // dispatch resize layers
           store.dispatch(resizeLayers({layers: state.layer.present.selected, verticalFlip: this.verticalFlip, horizontalFlip: this.horizontalFlip}));

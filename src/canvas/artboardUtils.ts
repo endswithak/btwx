@@ -9,7 +9,6 @@ export const applyArtboardMethods = (artboard: paper.Item) => {
     const state = store.getState();
     const layer = getLayer(state.layer.present, this.parent.data.id);
     const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, layer.id);
-    //store.dispatch(setActiveArtboard({id: this.data.artboard}));
     if (e.event.which === 3) {
       if (nearestScopeAncestor.id === this.parent.data.id) {
         store.dispatch(openContextMenu({type: 'TweenEvent', id: this.parent.data.id, x: e.event.clientX, y: e.event.clientY}));
@@ -22,7 +21,7 @@ export const applyArtboardMethods = (artboard: paper.Item) => {
         store.dispatch(selectLayer({id: nearestScopeAncestor.id}));
       }
     } else {
-      if (!state.layer.present.selected.includes(nearestScopeAncestor.id)) {
+      if (!nearestScopeAncestor.selected) {
         store.dispatch(selectLayer({id: nearestScopeAncestor.id, newSelection: true}));
       }
     }
