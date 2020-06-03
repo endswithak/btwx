@@ -51,29 +51,45 @@ class AreaSelectTool {
     });
     return selectAreaShape;
   }
-  paperLayers() {
+  hitTestLayers() {
+    // get paperlayers overlapped by area select shape
     const state = store.getState().layer;
-    return getPagePaperLayer(state.present).getItems({
+    const layers: string[] = [];
+    // get overlapped page layers
+    const overlappedLayers = getPagePaperLayer(state.present).getItems({
       data: (data: any) => {
-        if (data.id === 'ArtboardBackground') {
-          return true;
-        } else {
+        if (data.id !== 'ArtboardBackground') {
           const topParent = getNearestScopeAncestor(state.present, data.id);
           return topParent.id === data.id;
         }
       },
       overlapping: this.shape.bounds
     });
-  }
-  layers() {
-    const paperLayers = this.paperLayers();
-    return paperLayers.map((paperLayer) => {
-      if (paperLayer.data.id === 'ArtboardBackground') {
-        return paperLayer.parent.data.id;
+    // add fully overlapped artboards, overlapped children of
+    // partially overlapped artboards, and overlapped page layers
+    // to final layers array
+    overlappedLayers.forEach((item: paper.Item) => {
+      if (item.data.type === 'Artboard') {
+        if (item.isInside(this.shape.bounds)) {
+          layers.push(item.data.id);
+        } else {
+          item.getItems({
+            data: (data: any) => {
+              if (data.id !== 'ArtboardBackground') {
+                if (state.present.byId[item.data.id].children.includes(data.id)) {
+                  layers.push(data.id);
+                }
+              }
+            },
+            overlapping: this.shape.bounds
+          });
+        }
       } else {
-        return paperLayer.data.id;
+        layers.push(item.data.id);
       }
     });
+    // return fully overlapped artboards and overlapped layers of partially overlapped artboards
+    return layers;
   }
   onEscape() {
     this.disable();
@@ -81,7 +97,9 @@ class AreaSelectTool {
   onMouseDown(event: paper.ToolEvent): void {
     if (this.enabled) {
       const state = store.getState();
+      // set from point
       this.from = event.point;
+      // deselect all if layers if no shift modifier
       if (!this.shiftModifier) {
         if (state.layer.present.selected.length > 0) {
           store.dispatch(deselectAllLayers());
@@ -91,35 +109,49 @@ class AreaSelectTool {
   }
   onMouseDrag(event: paper.ToolEvent): void {
     if (this.enabled) {
+      // update to point and area select shape
       this.update(event.point);
       if (this.to) {
         const state = store.getState();
-        const layers = this.layers();
-        layers.forEach((id: string) => {
+        // get hit test layers
+        const hitTestLayers = this.hitTestLayers();
+        // loop through hit test layers
+        hitTestLayers.forEach((id: string) => {
+          // process layer if not included in overlapped
           if (!this.overlapped.includes(id)) {
+            // if shift modifier, add or remove layer from selected
             if (this.shiftModifier) {
               if (state.layer.present.selected.includes(id)) {
                 store.dispatch(deselectLayer({id}));
               } else {
                 store.dispatch(selectLayer({id}));
               }
-            } else {
+            }
+            // else, add layer to selected
+            else {
               store.dispatch(selectLayer({id}));
             }
+            // push layer id to overlapped
             this.overlapped.push(id);
           }
         });
+        // loop through overlapped
         this.overlapped.forEach((id: string) => {
-          if (!layers.includes(id)) {
+          // process layer if not included in hitTestLayers
+          if (!hitTestLayers.includes(id)) {
+            // if shift modifier, add or remove layer from selected
             if (this.shiftModifier) {
               if (state.layer.present.selected.includes(id)) {
                 store.dispatch(deselectLayer({id}));
               } else {
                 store.dispatch(selectLayer({id}));
               }
-            } else {
+            }
+            // else, remove layer from selected
+            else {
               store.dispatch(deselectLayer({id}));
             }
+            // remove layer from overlapped
             this.overlapped = this.overlapped.filter((layer) => layer !== id);
           }
         });

@@ -206,7 +206,7 @@ export const addPage = (payload: AddPagePayload): LayerTypes => {
 
 export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
   const layerId = uuidv4();
-  payload.paperLayer.data = { id: 'ArtboardBackground' };
+  payload.paperLayer.data = { id: 'ArtboardBackground', type: 'ArtboardBackground' };
   //payload.paperLayer.applyMatrix = false;
   const paperLayer = new paperMain.Group({
     name: payload.name ? payload.name : 'Artboard',
