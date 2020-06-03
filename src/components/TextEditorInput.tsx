@@ -18,7 +18,7 @@ interface TextEditorInputProps {
   textEditor?: TextEditorState;
   textSettings?: TextSettingsState;
   canvasSettings?: CanvasSettingsState;
-  layerText?: string;
+  layerItem?: em.Text;
   closeTextEditor?(): TextEditorTypes;
   disableSelectionTool?(): ToolTypes;
   enableSelectionTool?(): ToolTypes;
@@ -30,8 +30,8 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const textSpanRef = useRef<HTMLTextAreaElement>(null);
   const theme = useContext(ThemeContext);
-  const { textEditor, textSettings, canvasSettings, layerText, closeTextEditor, disableSelectionTool, enableSelectionTool, setLayerText, selectLayer } = props;
-  const [text, setText] = useState(layerText);
+  const { textEditor, textSettings, canvasSettings, layerItem, closeTextEditor, disableSelectionTool, enableSelectionTool, setLayerText, selectLayer } = props;
+  const [text, setText] = useState(layerItem.text);
 
   const handleTextChange = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
     const target = e.target as HTMLTextAreaElement;
@@ -65,11 +65,15 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
       const canvas = document.getElementById('canvas-main') as HTMLCanvasElement;
       const ctx = canvas.getContext('2d');
       ctx.font = `${textSettings.fontSize}px ${textSettings.fontFamily}`;
-      const textMetrics = ctx.measureText(layerText);
+      const textMetrics = ctx.measureText(layerItem.text);
       const boundingHeight = textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent;
       const boundingWhitespace = textSettings.leading - boundingHeight;
       const baseline = (boundingWhitespace / 2) + textMetrics.actualBoundingBoxAscent + (textMetrics.actualBoundingBoxDescent / 2);
-      gsap.set(textAreaRef.current, {x: textEditor.x, y: textEditor.y - (baseline * canvasSettings.zoom), scale: canvasSettings.zoom});
+      gsap.set(textAreaRef.current, {
+        x: textEditor.x,
+        y: textEditor.y - (baseline * canvasSettings.zoom),
+        scale: canvasSettings.zoom
+      });
       disableSelectionTool();
     }
   }, []);
@@ -99,10 +103,40 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
           position: 'absolute',
           fontFamily: textSettings.fontFamily,
           fontSize: textSettings.fontSize,
+          fontWeight: (() => {
+            switch(textSettings.fontWeight) {
+              case 'normal':
+                return textSettings.fontWeight;
+              case 'bold':
+              case 'bold italic':
+                return 'bold';
+              case 'italic':
+                return 'normal';
+            }
+          })(),
+          fontStyle: (() => {
+            switch(textSettings.fontWeight) {
+              case 'normal':
+              case 'bold':
+                return textSettings.fontWeight;
+              case 'bold italic':
+              case 'italic':
+                return 'italic';
+            }
+          })(),
           lineHeight: `${textSettings.leading}px`,
           color: textSettings.fillColor,
           textAlign: textSettings.justification,
-          transformOrigin: 'top left'
+          transformOrigin: (() => {
+            switch(textSettings.justification) {
+              case 'left':
+                return 'left top';
+              case 'center':
+                return 'center top';
+              case 'right':
+                return 'right top';
+            }
+          })()
         }} />
       <span
         className='c-text-editor__span'
@@ -110,6 +144,27 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
         style={{
           fontFamily: textSettings.fontFamily,
           fontSize: textSettings.fontSize,
+          fontWeight: (() => {
+            switch(textSettings.fontWeight) {
+              case 'normal':
+                return textSettings.fontWeight;
+              case 'bold':
+              case 'bold italic':
+                return 'bold';
+              case 'italic':
+                return 'normal';
+            }
+          })(),
+          fontStyle: (() => {
+            switch(textSettings.fontWeight) {
+              case 'normal':
+              case 'bold':
+                return textSettings.fontWeight;
+              case 'bold italic':
+              case 'italic':
+                return 'italic';
+            }
+          })(),
           lineHeight: `${textSettings.leading}px`,
           color: textSettings.fillColor,
           textAlign: textSettings.justification
@@ -122,8 +177,8 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
 
 const mapStateToProps = (state: RootState) => {
   const { textEditor, textSettings, layer, canvasSettings } = state;
-  const layerText = (layer.present.byId[textEditor.layer] as em.Text).text;
-  return { textEditor, textSettings, layerText, canvasSettings };
+  const layerItem = (layer.present.byId[textEditor.layer] as em.Text);
+  return { textEditor, textSettings, layerItem, canvasSettings };
 };
 
 export default connect(

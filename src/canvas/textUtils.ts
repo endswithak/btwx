@@ -21,6 +21,17 @@ export const applyTextMethods = (text: paper.Item) => {
     const state = store.getState();
     const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, this.data.id);
     if (nearestScopeAncestor.id === this.data.id) {
+      // switch(this.justification) {
+      //   case 'left':
+      //     this.pivot = this.bounds.topLeft;
+      //     break;
+      //   case 'center':
+      //     this.pivot = this.bounds.center;
+      //     break;
+      //   case 'right':
+      //     this.pivot = this.bounds.topRight;
+      //     break;
+      // }
       store.dispatch(openTextEditor({
         layer: this.data.id,
         x: this.viewMatrix.tx,

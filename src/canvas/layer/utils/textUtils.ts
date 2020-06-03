@@ -114,7 +114,7 @@ export const getFontStretch = ({ fontStretch }: GetFontStretch): number => {
   switch(fontStretch) {
     case 'condensed':
       return 0.75;
-    case 'expanded;':
+    case 'expanded':
       return 1.25;
     default:
       return null;

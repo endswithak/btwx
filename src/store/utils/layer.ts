@@ -1076,8 +1076,8 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
       [id]: {
         ...currentState.byId[id],
         frame: {
-          x: paperLayer.bounds.x,
-          y: paperLayer.bounds.y,
+          x: paperLayer.position.x,
+          y: paperLayer.position.y,
           width: paperLayer.bounds.width,
           height: paperLayer.bounds.height
         }
@@ -1699,7 +1699,7 @@ export const disableLayerVerticalFlip = (state: LayerState, action: DisableLayer
         ...currentState.byId[action.payload.id],
         style: {
           ...currentState.byId[action.payload.id].style,
-          verticalFlip: true
+          verticalFlip: false
         }
       }
     },
@@ -2104,12 +2104,6 @@ export const resizeLayer = (state: LayerState, action: ResizeLayer): LayerState 
         ...currentState.byId,
         [action.payload.id]: {
           ...currentState.byId[action.payload.id],
-          frame: {
-            x: paperLayer.position.x,
-            y: paperLayer.position.y,
-            width: paperLayer.bounds.width,
-            height: paperLayer.bounds.height
-          },
           pathData: clone.pathData,
           style: {
             ...currentState.byId[action.payload.id].style,
@@ -2127,12 +2121,6 @@ export const resizeLayer = (state: LayerState, action: ResizeLayer): LayerState 
         ...currentState.byId,
         [action.payload.id]: {
           ...currentState.byId[action.payload.id],
-          frame: {
-            x: paperLayer.position.x,
-            y: paperLayer.position.y,
-            width: paperLayer.bounds.width,
-            height: paperLayer.bounds.height
-          },
           style: {
             ...currentState.byId[action.payload.id].style,
             horizontalFlip: action.payload.horizontalFlip ? !currentState.byId[action.payload.id].style.horizontalFlip : currentState.byId[action.payload.id].style.horizontalFlip,
@@ -2143,10 +2131,7 @@ export const resizeLayer = (state: LayerState, action: ResizeLayer): LayerState 
       paperProject: paperMain.project.exportJSON()
     }
   }
-  currentState = updateParentBounds(currentState, action.payload.id);
-  if (layer.type === 'Group') {
-    currentState = updateChildrenBounds(currentState, action.payload.id);
-  }
+  currentState = updateLayerBounds(currentState, action.payload.id);
   return currentState;
 };
 
@@ -2265,7 +2250,46 @@ export const setLayerLeading = (state: LayerState, action: SetLayerLeading): Lay
 export const setLayerJustification = (state: LayerState, action: SetLayerJustification): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id) as paper.PointText;
+  const prevJustification = paperLayer.justification;
   paperLayer.justification = action.payload.justification;
+  switch(prevJustification) {
+    case 'left':
+      switch(action.payload.justification) {
+        case 'left':
+          break;
+        case 'center':
+          paperLayer.position.x += paperLayer.bounds.width / 2
+          break;
+        case 'right':
+          paperLayer.position.x += paperLayer.bounds.width
+          break;
+      }
+      break;
+    case 'center':
+      switch(action.payload.justification) {
+        case 'left':
+          paperLayer.position.x -= paperLayer.bounds.width / 2
+          break;
+        case 'center':
+          break;
+        case 'right':
+          paperLayer.position.x += paperLayer.bounds.width / 2
+          break;
+      }
+      break;
+    case 'right':
+      switch(action.payload.justification) {
+        case 'left':
+          paperLayer.position.x -= paperLayer.bounds.width;
+          break;
+        case 'center':
+          paperLayer.position.x -= paperLayer.bounds.width / 2;
+          break;
+        case 'right':
+          break;
+      }
+      break;
+  }
   currentState = {
     ...currentState,
     byId: {

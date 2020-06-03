@@ -43,6 +43,8 @@ class ResizeTool {
     const state = store.getState();
     this.enabled = true;
     this.handle = handle;
+    this.scaleX = 1;
+    this.scaleY = 1;
     updateSelectionFrame(state.layer.present, this.handle);
   }
   disable() {
@@ -73,13 +75,15 @@ class ResizeTool {
       paperLayer.scale(hor, ver);
     });
   }
-  updateTooltip(point: paper.Point) {
+  updateTooltip() {
     if (this.tooltip) {
       this.tooltip.paperLayer.remove();
     }
-    this.tooltip = new Tooltip(`${Math.round(this.currentBounds.width)} x ${Math.round(this.currentBounds.height)}`, point, {drag: true, up: true});
+    this.tooltip = new Tooltip(`${Math.round(this.currentBounds.width)} x ${Math.round(this.currentBounds.height)}`, this.to, {drag: true, up: true});
   }
   scaleLayers() {
+    // used when dragging
+    // scales layers by current scale values
     const state = store.getState();
     if (this.shiftModifier) {
       const maxDim = Math.max(this.scaleX, this.scaleY);
@@ -121,56 +125,8 @@ class ResizeTool {
     updateSelectionFrame(state.layer.present, this.handle);
     this.currentBounds = getSelectionBounds(state.layer.present);
   }
-  setLayersScale() {
-    const state = store.getState();
-    if (this.shiftModifier) {
-      const maxDim = Math.max(this.scaleX, this.scaleY);
-      state.layer.present.selected.forEach((layer: string) => {
-        const paperLayer = getPaperLayer(layer);
-        paperLayer.pivot = this.from;
-        paperLayer.scale(this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
-        paperLayer.scale(maxDim);
-      });
-    } else {
-      switch(this.handle) {
-        case 'topLeft':
-        case 'topRight':
-        case 'bottomLeft':
-        case 'bottomRight': {
-          state.layer.present.selected.forEach((layer: string) => {
-            const paperLayer = getPaperLayer(layer);
-            paperLayer.pivot = this.from;
-            paperLayer.scale(this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
-            paperLayer.scale(this.scaleX, this.scaleY);
-          });
-          break;
-        }
-        case 'topCenter':
-        case 'bottomCenter': {
-          state.layer.present.selected.forEach((layer: string) => {
-            const paperLayer = getPaperLayer(layer);
-            paperLayer.pivot = this.from;
-            paperLayer.scale(this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
-            paperLayer.scale(1, this.scaleY);
-          });
-          break;
-        }
-        case 'leftCenter':
-        case 'rightCenter': {
-          state.layer.present.selected.forEach((layer: string) => {
-            const paperLayer = getPaperLayer(layer);
-            paperLayer.pivot = this.from;
-            paperLayer.scale(this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
-            paperLayer.scale(this.scaleX, 1);
-          });
-          break;
-        }
-      }
-    }
-    updateSelectionFrame(state.layer.present, this.handle);
-    this.currentBounds = getSelectionBounds(state.layer.present);
-  }
   adjustHandle() {
+    // updates handle, horizontalFlip, and verticalFlip based on to and from points
     switch(this.handle) {
       case 'topLeft': {
         if (this.to.x > this.from.x) {
@@ -259,6 +215,7 @@ class ResizeTool {
     }
   }
   clearLayerScale() {
+    // clears current scaling from layers
     const state = store.getState();
     if (state.layer.present.selected.length > 0) {
       state.layer.present.selected.forEach((layer) => {
@@ -273,10 +230,6 @@ class ResizeTool {
       });
     }
   }
-  resetLayerScale() {
-    this.clearLayerScale();
-    this.setLayersScale();
-  }
   onEscape() {
     if (this.enabled) {
       this.clearLayerScale();
@@ -284,19 +237,79 @@ class ResizeTool {
     }
   }
   onShiftDown() {
-    if (this.enabled) {
-      this.resetLayerScale();
+    if (this.enabled && this.to) {
+      const state = store.getState();
+      // clear current scale
+      this.clearLayerScale();
+      // apply constrained scale based on largest scale
+      const maxDim = Math.max(this.scaleX, this.scaleY);
+      state.layer.present.selected.forEach((layer: string) => {
+        const paperLayer = getPaperLayer(layer);
+        paperLayer.pivot = this.from;
+        paperLayer.scale(this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
+        paperLayer.scale(maxDim);
+      });
+      // update selection frame
+      updateSelectionFrame(state.layer.present, this.handle);
+      // set new bounds
+      this.currentBounds = getSelectionBounds(state.layer.present);
+      // update tooltip
+      this.updateTooltip();
     }
   }
   onShiftUp() {
-    if (this.enabled) {
-      this.resetLayerScale();
+    if (this.enabled && this.to) {
+      const state = store.getState();
+      // clear current scale
+      this.clearLayerScale();
+      // apply scale based on current handle, scaleX, and scaleY values
+      switch(this.handle) {
+        case 'topLeft':
+        case 'topRight':
+        case 'bottomLeft':
+        case 'bottomRight': {
+          state.layer.present.selected.forEach((layer: string) => {
+            const paperLayer = getPaperLayer(layer);
+            paperLayer.pivot = this.from;
+            paperLayer.scale(this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
+            paperLayer.scale(this.scaleX, this.scaleY);
+          });
+          break;
+        }
+        case 'topCenter':
+        case 'bottomCenter': {
+          state.layer.present.selected.forEach((layer: string) => {
+            const paperLayer = getPaperLayer(layer);
+            paperLayer.pivot = this.from;
+            paperLayer.scale(this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
+            paperLayer.scale(1, this.scaleY);
+          });
+          break;
+        }
+        case 'leftCenter':
+        case 'rightCenter': {
+          state.layer.present.selected.forEach((layer: string) => {
+            const paperLayer = getPaperLayer(layer);
+            paperLayer.pivot = this.from;
+            paperLayer.scale(this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
+            paperLayer.scale(this.scaleX, 1);
+          });
+          break;
+        }
+      }
+      // update selection frame
+      updateSelectionFrame(state.layer.present, this.handle);
+      // update current bounds
+      this.currentBounds = getSelectionBounds(state.layer.present);
+      // update tooltip
+      this.updateTooltip();
     }
   }
   onMouseDown(event: paper.ToolEvent): void {
     if (this.enabled) {
       const state = store.getState();
       const selectionBounds = getSelectionBounds(state.layer.present);
+      // set from point to handle pivot point
       switch(this.handle) {
         case 'topLeft':
           this.from = selectionBounds.bottomRight;
@@ -323,38 +336,51 @@ class ResizeTool {
           this.from = selectionBounds.leftCenter;
           break;
       }
+      // set selected layer pivots
       state.layer.present.selected.forEach((layer) => {
         const paperLayer = getPaperLayer(layer);
         paperLayer.pivot = this.from;
       });
+      // set from bounds
       this.fromBounds = selectionBounds;
+      // set current bounds
       this.currentBounds = selectionBounds;
-      this.to = event.point;
+      // set to bounds with from and event point points
       this.toBounds = new paperMain.Rectangle({
         from: this.from,
-        to: this.to
+        to: event.point
       });
     }
   }
   onMouseDrag(event: paper.ToolEvent): void {
     if (this.enabled) {
+      // set prev bounds
       const prevToBounds = this.toBounds;
+      // update to point
       this.to = event.point;
+      // update to bounds with new to point
       this.toBounds = new paperMain.Rectangle({
         from: this.from,
         to: this.to
       });
+      // get relative scale changes
       const widthDiff = this.toBounds.width / prevToBounds.width;
       const heightDiff = this.toBounds.height / prevToBounds.height;
+      // get absolute scale changes
       const totalWidthDiff = this.toBounds.width / this.fromBounds.width;
       const totalHeightDiff = this.toBounds.height / this.fromBounds.height;
+      // set scale deltas
       this.scaleXDelta = isFinite(widthDiff) && widthDiff !== 0 ? widthDiff : 1;
       this.scaleYDelta = isFinite(heightDiff) && heightDiff !== 0 ? heightDiff : 1;
+      // set total scale
       this.scaleX = isFinite(totalWidthDiff) && totalWidthDiff !== 0 ? totalWidthDiff : 1;
       this.scaleY = isFinite(totalHeightDiff) && totalHeightDiff !== 0 ? totalHeightDiff : 1;
+      // update handle
       this.adjustHandle();
+      // scale layers with new scale values
       this.scaleLayers();
-      this.updateTooltip(event.point);
+      // update tooltip
+      this.updateTooltip();
     }
   }
   onMouseUp(event: paper.ToolEvent): void {
@@ -362,11 +388,15 @@ class ResizeTool {
       if (this.scaleX || this.scaleY) {
         const state = store.getState();
         if (state.layer.present.selected.length > 0) {
-          store.dispatch(resizeLayers({layers: state.layer.present.selected, verticalFlip: this.verticalFlip, horizontalFlip: this.horizontalFlip}));
+          // set selected layers back to the default pivot point
+          // needs to be before resize dispatch to correctly set layer position
           state.layer.present.selected.forEach((layer) => {
             const paperLayer = getPaperLayer(layer);
             paperLayer.pivot = paperLayer.bounds.center;
           });
+          // dispatch resize layers
+          store.dispatch(resizeLayers({layers: state.layer.present.selected, verticalFlip: this.verticalFlip, horizontalFlip: this.horizontalFlip}));
+          // update selection frame
           updateSelectionFrame(state.layer.present);
         }
       }
