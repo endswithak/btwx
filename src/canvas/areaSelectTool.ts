@@ -3,6 +3,7 @@ import { getPagePaperLayer, getNearestScopeAncestor } from '../store/selectors/l
 import { deselectAllLayers, deselectLayer, selectLayer } from '../store/actions/layer';
 import store from '../store';
 import { paperMain } from './index';
+import { THEME_PRIMARY_COLOR } from '../constants';
 
 class AreaSelectTool {
   enabled: boolean;
@@ -42,7 +43,8 @@ class AreaSelectTool {
     const selectAreaShape = new paperMain.Path.Rectangle({
       from: this.from,
       to: this.to,
-      selected: true,
+      fillColor: new paper.Color(THEME_PRIMARY_COLOR),
+      opacity: 0.5,
       ...shapeOpts
     });
     selectAreaShape.removeOn({

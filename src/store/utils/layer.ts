@@ -41,6 +41,8 @@ import { applyShapeMethods } from '../../canvas/shapeUtils';
 import { applyTextMethods } from '../../canvas/textUtils';
 import { applyArtboardMethods } from '../../canvas/artboardUtils';
 
+import { THEME_PRIMARY_COLOR } from '../../constants';
+
 export const addPage = (state: LayerState, action: AddPage): LayerState => {
   return {
     ...state,
@@ -239,7 +241,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandles = 'all') 
       point: selectionTopLeft,
       size: [8, 8],
       fillColor: '#fff',
-      strokeColor: '#009DEC',
+      strokeColor: THEME_PRIMARY_COLOR,
       strokeWidth: 1 / paperMain.view.zoom,
       insert: false,
       //applyMatrix: false
@@ -247,7 +249,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandles = 'all') 
     const baseFrame = new paperMain.Path.Rectangle({
       from: selectionTopLeft,
       to: selectionBottomRight,
-      strokeColor: '#009DEC',
+      strokeColor: THEME_PRIMARY_COLOR,
       strokeWidth: 1 / paperMain.view.zoom,
       insert: false,
       //applyMatrix: false,
@@ -343,7 +345,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandles = 'all') 
     leftCenterHandle.position = baseFrame.bounds.leftCenter;
     leftCenterHandle.scaling.x = 1 / paperMain.view.zoom;
     leftCenterHandle.scaling.y = 1 / paperMain.view.zoom;
-    if (state.selected.length === 1 && state.byId[state.selected[0]].type === 'Text' || state.selected.length > 1 && state.selected.every((id) => state.byId[id].type === 'Text')) {
+    if (state.selected.length >= 1 && state.selected.every((id) => state.byId[id].type === 'Text')) {
       topLeftHandle.opacity = 0.5;
       topCenterHandle.opacity = 0.5;
       topRightHandle.opacity = 0.5;
@@ -490,7 +492,7 @@ export const selectLayers = (state: LayerState, action: SelectLayers): LayerStat
 export const updateHoverFrame = (state: LayerState) => {
   const hoverFrame = paperMain.project.getItem({ data: { id: 'hoverFrame' } });
   const hoverFrameConstants = {
-    strokeColor: '#009DEC',
+    strokeColor: THEME_PRIMARY_COLOR,
     strokeWidth: 1,
     //applyMatrix: false,
     data: {

@@ -64,7 +64,7 @@ class SelectionTool {
   constructor() {
     this.tool = new paperMain.Tool();
     this.tool.activate();
-    this.tool.minDistance = 1;
+    //this.tool.minDistance = 1;
     this.tool.onKeyDown = (e: paper.KeyEvent) => this.onKeyDown(e);
     this.tool.onKeyUp = (e: paper.KeyEvent) => this.onKeyUp(e);
     this.tool.onMouseDown = (e: paper.ToolEvent) => this.onMouseDown(e);
@@ -169,11 +169,14 @@ class SelectionTool {
     }
   }
   onMouseDown(event: paper.ToolEvent): void {
+    const state = store.getState().layer.present;
     const hitResult = paperMain.project.hitTest(event.point);
     if (hitResult) {
       if (hitResult.item.data.id === 'selectionFrameHandle') {
-        this.resizeTool.enable(hitResult.item.data.handle);
-        this.resizeTool.onMouseDown(event);
+        if (state.selected.length >= 1 && !state.selected.every((id) => state.byId[id].type === 'Text')) {
+          this.resizeTool.enable(hitResult.item.data.handle);
+          this.resizeTool.onMouseDown(event);
+        }
       } else {
         this.dragTool.enable();
         this.dragTool.onMouseDown(event);

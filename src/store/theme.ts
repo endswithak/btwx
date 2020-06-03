@@ -1,12 +1,10 @@
 import chroma, { Color } from 'chroma-js';
-
-export const SRM_DEFAULT_PRIMARY = chroma('#EF2EF2');
+import { THEME_PRIMARY_COLOR, THEME_UNIT_SIZE } from '../constants';
 
 const createScale = (min: string, max: string, count: number) => {
   return chroma.scale([min, max]).mode('lch').colors(count);
 }
 
-const primary = chroma('#3C88FD').css();
 const accent = chroma('magenta').css();
 
 const darkBgMin = '#1a1a1a';
@@ -31,8 +29,8 @@ const textOnColor = (color: string | chroma.Color) => {
 }
 
 const createPalette = (): em.Palette => ({
-  primary: primary,
-  primaryHover: chroma(primary).darken().css(),
+  primary: THEME_PRIMARY_COLOR,
+  primaryHover: chroma(THEME_PRIMARY_COLOR).darken().css(),
   accent: chroma(accent).css(),
   accentHover: chroma(accent).darken().css()
 });
@@ -66,14 +64,12 @@ const createText = (scale: string[], palette: em.Palette): em.TextScale => ({
   onAccent: textOnColor(palette.accent),
 });
 
-const unitSize = 4;
-
 export const darkTheme = {
   palette: createPalette(),
   background: createDarkBackgrounds(darkBgScale),
   backgroundInverse: createLightBackgrounds(lightBgScale),
   text: createText(darkTextScale, createPalette()),
-  unit: unitSize
+  unit: THEME_UNIT_SIZE
 }
 
 export const lightTheme = {
@@ -81,7 +77,7 @@ export const lightTheme = {
   background: createLightBackgrounds(lightBgScale),
   backgroundInverse: createDarkBackgrounds(lightBgScale),
   text: createText(lightTextScale, createPalette()),
-  unit: unitSize
+  unit: THEME_UNIT_SIZE
 }
 
 const getTheme = (theme: em.ThemeName): em.Theme => {
@@ -90,13 +86,13 @@ const getTheme = (theme: em.ThemeName): em.Theme => {
       return {
         name: theme,
         ...darkTheme,
-        unit: 4
+        unit: THEME_UNIT_SIZE
       }
     case 'light':
       return {
         name: theme,
         ...lightTheme,
-        unit: 4
+        unit: THEME_UNIT_SIZE
       }
   }
 };
