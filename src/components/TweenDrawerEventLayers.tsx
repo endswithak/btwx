@@ -50,7 +50,7 @@ const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElemen
               color: theme.text.lighter,
               textTransform: 'uppercase'
             }}>
-            Tweens
+
           </div>
         </div>
       </div>

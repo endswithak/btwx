@@ -20,7 +20,7 @@ const TweenDrawerEventLayerTweens = (props: TweenDrawerEventLayerTweensProps): R
   const { tweenEventLayerTweens } = props;
 
   return (
-    <div className={`c-tween-drawer-event-layer__tweens`}>
+    <>
       {
         tweenEventLayerTweens.allIds.map((tween, index) => (
           <TweenDrawerEventLayerTween
@@ -29,7 +29,7 @@ const TweenDrawerEventLayerTweens = (props: TweenDrawerEventLayerTweensProps): R
             index={index} />
         ))
       }
-    </div>
+    </>
   );
 }
 

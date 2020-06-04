@@ -30,9 +30,19 @@ const LeadingInput = (props: LeadingInputProps): ReactElement => {
   };
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    setLayerLeading({id: selected[0], leading: evaluate(`${leading}`)});
-    setTextSettingsLeading({leading: evaluate(`${leading}`)});
-    setLeading(evaluate(`${leading}`));
+    try {
+      let nextLeading = evaluate(`${leading}`);
+      if (nextLeading !== leadingValue) {
+        if (nextLeading < 1) {
+          nextLeading = 1;
+        }
+        setLayerLeading({id: selected[0], leading: nextLeading});
+        setTextSettingsLeading({leading: nextLeading});
+        setLeading(nextLeading);
+      }
+    } catch(error) {
+      setLeading(leadingValue);
+    }
   }
 
   return (
@@ -40,7 +50,7 @@ const LeadingInput = (props: LeadingInputProps): ReactElement => {
       value={leading}
       onChange={handleChange}
       onSubmit={handleSubmit}
-      blurOnSubmit
+      submitOnBlur
       disabled={selected.length > 1 || selected.length === 0}
       bottomLabel={'Leading'} />
   );

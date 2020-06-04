@@ -29,28 +29,14 @@ const StrokeColorInput = (props: StrokeColorInputProps): ReactElement => {
   const [enabled, setEnabled] = useState<boolean>(stroke.enabled);
   const [color, setColor] = useState<string>(chroma(stroke.color).alpha(1).hex());
   const [opacity, setOpacity] = useState<number | string>(strokeOpacity);
-  // const [width, setWidth] = useState<number | string>(stroke.width);
   const [swatchColor, setSwatchColor] = useState<string>(stroke.color);
 
   useEffect(() => {
     setEnabled(stroke.enabled);
     setColor(chroma(stroke.color).alpha(1).hex());
     setOpacity(strokeOpacity);
-    //setWidth(stroke.width);
     setSwatchColor(stroke.color);
   }, [stroke, selected]);
-
-  // const handleCheckChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
-  //   const target = e.target as HTMLInputElement;
-  //   const paperLayer = getPaperLayer(selected[0]);
-  //   if (target.checked) {
-  //     enableLayerStroke({id: selected[0]});
-  //     paperLayer.strokeColor = new paper.Color(stroke.color);
-  //   } else {
-  //     disableLayerStroke({id: selected[0]});
-  //     paperLayer.strokeColor = null;
-  //   }
-  // };
 
   const handleOpacityChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     const target = e.target as HTMLInputElement;
@@ -62,44 +48,37 @@ const StrokeColorInput = (props: StrokeColorInputProps): ReactElement => {
     setColor(target.value);
   };
 
-  // const handleWidthChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
-  //   const target = e.target as HTMLInputElement;
-  //   setWidth(target.value);
-  // };
-
   const handleOpacitySubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
-    const paperLayer = getPaperLayer(selected[0]);
-    let nextOpacity = evaluate(`${opacity}`);
-    if (nextOpacity > 100) {
-      nextOpacity = 100;
+    try {
+      let nextOpacity = evaluate(`${opacity}`);
+      if (nextOpacity !== strokeOpacity) {
+        if (nextOpacity > 100) {
+          nextOpacity = 100;
+        }
+        if (nextOpacity < 0) {
+          nextOpacity = 0;
+        }
+        const paperLayer = getPaperLayer(selected[0]);
+        const newColor = chroma(color).alpha(evaluate(`${nextOpacity} / 100`)).hex();
+        paperLayer.strokeColor = new paper.Color(newColor);
+        setLayerStrokeColor({id: selected[0], strokeColor: newColor});
+        setColor(chroma(newColor).alpha(1).hex());
+      }
+    } catch(error) {
+      setOpacity(strokeOpacity);
     }
-    if (nextOpacity < 0) {
-      nextOpacity = 0;
-    }
-    const newColor = chroma(color).alpha(evaluate(`${nextOpacity} / 100`)).hex();
-    paperLayer.strokeColor = new paper.Color(newColor);
-    setLayerStrokeColor({id: selected[0], strokeColor: newColor});
-    setColor(chroma(newColor).alpha(1).hex());
   }
 
   const handleColorSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     if (chroma.valid(color)) {
       const paperLayer = getPaperLayer(selected[0]);
-      paperLayer.strokeColor = new paper.Color(color);
-      setLayerStrokeColor({id: selected[0], strokeColor: chroma(color).hex()});
-      setColor(chroma(color).alpha(1).hex());
-      setSwatchColor(chroma(color).hex());
+      const nextStrokeColor = chroma(color).alpha(strokeOpacity / 100).hex();
+      paperLayer.strokeColor = new paper.Color(nextStrokeColor);
+      setLayerStrokeColor({id: selected[0], strokeColor: nextStrokeColor});
     } else {
       setColor(chroma(stroke.color).alpha(1).hex());
     }
   };
-
-  // const handleWidthSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
-  //   const paperLayer = getPaperLayer(selected[0]);
-  //   paperLayer.strokeWidth = evaluate(`${width}`);
-  //   setLayerStrokeWidth({id: selected[0], strokeWidth: evaluate(`${width}`)});
-  //   setWidth(evaluate(`${width}`));
-  // };
 
   const handleSwatchChange = (editorColor: string) => {
     setColor(chroma(editorColor).alpha(1).hex());

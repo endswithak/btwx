@@ -21,7 +21,7 @@ import TextTool from '../../canvas/textTool';
 export interface ToolState {
   tool: 'Draw' | 'Selection' | 'Artboard' | 'Text';
   drawing: boolean;
-  drawShape: em.ShapeType;
+  drawShape: em.ShapeType | 'Artboard';
   typing: boolean;
 }
 
@@ -121,7 +121,7 @@ export default (state = initialState, action: ToolTypes): ToolState => {
         tool: 'Artboard',
         drawing: false,
         typing: false,
-        drawShape: null
+        drawShape: 'Artboard'
       };
     }
     case ENABLE_TEXT_TOOL: {

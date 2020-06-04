@@ -27,10 +27,17 @@ const XInput = (props: XInputProps): ReactElement => {
   };
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const paperLayer = getPaperLayer(selected[0]);
-    paperLayer.position.x = evaluate(`${x}`);
-    setLayerX({id: selected[0], x: evaluate(`${x}`)});
-    setX(evaluate(`${x}`));
+    try {
+      const nextX = evaluate(`${x}`);
+      if (nextX !== xValue) {
+        const paperLayer = getPaperLayer(selected[0]);
+        paperLayer.position.x = nextX;
+        setLayerX({id: selected[0], x: nextX});
+        setX(nextX);
+      }
+    } catch(error) {
+      setX(xValue);
+    }
   }
 
   return (
@@ -38,7 +45,7 @@ const XInput = (props: XInputProps): ReactElement => {
       value={x}
       onChange={handleChange}
       onSubmit={handleSubmit}
-      blurOnSubmit
+      submitOnBlur
       label={'X'}
       disabled={selected.length > 1 || selected.length === 0} />
   );

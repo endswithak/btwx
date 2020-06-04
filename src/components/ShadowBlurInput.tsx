@@ -28,10 +28,17 @@ const ShadowBlurInput = (props: ShadowBlurInputProps): ReactElement => {
   };
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const paperLayer = getPaperLayer(selected[0]);
-    paperLayer.shadowBlur = evaluate(`${shadowBlur}`);
-    setLayerShadowBlur({id: selected[0], shadowBlur: evaluate(`${shadowBlur}`)});
-    setShadowBlur(evaluate(`${shadowBlur}`));
+    try {
+      const nextBlur = evaluate(`${shadowBlur}`);
+      if (nextBlur !== shadow.blur) {
+        const paperLayer = getPaperLayer(selected[0]);
+        paperLayer.shadowBlur = nextBlur;
+        setLayerShadowBlur({id: selected[0], shadowBlur: nextBlur});
+        setShadowBlur(nextBlur);
+      }
+    } catch(error) {
+      setShadowBlur(shadow.blur);
+    }
   }
 
   return (

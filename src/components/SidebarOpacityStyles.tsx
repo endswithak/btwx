@@ -64,7 +64,8 @@ const SidebarOpacityStyles = (props: SidebarOpacityStylesProps): ReactElement =>
           <SidebarSlider
             value={opacity}
             onChange={handleSliderChange}
-            onMouseUp={handleSubmit} />
+            onMouseUp={handleSubmit}
+            disabled={selected.length > 1 || selected.length === 0} />
         </SidebarSectionColumn>
         <SidebarSectionColumn width={'33.33%'}>
           <SidebarInput

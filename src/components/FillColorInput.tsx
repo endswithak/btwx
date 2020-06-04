@@ -64,31 +64,34 @@ const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
   };
 
   const handleOpacitySubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
-    const paperLayer = getPaperLayer(selected[0]);
-    let nextOpacity = evaluate(`${opacity}`);
-    if (nextOpacity > 100) {
-      nextOpacity = 100;
+    try {
+      let nextOpacity = evaluate(`${opacity}`);
+      if (nextOpacity  !== fillOpacity) {
+        if (nextOpacity > 100) {
+          nextOpacity = 100;
+        }
+        if (nextOpacity < 0) {
+          nextOpacity = 0;
+        }
+        const paperLayer = getPaperLayer(selected[0]);
+        const newColor = chroma(color).alpha(evaluate(`${nextOpacity} / 100`)).hex();
+        paperLayer.fillColor = new paper.Color(newColor);
+        setLayerFillColor({id: selected[0], fillColor: newColor});
+      }
+    } catch(error) {
+      setOpacity(fillOpacity);
     }
-    if (nextOpacity < 0) {
-      nextOpacity = 0;
-    }
-    const newColor = chroma(color).alpha(evaluate(`${nextOpacity} / 100`)).hex();
-    paperLayer.fillColor = new paper.Color(newColor);
-    setLayerFillColor({id: selected[0], fillColor: newColor});
-    setColor(chroma(newColor).alpha(1).hex());
-    setSwatchColor(newColor);
   }
 
   const handleColorSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     if (chroma.valid(color)) {
       const paperLayer = getPaperLayer(selected[0]);
-      paperLayer.fillColor = new paper.Color(color);
+      const nextFillColor = chroma(color).alpha(fillOpacity / 100).hex();
+      paperLayer.fillColor = new paper.Color(nextFillColor);
       if (selectedType === 'Text') {
         setTextSettingsFillColor({fillColor: chroma(color).hex()});
       }
-      setLayerFillColor({id: selected[0], fillColor: chroma(color).hex()});
-      setColor(chroma(color).alpha(1).hex());
-      setSwatchColor(chroma(color).hex());
+      setLayerFillColor({id: selected[0], fillColor: nextFillColor});
     } else {
       setColor(chroma(fill.color).alpha(1).hex());
     }

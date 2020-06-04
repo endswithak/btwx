@@ -30,9 +30,16 @@ const FontSizeInput = (props: FontSizeInputProps): ReactElement => {
   };
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    setLayerFontSize({id: selected[0], fontSize: evaluate(`${fontSize}`)});
-    setTextSettingsFontSize({fontSize: evaluate(`${fontSize}`)});
-    setFontSize(evaluate(`${fontSize}`));
+    try {
+      const nextFontSize = evaluate(`${fontSize}`);
+      if (nextFontSize !== fontSizeValue) {
+        setLayerFontSize({id: selected[0], fontSize: nextFontSize});
+        setTextSettingsFontSize({fontSize: nextFontSize});
+        setFontSize(nextFontSize);
+      }
+    } catch(error) {
+      setFontSize(fontSizeValue);
+    }
   }
 
   return (
@@ -40,7 +47,7 @@ const FontSizeInput = (props: FontSizeInputProps): ReactElement => {
       value={fontSize}
       onChange={handleChange}
       onSubmit={handleSubmit}
-      blurOnSubmit
+      submitOnBlur
       disabled={selected.length > 1 || selected.length === 0}
       bottomLabel={'Size'} />
   );

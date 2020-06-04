@@ -27,11 +27,21 @@ const RotationInput = (props: RotationInputProps): ReactElement => {
   };
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const paperLayer = getPaperLayer(selected[0]);
-    paperLayer.rotation = -rotationValue;
-    paperLayer.rotation = evaluate(`${rotation}`);
-    setLayerRotation({id: selected[0], rotation: evaluate(`${rotation}`)});
-    setRotation(evaluate(`${rotation}`));
+    try {
+      let nextRotation = evaluate(`${rotation}`);
+      if (nextRotation !== rotationValue) {
+        if (nextRotation >= 360 || nextRotation <= -360) {
+          nextRotation = 0;
+        }
+        const paperLayer = getPaperLayer(selected[0]);
+        paperLayer.rotation = -rotationValue;
+        paperLayer.rotation = nextRotation;
+        setLayerRotation({id: selected[0], rotation: nextRotation});
+        setRotation(nextRotation);
+      }
+    } catch(error) {
+      setRotation(rotationValue);
+    }
   }
 
   return (
@@ -39,7 +49,7 @@ const RotationInput = (props: RotationInputProps): ReactElement => {
       value={rotation}
       onChange={handleChange}
       onSubmit={handleSubmit}
-      blurOnSubmit
+      submitOnBlur
       label={'°'}
       disabled={selected.length > 1 || selected.length === 0} />
   );

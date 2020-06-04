@@ -27,10 +27,17 @@ const YInput = (props: YInputProps): ReactElement => {
   };
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const paperLayer = getPaperLayer(selected[0]);
-    paperLayer.position.y = evaluate(`${y}`);
-    setLayerY({id: selected[0], y: evaluate(`${y}`)});
-    setY(evaluate(`${y}`));
+    try {
+      const nextY = evaluate(`${y}`);
+      if (nextY !== yValue) {
+        const paperLayer = getPaperLayer(selected[0]);
+        paperLayer.position.y = nextY;
+        setLayerY({id: selected[0], y: nextY});
+        setY(nextY);
+      }
+    } catch(error) {
+      setY(yValue);
+    }
   }
 
   return (
@@ -38,7 +45,7 @@ const YInput = (props: YInputProps): ReactElement => {
       value={y}
       onChange={handleChange}
       onSubmit={handleSubmit}
-      blurOnSubmit
+      submitOnBlur
       label={'Y'}
       disabled={selected.length > 1 || selected.length === 0} />
   );

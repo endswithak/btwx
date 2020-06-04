@@ -9,6 +9,7 @@ interface SidebarSliderProps {
   max?: number;
   onChange(e: React.SyntheticEvent<HTMLInputElement>): void;
   onMouseUp?(e: React.SyntheticEvent<HTMLInputElement>): void;
+  disabled?: boolean;
 }
 
 const Slider = styled.input`
@@ -26,6 +27,9 @@ const Slider = styled.input`
     background: linear-gradient(to right, ${props => props.theme.palette.primary} ${props => props.value}%, ${props => props.theme.background.z4} ${props => props.value}%);
     border-radius: ${props => props.theme.unit * 2}px;
   }
+  :disabled::-webkit-slider-runnable-track {
+    cursor: inherit;
+  }
   ::-webkit-slider-thumb {
     box-shadow: 0px 0px 5px ${props => props.theme.background.z0};
     height: ${props => props.theme.unit * 3}px;
@@ -35,6 +39,9 @@ const Slider = styled.input`
     cursor: pointer;
     -webkit-appearance: none;
     transform: translateY(-36%);
+  }
+  :disabled::-webkit-slider-thumb {
+    cursor: inherit;
   }
   :hover::-webkit-slider-thumb {
     background: ${props => props.theme.backgroundInverse.z3};

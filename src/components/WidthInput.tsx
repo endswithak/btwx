@@ -27,10 +27,20 @@ const WidthInput = (props: WidthInputProps): ReactElement => {
   };
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const paperLayer = getPaperLayer(selected[0]);
-    paperLayer.bounds.width = evaluate(`${width}`);
-    setLayerWidth({id: selected[0], width: evaluate(`${width}`)});
-    setWidth(evaluate(`${width}`));
+    try {
+      let nextWidth = evaluate(`${width}`);
+      if (nextWidth !== widthValue) {
+        if (nextWidth < 1) {
+          nextWidth = 1;
+        }
+        const paperLayer = getPaperLayer(selected[0]);
+        paperLayer.bounds.width = nextWidth;
+        setLayerWidth({id: selected[0], width: nextWidth});
+        setWidth(nextWidth);
+      }
+    } catch(error) {
+      setWidth(widthValue);
+    }
   }
 
   return (
@@ -38,7 +48,7 @@ const WidthInput = (props: WidthInputProps): ReactElement => {
       value={width}
       onChange={handleChange}
       onSubmit={handleSubmit}
-      blurOnSubmit
+      submitOnBlur
       label={'W'}
       disabled={selected.length > 1 || selected.length === 0} />
   );

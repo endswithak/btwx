@@ -20,6 +20,9 @@
 .c-sidebar-input__form
   width: 100%
 
+.c-sidebar-input__form--disabled
+  opacity: 0.5
+
 .c-sidebar-input__field
   font-family: $fontFamily
   font-size: $fontSizeSm
@@ -42,6 +45,7 @@
 
 .c-sidebar-input__field--disabled
   cursor: default
+  opacity: 0.5
 
 .c-sidebar-input__label
   position: absolute
@@ -55,6 +59,9 @@
   height: $unit * 6
   line-height: $unit * 6
   border-radius: $unit
+
+  &::selection
+    background: none
 
 .c-sidebar-input__bottom-label
   right: 0
@@ -70,3 +77,6 @@
   margin-top: $unit * 2
   text-transform: uppercase
   justify-content: center
+
+  &::selection
+    background: none

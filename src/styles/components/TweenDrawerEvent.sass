@@ -59,6 +59,13 @@
   flex-shrink: 0
   width: 100%
 
+.c-tween-drawer-event__layer-timeline
+  overflow: hidden
+  padding-bottom: $unit * 6
+
+.c-tween-drawer-event-layers__layers
+  padding-bottom: $unit * 6
+
 .c-tween-drawer-event-layer__tween
   display: flex
   height: $unit * 8
@@ -73,6 +80,9 @@
   flex-grow: 2
   width: 100%
   line-height: $unit * 8
+
+  &::selection
+    background: none
 
 .c-tween-drawer-event-layer__tween--right
   justify-content: flex-end

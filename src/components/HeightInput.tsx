@@ -27,10 +27,20 @@ const HeightInput = (props: HeightInputProps): ReactElement => {
   };
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const paperLayer = getPaperLayer(selected[0]);
-    paperLayer.bounds.height = evaluate(`${height}`);
-    setLayerHeight({id: selected[0], height: evaluate(`${height}`)});
-    setHeight(evaluate(`${height}`));
+    try {
+      let nextHeight = evaluate(`${height}`);
+      if (height !== heightValue) {
+        if (nextHeight < 1) {
+          nextHeight = 1;
+        }
+        const paperLayer = getPaperLayer(selected[0]);
+        paperLayer.bounds.height = nextHeight;
+        setLayerHeight({id: selected[0], height: nextHeight});
+        setHeight(nextHeight);
+      }
+    } catch(error) {
+      setHeight(heightValue);
+    }
   }
 
   return (
@@ -38,7 +48,7 @@ const HeightInput = (props: HeightInputProps): ReactElement => {
       value={height}
       onChange={handleChange}
       onSubmit={handleSubmit}
-      blurOnSubmit
+      submitOnBlur
       label={'H'}
       disabled={selected.length > 1 || selected.length === 0} />
   );

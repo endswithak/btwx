@@ -29,10 +29,17 @@ const ShadowXInput = (props: ShadowXInputProps): ReactElement => {
   };
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const paperLayer = getPaperLayer(selected[0]);
-    paperLayer.shadowOffset = new paper.Point(evaluate(`${shadowXOffset}`), shadow.offset.y);
-    setLayerShadowXOffset({id: selected[0], shadowXOffset: evaluate(`${shadowXOffset}`)});
-    setShadowXOffset(evaluate(`${shadowXOffset}`));
+    try {
+      const newXOffset = evaluate(`${shadowXOffset}`);
+      if (newXOffset !== shadow.offset.x) {
+        const paperLayer = getPaperLayer(selected[0]);
+        paperLayer.shadowOffset = new paper.Point(newXOffset, shadow.offset.y);
+        setLayerShadowXOffset({id: selected[0], shadowXOffset: newXOffset});
+        setShadowXOffset(newXOffset);
+      }
+    } catch(error) {
+      setShadowXOffset(shadow.offset.x);
+    }
   }
 
   return (
@@ -40,7 +47,7 @@ const ShadowXInput = (props: ShadowXInputProps): ReactElement => {
       value={shadowXOffset}
       onChange={handleChange}
       onSubmit={handleSubmit}
-      blurOnSubmit
+      submitOnBlur
       bottomLabel={'X'}
       disabled={disabled} />
   );

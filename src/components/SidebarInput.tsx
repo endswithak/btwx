@@ -16,6 +16,7 @@ interface SidebarInputProps {
   disabled?: boolean;
   selectOnMount?: boolean;
   blurOnSubmit?: boolean;
+  submitOnBlur?: boolean;
   enableSelectionTool?(): ToolTypes;
   disableSelectionTool?(): ToolTypes;
 }
@@ -31,7 +32,7 @@ const Input = styled.input`
 const SidebarInput = (props: SidebarInputProps): ReactElement => {
   const inputRef = useRef<HTMLInputElement>(null);
   const theme = useContext(ThemeContext);
-  const { value, onChange, onSubmit, onFocus, onBlur, label, bottomLabel, disabled, selectOnMount, blurOnSubmit, enableSelectionTool, disableSelectionTool } = props;
+  const { value, onChange, onSubmit, onFocus, onBlur, label, bottomLabel, disabled, selectOnMount, blurOnSubmit, submitOnBlur, enableSelectionTool, disableSelectionTool } = props;
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -49,7 +50,6 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
     if (onFocus) {
       onFocus(e);
     }
-    inputRef.current.select();
     disableSelectionTool();
   };
 
@@ -57,7 +57,16 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
     if (onBlur) {
       onBlur(e);
     }
+    if (submitOnBlur) {
+      handleSubmit(e);
+    }
     enableSelectionTool();
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      inputRef.current.select();
+    }
   };
 
   useEffect(() => {
@@ -71,7 +80,7 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
     <div className={`c-sidebar-input ${disabled ? 'c-sidebar-input--disabled' : null}`}>
       <div className='c-sidebar-input__inner'>
         <form
-          className='c-sidebar-input__form'
+          className={`c-sidebar-input__form ${disabled ? 'c-sidebar-input__form--disabled' : null}`}
           onSubmit={handleSubmit}>
           <Input
             ref={inputRef}
@@ -79,26 +88,23 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
             onFocus={handleFocus}
             onChange={handleChange}
             onBlur={handleBlur}
+            onKeyPress={handleKeyPress}
             disabled={disabled}
             className='c-sidebar-input__field'
-            theme={theme}
-            style={{
-              opacity: disabled ? 0.5 : 1
-            }} />
+            theme={theme} />
+            {
+              label
+              ? <div
+                  className='c-sidebar-input__label'
+                  style={{
+                    background: theme.background.z4,
+                    color: theme.text.lighter
+                  }}>
+                  { label }
+                </div>
+              : null
+            }
         </form>
-        {
-          label
-          ? <div
-              className='c-sidebar-input__label'
-              style={{
-                background: theme.background.z4,
-                color: theme.text.lighter,
-                opacity: disabled ? 0.5 : 1
-              }}>
-              { label }
-            </div>
-          : null
-        }
         {
           bottomLabel
           ? <div

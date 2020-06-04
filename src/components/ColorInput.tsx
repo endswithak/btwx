@@ -63,7 +63,7 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
             value={colorValue}
             onChange={handleColorChange}
             onSubmit={handleColorSubmit}
-            blurOnSubmit
+            submitOnBlur
             disabled={disabled}
             bottomLabel={'Hex'} />
         </SidebarSectionColumn>
@@ -72,7 +72,7 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
             value={opacityValue}
             onChange={handleOpacityChange}
             onSubmit={handleOpacitySubmit}
-            blurOnSubmit
+            submitOnBlur
             label={'%'}
             disabled={disabled}
             bottomLabel={'Opacity'} />
