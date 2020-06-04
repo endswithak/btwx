@@ -18,6 +18,7 @@ import { setCanvasZoom } from '../store/actions/canvasSettings';
 interface CanvasProps {
   drawing: boolean;
   typing: boolean;
+  zoom: number;
   selectLayer(payload: SelectLayerPayload): LayerTypes;
   enableSelectionTool(): any;
   setCanvasZoom(payload: SetCanvasZoomPayload): CanvasSettingsTypes;
@@ -32,7 +33,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useContext(ThemeContext);
-  const { drawing, typing, selectLayer, enableSelectionTool, activeArtboard, paperProject, layerById, setCanvasZoom } = props;
+  const { drawing, typing, zoom, selectLayer, enableSelectionTool, activeArtboard, paperProject, layerById, setCanvasZoom } = props;
 
   useEffect(() => {
     canvasRef.current.width = canvasContainerRef.current.clientWidth;
@@ -85,6 +86,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
         applyArtboardMethods(getPaperLayer(key).getItem({data: {id: 'ArtboardBackground'}}));
       }
     });
+    paperMain.view.zoom = zoom;
   }, []);
 
   // const handleClick = (e) => {
@@ -123,13 +125,14 @@ const Canvas = (props: CanvasProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer, tool } = state;
+  const { layer, tool, canvasSettings } = state;
   return {
     activeArtboard: layer.present.activeArtboard,
     paperProject: layer.present.paperProject,
     layerById: layer.present.byId,
     drawing: tool.drawing,
-    typing: tool.typing
+    typing: tool.typing,
+    zoom: canvasSettings.zoom
   };
 };
 

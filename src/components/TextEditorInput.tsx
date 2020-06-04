@@ -12,7 +12,6 @@ import { paperMain } from '../canvas';
 import { TextEditorState } from '../store/reducers/textEditor';
 import { TextSettingsState } from '../store/reducers/textSettings';
 import { CanvasSettingsState } from '../store/reducers/canvasSettings';
-import gsap from 'gsap';
 
 interface TextEditorInputProps {
   textEditor?: TextEditorState;
@@ -32,6 +31,7 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { textEditor, textSettings, canvasSettings, layerItem, closeTextEditor, disableSelectionTool, enableSelectionTool, setLayerText, selectLayer } = props;
   const [text, setText] = useState(layerItem.text);
+  const [baseline, setBaseline] = useState(0);
 
   const handleTextChange = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
     const target = e.target as HTMLTextAreaElement;
@@ -68,12 +68,8 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
       const textMetrics = ctx.measureText(layerItem.text);
       const boundingHeight = textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent;
       const boundingWhitespace = textSettings.leading - boundingHeight;
-      const baseline = (boundingWhitespace / 2) + textMetrics.actualBoundingBoxAscent + (textMetrics.actualBoundingBoxDescent / 2);
-      gsap.set(textAreaRef.current, {
-        x: textEditor.x,
-        y: textEditor.y - (baseline * canvasSettings.zoom),
-        scale: canvasSettings.zoom
-      });
+      const newBaseline = (boundingWhitespace / 2) + textMetrics.actualBoundingBoxAscent + (textMetrics.actualBoundingBoxDescent / 2);
+      setBaseline(newBaseline);
       disableSelectionTool();
     }
   }, []);
@@ -100,6 +96,8 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
         onChange={handleTextChange}
         rows={1}
         style={{
+          left: textEditor.x,
+          top: textEditor.y - (baseline * canvasSettings.zoom),
           position: 'absolute',
           fontFamily: textSettings.fontFamily,
           fontSize: textSettings.fontSize,
@@ -127,14 +125,15 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
           lineHeight: `${textSettings.leading}px`,
           color: textSettings.fillColor,
           textAlign: textSettings.justification,
-          transformOrigin: (() => {
+          transformOrigin: 'left top',
+          transform: (() => {
             switch(textSettings.justification) {
               case 'left':
-                return 'left top';
+                return `scale(${canvasSettings.zoom})`;
               case 'center':
-                return 'center top';
+                return `scale(${canvasSettings.zoom}) translateX(-50%)`;
               case 'right':
-                return 'right top';
+                return `scale(${canvasSettings.zoom}) translateX(-100%)`;
             }
           })()
         }} />

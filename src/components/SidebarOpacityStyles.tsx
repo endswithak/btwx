@@ -44,17 +44,23 @@ const SidebarOpacityStyles = (props: SidebarOpacityStylesProps): ReactElement =>
   };
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const paperLayer = getPaperLayer(selected[0]);
-    let nextOpacity = evaluate(`${opacity}`);
-    if (nextOpacity > 100) {
-      nextOpacity = 100;
+    try {
+      let nextOpacity = evaluate(`${opacity}`);
+      if (nextOpacity !== opacityValue) {
+        if (nextOpacity > 100) {
+          nextOpacity = 100;
+        }
+        if (nextOpacity < 0) {
+          nextOpacity = 0;
+        }
+        const paperLayer = getPaperLayer(selected[0]);
+        paperLayer.opacity = evaluate(`${nextOpacity} / 100`);
+        setLayerOpacity({id: selected[0], opacity: evaluate(`${nextOpacity} / 100`)});
+        setOpacity(nextOpacity);
+      }
+    } catch(error) {
+      setOpacity(opacityValue);
     }
-    if (nextOpacity < 0) {
-      nextOpacity = 0;
-    }
-    paperLayer.opacity = evaluate(`${nextOpacity} / 100`);
-    setLayerOpacity({id: selected[0], opacity: evaluate(`${nextOpacity} / 100`)});
-    setOpacity(nextOpacity);
   }
 
   return (
@@ -72,7 +78,7 @@ const SidebarOpacityStyles = (props: SidebarOpacityStylesProps): ReactElement =>
             value={opacity}
             onChange={handleChange}
             onSubmit={handleSubmit}
-            blurOnSubmit
+            submitOnBlur
             disabled={selected.length > 1 || selected.length === 0}
             label={'%'} />
         </SidebarSectionColumn>
