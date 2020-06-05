@@ -130,8 +130,8 @@ const mapStateToProps = (state: RootState) => {
     activeArtboard: layer.present.activeArtboard,
     paperProject: layer.present.paperProject,
     layerById: layer.present.byId,
-    drawing: tool.drawing,
-    typing: tool.typing,
+    drawing: tool.type === 'Shape',
+    typing: tool.type === 'Text',
     zoom: canvasSettings.zoom
   };
 };

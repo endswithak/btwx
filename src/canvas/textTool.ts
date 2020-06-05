@@ -1,13 +1,12 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import store from '../store';
-import { enableSelectionTool, enableRectangleDrawTool, enableEllipseDrawTool, enableRoundedDrawTool, enableDragTool } from '../store/actions/tool';
 import { openTextEditor } from '../store/actions/textEditor';
 import { addText } from '../store/actions/layer';
-import { getNearestScopeAncestor, getPaperLayer } from '../store/selectors/layer';
+import { getNearestScopeAncestor, getPaperLayer, getPagePaperLayer } from '../store/selectors/layer';
 import { paperMain } from './index';
 import { applyTextMethods } from './textUtils';
 import { DEFAULT_TEXT_VALUE, DEFAULT_STYLE } from '../constants';
-import textSettings from 'src/store/reducers/textSettings';
+//import textSettings from 'src/store/reducers/textSettings';
 
 class TextTool {
   tool: paper.Tool;
@@ -34,34 +33,25 @@ class TextTool {
   }
   onMouseUp(event: paper.ToolEvent): void {
     let state = store.getState();
+    // create new text layer
     const newPaperLayer = new paperMain.PointText({
       point: event.point,
       content: DEFAULT_TEXT_VALUE,
       ...state.textSettings
     });
+    // apply text layer methods
     applyTextMethods(newPaperLayer);
-    const overlappedLayers = getPaperLayer(state.layer.present.page).getItems({
+    // check if new layer bounds overlap any artboard
+    const overlappedArtboard = getPagePaperLayer(state.layer.present).getItem({
       data: (data: any) => {
-        if (data.id === 'ArtboardBackground') {
-          return true;
-        } else {
-          const topParent = getNearestScopeAncestor(state.layer.present, data.id);
-          return topParent.id === data.id;
-        }
+        return data.id === 'ArtboardBackground';
       },
       overlapping: newPaperLayer.bounds
     });
-    const artboardOverlapped = () => {
-      if (overlappedLayers.length > 0 && overlappedLayers.some((item) => item.data.id === 'ArtboardBackground')) {
-        const firstArtboard = overlappedLayers.find((item) => item.data.id === 'ArtboardBackground');
-        return firstArtboard.parent.data.id;
-      } else {
-        return false;
-      }
-    }
+    // dispatch add text
     store.dispatch(addText({
       text: newPaperLayer.content,
-      parent: state.layer.present.scope.length > 0 ? state.layer.present.scope[state.layer.present.scope.length - 1] : artboardOverlapped() ? artboardOverlapped() : state.layer.present.page,
+      parent: overlappedArtboard ? overlappedArtboard.parent.data.id : state.layer.present.page,
       frame: {
         x: newPaperLayer.position.x,
         y: newPaperLayer.position.y,
@@ -88,11 +78,35 @@ class TextTool {
         justification: state.textSettings.justification
       }
     }));
+    // get new state with text layer
     state = store.getState();
+    // get new layer bounds
+    const topLeft = paperMain.view.projectToView(newPaperLayer.bounds.topLeft);
+    const topCenter = paperMain.view.projectToView(newPaperLayer.bounds.topCenter);
+    const topRight = paperMain.view.projectToView(newPaperLayer.bounds.topRight);
+    // open text editor with new text layer props
     store.dispatch(openTextEditor({
       layer: state.layer.present.allIds[state.layer.present.allIds.length - 1],
-      x: newPaperLayer.viewMatrix.tx,
-      y: newPaperLayer.viewMatrix.ty
+      x: (() => {
+        switch(state.textSettings.justification) {
+          case 'left':
+            return topLeft.x;
+          case 'center':
+            return topCenter.x;
+          case 'right':
+            return topRight.x;
+        }
+      })(),
+      y: (() => {
+        switch(state.textSettings.justification) {
+          case 'left':
+            return topLeft.y;
+          case 'center':
+            return topCenter.y;
+          case 'right':
+            return topRight.y;
+        }
+      })()
     }));
   }
 }

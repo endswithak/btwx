@@ -1,5 +1,4 @@
-import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
-import Sidebar from './Sidebar';
+import React, { ReactElement } from 'react';
 import SidebarFrameStyles from './SidebarFrameStyles';
 import SidebarContextStyles from './SidebarContextStyles';
 import SidebarFillStyles from './SidebarFillStyles';
@@ -7,20 +6,17 @@ import SidebarStrokeStyles from './SidebarStrokeStyles';
 import SidebarShadowStyles from './SidebarShadowStyles';
 import SidebarTextStyles from './SidebarTextStyles';
 
-const StylesSidebar = (): ReactElement => {
+const SidebarLayerStyles = (): ReactElement => {
   return (
-    <Sidebar
-      width={280}
-      position={'right'}
-      resizable={false}>
+    <>
       <SidebarFrameStyles />
       <SidebarContextStyles />
       <SidebarTextStyles />
       <SidebarFillStyles />
       <SidebarStrokeStyles />
       <SidebarShadowStyles />
-    </Sidebar>
+    </>
   );
 }
 
-export default StylesSidebar;
+export default SidebarLayerStyles;

@@ -1,7 +1,7 @@
 import React, { useRef, useContext, useEffect, ReactElement } from 'react';
 import Canvas from './Canvas';
-import LayersSidebar from './LayersSidebar';
-import StylesSidebar from './StylesSidebar';
+import SidebarLeft from './SidebarLeft';
+import SidebarRight from './SidebarRight';
 import Topbar from './Topbar';
 import TweenDrawer from './TweenDrawer';
 import TweenEventSelect from './TweenEventSelect';
@@ -25,13 +25,13 @@ const App = (): ReactElement => {
       }}>
         <Topbar />
         <div className='c-app__canvas'>
-          <LayersSidebar />
+          <SidebarLeft />
           <div className='c-app__main'>
             <Canvas />
             <TweenDrawer />
             <TextEditor />
           </div>
-          <StylesSidebar />
+          <SidebarRight />
         </div>
         <TweenEventSelect />
         <TweenEventDestinationSelect />

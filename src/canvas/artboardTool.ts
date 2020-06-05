@@ -1,17 +1,12 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import store from '../store';
-import { enableSelectionTool, enableRectangleDrawTool, enableEllipseDrawTool, enableRoundedDrawTool, enableDragTool } from '../store/actions/tool';
-import { openContextMenu, closeContextMenu } from '../store/actions/contextMenu';
-import { addShape, setLayerHover, increaseLayerScope, selectLayer, newLayerScope, deselectLayer, moveLayerBy, moveLayersBy, enableLayerDrag, disableLayerDrag, deepSelectLayer, addArtboard, setActiveArtboard, openAnimationSelect } from '../store/actions/layer';
-import { getNearestScopeAncestor, getLayerByPaperId, isScopeGroupLayer, getPaperLayer, getLayer } from '../store/selectors/layer';
-import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
+import { enableSelectionTool } from '../store/actions/tool';
+import { addArtboard } from '../store/actions/layer';
 import { applyArtboardMethods } from './artboardUtils';
 import { paperMain } from './index';
 import Tooltip from './tooltip';
 
-class DrawTool {
-  getState: any;
-  dispatch: any;
+class ArtboardTool {
   tool: paper.Tool;
   outline: paper.Path;
   tooltip: Tooltip;
@@ -137,4 +132,4 @@ class DrawTool {
   }
 }
 
-export default DrawTool;
+export default ArtboardTool;

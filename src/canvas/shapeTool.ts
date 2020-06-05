@@ -1,16 +1,15 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import store from '../store';
-import { enableSelectionTool, enableRectangleDrawTool, enableEllipseDrawTool, enableRoundedDrawTool, enableDragTool } from '../store/actions/tool';
-import { addShape, setLayerHover, increaseLayerScope, selectLayer, newLayerScope, deselectLayer, moveLayerBy, moveLayersBy, enableLayerDrag, disableLayerDrag, deepSelectLayer, openAnimationSelect, closeAnimationSelect } from '../store/actions/layer';
-import { getNearestScopeAncestor, getLayerByPaperId, isScopeGroupLayer, getPaperLayer, getLayer, getPagePaperLayer } from '../store/selectors/layer';
-import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
+import { enableSelectionTool } from '../store/actions/tool';
+import { addShape } from '../store/actions/layer';
+import { getPagePaperLayer } from '../store/selectors/layer';
 import { applyShapeMethods } from './shapeUtils';
 import { paperMain } from './index';
 import Tooltip from './tooltip';
 
-class DrawTool {
+class ShapeTool {
   tool: paper.Tool;
-  drawShapeType: em.ShapeType;
+  shapeType: em.ShapeType;
   outline: paper.Path;
   tooltip: Tooltip;
   from: paper.Point;
@@ -21,7 +20,7 @@ class DrawTool {
   constrainedDims: paper.Point;
   centerPoint: paper.Point;
   shiftModifier: boolean;
-  constructor({drawShapeType}: {drawShapeType: em.ShapeType}) {
+  constructor(shapeType: em.ShapeType) {
     this.tool = new paperMain.Tool();
     this.tool.activate();
     this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
@@ -29,7 +28,7 @@ class DrawTool {
     this.tool.onMouseDown = (e: paper.ToolEvent): void => this.onMouseDown(e);
     this.tool.onMouseDrag = (e: paper.ToolEvent): void => this.onMouseDrag(e);
     this.tool.onMouseUp = (e: paper.ToolEvent): void => this.onMouseUp(e);
-    this.drawShapeType = drawShapeType;
+    this.shapeType = shapeType;
     this.outline = null;
     this.tooltip = null;
     this.from = null;
@@ -42,7 +41,7 @@ class DrawTool {
     this.shiftModifier = false;
   }
   renderShape(shapeOpts: any) {
-    switch(this.drawShapeType) {
+    switch(this.shapeType) {
       case 'Rectangle':
         return new paperMain.Path.Rectangle({
           from: this.from,
@@ -86,7 +85,7 @@ class DrawTool {
   }
   updateTooltip(): void {
     let tooltipContent;
-    switch(this.drawShapeType) {
+    switch(this.shapeType) {
       case 'Rectangle':
       case 'Ellipse':
       case 'Rounded':
@@ -171,34 +170,21 @@ class DrawTool {
         //applyMatrix: false
       });
       applyShapeMethods(newPaperLayer);
-      const overlappedLayers = getPaperLayer(state.layer.present.page).getItems({
+      const overlappedArtboard = getPagePaperLayer(state.layer.present).getItem({
         data: (data: any) => {
-          if (data.id === 'ArtboardBackground') {
-            return true;
-          } else {
-            const topParent = getNearestScopeAncestor(state.layer.present, data.id);
-            return topParent.id === data.id;
-          }
+          return data.id === 'ArtboardBackground';
         },
         overlapping: this.outline.bounds
       });
-      const artboardOverlapped = () => {
-        if (overlappedLayers.length > 0 && overlappedLayers.some((item) => item.data.id === 'ArtboardBackground')) {
-          const firstArtboard = overlappedLayers.find((item) => item.data.id === 'ArtboardBackground');
-          return firstArtboard.parent.data.id;
-        } else {
-          return false;
-        }
-      }
       store.dispatch(addShape({
-        parent: state.layer.present.scope.length > 0 ? state.layer.present.scope[state.layer.present.scope.length - 1] : artboardOverlapped() ? artboardOverlapped() : state.layer.present.page,
+        parent: overlappedArtboard ? overlappedArtboard.parent.data.id : state.layer.present.page,
         frame: {
           x: newPaperLayer.position.x,
           y: newPaperLayer.position.y,
           width: newPaperLayer.bounds.width,
           height: newPaperLayer.bounds.height
         },
-        shapeType: this.drawShapeType,
+        shapeType: this.shapeType,
         paperLayer: newPaperLayer
       }));
       store.dispatch(enableSelectionTool());
@@ -206,4 +192,4 @@ class DrawTool {
   }
 }
 
-export default DrawTool;
+export default ShapeTool;

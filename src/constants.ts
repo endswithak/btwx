@@ -51,3 +51,241 @@ export const DEFAULT_TEXT_STYLE: em.TextStyle = {
   fontFamily: 'Helvetica',
   justification: 'left'
 }
+
+export const APPLE_IPHONE_DEVICES: em.Device[] = [
+  {
+    type: 'iPhone 8',
+    width: 375,
+    height: 667
+  }, {
+    type: 'iPhone 8 Plus',
+    width: 414,
+    height: 736
+  }, {
+    type: 'iPhone SE',
+    width: 320,
+    height: 568
+  }, {
+    type: 'iPhone 11 Pro',
+    width: 375,
+    height: 812
+  }, {
+    type: 'iPhone 11',
+    width: 414,
+    height: 896
+  }, {
+    type: 'iPhone 11 Pro Max',
+    width: 414,
+    height: 896
+  }
+];
+
+export const APPLE_IPAD_DEVICES: em.Device[] = [
+  {
+    type: '7.9" iPad mini',
+    width: 768,
+    height: 1024
+  }, {
+    type: '10.2" iPad',
+    width: 810,
+    height: 1080
+  }, {
+    type: '10.5" iPad Air',
+    width: 835,
+    height: 1112
+  }, {
+    type: '11" iPad Pro',
+    width: 834,
+    height: 1194
+  }, {
+    type: '12.9" iPad Pro',
+    width: 1024,
+    height: 1366
+  }
+];
+
+export const APPLE_WATCH_DEVICES: em.Device[] = [
+  {
+    type: 'Apple Watch 38mm',
+    width: 136,
+    height: 170
+  }, {
+    type: 'Apple Watch 40mm',
+    width: 162,
+    height: 197
+  }, {
+    type: 'Apple Watch 42mm',
+    width: 156,
+    height: 195
+  }, {
+    type: 'Apple Watch 44mm',
+    width: 184,
+    height: 224
+  }
+];
+
+export const APPLE_TV_DEVICES: em.Device[] = [
+  {
+    type: 'Apple TV',
+    width: 1920,
+    height: 1028
+  }
+];
+
+export const APPLE_MAC_DEVICES: em.Device[] = [
+  {
+    type: 'Touch Bar',
+    width: 1085,
+    height: 30
+  }
+];
+
+export const APPLE_DEVICES: em.DeviceCategory[] = [
+  {
+    type: 'iPhone',
+    devices: APPLE_IPHONE_DEVICES
+  }, {
+    type: 'iPad',
+    devices: APPLE_IPAD_DEVICES
+  }, {
+    type: 'Apple Watch',
+    devices: APPLE_WATCH_DEVICES
+  }, {
+    type: 'Apple TV',
+    devices: APPLE_TV_DEVICES
+  }, {
+    type: 'Mac',
+    devices: APPLE_MAC_DEVICES
+  }
+];
+
+export const ANDROID_MOBILE_DEVICES: em.Device[] = [
+  {
+    type: 'Android',
+    width: 360,
+    height: 640
+  }, {
+    type: 'Pixel 2',
+    width: 412,
+    height: 732
+  }, {
+    type: 'Pixel 2 XL',
+    width: 360,
+    height: 720
+  }, {
+    type: 'Pixel 3',
+    width: 360,
+    height: 720
+  }, {
+    type: 'Pixel 3 XL',
+    width: 360,
+    height: 740
+  }, {
+    type: 'Galaxy S10e',
+    width: 360,
+    height: 760
+  }, {
+    type: 'Galaxy S10',
+    width: 360,
+    height: 760
+  }, {
+    type: 'Galaxy S10+',
+    width: 360,
+    height: 760
+  }
+];
+
+export const ANDROID_TABLET_DEVICES: em.Device[] = [
+  {
+    type: 'Nexus 7',
+    width: 600,
+    height: 960
+  }, {
+    type: 'Nexus 9',
+    width: 768,
+    height: 1024
+  }, {
+    type: 'Nexus 10',
+    width: 800,
+    height: 1280
+  }
+];
+
+export const ANDROID_CHROMEBOOK_DEVICES: em.Device[] = [
+  {
+    type: 'Pixel State',
+    width: 1333,
+    height: 888
+  }, {
+    type: 'Pixelbook',
+    width: 1200,
+    height: 800
+  }
+];
+
+export const ANDROID_DEVICES: em.DeviceCategory[] = [
+  {
+    type: 'Common Mobile',
+    devices: ANDROID_MOBILE_DEVICES
+  }, {
+    type: 'Common Tablet',
+    devices: ANDROID_TABLET_DEVICES
+  }, {
+    type: 'Chromebook',
+    devices: ANDROID_CHROMEBOOK_DEVICES
+  }
+];
+
+export const RESPONSIVE_WEB_MOBILE_DEVICES: em.Device[] = [
+  {
+    type: 'Mobile',
+    width: 320,
+    height: 1024
+  }
+];
+
+export const RESPONSIVE_WEB_TABLET_DEVICES: em.Device[] = [
+  {
+    type: 'Tablet',
+    width: 768,
+    height: 1024
+  }
+];
+
+export const RESPONSIVE_WEB_DESKTOP_DEVICES: em.Device[] = [
+  {
+    type: 'Desktop',
+    width: 1024,
+    height: 1024
+  }, {
+    type: 'Desktop HD',
+    width: 1440,
+    height: 1024
+  }
+];
+
+export const RESPONSIVE_WEB_DEVICES: em.DeviceCategory[] = [
+  {
+    type: 'Mobile',
+    devices: RESPONSIVE_WEB_MOBILE_DEVICES
+  }, {
+    type: 'Tablet',
+    devices: RESPONSIVE_WEB_TABLET_DEVICES
+  }, {
+    type: 'Desktop',
+    devices: RESPONSIVE_WEB_DESKTOP_DEVICES
+  }
+];
+
+export const DEVICES: em.DevicePlatform[] = [
+  {
+    type: 'Apple',
+    categories: APPLE_DEVICES
+  }, {
+    type: 'Android',
+    categories: ANDROID_DEVICES
+  }, {
+    type: 'Responsive Web',
+    categories: RESPONSIVE_WEB_DEVICES
+  }
+];

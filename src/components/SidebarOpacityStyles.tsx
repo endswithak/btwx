@@ -14,11 +14,12 @@ import SidebarSlider from './SidebarSlider';
 interface SidebarOpacityStylesProps {
   selected?: string[];
   opacityValue?: number;
+  disabled?: boolean;
   setLayerOpacity?(payload: SetLayerOpacityPayload): LayerTypes;
 }
 
 const SidebarOpacityStyles = (props: SidebarOpacityStylesProps): ReactElement => {
-  const { selected, setLayerOpacity, opacityValue } = props;
+  const { selected, setLayerOpacity, opacityValue, disabled } = props;
   const [opacity, setOpacity] = useState<string | number>(opacityValue);
 
   useEffect(() => {
@@ -68,10 +69,10 @@ const SidebarOpacityStyles = (props: SidebarOpacityStylesProps): ReactElement =>
       <SidebarSectionRow alignItems={'center'}>
         <SidebarSectionColumn width={'66.66%'}>
           <SidebarSlider
-            value={opacity}
+            value={disabled ? 0 : opacity}
             onChange={handleSliderChange}
             onMouseUp={handleSubmit}
-            disabled={selected.length > 1 || selected.length === 0} />
+            disabled={disabled} />
         </SidebarSectionColumn>
         <SidebarSectionColumn width={'33.33%'}>
           <SidebarInput
@@ -79,7 +80,7 @@ const SidebarOpacityStyles = (props: SidebarOpacityStylesProps): ReactElement =>
             onChange={handleChange}
             onSubmit={handleSubmit}
             submitOnBlur
-            disabled={selected.length > 1 || selected.length === 0}
+            disabled={disabled}
             label={'%'} />
         </SidebarSectionColumn>
       </SidebarSectionRow>
@@ -93,14 +94,24 @@ const mapStateToProps = (state: RootState) => {
   const opacityValue = (() => {
     switch(layer.present.selected.length) {
       case 0:
-        return 0;
+        return '';
       case 1:
         return layer.present.byId[layer.present.selected[0]].style.opacity * 100;
       default:
         return 'multi';
     }
   })();
-  return { selected, opacityValue };
+  const disabled = (() => {
+    switch(layer.present.selected.length) {
+      case 0:
+        return true;
+      case 1:
+        return false;
+      default:
+        return true;
+    }
+  })();
+  return { selected, opacityValue, disabled };
 };
 
 export default connect(

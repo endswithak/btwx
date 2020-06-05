@@ -31,7 +31,7 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { textEditor, textSettings, canvasSettings, layerItem, closeTextEditor, disableSelectionTool, enableSelectionTool, setLayerText, selectLayer } = props;
   const [text, setText] = useState(layerItem.text);
-  const [baseline, setBaseline] = useState(0);
+  const [pos, setPos] = useState({x: textEditor.x, y: textEditor.y});
 
   const handleTextChange = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
     const target = e.target as HTMLTextAreaElement;
@@ -48,36 +48,52 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
 
   useEffect(() => {
     if (textAreaRef.current) {
-      if (paperMain.project.getItem({data: { id: 'selectionFrame' }})) {
-        paperMain.project.getItem({data: { id: 'selectionFrame' }}).remove();
-      }
-      if (paperMain.project.getItem({data: { id: 'hoverFrame' }})) {
-        paperMain.project.getItem({data: { id: 'hoverFrame' }}).remove();
-      }
       paperMain.project.getItem({data: { id: textEditor.layer }}).visible = false;
-      textAreaRef.current.focus();
-      textAreaRef.current.select();
-      textAreaRef.current.style.minHeight = `${textSettings.leading}px`;
-      textAreaRef.current.style.width = 'auto';
-      textAreaRef.current.style.width = `${textSpanRef.current.clientWidth + 4}px`;
-      textAreaRef.current.style.height = 'auto';
-      textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
-      const canvas = document.getElementById('canvas-main') as HTMLCanvasElement;
-      const ctx = canvas.getContext('2d');
-      ctx.font = `${textSettings.fontSize}px ${textSettings.fontFamily}`;
-      const textMetrics = ctx.measureText(layerItem.text);
-      const boundingHeight = textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent;
-      const boundingWhitespace = textSettings.leading - boundingHeight;
-      const newBaseline = (boundingWhitespace / 2) + textMetrics.actualBoundingBoxAscent + (textMetrics.actualBoundingBoxDescent / 2);
-      setBaseline(newBaseline);
       disableSelectionTool();
     }
   }, []);
 
   useEffect(() => {
+    if (paperMain.project.getItem({data: { id: 'selectionFrame' }})) {
+      paperMain.project.getItem({data: { id: 'selectionFrame' }}).remove();
+    }
+    if (paperMain.project.getItem({data: { id: 'hoverFrame' }})) {
+      paperMain.project.getItem({data: { id: 'hoverFrame' }}).remove();
+    }
+    textAreaRef.current.focus();
+    textAreaRef.current.select();
+    const paperLayer = paperMain.project.getItem({data: { id: textEditor.layer }});
+    const topLeft = paperMain.view.projectToView(paperLayer.bounds.topLeft);
+    const topCenter = paperMain.view.projectToView(paperLayer.bounds.topCenter);
+    const topRight = paperMain.view.projectToView(paperLayer.bounds.topRight);
+    setPos({
+      x: (() => {
+        switch(textSettings.justification) {
+          case 'left':
+            return topLeft.x;
+          case 'center':
+            return topCenter.x;
+          case 'right':
+            return topRight.x;
+        }
+      })(),
+      y: (() => {
+        switch(textSettings.justification) {
+          case 'left':
+            return topLeft.y;
+          case 'center':
+            return topCenter.y;
+          case 'right':
+            return topRight.y;
+        }
+      })()
+    });
+  }, [textSettings]);
+
+  useEffect(() => {
     if (textAreaRef.current) {
       textAreaRef.current.style.width = 'auto';
-      textAreaRef.current.style.width = `${textSpanRef.current.clientWidth + 12}px`;
+      textAreaRef.current.style.width = `${textSpanRef.current.clientWidth + 4}px`;
       textAreaRef.current.style.height = 'auto';
       textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
     }
@@ -89,6 +105,22 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
       <div
         className='c-text-editor__overlay'
         onClick={handleClose} />
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: pos.x,
+        height: '100%',
+        width: 1,
+        background: 'red'
+      }} />
+      <div style={{
+        position: 'absolute',
+        top: pos.y,
+        left: 0,
+        height: 1,
+        width: '100%',
+        background: 'red'
+      }} />
       <textarea
         className='c-text-editor__textarea'
         ref={textAreaRef}
@@ -96,11 +128,12 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
         onChange={handleTextChange}
         rows={1}
         style={{
-          left: textEditor.x,
-          top: textEditor.y - (baseline * canvasSettings.zoom),
+          left: pos.x,
+          top: pos.y,
           position: 'absolute',
           fontFamily: textSettings.fontFamily,
           fontSize: textSettings.fontSize,
+          minHeight: textSettings.leading,
           fontWeight: (() => {
             switch(textSettings.fontWeight) {
               case 'normal':

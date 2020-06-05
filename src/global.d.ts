@@ -1,5 +1,9 @@
 declare namespace em {
 
+  type ToolType = 'Shape' | 'Selection' | 'Artboard' | 'Text';
+
+  type Orientation = 'Portrait' | 'Landscape';
+
   type TweenEventType = 'click' | 'doubleclick' | 'mouseenter' | 'mouseleave';
 
   type CubicBezier = 'linear' | 'power1' | 'power2' | 'power3' | 'power4' | 'back' | 'elastic' | 'bounce' | 'rough' | 'slow' | 'steps' | 'circ' | 'expo' | 'sine' | 'custom';
@@ -23,6 +27,62 @@ declare namespace em {
   type Jusftification = 'left' | 'center' | 'right';
 
   type FontWeight = 'normal' | 'italic' | 'bold' | 'bold italic';
+
+  type AppleiPhoneDevice = 'iPhone 8' | 'iPhone 8 Plus' | 'iPhone SE' | 'iPhone 11 Pro' | 'iPhone 11' | 'iPhone 11 Pro Max';
+
+  type AppleiPadDevice = '7.9" iPad mini' | '10.2" iPad' | '10.5" iPad Air' | '11" iPad Pro' | '12.9" iPad Pro';
+
+  type AppleWatchDevice = 'Apple Watch 38mm' | 'Apple Watch 40mm' | 'Apple Watch 42mm' | 'Apple Watch 44mm';
+
+  type AppleTVDevice = 'Apple TV';
+
+  type AppleMacDevice = 'Touch Bar';
+
+  type AppleDeviceType = AppleiPhoneDevice | AppleiPadDevice | AppleWatchDevice | AppleTVDevice | AppleMacDevice;
+
+  type AppleDeviceCategory = 'iPhone' | 'iPad' | 'Mac' | 'Apple TV' | 'Apple Watch';
+
+  type AndroidMobileDevice = 'Android' | 'Pixel 2' | 'Pixel 2 XL' | 'Pixel 3' | 'Pixel 3 XL' | 'Galaxy S10e' | 'Galaxy S10' | 'Galaxy S10+';
+
+  type AndroidTabletDevice = 'Nexus 7' | 'Nexus 9' | 'Nexus 10';
+
+  type AndroidChromebookDevice = 'Pixel State' | 'Pixelbook';
+
+  type AndroidDeviceType = AndroidMobileDevice | AndroidTabletDevice | AndroidChromebookDevice;
+
+  type AndroidDeviceCategory = 'Common Mobile' | 'Common Tablet' | 'Chromebook';
+
+  type ResponsiveWebMobileDevice = 'Mobile';
+
+  type ResponsiveWebTabletDevice = 'Tablet';
+
+  type ResponsiveWebDesktopDevice = 'Desktop' | 'Desktop HD';
+
+  type ResponsiveWebDeviceType = ResponsiveWebMobileDevice | ResponsiveWebTabletDevice | ResponsiveWebDesktopDevice;
+
+  type ResponsiveWebDeviceCategory = 'Mobile' | 'Tablet' | 'Desktop';
+
+  type DeviceType = AppleDevice | AndroidDevice | ResponsiveWebDevice;
+
+  type DeviceCategoryType = AppleDeviceCategory | AndroidDeviceCategory | ResponsiveWebDeviceCategory;
+
+  type DevicePlatformType = 'Apple' | 'Android' | 'Responsive Web';
+
+  interface Device {
+    type: DeviceType;
+    width: number;
+    height: number;
+  }
+
+  interface DeviceCategory {
+    type: DeviceCategoryType;
+    devices: em.Device[];
+  }
+
+  interface DevicePlatform {
+    type: DevicePlatformType;
+    categories: em.DeviceCategory[];
+  }
 
   interface Style {
     fill: Fill;

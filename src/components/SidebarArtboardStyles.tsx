@@ -9,7 +9,7 @@ interface SidebarArtboardProps {
   depth: number;
 }
 
-const SidebarArtboard = (props: SidebarArtboardProps): ReactElement => {
+const SidebarArtboardStyles = (props: SidebarArtboardProps): ReactElement => {
   const globalState = useContext(store);
   const [isOpen, setIsOpen] = useState(false);
   const { artboard, depth, path } = props;

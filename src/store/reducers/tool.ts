@@ -1,35 +1,35 @@
 import { paperMain } from '../../canvas';
 
 import {
-  ENABLE_RECTANGLE_DRAW_TOOL,
-  ENABLE_ELLIPSE_DRAW_TOOL,
-  ENABLE_STAR_DRAW_TOOL,
-  ENABLE_POLYGON_DRAW_TOOL,
-  ENABLE_ROUNDED_DRAW_TOOL,
+  ENABLE_RECTANGLE_SHAPE_TOOL,
+  ENABLE_ELLIPSE_SHAPE_TOOL,
+  ENABLE_STAR_SHAPE_TOOL,
+  ENABLE_POLYGON_SHAPE_TOOL,
+  ENABLE_ROUNDED_SHAPE_TOOL,
   ENABLE_SELECTION_TOOL,
   DISABLE_SELECTION_TOOL,
   ENABLE_ARTBOARD_TOOL,
   ENABLE_TEXT_TOOL,
+  ENABLE_ARTBOARD_TOOL_PORTRAIT_ORIENTATION,
+  ENABLE_ARTBOARD_TOOL_LANDSCAPE_ORIENTATION,
   ToolTypes,
 } from '../actionTypes/tool';
 
-import DrawTool from '../../canvas/drawTool';
+import ShapeTool from '../../canvas/shapeTool';
 import SelectionTool from '../../canvas/selectionTool';
 import ArtboardTool from '../../canvas/artboardTool';
 import TextTool from '../../canvas/textTool';
 
 export interface ToolState {
-  tool: 'Draw' | 'Selection' | 'Artboard' | 'Text';
-  drawing: boolean;
-  drawShape: em.ShapeType | 'Artboard';
-  typing: boolean;
+  type: em.ToolType;
+  shapeToolType: em.ShapeType;
+  artboardToolOrientation: em.Orientation;
 }
 
 const initialState: ToolState = {
-  tool: null,
-  drawing: false,
-  drawShape: null,
-  typing: false
+  type: null,
+  shapeToolType: null,
+  artboardToolOrientation: 'Portrait'
 };
 
 const removeActiveTool = () => {
@@ -40,59 +40,49 @@ const removeActiveTool = () => {
 
 export default (state = initialState, action: ToolTypes): ToolState => {
   switch (action.type) {
-    case ENABLE_RECTANGLE_DRAW_TOOL: {
+    case ENABLE_RECTANGLE_SHAPE_TOOL: {
       removeActiveTool();
-      new DrawTool({drawShapeType: 'Rectangle'});
+      new ShapeTool('Rectangle');
       return {
         ...state,
-        tool: 'Draw',
-        drawing: true,
-        typing: false,
-        drawShape: 'Rectangle'
+        type: 'Shape',
+        shapeToolType: 'Rectangle'
       };
     }
-    case ENABLE_ELLIPSE_DRAW_TOOL: {
+    case ENABLE_ELLIPSE_SHAPE_TOOL: {
       removeActiveTool();
-      new DrawTool({drawShapeType: 'Ellipse'});
+      new ShapeTool('Ellipse');
       return {
         ...state,
-        tool: 'Draw',
-        drawing: true,
-        typing: false,
-        drawShape: 'Ellipse'
+        type: 'Shape',
+        shapeToolType: 'Ellipse'
       };
     }
-    case ENABLE_STAR_DRAW_TOOL: {
+    case ENABLE_STAR_SHAPE_TOOL: {
       removeActiveTool();
-      new DrawTool({drawShapeType: 'Star'});
+      new ShapeTool('Star');
       return {
         ...state,
-        tool: 'Draw',
-        drawing: true,
-        typing: false,
-        drawShape: 'Star'
+        type: 'Shape',
+        shapeToolType: 'Star'
       };
     }
-    case ENABLE_POLYGON_DRAW_TOOL: {
+    case ENABLE_POLYGON_SHAPE_TOOL: {
       removeActiveTool();
-      new DrawTool({drawShapeType: 'Polygon'});
+      new ShapeTool('Polygon');
       return {
         ...state,
-        tool: 'Draw',
-        drawing: true,
-        typing: false,
-        drawShape: 'Polygon'
+        type: 'Shape',
+        shapeToolType: 'Polygon'
       };
     }
-    case ENABLE_ROUNDED_DRAW_TOOL: {
+    case ENABLE_ROUNDED_SHAPE_TOOL: {
       removeActiveTool();
-      new DrawTool({drawShapeType: 'Rounded'});
+      new ShapeTool('Rounded');
       return {
         ...state,
-        tool: 'Draw',
-        drawing: true,
-        typing: false,
-        drawShape: 'Rounded'
+        type: 'Shape',
+        shapeToolType: 'Rounded'
       };
     }
     case ENABLE_SELECTION_TOOL: {
@@ -100,10 +90,7 @@ export default (state = initialState, action: ToolTypes): ToolState => {
       new SelectionTool();
       return {
         ...state,
-        tool: 'Selection',
-        drawing: false,
-        typing: false,
-        drawShape: null
+        type: 'Selection'
       };
     }
     case DISABLE_SELECTION_TOOL: {
@@ -118,10 +105,19 @@ export default (state = initialState, action: ToolTypes): ToolState => {
       new ArtboardTool();
       return {
         ...state,
-        tool: 'Artboard',
-        drawing: false,
-        typing: false,
-        drawShape: 'Artboard'
+        type: 'Artboard'
+      };
+    }
+    case ENABLE_ARTBOARD_TOOL_PORTRAIT_ORIENTATION: {
+      return {
+        ...state,
+        artboardToolOrientation: 'Portrait'
+      };
+    }
+    case ENABLE_ARTBOARD_TOOL_LANDSCAPE_ORIENTATION: {
+      return {
+        ...state,
+        artboardToolOrientation: 'Landscape'
       };
     }
     case ENABLE_TEXT_TOOL: {
@@ -129,10 +125,7 @@ export default (state = initialState, action: ToolTypes): ToolState => {
       new TextTool();
       return {
         ...state,
-        tool: 'Text',
-        drawing: false,
-        drawShape: null,
-        typing: true
+        type: 'Text'
       };
     }
     default:
