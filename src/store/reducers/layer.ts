@@ -85,13 +85,19 @@ import {
   SET_LAYER_FONT_WEIGHT,
   SET_LAYER_FONT_FAMILY,
   SET_LAYER_JUSTIFICATION,
+  ADD_IN_VIEW_LAYER,
+  ADD_IN_VIEW_LAYERS,
+  REMOVE_IN_VIEW_LAYER,
+  REMOVE_IN_VIEW_LAYERS,
+  UPDATE_IN_VIEW_LAYERS,
   LayerTypes
 } from '../actionTypes/layer';
 
 import {
   addPage,
   addArtboard,
-  addLayer,
+  addShape,
+  addGroup,
   addText,
   removeLayer,
   removeLayers,
@@ -173,7 +179,12 @@ import {
   setLayerFontWeight,
   setLayerFontFamily,
   setLayerJustification,
-  setLayerText
+  setLayerText,
+  addInViewLayer,
+  addInViewLayers,
+  removeInViewLayer,
+  removeInViewLayers,
+  updateInViewLayers
 } from '../utils/layer';
 
 export interface LayerState {
@@ -184,8 +195,12 @@ export interface LayerState {
   page: string;
   activeArtboard: string;
   selected: string[];
-  artboards: string[];
+  allArtboardIds: string[];
+  allShapeIds: string[];
+  allGroupIds: string[];
+  allTextIds: string[];
   scope: string[];
+  inView: string[];
   hover: string;
   clipboard: {
     main: string[];
@@ -222,8 +237,12 @@ const initialState: LayerState = {
   page: 'page',
   activeArtboard: null,
   selected: [],
-  artboards: [],
+  allArtboardIds: [],
+  allShapeIds: [],
+  allGroupIds: [],
+  allTextIds: [],
   scope: [],
+  inView: [],
   hover: null,
   clipboard: {
     main: [],
@@ -244,8 +263,9 @@ export default (state = initialState, action: LayerTypes): LayerState => {
     case ADD_ARTBOARD:
       return addArtboard(state, action);
     case ADD_GROUP:
+      return addGroup(state, action);
     case ADD_SHAPE:
-      return addLayer(state, action);
+      return addShape(state, action);
     case ADD_TEXT:
       return addText(state, action);
     case REMOVE_LAYER:
@@ -410,6 +430,16 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setLayerLeading(state, action);
     case SET_LAYER_JUSTIFICATION:
       return setLayerJustification(state, action);
+    case ADD_IN_VIEW_LAYER:
+      return addInViewLayer(state, action);
+    case ADD_IN_VIEW_LAYERS:
+      return addInViewLayers(state, action);
+    case REMOVE_IN_VIEW_LAYER:
+      return removeInViewLayer(state, action);
+    case REMOVE_IN_VIEW_LAYERS:
+      return removeInViewLayers(state, action);
+    case UPDATE_IN_VIEW_LAYERS:
+      return updateInViewLayers(state, action);
     default:
       return state;
   }

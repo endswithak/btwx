@@ -1,12 +1,12 @@
-export const SET_CANVAS_ZOOM = 'SET_CANVAS_ZOOM';
+export const SET_CANVAS_MATRIX = 'SET_CANVAS_MATRIX';
 
-export interface SetCanvasZoomPayload {
-  zoom: number;
+export interface SetCanvasMatrixPayload {
+  matrix: number[];
 }
 
-export interface SetCanvasZoom {
-  type: typeof SET_CANVAS_ZOOM;
-  payload: SetCanvasZoomPayload;
+export interface SetCanvasMatrix {
+  type: typeof SET_CANVAS_MATRIX;
+  payload: SetCanvasMatrixPayload;
 }
 
-export type CanvasSettingsTypes = SetCanvasZoom;
+export type CanvasSettingsTypes = SetCanvasMatrix;

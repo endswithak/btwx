@@ -1,39 +1,42 @@
 import paper from 'paper';
 import React, { useRef, useContext, useEffect, ReactElement } from 'react';
 import { connect } from 'react-redux';
-import { selectLayer } from '../store/actions/layer';
 import { enableSelectionTool } from '../store/actions/tool';
 import { ThemeContext } from './ThemeProvider';
-import { SelectLayerPayload, LayerTypes } from '../store/actionTypes/layer';
 import { RootState } from '../store/reducers';
 import { getPaperLayer } from '../store/selectors/layer';
 import { updateActiveArtboardFrame } from '../store/utils/layer';
+import { getPagePaperLayer } from '../store/selectors/layer';
 import { applyShapeMethods } from '../canvas/shapeUtils';
 import { applyTextMethods } from '../canvas/textUtils';
 import { applyArtboardMethods } from '../canvas/artboardUtils';
 import { paperMain } from '../canvas';
-import { SetCanvasZoomPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
-import { setCanvasZoom } from '../store/actions/canvasSettings';
+import { SetCanvasMatrixPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
+import { setCanvasMatrix } from '../store/actions/canvasSettings';
+import { LayerTypes } from '../store/actionTypes/layer';
+import { updateInViewLayers } from '../store/actions/layer';
+import { CanvasSettingsState } from '../store/reducers/canvasSettings';
+import { debounce } from '../utils';
 
 interface CanvasProps {
   drawing: boolean;
   typing: boolean;
-  zoom: number;
-  selectLayer(payload: SelectLayerPayload): LayerTypes;
+  canvasSettings: CanvasSettingsState;
   enableSelectionTool(): any;
-  setCanvasZoom(payload: SetCanvasZoomPayload): CanvasSettingsTypes;
+  setCanvasMatrix(payload: SetCanvasMatrixPayload): CanvasSettingsTypes;
+  updateInViewLayers(): LayerTypes;
   activeArtboard?: string;
   paperProject?: string;
-  layerById?: {
-    [id: string]: em.Layer;
-  };
+  allArtboardIds?: string[];
+  allShapeIds?: string[];
+  allTextIds?: string[];
 }
 
 const Canvas = (props: CanvasProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useContext(ThemeContext);
-  const { drawing, typing, zoom, selectLayer, enableSelectionTool, activeArtboard, paperProject, layerById, setCanvasZoom } = props;
+  const { drawing, typing, canvasSettings, enableSelectionTool, updateInViewLayers, activeArtboard, paperProject, allArtboardIds, allShapeIds, allTextIds, setCanvasMatrix } = props;
 
   useEffect(() => {
     canvasRef.current.width = canvasContainerRef.current.clientWidth;
@@ -48,17 +51,12 @@ const Canvas = (props: CanvasProps): ReactElement => {
         e.preventDefault();
         const prevZoom = paperMain.view.zoom;
         const nextZoom = paperMain.view.zoom - e.deltaY * 0.01;
-        // paper.view.center.x = e.clientX;
-        // paper.view.center.y = e.clientY;
         if (e.deltaY < 0 && nextZoom < 30) {
-          setCanvasZoom({zoom: nextZoom});
-          //paperMain.view.zoom = nextZoom;
+          paperMain.view.zoom = nextZoom;
         } else if (e.deltaY > 0 && nextZoom > 0) {
-          //paperMain.view.zoom = nextZoom;
-          setCanvasZoom({zoom: nextZoom});
+          paperMain.view.zoom = nextZoom;
         } else if (e.deltaY > 0 && nextZoom < 0) {
-          //paperMain.view.zoom = 0.001;
-          setCanvasZoom({zoom: 0.001});
+          paperMain.view.zoom = 0.001;
         }
         const zoomDiff = paperMain.view.zoom - prevZoom;
         const scale = 1 / paperMain.view.zoom;
@@ -75,39 +73,26 @@ const Canvas = (props: CanvasProps): ReactElement => {
         paperMain.view.translate(new paper.Point((e.deltaX * ( 1 / paperMain.view.zoom)) * -1, (e.deltaY * ( 1 / paperMain.view.zoom)) * -1));
       }
     });
-    Object.keys(layerById).forEach((key) => {
-      if (layerById[key].type === 'Shape') {
-        applyShapeMethods(getPaperLayer(key));
-      }
-      if (layerById[key].type === 'Text') {
-        applyTextMethods(getPaperLayer(key));
-      }
-      if (layerById[key].type === 'Artboard') {
-        applyArtboardMethods(getPaperLayer(key).getItem({data: {id: 'ArtboardBackground'}}));
-      }
+    canvasRef.current.addEventListener('wheel', debounce((e: WheelEvent) => {
+      e.preventDefault();
+      setCanvasMatrix({matrix: paperMain.view.matrix.values});
+      updateInViewLayers();
+    }, 250));
+    allShapeIds.forEach((shapeId) => {
+      applyShapeMethods(getPaperLayer(shapeId));
     });
-    paperMain.view.zoom = zoom;
+    allArtboardIds.forEach((artboardId) => {
+      const artboardBackground = getPaperLayer(artboardId).getItem({data: {id: 'ArtboardBackground'}});
+      applyArtboardMethods(artboardBackground);
+    });
+    allTextIds.forEach((textId) => {
+      applyTextMethods(getPaperLayer(textId));
+    });
+    if (canvasSettings.matrix) {
+      paperMain.view.matrix.set(canvasSettings.matrix);
+    }
+    updateInViewLayers();
   }, []);
-
-  // const handleClick = (e) => {
-  //   (document.activeElement as HTMLElement).blur();
-  //   // canvasRef.current.tabIndex = 0;
-  //   // canvasRef.current.focus();
-  //   // paper.projects[0].activate();
-  //   // //enableSelectionTool();
-  //   // console.log(paper);
-  // }
-
-  // useEffect(() => {
-  //   if (paperMain.project.getItem({data: { id: activeArtboard }})) {
-  //     const activeArtboardFrames = paperMain.project.getItems({ data: { id: 'ArtboardFrame' } });
-  //     if (activeArtboardFrames && activeArtboardFrames.length > 0) {
-  //       activeArtboardFrames.forEach((item) => item.visible = false);
-  //     }
-  //     const paperActiveArtboardLayer = getPaperLayer(activeArtboard);
-  //     paperActiveArtboardLayer.getItem({ data: { id: 'ArtboardFrame' } }).visible = true;
-  //   }
-  // }, [activeArtboard]);
 
   return (
     <div
@@ -116,7 +101,6 @@ const Canvas = (props: CanvasProps): ReactElement => {
       <canvas
         id='canvas-main'
         ref={canvasRef}
-        //onClick={handleClick}
         style={{
           background: theme.background.z0
         }} />
@@ -129,14 +113,16 @@ const mapStateToProps = (state: RootState) => {
   return {
     activeArtboard: layer.present.activeArtboard,
     paperProject: layer.present.paperProject,
-    layerById: layer.present.byId,
     drawing: tool.type === 'Shape',
     typing: tool.type === 'Text',
-    zoom: canvasSettings.zoom
+    allArtboardIds: layer.present.allArtboardIds,
+    allShapeIds: layer.present.allShapeIds,
+    allTextIds: layer.present.allTextIds,
+    canvasSettings
   };
 };
 
 export default connect(
   mapStateToProps,
-  { selectLayer, enableSelectionTool, setCanvasZoom }
+  { enableSelectionTool, setCanvasMatrix, updateInViewLayers }
 )(Canvas);

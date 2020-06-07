@@ -12,6 +12,7 @@ gsap.registerPlugin(CustomEase);
 interface TweenDrawerEditEaseProps {
   tweenId: string;
   tween?: em.Tween;
+  editingEase?: boolean;
   openEaseEditor?(payload: OpenEaseEditorPayload): EaseEditorTypes;
 }
 
@@ -19,7 +20,7 @@ const TweenDrawerEditEase = (props: TweenDrawerEditEaseProps): ReactElement => {
   const pathRef = useRef<SVGPathElement>(null);
   const theme = useContext(ThemeContext);
   const [hover, setHover] = useState(false);
-  const { tweenId, tween, openEaseEditor } = props;
+  const { tweenId, tween, editingEase, openEaseEditor } = props;
 
   const handleClick = () => {
     openEaseEditor({tween: tweenId});
@@ -51,9 +52,11 @@ const TweenDrawerEditEase = (props: TweenDrawerEditEaseProps): ReactElement => {
         viewBox="-1 -1 18 18"
         style={{
           strokeWidth: 2,
-          stroke: hover
-          ? theme.text.base
-          : theme.text.lighter,
+          stroke: editingEase
+          ? theme.palette.primary
+          : hover
+            ? theme.text.base
+            : theme.text.lighter,
           fill: 'none',
           overflow: 'visible'
         }}>
@@ -64,9 +67,10 @@ const TweenDrawerEditEase = (props: TweenDrawerEditEaseProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState, ownProps: TweenDrawerEditEaseProps) => {
-  const { layer } = state;
+  const { layer, easeEditor } = state;
   const tween = layer.present.tweenById[ownProps.tweenId];
-  return { tween };
+  const editingEase = easeEditor.tween && easeEditor.tween === ownProps.tweenId;
+  return { tween, editingEase };
 };
 
 export default connect(

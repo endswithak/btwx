@@ -11,13 +11,14 @@ interface TweenDrawerEventLayerTweenProps {
   tweenId: string;
   index: number;
   tweenHover?: string;
+  tweenEditing?: string;
   tween?: em.Tween;
   setTweenDrawerTweenHover?(payload: SetTweenDrawerTweenHoverPayload): TweenDrawerTypes;
 }
 
 const TweenDrawerEventLayerTween = (props: TweenDrawerEventLayerTweenProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { tweenId, index, tween, setTweenDrawerTweenHover, tweenHover } = props;
+  const { tweenId, index, tween, setTweenDrawerTweenHover, tweenEditing, tweenHover } = props;
 
   const handleMouseEnter = () => {
     setTweenDrawerTweenHover({id: tweenId});
@@ -33,7 +34,7 @@ const TweenDrawerEventLayerTween = (props: TweenDrawerEventLayerTweenProps): Rea
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{
-        background: tweenId === tweenHover
+        background: tweenId === tweenHover && !tweenEditing || tweenId === tweenEditing
         ? theme.background.z3
         : 'none'
       }}>
@@ -46,7 +47,7 @@ const TweenDrawerEventLayerTween = (props: TweenDrawerEventLayerTweenProps): Rea
         {tween.prop}
       </div>
       {
-        tweenId === tweenHover
+        tweenId === tweenHover && !tweenEditing || tweenId === tweenEditing
         ? <TweenDrawerEditEase tweenId={tweenId} />
         : null
       }
@@ -59,7 +60,8 @@ const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventLayerTweenP
   const { layer, tweenDrawer } = state;
   const tween = layer.present.tweenById[ownProps.tweenId];
   const tweenHover = tweenDrawer.tweenHover;
-  return { tween, tweenHover };
+  const tweenEditing = tweenDrawer.tweenEditing;
+  return { tween, tweenHover, tweenEditing };
 };
 
 export default connect(

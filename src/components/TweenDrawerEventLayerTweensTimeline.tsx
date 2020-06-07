@@ -18,7 +18,6 @@ interface TweenDrawerEventLayerTweensTimelineProps {
 const TweenDrawerEventLayerTweensTimeline = (props: TweenDrawerEventLayerTweensTimelineProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { tweenEventLayerTweens } = props;
-  const [editing, setEditing] = useState(null);
 
   return (
     <>
@@ -26,9 +25,7 @@ const TweenDrawerEventLayerTweensTimeline = (props: TweenDrawerEventLayerTweensT
         tweenEventLayerTweens.allIds.map((tween, index) => (
           <TweenDrawerEventLayerTweenTimeline
             key={index}
-            tweenId={tween}
-            editing={editing}
-            setEditing={setEditing} />
+            tweenId={tween} />
         ))
       }
     </>

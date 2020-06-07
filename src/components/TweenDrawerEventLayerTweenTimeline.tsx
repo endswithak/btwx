@@ -2,24 +2,25 @@
 import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import gsap from 'gsap';
-import { Draggable } from "gsap/Draggable";
+import { Draggable } from 'gsap/Draggable';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
-import { setTweenDrawerTweenHover } from '../store/actions/tweenDrawer';
-import { SetTweenDrawerTweenHoverPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
+import { setTweenDrawerTweenHover, setTweenDrawerTweenEditing } from '../store/actions/tweenDrawer';
+import { SetTweenDrawerTweenHoverPayload, SetTweenDrawerTweenEditingPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
 import { SetLayerTweenDurationPayload, SetLayerTweenDelayPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setLayerTweenDuration, setLayerTweenDelay } from '../store/actions/layer';
+
 gsap.registerPlugin(Draggable);
 
 interface TweenDrawerEventLayerTweenTimelineProps {
-  editing: string;
-  setEditing: any;
   tweenId: string;
   tween?: em.Tween;
   tweenHover?: string;
+  tweenEditing?: string;
   setLayerTweenDuration?(payload: SetLayerTweenDurationPayload): LayerTypes;
   setLayerTweenDelay?(payload: SetLayerTweenDelayPayload): LayerTypes;
   setTweenDrawerTweenHover?(payload: SetTweenDrawerTweenHoverPayload): TweenDrawerTypes;
+  setTweenDrawerTweenEditing?(payload: SetTweenDrawerTweenEditingPayload): TweenDrawerTypes;
 }
 
 const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTimelineProps): ReactElement => {
@@ -30,7 +31,7 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
   const rightHandleTooltipRef = useRef<HTMLSpanElement>(null);
   const leftHandleTooltipRef = useRef<HTMLSpanElement>(null);
   const theme = useContext(ThemeContext);
-  const { editing, setEditing, tweenId, tween, tweenHover, setLayerTweenDuration, setLayerTweenDelay, setTweenDrawerTweenHover } = props;
+  const { tweenId, tween, tweenHover, tweenEditing, setLayerTweenDuration, setLayerTweenDelay, setTweenDrawerTweenHover, setTweenDrawerTweenEditing } = props;
 
   useEffect(() => {
     if (tweenRef.current) {
@@ -50,20 +51,17 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
           }
         },
         onPress: function() {
-          setEditing(tweenId);
+          setTweenDrawerTweenEditing({id: tweenId});
           gsap.set(leftHandleTooltipRef.current, {opacity: 1});
           leftHandleTooltipRef.current.innerHTML = `${(gsap.getProperty(leftHandleRef.current, 'x') as number / 4) / 100}s`;
         },
         onRelease: function() {
-          setEditing(null);
+          setTweenDrawerTweenEditing({id: null});
           gsap.set(leftHandleTooltipRef.current, {opacity: 0});
         },
         onDrag: function() {
-          //const factor = this.deltaX / 4;
           gsap.set([leftHandleRef.current, rightHandleRef.current], {x: `+=${this.deltaX}`});
           leftHandleTooltipRef.current.innerHTML = `${(gsap.getProperty(leftHandleRef.current, 'x') as number / 4) / 100}s`;
-          //Draggable.get(leftHandleRef.current).update();
-          //Draggable.get(rightHandleRef.current).update();
         },
         onDragEnd: function() {
           const distance = this.endX - this.startX;
@@ -86,20 +84,17 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
           }
         },
         onPress: function() {
-          setEditing(tweenId);
+          setTweenDrawerTweenEditing({id: tweenId});
           gsap.set(leftHandleTooltipRef.current, {opacity: 1});
           leftHandleTooltipRef.current.innerHTML = `${(this.x / 4) / 100}s`;
         },
         onRelease: function() {
-          setEditing(null);
+          setTweenDrawerTweenEditing({id: null});
           gsap.set(leftHandleTooltipRef.current, {opacity: 0});
         },
         onDrag: function() {
-          //const factor = this.deltaX / 4;
           gsap.set(tweenRef.current, {x: `+=${this.deltaX}`, width: `-=${this.deltaX}`});
           leftHandleTooltipRef.current.innerHTML = `${(this.x / 4) / 100}s`;
-          // Draggable.get(tweenRef.current).update();
-          // Draggable.get(rightHandleRef.current).update().applyBounds({ minX: Draggable.get(leftHandleRef.current).x, maxX: timelineRef.current.clientWidth - theme.unit, minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight });
         },
         onDragEnd: function() {
           Draggable.get(tweenRef.current).update();
@@ -115,27 +110,24 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
         type: 'x',
         zIndexBoost: false,
         autoScroll: 1,
-        bounds: { minX: Draggable.get(leftHandleRef.current) ? Draggable.get(leftHandleRef.current).x : leftHandleInitialPos, maxX: timelineRef.current.clientWidth - theme.unit, minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight },
+        bounds: { minX: Draggable.get(leftHandleRef.current) ? Draggable.get(leftHandleRef.current).x : leftHandleInitialPos, maxX: timelineRef.current.clientWidth - (theme.unit * 4), minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight },
         liveSnap: {
           x: function(value) {
             return Math.round(value / theme.unit) * theme.unit;
           }
         },
         onPress: function() {
-          setEditing(tweenId);
+          setTweenDrawerTweenEditing({id: tweenId});
           gsap.set(rightHandleTooltipRef.current, {opacity: 1});
           rightHandleTooltipRef.current.innerHTML = `${(tweenRef.current.clientWidth / 4) / 100}s`;
         },
         onRelease: function() {
-          setEditing(null);
+          setTweenDrawerTweenEditing({id: null});
           gsap.set(rightHandleTooltipRef.current, {opacity: 0});
         },
         onDrag: function() {
-          //const factor = this.deltaX / 4;
           gsap.set(tweenRef.current, {width: `+=${this.deltaX}`});
           rightHandleTooltipRef.current.innerHTML = `${(tweenRef.current.clientWidth / 4) / 100}s`;
-          //Draggable.get(tweenRef.current).update();
-          //Draggable.get(leftHandleRef.current).update().applyBounds({ minX: 0, maxX: Draggable.get(rightHandleRef.current).x, minY: timelineRef.current.clientHeight, maxY: timelineRef.current.clientHeight });
         },
         onDragEnd: function() {
           Draggable.get(tweenRef.current).update();
@@ -164,15 +156,12 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
       onMouseLeave={handleMouseLeave}
       style={{
         color: theme.text.lighter,
-        background: tweenId === tweenHover
+        background: tweenId === tweenHover && !tweenEditing || tweenId === tweenEditing
         ? theme.background.z3
         : 'none',
-        zIndex: tweenId === editing
-        ? 99999
-        : 'inherit',
-        boxShadow: tweenId === editing
-        ? `0 0 0 1px ${theme.palette.primary} inset`
-        : 'none'
+        zIndex: tweenId === tweenEditing
+        ? 3
+        : 'inherit'
       }}>
       <div
         ref={tweenRef}
@@ -260,10 +249,11 @@ const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventLayerTweenT
   const { layer, tweenDrawer } = state;
   const tween = layer.present.tweenById[ownProps.tweenId];
   const tweenHover = tweenDrawer.tweenHover;
-  return { tween, tweenHover };
+  const tweenEditing = tweenDrawer.tweenEditing;
+  return { tween, tweenHover, tweenEditing };
 };
 
 export default connect(
   mapStateToProps,
-  {setLayerTweenDuration, setLayerTweenDelay, setTweenDrawerTweenHover}
+  { setLayerTweenDuration, setLayerTweenDelay, setTweenDrawerTweenHover, setTweenDrawerTweenEditing }
 )(TweenDrawerEventLayerTweenTimeline);

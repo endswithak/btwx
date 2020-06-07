@@ -1,25 +1,22 @@
-import { paperMain } from '../../canvas';
-
 import {
-  SET_CANVAS_ZOOM,
+  SET_CANVAS_MATRIX,
   CanvasSettingsTypes,
 } from '../actionTypes/canvasSettings';
 
 export interface CanvasSettingsState {
-  zoom: number;
+  matrix: number[];
 }
 
 const initialState: CanvasSettingsState = {
-  zoom: 1
+  matrix: null
 };
 
 export default (state = initialState, action: CanvasSettingsTypes): CanvasSettingsState => {
   switch (action.type) {
-    case SET_CANVAS_ZOOM: {
-      paperMain.project.view.zoom = action.payload.zoom;
+    case SET_CANVAS_MATRIX: {
       return {
         ...state,
-        zoom: action.payload.zoom
+        matrix: action.payload.matrix
       };
     }
     default:

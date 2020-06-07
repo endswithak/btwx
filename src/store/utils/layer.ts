@@ -22,7 +22,9 @@ import {
   SetLayerShadowYOffset, SetLayerRotation, EnableLayerFill, DisableLayerFill, EnableLayerStroke,
   DisableLayerStroke, DisableLayerShadow, EnableLayerShadow, SetLayerStrokeCap, SetLayerStrokeJoin,
   SetLayerStrokeDashArray, SetLayerStrokeMiterLimit, ResizeLayer, ResizeLayers, EnableLayerHorizontalFlip,
-  DisableLayerHorizontalFlip, EnableLayerVerticalFlip, DisableLayerVerticalFlip, AddText, SetLayerText, SetLayerFontSize, SetLayerFontWeight, SetLayerFontFamily, SetLayerLeading, SetLayerJustification
+  DisableLayerHorizontalFlip, EnableLayerVerticalFlip, DisableLayerVerticalFlip, AddText, SetLayerText,
+  SetLayerFontSize, SetLayerFontWeight, SetLayerFontFamily, SetLayerLeading, SetLayerJustification,
+  AddInViewLayer, AddInViewLayers, RemoveInViewLayer, RemoveInViewLayers, UpdateInViewLayers
 } from '../actionTypes/layer';
 
 import {
@@ -57,26 +59,30 @@ export const addPage = (state: LayerState, action: AddPage): LayerState => {
 };
 
 export const addArtboard = (state: LayerState, action: AddArtboard): LayerState => {
+  let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
-  paperLayer.parent = getPaperLayer(state.page);
-  const stateWithLayer = {
-    ...state,
-    allIds: addItem(state.allIds, action.payload.id),
+  paperLayer.parent = getPaperLayer(currentState.page);
+  currentState = {
+    ...currentState,
+    allIds: addItem(currentState.allIds, action.payload.id),
     byId: {
-      ...state.byId,
+      ...currentState.byId,
       [action.payload.id]: {
         ...action.payload,
-        parent: state.page
+        parent: currentState.page
       } as em.Artboard,
-      [state.page]: {
-        ...state.byId[state.page],
-        children: addItem(state.byId[state.page].children, action.payload.id)
+      [currentState.page]: {
+        ...currentState.byId[currentState.page],
+        children: addItem(currentState.byId[currentState.page].children, action.payload.id)
       } as em.Page
     },
-    artboards: addItem(state.artboards, action.payload.id),
+    allArtboardIds: addItem(currentState.allArtboardIds, action.payload.id),
     paperProject: paperMain.project.exportJSON()
   }
-  return selectLayer(stateWithLayer, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.includes(action.payload.id)) {
+    currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
+  }
+  return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
 };
 
 export const updateActiveArtboardFrame = (activeArtboard: string, scope = 1) => {
@@ -93,12 +99,12 @@ export const updateActiveArtboardFrame = (activeArtboard: string, scope = 1) => 
   }
 }
 
-export const addLayer = (state: LayerState, action: AddGroup | AddShape): LayerState => {
+export const addShape = (state: LayerState, action: AddShape): LayerState => {
   let currentState = state;
   const layerParent = action.payload.parent ? action.payload.parent : currentState.page;
   const paperLayer = getPaperLayer(action.payload.id);
   paperLayer.parent = getPaperLayer(layerParent);
-  // add layer
+  // add shape
   currentState = {
     ...currentState,
     allIds: addItem(currentState.allIds, action.payload.id),
@@ -107,18 +113,49 @@ export const addLayer = (state: LayerState, action: AddGroup | AddShape): LayerS
       [action.payload.id]: {
         ...action.payload,
         parent: layerParent
-      } as em.Page | em.Group | em.Shape,
+      } as em.Shape,
       [layerParent]: {
         ...currentState.byId[layerParent],
         children: addItem((currentState.byId[layerParent] as em.Group).children, action.payload.id),
         showChildren: true
       } as em.Group
     },
+    allShapeIds: addItem(state.allShapeIds, action.payload.id),
     paperProject: paperMain.project.exportJSON()
   }
-  // update tweens
-  //currentState = updateLayerTweens(currentState, action.payload.id);
-  // select layer
+  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.includes(action.payload.id)) {
+    currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
+  }
+  return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+};
+
+export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
+  let currentState = state;
+  const layerParent = action.payload.parent ? action.payload.parent : currentState.page;
+  const paperLayer = getPaperLayer(action.payload.id);
+  paperLayer.parent = getPaperLayer(layerParent);
+  // add shape
+  currentState = {
+    ...currentState,
+    allIds: addItem(currentState.allIds, action.payload.id),
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...action.payload,
+        parent: layerParent
+      } as em.Group,
+      [layerParent]: {
+        ...currentState.byId[layerParent],
+        children: addItem((currentState.byId[layerParent] as em.Group).children, action.payload.id),
+        showChildren: true
+      } as em.Group
+    },
+    allGroupIds: addItem(state.allGroupIds, action.payload.id),
+    paperProject: paperMain.project.exportJSON()
+  }
+  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.includes(action.payload.id)) {
+    currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
+  }
   return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
 };
 
@@ -144,11 +181,12 @@ export const addText = (state: LayerState, action: AddText): LayerState => {
         showChildren: true
       } as em.Group
     },
+    allTextIds: addItem(state.allTextIds, action.payload.id),
     paperProject: paperMain.project.exportJSON()
   }
-  // update tweens
-  //currentState = updateLayerTweens(currentState, action.payload.id);
-  // select layer
+  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.includes(action.payload.id)) {
+    currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
+  }
   return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
 };
 
@@ -160,12 +198,36 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
     const tweensByDestinationLayer = getTweensByDestinationLayer(result, current);
     const tweensByLayer = getTweensByLayer(result, current);
     const layer = getLayer(result, current);
-    // if layer is an artboard, remove it from artboards
-    if (layer.type === 'Artboard') {
-      result = {
-        ...result,
-        artboards: removeItem(result.artboards, current)
-      }
+    // remove layer from type array
+    switch(layer.type) {
+      case 'Artboard':
+        result = {
+          ...result,
+          allArtboardIds: removeItem(result.allArtboardIds, current)
+        }
+        break;
+      case 'Shape':
+        result = {
+          ...result,
+          allShapeIds: removeItem(result.allShapeIds, current)
+        }
+        break;
+      case 'Group':
+        result = {
+          ...result,
+          allGroupIds: removeItem(result.allGroupIds, current)
+        }
+        break;
+      case 'Text':
+        result = {
+          ...result,
+          allTextIds: removeItem(result.allTextIds, current)
+        }
+        break;
+    }
+    // if layer is inView, remove from inView
+    if (result.inView.includes(current)) {
+      result = removeInViewLayer(result, layerActions.removeInViewLayer({id: current}) as RemoveInViewLayer);
     }
     // if layer is the active artboard, set active artboard to null
     if (layer.id === result.activeArtboard) {
@@ -784,10 +846,13 @@ export const escapeLayerScope = (state: LayerState, action: EscapeLayerScope): L
 };
 
 export const groupLayers = (state: LayerState, action: GroupLayers): LayerState => {
+  let currentState = state;
+  // get bounds of layers to group
   const layersBounds = getLayersBounds(action.payload.layers);
+  // get layer with lowest depth and z-index
   const topLayer = action.payload.layers.reduce((result, current) => {
-    const layerDepth = getLayerDepth(state, current);
-    const layerIndex = getLayerIndex(state, current);
+    const layerDepth = getLayerDepth(currentState, current);
+    const layerIndex = getLayerIndex(currentState, current);
     if (layerDepth < result.depth) {
       return {
         id: current,
@@ -809,40 +874,60 @@ export const groupLayers = (state: LayerState, action: GroupLayers): LayerState 
     }
   }, {
     id: action.payload.layers[0],
-    index: getLayerIndex(state, action.payload.layers[0]),
-    depth: getLayerDepth(state, action.payload.layers[0])
+    index: getLayerIndex(currentState, action.payload.layers[0]),
+    depth: getLayerDepth(currentState, action.payload.layers[0])
   });
-  const addGroup = addLayer(state, layerActions.addGroup({selected: true, frame: {x: layersBounds.center.x, y: layersBounds.center.y, width: layersBounds.width, height: layersBounds.height}}) as AddGroup);
-  const groupId = addGroup.allIds[addGroup.allIds.length - 1];
-  const insertGroup = insertLayerAbove(addGroup, layerActions.insertLayerAbove({id: groupId, above: topLayer.id}) as InsertLayerAbove);
-  const groupedLayers = action.payload.layers.reduce((result: LayerState, current: string) => {
+  // add group
+  currentState = addGroup(currentState, layerActions.addGroup({selected: true, frame: {x: layersBounds.center.x, y: layersBounds.center.y, width: layersBounds.width, height: layersBounds.height}}) as AddGroup);
+  // get group id
+  const groupId = currentState.allIds[currentState.allIds.length - 1];
+  // move group above top layer
+  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: groupId, above: topLayer.id}) as InsertLayerAbove);
+  // add layers to group
+  currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
     result = addLayerChild(result, layerActions.addLayerChild({id: groupId, child: current}) as AddLayerChild);
     return result;
-  }, insertGroup);
-  return selectLayer(groupedLayers, {payload: {id: groupId, newSelection: true}} as SelectLayer);
+  }, currentState);
+  // select final group
+  currentState = selectLayer(currentState, {payload: {id: groupId, newSelection: true}} as SelectLayer);
+  // return final state
+  return currentState;
 };
 
 export const ungroupLayer = (state: LayerState, action: UngroupLayer): LayerState => {
   const layer = getLayer(state, action.payload.id);
   if (layer.type === 'Group') {
-    const ungroupedChildren = layer.children.reduce((result: LayerState, current: string) => {
+    let currentState = state;
+    // move children out of group
+    currentState = layer.children.reduce((result: LayerState, current: string) => {
       return insertLayerAbove(result, layerActions.insertLayerAbove({id: current, above: layer.id}) as InsertLayerAbove);
-    }, state);
-    const selectedChildren = selectLayers(ungroupedChildren, layerActions.selectLayers({layers: layer.children, newSelection: true}) as SelectLayers);
-    return removeLayer(selectedChildren, layerActions.removeLayer({id: layer.id}) as RemoveLayer);
+    }, currentState);
+    // select ungrouped children
+    currentState = selectLayers(currentState, layerActions.selectLayers({layers: layer.children, newSelection: true}) as SelectLayers);
+    // remove group
+    currentState = removeLayer(currentState, layerActions.removeLayer({id: layer.id}) as RemoveLayer);
+    // return final state
+    return currentState;
   } else {
     return selectLayer(state, layerActions.selectLayer({id: layer.id, newSelection: true}) as SelectLayer);
   }
 };
 
 export const ungroupLayers = (state: LayerState, action: UngroupLayers): LayerState => {
+  let currentState = state;
   const newSelection: string[] = [];
-  const ungroupedLayersState = action.payload.layers.reduce((result, current) => {
-    const ungroupLayerState = ungroupLayer(result, layerActions.ungroupLayer({id: current}) as UngroupLayer);
-    newSelection.push(...ungroupLayerState.selected);
-    return ungroupLayerState;
-  }, state);
-  return selectLayers(ungroupedLayersState, layerActions.selectLayers({layers: newSelection, newSelection: true}) as SelectLayers);
+  currentState = action.payload.layers.reduce((result, current) => {
+    // ungroup layer
+    result = ungroupLayer(result, layerActions.ungroupLayer({id: current}) as UngroupLayer);
+    // push ungrouped selection to newSelection
+    newSelection.push(...result.selected);
+    // return result
+    return result;
+  }, currentState);
+  // select newSelection
+  currentState = selectLayers(currentState, layerActions.selectLayers({layers: newSelection, newSelection: true}) as SelectLayers);
+  // return final state
+  return currentState;
 };
 
 const getClipboardLayerDescendants = (state: LayerState, id: string) => {
@@ -1005,6 +1090,36 @@ export const pasteLayerFromClipboard = (state: LayerState, id: string, pasteOver
   currentState = clonedLayerAndChildren.allIds.reduce((result: LayerState, current: string, index: number) => {
     const layer = clonedLayerAndChildren.byId[current];
     const layerParent = getLayer(result, layer.parent);
+    // add layer to type array
+    switch(layer.type) {
+      case 'Artboard':
+        result = {
+          ...result,
+          allArtboardIds: addItem(result.allArtboardIds, current)
+        }
+        break;
+      case 'Shape':
+        result = {
+          ...result,
+          allShapeIds: addItem(result.allShapeIds, current)
+        }
+        break;
+      case 'Group':
+        result = {
+          ...result,
+          allGroupIds: addItem(result.allGroupIds, current)
+        }
+        break;
+      case 'Text':
+        result = {
+          ...result,
+          allTextIds: addItem(result.allTextIds, current)
+        }
+        break;
+    }
+    // update inView layers
+    result = updateLayerInView(result, current);
+    // add layer
     return {
       ...result,
       allIds: addItem(result.allIds, current),
@@ -1019,17 +1134,20 @@ export const pasteLayerFromClipboard = (state: LayerState, id: string, pasteOver
       paperProject: paperMain.project.exportJSON()
     }
   }, currentState);
+  // select layer
   currentState = selectLayer(currentState, layerActions.selectLayer({id: rootLayer.id}) as SelectLayer);
-  if (rootLayer.type === 'Artboard') {
-    const paperLayer = getPaperLayer(rootLayer.id);
-    currentState = {
-      ...currentState,
-      artboards: addItem(currentState.artboards, rootLayer.id)
-    }
-    currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: rootLayer.id, scope: 1}) as SetActiveArtboard);
-    paperLayer.position.x += paperLayer.bounds.width + 48;
-    currentState = moveLayerBy(currentState, layerActions.moveLayerBy({id: rootLayer.id, x: paperLayer.bounds.width + 48, y: 0}) as MoveLayerBy);
-  }
+  // if (rootLayer.type === 'Artboard') {
+  //   const paperLayer = getPaperLayer(rootLayer.id);
+  //   currentState = {
+  //     ...currentState,
+  //     artboards: addItem(currentState.artboards, rootLayer.id)
+  //   }
+  //   currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: rootLayer.id, scope: 1}) as SetActiveArtboard);
+  //   paperLayer.position.x += paperLayer.bounds.width + 48;
+  //   currentState = moveLayerBy(currentState, layerActions.moveLayerBy({id: rootLayer.id, x: paperLayer.bounds.width + 48, y: 0}) as MoveLayerBy);
+  // }
+
+  // paste over selection is specified
   if (pasteOverSelection && state.selected.length > 0) {
     const selectionCenter = getSelectionCenter(state);
     const clipboardCenter = getClipboardCenter(state);
@@ -1064,7 +1182,8 @@ export const updateParentBounds = (state: LayerState, id: string): LayerState =>
   const layerScope = getLayerScope(state, id);
   return layerScope.reduce((result, current) => {
     const paperLayer = getPaperLayer(current);
-    return {
+    result = updateLayerInView(result, current);
+    result = {
       ...result,
       byId: {
         ...result.byId,
@@ -1079,6 +1198,7 @@ export const updateParentBounds = (state: LayerState, id: string): LayerState =>
       },
       paperProject: paperMain.project.exportJSON()
     }
+    return result;
   }, state);
 };
 
@@ -1086,7 +1206,8 @@ export const updateChildrenBounds = (state: LayerState, id: string): LayerState 
   const layerDescendants = getLayerDescendants(state, id);
   return layerDescendants.reduce((result, current) => {
     const paperLayer = getPaperLayer(current);
-    return {
+    result = updateLayerInView(result, current);
+    result = {
       ...result,
       byId: {
         ...result.byId,
@@ -1101,6 +1222,7 @@ export const updateChildrenBounds = (state: LayerState, id: string): LayerState 
       },
       paperProject: paperMain.project.exportJSON()
     }
+    return result;
   }, state);
 };
 
@@ -1123,6 +1245,7 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
     },
     paperProject: paperMain.project.exportJSON()
   }
+  currentState = updateLayerInView(currentState, id);
   currentState = updateParentBounds(currentState, id);
   if (state.byId[id].type === 'Group') {
     currentState = updateChildrenBounds(currentState, id);
@@ -2344,4 +2467,75 @@ export const setLayerJustification = (state: LayerState, action: SetLayerJustifi
   }
   updateSelectionFrame(currentState);
   return updateLayerBounds(currentState, action.payload.id);
+};
+
+export const addInViewLayer = (state: LayerState, action: AddInViewLayer): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    inView: addItem(currentState.inView, action.payload.id)
+  }
+  return currentState;
+};
+
+export const addInViewLayers = (state: LayerState, action: AddInViewLayers): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return addInViewLayer(result, layerActions.addInViewLayer({id: current}) as AddInViewLayer);
+  }, state);
+};
+
+export const removeInViewLayer = (state: LayerState, action: RemoveInViewLayer): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    inView: removeItem(currentState.inView, action.payload.id)
+  }
+  return currentState;
+};
+
+export const removeInViewLayers = (state: LayerState, action: RemoveInViewLayers): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return removeInViewLayer(result, layerActions.removeInViewLayer({id: current}) as RemoveInViewLayer);
+  }, state);
+};
+
+export const updateLayerInView = (state: LayerState, id: string): LayerState => {
+  let currentState = state;
+  const paperLayer = getPaperLayer(id);
+  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.includes(id)) {
+    currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id}) as AddInViewLayer);
+  }
+  if (!paperMain.view.bounds.intersects(paperLayer.bounds) && currentState.inView.includes(id)) {
+    currentState = removeInViewLayer(currentState, layerActions.removeInViewLayer({id}) as RemoveInViewLayer);
+  }
+  return currentState;
+};
+
+export const updateInViewLayers = (state: LayerState, action: UpdateInViewLayers): LayerState => {
+  let currentState = state;
+  // get in view layers
+  const visibleLayers = paperMain.project.getItem({data: { id: 'page' }}).getItems({
+    overlapping: paperMain.view.bounds
+  });
+  const visibleLayerIds = visibleLayers.reduce((result, current) => {
+    if (current.data.id !== 'ArtboardBackground') {
+      result = [...result, current.data.id];
+    }
+    return result;
+  }, []);
+  // remove out of view layers
+  currentState = currentState.inView.reduce((result, current) => {
+    if (!visibleLayerIds.includes(current)) {
+      result = addInViewLayer(result, layerActions.addInViewLayer({id: current}) as AddInViewLayer);
+    }
+    return result;
+  }, currentState);
+  // add new in view layers
+  currentState = visibleLayerIds.reduce((result, current) => {
+    if (!currentState.inView.includes(current)) {
+      result = addInViewLayer(result, layerActions.addInViewLayer({id: current}) as AddInViewLayer);
+    }
+    return result;
+  }, currentState);
+  return currentState;
 };

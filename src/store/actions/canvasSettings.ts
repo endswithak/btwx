@@ -1,10 +1,10 @@
 import {
-  SET_CANVAS_ZOOM,
-  SetCanvasZoomPayload,
+  SET_CANVAS_MATRIX,
+  SetCanvasMatrixPayload,
   CanvasSettingsTypes
 } from '../actionTypes/canvasSettings';
 
-export const setCanvasZoom = (payload: SetCanvasZoomPayload): CanvasSettingsTypes => ({
-  type: SET_CANVAS_ZOOM,
+export const setCanvasMatrix = (payload: SetCanvasMatrixPayload): CanvasSettingsTypes => ({
+  type: SET_CANVAS_MATRIX,
   payload
 });

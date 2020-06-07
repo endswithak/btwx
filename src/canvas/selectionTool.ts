@@ -16,17 +16,15 @@ const redo = () => {
   paperMain.project.clear();
   const state = store.getState();
   paperMain.project.importJSON(state.layer.present.paperProject);
-  Object.keys(state.layer.present.byId).forEach((key) => {
-    if (state.layer.present.byId[key].type === 'Shape') {
-      applyShapeMethods(getPaperLayer(key));
-    }
-    if (state.layer.present.byId[key].type === 'Artboard') {
-      const artboardBackground = getPaperLayer(key).getItem({data: {id: 'ArtboardBackground'}});
-      applyArtboardMethods(artboardBackground);
-    }
-    if (state.layer.present.byId[key].type === 'Text') {
-      applyTextMethods(getPaperLayer(key));
-    }
+  state.layer.present.allShapeIds.forEach((shapeId) => {
+    applyShapeMethods(getPaperLayer(shapeId));
+  });
+  state.layer.present.allArtboardIds.forEach((artboardId) => {
+    const artboardBackground = getPaperLayer(artboardId).getItem({data: {id: 'ArtboardBackground'}});
+    applyArtboardMethods(artboardBackground);
+  });
+  state.layer.present.allTextIds.forEach((textId) => {
+    applyTextMethods(getPaperLayer(textId));
   });
   updateHoverFrame(state.layer.present);
   updateSelectionFrame(state.layer.present);
@@ -37,17 +35,15 @@ const undo = () => {
   paperMain.project.clear();
   const state = store.getState();
   paperMain.project.importJSON(state.layer.present.paperProject);
-  Object.keys(state.layer.present.byId).forEach((key) => {
-    if (state.layer.present.byId[key].type === 'Shape') {
-      applyShapeMethods(getPaperLayer(key));
-    }
-    if (state.layer.present.byId[key].type === 'Artboard') {
-      const artboardBackground = getPaperLayer(key).getItem({data: {id: 'ArtboardBackground'}});
-      applyArtboardMethods(artboardBackground);
-    }
-    if (state.layer.present.byId[key].type === 'Text') {
-      applyTextMethods(getPaperLayer(key));
-    }
+  state.layer.present.allShapeIds.forEach((shapeId) => {
+    applyShapeMethods(getPaperLayer(shapeId));
+  });
+  state.layer.present.allArtboardIds.forEach((artboardId) => {
+    const artboardBackground = getPaperLayer(artboardId).getItem({data: {id: 'ArtboardBackground'}});
+    applyArtboardMethods(artboardBackground);
+  });
+  state.layer.present.allTextIds.forEach((textId) => {
+    applyTextMethods(getPaperLayer(textId));
   });
   updateHoverFrame(state.layer.present);
   updateSelectionFrame(state.layer.present);

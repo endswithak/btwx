@@ -61,7 +61,7 @@ const TweenEventDestinationSelect = (props: TweenEventDestinationSelectProps): R
 const mapStateToProps = (state: RootState) => {
   const { contextMenu, layer } = state;
   const activeArtboard = layer.present.activeArtboard;
-  const artboards = layer.present.artboards.reduce((result, current) => {
+  const artboards = layer.present.allArtboardIds.reduce((result, current) => {
     if (layer.present.byId[current]) {
       result = [
         ...result,

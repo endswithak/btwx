@@ -10,6 +10,8 @@ import { enableSelectionTool, disableSelectionTool } from '../store/actions/tool
 import { ToolTypes } from '../store/actionTypes/tool';
 import { setLayerTweenEase, setLayerTweenPower, setLayerTweenDuration } from '../store/actions/layer';
 import { SetLayerTweenEasePayload, SetLayerTweenPowerPayload, SetLayerTweenDurationPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setTweenDrawerTweenEditing } from '../store/actions/tweenDrawer';
+import { SetTweenDrawerTweenEditingPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
 import SidebarInput from './SidebarInput';
 import gsap from 'gsap';
 import CustomEase from 'gsap/CustomEase';
@@ -31,6 +33,7 @@ interface EaseEditorProps {
   setLayerTweenEase?(payload: SetLayerTweenEasePayload): LayerTypes;
   setLayerTweenPower?(payload: SetLayerTweenPowerPayload): LayerTypes;
   setLayerTweenDuration?(payload: SetLayerTweenDurationPayload): LayerTypes;
+  setTweenDrawerTweenEditing?(payload: SetTweenDrawerTweenEditingPayload): TweenDrawerTypes;
   disableSelectionTool?(): ToolTypes;
   enableSelectionTool?(): ToolTypes;
 }
@@ -42,7 +45,7 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
   const valueHeadRef = useRef<HTMLDivElement>(null);
   const visualizerRef = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
-  const { tween, easeEditor, closeEaseEditor, setLayerTweenEase, setLayerTweenPower, disableSelectionTool, enableSelectionTool, setLayerTweenDuration } = props;
+  const { tween, easeEditor, closeEaseEditor, setLayerTweenEase, setLayerTweenPower, disableSelectionTool, enableSelectionTool, setLayerTweenDuration, setTweenDrawerTweenEditing } = props;
   const [duration, setDuration] = useState<string | number>(null);
 
   const easeTypes = ['linear', 'power1', 'power2', 'power3', 'power4', 'back', 'bounce', 'circ', 'expo', 'sine'];
@@ -52,11 +55,11 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
     closeEaseEditor();
   }
 
-  const handleTypePresetClick = (preset: em.TweenEaseTypes) => {
+  const handleTypePresetClick = (preset: em.CubicBezier) => {
     setLayerTweenEase({id: tween.id, ease: preset});
   }
 
-  const handlePowerPresetClick = (preset: em.TweenEasePowerTypes) => {
+  const handlePowerPresetClick = (preset: em.CubicBezierType) => {
     setLayerTweenPower({id: tween.id, power: preset});
   }
 
@@ -80,9 +83,11 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
     disableSelectionTool();
     setAndAnimate();
     setDuration(tween.duration);
+    setTweenDrawerTweenEditing({id: tween.id});
   }
 
   const handleAfterClose = () => {
+    setTweenDrawerTweenEditing({id: null});
     enableSelectionTool();
   }
 
@@ -98,11 +103,15 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
   };
 
   const handleDurationSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const durationRounded = Math.round((evaluate(`${duration}`) + Number.EPSILON) * 100) / 100
-    if (durationRounded <= 10) {
-      setLayerTweenDuration({id: tween.id, duration: durationRounded});
-      setDuration(durationRounded);
-    } else {
+    try {
+      const durationRounded = Math.round((evaluate(`${duration}`) + Number.EPSILON) * 100) / 100
+      if (durationRounded <= 10 && durationRounded >= 0 && durationRounded !== tween.duration) {
+        setLayerTweenDuration({id: tween.id, duration: durationRounded});
+        setDuration(durationRounded);
+      } else {
+        setDuration(tween.duration);
+      }
+    } catch(error) {
       setDuration(tween.duration);
     }
   }
@@ -110,7 +119,7 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
   return (
     <Modal
       className='c-ease-editor'
-      overlayClassName='c-ease-editor__overlay'
+      overlayClassName='c-ease-editor-wrap'
       isOpen={easeEditor.isOpen}
       onAfterOpen={handleAfterOpen}
       onAfterClose={handleAfterClose}
@@ -195,7 +204,7 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
             Cubic Bezier
           </div>
           {
-            easeTypes.map((preset: em.TweenEaseTypes, index) => (
+            easeTypes.map((preset: em.CubicBezier, index) => (
               <div
                 className='c-ease-editor__preset'
                 onClick={() => handleTypePresetClick(preset)}
@@ -222,7 +231,7 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
             Type
           </div>
           {
-            easePowerTypes.map((preset: em.TweenEasePowerTypes, index) => (
+            easePowerTypes.map((preset: em.CubicBezierType, index) => (
               <div
                 className='c-ease-editor__preset'
                 onClick={() => handlePowerPresetClick(preset)}
@@ -252,7 +261,8 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
             value={duration}
             onChange={handleDurationChange}
             onSubmit={handleDurationSubmit}
-            blurOnSubmit />
+            submitOnBlur
+            disabled={!easeEditor.isOpen} />
         </div>
       </div>
     </Modal>
@@ -267,5 +277,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { closeEaseEditor, setLayerTweenEase, setLayerTweenPower, enableSelectionTool, disableSelectionTool, setLayerTweenDuration }
+  { closeEaseEditor, setLayerTweenEase, setLayerTweenPower, enableSelectionTool, disableSelectionTool, setLayerTweenDuration, setTweenDrawerTweenEditing }
 )(EaseEditor);

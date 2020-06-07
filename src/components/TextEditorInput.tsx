@@ -11,12 +11,10 @@ import { SetLayerTextPayload, SelectLayerPayload, LayerTypes } from '../store/ac
 import { paperMain } from '../canvas';
 import { TextEditorState } from '../store/reducers/textEditor';
 import { TextSettingsState } from '../store/reducers/textSettings';
-import { CanvasSettingsState } from '../store/reducers/canvasSettings';
 
 interface TextEditorInputProps {
   textEditor?: TextEditorState;
   textSettings?: TextSettingsState;
-  canvasSettings?: CanvasSettingsState;
   layerItem?: em.Text;
   closeTextEditor?(): TextEditorTypes;
   disableSelectionTool?(): ToolTypes;
@@ -29,7 +27,7 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const textSpanRef = useRef<HTMLTextAreaElement>(null);
   const theme = useContext(ThemeContext);
-  const { textEditor, textSettings, canvasSettings, layerItem, closeTextEditor, disableSelectionTool, enableSelectionTool, setLayerText, selectLayer } = props;
+  const { textEditor, textSettings, layerItem, closeTextEditor, disableSelectionTool, enableSelectionTool, setLayerText, selectLayer } = props;
   const [text, setText] = useState(layerItem.text);
   const [pos, setPos] = useState({x: textEditor.x, y: textEditor.y});
 
@@ -162,11 +160,11 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
           transform: (() => {
             switch(textSettings.justification) {
               case 'left':
-                return `scale(${canvasSettings.zoom})`;
+                return `scale(${paperMain.view.zoom})`;
               case 'center':
-                return `scale(${canvasSettings.zoom}) translateX(-50%)`;
+                return `scale(${paperMain.view.zoom}) translateX(-50%)`;
               case 'right':
-                return `scale(${canvasSettings.zoom}) translateX(-100%)`;
+                return `scale(${paperMain.view.zoom}) translateX(-100%)`;
             }
           })()
         }} />
@@ -208,9 +206,9 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { textEditor, textSettings, layer, canvasSettings } = state;
+  const { textEditor, textSettings, layer } = state;
   const layerItem = (layer.present.byId[textEditor.layer] as em.Text);
-  return { textEditor, textSettings, layerItem, canvasSettings };
+  return { textEditor, textSettings, layerItem };
 };
 
 export default connect(

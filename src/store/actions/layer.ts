@@ -93,6 +93,11 @@ import {
   SET_LAYER_FONT_WEIGHT,
   SET_LAYER_FONT_FAMILY,
   SET_LAYER_JUSTIFICATION,
+  ADD_IN_VIEW_LAYER,
+  ADD_IN_VIEW_LAYERS,
+  REMOVE_IN_VIEW_LAYER,
+  REMOVE_IN_VIEW_LAYERS,
+  UPDATE_IN_VIEW_LAYERS,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
@@ -177,6 +182,10 @@ import {
   SetLayerFontWeightPayload,
   SetLayerFontFamilyPayload,
   SetLayerJustificationPayload,
+  AddInViewLayerPayload,
+  AddInViewLayersPayload,
+  RemoveInViewLayerPayload,
+  RemoveInViewLayersPayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -798,4 +807,28 @@ export const setLayerFontFamily = (payload: SetLayerFontFamilyPayload): LayerTyp
 export const setLayerJustification = (payload: SetLayerJustificationPayload): LayerTypes => ({
   type: SET_LAYER_JUSTIFICATION,
   payload
+});
+
+export const addInViewLayer = (payload: AddInViewLayerPayload): LayerTypes => ({
+  type: ADD_IN_VIEW_LAYER,
+  payload
+});
+
+export const addInViewLayers = (payload: AddInViewLayersPayload): LayerTypes => ({
+  type: ADD_IN_VIEW_LAYERS,
+  payload
+});
+
+export const removeInViewLayer = (payload: RemoveInViewLayerPayload): LayerTypes => ({
+  type: REMOVE_IN_VIEW_LAYER,
+  payload
+});
+
+export const removeInViewLayers = (payload: RemoveInViewLayersPayload): LayerTypes => ({
+  type: REMOVE_IN_VIEW_LAYERS,
+  payload
+});
+
+export const updateInViewLayers = (): LayerTypes => ({
+  type: UPDATE_IN_VIEW_LAYERS
 });

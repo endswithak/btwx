@@ -17,11 +17,11 @@ const SidebarRight = (props: SidebarRightProps): ReactElement => {
       width={280}
       position={'right'}
       resizable={false}>
-      {
+      {/* {
         toolType !== 'Artboard' && artboardSelected
         ? <SidebarArtboardStyles />
         : null
-      }
+      } */}
       {
         toolType !== 'Artboard' && layerSelected
         ? <SidebarLayerStyles />
@@ -34,8 +34,8 @@ const SidebarRight = (props: SidebarRightProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer, tool } = state;
   const selected = layer.present.selected;
-  const artboardSelected = selected.some((id: string) => layer.present.artboards.includes(id));
-  const layerSelected = selected.some((id: string) => !layer.present.artboards.includes(id));
+  const artboardSelected = selected.some((id: string) => layer.present.allArtboardIds.includes(id));
+  const layerSelected = selected.some((id: string) => !layer.present.allArtboardIds.includes(id));
   const toolType = tool.type;
   return { selected, artboardSelected, layerSelected, toolType };
 };

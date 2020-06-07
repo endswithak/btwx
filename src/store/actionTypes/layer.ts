@@ -117,6 +117,12 @@ export const SET_LAYER_FONT_WEIGHT = 'SET_LAYER_FONT_WEIGHT';
 export const SET_LAYER_FONT_FAMILY = 'SET_LAYER_FONT_FAMILY';
 export const SET_LAYER_JUSTIFICATION = 'SET_LAYER_JUSTIFICATION';
 
+export const ADD_IN_VIEW_LAYER = 'ADD_IN_VIEW_LAYER';
+export const REMOVE_IN_VIEW_LAYER = 'REMOVE_IN_VIEW_LAYER';
+export const ADD_IN_VIEW_LAYERS = 'ADD_IN_VIEW_LAYERS';
+export const REMOVE_IN_VIEW_LAYERS = 'REMOVE_IN_VIEW_LAYERS';
+export const UPDATE_IN_VIEW_LAYERS = 'UPDATE_IN_VIEW_LAYERS';
+
 // Page
 
 export type AddPagePayload = {
@@ -1014,4 +1020,46 @@ export interface SetLayerJustification {
   payload: SetLayerJustificationPayload;
 }
 
-export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | AddText | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower | FreezeLayerTween | UnFreezeLayerTween | SetLayerX | SetLayerY | SetLayerWidth | SetLayerHeight | SetLayerRotation | SetLayerOpacity | EnableLayerHorizontalFlip | DisableLayerHorizontalFlip | EnableLayerVerticalFlip | DisableLayerVerticalFlip | EnableLayerFill | DisableLayerFill | SetLayerFillColor | EnableLayerStroke | DisableLayerStroke | SetLayerStrokeColor | SetLayerStrokeWidth | SetLayerStrokeCap | SetLayerStrokeJoin | SetLayerStrokeDashArray | SetLayerStrokeMiterLimit | EnableLayerShadow | DisableLayerShadow | SetLayerShadowColor | SetLayerShadowBlur | SetLayerShadowXOffset | SetLayerShadowYOffset | ResizeLayer | ResizeLayers | SetLayerText | SetLayerFontSize | SetLayerLeading | SetLayerFontWeight | SetLayerFontFamily | SetLayerJustification;
+// InView
+
+export interface AddInViewLayerPayload {
+  id: string;
+}
+
+export interface AddInViewLayer {
+  type: typeof ADD_IN_VIEW_LAYER;
+  payload: AddInViewLayerPayload;
+}
+
+export interface AddInViewLayersPayload {
+  layers: string[];
+}
+
+export interface AddInViewLayers {
+  type: typeof ADD_IN_VIEW_LAYERS;
+  payload: AddInViewLayersPayload;
+}
+
+export interface RemoveInViewLayerPayload {
+  id: string;
+}
+
+export interface RemoveInViewLayer {
+  type: typeof REMOVE_IN_VIEW_LAYER;
+  payload: RemoveInViewLayerPayload;
+}
+
+export interface RemoveInViewLayersPayload {
+  layers: string[];
+}
+
+export interface RemoveInViewLayers {
+  type: typeof REMOVE_IN_VIEW_LAYERS;
+  payload: RemoveInViewLayersPayload;
+}
+
+export interface UpdateInViewLayers {
+  type: typeof UPDATE_IN_VIEW_LAYERS;
+}
+
+export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | AddText | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower | FreezeLayerTween | UnFreezeLayerTween | SetLayerX | SetLayerY | SetLayerWidth | SetLayerHeight | SetLayerRotation | SetLayerOpacity | EnableLayerHorizontalFlip | DisableLayerHorizontalFlip | EnableLayerVerticalFlip | DisableLayerVerticalFlip | EnableLayerFill | DisableLayerFill | SetLayerFillColor | EnableLayerStroke | DisableLayerStroke | SetLayerStrokeColor | SetLayerStrokeWidth | SetLayerStrokeCap | SetLayerStrokeJoin | SetLayerStrokeDashArray | SetLayerStrokeMiterLimit | EnableLayerShadow | DisableLayerShadow | SetLayerShadowColor | SetLayerShadowBlur | SetLayerShadowXOffset | SetLayerShadowYOffset | ResizeLayer | ResizeLayers | SetLayerText | SetLayerFontSize | SetLayerLeading | SetLayerFontWeight | SetLayerFontFamily | SetLayerJustification | AddInViewLayer | AddInViewLayers | RemoveInViewLayer | RemoveInViewLayers | UpdateInViewLayers;
