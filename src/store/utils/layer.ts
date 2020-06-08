@@ -1015,6 +1015,9 @@ const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any) => 
   const paperParentLayer = getPaperLayer(parentLayer.id);
   const paperLayerClone = paperLayer.clone({deep: false, insert: true});
   if (paperLayer.data.type === 'Artboard') {
+    const artboardMask = paperLayer.getItem({ data: { id: 'ArtboardMask' }});
+    const artboardMaskClone = artboardMask.clone({deep: false, insert: true});
+    artboardMaskClone.parent = paperLayerClone;
     const artboardBackground = paperLayer.getItem({ data: { id: 'ArtboardBackground' }});
     const artboardBackgroundClone = artboardBackground.clone({deep: false, insert: true});
     artboardBackgroundClone.parent = paperLayerClone;
@@ -2525,7 +2528,7 @@ export const updateInViewLayers = (state: LayerState, action: UpdateInViewLayers
     overlapping: paperMain.view.bounds
   });
   const visibleLayerIds = visibleLayers.reduce((result, current) => {
-    if (current.data.id !== 'ArtboardBackground') {
+    if (current.data.id !== 'ArtboardBackground' || current.data.id !== 'ArtboardMask') {
       result = [...result, current.data.id];
     }
     return result;

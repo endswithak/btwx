@@ -216,11 +216,14 @@ export const addPage = (payload: AddPagePayload): LayerTypes => {
 export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
   const layerId = uuidv4();
   payload.paperLayer.data = { id: 'ArtboardBackground', type: 'ArtboardBackground' };
+  const mask = payload.paperLayer.clone();
+  mask.data = { id: 'ArtboardMask', type: 'ArtboardMask' };
+  mask.clipMask = true;
   //payload.paperLayer.applyMatrix = false;
   const paperLayer = new paperMain.Group({
     name: payload.name ? payload.name : 'Artboard',
     data: { id: layerId, type: 'Artboard' },
-    children: [payload.paperLayer],
+    children: [mask, payload.paperLayer],
     //applyMatrix: false
   });
   return {
