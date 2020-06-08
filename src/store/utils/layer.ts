@@ -1190,7 +1190,8 @@ export const updateParentBounds = (state: LayerState, id: string): LayerState =>
         [current]: {
           ...result.byId[current],
           frame: {
-            ...result.byId[current].frame,
+            x: paperLayer.position.x,
+            y: paperLayer.position.y,
             width: paperLayer.bounds.width,
             height: paperLayer.bounds.height
           }
@@ -1214,7 +1215,8 @@ export const updateChildrenBounds = (state: LayerState, id: string): LayerState 
         [current]: {
           ...result.byId[current],
           frame: {
-            ...result.byId[current].frame,
+            x: paperLayer.position.x,
+            y: paperLayer.position.y,
             width: paperLayer.bounds.width,
             height: paperLayer.bounds.height
           }
@@ -1247,7 +1249,7 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
   }
   currentState = updateLayerInView(currentState, id);
   currentState = updateParentBounds(currentState, id);
-  if (state.byId[id].type === 'Group') {
+  if (state.byId[id].type === 'Group' || state.byId[id].type === 'Artboard') {
     currentState = updateChildrenBounds(currentState, id);
   }
   return currentState;
@@ -1315,26 +1317,31 @@ export const moveLayersTo = (state: LayerState, action: MoveLayersTo): LayerStat
 
 export const moveLayerBy = (state: LayerState, action: MoveLayerBy): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  //const paperLayer = getPaperLayer(action.payload.id);
   //updateActiveArtboardFrame(currentState.activeArtboard);
   updateSelectionFrame(currentState);
-  currentState = {
-    ...currentState,
-    byId: {
-      ...currentState.byId,
-      [action.payload.id]: {
-        ...currentState.byId[action.payload.id],
-        frame: {
-          ...currentState.byId[action.payload.id].frame,
-          x: paperLayer.position.x,
-          y: paperLayer.position.y
-        }
-      }
-    },
-    paperProject: paperMain.project.exportJSON()
-  }
-  //currentState = updateLayerTweens(currentState, action.payload.id);
-  return updateParentBounds(currentState, action.payload.id);
+  currentState = updateLayerBounds(currentState, action.payload.id);
+  // currentState = {
+  //   ...currentState,
+  //   byId: {
+  //     ...currentState.byId,
+  //     [action.payload.id]: {
+  //       ...currentState.byId[action.payload.id],
+  //       frame: {
+  //         ...currentState.byId[action.payload.id].frame,
+  //         x: paperLayer.position.x,
+  //         y: paperLayer.position.y
+  //       }
+  //     }
+  //   },
+  //   paperProject: paperMain.project.exportJSON()
+  // }
+  // //currentState = updateLayerTweens(currentState, action.payload.id);
+  // currentState = updateParentBounds(currentState, action.payload.id);
+  // if (currentState.byId[action.payload.id].type === 'Group') {
+  //   currentState = updateChildrenBounds(currentState, action.payload.id);
+  // }
+  return currentState;
 };
 
 export const moveLayersBy = (state: LayerState, action: MoveLayersBy): LayerState => {
@@ -2526,7 +2533,7 @@ export const updateInViewLayers = (state: LayerState, action: UpdateInViewLayers
   // remove out of view layers
   currentState = currentState.inView.reduce((result, current) => {
     if (!visibleLayerIds.includes(current)) {
-      result = addInViewLayer(result, layerActions.addInViewLayer({id: current}) as AddInViewLayer);
+      result = removeInViewLayer(result, layerActions.removeInViewLayer({id: current}) as RemoveInViewLayer);
     }
     return result;
   }, currentState);
