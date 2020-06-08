@@ -28,10 +28,17 @@ const StrokeDashInput = (props: StrokeDashInputProps): ReactElement => {
   };
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const paperLayer = getPaperLayer(selected[0]);
-    paperLayer.dashArray = [evaluate(`${dash}`), dashArrayValue[1]];
-    setLayerStrokeDashArray({id: selected[0], strokeDashArray: [evaluate(`${dash}`), dashArrayValue[1]]});
-    setDash(evaluate(`${dash}`));
+    try {
+      const nextDash = evaluate(`${dash}`);
+      if (nextDash !== dashArrayValue[0]) {
+        const paperLayer = getPaperLayer(selected[0]);
+        paperLayer.dashArray = [nextDash, dashArrayValue[1]];
+        setLayerStrokeDashArray({id: selected[0], strokeDashArray: [nextDash, dashArrayValue[1]]});
+        setDash(nextDash);
+      }
+    } catch(error) {
+      setDash(dashArrayValue[0]);
+    }
   }
 
   return (
@@ -39,7 +46,7 @@ const StrokeDashInput = (props: StrokeDashInputProps): ReactElement => {
       value={dash}
       onChange={handleChange}
       onSubmit={handleSubmit}
-      blurOnSubmit
+      submitOnBlur
       disabled={disabled}
       bottomLabel={'Dash'} />
   );

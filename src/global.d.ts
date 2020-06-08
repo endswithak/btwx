@@ -263,4 +263,17 @@ declare namespace em {
   }
 
   type ShapeType = 'Rectangle' | 'Ellipse' | 'Rounded' | 'Polygon' | 'Star';
+
+  interface SnapPoint {
+    id: string;
+    axis: 'x' | 'y';
+    side: 'left' | 'right' | 'center' | 'top' | 'bottom';
+    point: number;
+    breakThreshold?: number;
+  }
+
+  interface SnapBound {
+    side: 'left' | 'right' | 'center' | 'top' | 'bottom';
+    point: number;
+  }
 }

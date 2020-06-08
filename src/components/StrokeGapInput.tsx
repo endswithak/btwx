@@ -28,10 +28,17 @@ const StrokeGapInput = (props: StrokeGapInputProps): ReactElement => {
   };
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const paperLayer = getPaperLayer(selected[0]);
-    paperLayer.dashArray = [dashArrayValue[0], evaluate(`${gap}`)];
-    setLayerStrokeDashArray({id: selected[0], strokeDashArray: [dashArrayValue[0], evaluate(`${gap}`)]});
-    setGap(evaluate(`${gap}`));
+    try {
+      const nextGap = evaluate(`${gap}`);
+      if (nextGap !== dashArrayValue[1]) {
+        const paperLayer = getPaperLayer(selected[0]);
+        paperLayer.dashArray = [dashArrayValue[0], nextGap];
+        setLayerStrokeDashArray({id: selected[0], strokeDashArray: [dashArrayValue[0], nextGap]});
+        setGap(nextGap);
+      }
+    } catch(error) {
+      setGap(dashArrayValue[1]);
+    }
   }
 
   return (
@@ -39,7 +46,7 @@ const StrokeGapInput = (props: StrokeGapInputProps): ReactElement => {
       value={gap}
       onChange={handleChange}
       onSubmit={handleSubmit}
-      blurOnSubmit
+      submitOnBlur
       disabled={disabled}
       bottomLabel={'Gap'} />
   );

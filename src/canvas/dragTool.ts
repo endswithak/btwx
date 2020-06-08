@@ -5,6 +5,8 @@ import { getPaperLayer, getSelectionBounds, getLayerAndDescendants } from '../st
 import { updateSelectionFrame } from '../store/utils/layer';
 import { paperMain } from './index';
 import { THEME_PRIMARY_COLOR, THEME_GUIDE_COLOR } from '../constants';
+import Guide from './guide';
+import MeasureGuide from './measureGuide';
 
 class DragTool {
   enabled: boolean;
@@ -13,44 +15,21 @@ class DragTool {
   from: paper.Point;
   to: paper.Point;
   snap: {
-    x: {
-      id: string;
-      axis: string;
-      side: string;
-      point: number;
-    };
-    y: {
-      id: string;
-      axis: string;
-      side: string;
-      point: number;
-    };
+    x: em.SnapPoint;
+    y: em.SnapPoint;
   };
-  snapPoints: {
-    id: string;
-    axis: string;
-    side: string;
-    point: number;
-  }[];
-  breakSnapThreshold: {
-    x: {
-      max: number;
-      min: number;
-      current: number;
-    };
-    y: {
-      max: number;
-      min: number;
-      current: number;
-    };
-  };
+  snapPoints: em.SnapPoint[];
+  snapBreakThreshholdMin: number;
+  snapBreakThreshholdMax: number;
   boundsGuide: paper.Path.Rectangle;
-  leftGuide: paper.Path.Line;
-  rightGuide: paper.Path.Line;
-  topGuide: paper.Path.Line;
-  bottomGuide: paper.Path.Line;
-  centerXGuide: paper.Path.Line;
-  centerYGuide: paper.Path.Line;
+  leftGuide: Guide;
+  rightGuide: Guide;
+  topGuide: Guide;
+  bottomGuide: Guide;
+  centerXGuide: Guide;
+  centerYGuide: Guide;
+  xMeasureGuide: MeasureGuide;
+  yMeasureGuide: MeasureGuide;
   shiftModifier: boolean;
   metaModifier: boolean;
   constructor() {
@@ -68,22 +47,14 @@ class DragTool {
     this.bottomGuide = null;
     this.centerXGuide = null;
     this.centerYGuide = null;
+    this.xMeasureGuide = null;
+    this.yMeasureGuide = null;
+    this.snapBreakThreshholdMin = -8;
+    this.snapBreakThreshholdMax = 8;
     this.snapPoints = [];
     this.snap = {
       x: null,
       y: null
-    };
-    this.breakSnapThreshold = {
-      x: {
-        max: 16,
-        min: -16,
-        current: 0
-      },
-      y: {
-        max: 16,
-        min: -16,
-        current: 0
-      },
     };
   }
   enable() {
@@ -95,13 +66,22 @@ class DragTool {
     this.y = null;
     this.from = null;
     this.to = null;
+    this.shiftModifier = false;
+    this.metaModifier = false;
+    this.boundsGuide = null;
+    this.leftGuide = null;
+    this.rightGuide = null;
+    this.topGuide = null;
+    this.bottomGuide = null;
+    this.centerXGuide = null;
+    this.centerYGuide = null;
+    this.xMeasureGuide = null;
+    this.yMeasureGuide = null;
     this.snapPoints = [];
     this.snap = {
       x: null,
       y: null
     };
-    this.breakSnapThreshold.x.current = 0;
-    this.breakSnapThreshold.y.current = 0;
   }
   onEscape() {
     if (this.enabled) {
@@ -118,16 +98,35 @@ class DragTool {
     }
     this.disable();
   }
-  updateGuide(guide: paper.Path.Line, point1: paper.Point, point2: paper.Point) {
+  updateGuide(guide: Guide, point1: paper.Point, point2: paper.Point) {
     if (guide) {
-      guide.remove();
+      guide.paperLayer.remove();
     }
-    guide = new paperMain.Path.Line(point1, point2);
-    guide.strokeColor = new paper.Color(THEME_GUIDE_COLOR);
-    guide.removeOn({
-      up: true,
-      drag: true
-    });
+    guide = new Guide(point1, point2, { up: true, drag: true });
+  }
+  updateMeasureGuide(guide: MeasureGuide, distance: string, point1: paper.Point, point2: paper.Point) {
+    if (guide) {
+      guide.paperLayer.remove();
+    }
+    guide = new MeasureGuide(distance, point1, point2, { up: true, drag: true });
+  }
+  closestSnapPoint(snapPoints: em.SnapPoint[], side: em.SnapBound) {
+    let closestSnap;
+    let distance;
+    for(let i = 0; i < snapPoints.length; i++) {
+      const snap = snapPoints[i];
+      const pointMax = Math.max(side.point, snap.point);
+      const pointMin = Math.min(side.point, snap.point);
+      const pointDistance = pointMax - pointMin;
+      if (!distance || pointDistance < distance) {
+        closestSnap = snap;
+        distance = pointDistance;
+      }
+    }
+    return {
+      snapPoint: closestSnap,
+      distance: distance
+    }
   }
   closestXSnapPoint() {
     // possible X snap points
@@ -198,7 +197,8 @@ class DragTool {
     // create guide with selection bounds
     this.boundsGuide = new paperMain.Path.Rectangle({
       rectangle: selectionBounds,
-      strokeColor: THEME_PRIMARY_COLOR
+      strokeColor: THEME_PRIMARY_COLOR,
+      strokeWidth: 1 / paperMain.view.zoom
     });
     this.boundsGuide.removeOn({
       up: true
@@ -212,12 +212,7 @@ class DragTool {
       const layerAndDescendants = getLayerAndDescendants(state.layer.present, id);
       allSelectedLayers = [...allSelectedLayers, ...layerAndDescendants];
     });
-    let allInViewLayers: string[] = [];
-    state.layer.present.inView.forEach((id) => {
-      const layerAndDescendants = getLayerAndDescendants(state.layer.present, id);
-      allInViewLayers = [...allInViewLayers, ...layerAndDescendants];
-    });
-    const inViewNotSelected = allInViewLayers.filter((id) => !allSelectedLayers.includes(id));
+    const inViewNotSelected = state.layer.present.inView.filter((id) => !allSelectedLayers.includes(id));
     inViewNotSelected.forEach((id) => {
       const paperLayer = getPaperLayer(id);
       let bounds;
@@ -231,37 +226,37 @@ class DragTool {
         axis: 'x',
         side: 'left',
         point: bounds.left
-      };
+      } as em.SnapPoint;
       const centerX = {
         id: id,
         axis: 'x',
         side: 'center',
         point: bounds.center.x
-      };
+      } as em.SnapPoint;
       const centerY = {
         id: id,
         axis: 'y',
         side: 'center',
         point: bounds.center.y
-      };
+      } as em.SnapPoint;
       const right = {
         id: id,
         axis: 'x',
         side: 'right',
         point: bounds.right
-      };
+      } as em.SnapPoint;
       const top = {
         id: id,
         axis: 'y',
         side: 'top',
         point: bounds.top
-      };
+      } as em.SnapPoint;
       const bottom = {
         id: id,
         axis: 'y',
         side: 'bottom',
         point: bounds.bottom
-      };
+      } as em.SnapPoint;
       this.snapPoints.push(left, right, top, bottom, centerX, centerY);
     });
   }
@@ -278,15 +273,14 @@ class DragTool {
       // check if there is an active X snap point
       if (this.snap.x) {
         // check if event delta will exceed X snap point min/max threshold
-        if (this.breakSnapThreshold.x.current + event.delta.x < this.breakSnapThreshold.x.min || this.breakSnapThreshold.x.current + event.delta.x > this.breakSnapThreshold.x.max) {
+        if (this.snap.x.breakThreshold + event.delta.x < this.snapBreakThreshholdMin || this.snap.x.breakThreshold + event.delta.x > this.snapBreakThreshholdMax) {
           // if exceeded, adjust selection bounds...
           // clear X snap, and reset X snap threshold
-          this.boundsGuide.position.x += (this.breakSnapThreshold.x.current + event.delta.x);
+          this.boundsGuide.position.x += (this.snap.x.breakThreshold + event.delta.x);
           this.snap.x = null;
-          this.breakSnapThreshold.x.current = 0;
         } else {
           // if not exceeded, update X snap threshold
-          this.breakSnapThreshold.x.current += event.delta.x;
+          this.snap.x.breakThreshold += event.delta.x;
         }
       }
       // if no active X snap
@@ -297,7 +291,7 @@ class DragTool {
         const closestXSnap = this.closestXSnapPoint();
         // if selection bounds is within 2 units from...
         // closest point, snap to that point
-        if (closestXSnap.distance <= 2) {
+        if (closestXSnap.distance <= (1 / paperMain.view.zoom) * 2) {
           switch(closestXSnap.bounds.side) {
             case 'left':
               this.boundsGuide.bounds.left = closestXSnap.snapPoint.point;
@@ -309,22 +303,23 @@ class DragTool {
               this.boundsGuide.bounds.right = closestXSnap.snapPoint.point;
               break;
           }
-          this.snap.x = closestXSnap.snapPoint;
-          this.breakSnapThreshold.x.current = 0;
+          this.snap.x = {
+            ...closestXSnap.snapPoint,
+            breakThreshold: 0
+          };
         }
       }
       // check if there is an active Y snap point
       if (this.snap.y) {
         // check if event delta will exceed Y snap point min/max threshold
-        if (this.breakSnapThreshold.y.current + event.delta.y < this.breakSnapThreshold.y.min || this.breakSnapThreshold.y.current + event.delta.y > this.breakSnapThreshold.y.max) {
+        if (this.snap.y.breakThreshold + event.delta.y < this.snapBreakThreshholdMin || this.snap.y.breakThreshold + event.delta.y > this.snapBreakThreshholdMax) {
           // if exceeded, adjust selection bounds...
           // clear Y snap, and reset Y snap threshold
-          this.boundsGuide.position.y += (this.breakSnapThreshold.y.current + event.delta.y);
+          this.boundsGuide.position.y += (this.snap.y.breakThreshold + event.delta.y);
           this.snap.y = null;
-          this.breakSnapThreshold.y.current = 0;
         } else {
           // if not exceeded, update Y snap threshold
-          this.breakSnapThreshold.y.current += event.delta.y;
+          this.snap.y.breakThreshold += event.delta.y;
         }
       }
       // if no active Y snap
@@ -335,7 +330,7 @@ class DragTool {
         const closestYSnap = this.closestYSnapPoint();
         // if selection bounds is within 2 units from...
         // closest point, snap to that point
-        if (closestYSnap.distance <= 2) {
+        if (closestYSnap.distance <= (1 / paperMain.view.zoom) * 2) {
           switch(closestYSnap.bounds.side) {
             case 'top':
               this.boundsGuide.bounds.top = closestYSnap.snapPoint.point;
@@ -347,8 +342,10 @@ class DragTool {
               this.boundsGuide.bounds.bottom = closestYSnap.snapPoint.point;
               break;
           }
-          this.snap.y = closestYSnap.snapPoint;
-          this.breakSnapThreshold.y.current = 0;
+          this.snap.y = {
+            ...closestYSnap.snapPoint,
+            breakThreshold: 0
+          };
         }
       }
       // find all snapPoints that match current selection bounds side
@@ -360,7 +357,7 @@ class DragTool {
       const bottomSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.boundsGuide.bounds.bottom) === Math.round(snapPoint.point));
       // if any snap points match, find their min/max...
       // vertical/horizontal position and add relevant guide
-      if (leftSnaps.length > 0) {
+      if (this.snap.x && leftSnaps.length > 0) {
         const topLeftPoints: paper.Point[] = [this.boundsGuide.bounds.topLeft];
         const bottomLeftPoints: paper.Point[] = [this.boundsGuide.bounds.bottomLeft];
         leftSnaps.forEach((point) => {
@@ -372,7 +369,7 @@ class DragTool {
         const maxBottomLeft = new paper.Point(this.boundsGuide.bounds.left, bottomLeftPoints.reduce(paper.Point.max).y);
         this.updateGuide(this.leftGuide, minTopLeft, maxBottomLeft);
       }
-      if (rightSnaps.length > 0) {
+      if (this.snap.x && rightSnaps.length > 0) {
         const topRightPoints: paper.Point[] = [this.boundsGuide.bounds.topRight];
         const bottomRightPoints: paper.Point[] = [this.boundsGuide.bounds.bottomRight];
         rightSnaps.forEach((point) => {
@@ -384,7 +381,7 @@ class DragTool {
         const maxBottomRight = new paper.Point(this.boundsGuide.bounds.right, bottomRightPoints.reduce(paper.Point.max).y);
         this.updateGuide(this.rightGuide, minTopRight, maxBottomRight);
       }
-      if (centerXSnaps.length > 0) {
+      if (this.snap.x && centerXSnaps.length > 0) {
         const topCenterPoints: paper.Point[] = [this.boundsGuide.bounds.topCenter];
         const bottomCenterPoints: paper.Point[] = [this.boundsGuide.bounds.bottomCenter];
         centerXSnaps.forEach((point) => {
@@ -396,7 +393,7 @@ class DragTool {
         const maxBottomCenter = new paper.Point(this.boundsGuide.bounds.bottomCenter.x, bottomCenterPoints.reduce(paper.Point.max).y);
         this.updateGuide(this.centerXGuide, minTopCenter, maxBottomCenter);
       }
-      if (topSnaps.length > 0) {
+      if (this.snap.y && topSnaps.length > 0) {
         const topLeftPoints: paper.Point[] = [this.boundsGuide.bounds.topLeft];
         const topRightPoints: paper.Point[] = [this.boundsGuide.bounds.topRight];
         topSnaps.forEach((point) => {
@@ -408,7 +405,7 @@ class DragTool {
         const maxTopRight = new paper.Point(topRightPoints.reduce(paper.Point.max).x, this.boundsGuide.bounds.top);
         this.updateGuide(this.topGuide, minTopLeft, maxTopRight);
       }
-      if (bottomSnaps.length > 0) {
+      if (this.snap.y && bottomSnaps.length > 0) {
         const bottomLeftPoints: paper.Point[] = [this.boundsGuide.bounds.bottomLeft];
         const bottomRightPoints: paper.Point[] = [this.boundsGuide.bounds.bottomRight];
         bottomSnaps.forEach((point) => {
@@ -420,7 +417,7 @@ class DragTool {
         const maxBottomRight = new paper.Point(bottomRightPoints.reduce(paper.Point.max).x, this.boundsGuide.bounds.bottom);
         this.updateGuide(this.bottomGuide, minBottomLeft, maxBottomRight);
       }
-      if (centerYSnaps.length > 0) {
+      if (this.snap.y && centerYSnaps.length > 0) {
         const leftCenterPoints: paper.Point[] = [this.boundsGuide.bounds.leftCenter];
         const rightCenterPoints: paper.Point[] = [this.boundsGuide.bounds.rightCenter];
         centerYSnaps.forEach((point) => {
