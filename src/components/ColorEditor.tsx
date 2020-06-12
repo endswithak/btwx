@@ -1,7 +1,5 @@
 import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
 import styled from 'styled-components';
-import chroma from 'chroma-js';
-import { SketchPicker } from 'react-color';
 import Modal from 'react-modal';
 import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
@@ -117,14 +115,6 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
       contentLabel='color-editor'>
       {
         colorEditor.isOpen && color
-        // ? <Editor
-        //     theme={theme}>
-        //     <SketchPicker
-        //       color={color}
-        //       onChange={handleColorChange}
-        //       presetColors={[]} />
-        //   </Editor>
-        // : null
         ? <ColorPicker
             colorValue={color}
             colorType='rgb'
