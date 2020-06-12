@@ -6,6 +6,7 @@ import contextMenu from './contextMenu';
 import tweenDrawer from './tweenDrawer';
 import easeEditor from './easeEditor';
 import colorEditor from './colorEditor';
+import fillEditor from './fillEditor';
 import textEditor from './textEditor';
 import textSettings from './textSettings';
 import canvasSettings from './canvasSettings';
@@ -145,7 +146,8 @@ const rootReducer = combineReducers({
   colorEditor,
   textEditor,
   textSettings,
-  canvasSettings
+  canvasSettings,
+  fillEditor
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

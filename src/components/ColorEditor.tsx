@@ -10,10 +10,7 @@ import { closeColorEditor } from '../store/actions/colorEditor';
 import { ColorEditorTypes } from '../store/actionTypes/colorEditor';
 import { enableSelectionTool, disableSelectionTool } from '../store/actions/tool';
 import { ToolTypes } from '../store/actionTypes/tool';
-import { setLayerFillColor, setLayerStrokeColor, setLayerShadowColor } from '../store/actions/layer';
-import { SetLayerFillColorPayload, SetLayerStrokeColorPayload, SetLayerShadowColorPayload, LayerTypes } from '../store/actionTypes/layer';
-import { SetTextSettingsFillColorPayload, TextSettingsTypes } from '../store/actionTypes/textSettings';
-import { setTextSettingsFillColor } from '../store/actions/textSettings';
+import ColorPicker from './ColorPicker';
 
 Modal.setAppElement('#root');
 
@@ -22,26 +19,25 @@ interface ColorEditorProps {
     isOpen: boolean;
     layer: string;
     color: string;
-    prop: em.ColorEditorProp;
+    //prop: em.ColorEditorProp;
     x: number;
     y: number;
     onChange?(color: string): void;
+    onClose?(color: string): void;
   };
   layerType?: em.LayerType;
   closeColorEditor?(): ColorEditorTypes;
-  setLayerFillColor?(payload: SetLayerFillColorPayload): LayerTypes;
-  setLayerStrokeColor?(payload: SetLayerStrokeColorPayload): LayerTypes;
-  setLayerShadowColor?(payload: SetLayerShadowColorPayload): LayerTypes;
   disableSelectionTool?(): ToolTypes;
   enableSelectionTool?(): ToolTypes;
-  setTextSettingsFillColor?(payload: SetTextSettingsFillColorPayload): TextSettingsTypes;
 }
 
 const Editor = styled.div`
   .sketch-picker {
-    background: ${props => props.theme.background.z2} !important;
+    /* background: ${props => props.theme.background.z2} !important; */
+    background: none !important;
     font-family: 'Space Mono' !important;
-    box-shadow: 0 0 0 1px ${props => props.theme.background.z4} inset !important;
+    /* box-shadow: 0 0 0 1px ${props => props.theme.background.z4} inset !important; */
+    box-shadow: none !important;
     ::selection {
       background: ${props => props.theme.palette.primary} !important;
     }
@@ -72,26 +68,12 @@ const Editor = styled.div`
 
 const ColorEditor = (props: ColorEditorProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { colorEditor, layerType, closeColorEditor, setLayerFillColor, setLayerStrokeColor, setLayerShadowColor, disableSelectionTool, enableSelectionTool, setTextSettingsFillColor } = props;
+  const { colorEditor, closeColorEditor, disableSelectionTool, enableSelectionTool } = props;
   const [color, setColor] = useState(colorEditor.color);
 
   const handleCloseRequest = () => {
-    switch(colorEditor.prop) {
-      case 'fillColor': {
-        setLayerFillColor({id: colorEditor.layer, fillColor: color});
-        if (layerType === 'Text') {
-          setTextSettingsFillColor({fillColor: color});
-        }
-        break;
-      }
-      case 'strokeColor': {
-        setLayerStrokeColor({id: colorEditor.layer, strokeColor: color});
-        break;
-      }
-      case 'shadowColor': {
-        setLayerShadowColor({id: colorEditor.layer, shadowColor: color});
-        break;
-      }
+    if (colorEditor.onClose) {
+      colorEditor.onClose(color);
     }
     closeColorEditor();
   }
@@ -105,11 +87,9 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
     enableSelectionTool();
   }
 
-  const handleColorChange = (color, event) => {
-    const newColor = chroma(color.rgb).hex();
-    setColor(newColor);
+  const handleColorChange = (color: string) => {
     if (colorEditor.onChange) {
-      colorEditor.onChange(newColor);
+      colorEditor.onChange(color);
     }
   }
 
@@ -125,23 +105,30 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
       onRequestClose={handleCloseRequest}
       style={{
         content: {
-          background: 'none',
+          //width: 220,
           width: 220,
-          height: 237,
+          //height: 240,
           top: colorEditor.y,
-          left: colorEditor.x
+          left: colorEditor.x,
+          background: theme.background.z1,
+          boxShadow: `0 0 0 1px ${theme.background.z4}`
         }
       }}
       contentLabel='color-editor'>
       {
         colorEditor.isOpen && color
-        ? <Editor
-            theme={theme}>
-            <SketchPicker
-              color={color}
-              onChange={handleColorChange}
-              presetColors={[]} />
-          </Editor>
+        // ? <Editor
+        //     theme={theme}>
+        //     <SketchPicker
+        //       color={color}
+        //       onChange={handleColorChange}
+        //       presetColors={[]} />
+        //   </Editor>
+        // : null
+        ? <ColorPicker
+            colorValue={color}
+            colorType='rgb'
+            onChange={handleColorChange} />
         : null
       }
     </Modal>
@@ -149,12 +136,11 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { colorEditor, layer } = state;
-  const layerType = colorEditor.layer ? layer.present.byId[colorEditor.layer].type : null;
-  return { colorEditor, layerType };
+  const { colorEditor } = state;
+  return { colorEditor };
 };
 
 export default connect(
   mapStateToProps,
-  { closeColorEditor, setLayerFillColor, setLayerStrokeColor, setLayerShadowColor, disableSelectionTool, enableSelectionTool, setTextSettingsFillColor }
+  { closeColorEditor, disableSelectionTool, enableSelectionTool }
 )(ColorEditor);

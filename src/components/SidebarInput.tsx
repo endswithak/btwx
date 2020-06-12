@@ -12,6 +12,7 @@ interface SidebarInputProps {
   onFocus?(e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>): void;
   onBlur?(e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>): void;
   label?: string;
+  leftLabel?: string;
   bottomLabel?: string;
   disabled?: boolean;
   selectOnMount?: boolean;
@@ -32,7 +33,7 @@ const Input = styled.input`
 const SidebarInput = (props: SidebarInputProps): ReactElement => {
   const inputRef = useRef<HTMLInputElement>(null);
   const theme = useContext(ThemeContext);
-  const { value, onChange, onSubmit, onFocus, onBlur, label, bottomLabel, disabled, selectOnMount, blurOnSubmit, submitOnBlur, enableSelectionTool, disableSelectionTool } = props;
+  const { value, onChange, onSubmit, onFocus, onBlur, label, leftLabel, bottomLabel, disabled, selectOnMount, blurOnSubmit, submitOnBlur, enableSelectionTool, disableSelectionTool } = props;
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -90,17 +91,29 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
             onBlur={handleBlur}
             onKeyPress={handleKeyPress}
             disabled={disabled}
-            className='c-sidebar-input__field'
+            className={`c-sidebar-input__field ${label ? 'c-sidebar-input__field--label' : null } ${leftLabel ? 'c-sidebar-input__field--left-label' : null }`}
             theme={theme} />
             {
               label
               ? <div
-                  className='c-sidebar-input__label'
+                  className='c-sidebar-input__label c-sidebar-input__label--right'
                   style={{
                     background: theme.background.z4,
                     color: theme.text.lighter
                   }}>
                   { label }
+                </div>
+              : null
+            }
+            {
+              leftLabel
+              ? <div
+                  className='c-sidebar-input__label c-sidebar-input__label--left'
+                  style={{
+                    background: theme.background.z4,
+                    color: theme.text.lighter
+                  }}>
+                  { leftLabel }
                 </div>
               : null
             }

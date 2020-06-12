@@ -90,6 +90,14 @@ export const SET_LAYER_OPACITY = 'SET_LAYER_OPACITY';
 export const ENABLE_LAYER_FILL = 'ENABLE_LAYER_FILL';
 export const DISABLE_LAYER_FILL = 'DISABLE_LAYER_FILL';
 export const SET_LAYER_FILL_COLOR = 'SET_LAYER_FILL_COLOR';
+export const SET_LAYER_FILL_TYPE = 'SET_LAYER_FILL_TYPE';
+export const SET_LAYER_FILL_GRADIENT_TYPE = 'SET_LAYER_FILL_GRADIENT_TYPE';
+export const SET_LAYER_FILL_GRADIENT_ORIGIN = 'SET_LAYER_FILL_GRADIENT_ORIGIN';
+export const SET_LAYER_FILL_GRADIENT_DESTINATION = 'SET_LAYER_FILL_GRADIENT_DESTINATION';
+export const SET_LAYER_FILL_GRADIENT_STOP_COLOR = 'SET_LAYER_FILL_GRADIENT_STOP_COLOR';
+export const SET_LAYER_FILL_GRADIENT_STOP_POSITION = 'SET_LAYER_FILL_GRADIENT_STOP_POSITION';
+export const ADD_LAYER_FILL_GRADIENT_STOP = 'ADD_LAYER_FILL_GRADIENT_STOP';
+export const REMOVE_LAYER_FILL_GRADIENT_STOP = 'REMOVE_LAYER_FILL_GRADIENT_STOP';
 
 export const ENABLE_LAYER_STROKE = 'ENABLE_LAYER_STROKE';
 export const DISABLE_LAYER_STROKE = 'DISABLE_LAYER_STROKE';
@@ -1062,4 +1070,87 @@ export interface UpdateInViewLayers {
   type: typeof UPDATE_IN_VIEW_LAYERS;
 }
 
-export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | AddText | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower | FreezeLayerTween | UnFreezeLayerTween | SetLayerX | SetLayerY | SetLayerWidth | SetLayerHeight | SetLayerRotation | SetLayerOpacity | EnableLayerHorizontalFlip | DisableLayerHorizontalFlip | EnableLayerVerticalFlip | DisableLayerVerticalFlip | EnableLayerFill | DisableLayerFill | SetLayerFillColor | EnableLayerStroke | DisableLayerStroke | SetLayerStrokeColor | SetLayerStrokeWidth | SetLayerStrokeCap | SetLayerStrokeJoin | SetLayerStrokeDashArray | SetLayerStrokeMiterLimit | EnableLayerShadow | DisableLayerShadow | SetLayerShadowColor | SetLayerShadowBlur | SetLayerShadowXOffset | SetLayerShadowYOffset | ResizeLayer | ResizeLayers | SetLayerText | SetLayerFontSize | SetLayerLeading | SetLayerFontWeight | SetLayerFontFamily | SetLayerJustification | AddInViewLayer | AddInViewLayers | RemoveInViewLayer | RemoveInViewLayers | UpdateInViewLayers;
+export interface SetLayerFillTypePayload {
+  id: string;
+  fillType: em.FillType;
+}
+
+export interface SetLayerFillType {
+  type: typeof SET_LAYER_FILL_TYPE;
+  payload: SetLayerFillTypePayload;
+}
+
+export interface SetLayerFillGradientTypePayload {
+  id: string;
+  gradientType: em.GradientType;
+}
+
+export interface SetLayerFillGradientType {
+  type: typeof SET_LAYER_FILL_GRADIENT_TYPE;
+  payload: SetLayerFillGradientTypePayload;
+}
+
+export interface SetLayerFillGradientOriginPayload {
+  id: string;
+  origin: em.Point;
+}
+
+export interface SetLayerFillGradientOrigin {
+  type: typeof SET_LAYER_FILL_GRADIENT_ORIGIN;
+  payload: SetLayerFillGradientOriginPayload;
+}
+
+export interface SetLayerFillGradientDestinationPayload {
+  id: string;
+  destination: em.Point;
+}
+
+export interface SetLayerFillGradientDestination {
+  type: typeof SET_LAYER_FILL_GRADIENT_DESTINATION;
+  payload: SetLayerFillGradientDestinationPayload;
+}
+
+export interface SetLayerFillGradientStopColorPayload {
+  id: string;
+  stopIndex: number;
+  color: string;
+}
+
+export interface SetLayerFillGradientStopColor {
+  type: typeof SET_LAYER_FILL_GRADIENT_STOP_COLOR;
+  payload: SetLayerFillGradientStopColorPayload;
+}
+
+export interface SetLayerFillGradientStopPositionPayload {
+  id: string;
+  stopIndex: number;
+  position: number;
+}
+
+export interface SetLayerFillGradientStopPosition {
+  type: typeof SET_LAYER_FILL_GRADIENT_STOP_POSITION;
+  payload: SetLayerFillGradientStopPositionPayload;
+}
+
+export interface AddLayerFillGradientStopPayload {
+  id: string;
+  gradientStop: em.GradientStop;
+}
+
+export interface AddLayerFillGradientStop {
+  type: typeof ADD_LAYER_FILL_GRADIENT_STOP;
+  payload: AddLayerFillGradientStopPayload;
+}
+
+export interface RemoveLayerFillGradientStopPayload {
+  id: string;
+  stopIndex: number;
+}
+
+export interface RemoveLayerFillGradientStop {
+  type: typeof REMOVE_LAYER_FILL_GRADIENT_STOP;
+  payload: RemoveLayerFillGradientStopPayload;
+}
+
+
+export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | AddText | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower | FreezeLayerTween | UnFreezeLayerTween | SetLayerX | SetLayerY | SetLayerWidth | SetLayerHeight | SetLayerRotation | SetLayerOpacity | EnableLayerHorizontalFlip | DisableLayerHorizontalFlip | EnableLayerVerticalFlip | DisableLayerVerticalFlip | EnableLayerFill | DisableLayerFill | SetLayerFillColor | EnableLayerStroke | DisableLayerStroke | SetLayerStrokeColor | SetLayerStrokeWidth | SetLayerStrokeCap | SetLayerStrokeJoin | SetLayerStrokeDashArray | SetLayerStrokeMiterLimit | EnableLayerShadow | DisableLayerShadow | SetLayerShadowColor | SetLayerShadowBlur | SetLayerShadowXOffset | SetLayerShadowYOffset | ResizeLayer | ResizeLayers | SetLayerText | SetLayerFontSize | SetLayerLeading | SetLayerFontWeight | SetLayerFontFamily | SetLayerJustification | AddInViewLayer | AddInViewLayers | RemoveInViewLayer | RemoveInViewLayers | UpdateInViewLayers | SetLayerFillType | SetLayerFillGradientType | SetLayerFillGradientOrigin | SetLayerFillGradientDestination | SetLayerFillGradientStopColor | SetLayerFillGradientStopPosition | AddLayerFillGradientStop | RemoveLayerFillGradientStop;

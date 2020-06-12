@@ -90,6 +90,14 @@ import {
   REMOVE_IN_VIEW_LAYER,
   REMOVE_IN_VIEW_LAYERS,
   UPDATE_IN_VIEW_LAYERS,
+  SET_LAYER_FILL_TYPE,
+  SET_LAYER_FILL_GRADIENT_TYPE,
+  SET_LAYER_FILL_GRADIENT_ORIGIN,
+  SET_LAYER_FILL_GRADIENT_DESTINATION,
+  SET_LAYER_FILL_GRADIENT_STOP_COLOR,
+  SET_LAYER_FILL_GRADIENT_STOP_POSITION,
+  ADD_LAYER_FILL_GRADIENT_STOP,
+  REMOVE_LAYER_FILL_GRADIENT_STOP,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -184,7 +192,15 @@ import {
   addInViewLayers,
   removeInViewLayer,
   removeInViewLayers,
-  updateInViewLayers
+  updateInViewLayers,
+  setLayerFillType,
+  setLayerFillGradientType,
+  setLayerFillGradientOrigin,
+  setLayerFillGradientDestination,
+  setLayerFillGradientStopColor,
+  setLayerFillGradientStopPosition,
+  addLayerFillGradientStop,
+  removeLayerFillGradientStop
 } from '../utils/layer';
 
 export interface LayerState {
@@ -440,6 +456,22 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return removeInViewLayers(state, action);
     case UPDATE_IN_VIEW_LAYERS:
       return updateInViewLayers(state, action);
+    case SET_LAYER_FILL_TYPE:
+      return setLayerFillType(state, action);
+    case SET_LAYER_FILL_GRADIENT_TYPE:
+      return setLayerFillGradientType(state, action);
+    case SET_LAYER_FILL_GRADIENT_ORIGIN:
+      return setLayerFillGradientOrigin(state, action);
+    case SET_LAYER_FILL_GRADIENT_DESTINATION:
+      return setLayerFillGradientDestination(state, action);
+    case SET_LAYER_FILL_GRADIENT_STOP_COLOR:
+      return setLayerFillGradientStopColor(state, action);
+    case SET_LAYER_FILL_GRADIENT_STOP_POSITION:
+      return setLayerFillGradientStopPosition(state, action);
+    case ADD_LAYER_FILL_GRADIENT_STOP:
+      return addLayerFillGradientStop(state, action);
+    case REMOVE_LAYER_FILL_GRADIENT_STOP:
+      return removeLayerFillGradientStop(state, action);
     default:
       return state;
   }

@@ -41,18 +41,6 @@ const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
     setSwatchColor(fill.color);
   }, [fill, selected]);
 
-  // const handleCheckChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
-  //   const target = e.target as HTMLInputElement;
-  //   const paperLayer = getPaperLayer(selected[0]);
-  //   if (target.checked) {
-  //     enableLayerFill({id: selected[0]});
-  //     paperLayer.fillColor = new paper.Color(fill.color);
-  //   } else {
-  //     disableLayerFill({id: selected[0]});
-  //     paperLayer.fillColor = null;
-  //   }
-  // };
-
   const handleOpacityChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     const target = e.target as HTMLInputElement;
     setOpacity(target.value);
@@ -105,6 +93,19 @@ const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
     paperLayer.fillColor = new paper.Color(editorColor);
   };
 
+  const handleSwatchClose = (editorColor: string): void => {
+    if (chroma.valid(editorColor)) {
+      const paperLayer = getPaperLayer(selected[0]);
+      paperLayer.fillColor = new paper.Color(editorColor);
+      if (selectedType === 'Text') {
+        setTextSettingsFillColor({fillColor: editorColor});
+      }
+      setLayerFillColor({id: selected[0], fillColor: editorColor});
+    } else {
+      setColor(chroma(fill.color).alpha(1).hex());
+    }
+  };
+
   const handleSwatchClick = (): void => {
     if (!enabled) {
       const paperLayer = getPaperLayer(selected[0]);
@@ -118,13 +119,14 @@ const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
       layer={selected[0]}
       colorValue={color}
       swatchColorValue={swatchColor}
-      prop='fillColor'
+      //prop='fillColor'
       opacityValue={opacity}
       onColorChange={handleColorChange}
       onColorSubmit={handleColorSubmit}
       onOpacityChange={handleOpacityChange}
       onOpacitySubmit={handleOpacitySubmit}
       onSwatchChange={handleSwatchChange}
+      onSwatchClose={handleSwatchClose}
       onSwatchClick={handleSwatchClick}
       disabled={selected.length > 1 || selected.length === 0 || !enabled} />
     // <div

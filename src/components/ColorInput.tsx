@@ -8,11 +8,12 @@ interface ColorInputProps {
   layer: string;
   colorValue: string;
   swatchColorValue: string;
-  prop: em.ColorEditorProp;
+  //prop: em.ColorEditorProp;
   opacityValue: number | string;
   disabled?: boolean;
   onSwatchClick(): void;
   onSwatchChange(e: any): void;
+  onSwatchClose?(editorColor: string): void;
   onColorChange(e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>): void;
   onColorSubmit(e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>): void;
   onOpacityChange(e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>): void;
@@ -20,7 +21,7 @@ interface ColorInputProps {
 }
 
 const ColorInput = (props: ColorInputProps): ReactElement => {
-  const { layer, prop, colorValue, swatchColorValue, opacityValue, disabled, onSwatchClick, onSwatchChange, onColorChange, onColorSubmit, onOpacityChange, onOpacitySubmit } = props;
+  const { layer, colorValue, swatchColorValue, opacityValue, disabled, onSwatchClick, onSwatchChange, onSwatchClose, onColorChange, onColorSubmit, onOpacityChange, onOpacitySubmit } = props;
 
   const handleOpacityChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     onOpacityChange(e);
@@ -42,6 +43,10 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
     onSwatchChange(editorColor);
   };
 
+  const handleSwatchClose = (editorColor: string): void => {
+    onSwatchClose(editorColor);
+  };
+
   const handleSwatchClick = (): void => {
     onSwatchClick();
   };
@@ -52,9 +57,10 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
         <SidebarSectionColumn width={'33.33%'}>
           <SidebarSwatch
             layer={layer}
-            prop={prop}
+            //prop={prop}
             color={swatchColorValue}
             onChange={handleSwatchChange}
+            onClose={handleSwatchClose}
             onClick={handleSwatchClick}
             bottomLabel={'Color'} />
         </SidebarSectionColumn>
@@ -65,6 +71,7 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
             onSubmit={handleColorSubmit}
             submitOnBlur
             disabled={disabled}
+            leftLabel={'#'}
             bottomLabel={'Hex'} />
         </SidebarSectionColumn>
         <SidebarSectionColumn width={'33.33%'}>

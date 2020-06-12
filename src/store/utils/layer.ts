@@ -24,7 +24,7 @@ import {
   SetLayerStrokeDashArray, SetLayerStrokeMiterLimit, ResizeLayer, ResizeLayers, EnableLayerHorizontalFlip,
   DisableLayerHorizontalFlip, EnableLayerVerticalFlip, DisableLayerVerticalFlip, AddText, SetLayerText,
   SetLayerFontSize, SetLayerFontWeight, SetLayerFontFamily, SetLayerLeading, SetLayerJustification,
-  AddInViewLayer, AddInViewLayers, RemoveInViewLayer, RemoveInViewLayers, UpdateInViewLayers
+  AddInViewLayer, AddInViewLayers, RemoveInViewLayer, RemoveInViewLayers, UpdateInViewLayers, SetLayerFillType, SetLayerFillGradientType, SetLayerFillGradientStopColor, SetLayerFillGradientStopPosition, AddLayerFillGradientStop, RemoveLayerFillGradientStop, SetLayerFillGradientOrigin
 } from '../actionTypes/layer';
 
 import {
@@ -2547,5 +2547,276 @@ export const updateInViewLayers = (state: LayerState, action: UpdateInViewLayers
     }
     return result;
   }, currentState);
+  return currentState;
+};
+
+export const setLayerFillType = (state: LayerState, action: SetLayerFillType): LayerState => {
+  let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  const layerItem = currentState.byId[action.payload.id];
+  switch(action.payload.fillType) {
+    case 'color':
+      paperLayer.fillColor = new paper.Color(layerItem.style.fill.color);
+      break;
+    case 'gradient':
+      paperLayer.fillColor = {
+        gradient: {
+          stops: layerItem.style.fill.gradient.stops.map((stop) => {
+            return new paper.GradientStop(new paper.Color(stop.color), stop.position);
+          }),
+          radial: layerItem.style.fill.gradient.gradientType === 'radial'
+        },
+        origin: layerItem.style.fill.gradient.origin,
+        destination: layerItem.style.fill.gradient.destination
+      }
+      break;
+  }
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          fill: {
+            ...currentState.byId[action.payload.id].style.fill,
+            fillType: action.payload.fillType
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const setLayerFillGradientType = (state: LayerState, action: SetLayerFillGradientType): LayerState => {
+  let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  switch(action.payload.gradientType) {
+    case 'linear':
+      paperLayer.fillColor.gradient.radial = false;
+      break;
+    case 'radial':
+      paperLayer.fillColor.gradient.radial = true;
+      break;
+  }
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          fill: {
+            ...currentState.byId[action.payload.id].style.fill,
+            gradient: {
+              ...currentState.byId[action.payload.id].style.fill.gradient,
+              gradientType: action.payload.gradientType
+            }
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const setLayerFillGradientOrigin = (state: LayerState, action: SetLayerFillGradientOrigin): LayerState => {
+  let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  paperLayer.fillColor.origin = action.payload.origin;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          fill: {
+            ...currentState.byId[action.payload.id].style.fill,
+            gradient: {
+              ...currentState.byId[action.payload.id].style.fill.gradient,
+              origin: action.payload.origin
+            }
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const setLayerFillGradientDestination = (state: LayerState, action: SetLayerFillGradientDestination): LayerState => {
+  let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  paperLayer.fillColor.destination = action.payload.destination;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          fill: {
+            ...currentState.byId[action.payload.id].style.fill,
+            gradient: {
+              ...currentState.byId[action.payload.id].style.fill.gradient,
+              destination: action.payload.destination
+            }
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const setLayerFillGradientStopColor = (state: LayerState, action: SetLayerFillGradientStopColor): LayerState => {
+  let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  paperLayer.fillColor.gradient.stops[action.payload.stopIndex].color = new paper.Color(action.payload.color);
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          fill: {
+            ...currentState.byId[action.payload.id].style.fill,
+            gradient: {
+              ...currentState.byId[action.payload.id].style.fill.gradient,
+              stops: currentState.byId[action.payload.id].style.fill.gradient.stops.map((gradient, index) => {
+                if (index === action.payload.stopIndex) {
+                  gradient.color = action.payload.color;
+                }
+                return gradient;
+              })
+            }
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const setLayerFillGradientStopPosition = (state: LayerState, action: SetLayerFillGradientStopPosition): LayerState => {
+  let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  paperLayer.fillColor.gradient.stops[action.payload.stopIndex].offset = action.payload.position;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          fill: {
+            ...currentState.byId[action.payload.id].style.fill,
+            gradient: {
+              ...currentState.byId[action.payload.id].style.fill.gradient,
+              stops: currentState.byId[action.payload.id].style.fill.gradient.stops.map((gradient, index) => {
+                if (index === action.payload.stopIndex) {
+                  gradient.position = action.payload.position;
+                }
+                return gradient;
+              })
+            }
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const addLayerFillGradientStop = (state: LayerState, action: AddLayerFillGradientStop): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          fill: {
+            ...currentState.byId[action.payload.id].style.fill,
+            gradient: {
+              ...currentState.byId[action.payload.id].style.fill.gradient,
+              stops: [...currentState.byId[action.payload.id].style.fill.gradient.stops, action.payload.gradientStop]
+            }
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  const paperLayer = getPaperLayer(action.payload.id);
+  const layerItem = currentState.byId[action.payload.id];
+  paperLayer.fillColor = {
+    gradient: {
+      stops: layerItem.style.fill.gradient.stops.filter((stop) => {
+        return new paper.GradientStop(new paper.Color(stop.color), stop.position);
+      }),
+      radial: layerItem.style.fill.gradient.gradientType === 'radial'
+    },
+    origin: layerItem.style.fill.gradient.from,
+    destination: layerItem.style.fill.gradient.to
+  }
+  return currentState;
+};
+
+export const removeLayerFillGradientStop = (state: LayerState, action: RemoveLayerFillGradientStop): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          fill: {
+            ...currentState.byId[action.payload.id].style.fill,
+            gradient: {
+              ...currentState.byId[action.payload.id].style.fill.gradient,
+              stops: currentState.byId[action.payload.id].style.fill.gradient.stops.filter((gradient, index) => {
+                if (index !== action.payload.stopIndex) {
+                  return gradient;
+                }
+              })
+            }
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  const paperLayer = getPaperLayer(action.payload.id);
+  const layerItem = currentState.byId[action.payload.id];
+  paperLayer.fillColor = {
+    gradient: {
+      stops: layerItem.style.fill.gradient.stops.filter((stop) => {
+        return new paper.GradientStop(new paper.Color(stop.color), stop.position);
+      }),
+      radial: layerItem.style.fill.gradient.gradientType === 'radial'
+    },
+    origin: layerItem.style.fill.gradient.from,
+    destination: layerItem.style.fill.gradient.to
+  }
   return currentState;
 };

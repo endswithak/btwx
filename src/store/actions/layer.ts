@@ -98,6 +98,14 @@ import {
   REMOVE_IN_VIEW_LAYER,
   REMOVE_IN_VIEW_LAYERS,
   UPDATE_IN_VIEW_LAYERS,
+  SET_LAYER_FILL_TYPE,
+  SET_LAYER_FILL_GRADIENT_TYPE,
+  SET_LAYER_FILL_GRADIENT_ORIGIN,
+  SET_LAYER_FILL_GRADIENT_DESTINATION,
+  SET_LAYER_FILL_GRADIENT_STOP_COLOR,
+  SET_LAYER_FILL_GRADIENT_STOP_POSITION,
+  ADD_LAYER_FILL_GRADIENT_STOP,
+  REMOVE_LAYER_FILL_GRADIENT_STOP,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
@@ -186,6 +194,14 @@ import {
   AddInViewLayersPayload,
   RemoveInViewLayerPayload,
   RemoveInViewLayersPayload,
+  SetLayerFillTypePayload,
+  SetLayerFillGradientTypePayload,
+  SetLayerFillGradientOriginPayload,
+  SetLayerFillGradientDestinationPayload,
+  SetLayerFillGradientStopColorPayload,
+  SetLayerFillGradientStopPositionPayload,
+  AddLayerFillGradientStopPayload,
+  RemoveLayerFillGradientStopPayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -834,4 +850,44 @@ export const removeInViewLayers = (payload: RemoveInViewLayersPayload): LayerTyp
 
 export const updateInViewLayers = (): LayerTypes => ({
   type: UPDATE_IN_VIEW_LAYERS
+});
+
+export const setLayerFillType = (payload: SetLayerFillTypePayload): LayerTypes => ({
+  type: SET_LAYER_FILL_TYPE,
+  payload
+});
+
+export const setLayerFillGradientType = (payload: SetLayerFillGradientTypePayload): LayerTypes => ({
+  type: SET_LAYER_FILL_GRADIENT_TYPE,
+  payload
+});
+
+export const setLayerFillGradientOrigin = (payload: SetLayerFillGradientOriginPayload): LayerTypes => ({
+  type: SET_LAYER_FILL_GRADIENT_ORIGIN,
+  payload
+});
+
+export const setLayerFillGradientDestination = (payload: SetLayerFillGradientDestinationPayload): LayerTypes => ({
+  type: SET_LAYER_FILL_GRADIENT_DESTINATION,
+  payload
+});
+
+export const setLayerFillGradientStopColor = (payload: SetLayerFillGradientStopColorPayload): LayerTypes => ({
+  type: SET_LAYER_FILL_GRADIENT_STOP_COLOR,
+  payload
+});
+
+export const setLayerFillGradientStopPosition = (payload: SetLayerFillGradientStopPositionPayload): LayerTypes => ({
+  type: SET_LAYER_FILL_GRADIENT_STOP_POSITION,
+  payload
+});
+
+export const addLayerFillGradientStop = (payload: AddLayerFillGradientStopPayload): LayerTypes => ({
+  type: ADD_LAYER_FILL_GRADIENT_STOP,
+  payload
+});
+
+export const removeLayerFillGradientStop = (payload: RemoveLayerFillGradientStopPayload): LayerTypes => ({
+  type: REMOVE_LAYER_FILL_GRADIENT_STOP,
+  payload
 });

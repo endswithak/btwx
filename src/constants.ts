@@ -2,9 +2,30 @@ export const THEME_PRIMARY_COLOR = '#3C88FD';
 export const THEME_GUIDE_COLOR = 'red';
 export const THEME_UNIT_SIZE = 4;
 
+export const DEFAULT_GRADIENT_STYLE: em.Gradient = {
+  gradientType: 'linear',
+  origin: {
+    x: 0,
+    y: 0
+  },
+  destination: {
+    x: 1,
+    y: 1
+  },
+  stops: [{
+    position: 0,
+    color: '#000000'
+  }, {
+    position: 1,
+    color: '#00000000'
+  }]
+}
+
 export const DEFAULT_FILL_STYLE: em.Fill = {
+  fillType: 'color',
   enabled: true,
-  color: '#cccccc'
+  color: '#cccccc',
+  gradient: DEFAULT_GRADIENT_STYLE
 }
 
 export const DEFAULT_STROKE_STYLE: em.Stroke = {

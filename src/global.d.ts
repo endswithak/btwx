@@ -103,8 +103,26 @@ declare namespace em {
     justification: Jusftification;
   }
 
+  type FillType = 'color' | 'gradient';
+
   interface Fill {
+    fillType: FillType;
     enabled: boolean;
+    color: string;
+    gradient: Gradient;
+  }
+
+  type GradientType = 'linear' | 'radial';
+
+  interface Gradient {
+    gradientType: GradientType;
+    origin: Point;
+    destination: Point;
+    stops: GradientStop[];
+  }
+
+  interface GradientStop {
+    position: number;
     color: string;
   }
 
@@ -125,10 +143,7 @@ declare namespace em {
     enabled: boolean;
     color: string;
     blur: number;
-    offset: {
-      x: number;
-      y: number;
-    };
+    offset: Point;
   }
 
   interface Layer {
@@ -275,5 +290,10 @@ declare namespace em {
   interface SnapBound {
     side: 'left' | 'right' | 'center' | 'top' | 'bottom';
     point: number;
+  }
+
+  interface Point {
+    x: number;
+    y: number;
   }
 }
