@@ -30,13 +30,13 @@ interface SidebarFillStyleProps {
 const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
   const { fill, fillOpacity, selected, selectedType, enableLayerFill, disableLayerFill, setLayerFillColor, setTextSettingsFillColor } = props;
   const [enabled, setEnabled] = useState<boolean>(fill.enabled);
-  const [color, setColor] = useState<string>(chroma(fill.color).alpha(1).hex());
+  const [color, setColor] = useState<string>(chroma(fill.color).alpha(1).hex().replace('#', ''));
   const [opacity, setOpacity] = useState<number | string>(fillOpacity);
   const [swatchColor, setSwatchColor] = useState<string>(fill.color);
 
   useEffect(() => {
     setEnabled(fill.enabled);
-    setColor(chroma(fill.color).alpha(1).hex());
+    setColor(chroma(fill.color).alpha(1).hex().replace('#', ''));
     setOpacity(fillOpacity);
     setSwatchColor(fill.color);
   }, [fill, selected]);
@@ -54,7 +54,7 @@ const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
   const handleOpacitySubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     try {
       let nextOpacity = evaluate(`${opacity}`);
-      if (nextOpacity  !== fillOpacity) {
+      if (nextOpacity  !== fillOpacity && !isNaN(nextOpacity)) {
         if (nextOpacity > 100) {
           nextOpacity = 100;
         }
@@ -65,6 +65,8 @@ const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
         const newColor = chroma(color).alpha(evaluate(`${nextOpacity} / 100`)).hex();
         paperLayer.fillColor = new paper.Color(newColor);
         setLayerFillColor({id: selected[0], fillColor: newColor});
+      } else {
+        setOpacity(fillOpacity);
       }
     } catch(error) {
       setOpacity(fillOpacity);
@@ -81,12 +83,12 @@ const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
       }
       setLayerFillColor({id: selected[0], fillColor: nextFillColor});
     } else {
-      setColor(chroma(fill.color).alpha(1).hex());
+      setColor(chroma(fill.color).alpha(1).hex().replace('#', ''));
     }
   };
 
   const handleSwatchChange = (editorColor: string): void => {
-    setColor(chroma(editorColor).alpha(1).hex());
+    setColor(chroma(editorColor).alpha(1).hex().replace('#', ''));
     setOpacity(chroma(editorColor).alpha() * 100);
     setSwatchColor(editorColor);
     const paperLayer = getPaperLayer(selected[0]);
@@ -102,7 +104,7 @@ const SidebarFillStyle = (props: SidebarFillStyleProps): ReactElement => {
       }
       setLayerFillColor({id: selected[0], fillColor: editorColor});
     } else {
-      setColor(chroma(fill.color).alpha(1).hex());
+      setColor(chroma(fill.color).alpha(1).hex().replace('#', ''));
     }
   };
 

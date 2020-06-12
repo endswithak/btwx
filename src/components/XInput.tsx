@@ -29,11 +29,13 @@ const XInput = (props: XInputProps): ReactElement => {
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
     try {
       const nextX = evaluate(`${x}`);
-      if (nextX !== xValue) {
+      if (nextX !== xValue && !isNaN(nextX)) {
         const paperLayer = getPaperLayer(selected[0]);
         paperLayer.position.x = nextX;
         setLayerX({id: selected[0], x: nextX});
         setX(nextX);
+      } else {
+        setX(xValue);
       }
     } catch(error) {
       setX(xValue);

@@ -32,13 +32,15 @@ const LeadingInput = (props: LeadingInputProps): ReactElement => {
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
     try {
       let nextLeading = evaluate(`${leading}`);
-      if (nextLeading !== leadingValue) {
+      if (nextLeading !== leadingValue && !isNaN(nextLeading)) {
         if (nextLeading < 1) {
           nextLeading = 1;
         }
         setLayerLeading({id: selected[0], leading: nextLeading});
         setTextSettingsLeading({leading: nextLeading});
         setLeading(nextLeading);
+      } else {
+        setLeading(leadingValue);
       }
     } catch(error) {
       setLeading(leadingValue);

@@ -29,11 +29,13 @@ const YInput = (props: YInputProps): ReactElement => {
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
     try {
       const nextY = evaluate(`${y}`);
-      if (nextY !== yValue) {
+      if (nextY !== yValue && !isNaN(nextY)) {
         const paperLayer = getPaperLayer(selected[0]);
         paperLayer.position.y = nextY;
         setLayerY({id: selected[0], y: nextY});
         setY(nextY);
+      } else {
+        setY(yValue);
       }
     } catch(error) {
       setY(yValue);

@@ -32,10 +32,12 @@ const FontSizeInput = (props: FontSizeInputProps): ReactElement => {
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
     try {
       const nextFontSize = evaluate(`${fontSize}`);
-      if (nextFontSize !== fontSizeValue) {
+      if (nextFontSize !== fontSizeValue && !isNaN(nextFontSize)) {
         setLayerFontSize({id: selected[0], fontSize: nextFontSize});
         setTextSettingsFontSize({fontSize: nextFontSize});
         setFontSize(nextFontSize);
+      } else {
+        setFontSize(fontSizeValue);
       }
     } catch(error) {
       setFontSize(fontSizeValue);

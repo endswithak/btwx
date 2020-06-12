@@ -35,11 +35,13 @@ const StrokeWidthInput = (props: StrokeWidthInputProps): ReactElement => {
   const handleStrokeWidthSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     try {
       const nextStrokeWidth = evaluate(`${strokeWidth}`);
-      if (nextStrokeWidth !== stroke.width) {
+      if (nextStrokeWidth !== stroke.width && !isNaN(nextStrokeWidth)) {
         const paperLayer = getPaperLayer(selected[0]);
         paperLayer.strokeWidth = nextStrokeWidth;
         setLayerStrokeWidth({id: selected[0], strokeWidth: nextStrokeWidth});
         setStrokeWidth(nextStrokeWidth);
+      } else {
+        setStrokeWidth(stroke.width);
       }
     } catch(error) {
       setStrokeWidth(stroke.width);

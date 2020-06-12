@@ -30,11 +30,13 @@ const StrokeGapInput = (props: StrokeGapInputProps): ReactElement => {
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
     try {
       const nextGap = evaluate(`${gap}`);
-      if (nextGap !== dashArrayValue[1]) {
+      if (nextGap !== dashArrayValue[1] && !isNaN(nextGap)) {
         const paperLayer = getPaperLayer(selected[0]);
         paperLayer.dashArray = [dashArrayValue[0], nextGap];
         setLayerStrokeDashArray({id: selected[0], strokeDashArray: [dashArrayValue[0], nextGap]});
         setGap(nextGap);
+      } else {
+        setGap(dashArrayValue[1]);
       }
     } catch(error) {
       setGap(dashArrayValue[1]);

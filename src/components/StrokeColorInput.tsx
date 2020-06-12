@@ -27,13 +27,13 @@ interface StrokeColorInputProps {
 const StrokeColorInput = (props: StrokeColorInputProps): ReactElement => {
   const { stroke, strokeOpacity, selected, enableLayerStroke, disableLayerStroke, setLayerStrokeColor, setLayerStrokeWidth } = props;
   const [enabled, setEnabled] = useState<boolean>(stroke.enabled);
-  const [color, setColor] = useState<string>(chroma(stroke.color).alpha(1).hex());
+  const [color, setColor] = useState<string>(chroma(stroke.color).alpha(1).hex().replace('#', ''));
   const [opacity, setOpacity] = useState<number | string>(strokeOpacity);
   const [swatchColor, setSwatchColor] = useState<string>(stroke.color);
 
   useEffect(() => {
     setEnabled(stroke.enabled);
-    setColor(chroma(stroke.color).alpha(1).hex());
+    setColor(chroma(stroke.color).alpha(1).hex().replace('#', ''));
     setOpacity(strokeOpacity);
     setSwatchColor(stroke.color);
   }, [stroke, selected]);
@@ -51,7 +51,7 @@ const StrokeColorInput = (props: StrokeColorInputProps): ReactElement => {
   const handleOpacitySubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     try {
       let nextOpacity = evaluate(`${opacity}`);
-      if (nextOpacity !== strokeOpacity) {
+      if (nextOpacity !== strokeOpacity && !isNaN(nextOpacity)) {
         if (nextOpacity > 100) {
           nextOpacity = 100;
         }
@@ -62,7 +62,9 @@ const StrokeColorInput = (props: StrokeColorInputProps): ReactElement => {
         const newColor = chroma(color).alpha(evaluate(`${nextOpacity} / 100`)).hex();
         paperLayer.strokeColor = new paper.Color(newColor);
         setLayerStrokeColor({id: selected[0], strokeColor: newColor});
-        setColor(chroma(newColor).alpha(1).hex());
+        setColor(chroma(newColor).alpha(1).hex().replace('#', ''));
+      } else {
+        setOpacity(strokeOpacity);
       }
     } catch(error) {
       setOpacity(strokeOpacity);
@@ -76,7 +78,7 @@ const StrokeColorInput = (props: StrokeColorInputProps): ReactElement => {
       paperLayer.strokeColor = new paper.Color(nextStrokeColor);
       setLayerStrokeColor({id: selected[0], strokeColor: nextStrokeColor});
     } else {
-      setColor(chroma(stroke.color).alpha(1).hex());
+      setColor(chroma(stroke.color).alpha(1).hex().replace('#', ''));
     }
   };
 

@@ -29,7 +29,7 @@ const WidthInput = (props: WidthInputProps): ReactElement => {
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
     try {
       let nextWidth = evaluate(`${width}`);
-      if (nextWidth !== widthValue) {
+      if (nextWidth !== widthValue && !isNaN(nextWidth)) {
         if (nextWidth < 1) {
           nextWidth = 1;
         }
@@ -37,6 +37,8 @@ const WidthInput = (props: WidthInputProps): ReactElement => {
         paperLayer.bounds.width = nextWidth;
         setLayerWidth({id: selected[0], width: nextWidth});
         setWidth(nextWidth);
+      } else {
+        setWidth(widthValue);
       }
     } catch(error) {
       setWidth(widthValue);

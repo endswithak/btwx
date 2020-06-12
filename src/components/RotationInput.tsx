@@ -29,7 +29,7 @@ const RotationInput = (props: RotationInputProps): ReactElement => {
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
     try {
       let nextRotation = evaluate(`${rotation}`);
-      if (nextRotation !== rotationValue) {
+      if (nextRotation !== rotationValue && !isNaN(nextRotation)) {
         if (nextRotation >= 360 || nextRotation <= -360) {
           nextRotation = 0;
         }
@@ -38,6 +38,8 @@ const RotationInput = (props: RotationInputProps): ReactElement => {
         paperLayer.rotation = nextRotation;
         setLayerRotation({id: selected[0], rotation: nextRotation});
         setRotation(nextRotation);
+      } else {
+        setRotation(rotationValue);
       }
     } catch(error) {
       setRotation(rotationValue);

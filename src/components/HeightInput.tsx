@@ -29,7 +29,7 @@ const HeightInput = (props: HeightInputProps): ReactElement => {
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
     try {
       let nextHeight = evaluate(`${height}`);
-      if (height !== heightValue) {
+      if (height !== heightValue && !isNaN(nextHeight)) {
         if (nextHeight < 1) {
           nextHeight = 1;
         }
@@ -37,6 +37,8 @@ const HeightInput = (props: HeightInputProps): ReactElement => {
         paperLayer.bounds.height = nextHeight;
         setLayerHeight({id: selected[0], height: nextHeight});
         setHeight(nextHeight);
+      } else {
+        setHeight(heightValue);
       }
     } catch(error) {
       setHeight(heightValue);

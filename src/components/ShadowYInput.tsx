@@ -31,11 +31,13 @@ const ShadowYInput = (props: ShadowYInputProps): ReactElement => {
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
     try {
       const newYOffset = evaluate(`${shadowYOffset}`);
-      if (newYOffset !== shadow.offset.y) {
+      if (newYOffset !== shadow.offset.y && !isNaN(newYOffset)) {
         const paperLayer = getPaperLayer(selected[0]);
         paperLayer.shadowOffset = new paper.Point(shadow.offset.x, newYOffset);
         setLayerShadowYOffset({id: selected[0], shadowYOffset: newYOffset});
         setShadowYOffset(newYOffset);
+      } else {
+        setShadowYOffset(shadow.offset.y);
       }
     } catch(error) {
       setShadowYOffset(shadow.offset.y);
