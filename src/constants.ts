@@ -5,12 +5,12 @@ export const THEME_UNIT_SIZE = 4;
 export const DEFAULT_GRADIENT_STYLE: em.Gradient = {
   gradientType: 'linear',
   origin: {
-    x: 0,
-    y: 0
+    x: -0.5,
+    y: 0.5
   },
   destination: {
-    x: 1,
-    y: 1
+    x: 0.5,
+    y: -0.5
   },
   stops: [{
     position: 0,
@@ -22,7 +22,7 @@ export const DEFAULT_GRADIENT_STYLE: em.Gradient = {
 }
 
 export const DEFAULT_FILL_STYLE: em.Fill = {
-  fillType: 'color',
+  fillType: 'gradient',
   enabled: true,
   color: '#cccccc',
   gradient: DEFAULT_GRADIENT_STYLE

@@ -1,6 +1,5 @@
 import React, { useContext, ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { evaluate } from 'mathjs';
 import SidebarToggleButton from './SidebarToggleButton';
 import { RootState } from '../store/reducers';
 import { SetLayerStrokeCapPayload, LayerTypes } from '../store/actionTypes/layer';

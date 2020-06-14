@@ -1,31 +1,38 @@
 import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
-import { OpenColorEditorPayload, ColorEditorTypes } from '../store/actionTypes/colorEditor';
-import { openColorEditor } from '../store/actions/colorEditor';
+// import { connect } from 'react-redux';
+// import { OpenColorEditorPayload, ColorEditorTypes } from '../store/actionTypes/colorEditor';
+// import { openColorEditor } from '../store/actions/colorEditor';
+// import { OpenFillEditorPayload, FillEditorTypes } from '../store/actionTypes/fillEditor';
+// import { openFillEditor } from '../store/actions/fillEditor';
 import { ThemeContext } from './ThemeProvider';
-import { paperMain } from '../canvas';
+//import { paperMain } from '../canvas';
 
 interface SidebarSwatchProps {
-  color: string;
-  colorEditor?: any;
-  onClick?(): void;
+  //color: string;
+  style?: any;
+  //fill?: em.Fill;
+  //colorEditor?: any;
+  //fillEditor?: any;
+  onClick?(bounding: DOMRect): void;
   //prop?: em.ColorEditorProp;
-  layer?: string;
+  //layer?: string;
   bottomLabel?: string;
-  openColorEditor?(payload: OpenColorEditorPayload): ColorEditorTypes;
+  //openColorEditor?(payload: OpenColorEditorPayload): ColorEditorTypes;
+  //openFillEditor?(payload: OpenFillEditorPayload): FillEditorTypes;
   disabled?: boolean;
-  onChange?(color: string): void;
-  onClose?(color: string): void;
+  active?: boolean;
+  //onChange?(color: string): void;
+  //onClose?(color: string): void;
 }
 
 const SidebarSwatch = (props: SidebarSwatchProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const swatchRef = useRef<HTMLDivElement>(null);
-  const { color, colorEditor, layer, bottomLabel, openColorEditor, disabled, onChange, onClose, onClick } = props;
+  const { style, active, bottomLabel, disabled, onClick } = props;
   const handleClick = () => {
     const bounding = swatchRef.current.getBoundingClientRect();
-    onClick();
-    openColorEditor({color, layer, onChange, onClose, x: bounding.x - 228, y: bounding.y > paperMain.view.bounds.height / 2 ? bounding.y - 208 : bounding.y + 4});
+    onClick(bounding);
+    //openFillEditor({fill, layer, x: bounding.x - 228, y: bounding.y > paperMain.view.bounds.height / 2 ? bounding.y - 208 : bounding.y + 4});
   }
   return (
     <div
@@ -37,10 +44,10 @@ const SidebarSwatch = (props: SidebarSwatchProps): ReactElement => {
           onClick={handleClick}
           disabled={disabled}
           style={{
-            background: color,
-            boxShadow: colorEditor.layer === layer
+            boxShadow: active
             ? `0 0 0 1px ${theme.palette.primary}`
-            : 'none'
+            : 'none',
+            ...style
           }} />
         {
           bottomLabel
@@ -58,12 +65,4 @@ const SidebarSwatch = (props: SidebarSwatchProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { colorEditor } = state;
-  return { colorEditor };
-};
-
-export default connect(
-  mapStateToProps,
-  { openColorEditor }
-)(SidebarSwatch);
+export default SidebarSwatch;

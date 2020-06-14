@@ -116,8 +116,8 @@ declare namespace em {
 
   interface Gradient {
     gradientType: GradientType;
-    origin: Point;
-    destination: Point;
+    origin: Point | string;
+    destination: Point | string;
     stops: GradientStop[];
   }
 

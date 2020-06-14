@@ -91,6 +91,7 @@ import {
   REMOVE_IN_VIEW_LAYERS,
   UPDATE_IN_VIEW_LAYERS,
   SET_LAYER_FILL_TYPE,
+  SET_LAYER_FILL_GRADIENT,
   SET_LAYER_FILL_GRADIENT_TYPE,
   SET_LAYER_FILL_GRADIENT_ORIGIN,
   SET_LAYER_FILL_GRADIENT_DESTINATION,
@@ -194,6 +195,7 @@ import {
   removeInViewLayers,
   updateInViewLayers,
   setLayerFillType,
+  setLayerFillGradient,
   setLayerFillGradientType,
   setLayerFillGradientOrigin,
   setLayerFillGradientDestination,
@@ -458,6 +460,8 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return updateInViewLayers(state, action);
     case SET_LAYER_FILL_TYPE:
       return setLayerFillType(state, action);
+    case SET_LAYER_FILL_GRADIENT:
+      return setLayerFillGradient(state, action);
     case SET_LAYER_FILL_GRADIENT_TYPE:
       return setLayerFillGradientType(state, action);
     case SET_LAYER_FILL_GRADIENT_ORIGIN:

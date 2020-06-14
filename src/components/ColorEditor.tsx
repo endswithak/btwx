@@ -29,41 +29,6 @@ interface ColorEditorProps {
   enableSelectionTool?(): ToolTypes;
 }
 
-const Editor = styled.div`
-  .sketch-picker {
-    /* background: ${props => props.theme.background.z2} !important; */
-    background: none !important;
-    font-family: 'Space Mono' !important;
-    /* box-shadow: 0 0 0 1px ${props => props.theme.background.z4} inset !important; */
-    box-shadow: none !important;
-    ::selection {
-      background: ${props => props.theme.palette.primary} !important;
-    }
-  }
-  input {
-    background: ${props => props.theme.background.z4} !important;
-    color: ${props => props.theme.text.base} !important;
-    outline: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    width: 100% !important;
-    font-family: 'Space Mono' !important;
-    border-radius: ${props => props.theme.unit}px !important;
-    ::selection {
-      background: ${props => props.theme.palette.primary} !important;
-    }
-    :focus {
-      box-shadow: 0 0 0 1px ${props => props.theme.palette.primary} !important;
-    }
-  }
-  span {
-    color: ${props => props.theme.text.lighter} !important;
-    ::selection {
-      background: ${props => props.theme.palette.primary} !important;
-    }
-  }
-`;
-
 const ColorEditor = (props: ColorEditorProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { colorEditor, closeColorEditor, disableSelectionTool, enableSelectionTool } = props;

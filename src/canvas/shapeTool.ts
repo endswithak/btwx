@@ -6,6 +6,7 @@ import { getPagePaperLayer } from '../store/selectors/layer';
 import { applyShapeMethods } from './shapeUtils';
 import { paperMain } from './index';
 import Tooltip from './tooltip';
+import { DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_GRADIENT_STYLE } from '../constants';
 
 class ShapeTool {
   tool: paper.Tool;
@@ -164,11 +165,21 @@ class ShapeTool {
     if (this.to) {
       const state = store.getState();
       const newPaperLayer = this.renderShape({
-        fillColor: new Color('#cccccc'),
-        strokeColor: new Color('#999999'),
-        strokeWidth: 1,
+        fillColor: new Color(DEFAULT_FILL_STYLE.color),
+        strokeColor: new Color(DEFAULT_STROKE_STYLE.color),
+        strokeWidth: DEFAULT_STROKE_STYLE.width,
         //applyMatrix: false
       });
+      newPaperLayer.fillColor = {
+        gradient: {
+          stops: DEFAULT_GRADIENT_STYLE.stops.map((stop) => {
+            return new paper.GradientStop(new paper.Color(stop.color), stop.position);
+          }),
+          radial: DEFAULT_GRADIENT_STYLE.gradientType === 'radial'
+        },
+        origin: new paper.Point((DEFAULT_GRADIENT_STYLE.origin.x * newPaperLayer.bounds.width) + newPaperLayer.position.x, (DEFAULT_GRADIENT_STYLE.origin.y * newPaperLayer.bounds.height) + newPaperLayer.position.y),
+        destination: new paper.Point((DEFAULT_GRADIENT_STYLE.destination.x * newPaperLayer.bounds.width) + newPaperLayer.position.x, (DEFAULT_GRADIENT_STYLE.destination.y * newPaperLayer.bounds.height) + newPaperLayer.position.y)
+      }
       applyShapeMethods(newPaperLayer);
       const overlappedArtboard = getPagePaperLayer(state.layer.present).getItem({
         data: (data: any) => {

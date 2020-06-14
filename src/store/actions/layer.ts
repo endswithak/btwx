@@ -99,6 +99,7 @@ import {
   REMOVE_IN_VIEW_LAYERS,
   UPDATE_IN_VIEW_LAYERS,
   SET_LAYER_FILL_TYPE,
+  SET_LAYER_FILL_GRADIENT,
   SET_LAYER_FILL_GRADIENT_TYPE,
   SET_LAYER_FILL_GRADIENT_ORIGIN,
   SET_LAYER_FILL_GRADIENT_DESTINATION,
@@ -195,6 +196,7 @@ import {
   RemoveInViewLayerPayload,
   RemoveInViewLayersPayload,
   SetLayerFillTypePayload,
+  SetLayerFillGradientPayload,
   SetLayerFillGradientTypePayload,
   SetLayerFillGradientOriginPayload,
   SetLayerFillGradientDestinationPayload,
@@ -854,6 +856,11 @@ export const updateInViewLayers = (): LayerTypes => ({
 
 export const setLayerFillType = (payload: SetLayerFillTypePayload): LayerTypes => ({
   type: SET_LAYER_FILL_TYPE,
+  payload
+});
+
+export const setLayerFillGradient = (payload: SetLayerFillGradientPayload): LayerTypes => ({
+  type: SET_LAYER_FILL_GRADIENT,
   payload
 });
 

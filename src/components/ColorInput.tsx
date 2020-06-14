@@ -39,13 +39,13 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
     onColorSubmit(e);
   };
 
-  const handleSwatchChange = (editorColor: string): void => {
-    onSwatchChange(editorColor);
-  };
+  // const handleSwatchChange = (editorColor: string): void => {
+  //   onSwatchChange(editorColor);
+  // };
 
-  const handleSwatchClose = (editorColor: string): void => {
-    onSwatchClose(editorColor);
-  };
+  // const handleSwatchClose = (editorColor: string): void => {
+  //   onSwatchClose(editorColor);
+  // };
 
   const handleSwatchClick = (): void => {
     onSwatchClick();
@@ -56,11 +56,11 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
       <SidebarSectionRow alignItems='center'>
         <SidebarSectionColumn width={'33.33%'}>
           <SidebarSwatch
-            layer={layer}
+            //layer={layer}
             //prop={prop}
             color={swatchColorValue}
-            onChange={handleSwatchChange}
-            onClose={handleSwatchClose}
+            //onChange={handleSwatchChange}
+            //onClose={handleSwatchClose}
             onClick={handleSwatchClick}
             bottomLabel={'Color'} />
         </SidebarSectionColumn>

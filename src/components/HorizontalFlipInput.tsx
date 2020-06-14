@@ -5,6 +5,7 @@ import { RootState } from '../store/reducers';
 import { EnableLayerHorizontalFlipPayload, DisableLayerHorizontalFlipPayload, LayerTypes } from '../store/actionTypes/layer';
 import { enableLayerHorizontalFlip, disableLayerHorizontalFlip } from '../store/actions/layer';
 import { getPaperLayer } from '../store/selectors/layer';
+import { ThemeContext } from './ThemeProvider';
 
 interface HorizontalFlipInputProps {
   selected?: string[];
@@ -14,6 +15,7 @@ interface HorizontalFlipInputProps {
 }
 
 const HorizontalFlipInput = (props: HorizontalFlipInputProps): ReactElement => {
+  const theme = useContext(ThemeContext);
   const { selected, horizontalFlipValue, enableLayerHorizontalFlip, disableLayerHorizontalFlip } = props;
   const [horizontalFlip, setHorizontalFlip] = useState<boolean>(horizontalFlipValue);
 
@@ -34,10 +36,21 @@ const HorizontalFlipInput = (props: HorizontalFlipInputProps): ReactElement => {
 
   return (
     <SidebarToggleButton
-      text={'|'}
       active={horizontalFlip}
       onClick={handleClick}
-      disabled={selected.length > 1 || selected.length === 0} />
+      disabled={selected.length > 1 || selected.length === 0}>
+      <svg
+        width='24'
+        height='24'
+        viewBox='0 0 24 24'
+        style={{
+          fill: horizontalFlip
+          ? theme.text.onPrimary
+          : theme.text.lighter
+        }}>
+        <path d='M13,4 L19,20 L13,19.0039693 L13,4 Z M11,4 L11,19 L5,20 L11,4 Z' />
+      </svg>
+    </SidebarToggleButton>
   );
 }
 

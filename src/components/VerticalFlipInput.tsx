@@ -5,6 +5,7 @@ import { RootState } from '../store/reducers';
 import { EnableLayerVerticalFlipPayload, DisableLayerVerticalFlipPayload, LayerTypes } from '../store/actionTypes/layer';
 import { enableLayerVerticalFlip, disableLayerVerticalFlip } from '../store/actions/layer';
 import { getPaperLayer } from '../store/selectors/layer';
+import { ThemeContext } from './ThemeProvider';
 
 interface VerticalFlipInputProps {
   selected?: string[];
@@ -14,6 +15,7 @@ interface VerticalFlipInputProps {
 }
 
 const VerticalFlipInput = (props: VerticalFlipInputProps): ReactElement => {
+  const theme = useContext(ThemeContext);
   const { selected, verticalFlipValue, enableLayerVerticalFlip, disableLayerVerticalFlip } = props;
   const [verticalFlip, setVerticalFlip] = useState<boolean>(verticalFlipValue);
 
@@ -34,10 +36,21 @@ const VerticalFlipInput = (props: VerticalFlipInputProps): ReactElement => {
 
   return (
     <SidebarToggleButton
-      text={'—'}
       active={verticalFlip}
       onClick={handleClick}
-      disabled={selected.length > 1 || selected.length === 0} />
+      disabled={selected.length > 1 || selected.length === 0}>
+      <svg
+        width='24'
+        height='24'
+        viewBox='0 0 24 24'
+        style={{
+          fill: verticalFlip
+          ? theme.text.onPrimary
+          : theme.text.lighter
+        }}>
+        <path d='M20,13 L4,19 L4.99603067,13 L20,13 Z M20,11 L5,11 L4,5 L20,11 Z' />
+      </svg>
+    </SidebarToggleButton>
   );
 }
 

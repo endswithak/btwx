@@ -24,7 +24,7 @@ import {
   SetLayerStrokeDashArray, SetLayerStrokeMiterLimit, ResizeLayer, ResizeLayers, EnableLayerHorizontalFlip,
   DisableLayerHorizontalFlip, EnableLayerVerticalFlip, DisableLayerVerticalFlip, AddText, SetLayerText,
   SetLayerFontSize, SetLayerFontWeight, SetLayerFontFamily, SetLayerLeading, SetLayerJustification,
-  AddInViewLayer, AddInViewLayers, RemoveInViewLayer, RemoveInViewLayers, UpdateInViewLayers, SetLayerFillType, SetLayerFillGradientType, SetLayerFillGradientStopColor, SetLayerFillGradientStopPosition, AddLayerFillGradientStop, RemoveLayerFillGradientStop, SetLayerFillGradientOrigin
+  AddInViewLayer, AddInViewLayers, RemoveInViewLayer, RemoveInViewLayers, UpdateInViewLayers, SetLayerFillType, SetLayerFillGradientType, SetLayerFillGradientStopColor, SetLayerFillGradientStopPosition, AddLayerFillGradientStop, RemoveLayerFillGradientStop, SetLayerFillGradientOrigin, SetLayerFillGradient
 } from '../actionTypes/layer';
 
 import {
@@ -2582,6 +2582,39 @@ export const setLayerFillType = (state: LayerState, action: SetLayerFillType): L
           fill: {
             ...currentState.byId[action.payload.id].style.fill,
             fillType: action.payload.fillType
+          }
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const setLayerFillGradient = (state: LayerState, action: SetLayerFillGradient): LayerState => {
+  let currentState = state;
+  // const paperLayer = getPaperLayer(action.payload.id);
+  // paperLayer.fillColor = {
+  //   gradient: {
+  //     stops: action.payload.gradient.stops.map((stop) => {
+  //       return new paper.GradientStop(new paper.Color(stop.color), stop.position);
+  //     }),
+  //     radial: action.payload.gradient.gradientType === 'radial'
+  //   },
+  //   origin: action.payload.gradient.origin,
+  //   destination: action.payload.gradient.destination
+  // }
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          fill: {
+            ...currentState.byId[action.payload.id].style.fill,
+            gradient: action.payload.gradient
           }
         }
       }

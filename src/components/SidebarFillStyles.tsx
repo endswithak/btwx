@@ -6,6 +6,7 @@ import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarSectionHead from './SidebarSectionHead';
 import FillColorInput from './FillColorInput';
+import FillInput from './FillInput';
 import FillToggle from './FillToggle';
 import { RootState } from '../store/reducers';
 
@@ -33,7 +34,7 @@ const SidebarFillStyles = (props: SidebarFillStylesProps): ReactElement => {
             </SidebarSectionColumn>
           </SidebarSectionRow>
           <SidebarSection>
-            <FillColorInput />
+            <FillInput />
           </SidebarSection>
         </SidebarSection>
       </SidebarSectionWrap>
