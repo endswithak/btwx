@@ -1074,6 +1074,7 @@ export interface UpdateInViewLayers {
 export interface SetLayerFillTypePayload {
   id: string;
   fillType: em.FillType;
+  gradientType?: em.GradientType;
 }
 
 export interface SetLayerFillType {

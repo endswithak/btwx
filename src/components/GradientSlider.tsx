@@ -41,6 +41,7 @@ const GradientSlider = (props: GradientSliderProps): ReactElement => {
           bounds: containerRef.current,
           onPress: function() {
             setActiveStopIndex(index);
+            setActivePickerColor(stops[index].color);
           },
           onDrag: function() {
             const newStops = [...stops];
@@ -94,7 +95,11 @@ const GradientSlider = (props: GradientSliderProps): ReactElement => {
   }
 
   return (
-    <div className='c-gradient-slider'>
+    <div
+      className='c-gradient-slider'
+      style={{
+        boxShadow: `0 -1px 0 0 ${theme.background.z4} inset`
+      }}>
       <div
         ref={containerRef}
         className='c-gradient-slider__slider'

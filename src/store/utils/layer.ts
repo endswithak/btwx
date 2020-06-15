@@ -2556,18 +2556,18 @@ export const setLayerFillType = (state: LayerState, action: SetLayerFillType): L
   const layerItem = currentState.byId[action.payload.id];
   switch(action.payload.fillType) {
     case 'color':
-      paperLayer.fillColor = new paper.Color(layerItem.style.fill.color);
+      paperLayer.fillColor = new paperMain.Color(layerItem.style.fill.color);
       break;
     case 'gradient':
       paperLayer.fillColor = {
         gradient: {
           stops: layerItem.style.fill.gradient.stops.map((stop) => {
-            return new paper.GradientStop(new paper.Color(stop.color), stop.position);
+            return new paperMain.GradientStop(new paperMain.Color(stop.color), stop.position);
           }),
           radial: layerItem.style.fill.gradient.gradientType === 'radial'
         },
-        origin: layerItem.style.fill.gradient.origin,
-        destination: layerItem.style.fill.gradient.destination
+        origin: new paperMain.Point((layerItem.style.fill.gradient.origin.x * paperLayer.bounds.width) + paperLayer.position.x, (layerItem.style.fill.gradient.origin.y * paperLayer.bounds.height) + paperLayer.position.y),
+        destination: new paperMain.Point((layerItem.style.fill.gradient.destination.x * paperLayer.bounds.width) + paperLayer.position.x, (layerItem.style.fill.gradient.destination.y * paperLayer.bounds.height) + paperLayer.position.y)
       }
       break;
   }
@@ -2587,6 +2587,9 @@ export const setLayerFillType = (state: LayerState, action: SetLayerFillType): L
       }
     },
     paperProject: paperMain.project.exportJSON()
+  }
+  if (action.payload.gradientType) {
+    currentState = setLayerFillGradientType(currentState, layerActions.setLayerFillGradientType({id: action.payload.id, gradientType: action.payload.gradientType}) as SetLayerFillGradientType);
   }
   return currentState;
 };

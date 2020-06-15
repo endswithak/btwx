@@ -15,7 +15,6 @@ interface GradientDraggerProps {
 const GradientDragger = (props: GradientDraggerProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { layer, gradient, onChange } = props;
-  const containerRef = useRef<HTMLDivElement>(null);
   const originRef = useRef<HTMLDivElement>(null);
   const destinationRef = useRef<HTMLDivElement>(null);
   const [origin, setOrigin] = useState(gradient.origin);
@@ -34,11 +33,29 @@ const GradientDragger = (props: GradientDraggerProps): ReactElement => {
       const gradientDestination = new paperMain.Point((gradient.destination.x * paperLayer.bounds.width) + paperLayer.position.x, (gradient.destination.y * paperLayer.bounds.height) + paperLayer.position.y);
       const originToView = paperMain.view.projectToView(gradientOrigin);
       const destinationToView = paperMain.view.projectToView(gradientDestination);
+      const snapPoints = (() => {
+        const topLeft = paperMain.view.projectToView(paperLayer.bounds.topLeft);
+        const topCenter = paperMain.view.projectToView(paperLayer.bounds.topCenter);
+        const topRight = paperMain.view.projectToView(paperLayer.bounds.topRight);
+        const bottomLeft = paperMain.view.projectToView(paperLayer.bounds.bottomLeft);
+        const bottomCenter = paperMain.view.projectToView(paperLayer.bounds.bottomCenter);
+        const bottomRight = paperMain.view.projectToView(paperLayer.bounds.bottomRight);
+        const leftCenter = paperMain.view.projectToView(paperLayer.bounds.leftCenter);
+        const rightCenter = paperMain.view.projectToView(paperLayer.bounds.rightCenter);
+        const centerCenter = paperMain.view.projectToView(paperLayer.bounds.center);
+        return [topLeft, topCenter, topRight, bottomLeft, bottomCenter, bottomRight, leftCenter, rightCenter, centerCenter].map((point) => {
+          return {x: point.x, y: point.y};
+        });
+      })();
       gsap.set(originRef.current, {x: originToView.x, y: originToView.y});
       gsap.set(destinationRef.current, {x: destinationToView.x, y: destinationToView.y});
       Draggable.create(originRef.current, {
         type: 'x,y',
         zIndexBoost: false,
+        liveSnap: {
+          points: snapPoints,
+          radius: 5
+        },
         bounds: document.getElementById('canvas-main'),
         onDrag: function() {
           const handlePos = paperMain.view.viewToProject(new paperMain.Point(this.x, this.y));
@@ -50,6 +67,10 @@ const GradientDragger = (props: GradientDraggerProps): ReactElement => {
       Draggable.create(destinationRef.current, {
         type: 'x,y',
         zIndexBoost: false,
+        liveSnap: {
+          points: snapPoints,
+          radius: 5
+        },
         bounds: document.getElementById('canvas-main'),
         onDrag: function() {
           const handlePos = paperMain.view.viewToProject(new paperMain.Point(this.x, this.y));
@@ -74,7 +95,7 @@ const GradientDragger = (props: GradientDraggerProps): ReactElement => {
         <div
           className='c-gradient-dragger__circle'
           style={{
-            background: theme.background.z6
+            background: gradient.stops[0].color
           }} />
       </div>
       <div
@@ -83,7 +104,7 @@ const GradientDragger = (props: GradientDraggerProps): ReactElement => {
         <div
           className='c-gradient-dragger__circle'
           style={{
-            background: theme.background.z6
+            background: gradient.stops[gradient.stops.length - 1].color
           }} />
       </div>
     </div>
