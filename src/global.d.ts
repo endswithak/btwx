@@ -116,8 +116,8 @@ declare namespace em {
 
   interface Gradient {
     gradientType: GradientType;
-    origin: Point | string;
-    destination: Point | string;
+    origin: Point;
+    destination: Point;
     stops: GradientStop[];
   }
 
@@ -127,9 +127,11 @@ declare namespace em {
   }
 
   interface Stroke {
+    fillType: FillType;
     enabled: boolean;
     color: string;
     width: number;
+    gradient: Gradient;
   }
 
   interface StrokeOptions {

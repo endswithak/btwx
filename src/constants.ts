@@ -14,24 +14,26 @@ export const DEFAULT_GRADIENT_STYLE: em.Gradient = {
   },
   stops: [{
     position: 0,
-    color: '#000000'
+    color: '#cccccc'
   }, {
     position: 1,
-    color: '#00000000'
+    color: '#000000'
   }]
 }
 
 export const DEFAULT_FILL_STYLE: em.Fill = {
-  fillType: 'gradient',
+  fillType: 'color',
   enabled: true,
   color: '#cccccc',
   gradient: DEFAULT_GRADIENT_STYLE
 }
 
 export const DEFAULT_STROKE_STYLE: em.Stroke = {
+  fillType: 'color',
   enabled: true,
   color: '#999999',
-  width: 1
+  width: 1,
+  gradient: DEFAULT_GRADIENT_STYLE
 }
 
 export const DEFAULT_STROKE_OPTIONS_STYLE: em.StrokeOptions = {

@@ -3,88 +3,88 @@ import Modal from 'react-modal';
 import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
-import { closeFillEditor } from '../store/actions/fillEditor';
-import { FillEditorTypes } from '../store/actionTypes/fillEditor';
+import { closeStrokeEditor } from '../store/actions/strokeEditor';
+import { StrokeEditorTypes } from '../store/actionTypes/strokeEditor';
 import { enableSelectionTool, disableSelectionTool } from '../store/actions/tool';
 import { ToolTypes } from '../store/actionTypes/tool';
-import { FillEditorState } from '../store/reducers/fillEditor';
+import { StrokeEditorState } from '../store/reducers/strokeEditor';
 import ColorPicker from './ColorPicker';
 import GradientSlider from './GradientSlider';
 import GradientDragger from './GradientDragger';
-import { SetLayerFillTypePayload, SetLayerFillGradientTypePayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayerFillType, setLayerFillGradientType } from '../store/actions/layer';
+import { SetLayerStrokeFillTypePayload, SetLayerStrokeGradientTypePayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayerStrokeFillType, setLayerStrokeGradientType } from '../store/actions/layer';
 
 Modal.setAppElement('#root');
 
-interface FillEditorProps {
-  fillEditor?: FillEditorState;
-  closeFillEditor?(): FillEditorTypes;
+interface StrokeEditorProps {
+  strokeEditor?: StrokeEditorState;
+  closeStrokeEditor?(): StrokeEditorTypes;
   disableSelectionTool?(): ToolTypes;
   enableSelectionTool?(): ToolTypes;
-  setLayerFillType?(payload: SetLayerFillTypePayload): LayerTypes;
-  setLayerFillGradientType?(payload: SetLayerFillGradientTypePayload): LayerTypes;
+  setLayerStrokeFillType?(payload: SetLayerStrokeFillTypePayload): LayerTypes;
+  setLayerStrokeGradientType?(payload: SetLayerStrokeGradientTypePayload): LayerTypes;
 }
 
-const FillEditor = (props: FillEditorProps): ReactElement => {
+const StrokeEditor = (props: StrokeEditorProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { fillEditor, closeFillEditor, disableSelectionTool, enableSelectionTool, setLayerFillType, setLayerFillGradientType } = props;
-  const [fill, setFill] = useState(null);
+  const { strokeEditor, closeStrokeEditor, disableSelectionTool, enableSelectionTool, setLayerStrokeFillType, setLayerStrokeGradientType } = props;
+  const [stroke, setStroke] = useState(null);
   const [activePickerColor, setActivePickerColor] = useState(null);
   const [activeStopIndex, setActiveStopIndex] = useState(0);
 
   const handleCloseRequest = () => {
-    if (fillEditor.onClose) {
-      fillEditor.onClose(fill);
+    if (strokeEditor.onClose) {
+      strokeEditor.onClose(stroke);
     }
-    closeFillEditor();
+    closeStrokeEditor();
   }
 
   const handleAfterOpen = () => {
     disableSelectionTool();
-    setFill(fillEditor.fill);
-    switch(fillEditor.fill.fillType) {
+    setStroke(strokeEditor.stroke);
+    switch(strokeEditor.stroke.fillType) {
       case 'color':
-        setActivePickerColor(fillEditor.fill.color);
+        setActivePickerColor(strokeEditor.stroke.color);
         break;
       case 'gradient':
-        setActivePickerColor(fillEditor.fill.gradient.stops[activeStopIndex].color);
+        setActivePickerColor(strokeEditor.stroke.gradient.stops[activeStopIndex].color);
         break;
     }
   }
 
   const handleAfterClose = () => {
     setActivePickerColor(null);
-    setFill(null);
+    setStroke(null);
     setActiveStopIndex(0);
     enableSelectionTool();
   }
 
   const handleActiveColorChange = (color: string) => {
-    switch(fill.fillType) {
+    switch(stroke.fillType) {
       case 'color': {
-        const newFill = {
-          ...fill,
+        const newStroke = {
+          ...stroke,
           color
         }
-        setFill(newFill);
-        if (fillEditor.onChange) {
-          fillEditor.onChange(newFill);
+        setStroke(newStroke);
+        if (strokeEditor.onChange) {
+          strokeEditor.onChange(newStroke);
         }
         break;
       }
       case 'gradient': {
-        const newStops = [...fill.gradient.stops];
+        const newStops = [...stroke.gradient.stops];
         newStops[activeStopIndex].color = color;
-        const newFill = {
-          ...fill,
+        const newStroke = {
+          ...stroke,
           gradient: {
-            ...fill.gradient,
+            ...stroke.gradient,
             stops: newStops
           }
         }
-        setFill(newFill);
-        if (fillEditor.onChange) {
-          fillEditor.onChange(newFill);
+        setStroke(newStroke);
+        if (strokeEditor.onChange) {
+          strokeEditor.onChange(newStroke);
         }
         break;
       }
@@ -92,102 +92,102 @@ const FillEditor = (props: FillEditorProps): ReactElement => {
   }
 
   const handleGradientChange = (stops: em.GradientStop[]) => {
-    const newFill = {
-      ...fill,
+    const newStroke = {
+      ...stroke,
       gradient: {
-        ...fill.gradient,
+        ...stroke.gradient,
         stops: stops
       }
     }
-    setFill(newFill);
-    if (fillEditor.onChange) {
-      fillEditor.onChange(newFill);
+    setStroke(newStroke);
+    if (strokeEditor.onChange) {
+      strokeEditor.onChange(newStroke);
     }
   }
 
   const handleGradientPositionChange = (origin: em.Point, destination: em.Point) => {
-    const newFill = {
-      ...fill,
+    const newStroke = {
+      ...stroke,
       gradient: {
-        ...fill.gradient,
+        ...stroke.gradient,
         origin,
         destination
       }
     }
-    setFill(newFill);
-    if (fillEditor.onChange) {
-      fillEditor.onChange(newFill);
+    setStroke(newStroke);
+    if (strokeEditor.onChange) {
+      strokeEditor.onChange(newStroke);
     }
   }
 
   const handleColorClick = () => {
-    if (fill.fillType !== 'color') {
-      setFill({
-        ...fill,
+    if (stroke.fillType !== 'color') {
+      setStroke({
+        ...stroke,
         fillType: 'color'
       });
-      setLayerFillType({id: fillEditor.layer, fillType: 'color'});
-      setActivePickerColor(fill.color);
+      setLayerStrokeFillType({id: strokeEditor.layer, fillType: 'color'});
+      setActivePickerColor(stroke.color);
     }
   }
 
   const handleLinearGradientClick = () => {
-    const newFill = {...fill};
-    if (fill.fillType !== 'gradient') {
-      newFill.fillType = 'gradient';
-      setLayerFillType({id: fillEditor.layer, fillType: 'gradient'});
-      setActivePickerColor(fill.gradient.stops[activeStopIndex].color);
+    const newStroke = {...stroke};
+    if (stroke.fillType !== 'gradient') {
+      newStroke.fillType = 'gradient';
+      setLayerStrokeFillType({id: strokeEditor.layer, fillType: 'gradient'});
+      setActivePickerColor(stroke.gradient.stops[activeStopIndex].color);
     }
-    if (fill.gradient.gradientType !== 'linear') {
-      newFill.gradient.gradientType = 'linear';
-      setLayerFillGradientType({id: fillEditor.layer, gradientType: 'linear'});
+    if (stroke.gradient.gradientType !== 'linear') {
+      newStroke.gradient.gradientType = 'linear';
+      setLayerStrokeGradientType({id: strokeEditor.layer, gradientType: 'linear'});
     }
-    setFill(newFill);
+    setStroke(newStroke);
   }
 
   const handleRadialGradientClick = () => {
-    const newFill = {...fill};
-    if (fill.fillType !== 'gradient') {
-      newFill.fillType = 'gradient';
-      setLayerFillType({id: fillEditor.layer, fillType: 'gradient'});
-      setActivePickerColor(fill.gradient.stops[activeStopIndex].color);
+    const newStroke = {...stroke};
+    if (stroke.fillType !== 'gradient') {
+      newStroke.fillType = 'gradient';
+      setLayerStrokeFillType({id: strokeEditor.layer, fillType: 'gradient'});
+      setActivePickerColor(stroke.gradient.stops[activeStopIndex].color);
     }
-    if (fill.gradient.gradientType !== 'radial') {
-      newFill.gradient.gradientType = 'radial';
-      setLayerFillGradientType({id: fillEditor.layer, gradientType: 'radial'});
+    if (stroke.gradient.gradientType !== 'radial') {
+      newStroke.gradient.gradientType = 'radial';
+      setLayerStrokeGradientType({id: strokeEditor.layer, gradientType: 'radial'});
     }
-    setFill(newFill);
+    setStroke(newStroke);
   }
 
   return (
     <Modal
       className='c-fill-editor'
       overlayClassName='c-fill-editor__overlay'
-      isOpen={fillEditor.isOpen}
+      isOpen={strokeEditor.isOpen}
       onAfterOpen={handleAfterOpen}
       onAfterClose={handleAfterClose}
       shouldCloseOnEsc={true}
       shouldCloseOnOverlayClick={true}
       onRequestClose={handleCloseRequest}
-      contentLabel='fill-editor'>
+      contentLabel='stroke-editor'>
       {
-        fillEditor.isOpen && fill && fill.fillType === 'gradient' && activePickerColor
+        strokeEditor.isOpen && stroke && stroke.fillType === 'gradient' && activePickerColor
         ? <GradientDragger
-            layer={fillEditor.layer}
-            gradient={fill.gradient}
+            layer={strokeEditor.layer}
+            gradient={stroke.gradient}
             onChange={handleGradientPositionChange} />
         : null
       }
       <div
         className='c-fill-editor__picker'
         style={{
-          top: fillEditor.y,
-          left: fillEditor.x,
+          top: strokeEditor.y,
+          left: strokeEditor.x,
           background: theme.background.z1,
           boxShadow: `0 0 0 1px ${theme.background.z4} inset`
         }}>
         {
-          fillEditor.isOpen && activePickerColor
+          strokeEditor.isOpen && activePickerColor
           ? <div
               className='c-fill-editor__type-selector'
               style={{
@@ -197,10 +197,10 @@ const FillEditor = (props: FillEditorProps): ReactElement => {
                 onClick={handleColorClick}
                 className='c-fill-editor__type'
                 style={{
-                  background: fill.fillType === 'color'
+                  background: stroke.fillType === 'color'
                   ? theme.palette.primary
                   : theme.background.z6,
-                  boxShadow: fill.fillType === 'color'
+                  boxShadow: stroke.fillType === 'color'
                   ? `0 0 0 1px ${theme.palette.primary} inset`
                   : `0 0 0 1px ${theme.background.z6} inset`
                 }} />
@@ -208,10 +208,10 @@ const FillEditor = (props: FillEditorProps): ReactElement => {
                 onClick={handleLinearGradientClick}
                 className='c-fill-editor__type'
                 style={{
-                  background: fill.fillType === 'gradient' && fill.gradient.gradientType === 'linear'
+                  background: stroke.fillType === 'gradient' && stroke.gradient.gradientType === 'linear'
                   ? `linear-gradient(to top, ${theme.palette.primary}, ${theme.background.z1})`
                   : `linear-gradient(to top, ${theme.background.z6}, ${theme.background.z1})`,
-                  boxShadow: fill.fillType === 'gradient' && fill.gradient.gradientType === 'linear'
+                  boxShadow: stroke.fillType === 'gradient' && stroke.gradient.gradientType === 'linear'
                   ? `0 0 0 1px ${theme.palette.primary} inset`
                   : `0 0 0 1px ${theme.background.z6} inset`
                 }} />
@@ -219,10 +219,10 @@ const FillEditor = (props: FillEditorProps): ReactElement => {
                 onClick={handleRadialGradientClick}
                 className='c-fill-editor__type'
                 style={{
-                  background: fill.fillType === 'gradient' && fill.gradient.gradientType === 'radial'
+                  background: stroke.fillType === 'gradient' && stroke.gradient.gradientType === 'radial'
                   ? `radial-gradient(${theme.palette.primary}, ${theme.background.z1})`
                   : `radial-gradient(${theme.background.z6}, ${theme.background.z1})`,
-                  boxShadow: fill.fillType === 'gradient' && fill.gradient.gradientType === 'radial'
+                  boxShadow: stroke.fillType === 'gradient' && stroke.gradient.gradientType === 'radial'
                   ? `0 0 0 1px ${theme.palette.primary} inset`
                   : `0 0 0 1px ${theme.background.z6} inset`
                 }} />
@@ -230,9 +230,9 @@ const FillEditor = (props: FillEditorProps): ReactElement => {
           : null
         }
         {
-          fillEditor.isOpen && fill && fill.fillType === 'gradient' && activePickerColor
+          strokeEditor.isOpen && stroke && stroke.fillType === 'gradient' && activePickerColor
           ? <GradientSlider
-              gradient={fill.gradient}
+              gradient={stroke.gradient}
               activeStopIndex={activeStopIndex}
               setActiveStopIndex={setActiveStopIndex}
               setActivePickerColor={setActivePickerColor}
@@ -240,7 +240,7 @@ const FillEditor = (props: FillEditorProps): ReactElement => {
           : null
         }
         {
-          fillEditor.isOpen && activePickerColor
+          strokeEditor.isOpen && activePickerColor
           ? <ColorPicker
               colorValue={activePickerColor}
               colorType='rgb'
@@ -253,11 +253,11 @@ const FillEditor = (props: FillEditorProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { fillEditor } = state;
-  return { fillEditor };
+  const { strokeEditor } = state;
+  return { strokeEditor };
 };
 
 export default connect(
   mapStateToProps,
-  { closeFillEditor, disableSelectionTool, enableSelectionTool, setLayerFillType, setLayerFillGradientType }
-)(FillEditor);
+  { closeStrokeEditor, disableSelectionTool, enableSelectionTool, setLayerStrokeFillType, setLayerStrokeGradientType }
+)(StrokeEditor);

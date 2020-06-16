@@ -8,11 +8,12 @@ import { setLayerFillGradientType } from '../store/actions/layer';
 interface GradientTypeSelectorProps {
   selected?: string[];
   gradientTypeValue: string;
+  disabled?: boolean;
   setLayerFillGradientType?(payload: SetLayerFillGradientTypePayload): LayerTypes;
 }
 
 const GradientTypeSelector = (props: GradientTypeSelectorProps): ReactElement => {
-  const { selected, gradientTypeValue, setLayerFillGradientType } = props;
+  const { selected, disabled, gradientTypeValue, setLayerFillGradientType } = props;
 
   const options: { value: em.GradientType; label: string }[] = [
     { value: 'linear', label: 'Linear' },
@@ -37,6 +38,7 @@ const GradientTypeSelector = (props: GradientTypeSelectorProps): ReactElement =>
       options={options}
       placeholder={'Gradient Type'}
       bottomLabel='Type'
+      disabled={disabled}
     />
   );
 }

@@ -542,3 +542,19 @@ export const getTweensEventsByDestinationArtboard = (store: LayerState, artboard
     byId
   };
 };
+
+export const getGradientOriginPoint = (id: string, origin: em.Point): paper.Point => {
+  const paperLayer = getPaperLayer(id);
+  return new paperMain.Point((origin.x * paperLayer.bounds.width) + paperLayer.position.x, (origin.y * paperLayer.bounds.height) + paperLayer.position.y);
+};
+
+export const getGradientDestinationPoint = (id: string, destination: em.Point): paper.Point => {
+  const paperLayer = getPaperLayer(id);
+  return new paperMain.Point((destination.x * paperLayer.bounds.width) + paperLayer.position.x, (destination.y * paperLayer.bounds.height) + paperLayer.position.y);
+};
+
+export const getGradientStops = (stops: em.GradientStop[]): paper.GradientStop[] => {
+  return stops.map((stop) => {
+    return new paperMain.GradientStop(new paperMain.Color(stop.color), stop.position);
+  });
+};

@@ -104,7 +104,14 @@ const GradientDragger = (props: GradientDraggerProps): ReactElement => {
         <div
           className='c-gradient-dragger__circle'
           style={{
-            background: gradient.stops[gradient.stops.length - 1].color
+            background: (() => {
+              return [...gradient.stops].reverse().reduce((result, current) => {
+                if (current.position === result.position) {
+                  result = current;
+                }
+                return result;
+              }, gradient.stops[gradient.stops.length - 1]).color
+            })()
           }} />
       </div>
     </div>

@@ -74,6 +74,9 @@ import {
   ENABLE_LAYER_STROKE,
   DISABLE_LAYER_STROKE,
   SET_LAYER_STROKE_COLOR,
+  SET_LAYER_STROKE_FILL_TYPE,
+  SET_LAYER_STROKE_GRADIENT,
+  SET_LAYER_STROKE_GRADIENT_TYPE,
   SET_LAYER_STROKE_WIDTH,
   SET_LAYER_STROKE_CAP,
   SET_LAYER_STROKE_JOIN,
@@ -172,6 +175,9 @@ import {
   EnableLayerStrokePayload,
   DisableLayerStrokePayload,
   SetLayerStrokeColorPayload,
+  SetLayerStrokeFillTypePayload,
+  SetLayerStrokeGradientPayload,
+  SetLayerStrokeGradientTypePayload,
   SetLayerStrokeWidthPayload,
   SetLayerStrokeCapPayload,
   SetLayerStrokeJoinPayload,
@@ -732,6 +738,21 @@ export const disableLayerStroke = (payload: DisableLayerStrokePayload): LayerTyp
 
 export const setLayerStrokeColor = (payload: SetLayerStrokeColorPayload): LayerTypes => ({
   type: SET_LAYER_STROKE_COLOR,
+  payload
+});
+
+export const setLayerStrokeFillType = (payload: SetLayerStrokeFillTypePayload): LayerTypes => ({
+  type: SET_LAYER_STROKE_FILL_TYPE,
+  payload
+});
+
+export const setLayerStrokeGradient = (payload: SetLayerStrokeGradientPayload): LayerTypes => ({
+  type: SET_LAYER_STROKE_GRADIENT,
+  payload
+});
+
+export const setLayerStrokeGradientType = (payload: SetLayerStrokeGradientTypePayload): LayerTypes => ({
+  type: SET_LAYER_STROKE_GRADIENT_TYPE,
   payload
 });
 

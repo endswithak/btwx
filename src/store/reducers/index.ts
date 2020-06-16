@@ -5,8 +5,8 @@ import tool from './tool';
 import contextMenu from './contextMenu';
 import tweenDrawer from './tweenDrawer';
 import easeEditor from './easeEditor';
-import colorEditor from './colorEditor';
 import fillEditor from './fillEditor';
+import strokeEditor from './strokeEditor';
 import textEditor from './textEditor';
 import textSettings from './textSettings';
 import canvasSettings from './canvasSettings';
@@ -52,9 +52,15 @@ import {
   ENABLE_LAYER_FILL,
   DISABLE_LAYER_FILL,
   SET_LAYER_FILL_COLOR,
+  SET_LAYER_FILL_GRADIENT,
+  SET_LAYER_FILL_TYPE,
+  SET_LAYER_FILL_GRADIENT_TYPE,
   ENABLE_LAYER_STROKE,
   DISABLE_LAYER_STROKE,
   SET_LAYER_STROKE_COLOR,
+  SET_LAYER_STROKE_FILL_TYPE,
+  SET_LAYER_STROKE_GRADIENT,
+  SET_LAYER_STROKE_GRADIENT_TYPE,
   SET_LAYER_STROKE_WIDTH,
   SET_LAYER_STROKE_CAP,
   SET_LAYER_STROKE_JOIN,
@@ -117,9 +123,15 @@ const rootReducer = combineReducers({
     ENABLE_LAYER_FILL,
     DISABLE_LAYER_FILL,
     SET_LAYER_FILL_COLOR,
+    SET_LAYER_FILL_GRADIENT,
+    SET_LAYER_FILL_TYPE,
+    SET_LAYER_FILL_GRADIENT_TYPE,
     ENABLE_LAYER_STROKE,
     DISABLE_LAYER_STROKE,
     SET_LAYER_STROKE_COLOR,
+    SET_LAYER_STROKE_FILL_TYPE,
+    SET_LAYER_STROKE_GRADIENT,
+    SET_LAYER_STROKE_GRADIENT_TYPE,
     SET_LAYER_STROKE_WIDTH,
     SET_LAYER_STROKE_CAP,
     SET_LAYER_STROKE_JOIN,
@@ -143,11 +155,11 @@ const rootReducer = combineReducers({
   contextMenu,
   tweenDrawer,
   easeEditor,
-  colorEditor,
   textEditor,
   textSettings,
   canvasSettings,
-  fillEditor
+  fillEditor,
+  strokeEditor
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

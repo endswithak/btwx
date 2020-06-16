@@ -1,49 +1,49 @@
 import {
-  OPEN_FILL_EDITOR,
-  CLOSE_FILL_EDITOR,
-  FillEditorTypes,
-} from '../actionTypes/fillEditor';
+  OPEN_STROKE_EDITOR,
+  CLOSE_STROKE_EDITOR,
+  StrokeEditorTypes,
+} from '../actionTypes/strokeEditor';
 
-export interface FillEditorState {
+export interface StrokeEditorState {
   isOpen: boolean;
   layer: string;
-  fill: em.Fill;
+  stroke: em.Stroke;
   x: number;
   y: number;
-  onChange?(fill: em.Fill): void;
-  onClose?(fill: em.Fill): void;
+  onChange?(stroke: em.Stroke): void;
+  onClose?(stroke: em.Stroke): void;
 }
 
-const initialState: FillEditorState = {
+const initialState: StrokeEditorState = {
   isOpen: false,
   layer: null,
-  fill: null,
+  stroke: null,
   x: null,
   y: null,
   onChange: null,
   onClose: null
 };
 
-export default (state = initialState, action: FillEditorTypes): FillEditorState => {
+export default (state = initialState, action: StrokeEditorTypes): StrokeEditorState => {
   switch (action.type) {
-    case OPEN_FILL_EDITOR: {
+    case OPEN_STROKE_EDITOR: {
       return {
         ...state,
         isOpen: true,
         layer: action.payload.layer,
-        fill: action.payload.fill,
+        stroke: action.payload.stroke,
         x: action.payload.x,
         y: action.payload.y,
         onChange: action.payload.onChange,
         onClose: action.payload.onClose
       };
     }
-    case CLOSE_FILL_EDITOR: {
+    case CLOSE_STROKE_EDITOR: {
       return {
         ...state,
         isOpen: false,
         layer: null,
-        fill: null,
+        stroke: null,
         x: null,
         y: null,
         onChange: null,

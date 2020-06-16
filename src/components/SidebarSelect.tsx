@@ -12,6 +12,7 @@ interface SidebarSelectProps {
     fontFamily: string;
   };
   bottomLabel?: string;
+  disabled?: boolean;
 }
 
 // const ba = () => ({
@@ -33,11 +34,13 @@ const SidebarSelect = (props: SidebarSelectProps): ReactElement => {
         onChange={props.onChange}
         options={props.options}
         placeholder={props.placeholder}
+        isDisabled={props.disabled}
         styles={{
           container: (provided, state) => {
             const width = '100%';
             const cursor = 'pointer';
-            return { ...provided, width, cursor };
+            const opacity = state.isDisabled ? 0.5 : 1;
+            return { ...provided, width, cursor, opacity };
           },
           control: (provided, state) => {
             const background = theme.background.z4;

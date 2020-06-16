@@ -5,7 +5,7 @@ import SidebarSection from './SidebarSection';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarSectionHead from './SidebarSectionHead';
-import StrokeColorInput from './StrokeColorInput';
+import StrokeInput from './StrokeInput';
 import SidebarStrokeOptionsStyle from './SidebarStrokeOptionsStyle';
 import StrokeOptionsToggle from './StrokeOptionsToggle';
 import StrokeToggle from './StrokeToggle';
@@ -45,7 +45,7 @@ const SidebarStrokeStyles = (props: SidebarStrokeStylesProps): ReactElement => {
             </SidebarSectionColumn>
           </SidebarSectionRow>
           <SidebarSectionRow>
-            <StrokeColorInput />
+            <StrokeInput />
           </SidebarSectionRow>
           <SidebarSectionRow>
             <SidebarSectionColumn width='33.33%'>

@@ -66,6 +66,9 @@ import {
   ENABLE_LAYER_STROKE,
   DISABLE_LAYER_STROKE,
   SET_LAYER_STROKE_COLOR,
+  SET_LAYER_STROKE_FILL_TYPE,
+  SET_LAYER_STROKE_GRADIENT,
+  SET_LAYER_STROKE_GRADIENT_TYPE,
   SET_LAYER_STROKE_WIDTH,
   SET_LAYER_STROKE_CAP,
   SET_LAYER_STROKE_JOIN,
@@ -170,6 +173,9 @@ import {
   enableLayerStroke,
   disableLayerStroke,
   setLayerStrokeColor,
+  setLayerStrokeFillType,
+  setLayerStrokeGradient,
+  setLayerStrokeGradientType,
   setLayerStrokeWidth,
   setLayerStrokeCap,
   setLayerStrokeJoin,
@@ -410,6 +416,12 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return disableLayerStroke(state, action);
     case SET_LAYER_STROKE_COLOR:
       return setLayerStrokeColor(state, action);
+    case SET_LAYER_STROKE_FILL_TYPE:
+      return setLayerStrokeFillType(state, action);
+    case SET_LAYER_STROKE_GRADIENT:
+      return setLayerStrokeGradient(state, action);
+    case SET_LAYER_STROKE_GRADIENT_TYPE:
+      return setLayerStrokeGradientType(state, action);
     case SET_LAYER_STROKE_WIDTH:
       return setLayerStrokeWidth(state, action);
     case SET_LAYER_STROKE_CAP:
