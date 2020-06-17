@@ -35,7 +35,7 @@ import {
   getLayerDescendants, getDestinationEquivalent, getEquivalentTweenProps, isTweenDestinationLayer,
   getTweensByDestinationLayer, getAllArtboardTweenEventDestinations, getAllArtboardTweenLayerDestinations,
   getAllArtboardTweenEvents, getTweensEventsByDestinationArtboard, getTweensByLayer, getLayersBounds,
-  getGradientOriginPoint, getGradientDestinationPoint, getGradientStops
+  getGradientOriginPoint, getGradientDestinationPoint, getGradientStops, getLayerSnapPoints, getInViewSnapPoints
 } from '../selectors/layer';
 
 import { paperMain } from '../../canvas';
@@ -80,7 +80,7 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
     allArtboardIds: addItem(currentState.allArtboardIds, action.payload.id),
     paperProject: paperMain.project.exportJSON()
   }
-  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.includes(action.payload.id)) {
+  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
   }
   return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
@@ -124,7 +124,7 @@ export const addShape = (state: LayerState, action: AddShape): LayerState => {
     allShapeIds: addItem(state.allShapeIds, action.payload.id),
     paperProject: paperMain.project.exportJSON()
   }
-  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.includes(action.payload.id)) {
+  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
   }
   return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
@@ -154,7 +154,7 @@ export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
     allGroupIds: addItem(state.allGroupIds, action.payload.id),
     paperProject: paperMain.project.exportJSON()
   }
-  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.includes(action.payload.id)) {
+  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
   }
   return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
@@ -185,7 +185,7 @@ export const addText = (state: LayerState, action: AddText): LayerState => {
     allTextIds: addItem(state.allTextIds, action.payload.id),
     paperProject: paperMain.project.exportJSON()
   }
-  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.includes(action.payload.id)) {
+  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
   }
   return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
@@ -227,7 +227,7 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
         break;
     }
     // if layer is inView, remove from inView
-    if (result.inView.includes(current)) {
+    if (result.inView.allIds.includes(current)) {
       result = removeInViewLayer(result, layerActions.removeInViewLayer({id: current}) as RemoveInViewLayer);
     }
     // if layer is the active artboard, set active artboard to null
@@ -2653,7 +2653,11 @@ export const addInViewLayer = (state: LayerState, action: AddInViewLayer): Layer
   let currentState = state;
   currentState = {
     ...currentState,
-    inView: addItem(currentState.inView, action.payload.id)
+    inView: {
+      ...currentState.inView,
+      allIds: addItem(currentState.inView.allIds, action.payload.id),
+      snapPoints: [...currentState.inView.snapPoints, ...getLayerSnapPoints(action.payload.id)]
+    }
   }
   return currentState;
 };
@@ -2668,7 +2672,11 @@ export const removeInViewLayer = (state: LayerState, action: RemoveInViewLayer):
   let currentState = state;
   currentState = {
     ...currentState,
-    inView: removeItem(currentState.inView, action.payload.id)
+    inView: {
+      ...currentState.inView,
+      allIds: removeItem(currentState.inView.allIds, action.payload.id),
+      snapPoints: currentState.inView.snapPoints.filter((snapPoint) => snapPoint.id !== action.payload.id)
+    }
   }
   return currentState;
 };
@@ -2679,13 +2687,17 @@ export const removeInViewLayers = (state: LayerState, action: RemoveInViewLayers
   }, state);
 };
 
+// utility to update inView layer after bounds change
 export const updateLayerInView = (state: LayerState, id: string): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(id);
-  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.includes(id)) {
+  if (paperMain.view.bounds.intersects(paperLayer.bounds)) {
+    if (currentState.inView.allIds.includes(id)) {
+      currentState = removeInViewLayer(currentState, layerActions.removeInViewLayer({id}) as RemoveInViewLayer);
+    }
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id}) as AddInViewLayer);
   }
-  if (!paperMain.view.bounds.intersects(paperLayer.bounds) && currentState.inView.includes(id)) {
+  if (!paperMain.view.bounds.intersects(paperLayer.bounds) && currentState.inView.allIds.includes(id)) {
     currentState = removeInViewLayer(currentState, layerActions.removeInViewLayer({id}) as RemoveInViewLayer);
   }
   return currentState;
@@ -2698,13 +2710,13 @@ export const updateInViewLayers = (state: LayerState, action: UpdateInViewLayers
     overlapping: paperMain.view.bounds
   });
   const visibleLayerIds = visibleLayers.reduce((result, current) => {
-    if (current.data.id !== 'ArtboardBackground' || current.data.id !== 'ArtboardMask') {
+    if (current.data.id !== 'ArtboardBackground' && current.data.id !== 'ArtboardMask') {
       result = [...result, current.data.id];
     }
     return result;
   }, []);
   // remove out of view layers
-  currentState = currentState.inView.reduce((result, current) => {
+  currentState = currentState.inView.allIds.reduce((result, current) => {
     if (!visibleLayerIds.includes(current)) {
       result = removeInViewLayer(result, layerActions.removeInViewLayer({id: current}) as RemoveInViewLayer);
     }
@@ -2712,7 +2724,7 @@ export const updateInViewLayers = (state: LayerState, action: UpdateInViewLayers
   }, currentState);
   // add new in view layers
   currentState = visibleLayerIds.reduce((result, current) => {
-    if (!currentState.inView.includes(current)) {
+    if (!currentState.inView.allIds.includes(current)) {
       result = addInViewLayer(result, layerActions.addInViewLayer({id: current}) as AddInViewLayer);
     }
     return result;

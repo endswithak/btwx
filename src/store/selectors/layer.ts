@@ -237,6 +237,7 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
   const tweenPropMap: em.TweenPropMap = {
     shape: false,
     fillColor: false,
+    fillGradient: false,
     x: false,
     y: false,
     rotation: false,
@@ -263,7 +264,14 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
         }
         break;
       case 'fillColor':
-        if (layer.fillColor && equivalent.fillColor && !layer.fillColor.equals(equivalent.fillColor)) {
+        if (layer.fillColor.type !== 'gradient' && layer.fillColor && equivalent.fillColor && !layer.fillColor.equals(equivalent.fillColor)) {
+          tweenPropMap[key] = true;
+        } else if (!layer.fillColor && equivalent.fillColor) {
+          tweenPropMap[key] = true;
+        }
+        break;
+      case 'fillGradient':
+        if (layer.fillColor.type === 'gradient' && equivalent.fillColor.type === 'gradient' && !layer.fillColor.gradient.equals(equivalent.fillColor.gradient)) {
           tweenPropMap[key] = true;
         } else if (!layer.fillColor && equivalent.fillColor) {
           tweenPropMap[key] = true;
@@ -557,4 +565,59 @@ export const getGradientStops = (stops: em.GradientStop[]): paper.GradientStop[]
   return stops.map((stop) => {
     return new paperMain.GradientStop(new paperMain.Color(stop.color), stop.position);
   });
+};
+
+export const getLayerSnapPoints = (id: string): em.SnapPoint[] => {
+  const paperLayer = getPaperLayer(id);
+  let bounds;
+  if (paperLayer.data.type === 'Artboard') {
+    bounds = paperLayer.getItem({data: { id: 'ArtboardBackground' }}).bounds;
+  } else {
+    bounds = paperLayer.bounds;
+  }
+  const left = {
+    id: id,
+    axis: 'x',
+    side: 'left',
+    point: bounds.left
+  } as em.SnapPoint;
+  const centerX = {
+    id: id,
+    axis: 'x',
+    side: 'center',
+    point: bounds.center.x
+  } as em.SnapPoint;
+  const centerY = {
+    id: id,
+    axis: 'y',
+    side: 'center',
+    point: bounds.center.y
+  } as em.SnapPoint;
+  const right = {
+    id: id,
+    axis: 'x',
+    side: 'right',
+    point: bounds.right
+  } as em.SnapPoint;
+  const top = {
+    id: id,
+    axis: 'y',
+    side: 'top',
+    point: bounds.top
+  } as em.SnapPoint;
+  const bottom = {
+    id: id,
+    axis: 'y',
+    side: 'bottom',
+    point: bounds.bottom
+  } as em.SnapPoint;
+  return [left, right, top, bottom, centerX, centerY];
+}
+
+export const getInViewSnapPoints = (state: LayerState): em.SnapPoint[] => {
+  return state.inView.allIds.reduce((result, current) => {
+    const snapPoints = getLayerSnapPoints(current);
+    result = [...result, ...snapPoints];
+    return result;
+  }, []);
 };

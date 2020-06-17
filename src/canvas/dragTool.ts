@@ -1,7 +1,7 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import store from '../store';
 import { moveLayersBy } from '../store/actions/layer';
-import { getPaperLayer, getSelectionBounds, getLayerAndDescendants } from '../store/selectors/layer';
+import { getPaperLayer, getSelectionBounds, getLayerAndDescendants, getInViewSnapPoints } from '../store/selectors/layer';
 import { updateSelectionFrame } from '../store/utils/layer';
 import { paperMain } from './index';
 import { THEME_PRIMARY_COLOR, THEME_GUIDE_COLOR } from '../constants';
@@ -28,8 +28,6 @@ class DragTool {
   bottomGuide: Guide;
   centerXGuide: Guide;
   centerYGuide: Guide;
-  xMeasureGuide: MeasureGuide;
-  yMeasureGuide: MeasureGuide;
   shiftModifier: boolean;
   metaModifier: boolean;
   constructor() {
@@ -47,8 +45,6 @@ class DragTool {
     this.bottomGuide = null;
     this.centerXGuide = null;
     this.centerYGuide = null;
-    this.xMeasureGuide = null;
-    this.yMeasureGuide = null;
     this.snapBreakThreshholdMin = -8;
     this.snapBreakThreshholdMax = 8;
     this.snapPoints = [];
@@ -75,8 +71,6 @@ class DragTool {
     this.bottomGuide = null;
     this.centerXGuide = null;
     this.centerYGuide = null;
-    this.xMeasureGuide = null;
-    this.yMeasureGuide = null;
     this.snapPoints = [];
     this.snap = {
       x: null,
@@ -212,53 +206,7 @@ class DragTool {
       const layerAndDescendants = getLayerAndDescendants(state.layer.present, id);
       allSelectedLayers = [...allSelectedLayers, ...layerAndDescendants];
     });
-    const inViewNotSelected = state.layer.present.inView.filter((id) => !allSelectedLayers.includes(id));
-    inViewNotSelected.forEach((id) => {
-      const paperLayer = getPaperLayer(id);
-      let bounds;
-      if (paperLayer.data.type === 'Artboard') {
-        bounds = paperLayer.getItem({data: { id: 'ArtboardBackground' }}).bounds;
-      } else {
-        bounds = paperLayer.bounds;
-      }
-      const left = {
-        id: id,
-        axis: 'x',
-        side: 'left',
-        point: bounds.left
-      } as em.SnapPoint;
-      const centerX = {
-        id: id,
-        axis: 'x',
-        side: 'center',
-        point: bounds.center.x
-      } as em.SnapPoint;
-      const centerY = {
-        id: id,
-        axis: 'y',
-        side: 'center',
-        point: bounds.center.y
-      } as em.SnapPoint;
-      const right = {
-        id: id,
-        axis: 'x',
-        side: 'right',
-        point: bounds.right
-      } as em.SnapPoint;
-      const top = {
-        id: id,
-        axis: 'y',
-        side: 'top',
-        point: bounds.top
-      } as em.SnapPoint;
-      const bottom = {
-        id: id,
-        axis: 'y',
-        side: 'bottom',
-        point: bounds.bottom
-      } as em.SnapPoint;
-      this.snapPoints.push(left, right, top, bottom, centerX, centerY);
-    });
+    this.snapPoints = state.layer.present.inView.snapPoints.filter((snapPoint) => !allSelectedLayers.includes(snapPoint.id));
   }
   onMouseDrag(event: paper.ToolEvent): void {
     if (this.enabled) {

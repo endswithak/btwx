@@ -24,6 +24,7 @@ class ShapeTool {
   constructor(shapeType: em.ShapeType) {
     this.tool = new paperMain.Tool();
     this.tool.activate();
+    this.tool.onMouseMove = (e: paper.ToolEvent): void => this.onMouseMove(e);
     this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
     this.tool.onKeyUp = (e: paper.KeyEvent): void => this.onKeyUp(e);
     this.tool.onMouseDown = (e: paper.ToolEvent): void => this.onMouseDown(e);
@@ -147,6 +148,9 @@ class ShapeTool {
         break;
       }
     }
+  }
+  onMouseMove(event: paper.ToolEvent): void {
+
   }
   onMouseDown(event: paper.ToolEvent): void {
     this.from = event.point;

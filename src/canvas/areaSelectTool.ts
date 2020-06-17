@@ -58,7 +58,7 @@ class AreaSelectTool {
     // get overlapped page layers
     const overlappedLayers = getPagePaperLayer(state.present).getItems({
       data: (data: any) => {
-        if (data.id !== 'ArtboardBackground' || data.id !== 'ArtboardMask') {
+        if (data.id !== 'ArtboardBackground' && data.id !== 'ArtboardMask') {
           const topParent = getNearestScopeAncestor(state.present, data.id);
           return topParent.id === data.id;
         }
@@ -75,7 +75,7 @@ class AreaSelectTool {
         } else {
           item.getItems({
             data: (data: any) => {
-              if (data.id !== 'ArtboardBackground' || data.id !== 'ArtboardMask') {
+              if (data.id !== 'ArtboardBackground' && data.id !== 'ArtboardMask') {
                 if (state.present.byId[item.data.id].children.includes(data.id)) {
                   layers.push(data.id);
                 }

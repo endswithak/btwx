@@ -12,7 +12,7 @@ declare namespace em {
 
   type ContextMenu = 'TweenEvent' | 'TweenEventDestination';
 
-  type TweenProp = 'shape' | 'fillColor' | 'x' | 'y' | 'rotation' | 'width' | 'height' | 'strokeColor' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity' | 'fontSize';
+  type TweenProp = 'shape' | 'fillColor' | 'fillGradient' | 'x' | 'y' | 'rotation' | 'width' | 'height' | 'strokeColor' | 'strokeGradient' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity' | 'fontSize';
 
   type TweenPropMap = { [K in TweenProp]: boolean; }
 

@@ -224,7 +224,10 @@ export interface LayerState {
   allGroupIds: string[];
   allTextIds: string[];
   scope: string[];
-  inView: string[];
+  inView: {
+    allIds: string[];
+    snapPoints: em.SnapPoint[];
+  };
   hover: string;
   clipboard: {
     main: string[];
@@ -266,7 +269,10 @@ const initialState: LayerState = {
   allGroupIds: [],
   allTextIds: [],
   scope: [],
-  inView: [],
+  inView: {
+    allIds: [],
+    snapPoints: []
+  },
   hover: null,
   clipboard: {
     main: [],

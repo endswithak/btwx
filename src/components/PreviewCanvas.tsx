@@ -6,7 +6,7 @@ import { RootState } from '../store/reducers';
 import { paperPreview } from '../canvas';
 import { setActiveArtboard } from '../store/actions/layer';
 import { SetActiveArtboardPayload, LayerTypes } from '../store/actionTypes/layer';
-import { getLongestEventTween, getPositionInArtboard, getAllArtboardTweenEvents, getAllArtboardTweenEventDestinations, getAllArtboardTweens, getAllArtboardTweenLayers, getAllArtboardTweenLayerDestinations, getAllArtboardTweenEventLayers } from '../store/selectors/layer';
+import { getLongestEventTween, getPositionInArtboard, getAllArtboardTweenEvents, getAllArtboardTweenEventDestinations, getAllArtboardTweens, getAllArtboardTweenLayers, getAllArtboardTweenLayerDestinations, getAllArtboardTweenEventLayers, getGradientDestinationPoint, getGradientOriginPoint } from '../store/selectors/layer';
 import { gsap } from 'gsap';
 import { MorphSVGPlugin } from "gsap/MorphSVGPlugin";
 
@@ -128,10 +128,23 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                   duration: tween.duration,
                   [tween.prop]: morphData[1],
                   onUpdate: () => {
-                    const clone = tweenPaperLayer.clone({insert: false}) as paper.Path;
+                    // clone tweenPaperLayer
+                    const clone = tweenPaperLayer.clone({insert: false, deep: false}) as paper.Path;
+                    // apply path data to clone
                     clone.pathData = tweenProp[tween.prop];
-                    clone.fitBounds(tweenPaperLayer.bounds);
+                    // apply tweenPaperLayer bounds to clone...
+                    // needed to give the final path data the correct x/y position
+                    clone.bounds.center.x = tweenPaperLayer.bounds.center.x;
+                    clone.bounds.center.y = tweenPaperLayer.bounds.center.y;
+                    // apply final clone path data to tweenPaperLayer
                     (tweenPaperLayer as paper.Path).pathData = clone.pathData;
+                    // update gradient origin/destination if needed
+                    if (tweenPaperLayer.fillColor.gradient) {
+                      const origin = tweenLayers.byId[tweenPaperLayer.data.id].style.fill.gradient.origin;
+                      const destination = tweenLayers.byId[tweenPaperLayer.data.id].style.fill.gradient.destination;
+                      tweenPaperLayer.fillColor.origin = new paper.Point((origin.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (origin.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
+                      tweenPaperLayer.fillColor.destination = new paper.Point((destination.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (destination.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
+                    }
                   },
                   ease: tween.ease,
                   delay: tween.delay
@@ -148,6 +161,24 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                   },
                   ease: tween.ease,
                   delay: tween.delay
+                });
+                break;
+              }
+              case 'fillGradient': {
+                tweenPaperLayer.fillColor.gradient.stops.forEach((stop, index) => {
+                  tweenProp[`${tween.prop}-stop-${index}-color`] = tweenPaperLayer.fillColor.gradient.stops[index].color.toCSS(true);
+                  tweenProp[`${tween.prop}-stop-${index}-offset`] = tweenPaperLayer.fillColor.gradient.stops[index].offset;
+                  paperTween = gsap.to(tweenProp, {
+                    duration: tween.duration,
+                    [`${tween.prop}-stop-${index}-color`]: tweenDestinationLayerPaperLayer.fillColor.gradient.stops[index].color.toCSS(true),
+                    [`${tween.prop}-stop-${index}-offset`]: tweenDestinationLayerPaperLayer.fillColor.gradient.stops[index].offset,
+                    onUpdate: () => {
+                      tweenPaperLayer.fillColor.gradient.stops[index].color = tweenProp[`${tween.prop}-stop-${index}-color`];
+                      tweenPaperLayer.fillColor.gradient.stops[index].offset = tweenProp[`${tween.prop}-stop-${index}-offset`];
+                    },
+                    ease: tween.ease,
+                    delay: tween.delay
+                  });
                 });
                 break;
               }
@@ -209,7 +240,8 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                   duration: tween.duration,
                   [tween.prop]: tweenDestinationLayerPaperLayer.bounds.width,
                   onUpdate: () => {
-                    tweenPaperLayer.bounds.width = tweenProp[tween.prop];
+                    const scaleX = tweenProp[tween.prop] / tweenPaperLayer.bounds.width;
+                    tweenPaperLayer.scale(scaleX, 1);
                   },
                   ease: tween.ease,
                   delay: tween.delay
@@ -222,7 +254,8 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                   duration: tween.duration,
                   [tween.prop]: tweenDestinationLayerPaperLayer.bounds.height,
                   onUpdate: () => {
-                    tweenPaperLayer.bounds.height = tweenProp[tween.prop];
+                    const scaleY = tweenProp[tween.prop] / tweenPaperLayer.bounds.height;
+                    tweenPaperLayer.scale(1, scaleY);
                   },
                   ease: tween.ease,
                   delay: tween.delay
