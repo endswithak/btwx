@@ -116,6 +116,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
             const tweenDestinationLayerArtboardPosition = getPositionInArtboard(tweenDestinationLayerPaperLayer, tweenEventDestinationArtboardPaperLayer);
             const tweenPaperLayerPositionDiffX = tweenDestinationLayerArtboardPosition.x - tweenPaperLayerArtboardPosition.x;
             const tweenPaperLayerPositionDiffY = tweenDestinationLayerArtboardPosition.y - tweenPaperLayerArtboardPosition.y;
+            console.log(tweenPaperLayer);
             switch(tween.prop) {
               case 'shape': {
                 const morphData = [

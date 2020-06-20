@@ -1367,7 +1367,8 @@ export const setLayerName = (state: LayerState, action: SetLayerName): LayerStat
       }
     }
   }
-  return updateLayerTweens(currentState, action.payload.id);
+  return currentState;
+  //return updateLayerTweens(currentState, action.payload.id);
 };
 
 export const setActiveArtboard = (state: LayerState, action: SetActiveArtboard): LayerState => {

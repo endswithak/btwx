@@ -6,15 +6,15 @@ import { paperMain } from './index';
 import Tooltip from './tooltip';
 
 class ResizeTool {
+  ref: paper.Path.Rectangle;
+  x: number;
+  y: number;
   from: paper.Point;
   to: paper.Point;
-  currentBounds: paper.Rectangle;
   fromBounds: paper.Rectangle;
   toBounds: paper.Rectangle;
   enabled: boolean;
   tooltip: Tooltip;
-  scaleXDelta: number;
-  scaleYDelta: number;
   scaleX: number;
   scaleY: number;
   verticalFlip: boolean;
@@ -23,17 +23,17 @@ class ResizeTool {
   shiftModifier: boolean;
   metaModifier: boolean;
   constructor() {
+    this.ref = null;
+    this.x = 0;
+    this.y = 0;
     this.from = null;
     this.to = null;
-    this.currentBounds = null;
     this.fromBounds = null;
     this.toBounds = null;
     this.enabled = false;
     this.tooltip = null;
-    this.scaleXDelta = null;
-    this.scaleYDelta = null;
-    this.scaleX = null;
-    this.scaleY = null;
+    this.scaleX = 1;
+    this.scaleY = 1;
     this.verticalFlip = false;
     this.horizontalFlip = false;
     this.shiftModifier = false;
@@ -43,8 +43,6 @@ class ResizeTool {
     const state = store.getState();
     this.enabled = true;
     this.handle = handle;
-    this.scaleX = 1;
-    this.scaleY = 1;
     updateSelectionFrame(state.layer.present, this.handle);
   }
   disable() {
@@ -52,17 +50,20 @@ class ResizeTool {
       this.tooltip.paperLayer.remove();
       this.tooltip = null;
     }
+    if (this.ref) {
+      this.ref.remove();
+    }
+    this.ref = null;
+    this.x = 0;
+    this.y = 0;
     this.from = null;
     this.to = null;
-    this.currentBounds = null;
     this.fromBounds = null;
     this.toBounds = null;
     this.enabled = false;
     this.tooltip = null;
-    this.scaleXDelta = null;
-    this.scaleYDelta = null;
-    this.scaleX = null;
-    this.scaleY = null;
+    this.scaleX = 1;
+    this.scaleY = 1;
     this.verticalFlip = false;
     this.horizontalFlip = false;
     this.shiftModifier = false;
@@ -74,33 +75,80 @@ class ResizeTool {
       this.scaleLayer(layer, hor, ver);
     });
   }
+  clearLayerScale(paperLayer: paper.Item, layerItem: em.Layer) {
+    paperLayer.pivot = paperLayer.bounds.center;
+    paperLayer.bounds.width = layerItem.frame.width;
+    paperLayer.bounds.height = layerItem.frame.height;
+    paperLayer.position.x = layerItem.frame.x;
+    paperLayer.position.y = layerItem.frame.y;
+    paperLayer.scale(this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
+  }
   scaleLayer(id: string, hor: number, ver: number) {
     const paperLayer = getPaperLayer(id);
-    if (paperLayer.data.type !== 'Text') {
-      paperLayer.scale(hor, ver);
+    switch(paperLayer.data.type) {
+      case 'Artboard': {
+        const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
+        const mask = paperLayer.getItem({data: { id: 'ArtboardMask' }});
+        background.scale(hor, ver);
+        mask.scale(hor, ver);
+        break;
+      }
+      case 'Group':
+      case 'Shape': {
+        paperLayer.scale(hor, ver);
+        break;
+      }
     }
   }
   setLayerPivot(id: string) {
     const paperLayer = getPaperLayer(id);
-    if (paperLayer.data.type !== 'Text') {
-      paperLayer.pivot = this.from;
+    switch(paperLayer.data.type) {
+      case 'Artboard': {
+        const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
+        const mask = paperLayer.getItem({data: { id: 'ArtboardMask' }});
+        background.pivot = this.from;
+        mask.pivot = this.from;
+        break;
+      }
+      case 'Group':
+      case 'Shape': {
+        paperLayer.pivot = this.from;
+        break;
+      }
     }
   }
   updateTooltip() {
     if (this.tooltip) {
       this.tooltip.paperLayer.remove();
     }
-    this.tooltip = new Tooltip(`${Math.round(this.currentBounds.width)} x ${Math.round(this.currentBounds.height)}`, this.to, {drag: true, up: true});
+    this.tooltip = new Tooltip(`${Math.round(Math.abs(this.toBounds.width))} x ${Math.round(Math.abs(this.toBounds.height))}`, this.to, {drag: true, up: true});
+  }
+  updateRef() {
+    if (this.ref) {
+      this.ref.remove();
+    }
+    this.ref = new paperMain.Path.Rectangle({
+      rectangle: this.toBounds,
+      strokeColor: 'red',
+    });
+    this.ref.removeOn({
+      drag: true,
+      up: true
+    });
   }
   scaleLayers() {
     // used when dragging
     // scales layers by current scale values
     const state = store.getState();
     if (this.shiftModifier) {
-      const maxDim = Math.max(this.scaleX, this.scaleY);
-      const scaleDelta = maxDim === this.scaleX ? this.scaleXDelta : this.scaleYDelta;
+      const tb = this.toBounds;
+      const maxDim = tb.width > tb.height ? this.scaleX : this.scaleY;
       state.layer.present.selected.forEach((layer: string) => {
-        this.scaleLayer(layer, scaleDelta, scaleDelta);
+        const paperLayer = getPaperLayer(layer);
+        this.clearLayerScale(paperLayer, state.layer.present.byId[layer]);
+        this.setLayerPivot(layer);
+        this.scaleLayer(layer, this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
+        this.scaleLayer(layer, maxDim, maxDim);
       });
     } else {
       switch(this.handle) {
@@ -109,88 +157,286 @@ class ResizeTool {
         case 'bottomLeft':
         case 'bottomRight': {
           state.layer.present.selected.forEach((layer: string) => {
-            this.scaleLayer(layer, this.scaleXDelta, this.scaleYDelta);
+            const paperLayer = getPaperLayer(layer);
+            this.clearLayerScale(paperLayer, state.layer.present.byId[layer]);
+            this.setLayerPivot(layer);
+            this.scaleLayer(layer, this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
+            this.scaleLayer(layer, this.scaleX, this.scaleY);
           });
           break;
         }
         case 'topCenter':
         case 'bottomCenter': {
           state.layer.present.selected.forEach((layer: string) => {
-            this.scaleLayer(layer, 1, this.scaleYDelta);
+            const paperLayer = getPaperLayer(layer);
+            this.clearLayerScale(paperLayer, state.layer.present.byId[layer]);
+            this.setLayerPivot(layer);
+            this.scaleLayer(layer, this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
+            this.scaleLayer(layer, 1, this.scaleY);
           });
           break;
         }
         case 'leftCenter':
         case 'rightCenter': {
           state.layer.present.selected.forEach((layer: string) => {
-            this.scaleLayer(layer, this.scaleXDelta, 1);
+            const paperLayer = getPaperLayer(layer);
+            this.clearLayerScale(paperLayer, state.layer.present.byId[layer]);
+            this.setLayerPivot(layer);
+            this.scaleLayer(layer, this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
+            this.scaleLayer(layer, this.scaleX, 1);
           });
           break;
         }
       }
     }
     updateSelectionFrame(state.layer.present, this.handle);
-    this.currentBounds = getSelectionBounds(state.layer.present);
+    this.updateTooltip();
+  }
+  updateToBounds() {
+    if (this.shiftModifier) {
+      const aspect = this.fromBounds.width / this.fromBounds.height;
+      const fb = this.fromBounds;
+      switch(this.handle) {
+        case 'topLeft':
+          this.toBounds = new paperMain.Rectangle({
+            rectangle: this.fromBounds,
+            top: fb.width > fb.height ? (this.horizontalFlip ? this.fromBounds.bottom : this.fromBounds.top) + ((this.to.x - (this.verticalFlip ? this.fromBounds.right : this.fromBounds.left)) / aspect) : this.to.y,
+            bottom: this.verticalFlip ? this.fromBounds.top : this.fromBounds.bottom,
+            left: fb.width > fb.height ? this.to.x : (this.verticalFlip ? this.fromBounds.right : this.fromBounds.left) + ((this.to.y - (this.horizontalFlip ? this.fromBounds.bottom : this.fromBounds.top)) * aspect),
+            right: this.horizontalFlip ? this.fromBounds.left : this.fromBounds.right,
+          });
+          break;
+        case 'topRight':
+          this.toBounds = new paperMain.Rectangle({
+            rectangle: this.fromBounds,
+            top: fb.width > fb.height ? (this.horizontalFlip ? this.fromBounds.bottom : this.fromBounds.top) - ((this.to.x - (this.verticalFlip ? this.fromBounds.left : this.fromBounds.right)) / aspect) : this.to.y,
+            bottom: this.verticalFlip ? this.fromBounds.top : this.fromBounds.bottom,
+            left: this.horizontalFlip ? this.fromBounds.right : this.fromBounds.left,
+            right: fb.width > fb.height ? this.to.x : (this.verticalFlip ? this.fromBounds.left : this.fromBounds.right) - ((this.to.y - (this.horizontalFlip ? this.fromBounds.bottom : this.fromBounds.top)) * aspect),
+          });
+          break;
+        case 'bottomLeft':
+          this.toBounds = new paperMain.Rectangle({
+            rectangle: this.fromBounds,
+            top: this.verticalFlip ? this.fromBounds.bottom : this.fromBounds.top,
+            bottom: fb.width > fb.height ? (this.horizontalFlip ? this.fromBounds.top : this.fromBounds.bottom) - ((this.to.x - (this.verticalFlip ? this.fromBounds.right : this.fromBounds.left)) / aspect) : this.to.y,
+            left: fb.width > fb.height ? this.to.x : (this.verticalFlip ? this.fromBounds.right : this.fromBounds.left) - ((this.to.y - (this.horizontalFlip ? this.fromBounds.top : this.fromBounds.bottom)) * aspect),
+            right: this.horizontalFlip ? this.fromBounds.left : this.fromBounds.right
+          });
+          break;
+        case 'bottomRight':
+          this.toBounds = new paperMain.Rectangle({
+            rectangle: this.fromBounds,
+            top: this.verticalFlip ? this.fromBounds.bottom : this.fromBounds.top,
+            bottom: fb.width > fb.height ? (this.horizontalFlip ? this.fromBounds.top : this.fromBounds.bottom) + ((this.to.x - (this.verticalFlip ? this.fromBounds.left : this.fromBounds.right)) / aspect) : this.to.y,
+            left: this.horizontalFlip ? this.fromBounds.right : this.fromBounds.left,
+            right: fb.width > fb.height ? this.to.x : (this.verticalFlip ? this.fromBounds.left : this.fromBounds.right) + ((this.to.y - (this.horizontalFlip ? this.fromBounds.top : this.fromBounds.bottom)) * aspect),
+          });
+          break;
+        case 'topCenter': {
+          const distance = this.to.y - (this.verticalFlip ? this.fromBounds.bottom : this.fromBounds.top);
+          const xDelta = distance * aspect;
+          this.toBounds = new paperMain.Rectangle({
+            rectangle: this.fromBounds,
+            top: this.to.y,
+            bottom: this.verticalFlip ? this.fromBounds.top : this.fromBounds.bottom,
+            left: this.verticalFlip ? this.fromBounds.left - (xDelta / 2) : this.fromBounds.left + (xDelta / 2),
+            right: this.verticalFlip ? this.fromBounds.right + (xDelta / 2) : this.fromBounds.right - (xDelta / 2)
+          });
+          break;
+        }
+        case 'bottomCenter': {
+          const distance = this.to.y - (this.verticalFlip ? this.fromBounds.top : this.fromBounds.bottom);
+          const xDelta = distance * aspect;
+          this.toBounds = new paperMain.Rectangle({
+            rectangle: this.fromBounds,
+            top: this.verticalFlip ? this.fromBounds.bottom : this.fromBounds.top,
+            bottom: this.to.y,
+            left: this.verticalFlip ? this.fromBounds.left + (xDelta / 2) : this.fromBounds.left - (xDelta / 2),
+            right: this.verticalFlip ? this.fromBounds.right - (xDelta / 2) : this.fromBounds.right + (xDelta / 2)
+          });
+          break;
+        }
+        case 'leftCenter': {
+          const distance = this.to.x - (this.horizontalFlip ? this.fromBounds.right : this.fromBounds.left);
+          const yDelta = distance / aspect;
+          this.toBounds = new paperMain.Rectangle({
+            rectangle: this.fromBounds,
+            top: this.horizontalFlip ? this.fromBounds.top - (yDelta / 2) : this.fromBounds.top + (yDelta / 2),
+            bottom: this.horizontalFlip ? this.fromBounds.bottom + (yDelta / 2) : this.fromBounds.bottom - (yDelta / 2),
+            left: this.to.x,
+            right: this.horizontalFlip ? this.fromBounds.left : this.fromBounds.right
+          });
+          break;
+        }
+        case 'rightCenter': {
+          const distance = this.to.x - (this.horizontalFlip ? this.fromBounds.left : this.fromBounds.right);
+          const yDelta = distance / aspect;
+          this.toBounds = new paperMain.Rectangle({
+            rectangle: this.fromBounds,
+            top: this.horizontalFlip ? this.fromBounds.top + (yDelta / 2) : this.fromBounds.top - (yDelta / 2),
+            bottom: this.horizontalFlip ? this.fromBounds.bottom - (yDelta / 2) : this.fromBounds.bottom + (yDelta / 2),
+            left: this.horizontalFlip ? this.fromBounds.right : this.fromBounds.left,
+            right: this.to.x
+          });
+          break;
+        }
+      }
+    } else {
+      switch(this.handle) {
+        case 'topLeft':
+          this.toBounds = new paperMain.Rectangle({
+            rectangle: this.fromBounds,
+            top: this.to.y,
+            bottom: this.verticalFlip ? this.fromBounds.top : this.fromBounds.bottom,
+            left: this.to.x,
+            right: this.horizontalFlip ? this.fromBounds.left : this.fromBounds.right
+          });
+          break;
+        case 'topRight':
+          this.toBounds = new paperMain.Rectangle({
+            rectangle: this.fromBounds,
+            top: this.to.y,
+            bottom: this.verticalFlip ? this.fromBounds.top : this.fromBounds.bottom,
+            left: this.horizontalFlip ? this.fromBounds.right : this.fromBounds.left,
+            right: this.to.x
+          });
+          break;
+        case 'bottomLeft':
+          this.toBounds = new paperMain.Rectangle({
+            rectangle: this.fromBounds,
+            top: this.verticalFlip ? this.fromBounds.bottom : this.fromBounds.top,
+            bottom: this.to.y,
+            left: this.to.x,
+            right: this.horizontalFlip ? this.fromBounds.left : this.fromBounds.right
+          });
+          break;
+        case 'bottomRight':
+          this.toBounds = new paperMain.Rectangle({
+            rectangle: this.fromBounds,
+            top: this.verticalFlip ? this.fromBounds.bottom : this.fromBounds.top,
+            bottom: this.to.y,
+            left: this.horizontalFlip ? this.fromBounds.right : this.fromBounds.left,
+            right: this.to.x
+          });
+          break;
+        case 'topCenter':
+          this.toBounds = new paperMain.Rectangle({
+            rectangle: this.fromBounds,
+            top: this.to.y,
+            bottom: this.verticalFlip ? this.fromBounds.top : this.fromBounds.bottom,
+            left: this.fromBounds.left,
+            right: this.fromBounds.right
+          });
+          break;
+        case 'bottomCenter':
+          this.toBounds = new paperMain.Rectangle({
+            rectangle: this.fromBounds,
+            top: this.verticalFlip ? this.fromBounds.bottom : this.fromBounds.top,
+            bottom: this.to.y,
+            left: this.fromBounds.left,
+            right: this.fromBounds.right
+          });
+          break;
+        case 'leftCenter':
+          this.toBounds = new paperMain.Rectangle({
+            rectangle: this.fromBounds,
+            top: this.fromBounds.top,
+            bottom: this.fromBounds.bottom,
+            left: this.to.x,
+            right: this.horizontalFlip ? this.fromBounds.left : this.fromBounds.right
+          });
+          break;
+        case 'rightCenter':
+          this.toBounds = new paperMain.Rectangle({
+            rectangle: this.fromBounds,
+            top: this.fromBounds.top,
+            bottom: this.fromBounds.bottom,
+            left: this.horizontalFlip ? this.fromBounds.right : this.fromBounds.left,
+            right: this.to.x
+          });
+          break;
+      }
+    }
+    const totalWidthDiff = this.toBounds.width / this.fromBounds.width;
+    const totalHeightDiff = this.toBounds.height / this.fromBounds.height;
+    this.scaleX = isFinite(totalWidthDiff) && totalWidthDiff > 0 ? totalWidthDiff : 0.01;
+    this.scaleY = isFinite(totalHeightDiff) && totalHeightDiff > 0 ? totalHeightDiff : 0.01;
   }
   adjustHandle() {
     // updates handle, horizontalFlip, and verticalFlip based on to and from points
     switch(this.handle) {
       case 'topLeft': {
-        if (this.to.x > this.from.x) {
+        if (this.to.x > this.from.x && this.to.y > this.from.y) {
           this.horizontalFlip = !this.horizontalFlip;
-          this.flipLayers(-1, 1);
-          this.handle = 'topRight';
-        }
-        if (this.to.y > this.from.y) {
           this.verticalFlip = !this.verticalFlip;
-          this.flipLayers(1, -1);
-          this.handle = 'bottomLeft';
+          this.handle = 'bottomRight';
+        } else {
+          if (this.to.x > this.from.x) {
+            this.horizontalFlip = !this.horizontalFlip;
+            this.handle = 'topRight';
+          }
+          if (this.to.y > this.from.y) {
+            this.verticalFlip = !this.verticalFlip;
+            this.handle = 'bottomLeft';
+          }
         }
         break;
       }
       case 'topRight': {
-        if (this.to.x < this.from.x) {
+        if (this.to.x < this.from.x && this.to.y > this.from.y) {
           this.horizontalFlip = !this.horizontalFlip;
-          this.flipLayers(-1, 1);
-          this.handle = 'topLeft';
-        }
-        if (this.to.y > this.from.y) {
           this.verticalFlip = !this.verticalFlip;
-          this.flipLayers(1, -1);
-          this.handle = 'bottomRight';
+          this.handle = 'bottomLeft';
+        } else {
+          if (this.to.x < this.from.x) {
+            this.horizontalFlip = !this.horizontalFlip;
+            this.handle = 'topLeft';
+          }
+          if (this.to.y > this.from.y) {
+            this.verticalFlip = !this.verticalFlip;
+            this.handle = 'bottomRight';
+          }
         }
         break;
       }
       case 'bottomLeft': {
-        if (this.to.x > this.from.x) {
+        if (this.to.x > this.from.x && this.to.y < this.from.y) {
           this.horizontalFlip = !this.horizontalFlip;
-          this.flipLayers(-1, 1);
-          this.handle = 'bottomRight';
-        }
-        if (this.to.y < this.from.y) {
           this.verticalFlip = !this.verticalFlip;
-          this.flipLayers(1, -1);
-          this.handle = 'topLeft';
+          this.handle = 'topRight';
+        } else {
+          if (this.to.x > this.from.x) {
+            this.horizontalFlip = !this.horizontalFlip;
+            this.handle = 'bottomRight';
+          }
+          if (this.to.y < this.from.y) {
+            this.verticalFlip = !this.verticalFlip;
+            this.handle = 'topLeft';
+          }
         }
         break;
       }
       case 'bottomRight': {
-        if (this.to.x < this.from.x) {
+        if (this.to.x < this.from.x && this.to.y < this.from.y) {
           this.horizontalFlip = !this.horizontalFlip;
-          this.flipLayers(-1, 1);
-          this.handle = 'bottomLeft';
-        }
-        if (this.to.y < this.from.y) {
           this.verticalFlip = !this.verticalFlip;
-          this.flipLayers(1, -1);
-          this.handle = 'topRight';
+          this.handle = 'topLeft';
+        } else {
+          if (this.to.x < this.from.x) {
+            this.horizontalFlip = !this.horizontalFlip;
+            this.handle = 'bottomLeft';
+          }
+          if (this.to.y < this.from.y) {
+            this.verticalFlip = !this.verticalFlip;
+            this.handle = 'topRight';
+          }
         }
         break;
       }
       case 'topCenter': {
         if (this.to.y > this.from.y) {
           this.verticalFlip = !this.verticalFlip;
-          this.flipLayers(1, -1);
           this.handle = 'bottomCenter';
         }
         break;
@@ -198,7 +444,6 @@ class ResizeTool {
       case 'bottomCenter': {
         if (this.to.y < this.from.y) {
           this.verticalFlip = !this.verticalFlip;
-          this.flipLayers(1, -1);
           this.handle = 'topCenter';
         }
         break;
@@ -206,7 +451,6 @@ class ResizeTool {
       case 'leftCenter': {
         if (this.to.x > this.from.x) {
           this.horizontalFlip = !this.horizontalFlip;
-          this.flipLayers(-1, 1);
           this.handle = 'rightCenter';
         }
         break;
@@ -214,14 +458,13 @@ class ResizeTool {
       case 'rightCenter': {
         if (this.to.x < this.from.x) {
           this.horizontalFlip = !this.horizontalFlip;
-          this.flipLayers(-1, 1);
           this.handle = 'leftCenter';
         }
         break;
       }
     }
   }
-  clearLayerScale() {
+  clearLayersScale() {
     // clears current scaling from layers
     const state = store.getState();
     if (state.layer.present.selected.length > 0) {
@@ -241,73 +484,22 @@ class ResizeTool {
   }
   onEscape() {
     if (this.enabled) {
-      this.clearLayerScale();
+      this.clearLayersScale();
       this.disable();
     }
   }
   onShiftDown() {
     if (this.enabled && this.to) {
-      const state = store.getState();
-      // clear current scale
-      this.clearLayerScale();
-      // apply constrained scale based on largest scale
-      const maxDim = Math.max(this.scaleX, this.scaleY);
-      state.layer.present.selected.forEach((layer: string) => {
-        this.setLayerPivot(layer);
-        this.scaleLayer(layer, this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
-        this.scaleLayer(layer, maxDim, maxDim);
-      });
-      // update selection frame
-      updateSelectionFrame(state.layer.present, this.handle);
-      // set new bounds
-      this.currentBounds = getSelectionBounds(state.layer.present);
-      // update tooltip
-      this.updateTooltip();
+      this.updateToBounds();
+      //this.updateRef();
+      this.scaleLayers();
     }
   }
   onShiftUp() {
     if (this.enabled && this.to) {
-      const state = store.getState();
-      // clear current scale
-      this.clearLayerScale();
-      // apply scale based on current handle, scaleX, and scaleY values
-      switch(this.handle) {
-        case 'topLeft':
-        case 'topRight':
-        case 'bottomLeft':
-        case 'bottomRight': {
-          state.layer.present.selected.forEach((layer: string) => {
-            this.setLayerPivot(layer);
-            this.scaleLayer(layer, this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
-            this.scaleLayer(layer, this.scaleX, this.scaleY);
-          });
-          break;
-        }
-        case 'topCenter':
-        case 'bottomCenter': {
-          state.layer.present.selected.forEach((layer: string) => {
-            this.setLayerPivot(layer);
-            this.scaleLayer(layer, this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
-            this.scaleLayer(layer, 1, this.scaleY);
-          });
-          break;
-        }
-        case 'leftCenter':
-        case 'rightCenter': {
-          state.layer.present.selected.forEach((layer: string) => {
-            this.setLayerPivot(layer);
-            this.scaleLayer(layer, this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
-            this.scaleLayer(layer, this.scaleX, 1);
-          });
-          break;
-        }
-      }
-      // update selection frame
-      updateSelectionFrame(state.layer.present, this.handle);
-      // update current bounds
-      this.currentBounds = getSelectionBounds(state.layer.present);
-      // update tooltip
-      this.updateTooltip();
+      this.updateToBounds();
+      //this.updateRef();
+      this.scaleLayers();
     }
   }
   onMouseDown(event: paper.ToolEvent): void {
@@ -347,44 +539,21 @@ class ResizeTool {
       });
       // set from bounds
       this.fromBounds = selectionBounds;
-      // set current bounds
-      this.currentBounds = selectionBounds;
+      this.to = event.point;
       // set to bounds with from and event point points
-      this.toBounds = new paperMain.Rectangle({
-        from: this.from,
-        to: event.point
-      });
+      this.updateToBounds();
+      //this.updateRef();
     }
   }
   onMouseDrag(event: paper.ToolEvent): void {
     if (this.enabled) {
-      // set prev bounds
-      const prevToBounds = this.toBounds;
-      // update to point
+      this.x += event.delta.x;
+      this.y += event.delta.y;
       this.to = event.point;
-      // update to bounds with new to point
-      this.toBounds = new paperMain.Rectangle({
-        from: this.from,
-        to: this.to
-      });
-      // get relative scale changes
-      const widthDiff = this.toBounds.width / prevToBounds.width;
-      const heightDiff = this.toBounds.height / prevToBounds.height;
-      // get absolute scale changes
-      const totalWidthDiff = this.toBounds.width / this.fromBounds.width;
-      const totalHeightDiff = this.toBounds.height / this.fromBounds.height;
-      // set scale deltas
-      this.scaleXDelta = isFinite(widthDiff) && widthDiff !== 0 ? widthDiff : 1;
-      this.scaleYDelta = isFinite(heightDiff) && heightDiff !== 0 ? heightDiff : 1;
-      // set total scale
-      this.scaleX = isFinite(totalWidthDiff) && totalWidthDiff !== 0 ? totalWidthDiff : 1;
-      this.scaleY = isFinite(totalHeightDiff) && totalHeightDiff !== 0 ? totalHeightDiff : 1;
-      // update handle
       this.adjustHandle();
-      // scale layers with new scale values
+      this.updateToBounds();
+      //this.updateRef();
       this.scaleLayers();
-      // update tooltip
-      this.updateTooltip();
     }
   }
   onMouseUp(event: paper.ToolEvent): void {
