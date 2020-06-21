@@ -185,6 +185,89 @@ class ResizeTool {
     }
     guide = new Guide(point1, point2, { up: true, drag: true });
   }
+  updateGuides() {
+    // find all snapPoints that match current selection bounds side
+    const leftSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.toBounds.left) === Math.round(snapPoint.point));
+    const centerXSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.toBounds.center.x) === Math.round(snapPoint.point));
+    const rightSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.toBounds.right) === Math.round(snapPoint.point));
+    const topSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.toBounds.top) === Math.round(snapPoint.point));
+    const centerYSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.toBounds.center.y) === Math.round(snapPoint.point));
+    const bottomSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.toBounds.bottom) === Math.round(snapPoint.point));
+    // if any snap points match, find their min/max...
+    // vertical/horizontal position and add relevant guide
+    if (this.snap.x && leftSnaps.length > 0) {
+      const topLeftPoints: paper.Point[] = [this.toBounds.topLeft];
+      const bottomLeftPoints: paper.Point[] = [this.toBounds.bottomLeft];
+      leftSnaps.forEach((point) => {
+        const paperLayer = getPaperLayer(point.id);
+        topLeftPoints.push(paperLayer.bounds.topLeft);
+        bottomLeftPoints.push(paperLayer.bounds.bottomLeft);
+      });
+      const minTopLeft = new paperMain.Point(this.toBounds.left, topLeftPoints.reduce(paper.Point.min).y);
+      const maxBottomLeft = new paperMain.Point(this.toBounds.left, bottomLeftPoints.reduce(paper.Point.max).y);
+      this.updateGuide(this.leftGuide, minTopLeft, maxBottomLeft);
+    }
+    if (this.snap.x && rightSnaps.length > 0) {
+      const topRightPoints: paper.Point[] = [this.toBounds.topRight];
+      const bottomRightPoints: paper.Point[] = [this.toBounds.bottomRight];
+      rightSnaps.forEach((point) => {
+        const paperLayer = getPaperLayer(point.id);
+        topRightPoints.push(paperLayer.bounds.topRight);
+        bottomRightPoints.push(paperLayer.bounds.bottomRight);
+      });
+      const minTopRight = new paperMain.Point(this.toBounds.right, topRightPoints.reduce(paper.Point.min).y);
+      const maxBottomRight = new paperMain.Point(this.toBounds.right, bottomRightPoints.reduce(paper.Point.max).y);
+      this.updateGuide(this.rightGuide, minTopRight, maxBottomRight);
+    }
+    if (this.snap.x && centerXSnaps.length > 0) {
+      const topCenterPoints: paper.Point[] = [this.toBounds.topCenter];
+      const bottomCenterPoints: paper.Point[] = [this.toBounds.bottomCenter];
+      centerXSnaps.forEach((point) => {
+        const paperLayer = getPaperLayer(point.id);
+        topCenterPoints.push(paperLayer.bounds.topCenter);
+        bottomCenterPoints.push(paperLayer.bounds.bottomCenter);
+      });
+      const minTopCenter = new paperMain.Point(this.toBounds.topCenter.x, topCenterPoints.reduce(paper.Point.min).y);
+      const maxBottomCenter = new paperMain.Point(this.toBounds.bottomCenter.x, bottomCenterPoints.reduce(paper.Point.max).y);
+      this.updateGuide(this.centerXGuide, minTopCenter, maxBottomCenter);
+    }
+    if (this.snap.y && topSnaps.length > 0) {
+      const topLeftPoints: paper.Point[] = [this.toBounds.topLeft];
+      const topRightPoints: paper.Point[] = [this.toBounds.topRight];
+      topSnaps.forEach((point) => {
+        const paperLayer = getPaperLayer(point.id);
+        topLeftPoints.push(paperLayer.bounds.topLeft);
+        topRightPoints.push(paperLayer.bounds.topRight);
+      });
+      const minTopLeft = new paperMain.Point(topLeftPoints.reduce(paper.Point.min).x, this.toBounds.top);
+      const maxTopRight = new paperMain.Point(topRightPoints.reduce(paper.Point.max).x, this.toBounds.top);
+      this.updateGuide(this.topGuide, minTopLeft, maxTopRight);
+    }
+    if (this.snap.y && bottomSnaps.length > 0) {
+      const bottomLeftPoints: paper.Point[] = [this.toBounds.bottomLeft];
+      const bottomRightPoints: paper.Point[] = [this.toBounds.bottomRight];
+      bottomSnaps.forEach((point) => {
+        const paperLayer = getPaperLayer(point.id);
+        bottomLeftPoints.push(paperLayer.bounds.bottomLeft);
+        bottomRightPoints.push(paperLayer.bounds.bottomRight);
+      });
+      const minBottomLeft = new paperMain.Point(bottomLeftPoints.reduce(paper.Point.min).x, this.toBounds.bottom);
+      const maxBottomRight = new paperMain.Point(bottomRightPoints.reduce(paper.Point.max).x, this.toBounds.bottom);
+      this.updateGuide(this.bottomGuide, minBottomLeft, maxBottomRight);
+    }
+    if (this.snap.y && centerYSnaps.length > 0) {
+      const leftCenterPoints: paper.Point[] = [this.toBounds.leftCenter];
+      const rightCenterPoints: paper.Point[] = [this.toBounds.rightCenter];
+      centerYSnaps.forEach((point) => {
+        const paperLayer = getPaperLayer(point.id);
+        leftCenterPoints.push(paperLayer.bounds.leftCenter);
+        rightCenterPoints.push(paperLayer.bounds.rightCenter);
+      });
+      const minLeftCenter = new paperMain.Point(leftCenterPoints.reduce(paper.Point.min).x, this.toBounds.leftCenter.y);
+      const maxLeftCenter = new paperMain.Point(rightCenterPoints.reduce(paper.Point.max).x, this.toBounds.rightCenter.y);
+      this.updateGuide(this.centerYGuide, minLeftCenter, maxLeftCenter);
+    }
+  }
   closestSnapPoint(snapPoints: em.SnapPoint[], side: em.SnapBound) {
     let closestSnap;
     let distance;
@@ -340,6 +423,7 @@ class ResizeTool {
     }
     updateSelectionFrame(state.layer.present, this.handle);
     this.updateTooltip();
+    this.updateGuides();
   }
   updateToBounds(overrides?: any) {
     if (this.shiftModifier) {
@@ -806,87 +890,6 @@ class ResizeTool {
         }
       }
       this.updateToBounds(snapBounds);
-      // find all snapPoints that match current selection bounds side
-      const leftSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.toBounds.left) === Math.round(snapPoint.point));
-      const centerXSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.toBounds.center.x) === Math.round(snapPoint.point));
-      const rightSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.toBounds.right) === Math.round(snapPoint.point));
-      const topSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.toBounds.top) === Math.round(snapPoint.point));
-      const centerYSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.toBounds.center.y) === Math.round(snapPoint.point));
-      const bottomSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.toBounds.bottom) === Math.round(snapPoint.point));
-      // if any snap points match, find their min/max...
-      // vertical/horizontal position and add relevant guide
-      if (this.snap.x && leftSnaps.length > 0) {
-        const topLeftPoints: paper.Point[] = [this.toBounds.topLeft];
-        const bottomLeftPoints: paper.Point[] = [this.toBounds.bottomLeft];
-        leftSnaps.forEach((point) => {
-          const paperLayer = getPaperLayer(point.id);
-          topLeftPoints.push(paperLayer.bounds.topLeft);
-          bottomLeftPoints.push(paperLayer.bounds.bottomLeft);
-        });
-        const minTopLeft = new paperMain.Point(this.toBounds.left, topLeftPoints.reduce(paper.Point.min).y);
-        const maxBottomLeft = new paperMain.Point(this.toBounds.left, bottomLeftPoints.reduce(paper.Point.max).y);
-        this.updateGuide(this.leftGuide, minTopLeft, maxBottomLeft);
-      }
-      if (this.snap.x && rightSnaps.length > 0) {
-        const topRightPoints: paper.Point[] = [this.toBounds.topRight];
-        const bottomRightPoints: paper.Point[] = [this.toBounds.bottomRight];
-        rightSnaps.forEach((point) => {
-          const paperLayer = getPaperLayer(point.id);
-          topRightPoints.push(paperLayer.bounds.topRight);
-          bottomRightPoints.push(paperLayer.bounds.bottomRight);
-        });
-        const minTopRight = new paperMain.Point(this.toBounds.right, topRightPoints.reduce(paper.Point.min).y);
-        const maxBottomRight = new paperMain.Point(this.toBounds.right, bottomRightPoints.reduce(paper.Point.max).y);
-        this.updateGuide(this.rightGuide, minTopRight, maxBottomRight);
-      }
-      if (this.snap.x && centerXSnaps.length > 0) {
-        const topCenterPoints: paper.Point[] = [this.toBounds.topCenter];
-        const bottomCenterPoints: paper.Point[] = [this.toBounds.bottomCenter];
-        centerXSnaps.forEach((point) => {
-          const paperLayer = getPaperLayer(point.id);
-          topCenterPoints.push(paperLayer.bounds.topCenter);
-          bottomCenterPoints.push(paperLayer.bounds.bottomCenter);
-        });
-        const minTopCenter = new paperMain.Point(this.toBounds.topCenter.x, topCenterPoints.reduce(paper.Point.min).y);
-        const maxBottomCenter = new paperMain.Point(this.toBounds.bottomCenter.x, bottomCenterPoints.reduce(paper.Point.max).y);
-        this.updateGuide(this.centerXGuide, minTopCenter, maxBottomCenter);
-      }
-      if (this.snap.y && topSnaps.length > 0) {
-        const topLeftPoints: paper.Point[] = [this.toBounds.topLeft];
-        const topRightPoints: paper.Point[] = [this.toBounds.topRight];
-        topSnaps.forEach((point) => {
-          const paperLayer = getPaperLayer(point.id);
-          topLeftPoints.push(paperLayer.bounds.topLeft);
-          topRightPoints.push(paperLayer.bounds.topRight);
-        });
-        const minTopLeft = new paperMain.Point(topLeftPoints.reduce(paper.Point.min).x, this.toBounds.top);
-        const maxTopRight = new paperMain.Point(topRightPoints.reduce(paper.Point.max).x, this.toBounds.top);
-        this.updateGuide(this.topGuide, minTopLeft, maxTopRight);
-      }
-      if (this.snap.y && bottomSnaps.length > 0) {
-        const bottomLeftPoints: paper.Point[] = [this.toBounds.bottomLeft];
-        const bottomRightPoints: paper.Point[] = [this.toBounds.bottomRight];
-        bottomSnaps.forEach((point) => {
-          const paperLayer = getPaperLayer(point.id);
-          bottomLeftPoints.push(paperLayer.bounds.bottomLeft);
-          bottomRightPoints.push(paperLayer.bounds.bottomRight);
-        });
-        const minBottomLeft = new paperMain.Point(bottomLeftPoints.reduce(paper.Point.min).x, this.toBounds.bottom);
-        const maxBottomRight = new paperMain.Point(bottomRightPoints.reduce(paper.Point.max).x, this.toBounds.bottom);
-        this.updateGuide(this.bottomGuide, minBottomLeft, maxBottomRight);
-      }
-      if (this.snap.y && centerYSnaps.length > 0) {
-        const leftCenterPoints: paper.Point[] = [this.toBounds.leftCenter];
-        const rightCenterPoints: paper.Point[] = [this.toBounds.rightCenter];
-        centerYSnaps.forEach((point) => {
-          const paperLayer = getPaperLayer(point.id);
-          leftCenterPoints.push(paperLayer.bounds.leftCenter);
-          rightCenterPoints.push(paperLayer.bounds.rightCenter);
-        });
-        const minLeftCenter = new paperMain.Point(leftCenterPoints.reduce(paper.Point.min).x, this.toBounds.leftCenter.y);
-        const maxLeftCenter = new paperMain.Point(rightCenterPoints.reduce(paper.Point.max).x, this.toBounds.rightCenter.y);
-        this.updateGuide(this.centerYGuide, minLeftCenter, maxLeftCenter);
-      }
       //this.updateRef();
       this.scaleLayers();
     }
