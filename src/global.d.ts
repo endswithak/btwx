@@ -287,6 +287,7 @@ declare namespace em {
     side: 'left' | 'right' | 'center' | 'top' | 'bottom';
     point: number;
     breakThreshold?: number;
+    boundsSide?: 'left' | 'right' | 'center' | 'top' | 'bottom';
   }
 
   interface SnapBound {

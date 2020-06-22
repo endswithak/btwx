@@ -6,8 +6,8 @@ import { getPagePaperLayer, getLayerAndDescendants, getPaperLayer } from '../sto
 import { applyShapeMethods } from './shapeUtils';
 import { paperMain } from './index';
 import Tooltip from './tooltip';
-import Guide from './guide';
 import { DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_GRADIENT_STYLE, THEME_PRIMARY_COLOR } from '../constants';
+import SnapTool from './snapTool';
 
 class ShapeTool {
   ref: paper.Path.Rectangle;
@@ -24,27 +24,14 @@ class ShapeTool {
   constrainedDims: paper.Point;
   centerPoint: paper.Point;
   shiftModifier: boolean;
+  snapTool: SnapTool;
   snap: {
-    x: {
-      snapPoint: em.SnapPoint;
-      breakThreshold: number;
-      boundsSide: 'left' | 'right' | 'center';
-    };
-    y: {
-      snapPoint: em.SnapPoint;
-      breakThreshold: number;
-      boundsSide: 'top' | 'bottom' | 'center';
-    };
+    x: em.SnapPoint;
+    y: em.SnapPoint;
   };
   snapPoints: em.SnapPoint[];
   snapBreakThreshholdMin: number;
   snapBreakThreshholdMax: number;
-  leftGuide: Guide;
-  rightGuide: Guide;
-  topGuide: Guide;
-  bottomGuide: Guide;
-  centerXGuide: Guide;
-  centerYGuide: Guide;
   toBounds: paper.Rectangle;
   constructor(shapeType: em.ShapeType) {
     this.ref = null;
@@ -68,12 +55,7 @@ class ShapeTool {
     this.constrainedDims = new Point(0, 0);
     this.centerPoint = new Point(0, 0);
     this.shiftModifier = false;
-    this.leftGuide = null;
-    this.rightGuide = null;
-    this.topGuide = null;
-    this.bottomGuide = null;
-    this.centerXGuide = null;
-    this.centerYGuide = null;
+    this.snapTool = new SnapTool;
     this.snapBreakThreshholdMin = -8;
     this.snapBreakThreshholdMax = 8;
     this.snapPoints = [];
@@ -162,173 +144,26 @@ class ShapeTool {
       up: true
     });
   }
-  updateGuide(guide: Guide, point1: paper.Point, point2: paper.Point) {
-    if (guide) {
-      guide.paperLayer.remove();
-    }
-    guide = new Guide(point1, point2, { up: true, drag: true, move: true });
-  }
-  updateGuides() {
-    // find all snapPoints that match current selection bounds side
-    const leftSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.toBounds.left) === Math.round(snapPoint.point));
-    const centerXSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.toBounds.center.x) === Math.round(snapPoint.point));
-    const rightSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.toBounds.right) === Math.round(snapPoint.point));
-    const topSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.toBounds.top) === Math.round(snapPoint.point));
-    const centerYSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.toBounds.center.y) === Math.round(snapPoint.point));
-    const bottomSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.toBounds.bottom) === Math.round(snapPoint.point));
-    // if any snap points match, find their min/max...
-    // vertical/horizontal position and add relevant guide
-    if (this.snap.x && leftSnaps.length > 0) {
-      const topLeftPoints: paper.Point[] = [this.toBounds.topLeft];
-      const bottomLeftPoints: paper.Point[] = [this.toBounds.bottomLeft];
-      leftSnaps.forEach((point) => {
-        const paperLayer = getPaperLayer(point.id);
-        topLeftPoints.push(paperLayer.bounds.topLeft);
-        bottomLeftPoints.push(paperLayer.bounds.bottomLeft);
-      });
-      const minTopLeft = new paperMain.Point(this.toBounds.left, topLeftPoints.reduce(paper.Point.min).y);
-      const maxBottomLeft = new paperMain.Point(this.toBounds.left, bottomLeftPoints.reduce(paper.Point.max).y);
-      this.updateGuide(this.leftGuide, minTopLeft, maxBottomLeft);
-    }
-    if (this.snap.x && rightSnaps.length > 0) {
-      const topRightPoints: paper.Point[] = [this.toBounds.topRight];
-      const bottomRightPoints: paper.Point[] = [this.toBounds.bottomRight];
-      rightSnaps.forEach((point) => {
-        const paperLayer = getPaperLayer(point.id);
-        topRightPoints.push(paperLayer.bounds.topRight);
-        bottomRightPoints.push(paperLayer.bounds.bottomRight);
-      });
-      const minTopRight = new paperMain.Point(this.toBounds.right, topRightPoints.reduce(paper.Point.min).y);
-      const maxBottomRight = new paperMain.Point(this.toBounds.right, bottomRightPoints.reduce(paper.Point.max).y);
-      this.updateGuide(this.rightGuide, minTopRight, maxBottomRight);
-    }
-    if (this.snap.x && centerXSnaps.length > 0) {
-      const topCenterPoints: paper.Point[] = [this.toBounds.topCenter];
-      const bottomCenterPoints: paper.Point[] = [this.toBounds.bottomCenter];
-      centerXSnaps.forEach((point) => {
-        const paperLayer = getPaperLayer(point.id);
-        topCenterPoints.push(paperLayer.bounds.topCenter);
-        bottomCenterPoints.push(paperLayer.bounds.bottomCenter);
-      });
-      const minTopCenter = new paperMain.Point(this.toBounds.topCenter.x, topCenterPoints.reduce(paper.Point.min).y);
-      const maxBottomCenter = new paperMain.Point(this.toBounds.bottomCenter.x, bottomCenterPoints.reduce(paper.Point.max).y);
-      this.updateGuide(this.centerXGuide, minTopCenter, maxBottomCenter);
-    }
-    if (this.snap.y && topSnaps.length > 0) {
-      const topLeftPoints: paper.Point[] = [this.toBounds.topLeft];
-      const topRightPoints: paper.Point[] = [this.toBounds.topRight];
-      topSnaps.forEach((point) => {
-        const paperLayer = getPaperLayer(point.id);
-        topLeftPoints.push(paperLayer.bounds.topLeft);
-        topRightPoints.push(paperLayer.bounds.topRight);
-      });
-      const minTopLeft = new paperMain.Point(topLeftPoints.reduce(paper.Point.min).x, this.toBounds.top);
-      const maxTopRight = new paperMain.Point(topRightPoints.reduce(paper.Point.max).x, this.toBounds.top);
-      this.updateGuide(this.topGuide, minTopLeft, maxTopRight);
-    }
-    if (this.snap.y && bottomSnaps.length > 0) {
-      const bottomLeftPoints: paper.Point[] = [this.toBounds.bottomLeft];
-      const bottomRightPoints: paper.Point[] = [this.toBounds.bottomRight];
-      bottomSnaps.forEach((point) => {
-        const paperLayer = getPaperLayer(point.id);
-        bottomLeftPoints.push(paperLayer.bounds.bottomLeft);
-        bottomRightPoints.push(paperLayer.bounds.bottomRight);
-      });
-      const minBottomLeft = new paperMain.Point(bottomLeftPoints.reduce(paper.Point.min).x, this.toBounds.bottom);
-      const maxBottomRight = new paperMain.Point(bottomRightPoints.reduce(paper.Point.max).x, this.toBounds.bottom);
-      this.updateGuide(this.bottomGuide, minBottomLeft, maxBottomRight);
-    }
-    if (this.snap.y && centerYSnaps.length > 0) {
-      const leftCenterPoints: paper.Point[] = [this.toBounds.leftCenter];
-      const rightCenterPoints: paper.Point[] = [this.toBounds.rightCenter];
-      centerYSnaps.forEach((point) => {
-        const paperLayer = getPaperLayer(point.id);
-        leftCenterPoints.push(paperLayer.bounds.leftCenter);
-        rightCenterPoints.push(paperLayer.bounds.rightCenter);
-      });
-      const minLeftCenter = new paperMain.Point(leftCenterPoints.reduce(paper.Point.min).x, this.toBounds.leftCenter.y);
-      const maxLeftCenter = new paperMain.Point(rightCenterPoints.reduce(paper.Point.max).x, this.toBounds.rightCenter.y);
-      this.updateGuide(this.centerYGuide, minLeftCenter, maxLeftCenter);
-    }
-  }
-  closestSnapPoint(snapPoints: em.SnapPoint[], side: em.SnapBound) {
-    let closestSnap;
-    let distance;
-    for(let i = 0; i < snapPoints.length; i++) {
-      const snap = snapPoints[i];
-      const pointMax = Math.max(side.point, snap.point);
-      const pointMin = Math.min(side.point, snap.point);
-      const pointDistance = pointMax - pointMin;
-      if (!distance || pointDistance < distance) {
-        closestSnap = snap;
-        distance = pointDistance;
-      }
-    }
-    return {
-      snapPoint: closestSnap,
-      distance: distance
-    }
-  }
-  closestXSnapPoint() {
-    // possible X snap points
-    const xSnaps = this.snapPoints.filter((snapPoint) => snapPoint.axis === 'x');
-    // bounding box snap points
-    const xSnapBounds = this.drawing ? [{side: 'left', point: this.toBounds.left}] : [{side: 'left', point: this.toBounds.left}, {side: 'right', point: this.toBounds.right}];
-    let closestXSnap;
-    let closestXSnapBounds;
-    let distance;
-    // For each bounding box snap point, loop through...
-    // every possible X snap point and return the closest...
-    // bounding snap point and X snap point
-    for(let i = 0; i < xSnapBounds.length; i++) {
-      const xSnapBound = xSnapBounds[i];
-      for(let j = 0; j < xSnaps.length; j++) {
-        const xSnap = xSnaps[j];
-        const pointMax = Math.max(xSnapBound.point, xSnap.point);
-        const pointMin = Math.min(xSnapBound.point, xSnap.point);
-        const pointDistance = pointMax - pointMin;
-        if (!distance || pointDistance < distance) {
-          closestXSnap = xSnap;
-          closestXSnapBounds = xSnapBound;
-          distance = pointDistance;
+  updateToBounds() {
+    const x = this.snap.x ? this.snap.x.point : this.to.x;
+    const y = this.snap.y ? this.snap.y.point : this.to.y;
+    if (this.shiftModifier) {
+      if (this.snap.x && this.snap.y) {
+        return;
+      } else {
+        if (this.snap.x) {
+          return;
+        }
+        if (this.snap.y) {
+          return;
         }
       }
-    }
-    return {
-      bounds: closestXSnapBounds,
-      snapPoint: closestXSnap,
-      distance: distance
-    }
-  }
-  closestYSnapPoint() {
-    // possible Y snap points
-    const ySnaps = this.snapPoints.filter((snapPoint) => snapPoint.axis === 'y');
-    // bounding box snap points
-    const ySnapBounds = [{side: 'top', point: this.toBounds.top}];
-    let closestYSnap;
-    let closestYSnapBounds;
-    let distance;
-    // For each bounding box snap point, loop through...
-    // every possible Y snap point and return the closest...
-    // bounding snap point and Y snap point
-    for(let i = 0; i < ySnapBounds.length; i++) {
-      const ySnapBound = ySnapBounds[i];
-      for(let j = 0; j < ySnaps.length; j++) {
-        const ySnap = ySnaps[j];
-        const pointMax = Math.max(ySnapBound.point, ySnap.point);
-        const pointMin = Math.min(ySnapBound.point, ySnap.point);
-        const pointDistance = pointMax - pointMin;
-        if (!distance || pointDistance < distance) {
-          closestYSnap = ySnap;
-          closestYSnapBounds = ySnapBound;
-          distance = pointDistance;
-        }
-      }
-    }
-    return {
-      bounds: closestYSnapBounds,
-      snapPoint: closestYSnap,
-      distance: distance
+      return;
+    } else {
+      this.toBounds = new paperMain.Rectangle({
+        from: this.from,
+        to: new paperMain.Point(x, y)
+      });
     }
   }
   onKeyDown(event: paper.KeyEvent): void {
@@ -342,7 +177,7 @@ class ShapeTool {
           });
           this.updateTooltip();
           this.updateOutline();
-          this.updateRef();
+          //this.updateRef();
         }
         break;
       }
@@ -369,7 +204,7 @@ class ShapeTool {
           });
           this.updateTooltip();
           this.updateOutline();
-          this.updateRef();
+          //this.updateRef();
         }
         break;
       }
@@ -393,20 +228,28 @@ class ShapeTool {
         } else {
           switch(this.snap.x.boundsSide) {
             case 'left':
-              snapBounds.center.x = this.snap.x.snapPoint.point + (this.toBounds.width / 2);
+              snapBounds.center.x = this.snap.x.point + (this.toBounds.width / 2);
               break;
             case 'center':
-              snapBounds.center.x = this.snap.x.snapPoint.point;
+              snapBounds.center.x = this.snap.x.point;
               break;
             case 'right':
-              snapBounds.center.x = this.snap.x.snapPoint.point - (this.toBounds.width / 2);
+              snapBounds.center.x = this.snap.x.point - (this.toBounds.width / 2);
               break;
           }
           // if not exceeded, update X snap threshold
           this.snap.x.breakThreshold += event.delta.x;
         }
       } else {
-        const closestXSnap = this.closestXSnapPoint();
+        const closestXSnap = this.snapTool.closestXSnapPoint({
+          snapPoints: this.snapPoints,
+          bounds: this.toBounds,
+          snapTo: {
+            left: true,
+            right: false,
+            center: false
+          }
+        });
         // if selection bounds is within 2 units from...
         // closest point, snap to that point
         if (closestXSnap.distance <= (1 / paperMain.view.zoom) * 2) {
@@ -422,9 +265,9 @@ class ShapeTool {
               break;
           }
           this.snap.x = {
-            snapPoint: closestXSnap.snapPoint,
+            ...closestXSnap.snapPoint,
             breakThreshold: 0,
-            boundsSide: closestXSnap.bounds.side as 'left' | 'right' | 'center'
+            boundsSide: closestXSnap.bounds.side
           };
         }
       }
@@ -437,20 +280,28 @@ class ShapeTool {
         } else {
           switch(this.snap.y.boundsSide) {
             case 'top':
-              snapBounds.center.y = this.snap.y.snapPoint.point + (this.toBounds.height / 2);
+              snapBounds.center.y = this.snap.y.point + (this.toBounds.height / 2);
               break;
             case 'center':
-              snapBounds.center.y = this.snap.y.snapPoint.point;
+              snapBounds.center.y = this.snap.y.point;
               break;
             case 'bottom':
-              snapBounds.center.y = this.snap.y.snapPoint.point - (this.toBounds.height / 2);
+              snapBounds.center.y = this.snap.y.point - (this.toBounds.height / 2);
               break;
           }
           // if not exceeded, update Y snap threshold
           this.snap.y.breakThreshold += event.delta.y;
         }
       } else {
-        const closestYSnap = this.closestYSnapPoint();
+        const closestYSnap = this.snapTool.closestYSnapPoint({
+          snapPoints: this.snapPoints,
+          bounds: this.toBounds,
+          snapTo: {
+            top: true,
+            bottom: false,
+            center: false
+          }
+        });
         // if selection bounds is within 2 units from...
         // closest point, snap to that point
         if (closestYSnap.distance <= (1 / paperMain.view.zoom) * 2) {
@@ -466,83 +317,113 @@ class ShapeTool {
               break;
           }
           this.snap.y = {
-            snapPoint: closestYSnap.snapPoint,
+            ...closestYSnap.snapPoint,
             breakThreshold: 0,
-            boundsSide: closestYSnap.bounds.side as 'top' | 'bottom' | 'center'
+            boundsSide: closestYSnap.bounds.side
           };
         }
       }
       this.toBounds = snapBounds;
-      this.updateGuides();
-      this.updateRef();
+      this.snapTool.updateGuides({
+        snapPoints: this.snapPoints,
+        bounds: this.toBounds,
+        xSnap: this.snap.x,
+        ySnap: this.snap.y
+      });
+      //this.updateRef();
     }
   }
   onMouseDown(event: paper.ToolEvent): void {
     this.drawing = true;
     const from = event.point;
     if (this.snap.x) {
-      from.x = this.snap.x.snapPoint.point;
+      from.x = this.snap.x.point;
     }
     if (this.snap.y) {
-      from.y = this.snap.y.snapPoint.point;
+      from.y = this.snap.y.point;
     }
     this.from = from;
   }
   onMouseDrag(event: paper.ToolEvent): void {
     this.to = event.point;
-    this.pointDiff = new Point(this.to.x - this.from.x, this.to.y - this.from.y);
-    this.dims = new Size(this.pointDiff.x < 0 ? this.pointDiff.x * -1 : this.pointDiff.x, this.pointDiff.y < 0 ? this.pointDiff.y * -1 : this.pointDiff.y);
+    this.pointDiff = new paperMain.Point(this.to.x - this.from.x, this.to.y - this.from.y);
+    this.dims = new paperMain.Size(this.pointDiff.x < 0 ? this.pointDiff.x * -1 : this.pointDiff.x, this.pointDiff.y < 0 ? this.pointDiff.y * -1 : this.pointDiff.y);
     this.maxDim = Math.max(this.dims.width, this.dims.height);
     this.constrainedDims = new Point(this.pointDiff.x < 0 ? this.from.x - this.maxDim : this.from.x + this.maxDim, this.pointDiff.y < 0 ? this.from.y - this.maxDim : this.from.y + this.maxDim);
-    //this.centerPoint = new Point((this.from.x + this.to.x) / 2, (this.from.y + this.to.y) / 2);
     this.toBounds = new paperMain.Rectangle({
       from: this.from,
       to: this.shiftModifier ? this.constrainedDims : this.to
     });
-    // const snapBounds = this.toBounds.clone();
-    // if (this.snap.x) {
-    //   // check if event delta will exceed X snap point min/max threshold
-    //   if (this.snap.x.breakThreshold + event.delta.x < this.snapBreakThreshholdMin || this.snap.x.breakThreshold + event.delta.x > this.snapBreakThreshholdMax) {
-    //     // if exceeded, adjust selection bounds...
-    //     // clear X snap, and reset X snap threshold
-    //     this.snap.x = null;
-    //   } else {
-    //     switch(this.snap.x.boundsSide) {
-    //       case 'left':
-    //         snapBounds.left = this.snap.x.snapPoint.point;
-    //         break;
-    //       case 'right':
-    //         snapBounds.right = this.snap.x.snapPoint.point;
-    //         break;
-    //     }
-    //     // if not exceeded, update X snap threshold
-    //     this.snap.x.breakThreshold += event.delta.x;
-    //   }
-    // } else {
-    //   const closestXSnap = this.closestXSnapPoint();
-    //   // if selection bounds is within 2 units from...
-    //   // closest point, snap to that point
-    //   if (closestXSnap.distance <= (1 / paperMain.view.zoom) * 2) {
-    //     switch(closestXSnap.bounds.side) {
-    //       case 'left':
-    //         snapBounds.left = closestXSnap.snapPoint.point;
-    //         break;
-    //       case 'right':
-    //         snapBounds.right = closestXSnap.snapPoint.point;
-    //         break;
-    //     }
-    //     this.snap.x = {
-    //       snapPoint: closestXSnap.snapPoint,
-    //       breakThreshold: 0,
-    //       boundsSide: closestXSnap.bounds.side as 'left' | 'right' | 'center'
-    //     };
-    //   }
-    // }
-    // this.toBounds = snapBounds;
-    this.updateGuides();
+    if (this.snap.x) {
+      // check if event delta will exceed X snap point min/max threshold
+      if (this.snap.x.breakThreshold + event.delta.x < this.snapBreakThreshholdMin || this.snap.x.breakThreshold + event.delta.x > this.snapBreakThreshholdMax) {
+        // if exceeded, adjust selection bounds...
+        // clear X snap, and reset X snap threshold
+        this.snap.x = null;
+      } else {
+        // if not exceeded, update X snap threshold
+        this.snap.x.breakThreshold += event.delta.x;
+      }
+    } else {
+      const closestXSnap = this.snapTool.closestXSnapPoint({
+        snapPoints: this.snapPoints,
+        bounds: this.toBounds,
+        snapTo: {
+          left: true,
+          right: true,
+          center: false
+        }
+      });
+      // if selection bounds is within 2 units from...
+      // closest point, snap to that point
+      if (closestXSnap.distance <= (1 / paperMain.view.zoom) * 2) {
+        this.snap.x = {
+          ...closestXSnap.snapPoint,
+          breakThreshold: 0,
+          boundsSide: closestXSnap.bounds.side
+        };
+      }
+    }
+    if (this.snap.y) {
+      // check if event delta will exceed Y snap point min/max threshold
+      if (this.snap.y.breakThreshold + event.delta.y < this.snapBreakThreshholdMin || this.snap.y.breakThreshold + event.delta.y > this.snapBreakThreshholdMax) {
+        // if exceeded, adjust selection bounds...
+        // clear Y snap, and reset Y snap threshold
+        this.snap.y = null;
+      } else {
+        // if not exceeded, update Y snap threshold
+        this.snap.y.breakThreshold += event.delta.y;
+      }
+    } else {
+      const closestYSnap = this.snapTool.closestYSnapPoint({
+        snapPoints: this.snapPoints,
+        bounds: this.toBounds,
+        snapTo: {
+          top: true,
+          bottom: true,
+          center: false
+        }
+      });
+      // if selection bounds is within 2 units from...
+      // closest point, snap to that point
+      if (closestYSnap.distance <= (1 / paperMain.view.zoom) * 2) {
+        this.snap.y = {
+          ...closestYSnap.snapPoint,
+          breakThreshold: 0,
+          boundsSide: closestYSnap.bounds.side
+        };
+      }
+    }
+    this.updateToBounds();
+    this.snapTool.updateGuides({
+      snapPoints: this.snapPoints,
+      bounds: this.toBounds,
+      xSnap: this.snap.x,
+      ySnap: this.snap.y
+    });
     this.updateTooltip();
     this.updateOutline();
-    this.updateRef();
+    //this.updateRef();
   }
   onMouseUp(event: paper.ToolEvent): void {
     if (this.to) {
