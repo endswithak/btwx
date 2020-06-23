@@ -180,6 +180,7 @@ declare namespace em {
     type: 'Group';
     children: string[];
     showChildren: boolean;
+    clipped: boolean;
   }
 
   interface Artboard extends Layer {

@@ -309,6 +309,7 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
       tweens: [],
       mask: false,
       masked: false,
+      clipped: false,
       points: {
         closed: true,
       },

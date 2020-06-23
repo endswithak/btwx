@@ -4,6 +4,7 @@ import { ThemeContext } from './ThemeProvider';
 import SidebarLayerTitleInput from './SidebarLayerTitleInput';
 import SidebarLayerChevron from './SidebarLayerChevron';
 import SidebarLayerIcon from './SidebarLayerIcon';
+import SidebarLayerMaskedIcon from './SidebarLayerMaskedIcon';
 import { setLayerHover } from '../store/actions/layer';
 import { SetLayerHoverPayload, LayerTypes } from '../store/actionTypes/layer';
 import { RootState } from '../store/reducers';
@@ -44,6 +45,8 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
         boxShadow: hover === layer.id ? `0 0 0 ${theme.unit / 2}px ${theme.background.z3} inset` : ''
       }}>
       <SidebarLayerChevron
+        layer={layer} />
+      <SidebarLayerMaskedIcon
         layer={layer} />
       <SidebarLayerIcon
         layer={layer} />
