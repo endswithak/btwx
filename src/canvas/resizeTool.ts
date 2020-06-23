@@ -103,12 +103,35 @@ class ResizeTool {
     });
   }
   clearLayerScale(paperLayer: paper.Item, layerItem: em.Layer) {
-    paperLayer.pivot = paperLayer.bounds.center;
-    paperLayer.bounds.width = layerItem.frame.width;
-    paperLayer.bounds.height = layerItem.frame.height;
-    paperLayer.position.x = layerItem.frame.x;
-    paperLayer.position.y = layerItem.frame.y;
-    paperLayer.scale(this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
+    switch(paperLayer.data.type) {
+      case 'Artboard': {
+        const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
+        const mask = paperLayer.getItem({data: { id: 'ArtboardMask' }});
+        background.pivot = paperLayer.bounds.center;
+        background.bounds.width = layerItem.frame.width;
+        background.bounds.height = layerItem.frame.height;
+        background.position.x = layerItem.frame.x;
+        background.position.y = layerItem.frame.y;
+        background.scale(this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
+        mask.pivot = paperLayer.bounds.center;
+        mask.bounds.width = layerItem.frame.width;
+        mask.bounds.height = layerItem.frame.height;
+        mask.position.x = layerItem.frame.x;
+        mask.position.y = layerItem.frame.y;
+        mask.scale(this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
+        break;
+      }
+      case 'Group':
+      case 'Shape': {
+        paperLayer.pivot = paperLayer.bounds.center;
+        paperLayer.bounds.width = layerItem.frame.width;
+        paperLayer.bounds.height = layerItem.frame.height;
+        paperLayer.position.x = layerItem.frame.x;
+        paperLayer.position.y = layerItem.frame.y;
+        paperLayer.scale(this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
+        break;
+      }
+    }
   }
   scaleLayer(id: string, hor: number, ver: number) {
     const paperLayer = getPaperLayer(id);

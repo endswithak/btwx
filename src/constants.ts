@@ -1,6 +1,7 @@
 export const THEME_PRIMARY_COLOR = '#3C88FD';
 export const THEME_GUIDE_COLOR = 'red';
 export const THEME_UNIT_SIZE = 4;
+export const DEFAULT_ARTBOARD_BACKGROUND_COLOR = '#fff';
 
 export const DEFAULT_GRADIENT_STYLE: em.Gradient = {
   gradientType: 'linear',

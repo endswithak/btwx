@@ -116,7 +116,6 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
             const tweenDestinationLayerArtboardPosition = getPositionInArtboard(tweenDestinationLayerPaperLayer, tweenEventDestinationArtboardPaperLayer);
             const tweenPaperLayerPositionDiffX = tweenDestinationLayerArtboardPosition.x - tweenPaperLayerArtboardPosition.x;
             const tweenPaperLayerPositionDiffY = tweenDestinationLayerArtboardPosition.y - tweenPaperLayerArtboardPosition.y;
-            console.log(tweenPaperLayer);
             switch(tween.prop) {
               case 'shape': {
                 const morphData = [
@@ -140,7 +139,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     // apply final clone path data to tweenPaperLayer
                     (tweenPaperLayer as paper.Path).pathData = clone.pathData;
                     // update gradient origin/destination if needed
-                    if (tweenPaperLayer.fillColor.gradient) {
+                    if (tweenPaperLayer.fillColor && tweenPaperLayer.fillColor.gradient) {
                       const origin = tweenLayers.byId[tweenPaperLayer.data.id].style.fill.gradient.origin;
                       const destination = tweenLayers.byId[tweenPaperLayer.data.id].style.fill.gradient.destination;
                       tweenPaperLayer.fillColor.origin = new paper.Point((origin.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (origin.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);

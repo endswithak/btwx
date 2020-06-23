@@ -102,6 +102,12 @@ import {
   SET_LAYER_FILL_GRADIENT_STOP_POSITION,
   ADD_LAYER_FILL_GRADIENT_STOP,
   REMOVE_LAYER_FILL_GRADIENT_STOP,
+  ADD_LAYERS_MASK,
+  REMOVE_LAYERS_MASK,
+  MASK_LAYER,
+  UNMASK_LAYER,
+  MASK_LAYERS,
+  UNMASK_LAYERS,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -208,7 +214,13 @@ import {
   setLayerFillGradientStopColor,
   setLayerFillGradientStopPosition,
   addLayerFillGradientStop,
-  removeLayerFillGradientStop
+  removeLayerFillGradientStop,
+  addLayersMask,
+  removeLayersMask,
+  maskLayer,
+  unmaskLayer,
+  maskLayers,
+  unmaskLayers
 } from '../utils/layer';
 
 export interface LayerState {
@@ -494,6 +506,18 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return addLayerFillGradientStop(state, action);
     case REMOVE_LAYER_FILL_GRADIENT_STOP:
       return removeLayerFillGradientStop(state, action);
+    case ADD_LAYERS_MASK:
+      return addLayersMask(state, action);
+    case REMOVE_LAYERS_MASK:
+      return removeLayersMask(state, action);
+    case MASK_LAYER:
+      return maskLayer(state, action);
+    case UNMASK_LAYER:
+      return unmaskLayer(state, action);
+    case MASK_LAYERS:
+      return maskLayers(state, action);
+    case UNMASK_LAYERS:
+      return unmaskLayers(state, action);
     default:
       return state;
   }

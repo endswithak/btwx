@@ -135,6 +135,13 @@ export const ADD_IN_VIEW_LAYERS = 'ADD_IN_VIEW_LAYERS';
 export const REMOVE_IN_VIEW_LAYERS = 'REMOVE_IN_VIEW_LAYERS';
 export const UPDATE_IN_VIEW_LAYERS = 'UPDATE_IN_VIEW_LAYERS';
 
+export const ADD_LAYERS_MASK = 'ADD_LAYERS_MASK';
+export const REMOVE_LAYERS_MASK = 'REMOVE_LAYERS_MASK';
+export const MASK_LAYER = 'MASK_LAYER';
+export const UNMASK_LAYER = 'UNMASK_LAYER';
+export const MASK_LAYERS = 'MASK_LAYERS';
+export const UNMASK_LAYERS = 'UNMASK_LAYERS';
+
 // Page
 
 export type AddPagePayload = {
@@ -1197,5 +1204,59 @@ export interface RemoveLayerFillGradientStop {
   payload: RemoveLayerFillGradientStopPayload;
 }
 
+export interface AddLayersMaskPayload {
+  layers: string[];
+}
 
-export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | AddText | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower | FreezeLayerTween | UnFreezeLayerTween | SetLayerX | SetLayerY | SetLayerWidth | SetLayerHeight | SetLayerRotation | SetLayerOpacity | EnableLayerHorizontalFlip | DisableLayerHorizontalFlip | EnableLayerVerticalFlip | DisableLayerVerticalFlip | EnableLayerFill | DisableLayerFill | SetLayerFillColor | EnableLayerStroke | DisableLayerStroke | SetLayerStrokeColor | SetLayerStrokeFillType | SetLayerStrokeGradient | SetLayerStrokeGradientType | SetLayerStrokeWidth | SetLayerStrokeCap | SetLayerStrokeJoin | SetLayerStrokeDashArray | SetLayerStrokeMiterLimit | EnableLayerShadow | DisableLayerShadow | SetLayerShadowColor | SetLayerShadowBlur | SetLayerShadowXOffset | SetLayerShadowYOffset | ResizeLayer | ResizeLayers | SetLayerText | SetLayerFontSize | SetLayerLeading | SetLayerFontWeight | SetLayerFontFamily | SetLayerJustification | AddInViewLayer | AddInViewLayers | RemoveInViewLayer | RemoveInViewLayers | UpdateInViewLayers | SetLayerFillType | SetLayerFillGradient | SetLayerFillGradientType | SetLayerFillGradientOrigin | SetLayerFillGradientDestination | SetLayerFillGradientStopColor | SetLayerFillGradientStopPosition | AddLayerFillGradientStop | RemoveLayerFillGradientStop;
+export interface AddLayersMask {
+  type: typeof ADD_LAYERS_MASK;
+  payload: AddLayersMaskPayload;
+}
+
+export interface RemoveLayersMaskPayload {
+  id: string;
+}
+
+export interface RemoveLayersMask {
+  type: typeof REMOVE_LAYERS_MASK;
+  payload: RemoveLayersMaskPayload;
+}
+
+export interface MaskLayerPayload {
+  id: string;
+}
+
+export interface MaskLayer {
+  type: typeof MASK_LAYER;
+  payload: MaskLayerPayload;
+}
+
+export interface UnmaskLayerPayload {
+  id: string;
+}
+
+export interface UnmaskLayer {
+  type: typeof UNMASK_LAYER;
+  payload: UnmaskLayerPayload;
+}
+
+export interface MaskLayersPayload {
+  layers: string[];
+}
+
+export interface MaskLayers {
+  type: typeof MASK_LAYERS;
+  payload: MaskLayersPayload;
+}
+
+export interface UnmaskLayersPayload {
+  layers: string[];
+}
+
+export interface UnmaskLayers {
+  type: typeof UNMASK_LAYERS;
+  payload: UnmaskLayersPayload;
+}
+
+
+export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | AddText | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower | FreezeLayerTween | UnFreezeLayerTween | SetLayerX | SetLayerY | SetLayerWidth | SetLayerHeight | SetLayerRotation | SetLayerOpacity | EnableLayerHorizontalFlip | DisableLayerHorizontalFlip | EnableLayerVerticalFlip | DisableLayerVerticalFlip | EnableLayerFill | DisableLayerFill | SetLayerFillColor | EnableLayerStroke | DisableLayerStroke | SetLayerStrokeColor | SetLayerStrokeFillType | SetLayerStrokeGradient | SetLayerStrokeGradientType | SetLayerStrokeWidth | SetLayerStrokeCap | SetLayerStrokeJoin | SetLayerStrokeDashArray | SetLayerStrokeMiterLimit | EnableLayerShadow | DisableLayerShadow | SetLayerShadowColor | SetLayerShadowBlur | SetLayerShadowXOffset | SetLayerShadowYOffset | ResizeLayer | ResizeLayers | SetLayerText | SetLayerFontSize | SetLayerLeading | SetLayerFontWeight | SetLayerFontFamily | SetLayerJustification | AddInViewLayer | AddInViewLayers | RemoveInViewLayer | RemoveInViewLayers | UpdateInViewLayers | SetLayerFillType | SetLayerFillGradient | SetLayerFillGradientType | SetLayerFillGradientOrigin | SetLayerFillGradientDestination | SetLayerFillGradientStopColor | SetLayerFillGradientStopPosition | AddLayerFillGradientStop | RemoveLayerFillGradientStop | AddLayersMask | RemoveLayerMask | MaskLayer | UnmaskLayer | MaskLayers | UnmaskLayers;

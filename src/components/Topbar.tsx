@@ -5,6 +5,9 @@ import { enableSelectionTool, enableRectangleShapeTool, enableEllipseShapeTool, 
 import { ToolTypes } from '../store/actionTypes/tool';
 import { openTweenDrawer, closeTweenDrawer } from '../store/actions/tweenDrawer';
 import { TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
+import { AddLayersMaskPayload, LayerTypes } from '../store/actionTypes/layer';
+import { addLayersMask } from '../store/actions/layer';
+import { orderLayersByDepth } from '../store/selectors/layer';
 import { ToolState } from '../store/reducers/tool';
 import { ThemeContext } from './ThemeProvider';
 import { ipcRenderer } from 'electron';
@@ -14,6 +17,8 @@ interface TopbarStateProps {
   tool: ToolState;
   activeArtboard: em.Artboard;
   isTweenDrawerOpen: boolean;
+  selected: string[];
+  canMask: boolean;
   enableRectangleShapeTool(): ToolTypes;
   enableEllipseShapeTool(): ToolTypes;
   enableStarShapeTool(): ToolTypes;
@@ -24,6 +29,7 @@ interface TopbarStateProps {
   enableTextTool(): ToolTypes;
   openTweenDrawer(): TweenDrawerTypes;
   closeTweenDrawer(): TweenDrawerTypes;
+  addLayersMask(payload: AddLayersMaskPayload): LayerTypes;
 }
 
 const Topbar = (props: TopbarStateProps): ReactElement => {
@@ -31,6 +37,8 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
   const {
     tool,
     isTweenDrawerOpen,
+    selected,
+    canMask,
     enableRectangleShapeTool,
     enableEllipseShapeTool,
     enableSelectionTool,
@@ -41,11 +49,18 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
     activeArtboard,
     enableTextTool,
     openTweenDrawer,
-    closeTweenDrawer
+    closeTweenDrawer,
+    addLayersMask
   } = props;
 
   const handlePreviewClick = () => {
     ipcRenderer.send('openPreview', JSON.stringify(activeArtboard));
+  }
+
+  const handleMaskClick = () => {
+    if (canMask) {
+      addLayersMask({layers: selected});
+    }
   }
 
   return (
@@ -90,6 +105,10 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
         onClick={isTweenDrawerOpen ? closeTweenDrawer : openTweenDrawer}
         icon='M15,16 L15,20 L3,20 L3,16 L15,16 Z M21,16 L21,20 L17,20 L17,16 L21,16 Z M15,10 L15,14 L11,14 L11,10 L15,10 Z M9,10 L9,14 L3,14 L3,10 L9,10 Z M15,4 L15,8 L3,8 L3,4.001 C3,4.00044772 3.00044772,4 3.001,4 L15,4 L15,4 Z M21,4 L21,8 L17,8 L17,4 L21,4 Z'
         isActive={isTweenDrawerOpen} />
+      <TopbarButton
+        onClick={handleMaskClick}
+        icon='M16,19 L16,18 L14,18 C13.2203039,18 12.5795513,17.4051119 12.5068666,16.64446 L12.5,16.5 L12.499,6.773 L14.6,9.5 L15.4,8.91558442 L12,4.5 L8.6,8.91558442 L9.4,9.5 L11.499,6.773 L11.5,16.5 C11.5,17.8254834 12.5315359,18.9100387 13.8356243,18.9946823 L14,19 L16,19 Z'
+        disabled={!canMask} />
     </div>
   );
 }
@@ -98,7 +117,17 @@ const mapStateToProps = (state: RootState) => {
   const { tool, layer, tweenDrawer } = state;
   const activeArtboard = layer.present.byId[layer.present.activeArtboard];
   const isTweenDrawerOpen = tweenDrawer.isOpen;
-  return { tool, activeArtboard, isTweenDrawerOpen };
+  const selected = layer.present.selected;
+  const selectedById: {[id: string]: em.Page | em.Artboard | em.Group | em.Shape | em.Text} = selected.reduce((result, current) => {
+    result = {
+      ...result,
+      [current]: layer.present.byId[current]
+    }
+    return result;
+  }, {});
+  const selectedByDepth = orderLayersByDepth(state.layer.present, selected);
+  const canMask = selected.length > 0 && selectedById[selectedByDepth[0]].type === 'Shape';
+  return { tool, activeArtboard, isTweenDrawerOpen, selected, canMask };
 };
 
 export default connect(
@@ -113,6 +142,7 @@ export default connect(
     enableArtboardTool,
     enableTextTool,
     openTweenDrawer,
-    closeTweenDrawer
+    closeTweenDrawer,
+    addLayersMask
   }
 )(Topbar);

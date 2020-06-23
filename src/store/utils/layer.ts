@@ -24,7 +24,11 @@ import {
   SetLayerStrokeDashArray, SetLayerStrokeMiterLimit, ResizeLayer, ResizeLayers, EnableLayerHorizontalFlip,
   DisableLayerHorizontalFlip, EnableLayerVerticalFlip, DisableLayerVerticalFlip, AddText, SetLayerText,
   SetLayerFontSize, SetLayerFontWeight, SetLayerFontFamily, SetLayerLeading, SetLayerJustification,
-  AddInViewLayer, AddInViewLayers, RemoveInViewLayer, RemoveInViewLayers, UpdateInViewLayers, SetLayerFillType, SetLayerFillGradientType, SetLayerFillGradientStopColor, SetLayerFillGradientStopPosition, AddLayerFillGradientStop, RemoveLayerFillGradientStop, SetLayerFillGradientOrigin, SetLayerFillGradient, SetLayerStrokeGradient, SetLayerStrokeGradientType, SetLayerStrokeFillType, SetLayerFillGradientDestination
+  AddInViewLayer, AddInViewLayers, RemoveInViewLayer, RemoveInViewLayers, UpdateInViewLayers, SetLayerFillType,
+  SetLayerFillGradientType, SetLayerFillGradientStopColor, SetLayerFillGradientStopPosition, AddLayerFillGradientStop,
+  RemoveLayerFillGradientStop, SetLayerFillGradientOrigin, SetLayerFillGradient, SetLayerStrokeGradient,
+  SetLayerStrokeGradientType, SetLayerStrokeFillType, SetLayerFillGradientDestination, AddLayersMask,
+  MaskLayer, MaskLayers, UnmaskLayers, UnmaskLayer, RemoveLayersMask
 } from '../actionTypes/layer';
 
 import {
@@ -35,7 +39,8 @@ import {
   getLayerDescendants, getDestinationEquivalent, getEquivalentTweenProps, isTweenDestinationLayer,
   getTweensByDestinationLayer, getAllArtboardTweenEventDestinations, getAllArtboardTweenLayerDestinations,
   getAllArtboardTweenEvents, getTweensEventsByDestinationArtboard, getTweensByLayer, getLayersBounds,
-  getGradientOriginPoint, getGradientDestinationPoint, getGradientStops, getLayerSnapPoints, getInViewSnapPoints
+  getGradientOriginPoint, getGradientDestinationPoint, getGradientStops, getLayerSnapPoints, getInViewSnapPoints,
+  orderLayersByDepth
 } from '../selectors/layer';
 
 import { paperMain } from '../../canvas';
@@ -885,7 +890,7 @@ export const groupLayers = (state: LayerState, action: GroupLayers): LayerState 
   // move group above top layer
   currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: groupId, above: topLayer.id}) as InsertLayerAbove);
   // add layers to group
-  currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
+  currentState = orderLayersByDepth(currentState, action.payload.layers).reduce((result: LayerState, current: string) => {
     result = addLayerChild(result, layerActions.addLayerChild({id: groupId, child: current}) as AddLayerChild);
     return result;
   }, currentState);
@@ -3033,4 +3038,111 @@ export const removeLayerFillGradientStop = (state: LayerState, action: RemoveLay
     destination: getGradientDestinationPoint(action.payload.id, fill.gradient.destination)
   }
   return currentState;
+};
+
+export const addLayersMask = (state: LayerState, action: AddLayersMask): LayerState => {
+  let currentState = state;
+  currentState = groupLayers(currentState, layerActions.groupLayers(action.payload) as GroupLayers);
+  const maskGroup = currentState.allGroupIds[currentState.allGroupIds.length - 1];
+  const maskGroupMask = currentState.byId[maskGroup].children[0];
+  const maskGroupMaskPaperLayer = getPaperLayer(maskGroupMask);
+  maskGroupMaskPaperLayer.clipMask = true;
+  // set mask
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [maskGroupMask]: {
+        ...currentState.byId[maskGroupMask],
+        mask: true
+      }
+    }
+  };
+  // rename group
+  currentState = setLayerName(currentState, layerActions.setLayerName({id: maskGroup, name: 'Masked Group'}) as SetLayerName);
+  // rename mask
+  currentState = setLayerName(currentState, layerActions.setLayerName({id: maskGroupMask, name: 'Mask'}) as SetLayerName);
+  // mask layers
+  const maskIndex = getLayerIndex(currentState, maskGroupMask);
+  const maskedLayers = currentState.byId[maskGroup].children.reduce((result, current, index) => {
+    if (index > maskIndex) {
+      result = [...result, current];
+    }
+    return result;
+  }, []);
+  currentState = maskLayers(currentState, layerActions.maskLayers({layers: maskedLayers}) as MaskLayers);
+  return currentState;
+};
+
+export const removeLayersMask = (state: LayerState, action: RemoveLayersMask): LayerState => {
+  let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  const layerScope = getLayerScope(currentState, action.payload.id);
+  const topScope = layerScope.length > 0 ? layerScope[layerScope.length - 1] : 'page';
+  // remove layer mask
+  paperLayer.clipMask = false;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        mask: false
+      }
+    }
+  };
+  // unmask masked layers
+  const maskIndex = getLayerIndex(currentState, action.payload.id);
+  const maskedLayers = currentState.byId[topScope].children.reduce((result, current, index) => {
+    if (index > maskIndex) {
+      result = [...result, current];
+    }
+    return result;
+  }, []);
+  currentState = unmaskLayers(currentState, layerActions.unmaskLayers({layers: maskedLayers}) as UnmaskLayers);
+  return currentState;
+};
+
+export const maskLayer = (state: LayerState, action: MaskLayer): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        masked: true
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const maskLayers = (state: LayerState, action: MaskLayers): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return maskLayer(result, layerActions.maskLayer({id: current}) as MaskLayer);
+  }, state);
+};
+
+export const unmaskLayer = (state: LayerState, action: UnmaskLayer): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        masked: false
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
+export const unmaskLayers = (state: LayerState, action: UnmaskLayers): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return unmaskLayer(result, layerActions.unmaskLayer({id: current}) as UnmaskLayer);
+  }, state);
 };

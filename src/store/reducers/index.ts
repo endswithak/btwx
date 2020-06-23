@@ -78,7 +78,9 @@ import {
   SET_LAYER_LEADING,
   SET_LAYER_FONT_WEIGHT,
   SET_LAYER_FONT_FAMILY,
-  SET_LAYER_JUSTIFICATION
+  SET_LAYER_JUSTIFICATION,
+  ADD_LAYERS_MASK,
+  REMOVE_LAYERS_MASK
 } from '../actionTypes/layer';
 
 const rootReducer = combineReducers({
@@ -149,7 +151,9 @@ const rootReducer = combineReducers({
     SET_LAYER_LEADING,
     SET_LAYER_FONT_WEIGHT,
     SET_LAYER_FONT_FAMILY,
-    SET_LAYER_JUSTIFICATION
+    SET_LAYER_JUSTIFICATION,
+    ADD_LAYERS_MASK,
+    REMOVE_LAYERS_MASK
   ])}),
   tool,
   contextMenu,

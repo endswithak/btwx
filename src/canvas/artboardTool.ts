@@ -6,7 +6,7 @@ import { applyArtboardMethods } from './artboardUtils';
 import { paperMain } from './index';
 import Tooltip from './tooltip';
 import SnapTool from './snapTool';
-import { DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_GRADIENT_STYLE, THEME_PRIMARY_COLOR } from '../constants';
+import { DEFAULT_ARTBOARD_BACKGROUND_COLOR, THEME_PRIMARY_COLOR } from '../constants';
 
 class ArtboardTool {
   tool: paper.Tool;
@@ -371,7 +371,7 @@ class ArtboardTool {
     if (this.to) {
       const state = store.getState();
       const newPaperLayer = this.renderShape({
-        fillColor: new Color('#fff'),
+        fillColor: new Color(DEFAULT_ARTBOARD_BACKGROUND_COLOR),
         //applyMatrix: false
       });
       applyArtboardMethods(newPaperLayer);

@@ -20,8 +20,10 @@ const TopbarButton = (props: TopbarButtonProps): ReactElement => {
       onClick={onClick}
       onMouseEnter={() => setHover(!hover)}
       onMouseLeave={() => setHover(!hover)}
+      disabled={disabled}
       style={{
-        background: isActive ? theme.palette.primary : theme.background.z4
+        background: isActive ? theme.palette.primary : theme.background.z4,
+        opacity: disabled ? 0.5 : 1
       }}>
       {
         icon

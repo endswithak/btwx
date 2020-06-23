@@ -110,6 +110,12 @@ import {
   SET_LAYER_FILL_GRADIENT_STOP_POSITION,
   ADD_LAYER_FILL_GRADIENT_STOP,
   REMOVE_LAYER_FILL_GRADIENT_STOP,
+  ADD_LAYERS_MASK,
+  REMOVE_LAYERS_MASK,
+  MASK_LAYER,
+  UNMASK_LAYER,
+  MASK_LAYERS,
+  UNMASK_LAYERS,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
@@ -210,6 +216,12 @@ import {
   SetLayerFillGradientStopPositionPayload,
   AddLayerFillGradientStopPayload,
   RemoveLayerFillGradientStopPayload,
+  AddLayersMaskPayload,
+  RemoveLayersMaskPayload,
+  MaskLayerPayload,
+  UnmaskLayerPayload,
+  MaskLayersPayload,
+  UnmaskLayersPayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -263,6 +275,8 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
       showChildren: false,
       tweenEvents: [],
       tweens: [],
+      mask: false,
+      masked: false,
       points: {
         closed: true,
       },
@@ -293,6 +307,8 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
       showChildren: false,
       tweenEvents: [],
       tweens: [],
+      mask: false,
+      masked: false,
       points: {
         closed: true,
       },
@@ -337,6 +353,8 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
       shapeType: payload.shapeType,
       pathData: clone.pathData,
       selected: false,
+      mask: false,
+      masked: false,
       points: {
         closed: true,
       },
@@ -365,6 +383,8 @@ export const addText = (payload: AddTextPayload): LayerTypes => {
       name: payload.name ? payload.name : DEFAULT_TEXT_VALUE,
       parent: payload.parent ? payload.parent : null,
       selected: false,
+      mask: false,
+      masked: false,
       points: {
         closed: true,
       },
@@ -917,5 +937,35 @@ export const addLayerFillGradientStop = (payload: AddLayerFillGradientStopPayloa
 
 export const removeLayerFillGradientStop = (payload: RemoveLayerFillGradientStopPayload): LayerTypes => ({
   type: REMOVE_LAYER_FILL_GRADIENT_STOP,
+  payload
+});
+
+export const addLayersMask = (payload: AddLayersMaskPayload): LayerTypes => ({
+  type: ADD_LAYERS_MASK,
+  payload
+});
+
+export const removeLayersMask = (payload: RemoveLayersMaskPayload): LayerTypes => ({
+  type: REMOVE_LAYERS_MASK,
+  payload
+});
+
+export const maskLayer = (payload: MaskLayerPayload): LayerTypes => ({
+  type: MASK_LAYER,
+  payload
+});
+
+export const unmaskLayer = (payload: UnmaskLayerPayload): LayerTypes => ({
+  type: UNMASK_LAYER,
+  payload
+});
+
+export const maskLayers = (payload: MaskLayersPayload): LayerTypes => ({
+  type: MASK_LAYERS,
+  payload
+});
+
+export const unmaskLayers = (payload: UnmaskLayersPayload): LayerTypes => ({
+  type: UNMASK_LAYERS,
   payload
 });

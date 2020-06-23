@@ -264,14 +264,14 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
         }
         break;
       case 'fillColor':
-        if (layer.fillColor.type !== 'gradient' && layer.fillColor && equivalent.fillColor && !layer.fillColor.equals(equivalent.fillColor)) {
+        if (layer.fillColor && layer.fillColor.type !== 'gradient' && equivalent.fillColor && !layer.fillColor.equals(equivalent.fillColor)) {
           tweenPropMap[key] = true;
         } else if (!layer.fillColor && equivalent.fillColor) {
           tweenPropMap[key] = true;
         }
         break;
       case 'fillGradient':
-        if (layer.fillColor.type === 'gradient' && equivalent.fillColor.type === 'gradient' && !layer.fillColor.gradient.equals(equivalent.fillColor.gradient)) {
+        if (layer.fillColor && layer.fillColor.type === 'gradient' && equivalent.fillColor.type === 'gradient' && !layer.fillColor.gradient.equals(equivalent.fillColor.gradient)) {
           tweenPropMap[key] = true;
         } else if (!layer.fillColor && equivalent.fillColor) {
           tweenPropMap[key] = true;
@@ -621,3 +621,39 @@ export const getInViewSnapPoints = (state: LayerState): em.SnapPoint[] => {
     return result;
   }, []);
 };
+
+export const orderLayersByDepth = (state: LayerState, layers: string[]): string[] => {
+  const ordered: string[] = [];
+  while(ordered.length !== layers.length) {
+    const filtered = layers.filter((id) => !ordered.includes(id));
+    const topLayer = filtered.reduce((result, current) => {
+      const layerDepth = getLayerDepth(state, current);
+      const layerIndex = getLayerIndex(state, current);
+      if (layerDepth < result.depth) {
+        return {
+          id: current,
+          index: layerIndex,
+          depth: layerDepth
+        }
+      } else if (layerDepth === result.depth) {
+        if (layerIndex > result.index) {
+          return {
+            id: current,
+            index: layerIndex,
+            depth: layerDepth
+          }
+        } else {
+          return result;
+        }
+      } else {
+        return result;
+      }
+    }, {
+      id: filtered[0],
+      index: getLayerIndex(state, filtered[0]),
+      depth: getLayerDepth(state, filtered[0])
+    });
+    ordered.push(topLayer.id);
+  }
+  return ordered;
+}

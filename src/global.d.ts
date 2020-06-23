@@ -162,6 +162,8 @@ declare namespace em {
       closed: boolean;
     };
     style: Style;
+    masked: boolean;
+    mask: boolean;
   }
 
   interface ClipboardLayer {
@@ -184,11 +186,6 @@ declare namespace em {
     type: 'Artboard';
     children: string[];
     showChildren: boolean;
-  }
-
-  interface ArtboardBackground extends Layer {
-    type: 'ArtboardBackground';
-    children: null;
   }
 
   interface Page extends Layer {
