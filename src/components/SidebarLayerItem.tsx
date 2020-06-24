@@ -5,8 +5,8 @@ import SidebarLayerTitleInput from './SidebarLayerTitleInput';
 import SidebarLayerChevron from './SidebarLayerChevron';
 import SidebarLayerIcon from './SidebarLayerIcon';
 import SidebarLayerMaskedIcon from './SidebarLayerMaskedIcon';
-import { setLayerHover } from '../store/actions/layer';
-import { SetLayerHoverPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayerHover, selectLayer, deselectLayer } from '../store/actions/layer';
+import { SetLayerHoverPayload, SelectLayerPayload, DeselectLayerPayload, LayerTypes } from '../store/actionTypes/layer';
 import { RootState } from '../store/reducers';
 
 interface SidebarLayerItemProps {
@@ -15,12 +15,14 @@ interface SidebarLayerItemProps {
   hover?: string;
   setDraggable?(draggable: boolean): void;
   setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
+  selectLayer?(payload: SelectLayerPayload): LayerTypes;
+  deselectLayer?(payload: DeselectLayerPayload): LayerTypes;
 }
 
 const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
   const [editing, setEditing] = useState(false);
   const theme = useContext(ThemeContext);
-  const { layer, depth, hover, setLayerHover, setDraggable } = props;
+  const { layer, depth, hover, setLayerHover, setDraggable, selectLayer, deselectLayer } = props;
 
   const handleMouseEnter = () => {
     setLayerHover({id: layer.id});
@@ -30,11 +32,24 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
     setLayerHover({id: null});
   }
 
+  const handleClick = (e: React.MouseEvent) => {
+    if (e.metaKey) {
+      if (layer.selected) {
+        deselectLayer({id: layer.id});
+      } else {
+        selectLayer({id: layer.id});
+      }
+    } else {
+      selectLayer({id: layer.id, newSelection: true});
+    }
+  }
+
   return (
     <div
       className='c-layers-sidebar__layer-item'
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onClick={handleClick}
       style={{
         background: layer.selected || editing
         ? theme.palette.primary
@@ -67,5 +82,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { setLayerHover }
+  { setLayerHover, selectLayer, deselectLayer }
 )(SidebarLayerItem);

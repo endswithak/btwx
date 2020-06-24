@@ -34,7 +34,8 @@ const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
         ? theme.text.onPrimary
         : theme.text.base
       }}
-      onClick={handleClick}>
+      //onClick={handleClick}
+      >
       {layer.name}
     </div>
   );

@@ -746,7 +746,6 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
   const aboveIndex = aboveParent.children.indexOf(action.payload.above);
   const paperLayer = getPaperLayer(action.payload.id);
   const abovePaperLayer = getPaperLayer(action.payload.above);
-  // array index and layer zindex are opposite for now
   paperLayer.insertBelow(abovePaperLayer);
   if (layer.parent !== above.parent) {
     if (layer.mask) {
@@ -757,8 +756,11 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
         currentState = unmaskLayer(currentState, layerActions.unmaskLayer({id: action.payload.id}) as UnmaskLayer);
       }
     }
-    if (!layer.masked && aboveParent.type === 'Group' && aboveParent.clipped) {
+    if (!layer.masked && aboveParent.type === 'Group' && aboveParent.clipped && !above.mask) {
       currentState = maskLayer(currentState, layerActions.maskLayer({id: action.payload.id}) as MaskLayer);
+    }
+    if (above.mask) {
+      currentState = removeLayersMask(currentState, layerActions.removeLayersMask({id: action.payload.above}) as RemoveLayersMask);
     }
     currentState = {
       ...currentState,
@@ -780,6 +782,9 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
       paperProject: paperMain.project.exportJSON()
     };
   } else {
+    if (layer.masked && above.mask) {
+      currentState = removeLayersMask(currentState, layerActions.removeLayersMask({id: action.payload.above}) as RemoveLayersMask);
+    }
     currentState = {
       ...currentState,
       byId: {
@@ -803,7 +808,6 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
   const belowIndex = belowParent.children.indexOf(action.payload.below);
   const paperLayer = getPaperLayer(action.payload.id);
   const abovePaperLayer = getPaperLayer(action.payload.below);
-  // array index and layer zindex are opposite for now
   paperLayer.insertAbove(abovePaperLayer);
   if (layer.parent !== below.parent) {
     if (layer.mask) {
@@ -837,6 +841,9 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
       paperProject: paperMain.project.exportJSON()
     };
   } else {
+    if (layer.mask && below.masked) {
+      currentState = removeLayersMask(currentState, layerActions.removeLayersMask({id: action.payload.id}) as RemoveLayersMask);
+    }
     currentState = {
       ...currentState,
       byId: {
@@ -900,47 +907,22 @@ export const escapeLayerScope = (state: LayerState, action: EscapeLayerScope): L
 
 export const groupLayers = (state: LayerState, action: GroupLayers): LayerState => {
   let currentState = state;
+  // order children
+  const orderedChildren = orderLayersByDepth(currentState, action.payload.layers);
+  if (orderedChildren.find((id) => state.byId[id].mask)) {
+    const mask = orderedChildren.find((id) => state.byId[id].mask);
+    currentState = removeLayersMask(currentState, layerActions.removeLayersMask({id: mask}) as RemoveLayersMask);
+  }
   // get bounds of layers to group
   const layersBounds = getLayersBounds(action.payload.layers);
-  // get layer with lowest depth and z-index
-  const topLayer = action.payload.layers.reduce((result, current) => {
-    const layerDepth = getLayerDepth(currentState, current);
-    const layerIndex = getLayerIndex(currentState, current);
-    if (layerDepth < result.depth) {
-      return {
-        id: current,
-        index: layerIndex,
-        depth: layerDepth
-      }
-    } else if (layerDepth === result.depth) {
-      if (layerIndex > result.index) {
-        return {
-          id: current,
-          index: layerIndex,
-          depth: layerDepth
-        }
-      } else {
-        return result;
-      }
-    } else {
-      return result;
-    }
-  }, {
-    id: action.payload.layers[0],
-    index: getLayerIndex(currentState, action.payload.layers[0]),
-    depth: getLayerDepth(currentState, action.payload.layers[0])
-  });
   // add group
   currentState = addGroup(currentState, layerActions.addGroup({selected: true, frame: {x: layersBounds.center.x, y: layersBounds.center.y, width: layersBounds.width, height: layersBounds.height}}) as AddGroup);
   // get group id
   const groupId = currentState.allIds[currentState.allIds.length - 1];
   // move group above top layer
-  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: groupId, above: topLayer.id}) as InsertLayerAbove);
+  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: groupId, above: orderedChildren[0]}) as InsertLayerAbove);
   // add layers to group
-  currentState = orderLayersByDepth(currentState, action.payload.layers).reduce((result: LayerState, current: string) => {
-    if (currentState.byId[current].mask) {
-      result = removeLayersMask(currentState, layerActions.removeLayersMask({id: current}) as RemoveLayersMask);
-    }
+  currentState = orderedChildren.reduce((result: LayerState, current: string) => {
     result = addLayerChild(result, layerActions.addLayerChild({id: groupId, child: current}) as AddLayerChild);
     return result;
   }, currentState);
@@ -3098,11 +3080,18 @@ export const removeLayerFillGradientStop = (state: LayerState, action: RemoveLay
 
 export const addLayersMask = (state: LayerState, action: AddLayersMask): LayerState => {
   let currentState = state;
+  // group layers
   currentState = groupLayers(currentState, layerActions.groupLayers(action.payload) as GroupLayers);
+  // get mask and group
   const maskGroup = currentState.allGroupIds[currentState.allGroupIds.length - 1];
   const mask = currentState.byId[maskGroup].children[0];
+  // set paper layer clipMask
   const maskPaperLayer = getPaperLayer(mask);
+  const maskGroupPaperLayer = getPaperLayer(maskGroup);
   maskPaperLayer.clipMask = true;
+  // hack to get paper to update to clipped group bounds
+  maskGroupPaperLayer.position.x += 1;
+  maskGroupPaperLayer.position.x -= 1;
   // set mask
   currentState = {
     ...currentState,
@@ -3123,23 +3112,20 @@ export const addLayersMask = (state: LayerState, action: AddLayersMask): LayerSt
   // rename mask
   currentState = setLayerName(currentState, layerActions.setLayerName({id: mask, name: 'Mask'}) as SetLayerName);
   // mask layers
-  const maskIndex = getLayerIndex(currentState, mask);
-  const maskedLayers = currentState.byId[maskGroup].children.reduce((result, current, index) => {
-    if (index > maskIndex) {
-      result = [...result, current];
-    }
-    return result;
-  }, []);
-  currentState = maskLayers(currentState, layerActions.maskLayers({layers: maskedLayers}) as MaskLayers);
+  currentState = maskLayers(currentState, layerActions.maskLayers({layers: currentState.byId[maskGroup].children.filter((id) => id !== mask)}) as MaskLayers);
+  // update masked group bounds
+  currentState = updateLayerBounds(currentState, maskGroup);
+  // update selection frame
+  updateSelectionFrame(currentState);
+  // return final state
   return currentState;
 };
 
 export const removeLayersMask = (state: LayerState, action: RemoveLayersMask): LayerState => {
   let currentState = state;
   const layerItem = state.byId[action.payload.id];
+  const parentLayerItem = state.byId[layerItem.parent];
   const paperLayer = getPaperLayer(action.payload.id);
-  const layerScope = getLayerScope(currentState, action.payload.id);
-  const topScope = layerScope.length > 0 ? layerScope[layerScope.length - 1] : 'page';
   if (layerItem.style.fill.enabled) {
     currentState = enableLayerFill(currentState, layerActions.enableLayerFill({id: action.payload.id}) as EnableLayerFill);
   } else if (layerItem.style.stroke.enabled) {
@@ -3162,15 +3148,7 @@ export const removeLayersMask = (state: LayerState, action: RemoveLayersMask): L
       } as em.Group
     }
   };
-  // unmask masked layers
-  const maskIndex = getLayerIndex(currentState, action.payload.id);
-  const maskedLayers = currentState.byId[topScope].children.reduce((result, current, index) => {
-    if (index > maskIndex) {
-      result = [...result, current];
-    }
-    return result;
-  }, []);
-  currentState = unmaskLayers(currentState, layerActions.unmaskLayers({layers: maskedLayers}) as UnmaskLayers);
+  currentState = unmaskLayers(currentState, layerActions.unmaskLayers({layers: parentLayerItem.children}) as UnmaskLayers);
   return currentState;
 };
 

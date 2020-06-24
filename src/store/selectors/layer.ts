@@ -653,7 +653,7 @@ export const orderLayersByDepth = (state: LayerState, layers: string[]): string[
       index: getLayerIndex(state, filtered[0]),
       depth: getLayerDepth(state, filtered[0])
     });
-    ordered.push(topLayer.id);
+    ordered.unshift(topLayer.id);
   }
   return ordered;
 }
