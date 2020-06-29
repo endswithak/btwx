@@ -8,6 +8,7 @@ import TweenEventSelect from './TweenEventSelect';
 import TweenEventDestinationSelect from './TweenEventDestinationSelect';
 import EaseEditor from './EaseEditor';
 import FillEditor from './FillEditor';
+import FillEditorWrap from './FillEditorWrap';
 import StrokeEditor from './StrokeEditor';
 import TextEditor from './TextEditor';
 import { ThemeContext } from './ThemeProvider';
@@ -37,7 +38,7 @@ const App = (): ReactElement => {
         <TweenEventSelect />
         <TweenEventDestinationSelect />
         <EaseEditor />
-        <FillEditor />
+        <FillEditorWrap />
         <StrokeEditor />
     </div>
   );

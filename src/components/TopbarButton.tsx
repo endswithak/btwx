@@ -1,5 +1,6 @@
 import React, { useContext, ReactElement, useState, useEffect } from 'react';
 import { ThemeContext } from './ThemeProvider';
+import styled from 'styled-components';
 
 interface TopbarButtonProps {
   onClick(): void;
@@ -9,41 +10,44 @@ interface TopbarButtonProps {
   text?: string;
 }
 
+const Button = styled.button`
+  background: ${props => props.isActive ? props.theme.palette.primary : props.theme.background.z4};
+  svg {
+    fill: ${props => props.theme.text.light};
+  }
+  :hover {
+    svg {
+      fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base};
+    }
+  }
+  :disabled {
+    opacity: 0.5;
+  }
+`;
+
 const TopbarButton = (props: TopbarButtonProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const [hover, setHover] = useState(false);
   const { onClick, isActive, disabled, text, icon } = props;
 
   return (
-    <button
+    <Button
       className='c-topbar__button'
       onClick={onClick}
-      onMouseEnter={() => setHover(!hover)}
-      onMouseLeave={() => setHover(!hover)}
       disabled={disabled}
-      style={{
-        background: isActive ? theme.palette.primary : theme.background.z4,
-        opacity: disabled ? 0.5 : 1
-      }}>
+      theme={theme}
+      isActive={isActive}>
       {
         icon
         ? <svg
             width='24'
             height='24'
-            viewBox='0 0 24 24'
-            style={{
-              fill: isActive
-              ? theme.text.onPrimary
-              : hover
-                ? theme.text.base
-                : theme.text.light
-            }}>
+            viewBox='0 0 24 24'>
             <path d={icon} />
           </svg>
         : null
       }
       {text}
-    </button>
+    </Button>
   );
 }
 

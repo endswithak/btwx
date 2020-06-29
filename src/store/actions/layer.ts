@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { paperMain } from '../../canvas';
-import { DEFAULT_STYLE, DEFAULT_TEXT_STYLE, DEFAULT_TEXT_VALUE } from '../../constants';
+import { DEFAULT_STYLE, DEFAULT_TEXT_STYLE, DEFAULT_TEXT_VALUE, DEFAULT_GRADIENT_STYLE } from '../../constants';
 
 import {
   ADD_PAGE,

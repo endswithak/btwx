@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
-import Modal from 'react-modal';
 import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
@@ -10,53 +10,57 @@ import { ToolTypes } from '../store/actionTypes/tool';
 import { FillEditorState } from '../store/reducers/fillEditor';
 import ColorPicker from './ColorPicker';
 import GradientSlider from './GradientSlider';
-import GradientDragger from './GradientDragger';
-import { SetLayerFillTypePayload, SetLayerFillGradientTypePayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayerFillType, setLayerFillGradientType } from '../store/actions/layer';
-
-Modal.setAppElement('#root');
+import { SetLayerFillTypePayload, SetLayerFillGradientTypePayload, SetLayerFillGradientPayload, SetLayerFillColorPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayerFillType, setLayerFillGradientType, setLayerFillGradient, setLayerFillColor } from '../store/actions/layer';
+import FillTypeSelector from './FillTypeSelector';
 
 interface FillEditorProps {
   fillEditor?: FillEditorState;
   closeFillEditor?(): FillEditorTypes;
   disableSelectionTool?(): ToolTypes;
   enableSelectionTool?(): ToolTypes;
+  setLayerFillColor?(payload: SetLayerFillColorPayload): LayerTypes;
+  setLayerFillGradient?(payload: SetLayerFillGradientPayload): LayerTypes;
   setLayerFillType?(payload: SetLayerFillTypePayload): LayerTypes;
   setLayerFillGradientType?(payload: SetLayerFillGradientTypePayload): LayerTypes;
 }
 
 const FillEditor = (props: FillEditorProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { fillEditor, closeFillEditor, disableSelectionTool, enableSelectionTool, setLayerFillType, setLayerFillGradientType } = props;
-  const [fill, setFill] = useState(null);
-  const [activePickerColor, setActivePickerColor] = useState(null);
-  const [activeStopIndex, setActiveStopIndex] = useState(0);
-
-  const handleCloseRequest = () => {
-    if (fillEditor.onClose) {
-      fillEditor.onClose(fill);
-    }
-    closeFillEditor();
-  }
-
-  const handleAfterOpen = () => {
-    disableSelectionTool();
-    setFill(fillEditor.fill);
+  const editorRef = useRef<HTMLDivElement>(null);
+  const { fillEditor, closeFillEditor, disableSelectionTool, enableSelectionTool, setLayerFillType, setLayerFillColor, setLayerFillGradient, setLayerFillGradientType } = props;
+  const [fill, setFill] = useState(fillEditor.fill);
+  const [activePickerColor, setActivePickerColor] = useState(() => {
     switch(fillEditor.fill.fillType) {
       case 'color':
-        setActivePickerColor(fillEditor.fill.color);
-        break;
+        return fillEditor.fill.color;
       case 'gradient':
-        setActivePickerColor(fillEditor.fill.gradient.stops[activeStopIndex].color);
-        break;
+        return fillEditor.fill.gradient.stops[0].color;
     }
+  });
+  const [activeStopIndex, setActiveStopIndex] = useState(0);
+
+  useEffect(() => {
+    onOpen();
+    return () => {
+      onClose();
+    }
+  }, []);
+
+  const onOpen = () => {
+    disableSelectionTool();
+    document.addEventListener('mousedown', onMouseDown, false);
   }
 
-  const handleAfterClose = () => {
-    setActivePickerColor(null);
-    setFill(null);
-    setActiveStopIndex(0);
+  const onClose = () => {
     enableSelectionTool();
+    document.removeEventListener('mousedown', onMouseDown);
+  }
+
+  const onMouseDown = (event: any) => {
+    if (editorRef.current && !editorRef.current.contains(event.target)) {
+      closeFillEditor();
+    }
   }
 
   const handleActiveColorChange = (color: string) => {
@@ -91,13 +95,22 @@ const FillEditor = (props: FillEditorProps): ReactElement => {
     }
   }
 
-  const handleGradientChange = (stops: em.GradientStop[]) => {
+  const handleActiveColorChangeDebounce = (color: string) => {
+    switch(fill.fillType) {
+      case 'color': {
+        setLayerFillColor({id: fillEditor.layer, fillColor: color});
+        break;
+      }
+      case 'gradient':
+        setLayerFillGradient({id: fillEditor.layer, gradient: fill.gradient});
+        break;
+    }
+  }
+
+  const handleGradientChange = (gradient: em.Gradient) => {
     const newFill = {
       ...fill,
-      gradient: {
-        ...fill.gradient,
-        stops: stops
-      }
+      gradient
     }
     setFill(newFill);
     if (fillEditor.onChange) {
@@ -105,19 +118,8 @@ const FillEditor = (props: FillEditorProps): ReactElement => {
     }
   }
 
-  const handleGradientPositionChange = (origin: em.Point, destination: em.Point) => {
-    const newFill = {
-      ...fill,
-      gradient: {
-        ...fill.gradient,
-        origin,
-        destination
-      }
-    }
-    setFill(newFill);
-    if (fillEditor.onChange) {
-      fillEditor.onChange(newFill);
-    }
+  const handleGradientChangeDebounce = (gradient: em.Gradient) => {
+    setLayerFillGradient({id: fillEditor.layer, gradient: gradient});
   }
 
   const handleColorClick = () => {
@@ -160,24 +162,9 @@ const FillEditor = (props: FillEditorProps): ReactElement => {
   }
 
   return (
-    <Modal
-      className='c-fill-editor'
-      overlayClassName='c-fill-editor__overlay'
-      isOpen={fillEditor.isOpen}
-      onAfterOpen={handleAfterOpen}
-      onAfterClose={handleAfterClose}
-      shouldCloseOnEsc={true}
-      shouldCloseOnOverlayClick={true}
-      onRequestClose={handleCloseRequest}
-      contentLabel='fill-editor'>
-      {
-        fillEditor.isOpen && fill && fill.fillType === 'gradient' && activePickerColor
-        ? <GradientDragger
-            layer={fillEditor.layer}
-            gradient={fill.gradient}
-            onChange={handleGradientPositionChange} />
-        : null
-      }
+    <div
+      ref={editorRef}
+      className='c-fill-editor'>
       <div
         className='c-fill-editor__picker'
         style={{
@@ -186,69 +173,40 @@ const FillEditor = (props: FillEditorProps): ReactElement => {
           background: theme.background.z1,
           boxShadow: `0 0 0 1px ${theme.background.z4} inset`
         }}>
+        <FillTypeSelector
+          colorSelector={{
+            enabled: true,
+            onClick: handleColorClick,
+            isActive: fill.fillType === 'color'
+          }}
+          linearGradientSelector={{
+            enabled: true,
+            onClick: handleLinearGradientClick,
+            isActive: fill.fillType === 'gradient' && fill.gradient.gradientType === 'linear'
+          }}
+          radialGradientSelector={{
+            enabled: true,
+            onClick: handleRadialGradientClick,
+            isActive: fill.fillType === 'gradient' && fill.gradient.gradientType === 'radial'
+          }} />
         {
-          fillEditor.isOpen && activePickerColor
-          ? <div
-              className='c-fill-editor__type-selector'
-              style={{
-                boxShadow: `0 -1px 0 0 ${theme.background.z4} inset`
-              }}>
-              <button
-                onClick={handleColorClick}
-                className='c-fill-editor__type'
-                style={{
-                  background: fill.fillType === 'color'
-                  ? theme.palette.primary
-                  : theme.background.z6,
-                  boxShadow: fill.fillType === 'color'
-                  ? `0 0 0 1px ${theme.palette.primary} inset`
-                  : `0 0 0 1px ${theme.background.z6} inset`
-                }} />
-              <button
-                onClick={handleLinearGradientClick}
-                className='c-fill-editor__type'
-                style={{
-                  background: fill.fillType === 'gradient' && fill.gradient.gradientType === 'linear'
-                  ? `linear-gradient(to top, ${theme.palette.primary}, ${theme.background.z1})`
-                  : `linear-gradient(to top, ${theme.background.z6}, ${theme.background.z1})`,
-                  boxShadow: fill.fillType === 'gradient' && fill.gradient.gradientType === 'linear'
-                  ? `0 0 0 1px ${theme.palette.primary} inset`
-                  : `0 0 0 1px ${theme.background.z6} inset`
-                }} />
-              <button
-                onClick={handleRadialGradientClick}
-                className='c-fill-editor__type'
-                style={{
-                  background: fill.fillType === 'gradient' && fill.gradient.gradientType === 'radial'
-                  ? `radial-gradient(${theme.palette.primary}, ${theme.background.z1})`
-                  : `radial-gradient(${theme.background.z6}, ${theme.background.z1})`,
-                  boxShadow: fill.fillType === 'gradient' && fill.gradient.gradientType === 'radial'
-                  ? `0 0 0 1px ${theme.palette.primary} inset`
-                  : `0 0 0 1px ${theme.background.z6} inset`
-                }} />
-            </div>
-          : null
-        }
-        {
-          fillEditor.isOpen && fill && fill.fillType === 'gradient' && activePickerColor
+          fill.fillType === 'gradient'
           ? <GradientSlider
-              gradient={fill.gradient}
+              gradientValue={fill.gradient}
               activeStopIndex={activeStopIndex}
               setActiveStopIndex={setActiveStopIndex}
               setActivePickerColor={setActivePickerColor}
-              onChange={handleGradientChange} />
+              onChange={handleGradientChange}
+              onChangeDebounce={handleGradientChangeDebounce} />
           : null
         }
-        {
-          fillEditor.isOpen && activePickerColor
-          ? <ColorPicker
-              colorValue={activePickerColor}
-              colorType='rgb'
-              onChange={handleActiveColorChange} />
-          : null
-        }
+        <ColorPicker
+          colorValue={activePickerColor}
+          colorType='rgb'
+          onChange={handleActiveColorChange}
+          onChangeDebounce={handleActiveColorChangeDebounce} />
       </div>
-    </Modal>
+    </div>
   );
 }
 
@@ -259,5 +217,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { closeFillEditor, disableSelectionTool, enableSelectionTool, setLayerFillType, setLayerFillGradientType }
+  { closeFillEditor, disableSelectionTool, enableSelectionTool, setLayerFillType, setLayerFillGradientType, setLayerFillGradient, setLayerFillColor }
 )(FillEditor);

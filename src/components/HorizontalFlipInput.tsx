@@ -42,12 +42,7 @@ const HorizontalFlipInput = (props: HorizontalFlipInputProps): ReactElement => {
       <svg
         width='24'
         height='24'
-        viewBox='0 0 24 24'
-        style={{
-          fill: horizontalFlip
-          ? theme.text.onPrimary
-          : theme.text.lighter
-        }}>
+        viewBox='0 0 24 24'>
         <path d='M13,4 L19,20 L13,19.0039693 L13,4 Z M11,4 L11,19 L5,20 L11,4 Z' />
       </svg>
     </SidebarToggleButton>

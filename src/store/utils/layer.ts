@@ -1183,17 +1183,6 @@ export const pasteLayerFromClipboard = (state: LayerState, id: string, pasteOver
   }, currentState);
   // select layer
   currentState = selectLayer(currentState, layerActions.selectLayer({id: rootLayer.id}) as SelectLayer);
-  // if (rootLayer.type === 'Artboard') {
-  //   const paperLayer = getPaperLayer(rootLayer.id);
-  //   currentState = {
-  //     ...currentState,
-  //     artboards: addItem(currentState.artboards, rootLayer.id)
-  //   }
-  //   currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: rootLayer.id, scope: 1}) as SetActiveArtboard);
-  //   paperLayer.position.x += paperLayer.bounds.width + 48;
-  //   currentState = moveLayerBy(currentState, layerActions.moveLayerBy({id: rootLayer.id, x: paperLayer.bounds.width + 48, y: 0}) as MoveLayerBy);
-  // }
-
   // paste over selection is specified
   if (pasteOverSelection && state.selected.length > 0) {
     const selectionCenter = getSelectionCenter(state);

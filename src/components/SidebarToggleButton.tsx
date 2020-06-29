@@ -1,5 +1,6 @@
 import React, { useContext, ReactElement } from 'react';
 import { ThemeContext } from './ThemeProvider';
+import styled from 'styled-components';
 
 interface SidebarToggleButtonProps {
   text?: string | number;
@@ -9,22 +10,35 @@ interface SidebarToggleButtonProps {
   children?: React.ReactElement | React.ReactElement[];
 }
 
+const Button = styled.button`
+  background: ${props => props.isActive ? props.theme.palette.primary : props.theme.background.z4};
+  svg {
+    fill: ${props => props.theme.text.light};
+  }
+  :hover {
+    svg {
+      fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base};
+    }
+  }
+  :disabled {
+    opacity: 0.5;
+  }
+`;
+
 const SidebarToggleButton = (props: SidebarToggleButtonProps): ReactElement => {
   const theme = useContext(ThemeContext);
 
   return (
     <div className={`c-sidebar-input c-sidebar-input--button ${props.disabled ? 'c-sidebar-input--disabled' : null}`}>
-      <button
+      <Button
         className={`c-sidebar-input__field c-sidebar-input__field--button ${props.disabled ? 'c-sidebar-input__field--disabled' : null}`}
         onClick={props.onClick}
-        style={{
-          background: props.active ? theme.palette.primary : theme.background.z4,
-          color: props.active ? theme.text.onPrimary : props.disabled ? theme.text.lighter : theme.text.base
-        }}
-        disabled={props.disabled}>
+        disabled={props.disabled}
+        isActive={props.active}
+        theme={theme}>
         { props.text }
         { props.children }
-      </button>
+      </Button>
     </div>
   );
 }

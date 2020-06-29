@@ -3,8 +3,8 @@ export const THEME_GUIDE_COLOR = 'red';
 export const THEME_UNIT_SIZE = 4;
 export const DEFAULT_ARTBOARD_BACKGROUND_COLOR = '#fff';
 
-export const DEFAULT_GRADIENT_STYLE: em.Gradient = {
-  gradientType: 'linear',
+export const DEFAULT_GRADIENT_STYLE = {
+  gradientType: 'linear' as em.GradientType,
   origin: {
     x: -0.5,
     y: 0.5
@@ -23,14 +23,14 @@ export const DEFAULT_GRADIENT_STYLE: em.Gradient = {
 }
 
 export const DEFAULT_FILL_STYLE: em.Fill = {
-  fillType: 'color',
+  fillType: 'color' as em.FillType,
   enabled: true,
   color: '#cccccc',
   gradient: DEFAULT_GRADIENT_STYLE
 }
 
 export const DEFAULT_STROKE_STYLE: em.Stroke = {
-  fillType: 'color',
+  fillType: 'color' as em.FillType,
   enabled: true,
   color: '#999999',
   width: 1,

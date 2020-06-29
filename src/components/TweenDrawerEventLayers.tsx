@@ -7,6 +7,7 @@ import TweenDrawerEventLayer from './TweenDrawerEventLayer';
 import { setTweenDrawerEvent } from '../store/actions/tweenDrawer';
 import { SetTweenDrawerEventPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
 import TweenDrawerIcon from './TweenDrawerIcon';
+import { ScrollSync, ScrollSyncPane } from 'react-scroll-sync';
 
 interface TweenDrawerEventLayersProps {
   tweenEventLayers?: {
@@ -23,10 +24,10 @@ const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElemen
   const theme = useContext(ThemeContext);
   const { tweenEventLayers, setTweenDrawerEvent } = props;
 
-  const handleScroll = (e) => {
-    const layersTimeline = document.getElementById('tween-drawer-event-layers-timeline');
-    layersTimeline.scrollTop = scrollRef.current.scrollTop;
-  }
+  // const handleScroll = (e) => {
+  //   const layersTimeline = document.getElementById('tween-drawer-event-layers-timeline');
+  //   layersTimeline.scrollTop = scrollRef.current.scrollTop;
+  // }
 
   return (
     <div
@@ -54,20 +55,22 @@ const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElemen
           </div>
         </div>
       </div>
-      <div
-        ref={scrollRef}
-        onScroll={handleScroll}
-        id='tween-drawer-event-layers'
-        className='c-tween-drawer-event-layers__layers'>
-        {
-          tweenEventLayers.allIds.map((layer, index) => (
-            <TweenDrawerEventLayer
-              key={index}
-              id={layer}
-              index={index} />
-          ))
-        }
-      </div>
+      <ScrollSyncPane>
+        <div
+          ref={scrollRef}
+          //onScroll={handleScroll}
+          id='tween-drawer-event-layers'
+          className='c-tween-drawer-event-layers__layers'>
+          {
+            tweenEventLayers.allIds.map((layer, index) => (
+              <TweenDrawerEventLayer
+                key={index}
+                id={layer}
+                index={index} />
+            ))
+          }
+        </div>
+      </ScrollSyncPane>
     </div>
   );
 }

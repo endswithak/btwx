@@ -1,4 +1,5 @@
-import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
+/* eslint-disable @typescript-eslint/no-use-before-define */
+import React, { useContext, ReactElement, useRef, useState, useEffect, useCallback } from 'react';
 import chroma from 'chroma-js';
 import { ThemeContext } from './ThemeProvider';
 import ColorPickerSaturation from './ColorPickerSaturation';
@@ -14,17 +15,20 @@ import ColorPickerHueInput from './ColorPickerHueInput';
 import ColorPickerSaturationInput from './ColorPickerSaturationInput';
 import ColorPickerLightnessInput from './ColorPickerLightnessInput';
 import ColorPickerTypeToggle from './ColorPickerTypeToggle';
+import useDebounce from './useDebounce';
 
 interface ColorPickerProps {
   colorValue: string;
   colorType: 'hsl' | 'rgb';
   onChange?(color: string): void;
+  onChangeDebounce?(color: string): void;
 }
 
 const ColorPicker = (props: ColorPickerProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { onChange, colorType, colorValue } = props;
+  const { onChange, colorType, colorValue, onChangeDebounce } = props;
   const [color, setColor] = useState<string>(chroma(colorValue).hex());
+  const debounceColor = useDebounce(color, 250);
   const [hue, setHue] = useState(isNaN(chroma(colorValue).get('hsl.h')) ? 0 : chroma(colorValue).get('hsl.h'));
   const [saturation, setSaturation] = useState(chroma(colorValue).get('hsl.s'));
   const [lightness, setLightness] = useState(chroma(colorValue).get('hsl.l'));
@@ -49,6 +53,10 @@ const ColorPicker = (props: ColorPickerProps): ReactElement => {
   useEffect(() => {
     onChange(color);
   }, [color]);
+
+  useEffect(() => {
+    onChangeDebounce(debounceColor);
+  }, [debounceColor]);
 
   return (
     <div className='c-color-picker'>

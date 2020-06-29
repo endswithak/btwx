@@ -236,14 +236,14 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
   const equivalentArtboardPosition = getPositionInArtboard(equivalent, destinationArtboard);
   const tweenPropMap: em.TweenPropMap = {
     shape: false,
-    fillColor: false,
-    fillGradient: false,
+    fill: false,
+    //fillGradient: false,
     x: false,
     y: false,
     rotation: false,
     width: false,
     height: false,
-    strokeColor: false,
+    stroke: false,
     strokeWidth: false,
     shadowColor: false,
     shadowOffsetX: false,
@@ -263,20 +263,32 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
           }
         }
         break;
-      case 'fillColor':
-        if (layer.fillColor && layer.fillColor.type !== 'gradient' && equivalent.fillColor && !layer.fillColor.equals(equivalent.fillColor)) {
-          tweenPropMap[key] = true;
-        } else if (!layer.fillColor && equivalent.fillColor) {
-          tweenPropMap[key] = true;
-        }
-        break;
-      case 'fillGradient':
-        if (layer.fillColor && layer.fillColor.type === 'gradient' && equivalent.fillColor.type === 'gradient' && !layer.fillColor.gradient.equals(equivalent.fillColor.gradient)) {
-          tweenPropMap[key] = true;
-        } else if (!layer.fillColor && equivalent.fillColor) {
+      case 'fill':
+        if (
+          (!layer.fillColor && equivalent.fillColor) ||
+          (layer.fillColor && !equivalent.fillColor) ||
+          (layer.fillColor && equivalent.fillColor && !layer.fillColor.equals(equivalent.fillColor)) ||
+          (layer.fillColor && layer.fillColor.type === 'gradient' && equivalent.fillColor && equivalent.fillColor.type === 'rgb') ||
+          (layer.fillColor && layer.fillColor.type === 'rgb' && equivalent.fillColor && equivalent.fillColor.type === 'gradient') ||
+          (layer.fillColor && layer.fillColor.type === 'gradient' && equivalent.fillColor && equivalent.fillColor.type === 'gradient' && !layer.fillColor.gradient.equals(equivalent.fillColor.gradient))
+        ) {
           tweenPropMap[key] = true;
         }
         break;
+      // case 'fillColor':
+      //   if (layer.fillColor && layer.fillColor.type !== 'gradient' && equivalent.fillColor && !layer.fillColor.equals(equivalent.fillColor)) {
+      //     tweenPropMap[key] = true;
+      //   } else if (!layer.fillColor && equivalent.fillColor) {
+      //     tweenPropMap[key] = true;
+      //   }
+      //   break;
+      // case 'fillGradient':
+      //   if (layer.fillColor && layer.fillColor.type === 'gradient' && equivalent.fillColor.type === 'gradient' && !layer.fillColor.gradient.equals(equivalent.fillColor.gradient)) {
+      //     tweenPropMap[key] = true;
+      //   } else if (!layer.fillColor && equivalent.fillColor) {
+      //     tweenPropMap[key] = true;
+      //   }
+      //   break;
       case 'x':
         if (layerArtboardPosition.x !== equivalentArtboardPosition.x && layer.data.type !== 'ArtboardBackground') {
           tweenPropMap[key] = true;
@@ -302,13 +314,13 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
           tweenPropMap[key] = true;
         }
         break;
-      case 'strokeColor':
-        if (layer.strokeColor && equivalent.strokeColor && !layer.strokeColor.equals(equivalent.strokeColor)) {
-          tweenPropMap[key] = true;
-        } else if (!layer.strokeColor && equivalent.strokeColor) {
-          tweenPropMap[key] = true;
-        }
-        break;
+      // case 'strokeColor':
+      //   if (layer.strokeColor && equivalent.strokeColor && !layer.strokeColor.equals(equivalent.strokeColor)) {
+      //     tweenPropMap[key] = true;
+      //   } else if (!layer.strokeColor && equivalent.strokeColor) {
+      //     tweenPropMap[key] = true;
+      //   }
+      //   break;
       case 'strokeWidth':
         if (layer.strokeWidth !== equivalent.strokeWidth) {
           tweenPropMap[key] = true;

@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
 import { ThemeContext } from './ThemeProvider';
-import throttle from 'lodash.throttle';
+import gsap from 'gsap';
+import { Draggable } from 'gsap/Draggable';
+
+gsap.registerPlugin(Draggable);
 
 interface ColorPickerSaturationProps {
   hue: number;
@@ -18,56 +21,65 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
   const { hue, saturation, value, lightness, setSaturation, setValue, setLightness } = props;
   const pointerRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const handleChange = throttle((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    const boundingBox = containerRef.current.getBoundingClientRect();
-    const x = e.pageX;
-    const y = e.pageY;
-    let left = x - (boundingBox.left + window.pageXOffset);
-    let top = y - (boundingBox.top + window.pageYOffset);
-
-    if (left < 0) {
-      left = 0
-    } else if (left > boundingBox.width) {
-      left = boundingBox.width
-    }
-
-    if (top < 0) {
-      top = 0
-    } else if (top > boundingBox.height) {
-      top = boundingBox.height
-    }
-
-    const s = left / boundingBox.width;
-    const v = 1 - (top / boundingBox.height);
-    const l = (2 - s) * v / 2;
-
-    setSaturation(s);
-    setValue(v);
-    setLightness(l);
-  }, 50, {});
-
-  const unbindEventListeners = () => {
-    window.removeEventListener('mousemove', handleChange)
-    window.removeEventListener('mouseup', handleMouseUp)
-  }
-
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    handleChange(e);
-    window.addEventListener('mousemove', handleChange)
-    window.addEventListener('mouseup', handleMouseUp)
-  }
-
-  const handleMouseUp = (e: MouseEvent) => {
-    unbindEventListeners();
-  }
+  const [dragging, setDragging] = useState(false);
 
   useEffect(() => {
+    if (pointerRef.current) {
+      Draggable.create(pointerRef.current, {
+        type: 'x,y',
+        zIndexBoost: false,
+        bounds: containerRef.current,
+        onPress: function() {
+          setDragging(true);
+        },
+        onDrag: function() {
+          const s = this.x / this.maxX;
+          const v = 1 - (this.y / this.maxY);
+          const l = (2 - s) * v / 2;
+          setSaturation(s);
+          setValue(v);
+          setLightness(l);
+        },
+        onRelease: function() {
+          setDragging(false);
+        }
+      });
+    }
     return () => {
-      handleChange.cancel();
-      unbindEventListeners();
+      if (Draggable.get(pointerRef.current)) {
+        Draggable.get(pointerRef.current).kill();
+      }
     }
   }, []);
+
+  useEffect(() => {
+    if (!dragging && pointerRef.current && Draggable.get(pointerRef.current)) {
+      const thing = Draggable.get(pointerRef.current);
+      gsap.set(pointerRef.current, {
+        x: thing.maxX * (lightness === 1 ? 0 : saturation),
+        y: thing.maxY * (-value + 1)
+      });
+      Draggable.get(pointerRef.current).update();
+    }
+  }, [saturation, value, lightness]);
+
+  const handleMouseDown = (event: React.MouseEvent) => {
+    if (!dragging && pointerRef.current && Draggable.get(pointerRef.current)) {
+      const boundingBox = containerRef.current.getBoundingClientRect();
+      const x = event.clientX - boundingBox.left;
+      const y = event.clientY - boundingBox.top;
+      const s = x / boundingBox.width;
+      const v = 1 - (y / boundingBox.height);
+      const l = (2 - s) * v / 2;
+      setDragging(true);
+      setSaturation(s);
+      setValue(v);
+      setLightness(l);
+      gsap.set(pointerRef.current, {x, y});
+      Draggable.get(pointerRef.current).update();
+      Draggable.get(pointerRef.current).startDrag(event);
+    }
+  }
 
   return (
     <div
@@ -86,15 +98,7 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
       <div className='c-color-picker-saturation__black' />
       <div
         ref={pointerRef}
-        className='c-color-picker-saturation__pointer'
-        style={{
-          top: `${ -(value * 100) + 100 }%`,
-          left: `${
-            lightness === 1
-            ? 0
-            : saturation * 100
-          }%`,
-        }}>
+        className='c-color-picker-saturation__pointer'>
         <div className='c-color-picker-saturation__circle' />
       </div>
     </div>

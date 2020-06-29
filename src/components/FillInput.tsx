@@ -138,26 +138,17 @@ const FillInput = (props: FillInputProps): ReactElement => {
     }
   };
 
-  const handleFillEditorClose = (editorFill: em.Fill): void => {
-    switch(editorFill.fillType) {
-      case 'color': {
-        if (selectedType === 'Text') {
-          setTextSettingsFillColor({fillColor: editorFill.color});
-        }
-        setLayerFillColor({id: selected[0], fillColor: editorFill.color});
-        break;
-      }
-      case 'gradient':
-        setLayerFillGradient({id: selected[0], gradient: editorFill.gradient});
-        break;
-    }
-  };
-
   const handleSwatchClick = (bounding: DOMRect): void => {
     if (!enabled) {
       enableLayerFill({id: selected[0]});
     }
-    openFillEditor({fill, onChange: handleFillEditorChange, onClose: handleFillEditorClose, layer: selected[0], x: bounding.x - 228, y: bounding.y > paperMain.view.bounds.height / 2 ? bounding.y - 208 : bounding.y + 4});
+    openFillEditor({
+      fill,
+      onChange: handleFillEditorChange,
+      layer: selected[0],
+      x: bounding.x - 228,
+      y: bounding.y > paperMain.view.bounds.height / 2 ? bounding.y - 208 : bounding.y + 4
+    });
   };
 
   return (
@@ -171,7 +162,7 @@ const FillInput = (props: FillInputProps): ReactElement => {
                 case 'color':
                   return fill.color;
                 case 'gradient':
-                  return fill.gradient.stops.reduce((result, current, index) => {
+                  return [...fill.gradient.stops].sort((a,b) => { return a.position - b.position }).reduce((result, current, index) => {
                     result = result + `${current.color} ${current.position * 100}%`;
                     if (index !== fill.gradient.stops.length - 1) {
                       result = result + ',';
