@@ -11,11 +11,11 @@ import SidebarSectionColumn from './SidebarSectionColumn';
 
 const SidebarFrameStyles = (): ReactElement => {
   return (
-    <SidebarSectionWrap>
+    <SidebarSectionWrap bottomBorder whiteSpace>
       <SidebarSection>
-        <SidebarSectionRow>
+        {/* <SidebarSectionRow>
           <SidebarSectionHead text={'position'} />
-        </SidebarSectionRow>
+        </SidebarSectionRow> */}
         <SidebarSectionRow>
           <SidebarSectionColumn width={'66%'}>
             <SidebarPositionStyles />

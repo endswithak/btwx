@@ -19,7 +19,7 @@ const SidebarFillStyles = (props: SidebarFillStylesProps): ReactElement => {
   const { selected, selectedType } = props;
   return (
     selected.length === 1 && (selectedType === 'Shape' || selectedType === 'Text')
-    ? <SidebarSectionWrap topBorder>
+    ? <SidebarSectionWrap bottomBorder whiteSpace>
         <SidebarSection>
           <SidebarSectionRow>
             <SidebarSectionColumn width='50%'>

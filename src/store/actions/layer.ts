@@ -70,6 +70,7 @@ import {
   DISABLE_LAYER_VERTICAL_FLIP,
   ENABLE_LAYER_FILL,
   DISABLE_LAYER_FILL,
+  SET_LAYER_FILL,
   SET_LAYER_FILL_COLOR,
   ENABLE_LAYER_STROKE,
   DISABLE_LAYER_STROKE,
@@ -116,6 +117,14 @@ import {
   UNMASK_LAYER,
   MASK_LAYERS,
   UNMASK_LAYERS,
+  ALIGN_LAYERS_TO_LEFT,
+  ALIGN_LAYERS_TO_RIGHT,
+  ALIGN_LAYERS_TO_TOP,
+  ALIGN_LAYERS_TO_BOTTOM,
+  ALIGN_LAYERS_TO_CENTER,
+  ALIGN_LAYERS_TO_MIDDLE,
+  DISTRIBUTE_LAYERS_HORIZONTALLY,
+  DISTRIBUTE_LAYERS_VERTICALLY,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
@@ -207,6 +216,7 @@ import {
   AddInViewLayersPayload,
   RemoveInViewLayerPayload,
   RemoveInViewLayersPayload,
+  SetLayerFillPayload,
   SetLayerFillTypePayload,
   SetLayerFillGradientPayload,
   SetLayerFillGradientTypePayload,
@@ -222,6 +232,14 @@ import {
   UnmaskLayerPayload,
   MaskLayersPayload,
   UnmaskLayersPayload,
+  AlignLayersToLeftPayload,
+  AlignLayersToRightPayload,
+  AlignLayersToTopPayload,
+  AlignLayersToBottomPayload,
+  AlignLayersToCenterPayload,
+  AlignLayersToMiddlePayload,
+  DistributeLayersHorizontallyPayload,
+  DistributeLayersVerticallyPayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -896,6 +914,11 @@ export const updateInViewLayers = (): LayerTypes => ({
   type: UPDATE_IN_VIEW_LAYERS
 });
 
+export const setLayerFill = (payload: SetLayerFillPayload): LayerTypes => ({
+  type: SET_LAYER_FILL,
+  payload
+});
+
 export const setLayerFillType = (payload: SetLayerFillTypePayload): LayerTypes => ({
   type: SET_LAYER_FILL_TYPE,
   payload
@@ -968,5 +991,45 @@ export const maskLayers = (payload: MaskLayersPayload): LayerTypes => ({
 
 export const unmaskLayers = (payload: UnmaskLayersPayload): LayerTypes => ({
   type: UNMASK_LAYERS,
+  payload
+});
+
+export const alignLayersToLeft = (payload: AlignLayersToLeftPayload): LayerTypes => ({
+  type: ALIGN_LAYERS_TO_LEFT,
+  payload
+});
+
+export const alignLayersToRight = (payload: AlignLayersToRightPayload): LayerTypes => ({
+  type: ALIGN_LAYERS_TO_RIGHT,
+  payload
+});
+
+export const alignLayersToTop = (payload: AlignLayersToTopPayload): LayerTypes => ({
+  type: ALIGN_LAYERS_TO_TOP,
+  payload
+});
+
+export const alignLayersToBottom = (payload: AlignLayersToBottomPayload): LayerTypes => ({
+  type: ALIGN_LAYERS_TO_BOTTOM,
+  payload
+});
+
+export const alignLayersToCenter = (payload: AlignLayersToCenterPayload): LayerTypes => ({
+  type: ALIGN_LAYERS_TO_CENTER,
+  payload
+});
+
+export const alignLayersToMiddle = (payload: AlignLayersToMiddlePayload): LayerTypes => ({
+  type: ALIGN_LAYERS_TO_MIDDLE,
+  payload
+});
+
+export const distributeLayersHorizontally = (payload: DistributeLayersHorizontallyPayload): LayerTypes => ({
+  type: DISTRIBUTE_LAYERS_HORIZONTALLY,
+  payload
+});
+
+export const distributeLayersVertically = (payload: DistributeLayersVerticallyPayload): LayerTypes => ({
+  type: DISTRIBUTE_LAYERS_VERTICALLY,
   payload
 });

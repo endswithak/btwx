@@ -3,27 +3,31 @@ import { ThemeContext } from './ThemeProvider';
 
 interface SidebarSectionWrapProps {
   children: ReactElement | ReactElement[];
-  topBorder?: boolean;
+  bottomBorder?: boolean;
+  whiteSpace?: boolean;
+  style?: any;
 }
 
 const SidebarSectionWrap = (props: SidebarSectionWrapProps): ReactElement => {
   const theme = useContext(ThemeContext);
+  const { children, bottomBorder, whiteSpace, style } = props;
 
   return (
     <div
       className='c-sidebar-section-wrap'
       style={{
-        boxShadow: props.topBorder
-        ? `0 1px 0 0 ${theme.background.z3} inset`
+        boxShadow: bottomBorder
+        ? `0 -1px 0 0 ${theme.background.z3} inset`
         : 'none',
-        marginTop: props.topBorder
+        paddingTop: whiteSpace
         ? theme.unit
         : 0,
-        paddingTop: props.topBorder
+        paddingBottom: whiteSpace
         ? theme.unit
-        : 0
+        : 0,
+        ...style
       }}>
-      { props.children }
+      { children }
     </div>
   );
 }

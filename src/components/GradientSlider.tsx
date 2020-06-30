@@ -7,40 +7,63 @@ import useDebounce from './useDebounce';
 import GradientSliderStop from './GradientSliderStop';
 import GradientSliderRemove from './GradientSliderRemove';
 import GradientSliderGradient from './GradientSliderGradient';
+import { compareGradients } from '../store/selectors/layer';
 
 gsap.registerPlugin(Draggable);
 
 interface GradientSliderProps {
   gradientValue: em.Gradient;
+  //gradientStops: em.GradientStop[];
+  activeStopColor: string;
   activeStopIndex: number;
   setActiveStopIndex(index: number): void;
   setActivePickerColor(color: string): any;
   onChange(gradient: em.Gradient): void;
-  onChangeDebounce(gradient: em.Gradient): void;
 }
 
 const GradientSlider = (props: GradientSliderProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { gradientValue, activeStopIndex, onChange, onChangeDebounce, setActiveStopIndex, setActivePickerColor } = props;
+  const { gradientValue, activeStopColor, activeStopIndex, onChange, setActiveStopIndex, setActivePickerColor } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const [gradient, setGradient] = useState(gradientValue);
+  const [prevGradient, setPrevGradient] = useState(gradientValue);
   const [stops, setStops] = useState(gradientValue.stops);
-  const debounceGradient = useDebounce(gradient, 250) as em.Gradient;
+  const [activeStopPos, setActiveStopPos] = useState(gradientValue.stops[activeStopIndex].position);
 
   useEffect(() => {
+    if (activeStopColor !== stops[activeStopIndex].color) {
+      const newStops = [...stops];
+      newStops[activeStopIndex] = {
+        ...newStops[activeStopIndex],
+        color: activeStopColor
+      }
+      setStops(newStops);
+      setGradient({
+        ...gradient,
+        stops: newStops
+      });
+    }
+  }, [activeStopColor]);
+
+  useEffect(() => {
+    const newStops = [...stops];
+    newStops[activeStopIndex] = {
+      ...newStops[activeStopIndex],
+      position: activeStopPos
+    }
+    setStops(newStops);
     setGradient({
       ...gradient,
-      stops
+      stops: newStops
     });
-  }, [stops]);
+  }, [activeStopPos]);
 
   useEffect(() => {
-    onChange(gradient);
+    if (!compareGradients(gradient, prevGradient)) {
+      setPrevGradient(gradient);
+      onChange(gradient);
+    }
   }, [gradient]);
-
-  useEffect(() => {
-    onChangeDebounce(debounceGradient);
-  }, [debounceGradient]);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -59,11 +82,7 @@ const GradientSlider = (props: GradientSliderProps): ReactElement => {
             setActivePickerColor(stop.color);
           },
           onDrag: function() {
-            const newStops = [...stops];
-            newStops[index].position = this.x / this.maxX;
-            //newStops[index].position = this.x / this.maxX;
-            //const sortedStops = newStops.sort((a,b) => { return b.position - a.position }).reverse();
-            setStops(newStops);
+            setActiveStopPos(this.x / this.maxX);
           }
         });
       });
@@ -87,7 +106,8 @@ const GradientSlider = (props: GradientSliderProps): ReactElement => {
           stops={stops}
           setStops={setStops}
           setActivePickerColor={setActivePickerColor}
-          setActiveStopIndex={setActiveStopIndex} />
+          setActiveStopIndex={setActiveStopIndex}
+          setActiveStopPos={setActiveStopPos} />
         {
           stops.map((stop, index) => (
             <div
@@ -99,7 +119,8 @@ const GradientSlider = (props: GradientSliderProps): ReactElement => {
                 style={{
                   boxShadow: index === activeStopIndex
                   ? `0 0 0 1.5px #fff, 0 0 0 3.5px ${theme.palette.primary}, inset 0 0 1px 1px rgba(0,0,0,.3), 0 0 1px 2px rgba(0,0,0,.4)`
-                  : `0 0 0 1.5px #fff, inset 0 0 1px 1px rgba(0,0,0,.3), 0 0 1px 2px rgba(0,0,0,.4)`
+                  : `0 0 0 1.5px #fff, inset 0 0 1px 1px rgba(0,0,0,.3), 0 0 1px 2px rgba(0,0,0,.4)`,
+                  background: stop.color
                 }} />
             </div>
           ))

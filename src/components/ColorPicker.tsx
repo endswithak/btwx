@@ -15,20 +15,18 @@ import ColorPickerHueInput from './ColorPickerHueInput';
 import ColorPickerSaturationInput from './ColorPickerSaturationInput';
 import ColorPickerLightnessInput from './ColorPickerLightnessInput';
 import ColorPickerTypeToggle from './ColorPickerTypeToggle';
-import useDebounce from './useDebounce';
 
 interface ColorPickerProps {
   colorValue: string;
   colorType: 'hsl' | 'rgb';
   onChange?(color: string): void;
-  onChangeDebounce?(color: string): void;
 }
 
 const ColorPicker = (props: ColorPickerProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { onChange, colorType, colorValue, onChangeDebounce } = props;
+  const { onChange, colorType, colorValue } = props;
   const [color, setColor] = useState<string>(chroma(colorValue).hex());
-  const debounceColor = useDebounce(color, 250);
+  const [prevColor, setPrevColor] = useState<string>(chroma(colorValue).hex());
   const [hue, setHue] = useState(isNaN(chroma(colorValue).get('hsl.h')) ? 0 : chroma(colorValue).get('hsl.h'));
   const [saturation, setSaturation] = useState(chroma(colorValue).get('hsl.s'));
   const [lightness, setLightness] = useState(chroma(colorValue).get('hsl.l'));
@@ -37,7 +35,6 @@ const ColorPicker = (props: ColorPickerProps): ReactElement => {
   const [type, setType] = useState(colorType);
 
   useEffect(() => {
-    //setColor(colorValue);
     setHue(isNaN(chroma(colorValue).get('hsl.h')) ? 0 : chroma(colorValue).get('hsl.h'));
     setSaturation(chroma(colorValue).get('hsl.s'));
     setLightness(chroma(colorValue).get('hsl.l'));
@@ -51,12 +48,11 @@ const ColorPicker = (props: ColorPickerProps): ReactElement => {
   }, [hue, saturation, lightness, value, alpha]);
 
   useEffect(() => {
-    onChange(color);
+    if (color !== prevColor) {
+      setPrevColor(color);
+      onChange(color);
+    }
   }, [color]);
-
-  useEffect(() => {
-    onChangeDebounce(debounceColor);
-  }, [debounceColor]);
 
   return (
     <div className='c-color-picker'>

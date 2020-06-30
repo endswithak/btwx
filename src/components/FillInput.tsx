@@ -12,7 +12,7 @@ import GradientTypeSelector from './GradientTypeSelector';
 import { getPaperLayer, getGradientOriginPoint, getGradientDestinationPoint, getGradientStops } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
 import { EnableLayerFillPayload, DisableLayerFillPayload, SetLayerFillGradientPayload, SetLayerFillColorPayload, LayerTypes } from '../store/actionTypes/layer';
-import { enableLayerFill, disableLayerFill, setLayerFillGradient, setLayerFillColor } from '../store/actions/layer';
+import { enableLayerFill, setLayerFillGradient, setLayerFillColor } from '../store/actions/layer';
 import { OpenFillEditorPayload, FillEditorTypes } from '../store/actionTypes/fillEditor';
 import { openFillEditor } from '../store/actions/fillEditor';
 import { SetTextSettingsFillColorPayload, TextSettingsTypes } from '../store/actionTypes/textSettings';
@@ -25,7 +25,6 @@ interface FillInputProps {
   fillOpacity: number;
   fillEditorOpen?: boolean;
   enableLayerFill?(payload: EnableLayerFillPayload): LayerTypes;
-  disableLayerFill?(payload: DisableLayerFillPayload): LayerTypes;
   setLayerFillColor?(payload: SetLayerFillColorPayload): LayerTypes;
   setLayerFillGradient?(payload: SetLayerFillGradientPayload): LayerTypes;
   openFillEditor?(payload: OpenFillEditorPayload): FillEditorTypes;
@@ -33,7 +32,7 @@ interface FillInputProps {
 }
 
 const FillInput = (props: FillInputProps): ReactElement => {
-  const { selected, selectedType, fillValue, fillOpacity, fillEditorOpen, enableLayerFill, disableLayerFill, setLayerFillGradient, openFillEditor, setTextSettingsFillColor, setLayerFillColor } = props;
+  const { selected, selectedType, fillValue, fillOpacity, fillEditorOpen, enableLayerFill, setLayerFillGradient, openFillEditor, setTextSettingsFillColor, setLayerFillColor } = props;
   const [enabled, setEnabled] = useState<boolean>(fillValue.enabled);
   const [fill, setFill] = useState(fillValue);
   const [opacity, setOpacity] = useState<number | string>(fillOpacity);
@@ -66,11 +65,9 @@ const FillInput = (props: FillInputProps): ReactElement => {
         if (nextOpacity < 0) {
           nextOpacity = 0;
         }
-        const paperLayer = getPaperLayer(selected[0]);
         switch(fill.fillType) {
           case 'color': {
             const newColor = chroma(fill.color).alpha(evaluate(`${nextOpacity} / 100`)).hex();
-            paperLayer.fillColor = new paper.Color(newColor);
             setLayerFillColor({id: selected[0], fillColor: newColor});
             break;
           }
@@ -80,14 +77,6 @@ const FillInput = (props: FillInputProps): ReactElement => {
               stops: fill.gradient.stops.map((stop) => {
                 return {...stop, color: chroma(stop.color).alpha(nextOpacity / 100).hex()}
               })
-            }
-            paperLayer.fillColor = {
-              gradient: {
-                stops: getGradientStops(newGradient.stops),
-                radial: newGradient.gradientType === 'radial'
-              },
-              origin: getGradientOriginPoint(selected[0], newGradient.origin),
-              destination: getGradientDestinationPoint(selected[0], newGradient.destination)
             }
             setLayerFillGradient({id: selected[0], gradient: newGradient});
             break;
@@ -243,5 +232,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { enableLayerFill, disableLayerFill, setLayerFillGradient, openFillEditor, setTextSettingsFillColor, setLayerFillColor }
+  { enableLayerFill, setLayerFillGradient, openFillEditor, setTextSettingsFillColor, setLayerFillColor }
 )(FillInput);

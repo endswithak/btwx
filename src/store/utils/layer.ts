@@ -28,7 +28,7 @@ import {
   SetLayerFillGradientType, SetLayerFillGradientStopColor, SetLayerFillGradientStopPosition, AddLayerFillGradientStop,
   RemoveLayerFillGradientStop, SetLayerFillGradientOrigin, SetLayerFillGradient, SetLayerStrokeGradient,
   SetLayerStrokeGradientType, SetLayerStrokeFillType, SetLayerFillGradientDestination, AddLayersMask,
-  MaskLayer, MaskLayers, UnmaskLayers, UnmaskLayer, RemoveLayersMask
+  MaskLayer, MaskLayers, UnmaskLayers, UnmaskLayer, RemoveLayersMask, SetLayerFill, AlignLayersToLeft, AlignLayersToRight, AlignLayersToTop, AlignLayersToBottom, AlignLayersToCenter, AlignLayersToMiddle, DistributeLayersHorizontally, DistributeLayersVertically
 } from '../actionTypes/layer';
 
 import {
@@ -40,7 +40,7 @@ import {
   getTweensByDestinationLayer, getAllArtboardTweenEventDestinations, getAllArtboardTweenLayerDestinations,
   getAllArtboardTweenEvents, getTweensEventsByDestinationArtboard, getTweensByLayer, getLayersBounds,
   getGradientOriginPoint, getGradientDestinationPoint, getGradientStops, getLayerSnapPoints, getInViewSnapPoints,
-  orderLayersByDepth
+  orderLayersByDepth, orderLayersByLeft, orderLayersByTop
 } from '../selectors/layer';
 
 import { paperMain } from '../../canvas';
@@ -1978,6 +1978,8 @@ export const disableLayerFill = (state: LayerState, action: DisableLayerFill): L
 
 export const setLayerFillColor = (state: LayerState, action: SetLayerFillColor): LayerState => {
   let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  paperLayer.fillColor = new paperMain.Color(action.payload.fillColor);
   currentState = {
     ...currentState,
     byId: {
@@ -2765,6 +2767,43 @@ export const updateInViewLayers = (state: LayerState, action: UpdateInViewLayers
   return currentState;
 };
 
+export const setLayerFill = (state: LayerState, action: SetLayerFill): LayerState => {
+  let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  const layerItem = currentState.byId[action.payload.id];
+  const fill = action.payload.fill;
+  switch(fill.fillType) {
+    case 'color':
+      paperLayer.fillColor = new paperMain.Color(fill.color);
+      break;
+    case 'gradient':
+      paperLayer.fillColor = {
+        gradient: {
+          stops: getGradientStops(fill.gradient.stops),
+          radial: layerItem.style.fill.gradient.gradientType === 'radial'
+        },
+        origin: getGradientOriginPoint(action.payload.id, fill.gradient.origin),
+        destination: getGradientDestinationPoint(action.payload.id, fill.gradient.destination)
+      }
+      break;
+  }
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          fill: fill
+        }
+      }
+    },
+    paperProject: paperMain.project.exportJSON()
+  }
+  return currentState;
+};
+
 export const setLayerFillType = (state: LayerState, action: SetLayerFillType): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
@@ -2801,9 +2840,6 @@ export const setLayerFillType = (state: LayerState, action: SetLayerFillType): L
       }
     },
     paperProject: paperMain.project.exportJSON()
-  }
-  if (action.payload.gradientType) {
-    currentState = setLayerFillGradientType(currentState, layerActions.setLayerFillGradientType({id: action.payload.id, gradientType: action.payload.gradientType}) as SetLayerFillGradientType);
   }
   return currentState;
 };
@@ -3183,4 +3219,130 @@ export const unmaskLayers = (state: LayerState, action: UnmaskLayers): LayerStat
   return action.payload.layers.reduce((result, current) => {
     return unmaskLayer(result, layerActions.unmaskLayer({id: current}) as UnmaskLayer);
   }, state);
+};
+
+export const alignLayersToLeft = (state: LayerState, action: AlignLayersToLeft): LayerState => {
+  let currentState = state;
+  const layersBounds = getLayersBounds(action.payload.layers);
+  currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
+    const paperLayer = getPaperLayer(current);
+    paperLayer.bounds.left = layersBounds.left;
+    updateSelectionFrame(currentState);
+    result = updateLayerBounds(result, current);
+    return result;
+  }, currentState);
+  return currentState;
+};
+
+export const alignLayersToRight = (state: LayerState, action: AlignLayersToRight): LayerState => {
+  let currentState = state;
+  const layersBounds = getLayersBounds(action.payload.layers);
+  currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
+    const paperLayer = getPaperLayer(current);
+    paperLayer.bounds.right = layersBounds.right;
+    updateSelectionFrame(currentState);
+    result = updateLayerBounds(result, current);
+    return result;
+  }, currentState);
+  return currentState;
+};
+
+export const alignLayersToTop = (state: LayerState, action: AlignLayersToTop): LayerState => {
+  let currentState = state;
+  const layersBounds = getLayersBounds(action.payload.layers);
+  currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
+    const paperLayer = getPaperLayer(current);
+    paperLayer.bounds.top = layersBounds.top;
+    updateSelectionFrame(currentState);
+    result = updateLayerBounds(result, current);
+    return result;
+  }, currentState);
+  return currentState;
+};
+
+export const alignLayersToBottom = (state: LayerState, action: AlignLayersToBottom): LayerState => {
+  let currentState = state;
+  const layersBounds = getLayersBounds(action.payload.layers);
+  currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
+    const paperLayer = getPaperLayer(current);
+    paperLayer.bounds.bottom = layersBounds.bottom;
+    updateSelectionFrame(currentState);
+    result = updateLayerBounds(result, current);
+    return result;
+  }, currentState);
+  return currentState;
+};
+
+export const alignLayersToCenter = (state: LayerState, action: AlignLayersToCenter): LayerState => {
+  let currentState = state;
+  const layersBounds = getLayersBounds(action.payload.layers);
+  currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
+    const paperLayer = getPaperLayer(current);
+    paperLayer.bounds.center.x = layersBounds.center.x;
+    updateSelectionFrame(currentState);
+    result = updateLayerBounds(result, current);
+    return result;
+  }, currentState);
+  return currentState;
+};
+
+export const alignLayersToMiddle = (state: LayerState, action: AlignLayersToMiddle): LayerState => {
+  let currentState = state;
+  const layersBounds = getLayersBounds(action.payload.layers);
+  currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
+    const paperLayer = getPaperLayer(current);
+    paperLayer.bounds.center.y = layersBounds.center.y;
+    updateSelectionFrame(currentState);
+    result = updateLayerBounds(result, current);
+    return result;
+  }, currentState);
+  return currentState;
+};
+
+export const distributeLayersHorizontally = (state: LayerState, action: DistributeLayersHorizontally): LayerState => {
+  let currentState = state;
+  const layersBounds = getLayersBounds(action.payload.layers);
+  const layersWidth = action.payload.layers.reduce((result, current) => {
+    const paperLayer = getPaperLayer(current);
+    result = result + paperLayer.bounds.width;
+    return result;
+  }, 0);
+  const diff = (layersBounds.width - layersWidth) / (action.payload.layers.length - 1);
+  const orderedLayers = orderLayersByLeft(action.payload.layers);
+  currentState = orderedLayers.reduce((result: LayerState, current: string, index: number) => {
+    if (index !== 0 && index !== orderedLayers.length - 1) {
+      const paperLayer = getPaperLayer(current);
+      const prevLayer = orderedLayers[index - 1];
+      const prevPaperLayer = getPaperLayer(prevLayer);
+      paperLayer.bounds.left = prevPaperLayer.bounds.right + diff;
+      updateSelectionFrame(currentState);
+      result = updateLayerBounds(result, current);
+    }
+    return result;
+  }, currentState);
+  return currentState;
+};
+
+export const distributeLayersVertically = (state: LayerState, action: DistributeLayersVertically): LayerState => {
+  let currentState = state;
+  const layersBounds = getLayersBounds(action.payload.layers);
+  const layersHeight = action.payload.layers.reduce((result, current) => {
+    const paperLayer = getPaperLayer(current);
+    result = result + paperLayer.bounds.height;
+    return result;
+  }, 0);
+  const diff = (layersBounds.height - layersHeight) / (action.payload.layers.length - 1);
+  const orderedLayers = orderLayersByTop(action.payload.layers);
+  currentState = orderedLayers.reduce((result: LayerState, current: string, index: number) => {
+    if (index !== 0 && index !== orderedLayers.length - 1) {
+      const paperLayer = getPaperLayer(current);
+      const prevLayer = orderedLayers[index - 1];
+      const prevPaperLayer = getPaperLayer(prevLayer);
+      paperLayer.bounds.top = prevPaperLayer.bounds.bottom + diff;
+      updateSelectionFrame(currentState);
+      result = updateLayerBounds(result, current);
+    }
+    return result;
+  }, currentState);
+  return currentState;
 };

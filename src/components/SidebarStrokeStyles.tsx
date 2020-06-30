@@ -27,7 +27,7 @@ const SidebarStrokeStyles = (props: SidebarStrokeStylesProps): ReactElement => {
 
   return (
     selected.length === 1 && (selectedType === 'Shape' || selectedType === 'Text')
-    ? <SidebarSectionWrap topBorder>
+    ? <SidebarSectionWrap bottomBorder whiteSpace>
         <SidebarSection>
           <SidebarSectionRow>
             <SidebarSectionColumn width='50%'>

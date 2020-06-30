@@ -62,6 +62,7 @@ import {
   DISABLE_LAYER_VERTICAL_FLIP,
   ENABLE_LAYER_FILL,
   DISABLE_LAYER_FILL,
+  SET_LAYER_FILL,
   SET_LAYER_FILL_COLOR,
   ENABLE_LAYER_STROKE,
   DISABLE_LAYER_STROKE,
@@ -103,11 +104,18 @@ import {
   ADD_LAYER_FILL_GRADIENT_STOP,
   REMOVE_LAYER_FILL_GRADIENT_STOP,
   ADD_LAYERS_MASK,
-  REMOVE_LAYERS_MASK,
   MASK_LAYER,
   UNMASK_LAYER,
   MASK_LAYERS,
   UNMASK_LAYERS,
+  ALIGN_LAYERS_TO_LEFT,
+  ALIGN_LAYERS_TO_RIGHT,
+  ALIGN_LAYERS_TO_TOP,
+  ALIGN_LAYERS_TO_BOTTOM,
+  ALIGN_LAYERS_TO_CENTER,
+  ALIGN_LAYERS_TO_MIDDLE,
+  DISTRIBUTE_LAYERS_HORIZONTALLY,
+  DISTRIBUTE_LAYERS_VERTICALLY,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -206,6 +214,7 @@ import {
   removeInViewLayer,
   removeInViewLayers,
   updateInViewLayers,
+  setLayerFill,
   setLayerFillType,
   setLayerFillGradient,
   setLayerFillGradientType,
@@ -216,11 +225,18 @@ import {
   addLayerFillGradientStop,
   removeLayerFillGradientStop,
   addLayersMask,
-  removeLayersMask,
   maskLayer,
   unmaskLayer,
   maskLayers,
-  unmaskLayers
+  unmaskLayers,
+  alignLayersToLeft,
+  alignLayersToRight,
+  alignLayersToTop,
+  alignLayersToBottom,
+  alignLayersToCenter,
+  alignLayersToMiddle,
+  distributeLayersHorizontally,
+  distributeLayersVertically
 } from '../utils/layer';
 
 export interface LayerState {
@@ -488,6 +504,8 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return removeInViewLayers(state, action);
     case UPDATE_IN_VIEW_LAYERS:
       return updateInViewLayers(state, action);
+    case SET_LAYER_FILL:
+      return setLayerFill(state, action);
     case SET_LAYER_FILL_TYPE:
       return setLayerFillType(state, action);
     case SET_LAYER_FILL_GRADIENT:
@@ -508,8 +526,6 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return removeLayerFillGradientStop(state, action);
     case ADD_LAYERS_MASK:
       return addLayersMask(state, action);
-    case REMOVE_LAYERS_MASK:
-      return removeLayersMask(state, action);
     case MASK_LAYER:
       return maskLayer(state, action);
     case UNMASK_LAYER:
@@ -518,6 +534,22 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return maskLayers(state, action);
     case UNMASK_LAYERS:
       return unmaskLayers(state, action);
+    case ALIGN_LAYERS_TO_LEFT:
+      return alignLayersToLeft(state, action);
+    case ALIGN_LAYERS_TO_RIGHT:
+      return alignLayersToRight(state, action);
+    case ALIGN_LAYERS_TO_TOP:
+      return alignLayersToTop(state, action);
+    case ALIGN_LAYERS_TO_BOTTOM:
+      return alignLayersToBottom(state, action);
+    case ALIGN_LAYERS_TO_CENTER:
+      return alignLayersToCenter(state, action);
+    case ALIGN_LAYERS_TO_MIDDLE:
+      return alignLayersToMiddle(state, action);
+    case DISTRIBUTE_LAYERS_HORIZONTALLY:
+      return distributeLayersHorizontally(state, action);
+    case DISTRIBUTE_LAYERS_VERTICALLY:
+      return distributeLayersVertically(state, action);
     default:
       return state;
   }

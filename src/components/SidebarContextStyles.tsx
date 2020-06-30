@@ -6,7 +6,7 @@ import SidebarSection from './SidebarSection';
 import SidebarSectionRow from './SidebarSectionRow';
 
 const SidebarContextStyles = (): ReactElement => (
-  <SidebarSectionWrap topBorder>
+  <SidebarSectionWrap bottomBorder whiteSpace>
     <SidebarSection>
       <SidebarSectionRow>
         <SidebarSectionHead text={'opacity'} />

@@ -2,18 +2,18 @@
 import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
 import { ThemeContext } from './ThemeProvider';
 import chroma from 'chroma-js';
-import { v4 as uuidv4 } from 'uuid';
 
 interface GradientSliderGradientProps {
   stops: em.GradientStop[];
   setStops(stops: em.GradientStop[]): void;
   setActivePickerColor(color: string): void;
   setActiveStopIndex(index: number): void;
+  setActiveStopPos(pos: number): void;
 }
 
 const GradientSliderGradient = (props: GradientSliderGradientProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { stops, setStops, setActivePickerColor, setActiveStopIndex } = props;
+  const { stops, setStops, setActivePickerColor, setActiveStopIndex, setActiveStopPos } = props;
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     const boundingBox = document.getElementById('c-gradient-slider__slider').getBoundingClientRect();
@@ -36,12 +36,12 @@ const GradientSliderGradient = (props: GradientSliderGradientProps): ReactElemen
       return result;
     }, stops[0]);
     const color = chroma.average([leftStop.color, rightStop.color]).hex();
-    const id = uuidv4();
-    const newStop = {position, color, id};
+    const newStop = {position, color};
     const newStops = [...stops, newStop];
-    setStops([...stops, newStop]);
+    setStops(newStops);
     setActiveStopIndex(newStops.length - 1);
     setActivePickerColor(color);
+    setActiveStopPos(position);
   }
 
   return (

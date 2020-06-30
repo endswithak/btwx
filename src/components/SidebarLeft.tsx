@@ -10,10 +10,10 @@ const SidebarLeft = (): ReactElement => {
       width={320}
       position={'left'}
       >
-      <SidebarSectionWrap>
+      {/* <SidebarSectionWrap>
         <SidebarSectionHead
           text={'layers'} />
-      </SidebarSectionWrap>
+      </SidebarSectionWrap> */}
       <SidebarLayerTree />
     </Sidebar>
   );

@@ -669,3 +669,38 @@ export const orderLayersByDepth = (state: LayerState, layers: string[]): string[
   }
   return ordered;
 }
+
+export const orderLayersByLeft = (layers: string[]): string[] => {
+  return [...layers].sort((a, b) => {
+    const aPaperLayer = getPaperLayer(a);
+    const bPaperLayer = getPaperLayer(b);
+    return aPaperLayer.bounds.left - bPaperLayer.bounds.left;
+  });
+}
+
+export const orderLayersByTop = (layers: string[]): string[] => {
+  return [...layers].sort((a, b) => {
+    const aPaperLayer = getPaperLayer(a);
+    const bPaperLayer = getPaperLayer(b);
+    return aPaperLayer.bounds.top - bPaperLayer.bounds.top;
+  });
+}
+
+export const compareGradientStops = (s1: em.GradientStop[], s2: em.GradientStop[]): boolean => {
+  return s1.length === s2.length &&
+         s1.every((stop, index) => stop.color === s2[index].color) &&
+         s1.every((stop, index) => stop.position === s2[index].position);
+};
+
+export const compareGradients = (g1: em.Gradient, g2: em.Gradient): boolean => {
+  return compareGradientStops(g1.stops, g2.stops) &&
+         g1.origin === g2.origin &&
+         g1.destination === g2.destination &&
+         g1.gradientType === g2.gradientType;
+};
+
+export const compareFills = (f1: em.Fill, f2: em.Fill): boolean => {
+  return f1.fillType === f2.fillType &&
+         f1.color === f2.color &&
+         compareGradients(f1.gradient, f2.gradient);
+};

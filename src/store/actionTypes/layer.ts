@@ -89,6 +89,7 @@ export const SET_LAYER_OPACITY = 'SET_LAYER_OPACITY';
 
 export const ENABLE_LAYER_FILL = 'ENABLE_LAYER_FILL';
 export const DISABLE_LAYER_FILL = 'DISABLE_LAYER_FILL';
+export const SET_LAYER_FILL = 'SET_LAYER_FILL';
 export const SET_LAYER_FILL_COLOR = 'SET_LAYER_FILL_COLOR';
 export const SET_LAYER_FILL_TYPE = 'SET_LAYER_FILL_TYPE';
 export const SET_LAYER_FILL_GRADIENT = 'SET_LAYER_FILL_GRADIENT';
@@ -141,6 +142,16 @@ export const MASK_LAYER = 'MASK_LAYER';
 export const UNMASK_LAYER = 'UNMASK_LAYER';
 export const MASK_LAYERS = 'MASK_LAYERS';
 export const UNMASK_LAYERS = 'UNMASK_LAYERS';
+
+export const ALIGN_LAYERS_TO_LEFT = 'ALIGN_LAYERS_TO_LEFT';
+export const ALIGN_LAYERS_TO_RIGHT = 'ALIGN_LAYERS_TO_RIGHT';
+export const ALIGN_LAYERS_TO_TOP = 'ALIGN_LAYERS_TO_TOP';
+export const ALIGN_LAYERS_TO_BOTTOM = 'ALIGN_LAYERS_TO_BOTTOM';
+export const ALIGN_LAYERS_TO_CENTER = 'ALIGN_LAYERS_TO_CENTER';
+export const ALIGN_LAYERS_TO_MIDDLE = 'ALIGN_LAYERS_TO_MIDDLE';
+
+export const DISTRIBUTE_LAYERS_HORIZONTALLY = 'DISTRIBUTE_LAYERS_HORIZONTALLY';
+export const DISTRIBUTE_LAYERS_VERTICALLY = 'DISTRIBUTE_LAYERS_VERTICALLY';
 
 // Page
 
@@ -1111,10 +1122,19 @@ export interface UpdateInViewLayers {
   type: typeof UPDATE_IN_VIEW_LAYERS;
 }
 
+export interface SetLayerFillPayload {
+  id: string;
+  fill: em.Fill;
+}
+
+export interface SetLayerFill {
+  type: typeof SET_LAYER_FILL;
+  payload: SetLayerFillPayload;
+}
+
 export interface SetLayerFillTypePayload {
   id: string;
   fillType: em.FillType;
-  gradientType?: em.GradientType;
 }
 
 export interface SetLayerFillType {
@@ -1258,5 +1278,76 @@ export interface UnmaskLayers {
   payload: UnmaskLayersPayload;
 }
 
+export interface AlignLayersToLeftPayload {
+  layers: string[];
+}
 
-export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | AddText | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower | FreezeLayerTween | UnFreezeLayerTween | SetLayerX | SetLayerY | SetLayerWidth | SetLayerHeight | SetLayerRotation | SetLayerOpacity | EnableLayerHorizontalFlip | DisableLayerHorizontalFlip | EnableLayerVerticalFlip | DisableLayerVerticalFlip | EnableLayerFill | DisableLayerFill | SetLayerFillColor | EnableLayerStroke | DisableLayerStroke | SetLayerStrokeColor | SetLayerStrokeFillType | SetLayerStrokeGradient | SetLayerStrokeGradientType | SetLayerStrokeWidth | SetLayerStrokeCap | SetLayerStrokeJoin | SetLayerStrokeDashArray | SetLayerStrokeMiterLimit | EnableLayerShadow | DisableLayerShadow | SetLayerShadowColor | SetLayerShadowBlur | SetLayerShadowXOffset | SetLayerShadowYOffset | ResizeLayer | ResizeLayers | SetLayerText | SetLayerFontSize | SetLayerLeading | SetLayerFontWeight | SetLayerFontFamily | SetLayerJustification | AddInViewLayer | AddInViewLayers | RemoveInViewLayer | RemoveInViewLayers | UpdateInViewLayers | SetLayerFillType | SetLayerFillGradient | SetLayerFillGradientType | SetLayerFillGradientOrigin | SetLayerFillGradientDestination | SetLayerFillGradientStopColor | SetLayerFillGradientStopPosition | AddLayerFillGradientStop | RemoveLayerFillGradientStop | AddLayersMask | RemoveLayerMask | MaskLayer | UnmaskLayer | MaskLayers | UnmaskLayers;
+export interface AlignLayersToLeft {
+  type: typeof ALIGN_LAYERS_TO_LEFT;
+  payload: AlignLayersToLeftPayload;
+}
+
+export interface AlignLayersToRightPayload {
+  layers: string[];
+}
+
+export interface AlignLayersToRight {
+  type: typeof ALIGN_LAYERS_TO_RIGHT;
+  payload: AlignLayersToRightPayload;
+}
+
+export interface AlignLayersToTopPayload {
+  layers: string[];
+}
+
+export interface AlignLayersToTop {
+  type: typeof ALIGN_LAYERS_TO_TOP;
+  payload: AlignLayersToTopPayload;
+}
+
+export interface AlignLayersToBottomPayload {
+  layers: string[];
+}
+
+export interface AlignLayersToBottom {
+  type: typeof ALIGN_LAYERS_TO_BOTTOM;
+  payload: AlignLayersToBottomPayload;
+}
+
+export interface AlignLayersToCenterPayload {
+  layers: string[];
+}
+
+export interface AlignLayersToCenter {
+  type: typeof ALIGN_LAYERS_TO_CENTER;
+  payload: AlignLayersToCenterPayload;
+}
+
+export interface AlignLayersToMiddlePayload {
+  layers: string[];
+}
+
+export interface AlignLayersToMiddle {
+  type: typeof ALIGN_LAYERS_TO_MIDDLE;
+  payload: AlignLayersToMiddlePayload;
+}
+
+export interface DistributeLayersHorizontallyPayload {
+  layers: string[];
+}
+
+export interface DistributeLayersHorizontally {
+  type: typeof DISTRIBUTE_LAYERS_HORIZONTALLY;
+  payload: DistributeLayersHorizontallyPayload;
+}
+
+export interface DistributeLayersVerticallyPayload {
+  layers: string[];
+}
+
+export interface DistributeLayersVertically {
+  type: typeof DISTRIBUTE_LAYERS_VERTICALLY;
+  payload: DistributeLayersVerticallyPayload;
+}
+
+export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | AddText | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower | FreezeLayerTween | UnFreezeLayerTween | SetLayerX | SetLayerY | SetLayerWidth | SetLayerHeight | SetLayerRotation | SetLayerOpacity | EnableLayerHorizontalFlip | DisableLayerHorizontalFlip | EnableLayerVerticalFlip | DisableLayerVerticalFlip | EnableLayerFill | DisableLayerFill | SetLayerFillColor | EnableLayerStroke | DisableLayerStroke | SetLayerStrokeColor | SetLayerStrokeFillType | SetLayerStrokeGradient | SetLayerStrokeGradientType | SetLayerStrokeWidth | SetLayerStrokeCap | SetLayerStrokeJoin | SetLayerStrokeDashArray | SetLayerStrokeMiterLimit | EnableLayerShadow | DisableLayerShadow | SetLayerShadowColor | SetLayerShadowBlur | SetLayerShadowXOffset | SetLayerShadowYOffset | ResizeLayer | ResizeLayers | SetLayerText | SetLayerFontSize | SetLayerLeading | SetLayerFontWeight | SetLayerFontFamily | SetLayerJustification | AddInViewLayer | AddInViewLayers | RemoveInViewLayer | RemoveInViewLayers | UpdateInViewLayers | SetLayerFill | SetLayerFillType | SetLayerFillGradient | SetLayerFillGradientType | SetLayerFillGradientOrigin | SetLayerFillGradientDestination | SetLayerFillGradientStopColor | SetLayerFillGradientStopPosition | AddLayerFillGradientStop | RemoveLayerFillGradientStop | AddLayersMask | MaskLayer | UnmaskLayer | MaskLayers | UnmaskLayers | AlignLayersToLeft | AlignLayersToRight | AlignLayersToTop | AlignLayersToBottom | AlignLayersToCenter | AlignLayersToMiddle | DistributeLayersHorizontally | DistributeLayersVertically;
