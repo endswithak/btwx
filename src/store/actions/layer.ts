@@ -125,6 +125,9 @@ import {
   ALIGN_LAYERS_TO_MIDDLE,
   DISTRIBUTE_LAYERS_HORIZONTALLY,
   DISTRIBUTE_LAYERS_VERTICALLY,
+  DUPLICATE_LAYER,
+  DUPLICATE_LAYERS,
+  REMOVE_DUPLICATED_LAYERS,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
@@ -240,6 +243,9 @@ import {
   AlignLayersToMiddlePayload,
   DistributeLayersHorizontallyPayload,
   DistributeLayersVerticallyPayload,
+  DuplicateLayerPayload,
+  DuplicateLayersPayload,
+  RemoveDuplicatedLayersPayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -1031,5 +1037,20 @@ export const distributeLayersHorizontally = (payload: DistributeLayersHorizontal
 
 export const distributeLayersVertically = (payload: DistributeLayersVerticallyPayload): LayerTypes => ({
   type: DISTRIBUTE_LAYERS_VERTICALLY,
+  payload
+});
+
+export const duplicateLayer = (payload: DuplicateLayerPayload): LayerTypes => ({
+  type: DUPLICATE_LAYER,
+  payload
+});
+
+export const duplicateLayers = (payload: DuplicateLayersPayload): LayerTypes => ({
+  type: DUPLICATE_LAYERS,
+  payload
+});
+
+export const removeDuplicatedLayers = (payload: RemoveDuplicatedLayersPayload): LayerTypes => ({
+  type: REMOVE_DUPLICATED_LAYERS,
   payload
 });

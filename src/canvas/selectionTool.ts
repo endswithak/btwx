@@ -1,62 +1,24 @@
 import { getPaperLayer } from '../store/selectors/layer';
-import { groupLayers, ungroupLayers, removeLayers, copyLayersToClipboard, pasteLayersFromClipboard, escapeLayerScope } from '../store/actions/layer';
+import { removeLayers, escapeLayerScope } from '../store/actions/layer';
 import store from '../store';
 import AreaSelectTool from './areaSelectTool';
-import { ActionCreators } from 'redux-undo';
-import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
-import { applyShapeMethods } from './shapeUtils';
-import { applyArtboardMethods } from './artboardUtils';
-import { applyTextMethods } from './textUtils';
 import DragTool from './dragTool';
 import ResizeTool from './resizeTool';
+import CopyTool from './copyTool';
+import GroupTool from './groupTool';
 import { paperMain } from './index';
-
-const redo = () => {
-  store.dispatch(ActionCreators.redo());
-  paperMain.project.clear();
-  const state = store.getState();
-  paperMain.project.importJSON(state.layer.present.paperProject);
-  state.layer.present.allShapeIds.forEach((shapeId) => {
-    applyShapeMethods(getPaperLayer(shapeId));
-  });
-  state.layer.present.allArtboardIds.forEach((artboardId) => {
-    const artboardBackground = getPaperLayer(artboardId).getItem({data: {id: 'ArtboardBackground'}});
-    applyArtboardMethods(artboardBackground);
-  });
-  state.layer.present.allTextIds.forEach((textId) => {
-    applyTextMethods(getPaperLayer(textId));
-  });
-  updateHoverFrame(state.layer.present);
-  updateSelectionFrame(state.layer.present);
-}
-
-const undo = () => {
-  store.dispatch(ActionCreators.undo());
-  paperMain.project.clear();
-  const state = store.getState();
-  paperMain.project.importJSON(state.layer.present.paperProject);
-  state.layer.present.allShapeIds.forEach((shapeId) => {
-    applyShapeMethods(getPaperLayer(shapeId));
-  });
-  state.layer.present.allArtboardIds.forEach((artboardId) => {
-    const artboardBackground = getPaperLayer(artboardId).getItem({data: {id: 'ArtboardBackground'}});
-    applyArtboardMethods(artboardBackground);
-  });
-  state.layer.present.allTextIds.forEach((textId) => {
-    applyTextMethods(getPaperLayer(textId));
-  });
-  updateHoverFrame(state.layer.present);
-  updateSelectionFrame(state.layer.present);
-}
 
 class SelectionTool {
   tool: paper.Tool;
   shiftModifier: boolean;
   metaModifier: boolean;
+  altModifier: boolean;
   hitResult: paper.HitResult;
   areaSelectTool: AreaSelectTool;
   dragTool: DragTool;
   resizeTool: ResizeTool;
+  copyTool: CopyTool;
+  groupTool: GroupTool;
   constructor() {
     this.tool = new paperMain.Tool();
     this.tool.activate();
@@ -69,60 +31,29 @@ class SelectionTool {
     this.areaSelectTool = new AreaSelectTool();
     this.dragTool = new DragTool();
     this.resizeTool = new ResizeTool();
+    this.copyTool = new CopyTool();
+    this.groupTool = new GroupTool();
     this.shiftModifier = false;
     this.metaModifier = false;
+    this.altModifier = false;
   }
   onKeyDown(event: paper.KeyEvent): void {
+    this.resizeTool.onKeyDown(event);
+    this.areaSelectTool.onKeyDown(event);
+    this.dragTool.onKeyDown(event);
+    this.copyTool.onKeyDown(event);
+    this.groupTool.onKeyDown(event);
     const state = store.getState();
     switch(event.key) {
-      case 'z': {
-        if (event.modifiers.meta) {
-          if (event.modifiers.shift) {
-            redo();
-          } else {
-            undo();
-          }
-        }
-        break;
-      }
-      case 'g': {
-        if (event.modifiers.meta && state.layer.present.selected.length > 0) {
-          if (event.modifiers.shift) {
-            store.dispatch(ungroupLayers({layers: state.layer.present.selected}));
-          } else {
-            store.dispatch(groupLayers({layers: state.layer.present.selected}));
-          }
-        }
-        break;
-      }
-      case 'c': {
-        if (event.modifiers.meta) {
-          store.dispatch(copyLayersToClipboard({layers: state.layer.present.selected}));
-        }
-        break;
-      }
-      case 'v': {
-        if (event.modifiers.meta && state.layer.present.clipboard.allIds.length > 0) {
-          if (event.modifiers.shift) {
-            store.dispatch(pasteLayersFromClipboard({overSelection: true}));
-          } else {
-            store.dispatch(pasteLayersFromClipboard({overSelection: false}));
-          }
-        }
+      case 'alt': {
+        this.altModifier = true;
         break;
       }
       case 'shift': {
-        this.areaSelectTool.shiftModifier = true;
-        this.dragTool.shiftModifier = true;
-        this.resizeTool.shiftModifier = true;
         this.shiftModifier = true;
-        this.resizeTool.onShiftDown();
         break;
       }
       case 'escape': {
-        this.areaSelectTool.onEscape();
-        this.dragTool.onEscape();
-        this.resizeTool.onEscape();
         store.dispatch(escapeLayerScope());
         if (state.layer.present.hover) {
           const paperLayer = getPaperLayer(state.layer.present.hover);
@@ -131,9 +62,6 @@ class SelectionTool {
         break;
       }
       case 'meta': {
-        this.areaSelectTool.metaModifier = true;
-        this.dragTool.metaModifier = true;
-        this.resizeTool.metaModifier = true;
         this.metaModifier = true;
         break;
       }
@@ -146,19 +74,21 @@ class SelectionTool {
     }
   }
   onKeyUp(event: paper.KeyEvent): void {
+    this.resizeTool.onKeyUp(event);
+    this.areaSelectTool.onKeyUp(event);
+    this.dragTool.onKeyUp(event);
+    this.copyTool.onKeyUp(event);
+    this.groupTool.onKeyUp(event);
     switch(event.key) {
       case 'shift': {
-        this.areaSelectTool.shiftModifier = false;
-        this.dragTool.shiftModifier = false;
-        this.resizeTool.shiftModifier = false;
         this.shiftModifier = false;
-        this.resizeTool.onShiftUp();
+        break;
+      }
+      case 'alt': {
+        this.altModifier = false;
         break;
       }
       case 'meta': {
-        this.areaSelectTool.metaModifier = false;
-        this.dragTool.metaModifier = false;
-        this.resizeTool.metaModifier = false;
         this.metaModifier = false;
         break;
       }

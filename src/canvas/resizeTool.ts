@@ -24,6 +24,7 @@ class ResizeTool {
   handle: string;
   shiftModifier: boolean;
   metaModifier: boolean;
+  altModifier: boolean;
   snapTool: SnapTool;
   snap: {
     x: em.SnapPoint;
@@ -48,6 +49,7 @@ class ResizeTool {
     this.horizontalFlip = false;
     this.shiftModifier = false;
     this.metaModifier = false;
+    this.altModifier = false;
     this.snapBreakThreshholdMin = -8;
     this.snapBreakThreshholdMax = 8;
     this.snapPoints = [];
@@ -85,8 +87,6 @@ class ResizeTool {
     this.scaleY = 1;
     this.verticalFlip = false;
     this.horizontalFlip = false;
-    this.shiftModifier = false;
-    this.metaModifier = false;
     this.snapBreakThreshholdMin = -8;
     this.snapBreakThreshholdMax = 8;
     this.snapPoints = [];
@@ -543,24 +543,46 @@ class ResizeTool {
       });
     }
   }
-  onEscape() {
-    if (this.enabled) {
-      this.clearLayersScale();
-      this.disable();
+  onKeyDown(event: paper.KeyEvent) {
+    switch(event.key) {
+      case 'shift': {
+        this.shiftModifier = true;
+        if (this.enabled && this.to) {
+          this.updateToBounds();
+          //this.updateRef();
+          this.scaleLayers();
+        }
+        break;
+      }
+      case 'meta': {
+        this.metaModifier = true;
+        break;
+      }
+      case 'alt': {
+        this.altModifier = true;
+        break;
+      }
     }
   }
-  onShiftDown() {
-    if (this.enabled && this.to) {
-      this.updateToBounds();
-      //this.updateRef();
-      this.scaleLayers();
-    }
-  }
-  onShiftUp() {
-    if (this.enabled && this.to) {
-      this.updateToBounds();
-      //this.updateRef();
-      this.scaleLayers();
+  onKeyUp(event: paper.KeyEvent) {
+    switch(event.key) {
+      case 'shift': {
+        this.shiftModifier = false;
+        if (this.enabled && this.to) {
+          this.updateToBounds();
+          //this.updateRef();
+          this.scaleLayers();
+        }
+        break;
+      }
+      case 'meta': {
+        this.metaModifier = false;
+        break;
+      }
+      case 'alt': {
+        this.altModifier = false;
+        break;
+      }
     }
   }
   onMouseDown(event: paper.ToolEvent): void {

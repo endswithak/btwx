@@ -153,6 +153,10 @@ export const ALIGN_LAYERS_TO_MIDDLE = 'ALIGN_LAYERS_TO_MIDDLE';
 export const DISTRIBUTE_LAYERS_HORIZONTALLY = 'DISTRIBUTE_LAYERS_HORIZONTALLY';
 export const DISTRIBUTE_LAYERS_VERTICALLY = 'DISTRIBUTE_LAYERS_VERTICALLY';
 
+export const DUPLICATE_LAYER = 'DUPLICATE_LAYER';
+export const DUPLICATE_LAYERS = 'DUPLICATE_LAYERS';
+export const REMOVE_DUPLICATED_LAYERS = 'REMOVE_DUPLICATED_LAYERS';
+
 // Page
 
 export type AddPagePayload = {
@@ -1350,4 +1354,32 @@ export interface DistributeLayersVertically {
   payload: DistributeLayersVerticallyPayload;
 }
 
-export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | AddText | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower | FreezeLayerTween | UnFreezeLayerTween | SetLayerX | SetLayerY | SetLayerWidth | SetLayerHeight | SetLayerRotation | SetLayerOpacity | EnableLayerHorizontalFlip | DisableLayerHorizontalFlip | EnableLayerVerticalFlip | DisableLayerVerticalFlip | EnableLayerFill | DisableLayerFill | SetLayerFillColor | EnableLayerStroke | DisableLayerStroke | SetLayerStrokeColor | SetLayerStrokeFillType | SetLayerStrokeGradient | SetLayerStrokeGradientType | SetLayerStrokeWidth | SetLayerStrokeCap | SetLayerStrokeJoin | SetLayerStrokeDashArray | SetLayerStrokeMiterLimit | EnableLayerShadow | DisableLayerShadow | SetLayerShadowColor | SetLayerShadowBlur | SetLayerShadowXOffset | SetLayerShadowYOffset | ResizeLayer | ResizeLayers | SetLayerText | SetLayerFontSize | SetLayerLeading | SetLayerFontWeight | SetLayerFontFamily | SetLayerJustification | AddInViewLayer | AddInViewLayers | RemoveInViewLayer | RemoveInViewLayers | UpdateInViewLayers | SetLayerFill | SetLayerFillType | SetLayerFillGradient | SetLayerFillGradientType | SetLayerFillGradientOrigin | SetLayerFillGradientDestination | SetLayerFillGradientStopColor | SetLayerFillGradientStopPosition | AddLayerFillGradientStop | RemoveLayerFillGradientStop | AddLayersMask | MaskLayer | UnmaskLayer | MaskLayers | UnmaskLayers | AlignLayersToLeft | AlignLayersToRight | AlignLayersToTop | AlignLayersToBottom | AlignLayersToCenter | AlignLayersToMiddle | DistributeLayersHorizontally | DistributeLayersVertically;
+export interface DuplicateLayerPayload {
+  id: string;
+}
+
+export interface DuplicateLayer {
+  type: typeof DUPLICATE_LAYER;
+  payload: DuplicateLayerPayload;
+}
+
+export interface DuplicateLayersPayload {
+  layers: string[];
+}
+
+export interface DuplicateLayers {
+  type: typeof DUPLICATE_LAYERS;
+  payload: DuplicateLayersPayload;
+}
+
+export interface RemoveDuplicatedLayersPayload {
+  layers: string[];
+  newSelection?: string[];
+}
+
+export interface RemoveDuplicatedLayers {
+  type: typeof REMOVE_DUPLICATED_LAYERS;
+  payload: RemoveDuplicatedLayersPayload;
+}
+
+export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | AddText | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower | FreezeLayerTween | UnFreezeLayerTween | SetLayerX | SetLayerY | SetLayerWidth | SetLayerHeight | SetLayerRotation | SetLayerOpacity | EnableLayerHorizontalFlip | DisableLayerHorizontalFlip | EnableLayerVerticalFlip | DisableLayerVerticalFlip | EnableLayerFill | DisableLayerFill | SetLayerFillColor | EnableLayerStroke | DisableLayerStroke | SetLayerStrokeColor | SetLayerStrokeFillType | SetLayerStrokeGradient | SetLayerStrokeGradientType | SetLayerStrokeWidth | SetLayerStrokeCap | SetLayerStrokeJoin | SetLayerStrokeDashArray | SetLayerStrokeMiterLimit | EnableLayerShadow | DisableLayerShadow | SetLayerShadowColor | SetLayerShadowBlur | SetLayerShadowXOffset | SetLayerShadowYOffset | ResizeLayer | ResizeLayers | SetLayerText | SetLayerFontSize | SetLayerLeading | SetLayerFontWeight | SetLayerFontFamily | SetLayerJustification | AddInViewLayer | AddInViewLayers | RemoveInViewLayer | RemoveInViewLayers | UpdateInViewLayers | SetLayerFill | SetLayerFillType | SetLayerFillGradient | SetLayerFillGradientType | SetLayerFillGradientOrigin | SetLayerFillGradientDestination | SetLayerFillGradientStopColor | SetLayerFillGradientStopPosition | AddLayerFillGradientStop | RemoveLayerFillGradientStop | AddLayersMask | MaskLayer | UnmaskLayer | MaskLayers | UnmaskLayers | AlignLayersToLeft | AlignLayersToRight | AlignLayersToTop | AlignLayersToBottom | AlignLayersToCenter | AlignLayersToMiddle | DistributeLayersHorizontally | DistributeLayersVertically | DuplicateLayer | DuplicateLayers | RemoveDuplicatedLayers;

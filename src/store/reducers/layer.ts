@@ -116,6 +116,9 @@ import {
   ALIGN_LAYERS_TO_MIDDLE,
   DISTRIBUTE_LAYERS_HORIZONTALLY,
   DISTRIBUTE_LAYERS_VERTICALLY,
+  DUPLICATE_LAYER,
+  DUPLICATE_LAYERS,
+  REMOVE_DUPLICATED_LAYERS,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -236,7 +239,10 @@ import {
   alignLayersToCenter,
   alignLayersToMiddle,
   distributeLayersHorizontally,
-  distributeLayersVertically
+  distributeLayersVertically,
+  duplicateLayer,
+  duplicateLayers,
+  removeDuplicatedLayers
 } from '../utils/layer';
 
 export interface LayerState {
@@ -550,6 +556,12 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return distributeLayersHorizontally(state, action);
     case DISTRIBUTE_LAYERS_VERTICALLY:
       return distributeLayersVertically(state, action);
+    case DUPLICATE_LAYER:
+      return duplicateLayer(state, action);
+    case DUPLICATE_LAYERS:
+      return duplicateLayers(state, action);
+    case REMOVE_DUPLICATED_LAYERS:
+      return removeDuplicatedLayers(state, action);
     default:
       return state;
   }

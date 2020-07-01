@@ -13,6 +13,7 @@ class AreaSelectTool {
   shape: paper.Path;
   shiftModifier: boolean;
   metaModifier: boolean;
+  altModifier: boolean;
   constructor() {
     this.enabled = false;
     this.from = null;
@@ -20,6 +21,7 @@ class AreaSelectTool {
     this.shape = null;
     this.shiftModifier = false;
     this.metaModifier = false;
+    this.altModifier = false;
     this.overlapped = [];
   }
   enable() {
@@ -91,8 +93,37 @@ class AreaSelectTool {
     // return final layers array
     return layers;
   }
-  onEscape() {
-    this.disable();
+  onKeyDown(event: paper.KeyEvent) {
+    switch(event.key) {
+      case 'shift': {
+        this.shiftModifier = true;
+        break;
+      }
+      case 'meta': {
+        this.metaModifier = true;
+        break;
+      }
+      case 'alt': {
+        this.altModifier = true;
+        break;
+      }
+    }
+  }
+  onKeyUp(event: paper.KeyEvent) {
+    switch(event.key) {
+      case 'shift': {
+        this.shiftModifier = false;
+        break;
+      }
+      case 'meta': {
+        this.metaModifier = false;
+        break;
+      }
+      case 'alt': {
+        this.altModifier = false;
+        break;
+      }
+    }
   }
   onMouseDown(event: paper.ToolEvent): void {
     if (this.enabled) {
