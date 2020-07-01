@@ -104,6 +104,7 @@ import {
   ADD_LAYER_FILL_GRADIENT_STOP,
   REMOVE_LAYER_FILL_GRADIENT_STOP,
   ADD_LAYERS_MASK,
+  REMOVE_LAYERS_MASK,
   MASK_LAYER,
   UNMASK_LAYER,
   MASK_LAYERS,
@@ -119,6 +120,14 @@ import {
   DUPLICATE_LAYER,
   DUPLICATE_LAYERS,
   REMOVE_DUPLICATED_LAYERS,
+  SEND_LAYER_FORWARD,
+  SEND_LAYERS_FORWARD,
+  SEND_LAYER_TO_FRONT,
+  SEND_LAYERS_TO_FRONT,
+  SEND_LAYER_BACKWARD,
+  SEND_LAYERS_BACKWARD,
+  SEND_LAYER_TO_BACK,
+  SEND_LAYERS_TO_BACK,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -228,6 +237,7 @@ import {
   addLayerFillGradientStop,
   removeLayerFillGradientStop,
   addLayersMask,
+  removeLayersMask,
   maskLayer,
   unmaskLayer,
   maskLayers,
@@ -242,7 +252,15 @@ import {
   distributeLayersVertically,
   duplicateLayer,
   duplicateLayers,
-  removeDuplicatedLayers
+  removeDuplicatedLayers,
+  sendLayerForward,
+  sendLayersForward,
+  sendLayerToFront,
+  sendLayersToFront,
+  sendLayerBackward,
+  sendLayersBackward,
+  sendLayerToBack,
+  sendLayersToBack,
 } from '../utils/layer';
 
 export interface LayerState {
@@ -532,6 +550,8 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return removeLayerFillGradientStop(state, action);
     case ADD_LAYERS_MASK:
       return addLayersMask(state, action);
+    case REMOVE_LAYERS_MASK:
+      return removeLayersMask(state, action);
     case MASK_LAYER:
       return maskLayer(state, action);
     case UNMASK_LAYER:
@@ -562,6 +582,22 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return duplicateLayers(state, action);
     case REMOVE_DUPLICATED_LAYERS:
       return removeDuplicatedLayers(state, action);
+    case SEND_LAYER_FORWARD:
+      return sendLayerForward(state, action);
+    case SEND_LAYERS_FORWARD:
+      return sendLayersForward(state, action);
+    case SEND_LAYER_TO_FRONT:
+      return sendLayerToFront(state, action);
+    case SEND_LAYERS_TO_FRONT:
+      return sendLayersToFront(state, action);
+    case SEND_LAYER_BACKWARD:
+      return sendLayerBackward(state, action);
+    case SEND_LAYERS_BACKWARD:
+      return sendLayersBackward(state, action);
+    case SEND_LAYER_TO_BACK:
+      return sendLayerToBack(state, action);
+    case SEND_LAYERS_TO_BACK:
+      return sendLayersToBack(state, action);
     default:
       return state;
   }

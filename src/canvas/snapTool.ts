@@ -1,8 +1,6 @@
-import { getPagePaperLayer, getLayerAndDescendants, getPaperLayer } from '../store/selectors/layer';
+import { getPaperLayer } from '../store/selectors/layer';
 import { paperMain } from './index';
-import Tooltip from './tooltip';
 import Guide from './guide';
-import { DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_GRADIENT_STYLE, THEME_PRIMARY_COLOR } from '../constants';
 
 class SnapTool {
   leftGuide: Guide;
@@ -19,13 +17,6 @@ class SnapTool {
     this.centerXGuide = null;
     this.centerYGuide = null;
   }
-  // updateGuide(guide: Guide, point1: paper.Point, point2: paper.Point) {
-  //   if (guide) {
-  //     guide.paperLayer.remove();
-  //   }
-  //   guide = new Guide(point1, point2, { up: true, drag: true, move: true });
-  //   return guide;
-  // }
   removeGuides() {
     if (this.leftGuide) {
       this.leftGuide.paperLayer.remove();

@@ -13,15 +13,23 @@ interface TopbarButtonProps {
 const Button = styled.button`
   background: ${props => props.isActive ? props.theme.palette.primary : props.theme.background.z4};
   svg {
-    fill: ${props => props.theme.text.light};
+    fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.light};
   }
   :hover {
+    background: ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.background.z3};
     svg {
       fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base};
+    }
+    :disabled {
+      background: ${props => props.isActive ? props.theme.palette.primary : props.theme.background.z4};
+      svg {
+        fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.light};
+      }
     }
   }
   :disabled {
     opacity: 0.5;
+    cursor: default;
   }
 `;
 

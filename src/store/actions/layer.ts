@@ -128,6 +128,14 @@ import {
   DUPLICATE_LAYER,
   DUPLICATE_LAYERS,
   REMOVE_DUPLICATED_LAYERS,
+  SEND_LAYER_FORWARD,
+  SEND_LAYERS_FORWARD,
+  SEND_LAYER_TO_FRONT,
+  SEND_LAYERS_TO_FRONT,
+  SEND_LAYER_BACKWARD,
+  SEND_LAYERS_BACKWARD,
+  SEND_LAYER_TO_BACK,
+  SEND_LAYERS_TO_BACK,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
@@ -246,7 +254,15 @@ import {
   DuplicateLayerPayload,
   DuplicateLayersPayload,
   RemoveDuplicatedLayersPayload,
-  LayerTypes
+  LayerTypes,
+  SendLayerForwardPayload,
+  SendLayersForwardPayload,
+  SendLayerToFrontPayload,
+  SendLayersToFrontPayload,
+  SendLayerBackwardPayload,
+  SendLayersBackwardPayload,
+  SendLayerToBackPayload,
+  SendLayersToBackPayload
 } from '../actionTypes/layer';
 
 // Page
@@ -1052,5 +1068,45 @@ export const duplicateLayers = (payload: DuplicateLayersPayload): LayerTypes => 
 
 export const removeDuplicatedLayers = (payload: RemoveDuplicatedLayersPayload): LayerTypes => ({
   type: REMOVE_DUPLICATED_LAYERS,
+  payload
+});
+
+export const sendLayerForward = (payload: SendLayerForwardPayload): LayerTypes => ({
+  type: SEND_LAYER_FORWARD,
+  payload
+});
+
+export const sendLayersForward = (payload: SendLayersForwardPayload): LayerTypes => ({
+  type: SEND_LAYERS_FORWARD,
+  payload
+});
+
+export const sendLayerToFront = (payload: SendLayerToFrontPayload): LayerTypes => ({
+  type: SEND_LAYER_TO_FRONT,
+  payload
+});
+
+export const sendLayersToFront = (payload: SendLayersToFrontPayload): LayerTypes => ({
+  type: SEND_LAYERS_TO_FRONT,
+  payload
+});
+
+export const sendLayerBackward = (payload: SendLayerBackwardPayload): LayerTypes => ({
+  type: SEND_LAYER_BACKWARD,
+  payload
+});
+
+export const sendLayersBackward = (payload: SendLayersBackwardPayload): LayerTypes => ({
+  type: SEND_LAYERS_BACKWARD,
+  payload
+});
+
+export const sendLayerToBack = (payload: SendLayerToBackPayload): LayerTypes => ({
+  type: SEND_LAYER_TO_BACK,
+  payload
+});
+
+export const sendLayersToBack = (payload: SendLayersToBackPayload): LayerTypes => ({
+  type: SEND_LAYERS_TO_BACK,
   payload
 });

@@ -1,4 +1,3 @@
-import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import store from '../store';
 import { moveLayersBy, duplicateLayers, removeDuplicatedLayers } from '../store/actions/layer';
 import { getPaperLayer, getSelectionBounds, getLayerAndDescendants, getInViewSnapPoints } from '../store/selectors/layer';
@@ -90,6 +89,7 @@ class DragTool {
     this.ref = new paperMain.Path.Rectangle({
       rectangle: this.toBounds,
       strokeColor: THEME_PRIMARY_COLOR,
+      strokeWidth: 1 / paperMain.view.zoom
     });
     this.ref.removeOn({
       drag: true,

@@ -157,6 +157,15 @@ export const DUPLICATE_LAYER = 'DUPLICATE_LAYER';
 export const DUPLICATE_LAYERS = 'DUPLICATE_LAYERS';
 export const REMOVE_DUPLICATED_LAYERS = 'REMOVE_DUPLICATED_LAYERS';
 
+export const SEND_LAYER_BACKWARD = 'SEND_LAYER_BACKWARD';
+export const SEND_LAYERS_BACKWARD = 'SEND_LAYERS_BACKWARD';
+export const SEND_LAYER_TO_BACK = 'SEND_LAYER_TO_BACK';
+export const SEND_LAYERS_TO_BACK = 'SEND_LAYERS_TO_BACK';
+export const SEND_LAYER_FORWARD = 'SEND_LAYER_FORWARD';
+export const SEND_LAYERS_FORWARD = 'SEND_LAYERS_FORWARD';
+export const SEND_LAYER_TO_FRONT = 'SEND_LAYER_TO_FRONT';
+export const SEND_LAYERS_TO_FRONT = 'SEND_LAYERS_TO_FRONT';
+
 // Page
 
 export type AddPagePayload = {
@@ -1382,4 +1391,76 @@ export interface RemoveDuplicatedLayers {
   payload: RemoveDuplicatedLayersPayload;
 }
 
-export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | AddText | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower | FreezeLayerTween | UnFreezeLayerTween | SetLayerX | SetLayerY | SetLayerWidth | SetLayerHeight | SetLayerRotation | SetLayerOpacity | EnableLayerHorizontalFlip | DisableLayerHorizontalFlip | EnableLayerVerticalFlip | DisableLayerVerticalFlip | EnableLayerFill | DisableLayerFill | SetLayerFillColor | EnableLayerStroke | DisableLayerStroke | SetLayerStrokeColor | SetLayerStrokeFillType | SetLayerStrokeGradient | SetLayerStrokeGradientType | SetLayerStrokeWidth | SetLayerStrokeCap | SetLayerStrokeJoin | SetLayerStrokeDashArray | SetLayerStrokeMiterLimit | EnableLayerShadow | DisableLayerShadow | SetLayerShadowColor | SetLayerShadowBlur | SetLayerShadowXOffset | SetLayerShadowYOffset | ResizeLayer | ResizeLayers | SetLayerText | SetLayerFontSize | SetLayerLeading | SetLayerFontWeight | SetLayerFontFamily | SetLayerJustification | AddInViewLayer | AddInViewLayers | RemoveInViewLayer | RemoveInViewLayers | UpdateInViewLayers | SetLayerFill | SetLayerFillType | SetLayerFillGradient | SetLayerFillGradientType | SetLayerFillGradientOrigin | SetLayerFillGradientDestination | SetLayerFillGradientStopColor | SetLayerFillGradientStopPosition | AddLayerFillGradientStop | RemoveLayerFillGradientStop | AddLayersMask | MaskLayer | UnmaskLayer | MaskLayers | UnmaskLayers | AlignLayersToLeft | AlignLayersToRight | AlignLayersToTop | AlignLayersToBottom | AlignLayersToCenter | AlignLayersToMiddle | DistributeLayersHorizontally | DistributeLayersVertically | DuplicateLayer | DuplicateLayers | RemoveDuplicatedLayers;
+export interface SendLayerBackwardPayload {
+  id: string;
+}
+
+export interface SendLayerBackward {
+  type: typeof SEND_LAYER_BACKWARD;
+  payload: SendLayerBackwardPayload;
+}
+
+export interface SendLayersBackwardPayload {
+  layers: string[];
+}
+
+export interface SendLayersBackward {
+  type: typeof SEND_LAYERS_BACKWARD;
+  payload: SendLayersBackwardPayload;
+}
+
+export interface SendLayerToBackPayload {
+  id: string;
+}
+
+export interface SendLayerToBack {
+  type: typeof SEND_LAYER_TO_BACK;
+  payload: SendLayerToBackPayload;
+}
+
+export interface SendLayersToBackPayload {
+  layers: string[];
+}
+
+export interface SendLayersToBack {
+  type: typeof SEND_LAYERS_TO_BACK;
+  payload: SendLayersToBackPayload;
+}
+
+export interface SendLayerForwardPayload {
+  id: string;
+}
+
+export interface SendLayerForward {
+  type: typeof SEND_LAYER_FORWARD;
+  payload: SendLayerForwardPayload;
+}
+
+export interface SendLayersForwardPayload {
+  layers: string[];
+}
+
+export interface SendLayersForward {
+  type: typeof SEND_LAYERS_FORWARD;
+  payload: SendLayersForwardPayload;
+}
+
+export interface SendLayerToFrontPayload {
+  id: string;
+}
+
+export interface SendLayerToFront {
+  type: typeof SEND_LAYER_TO_FRONT;
+  payload: SendLayerToFrontPayload;
+}
+
+export interface SendLayersToFrontPayload {
+  layers: string[];
+}
+
+export interface SendLayersToFront {
+  type: typeof SEND_LAYERS_TO_FRONT;
+  payload: SendLayersToFrontPayload;
+}
+
+export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | AddText | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower | FreezeLayerTween | UnFreezeLayerTween | SetLayerX | SetLayerY | SetLayerWidth | SetLayerHeight | SetLayerRotation | SetLayerOpacity | EnableLayerHorizontalFlip | DisableLayerHorizontalFlip | EnableLayerVerticalFlip | DisableLayerVerticalFlip | EnableLayerFill | DisableLayerFill | SetLayerFillColor | EnableLayerStroke | DisableLayerStroke | SetLayerStrokeColor | SetLayerStrokeFillType | SetLayerStrokeGradient | SetLayerStrokeGradientType | SetLayerStrokeWidth | SetLayerStrokeCap | SetLayerStrokeJoin | SetLayerStrokeDashArray | SetLayerStrokeMiterLimit | EnableLayerShadow | DisableLayerShadow | SetLayerShadowColor | SetLayerShadowBlur | SetLayerShadowXOffset | SetLayerShadowYOffset | ResizeLayer | ResizeLayers | SetLayerText | SetLayerFontSize | SetLayerLeading | SetLayerFontWeight | SetLayerFontFamily | SetLayerJustification | AddInViewLayer | AddInViewLayers | RemoveInViewLayer | RemoveInViewLayers | UpdateInViewLayers | SetLayerFill | SetLayerFillType | SetLayerFillGradient | SetLayerFillGradientType | SetLayerFillGradientOrigin | SetLayerFillGradientDestination | SetLayerFillGradientStopColor | SetLayerFillGradientStopPosition | AddLayerFillGradientStop | RemoveLayerFillGradientStop | AddLayersMask | RemoveLayersMask | MaskLayer | UnmaskLayer | MaskLayers | UnmaskLayers | AlignLayersToLeft | AlignLayersToRight | AlignLayersToTop | AlignLayersToBottom | AlignLayersToCenter | AlignLayersToMiddle | DistributeLayersHorizontally | DistributeLayersVertically | DuplicateLayer | DuplicateLayers | RemoveDuplicatedLayers | SendLayerForward | SendLayersForward | SendLayerToFront | SendLayersToFront | SendLayerBackward | SendLayersBackward | SendLayerToBack | SendLayersToBack;

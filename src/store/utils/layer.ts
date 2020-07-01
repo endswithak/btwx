@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { v4 as uuidv4 } from 'uuid';
-import { LayerState } from '../reducers/layer';
+import layer, { LayerState } from '../reducers/layer';
 import * as layerActions from '../actions/layer';
 import { addItem, removeItem, insertItem, addItems } from './general';
 
@@ -28,7 +28,7 @@ import {
   SetLayerFillGradientType, SetLayerFillGradientStopColor, SetLayerFillGradientStopPosition, AddLayerFillGradientStop,
   RemoveLayerFillGradientStop, SetLayerFillGradientOrigin, SetLayerFillGradient, SetLayerStrokeGradient,
   SetLayerStrokeGradientType, SetLayerStrokeFillType, SetLayerFillGradientDestination, AddLayersMask,
-  MaskLayer, MaskLayers, UnmaskLayers, UnmaskLayer, RemoveLayersMask, SetLayerFill, AlignLayersToLeft, AlignLayersToRight, AlignLayersToTop, AlignLayersToBottom, AlignLayersToCenter, AlignLayersToMiddle, DistributeLayersHorizontally, DistributeLayersVertically, DuplicateLayer, DuplicateLayers, RemoveDuplicatedLayers
+  MaskLayer, MaskLayers, UnmaskLayers, UnmaskLayer, RemoveLayersMask, SetLayerFill, AlignLayersToLeft, AlignLayersToRight, AlignLayersToTop, AlignLayersToBottom, AlignLayersToCenter, AlignLayersToMiddle, DistributeLayersHorizontally, DistributeLayersVertically, DuplicateLayer, DuplicateLayers, RemoveDuplicatedLayers, SendLayerForward, SendLayerBackward, SendLayersForward, SendLayersBackward, SendLayerToFront, SendLayersToFront, SendLayerToBack, SendLayersToBack
 } from '../actionTypes/layer';
 
 import {
@@ -232,7 +232,7 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
         break;
     }
     if (layer.mask) {
-      result = removeLayersMask(result, layerActions.removeLayersMask({id: layer.id}));
+      result = removeLayersMask(result, layerActions.removeLayersMask({id: layer.id}) as RemoveLayersMask);
     }
     // if layer is inView, remove from inView
     if (result.inView.allIds.includes(current)) {
@@ -564,7 +564,7 @@ export const updateHoverFrame = (state: LayerState) => {
   const hoverFrame = paperMain.project.getItem({ data: { id: 'hoverFrame' } });
   const hoverFrameConstants = {
     strokeColor: THEME_PRIMARY_COLOR,
-    strokeWidth: 1,
+    strokeWidth: 1 / paperMain.view.zoom,
     //applyMatrix: false,
     data: {
       id: 'hoverFrame'
@@ -940,7 +940,7 @@ export const ungroupLayer = (state: LayerState, action: UngroupLayer): LayerStat
     const paperLayer = getPaperLayer(action.payload.id) as paper.Group;
     if (paperLayer.clipped) {
       const maskLayer = layer.children.find((id) => state.byId[id].mask);
-      currentState = removeLayersMask(currentState, layerActions.removeLayersMask({id: maskLayer}));
+      currentState = removeLayersMask(currentState, layerActions.removeLayersMask({id: maskLayer}) as RemoveLayersMask);
     }
     // move children out of group
     currentState = layer.children.reduce((result: LayerState, current: string) => {
@@ -3369,8 +3369,86 @@ export const removeDuplicatedLayers = (state: LayerState, action: RemoveDuplicat
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: action.payload.layers}) as RemoveLayers);
   // select layer
   if (action.payload.newSelection) {
-    currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.newSelection, newSelection: true}) as SelectLayers);
+    currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.newSelection}) as SelectLayers);
   }
   // return final state
+  return currentState;
+};
+
+export const sendLayerForward = (state: LayerState, action: SendLayerForward): LayerState => {
+  let currentState = state;
+  const layerItem = currentState.byId[action.payload.id];
+  const parentItem = currentState.byId[layerItem.parent];
+  const layerIndex = getLayerIndex(currentState, action.payload.id);
+  if (layerIndex !== parentItem.children.length - 1) {
+    currentState = insertLayerChild(currentState, layerActions.insertLayerChild({id: layerItem.parent, child: action.payload.id, index: layerIndex + 1}) as InsertLayerChild);
+  }
+  return currentState;
+};
+
+export const sendLayersForward = (state: LayerState, action: SendLayersForward): LayerState => {
+  let currentState = state;
+  currentState = orderLayersByDepth(currentState, action.payload.layers).reverse().reduce((result, current) => {
+    return sendLayerForward(result, layerActions.sendLayerForward({id: current}) as SendLayerForward);
+  }, currentState);
+  currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.layers, newSelection: true}) as SelectLayers);
+  return currentState;
+};
+
+export const sendLayerToFront = (state: LayerState, action: SendLayerToFront): LayerState => {
+  let currentState = state;
+  const layerItem = currentState.byId[action.payload.id];
+  const parentItem = currentState.byId[layerItem.parent];
+  const layerIndex = getLayerIndex(currentState, action.payload.id);
+  if (layerIndex !== parentItem.children.length - 1) {
+    currentState = insertLayerChild(currentState, layerActions.insertLayerChild({id: layerItem.parent, child: action.payload.id, index: parentItem.children.length - 1}) as InsertLayerChild);
+  }
+  return currentState;
+};
+
+export const sendLayersToFront = (state: LayerState, action: SendLayersToFront): LayerState => {
+  let currentState = state;
+  currentState = orderLayersByDepth(currentState, action.payload.layers).reverse().reduce((result, current) => {
+    return sendLayerToFront(result, layerActions.sendLayerToFront({id: current}) as SendLayerToFront);
+  }, currentState);
+  currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.layers, newSelection: true}) as SelectLayers);
+  return currentState;
+};
+
+export const sendLayerBackward = (state: LayerState, action: SendLayerBackward): LayerState => {
+  let currentState = state;
+  const layerItem = currentState.byId[action.payload.id];
+  const layerIndex = getLayerIndex(currentState, action.payload.id);
+  if (layerIndex !== 0) {
+    currentState = insertLayerChild(currentState, layerActions.insertLayerChild({id: layerItem.parent, child: action.payload.id, index: layerIndex - 1}) as InsertLayerChild);
+  }
+  return currentState;
+};
+
+export const sendLayersBackward = (state: LayerState, action: SendLayersBackward): LayerState => {
+  let currentState = state;
+  currentState = orderLayersByDepth(currentState, action.payload.layers).reduce((result, current) => {
+    return sendLayerBackward(result, layerActions.sendLayerBackward({id: current}) as SendLayerBackward);
+  }, currentState);
+  currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.layers, newSelection: true}) as SelectLayers);
+  return currentState;
+};
+
+export const sendLayerToBack = (state: LayerState, action: SendLayerToBack): LayerState => {
+  let currentState = state;
+  const layerItem = currentState.byId[action.payload.id];
+  const layerIndex = getLayerIndex(currentState, action.payload.id);
+  if (layerIndex !== 0) {
+    currentState = insertLayerChild(currentState, layerActions.insertLayerChild({id: layerItem.parent, child: action.payload.id, index: 0}) as InsertLayerChild);
+  }
+  return currentState;
+};
+
+export const sendLayersToBack = (state: LayerState, action: SendLayersToBack): LayerState => {
+  let currentState = state;
+  currentState = orderLayersByDepth(currentState, action.payload.layers).reduce((result, current) => {
+    return sendLayerToBack(result, layerActions.sendLayerToBack({id: current}) as SendLayerToBack);
+  }, currentState);
+  currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.layers, newSelection: true}) as SelectLayers);
   return currentState;
 };

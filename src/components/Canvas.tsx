@@ -69,6 +69,10 @@ const Canvas = (props: CanvasProps): ReactElement => {
           });
           selectionFrameBase.strokeWidth = scale;
         }
+        if (paperMain.project.getItem({data: {id: 'hoverFrame'}})) {
+          const hoverFrame = paperMain.project.getItem({data: {id: 'hoverFrame'}});
+          hoverFrame.strokeWidth = scale;
+        }
       } else {
         paperMain.view.translate(new paper.Point((e.deltaX * ( 1 / paperMain.view.zoom)) * -1, (e.deltaY * ( 1 / paperMain.view.zoom)) * -1));
       }
