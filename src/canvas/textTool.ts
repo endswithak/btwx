@@ -6,10 +6,12 @@ import { getNearestScopeAncestor, getPaperLayer, getPagePaperLayer } from '../st
 import { paperMain } from './index';
 import { applyTextMethods } from './textUtils';
 import { DEFAULT_TEXT_VALUE, DEFAULT_STYLE } from '../constants';
+import InsertTool from './insertTool';
 //import textSettings from 'src/store/reducers/textSettings';
 
 class TextTool {
   tool: paper.Tool;
+  insertTool: InsertTool;
   constructor() {
     this.tool = new paperMain.Tool();
     this.tool.activate();
@@ -18,12 +20,13 @@ class TextTool {
     this.tool.onMouseDown = (e: paper.ToolEvent): void => this.onMouseDown(e);
     this.tool.onMouseDrag = (e: paper.ToolEvent): void => this.onMouseDrag(e);
     this.tool.onMouseUp = (e: paper.ToolEvent): void => this.onMouseUp(e);
+    this.insertTool = new InsertTool();
   }
   onKeyDown(event: paper.KeyEvent): void {
-
+    this.insertTool.onKeyDown(event);
   }
   onKeyUp(event: paper.KeyEvent): void {
-
+    this.insertTool.onKeyUp(event);
   }
   onMouseDown(event: paper.ToolEvent): void {
 
@@ -32,6 +35,7 @@ class TextTool {
 
   }
   onMouseUp(event: paper.ToolEvent): void {
+    this.insertTool.enabled = false;
     let state = store.getState();
     // create new text layer
     const newPaperLayer = new paperMain.PointText({

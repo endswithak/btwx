@@ -6,6 +6,7 @@ import { applyArtboardMethods } from './artboardUtils';
 import { paperMain } from './index';
 import Tooltip from './tooltip';
 import SnapTool from './snapTool';
+import InsertTool from './insertTool';
 import { DEFAULT_ARTBOARD_BACKGROUND_COLOR, THEME_PRIMARY_COLOR } from '../constants';
 
 class ArtboardTool {
@@ -30,6 +31,7 @@ class ArtboardTool {
   snapBreakThreshholdMin: number;
   snapBreakThreshholdMax: number;
   toBounds: paper.Rectangle;
+  insertTool: InsertTool;
   constructor() {
     this.tool = new paperMain.Tool();
     this.tool.activate();
@@ -59,6 +61,7 @@ class ArtboardTool {
       y: null
     };
     this.toBounds = null;
+    this.insertTool = new InsertTool();
   }
   renderShape(shapeOpts: any) {
     const shape = new paperMain.Path.Rectangle({
@@ -82,7 +85,8 @@ class ArtboardTool {
       this.outline.remove();
     }
     this.outline = this.renderShape({
-      strokeColor: THEME_PRIMARY_COLOR
+      strokeColor: THEME_PRIMARY_COLOR,
+      strokeWidth: 1 / paperMain.view.zoom
     });
     this.outline.removeOn({
       drag: true,
@@ -112,6 +116,7 @@ class ArtboardTool {
     }
   }
   onKeyDown(event: paper.KeyEvent): void {
+    this.insertTool.onKeyDown(event);
     switch(event.key) {
       case 'shift': {
         this.shiftModifier = true;
@@ -138,6 +143,7 @@ class ArtboardTool {
     }
   }
   onKeyUp(event: paper.KeyEvent): void {
+    this.insertTool.onKeyUp(event);
     switch(event.key) {
       case 'shift': {
         this.shiftModifier = false;
@@ -278,6 +284,7 @@ class ArtboardTool {
   }
   onMouseDown(event: paper.ToolEvent): void {
     this.drawing = true;
+    this.insertTool.enabled = false;
     const from = event.point;
     if (this.snap.x) {
       from.x = this.snap.x.point;

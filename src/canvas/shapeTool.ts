@@ -8,6 +8,7 @@ import { paperMain } from './index';
 import Tooltip from './tooltip';
 import { DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_GRADIENT_STYLE, THEME_PRIMARY_COLOR } from '../constants';
 import SnapTool from './snapTool';
+import InsertTool from './insertTool';
 
 class ShapeTool {
   ref: paper.Path.Rectangle;
@@ -33,6 +34,7 @@ class ShapeTool {
   snapBreakThreshholdMin: number;
   snapBreakThreshholdMax: number;
   toBounds: paper.Rectangle;
+  insertTool: InsertTool;
   constructor(shapeType: em.ShapeType) {
     this.ref = null;
     this.drawing = false;
@@ -55,7 +57,7 @@ class ShapeTool {
     this.constrainedDims = new Point(0, 0);
     this.centerPoint = new Point(0, 0);
     this.shiftModifier = false;
-    this.snapTool = new SnapTool;
+    this.snapTool = new SnapTool();
     this.snapBreakThreshholdMin = -8;
     this.snapBreakThreshholdMax = 8;
     this.snapPoints = [];
@@ -64,6 +66,7 @@ class ShapeTool {
       y: null
     };
     this.toBounds = null;
+    this.insertTool = new InsertTool();
   }
   updateRef() {
     if (this.ref) {
@@ -71,7 +74,8 @@ class ShapeTool {
     }
     this.ref = new paperMain.Path.Rectangle({
       rectangle: this.toBounds,
-      strokeColor: THEME_PRIMARY_COLOR
+      strokeColor: THEME_PRIMARY_COLOR,
+      strokeWidth: 1 / paperMain.view.zoom
     });
     this.ref.removeOn({
       drag: true,
@@ -137,7 +141,8 @@ class ShapeTool {
       this.outline.remove();
     }
     this.outline = this.renderShape({
-      strokeColor: THEME_PRIMARY_COLOR
+      strokeColor: THEME_PRIMARY_COLOR,
+      strokeWidth: 1 / paperMain.view.zoom
     });
     this.outline.removeOn({
       drag: true,
@@ -167,6 +172,7 @@ class ShapeTool {
     }
   }
   onKeyDown(event: paper.KeyEvent): void {
+    this.insertTool.onKeyDown(event);
     switch(event.key) {
       case 'shift': {
         this.shiftModifier = true;
@@ -194,6 +200,7 @@ class ShapeTool {
     }
   }
   onKeyUp(event: paper.KeyEvent): void {
+    this.insertTool.onKeyUp(event);
     switch(event.key) {
       case 'shift': {
         this.shiftModifier = false;
@@ -335,6 +342,7 @@ class ShapeTool {
   }
   onMouseDown(event: paper.ToolEvent): void {
     this.drawing = true;
+    this.insertTool.enabled = false;
     const from = event.point;
     if (this.snap.x) {
       from.x = this.snap.x.point;

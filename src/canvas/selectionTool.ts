@@ -6,6 +6,7 @@ import DragTool from './dragTool';
 import ResizeTool from './resizeTool';
 import CopyTool from './copyTool';
 import GroupTool from './groupTool';
+import InsertTool from './insertTool';
 import { paperMain } from './index';
 
 class SelectionTool {
@@ -19,6 +20,7 @@ class SelectionTool {
   resizeTool: ResizeTool;
   copyTool: CopyTool;
   groupTool: GroupTool;
+  insertTool: InsertTool;
   constructor() {
     this.tool = new paperMain.Tool();
     this.tool.activate();
@@ -33,6 +35,7 @@ class SelectionTool {
     this.resizeTool = new ResizeTool();
     this.copyTool = new CopyTool();
     this.groupTool = new GroupTool();
+    this.insertTool = new InsertTool();
     this.shiftModifier = false;
     this.metaModifier = false;
     this.altModifier = false;
@@ -43,6 +46,7 @@ class SelectionTool {
     this.dragTool.onKeyDown(event);
     this.copyTool.onKeyDown(event);
     this.groupTool.onKeyDown(event);
+    this.insertTool.onKeyDown(event);
     const state = store.getState();
     switch(event.key) {
       case 'alt': {
@@ -95,6 +99,7 @@ class SelectionTool {
     }
   }
   onMouseDown(event: paper.ToolEvent): void {
+    this.insertTool.enabled = false;
     const state = store.getState().layer.present;
     const hitResult = paperMain.project.hitTest(event.point);
     if (hitResult) {
@@ -118,6 +123,7 @@ class SelectionTool {
     this.resizeTool.onMouseDrag(event);
   }
   onMouseUp(event: paper.ToolEvent): void {
+    this.insertTool.enabled = true;
     this.areaSelectTool.onMouseUp(event);
     this.dragTool.onMouseUp(event);
     this.resizeTool.onMouseUp(event);

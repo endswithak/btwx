@@ -4,10 +4,10 @@ import { ThemeContext } from './ThemeProvider';
 import styled from 'styled-components';
 import TopbarButton from './TopbarButton';
 import TopbarDropdownButtonOption from './TopbarDropdownButtonOption';
+import chroma from 'chroma-js';
 
 interface TopbarDropdownButtonProps {
-  onClick(event: React.SyntheticEvent): void;
-  isActive?: boolean;
+  onClick?(event: React.SyntheticEvent): void;
   disabled?: boolean;
   icon?: string;
   label: string;
@@ -21,14 +21,14 @@ interface TopbarDropdownButtonProps {
 }
 
 const ButtonDropdown = styled.div`
-  background: ${props => props.theme.background.z1};
-  box-shadow: 0 0 0 -1px ${props => props.theme.background.z4} inset;
+  background: ${props => chroma(props.theme.background.z1).alpha(0.78).hex()};
+  box-shadow: 0 0 0 1px ${props => props.theme.background.z4};
 `;
 
 const TopbarDropdownButton = (props: TopbarDropdownButtonProps): ReactElement => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
-  const { onClick, isActive, disabled, label, icon, options } = props;
+  const { onClick, disabled, label, icon, options } = props;
   const [showDropdown, setShowDropdown] = useState(false);
 
   const onMouseDown = (event: any) => {
@@ -54,6 +54,11 @@ const TopbarDropdownButton = (props: TopbarDropdownButtonProps): ReactElement =>
     document.addEventListener('mousedown', onMouseDown, false);
   }
 
+  const handleOptionClick = (option) => {
+    option.onClick();
+    closeDropdown();
+  }
+
   return (
     <div
       className='c-topbar-dropdown-button'
@@ -73,6 +78,7 @@ const TopbarDropdownButton = (props: TopbarDropdownButtonProps): ReactElement =>
               options.map((option, index) => (
                 <TopbarDropdownButtonOption
                   {...option}
+                  onClick={() => handleOptionClick(option)}
                   key={index} />
               ))
             }

@@ -23,7 +23,7 @@ const Button = styled.button`
     color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.light};
   }
   :hover {
-    background: ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.background.z4};
+    background: ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.palette.primary};
     .c-topbar-dropdown-button__icon {
       svg {
         fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base};

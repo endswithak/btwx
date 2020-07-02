@@ -16,6 +16,7 @@ import { compareFills } from '../store/selectors/layer';
 import FillTypeSelector from './FillTypeSelector';
 import useDebounce from './useDebounce';
 import debounce from 'lodash.debounce';
+import chroma from 'chroma-js';
 
 interface FillEditorProps {
   fillEditor?: FillEditorState;
@@ -150,8 +151,8 @@ const FillEditor = (props: FillEditorProps): ReactElement => {
         style={{
           top: fillEditor.y,
           left: fillEditor.x,
-          background: theme.background.z1,
-          boxShadow: `0 0 0 1px ${theme.background.z4} inset`
+          background: chroma(theme.background.z1).alpha(0.78).hex(),
+          boxShadow: `0 0 0 1px ${theme.background.z4}`
         }}>
         <FillTypeSelector
           colorSelector={{
