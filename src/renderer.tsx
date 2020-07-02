@@ -31,13 +31,13 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
 import App from './components/App';
 import Preview from './components/Preview';
 import { ThemeProvider } from './components/ThemeProvider';
-import { Provider } from 'react-redux';
 import store, { persistor, persistConfig } from './store';
 import persist from './store/utils/persist';
-import { PersistGate } from 'redux-persist/integration/react';
 
 import './styles/index.sass';
 

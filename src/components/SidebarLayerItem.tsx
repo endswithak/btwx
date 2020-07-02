@@ -57,7 +57,9 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
           ? theme.background.z3
           : 'none',
         paddingLeft: depth * (theme.unit * 6),
-        boxShadow: hover === layer.id ? `0 0 0 ${theme.unit / 2}px ${theme.background.z3} inset` : ''
+        boxShadow: hover === layer.id
+        ? `0 0 0 1px ${layer.selected ? theme.palette.primaryHover : theme.palette.primary} inset`
+        : ''
       }}>
       <SidebarLayerChevron
         layer={layer} />

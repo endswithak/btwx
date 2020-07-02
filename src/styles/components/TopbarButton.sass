@@ -1,0 +1,33 @@
+.c-topbar-button
+  display: flex
+  flex-direction: column
+  align-items: center
+  justify-content: center
+  position: relative
+
+.c-topbar-button--disabled
+  opacity: 0.5
+  cursor: default
+
+.c-topbar-button__button
+  display: flex
+  align-items: center
+  justify-content: center
+  width: $unit * 12
+  height: $unit * 6
+  margin: 0 $unit
+  outline: 0
+  border: 0
+  border-radius: $unit
+
+  svg
+    transform: scale(0.80)
+
+  &:disabled
+    cursor: default
+
+.c-topbar-button__label
+  font-family: $fontFamily
+  font-size: $fontSizeXs
+  text-align: center
+  padding-top: $unit * 2

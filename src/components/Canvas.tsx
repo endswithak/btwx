@@ -104,6 +104,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
       ref={canvasContainerRef}>
       <canvas
         id='canvas-main'
+        tabIndex={0}
         ref={canvasRef}
         style={{
           background: theme.background.z0
@@ -117,7 +118,7 @@ const mapStateToProps = (state: RootState) => {
   return {
     activeArtboard: layer.present.activeArtboard,
     paperProject: layer.present.paperProject,
-    drawing: tool.type === 'Shape',
+    drawing: tool.type === 'Shape' || tool.type === 'Artboard',
     typing: tool.type === 'Text',
     allArtboardIds: layer.present.allArtboardIds,
     allShapeIds: layer.present.allShapeIds,

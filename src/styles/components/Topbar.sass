@@ -1,25 +1,15 @@
 .c-topbar
-  height: $unit * 12
-  max-height: $unit * 12
+  height: $unit * 15
+  max-height: $unit * 15
   width: 100%
   flex-grow: 0
   flex-shrink: 0
   display: flex
   align-items: center
-  justify-content: center
+  justify-content: space-between
   box-sizing: border-box
+  padding: 0 $unit
 
-.c-topbar__button
-  width: $unit * 8
-  height: $unit * 8
-  margin: 0 $unit
-  padding: $unit
-  outline: 0
-  border: 0
-  border-radius: $unit
-
-  &:disabled
-    cursor: default
-
-.c-topbar__button--blue
-  background: blue
+.c-topbar__button-group
+  display: flex
+  align-items: center
