@@ -2,7 +2,6 @@ import React, { useRef, useContext, useEffect, ReactElement } from 'react';
 import Canvas from './Canvas';
 import SidebarLeft from './SidebarLeft';
 import SidebarRight from './SidebarRight';
-import TitleBar from './TitleBar';
 import Topbar from './Topbar';
 import TweenDrawer from './TweenDrawer';
 import TweenEventSelect from './TweenEventSelect';
@@ -26,7 +25,6 @@ const App = (): ReactElement => {
       style={{
         background: theme.background.z0
       }}>
-        <TitleBar title='eSketch' />
         <Topbar />
         <div className='c-app__canvas'>
           <SidebarLeft />

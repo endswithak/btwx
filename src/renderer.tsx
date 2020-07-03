@@ -29,26 +29,41 @@
 // import * as sketchfile from 'sketch-file';
 // import paper from 'paper';
 
+import { remote } from 'electron';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import App from './components/App';
 import Preview from './components/Preview';
-import { ThemeProvider } from './components/ThemeProvider';
+import Preferences from './components/Preferences';
+import ThemeProvider from './components/ThemeProvider';
 import store, { persistor, persistConfig } from './store';
 import persist from './store/utils/persist';
+import { Titlebar, Color } from 'custom-electron-titlebar';
+import getTheme from './store/theme';
 
 import './styles/index.sass';
 
 window.addEventListener('storage', persist(store, persistConfig));
 
+let theme = remote.systemPreferences.getUserDefault('theme', 'string');
+let themeObject = getTheme(theme);
+const titleBar = new Titlebar({
+  backgroundColor: Color.fromHex(themeObject.background.z1)
+});
+
+window.updateTheme = () => {
+  theme = remote.systemPreferences.getUserDefault('theme', 'string');
+  themeObject = getTheme(theme);
+  titleBar.updateBackground(Color.fromHex(themeObject.background.z1));
+}
+
 window.renderMainWindow = () => {
+  titleBar.updateTitle('eSketch');
   ReactDOM.render(
     <Provider store={store}>
-      <PersistGate
-        loading={null}
-        persistor={persistor}>
+      <PersistGate loading={null} persistor={persistor}>
         <ThemeProvider>
           <App />
         </ThemeProvider>
@@ -59,11 +74,26 @@ window.renderMainWindow = () => {
 }
 
 window.renderPreviewWindow = () => {
+  titleBar.updateTitle('Preview');
   ReactDOM.render(
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <ThemeProvider>
           <Preview />
+        </ThemeProvider>
+      </PersistGate>
+    </Provider>,
+    document.getElementById('root')
+  );
+}
+
+window.renderPreferencesWindow = () => {
+  titleBar.updateTitle('Preferences');
+  ReactDOM.render(
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <ThemeProvider>
+          <Preferences />
         </ThemeProvider>
       </PersistGate>
     </Provider>,

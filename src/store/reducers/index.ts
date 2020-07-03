@@ -10,6 +10,7 @@ import strokeEditor from './strokeEditor';
 import textEditor from './textEditor';
 import textSettings from './textSettings';
 import canvasSettings from './canvasSettings';
+import theme from './theme';
 
 import {
   ADD_ARTBOARD,
@@ -179,7 +180,8 @@ const rootReducer = combineReducers({
   textSettings,
   canvasSettings,
   fillEditor,
-  strokeEditor
+  strokeEditor,
+  theme
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

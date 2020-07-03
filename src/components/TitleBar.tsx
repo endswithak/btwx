@@ -25,6 +25,7 @@ const TitleBar = (props: TitleBarProps): ReactElement => {
         }
       }}
       title={props.title}
+      drag={true}
       onClose={() => currentWindow.close()}
       onMinimize={() => currentWindow.minimize()}
       onMaximize={() => currentWindow.maximize()}
