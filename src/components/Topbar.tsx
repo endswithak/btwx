@@ -1,4 +1,5 @@
 import React, { useContext, ReactElement, useState, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
 import { paperMain } from '../canvas';
@@ -8,12 +9,15 @@ import { openTweenDrawer, closeTweenDrawer } from '../store/actions/tweenDrawer'
 import { TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
 import { AddImagePayload, AddLayersMaskPayload, GroupLayersPayload, UngroupLayersPayload, SendLayersBackwardPayload, SendLayersForwardPayload, LayerTypes } from '../store/actionTypes/layer';
 import { addImage, addLayersMask, groupLayers, ungroupLayers, sendLayersBackward, sendLayersForward } from '../store/actions/layer';
+import { AddCanvasImagePayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
+import { addCanvasImage } from '../store/actions/canvasSettings';
 import { orderLayersByDepth } from '../store/selectors/layer';
 import { ToolState } from '../store/reducers/tool';
 import { ThemeContext } from './ThemeProvider';
 import { ipcRenderer, remote } from 'electron';
 import TopbarButton from './TopbarButton';
 import TopbarDropdownButton from './TopbarDropdownButton';
+import { bufferToBase64 } from '../utils';
 
 interface TopbarStateProps {
   tool: ToolState;
@@ -25,6 +29,11 @@ interface TopbarStateProps {
   canMoveForward: boolean;
   canGroup: boolean;
   canUngroup: boolean;
+  zoom: number;
+  allCanvasImageIds: string[];
+  canvasImagesById: {
+    [id: string]: em.CanvasImage;
+  };
   enableRectangleShapeTool(): ToolTypes;
   enableEllipseShapeTool(): ToolTypes;
   enableStarShapeTool(): ToolTypes;
@@ -41,6 +50,7 @@ interface TopbarStateProps {
   sendLayersBackward(payload: SendLayersBackwardPayload): LayerTypes;
   sendLayersForward(payload: SendLayersForwardPayload): LayerTypes;
   addImage(payload: AddImagePayload): LayerTypes;
+  addCanvasImage(payload: AddCanvasImagePayload): CanvasSettingsTypes;
 }
 
 const Topbar = (props: TopbarStateProps): ReactElement => {
@@ -54,6 +64,8 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
     canMoveForward,
     canGroup,
     canUngroup,
+    zoom,
+    canvasImagesById,
     enableRectangleShapeTool,
     enableEllipseShapeTool,
     enableSelectionTool,
@@ -70,7 +82,9 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
     ungroupLayers,
     sendLayersBackward,
     sendLayersForward,
-    addImage
+    addImage,
+    addCanvasImage,
+    allCanvasImageIds
   } = props;
 
   const handlePreviewClick = () => {
@@ -111,14 +125,18 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
     ipcRenderer.send('addImage');
     ipcRenderer.once('addImage-reply', (event, arg) => {
       const buffer = Buffer.from(JSON.parse(arg).data);
-      const base64 = btoa(
-        new Uint8Array(buffer)
-          .reduce((data, byte) => data + String.fromCharCode(byte), '')
-      );
-      const paperLayer = new paperMain.Raster(`data:image/jpg;base64,${base64}`);
+      const exists = allCanvasImageIds.length > 0 && allCanvasImageIds.find((id) => canvasImagesById[id].buffer.equals(buffer));
+      const base64 = bufferToBase64(buffer);
+      const paperLayer = new paperMain.Raster(`data:image/webp;base64,${base64}`);
       paperLayer.position = paperMain.view.center;
       paperLayer.onLoad = () => {
-        addImage({source: null, paperLayer});
+        if (exists) {
+          addImage({paperLayer, imageId: exists});
+        } else {
+          const imageId = uuidv4();
+          addImage({paperLayer, imageId: imageId});
+          addCanvasImage({id: imageId, buffer: buffer});
+        }
       }
     });
   }
@@ -218,7 +236,7 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { tool, layer, tweenDrawer } = state;
+  const { tool, layer, tweenDrawer, canvasSettings } = state;
   const activeArtboard = layer.present.byId[layer.present.activeArtboard];
   const isTweenDrawerOpen = tweenDrawer.isOpen;
   const selected = layer.present.selected;
@@ -249,7 +267,10 @@ const mapStateToProps = (state: RootState) => {
     const layer = state.layer.present.byId[id];
     return layer.type === 'Group';
   });
-  return { tool, activeArtboard, isTweenDrawerOpen, selected, canMask, canMoveBackward, canMoveForward, canGroup, canUngroup };
+  const zoom = canvasSettings.matrix ? Math.round(canvasSettings.matrix[0] * 100) : 100;
+  const allCanvasImageIds = canvasSettings.allImageIds;
+  const canvasImagesById = canvasSettings.imageById;
+  return { tool, activeArtboard, isTweenDrawerOpen, selected, canMask, canMoveBackward, canMoveForward, canGroup, canUngroup, zoom, canvasImagesById, allCanvasImageIds };
 };
 
 export default connect(
@@ -270,6 +291,7 @@ export default connect(
     ungroupLayers,
     sendLayersBackward,
     sendLayersForward,
-    addImage
+    addImage,
+    addCanvasImage
   }
 )(Topbar);

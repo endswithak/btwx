@@ -1111,7 +1111,7 @@ const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any, fro
     const raster = paperLayer.getItem({ data: { id: 'Raster' }});
     const rasterClone = raster.clone({deep: false, insert: true});
     rasterClone.parent = paperLayerClone;
-    applyImageMethods(paperLayerClone);
+    applyImageMethods(rasterClone);
   }
   paperLayerClone.data.id = layerCloneMap[id];
   paperLayerClone.parent = paperParentLayer;
@@ -1137,7 +1137,7 @@ const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any, fro
           const raster = childPaperLayer.getItem({ data: { id: 'Raster' }});
           const rasterClone = raster.clone({deep: false, insert: true});
           rasterClone.parent = childPaperLayerClone;
-          applyImageMethods(childPaperLayerClone);
+          applyImageMethods(rasterClone);
         }
         if (childLayer.children && childLayer.children.length > 0) {
           groups.push(child);
@@ -3372,6 +3372,12 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer, fromCl
         result = {
           ...result,
           allTextIds: addItem(result.allTextIds, current)
+        }
+        break;
+      case 'Image':
+        result = {
+          ...result,
+          allImageIds: addItem(result.allImageIds, current)
         }
         break;
     }

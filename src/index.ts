@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import electron, { app, BrowserWindow, ipcMain, systemPreferences, Menu, shell, dialog } from 'electron';
 import sharp from 'sharp';
-import { v4 as uuidv4 } from 'uuid';
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
 
@@ -263,7 +262,7 @@ ipcMain.on('addImage', (event, arg) => {
   }).then(result => {
     if (result.filePaths.length > 0 && !result.canceled) {
       sharp(result.filePaths[0]).metadata().then(({ width }) => {
-        sharp(result.filePaths[0]).resize(Math.round(width * 0.5)).toBuffer().then((buffer) => {
+        sharp(result.filePaths[0]).resize(Math.round(width * 0.5)).webp({quality: 20}).toBuffer().then((buffer) => {
           event.reply('addImage-reply', JSON.stringify(buffer));
         });
       });

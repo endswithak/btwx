@@ -12,7 +12,7 @@ declare namespace em {
 
   type ContextMenu = 'TweenEvent' | 'TweenEventDestination';
 
-  type TweenProp = 'shape' | 'fill' | 'x' | 'y' | 'rotation' | 'width' | 'height' | 'stroke' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity' | 'fontSize';
+  type TweenProp = 'image' | 'shape' | 'fill' | 'x' | 'y' | 'rotation' | 'width' | 'height' | 'stroke' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity' | 'fontSize';
 
   type TweenPropMap = { [K in TweenProp]: boolean; }
 
@@ -210,8 +210,13 @@ declare namespace em {
 
   interface Image extends Layer {
     type: 'Image';
-    source: string;
+    imageId: string;
     children: null;
+  }
+
+  interface CanvasImage {
+    id: string;
+    buffer: Buffer;
   }
 
   interface TweenEvent {

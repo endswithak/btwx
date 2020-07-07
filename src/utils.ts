@@ -51,3 +51,10 @@ export const debounce = <F extends (...args: any[]) => any>(func: F, waitFor: nu
 
   return debounced as (...args: Parameters<F>) => ReturnType<F>;
 };
+
+export const bufferToBase64 = (buffer: Buffer) => {
+  return btoa(
+    new Uint8Array(buffer)
+      .reduce((data, byte) => data + String.fromCharCode(byte), '')
+  );
+}

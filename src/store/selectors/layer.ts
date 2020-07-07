@@ -235,6 +235,7 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
   const layerArtboardPosition = getPositionInArtboard(layer, artboard);
   const equivalentArtboardPosition = getPositionInArtboard(equivalent, destinationArtboard);
   const tweenPropMap: em.TweenPropMap = {
+    image: false,
     shape: false,
     fill: false,
     //fillGradient: false,
@@ -254,6 +255,11 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
   }
   Object.keys(tweenPropMap).forEach((key: em.TweenProp) => {
     switch(key) {
+      case 'image':
+        if (layer.data.type === 'Image' && equivalent.data.type === 'Image' && layer.data.imageId !== equivalent.data.imageId) {
+          tweenPropMap[key] = true;
+        }
+        break;
       case 'shape':
         if (layer.data.type !== 'ArtboardBackground' && layer.className === 'Path' && equivalent.className === 'Path') {
           const equivalentShapeTest = equivalent.clone({insert: false});

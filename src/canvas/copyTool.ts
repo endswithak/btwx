@@ -39,7 +39,8 @@ class CopyTool {
               applyTextMethods(getPaperLayer(textId));
             });
             state.layer.present.allImageIds.forEach((imageId) => {
-              applyImageMethods(getPaperLayer(imageId));
+              const raster = getPaperLayer(imageId).getItem({data: {id: 'Raster'}});
+              applyImageMethods(raster);
             });
             updateHoverFrame(state.layer.present);
             updateSelectionFrame(state.layer.present);
@@ -60,7 +61,8 @@ class CopyTool {
               applyTextMethods(getPaperLayer(textId));
             });
             state.layer.present.allImageIds.forEach((imageId) => {
-              applyImageMethods(getPaperLayer(imageId));
+              const raster = getPaperLayer(imageId).getItem({data: {id: 'Raster'}});
+              applyImageMethods(raster);
             });
             updateHoverFrame(state.layer.present);
             updateSelectionFrame(state.layer.present);

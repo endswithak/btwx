@@ -8,18 +8,18 @@ export const applyImageMethods = (image: paper.Item) => {
   image.set({
     onMouseEnter: function(e: paper.MouseEvent) {
       const state = store.getState();
-      const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, this.data.id);
+      const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, this.parent.data.id);
       store.dispatch(setLayerHover({id: nearestScopeAncestor.id}));
     },
     onMouseLeave: function(e: paper.MouseEvent) {
       store.dispatch(setLayerHover({id: null}));
     },
     onDoubleClick: function(e: paper.MouseEvent) {
-      store.dispatch(deepSelectLayer({id: this.data.id}));
+      store.dispatch(deepSelectLayer({id: this.parent.data.id}));
     },
     onMouseDown: function(e: paper.MouseEvent) {
       const state = store.getState();
-      const layer = getLayer(state.layer.present, this.data.id);
+      const layer = getLayer(state.layer.present, this.parent.data.id);
       const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, layer.id);
       if (e.event.which === 3) {
         store.dispatch(openContextMenu({type: 'TweenEvent', id: nearestScopeAncestor.id, x: e.event.clientX, y: e.event.clientY}));
@@ -33,7 +33,7 @@ export const applyImageMethods = (image: paper.Item) => {
       } else {
         if (!layer.selected) {
           if (nearestScopeAncestor.type === 'Artboard') {
-            store.dispatch(deepSelectLayer({id: this.data.id}));
+            store.dispatch(deepSelectLayer({id: this.parent.data.id}));
           } else {
             store.dispatch(selectLayer({id: nearestScopeAncestor.id, newSelection: true}));
           }

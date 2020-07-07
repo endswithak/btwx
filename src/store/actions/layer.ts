@@ -451,13 +451,12 @@ export const addText = (payload: AddTextPayload): LayerTypes => {
 
 export const addImage = (payload: AddImagePayload): LayerTypes => {
   const id = uuidv4();
-  payload.paperLayer.data = { id: 'Raster', type: 'Raster' };
+  payload.paperLayer.data = { id: 'Raster' };
   const imageContainer = new paperMain.Group({
-    name: payload.name ? payload.name : 'Artboard',
-    data: { id: id, type: 'Image' },
+    data: { id: id, type: 'Image', imageId: payload.imageId },
     children: [payload.paperLayer],
   });
-  applyImageMethods(imageContainer);
+  applyImageMethods(payload.paperLayer);
   return {
     type: ADD_IMAGE,
     payload: {
@@ -490,7 +489,7 @@ export const addImage = (payload: AddImagePayload): LayerTypes => {
           enabled: false
         }
       },
-      source: null
+      imageId: payload.imageId
     }
   }
 };

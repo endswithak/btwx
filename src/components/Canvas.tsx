@@ -95,7 +95,8 @@ const Canvas = (props: CanvasProps): ReactElement => {
       applyTextMethods(getPaperLayer(textId));
     });
     allImageIds.forEach((imageId) => {
-      applyImageMethods(getPaperLayer(imageId));
+      const raster = getPaperLayer(imageId).getItem({data: {id: 'Raster'}});
+      applyImageMethods(raster);
     });
     if (canvasSettings.matrix) {
       paperMain.view.matrix.set(canvasSettings.matrix);

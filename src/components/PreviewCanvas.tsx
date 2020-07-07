@@ -54,6 +54,9 @@ interface PreviewCanvasProps {
       [id: string]: em.Layer;
     };
   };
+  canvasImagesById: {
+    [id: string]: em.CanvasImage;
+  };
   setActiveArtboard?(payload: SetActiveArtboardPayload): LayerTypes;
 }
 
@@ -61,7 +64,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useContext(ThemeContext);
-  const { paperProject, activeArtboard, page, tweenEvents, tweenEventLayers, tweenEventDestinations, tweens, tweenLayers, tweenLayerDestinations, setActiveArtboard } = props;
+  const { paperProject, activeArtboard, page, tweenEvents, tweenEventLayers, tweenEventDestinations, tweens, tweenLayers, tweenLayerDestinations, setActiveArtboard, canvasImagesById } = props;
 
   useEffect(() => {
     canvasRef.current.width = canvasContainerRef.current.clientWidth;
@@ -120,6 +123,30 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
             const tweenPaperLayerPositionDiffX = tweenDestinationLayerArtboardPosition.x - tweenPaperLayerArtboardPosition.x;
             const tweenPaperLayerPositionDiffY = tweenDestinationLayerArtboardPosition.y - tweenPaperLayerArtboardPosition.y;
             switch(tween.prop) {
+              case 'image': {
+                const beforeRaster = tweenPaperLayer.getItem({data: {id: 'Raster'}}) as paper.Raster;
+                const destinationRaster = tweenDestinationLayerPaperLayer.getItem({data: {id: 'Raster'}}) as paper.Raster;
+                const afterRaster = beforeRaster.clone({insert: false}) as paper.Raster;
+                afterRaster.source = destinationRaster.source;
+                afterRaster.bounds = beforeRaster.bounds;
+                afterRaster.position = beforeRaster.position;
+                afterRaster.opacity = 0;
+                afterRaster.parent = beforeRaster.parent;
+                tweenProp[`${tween.prop}-before`] = 1;
+                tweenProp[`${tween.prop}-after`] = 0;
+                paperTween = gsap.to(tweenProp, {
+                  duration: tween.duration,
+                  [`${tween.prop}-before`]: 0,
+                  [`${tween.prop}-after`]: 1,
+                  onUpdate: () => {
+                    beforeRaster.opacity = tweenProp[`${tween.prop}-before`];
+                    afterRaster.opacity = tweenProp[`${tween.prop}-after`];
+                  },
+                  ease: tween.ease,
+                  delay: tween.delay
+                });
+                break;
+              }
               case 'shape': {
                 const morphData = [
                   (tweenPaperLayer as paper.Path).pathData,
@@ -569,13 +596,14 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
+  const { layer, canvasSettings } = state;
   const tweenEvents = getAllArtboardTweenEvents(layer.present, layer.present.activeArtboard);
   const tweenEventDestinations = getAllArtboardTweenEventDestinations(layer.present, layer.present.activeArtboard);
   const tweenEventLayers = getAllArtboardTweenEventLayers(layer.present, layer.present.activeArtboard);
   const tweens = getAllArtboardTweens(layer.present, layer.present.activeArtboard);
   const tweenLayers = getAllArtboardTweenLayers(layer.present, layer.present.activeArtboard);
   const tweenLayerDestinations = getAllArtboardTweenLayerDestinations(layer.present, layer.present.activeArtboard);
+  const canvasImagesById = canvasSettings.imageById;
   return {
     paperProject: layer.present.paperProject,
     activeArtboard: layer.present.byId[layer.present.activeArtboard],
@@ -585,7 +613,8 @@ const mapStateToProps = (state: RootState) => {
     tweenEventDestinations,
     tweens,
     tweenLayers,
-    tweenLayerDestinations
+    tweenLayerDestinations,
+    canvasImagesById
   };
 };
 
