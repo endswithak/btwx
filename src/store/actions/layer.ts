@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { paperMain } from '../../canvas';
 import { DEFAULT_STYLE, DEFAULT_TEXT_STYLE, DEFAULT_TEXT_VALUE, DEFAULT_GRADIENT_STYLE } from '../../constants';
+import { applyImageMethods } from '../../canvas/imageUtils';
 
 import {
   ADD_PAGE,
@@ -8,6 +9,7 @@ import {
   ADD_GROUP,
   ADD_SHAPE,
   ADD_TEXT,
+  ADD_IMAGE,
   REMOVE_LAYER,
   REMOVE_LAYERS,
   SELECT_LAYER,
@@ -141,6 +143,7 @@ import {
   AddGroupPayload,
   AddShapePayload,
   AddTextPayload,
+  AddImagePayload,
   RemoveLayerPayload,
   RemoveLayersPayload,
   SelectLayerPayload,
@@ -440,6 +443,54 @@ export const addText = (payload: AddTextPayload): LayerTypes => {
         ...DEFAULT_TEXT_STYLE,
         ...payload.textStyle
       }
+    }
+  }
+};
+
+// Image
+
+export const addImage = (payload: AddImagePayload): LayerTypes => {
+  const id = uuidv4();
+  payload.paperLayer.data = { id: 'Raster', type: 'Raster' };
+  const imageContainer = new paperMain.Group({
+    name: payload.name ? payload.name : 'Artboard',
+    data: { id: id, type: 'Image' },
+    children: [payload.paperLayer],
+  });
+  applyImageMethods(imageContainer);
+  return {
+    type: ADD_IMAGE,
+    payload: {
+      type: 'Image',
+      id: id,
+      frame: {
+        x: payload.paperLayer.position.x,
+        y: payload.paperLayer.position.y,
+        width: payload.paperLayer.bounds.width,
+        height: payload.paperLayer.bounds.height,
+      },
+      name: payload.name ? payload.name : 'Image',
+      parent: payload.parent ? payload.parent : null,
+      selected: false,
+      mask: false,
+      masked: false,
+      points: {
+        closed: true,
+      },
+      tweenEvents: [],
+      tweens: [],
+      style: {
+        ...DEFAULT_STYLE,
+        fill: {
+          ...DEFAULT_STYLE.fill,
+          enabled: false
+        },
+        stroke: {
+          ...DEFAULT_STYLE.stroke,
+          enabled: false
+        }
+      },
+      source: null
     }
   }
 };

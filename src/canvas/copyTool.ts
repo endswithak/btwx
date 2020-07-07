@@ -6,6 +6,7 @@ import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
 import { applyShapeMethods } from './shapeUtils';
 import { applyArtboardMethods } from './artboardUtils';
 import { applyTextMethods } from './textUtils';
+import { applyImageMethods } from './imageUtils';
 import { paperMain } from './index';
 
 class CopyTool {
@@ -37,6 +38,9 @@ class CopyTool {
             state.layer.present.allTextIds.forEach((textId) => {
               applyTextMethods(getPaperLayer(textId));
             });
+            state.layer.present.allImageIds.forEach((imageId) => {
+              applyImageMethods(getPaperLayer(imageId));
+            });
             updateHoverFrame(state.layer.present);
             updateSelectionFrame(state.layer.present);
           } else {
@@ -54,6 +58,9 @@ class CopyTool {
             });
             state.layer.present.allTextIds.forEach((textId) => {
               applyTextMethods(getPaperLayer(textId));
+            });
+            state.layer.present.allImageIds.forEach((imageId) => {
+              applyImageMethods(getPaperLayer(imageId));
             });
             updateHoverFrame(state.layer.present);
             updateSelectionFrame(state.layer.present);

@@ -16,7 +16,7 @@ declare namespace em {
 
   type TweenPropMap = { [K in TweenProp]: boolean; }
 
-  type LayerType = 'Group' | 'Shape' | 'Page' | 'Artboard' | 'ArtboardBackground' | 'Text';
+  type LayerType = 'Group' | 'Shape' | 'Page' | 'Artboard' | 'Text' | 'Image';
 
   type ColorEditorProp = 'fillColor' | 'strokeColor' | 'shadowColor';
 
@@ -205,6 +205,12 @@ declare namespace em {
     type: 'Shape';
     shapeType: ShapeType;
     pathData: string;
+    children: null;
+  }
+
+  interface Image extends Layer {
+    type: 'Image';
+    source: string;
     children: null;
   }
 

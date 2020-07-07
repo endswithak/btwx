@@ -28,9 +28,9 @@ const textOnColor = (color: string | chroma.Color) => {
   return contrast > 3 ? darkTextMax : lightTextMax;
 }
 
-const createPalette = (): em.Palette => ({
+const createPalette = (theme: em.ThemeName): em.Palette => ({
   primary: THEME_PRIMARY_COLOR,
-  primaryHover: chroma(THEME_PRIMARY_COLOR).darken().css(),
+  primaryHover: theme === 'dark' ? chroma(THEME_PRIMARY_COLOR).brighten(0.5).css() : chroma(THEME_PRIMARY_COLOR).darken(0.5).css(),
   accent: chroma(accent).css(),
   accentHover: chroma(accent).darken().css()
 });
@@ -47,11 +47,11 @@ const createDarkBackgrounds = (scale: string[]): em.BackgroundScale => ({
 
 const createLightBackgrounds = (scale: string[]): em.BackgroundScale => ({
   z6: scale[6],
-  z5: scale[4],
-  z4: scale[5],
-  z3: scale[4],
-  z2: scale[1],
-  z1: scale[2],
+  z5: scale[5],
+  z4: scale[4],
+  z3: scale[3],
+  z2: scale[2],
+  z1: scale[1],
   z0: scale[0]
 });
 
@@ -65,18 +65,18 @@ const createText = (scale: string[], palette: em.Palette): em.TextScale => ({
 });
 
 export const darkTheme = {
-  palette: createPalette(),
+  palette: createPalette('dark'),
   background: createDarkBackgrounds(darkBgScale),
   backgroundInverse: createLightBackgrounds(lightBgScale),
-  text: createText(darkTextScale, createPalette()),
+  text: createText(darkTextScale, createPalette('dark')),
   unit: THEME_UNIT_SIZE
 }
 
 export const lightTheme = {
-  palette: createPalette(),
+  palette: createPalette('light'),
   background: createLightBackgrounds(lightBgScale),
   backgroundInverse: createDarkBackgrounds(lightBgScale),
-  text: createText(lightTextScale, createPalette()),
+  text: createText(lightTextScale, createPalette('light')),
   unit: THEME_UNIT_SIZE
 }
 

@@ -1,5 +1,8 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import electron, { app, BrowserWindow, ipcMain, systemPreferences, Menu, shell } from 'electron';
+import electron, { app, BrowserWindow, ipcMain, systemPreferences, Menu, shell, dialog } from 'electron';
+import sharp from 'sharp';
+import { v4 as uuidv4 } from 'uuid';
+
 declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -240,13 +243,30 @@ ipcMain.on('openPreview', (event, activeArtboard) => {
 ipcMain.on('updateTheme', (event, theme) => {
   systemPreferences.setUserDefault('theme', 'string', theme);
 
-  if (mainWindow.webContents) {
+  if (mainWindow && mainWindow.webContents) {
     mainWindow.webContents.executeJavaScript(`updateTheme()`);
   }
-  if (previewWindow.webContents) {
+  if (previewWindow && previewWindow.webContents) {
     previewWindow.webContents.executeJavaScript(`updateTheme()`);
   }
-  if (preferencesWindow.webContents) {
+  if (preferencesWindow && preferencesWindow.webContents) {
     preferencesWindow.webContents.executeJavaScript(`updateTheme()`);
   }
+});
+
+ipcMain.on('addImage', (event, arg) => {
+  dialog.showOpenDialog(mainWindow, {
+    filters: [
+      { name: 'Images', extensions: ['jpg', 'png'] }
+    ],
+    properties: ['openFile']
+  }).then(result => {
+    if (result.filePaths.length > 0 && !result.canceled) {
+      sharp(result.filePaths[0]).metadata().then(({ width }) => {
+        sharp(result.filePaths[0]).resize(Math.round(width * 0.5)).toBuffer().then((buffer) => {
+          event.reply('addImage-reply', JSON.stringify(buffer));
+        });
+      });
+    }
+  });
 });

@@ -22,11 +22,27 @@ interface SidebarInputProps {
   disableSelectionTool?(): ToolTypes;
 }
 
-const Input = styled.input`
-  background: ${props => props.theme.background.z4};
-  color: ${props => props.theme.text.base};
-  :focus {
-    box-shadow: 0 0 0 1px ${props => props.theme.palette.primary};
+const Input = styled.div`
+  .c-sidebar-input__field {
+    background: ${props => props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
+    color: ${props => props.theme.text.base};
+    box-shadow: 0 0 0 1px ${props => props.theme.background.z4} inset;
+    :focus {
+      box-shadow: 0 0 0 1px ${props => props.theme.palette.primary} inset;
+    }
+    :hover {
+      box-shadow: 0 0 0 1px ${props => props.theme.background.z6} inset;
+      :focus {
+        box-shadow: 0 0 0 1px ${props => props.theme.palette.primaryHover} inset;
+      }
+    }
+  }
+  .c-sidebar-input__label {
+    background: ${props => props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
+    color: ${props => props.theme.text.lighter};
+  }
+  .c-sidebar-input__bottom-label {
+    color: ${props => props.theme.text.base};
   }
 `;
 
@@ -78,12 +94,14 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
   }, []);
 
   return (
-    <div className={`c-sidebar-input ${disabled ? 'c-sidebar-input--disabled' : null}`}>
+    <Input
+      className={`c-sidebar-input ${disabled ? 'c-sidebar-input--disabled' : null}`}
+      theme={theme}>
       <div className='c-sidebar-input__inner'>
         <form
           className={`c-sidebar-input__form ${disabled ? 'c-sidebar-input__form--disabled' : null}`}
           onSubmit={handleSubmit}>
-          <Input
+          <input
             ref={inputRef}
             value={value}
             onFocus={handleFocus}
@@ -91,28 +109,27 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
             onBlur={handleBlur}
             onKeyPress={handleKeyPress}
             disabled={disabled}
-            className={`c-sidebar-input__field ${label ? 'c-sidebar-input__field--label' : null } ${leftLabel ? 'c-sidebar-input__field--left-label' : null }`}
-            theme={theme} />
+            className={
+              `c-sidebar-input__field ${
+                label
+                ? 'c-sidebar-input__field--label'
+                : null
+              } ${
+                leftLabel
+                ? 'c-sidebar-input__field--left-label'
+                : null
+              }`
+            } />
             {
               label
-              ? <div
-                  className='c-sidebar-input__label c-sidebar-input__label--right'
-                  style={{
-                    background: theme.background.z4,
-                    color: theme.text.lighter
-                  }}>
+              ? <div className='c-sidebar-input__label c-sidebar-input__label--right'>
                   { label }
                 </div>
               : null
             }
             {
               leftLabel
-              ? <div
-                  className='c-sidebar-input__label c-sidebar-input__label--left'
-                  style={{
-                    background: theme.background.z4,
-                    color: theme.text.lighter
-                  }}>
+              ? <div className='c-sidebar-input__label c-sidebar-input__label--left'>
                   { leftLabel }
                 </div>
               : null
@@ -130,7 +147,7 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
           : null
         }
       </div>
-    </div>
+    </Input>
   );
 }
 

@@ -39,10 +39,10 @@
     background: $selectionColor
 
 .c-sidebar-input__field--label
-  padding-right:  $unit * 4
+  padding-right:  ($unit * 4) + 2
 
 .c-sidebar-input__field--left-label
-  padding-left:  $unit * 4
+  padding-left:  ($unit * 4) + 2
 
 .c-sidebar-input__field--button
   display: flex
@@ -55,13 +55,13 @@
 
 .c-sidebar-input__label
   position: absolute
-  top: 0
+  top: 1px
   font-family: $fontFamily
   font-size: $fontSizeXs
   text-align: center
   margin: 0
   width: $unit * 4
-  height: $unit * 6
+  height: ($unit * 6) - 2
   line-height: $unit * 6
   border-radius: $unit
 
@@ -69,10 +69,10 @@
     background: none
 
 .c-sidebar-input__label--right
-  right: 0
+  right: 1px
 
 .c-sidebar-input__label--left
-  left: 0
+  left: 1px
   font-size: $fontSizeSm
 
 .c-sidebar-input__bottom-label

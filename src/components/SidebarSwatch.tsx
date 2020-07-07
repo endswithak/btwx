@@ -5,6 +5,7 @@ import React, { useContext, ReactElement, useRef, useEffect, useState } from 're
 // import { OpenFillEditorPayload, FillEditorTypes } from '../store/actionTypes/fillEditor';
 // import { openFillEditor } from '../store/actions/fillEditor';
 import { ThemeContext } from './ThemeProvider';
+import styled from 'styled-components';
 //import { paperMain } from '../canvas';
 
 interface SidebarSwatchProps {
@@ -25,6 +26,18 @@ interface SidebarSwatchProps {
   //onClose?(color: string): void;
 }
 
+const Swatch = styled.div`
+  .c-sidebar-swatch {
+    box-shadow: 0 0 0 1px ${props => props.active ? props.theme.palette.primary : props.theme.background.z4} inset;
+    :hover {
+      box-shadow: 0 0 0 1px ${props => props.active ? props.theme.palette.primaryHover : props.theme.background.z6} inset;
+    }
+  }
+  .c-sidebar-input__bottom-label {
+    color: ${props => props.theme.text.base};
+  }
+`;
+
 const SidebarSwatch = (props: SidebarSwatchProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const swatchRef = useRef<HTMLDivElement>(null);
@@ -35,20 +48,17 @@ const SidebarSwatch = (props: SidebarSwatchProps): ReactElement => {
     //openFillEditor({fill, layer, x: bounding.x - 228, y: bounding.y > paperMain.view.bounds.height / 2 ? bounding.y - 208 : bounding.y + 4});
   }
   return (
-    <div
+    <Swatch
       className='c-sidebar-input'
-      ref={swatchRef}>
+      ref={swatchRef}
+      active={active}
+      theme={theme}>
       <div className='c-sidebar-input__inner'>
         <button
           className='c-sidebar-swatch'
           onClick={handleClick}
           disabled={disabled}
-          style={{
-            boxShadow: active
-            ? `0 0 0 1px ${theme.palette.primary}`
-            : 'none',
-            ...style
-          }} />
+          style={style} />
         {
           bottomLabel
           ? <div
@@ -61,7 +71,7 @@ const SidebarSwatch = (props: SidebarSwatchProps): ReactElement => {
           : null
         }
       </div>
-    </div>
+    </Swatch>
   );
 }
 

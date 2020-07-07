@@ -4,6 +4,7 @@ import {
   ADD_GROUP,
   ADD_SHAPE,
   ADD_TEXT,
+  ADD_IMAGE,
   REMOVE_LAYER,
   REMOVE_LAYERS,
   SELECT_LAYER,
@@ -137,6 +138,7 @@ import {
   addShape,
   addGroup,
   addText,
+  addImage,
   removeLayer,
   removeLayers,
   selectLayer,
@@ -265,7 +267,7 @@ import {
 
 export interface LayerState {
   byId: {
-    [id: string]: em.Page | em.Artboard | em.Group | em.Shape | em.Text;
+    [id: string]: em.Page | em.Artboard | em.Group | em.Shape | em.Text | em.Image;
   };
   allIds: string[];
   page: string;
@@ -275,6 +277,7 @@ export interface LayerState {
   allShapeIds: string[];
   allGroupIds: string[];
   allTextIds: string[];
+  allImageIds: string[];
   scope: string[];
   inView: {
     allIds: string[];
@@ -320,6 +323,7 @@ const initialState: LayerState = {
   allShapeIds: [],
   allGroupIds: [],
   allTextIds: [],
+  allImageIds: [],
   scope: [],
   inView: {
     allIds: [],
@@ -350,6 +354,8 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return addShape(state, action);
     case ADD_TEXT:
       return addText(state, action);
+    case ADD_IMAGE:
+      return addImage(state, action);
     case REMOVE_LAYER:
       return removeLayer(state, action);
     case REMOVE_LAYERS:

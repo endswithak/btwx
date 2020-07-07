@@ -28,7 +28,7 @@ import {
   SetLayerFillGradientType, SetLayerFillGradientStopColor, SetLayerFillGradientStopPosition, AddLayerFillGradientStop,
   RemoveLayerFillGradientStop, SetLayerFillGradientOrigin, SetLayerFillGradient, SetLayerStrokeGradient,
   SetLayerStrokeGradientType, SetLayerStrokeFillType, SetLayerFillGradientDestination, AddLayersMask,
-  MaskLayer, MaskLayers, UnmaskLayers, UnmaskLayer, RemoveLayersMask, SetLayerFill, AlignLayersToLeft, AlignLayersToRight, AlignLayersToTop, AlignLayersToBottom, AlignLayersToCenter, AlignLayersToMiddle, DistributeLayersHorizontally, DistributeLayersVertically, DuplicateLayer, DuplicateLayers, RemoveDuplicatedLayers, SendLayerForward, SendLayerBackward, SendLayersForward, SendLayersBackward, SendLayerToFront, SendLayersToFront, SendLayerToBack, SendLayersToBack
+  MaskLayer, MaskLayers, UnmaskLayers, UnmaskLayer, RemoveLayersMask, SetLayerFill, AlignLayersToLeft, AlignLayersToRight, AlignLayersToTop, AlignLayersToBottom, AlignLayersToCenter, AlignLayersToMiddle, DistributeLayersHorizontally, DistributeLayersVertically, DuplicateLayer, DuplicateLayers, RemoveDuplicatedLayers, SendLayerForward, SendLayerBackward, SendLayersForward, SendLayersBackward, SendLayerToFront, SendLayersToFront, SendLayerToBack, SendLayersToBack, AddImage
 } from '../actionTypes/layer';
 
 import {
@@ -48,6 +48,7 @@ import { paperMain } from '../../canvas';
 import { applyShapeMethods } from '../../canvas/shapeUtils';
 import { applyTextMethods } from '../../canvas/textUtils';
 import { applyArtboardMethods } from '../../canvas/artboardUtils';
+import { applyImageMethods } from '../../canvas/imageUtils';
 
 import { THEME_PRIMARY_COLOR } from '../../constants';
 
@@ -140,7 +141,6 @@ export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
   const layerParent = action.payload.parent ? action.payload.parent : currentState.page;
   const paperLayer = getPaperLayer(action.payload.id);
   paperLayer.parent = getPaperLayer(layerParent);
-  // add shape
   currentState = {
     ...currentState,
     allIds: addItem(currentState.allIds, action.payload.id),
@@ -170,7 +170,6 @@ export const addText = (state: LayerState, action: AddText): LayerState => {
   const layerParent = action.payload.parent ? action.payload.parent : currentState.page;
   const paperLayer = getPaperLayer(action.payload.id);
   paperLayer.parent = getPaperLayer(layerParent);
-  // add layer
   currentState = {
     ...currentState,
     allIds: addItem(currentState.allIds, action.payload.id),
@@ -188,6 +187,35 @@ export const addText = (state: LayerState, action: AddText): LayerState => {
       } as em.Group
     },
     allTextIds: addItem(state.allTextIds, action.payload.id),
+    paperProject: paperMain.project.exportJSON()
+  }
+  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
+    currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
+  }
+  return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+};
+
+export const addImage = (state: LayerState, action: AddImage): LayerState => {
+  let currentState = state;
+  const layerParent = action.payload.parent ? action.payload.parent : currentState.page;
+  const paperLayer = getPaperLayer(action.payload.id);
+  paperLayer.parent = getPaperLayer(layerParent);
+  currentState = {
+    ...currentState,
+    allIds: addItem(currentState.allIds, action.payload.id),
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...action.payload,
+        parent: layerParent
+      } as em.Image,
+      [layerParent]: {
+        ...currentState.byId[layerParent],
+        children: addItem((currentState.byId[layerParent] as em.Group).children, action.payload.id),
+        showChildren: true
+      } as em.Group
+    },
+    allImageIds: addItem(state.allImageIds, action.payload.id),
     paperProject: paperMain.project.exportJSON()
   }
   if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
@@ -228,6 +256,12 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
         result = {
           ...result,
           allTextIds: removeItem(result.allTextIds, current)
+        }
+        break;
+      case 'Image':
+        result = {
+          ...result,
+          allImageIds: removeItem(result.allImageIds, current)
         }
         break;
     }
@@ -1073,6 +1107,12 @@ const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any, fro
   if (paperLayer.data.type === 'Text') {
     applyTextMethods(paperLayerClone);
   }
+  if (paperLayer.data.type === 'Image') {
+    const raster = paperLayer.getItem({ data: { id: 'Raster' }});
+    const rasterClone = raster.clone({deep: false, insert: true});
+    rasterClone.parent = paperLayerClone;
+    applyImageMethods(paperLayerClone);
+  }
   paperLayerClone.data.id = layerCloneMap[id];
   paperLayerClone.parent = paperParentLayer;
   const groups: string[] = [id];
@@ -1092,6 +1132,12 @@ const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any, fro
         }
         if (childPaperLayer.data.type === 'Text') {
           applyTextMethods(childPaperLayerClone);
+        }
+        if (childPaperLayer.data.type === 'Image') {
+          const raster = childPaperLayer.getItem({ data: { id: 'Raster' }});
+          const rasterClone = raster.clone({deep: false, insert: true});
+          rasterClone.parent = childPaperLayerClone;
+          applyImageMethods(childPaperLayerClone);
         }
         if (childLayer.children && childLayer.children.length > 0) {
           groups.push(child);

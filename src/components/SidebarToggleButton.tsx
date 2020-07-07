@@ -11,11 +11,14 @@ interface SidebarToggleButtonProps {
 }
 
 const Button = styled.button`
-  background: ${props => props.isActive ? props.theme.palette.primary : props.theme.background.z4};
+  background: ${props => props.isActive ? props.theme.palette.primary : props.theme.background.z3};
+  box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primary : props.theme.background.z4} inset;
   svg {
-    fill: ${props => props.theme.text.light};
+    fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.lighter};
   }
   :hover {
+    background: ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.background.z3};
+    box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.background.z6} inset;
     svg {
       fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base};
     }

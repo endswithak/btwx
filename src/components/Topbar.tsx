@@ -1,16 +1,17 @@
 import React, { useContext, ReactElement, useState, useEffect } from 'react';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
+import { paperMain } from '../canvas';
 import { enableSelectionTool, enableRectangleShapeTool, enableEllipseShapeTool, enableStarShapeTool, enablePolygonShapeTool, enableRoundedShapeTool, enableArtboardTool, enableTextTool } from '../store/actions/tool';
 import { ToolTypes } from '../store/actionTypes/tool';
 import { openTweenDrawer, closeTweenDrawer } from '../store/actions/tweenDrawer';
 import { TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
-import { AddLayersMaskPayload, GroupLayersPayload, UngroupLayersPayload, SendLayersBackwardPayload, SendLayersForwardPayload, LayerTypes } from '../store/actionTypes/layer';
-import { addLayersMask, groupLayers, ungroupLayers, sendLayersBackward, sendLayersForward } from '../store/actions/layer';
+import { AddImagePayload, AddLayersMaskPayload, GroupLayersPayload, UngroupLayersPayload, SendLayersBackwardPayload, SendLayersForwardPayload, LayerTypes } from '../store/actionTypes/layer';
+import { addImage, addLayersMask, groupLayers, ungroupLayers, sendLayersBackward, sendLayersForward } from '../store/actions/layer';
 import { orderLayersByDepth } from '../store/selectors/layer';
 import { ToolState } from '../store/reducers/tool';
 import { ThemeContext } from './ThemeProvider';
-import { ipcRenderer } from 'electron';
+import { ipcRenderer, remote } from 'electron';
 import TopbarButton from './TopbarButton';
 import TopbarDropdownButton from './TopbarDropdownButton';
 
@@ -39,6 +40,7 @@ interface TopbarStateProps {
   ungroupLayers(payload: UngroupLayersPayload): LayerTypes;
   sendLayersBackward(payload: SendLayersBackwardPayload): LayerTypes;
   sendLayersForward(payload: SendLayersForwardPayload): LayerTypes;
+  addImage(payload: AddImagePayload): LayerTypes;
 }
 
 const Topbar = (props: TopbarStateProps): ReactElement => {
@@ -67,7 +69,8 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
     groupLayers,
     ungroupLayers,
     sendLayersBackward,
-    sendLayersForward
+    sendLayersForward,
+    addImage
   } = props;
 
   const handlePreviewClick = () => {
@@ -102,6 +105,22 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
     if (canUngroup) {
       ungroupLayers({layers: selected});
     }
+  }
+
+  const handleImageClick = () => {
+    ipcRenderer.send('addImage');
+    ipcRenderer.once('addImage-reply', (event, arg) => {
+      const buffer = Buffer.from(JSON.parse(arg).data);
+      const base64 = btoa(
+        new Uint8Array(buffer)
+          .reduce((data, byte) => data + String.fromCharCode(byte), '')
+      );
+      const paperLayer = new paperMain.Raster(`data:image/jpg;base64,${base64}`);
+      paperLayer.position = paperMain.view.center;
+      paperLayer.onLoad = () => {
+        addImage({source: null, paperLayer});
+      }
+    });
   }
 
   return (
@@ -150,6 +169,10 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
             onClick: tool.type === 'Text' ? enableSelectionTool : enableTextTool,
             icon: 'M12.84,18.999 L12.84,6.56 L12.84,6.56 L16.92,6.56 L16.92,5 L7.08,5 L7.08,6.56 L11.16,6.56 L11.16,19 L12.839,19 C12.8395523,19 12.84,18.9995523 12.84,18.999 Z',
             isActive: tool.type === 'Text'
+          },{
+            label: 'Image',
+            onClick: handleImageClick,
+            icon: theme.name === 'dark' ? 'M21,3 L21,21 L3,21 L3,3 L21,3 Z M20.1,3.9 L3.9,3.9 L3.9,16.16 L7.5,12.2 L12.765,17.991 L16.05,14.9 L20.1,18.712 L20.1,3.9 Z M16.05,5.7 C17.2926407,5.7 18.3,6.70735931 18.3,7.95 C18.3,9.19264069 17.2926407,10.2 16.05,10.2 C15.729854,10.2 15.4253249,10.1331365 15.1496154,10.0126123 C15.9443605,9.66600335 16.5,8.87288995 16.5,7.95 C16.5,7.02711005 15.9443605,6.23399665 15.1493633,5.8869416 C15.4253249,5.76686354 15.729854,5.7 16.05,5.7 Z' : 'M21,3 L21,21 L3,21 L3,3 L21,3 Z M20.1,3.9 L3.9,3.9 L3.9,16.16 L7.5,12.2 L12.765,17.991 L16.05,14.9 L20.1,18.712 L20.1,3.9 Z M16.05,5.7 C17.2926407,5.7 18.3,6.70735931 18.3,7.95 C18.3,9.19264069 17.2926407,10.2 16.05,10.2 C14.8073593,10.2 13.8,9.19264069 13.8,7.95 C13.8,6.70735931 14.8073593,5.7 16.05,5.7 Z',
           }]} />
       </div>
       <div className='c-topbar__button-group'>
@@ -246,6 +269,7 @@ export default connect(
     groupLayers,
     ungroupLayers,
     sendLayersBackward,
-    sendLayersForward
+    sendLayersForward,
+    addImage
   }
 )(Topbar);

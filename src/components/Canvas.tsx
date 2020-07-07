@@ -9,6 +9,7 @@ import { updateActiveArtboardFrame } from '../store/utils/layer';
 import { getPagePaperLayer } from '../store/selectors/layer';
 import { applyShapeMethods } from '../canvas/shapeUtils';
 import { applyTextMethods } from '../canvas/textUtils';
+import { applyImageMethods } from '../canvas/imageUtils';
 import { applyArtboardMethods } from '../canvas/artboardUtils';
 import { paperMain } from '../canvas';
 import { SetCanvasMatrixPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
@@ -30,13 +31,14 @@ interface CanvasProps {
   allArtboardIds?: string[];
   allShapeIds?: string[];
   allTextIds?: string[];
+  allImageIds?: string[];
 }
 
 const Canvas = (props: CanvasProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useContext(ThemeContext);
-  const { drawing, typing, canvasSettings, enableSelectionTool, updateInViewLayers, activeArtboard, paperProject, allArtboardIds, allShapeIds, allTextIds, setCanvasMatrix } = props;
+  const { drawing, typing, canvasSettings, enableSelectionTool, updateInViewLayers, activeArtboard, paperProject, allArtboardIds, allShapeIds, allTextIds, allImageIds, setCanvasMatrix } = props;
 
   useEffect(() => {
     canvasRef.current.width = canvasContainerRef.current.clientWidth;
@@ -92,6 +94,9 @@ const Canvas = (props: CanvasProps): ReactElement => {
     allTextIds.forEach((textId) => {
       applyTextMethods(getPaperLayer(textId));
     });
+    allImageIds.forEach((imageId) => {
+      applyImageMethods(getPaperLayer(imageId));
+    });
     if (canvasSettings.matrix) {
       paperMain.view.matrix.set(canvasSettings.matrix);
     }
@@ -123,6 +128,7 @@ const mapStateToProps = (state: RootState) => {
     allArtboardIds: layer.present.allArtboardIds,
     allShapeIds: layer.present.allShapeIds,
     allTextIds: layer.present.allTextIds,
+    allImageIds: layer.present.allImageIds,
     canvasSettings
   };
 };

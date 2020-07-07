@@ -122,7 +122,8 @@ class ResizeTool {
         break;
       }
       case 'Group':
-      case 'Shape': {
+      case 'Shape':
+      case 'Image': {
         paperLayer.pivot = paperLayer.bounds.center;
         paperLayer.bounds.width = layerItem.frame.width;
         paperLayer.bounds.height = layerItem.frame.height;
@@ -144,7 +145,8 @@ class ResizeTool {
         break;
       }
       case 'Group':
-      case 'Shape': {
+      case 'Shape':
+      case 'Image': {
         paperLayer.scale(hor, ver);
         break;
       }
@@ -161,7 +163,8 @@ class ResizeTool {
         break;
       }
       case 'Group':
-      case 'Shape': {
+      case 'Shape':
+      case 'Image': {
         paperLayer.pivot = this.from;
         break;
       }
@@ -426,20 +429,30 @@ class ResizeTool {
   }
   adjustHandle() {
     // updates handle, horizontalFlip, and verticalFlip based on to and from points
+    const state = store.getState();
     switch(this.handle) {
       case 'topLeft': {
         if (this.to.x > this.from.x && this.to.y > this.from.y) {
           this.horizontalFlip = !this.horizontalFlip;
           this.verticalFlip = !this.verticalFlip;
           this.handle = 'bottomRight';
+          state.layer.present.selected.forEach((layer: string) => {
+            this.scaleLayer(layer, -1, -1);
+          });
         } else {
           if (this.to.x > this.from.x) {
             this.horizontalFlip = !this.horizontalFlip;
             this.handle = 'topRight';
+            state.layer.present.selected.forEach((layer: string) => {
+              this.scaleLayer(layer, -1, 1);
+            });
           }
           if (this.to.y > this.from.y) {
             this.verticalFlip = !this.verticalFlip;
             this.handle = 'bottomLeft';
+            state.layer.present.selected.forEach((layer: string) => {
+              this.scaleLayer(layer, 1, -1);
+            });
           }
         }
         break;
@@ -449,14 +462,23 @@ class ResizeTool {
           this.horizontalFlip = !this.horizontalFlip;
           this.verticalFlip = !this.verticalFlip;
           this.handle = 'bottomLeft';
+          state.layer.present.selected.forEach((layer: string) => {
+            this.scaleLayer(layer, -1, -1);
+          });
         } else {
           if (this.to.x < this.from.x) {
             this.horizontalFlip = !this.horizontalFlip;
             this.handle = 'topLeft';
+            state.layer.present.selected.forEach((layer: string) => {
+              this.scaleLayer(layer, -1, 1);
+            });
           }
           if (this.to.y > this.from.y) {
             this.verticalFlip = !this.verticalFlip;
             this.handle = 'bottomRight';
+            state.layer.present.selected.forEach((layer: string) => {
+              this.scaleLayer(layer, 1, -1);
+            });
           }
         }
         break;
@@ -466,14 +488,23 @@ class ResizeTool {
           this.horizontalFlip = !this.horizontalFlip;
           this.verticalFlip = !this.verticalFlip;
           this.handle = 'topRight';
+          state.layer.present.selected.forEach((layer: string) => {
+            this.scaleLayer(layer, -1, -1);
+          });
         } else {
           if (this.to.x > this.from.x) {
             this.horizontalFlip = !this.horizontalFlip;
             this.handle = 'bottomRight';
+            state.layer.present.selected.forEach((layer: string) => {
+              this.scaleLayer(layer, -1, 1);
+            });
           }
           if (this.to.y < this.from.y) {
             this.verticalFlip = !this.verticalFlip;
             this.handle = 'topLeft';
+            state.layer.present.selected.forEach((layer: string) => {
+              this.scaleLayer(layer, 1, -1);
+            });
           }
         }
         break;
@@ -483,14 +514,23 @@ class ResizeTool {
           this.horizontalFlip = !this.horizontalFlip;
           this.verticalFlip = !this.verticalFlip;
           this.handle = 'topLeft';
+          state.layer.present.selected.forEach((layer: string) => {
+            this.scaleLayer(layer, -1, -1);
+          });
         } else {
           if (this.to.x < this.from.x) {
             this.horizontalFlip = !this.horizontalFlip;
             this.handle = 'bottomLeft';
+            state.layer.present.selected.forEach((layer: string) => {
+              this.scaleLayer(layer, -1, 1);
+            });
           }
           if (this.to.y < this.from.y) {
             this.verticalFlip = !this.verticalFlip;
             this.handle = 'topRight';
+            state.layer.present.selected.forEach((layer: string) => {
+              this.scaleLayer(layer, 1, -1);
+            });
           }
         }
         break;
@@ -499,6 +539,9 @@ class ResizeTool {
         if (this.to.y > this.from.y) {
           this.verticalFlip = !this.verticalFlip;
           this.handle = 'bottomCenter';
+          state.layer.present.selected.forEach((layer: string) => {
+            this.scaleLayer(layer, 1, -1);
+          });
         }
         break;
       }
@@ -506,6 +549,9 @@ class ResizeTool {
         if (this.to.y < this.from.y) {
           this.verticalFlip = !this.verticalFlip;
           this.handle = 'topCenter';
+          state.layer.present.selected.forEach((layer: string) => {
+            this.scaleLayer(layer, 1, -1);
+          });
         }
         break;
       }
@@ -513,6 +559,9 @@ class ResizeTool {
         if (this.to.x > this.from.x) {
           this.horizontalFlip = !this.horizontalFlip;
           this.handle = 'rightCenter';
+          state.layer.present.selected.forEach((layer: string) => {
+            this.scaleLayer(layer, -1, 1);
+          });
         }
         break;
       }
@@ -520,6 +569,9 @@ class ResizeTool {
         if (this.to.x < this.from.x) {
           this.horizontalFlip = !this.horizontalFlip;
           this.handle = 'leftCenter';
+          state.layer.present.selected.forEach((layer: string) => {
+            this.scaleLayer(layer, -1, 1);
+          });
         }
         break;
       }
