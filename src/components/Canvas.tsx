@@ -68,6 +68,9 @@ const Canvas = (props: CanvasProps): ReactElement => {
           selectionFrameHandles.forEach((handle) => {
             handle.scale(1 - scale * zoomDiff);
             handle.strokeWidth = scale;
+            if (handle.data.handle === 'move') {
+              handle.position.y = selectionFrameBase.bounds.topCenter.y - (scale * 20);
+            }
           });
           selectionFrameBase.strokeWidth = scale;
         }

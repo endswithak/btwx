@@ -29,7 +29,9 @@ class DragTool {
   fromBounds: paper.Rectangle;
   toBounds: paper.Rectangle;
   centerOffset: paper.Point;
-  constructor() {
+  moveHandle: boolean;
+  constructor(moveHandle: boolean) {
+    this.moveHandle = moveHandle;
     this.originalSelection = null;
     this.duplicateSelection = null;
     this.enabled = false;
@@ -57,6 +59,7 @@ class DragTool {
     this.snapTool = new SnapTool;
   }
   disable() {
+    this.moveHandle = null;
     this.originalSelection = null;
     this.duplicateSelection = null;
     this.enabled = false;
@@ -141,6 +144,9 @@ class DragTool {
       paperLayer.position.x = layerItem.frame.x + translate.x;
       paperLayer.position.y = layerItem.frame.y + translate.y;
     });
+    if (this.moveHandle) {
+      updateSelectionFrame(state.layer.present, 'move');
+    }
   }
   onKeyDown(event: paper.KeyEvent) {
     switch(event.key) {
@@ -207,6 +213,9 @@ class DragTool {
     this.toBounds = new paperMain.Rectangle(this.fromBounds);
     this.updateRef();
     this.updateSnapPoints();
+    if (this.moveHandle) {
+      updateSelectionFrame(state.layer.present, 'move');
+    }
   }
   onMouseDrag(event: paper.ToolEvent): void {
     if (this.enabled) {

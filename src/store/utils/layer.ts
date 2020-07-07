@@ -334,7 +334,7 @@ export const removeLayers = (state: LayerState, action: RemoveLayers): LayerStat
   }, state);
 }
 
-export const updateSelectionFrame = (state: LayerState, visibleHandles = 'all') => {
+export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all') => {
   const selectionFrame = paperMain.project.getItem({ data: { id: 'selectionFrame' } });
   if (selectionFrame) {
     selectionFrame.remove();
@@ -362,9 +362,20 @@ export const updateSelectionFrame = (state: LayerState, visibleHandles = 'all') 
         id: 'selectionFrameBase'
       }
     });
+    const moveHandle = new paperMain.Path.Ellipse({
+      ...baseProps,
+      visible: visibleHandle === 'all' || visibleHandle === 'move',
+      data: {
+        id: 'selectionFrameHandle',
+        handle: 'move'
+      }
+    });
+    moveHandle.position = new paperMain.Point(baseFrame.bounds.topCenter.x, baseFrame.bounds.topCenter.y - ((1 / paperMain.view.zoom) * 20));
+    moveHandle.scaling.x = 1 / paperMain.view.zoom;
+    moveHandle.scaling.y = 1 / paperMain.view.zoom;
     const topLeftHandle = new paperMain.Path.Rectangle({
       ...baseProps,
-      visible: visibleHandles === 'all' || visibleHandles === 'topLeft',
+      visible: visibleHandle === 'all' || visibleHandle === 'topLeft',
       data: {
         id: 'selectionFrameHandle',
         handle: 'topLeft'
@@ -375,7 +386,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandles = 'all') 
     topLeftHandle.scaling.y = 1 / paperMain.view.zoom;
     const topCenterHandle = new paperMain.Path.Rectangle({
       ...baseProps,
-      visible: visibleHandles === 'all' || visibleHandles === 'topCenter',
+      visible: visibleHandle === 'all' || visibleHandle === 'topCenter',
       data: {
         id: 'selectionFrameHandle',
         handle: 'topCenter'
@@ -386,7 +397,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandles = 'all') 
     topCenterHandle.scaling.y = 1 / paperMain.view.zoom;
     const topRightHandle = new paperMain.Path.Rectangle({
       ...baseProps,
-      visible: visibleHandles === 'all' || visibleHandles === 'topRight',
+      visible: visibleHandle === 'all' || visibleHandle === 'topRight',
       data: {
         id: 'selectionFrameHandle',
         handle: 'topRight'
@@ -397,7 +408,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandles = 'all') 
     topRightHandle.scaling.y = 1 / paperMain.view.zoom;
     const bottomLeftHandle = new paperMain.Path.Rectangle({
       ...baseProps,
-      visible: visibleHandles === 'all' || visibleHandles === 'bottomLeft',
+      visible: visibleHandle === 'all' || visibleHandle === 'bottomLeft',
       data: {
         id: 'selectionFrameHandle',
         handle: 'bottomLeft'
@@ -408,7 +419,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandles = 'all') 
     bottomLeftHandle.scaling.y = 1 / paperMain.view.zoom;
     const bottomCenterHandle = new paperMain.Path.Rectangle({
       ...baseProps,
-      visible: visibleHandles === 'all' || visibleHandles === 'bottomCenter',
+      visible: visibleHandle === 'all' || visibleHandle === 'bottomCenter',
       data: {
         id: 'selectionFrameHandle',
         handle: 'bottomCenter'
@@ -419,7 +430,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandles = 'all') 
     bottomCenterHandle.scaling.y = 1 / paperMain.view.zoom;
     const bottomRightHandle = new paperMain.Path.Rectangle({
       ...baseProps,
-      visible: visibleHandles === 'all' || visibleHandles === 'bottomRight',
+      visible: visibleHandle === 'all' || visibleHandle === 'bottomRight',
       data: {
         id: 'selectionFrameHandle',
         handle: 'bottomRight'
@@ -430,7 +441,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandles = 'all') 
     bottomRightHandle.scaling.y = 1 / paperMain.view.zoom;
     const rightCenterHandle = new paperMain.Path.Rectangle({
       ...baseProps,
-      visible: visibleHandles === 'all' || visibleHandles === 'rightCenter',
+      visible: visibleHandle === 'all' || visibleHandle === 'rightCenter',
       data: {
         id: 'selectionFrameHandle',
         handle: 'rightCenter'
@@ -441,7 +452,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandles = 'all') 
     rightCenterHandle.scaling.y = 1 / paperMain.view.zoom;
     const leftCenterHandle = new paperMain.Path.Rectangle({
       ...baseProps,
-      visible: visibleHandles === 'all' || visibleHandles === 'leftCenter',
+      visible: visibleHandle === 'all' || visibleHandle === 'leftCenter',
       data: {
         id: 'selectionFrameHandle',
         handle: 'leftCenter'
@@ -461,7 +472,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandles = 'all') 
       rightCenterHandle.opacity = 0.5;
     }
     new paperMain.Group({
-      children: [baseFrame, topLeftHandle, topCenterHandle, topRightHandle, bottomLeftHandle, bottomCenterHandle, bottomRightHandle, leftCenterHandle, rightCenterHandle],
+      children: [baseFrame, moveHandle, topLeftHandle, topCenterHandle, topRightHandle, bottomLeftHandle, bottomCenterHandle, bottomRightHandle, leftCenterHandle, rightCenterHandle],
       data: {
         id: 'selectionFrame'
       }
@@ -696,12 +707,8 @@ export const insertLayerChild = (state: LayerState, action: InsertLayerChild): L
   const child = currentState.byId[action.payload.child];
   const paperLayer = getPaperLayer(action.payload.id);
   const childPaperLayer = getPaperLayer(action.payload.child);
-  if (layer.type === 'Artboard') {
-    // add two to index to account for artboard background and mask
-    paperLayer.insertChild(action.payload.index + 2, childPaperLayer);
-  } else {
-    paperLayer.insertChild(action.payload.index, childPaperLayer);
-  }
+  // add two to index to account for background and mask if layer is an Artboard
+  paperLayer.insertChild(layer.type === 'Artboard' ? action.payload.index + 2 : action.payload.index, childPaperLayer);
   const updatedChildren = currentState.byId[action.payload.id].children.slice();
   updatedChildren.splice(action.payload.index, 0, action.payload.id);
   if (child.parent === action.payload.id) {

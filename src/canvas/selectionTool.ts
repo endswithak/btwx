@@ -104,9 +104,18 @@ class SelectionTool {
     const hitResult = paperMain.project.hitTest(event.point);
     if (hitResult) {
       if (hitResult.item.data.id === 'selectionFrameHandle') {
-        if (state.selected.length >= 1 && !state.selected.every((id) => state.byId[id].type === 'Text')) {
-          this.resizeTool.enable(hitResult.item.data.handle);
-          this.resizeTool.onMouseDown(event);
+        if (
+          state.selected.length >= 1 &&
+          !state.selected.every((id: string) => state.byId[id].type === 'Text')
+        ) {
+          if (hitResult.item.data.handle === 'move') {
+            this.dragTool.enable();
+            this.dragTool.moveHandle = true;
+            this.dragTool.onMouseDown(event);
+          } else {
+            this.resizeTool.enable(hitResult.item.data.handle);
+            this.resizeTool.onMouseDown(event);
+          }
         }
       } else {
         this.dragTool.enable();
