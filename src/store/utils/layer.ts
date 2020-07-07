@@ -696,7 +696,12 @@ export const insertLayerChild = (state: LayerState, action: InsertLayerChild): L
   const child = currentState.byId[action.payload.child];
   const paperLayer = getPaperLayer(action.payload.id);
   const childPaperLayer = getPaperLayer(action.payload.child);
-  paperLayer.insertChild(action.payload.index, childPaperLayer);
+  if (layer.type === 'Artboard') {
+    // add two to index to account for artboard background and mask
+    paperLayer.insertChild(action.payload.index + 2, childPaperLayer);
+  } else {
+    paperLayer.insertChild(action.payload.index, childPaperLayer);
+  }
   const updatedChildren = currentState.byId[action.payload.id].children.slice();
   updatedChildren.splice(action.payload.index, 0, action.payload.id);
   if (child.parent === action.payload.id) {
@@ -1428,7 +1433,11 @@ export const addLayerTweenEvent = (state: LayerState, action: AddLayerTweenEvent
   }
   // add animation event tweens
   return artboardChildren.reduce((result, current) => {
-    return addTweenEventLayerTweens(result, action.payload.id, current);
+    if (state.byId[current].type !== 'Group') {
+      return addTweenEventLayerTweens(result, action.payload.id, current);
+    } else {
+      return result;
+    }
   }, currentState);
 };
 
