@@ -31,7 +31,7 @@ const FillTypeSelector = (props: FillTypeSelectorProps): ReactElement => {
     <div
       className='c-fill-editor__type-selector'
       style={{
-        boxShadow: `0 -1px 0 0 ${theme.background.z4} inset`
+        boxShadow: `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
       }}>
       {
         colorSelector.enabled

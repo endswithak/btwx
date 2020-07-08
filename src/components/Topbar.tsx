@@ -145,8 +145,8 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
     <div
       className='c-topbar'
       style={{
-        background: theme.background.z1,
-        boxShadow: `0 -1px 0 0 ${theme.background.z3} inset`
+        background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
+        boxShadow: `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
       }}>
       <div className='c-topbar__button-group'>
         <TopbarDropdownButton

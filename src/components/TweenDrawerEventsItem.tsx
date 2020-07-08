@@ -45,7 +45,7 @@ const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement =>
       onMouseLeave={handleMouseLeave}
       style={{
         color: theme.text.base,
-        boxShadow: hover ? `0 0 0 ${theme.unit / 2}px ${theme.background.z4} inset` : ''
+        boxShadow: hover ? `0 0 0 ${theme.unit / 2}px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset` : ''
       }}>
       <div className='c-tween-drawer-events-item__module'>
         {tweenEvent.name}

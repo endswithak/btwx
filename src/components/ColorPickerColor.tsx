@@ -16,7 +16,7 @@ const ColorPickerColor = (props: ColorPickerColorProps): ReactElement => {
   return (
     <div style={{
       background: `hsla(${hue},${saturation * 100}%, ${lightness * 100}%, ${alpha})`,
-      boxShadow: `0 0 0 1px ${theme.background.z4}`
+      boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
     }} />
   );
 }

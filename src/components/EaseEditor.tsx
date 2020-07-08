@@ -1,5 +1,6 @@
 import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
 import Modal from 'react-modal';
+import chroma from 'chroma-js';
 import { evaluate } from 'mathjs';
 import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
@@ -110,9 +111,11 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
         setDuration(durationRounded);
       } else {
         setDuration(tween.duration);
+        setAndAnimate();
       }
     } catch(error) {
       setDuration(tween.duration);
+      setAndAnimate();
     }
   }
 
@@ -128,11 +131,12 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
       onRequestClose={handleCloseRequest}
       style={{
         content: {
-          background: theme.background.z2,
+          background: chroma(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).alpha(0.88).hex(),
           width: 700,
           height: 576,
-          boxShadow: `0 0 0 1px ${theme.background.z4} inset`,
-          borderRadius: theme.unit
+          boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`,
+          borderRadius: theme.unit,
+          backdropFilter: 'blur(17px)'
         }
       }}
       contentLabel='ease-editor'>
@@ -144,7 +148,7 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
             className='c-ease-editor__graph'
             style={{
               position: 'relative',
-              background: theme.background.z1,
+              //background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
               width: 400,
               height: 544
             }}>
@@ -159,10 +163,10 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
                 maxHeight: 400,
                 bottom: 72
               }}>
-              <line x1="0" y1="0" x2="400" y2="0" stroke={theme.background.z4}></line>
-              <path ref={pathRef} strokeWidth='1' stroke={theme.background.z4} fill='none'></path>
+              <line x1="0" y1="0" x2="400" y2="0" stroke={theme.text.lightest}></line>
+              <path ref={pathRef} strokeWidth='1' stroke={theme.text.lightest} fill='none'></path>
               <path ref={pathRevealRef} strokeWidth='1' stroke={theme.text.base} fill='none'></path>
-              <line x1="0" y1="400" x2="400" y2="400" stroke={theme.background.z4}></line>
+              <line x1="0" y1="400" x2="400" y2="400" stroke={theme.text.lightest}></line>
             </svg>
           </div>
           <div
@@ -173,7 +177,7 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
             <div
               className='c-ease-editor-value__bar'
               style={{
-                background: theme.background.z4,
+                background: theme.text.lightest,
                 height: 544
               }} />
             <div

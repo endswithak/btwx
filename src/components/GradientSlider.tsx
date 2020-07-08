@@ -93,14 +93,14 @@ const GradientSlider = (props: GradientSliderProps): ReactElement => {
     <div
       className='c-gradient-slider'
       style={{
-        boxShadow: `0 -1px 0 0 ${theme.background.z4} inset`
+        boxShadow: `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
       }}>
       <div
         ref={containerRef}
         id='c-gradient-slider__slider'
         className='c-gradient-slider__slider'
         style={{
-          boxShadow: `0 0 0 -1px ${theme.background.z4} inset`
+          boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
         }}>
         <GradientSliderGradient
           stops={stops}

@@ -26,12 +26,12 @@ const Input = styled.div`
   .c-sidebar-input__field {
     background: ${props => props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
     color: ${props => props.theme.text.base};
-    box-shadow: 0 0 0 1px ${props => props.theme.background.z4} inset;
+    box-shadow: 0 0 0 1px ${props => props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5} inset;
     :focus {
       box-shadow: 0 0 0 1px ${props => props.theme.palette.primary} inset;
     }
     :hover {
-      box-shadow: 0 0 0 1px ${props => props.theme.background.z6} inset;
+      box-shadow: 0 0 0 1px ${props => props.theme.name === 'dark' ? props.theme.background.z5 : props.theme.background.z6} inset;
       :focus {
         box-shadow: 0 0 0 1px ${props => props.theme.palette.primaryHover} inset;
       }

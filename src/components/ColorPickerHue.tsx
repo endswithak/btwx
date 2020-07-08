@@ -23,7 +23,7 @@ const Slider = styled.input`
     cursor: pointer;
     background: linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
     border-radius: ${props => props.theme.unit * 2}px;
-    box-shadow: 0 0 0 1px ${props => props.theme.background.z4}
+    box-shadow: 0 0 0 1px ${props => props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5}
   }
   :disabled::-webkit-slider-runnable-track {
     cursor: inherit;

@@ -58,7 +58,7 @@ const ColorPickerAlpha = (props: ColorPickerAlphaProps): ReactElement => {
             cursor: pointer;
             background: linear-gradient(to right, hsla(${hue},${saturation * 100}%, ${lightness * 100}%, 0) 0%, hsla(${hue},${saturation * 100}%, ${lightness * 100}%, 1) 100%);
             border-radius: ${theme.unit * 2}px;
-            box-shadow: 0 0 0 1px ${theme.background.z4};
+            box-shadow: 0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5};
           }
         `}
       </style>

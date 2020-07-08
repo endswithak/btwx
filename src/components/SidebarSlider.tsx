@@ -24,27 +24,32 @@ const Slider = styled.input`
     width: 100%;
     height: ${props => props.theme.unit}px;
     cursor: pointer;
-    background: linear-gradient(to right, ${props => props.theme.palette.primary} ${props => props.value}%, ${props => props.theme.background.z4} ${props => props.value}%);
+    background: linear-gradient(to right, ${props => props.theme.palette.primary} ${props => props.value}%, ${props => props.theme.background.z3} ${props => props.value}%);
     border-radius: ${props => props.theme.unit * 2}px;
+    box-shadow: none;
   }
   :disabled::-webkit-slider-runnable-track {
     cursor: inherit;
   }
   ::-webkit-slider-thumb {
-    box-shadow: 0px 0px 5px ${props => props.theme.background.z0};
+    /* box-shadow: 0px 0px 5px ${props => props.theme.background.z0}; */
+    box-shadow: 0 0 0 1.5px ${props => props.theme.name === 'dark' ? props.theme.backgroundInverse.z6 : props.theme.background.z0}, 0 0 1px 2px rgba(0,0,0,.4);
     height: ${props => props.theme.unit * 3}px;
     width: ${props => props.theme.unit * 3}px;
     border-radius: 100%;
-    background: ${props => props.theme.backgroundInverse.z6};
+    background: ${props => props.theme.name === 'dark' ? props.theme.backgroundInverse.z6 : props.theme.background.z0};
     cursor: pointer;
     -webkit-appearance: none;
-    transform: translateY(-36%);
+    transform-origin: center top;
+    transform: translateY(-37%);
   }
   :disabled::-webkit-slider-thumb {
     cursor: inherit;
   }
-  :hover::-webkit-slider-thumb {
-    background: ${props => props.theme.backgroundInverse.z3};
+  :hover {
+    ::-webkit-slider-runnable-track {
+      background: linear-gradient(to right, ${props => props.theme.palette.primaryHover} ${props => props.value}%, ${props => props.theme.background.z4} ${props => props.value}%);
+    }
   }
 `;
 

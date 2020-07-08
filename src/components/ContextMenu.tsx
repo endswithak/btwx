@@ -47,7 +47,7 @@ const ContextMenu = (props: ContextMenuProps): ReactElement => {
       onAfterClose={onClose}
       style={{
         content: {
-          background: theme.background.z4,
+          background: theme.name === 'dark' ? theme.background.z4 : theme.background.z5,
           width: 200,
           height: (theme.unit * 8) * options.length,
           minHeight: (theme.unit * 8) * 3,

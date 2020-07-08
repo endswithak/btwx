@@ -128,6 +128,7 @@ const FillInput = (props: FillInputProps): ReactElement => {
   };
 
   const handleSwatchClick = (bounding: DOMRect): void => {
+    console.log(bounding);
     if (!enabled) {
       enableLayerFill({id: selected[0]});
     }
@@ -136,8 +137,7 @@ const FillInput = (props: FillInputProps): ReactElement => {
       onChange: handleFillEditorChange,
       layer: selected[0],
       x: bounding.x,
-      y: bounding.y - 44
-      //y: bounding.y > paperMain.view.bounds.height / 2 ? bounding.y - 208 : bounding.y + 4
+      y: bounding.y - (bounding.height - 10) // 2 (swatch drop shadow) + 8 (top-padding)
     });
   };
 
@@ -145,7 +145,7 @@ const FillInput = (props: FillInputProps): ReactElement => {
     <SidebarSectionRow alignItems='center'>
       <SidebarSectionColumn width={'33.33%'}>
         <SidebarSwatch
-          active={fillEditorOpen}
+          isActive={fillEditorOpen}
           style={{
             background: (() => {
               switch(fill.fillType) {

@@ -50,13 +50,13 @@ window.addEventListener('storage', persist(store, persistConfig));
 let theme = remote.systemPreferences.getUserDefault('theme', 'string');
 let themeObject = getTheme(theme);
 const titleBar = new Titlebar({
-  backgroundColor: Color.fromHex(themeObject.background.z1)
+  backgroundColor: Color.fromHex(theme === 'dark' ? themeObject.background.z1 : themeObject.background.z2)
 });
 
 window.updateTheme = () => {
   theme = remote.systemPreferences.getUserDefault('theme', 'string');
   themeObject = getTheme(theme);
-  titleBar.updateBackground(Color.fromHex(themeObject.background.z1));
+  titleBar.updateBackground(Color.fromHex(theme === 'dark' ? themeObject.background.z1 : themeObject.background.z2));
 }
 
 window.renderMainWindow = () => {

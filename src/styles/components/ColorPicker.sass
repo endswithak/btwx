@@ -3,8 +3,12 @@
   flex-direction: column
   width: 100%
 
+.c-color-picker__saturation
+  padding: $unit * 2
+
 .c-color-picker-saturation
   +aspect(4,3)
+  border-radius: $unit
 
 .c-color-picker-saturation__color,
 .c-color-picker-saturation__white,
@@ -28,12 +32,15 @@
 
 .c-color-picker__alpha,
 .c-color-picker__hue
+  display: flex
+  align-items: center
   width: 100%
   height: $unit * 4
 
 .c-color-picker__controls
   display: flex
-  padding: $unit $unit 0 $unit
+  padding: 0 $unit
+  height: $unit * 10
 
 .c-color-picker__fields
   display: flex
@@ -53,7 +60,7 @@
   flex-shrink: 0
   align-items: center
   justify-content: center
-  padding: $unit
+  padding: 0 $unit
   width: 75%
   max-width: 75%
 
@@ -63,7 +70,7 @@
   height: $unit * 10
   flex-grow: 1
   flex-shrink: 0
-  padding: $unit
+  padding: 0 $unit
   align-items: center
   justify-content: center
 

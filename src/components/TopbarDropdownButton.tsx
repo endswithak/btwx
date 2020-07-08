@@ -21,8 +21,8 @@ interface TopbarDropdownButtonProps {
 }
 
 const ButtonDropdown = styled.div`
-  background: ${props => chroma(props.theme.background.z1).alpha(0.78).hex()};
-  box-shadow: 0 0 0 1px ${props => props.theme.background.z4};
+  background: ${props => chroma(props.theme.name === 'dark' ? props.theme.background.z1 : props.theme.background.z2).alpha(0.88).hex()};
+  box-shadow: 0 0 0 1px ${props =>  props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5};
 `;
 
 const TopbarDropdownButton = (props: TopbarDropdownButtonProps): ReactElement => {

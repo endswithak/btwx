@@ -1,6 +1,7 @@
 import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
 import Select from 'react-select';
 import { ThemeContext } from './ThemeProvider';
+import chroma from 'chroma-js';
 
 interface SidebarSelectProps {
   value: { value: string; label: string };
@@ -13,6 +14,7 @@ interface SidebarSelectProps {
   };
   bottomLabel?: string;
   disabled?: boolean;
+  isSearchable?: boolean;
 }
 
 // const ba = () => ({
@@ -35,6 +37,7 @@ const SidebarSelect = (props: SidebarSelectProps): ReactElement => {
         options={props.options}
         placeholder={props.placeholder}
         isDisabled={props.disabled}
+        isSearchable={props.isSearchable ? props.isSearchable : false}
         styles={{
           container: (provided, state) => {
             const width = '100%';
@@ -43,14 +46,19 @@ const SidebarSelect = (props: SidebarSelectProps): ReactElement => {
             return { ...provided, width, cursor, opacity };
           },
           control: (provided, state) => {
-            const background = theme.background.z4;
+            const background = theme.name === 'dark' ? theme.background.z3 : theme.background.z0;
             const color = theme.text.base;
             const border = 'none';
-            const boxShadow = state.isFocused ? `0 0 0 1px ${theme.palette.primary}` : 'none';
+            const boxShadow = `0 0 0 1px ${state.isFocused ? theme.palette.primary : theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`;
             const minHeight = 24;
             const padding = 0;
             const cursor = 'pointer';
-            return { ...provided, background, color, border, boxShadow, minHeight, padding, cursor };
+            return {
+              ...provided, background, color, border, boxShadow, minHeight, padding, cursor,
+              ':hover': {
+                boxShadow: `0 0 0 1px ${state.isFocused ? theme.palette.primaryHover : theme.name === 'dark' ? theme.background.z5 : theme.background.z6}`
+              },
+            };
           },
           singleValue: (provided, state) => {
             const color = theme.text.base;
@@ -84,13 +92,14 @@ const SidebarSelect = (props: SidebarSelectProps): ReactElement => {
             })() : 'inherit';
             const fontSize = 12;
             const background = isSelected ? theme.palette.primary : 'none';
-            const hoverBackground = isSelected ? theme.palette.primaryHover : theme.background.z4;
+            const hoverBackground = isSelected ? theme.palette.primaryHover : theme.palette.primary;
             const color = isSelected ? theme.text.onPrimary : theme.text.base;
             const cursor = 'pointer';
             return {
               ...provided, fontFamily, fontSize, background, color, cursor, fontWeight, fontStyle,
               ':hover': {
-                background: hoverBackground
+                background: hoverBackground,
+                color: theme.text.onPrimary
               },
               ':active': {
                 background: theme.palette.primary
@@ -127,10 +136,11 @@ const SidebarSelect = (props: SidebarSelectProps): ReactElement => {
             return { ...provided, display };
           },
           menu: (provided, state) => {
-            const background = theme.background.z2;
+            const background = chroma(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).alpha(0.88).hex();
             const color = theme.text.base;
-            const boxShadow = `0 0 0 1px ${theme.background.z4} inset`;
-            return { ...provided, background, color, boxShadow };
+            const boxShadow = `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`;
+            const backdropFilter = 'blur(17px)';
+            return { ...provided, background, color, boxShadow, backdropFilter };
           },
         }}
       />

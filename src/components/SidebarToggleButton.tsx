@@ -11,14 +11,14 @@ interface SidebarToggleButtonProps {
 }
 
 const Button = styled.button`
-  background: ${props => props.isActive ? props.theme.palette.primary : props.theme.background.z3};
-  box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primary : props.theme.background.z4} inset;
+  background: ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
+  box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5} inset;
   svg {
     fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.lighter};
   }
   :hover {
-    background: ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.background.z3};
-    box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.background.z6} inset;
+    background: ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
+    box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.name === 'dark' ? props.theme.background.z5 : props.theme.background.z6} inset;
     svg {
       fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base};
     }

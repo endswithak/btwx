@@ -9,7 +9,7 @@ interface ColorSelectorProps {
 
 const Button = styled.button`
   background: ${props => props.isActive ? props.theme.palette.primary : props.theme.text.lighter};
-  box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primary : props.theme.background.z6};
+  box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primary : props.theme.text.lighter};
   :hover {
     background: ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.text.light};
     box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.text.light};

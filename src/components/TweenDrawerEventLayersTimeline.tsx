@@ -31,7 +31,7 @@ const TweenDrawerEventLayersTimeline = (props: TweenDrawerEventLayersTimelinePro
         <div
           className='c-tween-drawer-event-layers-timeline__header'
           style={{
-            boxShadow: `0 1px 0 ${theme.background.z4}`
+            boxShadow: `0 1px 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
           }}>
           {
             [...Array(200).keys()].map((item, index) => (
@@ -48,8 +48,8 @@ const TweenDrawerEventLayersTimeline = (props: TweenDrawerEventLayersTimelinePro
                     : (index + 1) % 5 === 0
                       ? '50%'
                       : '25%',
-                  background: theme.background.z1,
-                  boxShadow: `-1px 0 0 ${theme.background.z4} inset`,
+                  background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
+                  boxShadow: `-1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`,
                   flexShrink: 0,
                   position: 'relative',
                   display: 'flex',

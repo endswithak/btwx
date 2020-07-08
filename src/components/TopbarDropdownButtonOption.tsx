@@ -2,7 +2,6 @@
 import React, { useContext, ReactElement, useState, useEffect, useRef } from 'react';
 import { ThemeContext } from './ThemeProvider';
 import styled from 'styled-components';
-import TopbarButton from './TopbarButton';
 
 interface TopbarDropdownButtonOptionProps {
   onClick(event: React.SyntheticEvent): void;
@@ -26,11 +25,11 @@ const Button = styled.button`
     background: ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.palette.primary};
     .c-topbar-dropdown-button__icon {
       svg {
-        fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base};
+        fill: ${props => props.theme.text.onPrimary};
       }
     }
     .c-topbar-dropdown-button__label {
-      color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base};
+      color: ${props => props.theme.text.onPrimary};
     }
   }
 `;

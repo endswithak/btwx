@@ -9,10 +9,10 @@ interface LinearGradientSelectorProps {
 
 const Button = styled.button`
   background: linear-gradient(to top, ${props => props.isActive ? props.theme.palette.primary : props.theme.text.light}, ${props => props.theme.background.z1});
-  box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primary : props.theme.background.z6};
+  box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primary : props.theme.text.lighter};
   :hover {
     background: linear-gradient(to top, ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.text.base}, ${props => props.theme.background.z1});
-    box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.text.base};
+    box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.text.light};
   }
 `;
 
