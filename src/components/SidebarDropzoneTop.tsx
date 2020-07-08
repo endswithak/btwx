@@ -23,7 +23,7 @@ const SidebarDropzoneTop = (props: SidebarDropzoneTopProps): ReactElement => {
       style={{
         width: '100%',
         //width: layersSidebarWidth - (depth * (theme.unit * 4)),
-        boxShadow: isActive ? `0 -${theme.unit / 2}px 0 0 ${theme.palette.primary}` : '',
+        boxShadow: isActive ? `0 ${theme.unit / 2}px 0 0 ${theme.palette.primary} inset` : '',
         height: layer.children ? theme.unit * 2 : theme.unit * 4
       }} />
   );

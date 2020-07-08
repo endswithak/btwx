@@ -9,7 +9,7 @@ const SidebarLeft = (): ReactElement => {
     <Sidebar
       width={320}
       position={'left'}
-      >
+      className='c-sidebar--left'>
       {/* <SidebarSectionWrap>
         <SidebarSectionHead
           text={'layers'} />

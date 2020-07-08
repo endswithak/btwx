@@ -9,6 +9,9 @@ interface SidebarProps {
   onDrag?(e: DragEvent): void;
   position?: 'left' | 'right';
   resizable?: boolean;
+  style?: any;
+  scrollStyle?: any;
+  className?: string;
 }
 
 const Sidebar = (props: SidebarProps): ReactElement => {
@@ -16,11 +19,12 @@ const Sidebar = (props: SidebarProps): ReactElement => {
 
   return (
     <div
-      className='c-sidebar'
+      className={`c-sidebar ${props.className ? props.className : null}`}
       style={{
         width: props.width,
         background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
-        boxShadow: props.position === 'left' ? `-1px 0 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset` : `1px 0 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
+        boxShadow: props.position === 'left' ? `1px 0 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}` : `-1px 0 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`,
+        ...props.style
       }}>
       {/* {
         props.resizable
@@ -32,7 +36,11 @@ const Sidebar = (props: SidebarProps): ReactElement => {
             }} />
         : null
       } */}
-      <div className='c-sidebar__scroll'>
+      <div
+        className='c-sidebar__scroll'
+        style={{
+          ...props.scrollStyle
+        }}>
         {props.children}
       </div>
     </div>

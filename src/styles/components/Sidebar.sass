@@ -9,6 +9,7 @@
   background: #ffffff
   overflow-x: hidden
   overflow-y: hidden
+  z-index: 4
 
 .c-sidebar__scroll
   position: relative
@@ -16,3 +17,8 @@
   width: 100%
   height: 100%
   overflow-y: scroll
+
+.c-sidebar--left
+  .c-sidebar__scroll
+    top: $unit / 2
+    height: calc(100% - 2px)
