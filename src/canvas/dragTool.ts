@@ -30,8 +30,8 @@ class DragTool {
   toBounds: paper.Rectangle;
   centerOffset: paper.Point;
   moveHandle: boolean;
-  constructor(moveHandle: boolean) {
-    this.moveHandle = moveHandle;
+  constructor() {
+    this.moveHandle = false;
     this.originalSelection = null;
     this.duplicateSelection = null;
     this.enabled = false;

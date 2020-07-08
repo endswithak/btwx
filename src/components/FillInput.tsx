@@ -135,8 +135,9 @@ const FillInput = (props: FillInputProps): ReactElement => {
       fill,
       onChange: handleFillEditorChange,
       layer: selected[0],
-      x: bounding.x - 228,
-      y: bounding.y > paperMain.view.bounds.height / 2 ? bounding.y - 208 : bounding.y + 4
+      x: bounding.x,
+      y: bounding.y - 44
+      //y: bounding.y > paperMain.view.bounds.height / 2 ? bounding.y - 208 : bounding.y + 4
     });
   };
 

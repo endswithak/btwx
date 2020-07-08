@@ -104,15 +104,13 @@ class SelectionTool {
     const hitResult = paperMain.project.hitTest(event.point);
     if (hitResult) {
       if (hitResult.item.data.id === 'selectionFrameHandle') {
-        if (
-          state.selected.length >= 1 &&
-          !state.selected.every((id: string) => state.byId[id].type === 'Text')
-        ) {
+        if (state.selected.length >= 1) {
           if (hitResult.item.data.handle === 'move') {
             this.dragTool.enable();
             this.dragTool.moveHandle = true;
             this.dragTool.onMouseDown(event);
-          } else {
+          }
+          if (!state.selected.every((id: string) => state.byId[id].type === 'Text') && hitResult.item.data.handle !== 'move') {
             this.resizeTool.enable(hitResult.item.data.handle);
             this.resizeTool.onMouseDown(event);
           }

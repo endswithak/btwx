@@ -11,6 +11,7 @@ import FillEditor from './FillEditor';
 import FillEditorWrap from './FillEditorWrap';
 import StrokeEditor from './StrokeEditor';
 import TextEditor from './TextEditor';
+import Main from './Main';
 import { ThemeContext } from './ThemeProvider';
 
 const App = (): ReactElement => {
@@ -26,19 +27,10 @@ const App = (): ReactElement => {
         background: theme.background.z0
       }}>
         <Topbar />
-        <div className='c-app__canvas'>
-          <SidebarLeft />
-          <div className='c-app__main'>
-            <Canvas />
-            <TweenDrawer />
-            <TextEditor />
-          </div>
-          <SidebarRight />
-        </div>
+        <Main />
         <TweenEventSelect />
         <TweenEventDestinationSelect />
         <EaseEditor />
-        <FillEditorWrap />
         <StrokeEditor />
     </div>
   );

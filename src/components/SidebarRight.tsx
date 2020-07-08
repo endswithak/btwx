@@ -14,7 +14,7 @@ const SidebarRight = (props: SidebarRightProps): ReactElement => {
   const { artboardSelected, layerSelected, toolType } = props;
   return (
     <Sidebar
-      width={280}
+      width={264}
       position={'right'}
       resizable={false}>
       {/* {

@@ -370,7 +370,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all') =
         handle: 'move'
       }
     });
-    moveHandle.position = new paperMain.Point(baseFrame.bounds.topCenter.x, baseFrame.bounds.topCenter.y - ((1 / paperMain.view.zoom) * 20));
+    moveHandle.position = new paperMain.Point(baseFrame.bounds.topCenter.x, baseFrame.bounds.topCenter.y - ((1 / paperMain.view.zoom) * 24));
     moveHandle.scaling.x = 1 / paperMain.view.zoom;
     moveHandle.scaling.y = 1 / paperMain.view.zoom;
     const topLeftHandle = new paperMain.Path.Rectangle({

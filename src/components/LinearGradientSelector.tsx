@@ -1,27 +1,29 @@
 import React, { useContext, ReactElement } from 'react';
 import { ThemeContext } from './ThemeProvider';
+import styled from 'styled-components';
 
 interface LinearGradientSelectorProps {
   onClick(): void;
   isActive: boolean;
 }
 
+const Button = styled.button`
+  background: linear-gradient(to top, ${props => props.isActive ? props.theme.palette.primary : props.theme.text.light}, ${props => props.theme.background.z1});
+  box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primary : props.theme.background.z6};
+  :hover {
+    background: linear-gradient(to top, ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.text.base}, ${props => props.theme.background.z1});
+    box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.text.base};
+  }
+`;
+
 const LinearGradientSelector = (props: LinearGradientSelectorProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { onClick, isActive } = props;
 
   return (
-    <button
-      onClick={onClick}
+    <Button
+      {...props}
       className='c-fill-editor__type'
-      style={{
-        background: isActive
-        ? `linear-gradient(to top, ${theme.palette.primary}, ${theme.background.z1})`
-        : `linear-gradient(to top, ${theme.background.z6}, ${theme.background.z1})`,
-        boxShadow: isActive
-        ? `0 0 0 1px ${theme.palette.primary} inset`
-        : `0 0 0 1px ${theme.background.z6} inset`
-      }} />
+      theme={theme} />
   );
 }
 

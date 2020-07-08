@@ -170,7 +170,8 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
           position: 'relative',
           background: tween.frozen
           ? theme.background.z6
-          : theme.palette.primary
+          : theme.palette.primary,
+          borderRadius: theme.unit * 2
         }}>
       </div>
       <div
@@ -187,7 +188,8 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
           style={{
             height: theme.unit * 2,
             width: theme.unit * 2,
-            background: theme.text.base
+            background: theme.text.base,
+            borderRadius: theme.unit * 2
           }} />
         <span
           ref={leftHandleTooltipRef}
@@ -221,7 +223,8 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
           style={{
             height: theme.unit * 2,
             width: theme.unit * 2,
-            background: theme.text.base
+            background: theme.text.base,
+            borderRadius: theme.unit * 2
           }} />
         <span
           ref={rightHandleTooltipRef}

@@ -1,7 +1,12 @@
+#root
+  position: relative
+  width: 100%
+  height: 100%
+
 .c-app
   display: flex
-  width: 100vw
-  height: calc(100vh - 22px)
+  width: 100%
+  height: 100%
   font-family: $fontFamily
   flex-direction: column
 
@@ -9,13 +14,13 @@
     &::selection
       background: none
 
-.c-app__canvas
+.c-app__main
   display: flex
   width: 100%
   height: 100%
   overflow: hidden
 
-.c-app__main
+.c-app__canvas
   display: flex
   position: relative
   flex-grow: 2

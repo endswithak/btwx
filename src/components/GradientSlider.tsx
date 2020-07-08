@@ -126,13 +126,13 @@ const GradientSlider = (props: GradientSliderProps): ReactElement => {
           ))
         }
       </div>
-      <GradientSliderRemove
+      {/* <GradientSliderRemove
         stops={stops}
         setStops={setStops}
         setActivePickerColor={setActivePickerColor}
         setActiveStopIndex={setActiveStopIndex}
         disabled={stops.length <= 2}
-        activeStopIndex={activeStopIndex} />
+        activeStopIndex={activeStopIndex} /> */}
     </div>
   );
 }

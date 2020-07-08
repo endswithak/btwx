@@ -5,33 +5,35 @@
   display: flex
   align-items: center
   justify-content: center
+  z-index: 99999999999
 
 .c-fill-editor__picker
   position: absolute
-  width: 220px
+  width: 248px
   display: flex
   flex-direction: column
   border-radius: $unit
   backdrop-filter: blur(10px)
+  z-index: 99999999999
 
 .c-fill-editor__type-selector
   position: relative
   display: flex
   align-items: center
   justify-content: center
-  padding: $unit * 2
+  height: $unit * 8
 
 .c-fill-editor__type
-  width: $unit * 6
-  height: $unit * 6
+  width: $unit * 4
+  height: $unit * 4
   display: flex
   align-items: center
   justify-content: center
   flex-grow: 1
   flex-shrink: 0
   border-radius: 50%
-  max-width: $unit * 6
-  max-height: $unit * 6
+  max-width: $unit * 4
+  max-height: $unit * 4
   margin: 0 $unit
 
 .c-fill-editor__remove-stop

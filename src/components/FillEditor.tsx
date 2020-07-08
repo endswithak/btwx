@@ -149,8 +149,8 @@ const FillEditor = (props: FillEditorProps): ReactElement => {
       <div
         className='c-fill-editor__picker'
         style={{
-          top: fillEditor.y,
-          left: fillEditor.x,
+          top: 0,
+          transform: `translate(8px, ${fillEditor.y}px)`,
           background: chroma(theme.background.z1).alpha(0.78).hex(),
           boxShadow: `0 0 0 1px ${theme.background.z4}`
         }}>
