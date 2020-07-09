@@ -26,7 +26,7 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
 
   return (
     <div
-      className='c-sidebar-layer__icon'>
+      className='c-sidebar-layer__icon c-sidebar-layer__icon--type'>
       <svg
         width='24'
         height='24'

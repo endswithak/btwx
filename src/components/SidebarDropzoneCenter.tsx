@@ -1,30 +1,73 @@
-import React, { useContext, ReactElement, useState, useLayoutEffect, useRef, useEffect } from 'react';
+import React, { useContext, ReactElement, useState, useRef, SyntheticEvent } from 'react';
+import { RootState } from '../store/reducers';
+import { connect } from 'react-redux';
+import { addLayerChild } from '../store/actions/layer';
+import { AddLayerChildPayload } from '../store/actionTypes/layer';
+import { LayerTypes } from '../store/actionTypes/layer';
 import { ThemeContext } from './ThemeProvider';
-import SidebarDropzoneArea from './SidebarDropzoneArea';
 
 interface SidebarDropzoneCenterProps {
   layer: em.Layer;
-  dragLayer: em.Layer;
-  dragEnterLayer: em.Layer;
-  dropzone: em.Dropzone;
+  dragLayer: string;
+  dragLayerItem?: em.Layer;
+  setDragLayer(id: string): void;
+  addLayerChild?(payload: AddLayerChildPayload): LayerTypes;
 }
 
 const SidebarDropzoneCenter = (props: SidebarDropzoneCenterProps): ReactElement => {
-  const dz = 'Center';
+  const ref = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(false);
   const theme = useContext(ThemeContext);
-  const {layer, dragLayer, dragEnterLayer, dropzone} = props;
-  const isActive = dragEnterLayer && dragEnterLayer.id === layer.id && dropzone === dz;
+  const { layer, dragLayer, dragLayerItem, setDragLayer, addLayerChild } = props;
+
+  const handleDragOver = (e: SyntheticEvent) => {
+    if (!document.getElementById(dragLayer).contains(ref.current)) {
+      if (dragLayerItem.type === 'Artboard' && (layer.type === 'Artboard' || layer.type === 'Group')) {
+        return;
+      } else {
+        e.preventDefault();
+        setActive(true);
+      }
+    }
+  }
+
+  const handleDragLeave = (e: SyntheticEvent) => {
+    setActive(false);
+  }
+
+  const handleDrop = (e: SyntheticEvent) => {
+    if (active) {
+      e.preventDefault();
+      addLayerChild({
+        id: layer.id,
+        child: dragLayer
+      });
+    }
+    setDragLayer(null);
+  }
 
   return (
     layer.children
-    ? <SidebarDropzoneArea
-        id={layer.id}
-        dz={dz}
+    ? <div
+        ref={ref}
+        className={`c-sidebar-dropzone__zone c-sidebar-dropzone__zone--center`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         style={{
-          boxShadow: isActive ? `0 0 0 ${theme.unit / 2}px ${theme.palette.primary} inset` : ''
+          boxShadow: active ? `0 0 0 ${theme.unit / 2}px ${theme.palette.primary} inset` : ''
         }} />
     : null
   );
 }
 
-export default SidebarDropzoneCenter;
+const mapStateToProps = (state: RootState, ownProps: SidebarDropzoneCenterProps) => {
+  const { layer } = state;
+  const dragLayerItem = layer.present.byId[ownProps.dragLayer];
+  return { dragLayerItem };
+};
+
+export default connect(
+  mapStateToProps,
+  { addLayerChild }
+)(SidebarDropzoneCenter);

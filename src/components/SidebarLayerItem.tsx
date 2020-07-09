@@ -1,7 +1,7 @@
 import React, { useContext, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
-import SidebarLayerTitleInput from './SidebarLayerTitleInput';
+import SidebarLayerTitle from './SidebarLayerTitle';
 import SidebarLayerChevron from './SidebarLayerChevron';
 import SidebarLayerIcon from './SidebarLayerIcon';
 import SidebarLayerMaskedIcon from './SidebarLayerMaskedIcon';
@@ -29,10 +29,8 @@ const Background = styled.div`
       : 'none'
   };
   box-shadow: 0 0 0 1px ${
-    props => props.isHovering
-    ? props.isSelected
-      ? props.theme.palette.primaryHover
-      : props.theme.palette.primary
+    props => props.isSelected || props.isHovering
+    ? props.theme.palette.primary
     : props.isArtboard
       ? props.theme.name === 'dark'
         ? props.theme.background.z4
@@ -54,24 +52,11 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
     setLayerHover({id: null});
   }
 
-  const handleClick = (e: React.MouseEvent) => {
-    if (e.metaKey) {
-      if (layer.selected) {
-        deselectLayer({id: layer.id});
-      } else {
-        selectLayer({id: layer.id});
-      }
-    } else {
-      selectLayer({id: layer.id, newSelection: true});
-    }
-  }
-
   return (
     <div
       className='c-layers-sidebar__layer-item'
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onClick={handleClick}
       style={{
         paddingLeft: depth * (theme.unit * 6)
       }}>
@@ -88,7 +73,7 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
         layer={layer} />
       <SidebarLayerIcon
         layer={layer} />
-      <SidebarLayerTitleInput
+      <SidebarLayerTitle
         layer={layer}
         setDraggable={setDraggable}
         editing={editing}

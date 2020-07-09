@@ -6,33 +6,20 @@ import SidebarDropzoneBottom from './SidebarDropzoneBottom';
 interface SidebarLayerDropzoneProps {
   layer: em.Layer;
   depth: number;
-  dragLayer: em.Layer;
-  dragEnterLayer: em.Layer;
-  dropzone: em.Dropzone;
+  dragLayer: string;
+  setDragLayer(id: string): void;
 }
 
 const SidebarLayerDropzone = (props: SidebarLayerDropzoneProps): ReactElement => {
-  const {layer, depth, dragLayer, dragEnterLayer, dropzone} = props;
 
   return (
     <div className='c-sidebar-dropzone'>
       <SidebarDropzoneCenter
-        layer={layer}
-        dragLayer={dragLayer}
-        dragEnterLayer={dragEnterLayer}
-        dropzone={dropzone} />
+        {...props} />
       <SidebarDropzoneTop
-        layer={layer}
-        depth={depth}
-        dragLayer={dragLayer}
-        dragEnterLayer={dragEnterLayer}
-        dropzone={dropzone} />
+        {...props}/>
       <SidebarDropzoneBottom
-        layer={layer}
-        depth={depth}
-        dragLayer={dragLayer}
-        dragEnterLayer={dragEnterLayer}
-        dropzone={dropzone} />
+        {...props} />
     </div>
   );
 }

@@ -3,14 +3,13 @@ import SidebarLayer from './SidebarLayer';
 
 interface SidebarLayersProps {
   layers: string[];
-  dragLayer: em.Layer;
-  dragEnterLayer: em.Layer;
-  dropzone: em.Dropzone;
+  dragLayer: string;
   depth: number;
+  setDragLayer(id: string): void;
 }
 
 const SidebarLayers = (props: SidebarLayersProps): ReactElement => {
-  const { layers, depth, dragLayer, dragEnterLayer, dropzone } = props;
+  const { layers, depth, dragLayer, setDragLayer } = props;
 
   return (
     <>
@@ -21,8 +20,7 @@ const SidebarLayers = (props: SidebarLayersProps): ReactElement => {
             layer={child}
             depth={depth + 1}
             dragLayer={dragLayer}
-            dragEnterLayer={dragEnterLayer}
-            dropzone={dropzone} />
+            setDragLayer={setDragLayer} />
         ))
       }
     </>

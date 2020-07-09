@@ -8,8 +8,7 @@ const SidebarLeft = (): ReactElement => {
   return (
     <Sidebar
       width={320}
-      position={'left'}
-      className='c-sidebar--left'>
+      position={'left'}>
       {/* <SidebarSectionWrap>
         <SidebarSectionHead
           text={'layers'} />

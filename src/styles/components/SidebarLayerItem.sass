@@ -5,12 +5,11 @@ $layersSidebarCellHeight: $unit * 8 // 32
   display: flex
   align-items: center
   height: $layersSidebarCellHeight
-  padding: 0 $unit * 2
+  padding: 0
   cursor: pointer
 
 .c-layers-sidebar-layer-item__background
   +absolute-full
-  margin: 0 $unit / 2
   border-radius: $unit
   z-index: -1
 
@@ -21,11 +20,18 @@ $layersSidebarCellHeight: $unit * 8 // 32
   cursor: pointer
   padding-left: $unit * 2
   width: 100%
+  overflow: hidden
+  white-space: nowrap
+  text-overflow: ellipsis
+
+  &:before
+    +content-block
 
 .c-sidebar-layer__name--editing
   padding-left: 0
 
 .c-sidebar-layer__icon
+  position: relative
   display: flex
   align-items: center
   justify-content: center
@@ -35,3 +41,12 @@ $layersSidebarCellHeight: $unit * 8 // 32
   flex-grow: 0
   flex-shrink: 0
   z-index: 2
+
+.c-sidebar-layer__icon--type
+  z-index: -1
+
+.c-sidebar-layer__icon--chevron
+  width: 20px
+
+  svg
+    position: absolute

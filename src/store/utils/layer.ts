@@ -2,7 +2,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import layer, { LayerState } from '../reducers/layer';
 import * as layerActions from '../actions/layer';
-import { addItem, removeItem, insertItem, addItems } from './general';
+import { addItem, removeItem, insertItem, addItems, moveItem, moveItemAbove, moveItemBelow } from './general';
 
 import {
   AddPage, AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer,
@@ -787,9 +787,10 @@ export const hideLayerChildren = (state: LayerState, action: HideLayerChildren):
 export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): LayerState => {
   let currentState = state;
   const layer = currentState.byId[action.payload.id];
+  const layerIndex = getLayerIndex(currentState, action.payload.id);
   const above = currentState.byId[action.payload.above];
   const aboveParent = currentState.byId[above.parent] as em.Group;
-  const aboveIndex = aboveParent.children.indexOf(action.payload.above);
+  const aboveIndex = getLayerIndex(currentState, action.payload.above);
   const paperLayer = getPaperLayer(action.payload.id);
   const abovePaperLayer = getPaperLayer(action.payload.above);
   paperLayer.insertBelow(abovePaperLayer);
@@ -837,7 +838,7 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
         ...currentState.byId,
         [layer.parent]: {
           ...currentState.byId[layer.parent],
-          children: insertItem(removeItem((currentState.byId[layer.parent] as em.Group).children, action.payload.id), action.payload.id, aboveIndex)
+          children: moveItemAbove(currentState.byId[layer.parent].children, layerIndex, aboveIndex)
         } as em.Group
       },
       paperProject: paperMain.project.exportJSON()
@@ -849,9 +850,10 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
 export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): LayerState => {
   let currentState = state;
   const layer = state.byId[action.payload.id];
+  const layerIndex = getLayerIndex(currentState, action.payload.id);
   const below = state.byId[action.payload.below];
   const belowParent = state.byId[below.parent] as em.Group;
-  const belowIndex = belowParent.children.indexOf(action.payload.below);
+  const belowIndex = getLayerIndex(currentState, action.payload.below);
   const paperLayer = getPaperLayer(action.payload.id);
   const abovePaperLayer = getPaperLayer(action.payload.below);
   paperLayer.insertAbove(abovePaperLayer);
@@ -896,7 +898,7 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
         ...currentState.byId,
         [layer.parent]: {
           ...currentState.byId[layer.parent],
-          children: insertItem(removeItem((currentState.byId[layer.parent] as em.Group).children, action.payload.id), action.payload.id, belowIndex + 1)
+          children: moveItemBelow(currentState.byId[layer.parent].children, layerIndex, belowIndex)
         } as em.Group
       },
       paperProject: paperMain.project.exportJSON()
