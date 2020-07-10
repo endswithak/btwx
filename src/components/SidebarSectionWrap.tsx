@@ -17,7 +17,7 @@ const SidebarSectionWrap = (props: SidebarSectionWrapProps): ReactElement => {
       className='c-sidebar-section-wrap'
       style={{
         boxShadow: bottomBorder
-        ? `0 -1px 0 0 ${theme.background.z3} inset`
+        ? `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
         : 'none',
         paddingTop: whiteSpace
         ? theme.unit

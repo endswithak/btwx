@@ -3,11 +3,12 @@ import { ThemeContext } from './ThemeProvider';
 
 interface SidebarLayerIconProps {
   layer: em.Layer;
+  dragGhost: boolean;
 }
 
 const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layer } = props;
+  const { layer, dragGhost } = props;
 
   const pathData = () => {
     switch(layer.type) {
@@ -32,11 +33,9 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
         height='24'
         viewBox='0 0 24 24'
         style={{
-          // strokeWidth: 1,
-          // stroke: layer.selected
-          // ? theme.text.onPrimary
-          // : theme.text.lighter,
-          fill: theme.text.lighter,
+          fill: layer.selected && !dragGhost
+          ? theme.text.onPrimary
+          : theme.text.lighter,
           transform: layer.type === 'Shape' ? `scale(0.75)` : 'none'
         }}>
         <path d={pathData()} />

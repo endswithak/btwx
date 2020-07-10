@@ -6,8 +6,9 @@ import SidebarDropzoneBottom from './SidebarDropzoneBottom';
 interface SidebarLayerDropzoneProps {
   layer: em.Layer;
   depth: number;
-  dragLayer: string;
-  setDragLayer(id: string): void;
+  dragLayers: string[];
+  setDragLayers(layers: string[]): void;
+  setDragging(dragging: boolean): void;
 }
 
 const SidebarLayerDropzone = (props: SidebarLayerDropzoneProps): ReactElement => {

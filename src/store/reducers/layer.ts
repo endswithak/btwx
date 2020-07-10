@@ -15,11 +15,14 @@ import {
   DESELECT_ALL_LAYERS,
   SET_LAYER_HOVER,
   ADD_LAYER_CHILD,
+  ADD_LAYER_CHILDREN,
   INSERT_LAYER_CHILD,
   SHOW_LAYER_CHILDREN,
   HIDE_LAYER_CHILDREN,
   INSERT_LAYER_ABOVE,
+  INSERT_LAYERS_ABOVE,
   INSERT_LAYER_BELOW,
+  INSERT_LAYERS_BELOW,
   INCREASE_LAYER_SCOPE,
   DECREASE_LAYER_SCOPE,
   CLEAR_LAYER_SCOPE,
@@ -149,11 +152,14 @@ import {
   deselectAllLayers,
   setLayerHover,
   addLayerChild,
+  addLayerChildren,
   insertLayerChild,
   showLayerChildren,
   hideLayerChildren,
   insertLayerAbove,
+  insertLayersAbove,
   insertLayerBelow,
+  insertLayersBelow,
   increaseLayerScope,
   decreaseLayerScope,
   newLayerScope,
@@ -376,6 +382,8 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setLayerHover(state, action);
     case ADD_LAYER_CHILD:
       return addLayerChild(state, action);
+    case ADD_LAYER_CHILDREN:
+      return addLayerChildren(state, action);
     case INSERT_LAYER_CHILD:
       return insertLayerChild(state, action);
     case SHOW_LAYER_CHILDREN:
@@ -384,8 +392,12 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return hideLayerChildren(state, action);
     case INSERT_LAYER_ABOVE:
       return insertLayerAbove(state, action);
+    case INSERT_LAYERS_ABOVE:
+      return insertLayersAbove(state, action);
     case INSERT_LAYER_BELOW:
       return insertLayerBelow(state, action);
+    case INSERT_LAYERS_BELOW:
+      return insertLayersBelow(state, action);
     case INCREASE_LAYER_SCOPE:
       return increaseLayerScope(state, action);
     case DECREASE_LAYER_SCOPE:

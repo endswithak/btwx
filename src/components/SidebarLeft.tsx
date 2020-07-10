@@ -1,7 +1,5 @@
-import React, { useContext, ReactElement, useEffect } from 'react';
+import React, { ReactElement } from 'react';
 import Sidebar from './Sidebar';
-import SidebarSectionHead from './SidebarSectionHead';
-import SidebarSectionWrap from './SidebarSectionWrap';
 import SidebarLayerTree from './SidebarLayerTree';
 
 const SidebarLeft = (): ReactElement => {
@@ -9,10 +7,6 @@ const SidebarLeft = (): ReactElement => {
     <Sidebar
       width={320}
       position={'left'}>
-      {/* <SidebarSectionWrap>
-        <SidebarSectionHead
-          text={'layers'} />
-      </SidebarSectionWrap> */}
       <SidebarLayerTree />
     </Sidebar>
   );

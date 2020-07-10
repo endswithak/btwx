@@ -128,7 +128,6 @@ const FillInput = (props: FillInputProps): ReactElement => {
   };
 
   const handleSwatchClick = (bounding: DOMRect): void => {
-    console.log(bounding);
     if (!enabled) {
       enableLayerFill({id: selected[0]});
     }

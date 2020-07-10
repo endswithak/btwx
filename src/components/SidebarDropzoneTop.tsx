@@ -1,29 +1,32 @@
 import React, { useContext, ReactElement, useState, useRef, SyntheticEvent } from 'react';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
-import { insertLayerAbove } from '../store/actions/layer';
-import { InsertLayerAbovePayload } from '../store/actionTypes/layer';
+import { insertLayersAbove } from '../store/actions/layer';
+import { InsertLayersAbovePayload } from '../store/actionTypes/layer';
 import { LayerTypes } from '../store/actionTypes/layer';
 import { ThemeContext } from './ThemeProvider';
 
 interface SidebarDropzoneTopProps {
   layer: em.Layer;
   depth: number;
-  dragLayer: string;
-  dragLayerItem?: em.Layer;
-  setDragLayer(id: string): void;
-  insertLayerAbove?(payload: InsertLayerAbovePayload): LayerTypes;
+  dragLayers: string[];
+  dragLayerById?: {
+    [id: string]: em.Layer;
+  };
+  setDragLayers(layers: string[]): void;
+  setDragging(dragging: boolean): void;
+  insertLayersAbove?(payload: InsertLayersAbovePayload): LayerTypes;
 }
 
 const SidebarDropzoneTop = (props: SidebarDropzoneTopProps): ReactElement => {
   const ref = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(false);
   const theme = useContext(ThemeContext);
-  const { layer, depth, dragLayer, dragLayerItem, setDragLayer, insertLayerAbove } = props;
+  const { layer, depth, dragLayers, dragLayerById, setDragLayers, setDragging, insertLayersAbove } = props;
 
   const handleDragOver = (e: SyntheticEvent) => {
-    if (!document.getElementById(dragLayer).contains(ref.current)) {
-      if (dragLayerItem.type === 'Artboard' && layer.parent !== 'page') {
+    if (!dragLayers.some((id) => document.getElementById(id).contains(ref.current))) {
+      if (dragLayers.some((id) => dragLayerById[id].type === 'Artboard') && layer.parent !== 'page') {
         return;
       } else {
         e.preventDefault();
@@ -39,12 +42,13 @@ const SidebarDropzoneTop = (props: SidebarDropzoneTopProps): ReactElement => {
   const handleDrop = (e: SyntheticEvent) => {
     if (active) {
       e.preventDefault();
-      insertLayerAbove({
-        id: dragLayer,
+      insertLayersAbove({
+        layers: dragLayers,
         above: layer.id
       });
     }
-    setDragLayer(null);
+    setDragLayers(null);
+    setDragging(false);
   }
 
   return (
@@ -64,11 +68,14 @@ const SidebarDropzoneTop = (props: SidebarDropzoneTopProps): ReactElement => {
 
 const mapStateToProps = (state: RootState, ownProps: SidebarDropzoneTopProps) => {
   const { layer } = state;
-  const dragLayerItem = layer.present.byId[ownProps.dragLayer];
-  return { dragLayerItem };
+  const dragLayerById = ownProps.dragLayers ? ownProps.dragLayers.reduce((result: {[id: string]: em.Layer}, current) => {
+    result[current] = layer.present.byId[current];
+    return result;
+  }, {}) : {};
+  return { dragLayerById };
 };
 
 export default connect(
   mapStateToProps,
-  { insertLayerAbove }
+  { insertLayersAbove }
 )(SidebarDropzoneTop);

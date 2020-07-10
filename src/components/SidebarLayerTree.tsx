@@ -1,31 +1,33 @@
-import React, { useContext, ReactElement, useState, useEffect, useRef } from 'react';
+import React, { ReactElement, useState, useRef } from 'react';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
 import SidebarDropzone from './SidebarDropzone';
-import { insertLayerAbove, insertLayerBelow, addLayerChild } from '../store/actions/layer';
-import { InsertLayerAbovePayload, InsertLayerBelowPayload, AddLayerChildPayload } from '../store/actionTypes/layer';
-import { LayerTypes } from '../store/actionTypes/layer';
 import SidebarLayer from './SidebarLayer';
-import { getLayerScope } from '../store/selectors/layer';
+import { orderLayersByDepth } from '../store/selectors/layer';
 import { LayerState } from '../store/reducers/layer';
 
 interface SidebarLayerTreeProps {
   page: em.Group;
+  layerbyId: {
+    [id: string]: em.Layer;
+  };
 }
 
 const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
-  const [dragLayer, setDragLayer] = useState<string>(null);
-  const { page } = props;
+  const [dragging, setDragging] = useState(false);
+  const [dragLayers, setDragLayers] = useState<string[]>(null);
+  const { page, layerbyId } = props;
 
   return (
     <div>
       {
-        dragLayer
+        dragging
         ? <SidebarDropzone
             layer={page}
             depth={0}
-            dragLayer={dragLayer}
-            setDragLayer={setDragLayer} />
+            dragLayers={dragLayers}
+            setDragging={setDragging}
+            setDragLayers={setDragLayers} />
         : null
       }
       {
@@ -33,10 +35,37 @@ const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
           <SidebarLayer
             key={index}
             layer={layer}
-            dragLayer={dragLayer}
-            setDragLayer={setDragLayer}
+            dragLayers={dragLayers}
+            setDragLayers={setDragLayers}
+            dragging={dragging}
+            setDragging={setDragging}
             depth={0} />
         ))
+      }
+      {
+        dragLayers
+        ? <div
+            id='sidebarDragGhosts'
+            style={{
+              position: 'fixed',
+              width: '100%',
+              left: 99999999
+            }}>
+            {
+              orderLayersByDepth({byId: layerbyId} as LayerState, dragLayers).map((id, index) => (
+                <SidebarLayer
+                  dragGhost
+                  key={index}
+                  layer={id}
+                  dragLayers={dragLayers}
+                  setDragLayers={() => {return;}}
+                  dragging={dragging}
+                  setDragging={() => {return;}}
+                  depth={0} />
+              ))
+            }
+          </div>
+        : null
       }
     </div>
   )
@@ -45,7 +74,8 @@ const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   return {
-    page: layer.present.byId[layer.present.page]
+    page: layer.present.byId[layer.present.page],
+    layerbyId: layer.present.byId
   };
 };
 

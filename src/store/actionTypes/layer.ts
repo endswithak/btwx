@@ -20,12 +20,15 @@ export const ENABLE_LAYER_HOVER = 'ENABLE_LAYER_HOVER';
 export const DISABLE_LAYER_HOVER = 'DISABLE_LAYER_HOVER';
 
 export const ADD_LAYER_CHILD = 'ADD_LAYER_CHILD';
+export const ADD_LAYER_CHILDREN = 'ADD_LAYER_CHILDREN';
 export const INSERT_LAYER_CHILD = 'INSERT_LAYER_CHILD';
 export const SHOW_LAYER_CHILDREN = 'SHOW_LAYER_CHILDREN';
 export const HIDE_LAYER_CHILDREN = 'HIDE_LAYER_CHILDREN';
 
 export const INSERT_LAYER_ABOVE = 'INSERT_LAYER_ABOVE';
+export const INSERT_LAYERS_ABOVE = 'INSERT_LAYERS_ABOVE';
 export const INSERT_LAYER_BELOW = 'INSERT_LAYER_BELOW';
+export const INSERT_LAYERS_BELOW = 'INSERT_LAYERS_BELOW';
 
 export const INCREASE_LAYER_SCOPE = 'INCREASE_LAYER_SCOPE';
 export const DECREASE_LAYER_SCOPE = 'DECREASE_LAYER_SCOPE';
@@ -347,6 +350,16 @@ export interface AddLayerChild {
   payload: AddLayerChildPayload;
 }
 
+export interface AddLayerChildrenPayload {
+  id: string;
+  children: string[];
+}
+
+export interface AddLayerChildren {
+  type: typeof ADD_LAYER_CHILDREN;
+  payload: AddLayerChildrenPayload;
+}
+
 export interface InsertLayerChildPayload {
   id: string;
   child: string;
@@ -388,6 +401,16 @@ export interface InsertLayerAbove {
   payload: InsertLayerAbovePayload;
 }
 
+export interface InsertLayersAbovePayload {
+  layers: string[];
+  above: string;
+}
+
+export interface InsertLayersAbove {
+  type: typeof INSERT_LAYERS_ABOVE;
+  payload: InsertLayersAbovePayload;
+}
+
 export interface InsertLayerBelowPayload {
   id: string;
   below: string;
@@ -396,6 +419,16 @@ export interface InsertLayerBelowPayload {
 export interface InsertLayerBelow {
   type: typeof INSERT_LAYER_BELOW;
   payload: InsertLayerBelowPayload;
+}
+
+export interface InsertLayersBelowPayload {
+  layers: string[];
+  below: string;
+}
+
+export interface InsertLayersBelow {
+  type: typeof INSERT_LAYERS_BELOW;
+  payload: InsertLayersBelowPayload;
 }
 
 // Scope
@@ -1475,4 +1508,4 @@ export interface SendLayersToFront {
   payload: SendLayersToFrontPayload;
 }
 
-export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | AddText | AddImage | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayerBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower | FreezeLayerTween | UnFreezeLayerTween | SetLayerX | SetLayerY | SetLayerWidth | SetLayerHeight | SetLayerRotation | SetLayerOpacity | EnableLayerHorizontalFlip | DisableLayerHorizontalFlip | EnableLayerVerticalFlip | DisableLayerVerticalFlip | EnableLayerFill | DisableLayerFill | SetLayerFillColor | EnableLayerStroke | DisableLayerStroke | SetLayerStrokeColor | SetLayerStrokeFillType | SetLayerStrokeGradient | SetLayerStrokeGradientType | SetLayerStrokeWidth | SetLayerStrokeCap | SetLayerStrokeJoin | SetLayerStrokeDashArray | SetLayerStrokeMiterLimit | EnableLayerShadow | DisableLayerShadow | SetLayerShadowColor | SetLayerShadowBlur | SetLayerShadowXOffset | SetLayerShadowYOffset | ResizeLayer | ResizeLayers | SetLayerText | SetLayerFontSize | SetLayerLeading | SetLayerFontWeight | SetLayerFontFamily | SetLayerJustification | AddInViewLayer | AddInViewLayers | RemoveInViewLayer | RemoveInViewLayers | UpdateInViewLayers | SetLayerFill | SetLayerFillType | SetLayerFillGradient | SetLayerFillGradientType | SetLayerFillGradientOrigin | SetLayerFillGradientDestination | SetLayerFillGradientStopColor | SetLayerFillGradientStopPosition | AddLayerFillGradientStop | RemoveLayerFillGradientStop | AddLayersMask | RemoveLayersMask | MaskLayer | UnmaskLayer | MaskLayers | UnmaskLayers | AlignLayersToLeft | AlignLayersToRight | AlignLayersToTop | AlignLayersToBottom | AlignLayersToCenter | AlignLayersToMiddle | DistributeLayersHorizontally | DistributeLayersVertically | DuplicateLayer | DuplicateLayers | RemoveDuplicatedLayers | SendLayerForward | SendLayersForward | SendLayerToFront | SendLayersToFront | SendLayerBackward | SendLayersBackward | SendLayerToBack | SendLayersToBack;
+export type LayerTypes = AddPage | AddArtboard | AddGroup | AddShape | AddText | AddImage | RemoveLayer | RemoveLayers | SelectLayer | DeepSelectLayer | SelectLayers | DeselectLayer | DeselectLayers | DeselectAllLayers | SetLayerHover | EnableLayerHover | DisableLayerHover | AddLayerChild | AddLayerChildren | InsertLayerChild | ShowLayerChildren | HideLayerChildren | InsertLayerAbove | InsertLayersAbove | InsertLayerBelow | InsertLayersBelow | IncreaseLayerScope | DecreaseLayerScope | NewLayerScope | ClearLayerScope | EscapeLayerScope | GroupLayers | UngroupLayer | UngroupLayers | CopyLayerToClipboard | CopyLayersToClipboard | PasteLayersFromClipboard | MoveLayer | MoveLayers | MoveLayerTo | MoveLayersTo | MoveLayerBy | MoveLayersBy | EnableLayerDrag | DisableLayerDrag | SetLayerName | SetActiveArtboard | AddLayerTweenEvent | RemoveLayerTweenEvent | AddLayerTween | RemoveLayerTween | SetLayerTweenDuration | IncrementLayerTweenDuration | DecrementLayerTweenDuration | SetLayerTweenDelay | IncrementLayerTweenDelay | DecrementLayerTweenDelay | SetLayerTweenEase | SetLayerTweenPower | FreezeLayerTween | UnFreezeLayerTween | SetLayerX | SetLayerY | SetLayerWidth | SetLayerHeight | SetLayerRotation | SetLayerOpacity | EnableLayerHorizontalFlip | DisableLayerHorizontalFlip | EnableLayerVerticalFlip | DisableLayerVerticalFlip | EnableLayerFill | DisableLayerFill | SetLayerFillColor | EnableLayerStroke | DisableLayerStroke | SetLayerStrokeColor | SetLayerStrokeFillType | SetLayerStrokeGradient | SetLayerStrokeGradientType | SetLayerStrokeWidth | SetLayerStrokeCap | SetLayerStrokeJoin | SetLayerStrokeDashArray | SetLayerStrokeMiterLimit | EnableLayerShadow | DisableLayerShadow | SetLayerShadowColor | SetLayerShadowBlur | SetLayerShadowXOffset | SetLayerShadowYOffset | ResizeLayer | ResizeLayers | SetLayerText | SetLayerFontSize | SetLayerLeading | SetLayerFontWeight | SetLayerFontFamily | SetLayerJustification | AddInViewLayer | AddInViewLayers | RemoveInViewLayer | RemoveInViewLayers | UpdateInViewLayers | SetLayerFill | SetLayerFillType | SetLayerFillGradient | SetLayerFillGradientType | SetLayerFillGradientOrigin | SetLayerFillGradientDestination | SetLayerFillGradientStopColor | SetLayerFillGradientStopPosition | AddLayerFillGradientStop | RemoveLayerFillGradientStop | AddLayersMask | RemoveLayersMask | MaskLayer | UnmaskLayer | MaskLayers | UnmaskLayers | AlignLayersToLeft | AlignLayersToRight | AlignLayersToTop | AlignLayersToBottom | AlignLayersToCenter | AlignLayersToMiddle | DistributeLayersHorizontally | DistributeLayersVertically | DuplicateLayer | DuplicateLayers | RemoveDuplicatedLayers | SendLayerForward | SendLayersForward | SendLayerToFront | SendLayersToFront | SendLayerBackward | SendLayersBackward | SendLayerToBack | SendLayersToBack;

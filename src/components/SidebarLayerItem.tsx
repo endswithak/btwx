@@ -11,9 +11,11 @@ import { RootState } from '../store/reducers';
 import styled from 'styled-components';
 
 interface SidebarLayerItemProps {
-  layer: em.Layer;
+  layer: string;
+  layerItem?: em.Layer;
   depth: number;
   hover?: string;
+  dragGhost?: boolean;
   setDraggable?(draggable: boolean): void;
   setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
   selectLayer?(payload: SelectLayerPayload): LayerTypes;
@@ -22,16 +24,16 @@ interface SidebarLayerItemProps {
 
 const Background = styled.div`
   background: ${
-    props => props.isSelected || props.isEditing
+    props => (props.isSelected || props.isEditing) && !props.dragGhost
     ? props.theme.palette.primary
-    : props.isArtboard
+    : props.isArtboard && !props.dragGhost
       ? props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0
       : 'none'
   };
   box-shadow: 0 0 0 1px ${
-    props => props.isSelected || props.isHovering
+    props => (props.isSelected || props.isHovering) && !props.dragGhost
     ? props.theme.palette.primary
-    : props.isArtboard
+    : props.isArtboard && !props.dragGhost
       ? props.theme.name === 'dark'
         ? props.theme.background.z4
         : props.theme.background.z5
@@ -42,10 +44,10 @@ const Background = styled.div`
 const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
   const [editing, setEditing] = useState(false);
   const theme = useContext(ThemeContext);
-  const { layer, depth, hover, setLayerHover, setDraggable, selectLayer, deselectLayer } = props;
+  const { layer, layerItem, depth, hover, setLayerHover, setDraggable, selectLayer, deselectLayer, dragGhost } = props;
 
   const handleMouseEnter = () => {
-    setLayerHover({id: layer.id});
+    setLayerHover({id: layer});
   }
 
   const handleMouseLeave = () => {
@@ -61,20 +63,25 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
         paddingLeft: depth * (theme.unit * 6)
       }}>
       <Background
-        isSelected={layer.selected}
+        dragGhost={dragGhost}
+        isSelected={layerItem.selected}
         isEditing={editing}
-        isArtboard={layer.type === 'Artboard'}
-        isHovering={hover === layer.id}
+        isArtboard={layerItem.type === 'Artboard'}
+        isHovering={hover === layer}
         theme={theme}
         className='c-layers-sidebar-layer-item__background' />
       <SidebarLayerChevron
-        layer={layer} />
+        dragGhost={dragGhost}
+        layer={layerItem} />
       <SidebarLayerMaskedIcon
-        layer={layer} />
+        dragGhost={dragGhost}
+        layer={layerItem} />
       <SidebarLayerIcon
-        layer={layer} />
+        dragGhost={dragGhost}
+        layer={layerItem} />
       <SidebarLayerTitle
-        layer={layer}
+        dragGhost={dragGhost}
+        layer={layerItem}
         setDraggable={setDraggable}
         editing={editing}
         setEditing={setEditing} />
@@ -82,10 +89,11 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
+const mapStateToProps = (state: RootState, ownProps: SidebarLayerItemProps) => {
   const { layer } = state;
   const hover = layer.present.hover;
-  return { hover };
+  const layerItem = layer.present.byId[ownProps.layer];
+  return { hover, layerItem };
 };
 
 export default connect(

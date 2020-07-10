@@ -8,6 +8,7 @@ import { ThemeContext } from './ThemeProvider';
 interface SidebarLayerTitleProps {
   layer: em.Layer;
   editing: boolean;
+  dragGhost: boolean;
   setDraggable(draggable: boolean): void;
   setEditing(editing: boolean): void;
   selectLayer?(payload: SelectLayerPayload): LayerTypes;
@@ -19,7 +20,7 @@ interface SidebarLayerTitleProps {
 const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const [nameInput, setNameInput] = useState(props.layer.name);
-  const { layer, editing, setEditing, setLayerName, setDraggable, selectLayer, deselectLayer, deselectAllLayers } = props;
+  const { layer, editing, setEditing, dragGhost, setLayerName, setDraggable, selectLayer, deselectLayer, deselectAllLayers } = props;
 
   const handleClick = (e: React.MouseEvent) => {
     if (!editing) {
@@ -62,7 +63,7 @@ const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
         : null
       }`}
       style={{
-        color: layer.selected
+        color: layer.selected && !dragGhost
         ? theme.text.onPrimary
         : theme.text.base
       }}

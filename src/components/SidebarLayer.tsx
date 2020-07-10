@@ -7,46 +7,63 @@ import SidebarLayers from './SidebarLayers';
 
 interface SidebarLayerProps {
   layer: string;
-  selected: string[];
-  dragLayer: string;
+  selected?: string[];
+  dragLayers: string[];
   depth: number;
   layerItem?: em.Layer;
-  setDragLayer(id: string): void;
+  dragging: boolean;
+  dragGhost?: boolean;
+  setDragging(dragging: boolean): void;
+  setDragLayers(layers: string[]): void;
 }
 
 const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
   const [draggable, setDraggable] = useState(true);
-  const { layer, depth, dragLayer, setDragLayer, layerItem } = props;
+  const { layer, depth, dragGhost, dragLayers, setDragLayers, layerItem, selected, dragging, setDragging } = props;
+
+  const handleMouseDown = (e: SyntheticEvent) => {
+    e.stopPropagation();
+    if (selected.length > 0 && selected.includes(layer)) {
+      setDragLayers(selected);
+    } else {
+      setDragLayers([layer]);
+    }
+  }
 
   const handleDragStart = (e: SyntheticEvent) => {
-    setDragLayer(e.target.id);
+    setDragging(true);
+    e.dataTransfer.setDragImage(document.getElementById('sidebarDragGhosts'), 0, 0);
   }
 
   const handleDragEnd = (e: SyntheticEvent) => {
-    setDragLayer(null);
+    setDragLayers(null);
+    setDragging(false);
   }
 
   return (
     <div
-      id={layer}
+      id={dragGhost ? `${layer}-dragGhost` : layer}
       draggable={draggable}
       className='c-sidebar-layer'
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      onMouseDown={handleMouseDown}
       style={{
-        opacity: dragLayer === layer ? 0.5 : 1
+        opacity: !dragGhost && dragging && dragLayers && dragLayers.includes(layer) ? 0.5 : 1
       }}>
       <SidebarLayerItem
-        layer={layerItem}
+        dragGhost={dragGhost}
+        layer={layer}
         depth={depth}
         setDraggable={setDraggable} />
       {
-        dragLayer
+        dragging && !dragGhost
         ? <SidebarDropzone
             layer={layerItem}
             depth={depth}
-            dragLayer={dragLayer}
-            setDragLayer={setDragLayer} />
+            dragLayers={dragLayers}
+            setDragLayers={setDragLayers}
+            setDragging={setDragging} />
         : null
       }
       {
@@ -54,8 +71,11 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
         ? <SidebarLayers
             layers={(layerItem as em.Group).children}
             depth={depth + 1}
-            dragLayer={dragLayer}
-            setDragLayer={setDragLayer} />
+            dragLayers={dragLayers}
+            setDragLayers={setDragLayers}
+            setDragging={setDragging}
+            dragging={dragging}
+            dragGhost={dragGhost} />
         : null
       }
     </div>

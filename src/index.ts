@@ -182,13 +182,13 @@ const createPreferencesWindow = (): void => {
   });
 }
 
-const createPreviewWindow = (width: number, height: number): void => {
+const createPreviewWindow = (artboard: em.Artboard): void => {
   previewWindow = new BrowserWindow({
     parent: mainWindow,
-    minWidth: width,
-    minHeight: height,
-    width: width,
-    height: height,
+    minWidth: artboard.frame.width,
+    minHeight: artboard.frame.height,
+    width: artboard.frame.width,
+    height: artboard.frame.height,
     webPreferences: {
       nodeIntegration: true
     },
@@ -236,7 +236,7 @@ app.on('activate', () => {
 // code. You can also put them in separate files and import them here.
 ipcMain.on('openPreview', (event, activeArtboard) => {
   const artboard = JSON.parse(activeArtboard);
-  createPreviewWindow(artboard.frame.width, artboard.frame.height);
+  createPreviewWindow(artboard);
 });
 
 ipcMain.on('updateTheme', (event, theme) => {

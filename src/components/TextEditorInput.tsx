@@ -1,4 +1,5 @@
-import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
+/* eslint-disable @typescript-eslint/no-use-before-define */
+import React, { useContext, ReactElement, useCallback, useRef, useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
@@ -11,6 +12,7 @@ import { SetLayerTextPayload, SelectLayerPayload, LayerTypes } from '../store/ac
 import { paperMain } from '../canvas';
 import { TextEditorState } from '../store/reducers/textEditor';
 import { TextSettingsState } from '../store/reducers/textSettings';
+import debounce from 'lodash.debounce';
 
 interface TextEditorInputProps {
   textEditor?: TextEditorState;
@@ -24,46 +26,33 @@ interface TextEditorInputProps {
 }
 
 const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const textSpanRef = useRef<HTMLTextAreaElement>(null);
   const theme = useContext(ThemeContext);
   const { textEditor, textSettings, layerItem, closeTextEditor, disableSelectionTool, enableSelectionTool, setLayerText, selectLayer } = props;
   const [text, setText] = useState(layerItem.text);
+  const [prevText, setPrevText] = useState(layerItem.text);
+  const debounceText = useCallback(
+    debounce((dText: string) => setLayerText({id: textEditor.layer, text: dText }), 250),
+    []
+  );
   const [pos, setPos] = useState({x: textEditor.x, y: textEditor.y});
 
-  const handleTextChange = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
-    const target = e.target as HTMLTextAreaElement;
-    setText(target.value);
-  }
-
-  const handleClose = () => {
-    paperMain.project.getItem({data: { id: textEditor.layer }}).visible = true;
-    closeTextEditor();
-    setLayerText({id: textEditor.layer, text });
-    selectLayer({id: textEditor.layer, newSelection: true });
-    enableSelectionTool();
-  }
-
-  useEffect(() => {
-    if (textAreaRef.current) {
-      paperMain.project.getItem({data: { id: textEditor.layer }}).visible = false;
-      disableSelectionTool();
-    }
-  }, []);
-
-  useEffect(() => {
-    if (paperMain.project.getItem({data: { id: 'selectionFrame' }})) {
-      paperMain.project.getItem({data: { id: 'selectionFrame' }}).remove();
-    }
-    if (paperMain.project.getItem({data: { id: 'hoverFrame' }})) {
-      paperMain.project.getItem({data: { id: 'hoverFrame' }}).remove();
-    }
+  const onOpen = () => {
+    disableSelectionTool();
+    document.addEventListener('mousedown', onMouseDown, false);
+    const paperLayer = paperMain.project.getItem({data: { id: textEditor.layer }}) as paper.PointText;
     textAreaRef.current.focus();
     textAreaRef.current.select();
-    const paperLayer = paperMain.project.getItem({data: { id: textEditor.layer }});
-    const topLeft = paperMain.view.projectToView(paperLayer.bounds.topLeft);
-    const topCenter = paperMain.view.projectToView(paperLayer.bounds.topCenter);
-    const topRight = paperMain.view.projectToView(paperLayer.bounds.topRight);
+    const singleLineText = paperLayer.clone({insert: false}) as paper.PointText;
+    singleLineText.content = 'Text';
+    const anchorPoint = paperMain.view.projectToView(singleLineText.point);
+    const domAnchorPoint = paperMain.view.projectToView(singleLineText.bounds.leftCenter);
+    const topLeft = paperMain.view.projectToView(singleLineText.bounds.topLeft);
+    const topCenter = paperMain.view.projectToView(singleLineText.bounds.topCenter);
+    const topRight = paperMain.view.projectToView(singleLineText.bounds.topRight);
+    const anchorDiff = (anchorPoint.y - domAnchorPoint.y) - (((textSettings.fontSize * 0.8) * paperMain.view.zoom) / 2);
     setPos({
       x: (() => {
         switch(textSettings.justification) {
@@ -78,32 +67,75 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
       y: (() => {
         switch(textSettings.justification) {
           case 'left':
-            return topLeft.y;
+            return topLeft.y + anchorDiff;
           case 'center':
-            return topCenter.y;
+            return topCenter.y + anchorDiff;
           case 'right':
-            return topRight.y;
+            return topRight.y + anchorDiff;
         }
       })()
     });
-  }, [textSettings]);
+    updateTextAreaSize();
+  }
 
-  useEffect(() => {
+  const onClose = () => {
+    paperMain.project.getItem({data: { id: textEditor.layer }}).visible = true;
+    selectLayer({id: textEditor.layer, newSelection: true });
+    enableSelectionTool();
+    document.removeEventListener('mousedown', onMouseDown);
+  }
+
+  const onMouseDown = (event: any) => {
+    if (event.target !== textAreaRef.current) {
+      closeTextEditor();
+    }
+  }
+
+  const handleTextChange = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
+    const target = e.target as HTMLTextAreaElement;
+    setText(target.value);
+  }
+
+  const updateTextAreaSize = () => {
     if (textAreaRef.current) {
       textAreaRef.current.style.width = 'auto';
       textAreaRef.current.style.width = `${textSpanRef.current.clientWidth + 4}px`;
       textAreaRef.current.style.height = 'auto';
       textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
     }
+  }
+
+  useEffect(() => {
+    onOpen();
+    return () => {
+      onClose();
+    }
+  }, []);
+
+  useEffect(() => {
+    const paperLayer = paperMain.project.getItem({data: { id: textEditor.layer }}) as paper.PointText;
+    paperLayer.visible = false;
+    if (paperMain.project.getItem({data: { id: 'selectionFrame' }})) {
+      paperMain.project.getItem({data: { id: 'selectionFrame' }}).remove();
+    }
+    if (paperMain.project.getItem({data: { id: 'hoverFrame' }})) {
+      paperMain.project.getItem({data: { id: 'hoverFrame' }}).remove();
+    }
+  }, [layerItem.text]);
+
+  useEffect(() => {
+    updateTextAreaSize();
+    if (text !== prevText) {
+      debounceText(text);
+      setPrevText(text);
+    }
   }, [text]);
 
   return (
     <div
-      className='c-text-editor'>
-      <div
-        className='c-text-editor__overlay'
-        onClick={handleClose} />
-      <div style={{
+      className='c-text-editor'
+      ref={containerRef}>
+      {/* <div style={{
         position: 'absolute',
         top: 0,
         left: pos.x,
@@ -118,7 +150,7 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
         height: 1,
         width: '100%',
         background: 'red'
-      }} />
+      }} /> */}
       <textarea
         className='c-text-editor__textarea'
         ref={textAreaRef}

@@ -6,13 +6,14 @@ import { ShowLayerChildrenPayload, HideLayerChildrenPayload, LayerTypes } from '
 
 interface SidebarLayerChevronProps {
   layer: em.Layer;
+  dragGhost: boolean;
   showLayerChildren(payload: ShowLayerChildrenPayload): LayerTypes;
   hideLayerChildren(payload: HideLayerChildrenPayload): LayerTypes;
 }
 
 const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layer, showLayerChildren, hideLayerChildren } = props;
+  const { layer, showLayerChildren, hideLayerChildren, dragGhost } = props;
 
   const handleChevronClick = (): void => {
     if ((layer as em.Group).showChildren) {
@@ -33,7 +34,7 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
           height="24"
           viewBox="0 0 24 24"
           style={{
-            fill: layer.selected
+            fill: layer.selected && !dragGhost
             ? theme.text.onPrimary
             : theme.text.lighter
           }}>

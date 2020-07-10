@@ -1,29 +1,32 @@
 import React, { useContext, ReactElement, useState, useRef, SyntheticEvent } from 'react';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
-import { insertLayerBelow } from '../store/actions/layer';
-import { InsertLayerBelowPayload } from '../store/actionTypes/layer';
+import { insertLayersBelow } from '../store/actions/layer';
+import { InsertLayersBelowPayload } from '../store/actionTypes/layer';
 import { LayerTypes } from '../store/actionTypes/layer';
 import { ThemeContext } from './ThemeProvider';
 
 interface SidebarDropzoneBottomProps {
   layer: em.Layer;
   depth: number;
-  dragLayer: string;
-  dragLayerItem?: em.Layer;
-  setDragLayer(id: string): void;
-  insertLayerBelow?(payload: InsertLayerBelowPayload): LayerTypes;
+  dragLayers: string[];
+  dragLayerById?: {
+    [id: string]: em.Layer;
+  };
+  setDragLayers(layers: string[]): void;
+  setDragging(dragging: boolean): void;
+  insertLayersBelow?(payload: InsertLayersBelowPayload): LayerTypes;
 }
 
 const SidebarDropzoneBottom = (props: SidebarDropzoneBottomProps): ReactElement => {
   const ref = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(false);
   const theme = useContext(ThemeContext);
-  const { layer, depth, dragLayer, dragLayerItem, setDragLayer, insertLayerBelow } = props;
+  const { layer, depth, dragLayers, dragLayerById, setDragLayers, setDragging, insertLayersBelow } = props;
 
   const handleDragOver = (e: SyntheticEvent) => {
-    if (!document.getElementById(dragLayer).contains(ref.current)) {
-      if (dragLayerItem.type === 'Artboard' && layer.parent !== 'page') {
+    if (dragLayers && !dragLayers.some((id) => document.getElementById(id).contains(ref.current))) {
+      if (dragLayers.some((id) => dragLayerById[id].type === 'Artboard') && layer.parent !== 'page') {
         return;
       } else {
         e.preventDefault();
@@ -39,12 +42,13 @@ const SidebarDropzoneBottom = (props: SidebarDropzoneBottomProps): ReactElement 
   const handleDrop = (e: SyntheticEvent) => {
     if (active) {
       e.preventDefault();
-      insertLayerBelow({
-        id: dragLayer,
+      insertLayersBelow({
+        layers: dragLayers,
         below: layer.id
       });
     }
-    setDragLayer(null);
+    setDragLayers(null);
+    setDragging(false);
   }
 
   return (
@@ -64,11 +68,14 @@ const SidebarDropzoneBottom = (props: SidebarDropzoneBottomProps): ReactElement 
 
 const mapStateToProps = (state: RootState, ownProps: SidebarDropzoneBottomProps) => {
   const { layer } = state;
-  const dragLayerItem = layer.present.byId[ownProps.dragLayer];
-  return { dragLayerItem };
+  const dragLayerById = ownProps.dragLayers ? ownProps.dragLayers.reduce((result: {[id: string]: em.Layer}, current) => {
+    result[current] = layer.present.byId[current];
+    return result;
+  }, {}) : {};
+  return { dragLayerById };
 };
 
 export default connect(
   mapStateToProps,
-  { insertLayerBelow }
+  { insertLayersBelow }
 )(SidebarDropzoneBottom);

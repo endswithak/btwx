@@ -28,7 +28,11 @@ import {
   SetLayerFillGradientType, SetLayerFillGradientStopColor, SetLayerFillGradientStopPosition, AddLayerFillGradientStop,
   RemoveLayerFillGradientStop, SetLayerFillGradientOrigin, SetLayerFillGradient, SetLayerStrokeGradient,
   SetLayerStrokeGradientType, SetLayerStrokeFillType, SetLayerFillGradientDestination, AddLayersMask,
-  MaskLayer, MaskLayers, UnmaskLayers, UnmaskLayer, RemoveLayersMask, SetLayerFill, AlignLayersToLeft, AlignLayersToRight, AlignLayersToTop, AlignLayersToBottom, AlignLayersToCenter, AlignLayersToMiddle, DistributeLayersHorizontally, DistributeLayersVertically, DuplicateLayer, DuplicateLayers, RemoveDuplicatedLayers, SendLayerForward, SendLayerBackward, SendLayersForward, SendLayersBackward, SendLayerToFront, SendLayersToFront, SendLayerToBack, SendLayersToBack, AddImage
+  MaskLayer, MaskLayers, UnmaskLayers, UnmaskLayer, RemoveLayersMask, SetLayerFill, AlignLayersToLeft,
+  AlignLayersToRight, AlignLayersToTop, AlignLayersToBottom, AlignLayersToCenter, AlignLayersToMiddle,
+  DistributeLayersHorizontally, DistributeLayersVertically, DuplicateLayer, DuplicateLayers, RemoveDuplicatedLayers,
+  SendLayerForward, SendLayerBackward, SendLayersForward, SendLayersBackward, SendLayerToFront, SendLayersToFront,
+  SendLayerToBack, SendLayersToBack, AddImage, InsertLayersAbove, InsertLayersBelow, AddLayerChildren
 } from '../actionTypes/layer';
 
 import {
@@ -701,6 +705,16 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
   return selectLayer(currentState, layerActions.selectLayer({id: action.payload.child, newSelection: true}) as SelectLayer);
 };
 
+export const addLayerChildren = (state: LayerState, action: AddLayerChildren) => {
+  let currentState = state;
+  const orderedLayers = orderLayersByDepth(currentState, action.payload.children);
+  currentState = orderedLayers.reduce((result, current) => {
+    return addLayerChild(result, layerActions.addLayerChild({id: action.payload.id, child: current}) as AddLayerChild);
+  }, currentState);
+  currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.children, newSelection: true}) as SelectLayers);
+  return currentState;
+};
+
 export const insertLayerChild = (state: LayerState, action: InsertLayerChild): LayerState => {
   let currentState = state;
   const layer = currentState.byId[action.payload.id] as em.Artboard | em.Group;
@@ -847,6 +861,16 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
   return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
 };
 
+export const insertLayersAbove = (state: LayerState, action: InsertLayersAbove) => {
+  let currentState = state;
+  const orderedLayers = orderLayersByDepth(currentState, action.payload.layers);
+  currentState = orderedLayers.reduce((result, current) => {
+    return insertLayerAbove(result, layerActions.insertLayerAbove({id: current, above: action.payload.above}) as InsertLayerAbove);
+  }, currentState);
+  currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.layers, newSelection: true}) as SelectLayers);
+  return currentState;
+};
+
 export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): LayerState => {
   let currentState = state;
   const layer = state.byId[action.payload.id];
@@ -905,6 +929,16 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
     };
   }
   return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+};
+
+export const insertLayersBelow = (state: LayerState, action: InsertLayersBelow) => {
+  let currentState = state;
+  const orderedLayers = orderLayersByDepth(state, action.payload.layers);
+  currentState = orderedLayers.reverse().reduce((result, current) => {
+    return insertLayerBelow(result, layerActions.insertLayerBelow({id: current, below: action.payload.below}) as InsertLayerBelow);
+  }, currentState);
+  currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.layers, newSelection: true}) as SelectLayers);
+  return currentState;
 };
 
 export const increaseLayerScope = (state: LayerState, action: IncreaseLayerScope): LayerState => {
@@ -2533,6 +2567,9 @@ export const setLayerText = (state: LayerState, action: SetLayerText): LayerStat
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id) as paper.PointText;
   paperLayer.content = action.payload.text;
+  if (!paperLayer.visible) {
+    paperLayer.visible = true;
+  }
   currentState = {
     ...currentState,
     byId: {
@@ -2544,6 +2581,7 @@ export const setLayerText = (state: LayerState, action: SetLayerText): LayerStat
     },
     paperProject: paperMain.project.exportJSON()
   }
+  updateSelectionFrame(currentState);
   return updateLayerBounds(currentState, action.payload.id);
 };
 

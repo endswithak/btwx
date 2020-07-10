@@ -3,11 +3,12 @@ import { ThemeContext } from './ThemeProvider';
 
 interface SidebarLayerMaskedIconProps {
   layer: em.Layer;
+  dragGhost: boolean;
 }
 
 const SidebarLayerMaskedIcon = (props: SidebarLayerMaskedIconProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layer } = props;
+  const { layer, dragGhost } = props;
 
   return (
     layer.masked
@@ -19,7 +20,7 @@ const SidebarLayerMaskedIcon = (props: SidebarLayerMaskedIconProps): ReactElemen
           height='24'
           viewBox='0 0 24 24'
           style={{
-            fill: layer.selected
+            fill: layer.selected && !dragGhost
             ? theme.text.onPrimary
             : theme.text.lighter
           }}>

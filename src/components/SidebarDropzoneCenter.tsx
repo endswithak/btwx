@@ -1,28 +1,31 @@
 import React, { useContext, ReactElement, useState, useRef, SyntheticEvent } from 'react';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
-import { addLayerChild } from '../store/actions/layer';
-import { AddLayerChildPayload } from '../store/actionTypes/layer';
+import { addLayerChildren } from '../store/actions/layer';
+import { AddLayerChildrenPayload } from '../store/actionTypes/layer';
 import { LayerTypes } from '../store/actionTypes/layer';
 import { ThemeContext } from './ThemeProvider';
 
 interface SidebarDropzoneCenterProps {
   layer: em.Layer;
-  dragLayer: string;
-  dragLayerItem?: em.Layer;
-  setDragLayer(id: string): void;
-  addLayerChild?(payload: AddLayerChildPayload): LayerTypes;
+  dragLayers: string[];
+  dragLayerById?: {
+    [id: string]: em.Layer;
+  };
+  setDragLayers(layers: string[]): void;
+  setDragging(dragging: boolean): void;
+  addLayerChildren?(payload: AddLayerChildrenPayload): LayerTypes;
 }
 
 const SidebarDropzoneCenter = (props: SidebarDropzoneCenterProps): ReactElement => {
   const ref = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(false);
   const theme = useContext(ThemeContext);
-  const { layer, dragLayer, dragLayerItem, setDragLayer, addLayerChild } = props;
+  const { layer, dragLayers, dragLayerById, setDragLayers, setDragging, addLayerChildren } = props;
 
   const handleDragOver = (e: SyntheticEvent) => {
-    if (!document.getElementById(dragLayer).contains(ref.current)) {
-      if (dragLayerItem.type === 'Artboard' && (layer.type === 'Artboard' || layer.type === 'Group')) {
+    if (!dragLayers.some((id) => document.getElementById(id).contains(ref.current))) {
+      if (dragLayers.some((id) => dragLayerById[id].type === 'Artboard') && (layer.type === 'Artboard' || layer.type === 'Group')) {
         return;
       } else {
         e.preventDefault();
@@ -38,12 +41,13 @@ const SidebarDropzoneCenter = (props: SidebarDropzoneCenterProps): ReactElement 
   const handleDrop = (e: SyntheticEvent) => {
     if (active) {
       e.preventDefault();
-      addLayerChild({
+      addLayerChildren({
         id: layer.id,
-        child: dragLayer
+        children: dragLayers
       });
     }
-    setDragLayer(null);
+    setDragLayers(null);
+    setDragging(false);
   }
 
   return (
@@ -63,11 +67,14 @@ const SidebarDropzoneCenter = (props: SidebarDropzoneCenterProps): ReactElement 
 
 const mapStateToProps = (state: RootState, ownProps: SidebarDropzoneCenterProps) => {
   const { layer } = state;
-  const dragLayerItem = layer.present.byId[ownProps.dragLayer];
-  return { dragLayerItem };
+  const dragLayerById = ownProps.dragLayers ? ownProps.dragLayers.reduce((result: {[id: string]: em.Layer}, current) => {
+    result[current] = layer.present.byId[current];
+    return result;
+  }, {}) : {};
+  return { dragLayerById };
 };
 
 export default connect(
   mapStateToProps,
-  { addLayerChild }
+  { addLayerChildren }
 )(SidebarDropzoneCenter);

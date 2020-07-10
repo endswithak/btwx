@@ -20,11 +20,14 @@ import {
   DESELECT_ALL_LAYERS,
   SET_LAYER_HOVER,
   ADD_LAYER_CHILD,
+  ADD_LAYER_CHILDREN,
   INSERT_LAYER_CHILD,
   SHOW_LAYER_CHILDREN,
   HIDE_LAYER_CHILDREN,
   INSERT_LAYER_ABOVE,
+  INSERT_LAYERS_ABOVE,
   INSERT_LAYER_BELOW,
+  INSERT_LAYERS_BELOW,
   INCREASE_LAYER_SCOPE,
   DECREASE_LAYER_SCOPE,
   NEW_LAYER_SCOPE,
@@ -153,11 +156,14 @@ import {
   DeselectLayersPayload,
   SetLayerHoverPayload,
   AddLayerChildPayload,
+  AddLayerChildrenPayload,
   InsertLayerChildPayload,
   ShowLayerChildrenPayload,
   HideLayerChildrenPayload,
   InsertLayerAbovePayload,
+  InsertLayersAbovePayload,
   InsertLayerBelowPayload,
+  InsertLayersBelowPayload,
   IncreaseLayerScopePayload,
   NewLayerScopePayload,
   GroupLayersPayload,
@@ -551,6 +557,11 @@ export const addLayerChild = (payload: AddLayerChildPayload): LayerTypes => ({
   payload
 });
 
+export const addLayerChildren = (payload: AddLayerChildrenPayload): LayerTypes => ({
+  type: ADD_LAYER_CHILDREN,
+  payload
+});
+
 export const insertLayerChild = (payload: InsertLayerChildPayload): LayerTypes => ({
   type: INSERT_LAYER_CHILD,
   payload
@@ -573,8 +584,18 @@ export const insertLayerAbove = (payload: InsertLayerAbovePayload): LayerTypes =
   payload
 });
 
+export const insertLayersAbove = (payload: InsertLayersAbovePayload): LayerTypes => ({
+  type: INSERT_LAYERS_ABOVE,
+  payload
+});
+
 export const insertLayerBelow = (payload: InsertLayerBelowPayload): LayerTypes => ({
   type: INSERT_LAYER_BELOW,
+  payload
+});
+
+export const insertLayersBelow = (payload: InsertLayersBelowPayload): LayerTypes => ({
+  type: INSERT_LAYERS_BELOW,
   payload
 });
 

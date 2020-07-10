@@ -122,6 +122,9 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
   }
 
   const handleImageClick = () => {
+    if (tool.type !== 'Selection') {
+      enableSelectionTool();
+    }
     ipcRenderer.send('addImage');
     ipcRenderer.once('addImage-reply', (event, arg) => {
       const buffer = Buffer.from(JSON.parse(arg).data);
