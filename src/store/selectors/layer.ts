@@ -1,6 +1,7 @@
 import paper from 'paper';
 import { LayerState } from '../reducers/layer';
 import { paperMain } from '../../canvas';
+import { bufferToBase64 } from '../../utils';
 
 export const getLayer = (store: LayerState, id: string): em.Layer => {
   return store.byId[id] as em.Layer;
@@ -38,15 +39,15 @@ export const getPagePaperLayer = (store: LayerState): paper.Item => {
   return getPaperLayer(page);
 }
 
-export const getLayerDescendants = (state: LayerState, layer: string): string[] => {
+export const getLayerDescendants = (state: LayerState, layer: string, fromClipboard?: boolean): string[] => {
   const groups: string[] = [layer];
   const layers: string[] = [];
   let i = 0;
   while(i < groups.length) {
-    const layer = state.byId[groups[i]];
+    const layer = fromClipboard ? state.clipboard.byId[groups[i]] : state.byId[groups[i]];
     if (layer.children) {
       layer.children.forEach((child) => {
-        const childLayer = state.byId[child];
+        const childLayer = fromClipboard ? state.clipboard.byId[child] : state.byId[child];
         if (childLayer.children && childLayer.children.length > 0) {
           groups.push(child);
         }
@@ -58,8 +59,8 @@ export const getLayerDescendants = (state: LayerState, layer: string): string[] 
   return layers;
 };
 
-export const getLayerAndDescendants = (state: LayerState, layer: string): string[] => {
-  const children = getLayerDescendants(state, layer);
+export const getLayerAndDescendants = (state: LayerState, layer: string, fromClipboard?: boolean): string[] => {
+  const children = getLayerDescendants(state, layer, fromClipboard);
   return [layer, ...children];
 };
 
@@ -188,25 +189,39 @@ export const getSelectionCenter = (store: LayerState): paper.Point => {
   return new paper.Point(xMid, yMid);
 }
 
-export const getClipboardTopLeft = (store: LayerState): paper.Point => {
+export const getClipboardTopLeft = (store: LayerState, canvasImages: {[id: string]: em.CanvasImage}): paper.Point => {
   const paperLayerPoints = store.clipboard.allIds.reduce((result, current) => {
-    const paperLayer = paperMain.project.importJSON(store.clipboard.byId[current].paperLayer);
+    const layerItem = store.clipboard.byId[current];
+    let paperLayerJSON = layerItem.paperLayer;
+    if (layerItem.type === 'Image') {
+      const buffer = Buffer.from(canvasImages[layerItem.imageId].buffer);
+      const base64 = `data:image/webp;base64,${bufferToBase64(buffer)}`;
+      paperLayerJSON = paperLayerJSON.replace(`"source":"${layerItem.imageId}"`, `"source":"${base64}"`);
+    }
+    const paperLayer = paperMain.project.importJSON(paperLayerJSON);
     return [...result, paperLayer.bounds.topLeft];
   }, []);
   return paperLayerPoints.reduce(paper.Point.min);
 }
 
-export const getClipboardBottomRight = (store: LayerState): paper.Point => {
+export const getClipboardBottomRight = (store: LayerState, canvasImages: {[id: string]: em.CanvasImage}): paper.Point => {
   const paperLayerPoints = store.clipboard.allIds.reduce((result, current) => {
-    const paperLayer = paperMain.project.importJSON(store.clipboard.byId[current].paperLayer);
+    const layerItem = store.clipboard.byId[current];
+    let paperLayerJSON = layerItem.paperLayer;
+    if (layerItem.type === 'Image') {
+      const buffer = Buffer.from(canvasImages[layerItem.imageId].buffer);
+      const base64 = `data:image/webp;base64,${bufferToBase64(buffer)}`;
+      paperLayerJSON = paperLayerJSON.replace(`"source":"${layerItem.imageId}"`, `"source":"${base64}"`);
+    }
+    const paperLayer = paperMain.project.importJSON(paperLayerJSON);
     return [...result, paperLayer.bounds.bottomRight];
   }, []);
   return paperLayerPoints.reduce(paper.Point.max);
 }
 
-export const getClipboardCenter = (store: LayerState): paper.Point => {
-  const topLeft = getClipboardTopLeft(store);
-  const bottomRight = getClipboardBottomRight(store);
+export const getClipboardCenter = (store: LayerState, canvasImages: {[id: string]: em.CanvasImage}): paper.Point => {
+  const topLeft = getClipboardTopLeft(store, canvasImages);
+  const bottomRight = getClipboardBottomRight(store, canvasImages);
   const xMid = (topLeft.x + bottomRight.x) / 2;
   const yMid = (topLeft.y + bottomRight.y) / 2;
   return new paper.Point(xMid, yMid);
@@ -719,6 +734,7 @@ export const exportProjectJSON = (state: LayerState, projectJSON: string): strin
     return result;
   }, {});
   return Object.keys(canvasImageBase64ById).reduce((result, current) => {
-    return result.replace(canvasImageBase64ById[current], current);
+    result = result.replace(canvasImageBase64ById[current], current);
+    return result;
   }, projectJSON);
 }

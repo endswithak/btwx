@@ -30,6 +30,10 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
     }
   }
 
+  const handleMouseUp = (e: SyntheticEvent) => {
+    setDragLayers(null);
+  }
+
   const handleDragStart = (e: SyntheticEvent) => {
     setDragging(true);
     e.dataTransfer.setDragImage(document.getElementById('sidebarDragGhosts'), 0, 0);
@@ -48,6 +52,7 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
       style={{
         opacity: !dragGhost && dragging && dragLayers && dragLayers.includes(layer) ? 0.5 : 1
       }}>

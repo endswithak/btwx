@@ -1061,17 +1061,20 @@ export const ungroupLayers = (state: LayerState, action: UngroupLayers): LayerSt
 const getClipboardLayerDescendants = (state: LayerState, id: string) => {
   const layer = state.byId[id];
   const paperLayer = getPaperLayer(id);
-  const getPaperLayerJSON = (paperItem: paper.Item) => {
-    switch(layer.type) {
+  const getPaperLayerJSON = (paperItem: paper.Item, layerItem: em.Layer) => {
+    switch(layerItem.type) {
       case 'Artboard':
       case 'Group': {
-        const clone = paperItem.clone({insert: false, deep: false});
+        const clone = paperItem.clone({insert: false});
+        layerItem.children.forEach((id) => {
+          clone.getItem({data: {id}}).remove();
+        });
         return clone.exportJSON();
       }
       case 'Image': {
         const imageJSON = paperItem.exportJSON();
         const imageSource = (paperItem.getItem({data: {id: 'Raster'}}) as paper.Raster).source;
-        return imageJSON.replace(`"source":"${imageSource}"`, `"source":"${paperItem.data.imageId}"`);
+        return imageJSON.replace(imageSource as string, paperItem.data.imageId);
       }
       default:
         return paperItem.exportJSON();
@@ -1083,7 +1086,7 @@ const getClipboardLayerDescendants = (state: LayerState, id: string) => {
     byId: {
       [id]: {
         ...layer,
-        paperLayer: getPaperLayerJSON(paperLayer)
+        paperLayer: getPaperLayerJSON(paperLayer, layer)
       }
     }
   };
@@ -1100,7 +1103,7 @@ const getClipboardLayerDescendants = (state: LayerState, id: string) => {
         clipboardLayerDescendants.allIds.push(child);
         clipboardLayerDescendants.byId[child] = {
           ...childLayer,
-          paperLayer: getPaperLayerJSON(childPaperLayer)
+          paperLayer: getPaperLayerJSON(childPaperLayer, childLayer)
         }
       });
     }
@@ -1201,7 +1204,7 @@ const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any, fro
       layer.children.forEach((child) => {
         const childLayer = fromClipboard ? state.clipboard.byId[child] : state.byId[child];
         const childPaperLayer = fromClipboard ? paperMain.project.importJSON((() => {
-          switch(layer.type) {
+          switch(childLayer.type) {
             case 'Image': {
               const imageBuffer = Buffer.from(canvasImages[childLayer.imageId].buffer);
               const imageBase64 = `data:image/webp;base64,${bufferToBase64(imageBuffer)}`;
@@ -1263,21 +1266,19 @@ const cloneLayerAndChildren = (state: LayerState, id: string, fromClipboard?: bo
   }, {allIds: [], byId: {}});
 }
 
-export const pasteLayerFromClipboard = (state: LayerState, id: string, pasteOverSelection?: boolean, canvasImages?: { [id: string]: em.CanvasImage }): LayerState => {
-  let currentState = state;
-  currentState = duplicateLayer(currentState, layerActions.duplicateLayer({id}) as DuplicateLayer, true, canvasImages);
-  const clonedLayerAndChildren = currentState.allIds.filter((id) => !state.allIds.includes(id));
+export const pasteLayerFromClipboard = (payload: {state: LayerState; id: string; pasteOverSelection?: boolean; canvasImages?: { [id: string]: em.CanvasImage }}): LayerState => {
+  let currentState = payload.state;
+  currentState = duplicateLayer(currentState, layerActions.duplicateLayer({id: payload.id}) as DuplicateLayer, true, payload.canvasImages);
+  const clonedLayerAndChildren = currentState.allIds.filter((id) => !payload.state.allIds.includes(id));
   // paste over selection is specified
-  if (pasteOverSelection && state.selected.length > 0) {
-    const selectionCenter = getSelectionCenter(state);
-    const clipboardCenter = getClipboardCenter(state);
-    currentState = clonedLayerAndChildren.reduce((result: LayerState, current: string) => {
-      const paperLayer = getPaperLayer(current);
-      const paperLayerCenter = paperLayer.position;
-      paperLayer.position.x = selectionCenter.x + (paperLayerCenter.x - clipboardCenter.x);
-      paperLayer.position.y = selectionCenter.y + (paperLayerCenter.y - clipboardCenter.y);
-      return moveLayerTo(result, layerActions.moveLayerTo({id: current, x: paperLayer.position.x, y: paperLayer.position.y}) as MoveLayerTo);
-    }, currentState);
+  if (payload.pasteOverSelection && payload.state.selected.length > 0) {
+    const selectionCenter = getSelectionCenter(payload.state);
+    const clipboardCenter = getClipboardCenter(payload.state, payload.canvasImages);
+    const paperLayer = getPaperLayer(clonedLayerAndChildren[0]);
+    const paperLayerCenter = paperLayer.position;
+    paperLayer.position.x = selectionCenter.x + (paperLayerCenter.x - clipboardCenter.x);
+    paperLayer.position.y = selectionCenter.y + (paperLayerCenter.y - clipboardCenter.y);
+    currentState = moveLayerTo(currentState, layerActions.moveLayerTo({id: clonedLayerAndChildren[0], x: paperLayer.position.x, y: paperLayer.position.y}) as MoveLayerTo);
   }
   return currentState;
 };
@@ -1286,7 +1287,12 @@ export const pasteLayersFromClipboard = (state: LayerState, action: PasteLayersF
   let currentState = state;
   if (state.clipboard.allIds.length > 0) {
     currentState = currentState.clipboard.main.reduce((result: LayerState, current: string) => {
-      return pasteLayerFromClipboard(result, current, action.payload.overSelection, action.payload.canvasImageById);
+      return pasteLayerFromClipboard({
+        state: result,
+        id: current,
+        pasteOverSelection: action.payload.overSelection,
+        canvasImages: action.payload.canvasImageById
+      });
     }, state);
     if (state.selected.length > 0) {
       currentState = deselectLayers(currentState, layerActions.deselectLayers({layers: state.selected}) as DeselectLayers);
@@ -1314,7 +1320,7 @@ export const updateParentBounds = (state: LayerState, id: string): LayerState =>
           }
         }
       },
-      paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
+      paperProject: exportProjectJSON(result, paperMain.project.exportJSON())
     }
     return result;
   }, state);
@@ -1339,7 +1345,7 @@ export const updateChildrenBounds = (state: LayerState, id: string): LayerState 
           }
         }
       },
-      paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
+      paperProject: exportProjectJSON(result, paperMain.project.exportJSON())
     }
     return result;
   }, state);
