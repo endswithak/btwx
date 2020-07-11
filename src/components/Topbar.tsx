@@ -128,7 +128,7 @@ const Topbar = (props: TopbarStateProps): ReactElement => {
     ipcRenderer.send('addImage');
     ipcRenderer.once('addImage-reply', (event, arg) => {
       const buffer = Buffer.from(JSON.parse(arg).data);
-      const exists = allCanvasImageIds.length > 0 && allCanvasImageIds.find((id) => canvasImagesById[id].buffer.equals(buffer));
+      const exists = allCanvasImageIds.length > 0 && allCanvasImageIds.find((id) => Buffer.from(canvasImagesById[id].buffer).equals(buffer));
       const base64 = bufferToBase64(buffer);
       const paperLayer = new paperMain.Raster(`data:image/webp;base64,${base64}`);
       paperLayer.position = paperMain.view.center;

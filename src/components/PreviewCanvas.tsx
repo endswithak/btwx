@@ -10,6 +10,7 @@ import { getLongestEventTween, getPositionInArtboard, getAllArtboardTweenEvents,
 import { gsap } from 'gsap';
 import { MorphSVGPlugin } from "gsap/MorphSVGPlugin";
 import chroma from 'chroma-js';
+import { bufferToBase64 } from '../utils';
 
 gsap.registerPlugin(MorphSVGPlugin);
 
@@ -597,6 +598,11 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
 
 const mapStateToProps = (state: RootState) => {
   const { layer, canvasSettings } = state;
+  const paperProject = canvasSettings.allImageIds.reduce((result, current) => {
+    const rasterBase64 = bufferToBase64(Buffer.from(canvasSettings.imageById[current].buffer));
+    const base64 = `data:image/webp;base64,${rasterBase64}`;
+    return result.replace(`"source":"${current}"`, `"source":"${base64}"`);
+  }, layer.present.paperProject);
   const tweenEvents = getAllArtboardTweenEvents(layer.present, layer.present.activeArtboard);
   const tweenEventDestinations = getAllArtboardTweenEventDestinations(layer.present, layer.present.activeArtboard);
   const tweenEventLayers = getAllArtboardTweenEventLayers(layer.present, layer.present.activeArtboard);
@@ -605,9 +611,9 @@ const mapStateToProps = (state: RootState) => {
   const tweenLayerDestinations = getAllArtboardTweenLayerDestinations(layer.present, layer.present.activeArtboard);
   const canvasImagesById = canvasSettings.imageById;
   return {
-    paperProject: layer.present.paperProject,
     activeArtboard: layer.present.byId[layer.present.activeArtboard],
     page: layer.present.page,
+    paperProject,
     tweenEvents,
     tweenEventLayers,
     tweenEventDestinations,

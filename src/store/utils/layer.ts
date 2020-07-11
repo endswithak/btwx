@@ -44,7 +44,7 @@ import {
   getTweensByDestinationLayer, getAllArtboardTweenEventDestinations, getAllArtboardTweenLayerDestinations,
   getAllArtboardTweenEvents, getTweensEventsByDestinationArtboard, getTweensByLayer, getLayersBounds,
   getGradientOriginPoint, getGradientDestinationPoint, getGradientStops, getLayerSnapPoints, getInViewSnapPoints,
-  orderLayersByDepth, orderLayersByLeft, orderLayersByTop
+  orderLayersByDepth, orderLayersByLeft, orderLayersByTop, exportProjectJSON
 } from '../selectors/layer';
 
 import { paperMain } from '../../canvas';
@@ -55,6 +55,7 @@ import { applyArtboardMethods } from '../../canvas/artboardUtils';
 import { applyImageMethods } from '../../canvas/imageUtils';
 
 import { THEME_PRIMARY_COLOR } from '../../constants';
+import { bufferToBase64 } from '../../utils';
 
 export const addPage = (state: LayerState, action: AddPage): LayerState => {
   return {
@@ -65,7 +66,7 @@ export const addPage = (state: LayerState, action: AddPage): LayerState => {
       [action.payload.id]: action.payload as em.Page
     },
     page: action.payload.id,
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(state, paperMain.project.exportJSON())
   }
 };
 
@@ -88,7 +89,7 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
       } as em.Page
     },
     allArtboardIds: addItem(currentState.allArtboardIds, action.payload.id),
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
@@ -132,7 +133,7 @@ export const addShape = (state: LayerState, action: AddShape): LayerState => {
       } as em.Group
     },
     allShapeIds: addItem(state.allShapeIds, action.payload.id),
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
@@ -161,7 +162,7 @@ export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
       } as em.Group
     },
     allGroupIds: addItem(state.allGroupIds, action.payload.id),
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
@@ -191,7 +192,7 @@ export const addText = (state: LayerState, action: AddText): LayerState => {
       } as em.Group
     },
     allTextIds: addItem(state.allTextIds, action.payload.id),
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, exportProjectJSON(currentState, paperMain.project.exportJSON()))
   }
   if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
@@ -203,6 +204,7 @@ export const addImage = (state: LayerState, action: AddImage): LayerState => {
   let currentState = state;
   const layerParent = action.payload.parent ? action.payload.parent : currentState.page;
   const paperLayer = getPaperLayer(action.payload.id);
+  const raster = paperLayer.getItem({data: {id: 'Raster'}}) as paper.Raster;
   paperLayer.parent = getPaperLayer(layerParent);
   currentState = {
     ...currentState,
@@ -220,7 +222,7 @@ export const addImage = (state: LayerState, action: AddImage): LayerState => {
       } as em.Group
     },
     allImageIds: addItem(state.allImageIds, action.payload.id),
-    paperProject: paperMain.project.exportJSON()
+    paperProject: paperMain.project.exportJSON().replace(raster.source as string, action.payload.imageId)
   }
   if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
@@ -327,7 +329,7 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
       }
       return result;
     }, {}),
-    paperProject: paperMain.project.exportJSON(),
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON()),
     scope: currentState.scope.filter((id) => !layersToRemove.includes(id))
   }
 };
@@ -667,7 +669,7 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
           children: addItem(removeItem((currentState.byId[action.payload.id] as em.Group).children, action.payload.child), action.payload.child)
         } as em.Group
       },
-      paperProject: paperMain.project.exportJSON()
+      paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
     };
   } else {
     if (child.mask) {
@@ -699,7 +701,7 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
           children: addItem((currentState.byId[action.payload.id] as em.Group).children, action.payload.child)
         } as em.Group
       },
-      paperProject: paperMain.project.exportJSON()
+      paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
     };
   }
   return selectLayer(currentState, layerActions.selectLayer({id: action.payload.child, newSelection: true}) as SelectLayer);
@@ -735,7 +737,7 @@ export const insertLayerChild = (state: LayerState, action: InsertLayerChild): L
           children: insertItem(removeItem((currentState.byId[action.payload.id] as em.Group).children, action.payload.child), action.payload.child, action.payload.index)
         } as em.Group
       },
-      paperProject: paperMain.project.exportJSON()
+      paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
     };
   } else {
     if (child.mask) {
@@ -766,7 +768,7 @@ export const insertLayerChild = (state: LayerState, action: InsertLayerChild): L
           children: insertItem((currentState.byId[action.payload.id] as em.Group).children, action.payload.child, action.payload.index)
         } as em.Group
       },
-      paperProject: paperMain.project.exportJSON()
+      paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
     };
   }
   return selectLayer(currentState, layerActions.selectLayer({id: action.payload.child, newSelection: true}) as SelectLayer);
@@ -840,7 +842,7 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
           children: insertItem((currentState.byId[above.parent] as em.Group).children, action.payload.id, aboveIndex)
         } as em.Group
       },
-      paperProject: paperMain.project.exportJSON()
+      paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
     };
   } else {
     if (layer.masked && above.mask) {
@@ -855,7 +857,7 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
           children: moveItemAbove(currentState.byId[layer.parent].children, layerIndex, aboveIndex)
         } as em.Group
       },
-      paperProject: paperMain.project.exportJSON()
+      paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
     };
   }
   return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
@@ -910,7 +912,7 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
           children: insertItem((currentState.byId[below.parent] as em.Group).children, action.payload.id, belowIndex + 1)
         } as em.Group
       },
-      paperProject: paperMain.project.exportJSON()
+      paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
     };
   } else {
     if (layer.mask && below.masked) {
@@ -925,7 +927,7 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
           children: moveItemBelow(currentState.byId[layer.parent].children, layerIndex, belowIndex)
         } as em.Group
       },
-      paperProject: paperMain.project.exportJSON()
+      paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
     };
   }
   return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
@@ -1059,13 +1061,29 @@ export const ungroupLayers = (state: LayerState, action: UngroupLayers): LayerSt
 const getClipboardLayerDescendants = (state: LayerState, id: string) => {
   const layer = state.byId[id];
   const paperLayer = getPaperLayer(id);
+  const getPaperLayerJSON = (paperItem: paper.Item) => {
+    switch(layer.type) {
+      case 'Artboard':
+      case 'Group': {
+        const clone = paperItem.clone({insert: false, deep: false});
+        return clone.exportJSON();
+      }
+      case 'Image': {
+        const imageJSON = paperItem.exportJSON();
+        const imageSource = (paperItem.getItem({data: {id: 'Raster'}}) as paper.Raster).source;
+        return imageJSON.replace(`"source":"${imageSource}"`, `"source":"${paperItem.data.imageId}"`);
+      }
+      default:
+        return paperItem.exportJSON();
+    }
+  }
   const groups: string[] = [id];
   const clipboardLayerDescendants: {allIds: string[]; byId: {[id: string]: em.ClipboardLayer}} = {
     allIds: [id],
     byId: {
       [id]: {
         ...layer,
-        paperLayer: paperLayer.exportJSON()
+        paperLayer: getPaperLayerJSON(paperLayer)
       }
     }
   };
@@ -1082,7 +1100,7 @@ const getClipboardLayerDescendants = (state: LayerState, id: string) => {
         clipboardLayerDescendants.allIds.push(child);
         clipboardLayerDescendants.byId[child] = {
           ...childLayer,
-          paperLayer: childPaperLayer.exportJSON()
+          paperLayer: getPaperLayerJSON(childPaperLayer)
         }
       });
     }
@@ -1135,8 +1153,19 @@ const getLayerCloneMap = (state: LayerState, id: string, fromClipboard?: boolean
   return layerCloneMap;
 }
 
-const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any, fromClipboard?: boolean) => {
-  const paperLayer = fromClipboard ? paperMain.project.importJSON(state.clipboard.byId[id].paperLayer) : getPaperLayer(id);
+const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any, fromClipboard?: boolean, canvasImages?: { [id: string]: em.CanvasImage }) => {
+  const paperLayer = fromClipboard ? paperMain.project.importJSON((() => {
+    const layer = state.clipboard.byId[id];
+    switch(layer.type) {
+      case 'Image': {
+        const imageBuffer = Buffer.from(canvasImages[layer.imageId].buffer);
+        const imageBase64 = `data:image/webp;base64,${bufferToBase64(imageBuffer)}`;
+        return layer.paperLayer.replace(`"source":"${layer.imageId}"`, `"source":"${imageBase64}"`);
+      }
+      default:
+        return layer.paperLayer;
+    }
+  })()) : getPaperLayer(id);
   const parentLayer = getLayer(state, state.scope.length > 0 ? state.scope[state.scope.length - 1] : state.page);
   const paperParentLayer = getPaperLayer(parentLayer.id);
   const paperLayerClone = paperLayer.clone({deep: false, insert: true});
@@ -1171,7 +1200,17 @@ const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any, fro
     if (layer.children) {
       layer.children.forEach((child) => {
         const childLayer = fromClipboard ? state.clipboard.byId[child] : state.byId[child];
-        const childPaperLayer = fromClipboard ? paperMain.project.importJSON(childLayer.paperLayer) : getPaperLayer(child);
+        const childPaperLayer = fromClipboard ? paperMain.project.importJSON((() => {
+          switch(layer.type) {
+            case 'Image': {
+              const imageBuffer = Buffer.from(canvasImages[childLayer.imageId].buffer);
+              const imageBase64 = `data:image/webp;base64,${bufferToBase64(imageBuffer)}`;
+              return childLayer.paperLayer.replace(`"source":"${childLayer.imageId}"`, `"source":"${imageBase64}"`);
+            }
+            default:
+              return childLayer.paperLayer;
+          }
+        })()) : getPaperLayer(child);
         const childPaperLayerClone = childPaperLayer.clone({deep: false, insert: true});
         childPaperLayerClone.data.id = layerCloneMap[child];
         childPaperLayerClone.parent = groupClonePaperLayer;
@@ -1196,9 +1235,9 @@ const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any, fro
   }
 }
 
-const cloneLayerAndChildren = (state: LayerState, id: string, fromClipboard?: boolean) => {
+const cloneLayerAndChildren = (state: LayerState, id: string, fromClipboard?: boolean, canvasImages?: { [id: string]: em.CanvasImage }) => {
   const layerCloneMap = getLayerCloneMap(state, id, fromClipboard);
-  clonePaperLayers(state, id, layerCloneMap, fromClipboard);
+  clonePaperLayers(state, id, layerCloneMap, fromClipboard, canvasImages);
   const rootLayer = fromClipboard ? state.clipboard.byId[id] : state.byId[id];
   const rootParent = getLayer(state, state.scope.length > 0 ? state.scope[state.scope.length - 1] : state.page);
   return Object.keys(layerCloneMap).reduce((result: any, key: string, index: number) => {
@@ -1224,9 +1263,9 @@ const cloneLayerAndChildren = (state: LayerState, id: string, fromClipboard?: bo
   }, {allIds: [], byId: {}});
 }
 
-export const pasteLayerFromClipboard = (state: LayerState, id: string, pasteOverSelection?: boolean): LayerState => {
+export const pasteLayerFromClipboard = (state: LayerState, id: string, pasteOverSelection?: boolean, canvasImages?: { [id: string]: em.CanvasImage }): LayerState => {
   let currentState = state;
-  currentState = duplicateLayer(currentState, layerActions.duplicateLayer({id}) as DuplicateLayer, true);
+  currentState = duplicateLayer(currentState, layerActions.duplicateLayer({id}) as DuplicateLayer, true, canvasImages);
   const clonedLayerAndChildren = currentState.allIds.filter((id) => !state.allIds.includes(id));
   // paste over selection is specified
   if (pasteOverSelection && state.selected.length > 0) {
@@ -1247,7 +1286,7 @@ export const pasteLayersFromClipboard = (state: LayerState, action: PasteLayersF
   let currentState = state;
   if (state.clipboard.allIds.length > 0) {
     currentState = currentState.clipboard.main.reduce((result: LayerState, current: string) => {
-      return pasteLayerFromClipboard(result, current, action.payload.overSelection);
+      return pasteLayerFromClipboard(result, current, action.payload.overSelection, action.payload.canvasImageById);
     }, state);
     if (state.selected.length > 0) {
       currentState = deselectLayers(currentState, layerActions.deselectLayers({layers: state.selected}) as DeselectLayers);
@@ -1275,7 +1314,7 @@ export const updateParentBounds = (state: LayerState, id: string): LayerState =>
           }
         }
       },
-      paperProject: paperMain.project.exportJSON()
+      paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
     }
     return result;
   }, state);
@@ -1300,7 +1339,7 @@ export const updateChildrenBounds = (state: LayerState, id: string): LayerState 
           }
         }
       },
-      paperProject: paperMain.project.exportJSON()
+      paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
     }
     return result;
   }, state);
@@ -1323,7 +1362,7 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   currentState = updateLayerInView(currentState, id);
   currentState = updateParentBounds(currentState, id);
@@ -1351,7 +1390,7 @@ export const moveLayer = (state: LayerState, action: MoveLayer): LayerState => {
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   //currentState = updateLayerTweens(currentState, action.payload.id);
   return updateParentBounds(currentState, action.payload.id);
@@ -1381,7 +1420,7 @@ export const moveLayerTo = (state: LayerState, action: MoveLayerTo): LayerState 
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   //currentState = updateLayerTweens(currentState, action.payload.id);
   return updateParentBounds(currentState, action.payload.id);
@@ -1412,7 +1451,7 @@ export const moveLayerBy = (state: LayerState, action: MoveLayerBy): LayerState 
   //       }
   //     }
   //   },
-  //   paperProject: paperMain.project.exportJSON()
+  //   paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   // }
   // //currentState = updateLayerTweens(currentState, action.payload.id);
   // currentState = updateParentBounds(currentState, action.payload.id);
@@ -1472,7 +1511,7 @@ export const addLayerTweenEvent = (state: LayerState, action: AddLayerTweenEvent
       ...currentState.tweenEventById,
       [action.payload.id]: action.payload as em.TweenEvent
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   // add animation event tweens
   return artboardChildren.reduce((result, current) => {
@@ -1539,7 +1578,7 @@ export const removeLayerTweenEvent = (state: LayerState, action: RemoveLayerTwee
       }
       return result;
     }, {}),
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   // return final state
   return currentState;
@@ -1567,7 +1606,7 @@ export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerSt
       ...state.tweenById,
       [action.payload.id]: action.payload as em.Tween
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
 };
 
@@ -1596,7 +1635,7 @@ export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): L
       }
       return result;
     }, {}),
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
 };
 
@@ -1657,7 +1696,7 @@ export const setLayerTweenDuration = (state: LayerState, action: SetLayerTweenDu
         duration: Math.round((action.payload.duration + Number.EPSILON) * 100) / 100
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
 };
 
@@ -1671,7 +1710,7 @@ export const incrementLayerTweenDuration = (state: LayerState, action: Increment
         duration: Math.round(((state.tweenById[action.payload.id].duration + (0.01 * (action.payload.factor ? action.payload.factor : 1))) + Number.EPSILON) * 100) / 100
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
 };
 
@@ -1685,7 +1724,7 @@ export const decrementLayerTweenDuration = (state: LayerState, action: Decrement
         duration: Math.round(((state.tweenById[action.payload.id].duration - (0.01 * (action.payload.factor ? action.payload.factor : 1))) + Number.EPSILON) * 100) / 100
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
 };
 
@@ -1699,7 +1738,7 @@ export const setLayerTweenDelay = (state: LayerState, action: SetLayerTweenDelay
         delay: Math.round((action.payload.delay + Number.EPSILON) * 100) / 100
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
 };
 
@@ -1713,7 +1752,7 @@ export const incrementLayerTweenDelay = (state: LayerState, action: IncrementLay
         delay: Math.round(((state.tweenById[action.payload.id].delay + (0.01 * (action.payload.factor ? action.payload.factor : 1))) + Number.EPSILON) * 100) / 100
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
 };
 
@@ -1727,7 +1766,7 @@ export const decrementLayerTweenDelay = (state: LayerState, action: DecrementLay
         delay: Math.round(((state.tweenById[action.payload.id].delay - (0.01 * (action.payload.factor ? action.payload.factor : 1))) + Number.EPSILON) * 100) / 100
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
 };
 
@@ -1741,7 +1780,7 @@ export const setLayerTweenEase = (state: LayerState, action: SetLayerTweenEase):
         ease: action.payload.ease
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
 };
 
@@ -1755,7 +1794,7 @@ export const setLayerTweenPower = (state: LayerState, action: SetLayerTweenPower
         power: action.payload.power
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
 };
 
@@ -1773,7 +1812,7 @@ export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   //updateActiveArtboardFrame(currentState.activeArtboard);
   updateSelectionFrame(currentState);
@@ -1794,7 +1833,7 @@ export const setLayerY = (state: LayerState, action: SetLayerY): LayerState => {
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   //updateActiveArtboardFrame(currentState.activeArtboard);
   updateSelectionFrame(currentState);
@@ -1815,7 +1854,7 @@ export const setLayerWidth = (state: LayerState, action: SetLayerWidth): LayerSt
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   //updateActiveArtboardFrame(currentState.activeArtboard);
   updateSelectionFrame(currentState);
@@ -1836,7 +1875,7 @@ export const setLayerHeight = (state: LayerState, action: SetLayerHeight): Layer
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   //updateActiveArtboardFrame(currentState.activeArtboard);
   updateSelectionFrame(currentState);
@@ -1857,7 +1896,7 @@ export const setLayerOpacity = (state: LayerState, action: SetLayerOpacity): Lay
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -1876,7 +1915,7 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   //updateActiveArtboardFrame(currentState.activeArtboard);
   updateSelectionFrame(currentState);
@@ -1897,7 +1936,7 @@ export const enableLayerHorizontalFlip = (state: LayerState, action: EnableLayer
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return updateParentBounds(currentState, action.payload.id);
 };
@@ -1916,7 +1955,7 @@ export const disableLayerHorizontalFlip = (state: LayerState, action: DisableLay
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return updateParentBounds(currentState, action.payload.id);
 };
@@ -1935,7 +1974,7 @@ export const enableLayerVerticalFlip = (state: LayerState, action: EnableLayerVe
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return updateParentBounds(currentState, action.payload.id);
 };
@@ -1954,7 +1993,7 @@ export const disableLayerVerticalFlip = (state: LayerState, action: DisableLayer
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return updateParentBounds(currentState, action.payload.id);
 };
@@ -1993,7 +2032,7 @@ export const enableLayerFill = (state: LayerState, action: EnableLayerFill): Lay
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2017,7 +2056,7 @@ export const disableLayerFill = (state: LayerState, action: DisableLayerFill): L
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2041,7 +2080,7 @@ export const setLayerFillColor = (state: LayerState, action: SetLayerFillColor):
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2080,7 +2119,7 @@ export const enableLayerStroke = (state: LayerState, action: EnableLayerStroke):
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2104,7 +2143,7 @@ export const disableLayerStroke = (state: LayerState, action: DisableLayerStroke
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2128,7 +2167,7 @@ export const setLayerStrokeColor = (state: LayerState, action: SetLayerStrokeCol
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2168,7 +2207,7 @@ export const setLayerStrokeFillType = (state: LayerState, action: SetLayerStroke
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2199,7 +2238,7 @@ export const setLayerStrokeGradient = (state: LayerState, action: SetLayerStroke
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2233,7 +2272,7 @@ export const setLayerStrokeGradientType = (state: LayerState, action: SetLayerSt
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2257,7 +2296,7 @@ export const setLayerStrokeWidth = (state: LayerState, action: SetLayerStrokeWid
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2281,7 +2320,7 @@ export const setLayerStrokeCap = (state: LayerState, action: SetLayerStrokeCap):
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2305,7 +2344,7 @@ export const setLayerStrokeJoin = (state: LayerState, action: SetLayerStrokeJoin
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2329,7 +2368,7 @@ export const setLayerStrokeDashArray = (state: LayerState, action: SetLayerStrok
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2351,7 +2390,7 @@ export const setLayerStrokeMiterLimit = (state: LayerState, action: SetLayerStro
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2379,7 +2418,7 @@ export const enableLayerShadow = (state: LayerState, action: EnableLayerShadow):
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2403,7 +2442,7 @@ export const disableLayerShadow = (state: LayerState, action: DisableLayerShadow
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2427,7 +2466,7 @@ export const setLayerShadowColor = (state: LayerState, action: SetLayerShadowCol
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2451,7 +2490,7 @@ export const setLayerShadowBlur = (state: LayerState, action: SetLayerShadowBlur
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2478,7 +2517,7 @@ export const setLayerShadowXOffset = (state: LayerState, action: SetLayerShadowX
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2505,7 +2544,7 @@ export const setLayerShadowYOffset = (state: LayerState, action: SetLayerShadowY
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2534,7 +2573,7 @@ export const resizeLayer = (state: LayerState, action: ResizeLayer): LayerState 
           }
         } as em.Shape
       },
-      paperProject: paperMain.project.exportJSON()
+      paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
     }
   } else {
     currentState = {
@@ -2550,7 +2589,7 @@ export const resizeLayer = (state: LayerState, action: ResizeLayer): LayerState 
           }
         }
       },
-      paperProject: paperMain.project.exportJSON()
+      paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
@@ -2579,7 +2618,7 @@ export const setLayerText = (state: LayerState, action: SetLayerText): LayerStat
         text: action.payload.text
       } as em.Text
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   updateSelectionFrame(currentState);
   return updateLayerBounds(currentState, action.payload.id);
@@ -2601,7 +2640,7 @@ export const setLayerFontSize = (state: LayerState, action: SetLayerFontSize): L
         }
       } as em.Text
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   updateSelectionFrame(currentState);
   return updateLayerBounds(currentState, action.payload.id);
@@ -2623,7 +2662,7 @@ export const setLayerFontWeight = (state: LayerState, action: SetLayerFontWeight
         }
       } as em.Text
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   updateSelectionFrame(currentState);
   return updateLayerBounds(currentState, action.payload.id);
@@ -2645,7 +2684,7 @@ export const setLayerFontFamily = (state: LayerState, action: SetLayerFontFamily
         }
       } as em.Text
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   updateSelectionFrame(currentState);
   return updateLayerBounds(currentState, action.payload.id);
@@ -2667,7 +2706,7 @@ export const setLayerLeading = (state: LayerState, action: SetLayerLeading): Lay
         }
       } as em.Text
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   updateSelectionFrame(currentState);
   return updateLayerBounds(currentState, action.payload.id);
@@ -2728,7 +2767,7 @@ export const setLayerJustification = (state: LayerState, action: SetLayerJustifi
         }
       } as em.Text
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   updateSelectionFrame(currentState);
   return updateLayerBounds(currentState, action.payload.id);
@@ -2849,7 +2888,7 @@ export const setLayerFill = (state: LayerState, action: SetLayerFill): LayerStat
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2889,7 +2928,7 @@ export const setLayerFillType = (state: LayerState, action: SetLayerFillType): L
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2920,7 +2959,7 @@ export const setLayerFillGradient = (state: LayerState, action: SetLayerFillGrad
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2954,7 +2993,7 @@ export const setLayerFillGradientType = (state: LayerState, action: SetLayerFill
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -2981,7 +3020,7 @@ export const setLayerFillGradientOrigin = (state: LayerState, action: SetLayerFi
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -3008,7 +3047,7 @@ export const setLayerFillGradientDestination = (state: LayerState, action: SetLa
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -3040,7 +3079,7 @@ export const setLayerFillGradientStopColor = (state: LayerState, action: SetLaye
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -3072,7 +3111,7 @@ export const setLayerFillGradientStopPosition = (state: LayerState, action: SetL
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -3097,7 +3136,7 @@ export const addLayerFillGradientStop = (state: LayerState, action: AddLayerFill
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   const paperLayer = getPaperLayer(action.payload.id);
   const layerItem = currentState.byId[action.payload.id];
@@ -3137,7 +3176,7 @@ export const removeLayerFillGradientStop = (state: LayerState, action: RemoveLay
         }
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   const paperLayer = getPaperLayer(action.payload.id);
   const layerItem = currentState.byId[action.payload.id];
@@ -3238,7 +3277,7 @@ export const maskLayer = (state: LayerState, action: MaskLayer): LayerState => {
         masked: true
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -3260,7 +3299,7 @@ export const unmaskLayer = (state: LayerState, action: UnmaskLayer): LayerState 
         masked: false
       }
     },
-    paperProject: paperMain.project.exportJSON()
+    paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
   }
   return currentState;
 };
@@ -3397,9 +3436,9 @@ export const distributeLayersVertically = (state: LayerState, action: Distribute
   return currentState;
 };
 
-export const duplicateLayer = (state: LayerState, action: DuplicateLayer, fromClipboard?: boolean): LayerState => {
+export const duplicateLayer = (state: LayerState, action: DuplicateLayer, fromClipboard?: boolean, canvasImages?: { [id: string]: em.CanvasImage }): LayerState => {
   let currentState = state;
-  const clonedLayerAndChildren = cloneLayerAndChildren(currentState, action.payload.id, fromClipboard);
+  const clonedLayerAndChildren = cloneLayerAndChildren(currentState, action.payload.id, fromClipboard, canvasImages);
   const rootLayer = clonedLayerAndChildren.byId[clonedLayerAndChildren.allIds[0]];
   currentState = clonedLayerAndChildren.allIds.reduce((result: LayerState, current: string, index: number) => {
     const layer = clonedLayerAndChildren.byId[current];
@@ -3451,7 +3490,7 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer, fromCl
           children: index === 0 ? addItem(result.byId[layerParent.id].children, current) : result.byId[layerParent.id].children
         }
       },
-      paperProject: paperMain.project.exportJSON()
+      paperProject: exportProjectJSON(currentState, paperMain.project.exportJSON())
     }
   }, currentState);
   // select layer

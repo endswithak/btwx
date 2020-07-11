@@ -710,3 +710,15 @@ export const compareFills = (f1: em.Fill, f2: em.Fill): boolean => {
          f1.color === f2.color &&
          compareGradients(f1.gradient, f2.gradient);
 };
+
+export const exportProjectJSON = (state: LayerState, projectJSON: string): string => {
+  const canvasImageBase64ById = state.allImageIds.reduce((result: { [id: string]: string }, current) => {
+    const layer = state.byId[current] as em.Image;
+    const paperLayer = getPaperLayer(current).getItem({data: {id: 'Raster'}}) as paper.Raster;
+    result[layer.imageId] = paperLayer.source as string;
+    return result;
+  }, {});
+  return Object.keys(canvasImageBase64ById).reduce((result, current) => {
+    return result.replace(canvasImageBase64ById[current], current);
+  }, projectJSON);
+}

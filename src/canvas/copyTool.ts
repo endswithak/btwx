@@ -1,4 +1,4 @@
-import { getPaperLayer } from '../store/selectors/layer';
+import { getPaperLayer, getLayerAndDescendants } from '../store/selectors/layer';
 import { copyLayersToClipboard, pasteLayersFromClipboard } from '../store/actions/layer';
 import store from '../store';
 import { ActionCreators } from 'redux-undo';
@@ -8,6 +8,7 @@ import { applyArtboardMethods } from './artboardUtils';
 import { applyTextMethods } from './textUtils';
 import { applyImageMethods } from './imageUtils';
 import { paperMain } from './index';
+import { bufferToBase64 } from '../utils';
 
 class CopyTool {
   shiftModifier: boolean;
@@ -27,7 +28,12 @@ class CopyTool {
             store.dispatch(ActionCreators.redo());
             paperMain.project.clear();
             const state = store.getState();
-            paperMain.project.importJSON(state.layer.present.paperProject);
+            const paperProject = state.canvasSettings.allImageIds.reduce((result, current) => {
+              const rasterBase64 = bufferToBase64(Buffer.from(state.canvasSettings.imageById[current].buffer));
+              const base64 = `data:image/webp;base64,${rasterBase64}`;
+              return result.replace(`"source":"${current}"`, `"source":"${base64}"`);
+            }, state.layer.present.paperProject);
+            paperMain.project.importJSON(paperProject);
             state.layer.present.allShapeIds.forEach((shapeId) => {
               applyShapeMethods(getPaperLayer(shapeId));
             });
@@ -49,7 +55,12 @@ class CopyTool {
             store.dispatch(ActionCreators.undo());
             paperMain.project.clear();
             const state = store.getState();
-            paperMain.project.importJSON(state.layer.present.paperProject);
+            const paperProject = state.canvasSettings.allImageIds.reduce((result, current) => {
+              const rasterBase64 = bufferToBase64(Buffer.from(state.canvasSettings.imageById[current].buffer));
+              const base64 = `data:image/webp;base64,${rasterBase64}`;
+              return result.replace(`"source":"${current}"`, `"source":"${base64}"`);
+            }, state.layer.present.paperProject);
+            paperMain.project.importJSON(paperProject);
             state.layer.present.allShapeIds.forEach((shapeId) => {
               applyShapeMethods(getPaperLayer(shapeId));
             });
@@ -80,11 +91,20 @@ class CopyTool {
       case 'v': {
         const state = store.getState();
         if (event.modifiers.meta && state.layer.present.clipboard.allIds.length > 0) {
-          if (event.modifiers.shift) {
-            store.dispatch(pasteLayersFromClipboard({overSelection: true}));
-          } else {
-            store.dispatch(pasteLayersFromClipboard({overSelection: false}));
-          }
+          const canvasImages = state.layer.present.clipboard.allIds.reduce((result, current) => {
+            const layerAndDescendants = getLayerAndDescendants(state.layer.present, current);
+            layerAndDescendants.forEach((id) => {
+              if (state.layer.present.byId[id].type === 'Image') {
+                const imageId = (state.layer.present.byId[id] as em.Image).imageId;
+                result[imageId] = state.canvasSettings.imageById[imageId];
+              }
+            });
+            return result;
+          }, {});
+          store.dispatch(pasteLayersFromClipboard({
+            overSelection: event.modifiers.shift,
+            canvasImageById: canvasImages
+          }));
         }
         break;
       }

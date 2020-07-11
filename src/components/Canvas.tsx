@@ -17,7 +17,7 @@ import { setCanvasMatrix } from '../store/actions/canvasSettings';
 import { LayerTypes } from '../store/actionTypes/layer';
 import { updateInViewLayers } from '../store/actions/layer';
 import { CanvasSettingsState } from '../store/reducers/canvasSettings';
-import { debounce } from '../utils';
+import { debounce, bufferToBase64 } from '../utils';
 
 interface CanvasProps {
   drawing: boolean;
@@ -98,7 +98,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
       applyTextMethods(getPaperLayer(textId));
     });
     allImageIds.forEach((imageId) => {
-      const raster = getPaperLayer(imageId).getItem({data: {id: 'Raster'}});
+      const raster = getPaperLayer(imageId).getItem({data: {id: 'Raster'}}) as paper.Raster;
       applyImageMethods(raster);
     });
     if (canvasSettings.matrix) {
@@ -124,16 +124,21 @@ const Canvas = (props: CanvasProps): ReactElement => {
 
 const mapStateToProps = (state: RootState) => {
   const { layer, tool, canvasSettings } = state;
+  const paperProject = canvasSettings.allImageIds.reduce((result, current) => {
+    const rasterBase64 = bufferToBase64(Buffer.from(canvasSettings.imageById[current].buffer));
+    const base64 = `data:image/webp;base64,${rasterBase64}`;
+    return result.replace(`"source":"${current}"`, `"source":"${base64}"`);
+  }, layer.present.paperProject);
   return {
     activeArtboard: layer.present.activeArtboard,
-    paperProject: layer.present.paperProject,
     drawing: tool.type === 'Shape' || tool.type === 'Artboard',
     typing: tool.type === 'Text',
     allArtboardIds: layer.present.allArtboardIds,
     allShapeIds: layer.present.allShapeIds,
     allTextIds: layer.present.allTextIds,
     allImageIds: layer.present.allImageIds,
-    canvasSettings
+    canvasSettings,
+    paperProject
   };
 };
 

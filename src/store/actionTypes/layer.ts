@@ -523,6 +523,9 @@ export interface CopyLayersToClipboard {
 
 export interface PasteLayersFromClipboardPayload {
   overSelection?: boolean;
+  canvasImageById?: {
+    [id: string]: em.CanvasImage;
+  };
 }
 
 export interface PasteLayersFromClipboard {
