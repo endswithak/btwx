@@ -253,7 +253,6 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
     image: false,
     shape: false,
     fill: false,
-    //fillGradient: false,
     x: false,
     y: false,
     rotation: false,
@@ -594,10 +593,12 @@ export const getGradientDestinationPoint = (id: string, destination: em.Point): 
   return new paperMain.Point((destination.x * paperLayer.bounds.width) + paperLayer.position.x, (destination.y * paperLayer.bounds.height) + paperLayer.position.y);
 };
 
-export const getGradientStops = (stops: em.GradientStop[]): paper.GradientStop[] => {
-  return stops.map((stop) => {
-    return new paperMain.GradientStop(new paperMain.Color(stop.color), stop.position);
-  });
+export const getGradientStops = (stops: { [id: string]: em.GradientStop }): paper.GradientStop[] => {
+  return Object.keys(stops).reduce((result, current) => {
+    const stop = stops[current];
+    result = [...result, new paperMain.GradientStop(new paperMain.Color(stop.color), stop.position)];
+    return result;
+  }, []);
 };
 
 export const getLayerSnapPoints = (id: string): em.SnapPoint[] => {

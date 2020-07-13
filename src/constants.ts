@@ -1,41 +1,57 @@
+import { v4 as uuidv4 } from 'uuid';
+
 export const THEME_PRIMARY_COLOR = '#3C88FD';
 export const THEME_GUIDE_COLOR = 'red';
 export const THEME_UNIT_SIZE = 4;
 export const DEFAULT_ARTBOARD_BACKGROUND_COLOR = '#fff';
 
-export const DEFAULT_GRADIENT_STYLE = {
-  gradientType: 'linear' as em.GradientType,
-  origin: {
-    x: -0.5,
-    y: 0.5
-  },
-  destination: {
-    x: 0.5,
-    y: -0.5
-  },
-  stops: [{
-    position: 0,
-    color: '#cccccc'
-  }, {
-    position: 1,
-    color: '#000000'
-  }]
-}
+export const DEFAULT_GRADIENT_STYLE = (): em.Gradient => {
+  const stopId1 = uuidv4();
+  const stopId2 = uuidv4();
+  return {
+    gradientType: 'linear' as em.GradientType,
+    origin: {
+      x: -0.5,
+      y: 0.5
+    },
+    destination: {
+      x: 0.5,
+      y: -0.5
+    },
+    stops: {
+      allIds: [stopId1, stopId2],
+      byId: {
+        [stopId1]: {
+          id: stopId1,
+          active: true,
+          position: 0,
+          color: '#cccccc'
+        },
+        [stopId2]: {
+          id: stopId2,
+          active: false,
+          position: 1,
+          color: '#000000'
+        }
+      }
+    }
+  }
+};
 
-export const DEFAULT_FILL_STYLE: em.Fill = {
+export const DEFAULT_FILL_STYLE = () => ({
   fillType: 'color' as em.FillType,
   enabled: true,
   color: '#cccccc',
-  gradient: DEFAULT_GRADIENT_STYLE
-}
+  gradient: DEFAULT_GRADIENT_STYLE()
+}) as em.Fill;
 
-export const DEFAULT_STROKE_STYLE: em.Stroke = {
+export const DEFAULT_STROKE_STYLE = () => ({
   fillType: 'color' as em.FillType,
   enabled: true,
   color: '#999999',
   width: 1,
-  gradient: DEFAULT_GRADIENT_STYLE
-}
+  gradient: DEFAULT_GRADIENT_STYLE()
+}) as em.Stroke;
 
 export const DEFAULT_STROKE_OPTIONS_STYLE: em.StrokeOptions = {
   cap: 'butt',
@@ -54,16 +70,16 @@ export const DEFAULT_SHADOW_STYLE: em.Shadow = {
   }
 }
 
-export const DEFAULT_STYLE: em.Style = {
-  fill: DEFAULT_FILL_STYLE,
-  stroke: DEFAULT_STROKE_STYLE,
+export const DEFAULT_STYLE = () => ({
+  fill: DEFAULT_FILL_STYLE(),
+  stroke: DEFAULT_STROKE_STYLE(),
   strokeOptions: DEFAULT_STROKE_OPTIONS_STYLE,
   opacity: 1,
   rotation: 0,
   horizontalFlip: false,
   verticalFlip: false,
   shadow: DEFAULT_SHADOW_STYLE
-}
+}) as em.Style;
 
 export const DEFAULT_TEXT_VALUE = 'Type Something';
 

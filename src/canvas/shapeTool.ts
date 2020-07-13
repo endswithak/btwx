@@ -1,4 +1,5 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
+import { v4 as uuidv4 } from 'uuid';
 import store from '../store';
 import { enableSelectionTool } from '../store/actions/tool';
 import { addShape } from '../store/actions/layer';
@@ -6,7 +7,7 @@ import { getPagePaperLayer, getLayerAndDescendants, getPaperLayer } from '../sto
 import { applyShapeMethods } from './shapeUtils';
 import { paperMain } from './index';
 import Tooltip from './tooltip';
-import { DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_GRADIENT_STYLE, THEME_PRIMARY_COLOR } from '../constants';
+import { DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_GRADIENT_STYLE, THEME_PRIMARY_COLOR, DEFAULT_STYLE } from '../constants';
 import SnapTool from './snapTool';
 import InsertTool from './insertTool';
 
@@ -436,29 +437,54 @@ class ShapeTool {
   onMouseUp(event: paper.ToolEvent): void {
     if (this.to) {
       const state = store.getState();
-      const newPaperLayer = this.renderShape({
-        fillColor: new Color(DEFAULT_FILL_STYLE.color),
-        strokeColor: new Color(DEFAULT_STROKE_STYLE.color),
-        strokeWidth: DEFAULT_STROKE_STYLE.width,
-        //applyMatrix: false
+      const id = uuidv4();
+      const paperLayer = this.renderShape({
+        fillColor: new Color(DEFAULT_FILL_STYLE().color),
+        strokeColor: new Color(DEFAULT_STROKE_STYLE().color),
+        strokeWidth: DEFAULT_STROKE_STYLE().width,
+        data: {
+          id: id,
+          type: 'Shape'
+        }
       });
-      applyShapeMethods(newPaperLayer);
-      const overlappedArtboard = getPagePaperLayer(state.layer.present).getItem({
-        data: (data: any) => {
-          return data.id === 'ArtboardBackground';
-        },
-        overlapping: this.outline.bounds
-      });
+      applyShapeMethods(paperLayer);
       store.dispatch(addShape({
-        parent: overlappedArtboard ? overlappedArtboard.parent.data.id : state.layer.present.page,
+        id: id,
+        type: 'Shape',
+        parent: (() => {
+          const overlappedArtboard = getPagePaperLayer(state.layer.present).getItem({
+            data: (data: any) => {
+              return data.id === 'ArtboardBackground';
+            },
+            overlapping: this.outline.bounds
+          });
+          return overlappedArtboard ? overlappedArtboard.parent.data.id : state.layer.present.page;
+        })(),
+        name: this.shapeType,
         frame: {
-          x: newPaperLayer.position.x,
-          y: newPaperLayer.position.y,
-          width: newPaperLayer.bounds.width,
-          height: newPaperLayer.bounds.height
+          x: paperLayer.position.x,
+          y: paperLayer.position.y,
+          width: paperLayer.bounds.width,
+          height: paperLayer.bounds.height
         },
         shapeType: this.shapeType,
-        paperLayer: newPaperLayer
+        pathData: (() => {
+          const clone = paperLayer.clone({insert: false}) as paper.PathItem;
+          clone.fitBounds(new paperMain.Rectangle({
+            point: new paperMain.Point(0,0),
+            size: new paperMain.Size(24,24)
+          }));
+          return clone.pathData;
+        })(),
+        selected: false,
+        mask: false,
+        masked: false,
+        points: {
+          closed: true,
+        },
+        tweenEvents: [],
+        tweens: [],
+        style: DEFAULT_STYLE()
       }));
       store.dispatch(enableSelectionTool());
     }

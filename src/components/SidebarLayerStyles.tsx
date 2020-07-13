@@ -6,7 +6,7 @@ import SidebarStrokeStyles from './SidebarStrokeStyles';
 import SidebarShadowStyles from './SidebarShadowStyles';
 import SidebarTextStyles from './SidebarTextStyles';
 import AlignDistribute from './AlignDistribute';
-import FillEditorWrap from './FillEditorWrap';
+import FillEditor from './FillEditor';
 
 const SidebarLayerStyles = (): ReactElement => {
   return (
@@ -17,7 +17,7 @@ const SidebarLayerStyles = (): ReactElement => {
       <SidebarTextStyles />
       <SidebarFillStyles />
       <SidebarStrokeStyles />
-      <FillEditorWrap />
+      <FillEditor />
       {/* <SidebarShadowStyles /> */}
     </>
   );

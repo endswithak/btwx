@@ -1,175 +1,159 @@
 import paper from 'paper';
-import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { evaluate } from 'mathjs';
 import chroma from 'chroma-js';
+import { RootState } from '../store/reducers';
 import SidebarInput from './SidebarInput';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarSwatch from './SidebarSwatch';
-import { RootState } from '../store/reducers';
-import { EnableLayerFillPayload, DisableLayerFillPayload, SetLayerFillColorPayload, LayerTypes } from '../store/actionTypes/layer';
-import { enableLayerFill, disableLayerFill, setLayerFillColor } from '../store/actions/layer';
+import { getPaperLayer } from '../store/selectors/layer';
+import { EnableLayerFillPayload, SetLayerFillGradientPayload, SetLayerFillColorPayload, LayerTypes } from '../store/actionTypes/layer';
+import { enableLayerFill, setLayerFillGradient, setLayerFillColor } from '../store/actions/layer';
+import { OpenFillColorEditorPayload, FillColorEditorTypes } from '../store/actionTypes/fillColorEditor';
+import { openFillColorEditor } from '../store/actions/fillColorEditor';
 import { SetTextSettingsFillColorPayload, TextSettingsTypes } from '../store/actionTypes/textSettings';
 import { setTextSettingsFillColor } from '../store/actions/textSettings';
-import { OpenFillEditorPayload, FillEditorTypes } from '../store/actionTypes/fillEditor';
-import { openFillEditor } from '../store/actions/fillEditor';
-import { getPaperLayer } from '../store/selectors/layer';
-import { paperMain } from '../canvas';
 
 interface FillColorInputProps {
-  fill?: em.Fill;
-  fillOpacity?: number;
+  fillEnabled: boolean;
   selected: string[];
   selectedType?: em.LayerType;
+  colorValue?: string;
+  colorOpacity: number;
+  fillColorEditorOpen?: boolean;
   enableLayerFill?(payload: EnableLayerFillPayload): LayerTypes;
-  disableLayerFill?(payload: DisableLayerFillPayload): LayerTypes;
   setLayerFillColor?(payload: SetLayerFillColorPayload): LayerTypes;
+  setLayerFillGradient?(payload: SetLayerFillGradientPayload): LayerTypes;
+  openFillColorEditor?(payload: OpenFillColorEditorPayload): FillColorEditorTypes;
   setTextSettingsFillColor?(payload: SetTextSettingsFillColorPayload): TextSettingsTypes;
-  openFillEditor?(payload: OpenFillEditorPayload): FillEditorTypes;
 }
 
 const FillColorInput = (props: FillColorInputProps): ReactElement => {
-  const { fill, fillOpacity, selected, selectedType, enableLayerFill, disableLayerFill, openFillEditor, setLayerFillColor, setTextSettingsFillColor } = props;
-  const [enabled, setEnabled] = useState<boolean>(fill.enabled);
-  const [color, setColor] = useState<string>(chroma(fill.color).alpha(1).hex().replace('#', ''));
-  const [opacity, setOpacity] = useState<number | string>(fillOpacity);
-  const [swatchColor, setSwatchColor] = useState<string>(fill.color);
+  const { fillEnabled, selected, selectedType, colorValue, colorOpacity, fillColorEditorOpen, enableLayerFill, openFillColorEditor, setTextSettingsFillColor, setLayerFillColor } = props;
+  const [enabled, setEnabled] = useState<boolean>(fillEnabled);
+  const [color, setColor] = useState(colorValue);
+  const [opacity, setOpacity] = useState<number | string>(colorOpacity);
+  const [hex, setHex] = useState(chroma(colorValue).alpha(1).hex().replace('#', ''));
 
   useEffect(() => {
-    setEnabled(fill.enabled);
-    setColor(chroma(fill.color).alpha(1).hex().replace('#', ''));
-    setOpacity(fillOpacity);
-    setSwatchColor(fill.color);
-  }, [fill, selected]);
+    setEnabled(fillEnabled);
+    setColor(colorValue);
+    setOpacity(colorOpacity);
+    setHex(chroma(colorValue).alpha(1).hex().replace('#', ''));
+  }, [colorValue, selected, colorOpacity]);
 
   const handleOpacityChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     const target = e.target as HTMLInputElement;
     setOpacity(target.value);
   };
 
-  const handleColorChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
+  const handleHexChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     const target = e.target as HTMLInputElement;
-    setColor(target.value);
+    setHex(target.value);
   };
 
   const handleOpacitySubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     try {
       let nextOpacity = evaluate(`${opacity}`);
-      if (nextOpacity  !== fillOpacity && !isNaN(nextOpacity)) {
+      if (nextOpacity  !== colorOpacity && !isNaN(nextOpacity)) {
         if (nextOpacity > 100) {
           nextOpacity = 100;
         }
         if (nextOpacity < 0) {
           nextOpacity = 0;
         }
-        const paperLayer = getPaperLayer(selected[0]);
         const newColor = chroma(color).alpha(evaluate(`${nextOpacity} / 100`)).hex();
-        paperLayer.fillColor = new paper.Color(newColor);
         setLayerFillColor({id: selected[0], fillColor: newColor});
       } else {
-        setOpacity(fillOpacity);
+        setOpacity(colorOpacity);
       }
     } catch(error) {
-      setOpacity(fillOpacity);
+      setOpacity(colorOpacity);
     }
   }
 
-  const handleColorSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
-    if (chroma.valid(color)) {
+  const handleHexSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
+    if (chroma.valid(hex)) {
       const paperLayer = getPaperLayer(selected[0]);
-      const nextFillColor = chroma(color).alpha(fillOpacity / 100).hex();
+      const nextFillColor = chroma(hex).alpha(colorOpacity / 100).hex();
       paperLayer.fillColor = new paper.Color(nextFillColor);
       if (selectedType === 'Text') {
-        setTextSettingsFillColor({fillColor: chroma(color).hex()});
+        setTextSettingsFillColor({fillColor: chroma(hex).hex()});
       }
       setLayerFillColor({id: selected[0], fillColor: nextFillColor});
     } else {
-      setColor(chroma(fill.color).alpha(1).hex().replace('#', ''));
-    }
-  };
-
-  const handleFillEditorChange = (editorFill: em.Fill): void => {
-    setColor(chroma(editorFill.color).alpha(1).hex().replace('#', ''));
-    setOpacity(chroma(editorFill.color).alpha() * 100);
-    setSwatchColor(editorFill.color);
-    const paperLayer = getPaperLayer(selected[0]);
-    paperLayer.fillColor = new paper.Color(editorFill.color);
-  };
-
-  const handleFillEditorClose = (editorFill: em.Fill): void => {
-    if (chroma.valid(editorFill.color)) {
-      const paperLayer = getPaperLayer(selected[0]);
-      paperLayer.fillColor = new paper.Color(editorFill.color);
-      if (selectedType === 'Text') {
-        setTextSettingsFillColor({fillColor: editorFill.color});
-      }
-      setLayerFillColor({id: selected[0], fillColor: editorFill.color});
-    } else {
-      setColor(chroma(fill.color).alpha(1).hex().replace('#', ''));
+      setHex(chroma(colorValue).alpha(1).hex().replace('#', ''));
     }
   };
 
   const handleSwatchClick = (bounding: DOMRect): void => {
     if (!enabled) {
-      const paperLayer = getPaperLayer(selected[0]);
       enableLayerFill({id: selected[0]});
-      paperLayer.fillColor = new paper.Color(fill.color);
     }
-    openFillEditor({fill, onChange: handleFillEditorChange, onClose: handleFillEditorClose, layer: selected[0], x: bounding.x - 228, y: bounding.y > paperMain.view.bounds.height / 2 ? bounding.y - 208 : bounding.y + 4});
+    openFillColorEditor({
+      color: color,
+      layer: selected[0],
+      x: bounding.x,
+      y: bounding.y - (bounding.height - 10) // 2 (swatch drop shadow) + 8 (top-padding)
+    });
   };
 
   return (
-    <div>
-      <SidebarSectionRow alignItems='center'>
-        <SidebarSectionColumn width={'33.33%'}>
-          <SidebarSwatch
-            //layer={selected[0]}
-            //prop={prop}
-            //fill={fill}
-            style={{
-              background: swatchColor
-            }}
-            //onChange={handleSwatchChange}
-            //onClose={handleSwatchClose}
-            onClick={handleSwatchClick}
-            bottomLabel={'Color'} />
-        </SidebarSectionColumn>
-        <SidebarSectionColumn width={'33.33%'}>
-          <SidebarInput
-            value={color}
-            onChange={handleColorChange}
-            onSubmit={handleColorSubmit}
-            submitOnBlur
-            disabled={selected.length > 1 || selected.length === 0 || !enabled}
-            leftLabel={'#'}
-            bottomLabel={'Hex'} />
-        </SidebarSectionColumn>
-        <SidebarSectionColumn width={'33.33%'}>
-          <SidebarInput
-            value={opacity}
-            onChange={handleOpacityChange}
-            onSubmit={handleOpacitySubmit}
-            submitOnBlur
-            label={'%'}
-            disabled={selected.length > 1 || selected.length === 0 || !enabled}
-            bottomLabel={'Opacity'} />
-        </SidebarSectionColumn>
-      </SidebarSectionRow>
-    </div>
+    <SidebarSectionRow alignItems='center'>
+      <SidebarSectionColumn width={'33.33%'}>
+        <SidebarSwatch
+          isActive={fillColorEditorOpen}
+          style={{
+            background: color
+          }}
+          onClick={handleSwatchClick}
+          bottomLabel='Color' />
+      </SidebarSectionColumn>
+      <SidebarSectionColumn width={'33.33%'}>
+        <SidebarInput
+          value={hex}
+          onChange={handleHexChange}
+          onSubmit={handleHexSubmit}
+          submitOnBlur
+          disabled={selected.length > 1 || selected.length === 0 || !enabled}
+          leftLabel={'#'}
+          bottomLabel={'Hex'} />
+      </SidebarSectionColumn>
+      <SidebarSectionColumn width={'33.33%'}>
+        <SidebarInput
+          value={opacity}
+          onChange={handleOpacityChange}
+          onSubmit={handleOpacitySubmit}
+          submitOnBlur
+          label={'%'}
+          disabled={selected.length > 1 || selected.length === 0 || !enabled}
+          bottomLabel={'Opacity'} />
+      </SidebarSectionColumn>
+    </SidebarSectionRow>
   );
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
+  const { layer, fillColorEditor } = state;
+  const fill = layer.present.byId[layer.present.selected[0]].style.fill;
+  const fillEnabled = fill.enabled;
   const selected = layer.present.selected;
   const selectedType = layer.present.selected.length === 1 ? layer.present.byId[layer.present.selected[0]].type : null;
-  const fill = layer.present.byId[layer.present.selected[0]].style.fill;
-  const fillOpacity = chroma(fill.color).alpha() * 100;
-  return { selected, fill, fillOpacity, selectedType };
+  const colorValue = fill.color;
+  const colorOpacity = chroma(colorValue).alpha() * 100;
+  const fillColorEditorOpen = fillColorEditor.isOpen;
+  return { fillEnabled, selected, selectedType, colorValue, colorOpacity, fillColorEditorOpen };
 };
 
 export default connect(
   mapStateToProps,
-  { enableLayerFill, disableLayerFill, setLayerFillColor, setTextSettingsFillColor, openFillEditor }
+  {
+    enableLayerFill,
+    setLayerFillGradient,
+    openFillColorEditor,
+    setTextSettingsFillColor,
+    setLayerFillColor
+  }
 )(FillColorInput);

@@ -78,6 +78,20 @@ const Canvas = (props: CanvasProps): ReactElement => {
           const hoverFrame = paperMain.project.getItem({data: {id: 'hoverFrame'}});
           hoverFrame.strokeWidth = scale;
         }
+        if (paperMain.project.getItem({data: {id: 'gradientEditor'}})) {
+          const gradientEditorHandles = paperMain.project.getItems({data: {id: 'gradientEditorHandle'}});
+          const gradientEditorLines = paperMain.project.getItems({data: {id: 'gradientEditorLine'}});
+          gradientEditorHandles.forEach((handle) => {
+            handle.scale(1 - scale * zoomDiff);
+          });
+          gradientEditorLines.forEach((line) => {
+            if (line.data.line === 'dark') {
+              line.strokeWidth = scale * 3;
+            } else {
+              line.strokeWidth = scale;
+            }
+          });
+        }
       } else {
         paperMain.view.translate(new paper.Point((e.deltaX * ( 1 / paperMain.view.zoom)) * -1, (e.deltaY * ( 1 / paperMain.view.zoom)) * -1));
       }
@@ -115,6 +129,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
         id='canvas-main'
         tabIndex={0}
         ref={canvasRef}
+        onMouseDown={() => canvasRef.current.focus()}
         style={{
           background: theme.background.z0
         }} />

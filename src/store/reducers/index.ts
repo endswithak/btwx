@@ -5,7 +5,9 @@ import tool from './tool';
 import contextMenu from './contextMenu';
 import tweenDrawer from './tweenDrawer';
 import easeEditor from './easeEditor';
-import fillEditor from './fillEditor';
+import fillColorEditor from './fillColorEditor';
+import fillLinearGradientEditor from './fillLinearGradientEditor';
+import fillRadialGradientEditor from './fillRadialGradientEditor';
 import strokeEditor from './strokeEditor';
 import textEditor from './textEditor';
 import textSettings from './textSettings';
@@ -67,6 +69,10 @@ import {
   SET_LAYER_STROKE_FILL_TYPE,
   SET_LAYER_STROKE_GRADIENT,
   SET_LAYER_STROKE_GRADIENT_TYPE,
+  ADD_LAYER_FILL_GRADIENT_STOP,
+  SET_LAYER_FILL_GRADIENT_STOP_POSITION,
+  SET_LAYER_FILL_GRADIENT_STOP_COLOR,
+  REMOVE_LAYER_FILL_GRADIENT_STOP,
   SET_LAYER_STROKE_WIDTH,
   SET_LAYER_STROKE_CAP,
   SET_LAYER_STROKE_JOIN,
@@ -152,6 +158,10 @@ const rootReducer = combineReducers({
     SET_LAYER_STROKE_FILL_TYPE,
     SET_LAYER_STROKE_GRADIENT,
     SET_LAYER_STROKE_GRADIENT_TYPE,
+    ADD_LAYER_FILL_GRADIENT_STOP,
+    SET_LAYER_FILL_GRADIENT_STOP_POSITION,
+    SET_LAYER_FILL_GRADIENT_STOP_COLOR,
+    REMOVE_LAYER_FILL_GRADIENT_STOP,
     SET_LAYER_STROKE_WIDTH,
     SET_LAYER_STROKE_CAP,
     SET_LAYER_STROKE_JOIN,
@@ -187,7 +197,9 @@ const rootReducer = combineReducers({
   textEditor,
   textSettings,
   canvasSettings,
-  fillEditor,
+  fillColorEditor,
+  fillLinearGradientEditor,
+  fillRadialGradientEditor,
   strokeEditor,
   theme
 });

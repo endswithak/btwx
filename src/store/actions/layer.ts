@@ -116,6 +116,9 @@ import {
   SET_LAYER_FILL_GRADIENT_STOP_POSITION,
   ADD_LAYER_FILL_GRADIENT_STOP,
   REMOVE_LAYER_FILL_GRADIENT_STOP,
+  ACTIVATE_LAYER_FILL_GRADIENT_STOP,
+  DEACTIVATE_LAYER_FILL_GRADIENT_STOP,
+  SET_LAYER_FILL_ACTIVE_GRADIENT_STOP,
   ADD_LAYERS_MASK,
   REMOVE_LAYERS_MASK,
   MASK_LAYER,
@@ -246,6 +249,9 @@ import {
   SetLayerFillGradientStopPositionPayload,
   AddLayerFillGradientStopPayload,
   RemoveLayerFillGradientStopPayload,
+  ActivateLayerFillGradientStopPayload,
+  DeactivateLayerFillGradientStopPayload,
+  SetLayerFillActiveGradientStopPayload,
   AddLayersMaskPayload,
   RemoveLayersMaskPayload,
   MaskLayerPayload,
@@ -271,7 +277,8 @@ import {
   SendLayerBackwardPayload,
   SendLayersBackwardPayload,
   SendLayerToBackPayload,
-  SendLayersToBackPayload
+  SendLayersToBackPayload,
+  SetLayerFill
 } from '../actionTypes/layer';
 
 // Page
@@ -329,7 +336,7 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
       points: {
         closed: true,
       },
-      style: DEFAULT_STYLE,
+      style: DEFAULT_STYLE(),
     }
   }
 };
@@ -363,13 +370,13 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
         closed: true,
       },
       style: {
-        ...DEFAULT_STYLE,
+        ...DEFAULT_STYLE(),
         fill: {
-          ...DEFAULT_STYLE.fill,
+          ...DEFAULT_STYLE().fill,
           enabled: false
         },
         stroke: {
-          ...DEFAULT_STYLE.stroke,
+          ...DEFAULT_STYLE().stroke,
           enabled: false
         },
       },
@@ -379,79 +386,17 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
 
 // Shape
 
-export const addShape = (payload: AddShapePayload): LayerTypes => {
-  const id = uuidv4();
-  payload.paperLayer.name = payload.name ? payload.name : payload.shapeType;
-  payload.paperLayer.data = {
-    id: id,
-    type: 'Shape'
-  }
-  const clone = payload.paperLayer.clone({insert: false}) as paper.PathItem;
-  //clone.applyMatrix = true;
-  clone.fitBounds(new paperMain.Rectangle({
-    point: new paperMain.Point(0,0),
-    size: new paperMain.Size(24,24)
-  }));
-  return {
-    type: ADD_SHAPE,
-    payload: {
-      type: 'Shape',
-      id: id,
-      frame: payload.frame,
-      name: payload.name ? payload.name : payload.shapeType,
-      parent: payload.parent ? payload.parent : null,
-      shapeType: payload.shapeType,
-      pathData: clone.pathData,
-      selected: false,
-      mask: false,
-      masked: false,
-      points: {
-        closed: true,
-      },
-      tweenEvents: [],
-      tweens: [],
-      style: DEFAULT_STYLE
-    }
-  }
-};
+export const addShape = (payload: AddShapePayload): LayerTypes => ({
+  type: ADD_SHAPE,
+  payload
+});
 
 // Text
 
-export const addText = (payload: AddTextPayload): LayerTypes => {
-  const id = uuidv4();
-  payload.paperLayer.name = payload.name ? payload.name : 'Text';
-  payload.paperLayer.data = {
-    id: id,
-    type: 'Text'
-  }
-  return {
-    type: ADD_TEXT,
-    payload: {
-      type: 'Text',
-      id: id,
-      frame: payload.frame,
-      name: payload.name ? payload.name : DEFAULT_TEXT_VALUE,
-      parent: payload.parent ? payload.parent : null,
-      selected: false,
-      mask: false,
-      masked: false,
-      points: {
-        closed: true,
-      },
-      text: payload.text ? payload.text : DEFAULT_TEXT_VALUE,
-      tweenEvents: [],
-      tweens: [],
-      style: {
-        ...DEFAULT_STYLE,
-        ...payload.style
-      },
-      textStyle: {
-        ...DEFAULT_TEXT_STYLE,
-        ...payload.textStyle
-      }
-    }
-  }
-};
+export const addText = (payload: AddTextPayload): LayerTypes => ({
+  type: ADD_TEXT,
+  payload
+});
 
 // Image
 
@@ -485,13 +430,13 @@ export const addImage = (payload: AddImagePayload): LayerTypes => {
       tweenEvents: [],
       tweens: [],
       style: {
-        ...DEFAULT_STYLE,
+        ...DEFAULT_STYLE(),
         fill: {
-          ...DEFAULT_STYLE.fill,
+          ...DEFAULT_STYLE().fill,
           enabled: false
         },
         stroke: {
-          ...DEFAULT_STYLE.stroke,
+          ...DEFAULT_STYLE().stroke,
           enabled: false
         }
       },
@@ -1054,6 +999,21 @@ export const addLayerFillGradientStop = (payload: AddLayerFillGradientStopPayloa
 
 export const removeLayerFillGradientStop = (payload: RemoveLayerFillGradientStopPayload): LayerTypes => ({
   type: REMOVE_LAYER_FILL_GRADIENT_STOP,
+  payload
+});
+
+export const activateLayerFillGradientStop = (payload: ActivateLayerFillGradientStopPayload): LayerTypes => ({
+  type: ACTIVATE_LAYER_FILL_GRADIENT_STOP,
+  payload
+});
+
+export const deactivateLayerFillGradientStop = (payload: DeactivateLayerFillGradientStopPayload): LayerTypes => ({
+  type: DEACTIVATE_LAYER_FILL_GRADIENT_STOP,
+  payload
+});
+
+export const setLayerFillActiveGradientStop = (payload: SetLayerFillActiveGradientStopPayload): LayerTypes => ({
+  type: SET_LAYER_FILL_ACTIVE_GRADIENT_STOP,
   payload
 });
 

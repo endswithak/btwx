@@ -1,4 +1,5 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
+import { v4 as uuidv4 } from 'uuid';
 import store from '../store';
 import { openTextEditor } from '../store/actions/textEditor';
 import { addText } from '../store/actions/layer';
@@ -37,40 +38,55 @@ class TextTool {
   onMouseUp(event: paper.ToolEvent): void {
     this.insertTool.enabled = false;
     let state = store.getState();
+    const id = uuidv4();
     // create new text layer
-    const newPaperLayer = new paperMain.PointText({
+    const paperLayer = new paperMain.PointText({
       point: event.point,
       content: DEFAULT_TEXT_VALUE,
+      data: {
+        id: id,
+        type: 'Text'
+      },
       ...state.textSettings
     });
-    // apply text layer methods
-    applyTextMethods(newPaperLayer);
-    // check if new layer bounds overlap any artboard
-    const overlappedArtboard = getPagePaperLayer(state.layer.present).getItem({
-      data: (data: any) => {
-        return data.id === 'ArtboardBackground';
-      },
-      overlapping: newPaperLayer.bounds
-    });
-    // dispatch add text
+    const parent = (() => {
+      const overlappedArtboard = getPagePaperLayer(state.layer.present).getItem({
+        data: (data: any) => {
+          return data.id === 'ArtboardBackground';
+        },
+        overlapping: paperLayer.bounds
+      });
+      return overlappedArtboard ? overlappedArtboard.parent.data.id : state.layer.present.page;
+    })();
+    applyTextMethods(paperLayer);
     store.dispatch(addText({
-      text: newPaperLayer.content,
-      parent: overlappedArtboard ? overlappedArtboard.parent.data.id : state.layer.present.page,
+      id: id,
+      type: 'Text',
+      text: DEFAULT_TEXT_VALUE,
+      parent: parent,
       frame: {
-        x: newPaperLayer.position.x,
-        y: newPaperLayer.position.y,
-        width: newPaperLayer.bounds.width,
-        height: newPaperLayer.bounds.height
+        x: paperLayer.position.x,
+        y: paperLayer.position.y,
+        width: paperLayer.bounds.width,
+        height: paperLayer.bounds.height
       },
-      paperLayer: newPaperLayer,
+      selected: false,
+      mask: false,
+      masked: false,
+      points: {
+        closed: true,
+      },
+      children: null,
+      tweenEvents: [],
+      tweens: [],
       style: {
-        ...DEFAULT_STYLE,
+        ...DEFAULT_STYLE(),
         fill: {
-          ...DEFAULT_STYLE.fill,
+          ...DEFAULT_STYLE().fill,
           color: state.textSettings.fillColor
         },
         stroke: {
-          ...DEFAULT_STYLE.stroke,
+          ...DEFAULT_STYLE().stroke,
           enabled: false
         }
       },
@@ -85,9 +101,9 @@ class TextTool {
     // get new state with text layer
     state = store.getState();
     // get new layer bounds
-    const topLeft = paperMain.view.projectToView(newPaperLayer.bounds.topLeft);
-    const topCenter = paperMain.view.projectToView(newPaperLayer.bounds.topCenter);
-    const topRight = paperMain.view.projectToView(newPaperLayer.bounds.topRight);
+    const topLeft = paperMain.view.projectToView(paperLayer.bounds.topLeft);
+    const topCenter = paperMain.view.projectToView(paperLayer.bounds.topCenter);
+    const topRight = paperMain.view.projectToView(paperLayer.bounds.topRight);
     // open text editor with new text layer props
     store.dispatch(openTextEditor({
       layer: state.layer.present.allIds[state.layer.present.allIds.length - 1],

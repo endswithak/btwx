@@ -1,44 +1,52 @@
 import paper from 'paper';
-import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { evaluate } from 'mathjs';
 import chroma from 'chroma-js';
+import { RootState } from '../store/reducers';
 import SidebarInput from './SidebarInput';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarSwatch from './SidebarSwatch';
-import { RootState } from '../store/reducers';
-import { EnableLayerFillPayload, DisableLayerFillPayload, SetLayerFillGradientPayload, LayerTypes } from '../store/actionTypes/layer';
-import { enableLayerFill, disableLayerFill, setLayerFillGradient } from '../store/actions/layer';
-import { OpenFillEditorPayload, FillEditorTypes } from '../store/actionTypes/fillEditor';
-import { openFillEditor } from '../store/actions/fillEditor';
-import { getPaperLayer } from '../store/selectors/layer';
-import { paperMain } from '../canvas';
 import GradientTypeSelector from './GradientTypeSelector';
+import { EnableLayerFillPayload, SetLayerFillGradientPayload, SetLayerFillColorPayload, LayerTypes } from '../store/actionTypes/layer';
+import { enableLayerFill, setLayerFillGradient, setLayerFillColor } from '../store/actions/layer';
+import { OpenFillLinearGradientEditorPayload, FillLinearGradientEditorTypes } from '../store/actionTypes/fillLinearGradientEditor';
+import { openFillLinearGradientEditor } from '../store/actions/fillLinearGradientEditor';
+import { OpenFillRadialGradientEditorPayload, FillRadialGradientEditorTypes } from '../store/actionTypes/fillRadialGradientEditor';
+import { openFillRadialGradientEditor } from '../store/actions/fillRadialGradientEditor';
+import { SetTextSettingsFillColorPayload, TextSettingsTypes } from '../store/actionTypes/textSettings';
+import { setTextSettingsFillColor } from '../store/actions/textSettings';
 
 interface FillGradientInputProps {
-  fill?: em.Fill;
-  fillOpacity?: number;
-  gradientOpacity?: number | string;
+  fillEnabled?: boolean;
   selected: string[];
-  selectedType?: em.LayerType;
+  gradientValue?: em.Gradient;
+  gradientOpacity: number;
+  isGradientEditorOpen?: boolean;
+  stopById?: {
+    [id: string]: em.GradientStop;
+  };
+  cssGradient?: string;
   enableLayerFill?(payload: EnableLayerFillPayload): LayerTypes;
-  disableLayerFill?(payload: DisableLayerFillPayload): LayerTypes;
+  setLayerFillColor?(payload: SetLayerFillColorPayload): LayerTypes;
   setLayerFillGradient?(payload: SetLayerFillGradientPayload): LayerTypes;
-  openFillEditor?(payload: OpenFillEditorPayload): FillEditorTypes;
+  openFillLinearGradientEditor?(payload: OpenFillLinearGradientEditorPayload): FillLinearGradientEditorTypes;
+  openFillRadialGradientEditor?(payload: OpenFillRadialGradientEditorPayload): FillRadialGradientEditorTypes;
+  setTextSettingsFillColor?(payload: SetTextSettingsFillColorPayload): TextSettingsTypes;
 }
 
 const FillGradientInput = (props: FillGradientInputProps): ReactElement => {
-  const { fill, fillOpacity, gradientOpacity, selected, selectedType, enableLayerFill, disableLayerFill, openFillEditor, setLayerFillGradient } = props;
-  const [enabled, setEnabled] = useState<boolean>(fill.enabled);
-  const [gradient, setGradient] = useState(fill.gradient);
+  const { fillEnabled, stopById, selected, gradientValue, gradientOpacity, isGradientEditorOpen, enableLayerFill, setLayerFillGradient, openFillLinearGradientEditor, openFillRadialGradientEditor, cssGradient } = props;
+  const [enabled, setEnabled] = useState<boolean>(fillEnabled);
+  const [gradient, setGradient] = useState(gradientValue);
   const [opacity, setOpacity] = useState<number | string>(gradientOpacity);
 
   useEffect(() => {
-    setEnabled(fill.enabled);
-    setGradient(fill.gradient);
+    setEnabled(fillEnabled);
+    setGradient(gradientValue);
     setOpacity(gradientOpacity);
-  }, [fill, selected, gradientOpacity]);
+  }, [gradientValue, selected, gradientOpacity, stopById]);
 
   const handleOpacityChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     const target = e.target as HTMLInputElement;
@@ -55,22 +63,18 @@ const FillGradientInput = (props: FillGradientInputProps): ReactElement => {
         if (nextOpacity < 0) {
           nextOpacity = 0;
         }
-        const paperLayer = getPaperLayer(selected[0]);
         const newGradient = {
           ...gradient,
-          stops: gradient.stops.map((stop) => {
-            return {...stop, color: chroma(stop.color).alpha(nextOpacity / 100).hex()}
-          })
-        }
-        paperLayer.fillColor = {
-          gradient: {
-            stops: newGradient.stops.map((stop) => {
-              return new paper.GradientStop(new paper.Color(stop.color), stop.position);
-            }),
-            radial: newGradient.gradientType === 'radial'
-          },
-          origin: new paper.Point((newGradient.origin.x * paperLayer.bounds.width) + paperLayer.position.x, (newGradient.origin.y * paperLayer.bounds.height) + paperLayer.position.y),
-          destination: new paper.Point((newGradient.destination.x * paperLayer.bounds.width) + paperLayer.position.x, (newGradient.destination.y * paperLayer.bounds.height) + paperLayer.position.y)
+          stops: {
+            ...gradient.stops,
+            byId: Object.keys(gradient.stops.byId).reduce((result: { [id: string]: em.GradientStop }, current) => {
+              result[current] = {
+                ...gradient.stops.byId[current],
+                color: chroma(gradient.stops.byId[current].color).alpha(nextOpacity / 100).hex()
+              }
+              return result;
+            }, {})
+          }
         }
         setLayerFillGradient({id: selected[0], gradient: newGradient});
       } else {
@@ -81,58 +85,44 @@ const FillGradientInput = (props: FillGradientInputProps): ReactElement => {
     }
   }
 
-  const handleFillEditorChange = (editorFill: em.Fill): void => {
-    setGradient(editorFill.gradient);
-    setOpacity(editorFill.gradient.stops.every((stop) => chroma(stop.color).alpha() === chroma(editorFill.gradient.stops[0].color).alpha()) ? chroma(editorFill.gradient.stops[0].color).alpha() * 100 : 'multi');
-    const paperLayer = getPaperLayer(selected[0]);
-    paperLayer.fillColor = {
-      gradient: {
-        stops: editorFill.gradient.stops.map((stop) => {
-          return new paper.GradientStop(new paper.Color(stop.color), stop.position);
-        }),
-        radial: editorFill.gradient.gradientType === 'radial'
-      },
-      origin: new paper.Point((editorFill.gradient.origin.x * paperLayer.bounds.width) + paperLayer.position.x, (editorFill.gradient.origin.y * paperLayer.bounds.height) + paperLayer.position.y),
-      destination: new paper.Point((editorFill.gradient.destination.x * paperLayer.bounds.width) + paperLayer.position.x, (editorFill.gradient.destination.y * paperLayer.bounds.height) + paperLayer.position.y)
-    }
-  };
-
-  const handleFillEditorClose = (editorFill: em.Fill): void => {
-    setLayerFillGradient({id: selected[0], gradient: editorFill.gradient});
-  };
-
   const handleSwatchClick = (bounding: DOMRect): void => {
     if (!enabled) {
-      const paperLayer = getPaperLayer(selected[0]);
       enableLayerFill({id: selected[0]});
-      paperLayer.fillColor = new paper.Color(fill.color);
     }
-    openFillEditor({fill, onChange: handleFillEditorChange, onClose: handleFillEditorClose, layer: selected[0], x: bounding.x - 228, y: bounding.y > paperMain.view.bounds.height / 2 ? bounding.y - 208 : bounding.y + 4});
+    switch(gradientValue.gradientType) {
+      case 'linear':
+        openFillLinearGradientEditor({
+          gradient: gradientValue,
+          layer: selected[0],
+          x: bounding.x,
+          y: bounding.y - (bounding.height - 10) // 2 (swatch drop shadow) + 8 (top-padding)
+        });
+        break;
+      case 'radial':
+        openFillRadialGradientEditor({
+          gradient: gradientValue,
+          layer: selected[0],
+          x: bounding.x,
+          y: bounding.y - (bounding.height - 10) // 2 (swatch drop shadow) + 8 (top-padding)
+        });
+    }
   };
 
   return (
     <SidebarSectionRow alignItems='center'>
       <SidebarSectionColumn width={'33.33%'}>
         <SidebarSwatch
+          isActive={isGradientEditorOpen}
           style={{
-            background: (() => {
-              return gradient.stops.reduce((result, current, index) => {
-                result = result + `${current.color} ${current.position * 100}%`;
-                if (index !== gradient.stops.length - 1) {
-                  result = result + ',';
-                } else {
-                  result = result + ')';
-                }
-                return result;
-              }, `linear-gradient(to right,`);
-            })()
+            background: cssGradient
           }}
           onClick={handleSwatchClick}
-          bottomLabel={'Gradient'} />
+          bottomLabel='Gradient' />
       </SidebarSectionColumn>
       <SidebarSectionColumn width={'33.33%'}>
         <GradientTypeSelector
-          gradientTypeValue={gradient.gradientType} />
+          gradientTypeValue={gradient.gradientType}
+          disabled={selected.length > 1 || selected.length === 0 || !enabled} />
       </SidebarSectionColumn>
       <SidebarSectionColumn width={'33.33%'}>
         <SidebarInput
@@ -149,16 +139,35 @@ const FillGradientInput = (props: FillGradientInputProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
+  const { layer, fillLinearGradientEditor, fillRadialGradientEditor } = state;
+  const fillEnabled = layer.present.byId[layer.present.selected[0]].style.fill.enabled;
   const selected = layer.present.selected;
-  const selectedType = layer.present.selected.length === 1 ? layer.present.byId[layer.present.selected[0]].type : null;
-  const fill = layer.present.byId[layer.present.selected[0]].style.fill;
-  const gradient = fill.gradient;
-  const gradientOpacity = gradient.stops.every((stop) => chroma(stop.color).alpha() === chroma(gradient.stops[0].color).alpha()) ? chroma(gradient.stops[0].color).alpha() * 100 : 'multi';
-  return { selected, fill, selectedType, gradientOpacity };
+  const gradientValue = layer.present.byId[layer.present.selected[0]].style.fill.gradient;
+  const stops = gradientValue.stops;
+  const gradientOpacity = stops.allIds.every((stop) => chroma(stops.byId[stop].color).alpha() === chroma(stops.byId[stops.allIds[0]].color).alpha()) ? chroma(stops.byId[stops.allIds[0]].color).alpha() * 100 : 'multi';
+  const isGradientEditorOpen = fillLinearGradientEditor.isOpen || fillRadialGradientEditor.isOpen;
+  const stopById = stops.byId;
+  const sorted = Object.keys(stopById).sort((a,b) => { return stopById[a].position - stopById[b].position });
+  const cssGradient = sorted.reduce((result, current, index) => {
+    result = result + `${stopById[current].color} ${stopById[current].position * 100}%`;
+    if (index !== stops.allIds.length - 1) {
+      result = result + ',';
+    } else {
+      result = result + ')';
+    }
+    return result;
+  }, `linear-gradient(to right,`);
+  return { fillEnabled, selected, gradientValue, gradientOpacity, isGradientEditorOpen, stopById, cssGradient };
 };
 
 export default connect(
   mapStateToProps,
-  { enableLayerFill, disableLayerFill, setLayerFillGradient, openFillEditor }
+  {
+    enableLayerFill,
+    setLayerFillGradient,
+    setTextSettingsFillColor,
+    setLayerFillColor,
+    openFillLinearGradientEditor,
+    openFillRadialGradientEditor
+  }
 )(FillGradientInput);

@@ -118,12 +118,19 @@ declare namespace em {
     gradientType: GradientType;
     origin: Point;
     destination: Point;
-    stops: GradientStop[];
+    stops: {
+      allIds: string[];
+      byId: {
+        [id: string]: GradientStop;
+      };
+    };
   }
 
   interface GradientStop {
+    id: string;
     position: number;
     color: string;
+    active: boolean;
   }
 
   interface Stroke {

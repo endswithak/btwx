@@ -6,6 +6,7 @@ import DragTool from './dragTool';
 import ResizeTool from './resizeTool';
 import CopyTool from './copyTool';
 import GroupTool from './groupTool';
+import GradientTool from './gradientTool';
 import InsertTool from './insertTool';
 import { paperMain } from './index';
 
@@ -21,6 +22,7 @@ class SelectionTool {
   copyTool: CopyTool;
   groupTool: GroupTool;
   insertTool: InsertTool;
+  gradientTool: GradientTool;
   constructor() {
     this.tool = new paperMain.Tool();
     this.tool.activate();
@@ -36,6 +38,7 @@ class SelectionTool {
     this.copyTool = new CopyTool();
     this.groupTool = new GroupTool();
     this.insertTool = new InsertTool();
+    this.gradientTool = new GradientTool();
     this.shiftModifier = false;
     this.metaModifier = false;
     this.altModifier = false;
@@ -115,6 +118,9 @@ class SelectionTool {
             this.resizeTool.onMouseDown(event);
           }
         }
+      } else if (hitResult.item.data.id === 'gradientEditorHandle') {
+        this.gradientTool.enable(hitResult.item.data.handle);
+        this.gradientTool.onMouseDown(event);
       } else {
         this.dragTool.enable();
         this.dragTool.onMouseDown(event);
@@ -128,12 +134,14 @@ class SelectionTool {
     this.areaSelectTool.onMouseDrag(event);
     this.dragTool.onMouseDrag(event);
     this.resizeTool.onMouseDrag(event);
+    this.gradientTool.onMouseDrag(event);
   }
   onMouseUp(event: paper.ToolEvent): void {
     this.insertTool.enabled = true;
     this.areaSelectTool.onMouseUp(event);
     this.dragTool.onMouseUp(event);
     this.resizeTool.onMouseUp(event);
+    this.gradientTool.onMouseUp(event);
   }
 }
 
