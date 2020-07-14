@@ -2,6 +2,13 @@ import paper from 'paper';
 import { LayerState } from '../reducers/layer';
 import { paperMain } from '../../canvas';
 import { bufferToBase64 } from '../../utils';
+import { updateHoverFrame, updateSelectionFrame } from '../../store/utils/layer';
+import { applyShapeMethods } from '../../canvas/shapeUtils';
+import { applyArtboardMethods } from '../../canvas/artboardUtils';
+import { applyTextMethods } from '../../canvas/textUtils';
+import { applyImageMethods } from '../../canvas/imageUtils';
+import { CanvasSettingsState } from '../reducers/canvasSettings';
+import store from '../../store';
 
 export const getLayer = (store: LayerState, id: string): em.Layer => {
   return store.byId[id] as em.Layer;
@@ -708,26 +715,20 @@ export const orderLayersByTop = (layers: string[]): string[] => {
   });
 }
 
-export const compareGradientStops = (s1: em.GradientStop[], s2: em.GradientStop[]): boolean => {
-  return s1.length === s2.length &&
-         s1.every((stop, index) => stop.color === s2[index].color) &&
-         s1.every((stop, index) => stop.position === s2[index].position);
-};
-
-export const compareGradients = (g1: em.Gradient, g2: em.Gradient): boolean => {
-  return compareGradientStops(g1.stops, g2.stops) &&
-         g1.origin === g2.origin &&
-         g1.destination === g2.destination &&
-         g1.gradientType === g2.gradientType;
-};
-
-export const compareFills = (f1: em.Fill, f2: em.Fill): boolean => {
-  return f1.fillType === f2.fillType &&
-         f1.color === f2.color &&
-         compareGradients(f1.gradient, f2.gradient);
-};
-
-export const exportProjectJSON = (state: LayerState, projectJSON: string): string => {
+export const exportPaperProject = (state: LayerState): string => {
+  const selectionFrame = paperMain.project.getItem({data: {id: 'selectionFrame'}});
+  const hoverFrame = paperMain.project.getItem({data: {id: 'hoverFrame'}});
+  const gradientFrame = paperMain.project.getItem({data: {id: 'gradientFrame'}});
+  if (selectionFrame) {
+    selectionFrame.remove();
+  }
+  if (hoverFrame) {
+    hoverFrame.remove();
+  }
+  if (gradientFrame) {
+    gradientFrame.remove();
+  }
+  const projectJSON = paperMain.project.exportJSON();
   const canvasImageBase64ById = state.allImageIds.reduce((result: { [id: string]: string }, current) => {
     const layer = state.byId[current] as em.Image;
     const paperLayer = getPaperLayer(current).getItem({data: {id: 'Raster'}}) as paper.Raster;
@@ -738,4 +739,41 @@ export const exportProjectJSON = (state: LayerState, projectJSON: string): strin
     result = result.replace(canvasImageBase64ById[current], current);
     return result;
   }, projectJSON);
+}
+
+interface ImportPaperProject {
+  canvasImages: {
+    [id: string]: em.CanvasImage;
+  };
+  paperProject: string;
+  layers: {
+    shape: string[];
+    artboard: string[];
+    text: string[];
+    image: string[];
+  };
+}
+
+export const importPaperProject = ({canvasImages, paperProject, layers}: ImportPaperProject): void => {
+  paperMain.project.clear();
+  const newPaperProject = Object.keys(canvasImages).reduce((result, current) => {
+    const rasterBase64 = bufferToBase64(Buffer.from(canvasImages[current].buffer));
+    const base64 = `data:image/webp;base64,${rasterBase64}`;
+    return result.replace(`"source":"${current}"`, `"source":"${base64}"`);
+  }, paperProject);
+  paperMain.project.importJSON(newPaperProject);
+  layers.shape.forEach((shapeId) => {
+    applyShapeMethods(getPaperLayer(shapeId));
+  });
+  layers.artboard.forEach((artboardId) => {
+    const artboardBackground = getPaperLayer(artboardId).getItem({data: {id: 'ArtboardBackground'}});
+    applyArtboardMethods(artboardBackground);
+  });
+  layers.text.forEach((textId) => {
+    applyTextMethods(getPaperLayer(textId));
+  });
+  layers.image.forEach((imageId) => {
+    const raster = getPaperLayer(imageId).getItem({data: {id: 'Raster'}});
+    applyImageMethods(raster);
+  });
 }

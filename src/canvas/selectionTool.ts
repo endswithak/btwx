@@ -8,13 +8,11 @@ import CopyTool from './copyTool';
 import GroupTool from './groupTool';
 import GradientTool from './gradientTool';
 import InsertTool from './insertTool';
+import UndoRedoTool from './undoRedoTool';
 import { paperMain } from './index';
 
 class SelectionTool {
   tool: paper.Tool;
-  shiftModifier: boolean;
-  metaModifier: boolean;
-  altModifier: boolean;
   hitResult: paper.HitResult;
   areaSelectTool: AreaSelectTool;
   dragTool: DragTool;
@@ -23,6 +21,7 @@ class SelectionTool {
   groupTool: GroupTool;
   insertTool: InsertTool;
   gradientTool: GradientTool;
+  undoRedoTool: UndoRedoTool;
   constructor() {
     this.tool = new paperMain.Tool();
     this.tool.activate();
@@ -39,9 +38,7 @@ class SelectionTool {
     this.groupTool = new GroupTool();
     this.insertTool = new InsertTool();
     this.gradientTool = new GradientTool();
-    this.shiftModifier = false;
-    this.metaModifier = false;
-    this.altModifier = false;
+    this.undoRedoTool = new UndoRedoTool();
   }
   onKeyDown(event: paper.KeyEvent): void {
     this.resizeTool.onKeyDown(event);
@@ -50,17 +47,10 @@ class SelectionTool {
     this.copyTool.onKeyDown(event);
     this.groupTool.onKeyDown(event);
     this.insertTool.onKeyDown(event);
-    const state = store.getState();
+    this.undoRedoTool.onKeyDown(event);
     switch(event.key) {
-      case 'alt': {
-        this.altModifier = true;
-        break;
-      }
-      case 'shift': {
-        this.shiftModifier = true;
-        break;
-      }
       case 'escape': {
+        const state = store.getState();
         store.dispatch(escapeLayerScope());
         if (state.layer.present.hover) {
           const paperLayer = getPaperLayer(state.layer.present.hover);
@@ -68,11 +58,8 @@ class SelectionTool {
         }
         break;
       }
-      case 'meta': {
-        this.metaModifier = true;
-        break;
-      }
       case 'backspace': {
+        const state = store.getState();
         if (state.layer.present.selected.length > 0) {
           store.dispatch(removeLayers({layers: state.layer.present.selected}));
         }
@@ -86,39 +73,28 @@ class SelectionTool {
     this.dragTool.onKeyUp(event);
     this.copyTool.onKeyUp(event);
     this.groupTool.onKeyUp(event);
-    switch(event.key) {
-      case 'shift': {
-        this.shiftModifier = false;
-        break;
-      }
-      case 'alt': {
-        this.altModifier = false;
-        break;
-      }
-      case 'meta': {
-        this.metaModifier = false;
-        break;
-      }
-    }
+    this.undoRedoTool.onKeyUp(event);
   }
   onMouseDown(event: paper.ToolEvent): void {
     this.insertTool.enabled = false;
-    const state = store.getState().layer.present;
+    const state = store.getState();
+    const layerState = state.layer.present;
     const hitResult = paperMain.project.hitTest(event.point);
+    const gradientEditorOpen = state.fillRadialGradientEditor.isOpen || state.fillLinearGradientEditor.isOpen;
     if (hitResult) {
       if (hitResult.item.data.id === 'selectionFrameHandle') {
-        if (state.selected.length >= 1) {
+        if (layerState.selected.length >= 1) {
           if (hitResult.item.data.handle === 'move') {
             this.dragTool.enable();
             this.dragTool.moveHandle = true;
             this.dragTool.onMouseDown(event);
           }
-          if (!state.selected.every((id: string) => state.byId[id].type === 'Text') && hitResult.item.data.handle !== 'move') {
+          if (!layerState.selected.every((id: string) => layerState.byId[id].type === 'Text') && hitResult.item.data.handle !== 'move') {
             this.resizeTool.enable(hitResult.item.data.handle);
             this.resizeTool.onMouseDown(event);
           }
         }
-      } else if (hitResult.item.data.id === 'gradientEditorHandle') {
+      } else if (hitResult.item.data.id === 'gradientFrameHandle') {
         this.gradientTool.enable(hitResult.item.data.handle);
         this.gradientTool.onMouseDown(event);
       } else {
@@ -126,8 +102,10 @@ class SelectionTool {
         this.dragTool.onMouseDown(event);
       }
     } else {
-      this.areaSelectTool.enable();
-      this.areaSelectTool.onMouseDown(event);
+      if (!gradientEditorOpen) {
+        this.areaSelectTool.enable();
+        this.areaSelectTool.onMouseDown(event);
+      }
     }
   }
   onMouseDrag(event: paper.ToolEvent): void {

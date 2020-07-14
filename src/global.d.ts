@@ -18,6 +18,8 @@ declare namespace em {
 
   type LayerType = 'Group' | 'Shape' | 'Page' | 'Artboard' | 'Text' | 'Image';
 
+  type BlendMode = 'normal' | 'darken' | 'multiply' | 'color-burn' | 'lighten' | 'screen' | 'color-dodge' | 'overlay' | 'soft-light' | 'hard-light' | 'difference' | 'exclusion' | 'hue' | 'saturation' | 'color' | 'luminosity';
+
   type ColorEditorProp = 'fillColor' | 'strokeColor' | 'shadowColor';
 
   type StrokeCap = 'round' | 'square' | 'butt';
@@ -93,6 +95,7 @@ declare namespace em {
     horizontalFlip: boolean;
     verticalFlip: boolean;
     shadow: Shadow;
+    blendMode: BlendMode;
   }
 
   interface TextStyle {

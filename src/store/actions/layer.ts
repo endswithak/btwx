@@ -144,6 +144,7 @@ import {
   SEND_LAYERS_BACKWARD,
   SEND_LAYER_TO_BACK,
   SEND_LAYERS_TO_BACK,
+  SET_LAYER_BLEND_MODE,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
@@ -269,7 +270,6 @@ import {
   DuplicateLayerPayload,
   DuplicateLayersPayload,
   RemoveDuplicatedLayersPayload,
-  LayerTypes,
   SendLayerForwardPayload,
   SendLayersForwardPayload,
   SendLayerToFrontPayload,
@@ -278,7 +278,8 @@ import {
   SendLayersBackwardPayload,
   SendLayerToBackPayload,
   SendLayersToBackPayload,
-  SetLayerFill
+  SetLayerBlendModePayload,
+  LayerTypes
 } from '../actionTypes/layer';
 
 // Page
@@ -1139,5 +1140,10 @@ export const sendLayerToBack = (payload: SendLayerToBackPayload): LayerTypes => 
 
 export const sendLayersToBack = (payload: SendLayersToBackPayload): LayerTypes => ({
   type: SEND_LAYERS_TO_BACK,
+  payload
+});
+
+export const setLayerBlendMode = (payload: SetLayerBlendModePayload): LayerTypes => ({
+  type: SET_LAYER_BLEND_MODE,
   payload
 });

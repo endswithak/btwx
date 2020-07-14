@@ -11,16 +11,16 @@ import { closeFillLinearGradientEditor } from '../store/actions/fillLinearGradie
 import { FillLinearGradientEditorTypes } from '../store/actionTypes/fillLinearGradientEditor';
 import { enableSelectionTool, disableSelectionTool } from '../store/actions/tool';
 import { ToolTypes } from '../store/actionTypes/tool';
-import { getPaperLayer, getGradientOriginPoint, getGradientDestinationPoint } from '../store/selectors/layer';
 import { FillLinearGradientEditorState } from '../store/reducers/fillLinearGradientEditor';
 import ColorPicker from './ColorPicker';
 import GradientSlider from './GradientSlider';
-import { SetLayerFillTypePayload, SetLayerFillGradientTypePayload, SetLayerFillGradientPayload, SetLayerFillActiveGradientStopPayload, SetLayerFillGradientStopColorPayload, SetLayerFillGradientStopPositionPayload, AddLayerFillGradientStopPayload, LayerTypes } from '../store/actionTypes/layer';
+import { SetLayerFillTypePayload, SetLayerFillGradientTypePayload, SetLayerFillActiveGradientStopPayload, SetLayerFillGradientStopColorPayload, SetLayerFillGradientStopPositionPayload, AddLayerFillGradientStopPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setLayerFillType, setLayerFillGradientType, setLayerFillGradientStopColor, setLayerFillActiveGradientStop, setLayerFillGradientStopPosition, addLayerFillGradientStop } from '../store/actions/layer';
 import FillTypeSelector from './FillTypeSelector';
 import debounce from 'lodash.debounce';
 import chroma from 'chroma-js';
 import { paperMain } from '../canvas';
+import GradientFrame from './GradientFrame';
 
 interface FillLinearGradientEditorProps {
   fill?: em.Fill;
@@ -61,95 +61,18 @@ const FillLinearGradientEditor = (props: FillLinearGradientEditorProps): ReactEl
   );
 
   useEffect(() => {
-    onOpen();
+    document.addEventListener('mousedown', onMouseDown, false);
     return () => {
-      onClose();
+      document.removeEventListener('mousedown', onMouseDown);
     }
   }, []);
-
-  const onOpen = () => {
-    if (paperMain.project.getItem({data: {id: 'gradientEditor'}})) {
-      paperMain.project.getItem({data: {id: 'gradientEditor'}}).remove();
-    }
-    if (paperMain.project.getItem({data: {id: 'selectionFrame'}})) {
-      paperMain.project.getItem({data: {id: 'selectionFrame'}}).remove();
-    }
-    document.addEventListener('mousedown', onMouseDown, false);
-    const gradientDraggerHandleProps = {
-      radius: (theme.unit * 2) / paperMain.view.zoom,
-      fillColor: '#fff',
-      shadowColor: new paperMain.Color(0, 0, 0, 0.5),
-      shadowBlur: theme.unit / 2,
-      insert: false
-    }
-    const gradientDraggerOrigin = new paperMain.Shape.Circle({
-      ...gradientDraggerHandleProps,
-      center: getGradientOriginPoint(fillLinearGradientEditor.layer, gradient.origin),
-      data: {
-        id: 'gradientEditorHandle',
-        handle: 'origin'
-      }
-    });
-    const gradientDraggerDestination = new paperMain.Shape.Circle({
-      ...gradientDraggerHandleProps,
-      center: getGradientDestinationPoint(fillLinearGradientEditor.layer, gradient.destination),
-      data: {
-        id: 'gradientEditorHandle',
-        handle: 'destination'
-      }
-    });
-    const gradientDraggerLineProps = {
-      from: getGradientOriginPoint(fillLinearGradientEditor.layer, gradient.origin),
-      to: getGradientDestinationPoint(fillLinearGradientEditor.layer, gradient.destination),
-      insert: false
-    }
-    const gradientDraggerLineLight = new paperMain.Path.Line({
-      ...gradientDraggerLineProps,
-      strokeColor: '#fff',
-      strokeWidth: 1 / paperMain.view.zoom,
-      data: {
-        id: 'gradientEditorLine',
-        line: 'light'
-      }
-    });
-    const gradientDraggerLineDark = new paperMain.Path.Line({
-      ...gradientDraggerLineProps,
-      strokeColor: new paperMain.Color(0, 0, 0, 0.25),
-      strokeWidth: 3 / paperMain.view.zoom,
-      data: {
-        id: 'gradientEditorLine',
-        line: 'dark'
-      }
-    });
-    const gradientDraggerLines = new paperMain.Group({
-      data: {
-        id: 'gradientEditorLines'
-      },
-      children: [gradientDraggerLineDark, gradientDraggerLineLight],
-      insert: false
-    });
-    const gradientDragger = new paperMain.Group({
-      data: {
-        id: 'gradientEditor'
-      },
-      children: [gradientDraggerLines, gradientDraggerOrigin, gradientDraggerDestination]
-    });
-  }
-
-  const onClose = () => {
-    //enableSelectionTool();
-    if (paperMain.project.getItem({data: {id: 'gradientEditor'}})) {
-      paperMain.project.getItem({data: {id: 'gradientEditor'}}).remove();
-    }
-    document.removeEventListener('mousedown', onMouseDown);
-  }
 
   const onMouseDown = (event: any) => {
     if (editorRef.current && !editorRef.current.contains(event.target)) {
       if (event.target.id === 'canvas-main') {
         const eventPoint = paperMain.view.getEventPoint(event);
         const hitResult = paperMain.project.hitTest(eventPoint);
-        if (!hitResult || hitResult.item.data.id !== 'gradientEditorHandle') {
+        if (!hitResult || hitResult.item.data.id !== 'gradientFrameHandle') {
           closeFillLinearGradientEditor();
         }
       } else {
@@ -240,6 +163,10 @@ const FillLinearGradientEditor = (props: FillLinearGradientEditorProps): ReactEl
           colorValue={activeStopValue.color}
           colorType='rgb'
           onChange={handleActiveStopColorChange} />
+        <GradientFrame
+          layer={fillLinearGradientEditor.layer}
+          gradient={gradient}
+          onStopPress={handleStopPress} />
       </div>
     </div>
   );
@@ -253,7 +180,7 @@ const mapStateToProps = (state: RootState) => {
   const stops = gradient.stops;
   const activeStopId = stops.allIds.find((stop) => stops.byId[stop].active);
   const activeStopValue = stops.byId[activeStopId];
-  return { fillLinearGradientEditor, layerItem, fill, gradient, activeStopValue };
+  return { fillLinearGradientEditor: fillLinearGradientEditor, layerItem, fill, gradient, activeStopValue };
 };
 
 export default connect(

@@ -135,6 +135,7 @@ import {
   SEND_LAYERS_BACKWARD,
   SEND_LAYER_TO_BACK,
   SEND_LAYERS_TO_BACK,
+  SET_LAYER_BLEND_MODE,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -275,6 +276,7 @@ import {
   sendLayersBackward,
   sendLayerToBack,
   sendLayersToBack,
+  setLayerBlendMode
 } from '../utils/layer';
 
 export interface LayerState {
@@ -628,6 +630,8 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return sendLayerToBack(state, action);
     case SEND_LAYERS_TO_BACK:
       return sendLayersToBack(state, action);
+    case SET_LAYER_BLEND_MODE:
+      return setLayerBlendMode(state, action);
     default:
       return state;
   }

@@ -31,9 +31,9 @@ class GradientTool {
   enable(handle: 'origin' | 'destination') {
     this.enabled = true;
     this.handle = handle;
-    this.originHandle = paperMain.project.getItem({data: {id: 'gradientEditorHandle', handle: 'origin'}}) as paper.Shape;
-    this.destinationHandle = paperMain.project.getItem({data: {id: 'gradientEditorHandle', handle: 'destination'}}) as paper.Shape;
-    this.gradientLines = paperMain.project.getItems({data: {id: 'gradientEditorLine'}}) as paper.Path.Line[];
+    this.originHandle = paperMain.project.getItem({data: {id: 'gradientFrameOriginHandle'}}) as paper.Shape;
+    this.destinationHandle = paperMain.project.getItem({data: {id: 'gradientFrameDestinationHandle'}}) as paper.Shape;
+    this.gradientLines = paperMain.project.getItems({data: {id: 'gradientFrameLine'}}) as paper.Path.Line[];
   }
   disable() {
     this.enabled = false;

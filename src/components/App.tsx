@@ -6,6 +6,8 @@ import EaseEditor from './EaseEditor';
 import StrokeEditor from './StrokeEditor';
 import Main from './Main';
 import { ThemeContext } from './ThemeProvider';
+import SelectionFrameWrap from './SelectionFrameWrap';
+import HoverFrameWrap from './HoverFrameWrap';
 
 const App = (): ReactElement => {
   const app = useRef<HTMLDivElement>(null);
@@ -25,6 +27,9 @@ const App = (): ReactElement => {
         <TweenEventDestinationSelect />
         <EaseEditor />
         <StrokeEditor />
+        <HoverFrameWrap />
+        <SelectionFrameWrap />
+        {/* <GradientFrameWrap /> */}
     </div>
   );
 }

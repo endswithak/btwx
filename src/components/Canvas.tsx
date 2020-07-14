@@ -4,13 +4,7 @@ import { connect } from 'react-redux';
 import { enableSelectionTool } from '../store/actions/tool';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
-import { getPaperLayer } from '../store/selectors/layer';
-import { updateActiveArtboardFrame } from '../store/utils/layer';
-import { getPagePaperLayer } from '../store/selectors/layer';
-import { applyShapeMethods } from '../canvas/shapeUtils';
-import { applyTextMethods } from '../canvas/textUtils';
-import { applyImageMethods } from '../canvas/imageUtils';
-import { applyArtboardMethods } from '../canvas/artboardUtils';
+import { importPaperProject } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
 import { SetCanvasMatrixPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
 import { setCanvasMatrix } from '../store/actions/canvasSettings';
@@ -44,9 +38,16 @@ const Canvas = (props: CanvasProps): ReactElement => {
     canvasRef.current.width = canvasContainerRef.current.clientWidth;
     canvasRef.current.height = canvasContainerRef.current.clientHeight;
     paperMain.setup(canvasRef.current);
-    paperMain.project.clear();
-    paperMain.project.importJSON(paperProject);
-    enableSelectionTool();
+    importPaperProject({
+      paperProject,
+      canvasImages: canvasSettings.imageById,
+      layers: {
+        shape: allShapeIds,
+        artboard: allArtboardIds,
+        text: allTextIds,
+        image: allImageIds
+      }
+    });
     canvasRef.current.addEventListener('wheel', (e: WheelEvent) => {
       e.preventDefault();
       if (e.ctrlKey) {
@@ -78,13 +79,13 @@ const Canvas = (props: CanvasProps): ReactElement => {
           const hoverFrame = paperMain.project.getItem({data: {id: 'hoverFrame'}});
           hoverFrame.strokeWidth = scale;
         }
-        if (paperMain.project.getItem({data: {id: 'gradientEditor'}})) {
-          const gradientEditorHandles = paperMain.project.getItems({data: {id: 'gradientEditorHandle'}});
-          const gradientEditorLines = paperMain.project.getItems({data: {id: 'gradientEditorLine'}});
-          gradientEditorHandles.forEach((handle) => {
+        if (paperMain.project.getItem({data: {id: 'gradientFrame'}})) {
+          const gradientFrameHandles = [paperMain.project.getItem({data: {id: 'gradientFrameOriginHandle'}}), paperMain.project.getItem({data: {id: 'gradientFrameDestinationHandle'}})];
+          const gradientFrameLines = paperMain.project.getItems({data: {id: 'gradientFrameLine'}});
+          gradientFrameHandles.forEach((handle) => {
             handle.scale(1 - scale * zoomDiff);
           });
-          gradientEditorLines.forEach((line) => {
+          gradientFrameLines.forEach((line) => {
             if (line.data.line === 'dark') {
               line.strokeWidth = scale * 3;
             } else {
@@ -101,24 +102,11 @@ const Canvas = (props: CanvasProps): ReactElement => {
       setCanvasMatrix({matrix: paperMain.view.matrix.values});
       updateInViewLayers();
     }, 250));
-    allShapeIds.forEach((shapeId) => {
-      applyShapeMethods(getPaperLayer(shapeId));
-    });
-    allArtboardIds.forEach((artboardId) => {
-      const artboardBackground = getPaperLayer(artboardId).getItem({data: {id: 'ArtboardBackground'}});
-      applyArtboardMethods(artboardBackground);
-    });
-    allTextIds.forEach((textId) => {
-      applyTextMethods(getPaperLayer(textId));
-    });
-    allImageIds.forEach((imageId) => {
-      const raster = getPaperLayer(imageId).getItem({data: {id: 'Raster'}}) as paper.Raster;
-      applyImageMethods(raster);
-    });
     if (canvasSettings.matrix) {
       paperMain.view.matrix.set(canvasSettings.matrix);
     }
     updateInViewLayers();
+    enableSelectionTool();
   }, []);
 
   return (
@@ -139,11 +127,6 @@ const Canvas = (props: CanvasProps): ReactElement => {
 
 const mapStateToProps = (state: RootState) => {
   const { layer, tool, canvasSettings } = state;
-  const paperProject = canvasSettings.allImageIds.reduce((result, current) => {
-    const rasterBase64 = bufferToBase64(Buffer.from(canvasSettings.imageById[current].buffer));
-    const base64 = `data:image/webp;base64,${rasterBase64}`;
-    return result.replace(`"source":"${current}"`, `"source":"${base64}"`);
-  }, layer.present.paperProject);
   return {
     activeArtboard: layer.present.activeArtboard,
     drawing: tool.type === 'Shape' || tool.type === 'Artboard',
@@ -152,8 +135,8 @@ const mapStateToProps = (state: RootState) => {
     allShapeIds: layer.present.allShapeIds,
     allTextIds: layer.present.allTextIds,
     allImageIds: layer.present.allImageIds,
-    canvasSettings,
-    paperProject
+    paperProject: layer.present.paperProject,
+    canvasSettings
   };
 };
 

@@ -38,20 +38,20 @@ export const DEFAULT_GRADIENT_STYLE = (): em.Gradient => {
   }
 };
 
-export const DEFAULT_FILL_STYLE = () => ({
+export const DEFAULT_FILL_STYLE = (): em.Fill => ({
   fillType: 'color' as em.FillType,
   enabled: true,
   color: '#cccccc',
   gradient: DEFAULT_GRADIENT_STYLE()
-}) as em.Fill;
+});
 
-export const DEFAULT_STROKE_STYLE = () => ({
+export const DEFAULT_STROKE_STYLE = (): em.Stroke => ({
   fillType: 'color' as em.FillType,
   enabled: true,
   color: '#999999',
   width: 1,
   gradient: DEFAULT_GRADIENT_STYLE()
-}) as em.Stroke;
+});
 
 export const DEFAULT_STROKE_OPTIONS_STYLE: em.StrokeOptions = {
   cap: 'butt',
@@ -70,7 +70,7 @@ export const DEFAULT_SHADOW_STYLE: em.Shadow = {
   }
 }
 
-export const DEFAULT_STYLE = () => ({
+export const DEFAULT_STYLE = (): em.Style => ({
   fill: DEFAULT_FILL_STYLE(),
   stroke: DEFAULT_STROKE_STYLE(),
   strokeOptions: DEFAULT_STROKE_OPTIONS_STYLE,
@@ -78,8 +78,9 @@ export const DEFAULT_STYLE = () => ({
   rotation: 0,
   horizontalFlip: false,
   verticalFlip: false,
-  shadow: DEFAULT_SHADOW_STYLE
-}) as em.Style;
+  shadow: DEFAULT_SHADOW_STYLE,
+  blendMode: 'normal'
+});
 
 export const DEFAULT_TEXT_VALUE = 'Type Something';
 

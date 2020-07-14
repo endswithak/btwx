@@ -23,7 +23,8 @@ interface FillGradientInputProps {
   selected: string[];
   gradientValue?: em.Gradient;
   gradientOpacity: number;
-  isGradientEditorOpen?: boolean;
+  isLinearGradientEditorOpen?: boolean;
+  isRadialGradientEditorOpen?: boolean;
   stopById?: {
     [id: string]: em.GradientStop;
   };
@@ -37,7 +38,7 @@ interface FillGradientInputProps {
 }
 
 const FillGradientInput = (props: FillGradientInputProps): ReactElement => {
-  const { fillEnabled, stopById, selected, gradientValue, gradientOpacity, isGradientEditorOpen, enableLayerFill, setLayerFillGradient, openFillLinearGradientEditor, openFillRadialGradientEditor, cssGradient } = props;
+  const { fillEnabled, stopById, selected, gradientValue, gradientOpacity, isLinearGradientEditorOpen, isRadialGradientEditorOpen, enableLayerFill, setLayerFillGradient, openFillLinearGradientEditor, openFillRadialGradientEditor, cssGradient } = props;
   const [enabled, setEnabled] = useState<boolean>(fillEnabled);
   const [gradient, setGradient] = useState(gradientValue);
   const [opacity, setOpacity] = useState<number | string>(gradientOpacity);
@@ -91,20 +92,25 @@ const FillGradientInput = (props: FillGradientInputProps): ReactElement => {
     }
     switch(gradientValue.gradientType) {
       case 'linear':
-        openFillLinearGradientEditor({
-          gradient: gradientValue,
-          layer: selected[0],
-          x: bounding.x,
-          y: bounding.y - (bounding.height - 10) // 2 (swatch drop shadow) + 8 (top-padding)
-        });
+        if (!isLinearGradientEditorOpen) {
+          openFillLinearGradientEditor({
+            gradient: gradientValue,
+            layer: selected[0],
+            x: bounding.x,
+            y: bounding.y - (bounding.height - 10) // 2 (swatch drop shadow) + 8 (top-padding)
+          });
+        }
         break;
       case 'radial':
-        openFillRadialGradientEditor({
-          gradient: gradientValue,
-          layer: selected[0],
-          x: bounding.x,
-          y: bounding.y - (bounding.height - 10) // 2 (swatch drop shadow) + 8 (top-padding)
-        });
+        if (!isRadialGradientEditorOpen) {
+          openFillRadialGradientEditor({
+            gradient: gradientValue,
+            layer: selected[0],
+            x: bounding.x,
+            y: bounding.y - (bounding.height - 10) // 2 (swatch drop shadow) + 8 (top-padding)
+          });
+        }
+        break;
     }
   };
 
@@ -112,7 +118,7 @@ const FillGradientInput = (props: FillGradientInputProps): ReactElement => {
     <SidebarSectionRow alignItems='center'>
       <SidebarSectionColumn width={'33.33%'}>
         <SidebarSwatch
-          isActive={isGradientEditorOpen}
+          isActive={isLinearGradientEditorOpen || isRadialGradientEditorOpen}
           style={{
             background: cssGradient
           }}
@@ -145,7 +151,8 @@ const mapStateToProps = (state: RootState) => {
   const gradientValue = layer.present.byId[layer.present.selected[0]].style.fill.gradient;
   const stops = gradientValue.stops;
   const gradientOpacity = stops.allIds.every((stop) => chroma(stops.byId[stop].color).alpha() === chroma(stops.byId[stops.allIds[0]].color).alpha()) ? chroma(stops.byId[stops.allIds[0]].color).alpha() * 100 : 'multi';
-  const isGradientEditorOpen = fillLinearGradientEditor.isOpen || fillRadialGradientEditor.isOpen;
+  const isLinearGradientEditorOpen = fillLinearGradientEditor.isOpen;
+  const isRadialGradientEditorOpen = fillRadialGradientEditor.isOpen;
   const stopById = stops.byId;
   const sorted = Object.keys(stopById).sort((a,b) => { return stopById[a].position - stopById[b].position });
   const cssGradient = sorted.reduce((result, current, index) => {
@@ -157,7 +164,7 @@ const mapStateToProps = (state: RootState) => {
     }
     return result;
   }, `linear-gradient(to right,`);
-  return { fillEnabled, selected, gradientValue, gradientOpacity, isGradientEditorOpen, stopById, cssGradient };
+  return { fillEnabled, selected, gradientValue, gradientOpacity, isLinearGradientEditorOpen, isRadialGradientEditorOpen, stopById, cssGradient };
 };
 
 export default connect(
