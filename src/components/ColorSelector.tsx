@@ -7,7 +7,7 @@ interface ColorSelectorProps {
   isActive: boolean;
 }
 
-const Button = styled.button`
+const Button = styled.button<ColorSelectorProps>`
   background: ${props => props.isActive ? props.theme.palette.primary : props.theme.text.lighter};
   box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primary : props.theme.text.lighter};
   :hover {

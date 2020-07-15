@@ -173,8 +173,8 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     if (tweenPaperLayer.fillColor && tweenPaperLayer.fillColor.gradient) {
                       const origin = tweenLayers.byId[tweenPaperLayer.data.id].style.fill.gradient.origin;
                       const destination = tweenLayers.byId[tweenPaperLayer.data.id].style.fill.gradient.destination;
-                      tweenPaperLayer.fillColor.origin = new paper.Point((origin.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (origin.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
-                      tweenPaperLayer.fillColor.destination = new paper.Point((destination.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (destination.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
+                      (tweenPaperLayer.fillColor as em.PaperGradientFill).origin = new paper.Point((origin.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (origin.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
+                      (tweenPaperLayer.fillColor as em.PaperGradientFill).destination = new paper.Point((destination.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (destination.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
                     }
                   },
                   ease: tween.ease,
@@ -295,15 +295,18 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 ) {
                   tweenPaperLayer.fillColor = {
                     gradient: {
-                      stops: tweenDestinationLayer.style.fill.gradient.stops.map((stop) => {
-                        stop.color = tweenPaperLayer.fillColor.toCSS(true);
-                        return new paperPreview.GradientStop(new paperPreview.Color(stop.color), stop.position);
+                      stops: tweenDestinationLayer.style.fill.gradient.stops.allIds.map((id) => {
+                        const stop = tweenDestinationLayer.style.fill.gradient.stops.byId[id];
+                        return new paperPreview.GradientStop(
+                          new paperPreview.Color(tweenPaperLayer.fillColor.toCSS(true)),
+                          stop.position
+                        );
                       }),
                       radial: tweenDestinationLayerPaperLayer.fillColor.gradient.radial
                     },
                     origin: new paperPreview.Point((tweenDestinationLayer.style.fill.gradient.origin.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (tweenDestinationLayer.style.fill.gradient.origin.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y),
                     destination: new paperPreview.Point((tweenDestinationLayer.style.fill.gradient.destination.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (tweenDestinationLayer.style.fill.gradient.destination.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y)
-                  };
+                  } as em.PaperGradientFill;
                   tweenPaperLayer.fillColor.gradient.stops.forEach((stop, index) => {
                     tweenProp[`${tween.prop}-stop-${index}-color`] = tweenPaperLayer.fillColor.gradient.stops[index].color.toCSS(true);
                     paperTween = gsap.to(tweenProp, {
@@ -342,15 +345,15 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 ) {
                   tweenPaperLayer.fillColor = {
                     gradient: {
-                      stops: tweenDestinationLayer.style.fill.gradient.stops.map((stop) => {
-                        stop.color = chroma(stop.color).alpha(0).hex();
-                        return new paperPreview.GradientStop(new paperPreview.Color(stop.color), stop.position);
+                      stops: tweenDestinationLayer.style.fill.gradient.stops.allIds.map((id) => {
+                        const stop = tweenDestinationLayer.style.fill.gradient.stops.byId[id];
+                        return new paperPreview.GradientStop(new paperPreview.Color(chroma(stop.color).alpha(0).hex()), stop.position);
                       }),
                       radial: tweenDestinationLayerPaperLayer.fillColor.gradient.radial
                     },
                     origin: new paperPreview.Point((tweenDestinationLayer.style.fill.gradient.origin.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (tweenDestinationLayer.style.fill.gradient.origin.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y),
                     destination: new paperPreview.Point((tweenDestinationLayer.style.fill.gradient.destination.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (tweenDestinationLayer.style.fill.gradient.destination.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y)
-                  };
+                  } as em.PaperGradientFill;
                   tweenPaperLayer.fillColor.gradient.stops.forEach((stop, index) => {
                     tweenProp[`${tween.prop}-stop-${index}-color`] = tweenPaperLayer.fillColor.gradient.stops[index].color.alpha;
                     paperTween = gsap.to(tweenProp, {

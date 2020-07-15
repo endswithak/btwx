@@ -9,9 +9,10 @@ interface IconButtonProps {
   icon: string;
   variant?: 'small' | 'medium' | 'large';
   activeIcon?: string;
+  theme?: em.Theme;
 }
 
-const Button = styled.button`
+const Button = styled.button<IconButtonProps>`
   svg {
     fill: ${props => props.isActive ? props.theme.palette.primary : props.theme.text.lighter};
   }
@@ -38,9 +39,7 @@ const IconButton = (props: IconButtonProps): ReactElement => {
   return (
     <Button
       className={`c-icon-button ${variant ? 'c-icon-button--' + variant : null}`}
-      disabled={disabled}
-      isActive={isActive}
-      onClick={onClick}
+      {...props}
       theme={theme}>
       <svg
         viewBox='0 0 24 24'

@@ -18,12 +18,12 @@ const ColorPickerHueInput = (props: ColorPickerHueInputProps): ReactElement => {
     setHue(hueValue);
   }, [hueValue]);
 
-  const handleChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const target = e.target as HTMLInputElement;
+  const handleChange = (e: any) => {
+    const target = e.target;
     setHue(target.value);
   };
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
+  const handleSubmit = (e: any): void => {
     if (hue <= 360 && hue >= 0 && !isNaN(hue)) {
       setHueValue(hue);
     } else {

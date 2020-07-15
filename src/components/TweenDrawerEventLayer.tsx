@@ -49,7 +49,8 @@ const TweenDrawerEventLayer = (props: TweenDrawerEventLayerProps): ReactElement 
         }}>
         <div className='c-tween-drawer__icon'>
           <SidebarLayerIcon
-            layer={layer} />
+            layer={layer}
+            dragGhost={false} />
         </div>
         <div
           className='c-tween-drawer-event-layer-tween__name'

@@ -1,5 +1,4 @@
 import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
-import styled from 'styled-components';
 import Modal from 'react-modal';
 import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';

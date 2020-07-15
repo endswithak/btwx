@@ -18,10 +18,10 @@ interface ColorPickerHexInputProps {
 const ColorPickerHexInput = (props: ColorPickerHexInputProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { hue, saturation, lightness, value, setHue, setSaturation, setLightness, setValue } = props;
-  const [hex, setHex] = useState<string | number>(chroma({h: hue, s: saturation, l: lightness}).set('hsv.v', value).hex().replace('#', ''));
+  const [hex, setHex] = useState<string | number>(chroma(hue, saturation, lightness, 'hsl').set('hsv.v', value).hex().replace('#', ''));
 
   useEffect(() => {
-    setHex(chroma({h: hue, s: saturation, l: lightness}).set('hsv.v', value).hex().replace('#', ''));
+    setHex(chroma(hue, saturation, lightness, 'hsl').set('hsv.v', value).hex().replace('#', ''));
   }, [hue, saturation, lightness, value]);
 
   const handleChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
@@ -37,7 +37,7 @@ const ColorPickerHexInput = (props: ColorPickerHexInputProps): ReactElement => {
       setValue(chroma(hex).get('hsv.v'));
       setHex(chroma(hex).hex().replace('#', ''));
     } else {
-      setHex(chroma({h: hue, s: saturation, l: lightness}).set('hsv.v', value).hex().replace('#', ''));
+      setHex(chroma(hue, saturation, lightness, 'hsl').set('hsv.v', value).hex().replace('#', ''));
     }
   };
 

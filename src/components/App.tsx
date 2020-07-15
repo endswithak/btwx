@@ -29,7 +29,6 @@ const App = (): ReactElement => {
         <StrokeEditor />
         <HoverFrameWrap />
         <SelectionFrameWrap />
-        {/* <GradientFrameWrap /> */}
     </div>
   );
 }

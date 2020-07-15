@@ -66,7 +66,7 @@ export const addPage = (state: LayerState, action: AddPage): LayerState => {
       [action.payload.id]: action.payload as em.Page
     },
     page: action.payload.id,
-    paperProject: exportProjectJSON(state, paperMain.project.exportJSON())
+    paperProject: exportPaperProject(state)
   }
 };
 
@@ -1203,10 +1203,10 @@ const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any, fro
             case 'Image': {
               const imageBuffer = Buffer.from(canvasImages[childLayer.imageId].buffer);
               const imageBase64 = `data:image/webp;base64,${bufferToBase64(imageBuffer)}`;
-              return childLayer.paperLayer.replace(`"source":"${childLayer.imageId}"`, `"source":"${imageBase64}"`);
+              return (childLayer as em.ClipboardLayer).paperLayer.replace(`"source":"${childLayer.imageId}"`, `"source":"${imageBase64}"`);
             }
             default:
-              return childLayer.paperLayer;
+              return (childLayer as em.ClipboardLayer).paperLayer;
           }
         })()) : getPaperLayer(child);
         const childPaperLayerClone = childPaperLayer.clone({deep: false, insert: true});
@@ -1315,7 +1315,7 @@ export const updateParentBounds = (state: LayerState, id: string): LayerState =>
           }
         }
       },
-      paperProject: exportProjectJSON(result, paperMain.project.exportJSON())
+      paperProject: exportPaperProject(result)
     }
     return result;
   }, state);
@@ -1340,7 +1340,7 @@ export const updateChildrenBounds = (state: LayerState, id: string): LayerState 
           }
         }
       },
-      paperProject: exportProjectJSON(result, paperMain.project.exportJSON())
+      paperProject: exportPaperProject(result)
     }
     return result;
   }, state);
@@ -1607,7 +1607,7 @@ export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerSt
       ...state.tweenById,
       [action.payload.id]: action.payload as em.Tween
     },
-    paperProject: exportPaperProject(currentState)
+    paperProject: exportPaperProject(state)
   }
 };
 
@@ -1636,7 +1636,7 @@ export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): L
       }
       return result;
     }, {}),
-    paperProject: exportPaperProject(currentState)
+    paperProject: exportPaperProject(state)
   }
 };
 
@@ -1697,7 +1697,7 @@ export const setLayerTweenDuration = (state: LayerState, action: SetLayerTweenDu
         duration: Math.round((action.payload.duration + Number.EPSILON) * 100) / 100
       }
     },
-    paperProject: exportPaperProject(currentState)
+    paperProject: exportPaperProject(state)
   }
 };
 
@@ -1711,7 +1711,7 @@ export const incrementLayerTweenDuration = (state: LayerState, action: Increment
         duration: Math.round(((state.tweenById[action.payload.id].duration + (0.01 * (action.payload.factor ? action.payload.factor : 1))) + Number.EPSILON) * 100) / 100
       }
     },
-    paperProject: exportPaperProject(currentState)
+    paperProject: exportPaperProject(state)
   }
 };
 
@@ -1725,7 +1725,7 @@ export const decrementLayerTweenDuration = (state: LayerState, action: Decrement
         duration: Math.round(((state.tweenById[action.payload.id].duration - (0.01 * (action.payload.factor ? action.payload.factor : 1))) + Number.EPSILON) * 100) / 100
       }
     },
-    paperProject: exportPaperProject(currentState)
+    paperProject: exportPaperProject(state)
   }
 };
 
@@ -1739,7 +1739,7 @@ export const setLayerTweenDelay = (state: LayerState, action: SetLayerTweenDelay
         delay: Math.round((action.payload.delay + Number.EPSILON) * 100) / 100
       }
     },
-    paperProject: exportPaperProject(currentState)
+    paperProject: exportPaperProject(state)
   }
 };
 
@@ -1753,7 +1753,7 @@ export const incrementLayerTweenDelay = (state: LayerState, action: IncrementLay
         delay: Math.round(((state.tweenById[action.payload.id].delay + (0.01 * (action.payload.factor ? action.payload.factor : 1))) + Number.EPSILON) * 100) / 100
       }
     },
-    paperProject: exportPaperProject(currentState)
+    paperProject: exportPaperProject(state)
   }
 };
 
@@ -1767,7 +1767,7 @@ export const decrementLayerTweenDelay = (state: LayerState, action: DecrementLay
         delay: Math.round(((state.tweenById[action.payload.id].delay - (0.01 * (action.payload.factor ? action.payload.factor : 1))) + Number.EPSILON) * 100) / 100
       }
     },
-    paperProject: exportPaperProject(currentState)
+    paperProject: exportPaperProject(state)
   }
 };
 
@@ -1781,7 +1781,7 @@ export const setLayerTweenEase = (state: LayerState, action: SetLayerTweenEase):
         ease: action.payload.ease
       }
     },
-    paperProject: exportPaperProject(currentState)
+    paperProject: exportPaperProject(state)
   }
 };
 
@@ -1795,7 +1795,7 @@ export const setLayerTweenPower = (state: LayerState, action: SetLayerTweenPower
         power: action.payload.power
       }
     },
-    paperProject: exportPaperProject(currentState)
+    paperProject: exportPaperProject(state)
   }
 };
 
@@ -2015,7 +2015,7 @@ export const enableLayerFill = (state: LayerState, action: EnableLayerFill): Lay
         },
         origin: getGradientOriginPoint(action.payload.id, fill.gradient.origin),
         destination: getGradientDestinationPoint(action.payload.id, fill.gradient.destination)
-      }
+      } as any
       break;
   }
   currentState = {
@@ -2102,7 +2102,7 @@ export const enableLayerStroke = (state: LayerState, action: EnableLayerStroke):
         },
         origin: getGradientOriginPoint(action.payload.id, stroke.gradient.origin),
         destination: getGradientDestinationPoint(action.payload.id, stroke.gradient.destination)
-      }
+      } as any
       break;
   }
   currentState = {
@@ -2190,7 +2190,7 @@ export const setLayerStrokeFillType = (state: LayerState, action: SetLayerStroke
         },
         origin: getGradientOriginPoint(action.payload.id, stroke.gradient.origin),
         destination: getGradientDestinationPoint(action.payload.id, stroke.gradient.destination)
-      }
+      } as any
       break;
   }
   currentState = {
@@ -2223,7 +2223,7 @@ export const setLayerStrokeGradient = (state: LayerState, action: SetLayerStroke
     },
     origin: getGradientOriginPoint(action.payload.id, action.payload.gradient.origin),
     destination: getGradientDestinationPoint(action.payload.id, action.payload.gradient.destination)
-  }
+  } as any
   currentState = {
     ...currentState,
     byId: {
@@ -2874,7 +2874,7 @@ export const setLayerFill = (state: LayerState, action: SetLayerFill): LayerStat
         },
         origin: getGradientOriginPoint(action.payload.id, fill.gradient.origin),
         destination: getGradientDestinationPoint(action.payload.id, fill.gradient.destination)
-      }
+      } as any
       break;
   }
   currentState = {
@@ -2911,7 +2911,7 @@ export const setLayerFillType = (state: LayerState, action: SetLayerFillType): L
         },
         origin: getGradientOriginPoint(action.payload.id, fill.gradient.origin),
         destination: getGradientDestinationPoint(action.payload.id, fill.gradient.destination)
-      }
+      } as any
       break;
   }
   currentState = {
@@ -2944,7 +2944,7 @@ export const setLayerFillGradient = (state: LayerState, action: SetLayerFillGrad
     },
     origin: getGradientOriginPoint(action.payload.id, action.payload.gradient.origin),
     destination: getGradientDestinationPoint(action.payload.id, action.payload.gradient.destination)
-  }
+  } as any
   currentState = {
     ...currentState,
     byId: {
@@ -3011,7 +3011,7 @@ export const setLayerFillGradientOrigin = (state: LayerState, action: SetLayerFi
     },
     origin: getGradientOriginPoint(action.payload.id, action.payload.origin),
     destination: getGradientDestinationPoint(action.payload.id, gradient.destination)
-  }
+  } as any
   currentState = {
     ...currentState,
     byId: {
@@ -3047,7 +3047,7 @@ export const setLayerFillGradientDestination = (state: LayerState, action: SetLa
     },
     origin: getGradientOriginPoint(action.payload.id, gradient.origin),
     destination: getGradientDestinationPoint(action.payload.id, action.payload.destination)
-  }
+  } as any
   currentState = {
     ...currentState,
     byId: {
@@ -3094,7 +3094,7 @@ export const setLayerFillGradientStopColor = (state: LayerState, action: SetLaye
     },
     origin: getGradientOriginPoint(action.payload.id, gradient.origin),
     destination: getGradientDestinationPoint(action.payload.id, gradient.destination)
-  }
+  } as any
   currentState = {
     ...currentState,
     byId: {
@@ -3144,7 +3144,7 @@ export const setLayerFillGradientStopPosition = (state: LayerState, action: SetL
     },
     origin: getGradientOriginPoint(action.payload.id, gradient.origin),
     destination: getGradientDestinationPoint(action.payload.id, gradient.destination)
-  }
+  } as any
   currentState = {
     ...currentState,
     byId: {
@@ -3187,7 +3187,7 @@ export const addLayerFillGradientStop = (state: LayerState, action: AddLayerFill
     },
     origin: getGradientOriginPoint(action.payload.id, gradient.origin),
     destination: getGradientDestinationPoint(action.payload.id, gradient.destination)
-  }
+  } as any
   currentState = {
     ...currentState,
     byId: {
@@ -3235,7 +3235,7 @@ export const removeLayerFillGradientStop = (state: LayerState, action: RemoveLay
     },
     origin: getGradientOriginPoint(action.payload.id, gradient.origin),
     destination: getGradientDestinationPoint(action.payload.id, gradient.destination)
-  }
+  } as any
   currentState = {
     ...currentState,
     byId: {
@@ -3249,7 +3249,7 @@ export const removeLayerFillGradientStop = (state: LayerState, action: RemoveLay
             gradient: {
               ...currentState.byId[action.payload.id].style.fill.gradient,
               stops: {
-                allIds: removeItem(...currentState.byId[action.payload.id].style.fill.gradient.stops.allIds, action.payload.stop),
+                allIds: removeItem(currentState.byId[action.payload.id].style.fill.gradient.stops.allIds, action.payload.stop),
                 byId: newStopsById
               }
             }
@@ -3259,7 +3259,7 @@ export const removeLayerFillGradientStop = (state: LayerState, action: RemoveLay
     },
     paperProject: exportPaperProject(currentState)
   }
-  currentState = setLayerFillActiveGradientStop(currentState, layerActions.setLayerFillActiveGradientStop({id: action.payload.id, stop: newStops[0].id}) as SetLayerFillActiveGradientStop);
+  currentState = setLayerFillActiveGradientStop(currentState, layerActions.setLayerFillActiveGradientStop({id: action.payload.id, stop: newStopsById[0].id}) as SetLayerFillActiveGradientStop);
   return currentState;
 };
 

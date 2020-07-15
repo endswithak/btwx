@@ -21,7 +21,7 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
   const [draggable, setDraggable] = useState(true);
   const { layer, depth, dragGhost, dragLayers, setDragLayers, layerItem, selected, dragging, setDragging } = props;
 
-  const handleMouseDown = (e: SyntheticEvent) => {
+  const handleMouseDown = (e: any) => {
     e.stopPropagation();
     if (selected.length > 0 && selected.includes(layer)) {
       setDragLayers(selected);
@@ -30,16 +30,16 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
     }
   }
 
-  const handleMouseUp = (e: SyntheticEvent) => {
+  const handleMouseUp = (e: any) => {
     setDragLayers(null);
   }
 
-  const handleDragStart = (e: SyntheticEvent) => {
+  const handleDragStart = (e: any) => {
     setDragging(true);
     e.dataTransfer.setDragImage(document.getElementById('sidebarDragGhosts'), 0, 0);
   }
 
-  const handleDragEnd = (e: SyntheticEvent) => {
+  const handleDragEnd = (e: any) => {
     setDragLayers(null);
     setDragging(false);
   }

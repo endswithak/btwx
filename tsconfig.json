@@ -18,5 +18,11 @@
   },
   "include": [
     "src/**/*"
+  ],
+  "exclude": [
+    "src/canvas/base",
+    "src/canvas/layer",
+    "src/canvas/layer/utils",
+    "src/canvas/sketch"
   ]
 }

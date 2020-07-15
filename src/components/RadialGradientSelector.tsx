@@ -7,7 +7,7 @@ interface RadialGradientSelectorProps {
   isActive: boolean;
 }
 
-const Button = styled.button`
+const Button = styled.button<RadialGradientSelectorProps>`
   background: radial-gradient(${props => props.isActive ? props.theme.palette.primary : props.theme.text.light}, ${props => props.theme.background.z1});
   box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primary : props.theme.text.lighter};
   :hover {

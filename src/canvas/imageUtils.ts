@@ -17,7 +17,7 @@ export const applyImageMethods = (image: paper.Item) => {
     onDoubleClick: function(e: paper.MouseEvent) {
       store.dispatch(deepSelectLayer({id: this.parent.data.id}));
     },
-    onMouseDown: function(e: paper.MouseEvent) {
+    onMouseDown: function(e: any) {
       const state = store.getState();
       const layer = getLayer(state.layer.present, this.parent.data.id);
       const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, layer.id);

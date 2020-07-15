@@ -21,15 +21,15 @@ const ColorPickerLighnessInput = (props: ColorPickerLighnessInputProps): ReactEl
     setLightness(Math.round(lightnessValue * 100));
   }, [lightnessValue]);
 
-  const handleChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const target = e.target as HTMLInputElement;
+  const handleChange = (e: any) => {
+    const target = e.target;
     setLightness(target.value);
   };
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     if (lightness <= 100 && lightness >= 0 && !isNaN(lightness)) {
       setLightnessValue(lightness / 100);
-      setValue(chroma({h: hueValue, s: saturationValue, l: lightness / 100}).get('hsv.v'));
+      setValue(chroma(hueValue, saturationValue, lightness / 100, 'hsl').get('hsv.v'));
     } else {
       setLightness(Math.round(lightnessValue * 100));
     }

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useState, useEffect, useRef } from 'react';
+import React, { useContext, ReactElement } from 'react';
 import { ThemeContext } from './ThemeProvider';
 import styled from 'styled-components';
 
@@ -11,7 +11,7 @@ interface TopbarDropdownButtonOptionProps {
   label: string;
 }
 
-const Button = styled.button`
+const Button = styled.button<TopbarDropdownButtonOptionProps>`
   background: ${props => props.isActive ? props.theme.palette.primary : 'none'};
   .c-topbar-dropdown-button__icon {
     svg {
@@ -36,15 +36,13 @@ const Button = styled.button`
 
 const TopbarDropdownButtonOption = (props: TopbarDropdownButtonOptionProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { onClick, isActive, disabled, label, icon } = props;
+  const { label, icon } = props;
 
   return (
     <Button
       className='c-topbar-dropdown-button__option'
-      onClick={onClick}
-      disabled={disabled}
-      theme={theme}
-      isActive={isActive}>
+      {...props}
+      theme={theme}>
       <span className='c-topbar-dropdown-button__icon'>
         <svg
           width='24'

@@ -26,7 +26,7 @@ interface SidebarSwatchProps {
   //onClose?(color: string): void;
 }
 
-const Swatch = styled.div`
+const Swatch = styled.div<SidebarSwatchProps>`
   .c-sidebar-swatch {
     box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5} inset;
     :hover {

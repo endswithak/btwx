@@ -3,14 +3,19 @@ import { ThemeContext } from './ThemeProvider';
 import styled from 'styled-components';
 
 interface TopbarButtonProps {
-  onClick(): void;
+  onClick?(event: React.SyntheticEvent): void;
   isActive?: boolean;
   disabled?: boolean;
   icon?: string;
   label: string;
 }
 
-const Button = styled.div`
+interface ButtonWrapProps {
+  isActive?: boolean;
+  disabled?: boolean;
+}
+
+const ButtonWrap = styled.div<ButtonWrapProps>`
   .c-topbar-button__button {
     background: ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
     box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5} inset;
@@ -41,7 +46,7 @@ const TopbarButton = (props: TopbarButtonProps): ReactElement => {
   const { onClick, isActive, disabled, label, icon } = props;
 
   return (
-    <Button
+    <ButtonWrap
       className={`c-topbar-button ${disabled ? 'c-topbar-button--disabled' : null}`}
       theme={theme}
       isActive={isActive}>
@@ -63,7 +68,7 @@ const TopbarButton = (props: TopbarButtonProps): ReactElement => {
       <div className='c-topbar-button__label'>
         {label}
       </div>
-    </Button>
+    </ButtonWrap>
   );
 }
 

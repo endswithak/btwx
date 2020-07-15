@@ -63,7 +63,7 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
     }
   }, [saturation, value, lightness]);
 
-  const handleMouseDown = (event: React.MouseEvent) => {
+  const handleMouseDown = (event: any) => {
     if (!dragging && pointerRef.current && Draggable.get(pointerRef.current)) {
       const boundingBox = containerRef.current.getBoundingClientRect();
       const x = event.clientX - boundingBox.left;

@@ -58,9 +58,7 @@ class InsertTool {
     }
   }
   onKeyUp(event: paper.KeyEvent): void {
-    if (this.enabled) {
-
-    }
+    return;
   }
 }
 

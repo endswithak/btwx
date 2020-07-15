@@ -11,7 +11,7 @@ const ContextMenuItem = (props: ContextMenuItemProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { text, onClick } = props;
 
-  const handleClick = (e) => {
+  const handleClick = (e: any) => {
     onClick(e);
   }
 

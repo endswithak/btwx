@@ -1,14 +1,8 @@
-import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
-import { v4 as uuidv4 } from 'uuid';
 import store from '../store';
-import { openTextEditor } from '../store/actions/textEditor';
 import { setLayerFillGradientOrigin, setLayerFillGradientDestination } from '../store/actions/layer';
-import { getNearestScopeAncestor, getPaperLayer, getPagePaperLayer } from '../store/selectors/layer';
+import { getPaperLayer } from '../store/selectors/layer';
 import { paperMain } from './index';
-import { applyTextMethods } from './textUtils';
-import { DEFAULT_TEXT_VALUE, DEFAULT_STYLE } from '../constants';
 import InsertTool from './insertTool';
-//import textSettings from 'src/store/reducers/textSettings';
 
 class GradientTool {
   enabled: boolean;
@@ -58,9 +52,10 @@ class GradientTool {
     this.y += event.delta.y;
     const state = store.getState().layer.present;
     const paperLayer = getPaperLayer(state.selected[0]);
+    const fillColor = paperLayer.fillColor as em.PaperGradientFill;
     switch(this.handle) {
       case 'origin': {
-        const newOrigin = new paperMain.Point(paperLayer.fillColor.origin.x + event.delta.x, paperLayer.fillColor.origin.y + event.delta.y);
+        const newOrigin = new paperMain.Point(fillColor.origin.x + event.delta.x, fillColor.origin.y + event.delta.y);
         this.originHandle.position.x += event.delta.x;
         this.originHandle.position.y += event.delta.y;
         this.gradientLines.forEach((line) => {
@@ -68,14 +63,14 @@ class GradientTool {
           line.firstSegment.point.y += event.delta.y;
         });
         paperLayer.fillColor = {
-          gradient: paperLayer.fillColor.gradient,
+          gradient: fillColor.gradient,
           origin: newOrigin,
-          destination: paperLayer.fillColor.destination
-        }
+          destination: fillColor.destination
+        } as em.PaperGradientFill
         break;
       }
       case 'destination': {
-        const newDestination = new paperMain.Point(paperLayer.fillColor.destination.x + event.delta.x, paperLayer.fillColor.destination.y + event.delta.y);
+        const newDestination = new paperMain.Point(fillColor.destination.x + event.delta.x, fillColor.destination.y + event.delta.y);
         this.destinationHandle.position.x += event.delta.x;
         this.destinationHandle.position.y += event.delta.y;
         this.gradientLines.forEach((line) => {
@@ -83,10 +78,10 @@ class GradientTool {
           line.lastSegment.point.y += event.delta.y;
         });
         paperLayer.fillColor = {
-          gradient: paperLayer.fillColor.gradient,
-          origin: paperLayer.fillColor.origin,
+          gradient: fillColor.gradient,
+          origin: fillColor.origin,
           destination: newDestination
-        }
+        } as em.PaperGradientFill
         break;
       }
     }
@@ -96,16 +91,17 @@ class GradientTool {
       if (this.x !== 0 || this.y !== 0) {
         const state = store.getState().layer.present;
         const paperLayer = getPaperLayer(state.selected[0]);
+        const fillColor = paperLayer.fillColor as em.PaperGradientFill;
         switch(this.handle) {
           case 'origin': {
-            const x = (paperLayer.fillColor.origin.x - paperLayer.position.x) / paperLayer.bounds.width;
-            const y = (paperLayer.fillColor.origin.y - paperLayer.position.y) / paperLayer.bounds.height;
+            const x = (fillColor.origin.x - paperLayer.position.x) / paperLayer.bounds.width;
+            const y = (fillColor.origin.y - paperLayer.position.y) / paperLayer.bounds.height;
             store.dispatch(setLayerFillGradientOrigin({id: state.selected[0], origin: {x, y}}));
             break;
           }
           case 'destination': {
-            const x = (paperLayer.fillColor.destination.x - paperLayer.position.x) / paperLayer.bounds.width;
-            const y = (paperLayer.fillColor.destination.y - paperLayer.position.y) / paperLayer.bounds.height;
+            const x = (fillColor.destination.x - paperLayer.position.x) / paperLayer.bounds.width;
+            const y = (fillColor.destination.y - paperLayer.position.y) / paperLayer.bounds.height;
             store.dispatch(setLayerFillGradientDestination({id: state.selected[0], destination: {x, y}}));
             break;
           }

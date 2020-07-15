@@ -16,7 +16,7 @@ const SidebarLayerStyles = (): ReactElement => {
       <SidebarContextStyles />
       <SidebarTextStyles />
       <SidebarFillStyles />
-      <SidebarStrokeStyles />
+      {/* <SidebarStrokeStyles /> */}
       <FillEditor />
       {/* <SidebarShadowStyles /> */}
     </>

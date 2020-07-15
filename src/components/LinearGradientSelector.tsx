@@ -5,9 +5,10 @@ import styled from 'styled-components';
 interface LinearGradientSelectorProps {
   onClick(): void;
   isActive: boolean;
+  theme?: em.Theme;
 }
 
-const Button = styled.button`
+const Button = styled.button<LinearGradientSelectorProps>`
   background: linear-gradient(to top, ${props => props.isActive ? props.theme.palette.primary : props.theme.text.light}, ${props => props.theme.background.z1});
   box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primary : props.theme.text.lighter};
   :hover {

@@ -123,7 +123,7 @@ const template = [
   }
 ];
 
-const menu = Menu.buildFromTemplate(template);
+const menu = Menu.buildFromTemplate(template as any);
 Menu.setApplicationMenu(menu);
 
 const createWindow = (): void => {

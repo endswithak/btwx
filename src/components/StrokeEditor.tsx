@@ -10,7 +10,6 @@ import { ToolTypes } from '../store/actionTypes/tool';
 import { StrokeEditorState } from '../store/reducers/strokeEditor';
 import ColorPicker from './ColorPicker';
 import GradientSlider from './GradientSlider';
-import GradientDragger from './GradientDragger';
 import { SetLayerStrokeFillTypePayload, SetLayerStrokeGradientTypePayload, LayerTypes } from '../store/actionTypes/layer';
 import { setLayerStrokeFillType, setLayerStrokeGradientType } from '../store/actions/layer';
 
@@ -227,16 +226,6 @@ const StrokeEditor = (props: StrokeEditorProps): ReactElement => {
                   : `0 0 0 1px ${theme.background.z6} inset`
                 }} />
             </div>
-          : null
-        }
-        {
-          strokeEditor.isOpen && stroke && stroke.fillType === 'gradient' && activePickerColor
-          ? <GradientSlider
-              gradient={stroke.gradient}
-              activeStopIndex={activeStopIndex}
-              setActiveStopIndex={setActiveStopIndex}
-              setActivePickerColor={setActivePickerColor}
-              onChange={handleGradientChange} />
           : null
         }
         {

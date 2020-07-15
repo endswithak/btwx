@@ -18,10 +18,10 @@ interface ColorPickerRedInputProps {
 const ColorPickerRedInput = (props: ColorPickerRedInputProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { hue, saturation, lightness, value, setHue, setSaturation, setLightness, setValue } = props;
-  const [red, setRed] = useState<string | number>(chroma({h: hue, s: saturation, l: lightness}).set('hsv.v', value).get('rgb.r'));
+  const [red, setRed] = useState<string | number>(chroma(hue, saturation, lightness, 'hsl').set('hsv.v', value).get('rgb.r'));
 
   useEffect(() => {
-    setRed(chroma({h: hue, s: saturation, l: lightness}).set('hsv.v', value).get('rgb.r'));
+    setRed(chroma(hue, saturation, lightness, 'hsl').set('hsv.v', value).get('rgb.r'));
   }, [hue, saturation, lightness, value]);
 
   const handleChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
@@ -31,13 +31,13 @@ const ColorPickerRedInput = (props: ColorPickerRedInputProps): ReactElement => {
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     if (red <= 255 && red >= 0) {
-      const nextColor = chroma({h: hue, s: saturation, l: lightness}).set('hsv.v', value).set('rgb.r', red);
+      const nextColor = chroma(hue, saturation, lightness, 'hsl').set('hsv.v', value).set('rgb.r', red).css();
       setHue(isNaN(chroma(nextColor).get('hsl.h')) ? 0 : chroma(nextColor).get('hsl.h'));
       setSaturation(chroma(nextColor).get('hsl.s'));
       setLightness(chroma(nextColor).get('hsl.l'));
       setValue(chroma(nextColor).get('hsv.v'));
     } else {
-      setRed(chroma({h: hue, s: saturation, l: lightness}).set('hsv.v', value).get('rgb.r'));
+      setRed(chroma(hue, saturation, lightness, 'hsl').set('hsv.v', value).get('rgb.r'));
     }
   };
 

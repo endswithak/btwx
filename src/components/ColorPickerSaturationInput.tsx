@@ -21,15 +21,15 @@ const ColorPickerHueInput = (props: ColorPickerHueInputProps): ReactElement => {
     setSaturation(Math.round(saturationValue * 100));
   }, [saturationValue]);
 
-  const handleChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const target = e.target as HTMLInputElement;
+  const handleChange = (e: any) => {
+    const target = e.target;
     setSaturation(target.value);
   };
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     if (saturation <= 100 && saturation >= 0 && !isNaN(saturation)) {
       setSaturationValue(saturation / 100);
-      setValue(chroma({h: hueValue, s: saturation / 100, l: lightnessValue}).get('hsv.v'));
+      setValue(chroma(hueValue, saturation / 100, lightnessValue, 'hsl').get('hsv.v'));
     } else {
       setSaturation(Math.round(saturationValue * 100));
     }

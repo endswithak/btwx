@@ -45,7 +45,7 @@ const SidebarStrokeStyles = (props: SidebarStrokeStylesProps): ReactElement => {
             </SidebarSectionColumn>
           </SidebarSectionRow>
           <SidebarSectionRow>
-            <StrokeInput />
+            {/* <StrokeInput /> */}
           </SidebarSectionRow>
           <SidebarSectionRow>
             <SidebarSectionColumn width='33.33%'>

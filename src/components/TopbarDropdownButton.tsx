@@ -11,13 +11,13 @@ interface TopbarDropdownButtonProps {
   disabled?: boolean;
   icon?: string;
   label: string;
-  options: [{
-    onClick(event: React.SyntheticEvent): void;
+  options: {
+    onClick: any;
     isActive?: boolean;
     disabled?: boolean;
     icon?: string;
     label: string;
-  }];
+  }[];
 }
 
 const ButtonDropdown = styled.div`
@@ -54,7 +54,7 @@ const TopbarDropdownButton = (props: TopbarDropdownButtonProps): ReactElement =>
     document.addEventListener('mousedown', onMouseDown, false);
   }
 
-  const handleOptionClick = (option) => {
+  const handleOptionClick = (option: any) => {
     option.onClick();
     closeDropdown();
   }

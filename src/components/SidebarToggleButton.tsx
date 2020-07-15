@@ -10,7 +10,13 @@ interface SidebarToggleButtonProps {
   children?: React.ReactElement | React.ReactElement[];
 }
 
-const Button = styled.button`
+interface ButtonProps {
+  onClick: any;
+  isActive: boolean;
+  disabled?: boolean;
+}
+
+const Button = styled.button<ButtonProps>`
   background: ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
   box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5} inset;
   svg {

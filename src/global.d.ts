@@ -1,3 +1,5 @@
+declare module 'lodash.debounce';
+declare module 'react-scroll-sync';
 declare namespace em {
 
   type ToolType = 'Shape' | 'Selection' | 'Artboard' | 'Text';
@@ -69,6 +71,12 @@ declare namespace em {
   type DeviceCategoryType = AppleDeviceCategory | AndroidDeviceCategory | ResponsiveWebDeviceCategory;
 
   type DevicePlatformType = 'Apple' | 'Android' | 'Responsive Web';
+
+  interface PaperGradientFill extends paper.Color {
+    origin: paper.Point;
+    destination: paper.Point;
+    gradient: paper.Gradient;
+  }
 
   interface Device {
     type: DeviceType;
@@ -184,6 +192,7 @@ declare namespace em {
     paperLayer: string;
     selected: boolean;
     children: string[] | null;
+    imageId?: string;
   }
 
   interface Group extends Layer {

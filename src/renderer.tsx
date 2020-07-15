@@ -53,13 +53,13 @@ const titleBar = new Titlebar({
   backgroundColor: Color.fromHex(theme === 'dark' ? themeObject.background.z1 : themeObject.background.z2)
 });
 
-window.updateTheme = () => {
+(window as any).updateTheme = () => {
   theme = remote.systemPreferences.getUserDefault('theme', 'string');
   themeObject = getTheme(theme);
   titleBar.updateBackground(Color.fromHex(theme === 'dark' ? themeObject.background.z1 : themeObject.background.z2));
 }
 
-window.renderMainWindow = () => {
+(window as any).renderMainWindow = () => {
   titleBar.updateTitle('eSketch');
   ReactDOM.render(
     <Provider store={store}>
@@ -73,7 +73,7 @@ window.renderMainWindow = () => {
   );
 }
 
-window.renderPreviewWindow = () => {
+(window as any).renderPreviewWindow = () => {
   titleBar.updateTitle('Preview');
   ReactDOM.render(
     <Provider store={store}>
@@ -87,7 +87,7 @@ window.renderPreviewWindow = () => {
   );
 }
 
-window.renderPreferencesWindow = () => {
+(window as any).renderPreferencesWindow = () => {
   titleBar.updateTitle('Preferences');
   ReactDOM.render(
     <Provider store={store}>

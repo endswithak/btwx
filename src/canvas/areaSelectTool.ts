@@ -4,6 +4,7 @@ import { deselectAllLayers, deselectLayer, selectLayer } from '../store/actions/
 import store from '../store';
 import { paperMain } from './index';
 import { THEME_PRIMARY_COLOR } from '../constants';
+import { LayerState } from '../store/reducers/layer';
 
 class AreaSelectTool {
   enabled: boolean;
@@ -55,13 +56,13 @@ class AreaSelectTool {
     });
     return selectAreaShape;
   }
-  hitTestLayers(state) {
+  hitTestLayers(state: LayerState) {
     const layers: string[] = [];
     // get overlapped page layers
-    const overlappedLayers = getPagePaperLayer(state.present).getItems({
+    const overlappedLayers = getPagePaperLayer(state).getItems({
       data: (data: any) => {
         if (data.id !== 'ArtboardBackground' && data.id !== 'ArtboardMask' && data.id !== 'Raster') {
-          const topParent = getNearestScopeAncestor(state.present, data.id);
+          const topParent = getNearestScopeAncestor(state, data.id);
           return topParent.id === data.id;
         }
       },
@@ -78,7 +79,7 @@ class AreaSelectTool {
           item.getItems({
             data: (data: any) => {
               if (data.id !== 'ArtboardBackground' && data.id !== 'ArtboardMask' && data.id !== 'Raster') {
-                if (state.present.byId[item.data.id].children.includes(data.id)) {
+                if (state.byId[item.data.id].children.includes(data.id)) {
                   layers.push(data.id);
                 }
               }
@@ -145,7 +146,7 @@ class AreaSelectTool {
       if (this.to) {
         const state = store.getState();
         // get hit test layers
-        const hitTestLayers = this.hitTestLayers(state.layer);
+        const hitTestLayers = this.hitTestLayers(state.layer.present);
         // loop through hit test layers
         hitTestLayers.forEach((id: string) => {
           // process layer if not included in overlapped

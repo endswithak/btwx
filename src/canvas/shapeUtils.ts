@@ -17,7 +17,7 @@ export const applyShapeMethods = (shape: paper.Item) => {
     onDoubleClick: function(e: paper.MouseEvent) {
       store.dispatch(deepSelectLayer({id: this.data.id}));
     },
-    onMouseDown: function(e: paper.MouseEvent) {
+    onMouseDown: function(e: any) {
       const state = store.getState();
       const layer = getLayer(state.layer.present, this.data.id);
       const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, layer.id);

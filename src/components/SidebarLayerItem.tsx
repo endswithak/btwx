@@ -22,7 +22,15 @@ interface SidebarLayerItemProps {
   deselectLayer?(payload: DeselectLayerPayload): LayerTypes;
 }
 
-const Background = styled.div`
+interface BackgroundProps {
+  dragGhost: boolean;
+  isSelected: boolean;
+  isEditing: boolean;
+  isArtboard: boolean;
+  isHovering: boolean;
+}
+
+const Background = styled.div<BackgroundProps>`
   background: ${
     props => (props.isSelected || props.isEditing) && !props.dragGhost
     ? props.theme.palette.primary

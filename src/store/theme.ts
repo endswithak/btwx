@@ -64,7 +64,8 @@ const createText = (scale: string[], palette: em.Palette): em.TextScale => ({
   onAccent: textOnColor(palette.accent),
 });
 
-export const darkTheme = {
+export const darkTheme: em.Theme = {
+  name: 'dark',
   palette: createPalette('dark'),
   background: createDarkBackgrounds(darkBgScale),
   backgroundInverse: createLightBackgrounds(lightBgScale),
@@ -72,7 +73,8 @@ export const darkTheme = {
   unit: THEME_UNIT_SIZE
 }
 
-export const lightTheme = {
+export const lightTheme: em.Theme = {
+  name: 'light',
   palette: createPalette('light'),
   background: createLightBackgrounds(lightBgScale),
   backgroundInverse: createDarkBackgrounds(lightBgScale),
@@ -83,17 +85,9 @@ export const lightTheme = {
 const getTheme = (theme: em.ThemeName): em.Theme => {
   switch(theme) {
     case 'dark':
-      return {
-        name: theme,
-        ...darkTheme,
-        unit: THEME_UNIT_SIZE
-      }
+      return darkTheme;
     case 'light':
-      return {
-        name: theme,
-        ...lightTheme,
-        unit: THEME_UNIT_SIZE
-      }
+      return lightTheme;
   }
 };
 

@@ -44,7 +44,7 @@ const ColorPicker = (props: ColorPickerProps): ReactElement => {
   }, [colorValue]);
 
   useEffect(() => {
-    setColor(chroma.hsl(hue, saturation, lightness, alpha).hex());
+    setColor(chroma.hsl(hue, saturation, lightness).alpha(alpha).hex());
   }, [hue, saturation, lightness, value, alpha]);
 
   useEffect(() => {

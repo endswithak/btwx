@@ -23,7 +23,7 @@ const VerticalFlipInput = (props: VerticalFlipInputProps): ReactElement => {
     setVerticalFlip(verticalFlipValue);
   }, [verticalFlipValue]);
 
-  const handleClick = (e: React.SyntheticEvent<HTMLInputElement>) => {
+  const handleClick = (e: any) => {
     const paperLayer = getPaperLayer(selected[0]);
     paperLayer.scale(1, -1);
     if (verticalFlip) {

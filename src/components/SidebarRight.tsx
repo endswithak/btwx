@@ -2,6 +2,7 @@ import React, { useContext, ReactElement, useRef, useEffect, useState } from 're
 import { connect } from 'react-redux';
 import Sidebar from './Sidebar';
 import SidebarLayerStyles from './SidebarLayerStyles';
+import { RootState } from '../store/reducers';
 //import SidebarArtboardStyles from './SidebarArtboardStyles';
 
 interface SidebarRightProps {

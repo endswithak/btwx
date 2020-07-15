@@ -1,9 +1,9 @@
 import paper, { Shape, Point, Path, Color, PointText } from 'paper';
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import store, { StoreDispatch, StoreGetState } from '../store';
-import { enableSelectionTool, enableRectangleDrawTool, enableEllipseDrawTool, enableRoundedDrawTool, enableDragTool } from '../store/actions/tool';
+import { enableSelectionTool, enableDragTool } from '../store/actions/tool';
 import { addShape, setLayerHover, increaseLayerScope, selectLayer, newLayerScope, deselectLayer, moveLayerBy, moveLayersBy, enableLayerDrag, disableLayerDrag, deepSelectLayer } from '../store/actions/layer';
-import { getNearestScopeAncestor, getLayerByPaperId, isScopeGroupLayer, getPaperLayer, getLayer } from '../store/selectors/layer';
+import { getNearestScopeAncestor, isScopeGroupLayer, getPaperLayer, getLayer } from '../store/selectors/layer';
 import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
 
 interface GetSymbolsPage {
@@ -137,16 +137,16 @@ export const setSelection = ({artboard, path, dispatch}: SetSelection): void => 
   selectionFrame.selected = true;
 }
 
-interface GetParent {
-  item: paper.Item;
-}
+// interface GetParent {
+//   item: paper.Item;
+// }
 
-export const getParent = ({ item }: GetParent) => {
-  if (item) {
-    let currentItem = item;
-    while(!currentItem.isGroup) {
-      currentItem = currentItem.parent;
-    }
-    return currentItem.layersGroup();
-  }
-}
+// export const getParent = ({ item }: GetParent) => {
+//   if (item) {
+//     let currentItem = item;
+//     while(!currentItem.isGroup) {
+//       currentItem = currentItem.parent;
+//     }
+//     return currentItem.layersGroup();
+//   }
+// }
