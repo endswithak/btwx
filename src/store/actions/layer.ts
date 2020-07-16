@@ -119,6 +119,15 @@ import {
   ACTIVATE_LAYER_FILL_GRADIENT_STOP,
   DEACTIVATE_LAYER_FILL_GRADIENT_STOP,
   SET_LAYER_FILL_ACTIVE_GRADIENT_STOP,
+  SET_LAYER_STROKE_GRADIENT_ORIGIN,
+  SET_LAYER_STROKE_GRADIENT_DESTINATION,
+  SET_LAYER_STROKE_GRADIENT_STOP_COLOR,
+  SET_LAYER_STROKE_GRADIENT_STOP_POSITION,
+  ADD_LAYER_STROKE_GRADIENT_STOP,
+  REMOVE_LAYER_STROKE_GRADIENT_STOP,
+  ACTIVATE_LAYER_STROKE_GRADIENT_STOP,
+  DEACTIVATE_LAYER_STROKE_GRADIENT_STOP,
+  SET_LAYER_STROKE_ACTIVE_GRADIENT_STOP,
   ADD_LAYERS_MASK,
   REMOVE_LAYERS_MASK,
   MASK_LAYER,
@@ -253,6 +262,15 @@ import {
   ActivateLayerFillGradientStopPayload,
   DeactivateLayerFillGradientStopPayload,
   SetLayerFillActiveGradientStopPayload,
+  SetLayerStrokeGradientOriginPayload,
+  SetLayerStrokeGradientDestinationPayload,
+  SetLayerStrokeGradientStopColorPayload,
+  SetLayerStrokeGradientStopPositionPayload,
+  AddLayerStrokeGradientStopPayload,
+  RemoveLayerStrokeGradientStopPayload,
+  ActivateLayerStrokeGradientStopPayload,
+  DeactivateLayerStrokeGradientStopPayload,
+  SetLayerStrokeActiveGradientStopPayload,
   AddLayersMaskPayload,
   RemoveLayersMaskPayload,
   MaskLayerPayload,
@@ -1015,6 +1033,51 @@ export const deactivateLayerFillGradientStop = (payload: DeactivateLayerFillGrad
 
 export const setLayerFillActiveGradientStop = (payload: SetLayerFillActiveGradientStopPayload): LayerTypes => ({
   type: SET_LAYER_FILL_ACTIVE_GRADIENT_STOP,
+  payload
+});
+
+export const setLayerStrokeGradientOrigin = (payload: SetLayerStrokeGradientOriginPayload): LayerTypes => ({
+  type: SET_LAYER_STROKE_GRADIENT_ORIGIN,
+  payload
+});
+
+export const setLayerStrokeGradientDestination = (payload: SetLayerStrokeGradientDestinationPayload): LayerTypes => ({
+  type: SET_LAYER_STROKE_GRADIENT_DESTINATION,
+  payload
+});
+
+export const setLayerStrokeGradientStopColor = (payload: SetLayerStrokeGradientStopColorPayload): LayerTypes => ({
+  type: SET_LAYER_STROKE_GRADIENT_STOP_COLOR,
+  payload
+});
+
+export const setLayerStrokeGradientStopPosition = (payload: SetLayerStrokeGradientStopPositionPayload): LayerTypes => ({
+  type: SET_LAYER_STROKE_GRADIENT_STOP_POSITION,
+  payload
+});
+
+export const addLayerStrokeGradientStop = (payload: AddLayerStrokeGradientStopPayload): LayerTypes => ({
+  type: ADD_LAYER_STROKE_GRADIENT_STOP,
+  payload
+});
+
+export const removeLayerStrokeGradientStop = (payload: RemoveLayerStrokeGradientStopPayload): LayerTypes => ({
+  type: REMOVE_LAYER_STROKE_GRADIENT_STOP,
+  payload
+});
+
+export const activateLayerStrokeGradientStop = (payload: ActivateLayerStrokeGradientStopPayload): LayerTypes => ({
+  type: ACTIVATE_LAYER_STROKE_GRADIENT_STOP,
+  payload
+});
+
+export const deactivateLayerStrokeGradientStop = (payload: DeactivateLayerStrokeGradientStopPayload): LayerTypes => ({
+  type: DEACTIVATE_LAYER_STROKE_GRADIENT_STOP,
+  payload
+});
+
+export const setLayerStrokeActiveGradientStop = (payload: SetLayerStrokeActiveGradientStopPayload): LayerTypes => ({
+  type: SET_LAYER_STROKE_ACTIVE_GRADIENT_STOP,
   payload
 });
 

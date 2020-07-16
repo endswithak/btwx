@@ -1,10 +1,10 @@
 import {
-  OPEN_FILL_LINEAR_GRADIENT_EDITOR,
-  CLOSE_FILL_LINEAR_GRADIENT_EDITOR,
-  FillLinearGradientEditorTypes,
-} from '../actionTypes/fillLinearGradientEditor';
+  OPEN_FILL_GRADIENT_EDITOR,
+  CLOSE_FILL_GRADIENT_EDITOR,
+  FillGradientEditorTypes,
+} from '../actionTypes/fillGradientEditor';
 
-export interface FillLinearGradientEditorState {
+export interface FillGradientEditorState {
   isOpen: boolean;
   layer: string;
   gradient: em.Gradient;
@@ -12,7 +12,7 @@ export interface FillLinearGradientEditorState {
   y: number;
 }
 
-const initialState: FillLinearGradientEditorState = {
+const initialState: FillGradientEditorState = {
   isOpen: false,
   layer: null,
   gradient: null,
@@ -20,9 +20,9 @@ const initialState: FillLinearGradientEditorState = {
   y: null
 };
 
-export default (state = initialState, action: FillLinearGradientEditorTypes): FillLinearGradientEditorState => {
+export default (state = initialState, action: FillGradientEditorTypes): FillGradientEditorState => {
   switch (action.type) {
-    case OPEN_FILL_LINEAR_GRADIENT_EDITOR: {
+    case OPEN_FILL_GRADIENT_EDITOR: {
       return {
         ...state,
         isOpen: true,
@@ -32,7 +32,7 @@ export default (state = initialState, action: FillLinearGradientEditorTypes): Fi
         y: action.payload.y
       };
     }
-    case CLOSE_FILL_LINEAR_GRADIENT_EDITOR: {
+    case CLOSE_FILL_GRADIENT_EDITOR: {
       return {
         ...state,
         isOpen: false,

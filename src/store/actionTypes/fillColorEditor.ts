@@ -3,7 +3,7 @@ export const CLOSE_FILL_COLOR_EDITOR = 'CLOSE_FILL_COLOR_EDITOR';
 
 export interface OpenFillColorEditorPayload {
   layer: string;
-  color: string;
+  color: em.Color;
   x: number;
   y: number;
 }

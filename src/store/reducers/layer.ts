@@ -110,6 +110,15 @@ import {
   ACTIVATE_LAYER_FILL_GRADIENT_STOP,
   DEACTIVATE_LAYER_FILL_GRADIENT_STOP,
   SET_LAYER_FILL_ACTIVE_GRADIENT_STOP,
+  SET_LAYER_STROKE_GRADIENT_ORIGIN,
+  SET_LAYER_STROKE_GRADIENT_DESTINATION,
+  SET_LAYER_STROKE_GRADIENT_STOP_COLOR,
+  SET_LAYER_STROKE_GRADIENT_STOP_POSITION,
+  ADD_LAYER_STROKE_GRADIENT_STOP,
+  REMOVE_LAYER_STROKE_GRADIENT_STOP,
+  ACTIVATE_LAYER_STROKE_GRADIENT_STOP,
+  DEACTIVATE_LAYER_STROKE_GRADIENT_STOP,
+  SET_LAYER_STROKE_ACTIVE_GRADIENT_STOP,
   ADD_LAYERS_MASK,
   REMOVE_LAYERS_MASK,
   MASK_LAYER,
@@ -251,6 +260,15 @@ import {
   activateLayerFillGradientStop,
   deactivateLayerFillGradientStop,
   setLayerFillActiveGradientStop,
+  setLayerStrokeGradientOrigin,
+  setLayerStrokeGradientDestination,
+  setLayerStrokeGradientStopColor,
+  setLayerStrokeGradientStopPosition,
+  addLayerStrokeGradientStop,
+  removeLayerStrokeGradientStop,
+  activateLayerStrokeGradientStop,
+  deactivateLayerStrokeGradientStop,
+  setLayerStrokeActiveGradientStop,
   addLayersMask,
   removeLayersMask,
   maskLayer,
@@ -580,6 +598,24 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return deactivateLayerFillGradientStop(state, action);
     case SET_LAYER_FILL_ACTIVE_GRADIENT_STOP:
       return setLayerFillActiveGradientStop(state, action);
+    case SET_LAYER_STROKE_GRADIENT_ORIGIN:
+      return setLayerStrokeGradientOrigin(state, action);
+    case SET_LAYER_STROKE_GRADIENT_DESTINATION:
+      return setLayerStrokeGradientDestination(state, action);
+    case SET_LAYER_STROKE_GRADIENT_STOP_COLOR:
+      return setLayerStrokeGradientStopColor(state, action);
+    case SET_LAYER_STROKE_GRADIENT_STOP_POSITION:
+      return setLayerStrokeGradientStopPosition(state, action);
+    case ADD_LAYER_STROKE_GRADIENT_STOP:
+      return addLayerStrokeGradientStop(state, action);
+    case REMOVE_LAYER_STROKE_GRADIENT_STOP:
+      return removeLayerStrokeGradientStop(state, action);
+    case ACTIVATE_LAYER_STROKE_GRADIENT_STOP:
+      return activateLayerStrokeGradientStop(state, action);
+    case DEACTIVATE_LAYER_STROKE_GRADIENT_STOP:
+      return deactivateLayerStrokeGradientStop(state, action);
+    case SET_LAYER_STROKE_ACTIVE_GRADIENT_STOP:
+      return setLayerStrokeActiveGradientStop(state, action);
     case ADD_LAYERS_MASK:
       return addLayersMask(state, action);
     case REMOVE_LAYERS_MASK:

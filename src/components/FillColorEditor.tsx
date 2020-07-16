@@ -5,10 +5,8 @@ import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { closeFillColorEditor } from '../store/actions/fillColorEditor';
 import { FillColorEditorTypes } from '../store/actionTypes/fillColorEditor';
-import { openFillLinearGradientEditor } from '../store/actions/fillLinearGradientEditor';
-import { FillLinearGradientEditorTypes, OpenFillLinearGradientEditorPayload } from '../store/actionTypes/fillLinearGradientEditor';
-import { openFillRadialGradientEditor } from '../store/actions/fillRadialGradientEditor';
-import { FillRadialGradientEditorTypes, OpenFillRadialGradientEditorPayload } from '../store/actionTypes/fillRadialGradientEditor';
+import { openFillGradientEditor } from '../store/actions/fillGradientEditor';
+import { FillGradientEditorTypes, OpenFillGradientEditorPayload } from '../store/actionTypes/fillGradientEditor';
 import { enableSelectionTool, disableSelectionTool } from '../store/actions/tool';
 import { ToolTypes } from '../store/actionTypes/tool';
 import { FillColorEditorState } from '../store/reducers/fillColorEditor';
@@ -24,8 +22,7 @@ interface FillEditorProps {
   fill?: em.Fill;
   fillColorEditor?: FillColorEditorState;
   closeFillColorEditor?(): FillColorEditorTypes;
-  openFillLinearGradientEditor?(payload: OpenFillLinearGradientEditorPayload): FillLinearGradientEditorTypes;
-  openFillRadialGradientEditor?(payload: OpenFillRadialGradientEditorPayload): FillRadialGradientEditorTypes;
+  openFillGradientEditor?(payload: OpenFillGradientEditorPayload): FillGradientEditorTypes;
   disableSelectionTool?(): ToolTypes;
   enableSelectionTool?(): ToolTypes;
   setLayerFillColor?(payload: SetLayerFillColorPayload): LayerTypes;
@@ -38,29 +35,18 @@ interface FillEditorProps {
 const FillColorEditor = (props: FillEditorProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const editorRef = useRef<HTMLDivElement>(null);
-  const { layerItem, fill, fillColorEditor, closeFillColorEditor, disableSelectionTool, enableSelectionTool, setLayerFillColor, openFillLinearGradientEditor, openFillRadialGradientEditor, setLayerFillType, setLayerFillGradientType } = props;
-  const [fillColor, setFillColor] = useState(fillColorEditor.color);
+  const { layerItem, fill, fillColorEditor, closeFillColorEditor, setLayerFillColor, setLayerFillType, setLayerFillGradientType, openFillGradientEditor } = props;
   const debounceFillColor = useCallback(
-    debounce((dFillColor: string) => setLayerFillColor({id: fillColorEditor.layer, fillColor: dFillColor}), 150),
+    debounce((dFillColor: em.Color) => setLayerFillColor({id: fillColorEditor.layer, fillColor: dFillColor}), 150),
     []
   );
 
   useEffect(() => {
-    onOpen();
+    document.addEventListener('mousedown', onMouseDown, false);
     return () => {
-      onClose();
+      document.removeEventListener('mousedown', onMouseDown);
     }
   }, []);
-
-  const onOpen = () => {
-    disableSelectionTool();
-    document.addEventListener('mousedown', onMouseDown, false);
-  }
-
-  const onClose = () => {
-    enableSelectionTool();
-    document.removeEventListener('mousedown', onMouseDown);
-  }
 
   const onMouseDown = (event: any) => {
     if (editorRef.current && !editorRef.current.contains(event.target)) {
@@ -68,7 +54,7 @@ const FillColorEditor = (props: FillEditorProps): ReactElement => {
     }
   }
 
-  const handleFillColorChange = (fillColor: string) => {
+  const handleFillColorChange = (fillColor: em.Color) => {
     debounceFillColor(fillColor);
   }
 
@@ -78,7 +64,7 @@ const FillColorEditor = (props: FillEditorProps): ReactElement => {
       setLayerFillGradientType({id: fillColorEditor.layer, gradientType: 'linear'});
     }
     closeFillColorEditor();
-    openFillLinearGradientEditor({
+    openFillGradientEditor({
       layer: fillColorEditor.layer,
       gradient: {
         ...fill.gradient,
@@ -95,7 +81,7 @@ const FillColorEditor = (props: FillEditorProps): ReactElement => {
       setLayerFillGradientType({id: fillColorEditor.layer, gradientType: 'radial'});
     }
     closeFillColorEditor();
-    openFillRadialGradientEditor({
+    openFillGradientEditor({
       layer: fillColorEditor.layer,
       gradient: {
         ...fill.gradient,
@@ -114,7 +100,6 @@ const FillColorEditor = (props: FillEditorProps): ReactElement => {
         className='c-fill-editor__picker'
         style={{
           top: fillColorEditor.y,
-          //transform: `translate(8px, ${fillColorEditor.y}px)`,
           background: chroma(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).alpha(0.88).hex(),
           boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
         }}>
@@ -135,7 +120,7 @@ const FillColorEditor = (props: FillEditorProps): ReactElement => {
             isActive: false
           }} />
         <ColorPicker
-          colorValue={fillColor}
+          colorValue={fill.color}
           colorType='rgb'
           onChange={handleFillColorChange} />
       </div>
@@ -161,7 +146,6 @@ export default connect(
     setLayerFillGradient,
     setLayerFillColor,
     setLayerFill,
-    openFillLinearGradientEditor,
-    openFillRadialGradientEditor
+    openFillGradientEditor
   }
 )(FillColorEditor);

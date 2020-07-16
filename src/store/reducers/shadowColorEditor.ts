@@ -1,10 +1,10 @@
 import {
-  OPEN_FILL_COLOR_EDITOR,
-  CLOSE_FILL_COLOR_EDITOR,
-  FillColorEditorTypes,
-} from '../actionTypes/fillColorEditor';
+  OPEN_SHADOW_COLOR_EDITOR,
+  CLOSE_SHADOW_COLOR_EDITOR,
+  ShadowColorEditorTypes,
+} from '../actionTypes/shadowColorEditor';
 
-export interface FillColorEditorState {
+export interface ShadowColorEditorState {
   isOpen: boolean;
   layer: string;
   color: em.Color;
@@ -12,7 +12,7 @@ export interface FillColorEditorState {
   y: number;
 }
 
-const initialState: FillColorEditorState = {
+const initialState: ShadowColorEditorState = {
   isOpen: false,
   layer: null,
   color: null,
@@ -20,9 +20,9 @@ const initialState: FillColorEditorState = {
   y: null
 };
 
-export default (state = initialState, action: FillColorEditorTypes): FillColorEditorState => {
+export default (state = initialState, action: ShadowColorEditorTypes): ShadowColorEditorState => {
   switch (action.type) {
-    case OPEN_FILL_COLOR_EDITOR: {
+    case OPEN_SHADOW_COLOR_EDITOR: {
       return {
         ...state,
         isOpen: true,
@@ -32,7 +32,7 @@ export default (state = initialState, action: FillColorEditorTypes): FillColorEd
         y: action.payload.y
       };
     }
-    case CLOSE_FILL_COLOR_EDITOR: {
+    case CLOSE_SHADOW_COLOR_EDITOR: {
       return {
         ...state,
         isOpen: false,

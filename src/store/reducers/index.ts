@@ -6,9 +6,10 @@ import contextMenu from './contextMenu';
 import tweenDrawer from './tweenDrawer';
 import easeEditor from './easeEditor';
 import fillColorEditor from './fillColorEditor';
-import fillLinearGradientEditor from './fillLinearGradientEditor';
-import fillRadialGradientEditor from './fillRadialGradientEditor';
-import strokeEditor from './strokeEditor';
+import fillGradientEditor from './fillGradientEditor';
+import strokeColorEditor from './strokeColorEditor';
+import strokeGradientEditor from './strokeGradientEditor';
+import shadowColorEditor from './shadowColorEditor';
 import textEditor from './textEditor';
 import textSettings from './textSettings';
 import canvasSettings from './canvasSettings';
@@ -75,6 +76,12 @@ import {
   REMOVE_LAYER_FILL_GRADIENT_STOP,
   SET_LAYER_FILL_GRADIENT_DESTINATION,
   SET_LAYER_FILL_GRADIENT_ORIGIN,
+  ADD_LAYER_STROKE_GRADIENT_STOP,
+  SET_LAYER_STROKE_GRADIENT_STOP_POSITION,
+  SET_LAYER_STROKE_GRADIENT_STOP_COLOR,
+  REMOVE_LAYER_STROKE_GRADIENT_STOP,
+  SET_LAYER_STROKE_GRADIENT_DESTINATION,
+  SET_LAYER_STROKE_GRADIENT_ORIGIN,
   SET_LAYER_STROKE_WIDTH,
   SET_LAYER_STROKE_CAP,
   SET_LAYER_STROKE_JOIN,
@@ -166,6 +173,12 @@ const rootReducer = combineReducers({
     REMOVE_LAYER_FILL_GRADIENT_STOP,
     SET_LAYER_FILL_GRADIENT_DESTINATION,
     SET_LAYER_FILL_GRADIENT_ORIGIN,
+    ADD_LAYER_STROKE_GRADIENT_STOP,
+    SET_LAYER_STROKE_GRADIENT_STOP_POSITION,
+    SET_LAYER_STROKE_GRADIENT_STOP_COLOR,
+    REMOVE_LAYER_STROKE_GRADIENT_STOP,
+    SET_LAYER_STROKE_GRADIENT_DESTINATION,
+    SET_LAYER_STROKE_GRADIENT_ORIGIN,
     SET_LAYER_STROKE_WIDTH,
     SET_LAYER_STROKE_CAP,
     SET_LAYER_STROKE_JOIN,
@@ -202,9 +215,10 @@ const rootReducer = combineReducers({
   textSettings,
   canvasSettings,
   fillColorEditor,
-  fillLinearGradientEditor,
-  fillRadialGradientEditor,
-  strokeEditor,
+  fillGradientEditor,
+  strokeColorEditor,
+  strokeGradientEditor,
+  shadowColorEditor,
   theme
 });
 

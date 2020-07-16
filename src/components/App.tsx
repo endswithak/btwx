@@ -3,7 +3,6 @@ import Topbar from './Topbar';
 import TweenEventSelect from './TweenEventSelect';
 import TweenEventDestinationSelect from './TweenEventDestinationSelect';
 import EaseEditor from './EaseEditor';
-import StrokeEditor from './StrokeEditor';
 import Main from './Main';
 import { ThemeContext } from './ThemeProvider';
 import SelectionFrameWrap from './SelectionFrameWrap';
@@ -26,7 +25,6 @@ const App = (): ReactElement => {
         <TweenEventSelect />
         <TweenEventDestinationSelect />
         <EaseEditor />
-        <StrokeEditor />
         <HoverFrameWrap />
         <SelectionFrameWrap />
     </div>

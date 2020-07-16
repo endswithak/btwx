@@ -1,10 +1,10 @@
 import {
-  OPEN_FILL_RADIAL_GRADIENT_EDITOR,
-  CLOSE_FILL_RADIAL_GRADIENT_EDITOR,
-  FillRadialGradientEditorTypes,
-} from '../actionTypes/fillRadialGradientEditor';
+  OPEN_STROKE_GRADIENT_EDITOR,
+  CLOSE_STROKE_GRADIENT_EDITOR,
+  StrokeGradientEditorTypes,
+} from '../actionTypes/strokeGradientEditor';
 
-export interface FillRadialGradientEditorState {
+export interface StrokeGradientEditorState {
   isOpen: boolean;
   layer: string;
   gradient: em.Gradient;
@@ -12,7 +12,7 @@ export interface FillRadialGradientEditorState {
   y: number;
 }
 
-const initialState: FillRadialGradientEditorState = {
+const initialState: StrokeGradientEditorState = {
   isOpen: false,
   layer: null,
   gradient: null,
@@ -20,9 +20,9 @@ const initialState: FillRadialGradientEditorState = {
   y: null
 };
 
-export default (state = initialState, action: FillRadialGradientEditorTypes): FillRadialGradientEditorState => {
+export default (state = initialState, action: StrokeGradientEditorTypes): StrokeGradientEditorState => {
   switch (action.type) {
-    case OPEN_FILL_RADIAL_GRADIENT_EDITOR: {
+    case OPEN_STROKE_GRADIENT_EDITOR: {
       return {
         ...state,
         isOpen: true,
@@ -32,7 +32,7 @@ export default (state = initialState, action: FillRadialGradientEditorTypes): Fi
         y: action.payload.y
       };
     }
-    case CLOSE_FILL_RADIAL_GRADIENT_EDITOR: {
+    case CLOSE_STROKE_GRADIENT_EDITOR: {
       return {
         ...state,
         isOpen: false,

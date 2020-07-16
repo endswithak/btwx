@@ -1,39 +1,42 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
-import chroma from 'chroma-js';
 import { ThemeContext } from './ThemeProvider';
 import SidebarInput from './SidebarInput';
 
 interface ColorPickerHueInputProps {
-  hueValue: number;
-  setHueValue: any;
+  hue: number;
+  saturation: number;
+  lightness: number;
+  value: number;
+  alpha: number;
+  onChange(color: em.Color): void;
 }
 
 const ColorPickerHueInput = (props: ColorPickerHueInputProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { hueValue, setHueValue } = props;
-  const [hue, setHue] = useState<number>(hueValue);
+  const { hue, saturation, lightness, value, alpha, onChange } = props;
+  const [hueValue, setHueValue] = useState<number>(Math.round(hue));
 
   useEffect(() => {
-    setHue(hueValue);
-  }, [hueValue]);
+    setHueValue(Math.round(hue));
+  }, [hue]);
 
   const handleChange = (e: any) => {
     const target = e.target;
-    setHue(target.value);
+    setHueValue(target.value);
   };
 
   const handleSubmit = (e: any): void => {
-    if (hue <= 360 && hue >= 0 && !isNaN(hue)) {
-      setHueValue(hue);
+    if (hueValue <= 360 && hueValue >= 0 && !isNaN(hueValue) && hueValue !== hue) {
+      onChange({h: hueValue, s: saturation, l: lightness, v: value, a: alpha});
     } else {
-      setHue(hueValue);
+      setHueValue(Math.round(hue));
     }
   };
 
   return (
     <SidebarInput
-      value={hue}
+      value={hueValue}
       onChange={handleChange}
       onSubmit={handleSubmit}
       submitOnBlur

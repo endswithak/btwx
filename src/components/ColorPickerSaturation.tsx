@@ -11,20 +11,22 @@ interface ColorPickerSaturationProps {
   saturation: number;
   value: number;
   lightness: number;
-  setSaturation: any;
-  setValue: any;
-  setLightness: any;
+  alpha: number;
+  onChange?(color: em.Color): void;
 }
 
 const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { hue, saturation, value, lightness, setSaturation, setValue, setLightness } = props;
+  const { hue, saturation, value, lightness, alpha, onChange } = props;
   const pointerRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
 
   useEffect(() => {
     if (pointerRef.current) {
+      if (Draggable.get(pointerRef.current)) {
+        Draggable.get(pointerRef.current).kill();
+      }
       Draggable.create(pointerRef.current, {
         type: 'x,y',
         zIndexBoost: false,
@@ -36,21 +38,15 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
           const s = this.x / this.maxX;
           const v = 1 - (this.y / this.maxY);
           const l = (2 - s) * v / 2;
-          setSaturation(s);
-          setValue(v);
-          setLightness(l);
+          onChange({h: hue, s: s, l: l, v: v, a: alpha});
+          //onChange(chroma.hsl(hue, s, l, alpha).hex());
         },
         onRelease: function() {
           setDragging(false);
         }
       });
     }
-    return () => {
-      if (Draggable.get(pointerRef.current)) {
-        Draggable.get(pointerRef.current).kill();
-      }
-    }
-  }, []);
+  }, [hue]);
 
   useEffect(() => {
     if (!dragging && pointerRef.current && Draggable.get(pointerRef.current)) {
@@ -72,9 +68,8 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
       const v = 1 - (y / boundingBox.height);
       const l = (2 - s) * v / 2;
       setDragging(true);
-      setSaturation(s);
-      setValue(v);
-      setLightness(l);
+      //onChange(chroma.hsl(hue, s, l, alpha).hex());
+      onChange({h: hue, s: s, l: l, v: v, a: alpha});
       gsap.set(pointerRef.current, {x, y});
       Draggable.get(pointerRef.current).update();
       Draggable.get(pointerRef.current).startDrag(event);

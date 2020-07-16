@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement, useRef, useState, useEffect, useCallback } from 'react';
-import chroma from 'chroma-js';
+//import chroma from 'chroma-js';
 import { ThemeContext } from './ThemeProvider';
 import ColorPickerSaturation from './ColorPickerSaturation';
 import ColorPickerHue from './ColorPickerHue';
@@ -15,44 +15,28 @@ import ColorPickerHueInput from './ColorPickerHueInput';
 import ColorPickerSaturationInput from './ColorPickerSaturationInput';
 import ColorPickerLightnessInput from './ColorPickerLightnessInput';
 import ColorPickerTypeToggle from './ColorPickerTypeToggle';
+import tinyColor from 'tinycolor2';
 
 interface ColorPickerProps {
-  colorValue: string;
+  colorValue: em.Color;
   colorType: 'hsl' | 'rgb';
-  onChange?(color: string): void;
+  onChange?(color: em.Color): void;
 }
 
 const ColorPicker = (props: ColorPickerProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { onChange, colorType, colorValue } = props;
-  const [color, setColor] = useState<string>(chroma(colorValue).hex());
-  const [prevColor, setPrevColor] = useState<string>(chroma(colorValue).hex());
-  const [hue, setHue] = useState(isNaN(chroma(colorValue).get('hsl.h')) ? 0 : chroma(colorValue).get('hsl.h'));
-  const [saturation, setSaturation] = useState(chroma(colorValue).get('hsl.s'));
-  const [lightness, setLightness] = useState(chroma(colorValue).get('hsl.l'));
-  const [value, setValue] = useState(chroma(colorValue).get('hsv.v'));
-  const [alpha, setAlpha] = useState(chroma(colorValue).alpha());
+  const color = tinyColor({h: colorValue.h, s: colorValue.s, l: colorValue.l, a: colorValue.a});
+  const rgb = color.toRgb();
+  const hue = colorValue.h;
+  const saturation = colorValue.s;
+  const lightness = colorValue.l;
+  const value = colorValue.v;
+  const alpha = colorValue.a;
+  const red = rgb.r;
+  const green = rgb.g;
+  const blue = rgb.b;
   const [type, setType] = useState(colorType);
-
-  useEffect(() => {
-    setHue(isNaN(chroma(colorValue).get('hsl.h')) ? 0 : chroma(colorValue).get('hsl.h'));
-    setSaturation(chroma(colorValue).get('hsl.s'));
-    setLightness(chroma(colorValue).get('hsl.l'));
-    setValue(chroma(colorValue).get('hsv.v'));
-    setAlpha(chroma(colorValue).alpha());
-    setType(colorType);
-  }, [colorValue]);
-
-  useEffect(() => {
-    setColor(chroma.hsl(hue, saturation, lightness).alpha(alpha).hex());
-  }, [hue, saturation, lightness, value, alpha]);
-
-  useEffect(() => {
-    if (color !== prevColor) {
-      setPrevColor(color);
-      onChange(color);
-    }
-  }, [color]);
 
   return (
     <div className='c-color-picker'>
@@ -62,92 +46,96 @@ const ColorPicker = (props: ColorPickerProps): ReactElement => {
           saturation={saturation}
           lightness={lightness}
           value={value}
-          setSaturation={setSaturation}
-          setValue={setValue}
-          setLightness={setLightness} />
+          alpha={alpha}
+          onChange={onChange} />
       </div>
       <div className='c-color-picker__controls'>
         <div className='c-color-picker__sliders'>
           <ColorPickerHue
             hue={hue}
-            setHue={setHue} />
+            saturation={saturation}
+            lightness={lightness}
+            value={value}
+            alpha={alpha}
+            onChange={onChange} />
           <ColorPickerAlpha
             hue={hue}
             saturation={saturation}
             lightness={lightness}
+            value={value}
             alpha={alpha}
-            setAlpha={setAlpha} />
+            onChange={onChange} />
         </div>
         <div className='c-color-picker__color'>
           <ColorPickerColor
             hue={hue}
             saturation={saturation}
             lightness={lightness}
+            value={value}
             alpha={alpha} />
         </div>
       </div>
       <div className='c-color-picker__fields c-color-picker__fields--hex'>
         <ColorPickerHexInput
-            hue={hue}
-            saturation={saturation}
-            lightness={lightness}
-            value={value}
-            setHue={setHue}
-            setSaturation={setSaturation}
-            setLightness={setLightness}
-            setValue={setValue} />
-        <ColorPickerAlphaInput
+          hue={hue}
+          saturation={saturation}
+          lightness={lightness}
+          value={value}
           alpha={alpha}
-          setAlpha={setAlpha} />
+          onChange={onChange} />
+        <ColorPickerAlphaInput
+          hue={hue}
+          saturation={saturation}
+          lightness={lightness}
+          value={value}
+          alpha={alpha}
+          onChange={onChange} />
       </div>
       <div className='c-color-picker__fields c-color-picker__fields--rgb'>
         {
           type === 'rgb'
           ? <>
               <ColorPickerRedInput
-                hue={hue}
-                saturation={saturation}
-                lightness={lightness}
-                value={value}
-                setHue={setHue}
-                setSaturation={setSaturation}
-                setLightness={setLightness}
-                setValue={setValue} />
+                red={red}
+                green={green}
+                blue={blue}
+                alpha={alpha}
+                onChange={onChange} />
               <ColorPickerGreenInput
-                hue={hue}
-                saturation={saturation}
-                lightness={lightness}
-                value={value}
-                setHue={setHue}
-                setSaturation={setSaturation}
-                setLightness={setLightness}
-                setValue={setValue} />
+                red={red}
+                green={green}
+                blue={blue}
+                alpha={alpha}
+                onChange={onChange} />
               <ColorPickerBlueInput
-                hue={hue}
-                saturation={saturation}
-                lightness={lightness}
-                value={value}
-                setHue={setHue}
-                setSaturation={setSaturation}
-                setLightness={setLightness}
-                setValue={setValue} />
+                red={red}
+                green={green}
+                blue={blue}
+                alpha={alpha}
+                onChange={onChange} />
             </>
           : <>
               <ColorPickerHueInput
-                hueValue={hue}
-                setHueValue={setHue} />
+                hue={hue}
+                saturation={saturation}
+                lightness={lightness}
+                value={value}
+                alpha={alpha}
+                onChange={onChange} />
               <ColorPickerSaturationInput
-                hueValue={hue}
-                saturationValue={saturation}
-                lightnessValue={lightness}
-                setValue={setValue}
-                setSaturationValue={setSaturation} />
+                hue={hue}
+                saturation={saturation}
+                lightness={lightness}
+                value={value}
+                alpha={alpha}
+                onChange={onChange} />
               <ColorPickerLightnessInput
-                hueValue={hue}
-                saturationValue={saturation}
-                lightnessValue={lightness}
-                setValue={setValue}
-                setLightnessValue={setLightness} />
+                hue={hue}
+                saturation={saturation}
+                lightness={lightness}
+                value={value}
+                alpha={alpha}
+                onChange={onChange} />
             </>
         }
         <ColorPickerTypeToggle

@@ -1,49 +1,45 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
-import chroma from 'chroma-js';
 import { ThemeContext } from './ThemeProvider';
 import SidebarInput from './SidebarInput';
+import tinyColor from 'tinycolor2';
 
 interface ColorPickerBlueInputProps {
-  hue: number;
-  saturation: number;
-  lightness: number;
-  value: number;
-  setHue: any;
-  setSaturation: any;
-  setLightness: any;
-  setValue: any;
+  red: number;
+  green: number;
+  blue: number;
+  alpha: number;
+  onChange(color: em.Color): void;
 }
 
 const ColorPickerBlueInput = (props: ColorPickerBlueInputProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { hue, saturation, lightness, value, setHue, setSaturation, setLightness, setValue } = props;
-  const [blue, setBlue] = useState<string | number>(chroma(hue, saturation, lightness, 'hsl').set('hsv.v', value).get('rgb.b'));
+  const { red, green, blue, alpha, onChange } = props;
+  const [blueValue, setBlueValue] = useState<number>(Math.round(blue));
 
   useEffect(() => {
-    setBlue(chroma(hue, saturation, lightness, 'hsl').set('hsv.v', value).get('rgb.b'));
-  }, [hue, saturation, lightness, value]);
+    setBlueValue(Math.round(blue));
+  }, [blue]);
 
-  const handleChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const target = e.target as HTMLInputElement;
-    setBlue(target.value);
+  const handleChange = (e: any) => {
+    const target = e.target;
+    setBlueValue(target.value);
   };
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
-    if (blue <= 255 && blue >= 0) {
-      const nextColor = chroma(hue, saturation, lightness, 'hsl').set('hsv.v', value).set('rgb.b', blue).css();
-      setHue(isNaN(chroma(nextColor).get('hsl.h')) ? 0 : chroma(nextColor).get('hsl.h'));
-      setSaturation(chroma(nextColor).get('hsl.s'));
-      setLightness(chroma(nextColor).get('hsl.l'));
-      setValue(chroma(nextColor).get('hsv.v'));
+  const handleSubmit = (e: any): void => {
+    if (blueValue <= 255 && blueValue >= 0 && blueValue !== blue) {
+      const nextColor = tinyColor({r: red, g: green, b: blueValue, a: alpha});
+      const hsl = nextColor.toHsl();
+      const hsv = nextColor.toHsv();
+      onChange({ h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v, a: alpha });
     } else {
-      setBlue(chroma(hue, saturation, lightness, 'hsl').set('hsv.v', value).get('rgb.b'));
+      setBlueValue(Math.round(blue));
     }
   };
 
   return (
     <SidebarInput
-      value={blue}
+      value={blueValue}
       onChange={handleChange}
       onSubmit={handleSubmit}
       submitOnBlur

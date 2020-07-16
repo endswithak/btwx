@@ -2,7 +2,7 @@
 import React, { useContext, ReactElement } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { ThemeContext } from './ThemeProvider';
-import chroma from 'chroma-js';
+import tinyColor from 'tinycolor2';
 
 interface GradientSliderGradientProps {
   stops: {
@@ -44,8 +44,12 @@ const GradientSliderGradient = (props: GradientSliderGradientProps): ReactElemen
       return result;
     }, stops.byId[stops.allIds[0]]);
     const id = uuidv4();
-    const color = chroma.average([leftStop.color, rightStop.color]).hex();
-    const newStop = { id, position, color, active: false };
+    const color1 = tinyColor({h: leftStop.color.h, s: leftStop.color.s, l: leftStop.color.l, a: leftStop.color.a});
+    const color2 = tinyColor({h: rightStop.color.h, s: rightStop.color.s, l: rightStop.color.l, a: rightStop.color.a});
+    const colorAvg = tinyColor.mix(color1, color2, 50);
+    const hsl = colorAvg.toHsl();
+    const hsv = colorAvg.toHsv();
+    const newStop = { id, position, color: { ...hsl, v: hsv.v }, active: false };
     onSliderClick(newStop);
   }
 
@@ -56,7 +60,9 @@ const GradientSliderGradient = (props: GradientSliderGradientProps): ReactElemen
       style={{
         background: (() => {
           return [...stops.allIds].sort((a,b) => { return stops.byId[a].position - stops.byId[b].position }).reduce((result, current, index) => {
-            result = result + `${stops.byId[current].color} ${stops.byId[current].position * 100}%`;
+            const stopItem = stops.byId[current];
+            const stopColor = tinyColor({h: stopItem.color.h, s: stopItem.color.s, l: stopItem.color.l, a: stopItem.color.a}).toHslString();
+            result = result + `${stopColor} ${stopItem.position * 100}%`;
             if (index !== stops.allIds.length - 1) {
               result = result + ',';
             } else {

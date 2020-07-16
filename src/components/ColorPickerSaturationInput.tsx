@@ -1,43 +1,42 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
-import chroma from 'chroma-js';
 import { ThemeContext } from './ThemeProvider';
 import SidebarInput from './SidebarInput';
 
-interface ColorPickerHueInputProps {
-  hueValue: number;
-  saturationValue: number;
-  lightnessValue: number;
-  setValue: any;
-  setSaturationValue: any;
+interface ColorPickerSaturationInputProps {
+  hue: number;
+  saturation: number;
+  lightness: number;
+  value: number;
+  alpha: number;
+  onChange(color: em.Color): void;
 }
 
-const ColorPickerHueInput = (props: ColorPickerHueInputProps): ReactElement => {
+const ColorPickerSaturationInput = (props: ColorPickerSaturationInputProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { hueValue, saturationValue, lightnessValue, setSaturationValue, setValue } = props;
-  const [saturation, setSaturation] = useState<number>(Math.round(saturationValue * 100));
+  const { hue, saturation, lightness, value, alpha, onChange } = props;
+  const [saturationValue, setSaturationValue] = useState<number>(Math.round(saturation * 100));
 
   useEffect(() => {
-    setSaturation(Math.round(saturationValue * 100));
-  }, [saturationValue]);
+    setSaturationValue(Math.round(saturation * 100));
+  }, [saturation]);
 
   const handleChange = (e: any) => {
     const target = e.target;
-    setSaturation(target.value);
+    setSaturationValue(target.value);
   };
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
-    if (saturation <= 100 && saturation >= 0 && !isNaN(saturation)) {
-      setSaturationValue(saturation / 100);
-      setValue(chroma(hueValue, saturation / 100, lightnessValue, 'hsl').get('hsv.v'));
+  const handleSubmit = (e: any): void => {
+    if (saturationValue <= 100 && saturationValue >= 0 && !isNaN(saturationValue) && saturationValue / 100 !== saturation) {
+      onChange({h: hue, s: saturationValue / 100, l: lightness, v: value, a: alpha});
     } else {
-      setSaturation(Math.round(saturationValue * 100));
+      setSaturationValue(Math.round(saturation * 100));
     }
   };
 
   return (
     <SidebarInput
-      value={saturation}
+      value={saturationValue}
       onChange={handleChange}
       onSubmit={handleSubmit}
       submitOnBlur
@@ -45,4 +44,4 @@ const ColorPickerHueInput = (props: ColorPickerHueInputProps): ReactElement => {
   );
 }
 
-export default ColorPickerHueInput;
+export default ColorPickerSaturationInput;

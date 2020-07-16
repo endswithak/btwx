@@ -19,8 +19,8 @@ const SelectionFrameWrap = (props: SelectionFrameWrapProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer, fillRadialGradientEditor, fillLinearGradientEditor } = state;
-  const isGradientEditorOpen = fillRadialGradientEditor.isOpen || fillLinearGradientEditor.isOpen;
+  const { layer, fillGradientEditor, strokeGradientEditor } = state;
+  const isGradientEditorOpen = fillGradientEditor.isOpen || strokeGradientEditor.isOpen;
   const selected = layer.present.selected;
   return { selected, isGradientEditorOpen };
 };

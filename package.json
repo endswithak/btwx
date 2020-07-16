@@ -83,6 +83,7 @@
     "@types/redux-logger": "^3.0.7",
     "@types/sharp": "^0.25.0",
     "@types/styled-components": "^5.0.1",
+    "@types/tinycolor2": "^1.4.2",
     "@types/uuid": "^7.0.2",
     "@typescript-eslint/eslint-plugin": "^2.23.0",
     "@typescript-eslint/parser": "^2.23.0",
@@ -123,6 +124,7 @@
     "sharp": "^0.25.4",
     "sketch-file": "^0.3.3",
     "styled-components": "^5.0.1",
+    "tinycolor2": "^1.4.1",
     "uuid": "^7.0.3"
   }
 }

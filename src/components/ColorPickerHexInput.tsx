@@ -3,41 +3,39 @@ import React, { useContext, ReactElement, useRef, useState, useEffect } from 're
 import chroma from 'chroma-js';
 import { ThemeContext } from './ThemeProvider';
 import SidebarInput from './SidebarInput';
+import tinyColor from 'tinycolor2';
 
 interface ColorPickerHexInputProps {
   hue: number;
   saturation: number;
   lightness: number;
   value: number;
-  setHue: any;
-  setSaturation: any;
-  setLightness: any;
-  setValue: any;
+  alpha: number;
+  onChange(color: em.Color): void;
 }
 
 const ColorPickerHexInput = (props: ColorPickerHexInputProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { hue, saturation, lightness, value, setHue, setSaturation, setLightness, setValue } = props;
-  const [hex, setHex] = useState<string | number>(chroma(hue, saturation, lightness, 'hsl').set('hsv.v', value).hex().replace('#', ''));
+  const { hue, saturation, lightness, value, alpha, onChange } = props;
+  const [hex, setHex] = useState<string>(tinyColor({h: hue, s: saturation, l: lightness}).toHex());
 
   useEffect(() => {
-    setHex(chroma(hue, saturation, lightness, 'hsl').set('hsv.v', value).hex().replace('#', ''));
+    setHex(tinyColor({h: hue, s: saturation, l: lightness}).toHex());
   }, [hue, saturation, lightness, value]);
 
-  const handleChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
+  const handleChange = (e: any) => {
     const target = e.target as HTMLInputElement;
     setHex(target.value);
   };
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
-    if (chroma.valid(hex)) {
-      setHue(isNaN(chroma(hex).get('hsl.h')) ? 0 : chroma(hex).get('hsl.h'));
-      setSaturation(chroma(hex).get('hsl.s'));
-      setLightness(chroma(hex).get('hsl.l'));
-      setValue(chroma(hex).get('hsv.v'));
-      setHex(chroma(hex).hex().replace('#', ''));
+  const handleSubmit = (e: any): void => {
+    const nextHex = tinyColor(hex);
+    if (nextHex.isValid()) {
+      const hsl = nextHex.toHsl();
+      const hsv = nextHex.toHsv();
+      onChange({ h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v, a: alpha });
     } else {
-      setHex(chroma(hue, saturation, lightness, 'hsl').set('hsv.v', value).hex().replace('#', ''));
+      setHex(tinyColor({h: hue, s: saturation, l: lightness}).toHex());
     }
   };
 

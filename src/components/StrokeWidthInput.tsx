@@ -9,11 +9,7 @@ import { setLayerStrokeWidth } from '../store/actions/layer';
 import { getPaperLayer } from '../store/selectors/layer';
 
 interface StrokeWidthInputProps {
-  stroke?: {
-    enabled: boolean;
-    color: string;
-    width: number;
-  };
+  stroke?: em.Stroke;
   selected?: string[];
   disabled?: boolean;
   setLayerStrokeWidth?(payload: SetLayerStrokeWidthPayload): LayerTypes;
@@ -27,12 +23,12 @@ const StrokeWidthInput = (props: StrokeWidthInputProps): ReactElement => {
     setStrokeWidth(stroke.width);
   }, [stroke, selected]);
 
-  const handleStrokeWidthChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
-    const target = e.target as HTMLInputElement;
+  const handleStrokeWidthChange = (e: any): void => {
+    const target = e.target;
     setStrokeWidth(target.value);
   };
 
-  const handleStrokeWidthSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
+  const handleStrokeWidthSubmit = (e: any): void => {
     try {
       const nextStrokeWidth = evaluate(`${strokeWidth}`);
       if (nextStrokeWidth !== stroke.width && !isNaN(nextStrokeWidth)) {

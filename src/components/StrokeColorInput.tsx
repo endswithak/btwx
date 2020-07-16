@@ -1,165 +1,150 @@
 import paper from 'paper';
-import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { evaluate } from 'mathjs';
-import chroma from 'chroma-js';
-// import SidebarInput from './SidebarInput';
-// import SidebarCheckbox from './SidebarCheckbox';
-// import SidebarSectionRow from './SidebarSectionRow';
-// import SidebarSectionColumn from './SidebarSectionColumn';
-// import SidebarSwatch from './SidebarSwatch';
 import { RootState } from '../store/reducers';
-import { EnableLayerStrokePayload, DisableLayerStrokePayload, SetLayerStrokeColorPayload, SetLayerStrokeWidthPayload, LayerTypes } from '../store/actionTypes/layer';
-import { enableLayerStroke, disableLayerStroke, setLayerStrokeColor, setLayerStrokeWidth } from '../store/actions/layer';
-import { getPaperLayer } from '../store/selectors/layer';
-import ColorInput from './ColorInput';
+import SidebarInput from './SidebarInput';
+import SidebarSectionRow from './SidebarSectionRow';
+import SidebarSectionColumn from './SidebarSectionColumn';
+import SidebarSwatch from './SidebarSwatch';
+import { EnableLayerStrokePayload, SetLayerStrokeGradientPayload, SetLayerStrokeColorPayload, LayerTypes } from '../store/actionTypes/layer';
+import { enableLayerStroke, setLayerStrokeGradient, setLayerStrokeColor } from '../store/actions/layer';
+import { OpenStrokeColorEditorPayload, StrokeColorEditorTypes } from '../store/actionTypes/strokeColorEditor';
+import { openStrokeColorEditor } from '../store/actions/strokeColorEditor';
+import tinyColor from 'tinycolor2';
 
 interface StrokeColorInputProps {
-  stroke?: em.Stroke;
-  strokeOpacity?: number;
+  strokeEnabled: boolean;
   selected: string[];
+  selectedType?: em.LayerType;
+  colorValue?: em.Color;
+  strokeColorEditorOpen?: boolean;
   enableLayerStroke?(payload: EnableLayerStrokePayload): LayerTypes;
-  disableLayerStroke?(payload: DisableLayerStrokePayload): LayerTypes;
   setLayerStrokeColor?(payload: SetLayerStrokeColorPayload): LayerTypes;
-  //setLayerStrokeWidth?(payload: SetLayerStrokeWidthPayload): LayerTypes;
+  setLayerStrokeGradient?(payload: SetLayerStrokeGradientPayload): LayerTypes;
+  openStrokeColorEditor?(payload: OpenStrokeColorEditorPayload): StrokeColorEditorTypes;
 }
 
 const StrokeColorInput = (props: StrokeColorInputProps): ReactElement => {
-  const { stroke, strokeOpacity, selected, enableLayerStroke, disableLayerStroke, setLayerStrokeColor, setLayerStrokeWidth } = props;
-  const [enabled, setEnabled] = useState<boolean>(stroke.enabled);
-  const [color, setColor] = useState<string>(chroma(stroke.color).alpha(1).hex().replace('#', ''));
-  const [opacity, setOpacity] = useState<number | string>(strokeOpacity);
-  const [swatchColor, setSwatchColor] = useState<string>(stroke.color);
+  const { strokeEnabled, selected, selectedType, colorValue, strokeColorEditorOpen, enableLayerStroke, openStrokeColorEditor, setLayerStrokeColor } = props;
+  const [enabled, setEnabled] = useState<boolean>(strokeEnabled);
+  const [color, setColor] = useState(colorValue);
+  const [opacity, setOpacity] = useState<number | string>(colorValue.a * 100);
+  const [hex, setHex] = useState(tinyColor({h: colorValue.h, s: colorValue.s, l: colorValue.l}).toHex());
 
   useEffect(() => {
-    setEnabled(stroke.enabled);
-    setColor(chroma(stroke.color).alpha(1).hex().replace('#', ''));
-    setOpacity(strokeOpacity);
-    setSwatchColor(stroke.color);
-  }, [stroke, selected]);
+    setEnabled(strokeEnabled);
+    setColor(colorValue);
+    setOpacity(colorValue.a * 100);
+    setHex(tinyColor({h: colorValue.h, s: colorValue.s, l: colorValue.l}).toHex());
+  }, [colorValue, selected, strokeEnabled]);
 
   const handleOpacityChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     const target = e.target as HTMLInputElement;
     setOpacity(target.value);
   };
 
-  const handleColorChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
+  const handleHexChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     const target = e.target as HTMLInputElement;
-    setColor(target.value);
+    setHex(target.value);
   };
 
   const handleOpacitySubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     try {
       let nextOpacity = evaluate(`${opacity}`);
-      if (nextOpacity !== strokeOpacity && !isNaN(nextOpacity)) {
+      if (nextOpacity !== colorValue.a && !isNaN(nextOpacity)) {
         if (nextOpacity > 100) {
           nextOpacity = 100;
         }
         if (nextOpacity < 0) {
           nextOpacity = 0;
         }
-        const paperLayer = getPaperLayer(selected[0]);
-        const newColor = chroma(color).alpha(evaluate(`${nextOpacity} / 100`)).hex();
-        paperLayer.strokeColor = new paper.Color(newColor);
-        setLayerStrokeColor({id: selected[0], strokeColor: newColor});
-        setColor(chroma(newColor).alpha(1).hex().replace('#', ''));
+        setLayerStrokeColor({id: selected[0], strokeColor: {...color, a: nextOpacity / 100}});
       } else {
-        setOpacity(strokeOpacity);
+        setOpacity(colorValue.a * 100);
       }
     } catch(error) {
-      setOpacity(strokeOpacity);
+      setOpacity(colorValue.a * 100);
     }
   }
 
-  const handleColorSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
-    if (chroma.valid(color)) {
-      const paperLayer = getPaperLayer(selected[0]);
-      const nextStrokeColor = chroma(color).alpha(strokeOpacity / 100).hex();
-      paperLayer.strokeColor = new paper.Color(nextStrokeColor);
-      setLayerStrokeColor({id: selected[0], strokeColor: nextStrokeColor});
+  const handleHexSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
+    const nextHex = tinyColor(hex);
+    if (nextHex.isValid()) {
+      const hsl = nextHex.toHsl();
+      const hsv = nextHex.toHsv();
+      setLayerStrokeColor({id: selected[0], strokeColor: { h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v, a: colorValue.a }});
     } else {
-      setColor(chroma(stroke.color).alpha(1).hex().replace('#', ''));
+      setHex(tinyColor({h: colorValue.h, s: colorValue.s, l: colorValue.l}).toHex());
     }
   };
 
-  const handleSwatchChange = (editorColor: string) => {
-    setColor(chroma(editorColor).alpha(1).hex());
-    setOpacity(chroma(editorColor).alpha() * 100);
-    setSwatchColor(editorColor);
-    const paperLayer = getPaperLayer(selected[0]);
-    paperLayer.strokeColor = new paper.Color(editorColor);
-  };
-
-  const handleSwatchClick = (): void => {
+  const handleSwatchClick = (bounding: DOMRect): void => {
     if (!enabled) {
-      const paperLayer = getPaperLayer(selected[0]);
       enableLayerStroke({id: selected[0]});
-      paperLayer.strokeColor = new paper.Color(stroke.color);
+    }
+    if (!strokeColorEditorOpen) {
+      openStrokeColorEditor({
+        color: color,
+        layer: selected[0],
+        x: bounding.x,
+        y: bounding.y - (bounding.height - 10) // 2 (swatch drop shadow) + 8 (top-padding)
+      });
     }
   };
 
   return (
-    <ColorInput
-      layer={selected[0]}
-      colorValue={color}
-      swatchColorValue={swatchColor}
-      prop='strokeColor'
-      opacityValue={opacity}
-      onColorChange={handleColorChange}
-      onColorSubmit={handleColorSubmit}
-      onOpacityChange={handleOpacityChange}
-      onOpacitySubmit={handleOpacitySubmit}
-      onSwatchChange={handleSwatchChange}
-      onSwatchClick={handleSwatchClick}
-      disabled={selected.length > 1 || selected.length === 0 || !enabled} />
-    // <div
-    //   className='c-sidebar-layer'>
-    //   <SidebarSectionRow alignItems='center'>
-    //     <SidebarSectionColumn width={'10%'} justifyContent={'center'}>
-    //       <SidebarCheckbox
-    //         id={`strokeColor`}
-    //         onChange={handleCheckChange}
-    //         checked={enabled} />
-    //     </SidebarSectionColumn>
-    //     <SidebarSectionColumn width={'23%'}>
-    //       <SidebarSwatch
-    //         layer={selected[0]}
-    //         prop={'strokeColor'}
-    //         color={swatchColor}
-    //         onChange={handleSwatchChange}
-    //         onClick={handleSwatchClick} />
-    //     </SidebarSectionColumn>
-    //     <SidebarSectionColumn width={'47%'}>
-    //       <SidebarInput
-    //         value={color}
-    //         onChange={handleColorChange}
-    //         onSubmit={handleColorSubmit}
-    //         blurOnSubmit
-    //         disabled={selected.length > 1 || selected.length === 0 || !enabled} />
-    //     </SidebarSectionColumn>
-    //     <SidebarSectionColumn width={'20%'}>
-    //       <SidebarInput
-    //         value={width}
-    //         onChange={handleWidthChange}
-    //         onSubmit={handleWidthSubmit}
-    //         blurOnSubmit
-    //         label={'W'}
-    //         disabled={selected.length > 1 || selected.length === 0 || !enabled} />
-    //     </SidebarSectionColumn>
-    //   </SidebarSectionRow>
-    // </div>
+    <SidebarSectionRow alignItems='center'>
+      <SidebarSectionColumn width={'33.33%'}>
+        <SidebarSwatch
+          isActive={strokeColorEditorOpen}
+          style={{
+            background: tinyColor(color).toHslString()
+          }}
+          onClick={handleSwatchClick}
+          bottomLabel='Color' />
+      </SidebarSectionColumn>
+      <SidebarSectionColumn width={'33.33%'}>
+        <SidebarInput
+          value={hex}
+          onChange={handleHexChange}
+          onSubmit={handleHexSubmit}
+          submitOnBlur
+          disabled={selected.length > 1 || selected.length === 0 || !enabled}
+          leftLabel={'#'}
+          bottomLabel={'Hex'} />
+      </SidebarSectionColumn>
+      <SidebarSectionColumn width={'33.33%'}>
+        <SidebarInput
+          value={opacity}
+          onChange={handleOpacityChange}
+          onSubmit={handleOpacitySubmit}
+          submitOnBlur
+          label={'%'}
+          disabled={selected.length > 1 || selected.length === 0 || !enabled}
+          bottomLabel={'Opacity'} />
+      </SidebarSectionColumn>
+    </SidebarSectionRow>
   );
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
-  const selected = layer.present.selected;
+  const { layer, strokeColorEditor } = state;
   const stroke = layer.present.byId[layer.present.selected[0]].style.stroke;
-  const strokeOpacity = chroma(stroke.color).alpha() * 100;
-  return { selected, stroke, strokeOpacity };
+  const strokeEnabled = stroke.enabled;
+  const selected = layer.present.selected;
+  const selectedType = layer.present.selected.length === 1 ? layer.present.byId[layer.present.selected[0]].type : null;
+  const colorValue = stroke.color;
+  const strokeColorEditorOpen = strokeColorEditor.isOpen;
+  return { strokeEnabled, selected, selectedType, colorValue, strokeColorEditorOpen };
 };
 
 export default connect(
   mapStateToProps,
-  { enableLayerStroke, disableLayerStroke, setLayerStrokeColor, setLayerStrokeWidth }
+  {
+    enableLayerStroke,
+    setLayerStrokeGradient,
+    openStrokeColorEditor,
+    setLayerStrokeColor
+  }
 )(StrokeColorInput);

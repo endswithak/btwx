@@ -1,12 +1,15 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
-import chroma from 'chroma-js';
 import { ThemeContext } from './ThemeProvider';
 import styled from 'styled-components';
 
 interface ColorPickerHueProps {
   hue: number;
-  setHue: any;
+  saturation: number;
+  lightness: number;
+  value: number;
+  alpha: number;
+  onChange?(color: em.Color): void;
 }
 
 const Slider = styled.input`
@@ -40,28 +43,31 @@ const Slider = styled.input`
   :disabled::-webkit-slider-thumb {
     cursor: inherit;
   }
-  /* :hover::-webkit-slider-thumb {
-    background: ${props => props.theme.backgroundInverse.z3};
-  } */
 `;
 
 const ColorPickerHue = (props: ColorPickerHueProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { hue, setHue } = props;
+  const { hue, saturation, lightness, value, alpha, onChange } = props;
+  const [hueValue, setHueValue] = useState(hue);
 
-  const handleChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const target = e.target as HTMLInputElement;
-    setHue(target.value);
+  useEffect(() => {
+    setHueValue(hue);
+  }, [hue]);
+
+  const handleChange = (e: any) => {
+    const target = e.target;
+    setHueValue(target.value);
+    onChange({h: target.value, s: saturation, l: lightness, v: value, a: alpha });
   };
 
   return (
     <div className='c-color-picker__hue'>
       <Slider
-        {...props}
         type='range'
         min={0}
         max={360}
-        value={hue}
+        step={1}
+        value={hueValue}
         onChange={handleChange}
         theme={theme} />
     </div>

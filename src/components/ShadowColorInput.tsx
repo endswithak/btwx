@@ -1,130 +1,148 @@
 import paper from 'paper';
-import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { evaluate } from 'mathjs';
-import chroma from 'chroma-js';
-// import SidebarInput from './SidebarInput';
-// import SidebarCheckbox from './SidebarCheckbox';
-// import SidebarSectionRow from './SidebarSectionRow';
-// import SidebarSectionColumn from './SidebarSectionColumn';
-// import SidebarSwatch from './SidebarSwatch';
 import { RootState } from '../store/reducers';
-import { EnableLayerShadowPayload, DisableLayerShadowPayload, SetLayerShadowColorPayload, SetLayerShadowBlurPayload, SetLayerShadowXOffsetPayload, SetLayerShadowYOffsetPayload, LayerTypes } from '../store/actionTypes/layer';
-import { enableLayerShadow, disableLayerShadow, setLayerShadowColor, setLayerShadowBlur, setLayerShadowXOffset, setLayerShadowYOffset } from '../store/actions/layer';
-import { getPaperLayer } from '../store/selectors/layer';
-import ColorInput from './ColorInput';
+import SidebarInput from './SidebarInput';
+import SidebarSectionRow from './SidebarSectionRow';
+import SidebarSectionColumn from './SidebarSectionColumn';
+import SidebarSwatch from './SidebarSwatch';
+import { EnableLayerShadowPayload, SetLayerShadowColorPayload, LayerTypes } from '../store/actionTypes/layer';
+import { enableLayerShadow, setLayerShadowColor } from '../store/actions/layer';
+import { OpenShadowColorEditorPayload, ShadowColorEditorTypes } from '../store/actionTypes/shadowColorEditor';
+import { openShadowColorEditor } from '../store/actions/shadowColorEditor';
+import tinyColor from 'tinycolor2';
 
 interface ShadowColorInputProps {
-  shadow?: em.Shadow;
-  shadowOpacity?: number;
+  shadowEnabled: boolean;
   selected: string[];
+  selectedType?: em.LayerType;
+  colorValue?: em.Color;
+  shadowColorEditorOpen?: boolean;
   enableLayerShadow?(payload: EnableLayerShadowPayload): LayerTypes;
-  disableLayerShadow?(payload: DisableLayerShadowPayload): LayerTypes;
   setLayerShadowColor?(payload: SetLayerShadowColorPayload): LayerTypes;
-  setLayerShadowBlur?(payload: SetLayerShadowBlurPayload): LayerTypes;
-  setLayerShadowXOffset?(payload: SetLayerShadowXOffsetPayload): LayerTypes;
-  setLayerShadowYOffset?(payload: SetLayerShadowYOffsetPayload): LayerTypes;
+  openShadowColorEditor?(payload: OpenShadowColorEditorPayload): ShadowColorEditorTypes;
 }
 
 const ShadowColorInput = (props: ShadowColorInputProps): ReactElement => {
-  const { shadow, shadowOpacity, selected, enableLayerShadow, disableLayerShadow, setLayerShadowColor, setLayerShadowBlur, setLayerShadowXOffset, setLayerShadowYOffset } = props;
-  const [enabled, setEnabled] = useState<boolean>(shadow.enabled);
-  const [color, setColor] = useState<string>(chroma(shadow.color).alpha(1).hex());
-  const [opacity, setOpacity] = useState<number | string>(shadowOpacity);
-  const [swatchColor, setSwatchColor] = useState<string>(shadow.color);
+  const { shadowEnabled, selected, selectedType, colorValue, shadowColorEditorOpen, enableLayerShadow, openShadowColorEditor, setLayerShadowColor } = props;
+  const [enabled, setEnabled] = useState<boolean>(shadowEnabled);
+  const [color, setColor] = useState(colorValue);
+  const [opacity, setOpacity] = useState<number | string>(colorValue.a * 100);
+  const [hex, setHex] = useState(tinyColor({h: colorValue.h, s: colorValue.s, l: colorValue.l}).toHex());
 
   useEffect(() => {
-    setEnabled(shadow.enabled);
-    setColor(chroma(shadow.color).alpha(1).hex());
-    setOpacity(shadowOpacity);
-    setSwatchColor(shadow.color);
-  }, [shadow, selected]);
+    setEnabled(shadowEnabled);
+    setColor(colorValue);
+    setOpacity(colorValue.a * 100);
+    setHex(tinyColor({h: colorValue.h, s: colorValue.s, l: colorValue.l}).toHex());
+  }, [colorValue, selected, shadowEnabled]);
 
   const handleOpacityChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     const target = e.target as HTMLInputElement;
     setOpacity(target.value);
   };
 
-  const handleColorChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
+  const handleHexChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     const target = e.target as HTMLInputElement;
-    setColor(target.value);
+    setHex(target.value);
   };
 
   const handleOpacitySubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     try {
       let nextOpacity = evaluate(`${opacity}`);
-      if (nextOpacity !== shadowOpacity) {
+      if (nextOpacity !== colorValue.a && !isNaN(nextOpacity)) {
         if (nextOpacity > 100) {
           nextOpacity = 100;
         }
         if (nextOpacity < 0) {
           nextOpacity = 0;
         }
-        const paperLayer = getPaperLayer(selected[0]);
-        const newColor = chroma(color).alpha(evaluate(`${nextOpacity} / 100`)).hex();
-        paperLayer.shadowColor = new paper.Color(newColor);
-        setLayerShadowColor({id: selected[0], shadowColor: newColor});
+        setLayerShadowColor({id: selected[0], shadowColor: {...color, a: nextOpacity / 100}});
+      } else {
+        setOpacity(colorValue.a * 100);
       }
     } catch(error) {
-      setOpacity(shadowOpacity);
+      setOpacity(colorValue.a * 100);
     }
   }
 
-  const handleColorSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
-    if (chroma.valid(color)) {
-      const paperLayer = getPaperLayer(selected[0]);
-      const nextShadowColor = chroma(color).alpha(shadowOpacity / 100).hex();
-      paperLayer.shadowColor = new paper.Color(nextShadowColor);
-      setLayerShadowColor({id: selected[0], shadowColor: nextShadowColor});
+  const handleHexSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
+    const nextHex = tinyColor(hex);
+    if (nextHex.isValid()) {
+      const hsl = nextHex.toHsl();
+      const hsv = nextHex.toHsv();
+      setLayerShadowColor({id: selected[0], shadowColor: { h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v, a: colorValue.a }});
     } else {
-      setColor(chroma(shadow.color).alpha(1).hex());
+      setHex(tinyColor({h: colorValue.h, s: colorValue.s, l: colorValue.l}).toHex());
     }
   };
 
-  const handleSwatchChange = (editorColor: string) => {
-    setColor(chroma(editorColor).alpha(1).hex());
-    setOpacity(chroma(editorColor).alpha() * 100);
-    setSwatchColor(editorColor);
-    const paperLayer = getPaperLayer(selected[0]);
-    paperLayer.shadowColor = new paper.Color(editorColor);
-  };
-
-  const handleSwatchClick = (): void => {
+  const handleSwatchClick = (bounding: DOMRect): void => {
     if (!enabled) {
-      const paperLayer = getPaperLayer(selected[0]);
       enableLayerShadow({id: selected[0]});
-      paperLayer.shadowColor = new paper.Color(shadow.color);
-      paperLayer.shadowBlur = shadow.blur;
-      paperLayer.shadowOffset = new paper.Point(shadow.offset.x, shadow.offset.y);
+    }
+    if (!shadowColorEditorOpen) {
+      openShadowColorEditor({
+        color: color,
+        layer: selected[0],
+        x: bounding.x,
+        y: bounding.y - (bounding.height - 10) // 2 (swatch drop shadow) + 8 (top-padding)
+      });
     }
   };
 
   return (
-    <ColorInput
-      layer={selected[0]}
-      colorValue={color}
-      swatchColorValue={swatchColor}
-      prop='shadowColor'
-      opacityValue={opacity}
-      onColorChange={handleColorChange}
-      onColorSubmit={handleColorSubmit}
-      onOpacityChange={handleOpacityChange}
-      onOpacitySubmit={handleOpacitySubmit}
-      onSwatchChange={handleSwatchChange}
-      onSwatchClick={handleSwatchClick}
-      disabled={selected.length > 1 || selected.length === 0 || !enabled} />
+    <SidebarSectionRow alignItems='center'>
+      <SidebarSectionColumn width={'33.33%'}>
+        <SidebarSwatch
+          isActive={shadowColorEditorOpen}
+          style={{
+            background: tinyColor(color).toHslString()
+          }}
+          onClick={handleSwatchClick}
+          bottomLabel='Color' />
+      </SidebarSectionColumn>
+      <SidebarSectionColumn width={'33.33%'}>
+        <SidebarInput
+          value={hex}
+          onChange={handleHexChange}
+          onSubmit={handleHexSubmit}
+          submitOnBlur
+          disabled={selected.length > 1 || selected.length === 0 || !enabled}
+          leftLabel={'#'}
+          bottomLabel={'Hex'} />
+      </SidebarSectionColumn>
+      <SidebarSectionColumn width={'33.33%'}>
+        <SidebarInput
+          value={opacity}
+          onChange={handleOpacityChange}
+          onSubmit={handleOpacitySubmit}
+          submitOnBlur
+          label={'%'}
+          disabled={selected.length > 1 || selected.length === 0 || !enabled}
+          bottomLabel={'Opacity'} />
+      </SidebarSectionColumn>
+    </SidebarSectionRow>
   );
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
-  const selected = layer.present.selected;
+  const { layer, shadowColorEditor } = state;
   const shadow = layer.present.byId[layer.present.selected[0]].style.shadow;
-  const shadowOpacity = chroma(shadow.color).alpha() * 100;
-  return { selected, shadow, shadowOpacity };
+  const shadowEnabled = shadow.enabled;
+  const selected = layer.present.selected;
+  const selectedType = layer.present.selected.length === 1 ? layer.present.byId[layer.present.selected[0]].type : null;
+  const colorValue = shadow.color;
+  const shadowColorEditorOpen = shadowColorEditor.isOpen;
+  return { shadowEnabled, selected, selectedType, colorValue, shadowColorEditorOpen };
 };
 
 export default connect(
   mapStateToProps,
-  { enableLayerShadow, disableLayerShadow, setLayerShadowColor, setLayerShadowBlur, setLayerShadowXOffset, setLayerShadowYOffset }
+  {
+    enableLayerShadow,
+    openShadowColorEditor,
+    setLayerShadowColor
+  }
 )(ShadowColorInput);

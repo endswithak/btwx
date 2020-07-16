@@ -25,13 +25,25 @@ export const DEFAULT_GRADIENT_STYLE = (): em.Gradient => {
           id: stopId1,
           active: true,
           position: 0,
-          color: '#cccccc'
+          color: {
+            h: 0,
+            s: 0,
+            l: 0.8,
+            v: 0.8,
+            a: 1
+          }
         },
         [stopId2]: {
           id: stopId2,
           active: false,
           position: 1,
-          color: '#000000'
+          color: {
+            h: 0,
+            s: 0,
+            l: 0,
+            v: 0,
+            a: 1
+          }
         }
       }
     }
@@ -41,14 +53,26 @@ export const DEFAULT_GRADIENT_STYLE = (): em.Gradient => {
 export const DEFAULT_FILL_STYLE = (): em.Fill => ({
   fillType: 'color' as em.FillType,
   enabled: true,
-  color: '#cccccc',
+  color: {
+    h: 0,
+    s: 0,
+    l: 0.8,
+    v: 0.8,
+    a: 1
+  },
   gradient: DEFAULT_GRADIENT_STYLE()
 });
 
 export const DEFAULT_STROKE_STYLE = (): em.Stroke => ({
   fillType: 'color' as em.FillType,
   enabled: true,
-  color: '#999999',
+  color: {
+    h: 0,
+    s: 0,
+    l: 0.6,
+    v: 0.6,
+    a: 1
+  },
   width: 1,
   gradient: DEFAULT_GRADIENT_STYLE()
 });
@@ -62,7 +86,13 @@ export const DEFAULT_STROKE_OPTIONS_STYLE: em.StrokeOptions = {
 
 export const DEFAULT_SHADOW_STYLE: em.Shadow = {
   enabled: false,
-  color: '#000000',
+  color: {
+    h: 0,
+    s: 0,
+    l: 0,
+    v: 0,
+    a: 0.5
+  },
   blur: 10,
   offset: {
     x: 0,

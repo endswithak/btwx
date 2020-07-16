@@ -1,29 +1,13 @@
 import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
-// import { connect } from 'react-redux';
-// import { OpenColorEditorPayload, ColorEditorTypes } from '../store/actionTypes/colorEditor';
-// import { openColorEditor } from '../store/actions/colorEditor';
-// import { OpenFillEditorPayload, FillEditorTypes } from '../store/actionTypes/fillEditor';
-// import { openFillEditor } from '../store/actions/fillEditor';
 import { ThemeContext } from './ThemeProvider';
 import styled from 'styled-components';
-//import { paperMain } from '../canvas';
 
 interface SidebarSwatchProps {
-  //color: string;
   style?: any;
-  //fill?: em.Fill;
-  //colorEditor?: any;
-  //fillEditor?: any;
   onClick?(bounding: DOMRect): void;
-  //prop?: em.ColorEditorProp;
-  //layer?: string;
   bottomLabel?: string;
-  //openColorEditor?(payload: OpenColorEditorPayload): ColorEditorTypes;
-  //openFillEditor?(payload: OpenFillEditorPayload): FillEditorTypes;
   disabled?: boolean;
   isActive?: boolean;
-  //onChange?(color: string): void;
-  //onClose?(color: string): void;
 }
 
 const Swatch = styled.div<SidebarSwatchProps>`

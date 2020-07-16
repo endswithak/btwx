@@ -15,6 +15,8 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
 
   useEffect(() => {
     const sortedStops = [...Object.keys(gradient.stops.byId)].sort((a,b) => { return gradient.stops.byId[a].position - gradient.stops.byId[b].position });
+    const originStop = gradient.stops.byId[sortedStops[0]];
+    const destStop = gradient.stops.byId[sortedStops[sortedStops.length - 1]];
     const oldGradientFrame = paperMain.project.getItem({ data: { id: 'gradientFrame' } });
     if (oldGradientFrame) {
       oldGradientFrame.remove();
@@ -45,11 +47,11 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
         handle: 'origin',
         type: 'background'
       },
-      strokeColor: gradient.stops.byId[sortedStops[0]].active ? theme.palette.primary : null
+      strokeColor: originStop.active ? theme.palette.primary : null
     });
     const gradientFrameOriginHandleSwatch  = new paperMain.Shape.Circle({
       ...gradientFrameHandleSwatchProps,
-      fillColor: gradient.stops.byId[sortedStops[0]].color,
+      fillColor: { hue: originStop.color.h, saturation: originStop.color.s, lightness: originStop.color.l, alpha: originStop.color.a },
       center: getGradientOriginPoint(layer, gradient.origin),
       data: {
         id: 'gradientFrameHandle',
@@ -65,11 +67,11 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
         handle: 'destination',
         type: 'background'
       },
-      strokeColor: gradient.stops.byId[sortedStops[sortedStops.length - 1]].active ? theme.palette.primary : null
+      strokeColor: destStop.active ? theme.palette.primary : null
     });
     const gradientFrameDestinationHandleSwatch = new paperMain.Shape.Circle({
       ...gradientFrameHandleSwatchProps,
-      fillColor: gradient.stops.byId[sortedStops[sortedStops.length - 1]].color,
+      fillColor: { hue: destStop.color.h, saturation: destStop.color.s, lightness: destStop.color.l, alpha: destStop.color.a },
       center: getGradientDestinationPoint(layer, gradient.destination),
       data: {
         id: 'gradientFrameHandle',
@@ -102,7 +104,7 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
       insert: false,
       children: [gradientFrameOriginHandleBg, gradientFrameOriginHandleSwatch],
       onMouseDown: () => {
-        if (!gradient.stops.byId[sortedStops[0]].active) {
+        if (!originStop.active) {
           onStopPress(sortedStops[0]);
         }
       }
@@ -114,7 +116,7 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
       insert: false,
       children: [gradientFrameDestinationHandleBg, gradientFrameDestinationHandleSwatch],
       onMouseDown: () => {
-        if (!gradient.stops.byId[sortedStops[sortedStops.length - 1]].active) {
+        if (!destStop.active) {
           onStopPress(sortedStops[sortedStops.length - 1]);
         }
       }

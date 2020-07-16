@@ -72,6 +72,14 @@ declare namespace em {
 
   type DevicePlatformType = 'Apple' | 'Android' | 'Responsive Web';
 
+  interface Color {
+    h: number;
+    s: number;
+    l: number;
+    v: number;
+    a: number;
+  }
+
   interface PaperGradientFill extends paper.Color {
     origin: paper.Point;
     destination: paper.Point;
@@ -119,7 +127,7 @@ declare namespace em {
   interface Fill {
     fillType: FillType;
     enabled: boolean;
-    color: string;
+    color: em.Color;
     gradient: Gradient;
   }
 
@@ -140,14 +148,14 @@ declare namespace em {
   interface GradientStop {
     id: string;
     position: number;
-    color: string;
+    color: em.Color;
     active: boolean;
   }
 
   interface Stroke {
     fillType: FillType;
     enabled: boolean;
-    color: string;
+    color: em.Color;
     width: number;
     gradient: Gradient;
   }
@@ -161,7 +169,7 @@ declare namespace em {
 
   interface Shadow {
     enabled: boolean;
-    color: string;
+    color: em.Color;
     blur: number;
     offset: Point;
   }

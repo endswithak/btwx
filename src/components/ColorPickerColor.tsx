@@ -6,12 +6,13 @@ interface ColorPickerColorProps {
   hue: number;
   saturation: number;
   lightness: number;
+  value: number;
   alpha: number;
 }
 
 const ColorPickerColor = (props: ColorPickerColorProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { hue, saturation, lightness, alpha } = props;
+  const { hue, saturation, lightness, value, alpha } = props;
 
   return (
     <div style={{

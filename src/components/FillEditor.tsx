@@ -2,17 +2,15 @@ import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import FillColorEditor from './FillColorEditor';
-import FillRadialGradientEditor from './FillRadialGradientEditor';
-import FillLinearGradientEditor from './FillLinearGradientEditor';
+import FillGradientEditor from './FillGradientEditor';
 
 interface FillEditorProps {
   isColorEditorOpen?: boolean;
-  isLinearGradientEditorOpen?: boolean;
-  isRadialGradientEditorOpen?: boolean;
+  isGradientEditorOpen?: boolean;
 }
 
 const FillEditor = (props: FillEditorProps): ReactElement => {
-  const { isColorEditorOpen, isLinearGradientEditorOpen, isRadialGradientEditorOpen } = props;
+  const { isColorEditorOpen, isGradientEditorOpen } = props;
 
   return (
     <>
@@ -22,13 +20,8 @@ const FillEditor = (props: FillEditorProps): ReactElement => {
         : null
       }
       {
-        isLinearGradientEditorOpen
-        ? <FillLinearGradientEditor />
-        : null
-      }
-      {
-        isRadialGradientEditorOpen
-        ? <FillRadialGradientEditor />
+        isGradientEditorOpen
+        ? <FillGradientEditor />
         : null
       }
     </>
@@ -36,11 +29,10 @@ const FillEditor = (props: FillEditorProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { fillColorEditor, fillLinearGradientEditor, fillRadialGradientEditor } = state;
-  const isLinearGradientEditorOpen = fillLinearGradientEditor.isOpen;
-  const isRadialGradientEditorOpen = fillRadialGradientEditor.isOpen;
+  const { fillColorEditor, fillGradientEditor } = state;
+  const isGradientEditorOpen = fillGradientEditor.isOpen;
   const isColorEditorOpen = fillColorEditor.isOpen;
-  return { isColorEditorOpen, isLinearGradientEditorOpen, isRadialGradientEditorOpen };
+  return { isColorEditorOpen, isGradientEditorOpen };
 };
 
 export default connect(

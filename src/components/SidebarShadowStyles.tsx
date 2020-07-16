@@ -5,7 +5,7 @@ import SidebarSection from './SidebarSection';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarSectionHead from './SidebarSectionHead';
-import SidebarShadowStyle from './ShadowColorInput';
+import ShadowColorInput from './ShadowColorInput';
 import ShadowToggle from './ShadowToggle';
 import ShadowXInput from './ShadowXInput';
 import ShadowYInput from './ShadowYInput';
@@ -37,9 +37,7 @@ const SidebarShadowStyles = (props: SidebarShadowStylesProps): ReactElement => {
             </SidebarSectionColumn>
           </SidebarSectionRow>
           <SidebarSection>
-            <SidebarSectionRow>
-              <SidebarShadowStyle />
-            </SidebarSectionRow>
+            <ShadowColorInput />
             <SidebarSectionRow>
               <SidebarSectionColumn width='33.33%'>
                 <ShadowXInput />

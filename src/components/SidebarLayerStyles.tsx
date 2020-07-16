@@ -7,6 +7,8 @@ import SidebarShadowStyles from './SidebarShadowStyles';
 import SidebarTextStyles from './SidebarTextStyles';
 import AlignDistribute from './AlignDistribute';
 import FillEditor from './FillEditor';
+import StrokeEditor from './StrokeEditor';
+import ShadowEditor from './ShadowEditor';
 
 const SidebarLayerStyles = (): ReactElement => {
   return (
@@ -16,9 +18,11 @@ const SidebarLayerStyles = (): ReactElement => {
       <SidebarContextStyles />
       <SidebarTextStyles />
       <SidebarFillStyles />
-      {/* <SidebarStrokeStyles /> */}
+      <SidebarStrokeStyles />
+      <SidebarShadowStyles />
       <FillEditor />
-      {/* <SidebarShadowStyles /> */}
+      <StrokeEditor />
+      <ShadowEditor />
     </>
   );
 }

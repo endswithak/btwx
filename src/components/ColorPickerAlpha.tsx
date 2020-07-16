@@ -2,13 +2,15 @@
 import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
 import { ThemeContext } from './ThemeProvider';
 import styled from 'styled-components';
+import chroma from 'chroma-js';
 
 interface ColorPickerAlphaProps {
   hue: number;
   saturation: number;
   lightness: number;
+  value: number;
   alpha: number;
-  setAlpha: any;
+  onChange(color: em.Color): void;
 }
 
 const Slider = styled.input`
@@ -41,11 +43,17 @@ const Slider = styled.input`
 
 const ColorPickerAlpha = (props: ColorPickerAlphaProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { hue, saturation, lightness, alpha, setAlpha } = props;
+  const { hue, saturation, lightness, value, alpha, onChange } = props;
+  const [alphaValue, setAlphaValue] = useState(alpha);
 
-  const handleChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const target = e.target as HTMLInputElement;
-    setAlpha(target.value);
+  useEffect(() => {
+    setAlphaValue(alpha);
+  }, [alpha]);
+
+  const handleChange = (e: any) => {
+    const target = e.target;
+    setAlphaValue(target.value);
+    onChange({h: hue, s: saturation, l: lightness, v: value, a: target.value});
   };
 
   return (
@@ -63,12 +71,11 @@ const ColorPickerAlpha = (props: ColorPickerAlphaProps): ReactElement => {
         `}
       </style>
       <Slider
-        {...props}
         type='range'
         min={0}
         max={1}
         step={0.01}
-        value={alpha}
+        value={alphaValue}
         onChange={handleChange}
         theme={theme} />
     </div>

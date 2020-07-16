@@ -438,10 +438,12 @@ class ShapeTool {
     if (this.to) {
       const state = store.getState();
       const id = uuidv4();
+      const fill = DEFAULT_FILL_STYLE();
+      const stroke = DEFAULT_STROKE_STYLE();
       const paperLayer = this.renderShape({
-        fillColor: new Color(DEFAULT_FILL_STYLE().color),
-        strokeColor: new Color(DEFAULT_STROKE_STYLE().color),
-        strokeWidth: DEFAULT_STROKE_STYLE().width,
+        fillColor: { hue: fill.color.h, saturation: fill.color.s, lightness: fill.color.l, alpha: fill.color.a },
+        strokeColor: { hue: stroke.color.h, saturation: stroke.color.s, lightness: stroke.color.l, alpha: stroke.color.a },
+        strokeWidth: stroke.width,
         data: {
           id: id,
           type: 'Shape'

@@ -8,16 +8,14 @@ import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarSwatch from './SidebarSwatch';
 import GradientTypeSelector from './GradientTypeSelector';
-import { EnableLayerFillPayload, SetLayerFillGradientPayload, SetLayerFillColorPayload, LayerTypes } from '../store/actionTypes/layer';
-import { enableLayerFill, setLayerFillGradient, setLayerFillColor } from '../store/actions/layer';
-import { OpenFillGradientEditorPayload, FillGradientEditorTypes } from '../store/actionTypes/fillGradientEditor';
-import { openFillGradientEditor } from '../store/actions/fillGradientEditor';
-import { SetTextSettingsFillColorPayload, TextSettingsTypes } from '../store/actionTypes/textSettings';
-import { setTextSettingsFillColor } from '../store/actions/textSettings';
+import { EnableLayerStrokePayload, SetLayerStrokeGradientPayload, SetLayerStrokeColorPayload, LayerTypes } from '../store/actionTypes/layer';
+import { enableLayerStroke, setLayerStrokeGradient, setLayerStrokeColor } from '../store/actions/layer';
+import { OpenStrokeGradientEditorPayload, StrokeGradientEditorTypes } from '../store/actionTypes/strokeGradientEditor';
+import { openStrokeGradientEditor } from '../store/actions/strokeGradientEditor';
 import tinyColor from 'tinycolor2';
 
-interface FillGradientInputProps {
-  fillEnabled?: boolean;
+interface StrokeGradientInputProps {
+  strokeEnabled?: boolean;
   selected: string[];
   gradientValue?: em.Gradient;
   gradientOpacity: number;
@@ -26,24 +24,23 @@ interface FillGradientInputProps {
     [id: string]: em.GradientStop;
   };
   cssGradient?: string;
-  enableLayerFill?(payload: EnableLayerFillPayload): LayerTypes;
-  setLayerFillColor?(payload: SetLayerFillColorPayload): LayerTypes;
-  setLayerFillGradient?(payload: SetLayerFillGradientPayload): LayerTypes;
-  openFillGradientEditor?(payload: OpenFillGradientEditorPayload): FillGradientEditorTypes;
-  setTextSettingsFillColor?(payload: SetTextSettingsFillColorPayload): TextSettingsTypes;
+  enableLayerStroke?(payload: EnableLayerStrokePayload): LayerTypes;
+  setLayerStrokeColor?(payload: SetLayerStrokeColorPayload): LayerTypes;
+  setLayerStrokeGradient?(payload: SetLayerStrokeGradientPayload): LayerTypes;
+  openStrokeGradientEditor?(payload: OpenStrokeGradientEditorPayload): StrokeGradientEditorTypes;
 }
 
-const FillGradientInput = (props: FillGradientInputProps): ReactElement => {
-  const { fillEnabled, stopById, selected, gradientValue, gradientOpacity, isGradientEditorOpen, enableLayerFill, setLayerFillGradient, cssGradient, openFillGradientEditor } = props;
-  const [enabled, setEnabled] = useState<boolean>(fillEnabled);
+const StrokeGradientInput = (props: StrokeGradientInputProps): ReactElement => {
+  const { strokeEnabled, stopById, selected, gradientValue, gradientOpacity, isGradientEditorOpen, enableLayerStroke, setLayerStrokeGradient, cssGradient, openStrokeGradientEditor } = props;
+  const [enabled, setEnabled] = useState<boolean>(strokeEnabled);
   const [gradient, setGradient] = useState(gradientValue);
   const [opacity, setOpacity] = useState<number | string>(gradientOpacity);
 
   useEffect(() => {
-    setEnabled(fillEnabled);
+    setEnabled(strokeEnabled);
     setGradient(gradientValue);
     setOpacity(gradientOpacity);
-  }, [gradientValue, selected, gradientOpacity, stopById, fillEnabled]);
+  }, [gradientValue, selected, gradientOpacity, stopById, strokeEnabled]);
 
   const handleOpacityChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     const target = e.target as HTMLInputElement;
@@ -76,7 +73,7 @@ const FillGradientInput = (props: FillGradientInputProps): ReactElement => {
             }, {})
           }
         }
-        setLayerFillGradient({id: selected[0], gradient: newGradient});
+        setLayerStrokeGradient({id: selected[0], gradient: newGradient});
       } else {
         setOpacity(gradientOpacity);
       }
@@ -87,10 +84,10 @@ const FillGradientInput = (props: FillGradientInputProps): ReactElement => {
 
   const handleSwatchClick = (bounding: DOMRect): void => {
     if (!enabled) {
-      enableLayerFill({id: selected[0]});
+      enableLayerStroke({id: selected[0]});
     }
     if (!isGradientEditorOpen) {
-      openFillGradientEditor({
+      openStrokeGradientEditor({
         gradient: gradientValue,
         layer: selected[0],
         x: bounding.x,
@@ -114,7 +111,7 @@ const FillGradientInput = (props: FillGradientInputProps): ReactElement => {
         <GradientTypeSelector
           gradientTypeValue={gradient.gradientType}
           disabled={selected.length > 1 || selected.length === 0 || !enabled}
-          prop='fill' />
+          prop='stroke' />
       </SidebarSectionColumn>
       <SidebarSectionColumn width={'33.33%'}>
         <SidebarInput
@@ -131,13 +128,13 @@ const FillGradientInput = (props: FillGradientInputProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer, fillGradientEditor } = state;
-  const fillEnabled = layer.present.byId[layer.present.selected[0]].style.fill.enabled;
+  const { layer, strokeGradientEditor } = state;
+  const strokeEnabled = layer.present.byId[layer.present.selected[0]].style.stroke.enabled;
   const selected = layer.present.selected;
-  const gradientValue = layer.present.byId[layer.present.selected[0]].style.fill.gradient;
+  const gradientValue = layer.present.byId[layer.present.selected[0]].style.stroke.gradient;
   const stops = gradientValue.stops;
   const gradientOpacity = stops.allIds.every((stop) => stops.byId[stop].color.a === stops.byId[stops.allIds[0]].color.a) ? stops.byId[stops.allIds[0]].color.a * 100 : 'multi';
-  const isGradientEditorOpen = fillGradientEditor.isOpen;
+  const isGradientEditorOpen = strokeGradientEditor.isOpen;
   const stopById = stops.byId;
   const sorted = Object.keys(stopById).sort((a,b) => { return stopById[a].position - stopById[b].position });
   const cssGradient = sorted.reduce((result, current, index) => {
@@ -151,16 +148,15 @@ const mapStateToProps = (state: RootState) => {
     }
     return result;
   }, `linear-gradient(to right,`);
-  return { fillEnabled, selected, gradientValue, gradientOpacity, isGradientEditorOpen, stopById, cssGradient };
+  return { strokeEnabled, selected, gradientValue, gradientOpacity, isGradientEditorOpen, stopById, cssGradient };
 };
 
 export default connect(
   mapStateToProps,
   {
-    enableLayerFill,
-    setLayerFillGradient,
-    setTextSettingsFillColor,
-    setLayerFillColor,
-    openFillGradientEditor
+    enableLayerStroke,
+    setLayerStrokeGradient,
+    setLayerStrokeColor,
+    openStrokeGradientEditor
   }
-)(FillGradientInput);
+)(StrokeGradientInput);

@@ -19,8 +19,8 @@ const HoverFrameWrap = (props: HoverFrameWrapProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer, fillRadialGradientEditor, fillLinearGradientEditor } = state;
-  const isGradientEditorOpen = fillRadialGradientEditor.isOpen || fillLinearGradientEditor.isOpen;
+  const { layer, fillGradientEditor, strokeGradientEditor } = state;
+  const isGradientEditorOpen = fillGradientEditor.isOpen || strokeGradientEditor.isOpen;
   const hover = layer.present.hover;
   return { hover, isGradientEditorOpen };
 };
