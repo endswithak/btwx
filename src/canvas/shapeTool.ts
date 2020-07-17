@@ -224,7 +224,7 @@ class ShapeTool {
       this.snapPoints = state.layer.present.inView.snapPoints;
       this.toBounds = new paperMain.Rectangle({
         point: event.point,
-        size: new paperMain.Size(4, 4)
+        size: new paperMain.Size(1, 1)
       });
       const snapBounds = this.toBounds.clone();
       if (this.snap.x) {
@@ -342,6 +342,7 @@ class ShapeTool {
     }
   }
   onMouseDown(event: paper.ToolEvent): void {
+    const state = store.getState();
     this.drawing = true;
     this.insertTool.enabled = false;
     const from = event.point;
@@ -351,7 +352,16 @@ class ShapeTool {
     if (this.snap.y) {
       from.y = this.snap.y.point;
     }
-    this.from = from;
+    this.from = new paperMain.Point(from.x, from.y);
+    this.snapPoints = state.layer.present.inView.snapPoints.filter((snapPoint) => {
+      if (snapPoint.axis === 'x') {
+        return snapPoint.point !== this.from.x;
+      } else {
+        return snapPoint.point !== this.from.y;
+      }
+    });
+    this.snap.x = null;
+    this.snap.y = null;
   }
   onMouseDrag(event: paper.ToolEvent): void {
     this.to = event.point;

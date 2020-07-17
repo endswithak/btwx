@@ -283,6 +283,7 @@ class ArtboardTool {
     }
   }
   onMouseDown(event: paper.ToolEvent): void {
+    const state = store.getState();
     this.drawing = true;
     this.insertTool.enabled = false;
     const from = event.point;
@@ -293,6 +294,15 @@ class ArtboardTool {
       from.y = this.snap.y.point;
     }
     this.from = from;
+    this.snapPoints = state.layer.present.inView.snapPoints.filter((snapPoint) => {
+      if (snapPoint.axis === 'x') {
+        return snapPoint.point !== this.from.x;
+      } else {
+        return snapPoint.point !== this.from.y;
+      }
+    });
+    this.snap.x = null;
+    this.snap.y = null;
   }
   onMouseDrag(event: paper.ToolEvent): void {
     this.to = event.point;
@@ -365,14 +375,14 @@ class ArtboardTool {
       }
     }
     this.updateToBounds();
+    this.updateTooltip();
+    this.updateOutline();
     this.snapTool.updateGuides({
       snapPoints: this.snapPoints,
       bounds: this.toBounds,
       xSnap: this.snap.x,
       ySnap: this.snap.y
     });
-    this.updateTooltip();
-    this.updateOutline();
   }
   onMouseUp(event: paper.ToolEvent): void {
     if (this.to) {
