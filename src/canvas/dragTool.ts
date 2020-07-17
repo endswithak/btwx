@@ -56,7 +56,7 @@ class DragTool {
   }
   enable() {
     this.enabled = true;
-    this.snapTool = new SnapTool;
+    this.snapTool = new SnapTool();
   }
   disable() {
     this.moveHandle = null;

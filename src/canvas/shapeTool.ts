@@ -424,14 +424,14 @@ class ShapeTool {
       }
     }
     this.updateToBounds();
+    this.updateTooltip();
+    this.updateOutline();
     this.snapTool.updateGuides({
       snapPoints: this.snapPoints,
       bounds: this.toBounds,
       xSnap: this.snap.x,
       ySnap: this.snap.y
     });
-    this.updateTooltip();
-    this.updateOutline();
     //this.updateRef();
   }
   onMouseUp(event: paper.ToolEvent): void {

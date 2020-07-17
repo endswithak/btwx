@@ -5,7 +5,6 @@ import SidebarSection from './SidebarSection';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarSectionHead from './SidebarSectionHead';
-import FillColorInput from './FillColorInput';
 import FillInput from './FillInput';
 import FillToggle from './FillToggle';
 import { RootState } from '../store/reducers';

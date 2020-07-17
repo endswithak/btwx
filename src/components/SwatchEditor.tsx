@@ -1,27 +1,27 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import StrokeColorEditor from './StrokeColorEditor';
-import StrokeGradientEditor from './StrokeGradientEditor';
+import ColorEditor from './ColorEditor';
+import GradientEditor from './GradientEditor';
 
-interface StrokeEditorProps {
+interface SwatchEditorProps {
   isColorEditorOpen?: boolean;
   isGradientEditorOpen?: boolean;
 }
 
-const StrokeEditor = (props: StrokeEditorProps): ReactElement => {
+const SwatchEditor = (props: SwatchEditorProps): ReactElement => {
   const { isColorEditorOpen, isGradientEditorOpen } = props;
 
   return (
     <>
       {
         isColorEditorOpen
-        ? <StrokeColorEditor />
+        ? <ColorEditor />
         : null
       }
       {
         isGradientEditorOpen
-        ? <StrokeGradientEditor />
+        ? <GradientEditor />
         : null
       }
     </>
@@ -29,12 +29,12 @@ const StrokeEditor = (props: StrokeEditorProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { strokeColorEditor, strokeGradientEditor } = state;
-  const isGradientEditorOpen = strokeGradientEditor.isOpen;
-  const isColorEditorOpen = strokeColorEditor.isOpen;
+  const { colorEditor, gradientEditor } = state;
+  const isGradientEditorOpen = gradientEditor.isOpen;
+  const isColorEditorOpen = colorEditor.isOpen;
   return { isColorEditorOpen, isGradientEditorOpen };
 };
 
 export default connect(
   mapStateToProps
-)(StrokeEditor);
+)(SwatchEditor);

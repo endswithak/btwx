@@ -63,7 +63,7 @@ class ResizeTool {
     const state = store.getState();
     this.enabled = true;
     this.handle = handle;
-    this.snapTool = new SnapTool;
+    this.snapTool = new SnapTool();
     updateSelectionFrame(state.layer.present, this.handle);
   }
   disable() {

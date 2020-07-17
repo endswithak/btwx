@@ -1,8 +1,10 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import StrokeGradientInput from './StrokeGradientInput';
-import StrokeColorInput from './StrokeColorInput';
+// import StrokeGradientInput from './StrokeGradientInput';
+// import StrokeColorInput from './StrokeColorInput';
+import GradientInput from './GradientInput';
+import ColorInput from './ColorInput';
 
 interface StrokeInputProps {
   fillType: em.FillType;
@@ -10,11 +12,17 @@ interface StrokeInputProps {
 
 const StrokeInput = (props: StrokeInputProps): ReactElement => {
   const { fillType } = props;
+  // switch(fillType) {
+  //   case 'color':
+  //     return <StrokeColorInput />
+  //   case 'gradient':
+  //     return <StrokeGradientInput />
+  // }
   switch(fillType) {
     case 'color':
-      return <StrokeColorInput />
+      return <ColorInput prop='stroke' />
     case 'gradient':
-      return <StrokeGradientInput />
+      return <GradientInput prop='stroke' />
   }
 }
 

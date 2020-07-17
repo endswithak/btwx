@@ -85,6 +85,7 @@ export const DEFAULT_STROKE_OPTIONS_STYLE: em.StrokeOptions = {
 }
 
 export const DEFAULT_SHADOW_STYLE: em.Shadow = {
+  fillType: 'color' as em.FillType,
   enabled: false,
   color: {
     h: 0,

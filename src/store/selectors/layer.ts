@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import paper from 'paper';
 import { LayerState } from '../reducers/layer';
 import { paperMain } from '../../canvas';
@@ -779,4 +780,24 @@ export const importPaperProject = ({canvasImages, paperProject, layers}: ImportP
     const raster = getPaperLayer(imageId).getItem({data: {id: 'Raster'}});
     applyImageMethods(raster);
   });
+}
+
+export const colorsMatch = (color1: em.Color, color2: em.Color) => {
+  return Object.keys(color1).every((prop: 'h' | 's' | 'l' | 'v' | 'a') => color1[prop] === color2[prop]);
+}
+
+export const gradientsMatch = (gradient1: em.Gradient, gradient2: em.Gradient) => {
+  const gradientTypesMatch = gradient1.gradientType === gradient2.gradientType;
+  const originsMatch = gradient1.origin.x === gradient2.origin.x && gradient1.origin.y === gradient2.origin.y;
+  const destinationsMatch = gradient1.destination.x === gradient2.destination.x && gradient1.destination.y === gradient2.destination.y;
+  const g1SortedStops = [...gradient1.stops.allIds].sort((a,b) => { return gradient1.stops.byId[a].position - gradient1.stops.byId[b].position });
+  const g2SortedStops = [...gradient2.stops.allIds].sort((a,b) => { return gradient2.stops.byId[a].position - gradient2.stops.byId[b].position });
+  const stopsMatch = g1SortedStops.every((id, index) => {
+    const g1Stop = gradient1.stops.byId[g1SortedStops[index]];
+    const g2Stop = gradient2.stops.byId[g2SortedStops[index]];
+    const stopColorsMatch = colorsMatch(g1Stop.color, g2Stop.color);
+    const stopPositionsMatch = g1Stop.position === g2Stop.position;
+    return stopColorsMatch && stopPositionsMatch;
+  });
+  return gradientTypesMatch && originsMatch && destinationsMatch && stopsMatch;
 }

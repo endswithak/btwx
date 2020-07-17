@@ -168,6 +168,7 @@ declare namespace em {
   }
 
   interface Shadow {
+    fillType: FillType;
     enabled: boolean;
     color: em.Color;
     blur: number;

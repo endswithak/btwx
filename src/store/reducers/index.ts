@@ -5,11 +5,8 @@ import tool from './tool';
 import contextMenu from './contextMenu';
 import tweenDrawer from './tweenDrawer';
 import easeEditor from './easeEditor';
-import fillColorEditor from './fillColorEditor';
-import fillGradientEditor from './fillGradientEditor';
-import strokeColorEditor from './strokeColorEditor';
-import strokeGradientEditor from './strokeGradientEditor';
-import shadowColorEditor from './shadowColorEditor';
+import colorEditor from './colorEditor';
+import gradientEditor from './gradientEditor';
 import textEditor from './textEditor';
 import textSettings from './textSettings';
 import canvasSettings from './canvasSettings';
@@ -214,11 +211,8 @@ const rootReducer = combineReducers({
   textEditor,
   textSettings,
   canvasSettings,
-  fillColorEditor,
-  fillGradientEditor,
-  strokeColorEditor,
-  strokeGradientEditor,
-  shadowColorEditor,
+  colorEditor,
+  gradientEditor,
   theme
 });
 

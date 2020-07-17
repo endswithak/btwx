@@ -80,9 +80,7 @@ class SelectionTool {
     const state = store.getState();
     const layerState = state.layer.present;
     const hitResult = paperMain.project.hitTest(event.point);
-    const isFillGradientEditorOpen = state.fillGradientEditor.isOpen;
-    const isStrokeGradientEditorOpen = state.strokeGradientEditor.isOpen;
-    const gradientEditorOpen = isFillGradientEditorOpen || isStrokeGradientEditorOpen;
+    const isGradientEditorOpen = state.gradientEditor.isOpen;
     if (hitResult) {
       if (hitResult.item.data.id === 'selectionFrameHandle') {
         if (layerState.selected.length >= 1) {
@@ -97,21 +95,14 @@ class SelectionTool {
           }
         }
       } else if (hitResult.item.data.id === 'gradientFrameHandle') {
-        this.gradientTool.enable(hitResult.item.data.handle, (() => {
-          if (isFillGradientEditorOpen) {
-            return 'fill';
-          }
-          if (isStrokeGradientEditorOpen) {
-            return 'stroke';
-          }
-        })());
+        this.gradientTool.enable(hitResult.item.data.handle, state.gradientEditor.prop as 'fill' | 'stroke');
         this.gradientTool.onMouseDown(event);
       } else {
         this.dragTool.enable();
         this.dragTool.onMouseDown(event);
       }
     } else {
-      if (!gradientEditorOpen) {
+      if (!isGradientEditorOpen) {
         this.areaSelectTool.enable();
         this.areaSelectTool.onMouseDown(event);
       }

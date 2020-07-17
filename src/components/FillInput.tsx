@@ -1,8 +1,8 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import FillGradientInput from './FillGradientInput';
-import FillColorInput from './FillColorInput';
+import GradientInput from './GradientInput';
+import ColorInput from './ColorInput';
 
 interface FillInputProps {
   fillType: em.FillType;
@@ -12,9 +12,9 @@ const FillInput = (props: FillInputProps): ReactElement => {
   const { fillType } = props;
   switch(fillType) {
     case 'color':
-      return <FillColorInput />
+      return <ColorInput prop='fill' />
     case 'gradient':
-      return <FillGradientInput />
+      return <GradientInput prop='fill' />
   }
 }
 

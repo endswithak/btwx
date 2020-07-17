@@ -6,9 +6,10 @@ import SidebarStrokeStyles from './SidebarStrokeStyles';
 import SidebarShadowStyles from './SidebarShadowStyles';
 import SidebarTextStyles from './SidebarTextStyles';
 import AlignDistribute from './AlignDistribute';
-import FillEditor from './FillEditor';
-import StrokeEditor from './StrokeEditor';
-import ShadowEditor from './ShadowEditor';
+// import FillEditor from './FillEditor';
+// import StrokeEditor from './StrokeEditor';
+// import ShadowEditor from './ShadowEditor';
+import SwatchEditor from './SwatchEditor';
 
 const SidebarLayerStyles = (): ReactElement => {
   return (
@@ -20,9 +21,10 @@ const SidebarLayerStyles = (): ReactElement => {
       <SidebarFillStyles />
       <SidebarStrokeStyles />
       <SidebarShadowStyles />
-      <FillEditor />
+      <SwatchEditor />
+      {/* <FillEditor />
       <StrokeEditor />
-      <ShadowEditor />
+      <ShadowEditor /> */}
     </>
   );
 }

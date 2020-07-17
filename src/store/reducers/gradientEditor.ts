@@ -1,43 +1,47 @@
 import {
-  OPEN_STROKE_GRADIENT_EDITOR,
-  CLOSE_STROKE_GRADIENT_EDITOR,
-  StrokeGradientEditorTypes,
-} from '../actionTypes/strokeGradientEditor';
+  OPEN_GRADIENT_EDITOR,
+  CLOSE_GRADIENT_EDITOR,
+  GradientEditorTypes,
+} from '../actionTypes/gradientEditor';
 
-export interface StrokeGradientEditorState {
+export interface GradientEditorState {
   isOpen: boolean;
+  prop: 'stroke' | 'fill' | 'shadow';
   layer: string;
   gradient: em.Gradient;
   x: number;
   y: number;
 }
 
-const initialState: StrokeGradientEditorState = {
+const initialState: GradientEditorState = {
   isOpen: false,
+  prop: null,
   layer: null,
   gradient: null,
   x: null,
   y: null
 };
 
-export default (state = initialState, action: StrokeGradientEditorTypes): StrokeGradientEditorState => {
+export default (state = initialState, action: GradientEditorTypes): GradientEditorState => {
   switch (action.type) {
-    case OPEN_STROKE_GRADIENT_EDITOR: {
+    case OPEN_GRADIENT_EDITOR: {
       return {
         ...state,
         isOpen: true,
         layer: action.payload.layer,
         gradient: action.payload.gradient,
+        prop: action.payload.prop,
         x: action.payload.x,
         y: action.payload.y
       };
     }
-    case CLOSE_STROKE_GRADIENT_EDITOR: {
+    case CLOSE_GRADIENT_EDITOR: {
       return {
         ...state,
         isOpen: false,
         layer: null,
         gradient: null,
+        prop: null,
         x: null,
         y: null
       };
