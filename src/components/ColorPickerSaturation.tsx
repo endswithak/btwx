@@ -38,7 +38,10 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
           const s = this.x / this.maxX;
           const v = 1 - (this.y / this.maxY);
           const l = (2 - s) * v / 2;
-          onChange({h: hue, s: s, l: l, v: v, a: alpha});
+          const sat = s < 0 ? 0 : s > 1 ? 1 : s;
+          const lit = l < 0 ? 0 : l > 1 ? 1 : l;
+          const val = v < 0 ? 0 : v > 1 ? 1 : v;
+          onChange({h: hue, s: sat, l: lit, v: val, a: alpha});
           //onChange(chroma.hsl(hue, s, l, alpha).hex());
         },
         onRelease: function() {
@@ -67,9 +70,11 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
       const s = x / boundingBox.width;
       const v = 1 - (y / boundingBox.height);
       const l = (2 - s) * v / 2;
+      const sat = s < 0 ? 0 : s > 1 ? 1 : s;
+      const lit = l < 0 ? 0 : l > 1 ? 1 : l;
+      const val = v < 0 ? 0 : v > 1 ? 1 : v;
       setDragging(true);
-      //onChange(chroma.hsl(hue, s, l, alpha).hex());
-      onChange({h: hue, s: s, l: l, v: v, a: alpha});
+      onChange({h: hue, s: sat, l: lit, v: val, a: alpha});
       gsap.set(pointerRef.current, {x, y});
       Draggable.get(pointerRef.current).update();
       Draggable.get(pointerRef.current).startDrag(event);

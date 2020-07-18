@@ -23,15 +23,10 @@ const ShadowToggle = (props: ShadowToggleProps): ReactElement => {
   }, [shadow, selected]);
 
   const handleToggleClick = () => {
-    const paperLayer = getPaperLayer(selected[0]);
     if (enabled) {
       disableLayerShadow({id: selected[0]});
-      paperLayer.shadowColor = null;
     } else {
       enableLayerShadow({id: selected[0]});
-      paperLayer.shadowColor = new paper.Color(shadow.color);
-      paperLayer.shadowBlur = shadow.blur;
-      paperLayer.shadowOffset = new paper.Point(shadow.offset.x, shadow.offset.y);
     }
   };
 

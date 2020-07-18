@@ -564,6 +564,32 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 }
                 break;
               }
+              case 'strokeDashWidth': {
+                tweenProp[tween.prop] = tweenPaperLayer.dashArray[0];
+                paperTween = gsap.to(tweenProp, {
+                  duration: tween.duration,
+                  [tween.prop]: tweenDestinationLayerPaperLayer.dashArray[0],
+                  onUpdate: () => {
+                    tweenPaperLayer.dashArray = [tweenProp[tween.prop], tweenPaperLayer.dashArray[1]];
+                  },
+                  ease: tween.ease,
+                  delay: tween.delay
+                });
+                break;
+              }
+              case 'strokeDashGap': {
+                tweenProp[tween.prop] = tweenPaperLayer.dashArray[1];
+                paperTween = gsap.to(tweenProp, {
+                  duration: tween.duration,
+                  [tween.prop]: tweenDestinationLayerPaperLayer.dashArray[1],
+                  onUpdate: () => {
+                    tweenPaperLayer.dashArray = [tweenPaperLayer.dashArray[0], tweenProp[tween.prop]];
+                  },
+                  ease: tween.ease,
+                  delay: tween.delay
+                });
+                break;
+              }
               case 'strokeWidth': {
                 tweenProp[tween.prop] = tweenPaperLayer.strokeWidth;
                 paperTween = gsap.to(tweenProp, {
@@ -645,10 +671,12 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 break;
               }
               case 'shadowColor': {
-                tweenProp[tween.prop] = tweenPaperLayer.shadowColor.toCSS(true);
+                const tls = tweenLayer.style.shadow.color;
+                const tdl = tweenDestinationLayer.style.shadow.color;
+                tweenProp[tween.prop] = tinyColor({h: tls.h, s: tls.s, l: tls.l, a: tls.a}).toHslString();
                 paperTween = gsap.to(tweenProp, {
                   duration: tween.duration,
-                  [tween.prop]: tweenDestinationLayerPaperLayer.shadowColor.toCSS(true),
+                  [tween.prop]: tinyColor({h: tdl.h, s: tdl.s, l: tdl.l, a: tdl.a}).toHslString(),
                   onUpdate: () => {
                     tweenPaperLayer.shadowColor = tweenProp[tween.prop];
                   },
@@ -663,7 +691,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                   duration: tween.duration,
                   [tween.prop]: tweenDestinationLayerPaperLayer.shadowOffset.x,
                   onUpdate: () => {
-                    tweenPaperLayer.shadowOffset.x = tweenProp[tween.prop];
+                    tweenPaperLayer.shadowOffset = new paperPreview.Point(tweenProp[tween.prop], tweenPaperLayer.shadowOffset.y);
                   },
                   ease: tween.ease,
                   delay: tween.delay
@@ -676,7 +704,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                   duration: tween.duration,
                   [tween.prop]: tweenDestinationLayerPaperLayer.shadowOffset.y,
                   onUpdate: () => {
-                    tweenPaperLayer.shadowOffset.y = tweenProp[tween.prop];
+                    tweenPaperLayer.shadowOffset = new paperPreview.Point(tweenPaperLayer.shadowOffset.x, tweenProp[tween.prop]);
                   },
                   ease: tween.ease,
                   delay: tween.delay

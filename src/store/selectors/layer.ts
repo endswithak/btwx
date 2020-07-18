@@ -276,6 +276,8 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
     width: false,
     height: false,
     stroke: false,
+    strokeDashWidth: false,
+    strokeDashGap: false,
     strokeWidth: false,
     shadowColor: false,
     shadowOffsetX: false,
@@ -374,6 +376,16 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
           (layer.strokeColor && layer.strokeColor.type === 'rgb' && equivalent.strokeColor && equivalent.strokeColor.type === 'gradient') ||
           (layer.strokeColor && layer.strokeColor.type === 'gradient' && equivalent.strokeColor && equivalent.strokeColor.type === 'gradient' && !layer.strokeColor.gradient.equals(equivalent.strokeColor.gradient))
         ) {
+          tweenPropMap[key] = true;
+        }
+        break;
+      case 'strokeDashWidth':
+        if (layer.dashArray[0] !== equivalent.dashArray[0]) {
+          tweenPropMap[key] = true;
+        }
+        break;
+      case 'strokeDashGap':
+        if (layer.dashArray[1] !== equivalent.dashArray[1]) {
           tweenPropMap[key] = true;
         }
         break;
