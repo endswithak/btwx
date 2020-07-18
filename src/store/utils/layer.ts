@@ -336,14 +336,14 @@ export const removeLayers = (state: LayerState, action: RemoveLayers): LayerStat
   }, state);
 }
 
-export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all') => {
+export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', useLayerItem = false) => {
   const selectionFrame = paperMain.project.getItem({ data: { id: 'selectionFrame' } });
   if (selectionFrame) {
     selectionFrame.remove();
   }
   if (state.selected.length > 0) {
-    const selectionTopLeft = getSelectionTopLeft(state);
-    const selectionBottomRight = getSelectionBottomRight(state);
+    const selectionTopLeft = getSelectionTopLeft(state, useLayerItem);
+    const selectionBottomRight = getSelectionBottomRight(state, useLayerItem);
     const baseProps = {
       point: selectionTopLeft,
       size: [8, 8],

@@ -91,9 +91,14 @@ const FillColorInput = (props: ColorInputProps): ReactElement => {
       const hsl = nextHex.toHsl();
       const hsv = nextHex.toHsv();
       switch(prop) {
-        case 'fill':
-          setLayerFillColor({id: selected[0], fillColor: { h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v, a: colorValue.a }});
+        case 'fill': {
+          const newFill = { h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v, a: colorValue.a };
+          setLayerFillColor({id: selected[0], fillColor: newFill});
+          if (selectedType === 'Text') {
+            setTextSettingsFillColor({fillColor: newFill});
+          }
           break;
+        }
         case 'stroke':
           setLayerStrokeColor({id: selected[0], strokeColor: { h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v, a: colorValue.a }});
           break;

@@ -39,6 +39,7 @@ class TextTool {
     this.insertTool.enabled = false;
     let state = store.getState();
     const id = uuidv4();
+    const fillColor = state.textSettings.fillColor;
     // create new text layer
     const paperLayer = new paperMain.PointText({
       point: event.point,
@@ -47,7 +48,8 @@ class TextTool {
         id: id,
         type: 'Text'
       },
-      ...state.textSettings
+      ...state.textSettings,
+      fillColor: { hue: fillColor.h, saturation: fillColor.s, lightness: fillColor.l, alpha: fillColor.a }
     });
     const parent = (() => {
       const overlappedArtboard = getPagePaperLayer(state.layer.present).getItem({
@@ -63,6 +65,7 @@ class TextTool {
       id: id,
       type: 'Text',
       text: DEFAULT_TEXT_VALUE,
+      name: DEFAULT_TEXT_VALUE,
       parent: parent,
       frame: {
         x: paperLayer.position.x,

@@ -11,8 +11,8 @@ import { ToolTypes } from '../store/actionTypes/tool';
 import { GradientEditorState } from '../store/reducers/gradientEditor';
 import ColorPicker from './ColorPicker';
 import GradientSlider from './GradientSlider';
-import { SetLayerFillTypePayload, SetLayerFillGradientTypePayload, SetLayerFillActiveGradientStopPayload, SetLayerFillGradientStopColorPayload, SetLayerFillGradientStopPositionPayload, AddLayerFillGradientStopPayload, SetLayerStrokeGradientTypePayload, SetLayerStrokeActiveGradientStopPayload, SetLayerStrokeGradientStopColorPayload, SetLayerStrokeGradientStopPositionPayload, AddLayerStrokeGradientStopPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayerFillType, setLayerFillGradientType, setLayerFillGradientStopColor, setLayerFillActiveGradientStop, setLayerFillGradientStopPosition, addLayerFillGradientStop, setLayerStrokeGradientType, setLayerStrokeGradientStopColor, setLayerStrokeActiveGradientStop, setLayerStrokeGradientStopPosition, addLayerStrokeGradientStop } from '../store/actions/layer';
+import { SetLayerFillTypePayload, SetLayerFillGradientTypePayload, SetLayerFillActiveGradientStopPayload, SetLayerFillGradientStopColorPayload, SetLayerFillGradientStopPositionPayload, AddLayerFillGradientStopPayload, SetLayerStrokeGradientTypePayload, SetLayerStrokeActiveGradientStopPayload, SetLayerStrokeGradientStopColorPayload, SetLayerStrokeGradientStopPositionPayload, AddLayerStrokeGradientStopPayload, SetLayerStrokeFillTypePayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayerFillType, setLayerFillGradientType, setLayerFillGradientStopColor, setLayerFillActiveGradientStop, setLayerFillGradientStopPosition, addLayerFillGradientStop, setLayerStrokeGradientType, setLayerStrokeGradientStopColor, setLayerStrokeActiveGradientStop, setLayerStrokeGradientStopPosition, addLayerStrokeGradientStop, setLayerStrokeFillType } from '../store/actions/layer';
 import FillTypeSelector from './FillTypeSelector';
 import debounce from 'lodash.debounce';
 import chroma from 'chroma-js';
@@ -45,12 +45,13 @@ interface GradientEditorProps {
   setLayerStrokeGradientStopPosition?(payload: SetLayerStrokeGradientStopPositionPayload): LayerTypes;
   setLayerStrokeActiveGradientStop?(payload: SetLayerStrokeActiveGradientStopPayload): LayerTypes;
   addLayerStrokeGradientStop?(payload: AddLayerStrokeGradientStopPayload): LayerTypes;
+  setLayerStrokeFillType?(payload: SetLayerStrokeFillTypePayload): LayerTypes;
 }
 
 const GradientEditor = (props: GradientEditorProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const editorRef = useRef<HTMLDivElement>(null);
-  const { gradientEditor, style, gradient, activeStopValue, setLayerStrokeActiveGradientStop, setLayerStrokeGradientType, setLayerStrokeGradientStopColor, setLayerStrokeGradientStopPosition, setLayerFillType, setLayerFillGradientType, openColorEditor, setLayerFillGradientStopColor, setLayerFillGradientStopPosition, setLayerFillActiveGradientStop, addLayerFillGradientStop, closeGradientEditor, addLayerStrokeGradientStop } = props;
+  const { gradientEditor, style, gradient, activeStopValue, setLayerStrokeActiveGradientStop, setLayerStrokeGradientType, setLayerStrokeGradientStopColor, setLayerStrokeGradientStopPosition, setLayerFillType, setLayerFillGradientType, openColorEditor, setLayerFillGradientStopColor, setLayerFillGradientStopPosition, setLayerFillActiveGradientStop, addLayerFillGradientStop, closeGradientEditor, addLayerStrokeGradientStop, setLayerStrokeFillType } = props;
   const debounceStopColorChange = useCallback(
     debounce((stop: string, color: em.Color) => {
       switch(gradientEditor.prop) {
@@ -130,7 +131,14 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
   }
 
   const handleColorClick = () => {
-    setLayerFillType({id: gradientEditor.layer, fillType: 'color'});
+    switch(gradientEditor.prop) {
+      case 'fill':
+        setLayerFillType({id: gradientEditor.layer, fillType: 'color'});
+        break;
+      case 'stroke':
+        setLayerStrokeFillType({id: gradientEditor.layer, fillType: 'color'});
+        break;
+    }
     closeGradientEditor();
     openColorEditor({
       layer: gradientEditor.layer,
@@ -246,6 +254,7 @@ export default connect(
     setLayerStrokeGradientStopColor,
     setLayerStrokeGradientStopPosition,
     setLayerStrokeActiveGradientStop,
-    addLayerStrokeGradientStop
+    addLayerStrokeGradientStop,
+    setLayerStrokeFillType
   }
 )(GradientEditor);

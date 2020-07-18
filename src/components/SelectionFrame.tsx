@@ -16,7 +16,7 @@ const SelectionFrame = (props: SelectionFrameProps): ReactElement => {
   const { selected, selectedById } = props;
 
   useEffect(() => {
-    updateSelectionFrame({selected: selected, byId: selectedById} as LayerState);
+    updateSelectionFrame({selected: selected, byId: selectedById} as LayerState, 'all', true);
     return () => {
       const selectionFrame = paperMain.project.getItem({ data: { id: 'selectionFrame' } });
       if (selectionFrame) {

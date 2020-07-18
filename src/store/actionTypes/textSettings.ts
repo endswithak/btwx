@@ -8,7 +8,7 @@ export const SET_TEXT_SETTINGS_JUSTIFICATION = 'SET_TEXT_SETTINGS_JUSTIFICATION'
 
 export type SetTextSettingsPayload = {
   [P in keyof em.TextStyle]?: em.TextStyle[P];
-} & { fillColor?: string }
+} & { fillColor?: em.Color }
 
 export interface SetTextSettings {
   type: typeof SET_TEXT_SETTINGS;
@@ -16,7 +16,7 @@ export interface SetTextSettings {
 }
 
 export interface SetTextSettingsFillColorPayload {
-  fillColor: string;
+  fillColor: em.Color;
 }
 
 export interface SetTextSettingsFillColor {

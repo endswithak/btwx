@@ -12,6 +12,8 @@ import { ColorEditorState } from '../store/reducers/colorEditor';
 import ColorPicker from './ColorPicker';
 import { SetLayerFillTypePayload, SetLayerFillGradientTypePayload, SetLayerFillColorPayload, SetLayerFillPayload, SetLayerStrokeFillTypePayload, SetLayerStrokeGradientTypePayload, SetLayerStrokeColorPayload, SetLayerShadowColorPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setLayerFillType, setLayerFillGradientType, setLayerFillColor, setLayerStrokeColor, setLayerStrokeFillType, setLayerStrokeGradientType, setLayerShadowColor } from '../store/actions/layer';
+import { SetTextSettingsFillColorPayload, TextSettingsTypes } from '../store/actionTypes/textSettings';
+import { setTextSettingsFillColor } from '../store/actions/textSettings';
 import FillTypeSelector from './FillTypeSelector';
 import debounce from 'lodash.debounce';
 import chroma from 'chroma-js';
@@ -32,18 +34,23 @@ interface ColorEditorProps {
   setLayerStrokeColor?(payload: SetLayerStrokeColorPayload): LayerTypes;
   setLayerStrokeFillType?(payload: SetLayerStrokeFillTypePayload): LayerTypes;
   setLayerStrokeGradientType?(payload: SetLayerStrokeGradientTypePayload): LayerTypes;
+  setTextSettingsFillColor?(payload: SetTextSettingsFillColorPayload): TextSettingsTypes;
 }
 
 const ColorEditor = (props: ColorEditorProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const editorRef = useRef<HTMLDivElement>(null);
-  const { style, colorEditor, closeColorEditor, setLayerFillColor, setLayerStrokeFillType, setLayerStrokeGradientType, setLayerFillType, setLayerStrokeColor, setLayerFillGradientType, openGradientEditor, setLayerShadowColor } = props;
+  const { layerItem, style, colorEditor, closeColorEditor, setLayerFillColor, setLayerStrokeFillType, setLayerStrokeGradientType, setLayerFillType, setLayerStrokeColor, setLayerFillGradientType, openGradientEditor, setLayerShadowColor, setTextSettingsFillColor } = props;
   const debounceColor = useCallback(
     debounce((color: em.Color) => {
       switch(colorEditor.prop) {
-        case 'fill':
+        case 'fill': {
           setLayerFillColor({id: colorEditor.layer, fillColor: color});
+          if (layerItem.type === 'Text') {
+            setTextSettingsFillColor({fillColor: color});
+          }
           break;
+        }
         case 'stroke':
           setLayerStrokeColor({id: colorEditor.layer, strokeColor: color});
           break;
@@ -203,6 +210,7 @@ export default connect(
     setLayerFillType,
     setLayerStrokeFillType,
     setLayerFillGradientType,
-    setLayerStrokeGradientType
+    setLayerStrokeGradientType,
+    setTextSettingsFillColor
   }
 )(ColorEditor);

@@ -5,7 +5,6 @@ import SidebarSection from './SidebarSection';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarSectionHead from './SidebarSectionHead';
-import SidebarTextStyle from './SidebarTextStyle';
 import FontFamilySelector from './FontFamilySelector';
 import FontWeightSelector from './FontWeightSelector';
 import FontSizeInput from './FontSizeInput';

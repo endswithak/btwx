@@ -9,7 +9,7 @@ import { SetActiveArtboardPayload, LayerTypes } from '../store/actionTypes/layer
 import { getLongestEventTween, getPositionInArtboard, getAllArtboardTweenEvents, getAllArtboardTweenEventDestinations, getAllArtboardTweens, getAllArtboardTweenLayers, getAllArtboardTweenLayerDestinations, getAllArtboardTweenEventLayers, getGradientDestinationPoint, getGradientOriginPoint, getGradientStops } from '../store/selectors/layer';
 import { gsap } from 'gsap';
 import { MorphSVGPlugin } from "gsap/MorphSVGPlugin";
-import chroma from 'chroma-js';
+import tinyColor from 'tinycolor2';
 import { bufferToBase64 } from '../utils';
 
 gsap.registerPlugin(MorphSVGPlugin);
@@ -169,12 +169,18 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     clone.bounds.center.y = tweenPaperLayer.bounds.center.y;
                     // apply final clone path data to tweenPaperLayer
                     (tweenPaperLayer as paper.Path).pathData = clone.pathData;
-                    // update gradient origin/destination if needed
+                    // update fill gradient origin/destination if needed
                     if (tweenPaperLayer.fillColor && tweenPaperLayer.fillColor.gradient) {
                       const origin = tweenLayers.byId[tweenPaperLayer.data.id].style.fill.gradient.origin;
                       const destination = tweenLayers.byId[tweenPaperLayer.data.id].style.fill.gradient.destination;
                       (tweenPaperLayer.fillColor as em.PaperGradientFill).origin = new paper.Point((origin.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (origin.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
                       (tweenPaperLayer.fillColor as em.PaperGradientFill).destination = new paper.Point((destination.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (destination.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
+                    }
+                    if (tweenPaperLayer.strokeColor && tweenPaperLayer.strokeColor.gradient) {
+                      const origin = tweenLayers.byId[tweenPaperLayer.data.id].style.stroke.gradient.origin;
+                      const destination = tweenLayers.byId[tweenPaperLayer.data.id].style.stroke.gradient.destination;
+                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).origin = new paper.Point((origin.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (origin.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
+                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).destination = new paper.Point((destination.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (destination.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
                     }
                   },
                   ease: tween.ease,
@@ -186,9 +192,9 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 // color fill to color fill
                 if (
                   tweenPaperLayer.fillColor &&
-                  tweenPaperLayer.fillColor.type === 'rgb' &&
+                  (tweenPaperLayer.fillColor.type === 'rgb' || tweenPaperLayer.fillColor.type === 'hsl') &&
                   tweenDestinationLayerPaperLayer.fillColor &&
-                  tweenDestinationLayerPaperLayer.fillColor.type === 'rgb'
+                  (tweenDestinationLayerPaperLayer.fillColor.type === 'rgb' || tweenDestinationLayerPaperLayer.fillColor.type === 'hsl')
                 ) {
                   tweenProp[tween.prop] = tweenPaperLayer.fillColor.toCSS(true);
                   paperTween = gsap.to(tweenProp, {
@@ -204,10 +210,10 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 } else if (
                   !tweenPaperLayer.fillColor &&
                   tweenDestinationLayerPaperLayer.fillColor &&
-                  tweenDestinationLayerPaperLayer.fillColor.type === 'rgb'
+                  (tweenDestinationLayerPaperLayer.fillColor.type === 'rgb' || tweenDestinationLayerPaperLayer.fillColor.type === 'hsl')
                 ) {
                   const c2 = tweenDestinationLayerPaperLayer.fillColor.toCSS(true);
-                  tweenProp[tween.prop] = new paperPreview.Color(chroma(c2).alpha(0).hex()).toCSS(true);
+                  tweenProp[tween.prop] = new paperPreview.Color(tinyColor(c2).setAlpha(0).toHex8String()).toCSS(true);
                   paperTween = gsap.to(tweenProp, {
                     duration: tween.duration,
                     [tween.prop]: tweenDestinationLayerPaperLayer.fillColor.toCSS(true),
@@ -221,7 +227,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 } else if (
                   tweenPaperLayer.fillColor &&
                   !tweenDestinationLayerPaperLayer.fillColor &&
-                  tweenPaperLayer.fillColor.type === 'rgb'
+                  (tweenPaperLayer.fillColor.type === 'rgb' || tweenPaperLayer.fillColor.type === 'hsl')
                 ) {
                   tweenProp[tween.prop] = tweenPaperLayer.fillColor.alpha;
                   paperTween = gsap.to(tweenProp, {
@@ -272,7 +278,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                   tweenPaperLayer.fillColor &&
                   tweenPaperLayer.fillColor.type === 'gradient' &&
                   tweenDestinationLayerPaperLayer.fillColor &&
-                  tweenDestinationLayerPaperLayer.fillColor.type === 'rgb'
+                  (tweenDestinationLayerPaperLayer.fillColor.type === 'rgb' || tweenDestinationLayerPaperLayer.fillColor.type === 'hsl')
                 ) {
                   tweenPaperLayer.fillColor.gradient.stops.forEach((stop, index) => {
                     tweenProp[`${tween.prop}-stop-${index}-color`] = tweenPaperLayer.fillColor.gradient.stops[index].color.toCSS(true);
@@ -289,7 +295,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 // color fill to gradient fill
                 } else if (
                   tweenPaperLayer.fillColor &&
-                  tweenPaperLayer.fillColor.type === 'rgb' &&
+                  (tweenPaperLayer.fillColor.type === 'rgb' || tweenPaperLayer.fillColor.type === 'hsl') &&
                   tweenDestinationLayerPaperLayer.fillColor &&
                   tweenDestinationLayerPaperLayer.fillColor.type === 'gradient'
                 ) {
@@ -347,7 +353,8 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     gradient: {
                       stops: tweenDestinationLayer.style.fill.gradient.stops.allIds.map((id) => {
                         const stop = tweenDestinationLayer.style.fill.gradient.stops.byId[id];
-                        return new paperPreview.GradientStop(new paperPreview.Color(chroma(stop.color).alpha(0).hex()), stop.position);
+                        const stopColor = stop.color;
+                        return new paperPreview.GradientStop({hue: stopColor.h, saturation: stopColor.s, lightness: stopColor.l, alpha: 0} as paper.Color, stop.position);
                       }),
                       radial: tweenDestinationLayerPaperLayer.fillColor.gradient.radial
                     },
@@ -369,50 +376,194 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 }
                 break;
               }
-              // case 'fillColor': {
-              //   tweenProp[tween.prop] = tweenPaperLayer.fillColor.toCSS(true);
-              //   paperTween = gsap.to(tweenProp, {
-              //     duration: tween.duration,
-              //     [tween.prop]: tweenDestinationLayerPaperLayer.fillColor.toCSS(true),
-              //     onUpdate: () => {
-              //       tweenPaperLayer.fillColor = tweenProp[tween.prop];
-              //     },
-              //     ease: tween.ease,
-              //     delay: tween.delay
-              //   });
-              //   break;
-              // }
-              // case 'fillGradient': {
-              //   tweenPaperLayer.fillColor.gradient.stops.forEach((stop, index) => {
-              //     tweenProp[`${tween.prop}-stop-${index}-color`] = tweenPaperLayer.fillColor.gradient.stops[index].color.toCSS(true);
-              //     tweenProp[`${tween.prop}-stop-${index}-offset`] = tweenPaperLayer.fillColor.gradient.stops[index].offset;
-              //     paperTween = gsap.to(tweenProp, {
-              //       duration: tween.duration,
-              //       [`${tween.prop}-stop-${index}-color`]: tweenDestinationLayerPaperLayer.fillColor.gradient.stops[index].color.toCSS(true),
-              //       [`${tween.prop}-stop-${index}-offset`]: tweenDestinationLayerPaperLayer.fillColor.gradient.stops[index].offset,
-              //       onUpdate: () => {
-              //         tweenPaperLayer.fillColor.gradient.stops[index].color = tweenProp[`${tween.prop}-stop-${index}-color`];
-              //         tweenPaperLayer.fillColor.gradient.stops[index].offset = tweenProp[`${tween.prop}-stop-${index}-offset`];
-              //       },
-              //       ease: tween.ease,
-              //       delay: tween.delay
-              //     });
-              //   });
-              //   break;
-              // }
-              // case 'strokeColor': {
-              //   tweenProp[tween.prop] = tweenPaperLayer.strokeColor.toCSS(true);
-              //   paperTween = gsap.to(tweenProp, {
-              //     duration: tween.duration,
-              //     [tween.prop]: tweenDestinationLayerPaperLayer.strokeColor.toCSS(true),
-              //     onUpdate: () => {
-              //       tweenPaperLayer.strokeColor = tweenProp[tween.prop];
-              //     },
-              //     ease: tween.ease,
-              //     delay: tween.delay
-              //   });
-              //   break;
-              // }
+              case 'stroke': {
+                // color stroke to color stroke
+                if (
+                  tweenPaperLayer.strokeColor &&
+                  (tweenPaperLayer.strokeColor.type === 'rgb' || tweenPaperLayer.strokeColor.type === 'hsl') &&
+                  tweenDestinationLayerPaperLayer.strokeColor &&
+                  (tweenDestinationLayerPaperLayer.strokeColor.type === 'rgb' || tweenDestinationLayerPaperLayer.strokeColor.type === 'hsl')
+                ) {
+                  tweenProp[tween.prop] = tweenPaperLayer.strokeColor.toCSS(true);
+                  paperTween = gsap.to(tweenProp, {
+                    duration: tween.duration,
+                    [tween.prop]: tweenDestinationLayerPaperLayer.strokeColor.toCSS(true),
+                    onUpdate: () => {
+                      tweenPaperLayer.strokeColor = tweenProp[tween.prop];
+                    },
+                    ease: tween.ease,
+                    delay: tween.delay
+                  });
+                // no stroke to color stroke
+                } else if (
+                  !tweenPaperLayer.strokeColor &&
+                  tweenDestinationLayerPaperLayer.strokeColor &&
+                  (tweenDestinationLayerPaperLayer.strokeColor.type === 'rgb' || tweenDestinationLayerPaperLayer.strokeColor.type === 'hsl')
+                ) {
+                  const c2 = tweenDestinationLayerPaperLayer.strokeColor.toCSS(true);
+                  tweenProp[tween.prop] = new paperPreview.Color(tinyColor(c2).setAlpha(0).toHex8String()).toCSS(true);
+                  paperTween = gsap.to(tweenProp, {
+                    duration: tween.duration,
+                    [tween.prop]: tweenDestinationLayerPaperLayer.strokeColor.toCSS(true),
+                    onUpdate: () => {
+                      tweenPaperLayer.strokeColor = tweenProp[tween.prop];
+                    },
+                    ease: tween.ease,
+                    delay: tween.delay
+                  });
+                // color stroke to no stroke
+                } else if (
+                  tweenPaperLayer.strokeColor &&
+                  !tweenDestinationLayerPaperLayer.strokeColor &&
+                  (tweenPaperLayer.strokeColor.type === 'rgb' || tweenPaperLayer.strokeColor.type === 'hsl')
+                ) {
+                  tweenProp[tween.prop] = tweenPaperLayer.strokeColor.alpha;
+                  paperTween = gsap.to(tweenProp, {
+                    duration: tween.duration,
+                    [tween.prop]: 0,
+                    onUpdate: () => {
+                      tweenPaperLayer.strokeColor.alpha = tweenProp[tween.prop];
+                    },
+                    ease: tween.ease,
+                    delay: tween.delay
+                  });
+                // gradient stroke to gradient stroke
+                } else if (
+                  tweenPaperLayer.strokeColor &&
+                  tweenPaperLayer.strokeColor.type === 'gradient' &&
+                  tweenDestinationLayerPaperLayer.strokeColor &&
+                  tweenDestinationLayerPaperLayer.strokeColor.type === 'gradient'
+                ) {
+                  const layerStopCount = tweenPaperLayer.strokeColor.gradient.stops.length;
+                  const destinationStopCount = tweenDestinationLayerPaperLayer.strokeColor.gradient.stops.length;
+                  if (destinationStopCount > layerStopCount) {
+                    const diff = destinationStopCount - layerStopCount;
+                    for (let i = 0; i < diff; i++) {
+                      const test = tweenPaperLayer.strokeColor.gradient.stops[0].clone();
+                      tweenPaperLayer.strokeColor.gradient.stops.push(test);
+                    }
+                  }
+                  tweenPaperLayer.strokeColor.gradient.stops.forEach((stop, index) => {
+                    const closestDestinationStop = tweenDestinationLayerPaperLayer.strokeColor.gradient.stops.reduce((result, current) => {
+                      return (Math.abs(current.offset - stop.offset) < Math.abs(result.offset - stop.offset) ? current : result);
+                    });
+                    tweenProp[`${tween.prop}-stop-${index}-color`] = tweenPaperLayer.strokeColor.gradient.stops[index].color.toCSS(true);
+                    tweenProp[`${tween.prop}-stop-${index}-offset`] = tweenPaperLayer.strokeColor.gradient.stops[index].offset;
+                    paperTween = gsap.to(tweenProp, {
+                      duration: tween.duration,
+                      [`${tween.prop}-stop-${index}-color`]: tweenDestinationLayerPaperLayer.strokeColor.gradient.stops[index] ? tweenDestinationLayerPaperLayer.strokeColor.gradient.stops[index].color.toCSS(true) : closestDestinationStop.color.toCSS(true),
+                      [`${tween.prop}-stop-${index}-offset`]: tweenDestinationLayerPaperLayer.strokeColor.gradient.stops[index] ? tweenDestinationLayerPaperLayer.strokeColor.gradient.stops[index].offset : closestDestinationStop.offset,
+                      onUpdate: () => {
+                        tweenPaperLayer.strokeColor.gradient.stops[index].color = tweenProp[`${tween.prop}-stop-${index}-color`];
+                        tweenPaperLayer.strokeColor.gradient.stops[index].offset = tweenProp[`${tween.prop}-stop-${index}-offset`];
+                      },
+                      ease: tween.ease,
+                      delay: tween.delay
+                    });
+                  });
+                // gradient stroke to color stroke
+                } else if (
+                  tweenPaperLayer.strokeColor &&
+                  tweenPaperLayer.strokeColor.type === 'gradient' &&
+                  tweenDestinationLayerPaperLayer.strokeColor &&
+                  (tweenDestinationLayerPaperLayer.strokeColor.type === 'rgb' || tweenDestinationLayerPaperLayer.strokeColor.type === 'hsl')
+                ) {
+                  tweenPaperLayer.strokeColor.gradient.stops.forEach((stop, index) => {
+                    tweenProp[`${tween.prop}-stop-${index}-color`] = tweenPaperLayer.strokeColor.gradient.stops[index].color.toCSS(true);
+                    paperTween = gsap.to(tweenProp, {
+                      duration: tween.duration,
+                      [`${tween.prop}-stop-${index}-color`]: tweenDestinationLayerPaperLayer.strokeColor.toCSS(true),
+                      onUpdate: () => {
+                        tweenPaperLayer.strokeColor.gradient.stops[index].color = tweenProp[`${tween.prop}-stop-${index}-color`];
+                      },
+                      ease: tween.ease,
+                      delay: tween.delay
+                    });
+                  });
+                // color stroke to gradient stroke
+                } else if (
+                  tweenPaperLayer.strokeColor &&
+                  (tweenPaperLayer.strokeColor.type === 'rgb' || tweenPaperLayer.strokeColor.type === 'hsl') &&
+                  tweenDestinationLayerPaperLayer.strokeColor &&
+                  tweenDestinationLayerPaperLayer.strokeColor.type === 'gradient'
+                ) {
+                  tweenPaperLayer.strokeColor = {
+                    gradient: {
+                      stops: tweenDestinationLayer.style.stroke.gradient.stops.allIds.map((id) => {
+                        const stop = tweenDestinationLayer.style.stroke.gradient.stops.byId[id];
+                        return new paperPreview.GradientStop(
+                          new paperPreview.Color(tweenPaperLayer.strokeColor.toCSS(true)),
+                          stop.position
+                        );
+                      }),
+                      radial: tweenDestinationLayerPaperLayer.strokeColor.gradient.radial
+                    },
+                    origin: new paperPreview.Point((tweenDestinationLayer.style.stroke.gradient.origin.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (tweenDestinationLayer.style.stroke.gradient.origin.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y),
+                    destination: new paperPreview.Point((tweenDestinationLayer.style.stroke.gradient.destination.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (tweenDestinationLayer.style.stroke.gradient.destination.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y)
+                  } as em.PaperGradientFill;
+                  tweenPaperLayer.strokeColor.gradient.stops.forEach((stop, index) => {
+                    tweenProp[`${tween.prop}-stop-${index}-color`] = tweenPaperLayer.strokeColor.gradient.stops[index].color.toCSS(true);
+                    paperTween = gsap.to(tweenProp, {
+                      duration: tween.duration,
+                      [`${tween.prop}-stop-${index}-color`]: tweenDestinationLayerPaperLayer.strokeColor.gradient.stops[index].color.toCSS(true),
+                      onUpdate: () => {
+                        tweenPaperLayer.strokeColor.gradient.stops[index].color = tweenProp[`${tween.prop}-stop-${index}-color`];
+                      },
+                      ease: tween.ease,
+                      delay: tween.delay
+                    });
+                  });
+                // gradient stroke to no stroke
+                } else if (
+                  tweenPaperLayer.strokeColor &&
+                  tweenPaperLayer.strokeColor.type === 'gradient' &&
+                  !tweenDestinationLayerPaperLayer.strokeColor
+                ) {
+                  tweenPaperLayer.strokeColor.gradient.stops.forEach((stop, index) => {
+                    tweenProp[`${tween.prop}-stop-${index}-color`] = tweenPaperLayer.strokeColor.gradient.stops[index].color.alpha;
+                    paperTween = gsap.to(tweenProp, {
+                      duration: tween.duration,
+                      [`${tween.prop}-stop-${index}-color`]: 0,
+                      onUpdate: () => {
+                        tweenPaperLayer.strokeColor.gradient.stops[index].color.alpha = tweenProp[`${tween.prop}-stop-${index}-color`];
+                      },
+                      ease: tween.ease,
+                      delay: tween.delay
+                    });
+                  });
+                // no stroke to gradient stroke
+                } else if (
+                  !tweenPaperLayer.strokeColor &&
+                  tweenDestinationLayerPaperLayer.strokeColor &&
+                  tweenDestinationLayerPaperLayer.strokeColor.type === 'gradient'
+                ) {
+                  tweenPaperLayer.strokeColor = {
+                    gradient: {
+                      stops: tweenDestinationLayer.style.stroke.gradient.stops.allIds.map((id) => {
+                        const stop = tweenDestinationLayer.style.stroke.gradient.stops.byId[id];
+                        const stopColor = stop.color;
+                        return new paperPreview.GradientStop({hue: stopColor.h, saturation: stopColor.s, lightness: stopColor.l, alpha: 0} as paper.Color, stop.position);
+                      }),
+                      radial: tweenDestinationLayerPaperLayer.strokeColor.gradient.radial
+                    },
+                    origin: new paperPreview.Point((tweenDestinationLayer.style.stroke.gradient.origin.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (tweenDestinationLayer.style.stroke.gradient.origin.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y),
+                    destination: new paperPreview.Point((tweenDestinationLayer.style.stroke.gradient.destination.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (tweenDestinationLayer.style.stroke.gradient.destination.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y)
+                  } as em.PaperGradientFill;
+                  tweenPaperLayer.strokeColor.gradient.stops.forEach((stop, index) => {
+                    tweenProp[`${tween.prop}-stop-${index}-color`] = tweenPaperLayer.strokeColor.gradient.stops[index].color.alpha;
+                    paperTween = gsap.to(tweenProp, {
+                      duration: tween.duration,
+                      [`${tween.prop}-stop-${index}-color`]: tweenDestinationLayerPaperLayer.strokeColor.gradient.stops[index].color.alpha,
+                      onUpdate: () => {
+                        tweenPaperLayer.strokeColor.gradient.stops[index].color.alpha = tweenProp[`${tween.prop}-stop-${index}-color`];
+                      },
+                      ease: tween.ease,
+                      delay: tween.delay
+                    });
+                  });
+                }
+                break;
+              }
               case 'strokeWidth': {
                 tweenProp[tween.prop] = tweenPaperLayer.strokeWidth;
                 paperTween = gsap.to(tweenProp, {
@@ -565,6 +716,32 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                   [tween.prop]: (tweenDestinationLayerPaperLayer as paper.PointText).fontSize,
                   onUpdate: () => {
                     (tweenPaperLayer as paper.PointText).fontSize = tweenProp[tween.prop];
+                  },
+                  ease: tween.ease,
+                  delay: tween.delay
+                });
+                break;
+              }
+              case 'lineHeight': {
+                tweenProp[tween.prop] = (tweenPaperLayer as paper.PointText).leading;
+                paperTween = gsap.to(tweenProp, {
+                  duration: tween.duration,
+                  [tween.prop]: (tweenDestinationLayerPaperLayer as paper.PointText).leading,
+                  onUpdate: () => {
+                    (tweenPaperLayer as paper.PointText).leading = tweenProp[tween.prop];
+                    // update fill gradient origin/destination if needed
+                    if (tweenPaperLayer.fillColor && tweenPaperLayer.fillColor.gradient) {
+                      const origin = tweenLayers.byId[tweenPaperLayer.data.id].style.fill.gradient.origin;
+                      const destination = tweenLayers.byId[tweenPaperLayer.data.id].style.fill.gradient.destination;
+                      (tweenPaperLayer.fillColor as em.PaperGradientFill).origin = new paper.Point((origin.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (origin.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
+                      (tweenPaperLayer.fillColor as em.PaperGradientFill).destination = new paper.Point((destination.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (destination.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
+                    }
+                    if (tweenPaperLayer.strokeColor && tweenPaperLayer.strokeColor.gradient) {
+                      const origin = tweenLayers.byId[tweenPaperLayer.data.id].style.stroke.gradient.origin;
+                      const destination = tweenLayers.byId[tweenPaperLayer.data.id].style.stroke.gradient.destination;
+                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).origin = new paper.Point((origin.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (origin.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
+                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).destination = new paper.Point((destination.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (destination.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
+                    }
                   },
                   ease: tween.ease,
                   delay: tween.delay

@@ -6,23 +6,25 @@ import HoverFrame from './HoverFrame';
 interface HoverFrameWrapProps {
   hover?: string;
   isGradientEditorOpen?: boolean;
+  isTextEditorOpen?: boolean;
 }
 
 const HoverFrameWrap = (props: HoverFrameWrapProps): ReactElement => {
-  const { hover, isGradientEditorOpen } = props;
+  const { hover, isGradientEditorOpen, isTextEditorOpen } = props;
 
   return (
-    hover && !isGradientEditorOpen
+    hover && !isGradientEditorOpen && !isTextEditorOpen
     ? <HoverFrame />
     : null
   );
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer, gradientEditor } = state;
+  const { layer, gradientEditor, textEditor } = state;
   const isGradientEditorOpen = gradientEditor.isOpen;
+  const isTextEditorOpen = textEditor.isOpen;
   const hover = layer.present.hover;
-  return { hover, isGradientEditorOpen };
+  return { hover, isGradientEditorOpen, isTextEditorOpen };
 };
 
 export default connect(

@@ -12,7 +12,7 @@ import {
 import { DEFAULT_TEXT_STYLE, DEFAULT_TEXT_FILL_COLOR } from '../../constants';
 
 export interface TextSettingsState extends em.TextStyle {
-  fillColor: string;
+  fillColor: em.Color;
 }
 
 const initialState: TextSettingsState = {

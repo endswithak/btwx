@@ -13,6 +13,7 @@ import { paperMain } from '../canvas';
 import { TextEditorState } from '../store/reducers/textEditor';
 import { TextSettingsState } from '../store/reducers/textSettings';
 import debounce from 'lodash.debounce';
+import tinyColor from 'tinycolor2';
 
 interface TextEditorInputProps {
   textEditor?: TextEditorState;
@@ -40,6 +41,12 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
   const [pos, setPos] = useState({x: textEditor.x, y: textEditor.y});
 
   const onOpen = () => {
+    if (paperMain.project.getItem({data: { id: 'selectionFrame' }})) {
+      paperMain.project.getItem({data: { id: 'selectionFrame' }}).remove();
+    }
+    if (paperMain.project.getItem({data: { id: 'hoverFrame' }})) {
+      paperMain.project.getItem({data: { id: 'hoverFrame' }}).remove();
+    }
     disableSelectionTool();
     document.addEventListener('mousedown', onMouseDown, false);
     const paperLayer = paperMain.project.getItem({data: { id: textEditor.layer }}) as paper.PointText;
@@ -115,12 +122,6 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
   useEffect(() => {
     const paperLayer = paperMain.project.getItem({data: { id: textEditor.layer }}) as paper.PointText;
     paperLayer.visible = false;
-    if (paperMain.project.getItem({data: { id: 'selectionFrame' }})) {
-      paperMain.project.getItem({data: { id: 'selectionFrame' }}).remove();
-    }
-    if (paperMain.project.getItem({data: { id: 'hoverFrame' }})) {
-      paperMain.project.getItem({data: { id: 'hoverFrame' }}).remove();
-    }
   }, [layerItem.text]);
 
   useEffect(() => {
@@ -186,7 +187,7 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
             }
           })(),
           lineHeight: `${textSettings.leading}px`,
-          color: textSettings.fillColor,
+          color: tinyColor({h: textSettings.fillColor.h, s: textSettings.fillColor.s, l: textSettings.fillColor.l, a: textSettings.fillColor.a}).toHslString(),
           textAlign: textSettings.justification,
           transformOrigin: 'left top',
           transform: (() => {
@@ -228,7 +229,6 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
             }
           })(),
           lineHeight: `${textSettings.leading}px`,
-          color: textSettings.fillColor,
           textAlign: textSettings.justification
         }}>
         {text}

@@ -164,34 +164,46 @@ export const getLayersBounds = (layers: string[]): paper.Rectangle => {
   });
 }
 
-export const getSelectionTopLeft = (store: LayerState): paper.Point => {
+export const getSelectionTopLeft = (store: LayerState, useLayerItem?: boolean): paper.Point => {
   const paperLayerPoints = store.selected.reduce((result, current) => {
-    const paperLayer = getPaperLayer(current);
-    return [...result, paperLayer.bounds.topLeft];
+    if (useLayerItem) {
+      const layerItem = store.byId[current];
+      const topLeft = new paperMain.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
+      return [...result, topLeft];
+    } else {
+      const paperLayer = getPaperLayer(current);
+      return [...result, paperLayer.bounds.topLeft];
+    }
   }, []);
   return paperLayerPoints.reduce(paper.Point.min);
 }
 
-export const getSelectionBottomRight = (store: LayerState): paper.Point => {
+export const getSelectionBottomRight = (store: LayerState, useLayerItem?: boolean): paper.Point => {
   const paperLayerPoints = store.selected.reduce((result, current) => {
-    const paperLayer = getPaperLayer(current);
-    return [...result, paperLayer.bounds.bottomRight];
+    if (useLayerItem) {
+      const layerItem = store.byId[current];
+      const bottomRight = new paperMain.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
+      return [...result, bottomRight];
+    } else {
+      const paperLayer = getPaperLayer(current);
+      return [...result, paperLayer.bounds.bottomRight];
+    }
   }, []);
   return paperLayerPoints.reduce(paper.Point.max);
 }
 
-export const getSelectionBounds = (store: LayerState): paper.Rectangle => {
-  const topLeft = getSelectionTopLeft(store);
-  const bottomRight = getSelectionBottomRight(store);
+export const getSelectionBounds = (store: LayerState, useLayerItem?: boolean): paper.Rectangle => {
+  const topLeft = getSelectionTopLeft(store, useLayerItem);
+  const bottomRight = getSelectionBottomRight(store, useLayerItem);
   return new paper.Rectangle({
     from: topLeft,
     to: bottomRight
   });
 }
 
-export const getSelectionCenter = (store: LayerState): paper.Point => {
-  const topLeft = getSelectionTopLeft(store);
-  const bottomRight = getSelectionBottomRight(store);
+export const getSelectionCenter = (store: LayerState, useLayerItem?: boolean): paper.Point => {
+  const topLeft = getSelectionTopLeft(store, useLayerItem);
+  const bottomRight = getSelectionBottomRight(store, useLayerItem);
   const xMid = (topLeft.x + bottomRight.x) / 2;
   const yMid = (topLeft.y + bottomRight.y) / 2;
   return new paper.Point(xMid, yMid);
@@ -273,17 +285,26 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
     shadowOffsetY: false,
     shadowBlur: false,
     opacity: false,
-    fontSize: false
+    fontSize: false,
+    lineHeight: false
   }
   Object.keys(tweenPropMap).forEach((key: em.TweenProp) => {
     switch(key) {
       case 'image':
-        if (layer.data.type === 'Image' && equivalent.data.type === 'Image' && layer.data.imageId !== equivalent.data.imageId) {
+        if (
+          layer.data.type === 'Image' &&
+          equivalent.data.type === 'Image' &&
+          layer.data.imageId !== equivalent.data.imageId
+        ) {
           tweenPropMap[key] = true;
         }
         break;
       case 'shape':
-        if (layer.data.type !== 'ArtboardBackground' && layer.className === 'Path' && equivalent.className === 'Path') {
+        if (
+          layer.data.type !== 'ArtboardBackground' &&
+          layer.className === 'Path' &&
+          equivalent.className === 'Path'
+        ) {
           const equivalentShapeTest = equivalent.clone({insert: false});
           equivalentShapeTest.position = layer.position;
           if (!(layer as paper.Path).compare(equivalentShapeTest as paper.Path)) {
@@ -303,61 +324,73 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
           tweenPropMap[key] = true;
         }
         break;
-      // case 'fillColor':
-      //   if (layer.fillColor && layer.fillColor.type !== 'gradient' && equivalent.fillColor && !layer.fillColor.equals(equivalent.fillColor)) {
-      //     tweenPropMap[key] = true;
-      //   } else if (!layer.fillColor && equivalent.fillColor) {
-      //     tweenPropMap[key] = true;
-      //   }
-      //   break;
-      // case 'fillGradient':
-      //   if (layer.fillColor && layer.fillColor.type === 'gradient' && equivalent.fillColor.type === 'gradient' && !layer.fillColor.gradient.equals(equivalent.fillColor.gradient)) {
-      //     tweenPropMap[key] = true;
-      //   } else if (!layer.fillColor && equivalent.fillColor) {
-      //     tweenPropMap[key] = true;
-      //   }
-      //   break;
       case 'x':
-        if (layerArtboardPosition.x !== equivalentArtboardPosition.x && layer.data.type !== 'ArtboardBackground') {
+        if (
+          (layer.data.type === 'Text' && equivalent.data.type === 'Text' && ((layer as paper.PointText).fontSize !== (equivalent as paper.PointText).fontSize || (layer as paper.PointText).leading !== (equivalent as paper.PointText).leading)) ||
+          layerArtboardPosition.x !== equivalentArtboardPosition.x &&
+          layer.data.type !== 'ArtboardBackground'
+        ) {
           tweenPropMap[key] = true;
         }
         break;
       case 'y':
-        if (layerArtboardPosition.y !== equivalentArtboardPosition.y && layer.data.type !== 'ArtboardBackground') {
+        if (
+          (layer.data.type === 'Text' && equivalent.data.type === 'Text' && ((layer as paper.PointText).fontSize !== (equivalent as paper.PointText).fontSize || (layer as paper.PointText).leading !== (equivalent as paper.PointText).leading)) ||
+          layerArtboardPosition.y !== equivalentArtboardPosition.y &&
+          layer.data.type !== 'ArtboardBackground'
+        ) {
           tweenPropMap[key] = true;
         }
         break;
       case 'rotation':
-        if (layer.rotation !== equivalent.rotation && layer.data.type !== 'ArtboardBackground') {
+        if (
+          layer.rotation !== equivalent.rotation &&
+          layer.data.type !== 'ArtboardBackground'
+        ) {
           tweenPropMap[key] = true;
         }
         break;
       case 'width':
-        if (layer.bounds.width !== equivalent.bounds.width && layer.data.type !== 'ArtboardBackground' && layer.data.type !== 'Text') {
+        if (
+          layer.bounds.width !== equivalent.bounds.width &&
+          layer.data.type !== 'ArtboardBackground' &&
+          layer.data.type !== 'Text'
+        ) {
           tweenPropMap[key] = true;
         }
         break;
       case 'height':
-        if (layer.bounds.height !== equivalent.bounds.height && layer.data.type !== 'ArtboardBackground' && layer.data.type !== 'Text') {
+        if (
+          layer.bounds.height !== equivalent.bounds.height &&
+          layer.data.type !== 'ArtboardBackground' &&
+          layer.data.type !== 'Text'
+        ) {
           tweenPropMap[key] = true;
         }
         break;
-      // case 'strokeColor':
-      //   if (layer.strokeColor && equivalent.strokeColor && !layer.strokeColor.equals(equivalent.strokeColor)) {
-      //     tweenPropMap[key] = true;
-      //   } else if (!layer.strokeColor && equivalent.strokeColor) {
-      //     tweenPropMap[key] = true;
-      //   }
-      //   break;
+      case 'stroke':
+        if (
+          (!layer.strokeColor && equivalent.strokeColor) ||
+          (layer.strokeColor && !equivalent.strokeColor) ||
+          (layer.strokeColor && equivalent.strokeColor && !layer.strokeColor.equals(equivalent.strokeColor)) ||
+          (layer.strokeColor && layer.strokeColor.type === 'gradient' && equivalent.strokeColor && equivalent.strokeColor.type === 'rgb') ||
+          (layer.strokeColor && layer.strokeColor.type === 'rgb' && equivalent.strokeColor && equivalent.strokeColor.type === 'gradient') ||
+          (layer.strokeColor && layer.strokeColor.type === 'gradient' && equivalent.strokeColor && equivalent.strokeColor.type === 'gradient' && !layer.strokeColor.gradient.equals(equivalent.strokeColor.gradient))
+        ) {
+          tweenPropMap[key] = true;
+        }
+        break;
       case 'strokeWidth':
         if (layer.strokeWidth !== equivalent.strokeWidth) {
           tweenPropMap[key] = true;
         }
         break;
       case 'shadowColor':
-        if (layer.shadowColor && equivalent.shadowColor && !layer.shadowColor.equals(equivalent.shadowColor)) {
-          tweenPropMap[key] = true;
-        } else if (!layer.shadowColor && equivalent.shadowColor) {
+        if (
+          (!layer.shadowColor && equivalent.shadowColor) ||
+          (layer.shadowColor && !equivalent.shadowColor) ||
+          (layer.shadowColor && equivalent.shadowColor && !layer.shadowColor.equals(equivalent.shadowColor))
+        ) {
           tweenPropMap[key] = true;
         }
         break;
@@ -382,10 +415,21 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
         }
         break;
       case 'fontSize':
-        if (layer.className === 'PointText' && equivalent.className === 'PointText') {
-          if ((layer as paper.PointText).fontSize !== (equivalent as paper.PointText).fontSize) {
-            tweenPropMap[key] = true;
-          }
+        if (
+          layer.className === 'PointText' &&
+          equivalent.className === 'PointText' &&
+          (layer as paper.PointText).fontSize !== (equivalent as paper.PointText).fontSize
+        ) {
+          tweenPropMap[key] = true;
+        }
+        break;
+      case 'lineHeight':
+        if (
+          layer.className === 'PointText' &&
+          equivalent.className === 'PointText' &&
+          (layer as paper.PointText).leading !== (equivalent as paper.PointText).leading
+        ) {
+          tweenPropMap[key] = true;
         }
         break;
     }
