@@ -4,27 +4,28 @@ import { RootState } from '../store/reducers';
 import HoverFrame from './HoverFrame';
 
 interface HoverFrameWrapProps {
-  hover?: string;
-  isGradientEditorOpen?: boolean;
-  isTextEditorOpen?: boolean;
+  isEnabled?: boolean;
 }
 
 const HoverFrameWrap = (props: HoverFrameWrapProps): ReactElement => {
-  const { hover, isGradientEditorOpen, isTextEditorOpen } = props;
+  const { isEnabled } = props;
 
   return (
-    hover && !isGradientEditorOpen && !isTextEditorOpen
+    isEnabled
     ? <HoverFrame />
     : null
   );
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer, gradientEditor, textEditor } = state;
+  const { layer, gradientEditor, textEditor, canvasSettings } = state;
+  const isResizing = canvasSettings.resizing;
+  const isDragging = canvasSettings.dragging;
   const isGradientEditorOpen = gradientEditor.isOpen;
   const isTextEditorOpen = textEditor.isOpen;
   const hover = layer.present.hover;
-  return { hover, isGradientEditorOpen, isTextEditorOpen };
+  const isEnabled = hover && !isGradientEditorOpen && !isTextEditorOpen && !isResizing && !isDragging;
+  return { isEnabled };
 };
 
 export default connect(

@@ -46,12 +46,12 @@ class SnapTool {
   updateGuides({snapPoints, xSnap, ySnap, bounds}: {snapPoints: em.SnapPoint[], xSnap: em.SnapPoint, ySnap: em.SnapPoint, bounds: paper.Rectangle}) {
     this.removeGuides();
     // find all snapPoints that match current selection bounds side
-    const leftSnaps = snapPoints.filter((snapPoint) => bounds.left === snapPoint.point);
-    const centerXSnaps = snapPoints.filter((snapPoint) => bounds.center.x === snapPoint.point);
-    const rightSnaps = snapPoints.filter((snapPoint) => bounds.right === snapPoint.point);
-    const topSnaps = snapPoints.filter((snapPoint) => bounds.top === snapPoint.point);
-    const centerYSnaps = snapPoints.filter((snapPoint) => bounds.center.y === snapPoint.point);
-    const bottomSnaps = snapPoints.filter((snapPoint) => bounds.bottom === snapPoint.point);
+    const leftSnaps = snapPoints.filter((snapPoint) => Math.round(bounds.left) === Math.round(snapPoint.point));
+    const centerXSnaps = snapPoints.filter((snapPoint) => Math.round(bounds.center.x) === Math.round(snapPoint.point));
+    const rightSnaps = snapPoints.filter((snapPoint) => Math.round(bounds.right) === Math.round(snapPoint.point));
+    const topSnaps = snapPoints.filter((snapPoint) => Math.round(bounds.top) === Math.round(snapPoint.point));
+    const centerYSnaps = snapPoints.filter((snapPoint) => Math.round(bounds.center.y) === Math.round(snapPoint.point));
+    const bottomSnaps = snapPoints.filter((snapPoint) => Math.round(bounds.bottom) === Math.round(snapPoint.point));
     // if any snap points match, find their min/max...
     // vertical/horizontal position and add relevant guide
     if (xSnap && leftSnaps.length > 0) {

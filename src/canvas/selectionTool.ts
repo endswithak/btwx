@@ -82,25 +82,33 @@ class SelectionTool {
     const hitResult = paperMain.project.hitTest(event.point);
     const isGradientEditorOpen = state.gradientEditor.isOpen;
     if (hitResult) {
+      // handle dragging/resizing if selection frame handle is hit result
       if (hitResult.item.data.id === 'selectionFrameHandle') {
         if (layerState.selected.length >= 1) {
+          // if move handle is hit result, enable drag tool
           if (hitResult.item.data.handle === 'move') {
-            this.dragTool.enable();
-            this.dragTool.moveHandle = true;
+            this.dragTool.enable(true);
             this.dragTool.onMouseDown(event);
           }
+          // else, enable resize tool if no text layers are selected
           if (!layerState.selected.every((id: string) => layerState.byId[id].type === 'Text') && hitResult.item.data.handle !== 'move') {
             this.resizeTool.enable(hitResult.item.data.handle);
             this.resizeTool.onMouseDown(event);
           }
         }
+      // if gradient handle is hit result, enable gradient tool
       } else if (hitResult.item.data.id === 'gradientFrameHandle') {
         this.gradientTool.enable(hitResult.item.data.handle, state.gradientEditor.prop as 'fill' | 'stroke');
         this.gradientTool.onMouseDown(event);
+      // if hit result isnt a frame handle, enable drag tool
       } else {
+        if (layerState.selected.length === 1 && hitResult.item.data.id === 'ArtboardBackground') {
+          return;
+        }
         this.dragTool.enable();
         this.dragTool.onMouseDown(event);
       }
+    // if no hit result, enable area select tool
     } else {
       if (!isGradientEditorOpen) {
         this.areaSelectTool.enable();

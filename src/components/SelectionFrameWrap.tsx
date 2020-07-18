@@ -4,27 +4,28 @@ import { RootState } from '../store/reducers';
 import SelectionFrame from './SelectionFrame';
 
 interface SelectionFrameWrapProps {
-  selected?: string[];
-  isGradientEditorOpen?: boolean;
-  isTextEditorOpen?: boolean;
+  isEnabled: boolean;
 }
 
 const SelectionFrameWrap = (props: SelectionFrameWrapProps): ReactElement => {
-  const { selected, isGradientEditorOpen, isTextEditorOpen } = props;
+  const { isEnabled } = props;
 
   return (
-    selected.length > 0 && !isGradientEditorOpen && !isTextEditorOpen
+    isEnabled
     ? <SelectionFrame />
     : null
   );
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer, gradientEditor, textEditor } = state;
+  const { layer, gradientEditor, textEditor, canvasSettings } = state;
+  const isResizing = canvasSettings.resizing;
+  const isDragging = canvasSettings.dragging;
   const isGradientEditorOpen = gradientEditor.isOpen;
   const isTextEditorOpen = textEditor.isOpen;
   const selected = layer.present.selected;
-  return { selected, isGradientEditorOpen, isTextEditorOpen };
+  const isEnabled = selected.length > 0 && !isGradientEditorOpen && !isTextEditorOpen && !isResizing && !isDragging;
+  return { isEnabled };
 };
 
 export default connect(

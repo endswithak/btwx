@@ -1,7 +1,7 @@
 import { importPaperProject, colorsMatch, gradientsMatch } from '../store/selectors/layer';
 import store from '../store';
 import { ActionCreators } from 'redux-undo';
-import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
+import { updateHoverFrame, updateSelectionFrame, updateActiveArtboardFrame } from '../store/utils/layer';
 import { openColorEditor, closeColorEditor } from '../store/actions/colorEditor';
 import { openGradientEditor, closeGradientEditor } from '../store/actions/gradientEditor';
 import { RootState } from '../store/reducers';
@@ -97,6 +97,7 @@ class UndoRedoTool {
             // update frames
             updateHoverFrame(state.layer.present);
             updateSelectionFrame(state.layer.present);
+            updateActiveArtboardFrame(state.layer.present);
           } else {
             // undo
             store.dispatch(ActionCreators.undo());
@@ -118,6 +119,7 @@ class UndoRedoTool {
             // update frames
             updateHoverFrame(state.layer.present);
             updateSelectionFrame(state.layer.present);
+            updateActiveArtboardFrame(state.layer.present);
           }
         }
         break;

@@ -17,6 +17,7 @@ class Guide {
         ...removeOpts
       });
     }
+    guide.bringToFront();
     this.paperLayer = guide;
   }
 }

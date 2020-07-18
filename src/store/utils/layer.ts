@@ -98,17 +98,32 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
   return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
 };
 
-export const updateActiveArtboardFrame = (activeArtboard: string, scope = 1) => {
-  if (scope === 1) {
-    const activeArtboardFrames = paperMain.project.getItems({ data: { id: 'ArtboardFrame' } });
-    if (activeArtboardFrames && activeArtboardFrames.length > 0) {
-      activeArtboardFrames.forEach((item) => item.visible = false);
-      //activeArtboardFrame.remove();
+export const updateActiveArtboardFrame = (state: LayerState, useLayerItem = false) => {
+  const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'activeArtboardFrame' } });
+  if (activeArtboardFrame) {
+    activeArtboardFrame.remove();
+  }
+  if (state.activeArtboard) {
+    let topLeft;
+    let bottomRight;
+    if (useLayerItem) {
+      const layerItem = state.byId[state.activeArtboard];
+      topLeft = new paperMain.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
+      bottomRight = new paperMain.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
+    } else {
+      const paperActiveArtboardLayer = getPaperLayer(state.activeArtboard);
+      topLeft = paperActiveArtboardLayer.bounds.topLeft;
+      bottomRight = paperActiveArtboardLayer.bounds.bottomRight;
     }
-    if (activeArtboard) {
-      const paperActiveArtboardLayer = getPaperLayer(activeArtboard);
-      paperActiveArtboardLayer.getItem({ data: { id: 'ArtboardFrame' } }).visible = true;
-    }
+    new paperMain.Path.Rectangle({
+      from: new paperMain.Point(topLeft.x - 8, topLeft.y - 8),
+      to: new paperMain.Point(bottomRight.x + 8, bottomRight.y + 8),
+      strokeColor: THEME_PRIMARY_COLOR,
+      strokeWidth: 4 / paperMain.view.zoom,
+      data: {
+        id: 'activeArtboardFrame'
+      }
+    });
   }
 }
 
@@ -495,7 +510,6 @@ export const deselectLayer = (state: LayerState, action: DeselectLayer): LayerSt
     },
     selected: state.selected.filter((id) => id !== layer.id)
   }
-  //updateSelectionFrame(newState);
   return newState;
 };
 
@@ -574,11 +588,6 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
       }
     }
   }
-  // update selection frame
-  //updateSelectionFrame(currentState);
-  // update hover frame
-  //updateHoverFrame(currentState);
-  // return final state
   return currentState;
 };
 
@@ -1377,8 +1386,6 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
 export const moveLayer = (state: LayerState, action: MoveLayer): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
-  //updateActiveArtboardFrame(currentState.activeArtboard);
-  //updateSelectionFrame(currentState);
   currentState = {
     ...currentState,
     byId: {
@@ -1407,8 +1414,6 @@ export const moveLayers = (state: LayerState, action: MoveLayers): LayerState =>
 export const moveLayerTo = (state: LayerState, action: MoveLayerTo): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
-  //updateActiveArtboardFrame(currentState.activeArtboard);
-  //updateSelectionFrame(currentState);
   currentState = {
     ...currentState,
     byId: {
@@ -1437,8 +1442,6 @@ export const moveLayersTo = (state: LayerState, action: MoveLayersTo): LayerStat
 export const moveLayerBy = (state: LayerState, action: MoveLayerBy): LayerState => {
   let currentState = state;
   //const paperLayer = getPaperLayer(action.payload.id);
-  //updateActiveArtboardFrame(currentState.activeArtboard);
-  //updateSelectionFrame(currentState);
   currentState = updateLayerBounds(currentState, action.payload.id);
   // currentState = {
   //   ...currentState,
@@ -1816,8 +1819,6 @@ export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
     },
     paperProject: exportPaperProject(currentState)
   }
-  //updateActiveArtboardFrame(currentState.activeArtboard);
-  //updateSelectionFrame(currentState);
   return updateParentBounds(currentState, action.payload.id);
 };
 
@@ -1837,8 +1838,6 @@ export const setLayerY = (state: LayerState, action: SetLayerY): LayerState => {
     },
     paperProject: exportPaperProject(currentState)
   }
-  //updateActiveArtboardFrame(currentState.activeArtboard);
-  //updateSelectionFrame(currentState);
   return updateParentBounds(currentState, action.payload.id);
 };
 
@@ -1858,8 +1857,6 @@ export const setLayerWidth = (state: LayerState, action: SetLayerWidth): LayerSt
     },
     paperProject: exportPaperProject(currentState)
   }
-  //updateActiveArtboardFrame(currentState.activeArtboard);
-  //updateSelectionFrame(currentState);
   return updateParentBounds(currentState, action.payload.id);
 };
 
@@ -1879,8 +1876,6 @@ export const setLayerHeight = (state: LayerState, action: SetLayerHeight): Layer
     },
     paperProject: exportPaperProject(currentState)
   }
-  //updateActiveArtboardFrame(currentState.activeArtboard);
-  //updateSelectionFrame(currentState);
   return updateParentBounds(currentState, action.payload.id);
 };
 
@@ -1919,8 +1914,6 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
     },
     paperProject: exportPaperProject(currentState)
   }
-  //updateActiveArtboardFrame(currentState.activeArtboard);
-  //updateSelectionFrame(currentState);
   return updateParentBounds(currentState, action.payload.id);
 };
 
@@ -2625,7 +2618,6 @@ export const setLayerText = (state: LayerState, action: SetLayerText): LayerStat
     },
     paperProject: exportPaperProject(currentState)
   }
-  //updateSelectionFrame(currentState);
   return updateLayerBounds(currentState, action.payload.id);
 };
 
@@ -2647,7 +2639,6 @@ export const setLayerFontSize = (state: LayerState, action: SetLayerFontSize): L
     },
     paperProject: exportPaperProject(currentState)
   }
-  //updateSelectionFrame(currentState);
   return updateLayerBounds(currentState, action.payload.id);
 };
 
@@ -2669,7 +2660,6 @@ export const setLayerFontWeight = (state: LayerState, action: SetLayerFontWeight
     },
     paperProject: exportPaperProject(currentState)
   }
-  //updateSelectionFrame(currentState);
   return updateLayerBounds(currentState, action.payload.id);
 };
 
@@ -2691,7 +2681,6 @@ export const setLayerFontFamily = (state: LayerState, action: SetLayerFontFamily
     },
     paperProject: exportPaperProject(currentState)
   }
-  //updateSelectionFrame(currentState);
   return updateLayerBounds(currentState, action.payload.id);
 };
 
@@ -2713,7 +2702,6 @@ export const setLayerLeading = (state: LayerState, action: SetLayerLeading): Lay
     },
     paperProject: exportPaperProject(currentState)
   }
-  //updateSelectionFrame(currentState);
   return updateLayerBounds(currentState, action.payload.id);
 };
 
@@ -2774,7 +2762,6 @@ export const setLayerJustification = (state: LayerState, action: SetLayerJustifi
     },
     paperProject: exportPaperProject(currentState)
   }
-  //updateSelectionFrame(currentState);
   return updateLayerBounds(currentState, action.payload.id);
 };
 
@@ -3742,8 +3729,6 @@ export const addLayersMask = (state: LayerState, action: AddLayersMask): LayerSt
   currentState = maskLayers(currentState, layerActions.maskLayers({layers: currentState.byId[maskGroup].children.filter((id) => id !== mask)}) as MaskLayers);
   // update masked group bounds
   currentState = updateLayerBounds(currentState, maskGroup);
-  // update selection frame
-  //updateSelectionFrame(currentState);
   // return final state
   return currentState;
 };
@@ -3829,7 +3814,6 @@ export const alignLayersToLeft = (state: LayerState, action: AlignLayersToLeft):
   currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
     const paperLayer = getPaperLayer(current);
     paperLayer.bounds.left = layersBounds.left;
-    //updateSelectionFrame(currentState);
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
@@ -3842,7 +3826,6 @@ export const alignLayersToRight = (state: LayerState, action: AlignLayersToRight
   currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
     const paperLayer = getPaperLayer(current);
     paperLayer.bounds.right = layersBounds.right;
-    //updateSelectionFrame(currentState);
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
@@ -3855,7 +3838,6 @@ export const alignLayersToTop = (state: LayerState, action: AlignLayersToTop): L
   currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
     const paperLayer = getPaperLayer(current);
     paperLayer.bounds.top = layersBounds.top;
-    //updateSelectionFrame(currentState);
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
@@ -3868,7 +3850,6 @@ export const alignLayersToBottom = (state: LayerState, action: AlignLayersToBott
   currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
     const paperLayer = getPaperLayer(current);
     paperLayer.bounds.bottom = layersBounds.bottom;
-    //updateSelectionFrame(currentState);
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
@@ -3881,7 +3862,6 @@ export const alignLayersToCenter = (state: LayerState, action: AlignLayersToCent
   currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
     const paperLayer = getPaperLayer(current);
     paperLayer.bounds.center.x = layersBounds.center.x;
-    //updateSelectionFrame(currentState);
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
@@ -3894,7 +3874,6 @@ export const alignLayersToMiddle = (state: LayerState, action: AlignLayersToMidd
   currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
     const paperLayer = getPaperLayer(current);
     paperLayer.bounds.center.y = layersBounds.center.y;
-    //updateSelectionFrame(currentState);
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
@@ -3917,7 +3896,6 @@ export const distributeLayersHorizontally = (state: LayerState, action: Distribu
       const prevLayer = orderedLayers[index - 1];
       const prevPaperLayer = getPaperLayer(prevLayer);
       paperLayer.bounds.left = prevPaperLayer.bounds.right + diff;
-      //updateSelectionFrame(currentState);
       result = updateLayerBounds(result, current);
     }
     return result;
@@ -3941,7 +3919,6 @@ export const distributeLayersVertically = (state: LayerState, action: Distribute
       const prevLayer = orderedLayers[index - 1];
       const prevPaperLayer = getPaperLayer(prevLayer);
       paperLayer.bounds.top = prevPaperLayer.bounds.bottom + diff;
-      //updateSelectionFrame(currentState);
       result = updateLayerBounds(result, current);
     }
     return result;

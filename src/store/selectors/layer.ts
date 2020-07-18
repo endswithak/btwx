@@ -3,13 +3,10 @@ import paper from 'paper';
 import { LayerState } from '../reducers/layer';
 import { paperMain } from '../../canvas';
 import { bufferToBase64 } from '../../utils';
-import { updateHoverFrame, updateSelectionFrame } from '../../store/utils/layer';
 import { applyShapeMethods } from '../../canvas/shapeUtils';
 import { applyArtboardMethods } from '../../canvas/artboardUtils';
 import { applyTextMethods } from '../../canvas/textUtils';
 import { applyImageMethods } from '../../canvas/imageUtils';
-import { CanvasSettingsState } from '../reducers/canvasSettings';
-import store from '../../store';
 
 export const getLayer = (store: LayerState, id: string): em.Layer => {
   return store.byId[id] as em.Layer;
@@ -767,6 +764,7 @@ export const exportPaperProject = (state: LayerState): string => {
   const selectionFrame = paperMain.project.getItem({data: {id: 'selectionFrame'}});
   const hoverFrame = paperMain.project.getItem({data: {id: 'hoverFrame'}});
   const gradientFrame = paperMain.project.getItem({data: {id: 'gradientFrame'}});
+  const activeArtboardFrame = paperMain.project.getItem({data: {id: 'activeArtboard'}});
   if (selectionFrame) {
     selectionFrame.remove();
   }
@@ -775,6 +773,9 @@ export const exportPaperProject = (state: LayerState): string => {
   }
   if (gradientFrame) {
     gradientFrame.remove();
+  }
+  if (activeArtboardFrame) {
+    activeArtboardFrame.remove();
   }
   const projectJSON = paperMain.project.exportJSON();
   const canvasImageBase64ById = state.allImageIds.reduce((result: { [id: string]: string }, current) => {

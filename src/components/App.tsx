@@ -5,6 +5,7 @@ import TweenEventDestinationSelect from './TweenEventDestinationSelect';
 import EaseEditor from './EaseEditor';
 import Main from './Main';
 import { ThemeContext } from './ThemeProvider';
+import ActiveArtboardFrameWrap from './ActiveArtboardFrameWrap';
 import SelectionFrameWrap from './SelectionFrameWrap';
 import HoverFrameWrap from './HoverFrameWrap';
 
@@ -25,6 +26,7 @@ const App = (): ReactElement => {
         <TweenEventSelect />
         <TweenEventDestinationSelect />
         <EaseEditor />
+        <ActiveArtboardFrameWrap />
         <HoverFrameWrap />
         <SelectionFrameWrap />
     </div>
