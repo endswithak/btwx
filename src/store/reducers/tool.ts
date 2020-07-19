@@ -10,8 +10,8 @@ import {
   DISABLE_SELECTION_TOOL,
   ENABLE_ARTBOARD_TOOL,
   ENABLE_TEXT_TOOL,
-  ENABLE_ARTBOARD_TOOL_PORTRAIT_ORIENTATION,
-  ENABLE_ARTBOARD_TOOL_LANDSCAPE_ORIENTATION,
+  SET_ARTBOARD_TOOL_DEVICE_ORIENTATION,
+  SET_ARTBOARD_TOOL_DEVICE_PLATFORM,
   ToolTypes,
 } from '../actionTypes/tool';
 
@@ -23,12 +23,14 @@ import TextTool from '../../canvas/textTool';
 export interface ToolState {
   type: em.ToolType;
   shapeToolType: em.ShapeType;
+  artboardToolDevicePlatform: em.DevicePlatformType;
   artboardToolOrientation: em.Orientation;
 }
 
 const initialState: ToolState = {
   type: null,
   shapeToolType: null,
+  artboardToolDevicePlatform: 'Apple',
   artboardToolOrientation: 'Portrait'
 };
 
@@ -97,7 +99,8 @@ export default (state = initialState, action: ToolTypes): ToolState => {
       removeActiveTool();
       return {
         ...state,
-        ...initialState
+        type: null,
+        shapeToolType: null
       };
     }
     case ENABLE_ARTBOARD_TOOL: {
@@ -108,24 +111,24 @@ export default (state = initialState, action: ToolTypes): ToolState => {
         type: 'Artboard'
       };
     }
-    case ENABLE_ARTBOARD_TOOL_PORTRAIT_ORIENTATION: {
-      return {
-        ...state,
-        artboardToolOrientation: 'Portrait'
-      };
-    }
-    case ENABLE_ARTBOARD_TOOL_LANDSCAPE_ORIENTATION: {
-      return {
-        ...state,
-        artboardToolOrientation: 'Landscape'
-      };
-    }
     case ENABLE_TEXT_TOOL: {
       removeActiveTool();
       new TextTool();
       return {
         ...state,
         type: 'Text'
+      };
+    }
+    case SET_ARTBOARD_TOOL_DEVICE_ORIENTATION: {
+      return {
+        ...state,
+        artboardToolOrientation: action.payload.orientation
+      };
+    }
+    case SET_ARTBOARD_TOOL_DEVICE_PLATFORM: {
+      return {
+        ...state,
+        artboardToolDevicePlatform: action.payload.platform
       };
     }
     default:

@@ -8,9 +8,11 @@ import {
   DISABLE_SELECTION_TOOL,
   ENABLE_DRAG_TOOL,
   ENABLE_ARTBOARD_TOOL,
-  ENABLE_ARTBOARD_TOOL_PORTRAIT_ORIENTATION,
-  ENABLE_ARTBOARD_TOOL_LANDSCAPE_ORIENTATION,
   ENABLE_TEXT_TOOL,
+  SET_ARTBOARD_TOOL_DEVICE_ORIENTATION,
+  SET_ARTBOARD_TOOL_DEVICE_PLATFORM,
+  SetArtboardToolDeviceOrientationPayload,
+  SetArtboardToolDevicePlatformPayload,
   ToolTypes
 } from '../actionTypes/tool';
 
@@ -46,18 +48,20 @@ export const enableDragTool = (): ToolTypes => ({
   type: ENABLE_DRAG_TOOL
 });
 
+export const enableTextTool = (): ToolTypes => ({
+  type: ENABLE_TEXT_TOOL
+});
+
 export const enableArtboardTool = (): ToolTypes => ({
   type: ENABLE_ARTBOARD_TOOL
 });
 
-export const enableArtboardToolPortaitOrientation = (): ToolTypes => ({
-  type: ENABLE_ARTBOARD_TOOL_PORTRAIT_ORIENTATION
+export const setArtboardToolDeviceOrientation = (payload: SetArtboardToolDeviceOrientationPayload): ToolTypes => ({
+  type: SET_ARTBOARD_TOOL_DEVICE_ORIENTATION,
+  payload
 });
 
-export const enableArtboardToolLandscapeOrientation = (): ToolTypes => ({
-  type: ENABLE_ARTBOARD_TOOL_LANDSCAPE_ORIENTATION
-});
-
-export const enableTextTool = (): ToolTypes => ({
-  type: ENABLE_TEXT_TOOL
+export const setArtboardToolDevicePlatform = (payload: SetArtboardToolDevicePlatformPayload): ToolTypes => ({
+  type: SET_ARTBOARD_TOOL_DEVICE_PLATFORM,
+  payload
 });

@@ -4,6 +4,7 @@ import Sidebar from './Sidebar';
 import SidebarLayerStyles from './SidebarLayerStyles';
 import { RootState } from '../store/reducers';
 //import SidebarArtboardStyles from './SidebarArtboardStyles';
+import SidebarArtboardSizes from './SidebarArtboardSizes';
 
 interface SidebarRightProps {
   toolType: em.ToolType;
@@ -26,6 +27,11 @@ const SidebarRight = (props: SidebarRightProps): ReactElement => {
       {
         toolType !== 'Artboard' && layerSelected
         ? <SidebarLayerStyles />
+        : null
+      }
+      {
+        toolType === 'Artboard'
+        ? <SidebarArtboardSizes />
         : null
       }
     </Sidebar>

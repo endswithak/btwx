@@ -28,13 +28,13 @@ class GroupTool {
   canGroup(state: RootState): boolean {
     return !state.layer.present.selected.some((id: string) => {
       const layer = state.layer.present.byId[id];
-      layer.type === 'Artboard';
+      return layer.type === 'Artboard';
     });
   }
   canUngroup(state: RootState): boolean {
     return state.layer.present.selected.some((id: string) => {
       const layer = state.layer.present.byId[id];
-      layer.type === 'Group';
+      return layer.type === 'Group';
     });
   }
   onKeyDown(event: paper.KeyEvent): void {

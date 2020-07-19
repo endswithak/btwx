@@ -72,6 +72,8 @@ declare namespace em {
 
   type DevicePlatformType = 'Apple' | 'Android' | 'Responsive Web';
 
+  type DeviceOrientationType = 'Landscape' | 'Portrait';
+
   interface Color {
     h: number;
     s: number;

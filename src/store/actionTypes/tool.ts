@@ -10,8 +10,8 @@ export const DISABLE_SELECTION_TOOL = 'DISABLE_SELECTION_TOOL';
 export const ENABLE_DRAG_TOOL = 'ENABLE_DRAG_TOOL';
 
 export const ENABLE_ARTBOARD_TOOL = 'ENABLE_ARTBOARD_TOOL';
-export const ENABLE_ARTBOARD_TOOL_PORTRAIT_ORIENTATION = 'ENABLE_ARTBOARD_TOOL_PORTRAIT_ORIENTATION';
-export const ENABLE_ARTBOARD_TOOL_LANDSCAPE_ORIENTATION = 'ENABLE_ARTBOARD_TOOL_LANDSCAPE_ORIENTATION';
+export const SET_ARTBOARD_TOOL_DEVICE_ORIENTATION = 'SET_ARTBOARD_TOOL_DEVICE_ORIENTATION';
+export const SET_ARTBOARD_TOOL_DEVICE_PLATFORM = 'SET_ARTBOARD_TOOL_DEVICE_PLATFORM';
 
 export const ENABLE_TEXT_TOOL = 'ENABLE_TEXT_TOOL';
 
@@ -51,16 +51,26 @@ interface EnableArtboardTool {
   type: typeof ENABLE_ARTBOARD_TOOL;
 }
 
-interface EnableArtboardToolPortaitOrientation {
-  type: typeof ENABLE_ARTBOARD_TOOL_PORTRAIT_ORIENTATION;
+export interface SetArtboardToolDeviceOrientationPayload {
+  orientation: em.DeviceOrientationType;
 }
 
-interface EnableArtboardToolLandscapeOrientation {
-  type: typeof ENABLE_ARTBOARD_TOOL_LANDSCAPE_ORIENTATION;
+interface SetArtboardToolDeviceOrientation {
+  type: typeof SET_ARTBOARD_TOOL_DEVICE_ORIENTATION;
+  payload: SetArtboardToolDeviceOrientationPayload;
+}
+
+export interface SetArtboardToolDevicePlatformPayload {
+  platform: em.DevicePlatformType;
+}
+
+interface SetArtboardToolDevicePlatform {
+  type: typeof SET_ARTBOARD_TOOL_DEVICE_PLATFORM;
+  payload: SetArtboardToolDevicePlatformPayload;
 }
 
 interface EnableTextTool {
   type: typeof ENABLE_TEXT_TOOL;
 }
 
-export type ToolTypes = EnableRectangleShapeTool | EnableEllipseShapeTool | EnableStarShapeTool | EnablePolygonShapeTool | EnableRoundedShapeTool | EnableSelectionTool | DisableSelectionTool | EnableDragTool | EnableArtboardTool | EnableArtboardToolPortaitOrientation | EnableArtboardToolLandscapeOrientation | EnableTextTool;
+export type ToolTypes = EnableRectangleShapeTool | EnableEllipseShapeTool | EnableStarShapeTool | EnablePolygonShapeTool | EnableRoundedShapeTool | EnableSelectionTool | DisableSelectionTool | EnableDragTool | EnableArtboardTool | SetArtboardToolDeviceOrientation | EnableTextTool | SetArtboardToolDevicePlatform;
