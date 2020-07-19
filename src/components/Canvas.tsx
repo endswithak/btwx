@@ -20,7 +20,6 @@ interface CanvasProps {
   enableSelectionTool(): any;
   setCanvasMatrix(payload: SetCanvasMatrixPayload): CanvasSettingsTypes;
   updateInViewLayers(): LayerTypes;
-  activeArtboard?: string;
   paperProject?: string;
   allArtboardIds?: string[];
   allShapeIds?: string[];
@@ -32,7 +31,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useContext(ThemeContext);
-  const { drawing, typing, canvasSettings, enableSelectionTool, updateInViewLayers, activeArtboard, paperProject, allArtboardIds, allShapeIds, allTextIds, allImageIds, setCanvasMatrix } = props;
+  const { drawing, typing, canvasSettings, enableSelectionTool, updateInViewLayers, paperProject, allArtboardIds, allShapeIds, allTextIds, allImageIds, setCanvasMatrix } = props;
 
   useEffect(() => {
     canvasRef.current.width = canvasContainerRef.current.clientWidth;
@@ -60,38 +59,6 @@ const Canvas = (props: CanvasProps): ReactElement => {
           paperMain.view.zoom = nextZoom;
         } else if (e.deltaY > 0 && nextZoom < 0) {
           paperMain.view.zoom = 0.001;
-        }
-        const zoomDiff = paperMain.view.zoom - prevZoom;
-        const scale = 1 / paperMain.view.zoom;
-        if (paperMain.project.getItem({data: {id: 'selectionFrame'}})) {
-          const selectionFrameHandles = paperMain.project.getItems({data: {id: 'selectionFrameHandle'}});
-          const selectionFrameBase = paperMain.project.getItem({data: {id: 'selectionFrameBase'}});
-          selectionFrameHandles.forEach((handle) => {
-            handle.scale(1 - scale * zoomDiff);
-            handle.strokeWidth = scale;
-            if (handle.data.handle === 'move') {
-              handle.position.y = selectionFrameBase.bounds.topCenter.y - (scale * 24);
-            }
-          });
-          selectionFrameBase.strokeWidth = scale;
-        }
-        if (paperMain.project.getItem({data: {id: 'hoverFrame'}})) {
-          const hoverFrame = paperMain.project.getItem({data: {id: 'hoverFrame'}});
-          hoverFrame.strokeWidth = scale;
-        }
-        if (paperMain.project.getItem({data: {id: 'gradientFrame'}})) {
-          const gradientFrameHandles = [paperMain.project.getItem({data: {id: 'gradientFrameOriginHandle'}}), paperMain.project.getItem({data: {id: 'gradientFrameDestinationHandle'}})];
-          const gradientFrameLines = paperMain.project.getItems({data: {id: 'gradientFrameLine'}});
-          gradientFrameHandles.forEach((handle) => {
-            handle.scale(1 - scale * zoomDiff);
-          });
-          gradientFrameLines.forEach((line) => {
-            if (line.data.line === 'dark') {
-              line.strokeWidth = scale * 3;
-            } else {
-              line.strokeWidth = scale;
-            }
-          });
         }
       } else {
         paperMain.view.translate(new paper.Point((e.deltaX * ( 1 / paperMain.view.zoom)) * -1, (e.deltaY * ( 1 / paperMain.view.zoom)) * -1));
@@ -128,7 +95,6 @@ const Canvas = (props: CanvasProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer, tool, canvasSettings } = state;
   return {
-    activeArtboard: layer.present.activeArtboard,
     drawing: tool.type === 'Shape' || tool.type === 'Artboard',
     typing: tool.type === 'Text',
     allArtboardIds: layer.present.allArtboardIds,

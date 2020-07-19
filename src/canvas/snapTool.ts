@@ -9,15 +9,31 @@ class SnapTool {
   bottomGuide: Guide;
   centerXGuide: Guide;
   centerYGuide: Guide;
+  snapBreakThreshholdMin: number;
+  snapBreakThreshholdMax: number;
+  snapPoints: em.SnapPoint[];
+  snapBounds: paper.Rectangle;
+  snap: {
+    x: em.SnapPoint;
+    y: em.SnapPoint;
+  };
   constructor() {
+    this.snapBounds = null;
+    this.snapPoints = [];
     this.leftGuide = null;
     this.rightGuide = null;
     this.topGuide = null;
     this.bottomGuide = null;
     this.centerXGuide = null;
     this.centerYGuide = null;
+    this.snapBreakThreshholdMin = -8 / paperMain.view.zoom;
+    this.snapBreakThreshholdMax = 8 / paperMain.view.zoom;
+    this.snap = {
+      x: null,
+      y: null
+    };
   }
-  removeGuides() {
+  removeGuides(): void {
     if (this.leftGuide) {
       this.leftGuide.paperLayer.remove();
       this.leftGuide = null;
@@ -43,91 +59,91 @@ class SnapTool {
       this.centerYGuide = null;
     }
   }
-  updateGuides({snapPoints, xSnap, ySnap, bounds}: {snapPoints: em.SnapPoint[], xSnap: em.SnapPoint, ySnap: em.SnapPoint, bounds: paper.Rectangle}) {
+  updateGuides(): void {
     this.removeGuides();
     // find all snapPoints that match current selection bounds side
-    const leftSnaps = snapPoints.filter((snapPoint) => Math.round(bounds.left) === Math.round(snapPoint.point));
-    const centerXSnaps = snapPoints.filter((snapPoint) => Math.round(bounds.center.x) === Math.round(snapPoint.point));
-    const rightSnaps = snapPoints.filter((snapPoint) => Math.round(bounds.right) === Math.round(snapPoint.point));
-    const topSnaps = snapPoints.filter((snapPoint) => Math.round(bounds.top) === Math.round(snapPoint.point));
-    const centerYSnaps = snapPoints.filter((snapPoint) => Math.round(bounds.center.y) === Math.round(snapPoint.point));
-    const bottomSnaps = snapPoints.filter((snapPoint) => Math.round(bounds.bottom) === Math.round(snapPoint.point));
+    const leftSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.snapBounds.left) === Math.round(snapPoint.point));
+    const centerXSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.snapBounds.center.x) === Math.round(snapPoint.point));
+    const rightSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.snapBounds.right) === Math.round(snapPoint.point));
+    const topSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.snapBounds.top) === Math.round(snapPoint.point));
+    const centerYSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.snapBounds.center.y) === Math.round(snapPoint.point));
+    const bottomSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.snapBounds.bottom) === Math.round(snapPoint.point));
     // if any snap points match, find their min/max...
     // vertical/horizontal position and add relevant guide
-    if (xSnap && leftSnaps.length > 0) {
-      const topLeftPoints: paper.Point[] = [bounds.topLeft];
-      const bottomLeftPoints: paper.Point[] = [bounds.bottomLeft];
+    if (this.snap.x && leftSnaps.length > 0) {
+      const topLeftPoints: paper.Point[] = [this.snapBounds.topLeft];
+      const bottomLeftPoints: paper.Point[] = [this.snapBounds.bottomLeft];
       leftSnaps.forEach((point) => {
         const paperLayer = getPaperLayer(point.id);
         topLeftPoints.push(paperLayer.bounds.topLeft);
         bottomLeftPoints.push(paperLayer.bounds.bottomLeft);
       });
-      const minTopLeft = new paperMain.Point(bounds.left, topLeftPoints.reduce(paperMain.Point.min).y);
-      const maxBottomLeft = new paperMain.Point(bounds.left, bottomLeftPoints.reduce(paperMain.Point.max).y);
+      const minTopLeft = new paperMain.Point(this.snapBounds.left, topLeftPoints.reduce(paperMain.Point.min).y);
+      const maxBottomLeft = new paperMain.Point(this.snapBounds.left, bottomLeftPoints.reduce(paperMain.Point.max).y);
       this.leftGuide = new Guide(minTopLeft, maxBottomLeft, { up: true, drag: true, move: true });
     }
-    if (xSnap && rightSnaps.length > 0) {
-      const topRightPoints: paper.Point[] = [bounds.topRight];
-      const bottomRightPoints: paper.Point[] = [bounds.bottomRight];
+    if (this.snap.x && rightSnaps.length > 0) {
+      const topRightPoints: paper.Point[] = [this.snapBounds.topRight];
+      const bottomRightPoints: paper.Point[] = [this.snapBounds.bottomRight];
       rightSnaps.forEach((point) => {
         const paperLayer = getPaperLayer(point.id);
         topRightPoints.push(paperLayer.bounds.topRight);
         bottomRightPoints.push(paperLayer.bounds.bottomRight);
       });
-      const minTopRight = new paperMain.Point(bounds.right, topRightPoints.reduce(paperMain.Point.min).y);
-      const maxBottomRight = new paperMain.Point(bounds.right, bottomRightPoints.reduce(paperMain.Point.max).y);
+      const minTopRight = new paperMain.Point(this.snapBounds.right, topRightPoints.reduce(paperMain.Point.min).y);
+      const maxBottomRight = new paperMain.Point(this.snapBounds.right, bottomRightPoints.reduce(paperMain.Point.max).y);
       this.rightGuide = new Guide(minTopRight, maxBottomRight, { up: true, drag: true, move: true });
     }
-    if (xSnap && centerXSnaps.length > 0) {
-      const topCenterPoints: paper.Point[] = [bounds.topCenter];
-      const bottomCenterPoints: paper.Point[] = [bounds.bottomCenter];
+    if (this.snap.x && centerXSnaps.length > 0) {
+      const topCenterPoints: paper.Point[] = [this.snapBounds.topCenter];
+      const bottomCenterPoints: paper.Point[] = [this.snapBounds.bottomCenter];
       centerXSnaps.forEach((point) => {
         const paperLayer = getPaperLayer(point.id);
         topCenterPoints.push(paperLayer.bounds.topCenter);
         bottomCenterPoints.push(paperLayer.bounds.bottomCenter);
       });
-      const minTopCenter = new paperMain.Point(bounds.topCenter.x, topCenterPoints.reduce(paperMain.Point.min).y);
-      const maxBottomCenter = new paperMain.Point(bounds.bottomCenter.x, bottomCenterPoints.reduce(paperMain.Point.max).y);
+      const minTopCenter = new paperMain.Point(this.snapBounds.topCenter.x, topCenterPoints.reduce(paperMain.Point.min).y);
+      const maxBottomCenter = new paperMain.Point(this.snapBounds.bottomCenter.x, bottomCenterPoints.reduce(paperMain.Point.max).y);
       this.centerXGuide = new Guide(minTopCenter, maxBottomCenter, { up: true, drag: true, move: true });
     }
-    if (ySnap && topSnaps.length > 0) {
-      const topLeftPoints: paper.Point[] = [bounds.topLeft];
-      const topRightPoints: paper.Point[] = [bounds.topRight];
+    if (this.snap.y && topSnaps.length > 0) {
+      const topLeftPoints: paper.Point[] = [this.snapBounds.topLeft];
+      const topRightPoints: paper.Point[] = [this.snapBounds.topRight];
       topSnaps.forEach((point) => {
         const paperLayer = getPaperLayer(point.id);
         topLeftPoints.push(paperLayer.bounds.topLeft);
         topRightPoints.push(paperLayer.bounds.topRight);
       });
-      const minTopLeft = new paperMain.Point(topLeftPoints.reduce(paperMain.Point.min).x, bounds.top);
-      const maxTopRight = new paperMain.Point(topRightPoints.reduce(paperMain.Point.max).x, bounds.top);
+      const minTopLeft = new paperMain.Point(topLeftPoints.reduce(paperMain.Point.min).x, this.snapBounds.top);
+      const maxTopRight = new paperMain.Point(topRightPoints.reduce(paperMain.Point.max).x, this.snapBounds.top);
       this.topGuide = new Guide(minTopLeft, maxTopRight, { up: true, drag: true, move: true });
     }
-    if (ySnap && bottomSnaps.length > 0) {
-      const bottomLeftPoints: paper.Point[] = [bounds.bottomLeft];
-      const bottomRightPoints: paper.Point[] = [bounds.bottomRight];
+    if (this.snap.y && bottomSnaps.length > 0) {
+      const bottomLeftPoints: paper.Point[] = [this.snapBounds.bottomLeft];
+      const bottomRightPoints: paper.Point[] = [this.snapBounds.bottomRight];
       bottomSnaps.forEach((point) => {
         const paperLayer = getPaperLayer(point.id);
         bottomLeftPoints.push(paperLayer.bounds.bottomLeft);
         bottomRightPoints.push(paperLayer.bounds.bottomRight);
       });
-      const minBottomLeft = new paperMain.Point(bottomLeftPoints.reduce(paperMain.Point.min).x, bounds.bottom);
-      const maxBottomRight = new paperMain.Point(bottomRightPoints.reduce(paperMain.Point.max).x, bounds.bottom);
+      const minBottomLeft = new paperMain.Point(bottomLeftPoints.reduce(paperMain.Point.min).x, this.snapBounds.bottom);
+      const maxBottomRight = new paperMain.Point(bottomRightPoints.reduce(paperMain.Point.max).x, this.snapBounds.bottom);
       this.bottomGuide = new Guide(minBottomLeft, maxBottomRight, { up: true, drag: true, move: true });
     }
-    if (ySnap && centerYSnaps.length > 0) {
-      const leftCenterPoints: paper.Point[] = [bounds.leftCenter];
-      const rightCenterPoints: paper.Point[] = [bounds.rightCenter];
+    if (this.snap.y && centerYSnaps.length > 0) {
+      const leftCenterPoints: paper.Point[] = [this.snapBounds.leftCenter];
+      const rightCenterPoints: paper.Point[] = [this.snapBounds.rightCenter];
       centerYSnaps.forEach((point) => {
         const paperLayer = getPaperLayer(point.id);
         leftCenterPoints.push(paperLayer.bounds.leftCenter);
         rightCenterPoints.push(paperLayer.bounds.rightCenter);
       });
-      const minLeftCenter = new paperMain.Point(leftCenterPoints.reduce(paperMain.Point.min).x, bounds.leftCenter.y);
-      const maxLeftCenter = new paperMain.Point(rightCenterPoints.reduce(paperMain.Point.max).x, bounds.rightCenter.y);
+      const minLeftCenter = new paperMain.Point(leftCenterPoints.reduce(paperMain.Point.min).x, this.snapBounds.leftCenter.y);
+      const maxLeftCenter = new paperMain.Point(rightCenterPoints.reduce(paperMain.Point.max).x, this.snapBounds.rightCenter.y);
       this.centerYGuide = new Guide(minLeftCenter, maxLeftCenter, { up: true, drag: true, move: true });
     }
   }
-  closestSnapPoint({snapPoints, side}: {snapPoints: em.SnapPoint[], side: em.SnapBound}) {
+  closestSnapPoint({snapPoints, side}: {snapPoints: em.SnapPoint[]; side: em.SnapBound}): { snapPoint: em.SnapPoint; distance: number } {
     let closestSnap;
     let distance;
     for(let i = 0; i < snapPoints.length; i++) {
@@ -145,19 +161,19 @@ class SnapTool {
       distance: distance
     }
   }
-  closestXSnapPoint({snapPoints, bounds, snapTo}: {snapPoints: em.SnapPoint[], bounds: paper.Rectangle, snapTo: { left: boolean; right: boolean; center: boolean; }}) {
-    const xSnaps = snapPoints.filter((snapPoint) => snapPoint.axis === 'x');
+  closestXSnapPoint({snapTo}: {snapTo: { left: boolean; right: boolean; center: boolean }}): { bounds: em.SnapBound; snapPoint: em.SnapPoint; distance: number } {
+    const xSnaps = this.snapPoints.filter((snapPoint) => snapPoint.axis === 'x');
     const snapBounds = Object.keys(snapTo).reduce((result: em.SnapBound[], current: 'left' | 'right' | 'center') => {
       if (snapTo[current]) {
         switch(current) {
           case 'left':
-            result = [...result, {side: current, point: bounds.left}];
+            result = [...result, {side: current, point: this.snapBounds.left}];
             break;
           case 'right':
-            result = [...result, {side: current, point: bounds.right}];
+            result = [...result, {side: current, point: this.snapBounds.right}];
             break;
           case 'center':
-            result = [...result, {side: current, point: bounds.center.x}];
+            result = [...result, {side: current, point: this.snapBounds.center.x}];
             break;
         }
       }
@@ -189,19 +205,19 @@ class SnapTool {
       distance: distance
     }
   }
-  closestYSnapPoint({snapPoints, bounds, snapTo}: {snapPoints: em.SnapPoint[], bounds: paper.Rectangle, snapTo: { top: boolean; bottom: boolean; center: boolean }}) {
-    const ySnaps = snapPoints.filter((snapPoint) => snapPoint.axis === 'y');
+  closestYSnapPoint({snapTo}: {snapTo: { top: boolean; bottom: boolean; center: boolean }}): { bounds: em.SnapBound; snapPoint: em.SnapPoint; distance: number } {
+    const ySnaps = this.snapPoints.filter((snapPoint) => snapPoint.axis === 'y');
     const snapBounds = Object.keys(snapTo).reduce((result: em.SnapBound[], current: 'top' | 'bottom' | 'center') => {
       if (snapTo[current]) {
         switch(current) {
           case 'top':
-            result = [...result, {side: current, point: bounds.top}];
+            result = [...result, {side: current, point: this.snapBounds.top}];
             break;
           case 'bottom':
-            result = [...result, {side: current, point: bounds.bottom}];
+            result = [...result, {side: current, point: this.snapBounds.bottom}];
             break;
           case 'center':
-            result = [...result, {side: current, point: bounds.center.y}];
+            result = [...result, {side: current, point: this.snapBounds.center.y}];
             break;
         }
       }
@@ -231,6 +247,90 @@ class SnapTool {
       bounds: closestYSnapBounds,
       snapPoint: closestYSnap,
       distance: distance
+    }
+  }
+  updateXSnap({
+    event,
+    snapTo,
+    handleSnapped,
+    handleSnap
+  }: {
+    event: paper.ToolEvent;
+    snapTo: { left: boolean; right: boolean; center: boolean };
+    handleSnapped?(snapPoint: em.SnapPoint): void;
+    handleSnap?({ bounds, snapPoint, distance }: { bounds: em.SnapBound; snapPoint: em.SnapPoint; distance: number }): void;
+  }): void {
+    if (this.snap.x) {
+      // check if event delta will exceed X snap point min/max threshold
+      if (this.snap.x.breakThreshold + event.delta.x < this.snapBreakThreshholdMin || this.snap.x.breakThreshold + event.delta.x > this.snapBreakThreshholdMax) {
+        // if exceeded, adjust selection bounds...
+        // clear X snap, and reset X snap threshold
+        this.snap.x = null;
+      } else {
+        if (handleSnapped) {
+          handleSnapped(this.snap.x);
+        }
+        // if not exceeded, update X snap threshold
+        this.snap.x.breakThreshold += event.delta.x;
+      }
+    } else {
+      const closestXSnap = this.closestXSnapPoint({
+        snapTo: snapTo
+      });
+      // if selection bounds is within 2 units from...
+      // closest point, snap to that point
+      if (closestXSnap.distance <= (1 / paperMain.view.zoom) * 2) {
+        if (handleSnap) {
+          handleSnap(closestXSnap);
+        }
+        this.snap.x = {
+          ...closestXSnap.snapPoint,
+          breakThreshold: 0,
+          boundsSide: closestXSnap.bounds.side as 'left' | 'right' | 'center'
+        };
+      }
+    }
+  }
+  updateYSnap({
+    event,
+    snapTo,
+    handleSnapped,
+    handleSnap
+  }: {
+    event: paper.ToolEvent;
+    snapTo: { top: boolean; bottom: boolean; center: boolean };
+    handleSnapped?(snapPoint: em.SnapPoint): void;
+    handleSnap?({ bounds, snapPoint, distance }: { bounds: em.SnapBound; snapPoint: em.SnapPoint; distance: number }): void;
+  }): void {
+    if (this.snap.y) {
+      // check if event delta will exceed Y snap point min/max threshold
+      if (this.snap.y.breakThreshold + event.delta.y < this.snapBreakThreshholdMin || this.snap.y.breakThreshold + event.delta.y > this.snapBreakThreshholdMax) {
+        // if exceeded, adjust selection bounds...
+        // clear Y snap, and reset Y snap threshold
+        this.snap.y = null;
+      } else {
+        if (handleSnapped) {
+          handleSnapped(this.snap.y);
+        }
+        // if not exceeded, update Y snap threshold
+        this.snap.y.breakThreshold += event.delta.y;
+      }
+    } else {
+      const closestYSnap = this.closestYSnapPoint({
+        snapTo: snapTo
+      });
+      // if selection bounds is within 2 units from...
+      // closest point, snap to that point
+      if (closestYSnap.distance <= (1 / paperMain.view.zoom) * 2) {
+        if (handleSnap) {
+          handleSnap(closestYSnap);
+        }
+        this.snap.y = {
+          ...closestYSnap.snapPoint,
+          breakThreshold: 0,
+          boundsSide: closestYSnap.bounds.side as 'top' | 'bottom' | 'center'
+        };
+      }
     }
   }
 }

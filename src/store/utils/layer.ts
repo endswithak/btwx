@@ -116,10 +116,10 @@ export const updateActiveArtboardFrame = (state: LayerState, useLayerItem = fals
       bottomRight = paperActiveArtboardLayer.bounds.bottomRight;
     }
     new paperMain.Path.Rectangle({
-      from: new paperMain.Point(topLeft.x - 8, topLeft.y - 8),
-      to: new paperMain.Point(bottomRight.x + 8, bottomRight.y + 8),
+      from: new paperMain.Point(topLeft.x - (4 / paperMain.view.zoom), topLeft.y - (4 / paperMain.view.zoom)),
+      to: new paperMain.Point(bottomRight.x + (4 / paperMain.view.zoom), bottomRight.y + (4 / paperMain.view.zoom)),
       strokeColor: THEME_PRIMARY_COLOR,
-      strokeWidth: 4 / paperMain.view.zoom,
+      strokeWidth: 3 / paperMain.view.zoom,
       data: {
         id: 'activeArtboardFrame'
       }

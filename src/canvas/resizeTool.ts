@@ -29,13 +29,6 @@ class ResizeTool {
   metaModifier: boolean;
   altModifier: boolean;
   snapTool: SnapTool;
-  snap: {
-    x: em.SnapPoint;
-    y: em.SnapPoint;
-  };
-  snapPoints: em.SnapPoint[];
-  snapBreakThreshholdMin: number;
-  snapBreakThreshholdMax: number;
   constructor() {
     this.state = null;
     this.ref = null;
@@ -54,13 +47,6 @@ class ResizeTool {
     this.shiftModifier = false;
     this.metaModifier = false;
     this.altModifier = false;
-    this.snapBreakThreshholdMin = -8;
-    this.snapBreakThreshholdMax = 8;
-    this.snapPoints = [];
-    this.snap = {
-      x: null,
-      y: null
-    };
     this.snapTool = null;
   }
   enable(handle: string) {
@@ -95,13 +81,6 @@ class ResizeTool {
     this.scaleY = 1;
     this.verticalFlip = false;
     this.horizontalFlip = false;
-    this.snapBreakThreshholdMin = -8;
-    this.snapBreakThreshholdMax = 8;
-    this.snapPoints = [];
-    this.snap = {
-      x: null,
-      y: null
-    };
     this.snapTool = null;
   }
   flipLayers(state: RootState, hor = 1, ver = 1) {
@@ -246,12 +225,7 @@ class ResizeTool {
     updateSelectionFrame(this.state.layer.present, this.handle);
     updateActiveArtboardFrame(this.state.layer.present);
     this.updateTooltip();
-    this.snapTool.updateGuides({
-      snapPoints: this.snapPoints,
-      bounds: this.toBounds,
-      xSnap: this.snap.x,
-      ySnap: this.snap.y
-    });
+    this.snapTool.updateGuides();
   }
   updateToBounds(overrides?: any) {
     if (this.shiftModifier) {
@@ -433,6 +407,7 @@ class ResizeTool {
     const totalHeightDiff = this.toBounds.height / this.fromBounds.height;
     this.scaleX = isFinite(totalWidthDiff) && totalWidthDiff > 0 ? totalWidthDiff : 0.01;
     this.scaleY = isFinite(totalHeightDiff) && totalHeightDiff > 0 ? totalHeightDiff : 0.01;
+    this.snapTool.snapBounds = this.toBounds;
   }
   adjustHandle() {
     // updates handle, horizontalFlip, and verticalFlip based on to and from points
@@ -685,7 +660,7 @@ class ResizeTool {
         const layerAndDescendants = getLayerAndDescendants(this.state.layer.present, id);
         allSelectedLayers = [...allSelectedLayers, ...layerAndDescendants];
       });
-      this.snapPoints = this.state.layer.present.inView.snapPoints.filter((snapPoint: em.SnapPoint) => !allSelectedLayers.includes(snapPoint.id));
+      this.snapTool.snapPoints = this.state.layer.present.inView.snapPoints.filter((snapPoint: em.SnapPoint) => !allSelectedLayers.includes(snapPoint.id));
     }
   }
   onMouseDrag(event: paper.ToolEvent): void {
@@ -701,41 +676,15 @@ class ResizeTool {
         left: this.toBounds.left,
         right: this.toBounds.right,
       };
-      if (this.snap.x) {
-        // check if event delta will exceed X snap point min/max threshold
-        if (this.snap.x.breakThreshold + event.delta.x < this.snapBreakThreshholdMin || this.snap.x.breakThreshold + event.delta.x > this.snapBreakThreshholdMax) {
-          // if exceeded, adjust selection bounds...
-          // clear X snap, and reset X snap threshold
-          this.snap.x = null;
-        } else {
-          switch(this.handle) {
-            case 'topLeft':
-            case 'bottomLeft':
-            case 'leftCenter':
-              snapBounds.left = this.snap.x.point;
-              break;
-            case 'topRight':
-            case 'bottomRight':
-            case 'rightCenter':
-              snapBounds.right = this.snap.x.point;
-              break;
-          }
-          // if not exceeded, update X snap threshold
-          this.snap.x.breakThreshold += event.delta.x;
-        }
-      } else {
-        const closestXSnap = this.snapTool.closestXSnapPoint({
-          snapPoints: this.snapPoints,
-          bounds: this.toBounds,
-          snapTo: {
-            left: this.handle === 'topLeft' || this.handle === 'bottomLeft' || this.handle === 'leftCenter',
-            right: this.handle === 'topRight' || this.handle === 'bottomRight' || this.handle === 'rightCenter',
-            center: false
-          }
-        });
-        // if selection bounds is within 2 units from...
-        // closest point, snap to that point
-        if (closestXSnap.distance <= (1 / paperMain.view.zoom) * 2) {
+      this.snapTool.snapBounds = this.toBounds;
+      this.snapTool.updateXSnap({
+        event: event,
+        snapTo: {
+          left: this.handle === 'topLeft' || this.handle === 'bottomLeft' || this.handle === 'leftCenter',
+          right: this.handle === 'topRight' || this.handle === 'bottomRight' || this.handle === 'rightCenter',
+          center: false
+        },
+        handleSnap: (closestXSnap) => {
           switch(closestXSnap.bounds.side) {
             case 'left':
               snapBounds.left = closestXSnap.snapPoint.point;
@@ -744,47 +693,30 @@ class ResizeTool {
               snapBounds.right = closestXSnap.snapPoint.point;
               break;
           }
-          this.snap.x = {
-            ...closestXSnap.snapPoint,
-            breakThreshold: 0
-          };
-        }
-      }
-      if (this.snap.y) {
-        // check if event delta will exceed Y snap point min/max threshold
-        if (this.snap.y.breakThreshold + event.delta.y < this.snapBreakThreshholdMin || this.snap.y.breakThreshold + event.delta.y > this.snapBreakThreshholdMax) {
-          // if exceeded, adjust selection bounds...
-          // clear Y snap, and reset Y snap threshold
-          this.snap.y = null;
-        } else {
+        },
+        handleSnapped: (snapPoint) => {
           switch(this.handle) {
-            case 'topCenter':
             case 'topLeft':
-            case 'topRight':
-              snapBounds.top = this.snap.y.point;
-              break;
-            case 'bottomCenter':
             case 'bottomLeft':
+            case 'leftCenter':
+              snapBounds.left = snapPoint.point;
+              break;
+            case 'topRight':
             case 'bottomRight':
-              snapBounds.bottom = this.snap.y.point;
+            case 'rightCenter':
+              snapBounds.right = snapPoint.point;
               break;
           }
-          // if not exceeded, update Y snap threshold
-          this.snap.y.breakThreshold += event.delta.y;
         }
-      } else {
-        const closestYSnap = this.snapTool.closestYSnapPoint({
-          snapPoints: this.snapPoints,
-          bounds: this.toBounds,
-          snapTo: {
-            top: this.handle === 'topLeft' || this.handle === 'topCenter' || this.handle === 'topRight',
-            bottom: this.handle === 'bottomLeft' || this.handle === 'bottomCenter' || this.handle === 'bottomRight',
-            center: false
-          }
-        });
-        // if selection bounds is within 2 units from...
-        // closest point, snap to that point
-        if (closestYSnap.distance <= (1 / paperMain.view.zoom) * 2) {
+      });
+      this.snapTool.updateYSnap({
+        event: event,
+        snapTo: {
+          top: this.handle === 'topLeft' || this.handle === 'topCenter' || this.handle === 'topRight',
+          bottom: this.handle === 'bottomLeft' || this.handle === 'bottomCenter' || this.handle === 'bottomRight',
+          center: false
+        },
+        handleSnap: (closestYSnap) => {
           switch(closestYSnap.bounds.side) {
             case 'top':
               snapBounds.top = closestYSnap.snapPoint.point;
@@ -793,14 +725,23 @@ class ResizeTool {
               snapBounds.bottom = closestYSnap.snapPoint.point;
               break;
           }
-          this.snap.y = {
-            ...closestYSnap.snapPoint,
-            breakThreshold: 0
-          };
+        },
+        handleSnapped: (snapPoint) => {
+          switch(this.handle) {
+            case 'topCenter':
+            case 'topLeft':
+            case 'topRight':
+              snapBounds.top = snapPoint.point;
+              break;
+            case 'bottomCenter':
+            case 'bottomLeft':
+            case 'bottomRight':
+              snapBounds.bottom = snapPoint.point;
+              break;
+          }
         }
-      }
+      });
       this.updateToBounds(snapBounds);
-      //this.updateRef();
       this.scaleLayers();
     }
   }

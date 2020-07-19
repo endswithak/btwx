@@ -20,14 +20,7 @@ class GradientTool {
   originHandle: paper.Shape;
   destinationHandle: paper.Shape;
   gradientLines: paper.Path.Line[];
-  snap: {
-    x: em.SnapPoint;
-    y: em.SnapPoint;
-  };
   snapTool: SnapTool;
-  snapPoints: em.SnapPoint[];
-  snapBreakThreshholdMin: number;
-  snapBreakThreshholdMax: number;
   constructor() {
     this.handle = null;
     this.prop = null;
@@ -39,13 +32,6 @@ class GradientTool {
     this.originHandle = null;
     this.destinationHandle = null;
     this.gradientLines = null;
-    this.snapBreakThreshholdMin = -8;
-    this.snapBreakThreshholdMax = 8;
-    this.snapPoints = [];
-    this.snap = {
-      x: null,
-      y: null
-    };
     this.snapTool = null;
   }
   enable(handle: 'origin' | 'destination', prop: 'fill' | 'stroke'): void {
@@ -69,16 +55,9 @@ class GradientTool {
     this.originHandle = null;
     this.destinationHandle = null;
     this.gradientLines = null;
-    this.snapBreakThreshholdMin = -8;
-    this.snapBreakThreshholdMax = 8;
-    this.snapPoints = [];
-    this.snap = {
-      x: null,
-      y: null
-    };
     this.snapTool = null;
   }
-  updateOrigin(event: paper.ToolEvent, state: RootState) {
+  updateOrigin(event: paper.ToolEvent, state: RootState): void {
     const paperLayer = getPaperLayer(state.gradientEditor.layer);
     const newOrigin = new paperMain.Point(this.toBounds.center.x, this.toBounds.center.y);
     paperLayer[`${state.gradientEditor.prop}Color` as 'fillColor' | 'strokeColor'] = {
@@ -93,7 +72,7 @@ class GradientTool {
       line.firstSegment.point.y = newOrigin.y;
     });
   }
-  updateDestination(event: paper.ToolEvent, state: RootState) {
+  updateDestination(event: paper.ToolEvent, state: RootState): void {
     const paperLayer = getPaperLayer(state.gradientEditor.layer);
     const newDestination = new paperMain.Point(this.toBounds.center.x, this.toBounds.center.y);
     paperLayer[`${state.gradientEditor.prop}Color` as 'fillColor' | 'strokeColor'] = {
@@ -108,74 +87,6 @@ class GradientTool {
       line.lastSegment.point.y = newDestination.y;
     });
   }
-  updateXSnap(event: paper.ToolEvent) {
-    if (this.snap.x) {
-      // check if event delta will exceed X snap point min/max threshold
-      if (this.snap.x.breakThreshold + event.delta.x < this.snapBreakThreshholdMin || this.snap.x.breakThreshold + event.delta.x > this.snapBreakThreshholdMax) {
-        // if exceeded, adjust selection bounds...
-        // clear X snap, and reset X snap threshold
-        this.snap.x = null;
-      } else {
-        this.toBounds.center.x = this.snap.x.point;
-        // if not exceeded, update X snap threshold
-        this.snap.x.breakThreshold += event.delta.x;
-      }
-    } else {
-      const closestXSnap = this.snapTool.closestXSnapPoint({
-        snapPoints: this.snapPoints,
-        bounds: this.toBounds,
-        snapTo: {
-          left: false,
-          right: false,
-          center: true
-        }
-      });
-      // if selection bounds is within 2 units from...
-      // closest point, snap to that point
-      if (closestXSnap.distance <= (1 / paperMain.view.zoom) * 2) {
-        this.toBounds.center.x = closestXSnap.snapPoint.point;
-        this.snap.x = {
-          ...closestXSnap.snapPoint,
-          breakThreshold: 0,
-          boundsSide: closestXSnap.bounds.side as 'left' | 'right' | 'center'
-        };
-      }
-    }
-  }
-  updateYSnap(event: paper.ToolEvent) {
-    if (this.snap.y) {
-      // check if event delta will exceed Y snap point min/max threshold
-      if (this.snap.y.breakThreshold + event.delta.y < this.snapBreakThreshholdMin || this.snap.y.breakThreshold + event.delta.y > this.snapBreakThreshholdMax) {
-        // if exceeded, adjust selection bounds...
-        // clear Y snap, and reset Y snap threshold
-        this.snap.y = null;
-      } else {
-        this.toBounds.center.y = this.snap.y.point;
-        // if not exceeded, update Y snap threshold
-        this.snap.y.breakThreshold += event.delta.y;
-      }
-    } else {
-      const closestYSnap = this.snapTool.closestYSnapPoint({
-        snapPoints: this.snapPoints,
-        bounds: this.toBounds,
-        snapTo: {
-          top: false,
-          bottom: false,
-          center: true
-        }
-      });
-      // if selection bounds is within 2 units from...
-      // closest point, snap to that point
-      if (closestYSnap.distance <= (1 / paperMain.view.zoom) * 2) {
-        this.toBounds.center.y = closestYSnap.snapPoint.point;
-        this.snap.y = {
-          ...closestYSnap.snapPoint,
-          breakThreshold: 0,
-          boundsSide: closestYSnap.bounds.side as 'top' | 'bottom' | 'center'
-        };
-      }
-    }
-  }
   onKeyDown(event: paper.KeyEvent): void {
     this.insertTool.onKeyDown(event);
   }
@@ -185,9 +96,10 @@ class GradientTool {
   onMouseDown(event: paper.ToolEvent): void {
     if (this.enabled) {
       const state = store.getState();
-      this.snapPoints = state.layer.present.inView.snapPoints.filter((snapPoint) => snapPoint.id === state.gradientEditor.layer);
       this.from = event.point;
       this.toBounds = new paperMain.Rectangle(this.fromBounds);
+      this.snapTool.snapPoints = state.layer.present.inView.snapPoints.filter((snapPoint) => snapPoint.id === state.gradientEditor.layer);
+      this.snapTool.snapBounds = this.toBounds;
     }
   }
   onMouseDrag(event: paper.ToolEvent): void {
@@ -198,8 +110,35 @@ class GradientTool {
       this.y += event.delta.y;
       this.toBounds.center.x = this.fromBounds.center.x + this.x;
       this.toBounds.center.y = this.fromBounds.center.y + this.y;
-      this.updateXSnap(event);
-      this.updateYSnap(event);
+      this.snapTool.snapBounds = this.toBounds;
+      this.snapTool.updateXSnap({
+        event: event,
+        snapTo: {
+          left: false,
+          right: false,
+          center: true
+        },
+        handleSnapped: (snapPoint) => {
+          this.toBounds.center.x = snapPoint.point;
+        },
+        handleSnap: (closestXSnap) => {
+          this.toBounds.center.x = closestXSnap.snapPoint.point;
+        }
+      });
+      this.snapTool.updateYSnap({
+        event: event,
+        snapTo: {
+          top: false,
+          bottom: false,
+          center: true
+        },
+        handleSnapped: (snapPoint) => {
+          this.toBounds.center.y = snapPoint.point;
+        },
+        handleSnap: (closestYSnap) => {
+          this.toBounds.center.y = closestYSnap.snapPoint.point;
+        }
+      });
       switch(this.handle) {
         case 'origin': {
           this.updateOrigin(event, state);
@@ -210,12 +149,7 @@ class GradientTool {
           break;
         }
       }
-      this.snapTool.updateGuides({
-        snapPoints: this.snapPoints,
-        bounds: this.toBounds,
-        xSnap: this.snap.x,
-        ySnap: this.snap.y
-      });
+      this.snapTool.updateGuides();
     }
   }
   onMouseUp(event: paper.ToolEvent): void {

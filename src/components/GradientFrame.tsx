@@ -13,7 +13,7 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { layer, gradient, onStopPress } = props;
 
-  useEffect(() => {
+  const updateGradientFrame = () => {
     const sortedStops = [...Object.keys(gradient.stops.byId)].sort((a,b) => { return gradient.stops.byId[a].position - gradient.stops.byId[b].position });
     const originStop = gradient.stops.byId[sortedStops[0]];
     const destStop = gradient.stops.byId[sortedStops[sortedStops.length - 1]];
@@ -134,8 +134,20 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
       },
       children: [gradientFrameLines, gradientFrameOriginHandle, gradientFrameDestinationHandle]
     });
+  }
+
+  const handleWheel = (e: WheelEvent) => {
+    if (e.ctrlKey) {
+      updateGradientFrame();
+    }
+  }
+
+  useEffect(() => {
+    updateGradientFrame();
+    document.getElementById('canvas-main').addEventListener('wheel', handleWheel);
     return () => {
       const oldGradientFrame = paperMain.project.getItem({ data: { id: 'gradientFrame' } });
+      document.getElementById('canvas-main').removeEventListener('wheel', handleWheel);
       if (oldGradientFrame) {
         oldGradientFrame.remove();
       }
