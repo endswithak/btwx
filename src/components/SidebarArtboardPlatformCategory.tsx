@@ -1,28 +1,35 @@
 import React, { useContext, ReactElement, useState } from 'react';
 import SidebarArtboardPlatformDevice from './SidebarArtboardPlatformDevice';
-import SidebarSectionWrap from './SidebarSectionWrap';
 import SidebarSection from './SidebarSection';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionHead from './SidebarSectionHead';
 
 interface SidebarArtboardPlatformCategoryProps {
   category: em.DeviceCategory;
+  onDeviceClick(device: em.Device): void;
+  orientation: em.DeviceOrientationType;
 }
 
 const SidebarArtboardPlatformCategory = (props: SidebarArtboardPlatformCategoryProps): ReactElement => {
-  const { category } = props;
+  const { category, onDeviceClick, orientation } = props;
 
   return (
     <SidebarSection>
-      <SidebarSectionRow>
-        <SidebarSectionHead text={category.type} />
-      </SidebarSectionRow>
+      {
+        category.type !== 'Custom'
+        ? <SidebarSectionRow>
+            <SidebarSectionHead text={category.type} />
+          </SidebarSectionRow>
+        : null
+      }
       <>
         {
           category.devices.map((device, index) => (
             <SidebarArtboardPlatformDevice
               key={index}
-              device={device} />
+              device={device}
+              onClick={onDeviceClick}
+              orientation={orientation} />
           ))
         }
       </>

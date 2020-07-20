@@ -7,6 +7,7 @@ import tweenDrawer from './tweenDrawer';
 import easeEditor from './easeEditor';
 import colorEditor from './colorEditor';
 import gradientEditor from './gradientEditor';
+import artboardPresetEditor from './artboardPresetEditor';
 import textEditor from './textEditor';
 import textSettings from './textSettings';
 import canvasSettings from './canvasSettings';
@@ -213,6 +214,7 @@ const rootReducer = combineReducers({
   canvasSettings,
   colorEditor,
   gradientEditor,
+  artboardPresetEditor,
   theme
 });
 

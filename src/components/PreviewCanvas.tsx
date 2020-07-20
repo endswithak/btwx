@@ -806,8 +806,8 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
 
 const mapStateToProps = (state: RootState) => {
   const { layer, canvasSettings } = state;
-  const paperProject = canvasSettings.allImageIds.reduce((result, current) => {
-    const rasterBase64 = bufferToBase64(Buffer.from(canvasSettings.imageById[current].buffer));
+  const paperProject = canvasSettings.images.allIds.reduce((result, current) => {
+    const rasterBase64 = bufferToBase64(Buffer.from(canvasSettings.images.byId[current].buffer));
     const base64 = `data:image/webp;base64,${rasterBase64}`;
     return result.replace(`"source":"${current}"`, `"source":"${base64}"`);
   }, layer.present.paperProject);
@@ -817,7 +817,7 @@ const mapStateToProps = (state: RootState) => {
   const tweens = getAllArtboardTweens(layer.present, layer.present.activeArtboard);
   const tweenLayers = getAllArtboardTweenLayers(layer.present, layer.present.activeArtboard);
   const tweenLayerDestinations = getAllArtboardTweenLayerDestinations(layer.present, layer.present.activeArtboard);
-  const canvasImagesById = canvasSettings.imageById;
+  const canvasImagesById = canvasSettings.images.byId;
   return {
     activeArtboard: layer.present.byId[layer.present.activeArtboard],
     page: layer.present.page,

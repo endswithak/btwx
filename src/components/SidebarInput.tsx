@@ -8,7 +8,7 @@ import { enableSelectionTool, disableSelectionTool } from '../store/actions/tool
 interface SidebarInputProps {
   value: string | number;
   onChange(e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>): void;
-  onSubmit(e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>): void;
+  onSubmit?(e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>): void;
   onFocus?(e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>): void;
   onBlur?(e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>): void;
   label?: string;
@@ -18,6 +18,7 @@ interface SidebarInputProps {
   selectOnMount?: boolean;
   blurOnSubmit?: boolean;
   submitOnBlur?: boolean;
+  disableSelectionToolToggle?: boolean;
   enableSelectionTool?(): ToolTypes;
   disableSelectionTool?(): ToolTypes;
 }
@@ -49,7 +50,7 @@ const Input = styled.div`
 const SidebarInput = (props: SidebarInputProps): ReactElement => {
   const inputRef = useRef<HTMLInputElement>(null);
   const theme = useContext(ThemeContext);
-  const { value, onChange, onSubmit, onFocus, onBlur, label, leftLabel, bottomLabel, disabled, selectOnMount, blurOnSubmit, submitOnBlur, enableSelectionTool, disableSelectionTool } = props;
+  const { value, onChange, onSubmit, onFocus, onBlur, label, leftLabel, bottomLabel, disabled, selectOnMount, blurOnSubmit, submitOnBlur, enableSelectionTool, disableSelectionTool, disableSelectionToolToggle } = props;
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -67,7 +68,9 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
     if (onFocus) {
       onFocus(e);
     }
-    disableSelectionTool();
+    if (!disableSelectionToolToggle) {
+      disableSelectionTool();
+    }
   };
 
   const handleBlur = (e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>) => {
@@ -77,7 +80,9 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
     if (submitOnBlur) {
       handleSubmit(e);
     }
-    enableSelectionTool();
+    if (!disableSelectionToolToggle) {
+      enableSelectionTool();
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {

@@ -2,16 +2,17 @@ import React, { useContext, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setArtboardToolDevicePlatform } from '../store/actions/tool';
-import { SetArtboardToolDevicePlatformPayload, ToolTypes } from '../store/actionTypes/tool';
 import SidebarArtboardPlatformCategory from './SidebarArtboardPlatformCategory';
 import { DEVICES } from '../constants';
 
 interface SidebarArtboardPlatformCategoriesProps {
   categories?: em.DeviceCategory[];
+  onDeviceClick(device: em.Device): void;
+  orientation: em.DeviceOrientationType;
 }
 
 const SidebarArtboardPlatformCategories = (props: SidebarArtboardPlatformCategoriesProps): ReactElement => {
-  const { categories } = props;
+  const { categories, onDeviceClick, orientation } = props;
 
   return (
     <>
@@ -19,7 +20,9 @@ const SidebarArtboardPlatformCategories = (props: SidebarArtboardPlatformCategor
         categories.map((category, index) => (
           <SidebarArtboardPlatformCategory
             key={index}
-            category={category} />
+            category={category}
+            onDeviceClick={onDeviceClick}
+            orientation={orientation} />
         ))
       }
     </>
@@ -27,9 +30,15 @@ const SidebarArtboardPlatformCategories = (props: SidebarArtboardPlatformCategor
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { tool } = state;
+  const { tool, canvasSettings } = state;
   const platformValue = tool.artboardToolDevicePlatform;
-  const categories = DEVICES.find((platform) => platform.type === platformValue).categories;
+  const categories = platformValue === 'Custom' ? [{
+    type: 'Custom',
+    devices: canvasSettings.artboardPresets.allIds.reduce((result: em.ArtboardPreset[], current) => {
+      result = [...result, canvasSettings.artboardPresets.byId[current]];
+      return result;
+    }, [])
+  }] : DEVICES.find((platform) => platform.type === platformValue).categories;
   return { categories };
 };
 

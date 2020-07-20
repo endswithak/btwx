@@ -271,8 +271,8 @@ const mapStateToProps = (state: RootState) => {
     return layer.type === 'Group';
   });
   const zoom = canvasSettings.matrix ? Math.round(canvasSettings.matrix[0] * 100) : 100;
-  const allCanvasImageIds = canvasSettings.allImageIds;
-  const canvasImagesById = canvasSettings.imageById;
+  const allCanvasImageIds = canvasSettings.images.allIds;
+  const canvasImagesById = canvasSettings.images.byId;
   return { tool, activeArtboard, isTweenDrawerOpen, selected, canMask, canMoveBackward, canMoveForward, canGroup, canUngroup, zoom, canvasImagesById, allCanvasImageIds };
 };
 

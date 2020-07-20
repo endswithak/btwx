@@ -28,7 +28,7 @@ class CopyTool {
             layerAndDescendants.forEach((id) => {
               if (state.layer.present.clipboard.byId[id].type === 'Image') {
                 const imageId = state.layer.present.clipboard.byId[id].imageId;
-                result[imageId] = state.canvasSettings.imageById[imageId];
+                result[imageId] = state.canvasSettings.images.byId[imageId];
               }
             });
             return result;

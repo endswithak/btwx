@@ -77,7 +77,7 @@ export const lightTheme: em.Theme = {
   name: 'light',
   palette: createPalette('light'),
   background: createLightBackgrounds(lightBgScale),
-  backgroundInverse: createDarkBackgrounds(lightBgScale),
+  backgroundInverse: createDarkBackgrounds(darkBgScale),
   text: createText(lightTextScale, createPalette('light')),
   unit: THEME_UNIT_SIZE
 }

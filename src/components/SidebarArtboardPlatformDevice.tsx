@@ -1,13 +1,12 @@
 import React, { useContext, ReactElement, useState } from 'react';
 import styled from 'styled-components';
-import { connect } from 'react-redux';
-import { RootState } from '../store/reducers';
 import SidebarSectionRow from './SidebarSectionRow';
 import { ThemeContext } from './ThemeProvider';
 
 interface SidebarArtboardPlatformDeviceProps {
   device: em.Device;
-  orientation?: em.DeviceOrientationType;
+  orientation: em.DeviceOrientationType;
+  onClick(device: em.Device): void;
 }
 
 const Device = styled.button`
@@ -29,7 +28,7 @@ const Device = styled.button`
 `;
 
 const SidebarArtboardPlatformDevice = (props: SidebarArtboardPlatformDeviceProps): ReactElement => {
-  const { device, orientation } = props;
+  const { device, orientation, onClick } = props;
   const theme = useContext(ThemeContext);
 
   return (
@@ -38,9 +37,10 @@ const SidebarArtboardPlatformDevice = (props: SidebarArtboardPlatformDeviceProps
       alignItems='center'>
       <Device
         className='c-sidebar-artboard-platform-device'
-        theme={theme}>
+        theme={theme}
+        onClick={() => onClick(device)}>
         <span className='c-sidebar-artboard-platform-device__name'>
-          {device.type}
+          {device.type ? device.type : device.name}
         </span>
         <span className='c-sidebar-artboard-platform-device__size'>
           {`${orientation === 'Landscape' ? device.height : device.width}x${orientation === 'Landscape' ? device.width : device.height}`}
@@ -50,12 +50,4 @@ const SidebarArtboardPlatformDevice = (props: SidebarArtboardPlatformDeviceProps
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { tool } = state;
-  const orientation = tool.artboardToolOrientation;
-  return { orientation };
-};
-
-export default connect(
-  mapStateToProps
-)(SidebarArtboardPlatformDevice);
+export default SidebarArtboardPlatformDevice;

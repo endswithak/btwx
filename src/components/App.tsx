@@ -8,6 +8,7 @@ import { ThemeContext } from './ThemeProvider';
 import ActiveArtboardFrameWrap from './ActiveArtboardFrameWrap';
 import SelectionFrameWrap from './SelectionFrameWrap';
 import HoverFrameWrap from './HoverFrameWrap';
+import ArtboardPresetEditorWrap from './ArtboardPresetEditorWrap';
 
 const App = (): ReactElement => {
   const app = useRef<HTMLDivElement>(null);
@@ -29,6 +30,7 @@ const App = (): ReactElement => {
         <ActiveArtboardFrameWrap />
         <HoverFrameWrap />
         <SelectionFrameWrap />
+        <ArtboardPresetEditorWrap />
     </div>
   );
 }

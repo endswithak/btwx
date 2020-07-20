@@ -68,9 +68,9 @@ declare namespace em {
 
   type DeviceType = AppleDevice | AndroidDevice | ResponsiveWebDevice;
 
-  type DeviceCategoryType = AppleDeviceCategory | AndroidDeviceCategory | ResponsiveWebDeviceCategory;
+  type DeviceCategoryType = AppleDeviceCategory | AndroidDeviceCategory | ResponsiveWebDeviceCategory | 'Custom';
 
-  type DevicePlatformType = 'Apple' | 'Android' | 'Responsive Web';
+  type DevicePlatformType = 'Apple' | 'Android' | 'Responsive Web' | 'Custom';
 
   type DeviceOrientationType = 'Landscape' | 'Portrait';
 
@@ -277,6 +277,13 @@ declare namespace em {
   interface Frame {
     x: number;
     y: number;
+    width: number;
+    height: number;
+  }
+
+  interface ArtboardPreset {
+    id: string;
+    name: string;
     width: number;
     height: number;
   }

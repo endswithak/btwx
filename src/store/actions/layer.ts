@@ -330,12 +330,10 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
   const mask = payload.paperLayer.clone();
   mask.data = { id: 'ArtboardMask', type: 'ArtboardMask' };
   mask.clipMask = true;
-  //payload.paperLayer.applyMatrix = false;
   const paperLayer = new paperMain.Group({
     name: payload.name ? payload.name : 'Artboard',
     data: { id: layerId, type: 'Artboard' },
     children: [mask, payload.paperLayer],
-    //applyMatrix: false
   });
   return {
     type: ADD_ARTBOARD,

@@ -84,7 +84,7 @@ class UndoRedoTool {
             // import future paper project
             importPaperProject({
               paperProject: state.layer.present.paperProject,
-              canvasImages: state.canvasSettings.imageById,
+              canvasImages: state.canvasSettings.images.byId,
               layers: {
                 shape: state.layer.present.allShapeIds,
                 artboard: state.layer.present.allArtboardIds,
@@ -106,7 +106,7 @@ class UndoRedoTool {
             // import past paper project
             importPaperProject({
               paperProject: state.layer.present.paperProject,
-              canvasImages: state.canvasSettings.imageById,
+              canvasImages: state.canvasSettings.images.byId,
               layers: {
                 shape: state.layer.present.allShapeIds,
                 artboard: state.layer.present.allArtboardIds,

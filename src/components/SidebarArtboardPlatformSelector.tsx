@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement, useState } from 'react';
+import React, { useContext, ReactElement, useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setArtboardToolDevicePlatform } from '../store/actions/tool';
@@ -9,12 +9,13 @@ import { DEVICES } from '../constants';
 interface SidebarArtboardPlatformSelectorProps {
   platformValue?: em.DevicePlatformType;
   setArtboardToolDevicePlatform?(payload: SetArtboardToolDevicePlatformPayload): ToolTypes;
+  optionValues?: em.DevicePlatform[];
 }
 
 const SidebarArtboardPlatformSelector = (props: SidebarArtboardPlatformSelectorProps): ReactElement => {
-  const { platformValue, setArtboardToolDevicePlatform } = props;
+  const { platformValue, setArtboardToolDevicePlatform, optionValues } = props;
 
-  const options: { value: em.DevicePlatformType; label: em.DevicePlatformType }[] = DEVICES.map((device) => {
+  const options: { value: em.DevicePlatformType; label: em.DevicePlatformType }[] = optionValues.map((device) => {
     return {
       value: device.type,
       label: device.type
@@ -28,6 +29,10 @@ const SidebarArtboardPlatformSelector = (props: SidebarArtboardPlatformSelectorP
     setArtboardToolDevicePlatform({platform: selectedOption.value});
   }
 
+  useEffect(() => {
+    setPlatform(options.find((option) => option.value === platformValue));
+  }, [platformValue]);
+
   return (
     <SidebarSelect
       value={platform}
@@ -39,9 +44,22 @@ const SidebarArtboardPlatformSelector = (props: SidebarArtboardPlatformSelectorP
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { tool } = state;
+  const { tool, canvasSettings } = state;
   const platformValue = tool.artboardToolDevicePlatform;
-  return { platformValue };
+  const optionValues = [
+    ...DEVICES,
+    {
+      type: 'Custom',
+      categories: [{
+        type: 'Custom',
+        devices: canvasSettings.artboardPresets.allIds.reduce((result: em.ArtboardPreset[], current) => {
+          result = [...result, canvasSettings.artboardPresets.byId[current]];
+          return result;
+        }, [])
+      }]
+    }
+  ]
+  return { platformValue, optionValues };
 };
 
 export default connect(

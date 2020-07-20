@@ -1,40 +1,21 @@
 import React, { useContext, ReactElement, useState } from 'react';
-import { connect } from 'react-redux';
-import { RootState } from '../store/reducers';
-import { setArtboardToolDeviceOrientation } from '../store/actions/tool';
-import { SetArtboardToolDeviceOrientationPayload, ToolTypes } from '../store/actionTypes/tool';
 import SidebarToggleButton from './SidebarToggleButton';
 
 interface SidebarArtboardPlatformOrientationProps {
-  orientationValue?: em.DeviceOrientationType;
-  setArtboardToolDeviceOrientation?(payload: SetArtboardToolDeviceOrientationPayload): ToolTypes;
+  orientation?: em.DeviceOrientationType;
+  onClick(orientation: em.DeviceOrientationType): void;
+  isDisabled?: boolean;
 }
 
 const SidebarArtboardPlatformOrientation = (props: SidebarArtboardPlatformOrientationProps): ReactElement => {
-  const { orientationValue, setArtboardToolDeviceOrientation } = props;
-
-  const handleClick = (type: em.DeviceOrientationType) => {
-    switch(type) {
-      case 'Landscape': {
-        if (orientationValue !== 'Landscape') {
-          setArtboardToolDeviceOrientation({orientation: 'Landscape'});
-        }
-        break;
-      }
-      case 'Portrait': {
-        if (orientationValue !== 'Portrait') {
-          setArtboardToolDeviceOrientation({orientation: 'Portrait'});
-        }
-        break;
-      }
-    }
-  }
+  const { orientation, onClick, isDisabled } = props;
 
   return (
     <>
       <SidebarToggleButton
-        active={orientationValue === 'Portrait'}
-        onClick={() => handleClick('Portrait')}>
+        active={orientation === 'Portrait'}
+        onClick={() => onClick('Portrait')}
+        disabled={isDisabled}>
         <svg
           width='24'
           height='24'
@@ -43,8 +24,9 @@ const SidebarArtboardPlatformOrientation = (props: SidebarArtboardPlatformOrient
         </svg>
       </SidebarToggleButton>
       <SidebarToggleButton
-        active={orientationValue === 'Landscape'}
-        onClick={() => handleClick('Landscape')}>
+        active={orientation === 'Landscape'}
+        onClick={() => onClick('Landscape')}
+        disabled={isDisabled}>
         <svg
           width='24'
           height='24'
@@ -56,13 +38,4 @@ const SidebarArtboardPlatformOrientation = (props: SidebarArtboardPlatformOrient
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { tool } = state;
-  const orientationValue = tool.artboardToolOrientation;
-  return { orientationValue };
-};
-
-export default connect(
-  mapStateToProps,
-  { setArtboardToolDeviceOrientation }
-)(SidebarArtboardPlatformOrientation);
+export default SidebarArtboardPlatformOrientation;

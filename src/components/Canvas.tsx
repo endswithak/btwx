@@ -39,7 +39,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
     paperMain.setup(canvasRef.current);
     importPaperProject({
       paperProject,
-      canvasImages: canvasSettings.imageById,
+      canvasImages: canvasSettings.images.byId,
       layers: {
         shape: allShapeIds,
         artboard: allArtboardIds,
@@ -51,7 +51,6 @@ const Canvas = (props: CanvasProps): ReactElement => {
       e.preventDefault();
       if (e.ctrlKey) {
         e.preventDefault();
-        const prevZoom = paperMain.view.zoom;
         const nextZoom = paperMain.view.zoom - e.deltaY * 0.01;
         if (e.deltaY < 0 && nextZoom < 30) {
           paperMain.view.zoom = nextZoom;

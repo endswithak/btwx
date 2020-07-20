@@ -103,7 +103,10 @@ class ArtboardTool {
     this.snapTool.snapBounds = this.toBounds;
   }
   onKeyDown(event: paper.KeyEvent): void {
-    this.insertTool.onKeyDown(event);
+    const state = store.getState();
+    if (!state.artboardPresetEditor.isOpen) {
+      this.insertTool.onKeyDown(event);
+    }
     switch(event.key) {
       case 'shift': {
         this.shiftModifier = true;
@@ -131,7 +134,10 @@ class ArtboardTool {
     }
   }
   onKeyUp(event: paper.KeyEvent): void {
-    this.insertTool.onKeyUp(event);
+    const state = store.getState();
+    if (!state.artboardPresetEditor.isOpen) {
+      this.insertTool.onKeyUp(event);
+    }
     switch(event.key) {
       case 'shift': {
         this.shiftModifier = false;
@@ -292,7 +298,6 @@ class ArtboardTool {
         const state = store.getState();
         const newPaperLayer = this.renderShape({
           fillColor: new Color(DEFAULT_ARTBOARD_BACKGROUND_COLOR),
-          //applyMatrix: false
         });
         applyArtboardMethods(newPaperLayer);
         store.dispatch(addArtboard({
