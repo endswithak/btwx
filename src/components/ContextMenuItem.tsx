@@ -1,13 +1,21 @@
 import React, { useRef, useContext, useEffect, ReactElement, useState } from 'react';
 import { ThemeContext } from './ThemeProvider';
+import styled from 'styled-components';
 
 interface ContextMenuItemProps {
   text: string;
   onClick(e: any): void;
 }
 
+const Item = styled.button`
+  color: ${props => props.theme.text.base};
+  :hover {
+    background: ${props => props.theme.palette.primary};
+    color: ${props => props.theme.text.onPrimary};
+  }
+`;
+
 const ContextMenuItem = (props: ContextMenuItemProps): ReactElement => {
-  const [hover, setHover] = useState(false);
   const theme = useContext(ThemeContext);
   const { text, onClick } = props;
 
@@ -16,21 +24,12 @@ const ContextMenuItem = (props: ContextMenuItemProps): ReactElement => {
   }
 
   return (
-    <div
+    <Item
       className='c-context-menu__item'
       onClick={handleClick}
-      onMouseOver={() => setHover(true)}
-      onMouseOut={() => setHover(false)}
-      style={{
-        background: hover
-        ? theme.palette.primary
-        : 'none',
-        color: hover
-        ? theme.text.onPrimary
-        : theme.text.base
-      }}>
+      theme={theme}>
       {text}
-    </div>
+    </Item>
   );
 }
 

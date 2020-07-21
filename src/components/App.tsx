@@ -1,7 +1,5 @@
 import React, { useRef, useContext, useEffect, ReactElement } from 'react';
 import Topbar from './Topbar';
-import TweenEventSelect from './TweenEventSelect';
-import TweenEventDestinationSelect from './TweenEventDestinationSelect';
 import EaseEditor from './EaseEditor';
 import Main from './Main';
 import { ThemeContext } from './ThemeProvider';
@@ -9,6 +7,7 @@ import ActiveArtboardFrameWrap from './ActiveArtboardFrameWrap';
 import SelectionFrameWrap from './SelectionFrameWrap';
 import HoverFrameWrap from './HoverFrameWrap';
 import ArtboardPresetEditorWrap from './ArtboardPresetEditorWrap';
+import ContextMenuWrap from './ContextMenuWrap';
 
 const App = (): ReactElement => {
   const app = useRef<HTMLDivElement>(null);
@@ -24,13 +23,12 @@ const App = (): ReactElement => {
       }}>
         <Topbar />
         <Main />
-        <TweenEventSelect />
-        <TweenEventDestinationSelect />
         <EaseEditor />
         <ActiveArtboardFrameWrap />
         <HoverFrameWrap />
         <SelectionFrameWrap />
         <ArtboardPresetEditorWrap />
+        <ContextMenuWrap />
     </div>
   );
 }

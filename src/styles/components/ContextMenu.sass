@@ -1,19 +1,21 @@
 .c-context-menu-wrap
   +absolute-full
+  z-index: 999999999999
 
 .c-context-menu__overlay
   +absolute-full
   position: fixed
   background: none
-  z-index: 999999999999
 
 .c-context-menu
   position: absolute
-  padding: 0
   border: none
   display: flex
   flex-direction: column
   outline: none
+  backdrop-filter: blur(17px)
+  border-radius: $unit
+  padding: $unit 0
 
   &::selection
     background: none
@@ -23,9 +25,22 @@
   height: $unit * 8
   line-height: $unit * 8
   font-family: $fontFamily
-  padding-left: $unit * 2
-  font-size: $fontSizeMd
+  padding: 0 $unit * 4
+  font-size: $fontSizeSm
   cursor: pointer
+  text-align: left
+
+  &::selection
+    background: none
+
+.c-context-menu__head
+  width: 100%
+  height: $unit * 8
+  line-height: $unit * 8
+  font-family: $fontFamily
+  padding: 0 $unit * 4
+  font-size: $fontSizeSm
+  text-transform: uppercase
 
   &::selection
     background: none

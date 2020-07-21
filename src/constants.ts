@@ -134,26 +134,32 @@ export const DEFAULT_TEXT_STYLE: em.TextStyle = {
 export const APPLE_IPHONE_DEVICES: em.Device[] = [
   {
     type: 'iPhone 8',
+    category: 'Apple',
     width: 375,
     height: 667
   }, {
     type: 'iPhone 8 Plus',
+    category: 'Apple',
     width: 414,
     height: 736
   }, {
     type: 'iPhone SE',
+    category: 'Apple',
     width: 320,
     height: 568
   }, {
     type: 'iPhone 11 Pro',
+    category: 'Apple',
     width: 375,
     height: 812
   }, {
     type: 'iPhone 11',
+    category: 'Apple',
     width: 414,
     height: 896
   }, {
     type: 'iPhone 11 Pro Max',
+    category: 'Apple',
     width: 414,
     height: 896
   }
@@ -162,22 +168,27 @@ export const APPLE_IPHONE_DEVICES: em.Device[] = [
 export const APPLE_IPAD_DEVICES: em.Device[] = [
   {
     type: '7.9" iPad mini',
+    category: 'Apple',
     width: 768,
     height: 1024
   }, {
     type: '10.2" iPad',
+    category: 'Apple',
     width: 810,
     height: 1080
   }, {
     type: '10.5" iPad Air',
+    category: 'Apple',
     width: 835,
     height: 1112
   }, {
     type: '11" iPad Pro',
+    category: 'Apple',
     width: 834,
     height: 1194
   }, {
     type: '12.9" iPad Pro',
+    category: 'Apple',
     width: 1024,
     height: 1366
   }
@@ -186,18 +197,22 @@ export const APPLE_IPAD_DEVICES: em.Device[] = [
 export const APPLE_WATCH_DEVICES: em.Device[] = [
   {
     type: 'Apple Watch 38mm',
+    category: 'Apple',
     width: 136,
     height: 170
   }, {
     type: 'Apple Watch 40mm',
+    category: 'Apple',
     width: 162,
     height: 197
   }, {
     type: 'Apple Watch 42mm',
+    category: 'Apple',
     width: 156,
     height: 195
   }, {
     type: 'Apple Watch 44mm',
+    category: 'Apple',
     width: 184,
     height: 224
   }
@@ -206,6 +221,7 @@ export const APPLE_WATCH_DEVICES: em.Device[] = [
 export const APPLE_TV_DEVICES: em.Device[] = [
   {
     type: 'Apple TV',
+    category: 'Apple',
     width: 1920,
     height: 1028
   }
@@ -214,6 +230,7 @@ export const APPLE_TV_DEVICES: em.Device[] = [
 export const APPLE_MAC_DEVICES: em.Device[] = [
   {
     type: 'Touch Bar',
+    category: 'Apple',
     width: 1085,
     height: 30
   }
@@ -241,34 +258,42 @@ export const APPLE_DEVICES: em.DeviceCategory[] = [
 export const ANDROID_MOBILE_DEVICES: em.Device[] = [
   {
     type: 'Android',
+    category: 'Android',
     width: 360,
     height: 640
   }, {
     type: 'Pixel 2',
+    category: 'Android',
     width: 412,
     height: 732
   }, {
     type: 'Pixel 2 XL',
+    category: 'Android',
     width: 360,
     height: 720
   }, {
     type: 'Pixel 3',
+    category: 'Android',
     width: 360,
     height: 720
   }, {
     type: 'Pixel 3 XL',
+    category: 'Android',
     width: 360,
     height: 740
   }, {
     type: 'Galaxy S10e',
+    category: 'Android',
     width: 360,
     height: 760
   }, {
     type: 'Galaxy S10',
+    category: 'Android',
     width: 360,
     height: 760
   }, {
     type: 'Galaxy S10+',
+    category: 'Android',
     width: 360,
     height: 760
   }
@@ -277,14 +302,17 @@ export const ANDROID_MOBILE_DEVICES: em.Device[] = [
 export const ANDROID_TABLET_DEVICES: em.Device[] = [
   {
     type: 'Nexus 7',
+    category: 'Android',
     width: 600,
     height: 960
   }, {
     type: 'Nexus 9',
+    category: 'Android',
     width: 768,
     height: 1024
   }, {
     type: 'Nexus 10',
+    category: 'Android',
     width: 800,
     height: 1280
   }
@@ -293,10 +321,12 @@ export const ANDROID_TABLET_DEVICES: em.Device[] = [
 export const ANDROID_CHROMEBOOK_DEVICES: em.Device[] = [
   {
     type: 'Pixel State',
+    category: 'Android',
     width: 1333,
     height: 888
   }, {
     type: 'Pixelbook',
+    category: 'Android',
     width: 1200,
     height: 800
   }
@@ -318,6 +348,7 @@ export const ANDROID_DEVICES: em.DeviceCategory[] = [
 export const RESPONSIVE_WEB_MOBILE_DEVICES: em.Device[] = [
   {
     type: 'Mobile',
+    category: 'Responsive Web',
     width: 320,
     height: 1024
   }
@@ -326,6 +357,7 @@ export const RESPONSIVE_WEB_MOBILE_DEVICES: em.Device[] = [
 export const RESPONSIVE_WEB_TABLET_DEVICES: em.Device[] = [
   {
     type: 'Tablet',
+    category: 'Responsive Web',
     width: 768,
     height: 1024
   }
@@ -334,10 +366,12 @@ export const RESPONSIVE_WEB_TABLET_DEVICES: em.Device[] = [
 export const RESPONSIVE_WEB_DESKTOP_DEVICES: em.Device[] = [
   {
     type: 'Desktop',
+    category: 'Responsive Web',
     width: 1024,
     height: 1024
   }, {
     type: 'Desktop HD',
+    category: 'Responsive Web',
     width: 1440,
     height: 1024
   }

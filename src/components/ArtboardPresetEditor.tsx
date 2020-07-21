@@ -14,6 +14,7 @@ import { CanvasSettingsTypes, AddArtboardPresetPayload, UpdateArtboardPresetPayl
 import SidebarInput from './SidebarInput';
 
 interface ArtboardPresetEditorProps {
+  exists?: boolean;
   artboardPresetEditor?: ArtboardPresetEditorState;
   platformType?: em.DevicePlatformType;
   closeArtboardPresetEditor?(): ArtboardPresetEditorTypes;
@@ -46,8 +47,8 @@ const SaveButton = styled.button`
 
 const ArtboardPresetEditor = (props: ArtboardPresetEditorProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { closeArtboardPresetEditor, platformType, artboardPresetEditor, addArtboardPreset, updateArtboardPreset, setArtboardToolDevicePlatform } = props;
-  const [name, setName] = useState(artboardPresetEditor.name);
+  const { exists, closeArtboardPresetEditor, platformType, artboardPresetEditor, addArtboardPreset, updateArtboardPreset, setArtboardToolDevicePlatform } = props;
+  const [name, setName] = useState(artboardPresetEditor.type);
   const [width, setWidth] = useState(artboardPresetEditor.width);
   const [height, setHeight] = useState(artboardPresetEditor.height);
 
@@ -71,12 +72,21 @@ const ArtboardPresetEditor = (props: ArtboardPresetEditorProps): ReactElement =>
   };
 
   const handleSaveClick = () => {
-    addArtboardPreset({
-      id: artboardPresetEditor.id,
-      name: name,
-      width: width,
-      height: height
-    });
+    if (exists) {
+      updateArtboardPreset({
+        id: artboardPresetEditor.id,
+        type: name,
+        width: width,
+        height: height
+      });
+    } else {
+      addArtboardPreset({
+        id: artboardPresetEditor.id,
+        type: name,
+        width: width,
+        height: height
+      });
+    }
     setArtboardToolDevicePlatform({
       platform: 'Custom'
     });
@@ -172,9 +182,10 @@ const ArtboardPresetEditor = (props: ArtboardPresetEditorProps): ReactElement =>
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { artboardPresetEditor, tool } = state;
+  const { artboardPresetEditor, tool, canvasSettings } = state;
   const platformType = tool.artboardToolDevicePlatform;
-  return { artboardPresetEditor, platformType };
+  const exists = canvasSettings.artboardPresets.allIds.includes(artboardPresetEditor.id);
+  return { artboardPresetEditor, platformType, exists };
 };
 
 export default connect(

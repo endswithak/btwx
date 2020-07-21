@@ -11,7 +11,7 @@ export interface ArtboardPresetEditorState extends em.ArtboardPreset {
 const initialState: ArtboardPresetEditorState = {
   isOpen: false,
   id: null,
-  name: 'Custom',
+  type: 'Custom',
   width: 100,
   height: 100
 };

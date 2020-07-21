@@ -55,7 +55,7 @@ export interface SetCanvasZooming {
 
 export interface AddArtboardPresetPayload {
   id: string;
-  name: string;
+  type: string;
   width: number;
   height: number;
 }
@@ -76,7 +76,7 @@ export interface RemoveArtboardPreset {
 
 export interface UpdateArtboardPresetPayload {
   id: string;
-  name: string;
+  type: string;
   width: number;
   height: number;
 }

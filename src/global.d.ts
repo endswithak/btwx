@@ -12,7 +12,7 @@ declare namespace em {
 
   type CubicBezierType = 'in' | 'inOut' | 'out';
 
-  type ContextMenu = 'TweenEvent' | 'TweenEventDestination';
+  type ContextMenu = 'TweenEvent' | 'TweenEventDestination' | 'ArtboardCustomPreset';
 
   type TweenProp = 'image' | 'shape' | 'fill' | 'x' | 'y' | 'rotation' | 'width' | 'height' | 'stroke' | 'strokeDashWidth' | 'strokeDashGap' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity' | 'fontSize' | 'lineHeight';
 
@@ -90,6 +90,7 @@ declare namespace em {
 
   interface Device {
     type: DeviceType;
+    category: DevicePlatformType;
     width: number;
     height: number;
   }
@@ -283,7 +284,8 @@ declare namespace em {
 
   interface ArtboardPreset {
     id: string;
-    name: string;
+    category: 'Custom';
+    type: string;
     width: number;
     height: number;
   }

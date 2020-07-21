@@ -95,7 +95,10 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
           allIds: addItem(state.artboardPresets.allIds, action.payload.id),
           byId: {
             ...state.artboardPresets.byId,
-            [action.payload.id]: action.payload
+            [action.payload.id]: {
+              ...action.payload,
+              category: 'Custom'
+            }
           }
         }
       };
@@ -125,7 +128,10 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
             if (id !== action.payload.id) {
               result[id] = state.artboardPresets.byId[id];
             } else {
-              result[id] = action.payload;
+              result[id] = {
+                ...action.payload,
+                category: 'Custom'
+              };
             }
             return result;
           }, {})

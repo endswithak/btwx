@@ -1,12 +1,17 @@
 import React, { useContext, ReactElement, useState } from 'react';
+import { connect } from 'react-redux';
+import { RootState } from '../store/reducers';
 import styled from 'styled-components';
 import SidebarSectionRow from './SidebarSectionRow';
 import { ThemeContext } from './ThemeProvider';
+import { ContextMenuTypes, OpenContextMenuPayload } from '../store/actionTypes/contextMenu';
+import { closeContextMenu, openContextMenu } from '../store/actions/contextMenu';
 
 interface SidebarArtboardPlatformDeviceProps {
-  device: em.Device;
+  device: em.Device | em.ArtboardPreset;
   orientation: em.DeviceOrientationType;
   onClick(device: em.Device): void;
+  openContextMenu?(payload: OpenContextMenuPayload): ContextMenuTypes;
 }
 
 const Device = styled.button`
@@ -28,8 +33,22 @@ const Device = styled.button`
 `;
 
 const SidebarArtboardPlatformDevice = (props: SidebarArtboardPlatformDeviceProps): ReactElement => {
-  const { device, orientation, onClick } = props;
+  const { device, orientation, onClick, openContextMenu } = props;
   const theme = useContext(ThemeContext);
+
+  const handleContextMenu = (e: any) => {
+    openContextMenu({
+      type: 'ArtboardCustomPreset',
+      x: e.clientX,
+      y: e.clientY,
+      id: (device as em.ArtboardPreset).id,
+      data: {
+        type: device.type,
+        width: device.width,
+        height: device.width
+      }
+    });
+  }
 
   return (
     <SidebarSectionRow
@@ -38,9 +57,10 @@ const SidebarArtboardPlatformDevice = (props: SidebarArtboardPlatformDeviceProps
       <Device
         className='c-sidebar-artboard-platform-device'
         theme={theme}
-        onClick={() => onClick(device)}>
+        onClick={() => onClick(device)}
+        onContextMenu={handleContextMenu}>
         <span className='c-sidebar-artboard-platform-device__name'>
-          {device.type ? device.type : device.name}
+          {device.type}
         </span>
         <span className='c-sidebar-artboard-platform-device__size'>
           {`${orientation === 'Landscape' ? device.height : device.width}x${orientation === 'Landscape' ? device.width : device.height}`}
@@ -50,4 +70,7 @@ const SidebarArtboardPlatformDevice = (props: SidebarArtboardPlatformDeviceProps
   );
 }
 
-export default SidebarArtboardPlatformDevice;
+export default connect(
+  null,
+  { openContextMenu }
+)(SidebarArtboardPlatformDevice);
