@@ -12,6 +12,7 @@ const initialState: ArtboardPresetEditorState = {
   isOpen: false,
   id: null,
   type: 'Custom',
+  category: 'Custom',
   width: 100,
   height: 100
 };

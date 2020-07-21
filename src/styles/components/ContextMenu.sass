@@ -20,27 +20,28 @@
   &::selection
     background: none
 
-.c-context-menu__item
-  width: 100%
-  height: $unit * 8
+.c-context-menu__item,
+.c-context-menu__head
   line-height: $unit * 8
   font-family: $fontFamily
-  padding: 0 $unit * 4
   font-size: $fontSizeSm
-  cursor: pointer
   text-align: left
+  width: 100%
+  height: $unit * 8
+  padding: 0 $unit * 4
 
   &::selection
     background: none
+
+.c-context-menu__item
+  cursor: pointer
 
 .c-context-menu__head
-  width: 100%
-  height: $unit * 8
-  line-height: $unit * 8
-  font-family: $fontFamily
-  padding: 0 $unit * 4
-  font-size: $fontSizeSm
   text-transform: uppercase
 
-  &::selection
-    background: none
+.c-context-menu__empty-state
+  font-family: $fontFamily
+  font-size: $fontSizeSm
+  line-height: 16px
+  text-align: center
+  padding: $unit * 4

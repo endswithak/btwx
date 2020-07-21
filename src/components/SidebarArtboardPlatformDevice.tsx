@@ -1,11 +1,10 @@
 import React, { useContext, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
-import { RootState } from '../store/reducers';
 import styled from 'styled-components';
 import SidebarSectionRow from './SidebarSectionRow';
 import { ThemeContext } from './ThemeProvider';
 import { ContextMenuTypes, OpenContextMenuPayload } from '../store/actionTypes/contextMenu';
-import { closeContextMenu, openContextMenu } from '../store/actions/contextMenu';
+import { openContextMenu } from '../store/actions/contextMenu';
 
 interface SidebarArtboardPlatformDeviceProps {
   device: em.Device | em.ArtboardPreset;

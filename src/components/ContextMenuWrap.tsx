@@ -30,6 +30,9 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
     switch(contextMenu.type) {
       case 'TweenEvent': {
         return [{
+          type: 'MenuHead',
+          text: 'Add Tween Event'
+        },{
           type: 'MenuItem',
           text: 'Click',
           onClick: (): void => {
@@ -84,7 +87,7 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
         }]
       }
       case 'TweenEventDestination': {
-        return artboards.reduce((result, current) => {
+        const tweenDestinations = artboards.reduce((result, current) => {
           if (current.id !== activeArtboard) {
             result = [
               ...result,
@@ -106,7 +109,11 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
             ]
           }
           return result;
-        }, [])
+        }, []);
+        return tweenDestinations.length > 0 ? [{
+          type: 'MenuHead',
+          text: 'Add Tween Destination'
+        }, ...tweenDestinations] : tweenDestinations;
       }
       case 'ArtboardCustomPreset': {
         return [{
@@ -134,10 +141,25 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
     }
   }
 
+  const getEmptyState = () => {
+    switch(contextMenu.type) {
+      case 'TweenEvent': {
+        return null;
+      }
+      case 'TweenEventDestination': {
+        return 'Need more than one artboard to select tween destination.';
+      }
+      case 'ArtboardCustomPreset': {
+        return null;
+      }
+    }
+  }
+
   return (
     contextMenu.isOpen
     ? <ContextMenu
-        options={getOptions()} />
+        options={getOptions()}
+        emptyState={getEmptyState()} />
     : null
   );
 }

@@ -101,7 +101,7 @@ const mapStateToProps = (state: RootState) => {
     allTextIds: layer.present.allTextIds,
     allImageIds: layer.present.allImageIds,
     paperProject: layer.present.paperProject,
-    canvasSettings
+    canvasSettings: canvasSettings
   };
 };
 

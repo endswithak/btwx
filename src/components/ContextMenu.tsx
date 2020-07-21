@@ -6,6 +6,7 @@ import { ContextMenuState } from '../store/reducers/contextMenu';
 import { ContextMenuTypes } from '../store/actionTypes/contextMenu';
 import { closeContextMenu } from '../store/actions/contextMenu';
 import ContextMenuItem from './ContextMenuItem';
+import ContextMenuEmptyState from './ContextMenuEmptyState';
 import ContextMenuHead from './ContextMenuHead';
 import tinyColor from 'tinycolor2';
 
@@ -14,6 +15,7 @@ interface ContextMenuProps {
     text: string;
     onClick(): void;
   }[];
+  emptyState?: string;
   contextMenu?: ContextMenuState;
   x?: number;
   y?: number;
@@ -22,17 +24,20 @@ interface ContextMenuProps {
 
 const ContextMenu = (props: ContextMenuProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { options, contextMenu, closeContextMenu, x, y } = props;
+  const { options, contextMenu, emptyState, closeContextMenu, x, y } = props;
 
-  const handleCloseRequest = () => {
-    closeContextMenu();
-  }
+  useEffect(() => {
+    document.addEventListener('keydown', closeContextMenu);
+    return () => {
+      document.removeEventListener('keydown', closeContextMenu);
+    }
+  }, []);
 
   return (
     <div className='c-context-menu-wrap'>
       <div
         className='c-context-menu__overlay'
-        onMouseDown={handleCloseRequest} />
+        onMouseDown={closeContextMenu} />
       <div
         className='c-context-menu'
         style={{
@@ -43,25 +48,30 @@ const ContextMenu = (props: ContextMenuProps): ReactElement => {
           top: y
         }}>
         {
-          options.map((option: {type: 'MenuItem' | 'MenuHead'; text: string; onClick(): void}, index: number) => {
-            switch(option.type) {
-              case 'MenuItem': {
-                return (
-                  <ContextMenuItem
-                    key={index}
-                    onClick={option.onClick}
-                    text={option.text} />
-                )
+          options.length > 0
+          ? options.map((option: {type: 'MenuItem' | 'MenuHead'; text: string; onClick(): void}, index: number) => {
+              switch(option.type) {
+                case 'MenuItem': {
+                  return (
+                    <ContextMenuItem
+                      key={index}
+                      onClick={option.onClick}
+                      text={option.text} />
+                  )
+                }
+                case 'MenuHead': {
+                  return (
+                    <ContextMenuHead
+                      key={index}
+                      text={option.text} />
+                  )
+                }
               }
-              case 'MenuHead': {
-                return (
-                  <ContextMenuHead
-                    key={index}
-                    text={option.text} />
-                )
-              }
-            }
-          })
+            })
+          : emptyState
+            ? <ContextMenuEmptyState
+                text={emptyState} />
+            : null
         }
       </div>
     </div>

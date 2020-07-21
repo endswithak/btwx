@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
@@ -71,18 +72,18 @@ const ArtboardPresetEditor = (props: ArtboardPresetEditorProps): ReactElement =>
     }
   };
 
-  const handleSaveClick = () => {
+  const handleSave = () => {
     if (exists) {
       updateArtboardPreset({
         id: artboardPresetEditor.id,
-        type: name,
+        type: name.replace(/\s/g, '').length > 0 ? name : 'Custom',
         width: width,
         height: height
       });
     } else {
       addArtboardPreset({
         id: artboardPresetEditor.id,
-        type: name,
+        type: name.replace(/\s/g, '').length > 0 ? name : 'Custom',
         width: width,
         height: height
       });
@@ -145,19 +146,25 @@ const ArtboardPresetEditor = (props: ArtboardPresetEditorProps): ReactElement =>
               <SidebarInput
                 value={name}
                 onChange={handleNameChange}
+                onSubmit={handleSave}
                 bottomLabel={'Name'}
-                disableSelectionToolToggle />
+                disableSelectionToolToggle
+                selectOnMount />
             </div>
             <div className='c-artboard-preset-editor__size-input'>
               <SidebarInput
                 value={width}
                 onChange={handleWidthChange}
+                onSubmit={handleSave}
                 bottomLabel={'Width'}
+                label='px'
                 disableSelectionToolToggle />
               <SidebarInput
                 value={height}
                 onChange={handleHeightChange}
+                onSubmit={handleSave}
                 bottomLabel={'Height'}
+                label='px'
                 disableSelectionToolToggle />
             </div>
           </div>
@@ -171,7 +178,7 @@ const ArtboardPresetEditor = (props: ArtboardPresetEditorProps): ReactElement =>
             <SaveButton
               className='c-artboard-preset-editor__button c-artboard-preset-editor__button--save'
               theme={theme}
-              onClick={handleSaveClick}>
+              onClick={handleSave}>
               Save
             </SaveButton>
           </div>

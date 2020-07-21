@@ -32,10 +32,11 @@ const SidebarArtboardPlatformAdd = (props: SidebarArtboardPlatformAddProps): Rea
   const handleClick = () => {
     openArtboardPresetEditor({
       id: uuidv4(),
-      name: artboardPresetEditor.name,
+      category: artboardPresetEditor.category,
+      type: artboardPresetEditor.type,
       width: artboardPresetEditor.width,
       height: artboardPresetEditor.height
-    })
+    });
   }
 
   return (
