@@ -9,14 +9,18 @@ interface HoverFrameProps {
   selected?: string[];
   hover?: string;
   hoverItem?: em.Layer;
+  zoom?: number;
 }
 
 const HoverFrame = (props: HoverFrameProps): ReactElement => {
-  const { selected, hover, hoverItem } = props;
+  const { selected, hover, hoverItem, zoom } = props;
 
   const handleWheel = (e: WheelEvent) => {
     if (e.ctrlKey) {
-      updateHoverFrame({selected: selected, hover: hover} as LayerState);
+      const hoverFrame = paperMain.project.getItem({ data: { id: 'hoverFrame' } });
+      if (hoverFrame) {
+        hoverFrame.remove();
+      }
     }
   }
 
@@ -30,7 +34,7 @@ const HoverFrame = (props: HoverFrameProps): ReactElement => {
         hoverFrame.remove();
       }
     }
-  }, [selected, hover, hoverItem]);
+  }, [selected, hover, hoverItem, zoom]);
 
   return (
     <div />
@@ -38,11 +42,12 @@ const HoverFrame = (props: HoverFrameProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
+  const { layer, canvasSettings } = state;
   const hover = layer.present.hover;
   const hoverItem = layer.present.byId[hover];
   const selected = layer.present.selected;
-  return { hover, hoverItem, selected };
+  const zoom = canvasSettings.matrix[0];
+  return { hover, hoverItem, selected, zoom };
 };
 
 export default connect(

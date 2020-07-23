@@ -67,7 +67,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
       e.preventDefault();
       setCanvasMatrix({matrix: paperMain.view.matrix.values});
       updateInViewLayers();
-    }, 250));
+    }, 150));
     if (canvasSettings.matrix) {
       paperMain.view.matrix.set(canvasSettings.matrix);
     }

@@ -21,6 +21,13 @@ const Button = styled.button<TopbarDropdownButtonOptionProps>`
   .c-topbar-dropdown-button__label {
     color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.light};
   }
+  :disabled {
+    background: none;
+    opacity: 0.5;
+    .c-topbar-dropdown-button__label {
+      color: ${props => props.theme.text.lighter};
+    }
+  }
   :hover {
     background: ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.palette.primary};
     .c-topbar-dropdown-button__icon {
@@ -30,6 +37,17 @@ const Button = styled.button<TopbarDropdownButtonOptionProps>`
     }
     .c-topbar-dropdown-button__label {
       color: ${props => props.theme.text.onPrimary};
+    }
+    :disabled {
+      background: none;
+      .c-topbar-dropdown-button__icon {
+        svg {
+          fill: ${props => props.theme.text.lighter};
+        }
+      }
+      .c-topbar-dropdown-button__label {
+        color: ${props => props.theme.text.lighter};
+      }
     }
   }
 `;
@@ -43,14 +61,18 @@ const TopbarDropdownButtonOption = (props: TopbarDropdownButtonOptionProps): Rea
       className='c-topbar-dropdown-button__option'
       {...props}
       theme={theme}>
-      <span className='c-topbar-dropdown-button__icon'>
-        <svg
-          width='24'
-          height='24'
-          viewBox='0 0 24 24'>
-          <path d={icon} />
-        </svg>
-      </span>
+      {
+        icon
+        ? <span className='c-topbar-dropdown-button__icon'>
+            <svg
+              width='24'
+              height='24'
+              viewBox='0 0 24 24'>
+              <path d={icon} />
+            </svg>
+          </span>
+        : null
+      }
       <span className='c-topbar-dropdown-button__label'>
         {label}
       </span>

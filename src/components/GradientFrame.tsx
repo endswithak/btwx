@@ -1,5 +1,7 @@
 import React, { useContext, ReactElement, useEffect, useState } from 'react';
 import { getGradientOriginPoint, getGradientDestinationPoint } from '../store/selectors/layer';
+import { connect } from 'react-redux';
+import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
 import { ThemeContext } from './ThemeProvider';
 
@@ -7,11 +9,12 @@ interface GradientFrameProps {
   layer: string;
   gradient: em.Gradient;
   onStopPress(id: string): void;
+  zoom?: number;
 }
 
 const GradientFrame = (props: GradientFrameProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layer, gradient, onStopPress } = props;
+  const { layer, gradient, onStopPress, zoom } = props;
 
   const updateGradientFrame = () => {
     const sortedStops = [...Object.keys(gradient.stops.byId)].sort((a,b) => { return gradient.stops.byId[a].position - gradient.stops.byId[b].position });
@@ -138,7 +141,10 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
 
   const handleWheel = (e: WheelEvent) => {
     if (e.ctrlKey) {
-      updateGradientFrame();
+      const oldGradientFrame = paperMain.project.getItem({ data: { id: 'gradientFrame' } });
+      if (oldGradientFrame) {
+        oldGradientFrame.remove();
+      }
     }
   }
 
@@ -152,11 +158,19 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
         oldGradientFrame.remove();
       }
     }
-  }, [gradient, layer]);
+  }, [gradient, layer, zoom]);
 
   return (
     <div />
   );
 }
 
-export default GradientFrame;
+const mapStateToProps = (state: RootState) => {
+  const { canvasSettings } = state;
+  const zoom = canvasSettings.matrix[0];
+  return { zoom };
+};
+
+export default connect(
+  mapStateToProps
+)(GradientFrame);

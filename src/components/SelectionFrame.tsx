@@ -10,14 +10,18 @@ interface SelectionFrameProps {
   selectedById?: {
     [id: string]: em.Layer;
   };
+  zoom: number;
 }
 
 const SelectionFrame = (props: SelectionFrameProps): ReactElement => {
-  const { selected, selectedById } = props;
+  const { selected, selectedById, zoom } = props;
 
   const handleWheel = (e: WheelEvent) => {
     if (e.ctrlKey) {
-      updateSelectionFrame({selected: selected, byId: selectedById} as LayerState, 'all', true);
+      const selectionFrame = paperMain.project.getItem({ data: { id: 'selectionFrame' } });
+      if (selectionFrame) {
+        selectionFrame.remove();
+      }
     }
   }
 
@@ -31,7 +35,7 @@ const SelectionFrame = (props: SelectionFrameProps): ReactElement => {
         selectionFrame.remove();
       }
     }
-  }, [selectedById, selected]);
+  }, [selectedById, selected, zoom]);
 
   return (
     <div />
@@ -39,13 +43,14 @@ const SelectionFrame = (props: SelectionFrameProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
+  const { layer, canvasSettings } = state;
   const selected = layer.present.selected;
   const selectedById = layer.present.selected.reduce((result: { [id: string]: em.Layer }, current) => {
     result[current] = layer.present.byId[current];
     return result;
   }, {});
-  return { selected, selectedById };
+  const zoom = canvasSettings.matrix[0];
+  return { selected, selectedById, zoom };
 };
 
 export default connect(

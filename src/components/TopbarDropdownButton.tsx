@@ -10,6 +10,7 @@ interface TopbarDropdownButtonProps {
   onClick?(event: React.SyntheticEvent): void;
   disabled?: boolean;
   icon?: string;
+  text?: string;
   label: string;
   options: {
     onClick: any;
@@ -28,7 +29,7 @@ const ButtonDropdown = styled.div`
 const TopbarDropdownButton = (props: TopbarDropdownButtonProps): ReactElement => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
-  const { onClick, disabled, label, icon, options } = props;
+  const { onClick, text, disabled, label, icon, options } = props;
   const [showDropdown, setShowDropdown] = useState(false);
 
   const onMouseDown = (event: any) => {
@@ -67,6 +68,7 @@ const TopbarDropdownButton = (props: TopbarDropdownButtonProps): ReactElement =>
         label={label}
         onClick={handleClick}
         icon={icon}
+        text={text}
         isActive={showDropdown}
         disabled={disabled} />
       {

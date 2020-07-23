@@ -206,6 +206,59 @@ export const getSelectionCenter = (store: LayerState, useLayerItem?: boolean): p
   return new paper.Point(xMid, yMid);
 }
 
+export const getCanvasTopLeft = (store: LayerState, useLayerItem?: boolean): paper.Point => {
+  const paperLayerPoints = store.allIds.reduce((result, current) => {
+    if (current !== 'page') {
+      if (useLayerItem) {
+        const layerItem = store.byId[current];
+        const topLeft = new paperMain.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
+        return [...result, topLeft];
+      } else {
+        const paperLayer = getPaperLayer(current);
+        return [...result, paperLayer.bounds.topLeft];
+      }
+    } else {
+      return result;
+    }
+  }, []);
+  return paperLayerPoints.reduce(paper.Point.min);
+}
+
+export const getCanvasBottomRight = (store: LayerState, useLayerItem?: boolean): paper.Point => {
+  const paperLayerPoints = store.allIds.reduce((result, current) => {
+    if (current !== 'page') {
+      if (useLayerItem) {
+        const layerItem = store.byId[current];
+        const bottomRight = new paperMain.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
+        return [...result, bottomRight];
+      } else {
+        const paperLayer = getPaperLayer(current);
+        return [...result, paperLayer.bounds.bottomRight];
+      }
+    } else {
+      return result;
+    }
+  }, []);
+  return paperLayerPoints.reduce(paper.Point.max);
+}
+
+export const getCanvasBounds = (store: LayerState, useLayerItem?: boolean): paper.Rectangle => {
+  const topLeft = getCanvasTopLeft(store, useLayerItem);
+  const bottomRight = getCanvasBottomRight(store, useLayerItem);
+  return new paper.Rectangle({
+    from: topLeft,
+    to: bottomRight
+  });
+}
+
+export const getCanvasCenter = (store: LayerState, useLayerItem?: boolean): paper.Point => {
+  const topLeft = getCanvasTopLeft(store, useLayerItem);
+  const bottomRight = getCanvasBottomRight(store, useLayerItem);
+  const xMid = (topLeft.x + bottomRight.x) / 2;
+  const yMid = (topLeft.y + bottomRight.y) / 2;
+  return new paper.Point(xMid, yMid);
+}
+
 export const getClipboardTopLeft = (store: LayerState, canvasImages: {[id: string]: em.CanvasImage}): paper.Point => {
   const paperLayerPoints = store.clipboard.allIds.reduce((result, current) => {
     const layerItem = store.clipboard.byId[current];

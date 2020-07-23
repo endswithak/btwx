@@ -8,14 +8,18 @@ import { paperMain } from '../canvas';
 interface ActiveArtboardFrameProps {
   activeArtboard?: string;
   activeArtboardItem?: em.Artboard;
+  zoom?: number;
 }
 
 const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
-  const { activeArtboard, activeArtboardItem } = props;
+  const { activeArtboard, activeArtboardItem, zoom } = props;
 
   const handleWheel = (e: WheelEvent) => {
     if (e.ctrlKey) {
-      updateActiveArtboardFrame({activeArtboard: activeArtboard, byId: {[activeArtboard]: activeArtboardItem}} as LayerState, true);
+      const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'activeArtboardFrame' } });
+      if (activeArtboardFrame) {
+        activeArtboardFrame.remove();
+      }
     }
   }
 
@@ -29,7 +33,7 @@ const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
         activeArtboardFrame.remove();
       }
     }
-  }, [activeArtboard, activeArtboardItem]);
+  }, [activeArtboard, activeArtboardItem, zoom]);
 
   return (
     <div />
@@ -37,10 +41,11 @@ const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
+  const { layer, canvasSettings } = state;
   const activeArtboard = layer.present.activeArtboard;
   const activeArtboardItem = layer.present.byId[activeArtboard];
-  return { activeArtboard, activeArtboardItem };
+  const zoom = canvasSettings.matrix[0];
+  return { activeArtboard, activeArtboardItem, zoom };
 };
 
 export default connect(
