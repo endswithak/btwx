@@ -7,6 +7,8 @@ import { paperMain } from '../canvas';
 import { SetCanvasMatrixPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
 import { setCanvasMatrix } from '../store/actions/canvasSettings';
 import { getSelectionBounds, getCanvasBounds, getSelectionCenter, getCanvasCenter } from '../store/selectors/layer';
+import ZoomOutButton from './ZoomOutButton';
+import ZoomInButton from './ZoomInButton';
 
 interface ZoomButtonProps {
   zoom?: number;
@@ -33,7 +35,11 @@ const ZoomButton = (props: ZoomButtonProps): ReactElement => {
     if (canCanvasZoom) {
       const canvasBounds = getCanvasBounds({allIds: allLayerIds, byId: layerById} as LayerState, true);
       const canvasCenter = getCanvasCenter({allIds: allLayerIds, byId: layerById} as LayerState, true);
-      const constrainingDim = canvasBounds.width >= canvasBounds.height ? {dim: canvasBounds.width, type: 'width'} : {dim: canvasBounds.height, type: 'height'};
+      const maxWidth: number = Math.max(paperMain.view.bounds.width, canvasBounds.width);
+      const maxHeight: number = Math.max(paperMain.view.bounds.height, canvasBounds.height);
+      const maxRatio: number = maxWidth / maxHeight;
+      const layerRatio: number = canvasBounds.width / canvasBounds.height;
+      const constrainingDim = maxRatio > layerRatio ? {dim: canvasBounds.height, type: 'height'} : {dim: canvasBounds.width, type: 'width'};
       const viewDim = (() => {
         switch(constrainingDim.type) {
           case 'height':
@@ -53,7 +59,11 @@ const ZoomButton = (props: ZoomButtonProps): ReactElement => {
     if (canSelectedZoom) {
       const selectionBounds = getSelectionBounds({selected: selected, byId: layerById} as LayerState, true);
       const selectionCenter = getSelectionCenter({selected: selected, byId: layerById} as LayerState, true);
-      const constrainingDim = selectionBounds.width >= selectionBounds.height ? {dim: selectionBounds.width, type: 'width'} : {dim: selectionBounds.height, type: 'height'};
+      const maxWidth: number = Math.max(paperMain.view.bounds.width, selectionBounds.width);
+      const maxHeight: number = Math.max(paperMain.view.bounds.height, selectionBounds.height);
+      const maxRatio: number = maxWidth / maxHeight;
+      const layerRatio: number = selectionBounds.width / selectionBounds.height;
+      const constrainingDim = maxRatio > layerRatio ? {dim: selectionBounds.height, type: 'height'} : {dim: selectionBounds.width, type: 'width'};
       const viewDim = (() => {
         switch(constrainingDim.type) {
           case 'height':
@@ -73,7 +83,11 @@ const ZoomButton = (props: ZoomButtonProps): ReactElement => {
     if (canArtboardZoom) {
       const selectionBounds = getSelectionBounds({selected: selected, byId: layerById} as LayerState, true);
       const selectionCenter = getSelectionCenter({selected: selected, byId: layerById} as LayerState, true);
-      const constrainingDim = selectionBounds.width >= selectionBounds.height ? {dim: selectionBounds.width, type: 'width'} : {dim: selectionBounds.height, type: 'height'};
+      const maxWidth: number = Math.max(paperMain.view.bounds.width, selectionBounds.width);
+      const maxHeight: number = Math.max(paperMain.view.bounds.height, selectionBounds.height);
+      const maxRatio: number = maxWidth / maxHeight;
+      const layerRatio: number = selectionBounds.width / selectionBounds.height;
+      const constrainingDim = maxRatio > layerRatio ? {dim: selectionBounds.height, type: 'height'} : {dim: selectionBounds.width, type: 'width'};
       const viewDim = (() => {
         switch(constrainingDim.type) {
           case 'height':
@@ -90,31 +104,35 @@ const ZoomButton = (props: ZoomButtonProps): ReactElement => {
   }
 
   return (
-    <TopbarDropdownButton
-      label='Zoom'
-      text={`${zoom}%`}
-      options={[{
-        label: '50%',
-        onClick: () => handlePercentageZoom(0.5)
-      },{
-        label: '100%',
-        onClick: () => handlePercentageZoom(1)
-      },{
-        label: '200%',
-        onClick: () => handlePercentageZoom(2)
-      },{
-        label: 'Fit Canvas',
-        onClick: handleCanvasZoom,
-        disabled: !canCanvasZoom
-      },{
-        label: 'Selection',
-        onClick: handleSelectionZoom,
-        disabled: !canSelectedZoom
-      },{
-        label: 'Artboard',
-        onClick: handleArtboardZoom,
-        disabled: !canArtboardZoom
-      }]} />
+    <div className='c-topbar-button c-topbar-button--split'>
+      <ZoomOutButton />
+      <TopbarDropdownButton
+        label='Zoom'
+        text={`${zoom}%`}
+        options={[{
+          label: '50%',
+          onClick: () => handlePercentageZoom(0.5)
+        },{
+          label: '100%',
+          onClick: () => handlePercentageZoom(1)
+        },{
+          label: '200%',
+          onClick: () => handlePercentageZoom(2)
+        },{
+          label: 'Fit Canvas',
+          onClick: handleCanvasZoom,
+          disabled: !canCanvasZoom
+        },{
+          label: 'Selection',
+          onClick: handleSelectionZoom,
+          disabled: !canSelectedZoom
+        },{
+          label: 'Artboard',
+          onClick: handleArtboardZoom,
+          disabled: !canArtboardZoom
+        }]} />
+      <ZoomInButton />
+    </div>
   );
 }
 

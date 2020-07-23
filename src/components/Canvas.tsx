@@ -57,7 +57,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
         } else if (e.deltaY > 0 && nextZoom > 0) {
           paperMain.view.zoom = nextZoom;
         } else if (e.deltaY > 0 && nextZoom < 0) {
-          paperMain.view.zoom = 0.001;
+          paperMain.view.zoom = 0.01;
         }
       } else {
         paperMain.view.translate(new paper.Point((e.deltaX * ( 1 / paperMain.view.zoom)) * -1, (e.deltaY * ( 1 / paperMain.view.zoom)) * -1));

@@ -33,7 +33,7 @@ export interface CanvasSettingsState {
 }
 
 const initialState: CanvasSettingsState = {
-  matrix: null,
+  matrix: [1, 0, 0, 1, 0, 0],
   artboardPresets: {
     allIds: [],
     byId: {},

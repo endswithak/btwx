@@ -8,7 +8,8 @@ interface TopbarButtonProps {
   disabled?: boolean;
   icon?: string;
   text?: string;
-  label: string;
+  label?: string;
+  hideLabel?: boolean;
 }
 
 interface ButtonWrapProps {
@@ -52,7 +53,7 @@ const ButtonWrap = styled.div<ButtonWrapProps>`
 
 const TopbarButton = (props: TopbarButtonProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { onClick, text, isActive, disabled, label, icon } = props;
+  const { onClick, text, hideLabel, isActive, disabled, label, icon } = props;
 
   return (
     <ButtonWrap
@@ -79,7 +80,7 @@ const TopbarButton = (props: TopbarButtonProps): ReactElement => {
           : null
         }
       </button>
-      <div className='c-topbar-button__label'>
+      <div className={`c-topbar-button__label ${hideLabel ? 'c-topbar-button__label--hidden' : null}`}>
         {label}
       </div>
     </ButtonWrap>

@@ -15,6 +15,7 @@ import { paperMain } from '../canvas';
 import { DEFAULT_ARTBOARD_BACKGROUND_COLOR } from '../constants';
 
 interface SidebarArtboardPlatformOrientationProps {
+  selected?: string[];
   orientation?: em.DeviceOrientationType;
   platform?: em.DevicePlatformType;
   setArtboardToolDeviceOrientation?(payload: SetArtboardToolDeviceOrientationPayload): ToolTypes;
@@ -24,7 +25,7 @@ interface SidebarArtboardPlatformOrientationProps {
 
 const SidebarArtboardSizes = (props: SidebarArtboardPlatformOrientationProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { orientation, platform, setArtboardToolDeviceOrientation, addArtboard, enableSelectionTool } = props;
+  const { selected, orientation, platform, setArtboardToolDeviceOrientation, addArtboard, enableSelectionTool } = props;
 
   const handleOrientationClick = (type: em.DeviceOrientationType) => {
     switch(type) {
@@ -99,10 +100,11 @@ const SidebarArtboardSizes = (props: SidebarArtboardPlatformOrientationProps): R
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { tool } = state;
+  const { tool, layer } = state;
+  const selected = layer.present.selected;
   const orientation = tool.artboardToolOrientation;
   const platform = tool.artboardToolDevicePlatform;
-  return { orientation, platform };
+  return { orientation, platform, selected };
 };
 
 export default connect(
