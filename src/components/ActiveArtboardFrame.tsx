@@ -25,10 +25,10 @@ const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
 
   useEffect(() => {
     updateActiveArtboardFrame({activeArtboard: activeArtboard, byId: {[activeArtboard]: activeArtboardItem}} as LayerState, true);
-    document.getElementById('canvas-main').addEventListener('wheel', handleWheel);
+    document.getElementById('canvas').addEventListener('wheel', handleWheel);
     return () => {
       const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'activeArtboardFrame' } });
-      document.getElementById('canvas-main').removeEventListener('wheel', handleWheel);
+      document.getElementById('canvas').removeEventListener('wheel', handleWheel);
       if (activeArtboardFrame) {
         activeArtboardFrame.remove();
       }

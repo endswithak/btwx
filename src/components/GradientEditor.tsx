@@ -88,7 +88,7 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
 
   const onMouseDown = (event: any) => {
     if (editorRef.current && !editorRef.current.contains(event.target)) {
-      if (event.target.id === 'canvas-main') {
+      if (event.target.id === 'canvas') {
         const eventPoint = paperMain.view.getEventPoint(event);
         const hitResult = paperMain.project.hitTest(eventPoint);
         if (!hitResult || hitResult.item.data.id !== 'gradientFrameHandle') {

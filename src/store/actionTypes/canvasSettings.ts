@@ -6,6 +6,9 @@ export const SET_CANVAS_ZOOMING = 'SET_CANVAS_ZOOMING';
 export const ADD_ARTBOARD_PRESET = 'ADD_ARTBOARD_PRESET';
 export const REMOVE_ARTBOARD_PRESET = 'REMOVE_ARTBOARD_PRESET';
 export const UPDATE_ARTBOARD_PRESET = 'UPDATE_ARTBOARD_PRESET';
+export const SET_LEFT_SIDEBAR_WIDTH = 'SET_LEFT_SIDEBAR_WIDTH';
+export const SET_RIGHT_SIDEBAR_WIDTH = 'SET_RIGHT_SIDEBAR_WIDTH';
+export const SET_TWEEN_DRAWER_HEIGHT = 'SET_TWEEN_DRAWER_HEIGHT';
 
 export interface SetCanvasMatrixPayload {
   matrix: number[];
@@ -86,6 +89,33 @@ export interface UpdateArtboardPreset {
   payload: UpdateArtboardPresetPayload;
 }
 
+export interface SetLeftSidebarWidthPayload {
+  width: number;
+}
+
+export interface SetLeftSidebarWidth {
+  type: typeof SET_LEFT_SIDEBAR_WIDTH;
+  payload: SetLeftSidebarWidthPayload;
+}
+
+export interface SetRightSidebarWidthPayload {
+  width: number;
+}
+
+export interface SetRightSidebarWidth {
+  type: typeof SET_RIGHT_SIDEBAR_WIDTH;
+  payload: SetRightSidebarWidthPayload;
+}
+
+export interface SetTweenDrawerHeightPayload {
+  height: number;
+}
+
+export interface SetTweenDrawerHeight {
+  type: typeof SET_TWEEN_DRAWER_HEIGHT;
+  payload: SetTweenDrawerHeightPayload;
+}
+
 export type CanvasSettingsTypes = SetCanvasMatrix |
                                   AddCanvasImage |
                                   SetCanvasResizing |
@@ -93,4 +123,7 @@ export type CanvasSettingsTypes = SetCanvasMatrix |
                                   SetCanvasZooming |
                                   AddArtboardPreset |
                                   RemoveArtboardPreset |
-                                  UpdateArtboardPreset;
+                                  UpdateArtboardPreset |
+                                  SetLeftSidebarWidth |
+                                  SetRightSidebarWidth |
+                                  SetTweenDrawerHeight;

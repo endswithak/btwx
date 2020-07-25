@@ -5,6 +5,10 @@ export const THEME_GUIDE_COLOR = 'red';
 export const THEME_UNIT_SIZE = 4;
 export const DEFAULT_ARTBOARD_BACKGROUND_COLOR = '#fff';
 
+export const DEFAULT_LEFT_SIDEBAR_WIDTH = 320;
+export const DEFAULT_RIGHT_SIDEBAR_WIDTH = 264;
+export const DEFAULT_TWEEN_DRAWER_HEIGHT = 320;
+
 export const DEFAULT_GRADIENT_STYLE = (): em.Gradient => {
   const stopId1 = uuidv4();
   const stopId2 = uuidv4();

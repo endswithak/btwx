@@ -3,6 +3,7 @@ import {
   ADD_ARTBOARD,
   ADD_GROUP,
   ADD_SHAPE,
+  ADD_COMPOUND_SHAPE,
   ADD_TEXT,
   ADD_IMAGE,
   REMOVE_LAYER,
@@ -299,7 +300,7 @@ import {
 
 export interface LayerState {
   byId: {
-    [id: string]: em.Page | em.Artboard | em.Group | em.Shape | em.Text | em.Image;
+    [id: string]: em.Page | em.Artboard | em.Group | em.Shape | em.Text | em.Image | em.CompoundShape;
   };
   allIds: string[];
   page: string;

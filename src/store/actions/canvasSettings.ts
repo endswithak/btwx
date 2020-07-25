@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
-
 import {
   SET_CANVAS_MATRIX,
   ADD_CANVAS_IMAGE,
@@ -9,6 +7,9 @@ import {
   ADD_ARTBOARD_PRESET,
   REMOVE_ARTBOARD_PRESET,
   UPDATE_ARTBOARD_PRESET,
+  SET_LEFT_SIDEBAR_WIDTH,
+  SET_RIGHT_SIDEBAR_WIDTH,
+  SET_TWEEN_DRAWER_HEIGHT,
   SetCanvasMatrixPayload,
   AddCanvasImagePayload,
   SetCanvasResizingPayload,
@@ -17,6 +18,9 @@ import {
   AddArtboardPresetPayload,
   RemoveArtboardPresetPayload,
   UpdateArtboardPresetPayload,
+  SetLeftSidebarWidthPayload,
+  SetRightSidebarWidthPayload,
+  SetTweenDrawerHeightPayload,
   CanvasSettingsTypes
 } from '../actionTypes/canvasSettings';
 
@@ -57,5 +61,20 @@ export const updateArtboardPreset = (payload: UpdateArtboardPresetPayload): Canv
 
 export const removeArtboardPreset = (payload: RemoveArtboardPresetPayload): CanvasSettingsTypes => ({
   type: REMOVE_ARTBOARD_PRESET,
+  payload
+});
+
+export const setLeftSidebarWidth = (payload: SetLeftSidebarWidthPayload): CanvasSettingsTypes => ({
+  type: SET_LEFT_SIDEBAR_WIDTH,
+  payload
+});
+
+export const setRightSidebarWidth = (payload: SetRightSidebarWidthPayload): CanvasSettingsTypes => ({
+  type: SET_RIGHT_SIDEBAR_WIDTH,
+  payload
+});
+
+export const setTweenDrawerHeight = (payload: SetTweenDrawerHeightPayload): CanvasSettingsTypes => ({
+  type: SET_TWEEN_DRAWER_HEIGHT,
   payload
 });

@@ -1,4 +1,6 @@
 import { addItem, removeItem } from '../utils/general';
+import { remote } from 'electron';
+import { DEFAULT_LEFT_SIDEBAR_WIDTH, DEFAULT_RIGHT_SIDEBAR_WIDTH, DEFAULT_TWEEN_DRAWER_HEIGHT } from '../../constants';
 
 import {
   SET_CANVAS_MATRIX,
@@ -9,6 +11,9 @@ import {
   ADD_ARTBOARD_PRESET,
   REMOVE_ARTBOARD_PRESET,
   UPDATE_ARTBOARD_PRESET,
+  SET_LEFT_SIDEBAR_WIDTH,
+  SET_RIGHT_SIDEBAR_WIDTH,
+  SET_TWEEN_DRAWER_HEIGHT,
   CanvasSettingsTypes,
 } from '../actionTypes/canvasSettings';
 
@@ -30,6 +35,9 @@ export interface CanvasSettingsState {
   resizing: boolean;
   dragging: boolean;
   zooming: boolean;
+  leftSidebarWidth: number;
+  rightSidebarWidth: number;
+  tweenDrawerHeight: number;
 }
 
 const initialState: CanvasSettingsState = {
@@ -45,7 +53,10 @@ const initialState: CanvasSettingsState = {
   },
   resizing: false,
   dragging: false,
-  zooming: false
+  zooming: false,
+  leftSidebarWidth: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('leftSidebarWidth', 'integer') : DEFAULT_LEFT_SIDEBAR_WIDTH,
+  rightSidebarWidth: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('rightSidebarWidth', 'integer') : DEFAULT_RIGHT_SIDEBAR_WIDTH,
+  tweenDrawerHeight: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('tweenDrawerHeight', 'integer') : DEFAULT_TWEEN_DRAWER_HEIGHT
 };
 
 export default (state = initialState, action: CanvasSettingsTypes): CanvasSettingsState => {
@@ -136,6 +147,33 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
             return result;
           }, {})
         }
+      };
+    }
+    case SET_LEFT_SIDEBAR_WIDTH: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('leftSidebarWidth', 'integer', parseInt(action.payload.width as any) as any);
+      }
+      return {
+        ...state,
+        leftSidebarWidth: action.payload.width
+      };
+    }
+    case SET_RIGHT_SIDEBAR_WIDTH: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('rightSidebarWidth', 'integer', parseInt(action.payload.width as any) as any);
+      }
+      return {
+        ...state,
+        rightSidebarWidth: action.payload.width
+      };
+    }
+    case SET_TWEEN_DRAWER_HEIGHT: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('tweenDrawerHeight', 'integer', parseInt(action.payload.height as any) as any);
+      }
+      return {
+        ...state,
+        tweenDrawerHeight: action.payload.height
       };
     }
     default:

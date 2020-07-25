@@ -8,6 +8,7 @@ import { setLayerHover } from '../store/actions/layer';
 import { SetLayerHoverPayload, LayerTypes } from '../store/actionTypes/layer';
 import TweenDrawerEventsItemEdit from './TweenDrawerEventsItemEdit';
 import TweenDrawerEventsItemRemove from './TweenDrawerEventsItemRemove';
+import styled from 'styled-components';
 
 interface TweenDrawerEventItemProps {
   id: string;

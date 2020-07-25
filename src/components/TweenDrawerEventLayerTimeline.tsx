@@ -13,18 +13,15 @@ interface TweenDrawerEventLayerTimelineProps {
 }
 
 const TweenDrawerEventLayerTimeline = (props: TweenDrawerEventLayerTimelineProps): ReactElement => {
-  const [hover, setHover] = useState(false);
   const theme = useContext(ThemeContext);
   const { id, layer, setLayerHover } = props;
 
   const handleMouseEnter = () => {
-    setHover(true);
     setLayerHover({ id });
   }
 
   const handleMouseLeave = () => {
-    setHover(false);
-    setLayerHover({ id });
+    setLayerHover({ id: null });
   }
 
   return (

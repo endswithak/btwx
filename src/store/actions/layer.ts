@@ -8,6 +8,7 @@ import {
   ADD_ARTBOARD,
   ADD_GROUP,
   ADD_SHAPE,
+  ADD_COMPOUND_SHAPE,
   ADD_TEXT,
   ADD_IMAGE,
   REMOVE_LAYER,
@@ -154,10 +155,16 @@ import {
   SEND_LAYER_TO_BACK,
   SEND_LAYERS_TO_BACK,
   SET_LAYER_BLEND_MODE,
+  UNITE_LAYERS,
+  INTERSECT_LAYERS,
+  SUBTRACT_LAYERS,
+  EXCLUDE_LAYERS,
+  DIVIDE_LAYERS,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
   AddShapePayload,
+  AddCompoundShapePayload,
   AddTextPayload,
   AddImagePayload,
   RemoveLayerPayload,
@@ -297,6 +304,11 @@ import {
   SendLayerToBackPayload,
   SendLayersToBackPayload,
   SetLayerBlendModePayload,
+  UniteLayersPayload,
+  IntersectLayersPayload,
+  SubtractLayersPayload,
+  ExcludeLayersPayload,
+  DivideLayersPayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -405,6 +417,13 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
 
 export const addShape = (payload: AddShapePayload): LayerTypes => ({
   type: ADD_SHAPE,
+  payload
+});
+
+// Compound Shape
+
+export const addCompoundShape = (payload: AddCompoundShapePayload): LayerTypes => ({
+  type: ADD_COMPOUND_SHAPE,
   payload
 });
 
@@ -1206,5 +1225,30 @@ export const sendLayersToBack = (payload: SendLayersToBackPayload): LayerTypes =
 
 export const setLayerBlendMode = (payload: SetLayerBlendModePayload): LayerTypes => ({
   type: SET_LAYER_BLEND_MODE,
+  payload
+});
+
+export const uniteLayers = (payload: UniteLayersPayload): LayerTypes => ({
+  type: UNITE_LAYERS,
+  payload
+});
+
+export const intersectLayers = (payload: IntersectLayersPayload): LayerTypes => ({
+  type: INTERSECT_LAYERS,
+  payload
+});
+
+export const subtractLayers = (payload: SubtractLayersPayload): LayerTypes => ({
+  type: SUBTRACT_LAYERS,
+  payload
+});
+
+export const excludeLayers = (payload: ExcludeLayersPayload): LayerTypes => ({
+  type: EXCLUDE_LAYERS,
+  payload
+});
+
+export const divideLayers = (payload: DivideLayersPayload): LayerTypes => ({
+  type: DIVIDE_LAYERS,
   payload
 });

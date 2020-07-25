@@ -399,7 +399,8 @@ class ShapeTool {
           },
           tweenEvents: [],
           tweens: [],
-          style: DEFAULT_STYLE()
+          style: DEFAULT_STYLE(),
+          booleanOperation: 'none'
         }));
       }
       store.dispatch(enableSelectionTool());

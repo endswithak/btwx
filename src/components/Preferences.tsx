@@ -19,12 +19,12 @@ const Preferences = (props: PreferencesProps): ReactElement => {
   const handleClick = () => {
     switch(themeName) {
       case 'dark':
-        ipcRenderer.send('updateTheme', 'light');
         enableLightTheme();
+        ipcRenderer.send('updateTheme');
         break;
       case 'light':
-        ipcRenderer.send('updateTheme', 'dark');
         enableDarkTheme();
+        ipcRenderer.send('updateTheme');
         break;
     }
   }

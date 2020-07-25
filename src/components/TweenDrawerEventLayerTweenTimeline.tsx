@@ -188,7 +188,7 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
           style={{
             height: theme.unit * 2,
             width: theme.unit * 2,
-            background: theme.text.base,
+            background: theme.text.onPrimary,
             borderRadius: theme.unit * 2
           }} />
         <span
@@ -206,7 +206,8 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
             fontSize: 12,
             textAlign: 'center',
             height: theme.unit * 5,
-            padding: `0 ${theme.unit}px`
+            padding: `0 ${theme.unit}px`,
+            zIndex: 999999999
           }} />
       </div>
       <div
@@ -223,7 +224,7 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
           style={{
             height: theme.unit * 2,
             width: theme.unit * 2,
-            background: theme.text.base,
+            background: theme.text.onPrimary,
             borderRadius: theme.unit * 2
           }} />
         <span
@@ -241,7 +242,8 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
             fontSize: 12,
             textAlign: 'center',
             height: theme.unit * 5,
-            padding: `0 ${theme.unit}px`
+            padding: `0 ${theme.unit}px`,
+            zIndex: 999999999
           }} />
       </div>
     </div>

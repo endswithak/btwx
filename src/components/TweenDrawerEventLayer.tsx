@@ -11,22 +11,20 @@ interface TweenDrawerEventLayerProps {
   id: string;
   index: number;
   layer?: em.Layer;
+  hover?: string;
   setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
   selectLayer?(payload: SelectLayerPayload): LayerTypes;
 }
 
 const TweenDrawerEventLayer = (props: TweenDrawerEventLayerProps): ReactElement => {
-  const [hover, setHover] = useState(false);
   const theme = useContext(ThemeContext);
-  const { id, index, layer, setLayerHover, selectLayer } = props;
+  const { id, index, layer, hover, setLayerHover, selectLayer } = props;
 
   const handleMouseEnter = () => {
-    setHover(true);
     setLayerHover({ id });
   }
 
   const handleMouseLeave = () => {
-    setHover(false);
     setLayerHover({ id: null });
   }
 
@@ -38,7 +36,12 @@ const TweenDrawerEventLayer = (props: TweenDrawerEventLayerProps): ReactElement 
     <div
       className={`c-tween-drawer-event__layer`}
       onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}>
+      onMouseLeave={handleMouseLeave}
+      style={{
+        boxShadow: id === hover
+        ? `2px 0 0 0 ${theme.palette.primary} inset`
+        : 'none'
+      }}>
       <div
         className={`c-tween-drawer-event-layer__tween`}
         style={{
@@ -55,7 +58,9 @@ const TweenDrawerEventLayer = (props: TweenDrawerEventLayerProps): ReactElement 
         <div
           className='c-tween-drawer-event-layer-tween__name'
           style={{
-            color: theme.text.base,
+            color: layer.selected
+            ? theme.text.onPrimary
+            : theme.text.base,
           }}
           onClick={handleClick}>
           {layer.name}
@@ -68,7 +73,10 @@ const TweenDrawerEventLayer = (props: TweenDrawerEventLayerProps): ReactElement 
 
 const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventLayerProps) => {
   const { layer } = state;
-  return { layer: layer.present.byId[ownProps.id] };
+  return {
+    layer: layer.present.byId[ownProps.id],
+    hover: layer.present.hover
+  };
 };
 
 export default connect(

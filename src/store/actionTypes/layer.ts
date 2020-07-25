@@ -4,6 +4,7 @@ export const ADD_SHAPE = 'ADD_SHAPE';
 export const ADD_ARTBOARD = 'ADD_ARTBOARD';
 export const ADD_TEXT = 'ADD_TEXT';
 export const ADD_IMAGE = 'ADD_IMAGE';
+export const ADD_COMPOUND_SHAPE = 'ADD_COMPOUND_SHAPE';
 
 export const REMOVE_LAYER = 'REMOVE_LAYER';
 export const REMOVE_LAYERS = 'REMOVE_LAYERS';
@@ -184,6 +185,12 @@ export const SEND_LAYERS_TO_FRONT = 'SEND_LAYERS_TO_FRONT';
 
 export const SET_LAYER_BLEND_MODE = 'SET_LAYER_BLEND_MODE';
 
+export const UNITE_LAYERS = 'UNITE_LAYERS';
+export const INTERSECT_LAYERS = 'INTERSECT_LAYERS';
+export const SUBTRACT_LAYERS = 'SUBTRACT_LAYERS';
+export const EXCLUDE_LAYERS = 'EXCLUDE_LAYERS';
+export const DIVIDE_LAYERS = 'DIVIDE_LAYERS';
+
 // Page
 
 export type AddPagePayload = {
@@ -226,6 +233,17 @@ export type AddShapePayload = {
 export interface AddShape {
   type: typeof ADD_SHAPE;
   payload: AddShapePayload;
+}
+
+// Compound Shape
+
+export type AddCompoundShapePayload = {
+  [P in keyof em.CompoundShape]?: em.CompoundShape[P];
+} & { paperLayer?: paper.Item }
+
+export interface AddCompoundShape {
+  type: typeof ADD_COMPOUND_SHAPE;
+  payload: AddCompoundShapePayload;
 }
 
 // Text
@@ -1657,10 +1675,61 @@ export interface SetLayerBlendMode {
   payload: SetLayerBlendModePayload;
 }
 
+export interface UniteLayersPayload {
+  id: string;
+  unite: string;
+}
+
+export interface UniteLayers {
+  type: typeof UNITE_LAYERS;
+  payload: UniteLayersPayload;
+}
+
+export interface IntersectLayersPayload {
+  id: string;
+  intersect: string;
+}
+
+export interface IntersectLayers {
+  type: typeof INTERSECT_LAYERS;
+  payload: IntersectLayersPayload;
+}
+
+export interface SubtractLayersPayload {
+  id: string;
+  subtract: string;
+}
+
+export interface SubtractLayers {
+  type: typeof SUBTRACT_LAYERS;
+  payload: SubtractLayersPayload;
+}
+
+export interface ExcludeLayersPayload {
+  id: string;
+  exclude: string;
+}
+
+export interface ExcludeLayers {
+  type: typeof EXCLUDE_LAYERS;
+  payload: ExcludeLayersPayload;
+}
+
+export interface DivideLayersPayload {
+  id: string;
+  divide: string;
+}
+
+export interface DivideLayers {
+  type: typeof DIVIDE_LAYERS;
+  payload: DivideLayersPayload;
+}
+
 export type LayerTypes = AddPage |
                          AddArtboard |
                          AddGroup |
                          AddShape |
+                         AddCompoundShape |
                          AddText |
                          AddImage |
                          RemoveLayer |
@@ -1808,4 +1877,9 @@ export type LayerTypes = AddPage |
                          RemoveLayerStrokeGradientStop |
                          ActivateLayerStrokeGradientStop |
                          DeactivateLayerStrokeGradientStop |
-                         SetLayerStrokeActiveGradientStop;
+                         SetLayerStrokeActiveGradientStop |
+                         UniteLayers |
+                         IntersectLayers |
+                         SubtractLayers |
+                         ExcludeLayers |
+                         DivideLayers;

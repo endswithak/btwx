@@ -27,10 +27,10 @@ const SelectionFrame = (props: SelectionFrameProps): ReactElement => {
 
   useEffect(() => {
     updateSelectionFrame({selected: selected, byId: selectedById} as LayerState, 'all', true);
-    document.getElementById('canvas-main').addEventListener('wheel', handleWheel);
+    document.getElementById('canvas').addEventListener('wheel', handleWheel);
     return () => {
       const selectionFrame = paperMain.project.getItem({ data: { id: 'selectionFrame' } });
-      document.getElementById('canvas-main').removeEventListener('wheel', handleWheel);
+      document.getElementById('canvas').removeEventListener('wheel', handleWheel);
       if (selectionFrame) {
         selectionFrame.remove();
       }

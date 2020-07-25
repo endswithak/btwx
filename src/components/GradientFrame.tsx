@@ -150,10 +150,10 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
 
   useEffect(() => {
     updateGradientFrame();
-    document.getElementById('canvas-main').addEventListener('wheel', handleWheel);
+    document.getElementById('canvas').addEventListener('wheel', handleWheel);
     return () => {
       const oldGradientFrame = paperMain.project.getItem({ data: { id: 'gradientFrame' } });
-      document.getElementById('canvas-main').removeEventListener('wheel', handleWheel);
+      document.getElementById('canvas').removeEventListener('wheel', handleWheel);
       if (oldGradientFrame) {
         oldGradientFrame.remove();
       }

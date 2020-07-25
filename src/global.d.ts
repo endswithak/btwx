@@ -18,7 +18,7 @@ declare namespace em {
 
   type TweenPropMap = { [K in TweenProp]: boolean; }
 
-  type LayerType = 'Group' | 'Shape' | 'Page' | 'Artboard' | 'Text' | 'Image';
+  type LayerType = 'Group' | 'Shape' | 'Page' | 'Artboard' | 'Text' | 'Image' | 'CompoundShape';
 
   type BlendMode = 'normal' | 'darken' | 'multiply' | 'color-burn' | 'lighten' | 'screen' | 'color-dodge' | 'overlay' | 'soft-light' | 'hard-light' | 'difference' | 'exclusion' | 'hue' | 'saturation' | 'color' | 'luminosity';
 
@@ -73,6 +73,8 @@ declare namespace em {
   type DevicePlatformType = 'Apple' | 'Android' | 'Responsive Web' | 'Custom';
 
   type DeviceOrientationType = 'Landscape' | 'Portrait';
+
+  type BooleanOperation = 'none' | 'unite' | 'intersect' | 'subtract' | 'exclude' | 'divide';
 
   interface Color {
     h: number;
@@ -236,7 +238,16 @@ declare namespace em {
     type: 'Shape';
     shapeType: ShapeType;
     pathData: string;
+    booleanOperation: BooleanOperation;
     children: null;
+  }
+
+  interface CompoundShape extends Layer {
+    type: 'CompoundShape';
+    pathData: string;
+    children: string[];
+    booleanOperation: BooleanOperation;
+    showChildren: boolean;
   }
 
   interface Image extends Layer {

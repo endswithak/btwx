@@ -4,6 +4,7 @@ import { LayerState } from '../reducers/layer';
 import { paperMain } from '../../canvas';
 import { bufferToBase64 } from '../../utils';
 import { applyShapeMethods } from '../../canvas/shapeUtils';
+import { applyCompoundShapeMethods } from '../../canvas/compoundShapeUtils';
 import { applyArtboardMethods } from '../../canvas/artboardUtils';
 import { applyTextMethods } from '../../canvas/textUtils';
 import { applyImageMethods } from '../../canvas/imageUtils';
@@ -72,7 +73,7 @@ export const getLayerAndDescendants = (state: LayerState, layer: string, fromCli
 export const getLayerDepth = (store: LayerState, id: string) => {
   let depth = 0;
   let currentNode = getParentLayer(store, id);
-  while(currentNode.type === 'Group' || currentNode.type === 'Artboard') {
+  while(currentNode.type === 'Group' || currentNode.type === 'Artboard' || currentNode.type === 'CompoundShape') {
     currentNode = getParentLayer(store, currentNode.id);
     depth++;
   }
@@ -93,7 +94,7 @@ export const getScopeGroupLayers = (store: LayerState) => {
   const expandedLayers = getScopeLayers(store);
   return expandedLayers.reduce((result, current) => {
     const layer = getLayer(store, current);
-    if (layer.type === 'Group' || layer.type === 'Artboard') {
+    if (layer.type === 'Group' || layer.type === 'Artboard' || layer.type === 'CompoundShape') {
       result = [...result, current];
     }
     return result;
@@ -129,7 +130,7 @@ export const getNearestScopeGroupAncestor = (store: LayerState, id: string) => {
 export const getLayerScope = (store: LayerState, id: string) => {
   const newScope = [];
   let parent = getParentLayer(store, id);
-  while(parent.type === 'Group' || parent.type === 'Artboard') {
+  while(parent.type === 'Group' || parent.type === 'Artboard' || parent.type === 'CompoundShape') {
     newScope.push(parent.id);
     parent = getParentLayer(store, parent.id);
   }

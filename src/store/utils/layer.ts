@@ -33,7 +33,11 @@ import {
   AlignLayersToRight, AlignLayersToTop, AlignLayersToBottom, AlignLayersToCenter, AlignLayersToMiddle,
   DistributeLayersHorizontally, DistributeLayersVertically, DuplicateLayer, DuplicateLayers, RemoveDuplicatedLayers,
   SendLayerForward, SendLayerBackward, SendLayersForward, SendLayersBackward, SendLayerToFront, SendLayersToFront,
-  SendLayerToBack, SendLayersToBack, AddImage, InsertLayersAbove, InsertLayersBelow, AddLayerChildren, SetLayerFillActiveGradientStop, ActivateLayerFillGradientStop, DeactivateLayerFillGradientStop, SetLayerBlendMode, SetLayerStrokeActiveGradientStop, DeactivateLayerStrokeGradientStop, ActivateLayerStrokeGradientStop, RemoveLayerStrokeGradientStop, AddLayerStrokeGradientStop, SetLayerStrokeGradientStopPosition, SetLayerStrokeGradientStopColor, SetLayerStrokeGradientDestination, SetLayerStrokeGradientOrigin
+  SendLayerToBack, SendLayersToBack, AddImage, InsertLayersAbove, InsertLayersBelow, AddLayerChildren,
+  SetLayerFillActiveGradientStop, ActivateLayerFillGradientStop, DeactivateLayerFillGradientStop, SetLayerBlendMode,
+  SetLayerStrokeActiveGradientStop, DeactivateLayerStrokeGradientStop, ActivateLayerStrokeGradientStop,
+  RemoveLayerStrokeGradientStop, AddLayerStrokeGradientStop, SetLayerStrokeGradientStopPosition,
+  SetLayerStrokeGradientStopColor, SetLayerStrokeGradientDestination, SetLayerStrokeGradientOrigin, AddCompoundShape, UniteLayers
 } from '../actionTypes/layer';
 
 import {
@@ -54,8 +58,9 @@ import { applyShapeMethods } from '../../canvas/shapeUtils';
 import { applyTextMethods } from '../../canvas/textUtils';
 import { applyArtboardMethods } from '../../canvas/artboardUtils';
 import { applyImageMethods } from '../../canvas/imageUtils';
+import { applyCompoundShapeMethods } from '../../canvas/compoundShapeUtils';
 
-import { THEME_PRIMARY_COLOR } from '../../constants';
+import { THEME_PRIMARY_COLOR, DEFAULT_STYLE } from '../../constants';
 import { bufferToBase64 } from '../../utils';
 
 export const addPage = (state: LayerState, action: AddPage): LayerState => {
@@ -155,6 +160,34 @@ export const addShape = (state: LayerState, action: AddShape): LayerState => {
   }
   return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
 };
+
+// export const addCompoundShape = (state: LayerState, action: AddCompoundShape): LayerState => {
+//   let currentState = state;
+//   const layerParent = action.payload.parent ? action.payload.parent : currentState.page;
+//   const paperLayer = getPaperLayer(action.payload.id);
+//   paperLayer.parent = getPaperLayer(layerParent);
+//   currentState = {
+//     ...currentState,
+//     allIds: addItem(currentState.allIds, action.payload.id),
+//     byId: {
+//       ...currentState.byId,
+//       [action.payload.id]: {
+//         ...action.payload
+//       } as em.CompoundShape,
+//       [layerParent]: {
+//         ...currentState.byId[layerParent],
+//         children: addItem((currentState.byId[layerParent] as em.Group).children, action.payload.id),
+//         showChildren: true
+//       } as em.Group
+//     },
+//     allCompoundShapeIds: addItem(state.allCompoundShapeIds, action.payload.id),
+//     paperProject: exportPaperProject(currentState)
+//   }
+//   if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
+//     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
+//   }
+//   return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+// };
 
 export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
   let currentState = state;
@@ -282,6 +315,11 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
         }
         break;
     }
+    // if layer compound shape
+    if (layer.type === 'CompoundShape') {
+      result = removeLayers(result, layerActions.removeLayers({layers: layer.children}) as RemoveLayers);
+    }
+    // if layer mask
     if (layer.mask) {
       result = removeLayersMask(result, layerActions.removeLayersMask({id: layer.id}) as RemoveLayersMask);
     }
@@ -4110,3 +4148,77 @@ export const setLayerBlendMode = (state: LayerState, action: SetLayerBlendMode):
   }
   return currentState;
 };
+
+// export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState => {
+//   let currentState = state;
+//   const layerItem = currentState.byId[action.payload.id];
+//   const uniteLayerItem = currentState.byId[action.payload.unite];
+//   const paperLayer = getPaperLayer(action.payload.id) as paper.PathItem;
+//   const unitePaperLayer = getPaperLayer(action.payload.unite) as paper.PathItem;
+//   const compoundShapeId = uuidv4();
+//   const unitedLayers = paperLayer.unite(unitePaperLayer);
+//   unitedLayers.data = {
+//     type: 'CompoundShape',
+//     id: compoundShapeId
+//   }
+//   applyCompoundShapeMethods(unitedLayers);
+//   currentState = {
+//     ...currentState,
+//     byId: {
+//       ...currentState.byId,
+//       [action.payload.unite]: {
+//         ...currentState.byId[action.payload.unite],
+//         parent: compoundShapeId,
+//         booleanOperation: 'unite'
+//       } as em.Shape | em.CompoundShape,
+//       [action.payload.id]: {
+//         ...currentState.byId[action.payload.id],
+//         parent: compoundShapeId,
+//         booleanOperation: 'unite'
+//       } as em.Shape | em.CompoundShape,
+//       [layerItem.parent]: {
+//         ...currentState.byId[layerItem.parent],
+//         children: removeItem(currentState.byId[layerItem.parent].children, action.payload.id)
+//       } as em.Group,
+//       [uniteLayerItem.parent]: {
+//         ...currentState.byId[uniteLayerItem.parent],
+//         children: removeItem(currentState.byId[uniteLayerItem.parent].children, action.payload.unite)
+//       } as em.Group
+//     },
+//     paperProject: exportPaperProject(currentState)
+//   }
+//   currentState = addCompoundShape(currentState, layerActions.addCompoundShape({
+//     id: compoundShapeId,
+//     type: 'CompoundShape',
+//     parent: layerItem.parent,
+//     name: 'Compound Shape',
+//     frame: {
+//       x: unitedLayers.position.x,
+//       y: unitedLayers.position.y,
+//       width: unitedLayers.bounds.width,
+//       height: unitedLayers.bounds.height
+//     },
+//     pathData: (() => {
+//       const clone = unitedLayers.clone({insert: false}) as paper.PathItem;
+//       clone.fitBounds(new paperMain.Rectangle({
+//         point: new paperMain.Point(0,0),
+//         size: new paperMain.Size(24,24)
+//       }));
+//       return clone.pathData;
+//     })(),
+//     selected: false,
+//     mask: false,
+//     masked: false,
+//     points: {
+//       closed: true,
+//     },
+//     tweenEvents: [],
+//     tweens: [],
+//     style: layerItem.style,
+//     children: [action.payload.id, action.payload.unite],
+//     booleanOperation: 'none'
+//   }) as AddCompoundShape);
+//   paperLayer.remove();
+//   unitePaperLayer.remove();
+//   return currentState;
+// };

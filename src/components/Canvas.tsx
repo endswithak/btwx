@@ -80,7 +80,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
       className={`c-canvas ${drawing ? 'c-canvas--drawing' : null} ${typing ? 'c-canvas--typing' : null}`}
       ref={canvasContainerRef}>
       <canvas
-        id='canvas-main'
+        id='canvas'
         tabIndex={0}
         ref={canvasRef}
         onMouseDown={() => canvasRef.current.focus()}

@@ -1,15 +1,34 @@
 import React, { ReactElement } from 'react';
+import { connect } from 'react-redux';
+import { RootState } from '../store/reducers';
 import Sidebar from './Sidebar';
 import SidebarLayerTree from './SidebarLayerTree';
+import SidebarLeftDragHandle from './SidebarLeftDragHandle';
 
-const SidebarLeft = (): ReactElement => {
+interface SidebarLeftProps {
+  sidebarWidth: number;
+}
+
+const SidebarLeft = (props: SidebarLeftProps): ReactElement => {
+  const { sidebarWidth } = props;
   return (
-    <Sidebar
-      width={320}
-      position={'left'}>
-      <SidebarLayerTree />
-    </Sidebar>
+    <>
+      <SidebarLeftDragHandle />
+      <Sidebar
+        width={sidebarWidth}
+        position='left'>
+        <SidebarLayerTree />
+      </Sidebar>
+    </>
   );
 }
 
-export default SidebarLeft;
+const mapStateToProps = (state: RootState) => {
+  const { canvasSettings } = state;
+  const sidebarWidth = canvasSettings.leftSidebarWidth;
+  return { sidebarWidth };
+};
+
+export default connect(
+  mapStateToProps
+)(SidebarLeft);

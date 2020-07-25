@@ -45,7 +45,7 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
           }
         </svg>
       </div>
-    : <div className='c-sidebar-layer__icon c-sidebar-layer__icon--chevron c-sidebar-layer__icon--type' />
+    : <div className='c-sidebar-layer__icon c-sidebar-layer__icon--chevron' />
   );
 }
 

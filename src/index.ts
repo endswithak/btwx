@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import electron, { app, BrowserWindow, ipcMain, systemPreferences, Menu, shell, dialog } from 'electron';
 import sharp from 'sharp';
+import { DEFAULT_LEFT_SIDEBAR_WIDTH, DEFAULT_RIGHT_SIDEBAR_WIDTH, DEFAULT_TWEEN_DRAWER_HEIGHT } from './constants';
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
 
@@ -9,14 +10,26 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
   app.quit();
 }
 
-if (!systemPreferences.getUserDefault('theme', 'string')) {
-  systemPreferences.setUserDefault('theme', 'string', 'dark');
-}
-
 let mainWindow: electron.BrowserWindow;
 let previewWindow: electron.BrowserWindow;
 let preferencesWindow: electron.BrowserWindow;
 const isMac = process.platform === 'darwin';
+
+if (isMac) {
+  if (!systemPreferences.getUserDefault('theme', 'string')) {
+    systemPreferences.setUserDefault('theme', 'string', 'dark');
+  }
+  if (!systemPreferences.getUserDefault('leftSidebarWidth', 'integer')) {
+    systemPreferences.setUserDefault('leftSidebarWidth', 'integer', DEFAULT_LEFT_SIDEBAR_WIDTH as any);
+  }
+  if (!systemPreferences.getUserDefault('rightSidebarWidth', 'integer')) {
+    systemPreferences.setUserDefault('rightSidebarWidth', 'integer', DEFAULT_RIGHT_SIDEBAR_WIDTH as any);
+  }
+
+  if (!systemPreferences.getUserDefault('tweenDrawerHeight', 'integer')) {
+    systemPreferences.setUserDefault('tweenDrawerHeight', 'integer', DEFAULT_RIGHT_SIDEBAR_WIDTH as any);
+  }
+}
 
 const template = [
   // { role: 'appMenu' }
@@ -108,17 +121,6 @@ const template = [
       ] : [
         { role: 'close' }
       ])
-    ]
-  },
-  {
-    role: 'help',
-    submenu: [
-      {
-        label: 'Learn More',
-        click: async () => {
-          await shell.openExternal('https://electronjs.org')
-        }
-      }
     ]
   }
 ];
@@ -240,8 +242,6 @@ ipcMain.on('openPreview', (event, activeArtboard) => {
 });
 
 ipcMain.on('updateTheme', (event, theme) => {
-  systemPreferences.setUserDefault('theme', 'string', theme);
-
   if (mainWindow && mainWindow.webContents) {
     mainWindow.webContents.executeJavaScript(`updateTheme()`);
   }
@@ -262,7 +262,7 @@ ipcMain.on('addImage', (event, arg) => {
   }).then(result => {
     if (result.filePaths.length > 0 && !result.canceled) {
       sharp(result.filePaths[0]).metadata().then(({ width }) => {
-        sharp(result.filePaths[0]).resize(Math.round(width * 0.5)).webp({quality: 20}).toBuffer().then((buffer) => {
+        sharp(result.filePaths[0]).resize(Math.round(width * 0.5)).webp({quality: 50}).toBuffer().then((buffer) => {
           event.reply('addImage-reply', JSON.stringify(buffer));
         });
       });

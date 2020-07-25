@@ -10,15 +10,15 @@ interface SidebarRightProps {
   toolType: em.ToolType;
   artboardSelected: boolean;
   layerSelected: boolean;
+  sidebarWidth: number;
 }
 
 const SidebarRight = (props: SidebarRightProps): ReactElement => {
-  const { artboardSelected, layerSelected, toolType } = props;
+  const { artboardSelected, layerSelected, toolType, sidebarWidth } = props;
   return (
     <Sidebar
-      width={264}
-      position={'right'}
-      resizable={false}>
+      width={sidebarWidth}
+      position='right'>
       {/* {
         toolType !== 'Artboard' && artboardSelected
         ? <SidebarArtboardStyles />
@@ -39,12 +39,13 @@ const SidebarRight = (props: SidebarRightProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer, tool } = state;
+  const { layer, tool, canvasSettings} = state;
   const selected = layer.present.selected;
   const artboardSelected = selected.some((id: string) => layer.present.allArtboardIds.includes(id));
   const layerSelected = selected.some((id: string) => !layer.present.allArtboardIds.includes(id));
   const toolType = tool.type;
-  return { selected, artboardSelected, layerSelected, toolType };
+  const sidebarWidth = canvasSettings.rightSidebarWidth;
+  return { selected, artboardSelected, layerSelected, toolType, sidebarWidth };
 };
 
 export default connect(

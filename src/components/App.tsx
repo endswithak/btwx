@@ -21,8 +21,10 @@ const App = (): ReactElement => {
       style={{
         background: theme.background.z0
       }}>
+        {/* flex items */}
         <Topbar />
         <Main />
+        {/* modals */}
         <EaseEditor />
         <ActiveArtboardFrameWrap />
         <HoverFrameWrap />
