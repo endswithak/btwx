@@ -34,7 +34,7 @@ const TweenDrawerEventLayer = (props: TweenDrawerEventLayerProps): ReactElement 
 
   return (
     <div
-      className={`c-tween-drawer-event__layer`}
+      className='c-tween-drawer-event__layer'
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{
@@ -43,7 +43,7 @@ const TweenDrawerEventLayer = (props: TweenDrawerEventLayerProps): ReactElement 
         : 'none'
       }}>
       <div
-        className={`c-tween-drawer-event-layer__tween`}
+        className='c-tween-drawer-event-layer__tween'
         style={{
           background: layer.selected
           ? theme.palette.primary

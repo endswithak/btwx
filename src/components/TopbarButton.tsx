@@ -80,9 +80,13 @@ const TopbarButton = (props: TopbarButtonProps): ReactElement => {
           : null
         }
       </button>
-      <div className={`c-topbar-button__label ${hideLabel ? 'c-topbar-button__label--hidden' : null}`}>
-        {label}
-      </div>
+      {
+        label
+        ? <div className={`c-topbar-button__label ${hideLabel ? 'c-topbar-button__label--hidden' : null}`}>
+            {label}
+          </div>
+        : null
+      }
     </ButtonWrap>
   );
 }

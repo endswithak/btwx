@@ -1,18 +1,18 @@
 import React, { useRef, useContext, useEffect, ReactElement, useState } from 'react';
 import { ThemeContext } from './ThemeProvider';
 import PreviewCanvas from './PreviewCanvas';
+import PreviewTopbar from './PreviewTopbar';
 
 const Preview = (): ReactElement => {
-  const preview = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
 
   return (
     <div
       className='c-app'
-      ref={preview}
       style={{
         background: theme.background.z0
       }}>
+      <PreviewTopbar />
       <div className='c-app__canvas'>
         <PreviewCanvas />
       </div>

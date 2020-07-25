@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import electron, { app, BrowserWindow, ipcMain, systemPreferences, Menu, shell, dialog } from 'electron';
 import sharp from 'sharp';
-import { DEFAULT_LEFT_SIDEBAR_WIDTH, DEFAULT_RIGHT_SIDEBAR_WIDTH, DEFAULT_TWEEN_DRAWER_HEIGHT } from './constants';
+import {
+  DEFAULT_LEFT_SIDEBAR_WIDTH,
+  DEFAULT_RIGHT_SIDEBAR_WIDTH,
+  DEFAULT_TWEEN_DRAWER_HEIGHT,
+  PREVIEW_TOPBAR_HEIGHT
+} from './constants';
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
 
@@ -188,9 +193,9 @@ const createPreviewWindow = (artboard: em.Artboard): void => {
   previewWindow = new BrowserWindow({
     parent: mainWindow,
     minWidth: artboard.frame.width,
-    minHeight: artboard.frame.height,
+    minHeight: artboard.frame.height + PREVIEW_TOPBAR_HEIGHT,
     width: artboard.frame.width,
-    height: artboard.frame.height,
+    height: artboard.frame.height + PREVIEW_TOPBAR_HEIGHT,
     webPreferences: {
       nodeIntegration: true
     },
