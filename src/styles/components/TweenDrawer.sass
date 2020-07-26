@@ -1,8 +1,9 @@
 .c-tween-drawer
-  position: absolute
+  position: relative
   bottom: 0
   width: 100%
   display: flex
+  flex-shrink: 0
   overflow: hidden
   z-index: 1
 
@@ -19,7 +20,7 @@
 .c-tween-drawer__drag-handle
   position: absolute
   width: 100%
-  height: $unit * 4
+  height: $unit * 2
   opacity: 0.5
   z-index: 2
   bottom: 0

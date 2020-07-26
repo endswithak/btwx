@@ -1,0 +1,38 @@
+.c-timeline-handle
+  display: flex
+  align-items: center
+  justify-content: center
+  position: absolute
+  width: $unit * 4
+  height: $unit * 4
+
+.c-timeline-handle__ellipse
+  width: $unit * 2
+  height: $unit * 2
+  border-radius: $unit * 2
+
+.c-timeline-handle__tooltip
+  height: $unit * 5
+  display: flex
+  position: absolute
+  align-items: center
+  justify-content: center
+  opacity: 0
+  font-size: $fontSizeSm
+  textAlign: center
+  padding: 0 $unit
+  zIndex: 999999999
+  top: $unit * 5
+
+.c-timeline-handle--right
+  .c-timeline-handle__tooltip
+    right: 0
+
+.c-timeline-handle--left
+  .c-timeline-handle__tooltip
+    left: 0
+
+.c-timeline-tween-handle
+  position: relative
+  height: $unit * 4
+  border-radius: $unit * 2

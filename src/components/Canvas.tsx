@@ -1,5 +1,5 @@
 import paper from 'paper';
-import React, { useRef, useContext, useEffect, ReactElement } from 'react';
+import React, { useRef, useContext, useEffect, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
 import { enableSelectionTool } from '../store/actions/tool';
 import { ThemeContext } from './ThemeProvider';
@@ -32,6 +32,8 @@ const Canvas = (props: CanvasProps): ReactElement => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useContext(ThemeContext);
   const { drawing, typing, canvasSettings, enableSelectionTool, updateInViewLayers, paperProject, allArtboardIds, allShapeIds, allTextIds, allImageIds, setCanvasMatrix } = props;
+  const [prevLeftSidebarWidth, setPrevLeftSidebarWidth] = useState(canvasSettings.leftSidebarWidth);
+  const [prevTweenDrawerHeight, setPrevTweenDrawerHeight] = useState(canvasSettings.tweenDrawerHeight);
 
   useEffect(() => {
     canvasRef.current.width = canvasContainerRef.current.clientWidth;
@@ -68,12 +70,29 @@ const Canvas = (props: CanvasProps): ReactElement => {
       setCanvasMatrix({matrix: paperMain.view.matrix.values});
       updateInViewLayers();
     }, 150));
+    window.addEventListener('resize', debounce((e: WheelEvent) => {
+      paperMain.view.viewSize = new paperMain.Size(canvasContainerRef.current.clientWidth, canvasContainerRef.current.clientHeight);
+    }, 250));
     if (canvasSettings.matrix) {
       paperMain.view.matrix.set(canvasSettings.matrix);
     }
     updateInViewLayers();
     enableSelectionTool();
   }, []);
+
+  useEffect(() => {
+    if (canvasSettings.leftSidebarWidth !== prevLeftSidebarWidth) {
+      paperMain.view.viewSize = new paperMain.Size(canvasContainerRef.current.clientWidth, canvasContainerRef.current.clientHeight);
+      setPrevLeftSidebarWidth(canvasSettings.leftSidebarWidth);
+    }
+  }, [canvasSettings.leftSidebarWidth]);
+
+  useEffect(() => {
+    if (canvasSettings.tweenDrawerHeight !== prevTweenDrawerHeight) {
+      paperMain.view.viewSize = new paperMain.Size(canvasContainerRef.current.clientWidth, canvasContainerRef.current.clientHeight);
+      setPrevTweenDrawerHeight(canvasSettings.leftSidebarWidth);
+    }
+  }, [canvasSettings.tweenDrawerHeight]);
 
   return (
     <div
