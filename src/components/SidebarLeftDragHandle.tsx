@@ -7,6 +7,7 @@ import { setLeftSidebarWidth } from '../store/actions/canvasSettings';
 import { SetLeftSidebarWidthPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
+import { paperMain } from '../canvas';
 
 gsap.registerPlugin(Draggable);
 
@@ -42,7 +43,9 @@ const SidebarLeftDragHandle = (props: SidebarLeftDragHandleProps): ReactElement 
         setDragging(true);
       },
       onDrag: function() {
+        const canvasContainer = document.getElementById('canvas-container');
         gsap.set('#sidebar-left', {width: this.x});
+        paperMain.view.viewSize = new paperMain.Size(canvasContainer.clientWidth, canvasContainer.clientHeight);
       },
       onRelease: function() {
         setLeftSidebarWidth({width: this.x});

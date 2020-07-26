@@ -41,7 +41,11 @@ const TweenDrawer = (props: TweenDrawerProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
+const mapStateToProps = (state: RootState): {
+  tweenDrawerHeight: number;
+  isOpen: boolean;
+  tweenEvent: em.TweenEvent;
+} => {
   const { layer, tweenDrawer, canvasSettings } = state;
   const isOpen = tweenDrawer.isOpen;
   const tweenEvent = layer.present.tweenEventById[tweenDrawer.event];

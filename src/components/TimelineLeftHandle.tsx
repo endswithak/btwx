@@ -117,7 +117,7 @@ const mapStateToProps = (state: RootState, ownProps: TimelineLeftHandleProps): {
   tweenHover: string;
   tweenEditing: string;
 } => {
-  const { layer, tweenDrawer, canvasSettings } = state;
+  const { layer, tweenDrawer } = state;
   const tween = layer.present.tweenById[ownProps.tweenId];
   const tweenHover = tweenDrawer.tweenHover;
   const tweenEditing = tweenDrawer.tweenEditing;

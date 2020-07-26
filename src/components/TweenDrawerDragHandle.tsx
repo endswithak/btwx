@@ -7,6 +7,7 @@ import { setTweenDrawerHeight } from '../store/actions/canvasSettings';
 import { SetTweenDrawerHeightPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
+import { paperMain } from '../canvas';
 
 gsap.registerPlugin(Draggable);
 
@@ -42,7 +43,9 @@ const TweenDrawerDragHandle = (props: TweenDrawerDragHandleProps): ReactElement 
         setDragging(true);
       },
       onDrag: function() {
+        const canvasContainer = document.getElementById('canvas-container');
         gsap.set('#tween-drawer', {height: this.y * -1});
+        paperMain.view.viewSize = new paperMain.Size(canvasContainer.clientWidth, canvasContainer.clientHeight);
       },
       onRelease: function() {
         setTweenDrawerHeight({height: this.y * -1});
