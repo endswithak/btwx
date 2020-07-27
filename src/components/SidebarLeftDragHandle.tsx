@@ -22,6 +22,7 @@ interface DragHandleProps {
 
 const DragHandle = styled.div<DragHandleProps>`
   background: ${props => props.dragging ? props.theme.palette.primary : 'none'};
+  opacity: ${props => props.dragging ? 0.75 : 0.33};
   :hover {
     background: ${props => props.theme.palette.primary};
   }
@@ -39,6 +40,7 @@ const SidebarLeftDragHandle = (props: SidebarLeftDragHandleProps): ReactElement 
       type: 'x',
       zIndexBoost: false,
       bounds: '#main',
+      cursor: 'col-resize',
       onPress: function() {
         setDragging(true);
       },

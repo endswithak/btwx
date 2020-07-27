@@ -4,7 +4,7 @@ import { ThemeContext } from './ThemeProvider';
 import styled from 'styled-components';
 import TopbarButton from './TopbarButton';
 import TopbarDropdownButtonOption from './TopbarDropdownButtonOption';
-import chroma from 'chroma-js';
+import tinyColor from 'tinycolor2';
 
 interface TopbarDropdownButtonProps {
   onClick?(event: React.SyntheticEvent): void;
@@ -22,8 +22,8 @@ interface TopbarDropdownButtonProps {
 }
 
 const ButtonDropdown = styled.div`
-  background: ${props => chroma(props.theme.name === 'dark' ? props.theme.background.z1 : props.theme.background.z2).alpha(0.88).hex()};
-  box-shadow: 0 0 0 1px ${props =>  props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5};
+  background: ${props => tinyColor(props.theme.name === 'dark' ? props.theme.background.z1 : props.theme.background.z2).setAlpha(0.77).toRgbString()};
+  box-shadow: 0 0 0 1px ${props =>  props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5}, 0 4px 16px 0 rgba(0,0,0,0.16);
 `;
 
 const TopbarDropdownButton = (props: TopbarDropdownButtonProps): ReactElement => {

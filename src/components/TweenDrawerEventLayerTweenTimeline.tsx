@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
+import React, { useContext, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import gsap from 'gsap';
 import { RootState } from '../store/reducers';
@@ -24,11 +24,11 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
   const theme = useContext(ThemeContext);
   const { tweenId, tweenHover, tweenEditing, setTweenDrawerTweenHover } = props;
 
-  const handleMouseEnter = () => {
+  const handleMouseEnter = (): void => {
     setTweenDrawerTweenHover({id: tweenId});
   }
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = (): void => {
     setTweenDrawerTweenHover({id: null});
   }
 
@@ -43,7 +43,7 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
         background: tweenId === tweenHover && !tweenEditing || tweenId === tweenEditing
         ? theme.background.z3
         : 'none',
-        zIndex: tweenId === tweenEditing
+        zIndex: tweenId === tweenEditing || tweenId === tweenHover
         ? 3
         : 'inherit'
       }}>

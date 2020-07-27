@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
-import chroma from 'chroma-js';
 import { evaluate } from 'mathjs';
 import { ThemeContext } from './ThemeProvider';
 import SidebarInput from './SidebarInput';

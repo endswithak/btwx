@@ -12,17 +12,18 @@
   border-radius: $unit * 2
 
 .c-timeline-handle__tooltip
-  height: $unit * 5
   display: flex
   position: absolute
   align-items: center
   justify-content: center
-  opacity: 0
+  display: none
   font-size: $fontSizeSm
+  line-height: 16px
   textAlign: center
-  padding: 0 $unit
+  padding: $unit
   zIndex: 999999999
   top: $unit * 5
+  border-radius: $unit
 
 .c-timeline-handle--right
   .c-timeline-handle__tooltip

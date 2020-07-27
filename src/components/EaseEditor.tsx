@@ -1,6 +1,5 @@
 import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
 import Modal from 'react-modal';
-import chroma from 'chroma-js';
 import { evaluate } from 'mathjs';
 import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
@@ -19,6 +18,7 @@ import CustomEase from 'gsap/CustomEase';
 import MotionPathPlugin from 'gsap/MotionPathPlugin';
 import MotionPathHelper from 'gsap/MotionPathHelper';
 import DrawSVGPlugin from 'gsap/DrawSVGPlugin';
+import tinyColor from 'tinycolor2';
 
 gsap.registerPlugin(CustomEase, MotionPathPlugin, MotionPathHelper, DrawSVGPlugin);
 
@@ -131,10 +131,10 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
       onRequestClose={handleCloseRequest}
       style={{
         content: {
-          background: chroma(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).alpha(0.88).hex(),
+          background: tinyColor(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).setAlpha(0.77).toRgbString(),
           width: 700,
           height: 576,
-          boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`,
+          boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset, 0 4px 16px 0 rgba(0,0,0,0.16)`,
           borderRadius: theme.unit,
           backdropFilter: 'blur(17px)'
         }
@@ -163,10 +163,10 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
                 maxHeight: 400,
                 bottom: 72
               }}>
-              <line x1="0" y1="0" x2="400" y2="0" stroke={theme.text.lightest}></line>
-              <path ref={pathRef} strokeWidth='1' stroke={theme.text.lightest} fill='none'></path>
+              <line x1="0" y1="0" x2="400" y2="0" stroke={theme.text.lightest} opacity='0.5'></line>
+              <path ref={pathRef} strokeWidth='1' stroke={theme.text.lightest} opacity='0.5' fill='none'></path>
               <path ref={pathRevealRef} strokeWidth='1' stroke={theme.text.base} fill='none'></path>
-              <line x1="0" y1="400" x2="400" y2="400" stroke={theme.text.lightest}></line>
+              <line x1="0" y1="400" x2="400" y2="400" stroke={theme.text.lightest} opacity='0.5'></line>
             </svg>
           </div>
           <div
@@ -178,6 +178,7 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
               className='c-ease-editor-value__bar'
               style={{
                 background: theme.text.lightest,
+                opacity: 0.5,
                 height: 544
               }} />
             <div

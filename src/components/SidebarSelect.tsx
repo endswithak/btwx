@@ -1,7 +1,7 @@
 import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
 import Select from 'react-select';
 import { ThemeContext } from './ThemeProvider';
-import chroma from 'chroma-js';
+import tinyColor from 'tinycolor2';
 
 interface SidebarSelectProps {
   value: { value: string; label: string };
@@ -16,15 +16,6 @@ interface SidebarSelectProps {
   disabled?: boolean;
   isSearchable?: boolean;
 }
-
-// const ba = () => ({
-//   ':before': {
-//     content: '"( "'
-//   },
-//   ':after': {
-//     content: '" )"'
-//   }
-// });
 
 const SidebarSelect = (props: SidebarSelectProps): ReactElement => {
   const theme = useContext(ThemeContext);
@@ -136,9 +127,9 @@ const SidebarSelect = (props: SidebarSelectProps): ReactElement => {
             return { ...provided, display };
           },
           menu: (provided, state) => {
-            const background = chroma(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).alpha(0.88).hex();
+            const background = tinyColor(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).setAlpha(0.77).toRgbString();
             const color = theme.text.base;
-            const boxShadow = `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`;
+            const boxShadow = `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}, 0 4px 16px 0 rgba(0,0,0,0.16)`;
             const backdropFilter = 'blur(17px)';
             return { ...provided, background, color, boxShadow, backdropFilter };
           },

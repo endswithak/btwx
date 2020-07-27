@@ -28,7 +28,17 @@ const SidebarSwatch = (props: SidebarSwatchProps): ReactElement => {
   const { style, isActive, bottomLabel, disabled, onClick } = props;
   const handleClick = () => {
     const bounding = swatchRef.current.getBoundingClientRect();
-    onClick(bounding);
+    const scrollTop = document.getElementById('sidebar-scroll-right').scrollTop;
+    onClick({
+      x: bounding.x,
+      y: bounding.y + scrollTop,
+      width: bounding.width,
+      height: bounding.height,
+      top: bounding.top + scrollTop,
+      right: bounding.right,
+      bottom: bounding.bottom - scrollTop,
+      left: bounding.left
+    } as DOMRect);
   }
   return (
     <Swatch

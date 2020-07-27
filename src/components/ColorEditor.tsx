@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useRef, useState, useEffect, useCallback } from 'react';
+import React, { useContext, ReactElement, useRef, useEffect, useCallback } from 'react';
 import { connect } from 'react-redux';
+import debounce from 'lodash.debounce';
+import tinyColor from 'tinycolor2';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { closeColorEditor } from '../store/actions/colorEditor';
 import { ColorEditorTypes } from '../store/actionTypes/colorEditor';
 import { openGradientEditor } from '../store/actions/gradientEditor';
 import { GradientEditorTypes, OpenGradientEditorPayload } from '../store/actionTypes/gradientEditor';
-import { ToolTypes } from '../store/actionTypes/tool';
 import { ColorEditorState } from '../store/reducers/colorEditor';
 import ColorPicker from './ColorPicker';
 import { SetLayerFillTypePayload, SetLayerFillGradientTypePayload, SetLayerFillColorPayload, SetLayerFillPayload, SetLayerStrokeFillTypePayload, SetLayerStrokeGradientTypePayload, SetLayerStrokeColorPayload, SetLayerShadowColorPayload, LayerTypes } from '../store/actionTypes/layer';
@@ -15,8 +16,6 @@ import { setLayerFillType, setLayerFillGradientType, setLayerFillColor, setLayer
 import { SetTextSettingsFillColorPayload, TextSettingsTypes } from '../store/actionTypes/textSettings';
 import { setTextSettingsFillColor } from '../store/actions/textSettings';
 import FillTypeSelector from './FillTypeSelector';
-import debounce from 'lodash.debounce';
-import chroma from 'chroma-js';
 
 interface ColorEditorProps {
   layerItem?: em.Layer;
@@ -24,8 +23,6 @@ interface ColorEditorProps {
   colorEditor?: ColorEditorState;
   closeColorEditor?(): ColorEditorTypes;
   openGradientEditor?(payload: OpenGradientEditorPayload): GradientEditorTypes;
-  disableSelectionTool?(): ToolTypes;
-  enableSelectionTool?(): ToolTypes;
   setLayerShadowColor?(payload: SetLayerShadowColorPayload): LayerTypes;
   setLayerFillColor?(payload: SetLayerFillColorPayload): LayerTypes;
   setLayerFillType?(payload: SetLayerFillTypePayload): LayerTypes;
@@ -41,6 +38,7 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const editorRef = useRef<HTMLDivElement>(null);
   const { layerItem, style, colorEditor, closeColorEditor, setLayerFillColor, setLayerStrokeFillType, setLayerStrokeGradientType, setLayerFillType, setLayerStrokeColor, setLayerFillGradientType, openGradientEditor, setLayerShadowColor, setTextSettingsFillColor } = props;
+
   const debounceColor = useCallback(
     debounce((color: em.Color) => {
       switch(colorEditor.prop) {
@@ -64,22 +62,22 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
 
   useEffect(() => {
     document.addEventListener('mousedown', onMouseDown, false);
-    return () => {
+    return (): void => {
       document.removeEventListener('mousedown', onMouseDown);
     }
   }, []);
 
-  const onMouseDown = (event: any) => {
+  const onMouseDown = (event: any): void => {
     if (editorRef.current && !editorRef.current.contains(event.target)) {
       closeColorEditor();
     }
   }
 
-  const handleColorChange = (color: em.Color) => {
+  const handleColorChange = (color: em.Color): void => {
     debounceColor(color);
   }
 
-  const handleLinearGradientClick = () => {
+  const handleLinearGradientClick = (): void => {
     switch(colorEditor.prop) {
       case 'fill':
         setLayerFillType({id: colorEditor.layer, fillType: 'gradient'});
@@ -111,7 +109,7 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
     });
   }
 
-  const handleRadialGradientClick = () => {
+  const handleRadialGradientClick = (): void => {
     switch(colorEditor.prop) {
       case 'fill':
         setLayerFillType({id: colorEditor.layer, fillType: 'gradient'});
@@ -151,15 +149,15 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
         className='c-fill-editor__picker'
         style={{
           top: colorEditor.y,
-          background: chroma(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).alpha(0.88).hex(),
-          boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
+          background: tinyColor(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).setAlpha(0.77).toRgbString(),
+          boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}, 0 4px 16px 0 rgba(0,0,0,0.16)`
         }}>
         {
           colorEditor.prop === 'fill' || colorEditor.prop === 'stroke'
           ? <FillTypeSelector
               colorSelector={{
                 enabled: true,
-                onClick: () => {return;},
+                onClick: (): void => {return;},
                 isActive: true
               }}
               linearGradientSelector={{
@@ -183,10 +181,14 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
+const mapStateToProps = (state: RootState): {
+  layerItem: em.Layer;
+  style: em.Fill | em.Stroke | em.Shadow;
+  colorEditor: ColorEditorState;
+} => {
   const { colorEditor, layer } = state;
   const layerItem = layer.present.byId[colorEditor.layer];
-  const style = (() => {
+  const style = ((): em.Fill | em.Stroke | em.Shadow => {
     switch(colorEditor.prop) {
       case 'fill':
         return layerItem.style.fill;

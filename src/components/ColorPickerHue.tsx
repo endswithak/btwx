@@ -32,12 +32,12 @@ const Slider = styled.input`
     cursor: inherit;
   }
   ::-webkit-slider-thumb {
-    box-shadow: 0 0 0 1.5px #fff, inset 0 0 1px 1px rgba(0,0,0,.3), 0 0 1px 2px rgba(0,0,0,.4);
+    box-shadow: 0 0 0 2px #fff, 0 0 0 1px rgba(0, 0, 0, 0.3) inset, 0 0 0 3px rgba(0, 0, 0, 0.3);
     height: ${props => props.theme.unit * 2}px;
     width: ${props => props.theme.unit * 2}px;
     border-radius: 100%;
     background: none;
-    cursor: pointer;
+    cursor: ${props => props.grabbing ? 'grabbing' : 'grab'};
     -webkit-appearance: none;
   }
   :disabled::-webkit-slider-thumb {
@@ -49,6 +49,7 @@ const ColorPickerHue = (props: ColorPickerHueProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { hue, saturation, lightness, value, alpha, onChange } = props;
   const [hueValue, setHueValue] = useState(hue);
+  const [grabbing, setGrabbing] = useState(false);
 
   useEffect(() => {
     setHueValue(hue);
@@ -60,6 +61,14 @@ const ColorPickerHue = (props: ColorPickerHueProps): ReactElement => {
     onChange({h: target.value, s: saturation, l: lightness, v: value, a: alpha });
   };
 
+  const handleMouseDown = () => {
+    setGrabbing(true);
+  }
+
+  const handleMouseUp = () => {
+    setGrabbing(false);
+  }
+
   return (
     <div className='c-color-picker__hue'>
       <Slider
@@ -69,7 +78,10 @@ const ColorPickerHue = (props: ColorPickerHueProps): ReactElement => {
         step={1}
         value={hueValue}
         onChange={handleChange}
-        theme={theme} />
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        theme={theme}
+        grabbing={grabbing} />
     </div>
   );
 }

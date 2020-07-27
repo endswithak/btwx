@@ -22,6 +22,7 @@ interface DragHandleProps {
 
 const DragHandle = styled.div<DragHandleProps>`
   background: ${props => props.dragging ? props.theme.palette.primary : 'none'};
+  opacity: ${props => props.dragging ? 0.75 : 0.33};
   :hover {
     background: ${props => props.theme.palette.primary};
   }
@@ -39,6 +40,7 @@ const TweenDrawerDragHandle = (props: TweenDrawerDragHandleProps): ReactElement 
       type: 'y',
       zIndexBoost: false,
       bounds: '#main-canvas',
+      cursor: 'row-resize',
       onPress: function() {
         setDragging(true);
       },

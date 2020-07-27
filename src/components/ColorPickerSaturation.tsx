@@ -42,7 +42,6 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
           const lit = l < 0 ? 0 : l > 1 ? 1 : l;
           const val = v < 0 ? 0 : v > 1 ? 1 : v;
           onChange({h: hue, s: sat, l: lit, v: val, a: alpha});
-          //onChange(chroma.hsl(hue, s, l, alpha).hex());
         },
         onRelease: function() {
           setDragging(false);

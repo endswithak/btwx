@@ -53,12 +53,12 @@ const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
       },
       onPress: function() {
         setTweenDrawerTweenEditing({id: tweenId});
-        gsap.set(leftTooltipElement, {opacity: 1});
+        gsap.set(leftTooltipElement, {display: 'inline'});
         leftTooltipElement.innerHTML = `${(this.x / 4) / 100}s`;
       },
       onRelease: function() {
         setTweenDrawerTweenEditing({id: null});
-        gsap.set(leftTooltipElement, {opacity: 0});
+        gsap.set(leftTooltipElement, {display: 'none'});
       },
       onDrag: function() {
         gsap.set(tweenHandleElement, {x: `+=${this.deltaX}`, width: `-=${this.deltaX}`});
@@ -105,8 +105,9 @@ const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
         id={`${tweenId}-tooltip-left`}
         className='c-timeline-handle__tooltip'
         style={{
-          background: theme.name === 'dark' ? theme.background.z4 : theme.background.z5,
-          color: theme.text.base
+          background: theme.name === 'dark' ? theme.background.z6 : theme.background.z0,
+          color: theme.text.base,
+          boxShadow: `0 1px 4px 0 rgba(0,0,0,0.25)`
         }} />
     </div>
   );

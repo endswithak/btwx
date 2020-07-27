@@ -70,7 +70,8 @@ const GradientSliderGradient = (props: GradientSliderGradientProps): ReactElemen
             }
             return result;
           }, 'linear-gradient(to right,');
-        })()
+        })(),
+        cursor: 'cell'
       }} />
   );
 }

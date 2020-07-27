@@ -1,39 +1,30 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useRef, useState, useEffect, useCallback } from 'react';
+import React, { useContext, ReactElement, useRef, useEffect, useCallback } from 'react';
 import { connect } from 'react-redux';
+import debounce from 'lodash.debounce';
+import tinyColor from 'tinycolor2';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { openColorEditor } from '../store/actions/colorEditor';
 import { ColorEditorTypes, OpenColorEditorPayload } from '../store/actionTypes/colorEditor';
 import { closeGradientEditor } from '../store/actions/gradientEditor';
 import { GradientEditorTypes } from '../store/actionTypes/gradientEditor';
-import { ToolTypes } from '../store/actionTypes/tool';
 import { GradientEditorState } from '../store/reducers/gradientEditor';
 import ColorPicker from './ColorPicker';
 import GradientSlider from './GradientSlider';
 import { SetLayerFillTypePayload, SetLayerFillGradientTypePayload, SetLayerFillActiveGradientStopPayload, SetLayerFillGradientStopColorPayload, SetLayerFillGradientStopPositionPayload, AddLayerFillGradientStopPayload, SetLayerStrokeGradientTypePayload, SetLayerStrokeActiveGradientStopPayload, SetLayerStrokeGradientStopColorPayload, SetLayerStrokeGradientStopPositionPayload, AddLayerStrokeGradientStopPayload, SetLayerStrokeFillTypePayload, LayerTypes } from '../store/actionTypes/layer';
 import { setLayerFillType, setLayerFillGradientType, setLayerFillGradientStopColor, setLayerFillActiveGradientStop, setLayerFillGradientStopPosition, addLayerFillGradientStop, setLayerStrokeGradientType, setLayerStrokeGradientStopColor, setLayerStrokeActiveGradientStop, setLayerStrokeGradientStopPosition, addLayerStrokeGradientStop, setLayerStrokeFillType } from '../store/actions/layer';
 import FillTypeSelector from './FillTypeSelector';
-import debounce from 'lodash.debounce';
-import chroma from 'chroma-js';
 import { paperMain } from '../canvas';
 import GradientFrame from './GradientFrame';
 
 interface GradientEditorProps {
   style?: em.Fill | em.Stroke;
   gradient?: em.Gradient;
-  stops?: {
-    allIds: string[];
-    byId: {
-      [id: string]: em.GradientStop;
-    };
-  };
   gradientEditor?: GradientEditorState;
   activeStopValue?: em.GradientStop;
   closeGradientEditor?(): GradientEditorTypes;
   openColorEditor?(payload: OpenColorEditorPayload): ColorEditorTypes;
-  disableSelectionTool?(): ToolTypes;
-  enableSelectionTool?(): ToolTypes;
   setLayerFillType?(payload: SetLayerFillTypePayload): LayerTypes;
   setLayerFillGradientType?(payload: SetLayerFillGradientTypePayload): LayerTypes;
   setLayerFillGradientStopColor?(payload: SetLayerFillGradientStopColorPayload): LayerTypes;
@@ -52,6 +43,7 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const editorRef = useRef<HTMLDivElement>(null);
   const { gradientEditor, style, gradient, activeStopValue, setLayerStrokeActiveGradientStop, setLayerStrokeGradientType, setLayerStrokeGradientStopColor, setLayerStrokeGradientStopPosition, setLayerFillType, setLayerFillGradientType, openColorEditor, setLayerFillGradientStopColor, setLayerFillGradientStopPosition, setLayerFillActiveGradientStop, addLayerFillGradientStop, closeGradientEditor, addLayerStrokeGradientStop, setLayerStrokeFillType } = props;
+
   const debounceStopColorChange = useCallback(
     debounce((stop: string, color: em.Color) => {
       switch(gradientEditor.prop) {
@@ -65,6 +57,7 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
     }, 150),
     []
   );
+
   const debounceStopPositionChange = useCallback(
     debounce((stop: string, position: number) => {
       switch(gradientEditor.prop) {
@@ -81,12 +74,12 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
 
   useEffect(() => {
     document.addEventListener('mousedown', onMouseDown, false);
-    return () => {
+    return (): void => {
       document.removeEventListener('mousedown', onMouseDown);
     }
   }, []);
 
-  const onMouseDown = (event: any) => {
+  const onMouseDown = (event: any): void => {
     if (editorRef.current && !editorRef.current.contains(event.target)) {
       if (event.target.id === 'canvas') {
         const eventPoint = paperMain.view.getEventPoint(event);
@@ -100,11 +93,11 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
     }
   }
 
-  const handleActiveStopColorChange = (stopColor: em.Color) => {
+  const handleActiveStopColorChange = (stopColor: em.Color): void => {
     debounceStopColorChange(activeStopValue.id, stopColor);
   }
 
-  const handleStopPress = (id: string) => {
+  const handleStopPress = (id: string): void => {
     switch(gradientEditor.prop) {
       case 'fill':
         setLayerFillActiveGradientStop({id: gradientEditor.layer, stop: id});
@@ -115,11 +108,11 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
     }
   }
 
-  const handleStopDrag = (id: string, position: number) => {
+  const handleStopDrag = (id: string, position: number): void => {
     debounceStopPositionChange(id, position);
   }
 
-  const handleSliderClick = (newStop: em.GradientStop) => {
+  const handleSliderClick = (newStop: em.GradientStop): void => {
     switch(gradientEditor.prop) {
       case 'fill':
         addLayerFillGradientStop({id: gradientEditor.layer, gradientStop: newStop});
@@ -130,7 +123,7 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
     }
   }
 
-  const handleColorClick = () => {
+  const handleColorClick = (): void => {
     switch(gradientEditor.prop) {
       case 'fill':
         setLayerFillType({id: gradientEditor.layer, fillType: 'color'});
@@ -149,7 +142,7 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
     });
   }
 
-  const handleLinearGradientClick = () => {
+  const handleLinearGradientClick = (): void => {
     if (gradient.gradientType !== 'linear') {
       switch(gradientEditor.prop) {
         case 'fill':
@@ -162,7 +155,7 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
     }
   }
 
-  const handleRadialGradientClick = () => {
+  const handleRadialGradientClick = (): void => {
     if (gradient.gradientType !== 'radial') {
       switch(gradientEditor.prop) {
         case 'fill':
@@ -183,8 +176,8 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
         className='c-fill-editor__picker'
         style={{
           top: gradientEditor.y,
-          background: chroma(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).alpha(0.88).hex(),
-          boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
+          background: tinyColor(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).setAlpha(0.77).toRgbString(),
+          boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}, 0 4px 16px 0 rgba(0,0,0,0.16)`
         }}>
         <FillTypeSelector
           colorSelector={{
@@ -221,10 +214,15 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
+const mapStateToProps = (state: RootState): {
+  style: em.Fill | em.Stroke;
+  gradient: em.Gradient;
+  gradientEditor: GradientEditorState;
+  activeStopValue: em.GradientStop;
+} => {
   const { gradientEditor, layer } = state;
   const layerItem = layer.present.byId[gradientEditor.layer];
-  const style = (() => {
+  const style = ((): em.Fill | em.Stroke => {
     switch(gradientEditor.prop) {
       case 'fill':
         return layerItem.style.fill;
@@ -236,7 +234,7 @@ const mapStateToProps = (state: RootState) => {
   const stops = gradient.stops;
   const activeStopId = stops.allIds.find((stop) => stops.byId[stop].active);
   const activeStopValue = stops.byId[activeStopId];
-  return { gradientEditor: gradientEditor, layerItem, style, gradient, activeStopValue };
+  return { gradientEditor: gradientEditor, style, gradient, activeStopValue };
 };
 
 export default connect(

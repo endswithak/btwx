@@ -24,7 +24,7 @@ interface TimelineRightHandleProps {
 
 const TimelineRightHandle = (props: TimelineRightHandleProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { tweenId, tween, setLayerTweenDuration, setTweenDrawerTweenEditing } = props;
+  const { tweenId, tween, setLayerTweenDuration, tweenEditing, setTweenDrawerTweenEditing } = props;
   const [prevDuration, setPrevDuration] = useState(tween.duration);
 
   useEffect(() => {
@@ -53,12 +53,12 @@ const TimelineRightHandle = (props: TimelineRightHandleProps): ReactElement => {
       },
       onPress: function() {
         setTweenDrawerTweenEditing({id: tweenId});
-        gsap.set(rightTooltipElement, {opacity: 1});
+        gsap.set(rightTooltipElement, {display: 'inline'});
         rightTooltipElement.innerHTML = `${(tweenHandleElement.clientWidth / 4) / 100}s`;
       },
       onRelease: function() {
         setTweenDrawerTweenEditing({id: null});
-        gsap.set(rightTooltipElement, {opacity: 0});
+        gsap.set(rightTooltipElement, {display: 'none'});
       },
       onDrag: function() {
         gsap.set(tweenHandleElement, {width: `+=${this.deltaX}`});
@@ -122,8 +122,9 @@ const TimelineRightHandle = (props: TimelineRightHandleProps): ReactElement => {
         id={`${tweenId}-tooltip-right`}
         className='c-timeline-handle__tooltip'
         style={{
-          background: theme.name === 'dark' ? theme.background.z4 : theme.background.z5,
-          color: theme.text.base
+          background: theme.name === 'dark' ? theme.background.z6 : theme.background.z0,
+          color: theme.text.base,
+          boxShadow: `0 1px 4px 0 rgba(0,0,0,0.25)`
         }} />
     </div>
   );

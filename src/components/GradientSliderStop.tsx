@@ -51,8 +51,8 @@ const GradientSliderStop = (props: GradientSliderProps): ReactElement => {
         className='c-gradient-slider__circle'
         style={{
           boxShadow: stop.active
-          ? `0 0 0 1.5px #fff, 0 0 0 3.5px ${theme.palette.primary}, inset 0 0 1px 1px rgba(0,0,0,.3), 0 0 1px 2px rgba(0,0,0,.4)`
-          : `0 0 0 1.5px #fff, inset 0 0 1px 1px rgba(0,0,0,.3), 0 0 1px 2px rgba(0,0,0,.4)`
+          ? `0 0 0 2px #fff, 0 0 0 3px ${theme.palette.primary}, 0 0 0 1px rgba(0, 0, 0, 0.3) inset, 0 0 0 3px rgba(0, 0, 0, 0.3)`
+          : `0 0 0 2px #fff, 0 0 0 1px rgba(0, 0, 0, 0.3) inset, 0 0 0 3px rgba(0, 0, 0, 0.3)`
         }} />
     </div>
   );
