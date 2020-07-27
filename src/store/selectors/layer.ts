@@ -173,7 +173,7 @@ export const getSelectionTopLeft = (store: LayerState, useLayerItem?: boolean): 
       return [...result, paperLayer.bounds.topLeft];
     }
   }, []);
-  return paperLayerPoints.reduce(paper.Point.min);
+  return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.min) : null;
 }
 
 export const getSelectionBottomRight = (store: LayerState, useLayerItem?: boolean): paper.Point => {
@@ -187,7 +187,7 @@ export const getSelectionBottomRight = (store: LayerState, useLayerItem?: boolea
       return [...result, paperLayer.bounds.bottomRight];
     }
   }, []);
-  return paperLayerPoints.reduce(paper.Point.max);
+  return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.max) : null;
 }
 
 export const getSelectionBounds = (store: LayerState, useLayerItem?: boolean): paper.Rectangle => {

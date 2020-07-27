@@ -25,12 +25,12 @@ class SelectionTool {
   constructor() {
     this.tool = new paperMain.Tool();
     this.tool.activate();
-    //this.tool.minDistance = 1;
-    this.tool.onKeyDown = (e: paper.KeyEvent) => this.onKeyDown(e);
-    this.tool.onKeyUp = (e: paper.KeyEvent) => this.onKeyUp(e);
-    this.tool.onMouseDown = (e: paper.ToolEvent) => this.onMouseDown(e);
-    this.tool.onMouseDrag = (e: paper.ToolEvent) => this.onMouseDrag(e);
-    this.tool.onMouseUp = (e: paper.ToolEvent) => this.onMouseUp(e);
+    this.tool.minDistance = 1;
+    this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
+    this.tool.onKeyUp = (e: paper.KeyEvent): void => this.onKeyUp(e);
+    this.tool.onMouseDown = (e: paper.ToolEvent): void => this.onMouseDown(e);
+    this.tool.onMouseDrag = (e: paper.ToolEvent): void => this.onMouseDrag(e);
+    this.tool.onMouseUp = (e: paper.ToolEvent): void => this.onMouseUp(e);
     this.areaSelectTool = new AreaSelectTool();
     this.dragTool = new DragTool();
     this.resizeTool = new ResizeTool();
@@ -82,29 +82,26 @@ class SelectionTool {
     const hitResult = paperMain.project.hitTest(event.point);
     const isGradientEditorOpen = state.gradientEditor.isOpen;
     if (hitResult) {
-      // handle dragging/resizing if selection frame handle is hit result
+      // if hit result is selection frame handle
       if (hitResult.item.data.id === 'selectionFrameHandle') {
-        if (layerState.selected.length >= 1) {
-          // if move handle is hit result, enable drag tool
-          if (hitResult.item.data.handle === 'move') {
-            this.dragTool.enable(true);
-            this.dragTool.onMouseDown(event);
-          }
-          // else, enable resize tool if no text layers are selected
-          if (!layerState.selected.every((id: string) => layerState.byId[id].type === 'Text') && hitResult.item.data.handle !== 'move') {
+        // if move handle, enable drag tool
+        if (hitResult.item.data.handle === 'move') {
+          this.dragTool.enable(true);
+          this.dragTool.onMouseDown(event);
+        }
+        // else (hit result is resize handle), enable resize tool if no text layers are selected
+        else {
+          if (!layerState.selected.every((id: string) => layerState.byId[id].type === 'Text')) {
             this.resizeTool.enable(hitResult.item.data.handle);
             this.resizeTool.onMouseDown(event);
           }
         }
-      // if gradient handle is hit result, enable gradient tool
+      // if hit result is gradient handle, enable gradient tool
       } else if (hitResult.item.data.id === 'gradientFrameHandle') {
         this.gradientTool.enable(hitResult.item.data.handle, state.gradientEditor.prop as 'fill' | 'stroke');
         this.gradientTool.onMouseDown(event);
-      // if hit result isnt a frame handle, enable drag tool
-      } else {
-        if (layerState.selected.length === 1 && hitResult.item.data.id === 'ArtboardBackground') {
-          return;
-        }
+      // if hit result is shape, group, text, or image, enable drag tool
+      } else if (hitResult.item.data.type && (hitResult.item.data.type === 'Shape' || hitResult.item.data.type === 'Group' || hitResult.item.data.type === 'Image' || hitResult.item.data.type === 'Text')) {
         this.dragTool.enable();
         this.dragTool.onMouseDown(event);
       }

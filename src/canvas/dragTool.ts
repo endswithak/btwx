@@ -1,10 +1,10 @@
 import store from '../store';
 import { setCanvasDragging } from '../store/actions/canvasSettings';
 import { moveLayersBy, duplicateLayers, removeDuplicatedLayers } from '../store/actions/layer';
-import { getPaperLayer, getSelectionBounds, getLayerAndDescendants, getInViewSnapPoints } from '../store/selectors/layer';
+import { getPaperLayer, getSelectionBounds, getLayerAndDescendants } from '../store/selectors/layer';
 import { updateSelectionFrame, updateActiveArtboardFrame } from '../store/utils/layer';
 import { paperMain } from './index';
-import { THEME_PRIMARY_COLOR, THEME_GUIDE_COLOR } from '../constants';
+import { THEME_PRIMARY_COLOR } from '../constants';
 import SnapTool from './snapTool';
 import { RootState } from '../store/reducers';
 
@@ -44,14 +44,14 @@ class DragTool {
     this.toBounds = null;
     this.snapTool = null;
   }
-  enable(moveHandle = false) {
+  enable(moveHandle = false): void {
     this.state = store.getState();
     store.dispatch(setCanvasDragging({dragging: true}));
     this.enabled = true;
     this.snapTool = new SnapTool();
     this.moveHandle = moveHandle;
   }
-  disable() {
+  disable(): void {
     store.dispatch(setCanvasDragging({dragging: false}));
     this.state = null;
     this.moveHandle = false;
@@ -67,7 +67,7 @@ class DragTool {
     this.toBounds = null;
     this.snapTool = null;
   }
-  updateRef() {
+  updateRef(): void {
     if (this.ref) {
       this.ref.remove();
     }
@@ -81,7 +81,7 @@ class DragTool {
       up: true
     });
   }
-  updateSnapPoints() {
+  updateSnapPoints(): void {
     let allSelectedLayers: string[] = [];
     this.state.layer.present.selected.forEach((id) => {
       const layerAndDescendants = getLayerAndDescendants(this.state.layer.present, id);
@@ -89,7 +89,7 @@ class DragTool {
     });
     this.snapTool.snapPoints = this.state.layer.present.inView.snapPoints.filter((snapPoint: em.SnapPoint) => !allSelectedLayers.includes(snapPoint.id));
   }
-  duplicate() {
+  duplicate(): void {
     store.dispatch(duplicateLayers({layers: this.originalSelection}));
     this.state = store.getState();
     this.duplicateSelection = this.state.layer.present.selected;
@@ -101,13 +101,13 @@ class DragTool {
       paperLayer.position.y = layerItem.frame.y;
     });
   }
-  clearDuplicate() {
+  clearDuplicate(): void {
     store.dispatch(removeDuplicatedLayers({layers: this.duplicateSelection, newSelection: this.originalSelection}));
     this.state = store.getState();
     this.duplicateSelection = null;
     this.updateSnapPoints();
   }
-  translateLayers() {
+  translateLayers(): void {
     if (this.altModifier && !this.duplicateSelection) {
       this.duplicate();
     }
@@ -126,7 +126,7 @@ class DragTool {
     updateActiveArtboardFrame(this.state.layer.present);
     this.snapTool.updateGuides();
   }
-  onKeyDown(event: paper.KeyEvent) {
+  onKeyDown(event: paper.KeyEvent): void {
     switch(event.key) {
       case 'shift': {
         this.shiftModifier = true;
@@ -146,7 +146,7 @@ class DragTool {
       }
     }
   }
-  onKeyUp(event: paper.KeyEvent) {
+  onKeyUp(event: paper.KeyEvent): void {
     switch(event.key) {
       case 'shift': {
         this.shiftModifier = false;

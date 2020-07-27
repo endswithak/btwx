@@ -14,9 +14,10 @@ class Tooltip {
       content: this.text
     });
     const tooltipBackground = new paperMain.Path.Rectangle({
-      point: [this.point.x + (30 / paperMain.view.zoom), this.point.y + (30 / paperMain.view.zoom)],
-      size: [tooltipText.bounds.width + 8, tooltipText.bounds.height + 8],
-      fillColor: new paperMain.Color(0,0,0,0.75)
+      point: [this.point.x + (24 / paperMain.view.zoom), this.point.y + (24 / paperMain.view.zoom)],
+      size: [tooltipText.bounds.width + (12 / paperMain.view.zoom), tooltipText.bounds.height + (12 / paperMain.view.zoom)],
+      fillColor: new paperMain.Color(0,0,0,0.5),
+      radius: (4 / paperMain.view.zoom),
     });
     tooltipText.position = tooltipBackground.position;
     const tooltipGroup = new paperMain.Group({

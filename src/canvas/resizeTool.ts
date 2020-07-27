@@ -49,7 +49,7 @@ class ResizeTool {
     this.altModifier = false;
     this.snapTool = null;
   }
-  enable(handle: string) {
+  enable(handle: string): void {
     store.dispatch(setCanvasResizing({resizing: true}));
     const state = store.getState();
     this.enabled = true;
@@ -58,7 +58,7 @@ class ResizeTool {
     this.state = state;
     updateSelectionFrame(state.layer.present, this.handle);
   }
-  disable() {
+  disable(): void {
     store.dispatch(setCanvasResizing({resizing: false}));
     if (this.tooltip) {
       this.tooltip.paperLayer.remove();
@@ -83,12 +83,12 @@ class ResizeTool {
     this.horizontalFlip = false;
     this.snapTool = null;
   }
-  flipLayers(state: RootState, hor = 1, ver = 1) {
+  flipLayers(state: RootState, hor = 1, ver = 1): void {
     this.state.layer.present.selected.forEach((layer) => {
       this.scaleLayer(layer, hor, ver);
     });
   }
-  clearLayerScale(paperLayer: paper.Item, layerItem: em.Layer) {
+  clearLayerScale(paperLayer: paper.Item, layerItem: em.Layer): void {
     switch(paperLayer.data.type) {
       case 'Artboard': {
         const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
@@ -120,7 +120,7 @@ class ResizeTool {
       }
     }
   }
-  scaleLayer(id: string, hor: number, ver: number) {
+  scaleLayer(id: string, hor: number, ver: number): void {
     const paperLayer = getPaperLayer(id);
     switch(paperLayer.data.type) {
       case 'Artboard': {
@@ -138,7 +138,7 @@ class ResizeTool {
       }
     }
   }
-  setLayerPivot(id: string) {
+  setLayerPivot(id: string): void {
     const paperLayer = getPaperLayer(id);
     switch(paperLayer.data.type) {
       case 'Artboard': {
@@ -156,13 +156,13 @@ class ResizeTool {
       }
     }
   }
-  updateTooltip() {
+  updateTooltip(): void {
     if (this.tooltip) {
       this.tooltip.paperLayer.remove();
     }
-    this.tooltip = new Tooltip(`${Math.round(this.toBounds.width)} x ${Math.round(this.toBounds.height)}`, this.to, {drag: true, up: true});
+    this.tooltip = new Tooltip(`${Math.round(this.toBounds.width)} x ${Math.round(this.toBounds.height)}`, this.to, {up: true});
   }
-  updateRef() {
+  updateRef(): void {
     if (this.ref) {
       this.ref.remove();
     }
@@ -176,7 +176,7 @@ class ResizeTool {
     });
     this.updateTooltip();
   }
-  scaleLayers() {
+  scaleLayers(): void {
     // used when dragging
     // scales layers by current scale values
     switch(this.handle) {
@@ -227,7 +227,7 @@ class ResizeTool {
     this.updateTooltip();
     this.snapTool.updateGuides();
   }
-  updateToBounds(overrides?: any) {
+  updateToBounds(overrides?: any): void {
     if (this.shiftModifier) {
       const aspect = this.fromBounds.width / this.fromBounds.height;
       const fb = this.fromBounds;
@@ -409,7 +409,7 @@ class ResizeTool {
     this.scaleY = isFinite(totalHeightDiff) && totalHeightDiff > 0 ? totalHeightDiff : 0.01;
     this.snapTool.snapBounds = this.toBounds;
   }
-  adjustHandle() {
+  adjustHandle(): void {
     // updates handle, horizontalFlip, and verticalFlip based on to and from points
     switch(this.handle) {
       case 'topLeft': {
@@ -558,7 +558,7 @@ class ResizeTool {
       }
     }
   }
-  clearLayersScale() {
+  clearLayersScale(): void {
     // clears current scaling from layers
     if (this.state.layer.present.selected.length > 0) {
       this.state.layer.present.selected.forEach((layer) => {
@@ -575,7 +575,7 @@ class ResizeTool {
       });
     }
   }
-  onKeyDown(event: paper.KeyEvent) {
+  onKeyDown(event: paper.KeyEvent): void {
     switch(event.key) {
       case 'shift': {
         this.shiftModifier = true;
@@ -595,7 +595,7 @@ class ResizeTool {
       }
     }
   }
-  onKeyUp(event: paper.KeyEvent) {
+  onKeyUp(event: paper.KeyEvent): void {
     switch(event.key) {
       case 'shift': {
         this.shiftModifier = false;

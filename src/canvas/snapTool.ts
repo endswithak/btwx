@@ -80,7 +80,7 @@ class SnapTool {
       });
       const minTopLeft = new paperMain.Point(this.snapBounds.left, topLeftPoints.reduce(paperMain.Point.min).y);
       const maxBottomLeft = new paperMain.Point(this.snapBounds.left, bottomLeftPoints.reduce(paperMain.Point.max).y);
-      this.leftGuide = new Guide(minTopLeft, maxBottomLeft, { up: true, drag: true, move: true });
+      this.leftGuide = new Guide(minTopLeft, maxBottomLeft, { up: true, move: true });
     }
     if (this.snap.x && rightSnaps.length > 0) {
       const topRightPoints: paper.Point[] = [this.snapBounds.topRight];
@@ -92,7 +92,7 @@ class SnapTool {
       });
       const minTopRight = new paperMain.Point(this.snapBounds.right, topRightPoints.reduce(paperMain.Point.min).y);
       const maxBottomRight = new paperMain.Point(this.snapBounds.right, bottomRightPoints.reduce(paperMain.Point.max).y);
-      this.rightGuide = new Guide(minTopRight, maxBottomRight, { up: true, drag: true, move: true });
+      this.rightGuide = new Guide(minTopRight, maxBottomRight, { up: true, move: true });
     }
     if (this.snap.x && centerXSnaps.length > 0) {
       const topCenterPoints: paper.Point[] = [this.snapBounds.topCenter];
@@ -104,7 +104,7 @@ class SnapTool {
       });
       const minTopCenter = new paperMain.Point(this.snapBounds.topCenter.x, topCenterPoints.reduce(paperMain.Point.min).y);
       const maxBottomCenter = new paperMain.Point(this.snapBounds.bottomCenter.x, bottomCenterPoints.reduce(paperMain.Point.max).y);
-      this.centerXGuide = new Guide(minTopCenter, maxBottomCenter, { up: true, drag: true, move: true });
+      this.centerXGuide = new Guide(minTopCenter, maxBottomCenter, { up: true, move: true });
     }
     if (this.snap.y && topSnaps.length > 0) {
       const topLeftPoints: paper.Point[] = [this.snapBounds.topLeft];
@@ -116,7 +116,7 @@ class SnapTool {
       });
       const minTopLeft = new paperMain.Point(topLeftPoints.reduce(paperMain.Point.min).x, this.snapBounds.top);
       const maxTopRight = new paperMain.Point(topRightPoints.reduce(paperMain.Point.max).x, this.snapBounds.top);
-      this.topGuide = new Guide(minTopLeft, maxTopRight, { up: true, drag: true, move: true });
+      this.topGuide = new Guide(minTopLeft, maxTopRight, { up: true, move: true });
     }
     if (this.snap.y && bottomSnaps.length > 0) {
       const bottomLeftPoints: paper.Point[] = [this.snapBounds.bottomLeft];
@@ -128,7 +128,7 @@ class SnapTool {
       });
       const minBottomLeft = new paperMain.Point(bottomLeftPoints.reduce(paperMain.Point.min).x, this.snapBounds.bottom);
       const maxBottomRight = new paperMain.Point(bottomRightPoints.reduce(paperMain.Point.max).x, this.snapBounds.bottom);
-      this.bottomGuide = new Guide(minBottomLeft, maxBottomRight, { up: true, drag: true, move: true });
+      this.bottomGuide = new Guide(minBottomLeft, maxBottomRight, { up: true, move: true });
     }
     if (this.snap.y && centerYSnaps.length > 0) {
       const leftCenterPoints: paper.Point[] = [this.snapBounds.leftCenter];
@@ -140,7 +140,7 @@ class SnapTool {
       });
       const minLeftCenter = new paperMain.Point(leftCenterPoints.reduce(paperMain.Point.min).x, this.snapBounds.leftCenter.y);
       const maxLeftCenter = new paperMain.Point(rightCenterPoints.reduce(paperMain.Point.max).x, this.snapBounds.rightCenter.y);
-      this.centerYGuide = new Guide(minLeftCenter, maxLeftCenter, { up: true, drag: true, move: true });
+      this.centerYGuide = new Guide(minLeftCenter, maxLeftCenter, { up: true, move: true });
     }
   }
   closestSnapPoint({snapPoints, side}: {snapPoints: em.SnapPoint[]; side: em.SnapBound}): { snapPoint: em.SnapPoint; distance: number } {

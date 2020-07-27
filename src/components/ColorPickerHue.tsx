@@ -12,7 +12,11 @@ interface ColorPickerHueProps {
   onChange?(color: em.Color): void;
 }
 
-const Slider = styled.input`
+interface SliderProps {
+  grabbing: boolean;
+}
+
+const Slider = styled.input<SliderProps>`
   -webkit-appearance: none;
   margin: 0;
   background: none;
