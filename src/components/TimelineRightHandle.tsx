@@ -15,8 +15,6 @@ gsap.registerPlugin(Draggable);
 interface TimelineRightHandleProps {
   tweenId: string;
   tween?: em.Tween;
-  tweenHover?: string;
-  tweenEditing?: string;
   setLayerTweenDuration?(payload: SetLayerTweenDurationPayload): LayerTypes;
   setLayerTweenDelay?(payload: SetLayerTweenDelayPayload): LayerTypes;
   setTweenDrawerTweenEditing?(payload: SetTweenDrawerTweenEditingPayload): TweenDrawerTypes;
@@ -24,7 +22,7 @@ interface TimelineRightHandleProps {
 
 const TimelineRightHandle = (props: TimelineRightHandleProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { tweenId, tween, setLayerTweenDuration, tweenEditing, setTweenDrawerTweenEditing } = props;
+  const { tweenId, tween, setLayerTweenDuration, setTweenDrawerTweenEditing } = props;
   const [prevDuration, setPrevDuration] = useState(tween.duration);
 
   useEffect(() => {
@@ -132,14 +130,10 @@ const TimelineRightHandle = (props: TimelineRightHandleProps): ReactElement => {
 
 const mapStateToProps = (state: RootState, ownProps: TimelineRightHandleProps): {
   tween: em.Tween;
-  tweenHover: string;
-  tweenEditing: string;
 } => {
-  const { layer, tweenDrawer } = state;
+  const { layer } = state;
   const tween = layer.present.tweenById[ownProps.tweenId];
-  const tweenHover = tweenDrawer.tweenHover;
-  const tweenEditing = tweenDrawer.tweenEditing;
-  return { tween, tweenHover, tweenEditing };
+  return { tween };
 };
 
 export default connect(
