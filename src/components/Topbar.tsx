@@ -29,11 +29,15 @@ const Topbar = (): ReactElement => {
       </div>
       <div className='c-topbar__button-group'>
         <ZoomButton />
+      </div>
+      <div className='c-topbar__button-group'>
         <MaskButton />
         <MoveForwardButton />
         <MoveBackwardButton />
         <GroupButton />
         <UngroupButton />
+      </div>
+      <div className='c-topbar__button-group'>
         <UniteButton />
         <SubtractButton />
         <IntersectButton />

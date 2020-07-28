@@ -53,6 +53,7 @@ const SidebarArtboardSizes = (props: SidebarArtboardPlatformOrientationProps): R
     applyArtboardMethods(newArtboard);
     addArtboard({
       parent: 'page',
+      name: device.type,
       frame: {
         x: newArtboard.position.x,
         y: newArtboard.position.y,

@@ -355,8 +355,8 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
       case 'shape':
         if (
           layer.data.type !== 'ArtboardBackground' &&
-          layer.className === 'Path' &&
-          equivalent.className === 'Path'
+          (layer.className === 'Path' || layer.className === 'CompoundPath') &&
+          (equivalent.className === 'Path' || layer.className === 'CompoundPath')
         ) {
           const equivalentShapeTest = equivalent.clone({insert: false});
           equivalentShapeTest.position = layer.position;

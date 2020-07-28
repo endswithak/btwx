@@ -1217,7 +1217,7 @@ const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any, fro
   })()) : getPaperLayer(id);
   const parentLayer = getLayer(state, state.scope.length > 0 ? state.scope[state.scope.length - 1] : state.page);
   const paperParentLayer = getPaperLayer(parentLayer.id);
-  const paperLayerClone = paperLayer.clone({deep: false, insert: true});
+  const paperLayerClone = paperLayer.clone({deep: paperLayer.className === 'CompoundPath', insert: true});
   if (paperLayer.data.type === 'Artboard') {
     const artboardMask = paperLayer.getItem({ data: { id: 'ArtboardMask' }});
     const artboardMaskClone = artboardMask.clone({deep: false, insert: true});
@@ -1260,7 +1260,7 @@ const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any, fro
               return (childLayer as em.ClipboardLayer).paperLayer;
           }
         })()) : getPaperLayer(child);
-        const childPaperLayerClone = childPaperLayer.clone({deep: false, insert: true});
+        const childPaperLayerClone = childPaperLayer.clone({deep: childPaperLayer.className === 'CompoundPath', insert: true});
         childPaperLayerClone.data.id = layerCloneMap[child];
         childPaperLayerClone.parent = groupClonePaperLayer;
         if (childPaperLayer.data.type === 'Shape') {
@@ -4163,6 +4163,11 @@ export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState 
     type: 'Shape',
     id: newShapeId
   }
+  if (booleanLayers.className === 'CompoundPath') {
+    (booleanLayers as paper.CompoundPath).children.forEach((child) => {
+      child.data.id = 'ShapePartial';
+    });
+  }
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.unite]}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
     id: newShapeId,
@@ -4210,6 +4215,11 @@ export const intersectLayers = (state: LayerState, action: IntersectLayers): Lay
   booleanLayers.data = {
     type: 'Shape',
     id: newShapeId
+  }
+  if (booleanLayers.className === 'CompoundPath') {
+    (booleanLayers as paper.CompoundPath).children.forEach((child) => {
+      child.data.id = 'ShapePartial';
+    });
   }
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.intersect]}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
@@ -4259,6 +4269,11 @@ export const subtractLayers = (state: LayerState, action: SubtractLayers): Layer
     type: 'Shape',
     id: newShapeId
   }
+  if (booleanLayers.className === 'CompoundPath') {
+    (booleanLayers as paper.CompoundPath).children.forEach((child) => {
+      child.data.id = 'ShapePartial';
+    });
+  }
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.subtract]}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
     id: newShapeId,
@@ -4307,6 +4322,11 @@ export const excludeLayers = (state: LayerState, action: ExcludeLayers): LayerSt
     type: 'Shape',
     id: newShapeId
   }
+  if (booleanLayers.className === 'CompoundPath') {
+    (booleanLayers as paper.CompoundPath).children.forEach((child) => {
+      child.data.id = 'ShapePartial';
+    });
+  }
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.exclude]}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
     id: newShapeId,
@@ -4354,6 +4374,11 @@ export const divideLayers = (state: LayerState, action: DivideLayers): LayerStat
   booleanLayers.data = {
     type: 'Shape',
     id: newShapeId
+  }
+  if (booleanLayers.className === 'CompoundPath') {
+    (booleanLayers as paper.CompoundPath).children.forEach((child) => {
+      child.data.id = 'ShapePartial';
+    });
   }
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.divide]}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
