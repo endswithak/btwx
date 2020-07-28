@@ -11,20 +11,17 @@ import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarInput from './SidebarInput';
 import SidebarSlider from './SidebarSlider';
 import { paperMain } from '../canvas';
-import { applyShapeMethods } from '../canvas/shapeUtils';
 
 interface PolygonSidesInputProps {
   selected?: string[];
   sidesValue?: number;
   disabled?: boolean;
-  maxDim?: number;
-  center?: paper.Point;
   layerItem?: em.Shape;
   setPolygonSides?(payload: SetPolygonSidesPayload): LayerTypes;
 }
 
 const PolygonSidesInput = (props: PolygonSidesInputProps): ReactElement => {
-  const { selected, setPolygonSides, sidesValue, disabled, maxDim, center, layerItem } = props;
+  const { selected, setPolygonSides, sidesValue, disabled, layerItem } = props;
   const [sides, setSides] = useState<string | number>(sidesValue);
 
   useEffect(() => {

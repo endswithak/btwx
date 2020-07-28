@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
+import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import SidebarSectionWrap from './SidebarSectionWrap';
 import SidebarSection from './SidebarSection';
@@ -22,16 +22,6 @@ const SidebarShapeStyles = (props: SidebarShapeStylesProps): ReactElement => {
     ? <SidebarSectionWrap bottomBorder whiteSpace>
         <SidebarSection>
           <SidebarSectionRow>
-            {/* <SidebarSectionHead text={(() => {
-              switch(selectedShapeType) {
-                case 'Polygon':
-                  return 'sides';
-                case 'Rounded':
-                  return 'radius';
-                case 'Star':
-                  return 'points';
-              }
-            })()} /> */}
             <SidebarSectionHead text='shape' />
           </SidebarSectionRow>
           <SidebarSection>
