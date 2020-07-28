@@ -7,6 +7,7 @@ interface TopbarButtonProps {
   isActive?: boolean;
   disabled?: boolean;
   icon?: string;
+  iconOpacity?: string;
   text?: string;
   label?: string;
   hideLabel?: boolean;
@@ -22,11 +23,16 @@ const ButtonWrap = styled.div<ButtonWrapProps>`
     background: ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
     box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5} inset;
     color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.lighter};
-    svg {
+    .icon-fill,
+    .icon-opacity {
       fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.lighter};
     }
+    .icon-opacity {
+      opacity: 0.25
+    }
     :disabled {
-      svg {
+      .icon-fill,
+      .icon-opacity {
         fill: ${props => props.theme.text.lighter};
       }
     }
@@ -34,13 +40,15 @@ const ButtonWrap = styled.div<ButtonWrapProps>`
       background: ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
       box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.name === 'dark' ? props.theme.background.z5 : props.theme.background.z6} inset;
       color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base};
-      svg {
+      .icon-fill,
+      .icon-opacity {
         fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base};
       }
       :disabled {
         background: ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
         color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.light};
-        svg {
+        .icon-fill,
+        .icon-opacity {
           fill: ${props => props.theme.text.lighter};
         }
       }
@@ -53,7 +61,7 @@ const ButtonWrap = styled.div<ButtonWrapProps>`
 
 const TopbarButton = (props: TopbarButtonProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { onClick, text, hideLabel, isActive, disabled, label, icon } = props;
+  const { onClick, text, hideLabel, isActive, disabled, label, icon, iconOpacity } = props;
 
   return (
     <ButtonWrap
@@ -70,7 +78,12 @@ const TopbarButton = (props: TopbarButtonProps): ReactElement => {
               width='24'
               height='24'
               viewBox='0 0 24 24'>
-              <path d={icon} />
+              <path className='icon-fill' d={icon} />
+              {
+                iconOpacity
+                ? <path className='icon-opacity' d={iconOpacity} />
+                : null
+              }
             </svg>
           : null
         }

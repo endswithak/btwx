@@ -419,7 +419,6 @@ class ShapeTool {
           style: DEFAULT_STYLE(),
           booleanOperation: 'none'
         }));
-        applyShapeMethods(paperLayer);
       }
       store.dispatch(enableSelectionTool());
     }

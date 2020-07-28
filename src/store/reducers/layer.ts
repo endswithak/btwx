@@ -146,6 +146,11 @@ import {
   SEND_LAYER_TO_BACK,
   SEND_LAYERS_TO_BACK,
   SET_LAYER_BLEND_MODE,
+  UNITE_LAYERS,
+  INTERSECT_LAYERS,
+  SUBTRACT_LAYERS,
+  EXCLUDE_LAYERS,
+  DIVIDE_LAYERS,
   SET_ROUNDED_RADIUS,
   SET_POLYGON_SIDES,
   SET_STAR_POINTS,
@@ -299,6 +304,11 @@ import {
   sendLayerToBack,
   sendLayersToBack,
   setLayerBlendMode,
+  uniteLayers,
+  intersectLayers,
+  subtractLayers,
+  excludeLayers,
+  divideLayers,
   setRoundedRadius,
   setPolygonSides,
   setStarPoints
@@ -675,6 +685,16 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return sendLayersToBack(state, action);
     case SET_LAYER_BLEND_MODE:
       return setLayerBlendMode(state, action);
+    case UNITE_LAYERS:
+      return uniteLayers(state, action);
+    case INTERSECT_LAYERS:
+      return intersectLayers(state, action);
+    case SUBTRACT_LAYERS:
+      return subtractLayers(state, action);
+    case EXCLUDE_LAYERS:
+      return excludeLayers(state, action);
+    case DIVIDE_LAYERS:
+      return divideLayers(state, action);
     case SET_ROUNDED_RADIUS:
       return setRoundedRadius(state, action);
     case SET_POLYGON_SIDES:

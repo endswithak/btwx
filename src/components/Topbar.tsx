@@ -9,6 +9,10 @@ import TweensButton from './TweensButton';
 import GroupButton from './GroupButton';
 import MoveForwardButton from './MoveForwardButton';
 import ZoomButton from './ZoomButton';
+import UniteButton from './UniteButton';
+import SubtractButton from './SubtractButton';
+import IntersectButton from './IntersectButton';
+import ExcludeButton from './ExcludeButton';
 
 const Topbar = (): ReactElement => {
   const theme = useContext(ThemeContext);
@@ -30,6 +34,10 @@ const Topbar = (): ReactElement => {
         <MoveBackwardButton />
         <GroupButton />
         <UngroupButton />
+        <UniteButton />
+        <SubtractButton />
+        <IntersectButton />
+        <ExcludeButton />
       </div>
       <div className='c-topbar__button-group'>
         <TweensButton />

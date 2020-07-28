@@ -38,7 +38,7 @@ import {
   SetLayerStrokeActiveGradientStop, DeactivateLayerStrokeGradientStop, ActivateLayerStrokeGradientStop,
   RemoveLayerStrokeGradientStop, AddLayerStrokeGradientStop, SetLayerStrokeGradientStopPosition,
   SetLayerStrokeGradientStopColor, SetLayerStrokeGradientDestination, SetLayerStrokeGradientOrigin,
-  AddCompoundShape, UniteLayers, SetRoundedRadius, SetPolygonSides, SetStarPoints
+  AddCompoundShape, UniteLayers, SetRoundedRadius, SetPolygonSides, SetStarPoints, IntersectLayers, SubtractLayers, ExcludeLayers, DivideLayers
 } from '../actionTypes/layer';
 
 import {
@@ -139,6 +139,7 @@ export const addShape = (state: LayerState, action: AddShape): LayerState => {
   const layerParent = action.payload.parent ? action.payload.parent : currentState.page;
   const paperLayer = getPaperLayer(action.payload.id);
   paperLayer.parent = getPaperLayer(layerParent);
+  applyShapeMethods(paperLayer);
   // add shape
   currentState = {
     ...currentState,
@@ -4151,6 +4152,246 @@ export const setLayerBlendMode = (state: LayerState, action: SetLayerBlendMode):
   return currentState;
 };
 
+export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState => {
+  let currentState = state;
+  const layerItem = currentState.byId[action.payload.id];
+  const paperLayer = getPaperLayer(action.payload.id) as paper.PathItem;
+  const booleanPaperLayer = getPaperLayer(action.payload.unite) as paper.PathItem;
+  const newShapeId = uuidv4();
+  const booleanLayers = paperLayer.unite(booleanPaperLayer);
+  booleanLayers.data = {
+    type: 'Shape',
+    id: newShapeId
+  }
+  currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.unite]}) as RemoveLayers);
+  currentState = addShape(currentState, layerActions.addShape({
+    id: newShapeId,
+    type: 'Shape',
+    parent: layerItem.parent,
+    name: 'Custom Shape',
+    shapeType: 'Custom',
+    frame: {
+      x: booleanLayers.position.x,
+      y: booleanLayers.position.y,
+      width: booleanLayers.bounds.width,
+      height: booleanLayers.bounds.height
+    },
+    pathData: (() => {
+      const clone = booleanLayers.clone({insert: false}) as paper.PathItem;
+      clone.fitBounds(new paperMain.Rectangle({
+        point: new paperMain.Point(0,0),
+        size: new paperMain.Size(24,24)
+      }));
+      return clone.pathData;
+    })(),
+    selected: false,
+    mask: false,
+    masked: false,
+    points: {
+      closed: true,
+      radius: 0
+    },
+    tweenEvents: [],
+    tweens: [],
+    style: layerItem.style,
+    children: null,
+    booleanOperation: 'none'
+  }) as AddShape);
+  return currentState;
+};
+
+export const intersectLayers = (state: LayerState, action: IntersectLayers): LayerState => {
+  let currentState = state;
+  const layerItem = currentState.byId[action.payload.id];
+  const paperLayer = getPaperLayer(action.payload.id) as paper.PathItem;
+  const booleanPaperLayer = getPaperLayer(action.payload.intersect) as paper.PathItem;
+  const newShapeId = uuidv4();
+  const booleanLayers = paperLayer.intersect(booleanPaperLayer);
+  booleanLayers.data = {
+    type: 'Shape',
+    id: newShapeId
+  }
+  currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.intersect]}) as RemoveLayers);
+  currentState = addShape(currentState, layerActions.addShape({
+    id: newShapeId,
+    type: 'Shape',
+    parent: layerItem.parent,
+    name: 'Custom Shape',
+    shapeType: 'Custom',
+    frame: {
+      x: booleanLayers.position.x,
+      y: booleanLayers.position.y,
+      width: booleanLayers.bounds.width,
+      height: booleanLayers.bounds.height
+    },
+    pathData: (() => {
+      const clone = booleanLayers.clone({insert: false}) as paper.PathItem;
+      clone.fitBounds(new paperMain.Rectangle({
+        point: new paperMain.Point(0,0),
+        size: new paperMain.Size(24,24)
+      }));
+      return clone.pathData;
+    })(),
+    selected: false,
+    mask: false,
+    masked: false,
+    points: {
+      closed: true,
+      radius: 0
+    },
+    tweenEvents: [],
+    tweens: [],
+    style: layerItem.style,
+    children: null,
+    booleanOperation: 'none'
+  }) as AddShape);
+  return currentState;
+};
+
+export const subtractLayers = (state: LayerState, action: SubtractLayers): LayerState => {
+  let currentState = state;
+  const layerItem = currentState.byId[action.payload.id];
+  const paperLayer = getPaperLayer(action.payload.id) as paper.PathItem;
+  const booleanPaperLayer = getPaperLayer(action.payload.subtract) as paper.PathItem;
+  const newShapeId = uuidv4();
+  const booleanLayers = paperLayer.subtract(booleanPaperLayer);
+  booleanLayers.data = {
+    type: 'Shape',
+    id: newShapeId
+  }
+  currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.subtract]}) as RemoveLayers);
+  currentState = addShape(currentState, layerActions.addShape({
+    id: newShapeId,
+    type: 'Shape',
+    parent: layerItem.parent,
+    name: 'Custom Shape',
+    shapeType: 'Custom',
+    frame: {
+      x: booleanLayers.position.x,
+      y: booleanLayers.position.y,
+      width: booleanLayers.bounds.width,
+      height: booleanLayers.bounds.height
+    },
+    pathData: (() => {
+      const clone = booleanLayers.clone({insert: false}) as paper.PathItem;
+      clone.fitBounds(new paperMain.Rectangle({
+        point: new paperMain.Point(0,0),
+        size: new paperMain.Size(24,24)
+      }));
+      return clone.pathData;
+    })(),
+    selected: false,
+    mask: false,
+    masked: false,
+    points: {
+      closed: true,
+      radius: 0
+    },
+    tweenEvents: [],
+    tweens: [],
+    style: layerItem.style,
+    children: null,
+    booleanOperation: 'none'
+  }) as AddShape);
+  return currentState;
+};
+
+export const excludeLayers = (state: LayerState, action: ExcludeLayers): LayerState => {
+  let currentState = state;
+  const layerItem = currentState.byId[action.payload.id];
+  const paperLayer = getPaperLayer(action.payload.id) as paper.PathItem;
+  const booleanPaperLayer = getPaperLayer(action.payload.exclude) as paper.PathItem;
+  const newShapeId = uuidv4();
+  const booleanLayers = paperLayer.exclude(booleanPaperLayer);
+  booleanLayers.data = {
+    type: 'Shape',
+    id: newShapeId
+  }
+  currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.exclude]}) as RemoveLayers);
+  currentState = addShape(currentState, layerActions.addShape({
+    id: newShapeId,
+    type: 'Shape',
+    parent: layerItem.parent,
+    name: 'Custom Shape',
+    shapeType: 'Custom',
+    frame: {
+      x: booleanLayers.position.x,
+      y: booleanLayers.position.y,
+      width: booleanLayers.bounds.width,
+      height: booleanLayers.bounds.height
+    },
+    pathData: (() => {
+      const clone = booleanLayers.clone({insert: false}) as paper.PathItem;
+      clone.fitBounds(new paperMain.Rectangle({
+        point: new paperMain.Point(0,0),
+        size: new paperMain.Size(24,24)
+      }));
+      return clone.pathData;
+    })(),
+    selected: false,
+    mask: false,
+    masked: false,
+    points: {
+      closed: true,
+      radius: 0
+    },
+    tweenEvents: [],
+    tweens: [],
+    style: layerItem.style,
+    children: null,
+    booleanOperation: 'none'
+  }) as AddShape);
+  return currentState;
+};
+
+export const divideLayers = (state: LayerState, action: DivideLayers): LayerState => {
+  let currentState = state;
+  const layerItem = currentState.byId[action.payload.id];
+  const paperLayer = getPaperLayer(action.payload.id) as paper.PathItem;
+  const booleanPaperLayer = getPaperLayer(action.payload.divide) as paper.PathItem;
+  const newShapeId = uuidv4();
+  const booleanLayers = paperLayer.divide(booleanPaperLayer);
+  booleanLayers.data = {
+    type: 'Shape',
+    id: newShapeId
+  }
+  currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.divide]}) as RemoveLayers);
+  currentState = addShape(currentState, layerActions.addShape({
+    id: newShapeId,
+    type: 'Shape',
+    parent: layerItem.parent,
+    name: 'Custom Shape',
+    shapeType: 'Custom',
+    frame: {
+      x: booleanLayers.position.x,
+      y: booleanLayers.position.y,
+      width: booleanLayers.bounds.width,
+      height: booleanLayers.bounds.height
+    },
+    pathData: (() => {
+      const clone = booleanLayers.clone({insert: false}) as paper.PathItem;
+      clone.fitBounds(new paperMain.Rectangle({
+        point: new paperMain.Point(0,0),
+        size: new paperMain.Size(24,24)
+      }));
+      return clone.pathData;
+    })(),
+    selected: false,
+    mask: false,
+    masked: false,
+    points: {
+      closed: true,
+      radius: 0
+    },
+    tweenEvents: [],
+    tweens: [],
+    style: layerItem.style,
+    children: null,
+    booleanOperation: 'none'
+  }) as AddShape);
+  return currentState;
+};
+
 export const setRoundedRadius = (state: LayerState, action: SetRoundedRadius): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
@@ -4267,77 +4508,3 @@ export const setStarPoints = (state: LayerState, action: SetStarPoints): LayerSt
   }
   return currentState;
 };
-
-// export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState => {
-//   let currentState = state;
-//   const layerItem = currentState.byId[action.payload.id];
-//   const uniteLayerItem = currentState.byId[action.payload.unite];
-//   const paperLayer = getPaperLayer(action.payload.id) as paper.PathItem;
-//   const unitePaperLayer = getPaperLayer(action.payload.unite) as paper.PathItem;
-//   const compoundShapeId = uuidv4();
-//   const unitedLayers = paperLayer.unite(unitePaperLayer);
-//   unitedLayers.data = {
-//     type: 'CompoundShape',
-//     id: compoundShapeId
-//   }
-//   applyCompoundShapeMethods(unitedLayers);
-//   currentState = {
-//     ...currentState,
-//     byId: {
-//       ...currentState.byId,
-//       [action.payload.unite]: {
-//         ...currentState.byId[action.payload.unite],
-//         parent: compoundShapeId,
-//         booleanOperation: 'unite'
-//       } as em.Shape | em.CompoundShape,
-//       [action.payload.id]: {
-//         ...currentState.byId[action.payload.id],
-//         parent: compoundShapeId,
-//         booleanOperation: 'unite'
-//       } as em.Shape | em.CompoundShape,
-//       [layerItem.parent]: {
-//         ...currentState.byId[layerItem.parent],
-//         children: removeItem(currentState.byId[layerItem.parent].children, action.payload.id)
-//       } as em.Group,
-//       [uniteLayerItem.parent]: {
-//         ...currentState.byId[uniteLayerItem.parent],
-//         children: removeItem(currentState.byId[uniteLayerItem.parent].children, action.payload.unite)
-//       } as em.Group
-//     },
-//     paperProject: exportPaperProject(currentState)
-//   }
-//   currentState = addCompoundShape(currentState, layerActions.addCompoundShape({
-//     id: compoundShapeId,
-//     type: 'CompoundShape',
-//     parent: layerItem.parent,
-//     name: 'Compound Shape',
-//     frame: {
-//       x: unitedLayers.position.x,
-//       y: unitedLayers.position.y,
-//       width: unitedLayers.bounds.width,
-//       height: unitedLayers.bounds.height
-//     },
-//     pathData: (() => {
-//       const clone = unitedLayers.clone({insert: false}) as paper.PathItem;
-//       clone.fitBounds(new paperMain.Rectangle({
-//         point: new paperMain.Point(0,0),
-//         size: new paperMain.Size(24,24)
-//       }));
-//       return clone.pathData;
-//     })(),
-//     selected: false,
-//     mask: false,
-//     masked: false,
-//     points: {
-//       closed: true,
-//     },
-//     tweenEvents: [],
-//     tweens: [],
-//     style: layerItem.style,
-//     children: [action.payload.id, action.payload.unite],
-//     booleanOperation: 'none'
-//   }) as AddCompoundShape);
-//   paperLayer.remove();
-//   unitePaperLayer.remove();
-//   return currentState;
-// };
