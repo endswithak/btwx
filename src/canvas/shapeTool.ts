@@ -7,7 +7,7 @@ import { getPagePaperLayer, getLayerAndDescendants, getPaperLayer } from '../sto
 import { applyShapeMethods } from './shapeUtils';
 import { paperMain } from './index';
 import Tooltip from './tooltip';
-import { DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_GRADIENT_STYLE, THEME_PRIMARY_COLOR, DEFAULT_STYLE } from '../constants';
+import { DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_ROUNDED_RECTANGLE_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_POINTS, THEME_PRIMARY_COLOR, DEFAULT_STYLE } from '../constants';
 import SnapTool from './snapTool';
 import InsertTool from './insertTool';
 
@@ -90,7 +90,7 @@ class ShapeTool {
         shape = new paperMain.Path.Rectangle({
           from: this.from,
           to: this.to,
-          radius: 8,
+          radius: DEFAULT_ROUNDED_RECTANGLE_RADIUS,
           ...shapeOpts
         });
         break;
@@ -98,7 +98,7 @@ class ShapeTool {
         shape = new paperMain.Path.RegularPolygon({
           center: this.centerPoint,
           radius: this.maxDim / 2,
-          sides: 5,
+          sides: DEFAULT_POLYGON_SIDES,
           ...shapeOpts
         });
         break;
@@ -107,7 +107,7 @@ class ShapeTool {
           center: this.centerPoint,
           radius1: this.maxDim / 2,
           radius2: (this.maxDim / 2) / 2,
-          points: 5,
+          points: DEFAULT_STAR_POINTS,
           ...shapeOpts
         });
         break;
@@ -362,7 +362,22 @@ class ShapeTool {
             type: 'Shape'
           }
         });
-        applyShapeMethods(paperLayer);
+        const shapeSpecificPointProps = (() => {
+          switch(this.shapeType) {
+            case 'Ellipse':
+            case 'Rectangle':
+            case 'Rounded':
+              return {};
+            case 'Star':
+              return {
+                points: DEFAULT_STAR_POINTS
+              }
+            case 'Polygon':
+              return {
+                sides: DEFAULT_STAR_POINTS
+              }
+          }
+        })();
         store.dispatch(addShape({
           id: id,
           type: 'Shape',
@@ -395,13 +410,16 @@ class ShapeTool {
           mask: false,
           masked: false,
           points: {
+            ...shapeSpecificPointProps,
             closed: true,
+            radius: this.shapeType === 'Rounded' ? DEFAULT_ROUNDED_RECTANGLE_RADIUS : 0,
           },
           tweenEvents: [],
           tweens: [],
           style: DEFAULT_STYLE(),
           booleanOperation: 'none'
         }));
+        applyShapeMethods(paperLayer);
       }
       store.dispatch(enableSelectionTool());
     }

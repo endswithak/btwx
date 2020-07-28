@@ -146,6 +146,9 @@ import {
   SEND_LAYER_TO_BACK,
   SEND_LAYERS_TO_BACK,
   SET_LAYER_BLEND_MODE,
+  SET_ROUNDED_RADIUS,
+  SET_POLYGON_SIDES,
+  SET_STAR_POINTS,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -295,7 +298,10 @@ import {
   sendLayersBackward,
   sendLayerToBack,
   sendLayersToBack,
-  setLayerBlendMode
+  setLayerBlendMode,
+  setRoundedRadius,
+  setPolygonSides,
+  setStarPoints
 } from '../utils/layer';
 
 export interface LayerState {
@@ -669,6 +675,12 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return sendLayersToBack(state, action);
     case SET_LAYER_BLEND_MODE:
       return setLayerBlendMode(state, action);
+    case SET_ROUNDED_RADIUS:
+      return setRoundedRadius(state, action);
+    case SET_POLYGON_SIDES:
+      return setPolygonSides(state, action);
+    case SET_STAR_POINTS:
+      return setStarPoints(state, action);
     default:
       return state;
   }

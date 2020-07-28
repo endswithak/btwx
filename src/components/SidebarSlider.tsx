@@ -3,20 +3,30 @@ import { ThemeContext } from './ThemeProvider';
 import styled from 'styled-components';
 
 interface SidebarSliderProps {
-  value: number | string;
+  value: number;
   step?: number;
   min?: number;
   max?: number;
   onChange(e: React.SyntheticEvent<HTMLInputElement>): void;
   onMouseUp?(e: React.SyntheticEvent<HTMLInputElement>): void;
   disabled?: boolean;
+  bottomSpace?: boolean;
 }
 
-const Slider = styled.input`
+interface SliderProps {
+  value: number;
+  step?: number;
+  min?: number;
+  max?: number;
+  bottomSpace?: boolean;
+}
+
+const Slider = styled.input<SliderProps>`
   -webkit-appearance: none;
   margin: 0;
   background: none;
   width: 100%;
+  margin-bottom: ${props => props.bottomSpace ? 20 : 0}px;
   :focus {
     outline: none;
   }
@@ -24,7 +34,7 @@ const Slider = styled.input`
     width: 100%;
     height: ${props => props.theme.unit}px;
     cursor: pointer;
-    background: linear-gradient(to right, ${props => props.theme.palette.primary} ${props => props.value}%, ${props => props.theme.background.z3} ${props => props.value}%);
+    background: linear-gradient(to right, ${props => props.theme.palette.primary} ${props => props.max ? ((props.min ? props.value - props.min : props.value) / (props.min ? props.max - props.min : props.max)) * 100 : props.value}%, ${props => props.theme.background.z3} ${props => props.max ? ((props.min ? props.value - props.min : props.value) / (props.min ? props.max - props.min : props.max)) * 100 : props.value}%);
     border-radius: ${props => props.theme.unit * 2}px;
     box-shadow: none;
   }
@@ -48,7 +58,7 @@ const Slider = styled.input`
   }
   :hover {
     ::-webkit-slider-runnable-track {
-      background: linear-gradient(to right, ${props => props.theme.palette.primaryHover} ${props => props.value}%, ${props => props.theme.background.z4} ${props => props.value}%);
+      background: linear-gradient(to right, ${props => props.theme.palette.primaryHover} ${props => props.max ? ((props.min ? props.value - props.min : props.value) / (props.min ? props.max - props.min : props.max)) * 100 : props.value}%, ${props => props.theme.background.z4} ${props => props.max ? ((props.min ? props.value - props.min : props.value) / (props.min ? props.max - props.min : props.max)) * 100 : props.value}%);
     }
   }
 `;

@@ -160,6 +160,9 @@ import {
   SUBTRACT_LAYERS,
   EXCLUDE_LAYERS,
   DIVIDE_LAYERS,
+  SET_ROUNDED_RADIUS,
+  SET_POLYGON_SIDES,
+  SET_STAR_POINTS,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
@@ -309,6 +312,9 @@ import {
   SubtractLayersPayload,
   ExcludeLayersPayload,
   DivideLayersPayload,
+  SetRoundedRadiusPayload,
+  SetPolygonSidesPayload,
+  SetStarPointsPayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -364,6 +370,7 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
       masked: false,
       points: {
         closed: true,
+        radius: 0
       },
       style: DEFAULT_STYLE(),
     }
@@ -397,6 +404,7 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
       clipped: false,
       points: {
         closed: true,
+        radius: 0
       },
       style: {
         ...DEFAULT_STYLE(),
@@ -462,6 +470,7 @@ export const addImage = (payload: AddImagePayload): LayerTypes => {
       masked: false,
       points: {
         closed: true,
+        radius: 0
       },
       tweenEvents: [],
       tweens: [],
@@ -1250,5 +1259,20 @@ export const excludeLayers = (payload: ExcludeLayersPayload): LayerTypes => ({
 
 export const divideLayers = (payload: DivideLayersPayload): LayerTypes => ({
   type: DIVIDE_LAYERS,
+  payload
+});
+
+export const setRoundedRadius = (payload: SetRoundedRadiusPayload): LayerTypes => ({
+  type: SET_ROUNDED_RADIUS,
+  payload
+});
+
+export const setPolygonSides = (payload: SetPolygonSidesPayload): LayerTypes => ({
+  type: SET_POLYGON_SIDES,
+  payload
+});
+
+export const setStarPoints = (payload: SetStarPointsPayload): LayerTypes => ({
+  type: SET_STAR_POINTS,
   payload
 });

@@ -8,6 +8,7 @@ import { paperMain } from './index';
 import Tooltip from './tooltip';
 import SnapTool from './snapTool';
 import { RootState } from '../store/reducers';
+import { applyShapeMethods } from './shapeUtils';
 
 class ResizeTool {
   state: RootState;
@@ -122,6 +123,7 @@ class ResizeTool {
   }
   scaleLayer(id: string, hor: number, ver: number): void {
     const paperLayer = getPaperLayer(id);
+    const layerItem = this.state.layer.present.byId[id];
     switch(paperLayer.data.type) {
       case 'Artboard': {
         const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
@@ -130,8 +132,30 @@ class ResizeTool {
         mask.scale(hor, ver);
         break;
       }
+      case 'Shape': {
+        switch((layerItem as em.Shape).shapeType) {
+          case 'Ellipse':
+          case 'Polygon':
+          case 'Rectangle':
+          case 'Star':
+          case 'Custom':
+            paperLayer.scale(hor, ver);
+            break;
+          case 'Rounded': {
+            paperLayer.scale(hor, ver);
+            const newShape = new paperMain.Path.Rectangle({
+              from: paperLayer.bounds.topLeft,
+              to: paperLayer.bounds.bottomRight,
+              radius: layerItem.points.radius
+            });
+            newShape.copyAttributes(paperLayer, true);
+            paperLayer.replaceWith(newShape);
+            break;
+          }
+        }
+        break;
+      }
       case 'Group':
-      case 'Shape':
       case 'Image': {
         paperLayer.scale(hor, ver);
         break;
@@ -753,8 +777,12 @@ class ResizeTool {
           if (resizedLayers.length > 0) {
             // set selected layers back to the default pivot point
             // needs to be before resize dispatch to correctly set layer position
-            resizedLayers.forEach((layer) => {
-              const paperLayer = getPaperLayer(layer);
+            resizedLayers.forEach((id) => {
+              const paperLayer = getPaperLayer(id);
+              const layerItem = this.state.layer.present.byId[id];
+              if (layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Rounded') {
+                applyShapeMethods(paperLayer);
+              }
               paperLayer.pivot = paperLayer.bounds.center;
             });
             // dispatch resize layers

@@ -62,12 +62,12 @@ class SnapTool {
   updateGuides(): void {
     this.removeGuides();
     // find all snapPoints that match current selection bounds side
-    const leftSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.snapBounds.left) === Math.round(snapPoint.point));
-    const centerXSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.snapBounds.center.x) === Math.round(snapPoint.point));
-    const rightSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.snapBounds.right) === Math.round(snapPoint.point));
-    const topSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.snapBounds.top) === Math.round(snapPoint.point));
-    const centerYSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.snapBounds.center.y) === Math.round(snapPoint.point));
-    const bottomSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.snapBounds.bottom) === Math.round(snapPoint.point));
+    const leftSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.snapBounds.left) === Math.round(snapPoint.point) && snapPoint.axis === 'x');
+    const centerXSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.snapBounds.center.x) === Math.round(snapPoint.point) && snapPoint.axis === 'x');
+    const rightSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.snapBounds.right) === Math.round(snapPoint.point) && snapPoint.axis === 'x');
+    const topSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.snapBounds.top) === Math.round(snapPoint.point) && snapPoint.axis === 'y');
+    const centerYSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.snapBounds.center.y) === Math.round(snapPoint.point) && snapPoint.axis === 'y');
+    const bottomSnaps = this.snapPoints.filter((snapPoint) => Math.round(this.snapBounds.bottom) === Math.round(snapPoint.point) && snapPoint.axis === 'y');
     // if any snap points match, find their min/max...
     // vertical/horizontal position and add relevant guide
     if (this.snap.x && leftSnaps.length > 0) {

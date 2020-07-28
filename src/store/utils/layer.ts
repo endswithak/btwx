@@ -37,7 +37,8 @@ import {
   SetLayerFillActiveGradientStop, ActivateLayerFillGradientStop, DeactivateLayerFillGradientStop, SetLayerBlendMode,
   SetLayerStrokeActiveGradientStop, DeactivateLayerStrokeGradientStop, ActivateLayerStrokeGradientStop,
   RemoveLayerStrokeGradientStop, AddLayerStrokeGradientStop, SetLayerStrokeGradientStopPosition,
-  SetLayerStrokeGradientStopColor, SetLayerStrokeGradientDestination, SetLayerStrokeGradientOrigin, AddCompoundShape, UniteLayers
+  SetLayerStrokeGradientStopColor, SetLayerStrokeGradientDestination, SetLayerStrokeGradientOrigin,
+  AddCompoundShape, UniteLayers, SetRoundedRadius, SetPolygonSides, SetStarPoints
 } from '../actionTypes/layer';
 
 import {
@@ -62,6 +63,7 @@ import { applyCompoundShapeMethods } from '../../canvas/compoundShapeUtils';
 
 import { THEME_PRIMARY_COLOR, DEFAULT_STYLE } from '../../constants';
 import { bufferToBase64 } from '../../utils';
+import { ActionTypes } from 'redux-undo';
 
 export const addPage = (state: LayerState, action: AddPage): LayerState => {
   return {
@@ -4143,6 +4145,123 @@ export const setLayerBlendMode = (state: LayerState, action: SetLayerBlendMode):
           blendMode: action.payload.blendMode
         }
       }
+    },
+    paperProject: exportPaperProject(currentState)
+  }
+  return currentState;
+};
+
+export const setRoundedRadius = (state: LayerState, action: SetRoundedRadius): LayerState => {
+  let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  const newShape = new paperMain.Path.Rectangle({
+    from: paperLayer.bounds.topLeft,
+    to: paperLayer.bounds.bottomRight,
+    radius: action.payload.radius
+  });
+  newShape.copyAttributes(paperLayer, true);
+  paperLayer.replaceWith(newShape);
+  const clone = newShape.clone({insert: false}) as paper.PathItem;
+  clone.fitBounds(new paperMain.Rectangle({
+    point: new paperMain.Point(0,0),
+    size: new paperMain.Size(24,24)
+  }));
+  applyShapeMethods(newShape);
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        pathData: clone.pathData,
+        points: {
+          ...currentState.byId[action.payload.id].points,
+          radius: action.payload.radius
+        }
+      } as em.Shape
+    },
+    paperProject: exportPaperProject(currentState)
+  }
+  return currentState;
+};
+
+export const setPolygonSides = (state: LayerState, action: SetPolygonSides): LayerState => {
+  let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  const layerItem = state.byId[action.payload.id];
+  const center = new paperMain.Point(layerItem.frame.x, layerItem.frame.y);
+  const newShape = new paperMain.Path.RegularPolygon({
+    center: center,
+    radius: Math.max(layerItem.frame.width, layerItem.frame.height) / 2,
+    sides: action.payload.sides
+  });
+  newShape.copyAttributes(paperLayer, true);
+  newShape.bounds.width = layerItem.frame.width;
+  newShape.bounds.height = layerItem.frame.height;
+  newShape.bounds.center = center;
+  newShape.pivot = center;
+  newShape.position = center;
+  paperLayer.replaceWith(newShape);
+  const clone = newShape.clone({insert: false}) as paper.PathItem;
+  clone.fitBounds(new paperMain.Rectangle({
+    point: new paperMain.Point(0,0),
+    size: new paperMain.Size(24,24)
+  }));
+  applyShapeMethods(newShape);
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        pathData: clone.pathData,
+        points: {
+          ...currentState.byId[action.payload.id].points,
+          sides: action.payload.sides
+        }
+      } as em.Shape
+    },
+    paperProject: exportPaperProject(currentState)
+  }
+  return currentState;
+};
+
+export const setStarPoints = (state: LayerState, action: SetStarPoints): LayerState => {
+  let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  const layerItem = state.byId[action.payload.id];
+  const center = new paperMain.Point(layerItem.frame.x, layerItem.frame.y);
+  const newShape = new paperMain.Path.Star({
+    center: center,
+    radius1: Math.max(layerItem.frame.width, layerItem.frame.height) / 2,
+    radius2: (Math.max(layerItem.frame.width, layerItem.frame.height) / 2) / 2,
+    points: action.payload.points
+  });
+  newShape.copyAttributes(paperLayer, true);
+  newShape.bounds.width = layerItem.frame.width;
+  newShape.bounds.height = layerItem.frame.height;
+  newShape.bounds.center = center;
+  newShape.pivot = center;
+  newShape.position = center;
+  paperLayer.replaceWith(newShape);
+  const clone = newShape.clone({insert: false}) as paper.PathItem;
+  clone.fitBounds(new paperMain.Rectangle({
+    point: new paperMain.Point(0,0),
+    size: new paperMain.Size(24,24)
+  }));
+  applyShapeMethods(newShape);
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        pathData: clone.pathData,
+        points: {
+          ...currentState.byId[action.payload.id].points,
+          points: action.payload.points
+        }
+      } as em.Shape
     },
     paperProject: exportPaperProject(currentState)
   }

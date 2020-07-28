@@ -10,12 +10,14 @@ import AlignDistribute from './AlignDistribute';
 // import StrokeEditor from './StrokeEditor';
 // import ShadowEditor from './ShadowEditor';
 import SwatchEditor from './SwatchEditor';
+import SidebarShapeStyles from './SidebarShapeStyles';
 
 const SidebarLayerStyles = (): ReactElement => {
   return (
     <>
       <AlignDistribute />
       <SidebarFrameStyles />
+      <SidebarShapeStyles />
       <SidebarContextStyles />
       <SidebarTextStyles />
       <SidebarFillStyles />

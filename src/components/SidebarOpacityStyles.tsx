@@ -10,6 +10,7 @@ import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarInput from './SidebarInput';
 import SidebarSlider from './SidebarSlider';
+import BlendModeSelector from './BlendModeSelector';
 
 interface SidebarOpacityStylesProps {
   selected?: string[];
@@ -68,11 +69,12 @@ const SidebarOpacityStyles = (props: SidebarOpacityStylesProps): ReactElement =>
     <SidebarSection>
       <SidebarSectionRow alignItems={'center'}>
         <SidebarSectionColumn width={'66.66%'}>
-          <SidebarSlider
+          {/* <SidebarSlider
             value={disabled ? 0 : opacity}
             onChange={handleSliderChange}
             onMouseUp={handleSubmit}
-            disabled={disabled} />
+            disabled={disabled} /> */}
+          <BlendModeSelector />
         </SidebarSectionColumn>
         <SidebarSectionColumn width={'33.33%'}>
           <SidebarInput
@@ -81,7 +83,8 @@ const SidebarOpacityStyles = (props: SidebarOpacityStylesProps): ReactElement =>
             onSubmit={handleSubmit}
             submitOnBlur
             disabled={disabled}
-            label={'%'} />
+            label={'%'}
+            bottomLabel='Opacity' />
         </SidebarSectionColumn>
       </SidebarSectionRow>
     </SidebarSection>

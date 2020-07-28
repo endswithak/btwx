@@ -192,6 +192,9 @@ declare namespace em {
     tweens: string[];
     points: {
       closed: boolean;
+      radius: number;
+      sides?: number;
+      points?: number;
     };
     style: Style;
     masked: boolean;
@@ -338,7 +341,7 @@ declare namespace em {
     unit: number;
   }
 
-  type ShapeType = 'Rectangle' | 'Ellipse' | 'Rounded' | 'Polygon' | 'Star';
+  type ShapeType = 'Rectangle' | 'Ellipse' | 'Rounded' | 'Polygon' | 'Star' | 'Custom';
 
   interface SnapPoint {
     id: string;

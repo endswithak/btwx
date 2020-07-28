@@ -191,6 +191,10 @@ export const SUBTRACT_LAYERS = 'SUBTRACT_LAYERS';
 export const EXCLUDE_LAYERS = 'EXCLUDE_LAYERS';
 export const DIVIDE_LAYERS = 'DIVIDE_LAYERS';
 
+export const SET_ROUNDED_RADIUS = 'SET_ROUNDED_RADIUS';
+export const SET_POLYGON_SIDES = 'SET_POLYGON_SIDES';
+export const SET_STAR_POINTS = 'SET_STAR_POINTS';
+
 // Page
 
 export type AddPagePayload = {
@@ -1725,6 +1729,36 @@ export interface DivideLayers {
   payload: DivideLayersPayload;
 }
 
+export interface SetRoundedRadiusPayload {
+  id: string;
+  radius: number;
+}
+
+export interface SetRoundedRadius {
+  type: typeof SET_ROUNDED_RADIUS;
+  payload: SetRoundedRadiusPayload;
+}
+
+export interface SetPolygonSidesPayload {
+  id: string;
+  sides: number;
+}
+
+export interface SetPolygonSides {
+  type: typeof SET_POLYGON_SIDES;
+  payload: SetPolygonSidesPayload;
+}
+
+export interface SetStarPointsPayload {
+  id: string;
+  points: number;
+}
+
+export interface SetStarPoints {
+  type: typeof SET_STAR_POINTS;
+  payload: SetStarPointsPayload;
+}
+
 export type LayerTypes = AddPage |
                          AddArtboard |
                          AddGroup |
@@ -1882,4 +1916,7 @@ export type LayerTypes = AddPage |
                          IntersectLayers |
                          SubtractLayers |
                          ExcludeLayers |
-                         DivideLayers;
+                         DivideLayers |
+                         SetRoundedRadius |
+                         SetPolygonSides |
+                         SetStarPoints;
