@@ -146,7 +146,7 @@ class ResizeTool {
             const newShape = new paperMain.Path.Rectangle({
               from: paperLayer.bounds.topLeft,
               to: paperLayer.bounds.bottomRight,
-              radius: layerItem.points.radius
+              radius: (Math.max(layerItem.frame.width, layerItem.frame.height) / 2) * layerItem.points.radius
             });
             newShape.copyAttributes(paperLayer, true);
             paperLayer.replaceWith(newShape);

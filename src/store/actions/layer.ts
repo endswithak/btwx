@@ -163,6 +163,7 @@ import {
   SET_ROUNDED_RADIUS,
   SET_POLYGON_SIDES,
   SET_STAR_POINTS,
+  SET_STAR_RADIUS,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
@@ -315,6 +316,7 @@ import {
   SetRoundedRadiusPayload,
   SetPolygonSidesPayload,
   SetStarPointsPayload,
+  SetStarRadiusPayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -1274,5 +1276,10 @@ export const setPolygonSides = (payload: SetPolygonSidesPayload): LayerTypes => 
 
 export const setStarPoints = (payload: SetStarPointsPayload): LayerTypes => ({
   type: SET_STAR_POINTS,
+  payload
+});
+
+export const setStarRadius = (payload: SetStarRadiusPayload): LayerTypes => ({
+  type: SET_STAR_RADIUS,
   payload
 });

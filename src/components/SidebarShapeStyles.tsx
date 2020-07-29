@@ -8,6 +8,7 @@ import { RootState } from '../store/reducers';
 import RoundedRadiusInput from './RoundedRadiusInput';
 import PolygonSidesInput from './PolygonSidesInput';
 import StarPointsInput from './StarPointsInput';
+import StarRadiusInput from './StarRadiusInput';
 
 interface SidebarShapeStylesProps {
   selected?: string[];
@@ -37,7 +38,10 @@ const SidebarShapeStyles = (props: SidebarShapeStylesProps): ReactElement => {
             }
             {
               selectedShapeType === 'Star'
-              ? <StarPointsInput />
+              ? <>
+                  <StarPointsInput />
+                  <StarRadiusInput />
+                </>
               : null
             }
           </SidebarSection>

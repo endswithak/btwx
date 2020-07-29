@@ -194,6 +194,7 @@ export const DIVIDE_LAYERS = 'DIVIDE_LAYERS';
 export const SET_ROUNDED_RADIUS = 'SET_ROUNDED_RADIUS';
 export const SET_POLYGON_SIDES = 'SET_POLYGON_SIDES';
 export const SET_STAR_POINTS = 'SET_STAR_POINTS';
+export const SET_STAR_RADIUS = 'SET_STAR_RADIUS';
 
 // Page
 
@@ -1759,6 +1760,16 @@ export interface SetStarPoints {
   payload: SetStarPointsPayload;
 }
 
+export interface SetStarRadiusPayload {
+  id: string;
+  radius: number;
+}
+
+export interface SetStarRadius {
+  type: typeof SET_STAR_RADIUS;
+  payload: SetStarRadiusPayload;
+}
+
 export type LayerTypes = AddPage |
                          AddArtboard |
                          AddGroup |
@@ -1919,4 +1930,5 @@ export type LayerTypes = AddPage |
                          DivideLayers |
                          SetRoundedRadius |
                          SetPolygonSides |
-                         SetStarPoints;
+                         SetStarPoints |
+                         SetStarRadius;

@@ -23,10 +23,10 @@ interface RoundedRadiusInputProps {
 
 const RoundedRadiusInput = (props: RoundedRadiusInputProps): ReactElement => {
   const { selected, setRoundedRadius, maxDim, radiusValue, disabled } = props;
-  const [radius, setRadius] = useState<string | number>(Math.round((radiusValue / maxDim) * 100));
+  const [radius, setRadius] = useState<string | number>(Math.round(radiusValue * 100));
 
   useEffect(() => {
-    setRadius(Math.round((radiusValue / maxDim) * 100));
+    setRadius(Math.round(radiusValue * 100));
   }, [radiusValue, selected, maxDim]);
 
   const handleChange = (e: any) => {
@@ -37,11 +37,11 @@ const RoundedRadiusInput = (props: RoundedRadiusInputProps): ReactElement => {
   const handleSliderChange = (e: any) => {
     handleChange(e);
     const paperLayer = getPaperLayer(selected[0]);
-    const nextRadius = maxDim * (e.target.value / 100);
+    const nextRadius = e.target.value / 100;
     const newShape = new paperMain.Path.Rectangle({
       from: paperLayer.bounds.topLeft,
       to: paperLayer.bounds.bottomRight,
-      radius: nextRadius
+      radius: maxDim * nextRadius
     });
     newShape.copyAttributes(paperLayer, true);
     paperLayer.replaceWith(newShape);
@@ -50,18 +50,18 @@ const RoundedRadiusInput = (props: RoundedRadiusInputProps): ReactElement => {
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
     try {
       let nextRadius = evaluate(`${radius}`);
-      if (nextRadius !== (radiusValue / maxDim) * 100) {
+      if (nextRadius !== radiusValue) {
         if (nextRadius > 100) {
           nextRadius = 100;
         }
         if (nextRadius < 0) {
           nextRadius = 0;
         }
-        setRoundedRadius({id: selected[0], radius: maxDim * (nextRadius / 100)});
+        setRoundedRadius({id: selected[0], radius: nextRadius / 100});
         setRadius(nextRadius);
       }
     } catch(error) {
-      setRadius(Math.round((radiusValue / maxDim) * 100));
+      setRadius(Math.round(radiusValue * 100));
     }
   }
 

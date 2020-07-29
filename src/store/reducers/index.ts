@@ -115,7 +115,8 @@ import {
   DIVIDE_LAYERS,
   SET_ROUNDED_RADIUS,
   SET_STAR_POINTS,
-  SET_POLYGON_SIDES
+  SET_POLYGON_SIDES,
+  SET_STAR_RADIUS
 } from '../actionTypes/layer';
 
 const rootReducer = combineReducers({
@@ -221,7 +222,8 @@ const rootReducer = combineReducers({
     DIVIDE_LAYERS,
     SET_ROUNDED_RADIUS,
     SET_STAR_POINTS,
-    SET_POLYGON_SIDES
+    SET_POLYGON_SIDES,
+    SET_STAR_RADIUS
   ])}),
   canvasSettings,
   tool,

@@ -2,8 +2,8 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { evaluate } from 'mathjs';
 import { RootState } from '../store/reducers';
-import { SetStarPointsPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setStarPoints } from '../store/actions/layer';
+import { SetStarRadiusPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setStarRadius } from '../store/actions/layer';
 import { getPaperLayer } from '../store/selectors/layer';
 import SidebarSection from './SidebarSection';
 import SidebarSectionRow from './SidebarSectionRow';
@@ -12,25 +12,25 @@ import SidebarInput from './SidebarInput';
 import SidebarSlider from './SidebarSlider';
 import { paperMain } from '../canvas';
 
-interface StarPointsInputProps {
+interface StarRadiusInputProps {
   selected?: string[];
-  pointsValue?: number;
+  radiusValue?: number;
   disabled?: boolean;
   layerItem?: em.Shape;
-  setStarPoints?(payload: SetStarPointsPayload): LayerTypes;
+  setStarRadius?(payload: SetStarRadiusPayload): LayerTypes;
 }
 
-const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
-  const { selected, setStarPoints, layerItem, pointsValue, disabled } = props;
-  const [points, setPoints] = useState<string | number>(pointsValue);
+const StarRadiusInput = (props: StarRadiusInputProps): ReactElement => {
+  const { selected, setStarRadius, layerItem, radiusValue, disabled } = props;
+  const [radius, setRadius] = useState<string | number>(Math.round(radiusValue * 100));
 
   useEffect(() => {
-    setPoints(pointsValue);
-  }, [pointsValue, selected]);
+    setRadius(Math.round(radiusValue * 100));
+  }, [radiusValue, selected]);
 
   const handleChange = (e: any) => {
     const target = e.target as HTMLInputElement;
-    setPoints(target.value);
+    setRadius(target.value);
   };
 
   const handleSliderChange = (e: any) => {
@@ -41,8 +41,8 @@ const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
     const newShape = new paperMain.Path.Star({
       center: center,
       radius1: maxDim / 2,
-      radius2: (maxDim / 2) * layerItem.points.radius,
-      points: e.target.value
+      radius2: (maxDim / 2) * (e.target.value / 100),
+      points: layerItem.points.points
     });
     newShape.copyAttributes(paperLayer, true);
     newShape.bounds.width = layerItem.frame.width;
@@ -55,19 +55,19 @@ const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
     try {
-      let nextPoints = evaluate(`${points}`);
-      if (nextPoints !== pointsValue) {
-        if (nextPoints > 50) {
-          nextPoints = 50;
+      let nextRadius = evaluate(`${radius}`);
+      if (nextRadius !== radiusValue) {
+        if (nextRadius > 100) {
+          nextRadius = 100;
         }
-        if (nextPoints < 3) {
-          nextPoints = 3;
+        if (nextRadius < 0) {
+          nextRadius = 0;
         }
-        setStarPoints({id: selected[0], points: nextPoints});
-        setPoints(nextPoints);
+        setStarRadius({id: selected[0], radius: nextRadius / 100});
+        setRadius(nextRadius);
       }
     } catch(error) {
-      setPoints(pointsValue);
+      setRadius(Math.round(radiusValue * 100));
     }
   }
 
@@ -76,10 +76,10 @@ const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
       <SidebarSectionRow alignItems={'center'}>
         <SidebarSectionColumn width={'66.66%'}>
           <SidebarSlider
-            value={points as number}
+            value={radius as number}
             step={1}
-            max={50}
-            min={3}
+            max={100}
+            min={0}
             onChange={handleSliderChange}
             onMouseUp={handleSubmit}
             disabled={disabled}
@@ -87,13 +87,13 @@ const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
         </SidebarSectionColumn>
         <SidebarSectionColumn width={'33.33%'}>
           <SidebarInput
-            value={points}
+            value={radius}
             onChange={handleChange}
             onSubmit={handleSubmit}
             submitOnBlur
             disabled={disabled}
-            label='#'
-            bottomLabel='Points' />
+            label='%'
+            bottomLabel='Radius' />
         </SidebarSectionColumn>
       </SidebarSectionRow>
     </SidebarSection>
@@ -103,12 +103,12 @@ const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const pointsValue = (() => {
+  const radiusValue = (() => {
     switch(layer.present.selected.length) {
       case 0:
         return '';
       case 1:
-        return layer.present.byId[layer.present.selected[0]].points.points;
+        return layer.present.byId[layer.present.selected[0]].points.radius;
       default:
         return 'multi';
     }
@@ -133,10 +133,10 @@ const mapStateToProps = (state: RootState) => {
         return true;
     }
   })();
-  return { selected, pointsValue, disabled, layerItem };
+  return { selected, radiusValue, disabled, layerItem };
 };
 
 export default connect(
   mapStateToProps,
-  { setStarPoints }
-)(StarPointsInput);
+  { setStarRadius }
+)(StarRadiusInput);

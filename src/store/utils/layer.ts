@@ -38,7 +38,7 @@ import {
   SetLayerStrokeActiveGradientStop, DeactivateLayerStrokeGradientStop, ActivateLayerStrokeGradientStop,
   RemoveLayerStrokeGradientStop, AddLayerStrokeGradientStop, SetLayerStrokeGradientStopPosition,
   SetLayerStrokeGradientStopColor, SetLayerStrokeGradientDestination, SetLayerStrokeGradientOrigin,
-  AddCompoundShape, UniteLayers, SetRoundedRadius, SetPolygonSides, SetStarPoints, IntersectLayers, SubtractLayers, ExcludeLayers, DivideLayers
+  AddCompoundShape, UniteLayers, SetRoundedRadius, SetPolygonSides, SetStarPoints, IntersectLayers, SubtractLayers, ExcludeLayers, DivideLayers, SetStarRadius
 } from '../actionTypes/layer';
 
 import {
@@ -4420,10 +4420,11 @@ export const divideLayers = (state: LayerState, action: DivideLayers): LayerStat
 export const setRoundedRadius = (state: LayerState, action: SetRoundedRadius): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
+  const layerItem = currentState.byId[action.payload.id];
   const newShape = new paperMain.Path.Rectangle({
     from: paperLayer.bounds.topLeft,
     to: paperLayer.bounds.bottomRight,
-    radius: action.payload.radius
+    radius: (Math.max(layerItem.frame.width, layerItem.frame.height) / 2) * action.payload.radius
   });
   newShape.copyAttributes(paperLayer, true);
   paperLayer.replaceWith(newShape);
@@ -4500,7 +4501,7 @@ export const setStarPoints = (state: LayerState, action: SetStarPoints): LayerSt
   const newShape = new paperMain.Path.Star({
     center: center,
     radius1: Math.max(layerItem.frame.width, layerItem.frame.height) / 2,
-    radius2: (Math.max(layerItem.frame.width, layerItem.frame.height) / 2) / 2,
+    radius2: (Math.max(layerItem.frame.width, layerItem.frame.height) / 2) * layerItem.points.radius,
     points: action.payload.points
   });
   newShape.copyAttributes(paperLayer, true);
@@ -4526,6 +4527,48 @@ export const setStarPoints = (state: LayerState, action: SetStarPoints): LayerSt
         points: {
           ...currentState.byId[action.payload.id].points,
           points: action.payload.points
+        }
+      } as em.Shape
+    },
+    paperProject: exportPaperProject(currentState)
+  }
+  return currentState;
+};
+
+export const setStarRadius = (state: LayerState, action: SetStarRadius): LayerState => {
+  let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  const layerItem = state.byId[action.payload.id];
+  const center = new paperMain.Point(layerItem.frame.x, layerItem.frame.y);
+  const newShape = new paperMain.Path.Star({
+    center: center,
+    radius1: Math.max(layerItem.frame.width, layerItem.frame.height) / 2,
+    radius2: (Math.max(layerItem.frame.width, layerItem.frame.height) / 2) * action.payload.radius,
+    points: layerItem.points.points
+  });
+  newShape.copyAttributes(paperLayer, true);
+  newShape.bounds.width = layerItem.frame.width;
+  newShape.bounds.height = layerItem.frame.height;
+  newShape.bounds.center = center;
+  newShape.pivot = center;
+  newShape.position = center;
+  paperLayer.replaceWith(newShape);
+  const clone = newShape.clone({insert: false}) as paper.PathItem;
+  clone.fitBounds(new paperMain.Rectangle({
+    point: new paperMain.Point(0,0),
+    size: new paperMain.Size(24,24)
+  }));
+  applyShapeMethods(newShape);
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        pathData: clone.pathData,
+        points: {
+          ...currentState.byId[action.payload.id].points,
+          radius: action.payload.radius
         }
       } as em.Shape
     },

@@ -7,7 +7,7 @@ import { getPagePaperLayer, getLayerAndDescendants, getPaperLayer } from '../sto
 import { applyShapeMethods } from './shapeUtils';
 import { paperMain } from './index';
 import Tooltip from './tooltip';
-import { DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_ROUNDED_RECTANGLE_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_POINTS, THEME_PRIMARY_COLOR, DEFAULT_STYLE } from '../constants';
+import { DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_POINTS, THEME_PRIMARY_COLOR, DEFAULT_STYLE } from '../constants';
 import SnapTool from './snapTool';
 import InsertTool from './insertTool';
 
@@ -90,7 +90,7 @@ class ShapeTool {
         shape = new paperMain.Path.Rectangle({
           from: this.from,
           to: this.to,
-          radius: DEFAULT_ROUNDED_RECTANGLE_RADIUS,
+          radius: (this.maxDim / 2) * DEFAULT_ROUNDED_RADIUS,
           ...shapeOpts
         });
         break;
@@ -106,7 +106,7 @@ class ShapeTool {
         shape = new paperMain.Path.Star({
           center: this.centerPoint,
           radius1: this.maxDim / 2,
-          radius2: (this.maxDim / 2) / 2,
+          radius2: (this.maxDim / 2) * DEFAULT_STAR_RADIUS,
           points: DEFAULT_STAR_POINTS,
           ...shapeOpts
         });
@@ -412,7 +412,16 @@ class ShapeTool {
           points: {
             ...shapeSpecificPointProps,
             closed: true,
-            radius: this.shapeType === 'Rounded' ? DEFAULT_ROUNDED_RECTANGLE_RADIUS : 0,
+            radius: (() => {
+              switch(this.shapeType) {
+                case 'Rounded':
+                  return DEFAULT_ROUNDED_RADIUS;
+                case 'Star':
+                  return DEFAULT_STAR_RADIUS;
+                default:
+                  return 0;
+              }
+            })(),
           },
           tweenEvents: [],
           tweens: [],

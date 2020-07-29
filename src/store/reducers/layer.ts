@@ -154,6 +154,7 @@ import {
   SET_ROUNDED_RADIUS,
   SET_POLYGON_SIDES,
   SET_STAR_POINTS,
+  SET_STAR_RADIUS,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -311,7 +312,8 @@ import {
   divideLayers,
   setRoundedRadius,
   setPolygonSides,
-  setStarPoints
+  setStarPoints,
+  setStarRadius
 } from '../utils/layer';
 
 export interface LayerState {
@@ -701,6 +703,8 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setPolygonSides(state, action);
     case SET_STAR_POINTS:
       return setStarPoints(state, action);
+    case SET_STAR_RADIUS:
+      return setStarRadius(state, action);
     default:
       return state;
   }
