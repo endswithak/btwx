@@ -6,7 +6,7 @@ import { addText } from '../store/actions/layer';
 import { getNearestScopeAncestor, getPaperLayer, getPagePaperLayer } from '../store/selectors/layer';
 import { paperMain } from './index';
 import { applyTextMethods } from './textUtils';
-import { DEFAULT_TEXT_VALUE, DEFAULT_STYLE } from '../constants';
+import { DEFAULT_TEXT_VALUE, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../constants';
 import InsertTool from './insertTool';
 //import textSettings from 'src/store/reducers/textSettings';
 
@@ -73,6 +73,12 @@ class TextTool {
         width: paperLayer.bounds.width,
         height: paperLayer.bounds.height
       },
+      master: {
+        x: paperLayer.position.x,
+        y: paperLayer.position.y,
+        width: paperLayer.bounds.width,
+        height: paperLayer.bounds.height
+      },
       selected: false,
       mask: false,
       masked: false,
@@ -82,6 +88,7 @@ class TextTool {
       children: null,
       tweenEvents: [],
       tweens: [],
+      transform: DEFAULT_TRANSFORM,
       style: {
         ...DEFAULT_STYLE(),
         fill: {

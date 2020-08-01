@@ -308,6 +308,12 @@ class ArtboardTool {
             width: newPaperLayer.bounds.width,
             height: newPaperLayer.bounds.height
           },
+          master: {
+            x: newPaperLayer.position.x,
+            y: newPaperLayer.position.y,
+            width: newPaperLayer.bounds.width,
+            height: newPaperLayer.bounds.height
+          },
           paperLayer: newPaperLayer
         }));
       }

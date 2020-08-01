@@ -36,18 +36,17 @@ const PolygonSidesInput = (props: PolygonSidesInputProps): ReactElement => {
   const handleSliderChange = (e: any) => {
     handleChange(e);
     const paperLayer = getPaperLayer(selected[0]);
-    const center = new paperMain.Point(layerItem.frame.x, layerItem.frame.y);
+    const center = new paperMain.Point(layerItem.master.x, layerItem.master.y);
     const newShape = new paperMain.Path.RegularPolygon({
       center: center,
-      radius: Math.max(layerItem.frame.width, layerItem.frame.height),
+      radius: Math.max(layerItem.master.width, layerItem.master.height) / 2,
       sides: e.target.value
     });
     newShape.copyAttributes(paperLayer, true);
-    newShape.bounds.width = layerItem.frame.width;
-    newShape.bounds.height = layerItem.frame.height;
-    newShape.bounds.center = center;
-    newShape.pivot = center;
-    newShape.position = center;
+    newShape.bounds.width = layerItem.master.width * layerItem.transform.scale.x;
+    newShape.bounds.height = layerItem.master.height * layerItem.transform.scale.y;
+    newShape.rotation = layerItem.transform.rotation;
+    newShape.position = paperLayer.position;
     paperLayer.replaceWith(newShape);
   };
 

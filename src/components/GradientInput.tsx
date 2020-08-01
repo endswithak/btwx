@@ -162,7 +162,7 @@ const mapStateToProps = (state: RootState, ownProps: GradientInputProps) => {
   const selected = layer.present.selected;
   const gradientValue = style.gradient;
   const stops = gradientValue.stops;
-  const gradientOpacity = stops.allIds.every((stop) => stops.byId[stop].color.a === stops.byId[stops.allIds[0]].color.a) ? stops.byId[stops.allIds[0]].color.a * 100 : 'multi';
+  const gradientOpacity = stops.allIds.every((stop) => stops.byId[stop].color.a === stops.byId[stops.allIds[0]].color.a) ? Math.round(stops.byId[stops.allIds[0]].color.a * 100) : 'multi';
   const isGradientEditorOpen = gradientEditor.isOpen;
   const stopById = stops.byId;
   const sorted = Object.keys(stopById).sort((a,b) => { return stopById[a].position - stopById[b].position });

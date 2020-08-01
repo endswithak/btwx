@@ -137,8 +137,8 @@ export const SET_LAYER_SHADOW_BLUR = 'SET_LAYER_SHADOW_BLUR';
 export const SET_LAYER_SHADOW_X_OFFSET = 'SET_LAYER_SHADOW_X_OFFSET';
 export const SET_LAYER_SHADOW_Y_OFFSET = 'SET_LAYER_SHADOW_Y_OFFSET';
 
-export const RESIZE_LAYER = 'RESIZE_LAYER';
-export const RESIZE_LAYERS = 'RESIZE_LAYERS';
+export const SCALE_LAYER = 'SCALE_LAYER';
+export const SCALE_LAYERS = 'SCALE_LAYERS';
 
 export const SET_LAYER_TEXT = 'SET_LAYER_TEXT';
 export const SET_LAYER_FONT_SIZE = 'SET_LAYER_FONT_SIZE';
@@ -1188,26 +1188,28 @@ export interface SetLayerShadowYOffset {
   payload: SetLayerShadowYOffsetPayload;
 }
 
-export interface ResizeLayerPayload {
+export interface ScaleLayerPayload {
   id: string;
+  scale: em.Point;
   verticalFlip: boolean;
   horizontalFlip: boolean;
 }
 
-export interface ResizeLayer {
-  type: typeof RESIZE_LAYER;
-  payload: ResizeLayerPayload;
+export interface ScaleLayer {
+  type: typeof SCALE_LAYER;
+  payload: ScaleLayerPayload;
 }
 
-export interface ResizeLayersPayload {
+export interface ScaleLayersPayload {
   layers: string[];
+  scale: em.Point;
   verticalFlip: boolean;
   horizontalFlip: boolean;
 }
 
-export interface ResizeLayers {
-  type: typeof RESIZE_LAYERS;
-  payload: ResizeLayersPayload;
+export interface ScaleLayers {
+  type: typeof SCALE_LAYERS;
+  payload: ScaleLayersPayload;
 }
 
 export interface SetLayerTextPayload {
@@ -1862,8 +1864,8 @@ export type LayerTypes = AddPage |
                          SetLayerShadowBlur |
                          SetLayerShadowXOffset |
                          SetLayerShadowYOffset |
-                         ResizeLayer |
-                         ResizeLayers |
+                         ScaleLayer |
+                         ScaleLayers |
                          SetLayerText |
                          SetLayerFontSize |
                          SetLayerLeading |

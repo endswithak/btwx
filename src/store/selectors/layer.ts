@@ -137,26 +137,32 @@ export const getLayerScope = (store: LayerState, id: string) => {
   return newScope.reverse();
 }
 
-export const getLayersTopLeft = (layers: string[]): paper.Point => {
+export const getLayersTopLeft = (store: LayerState, layers: string[]): paper.Point => {
   const paperLayerPoints = layers.reduce((result, current) => {
-    const paperLayer = getPaperLayer(current);
-    return [...result, paperLayer.bounds.topLeft];
+    const layerItem = store.byId[current];
+    const topLeft = new paperMain.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
+    return [...result, topLeft];
+    //const paperLayer = getPaperLayer(current);
+    //return [...result, paperLayer.bounds.topLeft];
   }, []);
   return paperLayerPoints.reduce(paper.Point.min);
 }
 
-export const getLayersBottomRight = (layers: string[]): paper.Point => {
+export const getLayersBottomRight = (store: LayerState, layers: string[]): paper.Point => {
   const paperLayerPoints = layers.reduce((result, current) => {
-    const paperLayer = getPaperLayer(current);
-    return [...result, paperLayer.bounds.bottomRight];
+    const layerItem = store.byId[current];
+    const bottomRight = new paperMain.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
+    return [...result, bottomRight];
+    // const paperLayer = getPaperLayer(current);
+    // return [...result, paperLayer.bounds.bottomRight];
   }, []);
   return paperLayerPoints.reduce(paper.Point.max);
 }
 
-export const getLayersBounds = (layers: string[]): paper.Rectangle => {
-  const topLeft = getLayersTopLeft(layers);
-  const bottomRight = getLayersBottomRight(layers);
-  return new paper.Rectangle({
+export const getLayersBounds = (store: LayerState, layers: string[]): paper.Rectangle => {
+  const topLeft = getLayersTopLeft(store, layers);
+  const bottomRight = getLayersBottomRight(store, layers);
+  return new paperMain.Rectangle({
     from: topLeft,
     to: bottomRight
   });
@@ -317,9 +323,17 @@ export const getPositionInArtboard = (layer: paper.Item, artboard: paper.Item): 
   return new paper.Point(xDiff, yDiff);
 }
 
-export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Item, artboard: paper.Item, destinationArtboard: paper.Item): em.TweenPropMap => {
-  const layerArtboardPosition = getPositionInArtboard(layer, artboard);
-  const equivalentArtboardPosition = getPositionInArtboard(equivalent, destinationArtboard);
+export const getArtboardPosition = (layer: em.Layer, artboard: em.Artboard): paper.Point => {
+  const xDiff = Math.round(artboard.frame.x - layer.frame.x);
+  const yDiff = Math.round(artboard.frame.y - layer.frame.y);
+  return new paper.Point(xDiff, yDiff);
+}
+
+export const getEquivalentTweenProps = (layerItem: em.Layer, layer: paper.Item, equivalentLayerItem: em.Layer, equivalent: paper.Item, artboardLayerItem: em.Artboard, artboard: paper.Item, destinationArtboardLayerItem: em.Artboard, destinationArtboard: paper.Item): em.TweenPropMap => {
+  const layerArtboardPosition = getArtboardPosition(layerItem, artboardLayerItem);
+  const equivalentArtboardPosition = getArtboardPosition(equivalentLayerItem, destinationArtboardLayerItem);
+  // const layerArtboardPosition = getPositionInArtboard(layer, artboard);
+  // const equivalentArtboardPosition = getPositionInArtboard(equivalent, destinationArtboard);
   const tweenPropMap: em.TweenPropMap = {
     image: false,
     shape: false,
@@ -327,6 +341,7 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
     x: false,
     y: false,
     rotation: false,
+    radius: false,
     width: false,
     height: false,
     stroke: false,
@@ -341,163 +356,158 @@ export const getEquivalentTweenProps = (layer: paper.Item, equivalent: paper.Ite
     fontSize: false,
     lineHeight: false
   }
-  Object.keys(tweenPropMap).forEach((key: em.TweenProp) => {
-    switch(key) {
-      case 'image':
-        if (
-          layer.data.type === 'Image' &&
-          equivalent.data.type === 'Image' &&
-          layer.data.imageId !== equivalent.data.imageId
-        ) {
-          tweenPropMap[key] = true;
-        }
-        break;
-      case 'shape':
-        if (
-          layer.data.type !== 'ArtboardBackground' &&
-          (layer.className === 'Path' || layer.className === 'CompoundPath') &&
-          (equivalent.className === 'Path' || layer.className === 'CompoundPath')
-        ) {
-          const equivalentShapeTest = equivalent.clone({insert: false});
-          equivalentShapeTest.position = layer.position;
-          if (!(layer as paper.Path).compare(equivalentShapeTest as paper.Path)) {
-            tweenPropMap[key] = true;
+  return Object.keys(tweenPropMap).reduce((result: em.TweenPropMap, key: em.TweenProp) => {
+    if (layerItem.type === equivalentLayerItem.type) {
+      switch(key) {
+        case 'image':
+          if (
+            layerItem.type === 'Image' &&
+            equivalentLayerItem.type === 'Image' &&
+            layer.data.imageId !== equivalent.data.imageId
+          ) {
+            result[key] = true;
           }
-        }
-        break;
-      case 'fill':
-        if (
-          (!layer.fillColor && equivalent.fillColor) ||
-          (layer.fillColor && !equivalent.fillColor) ||
-          (layer.fillColor && equivalent.fillColor && !layer.fillColor.equals(equivalent.fillColor)) ||
-          (layer.fillColor && layer.fillColor.type === 'gradient' && equivalent.fillColor && equivalent.fillColor.type === 'rgb') ||
-          (layer.fillColor && layer.fillColor.type === 'rgb' && equivalent.fillColor && equivalent.fillColor.type === 'gradient') ||
-          (layer.fillColor && layer.fillColor.type === 'gradient' && equivalent.fillColor && equivalent.fillColor.type === 'gradient' && !layer.fillColor.gradient.equals(equivalent.fillColor.gradient))
-        ) {
-          tweenPropMap[key] = true;
-        }
-        break;
-      case 'x':
-        if (
-          (layer.data.type === 'Text' && equivalent.data.type === 'Text' && ((layer as paper.PointText).fontSize !== (equivalent as paper.PointText).fontSize || (layer as paper.PointText).leading !== (equivalent as paper.PointText).leading)) ||
-          layerArtboardPosition.x !== equivalentArtboardPosition.x &&
-          layer.data.type !== 'ArtboardBackground'
-        ) {
-          tweenPropMap[key] = true;
-        }
-        break;
-      case 'y':
-        if (
-          (layer.data.type === 'Text' && equivalent.data.type === 'Text' && ((layer as paper.PointText).fontSize !== (equivalent as paper.PointText).fontSize || (layer as paper.PointText).leading !== (equivalent as paper.PointText).leading)) ||
-          layerArtboardPosition.y !== equivalentArtboardPosition.y &&
-          layer.data.type !== 'ArtboardBackground'
-        ) {
-          tweenPropMap[key] = true;
-        }
-        break;
-      case 'rotation':
-        if (
-          layer.rotation !== equivalent.rotation &&
-          layer.data.type !== 'ArtboardBackground'
-        ) {
-          tweenPropMap[key] = true;
-        }
-        break;
-      case 'width':
-        if (
-          layer.bounds.width !== equivalent.bounds.width &&
-          layer.data.type !== 'ArtboardBackground' &&
-          layer.data.type !== 'Text'
-        ) {
-          tweenPropMap[key] = true;
-        }
-        break;
-      case 'height':
-        if (
-          layer.bounds.height !== equivalent.bounds.height &&
-          layer.data.type !== 'ArtboardBackground' &&
-          layer.data.type !== 'Text'
-        ) {
-          tweenPropMap[key] = true;
-        }
-        break;
-      case 'stroke':
-        if (
-          (!layer.strokeColor && equivalent.strokeColor) ||
-          (layer.strokeColor && !equivalent.strokeColor) ||
-          (layer.strokeColor && equivalent.strokeColor && !layer.strokeColor.equals(equivalent.strokeColor)) ||
-          (layer.strokeColor && layer.strokeColor.type === 'gradient' && equivalent.strokeColor && equivalent.strokeColor.type === 'rgb') ||
-          (layer.strokeColor && layer.strokeColor.type === 'rgb' && equivalent.strokeColor && equivalent.strokeColor.type === 'gradient') ||
-          (layer.strokeColor && layer.strokeColor.type === 'gradient' && equivalent.strokeColor && equivalent.strokeColor.type === 'gradient' && !layer.strokeColor.gradient.equals(equivalent.strokeColor.gradient))
-        ) {
-          tweenPropMap[key] = true;
-        }
-        break;
-      case 'strokeDashWidth':
-        if (layer.dashArray[0] !== equivalent.dashArray[0]) {
-          tweenPropMap[key] = true;
-        }
-        break;
-      case 'strokeDashGap':
-        if (layer.dashArray[1] !== equivalent.dashArray[1]) {
-          tweenPropMap[key] = true;
-        }
-        break;
-      case 'strokeWidth':
-        if (layer.strokeWidth !== equivalent.strokeWidth) {
-          tweenPropMap[key] = true;
-        }
-        break;
-      case 'shadowColor':
-        if (
-          (!layer.shadowColor && equivalent.shadowColor) ||
-          (layer.shadowColor && !equivalent.shadowColor) ||
-          (layer.shadowColor && equivalent.shadowColor && !layer.shadowColor.equals(equivalent.shadowColor))
-        ) {
-          tweenPropMap[key] = true;
-        }
-        break;
-      case 'shadowOffsetX':
-        if (layer.shadowOffset.x !== equivalent.shadowOffset.x) {
-          tweenPropMap[key] = true;
-        }
-        break;
-      case 'shadowOffsetY':
-        if (layer.shadowOffset.y !== equivalent.shadowOffset.y) {
-          tweenPropMap[key] = true;
-        }
-        break;
-      case 'shadowBlur':
-        if (layer.shadowBlur !== equivalent.shadowBlur) {
-          tweenPropMap[key] = true;
-        }
-        break;
-      case 'opacity':
-        if (layer.opacity !== equivalent.opacity) {
-          tweenPropMap[key] = true;
-        }
-        break;
-      case 'fontSize':
-        if (
-          layer.className === 'PointText' &&
-          equivalent.className === 'PointText' &&
-          (layer as paper.PointText).fontSize !== (equivalent as paper.PointText).fontSize
-        ) {
-          tweenPropMap[key] = true;
-        }
-        break;
-      case 'lineHeight':
-        if (
-          layer.className === 'PointText' &&
-          equivalent.className === 'PointText' &&
-          (layer as paper.PointText).leading !== (equivalent as paper.PointText).leading
-        ) {
-          tweenPropMap[key] = true;
-        }
-        break;
+          break;
+        case 'shape':
+          if (
+            layerItem.type === 'Shape' &&
+            equivalentLayerItem.type === 'Shape' &&
+            (layerItem as em.Shape).shapeType !== (equivalentLayerItem as em.Shape).shapeType ||
+            (layerItem as em.Shape).shapeType === 'Polygon' && (equivalentLayerItem as em.Shape).shapeType === 'Polygon' && (layerItem as em.Shape).points.sides !== (equivalentLayerItem as em.Shape).points.sides ||
+            (layerItem as em.Shape).shapeType === 'Star' && (equivalentLayerItem as em.Shape).shapeType === 'Star' && (layerItem as em.Shape).points.points !== (equivalentLayerItem as em.Shape).points.points
+          ) {
+            result[key] = true;
+          }
+          break;
+        case 'fill':
+          if (
+            (!layer.fillColor && equivalent.fillColor) ||
+            (layer.fillColor && !equivalent.fillColor) ||
+            (layer.fillColor && equivalent.fillColor && !layer.fillColor.equals(equivalent.fillColor)) ||
+            (layer.fillColor && layer.fillColor.type === 'gradient' && equivalent.fillColor && equivalent.fillColor.type === 'rgb') ||
+            (layer.fillColor && layer.fillColor.type === 'rgb' && equivalent.fillColor && equivalent.fillColor.type === 'gradient') ||
+            (layer.fillColor && layer.fillColor.type === 'gradient' && equivalent.fillColor && equivalent.fillColor.type === 'gradient' && !layer.fillColor.gradient.equals(equivalent.fillColor.gradient))
+          ) {
+            result[key] = true;
+          }
+          break;
+        case 'x':
+          if (
+            (layer.data.type === 'Text' && equivalent.data.type === 'Text' && ((layer as paper.PointText).fontSize !== (equivalent as paper.PointText).fontSize || (layer as paper.PointText).leading !== (equivalent as paper.PointText).leading)) ||
+            layerArtboardPosition.x !== equivalentArtboardPosition.x &&
+            layer.data.type !== 'ArtboardBackground'
+          ) {
+            result[key] = true;
+          }
+          break;
+        case 'y':
+          if (
+            (layer.data.type === 'Text' && equivalent.data.type === 'Text' && ((layer as paper.PointText).fontSize !== (equivalent as paper.PointText).fontSize || (layer as paper.PointText).leading !== (equivalent as paper.PointText).leading)) ||
+            layerArtboardPosition.y !== equivalentArtboardPosition.y &&
+            layer.data.type !== 'ArtboardBackground'
+          ) {
+            result[key] = true;
+          }
+          break;
+        case 'rotation':
+          if (layerItem.transform.rotation !== equivalentLayerItem.transform.rotation) {
+            result[key] = true;
+          }
+          break;
+        case 'width':
+          if (
+            layerItem.frame.width !== equivalentLayerItem.frame.width &&
+            layerItem.type !== 'Text'
+          ) {
+            result[key] = true;
+          }
+          break;
+        case 'height':
+          if (
+            layerItem.frame.height !== equivalentLayerItem.frame.height &&
+            layerItem.type !== 'Text'
+          ) {
+            result[key] = true;
+          }
+          break;
+        case 'stroke':
+          if (
+            (!layer.strokeColor && equivalent.strokeColor) ||
+            (layer.strokeColor && !equivalent.strokeColor) ||
+            (layer.strokeColor && equivalent.strokeColor && !layer.strokeColor.equals(equivalent.strokeColor)) ||
+            (layer.strokeColor && layer.strokeColor.type === 'gradient' && equivalent.strokeColor && equivalent.strokeColor.type === 'rgb') ||
+            (layer.strokeColor && layer.strokeColor.type === 'rgb' && equivalent.strokeColor && equivalent.strokeColor.type === 'gradient') ||
+            (layer.strokeColor && layer.strokeColor.type === 'gradient' && equivalent.strokeColor && equivalent.strokeColor.type === 'gradient' && !layer.strokeColor.gradient.equals(equivalent.strokeColor.gradient))
+          ) {
+            result[key] = true;
+          }
+          break;
+        case 'strokeDashWidth':
+          if (layer.dashArray[0] !== equivalent.dashArray[0]) {
+            result[key] = true;
+          }
+          break;
+        case 'strokeDashGap':
+          if (layer.dashArray[1] !== equivalent.dashArray[1]) {
+            result[key] = true;
+          }
+          break;
+        case 'strokeWidth':
+          if (layer.strokeWidth !== equivalent.strokeWidth) {
+            result[key] = true;
+          }
+          break;
+        case 'shadowColor':
+          if (
+            (!layer.shadowColor && equivalent.shadowColor) ||
+            (layer.shadowColor && !equivalent.shadowColor) ||
+            (layer.shadowColor && equivalent.shadowColor && !layer.shadowColor.equals(equivalent.shadowColor))
+          ) {
+            result[key] = true;
+          }
+          break;
+        case 'shadowOffsetX':
+          if (layer.shadowOffset.x !== equivalent.shadowOffset.x) {
+            result[key] = true;
+          }
+          break;
+        case 'shadowOffsetY':
+          if (layer.shadowOffset.y !== equivalent.shadowOffset.y) {
+            result[key] = true;
+          }
+          break;
+        case 'shadowBlur':
+          if (layer.shadowBlur !== equivalent.shadowBlur) {
+            result[key] = true;
+          }
+          break;
+        case 'opacity':
+          if (layer.opacity !== equivalent.opacity) {
+            result[key] = true;
+          }
+          break;
+        case 'fontSize':
+          if (
+            layer.className === 'PointText' &&
+            equivalent.className === 'PointText' &&
+            (layer as paper.PointText).fontSize !== (equivalent as paper.PointText).fontSize
+          ) {
+            result[key] = true;
+          }
+          break;
+        case 'lineHeight':
+          if (
+            layer.className === 'PointText' &&
+            equivalent.className === 'PointText' &&
+            (layer as paper.PointText).leading !== (equivalent as paper.PointText).leading
+          ) {
+            result[key] = true;
+          }
+          break;
+      }
     }
-  });
-  return tweenPropMap;
+    return result;
+  }, tweenPropMap);
 }
 
 export const getLongestEventTween = (tweensById: {[id: string]: em.Tween}): em.Tween => {
@@ -522,6 +532,27 @@ export const getAllArtboardTweenEvents = (store: LayerState, artboard: string): 
     if (store.tweenEventById[current].artboard === artboard) {
       result[current] = store.tweenEventById[current];
       allIds.push(current);
+    }
+    return result;
+  }, {});
+  return {
+    allIds,
+    byId
+  };
+};
+
+export const getAllArtboardTweenEventArtboards = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: em.Artboard } } => {
+  const allArtboardAnimationEvents = getAllArtboardTweenEvents(store, artboard);
+  const allIds: string[] = [];
+  const byId = Object.keys(allArtboardAnimationEvents.byId).reduce((result: { [id: string]: em.Artboard }, current) => {
+    const event = allArtboardAnimationEvents.byId[current];
+    if (!allIds.includes(event.destinationArtboard)) {
+      result[event.destinationArtboard] = store.byId[event.destinationArtboard] as em.Artboard;
+      allIds.push(event.destinationArtboard);
+    }
+    if (!allIds.includes(event.artboard)) {
+      result[event.artboard] = store.byId[event.artboard] as em.Artboard;
+      allIds.push(event.artboard);
     }
     return result;
   }, {});

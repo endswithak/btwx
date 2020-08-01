@@ -86,8 +86,8 @@ import {
   SET_LAYER_SHADOW_BLUR,
   SET_LAYER_SHADOW_X_OFFSET,
   SET_LAYER_SHADOW_Y_OFFSET,
-  RESIZE_LAYER,
-  RESIZE_LAYERS,
+  SCALE_LAYER,
+  SCALE_LAYERS,
   SET_LAYER_TEXT,
   SET_LAYER_FONT_SIZE,
   SET_LAYER_LEADING,
@@ -244,8 +244,8 @@ import {
   setLayerShadowBlur,
   setLayerShadowXOffset,
   setLayerShadowYOffset,
-  resizeLayer,
-  resizeLayers,
+  scaleLayer,
+  scaleLayers,
   setLayerFontSize,
   setLayerLeading,
   setLayerFontWeight,
@@ -565,10 +565,10 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setLayerShadowXOffset(state, action);
     case SET_LAYER_SHADOW_Y_OFFSET:
       return setLayerShadowYOffset(state, action);
-    case RESIZE_LAYER:
-      return resizeLayer(state, action);
-    case RESIZE_LAYERS:
-      return resizeLayers(state, action);
+    case SCALE_LAYER:
+      return scaleLayer(state, action);
+    case SCALE_LAYERS:
+      return scaleLayers(state, action);
     case SET_LAYER_TEXT:
       return setLayerText(state, action);
     case SET_LAYER_FONT_SIZE:

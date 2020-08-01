@@ -16,8 +16,9 @@ const GradientSliderStop = (props: GradientSliderProps): ReactElement => {
   const ref = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
   const { stop, onStopPress, onStopDrag } = props;
+  const [prevPos, setPrevPos] = useState(stop.position);
 
-  useEffect(() => {
+  const initDraggable = () => {
     if (ref.current) {
       if (Draggable.get(ref.current)) {
         Draggable.get(ref.current).kill();
@@ -38,10 +39,22 @@ const GradientSliderStop = (props: GradientSliderProps): ReactElement => {
             newPosition = 1;
           }
           onStopDrag(stop.id, newPosition);
+          setPrevPos(newPosition);
         }
       });
     }
+  }
+
+  useEffect(() => {
+    initDraggable();
   }, []);
+
+  useEffect(() => {
+    if (stop.position !== prevPos) {
+      initDraggable();
+      setPrevPos(stop.position);
+    }
+  }, [stop.position]);
 
   return (
     <div

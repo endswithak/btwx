@@ -1,7 +1,7 @@
 import paper from 'paper';
 import store from '../store';
 import { setCanvasResizing } from '../store/actions/canvasSettings';
-import { resizeLayers } from '../store/actions/layer';
+import { scaleLayers } from '../store/actions/layer';
 import { getPaperLayer, getSelectionBounds, getLayerAndDescendants } from '../store/selectors/layer';
 import { updateSelectionFrame, updateActiveArtboardFrame } from '../store/utils/layer';
 import { paperMain } from './index';
@@ -21,8 +21,10 @@ class ResizeTool {
   toBounds: paper.Rectangle;
   enabled: boolean;
   tooltip: Tooltip;
-  scaleX: number;
-  scaleY: number;
+  scale: {
+    x: number;
+    y: number;
+  };
   verticalFlip: boolean;
   horizontalFlip: boolean;
   handle: string;
@@ -30,6 +32,7 @@ class ResizeTool {
   metaModifier: boolean;
   altModifier: boolean;
   snapTool: SnapTool;
+  groupScale: boolean;
   constructor() {
     this.state = null;
     this.ref = null;
@@ -41,22 +44,33 @@ class ResizeTool {
     this.toBounds = null;
     this.enabled = false;
     this.tooltip = null;
-    this.scaleX = 1;
-    this.scaleY = 1;
+    this.scale = {
+      x: 1,
+      y: 1
+    };
     this.verticalFlip = false;
     this.horizontalFlip = false;
     this.shiftModifier = false;
     this.metaModifier = false;
     this.altModifier = false;
     this.snapTool = null;
+    this.groupScale = false;
   }
-  enable(handle: string): void {
+  enable(state: RootState, handle: string): void {
     store.dispatch(setCanvasResizing({resizing: true}));
-    const state = store.getState();
     this.enabled = true;
     this.handle = handle;
     this.snapTool = new SnapTool();
     this.state = state;
+    if (
+      state.layer.present.selected.length > 1 ||
+      state.layer.present.selected.length === 1 && (
+        state.layer.present.byId[state.layer.present.selected[0]].type === 'Group' ||
+        state.layer.present.byId[state.layer.present.selected[0]].transform.rotation !== 0
+      )
+    ) {
+      this.groupScale = true;
+    }
     updateSelectionFrame(state.layer.present, this.handle);
   }
   disable(): void {
@@ -78,11 +92,14 @@ class ResizeTool {
     this.toBounds = null;
     this.enabled = false;
     this.tooltip = null;
-    this.scaleX = 1;
-    this.scaleY = 1;
+    this.scale = {
+      x: 1,
+      y: 1
+    };
     this.verticalFlip = false;
     this.horizontalFlip = false;
     this.snapTool = null;
+    this.groupScale = false;
   }
   flipLayers(state: RootState, hor = 1, ver = 1): void {
     this.state.layer.present.selected.forEach((layer) => {
@@ -209,16 +226,16 @@ class ResizeTool {
       case 'bottomLeft':
       case 'bottomRight': {
         const fb = this.fromBounds;
-        const maxDim = fb.width > fb.height ? this.scaleX : this.scaleY;
+        const maxDim = fb.width > fb.height ? this.scale.x : this.scale.y;
         this.state.layer.present.selected.forEach((layer: string) => {
           const paperLayer = getPaperLayer(layer);
           this.clearLayerScale(paperLayer, this.state.layer.present.byId[layer]);
           this.setLayerPivot(layer);
           this.scaleLayer(layer, this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
-          if (this.shiftModifier) {
+          if (this.shiftModifier || this.groupScale) {
             this.scaleLayer(layer, maxDim, maxDim);
           } else {
-            this.scaleLayer(layer, this.scaleX, this.scaleY);
+            this.scaleLayer(layer, this.scale.x, this.scale.y);
           }
         });
         break;
@@ -230,7 +247,7 @@ class ResizeTool {
           this.clearLayerScale(paperLayer, this.state.layer.present.byId[layer]);
           this.setLayerPivot(layer);
           this.scaleLayer(layer, this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
-          this.scaleLayer(layer, this.shiftModifier ? this.scaleY : 1, this.scaleY);
+          this.scaleLayer(layer, this.shiftModifier || this.groupScale ? this.scale.y : 1, this.scale.y);
         });
         break;
       }
@@ -241,7 +258,7 @@ class ResizeTool {
           this.clearLayerScale(paperLayer, this.state.layer.present.byId[layer]);
           this.setLayerPivot(layer);
           this.scaleLayer(layer, this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
-          this.scaleLayer(layer, this.scaleX, this.shiftModifier ? this.scaleX : 1);
+          this.scaleLayer(layer, this.scale.x, this.shiftModifier || this.groupScale ? this.scale.x : 1);
         });
         break;
       }
@@ -252,7 +269,7 @@ class ResizeTool {
     this.snapTool.updateGuides();
   }
   updateToBounds(overrides?: any): void {
-    if (this.shiftModifier) {
+    if (this.shiftModifier || this.groupScale) {
       const aspect = this.fromBounds.width / this.fromBounds.height;
       const fb = this.fromBounds;
       switch(this.handle) {
@@ -429,8 +446,8 @@ class ResizeTool {
     }
     const totalWidthDiff = this.toBounds.width / this.fromBounds.width;
     const totalHeightDiff = this.toBounds.height / this.fromBounds.height;
-    this.scaleX = isFinite(totalWidthDiff) && totalWidthDiff > 0 ? totalWidthDiff : 0.01;
-    this.scaleY = isFinite(totalHeightDiff) && totalHeightDiff > 0 ? totalHeightDiff : 0.01;
+    this.scale.x = isFinite(totalWidthDiff) && totalWidthDiff > 0 ? totalWidthDiff : 0.01;
+    this.scale.y = isFinite(totalHeightDiff) && totalHeightDiff > 0 ? totalHeightDiff : 0.01;
     this.snapTool.snapBounds = this.toBounds;
   }
   adjustHandle(): void {
@@ -771,22 +788,22 @@ class ResizeTool {
   }
   onMouseUp(event: paper.ToolEvent): void {
     if (this.enabled) {
-      if (this.scaleX || this.scaleY) {
+      if (this.scale.x || this.scale.y) {
         if (this.state.layer.present.selected.length > 0) {
-          const resizedLayers = this.state.layer.present.selected.filter((id) => this.state.layer.present.byId[id].type !== 'Text');
-          if (resizedLayers.length > 0) {
+          const scaledLayers = this.state.layer.present.selected.filter((id) => this.state.layer.present.byId[id].type !== 'Text');
+          if (scaledLayers.length > 0) {
             // set selected layers back to the default pivot point
             // needs to be before resize dispatch to correctly set layer position
-            resizedLayers.forEach((id) => {
+            scaledLayers.forEach((id) => {
               const paperLayer = getPaperLayer(id);
               const layerItem = this.state.layer.present.byId[id];
               if (layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Rounded') {
                 applyShapeMethods(paperLayer);
               }
-              paperLayer.pivot = paperLayer.bounds.center;
+              paperLayer.pivot = null;
             });
             // dispatch resize layers
-            store.dispatch(resizeLayers({layers: resizedLayers, verticalFlip: this.verticalFlip, horizontalFlip: this.horizontalFlip}));
+            store.dispatch(scaleLayers({layers: scaledLayers, scale: this.scale, verticalFlip: this.verticalFlip, horizontalFlip: this.horizontalFlip}));
             // update selection frame
             updateSelectionFrame(this.state.layer.present);
           }

@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { paperMain } from '../../canvas';
-import { DEFAULT_STYLE, DEFAULT_TEXT_STYLE, DEFAULT_TEXT_VALUE, DEFAULT_GRADIENT_STYLE } from '../../constants';
+import { DEFAULT_STYLE, DEFAULT_TEXT_STYLE, DEFAULT_TEXT_VALUE, DEFAULT_GRADIENT_STYLE, DEFAULT_TRANSFORM } from '../../constants';
 import { applyImageMethods } from '../../canvas/imageUtils';
 
 import {
@@ -95,8 +95,8 @@ import {
   SET_LAYER_SHADOW_BLUR,
   SET_LAYER_SHADOW_X_OFFSET,
   SET_LAYER_SHADOW_Y_OFFSET,
-  RESIZE_LAYER,
-  RESIZE_LAYERS,
+  SCALE_LAYER,
+  SCALE_LAYERS,
   SET_LAYER_TEXT,
   SET_LAYER_FONT_SIZE,
   SET_LAYER_LEADING,
@@ -248,8 +248,8 @@ import {
   SetLayerShadowBlurPayload,
   SetLayerShadowXOffsetPayload,
   SetLayerShadowYOffsetPayload,
-  ResizeLayerPayload,
-  ResizeLayersPayload,
+  ScaleLayerPayload,
+  ScaleLayersPayload,
   SetLayerTextPayload,
   SetLayerFontSizePayload,
   SetLayerLeadingPayload,
@@ -374,6 +374,7 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
         closed: true,
         radius: 0
       },
+      transform: DEFAULT_TRANSFORM,
       style: DEFAULT_STYLE(),
     }
   }
@@ -408,6 +409,7 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
         closed: true,
         radius: 0
       },
+      transform: DEFAULT_TRANSFORM,
       style: {
         ...DEFAULT_STYLE(),
         fill: {
@@ -463,7 +465,13 @@ export const addImage = (payload: AddImagePayload): LayerTypes => {
         x: payload.paperLayer.position.x,
         y: payload.paperLayer.position.y,
         width: payload.paperLayer.bounds.width,
-        height: payload.paperLayer.bounds.height,
+        height: payload.paperLayer.bounds.height
+      },
+      master: {
+        x: payload.paperLayer.position.x,
+        y: payload.paperLayer.position.y,
+        width: payload.paperLayer.bounds.width,
+        height: payload.paperLayer.bounds.height
       },
       name: payload.name ? payload.name : 'Image',
       parent: payload.parent ? payload.parent : null,
@@ -476,6 +484,7 @@ export const addImage = (payload: AddImagePayload): LayerTypes => {
       },
       tweenEvents: [],
       tweens: [],
+      transform: DEFAULT_TRANSFORM,
       style: {
         ...DEFAULT_STYLE(),
         fill: {
@@ -935,13 +944,13 @@ export const setLayerShadowYOffset = (payload: SetLayerShadowYOffsetPayload): La
   payload
 });
 
-export const resizeLayer = (payload: ResizeLayerPayload): LayerTypes => ({
-  type: RESIZE_LAYER,
+export const scaleLayer = (payload: ScaleLayerPayload): LayerTypes => ({
+  type: SCALE_LAYER,
   payload
 });
 
-export const resizeLayers = (payload: ResizeLayersPayload): LayerTypes => ({
-  type: RESIZE_LAYERS,
+export const scaleLayers = (payload: ScaleLayersPayload): LayerTypes => ({
+  type: SCALE_LAYERS,
   payload
 });
 

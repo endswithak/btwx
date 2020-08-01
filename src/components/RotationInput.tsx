@@ -5,7 +5,6 @@ import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
 import { SetLayerRotationPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setLayerRotation } from '../store/actions/layer';
-import { getPaperLayer } from '../store/selectors/layer';
 
 interface RotationInputProps {
   selected?: string[];
@@ -33,9 +32,6 @@ const RotationInput = (props: RotationInputProps): ReactElement => {
         if (nextRotation >= 360 || nextRotation <= -360) {
           nextRotation = 0;
         }
-        const paperLayer = getPaperLayer(selected[0]);
-        paperLayer.rotation = -rotationValue;
-        paperLayer.rotation = nextRotation;
         setLayerRotation({id: selected[0], rotation: nextRotation});
         setRotation(nextRotation);
       } else {
@@ -65,7 +61,7 @@ const mapStateToProps = (state: RootState) => {
       case 0:
         return '';
       case 1:
-        return Math.round(layer.present.byId[layer.present.selected[0]].style.rotation);
+        return Math.round(layer.present.byId[layer.present.selected[0]].transform.rotation);
       default:
         return 'multi';
     }

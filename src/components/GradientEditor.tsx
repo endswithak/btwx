@@ -5,6 +5,7 @@ import debounce from 'lodash.debounce';
 import tinyColor from 'tinycolor2';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
+import { getPaperLayer, getGradientStops, getGradientOriginPoint, getGradientDestinationPoint } from '../store/selectors/layer';
 import { openColorEditor } from '../store/actions/colorEditor';
 import { ColorEditorTypes, OpenColorEditorPayload } from '../store/actionTypes/colorEditor';
 import { closeGradientEditor } from '../store/actions/gradientEditor';
@@ -94,6 +95,41 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
   }
 
   const handleActiveStopColorChange = (stopColor: em.Color): void => {
+    // const paperLayer = getPaperLayer(gradientEditor.layer);
+    // const newStopsById = Object.keys(gradient.stops.byId).reduce((result: { [id: string]: em.GradientStop }, current) => {
+    //   if (current === activeStopValue.id) {
+    //     result[current] = {
+    //       ...gradient.stops.byId[current],
+    //       color: stopColor
+    //     }
+    //   } else {
+    //     result[current] = gradient.stops.byId[current];
+    //   }
+    //   return result;
+    // }, {});
+    // switch(gradientEditor.prop) {
+    //   case 'fill': {
+    //     paperLayer.fillColor = {
+    //       gradient: {
+    //         stops: getGradientStops(newStopsById),
+    //         radial: gradient.gradientType === 'radial'
+    //       },
+    //       origin: getGradientOriginPoint(gradientEditor.layer, gradient.origin),
+    //       destination: getGradientDestinationPoint(gradientEditor.layer, gradient.destination)
+    //     } as any
+    //     break;
+    //   }
+    //   case 'stroke':
+    //     paperLayer.strokeColor = {
+    //       gradient: {
+    //         stops: getGradientStops(newStopsById),
+    //         radial: gradient.gradientType === 'radial'
+    //       },
+    //       origin: getGradientOriginPoint(gradientEditor.layer, gradient.origin),
+    //       destination: getGradientDestinationPoint(gradientEditor.layer, gradient.destination)
+    //     } as any
+    //     break;
+    // }
     debounceStopColorChange(activeStopValue.id, stopColor);
   }
 

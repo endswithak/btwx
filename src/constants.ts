@@ -117,12 +117,23 @@ export const DEFAULT_STYLE = (): em.Style => ({
   stroke: DEFAULT_STROKE_STYLE(),
   strokeOptions: DEFAULT_STROKE_OPTIONS_STYLE,
   opacity: 1,
-  rotation: 0,
-  horizontalFlip: false,
-  verticalFlip: false,
   shadow: DEFAULT_SHADOW_STYLE,
   blendMode: 'normal'
 });
+
+export const DEFAULT_TRANSFORM: em.Transform = {
+  rotation: 0,
+  horizontalFlip: false,
+  verticalFlip: false,
+  pivot: {
+    x: 0,
+    y: 0
+  },
+  scale: {
+    x: 1,
+    y: 1
+  }
+}
 
 export const DEFAULT_TEXT_VALUE = 'Type Something';
 

@@ -25,7 +25,7 @@ const HoverFrame = (props: HoverFrameProps): ReactElement => {
   }
 
   useEffect(() => {
-    updateHoverFrame({selected: selected, hover: hover} as LayerState);
+    updateHoverFrame({byId: hoverItem ? {[hover]: hoverItem} : {}, selected: selected, hover: hover} as LayerState);
     document.getElementById('canvas').addEventListener('wheel', handleWheel);
     return () => {
       const hoverFrame = paperMain.project.getItem({ data: { id: 'hoverFrame' } });

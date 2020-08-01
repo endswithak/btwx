@@ -22,7 +22,7 @@ import {
   SetLayerStrokeColor, SetLayerStrokeWidth, SetLayerShadowColor, SetLayerShadowBlur, SetLayerShadowXOffset,
   SetLayerShadowYOffset, SetLayerRotation, EnableLayerFill, DisableLayerFill, EnableLayerStroke,
   DisableLayerStroke, DisableLayerShadow, EnableLayerShadow, SetLayerStrokeCap, SetLayerStrokeJoin,
-  SetLayerStrokeDashArray, SetLayerStrokeMiterLimit, ResizeLayer, ResizeLayers, EnableLayerHorizontalFlip,
+  SetLayerStrokeDashArray, SetLayerStrokeMiterLimit, ScaleLayer, ScaleLayers, EnableLayerHorizontalFlip,
   DisableLayerHorizontalFlip, EnableLayerVerticalFlip, DisableLayerVerticalFlip, AddText, SetLayerText,
   SetLayerFontSize, SetLayerFontWeight, SetLayerFontFamily, SetLayerLeading, SetLayerJustification,
   AddInViewLayer, AddInViewLayers, RemoveInViewLayer, RemoveInViewLayers, UpdateInViewLayers, SetLayerFillType,
@@ -61,7 +61,7 @@ import { applyArtboardMethods } from '../../canvas/artboardUtils';
 import { applyImageMethods } from '../../canvas/imageUtils';
 import { applyCompoundShapeMethods } from '../../canvas/compoundShapeUtils';
 
-import { THEME_PRIMARY_COLOR, DEFAULT_STYLE } from '../../constants';
+import { THEME_PRIMARY_COLOR, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../../constants';
 import { bufferToBase64 } from '../../utils';
 import { ActionTypes } from 'redux-undo';
 
@@ -318,6 +318,10 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
         }
         break;
     }
+    // check hover
+    if (result.hover === current) {
+      result = setLayerHover(result, layerActions.setLayerHover({id: null}) as SetLayerHover);
+    }
     // if layer compound shape
     if (layer.type === 'CompoundShape') {
       result = removeLayers(result, layerActions.removeLayers({layers: layer.children}) as RemoveLayers);
@@ -358,10 +362,6 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
     }
     return result;
   }, currentState);
-  // if layer is the active hover layer, set hover to null
-  if (currentState.hover === action.payload.id) {
-    currentState = setLayerHover(currentState, layerActions.setLayerHover({id: null}) as SetLayerHover);
-  }
   // remove paper layer
   getPaperLayer(action.payload.id).remove();
   // remove layer
@@ -428,7 +428,8 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         handle: 'move'
       }
     });
-    moveHandle.position = new paperMain.Point(baseFrame.bounds.topCenter.x, baseFrame.bounds.topCenter.y - ((1 / paperMain.view.zoom) * 24));
+    //moveHandle.position = new paperMain.Point(baseFrame.bounds.topCenter.x, baseFrame.bounds.topCenter.y - ((1 / paperMain.view.zoom) * 24));
+    moveHandle.position = new paperMain.Point(baseFrame.bounds.center.x, baseFrame.bounds.center.y);
     moveHandle.scaling.x = 1 / paperMain.view.zoom;
     moveHandle.scaling.y = 1 / paperMain.view.zoom;
     const topLeftHandle = new paperMain.Path.Rectangle({
@@ -529,7 +530,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
       leftCenterHandle.opacity = 0.5;
       rightCenterHandle.opacity = 0.5;
     }
-    new paperMain.Group({
+    const newSelectionFrame = new paperMain.Group({
       children: [baseFrame, moveHandle, topLeftHandle, topCenterHandle, topRightHandle, bottomLeftHandle, bottomCenterHandle, bottomRightHandle, leftCenterHandle, rightCenterHandle],
       data: {
         id: 'selectionFrame'
@@ -672,17 +673,18 @@ export const updateHoverFrame = (state: LayerState) => {
   }
   if (state.hover && !state.selected.includes(state.hover)) {
     const paperHoverLayer = getPaperLayer(state.hover);
-    if (paperHoverLayer.className === ('Path' || 'CompoundPath')) {
+    const hoverItem = state.byId[state.hover];
+    if (hoverItem.type === 'Shape') {
       new paperMain.Path({
         ...hoverFrameConstants,
         closed: (paperHoverLayer as paper.Path).closed,
-        segments: [...(paperHoverLayer as paper.Path).segments]
+        pathData: hoverItem.pathData
       });
     } else {
       new paperMain.Path.Rectangle({
         ...hoverFrameConstants,
-        point: paperHoverLayer.bounds.topLeft,
-        size: [paperHoverLayer.bounds.width, paperHoverLayer.bounds.height]
+        point: new paperMain.Point(hoverItem.frame.x - (hoverItem.frame.width / 2), hoverItem.frame.y - (hoverItem.frame.height / 2)),
+        size: [hoverItem.frame.width, hoverItem.frame.height]
       });
     }
   }
@@ -1044,9 +1046,21 @@ export const groupLayers = (state: LayerState, action: GroupLayers): LayerState 
     currentState = removeLayersMask(currentState, layerActions.removeLayersMask({id: mask}) as RemoveLayersMask);
   }
   // get bounds of layers to group
-  const layersBounds = getLayersBounds(action.payload.layers);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers);
   // add group
-  currentState = addGroup(currentState, layerActions.addGroup({selected: true, frame: {x: layersBounds.center.x, y: layersBounds.center.y, width: layersBounds.width, height: layersBounds.height}}) as AddGroup);
+  currentState = addGroup(currentState, layerActions.addGroup({
+    selected: true,
+    frame: {
+      x: layersBounds.center.x,
+      y: layersBounds.center.y,
+      width: layersBounds.width,
+      height: layersBounds.height,
+      rotation: 0,
+      horizontalFlip: false,
+      verticalFlip: false,
+      pivot: { x: 0, y: 0 }
+    }
+  }) as AddGroup);
   // get group id
   const groupId = currentState.allIds[currentState.allIds.length - 1];
   // move group above top layer
@@ -1359,6 +1373,7 @@ export const updateParentBounds = (state: LayerState, id: string): LayerState =>
         [current]: {
           ...result.byId[current],
           frame: {
+            ...result.byId[current].frame,
             x: paperLayer.position.x,
             y: paperLayer.position.y,
             width: paperLayer.bounds.width,
@@ -1384,6 +1399,7 @@ export const updateChildrenBounds = (state: LayerState, id: string): LayerState 
         [current]: {
           ...result.byId[current],
           frame: {
+            ...result.byId[current].frame,
             x: paperLayer.position.x,
             y: paperLayer.position.y,
             width: paperLayer.bounds.width,
@@ -1400,6 +1416,19 @@ export const updateChildrenBounds = (state: LayerState, id: string): LayerState 
 export const updateLayerBounds = (state: LayerState, id: string): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(id);
+  const layerItem = state.byId[id];
+  if (layerItem.type === 'Shape') {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [id]: {
+          ...currentState.byId[id],
+          pathData: (paperLayer as paper.PathItem).pathData
+        } as em.Shape
+      }
+    }
+  }
   currentState = {
     ...currentState,
     byId: {
@@ -1407,6 +1436,7 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
       [id]: {
         ...currentState.byId[id],
         frame: {
+          ...currentState.byId[id].frame,
           x: paperLayer.position.x,
           y: paperLayer.position.y,
           width: paperLayer.bounds.width,
@@ -1578,8 +1608,12 @@ export const addTweenEventLayerTweens = (state: LayerState, eventId: string, lay
   const destinationEquivalent = getDestinationEquivalent(currentState, layerId, destinationArtboardChildren);
   if (destinationEquivalent) {
     const currentPaperLayer = getPaperLayer(layerId);
+    const currentLayerItem = state.byId[layerId];
     const equivalentPaperLayer = getPaperLayer(destinationEquivalent.id);
-    const equivalentTweenProps = getEquivalentTweenProps(currentPaperLayer, equivalentPaperLayer, artboardPaperLayer, destinationArtboardPaperLayer);
+    const equivalentLayerItem = state.byId[destinationEquivalent.id];
+    const artboardLayerItem = state.byId[tweenEvent.artboard] as em.Artboard;
+    const destinationArtboardLayerItem = state.byId[tweenEvent.destinationArtboard] as em.Artboard;
+    const equivalentTweenProps = getEquivalentTweenProps(currentLayerItem, currentPaperLayer, equivalentLayerItem, equivalentPaperLayer, artboardLayerItem, artboardPaperLayer, destinationArtboardLayerItem, destinationArtboardPaperLayer);
     currentState = Object.keys(equivalentTweenProps).reduce((result, key: em.TweenProp) => {
       if (equivalentTweenProps[key]) {
         result = addLayerTween(result, layerActions.addLayerTween({
@@ -1941,21 +1975,39 @@ export const setLayerOpacity = (state: LayerState, action: SetLayerOpacity): Lay
 
 export const setLayerRotation = (state: LayerState, action: SetLayerRotation): LayerState => {
   let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  const layerItem = state.byId[action.payload.id];
+  paperLayer.rotation = -layerItem.transform.rotation;
+  paperLayer.rotation = action.payload.rotation;
+  paperLayer.position.x = layerItem.frame.x;
+  paperLayer.position.y = layerItem.frame.y;
+  if (layerItem.type === 'Shape') {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          pathData: (paperLayer as paper.PathItem).pathData
+        } as em.Shape
+      }
+    }
+  }
   currentState = {
     ...currentState,
     byId: {
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
-        style: {
-          ...currentState.byId[action.payload.id].style,
+        transform: {
+          ...currentState.byId[action.payload.id].transform,
           rotation: action.payload.rotation
         }
       }
     },
     paperProject: exportPaperProject(currentState)
   }
-  return updateParentBounds(currentState, action.payload.id);
+  return updateLayerBounds(currentState, action.payload.id);
 };
 
 export const enableLayerHorizontalFlip = (state: LayerState, action: EnableLayerHorizontalFlip): LayerState => {
@@ -1966,15 +2018,15 @@ export const enableLayerHorizontalFlip = (state: LayerState, action: EnableLayer
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
-        style: {
-          ...currentState.byId[action.payload.id].style,
+        transform: {
+          ...currentState.byId[action.payload.id].transform,
           horizontalFlip: true
         }
       }
     },
     paperProject: exportPaperProject(currentState)
   }
-  return updateParentBounds(currentState, action.payload.id);
+  return updateLayerBounds(currentState, action.payload.id);
 };
 
 export const disableLayerHorizontalFlip = (state: LayerState, action: DisableLayerHorizontalFlip): LayerState => {
@@ -1985,15 +2037,15 @@ export const disableLayerHorizontalFlip = (state: LayerState, action: DisableLay
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
-        style: {
-          ...currentState.byId[action.payload.id].style,
+        transform: {
+          ...currentState.byId[action.payload.id].transform,
           horizontalFlip: false
         }
       }
     },
     paperProject: exportPaperProject(currentState)
   }
-  return updateParentBounds(currentState, action.payload.id);
+  return updateLayerBounds(currentState, action.payload.id);
 };
 
 export const enableLayerVerticalFlip = (state: LayerState, action: EnableLayerVerticalFlip): LayerState => {
@@ -2004,15 +2056,15 @@ export const enableLayerVerticalFlip = (state: LayerState, action: EnableLayerVe
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
-        style: {
-          ...currentState.byId[action.payload.id].style,
+        transform: {
+          ...currentState.byId[action.payload.id].transform,
           verticalFlip: true
         }
       }
     },
     paperProject: exportPaperProject(currentState)
   }
-  return updateParentBounds(currentState, action.payload.id);
+  return updateLayerBounds(currentState, action.payload.id);
 };
 
 export const disableLayerVerticalFlip = (state: LayerState, action: DisableLayerVerticalFlip): LayerState => {
@@ -2023,15 +2075,15 @@ export const disableLayerVerticalFlip = (state: LayerState, action: DisableLayer
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
-        style: {
-          ...currentState.byId[action.payload.id].style,
+        transform: {
+          ...currentState.byId[action.payload.id].transform,
           verticalFlip: false
         }
       }
     },
     paperProject: exportPaperProject(currentState)
   }
-  return updateParentBounds(currentState, action.payload.id);
+  return updateLayerBounds(currentState, action.payload.id);
 };
 
 export const enableLayerFill = (state: LayerState, action: EnableLayerFill): LayerState => {
@@ -2588,56 +2640,48 @@ export const setLayerShadowYOffset = (state: LayerState, action: SetLayerShadowY
   return currentState;
 };
 
-export const resizeLayer = (state: LayerState, action: ResizeLayer): LayerState => {
+export const scaleLayer = (state: LayerState, action: ScaleLayer): LayerState => {
   let currentState = state;
   const layer = currentState.byId[action.payload.id];
   const paperLayer = getPaperLayer(action.payload.id);
   if (layer.type === 'Shape') {
-    const clone = paperLayer.clone({insert: false}) as paper.PathItem;
-    clone.fitBounds(new paperMain.Rectangle({
-      point: new paperMain.Point(0,0),
-      size: new paperMain.Size(24,24)
-    }));
     currentState = {
       ...currentState,
       byId: {
         ...currentState.byId,
         [action.payload.id]: {
           ...currentState.byId[action.payload.id],
-          pathData: clone.pathData,
-          style: {
-            ...currentState.byId[action.payload.id].style,
-            horizontalFlip: action.payload.horizontalFlip ? !currentState.byId[action.payload.id].style.horizontalFlip : currentState.byId[action.payload.id].style.horizontalFlip,
-            verticalFlip: action.payload.verticalFlip ? !currentState.byId[action.payload.id].style.verticalFlip : currentState.byId[action.payload.id].style.verticalFlip
-          }
+          pathData: (paperLayer as paper.PathItem).pathData
         } as em.Shape
-      },
-      paperProject: exportPaperProject(currentState)
+      }
     }
-  } else {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          style: {
-            ...currentState.byId[action.payload.id].style,
-            horizontalFlip: action.payload.horizontalFlip ? !currentState.byId[action.payload.id].style.horizontalFlip : currentState.byId[action.payload.id].style.horizontalFlip,
-            verticalFlip: action.payload.verticalFlip ? !currentState.byId[action.payload.id].style.verticalFlip : currentState.byId[action.payload.id].style.verticalFlip
-          }
+  }
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        transform: {
+          ...currentState.byId[action.payload.id].transform,
+          scale: {
+            x: currentState.byId[action.payload.id].transform.scale.x * action.payload.scale.x,
+            y: currentState.byId[action.payload.id].transform.scale.y * action.payload.scale.y
+          },
+          horizontalFlip: action.payload.horizontalFlip ? !currentState.byId[action.payload.id].transform.horizontalFlip : currentState.byId[action.payload.id].transform.horizontalFlip,
+          verticalFlip: action.payload.verticalFlip ? !currentState.byId[action.payload.id].transform.verticalFlip : currentState.byId[action.payload.id].transform.verticalFlip
         }
-      },
-      paperProject: exportPaperProject(currentState)
-    }
+      }
+    },
+    paperProject: exportPaperProject(currentState)
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
   return currentState;
 };
 
-export const resizeLayers = (state: LayerState, action: ResizeLayers): LayerState => {
+export const scaleLayers = (state: LayerState, action: ScaleLayers): LayerState => {
   return action.payload.layers.reduce((result, current) => {
-    return resizeLayer(result, layerActions.resizeLayer({id: current, verticalFlip: action.payload.verticalFlip, horizontalFlip: action.payload.horizontalFlip}) as ResizeLayer);
+    return scaleLayer(result, layerActions.scaleLayer({id: current, scale: action.payload.scale, verticalFlip: action.payload.verticalFlip, horizontalFlip: action.payload.horizontalFlip}) as ScaleLayer);
   }, state);
 };
 
@@ -3851,7 +3895,7 @@ export const unmaskLayers = (state: LayerState, action: UnmaskLayers): LayerStat
 
 export const alignLayersToLeft = (state: LayerState, action: AlignLayersToLeft): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(action.payload.layers);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers);
   currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
     const paperLayer = getPaperLayer(current);
     paperLayer.bounds.left = layersBounds.left;
@@ -3863,7 +3907,7 @@ export const alignLayersToLeft = (state: LayerState, action: AlignLayersToLeft):
 
 export const alignLayersToRight = (state: LayerState, action: AlignLayersToRight): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(action.payload.layers);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers);
   currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
     const paperLayer = getPaperLayer(current);
     paperLayer.bounds.right = layersBounds.right;
@@ -3875,7 +3919,7 @@ export const alignLayersToRight = (state: LayerState, action: AlignLayersToRight
 
 export const alignLayersToTop = (state: LayerState, action: AlignLayersToTop): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(action.payload.layers);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers);
   currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
     const paperLayer = getPaperLayer(current);
     paperLayer.bounds.top = layersBounds.top;
@@ -3887,7 +3931,7 @@ export const alignLayersToTop = (state: LayerState, action: AlignLayersToTop): L
 
 export const alignLayersToBottom = (state: LayerState, action: AlignLayersToBottom): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(action.payload.layers);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers);
   currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
     const paperLayer = getPaperLayer(current);
     paperLayer.bounds.bottom = layersBounds.bottom;
@@ -3899,7 +3943,7 @@ export const alignLayersToBottom = (state: LayerState, action: AlignLayersToBott
 
 export const alignLayersToCenter = (state: LayerState, action: AlignLayersToCenter): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(action.payload.layers);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers);
   currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
     const paperLayer = getPaperLayer(current);
     paperLayer.bounds.center.x = layersBounds.center.x;
@@ -3911,7 +3955,7 @@ export const alignLayersToCenter = (state: LayerState, action: AlignLayersToCent
 
 export const alignLayersToMiddle = (state: LayerState, action: AlignLayersToMiddle): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(action.payload.layers);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers);
   currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
     const paperLayer = getPaperLayer(current);
     paperLayer.bounds.center.y = layersBounds.center.y;
@@ -3923,7 +3967,7 @@ export const alignLayersToMiddle = (state: LayerState, action: AlignLayersToMidd
 
 export const distributeLayersHorizontally = (state: LayerState, action: DistributeLayersHorizontally): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(action.payload.layers);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers);
   const layersWidth = action.payload.layers.reduce((result, current) => {
     const paperLayer = getPaperLayer(current);
     result = result + paperLayer.bounds.width;
@@ -3946,7 +3990,7 @@ export const distributeLayersHorizontally = (state: LayerState, action: Distribu
 
 export const distributeLayersVertically = (state: LayerState, action: DistributeLayersVertically): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(action.payload.layers);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers);
   const layersHeight = action.payload.layers.reduce((result, current) => {
     const paperLayer = getPaperLayer(current);
     result = result + paperLayer.bounds.height;
@@ -4181,14 +4225,7 @@ export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState 
       width: booleanLayers.bounds.width,
       height: booleanLayers.bounds.height
     },
-    pathData: (() => {
-      const clone = booleanLayers.clone({insert: false}) as paper.PathItem;
-      clone.fitBounds(new paperMain.Rectangle({
-        point: new paperMain.Point(0,0),
-        size: new paperMain.Size(24,24)
-      }));
-      return clone.pathData;
-    })(),
+    pathData: booleanLayers.pathData,
     selected: false,
     mask: false,
     masked: false,
@@ -4198,6 +4235,7 @@ export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState 
     },
     tweenEvents: [],
     tweens: [],
+    transform: DEFAULT_TRANSFORM,
     style: layerItem.style,
     children: null,
     booleanOperation: 'none'
@@ -4234,14 +4272,7 @@ export const intersectLayers = (state: LayerState, action: IntersectLayers): Lay
       width: booleanLayers.bounds.width,
       height: booleanLayers.bounds.height
     },
-    pathData: (() => {
-      const clone = booleanLayers.clone({insert: false}) as paper.PathItem;
-      clone.fitBounds(new paperMain.Rectangle({
-        point: new paperMain.Point(0,0),
-        size: new paperMain.Size(24,24)
-      }));
-      return clone.pathData;
-    })(),
+    pathData: booleanLayers.pathData,
     selected: false,
     mask: false,
     masked: false,
@@ -4251,6 +4282,7 @@ export const intersectLayers = (state: LayerState, action: IntersectLayers): Lay
     },
     tweenEvents: [],
     tweens: [],
+    transform: DEFAULT_TRANSFORM,
     style: layerItem.style,
     children: null,
     booleanOperation: 'none'
@@ -4287,14 +4319,7 @@ export const subtractLayers = (state: LayerState, action: SubtractLayers): Layer
       width: booleanLayers.bounds.width,
       height: booleanLayers.bounds.height
     },
-    pathData: (() => {
-      const clone = booleanLayers.clone({insert: false}) as paper.PathItem;
-      clone.fitBounds(new paperMain.Rectangle({
-        point: new paperMain.Point(0,0),
-        size: new paperMain.Size(24,24)
-      }));
-      return clone.pathData;
-    })(),
+    pathData: booleanLayers.pathData,
     selected: false,
     mask: false,
     masked: false,
@@ -4304,6 +4329,7 @@ export const subtractLayers = (state: LayerState, action: SubtractLayers): Layer
     },
     tweenEvents: [],
     tweens: [],
+    transform: DEFAULT_TRANSFORM,
     style: layerItem.style,
     children: null,
     booleanOperation: 'none'
@@ -4340,14 +4366,7 @@ export const excludeLayers = (state: LayerState, action: ExcludeLayers): LayerSt
       width: booleanLayers.bounds.width,
       height: booleanLayers.bounds.height
     },
-    pathData: (() => {
-      const clone = booleanLayers.clone({insert: false}) as paper.PathItem;
-      clone.fitBounds(new paperMain.Rectangle({
-        point: new paperMain.Point(0,0),
-        size: new paperMain.Size(24,24)
-      }));
-      return clone.pathData;
-    })(),
+    pathData: booleanLayers.pathData,
     selected: false,
     mask: false,
     masked: false,
@@ -4357,6 +4376,7 @@ export const excludeLayers = (state: LayerState, action: ExcludeLayers): LayerSt
     },
     tweenEvents: [],
     tweens: [],
+    transform: DEFAULT_TRANSFORM,
     style: layerItem.style,
     children: null,
     booleanOperation: 'none'
@@ -4393,14 +4413,7 @@ export const divideLayers = (state: LayerState, action: DivideLayers): LayerStat
       width: booleanLayers.bounds.width,
       height: booleanLayers.bounds.height
     },
-    pathData: (() => {
-      const clone = booleanLayers.clone({insert: false}) as paper.PathItem;
-      clone.fitBounds(new paperMain.Rectangle({
-        point: new paperMain.Point(0,0),
-        size: new paperMain.Size(24,24)
-      }));
-      return clone.pathData;
-    })(),
+    pathData: booleanLayers.pathData,
     selected: false,
     mask: false,
     masked: false,
@@ -4410,6 +4423,7 @@ export const divideLayers = (state: LayerState, action: DivideLayers): LayerStat
     },
     tweenEvents: [],
     tweens: [],
+    transform: DEFAULT_TRANSFORM,
     style: layerItem.style,
     children: null,
     booleanOperation: 'none'
@@ -4421,18 +4435,18 @@ export const setRoundedRadius = (state: LayerState, action: SetRoundedRadius): L
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
   const layerItem = currentState.byId[action.payload.id];
+  const maxDim = Math.max(layerItem.master.width, layerItem.master.height);
   const newShape = new paperMain.Path.Rectangle({
-    from: paperLayer.bounds.topLeft,
-    to: paperLayer.bounds.bottomRight,
-    radius: (Math.max(layerItem.frame.width, layerItem.frame.height) / 2) * action.payload.radius
+    from: new paperMain.Point(layerItem.master.x - (layerItem.master.width / 2), layerItem.master.y - (layerItem.master.height / 2)),
+    to: new paperMain.Point(layerItem.master.x + (layerItem.master.width / 2), layerItem.master.y + (layerItem.master.height / 2)),
+    radius: (maxDim / 2) * action.payload.radius
   });
   newShape.copyAttributes(paperLayer, true);
+  newShape.bounds.width = layerItem.master.width * layerItem.transform.scale.x;
+  newShape.bounds.height = layerItem.master.height * layerItem.transform.scale.y;
+  newShape.rotation = layerItem.transform.rotation;
+  newShape.position = paperLayer.position;
   paperLayer.replaceWith(newShape);
-  const clone = newShape.clone({insert: false}) as paper.PathItem;
-  clone.fitBounds(new paperMain.Rectangle({
-    point: new paperMain.Point(0,0),
-    size: new paperMain.Size(24,24)
-  }));
   applyShapeMethods(newShape);
   currentState = {
     ...currentState,
@@ -4440,7 +4454,7 @@ export const setRoundedRadius = (state: LayerState, action: SetRoundedRadius): L
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
-        pathData: clone.pathData,
+        pathData: newShape.pathData,
         points: {
           ...currentState.byId[action.payload.id].points,
           radius: action.payload.radius
@@ -4449,31 +4463,25 @@ export const setRoundedRadius = (state: LayerState, action: SetRoundedRadius): L
     },
     paperProject: exportPaperProject(currentState)
   }
-  return currentState;
+  return updateLayerBounds(currentState, action.payload.id);
 };
 
 export const setPolygonSides = (state: LayerState, action: SetPolygonSides): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
   const layerItem = state.byId[action.payload.id];
-  const center = new paperMain.Point(layerItem.frame.x, layerItem.frame.y);
+  const center = new paperMain.Point(layerItem.master.x, layerItem.master.y);
   const newShape = new paperMain.Path.RegularPolygon({
     center: center,
-    radius: Math.max(layerItem.frame.width, layerItem.frame.height) / 2,
+    radius: Math.max(layerItem.master.width, layerItem.master.height) / 2,
     sides: action.payload.sides
   });
   newShape.copyAttributes(paperLayer, true);
-  newShape.bounds.width = layerItem.frame.width;
-  newShape.bounds.height = layerItem.frame.height;
-  newShape.bounds.center = center;
-  newShape.pivot = center;
-  newShape.position = center;
+  newShape.bounds.width = layerItem.master.width * layerItem.transform.scale.x;
+  newShape.bounds.height = layerItem.master.height * layerItem.transform.scale.y;
+  newShape.rotation = layerItem.transform.rotation;
+  newShape.position = paperLayer.position;
   paperLayer.replaceWith(newShape);
-  const clone = newShape.clone({insert: false}) as paper.PathItem;
-  clone.fitBounds(new paperMain.Rectangle({
-    point: new paperMain.Point(0,0),
-    size: new paperMain.Size(24,24)
-  }));
   applyShapeMethods(newShape);
   currentState = {
     ...currentState,
@@ -4481,7 +4489,7 @@ export const setPolygonSides = (state: LayerState, action: SetPolygonSides): Lay
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
-        pathData: clone.pathData,
+        pathData: newShape.pathData,
         points: {
           ...currentState.byId[action.payload.id].points,
           sides: action.payload.sides
@@ -4490,32 +4498,26 @@ export const setPolygonSides = (state: LayerState, action: SetPolygonSides): Lay
     },
     paperProject: exportPaperProject(currentState)
   }
-  return currentState;
+  return updateLayerBounds(currentState, action.payload.id);
 };
 
 export const setStarPoints = (state: LayerState, action: SetStarPoints): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
   const layerItem = state.byId[action.payload.id];
-  const center = new paperMain.Point(layerItem.frame.x, layerItem.frame.y);
+  const center = new paperMain.Point(layerItem.master.x, layerItem.master.y);
   const newShape = new paperMain.Path.Star({
     center: center,
-    radius1: Math.max(layerItem.frame.width, layerItem.frame.height) / 2,
-    radius2: (Math.max(layerItem.frame.width, layerItem.frame.height) / 2) * layerItem.points.radius,
+    radius1: Math.max(layerItem.master.width, layerItem.master.height) / 2,
+    radius2: (Math.max(layerItem.master.width, layerItem.master.height) / 2) * layerItem.points.radius,
     points: action.payload.points
   });
   newShape.copyAttributes(paperLayer, true);
-  newShape.bounds.width = layerItem.frame.width;
-  newShape.bounds.height = layerItem.frame.height;
-  newShape.bounds.center = center;
-  newShape.pivot = center;
-  newShape.position = center;
+  newShape.bounds.width = layerItem.master.width * layerItem.transform.scale.x;
+  newShape.bounds.height = layerItem.master.height * layerItem.transform.scale.y;
+  newShape.rotation = layerItem.transform.rotation;
+  newShape.position = paperLayer.position;
   paperLayer.replaceWith(newShape);
-  const clone = newShape.clone({insert: false}) as paper.PathItem;
-  clone.fitBounds(new paperMain.Rectangle({
-    point: new paperMain.Point(0,0),
-    size: new paperMain.Size(24,24)
-  }));
   applyShapeMethods(newShape);
   currentState = {
     ...currentState,
@@ -4523,7 +4525,7 @@ export const setStarPoints = (state: LayerState, action: SetStarPoints): LayerSt
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
-        pathData: clone.pathData,
+        pathData: newShape.pathData,
         points: {
           ...currentState.byId[action.payload.id].points,
           points: action.payload.points
@@ -4532,32 +4534,27 @@ export const setStarPoints = (state: LayerState, action: SetStarPoints): LayerSt
     },
     paperProject: exportPaperProject(currentState)
   }
-  return currentState;
+  return updateLayerBounds(currentState, action.payload.id);
 };
 
 export const setStarRadius = (state: LayerState, action: SetStarRadius): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
   const layerItem = state.byId[action.payload.id];
-  const center = new paperMain.Point(layerItem.frame.x, layerItem.frame.y);
+  const center = new paperMain.Point(layerItem.master.x, layerItem.master.y);
+  const maxDim = Math.max(layerItem.master.width, layerItem.master.height);
   const newShape = new paperMain.Path.Star({
     center: center,
-    radius1: Math.max(layerItem.frame.width, layerItem.frame.height) / 2,
-    radius2: (Math.max(layerItem.frame.width, layerItem.frame.height) / 2) * action.payload.radius,
+    radius1: maxDim / 2,
+    radius2: (maxDim / 2) * action.payload.radius,
     points: layerItem.points.points
   });
   newShape.copyAttributes(paperLayer, true);
-  newShape.bounds.width = layerItem.frame.width;
-  newShape.bounds.height = layerItem.frame.height;
-  newShape.bounds.center = center;
-  newShape.pivot = center;
-  newShape.position = center;
+  newShape.bounds.width = layerItem.master.width * layerItem.transform.scale.x;
+  newShape.bounds.height = layerItem.master.height * layerItem.transform.scale.y;
+  newShape.rotation = layerItem.transform.rotation;
+  newShape.position = paperLayer.position;
   paperLayer.replaceWith(newShape);
-  const clone = newShape.clone({insert: false}) as paper.PathItem;
-  clone.fitBounds(new paperMain.Rectangle({
-    point: new paperMain.Point(0,0),
-    size: new paperMain.Size(24,24)
-  }));
   applyShapeMethods(newShape);
   currentState = {
     ...currentState,
@@ -4565,7 +4562,7 @@ export const setStarRadius = (state: LayerState, action: SetStarRadius): LayerSt
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
-        pathData: clone.pathData,
+        pathData: newShape.pathData,
         points: {
           ...currentState.byId[action.payload.id].points,
           radius: action.payload.radius
@@ -4574,5 +4571,5 @@ export const setStarRadius = (state: LayerState, action: SetStarRadius): LayerSt
     },
     paperProject: exportPaperProject(currentState)
   }
-  return currentState;
+  return updateLayerBounds(currentState, action.payload.id);
 };

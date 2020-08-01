@@ -26,13 +26,14 @@ interface CanvasProps {
   enableSelectionTool(): ToolTypes;
   setCanvasMatrix(payload: SetCanvasMatrixPayload): CanvasSettingsTypes;
   updateInViewLayers(): LayerTypes;
+  setReady(ready: boolean): void;
 }
 
 const Canvas = (props: CanvasProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useContext(ThemeContext);
-  const { drawing, typing, canvasSettings, enableSelectionTool, updateInViewLayers, paperProject, allArtboardIds, allShapeIds, allTextIds, allImageIds, setCanvasMatrix } = props;
+  const { drawing, typing, canvasSettings, enableSelectionTool, updateInViewLayers, paperProject, allArtboardIds, allShapeIds, allTextIds, allImageIds, setCanvasMatrix, setReady } = props;
 
   const handleWheel = (e: WheelEvent): void => {
     e.preventDefault();
@@ -92,6 +93,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
     window.addEventListener('resize', handleResize);
     updateInViewLayers();
     enableSelectionTool();
+    setReady(true);
   }, []);
 
   return (

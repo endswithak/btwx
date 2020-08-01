@@ -3,6 +3,7 @@ import React, { useContext, ReactElement, useRef, useState, useEffect } from 're
 import { ThemeContext } from './ThemeProvider';
 import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
+import tinyColor from 'tinycolor2';
 
 gsap.registerPlugin(Draggable);
 
@@ -12,12 +13,18 @@ interface ColorPickerSaturationProps {
   value: number;
   lightness: number;
   alpha: number;
+  setRed(red: number): void;
+  setGreen(green: number): void;
+  setBlue(blue: number): void;
+  setSaturation(saturation: number): void;
+  setValue(value: number): void;
+  setLightness(lightness: number): void;
   onChange?(color: em.Color): void;
 }
 
 const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { hue, saturation, value, lightness, alpha, onChange } = props;
+  const { hue, setRed, setGreen, setBlue, saturation, setSaturation, value, setValue, lightness, setLightness, alpha, onChange } = props;
   const pointerRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
@@ -41,6 +48,14 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
           const sat = s < 0 ? 0 : s > 1 ? 1 : s;
           const lit = l < 0 ? 0 : l > 1 ? 1 : l;
           const val = v < 0 ? 0 : v > 1 ? 1 : v;
+          const nextColor = tinyColor({h: hue, s: sat, l: lit});
+          const rgb = nextColor.toRgb();
+          setRed(rgb.r);
+          setGreen(rgb.g);
+          setBlue(rgb.b);
+          setSaturation(sat);
+          setLightness(lit);
+          setValue(val);
           onChange({h: hue, s: sat, l: lit, v: val, a: alpha});
         },
         onRelease: function() {
@@ -72,6 +87,14 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
       const sat = s < 0 ? 0 : s > 1 ? 1 : s;
       const lit = l < 0 ? 0 : l > 1 ? 1 : l;
       const val = v < 0 ? 0 : v > 1 ? 1 : v;
+      const nextColor = tinyColor({h: hue, s: sat, l: lit});
+      const rgb = nextColor.toRgb();
+      setRed(rgb.r);
+      setGreen(rgb.g);
+      setBlue(rgb.b);
+      setSaturation(sat);
+      setLightness(lit);
+      setValue(val);
       setDragging(true);
       onChange({h: hue, s: sat, l: lit, v: val, a: alpha});
       gsap.set(pointerRef.current, {x, y});

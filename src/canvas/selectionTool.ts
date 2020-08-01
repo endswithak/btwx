@@ -92,7 +92,7 @@ class SelectionTool {
         // else (hit result is resize handle), enable resize tool if no text layers are selected
         else {
           if (!layerState.selected.every((id: string) => layerState.byId[id].type === 'Text')) {
-            this.resizeTool.enable(hitResult.item.data.handle);
+            this.resizeTool.enable(state, hitResult.item.data.handle);
             this.resizeTool.onMouseDown(event);
           }
         }

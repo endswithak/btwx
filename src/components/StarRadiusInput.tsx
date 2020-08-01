@@ -36,8 +36,8 @@ const StarRadiusInput = (props: StarRadiusInputProps): ReactElement => {
   const handleSliderChange = (e: any) => {
     handleChange(e);
     const paperLayer = getPaperLayer(selected[0]);
-    const maxDim = Math.max(layerItem.frame.width, layerItem.frame.height);
-    const center = new paperMain.Point(layerItem.frame.x, layerItem.frame.y);
+    const maxDim = Math.max(layerItem.master.width, layerItem.master.height);
+    const center = new paperMain.Point(layerItem.master.x, layerItem.master.y);
     const newShape = new paperMain.Path.Star({
       center: center,
       radius1: maxDim / 2,
@@ -45,11 +45,10 @@ const StarRadiusInput = (props: StarRadiusInputProps): ReactElement => {
       points: layerItem.points.points
     });
     newShape.copyAttributes(paperLayer, true);
-    newShape.bounds.width = layerItem.frame.width;
-    newShape.bounds.height = layerItem.frame.height;
-    newShape.bounds.center = center;
-    newShape.pivot = center;
-    newShape.position = center;
+    newShape.bounds.width = layerItem.master.width * layerItem.transform.scale.x;
+    newShape.bounds.height = layerItem.master.height * layerItem.transform.scale.y;
+    newShape.rotation = layerItem.transform.rotation;
+    newShape.position = paperLayer.position;
     paperLayer.replaceWith(newShape);
   };
 

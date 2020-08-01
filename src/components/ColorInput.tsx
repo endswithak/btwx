@@ -36,13 +36,13 @@ const FillColorInput = (props: ColorInputProps): ReactElement => {
   const { prop, enabled, selected, selectedType, colorValue, colorEditorOpen, enableLayerFill, enableLayerStroke, enableLayerShadow, openColorEditor, setTextSettingsFillColor, setLayerFillColor, setLayerStrokeColor, setLayerShadowColor } = props;
   const [enabledValue, setEnabledValue] = useState<boolean>(enabled);
   const [color, setColor] = useState(colorValue);
-  const [opacity, setOpacity] = useState<number | string>(colorValue.a * 100);
+  const [opacity, setOpacity] = useState<number | string>(Math.round(colorValue.a * 100));
   const [hex, setHex] = useState(tinyColor({h: colorValue.h, s: colorValue.s, l: colorValue.l}).toHex());
 
   useEffect(() => {
     setEnabledValue(enabled);
     setColor(colorValue);
-    setOpacity(colorValue.a * 100);
+    setOpacity(Math.round(colorValue.a * 100));
     setHex(tinyColor({h: colorValue.h, s: colorValue.s, l: colorValue.l}).toHex());
   }, [colorValue, selected, enabled]);
 
@@ -78,10 +78,10 @@ const FillColorInput = (props: ColorInputProps): ReactElement => {
             break;
         }
       } else {
-        setOpacity(colorValue.a * 100);
+        setOpacity(Math.round(colorValue.a * 100));
       }
     } catch(error) {
-      setOpacity(colorValue.a * 100);
+      setOpacity(Math.round(colorValue.a * 100));
     }
   }
 

@@ -27,15 +27,28 @@ const ColorPicker = (props: ColorPickerProps): ReactElement => {
   const { onChange, colorType, colorValue } = props;
   const color = tinyColor({h: colorValue.h, s: colorValue.s, l: colorValue.l, a: colorValue.a});
   const rgb = color.toRgb();
-  const hue = colorValue.h;
-  const saturation = colorValue.s;
-  const lightness = colorValue.l;
-  const value = colorValue.v;
-  const alpha = colorValue.a;
-  const red = rgb.r;
-  const green = rgb.g;
-  const blue = rgb.b;
+  const [hue, setHue] = useState(colorValue.h);
+  const [saturation, setSaturation] = useState(colorValue.s);
+  const [lightness, setLightness] = useState(colorValue.l);
+  const [value, setValue] = useState(colorValue.v);
+  const [alpha, setAlpha] = useState(colorValue.a);
+  const [red, setRed] = useState(rgb.r);
+  const [green, setGreen] = useState(rgb.g);
+  const [blue, setBlue] = useState(rgb.b);
   const [type, setType] = useState(colorType);
+
+  useEffect(() => {
+    const color = tinyColor({h: colorValue.h, s: colorValue.s, l: colorValue.l, a: colorValue.a});
+    const rgb = color.toRgb();
+    setHue(colorValue.h);
+    setSaturation(colorValue.s);
+    setLightness(colorValue.l);
+    setValue(colorValue.v);
+    setAlpha(colorValue.a);
+    setRed(rgb.r);
+    setGreen(rgb.g);
+    setBlue(rgb.b);
+  }, [colorValue]);
 
   return (
     <div className='c-color-picker'>
@@ -46,6 +59,12 @@ const ColorPicker = (props: ColorPickerProps): ReactElement => {
           lightness={lightness}
           value={value}
           alpha={alpha}
+          setRed={setRed}
+          setGreen={setGreen}
+          setBlue={setBlue}
+          setSaturation={setSaturation}
+          setLightness={setLightness}
+          setValue={setValue}
           onChange={onChange} />
       </div>
       <div className='c-color-picker__controls'>
@@ -56,6 +75,10 @@ const ColorPicker = (props: ColorPickerProps): ReactElement => {
             lightness={lightness}
             value={value}
             alpha={alpha}
+            setHue={setHue}
+            setRed={setRed}
+            setGreen={setGreen}
+            setBlue={setBlue}
             onChange={onChange} />
           <ColorPickerAlpha
             hue={hue}
@@ -63,6 +86,7 @@ const ColorPicker = (props: ColorPickerProps): ReactElement => {
             lightness={lightness}
             value={value}
             alpha={alpha}
+            setAlpha={setAlpha}
             onChange={onChange} />
         </div>
         <div className='c-color-picker__color'>
@@ -81,6 +105,13 @@ const ColorPicker = (props: ColorPickerProps): ReactElement => {
           lightness={lightness}
           value={value}
           alpha={alpha}
+          setRed={setRed}
+          setGreen={setGreen}
+          setBlue={setBlue}
+          setHue={setHue}
+          setSaturation={setSaturation}
+          setLightness={setLightness}
+          setValue={setValue}
           onChange={onChange} />
         <ColorPickerAlphaInput
           hue={hue}
@@ -88,6 +119,7 @@ const ColorPicker = (props: ColorPickerProps): ReactElement => {
           lightness={lightness}
           value={value}
           alpha={alpha}
+          setAlpha={setAlpha}
           onChange={onChange} />
       </div>
       <div className='c-color-picker__fields c-color-picker__fields--rgb'>
@@ -99,18 +131,33 @@ const ColorPicker = (props: ColorPickerProps): ReactElement => {
                 green={green}
                 blue={blue}
                 alpha={alpha}
+                setRed={setRed}
+                setHue={setHue}
+                setSaturation={setSaturation}
+                setLightness={setLightness}
+                setValue={setValue}
                 onChange={onChange} />
               <ColorPickerGreenInput
                 red={red}
                 green={green}
                 blue={blue}
                 alpha={alpha}
+                setGreen={setGreen}
+                setHue={setHue}
+                setSaturation={setSaturation}
+                setLightness={setLightness}
+                setValue={setValue}
                 onChange={onChange} />
               <ColorPickerBlueInput
                 red={red}
                 green={green}
                 blue={blue}
                 alpha={alpha}
+                setBlue={setBlue}
+                setHue={setHue}
+                setSaturation={setSaturation}
+                setLightness={setLightness}
+                setValue={setValue}
                 onChange={onChange} />
             </>
           : <>
@@ -120,6 +167,10 @@ const ColorPicker = (props: ColorPickerProps): ReactElement => {
                 lightness={lightness}
                 value={value}
                 alpha={alpha}
+                setHue={setHue}
+                setRed={setRed}
+                setGreen={setGreen}
+                setBlue={setBlue}
                 onChange={onChange} />
               <ColorPickerSaturationInput
                 hue={hue}
@@ -127,6 +178,10 @@ const ColorPicker = (props: ColorPickerProps): ReactElement => {
                 lightness={lightness}
                 value={value}
                 alpha={alpha}
+                setSaturation={setSaturation}
+                setRed={setRed}
+                setGreen={setGreen}
+                setBlue={setBlue}
                 onChange={onChange} />
               <ColorPickerLightnessInput
                 hue={hue}
@@ -134,6 +189,10 @@ const ColorPicker = (props: ColorPickerProps): ReactElement => {
                 lightness={lightness}
                 value={value}
                 alpha={alpha}
+                setLightness={setLightness}
+                setRed={setRed}
+                setGreen={setGreen}
+                setBlue={setBlue}
                 onChange={onChange} />
             </>
         }

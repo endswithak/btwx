@@ -6,7 +6,7 @@ import { RootState } from '../store/reducers';
 import { paperPreview } from '../canvas';
 import { setActiveArtboard } from '../store/actions/layer';
 import { SetActiveArtboardPayload, LayerTypes } from '../store/actionTypes/layer';
-import { getLongestEventTween, getPositionInArtboard, getAllArtboardTweenEvents, getAllArtboardTweenEventDestinations, getAllArtboardTweens, getAllArtboardTweenLayers, getAllArtboardTweenLayerDestinations, getAllArtboardTweenEventLayers, getGradientDestinationPoint, getGradientOriginPoint, getGradientStops } from '../store/selectors/layer';
+import { getLongestEventTween, getPositionInArtboard, getArtboardPosition, getAllArtboardTweenEvents, getAllArtboardTweenEventArtboards, getAllArtboardTweens, getAllArtboardTweenLayers, getAllArtboardTweenLayerDestinations, getAllArtboardTweenEventLayers, getGradientDestinationPoint, getGradientOriginPoint, getGradientStops } from '../store/selectors/layer';
 import { gsap } from 'gsap';
 import { MorphSVGPlugin } from "gsap/MorphSVGPlugin";
 import tinyColor from 'tinycolor2';
@@ -101,6 +101,8 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
     // add animation events
     tweenEvents.allIds.forEach((eventId) => {
       const tweenEvent = tweenEvents.byId[eventId];
+      const tweenEventArtboard = tweenEventDestinations.byId[tweenEvent.artboard] as em.Artboard;
+      const tweenEventDestinationArtboard = tweenEventDestinations.byId[tweenEvent.destinationArtboard] as em.Artboard;
       const tweenEventDestinationArtboardPaperLayer = paperTweenEventDestinationsById[tweenEvent.destinationArtboard];
       const tweenEventPaperLayer = paperTweenEventLayersById[tweenEvent.layer];
       const tweenEventTweensById = tweenEvent.tweens.reduce((result: { [id: string]: em.Tween }, current): {[id: string]: em.Tween} => {
@@ -117,10 +119,10 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
             const tween = tweenEventTweensById[tweenId];
             const tweenLayer = tweenLayers.byId[tween.layer];
             const tweenPaperLayer = paperTweenLayersById[tween.layer];
-            const tweenPaperLayerArtboardPosition = getPositionInArtboard(tweenPaperLayer, paperActiveArtboard);
+            const tweenPaperLayerArtboardPosition = getArtboardPosition(tweenLayer, tweenEventArtboard);
             const tweenDestinationLayer = tweenLayerDestinations.byId[tween.destinationLayer];
             const tweenDestinationLayerPaperLayer = paperTweenLayerDestinationsById[tween.destinationLayer];
-            const tweenDestinationLayerArtboardPosition = getPositionInArtboard(tweenDestinationLayerPaperLayer, tweenEventDestinationArtboardPaperLayer);
+            const tweenDestinationLayerArtboardPosition = getArtboardPosition(tweenDestinationLayer, tweenEventDestinationArtboard);
             const tweenPaperLayerPositionDiffX = tweenDestinationLayerArtboardPosition.x - tweenPaperLayerArtboardPosition.x;
             const tweenPaperLayerPositionDiffY = tweenDestinationLayerArtboardPosition.y - tweenPaperLayerArtboardPosition.y;
             switch(tween.prop) {
@@ -630,13 +632,19 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 break;
               }
               case 'width': {
-                tweenProp[tween.prop] = tweenPaperLayer.bounds.width;
+                tweenProp[tween.prop] = tweenLayer.master.width * tweenLayer.transform.scale.x;
                 paperTween = gsap.to(tweenProp, {
                   duration: tween.duration,
-                  [tween.prop]: tweenDestinationLayerPaperLayer.bounds.width,
+                  [tween.prop]: tweenDestinationLayer.master.width * tweenDestinationLayer.transform.scale.x,
                   onUpdate: () => {
-                    const scaleX = tweenProp[tween.prop] / tweenPaperLayer.bounds.width;
-                    tweenPaperLayer.scale(scaleX, 1);
+                    const startRotation = tweenPaperLayer.data.rotation || tweenPaperLayer.data.rotation === 0 ? tweenPaperLayer.data.rotation : tweenLayer.transform.rotation;
+                    const startX = tweenPaperLayer.position.x;
+                    const startY = tweenPaperLayer.position.y;
+                    tweenPaperLayer.rotation = -startRotation;
+                    tweenPaperLayer.bounds.width = tweenProp[tween.prop];
+                    tweenPaperLayer.rotation = startRotation;
+                    tweenPaperLayer.position.x = startX;
+                    tweenPaperLayer.position.y = startY;
                   },
                   ease: tween.ease,
                   delay: tween.delay
@@ -644,13 +652,19 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 break;
               }
               case 'height': {
-                tweenProp[tween.prop] = tweenPaperLayer.bounds.height;
+                tweenProp[tween.prop] = tweenLayer.master.height * tweenLayer.transform.scale.y;
                 paperTween = gsap.to(tweenProp, {
                   duration: tween.duration,
-                  [tween.prop]: tweenDestinationLayerPaperLayer.bounds.height,
+                  [tween.prop]: tweenDestinationLayer.master.height * tweenDestinationLayer.transform.scale.y,
                   onUpdate: () => {
-                    const scaleY = tweenProp[tween.prop] / tweenPaperLayer.bounds.height;
-                    tweenPaperLayer.scale(1, scaleY);
+                    const startRotation = tweenPaperLayer.data.rotation || tweenPaperLayer.data.rotation === 0 ? tweenPaperLayer.data.rotation : tweenLayer.transform.rotation;
+                    const startX = tweenPaperLayer.position.x;
+                    const startY = tweenPaperLayer.position.y;
+                    tweenPaperLayer.rotation = -startRotation;
+                    tweenPaperLayer.bounds.height = tweenProp[tween.prop];
+                    tweenPaperLayer.rotation = startRotation;
+                    tweenPaperLayer.position.x = startX;
+                    tweenPaperLayer.position.y = startY;
                   },
                   ease: tween.ease,
                   delay: tween.delay
@@ -658,12 +672,20 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 break;
               }
               case 'rotation': {
-                tweenProp[tween.prop] = tweenPaperLayer.rotation;
+                tweenProp[tween.prop] = tweenLayer.transform.rotation;
+                tweenProp[`${tween.prop}-prev`] = tweenLayer.transform.rotation;
                 paperTween = gsap.to(tweenProp, {
                   duration: tween.duration,
-                  [tween.prop]: tweenDestinationLayerPaperLayer.rotation,
+                  [tween.prop]: tweenDestinationLayer.transform.rotation,
                   onUpdate: () => {
+                    const startX = tweenPaperLayer.position.x;
+                    const startY = tweenPaperLayer.position.y;
+                    tweenPaperLayer.rotation = -tweenProp[`${tween.prop}-prev`];
                     tweenPaperLayer.rotation = tweenProp[tween.prop];
+                    tweenProp[`${tween.prop}-prev`] = tweenProp[tween.prop];
+                    tweenPaperLayer.position.x = startX;
+                    tweenPaperLayer.position.y = startY;
+                    tweenPaperLayer.data.rotation = tweenProp[tween.prop];
                   },
                   ease: tween.ease,
                   delay: tween.delay
@@ -812,7 +834,7 @@ const mapStateToProps = (state: RootState) => {
     return result.replace(`"source":"${current}"`, `"source":"${base64}"`);
   }, layer.present.paperProject);
   const tweenEvents = getAllArtboardTweenEvents(layer.present, layer.present.activeArtboard);
-  const tweenEventDestinations = getAllArtboardTweenEventDestinations(layer.present, layer.present.activeArtboard);
+  const tweenEventDestinations = getAllArtboardTweenEventArtboards(layer.present, layer.present.activeArtboard);
   const tweenEventLayers = getAllArtboardTweenEventLayers(layer.present, layer.present.activeArtboard);
   const tweens = getAllArtboardTweens(layer.present, layer.present.activeArtboard);
   const tweenLayers = getAllArtboardTweenLayers(layer.present, layer.present.activeArtboard);

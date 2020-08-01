@@ -8,6 +8,7 @@ import { RootState } from '../store/reducers';
 import { closeColorEditor } from '../store/actions/colorEditor';
 import { ColorEditorTypes } from '../store/actionTypes/colorEditor';
 import { openGradientEditor } from '../store/actions/gradientEditor';
+import { getPaperLayer } from '../store/selectors/layer';
 import { GradientEditorTypes, OpenGradientEditorPayload } from '../store/actionTypes/gradientEditor';
 import { ColorEditorState } from '../store/reducers/colorEditor';
 import ColorPicker from './ColorPicker';
@@ -74,6 +75,18 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
   }
 
   const handleColorChange = (color: em.Color): void => {
+    // const paperLayer = getPaperLayer(colorEditor.layer);
+    // switch(colorEditor.prop) {
+    //   case 'fill':
+    //     paperLayer.fillColor = { hue: color.h, saturation: color.s, lightness: color.l, alpha: color.a } as paper.Color;
+    //     break;
+    //   case 'stroke':
+    //     paperLayer.strokeColor = { hue: color.h, saturation: color.s, lightness: color.l, alpha: color.a } as paper.Color;
+    //     break;
+    //   case 'shadow':
+    //     paperLayer.shadowColor = { hue: color.h, saturation: color.s, lightness: color.l, alpha: color.a } as paper.Color;
+    //     break;
+    // }
     debounceColor(color);
   }
 

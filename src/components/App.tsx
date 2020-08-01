@@ -1,4 +1,4 @@
-import React, { useRef, useContext, useEffect, ReactElement } from 'react';
+import React, { useRef, useContext, useEffect, ReactElement, useState } from 'react';
 import Topbar from './Topbar';
 import EaseEditor from './EaseEditor';
 import Main from './Main';
@@ -12,6 +12,7 @@ import ContextMenuWrap from './ContextMenuWrap';
 const App = (): ReactElement => {
   const app = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
+  const [ready, setReady] = useState(false);
 
   return (
     <div
@@ -23,7 +24,7 @@ const App = (): ReactElement => {
       }}>
         {/* flex items */}
         <Topbar />
-        <Main />
+        <Main ready={ready} setReady={setReady} />
         {/* modals */}
         <EaseEditor />
         <ActiveArtboardFrameWrap />

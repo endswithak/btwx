@@ -17,17 +17,17 @@ interface RoundedRadiusInputProps {
   selected?: string[];
   radiusValue?: number;
   disabled?: boolean;
-  maxDim?: number;
+  layerItem?: em.Layer;
   setRoundedRadius?(payload: SetRoundedRadiusPayload): LayerTypes;
 }
 
 const RoundedRadiusInput = (props: RoundedRadiusInputProps): ReactElement => {
-  const { selected, setRoundedRadius, maxDim, radiusValue, disabled } = props;
+  const { selected, setRoundedRadius, radiusValue, disabled, layerItem } = props;
   const [radius, setRadius] = useState<string | number>(Math.round(radiusValue * 100));
 
   useEffect(() => {
     setRadius(Math.round(radiusValue * 100));
-  }, [radiusValue, selected, maxDim]);
+  }, [radiusValue, selected]);
 
   const handleChange = (e: any) => {
     const target = e.target as HTMLInputElement;
@@ -38,12 +38,17 @@ const RoundedRadiusInput = (props: RoundedRadiusInputProps): ReactElement => {
     handleChange(e);
     const paperLayer = getPaperLayer(selected[0]);
     const nextRadius = e.target.value / 100;
+    const maxDim = Math.max(layerItem.master.width, layerItem.master.height);
     const newShape = new paperMain.Path.Rectangle({
-      from: paperLayer.bounds.topLeft,
-      to: paperLayer.bounds.bottomRight,
-      radius: maxDim * nextRadius
+      from: new paperMain.Point(layerItem.master.x - (layerItem.master.width / 2), layerItem.master.y - (layerItem.master.height / 2)),
+      to: new paperMain.Point(layerItem.master.x + (layerItem.master.width / 2), layerItem.master.y + (layerItem.master.height / 2)),
+      radius: (maxDim / 2) * nextRadius
     });
     newShape.copyAttributes(paperLayer, true);
+    newShape.bounds.width = layerItem.master.width * layerItem.transform.scale.x;
+    newShape.bounds.height = layerItem.master.height * layerItem.transform.scale.y;
+    newShape.rotation = layerItem.transform.rotation;
+    newShape.position = paperLayer.position;
     paperLayer.replaceWith(newShape);
   };
 
@@ -117,19 +122,18 @@ const mapStateToProps = (state: RootState) => {
         return true;
     }
   })();
-  const maxDim = (() => {
+  const layerItem = (() => {
     switch(layer.present.selected.length) {
       case 0:
         return null;
       case 1: {
-        const layerItem = layer.present.byId[layer.present.selected[0]];
-        return Math.max(layerItem.frame.width, layerItem.frame.height) / 2;
+        return layer.present.byId[layer.present.selected[0]];
       }
       default:
         return null;
     }
   })();
-  return { selected, radiusValue, disabled, maxDim };
+  return { selected, radiusValue, disabled, layerItem };
 };
 
 export default connect(

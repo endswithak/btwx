@@ -14,7 +14,7 @@ declare namespace em {
 
   type ContextMenu = 'TweenEvent' | 'TweenEventDestination' | 'ArtboardCustomPreset';
 
-  type TweenProp = 'image' | 'shape' | 'fill' | 'x' | 'y' | 'rotation' | 'width' | 'height' | 'stroke' | 'strokeDashWidth' | 'strokeDashGap' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity' | 'fontSize' | 'lineHeight';
+  type TweenProp = 'image' | 'shape' | 'fill' | 'x' | 'y' | 'radius' | 'rotation' | 'width' | 'height' | 'stroke' | 'strokeDashWidth' | 'strokeDashGap' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity' | 'fontSize' | 'lineHeight';
 
   type TweenPropMap = { [K in TweenProp]: boolean; }
 
@@ -112,9 +112,6 @@ declare namespace em {
     stroke: Stroke;
     strokeOptions: StrokeOptions;
     opacity: number;
-    rotation: number;
-    horizontalFlip: boolean;
-    verticalFlip: boolean;
     shadow: Shadow;
     blendMode: BlendMode;
   }
@@ -183,6 +180,7 @@ declare namespace em {
   interface Layer {
     type: LayerType;
     id: string;
+    master: em.Master;
     frame: em.Frame;
     name: string;
     parent: string;
@@ -192,11 +190,12 @@ declare namespace em {
     tweens: string[];
     points: {
       closed: boolean;
-      radius: number;
+      radius?: number;
       sides?: number;
       points?: number;
     };
     style: Style;
+    transform: Transform;
     masked: boolean;
     mask: boolean;
   }
@@ -294,6 +293,21 @@ declare namespace em {
     y: number;
     width: number;
     height: number;
+  }
+
+  interface Master {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }
+
+  interface Transform {
+    rotation: number;
+    horizontalFlip: boolean;
+    verticalFlip: boolean;
+    pivot: Point;
+    scale: Point;
   }
 
   interface ArtboardPreset {

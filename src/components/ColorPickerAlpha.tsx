@@ -9,6 +9,7 @@ interface ColorPickerAlphaProps {
   lightness: number;
   value: number;
   alpha: number;
+  setAlpha(alpha: number): void;
   onChange(color: em.Color): void;
 }
 
@@ -43,7 +44,7 @@ const Slider = styled.input<SliderProps>`
 
 const ColorPickerAlpha = (props: ColorPickerAlphaProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { hue, saturation, lightness, value, alpha, onChange } = props;
+  const { hue, saturation, lightness, value, alpha, setAlpha, onChange } = props;
   const [alphaValue, setAlphaValue] = useState(alpha);
   const [grabbing, setGrabbing] = useState(false);
 
@@ -54,6 +55,7 @@ const ColorPickerAlpha = (props: ColorPickerAlphaProps): ReactElement => {
   const handleChange = (e: any) => {
     const target = e.target;
     setAlphaValue(target.value);
+    setAlpha(target.value);
     onChange({h: hue, s: saturation, l: lightness, v: value, a: target.value});
   };
 

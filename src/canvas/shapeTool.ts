@@ -7,7 +7,7 @@ import { getPagePaperLayer, getLayerAndDescendants, getPaperLayer } from '../sto
 import { applyShapeMethods } from './shapeUtils';
 import { paperMain } from './index';
 import Tooltip from './tooltip';
-import { DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_POINTS, THEME_PRIMARY_COLOR, DEFAULT_STYLE } from '../constants';
+import { DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_POINTS, THEME_PRIMARY_COLOR, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../constants';
 import SnapTool from './snapTool';
 import InsertTool from './insertTool';
 
@@ -362,15 +362,19 @@ class ShapeTool {
             type: 'Shape'
           }
         });
+        //paperLayer.pivot = paperLayer.bounds.center;
         const shapeSpecificPointProps = (() => {
           switch(this.shapeType) {
             case 'Ellipse':
             case 'Rectangle':
             case 'Rounded':
-              return {};
+              return {
+                radius: DEFAULT_ROUNDED_RADIUS
+              };
             case 'Star':
               return {
-                points: DEFAULT_STAR_POINTS
+                points: DEFAULT_STAR_POINTS,
+                radius: DEFAULT_STAR_RADIUS
               }
             case 'Polygon':
               return {
@@ -397,35 +401,25 @@ class ShapeTool {
             width: paperLayer.bounds.width,
             height: paperLayer.bounds.height
           },
+          master: {
+            x: paperLayer.position.x,
+            y: paperLayer.position.y,
+            width: paperLayer.bounds.width,
+            height: paperLayer.bounds.height
+          },
           shapeType: this.shapeType,
-          pathData: (() => {
-            const clone = paperLayer.clone({insert: false}) as paper.PathItem;
-            clone.fitBounds(new paperMain.Rectangle({
-              point: new paperMain.Point(0,0),
-              size: new paperMain.Size(24,24)
-            }));
-            return clone.pathData;
-          })(),
+          pathData: paperLayer.pathData,
           selected: false,
           mask: false,
           masked: false,
           points: {
             ...shapeSpecificPointProps,
-            closed: true,
-            radius: (() => {
-              switch(this.shapeType) {
-                case 'Rounded':
-                  return DEFAULT_ROUNDED_RADIUS;
-                case 'Star':
-                  return DEFAULT_STAR_RADIUS;
-                default:
-                  return 0;
-              }
-            })(),
+            closed: true
           },
           tweenEvents: [],
           tweens: [],
           style: DEFAULT_STYLE(),
+          transform: DEFAULT_TRANSFORM,
           booleanOperation: 'none'
         }));
       }

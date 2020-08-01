@@ -57,7 +57,7 @@ const mapStateToProps = (state: RootState) => {
       case 0:
         return false;
       case 1:
-        return layer.present.byId[layer.present.selected[0]].style.verticalFlip;
+        return layer.present.byId[layer.present.selected[0]].frame.verticalFlip;
       default:
         return false;
     }

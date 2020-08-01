@@ -1,4 +1,4 @@
-import React, { useRef, useContext, ReactElement } from 'react';
+import React, { useContext, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
@@ -13,7 +13,6 @@ interface TweenDrawerProps {
 }
 
 const TweenDrawer = (props: TweenDrawerProps): ReactElement => {
-  const elementRef = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
   const { isOpen, tweenEvent, tweenDrawerHeight } = props;
 
@@ -24,7 +23,6 @@ const TweenDrawer = (props: TweenDrawerProps): ReactElement => {
         <div
           id='tween-drawer'
           className='c-tween-drawer'
-          ref={elementRef}
           style={{
             height: tweenDrawerHeight,
             background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,

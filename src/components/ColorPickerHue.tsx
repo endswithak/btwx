@@ -2,6 +2,7 @@
 import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
 import { ThemeContext } from './ThemeProvider';
 import styled from 'styled-components';
+import tinyColor from 'tinycolor2';
 
 interface ColorPickerHueProps {
   hue: number;
@@ -9,6 +10,10 @@ interface ColorPickerHueProps {
   lightness: number;
   value: number;
   alpha: number;
+  setHue(hue: number): void;
+  setRed(red: number): void;
+  setGreen(green: number): void;
+  setBlue(blue: number): void;
   onChange?(color: em.Color): void;
 }
 
@@ -51,7 +56,7 @@ const Slider = styled.input<SliderProps>`
 
 const ColorPickerHue = (props: ColorPickerHueProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { hue, saturation, lightness, value, alpha, onChange } = props;
+  const { hue, setHue, saturation, lightness, value, alpha, setRed, setGreen, setBlue, onChange } = props;
   const [hueValue, setHueValue] = useState(hue);
   const [grabbing, setGrabbing] = useState(false);
 
@@ -61,7 +66,13 @@ const ColorPickerHue = (props: ColorPickerHueProps): ReactElement => {
 
   const handleChange = (e: any) => {
     const target = e.target;
+    const nextColor = tinyColor({h: target.value, s: saturation, l: lightness});
+    const rgb = nextColor.toRgb();
+    setRed(rgb.r);
+    setGreen(rgb.g);
+    setBlue(rgb.b);
     setHueValue(target.value);
+    setHue(target.value);
     onChange({h: target.value, s: saturation, l: lightness, v: value, a: alpha });
   };
 

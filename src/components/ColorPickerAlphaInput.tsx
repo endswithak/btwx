@@ -10,12 +10,13 @@ interface ColorPickerAlphaInputProps {
   lightness: number;
   value: number;
   alpha: number;
+  setAlpha(alpha: number): void;
   onChange(color: em.Color): void;
 }
 
 const ColorPickerAlphaInput = (props: ColorPickerAlphaInputProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { hue, saturation, lightness, value, alpha, onChange } = props;
+  const { hue, saturation, lightness, value, alpha, setAlpha, onChange } = props;
   const [opacity, setOpacity] = useState<number>(Math.round(alpha * 100));
 
   useEffect(() => {
@@ -37,6 +38,7 @@ const ColorPickerAlphaInput = (props: ColorPickerAlphaInputProps): ReactElement 
         if (nextOpacity < 0) {
           nextOpacity = 0;
         }
+        setAlpha(nextOpacity / 100);
         onChange({h: hue, s: saturation, l: lightness, v: value, a: nextOpacity / 100});
       } else {
         setOpacity(Math.round(alpha * 100));
