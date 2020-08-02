@@ -5,16 +5,19 @@ import { RootState } from '../store/reducers';
 import TextEditorInput from './TextEditorInput';
 
 interface TextEditorProps {
+  ready: boolean;
   isOpen: boolean;
 }
 
 const TextEditor = (props: TextEditorProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isOpen } = props;
+  const { ready, isOpen } = props;
 
   return (
     isOpen
-    ? <TextEditorInput />
+    ? ready
+      ? <TextEditorInput />
+      : null
     : null
   );
 }

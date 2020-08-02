@@ -7,6 +7,7 @@ import TweenDrawerEvent from './TweenDrawerEvent';
 import TweenDrawerDragHandle from './TweenDrawerDragHandle';
 
 interface TweenDrawerProps {
+  ready: boolean;
   tweenDrawerHeight?: number;
   isOpen?: boolean;
   tweenEvent?: em.TweenEvent;
@@ -14,7 +15,7 @@ interface TweenDrawerProps {
 
 const TweenDrawer = (props: TweenDrawerProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isOpen, tweenEvent, tweenDrawerHeight } = props;
+  const { ready, isOpen, tweenEvent, tweenDrawerHeight } = props;
 
   return (
     isOpen
@@ -29,9 +30,11 @@ const TweenDrawer = (props: TweenDrawerProps): ReactElement => {
             boxShadow: `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
           }}>
           {
-            tweenEvent
-            ? <TweenDrawerEvent />
-            : <TweenDrawerEvents />
+            ready
+            ? tweenEvent
+              ? <TweenDrawerEvent />
+              : <TweenDrawerEvents />
+            : null
           }
         </div>
       </>

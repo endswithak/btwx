@@ -82,9 +82,6 @@ class TextTool {
       selected: false,
       mask: false,
       masked: false,
-      points: {
-        closed: true,
-      },
       children: null,
       tweenEvents: [],
       tweens: [],

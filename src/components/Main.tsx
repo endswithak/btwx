@@ -16,29 +16,15 @@ const Main = (props: MainProps): ReactElement => {
     <div
       id='main'
       className='c-app__main'>
-      {
-        ready
-        ? <SidebarLeft />
-        : null
-      }
+      <SidebarLeft ready={ready} />
       <div
         id='main-canvas'
         className='c-app__canvas'>
         <Canvas setReady={setReady} />
-        {
-          ready
-          ? <>
-              <TweenDrawer />
-              <TextEditor />
-            </>
-          : null
-        }
+        <TweenDrawer ready={ready} />
+        <TextEditor ready={ready} />
       </div>
-      {
-        ready
-        ? <SidebarRight />
-        : null
-      }
+      <SidebarRight ready={ready} />
     </div>
   );
 }

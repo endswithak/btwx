@@ -11,6 +11,7 @@ import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarInput from './SidebarInput';
 import SidebarSlider from './SidebarSlider';
 import { paperMain } from '../canvas';
+import { applyShapeMethods } from '../canvas/shapeUtils';
 
 interface PolygonSidesInputProps {
   selected?: string[];
@@ -28,12 +29,12 @@ const PolygonSidesInput = (props: PolygonSidesInputProps): ReactElement => {
     setSides(sidesValue);
   }, [sidesValue, selected]);
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: any): void => {
     const target = e.target as HTMLInputElement;
     setSides(target.value);
   };
 
-  const handleSliderChange = (e: any) => {
+  const handleSliderChange = (e: any): void => {
     handleChange(e);
     const paperLayer = getPaperLayer(selected[0]);
     const center = new paperMain.Point(layerItem.master.x, layerItem.master.y);
@@ -60,8 +61,10 @@ const PolygonSidesInput = (props: PolygonSidesInputProps): ReactElement => {
         if (nextSides < 3) {
           nextSides = 3;
         }
+        const paperLayer = getPaperLayer(selected[0]);
         setPolygonSides({id: selected[0], sides: nextSides});
         setSides(nextSides);
+        applyShapeMethods(paperLayer);
       }
     } catch(error) {
       setSides(sidesValue);
@@ -105,7 +108,7 @@ const mapStateToProps = (state: RootState) => {
       case 0:
         return '';
       case 1:
-        return layer.present.byId[layer.present.selected[0]].points.sides;
+        return (layer.present.byId[layer.present.selected[0]] as em.Polygon).sides;
       default:
         return 'multi';
     }

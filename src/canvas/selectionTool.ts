@@ -101,7 +101,7 @@ class SelectionTool {
         this.gradientTool.enable(hitResult.item.data.handle, state.gradientEditor.prop as 'fill' | 'stroke');
         this.gradientTool.onMouseDown(event);
       // if hit result is shape, group, text, or image, enable drag tool
-      } else if (hitResult.item.data.type && (hitResult.item.data.type === 'Shape' || hitResult.item.data.type === 'Group' || hitResult.item.data.type === 'Image' || hitResult.item.data.type === 'Text')) {
+      } else if (hitResult.item.data.type && (hitResult.item.data.type === 'Shape' || hitResult.item.data.type === 'Group' || hitResult.item.data.type === 'Image' || hitResult.item.data.type === 'Raster' || hitResult.item.data.type === 'Text')) {
         this.dragTool.enable();
         this.dragTool.onMouseDown(event);
       }

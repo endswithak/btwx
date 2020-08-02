@@ -124,6 +124,7 @@ class DragTool {
     });
     updateSelectionFrame(this.state.layer.present, this.moveHandle ? 'move' : 'none');
     updateActiveArtboardFrame(this.state.layer.present);
+    this.updateSnapPoints();
     this.snapTool.updateGuides();
   }
   onKeyDown(event: paper.KeyEvent): void {

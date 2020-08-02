@@ -23,14 +23,14 @@ interface RoundedRadiusInputProps {
 
 const RoundedRadiusInput = (props: RoundedRadiusInputProps): ReactElement => {
   const { selected, setRoundedRadius, radiusValue, disabled, layerItem } = props;
-  const [radius, setRadius] = useState<string | number>(Math.round(radiusValue * 100));
+  const [radius, setRadius] = useState(Math.round(radiusValue * 100));
 
   useEffect(() => {
     setRadius(Math.round(radiusValue * 100));
   }, [radiusValue, selected]);
 
   const handleChange = (e: any) => {
-    const target = e.target as HTMLInputElement;
+    const target = e.target;
     setRadius(target.value);
   };
 
@@ -52,7 +52,7 @@ const RoundedRadiusInput = (props: RoundedRadiusInputProps): ReactElement => {
     paperLayer.replaceWith(newShape);
   };
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
+  const handleSubmit = (e: any): void => {
     try {
       let nextRadius = evaluate(`${radius}`);
       if (nextRadius !== radiusValue) {
@@ -62,8 +62,10 @@ const RoundedRadiusInput = (props: RoundedRadiusInputProps): ReactElement => {
         if (nextRadius < 0) {
           nextRadius = 0;
         }
+        const paperLayer = getPaperLayer(selected[0]);
         setRoundedRadius({id: selected[0], radius: nextRadius / 100});
         setRadius(nextRadius);
+        applyShapeMethods(paperLayer);
       }
     } catch(error) {
       setRadius(Math.round(radiusValue * 100));
@@ -107,7 +109,7 @@ const mapStateToProps = (state: RootState) => {
       case 0:
         return '';
       case 1:
-        return layer.present.byId[layer.present.selected[0]].points.radius;
+        return (layer.present.byId[layer.present.selected[0]] as em.Rounded).radius;
       default:
         return 'multi';
     }

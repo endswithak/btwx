@@ -370,10 +370,6 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
       tweens: [],
       mask: false,
       masked: false,
-      points: {
-        closed: true,
-        radius: 0
-      },
       transform: DEFAULT_TRANSFORM,
       style: DEFAULT_STYLE(),
     }
@@ -386,8 +382,7 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
   const layerId = uuidv4();
   const paperLayer = new paperMain.Group({
     name: payload.name ? payload.name : 'Group',
-    data: { id: layerId, type: 'Group' },
-    //applyMatrix: false
+    data: { id: layerId, type: 'Group' }
   });
   return {
     type: ADD_GROUP,
@@ -405,10 +400,6 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
       mask: false,
       masked: false,
       clipped: false,
-      points: {
-        closed: true,
-        radius: 0
-      },
       transform: DEFAULT_TRANSFORM,
       style: {
         ...DEFAULT_STYLE(),
@@ -450,7 +441,7 @@ export const addText = (payload: AddTextPayload): LayerTypes => ({
 
 export const addImage = (payload: AddImagePayload): LayerTypes => {
   const id = uuidv4();
-  payload.paperLayer.data = { id: 'Raster' };
+  payload.paperLayer.data = { id: 'Raster', type: 'Raster' };
   const imageContainer = new paperMain.Group({
     data: { id: id, type: 'Image', imageId: payload.imageId },
     children: [payload.paperLayer],
@@ -478,10 +469,6 @@ export const addImage = (payload: AddImagePayload): LayerTypes => {
       selected: false,
       mask: false,
       masked: false,
-      points: {
-        closed: true,
-        radius: 0
-      },
       tweenEvents: [],
       tweens: [],
       transform: DEFAULT_TRANSFORM,

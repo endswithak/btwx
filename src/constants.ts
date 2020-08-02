@@ -9,7 +9,7 @@ export const DEFAULT_LEFT_SIDEBAR_WIDTH = 320;
 export const DEFAULT_RIGHT_SIDEBAR_WIDTH = 264;
 export const DEFAULT_TWEEN_DRAWER_HEIGHT = 320;
 
-export const DEFAULT_ROUNDED_RADIUS = 0.25;
+export const DEFAULT_ROUNDED_RADIUS = 0.15;
 export const DEFAULT_POLYGON_SIDES = 5;
 export const DEFAULT_STAR_POINTS = 5;
 export const DEFAULT_STAR_RADIUS = 0.5;

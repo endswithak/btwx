@@ -59,11 +59,9 @@ import { applyShapeMethods } from '../../canvas/shapeUtils';
 import { applyTextMethods } from '../../canvas/textUtils';
 import { applyArtboardMethods } from '../../canvas/artboardUtils';
 import { applyImageMethods } from '../../canvas/imageUtils';
-import { applyCompoundShapeMethods } from '../../canvas/compoundShapeUtils';
 
-import { THEME_PRIMARY_COLOR, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../../constants';
+import { THEME_PRIMARY_COLOR, DEFAULT_TRANSFORM } from '../../constants';
 import { bufferToBase64 } from '../../utils';
-import { ActionTypes } from 'redux-undo';
 
 export const addPage = (state: LayerState, action: AddPage): LayerState => {
   return {
@@ -406,8 +404,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
       fillColor: '#fff',
       strokeColor: THEME_PRIMARY_COLOR,
       strokeWidth: 1 / paperMain.view.zoom,
-      insert: false,
-      //applyMatrix: false
+      insert: false
     }
     const baseFrame = new paperMain.Path.Rectangle({
       from: selectionTopLeft,
@@ -415,7 +412,6 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
       strokeColor: THEME_PRIMARY_COLOR,
       strokeWidth: 1 / paperMain.view.zoom,
       insert: false,
-      //applyMatrix: false,
       data: {
         id: 'selectionFrameBase'
       }
@@ -428,8 +424,8 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         handle: 'move'
       }
     });
-    //moveHandle.position = new paperMain.Point(baseFrame.bounds.topCenter.x, baseFrame.bounds.topCenter.y - ((1 / paperMain.view.zoom) * 24));
-    moveHandle.position = new paperMain.Point(baseFrame.bounds.center.x, baseFrame.bounds.center.y);
+    moveHandle.position = new paperMain.Point(baseFrame.bounds.topCenter.x, baseFrame.bounds.topCenter.y - ((1 / paperMain.view.zoom) * 24));
+    // moveHandle.position = new paperMain.Point(baseFrame.bounds.center.x, baseFrame.bounds.center.y);
     moveHandle.scaling.x = 1 / paperMain.view.zoom;
     moveHandle.scaling.y = 1 / paperMain.view.zoom;
     const topLeftHandle = new paperMain.Path.Rectangle({
@@ -672,21 +668,26 @@ export const updateHoverFrame = (state: LayerState) => {
     hoverFrame.remove();
   }
   if (state.hover && !state.selected.includes(state.hover)) {
-    const paperHoverLayer = getPaperLayer(state.hover);
+    // const paperHoverLayer = getPaperLayer(state.hover);
     const hoverItem = state.byId[state.hover];
-    if (hoverItem.type === 'Shape') {
-      new paperMain.Path({
-        ...hoverFrameConstants,
-        closed: (paperHoverLayer as paper.Path).closed,
-        pathData: hoverItem.pathData
-      });
-    } else {
-      new paperMain.Path.Rectangle({
-        ...hoverFrameConstants,
-        point: new paperMain.Point(hoverItem.frame.x - (hoverItem.frame.width / 2), hoverItem.frame.y - (hoverItem.frame.height / 2)),
-        size: [hoverItem.frame.width, hoverItem.frame.height]
-      });
-    }
+    new paperMain.Path.Rectangle({
+      ...hoverFrameConstants,
+      point: new paperMain.Point(hoverItem.frame.x - (hoverItem.frame.width / 2), hoverItem.frame.y - (hoverItem.frame.height / 2)),
+      size: [hoverItem.frame.width, hoverItem.frame.height]
+    });
+    // if (hoverItem.type === 'Shape') {
+    //   new paperMain.Path({
+    //     ...hoverFrameConstants,
+    //     closed: (paperHoverLayer as paper.Path).closed,
+    //     pathData: hoverItem.pathData
+    //   });
+    // } else {
+    //   new paperMain.Path.Rectangle({
+    //     ...hoverFrameConstants,
+    //     point: new paperMain.Point(hoverItem.frame.x - (hoverItem.frame.width / 2), hoverItem.frame.y - (hoverItem.frame.height / 2)),
+    //     size: [hoverItem.frame.width, hoverItem.frame.height]
+    //   });
+    // }
   }
 }
 
@@ -1054,11 +1055,13 @@ export const groupLayers = (state: LayerState, action: GroupLayers): LayerState 
       x: layersBounds.center.x,
       y: layersBounds.center.y,
       width: layersBounds.width,
-      height: layersBounds.height,
-      rotation: 0,
-      horizontalFlip: false,
-      verticalFlip: false,
-      pivot: { x: 0, y: 0 }
+      height: layersBounds.height
+    },
+    master: {
+      x: layersBounds.center.x,
+      y: layersBounds.center.y,
+      width: layersBounds.width,
+      height: layersBounds.height
     }
   }) as AddGroup);
   // get group id
@@ -1613,7 +1616,7 @@ export const addTweenEventLayerTweens = (state: LayerState, eventId: string, lay
     const equivalentLayerItem = state.byId[destinationEquivalent.id];
     const artboardLayerItem = state.byId[tweenEvent.artboard] as em.Artboard;
     const destinationArtboardLayerItem = state.byId[tweenEvent.destinationArtboard] as em.Artboard;
-    const equivalentTweenProps = getEquivalentTweenProps(currentLayerItem, currentPaperLayer, equivalentLayerItem, equivalentPaperLayer, artboardLayerItem, artboardPaperLayer, destinationArtboardLayerItem, destinationArtboardPaperLayer);
+    const equivalentTweenProps = getEquivalentTweenProps(currentLayerItem, equivalentLayerItem, artboardLayerItem, destinationArtboardLayerItem);
     currentState = Object.keys(equivalentTweenProps).reduce((result, key: em.TweenProp) => {
       if (equivalentTweenProps[key]) {
         result = addLayerTween(result, layerActions.addLayerTween({
@@ -2911,7 +2914,7 @@ export const updateInViewLayers = (state: LayerState, action: UpdateInViewLayers
     overlapping: paperMain.view.bounds
   });
   const visibleLayerIds = visibleLayers.reduce((result, current) => {
-    if (current.data.id !== 'ArtboardBackground' && current.data.id !== 'ArtboardMask') {
+    if (current.data.id !== 'ArtboardBackground' && current.data.id !== 'ArtboardMask' && current.data.id !== 'Raster') {
       result = [...result, current.data.id];
     }
     return result;
@@ -4225,14 +4228,16 @@ export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState 
       width: booleanLayers.bounds.width,
       height: booleanLayers.bounds.height
     },
+    master: {
+      x: booleanLayers.position.x,
+      y: booleanLayers.position.y,
+      width: booleanLayers.bounds.width,
+      height: booleanLayers.bounds.height
+    },
     pathData: booleanLayers.pathData,
     selected: false,
     mask: false,
     masked: false,
-    points: {
-      closed: true,
-      radius: 0
-    },
     tweenEvents: [],
     tweens: [],
     transform: DEFAULT_TRANSFORM,
@@ -4272,14 +4277,16 @@ export const intersectLayers = (state: LayerState, action: IntersectLayers): Lay
       width: booleanLayers.bounds.width,
       height: booleanLayers.bounds.height
     },
+    master: {
+      x: booleanLayers.position.x,
+      y: booleanLayers.position.y,
+      width: booleanLayers.bounds.width,
+      height: booleanLayers.bounds.height
+    },
     pathData: booleanLayers.pathData,
     selected: false,
     mask: false,
     masked: false,
-    points: {
-      closed: true,
-      radius: 0
-    },
     tweenEvents: [],
     tweens: [],
     transform: DEFAULT_TRANSFORM,
@@ -4319,14 +4326,16 @@ export const subtractLayers = (state: LayerState, action: SubtractLayers): Layer
       width: booleanLayers.bounds.width,
       height: booleanLayers.bounds.height
     },
+    master: {
+      x: booleanLayers.position.x,
+      y: booleanLayers.position.y,
+      width: booleanLayers.bounds.width,
+      height: booleanLayers.bounds.height
+    },
     pathData: booleanLayers.pathData,
     selected: false,
     mask: false,
     masked: false,
-    points: {
-      closed: true,
-      radius: 0
-    },
     tweenEvents: [],
     tweens: [],
     transform: DEFAULT_TRANSFORM,
@@ -4366,14 +4375,16 @@ export const excludeLayers = (state: LayerState, action: ExcludeLayers): LayerSt
       width: booleanLayers.bounds.width,
       height: booleanLayers.bounds.height
     },
+    master: {
+      x: booleanLayers.position.x,
+      y: booleanLayers.position.y,
+      width: booleanLayers.bounds.width,
+      height: booleanLayers.bounds.height
+    },
     pathData: booleanLayers.pathData,
     selected: false,
     mask: false,
     masked: false,
-    points: {
-      closed: true,
-      radius: 0
-    },
     tweenEvents: [],
     tweens: [],
     transform: DEFAULT_TRANSFORM,
@@ -4413,14 +4424,16 @@ export const divideLayers = (state: LayerState, action: DivideLayers): LayerStat
       width: booleanLayers.bounds.width,
       height: booleanLayers.bounds.height
     },
+    master: {
+      x: booleanLayers.position.x,
+      y: booleanLayers.position.y,
+      width: booleanLayers.bounds.width,
+      height: booleanLayers.bounds.height
+    },
     pathData: booleanLayers.pathData,
     selected: false,
     mask: false,
     masked: false,
-    points: {
-      closed: true,
-      radius: 0
-    },
     tweenEvents: [],
     tweens: [],
     transform: DEFAULT_TRANSFORM,
@@ -4434,7 +4447,7 @@ export const divideLayers = (state: LayerState, action: DivideLayers): LayerStat
 export const setRoundedRadius = (state: LayerState, action: SetRoundedRadius): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = currentState.byId[action.payload.id];
+  const layerItem = currentState.byId[action.payload.id] as em.Rounded;
   const maxDim = Math.max(layerItem.master.width, layerItem.master.height);
   const newShape = new paperMain.Path.Rectangle({
     from: new paperMain.Point(layerItem.master.x - (layerItem.master.width / 2), layerItem.master.y - (layerItem.master.height / 2)),
@@ -4455,11 +4468,8 @@ export const setRoundedRadius = (state: LayerState, action: SetRoundedRadius): L
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
         pathData: newShape.pathData,
-        points: {
-          ...currentState.byId[action.payload.id].points,
-          radius: action.payload.radius
-        }
-      } as em.Shape
+        radius: action.payload.radius
+      } as em.Rounded
     },
     paperProject: exportPaperProject(currentState)
   }
@@ -4469,7 +4479,7 @@ export const setRoundedRadius = (state: LayerState, action: SetRoundedRadius): L
 export const setPolygonSides = (state: LayerState, action: SetPolygonSides): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = state.byId[action.payload.id];
+  const layerItem = state.byId[action.payload.id] as em.Polygon;
   const center = new paperMain.Point(layerItem.master.x, layerItem.master.y);
   const newShape = new paperMain.Path.RegularPolygon({
     center: center,
@@ -4490,11 +4500,8 @@ export const setPolygonSides = (state: LayerState, action: SetPolygonSides): Lay
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
         pathData: newShape.pathData,
-        points: {
-          ...currentState.byId[action.payload.id].points,
-          sides: action.payload.sides
-        }
-      } as em.Shape
+        sides: action.payload.sides
+      } as em.Polygon
     },
     paperProject: exportPaperProject(currentState)
   }
@@ -4504,12 +4511,12 @@ export const setPolygonSides = (state: LayerState, action: SetPolygonSides): Lay
 export const setStarPoints = (state: LayerState, action: SetStarPoints): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = state.byId[action.payload.id];
+  const layerItem = state.byId[action.payload.id] as em.Star;
   const center = new paperMain.Point(layerItem.master.x, layerItem.master.y);
   const newShape = new paperMain.Path.Star({
     center: center,
     radius1: Math.max(layerItem.master.width, layerItem.master.height) / 2,
-    radius2: (Math.max(layerItem.master.width, layerItem.master.height) / 2) * layerItem.points.radius,
+    radius2: (Math.max(layerItem.master.width, layerItem.master.height) / 2) * layerItem.radius,
     points: action.payload.points
   });
   newShape.copyAttributes(paperLayer, true);
@@ -4526,11 +4533,8 @@ export const setStarPoints = (state: LayerState, action: SetStarPoints): LayerSt
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
         pathData: newShape.pathData,
-        points: {
-          ...currentState.byId[action.payload.id].points,
-          points: action.payload.points
-        }
-      } as em.Shape
+        points: action.payload.points
+      } as em.Star
     },
     paperProject: exportPaperProject(currentState)
   }
@@ -4540,14 +4544,14 @@ export const setStarPoints = (state: LayerState, action: SetStarPoints): LayerSt
 export const setStarRadius = (state: LayerState, action: SetStarRadius): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = state.byId[action.payload.id];
+  const layerItem = state.byId[action.payload.id] as em.Star;
   const center = new paperMain.Point(layerItem.master.x, layerItem.master.y);
   const maxDim = Math.max(layerItem.master.width, layerItem.master.height);
   const newShape = new paperMain.Path.Star({
     center: center,
     radius1: maxDim / 2,
     radius2: (maxDim / 2) * action.payload.radius,
-    points: layerItem.points.points
+    points: layerItem.points
   });
   newShape.copyAttributes(paperLayer, true);
   newShape.bounds.width = layerItem.master.width * layerItem.transform.scale.x;
@@ -4563,11 +4567,8 @@ export const setStarRadius = (state: LayerState, action: SetStarRadius): LayerSt
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
         pathData: newShape.pathData,
-        points: {
-          ...currentState.byId[action.payload.id].points,
-          radius: action.payload.radius
-        }
-      } as em.Shape
+        radius: action.payload.radius
+      } as em.Star
     },
     paperProject: exportPaperProject(currentState)
   }

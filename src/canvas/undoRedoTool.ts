@@ -4,6 +4,7 @@ import { ActionCreators } from 'redux-undo';
 import { updateHoverFrame, updateSelectionFrame, updateActiveArtboardFrame } from '../store/utils/layer';
 import { openColorEditor, closeColorEditor } from '../store/actions/colorEditor';
 import { openGradientEditor, closeGradientEditor } from '../store/actions/gradientEditor';
+import { setLayerHover } from '../store/actions/layer';
 import { RootState } from '../store/reducers';
 
 class UndoRedoTool {
@@ -77,6 +78,8 @@ class UndoRedoTool {
       case 'z': {
         if (event.modifiers.meta) {
           if (event.modifiers.shift) {
+            // remove hover
+            store.dispatch(setLayerHover({id: null}));
             // redo
             store.dispatch(ActionCreators.redo());
             // get state
@@ -99,6 +102,8 @@ class UndoRedoTool {
             updateSelectionFrame(state.layer.present);
             updateActiveArtboardFrame(state.layer.present);
           } else {
+            // remove hover
+            store.dispatch(setLayerHover({id: null}));
             // undo
             store.dispatch(ActionCreators.undo());
             // get state

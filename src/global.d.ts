@@ -188,12 +188,6 @@ declare namespace em {
     children: string[] | null;
     tweenEvents: string[];
     tweens: string[];
-    points: {
-      closed: boolean;
-      radius?: number;
-      sides?: number;
-      points?: number;
-    };
     style: Style;
     transform: Transform;
     masked: boolean;
@@ -242,6 +236,19 @@ declare namespace em {
     pathData: string;
     booleanOperation: BooleanOperation;
     children: null;
+  }
+
+  interface Polygon extends Shape {
+    sides: number;
+  }
+
+  interface Star extends Shape {
+    points: number;
+    radius: number;
+  }
+
+  interface Rounded extends Shape {
+    radius: number;
   }
 
   interface CompoundShape extends Layer {

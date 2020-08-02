@@ -11,6 +11,7 @@ import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarInput from './SidebarInput';
 import SidebarSlider from './SidebarSlider';
 import { paperMain } from '../canvas';
+import { applyShapeMethods } from '../canvas/shapeUtils';
 
 interface StarRadiusInputProps {
   selected?: string[];
@@ -22,18 +23,18 @@ interface StarRadiusInputProps {
 
 const StarRadiusInput = (props: StarRadiusInputProps): ReactElement => {
   const { selected, setStarRadius, layerItem, radiusValue, disabled } = props;
-  const [radius, setRadius] = useState<string | number>(Math.round(radiusValue * 100));
+  const [radius, setRadius] = useState(Math.round(radiusValue * 100));
 
   useEffect(() => {
     setRadius(Math.round(radiusValue * 100));
   }, [radiusValue, selected]);
 
-  const handleChange = (e: any) => {
-    const target = e.target as HTMLInputElement;
+  const handleChange = (e: any): void => {
+    const target = e.target;
     setRadius(target.value);
   };
 
-  const handleSliderChange = (e: any) => {
+  const handleSliderChange = (e: any): void => {
     handleChange(e);
     const paperLayer = getPaperLayer(selected[0]);
     const maxDim = Math.max(layerItem.master.width, layerItem.master.height);
@@ -42,7 +43,7 @@ const StarRadiusInput = (props: StarRadiusInputProps): ReactElement => {
       center: center,
       radius1: maxDim / 2,
       radius2: (maxDim / 2) * (e.target.value / 100),
-      points: layerItem.points.points
+      points: (layerItem as em.Star).points
     });
     newShape.copyAttributes(paperLayer, true);
     newShape.bounds.width = layerItem.master.width * layerItem.transform.scale.x;
@@ -52,7 +53,7 @@ const StarRadiusInput = (props: StarRadiusInputProps): ReactElement => {
     paperLayer.replaceWith(newShape);
   };
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
+  const handleSubmit = (e: any): void => {
     try {
       let nextRadius = evaluate(`${radius}`);
       if (nextRadius !== radiusValue) {
@@ -62,8 +63,10 @@ const StarRadiusInput = (props: StarRadiusInputProps): ReactElement => {
         if (nextRadius < 0) {
           nextRadius = 0;
         }
+        const paperLayer = getPaperLayer(selected[0]);
         setStarRadius({id: selected[0], radius: nextRadius / 100});
         setRadius(nextRadius);
+        applyShapeMethods(paperLayer);
       }
     } catch(error) {
       setRadius(Math.round(radiusValue * 100));
@@ -107,7 +110,7 @@ const mapStateToProps = (state: RootState) => {
       case 0:
         return '';
       case 1:
-        return layer.present.byId[layer.present.selected[0]].points.radius;
+        return (layer.present.byId[layer.present.selected[0]] as em.Star).radius;
       default:
         return 'multi';
     }

@@ -7,17 +7,22 @@ import SidebarLeftDragHandle from './SidebarLeftDragHandle';
 
 interface SidebarLeftProps {
   sidebarWidth: number;
+  ready: boolean;
 }
 
 const SidebarLeft = (props: SidebarLeftProps): ReactElement => {
-  const { sidebarWidth } = props;
+  const { sidebarWidth, ready } = props;
   return (
     <>
       <SidebarLeftDragHandle />
       <Sidebar
         width={sidebarWidth}
         position='left'>
-        <SidebarLayerTree />
+        {
+          ready
+          ? <SidebarLayerTree />
+          : null
+        }
       </Sidebar>
     </>
   );

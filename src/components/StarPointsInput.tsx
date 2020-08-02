@@ -11,6 +11,7 @@ import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarInput from './SidebarInput';
 import SidebarSlider from './SidebarSlider';
 import { paperMain } from '../canvas';
+import { applyShapeMethods } from '../canvas/shapeUtils';
 
 interface StarPointsInputProps {
   selected?: string[];
@@ -22,18 +23,18 @@ interface StarPointsInputProps {
 
 const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
   const { selected, setStarPoints, layerItem, pointsValue, disabled } = props;
-  const [points, setPoints] = useState<string | number>(pointsValue);
+  const [points, setPoints] = useState(pointsValue);
 
   useEffect(() => {
     setPoints(pointsValue);
   }, [pointsValue, selected]);
 
-  const handleChange = (e: any) => {
-    const target = e.target as HTMLInputElement;
+  const handleChange = (e: any): void => {
+    const target = e.target;
     setPoints(target.value);
   };
 
-  const handleSliderChange = (e: any) => {
+  const handleSliderChange = (e: any): void => {
     handleChange(e);
     const paperLayer = getPaperLayer(selected[0]);
     const maxDim = Math.max(layerItem.master.width, layerItem.master.height);
@@ -41,7 +42,7 @@ const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
     const newShape = new paperMain.Path.Star({
       center: center,
       radius1: maxDim / 2,
-      radius2: (maxDim / 2) * layerItem.points.radius,
+      radius2: (maxDim / 2) * (layerItem as em.Star).radius,
       points: e.target.value
     });
     newShape.copyAttributes(paperLayer, true);
@@ -52,7 +53,7 @@ const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
     paperLayer.replaceWith(newShape);
   };
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
+  const handleSubmit = (e: any): void => {
     try {
       let nextPoints = evaluate(`${points}`);
       if (nextPoints !== pointsValue) {
@@ -62,8 +63,10 @@ const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
         if (nextPoints < 3) {
           nextPoints = 3;
         }
+        const paperLayer = getPaperLayer(selected[0]);
         setStarPoints({id: selected[0], points: nextPoints});
         setPoints(nextPoints);
+        applyShapeMethods(paperLayer);
       }
     } catch(error) {
       setPoints(pointsValue);
@@ -107,7 +110,7 @@ const mapStateToProps = (state: RootState) => {
       case 0:
         return '';
       case 1:
-        return layer.present.byId[layer.present.selected[0]].points.points;
+        return (layer.present.byId[layer.present.selected[0]] as em.Star).points;
       default:
         return 'multi';
     }

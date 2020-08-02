@@ -11,10 +11,11 @@ interface SidebarRightProps {
   artboardSelected: boolean;
   layerSelected: boolean;
   sidebarWidth: number;
+  ready: boolean;
 }
 
 const SidebarRight = (props: SidebarRightProps): ReactElement => {
-  const { artboardSelected, layerSelected, toolType, sidebarWidth } = props;
+  const { artboardSelected, layerSelected, toolType, sidebarWidth, ready } = props;
   return (
     <Sidebar
       width={sidebarWidth}
@@ -25,12 +26,12 @@ const SidebarRight = (props: SidebarRightProps): ReactElement => {
         : null
       } */}
       {
-        toolType !== 'Artboard' && layerSelected
+        ready && toolType !== 'Artboard' && layerSelected
         ? <SidebarLayerStyles />
         : null
       }
       {
-        toolType === 'Artboard'
+        ready && toolType === 'Artboard'
         ? <SidebarArtboardSizes />
         : null
       }

@@ -362,11 +362,11 @@ class ShapeTool {
             type: 'Shape'
           }
         });
-        //paperLayer.pivot = paperLayer.bounds.center;
-        const shapeSpecificPointProps = (() => {
+        const shapeSpecificProps = (() => {
           switch(this.shapeType) {
             case 'Ellipse':
             case 'Rectangle':
+              return {};
             case 'Rounded':
               return {
                 radius: DEFAULT_ROUNDED_RADIUS
@@ -380,6 +380,8 @@ class ShapeTool {
               return {
                 sides: DEFAULT_STAR_POINTS
               }
+            default:
+              return {};
           }
         })();
         store.dispatch(addShape({
@@ -412,15 +414,12 @@ class ShapeTool {
           selected: false,
           mask: false,
           masked: false,
-          points: {
-            ...shapeSpecificPointProps,
-            closed: true
-          },
           tweenEvents: [],
           tweens: [],
           style: DEFAULT_STYLE(),
           transform: DEFAULT_TRANSFORM,
-          booleanOperation: 'none'
+          booleanOperation: 'none',
+          ...shapeSpecificProps
         }));
       }
       store.dispatch(enableSelectionTool());
