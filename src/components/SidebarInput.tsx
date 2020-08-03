@@ -52,7 +52,7 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { value, onChange, onSubmit, onFocus, onBlur, label, leftLabel, bottomLabel, disabled, selectOnMount, blurOnSubmit, submitOnBlur, enableSelectionTool, disableSelectionTool, disableSelectionToolToggle } = props;
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>) => {
+  const handleSubmit = (e: any) => {
     e.preventDefault();
     onSubmit(e);
     if (blurOnSubmit) {
@@ -60,11 +60,11 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
     }
   };
 
-  const handleChange = (e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>) => {
+  const handleChange = (e: any) => {
     onChange(e);
   };
 
-  const handleFocus = (e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>) => {
+  const handleFocus = (e: any) => {
     if (onFocus) {
       onFocus(e);
     }
@@ -73,7 +73,7 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
     }
   };
 
-  const handleBlur = (e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>) => {
+  const handleBlur = (e: any) => {
     if (onBlur) {
       onBlur(e);
     }
@@ -85,11 +85,11 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      inputRef.current.select();
-    }
-  };
+  // const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  //   if (e.key === 'Enter') {
+  //     inputRef.current.select();
+  //   }
+  // };
 
   useEffect(() => {
     if (selectOnMount) {
@@ -112,7 +112,7 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
             onFocus={handleFocus}
             onChange={handleChange}
             onBlur={handleBlur}
-            onKeyPress={handleKeyPress}
+            // onKeyPress={handleKeyPress}
             disabled={disabled}
             className={
               `c-sidebar-input__field ${

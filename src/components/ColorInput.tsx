@@ -85,9 +85,9 @@ const FillColorInput = (props: ColorInputProps): ReactElement => {
     }
   }
 
-  const handleHexSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
+  const handleHexSubmit = (e: any): void => {
     const nextHex = tinyColor(hex);
-    if (nextHex.isValid()) {
+    if (nextHex.isValid() && tinyColor({h: colorValue.h, s: colorValue.s, l: colorValue.l}).toHex() !== nextHex.toHex()) {
       const hsl = nextHex.toHsl();
       const hsv = nextHex.toHsv();
       switch(prop) {

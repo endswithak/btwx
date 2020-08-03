@@ -7,25 +7,20 @@ import TweenDrawerEventLayerTween from './TweenDrawerEventLayerTween';
 
 interface TweenDrawerEventLayerTweensProps {
   layerId: string;
-  tweenEventLayerTweens?: {
-    allIds: string[];
-    byId: {
-      [id: string]: em.Tween;
-    };
-  };
+  orderedLayerTweensByProp?: string[];
 }
 
 const TweenDrawerEventLayerTweens = (props: TweenDrawerEventLayerTweensProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { tweenEventLayerTweens } = props;
+  const { orderedLayerTweensByProp } = props;
 
   return (
     <>
       {
-        tweenEventLayerTweens.allIds.map((tween, index) => (
+        orderedLayerTweensByProp.map((id, index) => (
           <TweenDrawerEventLayerTween
             key={index}
-            tweenId={tween}
+            tweenId={id}
             index={index} />
         ))
       }
@@ -36,7 +31,17 @@ const TweenDrawerEventLayerTweens = (props: TweenDrawerEventLayerTweensProps): R
 const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventLayerTweensProps) => {
   const { layer, tweenDrawer } = state;
   const tweenEventLayerTweens = getTweenEventLayerTweens(layer.present, tweenDrawer.event, ownProps.layerId);
-  return { tweenEventLayerTweens };
+  const sortedProps = tweenEventLayerTweens.allIds.reduce((result, current) => {
+    const tween = tweenEventLayerTweens.byId[current];
+    result = [...result, tween.prop];
+    return result;
+  }, []).sort();
+  const orderedLayerTweensByProp = sortedProps.reduce((result, current: em.TweenProp) => {
+    const tween = tweenEventLayerTweens.allIds.find((id: string) => tweenEventLayerTweens.byId[id].prop === current);
+    result = [...result, tween];
+    return result;
+  }, []);
+  return { orderedLayerTweensByProp };
 };
 
 export default connect(

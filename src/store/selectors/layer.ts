@@ -11,39 +11,39 @@ import { applyImageMethods } from '../../canvas/imageUtils';
 
 export const getLayer = (store: LayerState, id: string): em.Layer => {
   return store.byId[id] as em.Layer;
-}
+};
 
 export const getParentLayer = (store: LayerState, id: string): em.Group => {
   const layer = getLayer(store, id);
   return store.byId[layer.parent] as em.Group;
-}
+};
 
 export const getLayerIndex = (store: LayerState, id: string): number => {
   const parent = getParentLayer(store, id);
   return parent.children.indexOf(id);
-}
+};
 
 export const getLayerType = (store: LayerState, id: string): em.LayerType => {
   const layer = getLayer(store, id);
   return layer.type;
-}
+};
 
 export const getPaperLayerByPaperId = (id: string): paper.Item => {
   return paperMain.project.getItem({ data: { id } });
-}
+};
 
 export const getPaperLayer = (id: string): paper.Item => {
   return paperMain.project.getItem({ data: { id } });
-}
+};
 
 export const getPage = (store: LayerState): em.Page => {
   return store.byId[store.page] as em.Page;
-}
+};
 
 export const getPagePaperLayer = (store: LayerState): paper.Item => {
   const page = store.page;
   return getPaperLayer(page);
-}
+};
 
 export const getLayerDescendants = (state: LayerState, layer: string, fromClipboard?: boolean): string[] => {
   const groups: string[] = [layer];
@@ -70,7 +70,7 @@ export const getLayerAndDescendants = (state: LayerState, layer: string, fromCli
   return [layer, ...children];
 };
 
-export const getLayerDepth = (store: LayerState, id: string) => {
+export const getLayerDepth = (store: LayerState, id: string): number => {
   let depth = 0;
   let currentNode = getParentLayer(store, id);
   while(currentNode.type === 'Group' || currentNode.type === 'Artboard' || currentNode.type === 'CompoundShape') {
@@ -78,9 +78,9 @@ export const getLayerDepth = (store: LayerState, id: string) => {
     depth++;
   }
   return depth;
-}
+};
 
-export const getScopeLayers = (store: LayerState) => {
+export const getScopeLayers = (store: LayerState): string[] => {
   const rootItems = getPage(store).children;
   const expandedItems = store.scope.reduce((result, current) => {
     const layer = getLayer(store, current);
@@ -88,9 +88,9 @@ export const getScopeLayers = (store: LayerState) => {
     return result;
   }, []);
   return [...rootItems, ...expandedItems];
-}
+};
 
-export const getScopeGroupLayers = (store: LayerState) => {
+export const getScopeGroupLayers = (store: LayerState): string[] => {
   const expandedLayers = getScopeLayers(store);
   return expandedLayers.reduce((result, current) => {
     const layer = getLayer(store, current);
@@ -99,35 +99,35 @@ export const getScopeGroupLayers = (store: LayerState) => {
     }
     return result;
   }, []);
-}
+};
 
-export const isScopeLayer = (store: LayerState, id: string) => {
+export const isScopeLayer = (store: LayerState, id: string): boolean => {
   const expandedLayers = getScopeLayers(store);
   return expandedLayers.includes(id);
-}
+};
 
-export const isScopeGroupLayer = (store: LayerState, id: string) => {
+export const isScopeGroupLayer = (store: LayerState, id: string): boolean => {
   const expandableLayers = getScopeGroupLayers(store);
   return expandableLayers.includes(id);
-}
+};
 
-export const getNearestScopeAncestor = (store: LayerState, id: string) => {
+export const getNearestScopeAncestor = (store: LayerState, id: string): em.Layer => {
   let currentNode = getLayer(store, id);
   while(!isScopeLayer(store, currentNode.id)) {
     currentNode = getParentLayer(store, currentNode.id);
   }
   return currentNode;
-}
+};
 
-export const getNearestScopeGroupAncestor = (store: LayerState, id: string) => {
+export const getNearestScopeGroupAncestor = (store: LayerState, id: string): em.Layer => {
   let currentNode = getLayer(store, id);
   while(!isScopeGroupLayer(store, currentNode.id)) {
     currentNode = getParentLayer(store, currentNode.id);
   }
   return currentNode;
-}
+};
 
-export const getLayerScope = (store: LayerState, id: string) => {
+export const getLayerScope = (store: LayerState, id: string): string[] => {
   const newScope = [];
   let parent = getParentLayer(store, id);
   while(parent.type === 'Group' || parent.type === 'Artboard' || parent.type === 'CompoundShape') {
@@ -135,7 +135,7 @@ export const getLayerScope = (store: LayerState, id: string) => {
     parent = getParentLayer(store, parent.id);
   }
   return newScope.reverse();
-}
+};
 
 export const getLayersTopLeft = (store: LayerState, layers: string[]): paper.Point => {
   const paperLayerPoints = layers.reduce((result, current) => {
@@ -146,7 +146,7 @@ export const getLayersTopLeft = (store: LayerState, layers: string[]): paper.Poi
     //return [...result, paperLayer.bounds.topLeft];
   }, []);
   return paperLayerPoints.reduce(paper.Point.min);
-}
+};
 
 export const getLayersBottomRight = (store: LayerState, layers: string[]): paper.Point => {
   const paperLayerPoints = layers.reduce((result, current) => {
@@ -157,7 +157,7 @@ export const getLayersBottomRight = (store: LayerState, layers: string[]): paper
     // return [...result, paperLayer.bounds.bottomRight];
   }, []);
   return paperLayerPoints.reduce(paper.Point.max);
-}
+};
 
 export const getLayersBounds = (store: LayerState, layers: string[]): paper.Rectangle => {
   const topLeft = getLayersTopLeft(store, layers);
@@ -166,7 +166,7 @@ export const getLayersBounds = (store: LayerState, layers: string[]): paper.Rect
     from: topLeft,
     to: bottomRight
   });
-}
+};
 
 export const getSelectionTopLeft = (store: LayerState, useLayerItem?: boolean): paper.Point => {
   const paperLayerPoints = store.selected.reduce((result, current) => {
@@ -180,7 +180,7 @@ export const getSelectionTopLeft = (store: LayerState, useLayerItem?: boolean): 
     }
   }, []);
   return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.min) : null;
-}
+};
 
 export const getSelectionBottomRight = (store: LayerState, useLayerItem?: boolean): paper.Point => {
   const paperLayerPoints = store.selected.reduce((result, current) => {
@@ -194,7 +194,7 @@ export const getSelectionBottomRight = (store: LayerState, useLayerItem?: boolea
     }
   }, []);
   return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.max) : null;
-}
+};
 
 export const getSelectionBounds = (store: LayerState, useLayerItem?: boolean): paper.Rectangle => {
   const topLeft = getSelectionTopLeft(store, useLayerItem);
@@ -203,7 +203,7 @@ export const getSelectionBounds = (store: LayerState, useLayerItem?: boolean): p
     from: topLeft,
     to: bottomRight
   });
-}
+};
 
 export const getSelectionCenter = (store: LayerState, useLayerItem?: boolean): paper.Point => {
   const topLeft = getSelectionTopLeft(store, useLayerItem);
@@ -211,7 +211,7 @@ export const getSelectionCenter = (store: LayerState, useLayerItem?: boolean): p
   const xMid = (topLeft.x + bottomRight.x) / 2;
   const yMid = (topLeft.y + bottomRight.y) / 2;
   return new paper.Point(xMid, yMid);
-}
+};
 
 export const getCanvasTopLeft = (store: LayerState, useLayerItem?: boolean): paper.Point => {
   const paperLayerPoints = store.allIds.reduce((result, current) => {
@@ -229,7 +229,7 @@ export const getCanvasTopLeft = (store: LayerState, useLayerItem?: boolean): pap
     }
   }, []);
   return paperLayerPoints.reduce(paper.Point.min);
-}
+};
 
 export const getCanvasBottomRight = (store: LayerState, useLayerItem?: boolean): paper.Point => {
   const paperLayerPoints = store.allIds.reduce((result, current) => {
@@ -247,7 +247,7 @@ export const getCanvasBottomRight = (store: LayerState, useLayerItem?: boolean):
     }
   }, []);
   return paperLayerPoints.reduce(paper.Point.max);
-}
+};
 
 export const getCanvasBounds = (store: LayerState, useLayerItem?: boolean): paper.Rectangle => {
   const topLeft = getCanvasTopLeft(store, useLayerItem);
@@ -256,7 +256,7 @@ export const getCanvasBounds = (store: LayerState, useLayerItem?: boolean): pape
     from: topLeft,
     to: bottomRight
   });
-}
+};
 
 export const getCanvasCenter = (store: LayerState, useLayerItem?: boolean): paper.Point => {
   const topLeft = getCanvasTopLeft(store, useLayerItem);
@@ -264,7 +264,7 @@ export const getCanvasCenter = (store: LayerState, useLayerItem?: boolean): pape
   const xMid = (topLeft.x + bottomRight.x) / 2;
   const yMid = (topLeft.y + bottomRight.y) / 2;
   return new paper.Point(xMid, yMid);
-}
+};
 
 export const getClipboardTopLeft = (store: LayerState, canvasImages: {[id: string]: em.CanvasImage}): paper.Point => {
   const paperLayerPoints = store.clipboard.allIds.reduce((result, current) => {
@@ -279,7 +279,7 @@ export const getClipboardTopLeft = (store: LayerState, canvasImages: {[id: strin
     return [...result, paperLayer.bounds.topLeft];
   }, []);
   return paperLayerPoints.reduce(paper.Point.min);
-}
+};
 
 export const getClipboardBottomRight = (store: LayerState, canvasImages: {[id: string]: em.CanvasImage}): paper.Point => {
   const paperLayerPoints = store.clipboard.allIds.reduce((result, current) => {
@@ -294,7 +294,7 @@ export const getClipboardBottomRight = (store: LayerState, canvasImages: {[id: s
     return [...result, paperLayer.bounds.bottomRight];
   }, []);
   return paperLayerPoints.reduce(paper.Point.max);
-}
+};
 
 export const getClipboardCenter = (store: LayerState, canvasImages: {[id: string]: em.CanvasImage}): paper.Point => {
   const topLeft = getClipboardTopLeft(store, canvasImages);
@@ -302,7 +302,7 @@ export const getClipboardCenter = (store: LayerState, canvasImages: {[id: string
   const xMid = (topLeft.x + bottomRight.x) / 2;
   const yMid = (topLeft.y + bottomRight.y) / 2;
   return new paper.Point(xMid, yMid);
-}
+};
 
 export const getDestinationEquivalent = (store: LayerState, layer: string, destinationChildren: string[]): em.Layer => {
   let equivalent = null;
@@ -315,218 +315,266 @@ export const getDestinationEquivalent = (store: LayerState, layer: string, desti
     }
   }
   return equivalent;
-}
+};
 
 export const getPositionInArtboard = (layer: paper.Item, artboard: paper.Item): paper.Point => {
   const xDiff = artboard.position.x - layer.position.x;
   const yDiff = artboard.position.y - layer.position.y;
   return new paper.Point(xDiff, yDiff);
-}
+};
 
 export const getArtboardPosition = (layer: em.Layer, artboard: em.Artboard): paper.Point => {
   const xDiff = Math.round(artboard.frame.x - layer.frame.x);
   const yDiff = Math.round(artboard.frame.y - layer.frame.y);
   return new paper.Point(xDiff, yDiff);
-}
+};
 
-export const getEquivalentTweenProps = (layerItem: em.Layer, equivalentLayerItem: em.Layer, artboardLayerItem: em.Artboard, destinationArtboardLayerItem: em.Artboard): em.TweenPropMap => {
+export const hasImageTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  return (
+    layerItem.type === 'Image' &&
+    equivalentLayerItem.type === 'Image' &&
+    (layerItem as em.Image).imageId !== (equivalentLayerItem as em.Image).imageId
+  );
+};
+
+export const hasShapeTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  return (
+    layerItem.type === 'Shape' &&
+    equivalentLayerItem.type === 'Shape' &&
+    (
+      (layerItem as em.Shape).shapeType !== (equivalentLayerItem as em.Shape).shapeType ||
+      (layerItem as em.Shape).shapeType === 'Polygon' && (equivalentLayerItem as em.Shape).shapeType === 'Polygon' && (layerItem as em.Polygon).sides !== (equivalentLayerItem as em.Polygon).sides ||
+      (layerItem as em.Shape).shapeType === 'Star' && (equivalentLayerItem as em.Shape).shapeType === 'Star' && (layerItem as em.Star).points !== (equivalentLayerItem as em.Star).points
+    )
+  );
+};
+
+export const hasFillTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  return (
+    (layerItem.style.fill.enabled || equivalentLayerItem.style.fill.enabled) &&
+    (layerItem.type === 'Shape' || layerItem.type === 'Text') &&
+    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text') &&
+    (
+      layerItem.style.fill.fillType !== equivalentLayerItem.style.fill.fillType ||
+      layerItem.style.fill.fillType === 'color' && equivalentLayerItem.style.fill.fillType === 'color' && !colorsMatch(layerItem.style.fill.color, equivalentLayerItem.style.fill.color) ||
+      layerItem.style.fill.fillType === 'gradient' && equivalentLayerItem.style.fill.fillType === 'gradient' && !gradientsMatch(layerItem.style.fill.gradient, equivalentLayerItem.style.fill.gradient)
+    )
+  );
+};
+
+export const hasXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer, artboardLayerItem: em.Artboard, destinationArtboardLayerItem: em.Artboard): boolean => {
   const layerArtboardPosition = getArtboardPosition(layerItem, artboardLayerItem);
   const equivalentArtboardPosition = getArtboardPosition(equivalentLayerItem, destinationArtboardLayerItem);
-  const tweenPropMap: em.TweenPropMap = {
-    image: false,
-    shape: false,
-    fill: false,
-    x: false,
-    y: false,
-    rotation: false,
-    radius: false,
-    width: false,
-    height: false,
-    stroke: false,
-    strokeDashWidth: false,
-    strokeDashGap: false,
-    strokeWidth: false,
-    shadowColor: false,
-    shadowOffsetX: false,
-    shadowOffsetY: false,
-    shadowBlur: false,
-    opacity: false,
-    fontSize: false,
-    lineHeight: false
+  return (
+    layerArtboardPosition.x !== equivalentArtboardPosition.x ||
+    (
+      layerItem.type === 'Text' &&
+      equivalentLayerItem.type === 'Text' &&
+      (
+        (layerItem as em.Text).textStyle.fontSize !== (equivalentLayerItem as em.Text).textStyle.fontSize ||
+        (layerItem as em.Text).textStyle.leading !== (equivalentLayerItem as em.Text).textStyle.leading
+      )
+    )
+  );
+};
+
+export const hasYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer, artboardLayerItem: em.Artboard, destinationArtboardLayerItem: em.Artboard): boolean => {
+  const layerArtboardPosition = getArtboardPosition(layerItem, artboardLayerItem);
+  const equivalentArtboardPosition = getArtboardPosition(equivalentLayerItem, destinationArtboardLayerItem);
+  return (
+    layerArtboardPosition.y !== equivalentArtboardPosition.y ||
+    (
+      layerItem.type === 'Text' &&
+      equivalentLayerItem.type === 'Text' &&
+      (
+        (layerItem as em.Text).textStyle.fontSize !== (equivalentLayerItem as em.Text).textStyle.fontSize ||
+        (layerItem as em.Text).textStyle.leading !== (equivalentLayerItem as em.Text).textStyle.leading
+      )
+    )
+  );
+};
+
+export const hasRotationTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  return layerItem.transform.rotation !== equivalentLayerItem.transform.rotation;
+};
+
+export const hasWidthTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  return (
+    (layerItem.type === 'Shape' || layerItem.type === 'Image') &&
+    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Image') &&
+    layerItem.master.width * layerItem.transform.scale.x !== equivalentLayerItem.master.width * equivalentLayerItem.transform.scale.x
+  );
+};
+
+export const hasHeightTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  return (
+    (layerItem.type === 'Shape' || layerItem.type === 'Image') &&
+    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Image') &&
+    layerItem.master.height * layerItem.transform.scale.y !== equivalentLayerItem.master.height * equivalentLayerItem.transform.scale.y
+  );
+};
+
+export const hasStrokeTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  return (
+    (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
+    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
+    (layerItem.style.stroke.enabled || equivalentLayerItem.style.stroke.enabled) &&
+    (
+      layerItem.style.stroke.fillType !== equivalentLayerItem.style.stroke.fillType ||
+      layerItem.style.stroke.fillType === 'color' && equivalentLayerItem.style.stroke.fillType === 'color' && !colorsMatch(layerItem.style.stroke.color, equivalentLayerItem.style.stroke.color) ||
+      layerItem.style.stroke.fillType === 'gradient' && equivalentLayerItem.style.stroke.fillType === 'gradient' && !gradientsMatch(layerItem.style.stroke.gradient, equivalentLayerItem.style.stroke.gradient)
+    )
+  );
+};
+
+export const hasStrokeDashWidthTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  return (
+    (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
+    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
+    (layerItem.style.stroke.enabled || equivalentLayerItem.style.stroke.enabled) &&
+    layerItem.style.strokeOptions.dashArray[0] !== equivalentLayerItem.style.strokeOptions.dashArray[0]
+  );
+};
+
+export const hasStrokeDashGapTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  return (
+    (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
+    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
+    (layerItem.style.stroke.enabled || equivalentLayerItem.style.stroke.enabled) &&
+    layerItem.style.strokeOptions.dashArray[1] !== equivalentLayerItem.style.strokeOptions.dashArray[1]
+  );
+};
+
+export const hasStrokeWidthTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  return (
+    (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
+    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
+    (layerItem.style.stroke.enabled || equivalentLayerItem.style.stroke.enabled) &&
+    layerItem.style.stroke.width !== equivalentLayerItem.style.stroke.width
+  );
+};
+
+export const hasShadowColorTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  return (
+    (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
+    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
+    (layerItem.style.shadow.enabled || equivalentLayerItem.style.shadow.enabled) &&
+    !colorsMatch(layerItem.style.shadow.color, equivalentLayerItem.style.shadow.color)
+  );
+};
+
+export const hasShadowOffsetXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  return (
+    (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
+    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
+    (layerItem.style.shadow.enabled || equivalentLayerItem.style.shadow.enabled) &&
+    layerItem.style.shadow.offset.x !== equivalentLayerItem.style.shadow.offset.x
+  );
+};
+
+export const hasShadowOffsetYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  return (
+    (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
+    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
+    (layerItem.style.shadow.enabled || equivalentLayerItem.style.shadow.enabled) &&
+    layerItem.style.shadow.offset.y !== equivalentLayerItem.style.shadow.offset.y
+  );
+};
+
+export const hasShadowBlurTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  return (
+    (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
+    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
+    (layerItem.style.shadow.enabled || equivalentLayerItem.style.shadow.enabled) &&
+    layerItem.style.shadow.blur !== equivalentLayerItem.style.shadow.blur
+  );
+};
+
+export const hasOpacityTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  return layerItem.style.opacity !== equivalentLayerItem.style.opacity;
+};
+
+export const hasFontSizeTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  return (
+    layerItem.type === 'Text' &&
+    equivalentLayerItem.type === 'Text' &&
+    (layerItem as em.Text).textStyle.fontSize !== (equivalentLayerItem as em.Text).textStyle.fontSize
+  );
+};
+
+export const hasLineHeightTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  return (
+    layerItem.type === 'Text' &&
+    equivalentLayerItem.type === 'Text' &&
+    (layerItem as em.Text).textStyle.leading !== (equivalentLayerItem as em.Text).textStyle.leading
+  );
+};
+
+export const getEquivalentTweenProp = (layerItem: em.Layer, equivalentLayerItem: em.Layer, artboardLayerItem: em.Artboard, destinationArtboardLayerItem: em.Artboard, prop: em.TweenProp): boolean => {
+  switch(prop) {
+    case 'image':
+      return hasImageTween(layerItem, equivalentLayerItem);
+    case 'shape':
+      return hasShapeTween(layerItem, equivalentLayerItem);
+    case 'fill':
+      return hasFillTween(layerItem, equivalentLayerItem);
+    case 'x':
+      return hasXTween(layerItem, equivalentLayerItem, artboardLayerItem, destinationArtboardLayerItem);
+    case 'y':
+      return hasYTween(layerItem, equivalentLayerItem, artboardLayerItem, destinationArtboardLayerItem);
+    case 'rotation':
+      return hasRotationTween(layerItem, equivalentLayerItem);
+    case 'width':
+      return hasWidthTween(layerItem, equivalentLayerItem);
+    case 'height':
+      return hasHeightTween(layerItem, equivalentLayerItem);
+    case 'stroke':
+      return hasStrokeTween(layerItem, equivalentLayerItem);
+    case 'strokeDashWidth':
+      return hasStrokeDashWidthTween(layerItem, equivalentLayerItem);
+    case 'strokeDashGap':
+      return hasStrokeDashGapTween(layerItem, equivalentLayerItem);
+    case 'strokeWidth':
+      return hasStrokeWidthTween(layerItem, equivalentLayerItem);
+    case 'shadowColor':
+      return hasShadowColorTween(layerItem, equivalentLayerItem);
+    case 'shadowOffsetX':
+      return hasShadowOffsetXTween(layerItem, equivalentLayerItem);
+    case 'shadowOffsetY':
+      return hasShadowOffsetYTween(layerItem, equivalentLayerItem);
+    case 'shadowBlur':
+      return hasShadowBlurTween(layerItem, equivalentLayerItem);
+    case 'opacity':
+      return hasOpacityTween(layerItem, equivalentLayerItem);
+    case 'fontSize':
+      return hasFontSizeTween(layerItem, equivalentLayerItem);
+    case 'lineHeight':
+      return hasLineHeightTween(layerItem, equivalentLayerItem);
   }
-  return Object.keys(tweenPropMap).reduce((result: em.TweenPropMap, key: em.TweenProp) => {
-    if (layerItem.type === equivalentLayerItem.type) {
-      switch(key) {
-        case 'image':
-          if (
-            layerItem.type === 'Image' &&
-            equivalentLayerItem.type === 'Image' &&
-            (layerItem as em.Image).imageId !== (equivalentLayerItem as em.Image).imageId
-          ) {
-            result[key] = true;
-          }
-          break;
-        case 'shape':
-          if (
-            layerItem.type === 'Shape' &&
-            equivalentLayerItem.type === 'Shape' &&
-            (layerItem as em.Shape).shapeType !== (equivalentLayerItem as em.Shape).shapeType ||
-            (layerItem as em.Shape).shapeType === 'Polygon' && (equivalentLayerItem as em.Shape).shapeType === 'Polygon' && (layerItem as em.Polygon).sides !== (equivalentLayerItem as em.Polygon).sides ||
-            (layerItem as em.Shape).shapeType === 'Star' && (equivalentLayerItem as em.Shape).shapeType === 'Star' && (layerItem as em.Star).points !== (equivalentLayerItem as em.Star).points
-          ) {
-            result[key] = true;
-          }
-          break;
-        case 'fill':
-          if (
-            (layerItem.style.fill.enabled || equivalentLayerItem.style.fill.enabled) &&
-            layerItem.type === 'Shape' &&
-            equivalentLayerItem.type === 'Shape' &&
-            layerItem.style.fill.fillType !== equivalentLayerItem.style.fill.fillType ||
-            layerItem.style.fill.fillType === 'color' && equivalentLayerItem.style.fill.fillType === 'color' && !colorsMatch(layerItem.style.fill.color, equivalentLayerItem.style.fill.color) ||
-            layerItem.style.fill.fillType === 'gradient' && equivalentLayerItem.style.fill.fillType === 'gradient' && !gradientsMatch(layerItem.style.fill.gradient, equivalentLayerItem.style.fill.gradient)
-          ) {
-            result[key] = true;
-          }
-          break;
-        case 'x':
-          if (
-            layerArtboardPosition.x !== equivalentArtboardPosition.x ||
-            (
-              layerItem.type === 'Text' &&
-              equivalentLayerItem.type === 'Text' &&
-              (
-                (layerItem as em.Text).textStyle.fontSize !== (equivalentLayerItem as em.Text).textStyle.fontSize ||
-                (layerItem as em.Text).textStyle.leading !== (equivalentLayerItem as em.Text).textStyle.leading
-              )
-            )
-          ) {
-            result[key] = true;
-          }
-          break;
-        case 'y':
-          if (
-            layerArtboardPosition.y !== equivalentArtboardPosition.y ||
-            (
-              layerItem.type === 'Text' &&
-              equivalentLayerItem.type === 'Text' &&
-              (
-                (layerItem as em.Text).textStyle.fontSize !== (equivalentLayerItem as em.Text).textStyle.fontSize ||
-                (layerItem as em.Text).textStyle.leading !== (equivalentLayerItem as em.Text).textStyle.leading
-              )
-            )
-          ) {
-            result[key] = true;
-          }
-          break;
-        case 'rotation':
-          if (layerItem.transform.rotation !== equivalentLayerItem.transform.rotation) {
-            result[key] = true;
-          }
-          break;
-        case 'width':
-          if (
-            layerItem.master.width * layerItem.transform.scale.x !== equivalentLayerItem.master.width * equivalentLayerItem.transform.scale.x &&
-            layerItem.type !== 'Text'
-          ) {
-            result[key] = true;
-          }
-          break;
-        case 'height':
-          if (
-            layerItem.master.height * layerItem.transform.scale.y !== equivalentLayerItem.master.height * equivalentLayerItem.transform.scale.y &&
-            layerItem.type !== 'Text'
-          ) {
-            result[key] = true;
-          }
-          break;
-        case 'stroke':
-          if (
-            (layerItem.style.stroke.enabled || equivalentLayerItem.style.stroke.enabled) &&
-            layerItem.type === 'Shape' &&
-            equivalentLayerItem.type === 'Shape' &&
-            layerItem.style.stroke.fillType !== equivalentLayerItem.style.stroke.fillType ||
-            layerItem.style.stroke.fillType === 'color' && equivalentLayerItem.style.stroke.fillType === 'color' && !colorsMatch(layerItem.style.stroke.color, equivalentLayerItem.style.stroke.color) ||
-            layerItem.style.stroke.fillType === 'gradient' && equivalentLayerItem.style.stroke.fillType === 'gradient' && !gradientsMatch(layerItem.style.stroke.gradient, equivalentLayerItem.style.stroke.gradient)
-          ) {
-            result[key] = true;
-          }
-          break;
-        case 'strokeDashWidth':
-          if (layerItem.style.strokeOptions.dashArray[0] !== equivalentLayerItem.style.strokeOptions.dashArray[0]) {
-            result[key] = true;
-          }
-          break;
-        case 'strokeDashGap':
-          if (layerItem.style.strokeOptions.dashArray[1] !== equivalentLayerItem.style.strokeOptions.dashArray[1]) {
-            result[key] = true;
-          }
-          break;
-        case 'strokeWidth':
-          if (layerItem.style.stroke.width !== equivalentLayerItem.style.stroke.width) {
-            result[key] = true;
-          }
-          break;
-        case 'shadowColor':
-          if (
-            (layerItem.style.shadow.enabled || equivalentLayerItem.style.shadow.enabled) &&
-            !colorsMatch(layerItem.style.shadow.color, equivalentLayerItem.style.shadow.color)
-          ) {
-            result[key] = true;
-          }
-          break;
-        case 'shadowOffsetX':
-          if (
-            (layerItem.style.shadow.enabled || equivalentLayerItem.style.shadow.enabled) &&
-            layerItem.style.shadow.offset.x !== equivalentLayerItem.style.shadow.offset.x
-          ) {
-            result[key] = true;
-          }
-          break;
-        case 'shadowOffsetY':
-          if (
-            (layerItem.style.shadow.enabled || equivalentLayerItem.style.shadow.enabled) &&
-            layerItem.style.shadow.offset.y !== equivalentLayerItem.style.shadow.offset.y
-          ) {
-            result[key] = true;
-          }
-          break;
-        case 'shadowBlur':
-          if (
-            (layerItem.style.shadow.enabled || equivalentLayerItem.style.shadow.enabled) &&
-            layerItem.style.shadow.blur !== equivalentLayerItem.style.shadow.blur
-          ) {
-            result[key] = true;
-          }
-          break;
-        case 'opacity':
-          if (layerItem.style.opacity !== equivalentLayerItem.style.opacity) {
-            result[key] = true;
-          }
-          break;
-        case 'fontSize':
-          if (
-            layerItem.type === 'Text' &&
-            equivalentLayerItem.type === 'Text' &&
-            (layerItem as em.Text).textStyle.fontSize !== (equivalentLayerItem as em.Text).textStyle.fontSize
-          ) {
-            result[key] = true;
-          }
-          break;
-        case 'lineHeight':
-          if (
-            layerItem.type === 'Text' &&
-            equivalentLayerItem.type === 'Text' &&
-            (layerItem as em.Text).textStyle.leading !== (equivalentLayerItem as em.Text).textStyle.leading
-          ) {
-            result[key] = true;
-          }
-          break;
-      }
-    }
-    return result;
-  }, tweenPropMap);
-}
+};
+
+export const getEquivalentTweenProps = (layerItem: em.Layer, equivalentLayerItem: em.Layer, artboardLayerItem: em.Artboard, destinationArtboardLayerItem: em.Artboard): em.TweenPropMap => ({
+  image: hasImageTween(layerItem, equivalentLayerItem),
+  shape: hasShapeTween(layerItem, equivalentLayerItem),
+  fill: hasFillTween(layerItem, equivalentLayerItem),
+  x: hasXTween(layerItem, equivalentLayerItem, artboardLayerItem, destinationArtboardLayerItem),
+  y: hasYTween(layerItem, equivalentLayerItem, artboardLayerItem, destinationArtboardLayerItem),
+  rotation: hasRotationTween(layerItem, equivalentLayerItem),
+  radius: false,
+  width: hasWidthTween(layerItem, equivalentLayerItem),
+  height: hasHeightTween(layerItem, equivalentLayerItem),
+  stroke: hasStrokeTween(layerItem, equivalentLayerItem),
+  strokeDashWidth: hasStrokeDashWidthTween(layerItem, equivalentLayerItem),
+  strokeDashGap: hasStrokeDashGapTween(layerItem, equivalentLayerItem),
+  strokeWidth: hasStrokeWidthTween(layerItem, equivalentLayerItem),
+  shadowColor: hasShadowColorTween(layerItem, equivalentLayerItem),
+  shadowOffsetX: hasShadowOffsetXTween(layerItem, equivalentLayerItem),
+  shadowOffsetY: hasShadowOffsetYTween(layerItem, equivalentLayerItem),
+  shadowBlur: hasShadowBlurTween(layerItem, equivalentLayerItem),
+  opacity: hasOpacityTween(layerItem, equivalentLayerItem),
+  fontSize: hasFontSizeTween(layerItem, equivalentLayerItem),
+  lineHeight: hasLineHeightTween(layerItem, equivalentLayerItem)
+});
 
 export const getLongestEventTween = (tweensById: {[id: string]: em.Tween}): em.Tween => {
   return Object.keys(tweensById).reduce((result: em.Tween, current: string) => {
@@ -536,18 +584,19 @@ export const getLongestEventTween = (tweensById: {[id: string]: em.Tween}): em.T
       return result;
     }
   }, tweensById[Object.keys(tweensById)[0]]);
-}
+};
 
 export const isTweenDestinationLayer = (store: LayerState, layer: string): boolean => {
   const layerItem = getLayer(store, layer);
   const layerTweens = layerItem.tweens;
   return layerTweens.length > 0 && layerTweens.some((tween) => store.tweenById[tween].destinationLayer === layer);
-}
+};
 
 export const getAllArtboardTweenEvents = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: em.TweenEvent } } => {
   const allIds: string[] = [];
   const byId = Object.keys(store.tweenEventById).reduce((result: {[id: string]: em.TweenEvent}, current) => {
-    if (store.tweenEventById[current].artboard === artboard) {
+    const tweenEvent = store.tweenEventById[current];
+    if (tweenEvent.artboard === artboard) {
       result[current] = store.tweenEventById[current];
       allIds.push(current);
     }
@@ -731,6 +780,25 @@ export const getTweensByLayer = (store: LayerState, layerId: string): { allIds: 
   };
 };
 
+export const getTweensByProp = (store: LayerState, layerId: string, prop: em.TweenProp): { allIds: string[]; byId: { [id: string]: em.Tween } } => {
+  const tweensByDestinationLayer = getTweensByDestinationLayer(store, layerId);
+  const tweensByLayer = getTweensByLayer(store, layerId);
+  const tweensByDestinationLayerAndProp = tweensByDestinationLayer.allIds.filter((id: string) => tweensByDestinationLayer.byId[id].prop === prop);
+  const tweensByLayerAndProp = tweensByLayer.allIds.filter((id: string) => tweensByLayer.byId[id].prop === prop);
+  const allIds = [...tweensByDestinationLayerAndProp, ...tweensByLayerAndProp];
+  const byId = Object.keys({...tweensByDestinationLayer.byId, ...tweensByLayer.byId}).reduce((result: { [id: string]: em.Tween }, current) => {
+    const tween = store.tweenById[current];
+    if (allIds.includes(current)) {
+      result[current] = tween;
+    }
+    return result;
+  }, {});
+  return {
+    allIds,
+    byId
+  }
+};
+
 export const getTweensEventsByDestinationArtboard = (store: LayerState, artboardId: string): { allIds: string[]; byId: { [id: string]: em.TweenEvent } } => {
   const allIds: string[] = [];
   const byId = Object.keys(store.tweenEventById).reduce((result: { [id: string]: em.TweenEvent }, current) => {
@@ -738,6 +806,34 @@ export const getTweensEventsByDestinationArtboard = (store: LayerState, artboard
     if (tweenEvent.destinationArtboard === artboardId) {
       allIds.push(current);
       result[current] = tweenEvent;
+    }
+    return result;
+  }, {});
+  return {
+    allIds,
+    byId
+  };
+};
+
+export const getTweenEventsWithArtboard = (store: LayerState, artboardId: string): { allIds: string[]; byId: { [id: string]: em.TweenEvent } } => {
+  const eventsWithArtboardAsOrigin = getAllArtboardTweenEvents(store, artboardId);
+  const eventsWithArtboardAsDestination = getTweensEventsByDestinationArtboard(store, artboardId);
+  return {
+    allIds: [...eventsWithArtboardAsOrigin.allIds, ...eventsWithArtboardAsDestination.allIds],
+    byId: {
+      ...eventsWithArtboardAsOrigin.byId,
+      ...eventsWithArtboardAsDestination.byId
+    }
+  }
+};
+
+export const getTweensWithLayer = (store: LayerState, layerId: string): { allIds: string[]; byId: { [id: string]: em.Tween } } => {
+  const allIds: string[] = [];
+  const byId = store.allTweenIds.reduce((result: { [id: string]: em.Tween }, current) => {
+    const tween = store.tweenById[current];
+    if (tween.layer === layerId || tween.destinationLayer === layerId) {
+      result[current] = tween;
+      allIds.push(current);
     }
     return result;
   }, {});
@@ -813,7 +909,7 @@ export const getLayerSnapPoints = (id: string): em.SnapPoint[] => {
     point: bounds.bottom
   } as em.SnapPoint;
   return [left, right, top, bottom, centerX, centerY];
-}
+};
 
 export const getInViewSnapPoints = (state: LayerState): em.SnapPoint[] => {
   return state.inView.allIds.reduce((result, current) => {
@@ -857,7 +953,7 @@ export const orderLayersByDepth = (state: LayerState, layers: string[]): string[
     ordered.unshift(topLayer.id);
   }
   return ordered;
-}
+};
 
 export const orderLayersByLeft = (layers: string[]): string[] => {
   return [...layers].sort((a, b) => {
@@ -865,7 +961,7 @@ export const orderLayersByLeft = (layers: string[]): string[] => {
     const bPaperLayer = getPaperLayer(b);
     return aPaperLayer.bounds.left - bPaperLayer.bounds.left;
   });
-}
+};
 
 export const orderLayersByTop = (layers: string[]): string[] => {
   return [...layers].sort((a, b) => {
@@ -873,7 +969,7 @@ export const orderLayersByTop = (layers: string[]): string[] => {
     const bPaperLayer = getPaperLayer(b);
     return aPaperLayer.bounds.top - bPaperLayer.bounds.top;
   });
-}
+};
 
 export const exportPaperProject = (state: LayerState): string => {
   const selectionFrame = paperMain.project.getItem({data: {id: 'selectionFrame'}});
@@ -903,7 +999,7 @@ export const exportPaperProject = (state: LayerState): string => {
     result = result.replace(canvasImageBase64ById[current], current);
     return result;
   }, projectJSON);
-}
+};
 
 interface ImportPaperProject {
   canvasImages: {
@@ -916,7 +1012,7 @@ interface ImportPaperProject {
     text: string[];
     image: string[];
   };
-}
+};
 
 export const importPaperProject = ({canvasImages, paperProject, layers}: ImportPaperProject): void => {
   paperMain.project.clear();
@@ -940,13 +1036,13 @@ export const importPaperProject = ({canvasImages, paperProject, layers}: ImportP
     const raster = getPaperLayer(imageId).getItem({data: {id: 'Raster'}});
     applyImageMethods(raster);
   });
-}
+};
 
-export const colorsMatch = (color1: em.Color, color2: em.Color) => {
+export const colorsMatch = (color1: em.Color, color2: em.Color): boolean => {
   return Object.keys(color1).every((prop: 'h' | 's' | 'l' | 'v' | 'a') => color1[prop] === color2[prop]);
-}
+};
 
-export const gradientsMatch = (gradient1: em.Gradient, gradient2: em.Gradient) => {
+export const gradientsMatch = (gradient1: em.Gradient, gradient2: em.Gradient): boolean => {
   const gradientTypesMatch = gradient1.gradientType === gradient2.gradientType;
   const originsMatch = gradient1.origin.x === gradient2.origin.x && gradient1.origin.y === gradient2.origin.y;
   const destinationsMatch = gradient1.destination.x === gradient2.destination.x && gradient1.destination.y === gradient2.destination.y;
@@ -960,4 +1056,4 @@ export const gradientsMatch = (gradient1: em.Gradient, gradient2: em.Gradient) =
     return stopColorsMatch && stopPositionsMatch;
   });
   return gradientTypesMatch && originsMatch && destinationsMatch && stopsMatch;
-}
+};
