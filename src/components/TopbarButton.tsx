@@ -28,7 +28,7 @@ const ButtonWrap = styled.div<ButtonWrapProps>`
       fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.lighter};
     }
     .icon-opacity {
-      opacity: 0.25
+      opacity: 0.5
     }
     :disabled {
       .icon-fill,

@@ -1,4 +1,3 @@
-import paper from 'paper';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { evaluate } from 'mathjs';

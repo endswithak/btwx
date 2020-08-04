@@ -4,11 +4,9 @@ import {
   SET_TWEEN_DRAWER_EVENT,
   SET_TWEEN_DRAWER_TWEEN_HOVER,
   SET_TWEEN_DRAWER_TWEEN_EDITING,
-  SET_TWEEN_DRAWER_SCROLL,
   SetTweenDrawerEventPayload,
   SetTweenDrawerTweenHoverPayload,
   SetTweenDrawerTweenEditingPayload,
-  SetTweenDrawerScrollPayload,
   TweenDrawerTypes
 } from '../actionTypes/tweenDrawer';
 
@@ -32,10 +30,5 @@ export const setTweenDrawerTweenHover = (payload: SetTweenDrawerTweenHoverPayloa
 
 export const setTweenDrawerTweenEditing = (payload: SetTweenDrawerTweenEditingPayload): TweenDrawerTypes => ({
   type: SET_TWEEN_DRAWER_TWEEN_EDITING,
-  payload
-});
-
-export const setTweenDrawerScroll = (payload: SetTweenDrawerScrollPayload): TweenDrawerTypes => ({
-  type: SET_TWEEN_DRAWER_SCROLL,
   payload
 });

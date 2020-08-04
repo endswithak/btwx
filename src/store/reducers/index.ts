@@ -11,6 +11,7 @@ import artboardPresetEditor from './artboardPresetEditor';
 import textEditor from './textEditor';
 import textSettings from './textSettings';
 import canvasSettings from './canvasSettings';
+import rightSidebar from './rightSidebar';
 import theme from './theme';
 
 import {
@@ -237,6 +238,7 @@ const rootReducer = combineReducers({
   colorEditor,
   gradientEditor,
   artboardPresetEditor,
+  rightSidebar,
   theme
 });
 

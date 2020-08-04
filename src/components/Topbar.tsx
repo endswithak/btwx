@@ -13,6 +13,7 @@ import UniteButton from './UniteButton';
 import SubtractButton from './SubtractButton';
 import IntersectButton from './IntersectButton';
 import ExcludeButton from './ExcludeButton';
+import RightSidebarButton from './RightSidebarButton';
 
 const Topbar = (): ReactElement => {
   const theme = useContext(ThemeContext);
@@ -28,9 +29,6 @@ const Topbar = (): ReactElement => {
         <InsertButton />
       </div>
       <div className='c-topbar__button-group'>
-        <ZoomButton />
-      </div>
-      <div className='c-topbar__button-group'>
         <MaskButton />
         <MoveForwardButton />
         <MoveBackwardButton />
@@ -44,7 +42,11 @@ const Topbar = (): ReactElement => {
         <ExcludeButton />
       </div>
       <div className='c-topbar__button-group'>
+        <ZoomButton />
         <TweensButton />
+        <RightSidebarButton />
+      </div>
+      <div className='c-topbar__button-group'>
         <PreviewButton />
       </div>
     </div>

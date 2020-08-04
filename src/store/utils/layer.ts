@@ -1,24 +1,21 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { v4 as uuidv4 } from 'uuid';
 import tinyColor from 'tinycolor2';
-import layer, { LayerState } from '../reducers/layer';
+import { LayerState } from '../reducers/layer';
 import * as layerActions from '../actions/layer';
-import { addItem, removeItem, insertItem, addItems, moveItem, moveItemAbove, moveItemBelow } from './general';
+import { addItem, removeItem, insertItem, moveItemAbove, moveItemBelow } from './general';
 
 import {
   AddPage, AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer,
-  AddLayerChild, InsertLayerChild, EnableLayerHover, DisableLayerHover,
-  InsertLayerAbove, InsertLayerBelow, GroupLayers, UngroupLayers, UngroupLayer,
-  DeselectAllLayers, RemoveLayers, SetGroupScope, HideLayerChildren, ShowLayerChildren,
+  AddLayerChild, InsertLayerChild, InsertLayerAbove, InsertLayerBelow, GroupLayers, UngroupLayers, UngroupLayer,
+  DeselectAllLayers, RemoveLayers, HideLayerChildren, ShowLayerChildren,
   DecreaseLayerScope, NewLayerScope, SetLayerHover, ClearLayerScope, IncreaseLayerScope,
   CopyLayerToClipboard, CopyLayersToClipboard, PasteLayersFromClipboard, SelectLayers,
-  DeselectLayers, MoveLayerTo, MoveLayerBy, EnableLayerDrag, DisableLayerDrag, MoveLayersTo,
-  MoveLayersBy, DeepSelectLayer, EscapeLayerScope, MoveLayer, MoveLayers, AddArtboard,
-  SetLayerName, SetActiveArtboard, AddLayerTween, RemoveLayerTween, AddLayerTweenEvent,
-  RemoveLayerTweenEvent, SetLayerTweenDuration, SetLayerTweenDelay, IncrementLayerTweenDuration,
+  DeselectLayers, MoveLayerTo, MoveLayerBy, MoveLayersTo, MoveLayersBy, DeepSelectLayer, EscapeLayerScope,
+  MoveLayer, MoveLayers, AddArtboard, SetLayerName, SetActiveArtboard, AddLayerTween, RemoveLayerTween,
+  AddLayerTweenEvent, RemoveLayerTweenEvent, SetLayerTweenDuration, SetLayerTweenDelay, IncrementLayerTweenDuration,
   DecrementLayerTweenDuration, IncrementLayerTweenDelay, DecrementLayerTweenDelay, SetLayerTweenEase,
-  SetLayerTweenPower, FreezeLayerTween, UnFreezeLayerTween, SetLayerX, SetLayerY, SetLayerWidth,
-  SetLayerHeight, SetLayerOpacity, SetLayerFillColor,
+  SetLayerTweenPower, SetLayerX, SetLayerY, SetLayerWidth, SetLayerHeight, SetLayerOpacity, SetLayerFillColor,
   SetLayerStrokeColor, SetLayerStrokeWidth, SetLayerShadowColor, SetLayerShadowBlur, SetLayerShadowXOffset,
   SetLayerShadowYOffset, SetLayerRotation, EnableLayerFill, DisableLayerFill, EnableLayerStroke,
   DisableLayerStroke, DisableLayerShadow, EnableLayerShadow, SetLayerStrokeCap, SetLayerStrokeJoin,
@@ -38,19 +35,17 @@ import {
   SetLayerStrokeActiveGradientStop, DeactivateLayerStrokeGradientStop, ActivateLayerStrokeGradientStop,
   RemoveLayerStrokeGradientStop, AddLayerStrokeGradientStop, SetLayerStrokeGradientStopPosition,
   SetLayerStrokeGradientStopColor, SetLayerStrokeGradientDestination, SetLayerStrokeGradientOrigin,
-  AddCompoundShape, UniteLayers, SetRoundedRadius, SetPolygonSides, SetStarPoints, IntersectLayers, SubtractLayers, ExcludeLayers, DivideLayers, SetStarRadius, SetLayerStrokeDashOffset
+  AddCompoundShape, UniteLayers, SetRoundedRadius, SetPolygonSides, SetStarPoints, IntersectLayers,
+  SubtractLayers, ExcludeLayers, DivideLayers, SetStarRadius, SetLayerStrokeDashOffset
 } from '../actionTypes/layer';
 
 import {
-  getLayerIndex, getLayer, getLayerDepth, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor,
-  getNearestScopeGroupAncestor, getParentLayer, getLayerScope, getPaperLayer, getSelectionTopLeft,
-  getPaperLayerByPaperId, getClipboardTopLeft, getSelectionBottomRight, getPagePaperLayer,
-  getClipboardBottomRight, getClipboardCenter, getSelectionCenter, getLayerAndDescendants,
-  getLayerDescendants, getDestinationEquivalent, getEquivalentTweenProps, isTweenDestinationLayer,
-  getTweensByDestinationLayer, getAllArtboardTweenEventDestinations, getAllArtboardTweenLayerDestinations,
-  getAllArtboardTweenEvents, getTweensEventsByDestinationArtboard, getTweensByLayer, getLayersBounds,
-  getGradientOriginPoint, getGradientDestinationPoint, getGradientStops, getLayerSnapPoints, getInViewSnapPoints,
-  orderLayersByDepth, orderLayersByLeft, orderLayersByTop, exportPaperProject, getTweensByProp, getTweenEventsWithArtboard,
+  getLayerIndex, getLayer, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor,
+  getLayerScope, getPaperLayer, getSelectionTopLeft, getSelectionBottomRight, getClipboardCenter,
+  getSelectionCenter, getLayerAndDescendants, getLayerDescendants, getDestinationEquivalent, getEquivalentTweenProps,
+  getTweensByDestinationLayer, getAllArtboardTweenEvents, getTweensEventsByDestinationArtboard, getTweensByLayer,
+  getLayersBounds, getGradientOriginPoint, getGradientDestinationPoint, getGradientStops, getLayerSnapPoints,
+  orderLayersByDepth, orderLayersByLeft, orderLayersByTop, exportPaperProject, getTweensByProp,
   getEquivalentTweenProp, getTweensWithLayer
 } from '../selectors/layer';
 
@@ -104,7 +99,7 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
   return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
 };
 
-export const updateActiveArtboardFrame = (state: LayerState, useLayerItem = false) => {
+export const updateActiveArtboardFrame = (state: LayerState, useLayerItem = false): void => {
   const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'activeArtboardFrame' } });
   if (activeArtboardFrame) {
     activeArtboardFrame.remove();
@@ -527,7 +522,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
       leftCenterHandle.opacity = 0.5;
       rightCenterHandle.opacity = 0.5;
     }
-    const newSelectionFrame = new paperMain.Group({
+    new paperMain.Group({
       children: [baseFrame, moveHandle, topLeftHandle, topCenterHandle, topRightHandle, bottomLeftHandle, bottomCenterHandle, bottomRightHandle, leftCenterHandle, rightCenterHandle],
       data: {
         id: 'selectionFrame'
@@ -983,7 +978,7 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
   return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
 };
 
-export const insertLayersBelow = (state: LayerState, action: InsertLayersBelow) => {
+export const insertLayersBelow = (state: LayerState, action: InsertLayersBelow): LayerState => {
   let currentState = state;
   const orderedLayers = orderLayersByDepth(state, action.payload.layers);
   currentState = orderedLayers.reverse().reduce((result, current) => {
@@ -2801,8 +2796,9 @@ export const enableLayerStroke = (state: LayerState, action: EnableLayerStroke):
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'stroke');
   currentState = updateLayerTweens(currentState, action.payload.id, 'strokeWidth');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'strokeDashWidth');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'strokeDashGap');
+  currentState = updateLayerTweens(currentState, action.payload.id, 'dashOffset');
+  currentState = updateLayerTweens(currentState, action.payload.id, 'dashArrayWidth');
+  currentState = updateLayerTweens(currentState, action.payload.id, 'dashArrayGap');
   return currentState;
 };
 
@@ -2829,8 +2825,9 @@ export const disableLayerStroke = (state: LayerState, action: DisableLayerStroke
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'stroke');
   currentState = updateLayerTweens(currentState, action.payload.id, 'strokeWidth');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'strokeDashWidth');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'strokeDashGap');
+  currentState = updateLayerTweens(currentState, action.payload.id, 'dashOffset');
+  currentState = updateLayerTweens(currentState, action.payload.id, 'dashArrayWidth');
+  currentState = updateLayerTweens(currentState, action.payload.id, 'dashArrayGap');
   return currentState;
 };
 
@@ -3419,7 +3416,7 @@ export const setLayerStrokeDashOffset = (state: LayerState, action: SetLayerStro
     },
     paperProject: exportPaperProject(currentState)
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'strokeDashOffset');
+  currentState = updateLayerTweens(currentState, action.payload.id, 'dashOffset');
   return currentState;
 };
 
@@ -3444,8 +3441,8 @@ export const setLayerStrokeDashArray = (state: LayerState, action: SetLayerStrok
     },
     paperProject: exportPaperProject(currentState)
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'strokeDashWidth');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'strokeDashGap');
+  currentState = updateLayerTweens(currentState, action.payload.id, 'dashArrayWidth');
+  currentState = updateLayerTweens(currentState, action.payload.id, 'dashArrayGap');
   return currentState;
 };
 
