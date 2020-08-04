@@ -14,7 +14,7 @@ declare namespace em {
 
   type ContextMenu = 'TweenEvent' | 'TweenEventDestination' | 'ArtboardCustomPreset';
 
-  type TweenProp = 'image' | 'shape' | 'fill' | 'x' | 'y' | 'radius' | 'rotation' | 'width' | 'height' | 'stroke' | 'strokeDashWidth' | 'strokeDashGap' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity' | 'fontSize' | 'lineHeight';
+  type TweenProp = 'image' | 'shape' | 'fill' | 'x' | 'y' | 'radius' | 'rotation' | 'width' | 'height' | 'stroke' | 'strokeDashOffset' | 'strokeDashWidth' | 'strokeDashGap' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity' | 'fontSize' | 'lineHeight';
 
   type TweenPropMap = { [K in TweenProp]: boolean; }
 
@@ -166,6 +166,7 @@ declare namespace em {
     cap: StrokeCapTypes;
     join: StrokeJoinTypes;
     dashArray: number[];
+    dashOffset: number;
     miterLimit: number;
   }
 

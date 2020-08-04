@@ -92,6 +92,7 @@ export const DEFAULT_STROKE_OPTIONS_STYLE: em.StrokeOptions = {
   cap: 'butt',
   join: 'miter',
   dashArray: [0,0],
+  dashOffset: 0,
   miterLimit: 10
 }
 

@@ -87,6 +87,7 @@ import {
   SET_LAYER_STROKE_WIDTH,
   SET_LAYER_STROKE_CAP,
   SET_LAYER_STROKE_JOIN,
+  SET_LAYER_STROKE_DASH_OFFSET,
   SET_LAYER_STROKE_DASH_ARRAY,
   SET_LAYER_STROKE_MITER_LIMIT,
   ENABLE_LAYER_SHADOW,
@@ -240,6 +241,7 @@ import {
   SetLayerStrokeWidthPayload,
   SetLayerStrokeCapPayload,
   SetLayerStrokeJoinPayload,
+  SetLayerStrokeDashOffsetPayload,
   SetLayerStrokeDashArrayPayload,
   SetLayerStrokeMiterLimitPayload,
   EnableLayerShadowPayload,
@@ -888,6 +890,11 @@ export const setLayerStrokeCap = (payload: SetLayerStrokeCapPayload): LayerTypes
 
 export const setLayerStrokeJoin = (payload: SetLayerStrokeJoinPayload): LayerTypes => ({
   type: SET_LAYER_STROKE_JOIN,
+  payload
+});
+
+export const setLayerStrokeDashOffset = (payload: SetLayerStrokeDashOffsetPayload): LayerTypes => ({
+  type: SET_LAYER_STROKE_DASH_OFFSET,
   payload
 });
 

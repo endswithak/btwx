@@ -127,6 +127,7 @@ export const SET_LAYER_STROKE_ACTIVE_GRADIENT_STOP = 'SET_LAYER_STROKE_ACTIVE_GR
 export const SET_LAYER_STROKE_WIDTH = 'SET_LAYER_STROKE_WIDTH';
 export const SET_LAYER_STROKE_CAP = 'SET_LAYER_STROKE_CAP';
 export const SET_LAYER_STROKE_JOIN = 'SET_LAYER_STROKE_JOIN';
+export const SET_LAYER_STROKE_DASH_OFFSET = 'SET_LAYER_STROKE_DASH_OFFSET';
 export const SET_LAYER_STROKE_DASH_ARRAY = 'SET_LAYER_STROKE_DASH_ARRAY';
 export const SET_LAYER_STROKE_MITER_LIMIT = 'SET_LAYER_STROKE_MITER_LIMIT';
 
@@ -1110,6 +1111,16 @@ export interface SetLayerStrokeJoin {
   payload: SetLayerStrokeJoinPayload;
 }
 
+export interface SetLayerStrokeDashOffsetPayload {
+  id: string;
+  strokeDashOffset: number;
+}
+
+export interface SetLayerStrokeDashOffset {
+  type: typeof SET_LAYER_STROKE_DASH_OFFSET;
+  payload: SetLayerStrokeDashOffsetPayload;
+}
+
 export interface SetLayerStrokeDashArrayPayload {
   id: string;
   strokeDashArray: number[];
@@ -1856,6 +1867,7 @@ export type LayerTypes = AddPage |
                          SetLayerStrokeWidth |
                          SetLayerStrokeCap |
                          SetLayerStrokeJoin |
+                         SetLayerStrokeDashOffset |
                          SetLayerStrokeDashArray |
                          SetLayerStrokeMiterLimit |
                          EnableLayerShadow |

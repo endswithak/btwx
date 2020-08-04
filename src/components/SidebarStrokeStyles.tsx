@@ -9,6 +9,7 @@ import StrokeInput from './StrokeInput';
 import SidebarStrokeOptionsStyle from './SidebarStrokeOptionsStyle';
 import StrokeOptionsToggle from './StrokeOptionsToggle';
 import StrokeToggle from './StrokeToggle';
+import StrokeDashOffsetInput from './StrokeDashOffsetInput';
 import StrokeDashInput from './StrokeDashInput';
 import StrokeGapInput from './StrokeGapInput';
 import StrokeWidthInput from './StrokeWidthInput';
@@ -52,10 +53,17 @@ const SidebarStrokeStyles = (props: SidebarStrokeStylesProps): ReactElement => {
               <StrokeWidthInput />
             </SidebarSectionColumn>
             <SidebarSectionColumn width='33.33%'>
-              <StrokeDashInput />
+              <StrokeDashOffsetInput />
             </SidebarSectionColumn>
             <SidebarSectionColumn width='33.33%'>
-              <StrokeGapInput />
+              <SidebarSectionRow>
+                <SidebarSectionColumn width='50%'>
+                  <StrokeDashInput />
+                </SidebarSectionColumn>
+                <SidebarSectionColumn width='50%'>
+                  <StrokeGapInput />
+                </SidebarSectionColumn>
+              </SidebarSectionRow>
             </SidebarSectionColumn>
           </SidebarSectionRow>
         </SidebarSection>

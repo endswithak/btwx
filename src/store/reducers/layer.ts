@@ -78,6 +78,7 @@ import {
   SET_LAYER_STROKE_WIDTH,
   SET_LAYER_STROKE_CAP,
   SET_LAYER_STROKE_JOIN,
+  SET_LAYER_STROKE_DASH_OFFSET,
   SET_LAYER_STROKE_DASH_ARRAY,
   SET_LAYER_STROKE_MITER_LIMIT,
   ENABLE_LAYER_SHADOW,
@@ -236,6 +237,7 @@ import {
   setLayerStrokeWidth,
   setLayerStrokeCap,
   setLayerStrokeJoin,
+  setLayerStrokeDashOffset,
   setLayerStrokeDashArray,
   setLayerStrokeMiterLimit,
   enableLayerShadow,
@@ -549,6 +551,8 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setLayerStrokeCap(state, action);
     case SET_LAYER_STROKE_JOIN:
       return setLayerStrokeJoin(state, action);
+    case SET_LAYER_STROKE_DASH_OFFSET:
+      return setLayerStrokeDashOffset(state, action);
     case SET_LAYER_STROKE_DASH_ARRAY:
       return setLayerStrokeDashArray(state, action);
     case SET_LAYER_STROKE_MITER_LIMIT:

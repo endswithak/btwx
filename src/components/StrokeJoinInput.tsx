@@ -86,7 +86,7 @@ const mapStateToProps = (state: RootState) => {
       case 0:
         return true;
       case 1:
-        return !layer.present.byId[layer.present.selected[0]].points.closed || !layer.present.byId[layer.present.selected[0]].style.stroke.enabled;
+        return !layer.present.byId[layer.present.selected[0]].style.stroke.enabled;
       default:
         return true;
     }

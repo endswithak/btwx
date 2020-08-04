@@ -421,6 +421,15 @@ export const hasStrokeTween = (layerItem: em.Layer, equivalentLayerItem: em.Laye
   );
 };
 
+export const hasStrokeDashOffsetTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  return (
+    (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
+    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
+    (layerItem.style.stroke.enabled || equivalentLayerItem.style.stroke.enabled) &&
+    layerItem.style.strokeOptions.dashOffset !== equivalentLayerItem.style.strokeOptions.dashOffset
+  );
+};
+
 export const hasStrokeDashWidthTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   return (
     (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
@@ -524,6 +533,8 @@ export const getEquivalentTweenProp = (layerItem: em.Layer, equivalentLayerItem:
       return hasHeightTween(layerItem, equivalentLayerItem);
     case 'stroke':
       return hasStrokeTween(layerItem, equivalentLayerItem);
+    case 'strokeDashOffset':
+      return hasStrokeDashOffsetTween(layerItem, equivalentLayerItem);
     case 'strokeDashWidth':
       return hasStrokeDashWidthTween(layerItem, equivalentLayerItem);
     case 'strokeDashGap':
@@ -558,6 +569,7 @@ export const getEquivalentTweenProps = (layerItem: em.Layer, equivalentLayerItem
   width: hasWidthTween(layerItem, equivalentLayerItem),
   height: hasHeightTween(layerItem, equivalentLayerItem),
   stroke: hasStrokeTween(layerItem, equivalentLayerItem),
+  strokeDashOffset: hasStrokeDashOffsetTween(layerItem, equivalentLayerItem),
   strokeDashWidth: hasStrokeDashWidthTween(layerItem, equivalentLayerItem),
   strokeDashGap: hasStrokeDashGapTween(layerItem, equivalentLayerItem),
   strokeWidth: hasStrokeWidthTween(layerItem, equivalentLayerItem),

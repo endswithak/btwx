@@ -38,7 +38,7 @@ import {
   SetLayerStrokeActiveGradientStop, DeactivateLayerStrokeGradientStop, ActivateLayerStrokeGradientStop,
   RemoveLayerStrokeGradientStop, AddLayerStrokeGradientStop, SetLayerStrokeGradientStopPosition,
   SetLayerStrokeGradientStopColor, SetLayerStrokeGradientDestination, SetLayerStrokeGradientOrigin,
-  AddCompoundShape, UniteLayers, SetRoundedRadius, SetPolygonSides, SetStarPoints, IntersectLayers, SubtractLayers, ExcludeLayers, DivideLayers, SetStarRadius
+  AddCompoundShape, UniteLayers, SetRoundedRadius, SetPolygonSides, SetStarPoints, IntersectLayers, SubtractLayers, ExcludeLayers, DivideLayers, SetStarRadius, SetLayerStrokeDashOffset
 } from '../actionTypes/layer';
 
 import {
@@ -3395,6 +3395,31 @@ export const setLayerStrokeJoin = (state: LayerState, action: SetLayerStrokeJoin
     },
     paperProject: exportPaperProject(currentState)
   }
+  return currentState;
+};
+
+export const setLayerStrokeDashOffset = (state: LayerState, action: SetLayerStrokeDashOffset): LayerState => {
+  let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  paperLayer.dashOffset = action.payload.strokeDashOffset;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          strokeOptions: {
+            ...currentState.byId[action.payload.id].style.strokeOptions,
+            dashOffset: action.payload.strokeDashOffset
+          }
+        }
+      }
+    },
+    paperProject: exportPaperProject(currentState)
+  }
+  currentState = updateLayerTweens(currentState, action.payload.id, 'strokeDashOffset');
   return currentState;
 };
 

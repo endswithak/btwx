@@ -632,6 +632,19 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 }
                 break;
               }
+              case 'strokeDashOffset': {
+                tweenProp[tween.prop] = tweenPaperLayer.dashOffset;
+                paperTween = gsap.to(tweenProp, {
+                  duration: tween.duration,
+                  [tween.prop]: tweenDestinationLayerPaperLayer.dashOffset,
+                  onUpdate: () => {
+                    tweenPaperLayer.dashOffset = tweenProp[tween.prop];
+                  },
+                  ease: tween.ease,
+                  delay: tween.delay
+                });
+                break;
+              }
               case 'strokeDashWidth': {
                 tweenProp[tween.prop] = tweenPaperLayer.dashArray[0];
                 paperTween = gsap.to(tweenProp, {
