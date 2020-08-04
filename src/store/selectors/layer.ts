@@ -421,7 +421,7 @@ export const hasStrokeTween = (layerItem: em.Layer, equivalentLayerItem: em.Laye
   );
 };
 
-export const hasStrokeDashOffsetTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasDashOffsetTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   return (
     (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
@@ -430,7 +430,7 @@ export const hasStrokeDashOffsetTween = (layerItem: em.Layer, equivalentLayerIte
   );
 };
 
-export const hasStrokeDashWidthTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasDashArrayWidthTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   return (
     (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
@@ -439,7 +439,7 @@ export const hasStrokeDashWidthTween = (layerItem: em.Layer, equivalentLayerItem
   );
 };
 
-export const hasStrokeDashGapTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasDashArrayGapTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   return (
     (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
@@ -533,12 +533,12 @@ export const getEquivalentTweenProp = (layerItem: em.Layer, equivalentLayerItem:
       return hasHeightTween(layerItem, equivalentLayerItem);
     case 'stroke':
       return hasStrokeTween(layerItem, equivalentLayerItem);
-    case 'strokeDashOffset':
-      return hasStrokeDashOffsetTween(layerItem, equivalentLayerItem);
-    case 'strokeDashWidth':
-      return hasStrokeDashWidthTween(layerItem, equivalentLayerItem);
-    case 'strokeDashGap':
-      return hasStrokeDashGapTween(layerItem, equivalentLayerItem);
+    case 'dashOffset':
+      return hasDashOffsetTween(layerItem, equivalentLayerItem);
+    case 'dashArrayWidth':
+      return hasDashArrayWidthTween(layerItem, equivalentLayerItem);
+    case 'dashArrayGap':
+      return hasDashArrayGapTween(layerItem, equivalentLayerItem);
     case 'strokeWidth':
       return hasStrokeWidthTween(layerItem, equivalentLayerItem);
     case 'shadowColor':
@@ -569,9 +569,9 @@ export const getEquivalentTweenProps = (layerItem: em.Layer, equivalentLayerItem
   width: hasWidthTween(layerItem, equivalentLayerItem),
   height: hasHeightTween(layerItem, equivalentLayerItem),
   stroke: hasStrokeTween(layerItem, equivalentLayerItem),
-  strokeDashOffset: hasStrokeDashOffsetTween(layerItem, equivalentLayerItem),
-  strokeDashWidth: hasStrokeDashWidthTween(layerItem, equivalentLayerItem),
-  strokeDashGap: hasStrokeDashGapTween(layerItem, equivalentLayerItem),
+  dashOffset: hasDashOffsetTween(layerItem, equivalentLayerItem),
+  dashArrayWidth: hasDashArrayWidthTween(layerItem, equivalentLayerItem),
+  dashArrayGap: hasDashArrayGapTween(layerItem, equivalentLayerItem),
   strokeWidth: hasStrokeWidthTween(layerItem, equivalentLayerItem),
   shadowColor: hasShadowColorTween(layerItem, equivalentLayerItem),
   shadowOffsetX: hasShadowOffsetXTween(layerItem, equivalentLayerItem),

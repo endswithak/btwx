@@ -632,7 +632,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 }
                 break;
               }
-              case 'strokeDashOffset': {
+              case 'dashOffset': {
                 tweenProp[tween.prop] = tweenPaperLayer.dashOffset;
                 paperTween = gsap.to(tweenProp, {
                   duration: tween.duration,
@@ -645,7 +645,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 });
                 break;
               }
-              case 'strokeDashWidth': {
+              case 'dashArrayWidth': {
                 tweenProp[tween.prop] = tweenPaperLayer.dashArray[0];
                 paperTween = gsap.to(tweenProp, {
                   duration: tween.duration,
@@ -658,7 +658,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 });
                 break;
               }
-              case 'strokeDashGap': {
+              case 'dashArrayGap': {
                 tweenProp[tween.prop] = tweenPaperLayer.dashArray[1];
                 paperTween = gsap.to(tweenProp, {
                   duration: tween.duration,

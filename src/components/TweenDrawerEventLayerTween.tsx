@@ -13,12 +13,13 @@ interface TweenDrawerEventLayerTweenProps {
   tweenHover?: string;
   tweenEditing?: string;
   tween?: em.Tween;
+  titleCaseProp?: string;
   setTweenDrawerTweenHover?(payload: SetTweenDrawerTweenHoverPayload): TweenDrawerTypes;
 }
 
 const TweenDrawerEventLayerTween = (props: TweenDrawerEventLayerTweenProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { tweenId, index, tween, setTweenDrawerTweenHover, tweenEditing, tweenHover } = props;
+  const { tweenId, index, tween, setTweenDrawerTweenHover, tweenEditing, tweenHover, titleCaseProp } = props;
 
   const handleMouseEnter = () => {
     setTweenDrawerTweenHover({id: tweenId});
@@ -47,7 +48,7 @@ const TweenDrawerEventLayerTween = (props: TweenDrawerEventLayerTweenProps): Rea
         style={{
           color: theme.text.lighter
         }}>
-        {tween.prop}
+        { titleCaseProp }
       </div>
       {
         tweenId === tweenHover && !tweenEditing || tweenId === tweenEditing
@@ -64,7 +65,11 @@ const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventLayerTweenP
   const tween = layer.present.tweenById[ownProps.tweenId];
   const tweenHover = tweenDrawer.tweenHover;
   const tweenEditing = tweenDrawer.tweenEditing;
-  return { tween, tweenHover, tweenEditing };
+  const titleCaseProp = ((): string => {
+    const reg = tween.prop.replace( /([A-Z])/g, " $1" );
+    return reg.charAt(0).toUpperCase() + reg.slice(1);
+  })();
+  return { tween, tweenHover, tweenEditing, titleCaseProp };
 };
 
 export default connect(
