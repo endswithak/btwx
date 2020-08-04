@@ -8,25 +8,26 @@ import { setLayerHeight } from '../store/actions/layer';
 import { getPaperLayer } from '../store/selectors/layer';
 
 interface HeightInputProps {
+  layerItem?: em.Layer;
   selected?: string[];
   heightValue?: number | string;
   setLayerHeight?(payload: SetLayerHeightPayload): LayerTypes;
 }
 
 const HeightInput = (props: HeightInputProps): ReactElement => {
-  const { selected, setLayerHeight, heightValue } = props;
-  const [height, setHeight] = useState<string | number>(props.heightValue);
+  const { selected, setLayerHeight, heightValue, layerItem } = props;
+  const [height, setHeight] = useState(props.heightValue);
 
   useEffect(() => {
     setHeight(heightValue);
   }, [heightValue, selected]);
 
-  const handleChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const target = e.target as HTMLInputElement;
+  const handleChange = (e: any) => {
+    const target = e.target;
     setHeight(target.value);
   };
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
+  const handleSubmit = (e: any) => {
     try {
       let nextHeight = evaluate(`${height}`);
       if (height !== heightValue && !isNaN(nextHeight)) {
@@ -34,7 +35,14 @@ const HeightInput = (props: HeightInputProps): ReactElement => {
           nextHeight = 1;
         }
         const paperLayer = getPaperLayer(selected[0]);
+        if (layerItem.transform.rotation !== 0) {
+          paperLayer.rotation = -layerItem.transform.rotation;
+        }
         paperLayer.bounds.height = nextHeight;
+        if (layerItem.transform.rotation !== 0) {
+          paperLayer.rotation = layerItem.transform.rotation;
+        }
+        paperLayer.position.y = layerItem.frame.y;
         setLayerHeight({id: selected[0], height: nextHeight});
         setHeight(nextHeight);
       } else {
@@ -59,17 +67,29 @@ const HeightInput = (props: HeightInputProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
+  const layerItem = ((): em.Layer => {
+    switch(layer.present.selected.length) {
+      case 0:
+        return null;
+      case 1: {
+        return layer.present.byId[layer.present.selected[0]];
+      }
+      default:
+        return null;
+    }
+  })();
   const heightValue = (() => {
     switch(layer.present.selected.length) {
       case 0:
         return '';
-      case 1:
-        return Math.round(layer.present.byId[layer.present.selected[0]].frame.height);
+      case 1: {
+        return Math.round(layerItem.master.height * layerItem.transform.scale.y);
+      }
       default:
         return 'multi';
     }
   })();
-  return { selected, heightValue };
+  return { selected, heightValue, layerItem };
 };
 
 export default connect(

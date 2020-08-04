@@ -317,15 +317,9 @@ export const getDestinationEquivalent = (store: LayerState, layer: string, desti
   return equivalent;
 };
 
-export const getPositionInArtboard = (layer: paper.Item, artboard: paper.Item): paper.Point => {
-  const xDiff = artboard.position.x - layer.position.x;
-  const yDiff = artboard.position.y - layer.position.y;
-  return new paper.Point(xDiff, yDiff);
-};
-
-export const getArtboardPosition = (layer: em.Layer, artboard: em.Artboard): paper.Point => {
-  const xDiff = Math.round(artboard.frame.x - layer.frame.x);
-  const yDiff = Math.round(artboard.frame.y - layer.frame.y);
+export const getPositionInArtboard = (layer: em.Layer, artboard: em.Artboard): paper.Point => {
+  const xDiff = Math.round(layer.frame.x - (artboard.frame.x - (artboard.frame.width / 2)));
+  const yDiff = Math.round(layer.frame.y - (artboard.frame.y - (artboard.frame.height / 2)));
   return new paper.Point(xDiff, yDiff);
 };
 
@@ -363,8 +357,8 @@ export const hasFillTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer)
 };
 
 export const hasXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer, artboardLayerItem: em.Artboard, destinationArtboardLayerItem: em.Artboard): boolean => {
-  const layerArtboardPosition = getArtboardPosition(layerItem, artboardLayerItem);
-  const equivalentArtboardPosition = getArtboardPosition(equivalentLayerItem, destinationArtboardLayerItem);
+  const layerArtboardPosition = getPositionInArtboard(layerItem, artboardLayerItem);
+  const equivalentArtboardPosition = getPositionInArtboard(equivalentLayerItem, destinationArtboardLayerItem);
   return (
     layerArtboardPosition.x !== equivalentArtboardPosition.x ||
     (
@@ -379,8 +373,8 @@ export const hasXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer, ar
 };
 
 export const hasYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer, artboardLayerItem: em.Artboard, destinationArtboardLayerItem: em.Artboard): boolean => {
-  const layerArtboardPosition = getArtboardPosition(layerItem, artboardLayerItem);
-  const equivalentArtboardPosition = getArtboardPosition(equivalentLayerItem, destinationArtboardLayerItem);
+  const layerArtboardPosition = getPositionInArtboard(layerItem, artboardLayerItem);
+  const equivalentArtboardPosition = getPositionInArtboard(equivalentLayerItem, destinationArtboardLayerItem);
   return (
     layerArtboardPosition.y !== equivalentArtboardPosition.y ||
     (
@@ -402,7 +396,7 @@ export const hasWidthTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer
   return (
     (layerItem.type === 'Shape' || layerItem.type === 'Image') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Image') &&
-    layerItem.master.width * layerItem.transform.scale.x !== equivalentLayerItem.master.width * equivalentLayerItem.transform.scale.x
+    Math.round(layerItem.master.width * layerItem.transform.scale.x) !== Math.round(equivalentLayerItem.master.width * equivalentLayerItem.transform.scale.x)
   );
 };
 
@@ -410,7 +404,7 @@ export const hasHeightTween = (layerItem: em.Layer, equivalentLayerItem: em.Laye
   return (
     (layerItem.type === 'Shape' || layerItem.type === 'Image') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Image') &&
-    layerItem.master.height * layerItem.transform.scale.y !== equivalentLayerItem.master.height * equivalentLayerItem.transform.scale.y
+    Math.round(layerItem.master.height * layerItem.transform.scale.y) !== Math.round(equivalentLayerItem.master.height * equivalentLayerItem.transform.scale.y)
   );
 };
 

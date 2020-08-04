@@ -1936,6 +1936,8 @@ export const setLayerTweenPower = (state: LayerState, action: SetLayerTweenPower
 
 export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
   let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  paperLayer.position.x = action.payload.x;
   currentState = {
     ...currentState,
     byId: {
@@ -1957,6 +1959,8 @@ export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
 
 export const setLayerY = (state: LayerState, action: SetLayerY): LayerState => {
   let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  paperLayer.position.y = action.payload.y;
   currentState = {
     ...currentState,
     byId: {
@@ -1984,15 +1988,22 @@ export const setLayerWidth = (state: LayerState, action: SetLayerWidth): LayerSt
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
-        frame: {
-          ...currentState.byId[action.payload.id].frame,
+        master: {
+          ...currentState.byId[action.payload.id].master,
           width: action.payload.width
+        },
+        transform: {
+          ...currentState.byId[action.payload.id].transform,
+          scale: {
+            ...currentState.byId[action.payload.id].transform.scale,
+            x: 1
+          }
         }
       }
     },
     paperProject: exportPaperProject(currentState)
   }
-  currentState = updateParentBounds(currentState, action.payload.id);
+  currentState = updateLayerBounds(currentState, action.payload.id);
   currentState = updateLayerTweens(currentState, action.payload.id, 'width');
   return currentState;
 };
@@ -2005,15 +2016,22 @@ export const setLayerHeight = (state: LayerState, action: SetLayerHeight): Layer
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
-        frame: {
-          ...currentState.byId[action.payload.id].frame,
+        master: {
+          ...currentState.byId[action.payload.id].master,
           height: action.payload.height
+        },
+        transform: {
+          ...currentState.byId[action.payload.id].transform,
+          scale: {
+            ...currentState.byId[action.payload.id].transform.scale,
+            y: 1
+          }
         }
       }
     },
     paperProject: exportPaperProject(currentState)
   }
-  currentState = updateParentBounds(currentState, action.payload.id);
+  currentState = updateLayerBounds(currentState, action.payload.id);
   currentState = updateLayerTweens(currentState, action.payload.id, 'height');
   return currentState;
 };

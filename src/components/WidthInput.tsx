@@ -9,24 +9,25 @@ import { getPaperLayer } from '../store/selectors/layer';
 
 interface WidthInputProps {
   selected?: string[];
+  layerItem?: em.Layer;
   widthValue?: number | string;
   setLayerWidth?(payload: SetLayerWidthPayload): LayerTypes;
 }
 
 const WidthInput = (props: WidthInputProps): ReactElement => {
-  const { selected, setLayerWidth, widthValue } = props;
-  const [width, setWidth] = useState<string | number>(widthValue);
+  const { selected, setLayerWidth, widthValue, layerItem } = props;
+  const [width, setWidth] = useState(widthValue);
 
   useEffect(() => {
     setWidth(widthValue);
   }, [widthValue, selected]);
 
-  const handleChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const target = e.target as HTMLInputElement;
+  const handleChange = (e: any) => {
+    const target = e.target;
     setWidth(target.value);
   };
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
+  const handleSubmit = (e: any) => {
     try {
       let nextWidth = evaluate(`${width}`);
       if (nextWidth !== widthValue && !isNaN(nextWidth)) {
@@ -34,7 +35,14 @@ const WidthInput = (props: WidthInputProps): ReactElement => {
           nextWidth = 1;
         }
         const paperLayer = getPaperLayer(selected[0]);
+        if (layerItem.transform.rotation !== 0) {
+          paperLayer.rotation = -layerItem.transform.rotation;
+        }
         paperLayer.bounds.width = nextWidth;
+        if (layerItem.transform.rotation !== 0) {
+          paperLayer.rotation = layerItem.transform.rotation;
+        }
+        paperLayer.position.x = layerItem.frame.x;
         setLayerWidth({id: selected[0], width: nextWidth});
         setWidth(nextWidth);
       } else {
@@ -59,17 +67,29 @@ const WidthInput = (props: WidthInputProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
+  const layerItem = ((): em.Layer => {
+    switch(layer.present.selected.length) {
+      case 0:
+        return null;
+      case 1: {
+        return layer.present.byId[layer.present.selected[0]];
+      }
+      default:
+        return null;
+    }
+  })();
   const widthValue = (() => {
     switch(layer.present.selected.length) {
       case 0:
         return '';
-      case 1:
-        return Math.round(layer.present.byId[layer.present.selected[0]].frame.width);
+      case 1: {
+        return Math.round(layerItem.master.width * layerItem.transform.scale.x);
+      }
       default:
         return 'multi';
     }
   })();
-  return { selected, widthValue };
+  return { selected, widthValue, layerItem };
 };
 
 export default connect(

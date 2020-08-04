@@ -7,6 +7,7 @@ import { LayerTypes } from '../store/actionTypes/layer';
 import { ThemeContext } from './ThemeProvider';
 
 interface SidebarDropzoneTopProps {
+  leftSidebarWidth?: number;
   layer: em.Layer;
   depth: number;
   dragLayers: string[];
@@ -22,7 +23,7 @@ const SidebarDropzoneTop = (props: SidebarDropzoneTopProps): ReactElement => {
   const ref = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(false);
   const theme = useContext(ThemeContext);
-  const { layer, depth, dragLayers, dragLayerById, setDragLayers, setDragging, insertLayersAbove } = props;
+  const { layer, depth, dragLayers, dragLayerById, setDragLayers, setDragging, insertLayersAbove, leftSidebarWidth } = props;
 
   const handleDragOver = (e: SyntheticEvent) => {
     if (!dragLayers.some((id) => document.getElementById(id).contains(ref.current))) {
@@ -59,7 +60,7 @@ const SidebarDropzoneTop = (props: SidebarDropzoneTopProps): ReactElement => {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       style={{
-        width: 320 - (depth * (theme.unit * 6)),
+        width: leftSidebarWidth - (depth * (theme.unit * 6)),
         boxShadow: active ? `0 ${theme.unit / 2}px 0 0 ${theme.palette.primary} inset` : '',
         height: layer.children ? theme.unit * 2 : theme.unit * 4
       }} />
@@ -67,12 +68,13 @@ const SidebarDropzoneTop = (props: SidebarDropzoneTopProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState, ownProps: SidebarDropzoneTopProps) => {
-  const { layer } = state;
+  const { layer, canvasSettings } = state;
   const dragLayerById = ownProps.dragLayers ? ownProps.dragLayers.reduce((result: {[id: string]: em.Layer}, current) => {
     result[current] = layer.present.byId[current];
     return result;
   }, {}) : {};
-  return { dragLayerById };
+  const leftSidebarWidth = canvasSettings.leftSidebarWidth;
+  return { dragLayerById, leftSidebarWidth };
 };
 
 export default connect(

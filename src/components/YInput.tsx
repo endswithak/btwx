@@ -5,7 +5,7 @@ import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
 import { SetLayerYPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setLayerY } from '../store/actions/layer';
-import { getPaperLayer, getLayerScope } from '../store/selectors/layer';
+import { getLayerScope, getPositionInArtboard } from '../store/selectors/layer';
 
 interface YInputProps {
   selected?: string[];
@@ -30,12 +30,10 @@ const YInput = (props: YInputProps): ReactElement => {
   const handleSubmit = (e: any) => {
     try {
       const nextY = evaluate(`${y}`);
-      if (nextY !== artboardParent ? artboardParent.frame.y - yValue : yValue && !isNaN(nextY)) {
-        const paperLayer = getPaperLayer(selected[0]);
-        const nextYValue = artboardParent ? nextY + (artboardParent.frame.y - (artboardParent.frame.height / 2)) : nextY;
-        paperLayer.position.y = nextYValue;
+      if (nextY !== yValue && !isNaN(nextY)) {
+        const nextYValue = Math.round(artboardParent ? nextY + (artboardParent.frame.y - (artboardParent.frame.height / 2)) : nextY);
         setLayerY({id: selected[0], y: nextYValue});
-        setY(nextYValue);
+        setY(nextY);
       } else {
         setY(yValue);
       }
@@ -58,14 +56,18 @@ const YInput = (props: YInputProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const artboardParent = (() => {
+  const artboardParent = ((): em.Artboard => {
     switch(layer.present.selected.length) {
       case 0:
         return null;
       case 1: {
         const layerScope = getLayerScope(layer.present, layer.present.selected[0]);
-        const containsArtboard = layer.present.allArtboardIds.includes(layerScope[0]);
-        return containsArtboard ? layer.present.byId[layerScope[0]] : null;
+        if (layerScope.some((id: string) => layer.present.allArtboardIds.includes(id))) {
+          const artboard = layerScope.find((id: string) => layer.present.allArtboardIds.includes(id));
+          return layer.present.byId[artboard] as em.Artboard;
+        } else {
+          return null;
+        }
       }
       default:
         return null;
@@ -75,8 +77,14 @@ const mapStateToProps = (state: RootState) => {
     switch(layer.present.selected.length) {
       case 0:
         return '';
-      case 1:
-        return artboardParent ? Math.round(layer.present.byId[layer.present.selected[0]].frame.y - (artboardParent.frame.y - (artboardParent.frame.height / 2))) : Math.round(layer.present.byId[layer.present.selected[0]].frame.y);
+      case 1: {
+        const layerItem = layer.present.byId[layer.present.selected[0]];
+        if (artboardParent) {
+          return getPositionInArtboard(layerItem, artboardParent).y;
+        } else {
+          return Math.round(layerItem.frame.y);
+        }
+      }
       default:
         return 'multi';
     }
