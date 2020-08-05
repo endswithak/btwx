@@ -10,13 +10,14 @@ import { ThemeContext } from './ThemeProvider';
 interface HorizontalFlipInputProps {
   selected?: string[];
   horizontalFlipValue?: boolean;
+  disabled?: boolean;
   enableLayerHorizontalFlip?(payload: EnableLayerHorizontalFlipPayload): LayerTypes;
   disableLayerHorizontalFlip?(payload: DisableLayerHorizontalFlipPayload): LayerTypes;
 }
 
 const HorizontalFlipInput = (props: HorizontalFlipInputProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { selected, horizontalFlipValue, enableLayerHorizontalFlip, disableLayerHorizontalFlip } = props;
+  const { selected, horizontalFlipValue, enableLayerHorizontalFlip, disableLayerHorizontalFlip, disabled } = props;
   const [horizontalFlip, setHorizontalFlip] = useState<boolean>(horizontalFlipValue);
 
   useEffect(() => {
@@ -38,7 +39,7 @@ const HorizontalFlipInput = (props: HorizontalFlipInputProps): ReactElement => {
     <SidebarToggleButton
       active={horizontalFlip}
       onClick={handleClick}
-      disabled={selected.length > 1 || selected.length === 0}>
+      disabled={disabled}>
       <svg
         width='24'
         height='24'
@@ -62,7 +63,8 @@ const mapStateToProps = (state: RootState) => {
         return false;
     }
   })();
-  return { selected, horizontalFlipValue };
+  const disabled = selected.some((id) => layer.present.byId[id].type === 'Artboard') || selected.length > 1;
+  return { selected, horizontalFlipValue, disabled };
 };
 
 export default connect(

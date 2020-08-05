@@ -1,11 +1,9 @@
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { evaluate } from 'mathjs';
 import { RootState } from '../store/reducers';
-import { SetLayerOpacityPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayerOpacity } from '../store/actions/layer';
-import { getPaperLayer } from '../store/selectors/layer';
-import SidebarSection from './SidebarSection';
+import { SetLayersOpacityPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayersOpacity } from '../store/actions/layer';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarInput from './SidebarInput';
@@ -15,37 +13,36 @@ import BlendModeSelector from './BlendModeSelector';
 interface OpacityInputProps {
   selected?: string[];
   opacityValue?: number;
-  disabled?: boolean;
-  setLayerOpacity?(payload: SetLayerOpacityPayload): LayerTypes;
+  setLayersOpacity?(payload: SetLayersOpacityPayload): LayerTypes;
 }
 
 const OpacityInput = (props: OpacityInputProps): ReactElement => {
-  const { selected, setLayerOpacity, opacityValue, disabled } = props;
-  const [opacity, setOpacity] = useState<string | number>(opacityValue);
+  const { selected, setLayersOpacity, opacityValue } = props;
+  const [opacity, setOpacity] = useState(opacityValue);
 
   useEffect(() => {
     setOpacity(opacityValue);
   }, [opacityValue, selected]);
 
-  const handleChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const target = e.target as HTMLInputElement;
+  const handleChange = (e: any) => {
+    const target = e.target;
     setOpacity(target.value);
   };
 
-  const handleSliderChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    handleChange(e);
-    const paperLayer = getPaperLayer(selected[0]);
-    let nextOpacity = evaluate(`${opacity}`);
-    if (nextOpacity > 100) {
-      nextOpacity = 100;
-    }
-    if (nextOpacity < 0) {
-      nextOpacity = 0;
-    }
-    paperLayer.opacity = evaluate(`${nextOpacity} / 100`);
-  };
+  // const handleSliderChange = (e: any) => {
+  //   handleChange(e);
+  //   const paperLayer = getPaperLayer(selected[0]);
+  //   let nextOpacity = evaluate(`${opacity}`);
+  //   if (nextOpacity > 100) {
+  //     nextOpacity = 100;
+  //   }
+  //   if (nextOpacity < 0) {
+  //     nextOpacity = 0;
+  //   }
+  //   paperLayer.opacity = evaluate(`${nextOpacity} / 100`);
+  // };
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
+  const handleSubmit = (e: any) => {
     try {
       let nextOpacity = evaluate(`${opacity}`);
       if (nextOpacity !== opacityValue) {
@@ -55,9 +52,7 @@ const OpacityInput = (props: OpacityInputProps): ReactElement => {
         if (nextOpacity < 0) {
           nextOpacity = 0;
         }
-        const paperLayer = getPaperLayer(selected[0]);
-        paperLayer.opacity = evaluate(`${nextOpacity} / 100`);
-        setLayerOpacity({id: selected[0], opacity: evaluate(`${nextOpacity} / 100`)});
+        setLayersOpacity({layers: selected, opacity: evaluate(`${nextOpacity} / 100`)});
         setOpacity(nextOpacity);
       }
     } catch(error) {
@@ -81,7 +76,6 @@ const OpacityInput = (props: OpacityInputProps): ReactElement => {
           onChange={handleChange}
           onSubmit={handleSubmit}
           submitOnBlur
-          disabled={disabled}
           label={'%'}
           bottomLabel='Opacity' />
       </SidebarSectionColumn>
@@ -94,28 +88,21 @@ const mapStateToProps = (state: RootState) => {
   const selected = layer.present.selected;
   const opacityValue = (() => {
     switch(layer.present.selected.length) {
-      case 0:
-        return '';
       case 1:
         return layer.present.byId[layer.present.selected[0]].style.opacity * 100;
-      default:
-        return 'multi';
+      default: {
+        if (selected.every((id: string) => layer.present.byId[id].style.opacity === layer.present.byId[layer.present.selected[0]].style.opacity)) {
+          return layer.present.byId[layer.present.selected[0]].style.opacity * 100;
+        } else {
+          return 'multi';
+        }
+      }
     }
   })();
-  const disabled = (() => {
-    switch(layer.present.selected.length) {
-      case 0:
-        return true;
-      case 1:
-        return false;
-      default:
-        return true;
-    }
-  })();
-  return { selected, opacityValue, disabled };
+  return { selected, opacityValue };
 };
 
 export default connect(
   mapStateToProps,
-  { setLayerOpacity }
+  { setLayersOpacity }
 )(OpacityInput);

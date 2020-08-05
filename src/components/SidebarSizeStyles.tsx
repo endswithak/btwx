@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
+import React, { ReactElement } from 'react';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import HeightInput from './HeightInput';

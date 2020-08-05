@@ -1,21 +1,19 @@
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { evaluate } from 'mathjs';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
-import { SetLayerHeightPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayerHeight } from '../store/actions/layer';
-import { getPaperLayer } from '../store/selectors/layer';
+import { SetLayersHeightPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayersHeight } from '../store/actions/layer';
 
 interface HeightInputProps {
-  layerItem?: em.Layer;
   selected?: string[];
   heightValue?: number | string;
-  setLayerHeight?(payload: SetLayerHeightPayload): LayerTypes;
+  setLayersHeight?(payload: SetLayersHeightPayload): LayerTypes;
 }
 
 const HeightInput = (props: HeightInputProps): ReactElement => {
-  const { selected, setLayerHeight, heightValue, layerItem } = props;
+  const { selected, setLayersHeight, heightValue } = props;
   const [height, setHeight] = useState(props.heightValue);
 
   useEffect(() => {
@@ -34,16 +32,7 @@ const HeightInput = (props: HeightInputProps): ReactElement => {
         if (nextHeight < 1) {
           nextHeight = 1;
         }
-        const paperLayer = getPaperLayer(selected[0]);
-        if (layerItem.transform.rotation !== 0) {
-          paperLayer.rotation = -layerItem.transform.rotation;
-        }
-        paperLayer.bounds.height = nextHeight;
-        if (layerItem.transform.rotation !== 0) {
-          paperLayer.rotation = layerItem.transform.rotation;
-        }
-        paperLayer.position.y = layerItem.frame.y;
-        setLayerHeight({id: selected[0], height: nextHeight});
+        setLayersHeight({layers: selected, height: nextHeight});
         setHeight(nextHeight);
       } else {
         setHeight(heightValue);
@@ -59,40 +48,32 @@ const HeightInput = (props: HeightInputProps): ReactElement => {
       onChange={handleChange}
       onSubmit={handleSubmit}
       submitOnBlur
-      label={'H'}
-      disabled={selected.length > 1 || selected.length === 0} />
+      label={'H'} />
   );
 }
 
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const layerItem = ((): em.Layer => {
-    switch(layer.present.selected.length) {
-      case 0:
-        return null;
-      case 1: {
-        return layer.present.byId[layer.present.selected[0]];
-      }
-      default:
-        return null;
-    }
-  })();
+  const layerItems: em.Layer[] = selected.reduce((result, current) => {
+    const layerItem = layer.present.byId[current];
+    return [...result, layerItem];
+  }, []);
+  const heightValues: number[] = layerItems.reduce((result, current) => {
+    const height = Math.round(current.master.height * current.transform.scale.y);
+    return [...result, height];
+  }, []);
   const heightValue = (() => {
-    switch(layer.present.selected.length) {
-      case 0:
-        return '';
-      case 1: {
-        return Math.round(layerItem.master.height * layerItem.transform.scale.y);
-      }
-      default:
-        return 'multi';
+    if (heightValues.every((value: number) => value === heightValues[0])) {
+      return heightValues[0];
+    } else {
+      return 'multi';
     }
   })();
-  return { selected, heightValue, layerItem };
+  return { selected, heightValue };
 };
 
 export default connect(
   mapStateToProps,
-  { setLayerHeight }
+  { setLayersHeight }
 )(HeightInput);

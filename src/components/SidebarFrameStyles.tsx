@@ -1,7 +1,6 @@
 import React, { ReactElement } from 'react';
 import SidebarPositionStyles from './SidebarPositionStyles';
 import SidebarSizeStyles from './SidebarSizeStyles';
-import SidebarSectionHead from './SidebarSectionHead';
 import SidebarRotationStyles from './SidebarRotationStyles';
 import SidebarFlippedStyles from './SidebarFlippedStyles';
 import SidebarSectionWrap from './SidebarSectionWrap';
@@ -13,9 +12,6 @@ const SidebarFrameStyles = (): ReactElement => {
   return (
     <SidebarSectionWrap bottomBorder whiteSpace>
       <SidebarSection>
-        {/* <SidebarSectionRow>
-          <SidebarSectionHead text={'position'} />
-        </SidebarSectionRow> */}
         <SidebarSectionRow>
           <SidebarSectionColumn width={'66%'}>
             <SidebarPositionStyles />

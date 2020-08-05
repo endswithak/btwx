@@ -56,11 +56,17 @@ import {
   SET_LAYER_TWEEN_EASE,
   SET_LAYER_TWEEN_POWER,
   SET_LAYER_X,
+  SET_LAYERS_X,
   SET_LAYER_Y,
+  SET_LAYERS_Y,
   SET_LAYER_WIDTH,
+  SET_LAYERS_WIDTH,
   SET_LAYER_HEIGHT,
+  SET_LAYERS_HEIGHT,
   SET_LAYER_ROTATION,
+  SET_LAYERS_ROTATION,
   SET_LAYER_OPACITY,
+  SET_LAYERS_OPACITY,
   ENABLE_LAYER_HORIZONTAL_FLIP,
   DISABLE_LAYER_HORIZONTAL_FLIP,
   ENABLE_LAYER_VERTICAL_FLIP,
@@ -147,6 +153,7 @@ import {
   SEND_LAYER_TO_BACK,
   SEND_LAYERS_TO_BACK,
   SET_LAYER_BLEND_MODE,
+  SET_LAYERS_BLEND_MODE,
   UNITE_LAYERS,
   INTERSECT_LAYERS,
   SUBTRACT_LAYERS,
@@ -216,11 +223,17 @@ import {
   setLayerTweenEase,
   setLayerTweenPower,
   setLayerX,
+  setLayersX,
   setLayerY,
+  setLayersY,
   setLayerWidth,
+  setLayersWidth,
   setLayerHeight,
+  setLayersHeight,
   setLayerRotation,
+  setLayersRotation,
   setLayerOpacity,
+  setLayersOpacity,
   enableLayerHorizontalFlip,
   disableLayerHorizontalFlip,
   enableLayerVerticalFlip,
@@ -307,6 +320,7 @@ import {
   sendLayerToBack,
   sendLayersToBack,
   setLayerBlendMode,
+  setLayersBlendMode,
   uniteLayers,
   intersectLayers,
   subtractLayers,
@@ -509,16 +523,28 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setLayerTweenPower(state, action);
     case SET_LAYER_X:
       return setLayerX(state, action);
+    case SET_LAYERS_X:
+      return setLayersX(state, action);
     case SET_LAYER_Y:
       return setLayerY(state, action);
+    case SET_LAYERS_Y:
+      return setLayersY(state, action);
     case SET_LAYER_WIDTH:
       return setLayerWidth(state, action);
+    case SET_LAYERS_WIDTH:
+      return setLayersWidth(state, action);
     case SET_LAYER_HEIGHT:
       return setLayerHeight(state, action);
+    case SET_LAYERS_HEIGHT:
+      return setLayersHeight(state, action);
     case SET_LAYER_ROTATION:
       return setLayerRotation(state, action);
+    case SET_LAYERS_ROTATION:
+      return setLayersRotation(state, action);
     case SET_LAYER_OPACITY:
       return setLayerOpacity(state, action);
+    case SET_LAYERS_OPACITY:
+      return setLayersOpacity(state, action);
     case ENABLE_LAYER_HORIZONTAL_FLIP:
       return enableLayerHorizontalFlip(state, action);
     case DISABLE_LAYER_HORIZONTAL_FLIP:
@@ -691,6 +717,8 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return sendLayersToBack(state, action);
     case SET_LAYER_BLEND_MODE:
       return setLayerBlendMode(state, action);
+    case SET_LAYERS_BLEND_MODE:
+      return setLayersBlendMode(state, action);
     case UNITE_LAYERS:
       return uniteLayers(state, action);
     case INTERSECT_LAYERS:

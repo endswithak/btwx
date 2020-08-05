@@ -7,15 +7,14 @@ import { RightSidebarTypes } from '../store/actionTypes/rightSidebar';
 import { expandOpacityStyles, collapseOpacityStyles } from '../store/actions/rightSidebar';
 
 interface SidebarOpacityStylesProps {
-  selected?: string[];
-  selectedType?: string;
+  isEnabled: boolean;
   opacityStylesCollapsed?: boolean;
   expandOpacityStyles?(): RightSidebarTypes;
   collapseOpacityStyles?(): RightSidebarTypes;
 }
 
 const SidebarOpacityStyles = (props: SidebarOpacityStylesProps): ReactElement => {
-  const { selected, selectedType, opacityStylesCollapsed, expandOpacityStyles, collapseOpacityStyles } = props;
+  const { isEnabled, opacityStylesCollapsed, expandOpacityStyles, collapseOpacityStyles } = props;
 
   const handleClick = () => {
     if (opacityStylesCollapsed) {
@@ -26,7 +25,7 @@ const SidebarOpacityStyles = (props: SidebarOpacityStylesProps): ReactElement =>
   }
 
   return (
-    selected.length === 1 && (selectedType === 'Shape' || selectedType === 'Text' || selectedType === 'Group' || selectedType === 'Image')
+    isEnabled
     ? <SidebarCollapseSection
         onClick={handleClick}
         collapsed={opacityStylesCollapsed}
@@ -40,9 +39,9 @@ const SidebarOpacityStyles = (props: SidebarOpacityStylesProps): ReactElement =>
 const mapStateToProps = (state: RootState) => {
   const { layer, rightSidebar } = state;
   const selected = layer.present.selected;
-  const selectedType = selected.length > 0 ? layer.present.byId[selected[0]].type : null;
   const opacityStylesCollapsed = rightSidebar.opacityStylesCollapsed;
-  return { selected, selectedType, opacityStylesCollapsed };
+  const isEnabled = selected.length > 0 && !selected.some((id: string) => layer.present.byId[id].type === 'Artboard');
+  return { opacityStylesCollapsed, isEnabled };
 };
 
 export default connect(

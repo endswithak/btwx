@@ -36,7 +36,7 @@ import {
   RemoveLayerStrokeGradientStop, AddLayerStrokeGradientStop, SetLayerStrokeGradientStopPosition,
   SetLayerStrokeGradientStopColor, SetLayerStrokeGradientDestination, SetLayerStrokeGradientOrigin,
   AddCompoundShape, UniteLayers, SetRoundedRadius, SetPolygonSides, SetStarPoints, IntersectLayers,
-  SubtractLayers, ExcludeLayers, DivideLayers, SetStarRadius, SetLayerStrokeDashOffset
+  SubtractLayers, ExcludeLayers, DivideLayers, SetStarRadius, SetLayerStrokeDashOffset, SetLayersOpacity, SetLayersBlendMode, SetLayersX, SetLayersY, SetLayersWidth, SetLayersHeight, SetLayersRotation
 } from '../actionTypes/layer';
 
 import {
@@ -1931,8 +1931,15 @@ export const setLayerTweenPower = (state: LayerState, action: SetLayerTweenPower
 
 export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
   let currentState = state;
+  let x = action.payload.x;
   const paperLayer = getPaperLayer(action.payload.id);
-  paperLayer.position.x = action.payload.x;
+  const layerScope = getLayerScope(currentState, action.payload.id);
+  if (layerScope.some((id: string) => currentState.allArtboardIds.includes(id))) {
+    const artboard = layerScope.find((id: string) => currentState.allArtboardIds.includes(id));
+    const artboardItem = state.byId[artboard];
+    x = Math.round(x + (artboardItem.frame.x - (artboardItem.frame.width / 2)));
+  }
+  paperLayer.position.x = x;
   currentState = {
     ...currentState,
     byId: {
@@ -1941,7 +1948,7 @@ export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
         ...currentState.byId[action.payload.id],
         frame: {
           ...currentState.byId[action.payload.id].frame,
-          x: action.payload.x
+          x: x
         }
       }
     },
@@ -1952,10 +1959,23 @@ export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
   return currentState;
 };
 
+export const setLayersX = (state: LayerState, action: SetLayersX): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return setLayerX(result, layerActions.setLayerX({id: current, x: action.payload.x}) as SetLayerX);
+  }, state);
+};
+
 export const setLayerY = (state: LayerState, action: SetLayerY): LayerState => {
   let currentState = state;
+  let y = action.payload.y;
   const paperLayer = getPaperLayer(action.payload.id);
-  paperLayer.position.y = action.payload.y;
+  const layerScope = getLayerScope(currentState, action.payload.id);
+  if (layerScope.some((id: string) => currentState.allArtboardIds.includes(id))) {
+    const artboard = layerScope.find((id: string) => currentState.allArtboardIds.includes(id));
+    const artboardItem = state.byId[artboard];
+    y = Math.round(y + (artboardItem.frame.y - (artboardItem.frame.height / 2)));
+  }
+  paperLayer.position.y = y;
   currentState = {
     ...currentState,
     byId: {
@@ -1964,19 +1984,42 @@ export const setLayerY = (state: LayerState, action: SetLayerY): LayerState => {
         ...currentState.byId[action.payload.id],
         frame: {
           ...currentState.byId[action.payload.id].frame,
-          y: action.payload.y
+          y: y
         }
       }
     },
     paperProject: exportPaperProject(currentState)
   }
-  currentState = updateParentBounds(currentState, action.payload.id);
+  currentState = updateLayerBounds(currentState, action.payload.id);
   currentState = updateLayerTweens(currentState, action.payload.id, 'y');
   return currentState;
 };
 
+export const setLayersY = (state: LayerState, action: SetLayersY): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return setLayerY(result, layerActions.setLayerY({id: current, y: action.payload.y}) as SetLayerY);
+  }, state);
+};
+
 export const setLayerWidth = (state: LayerState, action: SetLayerWidth): LayerState => {
   let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  const layerItem = state.byId[action.payload.id];
+  if (layerItem.type === 'Artboard') {
+    const mask = paperLayer.getItem({data: { id: 'ArtboardMask' }});
+    const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
+    mask.bounds.width = action.payload.width;
+    background.bounds.width = action.payload.width;
+  } else {
+    if (layerItem.transform.rotation !== 0) {
+      paperLayer.rotation = -layerItem.transform.rotation;
+    }
+    paperLayer.bounds.width = action.payload.width;
+    if (layerItem.transform.rotation !== 0) {
+      paperLayer.rotation = layerItem.transform.rotation;
+    }
+  }
+  paperLayer.position.x = layerItem.frame.x;
   currentState = {
     ...currentState,
     byId: {
@@ -2003,8 +2046,31 @@ export const setLayerWidth = (state: LayerState, action: SetLayerWidth): LayerSt
   return currentState;
 };
 
+export const setLayersWidth = (state: LayerState, action: SetLayersWidth): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return setLayerWidth(result, layerActions.setLayerWidth({id: current, width: action.payload.width}) as SetLayerWidth);
+  }, state);
+};
+
 export const setLayerHeight = (state: LayerState, action: SetLayerHeight): LayerState => {
   let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  const layerItem = state.byId[action.payload.id];
+  if (layerItem.type === 'Artboard') {
+    const mask = paperLayer.getItem({data: { id: 'ArtboardMask' }});
+    const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
+    mask.bounds.height = action.payload.height;
+    background.bounds.height = action.payload.height;
+  } else {
+    if (layerItem.transform.rotation !== 0) {
+      paperLayer.rotation = -layerItem.transform.rotation;
+    }
+    paperLayer.bounds.height = action.payload.height;
+    if (layerItem.transform.rotation !== 0) {
+      paperLayer.rotation = layerItem.transform.rotation;
+    }
+  }
+  paperLayer.position.y = layerItem.frame.y;
   currentState = {
     ...currentState,
     byId: {
@@ -2031,8 +2097,16 @@ export const setLayerHeight = (state: LayerState, action: SetLayerHeight): Layer
   return currentState;
 };
 
+export const setLayersHeight = (state: LayerState, action: SetLayersHeight): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return setLayerHeight(result, layerActions.setLayerHeight({id: current, height: action.payload.height}) as SetLayerHeight);
+  }, state);
+};
+
 export const setLayerOpacity = (state: LayerState, action: SetLayerOpacity): LayerState => {
   let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  paperLayer.opacity = action.payload.opacity;
   currentState = {
     ...currentState,
     byId: {
@@ -2049,6 +2123,12 @@ export const setLayerOpacity = (state: LayerState, action: SetLayerOpacity): Lay
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'opacity');
   return currentState;
+};
+
+export const setLayersOpacity = (state: LayerState, action: SetLayersOpacity): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return setLayerOpacity(result, layerActions.setLayerOpacity({id: current, opacity: action.payload.opacity}) as SetLayerOpacity);
+  }, state);
 };
 
 export const setLayerRotation = (state: LayerState, action: SetLayerRotation): LayerState => {
@@ -2085,7 +2165,15 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
     },
     paperProject: exportPaperProject(currentState)
   }
-  return updateLayerBounds(currentState, action.payload.id);
+  currentState = updateLayerTweens(currentState, action.payload.id, 'rotation');
+  currentState = updateLayerBounds(currentState, action.payload.id);
+  return currentState;
+};
+
+export const setLayersRotation = (state: LayerState, action: SetLayersRotation): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return setLayerRotation(result, layerActions.setLayerRotation({id: current, rotation: action.payload.rotation}) as SetLayerRotation);
+  }, state);
 };
 
 export const enableLayerHorizontalFlip = (state: LayerState, action: EnableLayerHorizontalFlip): LayerState => {
@@ -4355,6 +4443,12 @@ export const setLayerBlendMode = (state: LayerState, action: SetLayerBlendMode):
     paperProject: exportPaperProject(currentState)
   }
   return currentState;
+};
+
+export const setLayersBlendMode = (state: LayerState, action: SetLayersBlendMode): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return setLayerBlendMode(result, layerActions.setLayerBlendMode({id: current, blendMode: action.payload.blendMode}) as SetLayerBlendMode);
+  }, state);
 };
 
 export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState => {

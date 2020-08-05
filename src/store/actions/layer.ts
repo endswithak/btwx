@@ -65,11 +65,17 @@ import {
   FREEZE_LAYER_TWEEN,
   UNFREEZE_LAYER_TWEEN,
   SET_LAYER_X,
+  SET_LAYERS_X,
   SET_LAYER_Y,
+  SET_LAYERS_Y,
   SET_LAYER_WIDTH,
+  SET_LAYERS_WIDTH,
   SET_LAYER_HEIGHT,
+  SET_LAYERS_HEIGHT,
   SET_LAYER_ROTATION,
+  SET_LAYERS_ROTATION,
   SET_LAYER_OPACITY,
+  SET_LAYERS_OPACITY,
   ENABLE_LAYER_HORIZONTAL_FLIP,
   DISABLE_LAYER_HORIZONTAL_FLIP,
   ENABLE_LAYER_VERTICAL_FLIP,
@@ -156,6 +162,7 @@ import {
   SEND_LAYER_TO_BACK,
   SEND_LAYERS_TO_BACK,
   SET_LAYER_BLEND_MODE,
+  SET_LAYERS_BLEND_MODE,
   UNITE_LAYERS,
   INTERSECT_LAYERS,
   SUBTRACT_LAYERS,
@@ -220,11 +227,17 @@ import {
   FreezeLayerTweenPayload,
   UnFreezeLayerTweenPayload,
   SetLayerXPayload,
+  SetLayersXPayload,
   SetLayerYPayload,
+  SetLayersYPayload,
   SetLayerWidthPayload,
+  SetLayersWidthPayload,
   SetLayerHeightPayload,
+  SetLayersHeightPayload,
   SetLayerRotationPayload,
+  SetLayersRotationPayload,
   SetLayerOpacityPayload,
+  SetLayersOpacityPayload,
   EnableLayerHorizontalFlipPayload,
   DisableLayerHorizontalFlipPayload,
   EnableLayerVerticalFlipPayload,
@@ -310,6 +323,7 @@ import {
   SendLayerToBackPayload,
   SendLayersToBackPayload,
   SetLayerBlendModePayload,
+  SetLayersBlendModePayload,
   UniteLayersPayload,
   IntersectLayersPayload,
   SubtractLayersPayload,
@@ -363,6 +377,7 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
       type: 'Artboard',
       id: layerId,
       frame: payload.frame,
+      master: payload.master,
       name: payload.name ? payload.name : 'Artboard',
       parent: null,
       children: [],
@@ -392,6 +407,7 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
       type: 'Group',
       id: layerId,
       frame: payload.frame,
+      master: payload.master,
       name: payload.name ? payload.name : 'Group',
       parent: payload.parent ? payload.parent : null,
       children: [],
@@ -788,8 +804,18 @@ export const setLayerX = (payload: SetLayerXPayload): LayerTypes => ({
   payload
 });
 
+export const setLayersX = (payload: SetLayersXPayload): LayerTypes => ({
+  type: SET_LAYERS_X,
+  payload
+});
+
 export const setLayerY = (payload: SetLayerYPayload): LayerTypes => ({
   type: SET_LAYER_Y,
+  payload
+});
+
+export const setLayersY = (payload: SetLayersYPayload): LayerTypes => ({
+  type: SET_LAYERS_Y,
   payload
 });
 
@@ -798,8 +824,18 @@ export const setLayerWidth = (payload: SetLayerWidthPayload): LayerTypes => ({
   payload
 });
 
+export const setLayersWidth = (payload: SetLayersWidthPayload): LayerTypes => ({
+  type: SET_LAYERS_WIDTH,
+  payload
+});
+
 export const setLayerHeight = (payload: SetLayerHeightPayload): LayerTypes => ({
   type: SET_LAYER_HEIGHT,
+  payload
+});
+
+export const setLayersHeight = (payload: SetLayersHeightPayload): LayerTypes => ({
+  type: SET_LAYERS_HEIGHT,
   payload
 });
 
@@ -808,8 +844,18 @@ export const setLayerRotation = (payload: SetLayerRotationPayload): LayerTypes =
   payload
 });
 
+export const setLayersRotation = (payload: SetLayersRotationPayload): LayerTypes => ({
+  type: SET_LAYERS_ROTATION,
+  payload
+});
+
 export const setLayerOpacity = (payload: SetLayerOpacityPayload): LayerTypes => ({
   type: SET_LAYER_OPACITY,
+  payload
+});
+
+export const setLayersOpacity = (payload: SetLayersOpacityPayload): LayerTypes => ({
+  type: SET_LAYERS_OPACITY,
   payload
 });
 
@@ -1239,6 +1285,11 @@ export const sendLayersToBack = (payload: SendLayersToBackPayload): LayerTypes =
 
 export const setLayerBlendMode = (payload: SetLayerBlendModePayload): LayerTypes => ({
   type: SET_LAYER_BLEND_MODE,
+  payload
+});
+
+export const setLayersBlendMode = (payload: SetLayersBlendModePayload): LayerTypes => ({
+  type: SET_LAYERS_BLEND_MODE,
   payload
 });
 

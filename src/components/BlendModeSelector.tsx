@@ -1,19 +1,18 @@
-import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import SidebarSelect from './SidebarSelect';
 import { RootState } from '../store/reducers';
-import { SetLayerBlendModePayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayerBlendMode } from '../store/actions/layer';
+import { SetLayersBlendModePayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayersBlendMode } from '../store/actions/layer';
 
 interface BlendModeSelectorProps {
   selected?: string[];
   blendModeValue?: string;
-  setLayerBlendMode?(payload: SetLayerBlendModePayload): LayerTypes;
-  disabled?: boolean;
+  setLayersBlendMode?(payload: SetLayersBlendModePayload): LayerTypes;
 }
 
 const BlendModeSelector = (props: BlendModeSelectorProps): ReactElement => {
-  const { selected, blendModeValue, setLayerBlendMode, disabled } = props;
+  const { selected, blendModeValue, setLayersBlendMode } = props;
 
   const options: { value: em.BlendMode; label: string }[] = [
     { value: 'normal', label: 'Normal' },
@@ -37,12 +36,16 @@ const BlendModeSelector = (props: BlendModeSelectorProps): ReactElement => {
   const [blendMode, setBlendMode] = useState(options.find((option) => option.value === blendModeValue));
 
   useEffect(() => {
-    setBlendMode(options.find((option) => option.value === blendModeValue));
+    if (blendModeValue === 'multi') {
+      setBlendMode(null);
+    } else {
+      setBlendMode(options.find((option) => option.value === blendModeValue));
+    }
   }, [blendModeValue, selected]);
 
   const handleChange = (selectedOption: { value: em.BlendMode; label: string }): void => {
     setBlendMode(selectedOption);
-    setLayerBlendMode({id: selected[0], blendMode: selectedOption.value});
+    setLayersBlendMode({layers: selected, blendMode: selectedOption.value});
   }
 
   return (
@@ -50,9 +53,8 @@ const BlendModeSelector = (props: BlendModeSelectorProps): ReactElement => {
       value={blendMode}
       onChange={handleChange}
       options={options}
-      placeholder='Blend Mode'
+      placeholder='multi'
       bottomLabel='Blend Mode'
-      disabled={disabled}
     />
   );
 }
@@ -60,25 +62,26 @@ const BlendModeSelector = (props: BlendModeSelectorProps): ReactElement => {
 const mapStateToProps = (state: RootState): {
   selected: string[];
   blendModeValue: string;
-  disabled: boolean;
 } => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const blendModeValue = (layer.present.byId[selected[0]] as em.Text).style.blendMode;
-  const disabled = (() => {
+  const blendModeValue = (() => {
     switch(layer.present.selected.length) {
-      case 0:
-        return true;
       case 1:
-        return false;
-      default:
-        return true;
+        return layer.present.byId[selected[0]].style.blendMode;
+      default: {
+        if (selected.every((id: string) => layer.present.byId[id].style.blendMode === layer.present.byId[layer.present.selected[0]].style.blendMode)) {
+          return layer.present.byId[selected[0]].style.blendMode;
+        } else {
+          return 'multi';
+        }
+      }
     }
   })();
-  return { selected, blendModeValue, disabled };
+  return { selected, blendModeValue };
 };
 
 export default connect(
   mapStateToProps,
-  { setLayerBlendMode }
+  { setLayersBlendMode }
 )(BlendModeSelector);

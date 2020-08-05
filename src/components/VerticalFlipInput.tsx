@@ -10,13 +10,14 @@ import { ThemeContext } from './ThemeProvider';
 interface VerticalFlipInputProps {
   selected?: string[];
   verticalFlipValue?: boolean;
+  disabled?: boolean;
   enableLayerVerticalFlip?(payload: EnableLayerVerticalFlipPayload): LayerTypes;
   disableLayerVerticalFlip?(payload: DisableLayerVerticalFlipPayload): LayerTypes;
 }
 
 const VerticalFlipInput = (props: VerticalFlipInputProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { selected, verticalFlipValue, enableLayerVerticalFlip, disableLayerVerticalFlip } = props;
+  const { selected, verticalFlipValue, enableLayerVerticalFlip, disableLayerVerticalFlip, disabled } = props;
   const [verticalFlip, setVerticalFlip] = useState<boolean>(verticalFlipValue);
 
   useEffect(() => {
@@ -38,7 +39,7 @@ const VerticalFlipInput = (props: VerticalFlipInputProps): ReactElement => {
     <SidebarToggleButton
       active={verticalFlip}
       onClick={handleClick}
-      disabled={selected.length > 1 || selected.length === 0}>
+      disabled={disabled}>
       <svg
         width='24'
         height='24'
@@ -62,7 +63,8 @@ const mapStateToProps = (state: RootState) => {
         return false;
     }
   })();
-  return { selected, verticalFlipValue };
+  const disabled = selected.some((id) => layer.present.byId[id].type === 'Artboard') || selected.length > 1;
+  return { selected, verticalFlipValue, disabled };
 };
 
 export default connect(

@@ -60,6 +60,12 @@ const SidebarArtboardSizes = (props: SidebarArtboardPlatformOrientationProps): R
         width: newArtboard.bounds.width,
         height: newArtboard.bounds.height
       },
+      master: {
+        x: newArtboard.position.x,
+        y: newArtboard.position.y,
+        width: newArtboard.bounds.width,
+        height: newArtboard.bounds.height
+      },
       paperLayer: newArtboard
     });
     enableSelectionTool();

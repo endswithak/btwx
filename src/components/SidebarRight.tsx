@@ -9,14 +9,13 @@ import SidebarArtboardSizes from './SidebarArtboardSizes';
 interface SidebarRightProps {
   isOpen: boolean;
   toolType: em.ToolType;
-  artboardSelected: boolean;
-  layerSelected: boolean;
+  selected: string[];
   sidebarWidth: number;
   ready: boolean;
 }
 
 const SidebarRight = (props: SidebarRightProps): ReactElement => {
-  const { isOpen, artboardSelected, layerSelected, toolType, sidebarWidth, ready } = props;
+  const { isOpen, selected, toolType, sidebarWidth, ready } = props;
   return (
     isOpen
     ? <Sidebar
@@ -28,7 +27,7 @@ const SidebarRight = (props: SidebarRightProps): ReactElement => {
           : null
         } */}
         {
-          ready && toolType !== 'Artboard' && layerSelected
+          ready && toolType !== 'Artboard' && selected.length > 0
           ? <SidebarLayerStyles />
           : null
         }
@@ -46,11 +45,11 @@ const mapStateToProps = (state: RootState) => {
   const { layer, tool, canvasSettings, rightSidebar } = state;
   const isOpen = rightSidebar.isOpen;
   const selected = layer.present.selected;
-  const artboardSelected = selected.some((id: string) => layer.present.allArtboardIds.includes(id));
-  const layerSelected = selected.some((id: string) => !layer.present.allArtboardIds.includes(id));
+  // const artboardSelected = selected.some((id: string) => layer.present.allArtboardIds.includes(id));
+  // const layerSelected = selected.some((id: string) => !layer.present.allArtboardIds.includes(id));
   const toolType = tool.type;
   const sidebarWidth = canvasSettings.rightSidebarWidth;
-  return { isOpen, selected, artboardSelected, layerSelected, toolType, sidebarWidth };
+  return { isOpen, selected, toolType, sidebarWidth };
 };
 
 export default connect(

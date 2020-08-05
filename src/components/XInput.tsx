@@ -3,24 +3,23 @@ import { connect } from 'react-redux';
 import { evaluate } from 'mathjs';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
-import { SetLayerXPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayerX } from '../store/actions/layer';
+import { SetLayersXPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayersX } from '../store/actions/layer';
 import { getLayerScope, getPositionInArtboard } from '../store/selectors/layer';
 
 interface XInputProps {
   selected?: string[];
   xValue?: number;
-  artboardParent?: em.Artboard;
-  setLayerX?(payload: SetLayerXPayload): LayerTypes;
+  setLayersX?(payload: SetLayersXPayload): LayerTypes;
 }
 
 const XInput = (props: XInputProps): ReactElement => {
-  const { selected, setLayerX, xValue, artboardParent } = props;
+  const { selected, setLayersX, xValue } = props;
   const [x, setX] = useState(xValue);
 
   useEffect(() => {
     setX(xValue);
-  }, [xValue, selected, artboardParent]);
+  }, [xValue, selected]);
 
   const handleChange = (e: any): void => {
     const target = e.target;
@@ -31,8 +30,7 @@ const XInput = (props: XInputProps): ReactElement => {
     try {
       const nextX = evaluate(`${x}`);
       if (nextX !== xValue && !isNaN(nextX)) {
-        const nextXValue = Math.round(artboardParent ? nextX + (artboardParent.frame.x - (artboardParent.frame.width / 2)) : nextX);
-        setLayerX({id: selected[0], x: nextXValue});
+        setLayersX({layers: selected, x: nextX});
         setX(nextX);
       } else {
         setX(xValue);
@@ -48,51 +46,44 @@ const XInput = (props: XInputProps): ReactElement => {
       onChange={handleChange}
       onSubmit={handleSubmit}
       submitOnBlur
-      label={'X'}
-      disabled={selected.length > 1 || selected.length === 0} />
+      label={'X'} />
   );
 }
 
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const artboardParent = ((): em.Artboard => {
-    switch(layer.present.selected.length) {
-      case 0:
-        return null;
-      case 1: {
-        const layerScope = getLayerScope(layer.present, layer.present.selected[0]);
-        if (layerScope.some((id: string) => layer.present.allArtboardIds.includes(id))) {
-          const artboard = layerScope.find((id: string) => layer.present.allArtboardIds.includes(id));
-          return layer.present.byId[artboard] as em.Artboard;
-        } else {
-          return null;
-        }
-      }
-      default:
-        return null;
+  const artboardParents = selected.reduce((result: em.Artboard[], current: string) => {
+    const layerScope = getLayerScope(layer.present, current);
+    if (layerScope.some((id: string) => layer.present.allArtboardIds.includes(id))) {
+      const artboard = layerScope.find((id: string) => layer.present.allArtboardIds.includes(id));
+      result = [...result, layer.present.byId[artboard] as em.Artboard];
+    } else {
+      result = [...result, null];
     }
-  })();
+    return result;
+  }, []);
+  const xValues = selected.reduce((result: number[], current: string, index: number) => {
+    const layerItem = layer.present.byId[current];
+    const parent = artboardParents[index];
+    if (parent) {
+      result = [...result, getPositionInArtboard(layerItem, parent).x];
+    } else {
+      result = [...result, Math.round(layerItem.frame.x)];
+    }
+    return result;
+  }, []);
   const xValue = (() => {
-    switch(layer.present.selected.length) {
-      case 0:
-        return '';
-      case 1: {
-        const layerItem = layer.present.byId[layer.present.selected[0]];
-        if (artboardParent) {
-          return getPositionInArtboard(layerItem, artboardParent).x;
-        } else {
-          return Math.round(layerItem.frame.x);
-        }
-      }
-      default:
-        return 'multi';
+    if (xValues.every((value: number) => value === xValues[0])) {
+      return xValues[0];
+    } else {
+      return 'multi';
     }
   })();
-  return { selected, xValue, artboardParent };
+  return { selected, xValue };
 };
 
 export default connect(
   mapStateToProps,
-  { setLayerX }
+  { setLayersX }
 )(XInput);

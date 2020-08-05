@@ -80,10 +80,15 @@ export const FREEZE_LAYER_TWEENS = 'FREEZE_LAYER_TWEENS';
 export const UNFREEZE_LAYER_TWEENS = 'UNFREEZE_LAYER_TWEENS';
 
 export const SET_LAYER_X = 'SET_LAYER_X';
+export const SET_LAYERS_X = 'SET_LAYERS_X';
 export const SET_LAYER_Y = 'SET_LAYER_Y';
+export const SET_LAYERS_Y = 'SET_LAYERS_Y';
 export const SET_LAYER_WIDTH = 'SET_LAYER_WIDTH';
+export const SET_LAYERS_WIDTH = 'SET_LAYERS_WIDTH';
 export const SET_LAYER_HEIGHT = 'SET_LAYER_HEIGHT';
+export const SET_LAYERS_HEIGHT = 'SET_LAYERS_HEIGHT';
 export const SET_LAYER_ROTATION = 'SET_LAYER_ROTATION';
+export const SET_LAYERS_ROTATION = 'SET_LAYERS_ROTATION';
 
 export const ENABLE_LAYER_HORIZONTAL_FLIP = 'ENABLE_LAYER_HORIZONTAL_FLIP';
 export const DISABLE_LAYER_HORIZONTAL_FLIP = 'DISABLE_LAYER_HORIZONTAL_FLIP';
@@ -91,6 +96,7 @@ export const ENABLE_LAYER_VERTICAL_FLIP = 'ENABLE_LAYER_VERTICAL_FLIP';
 export const DISABLE_LAYER_VERTICAL_FLIP = 'DISABLE_LAYER_VERTICAL_FLIP';
 
 export const SET_LAYER_OPACITY = 'SET_LAYER_OPACITY';
+export const SET_LAYERS_OPACITY = 'SET_LAYERS_OPACITY';
 
 export const ENABLE_LAYER_FILL = 'ENABLE_LAYER_FILL';
 export const DISABLE_LAYER_FILL = 'DISABLE_LAYER_FILL';
@@ -185,6 +191,7 @@ export const SEND_LAYER_TO_FRONT = 'SEND_LAYER_TO_FRONT';
 export const SEND_LAYERS_TO_FRONT = 'SEND_LAYERS_TO_FRONT';
 
 export const SET_LAYER_BLEND_MODE = 'SET_LAYER_BLEND_MODE';
+export const SET_LAYERS_BLEND_MODE = 'SET_LAYERS_BLEND_MODE';
 
 export const UNITE_LAYERS = 'UNITE_LAYERS';
 export const INTERSECT_LAYERS = 'INTERSECT_LAYERS';
@@ -817,6 +824,16 @@ export interface SetLayerX {
   payload: SetLayerXPayload;
 }
 
+export interface SetLayersXPayload {
+  layers: string[];
+  x: number;
+}
+
+export interface SetLayersX {
+  type: typeof SET_LAYERS_X;
+  payload: SetLayersXPayload;
+}
+
 export interface SetLayerYPayload {
   id: string;
   y: number;
@@ -825,6 +842,16 @@ export interface SetLayerYPayload {
 export interface SetLayerY {
   type: typeof SET_LAYER_Y;
   payload: SetLayerYPayload;
+}
+
+export interface SetLayersYPayload {
+  layers: string[];
+  y: number;
+}
+
+export interface SetLayersY {
+  type: typeof SET_LAYERS_Y;
+  payload: SetLayersYPayload;
 }
 
 export interface SetLayerWidthPayload {
@@ -837,6 +864,16 @@ export interface SetLayerWidth {
   payload: SetLayerWidthPayload;
 }
 
+export interface SetLayersWidthPayload {
+  layers: string[];
+  width: number;
+}
+
+export interface SetLayersWidth {
+  type: typeof SET_LAYERS_WIDTH;
+  payload: SetLayersWidthPayload;
+}
+
 export interface SetLayerHeightPayload {
   id: string;
   height: number;
@@ -845,6 +882,16 @@ export interface SetLayerHeightPayload {
 export interface SetLayerHeight {
   type: typeof SET_LAYER_HEIGHT;
   payload: SetLayerHeightPayload;
+}
+
+export interface SetLayersHeightPayload {
+  layers: string[];
+  height: number;
+}
+
+export interface SetLayersHeight {
+  type: typeof SET_LAYERS_HEIGHT;
+  payload: SetLayersHeightPayload;
 }
 
 export interface SetLayerRotationPayload {
@@ -857,6 +904,16 @@ export interface SetLayerRotation {
   payload: SetLayerRotationPayload;
 }
 
+export interface SetLayersRotationPayload {
+  layers: string[];
+  rotation: number;
+}
+
+export interface SetLayersRotation {
+  type: typeof SET_LAYERS_ROTATION;
+  payload: SetLayersRotationPayload;
+}
+
 export interface SetLayerOpacityPayload {
   id: string;
   opacity: number;
@@ -865,6 +922,16 @@ export interface SetLayerOpacityPayload {
 export interface SetLayerOpacity {
   type: typeof SET_LAYER_OPACITY;
   payload: SetLayerOpacityPayload;
+}
+
+export interface SetLayersOpacityPayload {
+  layers: string[];
+  opacity: number;
+}
+
+export interface SetLayersOpacity {
+  type: typeof SET_LAYERS_OPACITY;
+  payload: SetLayersOpacityPayload;
 }
 
 export interface EnableLayerHorizontalFlipPayload {
@@ -1693,6 +1760,16 @@ export interface SetLayerBlendMode {
   payload: SetLayerBlendModePayload;
 }
 
+export interface SetLayersBlendModePayload {
+  layers: string[];
+  blendMode: em.BlendMode;
+}
+
+export interface SetLayersBlendMode {
+  type: typeof SET_LAYERS_BLEND_MODE;
+  payload: SetLayersBlendModePayload;
+}
+
 export interface UniteLayersPayload {
   id: string;
   unite: string;
@@ -1846,11 +1923,17 @@ export type LayerTypes = AddPage |
                          FreezeLayerTween |
                          UnFreezeLayerTween |
                          SetLayerX |
+                         SetLayersX |
                          SetLayerY |
+                         SetLayersY |
                          SetLayerWidth |
+                         SetLayersWidth |
                          SetLayerHeight |
+                         SetLayersHeight |
                          SetLayerRotation |
+                         SetLayersRotation |
                          SetLayerOpacity |
+                         SetLayersOpacity |
                          EnableLayerHorizontalFlip |
                          DisableLayerHorizontalFlip |
                          EnableLayerVerticalFlip |
@@ -1928,6 +2011,7 @@ export type LayerTypes = AddPage |
                          SendLayerToBack |
                          SendLayersToBack |
                          SetLayerBlendMode |
+                         SetLayersBlendMode |
                          SetLayerStrokeGradientOrigin |
                          SetLayerStrokeGradientDestination |
                          SetLayerStrokeGradientStopColor |

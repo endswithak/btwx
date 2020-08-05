@@ -3,19 +3,18 @@ import { connect } from 'react-redux';
 import { evaluate } from 'mathjs';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
-import { SetLayerYPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayerY } from '../store/actions/layer';
+import { SetLayersYPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayersY } from '../store/actions/layer';
 import { getLayerScope, getPositionInArtboard } from '../store/selectors/layer';
 
 interface YInputProps {
   selected?: string[];
   yValue?: number;
-  artboardParent?: em.Artboard;
-  setLayerY?(payload: SetLayerYPayload): LayerTypes;
+  setLayersY?(payload: SetLayersYPayload): LayerTypes;
 }
 
 const YInput = (props: YInputProps): ReactElement => {
-  const { selected, setLayerY, yValue, artboardParent } = props;
+  const { selected, setLayersY, yValue } = props;
   const [y, setY] = useState(props.yValue);
 
   useEffect(() => {
@@ -31,8 +30,7 @@ const YInput = (props: YInputProps): ReactElement => {
     try {
       const nextY = evaluate(`${y}`);
       if (nextY !== yValue && !isNaN(nextY)) {
-        const nextYValue = Math.round(artboardParent ? nextY + (artboardParent.frame.y - (artboardParent.frame.height / 2)) : nextY);
-        setLayerY({id: selected[0], y: nextYValue});
+        setLayersY({layers: selected, y: nextY});
         setY(nextY);
       } else {
         setY(yValue);
@@ -48,51 +46,44 @@ const YInput = (props: YInputProps): ReactElement => {
       onChange={handleChange}
       onSubmit={handleSubmit}
       submitOnBlur
-      label={'Y'}
-      disabled={selected.length > 1 || selected.length === 0} />
+      label={'Y'} />
   );
 }
 
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const artboardParent = ((): em.Artboard => {
-    switch(layer.present.selected.length) {
-      case 0:
-        return null;
-      case 1: {
-        const layerScope = getLayerScope(layer.present, layer.present.selected[0]);
-        if (layerScope.some((id: string) => layer.present.allArtboardIds.includes(id))) {
-          const artboard = layerScope.find((id: string) => layer.present.allArtboardIds.includes(id));
-          return layer.present.byId[artboard] as em.Artboard;
-        } else {
-          return null;
-        }
-      }
-      default:
-        return null;
+  const artboardParents = selected.reduce((result: em.Artboard[], current: string) => {
+    const layerScope = getLayerScope(layer.present, current);
+    if (layerScope.some((id: string) => layer.present.allArtboardIds.includes(id))) {
+      const artboard = layerScope.find((id: string) => layer.present.allArtboardIds.includes(id));
+      result = [...result, layer.present.byId[artboard] as em.Artboard];
+    } else {
+      result = [...result, null];
     }
-  })();
+    return result;
+  }, []);
+  const yValues = selected.reduce((result: number[], current: string, index: number) => {
+    const layerItem = layer.present.byId[current];
+    const parent = artboardParents[index];
+    if (parent) {
+      result = [...result, getPositionInArtboard(layerItem, parent).y];
+    } else {
+      result = [...result, Math.round(layerItem.frame.y)];
+    }
+    return result;
+  }, []);
   const yValue = (() => {
-    switch(layer.present.selected.length) {
-      case 0:
-        return '';
-      case 1: {
-        const layerItem = layer.present.byId[layer.present.selected[0]];
-        if (artboardParent) {
-          return getPositionInArtboard(layerItem, artboardParent).y;
-        } else {
-          return Math.round(layerItem.frame.y);
-        }
-      }
-      default:
-        return 'multi';
+    if (yValues.every((value: number) => value === yValues[0])) {
+      return yValues[0];
+    } else {
+      return 'multi';
     }
   })();
-  return { selected, yValue, artboardParent };
+  return { selected, yValue };
 };
 
 export default connect(
   mapStateToProps,
-  { setLayerY }
+  { setLayersY }
 )(YInput);
