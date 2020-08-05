@@ -1,53 +1,55 @@
-import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
+import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
-import SidebarSectionWrap from './SidebarSectionWrap';
-import SidebarSection from './SidebarSection';
-import SidebarSectionRow from './SidebarSectionRow';
-import SidebarSectionColumn from './SidebarSectionColumn';
-import SidebarSectionHead from './SidebarSectionHead';
+import { RootState } from '../store/reducers';
+import SidebarCollapseSection from './SidebarCollapseSection';
 import FillInput from './FillInput';
 import FillToggle from './FillToggle';
-import { RootState } from '../store/reducers';
+import { RightSidebarTypes } from '../store/actionTypes/rightSidebar';
+import { expandFillStyles, collapseFillStyles } from '../store/actions/rightSidebar';
 
 interface SidebarFillStylesProps {
   selected?: string[];
   selectedType?: string;
+  fillStylesCollapsed?: boolean;
+  expandFillStyles?(): RightSidebarTypes;
+  collapseFillStyles?(): RightSidebarTypes;
 }
 
 const SidebarFillStyles = (props: SidebarFillStylesProps): ReactElement => {
-  const { selected, selectedType } = props;
+  const { selected, selectedType, fillStylesCollapsed, expandFillStyles, collapseFillStyles } = props;
+
+  const handleClick = () => {
+    if (fillStylesCollapsed) {
+      expandFillStyles();
+    } else {
+      collapseFillStyles();
+    }
+  }
+
   return (
     selected.length === 1 && (selectedType === 'Shape' || selectedType === 'Text')
-    ? <SidebarSectionWrap bottomBorder whiteSpace>
-        <SidebarSection>
-          <SidebarSectionRow>
-            <SidebarSectionColumn width='50%'>
-              <SidebarSectionRow>
-                <SidebarSectionHead text={'fill'} />
-              </SidebarSectionRow>
-            </SidebarSectionColumn>
-            <SidebarSectionColumn width='50%'>
-              <SidebarSectionRow justifyContent='flex-end'>
-                <FillToggle />
-              </SidebarSectionRow>
-            </SidebarSectionColumn>
-          </SidebarSectionRow>
-          <SidebarSection>
-            <FillInput />
-          </SidebarSection>
-        </SidebarSection>
-      </SidebarSectionWrap>
+    ? <SidebarCollapseSection
+        onClick={handleClick}
+        collapsed={fillStylesCollapsed}
+        header='fill'
+        actions={[
+          <FillToggle key='fillToggle' />
+        ]}>
+        <FillInput />
+      </SidebarCollapseSection>
     : null
   );
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
+  const { layer, rightSidebar } = state;
   const selected = layer.present.selected;
   const selectedType = selected.length > 0 ? layer.present.byId[selected[0]].type : null;
-  return { selected, selectedType };
+  const fillStylesCollapsed = rightSidebar.fillStylesCollapsed;
+  return { selected, selectedType, fillStylesCollapsed };
 };
 
 export default connect(
-  mapStateToProps
+  mapStateToProps,
+  { expandFillStyles, collapseFillStyles }
 )(SidebarFillStyles);

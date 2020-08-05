@@ -74,31 +74,29 @@ const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
   }
 
   return (
-    <SidebarSection>
-      <SidebarSectionRow alignItems={'center'}>
-        <SidebarSectionColumn width={'66.66%'}>
-          <SidebarSlider
-            value={points as number}
-            step={1}
-            max={50}
-            min={3}
-            onChange={handleSliderChange}
-            onMouseUp={handleSubmit}
-            disabled={disabled}
-            bottomSpace />
-        </SidebarSectionColumn>
-        <SidebarSectionColumn width={'33.33%'}>
-          <SidebarInput
-            value={points}
-            onChange={handleChange}
-            onSubmit={handleSubmit}
-            submitOnBlur
-            disabled={disabled}
-            label='#'
-            bottomLabel='Points' />
-        </SidebarSectionColumn>
-      </SidebarSectionRow>
-    </SidebarSection>
+    <SidebarSectionRow>
+      <SidebarSectionColumn width={'66.66%'}>
+        <SidebarSlider
+          value={points as number}
+          step={1}
+          max={50}
+          min={3}
+          onChange={handleSliderChange}
+          onMouseUp={handleSubmit}
+          disabled={disabled}
+          bottomSpace />
+      </SidebarSectionColumn>
+      <SidebarSectionColumn width={'33.33%'}>
+        <SidebarInput
+          value={points}
+          onChange={handleChange}
+          onSubmit={handleSubmit}
+          submitOnBlur
+          disabled={disabled}
+          label='#'
+          bottomLabel='Points' />
+      </SidebarSectionColumn>
+    </SidebarSectionRow>
   );
 }
 

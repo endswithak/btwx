@@ -117,7 +117,7 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
   };
 
   return (
-    <SidebarSectionRow alignItems='center'>
+    <SidebarSectionRow>
       <SidebarSectionColumn width={'33.33%'}>
         <SidebarSwatch
           isActive={isGradientEditorOpen}

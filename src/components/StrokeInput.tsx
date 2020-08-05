@@ -12,12 +12,6 @@ interface StrokeInputProps {
 
 const StrokeInput = (props: StrokeInputProps): ReactElement => {
   const { fillType } = props;
-  // switch(fillType) {
-  //   case 'color':
-  //     return <StrokeColorInput />
-  //   case 'gradient':
-  //     return <StrokeGradientInput />
-  // }
   switch(fillType) {
     case 'color':
       return <ColorInput prop='stroke' />

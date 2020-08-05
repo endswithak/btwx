@@ -74,31 +74,29 @@ const StarRadiusInput = (props: StarRadiusInputProps): ReactElement => {
   }
 
   return (
-    <SidebarSection>
-      <SidebarSectionRow alignItems={'center'}>
-        <SidebarSectionColumn width={'66.66%'}>
-          <SidebarSlider
-            value={radius as number}
-            step={1}
-            max={100}
-            min={0}
-            onChange={handleSliderChange}
-            onMouseUp={handleSubmit}
-            disabled={disabled}
-            bottomSpace />
-        </SidebarSectionColumn>
-        <SidebarSectionColumn width={'33.33%'}>
-          <SidebarInput
-            value={radius}
-            onChange={handleChange}
-            onSubmit={handleSubmit}
-            submitOnBlur
-            disabled={disabled}
-            label='%'
-            bottomLabel='Radius' />
-        </SidebarSectionColumn>
-      </SidebarSectionRow>
-    </SidebarSection>
+    <SidebarSectionRow>
+      <SidebarSectionColumn width={'66.66%'}>
+        <SidebarSlider
+          value={radius as number}
+          step={1}
+          max={100}
+          min={0}
+          onChange={handleSliderChange}
+          onMouseUp={handleSubmit}
+          disabled={disabled}
+          bottomSpace />
+      </SidebarSectionColumn>
+      <SidebarSectionColumn width={'33.33%'}>
+        <SidebarInput
+          value={radius}
+          onChange={handleChange}
+          onSubmit={handleSubmit}
+          submitOnBlur
+          disabled={disabled}
+          label='%'
+          bottomLabel='Radius' />
+      </SidebarSectionColumn>
+    </SidebarSectionRow>
   );
 }
 

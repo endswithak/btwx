@@ -1,89 +1,71 @@
 import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import SidebarSectionWrap from './SidebarSectionWrap';
-import SidebarSection from './SidebarSection';
-import SidebarSectionRow from './SidebarSectionRow';
-import SidebarSectionColumn from './SidebarSectionColumn';
-import SidebarSectionHead from './SidebarSectionHead';
+import SidebarCollapseSection from './SidebarCollapseSection';
 import StrokeInput from './StrokeInput';
 import SidebarStrokeOptionsStyle from './SidebarStrokeOptionsStyle';
 import StrokeOptionsToggle from './StrokeOptionsToggle';
 import StrokeToggle from './StrokeToggle';
-import StrokeDashOffsetInput from './StrokeDashOffsetInput';
-import StrokeDashInput from './StrokeDashInput';
-import StrokeGapInput from './StrokeGapInput';
-import StrokeWidthInput from './StrokeWidthInput';
+import StrokeParamsInput from './StrokeParamsInput';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
+import { RightSidebarTypes } from '../store/actionTypes/rightSidebar';
+import { expandStrokeStyles, collapseStrokeStyles } from '../store/actions/rightSidebar';
 
 interface SidebarStrokeStylesProps {
   selected?: string[];
   selectedType?: string;
+  strokeStylesCollapsed?: boolean;
+  expandStrokeStyles?(): RightSidebarTypes;
+  collapseStrokeStyles?(): RightSidebarTypes;
 }
 
 const SidebarStrokeStyles = (props: SidebarStrokeStylesProps): ReactElement => {
   const [showOptions, setShowOptions] = useState(false);
-  const { selected, selectedType } = props;
+  const { selected, selectedType, strokeStylesCollapsed, expandStrokeStyles, collapseStrokeStyles } = props;
   const theme = useContext(ThemeContext);
+
+  const handleClick = () => {
+    if (strokeStylesCollapsed) {
+      expandStrokeStyles();
+    } else {
+      collapseStrokeStyles();
+    }
+  }
 
   return (
     selected.length === 1 && (selectedType === 'Shape' || selectedType === 'Text')
-    ? <SidebarSectionWrap bottomBorder whiteSpace>
-        <SidebarSection>
-          <SidebarSectionRow>
-            <SidebarSectionColumn width='50%'>
-              <SidebarSectionRow>
-                <SidebarSectionHead text={'stroke'} />
-              </SidebarSectionRow>
-            </SidebarSectionColumn>
-            <SidebarSectionColumn width='50%'>
-              <SidebarSectionRow justifyContent='flex-end'>
-                <StrokeOptionsToggle
-                  showOptions={showOptions}
-                  setShowOptions={setShowOptions} />
-                <StrokeToggle />
-              </SidebarSectionRow>
-            </SidebarSectionColumn>
-          </SidebarSectionRow>
-          <SidebarSection>
-            <StrokeInput />
-          </SidebarSection>
-          <SidebarSectionRow>
-            <SidebarSectionColumn width='33.33%'>
-              <StrokeWidthInput />
-            </SidebarSectionColumn>
-            <SidebarSectionColumn width='33.33%'>
-              <StrokeDashOffsetInput />
-            </SidebarSectionColumn>
-            <SidebarSectionColumn width='33.33%'>
-              <SidebarSectionRow>
-                <SidebarSectionColumn width='50%'>
-                  <StrokeDashInput />
-                </SidebarSectionColumn>
-                <SidebarSectionColumn width='50%'>
-                  <StrokeGapInput />
-                </SidebarSectionColumn>
-              </SidebarSectionRow>
-            </SidebarSectionColumn>
-          </SidebarSectionRow>
-        </SidebarSection>
+    ? <SidebarCollapseSection
+        onClick={handleClick}
+        collapsed={strokeStylesCollapsed}
+        header='stroke'
+        actions={[
+          <StrokeOptionsToggle
+            showOptions={showOptions}
+            setShowOptions={setShowOptions}
+            key='strokeOptions' />,
+          <StrokeToggle key='strokeToggle' />
+        ]}>
+        <StrokeInput />
+        <StrokeParamsInput />
         {
           showOptions
           ? <SidebarStrokeOptionsStyle />
           : null
         }
-      </SidebarSectionWrap>
+      </SidebarCollapseSection>
     : null
   );
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
+  const { layer, rightSidebar } = state;
   const selected = layer.present.selected;
   const selectedType = selected.length > 0 ? layer.present.byId[selected[0]].type : null;
-  return { selected, selectedType };
+  const strokeStylesCollapsed = rightSidebar.strokeStylesCollapsed;
+  return { selected, selectedType, strokeStylesCollapsed };
 };
 
 export default connect(
-  mapStateToProps
+  mapStateToProps,
+  { expandStrokeStyles, collapseStrokeStyles }
 )(SidebarStrokeStyles);

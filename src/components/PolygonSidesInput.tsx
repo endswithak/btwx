@@ -72,31 +72,29 @@ const PolygonSidesInput = (props: PolygonSidesInputProps): ReactElement => {
   }
 
   return (
-    <SidebarSection>
-      <SidebarSectionRow alignItems={'center'}>
-        <SidebarSectionColumn width={'66.66%'}>
-          <SidebarSlider
-            value={sides as number}
-            step={1}
-            max={10}
-            min={3}
-            onChange={handleSliderChange}
-            onMouseUp={handleSubmit}
-            disabled={disabled}
-            bottomSpace />
-        </SidebarSectionColumn>
-        <SidebarSectionColumn width={'33.33%'}>
-          <SidebarInput
-            value={sides}
-            onChange={handleChange}
-            onSubmit={handleSubmit}
-            submitOnBlur
-            disabled={disabled}
-            label='#'
-            bottomLabel='Sides' />
-        </SidebarSectionColumn>
-      </SidebarSectionRow>
-    </SidebarSection>
+    <SidebarSectionRow>
+      <SidebarSectionColumn width={'66.66%'}>
+        <SidebarSlider
+          value={sides as number}
+          step={1}
+          max={10}
+          min={3}
+          onChange={handleSliderChange}
+          onMouseUp={handleSubmit}
+          disabled={disabled}
+          bottomSpace />
+      </SidebarSectionColumn>
+      <SidebarSectionColumn width={'33.33%'}>
+        <SidebarInput
+          value={sides}
+          onChange={handleChange}
+          onSubmit={handleSubmit}
+          submitOnBlur
+          disabled={disabled}
+          label='#'
+          bottomLabel='Sides' />
+      </SidebarSectionColumn>
+    </SidebarSectionRow>
   );
 }
 
