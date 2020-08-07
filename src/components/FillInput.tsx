@@ -5,7 +5,7 @@ import GradientInput from './GradientInput';
 import ColorInput from './ColorInput';
 
 interface FillInputProps {
-  fillType: em.FillType;
+  fillType: em.FillType & 'multi';
 }
 
 const FillInput = (props: FillInputProps): ReactElement => {
@@ -15,12 +15,28 @@ const FillInput = (props: FillInputProps): ReactElement => {
       return <ColorInput prop='fill' />
     case 'gradient':
       return <GradientInput prop='fill' />
+    case 'multi':
+      // return <ColorInput prop='fill' />
   }
 }
 
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
-  const fillType = layer.present.byId[layer.present.selected[0]].style.fill.fillType;
+  const selected = layer.present.selected;
+  const layerItems: em.Layer[] = selected.reduce((result, current) => {
+    const layerItem = layer.present.byId[current];
+    return [...result, layerItem];
+  }, []);
+  const fillTypes: number[] = layerItems.reduce((result, current) => {
+    return [...result, current.style.fill.fillType];
+  }, []);
+  const fillType = (() => {
+    if (fillTypes.every((value: number) => value === fillTypes[0])) {
+      return fillTypes[0];
+    } else {
+      return 'multi';
+    }
+  })();
   return { fillType };
 };
 

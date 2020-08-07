@@ -36,7 +36,10 @@ import {
   RemoveLayerStrokeGradientStop, AddLayerStrokeGradientStop, SetLayerStrokeGradientStopPosition,
   SetLayerStrokeGradientStopColor, SetLayerStrokeGradientDestination, SetLayerStrokeGradientOrigin,
   AddCompoundShape, UniteLayers, SetRoundedRadius, SetPolygonSides, SetStarPoints, IntersectLayers,
-  SubtractLayers, ExcludeLayers, DivideLayers, SetStarRadius, SetLayerStrokeDashOffset, SetLayersOpacity, SetLayersBlendMode, SetLayersX, SetLayersY, SetLayersWidth, SetLayersHeight, SetLayersRotation
+  SubtractLayers, ExcludeLayers, DivideLayers, SetStarRadius, SetLayerStrokeDashOffset, SetLayersOpacity,
+  SetLayersBlendMode, SetLayersX, SetLayersY, SetLayersWidth, SetLayersHeight, SetLayersRotation, SetLayersFillColor,
+  SetLayersStrokeColor, SetLayersShadowColor, EnableLayersFill, DisableLayersFill, EnableLayersStroke, DisableLayersStroke,
+  EnableLayersShadow, DisableLayersShadow
 } from '../actionTypes/layer';
 
 import {
@@ -2292,6 +2295,12 @@ export const enableLayerFill = (state: LayerState, action: EnableLayerFill): Lay
   return currentState;
 };
 
+export const enableLayersFill = (state: LayerState, action: EnableLayersFill): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return enableLayerFill(result, layerActions.enableLayerFill({id: current}) as EnableLayerFill);
+  }, state);
+};
+
 export const disableLayerFill = (state: LayerState, action: DisableLayerFill): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
@@ -2317,11 +2326,19 @@ export const disableLayerFill = (state: LayerState, action: DisableLayerFill): L
   return currentState;
 };
 
+export const disableLayersFill = (state: LayerState, action: DisableLayersFill): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return disableLayerFill(result, layerActions.disableLayerFill({id: current}) as DisableLayerFill);
+  }, state);
+};
+
 export const setLayerFillColor = (state: LayerState, action: SetLayerFillColor): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
+  const layerItem = state.byId[action.payload.id];
   const fillColor = action.payload.fillColor;
-  paperLayer.fillColor = { hue: fillColor.h, saturation: fillColor.s, lightness: fillColor.l, alpha: fillColor.a } as paper.Color;
+  const newFill = { ...layerItem.style.fill.color, ...fillColor } as em.Color;
+  paperLayer.fillColor = { hue: newFill.h, saturation: newFill.s, lightness: newFill.l, alpha: newFill.a } as paper.Color;
   currentState = {
     ...currentState,
     byId: {
@@ -2332,7 +2349,7 @@ export const setLayerFillColor = (state: LayerState, action: SetLayerFillColor):
           ...currentState.byId[action.payload.id].style,
           fill: {
             ...currentState.byId[action.payload.id].style.fill,
-            color: action.payload.fillColor
+            color: newFill
           }
         }
       }
@@ -2341,6 +2358,12 @@ export const setLayerFillColor = (state: LayerState, action: SetLayerFillColor):
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'fill');
   return currentState;
+};
+
+export const setLayersFillColor = (state: LayerState, action: SetLayersFillColor): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return setLayerFillColor(result, layerActions.setLayerFillColor({id: current, fillColor: action.payload.fillColor}) as SetLayerFillColor);
+  }, state);
 };
 
 export const setLayerFill = (state: LayerState, action: SetLayerFill): LayerState => {
@@ -2890,6 +2913,12 @@ export const enableLayerStroke = (state: LayerState, action: EnableLayerStroke):
   return currentState;
 };
 
+export const enableLayersStroke = (state: LayerState, action: EnableLayersStroke): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return enableLayerStroke(result, layerActions.enableLayerStroke({id: current}) as EnableLayerStroke);
+  }, state);
+};
+
 export const disableLayerStroke = (state: LayerState, action: DisableLayerStroke): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
@@ -2919,11 +2948,19 @@ export const disableLayerStroke = (state: LayerState, action: DisableLayerStroke
   return currentState;
 };
 
+export const disableLayersStroke = (state: LayerState, action: DisableLayersStroke): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return disableLayerStroke(result, layerActions.disableLayerStroke({id: current}) as DisableLayerStroke);
+  }, state);
+};
+
 export const setLayerStrokeColor = (state: LayerState, action: SetLayerStrokeColor): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
+  const layerItem = state.byId[action.payload.id];
   const strokeColor = action.payload.strokeColor;
-  paperLayer.strokeColor = { hue: strokeColor.h, saturation: strokeColor.s, lightness: strokeColor.l, alpha: strokeColor.a } as paper.Color;
+  const newStroke = { ...layerItem.style.stroke.color, ...strokeColor } as em.Color;
+  paperLayer.strokeColor = { hue: newStroke.h, saturation: newStroke.s, lightness: newStroke.l, alpha: newStroke.a } as paper.Color;
   currentState = {
     ...currentState,
     byId: {
@@ -2934,7 +2971,7 @@ export const setLayerStrokeColor = (state: LayerState, action: SetLayerStrokeCol
           ...currentState.byId[action.payload.id].style,
           stroke: {
             ...currentState.byId[action.payload.id].style.stroke,
-            color: action.payload.strokeColor
+            color: newStroke
           }
         }
       }
@@ -2943,6 +2980,12 @@ export const setLayerStrokeColor = (state: LayerState, action: SetLayerStrokeCol
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'stroke');
   return currentState;
+};
+
+export const setLayersStrokeColor = (state: LayerState, action: SetLayersStrokeColor): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return setLayerStrokeColor(result, layerActions.setLayerStrokeColor({id: current, strokeColor: action.payload.strokeColor}) as SetLayerStrokeColor);
+  }, state);
 };
 
 export const setLayerStrokeFillType = (state: LayerState, action: SetLayerStrokeFillType): LayerState => {
@@ -3588,6 +3631,12 @@ export const enableLayerShadow = (state: LayerState, action: EnableLayerShadow):
   return currentState;
 };
 
+export const enableLayersShadow = (state: LayerState, action: EnableLayersShadow): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return enableLayerShadow(result, layerActions.enableLayerShadow({id: current}) as EnableLayerShadow);
+  }, state);
+};
+
 export const disableLayerShadow = (state: LayerState, action: DisableLayerShadow): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
@@ -3616,11 +3665,19 @@ export const disableLayerShadow = (state: LayerState, action: DisableLayerShadow
   return currentState;
 };
 
+export const disableLayersShadow = (state: LayerState, action: DisableLayersShadow): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return disableLayerShadow(result, layerActions.disableLayerShadow({id: current}) as DisableLayerShadow);
+  }, state);
+};
+
 export const setLayerShadowColor = (state: LayerState, action: SetLayerShadowColor): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
+  const layerItem = state.byId[action.payload.id];
   const shadowColor = action.payload.shadowColor;
-  paperLayer.shadowColor = { hue: shadowColor.h, saturation: shadowColor.s, lightness: shadowColor.l, alpha: shadowColor.a } as paper.Color;
+  const newShadow = { ...layerItem.style.shadow.color, ...shadowColor };
+  paperLayer.shadowColor = { hue: newShadow.h, saturation: newShadow.s, lightness: newShadow.l, alpha: newShadow.a } as paper.Color;
   currentState = {
     ...currentState,
     byId: {
@@ -3631,7 +3688,7 @@ export const setLayerShadowColor = (state: LayerState, action: SetLayerShadowCol
           ...currentState.byId[action.payload.id].style,
           shadow: {
             ...currentState.byId[action.payload.id].style.shadow,
-            color: action.payload.shadowColor
+            color: newShadow
           }
         }
       }
@@ -3640,6 +3697,12 @@ export const setLayerShadowColor = (state: LayerState, action: SetLayerShadowCol
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'shadowColor');
   return currentState;
+};
+
+export const setLayersShadowColor = (state: LayerState, action: SetLayersShadowColor): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return setLayerShadowColor(result, layerActions.setLayerShadowColor({id: current, shadowColor: action.payload.shadowColor}) as SetLayerShadowColor);
+  }, state);
 };
 
 export const setLayerShadowBlur = (state: LayerState, action: SetLayerShadowBlur): LayerState => {

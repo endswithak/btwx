@@ -72,12 +72,18 @@ import {
   ENABLE_LAYER_VERTICAL_FLIP,
   DISABLE_LAYER_VERTICAL_FLIP,
   ENABLE_LAYER_FILL,
+  ENABLE_LAYERS_FILL,
   DISABLE_LAYER_FILL,
+  DISABLE_LAYERS_FILL,
   SET_LAYER_FILL,
   SET_LAYER_FILL_COLOR,
+  SET_LAYERS_FILL_COLOR,
   ENABLE_LAYER_STROKE,
+  ENABLE_LAYERS_STROKE,
   DISABLE_LAYER_STROKE,
+  DISABLE_LAYERS_STROKE,
   SET_LAYER_STROKE_COLOR,
+  SET_LAYERS_STROKE_COLOR,
   SET_LAYER_STROKE_FILL_TYPE,
   SET_LAYER_STROKE_GRADIENT,
   SET_LAYER_STROKE_GRADIENT_TYPE,
@@ -88,8 +94,11 @@ import {
   SET_LAYER_STROKE_DASH_ARRAY,
   SET_LAYER_STROKE_MITER_LIMIT,
   ENABLE_LAYER_SHADOW,
+  ENABLE_LAYERS_SHADOW,
   DISABLE_LAYER_SHADOW,
+  DISABLE_LAYERS_SHADOW,
   SET_LAYER_SHADOW_COLOR,
+  SET_LAYERS_SHADOW_COLOR,
   SET_LAYER_SHADOW_BLUR,
   SET_LAYER_SHADOW_X_OFFSET,
   SET_LAYER_SHADOW_Y_OFFSET,
@@ -239,11 +248,17 @@ import {
   enableLayerVerticalFlip,
   disableLayerVerticalFlip,
   enableLayerFill,
+  enableLayersFill,
   disableLayerFill,
+  disableLayersFill,
   setLayerFillColor,
+  setLayersFillColor,
   enableLayerStroke,
+  enableLayersStroke,
   disableLayerStroke,
+  disableLayersStroke,
   setLayerStrokeColor,
+  setLayersStrokeColor,
   setLayerStrokeFillType,
   setLayerStrokeGradient,
   setLayerStrokeGradientType,
@@ -254,8 +269,11 @@ import {
   setLayerStrokeDashArray,
   setLayerStrokeMiterLimit,
   enableLayerShadow,
+  enableLayersShadow,
   disableLayerShadow,
+  disableLayersShadow,
   setLayerShadowColor,
+  setLayersShadowColor,
   setLayerShadowBlur,
   setLayerShadowXOffset,
   setLayerShadowYOffset,
@@ -555,16 +573,28 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return disableLayerVerticalFlip(state, action);
     case ENABLE_LAYER_FILL:
       return enableLayerFill(state, action);
+    case ENABLE_LAYERS_FILL:
+      return enableLayersFill(state, action);
     case DISABLE_LAYER_FILL:
       return disableLayerFill(state, action);
+    case DISABLE_LAYERS_FILL:
+      return disableLayersFill(state, action);
     case SET_LAYER_FILL_COLOR:
       return setLayerFillColor(state, action);
+    case SET_LAYERS_FILL_COLOR:
+      return setLayersFillColor(state, action);
     case ENABLE_LAYER_STROKE:
       return enableLayerStroke(state, action);
+    case ENABLE_LAYERS_STROKE:
+      return enableLayersStroke(state, action);
     case DISABLE_LAYER_STROKE:
       return disableLayerStroke(state, action);
+    case DISABLE_LAYERS_STROKE:
+      return disableLayersStroke(state, action);
     case SET_LAYER_STROKE_COLOR:
       return setLayerStrokeColor(state, action);
+    case SET_LAYERS_STROKE_COLOR:
+      return setLayersStrokeColor(state, action);
     case SET_LAYER_STROKE_FILL_TYPE:
       return setLayerStrokeFillType(state, action);
     case SET_LAYER_STROKE_GRADIENT:
@@ -585,10 +615,16 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setLayerStrokeMiterLimit(state, action);
     case ENABLE_LAYER_SHADOW:
       return enableLayerShadow(state, action);
+    case ENABLE_LAYERS_SHADOW:
+      return enableLayersShadow(state, action);
     case DISABLE_LAYER_SHADOW:
       return disableLayerShadow(state, action);
+    case DISABLE_LAYERS_SHADOW:
+      return disableLayersShadow(state, action);
     case SET_LAYER_SHADOW_COLOR:
       return setLayerShadowColor(state, action);
+    case SET_LAYERS_SHADOW_COLOR:
+      return setLayersShadowColor(state, action);
     case SET_LAYER_SHADOW_BLUR:
       return setLayerShadowBlur(state, action);
     case SET_LAYER_SHADOW_X_OFFSET:

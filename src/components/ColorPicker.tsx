@@ -17,7 +17,7 @@ import ColorPickerTypeToggle from './ColorPickerTypeToggle';
 import tinyColor from 'tinycolor2';
 
 interface ColorPickerProps {
-  colorValue: em.Color;
+  colorValue: em.Color | 'multi';
   colorType: 'hsl' | 'rgb';
   onChange?(color: em.Color): void;
 }
@@ -25,29 +25,29 @@ interface ColorPickerProps {
 const ColorPicker = (props: ColorPickerProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { onChange, colorType, colorValue } = props;
-  const color = tinyColor({h: colorValue.h, s: colorValue.s, l: colorValue.l, a: colorValue.a});
-  const rgb = color.toRgb();
-  const [hue, setHue] = useState(colorValue.h);
-  const [saturation, setSaturation] = useState(colorValue.s);
-  const [lightness, setLightness] = useState(colorValue.l);
-  const [value, setValue] = useState(colorValue.v);
-  const [alpha, setAlpha] = useState(colorValue.a);
-  const [red, setRed] = useState(rgb.r);
-  const [green, setGreen] = useState(rgb.g);
-  const [blue, setBlue] = useState(rgb.b);
+  const color = tinyColor(colorValue !== 'multi' ? {h: colorValue.h, s: colorValue.s, l: colorValue.l, a: colorValue.a} : colorValue);
+  const rgb = colorValue !== 'multi' ? color.toRgb() : colorValue;
+  const [hue, setHue] = useState(colorValue !== 'multi' ? colorValue.h : colorValue);
+  const [saturation, setSaturation] = useState(colorValue !== 'multi' ? colorValue.s : colorValue);
+  const [lightness, setLightness] = useState(colorValue !== 'multi' ? colorValue.l : colorValue);
+  const [value, setValue] = useState(colorValue !== 'multi' ? colorValue.v : colorValue);
+  const [alpha, setAlpha] = useState(colorValue !== 'multi' ? colorValue.a : colorValue);
+  const [red, setRed] = useState(colorValue !== 'multi' ? (rgb as tinyColor.ColorFormats.RGBA).r : colorValue);
+  const [green, setGreen] = useState(colorValue !== 'multi' ? (rgb as tinyColor.ColorFormats.RGBA).g : colorValue);
+  const [blue, setBlue] = useState(colorValue !== 'multi' ? (rgb as tinyColor.ColorFormats.RGBA).b : colorValue);
   const [type, setType] = useState(colorType);
 
   useEffect(() => {
-    const color = tinyColor({h: colorValue.h, s: colorValue.s, l: colorValue.l, a: colorValue.a});
-    const rgb = color.toRgb();
-    setHue(colorValue.h);
-    setSaturation(colorValue.s);
-    setLightness(colorValue.l);
-    setValue(colorValue.v);
-    setAlpha(colorValue.a);
-    setRed(rgb.r);
-    setGreen(rgb.g);
-    setBlue(rgb.b);
+    const color = tinyColor(colorValue !== 'multi' ? {h: colorValue.h, s: colorValue.s, l: colorValue.l, a: colorValue.a} : colorValue);
+    const rgb = colorValue !== 'multi' ? color.toRgb() : colorValue;
+    setHue(colorValue !== 'multi' ? colorValue.h : colorValue);
+    setSaturation(colorValue !== 'multi' ? colorValue.s : colorValue);
+    setLightness(colorValue !== 'multi' ? colorValue.l : colorValue);
+    setValue(colorValue !== 'multi' ? colorValue.v : colorValue);
+    setAlpha(colorValue !== 'multi' ? colorValue.a : colorValue);
+    setRed(colorValue !== 'multi' ? (rgb as tinyColor.ColorFormats.RGBA).r : colorValue);
+    setGreen(colorValue !== 'multi' ? (rgb as tinyColor.ColorFormats.RGBA).g : colorValue);
+    setBlue(colorValue !== 'multi' ? (rgb as tinyColor.ColorFormats.RGBA).b : colorValue);
   }, [colorValue]);
 
   return (

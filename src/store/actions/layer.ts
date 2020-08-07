@@ -81,12 +81,18 @@ import {
   ENABLE_LAYER_VERTICAL_FLIP,
   DISABLE_LAYER_VERTICAL_FLIP,
   ENABLE_LAYER_FILL,
+  ENABLE_LAYERS_FILL,
   DISABLE_LAYER_FILL,
+  DISABLE_LAYERS_FILL,
   SET_LAYER_FILL,
   SET_LAYER_FILL_COLOR,
+  SET_LAYERS_FILL_COLOR,
   ENABLE_LAYER_STROKE,
+  ENABLE_LAYERS_STROKE,
   DISABLE_LAYER_STROKE,
+  DISABLE_LAYERS_STROKE,
   SET_LAYER_STROKE_COLOR,
+  SET_LAYERS_STROKE_COLOR,
   SET_LAYER_STROKE_FILL_TYPE,
   SET_LAYER_STROKE_GRADIENT,
   SET_LAYER_STROKE_GRADIENT_TYPE,
@@ -97,8 +103,11 @@ import {
   SET_LAYER_STROKE_DASH_ARRAY,
   SET_LAYER_STROKE_MITER_LIMIT,
   ENABLE_LAYER_SHADOW,
+  ENABLE_LAYERS_SHADOW,
   DISABLE_LAYER_SHADOW,
+  DISABLE_LAYERS_SHADOW,
   SET_LAYER_SHADOW_COLOR,
+  SET_LAYERS_SHADOW_COLOR,
   SET_LAYER_SHADOW_BLUR,
   SET_LAYER_SHADOW_X_OFFSET,
   SET_LAYER_SHADOW_Y_OFFSET,
@@ -243,11 +252,17 @@ import {
   EnableLayerVerticalFlipPayload,
   DisableLayerVerticalFlipPayload,
   EnableLayerFillPayload,
+  EnableLayersFillPayload,
   DisableLayerFillPayload,
+  DisableLayersFillPayload,
   SetLayerFillColorPayload,
+  SetLayersFillColorPayload,
   EnableLayerStrokePayload,
+  EnableLayersStrokePayload,
   DisableLayerStrokePayload,
+  DisableLayersStrokePayload,
   SetLayerStrokeColorPayload,
+  SetLayersStrokeColorPayload,
   SetLayerStrokeFillTypePayload,
   SetLayerStrokeGradientPayload,
   SetLayerStrokeGradientTypePayload,
@@ -258,8 +273,11 @@ import {
   SetLayerStrokeDashArrayPayload,
   SetLayerStrokeMiterLimitPayload,
   EnableLayerShadowPayload,
+  EnableLayersShadowPayload,
   DisableLayerShadowPayload,
+  DisableLayersShadowPayload,
   SetLayerShadowColorPayload,
+  SetLayersShadowColorPayload,
   SetLayerShadowBlurPayload,
   SetLayerShadowXOffsetPayload,
   SetLayerShadowYOffsetPayload,
@@ -884,8 +902,18 @@ export const enableLayerFill = (payload: EnableLayerFillPayload): LayerTypes => 
   payload
 });
 
+export const enableLayersFill = (payload: EnableLayersFillPayload): LayerTypes => ({
+  type: ENABLE_LAYERS_FILL,
+  payload
+});
+
 export const disableLayerFill = (payload: DisableLayerFillPayload): LayerTypes => ({
   type: DISABLE_LAYER_FILL,
+  payload
+});
+
+export const disableLayersFill = (payload: DisableLayersFillPayload): LayerTypes => ({
+  type: DISABLE_LAYERS_FILL,
   payload
 });
 
@@ -894,8 +922,18 @@ export const setLayerFillColor = (payload: SetLayerFillColorPayload): LayerTypes
   payload
 });
 
+export const setLayersFillColor = (payload: SetLayersFillColorPayload): LayerTypes => ({
+  type: SET_LAYERS_FILL_COLOR,
+  payload
+});
+
 export const enableLayerStroke = (payload: EnableLayerStrokePayload): LayerTypes => ({
   type: ENABLE_LAYER_STROKE,
+  payload
+});
+
+export const enableLayersStroke = (payload: EnableLayersStrokePayload): LayerTypes => ({
+  type: ENABLE_LAYERS_STROKE,
   payload
 });
 
@@ -904,8 +942,18 @@ export const disableLayerStroke = (payload: DisableLayerStrokePayload): LayerTyp
   payload
 });
 
+export const disableLayersStroke = (payload: DisableLayersStrokePayload): LayerTypes => ({
+  type: DISABLE_LAYERS_STROKE,
+  payload
+});
+
 export const setLayerStrokeColor = (payload: SetLayerStrokeColorPayload): LayerTypes => ({
   type: SET_LAYER_STROKE_COLOR,
+  payload
+});
+
+export const setLayersStrokeColor = (payload: SetLayersStrokeColorPayload): LayerTypes => ({
+  type: SET_LAYERS_STROKE_COLOR,
   payload
 });
 
@@ -959,13 +1007,28 @@ export const enableLayerShadow = (payload: EnableLayerShadowPayload): LayerTypes
   payload
 });
 
+export const enableLayersShadow = (payload: EnableLayersShadowPayload): LayerTypes => ({
+  type: ENABLE_LAYERS_SHADOW,
+  payload
+});
+
 export const disableLayerShadow = (payload: DisableLayerShadowPayload): LayerTypes => ({
   type: DISABLE_LAYER_SHADOW,
   payload
 });
 
+export const disableLayersShadow = (payload: DisableLayersShadowPayload): LayerTypes => ({
+  type: DISABLE_LAYERS_SHADOW,
+  payload
+});
+
 export const setLayerShadowColor = (payload: SetLayerShadowColorPayload): LayerTypes => ({
   type: SET_LAYER_SHADOW_COLOR,
+  payload
+});
+
+export const setLayersShadowColor = (payload: SetLayersShadowColorPayload): LayerTypes => ({
+  type: SET_LAYERS_SHADOW_COLOR,
   payload
 });
 

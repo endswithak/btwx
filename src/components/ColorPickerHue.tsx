@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
+import React, { useContext, ReactElement, useState, useEffect } from 'react';
 import { ThemeContext } from './ThemeProvider';
 import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
 
 interface ColorPickerHueProps {
-  hue: number;
-  saturation: number;
-  lightness: number;
-  value: number;
-  alpha: number;
+  hue: number | 'multi';
+  saturation: number | 'multi';
+  lightness: number | 'multi';
+  value: number | 'multi';
+  alpha: number | 'multi';
   setHue(hue: number): void;
   setRed(red: number): void;
   setGreen(green: number): void;
@@ -57,23 +57,23 @@ const Slider = styled.input<SliderProps>`
 const ColorPickerHue = (props: ColorPickerHueProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { hue, setHue, saturation, lightness, value, alpha, setRed, setGreen, setBlue, onChange } = props;
-  const [hueValue, setHueValue] = useState(hue);
+  const [hueValue, setHueValue] = useState(hue !== 'multi' ? hue : 0);
   const [grabbing, setGrabbing] = useState(false);
 
   useEffect(() => {
-    setHueValue(hue);
+    setHueValue(hue !== 'multi' ? hue : 0);
   }, [hue]);
 
   const handleChange = (e: any) => {
     const target = e.target;
-    const nextColor = tinyColor({h: target.value, s: saturation, l: lightness});
+    const nextColor = tinyColor({h: target.value, s: saturation !== 'multi' ? saturation : 0, l: lightness !== 'multi' ? lightness : 0});
     const rgb = nextColor.toRgb();
     setRed(rgb.r);
     setGreen(rgb.g);
     setBlue(rgb.b);
     setHueValue(target.value);
     setHue(target.value);
-    onChange({h: target.value, s: saturation, l: lightness, v: value, a: alpha });
+    onChange({h: target.value, s: saturation !== 'multi' ? saturation : 0, l: lightness !== 'multi' ? lightness : 0, v: value !== 'multi' ? value : 0, a: alpha  !== 'multi' ? alpha : 1});
   };
 
   const handleMouseDown = () => {

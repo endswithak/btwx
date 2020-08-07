@@ -18,12 +18,20 @@ class UndoRedoTool {
   }
   updateEditors(state: RootState, type: 'redo' | 'undo') {
     if (state.colorEditor.isOpen) {
-      const layerItem = state.layer.present.byId[state.colorEditor.layer];
-      const prevLayerItem = type === 'redo' ? state.layer.past[state.layer.past.length - 1].byId[state.colorEditor.layer] : state.layer.future[0].byId[state.colorEditor.layer];
+      // const layerItem = state.layer.present.byId[state.colorEditor.layer];
+      const layerItems = state.colorEditor.layers.reduce((result, current) => {
+        return [...result, state.layer.present.byId[current]];
+      }, []);
+      // const prevLayerItem = type === 'redo' ? state.layer.past[state.layer.past.length - 1].byId[state.colorEditor.layer] : state.layer.future[0].byId[state.colorEditor.layer];
+      const prevLayerItems = type === 'redo' ? state.colorEditor.layers.reduce((result, current) => {
+        return [...result, state.layer.past[state.layer.past.length - 1].byId[current]];
+      }, []) : state.colorEditor.layers.reduce((result, current) => {
+        return [...result, state.layer.future[0].byId[current]];
+      }, []);
       // check if items exist and matches selection
-      if (layerItem && prevLayerItem && state.layer.present.selected[0] === state.colorEditor.layer) {
-        const style = layerItem.style[state.colorEditor.prop];
-        const prevStyle = prevLayerItem.style[state.colorEditor.prop];
+      if (layerItems.every((id) => id) && prevLayerItems.every((id) => id) && state.layer.present.selected.every((id, index) => state.layer.present.selected[index] === state.colorEditor.layers[index])) {
+        const style = layerItems[0].style[state.colorEditor.prop];
+        const prevStyle = prevLayerItems[0].style[state.colorEditor.prop];
         // check if fill types match
         if (style.fillType === prevStyle.fillType) {
           // check if prev action creator was for color
@@ -32,13 +40,13 @@ class UndoRedoTool {
           }
         } else {
           // if fill types dont match, open relevant editor
-          switch(style.fillType) {
-            case 'gradient': {
-              const gradient = (style as em.Fill | em.Stroke).gradient;
-              store.dispatch(closeColorEditor());
-              store.dispatch(openGradientEditor({layer: state.colorEditor.layer, x: state.colorEditor.x, y: state.colorEditor.y, gradient: gradient, prop: state.colorEditor.prop}));
-            }
-          }
+          // switch(style.fillType) {
+          //   case 'gradient': {
+          //     const gradient = (style as em.Fill | em.Stroke).gradient;
+          //     store.dispatch(closeColorEditor());
+          //     store.dispatch(openGradientEditor({layer: state.colorEditor.layer, x: state.colorEditor.x, y: state.colorEditor.y, gradient: gradient, prop: state.colorEditor.prop}));
+          //   }
+          // }
         }
       } else {
         store.dispatch(closeColorEditor());

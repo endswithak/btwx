@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
+import React, { useContext, ReactElement, useState, useEffect } from 'react';
 import { evaluate } from 'mathjs';
 import { ThemeContext } from './ThemeProvider';
 import SidebarInput from './SidebarInput';
 
 interface ColorPickerAlphaInputProps {
-  hue: number;
-  saturation: number;
-  lightness: number;
-  value: number;
-  alpha: number;
+  hue: number | 'multi';
+  saturation: number | 'multi';
+  lightness: number | 'multi';
+  value: number | 'multi';
+  alpha: number | 'multi';
   setAlpha(alpha: number): void;
   onChange(color: em.Color): void;
 }
@@ -17,10 +17,10 @@ interface ColorPickerAlphaInputProps {
 const ColorPickerAlphaInput = (props: ColorPickerAlphaInputProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { hue, saturation, lightness, value, alpha, setAlpha, onChange } = props;
-  const [opacity, setOpacity] = useState<number>(Math.round(alpha * 100));
+  const [opacity, setOpacity] = useState<number>(alpha !== 'multi' ? Math.round(alpha * 100) : 100);
 
   useEffect(() => {
-    setOpacity(Math.round(alpha * 100));
+    setOpacity(alpha !== 'multi' ? Math.round(alpha * 100) : 100);
   }, [alpha]);
 
   const handleChange = (e: any) => {
@@ -39,12 +39,12 @@ const ColorPickerAlphaInput = (props: ColorPickerAlphaInputProps): ReactElement 
           nextOpacity = 0;
         }
         setAlpha(nextOpacity / 100);
-        onChange({h: hue, s: saturation, l: lightness, v: value, a: nextOpacity / 100});
+        onChange({h: hue !== 'multi' ? hue : 0, s: saturation !== 'multi' ? saturation : 0, l: lightness !== 'multi' ? lightness : 0, v: value !== 'multi' ? value : 0, a: nextOpacity / 100});
       } else {
-        setOpacity(Math.round(alpha * 100));
+        setOpacity(alpha !== 'multi' ? Math.round(alpha * 100) : 100);
       }
     } catch(error) {
-      setOpacity(Math.round(alpha * 100));
+      setOpacity(alpha !== 'multi' ? Math.round(alpha * 100) : 100);
     }
   };
 

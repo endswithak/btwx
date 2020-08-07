@@ -4,11 +4,11 @@ import { ThemeContext } from './ThemeProvider';
 import styled from 'styled-components';
 
 interface ColorPickerAlphaProps {
-  hue: number;
-  saturation: number;
-  lightness: number;
-  value: number;
-  alpha: number;
+  hue: number | 'multi';
+  saturation: number | 'multi';
+  lightness: number | 'multi';
+  value: number | 'multi';
+  alpha: number | 'multi';
   setAlpha(alpha: number): void;
   onChange(color: em.Color): void;
 }
@@ -45,18 +45,18 @@ const Slider = styled.input<SliderProps>`
 const ColorPickerAlpha = (props: ColorPickerAlphaProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { hue, saturation, lightness, value, alpha, setAlpha, onChange } = props;
-  const [alphaValue, setAlphaValue] = useState(alpha);
+  const [alphaValue, setAlphaValue] = useState(alpha !== 'multi' ? alpha : 1);
   const [grabbing, setGrabbing] = useState(false);
 
   useEffect(() => {
-    setAlphaValue(alpha);
+    setAlphaValue(alpha !== 'multi' ? alpha : 1);
   }, [alpha]);
 
   const handleChange = (e: any) => {
     const target = e.target;
     setAlphaValue(target.value);
     setAlpha(target.value);
-    onChange({h: hue, s: saturation, l: lightness, v: value, a: target.value});
+    onChange({h: hue !== 'multi' ? hue : 0, s: saturation !== 'multi' ? saturation : 0, l: lightness !== 'multi' ? lightness : 0, v: value !== 'multi' ? value : 0, a: target.value});
   };
 
   const handleMouseDown = () => {
@@ -75,7 +75,7 @@ const ColorPickerAlpha = (props: ColorPickerAlphaProps): ReactElement => {
             width: 100%;
             height: ${theme.unit * 2}px;
             cursor: pointer;
-            background: linear-gradient(to right, hsla(${hue},${saturation * 100}%, ${lightness * 100}%, 0) 0%, hsla(${hue},${saturation * 100}%, ${lightness * 100}%, 1) 100%);
+            background: linear-gradient(to right, hsla(${hue !== 'multi' ? hue : 0},${saturation !== 'multi' ? saturation * 100 : 0}%, ${lightness !== 'multi' ? lightness * 100 : 0}%, 0) 0%, hsla(${hue !== 'multi' ? hue : 0},${saturation !== 'multi' ? saturation * 100 : 0}%, ${lightness !== 'multi' ? lightness * 100 : 0}%, 1) 100%);
             border-radius: ${theme.unit * 2}px;
             box-shadow: 0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5};
           }

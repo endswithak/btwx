@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
+import React, { useContext, ReactElement, useState, useEffect } from 'react';
 import { ThemeContext } from './ThemeProvider';
 import SidebarInput from './SidebarInput';
 import tinyColor from 'tinycolor2';
 
 interface ColorPickerBlueInputProps {
-  red: number;
-  green: number;
-  blue: number;
-  alpha: number;
+  red: number | 'multi';
+  green: number | 'multi';
+  blue: number | 'multi';
+  alpha: number | 'multi';
   setBlue(blue: number): void;
   setHue(hue: number): void;
   setSaturation(saturation: number): void;
@@ -20,10 +20,10 @@ interface ColorPickerBlueInputProps {
 const ColorPickerBlueInput = (props: ColorPickerBlueInputProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { red, green, blue, alpha, setBlue, setHue, setSaturation, setLightness, setValue, onChange } = props;
-  const [blueValue, setBlueValue] = useState<number>(Math.round(blue));
+  const [blueValue, setBlueValue] = useState<number>(blue !== 'multi' ? Math.round(blue) : 0);
 
   useEffect(() => {
-    setBlueValue(Math.round(blue));
+    setBlueValue(blue !== 'multi' ? Math.round(blue) : 0);
   }, [blue]);
 
   const handleChange = (e: any) => {
@@ -33,7 +33,7 @@ const ColorPickerBlueInput = (props: ColorPickerBlueInputProps): ReactElement =>
 
   const handleSubmit = (e: any): void => {
     if (blueValue <= 255 && blueValue >= 0 && blueValue !== blue) {
-      const nextColor = tinyColor({r: red, g: green, b: blueValue});
+      const nextColor = tinyColor({r: red !== 'multi' ? red : 0, g: green !== 'multi' ? green : 0, b: blueValue});
       const hsl = nextColor.toHsl();
       const hsv = nextColor.toHsv();
       setBlue(blueValue);
@@ -41,9 +41,9 @@ const ColorPickerBlueInput = (props: ColorPickerBlueInputProps): ReactElement =>
       setSaturation(hsl.s);
       setLightness(hsl.l);
       setValue(hsv.v);
-      onChange({ h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v, a: alpha });
+      onChange({ h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v, a: alpha !== 'multi' ? alpha : 1 });
     } else {
-      setBlueValue(Math.round(blue));
+      setBlueValue(blue !== 'multi' ? Math.round(blue) : 0);
     }
   };
 

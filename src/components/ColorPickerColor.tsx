@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
+import React, { useContext, ReactElement } from 'react';
 import { ThemeContext } from './ThemeProvider';
 
 interface ColorPickerColorProps {
-  hue: number;
-  saturation: number;
-  lightness: number;
-  value: number;
-  alpha: number;
+  hue: number | 'multi';
+  saturation: number | 'multi';
+  lightness: number | 'multi';
+  value: number | 'multi';
+  alpha: number | 'multi';
 }
 
 const ColorPickerColor = (props: ColorPickerColorProps): ReactElement => {
@@ -16,7 +16,7 @@ const ColorPickerColor = (props: ColorPickerColorProps): ReactElement => {
 
   return (
     <div style={{
-      background: `hsla(${hue},${saturation * 100}%, ${lightness * 100}%, ${alpha})`,
+      background: `hsla(${hue !== 'multi' ? hue : 0},${saturation !== 'multi' ? saturation * 100 : 0}%, ${lightness !== 'multi' ? lightness * 100 : 0}%, ${alpha !== 'multi' ? alpha : 1})`,
       boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
     }} />
   );

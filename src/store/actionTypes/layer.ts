@@ -99,9 +99,12 @@ export const SET_LAYER_OPACITY = 'SET_LAYER_OPACITY';
 export const SET_LAYERS_OPACITY = 'SET_LAYERS_OPACITY';
 
 export const ENABLE_LAYER_FILL = 'ENABLE_LAYER_FILL';
+export const ENABLE_LAYERS_FILL = 'ENABLE_LAYERS_FILL';
 export const DISABLE_LAYER_FILL = 'DISABLE_LAYER_FILL';
+export const DISABLE_LAYERS_FILL = 'DISABLE_LAYERS_FILL';
 export const SET_LAYER_FILL = 'SET_LAYER_FILL';
 export const SET_LAYER_FILL_COLOR = 'SET_LAYER_FILL_COLOR';
+export const SET_LAYERS_FILL_COLOR = 'SET_LAYERS_FILL_COLOR';
 export const SET_LAYER_FILL_TYPE = 'SET_LAYER_FILL_TYPE';
 export const SET_LAYER_FILL_GRADIENT = 'SET_LAYER_FILL_GRADIENT';
 export const SET_LAYER_FILL_GRADIENT_TYPE = 'SET_LAYER_FILL_GRADIENT_TYPE';
@@ -116,8 +119,11 @@ export const DEACTIVATE_LAYER_FILL_GRADIENT_STOP = 'DEACTIVATE_LAYER_FILL_GRADIE
 export const SET_LAYER_FILL_ACTIVE_GRADIENT_STOP = 'SET_LAYER_FILL_ACTIVE_GRADIENT_STOP';
 
 export const ENABLE_LAYER_STROKE = 'ENABLE_LAYER_STROKE';
+export const ENABLE_LAYERS_STROKE = 'ENABLE_LAYERS_STROKE';
 export const DISABLE_LAYER_STROKE = 'DISABLE_LAYER_STROKE';
+export const DISABLE_LAYERS_STROKE = 'DISABLE_LAYERS_STROKE';
 export const SET_LAYER_STROKE_COLOR = 'SET_LAYER_STROKE_COLOR';
+export const SET_LAYERS_STROKE_COLOR = 'SET_LAYERS_STROKE_COLOR';
 export const SET_LAYER_STROKE_FILL_TYPE = 'SET_LAYER_STROKE_FILL_TYPE';
 export const SET_LAYER_STROKE_GRADIENT = 'SET_LAYER_STROKE_GRADIENT';
 export const SET_LAYER_STROKE_GRADIENT_TYPE = 'SET_LAYER_STROKE_GRADIENT_TYPE';
@@ -138,8 +144,11 @@ export const SET_LAYER_STROKE_DASH_ARRAY = 'SET_LAYER_STROKE_DASH_ARRAY';
 export const SET_LAYER_STROKE_MITER_LIMIT = 'SET_LAYER_STROKE_MITER_LIMIT';
 
 export const ENABLE_LAYER_SHADOW = 'ENABLE_LAYER_SHADOW';
+export const ENABLE_LAYERS_SHADOW = 'ENABLE_LAYERS_SHADOW';
 export const DISABLE_LAYER_SHADOW = 'DISABLE_LAYER_SHADOW';
+export const DISABLE_LAYERS_SHADOW = 'DISABLE_LAYERS_SHADOW';
 export const SET_LAYER_SHADOW_COLOR = 'SET_LAYER_SHADOW_COLOR';
+export const SET_LAYERS_SHADOW_COLOR = 'SET_LAYERS_SHADOW_COLOR';
 export const SET_LAYER_SHADOW_BLUR = 'SET_LAYER_SHADOW_BLUR';
 export const SET_LAYER_SHADOW_X_OFFSET = 'SET_LAYER_SHADOW_X_OFFSET';
 export const SET_LAYER_SHADOW_Y_OFFSET = 'SET_LAYER_SHADOW_Y_OFFSET';
@@ -979,6 +988,15 @@ export interface EnableLayerFill {
   payload: EnableLayerFillPayload;
 }
 
+export interface EnableLayersFillPayload {
+  layers: string[];
+}
+
+export interface EnableLayersFill {
+  type: typeof ENABLE_LAYERS_FILL;
+  payload: EnableLayersFillPayload;
+}
+
 export interface DisableLayerFillPayload {
   id: string;
 }
@@ -986,6 +1004,15 @@ export interface DisableLayerFillPayload {
 export interface DisableLayerFill {
   type: typeof DISABLE_LAYER_FILL;
   payload: DisableLayerFillPayload;
+}
+
+export interface DisableLayersFillPayload {
+  layers: string[];
+}
+
+export interface DisableLayersFill {
+  type: typeof DISABLE_LAYERS_FILL;
+  payload: DisableLayersFillPayload;
 }
 
 export interface SetLayerFillColorPayload {
@@ -998,6 +1025,16 @@ export interface SetLayerFillColor {
   payload: SetLayerFillColorPayload;
 }
 
+export interface SetLayersFillColorPayload {
+  layers: string[];
+  fillColor: em.Color;
+}
+
+export interface SetLayersFillColor {
+  type: typeof SET_LAYERS_FILL_COLOR;
+  payload: SetLayersFillColorPayload;
+}
+
 export interface EnableLayerStrokePayload {
   id: string;
 }
@@ -1005,6 +1042,15 @@ export interface EnableLayerStrokePayload {
 export interface EnableLayerStroke {
   type: typeof ENABLE_LAYER_STROKE;
   payload: EnableLayerStrokePayload;
+}
+
+export interface EnableLayersStrokePayload {
+  layers: string[];
+}
+
+export interface EnableLayersStroke {
+  type: typeof ENABLE_LAYERS_STROKE;
+  payload: EnableLayersStrokePayload;
 }
 
 export interface DisableLayerStrokePayload {
@@ -1016,6 +1062,15 @@ export interface DisableLayerStroke {
   payload: DisableLayerStrokePayload;
 }
 
+export interface DisableLayersStrokePayload {
+  layers: string[];
+}
+
+export interface DisableLayersStroke {
+  type: typeof DISABLE_LAYERS_STROKE;
+  payload: DisableLayersStrokePayload;
+}
+
 export interface SetLayerStrokeColorPayload {
   id: string;
   strokeColor: em.Color;
@@ -1024,6 +1079,16 @@ export interface SetLayerStrokeColorPayload {
 export interface SetLayerStrokeColor {
   type: typeof SET_LAYER_STROKE_COLOR;
   payload: SetLayerStrokeColorPayload;
+}
+
+export interface SetLayersStrokeColorPayload {
+  layers: string[];
+  strokeColor: em.Color;
+}
+
+export interface SetLayersStrokeColor {
+  type: typeof SET_LAYERS_STROKE_COLOR;
+  payload: SetLayersStrokeColorPayload;
 }
 
 export interface SetLayerStrokeFillTypePayload {
@@ -1217,6 +1282,15 @@ export interface EnableLayerShadow {
   payload: EnableLayerShadowPayload;
 }
 
+export interface EnableLayersShadowPayload {
+  layers: string[];
+}
+
+export interface EnableLayersShadow {
+  type: typeof ENABLE_LAYERS_SHADOW;
+  payload: EnableLayersShadowPayload;
+}
+
 export interface DisableLayerShadowPayload {
   id: string;
 }
@@ -1224,6 +1298,15 @@ export interface DisableLayerShadowPayload {
 export interface DisableLayerShadow {
   type: typeof DISABLE_LAYER_SHADOW;
   payload: DisableLayerShadowPayload;
+}
+
+export interface DisableLayersShadowPayload {
+  layers: string[];
+}
+
+export interface DisableLayersShadow {
+  type: typeof DISABLE_LAYERS_SHADOW;
+  payload: DisableLayersShadowPayload;
 }
 
 export interface SetLayerShadowColorPayload {
@@ -1234,6 +1317,16 @@ export interface SetLayerShadowColorPayload {
 export interface SetLayerShadowColor {
   type: typeof SET_LAYER_SHADOW_COLOR;
   payload: SetLayerShadowColorPayload;
+}
+
+export interface SetLayersShadowColorPayload {
+  layers: string[];
+  shadowColor: em.Color;
+}
+
+export interface SetLayersShadowColor {
+  type: typeof SET_LAYERS_SHADOW_COLOR;
+  payload: SetLayersShadowColorPayload;
 }
 
 export interface SetLayerShadowBlurPayload {
@@ -1939,11 +2032,17 @@ export type LayerTypes = AddPage |
                          EnableLayerVerticalFlip |
                          DisableLayerVerticalFlip |
                          EnableLayerFill |
+                         EnableLayersFill |
                          DisableLayerFill |
+                         DisableLayersFill |
                          SetLayerFillColor |
+                         SetLayersFillColor |
                          EnableLayerStroke |
+                         EnableLayersStroke |
                          DisableLayerStroke |
+                         DisableLayersStroke |
                          SetLayerStrokeColor |
+                         SetLayersStrokeColor |
                          SetLayerStrokeFillType |
                          SetLayerStrokeGradient |
                          SetLayerStrokeGradientType |
@@ -1954,8 +2053,11 @@ export type LayerTypes = AddPage |
                          SetLayerStrokeDashArray |
                          SetLayerStrokeMiterLimit |
                          EnableLayerShadow |
+                         EnableLayersShadow |
                          DisableLayerShadow |
+                         DisableLayersShadow |
                          SetLayerShadowColor |
+                         SetLayersShadowColor |
                          SetLayerShadowBlur |
                          SetLayerShadowXOffset |
                          SetLayerShadowYOffset |

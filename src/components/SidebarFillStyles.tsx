@@ -9,14 +9,14 @@ import { expandFillStyles, collapseFillStyles } from '../store/actions/rightSide
 
 interface SidebarFillStylesProps {
   selected?: string[];
-  selectedType?: string;
+  validFillSelection?: boolean;
   fillStylesCollapsed?: boolean;
   expandFillStyles?(): RightSidebarTypes;
   collapseFillStyles?(): RightSidebarTypes;
 }
 
 const SidebarFillStyles = (props: SidebarFillStylesProps): ReactElement => {
-  const { selected, selectedType, fillStylesCollapsed, expandFillStyles, collapseFillStyles } = props;
+  const { selected, validFillSelection, fillStylesCollapsed, expandFillStyles, collapseFillStyles } = props;
 
   const handleClick = () => {
     if (fillStylesCollapsed) {
@@ -27,7 +27,7 @@ const SidebarFillStyles = (props: SidebarFillStylesProps): ReactElement => {
   }
 
   return (
-    selected.length === 1 && (selectedType === 'Shape' || selectedType === 'Text')
+    validFillSelection
     ? <SidebarCollapseSection
         onClick={handleClick}
         collapsed={fillStylesCollapsed}
@@ -44,9 +44,9 @@ const SidebarFillStyles = (props: SidebarFillStylesProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer, rightSidebar } = state;
   const selected = layer.present.selected;
-  const selectedType = selected.length > 0 ? layer.present.byId[selected[0]].type : null;
+  const validFillSelection = !selected.some((id: string) => layer.present.byId[id].type === 'Artboard' || layer.present.byId[id].type === 'Group' || layer.present.byId[id].type === 'Image');
   const fillStylesCollapsed = rightSidebar.fillStylesCollapsed;
-  return { selected, selectedType, fillStylesCollapsed };
+  return { selected, validFillSelection, fillStylesCollapsed };
 };
 
 export default connect(

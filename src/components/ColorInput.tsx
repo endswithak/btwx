@@ -1,127 +1,129 @@
-import paper from 'paper';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { evaluate } from 'mathjs';
+import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
-import SidebarInput from './SidebarInput';
-import SidebarSectionRow from './SidebarSectionRow';
-import SidebarSectionColumn from './SidebarSectionColumn';
-import SidebarSwatch from './SidebarSwatch';
-import { EnableLayerFillPayload, SetLayerFillColorPayload, EnableLayerShadowPayload, SetLayerShadowColorPayload, EnableLayerStrokePayload, SetLayerStrokeColorPayload, LayerTypes } from '../store/actionTypes/layer';
-import { enableLayerFill, setLayerFillColor, enableLayerShadow, setLayerShadowColor, enableLayerStroke, setLayerStrokeColor } from '../store/actions/layer';
+import { colorsMatch } from '../store/selectors/layer';
+import { EnableLayersFillPayload, SetLayersFillColorPayload, EnableLayersShadowPayload, SetLayersShadowColorPayload, EnableLayersStrokePayload, SetLayersStrokeColorPayload, LayerTypes } from '../store/actionTypes/layer';
+import { enableLayersFill, setLayersFillColor, enableLayersShadow, setLayersShadowColor, enableLayersStroke, setLayersStrokeColor } from '../store/actions/layer';
 import { OpenColorEditorPayload, ColorEditorTypes } from '../store/actionTypes/colorEditor';
 import { openColorEditor } from '../store/actions/colorEditor';
 import { SetTextSettingsFillColorPayload, TextSettingsTypes } from '../store/actionTypes/textSettings';
 import { setTextSettingsFillColor } from '../store/actions/textSettings';
-import tinyColor from 'tinycolor2';
+import SidebarInput from './SidebarInput';
+import SidebarSectionRow from './SidebarSectionRow';
+import SidebarSectionColumn from './SidebarSectionColumn';
+import SidebarSwatch from './SidebarSwatch';
 
 interface ColorInputProps {
   prop: 'fill' | 'stroke' | 'shadow';
-  enabled?: boolean;
+  enabledValue?: boolean | 'multi';
   selected?: string[];
   selectedType?: em.LayerType;
-  colorValue?: em.Color;
+  colorValue?: em.Color | 'multi';
+  opacityValue?: number | 'multi';
   colorEditorOpen?: boolean;
   openColorEditor?(payload: OpenColorEditorPayload): ColorEditorTypes;
-  enableLayerFill?(payload: EnableLayerFillPayload): LayerTypes;
-  enableLayerStroke?(payload: EnableLayerStrokePayload): LayerTypes;
-  enableLayerShadow?(payload: EnableLayerShadowPayload): LayerTypes;
-  setLayerFillColor?(payload: SetLayerFillColorPayload): LayerTypes;
-  setLayerStrokeColor?(payload: SetLayerStrokeColorPayload): LayerTypes;
-  setLayerShadowColor?(payload: SetLayerShadowColorPayload): LayerTypes;
+  enableLayersFill?(payload: EnableLayersFillPayload): LayerTypes;
+  enableLayersStroke?(payload: EnableLayersStrokePayload): LayerTypes;
+  enableLayersShadow?(payload: EnableLayersShadowPayload): LayerTypes;
+  setLayerFillColor?(payload: SetLayersFillColorPayload): LayerTypes;
+  setLayerStrokeColor?(payload: SetLayersStrokeColorPayload): LayerTypes;
+  setLayerShadowColor?(payload: SetLayersShadowColorPayload): LayerTypes;
   setTextSettingsFillColor?(payload: SetTextSettingsFillColorPayload): TextSettingsTypes;
 }
 
 const FillColorInput = (props: ColorInputProps): ReactElement => {
-  const { prop, enabled, selected, selectedType, colorValue, colorEditorOpen, enableLayerFill, enableLayerStroke, enableLayerShadow, openColorEditor, setTextSettingsFillColor, setLayerFillColor, setLayerStrokeColor, setLayerShadowColor } = props;
-  const [enabledValue, setEnabledValue] = useState<boolean>(enabled);
-  const [color, setColor] = useState(colorValue);
-  const [opacity, setOpacity] = useState<number | string>(Math.round(colorValue.a * 100));
-  const [hex, setHex] = useState(tinyColor({h: colorValue.h, s: colorValue.s, l: colorValue.l}).toHex());
+  const { prop, enabledValue, selected, selectedType, colorValue, opacityValue, colorEditorOpen, enableLayersFill, enableLayersStroke, enableLayersShadow, openColorEditor, setTextSettingsFillColor, setLayersFillColor, setLayersStrokeColor, setLayersShadowColor } = props;
+  const [enabled, setEnabled] = useState<boolean | 'multi'>(enabledValue);
+  const [color, setColor] = useState<em.Color | 'multi'>(colorValue);
+  const [opacity, setOpacity] = useState(opacityValue !== 'multi' ? Math.round(opacityValue * 100) : opacityValue);
+  const [hex, setHex] = useState(colorValue !== 'multi' ? tinyColor({h: colorValue.h, s: colorValue.s, l: colorValue.l}).toHex() : colorValue);
 
   useEffect(() => {
-    setEnabledValue(enabled);
+    setEnabled(enabledValue);
     setColor(colorValue);
-    setOpacity(Math.round(colorValue.a * 100));
-    setHex(tinyColor({h: colorValue.h, s: colorValue.s, l: colorValue.l}).toHex());
-  }, [colorValue, selected, enabled]);
+    setOpacity(opacityValue !== 'multi' ? Math.round(opacityValue * 100) : opacityValue);
+    setHex(colorValue !== 'multi' ? tinyColor({h: colorValue.h, s: colorValue.s, l: colorValue.l}).toHex() : colorValue);
+  }, [colorValue, opacityValue, selected, enabledValue]);
 
-  const handleOpacityChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
-    const target = e.target as HTMLInputElement;
+  const handleOpacityChange = (e: any): void => {
+    const target = e.target;
     setOpacity(target.value);
   };
 
-  const handleHexChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
-    const target = e.target as HTMLInputElement;
+  const handleHexChange = (e: any): void => {
+    const target = e.target;
     setHex(target.value);
   };
 
-  const handleOpacitySubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
+  const handleOpacitySubmit = (e: any): void => {
     try {
       let nextOpacity = evaluate(`${opacity}`);
-      if (nextOpacity !== colorValue.a && !isNaN(nextOpacity)) {
+      if (nextOpacity !== opacityValue && !isNaN(nextOpacity)) {
         if (nextOpacity > 100) {
           nextOpacity = 100;
         }
         if (nextOpacity < 0) {
           nextOpacity = 0;
         }
+        const nextAlpha = { a: nextOpacity / 100 } as em.Color;
         switch(prop) {
           case 'fill':
-            setLayerFillColor({id: selected[0], fillColor: {...color, a: nextOpacity / 100}});
+            setLayersFillColor({layers: selected, fillColor: nextAlpha});
             break;
           case 'stroke':
-            setLayerStrokeColor({id: selected[0], strokeColor: {...color, a: nextOpacity / 100}});
+            setLayersStrokeColor({layers: selected, strokeColor: nextAlpha});
             break;
           case 'shadow':
-            setLayerShadowColor({id: selected[0], shadowColor: {...color, a: nextOpacity / 100}});
+            setLayersShadowColor({layers: selected, shadowColor: nextAlpha});
             break;
         }
       } else {
-        setOpacity(Math.round(colorValue.a * 100));
+        setOpacity(opacityValue !== 'multi' ? Math.round(opacityValue * 100) : opacityValue);
       }
     } catch(error) {
-      setOpacity(Math.round(colorValue.a * 100));
+      setOpacity(opacityValue !== 'multi' ? Math.round(opacityValue * 100) : opacityValue);
     }
   }
 
   const handleHexSubmit = (e: any): void => {
     const nextHex = tinyColor(hex);
-    if (nextHex.isValid() && tinyColor({h: colorValue.h, s: colorValue.s, l: colorValue.l}).toHex() !== nextHex.toHex()) {
+    if (nextHex.isValid()) {
       const hsl = nextHex.toHsl();
       const hsv = nextHex.toHsv();
+      const nextColor = { h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v } as em.Color;
       switch(prop) {
         case 'fill': {
-          const newFill = { h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v, a: colorValue.a };
-          setLayerFillColor({id: selected[0], fillColor: newFill});
-          if (selectedType === 'Text') {
-            setTextSettingsFillColor({fillColor: newFill});
-          }
+          setLayersFillColor({layers: selected, fillColor: nextColor});
+          // if (selectedType === 'Text') {
+          //   setTextSettingsFillColor({fillColor: newFill});
+          // }
           break;
         }
         case 'stroke':
-          setLayerStrokeColor({id: selected[0], strokeColor: { h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v, a: colorValue.a }});
+          setLayersStrokeColor({layers: selected, strokeColor: nextColor});
           break;
         case 'shadow':
-          setLayerShadowColor({id: selected[0], shadowColor: { h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v, a: colorValue.a }});
+          setLayersShadowColor({layers: selected, shadowColor: nextColor});
           break;
       }
     } else {
-      setHex(tinyColor({h: colorValue.h, s: colorValue.s, l: colorValue.l}).toHex());
+      setHex(colorValue !== 'multi' ? tinyColor({h: colorValue.h, s: colorValue.s, l: colorValue.l}).toHex() : colorValue);
     }
   };
 
   const handleSwatchClick = (bounding: DOMRect): void => {
-    if (!enabledValue) {
+    if (!enabled) {
       switch(prop) {
         case 'fill':
-          enableLayerFill({id: selected[0]});
+          enableLayersFill({layers: selected});
           break;
         case 'stroke':
-          enableLayerStroke({id: selected[0]});
+          enableLayersStroke({layers: selected});
           break;
         case 'shadow':
-          enableLayerShadow({id: selected[0]});
+          enableLayersShadow({layers: selected});
           break;
       }
     }
@@ -129,7 +131,7 @@ const FillColorInput = (props: ColorInputProps): ReactElement => {
       openColorEditor({
         color: color,
         prop: prop,
-        layer: selected[0],
+        layers: selected,
         x: bounding.x,
         y: bounding.y - (bounding.height - 10) // 2 (swatch drop shadow) + 8 (top-padding)
       });
@@ -142,7 +144,7 @@ const FillColorInput = (props: ColorInputProps): ReactElement => {
         <SidebarSwatch
           isActive={colorEditorOpen}
           style={{
-            background: tinyColor(color).toHslString()
+            background: color !== 'multi' ? tinyColor(color).toHslString() : 'none'
           }}
           onClick={handleSwatchClick}
           bottomLabel='Color' />
@@ -171,36 +173,65 @@ const FillColorInput = (props: ColorInputProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState, ownProps: ColorInputProps) => {
+const mapStateToProps = (state: RootState, ownProps: ColorInputProps): {
+  enabledValue: boolean | 'multi';
+  selected: string[];
+  selectedType: em.LayerType;
+  colorValue: em.Color | 'multi';
+  opacityValue: number | 'multi';
+  colorEditorOpen: boolean;
+} => {
   const { layer, colorEditor } = state;
-  const layerItem = layer.present.byId[layer.present.selected[0]];
-  const style = (() => {
+  const selected = layer.present.selected;
+  const layerItems: em.Layer[] = selected.reduce((result, current) => {
+    const layerItem = layer.present.byId[current];
+    return [...result, layerItem];
+  }, []);
+  const styleValues: (em.Fill | em.Stroke | em.Shadow)[] = layerItems.reduce((result, current) => {
     switch(ownProps.prop) {
       case 'fill':
-        return layerItem.style.fill;
+        return [...result, current.style.fill];
       case 'stroke':
-        return layerItem.style.stroke;
+        return [...result, current.style.stroke];
       case 'shadow':
-        return layerItem.style.shadow;
+        return [...result, current.style.shadow];
+    }
+  }, []);
+  const colorValue = ((): em.Color | 'multi' => {
+    if (styleValues.every((value: em.Fill | em.Stroke | em.Shadow) => colorsMatch(value.color, styleValues[0].color))) {
+      return styleValues[0].color;
+    } else {
+      return 'multi';
     }
   })();
-  const enabled = style.enabled;
-  const selected = layer.present.selected;
+  const opacityValue = ((): number | 'multi' => {
+    if (styleValues.every((value: em.Fill | em.Stroke | em.Shadow) => value.color.a === styleValues[0].color.a)) {
+      return styleValues[0].color.a;
+    } else {
+      return 'multi';
+    }
+  })();
+  const enabledValue = ((): boolean | 'multi' => {
+    if (styleValues.every((value: em.Fill | em.Stroke | em.Shadow) => value.enabled === styleValues[0].enabled)) {
+      return styleValues[0].enabled;
+    } else {
+      return 'multi';
+    }
+  })();
   const selectedType = layer.present.selected.length === 1 ? layer.present.byId[layer.present.selected[0]].type : null;
-  const colorValue = style.color;
   const colorEditorOpen = colorEditor.isOpen;
-  return { enabled, selected, selectedType, colorValue, colorEditorOpen };
+  return { enabledValue, selected, selectedType, colorValue, opacityValue, colorEditorOpen };
 };
 
 export default connect(
   mapStateToProps,
   {
-    setLayerFillColor,
-    setLayerStrokeColor,
-    setLayerShadowColor,
-    enableLayerFill,
-    enableLayerStroke,
-    enableLayerShadow,
+    setLayersFillColor,
+    setLayersStrokeColor,
+    setLayersShadowColor,
+    enableLayersFill,
+    enableLayersStroke,
+    enableLayersShadow,
     openColorEditor,
     setTextSettingsFillColor,
   }

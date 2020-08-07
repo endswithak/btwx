@@ -8,11 +8,11 @@ import tinyColor from 'tinycolor2';
 gsap.registerPlugin(Draggable);
 
 interface ColorPickerSaturationProps {
-  hue: number;
-  saturation: number;
-  value: number;
-  lightness: number;
-  alpha: number;
+  hue: number | 'multi';
+  saturation: number | 'multi';
+  value: number | 'multi';
+  lightness: number | 'multi';
+  alpha: number | 'multi';
   setRed(red: number): void;
   setGreen(green: number): void;
   setBlue(blue: number): void;
@@ -48,7 +48,7 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
           const sat = s < 0 ? 0 : s > 1 ? 1 : s;
           const lit = l < 0 ? 0 : l > 1 ? 1 : l;
           const val = v < 0 ? 0 : v > 1 ? 1 : v;
-          const nextColor = tinyColor({h: hue, s: sat, l: lit});
+          const nextColor = tinyColor({h: hue !== 'multi' ? hue : 0, s: sat, l: lit});
           const rgb = nextColor.toRgb();
           setRed(rgb.r);
           setGreen(rgb.g);
@@ -56,7 +56,7 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
           setSaturation(sat);
           setLightness(lit);
           setValue(val);
-          onChange({h: hue, s: sat, l: lit, v: val, a: alpha});
+          onChange({h: hue !== 'multi' ? hue : 0, s: sat, l: lit, v: val, a: alpha !== 'multi' ? alpha : 1});
         },
         onRelease: function() {
           setDragging(false);
@@ -69,8 +69,8 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
     if (!dragging && pointerRef.current && Draggable.get(pointerRef.current)) {
       const thing = Draggable.get(pointerRef.current);
       gsap.set(pointerRef.current, {
-        x: thing.maxX * (lightness === 1 ? 0 : saturation),
-        y: thing.maxY * (-value + 1)
+        x: thing.maxX * (lightness === 1 || lightness === 'multi' ? 0 : saturation !== 'multi' ? saturation : 0 ),
+        y: thing.maxY * (-(value !== 'multi' ? value : 0) + 1)
       });
       Draggable.get(pointerRef.current).update();
     }
@@ -87,7 +87,7 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
       const sat = s < 0 ? 0 : s > 1 ? 1 : s;
       const lit = l < 0 ? 0 : l > 1 ? 1 : l;
       const val = v < 0 ? 0 : v > 1 ? 1 : v;
-      const nextColor = tinyColor({h: hue, s: sat, l: lit});
+      const nextColor = tinyColor({h: hue !== 'multi' ? hue : 0, s: sat, l: lit});
       const rgb = nextColor.toRgb();
       setRed(rgb.r);
       setGreen(rgb.g);
@@ -96,7 +96,7 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
       setLightness(lit);
       setValue(val);
       setDragging(true);
-      onChange({h: hue, s: sat, l: lit, v: val, a: alpha});
+      onChange({h: hue !== 'multi' ? hue : 0, s: sat, l: lit, v: val, a: alpha !== 'multi' ? alpha : 1});
       gsap.set(pointerRef.current, {x, y});
       Draggable.get(pointerRef.current).update();
       Draggable.get(pointerRef.current).startDrag(event);
@@ -114,7 +114,7 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
       <div
         className='c-color-picker-saturation__color'
         style={{
-          background: `hsl(${ hue },100%, 50%)`
+          background: `hsl(${ hue !== 'multi' ? hue : 0 },100%, 50%)`
         }} />
       <div className='c-color-picker-saturation__white' />
       <div className='c-color-picker-saturation__black' />

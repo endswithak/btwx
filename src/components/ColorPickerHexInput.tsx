@@ -5,11 +5,11 @@ import SidebarInput from './SidebarInput';
 import tinyColor from 'tinycolor2';
 
 interface ColorPickerHexInputProps {
-  hue: number;
-  saturation: number;
-  lightness: number;
-  value: number;
-  alpha: number;
+  hue: number | 'multi';
+  saturation: number | 'multi';
+  lightness: number | 'multi';
+  value: number | 'multi';
+  alpha: number | 'multi';
   setRed(red: number): void;
   setGreen(green: number): void;
   setBlue(blue: number): void;
@@ -23,10 +23,10 @@ interface ColorPickerHexInputProps {
 const ColorPickerHexInput = (props: ColorPickerHexInputProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { hue, setHue, setRed, setGreen, setBlue, saturation, setSaturation, lightness, setLightness, value, setValue, alpha, onChange } = props;
-  const [hex, setHex] = useState<string>(tinyColor({h: hue, s: saturation, l: lightness}).toHex());
+  const [hex, setHex] = useState<string>(hue !== 'multi' ? tinyColor({h: hue, s: saturation as number, l: lightness as number}).toHex() : 'multi');
 
   useEffect(() => {
-    setHex(tinyColor({h: hue, s: saturation, l: lightness}).toHex());
+    setHex(hue !== 'multi' ? tinyColor({h: hue, s: saturation as number, l: lightness as number}).toHex() : 'multi');
   }, [hue, saturation, lightness, value]);
 
   const handleChange = (e: any) => {
@@ -47,9 +47,9 @@ const ColorPickerHexInput = (props: ColorPickerHexInputProps): ReactElement => {
       setSaturation(hsl.s);
       setLightness(hsl.l);
       setValue(hsv.v);
-      onChange({ h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v, a: alpha });
+      onChange({ h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v, a: alpha !== 'multi' ? alpha : 1 });
     } else {
-      setHex(tinyColor({h: hue, s: saturation, l: lightness}).toHex());
+      setHex(hue !== 'multi' ? tinyColor({h: hue, s: saturation as number, l: lightness as number}).toHex() : 'multi');
     }
   };
 
