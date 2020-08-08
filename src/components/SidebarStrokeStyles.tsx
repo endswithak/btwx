@@ -13,7 +13,7 @@ import { expandStrokeStyles, collapseStrokeStyles } from '../store/actions/right
 
 interface SidebarStrokeStylesProps {
   selected?: string[];
-  selectedType?: string;
+  validFillSelection?: boolean;
   strokeStylesCollapsed?: boolean;
   expandStrokeStyles?(): RightSidebarTypes;
   collapseStrokeStyles?(): RightSidebarTypes;
@@ -21,7 +21,7 @@ interface SidebarStrokeStylesProps {
 
 const SidebarStrokeStyles = (props: SidebarStrokeStylesProps): ReactElement => {
   const [showOptions, setShowOptions] = useState(false);
-  const { selected, selectedType, strokeStylesCollapsed, expandStrokeStyles, collapseStrokeStyles } = props;
+  const { selected, validFillSelection, strokeStylesCollapsed, expandStrokeStyles, collapseStrokeStyles } = props;
   const theme = useContext(ThemeContext);
 
   const handleClick = () => {
@@ -33,7 +33,7 @@ const SidebarStrokeStyles = (props: SidebarStrokeStylesProps): ReactElement => {
   }
 
   return (
-    selected.length === 1 && (selectedType === 'Shape' || selectedType === 'Text')
+    validFillSelection
     ? <SidebarCollapseSection
         onClick={handleClick}
         collapsed={strokeStylesCollapsed}
@@ -60,9 +60,9 @@ const SidebarStrokeStyles = (props: SidebarStrokeStylesProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer, rightSidebar } = state;
   const selected = layer.present.selected;
-  const selectedType = selected.length > 0 ? layer.present.byId[selected[0]].type : null;
+  const validFillSelection = !selected.some((id: string) => layer.present.byId[id].type === 'Artboard' || layer.present.byId[id].type === 'Group');
   const strokeStylesCollapsed = rightSidebar.strokeStylesCollapsed;
-  return { selected, selectedType, strokeStylesCollapsed };
+  return { selected, validFillSelection, strokeStylesCollapsed };
 };
 
 export default connect(

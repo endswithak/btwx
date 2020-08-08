@@ -3,19 +3,19 @@ import React, { useContext, ReactElement, useRef, useEffect, useCallback } from 
 import { connect } from 'react-redux';
 import debounce from 'lodash.debounce';
 import tinyColor from 'tinycolor2';
-import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { closeColorEditor } from '../store/actions/colorEditor';
 import { ColorEditorTypes } from '../store/actionTypes/colorEditor';
 import { openGradientEditor } from '../store/actions/gradientEditor';
-import { colorsMatch } from '../store/selectors/layer';
+import { colorsMatch, gradientsMatch } from '../store/selectors/layer';
 import { GradientEditorTypes, OpenGradientEditorPayload } from '../store/actionTypes/gradientEditor';
 import { ColorEditorState } from '../store/reducers/colorEditor';
-import ColorPicker from './ColorPicker';
-import { SetLayerFillTypePayload, SetLayerFillGradientTypePayload, SetLayersFillColorPayload, SetLayerStrokeFillTypePayload, SetLayerStrokeGradientTypePayload, SetLayersStrokeColorPayload, SetLayersShadowColorPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayerFillType, setLayerFillGradientType, setLayersFillColor, setLayersStrokeColor, setLayerStrokeFillType, setLayerStrokeGradientType, setLayersShadowColor } from '../store/actions/layer';
+import { SetLayersFillTypePayload, SetLayersGradientTypePayload, SetLayersFillColorPayload, SetLayersStrokeFillTypePayload, SetLayersStrokeColorPayload, SetLayersShadowColorPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayersFillType, setLayersGradientType, setLayersFillColor, setLayersStrokeColor, setLayersStrokeFillType, setLayersShadowColor } from '../store/actions/layer';
 import { SetTextSettingsFillColorPayload, TextSettingsTypes } from '../store/actionTypes/textSettings';
 import { setTextSettingsFillColor } from '../store/actions/textSettings';
+import { ThemeContext } from './ThemeProvider';
+import ColorPicker from './ColorPicker';
 import FillTypeSelector from './FillTypeSelector';
 
 interface ColorEditorProps {
@@ -23,22 +23,22 @@ interface ColorEditorProps {
   styleValues: (em.Fill | em.Stroke | em.Shadow)[];
   colorEditor?: ColorEditorState;
   colorValue?: em.Color | 'multi';
+  gradientValue?: em.Gradient | 'multi';
   closeColorEditor?(): ColorEditorTypes;
   openGradientEditor?(payload: OpenGradientEditorPayload): GradientEditorTypes;
   setLayersShadowColor?(payload: SetLayersShadowColorPayload): LayerTypes;
   setLayersFillColor?(payload: SetLayersFillColorPayload): LayerTypes;
-  setLayerFillType?(payload: SetLayerFillTypePayload): LayerTypes;
-  setLayerFillGradientType?(payload: SetLayerFillGradientTypePayload): LayerTypes;
+  setLayersFillType?(payload: SetLayersFillTypePayload): LayerTypes;
+  setLayersGradientType?(payload: SetLayersGradientTypePayload): LayerTypes;
   setLayersStrokeColor?(payload: SetLayersStrokeColorPayload): LayerTypes;
-  setLayerStrokeFillType?(payload: SetLayerStrokeFillTypePayload): LayerTypes;
-  setLayerStrokeGradientType?(payload: SetLayerStrokeGradientTypePayload): LayerTypes;
+  setLayersStrokeFillType?(payload: SetLayersStrokeFillTypePayload): LayerTypes;
   setTextSettingsFillColor?(payload: SetTextSettingsFillColorPayload): TextSettingsTypes;
 }
 
 const ColorEditor = (props: ColorEditorProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const editorRef = useRef<HTMLDivElement>(null);
-  const { layerItem, styleValues, colorEditor, colorValue, closeColorEditor, setLayersFillColor, setLayerStrokeFillType, setLayerStrokeGradientType, setLayerFillType, setLayersStrokeColor, setLayerFillGradientType, openGradientEditor, setLayersShadowColor, setTextSettingsFillColor } = props;
+  const { layerItem, styleValues, gradientValue, colorEditor, colorValue, closeColorEditor, setLayersFillColor, setLayersStrokeFillType, setLayersGradientType, setLayersFillType, setLayersStrokeColor, openGradientEditor, setLayersShadowColor, setTextSettingsFillColor } = props;
 
   const debounceColor = useCallback(
     debounce((color: em.Color) => {
@@ -93,69 +93,55 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
     debounceColor(color);
   }
 
-  // const handleLinearGradientClick = (): void => {
-  //   switch(colorEditor.prop) {
-  //     case 'fill':
-  //       setLayerFillType({id: colorEditor.layer, fillType: 'gradient'});
-  //       break;
-  //     case 'stroke':
-  //       setLayerStrokeFillType({id: colorEditor.layer, fillType: 'gradient'});
-  //       break;
-  //   }
-  //   if (colorEditor.prop !== 'shadow' && (style as em.Fill | em.Stroke).gradient.gradientType !== 'linear') {
-  //     switch(colorEditor.prop) {
-  //       case 'fill':
-  //         setLayerFillGradientType({id: colorEditor.layer, gradientType: 'linear'});
-  //         break;
-  //       case 'stroke':
-  //         setLayerStrokeGradientType({id: colorEditor.layer, gradientType: 'linear'});
-  //         break;
-  //     }
-  //   }
-  //   closeColorEditor();
-  //   openGradientEditor({
-  //     layer: colorEditor.layer,
-  //     prop: colorEditor.prop,
-  //     gradient: {
-  //       ...(style as em.Fill | em.Stroke).gradient,
-  //       gradientType: 'linear'
-  //     },
-  //     x: colorEditor.x,
-  //     y: colorEditor.y
-  //   });
-  // }
+  const handleLinearGradientClick = (): void => {
+    switch(colorEditor.prop) {
+      case 'fill':
+        setLayersFillType({layers: colorEditor.layers, fillType: 'gradient'});
+        break;
+      case 'stroke':
+        setLayersStrokeFillType({layers: colorEditor.layers, fillType: 'gradient'});
+        break;
+    }
+    if (colorEditor.prop !== 'shadow') {
+      setLayersGradientType({layers: colorEditor.layers, prop: colorEditor.prop as 'fill' | 'stroke', gradientType: 'linear'});
+    }
+    closeColorEditor();
+    openGradientEditor({
+      layers: colorEditor.layers,
+      prop: colorEditor.prop,
+      gradient: {
+        ...(gradientValue as em.Gradient),
+        gradientType: 'linear'
+      },
+      x: colorEditor.x,
+      y: colorEditor.y
+    });
+  }
 
-  // const handleRadialGradientClick = (): void => {
-  //   switch(colorEditor.prop) {
-  //     case 'fill':
-  //       setLayerFillType({id: colorEditor.layer, fillType: 'gradient'});
-  //       break;
-  //     case 'stroke':
-  //       setLayerStrokeFillType({id: colorEditor.layer, fillType: 'gradient'});
-  //       break;
-  //   }
-  //   if (colorEditor.prop !== 'shadow' && (style as em.Fill | em.Stroke).gradient.gradientType !== 'radial') {
-  //     switch(colorEditor.prop) {
-  //       case 'fill':
-  //         setLayerFillGradientType({id: colorEditor.layer, gradientType: 'radial'});
-  //         break;
-  //       case 'stroke':
-  //         setLayerStrokeGradientType({id: colorEditor.layer, gradientType: 'radial'});
-  //         break;
-  //     }
-  //   }
-  //   closeColorEditor();
-  //   openGradientEditor({
-  //     layer: colorEditor.layer,
-  //     prop: colorEditor.prop,
-  //     gradient: {
-  //       ...(style as em.Fill | em.Stroke).gradient,
-  //       gradientType: 'radial'
-  //     },
-  //     x: colorEditor.x,
-  //     y: colorEditor.y
-  //   });
-  // }
+  const handleRadialGradientClick = (): void => {
+    switch(colorEditor.prop) {
+      case 'fill':
+        setLayersFillType({layers: colorEditor.layers, fillType: 'gradient'});
+        break;
+      case 'stroke':
+        setLayersStrokeFillType({layers: colorEditor.layers, fillType: 'gradient'});
+        break;
+    }
+    if (colorEditor.prop !== 'shadow') {
+      setLayersGradientType({layers: colorEditor.layers, prop: colorEditor.prop as 'fill' | 'stroke', gradientType: 'radial'});
+    }
+    closeColorEditor();
+    openGradientEditor({
+      layers: colorEditor.layers,
+      prop: colorEditor.prop,
+      gradient: {
+        ...(gradientValue as em.Gradient),
+        gradientType: 'radial'
+      },
+      x: colorEditor.x,
+      y: colorEditor.y
+    });
+  }
 
   return (
     <div
@@ -178,14 +164,12 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
               }}
               linearGradientSelector={{
                 enabled: true,
-                // onClick: handleLinearGradientClick,
-                onClick: (): void => {return;},
+                onClick: handleLinearGradientClick,
                 isActive: false
               }}
               radialGradientSelector={{
                 enabled: true,
-                // onClick: handleRadialGradientClick,
-                onClick: (): void => {return;},
+                onClick: handleRadialGradientClick,
                 isActive: false
               }} />
           : null
@@ -204,6 +188,7 @@ const mapStateToProps = (state: RootState): {
   styleValues: (em.Fill | em.Stroke | em.Shadow)[];
   colorEditor: ColorEditorState;
   colorValue: em.Color | 'multi';
+  gradientValue: em.Gradient | 'multi';
 } => {
   const { colorEditor, layer } = state;
   const layerItems: em.Layer[] = colorEditor.layers.reduce((result, current) => {
@@ -227,17 +212,14 @@ const mapStateToProps = (state: RootState): {
       return 'multi';
     }
   })();
-  // const style = ((): em.Fill | em.Stroke | em.Shadow => {
-  //   switch(colorEditor.prop) {
-  //     case 'fill':
-  //       return layerItem.style.fill;
-  //     case 'stroke':
-  //       return layerItem.style.stroke;
-  //     case 'shadow':
-  //       return layerItem.style.shadow;
-  //   }
-  // })();
-  return { colorEditor, layerItems, styleValues, colorValue };
+  const gradientValue = ((): em.Gradient | 'multi' => {
+    if (colorEditor.prop !== 'shadow' && styleValues.every((value: em.Fill | em.Stroke) => gradientsMatch(value.gradient, (styleValues[0] as em.Fill | em.Stroke).gradient))) {
+      return (styleValues[0] as em.Fill | em.Stroke).gradient;
+    } else {
+      return 'multi';
+    }
+  })();
+  return { colorEditor, layerItems, styleValues, colorValue, gradientValue };
 };
 
 export default connect(
@@ -248,10 +230,9 @@ export default connect(
     setLayersFillColor,
     setLayersStrokeColor,
     setLayersShadowColor,
-    setLayerFillType,
-    setLayerStrokeFillType,
-    setLayerFillGradientType,
-    setLayerStrokeGradientType,
+    setLayersFillType,
+    setLayersStrokeFillType,
+    setLayersGradientType,
     setTextSettingsFillColor
   }
 )(ColorEditor);

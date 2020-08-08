@@ -43,13 +43,13 @@ const GradientSliderGradient = (props: GradientSliderGradientProps): ReactElemen
       }
       return result;
     }, stops.byId[stops.allIds[0]]);
-    const id = uuidv4();
     const color1 = tinyColor({h: leftStop.color.h, s: leftStop.color.s, l: leftStop.color.l, a: leftStop.color.a});
     const color2 = tinyColor({h: rightStop.color.h, s: rightStop.color.s, l: rightStop.color.l, a: rightStop.color.a});
     const colorAvg = tinyColor.mix(color1, color2, 50);
     const hsl = colorAvg.toHsl();
     const hsv = colorAvg.toHsv();
-    const newStop = { id, position, color: { ...hsl, v: hsv.v }, active: false };
+    const id = uuidv4();
+    const newStop = { position, color: { ...hsl, v: hsv.v }, active: false, id } as em.GradientStop;
     onSliderClick(newStop);
   }
 

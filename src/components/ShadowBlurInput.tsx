@@ -1,45 +1,42 @@
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { evaluate } from 'mathjs';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
-import { SetLayerShadowBlurPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayerShadowBlur } from '../store/actions/layer';
-import { getPaperLayer } from '../store/selectors/layer';
+import { SetLayersShadowBlurPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayersShadowBlur } from '../store/actions/layer';
 
 interface ShadowBlurInputProps {
-  shadow?: em.Shadow;
+  shadowBlurValue?: number | 'multi';
   selected?: string[];
   disabled: boolean;
-  setLayerShadowBlur?(payload: SetLayerShadowBlurPayload): LayerTypes;
+  setLayersShadowBlur?(payload: SetLayersShadowBlurPayload): LayerTypes;
 }
 
 const ShadowBlurInput = (props: ShadowBlurInputProps): ReactElement => {
-  const { selected, shadow, disabled, setLayerShadowBlur } = props;
-  const [shadowBlur, setShadowBlur] = useState<string | number>(props.shadow.blur);
+  const { selected, shadowBlurValue, disabled, setLayersShadowBlur } = props;
+  const [shadowBlur, setShadowBlur] = useState(shadowBlurValue);
 
   useEffect(() => {
-    setShadowBlur(props.shadow.blur);
-  }, [shadow, selected]);
+    setShadowBlur(shadowBlurValue);
+  }, [shadowBlurValue, selected]);
 
-  const handleChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const target = e.target as HTMLInputElement;
+  const handleChange = (e: any) => {
+    const target = e.target;
     setShadowBlur(target.value);
   };
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
+  const handleSubmit = (e: any) => {
     try {
       const nextBlur = evaluate(`${shadowBlur}`);
-      if (nextBlur !== shadow.blur && !isNaN(nextBlur)) {
-        const paperLayer = getPaperLayer(selected[0]);
-        paperLayer.shadowBlur = nextBlur;
-        setLayerShadowBlur({id: selected[0], shadowBlur: nextBlur});
+      if (nextBlur !== shadowBlurValue && !isNaN(nextBlur)) {
+        setLayersShadowBlur({layers: selected, shadowBlur: nextBlur});
         setShadowBlur(nextBlur);
       } else {
-        setShadowBlur(shadow.blur);
+        setShadowBlur(shadowBlurValue);
       }
     } catch(error) {
-      setShadowBlur(shadow.blur);
+      setShadowBlur(shadowBlurValue);
     }
   }
 
@@ -57,21 +54,19 @@ const ShadowBlurInput = (props: ShadowBlurInputProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const shadow = layer.present.byId[layer.present.selected[0]].style.shadow;
-  const disabled = (() => {
-    switch(layer.present.selected.length) {
-      case 0:
-        return true;
-      case 1:
-        return !layer.present.byId[layer.present.selected[0]].style.shadow.enabled;
-      default:
-        return true;
-    }
-  })();
-  return { selected, shadow, disabled };
+  const layerItems: (em.Shape | em.Image | em.Text)[] = selected.reduce((result, current) => {
+    const layerItem = layer.present.byId[current];
+    return [...result, layerItem];
+  }, []);
+  const shadowBlurValues = layerItems.reduce((result: number[], current: em.Shape | em.Image | em.Text) => {
+    return [...result, current.style.shadow.blur];
+  }, []);
+  const shadowBlurValue = shadowBlurValues.every((shadowBlur: number) => shadowBlur === shadowBlurValues[0]) ? shadowBlurValues[0] : 'multi';
+  const disabled = !layerItems.every((layerItem) => layerItem.style.shadow.enabled);
+  return { selected, shadowBlurValue, disabled };
 };
 
 export default connect(
   mapStateToProps,
-  { setLayerShadowBlur }
+  { setLayersShadowBlur }
 )(ShadowBlurInput);

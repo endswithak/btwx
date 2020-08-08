@@ -7,8 +7,8 @@ import {
 export interface GradientEditorState {
   isOpen: boolean;
   prop: 'stroke' | 'fill' | 'shadow';
-  layer: string;
-  gradient: em.Gradient;
+  layers: string[];
+  gradient: em.Gradient | 'multi';
   x: number;
   y: number;
 }
@@ -16,7 +16,7 @@ export interface GradientEditorState {
 const initialState: GradientEditorState = {
   isOpen: false,
   prop: null,
-  layer: null,
+  layers: null,
   gradient: null,
   x: null,
   y: null
@@ -28,7 +28,7 @@ export default (state = initialState, action: GradientEditorTypes): GradientEdit
       return {
         ...state,
         isOpen: true,
-        layer: action.payload.layer,
+        layers: action.payload.layers,
         gradient: action.payload.gradient,
         prop: action.payload.prop,
         x: action.payload.x,
@@ -39,7 +39,7 @@ export default (state = initialState, action: GradientEditorTypes): GradientEdit
       return {
         ...state,
         isOpen: false,
-        layer: null,
+        layers: null,
         gradient: null,
         prop: null,
         x: null,

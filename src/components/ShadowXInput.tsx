@@ -1,46 +1,42 @@
-import paper from 'paper';
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { evaluate } from 'mathjs';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
-import { SetLayerShadowXOffsetPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayerShadowXOffset } from '../store/actions/layer';
-import { getPaperLayer } from '../store/selectors/layer';
+import { SetLayersShadowXOffsetPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayersShadowXOffset } from '../store/actions/layer';
 
 interface ShadowXInputProps {
-  shadow?: em.Shadow;
+  shadowXOffsetValue?: number | 'multi';
   selected?: string[];
   disabled: boolean;
-  setLayerShadowXOffset?(payload: SetLayerShadowXOffsetPayload): LayerTypes;
+  setLayersShadowXOffset?(payload: SetLayersShadowXOffsetPayload): LayerTypes;
 }
 
 const ShadowXInput = (props: ShadowXInputProps): ReactElement => {
-  const { selected, shadow, disabled, setLayerShadowXOffset } = props;
-  const [shadowXOffset, setShadowXOffset] = useState<string | number>(props.shadow.offset.x);
+  const { selected, shadowXOffsetValue, disabled, setLayersShadowXOffset } = props;
+  const [shadowXOffset, setShadowXOffset] = useState(shadowXOffsetValue);
 
   useEffect(() => {
-    setShadowXOffset(props.shadow.offset.x);
-  }, [shadow, selected]);
+    setShadowXOffset(shadowXOffsetValue);
+  }, [shadowXOffsetValue, selected]);
 
-  const handleChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const target = e.target as HTMLInputElement;
+  const handleChange = (e: any) => {
+    const target = e.target;
     setShadowXOffset(target.value);
   };
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
+  const handleSubmit = (e: any) => {
     try {
       const newXOffset = evaluate(`${shadowXOffset}`);
-      if (newXOffset !== shadow.offset.x && !isNaN(newXOffset)) {
-        const paperLayer = getPaperLayer(selected[0]);
-        paperLayer.shadowOffset = new paper.Point(newXOffset, shadow.offset.y);
-        setLayerShadowXOffset({id: selected[0], shadowXOffset: newXOffset});
+      if (newXOffset !== shadowXOffsetValue && !isNaN(newXOffset)) {
+        setLayersShadowXOffset({layers: selected, shadowXOffset: newXOffset});
         setShadowXOffset(newXOffset);
       } else {
-        setShadowXOffset(shadow.offset.x);
+        setShadowXOffset(shadowXOffsetValue);
       }
     } catch(error) {
-      setShadowXOffset(shadow.offset.x);
+      setShadowXOffset(shadowXOffsetValue);
     }
   }
 
@@ -58,21 +54,19 @@ const ShadowXInput = (props: ShadowXInputProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const shadow = layer.present.byId[layer.present.selected[0]].style.shadow;
-  const disabled = (() => {
-    switch(layer.present.selected.length) {
-      case 0:
-        return true;
-      case 1:
-        return !layer.present.byId[layer.present.selected[0]].style.shadow.enabled;
-      default:
-        return true;
-    }
-  })();
-  return { selected, shadow, disabled };
+  const layerItems: (em.Shape | em.Image | em.Text)[] = selected.reduce((result, current) => {
+    const layerItem = layer.present.byId[current];
+    return [...result, layerItem];
+  }, []);
+  const shadowXOffsetValues = layerItems.reduce((result: number[], current: em.Shape | em.Image | em.Text) => {
+    return [...result, current.style.shadow.offset.x];
+  }, []);
+  const shadowXOffsetValue = shadowXOffsetValues.every((shadowXOffset: number) => shadowXOffset === shadowXOffsetValues[0]) ? shadowXOffsetValues[0] : 'multi';
+  const disabled = !layerItems.every((layerItem) => layerItem.style.shadow.enabled);
+  return { selected, shadowXOffsetValue, disabled };
 };
 
 export default connect(
   mapStateToProps,
-  { setLayerShadowXOffset }
+  { setLayersShadowXOffset }
 )(ShadowXInput);

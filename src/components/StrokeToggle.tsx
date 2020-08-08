@@ -1,30 +1,30 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { EnableLayerStrokePayload, DisableLayerStrokePayload, LayerTypes } from '../store/actionTypes/layer';
-import { enableLayerStroke, disableLayerStroke } from '../store/actions/layer';
+import { EnableLayersStrokePayload, DisableLayersStrokePayload, LayerTypes } from '../store/actionTypes/layer';
+import { enableLayersStroke, disableLayersStroke } from '../store/actions/layer';
 import StyleToggle from './StyleToggle';
 
 interface StrokeToggleProps {
-  stroke?: em.Stroke;
+  enabledValue?: boolean;
   selected: string[];
-  enableLayerStroke?(payload: EnableLayerStrokePayload): LayerTypes;
-  disableLayerStroke?(payload: DisableLayerStrokePayload): LayerTypes;
+  enableLayersStroke?(payload: EnableLayersStrokePayload): LayerTypes;
+  disableLayersStroke?(payload: DisableLayersStrokePayload): LayerTypes;
 }
 
 const StrokeToggle = (props: StrokeToggleProps): ReactElement => {
-  const { stroke, selected, enableLayerStroke, disableLayerStroke } = props;
-  const [enabled, setEnabled] = useState<boolean>(stroke.enabled);
+  const { enabledValue, selected, enableLayersStroke, disableLayersStroke } = props;
+  const [enabled, setEnabled] = useState<boolean>(enabledValue);
 
   useEffect(() => {
-    setEnabled(stroke.enabled);
-  }, [stroke, selected]);
+    setEnabled(enabledValue);
+  }, [enabledValue, selected]);
 
   const handleToggleClick = () => {
     if (enabled) {
-      disableLayerStroke({id: selected[0]});
+      disableLayersStroke({layers: selected});
     } else {
-      enableLayerStroke({id: selected[0]});
+      enableLayersStroke({layers: selected});
     }
   };
 
@@ -38,11 +38,15 @@ const StrokeToggle = (props: StrokeToggleProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const stroke = layer.present.byId[layer.present.selected[0]].style.stroke;
-  return { selected, stroke };
+  const layerItems: (em.Shape | em.Text | em.Image)[] = selected.reduce((result, current) => {
+    const layerItem = layer.present.byId[current];
+    return [...result, layerItem];
+  }, []);
+  const enabledValue = layerItems.every((layerItem) => layerItem.style.stroke.enabled);
+  return { selected, enabledValue };
 };
 
 export default connect(
   mapStateToProps,
-  { enableLayerStroke, disableLayerStroke }
+  { enableLayersStroke, disableLayersStroke }
 )(StrokeToggle);

@@ -2,20 +2,20 @@ import React, { useContext, ReactElement, useRef, useEffect, useState } from 're
 import { connect } from 'react-redux';
 import SidebarSelect from './SidebarSelect';
 import { RootState } from '../store/reducers';
-import { SetLayerFillGradientTypePayload, SetLayerStrokeGradientTypePayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayerFillGradientType, setLayerStrokeGradientType } from '../store/actions/layer';
+import { SetLayersFillGradientTypePayload, SetLayersStrokeGradientTypePayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayersFillGradientType, setLayersStrokeGradientType } from '../store/actions/layer';
 
 interface GradientTypeSelectorProps {
   selected?: string[];
-  gradientTypeValue: string;
+  gradientTypeValue: em.GradientType | 'multi';
   disabled?: boolean;
   prop: 'fill' | 'stroke';
-  setLayerFillGradientType?(payload: SetLayerFillGradientTypePayload): LayerTypes;
-  setLayerStrokeGradientType?(payload: SetLayerStrokeGradientTypePayload): LayerTypes;
+  setLayersFillGradientType?(payload: SetLayersFillGradientTypePayload): LayerTypes;
+  setLayersStrokeGradientType?(payload: SetLayersStrokeGradientTypePayload): LayerTypes;
 }
 
 const GradientTypeSelector = (props: GradientTypeSelectorProps): ReactElement => {
-  const { selected, prop, disabled, gradientTypeValue, setLayerFillGradientType, setLayerStrokeGradientType } = props;
+  const { selected, prop, disabled, gradientTypeValue, setLayersFillGradientType, setLayersStrokeGradientType } = props;
 
   const options: { value: em.GradientType; label: string }[] = [
     { value: 'linear', label: 'Linear' },
@@ -25,17 +25,21 @@ const GradientTypeSelector = (props: GradientTypeSelectorProps): ReactElement =>
   const [gradientType, setGradientType] = useState(options.find((option) => option.value === gradientTypeValue));
 
   useEffect(() => {
-    setGradientType(options.find((option) => option.value === gradientTypeValue));
+    if (gradientTypeValue === 'multi') {
+      setGradientType(null);
+    } else {
+      setGradientType(options.find((option) => option.value === gradientTypeValue));
+    }
   }, [gradientTypeValue, selected]);
 
   const handleChange = (selectedOption: { value: em.GradientType; label: string }) => {
     setGradientType(selectedOption);
     switch(prop) {
       case 'fill':
-        setLayerFillGradientType({id: selected[0], gradientType: selectedOption.value});
+        setLayersFillGradientType({layers: selected, gradientType: selectedOption.value});
         break;
       case 'stroke':
-        setLayerStrokeGradientType({id: selected[0], gradientType: selectedOption.value});
+        setLayersStrokeGradientType({layers: selected, gradientType: selectedOption.value});
         break;
     }
   }
@@ -45,7 +49,7 @@ const GradientTypeSelector = (props: GradientTypeSelectorProps): ReactElement =>
       value={gradientType}
       onChange={handleChange}
       options={options}
-      placeholder={'Gradient Type'}
+      placeholder='multi'
       bottomLabel='Type'
       disabled={disabled}
     />
@@ -61,5 +65,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { setLayerFillGradientType, setLayerStrokeGradientType }
+  { setLayersFillGradientType, setLayersStrokeGradientType }
 )(GradientTypeSelector);

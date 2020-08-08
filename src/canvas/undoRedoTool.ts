@@ -40,25 +40,33 @@ class UndoRedoTool {
           }
         } else {
           // if fill types dont match, open relevant editor
-          // switch(style.fillType) {
-          //   case 'gradient': {
-          //     const gradient = (style as em.Fill | em.Stroke).gradient;
-          //     store.dispatch(closeColorEditor());
-          //     store.dispatch(openGradientEditor({layer: state.colorEditor.layer, x: state.colorEditor.x, y: state.colorEditor.y, gradient: gradient, prop: state.colorEditor.prop}));
-          //   }
-          // }
+          switch(style.fillType) {
+            case 'gradient': {
+              const gradient = (style as em.Fill | em.Stroke).gradient;
+              store.dispatch(closeColorEditor());
+              store.dispatch(openGradientEditor({layers: state.colorEditor.layers, x: state.colorEditor.x, y: state.colorEditor.y, gradient: gradient, prop: state.colorEditor.prop}));
+            }
+          }
         }
       } else {
         store.dispatch(closeColorEditor());
       }
     }
     if (state.gradientEditor.isOpen) {
-      const layerItem = state.layer.present.byId[state.gradientEditor.layer];
-      const prevLayerItem = type === 'redo' ? state.layer.past[state.layer.past.length - 1].byId[state.gradientEditor.layer] : state.layer.future[0].byId[state.gradientEditor.layer];
+      // const layerItem = state.layer.present.byId[state.gradientEditor.layer];
+      const layerItems = state.gradientEditor.layers.reduce((result, current) => {
+        return [...result, state.layer.present.byId[current]];
+      }, []);
+      // const prevLayerItem = type === 'redo' ? state.layer.past[state.layer.past.length - 1].byId[state.gradientEditor.layer] : state.layer.future[0].byId[state.gradientEditor.layer];
+      const prevLayerItems = type === 'redo' ? state.gradientEditor.layers.reduce((result, current) => {
+        return [...result, state.layer.past[state.layer.past.length - 1].byId[current]];
+      }, []) : state.gradientEditor.layers.reduce((result, current) => {
+        return [...result, state.layer.future[0].byId[current]];
+      }, []);
       // check if items exist and matches selection
-      if (layerItem && prevLayerItem && state.layer.present.selected[0] === state.gradientEditor.layer) {
-        const style = layerItem.style[state.gradientEditor.prop];
-        const prevStyle = prevLayerItem.style[state.gradientEditor.prop];
+      if (layerItems.every((id) => id) && prevLayerItems.every((id) => id) && state.layer.present.selected.every((id, index) => state.layer.present.selected[index] === state.gradientEditor.layers[index])) {
+        const style = layerItems[0].style[state.gradientEditor.prop];
+        const prevStyle = prevLayerItems[0].style[state.gradientEditor.prop];
         // check if fill types match
         if (style.fillType === prevStyle.fillType) {
           // check if prev action creator was for gradient
@@ -71,7 +79,7 @@ class UndoRedoTool {
             case 'color': {
               const color = (style as em.Fill | em.Stroke).color;
               store.dispatch(closeGradientEditor());
-              store.dispatch(openColorEditor({layer: state.gradientEditor.layer, x: state.gradientEditor.x, y: state.gradientEditor.y, color: color, prop: state.gradientEditor.prop}));
+              store.dispatch(openColorEditor({layers: state.gradientEditor.layers, x: state.gradientEditor.x, y: state.gradientEditor.y, color: color, prop: state.gradientEditor.prop}));
               break;
             }
           }

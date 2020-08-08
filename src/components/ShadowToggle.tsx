@@ -1,32 +1,30 @@
-import paper from 'paper';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { EnableLayerShadowPayload, DisableLayerShadowPayload, LayerTypes } from '../store/actionTypes/layer';
-import { enableLayerShadow, disableLayerShadow } from '../store/actions/layer';
-import { getPaperLayer } from '../store/selectors/layer';
+import { EnableLayersShadowPayload, DisableLayersShadowPayload, LayerTypes } from '../store/actionTypes/layer';
+import { enableLayersShadow, disableLayersShadow } from '../store/actions/layer';
 import StyleToggle from './StyleToggle';
 
 interface ShadowToggleProps {
-  shadow?: em.Shadow;
+  enabledValue?: boolean;
   selected: string[];
-  enableLayerShadow?(payload: EnableLayerShadowPayload): LayerTypes;
-  disableLayerShadow?(payload: DisableLayerShadowPayload): LayerTypes;
+  enableLayersShadow?(payload: EnableLayersShadowPayload): LayerTypes;
+  disableLayersShadow?(payload: DisableLayersShadowPayload): LayerTypes;
 }
 
 const ShadowToggle = (props: ShadowToggleProps): ReactElement => {
-  const { shadow, selected, enableLayerShadow, disableLayerShadow } = props;
-  const [enabled, setEnabled] = useState<boolean>(shadow.enabled);
+  const { enabledValue, selected, enableLayersShadow, disableLayersShadow } = props;
+  const [enabled, setEnabled] = useState<boolean>(enabledValue);
 
   useEffect(() => {
-    setEnabled(shadow.enabled);
-  }, [shadow, selected]);
+    setEnabled(enabledValue);
+  }, [enabledValue, selected]);
 
   const handleToggleClick = () => {
     if (enabled) {
-      disableLayerShadow({id: selected[0]});
+      disableLayersShadow({layers: selected});
     } else {
-      enableLayerShadow({id: selected[0]});
+      enableLayersShadow({layers: selected});
     }
   };
 
@@ -40,11 +38,15 @@ const ShadowToggle = (props: ShadowToggleProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const shadow = layer.present.byId[layer.present.selected[0]].style.shadow;
-  return { selected, shadow };
+  const layerItems: (em.Shape | em.Text | em.Image)[] = selected.reduce((result, current) => {
+    const layerItem = layer.present.byId[current];
+    return [...result, layerItem];
+  }, []);
+  const enabledValue = layerItems.every((layerItem) => layerItem.style.shadow.enabled);
+  return { selected, enabledValue };
 };
 
 export default connect(
   mapStateToProps,
-  { enableLayerShadow, disableLayerShadow }
+  { enableLayersShadow, disableLayersShadow }
 )(ShadowToggle);

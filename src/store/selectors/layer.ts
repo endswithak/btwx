@@ -1063,3 +1063,12 @@ export const gradientsMatch = (gradient1: em.Gradient, gradient2: em.Gradient): 
   });
   return gradientTypesMatch && originsMatch && destinationsMatch && stopsMatch;
 };
+
+export const getPaperProp = (prop: 'fill' | 'stroke'): 'fillColor' | 'strokeColor' => {
+  switch(prop) {
+    case 'fill':
+      return 'fillColor';
+    case 'stroke':
+      return 'strokeColor';
+  }
+};

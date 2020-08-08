@@ -27,13 +27,13 @@ interface ColorInputProps {
   enableLayersFill?(payload: EnableLayersFillPayload): LayerTypes;
   enableLayersStroke?(payload: EnableLayersStrokePayload): LayerTypes;
   enableLayersShadow?(payload: EnableLayersShadowPayload): LayerTypes;
-  setLayerFillColor?(payload: SetLayersFillColorPayload): LayerTypes;
-  setLayerStrokeColor?(payload: SetLayersStrokeColorPayload): LayerTypes;
-  setLayerShadowColor?(payload: SetLayersShadowColorPayload): LayerTypes;
+  setLayersFillColor?(payload: SetLayersFillColorPayload): LayerTypes;
+  setLayersStrokeColor?(payload: SetLayersStrokeColorPayload): LayerTypes;
+  setLayersShadowColor?(payload: SetLayersShadowColorPayload): LayerTypes;
   setTextSettingsFillColor?(payload: SetTextSettingsFillColorPayload): TextSettingsTypes;
 }
 
-const FillColorInput = (props: ColorInputProps): ReactElement => {
+const ColorInput = (props: ColorInputProps): ReactElement => {
   const { prop, enabledValue, selected, selectedType, colorValue, opacityValue, colorEditorOpen, enableLayersFill, enableLayersStroke, enableLayersShadow, openColorEditor, setTextSettingsFillColor, setLayersFillColor, setLayersStrokeColor, setLayersShadowColor } = props;
   const [enabled, setEnabled] = useState<boolean | 'multi'>(enabledValue);
   const [color, setColor] = useState<em.Color | 'multi'>(colorValue);
@@ -114,7 +114,7 @@ const FillColorInput = (props: ColorInputProps): ReactElement => {
   };
 
   const handleSwatchClick = (bounding: DOMRect): void => {
-    if (!enabled) {
+    if (!enabled || enabled === 'multi') {
       switch(prop) {
         case 'fill':
           enableLayersFill({layers: selected});
@@ -147,7 +147,8 @@ const FillColorInput = (props: ColorInputProps): ReactElement => {
             background: color !== 'multi' ? tinyColor(color).toHslString() : 'none'
           }}
           onClick={handleSwatchClick}
-          bottomLabel='Color' />
+          bottomLabel='Color'
+          multi={color === 'multi'} />
       </SidebarSectionColumn>
       <SidebarSectionColumn width={'33.33%'}>
         <SidebarInput
@@ -155,7 +156,7 @@ const FillColorInput = (props: ColorInputProps): ReactElement => {
           onChange={handleHexChange}
           onSubmit={handleHexSubmit}
           submitOnBlur
-          disabled={selected.length > 1 || selected.length === 0 || !enabledValue}
+          disabled={!enabled || enabled === 'multi'}
           leftLabel={'#'}
           bottomLabel={'Hex'} />
       </SidebarSectionColumn>
@@ -166,7 +167,7 @@ const FillColorInput = (props: ColorInputProps): ReactElement => {
           onSubmit={handleOpacitySubmit}
           submitOnBlur
           label={'%'}
-          disabled={selected.length > 1 || selected.length === 0 || !enabledValue}
+          disabled={!enabled || enabled === 'multi'}
           bottomLabel={'Opacity'} />
       </SidebarSectionColumn>
     </SidebarSectionRow>
@@ -235,4 +236,4 @@ export default connect(
     openColorEditor,
     setTextSettingsFillColor,
   }
-)(FillColorInput);
+)(ColorInput);

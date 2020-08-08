@@ -1,13 +1,12 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-// import StrokeGradientInput from './StrokeGradientInput';
-// import StrokeColorInput from './StrokeColorInput';
 import GradientInput from './GradientInput';
 import ColorInput from './ColorInput';
+import MultiInput from './MultiInput';
 
 interface StrokeInputProps {
-  fillType: em.FillType;
+  fillType: em.FillType | 'multi';
 }
 
 const StrokeInput = (props: StrokeInputProps): ReactElement => {
@@ -17,12 +16,28 @@ const StrokeInput = (props: StrokeInputProps): ReactElement => {
       return <ColorInput prop='stroke' />
     case 'gradient':
       return <GradientInput prop='stroke' />
+    case 'multi':
+      return <MultiInput prop='stroke' />
   }
 }
 
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
-  const fillType = layer.present.byId[layer.present.selected[0]].style.stroke.fillType;
+  const selected = layer.present.selected;
+  const layerItems: em.Layer[] = selected.reduce((result, current) => {
+    const layerItem = layer.present.byId[current];
+    return [...result, layerItem];
+  }, []);
+  const fillTypes: number[] = layerItems.reduce((result, current) => {
+    return [...result, current.style.stroke.fillType];
+  }, []);
+  const fillType = (() => {
+    if (fillTypes.every((value: number) => value === fillTypes[0])) {
+      return fillTypes[0];
+    } else {
+      return 'multi';
+    }
+  })();
   return { fillType };
 };
 

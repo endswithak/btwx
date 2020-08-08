@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useRef, forwardRef, useState, useEffect } from 'react';
+import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
 import { ThemeContext } from './ThemeProvider';
 import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';

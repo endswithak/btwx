@@ -85,13 +85,40 @@ import {
   SET_LAYER_STROKE_COLOR,
   SET_LAYERS_STROKE_COLOR,
   SET_LAYER_STROKE_FILL_TYPE,
-  SET_LAYER_STROKE_GRADIENT,
-  SET_LAYER_STROKE_GRADIENT_TYPE,
+  SET_LAYERS_STROKE_FILL_TYPE,
+  SET_LAYER_GRADIENT,
+  SET_LAYERS_GRADIENT,
+  SET_LAYER_GRADIENT_TYPE,
+  SET_LAYERS_GRADIENT_TYPE,
+  SET_LAYER_GRADIENT_ORIGIN,
+  SET_LAYERS_GRADIENT_ORIGIN,
+  SET_LAYER_GRADIENT_DESTINATION,
+  SET_LAYERS_GRADIENT_DESTINATION,
+  SET_LAYER_GRADIENT_STOP_COLOR,
+  SET_LAYERS_GRADIENT_STOP_COLOR,
+  SET_LAYER_GRADIENT_STOP_POSITION,
+  SET_LAYERS_GRADIENT_STOP_POSITION,
+  ADD_LAYER_GRADIENT_STOP,
+  ADD_LAYERS_GRADIENT_STOP,
+  REMOVE_LAYER_GRADIENT_STOP,
+  REMOVE_LAYERS_GRADIENT_STOP,
+  ACTIVATE_LAYER_GRADIENT_STOP,
+  DEACTIVATE_LAYER_GRADIENT_STOP,
+  SET_LAYER_ACTIVE_GRADIENT_STOP,
   SET_LAYER_STROKE_WIDTH,
+  SET_LAYERS_STROKE_WIDTH,
   SET_LAYER_STROKE_CAP,
+  SET_LAYERS_STROKE_CAP,
   SET_LAYER_STROKE_JOIN,
+  SET_LAYERS_STROKE_JOIN,
   SET_LAYER_STROKE_DASH_OFFSET,
+  SET_LAYERS_STROKE_DASH_OFFSET,
   SET_LAYER_STROKE_DASH_ARRAY,
+  SET_LAYERS_STROKE_DASH_ARRAY,
+  SET_LAYER_STROKE_DASH_ARRAY_WIDTH,
+  SET_LAYERS_STROKE_DASH_ARRAY_WIDTH,
+  SET_LAYER_STROKE_DASH_ARRAY_GAP,
+  SET_LAYERS_STROKE_DASH_ARRAY_GAP,
   SET_LAYER_STROKE_MITER_LIMIT,
   ENABLE_LAYER_SHADOW,
   ENABLE_LAYERS_SHADOW,
@@ -100,8 +127,11 @@ import {
   SET_LAYER_SHADOW_COLOR,
   SET_LAYERS_SHADOW_COLOR,
   SET_LAYER_SHADOW_BLUR,
+  SET_LAYERS_SHADOW_BLUR,
   SET_LAYER_SHADOW_X_OFFSET,
+  SET_LAYERS_SHADOW_X_OFFSET,
   SET_LAYER_SHADOW_Y_OFFSET,
+  SET_LAYERS_SHADOW_Y_OFFSET,
   SCALE_LAYER,
   SCALE_LAYERS,
   SET_LAYER_TEXT,
@@ -116,26 +146,7 @@ import {
   REMOVE_IN_VIEW_LAYERS,
   UPDATE_IN_VIEW_LAYERS,
   SET_LAYER_FILL_TYPE,
-  SET_LAYER_FILL_GRADIENT,
-  SET_LAYER_FILL_GRADIENT_TYPE,
-  SET_LAYER_FILL_GRADIENT_ORIGIN,
-  SET_LAYER_FILL_GRADIENT_DESTINATION,
-  SET_LAYER_FILL_GRADIENT_STOP_COLOR,
-  SET_LAYER_FILL_GRADIENT_STOP_POSITION,
-  ADD_LAYER_FILL_GRADIENT_STOP,
-  REMOVE_LAYER_FILL_GRADIENT_STOP,
-  ACTIVATE_LAYER_FILL_GRADIENT_STOP,
-  DEACTIVATE_LAYER_FILL_GRADIENT_STOP,
-  SET_LAYER_FILL_ACTIVE_GRADIENT_STOP,
-  SET_LAYER_STROKE_GRADIENT_ORIGIN,
-  SET_LAYER_STROKE_GRADIENT_DESTINATION,
-  SET_LAYER_STROKE_GRADIENT_STOP_COLOR,
-  SET_LAYER_STROKE_GRADIENT_STOP_POSITION,
-  ADD_LAYER_STROKE_GRADIENT_STOP,
-  REMOVE_LAYER_STROKE_GRADIENT_STOP,
-  ACTIVATE_LAYER_STROKE_GRADIENT_STOP,
-  DEACTIVATE_LAYER_STROKE_GRADIENT_STOP,
-  SET_LAYER_STROKE_ACTIVE_GRADIENT_STOP,
+  SET_LAYERS_FILL_TYPE,
   ADD_LAYERS_MASK,
   REMOVE_LAYERS_MASK,
   MASK_LAYER,
@@ -260,13 +271,25 @@ import {
   setLayerStrokeColor,
   setLayersStrokeColor,
   setLayerStrokeFillType,
-  setLayerStrokeGradient,
-  setLayerStrokeGradientType,
+  setLayersStrokeFillType,
+  setLayerGradient,
+  setLayersGradient,
+  setLayerGradientType,
+  setLayersGradientType,
   setLayerStrokeWidth,
+  setLayersStrokeWidth,
   setLayerStrokeCap,
+  setLayersStrokeCap,
   setLayerStrokeJoin,
+  setLayersStrokeJoin,
   setLayerStrokeDashOffset,
+  setLayersStrokeDashOffset,
   setLayerStrokeDashArray,
+  setLayersStrokeDashArray,
+  setLayerStrokeDashArrayWidth,
+  setLayersStrokeDashArrayWidth,
+  setLayerStrokeDashArrayGap,
+  setLayersStrokeDashArrayGap,
   setLayerStrokeMiterLimit,
   enableLayerShadow,
   enableLayersShadow,
@@ -275,8 +298,11 @@ import {
   setLayerShadowColor,
   setLayersShadowColor,
   setLayerShadowBlur,
+  setLayersShadowBlur,
   setLayerShadowXOffset,
+  setLayersShadowXOffset,
   setLayerShadowYOffset,
+  setLayersShadowYOffset,
   scaleLayer,
   scaleLayers,
   setLayerFontSize,
@@ -292,26 +318,22 @@ import {
   updateInViewLayers,
   setLayerFill,
   setLayerFillType,
-  setLayerFillGradient,
-  setLayerFillGradientType,
-  setLayerFillGradientOrigin,
-  setLayerFillGradientDestination,
-  setLayerFillGradientStopColor,
-  setLayerFillGradientStopPosition,
-  addLayerFillGradientStop,
-  removeLayerFillGradientStop,
-  activateLayerFillGradientStop,
-  deactivateLayerFillGradientStop,
-  setLayerFillActiveGradientStop,
-  setLayerStrokeGradientOrigin,
-  setLayerStrokeGradientDestination,
-  setLayerStrokeGradientStopColor,
-  setLayerStrokeGradientStopPosition,
-  addLayerStrokeGradientStop,
-  removeLayerStrokeGradientStop,
-  activateLayerStrokeGradientStop,
-  deactivateLayerStrokeGradientStop,
-  setLayerStrokeActiveGradientStop,
+  setLayersFillType,
+  setLayerGradientOrigin,
+  setLayersGradientOrigin,
+  setLayerGradientDestination,
+  setLayersGradientDestination,
+  setLayerGradientStopColor,
+  setLayersGradientStopColor,
+  setLayerGradientStopPosition,
+  setLayersGradientStopPosition,
+  addLayerGradientStop,
+  addLayersGradientStop,
+  removeLayerGradientStop,
+  removeLayersGradientStop,
+  activateLayerGradientStop,
+  deactivateLayerGradientStop,
+  setLayerActiveGradientStop,
   addLayersMask,
   removeLayersMask,
   maskLayer,
@@ -597,20 +619,44 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setLayersStrokeColor(state, action);
     case SET_LAYER_STROKE_FILL_TYPE:
       return setLayerStrokeFillType(state, action);
-    case SET_LAYER_STROKE_GRADIENT:
-      return setLayerStrokeGradient(state, action);
-    case SET_LAYER_STROKE_GRADIENT_TYPE:
-      return setLayerStrokeGradientType(state, action);
+    case SET_LAYERS_STROKE_FILL_TYPE:
+      return setLayersStrokeFillType(state, action);
+    case SET_LAYER_GRADIENT:
+      return setLayerGradient(state, action);
+    case SET_LAYERS_GRADIENT:
+      return setLayersGradient(state, action);
+    case SET_LAYER_GRADIENT_TYPE:
+      return setLayerGradientType(state, action);
+    case SET_LAYERS_GRADIENT_TYPE:
+      return setLayersGradientType(state, action);
     case SET_LAYER_STROKE_WIDTH:
       return setLayerStrokeWidth(state, action);
+    case SET_LAYERS_STROKE_WIDTH:
+      return setLayersStrokeWidth(state, action);
     case SET_LAYER_STROKE_CAP:
       return setLayerStrokeCap(state, action);
+    case SET_LAYERS_STROKE_CAP:
+      return setLayersStrokeCap(state, action);
     case SET_LAYER_STROKE_JOIN:
       return setLayerStrokeJoin(state, action);
+    case SET_LAYERS_STROKE_JOIN:
+      return setLayersStrokeJoin(state, action);
     case SET_LAYER_STROKE_DASH_OFFSET:
       return setLayerStrokeDashOffset(state, action);
+    case SET_LAYERS_STROKE_DASH_OFFSET:
+      return setLayersStrokeDashOffset(state, action);
     case SET_LAYER_STROKE_DASH_ARRAY:
       return setLayerStrokeDashArray(state, action);
+    case SET_LAYERS_STROKE_DASH_ARRAY:
+      return setLayersStrokeDashArray(state, action);
+    case SET_LAYER_STROKE_DASH_ARRAY_WIDTH:
+      return setLayerStrokeDashArrayWidth(state, action);
+    case SET_LAYERS_STROKE_DASH_ARRAY_WIDTH:
+      return setLayersStrokeDashArrayWidth(state, action);
+    case SET_LAYER_STROKE_DASH_ARRAY_GAP:
+      return setLayerStrokeDashArrayGap(state, action);
+    case SET_LAYERS_STROKE_DASH_ARRAY_GAP:
+      return setLayersStrokeDashArrayGap(state, action);
     case SET_LAYER_STROKE_MITER_LIMIT:
       return setLayerStrokeMiterLimit(state, action);
     case ENABLE_LAYER_SHADOW:
@@ -627,10 +673,16 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setLayersShadowColor(state, action);
     case SET_LAYER_SHADOW_BLUR:
       return setLayerShadowBlur(state, action);
+    case SET_LAYERS_SHADOW_BLUR:
+      return setLayersShadowBlur(state, action);
     case SET_LAYER_SHADOW_X_OFFSET:
       return setLayerShadowXOffset(state, action);
+    case SET_LAYERS_SHADOW_X_OFFSET:
+      return setLayersShadowXOffset(state, action);
     case SET_LAYER_SHADOW_Y_OFFSET:
       return setLayerShadowYOffset(state, action);
+    case SET_LAYERS_SHADOW_Y_OFFSET:
+      return setLayersShadowYOffset(state, action);
     case SCALE_LAYER:
       return scaleLayer(state, action);
     case SCALE_LAYERS:
@@ -661,46 +713,38 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setLayerFill(state, action);
     case SET_LAYER_FILL_TYPE:
       return setLayerFillType(state, action);
-    case SET_LAYER_FILL_GRADIENT:
-      return setLayerFillGradient(state, action);
-    case SET_LAYER_FILL_GRADIENT_TYPE:
-      return setLayerFillGradientType(state, action);
-    case SET_LAYER_FILL_GRADIENT_ORIGIN:
-      return setLayerFillGradientOrigin(state, action);
-    case SET_LAYER_FILL_GRADIENT_DESTINATION:
-      return setLayerFillGradientDestination(state, action);
-    case SET_LAYER_FILL_GRADIENT_STOP_COLOR:
-      return setLayerFillGradientStopColor(state, action);
-    case SET_LAYER_FILL_GRADIENT_STOP_POSITION:
-      return setLayerFillGradientStopPosition(state, action);
-    case ADD_LAYER_FILL_GRADIENT_STOP:
-      return addLayerFillGradientStop(state, action);
-    case REMOVE_LAYER_FILL_GRADIENT_STOP:
-      return removeLayerFillGradientStop(state, action);
-    case ACTIVATE_LAYER_FILL_GRADIENT_STOP:
-      return activateLayerFillGradientStop(state, action);
-    case DEACTIVATE_LAYER_FILL_GRADIENT_STOP:
-      return deactivateLayerFillGradientStop(state, action);
-    case SET_LAYER_FILL_ACTIVE_GRADIENT_STOP:
-      return setLayerFillActiveGradientStop(state, action);
-    case SET_LAYER_STROKE_GRADIENT_ORIGIN:
-      return setLayerStrokeGradientOrigin(state, action);
-    case SET_LAYER_STROKE_GRADIENT_DESTINATION:
-      return setLayerStrokeGradientDestination(state, action);
-    case SET_LAYER_STROKE_GRADIENT_STOP_COLOR:
-      return setLayerStrokeGradientStopColor(state, action);
-    case SET_LAYER_STROKE_GRADIENT_STOP_POSITION:
-      return setLayerStrokeGradientStopPosition(state, action);
-    case ADD_LAYER_STROKE_GRADIENT_STOP:
-      return addLayerStrokeGradientStop(state, action);
-    case REMOVE_LAYER_STROKE_GRADIENT_STOP:
-      return removeLayerStrokeGradientStop(state, action);
-    case ACTIVATE_LAYER_STROKE_GRADIENT_STOP:
-      return activateLayerStrokeGradientStop(state, action);
-    case DEACTIVATE_LAYER_STROKE_GRADIENT_STOP:
-      return deactivateLayerStrokeGradientStop(state, action);
-    case SET_LAYER_STROKE_ACTIVE_GRADIENT_STOP:
-      return setLayerStrokeActiveGradientStop(state, action);
+    case SET_LAYERS_FILL_TYPE:
+      return setLayersFillType(state, action);
+    case SET_LAYER_GRADIENT_ORIGIN:
+      return setLayerGradientOrigin(state, action);
+    case SET_LAYERS_GRADIENT_ORIGIN:
+      return setLayersGradientOrigin(state, action);
+    case SET_LAYER_GRADIENT_DESTINATION:
+      return setLayerGradientDestination(state, action);
+    case SET_LAYERS_GRADIENT_DESTINATION:
+      return setLayersGradientDestination(state, action);
+    case SET_LAYER_GRADIENT_STOP_COLOR:
+      return setLayerGradientStopColor(state, action);
+    case SET_LAYERS_GRADIENT_STOP_COLOR:
+      return setLayersGradientStopColor(state, action);
+    case SET_LAYER_GRADIENT_STOP_POSITION:
+      return setLayerGradientStopPosition(state, action);
+    case SET_LAYERS_GRADIENT_STOP_POSITION:
+      return setLayersGradientStopPosition(state, action);
+    case ADD_LAYER_GRADIENT_STOP:
+      return addLayerGradientStop(state, action);
+    case ADD_LAYERS_GRADIENT_STOP:
+      return addLayersGradientStop(state, action);
+    case REMOVE_LAYER_GRADIENT_STOP:
+      return removeLayerGradientStop(state, action);
+    case REMOVE_LAYERS_GRADIENT_STOP:
+      return removeLayersGradientStop(state, action);
+    case ACTIVATE_LAYER_GRADIENT_STOP:
+      return activateLayerGradientStop(state, action);
+    case DEACTIVATE_LAYER_GRADIENT_STOP:
+      return deactivateLayerGradientStop(state, action);
+    case SET_LAYER_ACTIVE_GRADIENT_STOP:
+      return setLayerActiveGradientStop(state, action);
     case ADD_LAYERS_MASK:
       return addLayersMask(state, action);
     case REMOVE_LAYERS_MASK:

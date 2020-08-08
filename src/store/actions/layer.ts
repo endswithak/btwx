@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { paperMain } from '../../canvas';
-import { DEFAULT_STYLE, DEFAULT_TEXT_STYLE, DEFAULT_TEXT_VALUE, DEFAULT_GRADIENT_STYLE, DEFAULT_TRANSFORM } from '../../constants';
+import { DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../../constants';
 import { applyImageMethods } from '../../canvas/imageUtils';
 
 import {
@@ -94,13 +94,40 @@ import {
   SET_LAYER_STROKE_COLOR,
   SET_LAYERS_STROKE_COLOR,
   SET_LAYER_STROKE_FILL_TYPE,
-  SET_LAYER_STROKE_GRADIENT,
-  SET_LAYER_STROKE_GRADIENT_TYPE,
+  SET_LAYERS_STROKE_FILL_TYPE,
+  SET_LAYER_GRADIENT,
+  SET_LAYERS_GRADIENT,
+  SET_LAYER_GRADIENT_TYPE,
+  SET_LAYERS_GRADIENT_TYPE,
+  SET_LAYER_GRADIENT_ORIGIN,
+  SET_LAYERS_GRADIENT_ORIGIN,
+  SET_LAYER_GRADIENT_DESTINATION,
+  SET_LAYERS_GRADIENT_DESTINATION,
+  SET_LAYER_GRADIENT_STOP_COLOR,
+  SET_LAYERS_GRADIENT_STOP_COLOR,
+  SET_LAYER_GRADIENT_STOP_POSITION,
+  SET_LAYERS_GRADIENT_STOP_POSITION,
+  ADD_LAYER_GRADIENT_STOP,
+  ADD_LAYERS_GRADIENT_STOP,
+  REMOVE_LAYER_GRADIENT_STOP,
+  REMOVE_LAYERS_GRADIENT_STOP,
+  ACTIVATE_LAYER_GRADIENT_STOP,
+  DEACTIVATE_LAYER_GRADIENT_STOP,
+  SET_LAYER_ACTIVE_GRADIENT_STOP,
   SET_LAYER_STROKE_WIDTH,
+  SET_LAYERS_STROKE_WIDTH,
   SET_LAYER_STROKE_CAP,
+  SET_LAYERS_STROKE_CAP,
   SET_LAYER_STROKE_JOIN,
+  SET_LAYERS_STROKE_JOIN,
   SET_LAYER_STROKE_DASH_OFFSET,
+  SET_LAYERS_STROKE_DASH_OFFSET,
   SET_LAYER_STROKE_DASH_ARRAY,
+  SET_LAYERS_STROKE_DASH_ARRAY,
+  SET_LAYER_STROKE_DASH_ARRAY_WIDTH,
+  SET_LAYERS_STROKE_DASH_ARRAY_WIDTH,
+  SET_LAYER_STROKE_DASH_ARRAY_GAP,
+  SET_LAYERS_STROKE_DASH_ARRAY_GAP,
   SET_LAYER_STROKE_MITER_LIMIT,
   ENABLE_LAYER_SHADOW,
   ENABLE_LAYERS_SHADOW,
@@ -109,8 +136,11 @@ import {
   SET_LAYER_SHADOW_COLOR,
   SET_LAYERS_SHADOW_COLOR,
   SET_LAYER_SHADOW_BLUR,
+  SET_LAYERS_SHADOW_BLUR,
   SET_LAYER_SHADOW_X_OFFSET,
+  SET_LAYERS_SHADOW_X_OFFSET,
   SET_LAYER_SHADOW_Y_OFFSET,
+  SET_LAYERS_SHADOW_Y_OFFSET,
   SCALE_LAYER,
   SCALE_LAYERS,
   SET_LAYER_TEXT,
@@ -125,26 +155,7 @@ import {
   REMOVE_IN_VIEW_LAYERS,
   UPDATE_IN_VIEW_LAYERS,
   SET_LAYER_FILL_TYPE,
-  SET_LAYER_FILL_GRADIENT,
-  SET_LAYER_FILL_GRADIENT_TYPE,
-  SET_LAYER_FILL_GRADIENT_ORIGIN,
-  SET_LAYER_FILL_GRADIENT_DESTINATION,
-  SET_LAYER_FILL_GRADIENT_STOP_COLOR,
-  SET_LAYER_FILL_GRADIENT_STOP_POSITION,
-  ADD_LAYER_FILL_GRADIENT_STOP,
-  REMOVE_LAYER_FILL_GRADIENT_STOP,
-  ACTIVATE_LAYER_FILL_GRADIENT_STOP,
-  DEACTIVATE_LAYER_FILL_GRADIENT_STOP,
-  SET_LAYER_FILL_ACTIVE_GRADIENT_STOP,
-  SET_LAYER_STROKE_GRADIENT_ORIGIN,
-  SET_LAYER_STROKE_GRADIENT_DESTINATION,
-  SET_LAYER_STROKE_GRADIENT_STOP_COLOR,
-  SET_LAYER_STROKE_GRADIENT_STOP_POSITION,
-  ADD_LAYER_STROKE_GRADIENT_STOP,
-  REMOVE_LAYER_STROKE_GRADIENT_STOP,
-  ACTIVATE_LAYER_STROKE_GRADIENT_STOP,
-  DEACTIVATE_LAYER_STROKE_GRADIENT_STOP,
-  SET_LAYER_STROKE_ACTIVE_GRADIENT_STOP,
+  SET_LAYERS_FILL_TYPE,
   ADD_LAYERS_MASK,
   REMOVE_LAYERS_MASK,
   MASK_LAYER,
@@ -264,13 +275,40 @@ import {
   SetLayerStrokeColorPayload,
   SetLayersStrokeColorPayload,
   SetLayerStrokeFillTypePayload,
-  SetLayerStrokeGradientPayload,
-  SetLayerStrokeGradientTypePayload,
+  SetLayersStrokeFillTypePayload,
+  SetLayerGradientPayload,
+  SetLayersGradientPayload,
+  SetLayerGradientTypePayload,
+  SetLayersGradientTypePayload,
+  SetLayerGradientOriginPayload,
+  SetLayersGradientOriginPayload,
+  SetLayerGradientDestinationPayload,
+  SetLayersGradientDestinationPayload,
+  SetLayerGradientStopColorPayload,
+  SetLayersGradientStopColorPayload,
+  SetLayerGradientStopPositionPayload,
+  SetLayersGradientStopPositionPayload,
+  AddLayerGradientStopPayload,
+  AddLayersGradientStopPayload,
+  RemoveLayerGradientStopPayload,
+  RemoveLayersGradientStopPayload,
+  ActivateLayerGradientStopPayload,
+  DeactivateLayerGradientStopPayload,
+  SetLayerActiveGradientStopPayload,
   SetLayerStrokeWidthPayload,
+  SetLayersStrokeWidthPayload,
   SetLayerStrokeCapPayload,
+  SetLayersStrokeCapPayload,
   SetLayerStrokeJoinPayload,
+  SetLayersStrokeJoinPayload,
   SetLayerStrokeDashOffsetPayload,
+  SetLayersStrokeDashOffsetPayload,
   SetLayerStrokeDashArrayPayload,
+  SetLayersStrokeDashArrayPayload,
+  SetLayerStrokeDashArrayWidthPayload,
+  SetLayersStrokeDashArrayWidthPayload,
+  SetLayerStrokeDashArrayGapPayload,
+  SetLayersStrokeDashArrayGapPayload,
   SetLayerStrokeMiterLimitPayload,
   EnableLayerShadowPayload,
   EnableLayersShadowPayload,
@@ -279,8 +317,11 @@ import {
   SetLayerShadowColorPayload,
   SetLayersShadowColorPayload,
   SetLayerShadowBlurPayload,
+  SetLayersShadowBlurPayload,
   SetLayerShadowXOffsetPayload,
+  SetLayersShadowXOffsetPayload,
   SetLayerShadowYOffsetPayload,
+  SetLayersShadowYOffsetPayload,
   ScaleLayerPayload,
   ScaleLayersPayload,
   SetLayerTextPayload,
@@ -295,26 +336,7 @@ import {
   RemoveInViewLayersPayload,
   SetLayerFillPayload,
   SetLayerFillTypePayload,
-  SetLayerFillGradientPayload,
-  SetLayerFillGradientTypePayload,
-  SetLayerFillGradientOriginPayload,
-  SetLayerFillGradientDestinationPayload,
-  SetLayerFillGradientStopColorPayload,
-  SetLayerFillGradientStopPositionPayload,
-  AddLayerFillGradientStopPayload,
-  RemoveLayerFillGradientStopPayload,
-  ActivateLayerFillGradientStopPayload,
-  DeactivateLayerFillGradientStopPayload,
-  SetLayerFillActiveGradientStopPayload,
-  SetLayerStrokeGradientOriginPayload,
-  SetLayerStrokeGradientDestinationPayload,
-  SetLayerStrokeGradientStopColorPayload,
-  SetLayerStrokeGradientStopPositionPayload,
-  AddLayerStrokeGradientStopPayload,
-  RemoveLayerStrokeGradientStopPayload,
-  ActivateLayerStrokeGradientStopPayload,
-  DeactivateLayerStrokeGradientStopPayload,
-  SetLayerStrokeActiveGradientStopPayload,
+  SetLayersFillTypePayload,
   AddLayersMaskPayload,
   RemoveLayersMaskPayload,
   MaskLayerPayload,
@@ -962,13 +984,103 @@ export const setLayerStrokeFillType = (payload: SetLayerStrokeFillTypePayload): 
   payload
 });
 
-export const setLayerStrokeGradient = (payload: SetLayerStrokeGradientPayload): LayerTypes => ({
-  type: SET_LAYER_STROKE_GRADIENT,
+export const setLayersStrokeFillType = (payload: SetLayersStrokeFillTypePayload): LayerTypes => ({
+  type: SET_LAYERS_STROKE_FILL_TYPE,
   payload
 });
 
-export const setLayerStrokeGradientType = (payload: SetLayerStrokeGradientTypePayload): LayerTypes => ({
-  type: SET_LAYER_STROKE_GRADIENT_TYPE,
+export const setLayerGradient = (payload: SetLayerGradientPayload): LayerTypes => ({
+  type: SET_LAYER_GRADIENT,
+  payload
+});
+
+export const setLayersGradient = (payload: SetLayersGradientPayload): LayerTypes => ({
+  type: SET_LAYERS_GRADIENT,
+  payload
+});
+
+export const setLayerGradientType = (payload: SetLayerGradientTypePayload): LayerTypes => ({
+  type: SET_LAYER_GRADIENT_TYPE,
+  payload
+});
+
+export const setLayersGradientType = (payload: SetLayersGradientTypePayload): LayerTypes => ({
+  type: SET_LAYERS_GRADIENT_TYPE,
+  payload
+});
+
+export const setLayerGradientOrigin = (payload: SetLayerGradientOriginPayload): LayerTypes => ({
+  type: SET_LAYER_GRADIENT_ORIGIN,
+  payload
+});
+
+export const setLayersGradientOrigin = (payload: SetLayersGradientOriginPayload): LayerTypes => ({
+  type: SET_LAYERS_GRADIENT_ORIGIN,
+  payload
+});
+
+export const setLayerGradientDestination = (payload: SetLayerGradientDestinationPayload): LayerTypes => ({
+  type: SET_LAYER_GRADIENT_DESTINATION,
+  payload
+});
+
+export const setLayersGradientDestination = (payload: SetLayersGradientDestinationPayload): LayerTypes => ({
+  type: SET_LAYERS_GRADIENT_DESTINATION,
+  payload
+});
+
+export const setLayerGradientStopColor = (payload: SetLayerGradientStopColorPayload): LayerTypes => ({
+  type: SET_LAYER_GRADIENT_STOP_COLOR,
+  payload
+});
+
+export const setLayersGradientStopColor = (payload: SetLayersGradientStopColorPayload): LayerTypes => ({
+  type: SET_LAYERS_GRADIENT_STOP_COLOR,
+  payload
+});
+
+export const setLayerGradientStopPosition = (payload: SetLayerGradientStopPositionPayload): LayerTypes => ({
+  type: SET_LAYER_GRADIENT_STOP_POSITION,
+  payload
+});
+
+export const setLayersGradientStopPosition = (payload: SetLayersGradientStopPositionPayload): LayerTypes => ({
+  type: SET_LAYERS_GRADIENT_STOP_POSITION,
+  payload
+});
+
+export const addLayerGradientStop = (payload: AddLayerGradientStopPayload): LayerTypes => ({
+  type: ADD_LAYER_GRADIENT_STOP,
+  payload
+});
+
+export const addLayersGradientStop = (payload: AddLayersGradientStopPayload): LayerTypes => ({
+  type: ADD_LAYERS_GRADIENT_STOP,
+  payload
+});
+
+export const removeLayerGradientStop = (payload: RemoveLayerGradientStopPayload): LayerTypes => ({
+  type: REMOVE_LAYER_GRADIENT_STOP,
+  payload
+});
+
+export const removeLayersGradientStop = (payload: RemoveLayersGradientStopPayload): LayerTypes => ({
+  type: REMOVE_LAYERS_GRADIENT_STOP,
+  payload
+});
+
+export const activateLayerGradientStop = (payload: ActivateLayerGradientStopPayload): LayerTypes => ({
+  type: ACTIVATE_LAYER_GRADIENT_STOP,
+  payload
+});
+
+export const deactivateLayerGradientStop = (payload: DeactivateLayerGradientStopPayload): LayerTypes => ({
+  type: DEACTIVATE_LAYER_GRADIENT_STOP,
+  payload
+});
+
+export const setLayerActiveGradientStop = (payload: SetLayerActiveGradientStopPayload): LayerTypes => ({
+  type: SET_LAYER_ACTIVE_GRADIENT_STOP,
   payload
 });
 
@@ -977,8 +1089,18 @@ export const setLayerStrokeWidth = (payload: SetLayerStrokeWidthPayload): LayerT
   payload
 });
 
+export const setLayersStrokeWidth = (payload: SetLayersStrokeWidthPayload): LayerTypes => ({
+  type: SET_LAYERS_STROKE_WIDTH,
+  payload
+});
+
 export const setLayerStrokeCap = (payload: SetLayerStrokeCapPayload): LayerTypes => ({
   type: SET_LAYER_STROKE_CAP,
+  payload
+});
+
+export const setLayersStrokeCap = (payload: SetLayersStrokeCapPayload): LayerTypes => ({
+  type: SET_LAYERS_STROKE_CAP,
   payload
 });
 
@@ -987,13 +1109,48 @@ export const setLayerStrokeJoin = (payload: SetLayerStrokeJoinPayload): LayerTyp
   payload
 });
 
+export const setLayersStrokeJoin = (payload: SetLayersStrokeJoinPayload): LayerTypes => ({
+  type: SET_LAYERS_STROKE_JOIN,
+  payload
+});
+
 export const setLayerStrokeDashOffset = (payload: SetLayerStrokeDashOffsetPayload): LayerTypes => ({
   type: SET_LAYER_STROKE_DASH_OFFSET,
   payload
 });
 
+export const setLayersStrokeDashOffset = (payload: SetLayersStrokeDashOffsetPayload): LayerTypes => ({
+  type: SET_LAYERS_STROKE_DASH_OFFSET,
+  payload
+});
+
 export const setLayerStrokeDashArray = (payload: SetLayerStrokeDashArrayPayload): LayerTypes => ({
   type: SET_LAYER_STROKE_DASH_ARRAY,
+  payload
+});
+
+export const setLayersStrokeDashArray = (payload: SetLayersStrokeDashArrayPayload): LayerTypes => ({
+  type: SET_LAYERS_STROKE_DASH_ARRAY,
+  payload
+});
+
+export const setLayerStrokeDashArrayWidth = (payload: SetLayerStrokeDashArrayWidthPayload): LayerTypes => ({
+  type: SET_LAYER_STROKE_DASH_ARRAY_WIDTH,
+  payload
+});
+
+export const setLayersStrokeDashArrayWidth = (payload: SetLayersStrokeDashArrayWidthPayload): LayerTypes => ({
+  type: SET_LAYERS_STROKE_DASH_ARRAY_WIDTH,
+  payload
+});
+
+export const setLayerStrokeDashArrayGap = (payload: SetLayerStrokeDashArrayGapPayload): LayerTypes => ({
+  type: SET_LAYER_STROKE_DASH_ARRAY_GAP,
+  payload
+});
+
+export const setLayersStrokeDashArrayGap = (payload: SetLayersStrokeDashArrayGapPayload): LayerTypes => ({
+  type: SET_LAYERS_STROKE_DASH_ARRAY_GAP,
   payload
 });
 
@@ -1037,13 +1194,28 @@ export const setLayerShadowBlur = (payload: SetLayerShadowBlurPayload): LayerTyp
   payload
 });
 
+export const setLayersShadowBlur = (payload: SetLayersShadowBlurPayload): LayerTypes => ({
+  type: SET_LAYERS_SHADOW_BLUR,
+  payload
+});
+
 export const setLayerShadowXOffset = (payload: SetLayerShadowXOffsetPayload): LayerTypes => ({
   type: SET_LAYER_SHADOW_X_OFFSET,
   payload
 });
 
+export const setLayersShadowXOffset = (payload: SetLayersShadowXOffsetPayload): LayerTypes => ({
+  type: SET_LAYERS_SHADOW_X_OFFSET,
+  payload
+});
+
 export const setLayerShadowYOffset = (payload: SetLayerShadowYOffsetPayload): LayerTypes => ({
   type: SET_LAYER_SHADOW_Y_OFFSET,
+  payload
+});
+
+export const setLayersShadowYOffset = (payload: SetLayersShadowYOffsetPayload): LayerTypes => ({
+  type: SET_LAYERS_SHADOW_Y_OFFSET,
   payload
 });
 
@@ -1121,103 +1293,8 @@ export const setLayerFillType = (payload: SetLayerFillTypePayload): LayerTypes =
   payload
 });
 
-export const setLayerFillGradient = (payload: SetLayerFillGradientPayload): LayerTypes => ({
-  type: SET_LAYER_FILL_GRADIENT,
-  payload
-});
-
-export const setLayerFillGradientType = (payload: SetLayerFillGradientTypePayload): LayerTypes => ({
-  type: SET_LAYER_FILL_GRADIENT_TYPE,
-  payload
-});
-
-export const setLayerFillGradientOrigin = (payload: SetLayerFillGradientOriginPayload): LayerTypes => ({
-  type: SET_LAYER_FILL_GRADIENT_ORIGIN,
-  payload
-});
-
-export const setLayerFillGradientDestination = (payload: SetLayerFillGradientDestinationPayload): LayerTypes => ({
-  type: SET_LAYER_FILL_GRADIENT_DESTINATION,
-  payload
-});
-
-export const setLayerFillGradientStopColor = (payload: SetLayerFillGradientStopColorPayload): LayerTypes => ({
-  type: SET_LAYER_FILL_GRADIENT_STOP_COLOR,
-  payload
-});
-
-export const setLayerFillGradientStopPosition = (payload: SetLayerFillGradientStopPositionPayload): LayerTypes => ({
-  type: SET_LAYER_FILL_GRADIENT_STOP_POSITION,
-  payload
-});
-
-export const addLayerFillGradientStop = (payload: AddLayerFillGradientStopPayload): LayerTypes => ({
-  type: ADD_LAYER_FILL_GRADIENT_STOP,
-  payload
-});
-
-export const removeLayerFillGradientStop = (payload: RemoveLayerFillGradientStopPayload): LayerTypes => ({
-  type: REMOVE_LAYER_FILL_GRADIENT_STOP,
-  payload
-});
-
-export const activateLayerFillGradientStop = (payload: ActivateLayerFillGradientStopPayload): LayerTypes => ({
-  type: ACTIVATE_LAYER_FILL_GRADIENT_STOP,
-  payload
-});
-
-export const deactivateLayerFillGradientStop = (payload: DeactivateLayerFillGradientStopPayload): LayerTypes => ({
-  type: DEACTIVATE_LAYER_FILL_GRADIENT_STOP,
-  payload
-});
-
-export const setLayerFillActiveGradientStop = (payload: SetLayerFillActiveGradientStopPayload): LayerTypes => ({
-  type: SET_LAYER_FILL_ACTIVE_GRADIENT_STOP,
-  payload
-});
-
-export const setLayerStrokeGradientOrigin = (payload: SetLayerStrokeGradientOriginPayload): LayerTypes => ({
-  type: SET_LAYER_STROKE_GRADIENT_ORIGIN,
-  payload
-});
-
-export const setLayerStrokeGradientDestination = (payload: SetLayerStrokeGradientDestinationPayload): LayerTypes => ({
-  type: SET_LAYER_STROKE_GRADIENT_DESTINATION,
-  payload
-});
-
-export const setLayerStrokeGradientStopColor = (payload: SetLayerStrokeGradientStopColorPayload): LayerTypes => ({
-  type: SET_LAYER_STROKE_GRADIENT_STOP_COLOR,
-  payload
-});
-
-export const setLayerStrokeGradientStopPosition = (payload: SetLayerStrokeGradientStopPositionPayload): LayerTypes => ({
-  type: SET_LAYER_STROKE_GRADIENT_STOP_POSITION,
-  payload
-});
-
-export const addLayerStrokeGradientStop = (payload: AddLayerStrokeGradientStopPayload): LayerTypes => ({
-  type: ADD_LAYER_STROKE_GRADIENT_STOP,
-  payload
-});
-
-export const removeLayerStrokeGradientStop = (payload: RemoveLayerStrokeGradientStopPayload): LayerTypes => ({
-  type: REMOVE_LAYER_STROKE_GRADIENT_STOP,
-  payload
-});
-
-export const activateLayerStrokeGradientStop = (payload: ActivateLayerStrokeGradientStopPayload): LayerTypes => ({
-  type: ACTIVATE_LAYER_STROKE_GRADIENT_STOP,
-  payload
-});
-
-export const deactivateLayerStrokeGradientStop = (payload: DeactivateLayerStrokeGradientStopPayload): LayerTypes => ({
-  type: DEACTIVATE_LAYER_STROKE_GRADIENT_STOP,
-  payload
-});
-
-export const setLayerStrokeActiveGradientStop = (payload: SetLayerStrokeActiveGradientStopPayload): LayerTypes => ({
-  type: SET_LAYER_STROKE_ACTIVE_GRADIENT_STOP,
+export const setLayersFillType = (payload: SetLayersFillTypePayload): LayerTypes => ({
+  type: SET_LAYERS_FILL_TYPE,
   payload
 });
 

@@ -1,35 +1,31 @@
 import React, { useContext, ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { evaluate } from 'mathjs';
 import SidebarToggleButton from './SidebarToggleButton';
 import { RootState } from '../store/reducers';
-import { SetLayerStrokeJoinPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayerStrokeJoin } from '../store/actions/layer';
-import { getPaperLayer } from '../store/selectors/layer';
+import { SetLayersStrokeJoinPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayersStrokeJoin } from '../store/actions/layer';
 import { ThemeContext } from './ThemeProvider';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 
 interface StrokeJoinInputProps {
   selected?: string[];
-  strokeJoinValue?: em.StrokeJoin;
+  strokeJoinValue?: em.StrokeJoin | 'multi';
   disabled?: boolean;
-  setLayerStrokeJoin?(payload: SetLayerStrokeJoinPayload): LayerTypes;
+  setLayersStrokeJoin?(payload: SetLayersStrokeJoinPayload): LayerTypes;
 }
 
 const StrokeJoinInput = (props: StrokeJoinInputProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { selected, strokeJoinValue, setLayerStrokeJoin, disabled } = props;
-  const [strokeJoin, setStrokeJoin] = useState<em.StrokeJoin>(strokeJoinValue);
+  const { selected, strokeJoinValue, setLayersStrokeJoin, disabled } = props;
+  const [strokeJoin, setStrokeJoin] = useState<em.StrokeJoin | 'multi'>(strokeJoinValue);
 
   useEffect(() => {
     setStrokeJoin(strokeJoinValue);
   }, [strokeJoinValue, disabled, selected]);
 
   const handleClick = (strokeJoinType: em.StrokeJoin) => {
-    const paperLayer = getPaperLayer(selected[0]);
-    paperLayer.strokeJoin = strokeJoinType;
-    setLayerStrokeJoin({id: selected[0], strokeJoin: strokeJoinType})
+    setLayersStrokeJoin({layers: selected, strokeJoin: strokeJoinType})
     setStrokeJoin(strokeJoinType);
   };
 
@@ -81,30 +77,19 @@ const StrokeJoinInput = (props: StrokeJoinInputProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const disabled = (() => {
-    switch(layer.present.selected.length) {
-      case 0:
-        return true;
-      case 1:
-        return !layer.present.byId[layer.present.selected[0]].style.stroke.enabled;
-      default:
-        return true;
-    }
-  })();
-  const strokeJoinValue = (() => {
-    switch(layer.present.selected.length) {
-      case 0:
-        return null;
-      case 1:
-        return layer.present.byId[layer.present.selected[0]].style.strokeOptions.join;
-      default:
-        return null;
-    }
-  })();
+  const layerItems: (em.Shape | em.Image | em.Text)[] = selected.reduce((result, current) => {
+    const layerItem = layer.present.byId[current];
+    return [...result, layerItem];
+  }, []);
+  const strokeJoinValues = layerItems.reduce((result: em.StrokeJoin[], current: em.Shape | em.Image | em.Text) => {
+    return [...result, current.style.strokeOptions.join];
+  }, []);
+  const strokeJoinValue = strokeJoinValues.every((join: em.StrokeJoin) => join === strokeJoinValues[0]) ? strokeJoinValues[0] : 'multi';
+  const disabled = !layerItems.every((layerItem) => layerItem.style.stroke.enabled);
   return { selected, strokeJoinValue, disabled };
 };
 
 export default connect(
   mapStateToProps,
-  { setLayerStrokeJoin }
+  { setLayersStrokeJoin }
 )(StrokeJoinInput);

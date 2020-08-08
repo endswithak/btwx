@@ -2,8 +2,8 @@ import React, { ReactElement } from 'react';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import StrokeDashOffsetInput from './StrokeDashOffsetInput';
-import StrokeDashInput from './StrokeDashInput';
-import StrokeGapInput from './StrokeGapInput';
+import StrokeDashArrayWidthInput from './StrokeDashArrayWidthInput';
+import StrokeDashArrayGapInput from './StrokeDashArrayGapInput';
 import StrokeWidthInput from './StrokeWidthInput';
 
 const StrokeParamsInput = (): ReactElement => {
@@ -18,10 +18,10 @@ const StrokeParamsInput = (): ReactElement => {
       <SidebarSectionColumn width='33.33%'>
         <SidebarSectionRow>
           <SidebarSectionColumn width='50%'>
-            <StrokeDashInput />
+            <StrokeDashArrayWidthInput />
           </SidebarSectionColumn>
           <SidebarSectionColumn width='50%'>
-            <StrokeGapInput />
+            <StrokeDashArrayGapInput />
           </SidebarSectionColumn>
         </SidebarSectionRow>
       </SidebarSectionColumn>

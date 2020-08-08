@@ -10,14 +10,14 @@ import { expandShadowStyles, collapseShadowStyles } from '../store/actions/right
 
 interface SidebarShadowStylesProps {
   selected?: string[];
-  selectedType?: string;
+  validFillSelection?: boolean;
   shadowStylesCollapsed?: boolean;
   expandShadowStyles?(): RightSidebarTypes;
   collapseShadowStyles?(): RightSidebarTypes;
 }
 
 const SidebarShadowStyles = (props: SidebarShadowStylesProps): ReactElement => {
-  const { selected, selectedType, shadowStylesCollapsed, expandShadowStyles, collapseShadowStyles } = props;
+  const { selected, validFillSelection, shadowStylesCollapsed, expandShadowStyles, collapseShadowStyles } = props;
 
   const handleClick = () => {
     if (shadowStylesCollapsed) {
@@ -28,7 +28,7 @@ const SidebarShadowStyles = (props: SidebarShadowStylesProps): ReactElement => {
   }
 
   return (
-    selected.length === 1 && (selectedType === 'Shape' || selectedType === 'Text' || selectedType === 'Image')
+    validFillSelection
     ? <SidebarCollapseSection
         onClick={handleClick}
         header='shadow'
@@ -46,9 +46,9 @@ const SidebarShadowStyles = (props: SidebarShadowStylesProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer, rightSidebar } = state;
   const selected = layer.present.selected;
-  const selectedType = selected.length > 0 ? layer.present.byId[selected[0]].type : null;
+  const validFillSelection = !selected.some((id: string) => layer.present.byId[id].type === 'Artboard' || layer.present.byId[id].type === 'Group');
   const shadowStylesCollapsed = rightSidebar.shadowStylesCollapsed;
-  return { selected, selectedType, shadowStylesCollapsed };
+  return { selected, validFillSelection, shadowStylesCollapsed };
 };
 
 export default connect(

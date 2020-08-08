@@ -2,33 +2,30 @@ import React, { useContext, ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import SidebarToggleButton from './SidebarToggleButton';
 import { RootState } from '../store/reducers';
-import { SetLayerStrokeCapPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayerStrokeCap } from '../store/actions/layer';
-import { getPaperLayer } from '../store/selectors/layer';
+import { SetLayersStrokeCapPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayersStrokeCap } from '../store/actions/layer';
 import { ThemeContext } from './ThemeProvider';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 
 interface StrokeCapInputProps {
   selected?: string[];
-  strokeCapValue?: em.StrokeCap;
+  strokeCapValue?: em.StrokeCap | 'multi';
   disabled?: boolean;
-  setLayerStrokeCap?(payload: SetLayerStrokeCapPayload): LayerTypes;
+  setLayersStrokeCap?(payload: SetLayersStrokeCapPayload): LayerTypes;
 }
 
 const StrokeCapInput = (props: StrokeCapInputProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { selected, strokeCapValue, setLayerStrokeCap, disabled } = props;
-  const [strokeCap, setStrokeCap] = useState<em.StrokeCap>(strokeCapValue);
+  const { selected, strokeCapValue, setLayersStrokeCap, disabled } = props;
+  const [strokeCap, setStrokeCap] = useState<em.StrokeCap | 'multi'>(strokeCapValue);
 
   useEffect(() => {
     setStrokeCap(strokeCapValue);
   }, [strokeCapValue, disabled, selected]);
 
   const handleClick = (strokeCapType: em.StrokeCap) => {
-    const paperLayer = getPaperLayer(selected[0]);
-    paperLayer.strokeCap = strokeCapType;
-    setLayerStrokeCap({id: selected[0], strokeCap: strokeCapType})
+    setLayersStrokeCap({layers: selected, strokeCap: strokeCapType})
     setStrokeCap(strokeCapType);
   };
 
@@ -80,30 +77,19 @@ const StrokeCapInput = (props: StrokeCapInputProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const disabled = (() => {
-    switch(layer.present.selected.length) {
-      case 0:
-        return true;
-      case 1:
-        return (layer.present.byId[layer.present.selected[0]].style.strokeOptions.dashArray[0] === 0 && layer.present.byId[layer.present.selected[0]].style.strokeOptions.dashArray[1] === 0) || !layer.present.byId[layer.present.selected[0]].style.stroke.enabled;
-      default:
-        return true;
-    }
-  })();
-  const strokeCapValue = (() => {
-    switch(layer.present.selected.length) {
-      case 0:
-        return null;
-      case 1:
-        return layer.present.byId[layer.present.selected[0]].style.strokeOptions.cap;
-      default:
-        return null;
-    }
-  })();
+  const layerItems: (em.Shape | em.Image | em.Text)[] = selected.reduce((result, current) => {
+    const layerItem = layer.present.byId[current];
+    return [...result, layerItem];
+  }, []);
+  const strokeCapValues = layerItems.reduce((result: em.StrokeCap[], current: em.Shape | em.Image | em.Text) => {
+    return [...result, current.style.strokeOptions.cap];
+  }, []);
+  const strokeCapValue = strokeCapValues.every((cap: em.StrokeCap) => cap === strokeCapValues[0]) ? strokeCapValues[0] : 'multi';
+  const disabled = !layerItems.every((layerItem) => layerItem.style.stroke.enabled);
   return { selected, strokeCapValue, disabled };
 };
 
 export default connect(
   mapStateToProps,
-  { setLayerStrokeCap }
+  { setLayersStrokeCap }
 )(StrokeCapInput);

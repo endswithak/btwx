@@ -2,9 +2,9 @@ export const OPEN_GRADIENT_EDITOR = 'OPEN_GRADIENT_EDITOR';
 export const CLOSE_GRADIENT_EDITOR = 'CLOSE_GRADIENT_EDITOR';
 
 export interface OpenGradientEditorPayload {
-  layer: string;
+  layers: string[];
   prop: 'fill' | 'stroke' | 'shadow';
-  gradient: em.Gradient;
+  gradient: em.Gradient | 'multi';
   x: number;
   y: number;
 }
