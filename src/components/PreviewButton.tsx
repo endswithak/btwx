@@ -13,7 +13,12 @@ const PreviewButton = (props: PreviewButtonProps): ReactElement => {
   const { activeArtboard, canPreview } = props;
 
   const handlePreviewClick = (): void => {
-    ipcRenderer.send('openPreview', JSON.stringify(activeArtboard));
+    const windowSize = {
+      width: activeArtboard.frame.width,
+      height: activeArtboard.frame.height
+    }
+    console.log(windowSize);
+    ipcRenderer.send('openPreview', JSON.stringify(windowSize));
   }
 
   return (

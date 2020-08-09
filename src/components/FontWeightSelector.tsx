@@ -1,23 +1,22 @@
-import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import SidebarSelect from './SidebarSelect';
 import { RootState } from '../store/reducers';
-import { SetLayerFontWeightPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayerFontWeight } from '../store/actions/layer';
-import { getPaperLayer } from '../store/selectors/layer';
+import { SetLayersFontWeightPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayersFontWeight } from '../store/actions/layer';
 import { TextSettingsTypes, SetTextSettingsFontWeightPayload } from '../store/actionTypes/textSettings';
 import { setTextSettingsFontWeight } from '../store/actions/textSettings';
 
 interface FontWeightSelectorProps {
   selected?: string[];
-  fontWeightValue?: em.FontWeight;
+  fontWeightValue?: em.FontWeight | 'multi';
   fontFamily?: string;
-  setLayerFontWeight?(payload: SetLayerFontWeightPayload): LayerTypes;
+  setLayersFontWeight?(payload: SetLayersFontWeightPayload): LayerTypes;
   setTextSettingsFontWeight?(payload: SetTextSettingsFontWeightPayload): TextSettingsTypes;
 }
 
 const FontWeightSelector = (props: FontWeightSelectorProps): ReactElement => {
-  const { selected, fontWeightValue, fontFamily, setLayerFontWeight, setTextSettingsFontWeight } = props;
+  const { selected, fontWeightValue, fontFamily, setLayersFontWeight, setTextSettingsFontWeight } = props;
 
   const options: { value: string; label: string }[] = [
     { value: 'normal', label: 'Regular' },
@@ -26,15 +25,19 @@ const FontWeightSelector = (props: FontWeightSelectorProps): ReactElement => {
     { value: 'bold italic', label: 'Bold Italic' }
   ];
 
-  const [fontWeight, setFontWeight] = useState(options.find((option) => option.value === fontWeightValue));
+  const [fontWeight, setFontWeight] = useState(fontWeightValue !== 'multi' ? options.find((option) => option.value === fontWeightValue) : null);
 
   useEffect(() => {
-    setFontWeight(options.find((option) => option.value === fontWeightValue));
+    if (fontWeightValue === 'multi') {
+      setFontWeight(null);
+    } else {
+      setFontWeight(options.find((option) => option.value === fontWeightValue));
+    }
   }, [fontWeightValue, selected]);
 
   const handleChange = (selectedOption: { value: string; label: string }) => {
     setFontWeight(selectedOption);
-    setLayerFontWeight({id: selected[0], fontWeight: selectedOption.value});
+    setLayersFontWeight({layers: selected, fontWeight: selectedOption.value});
     setTextSettingsFontWeight({fontWeight: selectedOption.value as em.FontWeight});
   }
 
@@ -43,10 +46,10 @@ const FontWeightSelector = (props: FontWeightSelectorProps): ReactElement => {
       value={fontWeight}
       onChange={handleChange}
       options={options}
-      placeholder={'Font Weight'}
-      type={'fontWeight'}
+      placeholder='multi'
+      type='fontWeight'
       data={{fontFamily}}
-      bottomLabel={'Weight'}
+      bottomLabel='Weight'
     />
   );
 }
@@ -54,12 +57,19 @@ const FontWeightSelector = (props: FontWeightSelectorProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer, textSettings } = state;
   const selected = layer.present.selected;
-  const fontWeightValue = (layer.present.byId[selected[0]] as em.Text).textStyle.fontWeight;
+  const layerItems: em.Text[] = selected.reduce((result, current) => {
+    const layerItem = layer.present.byId[current];
+    return [...result, layerItem];
+  }, []);
+  const fontWeightValues: string[] = layerItems.reduce((result, current) => {
+    return [...result, current.textStyle.fontWeight];
+  }, []);
+  const fontWeightValue = fontWeightValues.every((fontWeight: string) => fontWeight === fontWeightValues[0]) ? fontWeightValues[0] : 'multi';
   const fontFamily = textSettings.fontFamily;
   return { selected, fontWeightValue, fontFamily };
 };
 
 export default connect(
   mapStateToProps,
-  { setLayerFontWeight, setTextSettingsFontWeight }
+  { setLayersFontWeight, setTextSettingsFontWeight }
 )(FontWeightSelector);

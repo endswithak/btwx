@@ -11,6 +11,8 @@ import {
   COLLAPSE_FILL_STYLES,
   EXPAND_STROKE_STYLES,
   COLLAPSE_STROKE_STYLES,
+  EXPAND_STROKE_OPTIONS_STYLES,
+  COLLAPSE_STROKE_OPTIONS_STYLES,
   EXPAND_SHADOW_STYLES,
   COLLAPSE_SHADOW_STYLES,
   RightSidebarTypes,
@@ -23,6 +25,7 @@ export interface RightSidebarState {
   textStylesCollapsed: boolean;
   fillStylesCollapsed: boolean;
   strokeStylesCollapsed: boolean;
+  strokeOptionsStylesCollapsed: boolean;
   shadowStylesCollapsed: boolean;
 }
 
@@ -33,6 +36,7 @@ const initialState: RightSidebarState = {
   textStylesCollapsed: false,
   fillStylesCollapsed: false,
   strokeStylesCollapsed: false,
+  strokeOptionsStylesCollapsed: false,
   shadowStylesCollapsed: false
 };
 
@@ -108,6 +112,18 @@ export default (state = initialState, action: RightSidebarTypes): RightSidebarSt
       return {
         ...state,
         strokeStylesCollapsed: true
+      };
+    }
+    case EXPAND_STROKE_OPTIONS_STYLES: {
+      return {
+        ...state,
+        strokeOptionsStylesCollapsed: false
+      };
+    }
+    case COLLAPSE_STROKE_OPTIONS_STYLES: {
+      return {
+        ...state,
+        strokeOptionsStylesCollapsed: true
       };
     }
     case EXPAND_SHADOW_STYLES: {

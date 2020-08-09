@@ -37,7 +37,7 @@ import {
   SetLayerStrokeDashArrayGap, SetLayersStrokeDashArrayGap, SetLayerGradient, SetLayersGradient, SetLayerGradientType, SetLayersGradientType,
   SetLayerGradientOrigin, SetLayersGradientOrigin, SetLayerGradientDestination, SetLayersGradientDestination, SetLayerGradientStopColor,
   SetLayersGradientStopColor, SetLayerGradientStopPosition, SetLayersGradientStopPosition, AddLayerGradientStop, AddLayersGradientStop,
-  RemoveLayerGradientStop, RemoveLayersGradientStop, ActivateLayerGradientStop, DeactivateLayerGradientStop, SetLayerActiveGradientStop, SetLayersShadowBlur, SetLayersShadowXOffset, SetLayersShadowYOffset
+  RemoveLayerGradientStop, RemoveLayersGradientStop, ActivateLayerGradientStop, DeactivateLayerGradientStop, SetLayerActiveGradientStop, SetLayersShadowBlur, SetLayersShadowXOffset, SetLayersShadowYOffset, SetLayersFontSize, SetLayersFontWeight, SetLayersFontFamily, SetLayersLeading, SetLayersJustification
 } from '../actionTypes/layer';
 
 import {
@@ -3701,6 +3701,12 @@ export const setLayerFontSize = (state: LayerState, action: SetLayerFontSize): L
   return currentState;
 };
 
+export const setLayersFontSize = (state: LayerState, action: SetLayersFontSize): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return setLayerFontSize(result, layerActions.setLayerFontSize({id: current, fontSize: action.payload.fontSize}) as SetLayerFontSize);
+  }, state);
+};
+
 export const setLayerFontWeight = (state: LayerState, action: SetLayerFontWeight): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id) as paper.PointText;
@@ -3720,6 +3726,12 @@ export const setLayerFontWeight = (state: LayerState, action: SetLayerFontWeight
     paperProject: exportPaperProject(currentState)
   }
   return updateLayerBounds(currentState, action.payload.id);
+};
+
+export const setLayersFontWeight = (state: LayerState, action: SetLayersFontWeight): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return setLayerFontWeight(result, layerActions.setLayerFontWeight({id: current, fontWeight: action.payload.fontWeight}) as SetLayerFontWeight);
+  }, state);
 };
 
 export const setLayerFontFamily = (state: LayerState, action: SetLayerFontFamily): LayerState => {
@@ -3743,6 +3755,12 @@ export const setLayerFontFamily = (state: LayerState, action: SetLayerFontFamily
   return updateLayerBounds(currentState, action.payload.id);
 };
 
+export const setLayersFontFamily = (state: LayerState, action: SetLayersFontFamily): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return setLayerFontFamily(result, layerActions.setLayerFontFamily({id: current, fontFamily: action.payload.fontFamily}) as SetLayerFontFamily);
+  }, state);
+};
+
 export const setLayerLeading = (state: LayerState, action: SetLayerLeading): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id) as paper.PointText;
@@ -3764,6 +3782,12 @@ export const setLayerLeading = (state: LayerState, action: SetLayerLeading): Lay
   currentState = updateLayerBounds(currentState, action.payload.id);
   currentState = updateLayerTweens(currentState, action.payload.id, 'lineHeight');
   return currentState;
+};
+
+export const setLayersLeading = (state: LayerState, action: SetLayersLeading): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return setLayerLeading(result, layerActions.setLayerLeading({id: current, leading: action.payload.leading}) as SetLayerLeading);
+  }, state);
 };
 
 export const setLayerJustification = (state: LayerState, action: SetLayerJustification): LayerState => {
@@ -3824,6 +3848,12 @@ export const setLayerJustification = (state: LayerState, action: SetLayerJustifi
     paperProject: exportPaperProject(currentState)
   }
   return updateLayerBounds(currentState, action.payload.id);
+};
+
+export const setLayersJustification = (state: LayerState, action: SetLayersJustification): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return setLayerJustification(result, layerActions.setLayerJustification({id: current, justification: action.payload.justification}) as SetLayerJustification);
+  }, state);
 };
 
 export const addInViewLayer = (state: LayerState, action: AddInViewLayer): LayerState => {

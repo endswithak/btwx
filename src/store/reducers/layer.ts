@@ -136,10 +136,15 @@ import {
   SCALE_LAYERS,
   SET_LAYER_TEXT,
   SET_LAYER_FONT_SIZE,
+  SET_LAYERS_FONT_SIZE,
   SET_LAYER_LEADING,
+  SET_LAYERS_LEADING,
   SET_LAYER_FONT_WEIGHT,
+  SET_LAYERS_FONT_WEIGHT,
   SET_LAYER_FONT_FAMILY,
+  SET_LAYERS_FONT_FAMILY,
   SET_LAYER_JUSTIFICATION,
+  SET_LAYERS_JUSTIFICATION,
   ADD_IN_VIEW_LAYER,
   ADD_IN_VIEW_LAYERS,
   REMOVE_IN_VIEW_LAYER,
@@ -306,10 +311,15 @@ import {
   scaleLayer,
   scaleLayers,
   setLayerFontSize,
+  setLayersFontSize,
   setLayerLeading,
+  setLayersLeading,
   setLayerFontWeight,
+  setLayersFontWeight,
   setLayerFontFamily,
+  setLayersFontFamily,
   setLayerJustification,
+  setLayersJustification,
   setLayerText,
   addInViewLayer,
   addInViewLayers,
@@ -691,14 +701,24 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setLayerText(state, action);
     case SET_LAYER_FONT_SIZE:
       return setLayerFontSize(state, action);
+    case SET_LAYERS_FONT_SIZE:
+      return setLayersFontSize(state, action);
     case SET_LAYER_FONT_WEIGHT:
       return setLayerFontWeight(state, action);
+    case SET_LAYERS_FONT_WEIGHT:
+      return setLayersFontWeight(state, action);
     case SET_LAYER_FONT_FAMILY:
       return setLayerFontFamily(state, action);
+    case SET_LAYERS_FONT_FAMILY:
+      return setLayersFontFamily(state, action);
     case SET_LAYER_LEADING:
       return setLayerLeading(state, action);
+    case SET_LAYERS_LEADING:
+      return setLayersLeading(state, action);
     case SET_LAYER_JUSTIFICATION:
       return setLayerJustification(state, action);
+    case SET_LAYERS_JUSTIFICATION:
+      return setLayersJustification(state, action);
     case ADD_IN_VIEW_LAYER:
       return addInViewLayer(state, action);
     case ADD_IN_VIEW_LAYERS:

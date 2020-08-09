@@ -14,14 +14,14 @@ import { expandTextStyles, collapseTextStyles } from '../store/actions/rightSide
 
 interface SidebarTextStylesProps {
   selected?: string[];
-  selectedType?: string;
+  validTextSelection?: boolean;
   textStylesCollapsed?: boolean;
   expandTextStyles?(): RightSidebarTypes;
   collapseTextStyles?(): RightSidebarTypes;
 }
 
 const SidebarTextStyles = (props: SidebarTextStylesProps): ReactElement => {
-  const { selected, selectedType, textStylesCollapsed, expandTextStyles, collapseTextStyles } = props;
+  const { selected, validTextSelection, textStylesCollapsed, expandTextStyles, collapseTextStyles } = props;
 
   const handleClick = () => {
     if (textStylesCollapsed) {
@@ -32,7 +32,7 @@ const SidebarTextStyles = (props: SidebarTextStylesProps): ReactElement => {
   }
 
   return (
-    selected.length === 1 && selectedType === 'Text'
+    validTextSelection
     ? <SidebarCollapseSection
         onClick={handleClick}
         collapsed={textStylesCollapsed}
@@ -64,9 +64,9 @@ const SidebarTextStyles = (props: SidebarTextStylesProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer, rightSidebar } = state;
   const selected = layer.present.selected;
-  const selectedType = selected.length > 0 ? layer.present.byId[selected[0]].type : null;
+  const validTextSelection = selected.every((id: string) => layer.present.byId[id].type === 'Text');
   const textStylesCollapsed = rightSidebar.textStylesCollapsed;
-  return { selected, selectedType, textStylesCollapsed };
+  return { selected, validTextSelection, textStylesCollapsed };
 };
 
 export default connect(

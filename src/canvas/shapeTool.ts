@@ -419,6 +419,7 @@ class ShapeTool {
           style: DEFAULT_STYLE(),
           transform: DEFAULT_TRANSFORM,
           booleanOperation: 'none',
+          closed: true,
           ...shapeSpecificProps
         }));
       }

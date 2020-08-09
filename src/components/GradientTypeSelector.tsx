@@ -2,20 +2,19 @@ import React, { useContext, ReactElement, useRef, useEffect, useState } from 're
 import { connect } from 'react-redux';
 import SidebarSelect from './SidebarSelect';
 import { RootState } from '../store/reducers';
-import { SetLayersFillGradientTypePayload, SetLayersStrokeGradientTypePayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayersFillGradientType, setLayersStrokeGradientType } from '../store/actions/layer';
+import { SetLayersGradientTypePayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayersGradientType } from '../store/actions/layer';
 
 interface GradientTypeSelectorProps {
   selected?: string[];
   gradientTypeValue: em.GradientType | 'multi';
   disabled?: boolean;
   prop: 'fill' | 'stroke';
-  setLayersFillGradientType?(payload: SetLayersFillGradientTypePayload): LayerTypes;
-  setLayersStrokeGradientType?(payload: SetLayersStrokeGradientTypePayload): LayerTypes;
+  setLayersGradientType?(payload: SetLayersGradientTypePayload): LayerTypes;
 }
 
 const GradientTypeSelector = (props: GradientTypeSelectorProps): ReactElement => {
-  const { selected, prop, disabled, gradientTypeValue, setLayersFillGradientType, setLayersStrokeGradientType } = props;
+  const { selected, prop, disabled, gradientTypeValue, setLayersGradientType } = props;
 
   const options: { value: em.GradientType; label: string }[] = [
     { value: 'linear', label: 'Linear' },
@@ -34,14 +33,7 @@ const GradientTypeSelector = (props: GradientTypeSelectorProps): ReactElement =>
 
   const handleChange = (selectedOption: { value: em.GradientType; label: string }) => {
     setGradientType(selectedOption);
-    switch(prop) {
-      case 'fill':
-        setLayersFillGradientType({layers: selected, gradientType: selectedOption.value});
-        break;
-      case 'stroke':
-        setLayersStrokeGradientType({layers: selected, gradientType: selectedOption.value});
-        break;
-    }
+    setLayersGradientType({layers: selected, prop: prop, gradientType: selectedOption.value});
   }
 
   return (
@@ -56,14 +48,26 @@ const GradientTypeSelector = (props: GradientTypeSelectorProps): ReactElement =>
   );
 }
 
-const mapStateToProps = (state: RootState) => {
+const mapStateToProps = (state: RootState, ownProps: GradientTypeSelectorProps) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  //const gradientTypeValue = (layer.present.byId[selected[0]] as em.Text).style.fill.gradient.gradientType;
-  return { selected };
+  const layerItems: em.Layer[] = selected.reduce((result, current) => {
+    const layerItem = layer.present.byId[current];
+    return [...result, layerItem];
+  }, []);
+  const styleValues: (em.Fill | em.Stroke)[] = layerItems.reduce((result, current) => {
+    switch(ownProps.prop) {
+      case 'fill':
+        return [...result, current.style.fill];
+      case 'stroke':
+        return [...result, current.style.stroke];
+    }
+  }, []);
+  const gradientTypeValue = styleValues.every((style) => style.gradient.gradientType === styleValues[0].gradient.gradientType) ? styleValues[0].gradient.gradientType : 'multi' ;
+  return { selected, gradientTypeValue };
 };
 
 export default connect(
   mapStateToProps,
-  { setLayersFillGradientType, setLayersStrokeGradientType }
+  { setLayersGradientType }
 )(GradientTypeSelector);

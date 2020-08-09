@@ -1,4 +1,7 @@
 import React, { useRef, useContext, useEffect, ReactElement, useState } from 'react';
+import { connect } from 'react-redux';
+import { remote } from 'electron';
+import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 import PreviewCanvas from './PreviewCanvas';
 import PreviewTopbar from './PreviewTopbar';
@@ -20,4 +23,13 @@ const Preview = (): ReactElement => {
   );
 }
 
-export default Preview;
+const mapStateToProps = (state: RootState) => {
+  const { layer } = state;
+  return {
+    activeArtboard: layer.present.byId[layer.present.activeArtboard]
+  };
+};
+
+export default connect(
+  mapStateToProps
+)(Preview);

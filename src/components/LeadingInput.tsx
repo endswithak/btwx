@@ -1,42 +1,41 @@
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { evaluate } from 'mathjs';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
-import { SetLayerLeadingPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayerLeading } from '../store/actions/layer';
-import { getPaperLayer } from '../store/selectors/layer';
+import { SetLayersLeadingPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayersLeading } from '../store/actions/layer';
 import { TextSettingsTypes, SetTextSettingsLeadingPayload } from '../store/actionTypes/textSettings';
 import { setTextSettingsLeading } from '../store/actions/textSettings';
 
 interface LeadingInputProps {
   selected?: string[];
-  leadingValue?: number;
-  setLayerLeading?(payload: SetLayerLeadingPayload): LayerTypes;
+  leadingValue?: number | 'multi';
+  setLayersLeading?(payload: SetLayersLeadingPayload): LayerTypes;
   setTextSettingsLeading?(payload: SetTextSettingsLeadingPayload): TextSettingsTypes;
 }
 
 const LeadingInput = (props: LeadingInputProps): ReactElement => {
-  const { selected, setLayerLeading, leadingValue } = props;
-  const [leading, setLeading] = useState<string | number>(props.leadingValue);
+  const { selected, setLayersLeading, leadingValue } = props;
+  const [leading, setLeading] = useState(props.leadingValue);
 
   useEffect(() => {
     setLeading(leadingValue);
   }, [leadingValue, selected]);
 
-  const handleChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const target = e.target as HTMLInputElement;
+  const handleChange = (e: any) => {
+    const target = e.target;
     setLeading(target.value);
   };
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
+  const handleSubmit = (e: any) => {
     try {
       let nextLeading = evaluate(`${leading}`);
       if (nextLeading !== leadingValue && !isNaN(nextLeading)) {
         if (nextLeading < 1) {
           nextLeading = 1;
         }
-        setLayerLeading({id: selected[0], leading: nextLeading});
+        setLayersLeading({layers: selected, leading: nextLeading});
         setTextSettingsLeading({leading: nextLeading});
         setLeading(nextLeading);
       } else {
@@ -53,7 +52,6 @@ const LeadingInput = (props: LeadingInputProps): ReactElement => {
       onChange={handleChange}
       onSubmit={handleSubmit}
       submitOnBlur
-      disabled={selected.length > 1 || selected.length === 0}
       bottomLabel={'Leading'} />
   );
 }
@@ -61,20 +59,18 @@ const LeadingInput = (props: LeadingInputProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const leadingValue = (() => {
-    switch(layer.present.selected.length) {
-      case 0:
-        return null;
-      case 1:
-        return (layer.present.byId[layer.present.selected[0]] as em.Text).textStyle.leading;
-      default:
-        return null;
-    }
-  })();
+  const layerItems: em.Text[] = selected.reduce((result, current) => {
+    const layerItem = layer.present.byId[current];
+    return [...result, layerItem];
+  }, []);
+  const leadingValues: number[] = layerItems.reduce((result, current) => {
+    return [...result, current.textStyle.leading];
+  }, []);
+  const leadingValue = leadingValues.every((leading: number) => leading === leadingValues[0]) ? leadingValues[0] : 'multi';
   return { selected, leadingValue };
 };
 
 export default connect(
   mapStateToProps,
-  { setLayerLeading, setTextSettingsLeading }
+  { setLayersLeading, setTextSettingsLeading }
 )(LeadingInput);

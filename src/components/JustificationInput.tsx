@@ -2,11 +2,9 @@ import React, { useContext, ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import SidebarToggleButton from './SidebarToggleButton';
 import { RootState } from '../store/reducers';
-import { SetLayerJustificationPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayerJustification } from '../store/actions/layer';
-import { getPaperLayer } from '../store/selectors/layer';
+import { SetLayersJustificationPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayersJustification } from '../store/actions/layer';
 import { ThemeContext } from './ThemeProvider';
-import SidebarSection from './SidebarSection';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarButtonGroup from './SidebarButtonGroup';
@@ -15,22 +13,22 @@ import { setTextSettingsJustification } from '../store/actions/textSettings';
 
 interface JustificationInputProps {
   selected?: string[];
-  justificationValue?: em.Jusftification;
-  setLayerJustification?(payload: SetLayerJustificationPayload): LayerTypes;
+  justificationValue?: em.Jusftification | 'multi';
+  setLayersJustification?(payload: SetLayersJustificationPayload): LayerTypes;
   setTextSettingsJustification?(payload: SetTextSettingsJustificationPayload): TextSettingsTypes;
 }
 
 const JustificationInput = (props: JustificationInputProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { selected, justificationValue, setLayerJustification, setTextSettingsJustification } = props;
-  const [justification, setJustification] = useState<em.Jusftification>(justificationValue);
+  const { selected, justificationValue, setLayersJustification, setTextSettingsJustification } = props;
+  const [justification, setJustification] = useState(justificationValue);
 
   useEffect(() => {
     setJustification(justificationValue);
   }, [justificationValue, selected]);
 
   const handleClick = (justificationButtonValue: em.Jusftification) => {
-    setLayerJustification({id: selected[0], justification: justificationButtonValue as em.Jusftification})
+    setLayersJustification({layers: selected, justification: justificationButtonValue as em.Jusftification})
     setJustification(justificationButtonValue);
     setTextSettingsJustification({justification: justificationButtonValue as em.Jusftification});
   };
@@ -82,20 +80,18 @@ const JustificationInput = (props: JustificationInputProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const justificationValue = (() => {
-    switch(layer.present.selected.length) {
-      case 0:
-        return null;
-      case 1:
-        return (layer.present.byId[layer.present.selected[0]] as em.Text).textStyle.justification;
-      default:
-        return null;
-    }
-  })();
+  const layerItems: em.Text[] = selected.reduce((result, current) => {
+    const layerItem = layer.present.byId[current];
+    return [...result, layerItem];
+  }, []);
+  const justificationValues: em.Jusftification[] = layerItems.reduce((result, current) => {
+    return [...result, current.textStyle.justification];
+  }, []);
+  const justificationValue = justificationValues.every((justification: em.Jusftification) => justification === justificationValues[0]) ? justificationValues[0] : 'multi';
   return { selected, justificationValue };
 };
 
 export default connect(
   mapStateToProps,
-  { setLayerJustification, setTextSettingsJustification }
+  { setLayersJustification, setTextSettingsJustification }
 )(JustificationInput);

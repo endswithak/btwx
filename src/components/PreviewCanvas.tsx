@@ -1,15 +1,15 @@
 import paper from 'paper';
-import { connect } from 'react-redux';
 import React, { useRef, useContext, useEffect, ReactElement } from 'react';
+import { connect } from 'react-redux';
+import { gsap } from 'gsap';
+import { MorphSVGPlugin } from "gsap/MorphSVGPlugin";
+import tinyColor from 'tinycolor2';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { paperPreview } from '../canvas';
 import { setActiveArtboard } from '../store/actions/layer';
 import { SetActiveArtboardPayload, LayerTypes } from '../store/actionTypes/layer';
 import { getLongestEventTween, getPositionInArtboard, getAllArtboardTweenEvents, getAllArtboardTweenEventArtboards, getAllArtboardTweens, getAllArtboardTweenLayers, getAllArtboardTweenLayerDestinations, getAllArtboardTweenEventLayers, getGradientDestinationPoint, getGradientOriginPoint, getGradientStops } from '../store/selectors/layer';
-import { gsap } from 'gsap';
-import { MorphSVGPlugin } from "gsap/MorphSVGPlugin";
-import tinyColor from 'tinycolor2';
 import { bufferToBase64 } from '../utils';
 
 gsap.registerPlugin(MorphSVGPlugin);
@@ -103,7 +103,6 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
       const tweenEvent = tweenEvents.byId[eventId];
       const tweenEventArtboard = tweenEventDestinations.byId[tweenEvent.artboard] as em.Artboard;
       const tweenEventDestinationArtboard = tweenEventDestinations.byId[tweenEvent.destinationArtboard] as em.Artboard;
-      const tweenEventDestinationArtboardPaperLayer = paperTweenEventDestinationsById[tweenEvent.destinationArtboard];
       const tweenEventPaperLayer = paperTweenEventLayersById[tweenEvent.layer];
       const tweenEventTweensById = tweenEvent.tweens.reduce((result: { [id: string]: em.Tween }, current): {[id: string]: em.Tween} => {
         result[current] = tweens.byId[current];
@@ -112,9 +111,12 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
       // add tweens for each animation event
       tweenEventPaperLayer.on(tweenEvent.event, (e: paper.MouseEvent | paper.KeyEvent) => {
         if (tweenEvent.tweens.length > 0) {
-          const longestTween = getLongestEventTween(tweenEventTweensById);
+          tweenEventPaperLayer.off(tweenEvent.event);
+          const tweenTimeline = gsap.timeline();
+          tweenTimeline.then(() => {
+            setActiveArtboard({id: tweenEvent.destinationArtboard, scope: 2});
+          });
           Object.keys(tweenEventTweensById).forEach((tweenId) => {
-            let paperTween: gsap.core.Tween;
             const tweenProp: any = {};
             const tween = tweenEventTweensById[tweenId];
             const tweenLayer = tweenLayers.byId[tween.layer];
@@ -137,7 +139,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 afterRaster.parent = beforeRaster.parent;
                 tweenProp[`${tween.prop}-before`] = 1;
                 tweenProp[`${tween.prop}-after`] = 0;
-                paperTween = gsap.to(tweenProp, {
+                tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
                   [`${tween.prop}-before`]: 0,
                   [`${tween.prop}-after`]: 1,
@@ -146,8 +148,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     afterRaster.opacity = tweenProp[`${tween.prop}-after`];
                   },
                   ease: tween.ease,
-                  delay: tween.delay
-                });
+                }, tween.delay);
                 break;
               }
               case 'shape': {
@@ -157,7 +158,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 ];
                 MorphSVGPlugin.pathFilter(morphData);
                 tweenProp[tween.prop] = morphData[0];
-                paperTween = gsap.to(tweenProp, {
+                tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
                   [tween.prop]: morphData[1],
                   onUpdate: () => {
@@ -186,8 +187,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     }
                   },
                   ease: tween.ease,
-                  delay: tween.delay
-                });
+                }, tween.delay);
                 break;
               }
               case 'fill': {
@@ -199,15 +199,14 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                   (tweenDestinationLayerPaperLayer.fillColor.type === 'rgb' || tweenDestinationLayerPaperLayer.fillColor.type === 'hsl')
                 ) {
                   tweenProp[tween.prop] = tweenPaperLayer.fillColor.toCSS(true);
-                  paperTween = gsap.to(tweenProp, {
+                  tweenTimeline.to(tweenProp, {
                     duration: tween.duration,
                     [tween.prop]: tweenDestinationLayerPaperLayer.fillColor.toCSS(true),
                     onUpdate: () => {
                       tweenPaperLayer.fillColor = tweenProp[tween.prop];
                     },
                     ease: tween.ease,
-                    delay: tween.delay
-                  });
+                  }, tween.delay);
                 // no fill to color fill
                 } else if (
                   !tweenPaperLayer.fillColor &&
@@ -216,15 +215,14 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 ) {
                   const c2 = tweenDestinationLayerPaperLayer.fillColor.toCSS(true);
                   tweenProp[tween.prop] = new paperPreview.Color(tinyColor(c2).setAlpha(0).toHex8String()).toCSS(true);
-                  paperTween = gsap.to(tweenProp, {
+                  tweenTimeline.to(tweenProp, {
                     duration: tween.duration,
                     [tween.prop]: tweenDestinationLayerPaperLayer.fillColor.toCSS(true),
                     onUpdate: () => {
                       tweenPaperLayer.fillColor = tweenProp[tween.prop];
                     },
                     ease: tween.ease,
-                    delay: tween.delay
-                  });
+                  }, tween.delay);
                 // color fill to no fill
                 } else if (
                   tweenPaperLayer.fillColor &&
@@ -232,15 +230,14 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                   (tweenPaperLayer.fillColor.type === 'rgb' || tweenPaperLayer.fillColor.type === 'hsl')
                 ) {
                   tweenProp[tween.prop] = tweenPaperLayer.fillColor.alpha;
-                  paperTween = gsap.to(tweenProp, {
+                  tweenTimeline.to(tweenProp, {
                     duration: tween.duration,
                     [tween.prop]: 0,
                     onUpdate: () => {
                       tweenPaperLayer.fillColor.alpha = tweenProp[tween.prop];
                     },
                     ease: tween.ease,
-                    delay: tween.delay
-                  });
+                  }, tween.delay);
                 // gradient fill to gradient fill
                 } else if (
                   tweenPaperLayer.fillColor &&
@@ -251,7 +248,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                   // origin
                   tweenProp[`${tween.prop}-origin-x`] = tweenLayer.style.fill.gradient.origin.x;
                   tweenProp[`${tween.prop}-origin-y`] = tweenLayer.style.fill.gradient.origin.y;
-                  paperTween = gsap.to(tweenProp, {
+                  tweenTimeline.to(tweenProp, {
                     duration: tween.duration,
                     [`${tween.prop}-origin-x`]: tweenDestinationLayer.style.fill.gradient.origin.x,
                     [`${tween.prop}-origin-y`]: tweenDestinationLayer.style.fill.gradient.origin.y,
@@ -262,12 +259,11 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                       (tweenPaperLayer.fillColor as em.PaperGradientFill).origin = nextOrigin;
                     },
                     ease: tween.ease,
-                    delay: tween.delay
-                  });
+                  }, tween.delay);
                   // destination
                   tweenProp[`${tween.prop}-destination-x`] = tweenLayer.style.fill.gradient.destination.x;
                   tweenProp[`${tween.prop}-destination-y`] = tweenLayer.style.fill.gradient.destination.y;
-                  paperTween = gsap.to(tweenProp, {
+                  tweenTimeline.to(tweenProp, {
                     duration: tween.duration,
                     [`${tween.prop}-destination-x`]: tweenDestinationLayer.style.fill.gradient.destination.x,
                     [`${tween.prop}-destination-y`]: tweenDestinationLayer.style.fill.gradient.destination.y,
@@ -278,8 +274,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                       (tweenPaperLayer.fillColor as em.PaperGradientFill).destination = nextDestination;
                     },
                     ease: tween.ease,
-                    delay: tween.delay
-                  });
+                  }, tween.delay);
                   // stops
                   const layerStopCount = tweenPaperLayer.fillColor.gradient.stops.length;
                   const destinationStopCount = tweenDestinationLayerPaperLayer.fillColor.gradient.stops.length;
@@ -296,7 +291,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     });
                     tweenProp[`${tween.prop}-stop-${index}-color`] = tweenPaperLayer.fillColor.gradient.stops[index].color.toCSS(true);
                     tweenProp[`${tween.prop}-stop-${index}-offset`] = tweenPaperLayer.fillColor.gradient.stops[index].offset;
-                    paperTween = gsap.to(tweenProp, {
+                    tweenTimeline.to(tweenProp, {
                       duration: tween.duration,
                       [`${tween.prop}-stop-${index}-color`]: tweenDestinationLayerPaperLayer.fillColor.gradient.stops[index] ? tweenDestinationLayerPaperLayer.fillColor.gradient.stops[index].color.toCSS(true) : closestDestinationStop.color.toCSS(true),
                       [`${tween.prop}-stop-${index}-offset`]: tweenDestinationLayerPaperLayer.fillColor.gradient.stops[index] ? tweenDestinationLayerPaperLayer.fillColor.gradient.stops[index].offset : closestDestinationStop.offset,
@@ -305,8 +300,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                         tweenPaperLayer.fillColor.gradient.stops[index].offset = tweenProp[`${tween.prop}-stop-${index}-offset`];
                       },
                       ease: tween.ease,
-                      delay: tween.delay
-                    });
+                    }, tween.delay);
                   });
                 // gradient fill to color fill
                 } else if (
@@ -317,15 +311,14 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 ) {
                   tweenPaperLayer.fillColor.gradient.stops.forEach((stop, index) => {
                     tweenProp[`${tween.prop}-stop-${index}-color`] = tweenPaperLayer.fillColor.gradient.stops[index].color.toCSS(true);
-                    paperTween = gsap.to(tweenProp, {
+                    tweenTimeline.to(tweenProp, {
                       duration: tween.duration,
                       [`${tween.prop}-stop-${index}-color`]: tweenDestinationLayerPaperLayer.fillColor.toCSS(true),
                       onUpdate: () => {
                         tweenPaperLayer.fillColor.gradient.stops[index].color = tweenProp[`${tween.prop}-stop-${index}-color`];
                       },
-                      ease: tween.ease,
-                      delay: tween.delay
-                    });
+                      ease: tween.ease
+                    }, tween.delay);
                   });
                 // color fill to gradient fill
                 } else if (
@@ -350,15 +343,14 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                   } as em.PaperGradientFill;
                   tweenPaperLayer.fillColor.gradient.stops.forEach((stop, index) => {
                     tweenProp[`${tween.prop}-stop-${index}-color`] = tweenPaperLayer.fillColor.gradient.stops[index].color.toCSS(true);
-                    paperTween = gsap.to(tweenProp, {
+                    tweenTimeline.to(tweenProp, {
                       duration: tween.duration,
                       [`${tween.prop}-stop-${index}-color`]: tweenDestinationLayerPaperLayer.fillColor.gradient.stops[index].color.toCSS(true),
                       onUpdate: () => {
                         tweenPaperLayer.fillColor.gradient.stops[index].color = tweenProp[`${tween.prop}-stop-${index}-color`];
                       },
                       ease: tween.ease,
-                      delay: tween.delay
-                    });
+                    }, tween.delay);
                   });
                 // gradient fill to no fill
                 } else if (
@@ -368,15 +360,14 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 ) {
                   tweenPaperLayer.fillColor.gradient.stops.forEach((stop, index) => {
                     tweenProp[`${tween.prop}-stop-${index}-color`] = tweenPaperLayer.fillColor.gradient.stops[index].color.alpha;
-                    paperTween = gsap.to(tweenProp, {
+                    tweenTimeline.to(tweenProp, {
                       duration: tween.duration,
                       [`${tween.prop}-stop-${index}-color`]: 0,
                       onUpdate: () => {
                         tweenPaperLayer.fillColor.gradient.stops[index].color.alpha = tweenProp[`${tween.prop}-stop-${index}-color`];
                       },
                       ease: tween.ease,
-                      delay: tween.delay
-                    });
+                    }, tween.delay);
                   });
                 // no fill to gradient fill
                 } else if (
@@ -398,15 +389,14 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                   } as em.PaperGradientFill;
                   tweenPaperLayer.fillColor.gradient.stops.forEach((stop, index) => {
                     tweenProp[`${tween.prop}-stop-${index}-color`] = tweenPaperLayer.fillColor.gradient.stops[index].color.alpha;
-                    paperTween = gsap.to(tweenProp, {
+                    tweenTimeline.to(tweenProp, {
                       duration: tween.duration,
                       [`${tween.prop}-stop-${index}-color`]: tweenDestinationLayerPaperLayer.fillColor.gradient.stops[index].color.alpha,
                       onUpdate: () => {
                         tweenPaperLayer.fillColor.gradient.stops[index].color.alpha = tweenProp[`${tween.prop}-stop-${index}-color`];
                       },
                       ease: tween.ease,
-                      delay: tween.delay
-                    });
+                    }, tween.delay);
                   });
                 }
                 break;
@@ -420,15 +410,14 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                   (tweenDestinationLayerPaperLayer.strokeColor.type === 'rgb' || tweenDestinationLayerPaperLayer.strokeColor.type === 'hsl')
                 ) {
                   tweenProp[tween.prop] = tweenPaperLayer.strokeColor.toCSS(true);
-                  paperTween = gsap.to(tweenProp, {
+                  tweenTimeline.to(tweenProp, {
                     duration: tween.duration,
                     [tween.prop]: tweenDestinationLayerPaperLayer.strokeColor.toCSS(true),
                     onUpdate: () => {
                       tweenPaperLayer.strokeColor = tweenProp[tween.prop];
                     },
                     ease: tween.ease,
-                    delay: tween.delay
-                  });
+                  }, tween.delay);
                 // no stroke to color stroke
                 } else if (
                   !tweenPaperLayer.strokeColor &&
@@ -437,15 +426,14 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 ) {
                   const c2 = tweenDestinationLayerPaperLayer.strokeColor.toCSS(true);
                   tweenProp[tween.prop] = new paperPreview.Color(tinyColor(c2).setAlpha(0).toHex8String()).toCSS(true);
-                  paperTween = gsap.to(tweenProp, {
+                  tweenTimeline.to(tweenProp, {
                     duration: tween.duration,
                     [tween.prop]: tweenDestinationLayerPaperLayer.strokeColor.toCSS(true),
                     onUpdate: () => {
                       tweenPaperLayer.strokeColor = tweenProp[tween.prop];
                     },
                     ease: tween.ease,
-                    delay: tween.delay
-                  });
+                  }, tween.delay);
                 // color stroke to no stroke
                 } else if (
                   tweenPaperLayer.strokeColor &&
@@ -453,15 +441,14 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                   (tweenPaperLayer.strokeColor.type === 'rgb' || tweenPaperLayer.strokeColor.type === 'hsl')
                 ) {
                   tweenProp[tween.prop] = tweenPaperLayer.strokeColor.alpha;
-                  paperTween = gsap.to(tweenProp, {
+                  tweenTimeline.to(tweenProp, {
                     duration: tween.duration,
                     [tween.prop]: 0,
                     onUpdate: () => {
                       tweenPaperLayer.strokeColor.alpha = tweenProp[tween.prop];
                     },
                     ease: tween.ease,
-                    delay: tween.delay
-                  });
+                  }, tween.delay);
                 // gradient stroke to gradient stroke
                 } else if (
                   tweenPaperLayer.strokeColor &&
@@ -472,7 +459,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                   // origin
                   tweenProp[`${tween.prop}-origin-x`] = tweenLayer.style.stroke.gradient.origin.x;
                   tweenProp[`${tween.prop}-origin-y`] = tweenLayer.style.stroke.gradient.origin.y;
-                  paperTween = gsap.to(tweenProp, {
+                  tweenTimeline.to(tweenProp, {
                     duration: tween.duration,
                     [`${tween.prop}-origin-x`]: tweenDestinationLayer.style.stroke.gradient.origin.x,
                     [`${tween.prop}-origin-y`]: tweenDestinationLayer.style.stroke.gradient.origin.y,
@@ -483,12 +470,11 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                       (tweenPaperLayer.strokeColor as em.PaperGradientFill).origin = nextOrigin;
                     },
                     ease: tween.ease,
-                    delay: tween.delay
-                  });
+                  }, tween.delay);
                   // destination
                   tweenProp[`${tween.prop}-destination-x`] = tweenLayer.style.stroke.gradient.destination.x;
                   tweenProp[`${tween.prop}-destination-y`] = tweenLayer.style.stroke.gradient.destination.y;
-                  paperTween = gsap.to(tweenProp, {
+                  tweenTimeline.to(tweenProp, {
                     duration: tween.duration,
                     [`${tween.prop}-destination-x`]: tweenDestinationLayer.style.stroke.gradient.destination.x,
                     [`${tween.prop}-destination-y`]: tweenDestinationLayer.style.stroke.gradient.destination.y,
@@ -499,8 +485,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                       (tweenPaperLayer.strokeColor as em.PaperGradientFill).destination = nextDestination;
                     },
                     ease: tween.ease,
-                    delay: tween.delay
-                  });
+                  }, tween.delay);
                   // stops
                   const layerStopCount = tweenPaperLayer.strokeColor.gradient.stops.length;
                   const destinationStopCount = tweenDestinationLayerPaperLayer.strokeColor.gradient.stops.length;
@@ -517,7 +502,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     });
                     tweenProp[`${tween.prop}-stop-${index}-color`] = tweenPaperLayer.strokeColor.gradient.stops[index].color.toCSS(true);
                     tweenProp[`${tween.prop}-stop-${index}-offset`] = tweenPaperLayer.strokeColor.gradient.stops[index].offset;
-                    paperTween = gsap.to(tweenProp, {
+                    tweenTimeline.to(tweenProp, {
                       duration: tween.duration,
                       [`${tween.prop}-stop-${index}-color`]: tweenDestinationLayerPaperLayer.strokeColor.gradient.stops[index] ? tweenDestinationLayerPaperLayer.strokeColor.gradient.stops[index].color.toCSS(true) : closestDestinationStop.color.toCSS(true),
                       [`${tween.prop}-stop-${index}-offset`]: tweenDestinationLayerPaperLayer.strokeColor.gradient.stops[index] ? tweenDestinationLayerPaperLayer.strokeColor.gradient.stops[index].offset : closestDestinationStop.offset,
@@ -526,8 +511,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                         tweenPaperLayer.strokeColor.gradient.stops[index].offset = tweenProp[`${tween.prop}-stop-${index}-offset`];
                       },
                       ease: tween.ease,
-                      delay: tween.delay
-                    });
+                    }, tween.delay);
                   });
                 // gradient stroke to color stroke
                 } else if (
@@ -538,15 +522,14 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 ) {
                   tweenPaperLayer.strokeColor.gradient.stops.forEach((stop, index) => {
                     tweenProp[`${tween.prop}-stop-${index}-color`] = tweenPaperLayer.strokeColor.gradient.stops[index].color.toCSS(true);
-                    paperTween = gsap.to(tweenProp, {
+                    tweenTimeline.to(tweenProp, {
                       duration: tween.duration,
                       [`${tween.prop}-stop-${index}-color`]: tweenDestinationLayerPaperLayer.strokeColor.toCSS(true),
                       onUpdate: () => {
                         tweenPaperLayer.strokeColor.gradient.stops[index].color = tweenProp[`${tween.prop}-stop-${index}-color`];
                       },
                       ease: tween.ease,
-                      delay: tween.delay
-                    });
+                    }, tween.delay);
                   });
                 // color stroke to gradient stroke
                 } else if (
@@ -571,15 +554,14 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                   } as em.PaperGradientFill;
                   tweenPaperLayer.strokeColor.gradient.stops.forEach((stop, index) => {
                     tweenProp[`${tween.prop}-stop-${index}-color`] = tweenPaperLayer.strokeColor.gradient.stops[index].color.toCSS(true);
-                    paperTween = gsap.to(tweenProp, {
+                    tweenTimeline.to(tweenProp, {
                       duration: tween.duration,
                       [`${tween.prop}-stop-${index}-color`]: tweenDestinationLayerPaperLayer.strokeColor.gradient.stops[index].color.toCSS(true),
                       onUpdate: () => {
                         tweenPaperLayer.strokeColor.gradient.stops[index].color = tweenProp[`${tween.prop}-stop-${index}-color`];
                       },
                       ease: tween.ease,
-                      delay: tween.delay
-                    });
+                    }, tween.delay);
                   });
                 // gradient stroke to no stroke
                 } else if (
@@ -589,15 +571,14 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 ) {
                   tweenPaperLayer.strokeColor.gradient.stops.forEach((stop, index) => {
                     tweenProp[`${tween.prop}-stop-${index}-color`] = tweenPaperLayer.strokeColor.gradient.stops[index].color.alpha;
-                    paperTween = gsap.to(tweenProp, {
+                    tweenTimeline.to(tweenProp, {
                       duration: tween.duration,
                       [`${tween.prop}-stop-${index}-color`]: 0,
                       onUpdate: () => {
                         tweenPaperLayer.strokeColor.gradient.stops[index].color.alpha = tweenProp[`${tween.prop}-stop-${index}-color`];
                       },
                       ease: tween.ease,
-                      delay: tween.delay
-                    });
+                    }, tween.delay);
                   });
                 // no stroke to gradient stroke
                 } else if (
@@ -619,100 +600,93 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                   } as em.PaperGradientFill;
                   tweenPaperLayer.strokeColor.gradient.stops.forEach((stop, index) => {
                     tweenProp[`${tween.prop}-stop-${index}-color`] = tweenPaperLayer.strokeColor.gradient.stops[index].color.alpha;
-                    paperTween = gsap.to(tweenProp, {
+                    tweenTimeline.to(tweenProp, {
                       duration: tween.duration,
                       [`${tween.prop}-stop-${index}-color`]: tweenDestinationLayerPaperLayer.strokeColor.gradient.stops[index].color.alpha,
                       onUpdate: () => {
                         tweenPaperLayer.strokeColor.gradient.stops[index].color.alpha = tweenProp[`${tween.prop}-stop-${index}-color`];
                       },
                       ease: tween.ease,
-                      delay: tween.delay
-                    });
+                    }, tween.delay);
                   });
                 }
                 break;
               }
               case 'dashOffset': {
                 tweenProp[tween.prop] = tweenPaperLayer.dashOffset;
-                paperTween = gsap.to(tweenProp, {
+                tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
                   [tween.prop]: tweenDestinationLayerPaperLayer.dashOffset,
                   onUpdate: () => {
                     tweenPaperLayer.dashOffset = tweenProp[tween.prop];
                   },
                   ease: tween.ease,
-                  delay: tween.delay
-                });
+                }, tween.delay);
                 break;
               }
               case 'dashArrayWidth': {
                 tweenProp[tween.prop] = tweenPaperLayer.dashArray[0];
-                paperTween = gsap.to(tweenProp, {
+                tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
                   [tween.prop]: tweenDestinationLayerPaperLayer.dashArray[0],
                   onUpdate: () => {
                     tweenPaperLayer.dashArray = [tweenProp[tween.prop], tweenPaperLayer.dashArray[1]];
                   },
                   ease: tween.ease,
-                  delay: tween.delay
-                });
+                }, tween.delay);
                 break;
               }
               case 'dashArrayGap': {
                 tweenProp[tween.prop] = tweenPaperLayer.dashArray[1];
-                paperTween = gsap.to(tweenProp, {
+                tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
                   [tween.prop]: tweenDestinationLayerPaperLayer.dashArray[1],
                   onUpdate: () => {
                     tweenPaperLayer.dashArray = [tweenPaperLayer.dashArray[0], tweenProp[tween.prop]];
                   },
                   ease: tween.ease,
-                  delay: tween.delay
-                });
+                }, tween.delay);
                 break;
               }
               case 'strokeWidth': {
                 tweenProp[tween.prop] = tweenPaperLayer.strokeWidth;
-                paperTween = gsap.to(tweenProp, {
+                tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
                   [tween.prop]: tweenDestinationLayerPaperLayer.strokeWidth,
                   onUpdate: () => {
                     tweenPaperLayer.strokeWidth = tweenProp[tween.prop];
                   },
                   ease: tween.ease,
-                  delay: tween.delay
-                });
+                }, tween.delay);
                 break;
               }
               case 'x': {
                 tweenProp[tween.prop] = tweenPaperLayer.position.x;
-                paperTween = gsap.to(tweenProp, {
+                tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
                   [tween.prop]: `+=${tweenPaperLayerPositionDiffX}`,
                   onUpdate: () => {
                     tweenPaperLayer.position.x = tweenProp[tween.prop];
                   },
                   ease: tween.ease,
-                  delay: tween.delay
-                });
+                }, tween.delay);
                 break;
               }
               case 'y': {
                 tweenProp[tween.prop] = tweenPaperLayer.position.y;
-                paperTween = gsap.to(tweenProp, {
+                tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
                   [tween.prop]: `+=${tweenPaperLayerPositionDiffY}`,
                   onUpdate: () => {
                     tweenPaperLayer.position.y = tweenProp[tween.prop];
                   },
                   ease: tween.ease,
-                  delay: tween.delay
-                });
+                }, tween.delay);
                 break;
               }
               case 'width': {
                 tweenProp[tween.prop] = tweenLayer.master.width * tweenLayer.transform.scale.x;
-                paperTween = gsap.to(tweenProp, {
+                tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
                   [tween.prop]: tweenDestinationLayer.master.width * tweenDestinationLayer.transform.scale.x,
                   onUpdate: () => {
@@ -726,13 +700,12 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     tweenPaperLayer.position.y = startY;
                   },
                   ease: tween.ease,
-                  delay: tween.delay
-                });
+                }, tween.delay);
                 break;
               }
               case 'height': {
                 tweenProp[tween.prop] = tweenLayer.master.height * tweenLayer.transform.scale.y;
-                paperTween = gsap.to(tweenProp, {
+                tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
                   [tween.prop]: tweenDestinationLayer.master.height * tweenDestinationLayer.transform.scale.y,
                   onUpdate: () => {
@@ -746,14 +719,13 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     tweenPaperLayer.position.y = startY;
                   },
                   ease: tween.ease,
-                  delay: tween.delay
-                });
+                }, tween.delay);
                 break;
               }
               case 'rotation': {
                 tweenProp[tween.prop] = tweenLayer.transform.rotation;
                 tweenProp[`${tween.prop}-prev`] = tweenLayer.transform.rotation;
-                paperTween = gsap.to(tweenProp, {
+                tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
                   [tween.prop]: tweenDestinationLayer.transform.rotation,
                   onUpdate: () => {
@@ -767,93 +739,86 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     tweenPaperLayer.data.rotation = tweenProp[tween.prop];
                   },
                   ease: tween.ease,
-                  delay: tween.delay
-                });
+                }, tween.delay);
                 break;
               }
               case 'shadowColor': {
                 const tls = tweenLayer.style.shadow.color;
                 const tdl = tweenDestinationLayer.style.shadow.color;
                 tweenProp[tween.prop] = tinyColor({h: tls.h, s: tls.s, l: tls.l, a: tls.a}).toHslString();
-                paperTween = gsap.to(tweenProp, {
+                tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
                   [tween.prop]: tinyColor({h: tdl.h, s: tdl.s, l: tdl.l, a: tdl.a}).toHslString(),
                   onUpdate: () => {
                     tweenPaperLayer.shadowColor = tweenProp[tween.prop];
                   },
                   ease: tween.ease,
-                  delay: tween.delay
-                });
+                }, tween.delay);
                 break;
               }
               case 'shadowOffsetX': {
                 tweenProp[tween.prop] = tweenPaperLayer.shadowOffset.x;
-                paperTween = gsap.to(tweenProp, {
+                tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
                   [tween.prop]: tweenDestinationLayerPaperLayer.shadowOffset.x,
                   onUpdate: () => {
                     tweenPaperLayer.shadowOffset = new paperPreview.Point(tweenProp[tween.prop], tweenPaperLayer.shadowOffset.y);
                   },
                   ease: tween.ease,
-                  delay: tween.delay
-                });
+                }, tween.delay);
                 break;
               }
               case 'shadowOffsetY': {
                 tweenProp[tween.prop] = tweenPaperLayer.shadowOffset.y;
-                paperTween = gsap.to(tweenProp, {
+                tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
                   [tween.prop]: tweenDestinationLayerPaperLayer.shadowOffset.y,
                   onUpdate: () => {
                     tweenPaperLayer.shadowOffset = new paperPreview.Point(tweenPaperLayer.shadowOffset.x, tweenProp[tween.prop]);
                   },
                   ease: tween.ease,
-                  delay: tween.delay
-                });
+                }, tween.delay);
                 break;
               }
               case 'shadowBlur': {
                 tweenProp[tween.prop] = tweenPaperLayer.shadowBlur;
-                paperTween = gsap.to(tweenProp, {
+                tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
                   [tween.prop]: tweenDestinationLayerPaperLayer.shadowBlur,
                   onUpdate: () => {
                     tweenPaperLayer.shadowBlur = tweenProp[tween.prop];
                   },
                   ease: tween.ease,
-                  delay: tween.delay
-                });
+                }, tween.delay);
                 break;
               }
               case 'opacity': {
                 tweenProp[tween.prop] = tweenPaperLayer.opacity;
-                paperTween = gsap.to(tweenProp, {
+                tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
                   [tween.prop]: tweenDestinationLayerPaperLayer.opacity,
                   onUpdate: () => {
                     tweenPaperLayer.opacity = tweenProp[tween.prop];
                   },
                   ease: tween.ease,
-                  delay: tween.delay
-                });
+                }, tween.delay);
                 break;
               }
               case 'fontSize': {
                 tweenProp[tween.prop] = (tweenPaperLayer as paper.PointText).fontSize;
-                paperTween = gsap.to(tweenProp, {
+                tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
                   [tween.prop]: (tweenDestinationLayerPaperLayer as paper.PointText).fontSize,
                   onUpdate: () => {
                     (tweenPaperLayer as paper.PointText).fontSize = tweenProp[tween.prop];
                   },
                   ease: tween.ease,
-                  delay: tween.delay
-                });
+                }, tween.delay);
                 break;
               }
               case 'lineHeight': {
                 tweenProp[tween.prop] = (tweenPaperLayer as paper.PointText).leading;
-                paperTween = gsap.to(tweenProp, {
+                tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
                   [tween.prop]: (tweenDestinationLayerPaperLayer as paper.PointText).leading,
                   onUpdate: () => {
@@ -873,15 +838,9 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     }
                   },
                   ease: tween.ease,
-                  delay: tween.delay
-                });
+                }, tween.delay);
                 break;
               }
-            }
-            if (tween.id === longestTween.id) {
-              paperTween.then(() => {
-                setActiveArtboard({id: tweenEvent.destinationArtboard, scope: 2});
-              });
             }
           });
         } else {

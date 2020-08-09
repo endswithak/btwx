@@ -30,10 +30,27 @@ const BlendModeSelector = (props: BlendModeSelectorProps): ReactElement => {
     { value: 'hue', label: 'Hue' },
     { value: 'saturation', label: 'Saturation' },
     { value: 'color', label: 'Color' },
-    { value: 'luminosity', label: 'Luminosity' }
+    { value: 'luminosity', label: 'Luminosity' },
+    { value: 'add', label: 'Add' },
+    { value: 'subtract', label: 'Subtract' },
+    { value: 'average', label: 'Average' },
+    { value: 'pin-light', label: 'Pin Light' },
+    { value: 'negation', label: 'Negation' },
+    { value: 'source-over', label: 'Source Over' },
+    { value: 'source-in', label: 'Source In' },
+    { value: 'source-out', label: 'Source Out' },
+    { value: 'source-atop', label: 'Source Atop' },
+    { value: 'destination-over', label: 'Destination Over' },
+    { value: 'destination-in', label: 'Destination In' },
+    { value: 'destination-out', label: 'Destination Out' },
+    { value: 'destination-atop', label: 'Destination Atop' },
+    { value: 'lighter', label: 'Lighter' },
+    { value: 'darker', label: 'Darker' },
+    { value: 'copy', label: 'Copy' },
+    { value: 'xor', label: 'Xor' }
   ];
 
-  const [blendMode, setBlendMode] = useState(options.find((option) => option.value === blendModeValue));
+  const [blendMode, setBlendMode] = useState(blendModeValue !== 'multi' ? options.find((option) => option.value === blendModeValue) : null);
 
   useEffect(() => {
     if (blendModeValue === 'multi') {

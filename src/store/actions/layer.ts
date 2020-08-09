@@ -145,10 +145,15 @@ import {
   SCALE_LAYERS,
   SET_LAYER_TEXT,
   SET_LAYER_FONT_SIZE,
+  SET_LAYERS_FONT_SIZE,
   SET_LAYER_LEADING,
+  SET_LAYERS_LEADING,
   SET_LAYER_FONT_WEIGHT,
+  SET_LAYERS_FONT_WEIGHT,
   SET_LAYER_FONT_FAMILY,
+  SET_LAYERS_FONT_FAMILY,
   SET_LAYER_JUSTIFICATION,
+  SET_LAYERS_JUSTIFICATION,
   ADD_IN_VIEW_LAYER,
   ADD_IN_VIEW_LAYERS,
   REMOVE_IN_VIEW_LAYER,
@@ -326,10 +331,15 @@ import {
   ScaleLayersPayload,
   SetLayerTextPayload,
   SetLayerFontSizePayload,
+  SetLayersFontSizePayload,
   SetLayerLeadingPayload,
+  SetLayersLeadingPayload,
   SetLayerFontWeightPayload,
+  SetLayersFontWeightPayload,
   SetLayerFontFamilyPayload,
+  SetLayersFontFamilyPayload,
   SetLayerJustificationPayload,
+  SetLayersJustificationPayload,
   AddInViewLayerPayload,
   AddInViewLayersPayload,
   RemoveInViewLayerPayload,
@@ -1239,8 +1249,18 @@ export const setLayerFontSize = (payload: SetLayerFontSizePayload): LayerTypes =
   payload
 });
 
+export const setLayersFontSize = (payload: SetLayersFontSizePayload): LayerTypes => ({
+  type: SET_LAYERS_FONT_SIZE,
+  payload
+});
+
 export const setLayerLeading = (payload: SetLayerLeadingPayload): LayerTypes => ({
   type: SET_LAYER_LEADING,
+  payload
+});
+
+export const setLayersLeading = (payload: SetLayersLeadingPayload): LayerTypes => ({
+  type: SET_LAYERS_LEADING,
   payload
 });
 
@@ -1249,13 +1269,28 @@ export const setLayerFontWeight = (payload: SetLayerFontWeightPayload): LayerTyp
   payload
 });
 
+export const setLayersFontWeight = (payload: SetLayersFontWeightPayload): LayerTypes => ({
+  type: SET_LAYERS_FONT_WEIGHT,
+  payload
+});
+
 export const setLayerFontFamily = (payload: SetLayerFontFamilyPayload): LayerTypes => ({
   type: SET_LAYER_FONT_FAMILY,
   payload
 });
 
+export const setLayersFontFamily = (payload: SetLayersFontFamilyPayload): LayerTypes => ({
+  type: SET_LAYERS_FONT_FAMILY,
+  payload
+});
+
 export const setLayerJustification = (payload: SetLayerJustificationPayload): LayerTypes => ({
   type: SET_LAYER_JUSTIFICATION,
+  payload
+});
+
+export const setLayersJustification = (payload: SetLayersJustificationPayload): LayerTypes => ({
+  type: SET_LAYERS_JUSTIFICATION,
   payload
 });
 

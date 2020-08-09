@@ -16,6 +16,9 @@ export const COLLAPSE_FILL_STYLES = 'COLLAPSE_FILL_STYLES';
 export const EXPAND_STROKE_STYLES = 'EXPAND_STROKE_STYLES';
 export const COLLAPSE_STROKE_STYLES = 'COLLAPSE_STROKE_STYLES';
 
+export const EXPAND_STROKE_OPTIONS_STYLES = 'EXPAND_STROKE_OPTIONS_STYLES';
+export const COLLAPSE_STROKE_OPTIONS_STYLES = 'COLLAPSE_STROKE_OPTIONS_STYLES';
+
 export const EXPAND_SHADOW_STYLES = 'EXPAND_SHADOW_STYLES';
 export const COLLAPSE_SHADOW_STYLES = 'COLLAPSE_SHADOW_STYLES';
 
@@ -67,6 +70,14 @@ export interface CollapseStrokeStyles {
   type: typeof COLLAPSE_STROKE_STYLES;
 }
 
+export interface ExpandStrokeOptionsStyles {
+  type: typeof EXPAND_STROKE_OPTIONS_STYLES;
+}
+
+export interface CollapseStrokeOptionsStyles {
+  type: typeof COLLAPSE_STROKE_OPTIONS_STYLES;
+}
+
 export interface ExpandShadowStyles {
   type: typeof EXPAND_SHADOW_STYLES;
 }
@@ -87,5 +98,7 @@ export type RightSidebarTypes = OpenRightSidebar |
                                 CollapseFillStyles |
                                 ExpandStrokeStyles |
                                 CollapseStrokeStyles |
+                                ExpandStrokeOptionsStyles |
+                                CollapseStrokeOptionsStyles |
                                 ExpandShadowStyles |
                                 CollapseShadowStyles;

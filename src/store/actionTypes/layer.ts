@@ -171,10 +171,15 @@ export const SCALE_LAYERS = 'SCALE_LAYERS';
 
 export const SET_LAYER_TEXT = 'SET_LAYER_TEXT';
 export const SET_LAYER_FONT_SIZE = 'SET_LAYER_FONT_SIZE';
+export const SET_LAYERS_FONT_SIZE = 'SET_LAYERS_FONT_SIZE';
 export const SET_LAYER_LEADING = 'SET_LAYER_LEADING';
+export const SET_LAYERS_LEADING = 'SET_LAYERS_LEADING';
 export const SET_LAYER_FONT_WEIGHT = 'SET_LAYER_FONT_WEIGHT';
+export const SET_LAYERS_FONT_WEIGHT = 'SET_LAYERS_FONT_WEIGHT';
 export const SET_LAYER_FONT_FAMILY = 'SET_LAYER_FONT_FAMILY';
+export const SET_LAYERS_FONT_FAMILY = 'SET_LAYERS_FONT_FAMILY';
 export const SET_LAYER_JUSTIFICATION = 'SET_LAYER_JUSTIFICATION';
+export const SET_LAYERS_JUSTIFICATION = 'SET_LAYERS_JUSTIFICATION';
 
 export const ADD_IN_VIEW_LAYER = 'ADD_IN_VIEW_LAYER';
 export const REMOVE_IN_VIEW_LAYER = 'REMOVE_IN_VIEW_LAYER';
@@ -1647,6 +1652,16 @@ export interface SetLayerFontSize {
   payload: SetLayerFontSizePayload;
 }
 
+export interface SetLayersFontSizePayload {
+  layers: string[];
+  fontSize: number;
+}
+
+export interface SetLayersFontSize {
+  type: typeof SET_LAYERS_FONT_SIZE;
+  payload: SetLayersFontSizePayload;
+}
+
 export interface SetLayerLeadingPayload {
   id: string;
   leading: number;
@@ -1655,6 +1670,16 @@ export interface SetLayerLeadingPayload {
 export interface SetLayerLeading {
   type: typeof SET_LAYER_LEADING;
   payload: SetLayerLeadingPayload;
+}
+
+export interface SetLayersLeadingPayload {
+  layers: string[];
+  leading: number;
+}
+
+export interface SetLayersLeading {
+  type: typeof SET_LAYERS_LEADING;
+  payload: SetLayersLeadingPayload;
 }
 
 export interface SetLayerFontWeightPayload {
@@ -1667,6 +1692,16 @@ export interface SetLayerFontWeight {
   payload: SetLayerFontWeightPayload;
 }
 
+export interface SetLayersFontWeightPayload {
+  layers: string[];
+  fontWeight: string | number;
+}
+
+export interface SetLayersFontWeight {
+  type: typeof SET_LAYERS_FONT_WEIGHT;
+  payload: SetLayersFontWeightPayload;
+}
+
 export interface SetLayerFontFamilyPayload {
   id: string;
   fontFamily: string;
@@ -1677,6 +1712,16 @@ export interface SetLayerFontFamily {
   payload: SetLayerFontFamilyPayload;
 }
 
+export interface SetLayersFontFamilyPayload {
+  layers: string[];
+  fontFamily: string;
+}
+
+export interface SetLayersFontFamily {
+  type: typeof SET_LAYERS_FONT_FAMILY;
+  payload: SetLayersFontFamilyPayload;
+}
+
 export interface SetLayerJustificationPayload {
   id: string;
   justification: em.Jusftification;
@@ -1685,6 +1730,16 @@ export interface SetLayerJustificationPayload {
 export interface SetLayerJustification {
   type: typeof SET_LAYER_JUSTIFICATION;
   payload: SetLayerJustificationPayload;
+}
+
+export interface SetLayersJustificationPayload {
+  layers: string[];
+  justification: em.Jusftification;
+}
+
+export interface SetLayersJustification {
+  type: typeof SET_LAYERS_JUSTIFICATION;
+  payload: SetLayersJustificationPayload;
 }
 
 // InView
@@ -2240,10 +2295,15 @@ export type LayerTypes = AddPage |
                          ScaleLayers |
                          SetLayerText |
                          SetLayerFontSize |
+                         SetLayersFontSize |
                          SetLayerLeading |
+                         SetLayersLeading |
                          SetLayerFontWeight |
+                         SetLayersFontWeight |
                          SetLayerFontFamily |
+                         SetLayersFontFamily |
                          SetLayerJustification |
+                         SetLayersJustification |
                          AddInViewLayer |
                          AddInViewLayers |
                          RemoveInViewLayer |

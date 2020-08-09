@@ -20,7 +20,7 @@ declare namespace em {
 
   type LayerType = 'Group' | 'Shape' | 'Page' | 'Artboard' | 'Text' | 'Image' | 'CompoundShape';
 
-  type BlendMode = 'normal' | 'darken' | 'multiply' | 'color-burn' | 'lighten' | 'screen' | 'color-dodge' | 'overlay' | 'soft-light' | 'hard-light' | 'difference' | 'exclusion' | 'hue' | 'saturation' | 'color' | 'luminosity';
+  type BlendMode = 'normal' | 'darken' | 'multiply' | 'color-burn' | 'lighten' | 'screen' | 'color-dodge' | 'overlay' | 'soft-light' | 'hard-light' | 'difference' | 'exclusion' | 'hue' | 'saturation' | 'color' | 'luminosity' | 'add' | 'subtract' | 'average' | 'pin-light' | 'negation' | 'source-over' | 'source-in' | 'source-out' | 'source-atop' | 'destination-over' | 'destination-in' | 'destination-out' | 'destination-atop' | 'lighter' | 'darker' | 'copy' | 'xor';
 
   type ColorEditorProp = 'fillColor' | 'strokeColor' | 'shadowColor';
 
@@ -237,6 +237,7 @@ declare namespace em {
     pathData: string;
     booleanOperation: BooleanOperation;
     children: null;
+    closed: boolean;
   }
 
   interface Polygon extends Shape {

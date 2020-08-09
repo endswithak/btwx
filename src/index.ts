@@ -189,13 +189,11 @@ const createPreferencesWindow = (): void => {
   });
 }
 
-const createPreviewWindow = (artboard: em.Artboard): void => {
+const createPreviewWindow = ({width, height}: {width: number; height: number}): void => {
   previewWindow = new BrowserWindow({
     parent: mainWindow,
-    minWidth: artboard.frame.width,
-    minHeight: artboard.frame.height + PREVIEW_TOPBAR_HEIGHT,
-    width: artboard.frame.width,
-    height: artboard.frame.height + PREVIEW_TOPBAR_HEIGHT,
+    width: width,
+    height: height + PREVIEW_TOPBAR_HEIGHT,
     webPreferences: {
       nodeIntegration: true
     },
@@ -241,9 +239,12 @@ app.on('activate', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
-ipcMain.on('openPreview', (event, activeArtboard) => {
-  const artboard = JSON.parse(activeArtboard);
-  createPreviewWindow(artboard);
+ipcMain.on('openPreview', (event, windowSize) => {
+  const size = JSON.parse(windowSize);
+  createPreviewWindow({
+    width: Math.round(size.width),
+    height: Math.round(size.height)
+  });
 });
 
 ipcMain.on('updateTheme', (event, theme) => {

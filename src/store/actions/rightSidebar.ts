@@ -11,6 +11,8 @@ import {
   COLLAPSE_FILL_STYLES,
   EXPAND_STROKE_STYLES,
   COLLAPSE_STROKE_STYLES,
+  EXPAND_STROKE_OPTIONS_STYLES,
+  COLLAPSE_STROKE_OPTIONS_STYLES,
   EXPAND_SHADOW_STYLES,
   COLLAPSE_SHADOW_STYLES,
   RightSidebarTypes
@@ -62,6 +64,14 @@ export const expandStrokeStyles = (): RightSidebarTypes => ({
 
 export const collapseStrokeStyles = (): RightSidebarTypes => ({
   type: COLLAPSE_STROKE_STYLES
+});
+
+export const expandStrokeOptionsStyles = (): RightSidebarTypes => ({
+  type: EXPAND_STROKE_OPTIONS_STYLES
+});
+
+export const collapseStrokeOptionsStyles = (): RightSidebarTypes => ({
+  type: COLLAPSE_STROKE_OPTIONS_STYLES
 });
 
 export const expandShadowStyles = (): RightSidebarTypes => ({
