@@ -13,8 +13,7 @@ import {
   CopyLayerToClipboard, CopyLayersToClipboard, PasteLayersFromClipboard, SelectLayers,
   DeselectLayers, MoveLayerTo, MoveLayerBy, MoveLayersTo, MoveLayersBy, DeepSelectLayer, EscapeLayerScope,
   MoveLayer, MoveLayers, AddArtboard, SetLayerName, SetActiveArtboard, AddLayerTween, RemoveLayerTween,
-  AddLayerTweenEvent, RemoveLayerTweenEvent, SetLayerTweenDuration, SetLayerTweenDelay, IncrementLayerTweenDuration,
-  DecrementLayerTweenDuration, IncrementLayerTweenDelay, DecrementLayerTweenDelay, SetLayerTweenEase,
+  AddLayerTweenEvent, RemoveLayerTweenEvent, SetLayerTweenDuration, SetLayerTweenDelay, SetLayerTweenEase,
   SetLayerTweenPower, SetLayerX, SetLayerY, SetLayerWidth, SetLayerHeight, SetLayerOpacity, SetLayerFillColor,
   SetLayerStrokeColor, SetLayerStrokeWidth, SetLayerShadowColor, SetLayerShadowBlur, SetLayerShadowXOffset,
   SetLayerShadowYOffset, SetLayerRotation, EnableLayerFill, DisableLayerFill, EnableLayerStroke,
@@ -37,7 +36,9 @@ import {
   SetLayerStrokeDashArrayGap, SetLayersStrokeDashArrayGap, SetLayerGradient, SetLayersGradient, SetLayerGradientType, SetLayersGradientType,
   SetLayerGradientOrigin, SetLayersGradientOrigin, SetLayerGradientDestination, SetLayersGradientDestination, SetLayerGradientStopColor,
   SetLayersGradientStopColor, SetLayerGradientStopPosition, SetLayersGradientStopPosition, AddLayerGradientStop, AddLayersGradientStop,
-  RemoveLayerGradientStop, RemoveLayersGradientStop, ActivateLayerGradientStop, DeactivateLayerGradientStop, SetLayerActiveGradientStop, SetLayersShadowBlur, SetLayersShadowXOffset, SetLayersShadowYOffset, SetLayersFontSize, SetLayersFontWeight, SetLayersFontFamily, SetLayersLeading, SetLayersJustification
+  RemoveLayerGradientStop, RemoveLayersGradientStop, ActivateLayerGradientStop, DeactivateLayerGradientStop,
+  SetLayerActiveGradientStop, SetLayersShadowBlur, SetLayersShadowXOffset, SetLayersShadowYOffset, SetLayersFontSize,
+  SetLayersFontWeight, SetLayersFontFamily, SetLayersLeading, SetLayersJustification, SetLayerTweenTiming
 } from '../actionTypes/layer';
 
 import {
@@ -1832,34 +1833,6 @@ export const setLayerTweenDuration = (state: LayerState, action: SetLayerTweenDu
   }
 };
 
-export const incrementLayerTweenDuration = (state: LayerState, action: IncrementLayerTweenDuration): LayerState => {
-  return {
-    ...state,
-    tweenById: {
-      ...state.tweenById,
-      [action.payload.id]: {
-        ...state.tweenById[action.payload.id],
-        duration: Math.round(((state.tweenById[action.payload.id].duration + (0.01 * (action.payload.factor ? action.payload.factor : 1))) + Number.EPSILON) * 100) / 100
-      }
-    },
-    paperProject: exportPaperProject(state)
-  }
-};
-
-export const decrementLayerTweenDuration = (state: LayerState, action: DecrementLayerTweenDuration): LayerState => {
-  return {
-    ...state,
-    tweenById: {
-      ...state.tweenById,
-      [action.payload.id]: {
-        ...state.tweenById[action.payload.id],
-        duration: Math.round(((state.tweenById[action.payload.id].duration - (0.01 * (action.payload.factor ? action.payload.factor : 1))) + Number.EPSILON) * 100) / 100
-      }
-    },
-    paperProject: exportPaperProject(state)
-  }
-};
-
 export const setLayerTweenDelay = (state: LayerState, action: SetLayerTweenDelay): LayerState => {
   return {
     ...state,
@@ -1874,32 +1847,11 @@ export const setLayerTweenDelay = (state: LayerState, action: SetLayerTweenDelay
   }
 };
 
-export const incrementLayerTweenDelay = (state: LayerState, action: IncrementLayerTweenDelay): LayerState => {
-  return {
-    ...state,
-    tweenById: {
-      ...state.tweenById,
-      [action.payload.id]: {
-        ...state.tweenById[action.payload.id],
-        delay: Math.round(((state.tweenById[action.payload.id].delay + (0.01 * (action.payload.factor ? action.payload.factor : 1))) + Number.EPSILON) * 100) / 100
-      }
-    },
-    paperProject: exportPaperProject(state)
-  }
-};
-
-export const decrementLayerTweenDelay = (state: LayerState, action: DecrementLayerTweenDelay): LayerState => {
-  return {
-    ...state,
-    tweenById: {
-      ...state.tweenById,
-      [action.payload.id]: {
-        ...state.tweenById[action.payload.id],
-        delay: Math.round(((state.tweenById[action.payload.id].delay - (0.01 * (action.payload.factor ? action.payload.factor : 1))) + Number.EPSILON) * 100) / 100
-      }
-    },
-    paperProject: exportPaperProject(state)
-  }
+export const setLayerTweenTiming = (state: LayerState, action: SetLayerTweenTiming): LayerState => {
+  let currentState = state;
+  currentState = setLayerTweenDuration(currentState, layerActions.setLayerTweenDuration({id: action.payload.id, duration: action.payload.duration}) as SetLayerTweenDuration);
+  currentState = setLayerTweenDelay(currentState, layerActions.setLayerTweenDelay({id: action.payload.id, delay: action.payload.delay}) as SetLayerTweenDelay);
+  return currentState;
 };
 
 export const setLayerTweenEase = (state: LayerState, action: SetLayerTweenEase): LayerState => {

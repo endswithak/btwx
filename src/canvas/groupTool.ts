@@ -15,14 +15,17 @@ class GroupTool {
     return !state.layer.present.selected.some((id: string) => {
       const layer = state.layer.present.byId[id];
       const parent = state.layer.present.byId[layer.parent];
-      return parent.children[0] === id;
+      const inMaskedGroup = parent.type === 'Group' && (parent as em.Group).clipped;
+      const isFirstMaskChild = inMaskedGroup && parent.children[1] === id;
+      return parent.children[0] === id || isFirstMaskChild;
     });
   }
   canMoveForward(state: RootState): boolean {
     return !state.layer.present.selected.some((id: string) => {
       const layer = state.layer.present.byId[id];
       const parent = state.layer.present.byId[layer.parent];
-      return parent.children[parent.children.length - 1] === id;
+      const isMask = layer.mask;
+      return parent.children[parent.children.length - 1] === id || isMask;
     });
   }
   canGroup(state: RootState): boolean {

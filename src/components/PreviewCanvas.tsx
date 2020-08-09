@@ -67,10 +67,20 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { paperProject, activeArtboard, page, tweenEvents, tweenEventLayers, tweenEventDestinations, tweens, tweenLayers, tweenLayerDestinations, setActiveArtboard, canvasImagesById } = props;
 
+  const handleResize = (): void => {
+    paperPreview.view.viewSize = new paperPreview.Size(
+      canvasContainerRef.current.clientWidth,
+      canvasContainerRef.current.clientHeight
+    );
+    paperPreview.view.center = new paperPreview.Point(activeArtboard.frame.x, activeArtboard.frame.y);
+  }
+
   useEffect(() => {
     canvasRef.current.width = canvasContainerRef.current.clientWidth;
     canvasRef.current.height = canvasContainerRef.current.clientHeight;
     paperPreview.setup(canvasRef.current);
+    paperPreview.view.center = new paperPreview.Point(activeArtboard.frame.x, activeArtboard.frame.y);
+    window.addEventListener('resize', handleResize);
   }, []);
 
   useEffect(() => {

@@ -217,9 +217,13 @@ export const getCanvasTopLeft = (store: LayerState, useLayerItem?: boolean): pap
   const paperLayerPoints = store.allIds.reduce((result, current) => {
     if (current !== 'page') {
       if (useLayerItem) {
+        const layerScope = getLayerScope(store, current);
         const layerItem = store.byId[current];
-        const topLeft = new paperMain.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
-        return [...result, topLeft];
+        if (!layerScope.some((id) => store.byId[id].type === 'Artboard') && !layerItem.masked) {
+          const topLeft = new paperMain.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
+          result = [...result, topLeft];
+        }
+        return result;
       } else {
         const paperLayer = getPaperLayer(current);
         return [...result, paperLayer.bounds.topLeft];
@@ -235,9 +239,13 @@ export const getCanvasBottomRight = (store: LayerState, useLayerItem?: boolean):
   const paperLayerPoints = store.allIds.reduce((result, current) => {
     if (current !== 'page') {
       if (useLayerItem) {
+        const layerScope = getLayerScope(store, current);
         const layerItem = store.byId[current];
-        const bottomRight = new paperMain.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
-        return [...result, bottomRight];
+        if (!layerScope.some((id) => store.byId[id].type === 'Artboard') && !layerItem.masked) {
+          const bottomRight = new paperMain.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
+          result = [...result, bottomRight];
+        }
+        return result;
       } else {
         const paperLayer = getPaperLayer(current);
         return [...result, paperLayer.bounds.bottomRight];

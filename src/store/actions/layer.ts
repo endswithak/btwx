@@ -55,11 +55,8 @@ import {
   ADD_LAYER_TWEEN,
   REMOVE_LAYER_TWEEN,
   SET_LAYER_TWEEN_DURATION,
-  INCREMENT_LAYER_TWEEN_DURATION,
-  DECREMENT_LAYER_TWEEN_DURATION,
+  SET_LAYER_TWEEN_TIMING,
   SET_LAYER_TWEEN_DELAY,
-  INCREMENT_LAYER_TWEEN_DELAY,
-  DECREMENT_LAYER_TWEEN_DELAY,
   SET_LAYER_TWEEN_EASE,
   SET_LAYER_TWEEN_POWER,
   FREEZE_LAYER_TWEEN,
@@ -242,11 +239,8 @@ import {
   AddLayerTweenPayload,
   RemoveLayerTweenPayload,
   SetLayerTweenDurationPayload,
-  IncrementLayerTweenDurationPayload,
-  DecrementLayerTweenDurationPayload,
+  SetLayerTweenTimingPayload,
   SetLayerTweenDelayPayload,
-  IncrementLayerTweenDelayPayload,
-  DecrementLayerTweenDelayPayload,
   SetLayerTweenEasePayload,
   SetLayerTweenPowerPayload,
   FreezeLayerTweenPayload,
@@ -804,28 +798,13 @@ export const setLayerTweenDuration = (payload: SetLayerTweenDurationPayload): La
   payload
 });
 
-export const incrementLayerTweenDuration = (payload: IncrementLayerTweenDurationPayload): LayerTypes => ({
-  type: INCREMENT_LAYER_TWEEN_DURATION,
-  payload
-});
-
-export const decrementLayerTweenDuration = (payload: DecrementLayerTweenDurationPayload): LayerTypes => ({
-  type: DECREMENT_LAYER_TWEEN_DURATION,
+export const setLayerTweenTiming = (payload: SetLayerTweenTimingPayload): LayerTypes => ({
+  type: SET_LAYER_TWEEN_TIMING,
   payload
 });
 
 export const setLayerTweenDelay = (payload: SetLayerTweenDelayPayload): LayerTypes => ({
   type: SET_LAYER_TWEEN_DELAY,
-  payload
-});
-
-export const incrementLayerTweenDelay = (payload: IncrementLayerTweenDelayPayload): LayerTypes => ({
-  type: INCREMENT_LAYER_TWEEN_DELAY,
-  payload
-});
-
-export const decrementLayerTweenDelay = (payload: DecrementLayerTweenDelayPayload): LayerTypes => ({
-  type: DECREMENT_LAYER_TWEEN_DELAY,
   payload
 });
 

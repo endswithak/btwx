@@ -40,7 +40,7 @@ const mapStateToProps = (state: RootState) => {
   const { layer, rightSidebar } = state;
   const selected = layer.present.selected;
   const opacityStylesCollapsed = rightSidebar.opacityStylesCollapsed;
-  const isEnabled = selected.length > 0 && !selected.some((id: string) => layer.present.byId[id].type === 'Artboard');
+  const isEnabled = selected.length > 0 && !selected.some((id: string) => layer.present.byId[id].type === 'Artboard' || layer.present.byId[id].type === 'Group');
   return { opacityStylesCollapsed, isEnabled };
 };
 

@@ -1,28 +1,27 @@
 import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
-import Modal from 'react-modal';
 import { evaluate } from 'mathjs';
 import { connect } from 'react-redux';
-import { ThemeContext } from './ThemeProvider';
-import { RootState } from '../store/reducers';
-import { closeEaseEditor } from '../store/actions/easeEditor';
-import { EaseEditorTypes } from '../store/actionTypes/easeEditor';
-import { enableSelectionTool, disableSelectionTool } from '../store/actions/tool';
-import { ToolTypes } from '../store/actionTypes/tool';
-import { setLayerTweenEase, setLayerTweenPower, setLayerTweenDuration } from '../store/actions/layer';
-import { SetLayerTweenEasePayload, SetLayerTweenPowerPayload, SetLayerTweenDurationPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setTweenDrawerTweenEditing } from '../store/actions/tweenDrawer';
-import { SetTweenDrawerTweenEditingPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
-import SidebarInput from './SidebarInput';
 import gsap from 'gsap';
 import CustomEase from 'gsap/CustomEase';
 import MotionPathPlugin from 'gsap/MotionPathPlugin';
 import MotionPathHelper from 'gsap/MotionPathHelper';
 import DrawSVGPlugin from 'gsap/DrawSVGPlugin';
 import tinyColor from 'tinycolor2';
+import { ThemeContext } from './ThemeProvider';
+import { RootState } from '../store/reducers';
+import { closeEaseEditor } from '../store/actions/easeEditor';
+import { EaseEditorTypes } from '../store/actionTypes/easeEditor';
+import { enableSelectionTool, disableSelectionTool } from '../store/actions/tool';
+import { ToolTypes } from '../store/actionTypes/tool';
+import { setLayerTweenEase, setLayerTweenPower, setLayerTweenDuration, setLayerTweenDelay } from '../store/actions/layer';
+import { SetLayerTweenEasePayload, SetLayerTweenPowerPayload, SetLayerTweenDurationPayload, SetLayerTweenDelayPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setTweenDrawerTweenEditing } from '../store/actions/tweenDrawer';
+import { SetTweenDrawerTweenEditingPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
+import SidebarInput from './SidebarInput';
+import SidebarSectionColumn from './SidebarSectionColumn';
+import SidebarSectionRow from './SidebarSectionRow';
 
 gsap.registerPlugin(CustomEase, MotionPathPlugin, MotionPathHelper, DrawSVGPlugin);
-
-Modal.setAppElement('#root');
 
 interface EaseEditorProps {
   tween?: em.Tween;
@@ -34,27 +33,26 @@ interface EaseEditorProps {
   setLayerTweenEase?(payload: SetLayerTweenEasePayload): LayerTypes;
   setLayerTweenPower?(payload: SetLayerTweenPowerPayload): LayerTypes;
   setLayerTweenDuration?(payload: SetLayerTweenDurationPayload): LayerTypes;
+  setLayerTweenDelay?(payload: SetLayerTweenDelayPayload): LayerTypes;
   setTweenDrawerTweenEditing?(payload: SetTweenDrawerTweenEditingPayload): TweenDrawerTypes;
   disableSelectionTool?(): ToolTypes;
   enableSelectionTool?(): ToolTypes;
 }
 
 const EaseEditor = (props: EaseEditorProps): ReactElement => {
+  const editorRef = useRef<HTMLDivElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
   const pathRevealRef = useRef<SVGPathElement>(null);
   const valueBarRef = useRef<HTMLDivElement>(null);
   const valueHeadRef = useRef<HTMLDivElement>(null);
   const visualizerRef = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
-  const { tween, easeEditor, closeEaseEditor, setLayerTweenEase, setLayerTweenPower, disableSelectionTool, enableSelectionTool, setLayerTweenDuration, setTweenDrawerTweenEditing } = props;
-  const [duration, setDuration] = useState<string | number>(null);
+  const { tween, easeEditor, closeEaseEditor, setLayerTweenEase, setLayerTweenPower, disableSelectionTool, enableSelectionTool, setLayerTweenDuration, setLayerTweenDelay, setTweenDrawerTweenEditing } = props;
+  const [duration, setDuration] = useState(tween.duration);
+  const [delay, setDelay] = useState(tween.delay);
 
   const easeTypes = ['linear', 'power1', 'power2', 'power3', 'power4', 'back', 'bounce', 'circ', 'expo', 'sine'];
   const easePowerTypes = ['in', 'inOut', 'out'];
-
-  const handleCloseRequest = () => {
-    closeEaseEditor();
-  }
 
   const handleTypePresetClick = (preset: em.CubicBezier) => {
     setLayerTweenEase({id: tween.id, ease: preset});
@@ -80,35 +78,53 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
     });
   }
 
-  const handleAfterOpen = () => {
-    disableSelectionTool();
-    setAndAnimate();
-    setDuration(tween.duration);
-    setTweenDrawerTweenEditing({id: tween.id});
-  }
-
-  const handleAfterClose = () => {
-    setTweenDrawerTweenEditing({id: null});
-    enableSelectionTool();
+  const onMouseDown = (event: any): void => {
+    if (editorRef.current && !editorRef.current.contains(event.target)) {
+      setTweenDrawerTweenEditing({id: null});
+      enableSelectionTool();
+      closeEaseEditor();
+    }
   }
 
   useEffect(() => {
+    document.addEventListener('mousedown', onMouseDown, false);
+    disableSelectionTool();
+    setTweenDrawerTweenEditing({id: tween.id});
+    return (): void => {
+      if (easeEditor.isOpen) {
+        closeEaseEditor();
+      }
+      document.removeEventListener('mousedown', onMouseDown);
+    }
+  }, []);
+
+  useEffect(() => {
     if (tween) {
+      setDuration(tween.duration);
+      setDelay(tween.delay);
       setAndAnimate();
     }
   }, [tween]);
 
-  const handleDurationChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const target = e.target as HTMLInputElement;
+  const handleDurationChange = (e: any) => {
+    const target = e.target;
     setDuration(target.value);
   };
 
-  const handleDurationSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
+  const handleDurationSubmit = (e: any) => {
     try {
       const durationRounded = Math.round((evaluate(`${duration}`) + Number.EPSILON) * 100) / 100
-      if (durationRounded <= 10 && durationRounded >= 0 && durationRounded !== tween.duration) {
-        setLayerTweenDuration({id: tween.id, duration: durationRounded});
-        setDuration(durationRounded);
+      if (durationRounded !== tween.duration) {
+        let newDuration = durationRounded;
+        if (durationRounded + tween.delay > 10) {
+          const diff = (durationRounded + tween.delay) - 10;
+          newDuration = durationRounded - diff;
+        }
+        if (durationRounded < 0.04) {
+          newDuration = 0.04;
+        }
+        setLayerTweenDuration({id: tween.id, duration: newDuration});
+        setDuration(newDuration);
       } else {
         setDuration(tween.duration);
         setAndAnimate();
@@ -119,158 +135,195 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
     }
   }
 
+  const handleDelayChange = (e: any) => {
+    const target = e.target;
+    setDelay(target.value);
+  };
+
+  const handleDelaySubmit = (e: any) => {
+    try {
+      const delayRounded = Math.round((evaluate(`${delay}`) + Number.EPSILON) * 100) / 100
+      if (delayRounded !== tween.delay) {
+        let newDelay = delayRounded;
+        if (delayRounded + tween.duration > 10) {
+          const diff = (delayRounded + tween.duration) - 10;
+          newDelay = delayRounded - diff;
+        }
+        if (delayRounded < 0) {
+          newDelay = 0;
+        }
+        setLayerTweenDelay({id: tween.id, delay: newDelay});
+        setDelay(newDelay);
+      } else {
+        setDelay(tween.delay);
+        setAndAnimate();
+      }
+    } catch(error) {
+      setDelay(tween.delay);
+      setAndAnimate();
+    }
+  }
+
   return (
-    <Modal
-      className='c-ease-editor'
-      overlayClassName='c-ease-editor-wrap'
-      isOpen={easeEditor.isOpen}
-      onAfterOpen={handleAfterOpen}
-      onAfterClose={handleAfterClose}
-      shouldCloseOnEsc={true}
-      shouldCloseOnOverlayClick={true}
-      onRequestClose={handleCloseRequest}
-      style={{
-        content: {
+    <div className='c-ease-editor'>
+      <div
+        className='c-ease-editor__content'
+        ref={editorRef}
+        style={{
           background: tinyColor(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).setAlpha(0.77).toRgbString(),
           width: 700,
-          height: 576,
-          boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset, 0 4px 16px 0 rgba(0,0,0,0.16)`,
+          boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}, 0 4px 16px 0 rgba(0,0,0,0.16)`,
           borderRadius: theme.unit,
           backdropFilter: 'blur(17px)'
-        }
-      }}
-      contentLabel='ease-editor'>
-      <div
-        ref={visualizerRef}
-        className='c-ease-editor__visualizer'>
-        <div className='c-ease-editor-visualizer__top'>
-          <div
-            className='c-ease-editor__graph'
-            style={{
-              position: 'relative',
-              //background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
-              width: 400,
-              height: 544
-            }}>
-            <svg
-              viewBox='0 0 400 400'
-              preserveAspectRatio='xMidYMid meet'
+        }}>
+        <div className='c-ease-editor__presets'>
+          <div className='c-ease-editor__preset-group'>
+            <div
+              className='c-ease-editor__preset c-ease-editor__preset--label'
               style={{
-                width: '100%',
-                height: '100%',
-                position: 'absolute',
-                overflow: 'visible',
-                maxHeight: 400,
-                bottom: 72
+                color: theme.text.lighter
               }}>
-              <line x1="0" y1="0" x2="400" y2="0" stroke={theme.text.lightest} opacity='0.5'></line>
-              <path ref={pathRef} strokeWidth='1' stroke={theme.text.lightest} opacity='0.5' fill='none'></path>
-              <path ref={pathRevealRef} strokeWidth='1' stroke={theme.text.base} fill='none'></path>
-              <line x1="0" y1="400" x2="400" y2="400" stroke={theme.text.lightest} opacity='0.5'></line>
-            </svg>
+              Ease Curve
+            </div>
+            {
+              easeTypes.map((preset: em.CubicBezier, index) => (
+                <button
+                  className='c-ease-editor__preset'
+                  onClick={() => handleTypePresetClick(preset)}
+                  key={index}
+                  style={{
+                    background: tween && preset === tween.ease
+                    ? theme.palette.primary
+                    : 'none',
+                    color: tween && preset === tween.ease
+                    ? theme.text.onPrimary
+                    : theme.text.base
+                  }}>
+                  { preset }
+                </button>
+              ))
+            }
           </div>
-          <div
-            className='c-ease-editor__value'
-            style={{
-              height: 544
-            }}>
-            <div
-              className='c-ease-editor-value__bar'
+          <div className='c-ease-editor__preset-group'>
+            {/* <div
+              className='c-ease-editor__preset c-ease-editor__preset--label'
               style={{
-                background: theme.text.lightest,
-                opacity: 0.5,
-                height: 544
-              }} />
+                color: theme.text.lighter
+              }}>
+              Type
+            </div> */}
+            {
+              easePowerTypes.map((preset: em.CubicBezierType, index) => (
+                <button
+                  className='c-ease-editor__preset'
+                  onClick={() => handlePowerPresetClick(preset)}
+                  key={index}
+                  style={{
+                    background: tween && preset === tween.power
+                    ? theme.palette.primary
+                    : 'none',
+                    color: tween && preset === tween.power
+                    ? theme.text.onPrimary
+                    : theme.text.base
+                  }}>
+                  { preset }
+                </button>
+              ))
+            }
+          </div>
+          <div className='c-ease-editor__preset-group'>
             <div
-              ref={valueBarRef}
-              className='c-ease-editor-value__progress'
+              className='c-ease-editor__preset c-ease-editor__preset--label'
               style={{
-                background: theme.palette.primary,
-                height: 400,
-                bottom: 72
-              }} />
+                color: theme.text.lighter
+              }}>
+              Timing
+            </div>
+            <SidebarSectionRow>
+              <SidebarSectionColumn width='50%'>
+                <SidebarInput
+                  value={duration}
+                  onChange={handleDurationChange}
+                  onSubmit={handleDurationSubmit}
+                  submitOnBlur
+                  bottomLabel='Duration' />
+              </SidebarSectionColumn>
+              <SidebarSectionColumn width='50%'>
+                <SidebarInput
+                  value={delay}
+                  onChange={handleDelayChange}
+                  onSubmit={handleDelaySubmit}
+                  submitOnBlur
+                  bottomLabel='Delay' />
+              </SidebarSectionColumn>
+            </SidebarSectionRow>
+          </div>
+        </div>
+        <div
+          ref={visualizerRef}
+          className='c-ease-editor__visualizer'
+          style={{
+            background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
+            boxShadow: `-1px 0 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
+          }}>
+          <div className='c-ease-editor-visualizer__top'>
             <div
-              ref={valueHeadRef}
-              className='c-ease-editor-value__progress-head'
+              className='c-ease-editor__graph'
               style={{
-                background: theme.palette.primary,
-                bottom: 72
-              }} />
+                position: 'relative',
+                //background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
+                width: 400,
+                height: 536
+              }}>
+              <svg
+                viewBox='0 0 400 400'
+                preserveAspectRatio='xMidYMid meet'
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  position: 'absolute',
+                  overflow: 'visible',
+                  maxHeight: 400,
+                  bottom: 72
+                }}>
+                <line x1="0" y1="0" x2="400" y2="0" stroke={theme.text.lightest} opacity='0.5'></line>
+                <path ref={pathRef} strokeWidth='1' stroke={theme.text.lightest} opacity='0.5' fill='none'></path>
+                <path ref={pathRevealRef} strokeWidth='1' stroke={theme.text.base} fill='none'></path>
+                <line x1="0" y1="400" x2="400" y2="400" stroke={theme.text.lightest} opacity='0.5'></line>
+              </svg>
+            </div>
+            <div
+              className='c-ease-editor__value'
+              style={{
+                height: 536
+              }}>
+              <div
+                className='c-ease-editor-value__bar'
+                style={{
+                  background: theme.text.lightest,
+                  opacity: 0.5,
+                  height: 536
+                }} />
+              <div
+                ref={valueBarRef}
+                className='c-ease-editor-value__progress'
+                style={{
+                  background: theme.palette.primary,
+                  height: 400,
+                  bottom: 72
+                }} />
+              <div
+                ref={valueHeadRef}
+                className='c-ease-editor-value__progress-head'
+                style={{
+                  background: theme.palette.primary,
+                  bottom: 72
+                }} />
+            </div>
           </div>
         </div>
       </div>
-      <div className='c-ease-editor__presets'>
-        <div className='c-ease-editor__preset-group'>
-          <div
-            className='c-ease-editor__preset c-ease-editor__preset--label'
-            style={{
-              color: theme.text.lighter
-            }}>
-            Cubic Bezier
-          </div>
-          {
-            easeTypes.map((preset: em.CubicBezier, index) => (
-              <div
-                className='c-ease-editor__preset'
-                onClick={() => handleTypePresetClick(preset)}
-                key={index}
-                style={{
-                  background: tween && preset === tween.ease
-                  ? theme.palette.primary
-                  : 'none',
-                  color: tween && preset === tween.ease
-                  ? theme.text.onPrimary
-                  : theme.text.base
-                }}>
-                { preset }
-              </div>
-            ))
-          }
-        </div>
-        <div className='c-ease-editor__preset-group'>
-          <div
-            className='c-ease-editor__preset c-ease-editor__preset--label'
-            style={{
-              color: theme.text.lighter
-            }}>
-            Type
-          </div>
-          {
-            easePowerTypes.map((preset: em.CubicBezierType, index) => (
-              <div
-                className='c-ease-editor__preset'
-                onClick={() => handlePowerPresetClick(preset)}
-                key={index}
-                style={{
-                  background: tween && preset === tween.power
-                  ? theme.palette.primary
-                  : 'none',
-                  color: tween && preset === tween.power
-                  ? theme.text.onPrimary
-                  : theme.text.base
-                }}>
-                { preset }
-              </div>
-            ))
-          }
-        </div>
-        <div className='c-ease-editor__preset-group'>
-          <div
-            className='c-ease-editor__preset c-ease-editor__preset--label'
-            style={{
-              color: theme.text.lighter
-            }}>
-            Duration
-          </div>
-          <SidebarInput
-            value={duration}
-            onChange={handleDurationChange}
-            onSubmit={handleDurationSubmit}
-            submitOnBlur
-            disabled={!easeEditor.isOpen} />
-        </div>
-      </div>
-    </Modal>
+    </div>
   );
 }
 
@@ -282,5 +335,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { closeEaseEditor, setLayerTweenEase, setLayerTweenPower, enableSelectionTool, disableSelectionTool, setLayerTweenDuration, setTweenDrawerTweenEditing }
+  { closeEaseEditor, setLayerTweenEase, setLayerTweenPower, enableSelectionTool, disableSelectionTool, setLayerTweenDuration, setLayerTweenDelay, setTweenDrawerTweenEditing }
 )(EaseEditor);

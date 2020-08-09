@@ -38,7 +38,8 @@ const mapStateToProps = (state: RootState): {
   const canMoveForward = selected.length > 0 && !layer.present.selected.some((id: string) => {
     const layer = state.layer.present.byId[id];
     const parent = state.layer.present.byId[layer.parent];
-    return parent.children[parent.children.length - 1] === id;
+    const isMask = layer.mask;
+    return parent.children[parent.children.length - 1] === id || isMask;
   });
   return { selected, canMoveForward };
 };

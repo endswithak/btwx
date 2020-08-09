@@ -1,6 +1,6 @@
-import React, { useRef, useContext, useEffect, ReactElement, useState } from 'react';
+import React, { useRef, useContext, ReactElement, useState } from 'react';
 import Topbar from './Topbar';
-import EaseEditor from './EaseEditor';
+import EaseEditorWrap from './EaseEditorWrap';
 import Main from './Main';
 import { ThemeContext } from './ThemeProvider';
 import ActiveArtboardFrameWrap from './ActiveArtboardFrameWrap';
@@ -26,7 +26,7 @@ const App = (): ReactElement => {
         <Topbar />
         <Main ready={ready} setReady={setReady} />
         {/* modals */}
-        <EaseEditor />
+        <EaseEditorWrap />
         <ActiveArtboardFrameWrap />
         <HoverFrameWrap />
         <SelectionFrameWrap />

@@ -5,9 +5,22 @@ import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 import PreviewCanvas from './PreviewCanvas';
 import PreviewTopbar from './PreviewTopbar';
+import { PREVIEW_TOPBAR_HEIGHT } from '../constants';
 
-const Preview = (): ReactElement => {
+interface PreviewProps {
+  activeArtboard: em.Artboard;
+}
+
+const Preview = (props: PreviewProps): ReactElement => {
   const theme = useContext(ThemeContext);
+  const { activeArtboard } = props;
+
+  useEffect(() => {
+    const windowSize = remote.getCurrentWindow().getSize();
+    if (windowSize[0] !== Math.round(activeArtboard.frame.width) || windowSize[1] !== Math.round(activeArtboard.frame.height) + PREVIEW_TOPBAR_HEIGHT) {
+      remote.getCurrentWindow().setSize(Math.round(activeArtboard.frame.width), Math.round(activeArtboard.frame.height) + PREVIEW_TOPBAR_HEIGHT, true);
+    }
+  }, [activeArtboard]);
 
   return (
     <div

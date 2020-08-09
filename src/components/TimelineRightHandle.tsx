@@ -24,6 +24,7 @@ const TimelineRightHandle = (props: TimelineRightHandleProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { tweenId, tween, setLayerTweenDuration, setTweenDrawerTweenEditing } = props;
   const [prevDuration, setPrevDuration] = useState(tween.duration);
+  const [prevDelay, setPrevDelay] = useState(tween.delay);
 
   useEffect(() => {
     const rightHandleInitialPos = ((tween.delay * 100) * theme.unit) + ((tween.duration * 100) * theme.unit) - theme.unit * 4;
@@ -37,6 +38,7 @@ const TimelineRightHandle = (props: TimelineRightHandleProps): ReactElement => {
     Draggable.create(rightHandleElement, {
       type: 'x',
       zIndexBoost: false,
+      cursor: 'ew-resize',
       autoScroll: 1,
       bounds: {
         minX: Draggable.get(leftHandleElement) ? Draggable.get(leftHandleElement).x : leftHandleInitialPos,
@@ -90,7 +92,7 @@ const TimelineRightHandle = (props: TimelineRightHandleProps): ReactElement => {
   }, []);
 
   useEffect(() => {
-    if (prevDuration !== tween.duration) {
+    if (prevDuration !== tween.duration || prevDelay !== tween.delay) {
       const rightHandleElement = document.getElementById(`${tweenId}-handle-right`);
       const leftHandleElement = document.getElementById(`${tweenId}-handle-left`);
       const timelineElement = document.getElementById(`${tweenId}-timeline`);
@@ -104,8 +106,9 @@ const TimelineRightHandle = (props: TimelineRightHandleProps): ReactElement => {
         maxY: timelineElement.clientHeight
       });
       setPrevDuration(tween.duration);
+      setPrevDelay(tween.delay);
     }
-  }, [tween.duration]);
+  }, [tween.duration, tween.delay]);
 
   return (
     <div

@@ -24,6 +24,7 @@ const TimelineTweenHandle = (props: TimelineTweenHandleProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { tweenId, tween, setLayerTweenDelay, setTweenDrawerTweenEditing } = props;
   const [prevDuration, setPrevDuration] = useState(tween.duration);
+  const [prevDelay, setPrevDelay] = useState(tween.delay);
 
   useEffect(() => {
     const tweenHandleElement = document.getElementById(`${tweenId}-handle-tween`);
@@ -76,6 +77,7 @@ const TimelineTweenHandle = (props: TimelineTweenHandleProps): ReactElement => {
         });
         const leftHandlePos = Draggable.get(leftHandleElement).x;
         const delay = (leftHandlePos / 4) / 100;
+        setPrevDelay(delay);
         setLayerTweenDelay({id: tweenId, delay });
       }
     });
@@ -88,10 +90,10 @@ const TimelineTweenHandle = (props: TimelineTweenHandleProps): ReactElement => {
   }, []);
 
   useEffect(() => {
-    if (prevDuration !== tween.duration) {
+    if (prevDuration !== tween.duration || prevDelay !== tween.delay) {
       const tweenHandleElement = document.getElementById(`${tweenId}-handle-tween`);
       const timelineElement = document.getElementById(`${tweenId}-timeline`);
-      gsap.set(tweenHandleElement, { width: (tween.duration * 100) * theme.unit });
+      gsap.set(tweenHandleElement, { x: (tween.delay * 100) * theme.unit, width: (tween.duration * 100) * theme.unit });
       Draggable.get(tweenHandleElement).update().applyBounds({
         minX: 0,
         maxX: timelineElement.clientWidth - tweenHandleElement.clientWidth,
@@ -99,8 +101,9 @@ const TimelineTweenHandle = (props: TimelineTweenHandleProps): ReactElement => {
         maxY: timelineElement.clientHeight
       });
       setPrevDuration(tween.duration);
+      setPrevDelay(tween.delay);
     }
-  }, [tween.duration]);
+  }, [tween.duration, tween.delay]);
 
   return (
     <div

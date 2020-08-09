@@ -66,13 +66,10 @@ export const REMOVE_LAYER_TWEEN_EVENT = 'REMOVE_LAYER_TWEEN_EVENT';
 export const ADD_LAYER_TWEEN = 'ADD_LAYER_TWEEN';
 export const REMOVE_LAYER_TWEEN = 'REMOVE_LAYER_TWEEN';
 export const SET_LAYER_TWEEN_DURATION = 'SET_LAYER_TWEEN_DURATION';
-export const INCREMENT_LAYER_TWEEN_DURATION = 'INCREMENT_LAYER_TWEEN_DURATION';
-export const DECREMENT_LAYER_TWEEN_DURATION = 'DECREMENT_LAYER_TWEEN_DURATION';
 export const SET_LAYER_TWEEN_DELAY = 'SET_LAYER_TWEEN_DELAY';
-export const INCREMENT_LAYER_TWEEN_DELAY = 'INCREMENT_LAYER_TWEEN_DELAY';
-export const DECREMENT_LAYER_TWEEN_DELAY = 'DECREMENT_LAYER_TWEEN_DELAY';
 export const SET_LAYER_TWEEN_EASE = 'SET_LAYER_TWEEN_EASE';
 export const SET_LAYER_TWEEN_POWER = 'SET_LAYER_TWEEN_POWER';
+export const SET_LAYER_TWEEN_TIMING = 'SET_LAYER_TWEEN_TIMING';
 
 export const FREEZE_LAYER_TWEEN = 'FREEZE_LAYER_TWEEN';
 export const UNFREEZE_LAYER_TWEEN = 'UNFREEZE_LAYER_TWEEN';
@@ -753,24 +750,15 @@ export interface SetLayerTweenDuration {
   payload: SetLayerTweenDurationPayload;
 }
 
-export interface IncrementLayerTweenDurationPayload {
+export interface SetLayerTweenTimingPayload {
   id: string;
-  factor?: number;
+  duration: number;
+  delay: number;
 }
 
-export interface IncrementLayerTweenDuration {
-  type: typeof INCREMENT_LAYER_TWEEN_DURATION;
-  payload: IncrementLayerTweenDurationPayload;
-}
-
-export interface DecrementLayerTweenDurationPayload {
-  id: string;
-  factor?: number;
-}
-
-export interface DecrementLayerTweenDuration {
-  type: typeof DECREMENT_LAYER_TWEEN_DURATION;
-  payload: DecrementLayerTweenDurationPayload;
+export interface SetLayerTweenTiming {
+  type: typeof SET_LAYER_TWEEN_TIMING;
+  payload: SetLayerTweenTimingPayload;
 }
 
 export interface SetLayerTweenDelayPayload {
@@ -781,26 +769,6 @@ export interface SetLayerTweenDelayPayload {
 export interface SetLayerTweenDelay {
   type: typeof SET_LAYER_TWEEN_DELAY;
   payload: SetLayerTweenDelayPayload;
-}
-
-export interface IncrementLayerTweenDelayPayload {
-  id: string;
-  factor?: number;
-}
-
-export interface IncrementLayerTweenDelay {
-  type: typeof INCREMENT_LAYER_TWEEN_DELAY;
-  payload: IncrementLayerTweenDelayPayload;
-}
-
-export interface DecrementLayerTweenDelayPayload {
-  id: string;
-  factor?: number;
-}
-
-export interface DecrementLayerTweenDelay {
-  type: typeof DECREMENT_LAYER_TWEEN_DELAY;
-  payload: DecrementLayerTweenDelayPayload;
 }
 
 export interface SetLayerTweenEasePayload {
@@ -2203,11 +2171,8 @@ export type LayerTypes = AddPage |
                          AddLayerTween |
                          RemoveLayerTween |
                          SetLayerTweenDuration |
-                         IncrementLayerTweenDuration |
-                         DecrementLayerTweenDuration |
+                         SetLayerTweenTiming |
                          SetLayerTweenDelay |
-                         IncrementLayerTweenDelay |
-                         DecrementLayerTweenDelay |
                          SetLayerTweenEase |
                          SetLayerTweenPower |
                          FreezeLayerTween |

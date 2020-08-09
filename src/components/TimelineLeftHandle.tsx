@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useEffect } from 'react';
+import React, { useContext, ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
@@ -7,22 +7,22 @@ import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { setTweenDrawerTweenEditing } from '../store/actions/tweenDrawer';
 import { SetTweenDrawerTweenEditingPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
-import { SetLayerTweenDurationPayload, SetLayerTweenDelayPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayerTweenDuration, setLayerTweenDelay } from '../store/actions/layer';
+import { SetLayerTweenTimingPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayerTweenTiming } from '../store/actions/layer';
 
 gsap.registerPlugin(Draggable);
 
 interface TimelineLeftHandleProps {
   tweenId: string;
   tween?: em.Tween;
-  setLayerTweenDuration?(payload: SetLayerTweenDurationPayload): LayerTypes;
-  setLayerTweenDelay?(payload: SetLayerTweenDelayPayload): LayerTypes;
+  setLayerTweenTiming?(payload: SetLayerTweenTimingPayload): LayerTypes;
   setTweenDrawerTweenEditing?(payload: SetTweenDrawerTweenEditingPayload): TweenDrawerTypes;
 }
 
 const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { tweenId, tween, setLayerTweenDuration, setLayerTweenDelay, setTweenDrawerTweenEditing } = props;
+  const { tweenId, tween, setLayerTweenTiming, setTweenDrawerTweenEditing } = props;
+  const [prevDelay, setPrevDelay] = useState(tween.delay);
 
   useEffect(() => {
     const rightHandleInitialPos = ((tween.delay * 100) * theme.unit) + ((tween.duration * 100) * theme.unit) - theme.unit * 4;
@@ -36,6 +36,7 @@ const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
     Draggable.create(leftHandleElement, {
       type: 'x',
       zIndexBoost: false,
+      cursor: 'ew-resize',
       autoScroll: 1,
       bounds: {
         minX: 0,
@@ -78,8 +79,8 @@ const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
         const rightHandlePos = Draggable.get(rightHandleElement).x;
         const duration = (((rightHandlePos + theme.unit * 4) - this.x) / 4) / 100;
         const delay = (this.x / 4) / 100;
-        setLayerTweenDuration({id: tweenId, duration });
-        setLayerTweenDelay({id: tweenId, delay });
+        setPrevDelay(delay);
+        setLayerTweenTiming({id: tweenId, duration, delay});
       }
     });
     return (): void => {
@@ -89,6 +90,24 @@ const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (prevDelay !== tween.delay) {
+      const rightHandleElement = document.getElementById(`${tweenId}-handle-right`);
+      const leftHandleElement = document.getElementById(`${tweenId}-handle-left`);
+      const timelineElement = document.getElementById(`${tweenId}-timeline`);
+      const leftHandlePos = ((tween.delay * 100) * theme.unit);
+      gsap.set(leftHandleElement, {x: leftHandlePos});
+      Draggable.get(leftHandleElement).update();
+      Draggable.get(rightHandleElement).update().applyBounds({
+        minX: Draggable.get(leftHandleElement).x,
+        maxX: timelineElement.clientWidth - (theme.unit * 4),
+        minY: timelineElement.clientHeight,
+        maxY: timelineElement.clientHeight
+      });
+      setPrevDelay(tween.delay);
+    }
+  }, [tween.delay]);
 
   return (
     <div
@@ -121,5 +140,5 @@ const mapStateToProps = (state: RootState, ownProps: TimelineLeftHandleProps): {
 
 export default connect(
   mapStateToProps,
-  { setLayerTweenDuration, setLayerTweenDelay, setTweenDrawerTweenEditing }
+  { setLayerTweenTiming, setTweenDrawerTweenEditing }
 )(TimelineLeftHandle);

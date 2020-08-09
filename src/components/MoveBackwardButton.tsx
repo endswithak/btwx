@@ -38,7 +38,9 @@ const mapStateToProps = (state: RootState): {
   const canMoveBackward = selected.length > 0 && !layer.present.selected.some((id: string) => {
     const layer = state.layer.present.byId[id];
     const parent = state.layer.present.byId[layer.parent];
-    return parent.children[0] === id;
+    const inMaskedGroup = parent.type === 'Group' && (parent as em.Group).clipped;
+    const isFirstMaskChild = inMaskedGroup && parent.children[1] === id;
+    return parent.children[0] === id || isFirstMaskChild;
   });
   return { selected, canMoveBackward };
 };

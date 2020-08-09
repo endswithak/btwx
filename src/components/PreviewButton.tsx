@@ -17,7 +17,6 @@ const PreviewButton = (props: PreviewButtonProps): ReactElement => {
       width: activeArtboard.frame.width,
       height: activeArtboard.frame.height
     }
-    console.log(windowSize);
     ipcRenderer.send('openPreview', JSON.stringify(windowSize));
   }
 

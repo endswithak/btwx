@@ -48,11 +48,8 @@ import {
   ADD_LAYER_TWEEN,
   REMOVE_LAYER_TWEEN,
   SET_LAYER_TWEEN_DURATION,
-  INCREMENT_LAYER_TWEEN_DURATION,
-  DECREMENT_LAYER_TWEEN_DURATION,
+  SET_LAYER_TWEEN_TIMING,
   SET_LAYER_TWEEN_DELAY,
-  INCREMENT_LAYER_TWEEN_DELAY,
-  DECREMENT_LAYER_TWEEN_DELAY,
   SET_LAYER_TWEEN_EASE,
   SET_LAYER_TWEEN_POWER,
   SET_LAYER_X,
@@ -240,11 +237,8 @@ import {
   removeLayerTween,
   setLayerName,
   setLayerTweenDuration,
-  incrementLayerTweenDuration,
-  decrementLayerTweenDuration,
+  setLayerTweenTiming,
   setLayerTweenDelay,
-  incrementLayerTweenDelay,
-  decrementLayerTweenDelay,
   setLayerTweenEase,
   setLayerTweenPower,
   setLayerX,
@@ -557,16 +551,10 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return removeLayerTween(state, action);
     case SET_LAYER_TWEEN_DURATION:
       return setLayerTweenDuration(state, action);
-    case INCREMENT_LAYER_TWEEN_DURATION:
-      return incrementLayerTweenDuration(state, action);
-    case DECREMENT_LAYER_TWEEN_DURATION:
-      return decrementLayerTweenDuration(state, action);
+    case SET_LAYER_TWEEN_TIMING:
+      return setLayerTweenTiming(state, action);
     case SET_LAYER_TWEEN_DELAY:
       return setLayerTweenDelay(state, action);
-    case INCREMENT_LAYER_TWEEN_DELAY:
-      return incrementLayerTweenDelay(state, action);
-    case DECREMENT_LAYER_TWEEN_DELAY:
-      return decrementLayerTweenDelay(state, action);
     case SET_LAYER_TWEEN_EASE:
       return setLayerTweenEase(state, action);
     case SET_LAYER_TWEEN_POWER:

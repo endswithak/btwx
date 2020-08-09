@@ -1,20 +1,15 @@
-.c-ease-editor-wrap
+.c-ease-editor
   +absolute-full
-  position: fixed
-  background: none
   display: flex
   align-items: center
   justify-content: center
-  z-index: 999999999999
+  z-index: 999999999999999
 
-.c-ease-editor
-  position: absolute
-  padding: 0
-  border: none
+.c-ease-editor__content
   display: flex
-  outline: none
   overflow: hidden
-  padding: $unit * 4
+  align-items: center
+  //padding: $unit * 4
 
   &::selection
     background: none
@@ -22,6 +17,8 @@
 .c-ease-editor__visualizer
   display: flex
   flex-direction: column
+  padding: $unit * 4
+  padding-right: 0
 
 .c-ease-editor-visualizer__top
   display: flex
@@ -101,6 +98,7 @@
   display: flex
   flex-direction: column
   flex-grow: 2
+  padding: $unit * 4
 
 .c-ease-editor__preset-group
   display: flex
@@ -110,7 +108,6 @@
   display: flex
   width: 100%
   height: $unit * 8
-  line-height: $unit * 8
   align-items: center
   padding: $unit
   font-size: $fontSizeSm
