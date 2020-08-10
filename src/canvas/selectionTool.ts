@@ -7,6 +7,7 @@ import ResizeTool from './resizeTool';
 import CopyTool from './copyTool';
 import GroupTool from './groupTool';
 import GradientTool from './gradientTool';
+import LineTool from './lineTool';
 import InsertTool from './insertTool';
 import UndoRedoTool from './undoRedoTool';
 import { paperMain } from './index';
@@ -21,6 +22,7 @@ class SelectionTool {
   groupTool: GroupTool;
   insertTool: InsertTool;
   gradientTool: GradientTool;
+  lineTool: LineTool;
   undoRedoTool: UndoRedoTool;
   constructor() {
     this.tool = new paperMain.Tool();
@@ -39,6 +41,7 @@ class SelectionTool {
     this.insertTool = new InsertTool();
     this.gradientTool = new GradientTool();
     this.undoRedoTool = new UndoRedoTool();
+    this.lineTool = new LineTool();
   }
   onKeyDown(event: paper.KeyEvent): void {
     this.resizeTool.onKeyDown(event);
@@ -89,6 +92,11 @@ class SelectionTool {
           this.dragTool.enable(true);
           this.dragTool.onMouseDown(event);
         }
+        // if from or to handle, enable line tool
+        else if (hitResult.item.data.handle === 'from' || hitResult.item.data.handle === 'to') {
+          this.lineTool.enable(state, hitResult.item.data.handle);
+          this.lineTool.onMouseDown(event);
+        }
         // else (hit result is resize handle), enable resize tool if no text layers are selected
         else {
           if (!layerState.selected.every((id: string) => layerState.byId[id].type === 'Text')) {
@@ -118,6 +126,7 @@ class SelectionTool {
     this.dragTool.onMouseDrag(event);
     this.resizeTool.onMouseDrag(event);
     this.gradientTool.onMouseDrag(event);
+    this.lineTool.onMouseDrag(event);
   }
   onMouseUp(event: paper.ToolEvent): void {
     this.insertTool.enabled = true;
@@ -125,6 +134,7 @@ class SelectionTool {
     this.dragTool.onMouseUp(event);
     this.resizeTool.onMouseUp(event);
     this.gradientTool.onMouseUp(event);
+    this.lineTool.onMouseUp(event);
   }
 }
 

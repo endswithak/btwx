@@ -7,12 +7,12 @@ import { getNearestScopeAncestor, getLayer } from '../store/selectors/layer';
 export const applyShapeMethods = (shape: paper.Item) => {
   shape.set({
     onMouseEnter: function(e: paper.MouseEvent) {
-      const state = store.getState();
-      const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, this.data.id);
-      store.dispatch(setLayerHover({id: nearestScopeAncestor.id}));
+      // const state = store.getState();
+      // const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, this.data.id);
+      // store.dispatch(setLayerHover({id: nearestScopeAncestor.id}));
     },
     onMouseLeave: function(e: paper.MouseEvent) {
-      store.dispatch(setLayerHover({id: null}));
+      // store.dispatch(setLayerHover({id: null}));
     },
     onDoubleClick: function(e: paper.MouseEvent) {
       store.dispatch(deepSelectLayer({id: this.data.id}));

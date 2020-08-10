@@ -20,13 +20,13 @@ const TweenDrawerEventLayer = (props: TweenDrawerEventLayerProps): ReactElement 
   const theme = useContext(ThemeContext);
   const { id, index, layer, hover, setLayerHover, selectLayer } = props;
 
-  const handleMouseEnter = () => {
-    setLayerHover({ id });
-  }
+  // const handleMouseEnter = () => {
+  //   setLayerHover({ id });
+  // }
 
-  const handleMouseLeave = () => {
-    setLayerHover({ id: null });
-  }
+  // const handleMouseLeave = () => {
+  //   setLayerHover({ id: null });
+  // }
 
   const handleClick = () => {
     selectLayer({id: id, newSelection: true});
@@ -35,8 +35,8 @@ const TweenDrawerEventLayer = (props: TweenDrawerEventLayerProps): ReactElement 
   return (
     <div
       className='c-tween-drawer-event__layer'
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      // onMouseEnter={handleMouseEnter}
+      // onMouseLeave={handleMouseLeave}
       style={{
         boxShadow: id === hover
         ? `2px 0 0 0 ${theme.palette.primary} inset`

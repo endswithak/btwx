@@ -185,6 +185,9 @@ import {
   SET_POLYGON_SIDES,
   SET_STAR_POINTS,
   SET_STAR_RADIUS,
+  SET_CURVE_POINT_ORIGIN,
+  SET_CURVE_POINT_ORIGIN_X,
+  SET_CURVE_POINT_ORIGIN_Y,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -373,6 +376,9 @@ import {
   setRoundedRadius,
   setPolygonSides,
   setStarPoints,
+  setCurvePointOrigin,
+  setCurvePointOriginX,
+  setCurvePointOriginY,
   setStarRadius
 } from '../utils/layer';
 
@@ -825,6 +831,12 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setStarPoints(state, action);
     case SET_STAR_RADIUS:
       return setStarRadius(state, action);
+    case SET_CURVE_POINT_ORIGIN:
+      return setCurvePointOrigin(state, action);
+    case SET_CURVE_POINT_ORIGIN_X:
+      return setCurvePointOriginX(state, action);
+    case SET_CURVE_POINT_ORIGIN_Y:
+      return setCurvePointOriginY(state, action);
     default:
       return state;
   }

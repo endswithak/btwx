@@ -98,7 +98,7 @@ const mapStateToProps = (state: RootState) => {
     return [...result, current.style.strokeOptions.join];
   }, []);
   const strokeJoinValue = strokeJoinValues.every((join: em.StrokeJoin) => join === strokeJoinValues[0]) ? strokeJoinValues[0] : 'multi';
-  const disabled = !layerItems.every((layerItem) => layerItem.style.stroke.enabled) || !layerItems.every((layerItem) => layerItem.type === 'Shape' && (layerItem as em.Shape).closed);
+  const disabled = !layerItems.every((layerItem) => layerItem.style.stroke.enabled) || !layerItems.every((layerItem) => layerItem.type === 'Shape' && (layerItem as em.Shape).path.closed);
   return { selected, strokeJoinValue, disabled };
 };
 

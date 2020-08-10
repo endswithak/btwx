@@ -8,6 +8,7 @@ import { applyCompoundShapeMethods } from '../../canvas/compoundShapeUtils';
 import { applyArtboardMethods } from '../../canvas/artboardUtils';
 import { applyTextMethods } from '../../canvas/textUtils';
 import { applyImageMethods } from '../../canvas/imageUtils';
+import { v4 as uuidv4 } from 'uuid';
 
 export const getLayer = (store: LayerState, id: string): em.Layer => {
   return store.byId[id] as em.Layer;
@@ -1080,3 +1081,58 @@ export const getPaperProp = (prop: 'fill' | 'stroke'): 'fillColor' | 'strokeColo
       return 'strokeColor';
   }
 };
+
+export const getCurvePoints = (paperLayer: paper.Path | paper.CompoundPath): { allIds: string[]; byId: { [id: string]: em.CurvePoint } } => {
+  const allIds: string[] = [];
+  const byId: { [id: string]: em.CurvePoint } = {};
+  const newPoint = (segment: paper.Segment) => {
+    const id = uuidv4();
+    allIds.push(id);
+    byId[id] = {
+      id,
+      point: {
+        x: segment.point.x,
+        y: segment.point.y
+      },
+      handleIn: {
+        x: segment.handleIn.x,
+        y: segment.handleIn.y
+      },
+      handleOut: {
+        x: segment.handleOut.x,
+        y: segment.handleOut.y
+      }
+    }
+  }
+  switch(paperLayer.className) {
+    case 'Path':
+      (paperLayer as paper.Path).segments.forEach((segment) => {
+        newPoint(segment);
+      });
+      break;
+    case 'CompoundPath': {
+      const compoundPaths: paper.CompoundPath[] = [paperLayer as paper.CompoundPath];
+      let i = 0;
+      while(i < compoundPaths.length) {
+        const compoundPath = compoundPaths[i];
+        if (compoundPath.children) {
+          compoundPath.children.forEach((child) => {
+            if (child.className === 'CompoundPath') {
+              compoundPaths.push(child as paper.CompoundPath);
+            } else {
+              (paperLayer as paper.Path).segments.forEach((segment) => {
+                newPoint(segment);
+              });
+            }
+          });
+        }
+        i++;
+      }
+      break;
+    }
+  }
+  return {
+    allIds,
+    byId
+  }
+}

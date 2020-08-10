@@ -155,6 +155,7 @@ class ResizeTool {
           case 'Polygon':
           case 'Rectangle':
           case 'Star':
+          case 'Line':
           case 'Custom':
             paperLayer.scale(hor, ver);
             break;

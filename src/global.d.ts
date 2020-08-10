@@ -234,10 +234,25 @@ declare namespace em {
   interface Shape extends Layer {
     type: 'Shape';
     shapeType: ShapeType;
-    pathData: string;
     booleanOperation: BooleanOperation;
     children: null;
-    closed: boolean;
+    path: {
+      data: string;
+      closed: boolean;
+      points: {
+        allIds: string[];
+        byId: {
+          [id: string]: CurvePoint;
+        };
+      };
+    };
+  }
+
+  interface CurvePoint {
+    id: string;
+    point: Point;
+    handleIn: Point;
+    handleOut: Point;
   }
 
   interface Polygon extends Shape {
@@ -364,7 +379,7 @@ declare namespace em {
     unit: number;
   }
 
-  type ShapeType = 'Rectangle' | 'Ellipse' | 'Rounded' | 'Polygon' | 'Star' | 'Custom';
+  type ShapeType = 'Rectangle' | 'Ellipse' | 'Rounded' | 'Polygon' | 'Star' | 'Line' | 'Custom';
 
   interface SnapPoint {
     id: string;

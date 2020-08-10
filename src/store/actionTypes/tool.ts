@@ -3,6 +3,7 @@ export const ENABLE_ELLIPSE_SHAPE_TOOL = 'ENABLE_ELLIPSE_SHAPE_TOOL';
 export const ENABLE_STAR_SHAPE_TOOL = 'ENABLE_STAR_SHAPE_TOOL';
 export const ENABLE_POLYGON_SHAPE_TOOL = 'ENABLE_POLYGON_SHAPE_TOOL';
 export const ENABLE_ROUNDED_SHAPE_TOOL = 'ENABLE_ROUNDED_SHAPE_TOOL';
+export const ENABLE_LINE_SHAPE_TOOL = 'ENABLE_LINE_SHAPE_TOOL';
 
 export const ENABLE_SELECTION_TOOL = 'ENABLE_SELECTION_TOOL';
 export const DISABLE_SELECTION_TOOL = 'DISABLE_SELECTION_TOOL';
@@ -33,6 +34,10 @@ interface EnablePolygonShapeTool {
 
 interface EnableRoundedShapeTool {
   type: typeof ENABLE_ROUNDED_SHAPE_TOOL;
+}
+
+interface EnableLineShapeTool {
+  type: typeof ENABLE_LINE_SHAPE_TOOL;
 }
 
 interface EnableSelectionTool {
@@ -73,4 +78,16 @@ interface EnableTextTool {
   type: typeof ENABLE_TEXT_TOOL;
 }
 
-export type ToolTypes = EnableRectangleShapeTool | EnableEllipseShapeTool | EnableStarShapeTool | EnablePolygonShapeTool | EnableRoundedShapeTool | EnableSelectionTool | DisableSelectionTool | EnableDragTool | EnableArtboardTool | SetArtboardToolDeviceOrientation | EnableTextTool | SetArtboardToolDevicePlatform;
+export type ToolTypes = EnableRectangleShapeTool |
+                        EnableEllipseShapeTool |
+                        EnableStarShapeTool |
+                        EnablePolygonShapeTool |
+                        EnableRoundedShapeTool |
+                        EnableLineShapeTool |
+                        EnableSelectionTool |
+                        DisableSelectionTool |
+                        EnableDragTool |
+                        EnableArtboardTool |
+                        SetArtboardToolDeviceOrientation |
+                        EnableTextTool |
+                        SetArtboardToolDevicePlatform;

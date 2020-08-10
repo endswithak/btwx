@@ -26,12 +26,12 @@ const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement =>
 
   const handleMouseEnter = () => {
     setHover(true);
-    setLayerHover({id: layerItem.id});
+    // setLayerHover({id: layerItem.id});
   }
 
   const handleMouseLeave = () => {
     setHover(false);
-    setLayerHover({id: null});
+    // setLayerHover({id: null});
   }
 
   const handleDoubleClick = () => {

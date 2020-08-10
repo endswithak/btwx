@@ -19,7 +19,7 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
         return 'M21,9 L21,20 L3,20 L3,9 L21,9 Z M9,4 C10.480515,4 11.7731656,4.80434324 12.4648015,5.99987956 L21,6 L21,8 L3,8 L3,4 L9,4 Z';
       case 'Shape': {
         const layerIcon = new paperMain.Path({
-          pathData: (layer as em.Shape).pathData,
+          pathData: (layer as em.Shape).path.data,
           insert: false
         });
         layerIcon.fitBounds(new paperMain.Rectangle({
@@ -46,7 +46,13 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
           fill: layer.selected && !dragGhost
           ? theme.text.onPrimary
           : theme.text.lighter,
-          transform: layer.type === 'Shape' ? `scale(0.75)` : 'none'
+          transform: layer.type === 'Shape' ? `scale(0.75)` : 'none',
+          stroke: layer.type === 'Shape' && !(layer as em.Shape).path.closed
+          ? layer.selected && !dragGhost
+            ? theme.text.onPrimary
+            : theme.text.lighter
+          : 'none',
+          strokeWidth: 1
         }}>
         <path d={pathData()} />
       </svg>

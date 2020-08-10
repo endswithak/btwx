@@ -151,7 +151,10 @@ import {
   SET_ROUNDED_RADIUS,
   SET_STAR_POINTS,
   SET_POLYGON_SIDES,
-  SET_STAR_RADIUS
+  SET_STAR_RADIUS,
+  SET_CURVE_POINT_ORIGIN,
+  SET_CURVE_POINT_ORIGIN_X,
+  SET_CURVE_POINT_ORIGIN_Y
 } from '../actionTypes/layer';
 
 const rootReducer = combineReducers({
@@ -292,7 +295,10 @@ const rootReducer = combineReducers({
     SET_ROUNDED_RADIUS,
     SET_STAR_POINTS,
     SET_POLYGON_SIDES,
-    SET_STAR_RADIUS
+    SET_STAR_RADIUS,
+    SET_CURVE_POINT_ORIGIN,
+    SET_CURVE_POINT_ORIGIN_X,
+    SET_CURVE_POINT_ORIGIN_Y
   ])}),
   canvasSettings,
   tool,

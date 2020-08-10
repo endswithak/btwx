@@ -228,6 +228,10 @@ export const SET_POLYGON_SIDES = 'SET_POLYGON_SIDES';
 export const SET_STAR_POINTS = 'SET_STAR_POINTS';
 export const SET_STAR_RADIUS = 'SET_STAR_RADIUS';
 
+export const SET_CURVE_POINT_ORIGIN = 'SET_CURVE_POINT_POINT';
+export const SET_CURVE_POINT_ORIGIN_X = 'SET_CURVE_POINT_ORIGIN_X';
+export const SET_CURVE_POINT_ORIGIN_Y = 'SSET_CURVE_POINT_ORIGIN_Y';
+
 // Page
 
 export type AddPagePayload = {
@@ -2118,6 +2122,40 @@ export interface SetStarRadius {
   payload: SetStarRadiusPayload;
 }
 
+export interface SetCurvePointOriginPayload {
+  id: string;
+  pointId: string;
+  x: number;
+  y: number;
+}
+
+export interface SetCurvePointOrigin {
+  type: typeof SET_CURVE_POINT_ORIGIN;
+  payload: SetCurvePointOriginPayload;
+}
+
+export interface SetCurvePointOriginXPayload {
+  id: string;
+  pointId: string;
+  x: number;
+}
+
+export interface SetCurvePointOriginX {
+  type: typeof SET_CURVE_POINT_ORIGIN_X;
+  payload: SetCurvePointOriginXPayload;
+}
+
+export interface SetCurvePointOriginYPayload {
+  id: string;
+  pointId: string;
+  y: number;
+}
+
+export interface SetCurvePointOriginY {
+  type: typeof SET_CURVE_POINT_ORIGIN_Y;
+  payload: SetCurvePointOriginYPayload;
+}
+
 export type LayerTypes = AddPage |
                          AddArtboard |
                          AddGroup |
@@ -2309,4 +2347,7 @@ export type LayerTypes = AddPage |
                          SetRoundedRadius |
                          SetPolygonSides |
                          SetStarPoints |
-                         SetStarRadius;
+                         SetStarRadius |
+                         SetCurvePointOrigin |
+                         SetCurvePointOriginX |
+                         SetCurvePointOriginY;

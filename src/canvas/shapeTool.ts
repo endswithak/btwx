@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import store from '../store';
 import { enableSelectionTool } from '../store/actions/tool';
 import { addShape } from '../store/actions/layer';
-import { getPagePaperLayer, getLayerAndDescendants, getPaperLayer } from '../store/selectors/layer';
+import { getPagePaperLayer, getLayerAndDescendants, getPaperLayer, getCurvePoints } from '../store/selectors/layer';
 import { applyShapeMethods } from './shapeUtils';
 import { paperMain } from './index';
 import Tooltip from './tooltip';
@@ -108,6 +108,13 @@ class ShapeTool {
           radius1: this.maxDim / 2,
           radius2: (this.maxDim / 2) * DEFAULT_STAR_RADIUS,
           points: DEFAULT_STAR_POINTS,
+          ...shapeOpts
+        });
+        break;
+      case 'Line':
+        shape = new paperMain.Path.Line({
+          from: this.from,
+          to: this.to,
           ...shapeOpts
         });
         break;
@@ -348,7 +355,7 @@ class ShapeTool {
   }
   onMouseUp(event: paper.ToolEvent): void {
     if (this.to) {
-      if (this.to.x - this.from.x !== 0 && this.to.y - this.from.y !== 0) {
+      if (this.to.x - this.from.x !== 0 || this.to.y - this.from.y !== 0) {
         const state = store.getState();
         const id = uuidv4();
         const fill = DEFAULT_FILL_STYLE();
@@ -362,28 +369,6 @@ class ShapeTool {
             type: 'Shape'
           }
         });
-        const shapeSpecificProps = (() => {
-          switch(this.shapeType) {
-            case 'Ellipse':
-            case 'Rectangle':
-              return {};
-            case 'Rounded':
-              return {
-                radius: DEFAULT_ROUNDED_RADIUS
-              };
-            case 'Star':
-              return {
-                points: DEFAULT_STAR_POINTS,
-                radius: DEFAULT_STAR_RADIUS
-              }
-            case 'Polygon':
-              return {
-                sides: DEFAULT_STAR_POINTS
-              }
-            default:
-              return {};
-          }
-        })();
         store.dispatch(addShape({
           id: id,
           type: 'Shape',
@@ -410,17 +395,50 @@ class ShapeTool {
             height: paperLayer.bounds.height
           },
           shapeType: this.shapeType,
-          pathData: paperLayer.pathData,
           selected: false,
           mask: false,
           masked: false,
           tweenEvents: [],
           tweens: [],
-          style: DEFAULT_STYLE(),
+          style: (() => {
+            const style = DEFAULT_STYLE();
+            return {
+              ...style,
+              fill: {
+                ...style.fill,
+                enabled: this.shapeType !== 'Line'
+              }
+            } as em.Style
+          })(),
           transform: DEFAULT_TRANSFORM,
           booleanOperation: 'none',
-          closed: true,
-          ...shapeSpecificProps
+          path: {
+            closed: this.shapeType !== 'Line',
+            data: paperLayer.pathData,
+            points: getCurvePoints(paperLayer)
+          },
+          ...(() => {
+            switch(this.shapeType) {
+              case 'Ellipse':
+              case 'Rectangle':
+                return {};
+              case 'Rounded':
+                return {
+                  radius: DEFAULT_ROUNDED_RADIUS
+                };
+              case 'Star':
+                return {
+                  points: DEFAULT_STAR_POINTS,
+                  radius: DEFAULT_STAR_RADIUS
+                }
+              case 'Polygon':
+                return {
+                  sides: DEFAULT_STAR_POINTS
+                }
+              default:
+                return {};
+            }
+          })()
         }));
       }
       store.dispatch(enableSelectionTool());

@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
 import { paperMain } from '../canvas';
-import { enableSelectionTool, enableRectangleShapeTool, enableEllipseShapeTool, enableStarShapeTool, enablePolygonShapeTool, enableRoundedShapeTool, enableArtboardTool, enableTextTool } from '../store/actions/tool';
+import { enableSelectionTool, enableRectangleShapeTool, enableEllipseShapeTool, enableStarShapeTool, enablePolygonShapeTool, enableRoundedShapeTool, enableLineShapeTool, enableArtboardTool, enableTextTool } from '../store/actions/tool';
 import { ToolTypes } from '../store/actionTypes/tool';
 import { AddImagePayload, LayerTypes } from '../store/actionTypes/layer';
 import { addImage } from '../store/actions/layer';
@@ -26,6 +26,7 @@ interface InsertButtonProps {
   enableStarShapeTool(): ToolTypes;
   enablePolygonShapeTool(): ToolTypes;
   enableRoundedShapeTool(): ToolTypes;
+  enableLineShapeTool(): ToolTypes;
   enableSelectionTool(): ToolTypes;
   enableArtboardTool(): ToolTypes;
   enableTextTool(): ToolTypes;
@@ -44,6 +45,7 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
     enableStarShapeTool,
     enablePolygonShapeTool,
     enableRoundedShapeTool,
+    enableLineShapeTool,
     enableArtboardTool,
     enableTextTool,
     addImage,
@@ -109,6 +111,11 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
         icon: 'M12.0006071,3.00046375 L20.9994457,9.87496475 C20.9997787,9.87521916 20.9999178,9.87565424 20.9997941,9.87605465 L17.5625237,20.9992952 C17.5623942,20.9997142 17.5620068,21 17.5615683,21 L6.43843174,21 C6.43799318,21 6.4376058,20.9997142 6.43747632,20.9992952 L3.00020594,9.87605465 C3.00008221,9.87565424 3.00022128,9.87521916 3.0005543,9.87496475 L11.9993929,3.00046375 C11.9997513,3.00018996 12.0002487,3.00018996 12.0006071,3.00046375 Z',
         isActive: tool.type === 'Shape' && tool.shapeToolType === 'Polygon'
       },{
+        label: 'Line',
+        onClick: tool.type === 'Shape' && tool.shapeToolType === 'Line' ? enableSelectionTool : enableLineShapeTool,
+        icon: 'M18.7928932,3.79289322 C19.1834175,3.40236893 19.8165825,3.40236893 20.2071068,3.79289322 C20.5675907,4.15337718 20.5953203,4.72060824 20.2902954,5.11289944 L20.2071068,5.20710678 L5.20710678,20.2071068 C4.81658249,20.5976311 4.18341751,20.5976311 3.79289322,20.2071068 C3.43240926,19.8466228 3.40467972,19.2793918 3.70970461,18.8871006 L3.79289322,18.7928932 L18.7928932,3.79289322 Z',
+        isActive: tool.type === 'Shape' && tool.shapeToolType === 'Line'
+      },{
         label: 'Text',
         onClick: tool.type === 'Text' ? enableSelectionTool : enableTextTool,
         icon: 'M12.84,18.999 L12.84,6.56 L12.84,6.56 L16.92,6.56 L16.92,5 L7.08,5 L7.08,6.56 L11.16,6.56 L11.16,19 L12.839,19 C12.8395523,19 12.84,18.9995523 12.84,18.999 Z',
@@ -142,6 +149,7 @@ export default connect(
     enableStarShapeTool,
     enablePolygonShapeTool,
     enableRoundedShapeTool,
+    enableLineShapeTool,
     enableSelectionTool,
     enableArtboardTool,
     enableTextTool,

@@ -12,12 +12,12 @@ import { paperMain } from './';
 export const applyTextMethods = (text: paper.Item) => {
   text.set({
     onMouseEnter: function(e: paper.MouseEvent) {
-      const state = store.getState();
-      const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, this.data.id);
-      store.dispatch(setLayerHover({id: nearestScopeAncestor.id}));
+      // const state = store.getState();
+      // const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, this.data.id);
+      // store.dispatch(setLayerHover({id: nearestScopeAncestor.id}));
     },
     onMouseLeave: function(e: paper.MouseEvent) {
-      store.dispatch(setLayerHover({id: null}));
+      // store.dispatch(setLayerHover({id: null}));
     },
     onDoubleClick: function(e: paper.MouseEvent) {
       const state = store.getState();

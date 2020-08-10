@@ -6,6 +6,7 @@ import {
   ENABLE_STAR_SHAPE_TOOL,
   ENABLE_POLYGON_SHAPE_TOOL,
   ENABLE_ROUNDED_SHAPE_TOOL,
+  ENABLE_LINE_SHAPE_TOOL,
   ENABLE_SELECTION_TOOL,
   DISABLE_SELECTION_TOOL,
   ENABLE_ARTBOARD_TOOL,
@@ -85,6 +86,15 @@ export default (state = initialState, action: ToolTypes): ToolState => {
         ...state,
         type: 'Shape',
         shapeToolType: 'Rounded'
+      };
+    }
+    case ENABLE_LINE_SHAPE_TOOL: {
+      removeActiveTool();
+      new ShapeTool('Line');
+      return {
+        ...state,
+        type: 'Shape',
+        shapeToolType: 'Line'
       };
     }
     case ENABLE_SELECTION_TOOL: {

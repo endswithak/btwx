@@ -194,6 +194,9 @@ import {
   SET_POLYGON_SIDES,
   SET_STAR_POINTS,
   SET_STAR_RADIUS,
+  SET_CURVE_POINT_ORIGIN,
+  SET_CURVE_POINT_ORIGIN_X,
+  SET_CURVE_POINT_ORIGIN_Y,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
@@ -377,6 +380,9 @@ import {
   SetPolygonSidesPayload,
   SetStarPointsPayload,
   SetStarRadiusPayload,
+  SetCurvePointOriginPayload,
+  SetCurvePointOriginXPayload,
+  SetCurvePointOriginYPayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -1489,5 +1495,20 @@ export const setStarPoints = (payload: SetStarPointsPayload): LayerTypes => ({
 
 export const setStarRadius = (payload: SetStarRadiusPayload): LayerTypes => ({
   type: SET_STAR_RADIUS,
+  payload
+});
+
+export const setCurvePointOrigin = (payload: SetCurvePointOriginPayload): LayerTypes => ({
+  type: SET_CURVE_POINT_ORIGIN,
+  payload
+});
+
+export const setCurvePointOriginX = (payload: SetCurvePointOriginXPayload): LayerTypes => ({
+  type: SET_CURVE_POINT_ORIGIN_X,
+  payload
+});
+
+export const setCurvePointOriginY = (payload: SetCurvePointOriginYPayload): LayerTypes => ({
+  type: SET_CURVE_POINT_ORIGIN_Y,
   payload
 });

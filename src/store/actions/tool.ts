@@ -4,6 +4,7 @@ import {
   ENABLE_STAR_SHAPE_TOOL,
   ENABLE_POLYGON_SHAPE_TOOL,
   ENABLE_ROUNDED_SHAPE_TOOL,
+  ENABLE_LINE_SHAPE_TOOL,
   ENABLE_SELECTION_TOOL,
   DISABLE_SELECTION_TOOL,
   ENABLE_DRAG_TOOL,
@@ -34,6 +35,10 @@ export const enablePolygonShapeTool = (): ToolTypes => ({
 
 export const enableRoundedShapeTool = (): ToolTypes => ({
   type: ENABLE_ROUNDED_SHAPE_TOOL
+});
+
+export const enableLineShapeTool = (): ToolTypes => ({
+  type: ENABLE_LINE_SHAPE_TOOL
 });
 
 export const enableSelectionTool = (): ToolTypes => ({

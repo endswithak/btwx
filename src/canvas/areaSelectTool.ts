@@ -43,6 +43,9 @@ class AreaSelectTool {
     this.shape = this.renderAreaSelectShape({});
   }
   renderAreaSelectShape(shapeOpts: any) {
+    if (this.shape) {
+      this.shape.remove();
+    }
     const selectAreaShape = new paperMain.Path.Rectangle({
       from: this.from,
       to: this.to,
@@ -51,7 +54,6 @@ class AreaSelectTool {
       ...shapeOpts
     });
     selectAreaShape.removeOn({
-      drag: true,
       up: true
     });
     return selectAreaShape;
