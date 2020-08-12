@@ -868,12 +868,22 @@ export const getGradientDestinationPoint = (id: string, destination: em.Point): 
   return new paperMain.Point((destination.x * paperLayer.bounds.width) + paperLayer.position.x, (destination.y * paperLayer.bounds.height) + paperLayer.position.y);
 };
 
-export const getGradientStops = (stops: { [id: string]: em.GradientStop }): paper.GradientStop[] => {
-  return Object.keys(stops).reduce((result, current) => {
-    const stop = stops[current];
+// export const getGradientStops = (stops: { [id: string]: em.GradientStop }): paper.GradientStop[] => {
+//   return Object.keys(stops).reduce((result, current) => {
+//     const stop = stops[current];
+//     result = [
+//       ...result,
+//       new paperMain.GradientStop({ hue: stop.color.h, saturation: stop.color.s, lightness: stop.color.l, alpha: stop.color.a } as paper.Color, stop.position)
+//     ];
+//     return result;
+//   }, []);
+// };
+
+export const getGradientStops = (stops: em.GradientStop[]): paper.GradientStop[] => {
+  return stops.reduce((result, current) => {
     result = [
       ...result,
-      new paperMain.GradientStop({ hue: stop.color.h, saturation: stop.color.s, lightness: stop.color.l, alpha: stop.color.a } as paper.Color, stop.position)
+      new paperMain.GradientStop({ hue: current.color.h, saturation: current.color.s, lightness: current.color.l, alpha: current.color.a } as paper.Color, current.position)
     ];
     return result;
   }, []);
@@ -1061,11 +1071,11 @@ export const gradientsMatch = (gradient1: em.Gradient, gradient2: em.Gradient): 
   const gradientTypesMatch = gradient1.gradientType === gradient2.gradientType;
   const originsMatch = gradient1.origin.x === gradient2.origin.x && gradient1.origin.y === gradient2.origin.y;
   const destinationsMatch = gradient1.destination.x === gradient2.destination.x && gradient1.destination.y === gradient2.destination.y;
-  const g1SortedStops = [...gradient1.stops.allIds].sort((a,b) => { return gradient1.stops.byId[a].position - gradient1.stops.byId[b].position });
-  const g2SortedStops = [...gradient2.stops.allIds].sort((a,b) => { return gradient2.stops.byId[a].position - gradient2.stops.byId[b].position });
+  const g1SortedStops = [...gradient1.stops].sort((a,b) => { return a.position - b.position });
+  const g2SortedStops = [...gradient2.stops].sort((a,b) => { return a.position - b.position });
   const stopsMatch = g1SortedStops.every((id, index) => {
-    const g1Stop = gradient1.stops.byId[g1SortedStops[index]];
-    const g2Stop = gradient2.stops.byId[g2SortedStops[index]];
+    const g1Stop = g1SortedStops[index];
+    const g2Stop = g2SortedStops[index];
     const stopColorsMatch = colorsMatch(g1Stop.color, g2Stop.color);
     const stopPositionsMatch = g1Stop.position === g2Stop.position;
     return stopColorsMatch && stopPositionsMatch;
@@ -1082,14 +1092,10 @@ export const getPaperProp = (prop: 'fill' | 'stroke'): 'fillColor' | 'strokeColo
   }
 };
 
-export const getCurvePoints = (paperLayer: paper.Path | paper.CompoundPath): { allIds: string[]; byId: { [id: string]: em.CurvePoint } } => {
-  const allIds: string[] = [];
-  const byId: { [id: string]: em.CurvePoint } = {};
+export const getCurvePoints = (paperLayer: paper.Path | paper.CompoundPath): em.CurvePoint[] => {
+  const curvePoints: em.CurvePoint[] = [];
   const newPoint = (segment: paper.Segment) => {
-    const id = uuidv4();
-    allIds.push(id);
-    byId[id] = {
-      id,
+    curvePoints.push({
       point: {
         x: segment.point.x,
         y: segment.point.y
@@ -1102,7 +1108,7 @@ export const getCurvePoints = (paperLayer: paper.Path | paper.CompoundPath): { a
         x: segment.handleOut.x,
         y: segment.handleOut.y
       }
-    }
+    });
   }
   switch(paperLayer.className) {
     case 'Path':
@@ -1131,8 +1137,5 @@ export const getCurvePoints = (paperLayer: paper.Path | paper.CompoundPath): { a
       break;
     }
   }
-  return {
-    allIds,
-    byId
-  }
+  return curvePoints;
 }

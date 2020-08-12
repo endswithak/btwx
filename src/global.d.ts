@@ -139,19 +139,13 @@ declare namespace em {
     gradientType: GradientType;
     origin: Point;
     destination: Point;
-    stops: {
-      allIds: string[];
-      byId: {
-        [id: string]: GradientStop;
-      };
-    };
+    activeStopIndex: number;
+    stops: GradientStop[];
   }
 
   interface GradientStop {
-    id: string;
     position: number;
     color: em.Color;
-    active: boolean;
   }
 
   interface Stroke {
@@ -239,17 +233,11 @@ declare namespace em {
     path: {
       data: string;
       closed: boolean;
-      points: {
-        allIds: string[];
-        byId: {
-          [id: string]: CurvePoint;
-        };
-      };
+      points: CurvePoint[];
     };
   }
 
   interface CurvePoint {
-    id: string;
     point: Point;
     handleIn: Point;
     handleOut: Point;

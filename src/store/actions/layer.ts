@@ -108,8 +108,6 @@ import {
   ADD_LAYERS_GRADIENT_STOP,
   REMOVE_LAYER_GRADIENT_STOP,
   REMOVE_LAYERS_GRADIENT_STOP,
-  ACTIVATE_LAYER_GRADIENT_STOP,
-  DEACTIVATE_LAYER_GRADIENT_STOP,
   SET_LAYER_ACTIVE_GRADIENT_STOP,
   SET_LAYER_STROKE_WIDTH,
   SET_LAYERS_STROKE_WIDTH,
@@ -294,8 +292,6 @@ import {
   AddLayersGradientStopPayload,
   RemoveLayerGradientStopPayload,
   RemoveLayersGradientStopPayload,
-  ActivateLayerGradientStopPayload,
-  DeactivateLayerGradientStopPayload,
   SetLayerActiveGradientStopPayload,
   SetLayerStrokeWidthPayload,
   SetLayersStrokeWidthPayload,
@@ -438,7 +434,7 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
       mask: false,
       masked: false,
       transform: DEFAULT_TRANSFORM,
-      style: DEFAULT_STYLE(),
+      style: DEFAULT_STYLE
     }
   }
 };
@@ -470,16 +466,16 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
       clipped: false,
       transform: DEFAULT_TRANSFORM,
       style: {
-        ...DEFAULT_STYLE(),
+        ...DEFAULT_STYLE,
         fill: {
-          ...DEFAULT_STYLE().fill,
+          ...DEFAULT_STYLE.fill,
           enabled: false
         },
         stroke: {
-          ...DEFAULT_STYLE().stroke,
+          ...DEFAULT_STYLE.stroke,
           enabled: false
-        },
-      },
+        }
+      }
     }
   }
 };
@@ -541,13 +537,13 @@ export const addImage = (payload: AddImagePayload): LayerTypes => {
       tweens: [],
       transform: DEFAULT_TRANSFORM,
       style: {
-        ...DEFAULT_STYLE(),
+        ...DEFAULT_STYLE,
         fill: {
-          ...DEFAULT_STYLE().fill,
+          ...DEFAULT_STYLE.fill,
           enabled: false
         },
         stroke: {
-          ...DEFAULT_STYLE().stroke,
+          ...DEFAULT_STYLE.stroke,
           enabled: false
         }
       },
@@ -1061,16 +1057,6 @@ export const removeLayerGradientStop = (payload: RemoveLayerGradientStopPayload)
 
 export const removeLayersGradientStop = (payload: RemoveLayersGradientStopPayload): LayerTypes => ({
   type: REMOVE_LAYERS_GRADIENT_STOP,
-  payload
-});
-
-export const activateLayerGradientStop = (payload: ActivateLayerGradientStopPayload): LayerTypes => ({
-  type: ACTIVATE_LAYER_GRADIENT_STOP,
-  payload
-});
-
-export const deactivateLayerGradientStop = (payload: DeactivateLayerGradientStopPayload): LayerTypes => ({
-  type: DEACTIVATE_LAYER_GRADIENT_STOP,
   payload
 });
 

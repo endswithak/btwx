@@ -19,11 +19,8 @@ import ColorPicker from './ColorPicker';
 import FillTypeSelector from './FillTypeSelector';
 
 interface ColorEditorProps {
-  layerItem?: em.Layer;
-  styleValues: (em.Fill | em.Stroke | em.Shadow)[];
   colorEditor?: ColorEditorState;
-  colorValue?: em.Color | 'multi';
-  gradientValue?: em.Gradient | 'multi';
+  colorValue?: em.Color;
   closeColorEditor?(): ColorEditorTypes;
   openGradientEditor?(payload: OpenGradientEditorPayload): GradientEditorTypes;
   setLayersShadowColor?(payload: SetLayersShadowColorPayload): LayerTypes;
@@ -38,7 +35,7 @@ interface ColorEditorProps {
 const ColorEditor = (props: ColorEditorProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const editorRef = useRef<HTMLDivElement>(null);
-  const { layerItem, styleValues, gradientValue, colorEditor, colorValue, closeColorEditor, setLayersFillColor, setLayersStrokeFillType, setLayersGradientType, setLayersFillType, setLayersStrokeColor, openGradientEditor, setLayersShadowColor, setTextSettingsFillColor } = props;
+  const { colorEditor, colorValue, closeColorEditor, setLayersFillColor, setLayersStrokeFillType, setLayersGradientType, setLayersFillType, setLayersStrokeColor, openGradientEditor, setLayersShadowColor, setTextSettingsFillColor } = props;
 
   const debounceColor = useCallback(
     debounce((color: em.Color) => {
@@ -102,17 +99,11 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
         setLayersStrokeFillType({layers: colorEditor.layers, fillType: 'gradient'});
         break;
     }
-    if (colorEditor.prop !== 'shadow') {
-      setLayersGradientType({layers: colorEditor.layers, prop: colorEditor.prop as 'fill' | 'stroke', gradientType: 'linear'});
-    }
+    setLayersGradientType({layers: colorEditor.layers, prop: colorEditor.prop as 'fill' | 'stroke', gradientType: 'linear'});
     closeColorEditor();
     openGradientEditor({
       layers: colorEditor.layers,
       prop: colorEditor.prop,
-      gradient: {
-        ...(gradientValue as em.Gradient),
-        gradientType: 'linear'
-      },
       x: colorEditor.x,
       y: colorEditor.y
     });
@@ -127,17 +118,11 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
         setLayersStrokeFillType({layers: colorEditor.layers, fillType: 'gradient'});
         break;
     }
-    if (colorEditor.prop !== 'shadow') {
-      setLayersGradientType({layers: colorEditor.layers, prop: colorEditor.prop as 'fill' | 'stroke', gradientType: 'radial'});
-    }
+    setLayersGradientType({layers: colorEditor.layers, prop: colorEditor.prop as 'fill' | 'stroke', gradientType: 'radial'});
     closeColorEditor();
     openGradientEditor({
       layers: colorEditor.layers,
       prop: colorEditor.prop,
-      gradient: {
-        ...(gradientValue as em.Gradient),
-        gradientType: 'radial'
-      },
       x: colorEditor.x,
       y: colorEditor.y
     });
@@ -184,11 +169,8 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState): {
-  layerItems: em.Layer[];
-  styleValues: (em.Fill | em.Stroke | em.Shadow)[];
   colorEditor: ColorEditorState;
-  colorValue: em.Color | 'multi';
-  gradientValue: em.Gradient | 'multi';
+  colorValue: em.Color;
 } => {
   const { colorEditor, layer } = state;
   const layerItems: em.Layer[] = colorEditor.layers.reduce((result, current) => {
@@ -205,21 +187,8 @@ const mapStateToProps = (state: RootState): {
         return [...result, current.style.shadow];
     }
   }, []);
-  const colorValue = ((): em.Color | 'multi' => {
-    if (styleValues.every((value: em.Fill | em.Stroke | em.Shadow) => colorsMatch(value.color, styleValues[0].color))) {
-      return styleValues[0].color;
-    } else {
-      return 'multi';
-    }
-  })();
-  const gradientValue = ((): em.Gradient | 'multi' => {
-    if (colorEditor.prop !== 'shadow' && styleValues.every((value: em.Fill | em.Stroke) => gradientsMatch(value.gradient, (styleValues[0] as em.Fill | em.Stroke).gradient))) {
-      return (styleValues[0] as em.Fill | em.Stroke).gradient;
-    } else {
-      return 'multi';
-    }
-  })();
-  return { colorEditor, layerItems, styleValues, colorValue, gradientValue };
+  const colorValue = styleValues[0].color;
+  return { colorEditor, colorValue };
 };
 
 export default connect(

@@ -65,19 +65,16 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
         }
         const newGradient = {
           ...gradient,
-          stops: {
-            ...gradient.stops,
-            byId: Object.keys(gradient.stops.byId).reduce((result: { [id: string]: em.GradientStop }, current) => {
-              result[current] = {
-                ...gradient.stops.byId[current],
-                color: {
-                  ...gradient.stops.byId[current].color,
-                  a: nextOpacity / 100
-                }
+          stops: gradient.stops.reduce((result, current) => {
+            result = [...result, {
+              ...current,
+              color: {
+                ...current.color,
+                a: nextOpacity / 100
               }
-              return result;
-            }, {})
-          }
+            }];
+            return result;
+          }, [])
         }
         setLayersGradient({layers: selected, prop: prop, gradient: newGradient});
       } else {
@@ -102,7 +99,6 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
     if (!isGradientEditorOpen) {
       openGradientEditor({
         prop: prop,
-        gradient: gradientValue,
         layers: selected,
         x: bounding.x,
         y: bounding.y - (bounding.height - 10) // 2 (swatch drop shadow) + 8 (top-padding)
@@ -180,22 +176,20 @@ const mapStateToProps = (state: RootState, ownProps: GradientInputProps) => {
   })();
   const gradientValue = styleValues[0].gradient;
   const stops = gradientValue.stops;
-  const gradientOpacity = stops.allIds.every((stop) => stops.byId[stop].color.a === stops.byId[stops.allIds[0]].color.a) ? Math.round(stops.byId[stops.allIds[0]].color.a * 100) : 'multi';
+  const gradientOpacity = stops.every((stop) => stop.color.a === stops[0].color.a) ? Math.round(stops[0].color.a * 100) : 'multi';
   const isGradientEditorOpen = gradientEditor.isOpen;
-  const stopById = stops.byId;
-  const sortedStops = [...stops.allIds].sort((a,b) => { return stopById[a].position - stopById[b].position });
+  const sortedStops = [...stops].sort((a,b) => { return a.position - b.position });
   const cssGradient = sortedStops.reduce((result, current, index) => {
-    const stopItem = stops.byId[current];
-    const stopColor = tinyColor({h: stopItem.color.h, s: stopItem.color.s, l: stopItem.color.l, a: stopItem.color.a}).toHslString();
-    result = result + `${stopColor} ${stopItem.position * 100}%`;
-    if (index !== stops.allIds.length - 1) {
+    const stopColor = tinyColor({h: current.color.h, s: current.color.s, l: current.color.l, a: current.color.a}).toHslString();
+    result = result + `${stopColor} ${current.position * 100}%`;
+    if (index !== stops.length - 1) {
       result = result + ',';
     } else {
       result = result + ')';
     }
     return result;
   }, `linear-gradient(to right,`);
-  return { enabledValue, selected, gradientValue, gradientTypeValue, gradientOpacity, isGradientEditorOpen, stopById, cssGradient, displayGradient };
+  return { enabledValue, selected, gradientValue, gradientTypeValue, gradientOpacity, isGradientEditorOpen, cssGradient, displayGradient };
 };
 
 export default connect(

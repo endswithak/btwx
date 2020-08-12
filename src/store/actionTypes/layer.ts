@@ -121,8 +121,6 @@ export const ADD_LAYER_GRADIENT_STOP = 'ADD_LAYER_GRADIENT_STOP';
 export const ADD_LAYERS_GRADIENT_STOP = 'ADD_LAYERS_GRADIENT_STOP';
 export const REMOVE_LAYER_GRADIENT_STOP = 'REMOVE_LAYER_GRADIENT_STOP';
 export const REMOVE_LAYERS_GRADIENT_STOP = 'REMOVE_LAYERS_GRADIENT_STOP';
-export const ACTIVATE_LAYER_GRADIENT_STOP = 'ACTIVATE_LAYER_GRADIENT_STOP';
-export const DEACTIVATE_LAYER_GRADIENT_STOP = 'DEACTIVATE_LAYER_GRADIENT_STOP';
 export const SET_LAYER_ACTIVE_GRADIENT_STOP = 'SET_LAYER_ACTIVE_GRADIENT_STOP';
 
 export const ENABLE_LAYER_STROKE = 'ENABLE_LAYER_STROKE';
@@ -1191,7 +1189,7 @@ export interface SetLayersGradientDestination {
 
 export interface SetLayerGradientStopColorPayload {
   id: string;
-  stopId: string;
+  stopIndex: number;
   prop: 'fill' | 'stroke';
   color: em.Color;
 }
@@ -1203,7 +1201,7 @@ export interface SetLayerGradientStopColor {
 
 export interface SetLayersGradientStopColorPayload {
   layers: string[];
-  stopId: string;
+  stopIndex: number;
   prop: 'fill' | 'stroke';
   color: em.Color;
 }
@@ -1215,7 +1213,7 @@ export interface SetLayersGradientStopColor {
 
 export interface SetLayerGradientStopPositionPayload {
   id: string;
-  stopId: string;
+  stopIndex: number;
   prop: 'fill' | 'stroke';
   position: number;
 }
@@ -1227,7 +1225,7 @@ export interface SetLayerGradientStopPosition {
 
 export interface SetLayersGradientStopPositionPayload {
   layers: string[];
-  stopId: string;
+  stopIndex: number;
   prop: 'fill' | 'stroke';
   position: number;
 }
@@ -1262,7 +1260,7 @@ export interface AddLayersGradientStop {
 export interface RemoveLayerGradientStopPayload {
   id: string;
   prop: 'fill' | 'stroke';
-  stopId: string;
+  stopIndex: number;
 }
 
 export interface RemoveLayerGradientStop {
@@ -1273,7 +1271,7 @@ export interface RemoveLayerGradientStop {
 export interface RemoveLayersGradientStopPayload {
   layers: string[];
   prop: 'fill' | 'stroke';
-  stopId: string;
+  stopIndex: number;
 }
 
 export interface RemoveLayersGradientStop {
@@ -1281,32 +1279,10 @@ export interface RemoveLayersGradientStop {
   payload: RemoveLayersGradientStopPayload;
 }
 
-export interface ActivateLayerGradientStopPayload {
-  id: string;
-  prop: 'fill' | 'stroke';
-  stopId: string;
-}
-
-export interface ActivateLayerGradientStop {
-  type: typeof ACTIVATE_LAYER_GRADIENT_STOP;
-  payload: ActivateLayerGradientStopPayload;
-}
-
-export interface DeactivateLayerGradientStopPayload {
-  id: string;
-  prop: 'fill' | 'stroke';
-  stopId: string;
-}
-
-export interface DeactivateLayerGradientStop {
-  type: typeof DEACTIVATE_LAYER_GRADIENT_STOP;
-  payload: DeactivateLayerGradientStopPayload;
-}
-
 export interface SetLayerActiveGradientStopPayload {
   id: string;
   prop: 'fill' | 'stroke';
-  stopId: string;
+  stopIndex: number;
 }
 
 export interface SetLayerActiveGradientStop {
@@ -2124,7 +2100,7 @@ export interface SetStarRadius {
 
 export interface SetCurvePointOriginPayload {
   id: string;
-  pointId: string;
+  pointIndex: number;
   x: number;
   y: number;
 }
@@ -2136,7 +2112,7 @@ export interface SetCurvePointOrigin {
 
 export interface SetCurvePointOriginXPayload {
   id: string;
-  pointId: string;
+  pointIndex: number;
   x: number;
 }
 
@@ -2147,7 +2123,7 @@ export interface SetCurvePointOriginX {
 
 export interface SetCurvePointOriginYPayload {
   id: string;
-  pointId: string;
+  pointIndex: number;
   y: number;
 }
 
@@ -2256,8 +2232,6 @@ export type LayerTypes = AddPage |
                          AddLayersGradientStop |
                          RemoveLayerGradientStop |
                          RemoveLayersGradientStop |
-                         ActivateLayerGradientStop |
-                         DeactivateLayerGradientStop |
                          SetLayerActiveGradientStop |
                          EnableLayerStroke |
                          EnableLayersStroke |

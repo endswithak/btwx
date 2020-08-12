@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useRef, useState, useEffect, useCallback } from 'react';
+import React, { useContext, ReactElement, useState, useEffect } from 'react';
 import { ThemeContext } from './ThemeProvider';
 import ColorPickerSaturation from './ColorPickerSaturation';
 import ColorPickerHue from './ColorPickerHue';

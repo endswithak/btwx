@@ -86,14 +86,25 @@ class TextTool {
       tweenEvents: [],
       tweens: [],
       transform: DEFAULT_TRANSFORM,
+      // style: {
+      //   ...DEFAULT_STYLE(),
+      //   fill: {
+      //     ...DEFAULT_STYLE().fill,
+      //     color: state.textSettings.fillColor
+      //   },
+      //   stroke: {
+      //     ...DEFAULT_STYLE().stroke,
+      //     enabled: false
+      //   }
+      // },
       style: {
-        ...DEFAULT_STYLE(),
+        ...DEFAULT_STYLE,
         fill: {
-          ...DEFAULT_STYLE().fill,
+          ...DEFAULT_STYLE.fill,
           color: state.textSettings.fillColor
         },
         stroke: {
-          ...DEFAULT_STYLE().stroke,
+          ...DEFAULT_STYLE.stroke,
           enabled: false
         }
       },

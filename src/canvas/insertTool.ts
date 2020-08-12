@@ -1,4 +1,4 @@
-import { enableSelectionTool, enableRectangleShapeTool, enableEllipseShapeTool, enableStarShapeTool, enablePolygonShapeTool, enableRoundedShapeTool, enableArtboardTool, enableTextTool } from '../store/actions/tool';
+import { enableSelectionTool, enableRectangleShapeTool, enableEllipseShapeTool, enableStarShapeTool, enablePolygonShapeTool, enableLineShapeTool, enableRoundedShapeTool, enableArtboardTool, enableTextTool } from '../store/actions/tool';
 import store from '../store';
 
 class InsertTool {
@@ -51,6 +51,15 @@ class InsertTool {
             store.dispatch(enableSelectionTool());
           } else {
             store.dispatch(enableTextTool());
+          }
+          break;
+        }
+        case 'l': {
+          const state = store.getState();
+          if (state.tool.type === 'Shape' && state.tool.shapeToolType === 'Line') {
+            store.dispatch(enableSelectionTool());
+          } else {
+            store.dispatch(enableLineShapeTool());
           }
           break;
         }

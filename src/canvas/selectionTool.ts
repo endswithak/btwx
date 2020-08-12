@@ -51,6 +51,7 @@ class SelectionTool {
     this.groupTool.onKeyDown(event);
     this.insertTool.onKeyDown(event);
     this.undoRedoTool.onKeyDown(event);
+    this.lineTool.onKeyDown(event);
     switch(event.key) {
       case 'escape': {
         const state = store.getState();
@@ -77,6 +78,7 @@ class SelectionTool {
     this.copyTool.onKeyUp(event);
     this.groupTool.onKeyUp(event);
     this.undoRedoTool.onKeyUp(event);
+    this.lineTool.onKeyUp(event);
   }
   onMouseDown(event: paper.ToolEvent): void {
     this.insertTool.enabled = false;

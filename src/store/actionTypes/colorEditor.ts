@@ -3,7 +3,6 @@ export const CLOSE_COLOR_EDITOR = 'CLOSE_COLOR_EDITOR';
 
 export interface OpenColorEditorPayload {
   layers: string[];
-  color: em.Color | 'multi';
   prop: 'stroke' | 'fill' | 'shadow';
   x: number;
   y: number;

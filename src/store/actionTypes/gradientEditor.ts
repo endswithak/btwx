@@ -4,7 +4,6 @@ export const CLOSE_GRADIENT_EDITOR = 'CLOSE_GRADIENT_EDITOR';
 export interface OpenGradientEditorPayload {
   layers: string[];
   prop: 'fill' | 'stroke' | 'shadow';
-  gradient: em.Gradient | 'multi';
   x: number;
   y: number;
 }

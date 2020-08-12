@@ -8,12 +8,13 @@ import { setLayersHeight } from '../store/actions/layer';
 
 interface HeightInputProps {
   selected?: string[];
+  disabled?: boolean;
   heightValue?: number | string;
   setLayersHeight?(payload: SetLayersHeightPayload): LayerTypes;
 }
 
 const HeightInput = (props: HeightInputProps): ReactElement => {
-  const { selected, setLayersHeight, heightValue } = props;
+  const { selected, setLayersHeight, disabled, heightValue } = props;
   const [height, setHeight] = useState(props.heightValue);
 
   useEffect(() => {
@@ -47,6 +48,7 @@ const HeightInput = (props: HeightInputProps): ReactElement => {
       value={height}
       onChange={handleChange}
       onSubmit={handleSubmit}
+      disabled={disabled}
       submitOnBlur
       label={'H'} />
   );
@@ -70,7 +72,8 @@ const mapStateToProps = (state: RootState) => {
       return 'multi';
     }
   })();
-  return { selected, heightValue };
+  const disabled = layerItems.some((layerItem) => layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line');
+  return { selected, heightValue, disabled };
 };
 
 export default connect(

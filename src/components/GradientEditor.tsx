@@ -20,8 +20,7 @@ import FillTypeSelector from './FillTypeSelector';
 import GradientFrame from './GradientFrame';
 
 interface GradientEditorProps {
-  style?: em.Fill | em.Stroke;
-  gradient?: em.Gradient;
+  gradientValue?: em.Gradient;
   gradientEditor?: GradientEditorState;
   activeStopValue?: em.GradientStop;
   closeGradientEditor?(): GradientEditorTypes;
@@ -38,18 +37,18 @@ interface GradientEditorProps {
 const GradientEditor = (props: GradientEditorProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const editorRef = useRef<HTMLDivElement>(null);
-  const { gradientEditor, style, gradient, activeStopValue, setLayersGradientType, setLayersGradientStopColor, setLayerActiveGradientStop, setLayersGradientStopPosition, addLayersGradientStop, setLayersStrokeFillType, setLayersFillType, openColorEditor, closeGradientEditor } = props;
+  const { gradientEditor, gradientValue, activeStopValue, setLayersGradientType, setLayersGradientStopColor, setLayerActiveGradientStop, setLayersGradientStopPosition, addLayersGradientStop, setLayersStrokeFillType, setLayersFillType, openColorEditor, closeGradientEditor } = props;
 
   const debounceStopColorChange = useCallback(
-    debounce((stopId: string, color: em.Color) => {
-      setLayersGradientStopColor({layers: gradientEditor.layers, prop: gradientEditor.prop as 'fill' | 'stroke', stopId, color});
+    debounce((stopIndex: number, color: em.Color) => {
+      setLayersGradientStopColor({layers: gradientEditor.layers, prop: gradientEditor.prop as 'fill' | 'stroke', stopIndex, color});
     }, 150),
     []
   );
 
   const debounceStopPositionChange = useCallback(
-    debounce((stopId: string, position: number) => {
-      setLayersGradientStopPosition({layers: gradientEditor.layers, prop: gradientEditor.prop as 'fill' | 'stroke', stopId, position});
+    debounce((stopIndex: number, position: number) => {
+      setLayersGradientStopPosition({layers: gradientEditor.layers, prop: gradientEditor.prop as 'fill' | 'stroke', stopIndex, position});
     }, 150),
     []
   );
@@ -114,15 +113,15 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
     //     } as any
     //     break;
     // }
-    debounceStopColorChange(activeStopValue.id, stopColor);
+    debounceStopColorChange(gradientValue.activeStopIndex, stopColor);
   }
 
-  const handleStopPress = (id: string): void => {
-    setLayerActiveGradientStop({id: gradientEditor.layers[0], prop: gradientEditor.prop as 'fill' | 'stroke', stopId: id});
+  const handleStopPress = (stopIndex: number): void => {
+    setLayerActiveGradientStop({id: gradientEditor.layers[0], prop: gradientEditor.prop as 'fill' | 'stroke', stopIndex});
   }
 
-  const handleStopDrag = (id: string, position: number): void => {
-    debounceStopPositionChange(id, position);
+  const handleStopDrag = (stopIndex: number, position: number): void => {
+    debounceStopPositionChange(stopIndex, position);
   }
 
   const handleSliderClick = (newStop: em.GradientStop): void => {
@@ -142,20 +141,19 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
     openColorEditor({
       layers: gradientEditor.layers,
       prop: gradientEditor.prop,
-      color: style.color,
       x: gradientEditor.x,
       y: gradientEditor.y
     });
   }
 
   const handleLinearGradientClick = (): void => {
-    if (gradient.gradientType !== 'linear') {
+    if (gradientValue.gradientType !== 'linear') {
       setLayersGradientType({layers: gradientEditor.layers, prop: gradientEditor.prop as 'fill' | 'stroke', gradientType: 'linear'});
     }
   }
 
   const handleRadialGradientClick = (): void => {
-    if (gradient.gradientType !== 'radial') {
+    if (gradientValue.gradientType !== 'radial') {
       setLayersGradientType({layers: gradientEditor.layers, prop: gradientEditor.prop as 'fill' | 'stroke', gradientType: 'radial'});
     }
   }
@@ -180,15 +178,16 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
           linearGradientSelector={{
             enabled: true,
             onClick: handleLinearGradientClick,
-            isActive: gradient.gradientType === 'linear'
+            isActive: gradientValue.gradientType === 'linear'
           }}
           radialGradientSelector={{
             enabled: true,
             onClick: handleRadialGradientClick,
-            isActive: gradient.gradientType === 'radial'
+            isActive: gradientValue.gradientType === 'radial'
           }} />
         <GradientSlider
-          gradientStops={gradient.stops}
+          gradientStops={gradientValue.stops}
+          activeStopIndex={gradientValue.activeStopIndex}
           onStopPress={handleStopPress}
           onStopDrag={handleStopDrag}
           onSliderClick={handleSliderClick}
@@ -207,8 +206,7 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState): {
-  style: em.Fill | em.Stroke;
-  gradient: em.Gradient;
+  gradientValue: em.Gradient;
   gradientEditor: GradientEditorState;
   activeStopValue: em.GradientStop;
 } => {
@@ -225,12 +223,17 @@ const mapStateToProps = (state: RootState): {
         return [...result, current.style.stroke];
     }
   }, []);
-  const style = styles[0];
-  const gradient = style.gradient;
-  const stops = gradient.stops;
-  const activeStop = stops.allIds.find((id) => stops.byId[id].active);
-  const activeStopValue = stops.byId[activeStop];
-  return { gradientEditor: gradientEditor, style, gradient, activeStopValue };
+  const gradientValues: em.Gradient[] = styles.reduce((result, current) => {
+    switch(gradientEditor.prop) {
+      case 'fill':
+        return [...result, current.gradient];
+      case 'stroke':
+        return [...result, current.gradient];
+    }
+  }, []);
+  const gradientValue = gradientValues[0];
+  const activeStopValue = gradientValue.stops.find((stop, index) => index === gradientValue.activeStopIndex);
+  return { gradientEditor, gradientValue, activeStopValue };
 };
 
 export default connect(

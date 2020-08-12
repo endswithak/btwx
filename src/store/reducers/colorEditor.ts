@@ -7,7 +7,6 @@ import {
 export interface ColorEditorState {
   isOpen: boolean;
   layers: string[];
-  color: em.Color | 'multi';
   prop: 'stroke' | 'fill' | 'shadow';
   x: number;
   y: number;
@@ -16,7 +15,6 @@ export interface ColorEditorState {
 const initialState: ColorEditorState = {
   isOpen: false,
   layers: null,
-  color: null,
   prop: null,
   x: null,
   y: null
@@ -29,7 +27,6 @@ export default (state = initialState, action: ColorEditorTypes): ColorEditorStat
         ...state,
         isOpen: true,
         layers: action.payload.layers,
-        color: action.payload.color,
         prop: action.payload.prop,
         x: action.payload.x,
         y: action.payload.y
@@ -40,7 +37,6 @@ export default (state = initialState, action: ColorEditorTypes): ColorEditorStat
         ...state,
         isOpen: false,
         layers: null,
-        color: null,
         x: null,
         y: null,
         prop: null

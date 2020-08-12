@@ -99,8 +99,6 @@ import {
   ADD_LAYERS_GRADIENT_STOP,
   REMOVE_LAYER_GRADIENT_STOP,
   REMOVE_LAYERS_GRADIENT_STOP,
-  ACTIVATE_LAYER_GRADIENT_STOP,
-  DEACTIVATE_LAYER_GRADIENT_STOP,
   SET_LAYER_ACTIVE_GRADIENT_STOP,
   SET_LAYER_STROKE_WIDTH,
   SET_LAYERS_STROKE_WIDTH,
@@ -338,8 +336,6 @@ import {
   addLayersGradientStop,
   removeLayerGradientStop,
   removeLayersGradientStop,
-  activateLayerGradientStop,
-  deactivateLayerGradientStop,
   setLayerActiveGradientStop,
   addLayersMask,
   removeLayersMask,
@@ -753,10 +749,6 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return removeLayerGradientStop(state, action);
     case REMOVE_LAYERS_GRADIENT_STOP:
       return removeLayersGradientStop(state, action);
-    case ACTIVATE_LAYER_GRADIENT_STOP:
-      return activateLayerGradientStop(state, action);
-    case DEACTIVATE_LAYER_GRADIENT_STOP:
-      return deactivateLayerGradientStop(state, action);
     case SET_LAYER_ACTIVE_GRADIENT_STOP:
       return setLayerActiveGradientStop(state, action);
     case ADD_LAYERS_MASK:

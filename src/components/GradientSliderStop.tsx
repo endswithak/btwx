@@ -8,14 +8,16 @@ gsap.registerPlugin(Draggable);
 
 interface GradientSliderProps {
   stop: em.GradientStop;
-  onStopPress(id: string): void;
-  onStopDrag(id: string, position: number): void;
+  index: number;
+  activeStopIndex: number;
+  onStopPress(index: number): void;
+  onStopDrag(index: number, position: number): void;
 }
 
 const GradientSliderStop = (props: GradientSliderProps): ReactElement => {
   const ref = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
-  const { stop, onStopPress, onStopDrag } = props;
+  const { stop, index, activeStopIndex, onStopPress, onStopDrag } = props;
   const [prevPos, setPrevPos] = useState(stop.position);
 
   const initDraggable = () => {
@@ -29,7 +31,7 @@ const GradientSliderStop = (props: GradientSliderProps): ReactElement => {
         zIndexBoost: false,
         bounds: '#c-gradient-slider__slider',
         onPress: function() {
-          onStopPress(stop.id);
+          onStopPress(index);
         },
         onDrag: function() {
           let newPosition = this.x / this.maxX;
@@ -38,7 +40,7 @@ const GradientSliderStop = (props: GradientSliderProps): ReactElement => {
           } else if (newPosition > 1) {
             newPosition = 1;
           }
-          onStopDrag(stop.id, newPosition);
+          onStopDrag(index, newPosition);
           setPrevPos(newPosition);
         }
       });
@@ -63,7 +65,7 @@ const GradientSliderStop = (props: GradientSliderProps): ReactElement => {
       <div
         className='c-gradient-slider__circle'
         style={{
-          boxShadow: stop.active
+          boxShadow: index === activeStopIndex
           ? `0 0 0 2px #fff, 0 0 0 3px ${theme.palette.primary}, 0 0 0 1px rgba(0, 0, 0, 0.3) inset, 0 0 0 3px rgba(0, 0, 0, 0.3)`
           : `0 0 0 2px #fff, 0 0 0 1px rgba(0, 0, 0, 0.3) inset, 0 0 0 3px rgba(0, 0, 0, 0.3)`
         }} />

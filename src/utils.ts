@@ -7,7 +7,7 @@ interface GetLayerById {
 
 export const getLayerById = ({layer, id}: GetLayerById): FileFormat.AnyLayer => {
   return layer.layers.find((layer) => layer.do_objectID === id);
-}
+};
 
 interface GetLayerByPath {
   layer: FileFormat.AnyLayer;
@@ -19,7 +19,7 @@ interface GetLayerByPathReturnValue {
   absPosition: {
     x: number;
     y: number;
-  }
+  };
 }
 
 export const getAbsLayerByPath = ({layer, path}: GetLayerByPath): GetLayerByPathReturnValue => {
@@ -36,7 +36,7 @@ export const getAbsLayerByPath = ({layer, path}: GetLayerByPath): GetLayerByPath
     layer: selectedLayer,
     absPosition: absPosition
   };
-}
+};
 
 export const debounce = <F extends (...args: any[]) => any>(func: F, waitFor: number) => {
   let timeout: ReturnType<typeof setTimeout> | null = null;
@@ -57,4 +57,8 @@ export const bufferToBase64 = (buffer: Buffer) => {
     new Uint8Array(buffer)
       .reduce((data, byte) => data + String.fromCharCode(byte), '')
   );
-}
+};
+
+export const isBetween = (x: number, min: number, max: number): boolean => {
+  return x >= min && x <= max;
+};

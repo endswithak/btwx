@@ -129,7 +129,6 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
     }
     if (!colorEditorOpen) {
       openColorEditor({
-        color: color,
         prop: prop,
         layers: selected,
         x: bounding.x,

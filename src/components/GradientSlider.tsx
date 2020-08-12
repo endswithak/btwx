@@ -1,27 +1,20 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
-import { connect } from 'react-redux';
-import { RootState } from '../store/reducers';
+import React, { useContext, ReactElement } from 'react';
 import { ThemeContext } from './ThemeProvider';
 import GradientSliderStop from './GradientSliderStop';
-import GradientSliderRemove from './GradientSliderRemove';
 import GradientSliderGradient from './GradientSliderGradient';
 
 interface GradientSliderProps {
-  gradientStops: {
-    allIds: string[];
-    byId: {
-      [id: string]: em.GradientStop;
-    };
-  };
-  onStopPress(id: string): void;
-  onStopDrag(id: string, position: number): void;
+  gradientStops: em.GradientStop[];
+  activeStopIndex: number;
+  onStopPress(index: number): void;
+  onStopDrag(index: number, position: number): void;
   onSliderClick(stop: em.GradientStop): void;
 }
 
 const GradientSlider = (props: GradientSliderProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { gradientStops, onStopPress, onStopDrag, onSliderClick } = props;
+  const { gradientStops, activeStopIndex, onStopPress, onStopDrag, onSliderClick } = props;
 
   return (
     <div
@@ -39,9 +32,11 @@ const GradientSlider = (props: GradientSliderProps): ReactElement => {
           stops={gradientStops}
           onSliderClick={onSliderClick} />
         {
-          gradientStops.allIds.map((stop, index) => (
+          gradientStops.map((stop, index) => (
             <GradientSliderStop
-              stop={gradientStops.byId[stop]}
+              stop={stop}
+              index={index}
+              activeStopIndex={activeStopIndex}
               onStopPress={onStopPress}
               onStopDrag={onStopDrag}
               key={index}

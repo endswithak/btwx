@@ -6,6 +6,7 @@ import { addShape } from '../store/actions/layer';
 import { getPagePaperLayer, getLayerAndDescendants, getPaperLayer, getCurvePoints } from '../store/selectors/layer';
 import { applyShapeMethods } from './shapeUtils';
 import { paperMain } from './index';
+import { isBetween } from '../utils';
 import Tooltip from './tooltip';
 import { DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_POINTS, THEME_PRIMARY_COLOR, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../constants';
 import SnapTool from './snapTool';
@@ -16,11 +17,14 @@ class ShapeTool {
   drawing: boolean;
   tool: paper.Tool;
   shapeType: em.ShapeType;
+  pivot: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
   outline: paper.Path;
   tooltip: Tooltip;
   from: paper.Point;
+  x: number;
+  y: number;
   to: paper.Point;
-  pointDiff: paper.Point;
+  vector: paper.Point;
   dims: paper.Size;
   maxDim: number;
   constrainedDims: paper.Point;
@@ -45,9 +49,11 @@ class ShapeTool {
     this.tooltip = null;
     this.from = null;
     this.to = null;
-    this.pointDiff = new Point(0, 0);
-    this.dims = new Size(0, 0);
+    this.vector = null;
+    this.dims = null;
     this.maxDim = 0;
+    this.x = 0;
+    this.y = 0;
     this.constrainedDims = new Point(0, 0);
     this.centerPoint = new Point(0, 0);
     this.shiftModifier = false;
@@ -70,59 +76,89 @@ class ShapeTool {
     });
   }
   renderShape(shapeOpts: any) {
-    let shape;
     switch(this.shapeType) {
       case 'Rectangle':
-        shape = new paperMain.Path.Rectangle({
-          from: this.from,
-          to: this.to,
+        return new paperMain.Path.Rectangle({
+          from: this.toBounds.topLeft,
+          to: this.toBounds.bottomRight,
           ...shapeOpts
         });
-        break;
       case 'Ellipse':
-        shape = new paperMain.Path.Ellipse({
-          from: this.from,
-          to: this.to,
+        return new paperMain.Path.Rectangle({
+          from: this.toBounds.topLeft,
+          to: this.toBounds.bottomRight,
           ...shapeOpts
         });
-        break;
       case 'Rounded':
-        shape = new paperMain.Path.Rectangle({
-          from: this.from,
-          to: this.to,
+        return new paperMain.Path.Rectangle({
+          from: this.toBounds.topLeft,
+          to: this.toBounds.bottomRight,
           radius: (this.maxDim / 2) * DEFAULT_ROUNDED_RADIUS,
           ...shapeOpts
         });
-        break;
-      case 'Polygon':
-        shape = new paperMain.Path.RegularPolygon({
+      case 'Polygon': {
+        const shape = new paperMain.Path.RegularPolygon({
           center: this.centerPoint,
           radius: this.maxDim / 2,
           sides: DEFAULT_POLYGON_SIDES,
           ...shapeOpts
         });
-        break;
-      case 'Star':
-        shape = new paperMain.Path.Star({
+        shape.bounds.width = this.toBounds.width;
+        shape.bounds.height = this.toBounds.height;
+        shape.position = this.toBounds.center;
+        return shape;
+      }
+      case 'Star': {
+        const shape = new paperMain.Path.Star({
           center: this.centerPoint,
           radius1: this.maxDim / 2,
           radius2: (this.maxDim / 2) * DEFAULT_STAR_RADIUS,
           points: DEFAULT_STAR_POINTS,
           ...shapeOpts
         });
-        break;
-      case 'Line':
-        shape = new paperMain.Path.Line({
+        shape.bounds.width = this.toBounds.width;
+        shape.bounds.height = this.toBounds.height;
+        shape.position = this.toBounds.center;
+        return shape;
+      }
+      case 'Line': {
+        const isHorizontal = isBetween(this.vector.angle, 0, 45) || isBetween(this.vector.angle, -45, 0) || isBetween(this.vector.angle, 135, 180) || isBetween(this.vector.angle, -180, -135);
+        const isVertical = isBetween(this.vector.angle, -90, -45) || isBetween(this.vector.angle, -135, -90) || isBetween(this.vector.angle, 45, 90) || isBetween(this.vector.angle, 90, 135);
+        const lineTo = (() => {
+          if (this.shiftModifier) {
+            if (isHorizontal) {
+              return new paperMain.Point(this.snapTool.snap.x ? this.snapTool.snap.x.point : this.to.x, this.from.y);
+            } else if (isVertical) {
+              return new paperMain.Point(this.from.x, this.snapTool.snap.y ? this.snapTool.snap.y.point : this.to.y);
+            } else {
+              return this.to;
+            }
+          } else {
+            return this.to;
+          }
+        })();
+        const shape = new paperMain.Path.Line({
           from: this.from,
-          to: this.to,
+          to: lineTo,
           ...shapeOpts
         });
-        break;
+        if (this.shiftModifier) {
+          if (isVertical) {
+            this.toBounds.width = 1;
+            this.snapTool.snapBounds = this.toBounds;
+          }
+          if (isHorizontal) {
+            this.toBounds.height = 1;
+            this.snapTool.snapBounds = this.toBounds;
+          }
+        } else {
+          shape.bounds.width = this.toBounds.width;
+          shape.bounds.height = this.toBounds.height;
+          shape.position = this.toBounds.center;
+        }
+        return shape;
+      }
     }
-    shape.bounds.width = this.toBounds.width;
-    shape.bounds.height = this.toBounds.height;
-    shape.position = this.toBounds.center;
-    return shape;
   }
   updateTooltip(): void {
     if (this.tooltip) {
@@ -139,7 +175,6 @@ class ShapeTool {
       strokeWidth: 1 / paperMain.view.zoom
     });
     this.outline.removeOn({
-      drag: true,
       up: true
     });
   }
@@ -147,17 +182,64 @@ class ShapeTool {
     const x = this.snapTool.snap.x ? this.snapTool.snap.x.point : this.to.x;
     const y = this.snapTool.snap.y ? this.snapTool.snap.y.point : this.to.y;
     if (this.shiftModifier) {
-      if (this.snapTool.snap.x && this.snapTool.snap.y) {
-        return;
-      } else {
-        if (this.snapTool.snap.x) {
-          return;
+      const xSnap = this.snapTool.snap.x;
+      const ySnap = this.snapTool.snap.y;
+      const setXSnapBounds = () => {
+        const newSize = Math.abs(xSnap.point - this.from.x);
+        this.toBounds = new paperMain.Rectangle({
+          from: this.from,
+          to: new paperMain.Point(xSnap.point, (() => {
+            switch(this.pivot) {
+              case 'bottomLeft':
+              case 'bottomRight':
+                return this.from.y - newSize;
+              case 'topLeft':
+              case 'topRight':
+                return this.from.y + newSize;
+            }
+          })())
+        });
+      }
+      const setYSnapBounds = () => {
+        const newSize = Math.abs(ySnap.point - this.from.y);
+        this.toBounds = new paperMain.Rectangle({
+          from: this.from,
+          to: new paperMain.Point((() => {
+            switch(this.pivot) {
+              case 'bottomLeft':
+              case 'topLeft':
+                return this.from.x + newSize;
+              case 'bottomRight':
+              case 'topRight':
+                return this.from.x - newSize;
+            }
+          })(), ySnap.point)
+        });
+      }
+      if (xSnap && ySnap) {
+        const xMax = Math.max(xSnap.point, this.toBounds[xSnap.boundsSide as 'left' | 'right']);
+        const xMin = Math.min(xSnap.point, this.toBounds[xSnap.boundsSide as 'left' | 'right']);
+        const yMax = Math.max(ySnap.point, this.toBounds[ySnap.boundsSide as 'top' | 'bottom']);
+        const yMin = Math.min(ySnap.point, this.toBounds[ySnap.boundsSide as 'top' | 'bottom']);
+        const xSnapDistance = xMax - xMin;
+        const ySnapDistance = yMax - yMin;
+        const closestSnapPoint: 'x' | 'y' = xSnapDistance <= ySnapDistance ? 'x' : 'y';
+        switch(closestSnapPoint) {
+          case 'x':
+            setXSnapBounds();
+            break;
+          case 'y':
+            setYSnapBounds();
+            break;
         }
-        if (this.snapTool.snap.y) {
-          return;
+      } else {
+        if (xSnap) {
+          setXSnapBounds();
+        }
+        if (ySnap) {
+          setYSnapBounds();
         }
       }
-      return;
     } else {
       this.toBounds = new paperMain.Rectangle({
         from: this.from,
@@ -172,13 +254,10 @@ class ShapeTool {
       case 'shift': {
         this.shiftModifier = true;
         if (this.outline) {
-          this.toBounds = new paperMain.Rectangle({
-            from: this.from,
-            to: this.shiftModifier ? this.constrainedDims : this.to
-          });
-          this.snapTool.snapBounds = this.toBounds;
-          this.updateTooltip();
+          this.updateToBounds();
           this.updateOutline();
+          this.updateTooltip();
+          this.snapTool.updateGuides();
           //this.updateRef();
         }
         break;
@@ -201,13 +280,10 @@ class ShapeTool {
       case 'shift': {
         this.shiftModifier = false;
         if (this.outline) {
-          this.toBounds = new paperMain.Rectangle({
-            from: this.from,
-            to: this.shiftModifier ? this.constrainedDims : this.to
-          });
-          this.snapTool.snapBounds = this.toBounds;
-          this.updateTooltip();
+          this.updateToBounds();
           this.updateOutline();
+          this.updateTooltip();
+          this.snapTool.updateGuides();
           //this.updateRef();
         }
         break;
@@ -221,7 +297,6 @@ class ShapeTool {
         point: event.point,
         size: new paperMain.Size(1, 1)
       });
-      const snapBounds = this.toBounds.clone();
       this.snapTool.snapPoints = state.layer.present.inView.snapPoints;
       this.snapTool.snapBounds = this.toBounds;
       this.snapTool.updateXSnap({
@@ -234,26 +309,26 @@ class ShapeTool {
         handleSnapped: (snapPoint) => {
           switch(snapPoint.boundsSide) {
             case 'left':
-              snapBounds.center.x = snapPoint.point + (this.toBounds.width / 2);
+              this.toBounds.center.x = snapPoint.point + (this.toBounds.width / 2);
               break;
             case 'center':
-              snapBounds.center.x = snapPoint.point;
+              this.toBounds.center.x = snapPoint.point;
               break;
             case 'right':
-              snapBounds.center.x = snapPoint.point - (this.toBounds.width / 2);
+              this.toBounds.center.x = snapPoint.point - (this.toBounds.width / 2);
               break;
           }
         },
         handleSnap: (closestXSnap) => {
           switch(closestXSnap.bounds.side) {
             case 'left':
-              snapBounds.center.x = closestXSnap.snapPoint.point + (this.toBounds.width / 2);
+              this.toBounds.center.x = closestXSnap.snapPoint.point + (this.toBounds.width / 2);
               break;
             case 'center':
-              snapBounds.center.x = closestXSnap.snapPoint.point;
+              this.toBounds.center.x = closestXSnap.snapPoint.point;
               break;
             case 'right':
-              snapBounds.center.x = closestXSnap.snapPoint.point - (this.toBounds.width / 2);
+              this.toBounds.center.x = closestXSnap.snapPoint.point - (this.toBounds.width / 2);
               break;
           }
         }
@@ -268,32 +343,30 @@ class ShapeTool {
         handleSnapped: (snapPoint) => {
           switch(snapPoint.boundsSide) {
             case 'top':
-              snapBounds.center.y = snapPoint.point + (this.toBounds.height / 2);
+              this.toBounds.center.y = snapPoint.point + (this.toBounds.height / 2);
               break;
             case 'center':
-              snapBounds.center.y = snapPoint.point;
+              this.toBounds.center.y = snapPoint.point;
               break;
             case 'bottom':
-              snapBounds.center.y = snapPoint.point - (this.toBounds.height / 2);
+              this.toBounds.center.y = snapPoint.point - (this.toBounds.height / 2);
               break;
           }
         },
         handleSnap: (closestYSnap) => {
           switch(closestYSnap.bounds.side) {
             case 'top':
-              snapBounds.center.y = closestYSnap.snapPoint.point + (this.toBounds.height / 2);
+              this.toBounds.center.y = closestYSnap.snapPoint.point + (this.toBounds.height / 2);
               break;
             case 'center':
-              snapBounds.center.y = closestYSnap.snapPoint.point;
+              this.toBounds.center.y = closestYSnap.snapPoint.point;
               break;
             case 'bottom':
-              snapBounds.center.y = closestYSnap.snapPoint.point - (this.toBounds.height / 2);
+              this.toBounds.center.y = closestYSnap.snapPoint.point - (this.toBounds.height / 2);
               break;
           }
         }
       });
-      this.toBounds = snapBounds;
-      this.snapTool.snapBounds = this.toBounds;
       this.snapTool.updateGuides();
       //this.updateRef();
     }
@@ -302,14 +375,11 @@ class ShapeTool {
     const state = store.getState();
     this.drawing = true;
     this.insertTool.enabled = false;
-    const from = event.point;
-    if (this.snapTool.snap.x) {
-      from.x = this.snapTool.snap.x.point;
-    }
-    if (this.snapTool.snap.y) {
-      from.y = this.snapTool.snap.y.point;
-    }
-    this.from = new paperMain.Point(from.x, from.y);
+    this.from = new paperMain.Point((
+      this.snapTool.snap.x ? this.snapTool.snap.x.point : event.point.x
+    ),(
+      this.snapTool.snap.y ? this.snapTool.snap.y.point : event.point.y
+    ));
     this.snapTool.snapPoints = state.layer.present.inView.snapPoints.filter((snapPoint) => {
       if (snapPoint.axis === 'x') {
         return snapPoint.point !== this.from.x;
@@ -321,11 +391,14 @@ class ShapeTool {
     this.snapTool.snap.y = null;
   }
   onMouseDrag(event: paper.ToolEvent): void {
+    this.x += event.delta.x;
+    this.y += event.delta.y;
+    this.pivot = `${this.y < 0 ? 'bottom' : 'top'}${this.x < 0 ? 'Right' : 'Left'}` as 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
     this.to = event.point;
-    this.pointDiff = new paperMain.Point(this.to.x - this.from.x, this.to.y - this.from.y);
-    this.dims = new paperMain.Size(this.pointDiff.x < 0 ? this.pointDiff.x * -1 : this.pointDiff.x, this.pointDiff.y < 0 ? this.pointDiff.y * -1 : this.pointDiff.y);
+    this.vector = this.to.subtract(this.from);
+    this.dims = new paperMain.Rectangle({from: this.from, to: this.to}).size;
     this.maxDim = Math.max(this.dims.width, this.dims.height);
-    this.constrainedDims = new Point(this.pointDiff.x < 0 ? this.from.x - this.maxDim : this.from.x + this.maxDim, this.pointDiff.y < 0 ? this.from.y - this.maxDim : this.from.y + this.maxDim);
+    this.constrainedDims = new Point(this.vector.x < 0 ? this.from.x - this.maxDim : this.from.x + this.maxDim, this.vector.y < 0 ? this.from.y - this.maxDim : this.from.y + this.maxDim);
     this.toBounds = new paperMain.Rectangle({
       from: this.from,
       to: this.shiftModifier ? this.constrainedDims : this.to
@@ -348,8 +421,8 @@ class ShapeTool {
       }
     });
     this.updateToBounds();
-    this.updateTooltip();
     this.updateOutline();
+    this.updateTooltip();
     this.snapTool.updateGuides();
     //this.updateRef();
   }
@@ -358,8 +431,8 @@ class ShapeTool {
       if (this.to.x - this.from.x !== 0 || this.to.y - this.from.y !== 0) {
         const state = store.getState();
         const id = uuidv4();
-        const fill = DEFAULT_FILL_STYLE();
-        const stroke = DEFAULT_STROKE_STYLE();
+        const fill = DEFAULT_FILL_STYLE;
+        const stroke = DEFAULT_STROKE_STYLE;
         const paperLayer = this.renderShape({
           fillColor: { hue: fill.color.h, saturation: fill.color.s, lightness: fill.color.l, alpha: fill.color.a },
           strokeColor: { hue: stroke.color.h, saturation: stroke.color.s, lightness: stroke.color.l, alpha: stroke.color.a },
@@ -369,6 +442,9 @@ class ShapeTool {
             type: 'Shape'
           }
         });
+        const fromPoint = (paperLayer as paper.Path).segments[0].point;
+        const toPoint = (paperLayer as paper.Path).segments[1].point;
+        const vector = toPoint.subtract(fromPoint);
         store.dispatch(addShape({
           id: id,
           type: 'Shape',
@@ -391,8 +467,8 @@ class ShapeTool {
           master: {
             x: paperLayer.position.x,
             y: paperLayer.position.y,
-            width: paperLayer.bounds.width,
-            height: paperLayer.bounds.height
+            width: this.shapeType === 'Line' ? vector.length : paperLayer.bounds.width,
+            height: this.shapeType === 'Line' ? 0 : paperLayer.bounds.height
           },
           shapeType: this.shapeType,
           selected: false,
@@ -400,17 +476,17 @@ class ShapeTool {
           masked: false,
           tweenEvents: [],
           tweens: [],
-          style: (() => {
-            const style = DEFAULT_STYLE();
-            return {
-              ...style,
-              fill: {
-                ...style.fill,
-                enabled: this.shapeType !== 'Line'
-              }
-            } as em.Style
-          })(),
-          transform: DEFAULT_TRANSFORM,
+          style: {
+            ...DEFAULT_STYLE,
+            fill: {
+              ...DEFAULT_STYLE.fill,
+              enabled: this.shapeType !== 'Line'
+            }
+          },
+          transform: {
+            ...DEFAULT_TRANSFORM,
+            rotation: this.shapeType === 'Line' ? vector.angle : DEFAULT_TRANSFORM.rotation
+          },
           booleanOperation: 'none',
           path: {
             closed: this.shapeType !== 'Line',

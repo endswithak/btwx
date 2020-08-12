@@ -8,17 +8,17 @@ import { setLayersRotation } from '../store/actions/layer';
 
 interface RotationInputProps {
   selected?: string[];
-  rotationValue?: number | string;
+  rotationValue?: number | 'multi';
   disabled?: boolean;
   setLayersRotation?(payload: SetLayersRotationPayload): LayerTypes;
 }
 
 const RotationInput = (props: RotationInputProps): ReactElement => {
   const { selected, setLayersRotation, rotationValue, disabled } = props;
-  const [rotation, setRotation] = useState(rotationValue);
+  const [rotation, setRotation] = useState(rotationValue !== 'multi' ? Math.round(rotationValue) : rotationValue);
 
   useEffect(() => {
-    setRotation(rotationValue);
+    setRotation(rotationValue !== 'multi' ? Math.round(rotationValue) : rotationValue);
   }, [rotationValue, selected]);
 
   const handleChange = (e: any) => {
@@ -36,10 +36,10 @@ const RotationInput = (props: RotationInputProps): ReactElement => {
         setLayersRotation({layers: selected, rotation: nextRotation});
         setRotation(nextRotation);
       } else {
-        setRotation(rotationValue);
+        setRotation(rotationValue !== 'multi' ? Math.round(rotationValue) : rotationValue);
       }
     } catch(error) {
-      setRotation(rotationValue);
+      setRotation(rotationValue !== 'multi' ? Math.round(rotationValue) : rotationValue);
     }
   }
 
