@@ -5,8 +5,10 @@ import store from '../store';
 import { paperMain } from './index';
 import { THEME_PRIMARY_COLOR } from '../constants';
 import { LayerState } from '../store/reducers/layer';
+import { RootState } from '../store/reducers';
 
 class AreaSelectTool {
+  state: RootState;
   enabled: boolean;
   from: paper.Point;
   to: paper.Point;
@@ -16,6 +18,7 @@ class AreaSelectTool {
   metaModifier: boolean;
   altModifier: boolean;
   constructor() {
+    this.state = null;
     this.enabled = false;
     this.from = null;
     this.to = null;
@@ -25,8 +28,9 @@ class AreaSelectTool {
     this.altModifier = false;
     this.overlapped = [];
   }
-  enable() {
+  enable(state: RootState) {
     this.enabled = true;
+    this.state = state;
   }
   disable() {
     if (this.shape) {
@@ -37,6 +41,7 @@ class AreaSelectTool {
     this.shape = null;
     this.enabled = false;
     this.overlapped = [];
+    this.state = null;
   }
   update(to: paper.Point) {
     this.to = to;
@@ -58,13 +63,13 @@ class AreaSelectTool {
     });
     return selectAreaShape;
   }
-  hitTestLayers(state: LayerState) {
+  hitTestLayers() {
     const layers: string[] = [];
     // get overlapped page layers
-    const overlappedLayers = getPagePaperLayer(state).getItems({
+    const overlappedLayers = getPagePaperLayer(this.state.layer.present).getItems({
       data: (data: any) => {
         if (data.id !== 'ArtboardBackground' && data.id !== 'ArtboardMask' && data.id !== 'Raster') {
-          const topParent = getNearestScopeAncestor(state, data.id);
+          const topParent = getNearestScopeAncestor(this.state.layer.present, data.id);
           return topParent.id === data.id;
         }
       },
@@ -81,7 +86,7 @@ class AreaSelectTool {
           item.getItems({
             data: (data: any) => {
               if (data.id !== 'ArtboardBackground' && data.id !== 'ArtboardMask' && data.id !== 'Raster') {
-                if (state.byId[item.data.id].children.includes(data.id)) {
+                if (this.state.layer.present.byId[item.data.id].children.includes(data.id)) {
                   layers.push(data.id);
                 }
               }
@@ -130,12 +135,11 @@ class AreaSelectTool {
   }
   onMouseDown(event: paper.ToolEvent): void {
     if (this.enabled) {
-      const state = store.getState();
       // set from point
       this.from = event.point;
       // deselect all if layers if no shift modifier
       if (!this.shiftModifier) {
-        if (state.layer.present.selected.length > 0) {
+        if (this.state.layer.present.selected.length > 0) {
           store.dispatch(deselectAllLayers());
         }
       }
@@ -146,16 +150,15 @@ class AreaSelectTool {
       // update to point and area select shape
       this.update(event.point);
       if (this.to) {
-        const state = store.getState();
         // get hit test layers
-        const hitTestLayers = this.hitTestLayers(state.layer.present);
+        const hitTestLayers = this.hitTestLayers();
         // loop through hit test layers
         hitTestLayers.forEach((id: string) => {
           // process layer if not included in overlapped
           if (!this.overlapped.includes(id)) {
             // if shift modifier, add or remove layer from selected
             if (this.shiftModifier) {
-              if (state.layer.present.selected.includes(id)) {
+              if (this.state.layer.present.selected.includes(id)) {
                 store.dispatch(deselectLayer({id}));
               } else {
                 store.dispatch(selectLayer({id}));
@@ -175,7 +178,7 @@ class AreaSelectTool {
           if (!hitTestLayers.includes(id)) {
             // if shift modifier, add or remove layer from selected
             if (this.shiftModifier) {
-              if (state.layer.present.selected.includes(id)) {
+              if (this.state.layer.present.selected.includes(id)) {
                 store.dispatch(deselectLayer({id}));
               } else {
                 store.dispatch(selectLayer({id}));

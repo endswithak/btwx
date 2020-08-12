@@ -44,9 +44,9 @@ class DragTool {
     this.toBounds = null;
     this.snapTool = null;
   }
-  enable(moveHandle = false): void {
-    this.state = store.getState();
+  enable(state: RootState, moveHandle = false): void {
     store.dispatch(setCanvasDragging({dragging: true}));
+    this.state = state;
     this.enabled = true;
     this.snapTool = new SnapTool();
     this.moveHandle = moveHandle;

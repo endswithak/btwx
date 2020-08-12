@@ -91,7 +91,7 @@ class SelectionTool {
       if (hitResult.item.data.id === 'selectionFrameHandle') {
         // if move handle, enable drag tool
         if (hitResult.item.data.handle === 'move') {
-          this.dragTool.enable(true);
+          this.dragTool.enable(state, true);
           this.dragTool.onMouseDown(event);
         }
         // if from or to handle, enable line tool
@@ -112,13 +112,13 @@ class SelectionTool {
         this.gradientTool.onMouseDown(event);
       // if hit result is shape, group, text, or image, enable drag tool
       } else if (hitResult.item.data.type && (hitResult.item.data.type === 'Shape' || hitResult.item.data.type === 'Group' || hitResult.item.data.type === 'Image' || hitResult.item.data.type === 'Raster' || hitResult.item.data.type === 'Text')) {
-        this.dragTool.enable();
+        this.dragTool.enable(state);
         this.dragTool.onMouseDown(event);
       }
     // if no hit result, enable area select tool
     } else {
       if (!isGradientEditorOpen) {
-        this.areaSelectTool.enable();
+        this.areaSelectTool.enable(state);
         this.areaSelectTool.onMouseDown(event);
       }
     }

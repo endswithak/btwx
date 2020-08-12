@@ -38,7 +38,7 @@ const mapStateToProps = (state: RootState): {
   const selected = orderLayersByDepth(state.layer.present, layer.present.selected);
   const canUnite = selected.length === 2 && layer.present.selected.every((id: string) => {
     const layer = state.layer.present.byId[id];
-    return layer.type === 'Shape';
+    return layer.type === 'Shape' && (layer as em.Shape).path.closed;
   });
   return { selected, canUnite };
 };

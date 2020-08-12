@@ -339,8 +339,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 ) {
                   tweenPaperLayer.fillColor = {
                     gradient: {
-                      stops: tweenDestinationLayer.style.fill.gradient.stops.allIds.map((id) => {
-                        const stop = tweenDestinationLayer.style.fill.gradient.stops.byId[id];
+                      stops: tweenDestinationLayer.style.fill.gradient.stops.map((stop) => {
                         return new paperPreview.GradientStop(
                           new paperPreview.Color(tweenPaperLayer.fillColor.toCSS(true)),
                           stop.position
@@ -387,8 +386,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 ) {
                   tweenPaperLayer.fillColor = {
                     gradient: {
-                      stops: tweenDestinationLayer.style.fill.gradient.stops.allIds.map((id) => {
-                        const stop = tweenDestinationLayer.style.fill.gradient.stops.byId[id];
+                      stops: tweenDestinationLayer.style.fill.gradient.stops.map((stop) => {
                         const stopColor = stop.color;
                         return new paperPreview.GradientStop({hue: stopColor.h, saturation: stopColor.s, lightness: stopColor.l, alpha: 0} as paper.Color, stop.position);
                       }),
@@ -550,8 +548,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 ) {
                   tweenPaperLayer.strokeColor = {
                     gradient: {
-                      stops: tweenDestinationLayer.style.stroke.gradient.stops.allIds.map((id) => {
-                        const stop = tweenDestinationLayer.style.stroke.gradient.stops.byId[id];
+                      stops: tweenDestinationLayer.style.stroke.gradient.stops.map((stop) => {
                         return new paperPreview.GradientStop(
                           new paperPreview.Color(tweenPaperLayer.strokeColor.toCSS(true)),
                           stop.position
@@ -598,8 +595,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 ) {
                   tweenPaperLayer.strokeColor = {
                     gradient: {
-                      stops: tweenDestinationLayer.style.stroke.gradient.stops.allIds.map((id) => {
-                        const stop = tweenDestinationLayer.style.stroke.gradient.stops.byId[id];
+                      stops: tweenDestinationLayer.style.stroke.gradient.stops.map((stop) => {
                         const stopColor = stop.color;
                         return new paperPreview.GradientStop({hue: stopColor.h, saturation: stopColor.s, lightness: stopColor.l, alpha: 0} as paper.Color, stop.position);
                       }),

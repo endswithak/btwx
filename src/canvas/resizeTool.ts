@@ -63,7 +63,13 @@ class ResizeTool {
     this.snapTool = new SnapTool();
     this.state = state;
     if (
-      state.layer.present.selected.length > 1 ||
+      (
+        state.layer.present.selected.length > 1 &&
+        (
+          state.layer.present.selected.some((id) => state.layer.present.byId[id].type === 'Group') ||
+          state.layer.present.selected.some((id) => state.layer.present.byId[id].transform.rotation !== 0)
+        )
+      ) ||
       state.layer.present.selected.length === 1 && (
         state.layer.present.byId[state.layer.present.selected[0]].type === 'Group' ||
         state.layer.present.byId[state.layer.present.selected[0]].transform.rotation !== 0

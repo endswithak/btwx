@@ -84,7 +84,7 @@ class ShapeTool {
           ...shapeOpts
         });
       case 'Ellipse':
-        return new paperMain.Path.Rectangle({
+        return new paperMain.Path.Ellipse({
           from: this.toBounds.topLeft,
           to: this.toBounds.bottomRight,
           ...shapeOpts
