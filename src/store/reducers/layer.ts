@@ -180,9 +180,13 @@ import {
   EXCLUDE_LAYERS,
   DIVIDE_LAYERS,
   SET_ROUNDED_RADIUS,
+  SET_ROUNDED_RADII,
   SET_POLYGON_SIDES,
+  SET_POLYGONS_SIDES,
   SET_STAR_POINTS,
+  SET_STARS_POINTS,
   SET_STAR_RADIUS,
+  SET_STARS_RADIUS,
   SET_CURVE_POINT_ORIGIN,
   SET_CURVE_POINT_ORIGIN_X,
   SET_CURVE_POINT_ORIGIN_Y,
@@ -370,12 +374,16 @@ import {
   excludeLayers,
   divideLayers,
   setRoundedRadius,
+  setRoundedRadii,
   setPolygonSides,
+  setPolygonsSides,
   setStarPoints,
+  setStarsPoints,
+  setStarRadius,
+  setStarsRadius,
   setCurvePointOrigin,
   setCurvePointOriginX,
-  setCurvePointOriginY,
-  setStarRadius
+  setCurvePointOriginY
 } from '../utils/layer';
 
 export interface LayerState {
@@ -817,12 +825,20 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return divideLayers(state, action);
     case SET_ROUNDED_RADIUS:
       return setRoundedRadius(state, action);
+    case SET_ROUNDED_RADII:
+      return setRoundedRadii(state, action);
     case SET_POLYGON_SIDES:
       return setPolygonSides(state, action);
+    case SET_POLYGONS_SIDES:
+      return setPolygonsSides(state, action);
     case SET_STAR_POINTS:
       return setStarPoints(state, action);
+    case SET_STARS_POINTS:
+      return setStarsPoints(state, action);
     case SET_STAR_RADIUS:
       return setStarRadius(state, action);
+    case SET_STARS_RADIUS:
+      return setStarsRadius(state, action);
     case SET_CURVE_POINT_ORIGIN:
       return setCurvePointOrigin(state, action);
     case SET_CURVE_POINT_ORIGIN_X:

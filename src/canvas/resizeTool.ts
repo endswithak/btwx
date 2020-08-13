@@ -167,13 +167,15 @@ class ResizeTool {
             break;
           case 'Rounded': {
             paperLayer.scale(hor, ver);
-            const newShape = new paperMain.Path.Rectangle({
-              from: paperLayer.bounds.topLeft,
-              to: paperLayer.bounds.bottomRight,
-              radius: (Math.max(layerItem.frame.width, layerItem.frame.height) / 2) * (layerItem as em.Rounded).radius
-            });
-            newShape.copyAttributes(paperLayer, true);
-            paperLayer.replaceWith(newShape);
+            if (!this.groupScale) {
+              const newShape = new paperMain.Path.Rectangle({
+                from: paperLayer.bounds.topLeft,
+                to: paperLayer.bounds.bottomRight,
+                radius: (Math.max(paperLayer.bounds.width, paperLayer.bounds.height) / 2) * (layerItem as em.Rounded).radius,
+                insert: false
+              });
+              (paperLayer as paper.Path).pathData = newShape.pathData;
+            }
             break;
           }
         }

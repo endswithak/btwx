@@ -189,9 +189,13 @@ import {
   EXCLUDE_LAYERS,
   DIVIDE_LAYERS,
   SET_ROUNDED_RADIUS,
+  SET_ROUNDED_RADII,
   SET_POLYGON_SIDES,
+  SET_POLYGONS_SIDES,
   SET_STAR_POINTS,
+  SET_STARS_POINTS,
   SET_STAR_RADIUS,
+  SET_STARS_RADIUS,
   SET_CURVE_POINT_ORIGIN,
   SET_CURVE_POINT_ORIGIN_X,
   SET_CURVE_POINT_ORIGIN_Y,
@@ -373,9 +377,13 @@ import {
   ExcludeLayersPayload,
   DivideLayersPayload,
   SetRoundedRadiusPayload,
+  SetRoundedRadiiPayload,
   SetPolygonSidesPayload,
+  SetPolygonsSidesPayload,
   SetStarPointsPayload,
+  SetStarsPointsPayload,
   SetStarRadiusPayload,
+  SetStarsRadiusPayload,
   SetCurvePointOriginPayload,
   SetCurvePointOriginXPayload,
   SetCurvePointOriginYPayload,
@@ -423,7 +431,6 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
       type: 'Artboard',
       id: layerId,
       frame: payload.frame,
-      master: payload.master,
       name: payload.name ? payload.name : 'Artboard',
       parent: null,
       children: [],
@@ -453,7 +460,6 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
       type: 'Group',
       id: layerId,
       frame: payload.frame,
-      master: payload.master,
       name: payload.name ? payload.name : 'Group',
       parent: payload.parent ? payload.parent : null,
       children: [],
@@ -520,13 +526,9 @@ export const addImage = (payload: AddImagePayload): LayerTypes => {
         x: payload.paperLayer.position.x,
         y: payload.paperLayer.position.y,
         width: payload.paperLayer.bounds.width,
-        height: payload.paperLayer.bounds.height
-      },
-      master: {
-        x: payload.paperLayer.position.x,
-        y: payload.paperLayer.position.y,
-        width: payload.paperLayer.bounds.width,
-        height: payload.paperLayer.bounds.height
+        height: payload.paperLayer.bounds.height,
+        innerWidth: payload.paperLayer.bounds.width,
+        innerHeight: payload.paperLayer.bounds.height
       },
       name: payload.name ? payload.name : 'Image',
       parent: payload.parent ? payload.parent : null,
@@ -1469,8 +1471,18 @@ export const setRoundedRadius = (payload: SetRoundedRadiusPayload): LayerTypes =
   payload
 });
 
+export const setRoundedRadii = (payload: SetRoundedRadiiPayload): LayerTypes => ({
+  type: SET_ROUNDED_RADII,
+  payload
+});
+
 export const setPolygonSides = (payload: SetPolygonSidesPayload): LayerTypes => ({
   type: SET_POLYGON_SIDES,
+  payload
+});
+
+export const setPolygonsSides = (payload: SetPolygonsSidesPayload): LayerTypes => ({
+  type: SET_POLYGONS_SIDES,
   payload
 });
 
@@ -1479,8 +1491,18 @@ export const setStarPoints = (payload: SetStarPointsPayload): LayerTypes => ({
   payload
 });
 
+export const setStarsPoints = (payload: SetStarsPointsPayload): LayerTypes => ({
+  type: SET_STARS_POINTS,
+  payload
+});
+
 export const setStarRadius = (payload: SetStarRadiusPayload): LayerTypes => ({
   type: SET_STAR_RADIUS,
+  payload
+});
+
+export const setStarsRadius = (payload: SetStarsRadiusPayload): LayerTypes => ({
+  type: SET_STARS_RADIUS,
   payload
 });
 

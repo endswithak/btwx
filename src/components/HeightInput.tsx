@@ -9,16 +9,16 @@ import { setLayersHeight } from '../store/actions/layer';
 interface HeightInputProps {
   selected?: string[];
   disabled?: boolean;
-  heightValue?: number | string;
+  heightValue?: number | 'multi';
   setLayersHeight?(payload: SetLayersHeightPayload): LayerTypes;
 }
 
 const HeightInput = (props: HeightInputProps): ReactElement => {
   const { selected, setLayersHeight, disabled, heightValue } = props;
-  const [height, setHeight] = useState(props.heightValue);
+  const [height, setHeight] = useState(heightValue !== 'multi' ? Math.round(heightValue) : heightValue);
 
   useEffect(() => {
-    setHeight(heightValue);
+    setHeight(heightValue !== 'multi' ? Math.round(heightValue) : heightValue);
   }, [heightValue, selected]);
 
   const handleChange = (e: any) => {
@@ -36,10 +36,10 @@ const HeightInput = (props: HeightInputProps): ReactElement => {
         setLayersHeight({layers: selected, height: nextHeight});
         setHeight(nextHeight);
       } else {
-        setHeight(heightValue);
+        setHeight(heightValue !== 'multi' ? Math.round(heightValue) : heightValue);
       }
     } catch(error) {
-      setHeight(heightValue);
+      setHeight(heightValue !== 'multi' ? Math.round(heightValue) : heightValue);
     }
   }
 
@@ -62,8 +62,7 @@ const mapStateToProps = (state: RootState) => {
     return [...result, layerItem];
   }, []);
   const heightValues: number[] = layerItems.reduce((result, current) => {
-    const height = Math.round(current.master.height * current.transform.scale.y);
-    return [...result, height];
+    return [...result, current.frame.innerHeight];
   }, []);
   const heightValue = (() => {
     if (heightValues.every((value: number) => value === heightValues[0])) {

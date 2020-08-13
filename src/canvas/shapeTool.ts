@@ -462,13 +462,9 @@ class ShapeTool {
             x: paperLayer.position.x,
             y: paperLayer.position.y,
             width: paperLayer.bounds.width,
-            height: paperLayer.bounds.height
-          },
-          master: {
-            x: paperLayer.position.x,
-            y: paperLayer.position.y,
-            width: this.shapeType === 'Line' ? vector.length : paperLayer.bounds.width,
-            height: this.shapeType === 'Line' ? 0 : paperLayer.bounds.height
+            height: paperLayer.bounds.height,
+            innerWidth: this.shapeType === 'Line' ? vector.length : paperLayer.bounds.width,
+            innerHeight: this.shapeType === 'Line' ? 0 : paperLayer.bounds.height
           },
           shapeType: this.shapeType,
           selected: false,

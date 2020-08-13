@@ -398,30 +398,26 @@ export const hasYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer, ar
 };
 
 export const hasRotationTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
-  return layerItem.transform.rotation !== equivalentLayerItem.transform.rotation;
+  return layerItem.transform.rotation !== equivalentLayerItem.transform.rotation && !hasShapeTween(layerItem, equivalentLayerItem);
 };
 
 export const hasWidthTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  const lineToLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType === 'Line';
+  const layerItemValid = ((layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType !== 'Line') || layerItem.type === 'Image');
+  const equivalentLayerItemValid = ((equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType !== 'Line') || equivalentLayerItem.type === 'Image');
   return (
-    (
-      (
-        layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' &&
-        equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType === 'Line'
-      ) ||
-      (
-        ((layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType !== 'Line') || layerItem.type === 'Image') &&
-        ((equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType !== 'Line') || equivalentLayerItem.type === 'Image')
-      )
-    ) &&
-    Math.round(layerItem.master.width * layerItem.transform.scale.x) !== Math.round(equivalentLayerItem.master.width * equivalentLayerItem.transform.scale.x)
+    !hasShapeTween(layerItem, equivalentLayerItem) &&
+    (lineToLine || (layerItemValid && equivalentLayerItemValid)) &&
+    Math.round(layerItem.frame.innerWidth) !== Math.round(equivalentLayerItem.frame.innerWidth)
   );
 };
 
 export const hasHeightTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   return (
+    !hasShapeTween(layerItem, equivalentLayerItem) &&
     ((layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType !== 'Line') || layerItem.type === 'Image') &&
     ((equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType !== 'Line') || equivalentLayerItem.type === 'Image') &&
-    Math.round(layerItem.master.height * layerItem.transform.scale.y) !== Math.round(equivalentLayerItem.master.height * equivalentLayerItem.transform.scale.y)
+    Math.round(layerItem.frame.innerHeight) !== Math.round(equivalentLayerItem.frame.innerHeight)
   );
 };
 
@@ -1134,7 +1130,7 @@ export const getCurvePoints = (paperLayer: paper.Path | paper.CompoundPath): em.
             if (child.className === 'CompoundPath') {
               compoundPaths.push(child as paper.CompoundPath);
             } else {
-              (paperLayer as paper.Path).segments.forEach((segment) => {
+              (child as paper.Path).segments.forEach((segment) => {
                 newPoint(segment);
               });
             }

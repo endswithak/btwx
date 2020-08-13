@@ -71,13 +71,9 @@ class TextTool {
         x: paperLayer.position.x,
         y: paperLayer.position.y,
         width: paperLayer.bounds.width,
-        height: paperLayer.bounds.height
-      },
-      master: {
-        x: paperLayer.position.x,
-        y: paperLayer.position.y,
-        width: paperLayer.bounds.width,
-        height: paperLayer.bounds.height
+        height: paperLayer.bounds.height,
+        innerWidth: paperLayer.bounds.width,
+        innerHeight: paperLayer.bounds.height
       },
       selected: false,
       mask: false,
@@ -86,17 +82,6 @@ class TextTool {
       tweenEvents: [],
       tweens: [],
       transform: DEFAULT_TRANSFORM,
-      // style: {
-      //   ...DEFAULT_STYLE(),
-      //   fill: {
-      //     ...DEFAULT_STYLE().fill,
-      //     color: state.textSettings.fillColor
-      //   },
-      //   stroke: {
-      //     ...DEFAULT_STYLE().stroke,
-      //     enabled: false
-      //   }
-      // },
       style: {
         ...DEFAULT_STYLE,
         fill: {

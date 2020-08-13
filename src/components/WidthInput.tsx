@@ -8,16 +8,16 @@ import { setLayersWidth } from '../store/actions/layer';
 
 interface WidthInputProps {
   selected?: string[];
-  widthValue?: number | string;
+  widthValue?: number | 'multi';
   setLayersWidth?(payload: SetLayersWidthPayload): LayerTypes;
 }
 
 const WidthInput = (props: WidthInputProps): ReactElement => {
   const { selected, setLayersWidth, widthValue } = props;
-  const [width, setWidth] = useState(widthValue);
+  const [width, setWidth] = useState(widthValue !== 'multi' ? Math.round(widthValue) : widthValue);
 
   useEffect(() => {
-    setWidth(widthValue);
+    setWidth(widthValue !== 'multi' ? Math.round(widthValue) : widthValue);
   }, [widthValue, selected]);
 
   const handleChange = (e: any) => {
@@ -35,10 +35,10 @@ const WidthInput = (props: WidthInputProps): ReactElement => {
         setLayersWidth({layers: selected, width: nextWidth});
         setWidth(nextWidth);
       } else {
-        setWidth(widthValue);
+        setWidth(widthValue !== 'multi' ? Math.round(widthValue) : widthValue);
       }
     } catch(error) {
-      setWidth(widthValue);
+      setWidth(widthValue !== 'multi' ? Math.round(widthValue) : widthValue);
     }
   }
 
@@ -60,8 +60,7 @@ const mapStateToProps = (state: RootState) => {
     return [...result, layerItem];
   }, []);
   const widthValues: number[] = layerItems.reduce((result, current) => {
-    const width = Math.round(current.master.width * current.transform.scale.x);
-    return [...result, width];
+    return [...result, current.frame.innerWidth];
   }, []);
   const widthValue = (() => {
     if (widthValues.every((value: number) => value === widthValues[0])) {

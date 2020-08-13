@@ -115,10 +115,10 @@ export const DEFAULT_TRANSFORM: em.Transform = {
     x: 0,
     y: 0
   },
-  scale: {
-    x: 1,
-    y: 1
-  }
+  // scale: {
+  //   x: 1,
+  //   y: 1
+  // }
 }
 
 export const DEFAULT_TEXT_VALUE = 'Type Something';

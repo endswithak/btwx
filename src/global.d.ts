@@ -175,7 +175,6 @@ declare namespace em {
   interface Layer {
     type: LayerType;
     id: string;
-    master: em.Master;
     frame: em.Frame;
     name: string;
     parent: string;
@@ -305,13 +304,8 @@ declare namespace em {
     y: number;
     width: number;
     height: number;
-  }
-
-  interface Master {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
+    innerWidth: number;
+    innerHeight: number;
   }
 
   interface Transform {
@@ -319,7 +313,6 @@ declare namespace em {
     horizontalFlip: boolean;
     verticalFlip: boolean;
     pivot: Point;
-    scale: Point;
   }
 
   interface ArtboardPreset {

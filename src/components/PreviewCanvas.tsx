@@ -121,7 +121,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
       // add tweens for each animation event
       tweenEventPaperLayer.on(tweenEvent.event, (e: paper.MouseEvent | paper.KeyEvent) => {
         if (tweenEvent.tweens.length > 0) {
-          tweenEventPaperLayer.off(tweenEvent.event);
+          tweenEventPaperLayer.off(tweenEvent.event as any);
           const tweenTimeline = gsap.timeline();
           tweenTimeline.then(() => {
             setActiveArtboard({id: tweenEvent.destinationArtboard, scope: 2});
@@ -691,38 +691,56 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 break;
               }
               case 'width': {
-                tweenProp[tween.prop] = tweenLayer.master.width * tweenLayer.transform.scale.x;
+                tweenProp[tween.prop] = tweenLayer.frame.innerWidth;
                 tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
-                  [tween.prop]: tweenDestinationLayer.master.width * tweenDestinationLayer.transform.scale.x,
+                  [tween.prop]: tweenDestinationLayer.frame.innerWidth,
                   onUpdate: () => {
                     const startRotation = tweenPaperLayer.data.rotation || tweenPaperLayer.data.rotation === 0 ? tweenPaperLayer.data.rotation : tweenLayer.transform.rotation;
-                    const startX = tweenPaperLayer.position.x;
-                    const startY = tweenPaperLayer.position.y;
+                    const startPosition = tweenPaperLayer.position;
                     tweenPaperLayer.rotation = -startRotation;
                     tweenPaperLayer.bounds.width = tweenProp[tween.prop];
                     tweenPaperLayer.rotation = startRotation;
-                    tweenPaperLayer.position.x = startX;
-                    tweenPaperLayer.position.y = startY;
+                    tweenPaperLayer.position = startPosition;
+                    if (tweenLayer.type === 'Shape' && (tweenLayer as em.Shape).shapeType === 'Rounded') {
+                      tweenPaperLayer.rotation = -startRotation;
+                      const newShape = new paperPreview.Path.Rectangle({
+                        from: tweenPaperLayer.bounds.topLeft,
+                        to: tweenPaperLayer.bounds.bottomRight,
+                        radius: (Math.max(tweenPaperLayer.bounds.width, tweenPaperLayer.bounds.height) / 2) * (tweenLayer as em.Rounded).radius,
+                        insert: false
+                      });
+                      (tweenPaperLayer as paper.Path).pathData = newShape.pathData;
+                      tweenPaperLayer.rotation = startRotation;
+                    }
                   },
                   ease: tween.ease,
                 }, tween.delay);
                 break;
               }
               case 'height': {
-                tweenProp[tween.prop] = tweenLayer.master.height * tweenLayer.transform.scale.y;
+                tweenProp[tween.prop] = tweenLayer.frame.innerHeight;
                 tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
-                  [tween.prop]: tweenDestinationLayer.master.height * tweenDestinationLayer.transform.scale.y,
+                  [tween.prop]: tweenDestinationLayer.frame.innerHeight,
                   onUpdate: () => {
                     const startRotation = tweenPaperLayer.data.rotation || tweenPaperLayer.data.rotation === 0 ? tweenPaperLayer.data.rotation : tweenLayer.transform.rotation;
-                    const startX = tweenPaperLayer.position.x;
-                    const startY = tweenPaperLayer.position.y;
+                    const startPosition = tweenPaperLayer.position;
                     tweenPaperLayer.rotation = -startRotation;
                     tweenPaperLayer.bounds.height = tweenProp[tween.prop];
                     tweenPaperLayer.rotation = startRotation;
-                    tweenPaperLayer.position.x = startX;
-                    tweenPaperLayer.position.y = startY;
+                    tweenPaperLayer.position = startPosition;
+                    if (tweenLayer.type === 'Shape' && (tweenLayer as em.Shape).shapeType === 'Rounded') {
+                      tweenPaperLayer.rotation = -startRotation;
+                      const newShape = new paperPreview.Path.Rectangle({
+                        from: tweenPaperLayer.bounds.topLeft,
+                        to: tweenPaperLayer.bounds.bottomRight,
+                        radius: (Math.max(tweenPaperLayer.bounds.width, tweenPaperLayer.bounds.height) / 2) * (tweenLayer as em.Rounded).radius,
+                        insert: false
+                      });
+                      (tweenPaperLayer as paper.Path).pathData = newShape.pathData;
+                      tweenPaperLayer.rotation = startRotation;
+                    }
                   },
                   ease: tween.ease,
                 }, tween.delay);
@@ -735,13 +753,11 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                   duration: tween.duration,
                   [tween.prop]: tweenDestinationLayer.transform.rotation,
                   onUpdate: () => {
-                    const startX = tweenPaperLayer.position.x;
-                    const startY = tweenPaperLayer.position.y;
+                    const startPosition = tweenPaperLayer.position;
                     tweenPaperLayer.rotation = -tweenProp[`${tween.prop}-prev`];
                     tweenPaperLayer.rotation = tweenProp[tween.prop];
                     tweenProp[`${tween.prop}-prev`] = tweenProp[tween.prop];
-                    tweenPaperLayer.position.x = startX;
-                    tweenPaperLayer.position.y = startY;
+                    tweenPaperLayer.position = startPosition;
                     tweenPaperLayer.data.rotation = tweenProp[tween.prop];
                   },
                   ease: tween.ease,

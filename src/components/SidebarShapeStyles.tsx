@@ -11,15 +11,17 @@ import { expandShapeStyles, collapseShapeStyles } from '../store/actions/rightSi
 
 interface SidebarShapeStylesProps {
   selected?: string[];
-  selectedType?: em.LayerType;
-  selectedShapeType?: em.ShapeType;
+  allShapes?: boolean;
+  allRounded?: boolean;
+  allPolygons?: boolean;
+  allStars?: boolean;
   shapeStylesCollapsed?: boolean;
   expandShapeStyles?(): RightSidebarTypes;
   collapseShapeStyles?(): RightSidebarTypes;
 }
 
 const SidebarShapeStyles = (props: SidebarShapeStylesProps): ReactElement => {
-  const { selected, selectedType, selectedShapeType, shapeStylesCollapsed, expandShapeStyles, collapseShapeStyles } = props;
+  const { selected, allShapes, allRounded, allPolygons, allStars, shapeStylesCollapsed, expandShapeStyles, collapseShapeStyles } = props;
 
   const handleClick = () => {
     if (shapeStylesCollapsed) {
@@ -30,23 +32,23 @@ const SidebarShapeStyles = (props: SidebarShapeStylesProps): ReactElement => {
   }
 
   return (
-    selected.length === 1 && selectedType === 'Shape' && (selectedShapeType === 'Rounded' || selectedShapeType === 'Star' || selectedShapeType === 'Polygon')
+    allShapes && (allShapes || allRounded || allPolygons || allStars)
     ? <SidebarCollapseSection
         onClick={handleClick}
         collapsed={shapeStylesCollapsed}
         header='shape'>
         {
-          selectedShapeType === 'Rounded'
+          allRounded
           ? <RoundedRadiusInput />
           : null
         }
         {
-          selectedShapeType === 'Polygon'
+          allPolygons
           ? <PolygonSidesInput />
           : null
         }
         {
-          selectedShapeType === 'Star'
+          allStars
           ? <>
               <StarPointsInput />
               <StarRadiusInput />
@@ -61,10 +63,12 @@ const SidebarShapeStyles = (props: SidebarShapeStylesProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer, rightSidebar } = state;
   const selected = layer.present.selected;
-  const selectedType = selected.length > 0 ? layer.present.byId[selected[0]].type : null;
-  const selectedShapeType = selectedType === 'Shape' ? (layer.present.byId[selected[0]] as em.Shape).shapeType : null;
+  const allShapes = selected.every((id: string) => layer.present.byId[id].type === 'Shape');
+  const allRounded = allShapes && selected.every((id: string) => (layer.present.byId[id] as em.Shape).shapeType === 'Rounded');
+  const allPolygons = allShapes && selected.every((id: string) => (layer.present.byId[id] as em.Shape).shapeType === 'Polygon');
+  const allStars = allShapes && selected.every((id: string) => (layer.present.byId[id] as em.Shape).shapeType === 'Star');
   const shapeStylesCollapsed = rightSidebar.shapeStylesCollapsed;
-  return { selected, selectedType, selectedShapeType, shapeStylesCollapsed };
+  return { selected, allShapes, allRounded, allPolygons, allStars, shapeStylesCollapsed };
 };
 
 export default connect(

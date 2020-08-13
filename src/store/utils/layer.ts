@@ -37,7 +37,7 @@ import {
   SetLayerGradientOrigin, SetLayersGradientOrigin, SetLayerGradientDestination, SetLayersGradientDestination, SetLayerGradientStopColor,
   SetLayersGradientStopColor, SetLayerGradientStopPosition, SetLayersGradientStopPosition, AddLayerGradientStop, AddLayersGradientStop,
   RemoveLayerGradientStop, RemoveLayersGradientStop, SetLayerActiveGradientStop, SetLayersShadowBlur, SetLayersShadowXOffset, SetLayersShadowYOffset, SetLayersFontSize,
-  SetLayersFontWeight, SetLayersFontFamily, SetLayersLeading, SetLayersJustification, SetLayerTweenTiming, SetCurvePointOriginX, SetCurvePointOriginY, SetCurvePointOrigin
+  SetLayersFontWeight, SetLayersFontFamily, SetLayersLeading, SetLayersJustification, SetLayerTweenTiming, SetCurvePointOriginX, SetCurvePointOriginY, SetCurvePointOrigin, SetRoundedRadii, SetPolygonsSides, SetStarsPoints, SetStarsRadius
 } from '../actionTypes/layer';
 
 import {
@@ -1096,13 +1096,9 @@ export const groupLayers = (state: LayerState, action: GroupLayers): LayerState 
       x: layersBounds.center.x,
       y: layersBounds.center.y,
       width: layersBounds.width,
-      height: layersBounds.height
-    },
-    master: {
-      x: layersBounds.center.x,
-      y: layersBounds.center.y,
-      width: layersBounds.width,
-      height: layersBounds.height
+      height: layersBounds.height,
+      innerWidth: layersBounds.width,
+      innerHeight: layersBounds.height
     }
   }) as AddGroup);
   // get group id
@@ -1409,7 +1405,41 @@ export const updateParentBounds = (state: LayerState, id: string): LayerState =>
   const layerScope = getLayerScope(state, id);
   return layerScope.reduce((result, current) => {
     const paperLayer = getPaperLayer(current);
+    const layerItem = result.byId[current];
     result = updateLayerInView(result, current);
+    if (layerItem.transform.rotation !== 0) {
+      paperLayer.rotation = -layerItem.transform.rotation;
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              innerWidth: paperLayer.bounds.width,
+              innerHeight: paperLayer.bounds.height
+            }
+          }
+        }
+      }
+      paperLayer.rotation = layerItem.transform.rotation;
+    } else {
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              innerWidth: paperLayer.bounds.width,
+              innerHeight: paperLayer.bounds.height
+            }
+          }
+        }
+      }
+    }
     result = {
       ...result,
       byId: {
@@ -1435,6 +1465,7 @@ export const updateChildrenBounds = (state: LayerState, id: string): LayerState 
   const layerDescendants = getLayerDescendants(state, id);
   return layerDescendants.reduce((result, current) => {
     const paperLayer = getPaperLayer(current);
+    const layerItem = result.byId[current];
     result = updateLayerInView(result, current);
     if (result.byId[current].type === 'Shape') {
       result = {
@@ -1448,6 +1479,39 @@ export const updateChildrenBounds = (state: LayerState, id: string): LayerState 
               points: getCurvePoints(paperLayer as paper.Path | paper.CompoundPath)
             }
           } as em.Shape
+        }
+      }
+    }
+    if (layerItem.transform.rotation !== 0) {
+      paperLayer.rotation = -layerItem.transform.rotation;
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              innerWidth: paperLayer.bounds.width,
+              innerHeight: paperLayer.bounds.height
+            }
+          }
+        }
+      }
+      paperLayer.rotation = layerItem.transform.rotation;
+    } else {
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              innerWidth: paperLayer.bounds.width,
+              innerHeight: paperLayer.bounds.height
+            }
+          }
         }
       }
     }
@@ -1489,6 +1553,39 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
             points: getCurvePoints(paperLayer as paper.Path | paper.CompoundPath)
           }
         } as em.Shape
+      }
+    }
+  }
+  if (layerItem.transform.rotation !== 0) {
+    paperLayer.rotation = -layerItem.transform.rotation;
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [id]: {
+          ...currentState.byId[id],
+          frame: {
+            ...currentState.byId[id].frame,
+            innerWidth: paperLayer.bounds.width,
+            innerHeight: paperLayer.bounds.height
+          }
+        }
+      }
+    }
+    paperLayer.rotation = layerItem.transform.rotation;
+  } else {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [id]: {
+          ...currentState.byId[id],
+          frame: {
+            ...currentState.byId[id].frame,
+            innerWidth: paperLayer.bounds.width,
+            innerHeight: paperLayer.bounds.height
+          }
+        }
       }
     }
   }
@@ -2041,16 +2138,9 @@ export const setLayerWidth = (state: LayerState, action: SetLayerWidth): LayerSt
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
-        master: {
-          ...currentState.byId[action.payload.id].master,
-          width: action.payload.width
-        },
-        transform: {
-          ...currentState.byId[action.payload.id].transform,
-          scale: {
-            ...currentState.byId[action.payload.id].transform.scale,
-            x: 1
-          }
+        frame: {
+          ...currentState.byId[action.payload.id].frame,
+          innerWidth: action.payload.width
         }
       }
     },
@@ -2092,16 +2182,9 @@ export const setLayerHeight = (state: LayerState, action: SetLayerHeight): Layer
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
-        master: {
-          ...currentState.byId[action.payload.id].master,
-          height: action.payload.height
-        },
-        transform: {
-          ...currentState.byId[action.payload.id].transform,
-          scale: {
-            ...currentState.byId[action.payload.id].transform.scale,
-            y: 1
-          }
+        frame: {
+          ...currentState.byId[action.payload.id].frame,
+          innerHeight: action.payload.height
         }
       }
     },
@@ -3532,10 +3615,10 @@ export const scaleLayer = (state: LayerState, action: ScaleLayer): LayerState =>
         ...currentState.byId[action.payload.id],
         transform: {
           ...currentState.byId[action.payload.id].transform,
-          scale: {
-            x: currentState.byId[action.payload.id].transform.scale.x * action.payload.scale.x,
-            y: currentState.byId[action.payload.id].transform.scale.y * action.payload.scale.y
-          },
+          // scale: {
+          //   x: currentState.byId[action.payload.id].transform.scale.x * action.payload.scale.x,
+          //   y: currentState.byId[action.payload.id].transform.scale.y * action.payload.scale.y
+          // },
           horizontalFlip: action.payload.horizontalFlip ? !currentState.byId[action.payload.id].transform.horizontalFlip : currentState.byId[action.payload.id].transform.horizontalFlip,
           verticalFlip: action.payload.verticalFlip ? !currentState.byId[action.payload.id].transform.verticalFlip : currentState.byId[action.payload.id].transform.verticalFlip
         }
@@ -4293,13 +4376,9 @@ export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState 
       x: booleanLayers.position.x,
       y: booleanLayers.position.y,
       width: booleanLayers.bounds.width,
-      height: booleanLayers.bounds.height
-    },
-    master: {
-      x: booleanLayers.position.x,
-      y: booleanLayers.position.y,
-      width: booleanLayers.bounds.width,
-      height: booleanLayers.bounds.height
+      height: booleanLayers.bounds.height,
+      innerWidth: booleanLayers.bounds.width,
+      innerHeight: booleanLayers.bounds.height
     },
     selected: false,
     mask: false,
@@ -4346,13 +4425,9 @@ export const intersectLayers = (state: LayerState, action: IntersectLayers): Lay
       x: booleanLayers.position.x,
       y: booleanLayers.position.y,
       width: booleanLayers.bounds.width,
-      height: booleanLayers.bounds.height
-    },
-    master: {
-      x: booleanLayers.position.x,
-      y: booleanLayers.position.y,
-      width: booleanLayers.bounds.width,
-      height: booleanLayers.bounds.height
+      height: booleanLayers.bounds.height,
+      innerWidth: booleanLayers.bounds.width,
+      innerHeight: booleanLayers.bounds.height
     },
     selected: false,
     mask: false,
@@ -4399,13 +4474,9 @@ export const subtractLayers = (state: LayerState, action: SubtractLayers): Layer
       x: booleanLayers.position.x,
       y: booleanLayers.position.y,
       width: booleanLayers.bounds.width,
-      height: booleanLayers.bounds.height
-    },
-    master: {
-      x: booleanLayers.position.x,
-      y: booleanLayers.position.y,
-      width: booleanLayers.bounds.width,
-      height: booleanLayers.bounds.height
+      height: booleanLayers.bounds.height,
+      innerWidth: booleanLayers.bounds.width,
+      innerHeight: booleanLayers.bounds.height
     },
     selected: false,
     mask: false,
@@ -4452,13 +4523,9 @@ export const excludeLayers = (state: LayerState, action: ExcludeLayers): LayerSt
       x: booleanLayers.position.x,
       y: booleanLayers.position.y,
       width: booleanLayers.bounds.width,
-      height: booleanLayers.bounds.height
-    },
-    master: {
-      x: booleanLayers.position.x,
-      y: booleanLayers.position.y,
-      width: booleanLayers.bounds.width,
-      height: booleanLayers.bounds.height
+      height: booleanLayers.bounds.height,
+      innerWidth: booleanLayers.bounds.width,
+      innerHeight: booleanLayers.bounds.height
     },
     selected: false,
     mask: false,
@@ -4505,13 +4572,9 @@ export const divideLayers = (state: LayerState, action: DivideLayers): LayerStat
       x: booleanLayers.position.x,
       y: booleanLayers.position.y,
       width: booleanLayers.bounds.width,
-      height: booleanLayers.bounds.height
-    },
-    master: {
-      x: booleanLayers.position.x,
-      y: booleanLayers.position.y,
-      width: booleanLayers.bounds.width,
-      height: booleanLayers.bounds.height
+      height: booleanLayers.bounds.height,
+      innerWidth: booleanLayers.bounds.width,
+      innerHeight: booleanLayers.bounds.height
     },
     selected: false,
     mask: false,
@@ -4533,21 +4596,18 @@ export const divideLayers = (state: LayerState, action: DivideLayers): LayerStat
 
 export const setRoundedRadius = (state: LayerState, action: SetRoundedRadius): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const paperLayer = getPaperLayer(action.payload.id) as paper.Path;
   const layerItem = currentState.byId[action.payload.id] as em.Rounded;
-  const maxDim = Math.max(layerItem.master.width, layerItem.master.height);
+  paperLayer.rotation = -layerItem.transform.rotation;
+  const maxDim = Math.max(paperLayer.bounds.width, paperLayer.bounds.height);
   const newShape = new paperMain.Path.Rectangle({
-    from: new paperMain.Point(layerItem.master.x - (layerItem.master.width / 2), layerItem.master.y - (layerItem.master.height / 2)),
-    to: new paperMain.Point(layerItem.master.x + (layerItem.master.width / 2), layerItem.master.y + (layerItem.master.height / 2)),
-    radius: (maxDim / 2) * action.payload.radius
+    from: paperLayer.bounds.topLeft,
+    to: paperLayer.bounds.bottomRight,
+    radius: (maxDim / 2) * action.payload.radius,
+    insert: false
   });
-  newShape.copyAttributes(paperLayer, true);
-  newShape.bounds.width = layerItem.master.width * layerItem.transform.scale.x;
-  newShape.bounds.height = layerItem.master.height * layerItem.transform.scale.y;
-  newShape.rotation = layerItem.transform.rotation;
-  newShape.position = paperLayer.position;
-  paperLayer.replaceWith(newShape);
-  applyShapeMethods(newShape);
+  paperLayer.pathData = newShape.pathData;
+  paperLayer.rotation = layerItem.transform.rotation;
   currentState = {
     ...currentState,
     byId: {
@@ -4564,26 +4624,36 @@ export const setRoundedRadius = (state: LayerState, action: SetRoundedRadius): L
     },
     paperProject: exportPaperProject(currentState)
   }
+  currentState = updateLayerTweens(currentState, action.payload.id, 'width');
+  currentState = updateLayerTweens(currentState, action.payload.id, 'height');
+  currentState = updateLayerTweens(currentState, action.payload.id, 'rotation');
+  currentState = updateLayerTweens(currentState, action.payload.id, 'shape');
   return updateLayerBounds(currentState, action.payload.id);
+};
+
+export const setRoundedRadii = (state: LayerState, action: SetRoundedRadii): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return setRoundedRadius(result, layerActions.setRoundedRadius({id: current, radius: action.payload.radius}) as SetRoundedRadius);
+  }, state);
 };
 
 export const setPolygonSides = (state: LayerState, action: SetPolygonSides): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const paperLayer = getPaperLayer(action.payload.id) as paper.Path;
+  const startPosition = paperLayer.position;
   const layerItem = state.byId[action.payload.id] as em.Polygon;
-  const center = new paperMain.Point(layerItem.master.x, layerItem.master.y);
+  paperLayer.rotation = -layerItem.transform.rotation;
   const newShape = new paperMain.Path.RegularPolygon({
-    center: center,
-    radius: Math.max(layerItem.master.width, layerItem.master.height) / 2,
-    sides: action.payload.sides
+    center: paperLayer.bounds.center,
+    radius: Math.max(paperLayer.bounds.width, paperLayer.bounds.height) / 2,
+    sides: action.payload.sides,
+    insert: false
   });
-  newShape.copyAttributes(paperLayer, true);
-  newShape.bounds.width = layerItem.master.width * layerItem.transform.scale.x;
-  newShape.bounds.height = layerItem.master.height * layerItem.transform.scale.y;
+  newShape.bounds.width = paperLayer.bounds.width;
+  newShape.bounds.height = paperLayer.bounds.height;
   newShape.rotation = layerItem.transform.rotation;
-  newShape.position = paperLayer.position;
-  paperLayer.replaceWith(newShape);
-  applyShapeMethods(newShape);
+  newShape.position = startPosition;
+  paperLayer.pathData = newShape.pathData;
   currentState = {
     ...currentState,
     byId: {
@@ -4600,27 +4670,38 @@ export const setPolygonSides = (state: LayerState, action: SetPolygonSides): Lay
     },
     paperProject: exportPaperProject(currentState)
   }
+  currentState = updateLayerTweens(currentState, action.payload.id, 'width');
+  currentState = updateLayerTweens(currentState, action.payload.id, 'height');
+  currentState = updateLayerTweens(currentState, action.payload.id, 'rotation');
+  currentState = updateLayerTweens(currentState, action.payload.id, 'shape');
   return updateLayerBounds(currentState, action.payload.id);
+};
+
+export const setPolygonsSides = (state: LayerState, action: SetPolygonsSides): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return setPolygonSides(result, layerActions.setPolygonSides({id: current, sides: action.payload.sides}) as SetPolygonSides);
+  }, state);
 };
 
 export const setStarPoints = (state: LayerState, action: SetStarPoints): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const paperLayer = getPaperLayer(action.payload.id) as paper.Path;
+  const startPosition = paperLayer.position;
   const layerItem = state.byId[action.payload.id] as em.Star;
-  const center = new paperMain.Point(layerItem.master.x, layerItem.master.y);
+  paperLayer.rotation = -layerItem.transform.rotation;
+  const maxDim = Math.max(paperLayer.bounds.width, paperLayer.bounds.height);
   const newShape = new paperMain.Path.Star({
-    center: center,
-    radius1: Math.max(layerItem.master.width, layerItem.master.height) / 2,
-    radius2: (Math.max(layerItem.master.width, layerItem.master.height) / 2) * layerItem.radius,
-    points: action.payload.points
+    center: paperLayer.bounds.center,
+    radius1: maxDim / 2,
+    radius2: (maxDim / 2) * (layerItem as em.Star).radius,
+    points: action.payload.points,
+    insert: false
   });
-  newShape.copyAttributes(paperLayer, true);
-  newShape.bounds.width = layerItem.master.width * layerItem.transform.scale.x;
-  newShape.bounds.height = layerItem.master.height * layerItem.transform.scale.y;
+  newShape.bounds.width = paperLayer.bounds.width;
+  newShape.bounds.height = paperLayer.bounds.height;
   newShape.rotation = layerItem.transform.rotation;
-  newShape.position = paperLayer.position;
-  paperLayer.replaceWith(newShape);
-  applyShapeMethods(newShape);
+  newShape.position = startPosition;
+  paperLayer.pathData = newShape.pathData;
   currentState = {
     ...currentState,
     byId: {
@@ -4637,28 +4718,38 @@ export const setStarPoints = (state: LayerState, action: SetStarPoints): LayerSt
     },
     paperProject: exportPaperProject(currentState)
   }
+  currentState = updateLayerTweens(currentState, action.payload.id, 'width');
+  currentState = updateLayerTweens(currentState, action.payload.id, 'height');
+  currentState = updateLayerTweens(currentState, action.payload.id, 'rotation');
+  currentState = updateLayerTweens(currentState, action.payload.id, 'shape');
   return updateLayerBounds(currentState, action.payload.id);
+};
+
+export const setStarsPoints = (state: LayerState, action: SetStarsPoints): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return setStarPoints(result, layerActions.setStarPoints({id: current, points: action.payload.points}) as SetStarPoints);
+  }, state);
 };
 
 export const setStarRadius = (state: LayerState, action: SetStarRadius): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const paperLayer = getPaperLayer(action.payload.id) as paper.Path;
   const layerItem = state.byId[action.payload.id] as em.Star;
-  const center = new paperMain.Point(layerItem.master.x, layerItem.master.y);
-  const maxDim = Math.max(layerItem.master.width, layerItem.master.height);
+  const startPosition = paperLayer.position;
+  paperLayer.rotation = -layerItem.transform.rotation;
+  const maxDim = Math.max(paperLayer.bounds.width, paperLayer.bounds.height);
   const newShape = new paperMain.Path.Star({
-    center: center,
+    center: paperLayer.bounds.center,
     radius1: maxDim / 2,
     radius2: (maxDim / 2) * action.payload.radius,
-    points: layerItem.points
+    points: (layerItem as em.Star).points,
+    insert: false
   });
-  newShape.copyAttributes(paperLayer, true);
-  newShape.bounds.width = layerItem.master.width * layerItem.transform.scale.x;
-  newShape.bounds.height = layerItem.master.height * layerItem.transform.scale.y;
+  newShape.bounds.width = paperLayer.bounds.width;
+  newShape.bounds.height = paperLayer.bounds.height;
   newShape.rotation = layerItem.transform.rotation;
-  newShape.position = paperLayer.position;
-  paperLayer.replaceWith(newShape);
-  applyShapeMethods(newShape);
+  newShape.position = startPosition;
+  paperLayer.pathData = newShape.pathData;
   currentState = {
     ...currentState,
     byId: {
@@ -4675,7 +4766,17 @@ export const setStarRadius = (state: LayerState, action: SetStarRadius): LayerSt
     },
     paperProject: exportPaperProject(currentState)
   }
+  currentState = updateLayerTweens(currentState, action.payload.id, 'width');
+  currentState = updateLayerTweens(currentState, action.payload.id, 'height');
+  currentState = updateLayerTweens(currentState, action.payload.id, 'rotation');
+  currentState = updateLayerTweens(currentState, action.payload.id, 'shape');
   return updateLayerBounds(currentState, action.payload.id);
+};
+
+export const setStarsRadius = (state: LayerState, action: SetStarsRadius): LayerState => {
+  return action.payload.layers.reduce((result, current) => {
+    return setStarRadius(result, layerActions.setStarRadius({id: current, radius: action.payload.radius}) as SetStarRadius);
+  }, state);
 };
 
 export const setCurvePointOriginX = (state: LayerState, action: SetCurvePointOriginX): LayerState => {
@@ -4807,17 +4908,13 @@ export const setCurvePointOrigin = (state: LayerState, action: SetCurvePointOrig
         ...currentState.byId,
         [action.payload.id]: {
           ...currentState.byId[action.payload.id],
-          master: {
-            ...currentState.byId[action.payload.id].master,
-            width: vector.length
+          frame: {
+            ...currentState.byId[action.payload.id].frame,
+            innerWidth: vector.length
           },
           transform: {
             ...currentState.byId[action.payload.id].transform,
-            rotation: vector.angle,
-            scale: {
-              x: 1,
-              y: 1
-            }
+            rotation: vector.angle
           }
         } as em.Shape
       }

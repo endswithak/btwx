@@ -306,13 +306,9 @@ class ArtboardTool {
             x: newPaperLayer.position.x,
             y: newPaperLayer.position.y,
             width: newPaperLayer.bounds.width,
-            height: newPaperLayer.bounds.height
-          },
-          master: {
-            x: newPaperLayer.position.x,
-            y: newPaperLayer.position.y,
-            width: newPaperLayer.bounds.width,
-            height: newPaperLayer.bounds.height
+            height: newPaperLayer.bounds.height,
+            innerWidth: newPaperLayer.bounds.width,
+            innerHeight: newPaperLayer.bounds.height
           },
           paperLayer: newPaperLayer
         }));

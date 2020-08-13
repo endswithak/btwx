@@ -222,9 +222,13 @@ export const EXCLUDE_LAYERS = 'EXCLUDE_LAYERS';
 export const DIVIDE_LAYERS = 'DIVIDE_LAYERS';
 
 export const SET_ROUNDED_RADIUS = 'SET_ROUNDED_RADIUS';
+export const SET_ROUNDED_RADII = 'SET_ROUNDED_RADII';
 export const SET_POLYGON_SIDES = 'SET_POLYGON_SIDES';
+export const SET_POLYGONS_SIDES = 'SET_POLYGONS_SIDES';
 export const SET_STAR_POINTS = 'SET_STAR_POINTS';
+export const SET_STARS_POINTS = 'SET_STARS_POINTS';
 export const SET_STAR_RADIUS = 'SET_STAR_RADIUS';
+export const SET_STARS_RADIUS = 'SET_STARS_RADIUS';
 
 export const SET_CURVE_POINT_ORIGIN = 'SET_CURVE_POINT_POINT';
 export const SET_CURVE_POINT_ORIGIN_X = 'SET_CURVE_POINT_ORIGIN_X';
@@ -2068,6 +2072,16 @@ export interface SetRoundedRadius {
   payload: SetRoundedRadiusPayload;
 }
 
+export interface SetRoundedRadiiPayload {
+  layers: string[];
+  radius: number;
+}
+
+export interface SetRoundedRadii {
+  type: typeof SET_ROUNDED_RADII;
+  payload: SetRoundedRadiiPayload;
+}
+
 export interface SetPolygonSidesPayload {
   id: string;
   sides: number;
@@ -2076,6 +2090,16 @@ export interface SetPolygonSidesPayload {
 export interface SetPolygonSides {
   type: typeof SET_POLYGON_SIDES;
   payload: SetPolygonSidesPayload;
+}
+
+export interface SetPolygonsSidesPayload {
+  layers: string[];
+  sides: number;
+}
+
+export interface SetPolygonsSides {
+  type: typeof SET_POLYGONS_SIDES;
+  payload: SetPolygonsSidesPayload;
 }
 
 export interface SetStarPointsPayload {
@@ -2088,6 +2112,16 @@ export interface SetStarPoints {
   payload: SetStarPointsPayload;
 }
 
+export interface SetStarsPointsPayload {
+  layers: string[];
+  points: number;
+}
+
+export interface SetStarsPoints {
+  type: typeof SET_STARS_POINTS;
+  payload: SetStarsPointsPayload;
+}
+
 export interface SetStarRadiusPayload {
   id: string;
   radius: number;
@@ -2096,6 +2130,16 @@ export interface SetStarRadiusPayload {
 export interface SetStarRadius {
   type: typeof SET_STAR_RADIUS;
   payload: SetStarRadiusPayload;
+}
+
+export interface SetStarsRadiusPayload {
+  layers: string[];
+  radius: number;
+}
+
+export interface SetStarsRadius {
+  type: typeof SET_STARS_RADIUS;
+  payload: SetStarsRadiusPayload;
 }
 
 export interface SetCurvePointOriginPayload {
@@ -2319,9 +2363,13 @@ export type LayerTypes = AddPage |
                          ExcludeLayers |
                          DivideLayers |
                          SetRoundedRadius |
+                         SetRoundedRadii |
                          SetPolygonSides |
+                         SetPolygonsSides |
                          SetStarPoints |
+                         SetStarsPoints |
                          SetStarRadius |
+                         SetStarsRadius |
                          SetCurvePointOrigin |
                          SetCurvePointOriginX |
                          SetCurvePointOriginY;

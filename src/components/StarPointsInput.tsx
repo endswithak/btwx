@@ -2,27 +2,24 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { evaluate } from 'mathjs';
 import { RootState } from '../store/reducers';
-import { SetStarPointsPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setStarPoints } from '../store/actions/layer';
+import { SetStarsPointsPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setStarsPoints } from '../store/actions/layer';
 import { getPaperLayer } from '../store/selectors/layer';
-import SidebarSection from './SidebarSection';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarInput from './SidebarInput';
 import SidebarSlider from './SidebarSlider';
 import { paperMain } from '../canvas';
-import { applyShapeMethods } from '../canvas/shapeUtils';
 
 interface StarPointsInputProps {
   selected?: string[];
-  pointsValue?: number;
-  disabled?: boolean;
-  layerItem?: em.Shape;
-  setStarPoints?(payload: SetStarPointsPayload): LayerTypes;
+  pointsValue?: number | 'multi';
+  layerItems?: em.Star[];
+  setStarsPoints?(payload: SetStarsPointsPayload): LayerTypes;
 }
 
 const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
-  const { selected, setStarPoints, layerItem, pointsValue, disabled } = props;
+  const { selected, setStarsPoints, layerItems, pointsValue } = props;
   const [points, setPoints] = useState(pointsValue);
 
   useEffect(() => {
@@ -36,37 +33,38 @@ const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
 
   const handleSliderChange = (e: any): void => {
     handleChange(e);
-    const paperLayer = getPaperLayer(selected[0]);
-    const maxDim = Math.max(layerItem.master.width, layerItem.master.height);
-    const center = new paperMain.Point(layerItem.master.x, layerItem.master.y);
-    const newShape = new paperMain.Path.Star({
-      center: center,
-      radius1: maxDim / 2,
-      radius2: (maxDim / 2) * (layerItem as em.Star).radius,
-      points: e.target.value
+    layerItems.forEach((layerItem) => {
+      const paperLayer = getPaperLayer(layerItem.id) as paper.Path;
+      const startPosition = paperLayer.position;
+      paperLayer.rotation = -layerItem.transform.rotation;
+      const maxDim = Math.max(paperLayer.bounds.width, paperLayer.bounds.height);
+      const newShape = new paperMain.Path.Star({
+        center: paperLayer.bounds.center,
+        radius1: maxDim / 2,
+        radius2: (maxDim / 2) * (layerItem as em.Star).radius,
+        points: e.target.value,
+        insert: false
+      });
+      newShape.bounds.width = paperLayer.bounds.width;
+      newShape.bounds.height = paperLayer.bounds.height;
+      newShape.rotation = layerItem.transform.rotation;
+      newShape.position = startPosition;
+      paperLayer.pathData = newShape.pathData;
     });
-    newShape.copyAttributes(paperLayer, true);
-    newShape.bounds.width = layerItem.master.width * layerItem.transform.scale.x;
-    newShape.bounds.height = layerItem.master.height * layerItem.transform.scale.y;
-    newShape.rotation = layerItem.transform.rotation;
-    newShape.position = paperLayer.position;
-    paperLayer.replaceWith(newShape);
   };
 
   const handleSubmit = (e: any): void => {
     try {
       let nextPoints = evaluate(`${points}`);
-      if (nextPoints !== pointsValue) {
-        if (nextPoints > 50) {
+      if (Math.round(nextPoints) !== pointsValue) {
+        if (Math.round(nextPoints) > 50) {
           nextPoints = 50;
         }
-        if (nextPoints < 3) {
+        if (Math.round(nextPoints) < 3) {
           nextPoints = 3;
         }
-        const paperLayer = getPaperLayer(selected[0]);
-        setStarPoints({id: selected[0], points: nextPoints});
-        setPoints(nextPoints);
-        applyShapeMethods(paperLayer);
+        setStarsPoints({layers: selected, points: Math.round(nextPoints)});
+        setPoints(Math.round(nextPoints));
       }
     } catch(error) {
       setPoints(pointsValue);
@@ -77,13 +75,12 @@ const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
     <SidebarSectionRow>
       <SidebarSectionColumn width={'66.66%'}>
         <SidebarSlider
-          value={points as number}
+          value={points !== 'multi' ? points : 0}
           step={1}
           max={50}
           min={3}
           onChange={handleSliderChange}
           onMouseUp={handleSubmit}
-          disabled={disabled}
           bottomSpace />
       </SidebarSectionColumn>
       <SidebarSectionColumn width={'33.33%'}>
@@ -92,7 +89,6 @@ const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
           onChange={handleChange}
           onSubmit={handleSubmit}
           submitOnBlur
-          disabled={disabled}
           label='#'
           bottomLabel='Points' />
       </SidebarSectionColumn>
@@ -100,43 +96,31 @@ const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
+const mapStateToProps = (state: RootState): {
+  selected: string[];
+  pointsValue: number | 'multi';
+  layerItems: em.Star[];
+} => {
   const { layer } = state;
   const selected = layer.present.selected;
+  const layerItems: em.Star[] = selected.reduce((result, current) => {
+    const layerItem = layer.present.byId[current];
+    return [...result, layerItem];
+  }, []);
+  const pointsValues: number[] = layerItems.reduce((result, current) => {
+    return [...result, current.points];
+  }, []);
   const pointsValue = (() => {
-    switch(layer.present.selected.length) {
-      case 0:
-        return '';
-      case 1:
-        return (layer.present.byId[layer.present.selected[0]] as em.Star).points;
-      default:
-        return 'multi';
+    if (pointsValues.every((value: number) => value === pointsValues[0])) {
+      return pointsValues[0];
+    } else {
+      return 'multi';
     }
   })();
-  const layerItem = (() => {
-    switch(layer.present.selected.length) {
-      case 0:
-        return null;
-      case 1:
-        return layer.present.byId[layer.present.selected[0]];
-      default:
-        return null;
-    }
-  })();
-  const disabled = (() => {
-    switch(layer.present.selected.length) {
-      case 0:
-        return true;
-      case 1:
-        return false;
-      default:
-        return true;
-    }
-  })();
-  return { selected, pointsValue, disabled, layerItem };
+  return { selected, pointsValue, layerItems };
 };
 
 export default connect(
   mapStateToProps,
-  { setStarPoints }
+  { setStarsPoints }
 )(StarPointsInput);

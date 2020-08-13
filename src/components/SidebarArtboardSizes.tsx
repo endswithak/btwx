@@ -58,13 +58,9 @@ const SidebarArtboardSizes = (props: SidebarArtboardPlatformOrientationProps): R
         x: newArtboard.position.x,
         y: newArtboard.position.y,
         width: newArtboard.bounds.width,
-        height: newArtboard.bounds.height
-      },
-      master: {
-        x: newArtboard.position.x,
-        y: newArtboard.position.y,
-        width: newArtboard.bounds.width,
-        height: newArtboard.bounds.height
+        height: newArtboard.bounds.height,
+        innerWidth: newArtboard.bounds.width,
+        innerHeight: newArtboard.bounds.height
       },
       paperLayer: newArtboard
     });
