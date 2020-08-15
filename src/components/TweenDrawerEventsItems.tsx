@@ -29,7 +29,8 @@ const TweenDrawerEventsItems = (props: TweenDrawerEventsItemsProps): ReactElemen
 
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
-  const tweenEvents = getAllArtboardTweenEvents(layer.present, layer.present.activeArtboard).allIds;
+  // const tweenEvents = getAllArtboardTweenEvents(layer.present, layer.present.activeArtboard).allIds;
+  const tweenEvents = layer.present.allTweenEventIds;
   return { tweenEvents };
 };
 

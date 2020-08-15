@@ -42,6 +42,7 @@ import store, { persistor, persistConfig } from './store';
 import persist from './store/utils/persist';
 import { Titlebar, Color } from 'custom-electron-titlebar';
 import getTheme from './store/theme';
+import { openFile } from './store/reducers';
 
 import './styles/index.sass';
 
@@ -52,6 +53,45 @@ let themeObject = getTheme(theme);
 const titleBar = new Titlebar({
   backgroundColor: Color.fromHex(theme === 'dark' ? themeObject.background.z1 : themeObject.background.z2)
 });
+
+(window as any).saveFile = () => {
+  const state = store.getState();
+  const {
+    layer,
+    canvasSettings,
+    tool,
+    contextMenu,
+    tweenDrawer,
+    easeEditor,
+    textEditor,
+    textSettings,
+    colorEditor,
+    gradientEditor,
+    artboardPresetEditor,
+    rightSidebar,
+    theme
+  } = state;
+  const fileState = {
+    layer,
+    canvasSettings,
+    tool,
+    contextMenu,
+    tweenDrawer,
+    easeEditor,
+    textEditor,
+    textSettings,
+    colorEditor,
+    gradientEditor,
+    artboardPresetEditor,
+    rightSidebar,
+    theme
+  }
+  return JSON.stringify(fileState);
+}
+
+(window as any).openFile = (fileJSON: any) => {
+  store.dispatch(openFile({file: fileJSON}));
+}
 
 (window as any).updateTheme = () => {
   theme = remote.systemPreferences.getUserDefault('theme', 'string');

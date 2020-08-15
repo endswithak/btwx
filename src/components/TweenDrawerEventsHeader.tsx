@@ -16,7 +16,8 @@ const TweenDrawerEventsHeader = (): ReactElement => {
           color: theme.text.lighter
         }}>
         <div className='c-tween-drawer-events-item__module c-tween-drawer-events-item__module--label'>
-          name
+          {/* name */}
+          artboard
         </div>
         <div className='c-tween-drawer-events-item__module c-tween-drawer-events-item__module--label'>
           layer

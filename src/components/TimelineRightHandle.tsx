@@ -25,11 +25,15 @@ const TimelineRightHandle = (props: TimelineRightHandleProps): ReactElement => {
   const { tweenId, tween, setLayerTweenDuration, setTweenDrawerTweenEditing } = props;
   const [prevDuration, setPrevDuration] = useState(tween.duration);
   const [prevDelay, setPrevDelay] = useState(tween.delay);
+  const [prevId, setPrevId] = useState(tweenId);
 
-  useEffect(() => {
+  const setupHandle = () => {
     const rightHandleInitialPos = ((tween.delay * 100) * theme.unit) + ((tween.duration * 100) * theme.unit) - theme.unit * 4;
     const leftHandleInitialPos = ((tween.delay * 100) * theme.unit);
     const rightHandleElement = document.getElementById(`${tweenId}-handle-right`);
+    if (Draggable.get(rightHandleElement)) {
+      Draggable.get(rightHandleElement).kill();
+    }
     const leftHandleElement = document.getElementById(`${tweenId}-handle-left`);
     const timelineElement = document.getElementById(`${tweenId}-timeline`);
     const rightTooltipElement = document.getElementById(`${tweenId}-tooltip-right`);
@@ -83,6 +87,11 @@ const TimelineRightHandle = (props: TimelineRightHandleProps): ReactElement => {
         setLayerTweenDuration({id: tweenId, duration });
       }
     });
+  }
+
+  // initial render
+  useEffect(() => {
+    setupHandle();
     return (): void => {
       const rightHandleElement = document.getElementById(`${tweenId}-handle-right`);
       if (Draggable.get(rightHandleElement)) {
@@ -91,6 +100,7 @@ const TimelineRightHandle = (props: TimelineRightHandleProps): ReactElement => {
     }
   }, []);
 
+  // updates bounds when delay or duration changes outside handles scope (ease editor)
   useEffect(() => {
     if (prevDuration !== tween.duration || prevDelay !== tween.delay) {
       const rightHandleElement = document.getElementById(`${tweenId}-handle-right`);
@@ -109,6 +119,14 @@ const TimelineRightHandle = (props: TimelineRightHandleProps): ReactElement => {
       setPrevDelay(tween.delay);
     }
   }, [tween.duration, tween.delay]);
+
+  // updates handle when id changes (due to sorting)
+  useEffect(() => {
+    if (prevId !== tweenId) {
+      setupHandle();
+      setPrevId(tweenId);
+    }
+  }, [tweenId]);
 
   return (
     <div

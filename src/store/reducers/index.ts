@@ -1,4 +1,5 @@
 import { combineReducers } from 'redux';
+import storage from 'redux-persist/lib/storage';
 import undoable, { includeAction } from 'redux-undo';
 import layer from './layer';
 import tool from './tool';
@@ -13,6 +14,8 @@ import textSettings from './textSettings';
 import canvasSettings from './canvasSettings';
 import rightSidebar from './rightSidebar';
 import theme from './theme';
+import { importPaperProject } from '../selectors/layer';
+import { paperMain } from '../../canvas';
 
 import {
   ADD_ARTBOARD,
@@ -157,7 +160,7 @@ import {
   SET_CURVE_POINT_ORIGIN_Y
 } from '../actionTypes/layer';
 
-const rootReducer = combineReducers({
+const appReducer = combineReducers({
   layer: undoable(layer, { filter: includeAction([
     ADD_ARTBOARD,
     ADD_GROUP,
@@ -313,6 +316,44 @@ const rootReducer = combineReducers({
   rightSidebar,
   theme
 });
+
+const OPEN_FILE = 'OPEN_FILE';
+
+interface OpenFilePayload {
+  file: string;
+}
+
+interface OpenFile {
+  type: typeof OPEN_FILE;
+  payload: OpenFilePayload;
+}
+
+type fileTypes = OpenFile;
+
+export const openFile = (payload: OpenFilePayload): fileTypes => ({
+  type: OPEN_FILE,
+  payload
+});
+
+const rootReducer = (state: any, action: fileTypes) => {
+  if (action.type === 'OPEN_FILE') {
+    state = action.payload.file;
+    const canvas = document.getElementById('canvas-container') as HTMLCanvasElement;
+    importPaperProject({
+      paperProject: state.layer.present.paperProject,
+      canvasImages: state.canvasSettings.images.byId,
+      layers: {
+        shape: state.layer.present.allShapeIds,
+        artboard: state.layer.present.allArtboardIds,
+        text: state.layer.present.allTextIds,
+        image: state.layer.present.allImageIds
+      }
+    });
+    paperMain.view.viewSize = new paperMain.Size(canvas.clientWidth, canvas.clientHeight);
+    paperMain.view.matrix.set(state.canvasSettings.matrix);
+  }
+  return appReducer(state, action);
+}
 
 export type RootState = ReturnType<typeof rootReducer>;
 

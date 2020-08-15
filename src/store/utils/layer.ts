@@ -47,7 +47,7 @@ import {
   getTweensByDestinationLayer, getAllArtboardTweenEvents, getTweensEventsByDestinationArtboard, getTweensByLayer,
   getLayersBounds, getGradientOriginPoint, getGradientDestinationPoint, getGradientStops, getLayerSnapPoints,
   orderLayersByDepth, orderLayersByLeft, orderLayersByTop, exportPaperProject, getTweensByProp,
-  getEquivalentTweenProp, getTweensWithLayer, gradientsMatch, getPaperProp, getCurvePoints
+  getEquivalentTweenProp, getTweensWithLayer, gradientsMatch, getPaperProp, getCurvePoints, getArtboardsTopTop
 } from '../selectors/layer';
 
 import { paperMain } from '../../canvas';
@@ -59,6 +59,7 @@ import { applyImageMethods } from '../../canvas/imageUtils';
 
 import { THEME_PRIMARY_COLOR, DEFAULT_TRANSFORM } from '../../constants';
 import { bufferToBase64 } from '../../utils';
+import { TweenDrawerState } from '../reducers/tweenDrawer';
 
 export const addPage = (state: LayerState, action: AddPage): LayerState => {
   return {
@@ -573,6 +574,65 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         }
       });
     }
+  }
+}
+
+export const updateTweenEventFrame = (state: LayerState, event: em.TweenEvent) => {
+  const tweenEventFrame = paperMain.project.getItem({ data: { id: 'tweenEventFrame' } });
+  if (tweenEventFrame) {
+    tweenEventFrame.remove();
+  }
+  if (event) {
+    const artboardTopTop = getArtboardsTopTop(state);
+    const origin = getPaperLayer(event.artboard);
+    const destination = getPaperLayer(event.destinationArtboard);
+    const destinationIndicator = new paperMain.Path.Ellipse({
+      center: new paperMain.Point(destination.bounds.center.x, artboardTopTop - ((1 / paperMain.view.zoom) * 48)),
+      radius: ((1 / paperMain.view.zoom) * 4),
+      fillColor: THEME_PRIMARY_COLOR,
+      insert: false,
+      data: {
+        id: 'tweenEventFrameIndicator',
+        indicator: 'destination'
+      }
+    });
+    const originIndicator = new paperMain.Path.Line({
+      from: new paperMain.Point(origin.bounds.center.x, destinationIndicator.bounds.top),
+      to: new paperMain.Point(origin.bounds.center.x, destinationIndicator.bounds.bottom),
+      strokeColor: THEME_PRIMARY_COLOR,
+      strokeWidth: 1 / paperMain.view.zoom,
+      insert: false,
+      data: {
+        id: 'tweenEventFrameIndicator',
+        indicator: 'origin'
+      }
+    });
+    const connector = new paperMain.Path.Line({
+      from: originIndicator.bounds.center,
+      to: destinationIndicator.bounds.center,
+      strokeColor: THEME_PRIMARY_COLOR,
+      strokeWidth: 1 / paperMain.view.zoom,
+      insert: false,
+      data: {
+        id: 'tweenEventFrameIndicator',
+        indicator: 'connector'
+      }
+    });
+    const eventType = new paperMain.PointText({
+      content: event.event,
+      point: new paperMain.Point(connector.bounds.center.x, destinationIndicator.bounds.top - ((1 / paperMain.view.zoom) * 12)),
+      justification: 'center',
+      fontSize: ((1 / paperMain.view.zoom) * 12),
+      fillColor: THEME_PRIMARY_COLOR,
+      insert: false,
+      fontFamily: 'Space Mono'
+    });
+    new paperMain.Group({
+      children: [originIndicator, connector, destinationIndicator, eventType],
+      data: {
+        id: 'tweenEventFrame'
+      }
+    });
   }
 }
 

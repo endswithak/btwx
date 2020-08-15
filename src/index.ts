@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import electron, { app, BrowserWindow, ipcMain, systemPreferences, Menu, shell, dialog } from 'electron';
+import electron, { app, BrowserWindow, ipcMain, systemPreferences, Menu, dialog, nativeTheme } from 'electron';
+import fs from 'fs';
 import sharp from 'sharp';
 import {
   DEFAULT_LEFT_SIDEBAR_WIDTH,
@@ -22,7 +23,7 @@ const isMac = process.platform === 'darwin';
 
 if (isMac) {
   if (!systemPreferences.getUserDefault('theme', 'string')) {
-    systemPreferences.setUserDefault('theme', 'string', 'dark');
+    systemPreferences.setUserDefault('theme', 'string', nativeTheme.shouldUseDarkColors ? 'dark' : 'light');
   }
   if (!systemPreferences.getUserDefault('leftSidebarWidth', 'integer')) {
     systemPreferences.setUserDefault('leftSidebarWidth', 'integer', DEFAULT_LEFT_SIDEBAR_WIDTH as any);
@@ -65,6 +66,45 @@ const template = [
   {
     label: 'File',
     submenu: [
+      {
+        label: 'Save',
+        click: () => {
+          dialog.showSaveDialog(mainWindow, {
+            properties: ['showOverwriteConfirmation']
+          }).then((result) => {
+            if (!result.canceled) {
+              mainWindow.webContents.executeJavaScript(`saveFile()`).then((fileJSON) => {
+                fs.writeFile(`${result.filePath}.esketch`, fileJSON, function(err) {
+                  if(err) {
+                    return console.log(err);
+                  }
+                });
+              });
+            }
+          });
+        }
+      },
+      {
+        label: 'Open',
+        click: () => {
+          dialog.showOpenDialog(mainWindow, {
+            filters: [
+              { name: 'Custom File Type', extensions: ['esketch'] }
+            ],
+            properties: ['openFile']
+          }).then((result) => {
+            if (result.filePaths.length > 0 && !result.canceled) {
+              fs.readFile(result.filePaths[0], {encoding: 'utf-8'}, function(err, data) {
+                if(err) {
+                  return console.log(err);
+                } else {
+                  mainWindow.webContents.executeJavaScript(`openFile(${data})`);
+                }
+              });
+            }
+          });
+        }
+      },
       isMac ? { role: 'close' } : { role: 'quit' }
     ]
   },

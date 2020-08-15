@@ -23,11 +23,15 @@ const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { tweenId, tween, setLayerTweenTiming, setTweenDrawerTweenEditing } = props;
   const [prevDelay, setPrevDelay] = useState(tween.delay);
+  const [prevId, setPrevId] = useState(tweenId);
 
-  useEffect(() => {
+  const setupHandle = () => {
     const rightHandleInitialPos = ((tween.delay * 100) * theme.unit) + ((tween.duration * 100) * theme.unit) - theme.unit * 4;
     const leftHandleInitialPos = ((tween.delay * 100) * theme.unit);
     const leftHandleElement = document.getElementById(`${tweenId}-handle-left`);
+    if (Draggable.get(leftHandleElement)) {
+      Draggable.get(leftHandleElement).kill();
+    }
     const rightHandleElement = document.getElementById(`${tweenId}-handle-right`);
     const tweenHandleElement = document.getElementById(`${tweenId}-handle-tween`);
     const timelineElement = document.getElementById(`${tweenId}-timeline`);
@@ -83,6 +87,11 @@ const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
         setLayerTweenTiming({id: tweenId, duration, delay});
       }
     });
+  }
+
+  // initial render
+  useEffect(() => {
+    setupHandle();
     return (): void => {
       const leftHandleElement = document.getElementById(`${tweenId}-handle-left`);
       if (Draggable.get(leftHandleElement)) {
@@ -91,6 +100,7 @@ const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
     }
   }, []);
 
+  // updates bounds when delay changes outside handles scope (ease editor)
   useEffect(() => {
     if (prevDelay !== tween.delay) {
       const rightHandleElement = document.getElementById(`${tweenId}-handle-right`);
@@ -108,6 +118,14 @@ const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
       setPrevDelay(tween.delay);
     }
   }, [tween.delay]);
+
+  // updates handle when id changes (due to sorting)
+  useEffect(() => {
+    if (prevId !== tweenId) {
+      setupHandle();
+      setPrevId(tweenId);
+    }
+  }, [tweenId]);
 
   return (
     <div

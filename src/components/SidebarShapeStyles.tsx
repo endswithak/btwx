@@ -10,8 +10,6 @@ import { RightSidebarTypes } from '../store/actionTypes/rightSidebar';
 import { expandShapeStyles, collapseShapeStyles } from '../store/actions/rightSidebar';
 
 interface SidebarShapeStylesProps {
-  selected?: string[];
-  allShapes?: boolean;
   allRounded?: boolean;
   allPolygons?: boolean;
   allStars?: boolean;
@@ -21,7 +19,7 @@ interface SidebarShapeStylesProps {
 }
 
 const SidebarShapeStyles = (props: SidebarShapeStylesProps): ReactElement => {
-  const { selected, allShapes, allRounded, allPolygons, allStars, shapeStylesCollapsed, expandShapeStyles, collapseShapeStyles } = props;
+  const { allRounded, allPolygons, allStars, shapeStylesCollapsed, expandShapeStyles, collapseShapeStyles } = props;
 
   const handleClick = () => {
     if (shapeStylesCollapsed) {
@@ -32,7 +30,7 @@ const SidebarShapeStyles = (props: SidebarShapeStylesProps): ReactElement => {
   }
 
   return (
-    allShapes && (allShapes || allRounded || allPolygons || allStars)
+    allRounded || allPolygons || allStars
     ? <SidebarCollapseSection
         onClick={handleClick}
         collapsed={shapeStylesCollapsed}
@@ -60,7 +58,12 @@ const SidebarShapeStyles = (props: SidebarShapeStylesProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
+const mapStateToProps = (state: RootState): {
+  allRounded: boolean;
+  allPolygons: boolean;
+  allStars: boolean;
+  shapeStylesCollapsed: boolean;
+} => {
   const { layer, rightSidebar } = state;
   const selected = layer.present.selected;
   const allShapes = selected.every((id: string) => layer.present.byId[id].type === 'Shape');
@@ -68,7 +71,7 @@ const mapStateToProps = (state: RootState) => {
   const allPolygons = allShapes && selected.every((id: string) => (layer.present.byId[id] as em.Shape).shapeType === 'Polygon');
   const allStars = allShapes && selected.every((id: string) => (layer.present.byId[id] as em.Shape).shapeType === 'Star');
   const shapeStylesCollapsed = rightSidebar.shapeStylesCollapsed;
-  return { selected, allShapes, allRounded, allPolygons, allStars, shapeStylesCollapsed };
+  return { allRounded, allPolygons, allStars, shapeStylesCollapsed };
 };
 
 export default connect(

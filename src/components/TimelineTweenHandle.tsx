@@ -25,9 +25,13 @@ const TimelineTweenHandle = (props: TimelineTweenHandleProps): ReactElement => {
   const { tweenId, tween, setLayerTweenDelay, setTweenDrawerTweenEditing } = props;
   const [prevDuration, setPrevDuration] = useState(tween.duration);
   const [prevDelay, setPrevDelay] = useState(tween.delay);
+  const [prevId, setPrevId] = useState(tweenId);
 
-  useEffect(() => {
+  const setupHandle = () => {
     const tweenHandleElement = document.getElementById(`${tweenId}-handle-tween`);
+    if (Draggable.get(tweenHandleElement)) {
+      Draggable.get(tweenHandleElement).kill();
+    }
     const leftHandleElement = document.getElementById(`${tweenId}-handle-left`);
     const rightHandleElement = document.getElementById(`${tweenId}-handle-right`);
     const leftHandleTooltipElement = document.getElementById(`${tweenId}-tooltip-left`);
@@ -81,6 +85,11 @@ const TimelineTweenHandle = (props: TimelineTweenHandleProps): ReactElement => {
         setLayerTweenDelay({id: tweenId, delay });
       }
     });
+  }
+
+  // initial render
+  useEffect(() => {
+    setupHandle();
     return (): void => {
       const tweenHandleElement = document.getElementById(`${tweenId}-handle-tween`);
       if (Draggable.get(tweenHandleElement)) {
@@ -89,6 +98,7 @@ const TimelineTweenHandle = (props: TimelineTweenHandleProps): ReactElement => {
     }
   }, []);
 
+  // updates bounds when delay or duration changes outside handles scope (ease editor)
   useEffect(() => {
     if (prevDuration !== tween.duration || prevDelay !== tween.delay) {
       const tweenHandleElement = document.getElementById(`${tweenId}-handle-tween`);
@@ -104,6 +114,14 @@ const TimelineTweenHandle = (props: TimelineTweenHandleProps): ReactElement => {
       setPrevDelay(tween.delay);
     }
   }, [tween.duration, tween.delay]);
+
+  // updates handle when id changes (due to sorting)
+  useEffect(() => {
+    if (prevId !== tweenId) {
+      setupHandle();
+      setPrevId(tweenId);
+    }
+  }, [tweenId]);
 
   return (
     <div
