@@ -1,13 +1,9 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import electron, { app, BrowserWindow, ipcMain, systemPreferences, Menu, dialog, nativeTheme } from 'electron';
-import fs from 'fs';
+import menu from './menu';
+import preferences from './preferences';
 import sharp from 'sharp';
-import {
-  DEFAULT_LEFT_SIDEBAR_WIDTH,
-  DEFAULT_RIGHT_SIDEBAR_WIDTH,
-  DEFAULT_TWEEN_DRAWER_HEIGHT,
-  PREVIEW_TOPBAR_HEIGHT
-} from './constants';
+import { PREVIEW_TOPBAR_HEIGHT } from './constants';
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
 
@@ -16,161 +12,10 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
   app.quit();
 }
 
-let mainWindow: electron.BrowserWindow;
-let previewWindow: electron.BrowserWindow;
-let preferencesWindow: electron.BrowserWindow;
-const isMac = process.platform === 'darwin';
+export let mainWindow: electron.BrowserWindow;
+export let previewWindow: electron.BrowserWindow;
+export let preferencesWindow: electron.BrowserWindow;
 
-if (isMac) {
-  if (!systemPreferences.getUserDefault('theme', 'string')) {
-    systemPreferences.setUserDefault('theme', 'string', nativeTheme.shouldUseDarkColors ? 'dark' : 'light');
-  }
-  if (!systemPreferences.getUserDefault('leftSidebarWidth', 'integer')) {
-    systemPreferences.setUserDefault('leftSidebarWidth', 'integer', DEFAULT_LEFT_SIDEBAR_WIDTH as any);
-  }
-  if (!systemPreferences.getUserDefault('rightSidebarWidth', 'integer')) {
-    systemPreferences.setUserDefault('rightSidebarWidth', 'integer', DEFAULT_RIGHT_SIDEBAR_WIDTH as any);
-  }
-
-  if (!systemPreferences.getUserDefault('tweenDrawerHeight', 'integer')) {
-    systemPreferences.setUserDefault('tweenDrawerHeight', 'integer', DEFAULT_RIGHT_SIDEBAR_WIDTH as any);
-  }
-}
-
-const template = [
-  // { role: 'appMenu' }
-  ...(isMac ? [{
-    label: app.name,
-    submenu: [
-      { role: 'about' },
-      { type: 'separator' },
-      {
-        label: 'Preferences',
-        click: () => {
-          if (!preferencesWindow) {
-            createPreferencesWindow();
-          }
-        }
-      },
-      { type: 'separator' },
-      { role: 'services' },
-      { type: 'separator' },
-      { role: 'hide' },
-      { role: 'hideothers' },
-      { role: 'unhide' },
-      { type: 'separator' },
-      { role: 'quit' }
-    ]
-  }] : []),
-  // { role: 'fileMenu' }
-  {
-    label: 'File',
-    submenu: [
-      {
-        label: 'Save',
-        click: () => {
-          dialog.showSaveDialog(mainWindow, {
-            properties: ['showOverwriteConfirmation']
-          }).then((result) => {
-            if (!result.canceled) {
-              mainWindow.webContents.executeJavaScript(`saveFile()`).then((fileJSON) => {
-                fs.writeFile(`${result.filePath}.esketch`, fileJSON, function(err) {
-                  if(err) {
-                    return console.log(err);
-                  }
-                });
-              });
-            }
-          });
-        }
-      },
-      {
-        label: 'Open',
-        click: () => {
-          dialog.showOpenDialog(mainWindow, {
-            filters: [
-              { name: 'Custom File Type', extensions: ['esketch'] }
-            ],
-            properties: ['openFile']
-          }).then((result) => {
-            if (result.filePaths.length > 0 && !result.canceled) {
-              fs.readFile(result.filePaths[0], {encoding: 'utf-8'}, function(err, data) {
-                if(err) {
-                  return console.log(err);
-                } else {
-                  mainWindow.webContents.executeJavaScript(`openFile(${data})`);
-                }
-              });
-            }
-          });
-        }
-      },
-      isMac ? { role: 'close' } : { role: 'quit' }
-    ]
-  },
-  // { role: 'editMenu' }
-  {
-    label: 'Edit',
-    submenu: [
-      { role: 'undo' },
-      { role: 'redo' },
-      { type: 'separator' },
-      { role: 'cut' },
-      { role: 'copy' },
-      { role: 'paste' },
-      ...(isMac ? [
-        { role: 'pasteAndMatchStyle' },
-        { role: 'delete' },
-        { role: 'selectAll' },
-        { type: 'separator' },
-        {
-          label: 'Speech',
-          submenu: [
-            { role: 'startspeaking' },
-            { role: 'stopspeaking' }
-          ]
-        }
-      ] : [
-        { role: 'delete' },
-        { type: 'separator' },
-        { role: 'selectAll' }
-      ])
-    ]
-  },
-  // { role: 'viewMenu' }
-  {
-    label: 'View',
-    submenu: [
-      { role: 'reload' },
-      { role: 'forcereload' },
-      { role: 'toggledevtools' },
-      { type: 'separator' },
-      { role: 'resetzoom' },
-      { role: 'zoomin' },
-      { role: 'zoomout' },
-      { type: 'separator' },
-      { role: 'togglefullscreen' }
-    ]
-  },
-  // { role: 'windowMenu' }
-  {
-    label: 'Window',
-    submenu: [
-      { role: 'minimize' },
-      { role: 'zoom' },
-      ...(isMac ? [
-        { type: 'separator' },
-        { role: 'front' },
-        { type: 'separator' },
-        { role: 'window' }
-      ] : [
-        { role: 'close' }
-      ])
-    ]
-  }
-];
-
-const menu = Menu.buildFromTemplate(template as any);
 Menu.setApplicationMenu(menu);
 
 const createWindow = (): void => {
@@ -200,7 +45,7 @@ const createWindow = (): void => {
   });
 };
 
-const createPreferencesWindow = (): void => {
+export const createPreferencesWindow = (): void => {
   preferencesWindow = new BrowserWindow({
     parent: mainWindow,
     height: 600,

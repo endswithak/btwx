@@ -1,5 +1,4 @@
 import { combineReducers } from 'redux';
-import storage from 'redux-persist/lib/storage';
 import undoable, { includeAction } from 'redux-undo';
 import layer from './layer';
 import tool from './tool';
@@ -12,6 +11,7 @@ import artboardPresetEditor from './artboardPresetEditor';
 import textEditor from './textEditor';
 import textSettings from './textSettings';
 import canvasSettings from './canvasSettings';
+import documentSettings from './documentSettings';
 import rightSidebar from './rightSidebar';
 import theme from './theme';
 import { importPaperProject } from '../selectors/layer';
@@ -303,6 +303,7 @@ const appReducer = combineReducers({
     SET_CURVE_POINT_ORIGIN_X,
     SET_CURVE_POINT_ORIGIN_Y
   ])}),
+  documentSettings,
   canvasSettings,
   tool,
   contextMenu,

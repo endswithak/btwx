@@ -43,6 +43,7 @@ import persist from './store/utils/persist';
 import { Titlebar, Color } from 'custom-electron-titlebar';
 import getTheme from './store/theme';
 import { openFile } from './store/reducers';
+import { saveDocumentAs, saveDocument } from './store/actions/documentSettings';
 
 import './styles/index.sass';
 
@@ -54,9 +55,10 @@ const titleBar = new Titlebar({
   backgroundColor: Color.fromHex(theme === 'dark' ? themeObject.background.z1 : themeObject.background.z2)
 });
 
-(window as any).saveFile = () => {
+(window as any).getSaveState = () => {
   const state = store.getState();
   const {
+    documentSettings,
     layer,
     canvasSettings,
     tool,
@@ -72,7 +74,12 @@ const titleBar = new Titlebar({
     theme
   } = state;
   const fileState = {
-    layer,
+    documentSettings,
+    layer: {
+      past: [] as any,
+      present: layer.present,
+      future: [] as any
+    },
     canvasSettings,
     tool,
     contextMenu,
@@ -89,8 +96,25 @@ const titleBar = new Titlebar({
   return JSON.stringify(fileState);
 }
 
+(window as any).getDocumentSettings = () => {
+  const state = store.getState();
+  return JSON.stringify(state.documentSettings);
+}
+
+(window as any).saveDocument = (documentSettings: { base: string; fullPath: string }) => {
+  store.dispatch(saveDocument({name: documentSettings.base, path: documentSettings.fullPath}));
+  return (window as any).getSaveState();
+}
+
+(window as any).saveDocumentAs = (documentSettings: { base: string; fullPath: string }) => {
+  store.dispatch(saveDocumentAs({name: documentSettings.base, path: documentSettings.fullPath}));
+  titleBar.updateTitle(documentSettings.base);
+  return (window as any).getSaveState();
+}
+
 (window as any).openFile = (fileJSON: any) => {
   store.dispatch(openFile({file: fileJSON}));
+  titleBar.updateTitle(fileJSON.documentSettings.name);
 }
 
 (window as any).updateTheme = () => {
@@ -100,7 +124,7 @@ const titleBar = new Titlebar({
 }
 
 (window as any).renderMainWindow = () => {
-  titleBar.updateTitle('eSketch');
+  titleBar.updateTitle('untitled');
   ReactDOM.render(
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
