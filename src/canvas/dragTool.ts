@@ -2,7 +2,7 @@ import store from '../store';
 import { setCanvasDragging } from '../store/actions/canvasSettings';
 import { moveLayersBy, duplicateLayers, removeDuplicatedLayers } from '../store/actions/layer';
 import { getPaperLayer, getSelectionBounds, getLayerAndDescendants } from '../store/selectors/layer';
-import { updateSelectionFrame, updateActiveArtboardFrame } from '../store/utils/layer';
+import { updateSelectionFrame, updateActiveArtboardFrame, updateMeasureFrame } from '../store/utils/layer';
 import { paperMain } from './index';
 import { THEME_PRIMARY_COLOR } from '../constants';
 import SnapTool from './snapTool';
@@ -101,6 +101,22 @@ class DragTool {
       paperLayer.position.y = layerItem.frame.y;
     });
   }
+  getMeasureGuides(): { top?: string; bottom?: string; left?: string; right?: string; all?: string } {
+    const measureGuides: { top?: string; bottom?: string; left?: string; right?: string; all?: string } = {};
+    if (this.snapTool.snap.x) {
+      if (!this.toBounds.intersects(getPaperLayer(this.snapTool.snap.x.id).bounds, 1)) {
+        measureGuides['top'] = this.snapTool.snap.x.id;
+        measureGuides['bottom'] = this.snapTool.snap.x.id;
+      }
+    }
+    if (this.snapTool.snap.y) {
+      if (!this.toBounds.intersects(getPaperLayer(this.snapTool.snap.y.id).bounds, 1)) {
+        measureGuides['left'] = this.snapTool.snap.y.id;
+        measureGuides['right'] = this.snapTool.snap.y.id;
+      }
+    }
+    return measureGuides;
+  }
   clearDuplicate(): void {
     store.dispatch(removeDuplicatedLayers({layers: this.duplicateSelection, newSelection: this.originalSelection}));
     this.state = store.getState();
@@ -126,6 +142,7 @@ class DragTool {
     updateActiveArtboardFrame(this.state.layer.present);
     this.updateSnapPoints();
     this.snapTool.updateGuides();
+    updateMeasureFrame(this.state.layer.present, this.getMeasureGuides());
   }
   onKeyDown(event: paper.KeyEvent): void {
     switch(event.key) {

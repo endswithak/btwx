@@ -54,19 +54,19 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { layer, layerItem, depth, hover, setLayerHover, setDraggable, selectLayer, deselectLayer, dragGhost } = props;
 
-  // const handleMouseEnter = () => {
-  //   setLayerHover({id: layer});
-  // }
+  const handleMouseEnter = () => {
+    setLayerHover({id: layer});
+  }
 
-  // const handleMouseLeave = () => {
-  //   setLayerHover({id: null});
-  // }
+  const handleMouseLeave = () => {
+    setLayerHover({id: null});
+  }
 
   return (
     <div
       className='c-layers-sidebar__layer-item'
-      // onMouseEnter={handleMouseEnter}
-      // onMouseLeave={handleMouseLeave}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       style={{
         paddingLeft: depth * (theme.unit * 6)
       }}>

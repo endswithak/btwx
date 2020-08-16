@@ -3,7 +3,7 @@ import store from '../store';
 import { setCanvasResizing } from '../store/actions/canvasSettings';
 import { scaleLayers } from '../store/actions/layer';
 import { getPaperLayer, getSelectionBounds, getLayerAndDescendants } from '../store/selectors/layer';
-import { updateSelectionFrame, updateActiveArtboardFrame } from '../store/utils/layer';
+import { updateSelectionFrame, updateActiveArtboardFrame, updateMeasureFrame } from '../store/utils/layer';
 import { paperMain } from './index';
 import Tooltip from './tooltip';
 import SnapTool from './snapTool';
@@ -106,6 +106,22 @@ class ResizeTool {
     this.horizontalFlip = false;
     this.snapTool = null;
     this.groupScale = false;
+  }
+  getMeasureGuides(): { top?: string; bottom?: string; left?: string; right?: string; all?: string } {
+    const measureGuides: { top?: string; bottom?: string; left?: string; right?: string; all?: string } = {};
+    if (this.snapTool.snap.x) {
+      if (!this.toBounds.intersects(getPaperLayer(this.snapTool.snap.x.id).bounds, 1)) {
+        measureGuides['top'] = this.snapTool.snap.x.id;
+        measureGuides['bottom'] = this.snapTool.snap.x.id;
+      }
+    }
+    if (this.snapTool.snap.y) {
+      if (!this.toBounds.intersects(getPaperLayer(this.snapTool.snap.y.id).bounds, 1)) {
+        measureGuides['left'] = this.snapTool.snap.y.id;
+        measureGuides['right'] = this.snapTool.snap.y.id;
+      }
+    }
+    return measureGuides;
   }
   flipLayers(state: RootState, hor = 1, ver = 1): void {
     this.state.layer.present.selected.forEach((layer) => {
@@ -276,6 +292,7 @@ class ResizeTool {
     updateActiveArtboardFrame(this.state.layer.present);
     this.updateTooltip();
     this.snapTool.updateGuides();
+    updateMeasureFrame(this.state.layer.present, this.getMeasureGuides());
   }
   updateToBounds(overrides?: any): void {
     if (this.shiftModifier || this.groupScale) {

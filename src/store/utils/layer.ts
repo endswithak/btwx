@@ -47,7 +47,7 @@ import {
   getTweensByDestinationLayer, getAllArtboardTweenEvents, getTweensEventsByDestinationArtboard, getTweensByLayer,
   getLayersBounds, getGradientOriginPoint, getGradientDestinationPoint, getGradientStops, getLayerSnapPoints,
   orderLayersByDepth, orderLayersByLeft, orderLayersByTop, exportPaperProject, getTweensByProp,
-  getEquivalentTweenProp, getTweensWithLayer, gradientsMatch, getPaperProp, getCurvePoints, getArtboardsTopTop
+  getEquivalentTweenProp, getTweensWithLayer, gradientsMatch, getPaperProp, getCurvePoints, getArtboardsTopTop, getSelectionBounds
 } from '../selectors/layer';
 
 import { paperMain } from '../../canvas';
@@ -60,6 +60,7 @@ import { applyImageMethods } from '../../canvas/imageUtils';
 import { THEME_PRIMARY_COLOR, DEFAULT_TRANSFORM } from '../../constants';
 import { bufferToBase64 } from '../../utils';
 import { TweenDrawerState } from '../reducers/tweenDrawer';
+import MeasureGuide from '../../canvas/measureGuide';
 
 export const addPage = (state: LayerState, action: AddPage): LayerState => {
   return {
@@ -631,6 +632,126 @@ export const updateTweenEventFrame = (state: LayerState, event: em.TweenEvent) =
       children: [originIndicator, connector, destinationIndicator, eventType],
       data: {
         id: 'tweenEventFrame'
+      }
+    });
+  }
+}
+
+export const updateMeasureFrame = (state: LayerState, guides: { top?: string; bottom?: string; left?: string; right?: string; all?: string }): void => {
+  const measureFrame = paperMain.project.getItem({ data: { id: 'measureFrame' } });
+  if (measureFrame) {
+    measureFrame.remove();
+  }
+  if (state.selected.length > 0) {
+    const selectionBounds = getSelectionBounds(state);
+    const measureFrameGuides = [];
+    let hasTopMeasure;
+    let hasBottomMeasure;
+    let hasLeftMeasure;
+    let hasRightMeasure;
+    let topMeasureTo;
+    let bottomMeasureTo;
+    let leftMeasureTo;
+    let rightMeasureTo;
+    Object.keys(guides).forEach((current: 'top' | 'bottom' | 'left' | 'right' | 'all') => {
+      const guideMeasureToId = guides[current] as any;
+      const measureToBounds = getPaperLayer(guideMeasureToId).bounds;
+      if (measureToBounds.contains(selectionBounds)) {
+        switch(current) {
+          case 'top':
+            hasTopMeasure = true;
+            topMeasureTo = measureToBounds.top;
+            break;
+          case 'bottom':
+            hasBottomMeasure = true;
+            bottomMeasureTo = measureToBounds.bottom;
+            break;
+          case 'left':
+            hasLeftMeasure = true;
+            leftMeasureTo = measureToBounds.left;
+            break;
+          case 'right':
+            hasRightMeasure = true;
+            rightMeasureTo = measureToBounds.right;
+            break;
+          case 'all':
+            hasTopMeasure = true;
+            hasBottomMeasure = true;
+            hasLeftMeasure = true;
+            hasRightMeasure = true;
+            topMeasureTo = measureToBounds.top;
+            bottomMeasureTo = measureToBounds.bottom;
+            leftMeasureTo = measureToBounds.left;
+            rightMeasureTo = measureToBounds.right;
+            break;
+        }
+      } else {
+        switch(current) {
+          case 'top':
+            hasTopMeasure = selectionBounds.top > measureToBounds.top;
+            topMeasureTo = selectionBounds.top > measureToBounds.bottom ? measureToBounds.bottom : measureToBounds.top;
+            break;
+          case 'bottom':
+            hasBottomMeasure = selectionBounds.bottom < measureToBounds.bottom;
+            bottomMeasureTo = selectionBounds.bottom < measureToBounds.top ? measureToBounds.top : measureToBounds.bottom;
+            break;
+          case 'left':
+            hasLeftMeasure = selectionBounds.left > measureToBounds.left;
+            leftMeasureTo = selectionBounds.left > measureToBounds.right ? measureToBounds.right : measureToBounds.left;
+            break;
+          case 'right':
+            hasRightMeasure = selectionBounds.right < measureToBounds.right;
+            rightMeasureTo = selectionBounds.right < measureToBounds.left ? measureToBounds.left : measureToBounds.right;
+            break;
+          case 'all':
+            hasTopMeasure = selectionBounds.top > measureToBounds.top;
+            hasBottomMeasure = selectionBounds.bottom < measureToBounds.bottom;
+            hasLeftMeasure = selectionBounds.left > measureToBounds.left;
+            hasRightMeasure = selectionBounds.right < measureToBounds.right;
+            topMeasureTo = selectionBounds.top > measureToBounds.bottom ? measureToBounds.bottom : measureToBounds.top;
+            bottomMeasureTo = selectionBounds.bottom < measureToBounds.top ? measureToBounds.top : measureToBounds.bottom;
+            leftMeasureTo = selectionBounds.left > measureToBounds.right ? measureToBounds.right : measureToBounds.left;
+            rightMeasureTo = selectionBounds.right < measureToBounds.left ? measureToBounds.left : measureToBounds.right;
+            break;
+        }
+      }
+    });
+    if (hasTopMeasure && (guides['all'] || guides['top'])) {
+      const topMeasureFromPoint = selectionBounds.topCenter;
+      const topMeasureToPoint = new paperMain.Point(topMeasureFromPoint.x, topMeasureTo);
+      const measureGuide = new MeasureGuide(topMeasureFromPoint, topMeasureToPoint, 'top', { down: true, up: true });
+      if (measureGuide.distance > 0) {
+        measureFrameGuides.push(measureGuide.paperLayer);
+      }
+    }
+    if (hasBottomMeasure && (guides['all'] || guides['bottom'])) {
+      const bottomMeasureFromPoint = selectionBounds.bottomCenter;
+      const bottomMeasureToPoint = new paperMain.Point(bottomMeasureFromPoint.x, bottomMeasureTo);
+      const measureGuide = new MeasureGuide(bottomMeasureFromPoint, bottomMeasureToPoint, 'bottom', { down: true, up: true });
+      if (measureGuide.distance > 0) {
+        measureFrameGuides.push(measureGuide.paperLayer);
+      }
+    }
+    if (hasLeftMeasure && (guides['all'] || guides['left'])) {
+      const leftMeasureFromPoint = selectionBounds.leftCenter;
+      const leftMeasureToPoint = new paperMain.Point(leftMeasureTo, leftMeasureFromPoint.y);
+      const measureGuide = new MeasureGuide(leftMeasureFromPoint, leftMeasureToPoint, 'left', { down: true, up: true });
+      if (measureGuide.distance > 0) {
+        measureFrameGuides.push(measureGuide.paperLayer);
+      }
+    }
+    if (hasRightMeasure && (guides['all'] || guides['right'])) {
+      const rightMeasureFromPoint = selectionBounds.rightCenter;
+      const rightMeasureToPoint = new paperMain.Point(rightMeasureTo, rightMeasureFromPoint.y);
+      const measureGuide = new MeasureGuide(rightMeasureFromPoint, rightMeasureToPoint, 'right', { down: true, up: true });
+      if (measureGuide.distance > 0) {
+        measureFrameGuides.push(measureGuide.paperLayer);
+      }
+    }
+    new paperMain.Group({
+      children: measureFrameGuides,
+      data: {
+        id: 'measureFrame'
       }
     });
   }

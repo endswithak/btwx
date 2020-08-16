@@ -124,7 +124,7 @@ const titleBar = new Titlebar({
 }
 
 (window as any).renderMainWindow = () => {
-  titleBar.updateTitle('untitled');
+  titleBar.updateTitle('Untitled');
   ReactDOM.render(
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>

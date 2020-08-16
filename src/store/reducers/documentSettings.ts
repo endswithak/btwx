@@ -12,7 +12,7 @@ export interface DocumentSettingsState {
 
 const initialState: DocumentSettingsState = {
   id: null,
-  name: 'untitled',
+  name: 'Untitled',
   path: null
 };
 

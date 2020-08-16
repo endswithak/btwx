@@ -16,19 +16,19 @@ const TweenDrawerEventLayerTimeline = (props: TweenDrawerEventLayerTimelineProps
   const theme = useContext(ThemeContext);
   const { id, layer, setLayerHover } = props;
 
-  // const handleMouseEnter = () => {
-  //   setLayerHover({ id });
-  // }
+  const handleMouseEnter = () => {
+    setLayerHover({ id });
+  }
 
-  // const handleMouseLeave = () => {
-  //   setLayerHover({ id: null });
-  // }
+  const handleMouseLeave = () => {
+    setLayerHover({ id: null });
+  }
 
   return (
     <div
       className={`c-tween-drawer-event__layer-timeline`}
-      // onMouseEnter={handleMouseEnter}
-      // onMouseLeave={handleMouseLeave}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       >
       <div className={`c-tween-drawer-event-layer__tween-timeline`} />
       <TweenDrawerEventLayerTweensTimeline layerId={id} />

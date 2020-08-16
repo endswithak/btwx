@@ -1,5 +1,6 @@
 import { getPaperLayer } from '../store/selectors/layer';
 import { removeLayers, escapeLayerScope } from '../store/actions/layer';
+import { setCanvasMeasuring } from '../store/actions/canvasSettings';
 import store from '../store';
 import AreaSelectTool from './areaSelectTool';
 import DragTool from './dragTool';
@@ -24,6 +25,7 @@ class SelectionTool {
   gradientTool: GradientTool;
   lineTool: LineTool;
   undoRedoTool: UndoRedoTool;
+  altModifier: boolean;
   constructor() {
     this.tool = new paperMain.Tool();
     this.tool.activate();
@@ -42,6 +44,7 @@ class SelectionTool {
     this.gradientTool = new GradientTool();
     this.undoRedoTool = new UndoRedoTool();
     this.lineTool = new LineTool();
+    this.altModifier = false;
   }
   onKeyDown(event: paper.KeyEvent): void {
     this.resizeTool.onKeyDown(event);
@@ -53,6 +56,10 @@ class SelectionTool {
     this.undoRedoTool.onKeyDown(event);
     this.lineTool.onKeyDown(event);
     switch(event.key) {
+      case 'alt': {
+        store.dispatch(setCanvasMeasuring({measuring: true}));
+        break;
+      }
       case 'escape': {
         const state = store.getState();
         store.dispatch(escapeLayerScope());
@@ -79,6 +86,12 @@ class SelectionTool {
     this.groupTool.onKeyUp(event);
     this.undoRedoTool.onKeyUp(event);
     this.lineTool.onKeyUp(event);
+    switch(event.key) {
+      case 'alt': {
+        store.dispatch(setCanvasMeasuring({measuring: false}));
+        break;
+      }
+    }
   }
   onMouseDown(event: paper.ToolEvent): void {
     this.insertTool.enabled = false;

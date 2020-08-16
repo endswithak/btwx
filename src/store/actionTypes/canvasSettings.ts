@@ -9,6 +9,7 @@ export const UPDATE_ARTBOARD_PRESET = 'UPDATE_ARTBOARD_PRESET';
 export const SET_LEFT_SIDEBAR_WIDTH = 'SET_LEFT_SIDEBAR_WIDTH';
 export const SET_RIGHT_SIDEBAR_WIDTH = 'SET_RIGHT_SIDEBAR_WIDTH';
 export const SET_TWEEN_DRAWER_HEIGHT = 'SET_TWEEN_DRAWER_HEIGHT';
+export const SET_CANVAS_MEASURING = 'SET_CANVAS_MEASURING';
 
 export interface SetCanvasMatrixPayload {
   matrix: number[];
@@ -116,6 +117,15 @@ export interface SetTweenDrawerHeight {
   payload: SetTweenDrawerHeightPayload;
 }
 
+export interface SetCanvasMeasuringPayload {
+  measuring: boolean;
+}
+
+export interface SetCanvasMeasuring {
+  type: typeof SET_CANVAS_MEASURING;
+  payload: SetCanvasMeasuringPayload;
+}
+
 export type CanvasSettingsTypes = SetCanvasMatrix |
                                   AddCanvasImage |
                                   SetCanvasResizing |
@@ -126,4 +136,5 @@ export type CanvasSettingsTypes = SetCanvasMatrix |
                                   UpdateArtboardPreset |
                                   SetLeftSidebarWidth |
                                   SetRightSidebarWidth |
-                                  SetTweenDrawerHeight;
+                                  SetTweenDrawerHeight |
+                                  SetCanvasMeasuring;

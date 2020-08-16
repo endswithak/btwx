@@ -14,6 +14,7 @@ import {
   SET_LEFT_SIDEBAR_WIDTH,
   SET_RIGHT_SIDEBAR_WIDTH,
   SET_TWEEN_DRAWER_HEIGHT,
+  SET_CANVAS_MEASURING,
   CanvasSettingsTypes,
 } from '../actionTypes/canvasSettings';
 
@@ -34,6 +35,7 @@ export interface CanvasSettingsState {
   };
   resizing: boolean;
   dragging: boolean;
+  measuring: boolean;
   zooming: boolean;
   leftSidebarWidth: number;
   rightSidebarWidth: number;
@@ -53,6 +55,7 @@ const initialState: CanvasSettingsState = {
   },
   resizing: false,
   dragging: false,
+  measuring: false,
   zooming: false,
   leftSidebarWidth: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('leftSidebarWidth', 'integer') : DEFAULT_LEFT_SIDEBAR_WIDTH,
   rightSidebarWidth: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('rightSidebarWidth', 'integer') : DEFAULT_RIGHT_SIDEBAR_WIDTH,
@@ -96,6 +99,12 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
       return {
         ...state,
         zooming: action.payload.zooming
+      };
+    }
+    case SET_CANVAS_MEASURING: {
+      return {
+        ...state,
+        measuring: action.payload.measuring
       };
     }
     case ADD_ARTBOARD_PRESET: {
