@@ -342,7 +342,7 @@ const rootReducer = (state: any, action: fileTypes) => {
     const canvas = document.getElementById('canvas-container') as HTMLCanvasElement;
     importPaperProject({
       paperProject: state.layer.present.paperProject,
-      canvasImages: state.canvasSettings.images.byId,
+      documentImages: state.documentSettings.images.byId,
       layers: {
         shape: state.layer.present.allShapeIds,
         artboard: state.layer.present.allArtboardIds,

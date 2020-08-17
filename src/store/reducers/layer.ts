@@ -190,6 +190,7 @@ import {
   SET_CURVE_POINT_ORIGIN,
   SET_CURVE_POINT_ORIGIN_X,
   SET_CURVE_POINT_ORIGIN_Y,
+  SET_LAYER_EDIT,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -383,7 +384,8 @@ import {
   setStarsRadius,
   setCurvePointOrigin,
   setCurvePointOriginX,
-  setCurvePointOriginY
+  setCurvePointOriginY,
+  setLayerEdit
 } from '../utils/layer';
 
 export interface LayerState {
@@ -421,6 +423,7 @@ export interface LayerState {
   tweenById: {
     [id: string]: em.Tween;
   };
+  edit: string;
 }
 
 const initialState: LayerState = {
@@ -460,7 +463,8 @@ const initialState: LayerState = {
   allTweenEventIds: [],
   tweenEventById: {},
   allTweenIds: [],
-  tweenById: {}
+  tweenById: {},
+  edit: null
 };
 
 export default (state = initialState, action: LayerTypes): LayerState => {
@@ -845,6 +849,8 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setCurvePointOriginX(state, action);
     case SET_CURVE_POINT_ORIGIN_Y:
       return setCurvePointOriginY(state, action);
+    case SET_LAYER_EDIT:
+      return setLayerEdit(state, action);
     default:
       return state;
   }

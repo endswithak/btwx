@@ -42,9 +42,8 @@ class UndoRedoTool {
           // if fill types dont match, open relevant editor
           switch(style.fillType) {
             case 'gradient': {
-              const gradient = (style as em.Fill | em.Stroke).gradient;
               store.dispatch(closeColorEditor());
-              store.dispatch(openGradientEditor({layers: state.colorEditor.layers, x: state.colorEditor.x, y: state.colorEditor.y, gradient: gradient, prop: state.colorEditor.prop}));
+              store.dispatch(openGradientEditor({layers: state.colorEditor.layers, x: state.colorEditor.x, y: state.colorEditor.y, prop: state.colorEditor.prop}));
             }
           }
         }
@@ -77,9 +76,8 @@ class UndoRedoTool {
           // if fill types dont match, open relevant editor
           switch(style.fillType) {
             case 'color': {
-              const color = (style as em.Fill | em.Stroke).color;
               store.dispatch(closeGradientEditor());
-              store.dispatch(openColorEditor({layers: state.gradientEditor.layers, x: state.gradientEditor.x, y: state.gradientEditor.y, color: color, prop: state.gradientEditor.prop}));
+              store.dispatch(openColorEditor({layers: state.gradientEditor.layers, x: state.gradientEditor.x, y: state.gradientEditor.y, prop: state.gradientEditor.prop}));
               break;
             }
           }
@@ -103,7 +101,7 @@ class UndoRedoTool {
             // import future paper project
             importPaperProject({
               paperProject: state.layer.present.paperProject,
-              canvasImages: state.canvasSettings.images.byId,
+              documentImages: state.documentSettings.images.byId,
               layers: {
                 shape: state.layer.present.allShapeIds,
                 artboard: state.layer.present.allArtboardIds,
@@ -127,7 +125,7 @@ class UndoRedoTool {
             // import past paper project
             importPaperProject({
               paperProject: state.layer.present.paperProject,
-              canvasImages: state.canvasSettings.images.byId,
+              documentImages: state.documentSettings.images.byId,
               layers: {
                 shape: state.layer.present.allShapeIds,
                 artboard: state.layer.present.allArtboardIds,

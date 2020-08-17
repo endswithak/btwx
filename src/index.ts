@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import electron, { app, BrowserWindow, ipcMain, systemPreferences, Menu, dialog, nativeTheme } from 'electron';
+import fs from 'fs';
+import path from 'path';
 import menu from './menu';
 import preferences from './preferences';
 import sharp from 'sharp';
@@ -18,7 +20,7 @@ export let preferencesWindow: electron.BrowserWindow;
 
 Menu.setApplicationMenu(menu);
 
-const createWindow = (): void => {
+const createMainWindow = (): void => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     height: 600,
@@ -103,7 +105,7 @@ const createPreviewWindow = ({width, height}: {width: number; height: number}): 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow);
+app.on('ready', createMainWindow);
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
@@ -118,7 +120,7 @@ app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
+    createMainWindow();
   }
 });
 
@@ -155,6 +157,35 @@ ipcMain.on('addImage', (event, arg) => {
       sharp(result.filePaths[0]).metadata().then(({ width }) => {
         sharp(result.filePaths[0]).resize(Math.round(width * 0.5)).webp({quality: 50}).toBuffer().then((buffer) => {
           event.reply('addImage-reply', JSON.stringify(buffer));
+        });
+      });
+    }
+  });
+});
+
+ipcMain.on('saveDocument', (event, path) => {
+  mainWindow.webContents.executeJavaScript(`saveDocument()`).then((documentJSON) => {
+    fs.writeFile(`${path}.esketch`, documentJSON, function(err) {
+      if(err) {
+        return console.log(err);
+      }
+      mainWindow.close();
+    });
+  });
+});
+
+ipcMain.on('saveDocumentAs', (event, arg) => {
+  dialog.showSaveDialog(mainWindow, {}).then((result) => {
+    if (!result.canceled) {
+      const base = path.basename(result.filePath);
+      const fullPath = result.filePath;
+      const documentSettings = {base, fullPath};
+      mainWindow.webContents.executeJavaScript(`saveDocumentAs(${JSON.stringify(documentSettings)})`).then((documentJSON) => {
+        fs.writeFile(`${result.filePath}.esketch`, documentJSON, function(err) {
+          if(err) {
+            return console.log(err);
+          }
+          mainWindow.close();
         });
       });
     }

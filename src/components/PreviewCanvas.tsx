@@ -9,7 +9,7 @@ import { RootState } from '../store/reducers';
 import { paperPreview } from '../canvas';
 import { setActiveArtboard } from '../store/actions/layer';
 import { SetActiveArtboardPayload, LayerTypes } from '../store/actionTypes/layer';
-import { getLongestEventTween, getPositionInArtboard, getAllArtboardTweenEvents, getAllArtboardTweenEventArtboards, getAllArtboardTweens, getAllArtboardTweenLayers, getAllArtboardTweenLayerDestinations, getAllArtboardTweenEventLayers, getGradientDestinationPoint, getGradientOriginPoint, getGradientStops } from '../store/selectors/layer';
+import { getPositionInArtboard, getAllArtboardTweenEvents, getAllArtboardTweenEventArtboards, getAllArtboardTweens, getAllArtboardTweenLayers, getAllArtboardTweenLayerDestinations, getAllArtboardTweenEventLayers, getGradientDestinationPoint, getGradientOriginPoint, getGradientStops } from '../store/selectors/layer';
 import { bufferToBase64 } from '../utils';
 
 gsap.registerPlugin(MorphSVGPlugin);
@@ -55,8 +55,8 @@ interface PreviewCanvasProps {
       [id: string]: em.Layer;
     };
   };
-  canvasImagesById: {
-    [id: string]: em.CanvasImage;
+  documentImagesById: {
+    [id: string]: em.DocumentImage;
   };
   setActiveArtboard?(payload: SetActiveArtboardPayload): LayerTypes;
 }
@@ -65,7 +65,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useContext(ThemeContext);
-  const { paperProject, activeArtboard, page, tweenEvents, tweenEventLayers, tweenEventDestinations, tweens, tweenLayers, tweenLayerDestinations, setActiveArtboard, canvasImagesById } = props;
+  const { paperProject, activeArtboard, page, tweenEvents, tweenEventLayers, tweenEventDestinations, tweens, tweenLayers, tweenLayerDestinations, setActiveArtboard, documentImagesById } = props;
 
   const handleResize = (): void => {
     paperPreview.view.viewSize = new paperPreview.Size(
@@ -887,9 +887,9 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer, canvasSettings } = state;
-  const paperProject = canvasSettings.images.allIds.reduce((result, current) => {
-    const rasterBase64 = bufferToBase64(Buffer.from(canvasSettings.images.byId[current].buffer));
+  const { layer, documentSettings } = state;
+  const paperProject = documentSettings.images.allIds.reduce((result, current) => {
+    const rasterBase64 = bufferToBase64(Buffer.from(documentSettings.images.byId[current].buffer));
     const base64 = `data:image/webp;base64,${rasterBase64}`;
     return result.replace(`"source":"${current}"`, `"source":"${base64}"`);
   }, layer.present.paperProject);
@@ -899,7 +899,7 @@ const mapStateToProps = (state: RootState) => {
   const tweens = getAllArtboardTweens(layer.present, layer.present.activeArtboard);
   const tweenLayers = getAllArtboardTweenLayers(layer.present, layer.present.activeArtboard);
   const tweenLayerDestinations = getAllArtboardTweenLayerDestinations(layer.present, layer.present.activeArtboard);
-  const canvasImagesById = canvasSettings.images.byId;
+  const documentImagesById = documentSettings.images.byId;
   return {
     activeArtboard: layer.present.byId[layer.present.activeArtboard],
     page: layer.present.page,
@@ -910,7 +910,7 @@ const mapStateToProps = (state: RootState) => {
     tweens,
     tweenLayers,
     tweenLayerDestinations,
-    canvasImagesById
+    documentImagesById
   };
 };
 

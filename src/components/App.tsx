@@ -1,5 +1,6 @@
 import React, { useRef, useContext, ReactElement, useState } from 'react';
 import Topbar from './Topbar';
+import TopbarTitle from './TopbarTitle';
 import EaseEditorWrap from './EaseEditorWrap';
 import Main from './Main';
 import { ThemeContext } from './ThemeProvider';
@@ -24,6 +25,7 @@ const App = (): ReactElement => {
       style={{
         background: theme.background.z0
       }}>
+        <TopbarTitle />
         {/* flex items */}
         <Topbar />
         <Main ready={ready} setReady={setReady} />

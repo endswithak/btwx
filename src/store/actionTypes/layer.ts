@@ -234,6 +234,8 @@ export const SET_CURVE_POINT_ORIGIN = 'SET_CURVE_POINT_POINT';
 export const SET_CURVE_POINT_ORIGIN_X = 'SET_CURVE_POINT_ORIGIN_X';
 export const SET_CURVE_POINT_ORIGIN_Y = 'SSET_CURVE_POINT_ORIGIN_Y';
 
+export const SET_LAYER_EDIT = 'SET_LAYER_EDIT';
+
 // Page
 
 export type AddPagePayload = {
@@ -598,8 +600,8 @@ export interface CopyLayersToClipboard {
 
 export interface PasteLayersFromClipboardPayload {
   overSelection?: boolean;
-  canvasImageById?: {
-    [id: string]: em.CanvasImage;
+  documentImageById?: {
+    [id: string]: em.DocumentImage;
   };
 }
 
@@ -2176,6 +2178,15 @@ export interface SetCurvePointOriginY {
   payload: SetCurvePointOriginYPayload;
 }
 
+export interface SetLayerEditPayload {
+  edit?: string;
+}
+
+export interface SetLayerEdit {
+  type: typeof SET_LAYER_EDIT;
+  payload: SetLayerEditPayload;
+}
+
 export type LayerTypes = AddPage |
                          AddArtboard |
                          AddGroup |
@@ -2372,4 +2383,5 @@ export type LayerTypes = AddPage |
                          SetStarsRadius |
                          SetCurvePointOrigin |
                          SetCurvePointOriginX |
-                         SetCurvePointOriginY;
+                         SetCurvePointOriginY |
+                         SetLayerEdit;

@@ -275,12 +275,12 @@ export const getCanvasCenter = (store: LayerState, useLayerItem?: boolean): pape
   return new paper.Point(xMid, yMid);
 };
 
-export const getClipboardTopLeft = (store: LayerState, canvasImages: {[id: string]: em.CanvasImage}): paper.Point => {
+export const getClipboardTopLeft = (store: LayerState, documentImages: {[id: string]: em.DocumentImage}): paper.Point => {
   const paperLayerPoints = store.clipboard.allIds.reduce((result, current) => {
     const layerItem = store.clipboard.byId[current];
     let paperLayerJSON = layerItem.paperLayer;
     if (layerItem.type === 'Image') {
-      const buffer = Buffer.from(canvasImages[layerItem.imageId].buffer);
+      const buffer = Buffer.from(documentImages[layerItem.imageId].buffer);
       const base64 = `data:image/webp;base64,${bufferToBase64(buffer)}`;
       paperLayerJSON = paperLayerJSON.replace(`"source":"${layerItem.imageId}"`, `"source":"${base64}"`);
     }
@@ -290,12 +290,12 @@ export const getClipboardTopLeft = (store: LayerState, canvasImages: {[id: strin
   return paperLayerPoints.reduce(paper.Point.min);
 };
 
-export const getClipboardBottomRight = (store: LayerState, canvasImages: {[id: string]: em.CanvasImage}): paper.Point => {
+export const getClipboardBottomRight = (store: LayerState, documentImages: {[id: string]: em.DocumentImage}): paper.Point => {
   const paperLayerPoints = store.clipboard.allIds.reduce((result, current) => {
     const layerItem = store.clipboard.byId[current];
     let paperLayerJSON = layerItem.paperLayer;
     if (layerItem.type === 'Image') {
-      const buffer = Buffer.from(canvasImages[layerItem.imageId].buffer);
+      const buffer = Buffer.from(documentImages[layerItem.imageId].buffer);
       const base64 = `data:image/webp;base64,${bufferToBase64(buffer)}`;
       paperLayerJSON = paperLayerJSON.replace(`"source":"${layerItem.imageId}"`, `"source":"${base64}"`);
     }
@@ -305,9 +305,9 @@ export const getClipboardBottomRight = (store: LayerState, canvasImages: {[id: s
   return paperLayerPoints.reduce(paper.Point.max);
 };
 
-export const getClipboardCenter = (store: LayerState, canvasImages: {[id: string]: em.CanvasImage}): paper.Point => {
-  const topLeft = getClipboardTopLeft(store, canvasImages);
-  const bottomRight = getClipboardBottomRight(store, canvasImages);
+export const getClipboardCenter = (store: LayerState, documentImages: {[id: string]: em.DocumentImage}): paper.Point => {
+  const topLeft = getClipboardTopLeft(store, documentImages);
+  const bottomRight = getClipboardBottomRight(store, documentImages);
   const xMid = (topLeft.x + bottomRight.x) / 2;
   const yMid = (topLeft.y + bottomRight.y) / 2;
   return new paper.Point(xMid, yMid);
@@ -1005,6 +1005,7 @@ export const exportPaperProject = (state: LayerState): string => {
   const hoverFrame = paperMain.project.getItem({data: {id: 'hoverFrame'}});
   const gradientFrame = paperMain.project.getItem({data: {id: 'gradientFrame'}});
   const activeArtboardFrame = paperMain.project.getItem({data: {id: 'activeArtboard'}});
+  const measureFrame = paperMain.project.getItem({data: {id: 'measureFrame'}});
   if (selectionFrame) {
     selectionFrame.remove();
   }
@@ -1016,6 +1017,9 @@ export const exportPaperProject = (state: LayerState): string => {
   }
   if (activeArtboardFrame) {
     activeArtboardFrame.remove();
+  }
+  if (measureFrame) {
+    measureFrame.remove();
   }
   const projectJSON = paperMain.project.exportJSON();
   const canvasImageBase64ById = state.allImageIds.reduce((result: { [id: string]: string }, current) => {
@@ -1031,8 +1035,8 @@ export const exportPaperProject = (state: LayerState): string => {
 };
 
 interface ImportPaperProject {
-  canvasImages: {
-    [id: string]: em.CanvasImage;
+  documentImages: {
+    [id: string]: em.DocumentImage;
   };
   paperProject: string;
   layers: {
@@ -1041,12 +1045,12 @@ interface ImportPaperProject {
     text: string[];
     image: string[];
   };
-};
+}
 
-export const importPaperProject = ({canvasImages, paperProject, layers}: ImportPaperProject): void => {
+export const importPaperProject = ({documentImages, paperProject, layers}: ImportPaperProject): void => {
   paperMain.project.clear();
-  const newPaperProject = Object.keys(canvasImages).reduce((result, current) => {
-    const rasterBase64 = bufferToBase64(Buffer.from(canvasImages[current].buffer));
+  const newPaperProject = Object.keys(documentImages).reduce((result, current) => {
+    const rasterBase64 = bufferToBase64(Buffer.from(documentImages[current].buffer));
     const base64 = `data:image/webp;base64,${rasterBase64}`;
     return result.replace(`"source":"${current}"`, `"source":"${base64}"`);
   }, paperProject);

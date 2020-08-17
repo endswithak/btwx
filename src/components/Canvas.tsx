@@ -13,11 +13,13 @@ import { LayerTypes } from '../store/actionTypes/layer';
 import { updateInViewLayers } from '../store/actions/layer';
 import { CanvasSettingsState } from '../store/reducers/canvasSettings';
 import { debounce } from '../utils';
+import { DocumentSettingsState } from '../store/reducers/documentSettings';
 
 interface CanvasProps {
   drawing: boolean;
   typing: boolean;
   canvasSettings: CanvasSettingsState;
+  documentSettings: DocumentSettingsState;
   paperProject?: string;
   allArtboardIds?: string[];
   allShapeIds?: string[];
@@ -33,7 +35,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useContext(ThemeContext);
-  const { drawing, typing, canvasSettings, enableSelectionTool, updateInViewLayers, paperProject, allArtboardIds, allShapeIds, allTextIds, allImageIds, setCanvasMatrix, setReady } = props;
+  const { drawing, typing, canvasSettings, documentSettings, enableSelectionTool, updateInViewLayers, paperProject, allArtboardIds, allShapeIds, allTextIds, allImageIds, setCanvasMatrix, setReady } = props;
 
   const handleWheel = (e: WheelEvent): void => {
     e.preventDefault();
@@ -74,7 +76,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
     paperMain.setup(canvasRef.current);
     importPaperProject({
       paperProject,
-      canvasImages: canvasSettings.images.byId,
+      documentImages: documentSettings.images.byId,
       layers: {
         shape: allShapeIds,
         artboard: allArtboardIds,
@@ -117,13 +119,14 @@ const mapStateToProps = (state: RootState): {
   drawing: boolean;
   typing: boolean;
   canvasSettings: CanvasSettingsState;
+  documentSettings: DocumentSettingsState;
   paperProject: string;
   allArtboardIds: string[];
   allShapeIds: string[];
   allTextIds: string[];
   allImageIds: string[];
 } => {
-  const { layer, tool, canvasSettings } = state;
+  const { layer, tool, canvasSettings, documentSettings } = state;
   return {
     drawing: tool.type === 'Shape' || tool.type === 'Artboard',
     typing: tool.type === 'Text',
@@ -132,7 +135,8 @@ const mapStateToProps = (state: RootState): {
     allTextIds: layer.present.allTextIds,
     allImageIds: layer.present.allImageIds,
     paperProject: layer.present.paperProject,
-    canvasSettings: canvasSettings
+    canvasSettings,
+    documentSettings
   };
 };
 

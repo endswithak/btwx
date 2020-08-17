@@ -199,6 +199,7 @@ import {
   SET_CURVE_POINT_ORIGIN,
   SET_CURVE_POINT_ORIGIN_X,
   SET_CURVE_POINT_ORIGIN_Y,
+  SET_LAYER_EDIT,
   AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
@@ -387,6 +388,7 @@ import {
   SetCurvePointOriginPayload,
   SetCurvePointOriginXPayload,
   SetCurvePointOriginYPayload,
+  SetLayerEditPayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -1519,4 +1521,12 @@ export const setCurvePointOriginX = (payload: SetCurvePointOriginXPayload): Laye
 export const setCurvePointOriginY = (payload: SetCurvePointOriginYPayload): LayerTypes => ({
   type: SET_CURVE_POINT_ORIGIN_Y,
   payload
+});
+
+export const setLayerEdit = (payload: SetLayerEditPayload): LayerTypes => ({
+  type: SET_LAYER_EDIT,
+  payload: {
+    ...payload,
+    edit: uuidv4()
+  }
 });

@@ -4,7 +4,6 @@ import { DEFAULT_LEFT_SIDEBAR_WIDTH, DEFAULT_RIGHT_SIDEBAR_WIDTH, DEFAULT_TWEEN_
 
 import {
   SET_CANVAS_MATRIX,
-  ADD_CANVAS_IMAGE,
   SET_CANVAS_ZOOMING,
   SET_CANVAS_RESIZING,
   SET_CANVAS_DRAGGING,
@@ -20,12 +19,6 @@ import {
 
 export interface CanvasSettingsState {
   matrix: number[];
-  images: {
-    allIds: string[];
-    byId: {
-      [id: string]: em.CanvasImage;
-    };
-  };
   artboardPresets: {
     allIds: string[];
     byId: {
@@ -49,10 +42,6 @@ const initialState: CanvasSettingsState = {
     byId: {},
     editing: null
   },
-  images: {
-    allIds: [],
-    byId: {}
-  },
   resizing: false,
   dragging: false,
   measuring: false,
@@ -68,19 +57,6 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
       return {
         ...state,
         matrix: action.payload.matrix
-      };
-    }
-    case ADD_CANVAS_IMAGE: {
-      return {
-        ...state,
-        images: {
-          ...state.images,
-          allIds: addItem(state.images.allIds, action.payload.id),
-          byId: {
-            ...state.images.byId,
-            [action.payload.id]: action.payload
-          }
-        }
       };
     }
     case SET_CANVAS_RESIZING: {

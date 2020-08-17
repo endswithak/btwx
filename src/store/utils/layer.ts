@@ -37,7 +37,7 @@ import {
   SetLayerGradientOrigin, SetLayersGradientOrigin, SetLayerGradientDestination, SetLayersGradientDestination, SetLayerGradientStopColor,
   SetLayersGradientStopColor, SetLayerGradientStopPosition, SetLayersGradientStopPosition, AddLayerGradientStop, AddLayersGradientStop,
   RemoveLayerGradientStop, RemoveLayersGradientStop, SetLayerActiveGradientStop, SetLayersShadowBlur, SetLayersShadowXOffset, SetLayersShadowYOffset, SetLayersFontSize,
-  SetLayersFontWeight, SetLayersFontFamily, SetLayersLeading, SetLayersJustification, SetLayerTweenTiming, SetCurvePointOriginX, SetCurvePointOriginY, SetCurvePointOrigin, SetRoundedRadii, SetPolygonsSides, SetStarsPoints, SetStarsRadius
+  SetLayersFontWeight, SetLayersFontFamily, SetLayersLeading, SetLayersJustification, SetLayerTweenTiming, SetCurvePointOriginX, SetCurvePointOriginY, SetCurvePointOrigin, SetRoundedRadii, SetPolygonsSides, SetStarsPoints, SetStarsRadius, SetLayerEdit
 } from '../actionTypes/layer';
 
 import {
@@ -93,13 +93,14 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
         children: addItem(currentState.byId[currentState.page].children, action.payload.id)
       } as em.Page
     },
-    allArtboardIds: addItem(currentState.allArtboardIds, action.payload.id),
-    paperProject: exportPaperProject(currentState)
+    allArtboardIds: addItem(currentState.allArtboardIds, action.payload.id)
   }
   if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
   }
-  return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const updateActiveArtboardFrame = (state: LayerState, useLayerItem = false): void => {
@@ -152,13 +153,14 @@ export const addShape = (state: LayerState, action: AddShape): LayerState => {
         showChildren: true
       } as em.Group
     },
-    allShapeIds: addItem(state.allShapeIds, action.payload.id),
-    paperProject: exportPaperProject(currentState)
+    allShapeIds: addItem(state.allShapeIds, action.payload.id)
   }
   if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
   }
-  return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 // export const addCompoundShape = (state: LayerState, action: AddCompoundShape): LayerState => {
@@ -209,13 +211,14 @@ export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
         showChildren: true
       } as em.Group
     },
-    allGroupIds: addItem(state.allGroupIds, action.payload.id),
-    paperProject: exportPaperProject(currentState)
+    allGroupIds: addItem(state.allGroupIds, action.payload.id)
   }
   if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
   }
-  return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const addText = (state: LayerState, action: AddText): LayerState => {
@@ -235,13 +238,14 @@ export const addText = (state: LayerState, action: AddText): LayerState => {
         showChildren: true
       } as em.Group
     },
-    allTextIds: addItem(state.allTextIds, action.payload.id),
-    paperProject: exportPaperProject(currentState)
+    allTextIds: addItem(state.allTextIds, action.payload.id)
   }
   if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
   }
-  return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const addImage = (state: LayerState, action: AddImage): LayerState => {
@@ -265,13 +269,14 @@ export const addImage = (state: LayerState, action: AddImage): LayerState => {
         showChildren: true
       } as em.Group
     },
-    allImageIds: addItem(state.allImageIds, action.payload.id),
-    paperProject: paperMain.project.exportJSON().replace(raster.source as string, action.payload.imageId)
+    allImageIds: addItem(state.allImageIds, action.payload.id)
   }
   if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
   }
-  return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState => {
@@ -362,7 +367,7 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
   // remove paper layer
   getPaperLayer(action.payload.id).remove();
   // remove layer
-  return {
+  currentState = {
     ...currentState,
     allIds: currentState.allIds.filter((id) => !layersToRemove.includes(id)),
     byId: Object.keys(currentState.byId).reduce((result: any, key) => {
@@ -378,9 +383,10 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
       }
       return result;
     }, {}),
-    paperProject: exportPaperProject(currentState),
     scope: currentState.scope.filter((id) => !layersToRemove.includes(id))
   }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const removeLayers = (state: LayerState, action: RemoveLayers): LayerState => {
@@ -939,8 +945,7 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
           showChildren: true,
           children: addItem(removeItem((currentState.byId[action.payload.id] as em.Group).children, action.payload.child), action.payload.child)
         } as em.Group
-      },
-      paperProject: exportPaperProject(currentState)
+      }
     };
   } else {
     if (child.mask) {
@@ -971,11 +976,12 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
           showChildren: true,
           children: addItem((currentState.byId[action.payload.id] as em.Group).children, action.payload.child)
         } as em.Group
-      },
-      paperProject: exportPaperProject(currentState)
+      }
     };
   }
-  return selectLayer(currentState, layerActions.selectLayer({id: action.payload.child, newSelection: true}) as SelectLayer);
+  currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.child, newSelection: true}) as SelectLayer);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const addLayerChildren = (state: LayerState, action: AddLayerChildren) => {
@@ -1007,8 +1013,7 @@ export const insertLayerChild = (state: LayerState, action: InsertLayerChild): L
           ...currentState.byId[action.payload.id],
           children: insertItem(removeItem((currentState.byId[action.payload.id] as em.Group).children, action.payload.child), action.payload.child, action.payload.index)
         } as em.Group
-      },
-      paperProject: exportPaperProject(currentState)
+      }
     };
   } else {
     if (child.mask) {
@@ -1038,11 +1043,12 @@ export const insertLayerChild = (state: LayerState, action: InsertLayerChild): L
           ...currentState.byId[action.payload.id],
           children: insertItem((currentState.byId[action.payload.id] as em.Group).children, action.payload.child, action.payload.index)
         } as em.Group
-      },
-      paperProject: exportPaperProject(currentState)
+      }
     };
   }
-  return selectLayer(currentState, layerActions.selectLayer({id: action.payload.child, newSelection: true}) as SelectLayer);
+  currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.child, newSelection: true}) as SelectLayer);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const showLayerChildren = (state: LayerState, action: ShowLayerChildren): LayerState => {
@@ -1112,8 +1118,7 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
           ...currentState.byId[above.parent],
           children: insertItem((currentState.byId[above.parent] as em.Group).children, action.payload.id, aboveIndex)
         } as em.Group
-      },
-      paperProject: exportPaperProject(currentState)
+      }
     };
   } else {
     if (layer.masked && above.mask) {
@@ -1131,7 +1136,9 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
       paperProject: exportPaperProject(currentState)
     };
   }
-  return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const insertLayersAbove = (state: LayerState, action: InsertLayersAbove) => {
@@ -1182,8 +1189,7 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
           ...currentState.byId[below.parent],
           children: insertItem((currentState.byId[below.parent] as em.Group).children, action.payload.id, belowIndex + 1)
         } as em.Group
-      },
-      paperProject: exportPaperProject(currentState)
+      }
     };
   } else {
     if (layer.mask && below.masked) {
@@ -1197,11 +1203,12 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
           ...currentState.byId[layer.parent],
           children: moveItemBelow(currentState.byId[layer.parent].children, layerIndex, belowIndex)
         } as em.Group
-      },
-      paperProject: exportPaperProject(currentState)
+      }
     };
   }
-  return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const insertLayersBelow = (state: LayerState, action: InsertLayersBelow): LayerState => {
@@ -1293,14 +1300,16 @@ export const groupLayers = (state: LayerState, action: GroupLayers): LayerState 
   }, currentState);
   // select final group
   currentState = selectLayer(currentState, {payload: {id: groupId, newSelection: true}} as SelectLayer);
+  // set layer edit
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   // return final state
   return currentState;
 };
 
 export const ungroupLayer = (state: LayerState, action: UngroupLayer): LayerState => {
   const layer = getLayer(state, action.payload.id);
+  let currentState = state;
   if (layer.type === 'Group') {
-    let currentState = state;
     // check if contains clip mask
     const paperLayer = getPaperLayer(action.payload.id) as paper.Group;
     if (paperLayer.clipped) {
@@ -1315,11 +1324,11 @@ export const ungroupLayer = (state: LayerState, action: UngroupLayer): LayerStat
     currentState = selectLayers(currentState, layerActions.selectLayers({layers: layer.children, newSelection: true}) as SelectLayers);
     // remove group
     currentState = removeLayer(currentState, layerActions.removeLayer({id: layer.id}) as RemoveLayer);
-    // return final state
-    return currentState;
   } else {
-    return selectLayer(state, layerActions.selectLayer({id: layer.id, newSelection: true}) as SelectLayer);
+    currentState = selectLayer(state, layerActions.selectLayer({id: layer.id, newSelection: true}) as SelectLayer);
   }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const ungroupLayers = (state: LayerState, action: UngroupLayers): LayerState => {
@@ -1437,12 +1446,12 @@ const getLayerCloneMap = (state: LayerState, id: string, fromClipboard?: boolean
   return layerCloneMap;
 }
 
-const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any, fromClipboard?: boolean, canvasImages?: { [id: string]: em.CanvasImage }) => {
+const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any, fromClipboard?: boolean, documentImages?: { [id: string]: em.DocumentImage }) => {
   const paperLayer = fromClipboard ? paperMain.project.importJSON((() => {
     const layer = state.clipboard.byId[id];
     switch(layer.type) {
       case 'Image': {
-        const imageBuffer = Buffer.from(canvasImages[layer.imageId].buffer);
+        const imageBuffer = Buffer.from(documentImages[layer.imageId].buffer);
         const imageBase64 = `data:image/webp;base64,${bufferToBase64(imageBuffer)}`;
         return layer.paperLayer.replace(`"source":"${layer.imageId}"`, `"source":"${imageBase64}"`);
       }
@@ -1487,7 +1496,7 @@ const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any, fro
         const childPaperLayer = fromClipboard ? paperMain.project.importJSON((() => {
           switch(childLayer.type) {
             case 'Image': {
-              const imageBuffer = Buffer.from(canvasImages[childLayer.imageId].buffer);
+              const imageBuffer = Buffer.from(documentImages[childLayer.imageId].buffer);
               const imageBase64 = `data:image/webp;base64,${bufferToBase64(imageBuffer)}`;
               return (childLayer as em.ClipboardLayer).paperLayer.replace(`"source":"${childLayer.imageId}"`, `"source":"${imageBase64}"`);
             }
@@ -1519,9 +1528,9 @@ const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any, fro
   }
 }
 
-const cloneLayerAndChildren = (state: LayerState, id: string, fromClipboard?: boolean, canvasImages?: { [id: string]: em.CanvasImage }) => {
+const cloneLayerAndChildren = (state: LayerState, id: string, fromClipboard?: boolean, documentImages?: { [id: string]: em.DocumentImage }) => {
   const layerCloneMap = getLayerCloneMap(state, id, fromClipboard);
-  clonePaperLayers(state, id, layerCloneMap, fromClipboard, canvasImages);
+  clonePaperLayers(state, id, layerCloneMap, fromClipboard, documentImages);
   const rootLayer = fromClipboard ? state.clipboard.byId[id] : state.byId[id];
   const rootParent = getLayer(state, state.scope.length > 0 ? state.scope[state.scope.length - 1] : state.page);
   return Object.keys(layerCloneMap).reduce((result: any, key: string, index: number) => {
@@ -1547,14 +1556,14 @@ const cloneLayerAndChildren = (state: LayerState, id: string, fromClipboard?: bo
   }, {allIds: [], byId: {}});
 }
 
-export const pasteLayerFromClipboard = (payload: {state: LayerState; id: string; pasteOverSelection?: boolean; canvasImages?: { [id: string]: em.CanvasImage }}): LayerState => {
+export const pasteLayerFromClipboard = (payload: {state: LayerState; id: string; pasteOverSelection?: boolean; documentImages?: { [id: string]: em.DocumentImage }}): LayerState => {
   let currentState = payload.state;
-  currentState = duplicateLayer(currentState, layerActions.duplicateLayer({id: payload.id}) as DuplicateLayer, true, payload.canvasImages);
+  currentState = duplicateLayer(currentState, layerActions.duplicateLayer({id: payload.id}) as DuplicateLayer, true, payload.documentImages);
   const clonedLayerAndChildren = currentState.allIds.filter((id) => !payload.state.allIds.includes(id));
   // paste over selection is specified
   if (payload.pasteOverSelection && payload.state.selected.length > 0) {
     const selectionCenter = getSelectionCenter(payload.state);
-    const clipboardCenter = getClipboardCenter(payload.state, payload.canvasImages);
+    const clipboardCenter = getClipboardCenter(payload.state, payload.documentImages);
     const paperLayer = getPaperLayer(clonedLayerAndChildren[0]);
     const paperLayerCenter = paperLayer.position;
     paperLayer.position.x = selectionCenter.x + (paperLayerCenter.x - clipboardCenter.x);
@@ -1572,7 +1581,7 @@ export const pasteLayersFromClipboard = (state: LayerState, action: PasteLayersF
         state: result,
         id: current,
         pasteOverSelection: action.payload.overSelection,
-        canvasImages: action.payload.canvasImageById
+        documentImages: action.payload.documentImageById
       });
     }, state);
     if (state.selected.length > 0) {
@@ -1813,7 +1822,9 @@ export const moveLayer = (state: LayerState, action: MoveLayer): LayerState => {
     },
     paperProject: exportPaperProject(currentState)
   }
-  return updateParentBounds(currentState, action.payload.id);
+  currentState = updateParentBounds(currentState, action.payload.id);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const moveLayers = (state: LayerState, action: MoveLayers): LayerState => {
@@ -1840,7 +1851,9 @@ export const moveLayerTo = (state: LayerState, action: MoveLayerTo): LayerState 
     },
     paperProject: exportPaperProject(currentState)
   }
-  return updateParentBounds(currentState, action.payload.id);
+  currentState = updateParentBounds(currentState, action.payload.id);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const moveLayersTo = (state: LayerState, action: MoveLayersTo): LayerState => {
@@ -1858,6 +1871,7 @@ export const moveLayerBy = (state: LayerState, action: MoveLayerBy): LayerState 
   if (action.payload.y) {
     currentState = updateLayerTweens(currentState, action.payload.id, 'y');
   }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -1895,6 +1909,8 @@ export const setLayerName = (state: LayerState, action: SetLayerName): LayerStat
     result = updateLayerTweens(result, action.payload.id, current);
     return result;
   }, currentState);
+  // set layer edit
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   // return final state
   return currentState;
 };
@@ -1933,20 +1949,19 @@ export const addLayerTweenEvent = (state: LayerState, action: AddLayerTweenEvent
       tweenEventById: {
         ...currentState.tweenEventById,
         [action.payload.id]: action.payload as em.TweenEvent
-      },
-      paperProject: exportPaperProject(currentState)
+      }
     }
     // add animation event tweens
-    return artboardChildren.reduce((result, current) => {
+    currentState = artboardChildren.reduce((result, current) => {
       if (state.byId[current].type !== 'Group') {
         return addTweenEventLayerTweens(result, action.payload.id, current);
       } else {
         return result;
       }
     }, currentState);
-  } else {
-    return currentState;
   }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const addTweenEventLayerTweens = (state: LayerState, eventId: string, layerId: string): LayerState => {
@@ -2003,66 +2018,69 @@ export const removeLayerTweenEvent = (state: LayerState, action: RemoveLayerTwee
         result[key] = currentState.tweenEventById[key];
       }
       return result;
-    }, {}),
-    paperProject: exportPaperProject(currentState)
+    }, {})
   }
-  // return final state
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
 export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerState => {
-  return {
-    ...state,
+  let currentState = state;
+  currentState = {
+    ...currentState,
     tweenEventById: {
-      ...state.tweenEventById,
+      ...currentState.tweenEventById,
       [action.payload.event]: {
-        ...state.tweenEventById[action.payload.event],
-        tweens: addItem(state.tweenEventById[action.payload.event].tweens, action.payload.id)
+        ...currentState.tweenEventById[action.payload.event],
+        tweens: addItem(currentState.tweenEventById[action.payload.event].tweens, action.payload.id)
       }
     },
     byId: {
-      ...state.byId,
+      ...currentState.byId,
       [action.payload.layer]: {
-        ...state.byId[action.payload.layer],
-        tweens: addItem(state.byId[action.payload.layer].tweens, action.payload.id)
+        ...currentState.byId[action.payload.layer],
+        tweens: addItem(currentState.byId[action.payload.layer].tweens, action.payload.id)
       }
     },
-    allTweenIds: addItem(state.allTweenIds, action.payload.id),
+    allTweenIds: addItem(currentState.allTweenIds, action.payload.id),
     tweenById: {
-      ...state.tweenById,
+      ...currentState.tweenById,
       [action.payload.id]: action.payload as em.Tween
-    },
-    paperProject: exportPaperProject(state)
+    }
   }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): LayerState => {
   const tween = state.tweenById[action.payload.id];
-  return {
+  let currentState = state;
+  currentState = {
     ...state,
     tweenEventById: {
-      ...state.tweenEventById,
+      ...currentState.tweenEventById,
       [tween.event]: {
-        ...state.tweenEventById[tween.event],
-        tweens: removeItem(state.tweenEventById[tween.event].tweens, action.payload.id)
+        ...currentState.tweenEventById[tween.event],
+        tweens: removeItem(currentState.tweenEventById[tween.event].tweens, action.payload.id)
       }
     },
     byId: {
-      ...state.byId,
+      ...currentState.byId,
       [tween.layer]: {
-        ...state.byId[tween.layer],
-        tweens: removeItem(state.byId[tween.layer].tweens, action.payload.id)
+        ...currentState.byId[tween.layer],
+        tweens: removeItem(currentState.byId[tween.layer].tweens, action.payload.id)
       }
     },
-    allTweenIds: removeItem(state.allTweenIds, action.payload.id),
-    tweenById: Object.keys(state.tweenById).reduce((result: any, key) => {
+    allTweenIds: removeItem(currentState.allTweenIds, action.payload.id),
+    tweenById: Object.keys(currentState.tweenById).reduce((result: any, key) => {
       if (key !== action.payload.id) {
-        result[key] = state.tweenById[key];
+        result[key] = currentState.tweenById[key];
       }
       return result;
-    }, {}),
-    paperProject: exportPaperProject(state)
+    }, {})
   }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const updateLayerTweens = (state: LayerState, layerId: string, prop: em.TweenProp): LayerState => {
@@ -2160,21 +2178,24 @@ export const updateLayerTweens = (state: LayerState, layerId: string, prop: em.T
 };
 
 export const setLayerTweenDuration = (state: LayerState, action: SetLayerTweenDuration): LayerState => {
-  return {
-    ...state,
+  let currentState = state;
+  currentState = {
+    ...currentState,
     tweenById: {
-      ...state.tweenById,
+      ...currentState.tweenById,
       [action.payload.id]: {
-        ...state.tweenById[action.payload.id],
+        ...currentState.tweenById[action.payload.id],
         duration: Math.round((action.payload.duration + Number.EPSILON) * 100) / 100
       }
-    },
-    paperProject: exportPaperProject(state)
+    }
   }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerTweenDelay = (state: LayerState, action: SetLayerTweenDelay): LayerState => {
-  return {
+  let currentState = state;
+  currentState = {
     ...state,
     tweenById: {
       ...state.tweenById,
@@ -2182,9 +2203,10 @@ export const setLayerTweenDelay = (state: LayerState, action: SetLayerTweenDelay
         ...state.tweenById[action.payload.id],
         delay: Math.round((action.payload.delay + Number.EPSILON) * 100) / 100
       }
-    },
-    paperProject: exportPaperProject(state)
+    }
   }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerTweenTiming = (state: LayerState, action: SetLayerTweenTiming): LayerState => {
@@ -2195,7 +2217,8 @@ export const setLayerTweenTiming = (state: LayerState, action: SetLayerTweenTimi
 };
 
 export const setLayerTweenEase = (state: LayerState, action: SetLayerTweenEase): LayerState => {
-  return {
+  let currentState = state;
+  currentState = {
     ...state,
     tweenById: {
       ...state.tweenById,
@@ -2203,13 +2226,15 @@ export const setLayerTweenEase = (state: LayerState, action: SetLayerTweenEase):
         ...state.tweenById[action.payload.id],
         ease: action.payload.ease
       }
-    },
-    paperProject: exportPaperProject(state)
+    }
   }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerTweenPower = (state: LayerState, action: SetLayerTweenPower): LayerState => {
-  return {
+  let currentState = state;
+  currentState = {
     ...state,
     tweenById: {
       ...state.tweenById,
@@ -2217,9 +2242,10 @@ export const setLayerTweenPower = (state: LayerState, action: SetLayerTweenPower
         ...state.tweenById[action.payload.id],
         power: action.payload.power
       }
-    },
-    paperProject: exportPaperProject(state)
+    }
   }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
@@ -2244,11 +2270,11 @@ export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
           x: x
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
   currentState = updateLayerTweens(currentState, action.payload.id, 'x');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -2280,11 +2306,11 @@ export const setLayerY = (state: LayerState, action: SetLayerY): LayerState => {
           y: y
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
   currentState = updateLayerTweens(currentState, action.payload.id, 'y');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -2324,11 +2350,11 @@ export const setLayerWidth = (state: LayerState, action: SetLayerWidth): LayerSt
           innerWidth: action.payload.width
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
   currentState = updateLayerTweens(currentState, action.payload.id, 'width');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -2368,11 +2394,11 @@ export const setLayerHeight = (state: LayerState, action: SetLayerHeight): Layer
           innerHeight: action.payload.height
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
   currentState = updateLayerTweens(currentState, action.payload.id, 'height');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -2397,10 +2423,10 @@ export const setLayerOpacity = (state: LayerState, action: SetLayerOpacity): Lay
           opacity: action.payload.opacity
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'opacity');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -2445,11 +2471,11 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
           rotation: action.payload.rotation
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'rotation');
   currentState = updateLayerBounds(currentState, action.payload.id);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -2472,10 +2498,11 @@ export const enableLayerHorizontalFlip = (state: LayerState, action: EnableLayer
           horizontalFlip: true
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
-  return updateLayerBounds(currentState, action.payload.id);
+  currentState = updateLayerBounds(currentState, action.payload.id);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const disableLayerHorizontalFlip = (state: LayerState, action: DisableLayerHorizontalFlip): LayerState => {
@@ -2491,10 +2518,11 @@ export const disableLayerHorizontalFlip = (state: LayerState, action: DisableLay
           horizontalFlip: false
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
-  return updateLayerBounds(currentState, action.payload.id);
+  currentState = updateLayerBounds(currentState, action.payload.id);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const enableLayerVerticalFlip = (state: LayerState, action: EnableLayerVerticalFlip): LayerState => {
@@ -2510,10 +2538,11 @@ export const enableLayerVerticalFlip = (state: LayerState, action: EnableLayerVe
           verticalFlip: true
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
-  return updateLayerBounds(currentState, action.payload.id);
+  currentState = updateLayerBounds(currentState, action.payload.id);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const disableLayerVerticalFlip = (state: LayerState, action: DisableLayerVerticalFlip): LayerState => {
@@ -2529,10 +2558,11 @@ export const disableLayerVerticalFlip = (state: LayerState, action: DisableLayer
           verticalFlip: false
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
-  return updateLayerBounds(currentState, action.payload.id);
+  currentState = updateLayerBounds(currentState, action.payload.id);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const enableLayerFill = (state: LayerState, action: EnableLayerFill): LayerState => {
@@ -2568,10 +2598,10 @@ export const enableLayerFill = (state: LayerState, action: EnableLayerFill): Lay
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'fill');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -2599,10 +2629,10 @@ export const disableLayerFill = (state: LayerState, action: DisableLayerFill): L
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'fill');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -2633,10 +2663,10 @@ export const setLayerFillColor = (state: LayerState, action: SetLayerFillColor):
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'fill');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -2677,10 +2707,10 @@ export const setLayerFill = (state: LayerState, action: SetLayerFill): LayerStat
           fill: fill
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'fill');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -2718,10 +2748,10 @@ export const setLayerFillType = (state: LayerState, action: SetLayerFillType): L
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'fill');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -2756,10 +2786,10 @@ export const setLayerGradient = (state: LayerState, action: SetLayerGradient): L
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, action.payload.prop);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -2798,10 +2828,10 @@ export const setLayerGradientType = (state: LayerState, action: SetLayerGradient
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, action.payload.prop);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -2842,10 +2872,10 @@ export const setLayerGradientOrigin = (state: LayerState, action: SetLayerGradie
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, action.payload.prop);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -2886,10 +2916,10 @@ export const setLayerGradientDestination = (state: LayerState, action: SetLayerG
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, action.payload.prop);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -2944,10 +2974,10 @@ export const setLayerGradientStopColor = (state: LayerState, action: SetLayerGra
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, action.payload.prop);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3017,10 +3047,10 @@ export const setLayerGradientStopPosition = (state: LayerState, action: SetLayer
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, action.payload.prop);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3063,8 +3093,7 @@ export const addLayerGradientStop = (state: LayerState, action: AddLayerGradient
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = setLayerActiveGradientStop(currentState, layerActions.setLayerActiveGradientStop({
     id: action.payload.id,
@@ -3072,6 +3101,7 @@ export const addLayerGradientStop = (state: LayerState, action: AddLayerGradient
     prop: action.payload.prop
   }) as SetLayerActiveGradientStop);
   currentState = updateLayerTweens(currentState, action.payload.id, action.payload.prop);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3114,11 +3144,11 @@ export const removeLayerGradientStop = (state: LayerState, action: RemoveLayerGr
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = setLayerActiveGradientStop(currentState, layerActions.setLayerActiveGradientStop({id: action.payload.id, prop: action.payload.prop, stopIndex: 0}) as SetLayerActiveGradientStop);
   currentState = updateLayerTweens(currentState, action.payload.id, action.payload.prop);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3186,14 +3216,14 @@ export const enableLayerStroke = (state: LayerState, action: EnableLayerStroke):
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'stroke');
   currentState = updateLayerTweens(currentState, action.payload.id, 'strokeWidth');
   currentState = updateLayerTweens(currentState, action.payload.id, 'dashOffset');
   currentState = updateLayerTweens(currentState, action.payload.id, 'dashArrayWidth');
   currentState = updateLayerTweens(currentState, action.payload.id, 'dashArrayGap');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3221,14 +3251,14 @@ export const disableLayerStroke = (state: LayerState, action: DisableLayerStroke
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'stroke');
   currentState = updateLayerTweens(currentState, action.payload.id, 'strokeWidth');
   currentState = updateLayerTweens(currentState, action.payload.id, 'dashOffset');
   currentState = updateLayerTweens(currentState, action.payload.id, 'dashArrayWidth');
   currentState = updateLayerTweens(currentState, action.payload.id, 'dashArrayGap');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3259,10 +3289,10 @@ export const setLayerStrokeColor = (state: LayerState, action: SetLayerStrokeCol
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'stroke');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3306,10 +3336,10 @@ export const setLayerStrokeFillType = (state: LayerState, action: SetLayerStroke
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'stroke');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3337,10 +3367,10 @@ export const setLayerStrokeWidth = (state: LayerState, action: SetLayerStrokeWid
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'strokeWidth');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3368,9 +3398,9 @@ export const setLayerStrokeCap = (state: LayerState, action: SetLayerStrokeCap):
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3398,9 +3428,9 @@ export const setLayerStrokeJoin = (state: LayerState, action: SetLayerStrokeJoin
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3428,10 +3458,10 @@ export const setLayerStrokeDashOffset = (state: LayerState, action: SetLayerStro
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'dashOffset');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3459,11 +3489,11 @@ export const setLayerStrokeDashArray = (state: LayerState, action: SetLayerStrok
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'dashArrayWidth');
   currentState = updateLayerTweens(currentState, action.payload.id, 'dashArrayGap');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3494,10 +3524,10 @@ export const setLayerStrokeDashArrayWidth = (state: LayerState, action: SetLayer
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'dashArrayWidth');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3528,10 +3558,10 @@ export const setLayerStrokeDashArrayGap = (state: LayerState, action: SetLayerSt
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'dashArrayGap');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3557,9 +3587,9 @@ export const setLayerStrokeMiterLimit = (state: LayerState, action: SetLayerStro
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3585,13 +3615,13 @@ export const enableLayerShadow = (state: LayerState, action: EnableLayerShadow):
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'shadowColor');
   currentState = updateLayerTweens(currentState, action.payload.id, 'shadowOffsetX');
   currentState = updateLayerTweens(currentState, action.payload.id, 'shadowOffsetY');
   currentState = updateLayerTweens(currentState, action.payload.id, 'shadowBlur');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3619,13 +3649,13 @@ export const disableLayerShadow = (state: LayerState, action: DisableLayerShadow
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'shadowColor');
   currentState = updateLayerTweens(currentState, action.payload.id, 'shadowOffsetX');
   currentState = updateLayerTweens(currentState, action.payload.id, 'shadowOffsetY');
   currentState = updateLayerTweens(currentState, action.payload.id, 'shadowBlur');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3656,10 +3686,10 @@ export const setLayerShadowColor = (state: LayerState, action: SetLayerShadowCol
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'shadowColor');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3687,10 +3717,10 @@ export const setLayerShadowBlur = (state: LayerState, action: SetLayerShadowBlur
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'shadowBlur');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3721,10 +3751,10 @@ export const setLayerShadowXOffset = (state: LayerState, action: SetLayerShadowX
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'shadowOffsetX');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3755,10 +3785,10 @@ export const setLayerShadowYOffset = (state: LayerState, action: SetLayerShadowY
           }
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerTweens(currentState, action.payload.id, 'shadowOffsetY');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3796,16 +3826,11 @@ export const scaleLayer = (state: LayerState, action: ScaleLayer): LayerState =>
         ...currentState.byId[action.payload.id],
         transform: {
           ...currentState.byId[action.payload.id].transform,
-          // scale: {
-          //   x: currentState.byId[action.payload.id].transform.scale.x * action.payload.scale.x,
-          //   y: currentState.byId[action.payload.id].transform.scale.y * action.payload.scale.y
-          // },
           horizontalFlip: action.payload.horizontalFlip ? !currentState.byId[action.payload.id].transform.horizontalFlip : currentState.byId[action.payload.id].transform.horizontalFlip,
           verticalFlip: action.payload.verticalFlip ? !currentState.byId[action.payload.id].transform.verticalFlip : currentState.byId[action.payload.id].transform.verticalFlip
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
   if (action.payload.scale.x) {
@@ -3814,6 +3839,7 @@ export const scaleLayer = (state: LayerState, action: ScaleLayer): LayerState =>
   if (action.payload.scale.y) {
     currentState = updateLayerTweens(currentState, action.payload.id, 'height');
   }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3838,10 +3864,11 @@ export const setLayerText = (state: LayerState, action: SetLayerText): LayerStat
         ...currentState.byId[action.payload.id],
         text: action.payload.text
       } as em.Text
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
-  return updateLayerBounds(currentState, action.payload.id);
+  currentState = updateLayerBounds(currentState, action.payload.id);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerFontSize = (state: LayerState, action: SetLayerFontSize): LayerState => {
@@ -3859,11 +3886,11 @@ export const setLayerFontSize = (state: LayerState, action: SetLayerFontSize): L
           fontSize: action.payload.fontSize
         }
       } as em.Text
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
   currentState = updateLayerTweens(currentState, action.payload.id, 'fontSize');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3888,10 +3915,11 @@ export const setLayerFontWeight = (state: LayerState, action: SetLayerFontWeight
           fontWeight: action.payload.fontWeight
         }
       } as em.Text
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
-  return updateLayerBounds(currentState, action.payload.id);
+  currentState = updateLayerBounds(currentState, action.payload.id);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayersFontWeight = (state: LayerState, action: SetLayersFontWeight): LayerState => {
@@ -3915,10 +3943,11 @@ export const setLayerFontFamily = (state: LayerState, action: SetLayerFontFamily
           fontFamily: action.payload.fontFamily
         }
       } as em.Text
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
-  return updateLayerBounds(currentState, action.payload.id);
+  currentState = updateLayerBounds(currentState, action.payload.id);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayersFontFamily = (state: LayerState, action: SetLayersFontFamily): LayerState => {
@@ -3942,11 +3971,11 @@ export const setLayerLeading = (state: LayerState, action: SetLayerLeading): Lay
           leading: action.payload.leading
         }
       } as em.Text
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
   currentState = updateLayerTweens(currentState, action.payload.id, 'lineHeight');
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4010,10 +4039,11 @@ export const setLayerJustification = (state: LayerState, action: SetLayerJustifi
           justification: action.payload.justification
         }
       } as em.Text
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
-  return updateLayerBounds(currentState, action.payload.id);
+  currentState = updateLayerBounds(currentState, action.payload.id);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayersJustification = (state: LayerState, action: SetLayersJustification): LayerState => {
@@ -4142,7 +4172,7 @@ export const addLayersMask = (state: LayerState, action: AddLayersMask): LayerSt
   currentState = maskLayers(currentState, layerActions.maskLayers({layers: currentState.byId[maskGroup].children.filter((id) => id !== mask)}) as MaskLayers);
   // update masked group bounds
   currentState = updateLayerBounds(currentState, maskGroup);
-  // return final state
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4174,6 +4204,7 @@ export const removeLayersMask = (state: LayerState, action: RemoveLayersMask): L
     }
   };
   currentState = unmaskLayers(currentState, layerActions.unmaskLayers({layers: parentLayerItem.children}) as UnmaskLayers);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4187,9 +4218,9 @@ export const maskLayer = (state: LayerState, action: MaskLayer): LayerState => {
         ...currentState.byId[action.payload.id],
         masked: true
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4209,9 +4240,9 @@ export const unmaskLayer = (state: LayerState, action: UnmaskLayer): LayerState 
         ...currentState.byId[action.payload.id],
         masked: false
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4230,6 +4261,7 @@ export const alignLayersToLeft = (state: LayerState, action: AlignLayersToLeft):
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4242,6 +4274,7 @@ export const alignLayersToRight = (state: LayerState, action: AlignLayersToRight
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4254,6 +4287,7 @@ export const alignLayersToTop = (state: LayerState, action: AlignLayersToTop): L
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4266,6 +4300,7 @@ export const alignLayersToBottom = (state: LayerState, action: AlignLayersToBott
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4278,6 +4313,7 @@ export const alignLayersToCenter = (state: LayerState, action: AlignLayersToCent
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4290,6 +4326,7 @@ export const alignLayersToMiddle = (state: LayerState, action: AlignLayersToMidd
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4313,6 +4350,7 @@ export const distributeLayersHorizontally = (state: LayerState, action: Distribu
     }
     return result;
   }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4336,12 +4374,13 @@ export const distributeLayersVertically = (state: LayerState, action: Distribute
     }
     return result;
   }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
-export const duplicateLayer = (state: LayerState, action: DuplicateLayer, fromClipboard?: boolean, canvasImages?: { [id: string]: em.CanvasImage }): LayerState => {
+export const duplicateLayer = (state: LayerState, action: DuplicateLayer, fromClipboard?: boolean, documentImages?: { [id: string]: em.DocumentImage }): LayerState => {
   let currentState = state;
-  const clonedLayerAndChildren = cloneLayerAndChildren(currentState, action.payload.id, fromClipboard, canvasImages);
+  const clonedLayerAndChildren = cloneLayerAndChildren(currentState, action.payload.id, fromClipboard, documentImages);
   const rootLayer = clonedLayerAndChildren.byId[clonedLayerAndChildren.allIds[0]];
   currentState = clonedLayerAndChildren.allIds.reduce((result: LayerState, current: string, index: number) => {
     const layer = clonedLayerAndChildren.byId[current];
@@ -4392,13 +4431,12 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer, fromCl
           ...result.byId[layerParent.id],
           children: index === 0 ? addItem(result.byId[layerParent.id].children, current) : result.byId[layerParent.id].children
         }
-      },
-      paperProject: exportPaperProject(currentState)
+      }
     }
   }, currentState);
   // select layer
   currentState = selectLayer(currentState, layerActions.selectLayer({id: rootLayer.id}) as SelectLayer);
-  // return final state
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4433,6 +4471,7 @@ export const sendLayerForward = (state: LayerState, action: SendLayerForward): L
   if (layerIndex !== parentItem.children.length - 1) {
     currentState = insertLayerChild(currentState, layerActions.insertLayerChild({id: layerItem.parent, child: action.payload.id, index: layerIndex + 1}) as InsertLayerChild);
   }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4453,6 +4492,7 @@ export const sendLayerToFront = (state: LayerState, action: SendLayerToFront): L
   if (layerIndex !== parentItem.children.length - 1) {
     currentState = insertLayerChild(currentState, layerActions.insertLayerChild({id: layerItem.parent, child: action.payload.id, index: parentItem.children.length - 1}) as InsertLayerChild);
   }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4472,6 +4512,7 @@ export const sendLayerBackward = (state: LayerState, action: SendLayerBackward):
   if (layerIndex !== 0) {
     currentState = insertLayerChild(currentState, layerActions.insertLayerChild({id: layerItem.parent, child: action.payload.id, index: layerIndex - 1}) as InsertLayerChild);
   }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4491,6 +4532,7 @@ export const sendLayerToBack = (state: LayerState, action: SendLayerToBack): Lay
   if (layerIndex !== 0) {
     currentState = insertLayerChild(currentState, layerActions.insertLayerChild({id: layerItem.parent, child: action.payload.id, index: 0}) as InsertLayerChild);
   }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4518,9 +4560,9 @@ export const setLayerBlendMode = (state: LayerState, action: SetLayerBlendMode):
           blendMode: action.payload.blendMode
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4576,6 +4618,7 @@ export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState 
       points: getCurvePoints(booleanLayers)
     }
   }) as AddShape);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4625,6 +4668,7 @@ export const intersectLayers = (state: LayerState, action: IntersectLayers): Lay
       points: getCurvePoints(booleanLayers)
     }
   }) as AddShape);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4674,6 +4718,7 @@ export const subtractLayers = (state: LayerState, action: SubtractLayers): Layer
       points: getCurvePoints(booleanLayers)
     }
   }) as AddShape);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4723,6 +4768,7 @@ export const excludeLayers = (state: LayerState, action: ExcludeLayers): LayerSt
       points: getCurvePoints(booleanLayers)
     }
   }) as AddShape);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4772,6 +4818,7 @@ export const divideLayers = (state: LayerState, action: DivideLayers): LayerStat
       points: getCurvePoints(booleanLayers)
     }
   }) as AddShape);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4809,7 +4856,9 @@ export const setRoundedRadius = (state: LayerState, action: SetRoundedRadius): L
   currentState = updateLayerTweens(currentState, action.payload.id, 'height');
   currentState = updateLayerTweens(currentState, action.payload.id, 'rotation');
   currentState = updateLayerTweens(currentState, action.payload.id, 'shape');
-  return updateLayerBounds(currentState, action.payload.id);
+  currentState = updateLayerBounds(currentState, action.payload.id);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setRoundedRadii = (state: LayerState, action: SetRoundedRadii): LayerState => {
@@ -4855,7 +4904,9 @@ export const setPolygonSides = (state: LayerState, action: SetPolygonSides): Lay
   currentState = updateLayerTweens(currentState, action.payload.id, 'height');
   currentState = updateLayerTweens(currentState, action.payload.id, 'rotation');
   currentState = updateLayerTweens(currentState, action.payload.id, 'shape');
-  return updateLayerBounds(currentState, action.payload.id);
+  currentState = updateLayerBounds(currentState, action.payload.id);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setPolygonsSides = (state: LayerState, action: SetPolygonsSides): LayerState => {
@@ -4903,7 +4954,9 @@ export const setStarPoints = (state: LayerState, action: SetStarPoints): LayerSt
   currentState = updateLayerTweens(currentState, action.payload.id, 'height');
   currentState = updateLayerTweens(currentState, action.payload.id, 'rotation');
   currentState = updateLayerTweens(currentState, action.payload.id, 'shape');
-  return updateLayerBounds(currentState, action.payload.id);
+  currentState = updateLayerBounds(currentState, action.payload.id);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setStarsPoints = (state: LayerState, action: SetStarsPoints): LayerState => {
@@ -4951,7 +5004,9 @@ export const setStarRadius = (state: LayerState, action: SetStarRadius): LayerSt
   currentState = updateLayerTweens(currentState, action.payload.id, 'height');
   currentState = updateLayerTweens(currentState, action.payload.id, 'rotation');
   currentState = updateLayerTweens(currentState, action.payload.id, 'shape');
-  return updateLayerBounds(currentState, action.payload.id);
+  currentState = updateLayerBounds(currentState, action.payload.id);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setStarsRadius = (state: LayerState, action: SetStarsRadius): LayerState => {
@@ -5001,7 +5056,9 @@ export const setCurvePointOriginX = (state: LayerState, action: SetCurvePointOri
       }
     }
   }
-  return updateLayerBounds(currentState, action.payload.id);
+  currentState = updateLayerBounds(currentState, action.payload.id);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setCurvePointOriginY = (state: LayerState, action: SetCurvePointOriginY): LayerState => {
@@ -5045,7 +5102,9 @@ export const setCurvePointOriginY = (state: LayerState, action: SetCurvePointOri
       }
     }
   }
-  return updateLayerBounds(currentState, action.payload.id);
+  currentState = updateLayerBounds(currentState, action.payload.id);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setCurvePointOrigin = (state: LayerState, action: SetCurvePointOrigin): LayerState => {
@@ -5113,5 +5172,17 @@ export const setCurvePointOrigin = (state: LayerState, action: SetCurvePointOrig
       }
     }
   }
-  return updateLayerBounds(currentState, action.payload.id);
+  currentState = updateLayerBounds(currentState, action.payload.id);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerEdit = (state: LayerState, action: SetLayerEdit): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    edit: action.payload.edit,
+    paperProject: exportPaperProject(currentState)
+  }
+  return currentState;
 };

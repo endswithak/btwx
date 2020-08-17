@@ -41,7 +41,7 @@ const template = [
           mainWindow.webContents.executeJavaScript(`getDocumentSettings()`).then((documentSettingsJSON) => {
             const documentSettings = JSON.parse(documentSettingsJSON);
             if (documentSettings.path) {
-              mainWindow.webContents.executeJavaScript(`saveDocument(${documentSettingsJSON})`).then((documentJSON) => {
+              mainWindow.webContents.executeJavaScript(`saveDocument()`).then((documentJSON) => {
                 fs.writeFile(`${documentSettings.path}.esketch`, documentJSON, function(err) {
                   if(err) {
                     return console.log(err);

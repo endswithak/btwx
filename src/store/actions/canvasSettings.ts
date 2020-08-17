@@ -1,6 +1,5 @@
 import {
   SET_CANVAS_MATRIX,
-  ADD_CANVAS_IMAGE,
   SET_CANVAS_RESIZING,
   SET_CANVAS_DRAGGING,
   SET_CANVAS_ZOOMING,
@@ -12,7 +11,6 @@ import {
   SET_TWEEN_DRAWER_HEIGHT,
   SET_CANVAS_MEASURING,
   SetCanvasMatrixPayload,
-  AddCanvasImagePayload,
   SetCanvasResizingPayload,
   SetCanvasDraggingPayload,
   SetCanvasZoomingPayload,
@@ -28,11 +26,6 @@ import {
 
 export const setCanvasMatrix = (payload: SetCanvasMatrixPayload): CanvasSettingsTypes => ({
   type: SET_CANVAS_MATRIX,
-  payload
-});
-
-export const addCanvasImage = (payload: AddCanvasImagePayload): CanvasSettingsTypes => ({
-  type: ADD_CANVAS_IMAGE,
   payload
 });
 

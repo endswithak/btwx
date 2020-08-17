@@ -23,19 +23,19 @@ class CopyTool {
       case 'v': {
         const state = store.getState();
         if (event.modifiers.meta && state.layer.present.clipboard.allIds.length > 0) {
-          const canvasImages = state.layer.present.clipboard.allIds.reduce((result: { [id: string]: em.CanvasImage }, current) => {
+          const documentImages = state.layer.present.clipboard.allIds.reduce((result: { [id: string]: em.DocumentImage }, current) => {
             const layerAndDescendants = getLayerAndDescendants(state.layer.present, current, true);
             layerAndDescendants.forEach((id) => {
               if (state.layer.present.clipboard.byId[id].type === 'Image') {
                 const imageId = state.layer.present.clipboard.byId[id].imageId;
-                result[imageId] = state.canvasSettings.images.byId[imageId];
+                result[imageId] = state.documentSettings.images.byId[imageId];
               }
             });
             return result;
           }, {});
           store.dispatch(pasteLayersFromClipboard({
             overSelection: event.modifiers.shift && state.layer.present.selected.length > 0,
-            canvasImageById: canvasImages
+            documentImageById: documentImages
           }));
         }
         break;

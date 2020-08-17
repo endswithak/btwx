@@ -269,7 +269,7 @@ declare namespace em {
     children: null;
   }
 
-  interface CanvasImage {
+  interface DocumentImage {
     id: string;
     buffer: Buffer;
   }

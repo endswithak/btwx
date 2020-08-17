@@ -1,10 +1,12 @@
 export const SAVE_DOCUMENT_AS = 'SAVE_DOCUMENT_AS';
 export const SAVE_DOCUMENT = 'SAVE_DOCUMENT';
+export const ADD_DOCUMENT_IMAGE = 'ADD_DOCUMENT_IMAGE';
 
 export interface SaveDocumentAsPayload {
   id?: string;
   name: string;
   path: string;
+  edit: string;
 }
 
 export interface SaveDocumentAs {
@@ -13,8 +15,7 @@ export interface SaveDocumentAs {
 }
 
 export interface SaveDocumentPayload {
-  name: string;
-  path: string;
+  edit: string;
 }
 
 export interface SaveDocument {
@@ -22,4 +23,14 @@ export interface SaveDocument {
   payload: SaveDocumentPayload;
 }
 
-export type DocumentSettingsTypes = SaveDocument | SaveDocumentAs;
+export interface AddDocumentImagePayload {
+  id: string;
+  buffer: Buffer;
+}
+
+export interface AddDocumentImage {
+  type: typeof ADD_DOCUMENT_IMAGE;
+  payload: AddDocumentImagePayload;
+}
+
+export type DocumentSettingsTypes = SaveDocumentAs | SaveDocument | AddDocumentImage;

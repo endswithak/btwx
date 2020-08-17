@@ -7,8 +7,8 @@ import { enableSelectionTool, enableRectangleShapeTool, enableEllipseShapeTool, 
 import { ToolTypes } from '../store/actionTypes/tool';
 import { AddImagePayload, LayerTypes } from '../store/actionTypes/layer';
 import { addImage } from '../store/actions/layer';
-import { AddCanvasImagePayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
-import { addCanvasImage } from '../store/actions/canvasSettings';
+import { AddDocumentImagePayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
+import { addDocumentImage } from '../store/actions/documentSettings';
 import { ToolState } from '../store/reducers/tool';
 import { ThemeContext } from './ThemeProvider';
 import { ipcRenderer } from 'electron';
@@ -17,9 +17,9 @@ import { bufferToBase64 } from '../utils';
 
 interface InsertButtonProps {
   tool: ToolState;
-  allCanvasImageIds: string[];
-  canvasImagesById: {
-    [id: string]: em.CanvasImage;
+  allDocumentImageIds: string[];
+  documentImagesById: {
+    [id: string]: em.DocumentImage;
   };
   enableRectangleShapeTool(): ToolTypes;
   enableEllipseShapeTool(): ToolTypes;
@@ -31,14 +31,14 @@ interface InsertButtonProps {
   enableArtboardTool(): ToolTypes;
   enableTextTool(): ToolTypes;
   addImage(payload: AddImagePayload): LayerTypes;
-  addCanvasImage(payload: AddCanvasImagePayload): CanvasSettingsTypes;
+  addDocumentImage(payload: AddDocumentImagePayload): DocumentSettingsTypes;
 }
 
 const InsertButton = (props: InsertButtonProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const {
     tool,
-    canvasImagesById,
+    documentImagesById,
     enableRectangleShapeTool,
     enableEllipseShapeTool,
     enableSelectionTool,
@@ -49,8 +49,8 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
     enableArtboardTool,
     enableTextTool,
     addImage,
-    addCanvasImage,
-    allCanvasImageIds
+    addDocumentImage,
+    allDocumentImageIds
   } = props;
 
   const handleImageClick = (): void => {
@@ -60,7 +60,7 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
     ipcRenderer.send('addImage');
     ipcRenderer.once('addImage-reply', (event, arg) => {
       const buffer = Buffer.from(JSON.parse(arg).data);
-      const exists = allCanvasImageIds.length > 0 && allCanvasImageIds.find((id) => Buffer.from(canvasImagesById[id].buffer).equals(buffer));
+      const exists = allDocumentImageIds.length > 0 && allDocumentImageIds.find((id) => Buffer.from(documentImagesById[id].buffer).equals(buffer));
       const base64 = bufferToBase64(buffer);
       const paperLayer = new paperMain.Raster(`data:image/webp;base64,${base64}`);
       paperLayer.position = paperMain.view.center;
@@ -70,7 +70,7 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
         } else {
           const imageId = uuidv4();
           addImage({paperLayer, imageId: imageId});
-          addCanvasImage({id: imageId, buffer: buffer});
+          addDocumentImage({id: imageId, buffer: buffer});
         }
       }
     });
@@ -130,15 +130,15 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   tool: ToolState;
-  allCanvasImageIds: string[];
-  canvasImagesById: {
-    [id: string]: em.CanvasImage;
+  allDocumentImageIds: string[];
+  documentImagesById: {
+    [id: string]: em.DocumentImage;
   };
 } => {
-  const { tool, canvasSettings } = state;
-  const allCanvasImageIds = canvasSettings.images.allIds;
-  const canvasImagesById = canvasSettings.images.byId;
-  return { tool, canvasImagesById, allCanvasImageIds };
+  const { tool, documentSettings } = state;
+  const allDocumentImageIds = documentSettings.images.allIds;
+  const documentImagesById = documentSettings.images.byId;
+  return { tool, documentImagesById, allDocumentImageIds };
 };
 
 export default connect(
@@ -154,6 +154,6 @@ export default connect(
     enableArtboardTool,
     enableTextTool,
     addImage,
-    addCanvasImage
+    addDocumentImage
   }
 )(InsertButton);
