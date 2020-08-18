@@ -5,7 +5,7 @@ import path from 'path';
 import menu from './menu';
 import preferences from './preferences';
 import sharp from 'sharp';
-import { PREVIEW_TOPBAR_HEIGHT } from './constants';
+import { PREVIEW_TOPBAR_HEIGHT, MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT } from './constants';
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
 
@@ -80,7 +80,7 @@ const createPreviewWindow = ({width, height}: {width: number; height: number}): 
   previewWindow = new BrowserWindow({
     parent: mainWindow,
     width: width,
-    height: height + PREVIEW_TOPBAR_HEIGHT,
+    height: height + PREVIEW_TOPBAR_HEIGHT + (process.platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT),
     webPreferences: {
       nodeIntegration: true
     },

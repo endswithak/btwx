@@ -1,5 +1,5 @@
 import chroma, { Color } from 'chroma-js';
-import { THEME_PRIMARY_COLOR, THEME_UNIT_SIZE } from '../constants';
+import { THEME_PRIMARY_COLOR, THEME_UNIT_SIZE, THEME_RECORDING_COLOR } from '../constants';
 
 const createScale = (min: string, max: string, count: number) => {
   return chroma.scale([min, max]).mode('lch').colors(count);
@@ -32,7 +32,9 @@ const createPalette = (theme: em.ThemeName): em.Palette => ({
   primary: THEME_PRIMARY_COLOR,
   primaryHover: theme === 'dark' ? chroma(THEME_PRIMARY_COLOR).brighten(0.5).css() : chroma(THEME_PRIMARY_COLOR).darken(0.5).css(),
   accent: chroma(accent).css(),
-  accentHover: chroma(accent).darken().css()
+  accentHover: chroma(accent).darken().css(),
+  recording: chroma(THEME_RECORDING_COLOR).css(),
+  recordingHover: theme === 'dark' ? chroma(THEME_RECORDING_COLOR).brighten(0.5).css() : chroma(THEME_RECORDING_COLOR).darken(0.5).css()
 });
 
 const createDarkBackgrounds = (scale: string[]): em.BackgroundScale => ({

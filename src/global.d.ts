@@ -328,6 +328,8 @@ declare namespace em {
     primaryHover: string;
     accent: string;
     accentHover: string;
+    recording: string;
+    recordingHover: string;
   }
 
   interface BackgroundScale {

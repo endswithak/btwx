@@ -1,30 +1,66 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import { desktopCapturer, remote } from 'electron';
+import { desktopCapturer, remote, ipcRenderer } from 'electron';
+import { gsap } from 'gsap';
 import { writeFile } from 'fs';
 import React, { ReactElement, useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { startPreviewRecord, stopPreviewRecord } from '../store/actions/preview';
+import { startPreviewRecording } from '../store/actions/preview';
 import { PreviewTypes } from '../store/actionTypes/preview';
 import TopbarButton from './TopbarButton';
+import { PREVIEW_TOPBAR_HEIGHT, MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT } from '../constants';
 
 interface PreviewRecordButtonProps {
-  recording: boolean;
-  startPreviewRecord(): PreviewTypes;
-  stopPreviewRecord(): PreviewTypes;
+  recording?: boolean;
+  startPreviewRecording?(): PreviewTypes;
 }
 
+let previewMediaRecorder: MediaRecorder;
+let previewVideoChunks: any[] = [];
+let windowSize: { width: number; height: number } = { width: null, height: null };
+const titlebarHeight = remote.process.platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT;
+const topbarHeight = PREVIEW_TOPBAR_HEIGHT;
+
+ipcRenderer.on('stopPreviewRecording', () => {
+  if (remote.process.platform === 'darwin') {
+    remote.getCurrentWindow().setWindowButtonVisibility(true);
+  }
+  previewMediaRecorder.stop();
+  gsap.to('.titlebar', {
+    height: titlebarHeight,
+    duration: 0.15,
+    delay: 0.15
+  });
+  gsap.to('.c-preview-topbar', {
+    height: topbarHeight,
+    duration: 0.15
+  });
+  gsap.to(windowSize, {
+    height: `+=${topbarHeight}`,
+    duration: 0.15,
+    onComplete: function() {
+      remote.getCurrentWindow().setSize(windowSize.width, windowSize.height, false);
+    }
+  });
+  gsap.to(windowSize, {
+    height: `+=${titlebarHeight}`,
+    duration: 0.15,
+    delay: 0.15,
+    onComplete: function() {
+      remote.getCurrentWindow().setSize(windowSize.width, windowSize.height, false);
+    }
+  });
+});
+
 const PreviewRecordButton = (props: PreviewRecordButtonProps): ReactElement => {
-  const { recording, startPreviewRecord, stopPreviewRecord } = props;
-  const [mediaRecorder, setMediaRecorder] = useState(null);
-  const [chuncks, setChuncks] = useState([]);
+  const { recording, startPreviewRecording } = props;
 
   const handleVideoData = (e) => {
-    setChuncks([...chuncks, e.data]);
+    previewVideoChunks.push(e.data);
   }
 
-  const handleStop = async (e) => {
-    const blob = new Blob(chuncks, {
+  const handleStop = async () => {
+    const blob = new Blob(previewVideoChunks, {
       type: 'video/webm; codecs=vp9'
     });
     const buffer = Buffer.from(await blob.arrayBuffer());
@@ -37,19 +73,52 @@ const PreviewRecordButton = (props: PreviewRecordButtonProps): ReactElement => {
           if(err) {
             return console.log(err);
           }
-          setChuncks([]);
         });
       }
+      previewVideoChunks = [];
     });
   }
 
   const handleRecord = () => {
-    if (recording) {
-      stopPreviewRecord();
-      mediaRecorder.stop();
-    } else {
-      startPreviewRecord();
-      mediaRecorder.start();
+    if (!recording) {
+      if (remote.process.platform === 'darwin') {
+        remote.getCurrentWindow().setWindowButtonVisibility(false);
+      }
+      const currentWindowSize = remote.getCurrentWindow().getSize();
+      windowSize = {
+        width: currentWindowSize[0],
+        height: currentWindowSize[1]
+      }
+      const timeline = gsap.timeline({
+        onComplete: () => {
+          setTimeout(() => {
+            startPreviewRecording();
+            previewMediaRecorder.start();
+          }, 0.15);
+        }
+      });
+      timeline.to('.titlebar', {
+        height: 0,
+        duration: 0.15
+      }, 0.15);
+      timeline.to('.c-preview-topbar', {
+        height: 0,
+        duration: 0.15
+      }, 0);
+      timeline.to(windowSize, {
+        height: `-=${topbarHeight}`,
+        duration: 0.15,
+        onComplete: () => {
+          remote.getCurrentWindow().setSize(windowSize.width, windowSize.height, false);
+        }
+      }, 0);
+      timeline.to(windowSize, {
+        height: `-=${titlebarHeight}`,
+        duration: 0.15,
+        onComplete: () => {
+          remote.getCurrentWindow().setSize(windowSize.width, windowSize.height, false);
+        }
+      }, 0.15);
     }
   };
 
@@ -69,10 +138,9 @@ const PreviewRecordButton = (props: PreviewRecordButtonProps): ReactElement => {
       videoElement.srcObject = stream;
       videoElement.play();
       const options = { mimeType: 'video/webm; codecs=vp9' };
-      const recorder = new MediaRecorder(stream, options);
-      recorder.ondataavailable = handleVideoData;
-      recorder.onstop = handleStop;
-      setMediaRecorder(recorder);
+      previewMediaRecorder = new MediaRecorder(stream, options);
+      previewMediaRecorder.ondataavailable = handleVideoData;
+      previewMediaRecorder.onstop = handleStop;
     });
   }, []);
 
@@ -94,5 +162,5 @@ const mapStateToProps = (state: RootState): {
 
 export default connect(
   mapStateToProps,
-  { startPreviewRecord, stopPreviewRecord }
+  { startPreviewRecording }
 )(PreviewRecordButton);

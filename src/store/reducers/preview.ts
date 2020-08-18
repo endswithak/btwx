@@ -1,9 +1,9 @@
 import {
   OPEN_PREVIEW,
   CLOSE_PREVIEW,
-  START_PREVIEW_RECORD,
-  STOP_PREVIEW_RECORD,
-  PreviewTypes,
+  START_PREVIEW_RECORDING,
+  STOP_PREVIEW_RECORDING,
+  PreviewTypes
 } from '../actionTypes/preview';
 
 export interface PreviewState {
@@ -30,13 +30,13 @@ export default (state = initialState, action: PreviewTypes): PreviewState => {
         isOpen: false
       };
     }
-    case START_PREVIEW_RECORD: {
+    case START_PREVIEW_RECORDING: {
       return {
         ...state,
         recording: true
       };
     }
-    case STOP_PREVIEW_RECORD: {
+    case STOP_PREVIEW_RECORDING: {
       return {
         ...state,
         recording: false

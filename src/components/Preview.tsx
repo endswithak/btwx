@@ -5,20 +5,21 @@ import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 import PreviewCanvas from './PreviewCanvas';
 import PreviewTopbar from './PreviewTopbar';
-import { PREVIEW_TOPBAR_HEIGHT } from '../constants';
+import { PREVIEW_TOPBAR_HEIGHT, MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT } from '../constants';
 
 interface PreviewProps {
   activeArtboard: em.Artboard;
+  recording: boolean;
 }
 
 const Preview = (props: PreviewProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { activeArtboard } = props;
+  const { activeArtboard, recording } = props;
 
   useEffect(() => {
     const windowSize = remote.getCurrentWindow().getSize();
-    if (windowSize[0] !== Math.round(activeArtboard.frame.width) || windowSize[1] !== Math.round(activeArtboard.frame.height) + PREVIEW_TOPBAR_HEIGHT) {
-      remote.getCurrentWindow().setSize(Math.round(activeArtboard.frame.width), Math.round(activeArtboard.frame.height) + PREVIEW_TOPBAR_HEIGHT, true);
+    if ((windowSize[0] !== Math.round(activeArtboard.frame.width) || windowSize[1] !== (Math.round(activeArtboard.frame.height) + PREVIEW_TOPBAR_HEIGHT + (remote.process.platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT))) && !recording) {
+      remote.getCurrentWindow().setSize(Math.round(activeArtboard.frame.width), Math.round(activeArtboard.frame.height) + PREVIEW_TOPBAR_HEIGHT + (remote.process.platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT), true);
     }
   }, [activeArtboard]);
 
@@ -43,9 +44,12 @@ const Preview = (props: PreviewProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
+  const { layer, preview } = state;
+  const activeArtboard = layer.present.byId[layer.present.activeArtboard];
+  const recording = preview.recording;
   return {
-    activeArtboard: layer.present.byId[layer.present.activeArtboard]
+    activeArtboard,
+    recording
   };
 };
 

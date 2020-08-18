@@ -8,9 +8,14 @@ import { ThemeContext } from './ThemeProvider';
 interface TopbarTitleProps {
   title: string;
   unsavedEdits: boolean;
+  recording: boolean;
 }
 
-const Title = styled.div`
+interface TitleProps {
+  recording: boolean;
+}
+
+const Title = styled.div<TitleProps>`
   position: fixed;
   display: flex;
   align-items: center;
@@ -24,6 +29,7 @@ const Title = styled.div`
   color: ${props => props.theme.text.base};
   font-family: 'Space Mono';
   line-height: ${remote.process.platform === 'darwin' ? 22 : 30}px;
+  background: ${props => props.recording ? props.theme.palette.recording : 'none'};
   .c-topbar-title__unsaved-indicator {
     color: ${props => props.theme.text.lighter};
     margin-left: ${props => props.theme.unit}px;
@@ -32,12 +38,13 @@ const Title = styled.div`
 
 const TopbarTitle = (props: TopbarTitleProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { title, unsavedEdits } = props;
+  const { title, unsavedEdits, recording } = props;
 
   return (
     <Title
       className='c-topbar-title'
-      theme={theme}>
+      theme={theme}
+      recording={recording}>
       <span>
         <span className='c-topbar-title__title'>{title}</span>
         {
@@ -53,11 +60,13 @@ const TopbarTitle = (props: TopbarTitleProps): ReactElement => {
 const mapStateToProps = (state: RootState): {
   unsavedEdits: boolean;
   title: string;
+  recording: boolean;
 } => {
-  const { layer, documentSettings } = state;
+  const { layer, documentSettings, preview } = state;
   const unsavedEdits = layer.present.edit !== documentSettings.edit;
   const title = documentSettings.name;
-  return { unsavedEdits, title };
+  const recording = preview.recording;
+  return { unsavedEdits, title, recording };
 };
 
 export default connect(

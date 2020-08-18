@@ -1,5 +1,6 @@
 export const THEME_PRIMARY_COLOR = '#3C88FD';
 export const THEME_GUIDE_COLOR = 'red';
+export const THEME_RECORDING_COLOR = 'red';
 export const THEME_UNIT_SIZE = 4;
 export const DEFAULT_ARTBOARD_BACKGROUND_COLOR = '#fff';
 
@@ -13,6 +14,9 @@ export const DEFAULT_STAR_POINTS = 5;
 export const DEFAULT_STAR_RADIUS = 0.5;
 
 export const PREVIEW_TOPBAR_HEIGHT = 44;
+
+export const MAC_TITLEBAR_HEIGHT = 22;
+export const WINDOWS_TITLEBAR_HEIGHT = 30;
 
 export const DEFAULT_GRADIENT_STYLE: em.Gradient = {
   gradientType: 'linear' as em.GradientType,

@@ -1,8 +1,8 @@
 import {
   OPEN_PREVIEW,
   CLOSE_PREVIEW,
-  START_PREVIEW_RECORD,
-  STOP_PREVIEW_RECORD,
+  START_PREVIEW_RECORDING,
+  STOP_PREVIEW_RECORDING,
   PreviewTypes
 } from '../actionTypes/preview';
 
@@ -14,10 +14,10 @@ export const closePreview = (): PreviewTypes => ({
   type: CLOSE_PREVIEW
 });
 
-export const startPreviewRecord = (): PreviewTypes => ({
-  type: START_PREVIEW_RECORD
+export const startPreviewRecording = (): PreviewTypes => ({
+  type: START_PREVIEW_RECORDING
 });
 
-export const stopPreviewRecord = (): PreviewTypes => ({
-  type: STOP_PREVIEW_RECORD
+export const stopPreviewRecording = (): PreviewTypes => ({
+  type: STOP_PREVIEW_RECORDING
 });
