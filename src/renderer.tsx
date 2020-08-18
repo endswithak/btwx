@@ -44,6 +44,8 @@ import { Titlebar, Color } from 'custom-electron-titlebar';
 import getTheme from './store/theme';
 import { openFile } from './store/reducers';
 import { saveDocumentAs, saveDocument } from './store/actions/documentSettings';
+import { closePreview } from './store/actions/preview';
+import { initialState as previewInitialState } from './store/reducers/preview';
 
 import './styles/index.sass';
 
@@ -74,12 +76,13 @@ const titleBar = new Titlebar({
     theme
   } = state;
   const fileState = {
-    documentSettings,
     layer: {
       past: [] as any,
       present: layer.present,
       future: [] as any
     },
+    preview: previewInitialState,
+    documentSettings,
     canvasSettings,
     tool,
     contextMenu,
@@ -166,6 +169,9 @@ const titleBar = new Titlebar({
 }
 
 (window as any).renderPreviewWindow = () => {
+  window.onbeforeunload = (): any => {
+    store.dispatch(closePreview());
+  }
   titleBar.updateTitle('Preview');
   ReactDOM.render(
     <Provider store={store}>

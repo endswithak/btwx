@@ -1,4 +1,4 @@
-import React, { useRef, useContext, useEffect, ReactElement, useState } from 'react';
+import React, { useContext, useEffect, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { remote } from 'electron';
 import { RootState } from '../store/reducers';
@@ -32,6 +32,12 @@ const Preview = (props: PreviewProps): ReactElement => {
       <div className='c-app__canvas'>
         <PreviewCanvas />
       </div>
+      <video
+        id='preview-video'
+        style={{
+        position: 'absolute',
+        opacity: 0
+      }} />
     </div>
   );
 }

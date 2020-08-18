@@ -13,6 +13,7 @@ import textSettings from './textSettings';
 import canvasSettings from './canvasSettings';
 import documentSettings from './documentSettings';
 import rightSidebar from './rightSidebar';
+import preview from './preview';
 import theme from './theme';
 import { importPaperProject } from '../selectors/layer';
 import { paperMain } from '../../canvas';
@@ -315,7 +316,8 @@ const appReducer = combineReducers({
   gradientEditor,
   artboardPresetEditor,
   rightSidebar,
-  theme
+  theme,
+  preview
 });
 
 const OPEN_FILE = 'OPEN_FILE';
