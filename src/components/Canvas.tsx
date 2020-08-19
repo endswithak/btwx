@@ -7,8 +7,8 @@ import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { importPaperProject } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
-import { SetCanvasMatrixPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
-import { setCanvasMatrix } from '../store/actions/canvasSettings';
+import { SetCanvasMatrixPayload, SetCanvasZoomingPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
+import { setCanvasMatrix, setCanvasZooming } from '../store/actions/canvasSettings';
 import { LayerTypes } from '../store/actionTypes/layer';
 import { updateInViewLayers } from '../store/actions/layer';
 import { CanvasSettingsState } from '../store/reducers/canvasSettings';
@@ -25,37 +25,49 @@ interface CanvasProps {
   allShapeIds?: string[];
   allTextIds?: string[];
   allImageIds?: string[];
+  isInsertKnobActive?: boolean;
+  zooming?: boolean;
   enableSelectionTool(): ToolTypes;
   setCanvasMatrix(payload: SetCanvasMatrixPayload): CanvasSettingsTypes;
+  setCanvasZooming(payload: SetCanvasZoomingPayload): CanvasSettingsTypes;
   updateInViewLayers(): LayerTypes;
   setReady(ready: boolean): void;
 }
+
+let canvasZooming = false;
+let insertKnobActive = false;
 
 const Canvas = (props: CanvasProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useContext(ThemeContext);
-  const { drawing, typing, canvasSettings, documentSettings, enableSelectionTool, updateInViewLayers, paperProject, allArtboardIds, allShapeIds, allTextIds, allImageIds, setCanvasMatrix, setReady } = props;
+  const { drawing, typing, canvasSettings, documentSettings, enableSelectionTool, updateInViewLayers, paperProject, allArtboardIds, allShapeIds, allTextIds, allImageIds, setCanvasMatrix, setReady, isInsertKnobActive, setCanvasZooming, zooming } = props;
 
   const handleWheel = (e: WheelEvent): void => {
     e.preventDefault();
-    if (e.ctrlKey) {
-      e.preventDefault();
-      const nextZoom = paperMain.view.zoom - e.deltaY * 0.01;
-      if (e.deltaY < 0 && nextZoom < 30) {
-        paperMain.view.zoom = nextZoom;
-      } else if (e.deltaY > 0 && nextZoom > 0) {
-        paperMain.view.zoom = nextZoom;
-      } else if (e.deltaY > 0 && nextZoom < 0) {
-        paperMain.view.zoom = 0.01;
+    if (!insertKnobActive) {
+      if (e.ctrlKey) {
+        e.preventDefault();
+        const nextZoom = paperMain.view.zoom - e.deltaY * 0.01;
+        if (!canvasZooming) {
+          canvasZooming = true;
+          setCanvasZooming({zooming: true});
+        }
+        if (e.deltaY < 0 && nextZoom < 30) {
+          paperMain.view.zoom = nextZoom;
+        } else if (e.deltaY > 0 && nextZoom > 0) {
+          paperMain.view.zoom = nextZoom;
+        } else if (e.deltaY > 0 && nextZoom < 0) {
+          paperMain.view.zoom = 0.01;
+        }
+      } else {
+        paperMain.view.translate(
+          new paper.Point(
+            (e.deltaX * ( 1 / paperMain.view.zoom)) * -1,
+            (e.deltaY * ( 1 / paperMain.view.zoom)) * -1
+          )
+        );
       }
-    } else {
-      paperMain.view.translate(
-        new paper.Point(
-          (e.deltaX * ( 1 / paperMain.view.zoom)) * -1,
-          (e.deltaY * ( 1 / paperMain.view.zoom)) * -1
-        )
-      );
     }
   }
 
@@ -68,6 +80,10 @@ const Canvas = (props: CanvasProps): ReactElement => {
 
   const handleWheelDebounce = debounce((e: WheelEvent) => {
     e.preventDefault();
+    if (canvasZooming) {
+      canvasZooming = false;
+      setCanvasZooming({zooming: false});
+    }
     setCanvasMatrix({matrix: paperMain.view.matrix.values});
     updateInViewLayers();
   }, 150);
@@ -98,6 +114,10 @@ const Canvas = (props: CanvasProps): ReactElement => {
     setReady(true);
   }, []);
 
+  useEffect(() => {
+    insertKnobActive = isInsertKnobActive;
+  }, [isInsertKnobActive]);
+
   return (
     <div
       id='canvas-container'
@@ -125,8 +145,10 @@ const mapStateToProps = (state: RootState): {
   allShapeIds: string[];
   allTextIds: string[];
   allImageIds: string[];
+  isInsertKnobActive: boolean;
+  zooming: boolean;
 } => {
-  const { layer, tool, canvasSettings, documentSettings } = state;
+  const { layer, tool, canvasSettings, documentSettings, insertKnob } = state;
   return {
     drawing: tool.type === 'Shape' || tool.type === 'Artboard',
     typing: tool.type === 'Text',
@@ -135,6 +157,8 @@ const mapStateToProps = (state: RootState): {
     allTextIds: layer.present.allTextIds,
     allImageIds: layer.present.allImageIds,
     paperProject: layer.present.paperProject,
+    isInsertKnobActive: insertKnob.isActive,
+    zooming: canvasSettings.zooming,
     canvasSettings,
     documentSettings
   };
@@ -142,5 +166,5 @@ const mapStateToProps = (state: RootState): {
 
 export default connect(
   mapStateToProps,
-  { enableSelectionTool, setCanvasMatrix, updateInViewLayers }
+  { enableSelectionTool, setCanvasMatrix, updateInViewLayers, setCanvasZooming }
 )(Canvas);

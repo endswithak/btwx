@@ -14,6 +14,7 @@ import canvasSettings from './canvasSettings';
 import documentSettings from './documentSettings';
 import rightSidebar from './rightSidebar';
 import preview from './preview';
+import insertKnob from './insertKnob';
 import theme from './theme';
 import { importPaperProject } from '../selectors/layer';
 import { paperMain } from '../../canvas';
@@ -317,7 +318,8 @@ const appReducer = combineReducers({
   artboardPresetEditor,
   rightSidebar,
   theme,
-  preview
+  preview,
+  insertKnob
 });
 
 const OPEN_FILE = 'OPEN_FILE';
