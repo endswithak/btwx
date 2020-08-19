@@ -43,7 +43,7 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
         background: tweenId === tweenHover && !tweenEditing || tweenId === tweenEditing
         ? theme.background.z3
         : 'none',
-        zIndex: tweenId === tweenEditing || tweenId === tweenHover
+        zIndex: tweenId === tweenEditing
         ? 3
         : 'inherit'
       }}>

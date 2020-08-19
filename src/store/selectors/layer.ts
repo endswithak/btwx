@@ -1000,12 +1000,13 @@ export const orderLayersByTop = (layers: string[]): string[] => {
   });
 };
 
-export const exportPaperProject = (state: LayerState): string => {
+export const savePaperProjectJSON = (state: LayerState): string => {
   const selectionFrame = paperMain.project.getItem({data: {id: 'selectionFrame'}});
   const hoverFrame = paperMain.project.getItem({data: {id: 'hoverFrame'}});
   const gradientFrame = paperMain.project.getItem({data: {id: 'gradientFrame'}});
   const activeArtboardFrame = paperMain.project.getItem({data: {id: 'activeArtboard'}});
   const measureFrame = paperMain.project.getItem({data: {id: 'measureFrame'}});
+  const tweenEventFrame = paperMain.project.getItem({data: {id: 'tweenEventFrame'}});
   if (selectionFrame) {
     selectionFrame.remove();
   }
@@ -1020,6 +1021,9 @@ export const exportPaperProject = (state: LayerState): string => {
   }
   if (measureFrame) {
     measureFrame.remove();
+  }
+  if (tweenEventFrame) {
+    tweenEventFrame.remove();
   }
   const projectJSON = paperMain.project.exportJSON();
   const canvasImageBase64ById = state.allImageIds.reduce((result: { [id: string]: string }, current) => {

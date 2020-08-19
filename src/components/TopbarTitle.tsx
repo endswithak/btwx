@@ -26,12 +26,12 @@ const Title = styled.div<TitleProps>`
   pointer-events: none;
   z-index: 99999999999;
   height: ${remote.process.platform === 'darwin' ? 22 : 30}px;
-  color: ${props => props.theme.text.base};
+  color: ${props => props.recording ? '#fff' : props.theme.text.base};
   font-family: 'Space Mono';
   line-height: ${remote.process.platform === 'darwin' ? 22 : 30}px;
   background: ${props => props.recording ? props.theme.palette.recording : 'none'};
   .c-topbar-title__unsaved-indicator {
-    color: ${props => props.theme.text.lighter};
+    color: ${props => props.recording ? 'rgba(255, 255, 255, 0.5)' : props.theme.text.lighter};
     margin-left: ${props => props.theme.unit}px;
   }
 `;

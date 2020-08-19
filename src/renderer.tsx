@@ -77,7 +77,7 @@ const titleBar = new Titlebar({
   } = state;
   const fileState = {
     layer: {
-      past: [] as any,
+      past: [layer.present] as any,
       present: layer.present,
       future: [] as any
     },

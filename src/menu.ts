@@ -5,7 +5,7 @@ import { mainWindow, preferencesWindow, createPreferencesWindow } from './index'
 
 const isMac = process.platform === 'darwin';
 
-const template = [
+export default Menu.buildFromTemplate([
   // { role: 'appMenu' }
   ...(isMac ? [{
     label: app.name,
@@ -171,8 +171,4 @@ const template = [
       ])
     ]
   }
-];
-
-const menu = Menu.buildFromTemplate(template as any);
-
-export default menu;
+] as any);

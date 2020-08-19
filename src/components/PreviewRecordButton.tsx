@@ -2,7 +2,7 @@
 import { desktopCapturer, remote, ipcRenderer } from 'electron';
 import { gsap } from 'gsap';
 import { writeFile } from 'fs';
-import React, { ReactElement, useState, useEffect } from 'react';
+import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { startPreviewRecording } from '../store/actions/preview';

@@ -8,7 +8,7 @@ import {
 
 const isMac = process.platform === 'darwin';
 
-const preferences = (() => {
+export default (() => {
   if (isMac) {
     if (!systemPreferences.getUserDefault('theme', 'string')) {
       systemPreferences.setUserDefault('theme', 'string', nativeTheme.shouldUseDarkColors ? 'dark' : 'light');
@@ -25,5 +25,3 @@ const preferences = (() => {
     }
   }
 })();
-
-export default preferences;

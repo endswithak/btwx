@@ -46,7 +46,7 @@ import {
   getSelectionCenter, getLayerAndDescendants, getLayerDescendants, getDestinationEquivalent, getEquivalentTweenProps,
   getTweensByDestinationLayer, getAllArtboardTweenEvents, getTweensEventsByDestinationArtboard, getTweensByLayer,
   getLayersBounds, getGradientOriginPoint, getGradientDestinationPoint, getGradientStops, getLayerSnapPoints,
-  orderLayersByDepth, orderLayersByLeft, orderLayersByTop, exportPaperProject, getTweensByProp,
+  orderLayersByDepth, orderLayersByLeft, orderLayersByTop, savePaperProjectJSON, getTweensByProp,
   getEquivalentTweenProp, getTweensWithLayer, gradientsMatch, getPaperProp, getCurvePoints, getArtboardsTopTop, getSelectionBounds
 } from '../selectors/layer';
 
@@ -71,7 +71,7 @@ export const addPage = (state: LayerState, action: AddPage): LayerState => {
       [action.payload.id]: action.payload as em.Page
     },
     page: action.payload.id,
-    paperProject: exportPaperProject(state)
+    paperProject: savePaperProjectJSON(state)
   }
 };
 
@@ -158,38 +158,11 @@ export const addShape = (state: LayerState, action: AddShape): LayerState => {
   if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
   }
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, 'all');
   currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
-
-// export const addCompoundShape = (state: LayerState, action: AddCompoundShape): LayerState => {
-//   let currentState = state;
-//   const layerParent = action.payload.parent ? action.payload.parent : currentState.page;
-//   const paperLayer = getPaperLayer(action.payload.id);
-//   paperLayer.parent = getPaperLayer(layerParent);
-//   currentState = {
-//     ...currentState,
-//     allIds: addItem(currentState.allIds, action.payload.id),
-//     byId: {
-//       ...currentState.byId,
-//       [action.payload.id]: {
-//         ...action.payload
-//       } as em.CompoundShape,
-//       [layerParent]: {
-//         ...currentState.byId[layerParent],
-//         children: addItem((currentState.byId[layerParent] as em.Group).children, action.payload.id),
-//         showChildren: true
-//       } as em.Group
-//     },
-//     allCompoundShapeIds: addItem(state.allCompoundShapeIds, action.payload.id),
-//     paperProject: exportPaperProject(currentState)
-//   }
-//   if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
-//     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
-//   }
-//   return selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
-// };
 
 export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
   let currentState = state;
@@ -243,6 +216,7 @@ export const addText = (state: LayerState, action: AddText): LayerState => {
   if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
   }
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, 'all');
   currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
@@ -274,6 +248,7 @@ export const addImage = (state: LayerState, action: AddImage): LayerState => {
   if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
   }
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, 'all');
   currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
@@ -385,14 +360,16 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
     }, {}),
     scope: currentState.scope.filter((id) => !layersToRemove.includes(id))
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
 export const removeLayers = (state: LayerState, action: RemoveLayers): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return removeLayer(result, layerActions.removeLayer({id: current}) as RemoveLayer);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 }
 
 export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', useLayerItem = false) => {
@@ -920,12 +897,12 @@ export const updateHoverFrame = (state: LayerState) => {
 }
 
 export const setLayerHover = (state: LayerState, action: SetLayerHover): LayerState => {
-  const stateWithNewHover = {
-    ...state,
+  let currentState = state;
+  currentState = {
+    ...currentState,
     hover: action.payload.id
   };
-  //updateHoverFrame(stateWithNewHover);
-  return stateWithNewHover;
+  return currentState;
 };
 
 export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerState => {
@@ -980,7 +957,6 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
     };
   }
   currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.child, newSelection: true}) as SelectLayer);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -991,6 +967,7 @@ export const addLayerChildren = (state: LayerState, action: AddLayerChildren) =>
     return addLayerChild(result, layerActions.addLayerChild({id: action.payload.id, child: current}) as AddLayerChild);
   }, currentState);
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.children, newSelection: true}) as SelectLayers);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -1047,7 +1024,6 @@ export const insertLayerChild = (state: LayerState, action: InsertLayerChild): L
     };
   }
   currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.child, newSelection: true}) as SelectLayer);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -1132,12 +1108,10 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
           ...currentState.byId[layer.parent],
           children: moveItemAbove(currentState.byId[layer.parent].children, layerIndex, aboveIndex)
         } as em.Group
-      },
-      paperProject: exportPaperProject(currentState)
+      }
     };
   }
   currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -1148,6 +1122,7 @@ export const insertLayersAbove = (state: LayerState, action: InsertLayersAbove) 
     return insertLayerAbove(result, layerActions.insertLayerAbove({id: current, above: action.payload.above}) as InsertLayerAbove);
   }, currentState);
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.layers, newSelection: true}) as SelectLayers);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -1207,7 +1182,6 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
     };
   }
   currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -1218,6 +1192,7 @@ export const insertLayersBelow = (state: LayerState, action: InsertLayersBelow):
     return insertLayerBelow(result, layerActions.insertLayerBelow({id: current, below: action.payload.below}) as InsertLayerBelow);
   }, currentState);
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.layers, newSelection: true}) as SelectLayers);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -1327,7 +1302,6 @@ export const ungroupLayer = (state: LayerState, action: UngroupLayer): LayerStat
   } else {
     currentState = selectLayer(state, layerActions.selectLayer({id: layer.id, newSelection: true}) as SelectLayer);
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -1345,6 +1319,7 @@ export const ungroupLayers = (state: LayerState, action: UngroupLayers): LayerSt
   // select newSelection
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: newSelection, newSelection: true}) as SelectLayers);
   // return final state
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -1644,8 +1619,7 @@ export const updateParentBounds = (state: LayerState, id: string): LayerState =>
             height: paperLayer.bounds.height
           }
         }
-      },
-      paperProject: exportPaperProject(result)
+      }
     }
     return result;
   }, state);
@@ -1719,8 +1693,7 @@ export const updateChildrenBounds = (state: LayerState, id: string): LayerState 
             height: paperLayer.bounds.height
           }
         }
-      },
-      paperProject: exportPaperProject(result)
+      }
     }
     return result;
   }, state);
@@ -1793,8 +1766,7 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
           height: paperLayer.bounds.height
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateLayerInView(currentState, id);
   currentState = updateParentBounds(currentState, id);
@@ -1819,18 +1791,19 @@ export const moveLayer = (state: LayerState, action: MoveLayer): LayerState => {
           y: paperLayer.position.y
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateParentBounds(currentState, action.payload.id);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
 export const moveLayers = (state: LayerState, action: MoveLayers): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return moveLayer(result, layerActions.moveLayer({id: current}) as MoveLayer);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const moveLayerTo = (state: LayerState, action: MoveLayerTo): LayerState => {
@@ -1848,37 +1821,40 @@ export const moveLayerTo = (state: LayerState, action: MoveLayerTo): LayerState 
           y: paperLayer.position.y
         }
       }
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
   currentState = updateParentBounds(currentState, action.payload.id);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
 export const moveLayersTo = (state: LayerState, action: MoveLayersTo): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return moveLayerTo(result, layerActions.moveLayerTo({id: current, x: action.payload.x, y: action.payload.y}) as MoveLayerTo);
   }, state);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const moveLayerBy = (state: LayerState, action: MoveLayerBy): LayerState => {
   let currentState = state;
   currentState = updateLayerBounds(currentState, action.payload.id);
   if (action.payload.x) {
-    currentState = updateLayerTweens(currentState, action.payload.id, 'x');
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x']);
   }
   if (action.payload.y) {
-    currentState = updateLayerTweens(currentState, action.payload.id, 'y');
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
 export const moveLayersBy = (state: LayerState, action: MoveLayersBy): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return moveLayerBy(result, layerActions.moveLayerBy({id: current, x: action.payload.x, y: action.payload.y}) as MoveLayerBy);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerName = (state: LayerState, action: SetLayerName): LayerState => {
@@ -1904,11 +1880,7 @@ export const setLayerName = (state: LayerState, action: SetLayerName): LayerStat
     }
   }
   // add new tweens
-  const tweenProps = ['image', 'shape', 'fill', 'x', 'y', 'radius', 'rotation', 'width', 'height', 'stroke', 'strokeDashWidth', 'strokeDashGap', 'strokeWidth', 'shadowColor', 'shadowOffsetX', 'shadowOffsetY', 'shadowBlur', 'opacity', 'fontSize', 'lineHeight'] as em.TweenProp[];
-  currentState = tweenProps.reduce((result: LayerState, current: em.TweenProp) => {
-    result = updateLayerTweens(result, action.payload.id, current);
-    return result;
-  }, currentState);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, 'all');
   // set layer edit
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   // return final state
@@ -2083,7 +2055,7 @@ export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): L
   return currentState;
 };
 
-export const updateLayerTweens = (state: LayerState, layerId: string, prop: em.TweenProp): LayerState => {
+export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop: em.TweenProp): LayerState => {
   let currentState = state;
   const layerScope = getLayerScope(currentState, layerId);
   if (layerScope.some((id: string) => currentState.allArtboardIds.includes(id))) {
@@ -2176,6 +2148,23 @@ export const updateLayerTweens = (state: LayerState, layerId: string, prop: em.T
   }
   return currentState;
 };
+
+export const updateLayerTweensByProps = (state: LayerState, layerId: string, props: em.TweenProp[] | 'all'): LayerState => {
+  let currentState = state;
+  if (props === 'all') {
+    const tweenProps = ['image', 'shape', 'fill', 'x', 'y', 'radius', 'rotation', 'width', 'height', 'stroke', 'strokeDashWidth', 'strokeDashGap', 'strokeWidth', 'shadowColor', 'shadowOffsetX', 'shadowOffsetY', 'shadowBlur', 'opacity', 'fontSize', 'lineHeight'] as em.TweenProp[];
+    currentState = tweenProps.reduce((result: LayerState, current: em.TweenProp) => {
+      result = updateLayerTweensByProp(result, layerId, current);
+      return result;
+    }, currentState);
+  } else {
+    currentState = (props as em.TweenProp[]).reduce((result: LayerState, current: em.TweenProp) => {
+      result = updateLayerTweensByProp(result, layerId, current);
+      return result;
+    }, currentState);
+  }
+  return currentState;
+}
 
 export const setLayerTweenDuration = (state: LayerState, action: SetLayerTweenDuration): LayerState => {
   let currentState = state;
@@ -2273,15 +2262,17 @@ export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = updateLayerTweens(currentState, action.payload.id, 'x');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x']);
   return currentState;
 };
 
 export const setLayersX = (state: LayerState, action: SetLayersX): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerX(result, layerActions.setLayerX({id: current, x: action.payload.x}) as SetLayerX);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerY = (state: LayerState, action: SetLayerY): LayerState => {
@@ -2309,15 +2300,17 @@ export const setLayerY = (state: LayerState, action: SetLayerY): LayerState => {
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = updateLayerTweens(currentState, action.payload.id, 'y');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
   return currentState;
 };
 
 export const setLayersY = (state: LayerState, action: SetLayersY): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerY(result, layerActions.setLayerY({id: current, y: action.payload.y}) as SetLayerY);
   }, state);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerWidth = (state: LayerState, action: SetLayerWidth): LayerState => {
@@ -2353,15 +2346,17 @@ export const setLayerWidth = (state: LayerState, action: SetLayerWidth): LayerSt
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = updateLayerTweens(currentState, action.payload.id, 'width');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['width']);
   return currentState;
 };
 
 export const setLayersWidth = (state: LayerState, action: SetLayersWidth): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerWidth(result, layerActions.setLayerWidth({id: current, width: action.payload.width}) as SetLayerWidth);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerHeight = (state: LayerState, action: SetLayerHeight): LayerState => {
@@ -2397,15 +2392,17 @@ export const setLayerHeight = (state: LayerState, action: SetLayerHeight): Layer
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = updateLayerTweens(currentState, action.payload.id, 'height');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['height']);
   return currentState;
 };
 
 export const setLayersHeight = (state: LayerState, action: SetLayersHeight): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerHeight(result, layerActions.setLayerHeight({id: current, height: action.payload.height}) as SetLayerHeight);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerOpacity = (state: LayerState, action: SetLayerOpacity): LayerState => {
@@ -2425,15 +2422,17 @@ export const setLayerOpacity = (state: LayerState, action: SetLayerOpacity): Lay
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'opacity');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['opacity']);
   return currentState;
 };
 
 export const setLayersOpacity = (state: LayerState, action: SetLayersOpacity): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerOpacity(result, layerActions.setLayerOpacity({id: current, opacity: action.payload.opacity}) as SetLayerOpacity);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerRotation = (state: LayerState, action: SetLayerRotation): LayerState => {
@@ -2473,16 +2472,18 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'rotation');
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['rotation']);
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayersRotation = (state: LayerState, action: SetLayersRotation): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerRotation(result, layerActions.setLayerRotation({id: current, rotation: action.payload.rotation}) as SetLayerRotation);
   }, state);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const enableLayerHorizontalFlip = (state: LayerState, action: EnableLayerHorizontalFlip): LayerState => {
@@ -2600,15 +2601,17 @@ export const enableLayerFill = (state: LayerState, action: EnableLayerFill): Lay
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'fill');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fill']);
   return currentState;
 };
 
 export const enableLayersFill = (state: LayerState, action: EnableLayersFill): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return enableLayerFill(result, layerActions.enableLayerFill({id: current}) as EnableLayerFill);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const disableLayerFill = (state: LayerState, action: DisableLayerFill): LayerState => {
@@ -2631,15 +2634,17 @@ export const disableLayerFill = (state: LayerState, action: DisableLayerFill): L
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'fill');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fill']);
   return currentState;
 };
 
 export const disableLayersFill = (state: LayerState, action: DisableLayersFill): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return disableLayerFill(result, layerActions.disableLayerFill({id: current}) as DisableLayerFill);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerFillColor = (state: LayerState, action: SetLayerFillColor): LayerState => {
@@ -2665,15 +2670,17 @@ export const setLayerFillColor = (state: LayerState, action: SetLayerFillColor):
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'fill');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fill']);
   return currentState;
 };
 
 export const setLayersFillColor = (state: LayerState, action: SetLayersFillColor): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerFillColor(result, layerActions.setLayerFillColor({id: current, fillColor: action.payload.fillColor}) as SetLayerFillColor);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerFill = (state: LayerState, action: SetLayerFill): LayerState => {
@@ -2709,7 +2716,7 @@ export const setLayerFill = (state: LayerState, action: SetLayerFill): LayerStat
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'fill');
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fill']);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -2750,15 +2757,17 @@ export const setLayerFillType = (state: LayerState, action: SetLayerFillType): L
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'fill');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fill']);
   return currentState;
 };
 
 export const setLayersFillType = (state: LayerState, action: SetLayersFillType): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerFillType(result, layerActions.setLayerFillType({id: current, fillType: action.payload.fillType}) as SetLayerFillType);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerGradient = (state: LayerState, action: SetLayerGradient): LayerState => {
@@ -2788,15 +2797,17 @@ export const setLayerGradient = (state: LayerState, action: SetLayerGradient): L
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, action.payload.prop);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, [action.payload.prop]);
   return currentState;
 };
 
 export const setLayersGradient = (state: LayerState, action: SetLayersGradient): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerGradient(result, layerActions.setLayerGradient({id: current, prop: action.payload.prop, gradient: action.payload.gradient}) as SetLayerGradient);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerGradientType = (state: LayerState, action: SetLayerGradientType): LayerState => {
@@ -2830,15 +2841,17 @@ export const setLayerGradientType = (state: LayerState, action: SetLayerGradient
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, action.payload.prop);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, [action.payload.prop]);
   return currentState;
 };
 
 export const setLayersGradientType = (state: LayerState, action: SetLayersGradientType): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerGradientType(result, layerActions.setLayerGradientType({id: current, prop: action.payload.prop, gradientType: action.payload.gradientType}) as SetLayerGradientType);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerGradientOrigin = (state: LayerState, action: SetLayerGradientOrigin): LayerState => {
@@ -2874,15 +2887,17 @@ export const setLayerGradientOrigin = (state: LayerState, action: SetLayerGradie
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, action.payload.prop);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, [action.payload.prop]);
   return currentState;
 };
 
 export const setLayersGradientOrigin = (state: LayerState, action: SetLayersGradientOrigin): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerGradientOrigin(result, layerActions.setLayerGradientOrigin({id: current, prop: action.payload.prop, origin: action.payload.origin}) as SetLayerGradientOrigin);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerGradientDestination = (state: LayerState, action: SetLayerGradientDestination): LayerState => {
@@ -2918,15 +2933,17 @@ export const setLayerGradientDestination = (state: LayerState, action: SetLayerG
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, action.payload.prop);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, [action.payload.prop]);
   return currentState;
 };
 
 export const setLayersGradientDestination = (state: LayerState, action: SetLayersGradientDestination): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerGradientDestination(result, layerActions.setLayerGradientDestination({id: current, prop: action.payload.prop, destination: action.payload.destination}) as SetLayerGradientDestination);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerGradientStopColor = (state: LayerState, action: SetLayerGradientStopColor): LayerState => {
@@ -2976,8 +2993,7 @@ export const setLayerGradientStopColor = (state: LayerState, action: SetLayerGra
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, action.payload.prop);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, [action.payload.prop]);
   return currentState;
 };
 
@@ -3049,8 +3065,7 @@ export const setLayerGradientStopPosition = (state: LayerState, action: SetLayer
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, action.payload.prop);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, [action.payload.prop]);
   return currentState;
 };
 
@@ -3058,6 +3073,7 @@ export const setLayersGradientStopPosition = (state: LayerState, action: SetLaye
   let currentState = state;
   currentState = setLayerGradientStopPosition(currentState, layerActions.setLayerGradientStopPosition({id: action.payload.layers[0], prop: action.payload.prop, stopIndex: action.payload.stopIndex, position: action.payload.position}) as SetLayerGradientStopPosition);
   currentState = updateGradients(currentState, action.payload.layers, action.payload.prop);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3100,8 +3116,7 @@ export const addLayerGradientStop = (state: LayerState, action: AddLayerGradient
     stopIndex: newStops.length - 1,
     prop: action.payload.prop
   }) as SetLayerActiveGradientStop);
-  currentState = updateLayerTweens(currentState, action.payload.id, action.payload.prop);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, [action.payload.prop]);
   return currentState;
 };
 
@@ -3109,6 +3124,7 @@ export const addLayersGradientStop = (state: LayerState, action: AddLayersGradie
   let currentState = state;
   currentState = addLayerGradientStop(currentState, layerActions.addLayerGradientStop({id: action.payload.layers[0], prop: action.payload.prop, gradientStop: action.payload.gradientStop}) as AddLayerGradientStop);
   currentState = updateGradients(currentState, action.payload.layers, action.payload.prop);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3147,8 +3163,7 @@ export const removeLayerGradientStop = (state: LayerState, action: RemoveLayerGr
     }
   }
   currentState = setLayerActiveGradientStop(currentState, layerActions.setLayerActiveGradientStop({id: action.payload.id, prop: action.payload.prop, stopIndex: 0}) as SetLayerActiveGradientStop);
-  currentState = updateLayerTweens(currentState, action.payload.id, action.payload.prop);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, [action.payload.prop]);
   return currentState;
 };
 
@@ -3156,6 +3171,7 @@ export const removeLayersGradientStop = (state: LayerState, action: RemoveLayers
   let currentState = state;
   currentState = removeLayerGradientStop(currentState, layerActions.removeLayerGradientStop({id: action.payload.layers[0], prop: action.payload.prop, stopIndex: action.payload.stopIndex}) as RemoveLayerGradientStop);
   currentState = updateGradients(currentState, action.payload.layers, action.payload.prop);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3218,19 +3234,17 @@ export const enableLayerStroke = (state: LayerState, action: EnableLayerStroke):
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'stroke');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'strokeWidth');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'dashOffset');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'dashArrayWidth');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'dashArrayGap');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['stroke', 'strokeWidth', 'dashOffset', 'dashArrayWidth', 'dashArrayGap']);
   return currentState;
 };
 
 export const enableLayersStroke = (state: LayerState, action: EnableLayersStroke): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return enableLayerStroke(result, layerActions.enableLayerStroke({id: current}) as EnableLayerStroke);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const disableLayerStroke = (state: LayerState, action: DisableLayerStroke): LayerState => {
@@ -3253,19 +3267,17 @@ export const disableLayerStroke = (state: LayerState, action: DisableLayerStroke
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'stroke');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'strokeWidth');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'dashOffset');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'dashArrayWidth');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'dashArrayGap');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['stroke', 'strokeWidth', 'dashOffset', 'dashArrayWidth', 'dashArrayGap']);
   return currentState;
 };
 
 export const disableLayersStroke = (state: LayerState, action: DisableLayersStroke): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return disableLayerStroke(result, layerActions.disableLayerStroke({id: current}) as DisableLayerStroke);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerStrokeColor = (state: LayerState, action: SetLayerStrokeColor): LayerState => {
@@ -3291,15 +3303,17 @@ export const setLayerStrokeColor = (state: LayerState, action: SetLayerStrokeCol
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'stroke');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['stroke']);
   return currentState;
 };
 
 export const setLayersStrokeColor = (state: LayerState, action: SetLayersStrokeColor): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerStrokeColor(result, layerActions.setLayerStrokeColor({id: current, strokeColor: action.payload.strokeColor}) as SetLayerStrokeColor);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerStrokeFillType = (state: LayerState, action: SetLayerStrokeFillType): LayerState => {
@@ -3338,15 +3352,17 @@ export const setLayerStrokeFillType = (state: LayerState, action: SetLayerStroke
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'stroke');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['stroke']);
   return currentState;
 };
 
 export const setLayersStrokeFillType = (state: LayerState, action: SetLayersStrokeFillType): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerStrokeFillType(result, layerActions.setLayerStrokeFillType({id: current, fillType: action.payload.fillType}) as SetLayerStrokeFillType);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerStrokeWidth = (state: LayerState, action: SetLayerStrokeWidth): LayerState => {
@@ -3369,15 +3385,17 @@ export const setLayerStrokeWidth = (state: LayerState, action: SetLayerStrokeWid
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'strokeWidth');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['strokeWidth']);
   return currentState;
 };
 
 export const setLayersStrokeWidth = (state: LayerState, action: SetLayersStrokeWidth): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerStrokeWidth(result, layerActions.setLayerStrokeWidth({id: current, strokeWidth: action.payload.strokeWidth}) as SetLayerStrokeWidth);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerStrokeCap = (state: LayerState, action: SetLayerStrokeCap): LayerState => {
@@ -3400,14 +3418,16 @@ export const setLayerStrokeCap = (state: LayerState, action: SetLayerStrokeCap):
       }
     }
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayersStrokeCap = (state: LayerState, action: SetLayersStrokeCap): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerStrokeCap(result, layerActions.setLayerStrokeCap({id: current, strokeCap: action.payload.strokeCap}) as SetLayerStrokeCap);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerStrokeJoin = (state: LayerState, action: SetLayerStrokeJoin): LayerState => {
@@ -3430,14 +3450,16 @@ export const setLayerStrokeJoin = (state: LayerState, action: SetLayerStrokeJoin
       }
     }
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayersStrokeJoin = (state: LayerState, action: SetLayersStrokeJoin): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerStrokeJoin(result, layerActions.setLayerStrokeJoin({id: current, strokeJoin: action.payload.strokeJoin}) as SetLayerStrokeJoin);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerStrokeDashOffset = (state: LayerState, action: SetLayerStrokeDashOffset): LayerState => {
@@ -3460,15 +3482,17 @@ export const setLayerStrokeDashOffset = (state: LayerState, action: SetLayerStro
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'dashOffset');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['dashOffset']);
   return currentState;
 };
 
 export const setLayersStrokeDashOffset = (state: LayerState, action: SetLayersStrokeDashOffset): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerStrokeDashOffset(result, layerActions.setLayerStrokeDashOffset({id: current, strokeDashOffset: action.payload.strokeDashOffset}) as SetLayerStrokeDashOffset);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerStrokeDashArray = (state: LayerState, action: SetLayerStrokeDashArray): LayerState => {
@@ -3491,16 +3515,17 @@ export const setLayerStrokeDashArray = (state: LayerState, action: SetLayerStrok
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'dashArrayWidth');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'dashArrayGap');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['dashArrayWidth', 'dashArrayGap']);
   return currentState;
 };
 
 export const setLayersStrokeDashArray = (state: LayerState, action: SetLayersStrokeDashArray): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerStrokeDashArray(result, layerActions.setLayerStrokeDashArray({id: current, strokeDashArray: action.payload.strokeDashArray}) as SetLayerStrokeDashArray);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerStrokeDashArrayWidth = (state: LayerState, action: SetLayerStrokeDashArrayWidth): LayerState => {
@@ -3526,15 +3551,17 @@ export const setLayerStrokeDashArrayWidth = (state: LayerState, action: SetLayer
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'dashArrayWidth');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['dashArrayWidth']);
   return currentState;
 };
 
 export const setLayersStrokeDashArrayWidth = (state: LayerState, action: SetLayersStrokeDashArrayWidth): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerStrokeDashArrayWidth(result, layerActions.setLayerStrokeDashArrayWidth({id: current, strokeDashArrayWidth: action.payload.strokeDashArrayWidth}) as SetLayerStrokeDashArrayWidth);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerStrokeDashArrayGap = (state: LayerState, action: SetLayerStrokeDashArrayGap): LayerState => {
@@ -3560,15 +3587,17 @@ export const setLayerStrokeDashArrayGap = (state: LayerState, action: SetLayerSt
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'dashArrayGap');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['dashArrayGap']);
   return currentState;
 };
 
 export const setLayersStrokeDashArrayGap = (state: LayerState, action: SetLayersStrokeDashArrayGap): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerStrokeDashArrayGap(result, layerActions.setLayerStrokeDashArrayGap({id: current, strokeDashArrayGap: action.payload.strokeDashArrayGap}) as SetLayerStrokeDashArrayGap);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerStrokeMiterLimit = (state: LayerState, action: SetLayerStrokeMiterLimit): LayerState => {
@@ -3589,7 +3618,6 @@ export const setLayerStrokeMiterLimit = (state: LayerState, action: SetLayerStro
       }
     }
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3617,18 +3645,17 @@ export const enableLayerShadow = (state: LayerState, action: EnableLayerShadow):
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'shadowColor');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'shadowOffsetX');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'shadowOffsetY');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'shadowBlur');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['shadowColor', 'shadowOffsetX', 'shadowOffsetY', 'shadowBlur']);
   return currentState;
 };
 
 export const enableLayersShadow = (state: LayerState, action: EnableLayersShadow): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return enableLayerShadow(result, layerActions.enableLayerShadow({id: current}) as EnableLayerShadow);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const disableLayerShadow = (state: LayerState, action: DisableLayerShadow): LayerState => {
@@ -3651,18 +3678,17 @@ export const disableLayerShadow = (state: LayerState, action: DisableLayerShadow
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'shadowColor');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'shadowOffsetX');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'shadowOffsetY');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'shadowBlur');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['shadowColor', 'shadowOffsetX', 'shadowOffsetY', 'shadowBlur']);
   return currentState;
 };
 
 export const disableLayersShadow = (state: LayerState, action: DisableLayersShadow): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return disableLayerShadow(result, layerActions.disableLayerShadow({id: current}) as DisableLayerShadow);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerShadowColor = (state: LayerState, action: SetLayerShadowColor): LayerState => {
@@ -3688,15 +3714,17 @@ export const setLayerShadowColor = (state: LayerState, action: SetLayerShadowCol
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'shadowColor');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['shadowColor']);
   return currentState;
 };
 
 export const setLayersShadowColor = (state: LayerState, action: SetLayersShadowColor): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerShadowColor(result, layerActions.setLayerShadowColor({id: current, shadowColor: action.payload.shadowColor}) as SetLayerShadowColor);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerShadowBlur = (state: LayerState, action: SetLayerShadowBlur): LayerState => {
@@ -3719,15 +3747,17 @@ export const setLayerShadowBlur = (state: LayerState, action: SetLayerShadowBlur
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'shadowBlur');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['shadowBlur']);
   return currentState;
 };
 
 export const setLayersShadowBlur = (state: LayerState, action: SetLayersShadowBlur): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerShadowBlur(result, layerActions.setLayerShadowBlur({id: current, shadowBlur: action.payload.shadowBlur}) as SetLayerShadowBlur);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerShadowXOffset = (state: LayerState, action: SetLayerShadowXOffset): LayerState => {
@@ -3753,15 +3783,17 @@ export const setLayerShadowXOffset = (state: LayerState, action: SetLayerShadowX
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'shadowOffsetX');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['shadowOffsetX']);
   return currentState;
 };
 
 export const setLayersShadowXOffset = (state: LayerState, action: SetLayersShadowXOffset): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerShadowXOffset(result, layerActions.setLayerShadowXOffset({id: current, shadowXOffset: action.payload.shadowXOffset}) as SetLayerShadowXOffset);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerShadowYOffset = (state: LayerState, action: SetLayerShadowYOffset): LayerState => {
@@ -3787,15 +3819,17 @@ export const setLayerShadowYOffset = (state: LayerState, action: SetLayerShadowY
       }
     }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'shadowOffsetY');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['shadowOffsetY']);
   return currentState;
 };
 
 export const setLayersShadowYOffset = (state: LayerState, action: SetLayersShadowYOffset): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerShadowYOffset(result, layerActions.setLayerShadowYOffset({id: current, shadowYOffset: action.payload.shadowYOffset}) as SetLayerShadowYOffset);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const scaleLayer = (state: LayerState, action: ScaleLayer): LayerState => {
@@ -3834,19 +3868,21 @@ export const scaleLayer = (state: LayerState, action: ScaleLayer): LayerState =>
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
   if (action.payload.scale.x) {
-    currentState = updateLayerTweens(currentState, action.payload.id, 'width');
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['width']);
   }
   if (action.payload.scale.y) {
-    currentState = updateLayerTweens(currentState, action.payload.id, 'height');
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['height']);
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
 export const scaleLayers = (state: LayerState, action: ScaleLayers): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return scaleLayer(result, layerActions.scaleLayer({id: current, scale: action.payload.scale, verticalFlip: action.payload.verticalFlip, horizontalFlip: action.payload.horizontalFlip}) as ScaleLayer);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerText = (state: LayerState, action: SetLayerText): LayerState => {
@@ -3889,15 +3925,17 @@ export const setLayerFontSize = (state: LayerState, action: SetLayerFontSize): L
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = updateLayerTweens(currentState, action.payload.id, 'fontSize');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fontSize']);
   return currentState;
 };
 
 export const setLayersFontSize = (state: LayerState, action: SetLayersFontSize): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerFontSize(result, layerActions.setLayerFontSize({id: current, fontSize: action.payload.fontSize}) as SetLayerFontSize);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerFontWeight = (state: LayerState, action: SetLayerFontWeight): LayerState => {
@@ -3918,14 +3956,16 @@ export const setLayerFontWeight = (state: LayerState, action: SetLayerFontWeight
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayersFontWeight = (state: LayerState, action: SetLayersFontWeight): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerFontWeight(result, layerActions.setLayerFontWeight({id: current, fontWeight: action.payload.fontWeight}) as SetLayerFontWeight);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerFontFamily = (state: LayerState, action: SetLayerFontFamily): LayerState => {
@@ -3946,14 +3986,16 @@ export const setLayerFontFamily = (state: LayerState, action: SetLayerFontFamily
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayersFontFamily = (state: LayerState, action: SetLayersFontFamily): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerFontFamily(result, layerActions.setLayerFontFamily({id: current, fontFamily: action.payload.fontFamily}) as SetLayerFontFamily);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerLeading = (state: LayerState, action: SetLayerLeading): LayerState => {
@@ -3974,15 +4016,17 @@ export const setLayerLeading = (state: LayerState, action: SetLayerLeading): Lay
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = updateLayerTweens(currentState, action.payload.id, 'lineHeight');
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['lineHeight']);
   return currentState;
 };
 
 export const setLayersLeading = (state: LayerState, action: SetLayersLeading): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerLeading(result, layerActions.setLayerLeading({id: current, leading: action.payload.leading}) as SetLayerLeading);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setLayerJustification = (state: LayerState, action: SetLayerJustification): LayerState => {
@@ -4042,14 +4086,16 @@ export const setLayerJustification = (state: LayerState, action: SetLayerJustifi
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayersJustification = (state: LayerState, action: SetLayersJustification): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerJustification(result, layerActions.setLayerJustification({id: current, justification: action.payload.justification}) as SetLayerJustification);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const addInViewLayer = (state: LayerState, action: AddInViewLayer): LayerState => {
@@ -4172,7 +4218,6 @@ export const addLayersMask = (state: LayerState, action: AddLayersMask): LayerSt
   currentState = maskLayers(currentState, layerActions.maskLayers({layers: currentState.byId[maskGroup].children.filter((id) => id !== mask)}) as MaskLayers);
   // update masked group bounds
   currentState = updateLayerBounds(currentState, maskGroup);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4204,7 +4249,6 @@ export const removeLayersMask = (state: LayerState, action: RemoveLayersMask): L
     }
   };
   currentState = unmaskLayers(currentState, layerActions.unmaskLayers({layers: parentLayerItem.children}) as UnmaskLayers);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4220,14 +4264,16 @@ export const maskLayer = (state: LayerState, action: MaskLayer): LayerState => {
       }
     }
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
 export const maskLayers = (state: LayerState, action: MaskLayers): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return maskLayer(result, layerActions.maskLayer({id: current}) as MaskLayer);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const unmaskLayer = (state: LayerState, action: UnmaskLayer): LayerState => {
@@ -4242,14 +4288,16 @@ export const unmaskLayer = (state: LayerState, action: UnmaskLayer): LayerState 
       }
     }
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
 export const unmaskLayers = (state: LayerState, action: UnmaskLayers): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return unmaskLayer(result, layerActions.unmaskLayer({id: current}) as UnmaskLayer);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const alignLayersToLeft = (state: LayerState, action: AlignLayersToLeft): LayerState => {
@@ -4436,7 +4484,6 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer, fromCl
   }, currentState);
   // select layer
   currentState = selectLayer(currentState, layerActions.selectLayer({id: rootLayer.id}) as SelectLayer);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4448,6 +4495,7 @@ export const duplicateLayers = (state: LayerState, action: DuplicateLayers, from
   if (state.selected.length > 0) {
     currentState = deselectLayers(currentState, layerActions.deselectLayers({layers: state.selected}) as DeselectLayers);
   }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4471,7 +4519,6 @@ export const sendLayerForward = (state: LayerState, action: SendLayerForward): L
   if (layerIndex !== parentItem.children.length - 1) {
     currentState = insertLayerChild(currentState, layerActions.insertLayerChild({id: layerItem.parent, child: action.payload.id, index: layerIndex + 1}) as InsertLayerChild);
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4481,6 +4528,7 @@ export const sendLayersForward = (state: LayerState, action: SendLayersForward):
     return sendLayerForward(result, layerActions.sendLayerForward({id: current}) as SendLayerForward);
   }, currentState);
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.layers, newSelection: true}) as SelectLayers);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4492,7 +4540,6 @@ export const sendLayerToFront = (state: LayerState, action: SendLayerToFront): L
   if (layerIndex !== parentItem.children.length - 1) {
     currentState = insertLayerChild(currentState, layerActions.insertLayerChild({id: layerItem.parent, child: action.payload.id, index: parentItem.children.length - 1}) as InsertLayerChild);
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4502,6 +4549,7 @@ export const sendLayersToFront = (state: LayerState, action: SendLayersToFront):
     return sendLayerToFront(result, layerActions.sendLayerToFront({id: current}) as SendLayerToFront);
   }, currentState);
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.layers, newSelection: true}) as SelectLayers);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4512,7 +4560,6 @@ export const sendLayerBackward = (state: LayerState, action: SendLayerBackward):
   if (layerIndex !== 0) {
     currentState = insertLayerChild(currentState, layerActions.insertLayerChild({id: layerItem.parent, child: action.payload.id, index: layerIndex - 1}) as InsertLayerChild);
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4522,6 +4569,7 @@ export const sendLayersBackward = (state: LayerState, action: SendLayersBackward
     return sendLayerBackward(result, layerActions.sendLayerBackward({id: current}) as SendLayerBackward);
   }, currentState);
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.layers, newSelection: true}) as SelectLayers);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4532,7 +4580,6 @@ export const sendLayerToBack = (state: LayerState, action: SendLayerToBack): Lay
   if (layerIndex !== 0) {
     currentState = insertLayerChild(currentState, layerActions.insertLayerChild({id: layerItem.parent, child: action.payload.id, index: 0}) as InsertLayerChild);
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4542,6 +4589,7 @@ export const sendLayersToBack = (state: LayerState, action: SendLayersToBack): L
     return sendLayerToBack(result, layerActions.sendLayerToBack({id: current}) as SendLayerToBack);
   }, currentState);
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.layers, newSelection: true}) as SelectLayers);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4562,14 +4610,16 @@ export const setLayerBlendMode = (state: LayerState, action: SetLayerBlendMode):
       }
     }
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayersBlendMode = (state: LayerState, action: SetLayersBlendMode): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setLayerBlendMode(result, layerActions.setLayerBlendMode({id: current, blendMode: action.payload.blendMode}) as SetLayerBlendMode);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState => {
@@ -4583,11 +4633,6 @@ export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState 
     type: 'Shape',
     id: newShapeId
   }
-  // if (booleanLayers.className === 'CompoundPath') {
-  //   (booleanLayers as paper.CompoundPath).children.forEach((child) => {
-  //     child.data.id = 'ShapePartial';
-  //   });
-  // }
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.unite]}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
     id: newShapeId,
@@ -4618,7 +4663,6 @@ export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState 
       points: getCurvePoints(booleanLayers)
     }
   }) as AddShape);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4633,11 +4677,6 @@ export const intersectLayers = (state: LayerState, action: IntersectLayers): Lay
     type: 'Shape',
     id: newShapeId
   }
-  // if (booleanLayers.className === 'CompoundPath') {
-  //   (booleanLayers as paper.CompoundPath).children.forEach((child) => {
-  //     child.data.id = 'ShapePartial';
-  //   });
-  // }
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.intersect]}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
     id: newShapeId,
@@ -4668,7 +4707,6 @@ export const intersectLayers = (state: LayerState, action: IntersectLayers): Lay
       points: getCurvePoints(booleanLayers)
     }
   }) as AddShape);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4683,11 +4721,6 @@ export const subtractLayers = (state: LayerState, action: SubtractLayers): Layer
     type: 'Shape',
     id: newShapeId
   }
-  // if (booleanLayers.className === 'CompoundPath') {
-  //   (booleanLayers as paper.CompoundPath).children.forEach((child) => {
-  //     child.data.id = 'ShapePartial';
-  //   });
-  // }
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.subtract]}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
     id: newShapeId,
@@ -4718,7 +4751,6 @@ export const subtractLayers = (state: LayerState, action: SubtractLayers): Layer
       points: getCurvePoints(booleanLayers)
     }
   }) as AddShape);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4733,11 +4765,6 @@ export const excludeLayers = (state: LayerState, action: ExcludeLayers): LayerSt
     type: 'Shape',
     id: newShapeId
   }
-  // if (booleanLayers.className === 'CompoundPath') {
-  //   (booleanLayers as paper.CompoundPath).children.forEach((child) => {
-  //     child.data.id = 'ShapePartial';
-  //   });
-  // }
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.exclude]}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
     id: newShapeId,
@@ -4768,7 +4795,6 @@ export const excludeLayers = (state: LayerState, action: ExcludeLayers): LayerSt
       points: getCurvePoints(booleanLayers)
     }
   }) as AddShape);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4783,11 +4809,6 @@ export const divideLayers = (state: LayerState, action: DivideLayers): LayerStat
     type: 'Shape',
     id: newShapeId
   }
-  // if (booleanLayers.className === 'CompoundPath') {
-  //   (booleanLayers as paper.CompoundPath).children.forEach((child) => {
-  //     child.data.id = 'ShapePartial';
-  //   });
-  // }
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.divide]}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
     id: newShapeId,
@@ -4818,7 +4839,6 @@ export const divideLayers = (state: LayerState, action: DivideLayers): LayerStat
       points: getCurvePoints(booleanLayers)
     }
   }) as AddShape);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4849,22 +4869,20 @@ export const setRoundedRadius = (state: LayerState, action: SetRoundedRadius): L
           points: getCurvePoints(newShape)
         }
       } as em.Rounded
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'width');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'height');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'rotation');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'shape');
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['width', 'height', 'rotation', 'shape']);
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
 export const setRoundedRadii = (state: LayerState, action: SetRoundedRadii): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setRoundedRadius(result, layerActions.setRoundedRadius({id: current, radius: action.payload.radius}) as SetRoundedRadius);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setPolygonSides = (state: LayerState, action: SetPolygonSides): LayerState => {
@@ -4897,22 +4915,20 @@ export const setPolygonSides = (state: LayerState, action: SetPolygonSides): Lay
           points: getCurvePoints(newShape)
         }
       } as em.Polygon
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'width');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'height');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'rotation');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'shape');
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['width', 'height', 'rotation', 'shape']);
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
 export const setPolygonsSides = (state: LayerState, action: SetPolygonsSides): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setPolygonSides(result, layerActions.setPolygonSides({id: current, sides: action.payload.sides}) as SetPolygonSides);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setStarPoints = (state: LayerState, action: SetStarPoints): LayerState => {
@@ -4947,22 +4963,20 @@ export const setStarPoints = (state: LayerState, action: SetStarPoints): LayerSt
           points: getCurvePoints(newShape)
         }
       } as em.Star
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'width');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'height');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'rotation');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'shape');
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['width', 'height', 'rotation', 'shape']);
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
 export const setStarsPoints = (state: LayerState, action: SetStarsPoints): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setStarPoints(result, layerActions.setStarPoints({id: current, points: action.payload.points}) as SetStarPoints);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setStarRadius = (state: LayerState, action: SetStarRadius): LayerState => {
@@ -4997,53 +5011,25 @@ export const setStarRadius = (state: LayerState, action: SetStarRadius): LayerSt
           points: getCurvePoints(newShape)
         }
       } as em.Star
-    },
-    paperProject: exportPaperProject(currentState)
+    }
   }
-  currentState = updateLayerTweens(currentState, action.payload.id, 'width');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'height');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'rotation');
-  currentState = updateLayerTweens(currentState, action.payload.id, 'shape');
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['width', 'height', 'rotation', 'shape']);
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
 export const setStarsRadius = (state: LayerState, action: SetStarsRadius): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return setStarRadius(result, layerActions.setStarRadius({id: current, radius: action.payload.radius}) as SetStarRadius);
-  }, state);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
 };
 
 export const setCurvePointOriginX = (state: LayerState, action: SetCurvePointOriginX): LayerState => {
   let currentState = state;
   const layerItem = state.byId[action.payload.id] as em.Shape;
-  // currentState = {
-  //   ...currentState,
-  //   byId: {
-  //     ...currentState.byId,
-  //     [action.payload.id]: {
-  //       ...currentState.byId[action.payload.id],
-  //       path: {
-  //         ...(currentState.byId[action.payload.id] as em.Shape).path,
-  //         points: {
-  //           ...(currentState.byId[action.payload.id] as em.Shape).path.points,
-  //           byId: {
-  //             ...(currentState.byId[action.payload.id] as em.Shape).path.points.byId,
-  //             [action.payload.pointId]: {
-  //               ...(currentState.byId[action.payload.id] as em.Shape).path.points.byId[action.payload.pointId],
-  //               point: {
-  //                 ...(currentState.byId[action.payload.id] as em.Shape).path.points.byId[action.payload.pointId].point,
-  //                 x: action.payload.x
-  //               }
-  //             }
-  //           }
-  //         }
-  //       }
-  //     } as em.Shape
-  //   },
-  //   paperProject: exportPaperProject(currentState)
-  // }
   if (layerItem.path.points.length > 2) {
     currentState = {
       ...currentState,
@@ -5064,32 +5050,6 @@ export const setCurvePointOriginX = (state: LayerState, action: SetCurvePointOri
 export const setCurvePointOriginY = (state: LayerState, action: SetCurvePointOriginY): LayerState => {
   let currentState = state;
   const layerItem = state.byId[action.payload.id] as em.Shape;
-  // currentState = {
-  //   ...currentState,
-  //   byId: {
-  //     ...currentState.byId,
-  //     [action.payload.id]: {
-  //       ...currentState.byId[action.payload.id],
-  //       path: {
-  //         ...(currentState.byId[action.payload.id] as em.Shape).path,
-  //         points: {
-  //           ...(currentState.byId[action.payload.id] as em.Shape).path.points,
-  //           byId: {
-  //             ...(currentState.byId[action.payload.id] as em.Shape).path.points.byId,
-  //             [action.payload.pointId]: {
-  //               ...(currentState.byId[action.payload.id] as em.Shape).path.points.byId[action.payload.pointId],
-  //               point: {
-  //                 ...(currentState.byId[action.payload.id] as em.Shape).path.points.byId[action.payload.pointId].point,
-  //                 y: action.payload.y
-  //               }
-  //             }
-  //           }
-  //         }
-  //       }
-  //     } as em.Shape
-  //   },
-  //   paperProject: exportPaperProject(currentState)
-  // }
   if (layerItem.path.points.length > 2) {
     currentState = {
       ...currentState,
@@ -5111,33 +5071,6 @@ export const setCurvePointOrigin = (state: LayerState, action: SetCurvePointOrig
   let currentState = state;
   const layerItem = state.byId[action.payload.id] as em.Shape;
   const paperLayer = getPaperLayer(action.payload.id);
-  // currentState = {
-  //   ...currentState,
-  //   byId: {
-  //     ...currentState.byId,
-  //     [action.payload.id]: {
-  //       ...currentState.byId[action.payload.id],
-  //       path: {
-  //         ...(currentState.byId[action.payload.id] as em.Shape).path,
-  //         points: {
-  //           ...(currentState.byId[action.payload.id] as em.Shape).path.points,
-  //           byId: {
-  //             ...(currentState.byId[action.payload.id] as em.Shape).path.points.byId,
-  //             [action.payload.pointId]: {
-  //               ...(currentState.byId[action.payload.id] as em.Shape).path.points.byId[action.payload.pointId],
-  //               point: {
-  //                 ...(currentState.byId[action.payload.id] as em.Shape).path.points.byId[action.payload.pointId].point,
-  //                 x: action.payload.x,
-  //                 y: action.payload.y
-  //               }
-  //             }
-  //           }
-  //         }
-  //       }
-  //     } as em.Shape
-  //   },
-  //   paperProject: exportPaperProject(currentState)
-  // }
   if (layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line') {
     const fromPoint = (paperLayer as paper.Path).segments[0].point;
     const toPoint = (paperLayer as paper.Path).segments[1].point;
@@ -5182,7 +5115,7 @@ export const setLayerEdit = (state: LayerState, action: SetLayerEdit): LayerStat
   currentState = {
     ...currentState,
     edit: action.payload.edit,
-    paperProject: exportPaperProject(currentState)
+    paperProject: savePaperProjectJSON(currentState)
   }
   return currentState;
 };

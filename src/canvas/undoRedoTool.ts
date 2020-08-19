@@ -1,7 +1,7 @@
 import { importPaperProject, colorsMatch, gradientsMatch } from '../store/selectors/layer';
 import store from '../store';
 import { ActionCreators } from 'redux-undo';
-import { updateHoverFrame, updateSelectionFrame, updateActiveArtboardFrame } from '../store/utils/layer';
+import { updateHoverFrame, updateSelectionFrame, updateActiveArtboardFrame, updateTweenEventFrame } from '../store/utils/layer';
 import { openColorEditor, closeColorEditor } from '../store/actions/colorEditor';
 import { openGradientEditor, closeGradientEditor } from '../store/actions/gradientEditor';
 import { setLayerHover } from '../store/actions/layer';
@@ -90,55 +90,62 @@ class UndoRedoTool {
   onKeyDown(event: paper.KeyEvent): void {
     switch(event.key) {
       case 'z': {
+        const state = store.getState();
         if (event.modifiers.meta) {
           if (event.modifiers.shift) {
-            // remove hover
-            store.dispatch(setLayerHover({id: null}));
-            // redo
-            store.dispatch(ActionCreators.redo());
-            // get state
-            const state = store.getState();
-            // import future paper project
-            importPaperProject({
-              paperProject: state.layer.present.paperProject,
-              documentImages: state.documentSettings.images.byId,
-              layers: {
-                shape: state.layer.present.allShapeIds,
-                artboard: state.layer.present.allArtboardIds,
-                text: state.layer.present.allTextIds,
-                image: state.layer.present.allImageIds
-              }
-            });
-            // update editors
-            this.updateEditors(state, 'redo');
-            // update frames
-            updateHoverFrame(state.layer.present);
-            updateSelectionFrame(state.layer.present);
-            updateActiveArtboardFrame(state.layer.present);
+            if (state.layer.future.length > 0) {
+              // remove hover
+              store.dispatch(setLayerHover({id: null}));
+              // redo
+              store.dispatch(ActionCreators.redo());
+              // get state
+              const state = store.getState();
+              // import future paper project
+              importPaperProject({
+                paperProject: state.layer.present.paperProject,
+                documentImages: state.documentSettings.images.byId,
+                layers: {
+                  shape: state.layer.present.allShapeIds,
+                  artboard: state.layer.present.allArtboardIds,
+                  text: state.layer.present.allTextIds,
+                  image: state.layer.present.allImageIds
+                }
+              });
+              // update editors
+              this.updateEditors(state, 'redo');
+              // update frames
+              updateHoverFrame(state.layer.present);
+              updateSelectionFrame(state.layer.present);
+              updateActiveArtboardFrame(state.layer.present);
+              updateTweenEventFrame(state.layer.present, state.layer.present.tweenEventById[state.tweenDrawer.event]);
+            }
           } else {
-            // remove hover
-            store.dispatch(setLayerHover({id: null}));
-            // undo
-            store.dispatch(ActionCreators.undo());
-            // get state
-            const state = store.getState();
-            // import past paper project
-            importPaperProject({
-              paperProject: state.layer.present.paperProject,
-              documentImages: state.documentSettings.images.byId,
-              layers: {
-                shape: state.layer.present.allShapeIds,
-                artboard: state.layer.present.allArtboardIds,
-                text: state.layer.present.allTextIds,
-                image: state.layer.present.allImageIds
-              }
-            });
-            // update editors
-            this.updateEditors(state, 'undo');
-            // update frames
-            updateHoverFrame(state.layer.present);
-            updateSelectionFrame(state.layer.present);
-            updateActiveArtboardFrame(state.layer.present);
+            if (state.layer.past.length > 0) {
+              // remove hover
+              store.dispatch(setLayerHover({id: null}));
+              // undo
+              store.dispatch(ActionCreators.undo());
+              // get state
+              const state = store.getState();
+              // import past paper project
+              importPaperProject({
+                paperProject: state.layer.present.paperProject,
+                documentImages: state.documentSettings.images.byId,
+                layers: {
+                  shape: state.layer.present.allShapeIds,
+                  artboard: state.layer.present.allArtboardIds,
+                  text: state.layer.present.allTextIds,
+                  image: state.layer.present.allImageIds
+                }
+              });
+              // update editors
+              this.updateEditors(state, 'undo');
+              // update frames
+              updateHoverFrame(state.layer.present);
+              updateSelectionFrame(state.layer.present);
+              updateActiveArtboardFrame(state.layer.present);
+              updateTweenEventFrame(state.layer.present, state.layer.present.tweenEventById[state.tweenDrawer.event]);
+            }
           }
         }
         break;
