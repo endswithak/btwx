@@ -7,7 +7,7 @@ interface TopbarDropdownButtonOptionProps {
   onClick(event: React.SyntheticEvent): void;
   isActive?: boolean;
   disabled?: boolean;
-  icon?: string;
+  icon?: em.Icon;
   label: string;
 }
 
@@ -69,7 +69,12 @@ const TopbarDropdownButtonOption = (props: TopbarDropdownButtonOptionProps): Rea
               width='24'
               height='24'
               viewBox='0 0 24 24'>
-              <path d={icon} />
+              <path d={icon.fill} />
+              {
+                icon.opacity
+                ? <path className='icon-opacity' d={icon.opacity} />
+                : null
+              }
             </svg>
           </span>
         : null

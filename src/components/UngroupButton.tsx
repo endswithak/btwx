@@ -1,9 +1,10 @@
 import React, { ReactElement } from 'react';
-import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
+import { RootState } from '../store/reducers';
 import { UngroupLayersPayload, LayerTypes } from '../store/actionTypes/layer';
 import { ungroupLayers } from '../store/actions/layer';
 import TopbarButton from './TopbarButton';
+import Icon from './Icon';
 
 interface UngroupButtonProps {
   selected: string[];
@@ -24,7 +25,7 @@ const UngroupButton = (props: UngroupButtonProps): ReactElement => {
     <TopbarButton
       label='Ungroup'
       onClick={handleUngroupClick}
-      icon='M13,11 L13,12 L18,12 L18,11 L20,11 L20,13 L19,13 L19,18 L20,18 L20,20 L18,20 L18,19 L13,19 L13,20 L11,20 L11,18 L12,18 L12,13 L11,13 L11,11 L13,11 Z M6,4 L6,5 L11,5 L11,4 L13,4 L13,6 L12,6 L12,10 L10,10 L10,12 L6,12 L6,13 L4,13 L4,11 L5,11 L5,6 L4,6 L4,4 L6,4 Z'
+      icon={Icon('ungroup')}
       disabled={!canUngroup} />
   );
 }

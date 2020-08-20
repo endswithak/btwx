@@ -1,11 +1,12 @@
 import React, { useContext, ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import SidebarToggleButton from './SidebarToggleButton';
 import { RootState } from '../store/reducers';
 import { EnableLayerHorizontalFlipPayload, DisableLayerHorizontalFlipPayload, LayerTypes } from '../store/actionTypes/layer';
 import { enableLayerHorizontalFlip, disableLayerHorizontalFlip } from '../store/actions/layer';
 import { getPaperLayer } from '../store/selectors/layer';
 import { ThemeContext } from './ThemeProvider';
+import SidebarToggleButton from './SidebarToggleButton';
+import Icon from './Icon';
 
 interface HorizontalFlipInputProps {
   selected?: string[];
@@ -44,7 +45,7 @@ const HorizontalFlipInput = (props: HorizontalFlipInputProps): ReactElement => {
         width='24'
         height='24'
         viewBox='0 0 24 24'>
-        <path d='M13,4 L19,20 L13,19.0039693 L13,4 Z M11,4 L11,19 L5,20 L11,4 Z' />
+        <path d={Icon('horizontal-flip').fill} />
       </svg>
     </SidebarToggleButton>
   );

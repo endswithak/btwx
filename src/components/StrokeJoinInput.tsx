@@ -1,12 +1,13 @@
 import React, { useContext, ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import SidebarToggleButton from './SidebarToggleButton';
 import { RootState } from '../store/reducers';
 import { SetLayersStrokeJoinPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setLayersStrokeJoin } from '../store/actions/layer';
 import { ThemeContext } from './ThemeProvider';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
+import SidebarToggleButton from './SidebarToggleButton';
+import Icon from './Icon';
 
 interface StrokeJoinInputProps {
   selected?: string[];
@@ -41,7 +42,7 @@ const StrokeJoinInput = (props: StrokeJoinInputProps): ReactElement => {
               width="24"
               height="24"
               viewBox="0 0 24 24">
-              <path d="M21,14 L21,21 L14,21 L14,16 L16,16 L16,14 L21,14 Z M21,3 L21,10 L16,10 L16,8 L8,8 L8,16 L10,16 L10,21 L3,21 L3,3 L21,3 Z M15,9 L15,11 L21,11 L21,13 L15,13 L15,15 L13,15 L13,21 L11,21 L11,15 L9,15 L9,9 L15,9 Z M13,11 L11,11 L11,13 L13,13 L13,11 Z" />
+              <path d={Icon('stroke-join-miter').fill} />
             </svg>
           </SidebarToggleButton>
         </SidebarSectionColumn>
@@ -54,7 +55,7 @@ const StrokeJoinInput = (props: StrokeJoinInputProps): ReactElement => {
               width="24"
               height="24"
               viewBox="0 0 24 24">
-              <path d="M21,14 L21,21 L14,21 L14,16 L16,16 L16,14 L21,14 Z M21,3 L21,10 L16,10 L16,8 L8,8 L8,16 L10,16 L10,21 L3,21 L3,8 C3,5.23857625 5.23857625,3 8,3 L21,3 Z M15,9 L15,11 L21,11 L21,13 L15,13 L15,15 L13,15 L13,21 L11,21 L11,15 L9,15 L9,9 L15,9 Z M13,11 L11,11 L11,13 L13,13 L13,11 Z" />
+              <path d={Icon('stroke-join-round').fill} />
             </svg>
           </SidebarToggleButton>
         </SidebarSectionColumn>
@@ -67,7 +68,7 @@ const StrokeJoinInput = (props: StrokeJoinInputProps): ReactElement => {
               width="24"
               height="24"
               viewBox="0 0 24 24">
-              <path d="M21,14 L21,21 L14,21 L14,16 L16,16 L16,14 L21,14 Z M21,3 L21,10 L16,10 L16,8 L8,8 L8,16 L10,16 L10,21 L3,21 L3,8.00529368 L8,3 L21,3 Z M15,9 L15,11 L21,11 L21,13 L15,13 L15,15 L13,15 L13,21 L11,21 L11,15 L9,15 L9,9 L15,9 Z M13,11 L11,11 L11,13 L13,13 L13,11 Z" />
+              <path d={Icon('stroke-join-bevel').fill} />
             </svg>
           </SidebarToggleButton>
         </SidebarSectionColumn>

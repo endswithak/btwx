@@ -1,10 +1,11 @@
 import React, { ReactElement } from 'react';
-import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
+import { RootState } from '../store/reducers';
 import { UniteLayersPayload, LayerTypes } from '../store/actionTypes/layer';
 import { uniteLayers } from '../store/actions/layer';
-import TopbarButton from './TopbarButton';
 import { orderLayersByDepth } from '../store/selectors/layer';
+import TopbarButton from './TopbarButton';
+import Icon from './Icon';
 
 interface UniteButtonProps {
   selected: string[];
@@ -25,7 +26,7 @@ const UniteButton = (props: UniteButtonProps): ReactElement => {
     <TopbarButton
       label='Unite'
       onClick={handleUniteClick}
-      icon='M21,3 L21,15 L15,15 L15,21 L3,21 L3,9 L9,9 L9,3 L21,3 Z'
+      icon={Icon('unite')}
       disabled={!canUnite} />
   );
 }

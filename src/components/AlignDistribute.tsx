@@ -1,5 +1,4 @@
-import React, { ReactElement, useContext } from 'react';
-import { ThemeContext } from './ThemeProvider';
+import React, { ReactElement } from 'react';
 import SidebarSectionWrap from './SidebarSectionWrap';
 import SidebarSection from './SidebarSection';
 import SidebarSectionRow from './SidebarSectionRow';
@@ -14,7 +13,6 @@ import AlignCenterToggle from './AlignCenterToggle';
 import AlignMiddleToggle from './AlignMiddleToggle';
 
 const AlignDistribute = (): ReactElement => {
-  const theme = useContext(ThemeContext);
   return (
     <SidebarSectionWrap bottomBorder>
       <SidebarSection>

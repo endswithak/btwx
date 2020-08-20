@@ -1,13 +1,12 @@
-import React, { useContext, ReactElement, useState, useEffect } from 'react';
-import { ThemeContext } from './ThemeProvider';
+import React, { useContext, ReactElement } from 'react';
 import styled from 'styled-components';
+import { ThemeContext } from './ThemeProvider';
 
 interface TopbarButtonProps {
   onClick?(event: React.SyntheticEvent): void;
   isActive?: boolean;
   disabled?: boolean;
-  icon?: string;
-  iconOpacity?: string;
+  icon?: em.Icon;
   text?: string;
   label?: string;
   hideLabel?: boolean;
@@ -63,7 +62,7 @@ const ButtonWrap = styled.div<ButtonWrapProps>`
 
 const TopbarButton = (props: TopbarButtonProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { onClick, text, hideLabel, isActive, disabled, label, icon, iconOpacity, recording } = props;
+  const { onClick, text, hideLabel, isActive, disabled, label, icon, recording } = props;
 
   return (
     <ButtonWrap
@@ -81,10 +80,10 @@ const TopbarButton = (props: TopbarButtonProps): ReactElement => {
               width='24'
               height='24'
               viewBox='0 0 24 24'>
-              <path className='icon-fill' d={icon} />
+              <path className='icon-fill' d={icon.fill} />
               {
-                iconOpacity
-                ? <path className='icon-opacity' d={iconOpacity} />
+                icon.opacity
+                ? <path className='icon-opacity' d={icon.opacity} />
                 : null
               }
             </svg>

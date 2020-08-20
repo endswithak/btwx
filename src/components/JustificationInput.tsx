@@ -1,15 +1,16 @@
 import React, { useContext, ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import SidebarToggleButton from './SidebarToggleButton';
 import { RootState } from '../store/reducers';
 import { SetLayersJustificationPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setLayersJustification } from '../store/actions/layer';
+import { TextSettingsTypes, SetTextSettingsJustificationPayload } from '../store/actionTypes/textSettings';
+import { setTextSettingsJustification } from '../store/actions/textSettings';
 import { ThemeContext } from './ThemeProvider';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarButtonGroup from './SidebarButtonGroup';
-import { TextSettingsTypes, SetTextSettingsJustificationPayload } from '../store/actionTypes/textSettings';
-import { setTextSettingsJustification } from '../store/actions/textSettings';
+import SidebarToggleButton from './SidebarToggleButton';
+import Icon from './Icon';
 
 interface JustificationInputProps {
   selected?: string[];
@@ -44,7 +45,7 @@ const JustificationInput = (props: JustificationInputProps): ReactElement => {
               width="24"
               height="24"
               viewBox="0 0 24 24">
-              <path d="M15 15H3v2h12v-2zm0-8H3v2h12V7zM3 13h18v-2H3v2zm0 8h18v-2H3v2zM3 3v2h18V3H3z" />
+              <path d={Icon('justify-left').fill} />
             </svg>
           </SidebarToggleButton>
         </SidebarSectionColumn>
@@ -56,7 +57,7 @@ const JustificationInput = (props: JustificationInputProps): ReactElement => {
               width="24"
               height="24"
               viewBox="0 0 24 24">
-              <path d="M7 15v2h10v-2H7zm-4 6h18v-2H3v2zm0-8h18v-2H3v2zm4-6v2h10V7H7zM3 3v2h18V3H3z" />
+              <path d={Icon('justify-center').fill} />
             </svg>
           </SidebarToggleButton>
         </SidebarSectionColumn>
@@ -68,7 +69,7 @@ const JustificationInput = (props: JustificationInputProps): ReactElement => {
               width="24"
               height="24"
               viewBox="0 0 24 24">
-              <path d="M3 21h18v-2H3v2zm6-4h12v-2H9v2zm-6-4h18v-2H3v2zm6-4h12V7H9v2zM3 3v2h18V3H3z" />
+              <path d={Icon('justify-right').fill} />
             </svg>
           </SidebarToggleButton>
         </SidebarSectionColumn>

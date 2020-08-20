@@ -1,9 +1,10 @@
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { DistributeLayersHorizontallyPayload, LayerTypes } from '../store/actionTypes/layer';
 import { distributeLayersHorizontally } from '../store/actions/layer';
 import IconButton from './IconButton';
+import Icon from './Icon';
 
 interface DistributeHorizontallyToggleProps {
   selected?: string[];
@@ -16,7 +17,7 @@ const DistributeHorizontallyToggle = (props: DistributeHorizontallyToggleProps):
   return (
     <IconButton
       onClick={() => distributeLayersHorizontally({layers: selected})}
-      icon='M5,3 L5,21 L4,21 L4,3 L5,3 Z M20,3 L20,21 L19,21 L19,3 L20,3 Z M15,6 L15,18 L9,18 L9,6 L15,6 Z'
+      icon={Icon('distribute-horizontally')}
       disabled={selected.length <= 2}
       variant='medium' />
   );

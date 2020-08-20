@@ -1,9 +1,10 @@
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { AlignLayersToBottomPayload, LayerTypes } from '../store/actionTypes/layer';
 import { alignLayersToBottom } from '../store/actions/layer';
 import IconButton from './IconButton';
+import Icon from './Icon';
 
 interface AlignBottomToggleProps {
   selected?: string[];
@@ -16,7 +17,7 @@ const AlignBottomToggle = (props: AlignBottomToggleProps): ReactElement => {
   return (
     <IconButton
       onClick={() => alignLayersToBottom({layers: selected})}
-      icon='M21,19 L21,20 L3,20 L3,19 L21,19 Z M15,5 L15,17 L9,17 L9,5 L15,5 Z'
+      icon={Icon('align-bottom')}
       disabled={selected.length <= 1}
       variant='medium' />
   );

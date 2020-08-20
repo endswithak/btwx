@@ -76,6 +76,12 @@ declare namespace em {
 
   type BooleanOperation = 'none' | 'unite' | 'intersect' | 'subtract' | 'exclude' | 'divide';
 
+  interface Icon {
+    name: string;
+    fill: string;
+    opacity: string;
+  }
+
   interface Color {
     h: number;
     s: number;

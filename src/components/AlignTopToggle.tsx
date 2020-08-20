@@ -1,9 +1,10 @@
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { AlignLayersToTopPayload, LayerTypes } from '../store/actionTypes/layer';
 import { alignLayersToTop } from '../store/actions/layer';
 import IconButton from './IconButton';
+import Icon from './Icon';
 
 interface AlignTopToggleProps {
   selected?: string[];
@@ -16,7 +17,7 @@ const AlignTopToggle = (props: AlignTopToggleProps): ReactElement => {
   return (
     <IconButton
       onClick={() => alignLayersToTop({layers: selected})}
-      icon='M15,7 L15,19 L9,19 L9,7 L15,7 Z M21,4 L21,5 L3,5 L3,4 L21,4 Z'
+      icon={Icon('align-top')}
       disabled={selected.length <= 1}
       variant='medium' />
   );

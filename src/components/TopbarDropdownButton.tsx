@@ -9,7 +9,7 @@ import tinyColor from 'tinycolor2';
 interface TopbarDropdownButtonProps {
   onClick?(event: React.SyntheticEvent): void;
   disabled?: boolean;
-  icon?: string;
+  icon?: em.Icon;
   text?: string;
   isActive?: boolean;
   label: string;
@@ -17,7 +17,7 @@ interface TopbarDropdownButtonProps {
     onClick: any;
     isActive?: boolean;
     disabled?: boolean;
-    icon?: string;
+    icon?: em.Icon;
     label: string;
   }[];
 }

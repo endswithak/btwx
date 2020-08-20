@@ -1,11 +1,12 @@
 import React, { useContext, ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import SidebarToggleButton from './SidebarToggleButton';
 import { RootState } from '../store/reducers';
 import { EnableLayerVerticalFlipPayload, DisableLayerVerticalFlipPayload, LayerTypes } from '../store/actionTypes/layer';
 import { enableLayerVerticalFlip, disableLayerVerticalFlip } from '../store/actions/layer';
 import { getPaperLayer } from '../store/selectors/layer';
 import { ThemeContext } from './ThemeProvider';
+import SidebarToggleButton from './SidebarToggleButton';
+import Icon from './Icon';
 
 interface VerticalFlipInputProps {
   selected?: string[];
@@ -44,7 +45,7 @@ const VerticalFlipInput = (props: VerticalFlipInputProps): ReactElement => {
         width='24'
         height='24'
         viewBox='0 0 24 24'>
-        <path d='M20,13 L4,19 L4.99603067,13 L20,13 Z M20,11 L5,11 L4,5 L20,11 Z' />
+        <path d={Icon('vertical-flip').fill} />
       </svg>
     </SidebarToggleButton>
   );

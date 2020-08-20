@@ -1,9 +1,10 @@
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { AlignLayersToLeftPayload, LayerTypes } from '../store/actionTypes/layer';
 import { alignLayersToLeft } from '../store/actions/layer';
 import IconButton from './IconButton';
+import Icon from './Icon';
 
 interface AlignLeftToggleProps {
   selected?: string[];
@@ -16,7 +17,7 @@ const AlignLeftToggle = (props: AlignLeftToggleProps): ReactElement => {
   return (
     <IconButton
       onClick={() => alignLayersToLeft({layers: selected})}
-      icon='M5,3 L5,21 L4,21 L4,3 L5,3 Z M19,9 L19,15 L7,15 L7,9 L19,9 Z'
+      icon={Icon('align-left')}
       disabled={selected.length <= 1}
       variant='medium' />
   );

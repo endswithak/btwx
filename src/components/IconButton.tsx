@@ -6,9 +6,9 @@ interface IconButtonProps {
   onClick(): void;
   disabled?: boolean;
   isActive?: boolean;
-  icon: string;
+  icon: em.Icon;
   variant?: 'small' | 'medium' | 'large';
-  activeIcon?: string;
+  activeIcon?: em.Icon;
   theme?: em.Theme;
 }
 
@@ -45,7 +45,12 @@ const IconButton = (props: IconButtonProps): ReactElement => {
         viewBox='0 0 24 24'
         width='24px'
         height='24px'>
-        <path d={activeIcon && isActive ? activeIcon : icon} />
+        <path d={activeIcon && isActive ? activeIcon.fill : icon.fill} />
+        {
+          icon.opacity
+          ? <path className='icon-opacity' d={activeIcon && isActive ? activeIcon.opacity : icon.opacity} />
+          : null
+        }
       </svg>
     </Button>
   );

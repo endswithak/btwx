@@ -1,9 +1,10 @@
 import React, { ReactElement } from 'react';
-import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
+import { RootState } from '../store/reducers';
 import { GroupLayersPayload, LayerTypes } from '../store/actionTypes/layer';
 import { groupLayers } from '../store/actions/layer';
 import TopbarButton from './TopbarButton';
+import Icon from './Icon';
 
 interface GroupButtonProps {
   selected: string[];
@@ -24,7 +25,7 @@ const GroupButton = (props: GroupButtonProps): ReactElement => {
     <TopbarButton
       label='Group'
       onClick={handleGroupClick}
-      icon='M5,2 L5,3 L19,3 L19,2 L22,2 L22,5 L21,5 L21,19 L22,19 L22,22 L19,22 L19,21 L5,21 L5,22 L2,22 L2,19 L3,19 L3,5 L2,5 L2,2 L5,2 Z M19,4 L5,4 L5,5 L4,5 L4,19 L5,19 L5,20 L19,20 L19,19 L20,19 L20,5 L19,5 L19,4 Z M17,10 L17,17 L10,17 L10,10 L17,10 Z M14,7 L14,9 L9,9 L9,14 L7,14 L7,7 L14,7 Z'
+      icon={Icon('group')}
       disabled={!canGroup} />
   );
 }

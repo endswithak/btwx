@@ -1,9 +1,10 @@
 import React, { ReactElement } from 'react';
-import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
+import { RootState } from '../store/reducers';
 import { setActiveArtboard } from '../store/actions/layer';
 import { LayerTypes, SetActiveArtboardPayload } from '../store/actionTypes/layer';
 import TopbarButton from './TopbarButton';
+import Icon from './Icon';
 
 interface PreviewRewindButtonProps {
   canRewind: boolean;
@@ -23,7 +24,7 @@ const PreviewRewindButton = (props: PreviewRewindButtonProps): ReactElement => {
   return (
     <TopbarButton
       onClick={handleRewind}
-      icon='M21,6 L18.8666667,6 L18.8666667,10.8689927 C18.8666667,11.4042237 18.4548905,11.8453526 17.9243959,11.9056403 L17.8,11.9126618 L6.798,11.913 L10,8.48679212 L8.60987928,7 L3,13 L8.60987928,19 L10,17.5132079 L6.716,14 L17.8,14 C19.5041929,14 20.8972383,12.6965408 20.9945678,11.0529632 L21,10.8689927 L21,6 Z'
+      icon={Icon('rewind')}
       disabled={!canRewind} />
   );
 }

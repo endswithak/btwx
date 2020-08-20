@@ -5,7 +5,7 @@ import SidebarLeft from './SidebarLeft';
 import SidebarRight from './SidebarRight';
 import TweenDrawer from './TweenDrawer';
 import TextEditor from './TextEditor';
-import InsertKnob from './InsertKnob';
+import InsertKnobWrap from './InsertKnobWrap';
 
 interface MainProps {
   ready: boolean;
@@ -27,7 +27,7 @@ const Main = (props: MainProps): ReactElement => {
         <TextEditor ready={ready} />
         {
           remote.process.platform === 'darwin'
-          ? <InsertKnob />
+          ? <InsertKnobWrap />
           : null
         }
       </div>

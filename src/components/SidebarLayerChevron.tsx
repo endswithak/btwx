@@ -1,8 +1,9 @@
-import React, { useContext, ReactElement, useEffect } from 'react';
+import React, { useContext, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { showLayerChildren, hideLayerChildren } from '../store/actions/layer';
-import { ThemeContext } from './ThemeProvider';
 import { ShowLayerChildrenPayload, HideLayerChildrenPayload, LayerTypes } from '../store/actionTypes/layer';
+import { ThemeContext } from './ThemeProvider';
+import Icon from './Icon';
 
 interface SidebarLayerChevronProps {
   layer: em.Layer;
@@ -38,11 +39,7 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
             ? theme.text.onPrimary
             : theme.text.lighter
           }}>
-          {
-            (layer as em.Group).showChildren
-            ? <path d="M7 10l5 5 5-5H7z"/>
-            : <path d='M10 17l5-5-5-5v10z' />
-          }
+          <path d={Icon((layer as em.Group).showChildren ? 'chevron-down' : 'chevron-right').fill} />
         </svg>
       </div>
     : <div className='c-sidebar-layer__icon c-sidebar-layer__icon--chevron' />
