@@ -8,28 +8,37 @@ interface InsertKnobItemProps {
     icon: em.Icon;
     onSelection: any;
   };
+  index: number;
   isActive: boolean;
+  onMouseEnter(index: number): void;
+  onClick(index: number): void;
 }
 
 interface ItemProps {
   isActive: boolean;
+  onClick: any;
+  onMouseEnter: any;
 }
 
 const Item = styled.li<ItemProps>`
-  background: ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
+  cursor: pointer;
+  background: ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z2};
   color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base};
+  box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5} inset, 0 4px 16px 0 rgba(0,0,0,0.16);
   svg {
     fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base};
   }
 `;
 
 const InsertKnobItem = (props: InsertKnobItemProps): ReactElement => {
-  const { isActive, item } = props;
+  const { isActive, item, onMouseEnter, index, onClick } = props;
   const theme = useContext(ThemeContext);
 
   return (
     <Item
       className='c-insert-knob__item'
+      onClick={onClick}
+      onMouseEnter={onMouseEnter}
       theme={theme}
       isActive={isActive}>
       <div className='c-insert-knob__icon'>

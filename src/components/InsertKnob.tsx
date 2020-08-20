@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import { remote, ipcRenderer } from 'electron';
-import React, { useContext, ReactElement, useState, useEffect } from 'react';
+import React, { useContext, ReactElement, useState, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { connect } from 'react-redux';
+import tinyColor from 'tinycolor2';
 import { paperMain } from '../canvas';
 import store from '../store';
 import { RootState } from '../store/reducers';
@@ -20,26 +22,46 @@ import InsertKnobItem from './InsertKnobItem';
 import Icon from './Icon';
 
 const knobLength = 8;
-const maxKnobRotation = 360;
-const minKnobRotation = 0;
-let knobRotation = 0;
-let knobActiveIndex = 0;
-let prevKnobActiveIndex = 0;
-let isInsertKnobActive = false;
+const knobSwitchThreshold = 360 / knobLength;
+let knobActive = false;
+let knobIndex = 0;
+
+let currentKnobPosThreshold = 0;
+let currentKnobNegThreshold = 0;
 
 remote.getCurrentWindow().addListener('rotate-gesture', (event, rotation) => {
-  if (isInsertKnobActive) {
-    knobRotation -= (rotation * knobLength);
-    if (knobRotation < minKnobRotation) {
-      knobRotation = maxKnobRotation;
+  if (knobActive) {
+    if ((rotation * knobLength) < 0) {
+      currentKnobPosThreshold -= (rotation * knobLength);
+      if (currentKnobPosThreshold >= knobSwitchThreshold) {
+        if (knobIndex === knobLength) {
+          knobIndex = 0;
+          store.dispatch(setInsertKnobIndex({index: 0}));
+        } else {
+          knobIndex = knobIndex + 1;
+          store.dispatch(setInsertKnobIndex({index: knobIndex + 1}));
+        }
+        currentKnobNegThreshold = 0;
+        currentKnobPosThreshold = 0;
+      }
     }
-    if (knobRotation > maxKnobRotation) {
-      knobRotation = minKnobRotation;
+    if ((rotation * knobLength) > 0) {
+      currentKnobNegThreshold -= (rotation * knobLength);
+      if (currentKnobNegThreshold <= -knobSwitchThreshold) {
+        if (knobIndex === 0) {
+          knobIndex = knobLength;
+          store.dispatch(setInsertKnobIndex({index: knobLength}));
+        } else {
+          knobIndex = knobIndex - 1;
+          store.dispatch(setInsertKnobIndex({index: knobIndex - 1}));
+        }
+        currentKnobNegThreshold = 0;
+        currentKnobPosThreshold = 0;
+      }
     }
-    knobActiveIndex = Math.round((knobRotation / maxKnobRotation) * knobLength);
-    if (prevKnobActiveIndex !== knobActiveIndex) {
-      store.dispatch(setInsertKnobIndex({index: knobActiveIndex}));
-      prevKnobActiveIndex = knobActiveIndex;
+    if (rotation === 0) {
+      currentKnobNegThreshold = 0;
+      currentKnobPosThreshold = 0;
     }
   }
 });
@@ -47,18 +69,17 @@ remote.getCurrentWindow().addListener('rotate-gesture', (event, rotation) => {
 remote.getCurrentWindow().addListener('swipe', (event, direction) => {
   switch(direction) {
     case 'left': {
-      if (isInsertKnobActive) {
-        knobRotation = 0;
-        knobActiveIndex = 0;
-        isInsertKnobActive = false;
+      if (knobActive) {
+        currentKnobNegThreshold = 0;
+        currentKnobPosThreshold = 0;
+        knobActive = false;
         store.dispatch(deactivateInsertKnob());
-        store.dispatch(setInsertKnobIndex({index: 0}));
       }
       break;
     }
     case 'right': {
-      if (!isInsertKnobActive) {
-        isInsertKnobActive = true;
+      if (!knobActive) {
+        knobActive = true;
         store.dispatch(enableSelectionTool());
         store.dispatch(activateInsertKnob());
       }
@@ -111,30 +132,8 @@ const InsertKnob = (props: InsertKnobProps): ReactElement => {
     addDocumentImage
   } = props;
 
+  const insertKnobRef = useRef<HTMLUListElement>(null);
   const theme = useContext(ThemeContext);
-
-  const handleImageSelection = (): void => {
-    if (tool.type !== 'Selection') {
-      enableSelectionTool();
-    }
-    ipcRenderer.send('addImage');
-    ipcRenderer.once('addImage-reply', (event, arg) => {
-      const buffer = Buffer.from(JSON.parse(arg).data);
-      const exists = allDocumentImageIds.length > 0 && allDocumentImageIds.find((id) => Buffer.from(documentImagesById[id].buffer).equals(buffer));
-      const base64 = bufferToBase64(buffer);
-      const paperLayer = new paperMain.Raster(`data:image/webp;base64,${base64}`);
-      paperLayer.position = paperMain.view.center;
-      paperLayer.onLoad = (): void => {
-        if (exists) {
-          addImage({paperLayer, imageId: exists});
-        } else {
-          const imageId = uuidv4();
-          addImage({paperLayer, imageId: imageId});
-          addDocumentImage({id: imageId, buffer: buffer});
-        }
-      }
-    });
-  }
 
   const insertKnobItems = [{
     label: 'Artboard',
@@ -171,46 +170,103 @@ const InsertKnob = (props: InsertKnobProps): ReactElement => {
   },{
     label: 'Image',
     icon: Icon('image'),
-    onSelection: handleImageSelection
+    onSelection: (): void => {
+      if (tool.type !== 'Selection') {
+        enableSelectionTool();
+      }
+      ipcRenderer.send('addImage');
+      ipcRenderer.once('addImage-reply', (event, arg) => {
+        const buffer = Buffer.from(JSON.parse(arg).data);
+        const exists = allDocumentImageIds.length > 0 && allDocumentImageIds.find((id) => Buffer.from(documentImagesById[id].buffer).equals(buffer));
+        const base64 = bufferToBase64(buffer);
+        const paperLayer = new paperMain.Raster(`data:image/webp;base64,${base64}`);
+        paperLayer.position = paperMain.view.center;
+        paperLayer.onLoad = (): void => {
+          if (exists) {
+            addImage({paperLayer, imageId: exists});
+          } else {
+            const imageId = uuidv4();
+            addImage({paperLayer, imageId: imageId});
+            addDocumentImage({id: imageId, buffer: buffer});
+          }
+        }
+      });
+    }
   }];
 
-  useEffect(() => {
-    window.addEventListener('keydown', (event) => {
-      switch(event.key) {
-        case 'Enter': {
-          if (isInsertKnobActive) {
-            insertKnobItems[knobActiveIndex].onSelection();
-            knobRotation = 0;
-            knobActiveIndex = 0;
-            isInsertKnobActive = false;
-            setInsertKnobIndex({index: 0});
-            deactivateInsertKnob();
-          }
-          break;
+  const handleMouseDown = (event: any): void => {
+    if (insertKnobRef.current && !insertKnobRef.current.contains(event.target)) {
+      handleDeactivation();
+    }
+  }
+
+  const handleKeyDown = (event) => {
+    switch(event.key) {
+      case 'Enter': {
+        if (knobActive) {
+          insertKnobItems[knobIndex].onSelection();
+          handleDeactivation();
         }
-        case 'Escape': {
-          if (isInsertKnobActive) {
-            knobRotation = 0;
-            knobActiveIndex = 0;
-            isInsertKnobActive = false;
-            setInsertKnobIndex({index: 0});
-            deactivateInsertKnob();
-          }
-          break;
-        }
+        break;
       }
-    });
+      case 'Escape': {
+        if (knobActive) {
+          handleDeactivation();
+        }
+        break;
+      }
+    }
+  }
+
+  const handleDeactivation = () => {
+    currentKnobNegThreshold = 0;
+    currentKnobPosThreshold = 0;
+    knobActive = false;
+    deactivateInsertKnob();
+  }
+
+  const handleMouseEnter = (index: number) => {
+    knobIndex = index;
+    currentKnobNegThreshold = 0;
+    currentKnobPosThreshold = 0;
+    setInsertKnobIndex({index});
+  }
+
+  const handleClick = (index: number) => {
+    insertKnobItems[index].onSelection();
+    handleDeactivation();
+  }
+
+  useEffect(() => {
+    knobActive = true;
+    document.addEventListener('mousedown', handleMouseDown, false);
+    document.addEventListener('keydown', handleKeyDown, false);
+    return (): void => {
+      document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    }
   }, []);
 
   return (
-    <div className='c-insert-knob'>
-      <ul className='c-insert-knob__items'>
+    <div
+      className='c-insert-knob'
+      style={{
+        background: tinyColor(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).setAlpha(0.77).toRgbString(),
+        backdropFilter: 'blur(17px)',
+        boxShadow: `1px 0 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset, -1px 0 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
+      }}>
+      <ul
+        className='c-insert-knob__items'
+        ref={insertKnobRef}>
         {
           insertKnobItems.map((item, index) => (
             <InsertKnobItem
               item={item}
               key={index}
-              isActive={activeIndex === index} />
+              index={index}
+              isActive={knobIndex === index}
+              onClick={() => handleClick(index)}
+              onMouseEnter={() => handleMouseEnter(index)} />
           ))
         }
       </ul>
