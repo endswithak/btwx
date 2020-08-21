@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { updateSelectionFrame } from '../store/utils/layer';
@@ -10,11 +10,10 @@ interface SelectionFrameProps {
   selectedById?: {
     [id: string]: em.Layer;
   };
-  zoom: number;
 }
 
 const SelectionFrame = (props: SelectionFrameProps): ReactElement => {
-  const { selected, selectedById, zoom } = props;
+  const { selected, selectedById } = props;
 
   const handleWheel = (e: WheelEvent) => {
     if (e.ctrlKey) {
@@ -35,7 +34,7 @@ const SelectionFrame = (props: SelectionFrameProps): ReactElement => {
         selectionFrame.remove();
       }
     }
-  }, [selectedById, selected, zoom]);
+  }, [selectedById, selected]);
 
   return (
     <div />
@@ -43,14 +42,13 @@ const SelectionFrame = (props: SelectionFrameProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer, canvasSettings } = state;
+  const { layer } = state;
   const selected = layer.present.selected;
   const selectedById = layer.present.selected.reduce((result: { [id: string]: em.Layer }, current) => {
     result[current] = layer.present.byId[current];
     return result;
   }, {});
-  const zoom = canvasSettings.matrix[0];
-  return { selected, selectedById, zoom };
+  return { selected, selectedById };
 };
 
 export default connect(

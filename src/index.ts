@@ -100,6 +100,14 @@ const createPreviewWindow = ({width, height}: {width: number; height: number}): 
   previewWindow.on('close', () => {
     previewWindow = null;
   });
+
+  previewWindow.on('unresponsive', () => {
+    previewWindow.destroy();
+  });
+
+  previewWindow.on('closed', () => {
+    mainWindow.webContents.executeJavaScript(`previewClosed()`);
+  });
 }
 
 // This method will be called when Electron has finished

@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { updateHoverFrame } from '../store/utils/layer';
@@ -9,11 +9,10 @@ interface HoverFrameProps {
   selected?: string[];
   hover?: string;
   hoverItem?: em.Layer;
-  zoom?: number;
 }
 
 const HoverFrame = (props: HoverFrameProps): ReactElement => {
-  const { selected, hover, hoverItem, zoom } = props;
+  const { selected, hover, hoverItem } = props;
 
   const handleWheel = (e: WheelEvent) => {
     if (e.ctrlKey) {
@@ -34,20 +33,23 @@ const HoverFrame = (props: HoverFrameProps): ReactElement => {
         hoverFrame.remove();
       }
     }
-  }, [selected, hover, hoverItem, zoom]);
+  }, [selected, hover, hoverItem]);
 
   return (
     <div />
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer, canvasSettings } = state;
+const mapStateToProps = (state: RootState): {
+  selected: string[];
+  hover: string;
+  hoverItem: em.Layer;
+} => {
+  const { layer } = state;
   const hover = layer.present.hover;
   const hoverItem = layer.present.byId[hover];
   const selected = layer.present.selected;
-  const zoom = canvasSettings.matrix[0];
-  return { hover, hoverItem, selected, zoom };
+  return { hover, hoverItem, selected };
 };
 
 export default connect(

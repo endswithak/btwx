@@ -325,7 +325,7 @@ const appReducer = combineReducers({
 const OPEN_FILE = 'OPEN_FILE';
 
 interface OpenFilePayload {
-  file: string;
+  file: any;
 }
 
 interface OpenFile {
@@ -341,23 +341,27 @@ export const openFile = (payload: OpenFilePayload): fileTypes => ({
 });
 
 const rootReducer = (state: any, action: fileTypes) => {
+  let currentState = state;
   if (action.type === 'OPEN_FILE') {
-    state = action.payload.file;
+    currentState = {
+      ...currentState,
+      ...action.payload.file
+    };
     const canvas = document.getElementById('canvas-container') as HTMLCanvasElement;
     importPaperProject({
-      paperProject: state.layer.present.paperProject,
-      documentImages: state.documentSettings.images.byId,
+      paperProject: currentState.layer.present.paperProject,
+      documentImages: currentState.documentSettings.images.byId,
       layers: {
-        shape: state.layer.present.allShapeIds,
-        artboard: state.layer.present.allArtboardIds,
-        text: state.layer.present.allTextIds,
-        image: state.layer.present.allImageIds
+        shape: currentState.layer.present.allShapeIds,
+        artboard: currentState.layer.present.allArtboardIds,
+        text: currentState.layer.present.allTextIds,
+        image: currentState.layer.present.allImageIds
       }
     });
     paperMain.view.viewSize = new paperMain.Size(canvas.clientWidth, canvas.clientHeight);
-    paperMain.view.matrix.set(state.canvasSettings.matrix);
+    paperMain.view.matrix.set(currentState.canvasSettings.matrix);
   }
-  return appReducer(state, action);
+  return appReducer(currentState, action);
 }
 
 export type RootState = ReturnType<typeof rootReducer>;

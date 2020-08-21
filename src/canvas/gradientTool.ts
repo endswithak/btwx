@@ -1,5 +1,5 @@
 import store from '../store';
-import { setLayerFillGradientOrigin, setLayerFillGradientDestination, setLayerStrokeGradientOrigin, setLayerStrokeGradientDestination } from '../store/actions/layer';
+import { setLayersGradientOrigin, setLayersGradientDestination } from '../store/actions/layer';
 import { getPaperLayer, getGradientOriginPoint, getGradientDestinationPoint } from '../store/selectors/layer';
 import { paperMain } from './index';
 import InsertTool from './insertTool';
@@ -21,6 +21,14 @@ class GradientTool {
   destinationHandle: paper.Shape;
   gradientLines: paper.Path.Line[];
   snapTool: SnapTool;
+  origin: {
+    x: number;
+    y: number;
+  }
+  destination: {
+    x: number;
+    y: number;
+  }
   constructor() {
     this.handle = null;
     this.prop = null;
@@ -33,6 +41,8 @@ class GradientTool {
     this.destinationHandle = null;
     this.gradientLines = null;
     this.snapTool = null;
+    this.origin = null;
+    this.destination = null;
   }
   enable(handle: 'origin' | 'destination', prop: 'fill' | 'stroke'): void {
     this.enabled = true;
@@ -56,35 +66,77 @@ class GradientTool {
     this.destinationHandle = null;
     this.gradientLines = null;
     this.snapTool = null;
+    this.origin = null;
+    this.destination = null;
   }
   updateOrigin(event: paper.ToolEvent, state: RootState): void {
-    const paperLayer = getPaperLayer(state.gradientEditor.layer);
-    const newOrigin = new paperMain.Point(this.toBounds.center.x, this.toBounds.center.y);
+    const paperLayer = getPaperLayer(state.gradientEditor.layers[0]);
+    const newOriginPoint = new paperMain.Point(this.toBounds.center.x, this.toBounds.center.y);
     paperLayer[`${state.gradientEditor.prop}Color` as 'fillColor' | 'strokeColor'] = {
       gradient: paperLayer[`${state.gradientEditor.prop}Color` as 'fillColor' | 'strokeColor'].gradient,
-      origin: newOrigin,
+      origin: newOriginPoint,
       destination: (paperLayer[`${state.gradientEditor.prop}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).destination
     } as em.PaperGradientFill
-    this.originHandle.bounds.center.x = newOrigin.x;
-    this.originHandle.bounds.center.y = newOrigin.y;
+    this.originHandle.bounds.center.x = newOriginPoint.x;
+    this.originHandle.bounds.center.y = newOriginPoint.y;
     this.gradientLines.forEach((line) => {
-      line.firstSegment.point.x = newOrigin.x;
-      line.firstSegment.point.y = newOrigin.y;
+      line.firstSegment.point.x = newOriginPoint.x;
+      line.firstSegment.point.y = newOriginPoint.y;
+    });
+    const style = (() => {
+      switch(this.prop) {
+        case 'fill':
+          return paperLayer.fillColor;
+        case 'stroke':
+          return paperLayer.strokeColor;
+      }
+    })() as em.PaperGradientFill;
+    this.origin = {
+      x: (style.origin.x - paperLayer.position.x) / paperLayer.bounds.width,
+      y: (style.origin.y - paperLayer.position.y) / paperLayer.bounds.height
+    }
+    state.gradientEditor.layers.forEach((id, index) => {
+      const paperLayer = getPaperLayer(id);
+      paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] = {
+        gradient: paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'].gradient,
+        origin: getGradientOriginPoint(id, this.origin),
+        destination: (paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).destination
+      } as em.PaperGradientFill
     });
   }
   updateDestination(event: paper.ToolEvent, state: RootState): void {
-    const paperLayer = getPaperLayer(state.gradientEditor.layer);
-    const newDestination = new paperMain.Point(this.toBounds.center.x, this.toBounds.center.y);
+    const paperLayer = getPaperLayer(state.gradientEditor.layers[0]);
+    const newDestinationPoint = new paperMain.Point(this.toBounds.center.x, this.toBounds.center.y);
     paperLayer[`${state.gradientEditor.prop}Color` as 'fillColor' | 'strokeColor'] = {
       gradient: paperLayer[`${state.gradientEditor.prop}Color` as 'fillColor' | 'strokeColor'].gradient,
       origin: (paperLayer[`${state.gradientEditor.prop}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).origin,
-      destination: newDestination
+      destination: newDestinationPoint
     } as em.PaperGradientFill
-    this.destinationHandle.bounds.center.x = newDestination.x;
-    this.destinationHandle.bounds.center.y = newDestination.y;
+    this.destinationHandle.bounds.center.x = newDestinationPoint.x;
+    this.destinationHandle.bounds.center.y = newDestinationPoint.y;
     this.gradientLines.forEach((line) => {
-      line.lastSegment.point.x = newDestination.x;
-      line.lastSegment.point.y = newDestination.y;
+      line.lastSegment.point.x = newDestinationPoint.x;
+      line.lastSegment.point.y = newDestinationPoint.y;
+    });
+    const style = (() => {
+      switch(this.prop) {
+        case 'fill':
+          return paperLayer.fillColor;
+        case 'stroke':
+          return paperLayer.strokeColor;
+      }
+    })() as em.PaperGradientFill;
+    this.destination = {
+      x: (style.destination.x - paperLayer.position.x) / paperLayer.bounds.width,
+      y: (style.destination.y - paperLayer.position.y) / paperLayer.bounds.height
+    }
+    state.gradientEditor.layers.forEach((id, index) => {
+      const paperLayer = getPaperLayer(id);
+      paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] = {
+        gradient: paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'].gradient,
+        origin: (paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).origin,
+        destination: getGradientDestinationPoint(id, this.destination)
+      } as em.PaperGradientFill
     });
   }
   onKeyDown(event: paper.KeyEvent): void {
@@ -98,7 +150,7 @@ class GradientTool {
       const state = store.getState();
       this.from = event.point;
       this.toBounds = new paperMain.Rectangle(this.fromBounds);
-      this.snapTool.snapPoints = state.layer.present.inView.snapPoints.filter((snapPoint) => snapPoint.id === state.gradientEditor.layer);
+      this.snapTool.snapPoints = state.layer.present.inView.snapPoints.filter((snapPoint) => snapPoint.id === state.gradientEditor.layers[0]);
       this.snapTool.snapBounds = this.toBounds;
     }
   }
@@ -156,42 +208,13 @@ class GradientTool {
     if (this.enabled) {
       if (this.x !== 0 || this.y !== 0) {
         const state = store.getState().layer.present;
-        const paperLayer = getPaperLayer(state.selected[0]);
-        const fillColor = paperLayer.fillColor as em.PaperGradientFill;
-        const strokeColor = paperLayer.strokeColor as em.PaperGradientFill;
-        let x;
-        let y;
         switch(this.handle) {
-          case 'origin': {
-            switch(this.prop) {
-              case 'fill':
-                x = (fillColor.origin.x - paperLayer.position.x) / paperLayer.bounds.width;
-                y = (fillColor.origin.y - paperLayer.position.y) / paperLayer.bounds.height;
-                store.dispatch(setLayerFillGradientOrigin({id: state.selected[0], origin: {x, y}}));
-                break;
-              case 'stroke':
-                x = (strokeColor.origin.x - paperLayer.position.x) / paperLayer.bounds.width;
-                y = (strokeColor.origin.y - paperLayer.position.y) / paperLayer.bounds.height;
-                store.dispatch(setLayerStrokeGradientOrigin({id: state.selected[0], origin: {x, y}}));
-                break;
-            }
+          case 'origin':
+            store.dispatch(setLayersGradientOrigin({layers: state.selected, prop: this.prop, origin: this.origin}));
             break;
-          }
-          case 'destination': {
-            switch(this.prop) {
-              case 'fill':
-                x = (fillColor.destination.x - paperLayer.position.x) / paperLayer.bounds.width;
-                y = (fillColor.destination.y - paperLayer.position.y) / paperLayer.bounds.height;
-                store.dispatch(setLayerFillGradientDestination({id: state.selected[0], destination: {x, y}}));
-                break;
-              case 'stroke':
-                x = (strokeColor.destination.x - paperLayer.position.x) / paperLayer.bounds.width;
-                y = (strokeColor.destination.y - paperLayer.position.y) / paperLayer.bounds.height;
-                store.dispatch(setLayerStrokeGradientDestination({id: state.selected[0], destination: {x, y}}));
-                break;
-            }
+          case 'destination':
+            store.dispatch(setLayersGradientDestination({layers: state.selected, prop: this.prop, destination: this.destination}));
             break;
-          }
         }
       }
       this.disable();

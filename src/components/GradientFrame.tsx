@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { useContext, ReactElement, useEffect } from 'react';
 import { getGradientOriginPoint, getGradientDestinationPoint } from '../store/selectors/layer';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
@@ -8,7 +8,7 @@ import { ThemeContext } from './ThemeProvider';
 interface GradientFrameProps {
   layer: string;
   gradient: em.Gradient;
-  onStopPress(id: string): void;
+  onStopPress(index: number): void;
   zoom?: number;
 }
 
@@ -17,9 +17,15 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
   const { layer, gradient, onStopPress, zoom } = props;
 
   const updateGradientFrame = () => {
-    const sortedStops = [...Object.keys(gradient.stops.byId)].sort((a,b) => { return gradient.stops.byId[a].position - gradient.stops.byId[b].position });
-    const originStop = gradient.stops.byId[sortedStops[0]];
-    const destStop = gradient.stops.byId[sortedStops[sortedStops.length - 1]];
+    const stopsWithIndex = gradient.stops.map((stop, index) => {
+      return {
+        ...stop,
+        index
+      }
+    });
+    const sortedStops = stopsWithIndex.sort((a,b) => { return a.position - b.position });
+    const originStop = sortedStops[0];
+    const destStop = sortedStops[sortedStops.length - 1];
     const oldGradientFrame = paperMain.project.getItem({ data: { id: 'gradientFrame' } });
     if (oldGradientFrame) {
       oldGradientFrame.remove();
@@ -50,7 +56,7 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
         handle: 'origin',
         type: 'background'
       },
-      strokeColor: originStop.active ? theme.palette.primary : null
+      strokeColor: originStop.index === gradient.activeStopIndex ? theme.palette.primary : null
     });
     const gradientFrameOriginHandleSwatch  = new paperMain.Shape.Circle({
       ...gradientFrameHandleSwatchProps,
@@ -70,7 +76,7 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
         handle: 'destination',
         type: 'background'
       },
-      strokeColor: destStop.active ? theme.palette.primary : null
+      strokeColor: destStop.index === gradient.activeStopIndex ? theme.palette.primary : null
     });
     const gradientFrameDestinationHandleSwatch = new paperMain.Shape.Circle({
       ...gradientFrameHandleSwatchProps,
@@ -107,8 +113,8 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
       insert: false,
       children: [gradientFrameOriginHandleBg, gradientFrameOriginHandleSwatch],
       onMouseDown: () => {
-        if (!originStop.active) {
-          onStopPress(sortedStops[0]);
+        if (originStop.index !== gradient.activeStopIndex) {
+          onStopPress(originStop.index);
         }
       }
     });
@@ -119,8 +125,8 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
       insert: false,
       children: [gradientFrameDestinationHandleBg, gradientFrameDestinationHandleSwatch],
       onMouseDown: () => {
-        if (!destStop.active) {
-          onStopPress(sortedStops[sortedStops.length - 1]);
+        if (destStop.index !== gradient.activeStopIndex) {
+          onStopPress(destStop.index);
         }
       }
     });

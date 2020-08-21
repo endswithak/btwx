@@ -45,7 +45,6 @@ import getTheme from './store/theme';
 import { openFile } from './store/reducers';
 import { saveDocumentAs, saveDocument } from './store/actions/documentSettings';
 import { closePreview } from './store/actions/preview';
-import { initialState as previewInitialState } from './store/reducers/preview';
 
 import './styles/index.sass';
 
@@ -57,76 +56,50 @@ const titleBar = new Titlebar({
   backgroundColor: Color.fromHex(theme === 'dark' ? themeObject.background.z1 : themeObject.background.z2)
 });
 
-(window as any).getSaveState = () => {
+(window as any).getSaveState = (): string => {
   const state = store.getState();
-  const {
-    documentSettings,
-    layer,
-    canvasSettings,
-    tool,
-    contextMenu,
-    tweenDrawer,
-    easeEditor,
-    textEditor,
-    textSettings,
-    colorEditor,
-    gradientEditor,
-    artboardPresetEditor,
-    rightSidebar,
-    theme
-  } = state;
+  const { documentSettings, layer, canvasSettings, textSettings } = state;
   const fileState = {
-    layer: {
-      past: [layer.present] as any,
-      present: layer.present,
-      future: [] as any
-    },
-    preview: previewInitialState,
+    layer: { past: [layer.present] as any, present: layer.present, future: [] as any },
     documentSettings,
     canvasSettings,
-    tool,
-    contextMenu,
-    tweenDrawer,
-    easeEditor,
-    textEditor,
-    textSettings,
-    colorEditor,
-    gradientEditor,
-    artboardPresetEditor,
-    rightSidebar,
-    theme
+    textSettings
   }
   return JSON.stringify(fileState);
 }
 
-(window as any).getDocumentSettings = () => {
+(window as any).getDocumentSettings = (): string => {
   const state = store.getState();
   return JSON.stringify(state.documentSettings);
 }
 
-(window as any).saveDocument = () => {
+(window as any).saveDocument = (): void => {
   const state = store.getState();
   store.dispatch(saveDocument({edit: state.layer.present.edit}));
   return (window as any).getSaveState();
 }
 
-(window as any).saveDocumentAs = (documentSettings: { base: string; fullPath: string }) => {
+(window as any).saveDocumentAs = (documentSettings: { base: string; fullPath: string }): void => {
   const state = store.getState();
   store.dispatch(saveDocumentAs({name: documentSettings.base, path: documentSettings.fullPath, edit: state.layer.present.edit}));
   return (window as any).getSaveState();
 }
 
-(window as any).openFile = (fileJSON: any) => {
+(window as any).openFile = (fileJSON: any): void => {
   store.dispatch(openFile({file: fileJSON}));
 }
 
-(window as any).updateTheme = () => {
+(window as any).updateTheme = (): void => {
   theme = remote.systemPreferences.getUserDefault('theme', 'string');
   themeObject = getTheme(theme);
   titleBar.updateBackground(Color.fromHex(theme === 'dark' ? themeObject.background.z1 : themeObject.background.z2));
 }
 
-(window as any).renderMainWindow = () => {
+(window as any).previewClosed = (): void => {
+  store.dispatch(closePreview());
+}
+
+(window as any).renderMainWindow = (): void => {
   window.onbeforeunload = (e) => {
     const state = store.getState();
     if (state.documentSettings.edit !== state.layer.present.edit) {
@@ -168,10 +141,7 @@ const titleBar = new Titlebar({
   );
 }
 
-(window as any).renderPreviewWindow = () => {
-  window.onbeforeunload = (): any => {
-    store.dispatch(closePreview());
-  }
+(window as any).renderPreviewWindow = (): void => {
   titleBar.updateTitle('Preview');
   ReactDOM.render(
     <Provider store={store}>
@@ -185,7 +155,7 @@ const titleBar = new Titlebar({
   );
 }
 
-(window as any).renderPreferencesWindow = () => {
+(window as any).renderPreferencesWindow = (): void => {
   titleBar.updateTitle('Preferences');
   ReactDOM.render(
     <Provider store={store}>

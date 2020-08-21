@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { remote, ipcRenderer } from 'electron';
-import React, { useContext, ReactElement, useState, useEffect, useRef } from 'react';
+import React, { useContext, ReactElement, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { connect } from 'react-redux';
 import tinyColor from 'tinycolor2';
@@ -29,64 +29,29 @@ let knobIndex = 0;
 let currentKnobPosThreshold = 0;
 let currentKnobNegThreshold = 0;
 
-remote.getCurrentWindow().addListener('rotate-gesture', (event, rotation) => {
-  if (knobActive) {
-    if ((rotation * knobLength) < 0) {
-      currentKnobPosThreshold -= (rotation * knobLength);
-      if (currentKnobPosThreshold >= knobSwitchThreshold) {
-        if (knobIndex === knobLength) {
-          knobIndex = 0;
-          store.dispatch(setInsertKnobIndex({index: 0}));
-        } else {
-          knobIndex = knobIndex + 1;
-          store.dispatch(setInsertKnobIndex({index: knobIndex + 1}));
+if (remote.process.platform === 'darwin') {
+  remote.getCurrentWindow().addListener('swipe', (event: any, direction: any) => {
+    switch(direction) {
+      case 'left': {
+        if (knobActive) {
+          currentKnobNegThreshold = 0;
+          currentKnobPosThreshold = 0;
+          knobActive = false;
+          store.dispatch(deactivateInsertKnob());
         }
-        currentKnobNegThreshold = 0;
-        currentKnobPosThreshold = 0;
+        break;
       }
-    }
-    if ((rotation * knobLength) > 0) {
-      currentKnobNegThreshold -= (rotation * knobLength);
-      if (currentKnobNegThreshold <= -knobSwitchThreshold) {
-        if (knobIndex === 0) {
-          knobIndex = knobLength;
-          store.dispatch(setInsertKnobIndex({index: knobLength}));
-        } else {
-          knobIndex = knobIndex - 1;
-          store.dispatch(setInsertKnobIndex({index: knobIndex - 1}));
+      case 'right': {
+        if (!knobActive) {
+          knobActive = true;
+          store.dispatch(enableSelectionTool());
+          store.dispatch(activateInsertKnob());
         }
-        currentKnobNegThreshold = 0;
-        currentKnobPosThreshold = 0;
+        break;
       }
     }
-    if (rotation === 0) {
-      currentKnobNegThreshold = 0;
-      currentKnobPosThreshold = 0;
-    }
-  }
-});
-
-remote.getCurrentWindow().addListener('swipe', (event, direction) => {
-  switch(direction) {
-    case 'left': {
-      if (knobActive) {
-        currentKnobNegThreshold = 0;
-        currentKnobPosThreshold = 0;
-        knobActive = false;
-        store.dispatch(deactivateInsertKnob());
-      }
-      break;
-    }
-    case 'right': {
-      if (!knobActive) {
-        knobActive = true;
-        store.dispatch(enableSelectionTool());
-        store.dispatch(activateInsertKnob());
-      }
-      break;
-    }
-  }
-});
+  });
+}
 
 interface InsertKnobProps {
   tool?: ToolState;
@@ -195,12 +160,12 @@ const InsertKnob = (props: InsertKnobProps): ReactElement => {
   }];
 
   const handleMouseDown = (event: any): void => {
-    if (insertKnobRef.current && !insertKnobRef.current.contains(event.target)) {
+    if (insertKnobRef.current && (!insertKnobRef.current.contains(event.target) || event.target === insertKnobRef.current)) {
       handleDeactivation();
     }
   }
 
-  const handleKeyDown = (event) => {
+  const handleKeyDown = (event: any): void => {
     switch(event.key) {
       case 'Enter': {
         if (knobActive) {
@@ -225,27 +190,70 @@ const InsertKnob = (props: InsertKnobProps): ReactElement => {
     deactivateInsertKnob();
   }
 
-  const handleMouseEnter = (index: number) => {
-    knobIndex = index;
+  const handleMouseEnter = (index: number): void => {
     currentKnobNegThreshold = 0;
     currentKnobPosThreshold = 0;
     setInsertKnobIndex({index});
   }
 
-  const handleClick = (index: number) => {
+  const handleClick = (index: number): void => {
     insertKnobItems[index].onSelection();
     handleDeactivation();
+  }
+
+  const handleRotate = (event: any, rotation: any): void => {
+    if (knobActive) {
+      if ((rotation * knobLength) < 0) {
+        currentKnobPosThreshold -= (rotation * knobLength);
+        if (currentKnobPosThreshold >= knobSwitchThreshold) {
+          if (knobIndex === knobLength) {
+            store.dispatch(setInsertKnobIndex({index: 0}));
+          } else {
+            store.dispatch(setInsertKnobIndex({index: knobIndex + 1}));
+          }
+          currentKnobNegThreshold = 0;
+          currentKnobPosThreshold = 0;
+        }
+      }
+      if ((rotation * knobLength) > 0) {
+        currentKnobNegThreshold -= (rotation * knobLength);
+        if (currentKnobNegThreshold <= -knobSwitchThreshold) {
+          if (knobIndex === 0) {
+            store.dispatch(setInsertKnobIndex({index: knobLength}));
+          } else {
+            store.dispatch(setInsertKnobIndex({index: knobIndex - 1}));
+          }
+          currentKnobNegThreshold = 0;
+          currentKnobPosThreshold = 0;
+        }
+      }
+      if (rotation === 0) {
+        currentKnobNegThreshold = 0;
+        currentKnobPosThreshold = 0;
+      }
+    }
   }
 
   useEffect(() => {
     knobActive = true;
     document.addEventListener('mousedown', handleMouseDown, false);
     document.addEventListener('keydown', handleKeyDown, false);
+    if (remote.process.platform === 'darwin') {
+      remote.getCurrentWindow().addListener('rotate-gesture', handleRotate);
+    }
     return (): void => {
+      knobActive = false;
       document.removeEventListener('mousedown', handleMouseDown);
       document.removeEventListener('keydown', handleKeyDown);
+      if (remote.process.platform === 'darwin') {
+        remote.getCurrentWindow().removeListener('rotate-gesture', handleRotate);
+      }
     }
   }, []);
+
+  useEffect(() => {
+    knobIndex = activeIndex;
+  }, [activeIndex]);
 
   return (
     <div
@@ -264,9 +272,9 @@ const InsertKnob = (props: InsertKnobProps): ReactElement => {
               item={item}
               key={index}
               index={index}
-              isActive={knobIndex === index}
-              onClick={() => handleClick(index)}
-              onMouseEnter={() => handleMouseEnter(index)} />
+              isActive={activeIndex === index}
+              onClick={(): void => handleClick(index)}
+              onMouseEnter={(): void => handleMouseEnter(index)} />
           ))
         }
       </ul>

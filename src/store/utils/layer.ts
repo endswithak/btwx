@@ -561,61 +561,70 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
   }
 }
 
-export const updateTweenEventFrame = (state: LayerState, event: em.TweenEvent) => {
-  const tweenEventFrame = paperMain.project.getItem({ data: { id: 'tweenEventFrame' } });
-  if (tweenEventFrame) {
-    tweenEventFrame.remove();
+export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[]) => {
+  const tweenEventsFrame = paperMain.project.getItem({ data: { id: 'tweenEventsFrame' } });
+  if (tweenEventsFrame) {
+    tweenEventsFrame.remove();
   }
-  if (event) {
-    const artboardTopTop = getArtboardsTopTop(state);
-    const origin = getPaperLayer(event.artboard);
-    const destination = getPaperLayer(event.destinationArtboard);
-    const destinationIndicator = new paperMain.Path.Ellipse({
-      center: new paperMain.Point(destination.bounds.center.x, artboardTopTop - ((1 / paperMain.view.zoom) * 48)),
-      radius: ((1 / paperMain.view.zoom) * 4),
-      fillColor: THEME_PRIMARY_COLOR,
-      insert: false,
+  if (events) {
+    const tweenEventsFrame = new paperMain.Group({
       data: {
-        id: 'tweenEventFrameIndicator',
-        indicator: 'destination'
+        id: 'tweenEventsFrame'
       }
     });
-    const originIndicator = new paperMain.Path.Line({
-      from: new paperMain.Point(origin.bounds.center.x, destinationIndicator.bounds.top),
-      to: new paperMain.Point(origin.bounds.center.x, destinationIndicator.bounds.bottom),
-      strokeColor: THEME_PRIMARY_COLOR,
-      strokeWidth: 1 / paperMain.view.zoom,
-      insert: false,
-      data: {
-        id: 'tweenEventFrameIndicator',
-        indicator: 'origin'
-      }
-    });
-    const connector = new paperMain.Path.Line({
-      from: originIndicator.bounds.center,
-      to: destinationIndicator.bounds.center,
-      strokeColor: THEME_PRIMARY_COLOR,
-      strokeWidth: 1 / paperMain.view.zoom,
-      insert: false,
-      data: {
-        id: 'tweenEventFrameIndicator',
-        indicator: 'connector'
-      }
-    });
-    const eventType = new paperMain.PointText({
-      content: event.event,
-      point: new paperMain.Point(connector.bounds.center.x, destinationIndicator.bounds.top - ((1 / paperMain.view.zoom) * 12)),
-      justification: 'center',
-      fontSize: ((1 / paperMain.view.zoom) * 12),
-      fillColor: THEME_PRIMARY_COLOR,
-      insert: false,
-      fontFamily: 'Space Mono'
-    });
-    new paperMain.Group({
-      children: [originIndicator, connector, destinationIndicator, eventType],
-      data: {
-        id: 'tweenEventFrame'
-      }
+    events.forEach((event, index) => {
+      const artboardTopTop = getArtboardsTopTop(state);
+      const origin = getPaperLayer(event.artboard);
+      const destination = getPaperLayer(event.destinationArtboard);
+      const destinationIndicator = new paperMain.Path.Ellipse({
+        center: new paperMain.Point(destination.bounds.center.x, artboardTopTop - ((1 / paperMain.view.zoom) * 48)),
+        radius: ((1 / paperMain.view.zoom) * 4),
+        fillColor: THEME_PRIMARY_COLOR,
+        insert: false,
+        data: {
+          id: 'tweenEventFrameIndicator',
+          indicator: 'destination'
+        }
+      });
+      const originIndicator = new paperMain.Path.Line({
+        from: new paperMain.Point(origin.bounds.center.x, destinationIndicator.bounds.top),
+        to: new paperMain.Point(origin.bounds.center.x, destinationIndicator.bounds.bottom),
+        strokeColor: THEME_PRIMARY_COLOR,
+        strokeWidth: 1 / paperMain.view.zoom,
+        insert: false,
+        data: {
+          id: 'tweenEventFrameIndicator',
+          indicator: 'origin'
+        }
+      });
+      const connector = new paperMain.Path.Line({
+        from: originIndicator.bounds.center,
+        to: destinationIndicator.bounds.center,
+        strokeColor: THEME_PRIMARY_COLOR,
+        strokeWidth: 1 / paperMain.view.zoom,
+        insert: false,
+        data: {
+          id: 'tweenEventFrameIndicator',
+          indicator: 'connector'
+        }
+      });
+      const eventType = new paperMain.PointText({
+        content: event.event,
+        point: new paperMain.Point(connector.bounds.center.x, destinationIndicator.bounds.top - ((1 / paperMain.view.zoom) * 12)),
+        justification: 'center',
+        fontSize: ((1 / paperMain.view.zoom) * 12),
+        fillColor: THEME_PRIMARY_COLOR,
+        insert: false,
+        fontFamily: 'Space Mono'
+      });
+      const tweenEventFrame = new paperMain.Group({
+        children: [originIndicator, connector, destinationIndicator, eventType],
+        data: {
+          id: 'tweenEventFrame'
+        },
+        parent: tweenEventsFrame
+      });
+      tweenEventFrame.position.y -= (tweenEventFrame.bounds.height + ((1 / paperMain.view.zoom) * 12)) * index;
     });
   }
 }

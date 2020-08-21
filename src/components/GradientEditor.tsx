@@ -196,10 +196,10 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
           colorValue={activeStopValue.color}
           colorType='rgb'
           onChange={handleActiveStopColorChange} />
-        {/* <GradientFrame
-          layer={gradientEditor.layers}
-          gradient={gradient}
-          onStopPress={handleStopPress} /> */}
+        <GradientFrame
+          layer={gradientEditor.layers[0]}
+          gradient={gradientValue}
+          onStopPress={handleStopPress} />
       </div>
     </div>
   );

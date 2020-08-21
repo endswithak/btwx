@@ -1,7 +1,7 @@
 import { importPaperProject, colorsMatch, gradientsMatch } from '../store/selectors/layer';
 import store from '../store';
 import { ActionCreators } from 'redux-undo';
-import { updateHoverFrame, updateSelectionFrame, updateActiveArtboardFrame, updateTweenEventFrame } from '../store/utils/layer';
+import { updateHoverFrame, updateSelectionFrame, updateActiveArtboardFrame, updateTweenEventsFrame } from '../store/utils/layer';
 import { openColorEditor, closeColorEditor } from '../store/actions/colorEditor';
 import { openGradientEditor, closeGradientEditor } from '../store/actions/gradientEditor';
 import { setLayerHover } from '../store/actions/layer';
@@ -117,7 +117,13 @@ class UndoRedoTool {
               updateHoverFrame(state.layer.present);
               updateSelectionFrame(state.layer.present);
               updateActiveArtboardFrame(state.layer.present);
-              updateTweenEventFrame(state.layer.present, state.layer.present.tweenEventById[state.tweenDrawer.event]);
+              updateTweenEventsFrame(state.layer.present, state.tweenDrawer.event === null ? state.layer.present.allTweenEventIds.reduce((result, current) => {
+                const tweenEvent = state.layer.present.tweenEventById[current];
+                if (tweenEvent.artboard === state.layer.present.activeArtboard) {
+                  result = [...result, tweenEvent];
+                }
+                return result;
+              }, []) : [state.layer.present.tweenEventById[state.tweenDrawer.event]]);
             }
           } else {
             if (state.layer.past.length > 0) {
@@ -144,7 +150,13 @@ class UndoRedoTool {
               updateHoverFrame(state.layer.present);
               updateSelectionFrame(state.layer.present);
               updateActiveArtboardFrame(state.layer.present);
-              updateTweenEventFrame(state.layer.present, state.layer.present.tweenEventById[state.tweenDrawer.event]);
+              updateTweenEventsFrame(state.layer.present, state.tweenDrawer.event === null ? state.layer.present.allTweenEventIds.reduce((result, current) => {
+                const tweenEvent = state.layer.present.tweenEventById[current];
+                if (tweenEvent.artboard === state.layer.present.activeArtboard) {
+                  result = [...result, tweenEvent];
+                }
+                return result;
+              }, []) : [state.layer.present.tweenEventById[state.tweenDrawer.event]]);
             }
           }
         }

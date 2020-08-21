@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { updateActiveArtboardFrame } from '../store/utils/layer';
@@ -8,11 +8,10 @@ import { paperMain } from '../canvas';
 interface ActiveArtboardFrameProps {
   activeArtboard?: string;
   activeArtboardItem?: em.Artboard;
-  zoom?: number;
 }
 
 const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
-  const { activeArtboard, activeArtboardItem, zoom } = props;
+  const { activeArtboard, activeArtboardItem } = props;
 
   const handleWheel = (e: WheelEvent) => {
     if (e.ctrlKey) {
@@ -33,19 +32,21 @@ const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
         activeArtboardFrame.remove();
       }
     }
-  }, [activeArtboard, activeArtboardItem, zoom]);
+  }, [activeArtboard, activeArtboardItem]);
 
   return (
     <div />
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer, canvasSettings } = state;
+const mapStateToProps = (state: RootState): {
+  activeArtboard: string;
+  activeArtboardItem: em.Artboard;
+} => {
+  const { layer } = state;
   const activeArtboard = layer.present.activeArtboard;
-  const activeArtboardItem = layer.present.byId[activeArtboard];
-  const zoom = canvasSettings.matrix[0];
-  return { activeArtboard, activeArtboardItem, zoom };
+  const activeArtboardItem = layer.present.byId[activeArtboard] as em.Artboard;
+  return { activeArtboard, activeArtboardItem };
 };
 
 export default connect(
