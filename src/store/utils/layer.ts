@@ -47,7 +47,8 @@ import {
   getTweensByDestinationLayer, getAllArtboardTweenEvents, getTweensEventsByDestinationArtboard, getTweensByLayer,
   getLayersBounds, getGradientOriginPoint, getGradientDestinationPoint, getGradientStops, getLayerSnapPoints,
   orderLayersByDepth, orderLayersByLeft, orderLayersByTop, savePaperProjectJSON, getTweensByProp,
-  getEquivalentTweenProp, getTweensWithLayer, gradientsMatch, getPaperProp, getCurvePoints, getArtboardsTopTop, getSelectionBounds
+  getEquivalentTweenProp, getTweensWithLayer, gradientsMatch, getPaperProp, getCurvePoints, getArtboardsTopTop, getSelectionBounds,
+  getTweenEventsWithArtboard
 } from '../selectors/layer';
 
 import { paperMain } from '../../canvas';
@@ -313,7 +314,7 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
     }
     // if layer is the active artboard, set active artboard to null
     if (layer.id === result.activeArtboard) {
-      result = setActiveArtboard(result, layerActions.setActiveArtboard({id: null, scope: 1}) as SetActiveArtboard);
+      result = setActiveArtboard(result, layerActions.setActiveArtboard({id: result.allArtboardIds.length > 0 ? result.allArtboardIds[0] : null, scope: 1}) as SetActiveArtboard);
     }
     // if layer is a destination layer for any tween, remove that tween
     if (tweensByDestinationLayer.allIds.length > 0) {
@@ -336,6 +337,13 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
     // if selection includes layer, remove layer from selection
     if (result.selected.includes(current)) {
       result = deselectLayer(result, layerActions.deselectLayer({id: current}) as DeselectLayer);
+    }
+    // if artboard, remove any tween events with artboard as origin or destination
+    if (layer.type === 'Artboard') {
+      const tweenEventsWithArtboard = getTweenEventsWithArtboard(result, layer.id);
+      result = tweenEventsWithArtboard.allIds.reduce((tweenResult, tweenCurrent) => {
+        return removeLayerTweenEvent(tweenResult, layerActions.removeLayerTweenEvent({id: tweenCurrent}) as RemoveLayerTweenEvent);
+      }, result);
     }
     return result;
   }, currentState);
@@ -561,7 +569,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
   }
 }
 
-export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[]) => {
+export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[], hover: string) => {
   const tweenEventsFrame = paperMain.project.getItem({ data: { id: 'tweenEventsFrame' } });
   if (tweenEventsFrame) {
     tweenEventsFrame.remove();
@@ -573,11 +581,12 @@ export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[
       }
     });
     events.forEach((event, index) => {
+      const groupOpacity = hover ? hover === event.id ? 1 : 0.25 : 1;
       const artboardTopTop = getArtboardsTopTop(state);
-      const origin = getPaperLayer(event.artboard);
-      const destination = getPaperLayer(event.destinationArtboard);
+      const origin = state.byId[event.artboard];
+      const destination = state.byId[event.destinationArtboard];
       const destinationIndicator = new paperMain.Path.Ellipse({
-        center: new paperMain.Point(destination.bounds.center.x, artboardTopTop - ((1 / paperMain.view.zoom) * 48)),
+        center: new paperMain.Point(destination.frame.x, artboardTopTop - ((1 / paperMain.view.zoom) * 48)),
         radius: ((1 / paperMain.view.zoom) * 4),
         fillColor: THEME_PRIMARY_COLOR,
         insert: false,
@@ -587,8 +596,8 @@ export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[
         }
       });
       const originIndicator = new paperMain.Path.Line({
-        from: new paperMain.Point(origin.bounds.center.x, destinationIndicator.bounds.top),
-        to: new paperMain.Point(origin.bounds.center.x, destinationIndicator.bounds.bottom),
+        from: new paperMain.Point(origin.frame.x, destinationIndicator.bounds.top),
+        to: new paperMain.Point(origin.frame.x, destinationIndicator.bounds.bottom),
         strokeColor: THEME_PRIMARY_COLOR,
         strokeWidth: 1 / paperMain.view.zoom,
         insert: false,
@@ -622,7 +631,8 @@ export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[
         data: {
           id: 'tweenEventFrame'
         },
-        parent: tweenEventsFrame
+        parent: tweenEventsFrame,
+        opacity: groupOpacity
       });
       tweenEventFrame.position.y -= (tweenEventFrame.bounds.height + ((1 / paperMain.view.zoom) * 12)) * index;
     });

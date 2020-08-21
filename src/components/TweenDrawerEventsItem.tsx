@@ -1,12 +1,12 @@
 import React, { useContext, ReactElement } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
-import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
-import { setTweenDrawerEvent } from '../store/actions/tweenDrawer';
-import { SetTweenDrawerEventPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
+import { setTweenDrawerEvent, setTweenDrawerEventHover } from '../store/actions/tweenDrawer';
+import { SetTweenDrawerEventPayload, TweenDrawerTypes, SetTweenDrawerEventHoverPayload } from '../store/actionTypes/tweenDrawer';
 import { setLayerHover } from '../store/actions/layer';
 import { SetLayerHoverPayload, LayerTypes } from '../store/actionTypes/layer';
+import { ThemeContext } from './ThemeProvider';
 import TweenDrawerEventsItemEdit from './TweenDrawerEventsItemEdit';
 import TweenDrawerEventsItemRemove from './TweenDrawerEventsItemRemove';
 
@@ -19,41 +19,48 @@ interface TweenDrawerEventItemProps {
   artboardName?: string;
   destinationName?: string;
   tweenEventDisplayName?: string;
+  hovering?: boolean;
   setTweenDrawerEvent?(payload: SetTweenDrawerEventPayload): TweenDrawerTypes;
   setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
+  setTweenDrawerEventHover?(payload: SetTweenDrawerEventHoverPayload): TweenDrawerTypes;
 }
 
-const Item = styled.div`
+interface ItemProps {
+  hovering: boolean;
+}
+
+const Item = styled.div<ItemProps>`
   color: ${props => props.theme.text.base};
-  :hover {
-    box-shadow: 2px 0 0 0 ${props => props.theme.palette.primary} inset;
-    background: ${props => props.theme.background.z3};
-  }
+  box-shadow: ${props => props.hovering ? `2px 0 0 0 ${props.theme.palette.primary} inset` : 'none'};
+  background: ${props => props.hovering ? props.theme.background.z3 : 'none'};
 `;
 
 const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { artboardActive, destinationActive, id, tweenEvent, layerItem, artboardName, destinationName, setTweenDrawerEvent, setLayerHover, tweenEventDisplayName } = props;
+  const { artboardActive, destinationActive, id, tweenEvent, layerItem, artboardName, destinationName, setTweenDrawerEvent, setLayerHover, tweenEventDisplayName, setTweenDrawerEventHover, hovering } = props;
 
   const handleMouseEnter = () => {
-    // setLayerHover({id: layerItem.id});
+    setLayerHover({id: layerItem.id});
+    setTweenDrawerEventHover({id});
   }
 
   const handleMouseLeave = () => {
-    // setLayerHover({id: null});
+    setLayerHover({id: null});
+    setTweenDrawerEventHover({id: null});
   }
 
-  const handleDoubleClick = () => {
-    setTweenDrawerEvent({id});
-  }
+  // const handleDoubleClick = () => {
+  //   setTweenDrawerEvent({id});
+  // }
 
   return (
     <Item
-      className={`c-tween-drawer-events__item`}
-      onDoubleClick={handleDoubleClick}
+      className='c-tween-drawer-events__item'
+      // onDoubleClick={handleDoubleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      theme={theme}>
+      theme={theme}
+      hovering={hovering}>
       <div className='c-tween-drawer-events-item__module'>
         <span className='c-tween-drawer-events-item__artboard'>
           {artboardName}
@@ -96,8 +103,9 @@ const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventItemProps):
   artboardName: string;
   destinationName: string;
   tweenEventDisplayName: string;
+  hovering: boolean;
 } => {
-  const { layer } = state;
+  const { layer, tweenDrawer } = state;
   const activeArtboard = layer.present.activeArtboard;
   const tweenEvent = layer.present.tweenEventById[ownProps.id];
   const artboard = layer.present.byId[tweenEvent.artboard];
@@ -119,10 +127,11 @@ const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventItemProps):
         return 'Mouse Leave';
     }
   })();
-  return { artboardActive, destinationActive, artboardName, tweenEvent, layerItem, destinationName, tweenEventDisplayName };
+  const hovering = tweenDrawer.eventHover === ownProps.id;
+  return { artboardActive, destinationActive, artboardName, tweenEvent, layerItem, destinationName, tweenEventDisplayName, hovering };
 };
 
 export default connect(
   mapStateToProps,
-  { setTweenDrawerEvent, setLayerHover }
+  { setTweenDrawerEvent, setLayerHover, setTweenDrawerEventHover }
 )(TweenDrawerEventItem);

@@ -1155,10 +1155,10 @@ export const getCurvePoints = (paperLayer: paper.Path | paper.CompoundPath): em.
 export const getArtboardsTopTop = (state: LayerState): number => {
   const artboards = state.allArtboardIds;
   return artboards.reduce((result: number, current: string) => {
-    const paperLayer = getPaperLayer(current);
-    if (paperLayer.bounds.top < result) {
-      result = paperLayer.bounds.top;
+    const layerItem = state.byId[current];
+    if ((layerItem.frame.y - (layerItem.frame.height / 2)) < result) {
+      result = layerItem.frame.y - (layerItem.frame.height / 2);
     }
     return result;
-  }, getPaperLayer(artboards[0]).bounds.top);
+  }, state.byId[artboards[0]].frame.y - (state.byId[artboards[0]].frame.height / 2));
 };

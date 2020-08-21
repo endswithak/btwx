@@ -1,9 +1,7 @@
-import paper from 'paper';
-import React, { useRef, useContext, useEffect, ReactElement, useState } from 'react';
+import React, { useContext, ReactElement } from 'react';
 import { connect } from 'react-redux';
-import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
-import { getAllArtboardTweenEvents } from '../store/selectors/layer';
+import { ThemeContext } from './ThemeProvider';
 import TweenDrawerEventsItem from './TweenDrawerEventsItem';
 
 interface TweenDrawerEventsItemsProps {
@@ -29,7 +27,6 @@ const TweenDrawerEventsItems = (props: TweenDrawerEventsItemsProps): ReactElemen
 
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
-  // const tweenEvents = getAllArtboardTweenEvents(layer.present, layer.present.activeArtboard).allIds;
   const tweenEvents = layer.present.allTweenEventIds;
   return { tweenEvents };
 };

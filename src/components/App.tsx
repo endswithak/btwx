@@ -30,14 +30,20 @@ const App = (): ReactElement => {
         <Topbar />
         <Main ready={ready} setReady={setReady} />
         {/* modals */}
-        <EaseEditorWrap />
-        <ActiveArtboardFrameWrap />
-        <HoverFrameWrap />
-        <SelectionFrameWrap />
-        <MeasureFrameWrap />
-        <ArtboardPresetEditorWrap />
-        <ContextMenuWrap />
-        <TweenEventsFrameWrap />
+        {
+          ready
+          ? <>
+              <EaseEditorWrap />
+              <ActiveArtboardFrameWrap />
+              <HoverFrameWrap />
+              <SelectionFrameWrap />
+              <MeasureFrameWrap />
+              <ArtboardPresetEditorWrap />
+              <ContextMenuWrap />
+              <TweenEventsFrameWrap />
+            </>
+          : null
+        }
     </div>
   );
 }

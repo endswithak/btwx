@@ -1,6 +1,7 @@
 import {
   OPEN_TWEEN_DRAWER,
   CLOSE_TWEEN_DRAWER,
+  SET_TWEEN_DRAWER_EVENT_HOVER,
   SET_TWEEN_DRAWER_EVENT,
   SET_TWEEN_DRAWER_TWEEN_HOVER,
   SET_TWEEN_DRAWER_TWEEN_EDITING,
@@ -10,6 +11,7 @@ import {
 export interface TweenDrawerState {
   isOpen: boolean;
   event: string;
+  eventHover: string;
   tweenHover: string;
   tweenEditing: string;
 }
@@ -17,6 +19,7 @@ export interface TweenDrawerState {
 const initialState: TweenDrawerState = {
   isOpen: false,
   event: null,
+  eventHover: null,
   tweenHover: null,
   tweenEditing: null
 };
@@ -34,13 +37,21 @@ export default (state = initialState, action: TweenDrawerTypes): TweenDrawerStat
         ...state,
         isOpen: false,
         tweenHover: null,
+        eventHover: null
+      };
+    }
+    case SET_TWEEN_DRAWER_EVENT_HOVER: {
+      return {
+        ...state,
+        eventHover: action.payload.id
       };
     }
     case SET_TWEEN_DRAWER_EVENT: {
       return {
         ...state,
         event: action.payload.id,
-        tweenHover: null
+        tweenHover: null,
+        eventHover: null
       };
     }
     case SET_TWEEN_DRAWER_TWEEN_HOVER: {

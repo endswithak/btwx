@@ -20,14 +20,14 @@ interface SidebarSelectProps {
 
 const DropdownIndicator = (
   props: any
-) => {
+): any => {
   return (
     <components.DropdownIndicator {...props}>
       <svg
         viewBox='0 0 24 24'
         width='18px'
         height='18px'>
-        <path d={Icon('select-chevron').fill} />
+        <path d={Icon('thicc-chevron-down').fill} />
       </svg>
     </components.DropdownIndicator>
   );

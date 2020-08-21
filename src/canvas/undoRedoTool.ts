@@ -123,7 +123,7 @@ class UndoRedoTool {
                   result = [...result, tweenEvent];
                 }
                 return result;
-              }, []) : [state.layer.present.tweenEventById[state.tweenDrawer.event]]);
+              }, []) : [state.layer.present.tweenEventById[state.tweenDrawer.event]], state.tweenDrawer.eventHover);
             }
           } else {
             if (state.layer.past.length > 0) {
@@ -156,7 +156,7 @@ class UndoRedoTool {
                   result = [...result, tweenEvent];
                 }
                 return result;
-              }, []) : [state.layer.present.tweenEventById[state.tweenDrawer.event]]);
+              }, []) : [state.layer.present.tweenEventById[state.tweenDrawer.event]], state.tweenDrawer.eventHover);
             }
           }
         }

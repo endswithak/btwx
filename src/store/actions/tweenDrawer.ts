@@ -1,10 +1,12 @@
 import {
   OPEN_TWEEN_DRAWER,
   CLOSE_TWEEN_DRAWER,
+  SET_TWEEN_DRAWER_EVENT_HOVER,
   SET_TWEEN_DRAWER_EVENT,
   SET_TWEEN_DRAWER_TWEEN_HOVER,
   SET_TWEEN_DRAWER_TWEEN_EDITING,
   SetTweenDrawerEventPayload,
+  SetTweenDrawerEventHoverPayload,
   SetTweenDrawerTweenHoverPayload,
   SetTweenDrawerTweenEditingPayload,
   TweenDrawerTypes
@@ -16,6 +18,11 @@ export const openTweenDrawer = (): TweenDrawerTypes => ({
 
 export const closeTweenDrawer = (): TweenDrawerTypes => ({
   type: CLOSE_TWEEN_DRAWER
+});
+
+export const setTweenDrawerEventHover = (payload: SetTweenDrawerEventHoverPayload): TweenDrawerTypes => ({
+  type: SET_TWEEN_DRAWER_EVENT_HOVER,
+  payload
 });
 
 export const setTweenDrawerEvent = (payload: SetTweenDrawerEventPayload): TweenDrawerTypes => ({
