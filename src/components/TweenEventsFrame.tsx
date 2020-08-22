@@ -6,6 +6,7 @@ import { LayerState } from '../store/reducers/layer';
 import { paperMain } from '../canvas';
 
 interface TweenEventsFrameProps {
+  activeArtboard?: string;
   allArtboardIds?: string[];
   artboardsById?: {
     [id: string]: em.Artboard;
@@ -13,10 +14,11 @@ interface TweenEventsFrameProps {
   tweenEventItems?: em.TweenEvent[];
   allArtboardItems?: em.Artboard[];
   eventHover?: string;
+  themeName?: em.ThemeName;
 }
 
 const TweenEventsFrame = (props: TweenEventsFrameProps): ReactElement => {
-  const { allArtboardIds, allArtboardItems, tweenEventItems, eventHover, artboardsById } = props;
+  const { allArtboardIds, allArtboardItems, tweenEventItems, eventHover, artboardsById, activeArtboard, themeName } = props;
 
   const handleWheel = (e: WheelEvent) => {
     if (e.ctrlKey) {
@@ -28,7 +30,7 @@ const TweenEventsFrame = (props: TweenEventsFrameProps): ReactElement => {
   }
 
   useEffect(() => {
-    updateTweenEventsFrame({allArtboardIds, byId: artboardsById} as LayerState, tweenEventItems, eventHover);
+    updateTweenEventsFrame({allArtboardIds, byId: artboardsById, activeArtboard} as LayerState, tweenEventItems, eventHover, themeName);
     document.getElementById('canvas').addEventListener('wheel', handleWheel);
     return () => {
       const tweenEventsFrame = paperMain.project.getItem({ data: { id: 'tweenEventsFrame' } });
@@ -37,7 +39,7 @@ const TweenEventsFrame = (props: TweenEventsFrameProps): ReactElement => {
         tweenEventsFrame.remove();
       }
     }
-  }, [allArtboardIds, allArtboardItems, tweenEventItems, eventHover]);
+  }, [allArtboardIds, allArtboardItems, tweenEventItems, eventHover, activeArtboard]);
 
   return (
     <div />
@@ -45,13 +47,15 @@ const TweenEventsFrame = (props: TweenEventsFrameProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState): {
+  activeArtboard: string;
   allArtboardIds: string[];
   artboardsById: { [id: string]: em.Artboard };
   tweenEventItems: em.TweenEvent[];
   allArtboardItems: em.Artboard[];
   eventHover: string;
+  themeName: em.ThemeName;
 } => {
-  const { layer, tweenDrawer } = state;
+  const { layer, tweenDrawer, theme } = state;
   const activeArtboard = layer.present.activeArtboard;
   const allArtboardIds = layer.present.allArtboardIds;
   const artboardsById = allArtboardIds.reduce((result: {[id: string]: em.Artboard}, current) => {
@@ -61,6 +65,8 @@ const mapStateToProps = (state: RootState): {
   const allArtboardItems = allArtboardIds.reduce((result, current) => {
     return [...result, layer.present.byId[current]];
   }, []);
+  const eventHover = tweenDrawer.eventHover;
+  const eventHoverItem = layer.present.tweenEventById[eventHover]
   const tweenEventItems = tweenDrawer.event === null ? layer.present.allTweenEventIds.reduce((result, current) => {
     const tweenEvent = layer.present.tweenEventById[current];
     if (tweenEvent.artboard === activeArtboard) {
@@ -68,8 +74,11 @@ const mapStateToProps = (state: RootState): {
     }
     return result;
   }, []) : [layer.present.tweenEventById[tweenDrawer.event]];
-  const eventHover = tweenDrawer.eventHover;
-  return { allArtboardIds, tweenEventItems, allArtboardItems, eventHover, artboardsById };
+  const themeName = theme.theme;
+  if (eventHoverItem && !tweenEventItems.some((item: em.TweenEvent) => item.id === eventHoverItem.id)) {
+    tweenEventItems.unshift(eventHoverItem);
+  }
+  return { allArtboardIds, tweenEventItems, allArtboardItems, eventHover, artboardsById, activeArtboard, themeName };
 };
 
 export default connect(

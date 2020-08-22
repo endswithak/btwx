@@ -57,7 +57,23 @@ class ResizeTool {
     this.groupScale = false;
   }
   enable(state: RootState, handle: string): void {
-    store.dispatch(setCanvasResizing({resizing: true}));
+    const resizingType = (() => {
+      switch(handle) {
+        case 'topLeft':
+        case 'bottomRight':
+          return 'nwse';
+        case 'topRight':
+        case 'bottomLeft':
+          return 'nesw';
+        case 'topCenter':
+        case 'bottomCenter':
+          return 'ns';
+        case 'leftCenter':
+        case 'rightCenter':
+          return 'ew';
+      }
+    })() as em.ResizingType;
+    store.dispatch(setCanvasResizing({resizing: true, resizingType}));
     this.enabled = true;
     this.handle = handle;
     this.snapTool = new SnapTool();

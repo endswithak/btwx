@@ -3,6 +3,7 @@ import {
   SET_CANVAS_RESIZING,
   SET_CANVAS_DRAGGING,
   SET_CANVAS_ZOOMING,
+  SET_CANVAS_ZOOMING_TYPE,
   ADD_ARTBOARD_PRESET,
   REMOVE_ARTBOARD_PRESET,
   UPDATE_ARTBOARD_PRESET,
@@ -14,6 +15,7 @@ import {
   SetCanvasResizingPayload,
   SetCanvasDraggingPayload,
   SetCanvasZoomingPayload,
+  SetCanvasZoomingTypePayload,
   AddArtboardPresetPayload,
   RemoveArtboardPresetPayload,
   UpdateArtboardPresetPayload,
@@ -41,6 +43,11 @@ export const setCanvasDragging = (payload: SetCanvasDraggingPayload): CanvasSett
 
 export const setCanvasZooming = (payload: SetCanvasZoomingPayload): CanvasSettingsTypes => ({
   type: SET_CANVAS_ZOOMING,
+  payload
+});
+
+export const setCanvasZoomingType = (payload: SetCanvasZoomingTypePayload): CanvasSettingsTypes => ({
+  type: SET_CANVAS_ZOOMING_TYPE,
   payload
 });
 

@@ -2,6 +2,7 @@ export const SET_CANVAS_MATRIX = 'SET_CANVAS_MATRIX';
 export const SET_CANVAS_RESIZING = 'SET_CANVAS_RESIZING';
 export const SET_CANVAS_DRAGGING = 'SET_CANVAS_DRAGGING';
 export const SET_CANVAS_ZOOMING = 'SET_CANVAS_ZOOMING';
+export const SET_CANVAS_ZOOMING_TYPE = 'SET_CANVAS_ZOOMING_TYPE';
 export const ADD_ARTBOARD_PRESET = 'ADD_ARTBOARD_PRESET';
 export const REMOVE_ARTBOARD_PRESET = 'REMOVE_ARTBOARD_PRESET';
 export const UPDATE_ARTBOARD_PRESET = 'UPDATE_ARTBOARD_PRESET';
@@ -21,6 +22,7 @@ export interface SetCanvasMatrix {
 
 export interface SetCanvasResizingPayload {
   resizing: boolean;
+  resizingType?: em.ResizingType;
 }
 
 export interface SetCanvasResizing {
@@ -39,11 +41,21 @@ export interface SetCanvasDragging {
 
 export interface SetCanvasZoomingPayload {
   zooming: boolean;
+  zoomingType?: em.ZoomingType;
 }
 
 export interface SetCanvasZooming {
   type: typeof SET_CANVAS_ZOOMING;
   payload: SetCanvasZoomingPayload;
+}
+
+export interface SetCanvasZoomingTypePayload {
+  zoomingType: em.ZoomingType;
+}
+
+export interface SetCanvasZoomingType {
+  type: typeof SET_CANVAS_ZOOMING_TYPE;
+  payload: SetCanvasZoomingTypePayload;
 }
 
 export interface AddArtboardPresetPayload {
@@ -119,6 +131,7 @@ export type CanvasSettingsTypes = SetCanvasMatrix |
                                   SetCanvasResizing |
                                   SetCanvasDragging |
                                   SetCanvasZooming |
+                                  SetCanvasZoomingType |
                                   AddArtboardPreset |
                                   RemoveArtboardPreset |
                                   UpdateArtboardPreset |

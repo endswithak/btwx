@@ -119,11 +119,11 @@ class UndoRedoTool {
               updateActiveArtboardFrame(state.layer.present);
               updateTweenEventsFrame(state.layer.present, state.tweenDrawer.event === null ? state.layer.present.allTweenEventIds.reduce((result, current) => {
                 const tweenEvent = state.layer.present.tweenEventById[current];
-                if (tweenEvent.artboard === state.layer.present.activeArtboard) {
+                if (tweenEvent.artboard === state.layer.present.activeArtboard || current === state.tweenDrawer.eventHover) {
                   result = [...result, tweenEvent];
                 }
                 return result;
-              }, []) : [state.layer.present.tweenEventById[state.tweenDrawer.event]], state.tweenDrawer.eventHover);
+              }, []) : [state.layer.present.tweenEventById[state.tweenDrawer.event]], state.tweenDrawer.eventHover, state.theme.theme);
             }
           } else {
             if (state.layer.past.length > 0) {
@@ -152,11 +152,11 @@ class UndoRedoTool {
               updateActiveArtboardFrame(state.layer.present);
               updateTweenEventsFrame(state.layer.present, state.tweenDrawer.event === null ? state.layer.present.allTweenEventIds.reduce((result, current) => {
                 const tweenEvent = state.layer.present.tweenEventById[current];
-                if (tweenEvent.artboard === state.layer.present.activeArtboard) {
+                if (tweenEvent.artboard === state.layer.present.activeArtboard || current === state.tweenDrawer.eventHover) {
                   result = [...result, tweenEvent];
                 }
                 return result;
-              }, []) : [state.layer.present.tweenEventById[state.tweenDrawer.event]], state.tweenDrawer.eventHover);
+              }, []) : [state.layer.present.tweenEventById[state.tweenDrawer.event]], state.tweenDrawer.eventHover, state.theme.theme);
             }
           }
         }

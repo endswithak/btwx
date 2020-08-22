@@ -1,9 +1,9 @@
 import { remote } from 'electron';
-import React, { useContext, ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import Canvas from './Canvas';
 import SidebarLeft from './SidebarLeft';
 import SidebarRight from './SidebarRight';
-import TweenDrawer from './TweenDrawer';
+import TweenDrawerWrap from './TweenDrawerWrap';
 import TextEditor from './TextEditor';
 import InsertKnobWrap from './InsertKnobWrap';
 
@@ -23,7 +23,7 @@ const Main = (props: MainProps): ReactElement => {
         id='main-canvas'
         className='c-app__canvas'>
         <Canvas setReady={setReady} />
-        <TweenDrawer ready={ready} />
+        <TweenDrawerWrap ready={ready} />
         <TextEditor ready={ready} />
         {
           remote.process.platform === 'darwin'

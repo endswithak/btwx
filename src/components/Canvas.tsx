@@ -7,8 +7,8 @@ import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { importPaperProject } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
-import { SetCanvasMatrixPayload, SetCanvasZoomingPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
-import { setCanvasMatrix, setCanvasZooming } from '../store/actions/canvasSettings';
+import { SetCanvasMatrixPayload, SetCanvasZoomingPayload, SetCanvasZoomingTypePayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
+import { setCanvasMatrix, setCanvasZooming, setCanvasZoomingType } from '../store/actions/canvasSettings';
 import { LayerTypes } from '../store/actionTypes/layer';
 import { updateInViewLayers } from '../store/actions/layer';
 import { CanvasSettingsState } from '../store/reducers/canvasSettings';
@@ -30,18 +30,20 @@ interface CanvasProps {
   enableSelectionTool(): ToolTypes;
   setCanvasMatrix(payload: SetCanvasMatrixPayload): CanvasSettingsTypes;
   setCanvasZooming(payload: SetCanvasZoomingPayload): CanvasSettingsTypes;
+  setCanvasZoomingType(payload: SetCanvasZoomingTypePayload): CanvasSettingsTypes;
   updateInViewLayers(): LayerTypes;
   setReady(ready: boolean): void;
 }
 
 let canvasZooming = false;
 let insertKnobActive = false;
+let canvasZoomingType: em.ZoomingType = null;
 
 const Canvas = (props: CanvasProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useContext(ThemeContext);
-  const { drawing, typing, canvasSettings, documentSettings, enableSelectionTool, updateInViewLayers, paperProject, allArtboardIds, allShapeIds, allTextIds, allImageIds, setCanvasMatrix, setReady, isInsertKnobActive, setCanvasZooming, zooming } = props;
+  const { drawing, typing, canvasSettings, documentSettings, enableSelectionTool, updateInViewLayers, paperProject, allArtboardIds, allShapeIds, allTextIds, allImageIds, setCanvasMatrix, setReady, isInsertKnobActive, setCanvasZooming, zooming, setCanvasZoomingType } = props;
 
   const handleWheel = (e: WheelEvent): void => {
     e.preventDefault();
@@ -54,8 +56,16 @@ const Canvas = (props: CanvasProps): ReactElement => {
           setCanvasZooming({zooming: true});
         }
         if (e.deltaY < 0 && nextZoom < 30) {
+          if (canvasZoomingType !== 'in') {
+            canvasZoomingType = 'in';
+            setCanvasZoomingType({zoomingType: 'in'});
+          }
           paperMain.view.zoom = nextZoom;
         } else if (e.deltaY > 0 && nextZoom > 0) {
+          if (canvasZoomingType !== 'out') {
+            canvasZoomingType = 'out';
+            setCanvasZoomingType({zoomingType: 'out'});
+          }
           paperMain.view.zoom = nextZoom;
         } else if (e.deltaY > 0 && nextZoom < 0) {
           paperMain.view.zoom = 0.01;
@@ -121,8 +131,27 @@ const Canvas = (props: CanvasProps): ReactElement => {
   return (
     <div
       id='canvas-container'
-      className={`c-canvas ${drawing ? 'c-canvas--drawing' : null} ${typing ? 'c-canvas--typing' : null}`}
-      ref={canvasContainerRef}>
+      className='c-canvas'
+      ref={canvasContainerRef}
+      style={{
+        cursor: (() => {
+          if (drawing) {
+            return 'crosshair';
+          }
+          if (typing) {
+            return 'text'
+          }
+          if (canvasSettings.resizing) {
+            return `${canvasSettings.resizingType}-resize`;
+          }
+          if (canvasSettings.dragging) {
+            return 'move';
+          }
+          if (canvasSettings.zooming) {
+            return `zoom-${canvasZoomingType}`;
+          }
+        })()
+      }}>
       <canvas
         id='canvas'
         tabIndex={0}
@@ -166,5 +195,5 @@ const mapStateToProps = (state: RootState): {
 
 export default connect(
   mapStateToProps,
-  { enableSelectionTool, setCanvasMatrix, updateInViewLayers, setCanvasZooming }
+  { enableSelectionTool, setCanvasMatrix, updateInViewLayers, setCanvasZooming, setCanvasZoomingType }
 )(Canvas);

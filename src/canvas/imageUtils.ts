@@ -10,9 +10,11 @@ export const applyImageMethods = (image: paper.Item) => {
       const state = store.getState();
       const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, this.parent.data.id);
       store.dispatch(setLayerHover({id: nearestScopeAncestor.id}));
+      document.body.style.cursor = 'move';
     },
     onMouseLeave: function(e: paper.MouseEvent) {
       store.dispatch(setLayerHover({id: null}));
+      document.body.style.cursor = 'auto';
     },
     onDoubleClick: function(e: paper.MouseEvent) {
       store.dispatch(deepSelectLayer({id: this.parent.data.id}));

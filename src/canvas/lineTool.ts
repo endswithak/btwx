@@ -40,7 +40,6 @@ class LineTool {
     this.isVertical = false;
   }
   enable(state: RootState, handle: 'from' | 'to'): void {
-    // store.dispatch(setCanvasResizing({resizing: true}));
     this.state = state;
     this.enabled = true;
     this.handle = handle;
@@ -48,10 +47,11 @@ class LineTool {
     this.toHandle = paperMain.project.getItem({data: {id: 'selectionFrameHandle', handle: 'to'}}) as paper.Shape;
     this.fromBounds = new paperMain.Rectangle(handle === 'from' ? this.fromHandle.bounds : this.toHandle.bounds);
     this.snapTool = new SnapTool();
+    store.dispatch(setCanvasResizing({resizing: true, resizingType: 'ew'}));
     updateSelectionFrame(this.state.layer.present, this.handle);
   }
   disable(): void {
-    // store.dispatch(setCanvasResizing({resizing: false}));
+    store.dispatch(setCanvasResizing({resizing: false}));
     this.state = null;
     this.enabled = false;
     this.handle = null;

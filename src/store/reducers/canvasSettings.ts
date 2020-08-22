@@ -5,6 +5,7 @@ import { DEFAULT_LEFT_SIDEBAR_WIDTH, DEFAULT_RIGHT_SIDEBAR_WIDTH, DEFAULT_TWEEN_
 import {
   SET_CANVAS_MATRIX,
   SET_CANVAS_ZOOMING,
+  SET_CANVAS_ZOOMING_TYPE,
   SET_CANVAS_RESIZING,
   SET_CANVAS_DRAGGING,
   ADD_ARTBOARD_PRESET,
@@ -27,9 +28,11 @@ export interface CanvasSettingsState {
     editing: string;
   };
   resizing: boolean;
+  resizingType: em.ResizingType;
   dragging: boolean;
   measuring: boolean;
   zooming: boolean;
+  zoomingType: em.ZoomingType;
   leftSidebarWidth: number;
   rightSidebarWidth: number;
   tweenDrawerHeight: number;
@@ -43,9 +46,11 @@ const initialState: CanvasSettingsState = {
     editing: null
   },
   resizing: false,
+  resizingType: null,
   dragging: false,
   measuring: false,
   zooming: false,
+  zoomingType: null,
   leftSidebarWidth: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('leftSidebarWidth', 'integer') : DEFAULT_LEFT_SIDEBAR_WIDTH,
   rightSidebarWidth: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('rightSidebarWidth', 'integer') : DEFAULT_RIGHT_SIDEBAR_WIDTH,
   tweenDrawerHeight: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('tweenDrawerHeight', 'integer') : DEFAULT_TWEEN_DRAWER_HEIGHT
@@ -62,7 +67,8 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
     case SET_CANVAS_RESIZING: {
       return {
         ...state,
-        resizing: action.payload.resizing
+        resizing: action.payload.resizing,
+        resizingType: action.payload.resizingType ? action.payload.resizingType : null
       };
     }
     case SET_CANVAS_DRAGGING: {
@@ -74,7 +80,14 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
     case SET_CANVAS_ZOOMING: {
       return {
         ...state,
-        zooming: action.payload.zooming
+        zooming: action.payload.zooming,
+        zoomingType: action.payload.zoomingType ? action.payload.zoomingType : null
+      };
+    }
+    case SET_CANVAS_ZOOMING_TYPE: {
+      return {
+        ...state,
+        zoomingType: action.payload.zoomingType
       };
     }
     case SET_CANVAS_MEASURING: {

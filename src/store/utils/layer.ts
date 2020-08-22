@@ -60,8 +60,10 @@ import { applyImageMethods } from '../../canvas/imageUtils';
 
 import { THEME_PRIMARY_COLOR, DEFAULT_TRANSFORM } from '../../constants';
 import { bufferToBase64 } from '../../utils';
-import { TweenDrawerState } from '../reducers/tweenDrawer';
 import MeasureGuide from '../../canvas/measureGuide';
+import getTheme from '../theme';
+import store from '../index';
+import { setTweenDrawerEventHover, setTweenDrawerEvent, openTweenDrawer } from '../actions/tweenDrawer';
 
 export const addPage = (state: LayerState, action: AddPage): LayerState => {
   return {
@@ -404,6 +406,12 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         data: {
           id: 'selectionFrameHandle',
           handle: 'move'
+        },
+        onMouseEnter: function() {
+          document.body.style.cursor = 'move';
+        },
+        onMouseLeave: function() {
+          document.body.style.cursor = 'auto';
         }
       });
       moveHandle.position = useLayerItem ? new paperMain.Point(layerItem.frame.x, layerItem.frame.y) : (getPaperLayer(state.selected[0]) as paper.Path).bounds.center;
@@ -415,6 +423,12 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         data: {
           id: 'selectionFrameHandle',
           handle: 'from'
+        },
+        onMouseEnter: function() {
+          document.body.style.cursor = 'ew-resize';
+        },
+        onMouseLeave: function() {
+          document.body.style.cursor = 'auto';
         }
       });
       fromHandle.position = useLayerItem ? new paperMain.Point(layerItem.path.points[0].point.x, layerItem.path.points[0].point.y) : (getPaperLayer(state.selected[0]) as paper.Path).firstSegment.point;
@@ -426,6 +440,12 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         data: {
           id: 'selectionFrameHandle',
           handle: 'to'
+        },
+        onMouseEnter: function() {
+          document.body.style.cursor = 'ew-resize';
+        },
+        onMouseLeave: function() {
+          document.body.style.cursor = 'auto';
         }
       });
       toHandle.position = useLayerItem ? new paperMain.Point(layerItem.path.points[1].point.x, layerItem.path.points[1].point.y) : (getPaperLayer(state.selected[0]) as paper.Path).lastSegment.point;
@@ -455,6 +475,12 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         data: {
           id: 'selectionFrameHandle',
           handle: 'move'
+        },
+        onMouseEnter: function() {
+          document.body.style.cursor = 'move';
+        },
+        onMouseLeave: function() {
+          document.body.style.cursor = 'auto';
         }
       });
       moveHandle.position = new paperMain.Point(baseFrame.bounds.topCenter.x, baseFrame.bounds.topCenter.y - ((1 / paperMain.view.zoom) * 24));
@@ -467,6 +493,12 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         data: {
           id: 'selectionFrameHandle',
           handle: 'topLeft'
+        },
+        onMouseEnter: function() {
+          document.body.style.cursor = 'nwse-resize';
+        },
+        onMouseLeave: function() {
+          document.body.style.cursor = 'auto';
         }
       });
       topLeftHandle.position = baseFrame.bounds.topLeft;
@@ -478,6 +510,12 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         data: {
           id: 'selectionFrameHandle',
           handle: 'topCenter'
+        },
+        onMouseEnter: function() {
+          document.body.style.cursor = 'ns-resize';
+        },
+        onMouseLeave: function() {
+          document.body.style.cursor = 'auto';
         }
       });
       topCenterHandle.position = baseFrame.bounds.topCenter;
@@ -489,6 +527,12 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         data: {
           id: 'selectionFrameHandle',
           handle: 'topRight'
+        },
+        onMouseEnter: function() {
+          document.body.style.cursor = 'nesw-resize';
+        },
+        onMouseLeave: function() {
+          document.body.style.cursor = 'auto';
         }
       });
       topRightHandle.position = baseFrame.bounds.topRight;
@@ -500,6 +544,12 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         data: {
           id: 'selectionFrameHandle',
           handle: 'bottomLeft'
+        },
+        onMouseEnter: function() {
+          document.body.style.cursor = 'nesw-resize';
+        },
+        onMouseLeave: function() {
+          document.body.style.cursor = 'auto';
         }
       });
       bottomLeftHandle.position = baseFrame.bounds.bottomLeft;
@@ -511,6 +561,12 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         data: {
           id: 'selectionFrameHandle',
           handle: 'bottomCenter'
+        },
+        onMouseEnter: function() {
+          document.body.style.cursor = 'ns-resize';
+        },
+        onMouseLeave: function() {
+          document.body.style.cursor = 'auto';
         }
       });
       bottomCenterHandle.position = baseFrame.bounds.bottomCenter;
@@ -522,6 +578,12 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         data: {
           id: 'selectionFrameHandle',
           handle: 'bottomRight'
+        },
+        onMouseEnter: function() {
+          document.body.style.cursor = 'nwse-resize';
+        },
+        onMouseLeave: function() {
+          document.body.style.cursor = 'auto';
         }
       });
       bottomRightHandle.position = baseFrame.bounds.bottomRight;
@@ -533,6 +595,12 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         data: {
           id: 'selectionFrameHandle',
           handle: 'rightCenter'
+        },
+        onMouseEnter: function() {
+          document.body.style.cursor = 'ew-resize';
+        },
+        onMouseLeave: function() {
+          document.body.style.cursor = 'auto';
         }
       });
       rightCenterHandle.position = baseFrame.bounds.rightCenter;
@@ -544,6 +612,12 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         data: {
           id: 'selectionFrameHandle',
           handle: 'leftCenter'
+        },
+        onMouseEnter: function() {
+          document.body.style.cursor = 'ew-resize';
+        },
+        onMouseLeave: function() {
+          document.body.style.cursor = 'auto';
         }
       });
       leftCenterHandle.position = baseFrame.bounds.leftCenter;
@@ -569,7 +643,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
   }
 }
 
-export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[], hover: string) => {
+export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[], hover: string, themeName: em.ThemeName) => {
   const tweenEventsFrame = paperMain.project.getItem({ data: { id: 'tweenEventsFrame' } });
   if (tweenEventsFrame) {
     tweenEventsFrame.remove();
@@ -582,13 +656,14 @@ export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[
     });
     events.forEach((event, index) => {
       const groupOpacity = hover ? hover === event.id ? 1 : 0.25 : 1;
+      const elementColor = event.artboard === state.activeArtboard ? THEME_PRIMARY_COLOR : getTheme(themeName).text.lighter;
       const artboardTopTop = getArtboardsTopTop(state);
       const origin = state.byId[event.artboard];
       const destination = state.byId[event.destinationArtboard];
       const destinationIndicator = new paperMain.Path.Ellipse({
         center: new paperMain.Point(destination.frame.x, artboardTopTop - ((1 / paperMain.view.zoom) * 48)),
         radius: ((1 / paperMain.view.zoom) * 4),
-        fillColor: THEME_PRIMARY_COLOR,
+        fillColor: elementColor,
         insert: false,
         data: {
           id: 'tweenEventFrameIndicator',
@@ -598,7 +673,7 @@ export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[
       const originIndicator = new paperMain.Path.Line({
         from: new paperMain.Point(origin.frame.x, destinationIndicator.bounds.top),
         to: new paperMain.Point(origin.frame.x, destinationIndicator.bounds.bottom),
-        strokeColor: THEME_PRIMARY_COLOR,
+        strokeColor: elementColor,
         strokeWidth: 1 / paperMain.view.zoom,
         insert: false,
         data: {
@@ -609,7 +684,7 @@ export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[
       const connector = new paperMain.Path.Line({
         from: originIndicator.bounds.center,
         to: destinationIndicator.bounds.center,
-        strokeColor: THEME_PRIMARY_COLOR,
+        strokeColor: elementColor,
         strokeWidth: 1 / paperMain.view.zoom,
         insert: false,
         data: {
@@ -622,17 +697,53 @@ export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[
         point: new paperMain.Point(connector.bounds.center.x, destinationIndicator.bounds.top - ((1 / paperMain.view.zoom) * 12)),
         justification: 'center',
         fontSize: ((1 / paperMain.view.zoom) * 12),
-        fillColor: THEME_PRIMARY_COLOR,
+        fillColor: elementColor,
         insert: false,
         fontFamily: 'Space Mono'
       });
       const tweenEventFrame = new paperMain.Group({
         children: [originIndicator, connector, destinationIndicator, eventType],
         data: {
-          id: 'tweenEventFrame'
+          id: 'tweenEventFrame',
+          tweenEvent: event.id
         },
         parent: tweenEventsFrame,
-        opacity: groupOpacity
+        opacity: groupOpacity,
+        onMouseEnter: function() {
+          document.body.style.cursor = 'pointer';
+          const eventFrames = this.parent.getItems({data: { id: 'tweenEventFrame' } });
+          const others = eventFrames.filter((item: paper.Item) => item.data.tweenEvent !== this.data.tweenEvent);
+          others.forEach((item: paper.Item) => {
+            item.opacity = 0.25;
+          });
+        },
+        onMouseLeave: function() {
+          document.body.style.cursor = 'auto';
+          const eventFrames = this.parent.getItems({data: { id: 'tweenEventFrame' } });
+          const others = eventFrames.filter((item: paper.Item) => item.data.tweenEvent !== this.data.tweenEvent);
+          others.forEach((item: paper.Item) => {
+            item.opacity = 1;
+          });
+        },
+        onClick: function() {
+          const state = store.getState();
+          if (!state.tweenDrawer.isOpen) {
+            paperMain.view.viewSize = new paperMain.Size(paperMain.view.viewSize.width, paperMain.view.viewSize.height - state.canvasSettings.tweenDrawerHeight);
+            store.dispatch(openTweenDrawer());
+          }
+          store.dispatch(setTweenDrawerEvent({id: event.id}));
+        }
+      });
+      const tweenEventFrameBackground = new paperMain.Path.Rectangle({
+        from: tweenEventFrame.bounds.topLeft,
+        to: tweenEventFrame.bounds.bottomRight,
+        fillColor: 'red',
+        opacity: 0.01,
+        parent: tweenEventFrame,
+        data: {
+          id: 'tweenEventFrameIndicator',
+          indicator: 'background'
+        }
       });
       tweenEventFrame.position.y -= (tweenEventFrame.bounds.height + ((1 / paperMain.view.zoom) * 12)) * index;
     });
@@ -2491,6 +2602,9 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
       }
     }
   }
+  if (layerItem.style.fill.fillType === 'gradient') {
+    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'fill', gradient: layerItem.style.fill.gradient}) as SetLayerGradient);
+  }
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['rotation']);
   currentState = updateLayerBounds(currentState, action.payload.id);
   return currentState;
@@ -3887,10 +4001,10 @@ export const scaleLayer = (state: LayerState, action: ScaleLayer): LayerState =>
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
   if (action.payload.scale.x) {
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['width']);
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['width', 'x', 'y']);
   }
   if (action.payload.scale.y) {
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['height']);
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['height', 'x', 'y']);
   }
   return currentState;
 };
