@@ -1,9 +1,8 @@
-import paper from 'paper';
 import store from '../store';
 import { setCanvasResizing } from '../store/actions/canvasSettings';
 import { scaleLayers } from '../store/actions/layer';
 import { getPaperLayer, getSelectionBounds, getLayerAndDescendants } from '../store/selectors/layer';
-import { updateSelectionFrame, updateActiveArtboardFrame, updateMeasureFrame } from '../store/utils/layer';
+import { updateSelectionFrame, updateMeasureFrame } from '../store/utils/layer';
 import { paperMain } from './index';
 import Tooltip from './tooltip';
 import SnapTool from './snapTool';
@@ -32,7 +31,7 @@ class ResizeTool {
   metaModifier: boolean;
   altModifier: boolean;
   snapTool: SnapTool;
-  groupScale: boolean;
+  preserveAspectRatio: boolean;
   constructor() {
     this.state = null;
     this.ref = null;
@@ -54,7 +53,7 @@ class ResizeTool {
     this.metaModifier = false;
     this.altModifier = false;
     this.snapTool = null;
-    this.groupScale = false;
+    this.preserveAspectRatio = false;
   }
   enable(state: RootState, handle: string): void {
     const resizingType = (() => {
@@ -91,7 +90,7 @@ class ResizeTool {
         state.layer.present.byId[state.layer.present.selected[0]].transform.rotation !== 0
       )
     ) {
-      this.groupScale = true;
+      this.preserveAspectRatio = true;
     }
     updateSelectionFrame(state.layer.present, this.handle);
   }
@@ -121,7 +120,7 @@ class ResizeTool {
     this.verticalFlip = false;
     this.horizontalFlip = false;
     this.snapTool = null;
-    this.groupScale = false;
+    this.preserveAspectRatio = false;
   }
   getMeasureGuides(): { top?: string; bottom?: string; left?: string; right?: string; all?: string } {
     const measureGuides: { top?: string; bottom?: string; left?: string; right?: string; all?: string } = {};
@@ -199,7 +198,7 @@ class ResizeTool {
             break;
           case 'Rounded': {
             paperLayer.scale(hor, ver);
-            if (!this.groupScale) {
+            if (!this.preserveAspectRatio) {
               const newShape = new paperMain.Path.Rectangle({
                 from: paperLayer.bounds.topLeft,
                 to: paperLayer.bounds.bottomRight,
@@ -273,7 +272,7 @@ class ResizeTool {
           this.clearLayerScale(paperLayer, this.state.layer.present.byId[layer]);
           this.setLayerPivot(layer);
           this.scaleLayer(layer, this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
-          if (this.shiftModifier || this.groupScale) {
+          if (this.shiftModifier || this.preserveAspectRatio) {
             this.scaleLayer(layer, maxDim, maxDim);
           } else {
             this.scaleLayer(layer, this.scale.x, this.scale.y);
@@ -288,7 +287,7 @@ class ResizeTool {
           this.clearLayerScale(paperLayer, this.state.layer.present.byId[layer]);
           this.setLayerPivot(layer);
           this.scaleLayer(layer, this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
-          this.scaleLayer(layer, this.shiftModifier || this.groupScale ? this.scale.y : 1, this.scale.y);
+          this.scaleLayer(layer, this.shiftModifier || this.preserveAspectRatio ? this.scale.y : 1, this.scale.y);
         });
         break;
       }
@@ -299,19 +298,18 @@ class ResizeTool {
           this.clearLayerScale(paperLayer, this.state.layer.present.byId[layer]);
           this.setLayerPivot(layer);
           this.scaleLayer(layer, this.horizontalFlip ? -1 : 1, this.verticalFlip ? -1 : 1);
-          this.scaleLayer(layer, this.scale.x, this.shiftModifier || this.groupScale ? this.scale.x : 1);
+          this.scaleLayer(layer, this.scale.x, this.shiftModifier || this.preserveAspectRatio ? this.scale.x : 1);
         });
         break;
       }
     }
     updateSelectionFrame(this.state.layer.present, this.handle);
-    updateActiveArtboardFrame(this.state.layer.present);
     this.updateTooltip();
     this.snapTool.updateGuides();
     updateMeasureFrame(this.state.layer.present, this.getMeasureGuides());
   }
   updateToBounds(overrides?: any): void {
-    if (this.shiftModifier || this.groupScale) {
+    if (this.shiftModifier || this.preserveAspectRatio) {
       const aspect = this.fromBounds.width / this.fromBounds.height;
       const fb = this.fromBounds;
       switch(this.handle) {

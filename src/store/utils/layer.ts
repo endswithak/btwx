@@ -1771,6 +1771,7 @@ export const updateChildrenBounds = (state: LayerState, id: string): LayerState 
             ...result.byId[current],
             path: {
               ...(result.byId[current] as em.Shape).path,
+              data: (paperLayer as paper.Path | paper.CompoundPath).pathData,
               points: getCurvePoints(paperLayer as paper.Path | paper.CompoundPath)
             }
           } as em.Shape
@@ -3152,6 +3153,7 @@ export const setLayersGradientStopColor = (state: LayerState, action: SetLayersG
   let currentState = state;
   currentState = setLayerGradientStopColor(currentState, layerActions.setLayerGradientStopColor({id: action.payload.layers[0], prop: action.payload.prop, stopIndex: action.payload.stopIndex, color: action.payload.color}) as SetLayerGradientStopColor);
   currentState = updateGradients(currentState, action.payload.layers, action.payload.prop);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3968,24 +3970,6 @@ export const setLayersShadowYOffset = (state: LayerState, action: SetLayersShado
 
 export const scaleLayer = (state: LayerState, action: ScaleLayer): LayerState => {
   let currentState = state;
-  const layer = currentState.byId[action.payload.id];
-  const paperLayer = getPaperLayer(action.payload.id);
-  if (layer.type === 'Shape') {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          path: {
-            ...(currentState.byId[action.payload.id] as em.Shape).path,
-            data: (paperLayer as paper.PathItem).pathData,
-            points: getCurvePoints(paperLayer as paper.Path | paper.CompoundPath)
-          }
-        } as em.Shape
-      }
-    }
-  }
   currentState = {
     ...currentState,
     byId: {

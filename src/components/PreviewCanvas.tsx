@@ -263,9 +263,11 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     [`${tween.prop}-origin-x`]: tweenDestinationLayer.style.fill.gradient.origin.x,
                     [`${tween.prop}-origin-y`]: tweenDestinationLayer.style.fill.gradient.origin.y,
                     onUpdate: () => {
+                      const innerWidth = tweenPaperLayer.data.innerWidth ? tweenPaperLayer.data.innerWidth : tweenLayer.frame.innerWidth;
+                      const innerHeight = tweenPaperLayer.data.innerHeight ? tweenPaperLayer.data.innerHeight : tweenLayer.frame.innerHeight;
                       const nextOriginX = tweenProp[`${tween.prop}-origin-x`];
                       const nextOriginY = tweenProp[`${tween.prop}-origin-y`];
-                      const nextOrigin = new paperPreview.Point((nextOriginX * tweenDestinationLayer.frame.innerWidth) + tweenPaperLayer.position.x, (nextOriginY * tweenDestinationLayer.frame.innerHeight) + tweenPaperLayer.position.y);
+                      const nextOrigin = new paperPreview.Point((nextOriginX * innerWidth) + tweenPaperLayer.position.x, (nextOriginY * innerHeight) + tweenPaperLayer.position.y);
                       (tweenPaperLayer.fillColor as em.PaperGradientFill).origin = nextOrigin;
                       tweenPaperLayer.data.gradientOrigin = { x: nextOriginX, y: nextOriginY };
                     },
@@ -279,9 +281,11 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     [`${tween.prop}-destination-x`]: tweenDestinationLayer.style.fill.gradient.destination.x,
                     [`${tween.prop}-destination-y`]: tweenDestinationLayer.style.fill.gradient.destination.y,
                     onUpdate: () => {
+                      const innerWidth = tweenPaperLayer.data.innerWidth ? tweenPaperLayer.data.innerWidth : tweenLayer.frame.innerWidth;
+                      const innerHeight = tweenPaperLayer.data.innerHeight ? tweenPaperLayer.data.innerHeight : tweenLayer.frame.innerHeight;
                       const nextDestinationX = tweenProp[`${tween.prop}-destination-x`];
                       const nextDestinationY = tweenProp[`${tween.prop}-destination-y`];
-                      const nextDestination = new paperPreview.Point((nextDestinationX * tweenDestinationLayer.frame.innerWidth) + tweenPaperLayer.position.x, (nextDestinationY * tweenDestinationLayer.frame.innerHeight) + tweenPaperLayer.position.y);
+                      const nextDestination = new paperPreview.Point((nextDestinationX * innerWidth) + tweenPaperLayer.position.x, (nextDestinationY * innerHeight) + tweenPaperLayer.position.y);
                       (tweenPaperLayer.fillColor as em.PaperGradientFill).destination = nextDestination;
                       tweenPaperLayer.data.gradientDestination = { x: nextDestinationX, y: nextDestinationY };
                     },
@@ -702,6 +706,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     const startPosition = tweenPaperLayer.position;
                     tweenPaperLayer.rotation = -startRotation;
                     tweenPaperLayer.bounds.width = tweenProp[tween.prop];
+                    tweenPaperLayer.data.innerWidth = tweenProp[tween.prop];
                     tweenPaperLayer.rotation = startRotation;
                     tweenPaperLayer.position = startPosition;
                     if (tweenLayer.type === 'Shape' && (tweenLayer as em.Shape).shapeType === 'Rounded') {
@@ -730,6 +735,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     const startPosition = tweenPaperLayer.position;
                     tweenPaperLayer.rotation = -startRotation;
                     tweenPaperLayer.bounds.height = tweenProp[tween.prop];
+                    tweenPaperLayer.data.innerHeight = tweenProp[tween.prop];
                     tweenPaperLayer.rotation = startRotation;
                     tweenPaperLayer.position = startPosition;
                     if (tweenLayer.type === 'Shape' && (tweenLayer as em.Shape).shapeType === 'Rounded') {
@@ -762,10 +768,12 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     tweenPaperLayer.position = startPosition;
                     tweenPaperLayer.data.rotation = tweenProp[tween.prop];
                     if (tweenPaperLayer.fillColor && tweenPaperLayer.fillColor.gradient) {
+                      const innerWidth = tweenPaperLayer.data.innerWidth ? tweenPaperLayer.data.innerWidth : tweenLayer.frame.innerWidth;
+                      const innerHeight = tweenPaperLayer.data.innerHeight ? tweenPaperLayer.data.innerHeight : tweenLayer.frame.innerHeight;
                       const origin = tweenPaperLayer.data.gradientOrigin ? tweenPaperLayer.data.gradientOrigin : tweenLayer.style.fill.gradient.origin;
                       const destination = tweenPaperLayer.data.gradientDestination ? tweenPaperLayer.data.gradientDestination : tweenLayer.style.fill.gradient.destination;
-                      const nextOrigin = new paperPreview.Point((origin.x * tweenDestinationLayer.frame.innerWidth) + tweenPaperLayer.position.x, (origin.y * tweenDestinationLayer.frame.innerHeight) + tweenPaperLayer.position.y);
-                      const nextDestination = new paperPreview.Point((destination.x * tweenDestinationLayer.frame.innerWidth) + tweenPaperLayer.position.x, (destination.y * tweenDestinationLayer.frame.innerHeight) + tweenPaperLayer.position.y);
+                      const nextOrigin = new paperPreview.Point((origin.x * innerWidth) + tweenPaperLayer.position.x, (origin.y * innerHeight) + tweenPaperLayer.position.y);
+                      const nextDestination = new paperPreview.Point((destination.x * innerWidth) + tweenPaperLayer.position.x, (destination.y * innerHeight) + tweenPaperLayer.position.y);
                       (tweenPaperLayer.fillColor as em.PaperGradientFill).origin = nextOrigin;
                       (tweenPaperLayer.fillColor as em.PaperGradientFill).destination = nextDestination;
                     }

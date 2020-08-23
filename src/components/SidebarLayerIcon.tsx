@@ -17,7 +17,7 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
       case 'Artboard':
         return Icon('artboard').fill;
       case 'Group':
-        return Icon('group').fill;
+        return Icon('folder').fill;
       case 'Shape': {
         const layerIcon = new paperMain.Path({
           pathData: (layer as em.Shape).path.data,

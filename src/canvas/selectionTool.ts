@@ -135,7 +135,7 @@ class SelectionTool {
     } else {
       if (!isGradientEditorOpen) {
         this.areaSelectTool.enable(state);
-        this.areaSelectTool.onMouseDown(event);
+        this.areaSelectTool.onMouseDown(event, true);
       }
     }
   }

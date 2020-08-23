@@ -1,11 +1,10 @@
-import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
+import paper from 'paper';
 import { getPagePaperLayer, getNearestScopeAncestor } from '../store/selectors/layer';
 import { deselectAllLayers, deselectLayer, selectLayer } from '../store/actions/layer';
 import { setCanvasSelecting } from '../store/actions/canvasSettings';
 import store from '../store';
 import { paperMain } from './index';
 import { THEME_PRIMARY_COLOR } from '../constants';
-import { LayerState } from '../store/reducers/layer';
 import { RootState } from '../store/reducers';
 
 class AreaSelectTool {
@@ -32,10 +31,11 @@ class AreaSelectTool {
   enable(state: RootState) {
     this.enabled = true;
     this.state = state;
-    store.dispatch(setCanvasSelecting({selecting: true}));
   }
   disable() {
-    store.dispatch(setCanvasSelecting({selecting: false}));
+    if (this.state.canvasSettings.selecting) {
+      store.dispatch(setCanvasSelecting({selecting: false}));
+    }
     if (this.shape) {
       this.shape.remove();
     }
@@ -136,12 +136,12 @@ class AreaSelectTool {
       }
     }
   }
-  onMouseDown(event: paper.ToolEvent): void {
+  onMouseDown(event: paper.ToolEvent, deselectAll?: boolean): void {
     if (this.enabled) {
       // set from point
       this.from = event.point;
       // deselect all if layers if no shift modifier
-      if (!this.shiftModifier) {
+      if (deselectAll && !this.shiftModifier) {
         if (this.state.layer.present.selected.length > 0) {
           store.dispatch(deselectAllLayers());
         }
@@ -150,6 +150,10 @@ class AreaSelectTool {
   }
   onMouseDrag(event: paper.ToolEvent): void {
     if (this.enabled) {
+      if (!this.to) {
+        store.dispatch(setCanvasSelecting({selecting: true}));
+        this.state = store.getState();
+      }
       // update to point and area select shape
       this.update(event.point);
       if (this.to) {
@@ -199,7 +203,9 @@ class AreaSelectTool {
     }
   }
   onMouseUp(event: paper.ToolEvent): void {
-    this.disable();
+    if (this.enabled) {
+      this.disable();
+    }
   }
 }
 

@@ -2,7 +2,7 @@ import store from '../store';
 import { setCanvasDragging } from '../store/actions/canvasSettings';
 import { moveLayersBy, duplicateLayers, removeDuplicatedLayers } from '../store/actions/layer';
 import { getPaperLayer, getSelectionBounds, getLayerAndDescendants } from '../store/selectors/layer';
-import { updateSelectionFrame, updateActiveArtboardFrame, updateMeasureFrame } from '../store/utils/layer';
+import { updateSelectionFrame, updateMeasureFrame } from '../store/utils/layer';
 import { paperMain } from './index';
 import { THEME_PRIMARY_COLOR } from '../constants';
 import SnapTool from './snapTool';
@@ -45,14 +45,15 @@ class DragTool {
     this.snapTool = null;
   }
   enable(state: RootState, moveHandle = false): void {
-    store.dispatch(setCanvasDragging({dragging: true}));
     this.state = state;
     this.enabled = true;
     this.snapTool = new SnapTool();
     this.moveHandle = moveHandle;
   }
   disable(): void {
-    store.dispatch(setCanvasDragging({dragging: false}));
+    if (this.state.canvasSettings.dragging) {
+      store.dispatch(setCanvasDragging({dragging: false}));
+    }
     this.state = null;
     this.moveHandle = false;
     this.originalSelection = null;
@@ -139,7 +140,6 @@ class DragTool {
       paperLayer.position.y = layerItem.frame.y + translate.y;
     });
     updateSelectionFrame(this.state.layer.present, this.moveHandle ? 'move' : 'none');
-    // updateActiveArtboardFrame(this.state.layer.present);
     this.updateSnapPoints();
     this.snapTool.updateGuides();
     updateMeasureFrame(this.state.layer.present, this.getMeasureGuides());
@@ -200,6 +200,10 @@ class DragTool {
   }
   onMouseDrag(event: paper.ToolEvent): void {
     if (this.enabled) {
+      if (!this.x) {
+        store.dispatch(setCanvasDragging({dragging: true}));
+        this.state = store.getState();
+      }
       this.x += event.delta.x;
       this.y += event.delta.y;
       this.to = event.point;
