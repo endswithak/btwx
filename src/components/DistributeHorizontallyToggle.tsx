@@ -17,7 +17,7 @@ const DistributeHorizontallyToggle = (props: DistributeHorizontallyToggleProps):
   return (
     <IconButton
       onClick={() => distributeLayersHorizontally({layers: selected})}
-      icon={Icon('distribute-horizontally')}
+      icon='distribute-horizontally'
       disabled={selected.length <= 2}
       variant='medium' />
   );

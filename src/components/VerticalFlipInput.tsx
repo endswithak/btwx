@@ -1,10 +1,9 @@
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { EnableLayerVerticalFlipPayload, DisableLayerVerticalFlipPayload, LayerTypes } from '../store/actionTypes/layer';
 import { enableLayerVerticalFlip, disableLayerVerticalFlip } from '../store/actions/layer';
 import { getPaperLayer } from '../store/selectors/layer';
-import { ThemeContext } from './ThemeProvider';
 import SidebarToggleButton from './SidebarToggleButton';
 import Icon from './Icon';
 
@@ -17,7 +16,6 @@ interface VerticalFlipInputProps {
 }
 
 const VerticalFlipInput = (props: VerticalFlipInputProps): ReactElement => {
-  const theme = useContext(ThemeContext);
   const { selected, verticalFlipValue, enableLayerVerticalFlip, disableLayerVerticalFlip, disabled } = props;
   const [verticalFlip, setVerticalFlip] = useState<boolean>(verticalFlipValue);
 
@@ -41,12 +39,7 @@ const VerticalFlipInput = (props: VerticalFlipInputProps): ReactElement => {
       active={verticalFlip}
       onClick={handleClick}
       disabled={disabled}>
-      <svg
-        width='24'
-        height='24'
-        viewBox='0 0 24 24'>
-        <path d={Icon('vertical-flip').fill} />
-      </svg>
+      <Icon name='vertical-flip' />
     </SidebarToggleButton>
   );
 }

@@ -4,7 +4,6 @@ import { RootState } from '../store/reducers';
 import { SendLayersBackwardPayload, LayerTypes } from '../store/actionTypes/layer';
 import { sendLayersBackward } from '../store/actions/layer';
 import TopbarButton from './TopbarButton';
-import Icon from './Icon';
 
 interface MoveBackwardButtonProps {
   selected: string[];
@@ -25,7 +24,7 @@ const MoveBackwardButton = (props: MoveBackwardButtonProps): ReactElement => {
     <TopbarButton
       label='Backward'
       onClick={handleMoveBackwardClick}
-      icon={Icon('move-backward')}
+      icon='move-backward'
       disabled={!canMoveBackward} />
   );
 }

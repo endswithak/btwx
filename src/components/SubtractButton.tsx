@@ -5,7 +5,6 @@ import { SubtractLayersPayload, LayerTypes } from '../store/actionTypes/layer';
 import { subtractLayers } from '../store/actions/layer';
 import { orderLayersByDepth } from '../store/selectors/layer';
 import TopbarButton from './TopbarButton';
-import Icon from './Icon';
 
 interface SubtractButtonProps {
   selected: string[];
@@ -26,7 +25,7 @@ const SubtractButton = (props: SubtractButtonProps): ReactElement => {
     <TopbarButton
       label='Subtract'
       onClick={handleSubtractClick}
-      icon={Icon('subtract')}
+      icon='subtract'
       disabled={!canSubtract} />
   );
 }

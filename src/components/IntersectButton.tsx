@@ -5,7 +5,6 @@ import { IntersectLayersPayload, LayerTypes } from '../store/actionTypes/layer';
 import { intersectLayers } from '../store/actions/layer';
 import { orderLayersByDepth } from '../store/selectors/layer';
 import TopbarButton from './TopbarButton';
-import Icon from './Icon';
 
 interface IntersectButtonProps {
   selected: string[];
@@ -26,7 +25,7 @@ const IntersectButton = (props: IntersectButtonProps): ReactElement => {
     <TopbarButton
       label='Intersect'
       onClick={handleIntersectClick}
-      icon={Icon('intersect')}
+      icon='intersect'
       disabled={!canIntersect} />
   );
 }

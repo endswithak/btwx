@@ -48,12 +48,7 @@ const GradientSliderRemove = (props: GradientSliderProps): ReactElement => {
       disabled={disabled}
       className='c-fill-editor__remove-stop'
       theme={theme}>
-      <svg
-        width='24'
-        height='24'
-        viewBox='0 0 24 24'>
-        <path d={Icon('trash-can').fill} />
-      </svg>
+      <Icon name='trash-can' />
     </Button>
   );
 }

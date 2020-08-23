@@ -4,7 +4,6 @@ import { RootState } from '../store/reducers';
 import { GroupLayersPayload, LayerTypes } from '../store/actionTypes/layer';
 import { groupLayers } from '../store/actions/layer';
 import TopbarButton from './TopbarButton';
-import Icon from './Icon';
 
 interface GroupButtonProps {
   selected: string[];
@@ -25,7 +24,7 @@ const GroupButton = (props: GroupButtonProps): ReactElement => {
     <TopbarButton
       label='Group'
       onClick={handleGroupClick}
-      icon={Icon('group')}
+      icon='group'
       disabled={!canGroup} />
   );
 }

@@ -2,11 +2,12 @@ import React, { useContext, ReactElement, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { gsap } from 'gsap';
 import { ThemeContext } from './ThemeProvider';
+import Icon from './Icon';
 
 interface InsertKnobItemProps {
   item: {
     label: string;
-    icon: em.Icon;
+    icon: string;
     onSelection: any;
   };
   index: number;
@@ -51,12 +52,7 @@ const InsertKnobItem = (props: InsertKnobItemProps): ReactElement => {
       theme={theme}
       isActive={isActive}>
       <div className='c-insert-knob__icon'>
-        <svg
-          viewBox='0 0 24 24'
-          width='24px'
-          height='24px'>
-          <path d={item.icon.fill} />
-        </svg>
+        <Icon name={item.icon} />
       </div>
       <div className='c-insert-knob__label'>
         {item.label}

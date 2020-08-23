@@ -102,39 +102,39 @@ const InsertKnob = (props: InsertKnobProps): ReactElement => {
 
   const insertKnobItems = [{
     label: 'Artboard',
-    icon: Icon('artboard'),
+    icon: 'artboard',
     onSelection: tool.type === 'Artboard' ? enableSelectionTool : enableArtboardTool
   },{
     label: 'Rectangle',
-    icon: Icon('rectangle'),
+    icon: 'rectangle',
     onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Rectangle' ? enableSelectionTool : enableRectangleShapeTool
   },{
     label: 'Rounded',
-    icon: Icon('rounded'),
+    icon: 'rounded',
     onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Rounded' ? enableSelectionTool : enableRoundedShapeTool
   },{
     label: 'Ellipse',
-    icon: Icon('ellipse'),
+    icon: 'ellipse',
     onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Ellipse' ? enableSelectionTool : enableEllipseShapeTool
   },{
     label: 'Star',
-    icon: Icon('star'),
+    icon: 'star',
     onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Star' ? enableSelectionTool : enableStarShapeTool
   },{
     label: 'Polygon',
-    icon: Icon('polygon'),
+    icon: 'polygon',
     onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Polygon' ? enableSelectionTool : enablePolygonShapeTool
   },{
     label: 'Line',
-    icon: Icon('line'),
+    icon: 'line',
     onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Line' ? enableSelectionTool : enableLineShapeTool
   },{
     label: 'Text',
-    icon: Icon('text'),
+    icon: 'text',
     onSelection: tool.type === 'Text' ? enableSelectionTool : enableTextTool
   },{
     label: 'Image',
-    icon: Icon('image'),
+    icon: 'image',
     onSelection: (): void => {
       if (tool.type !== 'Selection') {
         enableSelectionTool();

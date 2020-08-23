@@ -5,7 +5,6 @@ import { ExcludeLayersPayload, LayerTypes } from '../store/actionTypes/layer';
 import { excludeLayers } from '../store/actions/layer';
 import { orderLayersByDepth } from '../store/selectors/layer';
 import TopbarButton from './TopbarButton';
-import Icon from './Icon';
 
 interface ExcludeButtonProps {
   selected: string[];
@@ -26,7 +25,7 @@ const ExcludeButton = (props: ExcludeButtonProps): ReactElement => {
     <TopbarButton
       label='Exclude'
       onClick={handleExcludeClick}
-      icon={Icon('exclude')}
+      icon='exclude'
       disabled={!canExclude} />
   );
 }

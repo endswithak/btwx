@@ -30,7 +30,7 @@ const ZoomOutButton = (props: ZoomOutButtonProps): ReactElement => {
       label='Zoom Out'
       onClick={handleZoomOutClick}
       disabled={disabled}
-      icon={Icon('zoom-out')}
+      icon='zoom-out'
       />
   );
 }

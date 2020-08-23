@@ -9,7 +9,6 @@ import { startPreviewRecording } from '../store/actions/preview';
 import { PreviewTypes } from '../store/actionTypes/preview';
 import { PREVIEW_TOPBAR_HEIGHT, MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT } from '../constants';
 import TopbarButton from './TopbarButton';
-import Icon from './Icon';
 
 interface PreviewRecordButtonProps {
   recording?: boolean;
@@ -148,7 +147,7 @@ const PreviewRecordButton = (props: PreviewRecordButtonProps): ReactElement => {
   return (
     <TopbarButton
       onClick={handleRecord}
-      icon={Icon(recording ? 'stop-recording' : 'start-recording')} />
+      icon={recording ? 'stop-recording' : 'start-recording'} />
   );
 }
 

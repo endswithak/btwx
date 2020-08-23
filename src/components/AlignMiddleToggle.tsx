@@ -4,7 +4,6 @@ import { RootState } from '../store/reducers';
 import { AlignLayersToMiddlePayload, LayerTypes } from '../store/actionTypes/layer';
 import { alignLayersToMiddle } from '../store/actions/layer';
 import IconButton from './IconButton';
-import Icon from './Icon';
 
 interface AlignMiddleToggleProps {
   selected?: string[];
@@ -17,7 +16,7 @@ const AlignMiddleToggle = (props: AlignMiddleToggleProps): ReactElement => {
   return (
     <IconButton
       onClick={() => alignLayersToMiddle({layers: selected})}
-      icon={Icon('align-middle')}
+      icon='align-middle'
       disabled={selected.length <= 1}
       variant='medium' />
   );

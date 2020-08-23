@@ -5,7 +5,6 @@ import { RootState } from '../store/reducers';
 import { PreviewTypes } from '../store/actionTypes/preview';
 import { openPreview, stopPreviewRecording } from '../store/actions/preview';
 import TopbarButton from './TopbarButton';
-import Icon from './Icon';
 
 interface PreviewButtonProps {
   activeArtboard?: em.Artboard;
@@ -40,7 +39,7 @@ const PreviewButton = (props: PreviewButtonProps): ReactElement => {
     <TopbarButton
       label='Preview'
       onClick={handlePreviewClick}
-      icon={Icon(recording ? 'stop-recording' : 'preview')}
+      icon={recording ? 'stop-recording' : 'preview'}
       disabled={!canPreview}
       isActive={isOpen}
       recording={recording} />

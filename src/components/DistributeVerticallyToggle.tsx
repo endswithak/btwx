@@ -17,7 +17,7 @@ const DistributeVerticallyToggle = (props: DistributeVerticallyToggleProps): Rea
   return (
     <IconButton
       onClick={() => distributeLayersVertically({layers: selected})}
-      icon={Icon('distribute-vertically')}
+      icon='distribute-vertically'
       disabled={selected.length <= 2}
       variant='medium' />
   );

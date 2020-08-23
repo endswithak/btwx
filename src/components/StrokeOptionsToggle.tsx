@@ -1,7 +1,6 @@
 import React, { useContext, ReactElement } from 'react';
 import { ThemeContext } from './ThemeProvider';
 import IconButton from './IconButton';
-import Icon from './Icon';
 
 interface StrokeOptionsToggleProps {
   showOptions: boolean;
@@ -15,7 +14,7 @@ const StrokeOptionsToggle = (props: StrokeOptionsToggleProps): ReactElement => {
   return (
     <IconButton
       onClick={onClick}
-      icon={Icon('gear')}
+      icon='gear'
       isActive={showOptions}
       variant='small' />
   );

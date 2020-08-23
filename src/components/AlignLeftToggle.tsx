@@ -4,7 +4,6 @@ import { RootState } from '../store/reducers';
 import { AlignLayersToLeftPayload, LayerTypes } from '../store/actionTypes/layer';
 import { alignLayersToLeft } from '../store/actions/layer';
 import IconButton from './IconButton';
-import Icon from './Icon';
 
 interface AlignLeftToggleProps {
   selected?: string[];
@@ -17,7 +16,7 @@ const AlignLeftToggle = (props: AlignLeftToggleProps): ReactElement => {
   return (
     <IconButton
       onClick={() => alignLayersToLeft({layers: selected})}
-      icon={Icon('align-left')}
+      icon='align-left'
       disabled={selected.length <= 1}
       variant='medium' />
   );

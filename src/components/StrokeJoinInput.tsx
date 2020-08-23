@@ -38,12 +38,7 @@ const StrokeJoinInput = (props: StrokeJoinInputProps): ReactElement => {
             onClick={() => handleClick('miter')}
             active={'miter' === strokeJoin}
             disabled={disabled}>
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24">
-              <path d={Icon('stroke-join-miter').fill} />
-            </svg>
+            <Icon name='stroke-join-miter' />
           </SidebarToggleButton>
         </SidebarSectionColumn>
         <SidebarSectionColumn>
@@ -51,12 +46,7 @@ const StrokeJoinInput = (props: StrokeJoinInputProps): ReactElement => {
             onClick={() => handleClick('round')}
             active={'round' === strokeJoin}
             disabled={disabled}>
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24">
-              <path d={Icon('stroke-join-round').fill} />
-            </svg>
+            <Icon name='stroke-join-round' />
           </SidebarToggleButton>
         </SidebarSectionColumn>
         <SidebarSectionColumn>
@@ -64,12 +54,7 @@ const StrokeJoinInput = (props: StrokeJoinInputProps): ReactElement => {
             onClick={() => handleClick('bevel')}
             active={'bevel' === strokeJoin}
             disabled={disabled}>
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24">
-              <path d={Icon('stroke-join-bevel').fill} />
-            </svg>
+            <Icon name='stroke-join-bevel' />
           </SidebarToggleButton>
         </SidebarSectionColumn>
       </SidebarSectionRow>

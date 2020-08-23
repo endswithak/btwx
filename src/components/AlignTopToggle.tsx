@@ -4,7 +4,6 @@ import { RootState } from '../store/reducers';
 import { AlignLayersToTopPayload, LayerTypes } from '../store/actionTypes/layer';
 import { alignLayersToTop } from '../store/actions/layer';
 import IconButton from './IconButton';
-import Icon from './Icon';
 
 interface AlignTopToggleProps {
   selected?: string[];
@@ -17,7 +16,7 @@ const AlignTopToggle = (props: AlignTopToggleProps): ReactElement => {
   return (
     <IconButton
       onClick={() => alignLayersToTop({layers: selected})}
-      icon={Icon('align-top')}
+      icon='align-top'
       disabled={selected.length <= 1}
       variant='medium' />
   );

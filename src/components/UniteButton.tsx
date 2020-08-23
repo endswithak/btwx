@@ -5,7 +5,6 @@ import { UniteLayersPayload, LayerTypes } from '../store/actionTypes/layer';
 import { uniteLayers } from '../store/actions/layer';
 import { orderLayersByDepth } from '../store/selectors/layer';
 import TopbarButton from './TopbarButton';
-import Icon from './Icon';
 
 interface UniteButtonProps {
   selected: string[];
@@ -26,7 +25,7 @@ const UniteButton = (props: UniteButtonProps): ReactElement => {
     <TopbarButton
       label='Unite'
       onClick={handleUniteClick}
-      icon={Icon('unite')}
+      icon='unite'
       disabled={!canUnite} />
   );
 }

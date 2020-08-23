@@ -1,12 +1,10 @@
-import React, { useContext, ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import SidebarSectionWrap from './SidebarSectionWrap';
 import SidebarSection from './SidebarSection';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarSectionHead from './SidebarSectionHead';
 import IconButton from './IconButton';
-import Icon from './Icon';
-import { ThemeContext } from './ThemeProvider';
 
 interface SidebarCollapseSectionProps {
   header: string;
@@ -17,7 +15,6 @@ interface SidebarCollapseSectionProps {
 }
 
 const SidebarCollapseSection = (props: SidebarCollapseSectionProps): ReactElement => {
-  const theme = useContext(ThemeContext);
   const { header, actions, children, onClick, collapsed } = props;
 
   return (
@@ -36,7 +33,7 @@ const SidebarCollapseSection = (props: SidebarCollapseSectionProps): ReactElemen
                 <IconButton
                   onClick={onClick}
                   variant='small'
-                  icon={Icon(collapsed ? 'thicc-chevron-right' : 'thicc-chevron-down')} />
+                  icon={collapsed ? 'thicc-chevron-right' : 'thicc-chevron-down'} />
               </>
             </SidebarSectionRow>
           </SidebarSectionColumn>

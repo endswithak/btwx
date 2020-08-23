@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement } from 'react';
-import { ThemeContext } from './ThemeProvider';
 import styled from 'styled-components';
+import { ThemeContext } from './ThemeProvider';
+import Icon from './Icon';
 
 interface TopbarDropdownButtonOptionProps {
   onClick(event: React.SyntheticEvent): void;
   isActive?: boolean;
   disabled?: boolean;
-  icon?: em.Icon;
+  icon?: string;
   label: string;
 }
 
@@ -65,17 +66,7 @@ const TopbarDropdownButtonOption = (props: TopbarDropdownButtonOptionProps): Rea
       {
         icon
         ? <span className='c-topbar-dropdown-button__icon'>
-            <svg
-              width='24'
-              height='24'
-              viewBox='0 0 24 24'>
-              <path d={icon.fill} />
-              {
-                icon.opacity
-                ? <path className='icon-opacity' d={icon.opacity} />
-                : null
-              }
-            </svg>
+            <Icon name={icon} />
           </span>
         : null
       }

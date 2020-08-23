@@ -4,7 +4,6 @@ import { RootState } from '../store/reducers';
 import { setActiveArtboard } from '../store/actions/layer';
 import { LayerTypes, SetActiveArtboardPayload } from '../store/actionTypes/layer';
 import TopbarButton from './TopbarButton';
-import Icon from './Icon';
 
 interface PreviewRewindButtonProps {
   canRewind: boolean;
@@ -24,7 +23,7 @@ const PreviewRewindButton = (props: PreviewRewindButtonProps): ReactElement => {
   return (
     <TopbarButton
       onClick={handleRewind}
-      icon={Icon('rewind')}
+      icon='rewind'
       disabled={!canRewind} />
   );
 }

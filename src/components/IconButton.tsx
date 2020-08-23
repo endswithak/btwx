@@ -1,14 +1,15 @@
 import React, { useContext, ReactElement } from 'react';
 import styled from 'styled-components';
 import { ThemeContext } from './ThemeProvider';
+import Icon from './Icon';
 
 interface IconButtonProps {
   onClick(): void;
   disabled?: boolean;
   isActive?: boolean;
-  icon: em.Icon;
+  icon: string;
   variant?: 'small' | 'medium' | 'large';
-  activeIcon?: em.Icon;
+  activeIcon?: string;
   theme?: em.Theme;
 }
 
@@ -41,7 +42,8 @@ const IconButton = (props: IconButtonProps): ReactElement => {
       className={`c-icon-button ${variant ? 'c-icon-button--' + variant : null}`}
       {...props}
       theme={theme}>
-      <svg
+      <Icon name={activeIcon && isActive ? activeIcon : icon} />
+      {/* <svg
         viewBox='0 0 24 24'
         width='24px'
         height='24px'>
@@ -51,7 +53,7 @@ const IconButton = (props: IconButtonProps): ReactElement => {
           ? <path className='icon-opacity' d={activeIcon && isActive ? activeIcon.opacity : icon.opacity} />
           : null
         }
-      </svg>
+      </svg> */}
     </Button>
   );
 }

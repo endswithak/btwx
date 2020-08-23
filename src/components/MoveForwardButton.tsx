@@ -4,7 +4,6 @@ import { RootState } from '../store/reducers';
 import { SendLayersForwardPayload, LayerTypes } from '../store/actionTypes/layer';
 import { sendLayersForward } from '../store/actions/layer';
 import TopbarButton from './TopbarButton';
-import Icon from './Icon';
 
 interface MoveForwardButtonProps {
   selected: string[];
@@ -25,7 +24,7 @@ const MoveForwardButton = (props: MoveForwardButtonProps): ReactElement => {
     <TopbarButton
       label='Forward'
       onClick={handleMoveForwardClick}
-      icon={Icon('move-forward')}
+      icon='move-forward'
       disabled={!canMoveForward} />
   );
 }

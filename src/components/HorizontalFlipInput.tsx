@@ -1,10 +1,9 @@
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { EnableLayerHorizontalFlipPayload, DisableLayerHorizontalFlipPayload, LayerTypes } from '../store/actionTypes/layer';
 import { enableLayerHorizontalFlip, disableLayerHorizontalFlip } from '../store/actions/layer';
 import { getPaperLayer } from '../store/selectors/layer';
-import { ThemeContext } from './ThemeProvider';
 import SidebarToggleButton from './SidebarToggleButton';
 import Icon from './Icon';
 
@@ -17,7 +16,6 @@ interface HorizontalFlipInputProps {
 }
 
 const HorizontalFlipInput = (props: HorizontalFlipInputProps): ReactElement => {
-  const theme = useContext(ThemeContext);
   const { selected, horizontalFlipValue, enableLayerHorizontalFlip, disableLayerHorizontalFlip, disabled } = props;
   const [horizontalFlip, setHorizontalFlip] = useState<boolean>(horizontalFlipValue);
 
@@ -41,12 +39,7 @@ const HorizontalFlipInput = (props: HorizontalFlipInputProps): ReactElement => {
       active={horizontalFlip}
       onClick={handleClick}
       disabled={disabled}>
-      <svg
-        width='24'
-        height='24'
-        viewBox='0 0 24 24'>
-        <path d={Icon('horizontal-flip').fill} />
-      </svg>
+      <Icon name='horizontal-flip' />
     </SidebarToggleButton>
   );
 }

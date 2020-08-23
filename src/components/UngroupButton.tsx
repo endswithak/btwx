@@ -4,7 +4,6 @@ import { RootState } from '../store/reducers';
 import { UngroupLayersPayload, LayerTypes } from '../store/actionTypes/layer';
 import { ungroupLayers } from '../store/actions/layer';
 import TopbarButton from './TopbarButton';
-import Icon from './Icon';
 
 interface UngroupButtonProps {
   selected: string[];
@@ -25,7 +24,7 @@ const UngroupButton = (props: UngroupButtonProps): ReactElement => {
     <TopbarButton
       label='Ungroup'
       onClick={handleUngroupClick}
-      icon={Icon('ungroup')}
+      icon='ungroup'
       disabled={!canUngroup} />
   );
 }

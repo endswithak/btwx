@@ -16,17 +16,13 @@ const SidebarLayerMaskedIcon = (props: SidebarLayerMaskedIconProps): ReactElemen
     ? <div
         className='c-sidebar-layer__icon'
         >
-        <svg
-          width='24'
-          height='24'
-          viewBox='0 0 24 24'
+        <Icon
+          name='masked'
           style={{
             fill: layer.selected && !dragGhost
             ? theme.text.onPrimary
             : theme.text.lighter
-          }}>
-          <path d={Icon('masked').fill} />
-        </svg>
+          }} />
       </div>
     : null
   );

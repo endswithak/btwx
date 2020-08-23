@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
@@ -12,9 +12,7 @@ import { addDocumentImage } from '../store/actions/documentSettings';
 import { ToolState } from '../store/reducers/tool';
 import { ipcRenderer } from 'electron';
 import { bufferToBase64 } from '../utils';
-import { ThemeContext } from './ThemeProvider';
 import TopbarDropdownButton from './TopbarDropdownButton';
-import Icon from './Icon';
 
 interface InsertButtonProps {
   tool: ToolState;
@@ -36,7 +34,6 @@ interface InsertButtonProps {
 }
 
 const InsertButton = (props: InsertButtonProps): ReactElement => {
-  const theme = useContext(ThemeContext);
   const {
     tool,
     documentImagesById,
@@ -82,25 +79,25 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
       case 'Shape':
         switch(tool.shapeToolType) {
           case 'Rectangle':
-            return Icon('rectangle');
+            return 'rectangle';
           case 'Rounded':
-            return Icon('rounded');
+            return 'rounded';
           case 'Ellipse':
-            return Icon('ellipse');
+            return 'ellipse';
           case 'Star':
-            return Icon('star');
+            return 'star';
           case 'Polygon':
-            return Icon('polygon');
+            return 'polygon';
           case 'Line':
-            return Icon('line');
+            return 'line';
         }
         break;
       case 'Text':
-        return Icon('text');
+        return 'text';
       case 'Artboard':
-        return Icon('artboard');
+        return 'artboard';
       default:
-        return Icon('insert');
+        return 'insert';
     }
   }
 
@@ -112,47 +109,47 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
       options={[{
         label: 'Artboard',
         onClick: tool.type === 'Artboard' ? enableSelectionTool : enableArtboardTool,
-        icon: Icon('artboard'),
+        icon: 'artboard',
         isActive: tool.type === 'Artboard'
       },{
         label: 'Rectangle',
         onClick: tool.type === 'Shape' && tool.shapeToolType === 'Rectangle' ? enableSelectionTool : enableRectangleShapeTool,
-        icon: Icon('rectangle'),
+        icon: 'rectangle',
         isActive: tool.type === 'Shape' && tool.shapeToolType === 'Rectangle'
       },{
         label: 'Rounded',
         onClick: tool.type === 'Shape' && tool.shapeToolType === 'Rounded' ? enableSelectionTool : enableRoundedShapeTool,
-        icon: Icon('rounded'),
+        icon: 'rounded',
         isActive: tool.type === 'Shape' && tool.shapeToolType === 'Rounded'
       },{
         label: 'Ellipse',
         onClick: tool.type === 'Shape' && tool.shapeToolType === 'Ellipse' ? enableSelectionTool : enableEllipseShapeTool,
-        icon: Icon('ellipse'),
+        icon: 'ellipse',
         isActive: tool.type === 'Shape' && tool.shapeToolType === 'Ellipse'
       },{
         label: 'Star',
         onClick: tool.type === 'Shape' && tool.shapeToolType === 'Star' ? enableSelectionTool : enableStarShapeTool,
-        icon: Icon('star'),
+        icon: 'star',
         isActive: tool.type === 'Shape' && tool.shapeToolType === 'Star'
       },{
         label: 'Polygon',
         onClick: tool.type === 'Shape' && tool.shapeToolType === 'Polygon' ? enableSelectionTool : enablePolygonShapeTool,
-        icon: Icon('polygon'),
+        icon: 'polygon',
         isActive: tool.type === 'Shape' && tool.shapeToolType === 'Polygon'
       },{
         label: 'Line',
         onClick: tool.type === 'Shape' && tool.shapeToolType === 'Line' ? enableSelectionTool : enableLineShapeTool,
-        icon: Icon('line'),
+        icon: 'line',
         isActive: tool.type === 'Shape' && tool.shapeToolType === 'Line'
       },{
         label: 'Text',
         onClick: tool.type === 'Text' ? enableSelectionTool : enableTextTool,
-        icon: Icon('text'),
+        icon: 'text',
         isActive: tool.type === 'Text'
       },{
         label: 'Image',
         onClick: handleImageClick,
-        icon: Icon('image'),
+        icon: 'image',
       }]} />
   );
 }

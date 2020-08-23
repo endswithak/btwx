@@ -5,7 +5,6 @@ import { AddLayersMaskPayload, LayerTypes } from '../store/actionTypes/layer';
 import { addLayersMask } from '../store/actions/layer';
 import { orderLayersByDepth } from '../store/selectors/layer';
 import TopbarButton from './TopbarButton';
-import Icon from './Icon';
 
 interface MaskButtonProps {
   canMask?: boolean;
@@ -26,7 +25,7 @@ const MaskButton = (props: MaskButtonProps): ReactElement => {
     <TopbarButton
       label='Mask'
       onClick={handleMaskClick}
-      icon={Icon('mask')}
+      icon='mask'
       disabled={!canMask} />
   );
 }

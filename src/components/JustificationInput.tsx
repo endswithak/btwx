@@ -41,36 +41,21 @@ const JustificationInput = (props: JustificationInputProps): ReactElement => {
           <SidebarToggleButton
             onClick={() => handleClick('left')}
             active={'left' === justification}>
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24">
-              <path d={Icon('justify-left').fill} />
-            </svg>
+            <Icon name='justify-left' />
           </SidebarToggleButton>
         </SidebarSectionColumn>
         <SidebarSectionColumn width='33.33%'>
           <SidebarToggleButton
             onClick={() => handleClick('center')}
             active={'center' === justification}>
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24">
-              <path d={Icon('justify-center').fill} />
-            </svg>
+            <Icon name='justify-center' />
           </SidebarToggleButton>
         </SidebarSectionColumn>
         <SidebarSectionColumn width='33.33%'>
           <SidebarToggleButton
             onClick={() => handleClick('right')}
             active={'right' === justification}>
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24">
-              <path d={Icon('justify-right').fill} />
-            </svg>
+            <Icon name='justify-right' />
           </SidebarToggleButton>
         </SidebarSectionColumn>
       </SidebarSectionRow>

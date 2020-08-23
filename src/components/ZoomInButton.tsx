@@ -4,7 +4,6 @@ import { SetCanvasMatrixPayload, CanvasSettingsTypes } from '../store/actionType
 import { setCanvasMatrix } from '../store/actions/canvasSettings';
 import { paperMain } from '../canvas';
 import TopbarButton from './TopbarButton';
-import Icon from './Icon';
 
 interface ZoomInButtonProps {
   setCanvasMatrix?(payload: SetCanvasMatrixPayload): CanvasSettingsTypes;
@@ -23,7 +22,7 @@ const ZoomInButton = (props: ZoomInButtonProps): ReactElement => {
       hideLabel
       label='Zoom In'
       onClick={handleZoomInClick}
-      icon={Icon('zoom-in')}
+      icon='zoom-in'
       />
   );
 }

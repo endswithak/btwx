@@ -1,7 +1,5 @@
-import React, { useContext, ReactElement } from 'react';
-import { ThemeContext } from './ThemeProvider';
+import React, { ReactElement } from 'react';
 import IconButton from './IconButton';
-import Icon from './Icon';
 
 interface StrokeOptionsToggleProps {
   styleEnabled: boolean;
@@ -9,7 +7,6 @@ interface StrokeOptionsToggleProps {
 }
 
 const StyleToggle = (props: StrokeOptionsToggleProps): ReactElement => {
-  const theme = useContext(ThemeContext);
   const { styleEnabled, setStyleEnabled } = props;
 
   return (
@@ -17,8 +14,8 @@ const StyleToggle = (props: StrokeOptionsToggleProps): ReactElement => {
       onClick={() => setStyleEnabled(!styleEnabled)}
       variant='small'
       isActive={styleEnabled}
-      icon={Icon('switch-off')}
-      activeIcon={Icon('switch-on')} />
+      icon='switch-off'
+      activeIcon='switch-on' />
   );
 }
 

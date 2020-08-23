@@ -5,7 +5,6 @@ import { openRightSidebar, closeRightSidebar } from '../store/actions/rightSideb
 import { RightSidebarTypes } from '../store/actionTypes/rightSidebar';
 import { paperMain } from '../canvas';
 import TopbarButton from './TopbarButton';
-import Icon from './Icon';
 
 interface RightSidebarButtonProps {
   isRightSidebarOpen?: boolean;
@@ -31,7 +30,7 @@ const RightSidebarButton = (props: RightSidebarButtonProps): ReactElement => {
     <TopbarButton
       label='Styles'
       onClick={handleClick}
-      icon={Icon('right-sidebar')}
+      icon='right-sidebar'
       isActive={isRightSidebarOpen} />
   );
 }

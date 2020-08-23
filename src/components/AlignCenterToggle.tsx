@@ -4,7 +4,6 @@ import { RootState } from '../store/reducers';
 import { AlignLayersToCenterPayload, LayerTypes } from '../store/actionTypes/layer';
 import { alignLayersToCenter } from '../store/actions/layer';
 import IconButton from './IconButton';
-import Icon from './Icon';
 
 interface AlignCenterToggleProps {
   selected?: string[];
@@ -17,7 +16,7 @@ const AlignCenterToggle = (props: AlignCenterToggleProps): ReactElement => {
   return (
     <IconButton
       onClick={() => alignLayersToCenter({layers: selected})}
-      icon={Icon('align-center')}
+      icon='align-center'
       disabled={selected.length <= 1}
       variant='medium' />
   );

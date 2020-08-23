@@ -65,12 +65,7 @@ const SidebarSwatch = (props: SidebarSwatchProps): ReactElement => {
           style={style}>
           {
             multi
-            ? <svg
-                viewBox='0 0 24 24'
-                width='24px'
-                height='24px'>
-                <path d={Icon('more').fill} />
-              </svg>
+            ? <Icon name='more' />
             : null
           }
         </button>

@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useState, useEffect, useRef } from 'react';
-import { ThemeContext } from './ThemeProvider';
+import React, { useContext, ReactElement, useState, useRef } from 'react';
 import styled from 'styled-components';
+import tinyColor from 'tinycolor2';
+import { ThemeContext } from './ThemeProvider';
 import TopbarButton from './TopbarButton';
 import TopbarDropdownButtonOption from './TopbarDropdownButtonOption';
-import tinyColor from 'tinycolor2';
 
 interface TopbarDropdownButtonProps {
   onClick?(event: React.SyntheticEvent): void;
   disabled?: boolean;
-  icon?: em.Icon;
+  icon?: string;
   text?: string;
   isActive?: boolean;
   label: string;
@@ -17,7 +17,7 @@ interface TopbarDropdownButtonProps {
     onClick: any;
     isActive?: boolean;
     disabled?: boolean;
-    icon?: em.Icon;
+    icon?: string;
     label: string;
   }[];
 }

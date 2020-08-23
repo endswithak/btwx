@@ -30,17 +30,13 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
         className='c-sidebar-layer__icon c-sidebar-layer__icon--chevron'
         onClick={handleChevronClick}
         >
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
+        <Icon
+          name={(layer as em.Group).showChildren ? 'chevron-down' : 'chevron-right'}
           style={{
             fill: layer.selected && !dragGhost
             ? theme.text.onPrimary
             : theme.text.lighter
-          }}>
-          <path d={Icon((layer as em.Group).showChildren ? 'chevron-down' : 'chevron-right').fill} />
-        </svg>
+          }} />
       </div>
     : <div className='c-sidebar-layer__icon c-sidebar-layer__icon--chevron' />
   );
