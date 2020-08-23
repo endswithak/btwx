@@ -47,7 +47,7 @@ const SidebarLeftDragHandle = (props: SidebarLeftDragHandleProps): ReactElement 
       onDrag: function() {
         const canvasContainer = document.getElementById('canvas-container');
         gsap.set('#sidebar-left', {width: this.x});
-        paperMain.view.viewSize = new paperMain.Size(canvasContainer.clientWidth, canvasContainer.clientHeight);
+        paperMain.view.viewSize.width = canvasContainer.clientWidth;
       },
       onRelease: function() {
         setLeftSidebarWidth({width: this.x});

@@ -1,9 +1,9 @@
-import paper from 'paper';
-import React, { useRef, useContext, useEffect, ReactElement, useState } from 'react';
+import React, { useContext, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
-import { ThemeContext } from './ThemeProvider';
 import { removeLayerTweenEvent } from '../store/actions/layer';
 import { RemoveLayerTweenEventPayload, LayerTypes } from '../store/actionTypes/layer';
+import { ThemeContext } from './ThemeProvider';
+import Icon from './Icon';
 
 interface TweenDrawerEventsItemRemoveProps {
   id: string;
@@ -36,17 +36,13 @@ const TweenDrawerEventsItemRemove = (props: TweenDrawerEventsItemRemoveProps): R
       style={{
         color: 'red'
       }}>
-      {/* <svg
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
+      {/* <Icon
+        name='trash-can'
         style={{
           fill: hover
           ? theme.text.onPrimary
           : theme.text.lighter
-        }}>
-        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
-      </svg> */}
+        }} /> */}
       Remove
     </div>
   );

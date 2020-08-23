@@ -17,6 +17,30 @@ const Icon = (props: IconProps): ReactElement => {
   const { name, style, small, pathData } = props;
   const iconData = (() => {
     switch(name) {
+      case 'edit':
+        return {
+          name: 'edit',
+          fill: 'M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z',
+          opacity: null
+        }
+      case 'list-toggle':
+        return {
+          name: 'list-toggle',
+          fill: 'M12 5.83L15.17 9l1.41-1.41L12 3 7.41 7.59 8.83 9 12 5.83zm0 12.34L8.83 15l-1.41 1.41L12 21l4.59-4.59L15.17 15 12 18.17z',
+          opacity: null
+        }
+      case 'freeze':
+        return {
+          name: 'freeze',
+          fill: 'M22 11h-4.17l3.24-3.24-1.41-1.42L15 11h-2V9l4.66-4.66-1.42-1.41L13 6.17V2h-2v4.17L7.76 2.93 6.34 4.34 11 9v2H9L4.34 6.34 2.93 7.76 6.17 11H2v2h4.17l-3.24 3.24 1.41 1.42L9 13h2v2l-4.66 4.66 1.42 1.41L11 17.83V22h2v-4.17l3.24 3.24 1.42-1.41L13 15v-2h2l4.66 4.66 1.41-1.42L17.83 13H22z',
+          opacity: null
+        }
+      case 'left-arrow':
+        return {
+          name: 'left-arrow',
+          fill: 'M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z',
+          opacity: null
+        }
       case 'shape':
         return {
           name: 'shape',

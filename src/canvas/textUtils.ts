@@ -17,14 +17,12 @@ export const applyTextMethods = (text: paper.Item) => {
         const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, this.data.id);
         store.dispatch(setLayerHover({id: nearestScopeAncestor.id}));
       }
-      document.body.style.cursor = 'move';
     },
     onMouseLeave: function(e: paper.MouseEvent) {
       const state = store.getState();
       if (!state.canvasSettings.selecting) {
         store.dispatch(setLayerHover({id: null}));
       }
-      document.body.style.cursor = 'auto';
     },
     onDoubleClick: function(e: paper.MouseEvent) {
       const state = store.getState();

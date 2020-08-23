@@ -7,13 +7,14 @@ import TweenDrawerEvent from './TweenDrawerEvent';
 import TweenDrawerDragHandle from './TweenDrawerDragHandle';
 
 interface TweenDrawerProps {
+  ready?: boolean;
   tweenDrawerHeight?: number;
   tweenEvent?: em.TweenEvent;
 }
 
 const TweenDrawer = (props: TweenDrawerProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { tweenEvent, tweenDrawerHeight } = props;
+  const { ready, tweenEvent, tweenDrawerHeight } = props;
 
   return (
     <>
@@ -27,9 +28,11 @@ const TweenDrawer = (props: TweenDrawerProps): ReactElement => {
           boxShadow: `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
         }}>
         {
-          tweenEvent
-          ? <TweenDrawerEvent />
-          : <TweenDrawerEvents />
+          ready
+          ? tweenEvent
+            ? <TweenDrawerEvent />
+            : <TweenDrawerEvents />
+          : null
         }
       </div>
     </>

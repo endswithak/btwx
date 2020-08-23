@@ -1,16 +1,17 @@
 import React, { useContext, ReactElement, useState } from 'react';
 import { ThemeContext } from './ThemeProvider';
+import Icon from './Icon';
 
 interface TweenDrawerIconProps {
   onClick(): void;
-  iconPath: string;
+  icon: string;
   selected?: boolean;
 }
 
 const TweenDrawerIcon = (props: TweenDrawerIconProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const [hover, setHover] = useState(false);
-  const { onClick, iconPath, selected } = props;
+  const { onClick, icon, selected } = props;
 
   const handleMouseEnter = () => {
     setHover(true);
@@ -26,19 +27,15 @@ const TweenDrawerIcon = (props: TweenDrawerIconProps): ReactElement => {
       onClick={onClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}>
-      <svg
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
+      <Icon
+        name={icon}
         style={{
           fill: selected
           ? theme.palette.primary
           : hover
             ? theme.text.base
             : theme.text.lighter
-        }}>
-        <path d={iconPath} />
-      </svg>
+        }} />
     </div>
   );
 }

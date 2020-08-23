@@ -47,7 +47,7 @@ const TweenDrawerDragHandle = (props: TweenDrawerDragHandleProps): ReactElement 
       onDrag: function() {
         const canvasContainer = document.getElementById('canvas-container');
         gsap.set('#tween-drawer', {height: this.y * -1});
-        paperMain.view.viewSize = new paperMain.Size(canvasContainer.clientWidth, canvasContainer.clientHeight);
+        paperMain.view.viewSize.height = canvasContainer.clientHeight;
       },
       onRelease: function() {
         setTweenDrawerHeight({height: this.y * -1});

@@ -9,6 +9,7 @@ import { SetLayerHoverPayload, LayerTypes } from '../store/actionTypes/layer';
 import { ThemeContext } from './ThemeProvider';
 import TweenDrawerEventsItemEdit from './TweenDrawerEventsItemEdit';
 import TweenDrawerEventsItemRemove from './TweenDrawerEventsItemRemove';
+import SidebarLayerIcon from './SidebarLayerIcon';
 
 interface TweenDrawerEventItemProps {
   id: string;
@@ -33,6 +34,7 @@ const Item = styled.div<ItemProps>`
   color: ${props => props.theme.text.base};
   box-shadow: ${props => props.hovering ? `2px 0 0 0 ${props.theme.palette.primary} inset` : 'none'};
   background: ${props => props.hovering ? props.theme.background.z3 : 'none'};
+  cursor: pointer;
 `;
 
 const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement => {
@@ -40,23 +42,23 @@ const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement =>
   const { artboardActive, destinationActive, id, tweenEvent, layerItem, artboardName, destinationName, setTweenDrawerEvent, setLayerHover, tweenEventDisplayName, setTweenDrawerEventHover, hovering } = props;
 
   const handleMouseEnter = () => {
-    setLayerHover({id: layerItem.id});
+    // setLayerHover({id: layerItem.id});
     setTweenDrawerEventHover({id});
   }
 
   const handleMouseLeave = () => {
-    setLayerHover({id: null});
+    // setLayerHover({id: null});
     setTweenDrawerEventHover({id: null});
   }
 
-  // const handleDoubleClick = () => {
-  //   setTweenDrawerEvent({id});
-  // }
+  const handleDoubleClick = () => {
+    setTweenDrawerEvent({id});
+  }
 
   return (
     <Item
       className='c-tween-drawer-events__item'
-      // onDoubleClick={handleDoubleClick}
+      onDoubleClick={handleDoubleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       theme={theme}
@@ -72,7 +74,10 @@ const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement =>
         </span>
       </div>
       <div className='c-tween-drawer-events-item__module'>
-        {layerItem.name}
+        <SidebarLayerIcon
+          layer={layerItem}
+          dragGhost={true} />
+        <span style={{marginLeft: 8}}>{layerItem.name}</span>
       </div>
       <div className='c-tween-drawer-events-item__module'>
         <span className='c-tween-drawer-events-item__artboard'>

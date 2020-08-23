@@ -46,12 +46,7 @@ const StrokeCapInput = (props: StrokeCapInputProps): ReactElement => {
             onClick={() => handleClick('round')}
             active={'round' === strokeCap}
             disabled={disabled}>
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24">
-              <Icon name='stroke-cap-round' />
-            </svg>
+            <Icon name='stroke-cap-round' />
           </SidebarToggleButton>
         </SidebarSectionColumn>
         <SidebarSectionColumn>
