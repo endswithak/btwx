@@ -141,6 +141,9 @@ const Canvas = (props: CanvasProps): ReactElement => {
           if (typing) {
             return 'text'
           }
+          if (canvasSettings.selecting) {
+            return 'default';
+          }
           if (canvasSettings.resizing) {
             return `${canvasSettings.resizingType}-resize`;
           }

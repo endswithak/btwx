@@ -139,7 +139,7 @@ class DragTool {
       paperLayer.position.y = layerItem.frame.y + translate.y;
     });
     updateSelectionFrame(this.state.layer.present, this.moveHandle ? 'move' : 'none');
-    updateActiveArtboardFrame(this.state.layer.present);
+    // updateActiveArtboardFrame(this.state.layer.present);
     this.updateSnapPoints();
     this.snapTool.updateGuides();
     updateMeasureFrame(this.state.layer.present, this.getMeasureGuides());

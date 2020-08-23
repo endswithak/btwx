@@ -127,6 +127,9 @@ class SelectionTool {
       } else if (hitResult.item.data.type && (hitResult.item.data.type === 'Shape' || hitResult.item.data.type === 'Group' || hitResult.item.data.type === 'Image' || hitResult.item.data.type === 'Raster' || hitResult.item.data.type === 'Text')) {
         this.dragTool.enable(state);
         this.dragTool.onMouseDown(event);
+      } else if (hitResult.item.data.type && (hitResult.item.data.type === 'Artboard' || hitResult.item.data.type === 'ArtboardBackground') && hitResult.item.parent.data.id === state.layer.present.activeArtboard) {
+        this.areaSelectTool.enable(state);
+        this.areaSelectTool.onMouseDown(event);
       }
     // if no hit result, enable area select tool
     } else {

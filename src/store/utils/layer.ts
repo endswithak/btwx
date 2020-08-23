@@ -927,7 +927,9 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
   }
   // if layer scope root is an artboard, make the layer scope root the active artboard
   if (layerScopeRoot && currentState.byId[layerScopeRoot].type === 'Artboard' && layerScopeRoot !== currentState.activeArtboard) {
-    currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: layerScopeRoot, scope: 1}) as SetActiveArtboard);
+    if (!action.payload.noActiveArtboardUpdate) {
+      currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: layerScopeRoot, scope: 1}) as SetActiveArtboard);
+    }
   }
   // if new selection, create selection with just that layer
   if (action.payload.newSelection) {
@@ -1003,26 +1005,25 @@ export const updateHoverFrame = (state: LayerState) => {
     hoverFrame.remove();
   }
   if (state.hover && !state.selected.includes(state.hover)) {
-    // const paperHoverLayer = getPaperLayer(state.hover);
     const hoverItem = state.byId[state.hover];
-    new paperMain.Path.Rectangle({
-      ...hoverFrameConstants,
-      point: new paperMain.Point(hoverItem.frame.x - (hoverItem.frame.width / 2), hoverItem.frame.y - (hoverItem.frame.height / 2)),
-      size: [hoverItem.frame.width, hoverItem.frame.height]
-    });
-    // if (hoverItem.type === 'Shape') {
-    //   new paperMain.Path({
-    //     ...hoverFrameConstants,
-    //     closed: (paperHoverLayer as paper.Path).closed,
-    //     pathData: hoverItem.pathData
-    //   });
-    // } else {
-    //   new paperMain.Path.Rectangle({
-    //     ...hoverFrameConstants,
-    //     point: new paperMain.Point(hoverItem.frame.x - (hoverItem.frame.width / 2), hoverItem.frame.y - (hoverItem.frame.height / 2)),
-    //     size: [hoverItem.frame.width, hoverItem.frame.height]
-    //   });
-    // }
+    // new paperMain.Path.Rectangle({
+    //   ...hoverFrameConstants,
+    //   point: new paperMain.Point(hoverItem.frame.x - (hoverItem.frame.width / 2), hoverItem.frame.y - (hoverItem.frame.height / 2)),
+    //   size: [hoverItem.frame.width, hoverItem.frame.height]
+    // });
+    if (hoverItem.type === 'Shape') {
+      new paperMain.Path({
+        ...hoverFrameConstants,
+        closed: hoverItem.path.closed,
+        pathData: hoverItem.path.data
+      });
+    } else {
+      new paperMain.Path.Rectangle({
+        ...hoverFrameConstants,
+        point: new paperMain.Point(hoverItem.frame.x - (hoverItem.frame.width / 2), hoverItem.frame.y - (hoverItem.frame.height / 2)),
+        size: [hoverItem.frame.width, hoverItem.frame.height]
+      });
+    }
   }
 }
 
@@ -2713,8 +2714,8 @@ export const enableLayerFill = (state: LayerState, action: EnableLayerFill): Lay
           stops: getGradientStops(fill.gradient.stops),
           radial: fill.gradient.gradientType === 'radial'
         },
-        origin: getGradientOriginPoint(action.payload.id, fill.gradient.origin),
-        destination: getGradientDestinationPoint(action.payload.id, fill.gradient.destination)
+        origin: getGradientOriginPoint(currentState, action.payload.id, fill.gradient.origin),
+        destination: getGradientDestinationPoint(currentState, action.payload.id, fill.gradient.destination)
       } as any
       break;
   }
@@ -2831,8 +2832,8 @@ export const setLayerFill = (state: LayerState, action: SetLayerFill): LayerStat
           stops: getGradientStops(fill.gradient.stops),
           radial: layerItem.style.fill.gradient.gradientType === 'radial'
         },
-        origin: getGradientOriginPoint(action.payload.id, fill.gradient.origin),
-        destination: getGradientDestinationPoint(action.payload.id, fill.gradient.destination)
+        origin: getGradientOriginPoint(currentState, action.payload.id, fill.gradient.origin),
+        destination: getGradientDestinationPoint(currentState, action.payload.id, fill.gradient.destination)
       } as any
       break;
   }
@@ -2869,8 +2870,8 @@ export const setLayerFillType = (state: LayerState, action: SetLayerFillType): L
           stops: getGradientStops(fill.gradient.stops),
           radial: layerItem.style.fill.gradient.gradientType === 'radial'
         },
-        origin: getGradientOriginPoint(action.payload.id, fill.gradient.origin),
-        destination: getGradientDestinationPoint(action.payload.id, fill.gradient.destination)
+        origin: getGradientOriginPoint(currentState, action.payload.id, fill.gradient.origin),
+        destination: getGradientDestinationPoint(currentState, action.payload.id, fill.gradient.destination)
       } as any
       break;
   }
@@ -2911,8 +2912,8 @@ export const setLayerGradient = (state: LayerState, action: SetLayerGradient): L
       stops: getGradientStops(action.payload.gradient.stops),
       radial: action.payload.gradient.gradientType === 'radial'
     },
-    origin: getGradientOriginPoint(action.payload.id, action.payload.gradient.origin),
-    destination: getGradientDestinationPoint(action.payload.id, action.payload.gradient.destination)
+    origin: getGradientOriginPoint(currentState, action.payload.id, action.payload.gradient.origin),
+    destination: getGradientDestinationPoint(currentState, action.payload.id, action.payload.gradient.destination)
   } as any
   currentState = {
     ...currentState,
@@ -2998,8 +2999,8 @@ export const setLayerGradientOrigin = (state: LayerState, action: SetLayerGradie
       stops: getGradientStops(gradient.stops),
       radial: gradient.gradientType === 'radial'
     },
-    origin: getGradientOriginPoint(action.payload.id, action.payload.origin),
-    destination: getGradientDestinationPoint(action.payload.id, gradient.destination)
+    origin: getGradientOriginPoint(currentState, action.payload.id, action.payload.origin),
+    destination: getGradientDestinationPoint(currentState, action.payload.id, gradient.destination)
   } as any
   currentState = {
     ...currentState,
@@ -3044,8 +3045,8 @@ export const setLayerGradientDestination = (state: LayerState, action: SetLayerG
       stops: getGradientStops(gradient.stops),
       radial: gradient.gradientType === 'radial'
     },
-    origin: getGradientOriginPoint(action.payload.id, gradient.origin),
-    destination: getGradientDestinationPoint(action.payload.id, action.payload.destination)
+    origin: getGradientOriginPoint(currentState, action.payload.id, gradient.origin),
+    destination: getGradientDestinationPoint(currentState, action.payload.id, action.payload.destination)
   } as any
   currentState = {
     ...currentState,
@@ -3104,8 +3105,8 @@ export const setLayerGradientStopColor = (state: LayerState, action: SetLayerGra
       stops: getGradientStops(newStops),
       radial: gradient.gradientType === 'radial'
     },
-    origin: getGradientOriginPoint(action.payload.id, gradient.origin),
-    destination: getGradientDestinationPoint(action.payload.id, gradient.destination)
+    origin: getGradientOriginPoint(currentState, action.payload.id, gradient.origin),
+    destination: getGradientDestinationPoint(currentState, action.payload.id, gradient.destination)
   } as any
   currentState = {
     ...currentState,
@@ -3176,8 +3177,8 @@ export const setLayerGradientStopPosition = (state: LayerState, action: SetLayer
       stops: getGradientStops(newStops),
       radial: gradient.gradientType === 'radial'
     },
-    origin: getGradientOriginPoint(action.payload.id, gradient.origin),
-    destination: getGradientDestinationPoint(action.payload.id, gradient.destination)
+    origin: getGradientOriginPoint(currentState, action.payload.id, gradient.origin),
+    destination: getGradientDestinationPoint(currentState, action.payload.id, gradient.destination)
   } as any
   currentState = {
     ...currentState,
@@ -3222,8 +3223,8 @@ export const addLayerGradientStop = (state: LayerState, action: AddLayerGradient
       stops: getGradientStops(newStops),
       radial: gradient.gradientType === 'radial'
     },
-    origin: getGradientOriginPoint(action.payload.id, gradient.origin),
-    destination: getGradientDestinationPoint(action.payload.id, gradient.destination)
+    origin: getGradientOriginPoint(currentState, action.payload.id, gradient.origin),
+    destination: getGradientDestinationPoint(currentState, action.payload.id, gradient.destination)
   } as any
   currentState = {
     ...currentState,
@@ -3273,8 +3274,8 @@ export const removeLayerGradientStop = (state: LayerState, action: RemoveLayerGr
       stops: getGradientStops(newStops),
       radial: gradient.gradientType === 'radial'
     },
-    origin: getGradientOriginPoint(action.payload.id, gradient.origin),
-    destination: getGradientDestinationPoint(action.payload.id, gradient.destination)
+    origin: getGradientOriginPoint(currentState, action.payload.id, gradient.origin),
+    destination: getGradientDestinationPoint(currentState, action.payload.id, gradient.destination)
   } as any
   currentState = {
     ...currentState,
@@ -3346,8 +3347,8 @@ export const enableLayerStroke = (state: LayerState, action: EnableLayerStroke):
           stops: getGradientStops(stroke.gradient.stops),
           radial: stroke.gradient.gradientType === 'radial'
         },
-        origin: getGradientOriginPoint(action.payload.id, stroke.gradient.origin),
-        destination: getGradientDestinationPoint(action.payload.id, stroke.gradient.destination)
+        origin: getGradientOriginPoint(currentState, action.payload.id, stroke.gradient.origin),
+        destination: getGradientDestinationPoint(currentState, action.payload.id, stroke.gradient.destination)
       } as any
       break;
   }
@@ -3464,8 +3465,8 @@ export const setLayerStrokeFillType = (state: LayerState, action: SetLayerStroke
           stops: getGradientStops(stroke.gradient.stops),
           radial: stroke.gradient.gradientType === 'radial'
         },
-        origin: getGradientOriginPoint(action.payload.id, stroke.gradient.origin),
-        destination: getGradientDestinationPoint(action.payload.id, stroke.gradient.destination)
+        origin: getGradientOriginPoint(currentState, action.payload.id, stroke.gradient.origin),
+        destination: getGradientDestinationPoint(currentState, action.payload.id, stroke.gradient.destination)
       } as any
       break;
   }

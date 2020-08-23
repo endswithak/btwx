@@ -1,5 +1,6 @@
 import React, { useContext, ReactElement, useEffect } from 'react';
 import { getGradientOriginPoint, getGradientDestinationPoint } from '../store/selectors/layer';
+import { LayerState } from '../store/reducers/layer';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
@@ -9,12 +10,13 @@ interface GradientFrameProps {
   layer: string;
   gradient: em.Gradient;
   onStopPress(index: number): void;
+  layerItem?: em.Layer;
   zoom?: number;
 }
 
 const GradientFrame = (props: GradientFrameProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layer, gradient, onStopPress, zoom } = props;
+  const { layer, gradient, onStopPress, zoom, layerItem } = props;
 
   const updateGradientFrame = () => {
     const stopsWithIndex = gradient.stops.map((stop, index) => {
@@ -44,13 +46,13 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
       insert: false
     }
     const gradientFrameLineProps = {
-      from: getGradientOriginPoint(layer, gradient.origin),
-      to: getGradientDestinationPoint(layer, gradient.destination),
+      from: getGradientOriginPoint({byId: { [layer]: layerItem }} as LayerState, layer, gradient.origin),
+      to: getGradientDestinationPoint({byId: { [layer]: layerItem }} as LayerState, layer, gradient.destination),
       insert: false
     }
     const gradientFrameOriginHandleBg  = new paperMain.Shape.Circle({
       ...gradientFrameHandleBgProps,
-      center: getGradientOriginPoint(layer, gradient.origin),
+      center: getGradientOriginPoint({byId: { [layer]: layerItem }} as LayerState, layer, gradient.origin),
       data: {
         id: 'gradientFrameHandle',
         handle: 'origin',
@@ -61,7 +63,7 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
     const gradientFrameOriginHandleSwatch  = new paperMain.Shape.Circle({
       ...gradientFrameHandleSwatchProps,
       fillColor: { hue: originStop.color.h, saturation: originStop.color.s, lightness: originStop.color.l, alpha: originStop.color.a },
-      center: getGradientOriginPoint(layer, gradient.origin),
+      center: getGradientOriginPoint({byId: { [layer]: layerItem }} as LayerState, layer, gradient.origin),
       data: {
         id: 'gradientFrameHandle',
         handle: 'origin',
@@ -70,7 +72,7 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
     });
     const gradientFrameDestinationHandleBg = new paperMain.Shape.Circle({
       ...gradientFrameHandleBgProps,
-      center: getGradientDestinationPoint(layer, gradient.destination),
+      center: getGradientDestinationPoint({byId: { [layer]: layerItem }} as LayerState, layer, gradient.destination),
       data: {
         id: 'gradientFrameHandle',
         handle: 'destination',
@@ -81,7 +83,7 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
     const gradientFrameDestinationHandleSwatch = new paperMain.Shape.Circle({
       ...gradientFrameHandleSwatchProps,
       fillColor: { hue: destStop.color.h, saturation: destStop.color.s, lightness: destStop.color.l, alpha: destStop.color.a },
-      center: getGradientDestinationPoint(layer, gradient.destination),
+      center: getGradientDestinationPoint({byId: { [layer]: layerItem }} as LayerState, layer, gradient.destination),
       data: {
         id: 'gradientFrameHandle',
         handle: 'destination',
@@ -171,10 +173,11 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { canvasSettings } = state;
+const mapStateToProps = (state: RootState, ownProps: GradientFrameProps) => {
+  const { canvasSettings, layer } = state;
   const zoom = canvasSettings.matrix[0];
-  return { zoom };
+  const layerItem = layer.present.byId[ownProps.layer]
+  return { zoom, layerItem };
 };
 
 export default connect(

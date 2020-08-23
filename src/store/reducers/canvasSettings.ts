@@ -5,6 +5,7 @@ import { DEFAULT_LEFT_SIDEBAR_WIDTH, DEFAULT_RIGHT_SIDEBAR_WIDTH, DEFAULT_TWEEN_
 import {
   SET_CANVAS_MATRIX,
   SET_CANVAS_ZOOMING,
+  SET_CANVAS_SELECTING,
   SET_CANVAS_ZOOMING_TYPE,
   SET_CANVAS_RESIZING,
   SET_CANVAS_DRAGGING,
@@ -30,6 +31,7 @@ export interface CanvasSettingsState {
   resizing: boolean;
   resizingType: em.ResizingType;
   dragging: boolean;
+  selecting: boolean;
   measuring: boolean;
   zooming: boolean;
   zoomingType: em.ZoomingType;
@@ -48,6 +50,7 @@ const initialState: CanvasSettingsState = {
   resizing: false,
   resizingType: null,
   dragging: false,
+  selecting: false,
   measuring: false,
   zooming: false,
   zoomingType: null,
@@ -69,6 +72,12 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
         ...state,
         resizing: action.payload.resizing,
         resizingType: action.payload.resizingType ? action.payload.resizingType : null
+      };
+    }
+    case SET_CANVAS_SELECTING: {
+      return {
+        ...state,
+        selecting: action.payload.selecting
       };
     }
     case SET_CANVAS_DRAGGING: {

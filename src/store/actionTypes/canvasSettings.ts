@@ -1,5 +1,6 @@
 export const SET_CANVAS_MATRIX = 'SET_CANVAS_MATRIX';
 export const SET_CANVAS_RESIZING = 'SET_CANVAS_RESIZING';
+export const SET_CANVAS_SELECTING = 'SET_CANVAS_SELECTING';
 export const SET_CANVAS_DRAGGING = 'SET_CANVAS_DRAGGING';
 export const SET_CANVAS_ZOOMING = 'SET_CANVAS_ZOOMING';
 export const SET_CANVAS_ZOOMING_TYPE = 'SET_CANVAS_ZOOMING_TYPE';
@@ -28,6 +29,15 @@ export interface SetCanvasResizingPayload {
 export interface SetCanvasResizing {
   type: typeof SET_CANVAS_RESIZING;
   payload: SetCanvasResizingPayload;
+}
+
+export interface SetCanvasSelectingPayload {
+  selecting: boolean;
+}
+
+export interface SetCanvasSelecting {
+  type: typeof SET_CANVAS_SELECTING;
+  payload: SetCanvasSelectingPayload;
 }
 
 export interface SetCanvasDraggingPayload {
@@ -129,6 +139,7 @@ export interface SetCanvasMeasuring {
 
 export type CanvasSettingsTypes = SetCanvasMatrix |
                                   SetCanvasResizing |
+                                  SetCanvasSelecting |
                                   SetCanvasDragging |
                                   SetCanvasZooming |
                                   SetCanvasZoomingType |

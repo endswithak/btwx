@@ -1,6 +1,7 @@
 import {
   SET_CANVAS_MATRIX,
   SET_CANVAS_RESIZING,
+  SET_CANVAS_SELECTING,
   SET_CANVAS_DRAGGING,
   SET_CANVAS_ZOOMING,
   SET_CANVAS_ZOOMING_TYPE,
@@ -15,6 +16,7 @@ import {
   SetCanvasResizingPayload,
   SetCanvasDraggingPayload,
   SetCanvasZoomingPayload,
+  SetCanvasSelectingPayload,
   SetCanvasZoomingTypePayload,
   AddArtboardPresetPayload,
   RemoveArtboardPresetPayload,
@@ -33,6 +35,11 @@ export const setCanvasMatrix = (payload: SetCanvasMatrixPayload): CanvasSettings
 
 export const setCanvasResizing = (payload: SetCanvasResizingPayload): CanvasSettingsTypes => ({
   type: SET_CANVAS_RESIZING,
+  payload
+});
+
+export const setCanvasSelecting = (payload: SetCanvasSelectingPayload): CanvasSettingsTypes => ({
+  type: SET_CANVAS_SELECTING,
   payload
 });
 

@@ -265,8 +265,9 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     onUpdate: () => {
                       const nextOriginX = tweenProp[`${tween.prop}-origin-x`];
                       const nextOriginY = tweenProp[`${tween.prop}-origin-y`];
-                      const nextOrigin = new paperPreview.Point((nextOriginX * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (nextOriginY * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
+                      const nextOrigin = new paperPreview.Point((nextOriginX * tweenDestinationLayer.frame.innerWidth) + tweenPaperLayer.position.x, (nextOriginY * tweenDestinationLayer.frame.innerHeight) + tweenPaperLayer.position.y);
                       (tweenPaperLayer.fillColor as em.PaperGradientFill).origin = nextOrigin;
+                      tweenPaperLayer.data.gradientOrigin = { x: nextOriginX, y: nextOriginY };
                     },
                     ease: tween.ease,
                   }, tween.delay);
@@ -280,8 +281,9 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     onUpdate: () => {
                       const nextDestinationX = tweenProp[`${tween.prop}-destination-x`];
                       const nextDestinationY = tweenProp[`${tween.prop}-destination-y`];
-                      const nextDestination = new paperPreview.Point((nextDestinationX * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (nextDestinationY * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
+                      const nextDestination = new paperPreview.Point((nextDestinationX * tweenDestinationLayer.frame.innerWidth) + tweenPaperLayer.position.x, (nextDestinationY * tweenDestinationLayer.frame.innerHeight) + tweenPaperLayer.position.y);
                       (tweenPaperLayer.fillColor as em.PaperGradientFill).destination = nextDestination;
+                      tweenPaperLayer.data.gradientDestination = { x: nextDestinationX, y: nextDestinationY };
                     },
                     ease: tween.ease,
                   }, tween.delay);
@@ -759,6 +761,14 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     tweenProp[`${tween.prop}-prev`] = tweenProp[tween.prop];
                     tweenPaperLayer.position = startPosition;
                     tweenPaperLayer.data.rotation = tweenProp[tween.prop];
+                    if (tweenPaperLayer.fillColor && tweenPaperLayer.fillColor.gradient) {
+                      const origin = tweenPaperLayer.data.gradientOrigin ? tweenPaperLayer.data.gradientOrigin : tweenLayer.style.fill.gradient.origin;
+                      const destination = tweenPaperLayer.data.gradientDestination ? tweenPaperLayer.data.gradientDestination : tweenLayer.style.fill.gradient.destination;
+                      const nextOrigin = new paperPreview.Point((origin.x * tweenDestinationLayer.frame.innerWidth) + tweenPaperLayer.position.x, (origin.y * tweenDestinationLayer.frame.innerHeight) + tweenPaperLayer.position.y);
+                      const nextDestination = new paperPreview.Point((destination.x * tweenDestinationLayer.frame.innerWidth) + tweenPaperLayer.position.x, (destination.y * tweenDestinationLayer.frame.innerHeight) + tweenPaperLayer.position.y);
+                      (tweenPaperLayer.fillColor as em.PaperGradientFill).origin = nextOrigin;
+                      (tweenPaperLayer.fillColor as em.PaperGradientFill).destination = nextDestination;
+                    }
                   },
                   ease: tween.ease,
                 }, tween.delay);

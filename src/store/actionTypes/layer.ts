@@ -338,6 +338,7 @@ export interface RemoveLayers {
 export interface SelectLayerPayload {
   id: string;
   newSelection?: boolean;
+  noActiveArtboardUpdate?: boolean;
 }
 
 export interface SelectLayer {
@@ -357,6 +358,7 @@ export interface DeepSelectLayer {
 export interface SelectLayersPayload {
   layers: string[];
   newSelection?: boolean;
+  noActiveArtboardUpdate?: boolean;
 }
 
 export interface SelectLayers {

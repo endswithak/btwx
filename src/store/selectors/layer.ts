@@ -862,14 +862,24 @@ export const getTweensWithLayer = (store: LayerState, layerId: string): { allIds
   };
 };
 
-export const getGradientOriginPoint = (id: string, origin: em.Point): paper.Point => {
-  const paperLayer = getPaperLayer(id);
-  return new paperMain.Point((origin.x * paperLayer.bounds.width) + paperLayer.position.x, (origin.y * paperLayer.bounds.height) + paperLayer.position.y);
+// export const getGradientOriginPoint = (id: string, origin: em.Point): paper.Point => {
+//   const paperLayer = getPaperLayer(id);
+//   return new paperMain.Point((origin.x * paperLayer.bounds.width) + paperLayer.position.x, (origin.y * paperLayer.bounds.height) + paperLayer.position.y);
+// };
+
+// export const getGradientDestinationPoint = (id: string, destination: em.Point): paper.Point => {
+//   const paperLayer = getPaperLayer(id);
+//   return new paperMain.Point((destination.x * paperLayer.bounds.width) + paperLayer.position.x, (destination.y * paperLayer.bounds.height) + paperLayer.position.y);
+// };
+
+export const getGradientOriginPoint = (store: LayerState, id: string, origin: em.Point): paper.Point => {
+  const layerItem = store.byId[id];
+  return new paperMain.Point((origin.x * layerItem.frame.innerWidth) + layerItem.frame.x, (origin.y * layerItem.frame.innerHeight) + layerItem.frame.y);
 };
 
-export const getGradientDestinationPoint = (id: string, destination: em.Point): paper.Point => {
-  const paperLayer = getPaperLayer(id);
-  return new paperMain.Point((destination.x * paperLayer.bounds.width) + paperLayer.position.x, (destination.y * paperLayer.bounds.height) + paperLayer.position.y);
+export const getGradientDestinationPoint = (store: LayerState, id: string, destination: em.Point): paper.Point => {
+  const layerItem = store.byId[id];
+  return new paperMain.Point((destination.x * layerItem.frame.innerWidth) + layerItem.frame.x, (destination.y * layerItem.frame.innerHeight) + layerItem.frame.y);
 };
 
 export const getGradientStops = (stops: em.GradientStop[]): paper.GradientStop[] => {

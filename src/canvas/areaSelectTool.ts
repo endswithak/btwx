@@ -1,6 +1,7 @@
 import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import { getPagePaperLayer, getNearestScopeAncestor } from '../store/selectors/layer';
 import { deselectAllLayers, deselectLayer, selectLayer } from '../store/actions/layer';
+import { setCanvasSelecting } from '../store/actions/canvasSettings';
 import store from '../store';
 import { paperMain } from './index';
 import { THEME_PRIMARY_COLOR } from '../constants';
@@ -31,8 +32,10 @@ class AreaSelectTool {
   enable(state: RootState) {
     this.enabled = true;
     this.state = state;
+    store.dispatch(setCanvasSelecting({selecting: true}));
   }
   disable() {
+    store.dispatch(setCanvasSelecting({selecting: false}));
     if (this.shape) {
       this.shape.remove();
     }
@@ -161,12 +164,12 @@ class AreaSelectTool {
               if (this.state.layer.present.selected.includes(id)) {
                 store.dispatch(deselectLayer({id}));
               } else {
-                store.dispatch(selectLayer({id}));
+                store.dispatch(selectLayer({id, noActiveArtboardUpdate: true}));
               }
             }
             // else, add layer to selected
             else {
-              store.dispatch(selectLayer({id}));
+              store.dispatch(selectLayer({id, noActiveArtboardUpdate: true}));
             }
             // push layer id to overlapped
             this.overlapped.push(id);
@@ -181,7 +184,7 @@ class AreaSelectTool {
               if (this.state.layer.present.selected.includes(id)) {
                 store.dispatch(deselectLayer({id}));
               } else {
-                store.dispatch(selectLayer({id}));
+                store.dispatch(selectLayer({id, noActiveArtboardUpdate: true}));
               }
             }
             // else, remove layer from selected

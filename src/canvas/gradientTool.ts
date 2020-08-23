@@ -70,6 +70,7 @@ class GradientTool {
     this.destination = null;
   }
   updateOrigin(event: paper.ToolEvent, state: RootState): void {
+    const layerItem = state.layer.present.byId[state.gradientEditor.layers[0]];
     const paperLayer = getPaperLayer(state.gradientEditor.layers[0]);
     const newOriginPoint = new paperMain.Point(this.toBounds.center.x, this.toBounds.center.y);
     paperLayer[`${state.gradientEditor.prop}Color` as 'fillColor' | 'strokeColor'] = {
@@ -92,19 +93,20 @@ class GradientTool {
       }
     })() as em.PaperGradientFill;
     this.origin = {
-      x: (style.origin.x - paperLayer.position.x) / paperLayer.bounds.width,
-      y: (style.origin.y - paperLayer.position.y) / paperLayer.bounds.height
+      x: (style.origin.x - layerItem.frame.x) / layerItem.frame.innerWidth,
+      y: (style.origin.y - layerItem.frame.y) / layerItem.frame.innerHeight
     }
     state.gradientEditor.layers.forEach((id, index) => {
       const paperLayer = getPaperLayer(id);
       paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] = {
         gradient: paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'].gradient,
-        origin: getGradientOriginPoint(id, this.origin),
+        origin: getGradientOriginPoint(state.layer.present, id, this.origin),
         destination: (paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).destination
       } as em.PaperGradientFill
     });
   }
   updateDestination(event: paper.ToolEvent, state: RootState): void {
+    const layerItem = state.layer.present.byId[state.gradientEditor.layers[0]];
     const paperLayer = getPaperLayer(state.gradientEditor.layers[0]);
     const newDestinationPoint = new paperMain.Point(this.toBounds.center.x, this.toBounds.center.y);
     paperLayer[`${state.gradientEditor.prop}Color` as 'fillColor' | 'strokeColor'] = {
@@ -127,15 +129,15 @@ class GradientTool {
       }
     })() as em.PaperGradientFill;
     this.destination = {
-      x: (style.destination.x - paperLayer.position.x) / paperLayer.bounds.width,
-      y: (style.destination.y - paperLayer.position.y) / paperLayer.bounds.height
+      x: (style.destination.x - layerItem.frame.x) / layerItem.frame.innerWidth,
+      y: (style.destination.y - layerItem.frame.y) / layerItem.frame.innerHeight
     }
     state.gradientEditor.layers.forEach((id, index) => {
       const paperLayer = getPaperLayer(id);
       paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] = {
         gradient: paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'].gradient,
         origin: (paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).origin,
-        destination: getGradientDestinationPoint(id, this.destination)
+        destination: getGradientDestinationPoint(state.layer.present, id, this.destination)
       } as em.PaperGradientFill
     });
   }
