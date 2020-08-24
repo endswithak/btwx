@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement, useState } from 'react';
+import React, { useContext, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';

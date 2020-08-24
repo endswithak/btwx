@@ -13,13 +13,14 @@ interface SidebarLayerProps {
   layerItem?: em.Layer;
   dragging: boolean;
   dragGhost?: boolean;
+  hasChildren?: boolean;
   setDragging(dragging: boolean): void;
   setDragLayers(layers: string[]): void;
 }
 
 const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
   const [draggable, setDraggable] = useState(true);
-  const { layer, depth, dragGhost, dragLayers, setDragLayers, layerItem, selected, dragging, setDragging } = props;
+  const { layer, depth, dragGhost, dragLayers, setDragLayers, layerItem, selected, dragging, setDragging, hasChildren } = props;
 
   const handleMouseDown = (e: any) => {
     e.stopPropagation();
@@ -72,9 +73,9 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
         : null
       }
       {
-        (layerItem.type === 'Group' || layerItem.type === 'Artboard') && (layerItem as em.Group).showChildren
+        hasChildren && (layerItem as em.Group | em.Artboard).showChildren
         ? <SidebarLayers
-            layers={(layerItem as em.Group).children}
+            layers={[...(layerItem as em.Group | em.Artboard).children].reverse()}
             depth={depth + 1}
             dragLayers={dragLayers}
             setDragLayers={setDragLayers}
@@ -91,7 +92,8 @@ const mapStateToProps = (state: RootState, ownProps: SidebarLayerProps) => {
   const { layer } = state;
   const layerItem = layer.present.byId[ownProps.layer];
   const selected = layer.present.selected;
-  return { layerItem, selected };
+  const hasChildren = layerItem.type === 'Group' || layerItem.type === 'Artboard';
+  return { layerItem, selected, hasChildren };
 };
 
 export default connect(

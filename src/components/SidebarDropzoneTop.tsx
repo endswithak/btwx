@@ -1,8 +1,8 @@
 import React, { useContext, ReactElement, useState, useRef, SyntheticEvent } from 'react';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
-import { insertLayersAbove } from '../store/actions/layer';
-import { InsertLayersAbovePayload } from '../store/actionTypes/layer';
+import { insertLayersAbove, insertLayersBelow } from '../store/actions/layer';
+import { InsertLayersAbovePayload, InsertLayersBelowPayload } from '../store/actionTypes/layer';
 import { LayerTypes } from '../store/actionTypes/layer';
 import { ThemeContext } from './ThemeProvider';
 
@@ -16,16 +16,17 @@ interface SidebarDropzoneTopProps {
   };
   setDragLayers(layers: string[]): void;
   setDragging(dragging: boolean): void;
-  insertLayersAbove?(payload: InsertLayersAbovePayload): LayerTypes;
+  insertLayersBelow?(payload: InsertLayersBelowPayload): LayerTypes;
+  // insertLayersAbove?(payload: InsertLayersAbovePayload): LayerTypes;
 }
 
 const SidebarDropzoneTop = (props: SidebarDropzoneTopProps): ReactElement => {
   const ref = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(false);
   const theme = useContext(ThemeContext);
-  const { layer, depth, dragLayers, dragLayerById, setDragLayers, setDragging, insertLayersAbove, leftSidebarWidth } = props;
+  const { layer, depth, dragLayers, dragLayerById, setDragLayers, setDragging, insertLayersBelow, leftSidebarWidth } = props;
 
-  const handleDragOver = (e: SyntheticEvent) => {
+  const handleDragOver = (e: any) => {
     if (!dragLayers.some((id) => document.getElementById(id).contains(ref.current))) {
       if (dragLayers.some((id) => dragLayerById[id].type === 'Artboard') && layer.parent !== 'page') {
         return;
@@ -36,16 +37,16 @@ const SidebarDropzoneTop = (props: SidebarDropzoneTopProps): ReactElement => {
     }
   }
 
-  const handleDragLeave = (e: SyntheticEvent) => {
+  const handleDragLeave = (e: any) => {
     setActive(false);
   }
 
-  const handleDrop = (e: SyntheticEvent) => {
+  const handleDrop = (e: any) => {
     if (active) {
       e.preventDefault();
-      insertLayersAbove({
+      insertLayersBelow({
         layers: dragLayers,
-        above: layer.id
+        below: layer.id
       });
     }
     setDragLayers(null);
@@ -79,5 +80,5 @@ const mapStateToProps = (state: RootState, ownProps: SidebarDropzoneTopProps) =>
 
 export default connect(
   mapStateToProps,
-  { insertLayersAbove }
+  { insertLayersBelow }
 )(SidebarDropzoneTop);

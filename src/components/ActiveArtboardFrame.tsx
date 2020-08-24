@@ -8,31 +8,21 @@ import { paperMain } from '../canvas';
 interface ActiveArtboardFrameProps {
   activeArtboard?: string;
   activeArtboardItem?: em.Artboard;
+  zoom?: number;
 }
 
 const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
-  const { activeArtboard, activeArtboardItem } = props;
-
-  const handleWheel = (e: WheelEvent) => {
-    if (e.ctrlKey) {
-      const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'activeArtboardFrame' } });
-      if (activeArtboardFrame) {
-        activeArtboardFrame.remove();
-      }
-    }
-  }
+  const { activeArtboard, activeArtboardItem, zoom } = props;
 
   useEffect(() => {
     updateActiveArtboardFrame({activeArtboard: activeArtboard, byId: {[activeArtboard]: activeArtboardItem}} as LayerState, true);
-    document.getElementById('canvas').addEventListener('wheel', handleWheel);
     return () => {
       const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'activeArtboardFrame' } });
-      document.getElementById('canvas').removeEventListener('wheel', handleWheel);
       if (activeArtboardFrame) {
         activeArtboardFrame.remove();
       }
     }
-  }, [activeArtboard, activeArtboardItem]);
+  }, [activeArtboard, activeArtboardItem, zoom]);
 
   return (
     <div />
@@ -42,11 +32,13 @@ const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
 const mapStateToProps = (state: RootState): {
   activeArtboard: string;
   activeArtboardItem: em.Artboard;
+  zoom: number;
 } => {
-  const { layer } = state;
+  const { layer, canvasSettings } = state;
   const activeArtboard = layer.present.activeArtboard;
   const activeArtboardItem = layer.present.byId[activeArtboard] as em.Artboard;
-  return { activeArtboard, activeArtboardItem };
+  const zoom = canvasSettings.matrix[0];
+  return { activeArtboard, activeArtboardItem, zoom };
 };
 
 export default connect(

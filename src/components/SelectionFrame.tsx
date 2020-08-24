@@ -15,21 +15,10 @@ interface SelectionFrameProps {
 const SelectionFrame = (props: SelectionFrameProps): ReactElement => {
   const { selected, selectedById } = props;
 
-  const handleWheel = (e: WheelEvent) => {
-    if (e.ctrlKey) {
-      const selectionFrame = paperMain.project.getItem({ data: { id: 'selectionFrame' } });
-      if (selectionFrame) {
-        selectionFrame.remove();
-      }
-    }
-  }
-
   useEffect(() => {
     updateSelectionFrame({selected: selected, byId: selectedById} as LayerState, 'all', true);
-    document.getElementById('canvas').addEventListener('wheel', handleWheel);
     return () => {
       const selectionFrame = paperMain.project.getItem({ data: { id: 'selectionFrame' } });
-      document.getElementById('canvas').removeEventListener('wheel', handleWheel);
       if (selectionFrame) {
         selectionFrame.remove();
       }

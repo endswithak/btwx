@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement, useState, useLayoutEffect, useRef, useEffect } from 'react';
+import React, { ReactElement } from 'react';
 import SidebarDropzoneTop from './SidebarDropzoneTop';
 import SidebarDropzoneCenter from './SidebarDropzoneCenter';
 import SidebarDropzoneBottom from './SidebarDropzoneBottom';

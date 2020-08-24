@@ -1,20 +1,23 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
-import { SetCanvasMatrixPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
-import { setCanvasMatrix } from '../store/actions/canvasSettings';
+import { SetCanvasMatrixPayload, CanvasSettingsTypes, SetCanvasZoomingPayload } from '../store/actionTypes/canvasSettings';
+import { setCanvasMatrix, setCanvasZooming } from '../store/actions/canvasSettings';
 import { paperMain } from '../canvas';
 import TopbarButton from './TopbarButton';
 
 interface ZoomInButtonProps {
   setCanvasMatrix?(payload: SetCanvasMatrixPayload): CanvasSettingsTypes;
+  setCanvasZooming?(payload: SetCanvasZoomingPayload): CanvasSettingsTypes;
 }
 
 const ZoomInButton = (props: ZoomInButtonProps): ReactElement => {
-  const { setCanvasMatrix } = props;
+  const { setCanvasMatrix, setCanvasZooming } = props;
 
   const handleZoomInClick = (): void => {
     paperMain.view.zoom *= 2;
+    setCanvasZooming({zooming: true});
     setCanvasMatrix({matrix: paperMain.view.matrix.values});
+    setCanvasZooming({zooming: false});
   }
 
   return (
@@ -29,5 +32,5 @@ const ZoomInButton = (props: ZoomInButtonProps): ReactElement => {
 
 export default connect(
   null,
-  { setCanvasMatrix }
+  { setCanvasMatrix, setCanvasZooming }
 )(ZoomInButton);

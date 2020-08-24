@@ -195,7 +195,6 @@ class DragTool {
       this.toBounds = new paperMain.Rectangle(this.fromBounds);
       this.snapTool.snapBounds = this.toBounds.clone();
       this.updateSnapPoints();
-      updateSelectionFrame(this.state.layer.present, this.moveHandle ? 'move' : 'none');
     }
   }
   onMouseDrag(event: paper.ToolEvent): void {
@@ -291,8 +290,6 @@ class DragTool {
         if (this.ref) {
           this.ref.remove();
         }
-      } else {
-        updateSelectionFrame(this.state.layer.present);
       }
       this.disable();
     }

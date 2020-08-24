@@ -38,7 +38,11 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
             : theme.text.lighter
           }} />
       </div>
-    : <div className='c-sidebar-layer__icon c-sidebar-layer__icon--chevron' />
+    : <div
+        className='c-sidebar-layer__icon c-sidebar-layer__icon--chevron'
+        style={{
+          pointerEvents: 'none'
+        }} />
   );
 }
 

@@ -5,6 +5,7 @@ import {
   SET_TWEEN_DRAWER_EVENT,
   SET_TWEEN_DRAWER_TWEEN_HOVER,
   SET_TWEEN_DRAWER_TWEEN_EDITING,
+  SET_TWEEN_DRAWER_EVENT_SORT,
   TweenDrawerTypes,
 } from '../actionTypes/tweenDrawer';
 
@@ -14,6 +15,7 @@ export interface TweenDrawerState {
   eventHover: string;
   tweenHover: string;
   tweenEditing: string;
+  eventSort: em.TweenEventSort;
 }
 
 const initialState: TweenDrawerState = {
@@ -21,7 +23,8 @@ const initialState: TweenDrawerState = {
   event: null,
   eventHover: null,
   tweenHover: null,
-  tweenEditing: null
+  tweenEditing: null,
+  eventSort: 'none'
 };
 
 export default (state = initialState, action: TweenDrawerTypes): TweenDrawerState => {
@@ -64,6 +67,12 @@ export default (state = initialState, action: TweenDrawerTypes): TweenDrawerStat
       return {
         ...state,
         tweenEditing: action.payload.id
+      };
+    }
+    case SET_TWEEN_DRAWER_EVENT_SORT: {
+      return {
+        ...state,
+        eventSort: action.payload.eventSort
       };
     }
     default:

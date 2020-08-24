@@ -4,8 +4,8 @@ import { LayerState } from '../store/reducers/layer';
 import { connect } from 'react-redux';
 import TopbarDropdownButton from './TopbarDropdownButton';
 import { paperMain } from '../canvas';
-import { SetCanvasMatrixPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
-import { setCanvasMatrix } from '../store/actions/canvasSettings';
+import { SetCanvasMatrixPayload, CanvasSettingsTypes, SetCanvasZoomingPayload } from '../store/actionTypes/canvasSettings';
+import { setCanvasMatrix, setCanvasZooming } from '../store/actions/canvasSettings';
 import { getSelectionBounds, getCanvasBounds, getSelectionCenter, getCanvasCenter } from '../store/selectors/layer';
 import ZoomOutButton from './ZoomOutButton';
 import ZoomInButton from './ZoomInButton';
@@ -21,14 +21,21 @@ interface ZoomButtonProps {
     [id: string]: em.Layer;
   };
   setCanvasMatrix?(payload: SetCanvasMatrixPayload): CanvasSettingsTypes;
+  setCanvasZooming?(payload: SetCanvasZoomingPayload): CanvasSettingsTypes;
 }
 
 const ZoomButton = (props: ZoomButtonProps): ReactElement => {
-  const { zoom, selected, canArtboardZoom, allLayerIds, layerById, canSelectedZoom, canCanvasZoom, setCanvasMatrix } = props;
+  const { zoom, selected, canArtboardZoom, allLayerIds, layerById, canSelectedZoom, canCanvasZoom, setCanvasMatrix, setCanvasZooming } = props;
+
+  const setZoom = () => {
+    setCanvasZooming({zooming: true});
+    setCanvasMatrix({matrix: paperMain.view.matrix.values});
+    setCanvasZooming({zooming: false});
+  }
 
   const handlePercentageZoom = (percentage: number) => {
     paperMain.view.zoom = percentage;
-    setCanvasMatrix({matrix: paperMain.view.matrix.values});
+    setZoom();
   }
 
   const handleCanvasZoom = () => {
@@ -53,7 +60,7 @@ const ZoomButton = (props: ZoomButtonProps): ReactElement => {
       const newZoom = (viewDim / constrainingDim.dim) * paperMain.view.zoom;
       paperMain.view.center = canvasCenter;
       paperMain.view.zoom = newZoom;
-      setCanvasMatrix({matrix: paperMain.view.matrix.values});
+      setZoom();
     }
   }
 
@@ -79,7 +86,7 @@ const ZoomButton = (props: ZoomButtonProps): ReactElement => {
       const newZoom = (viewDim / constrainingDim.dim) * paperMain.view.zoom;
       paperMain.view.center = selectionCenter;
       paperMain.view.zoom = newZoom;
-      setCanvasMatrix({matrix: paperMain.view.matrix.values});
+      setZoom();
     }
   }
 
@@ -140,5 +147,5 @@ const mapStateToProps = (state: RootState): {
 
 export default connect(
   mapStateToProps,
-  { setCanvasMatrix }
+  { setCanvasMatrix, setCanvasZooming }
 )(ZoomButton);

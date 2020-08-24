@@ -1,15 +1,18 @@
 import React, { useContext, ReactElement } from 'react';
+import { connect } from 'react-redux';
+import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 import Icon from './Icon';
 
 interface SidebarLayerIconProps {
   layer: em.Layer;
   dragGhost: boolean;
+  maskItem?: em.Shape;
 }
 
 const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layer, dragGhost } = props;
+  const { layer, dragGhost, maskItem } = props;
 
   return (
     <div
@@ -20,7 +23,7 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
             case 'Artboard':
               return 'artboard'
             case 'Group':
-              return 'folder';
+              return maskItem ? 'shape' : 'folder';
             case 'Shape':
               return 'shape';
             case 'Text':
@@ -29,8 +32,8 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
               return 'image';
           }
         })()}
-        small={layer.type === 'Shape'}
-        shapeId={layer.type === 'Shape' ? layer.id : null}
+        small={layer.type === 'Shape' || maskItem !== null}
+        shapeId={layer.type === 'Shape' ? layer.id : maskItem ? maskItem.id : null}
         style={{
           fill: layer.selected && !dragGhost
           ? theme.text.onPrimary
@@ -46,4 +49,16 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
   );
 }
 
-export default SidebarLayerIcon;
+const mapStateToProps = (state: RootState, ownProps: SidebarLayerIconProps) => {
+  const { layer } = state;
+  const layerItem = ownProps.layer;
+  const mask = layerItem.type === 'Group' && (layerItem as em.Group).clipped ? (() => {
+    return (layerItem as em.Group).children.find((id) => layer.present.byId[id].mask);
+  })() : null;
+  const maskItem = mask ? layer.present.byId[mask] : null;
+  return { maskItem };
+};
+
+export default connect(
+  mapStateToProps
+)(SidebarLayerIcon);

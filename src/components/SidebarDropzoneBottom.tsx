@@ -1,8 +1,8 @@
 import React, { useContext, ReactElement, useState, useRef, SyntheticEvent } from 'react';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
-import { insertLayersBelow } from '../store/actions/layer';
-import { InsertLayersBelowPayload } from '../store/actionTypes/layer';
+import { insertLayersBelow, insertLayersAbove } from '../store/actions/layer';
+import { InsertLayersBelowPayload, InsertLayersAbovePayload } from '../store/actionTypes/layer';
 import { LayerTypes } from '../store/actionTypes/layer';
 import { ThemeContext } from './ThemeProvider';
 
@@ -16,14 +16,15 @@ interface SidebarDropzoneBottomProps {
   };
   setDragLayers(layers: string[]): void;
   setDragging(dragging: boolean): void;
-  insertLayersBelow?(payload: InsertLayersBelowPayload): LayerTypes;
+  insertLayersAbove?(payload: InsertLayersAbovePayload): LayerTypes;
+  // insertLayersBelow?(payload: InsertLayersBelowPayload): LayerTypes;
 }
 
 const SidebarDropzoneBottom = (props: SidebarDropzoneBottomProps): ReactElement => {
   const ref = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(false);
   const theme = useContext(ThemeContext);
-  const { layer, depth, dragLayers, dragLayerById, setDragLayers, setDragging, insertLayersBelow, leftSidebarWidth } = props;
+  const { layer, depth, dragLayers, dragLayerById, setDragLayers, setDragging, insertLayersAbove, leftSidebarWidth } = props;
 
   const handleDragOver = (e: SyntheticEvent) => {
     if (dragLayers && !dragLayers.some((id) => document.getElementById(id).contains(ref.current))) {
@@ -43,9 +44,9 @@ const SidebarDropzoneBottom = (props: SidebarDropzoneBottomProps): ReactElement 
   const handleDrop = (e: SyntheticEvent) => {
     if (active) {
       e.preventDefault();
-      insertLayersBelow({
+      insertLayersAbove({
         layers: dragLayers,
-        below: layer.id
+        above: layer.id
       });
     }
     setDragLayers(null);
@@ -79,5 +80,5 @@ const mapStateToProps = (state: RootState, ownProps: SidebarDropzoneBottomProps)
 
 export default connect(
   mapStateToProps,
-  { insertLayersBelow }
+  { insertLayersAbove }
 )(SidebarDropzoneBottom);

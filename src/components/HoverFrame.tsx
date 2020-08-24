@@ -14,21 +14,10 @@ interface HoverFrameProps {
 const HoverFrame = (props: HoverFrameProps): ReactElement => {
   const { selected, hover, hoverItem } = props;
 
-  const handleWheel = (e: WheelEvent) => {
-    if (e.ctrlKey) {
-      const hoverFrame = paperMain.project.getItem({ data: { id: 'hoverFrame' } });
-      if (hoverFrame) {
-        hoverFrame.remove();
-      }
-    }
-  }
-
   useEffect(() => {
     updateHoverFrame({byId: hoverItem ? {[hover]: hoverItem} : {}, selected: selected, hover: hover} as LayerState);
-    document.getElementById('canvas').addEventListener('wheel', handleWheel);
     return () => {
       const hoverFrame = paperMain.project.getItem({ data: { id: 'hoverFrame' } });
-      document.getElementById('canvas').removeEventListener('wheel', handleWheel);
       if (hoverFrame) {
         hoverFrame.remove();
       }

@@ -253,12 +253,11 @@ class ArtboardTool {
     this.snapTool.snapPoints = state.layer.present.inView.snapPoints.filter((snapPoint) => {
       if (snapPoint.axis === 'x') {
         return snapPoint.point !== this.from.x;
-      } else {
+      }
+      if (snapPoint.axis === 'y') {
         return snapPoint.point !== this.from.y;
       }
     });
-    this.snapTool.snap.x = null;
-    this.snapTool.snap.y = null;
   }
   onMouseDrag(event: paper.ToolEvent): void {
     this.to = event.point;

@@ -382,13 +382,12 @@ class ShapeTool {
     ));
     this.snapTool.snapPoints = state.layer.present.inView.snapPoints.filter((snapPoint) => {
       if (snapPoint.axis === 'x') {
-        return snapPoint.point !== this.from.x;
-      } else {
-        return snapPoint.point !== this.from.y;
+        return snapPoint.point !== this.from.x && (snapPoint.point > this.from.x + 1 || snapPoint.point < this.from.x - 1);
+      }
+      if (snapPoint.axis === 'y') {
+        return snapPoint.point !== this.from.y && (snapPoint.point > this.from.y + 1 || snapPoint.point < this.from.y - 1);
       }
     });
-    this.snapTool.snap.x = null;
-    this.snapTool.snap.y = null;
   }
   onMouseDrag(event: paper.ToolEvent): void {
     this.x += event.delta.x;

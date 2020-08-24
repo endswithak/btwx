@@ -1,4 +1,4 @@
-import React, { ReactElement, useState, useRef } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
 import SidebarDropzone from './SidebarDropzone';
@@ -7,12 +7,13 @@ import SidebarLayerDragGhosts from './SidebarLayerDragGhosts';
 
 interface SidebarLayerTreeProps {
   page: em.Group;
+  layers: string[];
 }
 
 const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
   const [dragging, setDragging] = useState(false);
   const [dragLayers, setDragLayers] = useState<string[]>(null);
-  const { page } = props;
+  const { page, layers } = props;
 
   return (
     <div>
@@ -27,7 +28,7 @@ const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
         : null
       }
       {
-        page.children.map((layer: string, index: number) => (
+        layers.map((layer: string, index: number) => (
           <SidebarLayer
             key={index}
             layer={layer}
@@ -51,9 +52,9 @@ const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
 
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
-  return {
-    page: layer.present.byId[layer.present.page]
-  };
+  const page = layer.present.byId[layer.present.page];
+  const layers = [...page.children].reverse();
+  return {page, layers};
 };
 
 export default connect(
