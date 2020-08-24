@@ -7,6 +7,8 @@ import { Draggable } from 'gsap/Draggable';
 import { ThemeContext } from './ThemeProvider';
 import { setTweenDrawerTweenHover, setTweenDrawerTweenEditing } from '../store/actions/tweenDrawer';
 import { SetTweenDrawerTweenHoverPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
+import { setLayerHover } from '../store/actions/layer';
+import { SetLayerHoverPayload, LayerTypes } from '../store/actionTypes/layer';
 import TimelineLeftHandle from './TimelineLeftHandle';
 import TimelineRightHandle from './TimelineRightHandle';
 import TimelineTweenHandle from './TimelineTweenHandle';
@@ -17,19 +19,29 @@ interface TweenDrawerEventLayerTweenTimelineProps {
   tweenId: string;
   tweenHover?: string;
   tweenEditing?: string;
+  hover?: string;
+  tweenLayer?: string;
   setTweenDrawerTweenHover?(payload: SetTweenDrawerTweenHoverPayload): TweenDrawerTypes;
+  setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
 }
 
 const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTimelineProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { tweenId, tweenHover, tweenEditing, setTweenDrawerTweenHover } = props;
+  const { tweenId, tweenHover, tweenEditing, setTweenDrawerTweenHover, hover, tweenLayer, setLayerHover } = props;
 
   const handleMouseEnter = (): void => {
-    setTweenDrawerTweenHover({id: tweenId});
+    if (!tweenEditing) {
+      if (hover !== tweenLayer) {
+        setLayerHover({id: tweenLayer});
+      }
+      setTweenDrawerTweenHover({id: tweenId});
+    }
   }
 
   const handleMouseLeave = (): void => {
-    setTweenDrawerTweenHover({id: null});
+    if (!tweenEditing) {
+      setTweenDrawerTweenHover({id: null});
+    }
   }
 
   return (
@@ -57,17 +69,21 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
   );
 }
 
-const mapStateToProps = (state: RootState): {
+const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventLayerTweenTimelineProps): {
   tweenHover: string;
   tweenEditing: string;
+  hover: string;
+  tweenLayer: string;
 } => {
-  const { tweenDrawer } = state;
+  const { tweenDrawer, layer } = state;
   const tweenHover = tweenDrawer.tweenHover;
   const tweenEditing = tweenDrawer.tweenEditing;
-  return { tweenHover, tweenEditing };
+  const hover = layer.present.hover;
+  const tweenLayer = layer.present.tweenById[ownProps.tweenId].layer;
+  return { tweenHover, tweenEditing, hover, tweenLayer };
 };
 
 export default connect(
   mapStateToProps,
-  { setTweenDrawerTweenHover, setTweenDrawerTweenEditing }
+  { setTweenDrawerTweenHover, setTweenDrawerTweenEditing, setLayerHover }
 )(TweenDrawerEventLayerTweenTimeline);

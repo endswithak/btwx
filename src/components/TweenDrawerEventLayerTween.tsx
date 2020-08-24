@@ -4,6 +4,8 @@ import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { setTweenDrawerTweenHover } from '../store/actions/tweenDrawer';
 import { SetTweenDrawerTweenHoverPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
+import { setLayerHover } from '../store/actions/layer';
+import { SetLayerHoverPayload, LayerTypes } from '../store/actionTypes/layer';
 import TweenDrawerFreezeTween from './TweenDrawerFreezeTween';
 import TweenDrawerEditEase from './TweenDrawerEditEase';
 
@@ -14,19 +16,28 @@ interface TweenDrawerEventLayerTweenProps {
   tweenEditing?: string;
   tween?: em.Tween;
   titleCaseProp?: string;
+  hover?: string;
   setTweenDrawerTweenHover?(payload: SetTweenDrawerTweenHoverPayload): TweenDrawerTypes;
+  setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
 }
 
 const TweenDrawerEventLayerTween = (props: TweenDrawerEventLayerTweenProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { tweenId, index, tween, setTweenDrawerTweenHover, tweenEditing, tweenHover, titleCaseProp } = props;
+  const { tweenId, index, tween, setTweenDrawerTweenHover, tweenEditing, tweenHover, titleCaseProp, hover, setLayerHover } = props;
 
   const handleMouseEnter = () => {
-    setTweenDrawerTweenHover({id: tweenId});
+    if (!tweenEditing) {
+      if (hover !== tween.layer) {
+        setLayerHover({id: tween.layer});
+      }
+      setTweenDrawerTweenHover({id: tweenId});
+    }
   }
 
   const handleMouseLeave = () => {
-    setTweenDrawerTweenHover({id: null});
+    if (!tweenEditing) {
+      setTweenDrawerTweenHover({id: null});
+    }
   }
 
   return (
@@ -69,10 +80,11 @@ const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventLayerTweenP
     const reg = tween.prop.replace( /([A-Z])/g, " $1" );
     return reg.charAt(0).toUpperCase() + reg.slice(1);
   })();
-  return { tween, tweenHover, tweenEditing, titleCaseProp };
+  const hover = layer.present.hover;
+  return { tween, tweenHover, tweenEditing, titleCaseProp, hover };
 };
 
 export default connect(
   mapStateToProps,
-  { setTweenDrawerTweenHover }
+  { setTweenDrawerTweenHover, setLayerHover }
 )(TweenDrawerEventLayerTween);

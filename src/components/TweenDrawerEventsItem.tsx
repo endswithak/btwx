@@ -58,6 +58,7 @@ const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement =>
 
   const handleDoubleClick = () => {
     setTweenDrawerEvent({id});
+    setLayerHover({id: null});
   }
 
   return (

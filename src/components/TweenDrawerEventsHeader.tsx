@@ -14,10 +14,15 @@ interface TweenDrawerEventsHeaderProps {
   setTweenDrawerEventSort?(payload: SetTweenDrawerEventSortPayload): TweenDrawerTypes;
 }
 
-const HeaderItem = styled.div`
-  cursor: pointer;
+interface HeaderItemProps {
+  isActive?: boolean;
+  isDisabled?: boolean;
+}
+
+const HeaderItem = styled.button<HeaderItemProps>`
+  color: ${props => props.isActive ? props.theme.palette.primary : props.theme.text.lighter};
   :hover {
-    box-shadow: 0 1px 0 0 ${props => props.theme.palette.primary} inset;
+    box-shadow: ${props => !props.isDisabled ? `0 1px 0 0 ${props.theme.palette.primary} inset` : 'none'};
   }
 `;
 
@@ -50,15 +55,12 @@ const TweenDrawerEventsHeader = (props: TweenDrawerEventsHeaderProps): ReactElem
       style={{
         background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2
       }}>
-      <div
-        className='c-tween-drawer-events__item c-tween-drawer-events__item--labels'
-        style={{
-          color: theme.text.lighter
-        }}>
+      <div className='c-tween-drawer-events__item c-tween-drawer-events__item--labels'>
         <HeaderItem
           theme={theme}
           className='c-tween-drawer-events-item__module c-tween-drawer-events-item__module--label'
-          onClick={() => handleSort('layer')}>
+          onClick={() => handleSort('layer')}
+          isActive={eventSort === 'layer-asc' || eventSort === 'layer-dsc'}>
           layer
           {
             eventSort === 'layer-asc' || eventSort === 'layer-dsc'
@@ -74,7 +76,8 @@ const TweenDrawerEventsHeader = (props: TweenDrawerEventsHeaderProps): ReactElem
         <HeaderItem
           theme={theme}
           className='c-tween-drawer-events-item__module c-tween-drawer-events-item__module--label'
-          onClick={() => handleSort('event')}>
+          onClick={() => handleSort('event')}
+          isActive={eventSort === 'event-asc' || eventSort === 'event-dsc'}>
           event
           {
             eventSort === 'event-asc' || eventSort === 'event-dsc'
@@ -90,7 +93,8 @@ const TweenDrawerEventsHeader = (props: TweenDrawerEventsHeaderProps): ReactElem
         <HeaderItem
           theme={theme}
           className='c-tween-drawer-events-item__module c-tween-drawer-events-item__module--label'
-          onClick={() => handleSort('artboard')}>
+          onClick={() => handleSort('artboard')}
+          isActive={eventSort === 'artboard-asc' || eventSort === 'artboard-dsc'}>
           artboard
           {
             eventSort === 'artboard-asc' || eventSort === 'artboard-dsc'
@@ -106,7 +110,8 @@ const TweenDrawerEventsHeader = (props: TweenDrawerEventsHeaderProps): ReactElem
         <HeaderItem
           theme={theme}
           className='c-tween-drawer-events-item__module c-tween-drawer-events-item__module--label'
-          onClick={() => handleSort('destinationArtboard')}>
+          onClick={() => handleSort('destinationArtboard')}
+          isActive={eventSort === 'destinationArtboard-asc' || eventSort === 'destinationArtboard-dsc'}>
           destination
           {
             eventSort === 'destinationArtboard-asc' || eventSort === 'destinationArtboard-dsc'
@@ -119,10 +124,12 @@ const TweenDrawerEventsHeader = (props: TweenDrawerEventsHeaderProps): ReactElem
             : null
           }
         </HeaderItem>
-        <div
-          className='c-tween-drawer-events-item__module c-tween-drawer-events-item__module--label'>
+        <HeaderItem
+          theme={theme}
+          className='c-tween-drawer-events-item__module c-tween-drawer-events-item__module--label'
+          isDisabled>
           actions
-        </div>
+        </HeaderItem>
       </div>
     </div>
   );

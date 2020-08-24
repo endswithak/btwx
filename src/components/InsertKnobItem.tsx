@@ -35,17 +35,17 @@ const Item = styled.li<ItemProps>`
 const InsertKnobItem = (props: InsertKnobItemProps): ReactElement => {
   const { isActive, item, onMouseEnter, index, onClick } = props;
   const theme = useContext(ThemeContext);
-  const ref = useRef<HTMLLIElement>(null);
+  // const ref = useRef<HTMLLIElement>(null);
 
-  useEffect(() => {
-    if (ref.current) {
-      gsap.fromTo(ref.current, { scale: 0 }, { scale: 1, duration: 0.10, delay: 0.01 * index });
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (ref.current) {
+  //     gsap.fromTo(ref.current, { scale: 0 }, { scale: 1, duration: 0.10, delay: 0.01 * index });
+  //   }
+  // }, []);
 
   return (
     <Item
-      ref={ref}
+      // ref={ref}
       className='c-insert-knob__item'
       onClick={onClick}
       onMouseEnter={onMouseEnter}

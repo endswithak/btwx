@@ -56,10 +56,12 @@ const TimelineTweenHandle = (props: TimelineTweenHandleProps): ReactElement => {
         setTweenDrawerTweenEditing({id: tweenId});
         gsap.set(leftHandleTooltipElement, {display: 'inline'});
         leftHandleTooltipElement.innerHTML = `${(gsap.getProperty(leftHandleElement, 'x') as number / 4) / 100}s`;
+        document.body.style.cursor = 'grabbing';
       },
       onRelease: function() {
         setTweenDrawerTweenEditing({id: null});
         gsap.set(leftHandleTooltipElement, {display: 'none'});
+        document.body.style.cursor = 'auto';
       },
       onDrag: function() {
         gsap.set([leftHandleElement, rightHandleElement], {x: `+=${this.deltaX}`});
