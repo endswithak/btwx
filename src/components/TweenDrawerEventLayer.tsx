@@ -36,18 +36,17 @@ const TweenDrawerEventLayer = (props: TweenDrawerEventLayerProps): ReactElement 
     <div
       className='c-tween-drawer-event__layer'
       onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      style={{
-        boxShadow: id === hover
-        ? `2px 0 0 0 ${theme.palette.primary} inset`
-        : 'none'
-      }}>
+      onMouseLeave={handleMouseLeave}>
       <div
         className='c-tween-drawer-event-layer__tween'
         style={{
           background: layer.selected
           ? theme.palette.primary
           : 'none',
+          // boxShadow: layer.id === hover
+          // ? `0 0 0 1px ${theme.palette.primary} inset`
+          // : 'none',
+          borderRadius: theme.unit,
           cursor: 'pointer'
         }}>
         <div className='c-tween-drawer__icon'>

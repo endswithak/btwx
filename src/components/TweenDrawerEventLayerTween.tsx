@@ -48,9 +48,6 @@ const TweenDrawerEventLayerTween = (props: TweenDrawerEventLayerTweenProps): Rea
       style={{
         background: tweenId === tweenHover && !tweenEditing || tweenId === tweenEditing
         ? theme.background.z3
-        : 'none',
-        boxShadow: tweenId === tweenHover && !tweenEditing || tweenId === tweenEditing
-        ? `2px 0 0 0 ${theme.palette.primary} inset`
         : 'none'
       }}>
       <div className='c-tween-drawer__icon' />

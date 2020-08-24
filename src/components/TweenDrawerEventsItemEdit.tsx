@@ -1,9 +1,9 @@
-import React, { useContext, ReactElement, useState } from 'react';
+import React, { useContext, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { setTweenDrawerEvent } from '../store/actions/tweenDrawer';
 import { SetTweenDrawerEventPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
 import { ThemeContext } from './ThemeProvider';
-import Icon from './Icon';
+import IconButton from './IconButton';
 
 interface TweenDrawerEventsItemEditProps {
   id: string;
@@ -11,17 +11,8 @@ interface TweenDrawerEventsItemEditProps {
 }
 
 const TweenDrawerEventsItemEdit = (props: TweenDrawerEventsItemEditProps): ReactElement => {
-  const [hover, setHover] = useState(false);
   const theme = useContext(ThemeContext);
   const { id, setTweenDrawerEvent } = props;
-
-  const handleMouseEnter = () => {
-    setHover(true);
-  }
-
-  const handleMouseLeave = () => {
-    setHover(false);
-  }
 
   const handleClick = () => {
     setTweenDrawerEvent({id});
@@ -29,21 +20,14 @@ const TweenDrawerEventsItemEdit = (props: TweenDrawerEventsItemEditProps): React
 
   return (
     <div
-      className={`c-tween-drawer-events-item__action c-tween-drawer-events-item__action--edit`}
-      onClick={handleClick}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      className='c-tween-drawer-events-item__action c-tween-drawer-events-item__action--edit'
       style={{
         color: theme.palette.primary
       }}>
-      {/* <Icon
-        name='edit'
-        style={{
-          fill: hover
-          ? theme.text.onPrimary
-          : theme.text.lighter
-        }} /> */}
-      Edit
+      <IconButton
+        onClick={handleClick}
+        icon='edit' />
+      {/* Edit */}
     </div>
   );
 }

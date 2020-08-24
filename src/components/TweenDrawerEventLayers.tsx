@@ -16,18 +16,29 @@ interface TweenDrawerEventLayersProps {
       [id: string]: em.Layer;
     };
   };
+  scrolled: boolean;
+  setScrolled(scrolled: boolean): void;
   setTweenDrawerEvent?(payload: SetTweenDrawerEventPayload): TweenDrawerTypes;
 }
 
 const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElement => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
-  const { tweenEventLayers, setTweenDrawerEvent } = props;
+  const { tweenEventLayers, setTweenDrawerEvent, scrolled, setScrolled } = props;
 
   // const handleScroll = (e) => {
   //   const layersTimeline = document.getElementById('tween-drawer-event-layers-timeline');
   //   layersTimeline.scrollTop = scrollRef.current.scrollTop;
   // }
+
+  const handleScroll = (e) => {
+    if (scrolled && e.target.scrollTop === 0) {
+      setScrolled(false);
+    }
+    if (!scrolled && e.target.scrollTop > 0) {
+      setScrolled(true);
+    }
+  }
 
   return (
     <div
@@ -36,7 +47,11 @@ const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElemen
         boxShadow: `-1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
       }}>
       <div
-        className='c-tween-drawer-event-layers__header'>
+        className='c-tween-drawer-event-layers__header'
+        style={{
+          background: theme.name === 'dark' ? theme.background.z3 : theme.background.z0,
+          boxShadow: scrolled ? `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset, 0 4px 16px 0 rgba(0,0,0,0.16)` : `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
+        }}>
         <div
           className={`c-tween-drawer-event-layer__tween`}
           style={{
@@ -58,7 +73,7 @@ const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElemen
       <ScrollSyncPane>
         <div
           ref={scrollRef}
-          //onScroll={handleScroll}
+          onScroll={handleScroll}
           id='tween-drawer-event-layers'
           className='c-tween-drawer-event-layers__layers'>
           {

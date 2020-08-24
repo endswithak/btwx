@@ -34,8 +34,8 @@ interface ItemProps {
 
 const Item = styled.div<ItemProps>`
   color: ${props => props.theme.text.base};
-  box-shadow: ${props => props.hovering ? `2px 0 0 0 ${props.theme.palette.primary} inset` : 'none'};
-  background: ${props => props.hovering ? props.theme.background.z3 : 'none'};
+  box-shadow: ${props => props.hovering ? `0 0 0 1px ${props.theme.palette.primary} inset` : 'none'};
+  /* background: ${props => props.hovering ? props.theme.background.z3 : 'none'}; */
   cursor: pointer;
 `;
 

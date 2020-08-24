@@ -13,12 +13,14 @@ interface TweenDrawerEventLayersTimelineProps {
       [id: string]: em.Layer;
     };
   };
+  scrolled: boolean;
+  setScrolled(scrolled: boolean): void;
 }
 
 const TweenDrawerEventLayersTimeline = (props: TweenDrawerEventLayersTimelineProps): ReactElement => {
   const timelineRef = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
-  const { tweenEventLayers } = props;
+  const { tweenEventLayers, scrolled, setScrolled } = props;
 
   // const handleScroll = (e) => {
   //   const layers = document.getElementById('tween-drawer-event-layers');
@@ -31,7 +33,8 @@ const TweenDrawerEventLayersTimeline = (props: TweenDrawerEventLayersTimelinePro
         <div
           className='c-tween-drawer-event-layers-timeline__header'
           style={{
-            boxShadow: `0 1px 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
+            background: theme.name === 'dark' ? theme.background.z3 : theme.background.z0,
+            boxShadow: scrolled ? `0 -1px 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset, 0 4px 16px 0 rgba(0,0,0,0.16)` : `0 -1px 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
           }}>
           {
             [...Array(200).keys()].map((item, index) => (
@@ -48,7 +51,7 @@ const TweenDrawerEventLayersTimeline = (props: TweenDrawerEventLayersTimelinePro
                     : (index + 1) % 5 === 0
                       ? '50%'
                       : '25%',
-                  background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
+                  // background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
                   boxShadow: `-1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`,
                   flexShrink: 0,
                   position: 'relative',

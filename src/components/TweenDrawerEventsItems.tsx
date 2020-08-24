@@ -6,14 +6,27 @@ import TweenDrawerEventsItem from './TweenDrawerEventsItem';
 
 interface TweenDrawerEventsItemsProps {
   tweenEvents?: string[];
+  scrolled: boolean;
+  setScrolled(scrolled: boolean): void;
 }
 
 const TweenDrawerEventsItems = (props: TweenDrawerEventsItemsProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { tweenEvents } = props;
+  const { tweenEvents, scrolled, setScrolled } = props;
+
+  const handleScroll = (e) => {
+    if (scrolled && e.target.scrollTop === 0) {
+      setScrolled(false);
+    }
+    if (!scrolled && e.target.scrollTop > 0) {
+      setScrolled(true);
+    }
+  }
 
   return (
-    <div className='c-tween-drawer-events__items'>
+    <div
+      className='c-tween-drawer-events__items'
+      onScroll={handleScroll}>
       {
         tweenEvents.map((tweenEvent, index) => (
           <TweenDrawerEventsItem

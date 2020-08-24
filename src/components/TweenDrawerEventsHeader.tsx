@@ -8,6 +8,7 @@ import { SetTweenDrawerEventSortPayload, TweenDrawerTypes } from '../store/actio
 import Icon from './Icon';
 
 interface TweenDrawerEventsHeaderProps {
+  scrolled: boolean;
   eventSort?: em.TweenEventSort;
   sortOrder?: 'asc' | 'dsc';
   sortBy?: 'layer' | 'event' | 'artboard' | 'destinationArtboard';
@@ -21,16 +22,18 @@ interface HeaderItemProps {
 
 const HeaderItem = styled.button<HeaderItemProps>`
   color: ${props => props.isActive ? props.theme.palette.primary : props.theme.text.lighter};
+  font-weight: ${props => props.isActive ? 'bold' : 'normal'};
   :hover {
-    box-shadow: ${props => !props.isDisabled ? `0 1px 0 0 ${props.theme.palette.primary} inset` : 'none'};
+    color: ${props => props.isActive && !props.isDisabled ? props.theme.palette.primaryHover : props.theme.text.base};
+    /* box-shadow: ${props => !props.isDisabled ? `0 1px 0 0 ${props.theme.palette.primary} inset` : 'none'}; */
   }
 `;
 
 const TweenDrawerEventsHeader = (props: TweenDrawerEventsHeaderProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { eventSort, setTweenDrawerEventSort, sortOrder, sortBy } = props;
+  const { scrolled, eventSort, setTweenDrawerEventSort, sortOrder, sortBy } = props;
 
-  const handleSort = (by: 'layer' | 'event' | 'artboard' | 'destinationArtboard') => {
+  const handleSort = (by: 'layer' | 'event' | 'artboard' | 'destinationArtboard'): void => {
     if (sortOrder) {
       if (sortBy === by) {
         switch(sortOrder) {
@@ -53,13 +56,14 @@ const TweenDrawerEventsHeader = (props: TweenDrawerEventsHeaderProps): ReactElem
     <div
       className='c-tween-drawer-events__header'
       style={{
-        background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2
+        background: theme.name === 'dark' ? theme.background.z3 : theme.background.z0,
+        boxShadow: scrolled ? `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset, 0 4px 16px 0 rgba(0,0,0,0.16)` : `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
       }}>
       <div className='c-tween-drawer-events__item c-tween-drawer-events__item--labels'>
         <HeaderItem
           theme={theme}
           className='c-tween-drawer-events-item__module c-tween-drawer-events-item__module--label'
-          onClick={() => handleSort('layer')}
+          onClick={(): void => handleSort('layer')}
           isActive={eventSort === 'layer-asc' || eventSort === 'layer-dsc'}>
           layer
           {
@@ -76,7 +80,7 @@ const TweenDrawerEventsHeader = (props: TweenDrawerEventsHeaderProps): ReactElem
         <HeaderItem
           theme={theme}
           className='c-tween-drawer-events-item__module c-tween-drawer-events-item__module--label'
-          onClick={() => handleSort('event')}
+          onClick={(): void => handleSort('event')}
           isActive={eventSort === 'event-asc' || eventSort === 'event-dsc'}>
           event
           {
@@ -93,7 +97,7 @@ const TweenDrawerEventsHeader = (props: TweenDrawerEventsHeaderProps): ReactElem
         <HeaderItem
           theme={theme}
           className='c-tween-drawer-events-item__module c-tween-drawer-events-item__module--label'
-          onClick={() => handleSort('artboard')}
+          onClick={(): void => handleSort('artboard')}
           isActive={eventSort === 'artboard-asc' || eventSort === 'artboard-dsc'}>
           artboard
           {
@@ -110,7 +114,7 @@ const TweenDrawerEventsHeader = (props: TweenDrawerEventsHeaderProps): ReactElem
         <HeaderItem
           theme={theme}
           className='c-tween-drawer-events-item__module c-tween-drawer-events-item__module--label'
-          onClick={() => handleSort('destinationArtboard')}
+          onClick={(): void => handleSort('destinationArtboard')}
           isActive={eventSort === 'destinationArtboard-asc' || eventSort === 'destinationArtboard-dsc'}>
           destination
           {
@@ -143,10 +147,10 @@ const mapStateToProps = (state: RootState): {
   const { tweenDrawer } = state;
   const eventSort = tweenDrawer.eventSort;
   const sortOrder = eventSort !== 'none' ? eventSort.substring(eventSort.length, eventSort.length - 3) as 'asc' | 'dsc' : null;
-  const sortBy = eventSort !== 'none' ? (() => {
+  const sortBy = eventSort !== 'none' ? ((): 'layer' | 'event' | 'artboard' | 'destinationArtboard' => {
     const hyphenIndex = eventSort.indexOf('-');
-    return eventSort.substring(0, hyphenIndex);
-  })() as 'layer' | 'event' | 'artboard' | 'destinationArtboard' : null;
+    return eventSort.substring(0, hyphenIndex) as 'layer' | 'event' | 'artboard' | 'destinationArtboard';
+  })() : null;
   return { eventSort, sortOrder, sortBy };
 };
 
