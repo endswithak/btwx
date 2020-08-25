@@ -7,7 +7,6 @@
 
 .c-tween-drawer-event__layers
   height: 100%
-  width: 224px
   display: flex
   flex-direction: column
   flex-shrink: 0
@@ -77,6 +76,11 @@
   flex-grow: 2
   width: 100%
   line-height: $unit * 8
+  overflow: hidden
+  white-space: nowrap
+  text-overflow: ellipsis
+  font-family: $fontFamily
+  text-align: left
 
   &::selection
     background: none

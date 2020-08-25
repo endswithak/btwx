@@ -3,9 +3,55 @@ import electron, { app, BrowserWindow, ipcMain, systemPreferences, Menu, dialog,
 import fs from 'fs';
 import path from 'path';
 import menu from './menu';
-import preferences from './preferences';
+// import preferences from './preferences';
 import sharp from 'sharp';
-import { PREVIEW_TOPBAR_HEIGHT, MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT } from './constants';
+import {
+  PREVIEW_TOPBAR_HEIGHT,
+  MAC_TITLEBAR_HEIGHT,
+  WINDOWS_TITLEBAR_HEIGHT,
+  DEFAULT_LEFT_SIDEBAR_WIDTH,
+  DEFAULT_RIGHT_SIDEBAR_WIDTH,
+  DEFAULT_TWEEN_DRAWER_HEIGHT,
+  DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH
+} from './constants';
+
+const isMac = process.platform === 'darwin';
+
+if (isMac) {
+  if (systemPreferences.getUserDefault('theme', 'string')) {
+    systemPreferences.removeUserDefault('theme');
+  }
+  if (systemPreferences.getUserDefault('leftSidebarWidth', 'integer')) {
+    systemPreferences.removeUserDefault('leftSidebarWidth');
+  }
+  if (systemPreferences.getUserDefault('rightSidebarWidth', 'integer')) {
+    systemPreferences.removeUserDefault('rightSidebarWidth');
+  }
+  if (systemPreferences.getUserDefault('tweenDrawerHeight', 'integer')) {
+    systemPreferences.removeUserDefault('tweenDrawerHeight');
+  }
+  if (systemPreferences.getUserDefault('tweenDrawerLayersWidth', 'integer')) {
+    systemPreferences.removeUserDefault('tweenDrawerLayersWidth');
+  }
+}
+
+if (isMac) {
+  if (!systemPreferences.getUserDefault('theme', 'string')) {
+    systemPreferences.setUserDefault('theme', 'string', nativeTheme.shouldUseDarkColors ? 'dark' : 'light');
+  }
+  if (!systemPreferences.getUserDefault('leftSidebarWidth', 'integer')) {
+    systemPreferences.setUserDefault('leftSidebarWidth', 'integer', DEFAULT_LEFT_SIDEBAR_WIDTH as any);
+  }
+  if (!systemPreferences.getUserDefault('rightSidebarWidth', 'integer')) {
+    systemPreferences.setUserDefault('rightSidebarWidth', 'integer', DEFAULT_RIGHT_SIDEBAR_WIDTH as any);
+  }
+  if (!systemPreferences.getUserDefault('tweenDrawerHeight', 'integer')) {
+    systemPreferences.setUserDefault('tweenDrawerHeight', 'integer', DEFAULT_TWEEN_DRAWER_HEIGHT as any);
+  }
+  if (!systemPreferences.getUserDefault('tweenDrawerLayersWidth', 'integer')) {
+    systemPreferences.setUserDefault('tweenDrawerLayersWidth', 'integer', DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH as any);
+  }
+}
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
 

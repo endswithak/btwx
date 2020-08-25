@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement, useState } from 'react';
+import React, { useContext, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
@@ -40,26 +40,18 @@ const TweenDrawerEventLayer = (props: TweenDrawerEventLayerProps): ReactElement 
       <div
         className='c-tween-drawer-event-layer__tween'
         style={{
-          background: layer.selected
-          ? theme.palette.primary
-          : 'none',
-          // boxShadow: layer.id === hover
-          // ? `0 0 0 1px ${theme.palette.primary} inset`
-          // : 'none',
           borderRadius: theme.unit,
           cursor: 'pointer'
         }}>
         <div className='c-tween-drawer__icon'>
           <SidebarLayerIcon
             layer={layer}
-            dragGhost={false} />
+            dragGhost={true} />
         </div>
         <div
           className='c-tween-drawer-event-layer-tween__name'
           style={{
-            color: layer.selected
-            ? theme.text.onPrimary
-            : theme.text.base,
+            color: theme.text.base
           }}
           onClick={handleClick}>
           {layer.name}

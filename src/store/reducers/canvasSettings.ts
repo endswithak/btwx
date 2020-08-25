@@ -1,7 +1,7 @@
 import { addItem, removeItem } from '../utils/general';
 import { remote } from 'electron';
-import { DEFAULT_LEFT_SIDEBAR_WIDTH, DEFAULT_RIGHT_SIDEBAR_WIDTH, DEFAULT_TWEEN_DRAWER_HEIGHT } from '../../constants';
-
+import { DEFAULT_LEFT_SIDEBAR_WIDTH, DEFAULT_RIGHT_SIDEBAR_WIDTH, DEFAULT_TWEEN_DRAWER_HEIGHT, DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH } from '../../constants';
+console.log(remote.systemPreferences.getUserDefault('tweenDrawerLayersWidth', 'integer'));
 import {
   SET_CANVAS_MATRIX,
   SET_CANVAS_ZOOMING,
@@ -15,6 +15,7 @@ import {
   SET_LEFT_SIDEBAR_WIDTH,
   SET_RIGHT_SIDEBAR_WIDTH,
   SET_TWEEN_DRAWER_HEIGHT,
+  SET_TWEEN_DRAWER_LAYERS_WIDTH,
   SET_CANVAS_MEASURING,
   CanvasSettingsTypes,
 } from '../actionTypes/canvasSettings';
@@ -38,6 +39,7 @@ export interface CanvasSettingsState {
   leftSidebarWidth: number;
   rightSidebarWidth: number;
   tweenDrawerHeight: number;
+  tweenDrawerLayersWidth: number;
 }
 
 const initialState: CanvasSettingsState = {
@@ -56,7 +58,8 @@ const initialState: CanvasSettingsState = {
   zoomingType: null,
   leftSidebarWidth: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('leftSidebarWidth', 'integer') : DEFAULT_LEFT_SIDEBAR_WIDTH,
   rightSidebarWidth: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('rightSidebarWidth', 'integer') : DEFAULT_RIGHT_SIDEBAR_WIDTH,
-  tweenDrawerHeight: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('tweenDrawerHeight', 'integer') : DEFAULT_TWEEN_DRAWER_HEIGHT
+  tweenDrawerHeight: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('tweenDrawerHeight', 'integer') : DEFAULT_TWEEN_DRAWER_HEIGHT,
+  tweenDrawerLayersWidth: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('tweenDrawerLayersWidth', 'integer') : DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH
 };
 
 export default (state = initialState, action: CanvasSettingsTypes): CanvasSettingsState => {
@@ -181,6 +184,15 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
       return {
         ...state,
         tweenDrawerHeight: action.payload.height
+      };
+    }
+    case SET_TWEEN_DRAWER_LAYERS_WIDTH: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('tweenDrawerLayersWidth', 'integer', parseInt(action.payload.width as any) as any);
+      }
+      return {
+        ...state,
+        tweenDrawerLayersWidth: action.payload.width
       };
     }
     default:

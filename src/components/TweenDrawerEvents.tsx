@@ -1,19 +1,12 @@
-import React, { useContext, ReactElement, useState } from 'react';
-import { ThemeContext } from './ThemeProvider';
+import React, { ReactElement } from 'react';
 import TweenDrawerEventsItems from './TweenDrawerEventsItems';
 import TweenDrawerEventsHeader from './TweenDrawerEventsHeader';
 
 const TweenDrawerEvents = (): ReactElement => {
-  const theme = useContext(ThemeContext);
-  const [scrolled, setScrolled] = useState(false);
-
   return (
-    <div className={`c-tween-drawer-events`}>
-      <TweenDrawerEventsHeader
-        scrolled={scrolled} />
-      <TweenDrawerEventsItems
-        scrolled={scrolled}
-        setScrolled={setScrolled} />
+    <div className='c-tween-drawer-events'>
+      <TweenDrawerEventsHeader />
+      <TweenDrawerEventsItems />
     </div>
   );
 }

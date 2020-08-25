@@ -8,7 +8,6 @@ import { SetTweenDrawerEventSortPayload, TweenDrawerTypes } from '../store/actio
 import Icon from './Icon';
 
 interface TweenDrawerEventsHeaderProps {
-  scrolled: boolean;
   eventSort?: em.TweenEventSort;
   sortOrder?: 'asc' | 'dsc';
   sortBy?: 'layer' | 'event' | 'artboard' | 'destinationArtboard';
@@ -23,15 +22,15 @@ interface HeaderItemProps {
 const HeaderItem = styled.button<HeaderItemProps>`
   color: ${props => props.isActive ? props.theme.palette.primary : props.theme.text.lighter};
   font-weight: ${props => props.isActive ? 'bold' : 'normal'};
+  cursor:  ${props => props.isDisabled ? 'default' : 'pointer'};
   :hover {
-    color: ${props => props.isActive && !props.isDisabled ? props.theme.palette.primaryHover : props.theme.text.base};
-    /* box-shadow: ${props => !props.isDisabled ? `0 1px 0 0 ${props.theme.palette.primary} inset` : 'none'}; */
+    color: ${props => props.isActive && !props.isDisabled ? props.theme.palette.primaryHover : props.isDisabled ? props.theme.text.lighter : props.theme.text.base};
   }
 `;
 
 const TweenDrawerEventsHeader = (props: TweenDrawerEventsHeaderProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { scrolled, eventSort, setTweenDrawerEventSort, sortOrder, sortBy } = props;
+  const { eventSort, setTweenDrawerEventSort, sortOrder, sortBy } = props;
 
   const handleSort = (by: 'layer' | 'event' | 'artboard' | 'destinationArtboard'): void => {
     if (sortOrder) {
@@ -57,7 +56,7 @@ const TweenDrawerEventsHeader = (props: TweenDrawerEventsHeaderProps): ReactElem
       className='c-tween-drawer-events__header'
       style={{
         background: theme.name === 'dark' ? theme.background.z3 : theme.background.z0,
-        boxShadow: scrolled ? `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset, 0 4px 16px 0 rgba(0,0,0,0.16)` : `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
+        boxShadow: `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
       }}>
       <div className='c-tween-drawer-events__item c-tween-drawer-events__item--labels'>
         <HeaderItem

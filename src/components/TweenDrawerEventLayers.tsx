@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement, useRef } from 'react';
+import React, { useContext, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
@@ -6,56 +6,62 @@ import { getTweenEventLayers } from '../store/selectors/layer';
 import TweenDrawerEventLayer from './TweenDrawerEventLayer';
 import { setTweenDrawerEvent } from '../store/actions/tweenDrawer';
 import { SetTweenDrawerEventPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
+import { setLayerHover, selectLayers } from '../store/actions/layer';
+import { SetLayerHoverPayload, SelectLayersPayload, LayerTypes } from '../store/actionTypes/layer';
 import TweenDrawerIcon from './TweenDrawerIcon';
-import { ScrollSync, ScrollSyncPane } from 'react-scroll-sync';
+import { ScrollSyncPane } from 'react-scroll-sync';
 
 interface TweenDrawerEventLayersProps {
+  tweenDrawerLayersWidth?: number;
+  artboardItem?: em.Artboard;
   tweenEventLayers?: {
     allIds: string[];
     byId: {
       [id: string]: em.Layer;
     };
   };
-  scrolled: boolean;
-  setScrolled(scrolled: boolean): void;
   setTweenDrawerEvent?(payload: SetTweenDrawerEventPayload): TweenDrawerTypes;
+  setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
+  selectLayers?(payload: SelectLayersPayload): LayerTypes;
 }
 
 const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElement => {
-  const scrollRef = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
-  const { tweenEventLayers, setTweenDrawerEvent, scrolled, setScrolled } = props;
+  const { tweenDrawerLayersWidth, tweenEventLayers, setTweenDrawerEvent, artboardItem, setLayerHover, selectLayers } = props;
 
-  // const handleScroll = (e) => {
-  //   const layersTimeline = document.getElementById('tween-drawer-event-layers-timeline');
-  //   layersTimeline.scrollTop = scrollRef.current.scrollTop;
-  // }
+  const handleMouseEnter = () => {
+    setLayerHover({id: artboardItem.id});
+  }
 
-  const handleScroll = (e) => {
-    if (scrolled && e.target.scrollTop === 0) {
-      setScrolled(false);
-    }
-    if (!scrolled && e.target.scrollTop > 0) {
-      setScrolled(true);
-    }
+  const handleMouseLeave = () => {
+    setLayerHover({id: null});
+  }
+
+  const handleClick = () => {
+    selectLayers({layers: [artboardItem.id], newSelection: true});
   }
 
   return (
     <div
-      className={`c-tween-drawer-event__layers`}
+      id='tween-layers'
+      className='c-tween-drawer-event__layers'
       style={{
-        boxShadow: `-1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
+        boxShadow: `-1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`,
+        width: tweenDrawerLayersWidth
       }}>
       <div
         className='c-tween-drawer-event-layers__header'
         style={{
           background: theme.name === 'dark' ? theme.background.z3 : theme.background.z0,
-          boxShadow: scrolled ? `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset, 0 4px 16px 0 rgba(0,0,0,0.16)` : `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
+          boxShadow: `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
         }}>
-        <div
-          className={`c-tween-drawer-event-layer__tween`}
+        <button
+          className='c-tween-drawer-event-layer__tween'
+          onClick={handleClick}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
           style={{
-            color: theme.text.base
+            boxShadow: `-1px 0 0 0 ${theme.background.z5} inset`
           }}>
           <TweenDrawerIcon
             onClick={() => setTweenDrawerEvent({id: null})}
@@ -63,17 +69,14 @@ const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElemen
           <div
             className='c-tween-drawer-event-layer-tween__name'
             style={{
-              color: theme.text.lighter,
-              textTransform: 'uppercase'
+              color: theme.text.base
             }}>
-
+            { artboardItem.name }
           </div>
-        </div>
+        </button>
       </div>
       <ScrollSyncPane>
         <div
-          ref={scrollRef}
-          onScroll={handleScroll}
           id='tween-drawer-event-layers'
           className='c-tween-drawer-event-layers__layers'>
           {
@@ -91,12 +94,15 @@ const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElemen
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer, tweenDrawer } = state;
+  const { layer, tweenDrawer, canvasSettings } = state;
   const tweenEventLayers = getTweenEventLayers(layer.present, tweenDrawer.event);
-  return { tweenEventLayers };
+  const eventItem = layer.present.tweenEventById[tweenDrawer.event];
+  const artboardItem = layer.present.byId[eventItem.artboard];
+  const tweenDrawerLayersWidth = canvasSettings.tweenDrawerLayersWidth;
+  return { tweenEventLayers, artboardItem, tweenDrawerLayersWidth };
 };
 
 export default connect(
   mapStateToProps,
-  { setTweenDrawerEvent }
+  { setTweenDrawerEvent, setLayerHover, selectLayers }
 )(TweenDrawerEventLayers);

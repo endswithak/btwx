@@ -11,6 +11,7 @@ import {
   SET_LEFT_SIDEBAR_WIDTH,
   SET_RIGHT_SIDEBAR_WIDTH,
   SET_TWEEN_DRAWER_HEIGHT,
+  SET_TWEEN_DRAWER_LAYERS_WIDTH,
   SET_CANVAS_MEASURING,
   SetCanvasMatrixPayload,
   SetCanvasResizingPayload,
@@ -24,6 +25,7 @@ import {
   SetLeftSidebarWidthPayload,
   SetRightSidebarWidthPayload,
   SetTweenDrawerHeightPayload,
+  SetTweenDrawerLayersWidthPayload,
   SetCanvasMeasuringPayload,
   CanvasSettingsTypes
 } from '../actionTypes/canvasSettings';
@@ -85,6 +87,11 @@ export const setRightSidebarWidth = (payload: SetRightSidebarWidthPayload): Canv
 
 export const setTweenDrawerHeight = (payload: SetTweenDrawerHeightPayload): CanvasSettingsTypes => ({
   type: SET_TWEEN_DRAWER_HEIGHT,
+  payload
+});
+
+export const setTweenDrawerLayersWidth = (payload: SetTweenDrawerLayersWidthPayload): CanvasSettingsTypes => ({
+  type: SET_TWEEN_DRAWER_LAYERS_WIDTH,
   payload
 });
 

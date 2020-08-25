@@ -14,8 +14,6 @@ import SidebarLayerIcon from './SidebarLayerIcon';
 interface TweenDrawerEventItemProps {
   id: string;
   activeArtboard?: string;
-  artboardActive?: boolean;
-  destinationActive?: boolean;
   tweenEvent?: em.TweenEvent;
   layerItem?: em.Layer;
   artboardName?: string;
@@ -35,15 +33,14 @@ interface ItemProps {
 const Item = styled.div<ItemProps>`
   color: ${props => props.theme.text.base};
   box-shadow: ${props => props.hovering ? `0 0 0 1px ${props.theme.palette.primary} inset` : 'none'};
-  /* background: ${props => props.hovering ? props.theme.background.z3 : 'none'}; */
   cursor: pointer;
 `;
 
 const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { activeArtboard, artboardActive, destinationActive, id, tweenEvent, layerItem, artboardName, destinationName, setTweenDrawerEvent, setLayerHover, tweenEventDisplayName, setTweenDrawerEventHover, hovering, setActiveArtboard } = props;
+  const { activeArtboard, id, tweenEvent, layerItem, artboardName, destinationName, setTweenDrawerEvent, setLayerHover, tweenEventDisplayName, setTweenDrawerEventHover, hovering, setActiveArtboard } = props;
 
-  const handleMouseEnter = () => {
+  const handleMouseEnter = (): void => {
     setLayerHover({id: layerItem.id});
     if (activeArtboard !== tweenEvent.artboard) {
       setActiveArtboard({id: tweenEvent.artboard, scope: 1});
@@ -51,12 +48,12 @@ const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement =>
     setTweenDrawerEventHover({id});
   }
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = (): void => {
     setLayerHover({id: null});
     setTweenDrawerEventHover({id: null});
   }
 
-  const handleDoubleClick = () => {
+  const handleDoubleClick = (): void => {
     setTweenDrawerEvent({id});
     setLayerHover({id: null});
   }
@@ -76,13 +73,13 @@ const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement =>
         <span style={{marginLeft: 8}}>{layerItem.name}</span>
       </div>
       <div className='c-tween-drawer-events-item__module'>
-        {tweenEventDisplayName}
+        <span>{tweenEventDisplayName}</span>
       </div>
       <div className='c-tween-drawer-events-item__module'>
-        {artboardName}
+        <span>{artboardName}</span>
       </div>
       <div className='c-tween-drawer-events-item__module'>
-        {destinationName}
+        <span>{destinationName}</span>
       </div>
       <div className='c-tween-drawer-events-item__module'>
         <TweenDrawerEventsItemEdit id={id} />
@@ -94,8 +91,6 @@ const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement =>
 
 const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventItemProps): {
   activeArtboard: string;
-  artboardActive: boolean;
-  destinationActive: boolean;
   tweenEvent: em.TweenEvent;
   layerItem: em.Layer;
   artboardName: string;
@@ -111,8 +106,6 @@ const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventItemProps):
   const layerItem = layer.present.byId[tweenEvent.layer];
   const destination = layer.present.byId[tweenEvent.destinationArtboard];
   const destinationName = destination.name;
-  const artboardActive = artboard.id === activeArtboard;
-  const destinationActive = destination.id === activeArtboard;
   const tweenEventDisplayName = ((): string => {
     switch(tweenEvent.event) {
       case 'click':
@@ -126,7 +119,7 @@ const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventItemProps):
     }
   })();
   const hovering = tweenDrawer.eventHover === ownProps.id;
-  return { activeArtboard, artboardActive, destinationActive, artboardName, tweenEvent, layerItem, destinationName, tweenEventDisplayName, hovering };
+  return { activeArtboard, artboardName, tweenEvent, layerItem, destinationName, tweenEventDisplayName, hovering };
 };
 
 export default connect(

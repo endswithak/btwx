@@ -4,7 +4,7 @@ import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { getTweenEventLayers } from '../store/selectors/layer';
 import TweenDrawerEventLayerTimeline from './TweenDrawerEventLayerTimeline';
-import { ScrollSync, ScrollSyncPane } from 'react-scroll-sync';
+import { ScrollSyncPane } from 'react-scroll-sync';
 
 interface TweenDrawerEventLayersTimelineProps {
   tweenEventLayers?: {
@@ -13,19 +13,12 @@ interface TweenDrawerEventLayersTimelineProps {
       [id: string]: em.Layer;
     };
   };
-  scrolled: boolean;
-  setScrolled(scrolled: boolean): void;
 }
 
 const TweenDrawerEventLayersTimeline = (props: TweenDrawerEventLayersTimelineProps): ReactElement => {
   const timelineRef = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
-  const { tweenEventLayers, scrolled, setScrolled } = props;
-
-  // const handleScroll = (e) => {
-  //   const layers = document.getElementById('tween-drawer-event-layers');
-  //   layers.scrollTop = timelineRef.current.scrollTop;
-  // }
+  const { tweenEventLayers } = props;
 
   return (
     <div className='c-tween-drawer-event__layers-timeline-wrap'>
@@ -34,7 +27,7 @@ const TweenDrawerEventLayersTimeline = (props: TweenDrawerEventLayersTimelinePro
           className='c-tween-drawer-event-layers-timeline__header'
           style={{
             background: theme.name === 'dark' ? theme.background.z3 : theme.background.z0,
-            boxShadow: scrolled ? `0 -1px 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset, 0 4px 16px 0 rgba(0,0,0,0.16)` : `0 -1px 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
+            boxShadow: `0 -1px 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
           }}>
           {
             [...Array(200).keys()].map((item, index) => (
@@ -51,8 +44,7 @@ const TweenDrawerEventLayersTimeline = (props: TweenDrawerEventLayersTimelinePro
                     : (index + 1) % 5 === 0
                       ? '50%'
                       : '25%',
-                  // background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
-                  boxShadow: `-1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`,
+                  boxShadow: `-1px 0 0 ${theme.background.z5} inset`,
                   flexShrink: 0,
                   position: 'relative',
                   display: 'flex',
@@ -82,7 +74,6 @@ const TweenDrawerEventLayersTimeline = (props: TweenDrawerEventLayersTimelinePro
         <ScrollSyncPane>
           <div
             ref={timelineRef}
-            //onScroll={handleScroll}
             id='tween-drawer-event-layers-timeline'
             className='c-tween-drawer-event-layers-timeline__layers'>
             {

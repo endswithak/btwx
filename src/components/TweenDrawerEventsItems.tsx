@@ -1,32 +1,17 @@
-import React, { useContext, ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { ThemeContext } from './ThemeProvider';
 import TweenDrawerEventsItem from './TweenDrawerEventsItem';
 
 interface TweenDrawerEventsItemsProps {
   tweenEvents?: string[];
-  scrolled: boolean;
-  setScrolled(scrolled: boolean): void;
 }
 
 const TweenDrawerEventsItems = (props: TweenDrawerEventsItemsProps): ReactElement => {
-  const theme = useContext(ThemeContext);
-  const { tweenEvents, scrolled, setScrolled } = props;
-
-  const handleScroll = (e) => {
-    if (scrolled && e.target.scrollTop === 0) {
-      setScrolled(false);
-    }
-    if (!scrolled && e.target.scrollTop > 0) {
-      setScrolled(true);
-    }
-  }
+  const { tweenEvents } = props;
 
   return (
-    <div
-      className='c-tween-drawer-events__items'
-      onScroll={handleScroll}>
+    <div className='c-tween-drawer-events__items'>
       {
         tweenEvents.map((tweenEvent, index) => (
           <TweenDrawerEventsItem
