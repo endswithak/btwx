@@ -398,7 +398,7 @@ export const hasYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer, ar
 };
 
 export const hasRotationTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
-  return layerItem.transform.rotation !== equivalentLayerItem.transform.rotation && !hasShapeTween(layerItem, equivalentLayerItem);
+  return layerItem.transform.rotation !== equivalentLayerItem.transform.rotation;
 };
 
 export const hasWidthTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
@@ -406,7 +406,6 @@ export const hasWidthTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer
   const layerItemValid = ((layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType !== 'Line') || layerItem.type === 'Image');
   const equivalentLayerItemValid = ((equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType !== 'Line') || equivalentLayerItem.type === 'Image');
   return (
-    !hasShapeTween(layerItem, equivalentLayerItem) &&
     (lineToLine || (layerItemValid && equivalentLayerItemValid)) &&
     Math.round(layerItem.frame.innerWidth) !== Math.round(equivalentLayerItem.frame.innerWidth)
   );
@@ -414,7 +413,6 @@ export const hasWidthTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer
 
 export const hasHeightTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   return (
-    !hasShapeTween(layerItem, equivalentLayerItem) &&
     ((layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType !== 'Line') || layerItem.type === 'Image') &&
     ((equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType !== 'Line') || equivalentLayerItem.type === 'Image') &&
     Math.round(layerItem.frame.innerHeight) !== Math.round(equivalentLayerItem.frame.innerHeight)

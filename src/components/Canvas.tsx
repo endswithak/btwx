@@ -95,6 +95,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
       setCanvasZooming({zooming: false});
     }
     setCanvasMatrix({matrix: paperMain.view.matrix.values});
+    // paperMain.tool.minDistance = 1 * ( 1 / paperMain.view.zoom) < 1 ? 1 : 1 * ( 1 / paperMain.view.zoom);
     updateInViewLayers();
   }, 150);
 

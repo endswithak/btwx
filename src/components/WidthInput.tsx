@@ -9,11 +9,12 @@ import { setLayersWidth } from '../store/actions/layer';
 interface WidthInputProps {
   selected?: string[];
   widthValue?: number | 'multi';
+  isDisabled?: boolean;
   setLayersWidth?(payload: SetLayersWidthPayload): LayerTypes;
 }
 
 const WidthInput = (props: WidthInputProps): ReactElement => {
-  const { selected, setLayersWidth, widthValue } = props;
+  const { selected, setLayersWidth, widthValue, isDisabled } = props;
   const [width, setWidth] = useState(widthValue !== 'multi' ? Math.round(widthValue) : widthValue);
 
   useEffect(() => {
@@ -48,7 +49,8 @@ const WidthInput = (props: WidthInputProps): ReactElement => {
       onChange={handleChange}
       onSubmit={handleSubmit}
       submitOnBlur
-      label={'W'} />
+      label={'W'}
+      disabled={isDisabled} />
   );
 }
 
@@ -69,7 +71,8 @@ const mapStateToProps = (state: RootState) => {
       return 'multi';
     }
   })();
-  return { selected, widthValue };
+  const isDisabled = layerItems.some((layerItem) => layerItem.type === 'Text' || layerItem.type === 'Group');
+  return { selected, widthValue, isDisabled };
 };
 
 export default connect(

@@ -7,8 +7,6 @@ import { EnableLayersFillPayload, EnableLayersStrokePayload, SetLayersGradientPa
 import { enableLayersFill, enableLayersStroke, setLayersGradient } from '../store/actions/layer';
 import { OpenGradientEditorPayload, GradientEditorTypes } from '../store/actionTypes/gradientEditor';
 import { openGradientEditor } from '../store/actions/gradientEditor';
-import { SetTextSettingsFillColorPayload, TextSettingsTypes } from '../store/actionTypes/textSettings';
-import { setTextSettingsFillColor } from '../store/actions/textSettings';
 import { gradientsMatch } from '../store/selectors/layer';
 import SidebarInput from './SidebarInput';
 import SidebarSectionRow from './SidebarSectionRow';
@@ -33,7 +31,6 @@ interface GradientInputProps {
   enableLayersStroke?(payload: EnableLayersStrokePayload): LayerTypes;
   setLayersGradient?(payload: SetLayersGradientPayload): LayerTypes;
   openGradientEditor?(payload: OpenGradientEditorPayload): GradientEditorTypes;
-  setTextSettingsFillColor?(payload: SetTextSettingsFillColorPayload): TextSettingsTypes;
 }
 
 const GradientInput = (props: GradientInputProps): ReactElement => {
@@ -198,7 +195,6 @@ export default connect(
     enableLayersFill,
     enableLayersStroke,
     setLayersGradient,
-    setTextSettingsFillColor,
     openGradientEditor
   }
 )(GradientInput);

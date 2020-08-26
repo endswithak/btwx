@@ -6,8 +6,6 @@ import { EnableLayersFillPayload, SetLayersFillTypePayload, EnableLayersStrokePa
 import { enableLayersFill, setLayersFillType, enableLayersStroke, setLayersStrokeFillType } from '../store/actions/layer';
 import { OpenColorEditorPayload, ColorEditorTypes } from '../store/actionTypes/colorEditor';
 import { openColorEditor } from '../store/actions/colorEditor';
-import { SetTextSettingsFillColorPayload, TextSettingsTypes } from '../store/actionTypes/textSettings';
-import { setTextSettingsFillColor } from '../store/actions/textSettings';
 import SidebarInput from './SidebarInput';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
@@ -26,11 +24,10 @@ interface ColorInputProps {
   enableLayersStroke?(payload: EnableLayersStrokePayload): LayerTypes;
   setLayersFillType?(payload: SetLayersFillTypePayload): LayerTypes;
   setLayersStrokeFillType?(payload: SetLayersStrokeFillTypePayload): LayerTypes;
-  setTextSettingsFillColor?(payload: SetTextSettingsFillColorPayload): TextSettingsTypes;
 }
 
 const ColorInput = (props: ColorInputProps): ReactElement => {
-  const { prop, enabledValue, selected, colorValue, opacityValue, colorEditorOpen, enableLayersFill, enableLayersStroke, openColorEditor, setTextSettingsFillColor, setLayersFillType, setLayersStrokeFillType } = props;
+  const { prop, enabledValue, selected, colorValue, opacityValue, colorEditorOpen, enableLayersFill, enableLayersStroke, openColorEditor, setLayersFillType, setLayersStrokeFillType } = props;
   const [enabled, setEnabled] = useState<boolean | 'multi'>(enabledValue);
   const [color, setColor] = useState<em.Color | 'multi'>(colorValue);
 
@@ -148,6 +145,5 @@ export default connect(
     enableLayersFill,
     enableLayersStroke,
     openColorEditor,
-    setTextSettingsFillColor,
   }
 )(ColorInput);

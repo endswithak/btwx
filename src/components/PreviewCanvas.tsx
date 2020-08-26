@@ -162,39 +162,52 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 break;
               }
               case 'shape': {
+                // clear rotations
+                tweenPaperLayer.rotation = -tweenLayer.transform.rotation;
+                tweenDestinationLayerPaperLayer.rotation = -tweenDestinationLayer.transform.rotation;
+                // get morph data
                 const morphData = [
                   (tweenPaperLayer as paper.Path).pathData,
                   (tweenDestinationLayerPaperLayer as paper.Path).pathData
                 ];
                 MorphSVGPlugin.pathFilter(morphData);
                 tweenProp[tween.prop] = morphData[0];
+                // reapply rotations
+                tweenPaperLayer.rotation = tweenLayer.transform.rotation;
+                tweenDestinationLayerPaperLayer.rotation = tweenDestinationLayer.transform.rotation;
+                // set tween
                 tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
                   [tween.prop]: morphData[1],
-                  onUpdate: () => {
-                    // clone tweenPaperLayer
-                    const clone = tweenPaperLayer.clone({insert: false, deep: false}) as paper.Path;
-                    // apply path data to clone
-                    clone.pathData = tweenProp[tween.prop];
-                    // apply tweenPaperLayer bounds to clone...
-                    // needed to give the final path data the correct x/y position
-                    clone.bounds.center.x = tweenPaperLayer.bounds.center.x;
-                    clone.bounds.center.y = tweenPaperLayer.bounds.center.y;
+                  onUpdate: function() {
+                    const innerWidth = tweenPaperLayer.data.innerWidth ? tweenPaperLayer.data.innerWidth : tweenLayer.frame.innerWidth;
+                    const innerHeight = tweenPaperLayer.data.innerHeight ? tweenPaperLayer.data.innerHeight : tweenLayer.frame.innerHeight;
+                    const startRotation = tweenPaperLayer.data.rotation || tweenPaperLayer.data.rotation === 0 ? tweenPaperLayer.data.rotation : tweenLayer.transform.rotation;
+                    const startPosition = tweenPaperLayer.position;
+                    tweenPaperLayer.rotation = -startRotation;
                     // apply final clone path data to tweenPaperLayer
-                    (tweenPaperLayer as paper.Path).pathData = clone.pathData;
+                    (tweenPaperLayer as paper.Path).pathData = tweenProp[tween.prop];
+                    tweenPaperLayer.bounds.width = innerWidth;
+                    tweenPaperLayer.bounds.height = innerHeight;
+                    tweenPaperLayer.rotation = startRotation;
+                    tweenPaperLayer.position = startPosition;
                     // update fill gradient origin/destination if needed
                     if (tweenPaperLayer.fillColor && tweenPaperLayer.fillColor.gradient) {
-                      const origin = tweenLayers.byId[tweenPaperLayer.data.id].style.fill.gradient.origin;
-                      const destination = tweenLayers.byId[tweenPaperLayer.data.id].style.fill.gradient.destination;
-                      (tweenPaperLayer.fillColor as em.PaperGradientFill).origin = new paperPreview.Point((origin.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (origin.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
-                      (tweenPaperLayer.fillColor as em.PaperGradientFill).destination = new paperPreview.Point((destination.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (destination.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
+                      const innerWidth = tweenPaperLayer.data.innerWidth ? tweenPaperLayer.data.innerWidth : tweenLayer.frame.innerWidth;
+                      const innerHeight = tweenPaperLayer.data.innerHeight ? tweenPaperLayer.data.innerHeight : tweenLayer.frame.innerHeight;
+                      const origin = tweenPaperLayer.data.gradientOrigin ? tweenPaperLayer.data.gradientOrigin : tweenLayer.style.fill.gradient.origin;
+                      const destination = tweenPaperLayer.data.gradientDestination ? tweenPaperLayer.data.gradientDestination : tweenLayer.style.fill.gradient.destination;
+                      const nextOrigin = new paperPreview.Point((origin.x * innerWidth) + tweenPaperLayer.position.x, (origin.y * innerHeight) + tweenPaperLayer.position.y);
+                      const nextDestination = new paperPreview.Point((destination.x * innerWidth) + tweenPaperLayer.position.x, (destination.y * innerHeight) + tweenPaperLayer.position.y);
+                      (tweenPaperLayer.fillColor as em.PaperGradientFill).origin = nextOrigin;
+                      (tweenPaperLayer.fillColor as em.PaperGradientFill).destination = nextDestination;
                     }
-                    if (tweenPaperLayer.strokeColor && tweenPaperLayer.strokeColor.gradient) {
-                      const origin = tweenLayers.byId[tweenPaperLayer.data.id].style.stroke.gradient.origin;
-                      const destination = tweenLayers.byId[tweenPaperLayer.data.id].style.stroke.gradient.destination;
-                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).origin = new paperPreview.Point((origin.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (origin.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
-                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).destination = new paperPreview.Point((destination.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (destination.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
-                    }
+                    // if (tweenPaperLayer.strokeColor && tweenPaperLayer.strokeColor.gradient) {
+                    //   const origin = tweenLayers.byId[tweenPaperLayer.data.id].style.stroke.gradient.origin;
+                    //   const destination = tweenLayers.byId[tweenPaperLayer.data.id].style.stroke.gradient.destination;
+                    //   (tweenPaperLayer.strokeColor as em.PaperGradientFill).origin = new paperPreview.Point((origin.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (origin.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
+                    //   (tweenPaperLayer.strokeColor as em.PaperGradientFill).destination = new paperPreview.Point((destination.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (destination.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
+                    // }
                   },
                   ease: tween.ease,
                 }, tween.delay);
@@ -756,17 +769,16 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
               }
               case 'rotation': {
                 tweenProp[tween.prop] = tweenLayer.transform.rotation;
-                tweenProp[`${tween.prop}-prev`] = tweenLayer.transform.rotation;
                 tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
                   [tween.prop]: tweenDestinationLayer.transform.rotation,
                   onUpdate: () => {
                     const startPosition = tweenPaperLayer.position;
-                    tweenPaperLayer.rotation = -tweenProp[`${tween.prop}-prev`];
+                    const startRotation = tweenPaperLayer.data.rotation || tweenPaperLayer.data.rotation === 0 ? tweenPaperLayer.data.rotation : tweenLayer.transform.rotation;
+                    tweenPaperLayer.rotation = -startRotation;
                     tweenPaperLayer.rotation = tweenProp[tween.prop];
-                    tweenProp[`${tween.prop}-prev`] = tweenProp[tween.prop];
-                    tweenPaperLayer.position = startPosition;
                     tweenPaperLayer.data.rotation = tweenProp[tween.prop];
+                    tweenPaperLayer.position = startPosition;
                     if (tweenPaperLayer.fillColor && tweenPaperLayer.fillColor.gradient) {
                       const innerWidth = tweenPaperLayer.data.innerWidth ? tweenPaperLayer.data.innerWidth : tweenLayer.frame.innerWidth;
                       const innerHeight = tweenPaperLayer.data.innerHeight ? tweenPaperLayer.data.innerHeight : tweenLayer.frame.innerHeight;
@@ -851,6 +863,18 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                   [tween.prop]: (tweenDestinationLayerPaperLayer as paper.PointText).fontSize,
                   onUpdate: () => {
                     (tweenPaperLayer as paper.PointText).fontSize = tweenProp[tween.prop];
+                    tweenPaperLayer.data.innerWidth = tweenPaperLayer.bounds.width;
+                    tweenPaperLayer.data.innerHeight = tweenPaperLayer.bounds.height;
+                    if (tweenPaperLayer.fillColor && tweenPaperLayer.fillColor.gradient) {
+                      const innerWidth = tweenPaperLayer.data.innerWidth ? tweenPaperLayer.data.innerWidth : tweenLayer.frame.innerWidth;
+                      const innerHeight = tweenPaperLayer.data.innerHeight ? tweenPaperLayer.data.innerHeight : tweenLayer.frame.innerHeight;
+                      const origin = tweenPaperLayer.data.gradientOrigin ? tweenPaperLayer.data.gradientOrigin : tweenLayer.style.fill.gradient.origin;
+                      const destination = tweenPaperLayer.data.gradientDestination ? tweenPaperLayer.data.gradientDestination : tweenLayer.style.fill.gradient.destination;
+                      const nextOrigin = new paperPreview.Point((origin.x * innerWidth) + tweenPaperLayer.position.x, (origin.y * innerHeight) + tweenPaperLayer.position.y);
+                      const nextDestination = new paperPreview.Point((destination.x * innerWidth) + tweenPaperLayer.position.x, (destination.y * innerHeight) + tweenPaperLayer.position.y);
+                      (tweenPaperLayer.fillColor as em.PaperGradientFill).origin = nextOrigin;
+                      (tweenPaperLayer.fillColor as em.PaperGradientFill).destination = nextDestination;
+                    }
                   },
                   ease: tween.ease,
                 }, tween.delay);
@@ -863,12 +887,17 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                   [tween.prop]: (tweenDestinationLayerPaperLayer as paper.PointText).leading,
                   onUpdate: () => {
                     (tweenPaperLayer as paper.PointText).leading = tweenProp[tween.prop];
+                    tweenPaperLayer.data.innerHeight = tweenPaperLayer.bounds.height;
                     // update fill gradient origin/destination if needed
                     if (tweenPaperLayer.fillColor && tweenPaperLayer.fillColor.gradient) {
-                      const origin = tweenLayers.byId[tweenPaperLayer.data.id].style.fill.gradient.origin;
-                      const destination = tweenLayers.byId[tweenPaperLayer.data.id].style.fill.gradient.destination;
-                      (tweenPaperLayer.fillColor as em.PaperGradientFill).origin = new paper.Point((origin.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (origin.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
-                      (tweenPaperLayer.fillColor as em.PaperGradientFill).destination = new paper.Point((destination.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (destination.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
+                      const innerWidth = tweenPaperLayer.data.innerWidth ? tweenPaperLayer.data.innerWidth : tweenLayer.frame.innerWidth;
+                      const innerHeight = tweenPaperLayer.data.innerHeight ? tweenPaperLayer.data.innerHeight : tweenLayer.frame.innerHeight;
+                      const origin = tweenPaperLayer.data.gradientOrigin ? tweenPaperLayer.data.gradientOrigin : tweenLayer.style.fill.gradient.origin;
+                      const destination = tweenPaperLayer.data.gradientDestination ? tweenPaperLayer.data.gradientDestination : tweenLayer.style.fill.gradient.destination;
+                      const nextOrigin = new paperPreview.Point((origin.x * innerWidth) + tweenPaperLayer.position.x, (origin.y * innerHeight) + tweenPaperLayer.position.y);
+                      const nextDestination = new paperPreview.Point((destination.x * innerWidth) + tweenPaperLayer.position.x, (destination.y * innerHeight) + tweenPaperLayer.position.y);
+                      (tweenPaperLayer.fillColor as em.PaperGradientFill).origin = nextOrigin;
+                      (tweenPaperLayer.fillColor as em.PaperGradientFill).destination = nextDestination;
                     }
                     if (tweenPaperLayer.strokeColor && tweenPaperLayer.strokeColor.gradient) {
                       const origin = tweenLayers.byId[tweenPaperLayer.data.id].style.stroke.gradient.origin;

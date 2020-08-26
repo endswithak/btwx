@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useCallback, useRef, useState, useEffect } from 'react';
+import React, { ReactElement, useCallback, useRef, useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { ThemeContext } from './ThemeProvider';
+import debounce from 'lodash.debounce';
+import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
 import { closeTextEditor } from '../store/actions/textEditor';
 import { TextEditorTypes } from '../store/actionTypes/textEditor';
@@ -12,8 +13,6 @@ import { SetLayerTextPayload, SelectLayerPayload, LayerTypes } from '../store/ac
 import { paperMain } from '../canvas';
 import { TextEditorState } from '../store/reducers/textEditor';
 import { TextSettingsState } from '../store/reducers/textSettings';
-import debounce from 'lodash.debounce';
-import tinyColor from 'tinycolor2';
 
 interface TextEditorInputProps {
   textEditor?: TextEditorState;
@@ -30,7 +29,6 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const textSpanRef = useRef<HTMLTextAreaElement>(null);
-  const theme = useContext(ThemeContext);
   const { textEditor, textSettings, layerItem, closeTextEditor, disableSelectionTool, enableSelectionTool, setLayerText, selectLayer } = props;
   const [text, setText] = useState(layerItem.text);
   const [prevText, setPrevText] = useState(layerItem.text);

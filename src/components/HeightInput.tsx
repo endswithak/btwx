@@ -71,7 +71,7 @@ const mapStateToProps = (state: RootState) => {
       return 'multi';
     }
   })();
-  const disabled = layerItems.some((layerItem) => layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line');
+  const disabled = layerItems.some((layerItem) => layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' || layerItem.type === 'Text' || layerItem.type === 'Group');
   return { selected, heightValue, disabled };
 };
 

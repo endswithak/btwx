@@ -72,7 +72,7 @@ const mapStateToProps = (state: RootState) => {
       return 'multi';
     }
   })();
-  const disabled = selected.some((id) => layer.present.byId[id].type === 'Artboard');
+  const disabled = selected.some((id) => layer.present.byId[id].type === 'Artboard' || layer.present.byId[id].type === 'Group');
   return { selected, rotationValue, disabled };
 };
 

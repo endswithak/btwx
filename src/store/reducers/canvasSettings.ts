@@ -1,7 +1,7 @@
 import { addItem, removeItem } from '../utils/general';
 import { remote } from 'electron';
 import { DEFAULT_LEFT_SIDEBAR_WIDTH, DEFAULT_RIGHT_SIDEBAR_WIDTH, DEFAULT_TWEEN_DRAWER_HEIGHT, DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH } from '../../constants';
-console.log(remote.systemPreferences.getUserDefault('tweenDrawerLayersWidth', 'integer'));
+
 import {
   SET_CANVAS_MATRIX,
   SET_CANVAS_ZOOMING,

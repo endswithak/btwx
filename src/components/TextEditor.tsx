@@ -1,6 +1,5 @@
-import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
+import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
-import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import TextEditorInput from './TextEditorInput';
 
@@ -10,7 +9,6 @@ interface TextEditorProps {
 }
 
 const TextEditor = (props: TextEditorProps): ReactElement => {
-  const theme = useContext(ThemeContext);
   const { ready, isOpen } = props;
 
   return (

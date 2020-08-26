@@ -31,7 +31,10 @@ export default (state = initialState, action: TextSettingsTypes): TextSettingsSt
     case SET_TEXT_SETTINGS_FILL_COLOR: {
       return {
         ...state,
-        fillColor: action.payload.fillColor
+        fillColor: {
+          ...state.fillColor,
+          ...action.payload.fillColor
+        }
       };
     }
     case SET_TEXT_SETTINGS_FONT_SIZE: {

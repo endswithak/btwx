@@ -18,24 +18,6 @@ import {
 const isMac = process.platform === 'darwin';
 
 if (isMac) {
-  if (systemPreferences.getUserDefault('theme', 'string')) {
-    systemPreferences.removeUserDefault('theme');
-  }
-  if (systemPreferences.getUserDefault('leftSidebarWidth', 'integer')) {
-    systemPreferences.removeUserDefault('leftSidebarWidth');
-  }
-  if (systemPreferences.getUserDefault('rightSidebarWidth', 'integer')) {
-    systemPreferences.removeUserDefault('rightSidebarWidth');
-  }
-  if (systemPreferences.getUserDefault('tweenDrawerHeight', 'integer')) {
-    systemPreferences.removeUserDefault('tweenDrawerHeight');
-  }
-  if (systemPreferences.getUserDefault('tweenDrawerLayersWidth', 'integer')) {
-    systemPreferences.removeUserDefault('tweenDrawerLayersWidth');
-  }
-}
-
-if (isMac) {
   if (!systemPreferences.getUserDefault('theme', 'string')) {
     systemPreferences.setUserDefault('theme', 'string', nativeTheme.shouldUseDarkColors ? 'dark' : 'light');
   }

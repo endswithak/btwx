@@ -7,7 +7,7 @@ import { RootState } from '../store/reducers';
 import { closeColorEditor } from '../store/actions/colorEditor';
 import { ColorEditorTypes } from '../store/actionTypes/colorEditor';
 import { openGradientEditor } from '../store/actions/gradientEditor';
-import { colorsMatch, gradientsMatch } from '../store/selectors/layer';
+import { colorsMatch, gradientsMatch, getPaperLayer } from '../store/selectors/layer';
 import { GradientEditorTypes, OpenGradientEditorPayload } from '../store/actionTypes/gradientEditor';
 import { ColorEditorState } from '../store/reducers/colorEditor';
 import { SetLayersFillTypePayload, SetLayersGradientTypePayload, SetLayersFillColorPayload, SetLayersStrokeFillTypePayload, SetLayersStrokeColorPayload, SetLayersShadowColorPayload, LayerTypes } from '../store/actionTypes/layer';
@@ -19,6 +19,7 @@ import ColorPicker from './ColorPicker';
 import FillTypeSelector from './FillTypeSelector';
 
 interface ColorEditorProps {
+  includesTextLayer?: boolean;
   colorEditor?: ColorEditorState;
   colorValue?: em.Color;
   closeColorEditor?(): ColorEditorTypes;
@@ -35,16 +36,16 @@ interface ColorEditorProps {
 const ColorEditor = (props: ColorEditorProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const editorRef = useRef<HTMLDivElement>(null);
-  const { colorEditor, colorValue, closeColorEditor, setLayersFillColor, setLayersStrokeFillType, setLayersGradientType, setLayersFillType, setLayersStrokeColor, openGradientEditor, setLayersShadowColor, setTextSettingsFillColor } = props;
+  const { includesTextLayer, colorEditor, colorValue, closeColorEditor, setLayersFillColor, setLayersStrokeFillType, setLayersGradientType, setLayersFillType, setLayersStrokeColor, openGradientEditor, setLayersShadowColor, setTextSettingsFillColor } = props;
 
   const debounceColor = useCallback(
     debounce((color: em.Color) => {
       switch(colorEditor.prop) {
         case 'fill': {
           setLayersFillColor({layers: colorEditor.layers, fillColor: color});
-          // if (layerItem.type === 'Text') {
-          //   setTextSettingsFillColor({fillColor: color});
-          // }
+          if (includesTextLayer) {
+            setTextSettingsFillColor({fillColor: color});
+          }
           break;
         }
         case 'stroke':
@@ -75,18 +76,20 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
   }
 
   const handleColorChange = (color: em.Color): void => {
-    // const paperLayer = getPaperLayer(colorEditor.layer);
-    // switch(colorEditor.prop) {
-    //   case 'fill':
-    //     paperLayer.fillColor = { hue: color.h, saturation: color.s, lightness: color.l, alpha: color.a } as paper.Color;
-    //     break;
-    //   case 'stroke':
-    //     paperLayer.strokeColor = { hue: color.h, saturation: color.s, lightness: color.l, alpha: color.a } as paper.Color;
-    //     break;
-    //   case 'shadow':
-    //     paperLayer.shadowColor = { hue: color.h, saturation: color.s, lightness: color.l, alpha: color.a } as paper.Color;
-    //     break;
-    // }
+    // colorEditor.layers.forEach((layer) => {
+    //   const paperLayer = getPaperLayer(layer);
+    //   switch(colorEditor.prop) {
+    //     case 'fill':
+    //       paperLayer.fillColor = { hue: color.h, saturation: color.s, lightness: color.l, alpha: color.a } as paper.Color;
+    //       break;
+    //     case 'stroke':
+    //       paperLayer.strokeColor = { hue: color.h, saturation: color.s, lightness: color.l, alpha: color.a } as paper.Color;
+    //       break;
+    //     case 'shadow':
+    //       paperLayer.shadowColor = { hue: color.h, saturation: color.s, lightness: color.l, alpha: color.a } as paper.Color;
+    //       break;
+    //   }
+    // });
     debounceColor(color);
   }
 
@@ -171,12 +174,14 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
 const mapStateToProps = (state: RootState): {
   colorEditor: ColorEditorState;
   colorValue: em.Color;
+  includesTextLayer: boolean;
 } => {
   const { colorEditor, layer } = state;
   const layerItems: em.Layer[] = colorEditor.layers.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);
+  const includesTextLayer = layerItems.some((layerItem: em.Layer) => layerItem.type === 'Text');
   const styleValues: (em.Fill | em.Stroke | em.Shadow)[] = layerItems.reduce((result, current) => {
     switch(colorEditor.prop) {
       case 'fill':
@@ -188,7 +193,7 @@ const mapStateToProps = (state: RootState): {
     }
   }, []);
   const colorValue = styleValues[0].color;
-  return { colorEditor, colorValue };
+  return { colorEditor, colorValue, includesTextLayer };
 };
 
 export default connect(

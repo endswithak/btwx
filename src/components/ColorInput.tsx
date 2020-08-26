@@ -19,10 +19,10 @@ interface ColorInputProps {
   prop: 'fill' | 'stroke' | 'shadow';
   enabledValue?: boolean | 'multi';
   selected?: string[];
-  selectedType?: em.LayerType;
   colorValue?: em.Color | 'multi';
   opacityValue?: number | 'multi';
   colorEditorOpen?: boolean;
+  textLayerSelected?: boolean;
   openColorEditor?(payload: OpenColorEditorPayload): ColorEditorTypes;
   enableLayersFill?(payload: EnableLayersFillPayload): LayerTypes;
   enableLayersStroke?(payload: EnableLayersStrokePayload): LayerTypes;
@@ -34,7 +34,7 @@ interface ColorInputProps {
 }
 
 const ColorInput = (props: ColorInputProps): ReactElement => {
-  const { prop, enabledValue, selected, selectedType, colorValue, opacityValue, colorEditorOpen, enableLayersFill, enableLayersStroke, enableLayersShadow, openColorEditor, setTextSettingsFillColor, setLayersFillColor, setLayersStrokeColor, setLayersShadowColor } = props;
+  const { prop, enabledValue, selected, textLayerSelected, colorValue, opacityValue, colorEditorOpen, enableLayersFill, enableLayersStroke, enableLayersShadow, openColorEditor, setTextSettingsFillColor, setLayersFillColor, setLayersStrokeColor, setLayersShadowColor } = props;
   const [enabled, setEnabled] = useState<boolean | 'multi'>(enabledValue);
   const [color, setColor] = useState<em.Color | 'multi'>(colorValue);
   const [opacity, setOpacity] = useState(opacityValue !== 'multi' ? Math.round(opacityValue * 100) : opacityValue);
@@ -96,9 +96,9 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
       switch(prop) {
         case 'fill': {
           setLayersFillColor({layers: selected, fillColor: nextColor});
-          // if (selectedType === 'Text') {
-          //   setTextSettingsFillColor({fillColor: newFill});
-          // }
+          if (textLayerSelected) {
+            setTextSettingsFillColor({fillColor: nextColor});
+          }
           break;
         }
         case 'stroke':
@@ -176,10 +176,10 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
 const mapStateToProps = (state: RootState, ownProps: ColorInputProps): {
   enabledValue: boolean | 'multi';
   selected: string[];
-  selectedType: em.LayerType;
   colorValue: em.Color | 'multi';
   opacityValue: number | 'multi';
   colorEditorOpen: boolean;
+  textLayerSelected: boolean;
 } => {
   const { layer, colorEditor } = state;
   const selected = layer.present.selected;
@@ -187,6 +187,7 @@ const mapStateToProps = (state: RootState, ownProps: ColorInputProps): {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);
+  const textLayerSelected = layerItems.some((layerItem: em.Layer) => layerItem.type === 'Text');
   const styleValues: (em.Fill | em.Stroke | em.Shadow)[] = layerItems.reduce((result, current) => {
     switch(ownProps.prop) {
       case 'fill':
@@ -218,9 +219,8 @@ const mapStateToProps = (state: RootState, ownProps: ColorInputProps): {
       return 'multi';
     }
   })();
-  const selectedType = layer.present.selected.length === 1 ? layer.present.byId[layer.present.selected[0]].type : null;
   const colorEditorOpen = colorEditor.isOpen;
-  return { enabledValue, selected, selectedType, colorValue, opacityValue, colorEditorOpen };
+  return { enabledValue, selected, colorValue, opacityValue, colorEditorOpen, textLayerSelected };
 };
 
 export default connect(

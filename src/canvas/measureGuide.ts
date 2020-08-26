@@ -51,7 +51,7 @@ class MeasureGuide {
     });
     const guideTextBackground = new paperMain.Path.Rectangle({
       point: guideLine.bounds.center,
-      size: [guideText.bounds.width + (10 / paperMain.view.zoom), guideText.bounds.height + (10 / paperMain.view.zoom)],
+      size: [guideText.bounds.width + (8 / paperMain.view.zoom), guideText.bounds.height + (8 / paperMain.view.zoom)],
       fillColor: THEME_PRIMARY_COLOR,
       radius: (4 / paperMain.view.zoom),
       insert: false,
