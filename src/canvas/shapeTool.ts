@@ -1,10 +1,8 @@
-import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import { v4 as uuidv4 } from 'uuid';
 import store from '../store';
 import { enableSelectionTool } from '../store/actions/tool';
 import { addShape } from '../store/actions/layer';
-import { getPagePaperLayer, getLayerAndDescendants, getPaperLayer, getCurvePoints } from '../store/selectors/layer';
-import { applyShapeMethods } from './shapeUtils';
+import { getPagePaperLayer, getCurvePoints } from '../store/selectors/layer';
 import { paperMain } from './index';
 import { isBetween } from '../utils';
 import Tooltip from './tooltip';
@@ -54,8 +52,8 @@ class ShapeTool {
     this.maxDim = 0;
     this.x = 0;
     this.y = 0;
-    this.constrainedDims = new Point(0, 0);
-    this.centerPoint = new Point(0, 0);
+    this.constrainedDims = new paperMain.Point(0, 0);
+    this.centerPoint = new paperMain.Point(0, 0);
     this.shiftModifier = false;
     this.snapTool = new SnapTool();
     this.toBounds = null;
@@ -397,7 +395,7 @@ class ShapeTool {
     this.vector = this.to.subtract(this.from);
     this.dims = new paperMain.Rectangle({from: this.from, to: this.to}).size;
     this.maxDim = Math.max(this.dims.width, this.dims.height);
-    this.constrainedDims = new Point(this.vector.x < 0 ? this.from.x - this.maxDim : this.from.x + this.maxDim, this.vector.y < 0 ? this.from.y - this.maxDim : this.from.y + this.maxDim);
+    this.constrainedDims = new paperMain.Point(this.vector.x < 0 ? this.from.x - this.maxDim : this.from.x + this.maxDim, this.vector.y < 0 ? this.from.y - this.maxDim : this.from.y + this.maxDim);
     this.toBounds = new paperMain.Rectangle({
       from: this.from,
       to: this.shiftModifier ? this.constrainedDims : this.to

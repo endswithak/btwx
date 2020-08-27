@@ -44,17 +44,16 @@ const TweenDrawerEventLayerTween = (props: TweenDrawerEventLayerTweenProps): Rea
     <div
       className='c-tween-drawer-event-layer__tween'
       onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      style={{
-        background: tweenId === tweenHover && !tweenEditing || tweenId === tweenEditing
-        ? theme.background.z3
-        : 'none'
-      }}>
+      onMouseLeave={handleMouseLeave}>
       <div className='c-tween-drawer__icon' />
       <div
         className='c-tween-drawer-event-layer-tween__name'
         style={{
-          color: theme.text.lighter
+          color: tweenId === tweenEditing
+          ? theme.palette.primary
+          : tweenId === tweenHover
+            ? theme.text.base
+            : theme.text.light
         }}>
         { titleCaseProp }
       </div>

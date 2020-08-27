@@ -10,6 +10,7 @@
   display: flex
   flex-direction: column
   flex-shrink: 0
+  position: relative
 
 .c-tween-drawer-event-layers__header,
 .c-tween-drawer-event-layers-timeline__header
@@ -19,6 +20,11 @@
   flex-shrink: 0
   width: 100%
   position: relative
+
+.c-tween-drawer-event-layers__header--sticky
+  position: absolute
+  top: $unit * 8
+  z-index: 2
 
 .c-tween-drawer-event-layers__layers,
 .c-tween-drawer-event-layers-timeline__layers
@@ -71,6 +77,12 @@
   font-size: $fontSizeSm
   align-items: center
   padding: 0 $unit * 2
+
+.c-tween-drawer-event-layer__icon
+  margin-right: $unit * 2
+  display: flex
+  align-items: center
+  justify-content: center
 
 .c-tween-drawer-event-layer-tween__name
   flex-grow: 2

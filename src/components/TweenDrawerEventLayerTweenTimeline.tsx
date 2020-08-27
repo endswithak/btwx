@@ -52,9 +52,6 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
       onMouseLeave={handleMouseLeave}
       style={{
         color: theme.text.lighter,
-        background: tweenId === tweenHover && !tweenEditing || tweenId === tweenEditing
-        ? theme.background.z3
-        : 'none',
         zIndex: tweenId === tweenEditing
         ? 3
         : 'inherit'

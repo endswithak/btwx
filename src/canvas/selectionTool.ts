@@ -75,12 +75,11 @@ class SelectionTool {
         if (state.layer.present.selected.length > 0) {
           if (state.tweenDrawer.isOpen && state.tweenDrawer.event) {
             const tweenEvent = state.layer.present.tweenEventById[state.tweenDrawer.event];
-            const tweenEventLayer = tweenEvent.layer;
             let layersAndChildren: string[] = [];
             state.layer.present.selected.forEach((id) => {
               layersAndChildren = [...layersAndChildren, ...getLayerAndDescendants(state.layer.present, id)];
             });
-            if (layersAndChildren.includes(tweenEventLayer)) {
+            if (layersAndChildren.includes(tweenEvent.layer) || layersAndChildren.includes(tweenEvent.artboard) || layersAndChildren.includes(tweenEvent.destinationArtboard)) {
               store.dispatch(setTweenDrawerEvent({id: null}));
             }
           }

@@ -1,19 +1,76 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useState, useRef } from 'react';
+import throttle from 'lodash.throttle';
+import { connect } from 'react-redux';
+import { ScrollSync } from 'react-scroll-sync';
+import { getTweenEventLayers } from '../store/selectors/layer';
+import { RootState } from '../store/reducers';
 import TweenDrawerEventLayers from './TweenDrawerEventLayers';
 import TweenDrawerLayersDragHandle from './TweenDrawerLayersDragHandle';
 import TweenDrawerEventLayersTimeline from './TweenDrawerEventLayersTimeline';
-import { ScrollSync } from 'react-scroll-sync';
 
-const TweenDrawerEvent = (): ReactElement => {
+interface TweenDrawerEventProps {
+  tweenEventLayers?: {
+    allIds: string[];
+    byId: {
+      [id: string]: em.Layer;
+    };
+  };
+  scrollPositions?: number[];
+}
+
+const TweenDrawerEvent = (props: TweenDrawerEventProps): ReactElement => {
+  const { tweenEventLayers, scrollPositions } = props;
+  const eventRef = useRef<HTMLDivElement>(null);
+  const [scrollLayer, setScrollLayer] = useState(tweenEventLayers.allIds[0]);
+
+  const handleScroll = throttle(() => {
+    const tweenLayers = document.getElementById('tween-drawer-event-layers');
+    const scrollTop = tweenLayers.scrollTop;
+    let index = 0;
+    while(scrollTop >= scrollPositions[index]) {
+      index++;
+    }
+    if (scrollLayer !== tweenEventLayers.allIds[index]) {
+      setScrollLayer(tweenEventLayers.allIds[index]);
+    }
+  }, 150);
+
   return (
     <ScrollSync>
-      <div className='c-tween-drawer-event'>
+      <div
+        ref={eventRef}
+        className='c-tween-drawer-event'
+        onScroll={handleScroll}>
         <TweenDrawerLayersDragHandle />
-        <TweenDrawerEventLayers />
+        <TweenDrawerEventLayers
+          scrollLayer={scrollLayer} />
         <TweenDrawerEventLayersTimeline />
       </div>
     </ScrollSync>
   );
 }
 
-export default TweenDrawerEvent;
+const mapStateToProps = (state: RootState) => {
+  const { layer, tweenDrawer } = state;
+  const tweenEventLayers = getTweenEventLayers(layer.present, tweenDrawer.event);
+  const scrollPositions = tweenEventLayers.allIds.reduce((result: number[], current, index) => {
+    const prevY = result[index - 1] ? result[index - 1] : 0;
+    let y = 16 + prevY;
+    const event = layer.present.tweenEventById[tweenDrawer.event];
+    const eventTweens = event.tweens;
+    const eventLayer = tweenEventLayers.byId[current];
+    const layerTweens = eventLayer.tweens;
+    layerTweens.forEach((id) => {
+      if (eventTweens.includes(id)) {
+        y += 32;
+      }
+    });
+    result = [...result, y];
+    return result;
+  }, []);
+  return { tweenEventLayers, scrollPositions };
+};
+
+export default connect(
+  mapStateToProps
+)(TweenDrawerEvent);
