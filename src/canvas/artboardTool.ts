@@ -1,4 +1,3 @@
-import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import store from '../store';
 import { enableSelectionTool } from '../store/actions/tool';
 import { addArtboard } from '../store/actions/layer';
@@ -39,11 +38,11 @@ class ArtboardTool {
     this.tooltip = null;
     this.from = null;
     this.to = null;
-    this.pointDiff = new Point(0, 0);
-    this.dims = new Size(0, 0);
+    this.pointDiff = new paperMain.Point(0, 0);
+    this.dims = new paperMain.Size(0, 0);
     this.maxDim = 0;
-    this.constrainedDims = new Point(0, 0);
-    this.centerPoint = new Point(0, 0);
+    this.constrainedDims = new paperMain.Point(0, 0);
+    this.centerPoint = new paperMain.Point(0, 0);
     this.shiftModifier = false;
     this.snapTool = new SnapTool();
     this.toBounds = null;
@@ -261,10 +260,10 @@ class ArtboardTool {
   }
   onMouseDrag(event: paper.ToolEvent): void {
     this.to = event.point;
-    this.pointDiff = new Point(this.to.x - this.from.x, this.to.y - this.from.y);
-    this.dims = new Size(this.pointDiff.x < 0 ? this.pointDiff.x * -1 : this.pointDiff.x, this.pointDiff.y < 0 ? this.pointDiff.y * -1 : this.pointDiff.y);
+    this.pointDiff = new paperMain.Point(this.to.x - this.from.x, this.to.y - this.from.y);
+    this.dims = new paperMain.Size(this.pointDiff.x < 0 ? this.pointDiff.x * -1 : this.pointDiff.x, this.pointDiff.y < 0 ? this.pointDiff.y * -1 : this.pointDiff.y);
     this.maxDim = Math.max(this.dims.width, this.dims.height);
-    this.constrainedDims = new Point(this.pointDiff.x < 0 ? this.from.x - this.maxDim : this.from.x + this.maxDim, this.pointDiff.y < 0 ? this.from.y - this.maxDim : this.from.y + this.maxDim);
+    this.constrainedDims = new paperMain.Point(this.pointDiff.x < 0 ? this.from.x - this.maxDim : this.from.x + this.maxDim, this.pointDiff.y < 0 ? this.from.y - this.maxDim : this.from.y + this.maxDim);
     this.toBounds = new paperMain.Rectangle({
       from: this.from,
       to: this.shiftModifier ? this.constrainedDims : this.to
@@ -296,7 +295,7 @@ class ArtboardTool {
       if (this.to.x - this.from.x !== 0 && this.to.y - this.from.y !== 0) {
         const state = store.getState();
         const newPaperLayer = this.renderShape({
-          fillColor: new Color(DEFAULT_ARTBOARD_BACKGROUND_COLOR),
+          fillColor: DEFAULT_ARTBOARD_BACKGROUND_COLOR,
         });
         applyArtboardMethods(newPaperLayer);
         store.dispatch(addArtboard({

@@ -388,6 +388,15 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
     selectionFrame.remove();
   }
   if (state.selected.length > 0) {
+    const selectedWithChildren = state.selected.reduce((result: { allIds: string[]; byId: { [id: string]: em.Layer } }, current) => {
+      const layerAndChildren = getLayerAndDescendants(state, current);
+      result.allIds = [...result.allIds, ...layerAndChildren];
+      layerAndChildren.forEach((id) => {
+        result.byId[id] = state.byId[id];
+      });
+      return result;
+    }, { allIds: [], byId: {} });
+    const resizeDisabled = state.selected.length >= 1 && selectedWithChildren.allIds.some((id) => state.byId[id].type === 'Text' || state.byId[id].type === 'Group');
     const selectionTopLeft = getSelectionTopLeft(state, useLayerItem);
     const selectionBottomRight = getSelectionBottomRight(state, useLayerItem);
     const baseProps = {
@@ -396,12 +405,14 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
       fillColor: '#fff',
       strokeColor: THEME_PRIMARY_COLOR,
       strokeWidth: 1 / paperMain.view.zoom,
-      insert: false
+      insert: false,
+      opacity: resizeDisabled ? 0 : 1
     }
     if (state.selected.length === 1 && state.byId[state.selected[0]].type === 'Shape' && (state.byId[state.selected[0]] as em.Shape).shapeType === 'Line') {
       const layerItem = state.byId[state.selected[0]] as em.Shape;
       const moveHandle = new paperMain.Path.Ellipse({
         ...baseProps,
+        opacity: 1,
         visible: visibleHandle === 'all' || visibleHandle === 'move',
         data: {
           id: 'selectionFrameHandle',
@@ -425,7 +436,9 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           handle: 'from'
         },
         onMouseEnter: function() {
-          document.body.style.cursor = 'ew-resize';
+          if (!resizeDisabled) {
+            document.body.style.cursor = 'ew-resize';
+          }
         },
         onMouseLeave: function() {
           document.body.style.cursor = 'auto';
@@ -442,7 +455,9 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           handle: 'to'
         },
         onMouseEnter: function() {
-          document.body.style.cursor = 'ew-resize';
+          if (!resizeDisabled) {
+            document.body.style.cursor = 'ew-resize';
+          }
         },
         onMouseLeave: function() {
           document.body.style.cursor = 'auto';
@@ -471,6 +486,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
       });
       const moveHandle = new paperMain.Path.Ellipse({
         ...baseProps,
+        opacity: 1,
         visible: visibleHandle === 'all' || visibleHandle === 'move',
         data: {
           id: 'selectionFrameHandle',
@@ -495,7 +511,9 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           handle: 'topLeft'
         },
         onMouseEnter: function() {
-          document.body.style.cursor = 'nwse-resize';
+          if (!resizeDisabled) {
+            document.body.style.cursor = 'nwse-resize';
+          }
         },
         onMouseLeave: function() {
           document.body.style.cursor = 'auto';
@@ -512,7 +530,9 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           handle: 'topCenter'
         },
         onMouseEnter: function() {
-          document.body.style.cursor = 'ns-resize';
+          if (!resizeDisabled) {
+            document.body.style.cursor = 'ns-resize';
+          }
         },
         onMouseLeave: function() {
           document.body.style.cursor = 'auto';
@@ -529,7 +549,9 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           handle: 'topRight'
         },
         onMouseEnter: function() {
-          document.body.style.cursor = 'nesw-resize';
+          if (!resizeDisabled) {
+            document.body.style.cursor = 'nesw-resize';
+          }
         },
         onMouseLeave: function() {
           document.body.style.cursor = 'auto';
@@ -546,7 +568,9 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           handle: 'bottomLeft'
         },
         onMouseEnter: function() {
-          document.body.style.cursor = 'nesw-resize';
+          if (!resizeDisabled) {
+            document.body.style.cursor = 'nesw-resize';
+          }
         },
         onMouseLeave: function() {
           document.body.style.cursor = 'auto';
@@ -563,7 +587,9 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           handle: 'bottomCenter'
         },
         onMouseEnter: function() {
-          document.body.style.cursor = 'ns-resize';
+          if (!resizeDisabled) {
+            document.body.style.cursor = 'ns-resize';
+          }
         },
         onMouseLeave: function() {
           document.body.style.cursor = 'auto';
@@ -580,7 +606,9 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           handle: 'bottomRight'
         },
         onMouseEnter: function() {
-          document.body.style.cursor = 'nwse-resize';
+          if (!resizeDisabled) {
+            document.body.style.cursor = 'nwse-resize';
+          }
         },
         onMouseLeave: function() {
           document.body.style.cursor = 'auto';
@@ -597,7 +625,9 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           handle: 'rightCenter'
         },
         onMouseEnter: function() {
-          document.body.style.cursor = 'ew-resize';
+          if (!resizeDisabled) {
+            document.body.style.cursor = 'ew-resize';
+          }
         },
         onMouseLeave: function() {
           document.body.style.cursor = 'auto';
@@ -614,7 +644,9 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           handle: 'leftCenter'
         },
         onMouseEnter: function() {
-          document.body.style.cursor = 'ew-resize';
+          if (!resizeDisabled) {
+            document.body.style.cursor = 'ew-resize';
+          }
         },
         onMouseLeave: function() {
           document.body.style.cursor = 'auto';
@@ -623,16 +655,6 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
       leftCenterHandle.position = baseFrame.bounds.leftCenter;
       leftCenterHandle.scaling.x = 1 / paperMain.view.zoom;
       leftCenterHandle.scaling.y = 1 / paperMain.view.zoom;
-      if (state.selected.length >= 1 && state.selected.every((id) => state.byId[id].type === 'Text')) {
-        topLeftHandle.opacity = 0.5;
-        topCenterHandle.opacity = 0.5;
-        topRightHandle.opacity = 0.5;
-        bottomLeftHandle.opacity = 0.5;
-        bottomCenterHandle.opacity = 0.5;
-        bottomRightHandle.opacity = 0.5;
-        leftCenterHandle.opacity = 0.5;
-        rightCenterHandle.opacity = 0.5;
-      }
       new paperMain.Group({
         children: [baseFrame, moveHandle, topLeftHandle, topCenterHandle, topRightHandle, bottomLeftHandle, bottomCenterHandle, bottomRightHandle, leftCenterHandle, rightCenterHandle],
         data: {
@@ -2688,6 +2710,9 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
   if (layerItem.style.fill.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'fill', gradient: layerItem.style.fill.gradient}) as SetLayerGradient);
   }
+  if (layerItem.style.stroke.fillType === 'gradient') {
+    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
+  }
   return currentState;
 };
 
@@ -4106,6 +4131,9 @@ export const setLayerText = (state: LayerState, action: SetLayerText): LayerStat
   if (layerItem.style.fill.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'fill', gradient: layerItem.style.fill.gradient}) as SetLayerGradient);
   }
+  if (layerItem.style.stroke.fillType === 'gradient') {
+    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
+  }
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4134,6 +4162,9 @@ export const setLayerFontSize = (state: LayerState, action: SetLayerFontSize): L
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
   if (layerItem.style.fill.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'fill', gradient: layerItem.style.fill.gradient}) as SetLayerGradient);
+  }
+  if (layerItem.style.stroke.fillType === 'gradient') {
+    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
   }
   return currentState;
 };
@@ -4171,6 +4202,9 @@ export const setLayerFontWeight = (state: LayerState, action: SetLayerFontWeight
   if (layerItem.style.fill.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'fill', gradient: layerItem.style.fill.gradient}) as SetLayerGradient);
   }
+  if (layerItem.style.stroke.fillType === 'gradient') {
+    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
+  }
   return currentState;
 };
 
@@ -4207,6 +4241,9 @@ export const setLayerFontFamily = (state: LayerState, action: SetLayerFontFamily
   if (layerItem.style.fill.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'fill', gradient: layerItem.style.fill.gradient}) as SetLayerGradient);
   }
+  if (layerItem.style.stroke.fillType === 'gradient') {
+    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
+  }
   return currentState;
 };
 
@@ -4242,6 +4279,9 @@ export const setLayerLeading = (state: LayerState, action: SetLayerLeading): Lay
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
   if (layerItem.style.fill.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'fill', gradient: layerItem.style.fill.gradient}) as SetLayerGradient);
+  }
+  if (layerItem.style.stroke.fillType === 'gradient') {
+    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
   }
   return currentState;
 };
@@ -4317,6 +4357,9 @@ export const setLayerJustification = (state: LayerState, action: SetLayerJustifi
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
   if (layerItem.style.fill.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'fill', gradient: layerItem.style.fill.gradient}) as SetLayerGradient);
+  }
+  if (layerItem.style.stroke.fillType === 'gradient') {
+    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
   }
   return currentState;
 };
@@ -5153,6 +5196,9 @@ export const setPolygonSides = (state: LayerState, action: SetPolygonSides): Lay
   currentState = updateLayerBounds(currentState, action.payload.id);
   if (layerItem.style.fill.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'fill', gradient: layerItem.style.fill.gradient}) as SetLayerGradient);
+  }
+  if (layerItem.style.stroke.fillType === 'gradient') {
+    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
   }
   return currentState;
 };

@@ -1,14 +1,12 @@
-import paper, { Color, Tool, Point, Path, Size, PointText } from 'paper';
 import { v4 as uuidv4 } from 'uuid';
 import store from '../store';
 import { openTextEditor } from '../store/actions/textEditor';
 import { addText } from '../store/actions/layer';
-import { getNearestScopeAncestor, getPaperLayer, getPagePaperLayer } from '../store/selectors/layer';
+import { getPagePaperLayer } from '../store/selectors/layer';
 import { paperMain } from './index';
 import { applyTextMethods } from './textUtils';
 import { DEFAULT_TEXT_VALUE, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../constants';
 import InsertTool from './insertTool';
-//import textSettings from 'src/store/reducers/textSettings';
 
 class TextTool {
   tool: paper.Tool;
@@ -18,8 +16,6 @@ class TextTool {
     this.tool.activate();
     this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
     this.tool.onKeyUp = (e: paper.KeyEvent): void => this.onKeyUp(e);
-    this.tool.onMouseDown = (e: paper.ToolEvent): void => this.onMouseDown(e);
-    this.tool.onMouseDrag = (e: paper.ToolEvent): void => this.onMouseDrag(e);
     this.tool.onMouseUp = (e: paper.ToolEvent): void => this.onMouseUp(e);
     this.insertTool = new InsertTool();
   }
@@ -28,12 +24,6 @@ class TextTool {
   }
   onKeyUp(event: paper.KeyEvent): void {
     this.insertTool.onKeyUp(event);
-  }
-  onMouseDown(event: paper.ToolEvent): void {
-
-  }
-  onMouseDrag(event: paper.ToolEvent): void {
-
   }
   onMouseUp(event: paper.ToolEvent): void {
     this.insertTool.enabled = false;

@@ -1,5 +1,6 @@
-import { getPaperLayer } from '../store/selectors/layer';
+import { getPaperLayer, getLayerAndDescendants } from '../store/selectors/layer';
 import { removeLayers, escapeLayerScope } from '../store/actions/layer';
+import { setTweenDrawerEvent } from '../store/actions/tweenDrawer';
 import { setCanvasMeasuring } from '../store/actions/canvasSettings';
 import store from '../store';
 import AreaSelectTool from './areaSelectTool';
@@ -72,6 +73,17 @@ class SelectionTool {
       case 'backspace': {
         const state = store.getState();
         if (state.layer.present.selected.length > 0) {
+          if (state.tweenDrawer.isOpen && state.tweenDrawer.event) {
+            const tweenEvent = state.layer.present.tweenEventById[state.tweenDrawer.event];
+            const tweenEventLayer = tweenEvent.layer;
+            let layersAndChildren: string[] = [];
+            state.layer.present.selected.forEach((id) => {
+              layersAndChildren = [...layersAndChildren, ...getLayerAndDescendants(state.layer.present, id)];
+            });
+            if (layersAndChildren.includes(tweenEventLayer)) {
+              store.dispatch(setTweenDrawerEvent({id: null}));
+            }
+          }
           store.dispatch(removeLayers({layers: state.layer.present.selected}));
         }
         break;
@@ -99,6 +111,14 @@ class SelectionTool {
     const layerState = state.layer.present;
     const hitResult = paperMain.project.hitTest(event.point);
     const isGradientEditorOpen = state.gradientEditor.isOpen;
+    const selectedWithChildren = layerState.selected.reduce((result: { allIds: string[]; byId: { [id: string]: em.Layer } }, current) => {
+      const layerAndChildren = getLayerAndDescendants(layerState, current);
+      result.allIds = [...result.allIds, ...layerAndChildren];
+      layerAndChildren.forEach((id) => {
+        result.byId[id] = layerState.byId[id];
+      });
+      return result;
+    }, { allIds: [], byId: {} });
     if (hitResult) {
       // if hit result is selection frame handle
       if (hitResult.item.data.id === 'selectionFrameHandle') {
@@ -114,7 +134,7 @@ class SelectionTool {
         }
         // else (hit result is resize handle), enable resize tool if no text layers are selected
         else {
-          if (!layerState.selected.every((id: string) => layerState.byId[id].type === 'Text' || layerState.byId[id].type === 'Group')) {
+          if (!selectedWithChildren.allIds.some((id: string) => layerState.byId[id].type === 'Text' || layerState.byId[id].type === 'Group')) {
             this.resizeTool.enable(state, hitResult.item.data.handle);
             this.resizeTool.onMouseDown(event);
           }

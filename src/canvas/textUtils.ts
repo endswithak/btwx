@@ -1,11 +1,8 @@
-import paper, { Shape, Point, Path, Color, PointText } from 'paper';
-import store, { StoreDispatch, StoreGetState } from '../store';
-import { disableSelectionTool } from '../store/actions/tool';
-import { openContextMenu, closeContextMenu } from '../store/actions/contextMenu';
+import store from '../store';
+import { openContextMenu } from '../store/actions/contextMenu';
 import { openTextEditor } from '../store/actions/textEditor';
 import { setLayerHover, selectLayer, deselectLayer, deepSelectLayer } from '../store/actions/layer';
 import { getNearestScopeAncestor, getLayer } from '../store/selectors/layer';
-import { SetTextSettingsPayload, TextSettingsTypes } from '../store/actionTypes/textSettings';
 import { setTextSettings } from '../store/actions/textSettings';
 import { paperMain } from './';
 

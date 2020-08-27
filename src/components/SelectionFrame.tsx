@@ -3,41 +3,57 @@ import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { updateSelectionFrame } from '../store/utils/layer';
 import { LayerState } from '../store/reducers/layer';
+import { getLayerAndDescendants } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
 
 interface SelectionFrameProps {
-  selected?: string[];
-  selectedById?: {
-    [id: string]: em.Layer;
+  selected: string[];
+  selectedWithChildren?: {
+    allIds: string[];
+    byId: {
+      [id: string]: em.Layer;
+    };
   };
 }
 
 const SelectionFrame = (props: SelectionFrameProps): ReactElement => {
-  const { selected, selectedById } = props;
+  const { selected, selectedWithChildren } = props;
 
   useEffect(() => {
-    updateSelectionFrame({selected: selected, byId: selectedById} as LayerState, 'all', true);
+    updateSelectionFrame({selected: selected, byId: selectedWithChildren.byId} as LayerState, 'all', true);
     return () => {
       const selectionFrame = paperMain.project.getItem({ data: { id: 'selectionFrame' } });
       if (selectionFrame) {
         selectionFrame.remove();
       }
     }
-  }, [selectedById, selected]);
+  }, [selectedWithChildren, selected]);
 
   return (
     <div />
   );
 }
 
-const mapStateToProps = (state: RootState) => {
+const mapStateToProps = (state: RootState): {
+  selected: string[];
+  selectedWithChildren: {
+    allIds: string[];
+    byId: {
+      [id: string]: em.Layer;
+    };
+  };
+} => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const selectedById = layer.present.selected.reduce((result: { [id: string]: em.Layer }, current) => {
-    result[current] = layer.present.byId[current];
+  const selectedWithChildren = layer.present.selected.reduce((result: { allIds: string[]; byId: { [id: string]: em.Layer } }, current) => {
+    const layerAndChildren = getLayerAndDescendants(layer.present, current);
+    result.allIds = [...result.allIds, ...layerAndChildren];
+    layerAndChildren.forEach((id) => {
+      result.byId[id] = layer.present.byId[id];
+    });
     return result;
-  }, {});
-  return { selected, selectedById };
+  }, { allIds: [], byId: {} });
+  return { selected, selectedWithChildren };
 };
 
 export default connect(

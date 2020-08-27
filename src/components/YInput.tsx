@@ -9,16 +9,16 @@ import { getLayerScope, getPositionInArtboard } from '../store/selectors/layer';
 
 interface YInputProps {
   selected?: string[];
-  yValue?: number;
+  yValue?: number | 'multi';
   setLayersY?(payload: SetLayersYPayload): LayerTypes;
 }
 
 const YInput = (props: YInputProps): ReactElement => {
   const { selected, setLayersY, yValue } = props;
-  const [y, setY] = useState(props.yValue);
+  const [y, setY] = useState(yValue !== 'multi' ? Math.round(yValue as number) : yValue);
 
   useEffect(() => {
-    setY(yValue);
+    setY(yValue !== 'multi' ? Math.round(yValue as number) : yValue);
   }, [yValue, selected]);
 
   const handleChange = (e: any) => {
@@ -33,10 +33,10 @@ const YInput = (props: YInputProps): ReactElement => {
         setLayersY({layers: selected, y: nextY});
         setY(nextY);
       } else {
-        setY(yValue);
+        setY(yValue !== 'multi' ? Math.round(yValue as number) : yValue);
       }
     } catch(error) {
-      setY(yValue);
+      setY(yValue !== 'multi' ? Math.round(yValue as number) : yValue);
     }
   }
 

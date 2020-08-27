@@ -1,7 +1,6 @@
-import paper, { Shape, Point, Path, Color, PointText } from 'paper';
-import store, { StoreDispatch, StoreGetState } from '../store';
-import { openContextMenu, closeContextMenu } from '../store/actions/contextMenu';
-import { setLayerHover, selectLayer, deselectLayer, deepSelectLayer } from '../store/actions/layer';
+import store from '../store';
+import { openContextMenu } from '../store/actions/contextMenu';
+import { selectLayer, deselectLayer } from '../store/actions/layer';
 import { getNearestScopeAncestor, getLayer } from '../store/selectors/layer';
 
 export const applyArtboardMethods = (artboard: paper.Item) => {

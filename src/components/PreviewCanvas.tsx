@@ -162,19 +162,18 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 break;
               }
               case 'shape': {
-                // clear rotations
-                tweenPaperLayer.rotation = -tweenLayer.transform.rotation;
-                tweenDestinationLayerPaperLayer.rotation = -tweenDestinationLayer.transform.rotation;
+                // get shapes without rotation
+                const tweenPaperLayerClone = tweenPaperLayer.clone({insert: false});
+                const tweenDestinationLayerPaperLayerClone = tweenDestinationLayerPaperLayer.clone({insert: false});
+                tweenPaperLayerClone.rotation = -tweenLayer.transform.rotation;
+                tweenDestinationLayerPaperLayerClone.rotation = -tweenDestinationLayer.transform.rotation;
                 // get morph data
                 const morphData = [
-                  (tweenPaperLayer as paper.Path).pathData,
-                  (tweenDestinationLayerPaperLayer as paper.Path).pathData
+                  (tweenPaperLayerClone as paper.Path).pathData,
+                  (tweenDestinationLayerPaperLayerClone as paper.Path).pathData
                 ];
                 MorphSVGPlugin.pathFilter(morphData);
                 tweenProp[tween.prop] = morphData[0];
-                // reapply rotations
-                tweenPaperLayer.rotation = tweenLayer.transform.rotation;
-                tweenDestinationLayerPaperLayer.rotation = tweenDestinationLayer.transform.rotation;
                 // set tween
                 tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
@@ -202,12 +201,16 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                       (tweenPaperLayer.fillColor as em.PaperGradientFill).origin = nextOrigin;
                       (tweenPaperLayer.fillColor as em.PaperGradientFill).destination = nextDestination;
                     }
-                    // if (tweenPaperLayer.strokeColor && tweenPaperLayer.strokeColor.gradient) {
-                    //   const origin = tweenLayers.byId[tweenPaperLayer.data.id].style.stroke.gradient.origin;
-                    //   const destination = tweenLayers.byId[tweenPaperLayer.data.id].style.stroke.gradient.destination;
-                    //   (tweenPaperLayer.strokeColor as em.PaperGradientFill).origin = new paperPreview.Point((origin.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (origin.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
-                    //   (tweenPaperLayer.strokeColor as em.PaperGradientFill).destination = new paperPreview.Point((destination.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (destination.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
-                    // }
+                    if (tweenPaperLayer.strokeColor && tweenPaperLayer.strokeColor.gradient) {
+                      const innerWidth = tweenPaperLayer.data.innerWidth ? tweenPaperLayer.data.innerWidth : tweenLayer.frame.innerWidth;
+                      const innerHeight = tweenPaperLayer.data.innerHeight ? tweenPaperLayer.data.innerHeight : tweenLayer.frame.innerHeight;
+                      const origin = tweenPaperLayer.data.gradientOrigin ? tweenPaperLayer.data.gradientOrigin : tweenLayer.style.fill.gradient.origin;
+                      const destination = tweenPaperLayer.data.gradientDestination ? tweenPaperLayer.data.gradientDestination : tweenLayer.style.stroke.gradient.destination;
+                      const nextOrigin = new paperPreview.Point((origin.x * innerWidth) + tweenPaperLayer.position.x, (origin.y * innerHeight) + tweenPaperLayer.position.y);
+                      const nextDestination = new paperPreview.Point((destination.x * innerWidth) + tweenPaperLayer.position.x, (destination.y * innerHeight) + tweenPaperLayer.position.y);
+                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).origin = nextOrigin;
+                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).destination = nextDestination;
+                    }
                   },
                   ease: tween.ease,
                 }, tween.delay);
@@ -491,10 +494,13 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     [`${tween.prop}-origin-x`]: tweenDestinationLayer.style.stroke.gradient.origin.x,
                     [`${tween.prop}-origin-y`]: tweenDestinationLayer.style.stroke.gradient.origin.y,
                     onUpdate: () => {
+                      const innerWidth = tweenPaperLayer.data.innerWidth ? tweenPaperLayer.data.innerWidth : tweenLayer.frame.innerWidth;
+                      const innerHeight = tweenPaperLayer.data.innerHeight ? tweenPaperLayer.data.innerHeight : tweenLayer.frame.innerHeight;
                       const nextOriginX = tweenProp[`${tween.prop}-origin-x`];
                       const nextOriginY = tweenProp[`${tween.prop}-origin-y`];
-                      const nextOrigin = new paperPreview.Point((nextOriginX * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (nextOriginY * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
+                      const nextOrigin = new paperPreview.Point((nextOriginX * innerWidth) + tweenPaperLayer.position.x, (nextOriginY * innerHeight) + tweenPaperLayer.position.y);
                       (tweenPaperLayer.strokeColor as em.PaperGradientFill).origin = nextOrigin;
+                      tweenPaperLayer.data.gradientOrigin = { x: nextOriginX, y: nextOriginY };
                     },
                     ease: tween.ease,
                   }, tween.delay);
@@ -506,10 +512,13 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     [`${tween.prop}-destination-x`]: tweenDestinationLayer.style.stroke.gradient.destination.x,
                     [`${tween.prop}-destination-y`]: tweenDestinationLayer.style.stroke.gradient.destination.y,
                     onUpdate: () => {
+                      const innerWidth = tweenPaperLayer.data.innerWidth ? tweenPaperLayer.data.innerWidth : tweenLayer.frame.innerWidth;
+                      const innerHeight = tweenPaperLayer.data.innerHeight ? tweenPaperLayer.data.innerHeight : tweenLayer.frame.innerHeight;
                       const nextDestinationX = tweenProp[`${tween.prop}-destination-x`];
                       const nextDestinationY = tweenProp[`${tween.prop}-destination-y`];
-                      const nextDestination = new paperPreview.Point((nextDestinationX * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (nextDestinationY * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
+                      const nextDestination = new paperPreview.Point((nextDestinationX * innerWidth) + tweenPaperLayer.position.x, (nextDestinationY * innerHeight) + tweenPaperLayer.position.y);
                       (tweenPaperLayer.strokeColor as em.PaperGradientFill).destination = nextDestination;
+                      tweenPaperLayer.data.gradientDestination = { x: nextDestinationX, y: nextDestinationY };
                     },
                     ease: tween.ease,
                   }, tween.delay);
@@ -722,17 +731,17 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     tweenPaperLayer.data.innerWidth = tweenProp[tween.prop];
                     tweenPaperLayer.rotation = startRotation;
                     tweenPaperLayer.position = startPosition;
-                    if (tweenLayer.type === 'Shape' && (tweenLayer as em.Shape).shapeType === 'Rounded') {
-                      tweenPaperLayer.rotation = -startRotation;
-                      const newShape = new paperPreview.Path.Rectangle({
-                        from: tweenPaperLayer.bounds.topLeft,
-                        to: tweenPaperLayer.bounds.bottomRight,
-                        radius: (Math.max(tweenPaperLayer.bounds.width, tweenPaperLayer.bounds.height) / 2) * (tweenLayer as em.Rounded).radius,
-                        insert: false
-                      });
-                      (tweenPaperLayer as paper.Path).pathData = newShape.pathData;
-                      tweenPaperLayer.rotation = startRotation;
-                    }
+                    // if (tweenLayer.type === 'Shape' && (tweenLayer as em.Shape).shapeType === 'Rounded') {
+                    //   tweenPaperLayer.rotation = -startRotation;
+                    //   const newShape = new paperPreview.Path.Rectangle({
+                    //     from: tweenPaperLayer.bounds.topLeft,
+                    //     to: tweenPaperLayer.bounds.bottomRight,
+                    //     radius: (Math.max(tweenPaperLayer.bounds.width, tweenPaperLayer.bounds.height) / 2) * (tweenLayer as em.Rounded).radius,
+                    //     insert: false
+                    //   });
+                    //   (tweenPaperLayer as paper.Path).pathData = newShape.pathData;
+                    //   tweenPaperLayer.rotation = startRotation;
+                    // }
                   },
                   ease: tween.ease,
                 }, tween.delay);
@@ -751,17 +760,17 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     tweenPaperLayer.data.innerHeight = tweenProp[tween.prop];
                     tweenPaperLayer.rotation = startRotation;
                     tweenPaperLayer.position = startPosition;
-                    if (tweenLayer.type === 'Shape' && (tweenLayer as em.Shape).shapeType === 'Rounded') {
-                      tweenPaperLayer.rotation = -startRotation;
-                      const newShape = new paperPreview.Path.Rectangle({
-                        from: tweenPaperLayer.bounds.topLeft,
-                        to: tweenPaperLayer.bounds.bottomRight,
-                        radius: (Math.max(tweenPaperLayer.bounds.width, tweenPaperLayer.bounds.height) / 2) * (tweenLayer as em.Rounded).radius,
-                        insert: false
-                      });
-                      (tweenPaperLayer as paper.Path).pathData = newShape.pathData;
-                      tweenPaperLayer.rotation = startRotation;
-                    }
+                    // if (tweenLayer.type === 'Shape' && (tweenLayer as em.Shape).shapeType === 'Rounded') {
+                    //   tweenPaperLayer.rotation = -startRotation;
+                    //   const newShape = new paperPreview.Path.Rectangle({
+                    //     from: tweenPaperLayer.bounds.topLeft,
+                    //     to: tweenPaperLayer.bounds.bottomRight,
+                    //     radius: (Math.max(tweenPaperLayer.bounds.width, tweenPaperLayer.bounds.height) / 2) * (tweenLayer as em.Rounded).radius,
+                    //     insert: false
+                    //   });
+                    //   (tweenPaperLayer as paper.Path).pathData = newShape.pathData;
+                    //   tweenPaperLayer.rotation = startRotation;
+                    // }
                   },
                   ease: tween.ease,
                 }, tween.delay);
@@ -788,6 +797,16 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                       const nextDestination = new paperPreview.Point((destination.x * innerWidth) + tweenPaperLayer.position.x, (destination.y * innerHeight) + tweenPaperLayer.position.y);
                       (tweenPaperLayer.fillColor as em.PaperGradientFill).origin = nextOrigin;
                       (tweenPaperLayer.fillColor as em.PaperGradientFill).destination = nextDestination;
+                    }
+                    if (tweenPaperLayer.strokeColor && tweenPaperLayer.strokeColor.gradient) {
+                      const innerWidth = tweenPaperLayer.data.innerWidth ? tweenPaperLayer.data.innerWidth : tweenLayer.frame.innerWidth;
+                      const innerHeight = tweenPaperLayer.data.innerHeight ? tweenPaperLayer.data.innerHeight : tweenLayer.frame.innerHeight;
+                      const origin = tweenPaperLayer.data.gradientOrigin ? tweenPaperLayer.data.gradientOrigin : tweenLayer.style.fill.gradient.origin;
+                      const destination = tweenPaperLayer.data.gradientDestination ? tweenPaperLayer.data.gradientDestination : tweenLayer.style.stroke.gradient.destination;
+                      const nextOrigin = new paperPreview.Point((origin.x * innerWidth) + tweenPaperLayer.position.x, (origin.y * innerHeight) + tweenPaperLayer.position.y);
+                      const nextDestination = new paperPreview.Point((destination.x * innerWidth) + tweenPaperLayer.position.x, (destination.y * innerHeight) + tweenPaperLayer.position.y);
+                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).origin = nextOrigin;
+                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).destination = nextDestination;
                     }
                   },
                   ease: tween.ease,
@@ -875,6 +894,16 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                       (tweenPaperLayer.fillColor as em.PaperGradientFill).origin = nextOrigin;
                       (tweenPaperLayer.fillColor as em.PaperGradientFill).destination = nextDestination;
                     }
+                    if (tweenPaperLayer.strokeColor && tweenPaperLayer.strokeColor.gradient) {
+                      const innerWidth = tweenPaperLayer.data.innerWidth ? tweenPaperLayer.data.innerWidth : tweenLayer.frame.innerWidth;
+                      const innerHeight = tweenPaperLayer.data.innerHeight ? tweenPaperLayer.data.innerHeight : tweenLayer.frame.innerHeight;
+                      const origin = tweenPaperLayer.data.gradientOrigin ? tweenPaperLayer.data.gradientOrigin : tweenLayer.style.fill.gradient.origin;
+                      const destination = tweenPaperLayer.data.gradientDestination ? tweenPaperLayer.data.gradientDestination : tweenLayer.style.stroke.gradient.destination;
+                      const nextOrigin = new paperPreview.Point((origin.x * innerWidth) + tweenPaperLayer.position.x, (origin.y * innerHeight) + tweenPaperLayer.position.y);
+                      const nextDestination = new paperPreview.Point((destination.x * innerWidth) + tweenPaperLayer.position.x, (destination.y * innerHeight) + tweenPaperLayer.position.y);
+                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).origin = nextOrigin;
+                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).destination = nextDestination;
+                    }
                   },
                   ease: tween.ease,
                 }, tween.delay);
@@ -900,10 +929,14 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                       (tweenPaperLayer.fillColor as em.PaperGradientFill).destination = nextDestination;
                     }
                     if (tweenPaperLayer.strokeColor && tweenPaperLayer.strokeColor.gradient) {
-                      const origin = tweenLayers.byId[tweenPaperLayer.data.id].style.stroke.gradient.origin;
-                      const destination = tweenLayers.byId[tweenPaperLayer.data.id].style.stroke.gradient.destination;
-                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).origin = new paper.Point((origin.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (origin.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
-                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).destination = new paper.Point((destination.x * tweenPaperLayer.bounds.width) + tweenPaperLayer.position.x, (destination.y * tweenPaperLayer.bounds.height) + tweenPaperLayer.position.y);
+                      const innerWidth = tweenPaperLayer.data.innerWidth ? tweenPaperLayer.data.innerWidth : tweenLayer.frame.innerWidth;
+                      const innerHeight = tweenPaperLayer.data.innerHeight ? tweenPaperLayer.data.innerHeight : tweenLayer.frame.innerHeight;
+                      const origin = tweenPaperLayer.data.gradientOrigin ? tweenPaperLayer.data.gradientOrigin : tweenLayer.style.fill.gradient.origin;
+                      const destination = tweenPaperLayer.data.gradientDestination ? tweenPaperLayer.data.gradientDestination : tweenLayer.style.stroke.gradient.destination;
+                      const nextOrigin = new paperPreview.Point((origin.x * innerWidth) + tweenPaperLayer.position.x, (origin.y * innerHeight) + tweenPaperLayer.position.y);
+                      const nextDestination = new paperPreview.Point((destination.x * innerWidth) + tweenPaperLayer.position.x, (destination.y * innerHeight) + tweenPaperLayer.position.y);
+                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).origin = nextOrigin;
+                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).destination = nextDestination;
                     }
                   },
                   ease: tween.ease,

@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { evaluate } from 'mathjs';
 import SidebarInput from './SidebarInput';
@@ -9,16 +9,16 @@ import { getLayerScope, getPositionInArtboard } from '../store/selectors/layer';
 
 interface XInputProps {
   selected?: string[];
-  xValue?: number;
+  xValue?: number | 'multi';
   setLayersX?(payload: SetLayersXPayload): LayerTypes;
 }
 
 const XInput = (props: XInputProps): ReactElement => {
   const { selected, setLayersX, xValue } = props;
-  const [x, setX] = useState(xValue);
+  const [x, setX] = useState(xValue !== 'multi' ? Math.round(xValue as number) : xValue);
 
   useEffect(() => {
-    setX(xValue);
+    setX(xValue !== 'multi' ? Math.round(xValue as number) : xValue);
   }, [xValue, selected]);
 
   const handleChange = (e: any): void => {
@@ -33,10 +33,10 @@ const XInput = (props: XInputProps): ReactElement => {
         setLayersX({layers: selected, x: nextX});
         setX(nextX);
       } else {
-        setX(xValue);
+        setX(xValue !== 'multi' ? Math.round(xValue as number) : xValue);
       }
     } catch(error) {
-      setX(xValue);
+      setX(xValue !== 'multi' ? Math.round(xValue as number) : xValue);
     }
   }
 

@@ -327,8 +327,8 @@ export const getDestinationEquivalent = (store: LayerState, layer: string, desti
 };
 
 export const getPositionInArtboard = (layer: em.Layer, artboard: em.Artboard): paper.Point => {
-  const xDiff = Math.round(layer.frame.x - (artboard.frame.x - (artboard.frame.width / 2)));
-  const yDiff = Math.round(layer.frame.y - (artboard.frame.y - (artboard.frame.height / 2)));
+  const xDiff = layer.frame.x - (artboard.frame.x - (artboard.frame.width / 2));
+  const yDiff = layer.frame.y - (artboard.frame.y - (artboard.frame.height / 2));
   return new paper.Point(xDiff, yDiff);
 };
 
@@ -358,6 +358,8 @@ export const hasFillTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer)
     (layerItem.type === 'Shape' || layerItem.type === 'Text') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text') &&
     (
+      (layerItem.style.fill.enabled && !equivalentLayerItem.style.fill.enabled) ||
+      (!layerItem.style.fill.enabled && equivalentLayerItem.style.fill.enabled) ||
       layerItem.style.fill.fillType !== equivalentLayerItem.style.fill.fillType ||
       layerItem.style.fill.fillType === 'color' && equivalentLayerItem.style.fill.fillType === 'color' && !colorsMatch(layerItem.style.fill.color, equivalentLayerItem.style.fill.color) ||
       layerItem.style.fill.fillType === 'gradient' && equivalentLayerItem.style.fill.fillType === 'gradient' && !gradientsMatch(layerItem.style.fill.gradient, equivalentLayerItem.style.fill.gradient)
@@ -425,6 +427,8 @@ export const hasStrokeTween = (layerItem: em.Layer, equivalentLayerItem: em.Laye
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
     (layerItem.style.stroke.enabled || equivalentLayerItem.style.stroke.enabled) &&
     (
+      (layerItem.style.stroke.enabled && !equivalentLayerItem.style.stroke.enabled) ||
+      (!layerItem.style.stroke.enabled && equivalentLayerItem.style.stroke.enabled) ||
       layerItem.style.stroke.fillType !== equivalentLayerItem.style.stroke.fillType ||
       layerItem.style.stroke.fillType === 'color' && equivalentLayerItem.style.stroke.fillType === 'color' && !colorsMatch(layerItem.style.stroke.color, equivalentLayerItem.style.stroke.color) ||
       layerItem.style.stroke.fillType === 'gradient' && equivalentLayerItem.style.stroke.fillType === 'gradient' && !gradientsMatch(layerItem.style.stroke.gradient, equivalentLayerItem.style.stroke.gradient)
@@ -463,8 +467,11 @@ export const hasStrokeWidthTween = (layerItem: em.Layer, equivalentLayerItem: em
   return (
     (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
-    (layerItem.style.stroke.enabled || equivalentLayerItem.style.stroke.enabled) &&
-    layerItem.style.stroke.width !== equivalentLayerItem.style.stroke.width
+    (
+      (layerItem.style.stroke.enabled && !equivalentLayerItem.style.stroke.enabled) ||
+      (!layerItem.style.stroke.enabled && equivalentLayerItem.style.stroke.enabled) ||
+      layerItem.style.stroke.width !== equivalentLayerItem.style.stroke.width
+    )
   );
 };
 
@@ -472,8 +479,11 @@ export const hasShadowColorTween = (layerItem: em.Layer, equivalentLayerItem: em
   return (
     (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
-    (layerItem.style.shadow.enabled || equivalentLayerItem.style.shadow.enabled) &&
-    !colorsMatch(layerItem.style.shadow.color, equivalentLayerItem.style.shadow.color)
+    (
+      (layerItem.style.shadow.enabled && !equivalentLayerItem.style.shadow.enabled) ||
+      (!layerItem.style.shadow.enabled && equivalentLayerItem.style.shadow.enabled) ||
+      !colorsMatch(layerItem.style.shadow.color, equivalentLayerItem.style.shadow.color)
+    )
   );
 };
 
@@ -481,8 +491,11 @@ export const hasShadowOffsetXTween = (layerItem: em.Layer, equivalentLayerItem: 
   return (
     (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
-    (layerItem.style.shadow.enabled || equivalentLayerItem.style.shadow.enabled) &&
-    layerItem.style.shadow.offset.x !== equivalentLayerItem.style.shadow.offset.x
+    (
+      (layerItem.style.shadow.enabled && !equivalentLayerItem.style.shadow.enabled) ||
+      (!layerItem.style.shadow.enabled && equivalentLayerItem.style.shadow.enabled) ||
+      layerItem.style.shadow.offset.x !== equivalentLayerItem.style.shadow.offset.x
+    )
   );
 };
 
@@ -490,8 +503,11 @@ export const hasShadowOffsetYTween = (layerItem: em.Layer, equivalentLayerItem: 
   return (
     (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
-    (layerItem.style.shadow.enabled || equivalentLayerItem.style.shadow.enabled) &&
-    layerItem.style.shadow.offset.y !== equivalentLayerItem.style.shadow.offset.y
+    (
+      (layerItem.style.shadow.enabled && !equivalentLayerItem.style.shadow.enabled) ||
+      (!layerItem.style.shadow.enabled && equivalentLayerItem.style.shadow.enabled) ||
+      layerItem.style.shadow.offset.y !== equivalentLayerItem.style.shadow.offset.y
+    )
   );
 };
 
@@ -499,8 +515,11 @@ export const hasShadowBlurTween = (layerItem: em.Layer, equivalentLayerItem: em.
   return (
     (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
-    (layerItem.style.shadow.enabled || equivalentLayerItem.style.shadow.enabled) &&
-    layerItem.style.shadow.blur !== equivalentLayerItem.style.shadow.blur
+    (
+      (layerItem.style.shadow.enabled && !equivalentLayerItem.style.shadow.enabled) ||
+      (!layerItem.style.shadow.enabled && equivalentLayerItem.style.shadow.enabled) ||
+      layerItem.style.shadow.blur!== equivalentLayerItem.style.shadow.blur
+    )
   );
 };
 
