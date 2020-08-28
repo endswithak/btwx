@@ -133,7 +133,7 @@ class SelectionTool {
         }
         // else (hit result is resize handle), enable resize tool if no text layers are selected
         else {
-          if (!selectedWithChildren.allIds.some((id: string) => layerState.byId[id].type === 'Text' || layerState.byId[id].type === 'Group')) {
+          if (layerState.selected.some((id) => layerState.byId[id].type === 'Artboard') || !selectedWithChildren.allIds.some((id: string) => layerState.byId[id].type === 'Text' || layerState.byId[id].type === 'Group')) {
             this.resizeTool.enable(state, hitResult.item.data.handle);
             this.resizeTool.onMouseDown(event);
           }

@@ -371,6 +371,7 @@ export const hasXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer, ar
   const layerArtboardPosition = getPositionInArtboard(layerItem, artboardLayerItem);
   const equivalentArtboardPosition = getPositionInArtboard(equivalentLayerItem, destinationArtboardLayerItem);
   return (
+    layerItem.type !== 'Group' && equivalentLayerItem.type !== 'Group' &&
     layerArtboardPosition.x !== equivalentArtboardPosition.x ||
     (
       layerItem.type === 'Text' &&
@@ -387,6 +388,7 @@ export const hasYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer, ar
   const layerArtboardPosition = getPositionInArtboard(layerItem, artboardLayerItem);
   const equivalentArtboardPosition = getPositionInArtboard(equivalentLayerItem, destinationArtboardLayerItem);
   return (
+    layerItem.type !== 'Group' && equivalentLayerItem.type !== 'Group' &&
     layerArtboardPosition.y !== equivalentArtboardPosition.y ||
     (
       layerItem.type === 'Text' &&
@@ -400,7 +402,7 @@ export const hasYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer, ar
 };
 
 export const hasRotationTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
-  return layerItem.transform.rotation !== equivalentLayerItem.transform.rotation;
+  return (layerItem.type !== 'Group' && equivalentLayerItem.type !== 'Group') && (layerItem.transform.rotation !== equivalentLayerItem.transform.rotation);
 };
 
 export const hasWidthTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {

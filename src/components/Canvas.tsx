@@ -50,6 +50,9 @@ const Canvas = (props: CanvasProps): ReactElement => {
     if (!insertKnobActive) {
       if (e.ctrlKey) {
         e.preventDefault();
+        const cursorPoint = paperMain.view.getEventPoint(e as any);
+        const pointDiff = new paperMain.Point(cursorPoint.x - paperMain.view.center.x, cursorPoint.y - paperMain.view.center.y);
+        const prevZoom = paperMain.view.zoom;
         const nextZoom = paperMain.view.zoom - e.deltaY * 0.01;
         if (!canvasZooming) {
           canvasZooming = true;
@@ -70,6 +73,13 @@ const Canvas = (props: CanvasProps): ReactElement => {
         } else if (e.deltaY > 0 && nextZoom < 0) {
           paperMain.view.zoom = 0.01;
         }
+        const zoomDiff = paperMain.view.zoom - prevZoom;
+        paperMain.view.translate(
+          new paper.Point(
+            ((zoomDiff * pointDiff.x) * ( 1 / paperMain.view.zoom)) * -1,
+            ((zoomDiff * pointDiff.y) * ( 1 / paperMain.view.zoom)) * -1
+          )
+        );
       } else {
         paperMain.view.translate(
           new paper.Point(
@@ -95,7 +105,6 @@ const Canvas = (props: CanvasProps): ReactElement => {
       setCanvasZooming({zooming: false});
     }
     setCanvasMatrix({matrix: paperMain.view.matrix.values});
-    // paperMain.tool.minDistance = 1 * ( 1 / paperMain.view.zoom) < 1 ? 1 : 1 * ( 1 / paperMain.view.zoom);
     updateInViewLayers();
   }, 150);
 

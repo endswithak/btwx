@@ -396,7 +396,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
       });
       return result;
     }, { allIds: [], byId: {} });
-    const resizeDisabled = state.selected.length >= 1 && selectedWithChildren.allIds.some((id) => state.byId[id].type === 'Text' || state.byId[id].type === 'Group');
+    const resizeDisabled = state.selected.length >= 1 && !state.selected.some((id) => state.byId[id].type === 'Artboard') && selectedWithChildren.allIds.some((id) => state.byId[id].type === 'Text' || state.byId[id].type === 'Group');
     const selectionTopLeft = getSelectionTopLeft(state, useLayerItem);
     const selectionBottomRight = getSelectionBottomRight(state, useLayerItem);
     const baseProps = {
@@ -2555,6 +2555,10 @@ export const setLayerWidth = (state: LayerState, action: SetLayerWidth): LayerSt
     const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
     mask.bounds.width = action.payload.width;
     background.bounds.width = action.payload.width;
+    mask.position.x = layerItem.frame.x;
+    mask.position.y = layerItem.frame.y;
+    background.position.x = layerItem.frame.x;
+    background.position.y = layerItem.frame.y;
   } else {
     if (layerItem.transform.rotation !== 0) {
       paperLayer.rotation = -layerItem.transform.rotation;
@@ -2601,6 +2605,10 @@ export const setLayerHeight = (state: LayerState, action: SetLayerHeight): Layer
     const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
     mask.bounds.height = action.payload.height;
     background.bounds.height = action.payload.height;
+    mask.position.x = layerItem.frame.x;
+    mask.position.y = layerItem.frame.y;
+    background.position.x = layerItem.frame.x;
+    background.position.y = layerItem.frame.y;
   } else {
     if (layerItem.transform.rotation !== 0) {
       paperLayer.rotation = -layerItem.transform.rotation;
