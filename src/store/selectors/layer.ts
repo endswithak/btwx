@@ -1101,13 +1101,17 @@ export const gradientsMatch = (gradient1: em.Gradient, gradient2: em.Gradient): 
   const destinationsMatch = gradient1.destination.x === gradient2.destination.x && gradient1.destination.y === gradient2.destination.y;
   const g1SortedStops = [...gradient1.stops].sort((a,b) => { return a.position - b.position });
   const g2SortedStops = [...gradient2.stops].sort((a,b) => { return a.position - b.position });
-  const stopsMatch = g1SortedStops.every((id, index) => {
-    const g1Stop = g1SortedStops[index];
-    const g2Stop = g2SortedStops[index];
-    const stopColorsMatch = colorsMatch(g1Stop.color, g2Stop.color);
-    const stopPositionsMatch = g1Stop.position === g2Stop.position;
-    return stopColorsMatch && stopPositionsMatch;
-  });
+  const stopsLengthMatch = g1SortedStops.length === g2SortedStops.length;
+  let stopsMatch = false;
+  if (stopsLengthMatch) {
+    stopsMatch = g1SortedStops.every((id, index) => {
+      const g1Stop = g1SortedStops[index];
+      const g2Stop = g2SortedStops[index];
+      const stopColorsMatch = colorsMatch(g1Stop.color, g2Stop.color);
+      const stopPositionsMatch = g1Stop.position === g2Stop.position;
+      return stopColorsMatch && stopPositionsMatch;
+    });
+  }
   return gradientTypesMatch && originsMatch && destinationsMatch && stopsMatch;
 };
 

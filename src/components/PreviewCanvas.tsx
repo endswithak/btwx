@@ -731,17 +731,17 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     tweenPaperLayer.data.innerWidth = tweenProp[tween.prop];
                     tweenPaperLayer.rotation = startRotation;
                     tweenPaperLayer.position = startPosition;
-                    // if (tweenLayer.type === 'Shape' && (tweenLayer as em.Shape).shapeType === 'Rounded') {
-                    //   tweenPaperLayer.rotation = -startRotation;
-                    //   const newShape = new paperPreview.Path.Rectangle({
-                    //     from: tweenPaperLayer.bounds.topLeft,
-                    //     to: tweenPaperLayer.bounds.bottomRight,
-                    //     radius: (Math.max(tweenPaperLayer.bounds.width, tweenPaperLayer.bounds.height) / 2) * (tweenLayer as em.Rounded).radius,
-                    //     insert: false
-                    //   });
-                    //   (tweenPaperLayer as paper.Path).pathData = newShape.pathData;
-                    //   tweenPaperLayer.rotation = startRotation;
-                    // }
+                    if (tweenLayer.type === 'Shape' && (tweenLayer as em.Shape).shapeType === 'Rounded') {
+                      tweenPaperLayer.rotation = -startRotation;
+                      const newShape = new paperPreview.Path.Rectangle({
+                        from: tweenPaperLayer.bounds.topLeft,
+                        to: tweenPaperLayer.bounds.bottomRight,
+                        radius: (Math.max(tweenPaperLayer.bounds.width, tweenPaperLayer.bounds.height) / 2) * (tweenLayer as em.Rounded).radius,
+                        insert: false
+                      });
+                      (tweenPaperLayer as paper.Path).pathData = newShape.pathData;
+                      tweenPaperLayer.rotation = startRotation;
+                    }
                   },
                   ease: tween.ease,
                 }, tween.delay);
@@ -760,17 +760,17 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     tweenPaperLayer.data.innerHeight = tweenProp[tween.prop];
                     tweenPaperLayer.rotation = startRotation;
                     tweenPaperLayer.position = startPosition;
-                    // if (tweenLayer.type === 'Shape' && (tweenLayer as em.Shape).shapeType === 'Rounded') {
-                    //   tweenPaperLayer.rotation = -startRotation;
-                    //   const newShape = new paperPreview.Path.Rectangle({
-                    //     from: tweenPaperLayer.bounds.topLeft,
-                    //     to: tweenPaperLayer.bounds.bottomRight,
-                    //     radius: (Math.max(tweenPaperLayer.bounds.width, tweenPaperLayer.bounds.height) / 2) * (tweenLayer as em.Rounded).radius,
-                    //     insert: false
-                    //   });
-                    //   (tweenPaperLayer as paper.Path).pathData = newShape.pathData;
-                    //   tweenPaperLayer.rotation = startRotation;
-                    // }
+                    if (tweenLayer.type === 'Shape' && (tweenLayer as em.Shape).shapeType === 'Rounded') {
+                      tweenPaperLayer.rotation = -startRotation;
+                      const newShape = new paperPreview.Path.Rectangle({
+                        from: tweenPaperLayer.bounds.topLeft,
+                        to: tweenPaperLayer.bounds.bottomRight,
+                        radius: (Math.max(tweenPaperLayer.bounds.width, tweenPaperLayer.bounds.height) / 2) * (tweenLayer as em.Rounded).radius,
+                        insert: false
+                      });
+                      (tweenPaperLayer as paper.Path).pathData = newShape.pathData;
+                      tweenPaperLayer.rotation = startRotation;
+                    }
                   },
                   ease: tween.ease,
                 }, tween.delay);
@@ -814,12 +814,20 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 break;
               }
               case 'shadowColor': {
-                const tls = tweenLayer.style.shadow.color;
-                const tdl = tweenDestinationLayer.style.shadow.color;
-                tweenProp[tween.prop] = tinyColor({h: tls.h, s: tls.s, l: tls.l, a: tls.a}).toHslString();
+                const originShadow = tweenLayer.style.shadow;
+                const destinationShadow = tweenDestinationLayer.style.shadow;
+                let osc = tweenLayer.style.shadow.color;
+                let dsc = tweenDestinationLayer.style.shadow.color;
+                if (originShadow.enabled && !destinationShadow.enabled) {
+                  dsc = {h: dsc.h, s: dsc.s, l: dsc.l, a: 0} as em.Color;
+                }
+                if (!originShadow.enabled && destinationShadow.enabled) {
+                  osc = {h: osc.h, s: osc.s, l: osc.l, a: 0} as em.Color;
+                }
+                tweenProp[tween.prop] = tinyColor({h: osc.h, s: osc.s, l: osc.l, a: osc.a}).toHslString();
                 tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
-                  [tween.prop]: tinyColor({h: tdl.h, s: tdl.s, l: tdl.l, a: tdl.a}).toHslString(),
+                  [tween.prop]: tinyColor({h: dsc.h, s: dsc.s, l: dsc.l, a: dsc.a}).toHslString(),
                   onUpdate: () => {
                     tweenPaperLayer.shadowColor = tweenProp[tween.prop];
                   },
@@ -828,10 +836,20 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 break;
               }
               case 'shadowOffsetX': {
-                tweenProp[tween.prop] = tweenPaperLayer.shadowOffset.x;
+                const originShadow = tweenLayer.style.shadow;
+                const destinationShadow = tweenDestinationLayer.style.shadow;
+                let osx = tweenLayer.style.shadow.offset.x;
+                let dsx = tweenDestinationLayer.style.shadow.offset.x;
+                if (originShadow.enabled && !destinationShadow.enabled) {
+                  dsx = 0;
+                }
+                if (!originShadow.enabled && destinationShadow.enabled) {
+                  osx = 0;
+                }
+                tweenProp[tween.prop] = osx;
                 tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
-                  [tween.prop]: tweenDestinationLayerPaperLayer.shadowOffset.x,
+                  [tween.prop]: dsx,
                   onUpdate: () => {
                     tweenPaperLayer.shadowOffset = new paperPreview.Point(tweenProp[tween.prop], tweenPaperLayer.shadowOffset.y);
                   },
@@ -840,10 +858,20 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 break;
               }
               case 'shadowOffsetY': {
-                tweenProp[tween.prop] = tweenPaperLayer.shadowOffset.y;
+                const originShadow = tweenLayer.style.shadow;
+                const destinationShadow = tweenDestinationLayer.style.shadow;
+                let osy = tweenLayer.style.shadow.offset.y;
+                let dsy = tweenDestinationLayer.style.shadow.offset.y;
+                if (originShadow.enabled && !destinationShadow.enabled) {
+                  dsy = 0;
+                }
+                if (!originShadow.enabled && destinationShadow.enabled) {
+                  osy = 0;
+                }
+                tweenProp[tween.prop] = osy;
                 tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
-                  [tween.prop]: tweenDestinationLayerPaperLayer.shadowOffset.y,
+                  [tween.prop]: dsy,
                   onUpdate: () => {
                     tweenPaperLayer.shadowOffset = new paperPreview.Point(tweenPaperLayer.shadowOffset.x, tweenProp[tween.prop]);
                   },
@@ -852,10 +880,20 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                 break;
               }
               case 'shadowBlur': {
-                tweenProp[tween.prop] = tweenPaperLayer.shadowBlur;
+                const originShadow = tweenLayer.style.shadow;
+                const destinationShadow = tweenDestinationLayer.style.shadow;
+                let osb = tweenLayer.style.shadow.blur;
+                let dsb = tweenDestinationLayer.style.shadow.blur;
+                if (originShadow.enabled && !destinationShadow.enabled) {
+                  dsb = 0;
+                }
+                if (!originShadow.enabled && destinationShadow.enabled) {
+                  osb = 0;
+                }
+                tweenProp[tween.prop] = osb;
                 tweenTimeline.to(tweenProp, {
                   duration: tween.duration,
-                  [tween.prop]: tweenDestinationLayerPaperLayer.shadowBlur,
+                  [tween.prop]: dsb,
                   onUpdate: () => {
                     tweenPaperLayer.shadowBlur = tweenProp[tween.prop];
                   },

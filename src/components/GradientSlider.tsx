@@ -3,6 +3,7 @@ import React, { useContext, ReactElement } from 'react';
 import { ThemeContext } from './ThemeProvider';
 import GradientSliderStop from './GradientSliderStop';
 import GradientSliderGradient from './GradientSliderGradient';
+import GradientSliderRemove from './GradientSliderRemove';
 
 interface GradientSliderProps {
   gradientStops: em.GradientStop[];
@@ -44,13 +45,9 @@ const GradientSlider = (props: GradientSliderProps): ReactElement => {
           ))
         }
       </div>
-      {/* <GradientSliderRemove
-        stops={stops}
-        setStops={setStops}
-        setActivePickerColor={setActivePickerColor}
-        setActiveStopIndex={setActiveStopIndex}
-        disabled={stops.length <= 2}
-        activeStopIndex={activeStopIndex} /> */}
+      <GradientSliderRemove
+        disabled={gradientStops.length <= 2}
+        activeStopIndex={activeStopIndex} />
     </div>
   );
 }

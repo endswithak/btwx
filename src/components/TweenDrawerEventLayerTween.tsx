@@ -53,7 +53,7 @@ const TweenDrawerEventLayerTween = (props: TweenDrawerEventLayerTweenProps): Rea
           ? theme.palette.primary
           : tweenId === tweenHover
             ? theme.text.base
-            : theme.text.light
+            : theme.text.lighter
         }}>
         { titleCaseProp }
       </div>

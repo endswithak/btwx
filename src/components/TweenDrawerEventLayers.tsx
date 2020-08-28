@@ -48,7 +48,7 @@ const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElemen
       id='tween-layers'
       className='c-tween-drawer-event__layers'
       style={{
-        boxShadow: `1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`,
+        boxShadow: `-1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`,
         width: tweenDrawerLayersWidth
       }}>
       <TweenDrawerEventLayersHeader

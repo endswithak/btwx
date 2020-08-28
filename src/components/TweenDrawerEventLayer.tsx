@@ -41,7 +41,7 @@ const TweenDrawerEventLayer = (props: TweenDrawerEventLayerProps): ReactElement 
         className='c-tween-drawer-event-layer__tween'
         style={{
           background: theme.name === 'dark' ? theme.background.z2 : theme.background.z1,
-          boxShadow: `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset, 0 1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`,
+          boxShadow: `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset, 0 1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset, -1px 0 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`,
           cursor: 'pointer'
         }}>
         <div className='c-tween-drawer__icon'>

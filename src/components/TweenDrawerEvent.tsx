@@ -27,7 +27,7 @@ const TweenDrawerEvent = (props: TweenDrawerEventProps): ReactElement => {
     const tweenLayers = document.getElementById('tween-drawer-event-layers');
     const scrollTop = tweenLayers.scrollTop;
     let index = 0;
-    while(scrollTop >= scrollPositions[index]) {
+    while(scrollTop >= (scrollPositions[index] - 16)) {
       index++;
     }
     if (scrollLayer !== tweenEventLayers.allIds[index]) {
@@ -52,17 +52,18 @@ const TweenDrawerEvent = (props: TweenDrawerEventProps): ReactElement => {
 
 const mapStateToProps = (state: RootState) => {
   const { layer, tweenDrawer } = state;
+  const itemHeight = 32;
   const tweenEventLayers = getTweenEventLayers(layer.present, tweenDrawer.event);
   const scrollPositions = tweenEventLayers.allIds.reduce((result: number[], current, index) => {
     const prevY = result[index - 1] ? result[index - 1] : 0;
-    let y = 16 + prevY;
+    let y = itemHeight + prevY;
     const event = layer.present.tweenEventById[tweenDrawer.event];
     const eventTweens = event.tweens;
     const eventLayer = tweenEventLayers.byId[current];
     const layerTweens = eventLayer.tweens;
     layerTweens.forEach((id) => {
       if (eventTweens.includes(id)) {
-        y += 32;
+        y += itemHeight;
       }
     });
     result = [...result, y];

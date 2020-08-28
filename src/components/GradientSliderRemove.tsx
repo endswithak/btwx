@@ -1,16 +1,19 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement } from 'react';
 import styled from 'styled-components';
+import { connect } from 'react-redux';
+import { RootState } from '../store/reducers';
+import { removeLayersGradientStop } from '../store/actions/layer';
+import { RemoveLayersGradientStopPayload, LayerTypes } from '../store/actionTypes/layer';
 import { ThemeContext } from './ThemeProvider';
 import Icon from './Icon';
 
 interface GradientSliderProps {
-  stops: em.GradientStop[];
   activeStopIndex: number;
   disabled: boolean;
-  setStops(stops: em.GradientStop[]): void;
-  setActivePickerColor(color: string): void;
-  setActiveStopIndex(index: number): void;
+  layers?: string[];
+  prop?: 'fill' | 'stroke';
+  removeLayersGradientStop?(payload: RemoveLayersGradientStopPayload): LayerTypes;
 }
 
 const Button = styled.button`
@@ -33,24 +36,31 @@ const Button = styled.button`
 
 const GradientSliderRemove = (props: GradientSliderProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { stops, setStops, activeStopIndex, disabled, setActivePickerColor, setActiveStopIndex } = props;
+  const { layers, disabled, removeLayersGradientStop, activeStopIndex, prop } = props;
 
   const removeStop = () => {
-    // const newStops = stops.filter((stop, index) => index !== activeStopIndex);
-    // setStops(newStops);
-    // setActiveStopIndex(0);
-    // setActivePickerColor(newStops[0].color);
+    removeLayersGradientStop({layers, prop, stopIndex: activeStopIndex});
   }
 
   return (
     <Button
       onClick={removeStop}
       disabled={disabled}
-      className='c-fill-editor__remove-stop'
+      className='c-gradient-slider__remove'
       theme={theme}>
       <Icon name='trash-can' />
     </Button>
   );
 }
 
-export default GradientSliderRemove;
+const mapStateToProps = (state: RootState) => {
+  const { gradientEditor } = state;
+  const layers = gradientEditor.layers;
+  const prop = gradientEditor.prop;
+  return { layers, prop };
+};
+
+export default connect(
+  mapStateToProps,
+  { removeLayersGradientStop }
+)(GradientSliderRemove);

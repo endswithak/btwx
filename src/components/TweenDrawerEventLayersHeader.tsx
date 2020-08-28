@@ -30,7 +30,7 @@ const TweenDrawerEventLayersHeader = (props: TweenDrawerEventLayersProps): React
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
         style={{
-          boxShadow: `1px 0 0 0 ${theme.background.z5}`
+          boxShadow: sticky ? `-1px 0 0 0 ${theme.background.z5} inset` : 'none'
         }}>
         <div
           className='c-tween-drawer-event-layer__icon'
@@ -50,7 +50,8 @@ const TweenDrawerEventLayersHeader = (props: TweenDrawerEventLayersProps): React
         <div
           className='c-tween-drawer-event-layer-tween__name'
           style={{
-            color: theme.text.base
+            color: sticky ? theme.text.base : theme.text.lighter,
+            textTransform: sticky ? 'none' : 'uppercase'
           }}>
           { text }
         </div>

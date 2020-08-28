@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
+import React, { useContext, ReactElement } from 'react';
 import { ThemeContext } from './ThemeProvider';
 import ColorSelector from './ColorSelector';
 import LinearGradientSelector from './LinearGradientSelector';
