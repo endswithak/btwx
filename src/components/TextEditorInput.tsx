@@ -13,23 +13,27 @@ import { SetLayerTextPayload, SelectLayerPayload, LayerTypes } from '../store/ac
 import { paperMain } from '../canvas';
 import { TextEditorState } from '../store/reducers/textEditor';
 import { TextSettingsState } from '../store/reducers/textSettings';
+import { setCanvasFocusing } from '../store/actions/canvasSettings';
+import { SetCanvasFocusingPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
 
 interface TextEditorInputProps {
   textEditor?: TextEditorState;
   textSettings?: TextSettingsState;
   layerItem?: em.Text;
+  canvasFocusing?: boolean;
   closeTextEditor?(): TextEditorTypes;
   disableSelectionTool?(): ToolTypes;
   enableSelectionTool?(): ToolTypes;
   setLayerText?(payload: SetLayerTextPayload): LayerTypes;
   selectLayer?(payload: SelectLayerPayload): LayerTypes;
+  setCanvasFocusing?(payload: SetCanvasFocusingPayload): CanvasSettingsTypes;
 }
 
 const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const textSpanRef = useRef<HTMLTextAreaElement>(null);
-  const { textEditor, textSettings, layerItem, closeTextEditor, disableSelectionTool, enableSelectionTool, setLayerText, selectLayer } = props;
+  const { textEditor, textSettings, layerItem, closeTextEditor, setCanvasFocusing, canvasFocusing, setLayerText, selectLayer } = props;
   const [text, setText] = useState(layerItem.text);
   const [prevText, setPrevText] = useState(layerItem.text);
   const debounceText = useCallback(
@@ -37,58 +41,6 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
     []
   );
   const [pos, setPos] = useState({x: textEditor.x, y: textEditor.y});
-
-  const onOpen = () => {
-    if (paperMain.project.getItem({data: { id: 'selectionFrame' }})) {
-      paperMain.project.getItem({data: { id: 'selectionFrame' }}).remove();
-    }
-    if (paperMain.project.getItem({data: { id: 'hoverFrame' }})) {
-      paperMain.project.getItem({data: { id: 'hoverFrame' }}).remove();
-    }
-    disableSelectionTool();
-    document.addEventListener('mousedown', onMouseDown, false);
-    const paperLayer = paperMain.project.getItem({data: { id: textEditor.layer }}) as paper.PointText;
-    textAreaRef.current.focus();
-    textAreaRef.current.select();
-    const singleLineText = paperLayer.clone({insert: false}) as paper.PointText;
-    singleLineText.content = 'Text';
-    const anchorPoint = paperMain.view.projectToView(singleLineText.point);
-    const domAnchorPoint = paperMain.view.projectToView(singleLineText.bounds.leftCenter);
-    const topLeft = paperMain.view.projectToView(singleLineText.bounds.topLeft);
-    const topCenter = paperMain.view.projectToView(singleLineText.bounds.topCenter);
-    const topRight = paperMain.view.projectToView(singleLineText.bounds.topRight);
-    const anchorDiff = (anchorPoint.y - domAnchorPoint.y) - (((textSettings.fontSize * 0.8) * paperMain.view.zoom) / 2);
-    setPos({
-      x: (() => {
-        switch(textSettings.justification) {
-          case 'left':
-            return topLeft.x;
-          case 'center':
-            return topCenter.x;
-          case 'right':
-            return topRight.x;
-        }
-      })(),
-      y: (() => {
-        switch(textSettings.justification) {
-          case 'left':
-            return topLeft.y + anchorDiff;
-          case 'center':
-            return topCenter.y + anchorDiff;
-          case 'right':
-            return topRight.y + anchorDiff;
-        }
-      })()
-    });
-    updateTextAreaSize();
-  }
-
-  const onClose = () => {
-    paperMain.project.getItem({data: { id: textEditor.layer }}).visible = true;
-    selectLayer({id: textEditor.layer, newSelection: true });
-    enableSelectionTool();
-    document.removeEventListener('mousedown', onMouseDown);
-  }
 
   const onMouseDown = (event: any) => {
     if (event.target !== textAreaRef.current) {
@@ -111,9 +63,51 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
   }
 
   useEffect(() => {
-    onOpen();
+    if (textAreaRef.current) {
+      if (canvasFocusing) {
+        setCanvasFocusing({focusing: false});
+      }
+      document.addEventListener('mousedown', onMouseDown);
+      const paperLayer = paperMain.project.getItem({data: { id: textEditor.layer }}) as paper.PointText;
+      textAreaRef.current.focus();
+      textAreaRef.current.select();
+      const singleLineText = paperLayer.clone({insert: false}) as paper.PointText;
+      singleLineText.content = 'Text';
+      const anchorPoint = paperMain.view.projectToView(singleLineText.point);
+      const domAnchorPoint = paperMain.view.projectToView(singleLineText.bounds.leftCenter);
+      const topLeft = paperMain.view.projectToView(singleLineText.bounds.topLeft);
+      const topCenter = paperMain.view.projectToView(singleLineText.bounds.topCenter);
+      const topRight = paperMain.view.projectToView(singleLineText.bounds.topRight);
+      const anchorDiff = (anchorPoint.y - domAnchorPoint.y) - (((textSettings.fontSize * 0.8) * paperMain.view.zoom) / 2);
+      setPos({
+        x: (() => {
+          switch(textSettings.justification) {
+            case 'left':
+              return topLeft.x;
+            case 'center':
+              return topCenter.x;
+            case 'right':
+              return topRight.x;
+          }
+        })(),
+        y: (() => {
+          switch(textSettings.justification) {
+            case 'left':
+              return topLeft.y + anchorDiff;
+            case 'center':
+              return topCenter.y + anchorDiff;
+            case 'right':
+              return topRight.y + anchorDiff;
+          }
+        })()
+      });
+      updateTextAreaSize();
+    }
     return () => {
-      onClose();
+      setCanvasFocusing({focusing: true});
+      paperMain.project.getItem({data: { id: textEditor.layer }}).visible = true;
+      selectLayer({id: textEditor.layer, newSelection: true });
+      document.removeEventListener('mousedown', onMouseDown);
     }
   }, []);
 
@@ -236,12 +230,13 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { textEditor, textSettings, layer } = state;
+  const { textEditor, textSettings, layer, canvasSettings } = state;
   const layerItem = (layer.present.byId[textEditor.layer] as em.Text);
-  return { textEditor, textSettings, layerItem };
+  const canvasFocusing = canvasSettings.focusing;
+  return { textEditor, textSettings, layerItem, canvasFocusing };
 };
 
 export default connect(
   mapStateToProps,
-  { closeTextEditor, disableSelectionTool, enableSelectionTool, setLayerText, selectLayer }
+  { closeTextEditor, disableSelectionTool, enableSelectionTool, setLayerText, selectLayer, setCanvasFocusing }
 )(TextEditorInput);

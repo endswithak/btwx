@@ -15,11 +15,12 @@ import { AddImagePayload, LayerTypes } from '../store/actionTypes/layer';
 import { addImage } from '../store/actions/layer';
 import { AddDocumentImagePayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
 import { addDocumentImage } from '../store/actions/documentSettings';
+import { SetCanvasFocusingPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
+import { setCanvasFocusing } from '../store/actions/canvasSettings';
 import { ToolState } from '../store/reducers/tool';
 import { bufferToBase64 } from '../utils';
 import { ThemeContext } from './ThemeProvider';
 import InsertKnobItem from './InsertKnobItem';
-import Icon from './Icon';
 
 const knobLength = 8;
 const knobSwitchThreshold = 360 / knobLength;
@@ -74,6 +75,7 @@ interface InsertKnobProps {
   enableTextTool?(): ToolTypes;
   addImage?(payload: AddImagePayload): LayerTypes;
   addDocumentImage?(payload: AddDocumentImagePayload): DocumentSettingsTypes;
+  setCanvasFocusing?(payload: SetCanvasFocusingPayload): CanvasSettingsTypes;
 }
 
 const InsertKnob = (props: InsertKnobProps): ReactElement => {
@@ -94,7 +96,8 @@ const InsertKnob = (props: InsertKnobProps): ReactElement => {
     enableArtboardTool,
     enableTextTool,
     addImage,
-    addDocumentImage
+    addDocumentImage,
+    setCanvasFocusing
   } = props;
 
   const insertKnobRef = useRef<HTMLUListElement>(null);
@@ -188,6 +191,7 @@ const InsertKnob = (props: InsertKnobProps): ReactElement => {
     currentKnobPosThreshold = 0;
     knobActive = false;
     deactivateInsertKnob();
+    setCanvasFocusing({focusing: true});
   }
 
   const handleMouseEnter = (index: number): void => {
@@ -235,6 +239,7 @@ const InsertKnob = (props: InsertKnobProps): ReactElement => {
   }
 
   useEffect(() => {
+    setCanvasFocusing({focusing: false});
     knobActive = true;
     document.addEventListener('mousedown', handleMouseDown, false);
     document.addEventListener('keydown', handleKeyDown, false);
@@ -313,6 +318,7 @@ export default connect(
     addDocumentImage,
     activateInsertKnob,
     deactivateInsertKnob,
-    setInsertKnobIndex
+    setInsertKnobIndex,
+    setCanvasFocusing
   }
 )(InsertKnob);

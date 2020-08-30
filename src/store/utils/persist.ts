@@ -7,7 +7,7 @@ const crossBrowserListener = (store: Store, persistConfig: PersistConfig) => {
     store.dispatch({
       type: REHYDRATE,
       key: persistConfig.key,
-      payload: state,
+      payload: state
     });
   }
 }

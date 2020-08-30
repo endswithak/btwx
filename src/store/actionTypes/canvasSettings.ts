@@ -12,6 +12,7 @@ export const SET_RIGHT_SIDEBAR_WIDTH = 'SET_RIGHT_SIDEBAR_WIDTH';
 export const SET_TWEEN_DRAWER_HEIGHT = 'SET_TWEEN_DRAWER_HEIGHT';
 export const SET_TWEEN_DRAWER_LAYERS_WIDTH = 'SET_TWEEN_DRAWER_LAYERS_WIDTH';
 export const SET_CANVAS_MEASURING = 'SET_CANVAS_MEASURING';
+export const SET_CANVAS_FOCUSING = 'SET_CANVAS_FOCUSING';
 
 export interface SetCanvasMatrixPayload {
   matrix: number[];
@@ -147,6 +148,15 @@ export interface SetCanvasMeasuring {
   payload: SetCanvasMeasuringPayload;
 }
 
+export interface SetCanvasFocusingPayload {
+  focusing: boolean;
+}
+
+export interface SetCanvasFocusing {
+  type: typeof SET_CANVAS_FOCUSING;
+  payload: SetCanvasFocusingPayload;
+}
+
 export type CanvasSettingsTypes = SetCanvasMatrix |
                                   SetCanvasResizing |
                                   SetCanvasSelecting |
@@ -160,4 +170,5 @@ export type CanvasSettingsTypes = SetCanvasMatrix |
                                   SetRightSidebarWidth |
                                   SetTweenDrawerHeight |
                                   SetTweenDrawerLayersWidth |
-                                  SetCanvasMeasuring;
+                                  SetCanvasMeasuring |
+                                  SetCanvasFocusing;

@@ -1,9 +1,11 @@
-import electron, { app, BrowserWindow, ipcMain, systemPreferences, Menu, dialog, nativeTheme } from 'electron';
-import fs from 'fs';
-import path from 'path';
-import { mainWindow, preferencesWindow, createPreferencesWindow } from './index';
+import electron, { app, BrowserWindow, Menu, dialog } from 'electron';
+import { createPreferencesWindow, createNewDocument, preferencesWindow, handleSave, handleSaveAs, handleOpenDocument } from './index';
 
 const isMac = process.platform === 'darwin';
+
+const getFocusedDocument = (): electron.BrowserWindow => {
+  return BrowserWindow.getFocusedWindow() ? BrowserWindow.getFocusedWindow().getParentWindow() ? BrowserWindow.getFocusedWindow().getParentWindow() : BrowserWindow.getFocusedWindow() : null;
+}
 
 export default Menu.buildFromTemplate([
   // { role: 'appMenu' }
@@ -35,34 +37,31 @@ export default Menu.buildFromTemplate([
     label: 'File',
     submenu: [
       {
+        label: 'New',
+        accelerator: process.platform === 'darwin' ? 'Cmd+N' : 'Ctrl+N',
+        click: () => {
+          // if document already open, set new document size to focused document size
+          const focusedDocument = getFocusedDocument();
+          if (focusedDocument) {
+            const size = focusedDocument.getSize();
+            createNewDocument(size[0], size[1]);
+          } else {
+            createNewDocument();
+          }
+        }
+      },
+      {
         label: 'Save',
         accelerator: process.platform === 'darwin' ? 'Cmd+S' : 'Ctrl+S',
+        // enabled: getFocusedDocument(),
         click: () => {
-          mainWindow.webContents.executeJavaScript(`getDocumentSettings()`).then((documentSettingsJSON) => {
+          const document = getFocusedDocument();
+          document.webContents.executeJavaScript(`getDocumentSettings()`).then((documentSettingsJSON) => {
             const documentSettings = JSON.parse(documentSettingsJSON);
             if (documentSettings.path) {
-              mainWindow.webContents.executeJavaScript(`saveDocument()`).then((documentJSON) => {
-                fs.writeFile(`${documentSettings.path}.esketch`, documentJSON, function(err) {
-                  if(err) {
-                    return console.log(err);
-                  }
-                });
-              });
+              handleSave(documentSettings.path);
             } else {
-              dialog.showSaveDialog(mainWindow, {title: 'Save As'}).then((result) => {
-                if (!result.canceled) {
-                  const base = path.basename(result.filePath);
-                  const fullPath = result.filePath;
-                  const documentSettings = {base, fullPath};
-                  mainWindow.webContents.executeJavaScript(`saveDocumentAs(${JSON.stringify(documentSettings)})`).then((documentJSON) => {
-                    fs.writeFile(`${result.filePath}.esketch`, documentJSON, function(err) {
-                      if(err) {
-                        return console.log(err);
-                      }
-                    });
-                  });
-                }
-              });
+              handleSaveAs();
             }
           });
         }
@@ -70,43 +69,36 @@ export default Menu.buildFromTemplate([
       {
         label: 'Save As...',
         accelerator: process.platform === 'darwin' ? 'Cmd+Shift+S' : 'Ctrl+Shift+S',
+        // enabled: getFocusedDocument(),
         click: () => {
-          dialog.showSaveDialog(mainWindow, {}).then((result) => {
-            if (!result.canceled) {
-              const base = path.basename(result.filePath);
-              const fullPath = result.filePath;
-              const documentSettings = {base, fullPath};
-              mainWindow.webContents.executeJavaScript(`saveDocumentAs(${JSON.stringify(documentSettings)})`).then((documentJSON) => {
-                fs.writeFile(`${result.filePath}.esketch`, documentJSON, function(err) {
-                  if(err) {
-                    return console.log(err);
-                  }
-                });
-              });
-            }
-          });
+          handleSaveAs();
         }
       },
       {
         label: 'Open...',
+        accelerator: process.platform === 'darwin' ? 'Cmd+O' : 'Ctrl+O',
         click: () => {
-          dialog.showOpenDialog(mainWindow, {
+          const document = getFocusedDocument();
+          dialog.showOpenDialog(document, {
             filters: [
               { name: 'Custom File Type', extensions: ['esketch'] }
             ],
             properties: ['openFile']
           }).then((result) => {
             if (result.filePaths.length > 0 && !result.canceled) {
-              fs.readFile(result.filePaths[0], {encoding: 'utf-8'}, function(err, data) {
-                if(err) {
-                  return console.log(err);
-                } else {
-                  mainWindow.webContents.executeJavaScript(`openFile(${data})`);
-                }
-              });
+              handleOpenDocument(result.filePaths[0]);
             }
           });
         }
+      },
+      {
+        label: 'Open Recent',
+        role: 'recentDocuments',
+        submenu: [
+          {
+            role: 'clearRecentDocuments'
+          }
+        ]
       },
       isMac ? { role: 'close' } : { role: 'quit' }
     ]

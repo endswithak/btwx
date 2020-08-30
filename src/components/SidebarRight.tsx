@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import Sidebar from './Sidebar';
 import SidebarLayerStyles from './SidebarLayerStyles';
 import { RootState } from '../store/reducers';
-//import SidebarArtboardStyles from './SidebarArtboardStyles';
 import SidebarArtboardSizes from './SidebarArtboardSizes';
 
 interface SidebarRightProps {
@@ -21,11 +20,6 @@ const SidebarRight = (props: SidebarRightProps): ReactElement => {
     ? <Sidebar
         width={sidebarWidth}
         position='right'>
-        {/* {
-          toolType !== 'Artboard' && artboardSelected
-          ? <SidebarArtboardStyles />
-          : null
-        } */}
         {
           ready && toolType !== 'Artboard' && selected.length > 0
           ? <SidebarLayerStyles />
@@ -45,8 +39,6 @@ const mapStateToProps = (state: RootState) => {
   const { layer, tool, canvasSettings, rightSidebar } = state;
   const isOpen = rightSidebar.isOpen;
   const selected = layer.present.selected;
-  // const artboardSelected = selected.some((id: string) => layer.present.allArtboardIds.includes(id));
-  // const layerSelected = selected.some((id: string) => !layer.present.allArtboardIds.includes(id));
   const toolType = tool.type;
   const sidebarWidth = canvasSettings.rightSidebarWidth;
   return { isOpen, selected, toolType, sidebarWidth };

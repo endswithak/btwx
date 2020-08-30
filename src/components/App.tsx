@@ -1,4 +1,4 @@
-import React, { useRef, useContext, ReactElement, useState } from 'react';
+import React, { useContext, ReactElement, useState } from 'react';
 import Topbar from './Topbar';
 import TopbarTitle from './TopbarTitle';
 import EaseEditorWrap from './EaseEditorWrap';
@@ -13,7 +13,6 @@ import ArtboardPresetEditorWrap from './ArtboardPresetEditorWrap';
 import ContextMenuWrap from './ContextMenuWrap';
 
 const App = (): ReactElement => {
-  const app = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
   const [ready, setReady] = useState(false);
 
@@ -21,7 +20,6 @@ const App = (): ReactElement => {
     <div
       id='app'
       className='c-app'
-      ref={app}
       style={{
         background: theme.background.z0
       }}>

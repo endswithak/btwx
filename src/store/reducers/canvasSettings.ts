@@ -17,6 +17,7 @@ import {
   SET_TWEEN_DRAWER_HEIGHT,
   SET_TWEEN_DRAWER_LAYERS_WIDTH,
   SET_CANVAS_MEASURING,
+  SET_CANVAS_FOCUSING,
   CanvasSettingsTypes,
 } from '../actionTypes/canvasSettings';
 
@@ -34,6 +35,7 @@ export interface CanvasSettingsState {
   dragging: boolean;
   selecting: boolean;
   measuring: boolean;
+  focusing: boolean;
   zooming: boolean;
   zoomingType: em.ZoomingType;
   leftSidebarWidth: number;
@@ -54,6 +56,7 @@ const initialState: CanvasSettingsState = {
   dragging: false,
   selecting: false,
   measuring: false,
+  focusing: true,
   zooming: false,
   zoomingType: null,
   leftSidebarWidth: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('leftSidebarWidth', 'integer') : DEFAULT_LEFT_SIDEBAR_WIDTH,
@@ -193,6 +196,12 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
       return {
         ...state,
         tweenDrawerLayersWidth: action.payload.width
+      };
+    }
+    case SET_CANVAS_FOCUSING: {
+      return {
+        ...state,
+        focusing: action.payload.focusing
       };
     }
     default:

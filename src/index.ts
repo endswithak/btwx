@@ -3,7 +3,7 @@ import electron, { app, BrowserWindow, ipcMain, systemPreferences, Menu, dialog,
 import fs from 'fs';
 import path from 'path';
 import menu from './menu';
-// import preferences from './preferences';
+import getTheme from './store/theme';
 import sharp from 'sharp';
 import {
   PREVIEW_TOPBAR_HEIGHT,
@@ -14,6 +14,19 @@ import {
   DEFAULT_TWEEN_DRAWER_HEIGHT,
   DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH
 } from './constants';
+
+declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
+
+const windowBackground = (() => {
+  let theme = getTheme('dark');
+  if (isMac) {
+    const themeName = systemPreferences.getUserDefault('theme', 'string');
+    theme = getTheme(themeName);
+  }
+  return theme.background.z0;
+})();
+
+export let preferencesWindow: electron.BrowserWindow;
 
 const isMac = process.platform === 'darwin';
 
@@ -35,57 +48,57 @@ if (isMac) {
   }
 }
 
-declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
-
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
   app.quit();
 }
 
-export let mainWindow: electron.BrowserWindow;
-export let previewWindow: electron.BrowserWindow;
-export let preferencesWindow: electron.BrowserWindow;
+export const createNewDocument = (width?: number, height?: number): Promise<electron.BrowserWindow> => {
+  return new Promise((resolve, reject) => {
+    // Create the browser window.
+    const newDocument = new BrowserWindow({
+      height: height ? height : 600,
+      width: width ? width : 800,
+      minWidth: 800,
+      minHeight: 600,
+      frame: false,
+      titleBarStyle: 'hidden',
+      backgroundColor: windowBackground,
+      webPreferences: {
+        nodeIntegration: true
+      }
+    });
 
-Menu.setApplicationMenu(menu);
+    // and load the index.html of the app.
+    newDocument.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-const createMainWindow = (): void => {
-  // Create the browser window.
-  mainWindow = new BrowserWindow({
-    height: 600,
-    width: 800,
-    webPreferences: {
-      nodeIntegration: true
-    },
-    frame: false,
-    titleBarStyle: 'hidden'
-  });
+    // Open the DevTools.
+    newDocument.webContents.openDevTools();
 
-  // and load the index.html of the app.
-  mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+    newDocument.webContents.session.clearStorageData();
 
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools();
-
-  mainWindow.webContents.session.clearStorageData();
-
-  mainWindow.webContents.on('did-finish-load', () => {
-    mainWindow.webContents.session.clearStorageData().then(() => {
-      mainWindow.webContents.executeJavaScript(`renderMainWindow()`);
+    newDocument.webContents.on('did-finish-load', () => {
+      newDocument.webContents.session.clearStorageData().then(() => {
+        newDocument.webContents.executeJavaScript(`renderNewDocument()`).then(() => {
+          resolve(newDocument);
+        });
+      });
     });
   });
 };
 
 export const createPreferencesWindow = (): void => {
   preferencesWindow = new BrowserWindow({
-    parent: mainWindow,
+    parent: getFocusedDocument(),
     height: 600,
     width: 800,
-    webPreferences: {
-      nodeIntegration: true
-    },
     frame: false,
     titleBarStyle: 'hidden',
-    show: false
+    show: false,
+    backgroundColor: windowBackground,
+    webPreferences: {
+      nodeIntegration: true
+    }
   });
 
   preferencesWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
@@ -99,21 +112,22 @@ export const createPreferencesWindow = (): void => {
     });
   });
 
-  preferencesWindow.on('close', () => {
+  preferencesWindow.on('closed', () => {
     preferencesWindow = null;
   });
 }
 
 const createPreviewWindow = ({width, height}: {width: number; height: number}): void => {
-  previewWindow = new BrowserWindow({
-    parent: mainWindow,
+  const previewWindow = new BrowserWindow({
+    parent: getFocusedDocument(),
     width: width,
     height: height + PREVIEW_TOPBAR_HEIGHT + (process.platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT),
+    frame: false,
+    titleBarStyle: 'hidden',
+    backgroundColor: windowBackground,
     webPreferences: {
       nodeIntegration: true
-    },
-    frame: false,
-    titleBarStyle: 'hidden'
+    }
   });
 
   previewWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
@@ -124,24 +138,15 @@ const createPreviewWindow = ({width, height}: {width: number; height: number}): 
   previewWindow.webContents.on('did-finish-load', () => {
     previewWindow.webContents.executeJavaScript(`renderPreviewWindow()`);
   });
-
-  previewWindow.on('close', () => {
-    previewWindow = null;
-  });
-
-  previewWindow.on('unresponsive', () => {
-    previewWindow.destroy();
-  });
-
-  previewWindow.on('closed', () => {
-    mainWindow.webContents.executeJavaScript(`previewClosed()`);
-  });
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createMainWindow);
+app.on('ready', () => {
+  Menu.setApplicationMenu(menu);
+  createNewDocument();
+});
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
@@ -156,12 +161,92 @@ app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
-    createMainWindow();
+    createNewDocument();
   }
+});
+
+app.on('open-file', (event, path) => {
+  // On OS X it's common to re-create a window in the app when the
+  // dock icon is clicked and there are no other windows open.
+  handleOpenDocument(path);
 });
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
+export const getFocusedDocument = (): electron.BrowserWindow => {
+  return BrowserWindow.getFocusedWindow().getParentWindow() ? BrowserWindow.getFocusedWindow().getParentWindow() : BrowserWindow.getFocusedWindow();
+}
+
+export const handleSave = (path: string, closeOnSave?: boolean) => {
+  const document = getFocusedDocument();
+  document.webContents.executeJavaScript(`saveDocument()`).then((documentJSON) => {
+    fs.writeFile(`${path}.esketch`, documentJSON, function(err) {
+      if(err) {
+        return console.log(err);
+      }
+      if (closeOnSave) {
+        document.close();
+      }
+    });
+  });
+};
+
+export const handleSaveAs = (closeOnSave?: boolean) => {
+  const document = getFocusedDocument();
+  dialog.showSaveDialog(document, {}).then((result) => {
+    if (!result.canceled) {
+      const base = path.basename(result.filePath);
+      const fullPath = result.filePath;
+      const documentSettings = {base, fullPath};
+      document.webContents.executeJavaScript(`saveDocumentAs(${JSON.stringify(documentSettings)})`).then((documentJSON) => {
+        app.addRecentDocument(result.filePath);
+        fs.writeFile(`${result.filePath}.esketch`, documentJSON, function(err) {
+          if(err) {
+            return console.log(err);
+          }
+          if (closeOnSave) {
+            document.close();
+          }
+        });
+      });
+    }
+  });
+};
+
+export const handleOpenDocument = (filePath: string) => {
+  const document = getFocusedDocument();
+  if (document) {
+    document.webContents.executeJavaScript(`getCurrentEdit()`).then((currentEditJSON) => {
+      const documentClean = JSON.parse(currentEditJSON);
+      if (documentClean) {
+        fs.readFile(filePath, {encoding: 'utf-8'}, function(err, data) {
+          if(err) {
+            return console.log(err);
+          } else {
+            createNewDocument().then((documentWindow) => {
+              documentWindow.webContents.executeJavaScript(`openFile(${data})`);
+            });
+          }
+        });
+      } else {
+        fs.readFile(filePath, {encoding: 'utf-8'}, function(err, data) {
+          if(err) {
+            return console.log(err);
+          } else {
+            document.webContents.executeJavaScript(`openFile(${data})`);
+          }
+        });
+      }
+    });
+  } else {
+    fs.readFile(filePath, {encoding: 'utf-8'}, function(err, data) {
+      createNewDocument().then((documentWindow) => {
+        documentWindow.webContents.executeJavaScript(`openFile(${data})`);
+      });
+    });
+  }
+};
+
 ipcMain.on('openPreview', (event, windowSize) => {
   const size = JSON.parse(windowSize);
   createPreviewWindow({
@@ -171,19 +256,19 @@ ipcMain.on('openPreview', (event, windowSize) => {
 });
 
 ipcMain.on('updateTheme', (event, theme) => {
-  if (mainWindow && mainWindow.webContents) {
-    mainWindow.webContents.executeJavaScript(`updateTheme()`);
-  }
-  if (previewWindow && previewWindow.webContents) {
-    previewWindow.webContents.executeJavaScript(`updateTheme()`);
-  }
-  if (preferencesWindow && preferencesWindow.webContents) {
-    preferencesWindow.webContents.executeJavaScript(`updateTheme()`);
-  }
+  BrowserWindow.getAllWindows().forEach((window) => {
+    const documentWindow = !window.getParentWindow();
+    if (window.webContents) {
+      window.webContents.executeJavaScript(`setTitleBarTheme(${JSON.stringify(theme)})`);
+      if (documentWindow) {
+        window.webContents.executeJavaScript(`setTheme(${JSON.stringify(theme)})`);
+      }
+    }
+  });
 });
 
 ipcMain.on('addImage', (event, arg) => {
-  dialog.showOpenDialog(mainWindow, {
+  dialog.showOpenDialog(getFocusedDocument(), {
     filters: [
       { name: 'Images', extensions: ['jpg', 'png'] }
     ],
@@ -200,30 +285,9 @@ ipcMain.on('addImage', (event, arg) => {
 });
 
 ipcMain.on('saveDocument', (event, path) => {
-  mainWindow.webContents.executeJavaScript(`saveDocument()`).then((documentJSON) => {
-    fs.writeFile(`${path}.esketch`, documentJSON, function(err) {
-      if(err) {
-        return console.log(err);
-      }
-      mainWindow.close();
-    });
-  });
+  handleSave(path, true);
 });
 
 ipcMain.on('saveDocumentAs', (event, arg) => {
-  dialog.showSaveDialog(mainWindow, {}).then((result) => {
-    if (!result.canceled) {
-      const base = path.basename(result.filePath);
-      const fullPath = result.filePath;
-      const documentSettings = {base, fullPath};
-      mainWindow.webContents.executeJavaScript(`saveDocumentAs(${JSON.stringify(documentSettings)})`).then((documentJSON) => {
-        fs.writeFile(`${result.filePath}.esketch`, documentJSON, function(err) {
-          if(err) {
-            return console.log(err);
-          }
-          mainWindow.close();
-        });
-      });
-    }
-  });
+  handleSaveAs(true);
 });

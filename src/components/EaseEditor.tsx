@@ -17,6 +17,8 @@ import { setLayerTweenEase, setLayerTweenPower, setLayerTweenDuration, setLayerT
 import { SetLayerTweenEasePayload, SetLayerTweenPowerPayload, SetLayerTweenDurationPayload, SetLayerTweenDelayPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setTweenDrawerTweenEditing } from '../store/actions/tweenDrawer';
 import { SetTweenDrawerTweenEditingPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
+import { setCanvasFocusing } from '../store/actions/canvasSettings';
+import { CanvasSettingsTypes, SetCanvasFocusingPayload } from '../store/actionTypes/canvasSettings';
 import SidebarInput from './SidebarInput';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarSectionRow from './SidebarSectionRow';
@@ -29,12 +31,14 @@ interface EaseEditorProps {
     isOpen: boolean;
     tween: string;
   };
+  canvasFocusing?: boolean;
   closeEaseEditor?(): EaseEditorTypes;
   setLayerTweenEase?(payload: SetLayerTweenEasePayload): LayerTypes;
   setLayerTweenPower?(payload: SetLayerTweenPowerPayload): LayerTypes;
   setLayerTweenDuration?(payload: SetLayerTweenDurationPayload): LayerTypes;
   setLayerTweenDelay?(payload: SetLayerTweenDelayPayload): LayerTypes;
   setTweenDrawerTweenEditing?(payload: SetTweenDrawerTweenEditingPayload): TweenDrawerTypes;
+  setCanvasFocusing?(payload: SetCanvasFocusingPayload): CanvasSettingsTypes;
   disableSelectionTool?(): ToolTypes;
   enableSelectionTool?(): ToolTypes;
 }
@@ -47,7 +51,7 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
   const valueHeadRef = useRef<HTMLDivElement>(null);
   const visualizerRef = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
-  const { tween, easeEditor, closeEaseEditor, setLayerTweenEase, setLayerTweenPower, disableSelectionTool, enableSelectionTool, setLayerTweenDuration, setLayerTweenDelay, setTweenDrawerTweenEditing } = props;
+  const { tween, easeEditor, closeEaseEditor, setLayerTweenEase, setLayerTweenPower, canvasFocusing, setCanvasFocusing, setLayerTweenDuration, setLayerTweenDelay, setTweenDrawerTweenEditing } = props;
   const [duration, setDuration] = useState(tween.duration);
   const [delay, setDelay] = useState(tween.delay);
 
@@ -81,30 +85,9 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
   const onMouseDown = (event: any): void => {
     if (editorRef.current && !editorRef.current.contains(event.target)) {
       setTweenDrawerTweenEditing({id: null});
-      enableSelectionTool();
       closeEaseEditor();
     }
   }
-
-  useEffect(() => {
-    document.addEventListener('mousedown', onMouseDown, false);
-    disableSelectionTool();
-    setTweenDrawerTweenEditing({id: tween.id});
-    return (): void => {
-      if (easeEditor.isOpen) {
-        closeEaseEditor();
-      }
-      document.removeEventListener('mousedown', onMouseDown);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (tween) {
-      setDuration(tween.duration);
-      setDelay(tween.delay);
-      setAndAnimate();
-    }
-  }, [tween]);
 
   const handleDurationChange = (e: any) => {
     const target = e.target;
@@ -163,6 +146,29 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
       setAndAnimate();
     }
   }
+
+  useEffect(() => {
+    if (canvasFocusing) {
+      setCanvasFocusing({focusing: false});
+    }
+    document.addEventListener('mousedown', onMouseDown, false);
+    setTweenDrawerTweenEditing({id: tween.id});
+    return (): void => {
+      if (easeEditor.isOpen) {
+        closeEaseEditor();
+      }
+      setCanvasFocusing({focusing: true});
+      document.removeEventListener('mousedown', onMouseDown);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (tween) {
+      setDuration(tween.duration);
+      setDelay(tween.delay);
+      setAndAnimate();
+    }
+  }, [tween]);
 
   return (
     <div className='c-ease-editor'>
@@ -328,12 +334,13 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer, easeEditor } = state;
+  const { layer, easeEditor, canvasSettings } = state;
   const tween = layer.present.tweenById[easeEditor.tween];
-  return { tween, easeEditor };
+  const canvasFocusing = canvasSettings.focusing;
+  return { tween, easeEditor, canvasFocusing };
 };
 
 export default connect(
   mapStateToProps,
-  { closeEaseEditor, setLayerTweenEase, setLayerTweenPower, enableSelectionTool, disableSelectionTool, setLayerTweenDuration, setLayerTweenDelay, setTweenDrawerTweenEditing }
+  { closeEaseEditor, setLayerTweenEase, setLayerTweenPower, enableSelectionTool, disableSelectionTool, setLayerTweenDuration, setLayerTweenDelay, setTweenDrawerTweenEditing, setCanvasFocusing }
 )(EaseEditor);

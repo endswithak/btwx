@@ -1,30 +1,24 @@
-import React, { useRef, useContext, useEffect, ReactElement, useState } from 'react';
+import React, { useContext, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
-import { enableDarkTheme, enableLightTheme } from '../store/actions/theme';
 import { ipcRenderer } from 'electron';
 
 interface PreferencesProps {
   themeName: em.ThemeName;
-  enableDarkTheme(): void;
-  enableLightTheme(): void;
 }
 
 const Preferences = (props: PreferencesProps): ReactElement => {
-  const preferences = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
-  const { themeName, enableDarkTheme, enableLightTheme } = props;
+  const { themeName } = props;
 
   const handleClick = () => {
     switch(themeName) {
       case 'dark':
-        enableLightTheme();
-        ipcRenderer.send('updateTheme');
+        ipcRenderer.send('updateTheme', 'light');
         break;
       case 'light':
-        enableDarkTheme();
-        ipcRenderer.send('updateTheme');
+        ipcRenderer.send('updateTheme', 'dark');
         break;
     }
   }
@@ -32,7 +26,6 @@ const Preferences = (props: PreferencesProps): ReactElement => {
   return (
     <div
       className='c-app'
-      ref={preferences}
       style={{
         background: theme.background.z0
       }}>
@@ -49,6 +42,5 @@ const mapStateToProps = (state: RootState) => {
 };
 
 export default connect(
-  mapStateToProps,
-  { enableDarkTheme, enableLightTheme }
+  mapStateToProps
 )(Preferences);

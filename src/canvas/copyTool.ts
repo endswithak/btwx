@@ -16,13 +16,15 @@ class CopyTool {
       case 'c': {
         if (event.modifiers.meta) {
           const state = store.getState();
-          store.dispatch(copyLayersToClipboard({layers: state.layer.present.selected}));
+          if (state.canvasSettings.focusing && state.layer.present.selected.length > 0) {
+            store.dispatch(copyLayersToClipboard({layers: state.layer.present.selected}));
+          }
         }
         break;
       }
       case 'v': {
         const state = store.getState();
-        if (event.modifiers.meta && state.layer.present.clipboard.allIds.length > 0) {
+        if (event.modifiers.meta && state.layer.present.clipboard.allIds.length > 0 && state.canvasSettings.focusing) {
           const documentImages = state.layer.present.clipboard.allIds.reduce((result: { [id: string]: em.DocumentImage }, current) => {
             const layerAndDescendants = getLayerAndDescendants(state.layer.present, current, true);
             layerAndDescendants.forEach((id) => {

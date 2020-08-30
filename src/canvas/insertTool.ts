@@ -9,6 +9,13 @@ class InsertTool {
   onKeyDown(event: paper.KeyEvent): void {
     if (this.enabled) {
       switch(event.key) {
+        case 'escape': {
+          const state = store.getState();
+          if (state.tool.type !== 'Selection') {
+            store.dispatch(enableSelectionTool());
+          }
+          break;
+        }
         case 'a': {
           const state = store.getState();
           if (state.tool.type === 'Artboard') {

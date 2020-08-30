@@ -10,18 +10,20 @@ import { closeArtboardPresetEditor } from '../store/actions/artboardPresetEditor
 import { ArtboardPresetEditorTypes } from '../store/actionTypes/artboardPresetEditor';
 import { setArtboardToolDevicePlatform } from '../store/actions/tool';
 import { ToolTypes, SetArtboardToolDevicePlatformPayload } from '../store/actionTypes/tool';
-import { addArtboardPreset, updateArtboardPreset } from '../store/actions/canvasSettings';
-import { CanvasSettingsTypes, AddArtboardPresetPayload, UpdateArtboardPresetPayload } from '../store/actionTypes/canvasSettings';
+import { addArtboardPreset, updateArtboardPreset, setCanvasFocusing } from '../store/actions/canvasSettings';
+import { CanvasSettingsTypes, AddArtboardPresetPayload, UpdateArtboardPresetPayload, SetCanvasFocusingPayload } from '../store/actionTypes/canvasSettings';
 import SidebarInput from './SidebarInput';
 
 interface ArtboardPresetEditorProps {
   exists?: boolean;
   artboardPresetEditor?: ArtboardPresetEditorState;
   platformType?: em.DevicePlatformType;
+  canvasFocusing?: boolean;
   closeArtboardPresetEditor?(): ArtboardPresetEditorTypes;
   setArtboardToolDevicePlatform?(payload: SetArtboardToolDevicePlatformPayload): ToolTypes;
   addArtboardPreset?(payload: AddArtboardPresetPayload): CanvasSettingsTypes;
   updateArtboardPreset?(payload: UpdateArtboardPresetPayload): CanvasSettingsTypes;
+  setCanvasFocusing?(payload: SetCanvasFocusingPayload): CanvasSettingsTypes;
 }
 
 const CancelButton = styled.button`
@@ -48,7 +50,7 @@ const SaveButton = styled.button`
 
 const ArtboardPresetEditor = (props: ArtboardPresetEditorProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { exists, closeArtboardPresetEditor, platformType, artboardPresetEditor, addArtboardPreset, updateArtboardPreset, setArtboardToolDevicePlatform } = props;
+  const { exists, closeArtboardPresetEditor, canvasFocusing, platformType, artboardPresetEditor, addArtboardPreset, updateArtboardPreset, setArtboardToolDevicePlatform } = props;
   const [name, setName] = useState(artboardPresetEditor.type);
   const [width, setWidth] = useState(artboardPresetEditor.width);
   const [height, setHeight] = useState(artboardPresetEditor.height);
@@ -94,6 +96,15 @@ const ArtboardPresetEditor = (props: ArtboardPresetEditorProps): ReactElement =>
     closeArtboardPresetEditor();
   }
 
+  useEffect(() => {
+    if (canvasFocusing) {
+      setCanvasFocusing({focusing: false});
+    }
+    return () => {
+      setCanvasFocusing({focusing: true});
+    }
+  }, []);
+
   return (
     <div
       className='c-artboard-preset-editor-wrap'>
@@ -117,7 +128,7 @@ const ArtboardPresetEditor = (props: ArtboardPresetEditorProps): ReactElement =>
               className='c-artboard-preset-editor-icon__plane c-artboard-preset-editor-icon__plane--fg'
               style={{
                 background: tinyColor(theme.palette.primary).setAlpha(0.77).toRgbString(),
-                backdropFilter: theme.name === 'dark' ? 'brightness(400%)' : 'opacity(400%)'
+                backdropFilter: 'opacity(50%)'
               }} />
           </div>
           <p
@@ -148,7 +159,6 @@ const ArtboardPresetEditor = (props: ArtboardPresetEditorProps): ReactElement =>
                 onChange={handleNameChange}
                 onSubmit={handleSave}
                 bottomLabel={'Name'}
-                disableSelectionToolToggle
                 selectOnMount />
             </div>
             <div className='c-artboard-preset-editor__size-input'>
@@ -157,15 +167,13 @@ const ArtboardPresetEditor = (props: ArtboardPresetEditorProps): ReactElement =>
                 onChange={handleWidthChange}
                 onSubmit={handleSave}
                 bottomLabel={'Width'}
-                label='px'
-                disableSelectionToolToggle />
+                label='px' />
               <SidebarInput
                 value={height}
                 onChange={handleHeightChange}
                 onSubmit={handleSave}
                 bottomLabel={'Height'}
-                label='px'
-                disableSelectionToolToggle />
+                label='px' />
             </div>
           </div>
           <div className='c-artboard-preset-editor__buttons'>
@@ -192,10 +200,11 @@ const mapStateToProps = (state: RootState) => {
   const { artboardPresetEditor, tool, canvasSettings } = state;
   const platformType = tool.artboardToolDevicePlatform;
   const exists = canvasSettings.artboardPresets.allIds.includes(artboardPresetEditor.id);
-  return { artboardPresetEditor, platformType, exists };
+  const canvasFocusing = canvasSettings.focusing;
+  return { artboardPresetEditor, platformType, exists, canvasFocusing };
 };
 
 export default connect(
   mapStateToProps,
-  { closeArtboardPresetEditor, addArtboardPreset, updateArtboardPreset, setArtboardToolDevicePlatform }
+  { closeArtboardPresetEditor, addArtboardPreset, updateArtboardPreset, setArtboardToolDevicePlatform, setCanvasFocusing }
 )(ArtboardPresetEditor);

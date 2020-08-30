@@ -11,22 +11,20 @@ import { SetCanvasMatrixPayload, SetCanvasZoomingPayload, SetCanvasZoomingTypePa
 import { setCanvasMatrix, setCanvasZooming, setCanvasZoomingType } from '../store/actions/canvasSettings';
 import { LayerTypes } from '../store/actionTypes/layer';
 import { updateInViewLayers } from '../store/actions/layer';
-import { CanvasSettingsState } from '../store/reducers/canvasSettings';
 import { debounce } from '../utils';
-import { DocumentSettingsState } from '../store/reducers/documentSettings';
 
 interface CanvasProps {
-  drawing: boolean;
-  typing: boolean;
-  canvasSettings: CanvasSettingsState;
-  documentSettings: DocumentSettingsState;
+  documentImages: {
+    [id: string]: em.DocumentImage;
+  };
   paperProject?: string;
   allArtboardIds?: string[];
   allShapeIds?: string[];
   allTextIds?: string[];
   allImageIds?: string[];
   isInsertKnobActive?: boolean;
-  zooming?: boolean;
+  cursor: string;
+  matrix?: number[];
   enableSelectionTool(): ToolTypes;
   setCanvasMatrix(payload: SetCanvasMatrixPayload): CanvasSettingsTypes;
   setCanvasZooming(payload: SetCanvasZoomingPayload): CanvasSettingsTypes;
@@ -36,58 +34,55 @@ interface CanvasProps {
 }
 
 let canvasZooming = false;
-let insertKnobActive = false;
 let canvasZoomingType: em.ZoomingType = null;
 
 const Canvas = (props: CanvasProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useContext(ThemeContext);
-  const { drawing, typing, canvasSettings, documentSettings, enableSelectionTool, updateInViewLayers, paperProject, allArtboardIds, allShapeIds, allTextIds, allImageIds, setCanvasMatrix, setReady, isInsertKnobActive, setCanvasZooming, zooming, setCanvasZoomingType } = props;
+  const { cursor, matrix, documentImages, enableSelectionTool, updateInViewLayers, paperProject, allArtboardIds, allShapeIds, allTextIds, allImageIds, setCanvasMatrix, setReady, setCanvasZooming, setCanvasZoomingType } = props;
 
   const handleWheel = (e: WheelEvent): void => {
     e.preventDefault();
-    if (!insertKnobActive) {
-      if (e.ctrlKey) {
-        e.preventDefault();
-        const cursorPoint = paperMain.view.getEventPoint(e as any);
-        const pointDiff = new paperMain.Point(cursorPoint.x - paperMain.view.center.x, cursorPoint.y - paperMain.view.center.y);
-        const prevZoom = paperMain.view.zoom;
-        const nextZoom = paperMain.view.zoom - e.deltaY * 0.01;
-        if (!canvasZooming) {
-          canvasZooming = true;
-          setCanvasZooming({zooming: true});
-        }
-        if (e.deltaY < 0 && nextZoom < 30) {
-          if (canvasZoomingType !== 'in') {
-            canvasZoomingType = 'in';
-            setCanvasZoomingType({zoomingType: 'in'});
-          }
-          paperMain.view.zoom = nextZoom;
-        } else if (e.deltaY > 0 && nextZoom > 0) {
-          if (canvasZoomingType !== 'out') {
-            canvasZoomingType = 'out';
-            setCanvasZoomingType({zoomingType: 'out'});
-          }
-          paperMain.view.zoom = nextZoom;
-        } else if (e.deltaY > 0 && nextZoom < 0) {
-          paperMain.view.zoom = 0.01;
-        }
-        const zoomDiff = paperMain.view.zoom - prevZoom;
-        paperMain.view.translate(
-          new paper.Point(
-            ((zoomDiff * pointDiff.x) * ( 1 / paperMain.view.zoom)) * -1,
-            ((zoomDiff * pointDiff.y) * ( 1 / paperMain.view.zoom)) * -1
-          )
-        );
-      } else {
-        paperMain.view.translate(
-          new paper.Point(
-            (e.deltaX * ( 1 / paperMain.view.zoom)) * -1,
-            (e.deltaY * ( 1 / paperMain.view.zoom)) * -1
-          )
-        );
+    if (e.ctrlKey) {
+      e.preventDefault();
+      const cursorPoint = paperMain.view.getEventPoint(e as any);
+      const pointDiff = new paperMain.Point(cursorPoint.x - paperMain.view.center.x, cursorPoint.y - paperMain.view.center.y);
+      const prevZoom = paperMain.view.zoom;
+      const nextZoom = paperMain.view.zoom - e.deltaY * 0.01;
+      if (!canvasZooming) {
+        canvasZooming = true;
+        setCanvasZooming({zooming: true});
       }
+      if (e.deltaY < 0 && nextZoom < 30) {
+        if (canvasZoomingType !== 'in') {
+          canvasZoomingType = 'in';
+          setCanvasZoomingType({zoomingType: 'in'});
+        }
+        paperMain.view.zoom = nextZoom;
+      } else if (e.deltaY > 0 && nextZoom > 0) {
+        if (canvasZoomingType !== 'out') {
+          canvasZoomingType = 'out';
+          setCanvasZoomingType({zoomingType: 'out'});
+        }
+        paperMain.view.zoom = nextZoom;
+      } else if (e.deltaY > 0 && nextZoom < 0) {
+        paperMain.view.zoom = 0.01;
+      }
+      const zoomDiff = paperMain.view.zoom - prevZoom;
+      paperMain.view.translate(
+        new paper.Point(
+          ((zoomDiff * pointDiff.x) * ( 1 / paperMain.view.zoom)) * -1,
+          ((zoomDiff * pointDiff.y) * ( 1 / paperMain.view.zoom)) * -1
+        )
+      );
+    } else {
+      paperMain.view.translate(
+        new paper.Point(
+          (e.deltaX * ( 1 / paperMain.view.zoom)) * -1,
+          (e.deltaY * ( 1 / paperMain.view.zoom)) * -1
+        )
+      );
     }
   }
 
@@ -108,11 +103,12 @@ const Canvas = (props: CanvasProps): ReactElement => {
     updateInViewLayers();
   }, 150);
 
-  const initCanvas = (): void => {
+  useEffect(() => {
+    // init canvas
     paperMain.setup(canvasRef.current);
     importPaperProject({
       paperProject,
-      documentImages: documentSettings.images.byId,
+      documentImages: documentImages,
       layers: {
         shape: allShapeIds,
         artboard: allArtboardIds,
@@ -121,55 +117,28 @@ const Canvas = (props: CanvasProps): ReactElement => {
       }
     });
     paperMain.view.viewSize = new paperMain.Size(canvasContainerRef.current.clientWidth, canvasContainerRef.current.clientHeight);
-    paperMain.view.matrix.set(canvasSettings.matrix);
-  }
-
-  useEffect(() => {
-    initCanvas();
+    paperMain.view.matrix.set(matrix);
+    // add listeners
     canvasRef.current.addEventListener('wheel', handleWheel);
     canvasRef.current.addEventListener('wheel', handleWheelDebounce);
     window.addEventListener('resize', handleResize);
+    // update inview layers
     updateInViewLayers();
     enableSelectionTool();
+    // set app ready
     setReady(true);
   }, []);
-
-  useEffect(() => {
-    insertKnobActive = isInsertKnobActive;
-  }, [isInsertKnobActive]);
 
   return (
     <div
       id='canvas-container'
       className='c-canvas'
       ref={canvasContainerRef}
-      style={{
-        cursor: (() => {
-          if (drawing) {
-            return 'crosshair';
-          }
-          if (typing) {
-            return 'text'
-          }
-          if (canvasSettings.selecting) {
-            return 'default';
-          }
-          if (canvasSettings.resizing) {
-            return `${canvasSettings.resizingType}-resize`;
-          }
-          if (canvasSettings.dragging) {
-            return 'move';
-          }
-          if (canvasSettings.zooming) {
-            return `zoom-${canvasZoomingType}`;
-          }
-        })()
-      }}>
+      style={{cursor}}>
       <canvas
         id='canvas'
         tabIndex={0}
         ref={canvasRef}
-        onMouseDown={(): void => canvasRef.current.focus()}
         style={{
           background: theme.background.z0
         }} />
@@ -178,31 +147,49 @@ const Canvas = (props: CanvasProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState): {
-  drawing: boolean;
-  typing: boolean;
-  canvasSettings: CanvasSettingsState;
-  documentSettings: DocumentSettingsState;
+  documentImages: {
+    [id: string]: em.DocumentImage;
+  };
   paperProject: string;
   allArtboardIds: string[];
   allShapeIds: string[];
   allTextIds: string[];
   allImageIds: string[];
-  isInsertKnobActive: boolean;
-  zooming: boolean;
+  focusing: boolean;
+  cursor: string;
+  matrix: number[];
 } => {
-  const { layer, tool, canvasSettings, documentSettings, insertKnob } = state;
+  const { layer, tool, canvasSettings, documentSettings } = state;
+  const cursor = (() => {
+    if (tool.type === 'Shape' || tool.type === 'Artboard') {
+      return 'crosshair';
+    }
+    if (tool.type === 'Text') {
+      return 'text'
+    }
+    if (canvasSettings.selecting) {
+      return 'default';
+    }
+    if (canvasSettings.resizing) {
+      return `${canvasSettings.resizingType}-resize`;
+    }
+    if (canvasSettings.dragging) {
+      return 'move';
+    }
+    if (canvasSettings.zooming) {
+      return `zoom-${canvasSettings.zoomingType}`;
+    }
+  })();
   return {
-    drawing: tool.type === 'Shape' || tool.type === 'Artboard',
-    typing: tool.type === 'Text',
+    documentImages: documentSettings.images.byId,
     allArtboardIds: layer.present.allArtboardIds,
     allShapeIds: layer.present.allShapeIds,
     allTextIds: layer.present.allTextIds,
     allImageIds: layer.present.allImageIds,
     paperProject: layer.present.paperProject,
-    isInsertKnobActive: insertKnob.isActive,
-    zooming: canvasSettings.zooming,
-    canvasSettings,
-    documentSettings
+    focusing: canvasSettings.focusing,
+    matrix: canvasSettings.matrix,
+    cursor
   };
 };
 

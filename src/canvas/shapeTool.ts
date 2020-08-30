@@ -247,7 +247,6 @@ class ShapeTool {
     this.snapTool.snapBounds = this.toBounds;
   }
   onKeyDown(event: paper.KeyEvent): void {
-    this.insertTool.onKeyDown(event);
     switch(event.key) {
       case 'shift': {
         this.shiftModifier = true;
@@ -267,13 +266,12 @@ class ShapeTool {
         if (this.outline) {
           this.outline.remove();
         }
-        store.dispatch(enableSelectionTool());
         break;
       }
     }
+    this.insertTool.onKeyDown(event);
   }
   onKeyUp(event: paper.KeyEvent): void {
-    this.insertTool.onKeyUp(event);
     switch(event.key) {
       case 'shift': {
         this.shiftModifier = false;
@@ -287,6 +285,7 @@ class ShapeTool {
         break;
       }
     }
+    this.insertTool.onKeyUp(event);
   }
   onMouseMove(event: paper.ToolEvent): void {
     if (!this.drawing) {

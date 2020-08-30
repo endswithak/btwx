@@ -34,26 +34,27 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
+import { Titlebar, Color } from 'custom-electron-titlebar';
+import store, { persistor, persistConfig } from './store';
+import persist from './store/utils/persist';
+import getTheme from './store/theme';
+import { openFile } from './store/reducers';
+import { enableDarkTheme, enableLightTheme } from './store/actions/theme';
+import { saveDocumentAs, saveDocument } from './store/actions/documentSettings';
+import { closePreview } from './store/actions/preview';
 import App from './components/App';
 import Preview from './components/Preview';
 import Preferences from './components/Preferences';
 import ThemeProvider from './components/ThemeProvider';
-import store, { persistor, persistConfig } from './store';
-import persist from './store/utils/persist';
-import { Titlebar, Color } from 'custom-electron-titlebar';
-import getTheme from './store/theme';
-import { openFile } from './store/reducers';
-import { saveDocumentAs, saveDocument } from './store/actions/documentSettings';
-import { closePreview } from './store/actions/preview';
 
 import './styles/index.sass';
 
 window.addEventListener('storage', persist(store, persistConfig));
 
-let theme = remote.systemPreferences.getUserDefault('theme', 'string');
-let themeObject = getTheme(theme);
+const themePref = remote.systemPreferences.getUserDefault('theme', 'string');
+let themeObject = getTheme(themePref);
 const titleBar = new Titlebar({
-  backgroundColor: Color.fromHex(theme === 'dark' ? themeObject.background.z1 : themeObject.background.z2)
+  backgroundColor: Color.fromHex(themePref === 'dark' ? themeObject.background.z1 : themeObject.background.z2)
 });
 
 (window as any).getSaveState = (): string => {
@@ -73,6 +74,11 @@ const titleBar = new Titlebar({
   return JSON.stringify(state.documentSettings);
 }
 
+(window as any).getCurrentEdit = (): string => {
+  const state = store.getState();
+  return JSON.stringify(state.layer.present.edit);
+}
+
 (window as any).saveDocument = (): void => {
   const state = store.getState();
   store.dispatch(saveDocument({edit: state.layer.present.edit}));
@@ -89,18 +95,28 @@ const titleBar = new Titlebar({
   store.dispatch(openFile({file: fileJSON}));
 }
 
-(window as any).updateTheme = (): void => {
-  theme = remote.systemPreferences.getUserDefault('theme', 'string');
+(window as any).setTitleBarTheme = (theme: em.ThemeName): void => {
   themeObject = getTheme(theme);
   titleBar.updateBackground(Color.fromHex(theme === 'dark' ? themeObject.background.z1 : themeObject.background.z2));
+}
+
+(window as any).setTheme = (theme: em.ThemeName): void => {
+  switch(theme) {
+    case 'light':
+      store.dispatch(enableLightTheme());
+      break;
+    case 'dark':
+      store.dispatch(enableDarkTheme());
+      break;
+  }
 }
 
 (window as any).previewClosed = (): void => {
   store.dispatch(closePreview());
 }
 
-(window as any).renderMainWindow = (): void => {
-  window.onbeforeunload = (e) => {
+(window as any).renderNewDocument = (): void => {
+  window.onbeforeunload = (e: any) => {
     const state = store.getState();
     if (state.documentSettings.edit !== state.layer.present.edit) {
       e.returnValue = false;
@@ -142,6 +158,9 @@ const titleBar = new Titlebar({
 }
 
 (window as any).renderPreviewWindow = (): void => {
+  window.onbeforeunload = (e: any) => {
+    store.dispatch(closePreview());
+  }
   titleBar.updateTitle('Preview');
   ReactDOM.render(
     <Provider store={store}>

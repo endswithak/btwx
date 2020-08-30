@@ -3,6 +3,7 @@ import store from '../store';
 import { openTextEditor } from '../store/actions/textEditor';
 import { addText } from '../store/actions/layer';
 import { getPagePaperLayer } from '../store/selectors/layer';
+import { enableSelectionTool } from '../store/actions/tool';
 import { paperMain } from './index';
 import { applyTextMethods } from './textUtils';
 import { DEFAULT_TEXT_VALUE, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../constants';
@@ -121,6 +122,7 @@ class TextTool {
         }
       })()
     }));
+    store.dispatch(enableSelectionTool());
   }
 }
 

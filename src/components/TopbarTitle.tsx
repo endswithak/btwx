@@ -23,13 +23,13 @@ const Title = styled.div<TitleProps>`
   font-size: 12px;
   top: 0;
   width: 100%;
-  pointer-events: none;
   z-index: 99999999999;
   height: ${remote.process.platform === 'darwin' ? 22 : 30}px;
   color: ${props => props.recording ? '#fff' : props.theme.text.base};
   font-family: 'Space Mono';
   line-height: ${remote.process.platform === 'darwin' ? 22 : 30}px;
   background: ${props => props.recording ? props.theme.palette.recording : 'none'};
+  cursor: default;
   .c-topbar-title__unsaved-indicator {
     color: ${props => props.recording ? 'rgba(255, 255, 255, 0.5)' : props.theme.text.lighter};
     margin-left: ${props => props.theme.unit}px;
@@ -40,11 +40,18 @@ const TopbarTitle = (props: TopbarTitleProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { title, unsavedEdits, recording } = props;
 
+  const handleDoubleClick = () => {
+    if (!remote.getCurrentWindow().isMaximized()) {
+      remote.getCurrentWindow().maximize();
+    }
+  }
+
   return (
     <Title
       className='c-topbar-title'
       theme={theme}
-      recording={recording}>
+      recording={recording}
+      onDoubleClick={handleDoubleClick}>
       <span>
         <span className='c-topbar-title__title'>{title}</span>
         {

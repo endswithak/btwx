@@ -14,6 +14,8 @@ import { SetLayersFillTypePayload, SetLayersGradientTypePayload, SetLayersFillCo
 import { setLayersFillType, setLayersGradientType, setLayersFillColor, setLayersStrokeColor, setLayersStrokeFillType, setLayersShadowColor } from '../store/actions/layer';
 import { SetTextSettingsFillColorPayload, TextSettingsTypes } from '../store/actionTypes/textSettings';
 import { setTextSettingsFillColor } from '../store/actions/textSettings';
+import { setCanvasFocusing } from '../store/actions/canvasSettings';
+import { CanvasSettingsTypes, SetCanvasFocusingPayload } from '../store/actionTypes/canvasSettings';
 import { ThemeContext } from './ThemeProvider';
 import ColorPicker from './ColorPicker';
 import FillTypeSelector from './FillTypeSelector';
@@ -22,6 +24,7 @@ interface ColorEditorProps {
   includesTextLayer?: boolean;
   colorEditor?: ColorEditorState;
   colorValue?: em.Color;
+  canvasFocusing?: boolean;
   closeColorEditor?(): ColorEditorTypes;
   openGradientEditor?(payload: OpenGradientEditorPayload): GradientEditorTypes;
   setLayersShadowColor?(payload: SetLayersShadowColorPayload): LayerTypes;
@@ -31,12 +34,13 @@ interface ColorEditorProps {
   setLayersStrokeColor?(payload: SetLayersStrokeColorPayload): LayerTypes;
   setLayersStrokeFillType?(payload: SetLayersStrokeFillTypePayload): LayerTypes;
   setTextSettingsFillColor?(payload: SetTextSettingsFillColorPayload): TextSettingsTypes;
+  setCanvasFocusing?(payload: SetCanvasFocusingPayload): CanvasSettingsTypes;
 }
 
 const ColorEditor = (props: ColorEditorProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const editorRef = useRef<HTMLDivElement>(null);
-  const { includesTextLayer, colorEditor, colorValue, closeColorEditor, setLayersFillColor, setLayersStrokeFillType, setLayersGradientType, setLayersFillType, setLayersStrokeColor, openGradientEditor, setLayersShadowColor, setTextSettingsFillColor } = props;
+  const { includesTextLayer, colorEditor, colorValue, closeColorEditor, setLayersFillColor, setLayersStrokeFillType, setLayersGradientType, setLayersFillType, setLayersStrokeColor, openGradientEditor, setLayersShadowColor, setTextSettingsFillColor, setCanvasFocusing, canvasFocusing } = props;
 
   const debounceColor = useCallback(
     debounce((color: em.Color) => {
@@ -60,11 +64,15 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
   );
 
   useEffect(() => {
+    if (canvasFocusing) {
+      setCanvasFocusing({focusing: false});
+    }
     document.addEventListener('mousedown', onMouseDown, false);
     return (): void => {
       if (colorEditor.isOpen) {
         closeColorEditor();
       }
+      setCanvasFocusing({focusing: true});
       document.removeEventListener('mousedown', onMouseDown);
     }
   }, []);
@@ -175,8 +183,9 @@ const mapStateToProps = (state: RootState): {
   colorEditor: ColorEditorState;
   colorValue: em.Color;
   includesTextLayer: boolean;
+  canvasFocusing: boolean;
 } => {
-  const { colorEditor, layer } = state;
+  const { colorEditor, layer, canvasSettings } = state;
   const layerItems: em.Layer[] = colorEditor.layers.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
@@ -193,7 +202,8 @@ const mapStateToProps = (state: RootState): {
     }
   }, []);
   const colorValue = styleValues[0].color;
-  return { colorEditor, colorValue, includesTextLayer };
+  const canvasFocusing = canvasSettings.focusing;
+  return { colorEditor, colorValue, includesTextLayer, canvasFocusing };
 };
 
 export default connect(
@@ -207,6 +217,7 @@ export default connect(
     setLayersFillType,
     setLayersStrokeFillType,
     setLayersGradientType,
-    setTextSettingsFillColor
+    setTextSettingsFillColor,
+    setCanvasFocusing
   }
 )(ColorEditor);

@@ -63,16 +63,18 @@ class SelectionTool {
       }
       case 'escape': {
         const state = store.getState();
-        store.dispatch(escapeLayerScope());
-        if (state.layer.present.hover) {
-          const paperLayer = getPaperLayer(state.layer.present.hover);
-          paperLayer.emit('mouseenter', event);
+        if (state.canvasSettings.focusing) {
+          store.dispatch(escapeLayerScope());
+          if (state.layer.present.hover) {
+            const paperLayer = getPaperLayer(state.layer.present.hover);
+            paperLayer.emit('mouseenter', event);
+          }
         }
         break;
       }
       case 'backspace': {
         const state = store.getState();
-        if (state.layer.present.selected.length > 0) {
+        if (state.layer.present.selected.length > 0 && state.canvasSettings.focusing) {
           if (state.tweenDrawer.isOpen && state.tweenDrawer.event) {
             const tweenEvent = state.layer.present.tweenEventById[state.tweenDrawer.event];
             let layersAndChildren: string[] = [];
