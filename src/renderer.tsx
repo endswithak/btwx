@@ -26,9 +26,7 @@
  * ```
  */
 
-// import * as sketchfile from 'sketch-file';
-// import paper from 'paper';
-
+import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { remote, ipcRenderer } from 'electron';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -41,11 +39,18 @@ import getTheme from './store/theme';
 import { openFile } from './store/reducers';
 import { enableDarkTheme, enableLightTheme } from './store/actions/theme';
 import { saveDocumentAs, saveDocument } from './store/actions/documentSettings';
+// import { openSketchImporter } from './store/actions/sketchImporter';
 import { closePreview } from './store/actions/preview';
 import App from './components/App';
 import Preview from './components/Preview';
 import Preferences from './components/Preferences';
+import SketchImporter from './components/SketchImporter';
 import ThemeProvider from './components/ThemeProvider';
+
+//
+import { DEFAULT_ARTBOARD_BACKGROUND_COLOR, THEME_PRIMARY_COLOR } from './constants';
+import { addArtboard } from './store/actions/layer';
+import { applyArtboardMethods } from './canvas/artboardUtils';
 
 import './styles/index.sass';
 
@@ -55,6 +60,30 @@ const themePref = remote.systemPreferences.getUserDefault('theme', 'string');
 let themeObject = getTheme(themePref);
 const titleBar = new Titlebar({
   backgroundColor: Color.fromHex(themePref === 'dark' ? themeObject.background.z1 : themeObject.background.z2)
+});
+
+ipcRenderer.on('sketchArtboardsImport', (event, arg) => {
+  const sketchData = JSON.parse(arg) as {
+    document: FileFormat.Document;
+    meta: FileFormat.Meta;
+    artboards: FileFormat.Artboard[];
+    images: Buffer[];
+    symbolMasters: FileFormat.SymbolMaster[];
+  };
+  // sketchData.artboards.forEach(() => {
+  //   store.dispatch(addArtboard({
+  //     parent: 'page',
+  //     frame: {
+  //       x: newPaperLayer.position.x,
+  //       y: newPaperLayer.position.y,
+  //       width: newPaperLayer.bounds.width,
+  //       height: newPaperLayer.bounds.height,
+  //       innerWidth: newPaperLayer.bounds.width,
+  //       innerHeight: newPaperLayer.bounds.height
+  //     },
+  //     paperLayer: newPaperLayer
+  //   }));
+  // });
 });
 
 (window as any).getSaveState = (): string => {
@@ -67,38 +96,38 @@ const titleBar = new Titlebar({
     textSettings
   }
   return JSON.stringify(fileState);
-}
+};
 
 (window as any).getDocumentSettings = (): string => {
   const state = store.getState();
   return JSON.stringify(state.documentSettings);
-}
+};
 
 (window as any).getCurrentEdit = (): string => {
   const state = store.getState();
   return JSON.stringify(state.layer.present.edit);
-}
+};
 
 (window as any).saveDocument = (): void => {
   const state = store.getState();
   store.dispatch(saveDocument({edit: state.layer.present.edit}));
   return (window as any).getSaveState();
-}
+};
 
 (window as any).saveDocumentAs = (documentSettings: { base: string; fullPath: string }): void => {
   const state = store.getState();
   store.dispatch(saveDocumentAs({name: documentSettings.base, path: documentSettings.fullPath, edit: state.layer.present.edit}));
   return (window as any).getSaveState();
-}
+};
 
 (window as any).openFile = (fileJSON: any): void => {
   store.dispatch(openFile({file: fileJSON}));
-}
+};
 
 (window as any).setTitleBarTheme = (theme: em.ThemeName): void => {
   themeObject = getTheme(theme);
   titleBar.updateBackground(Color.fromHex(theme === 'dark' ? themeObject.background.z1 : themeObject.background.z2));
-}
+};
 
 (window as any).setTheme = (theme: em.ThemeName): void => {
   switch(theme) {
@@ -109,11 +138,15 @@ const titleBar = new Titlebar({
       store.dispatch(enableDarkTheme());
       break;
   }
-}
+};
 
 (window as any).previewClosed = (): void => {
   store.dispatch(closePreview());
-}
+};
+
+// (window as any).importSketchFile = (sketchFile: any): void => {
+//   store.dispatch(openSketchImporter({sketchFile}));
+// };
 
 (window as any).renderNewDocument = (): void => {
   window.onbeforeunload = (e: any) => {
@@ -155,7 +188,7 @@ const titleBar = new Titlebar({
     </Provider>,
     document.getElementById('root')
   );
-}
+};
 
 (window as any).renderPreviewWindow = (): void => {
   window.onbeforeunload = (e: any) => {
@@ -172,7 +205,7 @@ const titleBar = new Titlebar({
     </Provider>,
     document.getElementById('root')
   );
-}
+};
 
 (window as any).renderPreferencesWindow = (): void => {
   titleBar.updateTitle('Preferences');
@@ -186,4 +219,19 @@ const titleBar = new Titlebar({
     </Provider>,
     document.getElementById('root')
   );
-}
+};
+
+(window as any).renderSketchImporterWindow = (sketchFile: any): void => {
+  titleBar.updateTitle('Sketch Import');
+  ReactDOM.render(
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <ThemeProvider>
+          <SketchImporter
+            sketchFile={sketchFile} />
+        </ThemeProvider>
+      </PersistGate>
+    </Provider>,
+    document.getElementById('root')
+  );
+};

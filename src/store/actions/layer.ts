@@ -1,7 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import { paperMain } from '../../canvas';
-import { DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../../constants';
+import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_TEXT_STYLE } from '../../constants';
 import { applyImageMethods } from '../../canvas/imageUtils';
+import { applyShapeMethods } from '../../canvas/shapeUtils';
+import { applyTextMethods } from '../../canvas/textUtils';
+import { applyArtboardMethods } from '../../canvas/artboardUtils';
+import { getPaperLayer } from '../selectors/layer';
 
 import {
   ADD_PAGE,
@@ -418,15 +422,28 @@ export const addPage = (payload: AddPagePayload): LayerTypes => {
 
 export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
   const layerId = uuidv4();
-  payload.paperLayer.data = { id: 'ArtboardBackground', type: 'ArtboardBackground' };
-  const mask = payload.paperLayer.clone();
-  mask.data = { id: 'ArtboardMask', type: 'ArtboardMask' };
-  mask.clipMask = true;
-  const paperLayer = new paperMain.Group({
+  // create background
+  const artboardBackground = new paperMain.Path.Rectangle({
+    point: new paperMain.Point(0,0),
+    size: [payload.frame.width, payload.frame.height],
+    data: { id: 'ArtboardBackground', type: 'ArtboardBackground' },
+    fillColor: DEFAULT_ARTBOARD_BACKGROUND_COLOR,
+    position: new paperMain.Point(payload.frame.x, payload.frame.y),
+  });
+  // create mask
+  const artboardMask = artboardBackground.clone();
+  artboardMask.data = { id: 'ArtboardMask', type: 'ArtboardMask' };
+  artboardMask.clipMask = true;
+  // create artboard group
+  const artboard = new paperMain.Group({
     name: payload.name ? payload.name : 'Artboard',
     data: { id: layerId, type: 'Artboard' },
-    children: [mask, payload.paperLayer],
+    children: [artboardMask, artboardBackground],
+    parent: getPaperLayer('page')
   });
+  // apply artboard methods to background
+  applyArtboardMethods(artboard);
+  // return action
   return {
     type: ADD_ARTBOARD,
     payload: {
@@ -452,9 +469,10 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
 
 export const addGroup = (payload: AddGroupPayload): LayerTypes => {
   const layerId = uuidv4();
-  const paperLayer = new paperMain.Group({
+  new paperMain.Group({
     name: payload.name ? payload.name : 'Group',
-    data: { id: layerId, type: 'Group' }
+    data: { id: layerId, type: 'Group' },
+    parent: getPaperLayer(payload.parent ? payload.parent : 'page')
   });
   return {
     type: ADD_GROUP,
@@ -490,10 +508,31 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
 
 // Shape
 
-export const addShape = (payload: AddShapePayload): LayerTypes => ({
-  type: ADD_SHAPE,
-  payload
-});
+export const addShape = (payload: AddShapePayload): LayerTypes => {
+  const id = uuidv4();
+  const fill = payload.style.fill ? {...DEFAULT_TEXT_STYLE, ...payload.style.fill} : DEFAULT_FILL_STYLE;
+  const stroke = payload.style.stroke ? {...DEFAULT_STROKE_STYLE, ...payload.style.stroke} : DEFAULT_STROKE_STYLE;
+  const newShape = new paperMain.Path({
+    pathData: payload.path.data,
+    closed: payload.path.closed,
+    fillColor: { hue: fill.color.h, saturation: fill.color.s, lightness: fill.color.l, alpha: fill.color.a },
+    strokeColor: { hue: stroke.color.h, saturation: stroke.color.s, lightness: stroke.color.l, alpha: stroke.color.a },
+    strokeWidth: stroke.width,
+    data: {
+      id: id,
+      type: 'Shape'
+    },
+    parent: getPaperLayer(payload.parent ? payload.parent : 'page')
+  });
+  applyShapeMethods(newShape);
+  return {
+    type: ADD_SHAPE,
+    payload: {
+      ...payload,
+      id
+    }
+  }
+};
 
 // Compound Shape
 
@@ -504,10 +543,35 @@ export const addCompoundShape = (payload: AddCompoundShapePayload): LayerTypes =
 
 // Text
 
-export const addText = (payload: AddTextPayload): LayerTypes => ({
-  type: ADD_TEXT,
-  payload
-});
+export const addText = (payload: AddTextPayload): LayerTypes => {
+  const id = uuidv4();
+  const fill = payload.style.fill ? {...DEFAULT_TEXT_STYLE, ...payload.style.fill} : DEFAULT_FILL_STYLE;
+  const textStyle = payload.textStyle ? {...DEFAULT_TEXT_STYLE, ...payload.textStyle} : DEFAULT_TEXT_STYLE;
+  const newText = new paperMain.PointText({
+    point: new paperMain.Point(0, 0),
+    content: payload.text,
+    data: {
+      id: id,
+      type: 'Text'
+    },
+    fillColor: { hue: fill.color.h, saturation: fill.color.s, lightness: fill.color.l, alpha: fill.color.a },
+    fontSize: textStyle.fontSize,
+    leading: textStyle.leading,
+    fontWeight: textStyle.fontWeight,
+    fontFamily: textStyle.fontFamily,
+    justification: textStyle.justification,
+    position: new paperMain.Point(payload.frame.x, payload.frame.y),
+    parent: getPaperLayer(payload.parent ? payload.parent : 'page')
+  });
+  applyTextMethods(newText);
+  return {
+    type: ADD_TEXT,
+    payload: {
+      ...payload,
+      id
+    }
+  }
+};
 
 // Image
 

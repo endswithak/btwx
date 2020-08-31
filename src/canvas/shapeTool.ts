@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import store from '../store';
 import { enableSelectionTool } from '../store/actions/tool';
 import { addShape } from '../store/actions/layer';
@@ -6,7 +5,7 @@ import { getPagePaperLayer, getCurvePoints } from '../store/selectors/layer';
 import { paperMain } from './index';
 import { isBetween } from '../utils';
 import Tooltip from './tooltip';
-import { DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_POINTS, THEME_PRIMARY_COLOR, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../constants';
+import { DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_POINTS, THEME_PRIMARY_COLOR, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../constants';
 import SnapTool from './snapTool';
 import InsertTool from './insertTool';
 
@@ -426,23 +425,14 @@ class ShapeTool {
     if (this.to) {
       if (this.to.x - this.from.x !== 0 || this.to.y - this.from.y !== 0) {
         const state = store.getState();
-        const id = uuidv4();
-        const fill = DEFAULT_FILL_STYLE;
-        const stroke = DEFAULT_STROKE_STYLE;
         const paperLayer = this.renderShape({
-          fillColor: { hue: fill.color.h, saturation: fill.color.s, lightness: fill.color.l, alpha: fill.color.a },
-          strokeColor: { hue: stroke.color.h, saturation: stroke.color.s, lightness: stroke.color.l, alpha: stroke.color.a },
-          strokeWidth: stroke.width,
-          data: {
-            id: id,
-            type: 'Shape'
-          }
+          insert: false
         });
         const fromPoint = (paperLayer as paper.Path).segments[0].point;
         const toPoint = (paperLayer as paper.Path).segments[1].point;
         const vector = toPoint.subtract(fromPoint);
         store.dispatch(addShape({
-          id: id,
+          // id: id,
           type: 'Shape',
           parent: (() => {
             const overlappedArtboard = getPagePaperLayer(state.layer.present).getItem({

@@ -293,22 +293,21 @@ class ArtboardTool {
   onMouseUp(event: paper.ToolEvent): void {
     if (this.to) {
       if (this.to.x - this.from.x !== 0 && this.to.y - this.from.y !== 0) {
-        const state = store.getState();
-        const newPaperLayer = this.renderShape({
-          fillColor: DEFAULT_ARTBOARD_BACKGROUND_COLOR,
+        // const state = store.getState();
+        const newArtboard = this.renderShape({
+          insert: false
         });
-        applyArtboardMethods(newPaperLayer);
+        // applyArtboardMethods(newPaperLayer);
         store.dispatch(addArtboard({
-          parent: state.layer.present.page,
+          parent: 'page',
           frame: {
-            x: newPaperLayer.position.x,
-            y: newPaperLayer.position.y,
-            width: newPaperLayer.bounds.width,
-            height: newPaperLayer.bounds.height,
-            innerWidth: newPaperLayer.bounds.width,
-            innerHeight: newPaperLayer.bounds.height
-          },
-          paperLayer: newPaperLayer
+            x: newArtboard.position.x,
+            y: newArtboard.position.y,
+            width: newArtboard.bounds.width,
+            height: newArtboard.bounds.height,
+            innerWidth: newArtboard.bounds.width,
+            innerHeight: newArtboard.bounds.height
+          }
         }));
       }
       store.dispatch(enableSelectionTool());

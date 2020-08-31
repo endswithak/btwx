@@ -1081,8 +1081,7 @@ export const importPaperProject = ({documentImages, paperProject, layers}: Impor
     applyShapeMethods(getPaperLayer(shapeId));
   });
   layers.artboard.forEach((artboardId) => {
-    const artboardBackground = getPaperLayer(artboardId).getItem({data: {id: 'ArtboardBackground'}});
-    applyArtboardMethods(artboardBackground);
+    applyArtboardMethods(getPaperLayer(artboardId));
   });
   layers.text.forEach((textId) => {
     applyTextMethods(getPaperLayer(textId));

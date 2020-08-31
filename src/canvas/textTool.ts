@@ -29,18 +29,12 @@ class TextTool {
   onMouseUp(event: paper.ToolEvent): void {
     this.insertTool.enabled = false;
     let state = store.getState();
-    const id = uuidv4();
-    const fillColor = state.textSettings.fillColor;
     // create new text layer
     const paperLayer = new paperMain.PointText({
       point: event.point,
       content: DEFAULT_TEXT_VALUE,
-      data: {
-        id: id,
-        type: 'Text'
-      },
       ...state.textSettings,
-      fillColor: { hue: fillColor.h, saturation: fillColor.s, lightness: fillColor.l, alpha: fillColor.a }
+      insert: false
     });
     const parent = (() => {
       const overlappedArtboard = getPagePaperLayer(state.layer.present).getItem({
@@ -51,9 +45,9 @@ class TextTool {
       });
       return overlappedArtboard ? overlappedArtboard.parent.data.id : state.layer.present.page;
     })();
-    applyTextMethods(paperLayer);
+    // applyTextMethods(paperLayer);
     store.dispatch(addText({
-      id: id,
+      // id: id,
       type: 'Text',
       text: DEFAULT_TEXT_VALUE,
       name: DEFAULT_TEXT_VALUE,

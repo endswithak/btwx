@@ -81,7 +81,6 @@ export const addPage = (state: LayerState, action: AddPage): LayerState => {
 export const addArtboard = (state: LayerState, action: AddArtboard): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
-  paperLayer.parent = getPaperLayer(currentState.page);
   currentState = {
     ...currentState,
     allIds: addItem(currentState.allIds, action.payload.id),
@@ -139,8 +138,6 @@ export const addShape = (state: LayerState, action: AddShape): LayerState => {
   let currentState = state;
   const layerParent = action.payload.parent ? action.payload.parent : currentState.page;
   const paperLayer = getPaperLayer(action.payload.id);
-  paperLayer.parent = getPaperLayer(layerParent);
-  applyShapeMethods(paperLayer);
   // add shape
   currentState = {
     ...currentState,
@@ -171,7 +168,6 @@ export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
   let currentState = state;
   const layerParent = action.payload.parent ? action.payload.parent : currentState.page;
   const paperLayer = getPaperLayer(action.payload.id);
-  paperLayer.parent = getPaperLayer(layerParent);
   currentState = {
     ...currentState,
     allIds: addItem(currentState.allIds, action.payload.id),
@@ -201,7 +197,6 @@ export const addText = (state: LayerState, action: AddText): LayerState => {
   let currentState = state;
   const layerParent = action.payload.parent ? action.payload.parent : currentState.page;
   const paperLayer = getPaperLayer(action.payload.id);
-  paperLayer.parent = getPaperLayer(layerParent);
   currentState = {
     ...currentState,
     allIds: addItem(currentState.allIds, action.payload.id),
@@ -1660,7 +1655,7 @@ const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any, fro
     const artboardBackground = paperLayer.getItem({ data: { id: 'ArtboardBackground' }});
     const artboardBackgroundClone = artboardBackground.clone({deep: false, insert: true});
     artboardBackgroundClone.parent = paperLayerClone;
-    applyArtboardMethods(artboardBackgroundClone);
+    applyArtboardMethods(paperLayerClone);
   }
   if (paperLayer.data.type === 'Shape') {
     applyShapeMethods(paperLayerClone);

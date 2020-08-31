@@ -1,5 +1,5 @@
 import electron, { app, BrowserWindow, Menu, dialog } from 'electron';
-import { createPreferencesWindow, createNewDocument, preferencesWindow, handleSave, handleSaveAs, handleOpenDocument } from './index';
+import { createPreferencesWindow, createNewDocument, preferencesWindow, handleSave, handleSaveAs, handleOpenDocument, handleSketchImport } from './index';
 
 const isMac = process.platform === 'darwin';
 
@@ -39,7 +39,7 @@ export default Menu.buildFromTemplate([
       {
         label: 'New',
         accelerator: process.platform === 'darwin' ? 'Cmd+N' : 'Ctrl+N',
-        click: () => {
+        click: (): void => {
           // if document already open, set new document size to focused document size
           const focusedDocument = getFocusedDocument();
           if (focusedDocument) {
@@ -54,7 +54,7 @@ export default Menu.buildFromTemplate([
         label: 'Save',
         accelerator: process.platform === 'darwin' ? 'Cmd+S' : 'Ctrl+S',
         // enabled: getFocusedDocument(),
-        click: () => {
+        click: (): void => {
           const document = getFocusedDocument();
           document.webContents.executeJavaScript(`getDocumentSettings()`).then((documentSettingsJSON) => {
             const documentSettings = JSON.parse(documentSettingsJSON);
@@ -70,14 +70,14 @@ export default Menu.buildFromTemplate([
         label: 'Save As...',
         accelerator: process.platform === 'darwin' ? 'Cmd+Shift+S' : 'Ctrl+Shift+S',
         // enabled: getFocusedDocument(),
-        click: () => {
+        click: (): void => {
           handleSaveAs();
         }
       },
       {
         label: 'Open...',
         accelerator: process.platform === 'darwin' ? 'Cmd+O' : 'Ctrl+O',
-        click: () => {
+        click: (): void => {
           const document = getFocusedDocument();
           dialog.showOpenDialog(document, {
             filters: [
@@ -130,6 +130,17 @@ export default Menu.buildFromTemplate([
         { type: 'separator' },
         { role: 'selectAll' }
       ])
+    ]
+  },
+  {
+    label: 'Import',
+    submenu: [
+      {
+        label: 'Sketch Artboard...',
+        click: (): void => {
+          handleSketchImport();
+        }
+      }
     ]
   },
   // { role: 'viewMenu' }

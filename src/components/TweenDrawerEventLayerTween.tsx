@@ -6,7 +6,6 @@ import { setTweenDrawerTweenHover } from '../store/actions/tweenDrawer';
 import { SetTweenDrawerTweenHoverPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
 import { setLayerHover } from '../store/actions/layer';
 import { SetLayerHoverPayload, LayerTypes } from '../store/actionTypes/layer';
-import TweenDrawerFreezeTween from './TweenDrawerFreezeTween';
 import TweenDrawerEditEase from './TweenDrawerEditEase';
 
 interface TweenDrawerEventLayerTweenProps {
@@ -62,7 +61,6 @@ const TweenDrawerEventLayerTween = (props: TweenDrawerEventLayerTweenProps): Rea
         ? <TweenDrawerEditEase tweenId={tweenId} />
         : null
       }
-      {/* <TweenDrawerFreezeTween tweenId={tweenId} /> */}
     </div>
   );
 }

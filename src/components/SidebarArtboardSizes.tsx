@@ -10,7 +10,6 @@ import SidebarArtboardPlatformAdd from './SidebarArtboardPlatformAdd';
 import { ThemeContext } from './ThemeProvider';
 import { addArtboard } from '../store/actions/layer';
 import { AddArtboardPayload, LayerTypes } from '../store/actionTypes/layer';
-import { applyArtboardMethods } from '../canvas/artboardUtils';
 import { paperMain } from '../canvas';
 import { DEFAULT_ARTBOARD_BACKGROUND_COLOR } from '../constants';
 
@@ -48,9 +47,8 @@ const SidebarArtboardSizes = (props: SidebarArtboardPlatformOrientationProps): R
     const newArtboard = new paperMain.Path.Rectangle({
       from: new paperMain.Point(paperMain.view.center.x - ((orientation === 'Landscape' ? device.height : device.width) / 2), paperMain.view.center.y - ((orientation === 'Landscape' ? device.width : device.height) / 2)),
       to: new paperMain.Point(paperMain.view.center.x + ((orientation === 'Landscape' ? device.height : device.width) / 2), paperMain.view.center.y + ((orientation === 'Landscape' ? device.width : device.height) / 2)),
-      fillColor: new paperMain.Color(DEFAULT_ARTBOARD_BACKGROUND_COLOR)
+      insert: false
     });
-    applyArtboardMethods(newArtboard);
     addArtboard({
       parent: 'page',
       name: device.type,

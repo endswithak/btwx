@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import menu from './menu';
 import getTheme from './store/theme';
+import { readSketchFile } from 'sketch-file';
 import sharp from 'sharp';
 import {
   PREVIEW_TOPBAR_HEIGHT,
@@ -27,6 +28,7 @@ const windowBackground = (() => {
 })();
 
 export let preferencesWindow: electron.BrowserWindow;
+export let sketchImporterWindow: electron.BrowserWindow;
 
 const isMac = process.platform === 'darwin';
 
@@ -115,7 +117,37 @@ export const createPreferencesWindow = (): void => {
   preferencesWindow.on('closed', () => {
     preferencesWindow = null;
   });
-}
+};
+
+export const createSketchImporterWindow = (sketchFile: any): void => {
+  sketchImporterWindow = new BrowserWindow({
+    parent: getFocusedDocument(),
+    height: 600,
+    width: 800,
+    frame: false,
+    titleBarStyle: 'hidden',
+    show: false,
+    backgroundColor: windowBackground,
+    webPreferences: {
+      nodeIntegration: true
+    }
+  });
+
+  sketchImporterWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+
+  // Open the DevTools.
+  sketchImporterWindow.webContents.openDevTools();
+
+  sketchImporterWindow.webContents.on('did-finish-load', () => {
+    sketchImporterWindow.webContents.executeJavaScript(`renderSketchImporterWindow(${JSON.stringify(sketchFile)})`).then(() => {
+      sketchImporterWindow.show();
+    });
+  });
+
+  sketchImporterWindow.on('closed', () => {
+    sketchImporterWindow = null;
+  });
+};
 
 const createPreviewWindow = ({width, height}: {width: number; height: number}): void => {
   const previewWindow = new BrowserWindow({
@@ -138,7 +170,7 @@ const createPreviewWindow = ({width, height}: {width: number; height: number}): 
   previewWindow.webContents.on('did-finish-load', () => {
     previewWindow.webContents.executeJavaScript(`renderPreviewWindow()`);
   });
-}
+};
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -175,7 +207,25 @@ app.on('open-file', (event, path) => {
 // code. You can also put them in separate files and import them here.
 export const getFocusedDocument = (): electron.BrowserWindow => {
   return BrowserWindow.getFocusedWindow().getParentWindow() ? BrowserWindow.getFocusedWindow().getParentWindow() : BrowserWindow.getFocusedWindow();
-}
+};
+
+export const handleSketchImport = () => {
+  const document = getFocusedDocument();
+  dialog.showOpenDialog(document, {
+    buttonLabel: 'Import',
+    filters: [{ name: 'Custom File Type', extensions: ['sketch'] }],
+    properties: ['openFile']
+  }).then(result => {
+    if (!result.canceled && result.filePaths.length > 0) {
+      const sketchFilePath = result.filePaths[0];
+      readSketchFile(sketchFilePath).then((sketchJSON) => {
+        if (!sketchImporterWindow) {
+          createSketchImporterWindow(sketchJSON);
+        }
+      });
+    }
+  });
+};
 
 export const handleSave = (path: string, closeOnSave?: boolean) => {
   const document = getFocusedDocument();

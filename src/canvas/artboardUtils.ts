@@ -4,7 +4,8 @@ import { selectLayer, deselectLayer } from '../store/actions/layer';
 import { getNearestScopeAncestor, getLayer } from '../store/selectors/layer';
 
 export const applyArtboardMethods = (artboard: paper.Item) => {
-  artboard.set({
+  const background = artboard.getItem({ data: { id: 'ArtboardBackground' } });
+  background.set({
     onMouseDown: function(e: any) {
       const state = store.getState();
       const layer = getLayer(state.layer.present, this.parent.data.id);
