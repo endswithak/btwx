@@ -19,125 +19,117 @@ export const PREVIEW_TOPBAR_HEIGHT = 44;
 export const MAC_TITLEBAR_HEIGHT = 22;
 export const WINDOWS_TITLEBAR_HEIGHT = 30;
 
+export const DEFAULT_GRADIENT_TYPE = 'linear';
+export const DEFAULT_GRADIENT_ACTIVE_STOP_INDEX = 0;
+export const DEFAULT_GRADIENT_ORIGIN_X = -0.5;
+export const DEFAULT_GRADIENT_ORIGIN_Y = 0.5;
+export const DEFAULT_GRADIENT_ORIGIN = { x: DEFAULT_GRADIENT_ORIGIN_X, y: DEFAULT_GRADIENT_ORIGIN_Y };
+export const DEFAULT_GRADIENT_DESTINATION_X = 0.5;
+export const DEFAULT_GRADIENT_DESTINATION_Y = -0.5;
+export const DEFAULT_GRADIENT_DESTINATION = { x: DEFAULT_GRADIENT_DESTINATION_X, y: DEFAULT_GRADIENT_DESTINATION_Y };
+export const DEFAULT_GRADIENT_STOP_0_POSITION = 0;
+export const DEFAULT_GRADIENT_STOP_0_COLOR = { h: 0, s: 0, l: 0.8, v: 0.8, a: 1 };
+export const DEFAULT_GRADIENT_STOP_0 = { position: DEFAULT_GRADIENT_STOP_0_POSITION, color: DEFAULT_GRADIENT_STOP_0_COLOR };
+export const DEFAULT_GRADIENT_STOP_1_POSITION = 1;
+export const DEFAULT_GRADIENT_STOP_1_COLOR = { h: 0, s: 0, l: 0, v: 0, a: 1 };
+export const DEFAULT_GRADIENT_STOP_1 = { position: DEFAULT_GRADIENT_STOP_1_POSITION, color: DEFAULT_GRADIENT_STOP_1_COLOR };
+export const DEFAULT_GRADIENT_STOPS = [DEFAULT_GRADIENT_STOP_0, DEFAULT_GRADIENT_STOP_1];
+
 export const DEFAULT_GRADIENT_STYLE: em.Gradient = {
-  gradientType: 'linear' as em.GradientType,
-  origin: {
-    x: -0.5,
-    y: 0.5
-  },
-  destination: {
-    x: 0.5,
-    y: -0.5
-  },
-  activeStopIndex: 0,
-  stops: [{
-    position: 0,
-    color: {
-      h: 0,
-      s: 0,
-      l: 0.8,
-      v: 0.8,
-      a: 1
-    }
-  },{
-    position: 1,
-    color: {
-      h: 0,
-      s: 0,
-      l: 0,
-      v: 0,
-      a: 1
-    }
-  }]
+  gradientType: DEFAULT_GRADIENT_TYPE,
+  origin: DEFAULT_GRADIENT_ORIGIN,
+  destination: DEFAULT_GRADIENT_DESTINATION,
+  activeStopIndex: DEFAULT_GRADIENT_ACTIVE_STOP_INDEX,
+  stops: DEFAULT_GRADIENT_STOPS
 }
+
+export const DEFAULT_FILL_FILL_TYPE = 'color';
+export const DEFAULT_FILL_COLOR = { h: 0, s: 0, l: 0.8, v: 0.8, a: 1 };
 
 export const DEFAULT_FILL_STYLE: em.Fill = {
-  fillType: 'color' as em.FillType,
+  fillType: DEFAULT_FILL_FILL_TYPE,
   enabled: true,
-  color: {
-    h: 0,
-    s: 0,
-    l: 0.8,
-    v: 0.8,
-    a: 1
-  },
+  color: DEFAULT_FILL_COLOR,
   gradient: DEFAULT_GRADIENT_STYLE
 }
+
+export const DEFAULT_STROKE_FILL_TYPE = 'color';
+export const DEFAULT_STROKE_COLOR = { h: 0, s: 0, l: 0.6, v: 0.6, a: 1 };
+export const DEFAULT_STROKE_WIDTH = 1;
 
 export const DEFAULT_STROKE_STYLE: em.Stroke = {
-  fillType: 'color' as em.FillType,
+  fillType: DEFAULT_STROKE_FILL_TYPE,
   enabled: true,
-  color: {
-    h: 0,
-    s: 0,
-    l: 0.6,
-    v: 0.6,
-    a: 1
-  },
-  width: 1,
+  color: DEFAULT_STROKE_COLOR,
+  width: DEFAULT_STROKE_WIDTH,
   gradient: DEFAULT_GRADIENT_STYLE
 }
 
+export const DEFAULT_STROKE_CAP = 'cap';
+export const DEFAULT_STROKE_JOIN = 'miter';
+export const DEFAULT_STROKE_DASH_ARRAY_WIDTH = 0;
+export const DEFAULT_STROKE_DASH_ARRAY_GAP = 0;
+export const DEFAULT_STROKE_DASH_ARRAY = [DEFAULT_STROKE_DASH_ARRAY_WIDTH, DEFAULT_STROKE_DASH_ARRAY_GAP];
+export const DEFAULT_STROKE_DASH_OFFSET = 0;
+
 export const DEFAULT_STROKE_OPTIONS_STYLE: em.StrokeOptions = {
-  cap: 'butt',
-  join: 'miter',
-  dashArray: [0,0],
-  dashOffset: 0,
-  miterLimit: 10
+  cap: DEFAULT_STROKE_CAP,
+  join: DEFAULT_STROKE_JOIN,
+  dashArray: DEFAULT_STROKE_DASH_ARRAY,
+  dashOffset: DEFAULT_STROKE_DASH_OFFSET,
 }
 
+export const DEFAULT_SHADOW_FILL_TYPE = 'color';
+export const DEFAULT_SHADOW_COLOR = { h: 0, s: 0, l: 0, v: 0, a: 0.5 };
+export const DEFAULT_SHADOW_BLUR = 10;
+export const DEFAULT_SHADOW_OFFSET_X = 0;
+export const DEFAULT_SHADOW_OFFSET_Y = 0;
+export const DEFAULT_SHADOW_OFFSET = { x: DEFAULT_SHADOW_OFFSET_X, y: DEFAULT_SHADOW_OFFSET_Y };
+
 export const DEFAULT_SHADOW_STYLE: em.Shadow = {
-  fillType: 'color' as em.FillType,
+  fillType: DEFAULT_SHADOW_FILL_TYPE,
   enabled: false,
-  color: {
-    h: 0,
-    s: 0,
-    l: 0,
-    v: 0,
-    a: 0.5
-  },
-  blur: 10,
-  offset: {
-    x: 0,
-    y: 0,
-  }
+  color: DEFAULT_SHADOW_COLOR,
+  blur: DEFAULT_SHADOW_BLUR,
+  offset: DEFAULT_SHADOW_OFFSET
 }
+
+export const DEFAULT_OPACITY = 1;
+export const DEFAULT_BLEND_MODE = 'normal';
 
 export const DEFAULT_STYLE: em.Style = {
   fill: DEFAULT_FILL_STYLE,
   stroke: DEFAULT_STROKE_STYLE,
   strokeOptions: DEFAULT_STROKE_OPTIONS_STYLE,
-  opacity: 1,
+  opacity: DEFAULT_OPACITY,
   shadow: DEFAULT_SHADOW_STYLE,
-  blendMode: 'normal'
+  blendMode: DEFAULT_BLEND_MODE
 }
 
+export const DEFAULT_ROTATION = 0;
+export const DEFAULT_VERTICAL_FLIP = false;
+export const DEFAULT_HORIZONTAL_FLIP = false;
+
 export const DEFAULT_TRANSFORM: em.Transform = {
-  rotation: 0,
-  horizontalFlip: false,
-  verticalFlip: false,
-  pivot: {
-    x: 0,
-    y: 0
-  }
+  rotation: DEFAULT_ROTATION,
+  horizontalFlip: DEFAULT_HORIZONTAL_FLIP,
+  verticalFlip: DEFAULT_VERTICAL_FLIP
 }
 
 export const DEFAULT_TEXT_VALUE = 'Type Something';
-
-export const DEFAULT_TEXT_FILL_COLOR = {
-  h: 0,
-  s: 0,
-  l: 0,
-  v: 0,
-  a: 1
-};
+export const DEFAULT_FONT_SIZE = 12;
+export const DEFAULT_FONT_FAMILY = 'Helvetica';
+export const DEFAULT_FONT_WEIGHT = 'normal';
+export const DEFAULT_JUSTIFICATION = 'left';
+export const DEFAULT_LEADING = 16;
+export const DEFAULT_TEXT_FILL_COLOR = { h: 0, s: 0, l: 0, v: 0, a: 1 };
 
 export const DEFAULT_TEXT_STYLE: em.TextStyle = {
-  fontSize: 12,
-  leading: 16,
-  fontWeight: 'normal',
-  fontFamily: 'Helvetica',
-  justification: 'left'
+  fontSize: DEFAULT_FONT_SIZE,
+  leading: DEFAULT_LEADING,
+  fontWeight: DEFAULT_FONT_WEIGHT,
+  fontFamily: DEFAULT_FONT_FAMILY,
+  justification: DEFAULT_JUSTIFICATION
 }
 
 export const APPLE_IPHONE_DEVICES: em.Device[] = [

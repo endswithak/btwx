@@ -37,7 +37,7 @@ import {
   SetLayerGradientOrigin, SetLayersGradientOrigin, SetLayerGradientDestination, SetLayersGradientDestination, SetLayerGradientStopColor,
   SetLayersGradientStopColor, SetLayerGradientStopPosition, SetLayersGradientStopPosition, AddLayerGradientStop, AddLayersGradientStop,
   RemoveLayerGradientStop, RemoveLayersGradientStop, SetLayerActiveGradientStop, SetLayersShadowBlur, SetLayersShadowXOffset, SetLayersShadowYOffset, SetLayersFontSize,
-  SetLayersFontWeight, SetLayersFontFamily, SetLayersLeading, SetLayersJustification, SetLayerTweenTiming, SetCurvePointOriginX, SetCurvePointOriginY, SetCurvePointOrigin, SetRoundedRadii, SetPolygonsSides, SetStarsPoints, SetStarsRadius, SetLayerEdit
+  SetLayersFontWeight, SetLayersFontFamily, SetLayersLeading, SetLayersJustification, SetLayerTweenTiming, SetCurvePointOriginX, SetCurvePointOriginY, SetCurvePointOrigin, SetRoundedRadii, SetPolygonsSides, SetStarsPoints, SetStarsRadius, SetLayerEdit, AddLayers
 } from '../actionTypes/layer';
 
 import {
@@ -249,6 +249,31 @@ export const addImage = (state: LayerState, action: AddImage): LayerState => {
   currentState = updateLayerTweensByProps(currentState, action.payload.id, 'all');
   currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
+};
+
+export const addLayers = (state: LayerState, action: AddLayers): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result: LayerState, current) => {
+    switch(current.type) {
+      case 'Artboard':
+        result = addArtboard(result, layerActions.addArtboard(current as em.Artboard) as AddArtboard);
+        break;
+      case 'Shape':
+        result = addShape(result, layerActions.addShape(current as em.Shape) as AddShape);
+        break;
+      case 'Image':
+        result = addImage(result, layerActions.addImage(current as em.Image) as AddImage);
+        break;
+      case 'Group':
+        result = addGroup(result, layerActions.addGroup(current as em.Group) as AddGroup);
+        break;
+      case 'Text':
+        result = addText(result, layerActions.addText(current as em.Text) as AddText);
+        break;
+    }
+    return result;
+  }, currentState);
   return currentState;
 };
 

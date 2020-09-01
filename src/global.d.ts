@@ -173,7 +173,6 @@ declare namespace em {
     join: StrokeJoinTypes;
     dashArray: number[];
     dashOffset: number;
-    miterLimit: number;
   }
 
   interface Shadow {
@@ -324,7 +323,6 @@ declare namespace em {
     rotation: number;
     horizontalFlip: boolean;
     verticalFlip: boolean;
-    pivot: Point;
   }
 
   interface ArtboardPreset {

@@ -6,6 +6,7 @@ import {
   ADD_COMPOUND_SHAPE,
   ADD_TEXT,
   ADD_IMAGE,
+  ADD_LAYERS,
   REMOVE_LAYER,
   REMOVE_LAYERS,
   SELECT_LAYER,
@@ -201,6 +202,7 @@ import {
   addGroup,
   addText,
   addImage,
+  addLayers,
   removeLayer,
   removeLayers,
   selectLayer,
@@ -481,6 +483,8 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return addText(state, action);
     case ADD_IMAGE:
       return addImage(state, action);
+    case ADD_LAYERS:
+      return addLayers(state, action);
     case REMOVE_LAYER:
       return removeLayer(state, action);
     case REMOVE_LAYERS:

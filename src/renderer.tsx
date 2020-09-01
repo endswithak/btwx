@@ -46,11 +46,7 @@ import Preview from './components/Preview';
 import Preferences from './components/Preferences';
 import SketchImporter from './components/SketchImporter';
 import ThemeProvider from './components/ThemeProvider';
-
-//
-import { DEFAULT_ARTBOARD_BACKGROUND_COLOR, THEME_PRIMARY_COLOR } from './constants';
-import { addArtboard } from './store/actions/layer';
-import { applyArtboardMethods } from './canvas/artboardUtils';
+import importSketchArtboards from './canvas/sketch';
 
 import './styles/index.sass';
 
@@ -63,27 +59,9 @@ const titleBar = new Titlebar({
 });
 
 ipcRenderer.on('sketchArtboardsImport', (event, arg) => {
-  const sketchData = JSON.parse(arg) as {
-    document: FileFormat.Document;
-    meta: FileFormat.Meta;
-    artboards: FileFormat.Artboard[];
-    images: Buffer[];
-    symbolMasters: FileFormat.SymbolMaster[];
-  };
-  // sketchData.artboards.forEach(() => {
-  //   store.dispatch(addArtboard({
-  //     parent: 'page',
-  //     frame: {
-  //       x: newPaperLayer.position.x,
-  //       y: newPaperLayer.position.y,
-  //       width: newPaperLayer.bounds.width,
-  //       height: newPaperLayer.bounds.height,
-  //       innerWidth: newPaperLayer.bounds.width,
-  //       innerHeight: newPaperLayer.bounds.height
-  //     },
-  //     paperLayer: newPaperLayer
-  //   }));
-  // });
+  const sketchData = JSON.parse(arg);
+  console.log(sketchData);
+  importSketchArtboards(sketchData);
 });
 
 (window as any).getSaveState = (): string => {

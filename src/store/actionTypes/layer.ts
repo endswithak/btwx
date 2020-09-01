@@ -5,6 +5,7 @@ export const ADD_ARTBOARD = 'ADD_ARTBOARD';
 export const ADD_TEXT = 'ADD_TEXT';
 export const ADD_IMAGE = 'ADD_IMAGE';
 export const ADD_COMPOUND_SHAPE = 'ADD_COMPOUND_SHAPE';
+export const ADD_LAYERS = 'ADD_LAYERS';
 
 export const REMOVE_LAYER = 'REMOVE_LAYER';
 export const REMOVE_LAYERS = 'REMOVE_LAYERS';
@@ -311,6 +312,17 @@ export type AddImagePayload = {
 export interface AddImage {
   type: typeof ADD_IMAGE;
   payload: AddImagePayload;
+}
+
+// layers
+
+export interface AddLayersPayload {
+  layers: em.Layer[];
+}
+
+export interface AddLayers {
+  type: typeof ADD_LAYERS;
+  payload: AddLayersPayload;
 }
 
 // Remove
@@ -2196,6 +2208,7 @@ export type LayerTypes = AddPage |
                          AddCompoundShape |
                          AddText |
                          AddImage |
+                         AddLayers |
                          RemoveLayer |
                          RemoveLayers |
                          SelectLayer |

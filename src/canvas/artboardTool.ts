@@ -297,7 +297,6 @@ class ArtboardTool {
         const newArtboard = this.renderShape({
           insert: false
         });
-        // applyArtboardMethods(newPaperLayer);
         store.dispatch(addArtboard({
           parent: 'page',
           frame: {

@@ -432,7 +432,6 @@ class ShapeTool {
         const toPoint = (paperLayer as paper.Path).segments[1].point;
         const vector = toPoint.subtract(fromPoint);
         store.dispatch(addShape({
-          // id: id,
           type: 'Shape',
           parent: (() => {
             const overlappedArtboard = getPagePaperLayer(state.layer.present).getItem({
@@ -453,11 +452,6 @@ class ShapeTool {
             innerHeight: this.shapeType === 'Line' ? 0 : paperLayer.bounds.height
           },
           shapeType: this.shapeType,
-          selected: false,
-          mask: false,
-          masked: false,
-          tweenEvents: [],
-          tweens: [],
           style: {
             ...DEFAULT_STYLE,
             fill: {
@@ -469,7 +463,6 @@ class ShapeTool {
             ...DEFAULT_TRANSFORM,
             rotation: this.shapeType === 'Line' ? vector.angle : DEFAULT_TRANSFORM.rotation
           },
-          booleanOperation: 'none',
           path: {
             closed: this.shapeType !== 'Line',
             data: paperLayer.pathData,

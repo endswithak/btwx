@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { paperMain } from '../../canvas';
-import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_TEXT_STYLE } from '../../constants';
+import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_TEXT_STYLE, DEFAULT_SHADOW_STYLE, DEFAULT_BLEND_MODE, DEFAULT_OPACITY, DEFAULT_STROKE_DASH_ARRAY, DEFAULT_STROKE_DASH_OFFSET, DEFAULT_STROKE_CAP, DEFAULT_STROKE_JOIN } from '../../constants';
 import { applyImageMethods } from '../../canvas/imageUtils';
 import { applyShapeMethods } from '../../canvas/shapeUtils';
 import { applyTextMethods } from '../../canvas/textUtils';
@@ -15,6 +15,7 @@ import {
   ADD_COMPOUND_SHAPE,
   ADD_TEXT,
   ADD_IMAGE,
+  ADD_LAYERS,
   REMOVE_LAYER,
   REMOVE_LAYERS,
   SELECT_LAYER,
@@ -211,6 +212,7 @@ import {
   AddCompoundShapePayload,
   AddTextPayload,
   AddImagePayload,
+  AddLayersPayload,
   RemoveLayerPayload,
   RemoveLayersPayload,
   SelectLayerPayload,
@@ -421,7 +423,7 @@ export const addPage = (payload: AddPagePayload): LayerTypes => {
 // Artboard
 
 export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
-  const layerId = uuidv4();
+  const id = payload.id ? payload.id : uuidv4();
   // create background
   const artboardBackground = new paperMain.Path.Rectangle({
     point: new paperMain.Point(0,0),
@@ -437,7 +439,7 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
   // create artboard group
   const artboard = new paperMain.Group({
     name: payload.name ? payload.name : 'Artboard',
-    data: { id: layerId, type: 'Artboard' },
+    data: { id: id, type: 'Artboard' },
     children: [artboardMask, artboardBackground],
     parent: getPaperLayer('page')
   });
@@ -447,11 +449,12 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
   return {
     type: ADD_ARTBOARD,
     payload: {
+      ...payload,
       type: 'Artboard',
-      id: layerId,
+      id: id,
       frame: payload.frame,
       name: payload.name ? payload.name : 'Artboard',
-      parent: null,
+      parent: payload.parent,
       children: [],
       selected: false,
       showChildren: false,
@@ -468,17 +471,18 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
 // Group
 
 export const addGroup = (payload: AddGroupPayload): LayerTypes => {
-  const layerId = uuidv4();
+  const id = payload.id ? payload.id : uuidv4();
   new paperMain.Group({
     name: payload.name ? payload.name : 'Group',
-    data: { id: layerId, type: 'Group' },
+    data: { id: id, type: 'Group' },
     parent: getPaperLayer(payload.parent ? payload.parent : 'page')
   });
   return {
     type: ADD_GROUP,
     payload: {
+      ...payload,
       type: 'Group',
-      id: layerId,
+      id: id,
       frame: payload.frame,
       name: payload.name ? payload.name : 'Group',
       parent: payload.parent ? payload.parent : null,
@@ -509,27 +513,106 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
 // Shape
 
 export const addShape = (payload: AddShapePayload): LayerTypes => {
-  const id = uuidv4();
-  const fill = payload.style.fill ? {...DEFAULT_TEXT_STYLE, ...payload.style.fill} : DEFAULT_FILL_STYLE;
-  const stroke = payload.style.stroke ? {...DEFAULT_STROKE_STYLE, ...payload.style.stroke} : DEFAULT_STROKE_STYLE;
-  const newShape = new paperMain.Path({
-    pathData: payload.path.data,
-    closed: payload.path.closed,
-    fillColor: { hue: fill.color.h, saturation: fill.color.s, lightness: fill.color.l, alpha: fill.color.a },
-    strokeColor: { hue: stroke.color.h, saturation: stroke.color.s, lightness: stroke.color.l, alpha: stroke.color.a },
-    strokeWidth: stroke.width,
-    data: {
-      id: id,
-      type: 'Shape'
+  const id = payload.id ? payload.id : uuidv4();
+  const fill = payload.style && payload.style.fill ? {...DEFAULT_TEXT_STYLE, ...payload.style.fill} : DEFAULT_FILL_STYLE;
+  const fillColor = fill.fillType === 'color' ? { hue: fill.color.h, saturation: fill.color.s, lightness: fill.color.l, alpha: fill.color.a } : {
+    gradient: {
+      stops: fill.gradient.stops.reduce((result, current) => {
+        result = [...result, new paperMain.GradientStop({ hue: current.color.h, saturation: current.color.s, lightness: current.color.l, alpha: current.color.a } as paper.Color, current.position)];
+        return result;
+      }, []),
+      radial: fill.gradient.gradientType === 'radial'
     },
+    origin: new paperMain.Point((fill.gradient.origin.x * payload.frame.innerWidth) + payload.frame.x, (fill.gradient.origin.y * payload.frame.innerHeight) + payload.frame.y),
+    destination: new paperMain.Point((fill.gradient.destination.x * payload.frame.innerWidth) + payload.frame.x, (fill.gradient.destination.y * payload.frame.innerHeight) + payload.frame.y)
+  }
+  const stroke = payload.style && payload.style.stroke ? {...DEFAULT_STROKE_STYLE, ...payload.style.stroke} : DEFAULT_STROKE_STYLE;
+  const strokeColor = stroke.fillType === 'color' ? { hue: stroke.color.h, saturation: stroke.color.s, lightness: stroke.color.l, alpha: stroke.color.a } : {
+    gradient: {
+      stops: stroke.gradient.stops.reduce((result, current) => {
+        result = [...result, new paperMain.GradientStop({ hue: current.color.h, saturation: current.color.s, lightness: current.color.l, alpha: current.color.a } as paper.Color, current.position)];
+        return result;
+      }, []),
+      radial: stroke.gradient.gradientType === 'radial'
+    },
+    origin: new paperMain.Point((stroke.gradient.origin.x * payload.frame.innerWidth) + payload.frame.x, (stroke.gradient.origin.y * payload.frame.innerHeight) + payload.frame.y),
+    destination: new paperMain.Point((stroke.gradient.destination.x * payload.frame.innerWidth) + payload.frame.x, (stroke.gradient.destination.y * payload.frame.innerHeight) + payload.frame.y)
+  }
+  const shadow = payload.style && payload.style.shadow ? {...DEFAULT_SHADOW_STYLE, ...payload.style.shadow} : DEFAULT_SHADOW_STYLE;
+  const opacity = payload.style && payload.style.opacity ? payload.style.opacity : DEFAULT_OPACITY;
+  const blendMode = payload.style && payload.style.blendMode ? payload.style.blendMode : DEFAULT_BLEND_MODE;
+  const dashArray = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.dashArray ? payload.style.strokeOptions.dashArray : DEFAULT_STROKE_DASH_ARRAY;
+  const dashOffset = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.dashOffset ? payload.style.strokeOptions.dashOffset : DEFAULT_STROKE_DASH_OFFSET;
+  const strokeCap = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.cap ? payload.style.strokeOptions.cap : DEFAULT_STROKE_CAP;
+  const strokeJoin = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.join ? payload.style.strokeOptions.join : DEFAULT_STROKE_JOIN;
+  const clipMask = payload.mask ? payload.mask : false;
+  const newShape = new paperMain.Path({
+    segments: payload.path.points.reduce((result, current) => {
+      const segmentPoint = new paperMain.Point(current.point.x, current.point.y);
+      const segmentHandleIn = current.handleIn ? new paperMain.Point(current.handleIn.x, current.handleIn.y) : null;
+      const segmentHandleOut = current.handleOut ? new paperMain.Point(current.handleOut.x, current.handleOut.y) : null;
+      const segment = new paperMain.Segment({
+        point: segmentPoint,
+        handleIn: segmentHandleIn,
+        handleOut: segmentHandleOut
+      });
+      result = [...result, segment];
+      return result;
+    }, []),
+    closed: payload.path.closed,
+    strokeWidth: stroke.width,
+    shadowColor: shadow.enabled ? { hue: shadow.color.h, saturation: shadow.color.s, lightness: shadow.color.l, alpha: shadow.color.a } : null,
+    shadowOffset: shadow.enabled ? new paperMain.Point(shadow.offset.x, shadow.offset.y) : null,
+    shadowBlur: shadow.enabled ? shadow.blur : null,
+    blendMode: blendMode,
+    opacity: opacity,
+    dashArray: dashArray,
+    dashOffset: dashOffset,
+    strokeCap: strokeCap,
+    strokeJoin: strokeJoin,
+    clipMask: clipMask,
+    data: { id: id, type: 'Shape' },
     parent: getPaperLayer(payload.parent ? payload.parent : 'page')
   });
+  newShape.position = new paperMain.Point(payload.frame.x, payload.frame.y);
+  newShape.fillColor = fill.enabled ? fillColor as em.PaperGradientFill : null;
+  newShape.strokeColor = stroke.enabled ? strokeColor as em.PaperGradientFill : null;
   applyShapeMethods(newShape);
   return {
     type: ADD_SHAPE,
     payload: {
       ...payload,
-      id
+      id,
+      type: payload.type,
+      shapeType: payload.shapeType,
+      name: payload.name,
+      frame: payload.frame,
+      selected: false,
+      mask: false,
+      masked: false,
+      children: null,
+      tweenEvents: [],
+      tweens: [],
+      style: {
+        fill,
+        stroke,
+        shadow,
+        blendMode,
+        opacity,
+        strokeOptions: {
+          cap: strokeCap,
+          join: strokeJoin,
+          dashArray,
+          dashOffset
+        }
+      },
+      transform: DEFAULT_TRANSFORM,
+      booleanOperation: 'none',
+      path: {
+        data: newShape.pathData,
+        points: payload.path.points,
+        closed: payload.path.closed
+      }
     }
   }
 };
@@ -544,7 +627,7 @@ export const addCompoundShape = (payload: AddCompoundShapePayload): LayerTypes =
 // Text
 
 export const addText = (payload: AddTextPayload): LayerTypes => {
-  const id = uuidv4();
+  const id = payload.id ? payload.id : uuidv4();
   const fill = payload.style.fill ? {...DEFAULT_TEXT_STYLE, ...payload.style.fill} : DEFAULT_FILL_STYLE;
   const textStyle = payload.textStyle ? {...DEFAULT_TEXT_STYLE, ...payload.textStyle} : DEFAULT_TEXT_STYLE;
   const newText = new paperMain.PointText({
@@ -619,6 +702,13 @@ export const addImage = (payload: AddImagePayload): LayerTypes => {
     }
   }
 };
+
+// layers
+
+export const addLayers = (payload: AddLayersPayload): LayerTypes => ({
+  type: ADD_LAYERS,
+  payload
+});
 
 // Remove
 
