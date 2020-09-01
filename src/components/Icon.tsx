@@ -426,7 +426,7 @@ const mapStateToProps = (state: RootState, ownProps: IconProps) => {
   const { layer } = state;
   let pathData = ownProps.name === 'shape' && ownProps.shapeId && layer.present.byId[ownProps.shapeId] ? (layer.present.byId[ownProps.shapeId] as em.Shape).path.data : null;
   if (pathData) {
-    const layerIcon = new paperMain.Path({
+    const layerIcon = new paperMain.CompoundPath({
       pathData: pathData,
       insert: false
     });

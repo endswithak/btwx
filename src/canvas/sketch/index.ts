@@ -3,8 +3,10 @@ import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { paperMain } from '../';
 import store from '../../store';
 import { addLayers } from '../../store/actions/layer';
-import { convertPoints } from './utils/shapePath';
-import { convertPosition, convertFill, convertStroke, convertShadow, convertStrokeOptions, convertBlendMode } from './utils/general';
+import { convertPoints, drawShapePath } from './utils/shapePath';
+import { getCurvePoints } from '../../store/selectors/layer';
+import { renderShapeGroupLayers } from './utils/shapeGroup';
+import { convertPosition, convertFill, convertStroke, convertShadow, convertStrokeOptions, convertBlendMode, convertWindingRule } from './utils/general';
 
 interface ConvertLayers {
   sketchLayers: FileFormat.AnyLayer[];
@@ -80,6 +82,14 @@ export const convertLayer = ({ sketchLayer, parentId, parentFrame, images, symbo
     case 'star':
     case 'polygon':
     case 'oval': {
+      const shape = drawShapePath({
+        layer: sketchLayer as FileFormat.ShapePath | FileFormat.Rectangle | FileFormat.Star | FileFormat.Polygon | FileFormat.Oval,
+        opts: {
+          closed: sketchLayer.isClosed,
+          windingRule: convertWindingRule(sketchLayer.style.windingRule),
+          insert: false
+        }
+      });
       return [
         {
           id: sketchLayer.do_objectID,
@@ -96,9 +106,9 @@ export const convertLayer = ({ sketchLayer, parentId, parentFrame, images, symbo
             innerHeight: sketchLayer.frame.height
           },
           path: {
-            points: convertPoints({layer: sketchLayer as FileFormat.Oval | FileFormat.Polygon | FileFormat.Rectangle | FileFormat.ShapePath | FileFormat.Star}),
+            points: null,
             closed: sketchLayer.isClosed,
-            data: null
+            data: shape.pathData
           },
           style: {
             fill: convertFill(sketchLayer),
@@ -111,9 +121,43 @@ export const convertLayer = ({ sketchLayer, parentId, parentFrame, images, symbo
         } as em.Shape
       ];
     }
-    case 'shapeGroup':
-
-      break;
+    case 'shapeGroup': {
+      const shapeContainer = new paperMain.Group({ insert: false });
+      renderShapeGroupLayers({layer: sketchLayer, container: shapeContainer});
+      const shapePath = shapeContainer.lastChild as paper.Path | paper.CompoundPath;
+      const pathData = shapePath.pathData;
+      shapeContainer.remove();
+      return [
+        {
+          id: sketchLayer.do_objectID,
+          type: 'Shape',
+          shapeType: 'Custom',
+          name: sketchLayer.name,
+          parent: parentId,
+          frame: {
+            x: position.x + (parentFrame.x - (parentFrame.width / 2)),
+            y: position.y + (parentFrame.y - (parentFrame.height / 2)),
+            width: sketchLayer.frame.width,
+            height: sketchLayer.frame.height,
+            innerWidth: sketchLayer.frame.width,
+            innerHeight: sketchLayer.frame.height
+          },
+          path: {
+            points: null,
+            closed: shapePath.closed,
+            data: pathData
+          },
+          style: {
+            fill: convertFill(sketchLayer),
+            stroke: convertStroke(sketchLayer),
+            strokeOptions: convertStrokeOptions(sketchLayer),
+            shadow: convertShadow(sketchLayer),
+            blendMode: convertBlendMode(sketchLayer),
+            opacity: sketchLayer.style.contextSettings.opacity
+          }
+        } as em.Shape
+      ]
+    }
     case 'group': {
       return [
         {

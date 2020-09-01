@@ -1,7 +1,7 @@
 import store from '../store';
 import { enableSelectionTool } from '../store/actions/tool';
 import { addShape } from '../store/actions/layer';
-import { getPagePaperLayer, getCurvePoints } from '../store/selectors/layer';
+import { getPagePaperLayer } from '../store/selectors/layer';
 import { paperMain } from './index';
 import { isBetween } from '../utils';
 import Tooltip from './tooltip';
@@ -466,7 +466,7 @@ class ShapeTool {
           path: {
             closed: this.shapeType !== 'Line',
             data: paperLayer.pathData,
-            points: getCurvePoints(paperLayer)
+            points: null
           },
           ...(() => {
             switch(this.shapeType) {

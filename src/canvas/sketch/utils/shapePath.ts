@@ -1,5 +1,31 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
+import { paperMain } from '../../';
 import { convertPointString } from './general';
+
+interface DrawShapePath {
+  layer: FileFormat.ShapePath | FileFormat.Rectangle | FileFormat.Star | FileFormat.Polygon | FileFormat.Oval;
+  opts: any;
+}
+
+export const drawShapePath = ({ layer, opts }: DrawShapePath): paper.Path => {
+  const path = new paperMain.Path(opts);
+  const segments: paper.Segment[] = [];
+  layer.points.forEach((point) => {
+    const relPoint = getRelPoint({point: point, frame: layer.frame});
+    const segmentPoint = new paperMain.Point(relPoint.point.x, relPoint.point.y);
+    const segmentHandleIn = new paperMain.Point(relPoint.curveTo.x, relPoint.curveTo.y);
+    const segmentHandleOut = new paperMain.Point(relPoint.curveFrom.x, relPoint.curveFrom.y);
+    const segment = new paperMain.Segment({
+      point: segmentPoint,
+      handleIn: point.hasCurveTo ? segmentHandleIn : null,
+      handleOut: point.hasCurveFrom ? segmentHandleOut : null
+    });
+    segments.push(segment);
+  });
+  path.addSegments(segments);
+  return path;
+};
 
 interface GetAbsPoint {
   point: FileFormat.CurvePoint;

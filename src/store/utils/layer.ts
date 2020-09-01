@@ -1117,7 +1117,7 @@ export const updateHoverFrame = (state: LayerState) => {
     //   size: [hoverItem.frame.width, hoverItem.frame.height]
     // });
     if (hoverItem.type === 'Shape') {
-      new paperMain.Path({
+      new paperMain.CompoundPath({
         ...hoverFrameConstants,
         closed: hoverItem.path.closed,
         pathData: hoverItem.path.data

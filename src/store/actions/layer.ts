@@ -5,7 +5,7 @@ import { applyImageMethods } from '../../canvas/imageUtils';
 import { applyShapeMethods } from '../../canvas/shapeUtils';
 import { applyTextMethods } from '../../canvas/textUtils';
 import { applyArtboardMethods } from '../../canvas/artboardUtils';
-import { getPaperLayer } from '../selectors/layer';
+import { getPaperLayer, getCurvePoints } from '../selectors/layer';
 
 import {
   ADD_PAGE,
@@ -546,19 +546,8 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
   const strokeCap = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.cap ? payload.style.strokeOptions.cap : DEFAULT_STROKE_CAP;
   const strokeJoin = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.join ? payload.style.strokeOptions.join : DEFAULT_STROKE_JOIN;
   const clipMask = payload.mask ? payload.mask : false;
-  const newShape = new paperMain.Path({
-    segments: payload.path.points.reduce((result, current) => {
-      const segmentPoint = new paperMain.Point(current.point.x, current.point.y);
-      const segmentHandleIn = current.handleIn ? new paperMain.Point(current.handleIn.x, current.handleIn.y) : null;
-      const segmentHandleOut = current.handleOut ? new paperMain.Point(current.handleOut.x, current.handleOut.y) : null;
-      const segment = new paperMain.Segment({
-        point: segmentPoint,
-        handleIn: segmentHandleIn,
-        handleOut: segmentHandleOut
-      });
-      result = [...result, segment];
-      return result;
-    }, []),
+  const newShape = new paperMain.CompoundPath({
+    pathData: payload.path.data,
     closed: payload.path.closed,
     strokeWidth: stroke.width,
     shadowColor: shadow.enabled ? { hue: shadow.color.h, saturation: shadow.color.s, lightness: shadow.color.l, alpha: shadow.color.a } : null,
@@ -574,6 +563,7 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
     data: { id: id, type: 'Shape' },
     parent: getPaperLayer(payload.parent ? payload.parent : 'page')
   });
+  newShape.children.forEach((item) => item.data = { id: 'ShapePartial' });
   newShape.position = new paperMain.Point(payload.frame.x, payload.frame.y);
   newShape.fillColor = fill.enabled ? fillColor as em.PaperGradientFill : null;
   newShape.strokeColor = stroke.enabled ? strokeColor as em.PaperGradientFill : null;
@@ -610,8 +600,8 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
       booleanOperation: 'none',
       path: {
         data: newShape.pathData,
-        points: payload.path.points,
-        closed: payload.path.closed
+        points: getCurvePoints(newShape),
+        closed: newShape.closed
       }
     }
   }

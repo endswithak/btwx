@@ -71,7 +71,7 @@ class AreaSelectTool {
     // get overlapped page layers
     const overlappedLayers = getPagePaperLayer(this.state.layer.present).getItems({
       data: (data: any) => {
-        if (data.id !== 'ArtboardBackground' && data.id !== 'ArtboardMask' && data.id !== 'Raster') {
+        if (data.id !== 'ArtboardBackground' && data.id !== 'ArtboardMask' && data.id !== 'Raster' && data.id !== 'ShapePartial') {
           const topParent = getNearestScopeAncestor(this.state.layer.present, data.id);
           return topParent.id === data.id;
         }
@@ -88,7 +88,7 @@ class AreaSelectTool {
         } else {
           item.getItems({
             data: (data: any) => {
-              if (data.id !== 'ArtboardBackground' && data.id !== 'ArtboardMask' && data.id !== 'Raster') {
+              if (data.id !== 'ArtboardBackground' && data.id !== 'ArtboardMask' && data.id !== 'Raster' && data.id !== 'ShapePartial') {
                 if (this.state.layer.present.byId[item.data.id].children.includes(data.id)) {
                   layers.push(data.id);
                 }

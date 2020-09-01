@@ -1,6 +1,30 @@
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import tinyColor from 'tinycolor2';
 
+export const convertWindingRule = (windingRule: number): string => {
+  switch(windingRule) {
+    case 0:
+      return 'nonzero';
+    case 1:
+      return 'evenodd';
+  }
+};
+
+export const convertBooleanOperation = (operation: FileFormat.BooleanOperation): string | null => {
+  switch(operation) {
+    case -1:
+      return 'exclude';
+    case 0:
+      return 'unite';
+    case 1:
+      return 'subtract';
+    case 2:
+      return 'intersect';
+    case 3:
+      return 'exclude';
+  }
+};
+
 export const convertPointString = (point: string): em.Point => {
   const str = point.replace(/\s/g, '');
   const commaPos = str.indexOf(',');
