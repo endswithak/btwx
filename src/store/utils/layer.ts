@@ -78,7 +78,7 @@ export const addPage = (state: LayerState, action: AddPage): LayerState => {
   }
 };
 
-export const addArtboard = (state: LayerState, action: AddArtboard): LayerState => {
+export const addArtboard = (state: LayerState, action: AddArtboard, batch?: boolean): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
   currentState = {
@@ -100,8 +100,10 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
   if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
   }
-  currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  if (!batch) {
+    currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+    currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  }
   return currentState;
 };
 
@@ -134,7 +136,7 @@ export const updateActiveArtboardFrame = (state: LayerState, useLayerItem = fals
   }
 }
 
-export const addShape = (state: LayerState, action: AddShape): LayerState => {
+export const addShape = (state: LayerState, action: AddShape, batch?: boolean): LayerState => {
   let currentState = state;
   const layerParent = action.payload.parent ? action.payload.parent : currentState.page;
   const paperLayer = getPaperLayer(action.payload.id);
@@ -159,12 +161,14 @@ export const addShape = (state: LayerState, action: AddShape): LayerState => {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
   }
   currentState = updateLayerTweensByProps(currentState, action.payload.id, 'all');
-  currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  if (!batch) {
+    currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+    currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  }
   return currentState;
 };
 
-export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
+export const addGroup = (state: LayerState, action: AddGroup, batch?: boolean): LayerState => {
   let currentState = state;
   const layerParent = action.payload.parent ? action.payload.parent : currentState.page;
   const paperLayer = getPaperLayer(action.payload.id);
@@ -188,12 +192,14 @@ export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
   if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
   }
-  currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  if (!batch) {
+    currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+    currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  }
   return currentState;
 };
 
-export const addText = (state: LayerState, action: AddText): LayerState => {
+export const addText = (state: LayerState, action: AddText, batch?: boolean): LayerState => {
   let currentState = state;
   const layerParent = action.payload.parent ? action.payload.parent : currentState.page;
   const paperLayer = getPaperLayer(action.payload.id);
@@ -215,17 +221,19 @@ export const addText = (state: LayerState, action: AddText): LayerState => {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
   }
   currentState = updateLayerTweensByProps(currentState, action.payload.id, 'all');
-  currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  if (!batch) {
+    currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+    currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  }
   return currentState;
 };
 
-export const addImage = (state: LayerState, action: AddImage): LayerState => {
+export const addImage = (state: LayerState, action: AddImage, batch?: boolean): LayerState => {
   let currentState = state;
   const layerParent = action.payload.parent ? action.payload.parent : currentState.page;
   const paperLayer = getPaperLayer(action.payload.id);
-  const raster = paperLayer.getItem({data: {id: 'Raster'}}) as paper.Raster;
-  paperLayer.parent = getPaperLayer(layerParent);
+  // const raster = paperLayer.getItem({data: {id: 'Raster'}}) as paper.Raster;
+  // paperLayer.parent = getPaperLayer(layerParent);
   currentState = {
     ...currentState,
     allIds: addItem(currentState.allIds, action.payload.id),
@@ -247,8 +255,10 @@ export const addImage = (state: LayerState, action: AddImage): LayerState => {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
   }
   currentState = updateLayerTweensByProps(currentState, action.payload.id, 'all');
-  currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  if (!batch) {
+    currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+    currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  }
   return currentState;
 };
 
@@ -257,23 +267,24 @@ export const addLayers = (state: LayerState, action: AddLayers): LayerState => {
   currentState = action.payload.layers.reduce((result: LayerState, current) => {
     switch(current.type) {
       case 'Artboard':
-        result = addArtboard(result, layerActions.addArtboard(current as em.Artboard) as AddArtboard);
+        result = addArtboard(result, layerActions.addArtboard(current as em.Artboard) as AddArtboard, true);
         break;
       case 'Shape':
-        result = addShape(result, layerActions.addShape(current as em.Shape) as AddShape);
+        result = addShape(result, layerActions.addShape(current as em.Shape) as AddShape, true);
         break;
       case 'Image':
-        result = addImage(result, layerActions.addImage(current as em.Image) as AddImage);
+        result = addImage(result, layerActions.addImage(current as em.Image) as AddImage, true);
         break;
       case 'Group':
-        result = addGroup(result, layerActions.addGroup(current as em.Group) as AddGroup);
+        result = addGroup(result, layerActions.addGroup(current as em.Group) as AddGroup, true);
         break;
       case 'Text':
-        result = addText(result, layerActions.addText(current as em.Text) as AddText);
+        result = addText(result, layerActions.addText(current as em.Text) as AddText, true);
         break;
     }
     return result;
   }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 

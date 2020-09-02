@@ -56,11 +56,13 @@ const renderShapeGroupLayer = ({ layer, container }: RenderShapeGroupLayer): voi
     opts: {
       closed: layer.isClosed,
       parent: container,
-      windingRule: convertWindingRule(layer.style.windingRule),
+      windingRule: convertWindingRule(layer.style.windingRule)
     }
   });
   layerPath.position.x += layer.frame.x;
   layerPath.position.y += layer.frame.y;
+  layerPath.rotation = layer.rotation * -1;
+  layerPath.scale(layer.isFlippedHorizontal ? -1 : 1, layer.isFlippedVertical ? -1 : 1);
   if (container.children.length > 1) {
     const prevBoolResult = container.children[container.children.length - 2];
     const boolResult = applyBooleanOperation({
@@ -121,6 +123,8 @@ const renderShapeGroup = ({ layer, container }: RenderShapeGroup): paper.Layer =
   });
   shape.position.x += layer.frame.x;
   shape.position.y += layer.frame.y;
+  shape.rotation = layer.rotation * -1;
+  shape.scale(layer.isFlippedHorizontal ? -1 : 1, layer.isFlippedVertical ? -1 : 1);
   if (container.children.length > 1) {
     const boolResult = applyBooleanOperation({
       a: getNestedPathItem({layer: container.children[container.children.length - 2] as paper.PathItem}) as paper.PathItem,

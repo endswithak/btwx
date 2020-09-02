@@ -51,17 +51,6 @@ export const convertColor = (sketchColor: FileFormat.Color): em.Color => {
   }
 };
 
-export const convertFillType = (sketchFillType: FileFormat.FillType): em.FillType => {
-  switch(sketchFillType) {
-    case 0:
-      return 'color';
-    case 1:
-      return 'gradient';
-    // case 4:
-    //   return 'pattern';
-  }
-};
-
 export const convertGradientType = (sketchGradientType: FileFormat.GradientType): em.GradientType => {
   switch(sketchGradientType) {
     case 0:
@@ -95,92 +84,6 @@ export const convertGradientStops = (sketchGradientStops: FileFormat.GradientSto
     }];
     return result;
   }, []);
-};
-
-export const convertFill = (layer: FileFormat.AnyLayer): em.Fill => {
-  const fill = layer.style.fills.find(fill => fill.fillType === 0 || fill.fillType === 1);
-  return {
-    enabled: fill.isEnabled,
-    color: convertColor(fill.color),
-    fillType: convertFillType(fill.fillType),
-    gradient: {
-      activeStopIndex: 0,
-      gradientType: convertGradientType(fill.gradient.gradientType),
-      origin: convertGradientOrigin(fill.gradient.from),
-      destination: convertGradientDestination(fill.gradient.to),
-      stops: convertGradientStops(fill.gradient.stops)
-    }
-  }
-};
-
-export const convertStroke = (layer: FileFormat.AnyLayer): em.Stroke => {
-  const stroke = layer.style.borders.find(border => border.fillType === 0 || border.fillType === 1);
-  return {
-    enabled: stroke.isEnabled,
-    width: stroke.thickness,
-    color: convertColor(stroke.color),
-    fillType: convertFillType(stroke.fillType),
-    gradient: {
-      activeStopIndex: 0,
-      gradientType: convertGradientType(stroke.gradient.gradientType),
-      origin: convertGradientOrigin(stroke.gradient.from),
-      destination: convertGradientDestination(stroke.gradient.to),
-      stops: convertGradientStops(stroke.gradient.stops)
-    }
-  }
-};
-
-export const convertStrokeCap = (sketchStrokeCap: FileFormat.LineCapStyle): string => {
-  switch(sketchStrokeCap) {
-    case 0:
-      return 'butt';
-    case 1:
-      return 'round';
-    case 2:
-      return 'square';
-  }
-};
-
-export const convertStrokeJoin = (sketchStrokeJoin: FileFormat.LineJoinStyle): string => {
-  switch(sketchStrokeJoin) {
-    case 0:
-      return 'miter';
-    case 1:
-      return 'round';
-    case 2:
-      return 'bevel';
-  }
-};
-
-export const convertStrokeDashArray = (sketchStrokeJoin: number[]): number[] => {
-  const width = sketchStrokeJoin[0] ? sketchStrokeJoin[0] : 0;
-  const gap = sketchStrokeJoin[1] ? sketchStrokeJoin[1] : 0;
-  return [width, gap];
-};
-
-export const convertStrokeOptions = (layer: FileFormat.AnyLayer): em.StrokeOptions => ({
-  cap: convertStrokeCap(layer.style.borderOptions.lineCapStyle),
-  join: convertStrokeJoin(layer.style.borderOptions.lineJoinStyle),
-  dashArray: convertStrokeDashArray(layer.style.borderOptions.dashPattern),
-  dashOffset: 0
-});
-
-export const convertShadow = (layer: FileFormat.AnyLayer): em.Shadow => {
-  const shadow = layer.style.shadows[0];
-  if (shadow) {
-    return {
-      fillType: 'color',
-      enabled: shadow.isEnabled,
-      color: convertColor(shadow.color),
-      offset: {
-        x: shadow.offsetX,
-        y: shadow.offsetY
-      },
-      blur: shadow.blurRadius
-    }
-  } else {
-    return {} as em.Shadow;
-  }
 };
 
 export const convertBlendMode = (layer: FileFormat.AnyLayer): em.BlendMode => {
@@ -223,4 +126,13 @@ export const convertBlendMode = (layer: FileFormat.AnyLayer): em.BlendMode => {
     case 17:
       return 'lighter';
   }
+};
+
+interface GetLayerPath {
+  path: string;
+  layer: FileFormat.AnyLayer;
+}
+
+export const getLayerPath = ({ path, layer }: GetLayerPath): string => {
+  return path ? `${path}/${layer.do_objectID}` : layer.do_objectID;
 };

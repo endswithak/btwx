@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { paperMain } from '../../canvas';
-import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_TEXT_STYLE, DEFAULT_SHADOW_STYLE, DEFAULT_BLEND_MODE, DEFAULT_OPACITY, DEFAULT_STROKE_DASH_ARRAY, DEFAULT_STROKE_DASH_OFFSET, DEFAULT_STROKE_CAP, DEFAULT_STROKE_JOIN } from '../../constants';
+import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_TEXT_STYLE, DEFAULT_SHADOW_STYLE, DEFAULT_BLEND_MODE, DEFAULT_OPACITY, DEFAULT_STROKE_DASH_ARRAY, DEFAULT_STROKE_DASH_OFFSET, DEFAULT_STROKE_CAP, DEFAULT_STROKE_JOIN, DEFAULT_ROTATION, DEFAULT_HORIZONTAL_FLIP, DEFAULT_VERTICAL_FLIP } from '../../constants';
 import { applyImageMethods } from '../../canvas/imageUtils';
 import { applyShapeMethods } from '../../canvas/shapeUtils';
 import { applyTextMethods } from '../../canvas/textUtils';
@@ -472,10 +472,11 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
 
 export const addGroup = (payload: AddGroupPayload): LayerTypes => {
   const id = payload.id ? payload.id : uuidv4();
+  const parent = payload.parent ? payload.parent : 'page';
   new paperMain.Group({
     name: payload.name ? payload.name : 'Group',
     data: { id: id, type: 'Group' },
-    parent: getPaperLayer(payload.parent ? payload.parent : 'page')
+    parent: getPaperLayer(parent)
   });
   return {
     type: ADD_GROUP,
@@ -485,7 +486,7 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
       id: id,
       frame: payload.frame,
       name: payload.name ? payload.name : 'Group',
-      parent: payload.parent ? payload.parent : null,
+      parent: parent,
       children: [],
       selected: false,
       showChildren: false,
@@ -514,6 +515,7 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
 
 export const addShape = (payload: AddShapePayload): LayerTypes => {
   const id = payload.id ? payload.id : uuidv4();
+  const parent = payload.parent ? payload.parent : 'page';
   const fill = payload.style && payload.style.fill ? {...DEFAULT_TEXT_STYLE, ...payload.style.fill} : DEFAULT_FILL_STYLE;
   const fillColor = fill.fillType === 'color' ? { hue: fill.color.h, saturation: fill.color.s, lightness: fill.color.l, alpha: fill.color.a } : {
     gradient: {
@@ -546,6 +548,9 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
   const strokeCap = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.cap ? payload.style.strokeOptions.cap : DEFAULT_STROKE_CAP;
   const strokeJoin = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.join ? payload.style.strokeOptions.join : DEFAULT_STROKE_JOIN;
   const clipMask = payload.mask ? payload.mask : false;
+  const rotation = payload.transform && payload.transform.rotation ? payload.transform.rotation : DEFAULT_ROTATION;
+  const horizontalFlip = payload.transform && payload.transform.horizontalFlip ? payload.transform.horizontalFlip : DEFAULT_HORIZONTAL_FLIP;
+  const verticalFlip = payload.transform && payload.transform.verticalFlip ? payload.transform.verticalFlip : DEFAULT_VERTICAL_FLIP;
   const newShape = new paperMain.CompoundPath({
     pathData: payload.path.data,
     closed: payload.path.closed,
@@ -561,7 +566,7 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
     strokeJoin: strokeJoin,
     clipMask: clipMask,
     data: { id: id, type: 'Shape' },
-    parent: getPaperLayer(payload.parent ? payload.parent : 'page')
+    parent: getPaperLayer(parent)
   });
   newShape.children.forEach((item) => item.data = { id: 'ShapePartial' });
   newShape.position = new paperMain.Point(payload.frame.x, payload.frame.y);
@@ -573,6 +578,7 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
     payload: {
       ...payload,
       id,
+      parent,
       type: payload.type,
       shapeType: payload.shapeType,
       name: payload.name,
@@ -596,7 +602,11 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
           dashOffset
         }
       },
-      transform: DEFAULT_TRANSFORM,
+      transform: {
+        rotation,
+        horizontalFlip,
+        verticalFlip
+      },
       booleanOperation: 'none',
       path: {
         data: newShape.pathData,
@@ -649,11 +659,31 @@ export const addText = (payload: AddTextPayload): LayerTypes => {
 // Image
 
 export const addImage = (payload: AddImagePayload): LayerTypes => {
-  const id = uuidv4();
+  const id = payload.id ? payload.id : uuidv4();
+  const parent = payload.parent ? payload.parent : 'page';
+  const x = payload.frame && payload.frame.x ? payload.frame.x : payload.paperLayer.position.x;
+  const y = payload.frame && payload.frame.y ? payload.frame.y : payload.paperLayer.position.y;
+  const width = payload.frame && payload.frame.width ? payload.frame.width : payload.paperLayer.bounds.width;
+  const height = payload.frame && payload.frame.height ? payload.frame.height : payload.paperLayer.bounds.height;
+  const innerWidth = payload.frame && payload.frame.innerWidth ? payload.frame.innerWidth : payload.paperLayer.bounds.width;
+  const innerHeight = payload.frame && payload.frame.innerHeight ? payload.frame.innerHeight : payload.paperLayer.bounds.height;
+  const shadow = payload.style && payload.style.shadow ? {...DEFAULT_SHADOW_STYLE, ...payload.style.shadow} : DEFAULT_SHADOW_STYLE;
+  const opacity = payload.style && payload.style.opacity ? payload.style.opacity : DEFAULT_OPACITY;
+  const blendMode = payload.style && payload.style.blendMode ? payload.style.blendMode : DEFAULT_BLEND_MODE;
+  const rotation = payload.transform && payload.transform.rotation ? payload.transform.rotation : DEFAULT_ROTATION;
+  const horizontalFlip = payload.transform && payload.transform.horizontalFlip ? payload.transform.horizontalFlip : DEFAULT_HORIZONTAL_FLIP;
+  const verticalFlip = payload.transform && payload.transform.verticalFlip ? payload.transform.verticalFlip : DEFAULT_VERTICAL_FLIP;
   payload.paperLayer.data = { id: 'Raster', type: 'Raster' };
+  payload.paperLayer.bounds.width = width;
+  payload.paperLayer.bounds.height = height;
+  payload.paperLayer.position = new paperMain.Point(x, y);
   const imageContainer = new paperMain.Group({
     data: { id: id, type: 'Image', imageId: payload.imageId },
     children: [payload.paperLayer],
+    shadowColor: shadow.enabled ? { hue: shadow.color.h, saturation: shadow.color.s, lightness: shadow.color.l, alpha: shadow.color.a } : null,
+    shadowOffset: shadow.enabled ? new paperMain.Point(shadow.offset.x, shadow.offset.y) : null,
+    shadowBlur: shadow.enabled ? shadow.blur : null,
+    parent: getPaperLayer(parent)
   });
   applyImageMethods(payload.paperLayer);
   return {
@@ -662,21 +692,21 @@ export const addImage = (payload: AddImagePayload): LayerTypes => {
       type: 'Image',
       id: id,
       frame: {
-        x: payload.paperLayer.position.x,
-        y: payload.paperLayer.position.y,
-        width: payload.paperLayer.bounds.width,
-        height: payload.paperLayer.bounds.height,
-        innerWidth: payload.paperLayer.bounds.width,
-        innerHeight: payload.paperLayer.bounds.height
+        x, y, width, height, innerWidth, innerHeight
       },
       name: payload.name ? payload.name : 'Image',
-      parent: payload.parent ? payload.parent : null,
+      parent: parent,
       selected: false,
       mask: false,
       masked: false,
+      children: null,
       tweenEvents: [],
       tweens: [],
-      transform: DEFAULT_TRANSFORM,
+      transform: {
+        rotation,
+        horizontalFlip,
+        verticalFlip
+      },
       style: {
         ...DEFAULT_STYLE,
         fill: {
@@ -686,7 +716,10 @@ export const addImage = (payload: AddImagePayload): LayerTypes => {
         stroke: {
           ...DEFAULT_STYLE.stroke,
           enabled: false
-        }
+        },
+        shadow,
+        opacity,
+        blendMode
       },
       imageId: payload.imageId
     }
