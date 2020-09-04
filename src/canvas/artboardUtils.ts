@@ -12,18 +12,19 @@ export const applyArtboardMethods = (artboard: paper.Item) => {
       const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, layer.id);
       if (e.event.which === 3) {
         if (nearestScopeAncestor.id === this.parent.data.id) {
-          store.dispatch(openContextMenu({type: 'TweenEvent', id: this.parent.data.id, x: e.event.clientX, y: e.event.clientY}));
-        }
-      }
-      if (e.modifiers.shift) {
-        if (layer.selected) {
-          store.dispatch(deselectLayer({id: nearestScopeAncestor.id}));
-        } else {
-          store.dispatch(selectLayer({id: nearestScopeAncestor.id}));
+          store.dispatch(openContextMenu({type: 'LayerEdit', id: this.parent.data.id, x: e.event.clientX, y: e.event.clientY}));
         }
       } else {
-        if (!nearestScopeAncestor.selected) {
-          store.dispatch(selectLayer({id: nearestScopeAncestor.id, newSelection: true}));
+        if (e.modifiers.shift) {
+          if (layer.selected) {
+            store.dispatch(deselectLayer({id: nearestScopeAncestor.id}));
+          } else {
+            store.dispatch(selectLayer({id: nearestScopeAncestor.id}));
+          }
+        } else {
+          if (!nearestScopeAncestor.selected) {
+            store.dispatch(selectLayer({id: nearestScopeAncestor.id, newSelection: true}));
+          }
         }
       }
     }

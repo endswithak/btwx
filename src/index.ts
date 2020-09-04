@@ -4,8 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import menu from './menu';
 import getTheme from './store/theme';
-import { readSketchFile } from 'sketch-file';
-import sharp from 'sharp';
+
 import {
   PREVIEW_TOPBAR_HEIGHT,
   MAC_TITLEBAR_HEIGHT,
@@ -18,7 +17,7 @@ import {
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
 
-const windowBackground = (() => {
+const windowBackground = ((): string => {
   let theme = getTheme('dark');
   if (isMac) {
     const themeName = systemPreferences.getUserDefault('theme', 'string');
@@ -27,8 +26,8 @@ const windowBackground = (() => {
   return theme.background.z0;
 })();
 
-export let preferencesWindow: electron.BrowserWindow;
-export let sketchImporterWindow: electron.BrowserWindow;
+// export let preferencesWindow: electron.BrowserWindow;
+// export let sketchImporterWindow: electron.BrowserWindow;
 
 const isMac = process.platform === 'darwin';
 
@@ -56,13 +55,13 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 }
 
 export const createNewDocument = (width?: number, height?: number): Promise<electron.BrowserWindow> => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     // Create the browser window.
     const newDocument = new BrowserWindow({
-      height: height ? height : 600,
-      width: width ? width : 800,
-      minWidth: 800,
-      minHeight: 600,
+      height: height ? height : 800,
+      width: width ? width : 1000,
+      minWidth: 1000,
+      minHeight: 800,
       frame: false,
       titleBarStyle: 'hidden',
       backgroundColor: windowBackground,
@@ -89,65 +88,65 @@ export const createNewDocument = (width?: number, height?: number): Promise<elec
   });
 };
 
-export const createPreferencesWindow = (): void => {
-  preferencesWindow = new BrowserWindow({
-    parent: getFocusedDocument(),
-    height: 600,
-    width: 800,
-    frame: false,
-    titleBarStyle: 'hidden',
-    show: false,
-    backgroundColor: windowBackground,
-    webPreferences: {
-      nodeIntegration: true
-    }
-  });
+// export const createPreferencesWindow = (): void => {
+//   preferencesWindow = new BrowserWindow({
+//     parent: getFocusedDocument(),
+//     height: 600,
+//     width: 800,
+//     frame: false,
+//     titleBarStyle: 'hidden',
+//     show: false,
+//     backgroundColor: windowBackground,
+//     webPreferences: {
+//       nodeIntegration: true
+//     }
+//   });
 
-  preferencesWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+//   preferencesWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-  // Open the DevTools.
-  preferencesWindow.webContents.openDevTools();
+//   // Open the DevTools.
+//   preferencesWindow.webContents.openDevTools();
 
-  preferencesWindow.webContents.on('did-finish-load', () => {
-    preferencesWindow.webContents.executeJavaScript(`renderPreferencesWindow()`).then(() => {
-      preferencesWindow.show();
-    });
-  });
+//   preferencesWindow.webContents.on('did-finish-load', () => {
+//     preferencesWindow.webContents.executeJavaScript(`renderPreferencesWindow()`).then(() => {
+//       preferencesWindow.show();
+//     });
+//   });
 
-  preferencesWindow.on('closed', () => {
-    preferencesWindow = null;
-  });
-};
+//   preferencesWindow.on('closed', () => {
+//     preferencesWindow = null;
+//   });
+// };
 
-export const createSketchImporterWindow = (sketchFile: any): void => {
-  sketchImporterWindow = new BrowserWindow({
-    parent: getFocusedDocument(),
-    height: 600,
-    width: 800,
-    frame: false,
-    titleBarStyle: 'hidden',
-    show: false,
-    backgroundColor: windowBackground,
-    webPreferences: {
-      nodeIntegration: true
-    }
-  });
+// export const createSketchImporterWindow = (sketchFile: any): void => {
+//   sketchImporterWindow = new BrowserWindow({
+//     parent: getFocusedDocument(),
+//     height: 600,
+//     width: 800,
+//     frame: false,
+//     titleBarStyle: 'hidden',
+//     show: false,
+//     backgroundColor: windowBackground,
+//     webPreferences: {
+//       nodeIntegration: true
+//     }
+//   });
 
-  sketchImporterWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+//   sketchImporterWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-  // Open the DevTools.
-  sketchImporterWindow.webContents.openDevTools();
+//   // Open the DevTools.
+//   sketchImporterWindow.webContents.openDevTools();
 
-  sketchImporterWindow.webContents.on('did-finish-load', () => {
-    sketchImporterWindow.webContents.executeJavaScript(`renderSketchImporterWindow(${JSON.stringify(sketchFile)})`).then(() => {
-      sketchImporterWindow.show();
-    });
-  });
+//   sketchImporterWindow.webContents.on('did-finish-load', () => {
+//     sketchImporterWindow.webContents.executeJavaScript(`renderSketchImporterWindow(${JSON.stringify(sketchFile)})`).then(() => {
+//       sketchImporterWindow.show();
+//     });
+//   });
 
-  sketchImporterWindow.on('closed', () => {
-    sketchImporterWindow = null;
-  });
-};
+//   sketchImporterWindow.on('closed', () => {
+//     sketchImporterWindow = null;
+//   });
+// };
 
 const createPreviewWindow = ({width, height}: {width: number; height: number}): void => {
   const previewWindow = new BrowserWindow({
@@ -206,28 +205,28 @@ app.on('open-file', (event, path) => {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
 export const getFocusedDocument = (): electron.BrowserWindow => {
-  return BrowserWindow.getFocusedWindow().getParentWindow() ? BrowserWindow.getFocusedWindow().getParentWindow() : BrowserWindow.getFocusedWindow();
+  return BrowserWindow.getFocusedWindow() ? BrowserWindow.getFocusedWindow().getParentWindow() ? BrowserWindow.getFocusedWindow().getParentWindow() : BrowserWindow.getFocusedWindow() : null;
 };
 
-export const handleSketchImport = () => {
-  const document = getFocusedDocument();
-  dialog.showOpenDialog(document, {
-    buttonLabel: 'Import',
-    filters: [{ name: 'Custom File Type', extensions: ['sketch'] }],
-    properties: ['openFile']
-  }).then(result => {
-    if (!result.canceled && result.filePaths.length > 0) {
-      const sketchFilePath = result.filePaths[0];
-      readSketchFile(sketchFilePath).then((sketchJSON) => {
-        if (!sketchImporterWindow) {
-          createSketchImporterWindow(sketchJSON);
-        }
-      });
-    }
-  });
-};
+// export const handleSketchImport = () => {
+//   const document = getFocusedDocument();
+//   dialog.showOpenDialog(document, {
+//     buttonLabel: 'Import',
+//     filters: [{ name: 'Custom File Type', extensions: ['sketch'] }],
+//     properties: ['openFile']
+//   }).then(result => {
+//     if (!result.canceled && result.filePaths.length > 0) {
+//       const sketchFilePath = result.filePaths[0];
+//       readSketchFile(sketchFilePath).then((sketchJSON) => {
+//         if (!sketchImporterWindow) {
+//           createSketchImporterWindow(sketchJSON);
+//         }
+//       });
+//     }
+//   });
+// };
 
-export const handleSave = (path: string, closeOnSave?: boolean) => {
+export const handleSave = (path: string, closeOnSave?: boolean): void => {
   const document = getFocusedDocument();
   document.webContents.executeJavaScript(`saveDocument()`).then((documentJSON) => {
     fs.writeFile(`${path}.esketch`, documentJSON, function(err) {
@@ -241,7 +240,7 @@ export const handleSave = (path: string, closeOnSave?: boolean) => {
   });
 };
 
-export const handleSaveAs = (closeOnSave?: boolean) => {
+export const handleSaveAs = (closeOnSave?: boolean): void => {
   const document = getFocusedDocument();
   dialog.showSaveDialog(document, {}).then((result) => {
     if (!result.canceled) {
@@ -249,7 +248,7 @@ export const handleSaveAs = (closeOnSave?: boolean) => {
       const fullPath = result.filePath;
       const documentSettings = {base, fullPath};
       document.webContents.executeJavaScript(`saveDocumentAs(${JSON.stringify(documentSettings)})`).then((documentJSON) => {
-        app.addRecentDocument(result.filePath);
+        // app.addRecentDocument(result.filePath);
         fs.writeFile(`${result.filePath}.esketch`, documentJSON, function(err) {
           if(err) {
             return console.log(err);
@@ -263,7 +262,7 @@ export const handleSaveAs = (closeOnSave?: boolean) => {
   });
 };
 
-export const handleOpenDocument = (filePath: string) => {
+export const handleOpenDocument = (filePath: string): void => {
   const document = getFocusedDocument();
   if (document) {
     document.webContents.executeJavaScript(`getCurrentEdit()`).then((currentEditJSON) => {
@@ -297,6 +296,24 @@ export const handleOpenDocument = (filePath: string) => {
   }
 };
 
+export const handleThemeToggle = (): void => {
+  const document = getFocusedDocument();
+  if (document) {
+    document.webContents.executeJavaScript(`getCurrentTheme()`).then((currentTheme) => {
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      BrowserWindow.getAllWindows().forEach((window) => {
+        const documentWindow = !window.getParentWindow();
+        if (window.webContents) {
+          window.webContents.executeJavaScript(`setTitleBarTheme(${JSON.stringify(newTheme)})`);
+          if (documentWindow) {
+            window.webContents.executeJavaScript(`setTheme(${JSON.stringify(newTheme)})`);
+          }
+        }
+      });
+    });
+  }
+}
+
 ipcMain.on('openPreview', (event, windowSize) => {
   const size = JSON.parse(windowSize);
   createPreviewWindow({
@@ -317,27 +334,10 @@ ipcMain.on('updateTheme', (event, theme) => {
   });
 });
 
-ipcMain.on('addImage', (event, arg) => {
-  dialog.showOpenDialog(getFocusedDocument(), {
-    filters: [
-      { name: 'Images', extensions: ['jpg', 'png'] }
-    ],
-    properties: ['openFile']
-  }).then(result => {
-    if (result.filePaths.length > 0 && !result.canceled) {
-      sharp(result.filePaths[0]).metadata().then(({ width }) => {
-        sharp(result.filePaths[0]).resize(Math.round(width * 0.5)).webp({quality: 50}).toBuffer().then((buffer) => {
-          event.reply('addImage-reply', JSON.stringify(buffer));
-        });
-      });
-    }
-  });
-});
-
 ipcMain.on('saveDocument', (event, path) => {
   handleSave(path, true);
 });
 
-ipcMain.on('saveDocumentAs', (event, arg) => {
+ipcMain.on('saveDocumentAs', () => {
   handleSaveAs(true);
 });

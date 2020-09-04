@@ -1,4 +1,6 @@
 import React, { ReactElement } from 'react';
+import sharp from 'sharp';
+import { remote } from 'electron';
 import { v4 as uuidv4 } from 'uuid';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
@@ -10,7 +12,6 @@ import { addImage } from '../store/actions/layer';
 import { AddDocumentImagePayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
 import { addDocumentImage } from '../store/actions/documentSettings';
 import { ToolState } from '../store/reducers/tool';
-import { ipcRenderer } from 'electron';
 import { bufferToBase64 } from '../utils';
 import TopbarDropdownButton from './TopbarDropdownButton';
 
@@ -55,21 +56,31 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
     if (tool.type !== 'Selection') {
       enableSelectionTool();
     }
-    ipcRenderer.send('addImage');
-    ipcRenderer.once('addImage-reply', (event, arg) => {
-      const buffer = Buffer.from(JSON.parse(arg).data);
-      const exists = allDocumentImageIds.length > 0 && allDocumentImageIds.find((id) => Buffer.from(documentImagesById[id].buffer).equals(buffer));
-      const base64 = bufferToBase64(buffer);
-      const paperLayer = new paperMain.Raster(`data:image/webp;base64,${base64}`);
-      paperLayer.position = paperMain.view.center;
-      paperLayer.onLoad = (): void => {
-        if (exists) {
-          addImage({paperLayer, imageId: exists});
-        } else {
-          const imageId = uuidv4();
-          addImage({paperLayer, imageId: imageId});
-          addDocumentImage({id: imageId, buffer: buffer});
-        }
+    remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
+      filters: [
+        { name: 'Images', extensions: ['jpg', 'png'] }
+      ],
+      properties: ['openFile']
+    }).then(result => {
+      if (result.filePaths.length > 0 && !result.canceled) {
+        sharp(result.filePaths[0]).metadata().then(({ width }) => {
+          sharp(result.filePaths[0]).resize(Math.round(width * 0.5)).webp({quality: 50}).toBuffer().then((buffer) => {
+            const newBuffer = Buffer.from(buffer);
+            const exists = allDocumentImageIds.length > 0 && allDocumentImageIds.find((id) => Buffer.from(documentImagesById[id].buffer).equals(newBuffer));
+            const base64 = bufferToBase64(newBuffer);
+            const paperLayer = new paperMain.Raster(`data:image/webp;base64,${base64}`);
+            paperLayer.position = paperMain.view.center;
+            paperLayer.onLoad = (): void => {
+              if (exists) {
+                addImage({paperLayer, imageId: exists});
+              } else {
+                const imageId = uuidv4();
+                addImage({paperLayer, imageId: imageId});
+                addDocumentImage({id: imageId, buffer: buffer});
+              }
+            }
+          });
+        });
       }
     });
   }

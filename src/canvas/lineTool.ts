@@ -64,18 +64,18 @@ class LineTool {
     this.snapTool = null;
   }
   updateHandles(): void {
-    const paperLayer = getPaperLayer(this.state.layer.present.selected[0]) as paper.Path;
+    const paperLayer = getPaperLayer(this.state.layer.present.selected[0]) as paper.CompoundPath;
     switch(this.handle) {
       case 'to': {
         const newTo = new paperMain.Point(this.toBounds.center.x, this.toBounds.center.y);
-        paperLayer.segments[1].point = newTo;
+        (paperLayer.children[0] as paper.Path).segments[1].point = newTo;
         this.toHandle.bounds.center.x = newTo.x;
         this.toHandle.bounds.center.y = newTo.y;
         break;
       }
       case 'from': {
         const newFrom = new paperMain.Point(this.toBounds.center.x, this.toBounds.center.y);
-        paperLayer.segments[0].point = newFrom;
+        (paperLayer.children[0] as paper.Path).segments[0].point = newFrom;
         this.fromHandle.bounds.center.x = newFrom.x;
         this.fromHandle.bounds.center.y = newFrom.y;
         break;

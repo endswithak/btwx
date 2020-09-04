@@ -1,5 +1,5 @@
 import electron, { app, BrowserWindow, Menu, dialog } from 'electron';
-import { createPreferencesWindow, createNewDocument, preferencesWindow, handleSave, handleSaveAs, handleOpenDocument, handleSketchImport } from './index';
+import { handleThemeToggle, createNewDocument, handleSave, handleSaveAs, handleOpenDocument } from './index';
 
 const isMac = process.platform === 'darwin';
 
@@ -14,12 +14,19 @@ export default Menu.buildFromTemplate([
     submenu: [
       { role: 'about' },
       { type: 'separator' },
+      // {
+      //   label: 'Preferences',
+      //   click: () => {
+      //     if (!preferencesWindow) {
+      //       createPreferencesWindow();
+      //     }
+      //   }
+      // },
       {
-        label: 'Preferences',
+        label: 'Toggle Theme',
+        // enabled: getFocusedDocument(),
         click: () => {
-          if (!preferencesWindow) {
-            createPreferencesWindow();
-          }
+          handleThemeToggle();
         }
       },
       { type: 'separator' },
@@ -78,8 +85,7 @@ export default Menu.buildFromTemplate([
         label: 'Open...',
         accelerator: process.platform === 'darwin' ? 'Cmd+O' : 'Ctrl+O',
         click: (): void => {
-          const document = getFocusedDocument();
-          dialog.showOpenDialog(document, {
+          dialog.showOpenDialog({
             filters: [
               { name: 'Custom File Type', extensions: ['esketch'] }
             ],
@@ -91,58 +97,58 @@ export default Menu.buildFromTemplate([
           });
         }
       },
-      {
-        label: 'Open Recent',
-        role: 'recentDocuments',
-        submenu: [
-          {
-            role: 'clearRecentDocuments'
-          }
-        ]
-      },
+      // {
+      //   label: 'Open Recent',
+      //   role: 'recentDocuments',
+      //   submenu: [
+      //     {
+      //       role: 'clearRecentDocuments'
+      //     }
+      //   ]
+      // },
       isMac ? { role: 'close' } : { role: 'quit' }
     ]
   },
   // { role: 'editMenu' }
-  {
-    label: 'Edit',
-    submenu: [
-      { role: 'undo' },
-      { role: 'redo' },
-      { type: 'separator' },
-      { role: 'cut' },
-      { role: 'copy' },
-      { role: 'paste' },
-      ...(isMac ? [
-        { role: 'pasteAndMatchStyle' },
-        { role: 'delete' },
-        { role: 'selectAll' },
-        { type: 'separator' },
-        {
-          label: 'Speech',
-          submenu: [
-            { role: 'startspeaking' },
-            { role: 'stopspeaking' }
-          ]
-        }
-      ] : [
-        { role: 'delete' },
-        { type: 'separator' },
-        { role: 'selectAll' }
-      ])
-    ]
-  },
-  {
-    label: 'Import',
-    submenu: [
-      {
-        label: 'Sketch Artboard...',
-        click: (): void => {
-          handleSketchImport();
-        }
-      }
-    ]
-  },
+  // {
+  //   label: 'Edit',
+  //   submenu: [
+  //     { role: 'undo' },
+  //     { role: 'redo' },
+  //     { type: 'separator' },
+  //     { role: 'cut' },
+  //     { role: 'copy' },
+  //     { role: 'paste' },
+  //     ...(isMac ? [
+  //       { role: 'pasteAndMatchStyle' },
+  //       { role: 'delete' },
+  //       { role: 'selectAll' },
+  //       { type: 'separator' },
+  //       {
+  //         label: 'Speech',
+  //         submenu: [
+  //           { role: 'startspeaking' },
+  //           { role: 'stopspeaking' }
+  //         ]
+  //       }
+  //     ] : [
+  //       { role: 'delete' },
+  //       { type: 'separator' },
+  //       { role: 'selectAll' }
+  //     ])
+  //   ]
+  // },
+  // {
+  //   label: 'Import',
+  //   submenu: [
+  //     {
+  //       label: 'Sketch Artboard...',
+  //       click: (): void => {
+  //         handleSketchImport();
+  //       }
+  //     }
+  //   ]
+  // },
   // { role: 'viewMenu' }
   {
     label: 'View',

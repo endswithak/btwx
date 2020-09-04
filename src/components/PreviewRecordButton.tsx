@@ -22,6 +22,7 @@ const titlebarHeight = remote.process.platform === 'darwin' ? MAC_TITLEBAR_HEIGH
 const topbarHeight = PREVIEW_TOPBAR_HEIGHT;
 
 ipcRenderer.on('stopPreviewRecording', () => {
+  const titlebarContent = document.getElementsByClassName('container-after-titlebar')[0];
   if (remote.process.platform === 'darwin') {
     remote.getCurrentWindow().setWindowButtonVisibility(true);
   }
@@ -38,15 +39,20 @@ ipcRenderer.on('stopPreviewRecording', () => {
   gsap.to(windowSize, {
     height: `+=${topbarHeight}`,
     duration: 0.15,
-    onComplete: function() {
+    onUpdate: () => {
       remote.getCurrentWindow().setSize(windowSize.width, windowSize.height, false);
     }
+  });
+  gsap.to(titlebarContent, {
+    top: `+=${titlebarHeight}`,
+    duration: 0.15,
+    delay: 0.15
   });
   gsap.to(windowSize, {
     height: `+=${titlebarHeight}`,
     duration: 0.15,
     delay: 0.15,
-    onComplete: function() {
+    onUpdate: () => {
       remote.getCurrentWindow().setSize(windowSize.width, windowSize.height, false);
     }
   });
@@ -85,6 +91,7 @@ const PreviewRecordButton = (props: PreviewRecordButtonProps): ReactElement => {
         remote.getCurrentWindow().setWindowButtonVisibility(false);
       }
       const currentWindowSize = remote.getCurrentWindow().getSize();
+      const titlebarContent = document.getElementsByClassName('container-after-titlebar')[0];
       windowSize = {
         width: currentWindowSize[0],
         height: currentWindowSize[1]
@@ -108,14 +115,18 @@ const PreviewRecordButton = (props: PreviewRecordButtonProps): ReactElement => {
       timeline.to(windowSize, {
         height: `-=${topbarHeight}`,
         duration: 0.15,
-        onComplete: () => {
+        onUpdate: () => {
           remote.getCurrentWindow().setSize(windowSize.width, windowSize.height, false);
         }
       }, 0);
+      timeline.to(titlebarContent, {
+        top: `-=${titlebarHeight}`,
+        duration: 0.15
+      }, 0.15);
       timeline.to(windowSize, {
         height: `-=${titlebarHeight}`,
         duration: 0.15,
-        onComplete: () => {
+        onUpdate: () => {
           remote.getCurrentWindow().setSize(windowSize.width, windowSize.height, false);
         }
       }, 0.15);

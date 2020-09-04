@@ -44,7 +44,7 @@ const mapStateToProps = (state: RootState): {
     return result;
   }, {});
   const selectedByDepth = orderLayersByDepth(state.layer.present, selected);
-  const canMask = selected.length > 0 && selectedById[selectedByDepth[0]].type === 'Shape';
+  const canMask = selected.length > 0 && selectedById[selectedByDepth[0]].type === 'Shape' && (selectedById[selectedByDepth[0]] as em.Shape).shapeType !== 'Line';
   return { selected, canMask };
 };
 

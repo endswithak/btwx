@@ -44,7 +44,6 @@ class TextTool {
       return overlappedArtboard ? overlappedArtboard.parent.data.id : state.layer.present.page;
     })();
     store.dispatch(addText({
-      // id: id,
       type: 'Text',
       text: DEFAULT_TEXT_VALUE,
       name: DEFAULT_TEXT_VALUE,
@@ -57,12 +56,6 @@ class TextTool {
         innerWidth: paperLayer.bounds.width,
         innerHeight: paperLayer.bounds.height
       },
-      selected: false,
-      mask: false,
-      masked: false,
-      children: null,
-      tweenEvents: [],
-      tweens: [],
       transform: DEFAULT_TRANSFORM,
       style: {
         ...DEFAULT_STYLE,
@@ -81,7 +74,8 @@ class TextTool {
         fontWeight: state.textSettings.fontWeight,
         fontFamily: state.textSettings.fontFamily,
         justification: state.textSettings.justification
-      }
+      },
+      paperLayer
     }));
     // get new state with text layer
     state = store.getState();

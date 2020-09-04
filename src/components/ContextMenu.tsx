@@ -1,4 +1,4 @@
-import React, { useRef, useContext, useEffect, ReactElement } from 'react';
+import React, { useContext, useEffect, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
@@ -13,6 +13,7 @@ import tinyColor from 'tinycolor2';
 interface ContextMenuProps {
   options: {
     text: string;
+    disabled: boolean;
     onClick(): void;
   }[];
   emptyState?: string;
@@ -40,6 +41,7 @@ const ContextMenu = (props: ContextMenuProps): ReactElement => {
         onMouseDown={closeContextMenu} />
       <div
         className='c-context-menu'
+        id='context-menu'
         style={{
           width: 200,
           background: tinyColor(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).setAlpha(0.77).toRgbString(),
@@ -49,12 +51,13 @@ const ContextMenu = (props: ContextMenuProps): ReactElement => {
         }}>
         {
           options.length > 0
-          ? options.map((option: {type: 'MenuItem' | 'MenuHead'; text: string; onClick(): void}, index: number) => {
+          ? options.map((option: {type: 'MenuItem' | 'MenuHead'; text: string; onClick(): void; disabled: boolean}, index: number) => {
               switch(option.type) {
                 case 'MenuItem': {
                   return (
                     <ContextMenuItem
                       key={index}
+                      disabled={option.disabled}
                       onClick={option.onClick}
                       text={option.text} />
                   )

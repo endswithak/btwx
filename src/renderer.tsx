@@ -26,7 +26,6 @@
  * ```
  */
 
-import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { remote, ipcRenderer } from 'electron';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -39,14 +38,13 @@ import getTheme from './store/theme';
 import { openFile } from './store/reducers';
 import { enableDarkTheme, enableLightTheme } from './store/actions/theme';
 import { saveDocumentAs, saveDocument } from './store/actions/documentSettings';
-// import { openSketchImporter } from './store/actions/sketchImporter';
 import { closePreview } from './store/actions/preview';
 import App from './components/App';
 import Preview from './components/Preview';
-import Preferences from './components/Preferences';
-import SketchImporter from './components/SketchImporter';
+// import Preferences from './components/Preferences';
+// import SketchImporter from './components/SketchImporter';
 import ThemeProvider from './components/ThemeProvider';
-import importSketchArtboards from './canvas/sketch';
+// import importSketchArtboards from './canvas/sketch';
 
 import './styles/index.sass';
 
@@ -58,11 +56,11 @@ const titleBar = new Titlebar({
   backgroundColor: Color.fromHex(themePref === 'dark' ? themeObject.background.z1 : themeObject.background.z2)
 });
 
-ipcRenderer.on('sketchArtboardsImport', (event, arg) => {
-  const sketchData = JSON.parse(arg);
-  console.log(sketchData);
-  importSketchArtboards(sketchData);
-});
+// ipcRenderer.on('sketchArtboardsImport', (event, arg) => {
+//   const sketchData = JSON.parse(arg);
+//   console.log(sketchData);
+//   importSketchArtboards(sketchData);
+// });
 
 (window as any).getSaveState = (): string => {
   const state = store.getState();
@@ -84,6 +82,11 @@ ipcRenderer.on('sketchArtboardsImport', (event, arg) => {
 (window as any).getCurrentEdit = (): string => {
   const state = store.getState();
   return JSON.stringify(state.layer.present.edit);
+};
+
+(window as any).getCurrentTheme = (): string => {
+  const state = store.getState();
+  return state.theme.theme;
 };
 
 (window as any).saveDocument = (): void => {
@@ -122,12 +125,8 @@ ipcRenderer.on('sketchArtboardsImport', (event, arg) => {
   store.dispatch(closePreview());
 };
 
-// (window as any).importSketchFile = (sketchFile: any): void => {
-//   store.dispatch(openSketchImporter({sketchFile}));
-// };
-
 (window as any).renderNewDocument = (): void => {
-  window.onbeforeunload = (e: any) => {
+  window.onbeforeunload = (e: any): void => {
     const state = store.getState();
     if (state.documentSettings.edit !== state.layer.present.edit) {
       e.returnValue = false;
@@ -169,7 +168,7 @@ ipcRenderer.on('sketchArtboardsImport', (event, arg) => {
 };
 
 (window as any).renderPreviewWindow = (): void => {
-  window.onbeforeunload = (e: any) => {
+  window.onbeforeunload = (e: any): void => {
     store.dispatch(closePreview());
   }
   titleBar.updateTitle('Preview');
@@ -185,31 +184,31 @@ ipcRenderer.on('sketchArtboardsImport', (event, arg) => {
   );
 };
 
-(window as any).renderPreferencesWindow = (): void => {
-  titleBar.updateTitle('Preferences');
-  ReactDOM.render(
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <ThemeProvider>
-          <Preferences />
-        </ThemeProvider>
-      </PersistGate>
-    </Provider>,
-    document.getElementById('root')
-  );
-};
+// (window as any).renderPreferencesWindow = (): void => {
+//   titleBar.updateTitle('Preferences');
+//   ReactDOM.render(
+//     <Provider store={store}>
+//       <PersistGate loading={null} persistor={persistor}>
+//         <ThemeProvider>
+//           <Preferences />
+//         </ThemeProvider>
+//       </PersistGate>
+//     </Provider>,
+//     document.getElementById('root')
+//   );
+// };
 
-(window as any).renderSketchImporterWindow = (sketchFile: any): void => {
-  titleBar.updateTitle('Sketch Import');
-  ReactDOM.render(
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <ThemeProvider>
-          <SketchImporter
-            sketchFile={sketchFile} />
-        </ThemeProvider>
-      </PersistGate>
-    </Provider>,
-    document.getElementById('root')
-  );
-};
+// (window as any).renderSketchImporterWindow = (sketchFile: any): void => {
+//   titleBar.updateTitle('Sketch Import');
+//   ReactDOM.render(
+//     <Provider store={store}>
+//       <PersistGate loading={null} persistor={persistor}>
+//         <ThemeProvider>
+//           <SketchImporter
+//             sketchFile={sketchFile} />
+//         </ThemeProvider>
+//       </PersistGate>
+//     </Provider>,
+//     document.getElementById('root')
+//   );
+// };

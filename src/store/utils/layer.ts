@@ -1809,6 +1809,7 @@ export const pasteLayersFromClipboard = (state: LayerState, action: PasteLayersF
     if (state.selected.length > 0) {
       currentState = deselectLayers(currentState, layerActions.deselectLayers({layers: state.selected}) as DeselectLayers);
     }
+    currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   }
   return currentState;
 };
@@ -5392,8 +5393,8 @@ export const setCurvePointOrigin = (state: LayerState, action: SetCurvePointOrig
   const layerItem = state.byId[action.payload.id] as em.Shape;
   const paperLayer = getPaperLayer(action.payload.id);
   if (layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line') {
-    const fromPoint = (paperLayer as paper.Path).segments[0].point;
-    const toPoint = (paperLayer as paper.Path).segments[1].point;
+    const fromPoint = ((paperLayer as paper.CompoundPath).children[0] as paper.Path).segments[0].point;
+    const toPoint = ((paperLayer as paper.CompoundPath).children[0] as paper.Path).segments[1].point;
     const vector = toPoint.subtract(fromPoint);
     currentState = {
       ...currentState,

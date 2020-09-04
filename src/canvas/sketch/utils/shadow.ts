@@ -1,5 +1,6 @@
 import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { convertColor } from './general';
+import { DEFAULT_SHADOW_STYLE } from '../../../constants';
 
 export const convertShadow = (layer: FileFormat.AnyLayer): em.Shadow => {
   const shadow = layer.style.shadows[0];
@@ -15,6 +16,13 @@ export const convertShadow = (layer: FileFormat.AnyLayer): em.Shadow => {
       blur: shadow.blurRadius
     }
   } else {
-    return {} as em.Shadow;
+    if (layer._class === 'text') {
+      return {
+        ...DEFAULT_SHADOW_STYLE,
+        enabled: false
+      }
+    } else {
+      return DEFAULT_SHADOW_STYLE;
+    }
   }
 };

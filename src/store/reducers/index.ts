@@ -15,7 +15,6 @@ import documentSettings from './documentSettings';
 import rightSidebar from './rightSidebar';
 import preview from './preview';
 import insertKnob from './insertKnob';
-import sketchImporter from './sketchImporter';
 import theme from './theme';
 import { importPaperProject } from '../selectors/layer';
 import { paperMain } from '../../canvas';
@@ -322,8 +321,7 @@ const appReducer = combineReducers({
   rightSidebar,
   theme,
   preview,
-  insertKnob,
-  sketchImporter
+  insertKnob
 });
 
 const OPEN_FILE = 'OPEN_FILE';
