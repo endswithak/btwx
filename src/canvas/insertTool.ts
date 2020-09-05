@@ -11,62 +11,74 @@ class InsertTool {
       switch(event.key) {
         case 'escape': {
           const state = store.getState();
-          if (state.tool.type !== 'Selection') {
+          if (state.tool.type !== 'Selection' && state.canvasSettings.focusing) {
             store.dispatch(enableSelectionTool());
           }
           break;
         }
         case 'a': {
           const state = store.getState();
-          if (state.tool.type === 'Artboard') {
-            store.dispatch(enableSelectionTool());
-          } else {
-            store.dispatch(enableArtboardTool());
+          if (state.canvasSettings.focusing) {
+            if (state.tool.type === 'Artboard') {
+              store.dispatch(enableSelectionTool());
+            } else {
+              store.dispatch(enableArtboardTool());
+            }
           }
           break;
         }
         case 'r': {
           const state = store.getState();
-          if (state.tool.type === 'Shape' && state.tool.shapeToolType === 'Rectangle') {
-            store.dispatch(enableSelectionTool());
-          } else {
-            store.dispatch(enableRectangleShapeTool());
+          if (state.canvasSettings.focusing) {
+            if (state.tool.type === 'Shape' && state.tool.shapeToolType === 'Rectangle') {
+              store.dispatch(enableSelectionTool());
+            } else {
+              store.dispatch(enableRectangleShapeTool());
+            }
           }
           break;
         }
         case 'o': {
           const state = store.getState();
-          if (state.tool.type === 'Shape' && state.tool.shapeToolType === 'Ellipse') {
-            store.dispatch(enableSelectionTool());
-          } else {
-            store.dispatch(enableEllipseShapeTool());
+          if (state.canvasSettings.focusing) {
+            if (state.tool.type === 'Shape' && state.tool.shapeToolType === 'Ellipse') {
+              store.dispatch(enableSelectionTool());
+            } else {
+              store.dispatch(enableEllipseShapeTool());
+            }
           }
           break;
         }
         case 'u': {
           const state = store.getState();
-          if (state.tool.type === 'Shape' && state.tool.shapeToolType === 'Rounded') {
-            store.dispatch(enableSelectionTool());
-          } else {
-            store.dispatch(enableRoundedShapeTool());
+          if (state.canvasSettings.focusing) {
+            if (state.tool.type === 'Shape' && state.tool.shapeToolType === 'Rounded') {
+              store.dispatch(enableSelectionTool());
+            } else {
+              store.dispatch(enableRoundedShapeTool());
+            }
           }
           break;
         }
         case 't': {
           const state = store.getState();
-          if (state.tool.type === 'Text') {
-            store.dispatch(enableSelectionTool());
-          } else {
-            store.dispatch(enableTextTool());
+          if (state.canvasSettings.focusing) {
+            if (state.tool.type === 'Text') {
+              store.dispatch(enableSelectionTool());
+            } else {
+              store.dispatch(enableTextTool());
+            }
           }
           break;
         }
         case 'l': {
           const state = store.getState();
-          if (state.tool.type === 'Shape' && state.tool.shapeToolType === 'Line') {
-            store.dispatch(enableSelectionTool());
-          } else {
-            store.dispatch(enableLineShapeTool());
+          if (state.canvasSettings.focusing) {
+            if (state.tool.type === 'Shape' && state.tool.shapeToolType === 'Line') {
+              store.dispatch(enableSelectionTool());
+            } else {
+              store.dispatch(enableLineShapeTool());
+            }
           }
           break;
         }

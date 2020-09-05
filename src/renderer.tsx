@@ -28,6 +28,7 @@
 
 import { remote, ipcRenderer } from 'electron';
 import React from 'react';
+import { ActionCreators } from 'redux-undo';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
@@ -64,13 +65,8 @@ const titleBar = new Titlebar({
 
 (window as any).getSaveState = (): string => {
   const state = store.getState();
-  const { documentSettings, layer, canvasSettings, textSettings } = state;
-  const fileState = {
-    layer: { past: [layer.present] as any, present: layer.present, future: [] as any },
-    documentSettings,
-    canvasSettings,
-    textSettings
-  }
+  const { documentSettings, layer, canvasSettings } = state;
+  const fileState = { layer: layer.present, documentSettings, canvasSettings };
   return JSON.stringify(fileState);
 };
 
@@ -103,6 +99,7 @@ const titleBar = new Titlebar({
 
 (window as any).openFile = (fileJSON: any): void => {
   store.dispatch(openFile({file: fileJSON}));
+  store.dispatch(ActionCreators.clearHistory());
 };
 
 (window as any).setTitleBarTheme = (theme: em.ThemeName): void => {
