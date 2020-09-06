@@ -61,7 +61,7 @@ const SidebarDropzoneBottom = (props: SidebarDropzoneBottomProps): ReactElement 
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       style={{
-        width: leftSidebarWidth - (depth * (theme.unit * 6)),
+        width: leftSidebarWidth - (depth * (theme.unit * 2)),
         boxShadow: active ? `0 ${theme.unit / 2}px 0 0 ${theme.palette.primary}` : '',
         height: layer.children ? theme.unit * 2 : theme.unit * 4
       }} />

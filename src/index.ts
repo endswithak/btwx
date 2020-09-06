@@ -228,38 +228,42 @@ export const getFocusedDocument = (): electron.BrowserWindow => {
 
 export const handleSave = (path: string, closeOnSave?: boolean): void => {
   const document = getFocusedDocument();
-  document.webContents.executeJavaScript(`saveDocument()`).then((documentJSON) => {
-    fs.writeFile(`${path}.esketch`, documentJSON, function(err) {
-      if(err) {
-        return console.log(err);
-      }
-      if (closeOnSave) {
-        document.close();
-      }
+  if (document) {
+    document.webContents.executeJavaScript(`saveDocument()`).then((documentJSON) => {
+      fs.writeFile(`${path}.betwix`, documentJSON, function(err) {
+        if(err) {
+          return console.log(err);
+        }
+        if (closeOnSave) {
+          document.close();
+        }
+      });
     });
-  });
+  }
 };
 
 export const handleSaveAs = (closeOnSave?: boolean): void => {
   const document = getFocusedDocument();
-  dialog.showSaveDialog(document, {}).then((result) => {
-    if (!result.canceled) {
-      const base = path.basename(result.filePath);
-      const fullPath = result.filePath;
-      const documentSettings = {base, fullPath};
-      document.webContents.executeJavaScript(`saveDocumentAs(${JSON.stringify(documentSettings)})`).then((documentJSON) => {
-        // app.addRecentDocument(result.filePath);
-        fs.writeFile(`${result.filePath}.esketch`, documentJSON, function(err) {
-          if(err) {
-            return console.log(err);
-          }
-          if (closeOnSave) {
-            document.close();
-          }
+  if (document) {
+    dialog.showSaveDialog(document, {}).then((result) => {
+      if (!result.canceled) {
+        const base = path.basename(result.filePath);
+        const fullPath = result.filePath;
+        const documentSettings = {base, fullPath};
+        document.webContents.executeJavaScript(`saveDocumentAs(${JSON.stringify(documentSettings)})`).then((documentJSON) => {
+          // app.addRecentDocument(result.filePath);
+          fs.writeFile(`${result.filePath}.betwix`, documentJSON, function(err) {
+            if(err) {
+              return console.log(err);
+            }
+            if (closeOnSave) {
+              document.close();
+            }
+          });
         });
-      });
-    }
-  });
+      }
+    });
+  }
 };
 
 export const handleOpenDocument = (filePath: string): void => {

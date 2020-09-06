@@ -1269,6 +1269,7 @@ export const insertLayerChild = (state: LayerState, action: InsertLayerChild): L
         } as em.Group
       }
     };
+    currentState = updateParentBounds(currentState, action.payload.id);
   }
   currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.child, newSelection: true}) as SelectLayer);
   return currentState;
@@ -1343,6 +1344,7 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
         } as em.Group
       }
     };
+    currentState = updateParentBounds(currentState, action.payload.id);
   } else {
     if (layer.masked && above.mask) {
       currentState = removeLayersMask(currentState, layerActions.removeLayersMask({id: action.payload.above}) as RemoveLayersMask);
@@ -1413,6 +1415,7 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
         } as em.Group
       }
     };
+    currentState = updateParentBounds(currentState, action.payload.id);
   } else {
     if (layer.mask && below.masked) {
       currentState = removeLayersMask(currentState, layerActions.removeLayersMask({id: action.payload.id}) as RemoveLayersMask);

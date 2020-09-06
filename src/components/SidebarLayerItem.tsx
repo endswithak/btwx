@@ -68,7 +68,7 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{
-        paddingLeft: depth * (theme.unit * 6)
+        paddingLeft: depth * (theme.unit * 2)
       }}>
       <Background
         dragGhost={dragGhost}

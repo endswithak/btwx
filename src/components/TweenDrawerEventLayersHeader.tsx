@@ -38,7 +38,7 @@ const TweenDrawerEventLayersHeader = (props: TweenDrawerEventLayersProps): React
           <Icon
             name={icon}
             shapeId={layerItem ? layerItem.id : null}
-            small={icon === 'shape'}
+            small
             style={{
               fill: theme.text.lighter,
               stroke: layerItem && layerItem.type === 'Shape' && !(layerItem as em.Shape).path.closed

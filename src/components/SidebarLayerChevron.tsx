@@ -31,7 +31,8 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
         onClick={handleChevronClick}
         >
         <Icon
-          name={(layer as em.Group).showChildren ? 'chevron-down' : 'chevron-right'}
+          name={(layer as em.Group).showChildren ? 'thicc-chevron-down' : 'thicc-chevron-right'}
+          small
           style={{
             fill: layer.selected && !dragGhost
             ? theme.text.onPrimary

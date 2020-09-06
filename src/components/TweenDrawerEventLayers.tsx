@@ -53,7 +53,7 @@ const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElemen
       }}>
       <TweenDrawerEventLayersHeader
         text={artboardItem.name}
-        icon='left-arrow'
+        icon='thicc-chevron-left'
         onClick={() => handleClick(artboardItem.id)}
         onMouseEnter={() => handleMouseEnter(artboardItem.id)}
         onMouseLeave={handleMouseLeave}
