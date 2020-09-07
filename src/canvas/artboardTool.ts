@@ -1,6 +1,6 @@
 import store from '../store';
 import { enableSelectionTool } from '../store/actions/tool';
-import { addArtboard } from '../store/actions/layer';
+import { addArtboard, addArtboardThunk } from '../store/actions/layer';
 import { applyArtboardMethods } from './artboardUtils';
 import { paperMain } from './index';
 import Tooltip from './tooltip';
@@ -297,7 +297,7 @@ class ArtboardTool {
         const newArtboard = this.renderShape({
           insert: false
         });
-        store.dispatch(addArtboard({
+        store.dispatch(addArtboardThunk({
           parent: 'page',
           frame: {
             x: newArtboard.position.x,
@@ -307,7 +307,7 @@ class ArtboardTool {
             innerWidth: newArtboard.bounds.width,
             innerHeight: newArtboard.bounds.height
           }
-        }));
+        }) as any);
       }
       store.dispatch(enableSelectionTool());
     }

@@ -13,6 +13,8 @@ export const DEFAULT_ROUNDED_RADIUS = 0.15;
 export const DEFAULT_POLYGON_SIDES = 5;
 export const DEFAULT_STAR_POINTS = 5;
 export const DEFAULT_STAR_RADIUS = 0.5;
+export const DEFAULT_SHAPE_WIDTH = 200;
+export const DEFAULT_SHAPE_HEIGHT = 200;
 
 export const PREVIEW_TOPBAR_HEIGHT = 44;
 

@@ -1,6 +1,6 @@
 import store from '../store';
 import { openTextEditor } from '../store/actions/textEditor';
-import { addText } from '../store/actions/layer';
+import { addText, addTextThunk } from '../store/actions/layer';
 import { getPagePaperLayer } from '../store/selectors/layer';
 import { enableSelectionTool } from '../store/actions/tool';
 import { paperMain } from './index';
@@ -43,8 +43,7 @@ class TextTool {
       });
       return overlappedArtboard ? overlappedArtboard.parent.data.id : state.layer.present.page;
     })();
-    store.dispatch(addText({
-      type: 'Text',
+    store.dispatch(addTextThunk({
       text: DEFAULT_TEXT_VALUE,
       name: DEFAULT_TEXT_VALUE,
       parent: parent,
@@ -74,9 +73,8 @@ class TextTool {
         fontWeight: state.textSettings.fontWeight,
         fontFamily: state.textSettings.fontFamily,
         justification: state.textSettings.justification
-      },
-      paperLayer
-    }));
+      }
+    }) as any);
     // get new state with text layer
     state = store.getState();
     // get new layer bounds

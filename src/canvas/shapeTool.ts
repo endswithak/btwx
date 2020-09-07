@@ -1,6 +1,6 @@
 import store from '../store';
 import { enableSelectionTool } from '../store/actions/tool';
-import { addShape } from '../store/actions/layer';
+import { addShape, addShapeThunk } from '../store/actions/layer';
 import { getPagePaperLayer } from '../store/selectors/layer';
 import { paperMain } from './index';
 import { isBetween } from '../utils';
@@ -431,8 +431,7 @@ class ShapeTool {
         const fromPoint = (paperLayer as paper.Path).segments[0].point;
         const toPoint = (paperLayer as paper.Path).segments[1].point;
         const vector = toPoint.subtract(fromPoint);
-        store.dispatch(addShape({
-          type: 'Shape',
+        store.dispatch(addShapeThunk({
           parent: (() => {
             const overlappedArtboard = getPagePaperLayer(state.layer.present).getItem({
               data: (data: any) => {
@@ -490,7 +489,7 @@ class ShapeTool {
                 return {};
             }
           })()
-        }));
+        }) as any);
       }
       store.dispatch(enableSelectionTool());
     }

@@ -8,7 +8,7 @@ import { paperMain } from '../canvas';
 import { enableSelectionTool, enableRectangleShapeTool, enableEllipseShapeTool, enableStarShapeTool, enablePolygonShapeTool, enableRoundedShapeTool, enableLineShapeTool, enableArtboardTool, enableTextTool } from '../store/actions/tool';
 import { ToolTypes } from '../store/actionTypes/tool';
 import { AddImagePayload, LayerTypes } from '../store/actionTypes/layer';
-import { addImage } from '../store/actions/layer';
+import { addImage, addImageThunk } from '../store/actions/layer';
 import { AddDocumentImagePayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
 import { addDocumentImage } from '../store/actions/documentSettings';
 import { ToolState } from '../store/reducers/tool';
@@ -31,6 +31,7 @@ interface InsertButtonProps {
   enableArtboardTool(): ToolTypes;
   enableTextTool(): ToolTypes;
   addImage(payload: AddImagePayload): LayerTypes;
+  addImageThunk?(payload: AddImagePayload): LayerTypes;
   addDocumentImage(payload: AddDocumentImagePayload): DocumentSettingsTypes;
 }
 
@@ -48,6 +49,7 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
     enableArtboardTool,
     enableTextTool,
     addImage,
+    addImageThunk,
     addDocumentImage,
     allDocumentImageIds
   } = props;
@@ -66,19 +68,20 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
         sharp(result.filePaths[0]).metadata().then(({ width }) => {
           sharp(result.filePaths[0]).resize(Math.round(width * 0.5)).webp({quality: 50}).toBuffer().then((buffer) => {
             const newBuffer = Buffer.from(buffer);
-            const exists = allDocumentImageIds.length > 0 && allDocumentImageIds.find((id) => Buffer.from(documentImagesById[id].buffer).equals(newBuffer));
-            const base64 = bufferToBase64(newBuffer);
-            const paperLayer = new paperMain.Raster(`data:image/webp;base64,${base64}`);
-            paperLayer.position = paperMain.view.center;
-            paperLayer.onLoad = (): void => {
-              if (exists) {
-                addImage({paperLayer, imageId: exists});
-              } else {
-                const imageId = uuidv4();
-                addImage({paperLayer, imageId: imageId});
-                addDocumentImage({id: imageId, buffer: buffer});
-              }
-            }
+            addImageThunk({buffer: newBuffer});
+            // const exists = allDocumentImageIds.length > 0 && allDocumentImageIds.find((id) => Buffer.from(documentImagesById[id].buffer).equals(newBuffer));
+            // const base64 = bufferToBase64(newBuffer);
+            // const paperLayer = new paperMain.Raster(`data:image/webp;base64,${base64}`);
+            // paperLayer.position = paperMain.view.center;
+            // paperLayer.onLoad = (): void => {
+            //   if (exists) {
+            //     addImage({paperLayer, imageId: exists});
+            //   } else {
+            //     const imageId = uuidv4();
+            //     addImage({paperLayer, imageId: imageId});
+            //     addDocumentImage({id: imageId, buffer: buffer});
+            //   }
+            // }
           });
         });
       }
@@ -191,6 +194,7 @@ export default connect(
     enableArtboardTool,
     enableTextTool,
     addImage,
+    addImageThunk,
     addDocumentImage
   }
 )(InsertButton);

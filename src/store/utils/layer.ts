@@ -255,19 +255,19 @@ export const addLayers = (state: LayerState, action: AddLayers): LayerState => {
   currentState = action.payload.layers.reduce((result: LayerState, current) => {
     switch(current.type) {
       case 'Artboard':
-        result = addArtboard(result, layerActions.addArtboard(current as em.Artboard) as AddArtboard, true);
+        result = addArtboard(result, layerActions.addArtboardThunk(current as em.Artboard) as any, true);
         break;
       case 'Shape':
-        result = addShape(result, layerActions.addShape(current as em.Shape) as AddShape, true);
+        result = addShape(result, layerActions.addShapeThunk(current as em.Shape) as any, true);
         break;
       case 'Image':
-        result = addImage(result, layerActions.addImage(current as em.Image) as AddImage, true);
+        result = addImage(result, layerActions.addImageThunk(current as em.Image) as any, true);
         break;
       case 'Group':
-        result = addGroup(result, layerActions.addGroup(current as em.Group) as AddGroup, true);
+        result = addGroup(result, layerActions.addGroupThunk(current as em.Group) as any, true);
         break;
       case 'Text':
-        result = addText(result, layerActions.addText(current as em.Text) as AddText, true);
+        result = addText(result, layerActions.addTextThunk(current as em.Text) as any, true);
         break;
     }
     return result;

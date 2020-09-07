@@ -1,12 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
 import { paperMain } from '../../canvas';
-import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_TEXT_STYLE, DEFAULT_SHADOW_STYLE, DEFAULT_BLEND_MODE, DEFAULT_OPACITY, DEFAULT_STROKE_DASH_ARRAY, DEFAULT_STROKE_DASH_OFFSET, DEFAULT_STROKE_CAP, DEFAULT_STROKE_JOIN, DEFAULT_ROTATION, DEFAULT_HORIZONTAL_FLIP, DEFAULT_VERTICAL_FLIP, DEFAULT_TEXT_VALUE, DEFAULT_FONT_SIZE, DEFAULT_FONT_WEIGHT, DEFAULT_FONT_FAMILY, DEFAULT_JUSTIFICATION, DEFAULT_LEADING, DEFAULT_SHADOW_COLOR, DEFAULT_SHADOW_OFFSET_X, DEFAULT_SHADOW_OFFSET_Y, DEFAULT_SHADOW_BLUR } from '../../constants';
+import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_TEXT_STYLE, DEFAULT_SHADOW_STYLE, DEFAULT_BLEND_MODE, DEFAULT_OPACITY, DEFAULT_STROKE_DASH_ARRAY, DEFAULT_STROKE_DASH_OFFSET, DEFAULT_STROKE_CAP, DEFAULT_STROKE_JOIN, DEFAULT_ROTATION, DEFAULT_HORIZONTAL_FLIP, DEFAULT_VERTICAL_FLIP, DEFAULT_TEXT_VALUE, DEFAULT_FONT_SIZE, DEFAULT_FONT_WEIGHT, DEFAULT_FONT_FAMILY, DEFAULT_JUSTIFICATION, DEFAULT_LEADING, DEFAULT_SHADOW_COLOR, DEFAULT_SHADOW_OFFSET_X, DEFAULT_SHADOW_OFFSET_Y, DEFAULT_SHADOW_BLUR, DEFAULT_SHAPE_WIDTH, DEFAULT_SHAPE_HEIGHT, DEFAULT_STAR_POINTS, DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS, DEFAULT_POLYGON_SIDES } from '../../constants';
 import { applyImageMethods } from '../../canvas/imageUtils';
 import { applyShapeMethods } from '../../canvas/shapeUtils';
 import { applyTextMethods } from '../../canvas/textUtils';
 import { applyArtboardMethods } from '../../canvas/artboardUtils';
 import { getCurvePoints } from '../selectors/layer';
-import { getPaperFillColor, getPaperStrokeColor, getPaperLayer, getPaperShadowColor } from '../utils/paper';
+import { getPaperFillColor, getPaperStrokeColor, getPaperLayer, getPaperShadowColor, getPaperShapePathData } from '../utils/paper';
 import { bufferToBase64 } from '../../utils';
 
 import { addDocumentImage } from './documentSettings';
@@ -207,11 +207,9 @@ import {
   SET_CURVE_POINT_ORIGIN_X,
   SET_CURVE_POINT_ORIGIN_Y,
   SET_LAYER_EDIT,
-  AddPagePayload,
   AddArtboardPayload,
   AddGroupPayload,
   AddShapePayload,
-  AddCompoundShapePayload,
   AddTextPayload,
   AddImagePayload,
   AddLayersPayload,
@@ -480,7 +478,7 @@ export const addGroupThunk = (payload: AddGroupPayload) => {
       tweenEvents: [],
       tweens: [],
       mask: false,
-      masked: false,
+      masked: payload.masked ? payload.masked : false,
       clipped: false,
       transform: DEFAULT_TRANSFORM,
       style: {
@@ -509,33 +507,52 @@ export const addShapeThunk = (payload: AddShapePayload) => {
   return (dispatch: any, getState: any) => {
     const id = payload.id ? payload.id : uuidv4();
     const parent = payload.parent ? payload.parent : 'page';
-    // const x = payload.frame && payload.frame.x ? payload.frame.x : paperMain.view.center.x;
-    // const y = payload.frame && payload.frame.y ? payload.frame.y : paperMain.view.center.y;
+    const x = payload.frame && payload.frame.x ? payload.frame.x : paperMain.view.center.x;
+    const y = payload.frame && payload.frame.y ? payload.frame.y : paperMain.view.center.y;
+    const width = payload.frame && payload.frame.width ? payload.frame.width : DEFAULT_SHAPE_WIDTH;
+    const height = payload.frame && payload.frame.width ? payload.frame.height : DEFAULT_SHAPE_HEIGHT;
+    const innerWidth = payload.frame && payload.frame.innerWidth ? payload.frame.innerWidth : DEFAULT_SHAPE_WIDTH;
+    const innerHeight = payload.frame && payload.frame.innerHeight ? payload.frame.innerHeight : DEFAULT_SHAPE_HEIGHT;
+    const frame = { x, y, width, height, innerWidth, innerHeight };
+    const shapeType = payload.shapeType ? payload.shapeType : 'Rectangle';
+    const name = payload.name ? payload.name : shapeType;
+    const hasRadius = payload.shapeType === 'Rounded' || payload.shapeType === 'Star';
+    const radius = hasRadius ? (payload as em.Star | em.Rounded).radius ? (payload as em.Star | em.Rounded).radius : payload.shapeType === 'Rounded' ? DEFAULT_ROUNDED_RADIUS : DEFAULT_STAR_RADIUS : null;
+    const points = payload.shapeType === 'Star' ? (payload as em.Star).points ? (payload as em.Star).points : DEFAULT_STAR_POINTS : null;
+    const sides = payload.shapeType === 'Polygon' ? (payload as em.Polygon).sides ? (payload as em.Polygon).sides : DEFAULT_POLYGON_SIDES : null;
+    const pathData = payload.path && payload.path.data ? payload.path.data : getPaperShapePathData(shapeType, innerWidth, innerHeight, x, y, { radius, points, sides });
+    const closed = payload.path && (payload.path.closed !== null || payload.path.closed !== undefined) ? payload.path.closed : true;
+    const path = { data: pathData, closed: closed, points: getCurvePoints(new paperMain.Path({pathData, insert: false})) };
     const fill = payload.style && payload.style.fill ? {...DEFAULT_TEXT_STYLE, ...payload.style.fill} : DEFAULT_FILL_STYLE;
-    const fillColor = getPaperFillColor(fill, payload.frame);
+    const paperFillColor = getPaperFillColor(fill, payload.frame);
     const stroke = payload.style && payload.style.stroke ? {...DEFAULT_STROKE_STYLE, ...payload.style.stroke} : DEFAULT_STROKE_STYLE;
-    const strokeColor = getPaperStrokeColor(stroke, payload.frame);
+    const paperStrokeColor = getPaperStrokeColor(stroke, payload.frame);
     const shadowEnabled = payload.style && payload.style.shadow && payload.style.shadow.enabled ? payload.style.shadow.enabled : false;
     const shadowColor = payload.style && payload.style.shadow && payload.style.shadow.color ? {...DEFAULT_SHADOW_COLOR, ...payload.style.shadow.color} : DEFAULT_SHADOW_COLOR;
     const shadowOffsetX = payload.style && payload.style.shadow && payload.style.shadow.offset.x ? payload.style.shadow.offset.x : DEFAULT_SHADOW_OFFSET_X;
     const shadowOffsetY = payload.style && payload.style.shadow && payload.style.shadow.offset.y ? payload.style.shadow.offset.y : DEFAULT_SHADOW_OFFSET_Y;
     const shadowBlur = payload.style && payload.style.shadow && payload.style.shadow.blur ? payload.style.shadow.blur : DEFAULT_SHADOW_BLUR;
     const shadow = { enabled: shadowEnabled, fillType: 'color', color: shadowColor, offset: { x: shadowOffsetX, y: shadowOffsetY }, blur: shadowBlur } as em.Shadow;
+    const paperShadowColor = getPaperShadowColor(shadow as em.Shadow);
     const opacity = payload.style && payload.style.opacity ? payload.style.opacity : DEFAULT_OPACITY;
     const blendMode = payload.style && payload.style.blendMode ? payload.style.blendMode : DEFAULT_BLEND_MODE;
     const dashArray = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.dashArray ? payload.style.strokeOptions.dashArray : DEFAULT_STROKE_DASH_ARRAY;
     const dashOffset = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.dashOffset ? payload.style.strokeOptions.dashOffset : DEFAULT_STROKE_DASH_OFFSET;
     const strokeCap = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.cap ? payload.style.strokeOptions.cap : DEFAULT_STROKE_CAP;
     const strokeJoin = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.join ? payload.style.strokeOptions.join : DEFAULT_STROKE_JOIN;
-    const clipMask = payload.mask ? payload.mask : false;
+    const mask = payload.mask ? payload.mask : false;
+    const masked = payload.masked ? payload.masked : false;
     const rotation = payload.transform && payload.transform.rotation ? payload.transform.rotation : DEFAULT_ROTATION;
     const horizontalFlip = payload.transform && payload.transform.horizontalFlip ? payload.transform.horizontalFlip : DEFAULT_HORIZONTAL_FLIP;
     const verticalFlip = payload.transform && payload.transform.verticalFlip ? payload.transform.verticalFlip : DEFAULT_VERTICAL_FLIP;
-    const newShape = new paperMain.CompoundPath({
-      pathData: payload.path.data,
-      closed: payload.path.closed,
+    const transform = { rotation, horizontalFlip, verticalFlip };
+    const strokeOptions = { cap: strokeCap, join: strokeJoin, dashArray, dashOffset };
+    const style = { fill, stroke, shadow, blendMode, opacity, strokeOptions };
+    const paperLayer = new paperMain.CompoundPath({
+      pathData: pathData,
+      closed: closed,
       strokeWidth: stroke.width,
-      shadowColor: shadow.enabled ? getPaperShadowColor(shadow as em.Shadow) : null,
+      shadowColor: shadow.enabled ? paperShadowColor : null,
       shadowOffset: shadow.enabled ? new paperMain.Point(shadow.offset.x, shadow.offset.y) : null,
       shadowBlur: shadow.enabled ? shadow.blur : null,
       blendMode: blendMode,
@@ -544,51 +561,53 @@ export const addShapeThunk = (payload: AddShapePayload) => {
       dashOffset: dashOffset,
       strokeCap: strokeCap,
       strokeJoin: strokeJoin,
-      clipMask: clipMask,
-      data: { id: id, type: 'Shape' },
+      clipMask: mask,
+      data: { id, type: 'Shape' },
       parent: getPaperLayer(parent)
     });
-    newShape.children.forEach((item) => item.data = { id: 'ShapePartial' });
-    newShape.position = new paperMain.Point(payload.frame.x, payload.frame.y);
-    newShape.fillColor = fill.enabled ? fillColor as em.PaperGradientFill : null;
-    newShape.strokeColor = stroke.enabled ? strokeColor as em.PaperGradientFill : null;
-    applyShapeMethods(newShape);
+    paperLayer.children.forEach((item) => item.data = { id: 'ShapePartial' });
+    paperLayer.position = new paperMain.Point(frame.x, frame.y);
+    paperLayer.fillColor = fill.enabled ? paperFillColor as em.PaperGradientFill : null;
+    paperLayer.strokeColor = stroke.enabled ? paperStrokeColor as em.PaperGradientFill : null;
+    applyShapeMethods(paperLayer);
     dispatch(addShape({
-      type: payload.type,
+      type: 'Shape',
       id: id,
-      name: payload.name,
+      name: name,
       parent: parent,
-      shapeType: payload.shapeType,
-      frame: payload.frame,
+      shapeType: shapeType,
+      frame: frame,
       selected: false,
-      mask: false,
-      masked: false,
       children: null,
       tweenEvents: [],
       tweens: [],
-      style: {
-        fill,
-        stroke,
-        shadow,
-        blendMode,
-        opacity,
-        strokeOptions: {
-          cap: strokeCap,
-          join: strokeJoin,
-          dashArray,
-          dashOffset
+      mask,
+      masked,
+      style,
+      transform,
+      path,
+      ...(() => {
+        switch(shapeType) {
+          case 'Ellipse':
+          case 'Rectangle':
+            return {};
+          case 'Rounded':
+            return {
+              radius
+            };
+          case 'Star':
+            return {
+              points,
+              radius
+            }
+          case 'Polygon':
+            return {
+              sides
+            }
+          default:
+            return {};
         }
-      },
-      transform: {
-        rotation,
-        horizontalFlip,
-        verticalFlip
-      },
-      path: {
-        data: newShape.pathData,
-        points: getCurvePoints(newShape),
-        closed: newShape.closed
-      }
+      })()
     }));
   }
 };
@@ -604,18 +623,11 @@ export const addTextThunk = (payload: AddTextPayload) => {
   return (dispatch: any, getState: any) => {
     const id = payload.id ? payload.id : uuidv4();
     const textContent = payload.text ? payload.text : DEFAULT_TEXT_VALUE;
+    const name = payload.name ? payload.name : textContent;
+    const masked = payload.masked ? payload.masked : false;
     const parent = payload.parent ? payload.parent : 'page';
     const fill = payload.style && payload.style.fill ? {...DEFAULT_TEXT_STYLE, ...payload.style.fill} : DEFAULT_FILL_STYLE;
-    const fillColor = getPaperFillColor(fill, payload.frame);
     const stroke = payload.style && payload.style.stroke ? {...DEFAULT_STROKE_STYLE, ...payload.style.stroke} : DEFAULT_STROKE_STYLE;
-    const strokeColor = getPaperStrokeColor(stroke, payload.frame);
-    const x = payload.frame && payload.frame.x ? payload.frame.x : paperMain.view.center.x;
-    const y = payload.frame && payload.frame.y ? payload.frame.y : paperMain.view.center.y;
-    const width = payload.frame && payload.frame.width ? payload.frame.width : payload.paperLayer.bounds.width;
-    const height = payload.frame && payload.frame.height ? payload.frame.height : payload.paperLayer.bounds.height;
-    const innerWidth = payload.frame && payload.frame.innerWidth ? payload.frame.innerWidth : payload.paperLayer.bounds.width;
-    const innerHeight = payload.frame && payload.frame.innerHeight ? payload.frame.innerHeight : payload.paperLayer.bounds.height;
-    const frame = { x, y, width, height, innerHeight, innerWidth };
     const opacity = payload.style && payload.style.opacity ? payload.style.opacity : DEFAULT_OPACITY;
     const blendMode = payload.style && payload.style.blendMode ? payload.style.blendMode : DEFAULT_BLEND_MODE;
     const shadowEnabled = payload.style && payload.style.shadow && payload.style.shadow.enabled ? payload.style.shadow.enabled : false;
@@ -636,16 +648,20 @@ export const addTextThunk = (payload: AddTextPayload) => {
     const fontFamily = payload.textStyle && payload.textStyle.fontFamily ? payload.textStyle.fontFamily : DEFAULT_FONT_FAMILY;
     const justification = payload.textStyle && payload.textStyle.justification ? payload.textStyle.justification : DEFAULT_JUSTIFICATION;
     const leading = payload.textStyle && payload.textStyle.leading ? payload.textStyle.leading : DEFAULT_LEADING;
-    const newText = new paperMain.PointText({
+    const transform = { rotation, horizontalFlip, verticalFlip };
+    const strokeOptions = { cap: strokeCap, join: strokeJoin, dashArray, dashOffset };
+    const style = { fill, stroke, shadow, blendMode, opacity, strokeOptions };
+    const textStyle = { fontSize, leading, fontWeight, fontFamily, justification };
+    const paperFillColor = getPaperFillColor(fill, payload.frame);
+    const paperStrokeColor = getPaperStrokeColor(stroke, payload.frame);
+    const paperShadowColor = getPaperShadowColor(shadow);
+    const paperLayer = new paperMain.PointText({
       point: new paperMain.Point(0, 0),
       content: payload.text,
-      data: {
-        id: id,
-        type: 'Text'
-      },
+      data: { id, type: 'Text' },
       parent: getPaperLayer(parent),
       strokeWidth: stroke.width,
-      shadowColor: shadow.enabled ? getPaperShadowColor(shadow) : null,
+      shadowColor: shadow.enabled ? paperShadowColor : null,
       shadowOffset: shadow.enabled ? new paperMain.Point(shadow.offset.x, shadow.offset.y) : null,
       shadowBlur: shadow.enabled ? shadow.blur : null,
       blendMode,
@@ -660,49 +676,34 @@ export const addTextThunk = (payload: AddTextPayload) => {
       fontFamily,
       justification
     });
-    newText.position = new paperMain.Point(payload.frame.x, payload.frame.y);
-    newText.fillColor = fill.enabled ? fillColor as em.PaperGradientFill : null;
-    newText.strokeColor = stroke.enabled ? strokeColor as em.PaperGradientFill : null;
-    applyTextMethods(newText);
-    dispatch({
+    const x = payload.frame && payload.frame.x ? payload.frame.x : paperMain.view.center.x;
+    const y = payload.frame && payload.frame.y ? payload.frame.y : paperMain.view.center.y;
+    const width = paperLayer.bounds.width;
+    const height = paperLayer.bounds.height;
+    const innerWidth = paperLayer.bounds.width;
+    const innerHeight = paperLayer.bounds.height;
+    const frame = { x, y, width, height, innerHeight, innerWidth };
+    paperLayer.position = new paperMain.Point(payload.frame.x, payload.frame.y);
+    paperLayer.fillColor = fill.enabled ? paperFillColor as em.PaperGradientFill : null;
+    paperLayer.strokeColor = stroke.enabled ? paperStrokeColor as em.PaperGradientFill : null;
+    applyTextMethods(paperLayer);
+    dispatch(addText({
       type: 'Text',
       id: id,
-      name: payload.name ? payload.name : 'Text',
+      name: name,
       parent: parent,
       text: textContent,
       frame: frame,
       selected: false,
       mask: false,
-      masked: false,
+      masked: masked,
       children: null,
       tweenEvents: [],
       tweens: [],
-      style: {
-        fill,
-        stroke,
-        shadow,
-        blendMode,
-        opacity,
-        strokeOptions: {
-          cap: strokeCap,
-          join: strokeJoin,
-          dashArray,
-          dashOffset
-        }
-      },
-      transform: {
-        rotation,
-        horizontalFlip,
-        verticalFlip
-      },
-      textStyle: {
-        fontSize,
-        leading,
-        fontWeight,
-        fontFamily,
-        justification
-      }
-    });
+      style,
+      transform,
+      textStyle
+    }));
   }
 };
 
@@ -720,7 +721,6 @@ export const addImageThunk = (payload: AddImagePayload) => {
     const exists = state.documentSettings.images.allIds.length > 0 && state.documentSettings.images.allIds.find((id) => Buffer.from(state.documentSettings.images.byId[id].buffer).equals(newBuffer));
     const base64 = bufferToBase64(newBuffer);
     const paperLayer = new paperMain.Raster(`data:image/webp;base64,${base64}`);
-    paperLayer.position = paperMain.view.center;
     paperLayer.onLoad = (): void => {
       const id = payload.id ? payload.id : uuidv4();
       const imageId = exists ? exists : payload.imageId ? payload.imageId : uuidv4();
@@ -744,6 +744,18 @@ export const addImageThunk = (payload: AddImagePayload) => {
       const horizontalFlip = payload.transform && payload.transform.horizontalFlip ? payload.transform.horizontalFlip : DEFAULT_HORIZONTAL_FLIP;
       const verticalFlip = payload.transform && payload.transform.verticalFlip ? payload.transform.verticalFlip : DEFAULT_VERTICAL_FLIP;
       const transform = { rotation, horizontalFlip, verticalFlip };
+      const paperShadowColor = getPaperShadowColor(shadow);
+      paperLayer.data = { type: 'Raster', id: 'Raster' };
+      const imageContainer = new paperMain.Group({
+        parent: getPaperLayer(parent),
+        data: { id, imageId, type: 'Image' },
+        shadowColor: shadow.enabled ? paperShadowColor : null,
+        shadowOffset: shadow.enabled ? new paperMain.Point(shadow.offset.x, shadow.offset.y) : null,
+        shadowBlur: shadow.enabled ? shadow.blur : null,
+        children: [paperLayer]
+      });
+      imageContainer.position = new paperMain.Point(frame.x, frame.y);
+      applyImageMethods(paperLayer);
       if (!exists) {
         dispatch(addDocumentImage({id: imageId, buffer: newBuffer}));
       }
@@ -755,7 +767,7 @@ export const addImageThunk = (payload: AddImagePayload) => {
         frame: frame,
         selected: false,
         mask: false,
-        masked: false,
+        masked: payload.masked ? payload.masked : false,
         children: null,
         tweenEvents: [],
         tweens: [],
