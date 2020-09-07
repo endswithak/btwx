@@ -22,7 +22,7 @@ declare namespace em {
 
   type TweenPropMap = { [K in TweenProp]: boolean; }
 
-  type LayerType = 'Group' | 'Shape' | 'Page' | 'Artboard' | 'Text' | 'Image' | 'CompoundShape';
+  type LayerType = 'Group' | 'Shape' | 'Page' | 'Artboard' | 'Text' | 'Image';
 
   type BlendMode = 'normal' | 'darken' | 'multiply' | 'color-burn' | 'lighten' | 'screen' | 'color-dodge' | 'overlay' | 'soft-light' | 'hard-light' | 'difference' | 'exclusion' | 'hue' | 'saturation' | 'color' | 'luminosity' | 'add' | 'subtract' | 'average' | 'pin-light' | 'negation' | 'source-over' | 'source-in' | 'source-out' | 'source-atop' | 'destination-over' | 'destination-in' | 'destination-out' | 'destination-atop' | 'lighter' | 'darker' | 'copy' | 'xor';
 
@@ -238,7 +238,6 @@ declare namespace em {
   interface Shape extends Layer {
     type: 'Shape';
     shapeType: ShapeType;
-    booleanOperation: BooleanOperation;
     children: null;
     path: {
       data: string;
@@ -264,14 +263,6 @@ declare namespace em {
 
   interface Rounded extends Shape {
     radius: number;
-  }
-
-  interface CompoundShape extends Layer {
-    type: 'CompoundShape';
-    pathData: string;
-    children: string[];
-    booleanOperation: BooleanOperation;
-    showChildren: boolean;
   }
 
   interface Image extends Layer {

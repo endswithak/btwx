@@ -6,7 +6,7 @@ import * as layerActions from '../actions/layer';
 import { addItem, removeItem, insertItem, moveItemAbove, moveItemBelow } from './general';
 
 import {
-  AddPage, AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer,
+  AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer,
   AddLayerChild, InsertLayerChild, InsertLayerAbove, InsertLayerBelow, GroupLayers, UngroupLayers, UngroupLayer,
   DeselectAllLayers, RemoveLayers, HideLayerChildren, ShowLayerChildren,
   DecreaseLayerScope, NewLayerScope, SetLayerHover, ClearLayerScope, IncreaseLayerScope,
@@ -27,7 +27,7 @@ import {
   DistributeLayersHorizontally, DistributeLayersVertically, DuplicateLayer, DuplicateLayers, RemoveDuplicatedLayers,
   SendLayerForward, SendLayerBackward, SendLayersForward, SendLayersBackward, SendLayerToFront, SendLayersToFront,
   SendLayerToBack, SendLayersToBack, AddImage, InsertLayersAbove, InsertLayersBelow, AddLayerChildren, SetLayerBlendMode,
-  AddCompoundShape, UniteLayers, SetRoundedRadius, SetPolygonSides, SetStarPoints, IntersectLayers,
+  UniteLayers, SetRoundedRadius, SetPolygonSides, SetStarPoints, IntersectLayers,
   SubtractLayers, ExcludeLayers, DivideLayers, SetStarRadius, SetLayerStrokeDashOffset, SetLayersOpacity,
   SetLayersBlendMode, SetLayersX, SetLayersY, SetLayersWidth, SetLayersHeight, SetLayersRotation, SetLayersFillColor,
   SetLayersStrokeColor, SetLayersShadowColor, EnableLayersFill, DisableLayersFill, EnableLayersStroke, DisableLayersStroke,
@@ -37,7 +37,8 @@ import {
   SetLayerGradientOrigin, SetLayersGradientOrigin, SetLayerGradientDestination, SetLayersGradientDestination, SetLayerGradientStopColor,
   SetLayersGradientStopColor, SetLayerGradientStopPosition, SetLayersGradientStopPosition, AddLayerGradientStop, AddLayersGradientStop,
   RemoveLayerGradientStop, RemoveLayersGradientStop, SetLayerActiveGradientStop, SetLayersShadowBlur, SetLayersShadowXOffset, SetLayersShadowYOffset, SetLayersFontSize,
-  SetLayersFontWeight, SetLayersFontFamily, SetLayersLeading, SetLayersJustification, SetLayerTweenTiming, SetCurvePointOriginX, SetCurvePointOriginY, SetCurvePointOrigin, SetRoundedRadii, SetPolygonsSides, SetStarsPoints, SetStarsRadius, SetLayerEdit, AddLayers
+  SetLayersFontWeight, SetLayersFontFamily, SetLayersLeading, SetLayersJustification, SetLayerTweenTiming, SetCurvePointOriginX,
+  SetCurvePointOriginY, SetCurvePointOrigin, SetRoundedRadii, SetPolygonsSides, SetStarsPoints, SetStarsRadius, SetLayerEdit, AddLayers
 } from '../actionTypes/layer';
 
 import {
@@ -64,19 +65,6 @@ import MeasureGuide from '../../canvas/measureGuide';
 import getTheme from '../theme';
 import store from '../index';
 import { setTweenDrawerEventHover, setTweenDrawerEvent, openTweenDrawer } from '../actions/tweenDrawer';
-
-export const addPage = (state: LayerState, action: AddPage): LayerState => {
-  return {
-    ...state,
-    allIds: addItem(state.allIds, action.payload.id),
-    byId: {
-      ...state.byId,
-      [action.payload.id]: action.payload as em.Page
-    },
-    page: action.payload.id,
-    paperProject: savePaperProjectJSON(state)
-  }
-};
 
 export const addArtboard = (state: LayerState, action: AddArtboard, batch?: boolean): LayerState => {
   let currentState = state;
@@ -332,10 +320,6 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
     // check hover
     if (result.hover === current) {
       result = setLayerHover(result, layerActions.setLayerHover({id: null}) as SetLayerHover);
-    }
-    // if layer compound shape
-    if (layer.type === 'CompoundShape') {
-      result = removeLayers(result, layerActions.removeLayers({layers: layer.children}) as RemoveLayers);
     }
     // if layer mask
     if (layer.mask) {
@@ -1580,10 +1564,7 @@ const getClipboardLayerDescendants = (state: LayerState, id: string) => {
     switch(layerItem.type) {
       case 'Artboard':
       case 'Group': {
-        const clone = paperItem.clone({insert: false});
-        layerItem.children.forEach((id) => {
-          clone.getItem({data: {id}}).remove();
-        });
+        const clone = paperItem.clone({insert: false, deep: false});
         return clone.exportJSON();
       }
       case 'Image': {

@@ -1,9 +1,7 @@
 import {
-  ADD_PAGE,
   ADD_ARTBOARD,
   ADD_GROUP,
   ADD_SHAPE,
-  ADD_COMPOUND_SHAPE,
   ADD_TEXT,
   ADD_IMAGE,
   ADD_LAYERS,
@@ -196,7 +194,6 @@ import {
 } from '../actionTypes/layer';
 
 import {
-  addPage,
   addArtboard,
   addShape,
   addGroup,
@@ -392,7 +389,7 @@ import {
 
 export interface LayerState {
   byId: {
-    [id: string]: em.Page | em.Artboard | em.Group | em.Shape | em.Text | em.Image | em.CompoundShape;
+    [id: string]: em.Page | em.Artboard | em.Group | em.Shape | em.Text | em.Image;
   };
   allIds: string[];
   page: string;
@@ -471,8 +468,6 @@ const initialState: LayerState = {
 
 export default (state = initialState, action: LayerTypes): LayerState => {
   switch (action.type) {
-    case ADD_PAGE:
-      return addPage(state, action);
     case ADD_ARTBOARD:
       return addArtboard(state, action);
     case ADD_GROUP:

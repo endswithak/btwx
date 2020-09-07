@@ -1,10 +1,8 @@
-export const ADD_PAGE = 'ADD_PAGE';
 export const ADD_GROUP = 'ADD_GROUP';
 export const ADD_SHAPE = 'ADD_SHAPE';
 export const ADD_ARTBOARD = 'ADD_ARTBOARD';
 export const ADD_TEXT = 'ADD_TEXT';
 export const ADD_IMAGE = 'ADD_IMAGE';
-export const ADD_COMPOUND_SHAPE = 'ADD_COMPOUND_SHAPE';
 export const ADD_LAYERS = 'ADD_LAYERS';
 
 export const REMOVE_LAYER = 'REMOVE_LAYER';
@@ -237,17 +235,6 @@ export const SET_CURVE_POINT_ORIGIN_Y = 'SSET_CURVE_POINT_ORIGIN_Y';
 
 export const SET_LAYER_EDIT = 'SET_LAYER_EDIT';
 
-// Page
-
-export type AddPagePayload = {
-  [P in keyof em.Page]?: em.Page[P];
-} & { paperLayer?: paper.Item }
-
-export interface AddPage {
-  type: typeof ADD_PAGE;
-  payload: AddPagePayload;
-}
-
 // Artboard
 
 export type AddArtboardPayload = {
@@ -281,17 +268,6 @@ export interface AddShape {
   payload: AddShapePayload;
 }
 
-// Compound Shape
-
-export type AddCompoundShapePayload = {
-  [P in keyof em.CompoundShape]?: em.CompoundShape[P];
-} & { paperLayer?: paper.Item }
-
-export interface AddCompoundShape {
-  type: typeof ADD_COMPOUND_SHAPE;
-  payload: AddCompoundShapePayload;
-}
-
 // Text
 
 export type AddTextPayload = {
@@ -307,7 +283,7 @@ export interface AddText {
 
 export type AddImagePayload = {
   [P in keyof em.Image]?: em.Image[P];
-} & { paperLayer?: paper.Item }
+} & { buffer?: Buffer }
 
 export interface AddImage {
   type: typeof ADD_IMAGE;
@@ -2201,11 +2177,9 @@ export interface SetLayerEdit {
   payload: SetLayerEditPayload;
 }
 
-export type LayerTypes = AddPage |
-                         AddArtboard |
+export type LayerTypes = AddArtboard |
                          AddGroup |
                          AddShape |
-                         AddCompoundShape |
                          AddText |
                          AddImage |
                          AddLayers |

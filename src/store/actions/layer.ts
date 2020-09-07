@@ -1,18 +1,20 @@
 import { v4 as uuidv4 } from 'uuid';
 import { paperMain } from '../../canvas';
-import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_TEXT_STYLE, DEFAULT_SHADOW_STYLE, DEFAULT_BLEND_MODE, DEFAULT_OPACITY, DEFAULT_STROKE_DASH_ARRAY, DEFAULT_STROKE_DASH_OFFSET, DEFAULT_STROKE_CAP, DEFAULT_STROKE_JOIN, DEFAULT_ROTATION, DEFAULT_HORIZONTAL_FLIP, DEFAULT_VERTICAL_FLIP, DEFAULT_TEXT_VALUE, DEFAULT_FONT_SIZE, DEFAULT_FONT_WEIGHT, DEFAULT_FONT_FAMILY, DEFAULT_JUSTIFICATION, DEFAULT_LEADING } from '../../constants';
+import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_TEXT_STYLE, DEFAULT_SHADOW_STYLE, DEFAULT_BLEND_MODE, DEFAULT_OPACITY, DEFAULT_STROKE_DASH_ARRAY, DEFAULT_STROKE_DASH_OFFSET, DEFAULT_STROKE_CAP, DEFAULT_STROKE_JOIN, DEFAULT_ROTATION, DEFAULT_HORIZONTAL_FLIP, DEFAULT_VERTICAL_FLIP, DEFAULT_TEXT_VALUE, DEFAULT_FONT_SIZE, DEFAULT_FONT_WEIGHT, DEFAULT_FONT_FAMILY, DEFAULT_JUSTIFICATION, DEFAULT_LEADING, DEFAULT_SHADOW_COLOR, DEFAULT_SHADOW_OFFSET_X, DEFAULT_SHADOW_OFFSET_Y, DEFAULT_SHADOW_BLUR } from '../../constants';
 import { applyImageMethods } from '../../canvas/imageUtils';
 import { applyShapeMethods } from '../../canvas/shapeUtils';
 import { applyTextMethods } from '../../canvas/textUtils';
 import { applyArtboardMethods } from '../../canvas/artboardUtils';
-import { getPaperLayer, getCurvePoints } from '../selectors/layer';
+import { getCurvePoints } from '../selectors/layer';
+import { getPaperFillColor, getPaperStrokeColor, getPaperLayer, getPaperShadowColor } from '../utils/paper';
+import { bufferToBase64 } from '../../utils';
+
+import { addDocumentImage } from './documentSettings';
 
 import {
-  ADD_PAGE,
   ADD_ARTBOARD,
   ADD_GROUP,
   ADD_SHAPE,
-  ADD_COMPOUND_SHAPE,
   ADD_TEXT,
   ADD_IMAGE,
   ADD_LAYERS,
@@ -397,58 +399,40 @@ import {
   SetLayerEditPayload,
   LayerTypes
 } from '../actionTypes/layer';
-
-// Page
-
-export const addPage = (payload: AddPagePayload): LayerTypes => {
-  const layerId = uuidv4();
-  const paperLayer = new paperMain.Group({
-    data: { id: layerId, type: 'Page' }
-  });
-  return {
-    type: ADD_PAGE,
-    payload: {
-      type: 'Page',
-      id: layerId,
-      name: payload.name ? payload.name : 'Page',
-      parent: null,
-      children: [],
-      selected: false,
-      tweenEvents: [],
-      tweens: []
-    }
-  }
-};
+import { RootState } from '../reducers';
 
 // Artboard
 
-export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
-  const id = payload.id ? payload.id : uuidv4();
-  // create background
-  const artboardBackground = new paperMain.Path.Rectangle({
-    point: new paperMain.Point(0,0),
-    size: [payload.frame.width, payload.frame.height],
-    data: { id: 'ArtboardBackground', type: 'ArtboardBackground' },
-    fillColor: DEFAULT_ARTBOARD_BACKGROUND_COLOR,
-    position: new paperMain.Point(payload.frame.x, payload.frame.y),
-  });
-  // create mask
-  const artboardMask = artboardBackground.clone();
-  artboardMask.data = { id: 'ArtboardMask', type: 'ArtboardMask' };
-  artboardMask.clipMask = true;
-  // create artboard group
-  const artboard = new paperMain.Group({
-    name: payload.name ? payload.name : 'Artboard',
-    data: { id: id, type: 'Artboard' },
-    children: [artboardMask, artboardBackground],
-    parent: getPaperLayer('page')
-  });
-  // apply artboard methods to background
-  applyArtboardMethods(artboard);
-  // return action
-  return {
-    type: ADD_ARTBOARD,
-    payload: {
+export const addArtboard = (payload: AddArtboardPayload): LayerTypes => ({
+  type: ADD_ARTBOARD,
+  payload
+});
+
+export const addArtboardThunk = (payload: AddArtboardPayload) => {
+  return (dispatch: any, getState: any) => {
+    const id = payload.id ? payload.id : uuidv4();
+    // create background
+    const artboardBackground = new paperMain.Path.Rectangle({
+      point: new paperMain.Point(0,0),
+      size: [payload.frame.width, payload.frame.height],
+      data: { id: 'ArtboardBackground', type: 'ArtboardBackground' },
+      fillColor: DEFAULT_ARTBOARD_BACKGROUND_COLOR,
+      position: new paperMain.Point(payload.frame.x, payload.frame.y),
+    });
+    // create mask
+    const artboardMask = artboardBackground.clone();
+    artboardMask.data = { id: 'ArtboardMask', type: 'ArtboardMask' };
+    artboardMask.clipMask = true;
+    // create artboard group
+    const artboard = new paperMain.Group({
+      data: { id: id, type: 'Artboard' },
+      children: [artboardMask, artboardBackground],
+      parent: getPaperLayer('page')
+    });
+    // apply artboard methods to background
+    applyArtboardMethods(artboard);
+    // dispatch action
+    dispatch(addArtboard({
       ...payload,
       type: 'Artboard',
       id: id,
@@ -464,23 +448,26 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => {
       masked: false,
       transform: DEFAULT_TRANSFORM,
       style: DEFAULT_STYLE
-    }
+    }));
   }
 };
 
 // Group
 
-export const addGroup = (payload: AddGroupPayload): LayerTypes => {
-  const id = payload.id ? payload.id : uuidv4();
-  const parent = payload.parent ? payload.parent : 'page';
-  new paperMain.Group({
-    name: payload.name ? payload.name : 'Group',
-    data: { id: id, type: 'Group' },
-    parent: getPaperLayer(parent)
-  });
-  return {
-    type: ADD_GROUP,
-    payload: {
+export const addGroup = (payload: AddGroupPayload): LayerTypes => ({
+  type: ADD_GROUP,
+  payload
+});
+
+export const addGroupThunk = (payload: AddGroupPayload) => {
+  return (dispatch: any, getState: any) => {
+    const id = payload.id ? payload.id : uuidv4();
+    const parent = payload.parent ? payload.parent : 'page';
+    new paperMain.Group({
+      data: { id: id, type: 'Group' },
+      parent: getPaperLayer(parent)
+    });
+    dispatch(addGroup({
       ...payload,
       type: 'Group',
       id: id,
@@ -507,76 +494,66 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => {
           enabled: false
         }
       }
-    }
+    }));
   }
 };
 
 // Shape
 
-export const addShape = (payload: AddShapePayload): LayerTypes => {
-  const id = payload.id ? payload.id : uuidv4();
-  const parent = payload.parent ? payload.parent : 'page';
-  const fill = payload.style && payload.style.fill ? {...DEFAULT_TEXT_STYLE, ...payload.style.fill} : DEFAULT_FILL_STYLE;
-  const fillColor = fill.fillType === 'color' ? { hue: fill.color.h, saturation: fill.color.s, lightness: fill.color.l, alpha: fill.color.a } : {
-    gradient: {
-      stops: fill.gradient.stops.reduce((result, current) => {
-        result = [...result, new paperMain.GradientStop({ hue: current.color.h, saturation: current.color.s, lightness: current.color.l, alpha: current.color.a } as paper.Color, current.position)];
-        return result;
-      }, []),
-      radial: fill.gradient.gradientType === 'radial'
-    },
-    origin: new paperMain.Point((fill.gradient.origin.x * payload.frame.innerWidth) + payload.frame.x, (fill.gradient.origin.y * payload.frame.innerHeight) + payload.frame.y),
-    destination: new paperMain.Point((fill.gradient.destination.x * payload.frame.innerWidth) + payload.frame.x, (fill.gradient.destination.y * payload.frame.innerHeight) + payload.frame.y)
-  }
-  const stroke = payload.style && payload.style.stroke ? {...DEFAULT_STROKE_STYLE, ...payload.style.stroke} : DEFAULT_STROKE_STYLE;
-  const strokeColor = stroke.fillType === 'color' ? { hue: stroke.color.h, saturation: stroke.color.s, lightness: stroke.color.l, alpha: stroke.color.a } : {
-    gradient: {
-      stops: stroke.gradient.stops.reduce((result, current) => {
-        result = [...result, new paperMain.GradientStop({ hue: current.color.h, saturation: current.color.s, lightness: current.color.l, alpha: current.color.a } as paper.Color, current.position)];
-        return result;
-      }, []),
-      radial: stroke.gradient.gradientType === 'radial'
-    },
-    origin: new paperMain.Point((stroke.gradient.origin.x * payload.frame.innerWidth) + payload.frame.x, (stroke.gradient.origin.y * payload.frame.innerHeight) + payload.frame.y),
-    destination: new paperMain.Point((stroke.gradient.destination.x * payload.frame.innerWidth) + payload.frame.x, (stroke.gradient.destination.y * payload.frame.innerHeight) + payload.frame.y)
-  }
-  const shadow = payload.style && payload.style.shadow ? {...DEFAULT_SHADOW_STYLE, ...payload.style.shadow} : DEFAULT_SHADOW_STYLE;
-  const opacity = payload.style && payload.style.opacity ? payload.style.opacity : DEFAULT_OPACITY;
-  const blendMode = payload.style && payload.style.blendMode ? payload.style.blendMode : DEFAULT_BLEND_MODE;
-  const dashArray = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.dashArray ? payload.style.strokeOptions.dashArray : DEFAULT_STROKE_DASH_ARRAY;
-  const dashOffset = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.dashOffset ? payload.style.strokeOptions.dashOffset : DEFAULT_STROKE_DASH_OFFSET;
-  const strokeCap = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.cap ? payload.style.strokeOptions.cap : DEFAULT_STROKE_CAP;
-  const strokeJoin = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.join ? payload.style.strokeOptions.join : DEFAULT_STROKE_JOIN;
-  const clipMask = payload.mask ? payload.mask : false;
-  const rotation = payload.transform && payload.transform.rotation ? payload.transform.rotation : DEFAULT_ROTATION;
-  const horizontalFlip = payload.transform && payload.transform.horizontalFlip ? payload.transform.horizontalFlip : DEFAULT_HORIZONTAL_FLIP;
-  const verticalFlip = payload.transform && payload.transform.verticalFlip ? payload.transform.verticalFlip : DEFAULT_VERTICAL_FLIP;
-  const newShape = new paperMain.CompoundPath({
-    pathData: payload.path.data,
-    closed: payload.path.closed,
-    strokeWidth: stroke.width,
-    shadowColor: shadow.enabled ? { hue: shadow.color.h, saturation: shadow.color.s, lightness: shadow.color.l, alpha: shadow.color.a } : null,
-    shadowOffset: shadow.enabled ? new paperMain.Point(shadow.offset.x, shadow.offset.y) : null,
-    shadowBlur: shadow.enabled ? shadow.blur : null,
-    blendMode: blendMode,
-    opacity: opacity,
-    dashArray: dashArray,
-    dashOffset: dashOffset,
-    strokeCap: strokeCap,
-    strokeJoin: strokeJoin,
-    clipMask: clipMask,
-    data: { id: id, type: 'Shape' },
-    parent: getPaperLayer(parent)
-  });
-  newShape.children.forEach((item) => item.data = { id: 'ShapePartial' });
-  newShape.position = new paperMain.Point(payload.frame.x, payload.frame.y);
-  newShape.fillColor = fill.enabled ? fillColor as em.PaperGradientFill : null;
-  newShape.strokeColor = stroke.enabled ? strokeColor as em.PaperGradientFill : null;
-  applyShapeMethods(newShape);
-  return {
-    type: ADD_SHAPE,
-    payload: {
-      ...payload,
+export const addShape = (payload: AddShapePayload): LayerTypes => ({
+  type: ADD_SHAPE,
+  payload
+});
+
+export const addShapeThunk = (payload: AddShapePayload) => {
+  return (dispatch: any, getState: any) => {
+    const id = payload.id ? payload.id : uuidv4();
+    const parent = payload.parent ? payload.parent : 'page';
+    // const x = payload.frame && payload.frame.x ? payload.frame.x : paperMain.view.center.x;
+    // const y = payload.frame && payload.frame.y ? payload.frame.y : paperMain.view.center.y;
+    const fill = payload.style && payload.style.fill ? {...DEFAULT_TEXT_STYLE, ...payload.style.fill} : DEFAULT_FILL_STYLE;
+    const fillColor = getPaperFillColor(fill, payload.frame);
+    const stroke = payload.style && payload.style.stroke ? {...DEFAULT_STROKE_STYLE, ...payload.style.stroke} : DEFAULT_STROKE_STYLE;
+    const strokeColor = getPaperStrokeColor(stroke, payload.frame);
+    const shadowEnabled = payload.style && payload.style.shadow && payload.style.shadow.enabled ? payload.style.shadow.enabled : false;
+    const shadowColor = payload.style && payload.style.shadow && payload.style.shadow.color ? {...DEFAULT_SHADOW_COLOR, ...payload.style.shadow.color} : DEFAULT_SHADOW_COLOR;
+    const shadowOffsetX = payload.style && payload.style.shadow && payload.style.shadow.offset.x ? payload.style.shadow.offset.x : DEFAULT_SHADOW_OFFSET_X;
+    const shadowOffsetY = payload.style && payload.style.shadow && payload.style.shadow.offset.y ? payload.style.shadow.offset.y : DEFAULT_SHADOW_OFFSET_Y;
+    const shadowBlur = payload.style && payload.style.shadow && payload.style.shadow.blur ? payload.style.shadow.blur : DEFAULT_SHADOW_BLUR;
+    const shadow = { enabled: shadowEnabled, fillType: 'color', color: shadowColor, offset: { x: shadowOffsetX, y: shadowOffsetY }, blur: shadowBlur } as em.Shadow;
+    const opacity = payload.style && payload.style.opacity ? payload.style.opacity : DEFAULT_OPACITY;
+    const blendMode = payload.style && payload.style.blendMode ? payload.style.blendMode : DEFAULT_BLEND_MODE;
+    const dashArray = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.dashArray ? payload.style.strokeOptions.dashArray : DEFAULT_STROKE_DASH_ARRAY;
+    const dashOffset = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.dashOffset ? payload.style.strokeOptions.dashOffset : DEFAULT_STROKE_DASH_OFFSET;
+    const strokeCap = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.cap ? payload.style.strokeOptions.cap : DEFAULT_STROKE_CAP;
+    const strokeJoin = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.join ? payload.style.strokeOptions.join : DEFAULT_STROKE_JOIN;
+    const clipMask = payload.mask ? payload.mask : false;
+    const rotation = payload.transform && payload.transform.rotation ? payload.transform.rotation : DEFAULT_ROTATION;
+    const horizontalFlip = payload.transform && payload.transform.horizontalFlip ? payload.transform.horizontalFlip : DEFAULT_HORIZONTAL_FLIP;
+    const verticalFlip = payload.transform && payload.transform.verticalFlip ? payload.transform.verticalFlip : DEFAULT_VERTICAL_FLIP;
+    const newShape = new paperMain.CompoundPath({
+      pathData: payload.path.data,
+      closed: payload.path.closed,
+      strokeWidth: stroke.width,
+      shadowColor: shadow.enabled ? getPaperShadowColor(shadow as em.Shadow) : null,
+      shadowOffset: shadow.enabled ? new paperMain.Point(shadow.offset.x, shadow.offset.y) : null,
+      shadowBlur: shadow.enabled ? shadow.blur : null,
+      blendMode: blendMode,
+      opacity: opacity,
+      dashArray: dashArray,
+      dashOffset: dashOffset,
+      strokeCap: strokeCap,
+      strokeJoin: strokeJoin,
+      clipMask: clipMask,
+      data: { id: id, type: 'Shape' },
+      parent: getPaperLayer(parent)
+    });
+    newShape.children.forEach((item) => item.data = { id: 'ShapePartial' });
+    newShape.position = new paperMain.Point(payload.frame.x, payload.frame.y);
+    newShape.fillColor = fill.enabled ? fillColor as em.PaperGradientFill : null;
+    newShape.strokeColor = stroke.enabled ? strokeColor as em.PaperGradientFill : null;
+    applyShapeMethods(newShape);
+    dispatch(addShape({
       type: payload.type,
       id: id,
       name: payload.name,
@@ -607,113 +584,93 @@ export const addShape = (payload: AddShapePayload): LayerTypes => {
         horizontalFlip,
         verticalFlip
       },
-      booleanOperation: 'none',
       path: {
         data: newShape.pathData,
         points: getCurvePoints(newShape),
         closed: newShape.closed
       }
-    }
+    }));
   }
 };
 
-// Compound Shape
+// Text
 
-export const addCompoundShape = (payload: AddCompoundShapePayload): LayerTypes => ({
-  type: ADD_COMPOUND_SHAPE,
+export const addText = (payload: AddTextPayload): LayerTypes => ({
+  type: ADD_TEXT,
   payload
 });
 
-// Text
-
-export const addText = (payload: AddTextPayload): LayerTypes => {
-  const id = payload.id ? payload.id : uuidv4();
-  const textContent = payload.text ? payload.text : DEFAULT_TEXT_VALUE;
-  const parent = payload.parent ? payload.parent : 'page';
-  const fill = payload.style && payload.style.fill ? {...DEFAULT_TEXT_STYLE, ...payload.style.fill} : DEFAULT_FILL_STYLE;
-  const fillColor = fill.fillType === 'color' ? { hue: fill.color.h, saturation: fill.color.s, lightness: fill.color.l, alpha: fill.color.a } : {
-    gradient: {
-      stops: fill.gradient.stops.reduce((result, current) => {
-        result = [...result, new paperMain.GradientStop({ hue: current.color.h, saturation: current.color.s, lightness: current.color.l, alpha: current.color.a } as paper.Color, current.position)];
-        return result;
-      }, []),
-      radial: fill.gradient.gradientType === 'radial'
-    },
-    origin: new paperMain.Point((fill.gradient.origin.x * payload.frame.innerWidth) + payload.frame.x, (fill.gradient.origin.y * payload.frame.innerHeight) + payload.frame.y),
-    destination: new paperMain.Point((fill.gradient.destination.x * payload.frame.innerWidth) + payload.frame.x, (fill.gradient.destination.y * payload.frame.innerHeight) + payload.frame.y)
-  }
-  const stroke = payload.style && payload.style.stroke ? {...DEFAULT_STROKE_STYLE, ...payload.style.stroke} : DEFAULT_STROKE_STYLE;
-  const strokeColor = stroke.fillType === 'color' ? { hue: stroke.color.h, saturation: stroke.color.s, lightness: stroke.color.l, alpha: stroke.color.a } : {
-    gradient: {
-      stops: stroke.gradient.stops.reduce((result, current) => {
-        result = [...result, new paperMain.GradientStop({ hue: current.color.h, saturation: current.color.s, lightness: current.color.l, alpha: current.color.a } as paper.Color, current.position)];
-        return result;
-      }, []),
-      radial: stroke.gradient.gradientType === 'radial'
-    },
-    origin: new paperMain.Point((stroke.gradient.origin.x * payload.frame.innerWidth) + payload.frame.x, (stroke.gradient.origin.y * payload.frame.innerHeight) + payload.frame.y),
-    destination: new paperMain.Point((stroke.gradient.destination.x * payload.frame.innerWidth) + payload.frame.x, (stroke.gradient.destination.y * payload.frame.innerHeight) + payload.frame.y)
-  }
-  const x = payload.frame && payload.frame.x ? payload.frame.x : payload.paperLayer.position.x;
-  const y = payload.frame && payload.frame.y ? payload.frame.y : payload.paperLayer.position.y;
-  const width = payload.frame && payload.frame.width ? payload.frame.width : payload.paperLayer.bounds.width;
-  const height = payload.frame && payload.frame.height ? payload.frame.height : payload.paperLayer.bounds.height;
-  const innerWidth = payload.frame && payload.frame.innerWidth ? payload.frame.innerWidth : payload.paperLayer.bounds.width;
-  const innerHeight = payload.frame && payload.frame.innerHeight ? payload.frame.innerHeight : payload.paperLayer.bounds.height;
-  const shadow = payload.style && payload.style.shadow ? {...DEFAULT_SHADOW_STYLE, ...payload.style.shadow} : DEFAULT_SHADOW_STYLE;
-  const opacity = payload.style && payload.style.opacity ? payload.style.opacity : DEFAULT_OPACITY;
-  const blendMode = payload.style && payload.style.blendMode ? payload.style.blendMode : DEFAULT_BLEND_MODE;
-  const rotation = payload.transform && payload.transform.rotation ? payload.transform.rotation : DEFAULT_ROTATION;
-  const horizontalFlip = payload.transform && payload.transform.horizontalFlip ? payload.transform.horizontalFlip : DEFAULT_HORIZONTAL_FLIP;
-  const verticalFlip = payload.transform && payload.transform.verticalFlip ? payload.transform.verticalFlip : DEFAULT_VERTICAL_FLIP;
-  const dashArray = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.dashArray ? payload.style.strokeOptions.dashArray : DEFAULT_STROKE_DASH_ARRAY;
-  const dashOffset = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.dashOffset ? payload.style.strokeOptions.dashOffset : DEFAULT_STROKE_DASH_OFFSET;
-  const strokeCap = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.cap ? payload.style.strokeOptions.cap : DEFAULT_STROKE_CAP;
-  const strokeJoin = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.join ? payload.style.strokeOptions.join : DEFAULT_STROKE_JOIN;
-  const fontSize = payload.textStyle && payload.textStyle.fontSize ? payload.textStyle.fontSize : DEFAULT_FONT_SIZE;
-  const fontWeight = payload.textStyle && payload.textStyle.fontWeight ? payload.textStyle.fontWeight : DEFAULT_FONT_WEIGHT;
-  const fontFamily = payload.textStyle && payload.textStyle.fontFamily ? payload.textStyle.fontFamily : DEFAULT_FONT_FAMILY;
-  const justification = payload.textStyle && payload.textStyle.justification ? payload.textStyle.justification : DEFAULT_JUSTIFICATION;
-  const leading = payload.textStyle && payload.textStyle.leading ? payload.textStyle.leading : DEFAULT_LEADING;
-  const newText = new paperMain.PointText({
-    point: new paperMain.Point(0, 0),
-    content: payload.text,
-    data: {
-      id: id,
-      type: 'Text'
-    },
-    parent: getPaperLayer(parent),
-    strokeWidth: stroke.width,
-    shadowColor: shadow.enabled ? { hue: shadow.color.h, saturation: shadow.color.s, lightness: shadow.color.l, alpha: shadow.color.a } : null,
-    shadowOffset: shadow.enabled ? new paperMain.Point(shadow.offset.x, shadow.offset.y) : null,
-    shadowBlur: shadow.enabled ? shadow.blur : null,
-    blendMode,
-    opacity,
-    dashArray,
-    dashOffset,
-    strokeCap,
-    strokeJoin,
-    fontSize,
-    leading,
-    fontWeight,
-    fontFamily,
-    justification
-  });
-  newText.position = new paperMain.Point(payload.frame.x, payload.frame.y);
-  newText.fillColor = fill.enabled ? fillColor as em.PaperGradientFill : null;
-  newText.strokeColor = stroke.enabled ? strokeColor as em.PaperGradientFill : null;
-  applyTextMethods(newText);
-  return {
-    type: ADD_TEXT,
-    payload: {
+export const addTextThunk = (payload: AddTextPayload) => {
+  return (dispatch: any, getState: any) => {
+    const id = payload.id ? payload.id : uuidv4();
+    const textContent = payload.text ? payload.text : DEFAULT_TEXT_VALUE;
+    const parent = payload.parent ? payload.parent : 'page';
+    const fill = payload.style && payload.style.fill ? {...DEFAULT_TEXT_STYLE, ...payload.style.fill} : DEFAULT_FILL_STYLE;
+    const fillColor = getPaperFillColor(fill, payload.frame);
+    const stroke = payload.style && payload.style.stroke ? {...DEFAULT_STROKE_STYLE, ...payload.style.stroke} : DEFAULT_STROKE_STYLE;
+    const strokeColor = getPaperStrokeColor(stroke, payload.frame);
+    const x = payload.frame && payload.frame.x ? payload.frame.x : paperMain.view.center.x;
+    const y = payload.frame && payload.frame.y ? payload.frame.y : paperMain.view.center.y;
+    const width = payload.frame && payload.frame.width ? payload.frame.width : payload.paperLayer.bounds.width;
+    const height = payload.frame && payload.frame.height ? payload.frame.height : payload.paperLayer.bounds.height;
+    const innerWidth = payload.frame && payload.frame.innerWidth ? payload.frame.innerWidth : payload.paperLayer.bounds.width;
+    const innerHeight = payload.frame && payload.frame.innerHeight ? payload.frame.innerHeight : payload.paperLayer.bounds.height;
+    const frame = { x, y, width, height, innerHeight, innerWidth };
+    const opacity = payload.style && payload.style.opacity ? payload.style.opacity : DEFAULT_OPACITY;
+    const blendMode = payload.style && payload.style.blendMode ? payload.style.blendMode : DEFAULT_BLEND_MODE;
+    const shadowEnabled = payload.style && payload.style.shadow && payload.style.shadow.enabled ? payload.style.shadow.enabled : false;
+    const shadowColor = payload.style && payload.style.shadow && payload.style.shadow.color ? {...DEFAULT_SHADOW_COLOR, ...payload.style.shadow.color} : DEFAULT_SHADOW_COLOR;
+    const shadowOffsetX = payload.style && payload.style.shadow && payload.style.shadow.offset.x ? payload.style.shadow.offset.x : DEFAULT_SHADOW_OFFSET_X;
+    const shadowOffsetY = payload.style && payload.style.shadow && payload.style.shadow.offset.y ? payload.style.shadow.offset.y : DEFAULT_SHADOW_OFFSET_Y;
+    const shadowBlur = payload.style && payload.style.shadow && payload.style.shadow.blur ? payload.style.shadow.blur : DEFAULT_SHADOW_BLUR;
+    const shadow = { enabled: shadowEnabled, fillType: 'color', color: shadowColor, offset: { x: shadowOffsetX, y: shadowOffsetY }, blur: shadowBlur } as em.Shadow;
+    const rotation = payload.transform && payload.transform.rotation ? payload.transform.rotation : DEFAULT_ROTATION;
+    const horizontalFlip = payload.transform && payload.transform.horizontalFlip ? payload.transform.horizontalFlip : DEFAULT_HORIZONTAL_FLIP;
+    const verticalFlip = payload.transform && payload.transform.verticalFlip ? payload.transform.verticalFlip : DEFAULT_VERTICAL_FLIP;
+    const dashArray = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.dashArray ? payload.style.strokeOptions.dashArray : DEFAULT_STROKE_DASH_ARRAY;
+    const dashOffset = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.dashOffset ? payload.style.strokeOptions.dashOffset : DEFAULT_STROKE_DASH_OFFSET;
+    const strokeCap = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.cap ? payload.style.strokeOptions.cap : DEFAULT_STROKE_CAP;
+    const strokeJoin = payload.style && payload.style.strokeOptions && payload.style.strokeOptions.join ? payload.style.strokeOptions.join : DEFAULT_STROKE_JOIN;
+    const fontSize = payload.textStyle && payload.textStyle.fontSize ? payload.textStyle.fontSize : DEFAULT_FONT_SIZE;
+    const fontWeight = payload.textStyle && payload.textStyle.fontWeight ? payload.textStyle.fontWeight : DEFAULT_FONT_WEIGHT;
+    const fontFamily = payload.textStyle && payload.textStyle.fontFamily ? payload.textStyle.fontFamily : DEFAULT_FONT_FAMILY;
+    const justification = payload.textStyle && payload.textStyle.justification ? payload.textStyle.justification : DEFAULT_JUSTIFICATION;
+    const leading = payload.textStyle && payload.textStyle.leading ? payload.textStyle.leading : DEFAULT_LEADING;
+    const newText = new paperMain.PointText({
+      point: new paperMain.Point(0, 0),
+      content: payload.text,
+      data: {
+        id: id,
+        type: 'Text'
+      },
+      parent: getPaperLayer(parent),
+      strokeWidth: stroke.width,
+      shadowColor: shadow.enabled ? getPaperShadowColor(shadow) : null,
+      shadowOffset: shadow.enabled ? new paperMain.Point(shadow.offset.x, shadow.offset.y) : null,
+      shadowBlur: shadow.enabled ? shadow.blur : null,
+      blendMode,
+      opacity,
+      dashArray,
+      dashOffset,
+      strokeCap,
+      strokeJoin,
+      fontSize,
+      leading,
+      fontWeight,
+      fontFamily,
+      justification
+    });
+    newText.position = new paperMain.Point(payload.frame.x, payload.frame.y);
+    newText.fillColor = fill.enabled ? fillColor as em.PaperGradientFill : null;
+    newText.strokeColor = stroke.enabled ? strokeColor as em.PaperGradientFill : null;
+    applyTextMethods(newText);
+    dispatch({
       type: 'Text',
       id: id,
       name: payload.name ? payload.name : 'Text',
       parent: parent,
       text: textContent,
-      frame: {
-        x, y, width, height, innerWidth, innerHeight
-      },
+      frame: frame,
       selected: false,
       mask: false,
       masked: false,
@@ -745,76 +702,80 @@ export const addText = (payload: AddTextPayload): LayerTypes => {
         fontFamily,
         justification
       }
-    }
+    });
   }
 };
 
 // Image
 
-export const addImage = (payload: AddImagePayload): LayerTypes => {
-  const id = payload.id ? payload.id : uuidv4();
-  const parent = payload.parent ? payload.parent : 'page';
-  const x = payload.frame && payload.frame.x ? payload.frame.x : payload.paperLayer.position.x;
-  const y = payload.frame && payload.frame.y ? payload.frame.y : payload.paperLayer.position.y;
-  const width = payload.frame && payload.frame.width ? payload.frame.width : payload.paperLayer.bounds.width;
-  const height = payload.frame && payload.frame.height ? payload.frame.height : payload.paperLayer.bounds.height;
-  const innerWidth = payload.frame && payload.frame.innerWidth ? payload.frame.innerWidth : payload.paperLayer.bounds.width;
-  const innerHeight = payload.frame && payload.frame.innerHeight ? payload.frame.innerHeight : payload.paperLayer.bounds.height;
-  const shadow = payload.style && payload.style.shadow ? {...DEFAULT_SHADOW_STYLE, ...payload.style.shadow} : DEFAULT_SHADOW_STYLE;
-  const opacity = payload.style && payload.style.opacity ? payload.style.opacity : DEFAULT_OPACITY;
-  const blendMode = payload.style && payload.style.blendMode ? payload.style.blendMode : DEFAULT_BLEND_MODE;
-  const rotation = payload.transform && payload.transform.rotation ? payload.transform.rotation : DEFAULT_ROTATION;
-  const horizontalFlip = payload.transform && payload.transform.horizontalFlip ? payload.transform.horizontalFlip : DEFAULT_HORIZONTAL_FLIP;
-  const verticalFlip = payload.transform && payload.transform.verticalFlip ? payload.transform.verticalFlip : DEFAULT_VERTICAL_FLIP;
-  payload.paperLayer.data = { id: 'Raster', type: 'Raster' };
-  payload.paperLayer.bounds.width = width;
-  payload.paperLayer.bounds.height = height;
-  payload.paperLayer.position = new paperMain.Point(x, y);
-  const imageContainer = new paperMain.Group({
-    data: { id: id, type: 'Image', imageId: payload.imageId },
-    children: [payload.paperLayer],
-    shadowColor: shadow.enabled ? { hue: shadow.color.h, saturation: shadow.color.s, lightness: shadow.color.l, alpha: shadow.color.a } : null,
-    shadowOffset: shadow.enabled ? new paperMain.Point(shadow.offset.x, shadow.offset.y) : null,
-    shadowBlur: shadow.enabled ? shadow.blur : null,
-    parent: getPaperLayer(parent)
-  });
-  applyImageMethods(payload.paperLayer);
-  return {
-    type: ADD_IMAGE,
-    payload: {
-      type: 'Image',
-      id: id,
-      name: payload.name ? payload.name : 'Image',
-      parent: parent,
-      frame: {
-        x, y, width, height, innerWidth, innerHeight
-      },
-      selected: false,
-      mask: false,
-      masked: false,
-      children: null,
-      tweenEvents: [],
-      tweens: [],
-      transform: {
-        rotation,
-        horizontalFlip,
-        verticalFlip
-      },
-      style: {
-        ...DEFAULT_STYLE,
-        fill: {
-          ...DEFAULT_STYLE.fill,
-          enabled: false
+export const addImage = (payload: AddImagePayload): LayerTypes => ({
+  type: ADD_IMAGE,
+  payload
+});
+
+export const addImageThunk = (payload: AddImagePayload) => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    const newBuffer = Buffer.from(payload.buffer);
+    const exists = state.documentSettings.images.allIds.length > 0 && state.documentSettings.images.allIds.find((id) => Buffer.from(state.documentSettings.images.byId[id].buffer).equals(newBuffer));
+    const base64 = bufferToBase64(newBuffer);
+    const paperLayer = new paperMain.Raster(`data:image/webp;base64,${base64}`);
+    paperLayer.position = paperMain.view.center;
+    paperLayer.onLoad = (): void => {
+      const id = payload.id ? payload.id : uuidv4();
+      const imageId = exists ? exists : payload.imageId ? payload.imageId : uuidv4();
+      const parent = payload.parent ? payload.parent : 'page';
+      const x = payload.frame && payload.frame.x ? payload.frame.x : paperMain.view.center.x;
+      const y = payload.frame && payload.frame.y ? payload.frame.y : paperMain.view.center.y;
+      const width = paperLayer.bounds.width;
+      const height = paperLayer.bounds.height;
+      const innerWidth = paperLayer.bounds.width;
+      const innerHeight = paperLayer.bounds.height;
+      const frame = { x, y, width, height, innerWidth, innerHeight };
+      const opacity = payload.style && payload.style.opacity ? payload.style.opacity : DEFAULT_OPACITY;
+      const blendMode = payload.style && payload.style.blendMode ? payload.style.blendMode : DEFAULT_BLEND_MODE;
+      const shadowEnabled = payload.style && payload.style.shadow && payload.style.shadow.enabled ? payload.style.shadow.enabled : false;
+      const shadowColor = payload.style && payload.style.shadow && payload.style.shadow.color ? {...DEFAULT_SHADOW_COLOR, ...payload.style.shadow.color} : DEFAULT_SHADOW_COLOR;
+      const shadowOffsetX = payload.style && payload.style.shadow && payload.style.shadow.offset.x ? payload.style.shadow.offset.x : DEFAULT_SHADOW_OFFSET_X;
+      const shadowOffsetY = payload.style && payload.style.shadow && payload.style.shadow.offset.y ? payload.style.shadow.offset.y : DEFAULT_SHADOW_OFFSET_Y;
+      const shadowBlur = payload.style && payload.style.shadow && payload.style.shadow.blur ? payload.style.shadow.blur : DEFAULT_SHADOW_BLUR;
+      const shadow = { enabled: shadowEnabled, fillType: 'color', color: shadowColor, offset: { x: shadowOffsetX, y: shadowOffsetY }, blur: shadowBlur } as em.Shadow;
+      const rotation = payload.transform && payload.transform.rotation ? payload.transform.rotation : DEFAULT_ROTATION;
+      const horizontalFlip = payload.transform && payload.transform.horizontalFlip ? payload.transform.horizontalFlip : DEFAULT_HORIZONTAL_FLIP;
+      const verticalFlip = payload.transform && payload.transform.verticalFlip ? payload.transform.verticalFlip : DEFAULT_VERTICAL_FLIP;
+      const transform = { rotation, horizontalFlip, verticalFlip };
+      if (!exists) {
+        dispatch(addDocumentImage({id: imageId, buffer: newBuffer}));
+      }
+      dispatch(addImage({
+        type: 'Image',
+        id: id,
+        name: payload.name ? payload.name : 'Image',
+        parent: parent,
+        frame: frame,
+        selected: false,
+        mask: false,
+        masked: false,
+        children: null,
+        tweenEvents: [],
+        tweens: [],
+        style: {
+          ...DEFAULT_STYLE,
+          fill: {
+            ...DEFAULT_STYLE.fill,
+            enabled: false
+          },
+          stroke: {
+            ...DEFAULT_STYLE.stroke,
+            enabled: false
+          },
+          shadow,
+          opacity,
+          blendMode
         },
-        stroke: {
-          ...DEFAULT_STYLE.stroke,
-          enabled: false
-        },
-        shadow,
-        opacity,
-        blendMode
-      },
-      imageId: payload.imageId
+        transform,
+        imageId
+      }));
     }
   }
 };

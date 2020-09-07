@@ -1,4 +1,5 @@
 import { createStore, applyMiddleware } from 'redux';
+import thunk from 'redux-thunk';
 import { remote } from 'electron';
 import logger from 'redux-logger';
 import rootReducer, { RootState } from './reducers';
@@ -14,7 +15,7 @@ export const persistConfig = {
 
 const persistedReducer = persistReducer<RootState>(persistConfig, rootReducer);
 
-const store = createStore(persistedReducer, applyMiddleware(logger));
+const store = createStore(persistedReducer, applyMiddleware(logger, thunk));
 export const persistor = persistStore(store);
 export type StoreDispatch = typeof store.dispatch;
 export type StoreGetState = typeof store.getState;
