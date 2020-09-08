@@ -31,9 +31,6 @@ import {
   GROUP_LAYERS,
   UNGROUP_LAYER,
   UNGROUP_LAYERS,
-  COPY_LAYER_TO_CLIPBOARD,
-  COPY_LAYERS_TO_CLIPBOARD,
-  PASTE_LAYERS_FROM_CLIPBOARD,
   MOVE_LAYER,
   MOVE_LAYERS,
   MOVE_LAYER_TO,
@@ -532,12 +529,6 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return ungroupLayer(state, action);
     case UNGROUP_LAYERS:
       return ungroupLayers(state, action);
-    case COPY_LAYER_TO_CLIPBOARD:
-      return copyLayerToClipboard(state, action);
-    case COPY_LAYERS_TO_CLIPBOARD:
-      return copyLayersToClipboard(state, action);
-    case PASTE_LAYERS_FROM_CLIPBOARD:
-      return pasteLayersFromClipboard(state, action);
     case MOVE_LAYER:
       return moveLayer(state, action);
     case MOVE_LAYERS:

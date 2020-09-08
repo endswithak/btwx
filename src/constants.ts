@@ -103,8 +103,8 @@ export const DEFAULT_STYLE: em.Style = {
   fill: DEFAULT_FILL_STYLE,
   stroke: DEFAULT_STROKE_STYLE,
   strokeOptions: DEFAULT_STROKE_OPTIONS_STYLE,
-  opacity: DEFAULT_OPACITY,
   shadow: DEFAULT_SHADOW_STYLE,
+  opacity: DEFAULT_OPACITY,
   blendMode: DEFAULT_BLEND_MODE
 }
 

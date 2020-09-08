@@ -123,8 +123,8 @@ declare namespace em {
     fill: Fill;
     stroke: Stroke;
     strokeOptions: StrokeOptions;
-    opacity: number;
     shadow: Shadow;
+    opacity: number;
     blendMode: BlendMode;
   }
 
@@ -186,8 +186,8 @@ declare namespace em {
   interface Layer {
     type: LayerType;
     id: string;
-    frame: em.Frame;
     name: string;
+    frame: em.Frame;
     parent: string;
     selected: boolean;
     children: string[] | null;
@@ -197,17 +197,6 @@ declare namespace em {
     transform: Transform;
     masked: boolean;
     mask: boolean;
-  }
-
-  interface ClipboardLayer {
-    type: LayerType;
-    id: string;
-    name: string;
-    parent: string;
-    paperLayer: string;
-    selected: boolean;
-    children: string[] | null;
-    imageId?: string;
   }
 
   type ClipboardType = 'layers' | 'style';

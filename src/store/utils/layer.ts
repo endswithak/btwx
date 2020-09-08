@@ -9,8 +9,7 @@ import {
   AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer,
   AddLayerChild, InsertLayerChild, InsertLayerAbove, InsertLayerBelow, GroupLayers, UngroupLayers, UngroupLayer,
   DeselectAllLayers, RemoveLayers, HideLayerChildren, ShowLayerChildren,
-  DecreaseLayerScope, NewLayerScope, SetLayerHover, ClearLayerScope, IncreaseLayerScope,
-  CopyLayerToClipboard, CopyLayersToClipboard, PasteLayersFromClipboard, SelectLayers,
+  DecreaseLayerScope, NewLayerScope, SetLayerHover, ClearLayerScope, IncreaseLayerScope, SelectLayers,
   DeselectLayers, MoveLayerTo, MoveLayerBy, MoveLayersTo, MoveLayersBy, DeepSelectLayer, EscapeLayerScope,
   MoveLayer, MoveLayers, AddArtboard, SetLayerName, SetActiveArtboard, AddLayerTween, RemoveLayerTween,
   AddLayerTweenEvent, RemoveLayerTweenEvent, SetLayerTweenDuration, SetLayerTweenDelay, SetLayerTweenEase,
@@ -1542,34 +1541,10 @@ export const ungroupLayers = (state: LayerState, action: UngroupLayers): LayerSt
   return currentState;
 };
 
-const getClipboardLayerDescendants = (state: LayerState, id: string) => {
-  const layer = state.byId[id];
-  const paperLayer = getPaperLayer(id);
-  const getPaperLayerJSON = (paperItem: paper.Item, layerItem: em.Layer) => {
-    switch(layerItem.type) {
-      case 'Artboard':
-      case 'Group': {
-        const clone = paperItem.clone({insert: false, deep: false});
-        return clone.exportJSON();
-      }
-      case 'Image': {
-        const imageJSON = paperItem.exportJSON();
-        const imageSource = (paperItem.getItem({data: {id: 'Raster'}}) as paper.Raster).source;
-        return imageJSON.replace(imageSource as string, paperItem.data.imageId);
-      }
-      default:
-        return paperItem.exportJSON();
-    }
-  }
+const getLayerCloneMap = (state: LayerState, id: string) => {
   const groups: string[] = [id];
-  const clipboardLayerDescendants: {allIds: string[]; byId: {[id: string]: em.ClipboardLayer}} = {
-    allIds: [id],
-    byId: {
-      [id]: {
-        ...layer,
-        paperLayer: getPaperLayerJSON(paperLayer, layer)
-      }
-    }
+  const layerCloneMap: {[id: string]: string} = {
+    [id]: uuidv4()
   };
   let i = 0;
   while(i < groups.length) {
@@ -1577,55 +1552,6 @@ const getClipboardLayerDescendants = (state: LayerState, id: string) => {
     if (layer.children) {
       layer.children.forEach((child) => {
         const childLayer = state.byId[child];
-        const childPaperLayer = getPaperLayer(child);
-        if (childLayer.children && childLayer.children.length > 0) {
-          groups.push(child);
-        }
-        clipboardLayerDescendants.allIds.push(child);
-        clipboardLayerDescendants.byId[child] = {
-          ...childLayer,
-          paperLayer: getPaperLayerJSON(childPaperLayer, childLayer)
-        }
-      });
-    }
-    i++;
-  }
-  return clipboardLayerDescendants;
-}
-
-export const copyLayerToClipboard = (state: LayerState, action: CopyLayerToClipboard): LayerState => {
-  if (!state.clipboard.allIds.includes(action.payload.id)) {
-    const clipboardLayerAncestors = getClipboardLayerDescendants(state, action.payload.id);
-    return {
-      ...state,
-      clipboard: {
-        main: addItem(state.clipboard.main, action.payload.id),
-        allIds: [...state.clipboard.allIds, ...clipboardLayerAncestors.allIds],
-        byId: { ...state.clipboard.byId, ...clipboardLayerAncestors.byId }
-      }
-    }
-  } else {
-    return state;
-  }
-};
-
-export const copyLayersToClipboard = (state: LayerState, action: CopyLayersToClipboard): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
-    return copyLayerToClipboard(result, layerActions.copyLayerToClipboard({id: current}) as CopyLayerToClipboard);
-  }, {...state, clipboard: {main: [], allIds: [], byId: {}}});
-};
-
-const getLayerCloneMap = (state: LayerState, id: string, fromClipboard?: boolean) => {
-  const groups: string[] = [id];
-  const layerCloneMap: {[id: string]: string} = {
-    [id]: uuidv4()
-  };
-  let i = 0;
-  while(i < groups.length) {
-    const layer = fromClipboard ? state.clipboard.byId[groups[i]] : state.byId[groups[i]];
-    if (layer.children) {
-      layer.children.forEach((child) => {
-        const childLayer = fromClipboard ? state.clipboard.byId[child] : state.byId[child];
         if (childLayer.children && childLayer.children.length > 0) {
           groups.push(child);
         }
@@ -1637,19 +1563,8 @@ const getLayerCloneMap = (state: LayerState, id: string, fromClipboard?: boolean
   return layerCloneMap;
 }
 
-const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any, fromClipboard?: boolean, documentImages?: { [id: string]: em.DocumentImage }) => {
-  const paperLayer = fromClipboard ? paperMain.project.importJSON((() => {
-    const layer = state.clipboard.byId[id];
-    switch(layer.type) {
-      case 'Image': {
-        const imageBuffer = Buffer.from(documentImages[layer.imageId].buffer);
-        const imageBase64 = `data:image/webp;base64,${bufferToBase64(imageBuffer)}`;
-        return layer.paperLayer.replace(`"source":"${layer.imageId}"`, `"source":"${imageBase64}"`);
-      }
-      default:
-        return layer.paperLayer;
-    }
-  })()) : getPaperLayer(id);
+const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any) => {
+  const paperLayer = getPaperLayer(id);
   const parentLayer = getLayer(state, state.scope.length > 0 ? state.scope[state.scope.length - 1] : state.page);
   const paperParentLayer = getPaperLayer(parentLayer.id);
   const paperLayerClone = paperLayer.clone({deep: paperLayer.className === 'CompoundPath', insert: true});
@@ -1679,22 +1594,12 @@ const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any, fro
   const groups: string[] = [id];
   let i = 0;
   while(i < groups.length) {
-    const layer = fromClipboard ? state.clipboard.byId[groups[i]] : state.byId[groups[i]];
+    const layer = state.byId[groups[i]];
     const groupClonePaperLayer = getPaperLayer(layerCloneMap[layer.id]);
     if (layer.children) {
       layer.children.forEach((child) => {
-        const childLayer = fromClipboard ? state.clipboard.byId[child] : state.byId[child];
-        const childPaperLayer = fromClipboard ? paperMain.project.importJSON((() => {
-          switch(childLayer.type) {
-            case 'Image': {
-              const imageBuffer = Buffer.from(documentImages[childLayer.imageId].buffer);
-              const imageBase64 = `data:image/webp;base64,${bufferToBase64(imageBuffer)}`;
-              return (childLayer as em.ClipboardLayer).paperLayer.replace(`"source":"${childLayer.imageId}"`, `"source":"${imageBase64}"`);
-            }
-            default:
-              return (childLayer as em.ClipboardLayer).paperLayer;
-          }
-        })()) : getPaperLayer(child);
+        const childLayer = state.byId[child];
+        const childPaperLayer = getPaperLayer(child);
         const childPaperLayerClone = childPaperLayer.clone({deep: childPaperLayer.className === 'CompoundPath', insert: true});
         childPaperLayerClone.data.id = layerCloneMap[child];
         childPaperLayerClone.parent = groupClonePaperLayer;
@@ -1719,13 +1624,13 @@ const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any, fro
   }
 }
 
-const cloneLayerAndChildren = (state: LayerState, id: string, fromClipboard?: boolean, documentImages?: { [id: string]: em.DocumentImage }) => {
-  const layerCloneMap = getLayerCloneMap(state, id, fromClipboard);
-  clonePaperLayers(state, id, layerCloneMap, fromClipboard, documentImages);
-  const rootLayer = fromClipboard ? state.clipboard.byId[id] : state.byId[id];
+const cloneLayerAndChildren = (state: LayerState, id: string) => {
+  const layerCloneMap = getLayerCloneMap(state, id);
+  clonePaperLayers(state, id, layerCloneMap);
+  const rootLayer = state.byId[id];
   const rootParent = getLayer(state, state.scope.length > 0 ? state.scope[state.scope.length - 1] : state.page);
   return Object.keys(layerCloneMap).reduce((result: any, key: string, index: number) => {
-    const layer = fromClipboard ? state.clipboard.byId[key] : state.byId[key];
+    const layer = state.byId[key];
     const cloneId = layerCloneMap[key];
     return {
       ...result,
@@ -1747,41 +1652,22 @@ const cloneLayerAndChildren = (state: LayerState, id: string, fromClipboard?: bo
   }, {allIds: [], byId: {}});
 }
 
-export const pasteLayerFromClipboard = (payload: {state: LayerState; id: string; pasteOverSelection?: boolean; documentImages?: { [id: string]: em.DocumentImage }}): LayerState => {
-  let currentState = payload.state;
-  currentState = duplicateLayer(currentState, layerActions.duplicateLayer({id: payload.id}) as DuplicateLayer, true, payload.documentImages);
-  const clonedLayerAndChildren = currentState.allIds.filter((id) => !payload.state.allIds.includes(id));
-  // paste over selection is specified
-  if (payload.pasteOverSelection && payload.state.selected.length > 0) {
-    const selectionCenter = getSelectionCenter(payload.state);
-    const clipboardCenter = getClipboardCenter(payload.state, payload.documentImages);
-    const paperLayer = getPaperLayer(clonedLayerAndChildren[0]);
-    const paperLayerCenter = paperLayer.position;
-    paperLayer.position.x = selectionCenter.x + (paperLayerCenter.x - clipboardCenter.x);
-    paperLayer.position.y = selectionCenter.y + (paperLayerCenter.y - clipboardCenter.y);
-    currentState = moveLayerTo(currentState, layerActions.moveLayerTo({id: clonedLayerAndChildren[0], x: paperLayer.position.x, y: paperLayer.position.y}) as MoveLayerTo);
-  }
-  return currentState;
-};
-
-export const pasteLayersFromClipboard = (state: LayerState, action: PasteLayersFromClipboard): LayerState => {
-  let currentState = state;
-  if (state.clipboard.allIds.length > 0) {
-    currentState = currentState.clipboard.main.reduce((result: LayerState, current: string) => {
-      return pasteLayerFromClipboard({
-        state: result,
-        id: current,
-        pasteOverSelection: action.payload.overSelection,
-        documentImages: action.payload.documentImageById
-      });
-    }, state);
-    if (state.selected.length > 0) {
-      currentState = deselectLayers(currentState, layerActions.deselectLayers({layers: state.selected}) as DeselectLayers);
-    }
-    currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
-  }
-  return currentState;
-};
+// export const pasteLayerFromClipboard = (payload: {state: LayerState; id: string; pasteOverSelection?: boolean; documentImages?: { [id: string]: em.DocumentImage }}): LayerState => {
+//   let currentState = payload.state;
+//   currentState = duplicateLayer(currentState, layerActions.duplicateLayer({id: payload.id}) as DuplicateLayer, true, payload.documentImages);
+//   const clonedLayerAndChildren = currentState.allIds.filter((id) => !payload.state.allIds.includes(id));
+//   // paste over selection is specified
+//   if (payload.pasteOverSelection && payload.state.selected.length > 0) {
+//     const selectionCenter = getSelectionCenter(payload.state);
+//     const clipboardCenter = getClipboardCenter(payload.state, payload.documentImages);
+//     const paperLayer = getPaperLayer(clonedLayerAndChildren[0]);
+//     const paperLayerCenter = paperLayer.position;
+//     paperLayer.position.x = selectionCenter.x + (paperLayerCenter.x - clipboardCenter.x);
+//     paperLayer.position.y = selectionCenter.y + (paperLayerCenter.y - clipboardCenter.y);
+//     currentState = moveLayerTo(currentState, layerActions.moveLayerTo({id: clonedLayerAndChildren[0], x: paperLayer.position.x, y: paperLayer.position.y}) as MoveLayerTo);
+//   }
+//   return currentState;
+// };
 
 export const updateParentBounds = (state: LayerState, id: string): LayerState => {
   const layerScope = getLayerScope(state, id);
@@ -4689,9 +4575,9 @@ export const distributeLayersVertically = (state: LayerState, action: Distribute
   return currentState;
 };
 
-export const duplicateLayer = (state: LayerState, action: DuplicateLayer, fromClipboard?: boolean, documentImages?: { [id: string]: em.DocumentImage }): LayerState => {
+export const duplicateLayer = (state: LayerState, action: DuplicateLayer): LayerState => {
   let currentState = state;
-  const clonedLayerAndChildren = cloneLayerAndChildren(currentState, action.payload.id, fromClipboard, documentImages);
+  const clonedLayerAndChildren = cloneLayerAndChildren(currentState, action.payload.id);
   const rootLayer = clonedLayerAndChildren.byId[clonedLayerAndChildren.allIds[0]];
   currentState = clonedLayerAndChildren.allIds.reduce((result: LayerState, current: string, index: number) => {
     const layer = clonedLayerAndChildren.byId[current];
@@ -4750,10 +4636,10 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer, fromCl
   return currentState;
 };
 
-export const duplicateLayers = (state: LayerState, action: DuplicateLayers, fromClipboard?: boolean): LayerState => {
+export const duplicateLayers = (state: LayerState, action: DuplicateLayers): LayerState => {
   let currentState = state;
   currentState = action.payload.layers.reduce((result, current) => {
-    return duplicateLayer(result, layerActions.duplicateLayer({id: current}) as DuplicateLayer, fromClipboard);
+    return duplicateLayer(result, layerActions.duplicateLayer({id: current}) as DuplicateLayer);
   }, currentState);
   if (state.selected.length > 0) {
     currentState = deselectLayers(currentState, layerActions.deselectLayers({layers: state.selected}) as DeselectLayers);

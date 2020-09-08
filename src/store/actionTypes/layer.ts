@@ -41,10 +41,6 @@ export const UNGROUP_LAYER = 'UNGROUP_LAYER';
 export const UNGROUP_LAYERS = 'UNGROUP_LAYERS';
 export const SET_GROUP_SCOPE = 'SET_GROUP_SCOPE';
 
-export const COPY_LAYER_TO_CLIPBOARD = 'COPY_LAYER_TO_CLIPBOARD';
-export const COPY_LAYERS_TO_CLIPBOARD = 'COPY_LAYERS_TO_CLIPBOARD';
-export const PASTE_LAYERS_FROM_CLIPBOARD = 'PASTE_LAYERS_FROM_CLIPBOARD';
-
 export const MOVE_LAYER = 'MOVE_LAYER';
 export const MOVE_LAYERS = 'MOVE_LAYERS';
 export const MOVE_LAYER_TO = 'MOVE_LAYER_TO';
@@ -585,38 +581,6 @@ export interface SetGroupScopePayload {
 export interface SetGroupScope {
   type: typeof SET_GROUP_SCOPE;
   payload: SetGroupScopePayload;
-}
-
-// Clipboard
-
-export interface CopyLayerToClipboardPayload {
-  id: string;
-}
-
-export interface CopyLayerToClipboard {
-  type: typeof COPY_LAYER_TO_CLIPBOARD;
-  payload: CopyLayerToClipboardPayload;
-}
-
-export interface CopyLayersToClipboardPayload {
-  layers: string[];
-}
-
-export interface CopyLayersToClipboard {
-  type: typeof COPY_LAYERS_TO_CLIPBOARD;
-  payload: CopyLayersToClipboardPayload;
-}
-
-export interface PasteLayersFromClipboardPayload {
-  overSelection?: boolean;
-  documentImageById?: {
-    [id: string]: em.DocumentImage;
-  };
-}
-
-export interface PasteLayersFromClipboard {
-  type: typeof PASTE_LAYERS_FROM_CLIPBOARD;
-  payload: PasteLayersFromClipboardPayload;
 }
 
 // Move
@@ -2230,9 +2194,6 @@ export type LayerTypes = AddArtboard |
                          GroupLayers |
                          UngroupLayer |
                          UngroupLayers |
-                         CopyLayerToClipboard |
-                         CopyLayersToClipboard |
-                         PasteLayersFromClipboard |
                          MoveLayer |
                          MoveLayers |
                          MoveLayerTo |

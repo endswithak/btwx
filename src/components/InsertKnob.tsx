@@ -153,23 +153,20 @@ const InsertKnob = (props: InsertKnobProps): ReactElement => {
         properties: ['openFile']
       }).then(result => {
         if (result.filePaths.length > 0 && !result.canceled) {
-          sharp(result.filePaths[0]).metadata().then(({ width }) => {
-            sharp(result.filePaths[0]).resize(Math.round(width * 0.5)).webp({quality: 50}).toBuffer().then((buffer) => {
-              const newBuffer = Buffer.from(buffer);
-              addImageThunk({layer: {}, buffer: newBuffer});
-              // const exists = allDocumentImageIds.length > 0 && allDocumentImageIds.find((id) => Buffer.from(documentImagesById[id].buffer).equals(newBuffer));
-              // const base64 = bufferToBase64(newBuffer);
-              // const paperLayer = new paperMain.Raster(`data:image/webp;base64,${base64}`);
-              // paperLayer.position = paperMain.view.center;
-              // paperLayer.onLoad = (): void => {
-              //   if (exists) {
-              //     addImage({paperLayer, imageId: exists});
-              //   } else {
-              //     const imageId = uuidv4();
-              //     addImage({paperLayer, imageId: imageId});
-              //     addDocumentImage({id: imageId, buffer: buffer});
-              //   }
-              // }
+          sharp(result.filePaths[0]).metadata().then(({ width, height }) => {
+            sharp(result.filePaths[0]).resize(Math.round(width * 0.5)).webp({quality: 50}).toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
+              const newBuffer = Buffer.from(data);
+              addImageThunk({
+                layer: {
+                  frame: {
+                    width: info.width,
+                    height: info.height,
+                    innerWidth: info.width,
+                    innerHeight: info.height
+                  } as em.Frame
+                },
+                buffer: newBuffer
+              });
             });
           });
         }

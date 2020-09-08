@@ -7,6 +7,7 @@ import { applyTextMethods } from '../../canvas/textUtils';
 import { applyArtboardMethods } from '../../canvas/artboardUtils';
 import { getCurvePoints } from '../selectors/layer';
 import { getPaperFillColor, getPaperStrokeColor, getPaperLayer, getPaperShadowColor, getPaperShapePathData } from '../utils/paper';
+import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerShapePath, getLayerTextStyle } from '../utils/actions';
 import { bufferToBase64 } from '../../utils';
 
 import { addDocumentImage } from './documentSettings';
@@ -44,9 +45,6 @@ import {
   GROUP_LAYERS,
   UNGROUP_LAYER,
   UNGROUP_LAYERS,
-  COPY_LAYER_TO_CLIPBOARD,
-  COPY_LAYERS_TO_CLIPBOARD,
-  PASTE_LAYERS_FROM_CLIPBOARD,
   MOVE_LAYER,
   MOVE_LAYERS,
   MOVE_LAYER_TO,
@@ -465,6 +463,7 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => ({
 export const addGroupThunk = (payload: AddGroupPayload) => {
   return (dispatch: any, getState: any): Promise<any> => {
     const id = payload.layer.id ? payload.layer.id : uuidv4();
+    const name = payload.layer.name ? payload.layer.name : 'Group';
     const parent = payload.layer.parent ? payload.layer.parent : 'page';
     const masked = payload.layer.masked && (payload.layer.masked !== null || payload.layer.masked !== undefined) ? payload.layer.masked : false;
     new paperMain.Group({
@@ -476,7 +475,7 @@ export const addGroupThunk = (payload: AddGroupPayload) => {
         layer: {
           type: 'Group',
           id: id,
-          name: payload.layer.name ? payload.layer.name : 'Group',
+          name: name,
           parent: parent,
           frame: payload.layer.frame,
           children: [],
@@ -513,90 +512,41 @@ export const addShapeThunk = (payload: AddShapePayload) => {
   return (dispatch: any, getState: any): Promise<any> => {
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const parent = payload.layer.parent ? payload.layer.parent : 'page';
-    const x = payload.layer.frame && payload.layer.frame.x ? payload.layer.frame.x : paperMain.view.center.x;
-    const y = payload.layer.frame && payload.layer.frame.y ? payload.layer.frame.y : paperMain.view.center.y;
-    const width = payload.layer.frame && payload.layer.frame.width ? payload.layer.frame.width : DEFAULT_SHAPE_WIDTH;
-    const height = payload.layer.frame && payload.layer.frame.width ? payload.layer.frame.height : DEFAULT_SHAPE_HEIGHT;
-    const innerWidth = payload.layer.frame && payload.layer.frame.innerWidth ? payload.layer.frame.innerWidth : DEFAULT_SHAPE_WIDTH;
-    const innerHeight = payload.layer.frame && payload.layer.frame.innerHeight ? payload.layer.frame.innerHeight : DEFAULT_SHAPE_HEIGHT;
-    const frame = { x, y, width, height, innerWidth, innerHeight };
     const shapeType = payload.layer.shapeType ? payload.layer.shapeType : 'Rectangle';
     const name = payload.layer.name ? payload.layer.name : shapeType;
-    const hasRadius = payload.layer.shapeType === 'Rounded' || payload.layer.shapeType === 'Star';
-    const radius = hasRadius ? (payload.layer as em.Star | em.Rounded).radius ? (payload.layer as em.Star | em.Rounded).radius : payload.layer.shapeType === 'Rounded' ? DEFAULT_ROUNDED_RADIUS : DEFAULT_STAR_RADIUS : null;
-    const points = payload.layer.shapeType === 'Star' ? (payload.layer as em.Star).points ? (payload.layer as em.Star).points : DEFAULT_STAR_POINTS : null;
-    const sides = payload.layer.shapeType === 'Polygon' ? (payload.layer as em.Polygon).sides ? (payload.layer as em.Polygon).sides : DEFAULT_POLYGON_SIDES : null;
-    const pathData = payload.layer.path && payload.layer.path.data ? payload.layer.path.data : getPaperShapePathData(shapeType, innerWidth, innerHeight, x, y, { radius, points, sides });
-    const closed = payload.layer.path && (payload.layer.path.closed !== null || payload.layer.path.closed !== undefined) ? payload.layer.path.closed : true;
-    const path = { data: pathData, closed: closed, points: getCurvePoints(new paperMain.Path({pathData, insert: false})) };
-    const fill = payload.layer.style && payload.layer.style.fill ? {...DEFAULT_TEXT_STYLE, ...payload.layer.style.fill} : DEFAULT_FILL_STYLE;
-    const paperFillColor = getPaperFillColor(fill, payload.layer.frame);
-    const stroke = payload.layer.style && payload.layer.style.stroke ? {...DEFAULT_STROKE_STYLE, ...payload.layer.style.stroke} : DEFAULT_STROKE_STYLE;
-    const paperStrokeColor = getPaperStrokeColor(stroke, payload.layer.frame);
-    const shadowEnabled = payload.layer.style && payload.layer.style.shadow && payload.layer.style.shadow.enabled ? payload.layer.style.shadow.enabled : false;
-    const shadowColor = payload.layer.style && payload.layer.style.shadow && payload.layer.style.shadow.color ? {...DEFAULT_SHADOW_COLOR, ...payload.layer.style.shadow.color} : DEFAULT_SHADOW_COLOR;
-    const shadowOffsetX = payload.layer.style && payload.layer.style.shadow && payload.layer.style.shadow.offset.x ? payload.layer.style.shadow.offset.x : DEFAULT_SHADOW_OFFSET_X;
-    const shadowOffsetY = payload.layer.style && payload.layer.style.shadow && payload.layer.style.shadow.offset.y ? payload.layer.style.shadow.offset.y : DEFAULT_SHADOW_OFFSET_Y;
-    const shadowBlur = payload.layer.style && payload.layer.style.shadow && payload.layer.style.shadow.blur ? payload.layer.style.shadow.blur : DEFAULT_SHADOW_BLUR;
-    const shadow = { enabled: shadowEnabled, fillType: 'color', color: shadowColor, offset: { x: shadowOffsetX, y: shadowOffsetY }, blur: shadowBlur } as em.Shadow;
-    const paperShadowColor = getPaperShadowColor(shadow as em.Shadow);
-    const opacity = payload.layer.style && payload.layer.style.opacity ? payload.layer.style.opacity : DEFAULT_OPACITY;
-    const blendMode = payload.layer.style && payload.layer.style.blendMode ? payload.layer.style.blendMode : DEFAULT_BLEND_MODE;
-    const dashArray = payload.layer.style && payload.layer.style.strokeOptions && payload.layer.style.strokeOptions.dashArray ? payload.layer.style.strokeOptions.dashArray : DEFAULT_STROKE_DASH_ARRAY;
-    const dashOffset = payload.layer.style && payload.layer.style.strokeOptions && payload.layer.style.strokeOptions.dashOffset ? payload.layer.style.strokeOptions.dashOffset : DEFAULT_STROKE_DASH_OFFSET;
-    const strokeCap = payload.layer.style && payload.layer.style.strokeOptions && payload.layer.style.strokeOptions.cap ? payload.layer.style.strokeOptions.cap : DEFAULT_STROKE_CAP;
-    const strokeJoin = payload.layer.style && payload.layer.style.strokeOptions && payload.layer.style.strokeOptions.join ? payload.layer.style.strokeOptions.join : DEFAULT_STROKE_JOIN;
+    const frame = getLayerFrame(payload);
+    const shapeOpts = getLayerShapeOpts(payload);
+    const path = getLayerShapePath(payload);
+    const style = getLayerStyle(payload);
+    const transform = getLayerTransform(payload);
+    const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as em.Shadow) : null;
+    const paperShadowOffset = style.shadow.enabled ? new paperMain.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
+    const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
+    const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as em.PaperGradientFill : null;
+    const paperStrokeColor = style.stroke.enabled ? getPaperStrokeColor(style.stroke, frame) as em.PaperGradientFill : null;
     const mask = payload.layer.mask && (payload.layer.mask !== null || payload.layer.mask !== undefined) ? payload.layer.mask : false;
     const masked = payload.layer.masked && (payload.layer.masked !== null || payload.layer.masked !== undefined) ? payload.layer.masked : false;
-    const rotation = payload.layer.transform && payload.layer.transform.rotation ? payload.layer.transform.rotation : DEFAULT_ROTATION;
-    const horizontalFlip = payload.layer.transform && payload.layer.transform.horizontalFlip ? payload.layer.transform.horizontalFlip : DEFAULT_HORIZONTAL_FLIP;
-    const verticalFlip = payload.layer.transform && payload.layer.transform.verticalFlip ? payload.layer.transform.verticalFlip : DEFAULT_VERTICAL_FLIP;
-    const transform = { rotation, horizontalFlip, verticalFlip };
-    const strokeOptions = { cap: strokeCap, join: strokeJoin, dashArray, dashOffset };
-    const style = { fill, stroke, shadow, blendMode, opacity, strokeOptions };
-    const shapeOpts = (() => {
-      switch(shapeType) {
-        case 'Ellipse':
-        case 'Rectangle':
-          return {};
-        case 'Rounded':
-          return {
-            radius
-          };
-        case 'Star':
-          return {
-            points,
-            radius
-          }
-        case 'Polygon':
-          return {
-            sides
-          }
-        default:
-          return {};
-      }
-    })();
     const paperLayer = new paperMain.CompoundPath({
-      pathData: pathData,
+      pathData: path.data,
       closed: closed,
-      strokeWidth: stroke.width,
-      shadowColor: shadow.enabled ? paperShadowColor : null,
-      shadowOffset: shadow.enabled ? new paperMain.Point(shadow.offset.x, shadow.offset.y) : null,
-      shadowBlur: shadow.enabled ? shadow.blur : null,
-      blendMode: blendMode,
-      opacity: opacity,
-      dashArray: dashArray,
-      dashOffset: dashOffset,
-      strokeCap: strokeCap,
-      strokeJoin: strokeJoin,
+      strokeWidth: style.stroke.width,
+      shadowColor: paperShadowColor,
+      shadowOffset: paperShadowOffset,
+      shadowBlur: paperShadowBlur,
+      blendMode: style.blendMode,
+      opacity: style.opacity,
+      dashArray: style.strokeOptions.dashArray,
+      dashOffset: style.strokeOptions.dashOffset,
+      strokeCap: style.strokeOptions.cap,
+      strokeJoin: style.strokeOptions.join,
       clipMask: mask,
       data: { id, type: 'Shape' },
       parent: getPaperLayer(parent)
     });
     paperLayer.children.forEach((item) => item.data = { id: 'ShapePartial' });
     paperLayer.position = new paperMain.Point(frame.x, frame.y);
-    paperLayer.fillColor = fill.enabled ? paperFillColor as em.PaperGradientFill : null;
-    paperLayer.strokeColor = stroke.enabled ? paperStrokeColor as em.PaperGradientFill : null;
+    paperLayer.fillColor = paperFillColor;
+    paperLayer.strokeColor = paperStrokeColor;
     applyShapeMethods(paperLayer);
     if (!payload.batch) {
       dispatch(addShape({
@@ -639,66 +589,39 @@ export const addTextThunk = (payload: AddTextPayload) => {
     const name = payload.layer.name ? payload.layer.name : textContent;
     const masked = payload.layer.masked && (payload.layer.masked !== null || payload.layer.masked !== undefined) ? payload.layer.masked : false;
     const parent = payload.layer.parent ? payload.layer.parent : 'page';
-    const fill = payload.layer.style && payload.layer.style.fill ? {...DEFAULT_TEXT_STYLE, ...payload.layer.style.fill} : DEFAULT_FILL_STYLE;
-    const stroke = payload.layer.style && payload.layer.style.stroke ? {...DEFAULT_STROKE_STYLE, ...payload.layer.style.stroke} : DEFAULT_STROKE_STYLE;
-    const opacity = payload.layer.style && payload.layer.style.opacity ? payload.layer.style.opacity : DEFAULT_OPACITY;
-    const blendMode = payload.layer.style && payload.layer.style.blendMode ? payload.layer.style.blendMode : DEFAULT_BLEND_MODE;
-    const shadowEnabled = payload.layer.style && payload.layer.style.shadow && payload.layer.style.shadow.enabled ? payload.layer.style.shadow.enabled : false;
-    const shadowColor = payload.layer.style && payload.layer.style.shadow && payload.layer.style.shadow.color ? {...DEFAULT_SHADOW_COLOR, ...payload.layer.style.shadow.color} : DEFAULT_SHADOW_COLOR;
-    const shadowOffsetX = payload.layer.style && payload.layer.style.shadow && payload.layer.style.shadow.offset.x ? payload.layer.style.shadow.offset.x : DEFAULT_SHADOW_OFFSET_X;
-    const shadowOffsetY = payload.layer.style && payload.layer.style.shadow && payload.layer.style.shadow.offset.y ? payload.layer.style.shadow.offset.y : DEFAULT_SHADOW_OFFSET_Y;
-    const shadowBlur = payload.layer.style && payload.layer.style.shadow && payload.layer.style.shadow.blur ? payload.layer.style.shadow.blur : DEFAULT_SHADOW_BLUR;
-    const shadow = { enabled: shadowEnabled, fillType: 'color', color: shadowColor, offset: { x: shadowOffsetX, y: shadowOffsetY }, blur: shadowBlur } as em.Shadow;
-    const rotation = payload.layer.transform && payload.layer.transform.rotation ? payload.layer.transform.rotation : DEFAULT_ROTATION;
-    const horizontalFlip = payload.layer.transform && payload.layer.transform.horizontalFlip ? payload.layer.transform.horizontalFlip : DEFAULT_HORIZONTAL_FLIP;
-    const verticalFlip = payload.layer.transform && payload.layer.transform.verticalFlip ? payload.layer.transform.verticalFlip : DEFAULT_VERTICAL_FLIP;
-    const dashArray = payload.layer.style && payload.layer.style.strokeOptions && payload.layer.style.strokeOptions.dashArray ? payload.layer.style.strokeOptions.dashArray : DEFAULT_STROKE_DASH_ARRAY;
-    const dashOffset = payload.layer.style && payload.layer.style.strokeOptions && payload.layer.style.strokeOptions.dashOffset ? payload.layer.style.strokeOptions.dashOffset : DEFAULT_STROKE_DASH_OFFSET;
-    const strokeCap = payload.layer.style && payload.layer.style.strokeOptions && payload.layer.style.strokeOptions.cap ? payload.layer.style.strokeOptions.cap : DEFAULT_STROKE_CAP;
-    const strokeJoin = payload.layer.style && payload.layer.style.strokeOptions && payload.layer.style.strokeOptions.join ? payload.layer.style.strokeOptions.join : DEFAULT_STROKE_JOIN;
-    const fontSize = payload.layer.textStyle && payload.layer.textStyle.fontSize ? payload.layer.textStyle.fontSize : DEFAULT_FONT_SIZE;
-    const fontWeight = payload.layer.textStyle && payload.layer.textStyle.fontWeight ? payload.layer.textStyle.fontWeight : DEFAULT_FONT_WEIGHT;
-    const fontFamily = payload.layer.textStyle && payload.layer.textStyle.fontFamily ? payload.layer.textStyle.fontFamily : DEFAULT_FONT_FAMILY;
-    const justification = payload.layer.textStyle && payload.layer.textStyle.justification ? payload.layer.textStyle.justification : DEFAULT_JUSTIFICATION;
-    const leading = payload.layer.textStyle && payload.layer.textStyle.leading ? payload.layer.textStyle.leading : DEFAULT_LEADING;
-    const transform = { rotation, horizontalFlip, verticalFlip };
-    const strokeOptions = { cap: strokeCap, join: strokeJoin, dashArray, dashOffset };
-    const style = { fill, stroke, shadow, blendMode, opacity, strokeOptions };
-    const textStyle = { fontSize, leading, fontWeight, fontFamily, justification };
-    const paperFillColor = getPaperFillColor(fill, payload.layer.frame);
-    const paperStrokeColor = getPaperStrokeColor(stroke, payload.layer.frame);
-    const paperShadowColor = getPaperShadowColor(shadow);
+    const style = getLayerStyle(payload);
+    const textStyle = getLayerTextStyle(payload);
+    const transform = getLayerTransform(payload);
+    const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as em.Shadow) : null;
+    const paperShadowOffset = style.shadow.enabled ? new paperMain.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
+    const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
     const paperLayer = new paperMain.PointText({
       point: new paperMain.Point(0, 0),
       content: textContent,
       data: { id, type: 'Text' },
       parent: getPaperLayer(parent),
-      strokeWidth: stroke.width,
-      shadowColor: shadow.enabled ? paperShadowColor : null,
-      shadowOffset: shadow.enabled ? new paperMain.Point(shadow.offset.x, shadow.offset.y) : null,
-      shadowBlur: shadow.enabled ? shadow.blur : null,
-      blendMode,
-      opacity,
-      dashArray,
-      dashOffset,
-      strokeCap,
-      strokeJoin,
-      fontSize,
-      leading,
-      fontWeight,
-      fontFamily,
-      justification
+      strokeWidth: style.stroke.width,
+      shadowColor: paperShadowColor,
+      shadowOffset: paperShadowOffset,
+      shadowBlur: paperShadowBlur,
+      blendMode: style.blendMode,
+      opacity: style.opacity,
+      dashArray: style.strokeOptions.dashArray,
+      dashOffset: style.strokeOptions.dashOffset,
+      strokeCap: style.strokeOptions.cap,
+      strokeJoin: style.strokeOptions.join,
+      fontSize: textStyle.fontSize,
+      leading: textStyle.leading,
+      fontWeight: textStyle.fontWeight,
+      fontFamily: textStyle.fontFamily,
+      justification: textStyle.justification
     });
-    const x = payload.layer.frame && payload.layer.frame.x ? payload.layer.frame.x : paperMain.view.center.x;
-    const y = payload.layer.frame && payload.layer.frame.y ? payload.layer.frame.y : paperMain.view.center.y;
-    const width = paperLayer.bounds.width;
-    const height = paperLayer.bounds.height;
-    const innerWidth = paperLayer.bounds.width;
-    const innerHeight = paperLayer.bounds.height;
-    const frame = { x, y, width, height, innerHeight, innerWidth };
-    paperLayer.position = new paperMain.Point(payload.layer.frame.x, payload.layer.frame.y);
-    paperLayer.fillColor = fill.enabled ? paperFillColor as em.PaperGradientFill : null;
-    paperLayer.strokeColor = stroke.enabled ? paperStrokeColor as em.PaperGradientFill : null;
+    const frame = getLayerFrame(payload, { width: paperLayer.bounds.width, height: paperLayer.bounds.height, innerWidth: paperLayer.bounds.width, innerHeight: paperLayer.bounds.height });
+    const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as em.PaperGradientFill : null;
+    const paperStrokeColor = style.stroke.enabled ? getPaperStrokeColor(style.stroke, frame) as em.PaperGradientFill : null;
+    paperLayer.position = new paperMain.Point(frame.x, frame.y);
+    paperLayer.fillColor = paperFillColor;
+    paperLayer.strokeColor = paperStrokeColor;
     applyTextMethods(paperLayer);
     if (!payload.batch) {
       dispatch(addText({
@@ -735,47 +658,35 @@ export const addImage = (payload: AddImagePayload): LayerTypes => ({
 
 export const addImageThunk = (payload: AddImagePayload) => {
   return (dispatch: any, getState: any): Promise<any> => {
-    const state = getState() as RootState;
-    const newBuffer = Buffer.from(payload.buffer);
-    const exists = state.documentSettings.images.allIds.length > 0 && state.documentSettings.images.allIds.find((id) => Buffer.from(state.documentSettings.images.byId[id].buffer).equals(newBuffer));
-    const base64 = bufferToBase64(newBuffer);
-    const paperLayer = new paperMain.Raster(`data:image/webp;base64,${base64}`);
     return new Promise((resolve, reject) => {
+      const state = getState() as RootState;
+      const frame = getLayerFrame(payload);
+      const newBuffer = Buffer.from(payload.buffer);
+      const exists = state.documentSettings.images.allIds.length > 0 && state.documentSettings.images.allIds.find((id) => Buffer.from(state.documentSettings.images.byId[id].buffer).equals(newBuffer));
+      const base64 = bufferToBase64(newBuffer);
+      const id = payload.layer.id ? payload.layer.id : uuidv4();
+      const imageId = exists ? exists : payload.layer.imageId ? payload.layer.imageId : uuidv4();
+      const masked = payload.layer.masked && (payload.layer.masked !== null || payload.layer.masked !== undefined) ? payload.layer.masked : false;
+      const parent = payload.layer.parent ? payload.layer.parent : 'page';
+      const style = getLayerStyle(payload, { fill: null, stroke: null, strokeOptions: null });
+      const transform = getLayerTransform(payload);
+      const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as em.Shadow) : null;
+      const paperShadowOffset = style.shadow.enabled ? new paperMain.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
+      const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
+      const paperLayer = new paperMain.Raster(`data:image/webp;base64,${base64}`);
+      const imageContainer = new paperMain.Group({
+        parent: getPaperLayer(parent),
+        data: { id, imageId, type: 'Image' },
+        children: [paperLayer]
+      });
       paperLayer.onLoad = (): void => {
-        const id = payload.layer.id ? payload.layer.id : uuidv4();
-        const imageId = exists ? exists : payload.layer.imageId ? payload.layer.imageId : uuidv4();
-        const masked = payload.layer.masked && (payload.layer.masked !== null || payload.layer.masked !== undefined) ? payload.layer.masked : false;
-        const parent = payload.layer.parent ? payload.layer.parent : 'page';
-        const x = payload.layer.frame && payload.layer.frame.x ? payload.layer.frame.x : paperMain.view.center.x;
-        const y = payload.layer.frame && payload.layer.frame.y ? payload.layer.frame.y : paperMain.view.center.y;
-        const width = paperLayer.bounds.width;
-        const height = paperLayer.bounds.height;
-        const innerWidth = paperLayer.bounds.width;
-        const innerHeight = paperLayer.bounds.height;
-        const frame = { x, y, width, height, innerWidth, innerHeight };
-        const opacity = payload.layer.style && payload.layer.style.opacity ? payload.layer.style.opacity : DEFAULT_OPACITY;
-        const blendMode = payload.layer.style && payload.layer.style.blendMode ? payload.layer.style.blendMode : DEFAULT_BLEND_MODE;
-        const shadowEnabled = payload.layer.style && payload.layer.style.shadow && payload.layer.style.shadow.enabled ? payload.layer.style.shadow.enabled : false;
-        const shadowColor = payload.layer.style && payload.layer.style.shadow && payload.layer.style.shadow.color ? {...DEFAULT_SHADOW_COLOR, ...payload.layer.style.shadow.color} : DEFAULT_SHADOW_COLOR;
-        const shadowOffsetX = payload.layer.style && payload.layer.style.shadow && payload.layer.style.shadow.offset.x ? payload.layer.style.shadow.offset.x : DEFAULT_SHADOW_OFFSET_X;
-        const shadowOffsetY = payload.layer.style && payload.layer.style.shadow && payload.layer.style.shadow.offset.y ? payload.layer.style.shadow.offset.y : DEFAULT_SHADOW_OFFSET_Y;
-        const shadowBlur = payload.layer.style && payload.layer.style.shadow && payload.layer.style.shadow.blur ? payload.layer.style.shadow.blur : DEFAULT_SHADOW_BLUR;
-        const shadow = { enabled: shadowEnabled, fillType: 'color', color: shadowColor, offset: { x: shadowOffsetX, y: shadowOffsetY }, blur: shadowBlur } as em.Shadow;
-        const rotation = payload.layer.transform && payload.layer.transform.rotation ? payload.layer.transform.rotation : DEFAULT_ROTATION;
-        const horizontalFlip = payload.layer.transform && payload.layer.transform.horizontalFlip ? payload.layer.transform.horizontalFlip : DEFAULT_HORIZONTAL_FLIP;
-        const verticalFlip = payload.layer.transform && payload.layer.transform.verticalFlip ? payload.layer.transform.verticalFlip : DEFAULT_VERTICAL_FLIP;
-        const transform = { rotation, horizontalFlip, verticalFlip };
-        const paperShadowColor = getPaperShadowColor(shadow);
         paperLayer.data = { type: 'Raster', id: 'Raster' };
-        const imageContainer = new paperMain.Group({
-          parent: getPaperLayer(parent),
-          data: { id, imageId, type: 'Image' },
-          shadowColor: shadow.enabled ? paperShadowColor : null,
-          shadowOffset: shadow.enabled ? new paperMain.Point(shadow.offset.x, shadow.offset.y) : null,
-          shadowBlur: shadow.enabled ? shadow.blur : null,
-          children: [paperLayer]
-        });
+        imageContainer.bounds.width = frame.innerWidth;
+        imageContainer.bounds.height = frame.innerHeight;
         imageContainer.position = new paperMain.Point(frame.x, frame.y);
+        imageContainer.shadowColor = paperShadowColor;
+        imageContainer.shadowOffset = paperShadowOffset;
+        imageContainer.shadowBlur = paperShadowBlur;
         applyImageMethods(paperLayer);
         if (!exists) {
           dispatch(addDocumentImage({id: imageId, buffer: newBuffer}));
@@ -794,14 +705,7 @@ export const addImageThunk = (payload: AddImagePayload) => {
               children: null,
               tweenEvents: [],
               tweens: [],
-              style: {
-                ...DEFAULT_STYLE,
-                fill: null,
-                stroke: null,
-                shadow,
-                opacity,
-                blendMode
-              },
+              style,
               transform,
               imageId
             },
@@ -989,23 +893,6 @@ export const ungroupLayer = (payload: UngroupLayerPayload): LayerTypes => ({
 
 export const ungroupLayers = (payload: UngroupLayersPayload): LayerTypes => ({
   type: UNGROUP_LAYERS,
-  payload
-});
-
-// Clipboard
-
-export const copyLayerToClipboard = (payload: CopyLayerToClipboardPayload): LayerTypes => ({
-  type: COPY_LAYER_TO_CLIPBOARD,
-  payload
-});
-
-export const copyLayersToClipboard = (payload: CopyLayersToClipboardPayload): LayerTypes => ({
-  type: COPY_LAYERS_TO_CLIPBOARD,
-  payload
-});
-
-export const pasteLayersFromClipboard = (payload: PasteLayersFromClipboardPayload): LayerTypes => ({
-  type: PASTE_LAYERS_FROM_CLIPBOARD,
   payload
 });
 
