@@ -44,35 +44,37 @@ class TextTool {
       return overlappedArtboard ? overlappedArtboard.parent.data.id : state.layer.present.page;
     })();
     store.dispatch(addTextThunk({
-      text: DEFAULT_TEXT_VALUE,
-      name: DEFAULT_TEXT_VALUE,
-      parent: parent,
-      frame: {
-        x: paperLayer.position.x,
-        y: paperLayer.position.y,
-        width: paperLayer.bounds.width,
-        height: paperLayer.bounds.height,
-        innerWidth: paperLayer.bounds.width,
-        innerHeight: paperLayer.bounds.height
-      },
-      transform: DEFAULT_TRANSFORM,
-      style: {
-        ...DEFAULT_STYLE,
-        fill: {
-          ...DEFAULT_STYLE.fill,
-          color: state.textSettings.fillColor
+      layer: {
+        text: DEFAULT_TEXT_VALUE,
+        name: DEFAULT_TEXT_VALUE,
+        parent: parent,
+        frame: {
+          x: paperLayer.position.x,
+          y: paperLayer.position.y,
+          width: paperLayer.bounds.width,
+          height: paperLayer.bounds.height,
+          innerWidth: paperLayer.bounds.width,
+          innerHeight: paperLayer.bounds.height
         },
-        stroke: {
-          ...DEFAULT_STYLE.stroke,
-          enabled: false
+        transform: DEFAULT_TRANSFORM,
+        style: {
+          ...DEFAULT_STYLE,
+          fill: {
+            ...DEFAULT_STYLE.fill,
+            color: state.textSettings.fillColor
+          },
+          stroke: {
+            ...DEFAULT_STYLE.stroke,
+            enabled: false
+          }
+        },
+        textStyle: {
+          fontSize: state.textSettings.fontSize,
+          leading: state.textSettings.leading,
+          fontWeight: state.textSettings.fontWeight,
+          fontFamily: state.textSettings.fontFamily,
+          justification: state.textSettings.justification
         }
-      },
-      textStyle: {
-        fontSize: state.textSettings.fontSize,
-        leading: state.textSettings.leading,
-        fontWeight: state.textSettings.fontWeight,
-        fontFamily: state.textSettings.fontFamily,
-        justification: state.textSettings.justification
       }
     }) as any);
     // get new state with text layer

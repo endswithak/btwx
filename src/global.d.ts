@@ -210,6 +210,20 @@ declare namespace em {
     imageId?: string;
   }
 
+  type ClipboardType = 'layers' | 'style';
+
+  interface ClipboardLayers {
+    type: ClipboardType;
+    main: string[];
+    allIds: string[];
+    byId: {
+      [id: string]: Layer;
+    };
+    images: {
+      [id: string]: DocumentImage;
+    };
+  }
+
   interface Group extends Layer {
     type: 'Group';
     children: string[];

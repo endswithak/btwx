@@ -1,7 +1,7 @@
 import { clipboard } from 'electron';
 import { v4 as uuidv4 } from 'uuid';
 import { getLayerAndDescendants, getPaperLayer } from '../store/selectors/layer';
-import { copyLayersToClipboard, pasteLayersFromClipboard, addLayers } from '../store/actions/layer';
+import { copyLayersToClipboard, pasteLayersFromClipboard, addLayersThunk, selectLayers } from '../store/actions/layer';
 import store from '../store';
 
 class CopyTool {
@@ -49,7 +49,7 @@ class CopyTool {
                 return lr;
               }, result.byId);
               return result;
-            }, { type: 'layers', main: [], allIds: [], byId: {}, images: {} });
+            }, { type: 'layers', main: [], allIds: [], byId: {}, images: {} } as em.ClipboardLayers);
             clipboard.writeText(JSON.stringify(layers));
           }
         }
@@ -59,7 +59,7 @@ class CopyTool {
         const state = store.getState();
         if (event.modifiers.meta && state.canvasSettings.focusing) {
           const text = clipboard.readText();
-          const parsedText = JSON.parse(text);
+          const parsedText: em.ClipboardLayers = JSON.parse(text);
           if (parsedText.type && parsedText.type === 'layers') {
             const replaceAll = (str: string, find: string, replace: string) => {
               return str.replace(new RegExp(find, 'g'), replace);
@@ -69,12 +69,14 @@ class CopyTool {
               result = replaceAll(result, current, newId);
               return result;
             }, text);
-            const newParse = JSON.parse(withNewIds);
+            const newParse: em.ClipboardLayers = JSON.parse(withNewIds);
             const newLayers = Object.keys(newParse.byId).reduce((result, current) => {
               result = [...result, newParse.byId[current]];
               return result;
             }, []);
-            store.dispatch(addLayers({layers: newLayers}));
+            store.dispatch(addLayersThunk({layers: newLayers, buffers: newParse.images}) as any).then(() => {
+              store.dispatch(selectLayers({layers: newParse.main, newSelection: true}));
+            });
           }
         }
         break;

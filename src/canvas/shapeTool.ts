@@ -432,63 +432,65 @@ class ShapeTool {
         const toPoint = (paperLayer as paper.Path).segments[1].point;
         const vector = toPoint.subtract(fromPoint);
         store.dispatch(addShapeThunk({
-          parent: (() => {
-            const overlappedArtboard = getPagePaperLayer(state.layer.present).getItem({
-              data: (data: any) => {
-                return data.id === 'ArtboardBackground';
-              },
-              overlapping: this.outline.bounds
-            });
-            return overlappedArtboard ? overlappedArtboard.parent.data.id : state.layer.present.page;
-          })(),
-          name: this.shapeType,
-          frame: {
-            x: paperLayer.position.x,
-            y: paperLayer.position.y,
-            width: paperLayer.bounds.width,
-            height: paperLayer.bounds.height,
-            innerWidth: this.shapeType === 'Line' ? vector.length : paperLayer.bounds.width,
-            innerHeight: this.shapeType === 'Line' ? 0 : paperLayer.bounds.height
-          },
-          shapeType: this.shapeType,
-          style: {
-            ...DEFAULT_STYLE,
-            fill: {
-              ...DEFAULT_STYLE.fill,
-              enabled: this.shapeType !== 'Line'
-            }
-          },
-          transform: {
-            ...DEFAULT_TRANSFORM,
-            rotation: this.shapeType === 'Line' ? vector.angle : DEFAULT_TRANSFORM.rotation
-          },
-          path: {
-            closed: this.shapeType !== 'Line',
-            data: paperLayer.pathData,
-            points: null
-          },
-          ...(() => {
-            switch(this.shapeType) {
-              case 'Ellipse':
-              case 'Rectangle':
-                return {};
-              case 'Rounded':
-                return {
-                  radius: DEFAULT_ROUNDED_RADIUS
-                };
-              case 'Star':
-                return {
-                  points: DEFAULT_STAR_POINTS,
-                  radius: DEFAULT_STAR_RADIUS
-                }
-              case 'Polygon':
-                return {
-                  sides: DEFAULT_STAR_POINTS
-                }
-              default:
-                return {};
-            }
-          })()
+          layer: {
+            parent: (() => {
+              const overlappedArtboard = getPagePaperLayer(state.layer.present).getItem({
+                data: (data: any) => {
+                  return data.id === 'ArtboardBackground';
+                },
+                overlapping: this.outline.bounds
+              });
+              return overlappedArtboard ? overlappedArtboard.parent.data.id : state.layer.present.page;
+            })(),
+            name: this.shapeType,
+            frame: {
+              x: paperLayer.position.x,
+              y: paperLayer.position.y,
+              width: paperLayer.bounds.width,
+              height: paperLayer.bounds.height,
+              innerWidth: this.shapeType === 'Line' ? vector.length : paperLayer.bounds.width,
+              innerHeight: this.shapeType === 'Line' ? 0 : paperLayer.bounds.height
+            },
+            shapeType: this.shapeType,
+            style: {
+              ...DEFAULT_STYLE,
+              fill: {
+                ...DEFAULT_STYLE.fill,
+                enabled: this.shapeType !== 'Line'
+              }
+            },
+            transform: {
+              ...DEFAULT_TRANSFORM,
+              rotation: this.shapeType === 'Line' ? vector.angle : DEFAULT_TRANSFORM.rotation
+            },
+            path: {
+              closed: this.shapeType !== 'Line',
+              data: paperLayer.pathData,
+              points: null
+            },
+            ...(() => {
+              switch(this.shapeType) {
+                case 'Ellipse':
+                case 'Rectangle':
+                  return {};
+                case 'Rounded':
+                  return {
+                    radius: DEFAULT_ROUNDED_RADIUS
+                  };
+                case 'Star':
+                  return {
+                    points: DEFAULT_STAR_POINTS,
+                    radius: DEFAULT_STAR_RADIUS
+                  }
+                case 'Polygon':
+                  return {
+                    sides: DEFAULT_STAR_POINTS
+                  }
+                default:
+                  return {};
+              }
+            })()
+          }
         }) as any);
       }
       store.dispatch(enableSelectionTool());

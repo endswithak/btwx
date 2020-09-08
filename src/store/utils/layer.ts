@@ -66,185 +66,139 @@ import getTheme from '../theme';
 import store from '../index';
 import { setTweenDrawerEventHover, setTweenDrawerEvent, openTweenDrawer } from '../actions/tweenDrawer';
 
-export const addArtboard = (state: LayerState, action: AddArtboard, batch?: boolean): LayerState => {
+export const addArtboard = (state: LayerState, action: AddArtboard): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const paperLayer = getPaperLayer(action.payload.layer.id);
   currentState = {
     ...currentState,
-    allIds: addItem(currentState.allIds, action.payload.id),
+    allIds: addItem(currentState.allIds, action.payload.layer.id),
     byId: {
       ...currentState.byId,
-      [action.payload.id]: {
-        ...action.payload,
-        parent: currentState.page
-      } as em.Artboard,
+      [action.payload.layer.id]: action.payload.layer as em.Artboard,
       [currentState.page]: {
         ...currentState.byId[currentState.page],
-        children: addItem(currentState.byId[currentState.page].children, action.payload.id)
+        children: addItem(currentState.byId[currentState.page].children, action.payload.layer.id)
       } as em.Page
     },
-    allArtboardIds: addItem(currentState.allArtboardIds, action.payload.id)
+    allArtboardIds: addItem(currentState.allArtboardIds, action.payload.layer.id)
   }
-  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
-    currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
+  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.layer.id)) {
+    currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.layer.id}) as AddInViewLayer);
   }
-  if (!batch) {
-    currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  if (!action.payload.batch) {
+    currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.layer.id, newSelection: true}) as SelectLayer);
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   }
   return currentState;
 };
 
-export const updateActiveArtboardFrame = (state: LayerState, useLayerItem = false): void => {
-  const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'activeArtboardFrame' } });
-  if (activeArtboardFrame) {
-    activeArtboardFrame.remove();
-  }
-  if (state.activeArtboard) {
-    let topLeft;
-    let bottomRight;
-    if (useLayerItem) {
-      const layerItem = state.byId[state.activeArtboard];
-      topLeft = new paperMain.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
-      bottomRight = new paperMain.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
-    } else {
-      const paperActiveArtboardLayer = getPaperLayer(state.activeArtboard);
-      topLeft = paperActiveArtboardLayer.bounds.topLeft;
-      bottomRight = paperActiveArtboardLayer.bounds.bottomRight;
-    }
-    new paperMain.Path.Rectangle({
-      from: new paperMain.Point(topLeft.x - (4 / paperMain.view.zoom), topLeft.y - (4 / paperMain.view.zoom)),
-      to: new paperMain.Point(bottomRight.x + (4 / paperMain.view.zoom), bottomRight.y + (4 / paperMain.view.zoom)),
-      strokeColor: THEME_PRIMARY_COLOR,
-      strokeWidth: 3 / paperMain.view.zoom,
-      data: {
-        id: 'activeArtboardFrame'
-      }
-    });
-  }
-}
-
-export const addShape = (state: LayerState, action: AddShape, batch?: boolean): LayerState => {
+export const addShape = (state: LayerState, action: AddShape): LayerState => {
   let currentState = state;
-  const layerParent = action.payload.parent ? action.payload.parent : currentState.page;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const paperLayer = getPaperLayer(action.payload.layer.id);
   // add shape
   currentState = {
     ...currentState,
-    allIds: addItem(currentState.allIds, action.payload.id),
+    allIds: addItem(currentState.allIds, action.payload.layer.id),
     byId: {
       ...currentState.byId,
-      [action.payload.id]: {
-        ...action.payload
-      } as em.Shape,
-      [layerParent]: {
-        ...currentState.byId[layerParent],
-        children: addItem((currentState.byId[layerParent] as em.Group).children, action.payload.id),
+      [action.payload.layer.id]: action.payload.layer as em.Shape,
+      [action.payload.layer.parent]: {
+        ...currentState.byId[action.payload.layer.parent],
+        children: addItem((currentState.byId[action.payload.layer.parent] as em.Group).children, action.payload.layer.id),
         showChildren: true
       } as em.Group
     },
-    allShapeIds: addItem(state.allShapeIds, action.payload.id)
+    allShapeIds: addItem(state.allShapeIds, action.payload.layer.id)
   }
-  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
-    currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
+  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.layer.id)) {
+    currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.layer.id}) as AddInViewLayer);
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, 'all');
-  if (!batch) {
-    currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  currentState = updateLayerTweensByProps(currentState, action.payload.layer.id, 'all');
+  if (!action.payload.batch) {
+    currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.layer.id, newSelection: true}) as SelectLayer);
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   }
   return currentState;
 };
 
-export const addGroup = (state: LayerState, action: AddGroup, batch?: boolean): LayerState => {
+export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
   let currentState = state;
-  const layerParent = action.payload.parent ? action.payload.parent : currentState.page;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const paperLayer = getPaperLayer(action.payload.layer.id);
   currentState = {
     ...currentState,
-    allIds: addItem(currentState.allIds, action.payload.id),
+    allIds: addItem(currentState.allIds, action.payload.layer.id),
     byId: {
       ...currentState.byId,
-      [action.payload.id]: {
-        ...action.payload,
-        parent: layerParent
-      } as em.Group,
-      [layerParent]: {
-        ...currentState.byId[layerParent],
-        children: addItem((currentState.byId[layerParent] as em.Group).children, action.payload.id),
+      [action.payload.layer.id]: action.payload.layer as em.Group,
+      [action.payload.layer.parent]: {
+        ...currentState.byId[action.payload.layer.parent],
+        children: addItem((currentState.byId[action.payload.layer.parent] as em.Group).children, action.payload.layer.id),
         showChildren: true
       } as em.Group
     },
-    allGroupIds: addItem(state.allGroupIds, action.payload.id)
+    allGroupIds: addItem(state.allGroupIds, action.payload.layer.id)
   }
-  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
-    currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
+  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.layer.id)) {
+    currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.layer.id}) as AddInViewLayer);
   }
-  if (!batch) {
-    currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  if (!action.payload.batch) {
+    currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.layer.id, newSelection: true}) as SelectLayer);
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   }
   return currentState;
 };
 
-export const addText = (state: LayerState, action: AddText, batch?: boolean): LayerState => {
+export const addText = (state: LayerState, action: AddText): LayerState => {
   let currentState = state;
-  const layerParent = action.payload.parent ? action.payload.parent : currentState.page;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const paperLayer = getPaperLayer(action.payload.layer.id);
   currentState = {
     ...currentState,
-    allIds: addItem(currentState.allIds, action.payload.id),
+    allIds: addItem(currentState.allIds, action.payload.layer.id),
     byId: {
       ...currentState.byId,
-      [action.payload.id]: action.payload as em.Text,
-      [layerParent]: {
-        ...currentState.byId[layerParent],
-        children: addItem((currentState.byId[layerParent] as em.Group).children, action.payload.id),
+      [action.payload.layer.id]: action.payload.layer as em.Text,
+      [action.payload.layer.parent]: {
+        ...currentState.byId[action.payload.layer.parent],
+        children: addItem((currentState.byId[action.payload.layer.parent] as em.Group).children, action.payload.layer.id),
         showChildren: true
       } as em.Group
     },
-    allTextIds: addItem(state.allTextIds, action.payload.id)
+    allTextIds: addItem(state.allTextIds, action.payload.layer.id)
   }
-  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
-    currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
+  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.layer.id)) {
+    currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.layer.id}) as AddInViewLayer);
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, 'all');
-  if (!batch) {
-    currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  currentState = updateLayerTweensByProps(currentState, action.payload.layer.id, 'all');
+  if (!action.payload.batch) {
+    currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.layer.id, newSelection: true}) as SelectLayer);
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   }
   return currentState;
 };
 
-export const addImage = (state: LayerState, action: AddImage, batch?: boolean): LayerState => {
+export const addImage = (state: LayerState, action: AddImage): LayerState => {
   let currentState = state;
-  const layerParent = action.payload.parent ? action.payload.parent : currentState.page;
-  const paperLayer = getPaperLayer(action.payload.id);
-  // const raster = paperLayer.getItem({data: {id: 'Raster'}}) as paper.Raster;
-  // paperLayer.parent = getPaperLayer(layerParent);
+  const paperLayer = getPaperLayer(action.payload.layer.id);
   currentState = {
     ...currentState,
-    allIds: addItem(currentState.allIds, action.payload.id),
+    allIds: addItem(currentState.allIds, action.payload.layer.id),
     byId: {
       ...currentState.byId,
-      [action.payload.id]: {
-        ...action.payload,
-        parent: layerParent
-      } as em.Image,
-      [layerParent]: {
-        ...currentState.byId[layerParent],
-        children: addItem((currentState.byId[layerParent] as em.Group).children, action.payload.id),
+      [action.payload.layer.id]: action.payload.layer as em.Image,
+      [action.payload.layer.parent]: {
+        ...currentState.byId[action.payload.layer.parent],
+        children: addItem((currentState.byId[action.payload.layer.parent] as em.Group).children, action.payload.layer.id),
         showChildren: true
       } as em.Group
     },
-    allImageIds: addItem(state.allImageIds, action.payload.id)
+    allImageIds: addItem(state.allImageIds, action.payload.layer.id)
   }
-  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.id)) {
-    currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.id}) as AddInViewLayer);
+  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.layer.id)) {
+    currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.layer.id}) as AddInViewLayer);
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, 'all');
-  if (!batch) {
-    currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  currentState = updateLayerTweensByProps(currentState, action.payload.layer.id, 'all');
+  if (!action.payload.batch) {
+    currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.layer.id, newSelection: true}) as SelectLayer);
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   }
   return currentState;
@@ -255,19 +209,19 @@ export const addLayers = (state: LayerState, action: AddLayers): LayerState => {
   currentState = action.payload.layers.reduce((result: LayerState, current) => {
     switch(current.type) {
       case 'Artboard':
-        result = addArtboard(result, layerActions.addArtboardThunk(current as em.Artboard) as any, true);
+        result = addArtboard(result, layerActions.addArtboard({layer: current as em.Artboard, batch: true}) as AddArtboard);
         break;
       case 'Shape':
-        result = addShape(result, layerActions.addShapeThunk(current as em.Shape) as any, true);
+        result = addShape(result, layerActions.addShape({layer: current as em.Shape, batch: true}) as AddShape);
         break;
       case 'Image':
-        result = addImage(result, layerActions.addImageThunk(current as em.Image) as any, true);
+        result = addImage(result, layerActions.addImage({layer: current as em.Image, batch: true}) as AddImage);
         break;
       case 'Group':
-        result = addGroup(result, layerActions.addGroupThunk(current as em.Group) as any, true);
+        result = addGroup(result, layerActions.addGroup({layer: current as em.Group, batch: true}) as AddGroup);
         break;
       case 'Text':
-        result = addText(result, layerActions.addTextThunk(current as em.Text) as any, true);
+        result = addText(result, layerActions.addText({layer: current as em.Text, batch: true}) as AddText);
         break;
     }
     return result;
@@ -395,6 +349,35 @@ export const removeLayers = (state: LayerState, action: RemoveLayers): LayerStat
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
+}
+
+export const updateActiveArtboardFrame = (state: LayerState, useLayerItem = false): void => {
+  const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'activeArtboardFrame' } });
+  if (activeArtboardFrame) {
+    activeArtboardFrame.remove();
+  }
+  if (state.activeArtboard) {
+    let topLeft;
+    let bottomRight;
+    if (useLayerItem) {
+      const layerItem = state.byId[state.activeArtboard];
+      topLeft = new paperMain.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
+      bottomRight = new paperMain.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
+    } else {
+      const paperActiveArtboardLayer = getPaperLayer(state.activeArtboard);
+      topLeft = paperActiveArtboardLayer.bounds.topLeft;
+      bottomRight = paperActiveArtboardLayer.bounds.bottomRight;
+    }
+    new paperMain.Path.Rectangle({
+      from: new paperMain.Point(topLeft.x - (4 / paperMain.view.zoom), topLeft.y - (4 / paperMain.view.zoom)),
+      to: new paperMain.Point(bottomRight.x + (4 / paperMain.view.zoom), bottomRight.y + (4 / paperMain.view.zoom)),
+      strokeColor: THEME_PRIMARY_COLOR,
+      strokeWidth: 3 / paperMain.view.zoom,
+      data: {
+        id: 'activeArtboardFrame'
+      }
+    });
+  }
 }
 
 export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', useLayerItem = false) => {
@@ -1488,14 +1471,16 @@ export const groupLayers = (state: LayerState, action: GroupLayers): LayerState 
   const layersBounds = getLayersBounds(currentState, action.payload.layers);
   // add group
   currentState = addGroup(currentState, layerActions.addGroup({
-    selected: true,
-    frame: {
-      x: layersBounds.center.x,
-      y: layersBounds.center.y,
-      width: layersBounds.width,
-      height: layersBounds.height,
-      innerWidth: layersBounds.width,
-      innerHeight: layersBounds.height
+    layer: {
+      selected: true,
+      frame: {
+        x: layersBounds.center.x,
+        y: layersBounds.center.y,
+        width: layersBounds.width,
+        height: layersBounds.height,
+        innerWidth: layersBounds.width,
+        innerHeight: layersBounds.height
+      }
     }
   }) as AddGroup);
   // get group id
@@ -3864,27 +3849,6 @@ export const setLayersStrokeDashArrayGap = (state: LayerState, action: SetLayers
   return currentState;
 };
 
-export const setLayerStrokeMiterLimit = (state: LayerState, action: SetLayerStrokeMiterLimit): LayerState => {
-  let currentState = state;
-  currentState = {
-    ...currentState,
-    byId: {
-      ...currentState.byId,
-      [action.payload.id]: {
-        ...currentState.byId[action.payload.id],
-        style: {
-          ...currentState.byId[action.payload.id].style,
-          strokeOptions: {
-            ...currentState.byId[action.payload.id].style.strokeOptions,
-            miterLimit: action.payload.miterLimit
-          }
-        }
-      }
-    }
-  }
-  return currentState;
-};
-
 export const enableLayerShadow = (state: LayerState, action: EnableLayerShadow): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
@@ -4934,32 +4898,24 @@ export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState 
   }
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.unite]}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
-    id: newShapeId,
-    type: 'Shape',
-    parent: layerItem.parent,
-    name: 'Custom Shape',
-    shapeType: 'Custom',
-    frame: {
-      x: booleanLayers.position.x,
-      y: booleanLayers.position.y,
-      width: booleanLayers.bounds.width,
-      height: booleanLayers.bounds.height,
-      innerWidth: booleanLayers.bounds.width,
-      innerHeight: booleanLayers.bounds.height
-    },
-    selected: false,
-    mask: false,
-    masked: false,
-    tweenEvents: [],
-    tweens: [],
-    transform: DEFAULT_TRANSFORM,
-    style: layerItem.style,
-    children: null,
-    booleanOperation: 'none',
-    path: {
-      data: booleanLayers.pathData,
-      closed: booleanLayers.closed,
-      points: getCurvePoints(booleanLayers)
+    layer: {
+      id: newShapeId,
+      parent: layerItem.parent,
+      name: 'Custom Shape',
+      shapeType: 'Custom',
+      frame: {
+        x: booleanLayers.position.x,
+        y: booleanLayers.position.y,
+        width: booleanLayers.bounds.width,
+        height: booleanLayers.bounds.height,
+        innerWidth: booleanLayers.bounds.width,
+        innerHeight: booleanLayers.bounds.height
+      },
+      path: {
+        data: booleanLayers.pathData,
+        closed: booleanLayers.closed,
+        points: getCurvePoints(booleanLayers)
+      }
     }
   }) as AddShape);
   return currentState;
@@ -4978,32 +4934,24 @@ export const intersectLayers = (state: LayerState, action: IntersectLayers): Lay
   }
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.intersect]}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
-    id: newShapeId,
-    type: 'Shape',
-    parent: layerItem.parent,
-    name: 'Custom Shape',
-    shapeType: 'Custom',
-    frame: {
-      x: booleanLayers.position.x,
-      y: booleanLayers.position.y,
-      width: booleanLayers.bounds.width,
-      height: booleanLayers.bounds.height,
-      innerWidth: booleanLayers.bounds.width,
-      innerHeight: booleanLayers.bounds.height
-    },
-    selected: false,
-    mask: false,
-    masked: false,
-    tweenEvents: [],
-    tweens: [],
-    transform: DEFAULT_TRANSFORM,
-    style: layerItem.style,
-    children: null,
-    booleanOperation: 'none',
-    path: {
-      data: booleanLayers.pathData,
-      closed: booleanLayers.closed,
-      points: getCurvePoints(booleanLayers)
+    layer: {
+      id: newShapeId,
+      parent: layerItem.parent,
+      name: 'Custom Shape',
+      shapeType: 'Custom',
+      frame: {
+        x: booleanLayers.position.x,
+        y: booleanLayers.position.y,
+        width: booleanLayers.bounds.width,
+        height: booleanLayers.bounds.height,
+        innerWidth: booleanLayers.bounds.width,
+        innerHeight: booleanLayers.bounds.height
+      },
+      path: {
+        data: booleanLayers.pathData,
+        closed: booleanLayers.closed,
+        points: getCurvePoints(booleanLayers)
+      }
     }
   }) as AddShape);
   return currentState;
@@ -5022,32 +4970,24 @@ export const subtractLayers = (state: LayerState, action: SubtractLayers): Layer
   }
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.subtract]}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
-    id: newShapeId,
-    type: 'Shape',
-    parent: layerItem.parent,
-    name: 'Custom Shape',
-    shapeType: 'Custom',
-    frame: {
-      x: booleanLayers.position.x,
-      y: booleanLayers.position.y,
-      width: booleanLayers.bounds.width,
-      height: booleanLayers.bounds.height,
-      innerWidth: booleanLayers.bounds.width,
-      innerHeight: booleanLayers.bounds.height
-    },
-    selected: false,
-    mask: false,
-    masked: false,
-    tweenEvents: [],
-    tweens: [],
-    transform: DEFAULT_TRANSFORM,
-    style: layerItem.style,
-    children: null,
-    booleanOperation: 'none',
-    path: {
-      data: booleanLayers.pathData,
-      closed: booleanLayers.closed,
-      points: getCurvePoints(booleanLayers)
+    layer: {
+      id: newShapeId,
+      parent: layerItem.parent,
+      name: 'Custom Shape',
+      shapeType: 'Custom',
+      frame: {
+        x: booleanLayers.position.x,
+        y: booleanLayers.position.y,
+        width: booleanLayers.bounds.width,
+        height: booleanLayers.bounds.height,
+        innerWidth: booleanLayers.bounds.width,
+        innerHeight: booleanLayers.bounds.height
+      },
+      path: {
+        data: booleanLayers.pathData,
+        closed: booleanLayers.closed,
+        points: getCurvePoints(booleanLayers)
+      }
     }
   }) as AddShape);
   return currentState;
@@ -5066,32 +5006,24 @@ export const excludeLayers = (state: LayerState, action: ExcludeLayers): LayerSt
   }
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.exclude]}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
-    id: newShapeId,
-    type: 'Shape',
-    parent: layerItem.parent,
-    name: 'Custom Shape',
-    shapeType: 'Custom',
-    frame: {
-      x: booleanLayers.position.x,
-      y: booleanLayers.position.y,
-      width: booleanLayers.bounds.width,
-      height: booleanLayers.bounds.height,
-      innerWidth: booleanLayers.bounds.width,
-      innerHeight: booleanLayers.bounds.height
-    },
-    selected: false,
-    mask: false,
-    masked: false,
-    tweenEvents: [],
-    tweens: [],
-    transform: DEFAULT_TRANSFORM,
-    style: layerItem.style,
-    children: null,
-    booleanOperation: 'none',
-    path: {
-      data: booleanLayers.pathData,
-      closed: booleanLayers.closed,
-      points: getCurvePoints(booleanLayers)
+    layer: {
+      id: newShapeId,
+      parent: layerItem.parent,
+      name: 'Custom Shape',
+      shapeType: 'Custom',
+      frame: {
+        x: booleanLayers.position.x,
+        y: booleanLayers.position.y,
+        width: booleanLayers.bounds.width,
+        height: booleanLayers.bounds.height,
+        innerWidth: booleanLayers.bounds.width,
+        innerHeight: booleanLayers.bounds.height
+      },
+      path: {
+        data: booleanLayers.pathData,
+        closed: booleanLayers.closed,
+        points: getCurvePoints(booleanLayers)
+      }
     }
   }) as AddShape);
   return currentState;
@@ -5110,32 +5042,24 @@ export const divideLayers = (state: LayerState, action: DivideLayers): LayerStat
   }
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.divide]}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
-    id: newShapeId,
-    type: 'Shape',
-    parent: layerItem.parent,
-    name: 'Custom Shape',
-    shapeType: 'Custom',
-    frame: {
-      x: booleanLayers.position.x,
-      y: booleanLayers.position.y,
-      width: booleanLayers.bounds.width,
-      height: booleanLayers.bounds.height,
-      innerWidth: booleanLayers.bounds.width,
-      innerHeight: booleanLayers.bounds.height
-    },
-    selected: false,
-    mask: false,
-    masked: false,
-    tweenEvents: [],
-    tweens: [],
-    transform: DEFAULT_TRANSFORM,
-    style: layerItem.style,
-    children: null,
-    booleanOperation: 'none',
-    path: {
-      data: booleanLayers.pathData,
-      closed: booleanLayers.closed,
-      points: getCurvePoints(booleanLayers)
+    layer: {
+      id: newShapeId,
+      parent: layerItem.parent,
+      name: 'Custom Shape',
+      shapeType: 'Custom',
+      frame: {
+        x: booleanLayers.position.x,
+        y: booleanLayers.position.y,
+        width: booleanLayers.bounds.width,
+        height: booleanLayers.bounds.height,
+        innerWidth: booleanLayers.bounds.width,
+        innerHeight: booleanLayers.bounds.height
+      },
+      path: {
+        data: booleanLayers.pathData,
+        closed: booleanLayers.closed,
+        points: getCurvePoints(booleanLayers)
+      }
     }
   }) as AddShape);
   return currentState;

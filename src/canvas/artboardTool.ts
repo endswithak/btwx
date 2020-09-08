@@ -298,14 +298,16 @@ class ArtboardTool {
           insert: false
         });
         store.dispatch(addArtboardThunk({
-          parent: 'page',
-          frame: {
-            x: newArtboard.position.x,
-            y: newArtboard.position.y,
-            width: newArtboard.bounds.width,
-            height: newArtboard.bounds.height,
-            innerWidth: newArtboard.bounds.width,
-            innerHeight: newArtboard.bounds.height
+          layer: {
+            parent: 'page',
+            frame: {
+              x: newArtboard.position.x,
+              y: newArtboard.position.y,
+              width: newArtboard.bounds.width,
+              height: newArtboard.bounds.height,
+              innerWidth: newArtboard.bounds.width,
+              innerHeight: newArtboard.bounds.height
+            }
           }
         }) as any);
       }

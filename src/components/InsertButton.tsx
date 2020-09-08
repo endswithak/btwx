@@ -68,7 +68,7 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
         sharp(result.filePaths[0]).metadata().then(({ width }) => {
           sharp(result.filePaths[0]).resize(Math.round(width * 0.5)).webp({quality: 50}).toBuffer().then((buffer) => {
             const newBuffer = Buffer.from(buffer);
-            addImageThunk({buffer: newBuffer});
+            addImageThunk({layer: {}, buffer: newBuffer});
             // const exists = allDocumentImageIds.length > 0 && allDocumentImageIds.find((id) => Buffer.from(documentImagesById[id].buffer).equals(newBuffer));
             // const base64 = bufferToBase64(newBuffer);
             // const paperLayer = new paperMain.Raster(`data:image/webp;base64,${base64}`);

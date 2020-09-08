@@ -238,8 +238,11 @@ export const SET_LAYER_EDIT = 'SET_LAYER_EDIT';
 // Artboard
 
 export type AddArtboardPayload = {
-  [P in keyof em.Artboard]?: em.Artboard[P];
-} & { paperLayer?: paper.Item }
+  layer: {
+    [P in keyof em.Artboard]?: em.Artboard[P];
+  };
+  batch?: boolean;
+}
 
 export interface AddArtboard {
   type: typeof ADD_ARTBOARD;
@@ -249,8 +252,11 @@ export interface AddArtboard {
 // Group
 
 export type AddGroupPayload = {
-  [P in keyof em.Group]?: em.Group[P];
-} & { paperLayer?: paper.Item }
+  layer: {
+    [P in keyof em.Group]?: em.Group[P];
+  };
+  batch?: boolean;
+}
 
 export interface AddGroup {
   type: typeof ADD_GROUP;
@@ -260,8 +266,11 @@ export interface AddGroup {
 // Shape
 
 export type AddShapePayload = {
-  [P in keyof em.Shape]?: em.Shape[P];
-} & { paperLayer?: paper.Item }
+  layer: {
+    [P in keyof em.Shape]?: em.Shape[P];
+  };
+  batch?: boolean;
+}
 
 export interface AddShape {
   type: typeof ADD_SHAPE;
@@ -271,8 +280,11 @@ export interface AddShape {
 // Text
 
 export type AddTextPayload = {
-  [P in keyof em.Text]?: em.Text[P];
-} & { paperLayer?: paper.Item }
+  layer: {
+    [P in keyof em.Text]?: em.Text[P];
+  };
+  batch?: boolean;
+}
 
 export interface AddText {
   type: typeof ADD_TEXT;
@@ -282,8 +294,12 @@ export interface AddText {
 // Image
 
 export type AddImagePayload = {
-  [P in keyof em.Image]?: em.Image[P];
-} & { buffer?: Buffer }
+  layer: {
+    [P in keyof em.Image]?: em.Image[P];
+  };
+  batch?: boolean;
+  buffer?: Buffer;
+}
 
 export interface AddImage {
   type: typeof ADD_IMAGE;
@@ -294,6 +310,9 @@ export interface AddImage {
 
 export interface AddLayersPayload {
   layers: em.Layer[];
+  buffers?: {
+    [id: string]: em.DocumentImage;
+  };
 }
 
 export interface AddLayers {
