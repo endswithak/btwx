@@ -110,7 +110,6 @@ import {
   SET_LAYERS_STROKE_DASH_ARRAY_WIDTH,
   SET_LAYER_STROKE_DASH_ARRAY_GAP,
   SET_LAYERS_STROKE_DASH_ARRAY_GAP,
-  SET_LAYER_STROKE_MITER_LIMIT,
   ENABLE_LAYER_SHADOW,
   ENABLE_LAYERS_SHADOW,
   DISABLE_LAYER_SHADOW,
@@ -183,9 +182,16 @@ import {
   SET_STARS_POINTS,
   SET_STAR_RADIUS,
   SET_STARS_RADIUS,
-  SET_CURVE_POINT_ORIGIN,
-  SET_CURVE_POINT_ORIGIN_X,
-  SET_CURVE_POINT_ORIGIN_Y,
+  SET_LINE_FROM_X,
+  SET_LINES_FROM_X,
+  SET_LINE_FROM_Y,
+  SET_LINES_FROM_Y,
+  SET_LINE_FROM,
+  SET_LINE_TO_X,
+  SET_LINES_TO_X,
+  SET_LINE_TO_Y,
+  SET_LINES_TO_Y,
+  SET_LINE_TO,
   SET_LAYER_EDIT,
   LayerTypes
 } from '../actionTypes/layer';
@@ -222,9 +228,6 @@ import {
   escapeLayerScope,
   groupLayers,
   ungroupLayer,
-  copyLayerToClipboard,
-  copyLayersToClipboard,
-  pasteLayersFromClipboard,
   moveLayer,
   moveLayers,
   moveLayerTo,
@@ -291,7 +294,6 @@ import {
   setLayersStrokeDashArrayWidth,
   setLayerStrokeDashArrayGap,
   setLayersStrokeDashArrayGap,
-  setLayerStrokeMiterLimit,
   enableLayerShadow,
   enableLayersShadow,
   disableLayerShadow,
@@ -378,9 +380,16 @@ import {
   setStarsPoints,
   setStarRadius,
   setStarsRadius,
-  setCurvePointOrigin,
-  setCurvePointOriginX,
-  setCurvePointOriginY,
+  setLineFromX,
+  setLinesFromX,
+  setLineFromY,
+  setLinesFromY,
+  setLineFrom,
+  setLineToX,
+  setLinesToX,
+  setLineToY,
+  setLinesToY,
+  setLineTo,
   setLayerEdit
 } from '../utils/layer';
 
@@ -403,13 +412,6 @@ export interface LayerState {
     snapPoints: em.SnapPoint[];
   };
   hover: string;
-  clipboard: {
-    main: string[];
-    allIds: string[];
-    byId: {
-      [id: string]: em.ClipboardLayer;
-    };
-  };
   paperProject: string;
   allTweenEventIds: string[];
   tweenEventById: {
@@ -450,11 +452,6 @@ const initialState: LayerState = {
     snapPoints: []
   },
   hover: null,
-  clipboard: {
-    main: [],
-    allIds: [],
-    byId: {}
-  },
   paperProject: '[["Layer",{"applyMatrix":true,"children":[["Group",{"applyMatrix":true,"data":{"id":"page","type":"Page"}}]]}]]',
   allTweenEventIds: [],
   tweenEventById: {},
@@ -659,8 +656,6 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setLayerStrokeDashArrayGap(state, action);
     case SET_LAYERS_STROKE_DASH_ARRAY_GAP:
       return setLayersStrokeDashArrayGap(state, action);
-    case SET_LAYER_STROKE_MITER_LIMIT:
-      return setLayerStrokeMiterLimit(state, action);
     case ENABLE_LAYER_SHADOW:
       return enableLayerShadow(state, action);
     case ENABLE_LAYERS_SHADOW:
@@ -833,12 +828,26 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setStarRadius(state, action);
     case SET_STARS_RADIUS:
       return setStarsRadius(state, action);
-    case SET_CURVE_POINT_ORIGIN:
-      return setCurvePointOrigin(state, action);
-    case SET_CURVE_POINT_ORIGIN_X:
-      return setCurvePointOriginX(state, action);
-    case SET_CURVE_POINT_ORIGIN_Y:
-      return setCurvePointOriginY(state, action);
+    case SET_LINE_FROM_X:
+      return setLineFromX(state, action);
+    case SET_LINES_FROM_X:
+      return setLinesFromX(state, action);
+    case SET_LINE_FROM_Y:
+      return setLineFromY(state, action);
+    case SET_LINES_FROM_Y:
+      return setLinesFromY(state, action);
+    case SET_LINE_FROM:
+      return setLineFrom(state, action);
+    case SET_LINE_TO_X:
+      return setLineToX(state, action);
+    case SET_LINES_TO_X:
+      return setLinesToX(state, action);
+    case SET_LINE_TO_Y:
+      return setLineToY(state, action);
+    case SET_LINES_TO_Y:
+      return setLinesToY(state, action);
+    case SET_LINE_TO:
+      return setLineTo(state, action);
     case SET_LAYER_EDIT:
       return setLayerEdit(state, action);
     default:

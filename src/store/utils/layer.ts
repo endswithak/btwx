@@ -16,28 +16,28 @@ import {
   SetLayerTweenPower, SetLayerX, SetLayerY, SetLayerWidth, SetLayerHeight, SetLayerOpacity, SetLayerFillColor,
   SetLayerStrokeColor, SetLayerStrokeWidth, SetLayerShadowColor, SetLayerShadowBlur, SetLayerShadowXOffset,
   SetLayerShadowYOffset, SetLayerRotation, EnableLayerFill, DisableLayerFill, EnableLayerStroke,
-  DisableLayerStroke, DisableLayerShadow, EnableLayerShadow, SetLayerStrokeCap, SetLayerStrokeJoin,
-  SetLayerStrokeDashArray, SetLayerStrokeMiterLimit, ScaleLayer, ScaleLayers, EnableLayerHorizontalFlip,
-  DisableLayerHorizontalFlip, EnableLayerVerticalFlip, DisableLayerVerticalFlip, AddText, SetLayerText,
-  SetLayerFontSize, SetLayerFontWeight, SetLayerFontFamily, SetLayerLeading, SetLayerJustification,
+  DisableLayerStroke, DisableLayerShadow, EnableLayerShadow, SetLayerStrokeCap, SetLayerStrokeJoin, ScaleLayer,
+  ScaleLayers, EnableLayerHorizontalFlip, DisableLayerHorizontalFlip, EnableLayerVerticalFlip, DisableLayerVerticalFlip,
+  AddText, SetLayerText, SetLayerFontSize, SetLayerFontWeight, SetLayerFontFamily, SetLayerLeading, SetLayerJustification,
   AddInViewLayer, AddInViewLayers, RemoveInViewLayer, RemoveInViewLayers, UpdateInViewLayers, SetLayerFillType,
-  SetLayerStrokeFillType, AddLayersMask, MaskLayer, MaskLayers, UnmaskLayers, UnmaskLayer, RemoveLayersMask, SetLayerFill, AlignLayersToLeft,
-  AlignLayersToRight, AlignLayersToTop, AlignLayersToBottom, AlignLayersToCenter, AlignLayersToMiddle,
+  SetLayerStrokeFillType, AddLayersMask, MaskLayer, MaskLayers, UnmaskLayers, UnmaskLayer, RemoveLayersMask, SetLayerFill,
+  AlignLayersToLeft, AlignLayersToRight, AlignLayersToTop, AlignLayersToBottom, AlignLayersToCenter, AlignLayersToMiddle,
   DistributeLayersHorizontally, DistributeLayersVertically, DuplicateLayer, DuplicateLayers, RemoveDuplicatedLayers,
   SendLayerForward, SendLayerBackward, SendLayersForward, SendLayersBackward, SendLayerToFront, SendLayersToFront,
   SendLayerToBack, SendLayersToBack, AddImage, InsertLayersAbove, InsertLayersBelow, AddLayerChildren, SetLayerBlendMode,
-  UniteLayers, SetRoundedRadius, SetPolygonSides, SetStarPoints, IntersectLayers,
-  SubtractLayers, ExcludeLayers, DivideLayers, SetStarRadius, SetLayerStrokeDashOffset, SetLayersOpacity,
-  SetLayersBlendMode, SetLayersX, SetLayersY, SetLayersWidth, SetLayersHeight, SetLayersRotation, SetLayersFillColor,
-  SetLayersStrokeColor, SetLayersShadowColor, EnableLayersFill, DisableLayersFill, EnableLayersStroke, DisableLayersStroke,
-  EnableLayersShadow, DisableLayersShadow, SetLayersFillType, SetLayersStrokeFillType, SetLayersStrokeWidth, SetLayersStrokeCap,
-  SetLayersStrokeJoin, SetLayersStrokeDashOffset, SetLayersStrokeDashArray, SetLayerStrokeDashArrayWidth, SetLayersStrokeDashArrayWidth,
-  SetLayerStrokeDashArrayGap, SetLayersStrokeDashArrayGap, SetLayerGradient, SetLayersGradient, SetLayerGradientType, SetLayersGradientType,
+  UniteLayers, SetRoundedRadius, SetPolygonSides, SetStarPoints, IntersectLayers, SubtractLayers, ExcludeLayers, DivideLayers,
+  SetStarRadius, SetLayerStrokeDashOffset, SetLayersOpacity, SetLayersBlendMode, SetLayersX, SetLayersY, SetLayersWidth,
+  SetLayersHeight, SetLayersRotation, SetLayersFillColor, SetLayersStrokeColor, SetLayersShadowColor, EnableLayersFill,
+  DisableLayersFill, EnableLayersStroke, DisableLayersStroke, EnableLayersShadow, DisableLayersShadow, SetLayersFillType,
+  SetLayersStrokeFillType, SetLayersStrokeWidth, SetLayersStrokeCap, SetLayersStrokeJoin, SetLayersStrokeDashOffset,
+  SetLayerStrokeDashArray, SetLayersStrokeDashArray, SetLayerStrokeDashArrayWidth, SetLayersStrokeDashArrayWidth, SetLayerStrokeDashArrayGap,
+  SetLayersStrokeDashArrayGap, SetLayerGradient, SetLayersGradient, SetLayerGradientType, SetLayersGradientType,
   SetLayerGradientOrigin, SetLayersGradientOrigin, SetLayerGradientDestination, SetLayersGradientDestination, SetLayerGradientStopColor,
   SetLayersGradientStopColor, SetLayerGradientStopPosition, SetLayersGradientStopPosition, AddLayerGradientStop, AddLayersGradientStop,
-  RemoveLayerGradientStop, RemoveLayersGradientStop, SetLayerActiveGradientStop, SetLayersShadowBlur, SetLayersShadowXOffset, SetLayersShadowYOffset, SetLayersFontSize,
-  SetLayersFontWeight, SetLayersFontFamily, SetLayersLeading, SetLayersJustification, SetLayerTweenTiming, SetCurvePointOriginX,
-  SetCurvePointOriginY, SetCurvePointOrigin, SetRoundedRadii, SetPolygonsSides, SetStarsPoints, SetStarsRadius, SetLayerEdit, AddLayers
+  RemoveLayerGradientStop, RemoveLayersGradientStop, SetLayerActiveGradientStop, SetLayersShadowBlur, SetLayersShadowXOffset,
+  SetLayersShadowYOffset, SetLayersFontSize, SetLayersFontWeight, SetLayersFontFamily, SetLayersLeading, SetLayersJustification,
+  SetLayerTweenTiming, SetRoundedRadii, SetPolygonsSides, SetStarsPoints, SetStarsRadius, SetLayerEdit, AddLayers, SetLineFromX,
+  SetLineFromY, SetLineFrom, SetLineToX, SetLineToY, SetLineTo, SetLinesFromX, SetLinesFromY, SetLinesToX, SetLinesToY
 } from '../actionTypes/layer';
 
 import {
@@ -47,8 +47,8 @@ import {
   getTweensByDestinationLayer, getAllArtboardTweenEvents, getTweensEventsByDestinationArtboard, getTweensByLayer,
   getLayersBounds, getGradientOriginPoint, getGradientDestinationPoint, getGradientStops, getLayerSnapPoints,
   orderLayersByDepth, orderLayersByLeft, orderLayersByTop, savePaperProjectJSON, getTweensByProp,
-  getEquivalentTweenProp, getTweensWithLayer, gradientsMatch, getPaperProp, getCurvePoints, getArtboardsTopTop, getSelectionBounds,
-  getTweenEventsWithArtboard
+  getEquivalentTweenProp, getTweensWithLayer, gradientsMatch, getPaperProp, getArtboardsTopTop, getSelectionBounds,
+  getTweenEventsWithArtboard, getLineFromPoint, getLineToPoint, getLineVector
 } from '../selectors/layer';
 
 import { paperMain } from '../../canvas';
@@ -406,7 +406,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
       opacity: resizeDisabled ? 0 : 1
     }
     if (state.selected.length === 1 && state.byId[state.selected[0]].type === 'Shape' && (state.byId[state.selected[0]] as em.Shape).shapeType === 'Line') {
-      const layerItem = state.byId[state.selected[0]] as em.Shape;
+      const layerItem = state.byId[state.selected[0]] as em.Line;
       const moveHandle = new paperMain.Path.Ellipse({
         ...baseProps,
         opacity: 1,
@@ -441,7 +441,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           document.body.style.cursor = 'auto';
         }
       });
-      fromHandle.position = useLayerItem ? new paperMain.Point(layerItem.path.points[0].point.x, layerItem.path.points[0].point.y) : (getPaperLayer(state.selected[0]) as paper.Path).firstSegment.point;
+      fromHandle.position = useLayerItem ? getLineFromPoint(state, layerItem.id, layerItem.from) : (getPaperLayer(state.selected[0]) as paper.Path).firstSegment.point;
       fromHandle.scaling.x = 1 / paperMain.view.zoom;
       fromHandle.scaling.y = 1 / paperMain.view.zoom;
       const toHandle = new paperMain.Path.Rectangle({
@@ -460,7 +460,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           document.body.style.cursor = 'auto';
         }
       });
-      toHandle.position = useLayerItem ? new paperMain.Point(layerItem.path.points[1].point.x, layerItem.path.points[1].point.y) : (getPaperLayer(state.selected[0]) as paper.Path).lastSegment.point;
+      toHandle.position = useLayerItem ? getLineToPoint(state, layerItem.id, layerItem.to) : (getPaperLayer(state.selected[0]) as paper.Path).lastSegment.point;
       toHandle.scaling.x = 1 / paperMain.view.zoom;
       toHandle.scaling.y = 1 / paperMain.view.zoom;
       new paperMain.Group({
@@ -730,13 +730,13 @@ export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[
               if (eventLayerItem.type === 'Group' && eventLayerItem.clipped) {
                 const mask = eventLayerItem.children.find((id) => state.byId[id].mask);
                 const maskItem = state.byId[mask] as em.Shape;
-                return maskItem.path.data;
+                return maskItem.pathData;
               } else {
                 return 'M21,9 L21,20 L3,20 L3,9 L21,9 Z M9,4 C10.480515,4 11.7731656,4.80434324 12.4648015,5.99987956 L21,6 L21,8 L3,8 L3,4 L9,4 Z';
               }
             }
             case 'Shape':
-              return eventLayerItem.path.data;
+              return eventLayerItem.pathData;
             case 'Text':
               return 'M12.84,18.999 L12.84,6.56 L12.84,6.56 L16.92,6.56 L16.92,5 L7.08,5 L7.08,6.56 L11.16,6.56 L11.16,19 L12.839,19 C12.8395523,19 12.84,18.9995523 12.84,18.999 Z';
             case 'Image':
@@ -1096,8 +1096,8 @@ export const updateHoverFrame = (state: LayerState) => {
     if (hoverItem.type === 'Shape') {
       new paperMain.CompoundPath({
         ...hoverFrameConstants,
-        closed: hoverItem.path.closed,
-        pathData: hoverItem.path.data
+        closed: (hoverItem as em.Shape).shapeType !== 'Line',
+        pathData: hoverItem.pathData
       });
     } else {
       new paperMain.Path.Rectangle({
@@ -1741,11 +1741,7 @@ export const updateChildrenBounds = (state: LayerState, id: string): LayerState 
           ...result.byId,
           [current]: {
             ...result.byId[current],
-            path: {
-              ...(result.byId[current] as em.Shape).path,
-              data: (paperLayer as paper.Path | paper.CompoundPath).pathData,
-              points: getCurvePoints(paperLayer as paper.Path | paper.CompoundPath)
-            }
+            pathData: (paperLayer as paper.Path | paper.CompoundPath).pathData
           } as em.Shape
         }
       }
@@ -1814,12 +1810,34 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
         ...currentState.byId,
         [id]: {
           ...currentState.byId[id],
-          path: {
-            ...(currentState.byId[id] as em.Shape).path,
-            data: (paperLayer as paper.PathItem).pathData,
-            points: getCurvePoints(paperLayer as paper.Path | paper.CompoundPath)
-          }
+          pathData: (paperLayer as paper.PathItem).pathData
         } as em.Shape
+      }
+    }
+    if ((layerItem as em.Shape).shapeType === 'Line') {
+      const fromPoint = (paperLayer as paper.Path).firstSegment.point;
+      const toPoint = (paperLayer as paper.Path).lastSegment.point;
+      const vector = toPoint.subtract(fromPoint);
+      currentState = {
+        ...currentState,
+        byId: {
+          ...currentState.byId,
+          [id]: {
+            ...currentState.byId[id],
+            from: {
+              x: (fromPoint.x - paperLayer.position.x) / vector.length,
+              y: (fromPoint.y - paperLayer.position.y) / vector.length
+            },
+            to: {
+              x: (toPoint.x - paperLayer.position.x) / vector.length,
+              y: (toPoint.y - paperLayer.position.y) / vector.length
+            },
+            transform: {
+              ...currentState.byId[id].transform,
+              rotation: vector.angle
+            }
+          } as em.Line
+        }
       }
     }
   }
@@ -2578,11 +2596,7 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
         ...currentState.byId,
         [action.payload.id]: {
           ...currentState.byId[action.payload.id],
-          path: {
-            ...(currentState.byId[action.payload.id] as em.Shape).path,
-            data: (paperLayer as paper.PathItem).pathData,
-            points: getCurvePoints(paperLayer as paper.Path | paper.CompoundPath)
-          }
+          pathData: (paperLayer as paper.PathItem).pathData
         } as em.Shape
       }
     }
@@ -4797,11 +4811,7 @@ export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState 
         innerWidth: booleanLayers.bounds.width,
         innerHeight: booleanLayers.bounds.height
       },
-      path: {
-        data: booleanLayers.pathData,
-        closed: booleanLayers.closed,
-        points: getCurvePoints(booleanLayers)
-      }
+      pathData: booleanLayers.pathData
     }
   }) as AddShape);
   return currentState;
@@ -4833,11 +4843,7 @@ export const intersectLayers = (state: LayerState, action: IntersectLayers): Lay
         innerWidth: booleanLayers.bounds.width,
         innerHeight: booleanLayers.bounds.height
       },
-      path: {
-        data: booleanLayers.pathData,
-        closed: booleanLayers.closed,
-        points: getCurvePoints(booleanLayers)
-      }
+      pathData: booleanLayers.pathData
     }
   }) as AddShape);
   return currentState;
@@ -4869,11 +4875,7 @@ export const subtractLayers = (state: LayerState, action: SubtractLayers): Layer
         innerWidth: booleanLayers.bounds.width,
         innerHeight: booleanLayers.bounds.height
       },
-      path: {
-        data: booleanLayers.pathData,
-        closed: booleanLayers.closed,
-        points: getCurvePoints(booleanLayers)
-      }
+      pathData: booleanLayers.pathData
     }
   }) as AddShape);
   return currentState;
@@ -4905,11 +4907,7 @@ export const excludeLayers = (state: LayerState, action: ExcludeLayers): LayerSt
         innerWidth: booleanLayers.bounds.width,
         innerHeight: booleanLayers.bounds.height
       },
-      path: {
-        data: booleanLayers.pathData,
-        closed: booleanLayers.closed,
-        points: getCurvePoints(booleanLayers)
-      }
+      pathData: booleanLayers.pathData
     }
   }) as AddShape);
   return currentState;
@@ -4941,11 +4939,7 @@ export const divideLayers = (state: LayerState, action: DivideLayers): LayerStat
         innerWidth: booleanLayers.bounds.width,
         innerHeight: booleanLayers.bounds.height
       },
-      path: {
-        data: booleanLayers.pathData,
-        closed: booleanLayers.closed,
-        points: getCurvePoints(booleanLayers)
-      }
+      pathData: booleanLayers.pathData
     }
   }) as AddShape);
   return currentState;
@@ -4972,11 +4966,7 @@ export const setRoundedRadius = (state: LayerState, action: SetRoundedRadius): L
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
         radius: action.payload.radius,
-        path: {
-          data: newShape.pathData,
-          closed: true,
-          points: getCurvePoints(newShape)
-        }
+        pathData: newShape.pathData
       } as em.Rounded
     }
   }
@@ -5018,11 +5008,7 @@ export const setPolygonSides = (state: LayerState, action: SetPolygonSides): Lay
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
         sides: action.payload.sides,
-        path: {
-          data: newShape.pathData,
-          closed: true,
-          points: getCurvePoints(newShape)
-        }
+        pathData: newShape.pathData
       } as em.Polygon
     }
   }
@@ -5072,11 +5058,7 @@ export const setStarPoints = (state: LayerState, action: SetStarPoints): LayerSt
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
         points: action.payload.points,
-        path: {
-          data: newShape.pathData,
-          closed: true,
-          points: getCurvePoints(newShape)
-        }
+        pathData: newShape.pathData
       } as em.Star
     }
   }
@@ -5120,11 +5102,7 @@ export const setStarRadius = (state: LayerState, action: SetStarRadius): LayerSt
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
         radius: action.payload.radius,
-        path: {
-          data: newShape.pathData,
-          closed: true,
-          points: getCurvePoints(newShape)
-        }
+        pathData: newShape.pathData
       } as em.Star
     }
   }
@@ -5142,85 +5120,90 @@ export const setStarsRadius = (state: LayerState, action: SetStarsRadius): Layer
   return currentState;
 };
 
-export const setCurvePointOriginX = (state: LayerState, action: SetCurvePointOriginX): LayerState => {
+export const setLineFromX = (state: LayerState, action: SetLineFromX): LayerState => {
   let currentState = state;
-  const layerItem = state.byId[action.payload.id] as em.Shape;
-  if (layerItem.path.points.length > 2) {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          shapeType: 'Custom'
-        } as em.Shape
-      }
-    }
-  }
   currentState = updateLayerBounds(currentState, action.payload.id);
+  if (action.payload.setEdit) {
+    currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  }
+  return currentState;
+};
+
+export const setLinesFromX = (state: LayerState, action: SetLinesFromX): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
+    return setLineFromX(result, layerActions.setLineFromX({id: current, x: action.payload.x, setEdit: false}) as SetLineFromX);
+  }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
-export const setCurvePointOriginY = (state: LayerState, action: SetCurvePointOriginY): LayerState => {
+export const setLineFromY = (state: LayerState, action: SetLineFromY): LayerState => {
   let currentState = state;
-  const layerItem = state.byId[action.payload.id] as em.Shape;
-  if (layerItem.path.points.length > 2) {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          shapeType: 'Custom'
-        } as em.Shape
-      }
-    }
-  }
   currentState = updateLayerBounds(currentState, action.payload.id);
+  if (action.payload.setEdit) {
+    currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  }
+  return currentState;
+};
+
+export const setLinesFromY = (state: LayerState, action: SetLinesFromY): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
+    return setLineFromY(result, layerActions.setLineFromY({id: current, y: action.payload.y, setEdit: false}) as SetLineFromY);
+  }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
-export const setCurvePointOrigin = (state: LayerState, action: SetCurvePointOrigin): LayerState => {
+export const setLineFrom = (state: LayerState, action: SetLineFrom): LayerState => {
   let currentState = state;
-  const layerItem = state.byId[action.payload.id] as em.Shape;
-  const paperLayer = getPaperLayer(action.payload.id);
-  if (layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line') {
-    const fromPoint = ((paperLayer as paper.CompoundPath).children[0] as paper.Path).segments[0].point;
-    const toPoint = ((paperLayer as paper.CompoundPath).children[0] as paper.Path).segments[1].point;
-    const vector = toPoint.subtract(fromPoint);
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          frame: {
-            ...currentState.byId[action.payload.id].frame,
-            innerWidth: vector.length
-          },
-          transform: {
-            ...currentState.byId[action.payload.id].transform,
-            rotation: vector.angle
-          }
-        } as em.Shape
-      }
-    }
-  }
-  if (layerItem.path.points.length > 2) {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          shapeType: 'Custom'
-        } as em.Shape
-      }
-    }
-  }
+  currentState = setLineFromX(currentState, layerActions.setLineFromX({id: action.payload.id, x: action.payload.x, setEdit: false}) as SetLineFromX);
+  currentState = setLineFromY(currentState, layerActions.setLineFromY({id: action.payload.id, y: action.payload.y, setEdit: false}) as SetLineFromY);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLineToX = (state: LayerState, action: SetLineToX): LayerState => {
+  let currentState = state;
   currentState = updateLayerBounds(currentState, action.payload.id);
+  if (action.payload.setEdit) {
+    currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  }
+  return currentState;
+};
+
+export const setLinesToX = (state: LayerState, action: SetLinesToX): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
+    return setLineToX(result, layerActions.setLineToX({id: current, x: action.payload.x, setEdit: false}) as SetLineToX);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLineToY = (state: LayerState, action: SetLineToY): LayerState => {
+  let currentState = state;
+  currentState = updateLayerBounds(currentState, action.payload.id);
+  if (action.payload.setEdit) {
+    currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  }
+  return currentState;
+};
+
+export const setLinesToY = (state: LayerState, action: SetLinesToY): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
+    return setLineToY(result, layerActions.setLineToY({id: current, y: action.payload.y, setEdit: false}) as SetLineToY);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLineTo = (state: LayerState, action: SetLineTo): LayerState => {
+  let currentState = state;
+  currentState = setLineToX(currentState, layerActions.setLineToX({id: action.payload.id, x: action.payload.x, setEdit: false}) as SetLineToX);
+  currentState = setLineToY(currentState, layerActions.setLineToY({id: action.payload.id, y: action.payload.y, setEdit: false}) as SetLineToY);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };

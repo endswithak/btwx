@@ -5,8 +5,8 @@ import { ContextMenuState } from '../store/reducers/contextMenu';
 import ContextMenu from './ContextMenu';
 import { ContextMenuTypes, OpenContextMenuPayload } from '../store/actionTypes/contextMenu';
 import { closeContextMenu, openContextMenu } from '../store/actions/contextMenu';
-import { AddLayerTweenEventPayload, LayerTypes, CopyLayersToClipboardPayload, PasteLayersFromClipboardPayload, RemoveLayersPayload, SelectLayerPayload } from '../store/actionTypes/layer';
-import { addLayerTweenEvent, copyLayersToClipboard, pasteLayersFromClipboard, removeLayers, selectLayer } from '../store/actions/layer';
+import { AddLayerTweenEventPayload, LayerTypes, RemoveLayersPayload, SelectLayerPayload } from '../store/actionTypes/layer';
+import { addLayerTweenEvent, removeLayers, selectLayer, copyLayersThunk, pasteLayersThunk } from '../store/actions/layer';
 import { RemoveArtboardPresetPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
 import { removeArtboardPreset } from '../store/actions/canvasSettings';
 import { ArtboardPresetEditorTypes } from '../store/actionTypes/artboardPresetEditor';
@@ -18,7 +18,6 @@ interface ContextMenuWrapProps {
   activeArtboard?: string;
   artboards?: em.Artboard[];
   selected?: string[];
-  clipboard?: string[];
   canAddTweenEvent?: boolean;
   tweenEventItems?: em.TweenEvent[];
   currentX?: number;
@@ -28,14 +27,14 @@ interface ContextMenuWrapProps {
   addLayerTweenEvent?(payload: AddLayerTweenEventPayload): LayerTypes;
   removeArtboardPreset?(payload: RemoveArtboardPresetPayload): CanvasSettingsTypes;
   openArtboardPresetEditor?(payload: em.ArtboardPreset): ArtboardPresetEditorTypes;
-  copyLayersToClipboard?(payload: CopyLayersToClipboardPayload): LayerTypes;
-  pasteLayersFromClipboard?(payload: PasteLayersFromClipboardPayload): LayerTypes;
   removeLayers?(payload: RemoveLayersPayload): LayerTypes;
   selectLayer?(payload: SelectLayerPayload): LayerTypes;
+  copyLayersThunk?(): Promise<any>;
+  pasteLayersThunk?({overSelection, overPoint, overLayer}: { overSelection?: boolean; overPoint?: em.Point, overLayer?: string }): Promise<any>;
 }
 
 const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
-  const { contextMenu, closeContextMenu, currentX, currentY, openContextMenu, canAddTweenEvent, artboards, activeArtboard, tweenEventItems, selected, clipboard, addLayerTweenEvent, removeArtboardPreset, openArtboardPresetEditor, copyLayersToClipboard, pasteLayersFromClipboard, removeLayers, selectLayer } = props;
+  const { contextMenu, closeContextMenu, currentX, currentY, openContextMenu, canAddTweenEvent, artboards, activeArtboard, tweenEventItems, selected, addLayerTweenEvent, removeArtboardPreset, openArtboardPresetEditor, removeLayers, selectLayer, copyLayersThunk, pasteLayersThunk } = props;
 
   const getOptions = () => {
     switch(contextMenu.type) {
@@ -43,6 +42,7 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
         return [{
           type: 'MenuItem',
           text: 'Add Tween Event',
+          hidden: contextMenu.id && contextMenu.id === 'page',
           disabled: !canAddTweenEvent,
           onClick: (): void => {
             closeContextMenu();
@@ -56,40 +56,51 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
         },{
           type: 'MenuItem',
           text: 'Select',
+          hidden: contextMenu.id && contextMenu.id === 'page',
+          disabled: !canAddTweenEvent,
           onClick: (): void => {
             closeContextMenu();
             selectLayer({id: contextMenu.id, newSelection: true});
           }
         },{
           type: 'MenuItem',
-          text: 'Copy',
+          text: 'Select All',
+          hidden: contextMenu.id && contextMenu.id !== 'page',
           onClick: (): void => {
             closeContextMenu();
+            // selectLayer({id: contextMenu.id, newSelection: true});
+          }
+        },{
+          type: 'MenuItem',
+          text: 'Copy',
+          hidden: contextMenu.id && contextMenu.id === 'page',
+          onClick: (): void => {
+            closeContextMenu();
+            copyLayersThunk();
+          }
+        },{
+          type: 'MenuItem',
+          text: 'Paste Here',
+          onClick: (): void => {
+            pasteLayersThunk({overPoint: { x: contextMenu.paperX, y: contextMenu.paperY }} as any).then(() => {
+              closeContextMenu();
+            });
+          }
+        },{
+          type: 'MenuItem',
+          text: 'Paste Over',
+          hidden: contextMenu.id && contextMenu.id === 'page',
+          onClick: (): void => {
             if (selected.length > 0) {
-              copyLayersToClipboard({layers: selected});
+              pasteLayersThunk({overSelection: true} as any).then(() => { closeContextMenu() });
             } else {
-              copyLayersToClipboard({layers: [contextMenu.id]});
+              pasteLayersThunk({overLayer: contextMenu.id} as any).then(() => { closeContextMenu() });
             }
           }
         },{
           type: 'MenuItem',
-          text: 'Paste',
-          disabled: clipboard.length === 0,
-          onClick: (): void => {
-            closeContextMenu();
-            pasteLayersFromClipboard({});
-          }
-        },{
-          type: 'MenuItem',
-          text: 'Paste Over Selection',
-          disabled: clipboard.length === 0,
-          onClick: (): void => {
-            closeContextMenu();
-            pasteLayersFromClipboard({overSelection: true});
-          }
-        },{
-          type: 'MenuItem',
           text: 'Delete',
+          hidden: contextMenu.id && contextMenu.id === 'page',
           onClick: (): void => {
             closeContextMenu();
             if (selected.length > 0) {
@@ -261,8 +272,7 @@ const mapStateToProps = (state: RootState) => {
     return result;
   }, []);
   const selected = layer.present.selected;
-  const clipboard = layer.present.clipboard.allIds;
-  const layerItem = contextMenu.id && layer.present.byId[contextMenu.id];
+  const layerItem = contextMenu.id && contextMenu.id !== 'page' && layer.present.byId[contextMenu.id];
   const tweenEventLayerScope = layerItem ? getLayerScope(layer.present, contextMenu.id) : null;
   const artboard = tweenEventLayerScope ? tweenEventLayerScope.find((id) => layer.present.allArtboardIds.includes(id)) : null;
   const canAddTweenEvent = layerItem && (selected.length === 0 || (selected.length === 1 && selected[0] === contextMenu.id)) && tweenEventLayerScope.some(id => layer.present.allArtboardIds.includes(id));
@@ -273,10 +283,10 @@ const mapStateToProps = (state: RootState) => {
    }, []) : null;
   const currentY = contextMenu.y && document.getElementById('context-menu') ? document.getElementById('context-menu').offsetTop : contextMenu.y;
   const currentX = contextMenu.x && document.getElementById('context-menu') ? document.getElementById('context-menu').offsetLeft : contextMenu.x;
-  return { contextMenu, activeArtboard, artboards, selected, clipboard, canAddTweenEvent, tweenEventItems, currentY, currentX };
+  return { contextMenu, activeArtboard, artboards, selected, canAddTweenEvent, tweenEventItems, currentY, currentX };
 };
 
 export default connect(
   mapStateToProps,
-  { openContextMenu, closeContextMenu, addLayerTweenEvent, removeArtboardPreset, openArtboardPresetEditor, copyLayersToClipboard, pasteLayersFromClipboard, removeLayers, selectLayer }
+  { openContextMenu, closeContextMenu, addLayerTweenEvent, removeArtboardPreset, openArtboardPresetEditor, removeLayers, selectLayer, copyLayersThunk, pasteLayersThunk }
 )(ContextMenuWrap);

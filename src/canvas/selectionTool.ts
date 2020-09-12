@@ -1,5 +1,6 @@
 import { getPaperLayer, getLayerAndDescendants } from '../store/selectors/layer';
 import { removeLayers, escapeLayerScope } from '../store/actions/layer';
+import { openContextMenu } from '../store/actions/contextMenu';
 import { setTweenDrawerEvent } from '../store/actions/tweenDrawer';
 import { setCanvasMeasuring } from '../store/actions/canvasSettings';
 import store from '../store';
@@ -154,9 +155,13 @@ class SelectionTool {
       }
     // if no hit result, enable area select tool
     } else {
-      if (!isGradientEditorOpen) {
-        this.areaSelectTool.enable(state);
-        this.areaSelectTool.onMouseDown(event, true);
+      if (event.event.which === 3) {
+        store.dispatch(openContextMenu({type: 'LayerEdit', id: 'page', x: event.event.clientX, y: event.event.clientY, paperX: event.point.x, paperY: event.point.y}));
+      } else {
+        if (!isGradientEditorOpen) {
+          this.areaSelectTool.enable(state);
+          this.areaSelectTool.onMouseDown(event, true);
+        }
       }
     }
   }

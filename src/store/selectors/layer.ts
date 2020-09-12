@@ -275,39 +275,27 @@ export const getCanvasCenter = (store: LayerState, useLayerItem?: boolean): pape
   return new paper.Point(xMid, yMid);
 };
 
-export const getClipboardTopLeft = (store: LayerState, documentImages: {[id: string]: em.DocumentImage}): paper.Point => {
-  const paperLayerPoints = store.clipboard.allIds.reduce((result, current) => {
-    const layerItem = store.clipboard.byId[current];
-    let paperLayerJSON = layerItem.paperLayer;
-    if (layerItem.type === 'Image') {
-      const buffer = Buffer.from(documentImages[layerItem.imageId].buffer);
-      const base64 = `data:image/webp;base64,${bufferToBase64(buffer)}`;
-      paperLayerJSON = paperLayerJSON.replace(`"source":"${layerItem.imageId}"`, `"source":"${base64}"`);
-    }
-    const paperLayer = paperMain.project.importJSON(paperLayerJSON);
-    return [...result, paperLayer.bounds.topLeft];
+export const getClipboardTopLeft = (layerItems: em.Layer[]): paper.Point => {
+  const paperLayerPoints = layerItems.reduce((result, current) => {
+    const layerItem = current;
+    const topLeft = new paperMain.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
+    return [...result, topLeft];
   }, []);
-  return paperLayerPoints.reduce(paper.Point.min);
+  return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.min) : null;
 };
 
-export const getClipboardBottomRight = (store: LayerState, documentImages: {[id: string]: em.DocumentImage}): paper.Point => {
-  const paperLayerPoints = store.clipboard.allIds.reduce((result, current) => {
-    const layerItem = store.clipboard.byId[current];
-    let paperLayerJSON = layerItem.paperLayer;
-    if (layerItem.type === 'Image') {
-      const buffer = Buffer.from(documentImages[layerItem.imageId].buffer);
-      const base64 = `data:image/webp;base64,${bufferToBase64(buffer)}`;
-      paperLayerJSON = paperLayerJSON.replace(`"source":"${layerItem.imageId}"`, `"source":"${base64}"`);
-    }
-    const paperLayer = paperMain.project.importJSON(paperLayerJSON);
-    return [...result, paperLayer.bounds.bottomRight];
+export const getClipboardBottomRight = (layerItems: em.Layer[]): paper.Point => {
+  const paperLayerPoints = layerItems.reduce((result, current) => {
+    const layerItem = current;
+    const bottomRight = new paperMain.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
+    return [...result, bottomRight];
   }, []);
-  return paperLayerPoints.reduce(paper.Point.max);
+  return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.max) : null;
 };
 
-export const getClipboardCenter = (store: LayerState, documentImages: {[id: string]: em.DocumentImage}): paper.Point => {
-  const topLeft = getClipboardTopLeft(store, documentImages);
-  const bottomRight = getClipboardBottomRight(store, documentImages);
+export const getClipboardCenter = (layerItems: em.Layer[]): paper.Point => {
+  const topLeft = getClipboardTopLeft(layerItems);
+  const bottomRight = getClipboardBottomRight(layerItems);
   const xMid = (topLeft.x + bottomRight.x) / 2;
   const yMid = (topLeft.y + bottomRight.y) / 2;
   return new paper.Point(xMid, yMid);
@@ -901,6 +889,23 @@ export const getGradientDestinationPoint = (store: LayerState, id: string, desti
   return new paperMain.Point((destination.x * layerItem.frame.innerWidth) + layerItem.frame.x, (destination.y * layerItem.frame.innerHeight) + layerItem.frame.y);
 };
 
+export const getLineFromPoint = (store: LayerState, id: string, from: em.Point): paper.Point => {
+  const layerItem = store.byId[id];
+  return new paperMain.Point((from.x * layerItem.frame.innerWidth) + layerItem.frame.x, (from.y * layerItem.frame.innerWidth) + layerItem.frame.y);
+};
+
+export const getLineToPoint = (store: LayerState, id: string, to: em.Point): paper.Point => {
+  const layerItem = store.byId[id];
+  return new paperMain.Point((to.x * layerItem.frame.innerWidth) + layerItem.frame.x, (to.y * layerItem.frame.innerWidth) + layerItem.frame.y);
+};
+
+export const getLineVector = (store: LayerState, id: string): paper.Point => {
+  const layerItem = store.byId[id] as em.Line;
+  const from = getLineFromPoint(store, id, layerItem.from);
+  const to = getLineToPoint(store, id, layerItem.to);
+  return to.subtract(from)
+};
+
 export const getGradientStops = (stops: em.GradientStop[]): paper.GradientStop[] => {
   return stops.reduce((result, current) => {
     result = [
@@ -1124,54 +1129,6 @@ export const getPaperProp = (prop: 'fill' | 'stroke'): 'fillColor' | 'strokeColo
       return 'strokeColor';
   }
 };
-
-export const getCurvePoints = (paperLayer: paper.Path | paper.CompoundPath): em.CurvePoint[] => {
-  const curvePoints: em.CurvePoint[] = [];
-  const newPoint = (segment: paper.Segment) => {
-    curvePoints.push({
-      point: {
-        x: segment.point.x,
-        y: segment.point.y
-      },
-      handleIn: {
-        x: segment.handleIn.x,
-        y: segment.handleIn.y
-      },
-      handleOut: {
-        x: segment.handleOut.x,
-        y: segment.handleOut.y
-      }
-    });
-  }
-  switch(paperLayer.className) {
-    case 'Path':
-      (paperLayer as paper.Path).segments.forEach((segment) => {
-        newPoint(segment);
-      });
-      break;
-    case 'CompoundPath': {
-      const compoundPaths: paper.CompoundPath[] = [paperLayer as paper.CompoundPath];
-      let i = 0;
-      while(i < compoundPaths.length) {
-        const compoundPath = compoundPaths[i];
-        if (compoundPath.children) {
-          compoundPath.children.forEach((child) => {
-            if (child.className === 'CompoundPath') {
-              compoundPaths.push(child as paper.CompoundPath);
-            } else {
-              (child as paper.Path).segments.forEach((segment) => {
-                newPoint(segment);
-              });
-            }
-          });
-        }
-        i++;
-      }
-      break;
-    }
-  }
-  return curvePoints;
-}
 
 export const getArtboardsTopTop = (state: LayerState): number => {
   const artboards = state.allArtboardIds;

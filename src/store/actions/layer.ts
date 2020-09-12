@@ -1,13 +1,14 @@
 import { v4 as uuidv4 } from 'uuid';
+import { clipboard } from 'electron';
 import { paperMain } from '../../canvas';
 import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_TEXT_STYLE, DEFAULT_SHADOW_STYLE, DEFAULT_BLEND_MODE, DEFAULT_OPACITY, DEFAULT_STROKE_DASH_ARRAY, DEFAULT_STROKE_DASH_OFFSET, DEFAULT_STROKE_CAP, DEFAULT_STROKE_JOIN, DEFAULT_ROTATION, DEFAULT_HORIZONTAL_FLIP, DEFAULT_VERTICAL_FLIP, DEFAULT_TEXT_VALUE, DEFAULT_FONT_SIZE, DEFAULT_FONT_WEIGHT, DEFAULT_FONT_FAMILY, DEFAULT_JUSTIFICATION, DEFAULT_LEADING, DEFAULT_SHADOW_COLOR, DEFAULT_SHADOW_OFFSET_X, DEFAULT_SHADOW_OFFSET_Y, DEFAULT_SHADOW_BLUR, DEFAULT_SHAPE_WIDTH, DEFAULT_SHAPE_HEIGHT, DEFAULT_STAR_POINTS, DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS, DEFAULT_POLYGON_SIDES } from '../../constants';
 import { applyImageMethods } from '../../canvas/imageUtils';
 import { applyShapeMethods } from '../../canvas/shapeUtils';
 import { applyTextMethods } from '../../canvas/textUtils';
 import { applyArtboardMethods } from '../../canvas/artboardUtils';
-import { getCurvePoints } from '../selectors/layer';
 import { getPaperFillColor, getPaperStrokeColor, getPaperLayer, getPaperShadowColor, getPaperShapePathData } from '../utils/paper';
-import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerShapePath, getLayerTextStyle } from '../utils/actions';
+import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants } from '../selectors/layer';
+import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle } from '../utils/actions';
 import { bufferToBase64 } from '../../utils';
 
 import { addDocumentImage } from './documentSettings';
@@ -201,9 +202,16 @@ import {
   SET_STARS_POINTS,
   SET_STAR_RADIUS,
   SET_STARS_RADIUS,
-  SET_CURVE_POINT_ORIGIN,
-  SET_CURVE_POINT_ORIGIN_X,
-  SET_CURVE_POINT_ORIGIN_Y,
+  SET_LINE_FROM_X,
+  SET_LINES_FROM_X,
+  SET_LINE_FROM_Y,
+  SET_LINES_FROM_Y,
+  SET_LINE_FROM,
+  SET_LINE_TO_X,
+  SET_LINES_TO_X,
+  SET_LINE_TO_Y,
+  SET_LINES_TO_Y,
+  SET_LINE_TO,
   SET_LAYER_EDIT,
   AddArtboardPayload,
   AddGroupPayload,
@@ -233,9 +241,6 @@ import {
   GroupLayersPayload,
   UngroupLayerPayload,
   UngroupLayersPayload,
-  CopyLayerToClipboardPayload,
-  CopyLayersToClipboardPayload,
-  PasteLayersFromClipboardPayload,
   MoveLayerPayload,
   MoveLayersPayload,
   MoveLayerToPayload,
@@ -389,9 +394,16 @@ import {
   SetStarsPointsPayload,
   SetStarRadiusPayload,
   SetStarsRadiusPayload,
-  SetCurvePointOriginPayload,
-  SetCurvePointOriginXPayload,
-  SetCurvePointOriginYPayload,
+  SetLineFromXPayload,
+  SetLinesFromXPayload,
+  SetLineFromYPayload,
+  SetLinesFromYPayload,
+  SetLineFromPayload,
+  SetLineToXPayload,
+  SetLinesToXPayload,
+  SetLineToYPayload,
+  SetLinesToYPayload,
+  SetLineToPayload,
   SetLayerEditPayload,
   LayerTypes
 } from '../actionTypes/layer';
@@ -516,7 +528,7 @@ export const addShapeThunk = (payload: AddShapePayload) => {
     const name = payload.layer.name ? payload.layer.name : shapeType;
     const frame = getLayerFrame(payload);
     const shapeOpts = getLayerShapeOpts(payload);
-    const path = getLayerShapePath(payload);
+    const pathData = getLayerPathData(payload);
     const style = getLayerStyle(payload);
     const transform = getLayerTransform(payload);
     const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as em.Shadow) : null;
@@ -527,7 +539,7 @@ export const addShapeThunk = (payload: AddShapePayload) => {
     const mask = payload.layer.mask && (payload.layer.mask !== null || payload.layer.mask !== undefined) ? payload.layer.mask : false;
     const masked = payload.layer.masked && (payload.layer.masked !== null || payload.layer.masked !== undefined) ? payload.layer.masked : false;
     const paperLayer = new paperMain.CompoundPath({
-      pathData: path.data,
+      pathData: pathData,
       closed: closed,
       strokeWidth: style.stroke.width,
       shadowColor: paperShadowColor,
@@ -565,7 +577,7 @@ export const addShapeThunk = (payload: AddShapePayload) => {
           masked,
           style,
           transform,
-          path,
+          pathData,
           ...shapeOpts
         },
         batch: payload.batch
@@ -1691,18 +1703,53 @@ export const setStarsRadius = (payload: SetStarsRadiusPayload): LayerTypes => ({
   payload
 });
 
-export const setCurvePointOrigin = (payload: SetCurvePointOriginPayload): LayerTypes => ({
-  type: SET_CURVE_POINT_ORIGIN,
+export const setLineFromX = (payload: SetLineFromXPayload): LayerTypes => ({
+  type: SET_LINE_FROM_X,
   payload
 });
 
-export const setCurvePointOriginX = (payload: SetCurvePointOriginXPayload): LayerTypes => ({
-  type: SET_CURVE_POINT_ORIGIN_X,
+export const setLinesFromX = (payload: SetLinesFromXPayload): LayerTypes => ({
+  type: SET_LINES_FROM_X,
   payload
 });
 
-export const setCurvePointOriginY = (payload: SetCurvePointOriginYPayload): LayerTypes => ({
-  type: SET_CURVE_POINT_ORIGIN_Y,
+export const setLineFromY = (payload: SetLineFromYPayload): LayerTypes => ({
+  type: SET_LINE_FROM_Y,
+  payload
+});
+
+export const setLinesFromY = (payload: SetLinesFromYPayload): LayerTypes => ({
+  type: SET_LINES_FROM_Y,
+  payload
+});
+
+export const setLineFrom = (payload: SetLineFromPayload): LayerTypes => ({
+  type: SET_LINE_FROM,
+  payload
+});
+
+export const setLineToX = (payload: SetLineToXPayload): LayerTypes => ({
+  type: SET_LINE_TO_X,
+  payload
+});
+
+export const setLinesToX = (payload: SetLinesToXPayload): LayerTypes => ({
+  type: SET_LINES_TO_X,
+  payload
+});
+
+export const setLineToY = (payload: SetLineToYPayload): LayerTypes => ({
+  type: SET_LINE_TO_Y,
+  payload
+});
+
+export const setLinesToY = (payload: SetLinesToYPayload): LayerTypes => ({
+  type: SET_LINES_TO_Y,
+  payload
+});
+
+export const setLineTo = (payload: SetLineToPayload): LayerTypes => ({
+  type: SET_LINE_TO,
   payload
 });
 
@@ -1713,3 +1760,117 @@ export const setLayerEdit = (payload: SetLayerEditPayload): LayerTypes => ({
     edit: uuidv4()
   }
 });
+
+export const copyLayersThunk = () => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    if (state.canvasSettings.focusing && state.layer.present.selected.length > 0) {
+      const layers = state.layer.present.selected.reduce((result, current) => {
+        const layerAndDescendants = getLayerAndDescendants(state.layer.present, current);
+        const imageLayers = layerAndDescendants.filter(id => state.layer.present.byId[id].type === 'Image');
+        const imageBuffers = imageLayers.reduce((bufferResult, bufferCurrent) => {
+          const imageId = (state.layer.present.byId[bufferCurrent] as em.Image).imageId;
+          if (!Object.keys(bufferResult).includes(imageId)) {
+            bufferResult[imageId] = state.documentSettings.images.byId[imageId];
+          }
+          return bufferResult;
+        }, {} as { [id: string]: em.DocumentImage });
+        result.images = { ...result.images, ...imageBuffers };
+        result.main = [...result.main, current];
+        result.allIds = [...result.allIds, ...layerAndDescendants];
+        result.byId = layerAndDescendants.reduce((lr, cr) => {
+          lr = {
+            ...lr,
+            [cr]: {
+              ...state.layer.present.byId[cr],
+              tweenEvents: [],
+              tweens: [],
+              children: ((): string[] => {
+                const layerItem = state.layer.present.byId[cr];
+                const hasChildren = layerItem.type === 'Artboard' || layerItem.type === 'Group';
+                return hasChildren ? [] : null;
+              })()
+            }
+          }
+          return lr;
+        }, result.byId);
+        return result;
+      }, { type: 'layers', main: [], allIds: [], byId: {}, images: {} } as em.ClipboardLayers);
+      clipboard.writeText(JSON.stringify(layers));
+    }
+  }
+};
+
+export const pasteLayersThunk = ({ overSelection, overPoint, overLayer }: { overSelection?: boolean; overPoint?: em.Point; overLayer?: string }) => {
+  return (dispatch: any, getState: any): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      const state = getState() as RootState;
+      if (state.canvasSettings.focusing) {
+        try {
+          const text = clipboard.readText();
+          const parsedText: em.ClipboardLayers = JSON.parse(text);
+          if (parsedText.type && parsedText.type === 'layers') {
+            const replaceAll = (str: string, find: string, replace: string) => {
+              return str.replace(new RegExp(find, 'g'), replace);
+            };
+            const withNewIds: string = parsedText.allIds.reduce((result: string, current: string) => {
+              const newId = uuidv4();
+              result = replaceAll(result, current, newId);
+              return result;
+            }, text);
+            const newParse: em.ClipboardLayers = JSON.parse(withNewIds);
+            const newLayers: em.Layer[] = Object.keys(newParse.byId).reduce((result, current) => {
+              result = [...result, newParse.byId[current]];
+              return result;
+            }, []);
+            const mainLayers = newLayers.filter(layerItem => newParse.main.includes(layerItem.id));
+            const clipboardPosition = getClipboardCenter(mainLayers);
+            // handle if clipboard position is not within viewport
+            if (!clipboardPosition.isInside(paperMain.view.bounds)) {
+              const pointDiff = paperMain.view.center.subtract(clipboardPosition);
+              newLayers.forEach((layerItem) => {
+                layerItem.frame.x += pointDiff.x;
+                layerItem.frame.y += pointDiff.y;
+              });
+            }
+            // handle paste over selection
+            if (overSelection && state.layer.present.selected.length > 0) {
+              const selectionPosition = getSelectionCenter(state.layer.present, true);
+              const pointDiff = selectionPosition.subtract(clipboardPosition);
+              newLayers.forEach((layerItem) => {
+                layerItem.frame.x += pointDiff.x;
+                layerItem.frame.y += pointDiff.y;
+              });
+            }
+            // handle paste at point
+            if (overPoint) {
+              const paperPoint = new paperMain.Point(overPoint.x, overPoint.y);
+              const pointDiff = paperPoint.subtract(clipboardPosition);
+              newLayers.forEach((layerItem) => {
+                layerItem.frame.x += pointDiff.x;
+                layerItem.frame.y += pointDiff.y;
+              });
+            }
+            // handle paste over layer
+            if (overLayer) {
+              const paperPoint = getPaperLayer(overLayer) as paper.Item;
+              const pointDiff = paperPoint.position.subtract(clipboardPosition);
+              newLayers.forEach((layerItem) => {
+                layerItem.frame.x += pointDiff.x;
+                layerItem.frame.y += pointDiff.y;
+              });
+            }
+            dispatch(addLayersThunk({layers: newLayers, buffers: newParse.images}) as any).then(() => {
+              dispatch(selectLayers({layers: newParse.main, newSelection: true}));
+              resolve();
+            });
+          }
+        } catch(error) {
+          resolve();
+        }
+      } else {
+        resolve();
+      }
+    });
+  }
+};

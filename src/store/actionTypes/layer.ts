@@ -224,10 +224,16 @@ export const SET_STAR_POINTS = 'SET_STAR_POINTS';
 export const SET_STARS_POINTS = 'SET_STARS_POINTS';
 export const SET_STAR_RADIUS = 'SET_STAR_RADIUS';
 export const SET_STARS_RADIUS = 'SET_STARS_RADIUS';
-
-export const SET_CURVE_POINT_ORIGIN = 'SET_CURVE_POINT_POINT';
-export const SET_CURVE_POINT_ORIGIN_X = 'SET_CURVE_POINT_ORIGIN_X';
-export const SET_CURVE_POINT_ORIGIN_Y = 'SSET_CURVE_POINT_ORIGIN_Y';
+export const SET_LINE_FROM_X = 'SET_LINE_FROM_X';
+export const SET_LINES_FROM_X = 'SET_LINES_FROM_X';
+export const SET_LINE_FROM_Y = 'SET_LINE_FROM_Y';
+export const SET_LINES_FROM_Y = 'SET_LINES_FROM_Y';
+export const SET_LINE_FROM = 'SET_LINE_FROM';
+export const SET_LINE_TO_X = 'SET_LINE_TO_X';
+export const SET_LINES_TO_X = 'SET_LINES_TO_X';
+export const SET_LINE_TO_Y = 'SET_LINE_TO_Y';
+export const SET_LINES_TO_Y = 'SET_LINES_TO_Y';
+export const SET_LINE_TO = 'SET_LINE_TO';
 
 export const SET_LAYER_EDIT = 'SET_LAYER_EDIT';
 
@@ -2117,38 +2123,114 @@ export interface SetStarsRadius {
   payload: SetStarsRadiusPayload;
 }
 
-export interface SetCurvePointOriginPayload {
+export interface SetLineFromXPayload {
   id: string;
-  pointIndex: number;
+  x: number;
+  setEdit?: boolean;
+}
+
+export interface SetLineFromX {
+  type: typeof SET_LINE_FROM_X;
+  payload: SetLineFromXPayload;
+}
+
+export interface SetLinesFromXPayload {
+  layers: string[];
+  x: number;
+  setEdit?: boolean;
+}
+
+export interface SetLinesFromX {
+  type: typeof SET_LINES_FROM_X;
+  payload: SetLinesFromXPayload;
+}
+
+export interface SetLineFromYPayload {
+  id: string;
+  y: number;
+  setEdit?: boolean;
+}
+
+export interface SetLineFromY {
+  type: typeof SET_LINE_FROM_Y;
+  payload: SetLineFromYPayload;
+}
+
+export interface SetLinesFromYPayload {
+  layers: string[];
+  y: number;
+  setEdit?: boolean;
+}
+
+export interface SetLinesFromY {
+  type: typeof SET_LINES_FROM_Y;
+  payload: SetLinesFromYPayload;
+}
+
+export interface SetLineFromPayload {
+  id: string;
   x: number;
   y: number;
 }
 
-export interface SetCurvePointOrigin {
-  type: typeof SET_CURVE_POINT_ORIGIN;
-  payload: SetCurvePointOriginPayload;
+export interface SetLineFrom {
+  type: typeof SET_LINE_FROM;
+  payload: SetLineFromPayload;
 }
 
-export interface SetCurvePointOriginXPayload {
+export interface SetLineToXPayload {
   id: string;
-  pointIndex: number;
   x: number;
+  setEdit?: boolean;
 }
 
-export interface SetCurvePointOriginX {
-  type: typeof SET_CURVE_POINT_ORIGIN_X;
-  payload: SetCurvePointOriginXPayload;
+export interface SetLineToX {
+  type: typeof SET_LINE_TO_X;
+  payload: SetLineToXPayload;
 }
 
-export interface SetCurvePointOriginYPayload {
+export interface SetLinesToXPayload {
+  layers: string[];
+  x: number;
+  setEdit?: boolean;
+}
+
+export interface SetLinesToX {
+  type: typeof SET_LINES_TO_X;
+  payload: SetLinesToXPayload;
+}
+
+export interface SetLineToYPayload {
   id: string;
-  pointIndex: number;
+  y: number;
+  setEdit?: boolean;
+}
+
+export interface SetLineToY {
+  type: typeof SET_LINE_TO_Y;
+  payload: SetLineToYPayload;
+}
+
+export interface SetLinesToYPayload {
+  layers: string[];
+  y: number;
+  setEdit?: boolean;
+}
+
+export interface SetLinesToY {
+  type: typeof SET_LINES_TO_Y;
+  payload: SetLinesToYPayload;
+}
+
+export interface SetLineToPayload {
+  id: string;
+  x: number;
   y: number;
 }
 
-export interface SetCurvePointOriginY {
-  type: typeof SET_CURVE_POINT_ORIGIN_Y;
-  payload: SetCurvePointOriginYPayload;
+export interface SetLineTo {
+  type: typeof SET_LINE_TO;
+  payload: SetLineToPayload;
 }
 
 export interface SetLayerEditPayload {
@@ -2350,7 +2432,14 @@ export type LayerTypes = AddArtboard |
                          SetStarsPoints |
                          SetStarRadius |
                          SetStarsRadius |
-                         SetCurvePointOrigin |
-                         SetCurvePointOriginX |
-                         SetCurvePointOriginY |
+                         SetLineFromX |
+                         SetLinesFromX |
+                         SetLineFromY |
+                         SetLinesFromY |
+                         SetLineFrom |
+                         SetLineToX |
+                         SetLinesToX |
+                         SetLineToY |
+                         SetLinesToY |
+                         SetLineTo |
                          SetLayerEdit;

@@ -428,8 +428,8 @@ class ShapeTool {
         const paperLayer = this.renderShape({
           insert: false
         });
-        const fromPoint = (paperLayer as paper.Path).segments[0].point;
-        const toPoint = (paperLayer as paper.Path).segments[1].point;
+        const fromPoint = (paperLayer as paper.Path).firstSegment.point;
+        const toPoint = (paperLayer as paper.Path).lastSegment.point;
         const vector = toPoint.subtract(fromPoint);
         store.dispatch(addShapeThunk({
           layer: {
@@ -463,11 +463,7 @@ class ShapeTool {
               ...DEFAULT_TRANSFORM,
               rotation: this.shapeType === 'Line' ? vector.angle : DEFAULT_TRANSFORM.rotation
             },
-            path: {
-              closed: this.shapeType !== 'Line',
-              data: paperLayer.pathData,
-              points: null
-            },
+            pathData: paperLayer.pathData,
             ...(() => {
               switch(this.shapeType) {
                 case 'Ellipse':
@@ -485,6 +481,17 @@ class ShapeTool {
                 case 'Polygon':
                   return {
                     sides: DEFAULT_STAR_POINTS
+                  }
+                case 'Line':
+                  return {
+                    from: {
+                      x: (fromPoint.x - paperLayer.position.x) / vector.length,
+                      y: (fromPoint.y - paperLayer.position.y) / vector.length
+                    },
+                    to: {
+                      x: (toPoint.x - paperLayer.position.x) / vector.length,
+                      y: (toPoint.y - paperLayer.position.y) / vector.length
+                    }
                   }
                 default:
                   return {};

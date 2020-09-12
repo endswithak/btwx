@@ -1,12 +1,11 @@
 import { paperMain } from '../../canvas';
 import { getPaperShapePathData } from './paper';
-import { getCurvePoints } from '../selectors/layer';
 
 import {
   DEFAULT_TRANSFORM, DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_TEXT_STYLE,
   DEFAULT_SHADOW_STYLE, DEFAULT_BLEND_MODE, DEFAULT_OPACITY, DEFAULT_SHAPE_WIDTH,
   DEFAULT_SHAPE_HEIGHT, DEFAULT_STAR_POINTS, DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS,
-  DEFAULT_POLYGON_SIDES, DEFAULT_STROKE_OPTIONS_STYLE
+  DEFAULT_POLYGON_SIDES, DEFAULT_STROKE_OPTIONS_STYLE, DEFAULT_LINE_FROM, DEFAULT_LINE_TO
 } from '../../constants';
 
 export const getLayerFillStyle = (payload: any, overrides = {}): em.Fill => {
@@ -49,11 +48,13 @@ export const getLayerTextStyle = (payload: any, overrides = {}): em.TextStyle =>
   return textStyle;
 }
 
-export const getLayerShapeOpts = (payload: any): { radius?: number; points?: number; sides?: number } => {
+export const getLayerShapeOpts = (payload: any): { radius?: number; points?: number; sides?: number; from?: em.Point; to?: em.Point } => {
   const hasRadius = payload.layer.shapeType === 'Rounded' || payload.layer.shapeType === 'Star';
-  const radius = hasRadius ? (payload.layer as em.Star | em.Rounded).radius ? (payload.layer as em.Star | em.Rounded).radius : payload.layer.shapeType === 'Rounded' ? DEFAULT_ROUNDED_RADIUS : DEFAULT_STAR_RADIUS : null;
-  const points = payload.layer.shapeType === 'Star' ? (payload.layer as em.Star).points ? (payload.layer as em.Star).points : DEFAULT_STAR_POINTS : null;
-  const sides = payload.layer.shapeType === 'Polygon' ? (payload.layer as em.Polygon).sides ? (payload.layer as em.Polygon).sides : DEFAULT_POLYGON_SIDES : null;
+  const radius = hasRadius ? (payload.layer as em.Star | em.Rounded).radius !== null && (payload.layer as em.Star | em.Rounded).radius !== undefined ? (payload.layer as em.Star | em.Rounded).radius : payload.layer.shapeType === 'Rounded' ? DEFAULT_ROUNDED_RADIUS : DEFAULT_STAR_RADIUS : null;
+  const points = payload.layer.shapeType === 'Star' ? (payload.layer as em.Star).points !== null && (payload.layer as em.Star).points !== undefined ? (payload.layer as em.Star).points : DEFAULT_STAR_POINTS : null;
+  const sides = payload.layer.shapeType === 'Polygon' ? (payload.layer as em.Polygon).sides !== null && (payload.layer as em.Polygon).sides !== undefined ? (payload.layer as em.Polygon).sides : DEFAULT_POLYGON_SIDES : null;
+  const from = payload.layer.shapeType === 'Line' ? (payload.layer as em.Line).from ? (payload.layer as em.Line).from : DEFAULT_LINE_FROM : null;
+  const to = payload.layer.shapeType === 'Line' ? (payload.layer as em.Line).to ? (payload.layer as em.Line).to : DEFAULT_LINE_TO : null;
   switch(payload.layer.shapeType) {
     case 'Ellipse':
     case 'Rectangle':
@@ -71,26 +72,30 @@ export const getLayerShapeOpts = (payload: any): { radius?: number; points?: num
       return {
         sides
       }
+    case 'Line':
+      return {
+        from,
+        to
+      }
     default:
       return {};
   }
 }
 
 export const getLayerFrame = (payload: any, overrides = {}): em.Frame => {
-  const x = payload.layer.frame && payload.layer.frame.x ? payload.layer.frame.x : paperMain.view.center.x;
-  const y = payload.layer.frame && payload.layer.frame.y ? payload.layer.frame.y : paperMain.view.center.y;
-  const width = payload.layer.frame && payload.layer.frame.width ? payload.layer.frame.width : DEFAULT_SHAPE_WIDTH;
-  const height = payload.layer.frame && payload.layer.frame.width ? payload.layer.frame.height : DEFAULT_SHAPE_HEIGHT;
-  const innerWidth = payload.layer.frame && payload.layer.frame.innerWidth ? payload.layer.frame.innerWidth : DEFAULT_SHAPE_WIDTH;
-  const innerHeight = payload.layer.frame && payload.layer.frame.innerHeight ? payload.layer.frame.innerHeight : DEFAULT_SHAPE_HEIGHT;
+  const x = payload.layer.frame && (payload.layer.frame.x !== null && payload.layer.frame.x !== undefined) ? payload.layer.frame.x : paperMain.view.center.x;
+  const y = payload.layer.frame && (payload.layer.frame.y !== null && payload.layer.frame.y !== undefined) ? payload.layer.frame.y : paperMain.view.center.y;
+  const width = payload.layer.frame && (payload.layer.frame.width !== null && payload.layer.frame.width !== undefined) ? payload.layer.frame.width : DEFAULT_SHAPE_WIDTH;
+  const height = payload.layer.frame && (payload.layer.frame.height !== null && payload.layer.frame.height !== undefined) ? payload.layer.frame.height : DEFAULT_SHAPE_HEIGHT;
+  const innerWidth = payload.layer.frame && (payload.layer.frame.innerWidth !== null && payload.layer.frame.innerWidth !== undefined) ? payload.layer.frame.innerWidth : DEFAULT_SHAPE_WIDTH;
+  const innerHeight = payload.layer.frame && (payload.layer.frame.innerHeight !== null && payload.layer.frame.innerHeight !== undefined) ? payload.layer.frame.innerHeight : DEFAULT_SHAPE_HEIGHT;
   return { x, y, width, height, innerWidth, innerHeight, ...overrides };
 }
 
-export const getLayerShapePath = (payload: any): { data: string; closed: boolean; points: em.CurvePoint[] } => {
+export const getLayerPathData = (payload: any): string => {
   const shapeType = payload.layer.shapeType ? payload.layer.shapeType : 'Rectangle';
   const frame = getLayerFrame(payload);
   const shapeOpts = getLayerShapeOpts(payload);
-  const pathData = payload.layer.path && payload.layer.path.data ? payload.layer.path.data : getPaperShapePathData(shapeType, frame.innerWidth, frame.innerHeight, frame.x, frame.y, shapeOpts);
-  const closed = payload.layer.path && (payload.layer.path.closed !== null || payload.layer.path.closed !== undefined) ? payload.layer.path.closed : true;
-  return { data: pathData, closed: closed, points: getCurvePoints(new paperMain.Path({pathData, insert: false})) };
+  const pathData = payload.layer.pathData && payload.layer.pathData ? payload.layer.pathData : getPaperShapePathData(shapeType, frame.innerWidth, frame.innerHeight, frame.x, frame.y, shapeOpts);
+  return pathData;
 }

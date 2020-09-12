@@ -12,7 +12,7 @@ export const applyArtboardMethods = (artboard: paper.Item) => {
       const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, layer.id);
       if (e.event.which === 3) {
         if (nearestScopeAncestor.id === this.parent.data.id) {
-          store.dispatch(openContextMenu({type: 'LayerEdit', id: this.parent.data.id, x: e.event.clientX, y: e.event.clientY}));
+          store.dispatch(openContextMenu({type: 'LayerEdit', id: this.parent.data.id, x: e.event.clientX, y: e.event.clientY, paperX: e.point.x, paperY: e.point.y}));
         }
       } else {
         if (e.modifiers.shift) {

@@ -14,6 +14,7 @@ interface ContextMenuProps {
   options: {
     text: string;
     disabled: boolean;
+    hidden: boolean;
     onClick(): void;
   }[];
   emptyState?: string;
@@ -51,23 +52,25 @@ const ContextMenu = (props: ContextMenuProps): ReactElement => {
         }}>
         {
           options.length > 0
-          ? options.map((option: {type: 'MenuItem' | 'MenuHead'; text: string; onClick(): void; disabled: boolean}, index: number) => {
-              switch(option.type) {
-                case 'MenuItem': {
-                  return (
-                    <ContextMenuItem
-                      key={index}
-                      disabled={option.disabled}
-                      onClick={option.onClick}
-                      text={option.text} />
-                  )
-                }
-                case 'MenuHead': {
-                  return (
-                    <ContextMenuHead
-                      key={index}
-                      text={option.text} />
-                  )
+          ? options.map((option: {type: 'MenuItem' | 'MenuHead'; text: string; onClick(): void; disabled: boolean; hidden: boolean}, index: number) => {
+              if (!option.hidden) {
+                switch(option.type) {
+                  case 'MenuItem': {
+                    return (
+                      <ContextMenuItem
+                        key={index}
+                        disabled={option.disabled}
+                        onClick={option.onClick}
+                        text={option.text} />
+                    )
+                  }
+                  case 'MenuHead': {
+                    return (
+                      <ContextMenuHead
+                        key={index}
+                        text={option.text} />
+                    )
+                  }
                 }
               }
             })
@@ -85,7 +88,8 @@ const mapStateToProps = (state: RootState, ownProps: ContextMenuProps) => {
   const { contextMenu } = state;
   const initialX = contextMenu.x;
   const initialY = contextMenu.y;
-  const menuHeight = (ownProps.options.length * 32) + 8;
+  const visibleOptions = ownProps.options.filter(option => !option.hidden);
+  const menuHeight = (visibleOptions.length * 32) + 8;
   const menuWidth = 200;
   const windowHeight = window.innerHeight;
   const windowWidth = window.innerWidth;

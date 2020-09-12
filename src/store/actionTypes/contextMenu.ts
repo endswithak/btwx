@@ -6,6 +6,8 @@ export interface OpenContextMenuPayload {
   id: string;
   x: number;
   y: number;
+  paperX: number;
+  paperY: number;
   data?: any;
 }
 

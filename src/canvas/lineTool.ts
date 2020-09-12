@@ -1,6 +1,6 @@
 import store from '../store';
-import { setCurvePointOrigin } from '../store/actions/layer';
-import { getPaperLayer } from '../store/selectors/layer';
+import { setLineFrom, setLineTo } from '../store/actions/layer';
+import { getPaperLayer, getLineFromPoint, getLineToPoint } from '../store/selectors/layer';
 import { paperMain } from './index';
 import SnapTool from './snapTool';
 import { RootState } from '../store/reducers';
@@ -68,14 +68,14 @@ class LineTool {
     switch(this.handle) {
       case 'to': {
         const newTo = new paperMain.Point(this.toBounds.center.x, this.toBounds.center.y);
-        (paperLayer.children[0] as paper.Path).segments[1].point = newTo;
+        (paperLayer.children[0] as paper.Path).lastSegment.point = newTo;
         this.toHandle.bounds.center.x = newTo.x;
         this.toHandle.bounds.center.y = newTo.y;
         break;
       }
       case 'from': {
         const newFrom = new paperMain.Point(this.toBounds.center.x, this.toBounds.center.y);
-        (paperLayer.children[0] as paper.Path).segments[0].point = newFrom;
+        (paperLayer.children[0] as paper.Path).firstSegment.point = newFrom;
         this.fromHandle.bounds.center.x = newFrom.x;
         this.fromHandle.bounds.center.y = newFrom.y;
         break;
@@ -86,9 +86,9 @@ class LineTool {
     const x = this.snapTool.snap.x ? this.snapTool.snap.x.point : this.fromBounds.center.x + this.x;
     const y = this.snapTool.snap.y ? this.snapTool.snap.y.point : this.fromBounds.center.y + this.y;
     if (this.shiftModifier) {
-      const layerItem = this.state.layer.present.byId[this.state.layer.present.selected[0]] as em.Shape;
-      const toPoint = layerItem.path.points[1].point;
-      const fromPoint = layerItem.path.points[0].point;
+      const layerItem = this.state.layer.present.byId[this.state.layer.present.selected[0]] as em.Line;
+      const toPoint = getLineToPoint(this.state.layer.present, layerItem.id, layerItem.to);
+      const fromPoint = getLineFromPoint(this.state.layer.present, layerItem.id, layerItem.from);
       if (this.isHorizontal) {
         switch(this.handle) {
           case 'to':
@@ -119,19 +119,16 @@ class LineTool {
     }
     this.snapTool.snapBounds = this.toBounds;
   }
-  updateVector() {
-    const layerItem = this.state.layer.present.byId[this.state.layer.present.selected[0]] as em.Shape;
+  updateVector(): void {
     switch(this.handle) {
       case 'from': {
-        const toPoint = layerItem.path.points[1].point;
-        const paperToPoint = new paperMain.Point(toPoint.x, toPoint.y);
-        this.vector = paperToPoint.subtract(this.to);
+        const toPoint = this.toHandle.position;
+        this.vector = toPoint.subtract(this.to);
         break;
       }
       case 'to': {
-        const fromPoint = layerItem.path.points[0].point;
-        const paperFromPoint = new paperMain.Point(fromPoint.x, fromPoint.y);
-        this.vector = paperFromPoint.subtract(this.to);
+        const fromPoint = this.fromHandle.position;
+        this.vector = fromPoint.subtract(this.to);
         break;
       }
     }
@@ -178,6 +175,7 @@ class LineTool {
   }
   onMouseDrag(event: paper.ToolEvent): void {
     if (this.enabled) {
+      this.state = store.getState();
       this.to = event.point;
       this.x += event.delta.x;
       this.y += event.delta.y;
@@ -204,11 +202,22 @@ class LineTool {
       this.snapTool.updateGuides();
     }
   }
-  onMouseUp(event: paper.ToolEvent): void {
+  onMouseUp(): void {
     if (this.enabled) {
       if (this.x !== 0 || this.y !== 0) {
-        const pointIndex = this.handle === 'from' ? 0 : 1;
-        store.dispatch(setCurvePointOrigin({id: this.state.layer.present.selected[0], pointIndex: pointIndex, x: this.to.x, y: this.to.y}));
+        const paperLayer = getPaperLayer(this.state.layer.present.selected[0]) as paper.CompoundPath;
+        const newX = (this.to.x - (paperLayer.children[0] as paper.Path).position.x) / this.vector.length;
+        const newY = (this.to.y - (paperLayer.children[0] as paper.Path).position.y) / this.vector.length;
+        switch(this.handle) {
+          case 'from': {
+            store.dispatch(setLineFrom({id: this.state.layer.present.selected[0], x: newX, y: newY}));
+            break;
+          }
+          case 'to': {
+            store.dispatch(setLineTo({id: this.state.layer.present.selected[0], x: newX, y: newY}));
+            break;
+          }
+        }
       }
       this.disable();
     }

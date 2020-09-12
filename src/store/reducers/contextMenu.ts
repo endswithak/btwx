@@ -10,6 +10,8 @@ export interface ContextMenuState {
   isOpen: boolean;
   x: number;
   y: number;
+  paperX: number;
+  paperY: number;
   data: any;
 }
 
@@ -19,6 +21,8 @@ const initialState: ContextMenuState = {
   isOpen: false,
   x: null,
   y: null,
+  paperX: null,
+  paperY: null,
   data: null
 };
 
@@ -32,6 +36,8 @@ export default (state = initialState, action: ContextMenuTypes): ContextMenuStat
         isOpen: true,
         x: action.payload.x,
         y: action.payload.y,
+        paperX: action.payload.paperX,
+        paperY: action.payload.paperY,
         data: action.payload.data
       };
     }

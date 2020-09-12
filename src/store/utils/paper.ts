@@ -1,5 +1,5 @@
 import { paperMain } from '../../canvas';
-import { DEFAULT_ROUNDED_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_RADIUS, DEFAULT_STAR_POINTS } from '../../constants';
+import { DEFAULT_ROUNDED_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_RADIUS, DEFAULT_STAR_POINTS, DEFAULT_LINE_FROM, DEFAULT_LINE_TO } from '../../constants';
 
 export const getPaperLayer = (id: string): paper.Item => {
   return paperMain.project.getItem({ data: { id } });
@@ -47,6 +47,8 @@ export const getPaperShapePathData = (shapeType: em.ShapeType, width?: number, h
   const bottomRight = new paperMain.Point(x + (width / 2), y + (height / 2));
   const maxDim = Math.max(width, height);
   const centerPoint = new paperMain.Point(x, y);
+  const lineFrom = new paperMain.Point((DEFAULT_LINE_FROM.x * width) + x, (DEFAULT_LINE_FROM.y * width) + y);
+  const lineTo = new paperMain.Point((DEFAULT_LINE_TO.x * width) + x, (DEFAULT_LINE_TO.y * width) + y);
   switch(shapeType) {
     case 'Rectangle':
       shape = new paperMain.Path.Rectangle({
@@ -92,6 +94,14 @@ export const getPaperShapePathData = (shapeType: em.ShapeType, width?: number, h
       });
       shape.bounds.width = width;
       shape.bounds.height = height;
+      shape.position = centerPoint;
+      break;
+    }
+    case 'Line': {
+      shape = new paperMain.Path.Line({
+        from: lineFrom,
+        to: lineTo
+      });
       shape.position = centerPoint;
       break;
     }

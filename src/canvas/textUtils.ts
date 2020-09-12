@@ -66,7 +66,7 @@ export const applyTextMethods = (text: paper.Item) => {
         }));
       }
       if (e.event.which === 3) {
-        store.dispatch(openContextMenu({type: 'LayerEdit', id: nearestScopeAncestor.id, x: e.event.clientX, y: e.event.clientY}));
+        store.dispatch(openContextMenu({type: 'LayerEdit', id: nearestScopeAncestor.id, x: e.event.clientX, y: e.event.clientY, paperX: e.point.x, paperY: e.point.y}));
       } else {
         if (e.modifiers.shift) {
           if (layer.selected) {

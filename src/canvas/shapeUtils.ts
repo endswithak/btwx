@@ -26,7 +26,7 @@ export const applyShapeMethods = (shape: paper.Item) => {
       const layer = getLayer(state.layer.present, this.data.id);
       const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, layer.id);
       if (e.event.which === 3) {
-        store.dispatch(openContextMenu({type: 'LayerEdit', id: nearestScopeAncestor.id, x: e.event.clientX, y: e.event.clientY}));
+        store.dispatch(openContextMenu({type: 'LayerEdit', id: nearestScopeAncestor.id, x: e.event.clientX, y: e.event.clientY, paperX: e.point.x, paperY: e.point.y}));
       } else {
         if (e.modifiers.shift) {
           if (layer.selected) {

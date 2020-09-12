@@ -15,6 +15,12 @@ export const DEFAULT_STAR_POINTS = 5;
 export const DEFAULT_STAR_RADIUS = 0.5;
 export const DEFAULT_SHAPE_WIDTH = 200;
 export const DEFAULT_SHAPE_HEIGHT = 200;
+export const DEFAULT_LINE_FROM_X = -0.5;
+export const DEFAULT_LINE_FROM_Y = 0;
+export const DEFAULT_LINE_FROM = { x: DEFAULT_LINE_FROM_X, y: DEFAULT_LINE_FROM_Y };
+export const DEFAULT_LINE_TO_X = 0.5;
+export const DEFAULT_LINE_TO_Y = 0;
+export const DEFAULT_LINE_TO = { x: DEFAULT_LINE_TO_X, y: DEFAULT_LINE_TO_Y };
 
 export const PREVIEW_TOPBAR_HEIGHT = 44;
 

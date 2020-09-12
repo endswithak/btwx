@@ -41,7 +41,7 @@ const TweenDrawerEventLayersHeader = (props: TweenDrawerEventLayersProps): React
             small
             style={{
               fill: theme.text.lighter,
-              stroke: layerItem && layerItem.type === 'Shape' && !(layerItem as em.Shape).path.closed
+              stroke: layerItem && layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line'
               ? theme.text.lighter
               : 'none',
               strokeWidth: 1

@@ -84,7 +84,7 @@ const mapStateToProps = (state: RootState) => {
     return [...result, current.style.strokeOptions.cap];
   }, []);
   const strokeCapValue = strokeCapValues.every((cap: em.StrokeCap) => cap === strokeCapValues[0]) ? strokeCapValues[0] : 'multi';
-  const disabled = !layerItems.every((layerItem) => layerItem.style.stroke.enabled) || layerItems.every((layerItem) => layerItem.type === 'Shape' && (layerItem as em.Shape).path.closed);
+  const disabled = !layerItems.every((layerItem) => layerItem.style.stroke.enabled) || layerItems.every((layerItem) => layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType !== 'Line');
   return { selected, strokeCapValue, disabled };
 };
 

@@ -242,11 +242,12 @@ declare namespace em {
     type: 'Shape';
     shapeType: ShapeType;
     children: null;
-    path: {
-      data: string;
-      closed: boolean;
-      points: CurvePoint[];
-    };
+    pathData: string;
+    sides?: number;
+    points?: number;
+    radius?: number;
+    from?: Point;
+    to?: Point;
   }
 
   interface CurvePoint {
@@ -266,6 +267,11 @@ declare namespace em {
 
   interface Rounded extends Shape {
     radius: number;
+  }
+
+  interface Line extends Shape {
+    from: Point;
+    to: Point;
   }
 
   interface Image extends Layer {
