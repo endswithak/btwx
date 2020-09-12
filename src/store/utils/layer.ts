@@ -1466,22 +1466,6 @@ export const groupLayers = (state: LayerState, action: GroupLayers): LayerState 
     const mask = orderedChildren.find((id) => state.byId[id].mask);
     currentState = removeLayersMask(currentState, layerActions.removeLayersMask({id: mask}) as RemoveLayersMask);
   }
-  // get bounds of layers to group
-  const layersBounds = getLayersBounds(currentState, action.payload.layers);
-  // add group
-  currentState = addGroup(currentState, layerActions.addGroup({
-    layer: {
-      selected: true,
-      frame: {
-        x: layersBounds.center.x,
-        y: layersBounds.center.y,
-        width: layersBounds.width,
-        height: layersBounds.height,
-        innerWidth: layersBounds.width,
-        innerHeight: layersBounds.height
-      }
-    }
-  }) as AddGroup);
   // get group id
   const groupId = currentState.allIds[currentState.allIds.length - 1];
   // move group above top layer
@@ -4787,160 +4771,45 @@ export const setLayersBlendMode = (state: LayerState, action: SetLayersBlendMode
 
 export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState => {
   let currentState = state;
-  const layerItem = currentState.byId[action.payload.id];
-  const paperLayer = getPaperLayer(action.payload.id) as paper.Path | paper.CompoundPath;
-  const booleanPaperLayer = getPaperLayer(action.payload.unite) as paper.Path | paper.CompoundPath;
-  const newShapeId = uuidv4();
-  const booleanLayers = paperLayer.unite(booleanPaperLayer) as paper.Path | paper.CompoundPath;
-  booleanLayers.data = {
-    type: 'Shape',
-    id: newShapeId
-  }
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.unite]}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
-    layer: {
-      id: newShapeId,
-      parent: layerItem.parent,
-      name: 'Custom Shape',
-      shapeType: 'Custom',
-      frame: {
-        x: booleanLayers.position.x,
-        y: booleanLayers.position.y,
-        width: booleanLayers.bounds.width,
-        height: booleanLayers.bounds.height,
-        innerWidth: booleanLayers.bounds.width,
-        innerHeight: booleanLayers.bounds.height
-      },
-      pathData: booleanLayers.pathData
-    }
+    layer: action.payload.booleanLayer
   }) as AddShape);
   return currentState;
 };
 
 export const intersectLayers = (state: LayerState, action: IntersectLayers): LayerState => {
   let currentState = state;
-  const layerItem = currentState.byId[action.payload.id];
-  const paperLayer = getPaperLayer(action.payload.id) as paper.Path | paper.CompoundPath;
-  const booleanPaperLayer = getPaperLayer(action.payload.intersect) as paper.Path | paper.CompoundPath;
-  const newShapeId = uuidv4();
-  const booleanLayers = paperLayer.intersect(booleanPaperLayer) as paper.Path | paper.CompoundPath;
-  booleanLayers.data = {
-    type: 'Shape',
-    id: newShapeId
-  }
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.intersect]}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
-    layer: {
-      id: newShapeId,
-      parent: layerItem.parent,
-      name: 'Custom Shape',
-      shapeType: 'Custom',
-      frame: {
-        x: booleanLayers.position.x,
-        y: booleanLayers.position.y,
-        width: booleanLayers.bounds.width,
-        height: booleanLayers.bounds.height,
-        innerWidth: booleanLayers.bounds.width,
-        innerHeight: booleanLayers.bounds.height
-      },
-      pathData: booleanLayers.pathData
-    }
+    layer: action.payload.booleanLayer
   }) as AddShape);
   return currentState;
 };
 
 export const subtractLayers = (state: LayerState, action: SubtractLayers): LayerState => {
   let currentState = state;
-  const layerItem = currentState.byId[action.payload.id];
-  const paperLayer = getPaperLayer(action.payload.id) as paper.Path | paper.CompoundPath;
-  const booleanPaperLayer = getPaperLayer(action.payload.subtract) as paper.Path | paper.CompoundPath;
-  const newShapeId = uuidv4();
-  const booleanLayers = paperLayer.subtract(booleanPaperLayer) as paper.Path | paper.CompoundPath;
-  booleanLayers.data = {
-    type: 'Shape',
-    id: newShapeId
-  }
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.subtract]}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
-    layer: {
-      id: newShapeId,
-      parent: layerItem.parent,
-      name: 'Custom Shape',
-      shapeType: 'Custom',
-      frame: {
-        x: booleanLayers.position.x,
-        y: booleanLayers.position.y,
-        width: booleanLayers.bounds.width,
-        height: booleanLayers.bounds.height,
-        innerWidth: booleanLayers.bounds.width,
-        innerHeight: booleanLayers.bounds.height
-      },
-      pathData: booleanLayers.pathData
-    }
+    layer: action.payload.booleanLayer
   }) as AddShape);
   return currentState;
 };
 
 export const excludeLayers = (state: LayerState, action: ExcludeLayers): LayerState => {
   let currentState = state;
-  const layerItem = currentState.byId[action.payload.id];
-  const paperLayer = getPaperLayer(action.payload.id) as paper.Path | paper.CompoundPath;
-  const booleanPaperLayer = getPaperLayer(action.payload.exclude) as paper.Path | paper.CompoundPath;
-  const newShapeId = uuidv4();
-  const booleanLayers = paperLayer.exclude(booleanPaperLayer) as paper.Path | paper.CompoundPath;
-  booleanLayers.data = {
-    type: 'Shape',
-    id: newShapeId
-  }
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.exclude]}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
-    layer: {
-      id: newShapeId,
-      parent: layerItem.parent,
-      name: 'Custom Shape',
-      shapeType: 'Custom',
-      frame: {
-        x: booleanLayers.position.x,
-        y: booleanLayers.position.y,
-        width: booleanLayers.bounds.width,
-        height: booleanLayers.bounds.height,
-        innerWidth: booleanLayers.bounds.width,
-        innerHeight: booleanLayers.bounds.height
-      },
-      pathData: booleanLayers.pathData
-    }
+    layer: action.payload.booleanLayer
   }) as AddShape);
   return currentState;
 };
 
 export const divideLayers = (state: LayerState, action: DivideLayers): LayerState => {
   let currentState = state;
-  const layerItem = currentState.byId[action.payload.id];
-  const paperLayer = getPaperLayer(action.payload.id) as paper.Path | paper.CompoundPath;
-  const booleanPaperLayer = getPaperLayer(action.payload.divide) as paper.Path | paper.CompoundPath;
-  const newShapeId = uuidv4();
-  const booleanLayers = paperLayer.divide(booleanPaperLayer) as paper.Path | paper.CompoundPath;
-  booleanLayers.data = {
-    type: 'Shape',
-    id: newShapeId
-  }
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.divide]}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
-    layer: {
-      id: newShapeId,
-      parent: layerItem.parent,
-      name: 'Custom Shape',
-      shapeType: 'Custom',
-      frame: {
-        x: booleanLayers.position.x,
-        y: booleanLayers.position.y,
-        width: booleanLayers.bounds.width,
-        height: booleanLayers.bounds.height,
-        innerWidth: booleanLayers.bounds.width,
-        innerHeight: booleanLayers.bounds.height
-      },
-      pathData: booleanLayers.pathData
-    }
+    layer: action.payload.booleanLayer
   }) as AddShape);
   return currentState;
 };

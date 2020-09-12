@@ -1,4 +1,4 @@
-import { ungroupLayers, groupLayers, sendLayersForward, sendLayersToFront, sendLayersBackward, sendLayersToBack } from '../store/actions/layer';
+import { ungroupLayers, groupLayers, groupLayersThunk, sendLayersForward, sendLayersToFront, sendLayersBackward, sendLayersToBack } from '../store/actions/layer';
 import store from '../store';
 import { RootState } from '../store/reducers';
 
@@ -51,7 +51,7 @@ class GroupTool {
             }
           } else {
             if (this.canGroup(state)) {
-              store.dispatch(groupLayers({layers: state.layer.present.selected}));
+              store.dispatch(groupLayersThunk({layers: state.layer.present.selected}) as any);
             }
           }
         }

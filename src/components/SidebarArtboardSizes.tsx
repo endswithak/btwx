@@ -8,7 +8,7 @@ import SidebarArtboardPlatformOrientation from './SidebarArtboardPlatformOrienta
 import SidebarArtboardPlatformCategories from './SidebarArtboardPlatformCategories';
 import SidebarArtboardPlatformAdd from './SidebarArtboardPlatformAdd';
 import { ThemeContext } from './ThemeProvider';
-import { addArtboard } from '../store/actions/layer';
+import { addArtboardThunk } from '../store/actions/layer';
 import { AddArtboardPayload, LayerTypes } from '../store/actionTypes/layer';
 import { paperMain } from '../canvas';
 import { DEFAULT_ARTBOARD_BACKGROUND_COLOR } from '../constants';
@@ -18,13 +18,13 @@ interface SidebarArtboardPlatformOrientationProps {
   orientation?: em.DeviceOrientationType;
   platform?: em.DevicePlatformType;
   setArtboardToolDeviceOrientation?(payload: SetArtboardToolDeviceOrientationPayload): ToolTypes;
-  addArtboard?(payload: AddArtboardPayload): LayerTypes;
+  addArtboardThunk?(payload: AddArtboardPayload): LayerTypes;
   enableSelectionTool?(): ToolTypes;
 }
 
 const SidebarArtboardSizes = (props: SidebarArtboardPlatformOrientationProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { selected, orientation, platform, setArtboardToolDeviceOrientation, addArtboard, enableSelectionTool } = props;
+  const { selected, orientation, platform, setArtboardToolDeviceOrientation, addArtboardThunk, enableSelectionTool } = props;
 
   const handleOrientationClick = (type: em.DeviceOrientationType) => {
     switch(type) {
@@ -49,18 +49,19 @@ const SidebarArtboardSizes = (props: SidebarArtboardPlatformOrientationProps): R
       to: new paperMain.Point(paperMain.view.center.x + ((orientation === 'Landscape' ? device.height : device.width) / 2), paperMain.view.center.y + ((orientation === 'Landscape' ? device.width : device.height) / 2)),
       insert: false
     });
-    addArtboard({
-      parent: 'page',
-      name: device.type,
-      frame: {
-        x: newArtboard.position.x,
-        y: newArtboard.position.y,
-        width: newArtboard.bounds.width,
-        height: newArtboard.bounds.height,
-        innerWidth: newArtboard.bounds.width,
-        innerHeight: newArtboard.bounds.height
-      },
-      paperLayer: newArtboard
+    addArtboardThunk({
+      layer: {
+        parent: 'page',
+        name: device.type,
+        frame: {
+          x: newArtboard.position.x,
+          y: newArtboard.position.y,
+          width: newArtboard.bounds.width,
+          height: newArtboard.bounds.height,
+          innerWidth: newArtboard.bounds.width,
+          innerHeight: newArtboard.bounds.height
+        }
+      } as any
     });
     enableSelectionTool();
   }
@@ -110,5 +111,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { setArtboardToolDeviceOrientation, addArtboard, enableSelectionTool }
+  { setArtboardToolDeviceOrientation, addArtboardThunk, enableSelectionTool }
 )(SidebarArtboardSizes);

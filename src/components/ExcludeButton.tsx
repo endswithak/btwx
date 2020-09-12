@@ -1,23 +1,23 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { ExcludeLayersPayload, LayerTypes } from '../store/actionTypes/layer';
-import { excludeLayers } from '../store/actions/layer';
+import { ExcludeLayersPayload } from '../store/actionTypes/layer';
+import { applyBooleanOperationThunk } from '../store/actions/layer';
 import { orderLayersByDepth } from '../store/selectors/layer';
 import TopbarButton from './TopbarButton';
 
 interface ExcludeButtonProps {
   selected: string[];
   canExclude: boolean;
-  excludeLayers(payload: ExcludeLayersPayload): LayerTypes;
+  applyBooleanOperationThunk(payload: ExcludeLayersPayload, booleanOperation: em.BooleanOperation): void;
 }
 
 const ExcludeButton = (props: ExcludeButtonProps): ReactElement => {
-  const { selected, canExclude, excludeLayers } = props;
+  const { selected, canExclude, applyBooleanOperationThunk } = props;
 
   const handleExcludeClick = (): void => {
     if (canExclude) {
-      excludeLayers({id: selected[0], exclude: selected[1]});
+      applyBooleanOperationThunk({id: selected[0], exclude: selected[1]}, 'exclude');
     }
   }
 
@@ -45,5 +45,5 @@ const mapStateToProps = (state: RootState): {
 
 export default connect(
   mapStateToProps,
-  { excludeLayers }
+  { applyBooleanOperationThunk }
 )(ExcludeButton);

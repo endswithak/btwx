@@ -1,23 +1,23 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { SubtractLayersPayload, LayerTypes } from '../store/actionTypes/layer';
-import { subtractLayers } from '../store/actions/layer';
+import { SubtractLayersPayload } from '../store/actionTypes/layer';
+import { applyBooleanOperationThunk } from '../store/actions/layer';
 import { orderLayersByDepth } from '../store/selectors/layer';
 import TopbarButton from './TopbarButton';
 
 interface SubtractButtonProps {
   selected: string[];
   canSubtract: boolean;
-  subtractLayers(payload: SubtractLayersPayload): LayerTypes;
+  applyBooleanOperationThunk(payload: SubtractLayersPayload, booleanOperation: em.BooleanOperation): void;
 }
 
 const SubtractButton = (props: SubtractButtonProps): ReactElement => {
-  const { selected, canSubtract, subtractLayers } = props;
+  const { selected, canSubtract, applyBooleanOperationThunk } = props;
 
   const handleSubtractClick = (): void => {
     if (canSubtract) {
-      subtractLayers({id: selected[0], subtract: selected[1]});
+      applyBooleanOperationThunk({id: selected[0], subtract: selected[1]}, 'subtract');
     }
   }
 
@@ -45,5 +45,5 @@ const mapStateToProps = (state: RootState): {
 
 export default connect(
   mapStateToProps,
-  { subtractLayers }
+  { applyBooleanOperationThunk }
 )(SubtractButton);

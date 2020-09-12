@@ -2,21 +2,21 @@ import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { GroupLayersPayload, LayerTypes } from '../store/actionTypes/layer';
-import { groupLayers } from '../store/actions/layer';
+import { groupLayersThunk } from '../store/actions/layer';
 import TopbarButton from './TopbarButton';
 
 interface GroupButtonProps {
   selected: string[];
   canGroup: boolean;
-  groupLayers(payload: GroupLayersPayload): LayerTypes;
+  groupLayersThunk(payload: GroupLayersPayload): void;
 }
 
 const GroupButton = (props: GroupButtonProps): ReactElement => {
-  const { selected, canGroup, groupLayers } = props;
+  const { selected, canGroup, groupLayersThunk } = props;
 
   const handleGroupClick = () => {
     if (canGroup) {
-      groupLayers({layers: selected});
+      groupLayersThunk({layers: selected});
     }
   }
 
@@ -44,5 +44,5 @@ const mapStateToProps = (state: RootState): {
 
 export default connect(
   mapStateToProps,
-  { groupLayers }
+  { groupLayersThunk }
 )(GroupButton);

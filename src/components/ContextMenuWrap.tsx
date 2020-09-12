@@ -1,5 +1,6 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
+import { clipboard } from 'electron';
 import { RootState } from '../store/reducers';
 import { ContextMenuState } from '../store/reducers/contextMenu';
 import ContextMenu from './ContextMenu';
@@ -22,6 +23,7 @@ interface ContextMenuWrapProps {
   tweenEventItems?: em.TweenEvent[];
   currentX?: number;
   currentY?: number;
+  clipboardType?: em.ClipboardType;
   closeContextMenu?(): ContextMenuTypes;
   openContextMenu?(payload: OpenContextMenuPayload): ContextMenuTypes;
   addLayerTweenEvent?(payload: AddLayerTweenEventPayload): LayerTypes;
@@ -30,11 +32,11 @@ interface ContextMenuWrapProps {
   removeLayers?(payload: RemoveLayersPayload): LayerTypes;
   selectLayer?(payload: SelectLayerPayload): LayerTypes;
   copyLayersThunk?(): Promise<any>;
-  pasteLayersThunk?({overSelection, overPoint, overLayer}: { overSelection?: boolean; overPoint?: em.Point, overLayer?: string }): Promise<any>;
+  pasteLayersThunk?({overSelection, overPoint, overLayer}: { overSelection?: boolean; overPoint?: em.Point; overLayer?: string }): Promise<any>;
 }
 
 const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
-  const { contextMenu, closeContextMenu, currentX, currentY, openContextMenu, canAddTweenEvent, artboards, activeArtboard, tweenEventItems, selected, addLayerTweenEvent, removeArtboardPreset, openArtboardPresetEditor, removeLayers, selectLayer, copyLayersThunk, pasteLayersThunk } = props;
+  const { clipboardType, contextMenu, closeContextMenu, currentX, currentY, openContextMenu, canAddTweenEvent, artboards, activeArtboard, tweenEventItems, selected, addLayerTweenEvent, removeArtboardPreset, openArtboardPresetEditor, removeLayers, selectLayer, copyLayersThunk, pasteLayersThunk } = props;
 
   const getOptions = () => {
     switch(contextMenu.type) {
@@ -81,8 +83,9 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
         },{
           type: 'MenuItem',
           text: 'Paste Here',
+          disabled: !clipboardType,
           onClick: (): void => {
-            pasteLayersThunk({overPoint: { x: contextMenu.paperX, y: contextMenu.paperY }} as any).then(() => {
+            pasteLayersThunk({overPoint: { x: contextMenu.paperX, y: contextMenu.paperY }, overLayer: contextMenu.id} as any).then(() => {
               closeContextMenu();
             });
           }
@@ -90,9 +93,14 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
           type: 'MenuItem',
           text: 'Paste Over',
           hidden: contextMenu.id && contextMenu.id === 'page',
+          disabled: !clipboardType,
           onClick: (): void => {
             if (selected.length > 0) {
-              pasteLayersThunk({overSelection: true} as any).then(() => { closeContextMenu() });
+              if (selected.length === 1) {
+                pasteLayersThunk({overLayer: selected[0]} as any).then(() => { closeContextMenu() });
+              } else {
+                pasteLayersThunk({overSelection: true} as any).then(() => { closeContextMenu() });
+              }
             } else {
               pasteLayersThunk({overLayer: contextMenu.id} as any).then(() => { closeContextMenu() });
             }
@@ -262,12 +270,7 @@ const mapStateToProps = (state: RootState) => {
   const activeArtboard = layer.present.activeArtboard;
   const artboards = layer.present.allArtboardIds.reduce((result, current) => {
     if (layer.present.byId[current]) {
-      result = [
-        ...result,
-        {
-          ...layer.present.byId[current]
-        }
-      ];
+      result = [...result, { ...layer.present.byId[current] }];
     }
     return result;
   }, []);
@@ -283,7 +286,16 @@ const mapStateToProps = (state: RootState) => {
    }, []) : null;
   const currentY = contextMenu.y && document.getElementById('context-menu') ? document.getElementById('context-menu').offsetTop : contextMenu.y;
   const currentX = contextMenu.x && document.getElementById('context-menu') ? document.getElementById('context-menu').offsetLeft : contextMenu.x;
-  return { contextMenu, activeArtboard, artboards, selected, canAddTweenEvent, tweenEventItems, currentY, currentX };
+  const clipboardType: em.ClipboardType = (() => {
+    try {
+      const text = clipboard.readText();
+      const parsedText: em.ClipboardLayers = JSON.parse(text);
+      return parsedText.type ? parsedText.type : null;
+    } catch (error) {
+      return null;
+    }
+  })();
+  return { contextMenu, activeArtboard, artboards, selected, canAddTweenEvent, tweenEventItems, currentY, currentX, clipboardType };
 };
 
 export default connect(

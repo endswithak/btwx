@@ -7,7 +7,7 @@ import { applyShapeMethods } from '../../canvas/shapeUtils';
 import { applyTextMethods } from '../../canvas/textUtils';
 import { applyArtboardMethods } from '../../canvas/artboardUtils';
 import { getPaperFillColor, getPaperStrokeColor, getPaperLayer, getPaperShadowColor, getPaperShapePathData } from '../utils/paper';
-import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants } from '../selectors/layer';
+import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayersBounds } from '../selectors/layer';
 import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle } from '../utils/actions';
 import { bufferToBase64 } from '../../utils';
 
@@ -540,7 +540,7 @@ export const addShapeThunk = (payload: AddShapePayload) => {
     const masked = payload.layer.masked && (payload.layer.masked !== null || payload.layer.masked !== undefined) ? payload.layer.masked : false;
     const paperLayer = new paperMain.CompoundPath({
       pathData: pathData,
-      closed: closed,
+      closed: shapeType !== 'Line',
       strokeWidth: style.stroke.width,
       shadowColor: paperShadowColor,
       shadowOffset: paperShadowOffset,
@@ -560,30 +560,31 @@ export const addShapeThunk = (payload: AddShapePayload) => {
     paperLayer.fillColor = paperFillColor;
     paperLayer.strokeColor = paperStrokeColor;
     applyShapeMethods(paperLayer);
+    const newShape = {
+      type: 'Shape',
+      id: id,
+      name: name,
+      parent: parent,
+      shapeType: shapeType,
+      frame: frame,
+      selected: false,
+      children: null,
+      tweenEvents: [],
+      tweens: [],
+      mask,
+      masked,
+      style,
+      transform,
+      pathData,
+      ...shapeOpts
+    } as any;
     if (!payload.batch) {
       dispatch(addShape({
-        layer: {
-          type: 'Shape',
-          id: id,
-          name: name,
-          parent: parent,
-          shapeType: shapeType,
-          frame: frame,
-          selected: false,
-          children: null,
-          tweenEvents: [],
-          tweens: [],
-          mask,
-          masked,
-          style,
-          transform,
-          pathData,
-          ...shapeOpts
-        },
+        layer: newShape,
         batch: payload.batch
       }));
     }
-    return Promise.resolve();
+    return Promise.resolve(newShape);
   }
 };
 
@@ -897,6 +898,33 @@ export const groupLayers = (payload: GroupLayersPayload): LayerTypes => ({
   type: GROUP_LAYERS,
   payload
 });
+
+export const groupLayersThunk = (payload: GroupLayersPayload) => {
+  return (dispatch: any, getState: any): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      const state = getState() as RootState;
+      // get bounds of layers to group
+      const layersBounds = getLayersBounds(state.layer.present, payload.layers);
+      // add group
+      dispatch(addGroupThunk({
+        layer: {
+          selected: true,
+          frame: {
+            x: layersBounds.center.x,
+            y: layersBounds.center.y,
+            width: layersBounds.width,
+            height: layersBounds.height,
+            innerWidth: layersBounds.width,
+            innerHeight: layersBounds.height
+          }
+        }
+      })).then(() => {
+        dispatch(groupLayers(payload));
+        resolve();
+      });
+    });
+  }
+};
 
 export const ungroupLayer = (payload: UngroupLayerPayload): LayerTypes => ({
   type: UNGROUP_LAYER,
@@ -1663,6 +1691,53 @@ export const divideLayers = (payload: DivideLayersPayload): LayerTypes => ({
   payload
 });
 
+export const applyBooleanOperationThunk = (payload: UniteLayersPayload | IntersectLayersPayload | SubtractLayersPayload | ExcludeLayersPayload | DivideLayersPayload, booleanOperation: em.BooleanOperation) => {
+  return (dispatch: any, getState: any): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      const state = getState() as RootState;
+      const layerItem = state.layer.present.byId[payload.id];
+      const paperLayer = getPaperLayer(payload.id) as paper.Path | paper.CompoundPath;
+      const booleanPaperLayer = getPaperLayer(payload[booleanOperation]) as paper.Path | paper.CompoundPath;
+      const booleanLayers = paperLayer[booleanOperation](booleanPaperLayer, { insert: false }) as paper.Path | paper.CompoundPath;
+      dispatch(addShapeThunk({
+        layer: {
+          shapeType: 'Custom',
+          pathData: booleanLayers.pathData,
+          parent: layerItem.parent,
+          frame: {
+            x: booleanLayers.position.x,
+            y: booleanLayers.position.y,
+            width: booleanLayers.bounds.width,
+            height: booleanLayers.bounds.height,
+            innerWidth: booleanLayers.bounds.width,
+            innerHeight: booleanLayers.bounds.height
+          }
+        },
+        batch: true
+      })).then((newShape) => {
+        switch(booleanOperation) {
+          case 'divide':
+            dispatch(divideLayers({id: payload.id, [booleanOperation]: payload[booleanOperation], booleanLayer: newShape}));
+            break;
+          case 'exclude':
+            dispatch(excludeLayers({id: payload.id, [booleanOperation]: payload[booleanOperation], booleanLayer: newShape}));
+            break;
+          case 'intersect':
+            dispatch(intersectLayers({id: payload.id, [booleanOperation]: payload[booleanOperation], booleanLayer: newShape}));
+            break;
+          case 'subtract':
+            dispatch(subtractLayers({id: payload.id, [booleanOperation]: payload[booleanOperation], booleanLayer: newShape}));
+            break;
+          case 'unite':
+            dispatch(uniteLayers({id: payload.id, [booleanOperation]: payload[booleanOperation], booleanLayer: newShape}));
+            break;
+        }
+        resolve();
+      });
+    });
+  }
+};
+
 export const setRoundedRadius = (payload: SetRoundedRadiusPayload): LayerTypes => ({
   type: SET_ROUNDED_RADIUS,
   payload
@@ -1843,7 +1918,7 @@ export const pasteLayersThunk = ({ overSelection, overPoint, overLayer }: { over
               });
             }
             // handle paste at point
-            if (overPoint) {
+            if (overPoint && !overLayer) {
               const paperPoint = new paperMain.Point(overPoint.x, overPoint.y);
               const pointDiff = paperPoint.subtract(clipboardPosition);
               newLayers.forEach((layerItem) => {
@@ -1852,10 +1927,35 @@ export const pasteLayersThunk = ({ overSelection, overPoint, overLayer }: { over
               });
             }
             // handle paste over layer
-            if (overLayer) {
+            if (overLayer && !overPoint) {
+              const overLayerItem = state.layer.present.byId[overLayer];
               const paperPoint = getPaperLayer(overLayer) as paper.Item;
               const pointDiff = paperPoint.position.subtract(clipboardPosition);
               newLayers.forEach((layerItem) => {
+                if (newParse.main.includes(layerItem.id) && layerItem.type !== 'Artboard') {
+                  if (overLayerItem.type === 'Group' || overLayerItem.type === 'Artboard') {
+                    layerItem.parent = overLayerItem.id;
+                  } else {
+                    layerItem.parent = overLayerItem.parent;
+                  }
+                }
+                layerItem.frame.x += pointDiff.x;
+                layerItem.frame.y += pointDiff.y;
+              });
+            }
+            // handle paste over layer and over point
+            if (overPoint && overLayer) {
+              const overLayerItem = state.layer.present.byId[overLayer];
+              const paperPoint = new paperMain.Point(overPoint.x, overPoint.y);
+              const pointDiff = paperPoint.subtract(clipboardPosition);
+              newLayers.forEach((layerItem) => {
+                if (newParse.main.includes(layerItem.id) && layerItem.type !== 'Artboard') {
+                  if (overLayerItem.type === 'Group' || overLayerItem.type === 'Artboard') {
+                    layerItem.parent = overLayerItem.id;
+                  } else {
+                    layerItem.parent = overLayerItem.parent;
+                  }
+                }
                 layerItem.frame.x += pointDiff.x;
                 layerItem.frame.y += pointDiff.y;
               });

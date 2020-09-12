@@ -78,7 +78,7 @@ declare namespace em {
 
   type DeviceOrientationType = 'Landscape' | 'Portrait';
 
-  type BooleanOperation = 'none' | 'unite' | 'intersect' | 'subtract' | 'exclude' | 'divide';
+  type BooleanOperation = 'unite' | 'intersect' | 'subtract' | 'exclude' | 'divide';
 
   type TweenEventSort = 'none' | 'layer-asc' | 'layer-dsc' | 'event-asc' | 'event-dsc' | 'artboard-asc' | 'artboard-dsc' | 'destinationArtboard-asc' | 'destinationArtboard-dsc';
 

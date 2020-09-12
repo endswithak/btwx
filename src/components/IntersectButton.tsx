@@ -1,23 +1,23 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { IntersectLayersPayload, LayerTypes } from '../store/actionTypes/layer';
-import { intersectLayers } from '../store/actions/layer';
+import { IntersectLayersPayload } from '../store/actionTypes/layer';
+import { applyBooleanOperationThunk } from '../store/actions/layer';
 import { orderLayersByDepth } from '../store/selectors/layer';
 import TopbarButton from './TopbarButton';
 
 interface IntersectButtonProps {
   selected: string[];
   canIntersect: boolean;
-  intersectLayers(payload: IntersectLayersPayload): LayerTypes;
+  applyBooleanOperationThunk(payload: IntersectLayersPayload, booleanOperation: em.BooleanOperation): void;
 }
 
 const IntersectButton = (props: IntersectButtonProps): ReactElement => {
-  const { selected, canIntersect, intersectLayers } = props;
+  const { selected, canIntersect, applyBooleanOperationThunk } = props;
 
   const handleIntersectClick = (): void => {
     if (canIntersect) {
-      intersectLayers({id: selected[0], intersect: selected[1]});
+      applyBooleanOperationThunk({id: selected[0], intersect: selected[1]}, 'intersect');
     }
   }
 
@@ -45,5 +45,5 @@ const mapStateToProps = (state: RootState): {
 
 export default connect(
   mapStateToProps,
-  { intersectLayers }
+  { applyBooleanOperationThunk }
 )(IntersectButton);

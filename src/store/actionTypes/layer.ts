@@ -1996,6 +1996,7 @@ export interface SetLayersBlendMode {
 export interface UniteLayersPayload {
   id: string;
   unite: string;
+  booleanLayer?: em.Shape;
 }
 
 export interface UniteLayers {
@@ -2006,6 +2007,7 @@ export interface UniteLayers {
 export interface IntersectLayersPayload {
   id: string;
   intersect: string;
+  booleanLayer?: em.Shape;
 }
 
 export interface IntersectLayers {
@@ -2016,6 +2018,7 @@ export interface IntersectLayers {
 export interface SubtractLayersPayload {
   id: string;
   subtract: string;
+  booleanLayer?: em.Shape;
 }
 
 export interface SubtractLayers {
@@ -2026,6 +2029,7 @@ export interface SubtractLayers {
 export interface ExcludeLayersPayload {
   id: string;
   exclude: string;
+  booleanLayer?: em.Shape;
 }
 
 export interface ExcludeLayers {
@@ -2036,6 +2040,7 @@ export interface ExcludeLayers {
 export interface DivideLayersPayload {
   id: string;
   divide: string;
+  booleanLayer?: em.Shape;
 }
 
 export interface DivideLayers {

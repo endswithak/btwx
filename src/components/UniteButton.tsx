@@ -1,23 +1,23 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { UniteLayersPayload, LayerTypes } from '../store/actionTypes/layer';
-import { uniteLayers } from '../store/actions/layer';
+import { UniteLayersPayload } from '../store/actionTypes/layer';
+import { applyBooleanOperationThunk } from '../store/actions/layer';
 import { orderLayersByDepth } from '../store/selectors/layer';
 import TopbarButton from './TopbarButton';
 
 interface UniteButtonProps {
   selected: string[];
   canUnite: boolean;
-  uniteLayers(payload: UniteLayersPayload): LayerTypes;
+  applyBooleanOperationThunk(payload: UniteLayersPayload, booleanOperation: em.BooleanOperation): void;
 }
 
 const UniteButton = (props: UniteButtonProps): ReactElement => {
-  const { selected, canUnite, uniteLayers } = props;
+  const { selected, canUnite, applyBooleanOperationThunk } = props;
 
   const handleUniteClick = (): void => {
     if (canUnite) {
-      uniteLayers({id: selected[0], unite: selected[1]});
+      applyBooleanOperationThunk({id: selected[0], unite: selected[1]}, 'unite');
     }
   }
 
@@ -45,5 +45,5 @@ const mapStateToProps = (state: RootState): {
 
 export default connect(
   mapStateToProps,
-  { uniteLayers }
+  { applyBooleanOperationThunk }
 )(UniteButton);
