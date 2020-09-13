@@ -18,7 +18,7 @@ declare namespace em {
 
   type ContextMenu = 'LayerEdit' | 'TweenEvent' | 'TweenEventDestination' | 'ArtboardCustomPreset';
 
-  type TweenProp = 'image' | 'shape' | 'fill' | 'x' | 'y' | 'radius' | 'rotation' | 'width' | 'height' | 'stroke' | 'dashOffset' | 'dashArrayWidth' | 'dashArrayGap' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity' | 'fontSize' | 'lineHeight';
+  type TweenProp = 'image' | 'shape' | 'fill' | 'x' | 'y' | 'radius' | 'rotation' | 'width' | 'height' | 'stroke' | 'dashOffset' | 'dashArrayWidth' | 'dashArrayGap' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity' | 'fontSize' | 'lineHeight' | 'fromX' | 'fromY' | 'toX' | 'toY';
 
   type TweenPropMap = { [K in TweenProp]: boolean; }
 

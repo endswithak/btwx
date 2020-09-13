@@ -71,6 +71,7 @@ class GradientTool {
   }
   updateOrigin(event: paper.ToolEvent, state: RootState): void {
     const layerItem = state.layer.present.byId[state.gradientEditor.layers[0]];
+    const isLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line';
     const paperLayer = getPaperLayer(state.gradientEditor.layers[0]);
     const newOriginPoint = new paperMain.Point(this.toBounds.center.x, this.toBounds.center.y);
     paperLayer[`${state.gradientEditor.prop}Color` as 'fillColor' | 'strokeColor'] = {
@@ -94,7 +95,7 @@ class GradientTool {
     })() as em.PaperGradientFill;
     this.origin = {
       x: (style.origin.x - layerItem.frame.x) / layerItem.frame.innerWidth,
-      y: (style.origin.y - layerItem.frame.y) / layerItem.frame.innerHeight
+      y: (style.origin.y - layerItem.frame.y) / (isLine ? layerItem.frame.innerWidth : layerItem.frame.innerHeight)
     }
     state.gradientEditor.layers.forEach((id, index) => {
       const paperLayer = getPaperLayer(id);
@@ -107,6 +108,7 @@ class GradientTool {
   }
   updateDestination(event: paper.ToolEvent, state: RootState): void {
     const layerItem = state.layer.present.byId[state.gradientEditor.layers[0]];
+    const isLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line';
     const paperLayer = getPaperLayer(state.gradientEditor.layers[0]);
     const newDestinationPoint = new paperMain.Point(this.toBounds.center.x, this.toBounds.center.y);
     paperLayer[`${state.gradientEditor.prop}Color` as 'fillColor' | 'strokeColor'] = {
@@ -130,7 +132,7 @@ class GradientTool {
     })() as em.PaperGradientFill;
     this.destination = {
       x: (style.destination.x - layerItem.frame.x) / layerItem.frame.innerWidth,
-      y: (style.destination.y - layerItem.frame.y) / layerItem.frame.innerHeight
+      y: (style.destination.y - layerItem.frame.y) / (isLine ? layerItem.frame.innerWidth : layerItem.frame.innerHeight)
     }
     state.gradientEditor.layers.forEach((id, index) => {
       const paperLayer = getPaperLayer(id);

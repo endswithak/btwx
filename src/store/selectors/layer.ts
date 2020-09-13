@@ -46,15 +46,15 @@ export const getPagePaperLayer = (store: LayerState): paper.Item => {
   return getPaperLayer(page);
 };
 
-export const getLayerDescendants = (state: LayerState, layer: string, fromClipboard?: boolean): string[] => {
+export const getLayerDescendants = (state: LayerState, layer: string): string[] => {
   const groups: string[] = [layer];
   const layers: string[] = [];
   let i = 0;
   while(i < groups.length) {
-    const layer = fromClipboard ? state.clipboard.byId[groups[i]] : state.byId[groups[i]];
+    const layer = state.byId[groups[i]];
     if (layer.children) {
       layer.children.forEach((child) => {
-        const childLayer = fromClipboard ? state.clipboard.byId[child] : state.byId[child];
+        const childLayer = state.byId[child];
         if (childLayer.children && childLayer.children.length > 0) {
           groups.push(child);
         }
@@ -66,8 +66,8 @@ export const getLayerDescendants = (state: LayerState, layer: string, fromClipbo
   return layers;
 };
 
-export const getLayerAndDescendants = (state: LayerState, layer: string, fromClipboard?: boolean): string[] => {
-  const children = getLayerDescendants(state, layer, fromClipboard);
+export const getLayerAndDescendants = (state: LayerState, layer: string): string[] => {
+  const children = getLayerDescendants(state, layer);
   return [layer, ...children];
 };
 
@@ -95,7 +95,7 @@ export const getScopeGroupLayers = (store: LayerState): string[] => {
   const expandedLayers = getScopeLayers(store);
   return expandedLayers.reduce((result, current) => {
     const layer = getLayer(store, current);
-    if (layer.type === 'Group' || layer.type === 'Artboard' || layer.type === 'CompoundShape') {
+    if (layer.type === 'Group' || layer.type === 'Artboard') {
       result = [...result, current];
     }
     return result;
@@ -320,6 +320,20 @@ export const getPositionInArtboard = (layer: em.Layer, artboard: em.Artboard): p
   return new paper.Point(xDiff, yDiff);
 };
 
+// export const getFromPositionInArtboard = (store: LayerState, layer: em.Line, artboard: em.Artboard): paper.Point => {
+//   const from = getLineFromPoint(store, layer.id, layer.from);
+//   const xDiff = from.x - (artboard.frame.x - (artboard.frame.width / 2));
+//   const yDiff = from.y - (artboard.frame.y - (artboard.frame.height / 2));
+//   return new paper.Point(xDiff, yDiff);
+// };
+
+// export const getToPositionInArtboard = (store: LayerState, layer: em.Line, artboard: em.Artboard): paper.Point => {
+//   const to = getLineFromPoint(store, layer.id, layer.to);
+//   const xDiff = to.x - (artboard.frame.x - (artboard.frame.width / 2));
+//   const yDiff = to.y - (artboard.frame.y - (artboard.frame.height / 2));
+//   return new paper.Point(xDiff, yDiff);
+// };
+
 export const hasImageTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   return (
     layerItem.type === 'Image' &&
@@ -358,49 +372,40 @@ export const hasFillTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer)
 export const hasXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer, artboardLayerItem: em.Artboard, destinationArtboardLayerItem: em.Artboard): boolean => {
   const layerArtboardPosition = getPositionInArtboard(layerItem, artboardLayerItem);
   const equivalentArtboardPosition = getPositionInArtboard(equivalentLayerItem, destinationArtboardLayerItem);
-  return (
-    layerItem.type !== 'Group' && equivalentLayerItem.type !== 'Group' &&
-    layerArtboardPosition.x !== equivalentArtboardPosition.x ||
-    (
-      layerItem.type === 'Text' &&
-      equivalentLayerItem.type === 'Text' &&
-      (
-        (layerItem as em.Text).textStyle.fontSize !== (equivalentLayerItem as em.Text).textStyle.fontSize ||
-        (layerItem as em.Text).textStyle.leading !== (equivalentLayerItem as em.Text).textStyle.leading
-      )
-    )
-  );
+  const lineToLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType === 'Line';
+  const groupToGroup = layerItem.type === 'Group' && equivalentLayerItem.type === 'Group';
+  const textToText = layerItem.type === 'Text' && equivalentLayerItem.type === 'Text';
+  const fontSizeMatch = textToText && (layerItem as em.Text).textStyle.fontSize === (equivalentLayerItem as em.Text).textStyle.fontSize;
+  const leadingsMatch = textToText && (layerItem as em.Text).textStyle.leading === (equivalentLayerItem as em.Text).textStyle.leading;
+  const positionsMatch = layerArtboardPosition.x === equivalentArtboardPosition.x;
+  return (!lineToLine && !groupToGroup && !positionsMatch) || (textToText && (!fontSizeMatch || !leadingsMatch));
 };
 
 export const hasYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer, artboardLayerItem: em.Artboard, destinationArtboardLayerItem: em.Artboard): boolean => {
   const layerArtboardPosition = getPositionInArtboard(layerItem, artboardLayerItem);
   const equivalentArtboardPosition = getPositionInArtboard(equivalentLayerItem, destinationArtboardLayerItem);
-  return (
-    layerItem.type !== 'Group' && equivalentLayerItem.type !== 'Group' &&
-    layerArtboardPosition.y !== equivalentArtboardPosition.y ||
-    (
-      layerItem.type === 'Text' &&
-      equivalentLayerItem.type === 'Text' &&
-      (
-        (layerItem as em.Text).textStyle.fontSize !== (equivalentLayerItem as em.Text).textStyle.fontSize ||
-        (layerItem as em.Text).textStyle.leading !== (equivalentLayerItem as em.Text).textStyle.leading
-      )
-    )
-  );
+  const lineToLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType === 'Line';
+  const groupToGroup = layerItem.type === 'Group' && equivalentLayerItem.type === 'Group';
+  const textToText = layerItem.type === 'Text' && equivalentLayerItem.type === 'Text';
+  const fontSizeMatch = textToText && (layerItem as em.Text).textStyle.fontSize === (equivalentLayerItem as em.Text).textStyle.fontSize;
+  const leadingsMatch = textToText && (layerItem as em.Text).textStyle.leading === (equivalentLayerItem as em.Text).textStyle.leading;
+  const positionsMatch = layerArtboardPosition.y === equivalentArtboardPosition.y;
+  return (!lineToLine && !groupToGroup && !positionsMatch) || (textToText && (!fontSizeMatch || !leadingsMatch));
 };
 
 export const hasRotationTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
-  return (layerItem.type !== 'Group' && equivalentLayerItem.type !== 'Group') && (layerItem.transform.rotation !== equivalentLayerItem.transform.rotation);
+  const lineToLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType === 'Line';
+  const groupToGroup = layerItem.type === 'Group' && equivalentLayerItem.type === 'Group';
+  const rotationsMatch = layerItem.transform.rotation === equivalentLayerItem.transform.rotation;
+  return !lineToLine && !groupToGroup && !rotationsMatch;
 };
 
 export const hasWidthTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   const lineToLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType === 'Line';
   const layerItemValid = ((layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType !== 'Line') || layerItem.type === 'Image');
   const equivalentLayerItemValid = ((equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType !== 'Line') || equivalentLayerItem.type === 'Image');
-  return (
-    (lineToLine || (layerItemValid && equivalentLayerItemValid)) &&
-    Math.round(layerItem.frame.innerWidth) !== Math.round(equivalentLayerItem.frame.innerWidth)
-  );
+  const widthsMatch = Math.round(layerItem.frame.innerWidth) === Math.round(equivalentLayerItem.frame.innerWidth);
+  return !lineToLine && (layerItemValid && equivalentLayerItemValid) && !widthsMatch;
 };
 
 export const hasHeightTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
@@ -533,6 +538,34 @@ export const hasLineHeightTween = (layerItem: em.Layer, equivalentLayerItem: em.
   );
 };
 
+export const hasFromXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  const lineToLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType === 'Line';
+  const fromXMatch = lineToLine && (layerItem as em.Line).from.x === (equivalentLayerItem as em.Line).from.x;
+  const widthsMatch = Math.round(layerItem.frame.innerWidth) === Math.round(equivalentLayerItem.frame.innerWidth);
+  return lineToLine && (!fromXMatch || !widthsMatch);
+};
+
+export const hasFromYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  const lineToLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType === 'Line';
+  const fromYMatch = lineToLine && (layerItem as em.Line).from.y === (equivalentLayerItem as em.Line).from.y;
+  const widthsMatch = Math.round(layerItem.frame.innerWidth) === Math.round(equivalentLayerItem.frame.innerWidth);
+  return lineToLine && (!fromYMatch || !widthsMatch);
+};
+
+export const hasToXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  const lineToLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType === 'Line';
+  const toXMatch = lineToLine && (layerItem as em.Line).to.x === (equivalentLayerItem as em.Line).to.x;
+  const widthsMatch = Math.round(layerItem.frame.innerWidth) === Math.round(equivalentLayerItem.frame.innerWidth);
+  return lineToLine && (!toXMatch || !widthsMatch);
+};
+
+export const hasToYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  const lineToLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType === 'Line';
+  const toYMatch = lineToLine && (layerItem as em.Line).to.y === (equivalentLayerItem as em.Line).to.y;
+  const widthsMatch = Math.round(layerItem.frame.innerWidth) === Math.round(equivalentLayerItem.frame.innerWidth);
+  return lineToLine && (!toYMatch || !widthsMatch);
+};
+
 export const getEquivalentTweenProp = (layerItem: em.Layer, equivalentLayerItem: em.Layer, artboardLayerItem: em.Artboard, destinationArtboardLayerItem: em.Artboard, prop: em.TweenProp): boolean => {
   switch(prop) {
     case 'image':
@@ -575,6 +608,14 @@ export const getEquivalentTweenProp = (layerItem: em.Layer, equivalentLayerItem:
       return hasFontSizeTween(layerItem, equivalentLayerItem);
     case 'lineHeight':
       return hasLineHeightTween(layerItem, equivalentLayerItem);
+    case 'fromX':
+      return hasFromXTween(layerItem, equivalentLayerItem);
+    case 'fromY':
+      return hasFromYTween(layerItem, equivalentLayerItem);
+    case 'toX':
+      return hasToXTween(layerItem, equivalentLayerItem);
+    case 'toY':
+      return hasToYTween(layerItem, equivalentLayerItem);
   }
 };
 
@@ -599,7 +640,11 @@ export const getEquivalentTweenProps = (layerItem: em.Layer, equivalentLayerItem
   shadowBlur: hasShadowBlurTween(layerItem, equivalentLayerItem),
   opacity: hasOpacityTween(layerItem, equivalentLayerItem),
   fontSize: hasFontSizeTween(layerItem, equivalentLayerItem),
-  lineHeight: hasLineHeightTween(layerItem, equivalentLayerItem)
+  lineHeight: hasLineHeightTween(layerItem, equivalentLayerItem),
+  fromX: hasFromXTween(layerItem, equivalentLayerItem),
+  fromY: hasFromYTween(layerItem, equivalentLayerItem),
+  toX: hasToXTween(layerItem, equivalentLayerItem),
+  toY: hasToYTween(layerItem, equivalentLayerItem)
 });
 
 export const getLongestEventTween = (tweensById: {[id: string]: em.Tween}): em.Tween => {
@@ -881,12 +926,14 @@ export const getTweensWithLayer = (store: LayerState, layerId: string): { allIds
 
 export const getGradientOriginPoint = (store: LayerState, id: string, origin: em.Point): paper.Point => {
   const layerItem = store.byId[id];
-  return new paperMain.Point((origin.x * layerItem.frame.innerWidth) + layerItem.frame.x, (origin.y * layerItem.frame.innerHeight) + layerItem.frame.y);
+  const isLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line';
+  return new paperMain.Point((origin.x * layerItem.frame.innerWidth) + layerItem.frame.x, (origin.y * (isLine ? layerItem.frame.innerWidth : layerItem.frame.innerHeight)) + layerItem.frame.y);
 };
 
 export const getGradientDestinationPoint = (store: LayerState, id: string, destination: em.Point): paper.Point => {
   const layerItem = store.byId[id];
-  return new paperMain.Point((destination.x * layerItem.frame.innerWidth) + layerItem.frame.x, (destination.y * layerItem.frame.innerHeight) + layerItem.frame.y);
+  const isLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line';
+  return new paperMain.Point((destination.x * layerItem.frame.innerWidth) + layerItem.frame.x, (destination.y * (isLine ? layerItem.frame.innerWidth : layerItem.frame.innerHeight)) + layerItem.frame.y);
 };
 
 export const getLineFromPoint = (store: LayerState, id: string, from: em.Point): paper.Point => {

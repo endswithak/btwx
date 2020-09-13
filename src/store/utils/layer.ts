@@ -2302,7 +2302,7 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
 export const updateLayerTweensByProps = (state: LayerState, layerId: string, props: em.TweenProp[] | 'all'): LayerState => {
   let currentState = state;
   if (props === 'all') {
-    const tweenProps = ['image', 'shape', 'fill', 'x', 'y', 'radius', 'rotation', 'width', 'height', 'stroke', 'strokeDashWidth', 'strokeDashGap', 'strokeWidth', 'shadowColor', 'shadowOffsetX', 'shadowOffsetY', 'shadowBlur', 'opacity', 'fontSize', 'lineHeight'] as em.TweenProp[];
+    const tweenProps = ['image', 'shape', 'fill', 'x', 'y', 'radius', 'rotation', 'width', 'height', 'stroke', 'strokeDashWidth', 'strokeDashGap', 'strokeWidth', 'shadowColor', 'shadowOffsetX', 'shadowOffsetY', 'shadowBlur', 'opacity', 'fontSize', 'lineHeight', 'fromX', 'fromY', 'toX', 'toY'] as em.TweenProp[];
     currentState = tweenProps.reduce((result: LayerState, current: em.TweenProp) => {
       result = updateLayerTweensByProp(result, layerId, current);
       return result;
@@ -3018,7 +3018,7 @@ export const setLayerGradientOrigin = (state: LayerState, action: SetLayerGradie
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
   const layerItem = currentState.byId[action.payload.id];
-  const gradient = layerItem.style.fill.gradient;
+  const gradient = layerItem.style[action.payload.prop].gradient;
   const paperProp = getPaperProp(action.payload.prop);
   paperLayer[paperProp] = {
     gradient: {
@@ -3064,7 +3064,7 @@ export const setLayerGradientDestination = (state: LayerState, action: SetLayerG
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
   const layerItem = currentState.byId[action.payload.id];
-  const gradient = layerItem.style.fill.gradient;
+  const gradient = layerItem.style[action.payload.prop].gradient;
   const paperProp = getPaperProp(action.payload.prop);
   paperLayer[paperProp] = {
     gradient: {
@@ -5009,6 +5009,7 @@ export const setStarsRadius = (state: LayerState, action: SetStarsRadius): Layer
 export const setLineFromX = (state: LayerState, action: SetLineFromX): LayerState => {
   let currentState = state;
   currentState = updateLayerBounds(currentState, action.payload.id);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fromX', 'fromY', 'toX', 'toY']);
   if (action.payload.setEdit) {
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   }
@@ -5027,6 +5028,7 @@ export const setLinesFromX = (state: LayerState, action: SetLinesFromX): LayerSt
 export const setLineFromY = (state: LayerState, action: SetLineFromY): LayerState => {
   let currentState = state;
   currentState = updateLayerBounds(currentState, action.payload.id);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fromX', 'fromY', 'toX', 'toY']);
   if (action.payload.setEdit) {
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   }
@@ -5044,8 +5046,12 @@ export const setLinesFromY = (state: LayerState, action: SetLinesFromY): LayerSt
 
 export const setLineFrom = (state: LayerState, action: SetLineFrom): LayerState => {
   let currentState = state;
+  const layerItem = state.byId[action.payload.id];
   currentState = setLineFromX(currentState, layerActions.setLineFromX({id: action.payload.id, x: action.payload.x, setEdit: false}) as SetLineFromX);
   currentState = setLineFromY(currentState, layerActions.setLineFromY({id: action.payload.id, y: action.payload.y, setEdit: false}) as SetLineFromY);
+  if (layerItem.style.stroke.fillType === 'gradient') {
+    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
+  }
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -5053,6 +5059,7 @@ export const setLineFrom = (state: LayerState, action: SetLineFrom): LayerState 
 export const setLineToX = (state: LayerState, action: SetLineToX): LayerState => {
   let currentState = state;
   currentState = updateLayerBounds(currentState, action.payload.id);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fromX', 'fromY', 'toX', 'toY']);
   if (action.payload.setEdit) {
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   }
@@ -5071,6 +5078,7 @@ export const setLinesToX = (state: LayerState, action: SetLinesToX): LayerState 
 export const setLineToY = (state: LayerState, action: SetLineToY): LayerState => {
   let currentState = state;
   currentState = updateLayerBounds(currentState, action.payload.id);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fromX', 'fromY', 'toX', 'toY']);
   if (action.payload.setEdit) {
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   }
@@ -5088,8 +5096,12 @@ export const setLinesToY = (state: LayerState, action: SetLinesToY): LayerState 
 
 export const setLineTo = (state: LayerState, action: SetLineTo): LayerState => {
   let currentState = state;
+  const layerItem = state.byId[action.payload.id];
   currentState = setLineToX(currentState, layerActions.setLineToX({id: action.payload.id, x: action.payload.x, setEdit: false}) as SetLineToX);
   currentState = setLineToY(currentState, layerActions.setLineToY({id: action.payload.id, y: action.payload.y, setEdit: false}) as SetLineToY);
+  if (layerItem.style.stroke.fillType === 'gradient') {
+    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
+  }
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };

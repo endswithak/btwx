@@ -112,7 +112,9 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
     tweenEvents.allIds.forEach((eventId) => {
       const tweenEvent = tweenEvents.byId[eventId];
       const tweenEventArtboard = tweenEventDestinations.byId[tweenEvent.artboard] as em.Artboard;
+      const tweenEventArtboardPaperLayer = paperTweenEventDestinationsById[tweenEvent.artboard];
       const tweenEventDestinationArtboard = tweenEventDestinations.byId[tweenEvent.destinationArtboard] as em.Artboard;
+      const tweenEventDestinationArtboardPaperLayer = paperTweenEventDestinationsById[tweenEvent.destinationArtboard];
       const tweenEventPaperLayer = paperTweenEventLayersById[tweenEvent.layer];
       const tweenEventTweensById = tweenEvent.tweens.reduce((result: { [id: string]: em.Tween }, current): {[id: string]: em.Tween} => {
         result[current] = tweens.byId[current];
@@ -969,6 +971,122 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
                     if (tweenPaperLayer.strokeColor && tweenPaperLayer.strokeColor.gradient) {
                       const innerWidth = tweenPaperLayer.data.innerWidth ? tweenPaperLayer.data.innerWidth : tweenLayer.frame.innerWidth;
                       const innerHeight = tweenPaperLayer.data.innerHeight ? tweenPaperLayer.data.innerHeight : tweenLayer.frame.innerHeight;
+                      const origin = tweenPaperLayer.data.gradientOrigin ? tweenPaperLayer.data.gradientOrigin : tweenLayer.style.fill.gradient.origin;
+                      const destination = tweenPaperLayer.data.gradientDestination ? tweenPaperLayer.data.gradientDestination : tweenLayer.style.stroke.gradient.destination;
+                      const nextOrigin = new paperPreview.Point((origin.x * innerWidth) + tweenPaperLayer.position.x, (origin.y * innerHeight) + tweenPaperLayer.position.y);
+                      const nextDestination = new paperPreview.Point((destination.x * innerWidth) + tweenPaperLayer.position.x, (destination.y * innerHeight) + tweenPaperLayer.position.y);
+                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).origin = nextOrigin;
+                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).destination = nextDestination;
+                    }
+                  },
+                  ease: tween.ease,
+                }, tween.delay);
+                break;
+              }
+              case 'fromX': {
+                const pla = ((tweenPaperLayer as paper.CompoundPath).children[0] as paper.Path).firstSegment.point.x;
+                const plb = ((tweenDestinationLayerPaperLayer as paper.CompoundPath).children[0] as paper.Path).firstSegment.point.x;
+                const relativeA = pla - tweenEventArtboardPaperLayer.position.x;
+                const relativeB = plb - tweenEventDestinationArtboardPaperLayer.position.x;
+                const diff = relativeB - relativeA;
+                tweenProp[tween.prop] = pla;
+                tweenTimeline.to(tweenProp, {
+                  duration: tween.duration,
+                  [tween.prop]: `+=${diff}`,
+                  onUpdate: () => {
+                    ((tweenPaperLayer as paper.CompoundPath).children[0] as paper.Path).firstSegment.point.x = tweenProp[tween.prop];
+                    tweenPaperLayer.data.innerWidth = ((tweenPaperLayer as paper.CompoundPath).children[0] as paper.Path).length;
+                    tweenPaperLayer.data.innerHeight = ((tweenPaperLayer as paper.CompoundPath).children[0] as paper.Path).length;
+                    if (tweenPaperLayer.strokeColor && tweenPaperLayer.strokeColor.gradient) {
+                      const innerWidth = tweenPaperLayer.data.innerWidth ? tweenPaperLayer.data.innerWidth : tweenLayer.frame.innerWidth;
+                      const innerHeight = innerWidth;
+                      const origin = tweenPaperLayer.data.gradientOrigin ? tweenPaperLayer.data.gradientOrigin : tweenLayer.style.fill.gradient.origin;
+                      const destination = tweenPaperLayer.data.gradientDestination ? tweenPaperLayer.data.gradientDestination : tweenLayer.style.stroke.gradient.destination;
+                      const nextOrigin = new paperPreview.Point((origin.x * innerWidth) + tweenPaperLayer.position.x, (origin.y * innerHeight) + tweenPaperLayer.position.y);
+                      const nextDestination = new paperPreview.Point((destination.x * innerWidth) + tweenPaperLayer.position.x, (destination.y * innerHeight) + tweenPaperLayer.position.y);
+                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).origin = nextOrigin;
+                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).destination = nextDestination;
+                    }
+                  },
+                  ease: tween.ease,
+                }, tween.delay);
+                break;
+              }
+              case 'fromY': {
+                const pla = ((tweenPaperLayer as paper.CompoundPath).children[0] as paper.Path).firstSegment.point.y;
+                const plb = ((tweenDestinationLayerPaperLayer as paper.CompoundPath).children[0] as paper.Path).firstSegment.point.y;
+                const relativeA = pla - tweenEventArtboardPaperLayer.position.y;
+                const relativeB = plb - tweenEventDestinationArtboardPaperLayer.position.y;
+                const diff = relativeB - relativeA;
+                tweenProp[tween.prop] = pla;
+                tweenTimeline.to(tweenProp, {
+                  duration: tween.duration,
+                  [tween.prop]: `+=${diff}`,
+                  onUpdate: () => {
+                    ((tweenPaperLayer as paper.CompoundPath).children[0] as paper.Path).firstSegment.point.y = tweenProp[tween.prop];
+                    tweenPaperLayer.data.innerWidth = ((tweenPaperLayer as paper.CompoundPath).children[0] as paper.Path).length;
+                    tweenPaperLayer.data.innerHeight = ((tweenPaperLayer as paper.CompoundPath).children[0] as paper.Path).length;
+                    if (tweenPaperLayer.strokeColor && tweenPaperLayer.strokeColor.gradient) {
+                      const innerWidth = tweenPaperLayer.data.innerWidth ? tweenPaperLayer.data.innerWidth : tweenLayer.frame.innerWidth;
+                      const innerHeight = innerWidth;
+                      const origin = tweenPaperLayer.data.gradientOrigin ? tweenPaperLayer.data.gradientOrigin : tweenLayer.style.fill.gradient.origin;
+                      const destination = tweenPaperLayer.data.gradientDestination ? tweenPaperLayer.data.gradientDestination : tweenLayer.style.stroke.gradient.destination;
+                      const nextOrigin = new paperPreview.Point((origin.x * innerWidth) + tweenPaperLayer.position.x, (origin.y * innerHeight) + tweenPaperLayer.position.y);
+                      const nextDestination = new paperPreview.Point((destination.x * innerWidth) + tweenPaperLayer.position.x, (destination.y * innerHeight) + tweenPaperLayer.position.y);
+                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).origin = nextOrigin;
+                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).destination = nextDestination;
+                    }
+                  },
+                  ease: tween.ease,
+                }, tween.delay);
+                break;
+              }
+              case 'toX': {
+                const pla = ((tweenPaperLayer as paper.CompoundPath).children[0] as paper.Path).lastSegment.point.x;
+                const plb = ((tweenDestinationLayerPaperLayer as paper.CompoundPath).children[0] as paper.Path).lastSegment.point.x;
+                const relativeA = pla - tweenEventArtboardPaperLayer.position.x;
+                const relativeB = plb - tweenEventDestinationArtboardPaperLayer.position.x;
+                const diff = relativeB - relativeA;
+                tweenProp[tween.prop] = pla;
+                tweenTimeline.to(tweenProp, {
+                  duration: tween.duration,
+                  [tween.prop]: `+=${diff}`,
+                  onUpdate: () => {
+                    ((tweenPaperLayer as paper.CompoundPath).children[0] as paper.Path).lastSegment.point.x = tweenProp[tween.prop];
+                    tweenPaperLayer.data.innerWidth = ((tweenPaperLayer as paper.CompoundPath).children[0] as paper.Path).length;
+                    tweenPaperLayer.data.innerHeight = ((tweenPaperLayer as paper.CompoundPath).children[0] as paper.Path).length;
+                    if (tweenPaperLayer.strokeColor && tweenPaperLayer.strokeColor.gradient) {
+                      const innerWidth = tweenPaperLayer.data.innerWidth ? tweenPaperLayer.data.innerWidth : tweenLayer.frame.innerWidth;
+                      const innerHeight = innerWidth;
+                      const origin = tweenPaperLayer.data.gradientOrigin ? tweenPaperLayer.data.gradientOrigin : tweenLayer.style.fill.gradient.origin;
+                      const destination = tweenPaperLayer.data.gradientDestination ? tweenPaperLayer.data.gradientDestination : tweenLayer.style.stroke.gradient.destination;
+                      const nextOrigin = new paperPreview.Point((origin.x * innerWidth) + tweenPaperLayer.position.x, (origin.y * innerHeight) + tweenPaperLayer.position.y);
+                      const nextDestination = new paperPreview.Point((destination.x * innerWidth) + tweenPaperLayer.position.x, (destination.y * innerHeight) + tweenPaperLayer.position.y);
+                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).origin = nextOrigin;
+                      (tweenPaperLayer.strokeColor as em.PaperGradientFill).destination = nextDestination;
+                    }
+                  },
+                  ease: tween.ease,
+                }, tween.delay);
+                break;
+              }
+              case 'toY': {
+                const pla = ((tweenPaperLayer as paper.CompoundPath).children[0] as paper.Path).lastSegment.point.y;
+                const plb = ((tweenDestinationLayerPaperLayer as paper.CompoundPath).children[0] as paper.Path).lastSegment.point.y;
+                const relativeA = pla - tweenEventArtboardPaperLayer.position.y;
+                const relativeB = plb - tweenEventDestinationArtboardPaperLayer.position.y;
+                const diff = relativeB - relativeA;
+                tweenProp[tween.prop] = pla;
+                tweenTimeline.to(tweenProp, {
+                  duration: tween.duration,
+                  [tween.prop]: `+=${diff}`,
+                  onUpdate: () => {
+                    ((tweenPaperLayer as paper.CompoundPath).children[0] as paper.Path).lastSegment.point.y = tweenProp[tween.prop];
+                    tweenPaperLayer.data.innerWidth = ((tweenPaperLayer as paper.CompoundPath).children[0] as paper.Path).length;
+                    tweenPaperLayer.data.innerHeight = ((tweenPaperLayer as paper.CompoundPath).children[0] as paper.Path).length;
+                    if (tweenPaperLayer.strokeColor && tweenPaperLayer.strokeColor.gradient) {
+                      const innerWidth = tweenPaperLayer.data.innerWidth ? tweenPaperLayer.data.innerWidth : tweenLayer.frame.innerWidth;
+                      const innerHeight = innerWidth;
                       const origin = tweenPaperLayer.data.gradientOrigin ? tweenPaperLayer.data.gradientOrigin : tweenLayer.style.fill.gradient.origin;
                       const destination = tweenPaperLayer.data.gradientDestination ? tweenPaperLayer.data.gradientDestination : tweenLayer.style.stroke.gradient.destination;
                       const nextOrigin = new paperPreview.Point((origin.x * innerWidth) + tweenPaperLayer.position.x, (origin.y * innerHeight) + tweenPaperLayer.position.y);
