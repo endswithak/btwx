@@ -1,9 +1,9 @@
-import React, { useContext, ReactElement, useState, useRef, SyntheticEvent } from 'react';
+import React, { useContext, ReactElement, useState, useRef } from 'react';
+import styled from 'styled-components';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
-import { insertLayersBelow, insertLayersAbove } from '../store/actions/layer';
-import { InsertLayersBelowPayload, InsertLayersAbovePayload } from '../store/actionTypes/layer';
-import { LayerTypes } from '../store/actionTypes/layer';
+import { insertLayersAbove } from '../store/actions/layer';
+import { InsertLayersAbovePayload, LayerTypes } from '../store/actionTypes/layer';
 import { ThemeContext } from './ThemeProvider';
 
 interface SidebarDropzoneBottomProps {
@@ -17,8 +17,27 @@ interface SidebarDropzoneBottomProps {
   setDragLayers(layers: string[]): void;
   setDragging(dragging: boolean): void;
   insertLayersAbove?(payload: InsertLayersAbovePayload): LayerTypes;
-  // insertLayersBelow?(payload: InsertLayersBelowPayload): LayerTypes;
 }
+
+interface DropzoneProps {
+  active: boolean;
+}
+
+const Dropzone = styled.div<DropzoneProps>`
+  box-shadow: ${props => props.active ? `0 ${props.theme.unit / 2}px 0 0 ${props.theme.palette.primary}` : 'none'};
+  width: 100%;
+  height: 100%;
+  :before {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    left: -4px;
+    bottom: -4.5px;
+    background: ${props => props.active ? props.theme.palette.primary : 'none'};
+  }
+`;
 
 const SidebarDropzoneBottom = (props: SidebarDropzoneBottomProps): ReactElement => {
   const ref = useRef<HTMLDivElement>(null);
@@ -26,7 +45,7 @@ const SidebarDropzoneBottom = (props: SidebarDropzoneBottomProps): ReactElement 
   const theme = useContext(ThemeContext);
   const { layer, depth, dragLayers, dragLayerById, setDragLayers, setDragging, insertLayersAbove, leftSidebarWidth } = props;
 
-  const handleDragOver = (e: SyntheticEvent) => {
+  const handleDragOver = (e: any) => {
     if (dragLayers && !dragLayers.some((id) => document.getElementById(id).contains(ref.current))) {
       if (dragLayers.some((id) => dragLayerById[id].type === 'Artboard') && layer.parent !== 'page') {
         return;
@@ -37,11 +56,11 @@ const SidebarDropzoneBottom = (props: SidebarDropzoneBottomProps): ReactElement 
     }
   }
 
-  const handleDragLeave = (e: SyntheticEvent) => {
+  const handleDragLeave = (e: any) => {
     setActive(false);
   }
 
-  const handleDrop = (e: SyntheticEvent) => {
+  const handleDrop = (e: any) => {
     if (active) {
       e.preventDefault();
       insertLayersAbove({
@@ -56,15 +75,18 @@ const SidebarDropzoneBottom = (props: SidebarDropzoneBottomProps): ReactElement 
   return (
     <div
       ref={ref}
-      className={`c-sidebar-dropzone__zone c-sidebar-dropzone__zone--bottom`}
+      className='c-sidebar-dropzone__zone c-sidebar-dropzone__zone--bottom'
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       style={{
-        width: leftSidebarWidth - (depth * (theme.unit * 2)),
-        boxShadow: active ? `0 ${theme.unit / 2}px 0 0 ${theme.palette.primary}` : '',
+        width: leftSidebarWidth - (depth * (theme.unit * 1.44)),
         height: layer.children ? theme.unit * 2 : theme.unit * 4
-      }} />
+      }}>
+      <Dropzone
+        active={active}
+        theme={theme} />
+    </div>
   );
 }
 

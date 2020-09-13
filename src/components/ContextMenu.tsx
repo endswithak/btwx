@@ -89,7 +89,7 @@ const mapStateToProps = (state: RootState, ownProps: ContextMenuProps) => {
   const initialX = contextMenu.x;
   const initialY = contextMenu.y;
   const visibleOptions = ownProps.options.filter(option => !option.hidden);
-  const menuHeight = (visibleOptions.length * 32) + 8;
+  const menuHeight = (visibleOptions.length * 24) + 8;
   const menuWidth = 200;
   const windowHeight = window.innerHeight;
   const windowWidth = window.innerWidth;

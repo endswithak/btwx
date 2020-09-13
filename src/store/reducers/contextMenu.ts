@@ -43,8 +43,14 @@ export default (state = initialState, action: ContextMenuTypes): ContextMenuStat
     }
     case CLOSE_CONTEXT_MENU: {
       return {
-        ...state,
-        ...initialState
+        type: null,
+        id: null,
+        isOpen: false,
+        x: null,
+        y: null,
+        paperX: null,
+        paperY: null,
+        data: null
       };
     }
     default:

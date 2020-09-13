@@ -36,7 +36,8 @@ const PolygonSidesInput = (props: PolygonSidesInputProps): ReactElement => {
   const handleSliderChange = (e: any): void => {
     handleChange(e);
     layerItems.forEach((layerItem) => {
-      const paperLayer = getPaperLayer(layerItem.id) as paper.Path;
+      const paperLayerCompound = getPaperLayer(layerItem.id) as paper.CompoundPath;
+      const paperLayer = paperLayerCompound.children[0] as paper.Path;
       const startPosition = paperLayer.position;
       paperLayer.rotation = -layerItem.transform.rotation;
       const newShape = new paperMain.Path.RegularPolygon({

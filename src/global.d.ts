@@ -169,8 +169,8 @@ declare namespace em {
   }
 
   interface StrokeOptions {
-    cap: StrokeCapTypes;
-    join: StrokeJoinTypes;
+    cap: StrokeCap;
+    join: StrokeJoin;
     dashArray: number[];
     dashOffset: number;
   }

@@ -167,7 +167,11 @@ import {
   SET_LINE_TO_X,
   SET_LINES_TO_X,
   SET_LINES_TO_Y,
-  SET_LINE_TO
+  SET_LINE_TO,
+  SEND_LAYERS_BACKWARD,
+  SEND_LAYERS_FORWARD,
+  SEND_LAYERS_TO_BACK,
+  SEND_LAYERS_TO_FRONT
 } from '../actionTypes/layer';
 
 const reduxUndoActions = [
@@ -318,7 +322,11 @@ const reduxUndoActions = [
   SET_LINE_TO_X,
   SET_LINES_TO_X,
   SET_LINES_TO_Y,
-  SET_LINE_TO
+  SET_LINE_TO,
+  SEND_LAYERS_BACKWARD,
+  SEND_LAYERS_FORWARD,
+  SEND_LAYERS_TO_BACK,
+  SEND_LAYERS_TO_FRONT
 ];
 
 const appReducer = combineReducers({

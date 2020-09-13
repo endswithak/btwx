@@ -6,13 +6,13 @@ import { ContextMenuState } from '../store/reducers/contextMenu';
 import ContextMenu from './ContextMenu';
 import { ContextMenuTypes, OpenContextMenuPayload } from '../store/actionTypes/contextMenu';
 import { closeContextMenu, openContextMenu } from '../store/actions/contextMenu';
-import { AddLayerTweenEventPayload, LayerTypes, RemoveLayersPayload, SelectLayerPayload } from '../store/actionTypes/layer';
-import { addLayerTweenEvent, removeLayers, selectLayer, copyLayersThunk, pasteLayersThunk } from '../store/actions/layer';
+import { AddLayerTweenEventPayload, LayerTypes, RemoveLayersPayload, SelectLayerPayload, SendLayersBackwardPayload, SendLayersForwardPayload, GroupLayersPayload, UngroupLayersPayload, AddLayersMaskPayload } from '../store/actionTypes/layer';
+import { addLayerTweenEvent, removeLayers, selectLayer, copyLayersThunk, pasteLayersThunk, sendLayersBackward, sendLayersForward, groupLayersThunk, ungroupLayers, addLayersMaskThunk } from '../store/actions/layer';
 import { RemoveArtboardPresetPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
 import { removeArtboardPreset } from '../store/actions/canvasSettings';
 import { ArtboardPresetEditorTypes } from '../store/actionTypes/artboardPresetEditor';
 import { openArtboardPresetEditor } from '../store/actions/artboardPresetEditor';
-import { getLayerScope } from '../store/selectors/layer';
+import { getLayerScope, orderLayersByDepth } from '../store/selectors/layer';
 
 interface ContextMenuWrapProps {
   contextMenu?: ContextMenuState;
@@ -24,6 +24,11 @@ interface ContextMenuWrapProps {
   currentX?: number;
   currentY?: number;
   clipboardType?: em.ClipboardType;
+  canMoveForward?: boolean;
+  canMoveBackward?: boolean;
+  canGroup?: boolean;
+  canUngroup?: boolean;
+  canMask?: boolean;
   closeContextMenu?(): ContextMenuTypes;
   openContextMenu?(payload: OpenContextMenuPayload): ContextMenuTypes;
   addLayerTweenEvent?(payload: AddLayerTweenEventPayload): LayerTypes;
@@ -31,12 +36,17 @@ interface ContextMenuWrapProps {
   openArtboardPresetEditor?(payload: em.ArtboardPreset): ArtboardPresetEditorTypes;
   removeLayers?(payload: RemoveLayersPayload): LayerTypes;
   selectLayer?(payload: SelectLayerPayload): LayerTypes;
+  sendLayersBackward?(payload: SendLayersBackwardPayload): LayerTypes;
+  sendLayersForward?(payload: SendLayersForwardPayload): LayerTypes;
+  ungroupLayers?(payload: UngroupLayersPayload): LayerTypes;
+  groupLayersThunk?(payload: GroupLayersPayload): Promise<any>;
+  addLayersMaskThunk?(payload: AddLayersMaskPayload): Promise<any>;
   copyLayersThunk?(): Promise<any>;
   pasteLayersThunk?({overSelection, overPoint, overLayer}: { overSelection?: boolean; overPoint?: em.Point; overLayer?: string }): Promise<any>;
 }
 
 const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
-  const { clipboardType, contextMenu, closeContextMenu, currentX, currentY, openContextMenu, canAddTweenEvent, artboards, activeArtboard, tweenEventItems, selected, addLayerTweenEvent, removeArtboardPreset, openArtboardPresetEditor, removeLayers, selectLayer, copyLayersThunk, pasteLayersThunk } = props;
+  const { clipboardType, canMask, addLayersMaskThunk, canGroup, canUngroup, ungroupLayers, groupLayersThunk, canMoveForward, canMoveBackward, contextMenu, closeContextMenu, currentX, currentY, openContextMenu, canAddTweenEvent, artboards, activeArtboard, tweenEventItems, selected, addLayerTweenEvent, removeArtboardPreset, openArtboardPresetEditor, removeLayers, selectLayer, copyLayersThunk, pasteLayersThunk, sendLayersBackward, sendLayersForward } = props;
 
   const getOptions = () => {
     switch(contextMenu.type) {
@@ -59,7 +69,6 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
           type: 'MenuItem',
           text: 'Select',
           hidden: contextMenu.id && contextMenu.id === 'page',
-          disabled: !canAddTweenEvent,
           onClick: (): void => {
             closeContextMenu();
             selectLayer({id: contextMenu.id, newSelection: true});
@@ -83,6 +92,7 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
         },{
           type: 'MenuItem',
           text: 'Paste Here',
+          hidden: contextMenu.data && contextMenu.data.origin && contextMenu.data.origin === 'sidebar',
           disabled: !clipboardType,
           onClick: (): void => {
             pasteLayersThunk({overPoint: { x: contextMenu.paperX, y: contextMenu.paperY }, overLayer: contextMenu.id} as any).then(() => {
@@ -97,11 +107,14 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
           onClick: (): void => {
             if (selected.length > 0) {
               if (selected.length === 1) {
+                console.log('over layer');
                 pasteLayersThunk({overLayer: selected[0]} as any).then(() => { closeContextMenu() });
               } else {
+                console.log('over selection');
                 pasteLayersThunk({overSelection: true} as any).then(() => { closeContextMenu() });
               }
             } else {
+              console.log('over context menu');
               pasteLayersThunk({overLayer: contextMenu.id} as any).then(() => { closeContextMenu() });
             }
           }
@@ -115,6 +128,69 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
               removeLayers({layers: selected});
             } else {
               removeLayers({layers: [contextMenu.id]});
+            }
+          }
+        },{
+          type: 'MenuItem',
+          text: 'Move Forward',
+          hidden: contextMenu.id && contextMenu.id === 'page',
+          disabled: !canMoveForward,
+          onClick: (): void => {
+            closeContextMenu();
+            if (selected.length > 0) {
+              sendLayersForward({layers: selected});
+            } else {
+              sendLayersForward({layers: [contextMenu.id]});
+            }
+          }
+        },{
+          type: 'MenuItem',
+          text: 'Move Backward',
+          hidden: contextMenu.id && contextMenu.id === 'page',
+          disabled: !canMoveBackward,
+          onClick: (): void => {
+            closeContextMenu();
+            if (selected.length > 0) {
+              sendLayersBackward({layers: selected});
+            } else {
+              sendLayersBackward({layers: [contextMenu.id]});
+            }
+          }
+        },{
+          type: 'MenuItem',
+          text: 'Group',
+          hidden: contextMenu.id && contextMenu.id === 'page',
+          disabled: !canGroup,
+          onClick: (): void => {
+            if (selected.length > 0) {
+              groupLayersThunk({layers: selected}).then(() => { closeContextMenu(); });
+            } else {
+              groupLayersThunk({layers: [contextMenu.id]}).then(() => { closeContextMenu(); });
+            }
+          }
+        },{
+          type: 'MenuItem',
+          text: 'Ungroup',
+          hidden: contextMenu.id && contextMenu.id === 'page',
+          disabled: !canUngroup,
+          onClick: (): void => {
+            closeContextMenu();
+            if (selected.length > 0) {
+              ungroupLayers({layers: selected});
+            } else {
+              ungroupLayers({layers: [contextMenu.id]});
+            }
+          }
+        },{
+          type: 'MenuItem',
+          text: 'Mask',
+          hidden: contextMenu.id && contextMenu.id === 'page',
+          disabled: !canMask,
+          onClick: (): void => {
+            if (selected.length > 0) {
+              addLayersMaskThunk({layers: selected}).then(() => { closeContextMenu(); });
+            } else {
+              addLayersMaskThunk({layers: [contextMenu.id]}).then(() => { closeContextMenu(); });
             }
           }
         }]
@@ -275,7 +351,19 @@ const mapStateToProps = (state: RootState) => {
     return result;
   }, []);
   const selected = layer.present.selected;
-  const layerItem = contextMenu.id && contextMenu.id !== 'page' && layer.present.byId[contextMenu.id];
+  const selectedById: {[id: string]: em.Page | em.Artboard | em.Group | em.Shape | em.Text} = selected.reduce((result, current) => {
+    result = {
+      ...result,
+      [current]: layer.present.byId[current]
+    }
+    return result;
+  }, {});
+  const selectedByDepth = orderLayersByDepth(state.layer.present, selected);
+  const layerItem = contextMenu.id && contextMenu.id !== 'page' ? layer.present.byId[contextMenu.id] : null;
+  const isMask = layerItem ? layerItem.mask : null;
+  const parent = layerItem ? state.layer.present.byId[layerItem.parent] : null;
+  const inMaskedGroup = parent ? parent.type === 'Group' && (parent as em.Group).clipped : null;
+  const isFirstMaskChild = inMaskedGroup && parent.children[1] === contextMenu.id;
   const tweenEventLayerScope = layerItem ? getLayerScope(layer.present, contextMenu.id) : null;
   const artboard = tweenEventLayerScope ? tweenEventLayerScope.find((id) => layer.present.allArtboardIds.includes(id)) : null;
   const canAddTweenEvent = layerItem && (selected.length === 0 || (selected.length === 1 && selected[0] === contextMenu.id)) && tweenEventLayerScope.some(id => layer.present.allArtboardIds.includes(id));
@@ -286,6 +374,28 @@ const mapStateToProps = (state: RootState) => {
    }, []) : null;
   const currentY = contextMenu.y && document.getElementById('context-menu') ? document.getElementById('context-menu').offsetTop : contextMenu.y;
   const currentX = contextMenu.x && document.getElementById('context-menu') ? document.getElementById('context-menu').offsetLeft : contextMenu.x;
+  const canMoveBackward = (selected.length > 0 && !layer.present.selected.some((id: string) => {
+    const layer = state.layer.present.byId[id];
+    const parent = state.layer.present.byId[layer.parent];
+    const inMaskedGroup = parent.type === 'Group' && (parent as em.Group).clipped;
+    const isFirstMaskChild = inMaskedGroup && parent.children[1] === id;
+    return parent.children[0] === id || isFirstMaskChild;
+  })) || (selected.length === 0 && !((parent && parent.children[0] === contextMenu.id) || isFirstMaskChild));
+  const canMoveForward = (selected.length > 0 && !layer.present.selected.some((id: string) => {
+    const layer = state.layer.present.byId[id];
+    const parent = state.layer.present.byId[layer.parent];
+    const isMask = layer.mask;
+    return parent.children[parent.children.length - 1] === id || isMask;
+  })) || (selected.length === 0 && !((parent && parent.children[parent.children.length - 1] === contextMenu.id) || isMask));
+  const canGroup = (selected.length > 0 && !layer.present.selected.some((id: string) => {
+    const layer = state.layer.present.byId[id];
+    return layer.type === 'Artboard';
+  })) || (selected.length === 0 && !(layerItem && layerItem.type === 'Artboard'));
+  const canUngroup = (selected.length > 0 && layer.present.selected.some((id: string) => {
+    const layer = state.layer.present.byId[id];
+    return layer.type === 'Group';
+  })) || (selected.length === 0 && layerItem && layerItem.type === 'Group');
+  const canMask = (selected.length > 0 && selectedById[selectedByDepth[0]].type === 'Shape' && (selectedById[selectedByDepth[0]] as em.Shape).shapeType !== 'Line' && !(selectedById[selectedByDepth[0]] as em.Shape).mask) || (selected.length === 0 && layerItem && layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType !== 'Line' && !(layerItem as em.Shape).mask);
   const clipboardType: em.ClipboardType = (() => {
     try {
       const text = clipboard.readText();
@@ -295,10 +405,10 @@ const mapStateToProps = (state: RootState) => {
       return null;
     }
   })();
-  return { contextMenu, activeArtboard, artboards, selected, canAddTweenEvent, tweenEventItems, currentY, currentX, clipboardType };
+  return { contextMenu, canGroup, canMask, canUngroup, activeArtboard, artboards, selected, canAddTweenEvent, tweenEventItems, currentY, currentX, clipboardType, canMoveBackward, canMoveForward };
 };
 
 export default connect(
   mapStateToProps,
-  { openContextMenu, closeContextMenu, addLayerTweenEvent, removeArtboardPreset, openArtboardPresetEditor, removeLayers, selectLayer, copyLayersThunk, pasteLayersThunk }
+  { openContextMenu, closeContextMenu, addLayerTweenEvent, removeArtboardPreset, openArtboardPresetEditor, removeLayers, selectLayer, copyLayersThunk, pasteLayersThunk, sendLayersBackward, sendLayersForward, ungroupLayers, groupLayersThunk, addLayersMaskThunk }
 )(ContextMenuWrap);

@@ -73,7 +73,7 @@ export const DEFAULT_STROKE_STYLE: em.Stroke = {
   gradient: DEFAULT_GRADIENT_STYLE
 }
 
-export const DEFAULT_STROKE_CAP = 'cap';
+export const DEFAULT_STROKE_CAP = 'butt';
 export const DEFAULT_STROKE_JOIN = 'miter';
 export const DEFAULT_STROKE_DASH_ARRAY_WIDTH = 0;
 export const DEFAULT_STROKE_DASH_ARRAY_GAP = 0;

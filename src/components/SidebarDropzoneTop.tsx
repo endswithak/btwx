@@ -1,9 +1,9 @@
-import React, { useContext, ReactElement, useState, useRef, SyntheticEvent } from 'react';
+import React, { useContext, ReactElement, useState, useRef } from 'react';
+import styled from 'styled-components';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
-import { insertLayersAbove, insertLayersBelow } from '../store/actions/layer';
-import { InsertLayersAbovePayload, InsertLayersBelowPayload } from '../store/actionTypes/layer';
-import { LayerTypes } from '../store/actionTypes/layer';
+import { insertLayersBelow } from '../store/actions/layer';
+import { InsertLayersBelowPayload, LayerTypes } from '../store/actionTypes/layer';
 import { ThemeContext } from './ThemeProvider';
 
 interface SidebarDropzoneTopProps {
@@ -17,8 +17,27 @@ interface SidebarDropzoneTopProps {
   setDragLayers(layers: string[]): void;
   setDragging(dragging: boolean): void;
   insertLayersBelow?(payload: InsertLayersBelowPayload): LayerTypes;
-  // insertLayersAbove?(payload: InsertLayersAbovePayload): LayerTypes;
 }
+
+interface DropzoneProps {
+  active: boolean;
+}
+
+const Dropzone = styled.div<DropzoneProps>`
+  box-shadow: ${props => props.active ? `0 ${props.theme.unit / 2}px 0 0 ${props.theme.palette.primary} inset` : 'none'};
+  width: 100%;
+  height: 100%;
+  :before {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    left: -4px;
+    top: -3.5px;
+    background: ${props => props.active ? props.theme.palette.primary : 'none'};
+  }
+`;
 
 const SidebarDropzoneTop = (props: SidebarDropzoneTopProps): ReactElement => {
   const ref = useRef<HTMLDivElement>(null);
@@ -56,15 +75,18 @@ const SidebarDropzoneTop = (props: SidebarDropzoneTopProps): ReactElement => {
   return (
     <div
       ref={ref}
-      className={`c-sidebar-dropzone__zone c-sidebar-dropzone__zone--top`}
+      className='c-sidebar-dropzone__zone c-sidebar-dropzone__zone--top'
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       style={{
-        width: leftSidebarWidth - (depth * (theme.unit * 2)),
-        boxShadow: active ? `0 ${theme.unit / 2}px 0 0 ${theme.palette.primary} inset` : '',
+        width: leftSidebarWidth - (depth * (theme.unit * 1.44)),
         height: layer.children ? theme.unit * 2 : theme.unit * 4
-      }} />
+      }}>
+      <Dropzone
+        active={active}
+        theme={theme} />
+    </div>
   );
 }
 

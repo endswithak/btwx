@@ -112,6 +112,7 @@ export const addShape = (state: LayerState, action: AddShape): LayerState => {
   if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.layer.id)) {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.layer.id}) as AddInViewLayer);
   }
+  currentState = updateLayerBounds(currentState, action.payload.layer.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.layer.id, 'all');
   if (!action.payload.batch) {
     currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.layer.id, newSelection: true}) as SelectLayer);
@@ -140,6 +141,7 @@ export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
   if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.layer.id)) {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.layer.id}) as AddInViewLayer);
   }
+  currentState = updateLayerBounds(currentState, action.payload.layer.id);
   if (!action.payload.batch) {
     currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.layer.id, newSelection: true}) as SelectLayer);
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
@@ -167,6 +169,7 @@ export const addText = (state: LayerState, action: AddText): LayerState => {
   if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.layer.id)) {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.layer.id}) as AddInViewLayer);
   }
+  currentState = updateLayerBounds(currentState, action.payload.layer.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.layer.id, 'all');
   if (!action.payload.batch) {
     currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.layer.id, newSelection: true}) as SelectLayer);
@@ -195,6 +198,7 @@ export const addImage = (state: LayerState, action: AddImage): LayerState => {
   if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.layer.id)) {
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.layer.id}) as AddInViewLayer);
   }
+  currentState = updateLayerBounds(currentState, action.payload.layer.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.layer.id, 'all');
   if (!action.payload.batch) {
     currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.layer.id, newSelection: true}) as SelectLayer);
@@ -337,6 +341,9 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
       return result;
     }, {}),
     scope: currentState.scope.filter((id) => !layersToRemove.includes(id))
+  }
+  if (layer.parent !== 'page') {
+    currentState = updateLayerBounds(currentState, layer.parent);
   }
   return currentState;
 };
@@ -1168,6 +1175,12 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
         } as em.Group
       }
     };
+    if (child.parent !== 'page') {
+      currentState = updateLayerBounds(currentState, child.parent);
+    }
+    if (action.payload.id !== 'page') {
+      currentState = updateLayerBounds(currentState, action.payload.id);
+    }
   }
   currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.child, newSelection: true}) as SelectLayer);
   return currentState;
@@ -1235,7 +1248,12 @@ export const insertLayerChild = (state: LayerState, action: InsertLayerChild): L
         } as em.Group
       }
     };
-    currentState = updateParentBounds(currentState, action.payload.id);
+    if (child.parent !== 'page') {
+      currentState = updateLayerBounds(currentState, child.parent);
+    }
+    if (action.payload.id !== 'page') {
+      currentState = updateLayerBounds(currentState, action.payload.id);
+    }
   }
   currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.child, newSelection: true}) as SelectLayer);
   return currentState;
@@ -1310,7 +1328,12 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
         } as em.Group
       }
     };
-    currentState = updateParentBounds(currentState, action.payload.id);
+    if (layer.parent !== 'page') {
+      currentState = updateLayerBounds(currentState, layer.parent);
+    }
+    if (above.parent !== 'page') {
+      currentState = updateLayerBounds(currentState, above.parent);
+    }
   } else {
     if (layer.masked && above.mask) {
       currentState = removeLayersMask(currentState, layerActions.removeLayersMask({id: action.payload.above}) as RemoveLayersMask);
@@ -1381,7 +1404,12 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
         } as em.Group
       }
     };
-    currentState = updateParentBounds(currentState, action.payload.id);
+    if (layer.parent !== 'page') {
+      currentState = updateLayerBounds(currentState, layer.parent);
+    }
+    if (below.parent !== 'page') {
+      currentState = updateLayerBounds(currentState, below.parent);
+    }
   } else {
     if (layer.mask && below.masked) {
       currentState = removeLayersMask(currentState, layerActions.removeLayersMask({id: action.payload.id}) as RemoveLayersMask);
@@ -1460,23 +1488,23 @@ export const escapeLayerScope = (state: LayerState, action: EscapeLayerScope): L
 
 export const groupLayers = (state: LayerState, action: GroupLayers): LayerState => {
   let currentState = state;
+  // add group
+  currentState = addGroup(currentState, layerActions.addGroup({layer: action.payload.group}) as AddGroup);
   // order children
   const orderedChildren = orderLayersByDepth(currentState, action.payload.layers);
   if (orderedChildren.find((id) => state.byId[id].mask)) {
     const mask = orderedChildren.find((id) => state.byId[id].mask);
     currentState = removeLayersMask(currentState, layerActions.removeLayersMask({id: mask}) as RemoveLayersMask);
   }
-  // get group id
-  const groupId = currentState.allIds[currentState.allIds.length - 1];
   // move group above top layer
-  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: groupId, above: orderedChildren[0]}) as InsertLayerAbove);
+  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: action.payload.group.id, above: orderedChildren[0]}) as InsertLayerAbove);
   // add layers to group
   currentState = orderedChildren.reduce((result: LayerState, current: string) => {
-    result = addLayerChild(result, layerActions.addLayerChild({id: groupId, child: current}) as AddLayerChild);
+    result = addLayerChild(result, layerActions.addLayerChild({id: action.payload.group.id, child: current}) as AddLayerChild);
     return result;
   }, currentState);
   // select final group
-  currentState = selectLayer(currentState, {payload: {id: groupId, newSelection: true}} as SelectLayer);
+  currentState = selectLayer(currentState, {payload: {id: action.payload.group.id, newSelection: true}} as SelectLayer);
   // set layer edit
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   // return final state
@@ -4330,19 +4358,13 @@ export const updateInViewLayers = (state: LayerState, action: UpdateInViewLayers
 
 export const addLayersMask = (state: LayerState, action: AddLayersMask): LayerState => {
   let currentState = state;
-  // group layers
   currentState = groupLayers(currentState, layerActions.groupLayers(action.payload) as GroupLayers);
-  // get mask and group
-  const maskGroup = currentState.allGroupIds[currentState.allGroupIds.length - 1];
-  const mask = currentState.byId[maskGroup].children[0];
-  // set paper layer clipMask
+  const mask = currentState.byId[action.payload.group.id].children[0];
   const maskPaperLayer = getPaperLayer(mask);
-  const maskGroupPaperLayer = getPaperLayer(maskGroup);
+  const maskGroupPaperLayer = getPaperLayer(action.payload.group.id);
   maskPaperLayer.clipMask = true;
-  // hack to get paper to update to clipped group bounds
   maskGroupPaperLayer.position.x += 1;
   maskGroupPaperLayer.position.x -= 1;
-  // set mask
   currentState = {
     ...currentState,
     byId: {
@@ -4350,21 +4372,13 @@ export const addLayersMask = (state: LayerState, action: AddLayersMask): LayerSt
       [mask]: {
         ...currentState.byId[mask],
         mask: true
-      },
-      [maskGroup] : {
-        ...currentState.byId[maskGroup],
-        clipped: true
-      } as em.Group
+      }
     }
   };
-  // rename group
-  currentState = setLayerName(currentState, layerActions.setLayerName({id: maskGroup, name: 'Masked Group'}) as SetLayerName);
-  // rename mask
   currentState = setLayerName(currentState, layerActions.setLayerName({id: mask, name: 'Mask'}) as SetLayerName);
-  // mask layers
-  currentState = maskLayers(currentState, layerActions.maskLayers({layers: currentState.byId[maskGroup].children.filter((id) => id !== mask)}) as MaskLayers);
-  // update masked group bounds
-  currentState = updateLayerBounds(currentState, maskGroup);
+  currentState = maskLayers(currentState, layerActions.maskLayers({layers: currentState.byId[action.payload.group.id].children.filter((id) => id !== mask)}) as MaskLayers);
+  currentState = updateLayerBounds(currentState, action.payload.group.id);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4396,6 +4410,7 @@ export const removeLayersMask = (state: LayerState, action: RemoveLayersMask): L
     }
   };
   currentState = unmaskLayers(currentState, layerActions.unmaskLayers({layers: parentLayerItem.children}) as UnmaskLayers);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4419,7 +4434,6 @@ export const maskLayers = (state: LayerState, action: MaskLayers): LayerState =>
   currentState = action.payload.layers.reduce((result, current) => {
     return maskLayer(result, layerActions.maskLayer({id: current}) as MaskLayer);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4443,7 +4457,6 @@ export const unmaskLayers = (state: LayerState, action: UnmaskLayers): LayerStat
   currentState = action.payload.layers.reduce((result, current) => {
     return unmaskLayer(result, layerActions.unmaskLayer({id: current}) as UnmaskLayer);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4816,7 +4829,8 @@ export const divideLayers = (state: LayerState, action: DivideLayers): LayerStat
 
 export const setRoundedRadius = (state: LayerState, action: SetRoundedRadius): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id) as paper.Path;
+  const paperLayerCompound = getPaperLayer(action.payload.id) as paper.CompoundPath;
+  const paperLayer = paperLayerCompound.children[0] as paper.Path;
   const layerItem = currentState.byId[action.payload.id] as em.Rounded;
   paperLayer.rotation = -layerItem.transform.rotation;
   const maxDim = Math.max(paperLayer.bounds.width, paperLayer.bounds.height);
@@ -4855,7 +4869,8 @@ export const setRoundedRadii = (state: LayerState, action: SetRoundedRadii): Lay
 
 export const setPolygonSides = (state: LayerState, action: SetPolygonSides): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id) as paper.Path;
+  const paperLayerCompound = getPaperLayer(action.payload.id) as paper.CompoundPath;
+  const paperLayer = paperLayerCompound.children[0] as paper.Path;
   const startPosition = paperLayer.position;
   const layerItem = state.byId[action.payload.id] as em.Polygon;
   paperLayer.rotation = -layerItem.transform.rotation;
@@ -4903,7 +4918,8 @@ export const setPolygonsSides = (state: LayerState, action: SetPolygonsSides): L
 
 export const setStarPoints = (state: LayerState, action: SetStarPoints): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id) as paper.Path;
+  const paperLayerCompound = getPaperLayer(action.payload.id) as paper.CompoundPath;
+  const paperLayer = paperLayerCompound.children[0] as paper.Path;
   const startPosition = paperLayer.position;
   const layerItem = state.byId[action.payload.id] as em.Star;
   paperLayer.rotation = -layerItem.transform.rotation;
@@ -4947,7 +4963,8 @@ export const setStarsPoints = (state: LayerState, action: SetStarsPoints): Layer
 
 export const setStarRadius = (state: LayerState, action: SetStarRadius): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id) as paper.Path;
+  const paperLayerCompound = getPaperLayer(action.payload.id) as paper.CompoundPath;
+  const paperLayer = paperLayerCompound.children[0] as paper.Path;
   const layerItem = state.byId[action.payload.id] as em.Star;
   const startPosition = paperLayer.position;
   paperLayer.rotation = -layerItem.transform.rotation;

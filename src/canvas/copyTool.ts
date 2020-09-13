@@ -1,6 +1,3 @@
-import { clipboard } from 'electron';
-import { v4 as uuidv4 } from 'uuid';
-import { getLayerAndDescendants, getPaperLayer } from '../store/selectors/layer';
 import { pasteLayersThunk, copyLayersThunk } from '../store/actions/layer';
 import store from '../store';
 

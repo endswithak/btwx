@@ -40,6 +40,8 @@ const SidebarArtboardPlatformDevice = (props: SidebarArtboardPlatformDeviceProps
       type: 'ArtboardCustomPreset',
       x: e.clientX,
       y: e.clientY,
+      paperX: e.clientX,
+      paperY: e.clientY,
       id: (device as em.ArtboardPreset).id,
       data: {
         type: device.type,

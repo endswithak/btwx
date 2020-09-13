@@ -1,9 +1,11 @@
 import React, { useContext, ReactElement, useState, useLayoutEffect, useRef, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { selectLayer, setLayerName, deselectLayer, deselectAllLayers } from '../store/actions/layer';
-import { SelectLayerPayload, DeselectLayerPayload, LayerTypes, SetLayerNamePayload } from '../store/actionTypes/layer';
 import SidebarInput from './SidebarInput';
 import { ThemeContext } from './ThemeProvider';
+import { selectLayer, setLayerName, deselectLayer, deselectAllLayers } from '../store/actions/layer';
+import { SelectLayerPayload, DeselectLayerPayload, LayerTypes, SetLayerNamePayload } from '../store/actionTypes/layer';
+import { openContextMenu } from '../store/actions/contextMenu';
+import { OpenContextMenuPayload, ContextMenuTypes } from '../store/actionTypes/contextMenu';
 
 interface SidebarLayerTitleProps {
   layer: em.Layer;
@@ -15,12 +17,13 @@ interface SidebarLayerTitleProps {
   deselectLayer?(payload: DeselectLayerPayload): LayerTypes;
   deselectAllLayers?(): LayerTypes;
   setLayerName?(payload: SetLayerNamePayload): LayerTypes;
+  openContextMenu?(payload: OpenContextMenuPayload): ContextMenuTypes;
 }
 
 const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const [nameInput, setNameInput] = useState(props.layer.name);
-  const { layer, editing, setEditing, dragGhost, setLayerName, setDraggable, selectLayer, deselectLayer, deselectAllLayers } = props;
+  const { layer, editing, setEditing, dragGhost, setLayerName, setDraggable, selectLayer, deselectLayer, deselectAllLayers, openContextMenu } = props;
 
   const handleClick = (e: React.MouseEvent) => {
     if (!editing) {
@@ -54,6 +57,23 @@ const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
     setNameInput((e.target as HTMLInputElement).value);
   }
 
+  const handleContextMenu = (e: any) => {
+    if (!editing) {
+      selectLayer({id: layer.id, newSelection: true});
+      openContextMenu({
+        type: 'LayerEdit',
+        id: layer.id,
+        x: e.clientX,
+        y: e.clientY,
+        paperX: e.clientX,
+        paperY: e.clientY,
+        data: {
+          origin: 'sidebar'
+        }
+      });
+    }
+  }
+
   return (
     <div
       className={`
@@ -68,6 +88,7 @@ const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
         : theme.text.base
       }}
       onClick={handleClick}
+      onContextMenu={handleContextMenu}
       onDoubleClick={handleDoubleClick}>
       {
         editing
@@ -86,5 +107,5 @@ const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
 
 export default connect(
   null,
-  { setLayerName, selectLayer, deselectLayer, deselectAllLayers }
+  { setLayerName, selectLayer, deselectLayer, deselectAllLayers, openContextMenu }
 )(SidebarLayerTitle);

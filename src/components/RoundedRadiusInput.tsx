@@ -34,7 +34,8 @@ const RoundedRadiusInput = (props: RoundedRadiusInputProps): ReactElement => {
   const handleSliderChange = (e: any) => {
     handleChange(e);
     layerItems.forEach((layerItem) => {
-      const paperLayer = getPaperLayer(layerItem.id) as paper.Path;
+      const paperLayerCompound = getPaperLayer(layerItem.id) as paper.CompoundPath;
+      const paperLayer = paperLayerCompound.children[0] as paper.Path;
       const nextRadius = e.target.value / 100;
       paperLayer.rotation = -layerItem.transform.rotation;
       const maxDim = Math.max(paperLayer.bounds.width, paperLayer.bounds.height);

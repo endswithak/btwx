@@ -1,5 +1,6 @@
 import React, { useContext, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
+import styled from 'styled-components';
 import { ThemeContext } from './ThemeProvider';
 import SidebarLayerTitle from './SidebarLayerTitle';
 import SidebarLayerChevron from './SidebarLayerChevron';
@@ -8,11 +9,12 @@ import SidebarLayerMaskedIcon from './SidebarLayerMaskedIcon';
 import { setLayerHover, selectLayer, deselectLayer } from '../store/actions/layer';
 import { SetLayerHoverPayload, SelectLayerPayload, DeselectLayerPayload, LayerTypes } from '../store/actionTypes/layer';
 import { RootState } from '../store/reducers';
-import styled from 'styled-components';
+import { getLayerScope } from '../store/selectors/layer';
 
 interface SidebarLayerItemProps {
   layer: string;
   layerItem?: em.Layer;
+  maskedParent?: boolean;
   depth: number;
   hover?: string;
   dragGhost?: boolean;
@@ -52,7 +54,7 @@ const Background = styled.div<BackgroundProps>`
 const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
   const [editing, setEditing] = useState(false);
   const theme = useContext(ThemeContext);
-  const { layer, layerItem, depth, hover, setLayerHover, setDraggable, selectLayer, deselectLayer, dragGhost } = props;
+  const { layer, layerItem, depth, hover, setLayerHover, setDraggable, selectLayer, deselectLayer, dragGhost, maskedParent } = props;
 
   const handleMouseEnter = () => {
     setLayerHover({id: layer});
@@ -68,7 +70,7 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{
-        paddingLeft: depth * (theme.unit * 2)
+        paddingLeft: depth * (theme.unit * 1.44)
       }}>
       <Background
         dragGhost={dragGhost}
@@ -83,7 +85,8 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
         layer={layerItem} />
       <SidebarLayerMaskedIcon
         dragGhost={dragGhost}
-        layer={layerItem} />
+        layer={layerItem}
+        maskedParent={maskedParent} />
       <SidebarLayerIcon
         dragGhost={dragGhost}
         layer={layerItem} />
@@ -101,7 +104,9 @@ const mapStateToProps = (state: RootState, ownProps: SidebarLayerItemProps) => {
   const { layer } = state;
   const hover = layer.present.hover;
   const layerItem = layer.present.byId[ownProps.layer];
-  return { hover, layerItem };
+  const scope = getLayerScope(layer.present, ownProps.layer);
+  const maskedParent = scope.some((id) => layer.present.byId[id].masked);
+  return { hover, layerItem, maskedParent };
 };
 
 export default connect(

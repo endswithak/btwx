@@ -417,7 +417,7 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => ({
 });
 
 export const addArtboardThunk = (payload: AddArtboardPayload) => {
-  return (dispatch: any, getState: any): Promise<any> => {
+  return (dispatch: any, getState: any): Promise<em.Artboard> => {
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     // create background
     const artboardBackground = new paperMain.Path.Rectangle({
@@ -440,28 +440,29 @@ export const addArtboardThunk = (payload: AddArtboardPayload) => {
     // apply artboard methods to background
     applyArtboardMethods(artboard);
     // dispatch action
+    const newLayer = {
+      type: 'Artboard',
+      id: id,
+      name: payload.layer.name ? payload.layer.name : 'Artboard',
+      parent: payload.layer.parent,
+      frame: payload.layer.frame,
+      children: [],
+      selected: false,
+      showChildren: false,
+      tweenEvents: [],
+      tweens: [],
+      mask: false,
+      masked: false,
+      transform: DEFAULT_TRANSFORM,
+      style: DEFAULT_STYLE
+    } as em.Artboard;
     if (!payload.batch) {
       dispatch(addArtboard({
-        layer: {
-          type: 'Artboard',
-          id: id,
-          name: payload.layer.name ? payload.layer.name : 'Artboard',
-          parent: payload.layer.parent,
-          frame: payload.layer.frame,
-          children: [],
-          selected: false,
-          showChildren: false,
-          tweenEvents: [],
-          tweens: [],
-          mask: false,
-          masked: false,
-          transform: DEFAULT_TRANSFORM,
-          style: DEFAULT_STYLE
-        },
+        layer: newLayer,
         batch: payload.batch
       }));
     }
-    return Promise.resolve();
+    return Promise.resolve(newLayer);
   }
 };
 
@@ -473,43 +474,45 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => ({
 });
 
 export const addGroupThunk = (payload: AddGroupPayload) => {
-  return (dispatch: any, getState: any): Promise<any> => {
+  return (dispatch: any, getState: any): Promise<em.Group> => {
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const name = payload.layer.name ? payload.layer.name : 'Group';
     const parent = payload.layer.parent ? payload.layer.parent : 'page';
-    const masked = payload.layer.masked && (payload.layer.masked !== null || payload.layer.masked !== undefined) ? payload.layer.masked : false;
+    const masked = payload.layer.masked ? payload.layer.masked : false;
+    const clipped = payload.layer.clipped ? payload.layer.clipped : false;
     new paperMain.Group({
       data: { id: id, type: 'Group' },
       parent: getPaperLayer(parent)
     });
+    const newLayer = {
+      type: 'Group',
+      id: id,
+      name: name,
+      parent: parent,
+      frame: payload.layer.frame,
+      children: [],
+      selected: false,
+      showChildren: false,
+      tweenEvents: [],
+      tweens: [],
+      mask: false,
+      masked: masked,
+      clipped: clipped,
+      transform: DEFAULT_TRANSFORM,
+      style: {
+        ...DEFAULT_STYLE,
+        fill: null,
+        stroke: null,
+        shadow: null
+      }
+    } as em.Group;
     if (!payload.batch) {
       dispatch(addGroup({
-        layer: {
-          type: 'Group',
-          id: id,
-          name: name,
-          parent: parent,
-          frame: payload.layer.frame,
-          children: [],
-          selected: false,
-          showChildren: false,
-          tweenEvents: [],
-          tweens: [],
-          mask: false,
-          masked: masked,
-          clipped: false,
-          transform: DEFAULT_TRANSFORM,
-          style: {
-            ...DEFAULT_STYLE,
-            fill: null,
-            stroke: null,
-            shadow: null
-          }
-        },
+        layer: newLayer,
         batch: payload.batch
       }));
     }
-    return Promise.resolve();
+    return Promise.resolve(newLayer);
   }
 };
 
@@ -521,7 +524,7 @@ export const addShape = (payload: AddShapePayload): LayerTypes => ({
 });
 
 export const addShapeThunk = (payload: AddShapePayload) => {
-  return (dispatch: any, getState: any): Promise<any> => {
+  return (dispatch: any, getState: any): Promise<em.Shape> => {
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const parent = payload.layer.parent ? payload.layer.parent : 'page';
     const shapeType = payload.layer.shapeType ? payload.layer.shapeType : 'Rectangle';
@@ -536,8 +539,8 @@ export const addShapeThunk = (payload: AddShapePayload) => {
     const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
     const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as em.PaperGradientFill : null;
     const paperStrokeColor = style.stroke.enabled ? getPaperStrokeColor(style.stroke, frame) as em.PaperGradientFill : null;
-    const mask = payload.layer.mask && (payload.layer.mask !== null || payload.layer.mask !== undefined) ? payload.layer.mask : false;
-    const masked = payload.layer.masked && (payload.layer.masked !== null || payload.layer.masked !== undefined) ? payload.layer.masked : false;
+    const mask = payload.layer.mask ? payload.layer.mask : false;
+    const masked = payload.layer.masked ? payload.layer.masked : false;
     const paperLayer = new paperMain.CompoundPath({
       pathData: pathData,
       closed: shapeType !== 'Line',
@@ -560,7 +563,7 @@ export const addShapeThunk = (payload: AddShapePayload) => {
     paperLayer.fillColor = paperFillColor;
     paperLayer.strokeColor = paperStrokeColor;
     applyShapeMethods(paperLayer);
-    const newShape = {
+    const newLayer = {
       type: 'Shape',
       id: id,
       name: name,
@@ -577,14 +580,14 @@ export const addShapeThunk = (payload: AddShapePayload) => {
       transform,
       pathData,
       ...shapeOpts
-    } as any;
+    } as em.Shape;
     if (!payload.batch) {
       dispatch(addShape({
-        layer: newShape,
+        layer: newLayer,
         batch: payload.batch
       }));
     }
-    return Promise.resolve(newShape);
+    return Promise.resolve(newLayer);
   }
 };
 
@@ -596,11 +599,11 @@ export const addText = (payload: AddTextPayload): LayerTypes => ({
 });
 
 export const addTextThunk = (payload: AddTextPayload) => {
-  return (dispatch: any, getState: any): Promise<any> => {
+  return (dispatch: any, getState: any): Promise<em.Text> => {
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const textContent = payload.layer.text ? payload.layer.text : DEFAULT_TEXT_VALUE;
     const name = payload.layer.name ? payload.layer.name : textContent;
-    const masked = payload.layer.masked && (payload.layer.masked !== null || payload.layer.masked !== undefined) ? payload.layer.masked : false;
+    const masked = payload.layer.masked ? payload.layer.masked : false;
     const parent = payload.layer.parent ? payload.layer.parent : 'page';
     const style = getLayerStyle(payload);
     const textStyle = getLayerTextStyle(payload);
@@ -636,29 +639,30 @@ export const addTextThunk = (payload: AddTextPayload) => {
     paperLayer.fillColor = paperFillColor;
     paperLayer.strokeColor = paperStrokeColor;
     applyTextMethods(paperLayer);
+    const newLayer = {
+      type: 'Text',
+      id: id,
+      name: name,
+      parent: parent,
+      text: textContent,
+      frame: frame,
+      selected: false,
+      mask: false,
+      masked: masked,
+      children: null,
+      tweenEvents: [],
+      tweens: [],
+      style,
+      transform,
+      textStyle
+    } as em.Text;
     if (!payload.batch) {
       dispatch(addText({
-        layer: {
-          type: 'Text',
-          id: id,
-          name: name,
-          parent: parent,
-          text: textContent,
-          frame: frame,
-          selected: false,
-          mask: false,
-          masked: masked,
-          children: null,
-          tweenEvents: [],
-          tweens: [],
-          style,
-          transform,
-          textStyle
-        },
+        layer: newLayer,
         batch: payload.batch
       }));
     }
-    return Promise.resolve();
+    return Promise.resolve(newLayer);
   }
 };
 
@@ -670,7 +674,7 @@ export const addImage = (payload: AddImagePayload): LayerTypes => ({
 });
 
 export const addImageThunk = (payload: AddImagePayload) => {
-  return (dispatch: any, getState: any): Promise<any> => {
+  return (dispatch: any, getState: any): Promise<em.Image> => {
     return new Promise((resolve, reject) => {
       const state = getState() as RootState;
       const frame = getLayerFrame(payload);
@@ -679,7 +683,7 @@ export const addImageThunk = (payload: AddImagePayload) => {
       const base64 = bufferToBase64(newBuffer);
       const id = payload.layer.id ? payload.layer.id : uuidv4();
       const imageId = exists ? exists : payload.layer.imageId ? payload.layer.imageId : uuidv4();
-      const masked = payload.layer.masked && (payload.layer.masked !== null || payload.layer.masked !== undefined) ? payload.layer.masked : false;
+      const masked = payload.layer.masked ? payload.layer.masked : false;
       const parent = payload.layer.parent ? payload.layer.parent : 'page';
       const style = getLayerStyle(payload, { fill: null, stroke: null, strokeOptions: null });
       const transform = getLayerTransform(payload);
@@ -701,31 +705,32 @@ export const addImageThunk = (payload: AddImagePayload) => {
         imageContainer.shadowOffset = paperShadowOffset;
         imageContainer.shadowBlur = paperShadowBlur;
         applyImageMethods(paperLayer);
+        const newLayer = {
+          type: 'Image',
+          id: id,
+          name: payload.layer.name ? payload.layer.name : 'Image',
+          parent: parent,
+          frame: frame,
+          selected: false,
+          mask: false,
+          masked: masked,
+          children: null,
+          tweenEvents: [],
+          tweens: [],
+          style,
+          transform,
+          imageId
+        } as em.Image;
         if (!exists) {
           dispatch(addDocumentImage({id: imageId, buffer: newBuffer}));
         }
         if (!payload.batch) {
           dispatch(addImage({
-            layer: {
-              type: 'Image',
-              id: id,
-              name: payload.layer.name ? payload.layer.name : 'Image',
-              parent: parent,
-              frame: frame,
-              selected: false,
-              mask: false,
-              masked: masked,
-              children: null,
-              tweenEvents: [],
-              tweens: [],
-              style,
-              transform,
-              imageId
-            },
+            layer: newLayer,
             batch: payload.batch
           }));
         }
-        resolve();
+        resolve(newLayer);
       }
     });
   }
@@ -917,9 +922,10 @@ export const groupLayersThunk = (payload: GroupLayersPayload) => {
             innerWidth: layersBounds.width,
             innerHeight: layersBounds.height
           }
-        }
-      })).then(() => {
-        dispatch(groupLayers(payload));
+        },
+        batch: true
+      })).then((newGroup: em.Group) => {
+        dispatch(groupLayers({...payload, group: newGroup}));
         resolve();
       });
     });
@@ -1536,6 +1542,23 @@ export const addLayersMask = (payload: AddLayersMaskPayload): LayerTypes => ({
   payload
 });
 
+export const addLayersMaskThunk = (payload: AddLayersMaskPayload) => {
+  return (dispatch: any, getState: any): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      dispatch(addGroupThunk({
+        layer: {
+          clipped: true,
+          name: 'Masked Group'
+        },
+        batch: true
+      })).then((newGroup: em.Group) => {
+        dispatch(addLayersMask({...payload, group: newGroup}));
+        resolve();
+      });
+    });
+  }
+}
+
 export const removeLayersMask = (payload: RemoveLayersMaskPayload): LayerTypes => ({
   type: REMOVE_LAYERS_MASK,
   payload
@@ -1692,12 +1715,12 @@ export const divideLayers = (payload: DivideLayersPayload): LayerTypes => ({
 });
 
 export const applyBooleanOperationThunk = (payload: UniteLayersPayload | IntersectLayersPayload | SubtractLayersPayload | ExcludeLayersPayload | DivideLayersPayload, booleanOperation: em.BooleanOperation) => {
-  return (dispatch: any, getState: any): Promise<any> => {
+  return (dispatch: any, getState: any): Promise<em.Shape> => {
     return new Promise((resolve, reject) => {
       const state = getState() as RootState;
       const layerItem = state.layer.present.byId[payload.id];
       const paperLayer = getPaperLayer(payload.id) as paper.Path | paper.CompoundPath;
-      const booleanPaperLayer = getPaperLayer(payload[booleanOperation]) as paper.Path | paper.CompoundPath;
+      const booleanPaperLayer = getPaperLayer((payload as any)[booleanOperation]) as paper.Path | paper.CompoundPath;
       const booleanLayers = paperLayer[booleanOperation](booleanPaperLayer, { insert: false }) as paper.Path | paper.CompoundPath;
       dispatch(addShapeThunk({
         layer: {
@@ -1714,25 +1737,45 @@ export const applyBooleanOperationThunk = (payload: UniteLayersPayload | Interse
           }
         },
         batch: true
-      })).then((newShape) => {
+      })).then((newShape: em.Shape) => {
         switch(booleanOperation) {
           case 'divide':
-            dispatch(divideLayers({id: payload.id, [booleanOperation]: payload[booleanOperation], booleanLayer: newShape}));
+            dispatch(divideLayers({
+              id: payload.id,
+              [booleanOperation]: (payload as DivideLayersPayload)[booleanOperation],
+              booleanLayer: newShape
+            }));
             break;
           case 'exclude':
-            dispatch(excludeLayers({id: payload.id, [booleanOperation]: payload[booleanOperation], booleanLayer: newShape}));
+            dispatch(excludeLayers({
+              id: payload.id,
+              [booleanOperation]: (payload as ExcludeLayersPayload)[booleanOperation],
+              booleanLayer: newShape
+            }));
             break;
           case 'intersect':
-            dispatch(intersectLayers({id: payload.id, [booleanOperation]: payload[booleanOperation], booleanLayer: newShape}));
+            dispatch(intersectLayers({
+              id: payload.id,
+              [booleanOperation]: (payload as IntersectLayersPayload)[booleanOperation],
+              booleanLayer: newShape
+            }));
             break;
           case 'subtract':
-            dispatch(subtractLayers({id: payload.id, [booleanOperation]: payload[booleanOperation], booleanLayer: newShape}));
+            dispatch(subtractLayers({
+              id: payload.id,
+              [booleanOperation]: (payload as SubtractLayersPayload)[booleanOperation],
+              booleanLayer: newShape
+            }));
             break;
           case 'unite':
-            dispatch(uniteLayers({id: payload.id, [booleanOperation]: payload[booleanOperation], booleanLayer: newShape}));
+            dispatch(uniteLayers({
+              id: payload.id,
+              [booleanOperation]: (payload as UniteLayersPayload)[booleanOperation],
+              booleanLayer: newShape
+            }));
             break;
         }
-        resolve();
+        resolve(newShape);
       });
     });
   }
@@ -1933,7 +1976,7 @@ export const pasteLayersThunk = ({ overSelection, overPoint, overLayer }: { over
               const pointDiff = paperPoint.position.subtract(clipboardPosition);
               newLayers.forEach((layerItem) => {
                 if (newParse.main.includes(layerItem.id) && layerItem.type !== 'Artboard') {
-                  if (overLayerItem.type === 'Group' || overLayerItem.type === 'Artboard') {
+                  if (overLayerItem.type === 'Group' || overLayerItem.type === 'Artboard' || overLayerItem.type === 'Page') {
                     layerItem.parent = overLayerItem.id;
                   } else {
                     layerItem.parent = overLayerItem.parent;
@@ -1950,7 +1993,7 @@ export const pasteLayersThunk = ({ overSelection, overPoint, overLayer }: { over
               const pointDiff = paperPoint.subtract(clipboardPosition);
               newLayers.forEach((layerItem) => {
                 if (newParse.main.includes(layerItem.id) && layerItem.type !== 'Artboard') {
-                  if (overLayerItem.type === 'Group' || overLayerItem.type === 'Artboard') {
+                  if (overLayerItem.type === 'Group' || overLayerItem.type === 'Artboard' || overLayerItem.type === 'Page') {
                     layerItem.parent = overLayerItem.id;
                   } else {
                     layerItem.parent = overLayerItem.parent;

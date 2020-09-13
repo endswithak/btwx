@@ -555,6 +555,7 @@ export interface EscapeLayerScope {
 
 export interface GroupLayersPayload {
   layers: string[];
+  group?: em.Group;
 }
 
 export interface GroupLayers {
@@ -1749,6 +1750,7 @@ export interface SetLayersFillType {
 
 export interface AddLayersMaskPayload {
   layers: string[];
+  group?: em.Group;
 }
 
 export interface AddLayersMask {

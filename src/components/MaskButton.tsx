@@ -1,23 +1,23 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { AddLayersMaskPayload, LayerTypes } from '../store/actionTypes/layer';
-import { addLayersMask } from '../store/actions/layer';
+import { AddLayersMaskPayload } from '../store/actionTypes/layer';
+import { addLayersMaskThunk } from '../store/actions/layer';
 import { orderLayersByDepth } from '../store/selectors/layer';
 import TopbarButton from './TopbarButton';
 
 interface MaskButtonProps {
   canMask?: boolean;
   selected?: string[];
-  addLayersMask?(payload: AddLayersMaskPayload): LayerTypes;
+  addLayersMaskThunk?(payload: AddLayersMaskPayload): void;
 }
 
 const MaskButton = (props: MaskButtonProps): ReactElement => {
-  const { canMask, selected, addLayersMask } = props;
+  const { canMask, selected, addLayersMaskThunk } = props;
 
   const handleMaskClick = (): void => {
     if (canMask) {
-      addLayersMask({layers: selected});
+      addLayersMaskThunk({layers: selected});
     }
   }
 
@@ -44,11 +44,11 @@ const mapStateToProps = (state: RootState): {
     return result;
   }, {});
   const selectedByDepth = orderLayersByDepth(state.layer.present, selected);
-  const canMask = selected.length > 0 && selectedById[selectedByDepth[0]].type === 'Shape' && (selectedById[selectedByDepth[0]] as em.Shape).shapeType !== 'Line';
+  const canMask = selected.length > 0 && selectedById[selectedByDepth[0]].type === 'Shape' && (selectedById[selectedByDepth[0]] as em.Shape).shapeType !== 'Line' && !(selectedById[selectedByDepth[0]] as em.Shape).mask;
   return { selected, canMask };
 };
 
 export default connect(
   mapStateToProps,
-  { addLayersMask }
+  { addLayersMaskThunk }
 )(MaskButton);

@@ -24,10 +24,12 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
 
   const handleMouseDown = (e: any) => {
     e.stopPropagation();
-    if (selected.length > 0 && selected.includes(layer)) {
-      setDragLayers(selected);
-    } else {
-      setDragLayers([layer]);
+    if (e.buttons !== 2) {
+      if (selected.length > 0 && selected.includes(layer)) {
+        setDragLayers(selected);
+      } else {
+        setDragLayers([layer]);
+      }
     }
   }
 

@@ -87,7 +87,7 @@ export default Menu.buildFromTemplate([
         click: (): void => {
           dialog.showOpenDialog({
             filters: [
-              { name: 'Custom File Type', extensions: ['esketch'] }
+              { name: 'Custom File Type', extensions: ['btwix'] }
             ],
             properties: ['openFile']
           }).then((result) => {

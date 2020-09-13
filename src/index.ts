@@ -230,7 +230,7 @@ export const handleSave = (path: string, closeOnSave?: boolean): void => {
   const document = getFocusedDocument();
   if (document) {
     document.webContents.executeJavaScript(`saveDocument()`).then((documentJSON) => {
-      fs.writeFile(`${path}.betwix`, documentJSON, function(err) {
+      fs.writeFile(`${path}.btwix`, documentJSON, function(err) {
         if(err) {
           return console.log(err);
         }
@@ -252,7 +252,7 @@ export const handleSaveAs = (closeOnSave?: boolean): void => {
         const documentSettings = {base, fullPath};
         document.webContents.executeJavaScript(`saveDocumentAs(${JSON.stringify(documentSettings)})`).then((documentJSON) => {
           // app.addRecentDocument(result.filePath);
-          fs.writeFile(`${result.filePath}.betwix`, documentJSON, function(err) {
+          fs.writeFile(`${result.filePath}.btwix`, documentJSON, function(err) {
             if(err) {
               return console.log(err);
             }
