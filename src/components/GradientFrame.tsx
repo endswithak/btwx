@@ -46,13 +46,13 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
       insert: false
     }
     const gradientFrameLineProps = {
-      from: getGradientOriginPoint({byId: { [layer]: layerItem }} as LayerState, layer, gradient.origin),
-      to: getGradientDestinationPoint({byId: { [layer]: layerItem }} as LayerState, layer, gradient.destination),
+      from: getGradientOriginPoint(layerItem, gradient.origin),
+      to: getGradientDestinationPoint(layerItem, gradient.destination),
       insert: false
     }
     const gradientFrameOriginHandleBg  = new paperMain.Shape.Circle({
       ...gradientFrameHandleBgProps,
-      center: getGradientOriginPoint({byId: { [layer]: layerItem }} as LayerState, layer, gradient.origin),
+      center: getGradientOriginPoint(layerItem, gradient.origin),
       data: {
         id: 'gradientFrameHandle',
         handle: 'origin',
@@ -63,7 +63,7 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
     const gradientFrameOriginHandleSwatch  = new paperMain.Shape.Circle({
       ...gradientFrameHandleSwatchProps,
       fillColor: { hue: originStop.color.h, saturation: originStop.color.s, lightness: originStop.color.l, alpha: originStop.color.a },
-      center: getGradientOriginPoint({byId: { [layer]: layerItem }} as LayerState, layer, gradient.origin),
+      center: getGradientOriginPoint(layerItem, gradient.origin),
       data: {
         id: 'gradientFrameHandle',
         handle: 'origin',
@@ -72,7 +72,7 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
     });
     const gradientFrameDestinationHandleBg = new paperMain.Shape.Circle({
       ...gradientFrameHandleBgProps,
-      center: getGradientDestinationPoint({byId: { [layer]: layerItem }} as LayerState, layer, gradient.destination),
+      center: getGradientDestinationPoint(layerItem, gradient.destination),
       data: {
         id: 'gradientFrameHandle',
         handle: 'destination',
@@ -83,7 +83,7 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
     const gradientFrameDestinationHandleSwatch = new paperMain.Shape.Circle({
       ...gradientFrameHandleSwatchProps,
       fillColor: { hue: destStop.color.h, saturation: destStop.color.s, lightness: destStop.color.l, alpha: destStop.color.a },
-      center: getGradientDestinationPoint({byId: { [layer]: layerItem }} as LayerState, layer, gradient.destination),
+      center: getGradientDestinationPoint(layerItem, gradient.destination),
       data: {
         id: 'gradientFrameHandle',
         handle: 'destination',

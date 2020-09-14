@@ -94,14 +94,14 @@ class GradientTool {
       }
     })() as em.PaperGradientFill;
     this.origin = {
-      x: (style.origin.x - layerItem.frame.x) / layerItem.frame.innerWidth,
-      y: (style.origin.y - layerItem.frame.y) / (isLine ? layerItem.frame.innerWidth : layerItem.frame.innerHeight)
+      x: (style.origin.x - layerItem.frame.x) / (isLine ? layerItem.frame.width : layerItem.frame.innerWidth),
+      y: (style.origin.y - layerItem.frame.y) / (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)
     }
     state.gradientEditor.layers.forEach((id, index) => {
       const paperLayer = getPaperLayer(id);
       paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] = {
         gradient: paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'].gradient,
-        origin: getGradientOriginPoint(state.layer.present, id, this.origin),
+        origin: getGradientOriginPoint(layerItem, this.origin),
         destination: (paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).destination
       } as em.PaperGradientFill
     });
@@ -131,15 +131,15 @@ class GradientTool {
       }
     })() as em.PaperGradientFill;
     this.destination = {
-      x: (style.destination.x - layerItem.frame.x) / layerItem.frame.innerWidth,
-      y: (style.destination.y - layerItem.frame.y) / (isLine ? layerItem.frame.innerWidth : layerItem.frame.innerHeight)
+      x: (style.destination.x - layerItem.frame.x) / (isLine ? layerItem.frame.width : layerItem.frame.innerWidth),
+      y: (style.destination.y - layerItem.frame.y) / (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)
     }
     state.gradientEditor.layers.forEach((id, index) => {
       const paperLayer = getPaperLayer(id);
       paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] = {
         gradient: paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'].gradient,
         origin: (paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).origin,
-        destination: getGradientDestinationPoint(state.layer.present, id, this.destination)
+        destination: getGradientDestinationPoint(layerItem, this.destination)
       } as em.PaperGradientFill
     });
   }

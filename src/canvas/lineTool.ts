@@ -87,8 +87,8 @@ class LineTool {
     const y = this.snapTool.snap.y ? this.snapTool.snap.y.point : this.fromBounds.center.y + this.y;
     if (this.shiftModifier) {
       const layerItem = this.state.layer.present.byId[this.state.layer.present.selected[0]] as em.Line;
-      const toPoint = getLineToPoint(this.state.layer.present, layerItem.id, layerItem.to);
-      const fromPoint = getLineFromPoint(this.state.layer.present, layerItem.id, layerItem.from);
+      const toPoint = getLineToPoint(layerItem);
+      const fromPoint = getLineFromPoint(layerItem);
       if (this.isHorizontal) {
         switch(this.handle) {
           case 'to':

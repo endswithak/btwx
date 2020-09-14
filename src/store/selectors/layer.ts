@@ -914,42 +914,27 @@ export const getTweensWithLayer = (store: LayerState, layerId: string): { allIds
   };
 };
 
-// export const getGradientOriginPoint = (id: string, origin: em.Point): paper.Point => {
-//   const paperLayer = getPaperLayer(id);
-//   return new paperMain.Point((origin.x * paperLayer.bounds.width) + paperLayer.position.x, (origin.y * paperLayer.bounds.height) + paperLayer.position.y);
-// };
-
-// export const getGradientDestinationPoint = (id: string, destination: em.Point): paper.Point => {
-//   const paperLayer = getPaperLayer(id);
-//   return new paperMain.Point((destination.x * paperLayer.bounds.width) + paperLayer.position.x, (destination.y * paperLayer.bounds.height) + paperLayer.position.y);
-// };
-
-export const getGradientOriginPoint = (store: LayerState, id: string, origin: em.Point): paper.Point => {
-  const layerItem = store.byId[id];
+export const getGradientOriginPoint = (layerItem: em.Layer, origin: em.Point): paper.Point => {
   const isLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line';
-  return new paperMain.Point((origin.x * layerItem.frame.innerWidth) + layerItem.frame.x, (origin.y * (isLine ? layerItem.frame.innerWidth : layerItem.frame.innerHeight)) + layerItem.frame.y);
+  return new paperMain.Point((origin.x * (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)) + layerItem.frame.x, (origin.y * (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)) + layerItem.frame.y);
 };
 
-export const getGradientDestinationPoint = (store: LayerState, id: string, destination: em.Point): paper.Point => {
-  const layerItem = store.byId[id];
+export const getGradientDestinationPoint = (layerItem: em.Layer, destination: em.Point): paper.Point => {
   const isLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line';
-  return new paperMain.Point((destination.x * layerItem.frame.innerWidth) + layerItem.frame.x, (destination.y * (isLine ? layerItem.frame.innerWidth : layerItem.frame.innerHeight)) + layerItem.frame.y);
+  return new paperMain.Point((destination.x * (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)) + layerItem.frame.x, (destination.y * (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)) + layerItem.frame.y);
 };
 
-export const getLineFromPoint = (store: LayerState, id: string, from: em.Point): paper.Point => {
-  const layerItem = store.byId[id];
-  return new paperMain.Point((from.x * layerItem.frame.innerWidth) + layerItem.frame.x, (from.y * layerItem.frame.innerWidth) + layerItem.frame.y);
+export const getLineFromPoint = (layerItem: em.Line): paper.Point => {
+  return new paperMain.Point((layerItem.from.x * layerItem.frame.innerWidth) + layerItem.frame.x, (layerItem.from.y * layerItem.frame.innerWidth) + layerItem.frame.y);
 };
 
-export const getLineToPoint = (store: LayerState, id: string, to: em.Point): paper.Point => {
-  const layerItem = store.byId[id];
-  return new paperMain.Point((to.x * layerItem.frame.innerWidth) + layerItem.frame.x, (to.y * layerItem.frame.innerWidth) + layerItem.frame.y);
+export const getLineToPoint = (layerItem: em.Line): paper.Point => {
+  return new paperMain.Point((layerItem.to.x * layerItem.frame.innerWidth) + layerItem.frame.x, (layerItem.to.y * layerItem.frame.innerWidth) + layerItem.frame.y);
 };
 
-export const getLineVector = (store: LayerState, id: string): paper.Point => {
-  const layerItem = store.byId[id] as em.Line;
-  const from = getLineFromPoint(store, id, layerItem.from);
-  const to = getLineToPoint(store, id, layerItem.to);
+export const getLineVector = (layerItem: em.Line): paper.Point => {
+  const from = getLineFromPoint(layerItem);
+  const to = getLineToPoint(layerItem);
   return to.subtract(from)
 };
 

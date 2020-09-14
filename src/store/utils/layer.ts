@@ -448,7 +448,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           document.body.style.cursor = 'auto';
         }
       });
-      fromHandle.position = useLayerItem ? getLineFromPoint(state, layerItem.id, layerItem.from) : (getPaperLayer(state.selected[0]) as paper.Path).firstSegment.point;
+      fromHandle.position = useLayerItem ? getLineFromPoint(layerItem) : (getPaperLayer(state.selected[0]) as paper.Path).firstSegment.point;
       fromHandle.scaling.x = 1 / paperMain.view.zoom;
       fromHandle.scaling.y = 1 / paperMain.view.zoom;
       const toHandle = new paperMain.Path.Rectangle({
@@ -467,7 +467,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           document.body.style.cursor = 'auto';
         }
       });
-      toHandle.position = useLayerItem ? getLineToPoint(state, layerItem.id, layerItem.to) : (getPaperLayer(state.selected[0]) as paper.Path).lastSegment.point;
+      toHandle.position = useLayerItem ? getLineToPoint(layerItem) : (getPaperLayer(state.selected[0]) as paper.Path).lastSegment.point;
       toHandle.scaling.x = 1 / paperMain.view.zoom;
       toHandle.scaling.y = 1 / paperMain.view.zoom;
       new paperMain.Group({
@@ -2596,7 +2596,7 @@ export const setLayersOpacity = (state: LayerState, action: SetLayersOpacity): L
 export const setLayerRotation = (state: LayerState, action: SetLayerRotation): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = state.byId[action.payload.id];
+  const layerItem = currentState.byId[action.payload.id];
   const startPosition = paperLayer.position;
   paperLayer.rotation = -layerItem.transform.rotation;
   paperLayer.rotation = action.payload.rotation;
@@ -2729,6 +2729,7 @@ export const disableLayerVerticalFlip = (state: LayerState, action: DisableLayer
 export const enableLayerFill = (state: LayerState, action: EnableLayerFill): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
+  const layerItem = currentState.byId[action.payload.id];
   const fill = currentState.byId[action.payload.id].style.fill;
   switch(fill.fillType) {
     case 'color':
@@ -2740,8 +2741,8 @@ export const enableLayerFill = (state: LayerState, action: EnableLayerFill): Lay
           stops: getGradientStops(fill.gradient.stops),
           radial: fill.gradient.gradientType === 'radial'
         },
-        origin: getGradientOriginPoint(currentState, action.payload.id, fill.gradient.origin),
-        destination: getGradientDestinationPoint(currentState, action.payload.id, fill.gradient.destination)
+        origin: getGradientOriginPoint(layerItem, fill.gradient.origin),
+        destination: getGradientDestinationPoint(layerItem, fill.gradient.destination)
       } as any
       break;
   }
@@ -2858,8 +2859,8 @@ export const setLayerFill = (state: LayerState, action: SetLayerFill): LayerStat
           stops: getGradientStops(fill.gradient.stops),
           radial: layerItem.style.fill.gradient.gradientType === 'radial'
         },
-        origin: getGradientOriginPoint(currentState, action.payload.id, fill.gradient.origin),
-        destination: getGradientDestinationPoint(currentState, action.payload.id, fill.gradient.destination)
+        origin: getGradientOriginPoint(layerItem, fill.gradient.origin),
+        destination: getGradientDestinationPoint(layerItem, fill.gradient.destination)
       } as any
       break;
   }
@@ -2896,8 +2897,8 @@ export const setLayerFillType = (state: LayerState, action: SetLayerFillType): L
           stops: getGradientStops(fill.gradient.stops),
           radial: layerItem.style.fill.gradient.gradientType === 'radial'
         },
-        origin: getGradientOriginPoint(currentState, action.payload.id, fill.gradient.origin),
-        destination: getGradientDestinationPoint(currentState, action.payload.id, fill.gradient.destination)
+        origin: getGradientOriginPoint(layerItem, fill.gradient.origin),
+        destination: getGradientDestinationPoint(layerItem, fill.gradient.destination)
       } as any
       break;
   }
@@ -2933,13 +2934,14 @@ export const setLayersFillType = (state: LayerState, action: SetLayersFillType):
 export const setLayerGradient = (state: LayerState, action: SetLayerGradient): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
+  const layerItem = currentState.byId[action.payload.id];
   paperLayer[action.payload.prop === 'fill' ? 'fillColor' : 'strokeColor'] = {
     gradient: {
       stops: getGradientStops(action.payload.gradient.stops),
       radial: action.payload.gradient.gradientType === 'radial'
     },
-    origin: getGradientOriginPoint(currentState, action.payload.id, action.payload.gradient.origin),
-    destination: getGradientDestinationPoint(currentState, action.payload.id, action.payload.gradient.destination)
+    origin: getGradientOriginPoint(layerItem, action.payload.gradient.origin),
+    destination: getGradientDestinationPoint(layerItem, action.payload.gradient.destination)
   } as any
   currentState = {
     ...currentState,
@@ -3025,8 +3027,8 @@ export const setLayerGradientOrigin = (state: LayerState, action: SetLayerGradie
       stops: getGradientStops(gradient.stops),
       radial: gradient.gradientType === 'radial'
     },
-    origin: getGradientOriginPoint(currentState, action.payload.id, action.payload.origin),
-    destination: getGradientDestinationPoint(currentState, action.payload.id, gradient.destination)
+    origin: getGradientOriginPoint(layerItem, action.payload.origin),
+    destination: getGradientDestinationPoint(layerItem, gradient.destination)
   } as any
   currentState = {
     ...currentState,
@@ -3071,8 +3073,8 @@ export const setLayerGradientDestination = (state: LayerState, action: SetLayerG
       stops: getGradientStops(gradient.stops),
       radial: gradient.gradientType === 'radial'
     },
-    origin: getGradientOriginPoint(currentState, action.payload.id, gradient.origin),
-    destination: getGradientDestinationPoint(currentState, action.payload.id, action.payload.destination)
+    origin: getGradientOriginPoint(layerItem, gradient.origin),
+    destination: getGradientDestinationPoint(layerItem, action.payload.destination)
   } as any
   currentState = {
     ...currentState,
@@ -3131,8 +3133,8 @@ export const setLayerGradientStopColor = (state: LayerState, action: SetLayerGra
       stops: getGradientStops(newStops),
       radial: gradient.gradientType === 'radial'
     },
-    origin: getGradientOriginPoint(currentState, action.payload.id, gradient.origin),
-    destination: getGradientDestinationPoint(currentState, action.payload.id, gradient.destination)
+    origin: getGradientOriginPoint(layerItem, gradient.origin),
+    destination: getGradientDestinationPoint(layerItem, gradient.destination)
   } as any
   currentState = {
     ...currentState,
@@ -3204,8 +3206,8 @@ export const setLayerGradientStopPosition = (state: LayerState, action: SetLayer
       stops: getGradientStops(newStops),
       radial: gradient.gradientType === 'radial'
     },
-    origin: getGradientOriginPoint(currentState, action.payload.id, gradient.origin),
-    destination: getGradientDestinationPoint(currentState, action.payload.id, gradient.destination)
+    origin: getGradientOriginPoint(layerItem, gradient.origin),
+    destination: getGradientDestinationPoint(layerItem, gradient.destination)
   } as any
   currentState = {
     ...currentState,
@@ -3250,8 +3252,8 @@ export const addLayerGradientStop = (state: LayerState, action: AddLayerGradient
       stops: getGradientStops(newStops),
       radial: gradient.gradientType === 'radial'
     },
-    origin: getGradientOriginPoint(currentState, action.payload.id, gradient.origin),
-    destination: getGradientDestinationPoint(currentState, action.payload.id, gradient.destination)
+    origin: getGradientOriginPoint(layerItem, gradient.origin),
+    destination: getGradientDestinationPoint(layerItem, gradient.destination)
   } as any
   currentState = {
     ...currentState,
@@ -3301,8 +3303,8 @@ export const removeLayerGradientStop = (state: LayerState, action: RemoveLayerGr
       stops: getGradientStops(newStops),
       radial: gradient.gradientType === 'radial'
     },
-    origin: getGradientOriginPoint(currentState, action.payload.id, gradient.origin),
-    destination: getGradientDestinationPoint(currentState, action.payload.id, gradient.destination)
+    origin: getGradientOriginPoint(layerItem, gradient.origin),
+    destination: getGradientDestinationPoint(layerItem, gradient.destination)
   } as any
   currentState = {
     ...currentState,
@@ -3363,6 +3365,7 @@ export const setLayerActiveGradientStop = (state: LayerState, action: SetLayerAc
 export const enableLayerStroke = (state: LayerState, action: EnableLayerStroke): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.id);
+  const layerItem = state.byId[action.payload.id];
   const stroke = currentState.byId[action.payload.id].style.stroke;
   switch(stroke.fillType) {
     case 'color':
@@ -3374,8 +3377,8 @@ export const enableLayerStroke = (state: LayerState, action: EnableLayerStroke):
           stops: getGradientStops(stroke.gradient.stops),
           radial: stroke.gradient.gradientType === 'radial'
         },
-        origin: getGradientOriginPoint(currentState, action.payload.id, stroke.gradient.origin),
-        destination: getGradientDestinationPoint(currentState, action.payload.id, stroke.gradient.destination)
+        origin: getGradientOriginPoint(layerItem, stroke.gradient.origin),
+        destination: getGradientDestinationPoint(layerItem, stroke.gradient.destination)
       } as any
       break;
   }
@@ -3492,8 +3495,8 @@ export const setLayerStrokeFillType = (state: LayerState, action: SetLayerStroke
           stops: getGradientStops(stroke.gradient.stops),
           radial: stroke.gradient.gradientType === 'radial'
         },
-        origin: getGradientOriginPoint(currentState, action.payload.id, stroke.gradient.origin),
-        destination: getGradientDestinationPoint(currentState, action.payload.id, stroke.gradient.destination)
+        origin: getGradientOriginPoint(layerItem, stroke.gradient.origin),
+        destination: getGradientDestinationPoint(layerItem, stroke.gradient.destination)
       } as any
       break;
   }
