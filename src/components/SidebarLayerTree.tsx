@@ -16,7 +16,7 @@ const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
   const { page, layers } = props;
 
   return (
-    <div>
+    <>
       {
         dragging
         ? <SidebarDropzone
@@ -46,7 +46,7 @@ const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
             dragging={dragging} />
         : null
       }
-    </div>
+    </>
   )
 }
 

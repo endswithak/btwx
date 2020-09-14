@@ -3,6 +3,8 @@ import {
   CLOSE_PREVIEW,
   START_PREVIEW_RECORDING,
   STOP_PREVIEW_RECORDING,
+  ENABLE_TOUCH_CURSOR,
+  DISABLE_TOUCH_CURSOR,
   PreviewTypes
 } from '../actionTypes/preview';
 
@@ -20,4 +22,12 @@ export const startPreviewRecording = (): PreviewTypes => ({
 
 export const stopPreviewRecording = (): PreviewTypes => ({
   type: STOP_PREVIEW_RECORDING
+});
+
+export const enableTouchCursor = (): PreviewTypes => ({
+  type: ENABLE_TOUCH_CURSOR
+});
+
+export const disableTouchCursor = (): PreviewTypes => ({
+  type: DISABLE_TOUCH_CURSOR
 });

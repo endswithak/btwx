@@ -45,7 +45,7 @@ const StrokeDashOffsetInput = (props: StrokeDashOffsetInputProps): ReactElement 
       value={dashOffset}
       onChange={handleChange}
       onSubmit={handleSubmit}
-      blurOnSubmit
+      submitOnBlur
       disabled={disabled}
       bottomLabel={'Dash Offset'} />
   );

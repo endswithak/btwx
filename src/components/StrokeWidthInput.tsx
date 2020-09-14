@@ -46,7 +46,7 @@ const StrokeWidthInput = (props: StrokeWidthInputProps): ReactElement => {
       value={strokeWidth}
       onChange={handleStrokeWidthChange}
       onSubmit={handleStrokeWidthSubmit}
-      blurOnSubmit
+      submitOnBlur
       disabled={disabled}
       bottomLabel={'Width'} />
   );

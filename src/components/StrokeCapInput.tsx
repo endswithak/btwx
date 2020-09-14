@@ -36,7 +36,7 @@ const StrokeCapInput = (props: StrokeCapInputProps): ReactElement => {
         <SidebarSectionColumn>
           <SidebarToggleButton
             onClick={() => handleClick('butt')}
-            active={'butt' === strokeCap}
+            active={'butt' === strokeCap && !disabled}
             disabled={disabled}>
             <Icon name='stroke-cap-butt' />
           </SidebarToggleButton>
@@ -44,7 +44,7 @@ const StrokeCapInput = (props: StrokeCapInputProps): ReactElement => {
         <SidebarSectionColumn>
           <SidebarToggleButton
             onClick={() => handleClick('round')}
-            active={'round' === strokeCap}
+            active={'round' === strokeCap && !disabled}
             disabled={disabled}>
             <Icon name='stroke-cap-round' />
           </SidebarToggleButton>
@@ -52,7 +52,7 @@ const StrokeCapInput = (props: StrokeCapInputProps): ReactElement => {
         <SidebarSectionColumn>
           <SidebarToggleButton
             onClick={() => handleClick('square')}
-            active={'square' === strokeCap}
+            active={'square' === strokeCap && !disabled}
             disabled={disabled}>
             <Icon name='stroke-cap-square' />
           </SidebarToggleButton>

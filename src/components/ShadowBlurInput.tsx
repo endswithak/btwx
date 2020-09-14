@@ -45,7 +45,7 @@ const ShadowBlurInput = (props: ShadowBlurInputProps): ReactElement => {
       value={shadowBlur}
       onChange={handleChange}
       onSubmit={handleSubmit}
-      blurOnSubmit
+      submitOnBlur
       bottomLabel={'Blur'}
       disabled={disabled} />
   );

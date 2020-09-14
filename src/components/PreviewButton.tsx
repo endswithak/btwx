@@ -19,17 +19,21 @@ const PreviewButton = (props: PreviewButtonProps): ReactElement => {
   const { activeArtboard, canPreview, isOpen, openPreview, recording, stopPreviewRecording } = props;
 
   const handlePreviewClick = (): void => {
+    const windowSize = {
+      width: activeArtboard.frame.width,
+      height: activeArtboard.frame.height
+    }
     if (isOpen) {
+      const previewWindow = remote.getCurrentWindow().getChildWindows().find((window) => window.getTitle() === 'Preview');
+      if (!previewWindow) {
+        ipcRenderer.send('openPreview', JSON.stringify(windowSize));
+      }
       if (recording) {
-        const previewContents = remote.getCurrentWindow().getChildWindows().find((window) => window.getTitle() === 'Preview').webContents;
+        const previewContents = previewWindow.webContents;
         stopPreviewRecording();
         ipcRenderer.sendTo(previewContents.id, 'stopPreviewRecording');
       }
     } else {
-      const windowSize = {
-        width: activeArtboard.frame.width,
-        height: activeArtboard.frame.height
-      }
       ipcRenderer.send('openPreview', JSON.stringify(windowSize));
       openPreview();
     }

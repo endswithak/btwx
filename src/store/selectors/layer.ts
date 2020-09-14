@@ -356,9 +356,9 @@ export const hasShapeTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer
 
 export const hasFillTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   return (
-    (layerItem.style.fill.enabled || equivalentLayerItem.style.fill.enabled) &&
     (layerItem.type === 'Shape' || layerItem.type === 'Text') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text') &&
+    (layerItem.style.fill.enabled || equivalentLayerItem.style.fill.enabled) &&
     (
       (layerItem.style.fill.enabled && !equivalentLayerItem.style.fill.enabled) ||
       (!layerItem.style.fill.enabled && equivalentLayerItem.style.fill.enabled) ||

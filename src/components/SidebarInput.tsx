@@ -18,10 +18,10 @@ interface SidebarInputProps {
   bottomLabel?: string;
   disabled?: boolean;
   selectOnMount?: boolean;
-  blurOnSubmit?: boolean;
   submitOnBlur?: boolean;
   disableSelectionToolToggle?: boolean;
   canvasFocusing?: boolean;
+  removedOnSubmit?: boolean;
   setCanvasFocusing?(payload: SetCanvasFocusingPayload): CanvasSettingsTypes;
 }
 
@@ -52,14 +52,11 @@ const Input = styled.div`
 const SidebarInput = (props: SidebarInputProps): ReactElement => {
   const inputRef = useRef<HTMLInputElement>(null);
   const theme = useContext(ThemeContext);
-  const { value, onChange, onSubmit, onFocus, onBlur, label, leftLabel, bottomLabel, disabled, selectOnMount, blurOnSubmit, submitOnBlur, setCanvasFocusing, canvasFocusing } = props;
+  const { value, onChange, onSubmit, onFocus, onBlur, removedOnSubmit, label, leftLabel, bottomLabel, disabled, selectOnMount, submitOnBlur, setCanvasFocusing, canvasFocusing } = props;
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
     onSubmit(e);
-    if (blurOnSubmit) {
-      inputRef.current.blur();
-    }
   };
 
   const handleChange = (e: any) => {
@@ -87,7 +84,13 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
       document.removeEventListener('keydown', handleKeyDown);
     }
     if (event.key === 'Enter') {
-      inputRef.current.select();
+      if (removedOnSubmit) {
+        setCanvasFocusing({focusing: true});
+        document.removeEventListener('mousedown', handleMouseDown);
+        document.removeEventListener('keydown', handleKeyDown);
+      } else {
+        inputRef.current.select();
+      }
     }
   }
 

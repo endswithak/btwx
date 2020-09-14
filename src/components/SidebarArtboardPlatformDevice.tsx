@@ -36,19 +36,21 @@ const SidebarArtboardPlatformDevice = (props: SidebarArtboardPlatformDeviceProps
   const theme = useContext(ThemeContext);
 
   const handleContextMenu = (e: any) => {
-    openContextMenu({
-      type: 'ArtboardCustomPreset',
-      x: e.clientX,
-      y: e.clientY,
-      paperX: e.clientX,
-      paperY: e.clientY,
-      id: (device as em.ArtboardPreset).id,
-      data: {
-        type: device.type,
-        width: device.width,
-        height: device.width
-      }
-    });
+    if (device.category === 'Custom') {
+      openContextMenu({
+        type: 'ArtboardCustomPreset',
+        x: e.clientX,
+        y: e.clientY,
+        paperX: e.clientX,
+        paperY: e.clientY,
+        id: (device as em.ArtboardPreset).id,
+        data: {
+          type: device.type,
+          width: device.width,
+          height: device.width
+        }
+      });
+    }
   }
 
   return (

@@ -13,6 +13,7 @@ export const DEEP_SELECT_LAYER = 'DEEP_SELECT_LAYER';
 export const SELECT_LAYERS = 'SELECT_LAYERS';
 export const DESELECT_LAYER = 'DESELECT_LAYER';
 export const DESELECT_LAYERS = 'DESELECT_LAYERS';
+export const SELECT_ALL_LAYERS = 'SELECT_ALL_LAYERS';
 export const DESELECT_ALL_LAYERS = 'DESELECT_ALL_LAYERS';
 
 export const SET_LAYER_HOVER = 'SET_LAYER_HOVER';
@@ -391,6 +392,10 @@ export interface DeselectLayersPayload {
 export interface DeselectLayers {
   type: typeof DESELECT_LAYERS;
   payload: DeselectLayersPayload;
+}
+
+export interface SelectAllLayers {
+  type: typeof SELECT_ALL_LAYERS;
 }
 
 export interface DeselectAllLayers {
@@ -2262,6 +2267,7 @@ export type LayerTypes = AddArtboard |
                          SelectLayers |
                          DeselectLayer |
                          DeselectLayers |
+                         SelectAllLayers |
                          DeselectAllLayers |
                          SetLayerHover |
                          EnableLayerHover |

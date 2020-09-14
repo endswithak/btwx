@@ -12,6 +12,7 @@ import {
   SELECT_LAYERS,
   DESELECT_LAYER,
   DESELECT_LAYERS,
+  SELECT_ALL_LAYERS,
   DESELECT_ALL_LAYERS,
   SET_LAYER_HOVER,
   ADD_LAYER_CHILD,
@@ -210,6 +211,7 @@ import {
   selectLayers,
   deselectLayer,
   deselectLayers,
+  selectAllLayers,
   deselectAllLayers,
   setLayerHover,
   addLayerChild,
@@ -488,6 +490,8 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return deselectLayer(state, action);
     case DESELECT_LAYERS:
       return deselectLayers(state, action);
+    case SELECT_ALL_LAYERS:
+      return selectAllLayers(state, action);
     case DESELECT_ALL_LAYERS:
       return deselectAllLayers(state, action);
     case SET_LAYER_HOVER:

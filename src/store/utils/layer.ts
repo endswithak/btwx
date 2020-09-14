@@ -37,7 +37,7 @@ import {
   RemoveLayerGradientStop, RemoveLayersGradientStop, SetLayerActiveGradientStop, SetLayersShadowBlur, SetLayersShadowXOffset,
   SetLayersShadowYOffset, SetLayersFontSize, SetLayersFontWeight, SetLayersFontFamily, SetLayersLeading, SetLayersJustification,
   SetLayerTweenTiming, SetRoundedRadii, SetPolygonsSides, SetStarsPoints, SetStarsRadius, SetLayerEdit, AddLayers, SetLineFromX,
-  SetLineFromY, SetLineFrom, SetLineToX, SetLineToY, SetLineTo, SetLinesFromX, SetLinesFromY, SetLinesToX, SetLinesToY
+  SetLineFromY, SetLineFrom, SetLineToX, SetLineToY, SetLineTo, SetLinesFromX, SetLinesFromY, SetLinesToX, SetLinesToY, SelectAllLayers
 } from '../actionTypes/layer';
 
 import {
@@ -410,7 +410,7 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
       strokeColor: THEME_PRIMARY_COLOR,
       strokeWidth: 1 / paperMain.view.zoom,
       insert: false,
-      opacity: resizeDisabled ? 0 : 1
+      opacity: resizeDisabled ? 0.5 : 1
     }
     if (state.selected.length === 1 && state.byId[state.selected[0]].type === 'Shape' && (state.byId[state.selected[0]] as em.Shape).shapeType === 'Line') {
       const layerItem = state.byId[state.selected[0]] as em.Line;
@@ -440,7 +440,9 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           handle: 'from'
         },
         onMouseEnter: function() {
-          if (!resizeDisabled) {
+          if (resizeDisabled) {
+            document.body.style.cursor = 'not-allowed';
+          } else {
             document.body.style.cursor = 'ew-resize';
           }
         },
@@ -459,7 +461,9 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           handle: 'to'
         },
         onMouseEnter: function() {
-          if (!resizeDisabled) {
+          if (resizeDisabled) {
+            document.body.style.cursor = 'not-allowed';
+          } else {
             document.body.style.cursor = 'ew-resize';
           }
         },
@@ -515,7 +519,9 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           handle: 'topLeft'
         },
         onMouseEnter: function() {
-          if (!resizeDisabled) {
+          if (resizeDisabled) {
+            document.body.style.cursor = 'not-allowed';
+          } else {
             document.body.style.cursor = 'nwse-resize';
           }
         },
@@ -534,7 +540,9 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           handle: 'topCenter'
         },
         onMouseEnter: function() {
-          if (!resizeDisabled) {
+          if (resizeDisabled) {
+            document.body.style.cursor = 'not-allowed';
+          } else {
             document.body.style.cursor = 'ns-resize';
           }
         },
@@ -553,7 +561,9 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           handle: 'topRight'
         },
         onMouseEnter: function() {
-          if (!resizeDisabled) {
+          if (resizeDisabled) {
+            document.body.style.cursor = 'not-allowed';
+          } else {
             document.body.style.cursor = 'nesw-resize';
           }
         },
@@ -572,7 +582,9 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           handle: 'bottomLeft'
         },
         onMouseEnter: function() {
-          if (!resizeDisabled) {
+          if (resizeDisabled) {
+            document.body.style.cursor = 'not-allowed';
+          } else {
             document.body.style.cursor = 'nesw-resize';
           }
         },
@@ -591,7 +603,9 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           handle: 'bottomCenter'
         },
         onMouseEnter: function() {
-          if (!resizeDisabled) {
+          if (resizeDisabled) {
+            document.body.style.cursor = 'not-allowed';
+          } else {
             document.body.style.cursor = 'ns-resize';
           }
         },
@@ -610,7 +624,9 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           handle: 'bottomRight'
         },
         onMouseEnter: function() {
-          if (!resizeDisabled) {
+          if (resizeDisabled) {
+            document.body.style.cursor = 'not-allowed';
+          } else {
             document.body.style.cursor = 'nwse-resize';
           }
         },
@@ -629,7 +645,9 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           handle: 'rightCenter'
         },
         onMouseEnter: function() {
-          if (!resizeDisabled) {
+          if (resizeDisabled) {
+            document.body.style.cursor = 'not-allowed';
+          } else {
             document.body.style.cursor = 'ew-resize';
           }
         },
@@ -648,7 +666,9 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
           handle: 'leftCenter'
         },
         onMouseEnter: function() {
-          if (!resizeDisabled) {
+          if (resizeDisabled) {
+            document.body.style.cursor = 'not-allowed';
+          } else {
             document.body.style.cursor = 'ew-resize';
           }
         },
@@ -980,6 +1000,11 @@ export const deselectLayers = (state: LayerState, action: DeselectLayers): Layer
   return action.payload.layers.reduce((result, current) => {
     return deselectLayer(result, layerActions.deselectLayer({id: current}) as DeselectLayer);
   }, state);
+};
+
+export const selectAllLayers = (state: LayerState, action: SelectAllLayers): LayerState => {
+  const pageScopeLayers = state.allIds.filter((id) => state.byId[id].parent && state.byId[id].parent === 'page');
+  return selectLayers(state, layerActions.selectLayers({layers: pageScopeLayers, newSelection: true}) as SelectLayers);
 };
 
 export const deselectAllLayers = (state: LayerState, action: DeselectAllLayers): LayerState => {

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, ReactElement } from 'react';
+import React, { useContext, useEffect, ReactElement, useRef } from 'react';
 import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
@@ -9,6 +9,7 @@ import ContextMenuItem from './ContextMenuItem';
 import ContextMenuEmptyState from './ContextMenuEmptyState';
 import ContextMenuHead from './ContextMenuHead';
 import tinyColor from 'tinycolor2';
+import { e } from 'mathjs';
 
 interface ContextMenuProps {
   options: {
@@ -16,6 +17,8 @@ interface ContextMenuProps {
     disabled: boolean;
     hidden: boolean;
     onClick(): void;
+    backButton?: boolean;
+    backButtonClick?(): void;
   }[];
   emptyState?: string;
   contextMenu?: ContextMenuState;
@@ -25,61 +28,69 @@ interface ContextMenuProps {
 }
 
 const ContextMenu = (props: ContextMenuProps): ReactElement => {
+  const ref = useRef(null);
   const theme = useContext(ThemeContext);
   const { options, contextMenu, emptyState, closeContextMenu, x, y } = props;
 
+  const handleMouseDown = (e: any) => {
+    if (e.buttons !== 2 && !ref.current.contains(e.target)) {
+      closeContextMenu();
+    }
+  }
+
   useEffect(() => {
+    document.addEventListener('mousedown', handleMouseDown);
     document.addEventListener('keydown', closeContextMenu);
     return () => {
+      document.removeEventListener('mousedown', handleMouseDown);
       document.removeEventListener('keydown', closeContextMenu);
     }
   }, []);
 
   return (
-    <div className='c-context-menu-wrap'>
-      <div
-        className='c-context-menu__overlay'
-        onMouseDown={closeContextMenu} />
-      <div
-        className='c-context-menu'
-        id='context-menu'
-        style={{
-          width: 200,
-          background: tinyColor(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).setAlpha(0.77).toRgbString(),
-          boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}, 0 4px 16px 0 rgba(0,0,0,0.16)`,
-          left: x,
-          top: y
-        }}>
-        {
-          options.length > 0
-          ? options.map((option: {type: 'MenuItem' | 'MenuHead'; text: string; onClick(): void; disabled: boolean; hidden: boolean}, index: number) => {
-              if (!option.hidden) {
-                switch(option.type) {
-                  case 'MenuItem': {
-                    return (
-                      <ContextMenuItem
-                        key={index}
-                        disabled={option.disabled}
-                        onClick={option.onClick}
-                        text={option.text} />
-                    )
-                  }
-                  case 'MenuHead': {
-                    return (
-                      <ContextMenuHead
-                        key={index}
-                        text={option.text} />
-                    )
-                  }
+    <div
+      className='c-context-menu'
+      id='context-menu'
+      ref={ref}
+      style={{
+        width: 224,
+        background: tinyColor(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).setAlpha(0.77).toRgbString(),
+        boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}, 0 4px 16px 0 rgba(0,0,0,0.16)`,
+        left: x,
+        top: y,
+        transform: `translate(4px, -24px)`
+      }}>
+      {
+        options.length > 0
+        ? options.map((option: {type: 'MenuItem' | 'MenuHead'; text: string; onClick(): void; disabled: boolean; hidden: boolean; backButton: boolean; backButtonClick(): void }, index: number) => {
+            if (!option.hidden) {
+              switch(option.type) {
+                case 'MenuItem': {
+                  return (
+                    <ContextMenuItem
+                      key={index}
+                      disabled={option.disabled}
+                      onClick={option.onClick}
+                      text={option.text} />
+                  )
+                }
+                case 'MenuHead': {
+                  return (
+                    <ContextMenuHead
+                      key={index}
+                      text={option.text}
+                      backButton={option.backButton}
+                      backButtonClick={option.backButtonClick} />
+                  )
                 }
               }
-            })
-          : emptyState
-            ? <ContextMenuEmptyState
-                text={emptyState} />
-            : null
-        }
-      </div>
+            }
+          })
+        : emptyState
+          ? <ContextMenuEmptyState
+              text={emptyState} />
+          : null
+      }
     </div>
   );
 }
@@ -90,18 +101,22 @@ const mapStateToProps = (state: RootState, ownProps: ContextMenuProps) => {
   const initialY = contextMenu.y;
   const visibleOptions = ownProps.options.filter(option => !option.hidden);
   const menuHeight = (visibleOptions.length * 24) + 8;
-  const menuWidth = 200;
+  const menuWidth = 224;
   const windowHeight = window.innerHeight;
   const windowWidth = window.innerWidth;
   let x;
   let y;
   if (initialX + menuWidth > windowWidth) {
-    x = initialX - (menuWidth - 16);
+    x = initialX - menuWidth;
   } else {
     x = initialX;
   }
   if (initialY + menuHeight > windowHeight) {
-    y = initialY - (menuHeight + 32);
+    if (initialY + (menuHeight / 2) > windowHeight) {
+      y = initialY - menuHeight;
+    } else {
+      y = initialY - (menuHeight / 2);
+    }
   } else {
     y = initialY;
   }

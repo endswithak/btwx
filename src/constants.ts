@@ -2,7 +2,7 @@ export const THEME_PRIMARY_COLOR = '#3C88FD';
 export const THEME_GUIDE_COLOR = 'red';
 export const THEME_RECORDING_COLOR = 'red';
 export const THEME_UNIT_SIZE = 4;
-export const DEFAULT_ARTBOARD_BACKGROUND_COLOR = '#fff';
+export const DEFAULT_ARTBOARD_BACKGROUND_COLOR = { h: 0, s: 0, l: 1, v: 0, a: 1 };
 
 export const DEFAULT_LEFT_SIDEBAR_WIDTH = 320;
 export const DEFAULT_RIGHT_SIDEBAR_WIDTH = 264;

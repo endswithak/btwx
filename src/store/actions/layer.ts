@@ -27,6 +27,7 @@ import {
   SELECT_LAYERS,
   DESELECT_LAYER,
   DESELECT_LAYERS,
+  SELECT_ALL_LAYERS,
   DESELECT_ALL_LAYERS,
   SET_LAYER_HOVER,
   ADD_LAYER_CHILD,
@@ -419,12 +420,15 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => ({
 export const addArtboardThunk = (payload: AddArtboardPayload) => {
   return (dispatch: any, getState: any): Promise<em.Artboard> => {
     const id = payload.layer.id ? payload.layer.id : uuidv4();
+    const style = getLayerStyle(payload, {}, { fill: { color: DEFAULT_ARTBOARD_BACKGROUND_COLOR }, stroke: { enabled: false }, shadow: { enabled: false } });
+    const frame = getLayerFrame(payload);
+    const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as em.PaperGradientFill : null;
     // create background
     const artboardBackground = new paperMain.Path.Rectangle({
       point: new paperMain.Point(0,0),
       size: [payload.layer.frame.width, payload.layer.frame.height],
       data: { id: 'ArtboardBackground', type: 'ArtboardBackground' },
-      fillColor: DEFAULT_ARTBOARD_BACKGROUND_COLOR,
+      fillColor: paperFillColor,
       position: new paperMain.Point(payload.layer.frame.x, payload.layer.frame.y),
     });
     // create mask
@@ -476,6 +480,7 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => ({
 export const addGroupThunk = (payload: AddGroupPayload) => {
   return (dispatch: any, getState: any): Promise<em.Group> => {
     const id = payload.layer.id ? payload.layer.id : uuidv4();
+    const style = getLayerStyle(payload, {}, { fill: { enabled: false }, stroke: { enabled: false }, shadow: { enabled: false } });
     const name = payload.layer.name ? payload.layer.name : 'Group';
     const parent = payload.layer.parent ? payload.layer.parent : 'page';
     const masked = payload.layer.masked ? payload.layer.masked : false;
@@ -499,12 +504,7 @@ export const addGroupThunk = (payload: AddGroupPayload) => {
       masked: masked,
       clipped: clipped,
       transform: DEFAULT_TRANSFORM,
-      style: {
-        ...DEFAULT_STYLE,
-        fill: null,
-        stroke: null,
-        shadow: null
-      }
+      style
     } as em.Group;
     if (!payload.batch) {
       dispatch(addGroup({
@@ -685,7 +685,7 @@ export const addImageThunk = (payload: AddImagePayload) => {
       const imageId = exists ? exists : payload.layer.imageId ? payload.layer.imageId : uuidv4();
       const masked = payload.layer.masked ? payload.layer.masked : false;
       const parent = payload.layer.parent ? payload.layer.parent : 'page';
-      const style = getLayerStyle(payload, { fill: null, stroke: null, strokeOptions: null });
+      const style = getLayerStyle(payload, {}, { fill: { enabled: false }, stroke: { enabled: false } });
       const transform = getLayerTransform(payload);
       const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as em.Shadow) : null;
       const paperShadowOffset = style.shadow.enabled ? new paperMain.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
@@ -815,6 +815,10 @@ export const deselectLayers = (payload: DeselectLayersPayload): LayerTypes => ({
 
 export const deselectAllLayers = (): LayerTypes => ({
   type: DESELECT_ALL_LAYERS
+});
+
+export const selectAllLayers = (): LayerTypes => ({
+  type: SELECT_ALL_LAYERS
 });
 
 // Hover
@@ -1953,9 +1957,18 @@ export const pasteLayersThunk = ({ overSelection, overPoint, overLayer }: { over
             }
             // handle paste over selection
             if (overSelection && state.layer.present.selected.length > 0) {
+              const singleSelection = state.layer.present.selected.length === 1;
+              const overSelectionItem = state.layer.present.byId[state.layer.present.selected[0]];
               const selectionPosition = getSelectionCenter(state.layer.present, true);
               const pointDiff = selectionPosition.subtract(clipboardPosition);
               newLayers.forEach((layerItem) => {
+                if (singleSelection && newParse.main.includes(layerItem.id) && layerItem.type !== 'Artboard') {
+                  if (overSelectionItem.type === 'Group' || overSelectionItem.type === 'Artboard' || overSelectionItem.type === 'Page') {
+                    layerItem.parent = overSelectionItem.id;
+                  } else {
+                    layerItem.parent = overSelectionItem.parent;
+                  }
+                }
                 layerItem.frame.x += pointDiff.x;
                 layerItem.frame.y += pointDiff.y;
               });

@@ -3,17 +3,21 @@ import {
   CLOSE_PREVIEW,
   START_PREVIEW_RECORDING,
   STOP_PREVIEW_RECORDING,
+  ENABLE_TOUCH_CURSOR,
+  DISABLE_TOUCH_CURSOR,
   PreviewTypes
 } from '../actionTypes/preview';
 
 export interface PreviewState {
   isOpen: boolean;
   recording: boolean;
+  touchCursor: boolean;
 }
 
 export const initialState: PreviewState = {
   isOpen: false,
-  recording: false
+  recording: false,
+  touchCursor: false
 };
 
 export default (state = initialState, action: PreviewTypes): PreviewState => {
@@ -40,6 +44,18 @@ export default (state = initialState, action: PreviewTypes): PreviewState => {
       return {
         ...state,
         recording: false
+      };
+    }
+    case ENABLE_TOUCH_CURSOR: {
+      return {
+        ...state,
+        touchCursor: true
+      };
+    }
+    case DISABLE_TOUCH_CURSOR: {
+      return {
+        ...state,
+        touchCursor: false
       };
     }
     default:

@@ -30,10 +30,18 @@ class InsertTool {
         case 'r': {
           const state = store.getState();
           if (state.canvasSettings.focusing) {
-            if (state.tool.type === 'Shape' && state.tool.shapeToolType === 'Rectangle') {
-              store.dispatch(enableSelectionTool());
+            // remove any tools if meta modifier (window refresh)
+            if (event.modifiers.meta) {
+              if (state.tool.type !== 'Selection') {
+                store.dispatch(enableSelectionTool());
+              }
+            // else handle rectangle tool toggle
             } else {
-              store.dispatch(enableRectangleShapeTool());
+              if (state.tool.type === 'Shape' && state.tool.shapeToolType === 'Rectangle') {
+                store.dispatch(enableSelectionTool());
+              } else {
+                store.dispatch(enableRectangleShapeTool());
+              }
             }
           }
           break;

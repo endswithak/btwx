@@ -1,8 +1,8 @@
-import React, { useContext, ReactElement, useState, useLayoutEffect, useRef, useEffect } from 'react';
+import React, { useContext, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
 import SidebarInput from './SidebarInput';
 import { ThemeContext } from './ThemeProvider';
-import { selectLayer, setLayerName, deselectLayer, deselectAllLayers } from '../store/actions/layer';
+import { selectLayer, setLayerName, deselectLayer } from '../store/actions/layer';
 import { SelectLayerPayload, DeselectLayerPayload, LayerTypes, SetLayerNamePayload } from '../store/actionTypes/layer';
 import { openContextMenu } from '../store/actions/contextMenu';
 import { OpenContextMenuPayload, ContextMenuTypes } from '../store/actionTypes/contextMenu';
@@ -15,7 +15,6 @@ interface SidebarLayerTitleProps {
   setEditing(editing: boolean): void;
   selectLayer?(payload: SelectLayerPayload): LayerTypes;
   deselectLayer?(payload: DeselectLayerPayload): LayerTypes;
-  deselectAllLayers?(): LayerTypes;
   setLayerName?(payload: SetLayerNamePayload): LayerTypes;
   openContextMenu?(payload: OpenContextMenuPayload): ContextMenuTypes;
 }
@@ -23,7 +22,7 @@ interface SidebarLayerTitleProps {
 const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const [nameInput, setNameInput] = useState(props.layer.name);
-  const { layer, editing, setEditing, dragGhost, setLayerName, setDraggable, selectLayer, deselectLayer, deselectAllLayers, openContextMenu } = props;
+  const { layer, editing, setEditing, dragGhost, setLayerName, setDraggable, selectLayer, deselectLayer, openContextMenu } = props;
 
   const handleClick = (e: React.MouseEvent) => {
     if (!editing) {
@@ -41,14 +40,14 @@ const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
   }
 
   const handleDoubleClick = () => {
-    deselectAllLayers();
     setEditing(true);
     setDraggable(false);
   }
 
   const handleSubmit = () => {
-    setLayerName({id: layer.id, name: nameInput});
-    selectLayer({id: layer.id, newSelection: true});
+    if (nameInput.replace(/\s/g, '').length > 0 && nameInput !== props.layer.name) {
+      setLayerName({id: layer.id, name: nameInput});
+    }
     setDraggable(true);
     setEditing(false);
   }
@@ -59,7 +58,9 @@ const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
 
   const handleContextMenu = (e: any) => {
     if (!editing) {
-      selectLayer({id: layer.id, newSelection: true});
+      if (!layer.selected) {
+        selectLayer({id: layer.id, newSelection: true});
+      }
       openContextMenu({
         type: 'LayerEdit',
         id: layer.id,
@@ -79,7 +80,7 @@ const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
       className={`
       c-sidebar-layer__name
       ${editing
-        ? `c-sidebar-layer__name--editing`
+        ? 'c-sidebar-layer__name--editing'
         : null
       }`}
       style={{
@@ -96,8 +97,8 @@ const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
             onChange={handleChange}
             value={nameInput}
             onSubmit={handleSubmit}
-            onBlur={handleSubmit}
-            blurOnSubmit
+            submitOnBlur
+            removedOnSubmit
             selectOnMount />
         : layer.name
       }
@@ -107,5 +108,5 @@ const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
 
 export default connect(
   null,
-  { setLayerName, selectLayer, deselectLayer, deselectAllLayers, openContextMenu }
+  { setLayerName, selectLayer, deselectLayer, openContextMenu }
 )(SidebarLayerTitle);

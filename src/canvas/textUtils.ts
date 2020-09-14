@@ -1,5 +1,5 @@
 import store from '../store';
-import { openContextMenu } from '../store/actions/contextMenu';
+import { openContextMenu, closeContextMenu } from '../store/actions/contextMenu';
 import { openTextEditor } from '../store/actions/textEditor';
 import { setLayerHover, selectLayer, deselectLayer, deepSelectLayer } from '../store/actions/layer';
 import { getNearestScopeAncestor, getLayer } from '../store/selectors/layer';
@@ -56,9 +56,9 @@ export const applyTextMethods = (text: paper.Item) => {
       }
     },
     onMouseDown: function(e: any) {
-      const state = store.getState();
+      let state = store.getState();
       const layer = getLayer(state.layer.present, this.data.id);
-      const nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, layer.id);
+      let nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, layer.id);
       if (nearestScopeAncestor.id === this.data.id) {
         store.dispatch(setTextSettings({
           fillColor: (nearestScopeAncestor as em.Text).style.fill.color,
@@ -66,6 +66,18 @@ export const applyTextMethods = (text: paper.Item) => {
         }));
       }
       if (e.event.which === 3) {
+        if (state.contextMenu.isOpen) {
+          store.dispatch(closeContextMenu());
+        }
+        if (!layer.selected) {
+          if (nearestScopeAncestor.type === 'Artboard') {
+            store.dispatch(deepSelectLayer({id: this.data.id}));
+          } else {
+            store.dispatch(selectLayer({id: nearestScopeAncestor.id, newSelection: true}));
+          }
+        }
+        state = store.getState();
+        nearestScopeAncestor = getNearestScopeAncestor(state.layer.present, layer.id);
         store.dispatch(openContextMenu({type: 'LayerEdit', id: nearestScopeAncestor.id, x: e.event.clientX, y: e.event.clientY, paperX: e.point.x, paperY: e.point.y}));
       } else {
         if (e.modifiers.shift) {

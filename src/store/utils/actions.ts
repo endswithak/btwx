@@ -9,31 +9,31 @@ import {
 } from '../../constants';
 
 export const getLayerFillStyle = (payload: any, overrides = {}): em.Fill => {
-  const fill = payload.layer.style && payload.layer.style.fill ? { ...DEFAULT_FILL_STYLE, ...payload.layer.style.fill, ...overrides } : DEFAULT_FILL_STYLE;
-  return fill;
+  const fill = payload.layer.style && payload.layer.style.fill ? { ...DEFAULT_FILL_STYLE, ...payload.layer.style.fill } : DEFAULT_FILL_STYLE;
+  return { ...fill, ...overrides };
 };
 
 export const getLayerStrokeOptionsStyle = (payload: any, overrides = {}): em.StrokeOptions => {
-  const strokeOptions = payload.layer.style && payload.layer.style.strokeOptions ? { ...DEFAULT_STROKE_OPTIONS_STYLE, ...payload.layer.style.strokeOptions, ...overrides } : DEFAULT_STROKE_OPTIONS_STYLE;
-  return strokeOptions;
+  const strokeOptions = payload.layer.style && payload.layer.style.strokeOptions ? { ...DEFAULT_STROKE_OPTIONS_STYLE, ...payload.layer.style.strokeOptions } : DEFAULT_STROKE_OPTIONS_STYLE;
+  return { ...strokeOptions, ...overrides };
 };
 
 export const getLayerStrokeStyle = (payload: any, overrides = {}): em.Stroke => {
-  const stroke = payload.layer.style && payload.layer.style.stroke ? { ...DEFAULT_STROKE_STYLE, ...payload.layer.style.stroke, ...overrides } : DEFAULT_STROKE_STYLE;
-  return stroke;
+  const stroke = payload.layer.style && payload.layer.style.stroke ? { ...DEFAULT_STROKE_STYLE, ...payload.layer.style.stroke } : DEFAULT_STROKE_STYLE;
+  return { ...stroke, ...overrides };
 };
 
 export const getLayerShadowStyle = (payload: any, overrides = {}): em.Shadow => {
-  const shadow = payload.layer.style && payload.layer.style.shadow ? { ...DEFAULT_SHADOW_STYLE, ...payload.layer.style.shadow, ...overrides } : DEFAULT_SHADOW_STYLE;
-  return shadow;
+  const shadow = payload.layer.style && payload.layer.style.shadow ? { ...DEFAULT_SHADOW_STYLE, ...payload.layer.style.shadow } : DEFAULT_SHADOW_STYLE;
+  return { ...shadow, ...overrides };
 };
 
 export const getLayerTransform = (payload: any, overrides = {}): em.Transform => {
-  const transform = payload.layer.transform ? { ...DEFAULT_TRANSFORM, ...payload.layer.transform, ...overrides } : DEFAULT_TRANSFORM;
-  return transform;
+  const transform = payload.layer.transform ? { ...DEFAULT_TRANSFORM, ...payload.layer.transform } : DEFAULT_TRANSFORM;
+  return { ...transform, ...overrides };
 }
 
-export const getLayerStyle = (payload: any, styleOverrides = {}, overrides = { fill: {}, stroke: {}, strokeOptions: {}, shadow: {} }): em.Style => {
+export const getLayerStyle = (payload: any, styleOverrides = {}, overrides = { fill: {}, stroke: {}, strokeOptions: {}, shadow: {} } as { fill?: em.Fill; stroke?: em.Stroke; strokeOptions?: em.StrokeOptions; shadow?: em.Shadow }): em.Style => {
   const fill = getLayerFillStyle(payload, overrides.fill);
   const stroke = getLayerStrokeStyle(payload, overrides.stroke);
   const strokeOptions = getLayerStrokeOptionsStyle(payload, overrides.strokeOptions);
@@ -44,8 +44,8 @@ export const getLayerStyle = (payload: any, styleOverrides = {}, overrides = { f
 }
 
 export const getLayerTextStyle = (payload: any, overrides = {}): em.TextStyle => {
-  const textStyle = payload.layer.textStyle ? { ...DEFAULT_TEXT_STYLE, ...payload.layer.textStyle, ...overrides } : DEFAULT_TEXT_STYLE;
-  return textStyle;
+  const textStyle = payload.layer.textStyle ? { ...DEFAULT_TEXT_STYLE, ...payload.layer.textStyle } : DEFAULT_TEXT_STYLE;
+  return { ...textStyle, ...overrides };
 }
 
 export const getLayerShapeOpts = (payload: any): { radius?: number; points?: number; sides?: number; from?: em.Point; to?: em.Point } => {
