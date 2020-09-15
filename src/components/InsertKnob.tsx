@@ -1,25 +1,20 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import { remote, ipcRenderer } from 'electron';
+import { remote } from 'electron';
 import sharp from 'sharp';
 import React, { useContext, ReactElement, useEffect, useRef } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { connect } from 'react-redux';
 import tinyColor from 'tinycolor2';
-import { paperMain } from '../canvas';
 import store from '../store';
 import { RootState } from '../store/reducers';
 import { activateInsertKnob, deactivateInsertKnob, setInsertKnobIndex } from '../store/actions/insertKnob';
 import { InsertKnobTypes, SetInsertKnobIndexPayload } from '../store/actionTypes/insertKnob';
 import { enableSelectionTool, enableRectangleShapeTool, enableEllipseShapeTool, enableStarShapeTool, enablePolygonShapeTool, enableRoundedShapeTool, enableLineShapeTool, enableArtboardTool, enableTextTool } from '../store/actions/tool';
 import { ToolTypes } from '../store/actionTypes/tool';
-import { AddImagePayload, LayerTypes } from '../store/actionTypes/layer';
-import { addImage, addImageThunk } from '../store/actions/layer';
-import { AddDocumentImagePayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
-import { addDocumentImage } from '../store/actions/documentSettings';
+import { AddImagePayload } from '../store/actionTypes/layer';
+import { addImageThunk } from '../store/actions/layer';
 import { SetCanvasFocusingPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
 import { setCanvasFocusing } from '../store/actions/canvasSettings';
 import { ToolState } from '../store/reducers/tool';
-import { bufferToBase64 } from '../utils';
 import { ThemeContext } from './ThemeProvider';
 import InsertKnobItem from './InsertKnobItem';
 
@@ -58,10 +53,6 @@ if (remote.process.platform === 'darwin') {
 
 interface InsertKnobProps {
   tool?: ToolState;
-  allDocumentImageIds?: string[];
-  documentImagesById?: {
-    [id: string]: em.DocumentImage;
-  };
   activeIndex?: number;
   setInsertKnobIndex?(payload: SetInsertKnobIndexPayload): InsertKnobTypes;
   activateInsertKnob?(): InsertKnobTypes;
@@ -75,17 +66,13 @@ interface InsertKnobProps {
   enableSelectionTool?(): ToolTypes;
   enableArtboardTool?(): ToolTypes;
   enableTextTool?(): ToolTypes;
-  addImage?(payload: AddImagePayload): LayerTypes;
-  addImageThunk?(payload: AddImagePayload): LayerTypes;
-  addDocumentImage?(payload: AddDocumentImagePayload): DocumentSettingsTypes;
+  addImageThunk?(payload: AddImagePayload): void;
   setCanvasFocusing?(payload: SetCanvasFocusingPayload): CanvasSettingsTypes;
 }
 
 const InsertKnob = (props: InsertKnobProps): ReactElement => {
   const {
     tool,
-    allDocumentImageIds,
-    documentImagesById,
     activeIndex,
     setInsertKnobIndex,
     deactivateInsertKnob,
@@ -98,9 +85,7 @@ const InsertKnob = (props: InsertKnobProps): ReactElement => {
     enableSelectionTool,
     enableArtboardTool,
     enableTextTool,
-    addImage,
     addImageThunk,
-    addDocumentImage,
     setCanvasFocusing
   } = props;
 
@@ -153,7 +138,7 @@ const InsertKnob = (props: InsertKnobProps): ReactElement => {
         properties: ['openFile']
       }).then(result => {
         if (result.filePaths.length > 0 && !result.canceled) {
-          sharp(result.filePaths[0]).metadata().then(({ width, height }) => {
+          sharp(result.filePaths[0]).metadata().then(({ width }) => {
             sharp(result.filePaths[0]).resize(Math.round(width * 0.5)).webp({quality: 50}).toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
               const newBuffer = Buffer.from(data);
               addImageThunk({
@@ -198,7 +183,7 @@ const InsertKnob = (props: InsertKnobProps): ReactElement => {
     }
   }
 
-  const handleDeactivation = () => {
+  const handleDeactivation = (): void => {
     currentKnobNegThreshold = 0;
     currentKnobPosThreshold = 0;
     knobActive = false;
@@ -301,17 +286,11 @@ const InsertKnob = (props: InsertKnobProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   tool: ToolState;
-  allDocumentImageIds: string[];
-  documentImagesById: {
-    [id: string]: em.DocumentImage;
-  };
   activeIndex: number;
 } => {
-  const { tool, documentSettings, insertKnob } = state;
-  const allDocumentImageIds = documentSettings.images.allIds;
-  const documentImagesById = documentSettings.images.byId;
+  const { tool, insertKnob } = state;
   const activeIndex = insertKnob.index;
-  return { tool, documentImagesById, allDocumentImageIds, activeIndex };
+  return { tool, activeIndex };
 };
 
 export default connect(
@@ -326,9 +305,7 @@ export default connect(
     enableSelectionTool,
     enableArtboardTool,
     enableTextTool,
-    addImage,
     addImageThunk,
-    addDocumentImage,
     activateInsertKnob,
     deactivateInsertKnob,
     setInsertKnobIndex,

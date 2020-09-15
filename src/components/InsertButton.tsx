@@ -1,26 +1,18 @@
 import React, { ReactElement } from 'react';
 import sharp from 'sharp';
 import { remote } from 'electron';
-import { v4 as uuidv4 } from 'uuid';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
-import { paperMain } from '../canvas';
 import { enableSelectionTool, enableRectangleShapeTool, enableEllipseShapeTool, enableStarShapeTool, enablePolygonShapeTool, enableRoundedShapeTool, enableLineShapeTool, enableArtboardTool, enableTextTool } from '../store/actions/tool';
 import { ToolTypes } from '../store/actionTypes/tool';
-import { AddImagePayload, LayerTypes } from '../store/actionTypes/layer';
-import { addImage, addImageThunk } from '../store/actions/layer';
-import { AddDocumentImagePayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
+import { AddImagePayload } from '../store/actionTypes/layer';
+import { addImageThunk } from '../store/actions/layer';
 import { addDocumentImage } from '../store/actions/documentSettings';
 import { ToolState } from '../store/reducers/tool';
-import { bufferToBase64 } from '../utils';
 import TopbarDropdownButton from './TopbarDropdownButton';
 
 interface InsertButtonProps {
   tool: ToolState;
-  allDocumentImageIds: string[];
-  documentImagesById: {
-    [id: string]: em.DocumentImage;
-  };
   enableRectangleShapeTool(): ToolTypes;
   enableEllipseShapeTool(): ToolTypes;
   enableStarShapeTool(): ToolTypes;
@@ -30,15 +22,12 @@ interface InsertButtonProps {
   enableSelectionTool(): ToolTypes;
   enableArtboardTool(): ToolTypes;
   enableTextTool(): ToolTypes;
-  addImage(payload: AddImagePayload): LayerTypes;
-  addImageThunk?(payload: AddImagePayload): LayerTypes;
-  addDocumentImage(payload: AddDocumentImagePayload): DocumentSettingsTypes;
+  addImageThunk?(payload: AddImagePayload): void;
 }
 
 const InsertButton = (props: InsertButtonProps): ReactElement => {
   const {
     tool,
-    documentImagesById,
     enableRectangleShapeTool,
     enableEllipseShapeTool,
     enableSelectionTool,
@@ -48,10 +37,7 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
     enableLineShapeTool,
     enableArtboardTool,
     enableTextTool,
-    addImage,
-    addImageThunk,
-    addDocumentImage,
-    allDocumentImageIds
+    addImageThunk
   } = props;
 
   const handleImageClick = (): void => {
@@ -166,15 +152,9 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   tool: ToolState;
-  allDocumentImageIds: string[];
-  documentImagesById: {
-    [id: string]: em.DocumentImage;
-  };
 } => {
-  const { tool, documentSettings } = state;
-  const allDocumentImageIds = documentSettings.images.allIds;
-  const documentImagesById = documentSettings.images.byId;
-  return { tool, documentImagesById, allDocumentImageIds };
+  const { tool } = state;
+  return { tool };
 };
 
 export default connect(
@@ -189,7 +169,6 @@ export default connect(
     enableSelectionTool,
     enableArtboardTool,
     enableTextTool,
-    addImage,
     addImageThunk,
     addDocumentImage
   }

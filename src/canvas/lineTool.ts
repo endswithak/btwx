@@ -202,7 +202,7 @@ class LineTool {
       this.snapTool.updateGuides();
     }
   }
-  onMouseUp(): void {
+  onMouseUp(event: paper.ToolEvent): void {
     if (this.enabled) {
       if (this.x !== 0 || this.y !== 0) {
         const paperLayer = getPaperLayer(this.state.layer.present.selected[0]) as paper.CompoundPath;

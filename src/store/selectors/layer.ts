@@ -4,11 +4,9 @@ import { LayerState } from '../reducers/layer';
 import { paperMain } from '../../canvas';
 import { bufferToBase64 } from '../../utils';
 import { applyShapeMethods } from '../../canvas/shapeUtils';
-import { applyCompoundShapeMethods } from '../../canvas/compoundShapeUtils';
 import { applyArtboardMethods } from '../../canvas/artboardUtils';
 import { applyTextMethods } from '../../canvas/textUtils';
 import { applyImageMethods } from '../../canvas/imageUtils';
-import { v4 as uuidv4 } from 'uuid';
 
 export const getLayer = (store: LayerState, id: string): em.Layer => {
   return store.byId[id] as em.Layer;
@@ -319,20 +317,6 @@ export const getPositionInArtboard = (layer: em.Layer, artboard: em.Artboard): p
   const yDiff = layer.frame.y - (artboard.frame.y - (artboard.frame.height / 2));
   return new paper.Point(xDiff, yDiff);
 };
-
-// export const getFromPositionInArtboard = (store: LayerState, layer: em.Line, artboard: em.Artboard): paper.Point => {
-//   const from = getLineFromPoint(store, layer.id, layer.from);
-//   const xDiff = from.x - (artboard.frame.x - (artboard.frame.width / 2));
-//   const yDiff = from.y - (artboard.frame.y - (artboard.frame.height / 2));
-//   return new paper.Point(xDiff, yDiff);
-// };
-
-// export const getToPositionInArtboard = (store: LayerState, layer: em.Line, artboard: em.Artboard): paper.Point => {
-//   const to = getLineFromPoint(store, layer.id, layer.to);
-//   const xDiff = to.x - (artboard.frame.x - (artboard.frame.width / 2));
-//   const yDiff = to.y - (artboard.frame.y - (artboard.frame.height / 2));
-//   return new paper.Point(xDiff, yDiff);
-// };
 
 export const hasImageTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   return (

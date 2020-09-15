@@ -42,16 +42,7 @@ export default (state = initialState, action: ContextMenuTypes): ContextMenuStat
       };
     }
     case CLOSE_CONTEXT_MENU: {
-      return {
-        type: null,
-        id: null,
-        isOpen: false,
-        x: null,
-        y: null,
-        paperX: null,
-        paperY: null,
-        data: null
-      };
+      return initialState;
     }
     default:
       return state;

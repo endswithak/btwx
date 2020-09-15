@@ -12,7 +12,8 @@ import {
   DEFAULT_LEFT_SIDEBAR_WIDTH,
   DEFAULT_RIGHT_SIDEBAR_WIDTH,
   DEFAULT_TWEEN_DRAWER_HEIGHT,
-  DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH
+  DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH,
+  APP_NAME
 } from './constants';
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
@@ -59,8 +60,8 @@ export const createNewDocument = (width?: number, height?: number): Promise<elec
     // Create the browser window.
     const newDocument = new BrowserWindow({
       height: height ? height : 800,
-      width: width ? width : 1000,
-      minWidth: 1000,
+      width: width ? width : 1024,
+      minWidth: 1024,
       minHeight: 800,
       frame: false,
       titleBarStyle: 'hidden',
@@ -230,7 +231,7 @@ export const handleSave = (path: string, closeOnSave?: boolean): void => {
   const document = getFocusedDocument();
   if (document) {
     document.webContents.executeJavaScript(`saveDocument()`).then((documentJSON) => {
-      fs.writeFile(`${path}.btwix`, documentJSON, function(err) {
+      fs.writeFile(`${path}.${APP_NAME}`, documentJSON, function(err) {
         if(err) {
           return console.log(err);
         }
@@ -252,7 +253,7 @@ export const handleSaveAs = (closeOnSave?: boolean): void => {
         const documentSettings = {base, fullPath};
         document.webContents.executeJavaScript(`saveDocumentAs(${JSON.stringify(documentSettings)})`).then((documentJSON) => {
           // app.addRecentDocument(result.filePath);
-          fs.writeFile(`${result.filePath}.btwix`, documentJSON, function(err) {
+          fs.writeFile(`${result.filePath}.${APP_NAME}`, documentJSON, function(err) {
             if(err) {
               return console.log(err);
             }

@@ -1,5 +1,6 @@
 import electron, { app, BrowserWindow, Menu, dialog } from 'electron';
 import { handleThemeToggle, createNewDocument, handleSave, handleSaveAs, handleOpenDocument } from './index';
+import { APP_NAME } from './constants';
 
 const isMac = process.platform === 'darwin';
 
@@ -87,7 +88,7 @@ export default Menu.buildFromTemplate([
         click: (): void => {
           dialog.showOpenDialog({
             filters: [
-              { name: 'Custom File Type', extensions: ['btwix'] }
+              { name: 'Custom File Type', extensions: [APP_NAME] }
             ],
             properties: ['openFile']
           }).then((result) => {

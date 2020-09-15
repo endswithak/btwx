@@ -1,24 +1,23 @@
-import React, { useContext, ReactElement, useState, useEffect } from 'react';
+import React, { useContext, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setArtboardToolDeviceOrientation, enableSelectionTool } from '../store/actions/tool';
 import { SetArtboardToolDeviceOrientationPayload, ToolTypes } from '../store/actionTypes/tool';
+import { addArtboardThunk } from '../store/actions/layer';
+import { AddArtboardPayload } from '../store/actionTypes/layer';
+import { paperMain } from '../canvas';
 import SidebarArtboardPlatformSelector from './SidebarArtboardPlatformSelector';
 import SidebarArtboardPlatformOrientation from './SidebarArtboardPlatformOrientation';
 import SidebarArtboardPlatformCategories from './SidebarArtboardPlatformCategories';
 import SidebarArtboardPlatformAdd from './SidebarArtboardPlatformAdd';
 import { ThemeContext } from './ThemeProvider';
-import { addArtboardThunk } from '../store/actions/layer';
-import { AddArtboardPayload, LayerTypes } from '../store/actionTypes/layer';
-import { paperMain } from '../canvas';
-import { DEFAULT_ARTBOARD_BACKGROUND_COLOR } from '../constants';
 
 interface SidebarArtboardPlatformOrientationProps {
   selected?: string[];
   orientation?: em.DeviceOrientationType;
   platform?: em.DevicePlatformType;
   setArtboardToolDeviceOrientation?(payload: SetArtboardToolDeviceOrientationPayload): ToolTypes;
-  addArtboardThunk?(payload: AddArtboardPayload): LayerTypes;
+  addArtboardThunk?(payload: AddArtboardPayload): void;
   enableSelectionTool?(): ToolTypes;
 }
 

@@ -61,11 +61,11 @@ ipcRenderer.on('stopPreviewRecording', () => {
 const PreviewRecordButton = (props: PreviewRecordButtonProps): ReactElement => {
   const { recording, startPreviewRecording } = props;
 
-  const handleVideoData = (e) => {
+  const handleVideoData = (e: any): void => {
     previewVideoChunks.push(e.data);
   }
 
-  const handleStop = async () => {
+  const handleStop = async (): Promise<void> => {
     const blob = new Blob(previewVideoChunks, {
       type: 'video/webm; codecs=vp9'
     });

@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import { clipboard } from 'electron';
 import { RootState } from '../store/reducers';
 import { ContextMenuState } from '../store/reducers/contextMenu';
-import ContextMenu from './ContextMenu';
 import { ContextMenuTypes, OpenContextMenuPayload } from '../store/actionTypes/contextMenu';
 import { closeContextMenu, openContextMenu } from '../store/actions/contextMenu';
 import { AddLayerTweenEventPayload, LayerTypes, RemoveLayersPayload, SelectLayerPayload, SendLayersBackwardPayload, SendLayersForwardPayload, GroupLayersPayload, UngroupLayersPayload, AddLayersMaskPayload } from '../store/actionTypes/layer';
@@ -13,6 +12,8 @@ import { removeArtboardPreset } from '../store/actions/canvasSettings';
 import { ArtboardPresetEditorTypes } from '../store/actionTypes/artboardPresetEditor';
 import { openArtboardPresetEditor } from '../store/actions/artboardPresetEditor';
 import { getLayerScope, orderLayersByDepth } from '../store/selectors/layer';
+import { APP_NAME } from '../constants';
+import ContextMenu from './ContextMenu';
 
 interface ContextMenuWrapProps {
   contextMenu?: ContextMenuState;
@@ -342,7 +343,7 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
         return null;
       }
       case 'TweenEventDestination': {
-        return 'Need two or more artboards to create tween event.';
+        return `Need two or more artboards to create ${APP_NAME} event.`;
       }
       case 'ArtboardCustomPreset': {
         return null;
@@ -414,7 +415,7 @@ const mapStateToProps = (state: RootState) => {
     return layer.type === 'Group';
   })) || (selected.length === 0 && layerItem && layerItem.type === 'Group');
   const canMask = (selected.length > 0 && selectedById[selectedByDepth[0]].type === 'Shape' && (selectedById[selectedByDepth[0]] as em.Shape).shapeType !== 'Line' && !(selectedById[selectedByDepth[0]] as em.Shape).mask) || (selected.length === 0 && layerItem && layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType !== 'Line' && !(layerItem as em.Shape).mask);
-  const clipboardType: em.ClipboardType = (() => {
+  const clipboardType: em.ClipboardType = ((): em.ClipboardType => {
     try {
       const text = clipboard.readText();
       const parsedText: em.ClipboardLayers = JSON.parse(text);

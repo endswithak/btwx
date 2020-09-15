@@ -107,7 +107,7 @@ class SelectionTool {
       }
     }
   }
-  onMouseDown(event: paper.ToolEvent): void {
+  onMouseDown(event: any): void {
     this.insertTool.enabled = false;
     const state = store.getState();
     const layerState = state.layer.present;

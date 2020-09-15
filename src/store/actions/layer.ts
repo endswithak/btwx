@@ -1,12 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
 import { clipboard } from 'electron';
 import { paperMain } from '../../canvas';
-import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_TEXT_STYLE, DEFAULT_SHADOW_STYLE, DEFAULT_BLEND_MODE, DEFAULT_OPACITY, DEFAULT_STROKE_DASH_ARRAY, DEFAULT_STROKE_DASH_OFFSET, DEFAULT_STROKE_CAP, DEFAULT_STROKE_JOIN, DEFAULT_ROTATION, DEFAULT_HORIZONTAL_FLIP, DEFAULT_VERTICAL_FLIP, DEFAULT_TEXT_VALUE, DEFAULT_FONT_SIZE, DEFAULT_FONT_WEIGHT, DEFAULT_FONT_FAMILY, DEFAULT_JUSTIFICATION, DEFAULT_LEADING, DEFAULT_SHADOW_COLOR, DEFAULT_SHADOW_OFFSET_X, DEFAULT_SHADOW_OFFSET_Y, DEFAULT_SHADOW_BLUR, DEFAULT_SHAPE_WIDTH, DEFAULT_SHAPE_HEIGHT, DEFAULT_STAR_POINTS, DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS, DEFAULT_POLYGON_SIDES } from '../../constants';
+import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_VALUE } from '../../constants';
 import { applyImageMethods } from '../../canvas/imageUtils';
 import { applyShapeMethods } from '../../canvas/shapeUtils';
 import { applyTextMethods } from '../../canvas/textUtils';
 import { applyArtboardMethods } from '../../canvas/artboardUtils';
-import { getPaperFillColor, getPaperStrokeColor, getPaperLayer, getPaperShadowColor, getPaperShapePathData } from '../utils/paper';
+import { getPaperFillColor, getPaperStrokeColor, getPaperLayer, getPaperShadowColor } from '../utils/paper';
 import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayersBounds } from '../selectors/layer';
 import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle } from '../utils/actions';
 import { bufferToBase64 } from '../../utils';
@@ -420,7 +420,7 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => ({
 export const addArtboardThunk = (payload: AddArtboardPayload) => {
   return (dispatch: any, getState: any): Promise<em.Artboard> => {
     const id = payload.layer.id ? payload.layer.id : uuidv4();
-    const style = getLayerStyle(payload, {}, { fill: { color: DEFAULT_ARTBOARD_BACKGROUND_COLOR }, stroke: { enabled: false }, shadow: { enabled: false } });
+    const style = getLayerStyle(payload, {}, { fill: { color: DEFAULT_ARTBOARD_BACKGROUND_COLOR } as em.Fill, stroke: { enabled: false } as em.Stroke, shadow: { enabled: false } as em.Shadow });
     const frame = getLayerFrame(payload);
     const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as em.PaperGradientFill : null;
     // create background
@@ -480,7 +480,7 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => ({
 export const addGroupThunk = (payload: AddGroupPayload) => {
   return (dispatch: any, getState: any): Promise<em.Group> => {
     const id = payload.layer.id ? payload.layer.id : uuidv4();
-    const style = getLayerStyle(payload, {}, { fill: { enabled: false }, stroke: { enabled: false }, shadow: { enabled: false } });
+    const style = getLayerStyle(payload, {}, { fill: { enabled: false } as em.Fill, stroke: { enabled: false } as em.Stroke, shadow: { enabled: false } as em.Shadow });
     const name = payload.layer.name ? payload.layer.name : 'Group';
     const parent = payload.layer.parent ? payload.layer.parent : 'page';
     const masked = payload.layer.masked ? payload.layer.masked : false;
@@ -685,7 +685,7 @@ export const addImageThunk = (payload: AddImagePayload) => {
       const imageId = exists ? exists : payload.layer.imageId ? payload.layer.imageId : uuidv4();
       const masked = payload.layer.masked ? payload.layer.masked : false;
       const parent = payload.layer.parent ? payload.layer.parent : 'page';
-      const style = getLayerStyle(payload, {}, { fill: { enabled: false }, stroke: { enabled: false } });
+      const style = getLayerStyle(payload, {}, { fill: { enabled: false } as em.Fill, stroke: { enabled: false } as em.Stroke });
       const transform = getLayerTransform(payload);
       const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as em.Shadow) : null;
       const paperShadowOffset = style.shadow.enabled ? new paperMain.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
