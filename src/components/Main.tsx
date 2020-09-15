@@ -25,11 +25,7 @@ const Main = (props: MainProps): ReactElement => {
         <Canvas setReady={setReady} />
         <TweenDrawerWrap ready={ready} />
         <TextEditor ready={ready} />
-        {
-          remote.process.platform === 'darwin'
-          ? <InsertKnobWrap />
-          : null
-        }
+        <InsertKnobWrap />
       </div>
       <SidebarRight ready={ready} />
     </div>

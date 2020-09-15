@@ -91,7 +91,7 @@ class UndoRedoTool {
     switch(event.key) {
       case 'z': {
         const state = store.getState();
-        if (event.modifiers.meta) {
+        if (event.modifiers.meta && !state.textEditor.isOpen) {
           if (event.modifiers.shift) {
             if (state.layer.future.length > 0) {
               // remove hover

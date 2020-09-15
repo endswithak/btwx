@@ -8,11 +8,12 @@ import { closeContextMenu } from '../store/actions/contextMenu';
 import ContextMenuItem from './ContextMenuItem';
 import ContextMenuEmptyState from './ContextMenuEmptyState';
 import ContextMenuHead from './ContextMenuHead';
+import ContextMenuDivider from './ContextMenuDivider';
 import tinyColor from 'tinycolor2';
-import { e } from 'mathjs';
 
 interface ContextMenuProps {
   options: {
+    type: 'MenuItem' | 'MenuHead' | 'MenuDivider';
     text: string;
     disabled: boolean;
     hidden: boolean;
@@ -62,7 +63,7 @@ const ContextMenu = (props: ContextMenuProps): ReactElement => {
       }}>
       {
         options.length > 0
-        ? options.map((option: {type: 'MenuItem' | 'MenuHead'; text: string; onClick(): void; disabled: boolean; hidden: boolean; backButton: boolean; backButtonClick(): void }, index: number) => {
+        ? options.map((option: {type: 'MenuItem' | 'MenuHead' | 'MenuDivider'; text: string; onClick(): void; disabled: boolean; hidden: boolean; backButton: boolean; backButtonClick(): void }, index: number) => {
             if (!option.hidden) {
               switch(option.type) {
                 case 'MenuItem': {
@@ -83,6 +84,12 @@ const ContextMenu = (props: ContextMenuProps): ReactElement => {
                       backButtonClick={option.backButtonClick} />
                   )
                 }
+                case 'MenuDivider': {
+                  return (
+                    <ContextMenuDivider
+                      key={index} />
+                  )
+                }
               }
             }
           })
@@ -100,7 +107,17 @@ const mapStateToProps = (state: RootState, ownProps: ContextMenuProps) => {
   const initialX = contextMenu.x;
   const initialY = contextMenu.y;
   const visibleOptions = ownProps.options.filter(option => !option.hidden);
-  const menuHeight = (visibleOptions.length * 24) + 8;
+  const menuHeight = visibleOptions.reduce((result, current) => {
+    switch(current.type) {
+      case 'MenuHead':
+      case 'MenuItem':
+        return result + 24;
+      case 'MenuDivider':
+        return result + 8;
+      default:
+        return result;
+    }
+  }, 0);
   const menuWidth = 224;
   const windowHeight = window.innerHeight;
   const windowWidth = window.innerWidth;

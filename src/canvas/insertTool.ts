@@ -1,4 +1,5 @@
 import { enableSelectionTool, enableRectangleShapeTool, enableEllipseShapeTool, enableStarShapeTool, enablePolygonShapeTool, enableLineShapeTool, enableRoundedShapeTool, enableArtboardTool, enableTextTool } from '../store/actions/tool';
+import { resetCanvasSettings } from '../store/actions/canvasSettings';
 import store from '../store';
 
 class InsertTool {
@@ -42,6 +43,10 @@ class InsertTool {
               } else {
                 store.dispatch(enableRectangleShapeTool());
               }
+            }
+          } else {
+            if (event.modifiers.meta) {
+              store.dispatch(resetCanvasSettings());
             }
           }
           break;

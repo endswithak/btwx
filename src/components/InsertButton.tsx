@@ -13,6 +13,7 @@ import TopbarDropdownButton from './TopbarDropdownButton';
 
 interface InsertButtonProps {
   tool: ToolState;
+  insertKnobOpen: boolean;
   enableRectangleShapeTool(): ToolTypes;
   enableEllipseShapeTool(): ToolTypes;
   enableStarShapeTool(): ToolTypes;
@@ -28,6 +29,7 @@ interface InsertButtonProps {
 const InsertButton = (props: InsertButtonProps): ReactElement => {
   const {
     tool,
+    insertKnobOpen,
     enableRectangleShapeTool,
     enableEllipseShapeTool,
     enableSelectionTool,
@@ -101,7 +103,7 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
     <TopbarDropdownButton
       label='Insert'
       icon={getInsertButtonIcon()}
-      isActive={ tool.type === 'Artboard' || tool.type === 'Shape' || tool.type === 'Text' }
+      isActive={ tool.type === 'Artboard' || tool.type === 'Shape' || tool.type === 'Text' || insertKnobOpen }
       options={[{
         label: 'Artboard',
         onClick: tool.type === 'Artboard' ? enableSelectionTool : enableArtboardTool,
@@ -152,9 +154,11 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   tool: ToolState;
+  insertKnobOpen: boolean;
 } => {
-  const { tool } = state;
-  return { tool };
+  const { tool, insertKnob } = state;
+  const insertKnobOpen = insertKnob.isActive;
+  return { tool, insertKnobOpen };
 };
 
 export default connect(

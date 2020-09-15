@@ -18,6 +18,7 @@ import {
   SET_TWEEN_DRAWER_LAYERS_WIDTH,
   SET_CANVAS_MEASURING,
   SET_CANVAS_FOCUSING,
+  RESET_CANVAS_SETTINGS,
   CanvasSettingsTypes,
 } from '../actionTypes/canvasSettings';
 
@@ -202,6 +203,19 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
       return {
         ...state,
         focusing: action.payload.focusing
+      };
+    }
+    case RESET_CANVAS_SETTINGS: {
+      return {
+        ...state,
+        resizing: false,
+        resizingType: null,
+        dragging: false,
+        selecting: false,
+        measuring: false,
+        focusing: true,
+        zooming: false,
+        zoomingType: null,
       };
     }
     default:

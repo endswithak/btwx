@@ -14,6 +14,7 @@ import {
   SET_TWEEN_DRAWER_LAYERS_WIDTH,
   SET_CANVAS_MEASURING,
   SET_CANVAS_FOCUSING,
+  RESET_CANVAS_SETTINGS,
   SetCanvasMatrixPayload,
   SetCanvasResizingPayload,
   SetCanvasDraggingPayload,
@@ -29,7 +30,7 @@ import {
   SetTweenDrawerLayersWidthPayload,
   SetCanvasMeasuringPayload,
   SetCanvasFocusingPayload,
-  CanvasSettingsTypes
+  CanvasSettingsTypes, ResetCanvasSettings
 } from '../actionTypes/canvasSettings';
 
 export const setCanvasMatrix = (payload: SetCanvasMatrixPayload): CanvasSettingsTypes => ({
@@ -105,4 +106,8 @@ export const setCanvasMeasuring = (payload: SetCanvasMeasuringPayload): CanvasSe
 export const setCanvasFocusing = (payload: SetCanvasFocusingPayload): CanvasSettingsTypes => ({
   type: SET_CANVAS_FOCUSING,
   payload
+});
+
+export const resetCanvasSettings = (): CanvasSettingsTypes => ({
+  type: RESET_CANVAS_SETTINGS
 });

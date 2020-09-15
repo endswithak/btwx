@@ -25,6 +25,21 @@
   &::selection
     background: none
 
+.c-context-menu__divider
+  display: flex
+  align-items: center
+  justify-content: center
+  position: relative
+  width: 100%
+  height: $unit * 2
+  padding: 0 $unit * 6
+
+  div
+    +absolute-full
+    height: 1px
+    top: 50%
+    transform: translateY(-50%)
+
 .c-context-menu__item
   cursor: pointer
 

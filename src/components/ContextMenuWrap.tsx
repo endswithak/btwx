@@ -68,6 +68,9 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
             });
           }
         },{
+          type: 'MenuDivider',
+          hidden: contextMenu.id && contextMenu.id === 'page'
+        },{
           type: 'MenuItem',
           text: 'Select',
           hidden: contextMenu.id && contextMenu.id === 'page',
@@ -118,6 +121,9 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
             }
           }
         },{
+          type: 'MenuDivider',
+          hidden: contextMenu.id && contextMenu.id === 'page'
+        },{
           type: 'MenuItem',
           text: 'Delete',
           hidden: contextMenu.id && contextMenu.id === 'page',
@@ -129,6 +135,9 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
               removeLayers({layers: [contextMenu.id]});
             }
           }
+        },{
+          type: 'MenuDivider',
+          hidden: contextMenu.id && contextMenu.id === 'page'
         },{
           type: 'MenuItem',
           text: 'Move Forward',
@@ -156,6 +165,9 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
             }
           }
         },{
+          type: 'MenuDivider',
+          hidden: contextMenu.id && contextMenu.id === 'page'
+        },{
           type: 'MenuItem',
           text: 'Group',
           hidden: contextMenu.id && contextMenu.id === 'page',
@@ -180,6 +192,9 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
               ungroupLayers({layers: [contextMenu.id]});
             }
           }
+        },{
+          type: 'MenuDivider',
+          hidden: contextMenu.id && contextMenu.id === 'page'
         },{
           type: 'MenuItem',
           text: 'Mask',
@@ -208,6 +223,8 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
               type: 'LayerEdit'
             });
           }
+        },{
+          type: 'MenuDivider'
         },{
           type: 'MenuItem',
           text: 'Click',
@@ -309,6 +326,8 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
               type: 'TweenEvent'
             });
           }
+        },{
+          type: 'MenuDivider'
         }, ...tweenDestinations] : tweenDestinations;
       }
       case 'ArtboardCustomPreset': {
@@ -343,7 +362,7 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
         return null;
       }
       case 'TweenEventDestination': {
-        return `Need two or more artboards to create ${APP_NAME} event.`;
+        return `Need two or more artboards to create a ${APP_NAME} event.`;
       }
       case 'ArtboardCustomPreset': {
         return null;

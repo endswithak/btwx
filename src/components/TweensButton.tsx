@@ -28,7 +28,7 @@ const TweensButton = (props: TweensButtonProps): ReactElement => {
 
   return (
     <TopbarButton
-      label='Tweens'
+      label='Events'
       onClick={handleTweensClick}
       icon='tweens'
       isActive={isTweenDrawerOpen} />

@@ -13,6 +13,7 @@ export const SET_TWEEN_DRAWER_HEIGHT = 'SET_TWEEN_DRAWER_HEIGHT';
 export const SET_TWEEN_DRAWER_LAYERS_WIDTH = 'SET_TWEEN_DRAWER_LAYERS_WIDTH';
 export const SET_CANVAS_MEASURING = 'SET_CANVAS_MEASURING';
 export const SET_CANVAS_FOCUSING = 'SET_CANVAS_FOCUSING';
+export const RESET_CANVAS_SETTINGS = 'RESET_CANVAS_SETTINGS';
 
 export interface SetCanvasMatrixPayload {
   matrix: number[];
@@ -157,6 +158,10 @@ export interface SetCanvasFocusing {
   payload: SetCanvasFocusingPayload;
 }
 
+export interface ResetCanvasSettings {
+  type: typeof RESET_CANVAS_SETTINGS;
+}
+
 export type CanvasSettingsTypes = SetCanvasMatrix |
                                   SetCanvasResizing |
                                   SetCanvasSelecting |
@@ -171,4 +176,5 @@ export type CanvasSettingsTypes = SetCanvasMatrix |
                                   SetTweenDrawerHeight |
                                   SetTweenDrawerLayersWidth |
                                   SetCanvasMeasuring |
-                                  SetCanvasFocusing;
+                                  SetCanvasFocusing |
+                                  ResetCanvasSettings;

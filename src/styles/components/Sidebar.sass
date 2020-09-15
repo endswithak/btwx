@@ -18,6 +18,55 @@
   height: 100%
   overflow-y: scroll
 
+.c-sidebar__empty-state
+  +absolute-full
+
+.c-sidebar-empty-state__inner
+  width: 100%
+  height: 100%
+  display: flex
+  align-items: center
+  justify-content: center
+  flex-direction: column
+
+.c-sidebar-empty-state__icon
+  display: flex
+  align-items: center
+  justify-content: center
+  width: $unit * 8
+  height: $unit * 8
+
+.c-sidebar-empty-state__text,
+.c-sidebar-empty-state__detail
+  font-family: $fontFamily
+  text-align: center
+
+.c-sidebar-empty-state__text
+  font-size: $fontSizeMd
+  line-height: $unit * 10
+
+.c-sidebar-empty-state__detail
+  font-size: $fontSizeSm
+  line-height: $unit * 6
+
+.c-sidebar-empty-state__action
+  display: flex
+  align-items: center
+  justify-content: center
+  padding: $unit * 4 0
+
+  button
+    font-family: $fontFamily
+    text-align: center
+    display: flex
+    align-items: center
+    justify-content: center
+    font-size: $fontSizeSm
+    line-height: $unit * 8
+    padding: 0 $unit * 2
+    height: $unit * 8
+    border-radius: $unit
+
 .c-sidebar--left
   .c-sidebar__scroll
     top: $unit / 2

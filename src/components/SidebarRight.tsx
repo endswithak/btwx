@@ -1,9 +1,10 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
+import { RootState } from '../store/reducers';
 import Sidebar from './Sidebar';
 import SidebarLayerStyles from './SidebarLayerStyles';
-import { RootState } from '../store/reducers';
 import SidebarArtboardSizes from './SidebarArtboardSizes';
+import SidebarEmptyState from './SidebarEmptyState';
 
 interface SidebarRightProps {
   isOpen: boolean;
@@ -20,6 +21,14 @@ const SidebarRight = (props: SidebarRightProps): ReactElement => {
     ? <Sidebar
         width={sidebarWidth}
         position='right'>
+        {
+          toolType !== 'Artboard' && selected.length === 0
+          ? <SidebarEmptyState
+              icon='right-sidebar'
+              text='Styles'
+              detail={<span>View and edit document<br/> layer styles here.</span>} />
+          : null
+        }
         {
           ready && toolType !== 'Artboard' && selected.length > 0
           ? <SidebarLayerStyles />

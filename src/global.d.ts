@@ -357,6 +357,7 @@ declare namespace em {
     light: string;
     lighter: string;
     lightest: string;
+    lightester: string;
     onPrimary: string;
     onAccent: string;
   }
