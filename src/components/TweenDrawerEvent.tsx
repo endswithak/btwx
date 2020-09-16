@@ -40,7 +40,7 @@ const TweenDrawerEvent = (props: TweenDrawerEventProps): ReactElement => {
       <div
         ref={eventRef}
         className='c-tween-drawer-event'
-        onScroll={handleScroll}>
+        onScroll={tweenEventLayers.allIds.length > 0 ? handleScroll : null}>
         <TweenDrawerLayersDragHandle />
         <TweenDrawerEventLayers
           scrollLayer={scrollLayer} />

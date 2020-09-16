@@ -4,8 +4,14 @@ import Icon from './Icon';
 
 interface TweenDrawerEventLayersProps {
   text?: string;
-  icon?: string;
+  icon?: {
+    name?: string;
+    shapeId?: string;
+    small?: boolean;
+    style?: any;
+  };
   layerItem?: em.Layer;
+  maskItem?: em.Layer;
   sticky?: boolean;
   onMouseEnter?(): void;
   onMouseLeave?(): void;
@@ -15,7 +21,7 @@ interface TweenDrawerEventLayersProps {
 
 const TweenDrawerEventLayersHeader = (props: TweenDrawerEventLayersProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { text, icon, onMouseEnter, onMouseLeave, onClick, onIconClick, sticky, layerItem } = props;
+  const { text, icon, onMouseEnter, onMouseLeave, onClick, onIconClick, sticky, layerItem, maskItem } = props;
 
   return (
     <div
@@ -36,9 +42,9 @@ const TweenDrawerEventLayersHeader = (props: TweenDrawerEventLayersProps): React
           className='c-tween-drawer-event-layer__icon'
           onClick={onIconClick}>
           <Icon
-            name={icon}
-            shapeId={layerItem ? layerItem.id : null}
-            small
+            name={icon.name}
+            shapeId={icon.shapeId}
+            small={icon.small}
             style={{
               fill: theme.text.lighter,
               stroke: layerItem && layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line'

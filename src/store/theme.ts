@@ -15,13 +15,13 @@ const lightBgMin = '#f7f7f7';
 const lightBgMax = '#ccc';
 const lightBgScale = createScale(lightBgMin, lightBgMax, 7);
 
-const darkTextMin = 'rgba(255,255,255,0.2)';
+const darkTextMin = 'rgba(255,255,255,0.25)';
 const darkTextMax = 'rgba(255,255,255,1)';
-const darkTextScale = createScale(darkTextMin, darkTextMax, 5);
+const darkTextScale = createScale(darkTextMin, darkTextMax, 4);
 
-const lightTextMin = 'rgba(0,0,0,0.2)';
+const lightTextMin = 'rgba(0,0,0,0.25)';
 const lightTextMax = 'rgba(0,0,0,1)';
-const lightTextScale = createScale(lightTextMin, lightTextMax, 5);
+const lightTextScale = createScale(lightTextMin, lightTextMax, 4);
 
 const textOnColor = (color: string | chroma.Color) => {
   const contrast = chroma.contrast(color, darkTextMax);
@@ -58,11 +58,10 @@ const createLightBackgrounds = (scale: string[]): em.BackgroundScale => ({
 });
 
 const createText = (scale: string[], palette: em.Palette): em.TextScale => ({
-  base: scale[4],
-  light: scale[3],
-  lighter: scale[2],
-  lightest: scale[1],
-  lightester: scale[0],
+  base: scale[3],
+  light: scale[2],
+  lighter: scale[1],
+  lightest: scale[0],
   onPrimary: textOnColor(palette.primary),
   onAccent: textOnColor(palette.accent),
 });

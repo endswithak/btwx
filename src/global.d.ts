@@ -20,6 +20,8 @@ declare namespace em {
 
   type TweenProp = 'image' | 'shape' | 'fill' | 'x' | 'y' | 'radius' | 'rotation' | 'width' | 'height' | 'stroke' | 'dashOffset' | 'dashArrayWidth' | 'dashArrayGap' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity' | 'fontSize' | 'lineHeight' | 'fromX' | 'fromY' | 'toX' | 'toY';
 
+  // type TweenProp = 'image' | 'shape' | 'fill' | 'fillGradientOriginX' | 'fillGradientOriginY' | 'fillGradientDestinationX' | 'fillGradientDestinationY' | 'x' | 'y' | 'radius' | 'rotation' | 'width' | 'height' | 'stroke' | 'strokeGradientOriginX' | 'strokeGradientOriginY' | 'strokeGradientDestinationX' | 'strokeGradientDestinationY' | 'dashOffset' | 'dashArrayWidth' | 'dashArrayGap' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity' | 'fontSize' | 'lineHeight' | 'fromX' | 'fromY' | 'toX' | 'toY';
+
   type TweenPropMap = { [K in TweenProp]: boolean; }
 
   type LayerType = 'Group' | 'Shape' | 'Page' | 'Artboard' | 'Text' | 'Image';
@@ -81,6 +83,8 @@ declare namespace em {
   type BooleanOperation = 'unite' | 'intersect' | 'subtract' | 'exclude' | 'divide';
 
   type TweenEventSort = 'none' | 'layer-asc' | 'layer-dsc' | 'event-asc' | 'event-dsc' | 'artboard-asc' | 'artboard-dsc' | 'destinationArtboard-asc' | 'destinationArtboard-dsc';
+
+  type FillStrokeTween = 'colorToColor' | 'nullToColor' | 'colorToNull' | 'gradientToGradient' | 'gradientToColor' | 'colorToGradient' | 'gradientToNull' | 'nullToGradient';
 
   interface Icon {
     name: string;
@@ -357,7 +361,6 @@ declare namespace em {
     light: string;
     lighter: string;
     lightest: string;
-    lightester: string;
     onPrimary: string;
     onAccent: string;
   }

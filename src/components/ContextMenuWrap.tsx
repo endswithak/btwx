@@ -224,8 +224,6 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
             });
           }
         },{
-          type: 'MenuDivider'
-        },{
           type: 'MenuItem',
           text: 'Click',
           onClick: (): void => {
@@ -326,8 +324,6 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
               type: 'TweenEvent'
             });
           }
-        },{
-          type: 'MenuDivider'
         }, ...tweenDestinations] : tweenDestinations;
       }
       case 'ArtboardCustomPreset': {

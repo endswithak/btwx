@@ -353,6 +353,13 @@ export const hasFillTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer)
   );
 };
 
+// export const hasFillGradientOriginXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+//   const fillTween = hasFillTween(layerItem, equivalentLayerItem);
+//   const hasFillGradientTween = fillTween && (layerItem.style.fill.fillType === 'gradient' || equivalentLayerItem.style.fill.fillType === 'gradient');
+//   const sameOriginX =  layerItem.style.fill.gradient.origin.x === equivalentLayerItem.style.fill.gradient.origin.x;
+//   return hasFillGradientTween && !sameOriginX;
+// };
+
 export const hasXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer, artboardLayerItem: em.Artboard, destinationArtboardLayerItem: em.Artboard): boolean => {
   const layerArtboardPosition = getPositionInArtboard(layerItem, artboardLayerItem);
   const equivalentArtboardPosition = getPositionInArtboard(equivalentLayerItem, destinationArtboardLayerItem);
@@ -607,6 +614,10 @@ export const getEquivalentTweenProps = (layerItem: em.Layer, equivalentLayerItem
   image: hasImageTween(layerItem, equivalentLayerItem),
   shape: hasShapeTween(layerItem, equivalentLayerItem),
   fill: hasFillTween(layerItem, equivalentLayerItem),
+  // fillGradientOriginX: hasFillGradientOriginXTween(layerItem, equivalentLayerItem),
+  // fillGradientOriginY: hasFillGradientOriginYTween(layerItem, equivalentLayerItem),
+  // fillGradientDestinationX: hasFillGradientDestinationXTween(layerItem, equivalentLayerItem),
+  // fillGradientDestinationY: hasFillGradientDestinationYTween(layerItem, equivalentLayerItem),
   x: hasXTween(layerItem, equivalentLayerItem, artboardLayerItem, destinationArtboardLayerItem),
   y: hasYTween(layerItem, equivalentLayerItem, artboardLayerItem, destinationArtboardLayerItem),
   rotation: hasRotationTween(layerItem, equivalentLayerItem),
@@ -614,6 +625,10 @@ export const getEquivalentTweenProps = (layerItem: em.Layer, equivalentLayerItem
   width: hasWidthTween(layerItem, equivalentLayerItem),
   height: hasHeightTween(layerItem, equivalentLayerItem),
   stroke: hasStrokeTween(layerItem, equivalentLayerItem),
+  // strokeGradientOriginX: hasStrokeGradientOriginXTween(layerItem, equivalentLayerItem),
+  // strokeGradientOriginY: hasStrokeGradientOriginYTween(layerItem, equivalentLayerItem),
+  // strokeGradientDestinationX: hasStrokeGradientDestinationXTween(layerItem, equivalentLayerItem),
+  // strokeGradientDestinationY: hasStrokeGradientDestinationYTween(layerItem, equivalentLayerItem),
   dashOffset: hasDashOffsetTween(layerItem, equivalentLayerItem),
   dashArrayWidth: hasDashArrayWidthTween(layerItem, equivalentLayerItem),
   dashArrayGap: hasDashArrayGapTween(layerItem, equivalentLayerItem),

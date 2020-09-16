@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
+import React, { ReactElement } from 'react';
 
 interface SidebarSectionRowProps {
   children: ReactElement | ReactElement[];

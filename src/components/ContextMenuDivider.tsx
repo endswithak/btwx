@@ -7,7 +7,8 @@ const ContextMenuDivider = (): ReactElement => {
   return (
     <div className='c-context-menu__divider'>
       <div style={{
-        background: theme.text.lightester
+        background: theme.text.lightest,
+        opacity: 0.44
       }} />
     </div>
   );

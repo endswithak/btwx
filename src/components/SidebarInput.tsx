@@ -64,7 +64,7 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
   };
 
   const handleMouseDown = (event: any) => {
-    if (event.target.nodeName !== 'INPUT') {
+    if (event.target !== inputRef.current) {
       if (inputRef.current) {
         inputRef.current.blur();
       }
@@ -75,7 +75,7 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
   }
 
   const handleKeyDown = (event: any) => {
-    if (event.key === 'Escape') {
+    if (event.key === 'Escape' || event.key === 'Tab') {
       if (inputRef.current) {
         inputRef.current.blur();
       }
