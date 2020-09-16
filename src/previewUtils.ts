@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import paper from 'paper';
 import tinyColor from 'tinycolor2';
 import { gsap } from 'gsap';
 import { MorphSVGPlugin } from "gsap/MorphSVGPlugin";
@@ -88,27 +87,57 @@ export const addShapeTween = (props: AddTweenProps): void => {
 export const updateGradients = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
   const isOriginLayerLine = originLayerItem.type === 'Shape' && (originLayerItem as em.Shape).shapeType === 'Line';
-  const isDestinationLayerLine = destinationLayerItem.type === 'Shape' && (destinationLayerItem as em.Shape).shapeType === 'Line';
-  if (originPaperLayer.fillColor && originPaperLayer.fillColor.gradient) {
-    const innerWidth = originPaperLayer.data.innerWidth ? originPaperLayer.data.innerWidth : (isOriginLayerLine ? originLayerItem.frame.width : originLayerItem.frame.innerWidth);
-    const innerHeight = originPaperLayer.data.innerHeight ? originPaperLayer.data.innerHeight : (isOriginLayerLine ? originLayerItem.frame.height : originLayerItem.frame.innerHeight);
-    const origin = originPaperLayer.data.fillGradientOrigin ? originPaperLayer.data.fillGradientOrigin : originLayerItem.style.fill.gradient.origin;
-    const destination = originPaperLayer.data.fillGradientDestination ? originPaperLayer.data.fillGradientDestination : originLayerItem.style.fill.gradient.destination;
-    const nextOrigin = new paperPreview.Point((origin.x * innerWidth) + originPaperLayer.position.x, (origin.y * innerHeight) + originPaperLayer.position.y);
-    const nextDestination = new paperPreview.Point((destination.x * innerWidth) + originPaperLayer.position.x, (destination.y * innerHeight) + originPaperLayer.position.y);
-    (originPaperLayer.fillColor as em.PaperGradientFill).origin = nextOrigin;
-    (originPaperLayer.fillColor as em.PaperGradientFill).destination = nextDestination;
-  }
-  if (originPaperLayer.strokeColor && originPaperLayer.strokeColor.gradient) {
-    const innerWidth = originPaperLayer.data.innerWidth ? originPaperLayer.data.innerWidth : (isOriginLayerLine ? originLayerItem.frame.width : originLayerItem.frame.innerWidth);
-    const innerHeight = originPaperLayer.data.innerHeight ? originPaperLayer.data.innerHeight : (isOriginLayerLine ? originLayerItem.frame.height : originLayerItem.frame.innerHeight);
-    const origin = originPaperLayer.data.strokeGradientOrigin ? originPaperLayer.data.strokeGradientOrigin : originLayerItem.style.fill.gradient.origin;
-    const destination = originPaperLayer.data.strokeGradientDestination ? originPaperLayer.data.strokeGradientDestination : originLayerItem.style.stroke.gradient.destination;
-    const nextOrigin = new paperPreview.Point((origin.x * innerWidth) + originPaperLayer.position.x, (origin.y * innerHeight) + originPaperLayer.position.y);
-    const nextDestination = new paperPreview.Point((destination.x * innerWidth) + originPaperLayer.position.x, (destination.y * innerHeight) + originPaperLayer.position.y);
-    (originPaperLayer.strokeColor as em.PaperGradientFill).origin = nextOrigin;
-    (originPaperLayer.strokeColor as em.PaperGradientFill).destination = nextDestination;
-  }
+  // if (originPaperLayer.fillColor && originPaperLayer.fillColor.gradient) {
+  //   if (originPaperLayer.data.fillGradientFit) {
+  //     const innerWidth = originPaperLayer.data.innerWidth ? originPaperLayer.data.innerWidth : (isOriginLayerLine ? originLayerItem.frame.width : originLayerItem.frame.innerWidth);
+  //     const innerHeight = originPaperLayer.data.innerHeight ? originPaperLayer.data.innerHeight : (isOriginLayerLine ? originLayerItem.frame.height : originLayerItem.frame.innerHeight);
+  //     (originPaperLayer.fillColor as em.PaperGradientFill).origin = new paperPreview.Point((destinationLayerItem.style.fill.gradient.origin.x * innerWidth) + originPaperLayer.position.x, (destinationLayerItem.style.fill.gradient.origin.y * innerHeight) + originPaperLayer.position.y);
+  //     (originPaperLayer.fillColor as em.PaperGradientFill).destination = new paperPreview.Point((destinationLayerItem.style.fill.gradient.destination.x * innerWidth) + originPaperLayer.position.x, (destinationLayerItem.style.fill.gradient.destination.y * innerHeight) + originPaperLayer.position.y);
+  //   } else {
+  //     const innerWidth = originPaperLayer.data.innerWidth ? originPaperLayer.data.innerWidth : (isOriginLayerLine ? originLayerItem.frame.width : originLayerItem.frame.innerWidth);
+  //     const innerHeight = originPaperLayer.data.innerHeight ? originPaperLayer.data.innerHeight : (isOriginLayerLine ? originLayerItem.frame.height : originLayerItem.frame.innerHeight);
+  //     const origin = originPaperLayer.data.fillGradientOrigin ? originPaperLayer.data.fillGradientOrigin : originLayerItem.style.fill.gradient.origin;
+  //     const destination = originPaperLayer.data.fillGradientDestination ? originPaperLayer.data.fillGradientDestination : originLayerItem.style.fill.gradient.destination;
+  //     const nextOrigin = new paperPreview.Point((origin.x * innerWidth) + originPaperLayer.position.x, (origin.y * innerHeight) + originPaperLayer.position.y);
+  //     const nextDestination = new paperPreview.Point((destination.x * innerWidth) + originPaperLayer.position.x, (destination.y * innerHeight) + originPaperLayer.position.y);
+  //     (originPaperLayer.fillColor as em.PaperGradientFill).origin = nextOrigin;
+  //     (originPaperLayer.fillColor as em.PaperGradientFill).destination = nextDestination;
+  //   }
+  // }
+  // if (originPaperLayer.fillColor && originPaperLayer.fillColor.gradient) {
+  //   const innerWidth = originPaperLayer.data.innerWidth ? originPaperLayer.data.innerWidth : (isOriginLayerLine ? originLayerItem.frame.width : originLayerItem.frame.innerWidth);
+  //   const innerHeight = originPaperLayer.data.innerHeight ? originPaperLayer.data.innerHeight : (isOriginLayerLine ? originLayerItem.frame.height : originLayerItem.frame.innerHeight);
+  //   const origin = originPaperLayer.data.fillGradientOrigin ? originPaperLayer.data.fillGradientOrigin : originLayerItem.style.fill.gradient.origin;
+  //   const destination = originPaperLayer.data.fillGradientDestination ? originPaperLayer.data.fillGradientDestination : originLayerItem.style.fill.gradient.destination;
+  //   const nextOrigin = new paperPreview.Point((origin.x * innerWidth) + originPaperLayer.position.x, (origin.y * innerHeight) + originPaperLayer.position.y);
+  //   const nextDestination = new paperPreview.Point((destination.x * innerWidth) + originPaperLayer.position.x, (destination.y * innerHeight) + originPaperLayer.position.y);
+  //   (originPaperLayer.fillColor as em.PaperGradientFill).origin = nextOrigin;
+  //   (originPaperLayer.fillColor as em.PaperGradientFill).destination = nextDestination;
+  // }
+  // if (originPaperLayer.strokeColor && originPaperLayer.strokeColor.gradient) {
+  //   const innerWidth = originPaperLayer.data.innerWidth ? originPaperLayer.data.innerWidth : (isOriginLayerLine ? originLayerItem.frame.width : originLayerItem.frame.innerWidth);
+  //   const innerHeight = originPaperLayer.data.innerHeight ? originPaperLayer.data.innerHeight : (isOriginLayerLine ? originLayerItem.frame.height : originLayerItem.frame.innerHeight);
+  //   const origin = originPaperLayer.data.strokeGradientOrigin ? originPaperLayer.data.strokeGradientOrigin : originLayerItem.style.fill.gradient.origin;
+  //   const destination = originPaperLayer.data.strokeGradientDestination ? originPaperLayer.data.strokeGradientDestination : originLayerItem.style.stroke.gradient.destination;
+  //   const nextOrigin = new paperPreview.Point((origin.x * innerWidth) + originPaperLayer.position.x, (origin.y * innerHeight) + originPaperLayer.position.y);
+  //   const nextDestination = new paperPreview.Point((destination.x * innerWidth) + originPaperLayer.position.x, (destination.y * innerHeight) + originPaperLayer.position.y);
+  //   (originPaperLayer.strokeColor as em.PaperGradientFill).origin = nextOrigin;
+  //   (originPaperLayer.strokeColor as em.PaperGradientFill).destination = nextDestination;
+  // }
+  ['fill', 'stroke'].forEach((style: 'fill' | 'stroke') => {
+    if (originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] && originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient) {
+      const innerWidth = originPaperLayer.data.innerWidth ? originPaperLayer.data.innerWidth : (isOriginLayerLine ? originLayerItem.frame.width : originLayerItem.frame.innerWidth);
+      const innerHeight = originPaperLayer.data.innerHeight ? originPaperLayer.data.innerHeight : (isOriginLayerLine ? originLayerItem.frame.height : originLayerItem.frame.innerHeight);
+      const originX = originPaperLayer.data[`${style}GradientOriginX`] ? originPaperLayer.data[`${style}GradientOriginX`] : originLayerItem.style[style].gradient.origin.x;
+      const originY = originPaperLayer.data[`${style}GradientOriginY`] ? originPaperLayer.data[`${style}GradientOriginY`] : originLayerItem.style[style].gradient.origin.y;
+      const destinationX = originPaperLayer.data[`${style}GradientDestinationX`] ? originPaperLayer.data[`${style}GradientDestinationX`] : originLayerItem.style[style].gradient.destination.x;
+      const destinationY = originPaperLayer.data[`${style}GradientDestinationY`] ? originPaperLayer.data[`${style}GradientDestinationY`] : originLayerItem.style[style].gradient.destination.y;
+      const nextOrigin = new paperPreview.Point((originX * innerWidth) + originPaperLayer.position.x, (originY * innerHeight) + originPaperLayer.position.y);
+      const nextDestination = new paperPreview.Point((destinationX * innerWidth) + originPaperLayer.position.x, (destinationY * innerHeight) + originPaperLayer.position.y);
+      (originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).origin = nextOrigin;
+      (originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).destination = nextDestination;
+    }
+  });
 };
 
 export const getFSTweenType = (props: AddTweenProps, style: 'fill' | 'stroke'): em.FillStrokeTween => {
@@ -207,47 +236,47 @@ export const addFSTween = (props: AddTweenProps, style: 'fill' | 'stroke'): void
   }
 };
 
-export const addFSGradientOriginTween = (props: AddTweenProps, style: 'fill' | 'stroke'): void => {
-  const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
-  timelineTweenProps[`${tween.prop}-origin-x`] = originLayerItem.style[style].gradient.origin.x;
-  timelineTweenProps[`${tween.prop}-origin-y`] = originLayerItem.style[style].gradient.origin.y;
-  timeline.to(timelineTweenProps, {
-    duration: tween.duration,
-    [`${tween.prop}-origin-x`]: destinationLayerItem.style[style].gradient.origin.x,
-    [`${tween.prop}-origin-y`]: destinationLayerItem.style[style].gradient.origin.y,
-    onUpdate: () => {
-      const innerWidth = originPaperLayer.data.innerWidth ? originPaperLayer.data.innerWidth : (originLayerItem.type === 'Shape' && (originLayerItem as em.Shape).shapeType === 'Line' ? originLayerItem.frame.width : originLayerItem.frame.innerWidth);
-      const innerHeight = originPaperLayer.data.innerHeight ? originPaperLayer.data.innerHeight : (originLayerItem.type === 'Shape' && (originLayerItem as em.Shape).shapeType === 'Line' ? originLayerItem.frame.height : originLayerItem.frame.innerHeight);
-      const nextOriginX = timelineTweenProps[`${tween.prop}-origin-x`];
-      const nextOriginY = timelineTweenProps[`${tween.prop}-origin-y`];
-      const nextOrigin = new paperPreview.Point((nextOriginX * innerWidth) + originPaperLayer.position.x, (nextOriginY * innerHeight) + originPaperLayer.position.y);
-      (originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).origin = nextOrigin;
-      originPaperLayer.data[`${style}GradientOrigin`] = { x: nextOriginX, y: nextOriginY };
-    },
-    ease: tween.ease,
-  }, tween.delay);
-};
+// export const addFSGradientOriginTween = (props: AddTweenProps, style: 'fill' | 'stroke'): void => {
+//   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
+//   timelineTweenProps[`${tween.prop}-origin-x`] = originLayerItem.style[style].gradient.origin.x;
+//   timelineTweenProps[`${tween.prop}-origin-y`] = originLayerItem.style[style].gradient.origin.y;
+//   timeline.to(timelineTweenProps, {
+//     duration: tween.duration,
+//     [`${tween.prop}-origin-x`]: destinationLayerItem.style[style].gradient.origin.x,
+//     [`${tween.prop}-origin-y`]: destinationLayerItem.style[style].gradient.origin.y,
+//     onUpdate: () => {
+//       const innerWidth = originPaperLayer.data.innerWidth ? originPaperLayer.data.innerWidth : (originLayerItem.type === 'Shape' && (originLayerItem as em.Shape).shapeType === 'Line' ? originLayerItem.frame.width : originLayerItem.frame.innerWidth);
+//       const innerHeight = originPaperLayer.data.innerHeight ? originPaperLayer.data.innerHeight : (originLayerItem.type === 'Shape' && (originLayerItem as em.Shape).shapeType === 'Line' ? originLayerItem.frame.height : originLayerItem.frame.innerHeight);
+//       const nextOriginX = timelineTweenProps[`${tween.prop}-origin-x`];
+//       const nextOriginY = timelineTweenProps[`${tween.prop}-origin-y`];
+//       const nextOrigin = new paperPreview.Point((nextOriginX * innerWidth) + originPaperLayer.position.x, (nextOriginY * innerHeight) + originPaperLayer.position.y);
+//       (originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).origin = nextOrigin;
+//       originPaperLayer.data[`${style}GradientOrigin`] = { x: nextOriginX, y: nextOriginY };
+//     },
+//     ease: tween.ease,
+//   }, tween.delay);
+// };
 
-export const addFSGradientDestinationTween = (props: AddTweenProps, style: 'fill' | 'stroke'): void => {
-  const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
-  timelineTweenProps[`${tween.prop}-destination-x`] = originLayerItem.style[style].gradient.destination.x;
-  timelineTweenProps[`${tween.prop}-destination-y`] = originLayerItem.style[style].gradient.destination.y;
-  timeline.to(timelineTweenProps, {
-    duration: tween.duration,
-    [`${tween.prop}-destination-x`]: destinationLayerItem.style[style].gradient.destination.x,
-    [`${tween.prop}-destination-y`]: destinationLayerItem.style[style].gradient.destination.y,
-    onUpdate: () => {
-      const innerWidth = originPaperLayer.data.innerWidth ? originPaperLayer.data.innerWidth : (originLayerItem.type === 'Shape' && (originLayerItem as em.Shape).shapeType === 'Line' ? originLayerItem.frame.width : originLayerItem.frame.innerWidth);
-      const innerHeight = originPaperLayer.data.innerHeight ? originPaperLayer.data.innerHeight : (originLayerItem.type === 'Shape' && (originLayerItem as em.Shape).shapeType === 'Line' ? originLayerItem.frame.height : originLayerItem.frame.innerHeight);
-      const nextDestinationX = timelineTweenProps[`${tween.prop}-destination-x`];
-      const nextDestinationY = timelineTweenProps[`${tween.prop}-destination-y`];
-      const nextDestination = new paperPreview.Point((nextDestinationX * innerWidth) + originPaperLayer.position.x, (nextDestinationY * innerHeight) + originPaperLayer.position.y);
-      (originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).destination = nextDestination;
-      originPaperLayer.data[`${style}GradientDestination`] = { x: nextDestinationX, y: nextDestinationY };
-    },
-    ease: tween.ease,
-  }, tween.delay);
-};
+// export const addFSGradientDestinationTween = (props: AddTweenProps, style: 'fill' | 'stroke'): void => {
+//   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
+//   timelineTweenProps[`${tween.prop}-destination-x`] = originLayerItem.style[style].gradient.destination.x;
+//   timelineTweenProps[`${tween.prop}-destination-y`] = originLayerItem.style[style].gradient.destination.y;
+//   timeline.to(timelineTweenProps, {
+//     duration: tween.duration,
+//     [`${tween.prop}-destination-x`]: destinationLayerItem.style[style].gradient.destination.x,
+//     [`${tween.prop}-destination-y`]: destinationLayerItem.style[style].gradient.destination.y,
+//     onUpdate: () => {
+//       const innerWidth = originPaperLayer.data.innerWidth ? originPaperLayer.data.innerWidth : (originLayerItem.type === 'Shape' && (originLayerItem as em.Shape).shapeType === 'Line' ? originLayerItem.frame.width : originLayerItem.frame.innerWidth);
+//       const innerHeight = originPaperLayer.data.innerHeight ? originPaperLayer.data.innerHeight : (originLayerItem.type === 'Shape' && (originLayerItem as em.Shape).shapeType === 'Line' ? originLayerItem.frame.height : originLayerItem.frame.innerHeight);
+//       const nextDestinationX = timelineTweenProps[`${tween.prop}-destination-x`];
+//       const nextDestinationY = timelineTweenProps[`${tween.prop}-destination-y`];
+//       const nextDestination = new paperPreview.Point((nextDestinationX * innerWidth) + originPaperLayer.position.x, (nextDestinationY * innerHeight) + originPaperLayer.position.y);
+//       (originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).destination = nextDestination;
+//       originPaperLayer.data[`${style}GradientDestination`] = { x: nextDestinationX, y: nextDestinationY };
+//     },
+//     ease: tween.ease,
+//   }, tween.delay);
+// };
 
 export const addColorToColorFSTween = (props: AddTweenProps, style: 'fill' | 'stroke'): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
@@ -291,10 +320,10 @@ export const addColorToNullFSTween = (props: AddTweenProps, style: 'fill' | 'str
 
 export const addGradientToGradientFSTween = (props: AddTweenProps, style: 'fill' | 'stroke'): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
-  // origin
-  addFSGradientOriginTween(props, style);
-  // destination
-  addFSGradientDestinationTween(props, style);
+  // // origin
+  // addFSGradientOriginTween(props, style);
+  // // destination
+  // addFSGradientDestinationTween(props, style);
   // stops
   const layerStopCount = originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops.length;
   const destinationStopCount = destinationPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops.length;
@@ -324,13 +353,84 @@ export const addGradientToGradientFSTween = (props: AddTweenProps, style: 'fill'
   });
 };
 
+export const addGradientOriginXFSTween = (props: AddTweenProps, style: 'fill' | 'stroke'): void => {
+  const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
+  timelineTweenProps[tween.prop] = originLayerItem.style[style].gradient.origin.x;
+  timeline.to(timelineTweenProps, {
+    duration: tween.duration,
+    [tween.prop]: destinationLayerItem.style[style].gradient.origin.x,
+    onUpdate: () => {
+      const innerWidth = originPaperLayer.data.innerWidth ? originPaperLayer.data.innerWidth : (originLayerItem.type === 'Shape' && (originLayerItem as em.Shape).shapeType === 'Line' ? originLayerItem.frame.width : originLayerItem.frame.innerWidth);
+      const innerHeight = originPaperLayer.data.innerHeight ? originPaperLayer.data.innerHeight : (originLayerItem.type === 'Shape' && (originLayerItem as em.Shape).shapeType === 'Line' ? originLayerItem.frame.height : originLayerItem.frame.innerHeight);
+      const originX = timelineTweenProps[tween.prop];
+      const originY = originPaperLayer.data[`${style}GradientOriginY`] ? originPaperLayer.data[`${style}GradientOriginY`] : originLayerItem.style[style].gradient.origin.y;
+      const nextOrigin = new paperPreview.Point((originX * innerWidth) + originPaperLayer.position.x, (originY * innerHeight) + originPaperLayer.position.y);
+      (originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).origin = nextOrigin;
+      originPaperLayer.data[tween.prop] = originX;
+    },
+    ease: tween.ease,
+  }, tween.delay);
+};
+
+export const addGradientOriginYFSTween = (props: AddTweenProps, style: 'fill' | 'stroke'): void => {
+  const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
+  timelineTweenProps[tween.prop] = originLayerItem.style[style].gradient.origin.y;
+  timeline.to(timelineTweenProps, {
+    duration: tween.duration,
+    [tween.prop]: destinationLayerItem.style[style].gradient.origin.y,
+    onUpdate: () => {
+      const innerWidth = originPaperLayer.data.innerWidth ? originPaperLayer.data.innerWidth : (originLayerItem.type === 'Shape' && (originLayerItem as em.Shape).shapeType === 'Line' ? originLayerItem.frame.width : originLayerItem.frame.innerWidth);
+      const innerHeight = originPaperLayer.data.innerHeight ? originPaperLayer.data.innerHeight : (originLayerItem.type === 'Shape' && (originLayerItem as em.Shape).shapeType === 'Line' ? originLayerItem.frame.height : originLayerItem.frame.innerHeight);
+      const originX = originPaperLayer.data[`${style}GradientOriginX`] ? originPaperLayer.data[`${style}GradientOriginX`] : originLayerItem.style[style].gradient.origin.x;
+      const originY = timelineTweenProps[tween.prop];
+      const nextOrigin = new paperPreview.Point((originX * innerWidth) + originPaperLayer.position.x, (originY * innerHeight) + originPaperLayer.position.y);
+      (originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).origin = nextOrigin;
+      originPaperLayer.data[tween.prop] = originY;
+    },
+    ease: tween.ease,
+  }, tween.delay);
+};
+
+export const addGradientDestinationXFSTween = (props: AddTweenProps, style: 'fill' | 'stroke'): void => {
+  const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
+  timelineTweenProps[tween.prop] = originLayerItem.style[style].gradient.destination.x;
+  timeline.to(timelineTweenProps, {
+    duration: tween.duration,
+    [tween.prop]: destinationLayerItem.style[style].gradient.destination.x,
+    onUpdate: () => {
+      const innerWidth = originPaperLayer.data.innerWidth ? originPaperLayer.data.innerWidth : (originLayerItem.type === 'Shape' && (originLayerItem as em.Shape).shapeType === 'Line' ? originLayerItem.frame.width : originLayerItem.frame.innerWidth);
+      const innerHeight = originPaperLayer.data.innerHeight ? originPaperLayer.data.innerHeight : (originLayerItem.type === 'Shape' && (originLayerItem as em.Shape).shapeType === 'Line' ? originLayerItem.frame.height : originLayerItem.frame.innerHeight);
+      const destinationX = timelineTweenProps[tween.prop];
+      const destinationY = originPaperLayer.data[`${style}GradientDestinationY`] ? originPaperLayer.data[`${style}GradientDestinationY`] : originLayerItem.style[style].gradient.destination.y;
+      const nextDestination = new paperPreview.Point((destinationX * innerWidth) + originPaperLayer.position.x, (destinationY * innerHeight) + originPaperLayer.position.y);
+      (originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).destination = nextDestination;
+      originPaperLayer.data[tween.prop] = destinationX;
+    },
+    ease: tween.ease,
+  }, tween.delay);
+};
+
+export const addGradientDestinationYFSTween = (props: AddTweenProps, style: 'fill' | 'stroke'): void => {
+  const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
+  timelineTweenProps[tween.prop] = originLayerItem.style[style].gradient.destination.y;
+  timeline.to(timelineTweenProps, {
+    duration: tween.duration,
+    [tween.prop]: destinationLayerItem.style[style].gradient.destination.y,
+    onUpdate: () => {
+      const innerWidth = originPaperLayer.data.innerWidth ? originPaperLayer.data.innerWidth : (originLayerItem.type === 'Shape' && (originLayerItem as em.Shape).shapeType === 'Line' ? originLayerItem.frame.width : originLayerItem.frame.innerWidth);
+      const innerHeight = originPaperLayer.data.innerHeight ? originPaperLayer.data.innerHeight : (originLayerItem.type === 'Shape' && (originLayerItem as em.Shape).shapeType === 'Line' ? originLayerItem.frame.height : originLayerItem.frame.innerHeight);
+      const destinationX = originPaperLayer.data[`${style}GradientDestinationX`] ? originPaperLayer.data[`${style}GradientDestinationX`] : originLayerItem.style[style].gradient.destination.x;
+      const destinationY = timelineTweenProps[tween.prop];
+      const nextDestination = new paperPreview.Point((destinationX * innerWidth) + originPaperLayer.position.x, (destinationY * innerHeight) + originPaperLayer.position.y);
+      (originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).destination = nextDestination;
+      originPaperLayer.data[tween.prop] = destinationY;
+    },
+    ease: tween.ease,
+  }, tween.delay);
+};
+
 export const addGradientToColorFSTween = (props: AddTweenProps, style: 'fill' | 'stroke'): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
-  // origin
-  addFSGradientOriginTween(props, style);
-  // destination
-  addFSGradientDestinationTween(props, style);
-  // stops
   originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops.forEach((stop, index) => {
     timelineTweenProps[`${tween.prop}-stop-${index}-color`] = originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.toCSS(true);
     timeline.to(timelineTweenProps, {
@@ -346,6 +446,10 @@ export const addGradientToColorFSTween = (props: AddTweenProps, style: 'fill' | 
 
 export const addColorToGradientFSTween = (props: AddTweenProps, style: 'fill' | 'stroke'): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
+  originPaperLayer.data[`${style}GradientOriginX`] = destinationLayerItem.style[style].gradient.origin.x;
+  originPaperLayer.data[`${style}GradientOriginY`] = destinationLayerItem.style[style].gradient.origin.y;
+  originPaperLayer.data[`${style}GradientDestinationX`] = destinationLayerItem.style[style].gradient.destination.x;
+  originPaperLayer.data[`${style}GradientDestinationY`] = destinationLayerItem.style[style].gradient.destination.y;
   // set origin layer styleColor to destination layer gradient
   // with all the stop colors as origin color
   originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] = {
@@ -361,11 +465,6 @@ export const addColorToGradientFSTween = (props: AddTweenProps, style: 'fill' | 
     origin: new paperPreview.Point((destinationLayerItem.style[style].gradient.origin.x * originPaperLayer.bounds.width) + originPaperLayer.position.x, (destinationLayerItem.style[style].gradient.origin.y * originPaperLayer.bounds.height) + originPaperLayer.position.y),
     destination: new paperPreview.Point((destinationLayerItem.style[style].gradient.destination.x * originPaperLayer.bounds.width) + originPaperLayer.position.x, (destinationLayerItem.style[style].gradient.destination.y * originPaperLayer.bounds.height) + originPaperLayer.position.y)
   } as em.PaperGradientFill;
-  // origin
-  addFSGradientOriginTween(props, style);
-  // destination
-  addFSGradientDestinationTween(props, style);
-  // stops
   originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops.forEach((stop, index) => {
     timelineTweenProps[`${tween.prop}-stop-${index}-color`] = originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.toCSS(true);
     timeline.to(timelineTweenProps, {
@@ -381,11 +480,6 @@ export const addColorToGradientFSTween = (props: AddTweenProps, style: 'fill' | 
 
 export const addGradientToNullFSTween = (props: AddTweenProps, style: 'fill' | 'stroke'): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
-  // origin
-  addFSGradientOriginTween(props, style);
-  // destination
-  addFSGradientDestinationTween(props, style);
-  // stops
   originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops.forEach((stop, index) => {
     timelineTweenProps[`${tween.prop}-stop-${index}-color`] = originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha;
     timeline.to(timelineTweenProps, {
@@ -401,6 +495,10 @@ export const addGradientToNullFSTween = (props: AddTweenProps, style: 'fill' | '
 
 export const addNullToGradientFSTween = (props: AddTweenProps, style: 'fill' | 'stroke'): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
+  originPaperLayer.data[`${style}GradientOriginX`] = destinationLayerItem.style[style].gradient.origin.x;
+  originPaperLayer.data[`${style}GradientOriginY`] = destinationLayerItem.style[style].gradient.origin.y;
+  originPaperLayer.data[`${style}GradientDestinationX`] = destinationLayerItem.style[style].gradient.destination.x;
+  originPaperLayer.data[`${style}GradientDestinationY`] = destinationLayerItem.style[style].gradient.destination.y;
   // set origin layer styleColor to destination layer gradient with opaque stops
   originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] = {
     gradient: {
@@ -413,10 +511,6 @@ export const addNullToGradientFSTween = (props: AddTweenProps, style: 'fill' | '
     origin: new paperPreview.Point((destinationLayerItem.style[style].gradient.origin.x * originPaperLayer.bounds.width) + originPaperLayer.position.x, (destinationLayerItem.style[style].gradient.origin.y * originPaperLayer.bounds.height) + originPaperLayer.position.y),
     destination: new paperPreview.Point((destinationLayerItem.style[style].gradient.destination.x * originPaperLayer.bounds.width) + originPaperLayer.position.x, (destinationLayerItem.style[style].gradient.destination.y * originPaperLayer.bounds.height) + originPaperLayer.position.y)
   } as em.PaperGradientFill;
-  // origin
-  addFSGradientOriginTween(props, style);
-  // destination
-  addFSGradientDestinationTween(props, style);
   // stops
   originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops.forEach((stop, index) => {
     timelineTweenProps[`${tween.prop}-stop-${index}-color`] = originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha;
@@ -816,101 +910,101 @@ export const addToYTween = (props: AddTweenProps): void => {
 
 export const addTweens = (tweenProps: AddTweenProps): void => {
   switch(tweenProps.tween.prop) {
-    case 'image': {
+    case 'image':
       addImageTween(tweenProps);
       break;
-    }
-    case 'shape': {
+    case 'shape':
       addShapeTween(tweenProps);
       break;
-    }
-    case 'fill': {
+    case 'fill':
       addFSTween(tweenProps, 'fill');
       break;
-    }
-    case 'stroke': {
+    case 'fillGradientOriginX':
+      addGradientOriginXFSTween(tweenProps, 'fill');
+      break;
+    case 'fillGradientOriginY':
+      addGradientOriginYFSTween(tweenProps, 'fill');
+      break;
+    case 'fillGradientDestinationX':
+      addGradientDestinationXFSTween(tweenProps, 'fill');
+      break;
+    case 'fillGradientDestinationY':
+      addGradientDestinationYFSTween(tweenProps, 'fill');
+      break;
+    case 'stroke':
       addFSTween(tweenProps, 'stroke');
       break;
-    }
-    case 'dashOffset': {
+    case 'strokeGradientOriginX':
+      addGradientOriginXFSTween(tweenProps, 'stroke');
+      break;
+    case 'strokeGradientOriginY':
+      addGradientOriginYFSTween(tweenProps, 'stroke');
+      break;
+    case 'strokeGradientDestinationX':
+      addGradientDestinationXFSTween(tweenProps, 'stroke');
+      break;
+    case 'strokeGradientDestinationY':
+      addGradientDestinationYFSTween(tweenProps, 'stroke');
+      break;
+    case 'dashOffset':
       addDashOffsetTween(tweenProps);
       break;
-    }
-    case 'dashArrayWidth': {
+    case 'dashArrayWidth':
       addDashArrayWidthTween(tweenProps);
       break;
-    }
-    case 'dashArrayGap': {
+    case 'dashArrayGap':
       addDashArrayGapTween(tweenProps);
       break;
-    }
-    case 'strokeWidth': {
+    case 'strokeWidth':
       addStrokeWidthTween(tweenProps);
       break;
-    }
-    case 'x': {
+    case 'x':
       addXTween(tweenProps);
       break;
-    }
-    case 'y': {
+    case 'y':
       addYTween(tweenProps);
       break;
-    }
-    case 'width': {
+    case 'width':
       addWidthTween(tweenProps);
       break;
-    }
-    case 'height': {
+    case 'height':
       addHeightTween(tweenProps);
       break;
-    }
-    case 'rotation': {
+    case 'rotation':
       addRotationTween(tweenProps);
       break;
-    }
-    case 'shadowColor': {
+    case 'shadowColor':
       addShadowColorTween(tweenProps);
       break;
-    }
-    case 'shadowOffsetX': {
+    case 'shadowOffsetX':
       addShadowXOffsetTween(tweenProps);
       break;
-    }
-    case 'shadowOffsetY': {
+    case 'shadowOffsetY':
       addShadowYOffsetTween(tweenProps);
       break;
-    }
-    case 'shadowBlur': {
+    case 'shadowBlur':
       addShadowBlurTween(tweenProps);
       break;
-    }
-    case 'opacity': {
+    case 'opacity':
       addOpacityTween(tweenProps);
       break;
-    }
-    case 'fontSize': {
+    case 'fontSize':
       addFontSizeTween(tweenProps);
       break;
-    }
-    case 'lineHeight': {
+    case 'lineHeight':
       addLineHeightTween(tweenProps);
       break;
-    }
-    case 'fromX': {
+    case 'fromX':
       addFromXTween(tweenProps);
       break;
-    }
-    case 'fromY': {
+    case 'fromY':
       addFromYTween(tweenProps);
       break;
-    }
-    case 'toX': {
+    case 'toX':
       addToXTween(tweenProps);
       break;
-    }
-    case 'toY': {
+    case 'toY':
       addToYTween(tweenProps);
       break;
-    }
   }
 };

@@ -147,13 +147,14 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
           setActiveArtboard({id: tweenEvent.destinationArtboard, scope: 2});
         }
       });
-      // add tweens to event timeline
+      // add tween timelines to event timeline
       Object.keys(tweenEventTweensById).forEach((tweenId) => {
-        timelineProps[tweenId] = {};
+        const tweenTimeline = gsap.timeline();
         const tween = tweenEventTweensById[tweenId];
+        timelineProps[tweenId] = {};
         previewUtils.addTweens({
           tween: tween,
-          timeline: timelines[eventId],
+          timeline: tweenTimeline,
           timelineTweenProps: timelineProps[tweenId],
           originLayerItem: tweenLayers.byId[tween.layer],
           destinationLayerItem: tweenLayerDestinations.byId[tween.destinationLayer],
@@ -164,6 +165,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
           originArtboardPaperLayer: paperTweenEventDestinationsById[tweenEvent.artboard],
           destinationArtboardPaperLayer: paperTweenEventDestinationsById[tweenEvent.destinationArtboard]
         });
+        timelines[eventId].add(tweenTimeline, 0);
       });
       // set event layer function
       eventLayerFunctions[eventId] = (e: paper.MouseEvent | paper.KeyEvent) => {

@@ -2327,7 +2327,7 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
 export const updateLayerTweensByProps = (state: LayerState, layerId: string, props: em.TweenProp[] | 'all'): LayerState => {
   let currentState = state;
   if (props === 'all') {
-    const tweenProps = ['image', 'shape', 'fill', 'x', 'y', 'radius', 'rotation', 'width', 'height', 'stroke', 'strokeDashWidth', 'strokeDashGap', 'strokeWidth', 'shadowColor', 'shadowOffsetX', 'shadowOffsetY', 'shadowBlur', 'opacity', 'fontSize', 'lineHeight', 'fromX', 'fromY', 'toX', 'toY'] as em.TweenProp[];
+    const tweenProps = ['image', 'shape', 'fill', 'fillGradientOriginX', 'fillGradientOriginY', 'fillGradientDestinationX', 'fillGradientDestinationY', 'x', 'y', 'radius', 'rotation', 'width', 'height', 'stroke', 'strokeGradientOriginX', 'strokeGradientOriginY', 'strokeGradientDestinationX', 'strokeGradientDestinationY', 'strokeDashWidth', 'strokeDashGap', 'strokeWidth', 'shadowColor', 'shadowOffsetX', 'shadowOffsetY', 'shadowBlur', 'opacity', 'fontSize', 'lineHeight', 'fromX', 'fromY', 'toX', 'toY'] as em.TweenProp[];
     currentState = tweenProps.reduce((result: LayerState, current: em.TweenProp) => {
       result = updateLayerTweensByProp(result, layerId, current);
       return result;
@@ -2787,7 +2787,7 @@ export const enableLayerFill = (state: LayerState, action: EnableLayerFill): Lay
       }
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fill']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fill', 'fillGradientOriginX', 'fillGradientOriginY', 'fillGradientDestinationX', 'fillGradientDestinationY']);
   return currentState;
 };
 
@@ -2820,7 +2820,7 @@ export const disableLayerFill = (state: LayerState, action: DisableLayerFill): L
       }
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fill']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fill', 'fillGradientOriginX', 'fillGradientOriginY', 'fillGradientDestinationX', 'fillGradientDestinationY']);
   return currentState;
 };
 
@@ -2856,7 +2856,7 @@ export const setLayerFillColor = (state: LayerState, action: SetLayerFillColor):
       }
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fill']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fill', 'fillGradientOriginX', 'fillGradientOriginY', 'fillGradientDestinationX', 'fillGradientDestinationY']);
   return currentState;
 };
 
@@ -2902,7 +2902,7 @@ export const setLayerFill = (state: LayerState, action: SetLayerFill): LayerStat
       }
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fill']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fill', 'fillGradientOriginX', 'fillGradientOriginY', 'fillGradientDestinationX', 'fillGradientDestinationY']);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -2943,7 +2943,7 @@ export const setLayerFillType = (state: LayerState, action: SetLayerFillType): L
       }
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fill']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fill', 'fillGradientOriginX', 'fillGradientOriginY', 'fillGradientDestinationX', 'fillGradientDestinationY']);
   return currentState;
 };
 
@@ -3074,7 +3074,7 @@ export const setLayerGradientOrigin = (state: LayerState, action: SetLayerGradie
       }
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, [action.payload.prop]);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, [action.payload.prop, `${action.payload.prop}GradientOriginX`, `${action.payload.prop}GradientOriginY`] as any);
   return currentState;
 };
 
@@ -3120,7 +3120,7 @@ export const setLayerGradientDestination = (state: LayerState, action: SetLayerG
       }
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, [action.payload.prop]);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, [action.payload.prop, `${action.payload.prop}GradientDestinationX`, `${action.payload.prop}GradientDestinationY`] as any);
   return currentState;
 };
 
@@ -3423,7 +3423,7 @@ export const enableLayerStroke = (state: LayerState, action: EnableLayerStroke):
       }
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['stroke', 'strokeWidth', 'dashOffset', 'dashArrayWidth', 'dashArrayGap']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['stroke', 'strokeGradientOriginX', 'strokeGradientOriginY', 'strokeGradientDestinationX', 'strokeGradientDestinationY', 'strokeWidth', 'dashOffset', 'dashArrayWidth', 'dashArrayGap']);
   return currentState;
 };
 
@@ -3456,7 +3456,7 @@ export const disableLayerStroke = (state: LayerState, action: DisableLayerStroke
       }
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['stroke', 'strokeWidth', 'dashOffset', 'dashArrayWidth', 'dashArrayGap']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['stroke', 'strokeGradientOriginX', 'strokeGradientOriginY', 'strokeGradientDestinationX', 'strokeGradientDestinationY', 'strokeWidth', 'dashOffset', 'dashArrayWidth', 'dashArrayGap']);
   return currentState;
 };
 
@@ -3492,7 +3492,7 @@ export const setLayerStrokeColor = (state: LayerState, action: SetLayerStrokeCol
       }
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['stroke']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['stroke', 'strokeGradientOriginX', 'strokeGradientOriginY', 'strokeGradientDestinationX', 'strokeGradientDestinationY', 'strokeGradientOriginX', 'strokeGradientOriginY', 'strokeGradientDestinationX', 'strokeGradientDestinationY']);
   return currentState;
 };
 
@@ -3541,7 +3541,7 @@ export const setLayerStrokeFillType = (state: LayerState, action: SetLayerStroke
       }
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['stroke']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['stroke', 'strokeGradientOriginX', 'strokeGradientOriginY', 'strokeGradientDestinationX', 'strokeGradientDestinationY', 'strokeGradientOriginX', 'strokeGradientOriginY', 'strokeGradientDestinationX', 'strokeGradientDestinationY']);
   return currentState;
 };
 

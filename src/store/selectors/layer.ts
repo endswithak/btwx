@@ -353,12 +353,33 @@ export const hasFillTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer)
   );
 };
 
-// export const hasFillGradientOriginXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
-//   const fillTween = hasFillTween(layerItem, equivalentLayerItem);
-//   const hasFillGradientTween = fillTween && (layerItem.style.fill.fillType === 'gradient' || equivalentLayerItem.style.fill.fillType === 'gradient');
-//   const sameOriginX =  layerItem.style.fill.gradient.origin.x === equivalentLayerItem.style.fill.gradient.origin.x;
-//   return hasFillGradientTween && !sameOriginX;
-// };
+export const hasFillGradientOriginXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  const fillTween = hasFillTween(layerItem, equivalentLayerItem);
+  const hasFillGradientTween = fillTween && (layerItem.style.fill.fillType === 'gradient' && equivalentLayerItem.style.fill.fillType === 'gradient');
+  const sameOriginX =  layerItem.style.fill.gradient.origin.x === equivalentLayerItem.style.fill.gradient.origin.x;
+  return hasFillGradientTween && !sameOriginX;
+};
+
+export const hasFillGradientOriginYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  const fillTween = hasFillTween(layerItem, equivalentLayerItem);
+  const hasFillGradientTween = fillTween && (layerItem.style.fill.fillType === 'gradient' && equivalentLayerItem.style.fill.fillType === 'gradient');
+  const sameOriginY =  layerItem.style.fill.gradient.origin.y === equivalentLayerItem.style.fill.gradient.origin.y;
+  return hasFillGradientTween && !sameOriginY;
+};
+
+export const hasFillGradientDestinationXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  const fillTween = hasFillTween(layerItem, equivalentLayerItem);
+  const hasFillGradientTween = fillTween && (layerItem.style.fill.fillType === 'gradient' && equivalentLayerItem.style.fill.fillType === 'gradient');
+  const sameOriginX =  layerItem.style.fill.gradient.destination.x === equivalentLayerItem.style.fill.gradient.destination.x;
+  return hasFillGradientTween && !sameOriginX;
+};
+
+export const hasFillGradientDestinationYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  const fillTween = hasFillTween(layerItem, equivalentLayerItem);
+  const hasFillGradientTween = fillTween && (layerItem.style.fill.fillType === 'gradient' && equivalentLayerItem.style.fill.fillType === 'gradient');
+  const sameOriginY =  layerItem.style.fill.gradient.destination.y === equivalentLayerItem.style.fill.gradient.destination.y;
+  return hasFillGradientTween && !sameOriginY;
+};
 
 export const hasXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer, artboardLayerItem: em.Artboard, destinationArtboardLayerItem: em.Artboard): boolean => {
   const layerArtboardPosition = getPositionInArtboard(layerItem, artboardLayerItem);
@@ -420,6 +441,34 @@ export const hasStrokeTween = (layerItem: em.Layer, equivalentLayerItem: em.Laye
       layerItem.style.stroke.fillType === 'gradient' && equivalentLayerItem.style.stroke.fillType === 'gradient' && !gradientsMatch(layerItem.style.stroke.gradient, equivalentLayerItem.style.stroke.gradient)
     )
   );
+};
+
+export const hasStrokeGradientOriginXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  const strokeTween = hasStrokeTween(layerItem, equivalentLayerItem);
+  const hasStrokeGradientTween = strokeTween && (layerItem.style.stroke.fillType === 'gradient' && equivalentLayerItem.style.stroke.fillType === 'gradient');
+  const sameOriginX =  layerItem.style.stroke.gradient.origin.x === equivalentLayerItem.style.stroke.gradient.origin.x;
+  return hasStrokeGradientTween && !sameOriginX;
+};
+
+export const hasStrokeGradientOriginYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  const strokeTween = hasStrokeTween(layerItem, equivalentLayerItem);
+  const hasStrokeGradientTween = strokeTween && (layerItem.style.stroke.fillType === 'gradient' && equivalentLayerItem.style.stroke.fillType === 'gradient');
+  const sameOriginY =  layerItem.style.stroke.gradient.origin.y === equivalentLayerItem.style.stroke.gradient.origin.y;
+  return hasStrokeGradientTween && !sameOriginY;
+};
+
+export const hasStrokeGradientDestinationXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  const strokeTween = hasStrokeTween(layerItem, equivalentLayerItem);
+  const hasStrokeGradientTween = strokeTween && (layerItem.style.stroke.fillType === 'gradient' && equivalentLayerItem.style.stroke.fillType === 'gradient');
+  const sameOriginX =  layerItem.style.stroke.gradient.destination.x === equivalentLayerItem.style.stroke.gradient.destination.x;
+  return hasStrokeGradientTween && !sameOriginX;
+};
+
+export const hasStrokeGradientDestinationYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+  const strokeTween = hasStrokeTween(layerItem, equivalentLayerItem);
+  const hasStrokeGradientTween = strokeTween && (layerItem.style.stroke.fillType === 'gradient' && equivalentLayerItem.style.stroke.fillType === 'gradient');
+  const sameOriginY =  layerItem.style.stroke.gradient.destination.y === equivalentLayerItem.style.stroke.gradient.destination.y;
+  return hasStrokeGradientTween && !sameOriginY;
 };
 
 export const hasDashOffsetTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
@@ -565,6 +614,14 @@ export const getEquivalentTweenProp = (layerItem: em.Layer, equivalentLayerItem:
       return hasShapeTween(layerItem, equivalentLayerItem);
     case 'fill':
       return hasFillTween(layerItem, equivalentLayerItem);
+    case 'fillGradientOriginX':
+      return hasFillGradientOriginXTween(layerItem, equivalentLayerItem);
+    case 'fillGradientOriginY':
+      return hasFillGradientOriginYTween(layerItem, equivalentLayerItem);
+    case 'fillGradientDestinationX':
+      return hasFillGradientDestinationXTween(layerItem, equivalentLayerItem);
+    case 'fillGradientDestinationY':
+      return hasFillGradientDestinationYTween(layerItem, equivalentLayerItem);
     case 'x':
       return hasXTween(layerItem, equivalentLayerItem, artboardLayerItem, destinationArtboardLayerItem);
     case 'y':
@@ -577,6 +634,14 @@ export const getEquivalentTweenProp = (layerItem: em.Layer, equivalentLayerItem:
       return hasHeightTween(layerItem, equivalentLayerItem);
     case 'stroke':
       return hasStrokeTween(layerItem, equivalentLayerItem);
+    case 'strokeGradientOriginX':
+      return hasStrokeGradientOriginXTween(layerItem, equivalentLayerItem);
+    case 'strokeGradientOriginY':
+      return hasStrokeGradientOriginYTween(layerItem, equivalentLayerItem);
+    case 'strokeGradientDestinationX':
+      return hasStrokeGradientDestinationXTween(layerItem, equivalentLayerItem);
+    case 'strokeGradientDestinationY':
+      return hasStrokeGradientDestinationYTween(layerItem, equivalentLayerItem);
     case 'dashOffset':
       return hasDashOffsetTween(layerItem, equivalentLayerItem);
     case 'dashArrayWidth':
@@ -614,10 +679,10 @@ export const getEquivalentTweenProps = (layerItem: em.Layer, equivalentLayerItem
   image: hasImageTween(layerItem, equivalentLayerItem),
   shape: hasShapeTween(layerItem, equivalentLayerItem),
   fill: hasFillTween(layerItem, equivalentLayerItem),
-  // fillGradientOriginX: hasFillGradientOriginXTween(layerItem, equivalentLayerItem),
-  // fillGradientOriginY: hasFillGradientOriginYTween(layerItem, equivalentLayerItem),
-  // fillGradientDestinationX: hasFillGradientDestinationXTween(layerItem, equivalentLayerItem),
-  // fillGradientDestinationY: hasFillGradientDestinationYTween(layerItem, equivalentLayerItem),
+  fillGradientOriginX: hasFillGradientOriginXTween(layerItem, equivalentLayerItem),
+  fillGradientOriginY: hasFillGradientOriginYTween(layerItem, equivalentLayerItem),
+  fillGradientDestinationX: hasFillGradientDestinationXTween(layerItem, equivalentLayerItem),
+  fillGradientDestinationY: hasFillGradientDestinationYTween(layerItem, equivalentLayerItem),
   x: hasXTween(layerItem, equivalentLayerItem, artboardLayerItem, destinationArtboardLayerItem),
   y: hasYTween(layerItem, equivalentLayerItem, artboardLayerItem, destinationArtboardLayerItem),
   rotation: hasRotationTween(layerItem, equivalentLayerItem),
@@ -625,10 +690,10 @@ export const getEquivalentTweenProps = (layerItem: em.Layer, equivalentLayerItem
   width: hasWidthTween(layerItem, equivalentLayerItem),
   height: hasHeightTween(layerItem, equivalentLayerItem),
   stroke: hasStrokeTween(layerItem, equivalentLayerItem),
-  // strokeGradientOriginX: hasStrokeGradientOriginXTween(layerItem, equivalentLayerItem),
-  // strokeGradientOriginY: hasStrokeGradientOriginYTween(layerItem, equivalentLayerItem),
-  // strokeGradientDestinationX: hasStrokeGradientDestinationXTween(layerItem, equivalentLayerItem),
-  // strokeGradientDestinationY: hasStrokeGradientDestinationYTween(layerItem, equivalentLayerItem),
+  strokeGradientOriginX: hasStrokeGradientOriginXTween(layerItem, equivalentLayerItem),
+  strokeGradientOriginY: hasStrokeGradientOriginYTween(layerItem, equivalentLayerItem),
+  strokeGradientDestinationX: hasStrokeGradientDestinationXTween(layerItem, equivalentLayerItem),
+  strokeGradientDestinationY: hasStrokeGradientDestinationYTween(layerItem, equivalentLayerItem),
   dashOffset: hasDashOffsetTween(layerItem, equivalentLayerItem),
   dashArrayWidth: hasDashArrayWidthTween(layerItem, equivalentLayerItem),
   dashArrayGap: hasDashArrayGapTween(layerItem, equivalentLayerItem),
