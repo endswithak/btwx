@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { evaluate } from 'mathjs';
+import mexp from 'math-expression-evaluator';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
 import { SetLayersStrokeDashArrayGapPayload, LayerTypes } from '../store/actionTypes/layer';
@@ -15,10 +15,10 @@ interface StrokeDashArrayGapInputProps {
 
 const StrokeDashArrayGapInput = (props: StrokeDashArrayGapInputProps): ReactElement => {
   const { selected, setLayersStrokeDashArrayGap, disabled, strokeDashArrayGapValue } = props;
-  const [dashArrayGap, setDashArrayGap] = useState(strokeDashArrayGapValue);
+  const [dashArrayGap, setDashArrayGap] = useState(strokeDashArrayGapValue !== 'multi' ? Math.round(strokeDashArrayGapValue) : strokeDashArrayGapValue);
 
   useEffect(() => {
-    setDashArrayGap(strokeDashArrayGapValue);
+    setDashArrayGap(strokeDashArrayGapValue !== 'multi' ? Math.round(strokeDashArrayGapValue) : strokeDashArrayGapValue);
   }, [strokeDashArrayGapValue, selected]);
 
   const handleChange = (e: any) => {
@@ -28,15 +28,15 @@ const StrokeDashArrayGapInput = (props: StrokeDashArrayGapInputProps): ReactElem
 
   const handleSubmit = (e: any) => {
     try {
-      const nextGap = evaluate(`${dashArrayGap}`);
-      if (nextGap !== strokeDashArrayGapValue && !isNaN(nextGap)) {
-        setLayersStrokeDashArrayGap({layers: selected, strokeDashArrayGap: nextGap});
-        setDashArrayGap(nextGap);
+      const nextGap = mexp.eval(`${dashArrayGap}`) as any;
+      if (nextGap !== strokeDashArrayGapValue) {
+        setLayersStrokeDashArrayGap({layers: selected, strokeDashArrayGap: Math.round(nextGap)});
+        setDashArrayGap(Math.round(nextGap));
       } else {
-        setDashArrayGap(strokeDashArrayGapValue);
+        setDashArrayGap(strokeDashArrayGapValue !== 'multi' ? Math.round(strokeDashArrayGapValue) : strokeDashArrayGapValue);
       }
     } catch(error) {
-      setDashArrayGap(strokeDashArrayGapValue);
+      setDashArrayGap(strokeDashArrayGapValue !== 'multi' ? Math.round(strokeDashArrayGapValue) : strokeDashArrayGapValue);
     }
   }
 

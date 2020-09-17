@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { evaluate } from 'mathjs';
+import mexp from 'math-expression-evaluator';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
 import { SetLayersRotationPayload, LayerTypes } from '../store/actionTypes/layer';
@@ -28,13 +28,13 @@ const RotationInput = (props: RotationInputProps): ReactElement => {
 
   const handleSubmit = (e: any) => {
     try {
-      let nextRotation = evaluate(`${rotation}`);
-      if (nextRotation !== rotationValue && !isNaN(nextRotation)) {
+      let nextRotation = mexp.eval(`${rotation}`) as any;
+      if (nextRotation !== rotationValue) {
         if (nextRotation >= 360 || nextRotation <= -360) {
           nextRotation = 0;
         }
-        setLayersRotation({layers: selected, rotation: nextRotation});
-        setRotation(nextRotation);
+        setLayersRotation({layers: selected, rotation: Math.round(nextRotation)});
+        setRotation(Math.round(nextRotation));
       } else {
         setRotation(rotationValue !== 'multi' ? Math.round(rotationValue) : rotationValue);
       }

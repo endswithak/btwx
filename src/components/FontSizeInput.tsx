@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { evaluate } from 'mathjs';
+import mexp from 'math-expression-evaluator';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
 import { SetLayersFontSizePayload, LayerTypes } from '../store/actionTypes/layer';
@@ -17,7 +17,7 @@ interface FontSizeInputProps {
 
 const FontSizeInput = (props: FontSizeInputProps): ReactElement => {
   const { selected, setLayersFontSize, fontSizeValue, setTextSettingsFontSize } = props;
-  const [fontSize, setFontSize] = useState(props.fontSizeValue);
+  const [fontSize, setFontSize] = useState(fontSizeValue);
 
   useEffect(() => {
     setFontSize(fontSizeValue);
@@ -30,11 +30,11 @@ const FontSizeInput = (props: FontSizeInputProps): ReactElement => {
 
   const handleSubmit = (e: any) => {
     try {
-      const nextFontSize = evaluate(`${fontSize}`);
-      if (nextFontSize !== fontSizeValue && !isNaN(nextFontSize)) {
-        setLayersFontSize({layers: selected, fontSize: nextFontSize});
-        setTextSettingsFontSize({fontSize: nextFontSize});
-        setFontSize(nextFontSize);
+      const nextFontSize = mexp.eval(`${fontSize}`) as any;
+      if (nextFontSize !== fontSizeValue) {
+        setLayersFontSize({layers: selected, fontSize: Math.round(nextFontSize)});
+        setTextSettingsFontSize({fontSize: Math.round(nextFontSize)});
+        setFontSize(Math.round(nextFontSize));
       } else {
         setFontSize(fontSizeValue);
       }

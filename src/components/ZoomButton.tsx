@@ -4,8 +4,10 @@ import { LayerState } from '../store/reducers/layer';
 import { connect } from 'react-redux';
 import TopbarDropdownButton from './TopbarDropdownButton';
 import { paperMain } from '../canvas';
-import { SetCanvasMatrixPayload, CanvasSettingsTypes, SetCanvasZoomingPayload } from '../store/actionTypes/canvasSettings';
-import { setCanvasMatrix, setCanvasZooming } from '../store/actions/canvasSettings';
+import { SetCanvasMatrixPayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
+import { setCanvasMatrix } from '../store/actions/documentSettings';
+import { CanvasSettingsTypes, SetCanvasZoomingPayload } from '../store/actionTypes/canvasSettings';
+import { setCanvasZooming } from '../store/actions/canvasSettings';
 import { getSelectionBounds, getCanvasBounds, getSelectionCenter, getCanvasCenter } from '../store/selectors/layer';
 import ZoomOutButton from './ZoomOutButton';
 import ZoomInButton from './ZoomInButton';
@@ -20,7 +22,7 @@ interface ZoomButtonProps {
   layerById?: {
     [id: string]: em.Layer;
   };
-  setCanvasMatrix?(payload: SetCanvasMatrixPayload): CanvasSettingsTypes;
+  setCanvasMatrix?(payload: SetCanvasMatrixPayload): DocumentSettingsTypes;
   setCanvasZooming?(payload: SetCanvasZoomingPayload): CanvasSettingsTypes;
 }
 
@@ -134,9 +136,9 @@ const mapStateToProps = (state: RootState): {
   };
   allLayerIds: string[];
 } => {
-  const { canvasSettings, layer } = state;
+  const { canvasSettings, layer, documentSettings } = state;
   const selected = layer.present.selected;
-  const zoom = Math.round(canvasSettings.matrix[0] * 100);
+  const zoom = Math.round(documentSettings.matrix[0] * 100);
   const canArtboardZoom = selected.length === 1 && layer.present.byId[selected[0]].type === 'Artboard';
   const canSelectedZoom = selected.length > 0;
   const canCanvasZoom = layer.present.allIds.length > 1;

@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { evaluate } from 'mathjs';
+import mexp from 'math-expression-evaluator';
 import { RootState } from '../store/reducers';
 import { SetLayersOpacityPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setLayersOpacity } from '../store/actions/layer';
@@ -12,16 +12,16 @@ import BlendModeSelector from './BlendModeSelector';
 
 interface OpacityInputProps {
   selected?: string[];
-  opacityValue?: number;
+  opacityValue?: number | 'multi';
   setLayersOpacity?(payload: SetLayersOpacityPayload): LayerTypes;
 }
 
 const OpacityInput = (props: OpacityInputProps): ReactElement => {
   const { selected, setLayersOpacity, opacityValue } = props;
-  const [opacity, setOpacity] = useState(opacityValue);
+  const [opacity, setOpacity] = useState(opacityValue !== 'multi' ? Math.round(opacityValue * 100) : opacityValue);
 
   useEffect(() => {
-    setOpacity(opacityValue);
+    setOpacity(opacityValue !== 'multi' ? Math.round(opacityValue * 100) : opacityValue);
   }, [opacityValue, selected]);
 
   const handleChange = (e: any) => {
@@ -32,19 +32,19 @@ const OpacityInput = (props: OpacityInputProps): ReactElement => {
   // const handleSliderChange = (e: any) => {
   //   handleChange(e);
   //   const paperLayer = getPaperLayer(selected[0]);
-  //   let nextOpacity = evaluate(`${opacity}`);
+  //   let nextOpacity = mexp.eval(`${opacity}`);
   //   if (nextOpacity > 100) {
   //     nextOpacity = 100;
   //   }
   //   if (nextOpacity < 0) {
   //     nextOpacity = 0;
   //   }
-  //   paperLayer.opacity = evaluate(`${nextOpacity} / 100`);
+  //   paperLayer.opacity = mexp.eval(`${nextOpacity} / 100`);
   // };
 
   const handleSubmit = (e: any) => {
     try {
-      let nextOpacity = evaluate(`${opacity}`);
+      let nextOpacity = mexp.eval(`${opacity}`) as any;
       if (nextOpacity !== opacityValue) {
         if (nextOpacity > 100) {
           nextOpacity = 100;
@@ -52,11 +52,11 @@ const OpacityInput = (props: OpacityInputProps): ReactElement => {
         if (nextOpacity < 0) {
           nextOpacity = 0;
         }
-        setLayersOpacity({layers: selected, opacity: evaluate(`${nextOpacity} / 100`)});
-        setOpacity(nextOpacity);
+        setLayersOpacity({layers: selected, opacity: Math.round(nextOpacity) / 100});
+        setOpacity(Math.round(nextOpacity));
       }
     } catch(error) {
-      setOpacity(opacityValue);
+      setOpacity(opacityValue !== 'multi' ? Math.round(opacityValue * 100) : opacityValue);
     }
   }
 
@@ -89,10 +89,10 @@ const mapStateToProps = (state: RootState) => {
   const opacityValue = (() => {
     switch(layer.present.selected.length) {
       case 1:
-        return layer.present.byId[layer.present.selected[0]].style.opacity * 100;
+        return layer.present.byId[layer.present.selected[0]].style.opacity;
       default: {
         if (selected.every((id: string) => layer.present.byId[id].style.opacity === layer.present.byId[layer.present.selected[0]].style.opacity)) {
-          return layer.present.byId[layer.present.selected[0]].style.opacity * 100;
+          return layer.present.byId[layer.present.selected[0]].style.opacity;
         } else {
           return 'multi';
         }

@@ -10,8 +10,10 @@ import { closeArtboardPresetEditor } from '../store/actions/artboardPresetEditor
 import { ArtboardPresetEditorTypes } from '../store/actionTypes/artboardPresetEditor';
 import { setArtboardToolDevicePlatform } from '../store/actions/tool';
 import { ToolTypes, SetArtboardToolDevicePlatformPayload } from '../store/actionTypes/tool';
-import { addArtboardPreset, updateArtboardPreset, setCanvasFocusing } from '../store/actions/canvasSettings';
-import { CanvasSettingsTypes, AddArtboardPresetPayload, UpdateArtboardPresetPayload, SetCanvasFocusingPayload } from '../store/actionTypes/canvasSettings';
+import { addArtboardPreset, updateArtboardPreset } from '../store/actions/documentSettings';
+import { DocumentSettingsTypes, AddArtboardPresetPayload, UpdateArtboardPresetPayload } from '../store/actionTypes/documentSettings';
+import { setCanvasFocusing } from '../store/actions/canvasSettings';
+import { CanvasSettingsTypes, SetCanvasFocusingPayload } from '../store/actionTypes/canvasSettings';
 import SidebarInput from './SidebarInput';
 
 interface ArtboardPresetEditorProps {
@@ -21,8 +23,8 @@ interface ArtboardPresetEditorProps {
   canvasFocusing?: boolean;
   closeArtboardPresetEditor?(): ArtboardPresetEditorTypes;
   setArtboardToolDevicePlatform?(payload: SetArtboardToolDevicePlatformPayload): ToolTypes;
-  addArtboardPreset?(payload: AddArtboardPresetPayload): CanvasSettingsTypes;
-  updateArtboardPreset?(payload: UpdateArtboardPresetPayload): CanvasSettingsTypes;
+  addArtboardPreset?(payload: AddArtboardPresetPayload): DocumentSettingsTypes;
+  updateArtboardPreset?(payload: UpdateArtboardPresetPayload): DocumentSettingsTypes;
   setCanvasFocusing?(payload: SetCanvasFocusingPayload): CanvasSettingsTypes;
 }
 
@@ -197,9 +199,9 @@ const ArtboardPresetEditor = (props: ArtboardPresetEditorProps): ReactElement =>
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { artboardPresetEditor, tool, canvasSettings } = state;
+  const { artboardPresetEditor, tool, documentSettings, canvasSettings } = state;
   const platformType = tool.artboardToolDevicePlatform;
-  const exists = canvasSettings.artboardPresets.allIds.includes(artboardPresetEditor.id);
+  const exists = documentSettings.artboardPresets.allIds.includes(artboardPresetEditor.id);
   const canvasFocusing = canvasSettings.focusing;
   return { artboardPresetEditor, platformType, exists, canvasFocusing };
 };

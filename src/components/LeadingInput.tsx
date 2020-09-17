@@ -1,12 +1,12 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { evaluate } from 'mathjs';
-import SidebarInput from './SidebarInput';
+import mexp from 'math-expression-evaluator';
 import { RootState } from '../store/reducers';
 import { SetLayersLeadingPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setLayersLeading } from '../store/actions/layer';
 import { TextSettingsTypes, SetTextSettingsLeadingPayload } from '../store/actionTypes/textSettings';
 import { setTextSettingsLeading } from '../store/actions/textSettings';
+import SidebarInput from './SidebarInput';
 
 interface LeadingInputProps {
   selected?: string[];
@@ -17,7 +17,7 @@ interface LeadingInputProps {
 
 const LeadingInput = (props: LeadingInputProps): ReactElement => {
   const { selected, setLayersLeading, leadingValue } = props;
-  const [leading, setLeading] = useState(props.leadingValue);
+  const [leading, setLeading] = useState(leadingValue);
 
   useEffect(() => {
     setLeading(leadingValue);
@@ -30,14 +30,14 @@ const LeadingInput = (props: LeadingInputProps): ReactElement => {
 
   const handleSubmit = (e: any) => {
     try {
-      let nextLeading = evaluate(`${leading}`);
-      if (nextLeading !== leadingValue && !isNaN(nextLeading)) {
+      let nextLeading = mexp.eval(`${leading}`) as any;
+      if (nextLeading !== leadingValue) {
         if (nextLeading < 1) {
           nextLeading = 1;
         }
-        setLayersLeading({layers: selected, leading: nextLeading});
-        setTextSettingsLeading({leading: nextLeading});
-        setLeading(nextLeading);
+        setLayersLeading({layers: selected, leading: Math.round(nextLeading)});
+        setTextSettingsLeading({leading: Math.round(nextLeading)});
+        setLeading(Math.round(nextLeading));
       } else {
         setLeading(leadingValue);
       }

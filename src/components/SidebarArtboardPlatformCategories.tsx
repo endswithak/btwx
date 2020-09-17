@@ -30,12 +30,12 @@ const SidebarArtboardPlatformCategories = (props: SidebarArtboardPlatformCategor
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { tool, canvasSettings } = state;
+  const { tool, documentSettings } = state;
   const platformValue = tool.artboardToolDevicePlatform;
   const categories = platformValue === 'Custom' ? [{
     type: 'Custom',
-    devices: canvasSettings.artboardPresets.allIds.reduce((result: em.ArtboardPreset[], current) => {
-      result = [...result, canvasSettings.artboardPresets.byId[current]];
+    devices: documentSettings.artboardPresets.allIds.reduce((result: em.ArtboardPreset[], current) => {
+      result = [...result, documentSettings.artboardPresets.byId[current]];
       return result;
     }, [])
   }] : DEVICES.find((platform) => platform.type === platformValue).categories;

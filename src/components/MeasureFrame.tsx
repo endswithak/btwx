@@ -37,15 +37,15 @@ const MeasureFrame = (props: MeasureFrameProps): ReactElement => {
   }, [selected, zoom, hover]);
 
   return (
-    <div />
+    <></>
   );
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer, canvasSettings } = state;
+  const { layer, documentSettings } = state;
   const selected = layer.present.selected;
   const hover = layer.present.hover;
-  const zoom = canvasSettings.matrix[0];
+  const zoom = documentSettings.matrix[0];
   return { selected, zoom, hover };
 };
 

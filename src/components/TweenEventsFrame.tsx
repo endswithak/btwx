@@ -38,7 +38,7 @@ const TweenEventsFrame = (props: TweenEventsFrameProps): ReactElement => {
   }, [allArtboardIds, allArtboardItems, tweenEventItems, eventHover, activeArtboard, themeName, eventSort]);
 
   return (
-    <div />
+    <></>
   );
 }
 

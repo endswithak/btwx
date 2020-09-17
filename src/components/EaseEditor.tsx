@@ -1,5 +1,5 @@
 import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
-import { evaluate } from 'mathjs';
+import mexp from 'math-expression-evaluator';
 import { connect } from 'react-redux';
 import gsap from 'gsap';
 import CustomEase from 'gsap/CustomEase';
@@ -96,7 +96,7 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
 
   const handleDurationSubmit = (e: any) => {
     try {
-      const durationRounded = Math.round((evaluate(`${duration}`) + Number.EPSILON) * 100) / 100
+      const durationRounded = Math.round((mexp.eval(`${duration}`) as any + Number.EPSILON) * 100) / 100
       if (durationRounded !== tween.duration) {
         let newDuration = durationRounded;
         if (durationRounded + tween.delay > 10) {
@@ -125,7 +125,7 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
 
   const handleDelaySubmit = (e: any) => {
     try {
-      const delayRounded = Math.round((evaluate(`${delay}`) + Number.EPSILON) * 100) / 100
+      const delayRounded = Math.round((mexp.eval(`${delay}`) as any + Number.EPSILON) * 100) / 100
       if (delayRounded !== tween.delay) {
         let newDelay = delayRounded;
         if (delayRounded + tween.duration > 10) {

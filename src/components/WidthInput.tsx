@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { evaluate } from 'mathjs';
+import mexp from 'math-expression-evaluator';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
 import { SetLayersWidthPayload, LayerTypes } from '../store/actionTypes/layer';
@@ -28,13 +28,13 @@ const WidthInput = (props: WidthInputProps): ReactElement => {
 
   const handleSubmit = (e: any) => {
     try {
-      let nextWidth = evaluate(`${width}`);
-      if (nextWidth !== widthValue && !isNaN(nextWidth)) {
+      let nextWidth = mexp.eval(`${width}`) as any;
+      if (nextWidth !== widthValue) {
         if (nextWidth < 1) {
           nextWidth = 1;
         }
-        setLayersWidth({layers: selected, width: nextWidth});
-        setWidth(nextWidth);
+        setLayersWidth({layers: selected, width: Math.round(nextWidth)});
+        setWidth(Math.round(nextWidth));
       } else {
         setWidth(widthValue !== 'multi' ? Math.round(widthValue) : widthValue);
       }

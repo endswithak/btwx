@@ -44,7 +44,7 @@ const SidebarArtboardPlatformSelector = (props: SidebarArtboardPlatformSelectorP
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { tool, canvasSettings } = state;
+  const { tool, documentSettings } = state;
   const platformValue = tool.artboardToolDevicePlatform;
   const optionValues = [
     ...DEVICES,
@@ -52,8 +52,8 @@ const mapStateToProps = (state: RootState) => {
       type: 'Custom',
       categories: [{
         type: 'Custom',
-        devices: canvasSettings.artboardPresets.allIds.reduce((result: em.ArtboardPreset[], current) => {
-          result = [...result, canvasSettings.artboardPresets.byId[current]];
+        devices: documentSettings.artboardPresets.allIds.reduce((result: em.ArtboardPreset[], current) => {
+          result = [...result, documentSettings.artboardPresets.byId[current]];
           return result;
         }, [])
       }]

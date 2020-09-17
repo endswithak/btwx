@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { evaluate } from 'mathjs';
+import mexp from 'math-expression-evaluator';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
 import { SetLayersStrokeDashArrayWidthPayload, LayerTypes } from '../store/actionTypes/layer';
@@ -15,10 +15,10 @@ interface StrokeDashArrayWidthInputProps {
 
 const StrokeDashArrayWidthInput = (props: StrokeDashArrayWidthInputProps): ReactElement => {
   const { selected, setLayersStrokeDashArrayWidth, strokeDashArrayWidthValue, disabled } = props;
-  const [dashArrayWidth, setDashArrayWidth] = useState(strokeDashArrayWidthValue);
+  const [dashArrayWidth, setDashArrayWidth] = useState(strokeDashArrayWidthValue !== 'multi' ? Math.round(strokeDashArrayWidthValue) : strokeDashArrayWidthValue);
 
   useEffect(() => {
-    setDashArrayWidth(strokeDashArrayWidthValue);
+    setDashArrayWidth(strokeDashArrayWidthValue !== 'multi' ? Math.round(strokeDashArrayWidthValue) : strokeDashArrayWidthValue);
   }, [strokeDashArrayWidthValue, selected]);
 
   const handleChange = (e: any) => {
@@ -28,15 +28,15 @@ const StrokeDashArrayWidthInput = (props: StrokeDashArrayWidthInputProps): React
 
   const handleSubmit = (e: any) => {
     try {
-      const nextDash = evaluate(`${dashArrayWidth}`);
-      if (nextDash !== strokeDashArrayWidthValue && !isNaN(nextDash)) {
-        setLayersStrokeDashArrayWidth({layers: selected, strokeDashArrayWidth: nextDash});
-        setDashArrayWidth(nextDash);
+      const nextDash = mexp.eval(`${dashArrayWidth}`) as any;
+      if (nextDash !== strokeDashArrayWidthValue) {
+        setLayersStrokeDashArrayWidth({layers: selected, strokeDashArrayWidth: Math.round(nextDash)});
+        setDashArrayWidth(Math.round(nextDash));
       } else {
-        setDashArrayWidth(strokeDashArrayWidthValue);
+        setDashArrayWidth(strokeDashArrayWidthValue !== 'multi' ? Math.round(strokeDashArrayWidthValue) : strokeDashArrayWidthValue);
       }
     } catch(error) {
-      setDashArrayWidth(strokeDashArrayWidthValue);
+      setDashArrayWidth(strokeDashArrayWidthValue !== 'multi' ? Math.round(strokeDashArrayWidthValue) : strokeDashArrayWidthValue);
     }
   }
 

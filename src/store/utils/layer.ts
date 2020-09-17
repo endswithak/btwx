@@ -838,7 +838,7 @@ export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[
         onClick: function() {
           const state = store.getState();
           if (!state.tweenDrawer.isOpen) {
-            paperMain.view.viewSize = new paperMain.Size(paperMain.view.viewSize.width, paperMain.view.viewSize.height - state.canvasSettings.tweenDrawerHeight);
+            paperMain.view.viewSize = new paperMain.Size(paperMain.view.viewSize.width, paperMain.view.viewSize.height - state.documentSettings.tweenDrawerHeight);
             store.dispatch(openTweenDrawer());
           }
           store.dispatch(setTweenDrawerEvent({id: event.id}));

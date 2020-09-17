@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { evaluate } from 'mathjs';
+import mexp from 'math-expression-evaluator';
 import { RootState } from '../store/reducers';
 import { SetStarsRadiusPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setStarsRadius } from '../store/actions/layer';
@@ -56,16 +56,16 @@ const StarRadiusInput = (props: StarRadiusInputProps): ReactElement => {
 
   const handleSubmit = (e: any): void => {
     try {
-      let nextRadius = evaluate(`${radius}`);
+      let nextRadius = mexp.eval(`${radius}`) as any;
+      if (nextRadius > 100) {
+        nextRadius = 100;
+      }
+      if (nextRadius < 0) {
+        nextRadius = 0;
+      }
       if (nextRadius !== radiusValue) {
-        if (nextRadius > 100) {
-          nextRadius = 100;
-        }
-        if (nextRadius < 0) {
-          nextRadius = 0;
-        }
-        setStarsRadius({layers: selected, radius: nextRadius / 100});
-        setRadius(nextRadius);
+        setStarsRadius({layers: selected, radius: Math.round(nextRadius) / 100});
+        setRadius(Math.round(nextRadius));
       }
     } catch(error) {
       setRadius(radiusValue !== 'multi' ? Math.round(radiusValue * 100) : radiusValue);

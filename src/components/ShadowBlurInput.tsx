@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { evaluate } from 'mathjs';
+import mexp from 'math-expression-evaluator';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
 import { SetLayersShadowBlurPayload, LayerTypes } from '../store/actionTypes/layer';
@@ -15,10 +15,10 @@ interface ShadowBlurInputProps {
 
 const ShadowBlurInput = (props: ShadowBlurInputProps): ReactElement => {
   const { selected, shadowBlurValue, disabled, setLayersShadowBlur } = props;
-  const [shadowBlur, setShadowBlur] = useState(shadowBlurValue);
+  const [shadowBlur, setShadowBlur] = useState(shadowBlurValue !== 'multi' ? Math.round(shadowBlurValue) : shadowBlurValue);
 
   useEffect(() => {
-    setShadowBlur(shadowBlurValue);
+    setShadowBlur(shadowBlurValue !== 'multi' ? Math.round(shadowBlurValue) : shadowBlurValue);
   }, [shadowBlurValue, selected]);
 
   const handleChange = (e: any) => {
@@ -28,15 +28,15 @@ const ShadowBlurInput = (props: ShadowBlurInputProps): ReactElement => {
 
   const handleSubmit = (e: any) => {
     try {
-      const nextBlur = evaluate(`${shadowBlur}`);
-      if (nextBlur !== shadowBlurValue && !isNaN(nextBlur)) {
-        setLayersShadowBlur({layers: selected, shadowBlur: nextBlur});
-        setShadowBlur(nextBlur);
+      const nextBlur = mexp.eval(`${shadowBlur}`) as any;
+      if (nextBlur !== shadowBlurValue) {
+        setLayersShadowBlur({layers: selected, shadowBlur: Math.round(nextBlur)});
+        setShadowBlur(Math.round(nextBlur));
       } else {
-        setShadowBlur(shadowBlurValue);
+        setShadowBlur(shadowBlurValue !== 'multi' ? Math.round(shadowBlurValue) : shadowBlurValue);
       }
     } catch(error) {
-      setShadowBlur(shadowBlurValue);
+      setShadowBlur(shadowBlurValue !== 'multi' ? Math.round(shadowBlurValue) : shadowBlurValue);
     }
   }
 

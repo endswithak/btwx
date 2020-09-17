@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { evaluate } from 'mathjs';
+import mexp from 'math-expression-evaluator';
 import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
 import { EnableLayersFillPayload, EnableLayersStrokePayload, SetLayersGradientPayload, LayerTypes } from '../store/actionTypes/layer';
@@ -21,7 +21,7 @@ interface GradientInputProps {
   enabledValue?: boolean | 'multi';
   selected?: string[];
   gradientValue?: em.Gradient;
-  gradientOpacity?: number;
+  gradientOpacity?: number | 'multi';
   isGradientEditorOpen?: boolean;
   stopById?: {
     [id: string]: em.GradientStop;
@@ -37,12 +37,12 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
   const { prop, enabledValue, displayGradient, gradientTypeValue, stopById, selected, gradientValue, gradientOpacity, isGradientEditorOpen, enableLayersFill, enableLayersStroke, setLayersGradient, cssGradient, openGradientEditor } = props;
   const [enabled, setEnabled] = useState<boolean | 'multi'>(enabledValue);
   const [gradient, setGradient] = useState(gradientValue);
-  const [opacity, setOpacity] = useState<number | string>(gradientOpacity);
+  const [opacity, setOpacity] = useState<number | string>(gradientOpacity !== 'multi' ? Math.round(gradientOpacity * 100) : gradientOpacity);
 
   useEffect(() => {
     setEnabled(enabledValue);
     setGradient(gradientValue);
-    setOpacity(gradientOpacity);
+    setOpacity(gradientOpacity !== 'multi' ? Math.round(gradientOpacity * 100) : gradientOpacity);
   }, [gradientValue, selected, gradientOpacity, stopById, enabledValue]);
 
   const handleOpacityChange = (e: React.SyntheticEvent<HTMLInputElement>): void => {
@@ -52,14 +52,14 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
 
   const handleOpacitySubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
     try {
-      let nextOpacity = evaluate(`${opacity}`);
-      if (nextOpacity  !== gradientOpacity && !isNaN(nextOpacity)) {
-        if (nextOpacity > 100) {
-          nextOpacity = 100;
-        }
-        if (nextOpacity < 0) {
-          nextOpacity = 0;
-        }
+      let nextOpacity = mexp.eval(`${opacity}`) as any;
+      if (nextOpacity > 100) {
+        nextOpacity = 100;
+      }
+      if (nextOpacity < 0) {
+        nextOpacity = 0;
+      }
+      if (nextOpacity !== gradientOpacity) {
         const newGradient = {
           ...gradient,
           stops: gradient.stops.reduce((result, current) => {
@@ -67,7 +67,7 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
               ...current,
               color: {
                 ...current.color,
-                a: nextOpacity / 100
+                a: Math.round(nextOpacity) / 100
               }
             }];
             return result;
@@ -75,10 +75,10 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
         }
         setLayersGradient({layers: selected, prop: prop, gradient: newGradient});
       } else {
-        setOpacity(gradientOpacity);
+        setOpacity(gradientOpacity !== 'multi' ? Math.round(gradientOpacity * 100) : gradientOpacity);
       }
     } catch(error) {
-      setOpacity(gradientOpacity);
+      setOpacity(gradientOpacity !== 'multi' ? Math.round(gradientOpacity * 100) : gradientOpacity);
     }
   }
 
@@ -173,7 +173,7 @@ const mapStateToProps = (state: RootState, ownProps: GradientInputProps) => {
   })();
   const gradientValue = styleValues[0].gradient;
   const stops = gradientValue.stops;
-  const gradientOpacity = stops.every((stop) => stop.color.a === stops[0].color.a) ? Math.round(stops[0].color.a * 100) : 'multi';
+  const gradientOpacity = stops.every((stop) => stop.color.a === stops[0].color.a) ? stops[0].color.a : 'multi';
   const isGradientEditorOpen = gradientEditor.isOpen;
   const sortedStops = [...stops].sort((a,b) => { return a.position - b.position });
   const cssGradient = sortedStops.reduce((result, current, index) => {

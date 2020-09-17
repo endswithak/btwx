@@ -39,9 +39,9 @@ const mapStateToProps = (state: RootState): {
   isTweenDrawerOpen: boolean;
   tweenDrawerHeight: number;
 } => {
-  const { tweenDrawer, canvasSettings } = state;
+  const { tweenDrawer, documentSettings } = state;
   const isTweenDrawerOpen = tweenDrawer.isOpen;
-  const tweenDrawerHeight = canvasSettings.tweenDrawerHeight;
+  const tweenDrawerHeight = documentSettings.tweenDrawerHeight;
   return { isTweenDrawerOpen, tweenDrawerHeight };
 };
 

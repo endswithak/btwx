@@ -91,12 +91,12 @@ const SidebarDropzoneTop = (props: SidebarDropzoneTopProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState, ownProps: SidebarDropzoneTopProps) => {
-  const { layer, canvasSettings } = state;
+  const { layer, documentSettings } = state;
   const dragLayerById = ownProps.dragLayers ? ownProps.dragLayers.reduce((result: {[id: string]: em.Layer}, current) => {
     result[current] = layer.present.byId[current];
     return result;
   }, {}) : {};
-  const leftSidebarWidth = canvasSettings.leftSidebarWidth;
+  const leftSidebarWidth = documentSettings.leftSidebarWidth;
   return { dragLayerById, leftSidebarWidth };
 };
 

@@ -122,8 +122,8 @@ const SidebarLeft = (props: SidebarLeftProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { canvasSettings, layer, tool, insertKnob } = state;
-  const sidebarWidth = canvasSettings.leftSidebarWidth;
+  const { documentSettings, layer, tool, insertKnob } = state;
+  const sidebarWidth = documentSettings.leftSidebarWidth;
   const isEmpty = layer.present.allIds.length <= 1;
   const insertKnobOpen = insertKnob.isActive;
   return { sidebarWidth, isEmpty, insertKnobOpen, tool };

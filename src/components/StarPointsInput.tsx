@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { evaluate } from 'mathjs';
+import mexp from 'math-expression-evaluator';
 import { RootState } from '../store/reducers';
 import { SetStarsPointsPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setStarsPoints } from '../store/actions/layer';
@@ -20,10 +20,10 @@ interface StarPointsInputProps {
 
 const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
   const { selected, setStarsPoints, layerItems, pointsValue } = props;
-  const [points, setPoints] = useState(pointsValue);
+  const [points, setPoints] = useState(pointsValue !== 'multi' ? Math.round(pointsValue) : pointsValue);
 
   useEffect(() => {
-    setPoints(pointsValue);
+    setPoints(pointsValue !== 'multi' ? Math.round(pointsValue) : pointsValue);
   }, [pointsValue, selected]);
 
   const handleChange = (e: any): void => {
@@ -56,8 +56,8 @@ const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
 
   const handleSubmit = (e: any): void => {
     try {
-      let nextPoints = evaluate(`${points}`);
-      if (Math.round(nextPoints) !== pointsValue) {
+      let nextPoints = mexp.eval(`${points}`) as any;
+      if (nextPoints !== pointsValue) {
         if (Math.round(nextPoints) > 50) {
           nextPoints = 50;
         }
@@ -68,7 +68,7 @@ const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
         setPoints(Math.round(nextPoints));
       }
     } catch(error) {
-      setPoints(pointsValue);
+      setPoints(pointsValue !== 'multi' ? Math.round(pointsValue) : pointsValue);
     }
   }
 

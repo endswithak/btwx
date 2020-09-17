@@ -39,9 +39,9 @@ const mapStateToProps = (state: RootState): {
   isRightSidebarOpen: boolean;
   rightSidebarWidth: number;
 } => {
-  const { rightSidebar, canvasSettings } = state;
+  const { rightSidebar, documentSettings } = state;
   const isRightSidebarOpen = rightSidebar.isOpen;
-  const rightSidebarWidth = canvasSettings.rightSidebarWidth;
+  const rightSidebarWidth = documentSettings.rightSidebarWidth;
   return { isRightSidebarOpen, rightSidebarWidth };
 };
 

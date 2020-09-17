@@ -7,8 +7,10 @@ import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { importPaperProject } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
-import { SetCanvasMatrixPayload, SetCanvasZoomingPayload, SetCanvasZoomingTypePayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
-import { setCanvasMatrix, setCanvasZooming, setCanvasZoomingType } from '../store/actions/canvasSettings';
+import { SetCanvasMatrixPayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
+import { setCanvasMatrix } from '../store/actions/documentSettings';
+import { SetCanvasZoomingPayload, SetCanvasZoomingTypePayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
+import { setCanvasZooming, setCanvasZoomingType } from '../store/actions/canvasSettings';
 import { LayerTypes } from '../store/actionTypes/layer';
 import { updateInViewLayers } from '../store/actions/layer';
 import { debounce } from '../utils';
@@ -26,7 +28,7 @@ interface CanvasProps {
   cursor: string;
   matrix?: number[];
   enableSelectionTool(): ToolTypes;
-  setCanvasMatrix(payload: SetCanvasMatrixPayload): CanvasSettingsTypes;
+  setCanvasMatrix(payload: SetCanvasMatrixPayload): DocumentSettingsTypes;
   setCanvasZooming(payload: SetCanvasZoomingPayload): CanvasSettingsTypes;
   setCanvasZoomingType(payload: SetCanvasZoomingTypePayload): CanvasSettingsTypes;
   updateInViewLayers(): LayerTypes;
@@ -188,7 +190,7 @@ const mapStateToProps = (state: RootState): {
     allImageIds: layer.present.allImageIds,
     paperProject: layer.present.paperProject,
     focusing: canvasSettings.focusing,
-    matrix: canvasSettings.matrix,
+    matrix: documentSettings.matrix,
     cursor
   };
 };

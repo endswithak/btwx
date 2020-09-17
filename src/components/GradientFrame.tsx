@@ -169,13 +169,13 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
   }, [gradient, layer, zoom]);
 
   return (
-    <div />
+    <></>
   );
 }
 
 const mapStateToProps = (state: RootState, ownProps: GradientFrameProps) => {
-  const { canvasSettings, layer } = state;
-  const zoom = canvasSettings.matrix[0];
+  const { documentSettings, layer } = state;
+  const zoom = documentSettings.matrix[0];
   const layerItem = layer.present.byId[ownProps.layer]
   return { zoom, layerItem };
 };

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement, useState, useEffect } from 'react';
+import mexp from 'math-expression-evaluator';
 import tinyColor from 'tinycolor2';
 import { ThemeContext } from './ThemeProvider';
 import SidebarInput from './SidebarInput';
@@ -32,15 +33,26 @@ const ColorPickerSaturationInput = (props: ColorPickerSaturationInputProps): Rea
   };
 
   const handleSubmit = (e: any): void => {
-    if (saturationValue <= 100 && saturationValue >= 0 && !isNaN(saturationValue) && saturationValue / 100 !== saturation) {
-      const nextColor = tinyColor({h: hue !== 'multi' ? hue : 0, s: saturationValue / 100, l: lightness !== 'multi' ? lightness : 0});
-      const rgb = nextColor.toRgb();
-      setSaturation(saturationValue / 100);
-      setRed(rgb.r);
-      setGreen(rgb.g);
-      setBlue(rgb.b);
-      onChange({h: hue !== 'multi' ? hue : 0, s: saturationValue / 100, l: lightness !== 'multi' ? lightness : 0, v: value !== 'multi' ? value : 0, a: alpha !== 'multi' ? alpha : 1});
-    } else {
+    try {
+      let nextSaturation = mexp.eval(`${saturationValue}`) as any;
+      if (nextSaturation > 100) {
+        nextSaturation = 100;
+      }
+      if (nextSaturation < 0) {
+        nextSaturation = 0;
+      }
+      if (nextSaturation !== (saturation !== 'multi' ? Math.round(saturation * 100) : 0)) {
+        const nextColor = tinyColor({h: hue !== 'multi' ? hue : 0, s: Math.round(nextSaturation) / 100, l: lightness !== 'multi' ? lightness : 0});
+        const rgb = nextColor.toRgb();
+        setSaturation(Math.round(nextSaturation) / 100);
+        setRed(rgb.r);
+        setGreen(rgb.g);
+        setBlue(rgb.b);
+        onChange({h: hue !== 'multi' ? hue : 0, s: Math.round(nextSaturation) / 100, l: lightness !== 'multi' ? lightness : 0, v: value !== 'multi' ? value : 0, a: alpha !== 'multi' ? alpha : 1});
+      } else {
+        setSaturationValue(saturation !== 'multi' ? Math.round(saturation * 100) : 0);
+      }
+    } catch(error) {
       setSaturationValue(saturation !== 'multi' ? Math.round(saturation * 100) : 0);
     }
   };

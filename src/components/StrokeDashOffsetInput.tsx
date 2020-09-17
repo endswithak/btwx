@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { evaluate } from 'mathjs';
+import mexp from 'math-expression-evaluator';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
 import { SetLayersStrokeDashOffsetPayload, LayerTypes } from '../store/actionTypes/layer';
@@ -15,10 +15,10 @@ interface StrokeDashOffsetInputProps {
 
 const StrokeDashOffsetInput = (props: StrokeDashOffsetInputProps): ReactElement => {
   const { selected, disabled, strokeDashOffsetValue, setLayersStrokeDashOffset } = props;
-  const [dashOffset, setDashOffset] = useState(strokeDashOffsetValue);
+  const [dashOffset, setDashOffset] = useState(strokeDashOffsetValue !== 'multi' ? Math.round(strokeDashOffsetValue) : strokeDashOffsetValue);
 
   useEffect(() => {
-    setDashOffset(strokeDashOffsetValue);
+    setDashOffset(strokeDashOffsetValue !== 'multi' ? Math.round(strokeDashOffsetValue) : strokeDashOffsetValue);
   }, [strokeDashOffsetValue, selected]);
 
   const handleChange = (e: any): void => {
@@ -28,15 +28,15 @@ const StrokeDashOffsetInput = (props: StrokeDashOffsetInputProps): ReactElement 
 
   const handleSubmit = (e: any): void => {
     try {
-      const nextDashOffset = evaluate(`${dashOffset}`);
-      if (nextDashOffset !== strokeDashOffsetValue && !isNaN(nextDashOffset)) {
-        setLayersStrokeDashOffset({layers: selected, strokeDashOffset: nextDashOffset});
-        setDashOffset(nextDashOffset);
+      const nextDashOffset = mexp.eval(`${dashOffset}`) as any;
+      if (nextDashOffset !== strokeDashOffsetValue) {
+        setLayersStrokeDashOffset({layers: selected, strokeDashOffset: Math.round(nextDashOffset)});
+        setDashOffset(Math.round(nextDashOffset));
       } else {
-        setDashOffset(strokeDashOffsetValue);
+        setDashOffset(strokeDashOffsetValue !== 'multi' ? Math.round(strokeDashOffsetValue) : strokeDashOffsetValue);
       }
     } catch(error) {
-      setDashOffset(strokeDashOffsetValue);
+      setDashOffset(strokeDashOffsetValue !== 'multi' ? Math.round(strokeDashOffsetValue) : strokeDashOffsetValue);
     }
   };
 

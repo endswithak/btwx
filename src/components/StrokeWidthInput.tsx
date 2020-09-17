@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { evaluate } from 'mathjs';
+import mexp from 'math-expression-evaluator';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
 import { SetLayersStrokeWidthPayload, LayerTypes } from '../store/actionTypes/layer';
@@ -16,10 +16,10 @@ interface StrokeWidthInputProps {
 
 const StrokeWidthInput = (props: StrokeWidthInputProps): ReactElement => {
   const { strokeWidthValue, selected, disabled, setLayersStrokeWidth } = props;
-  const [strokeWidth, setStrokeWidth] = useState(strokeWidthValue);
+  const [strokeWidth, setStrokeWidth] = useState(strokeWidthValue !== 'multi' ? Math.round(strokeWidthValue) : strokeWidthValue);
 
   useEffect(() => {
-    setStrokeWidth(strokeWidthValue);
+    setStrokeWidth(strokeWidthValue !== 'multi' ? Math.round(strokeWidthValue) : strokeWidthValue);
   }, [strokeWidthValue, selected]);
 
   const handleStrokeWidthChange = (e: any): void => {
@@ -29,15 +29,15 @@ const StrokeWidthInput = (props: StrokeWidthInputProps): ReactElement => {
 
   const handleStrokeWidthSubmit = (e: any): void => {
     try {
-      const nextStrokeWidth = evaluate(`${strokeWidth}`);
-      if (nextStrokeWidth !== strokeWidthValue && !isNaN(nextStrokeWidth)) {
-        setLayersStrokeWidth({layers: selected, strokeWidth: nextStrokeWidth});
-        setStrokeWidth(nextStrokeWidth);
+      const nextStrokeWidth = mexp.eval(`${strokeWidth}`) as any;
+      if (nextStrokeWidth !== strokeWidthValue) {
+        setLayersStrokeWidth({layers: selected, strokeWidth: Math.round(nextStrokeWidth)});
+        setStrokeWidth(Math.round(nextStrokeWidth));
       } else {
-        setStrokeWidth(strokeWidthValue);
+        setStrokeWidth(strokeWidthValue !== 'multi' ? Math.round(strokeWidthValue) : strokeWidthValue);
       }
     } catch(error) {
-      setStrokeWidth(strokeWidthValue);
+      setStrokeWidth(strokeWidthValue !== 'multi' ? Math.round(strokeWidthValue) : strokeWidthValue);
     }
   };
 

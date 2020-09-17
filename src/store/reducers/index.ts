@@ -375,8 +375,7 @@ const rootReducer = (state: any, action: fileTypes) => {
         ...currentState.layer,
         present: action.payload.file.layer
       },
-      documentSettings: action.payload.file.documentSettings,
-      canvasSettings: action.payload.file.canvasSettings
+      documentSettings: action.payload.file.documentSettings
     };
     const canvas = document.getElementById('canvas-container') as HTMLCanvasElement;
     importPaperProject({

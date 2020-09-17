@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { evaluate } from 'mathjs';
+import mexp from 'math-expression-evaluator';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
 import { SetLayersShadowXOffsetPayload, LayerTypes } from '../store/actionTypes/layer';
@@ -15,10 +15,10 @@ interface ShadowXInputProps {
 
 const ShadowXInput = (props: ShadowXInputProps): ReactElement => {
   const { selected, shadowXOffsetValue, disabled, setLayersShadowXOffset } = props;
-  const [shadowXOffset, setShadowXOffset] = useState(shadowXOffsetValue);
+  const [shadowXOffset, setShadowXOffset] = useState(shadowXOffsetValue !== 'multi' ? Math.round(shadowXOffsetValue) : shadowXOffsetValue);
 
   useEffect(() => {
-    setShadowXOffset(shadowXOffsetValue);
+    setShadowXOffset(shadowXOffsetValue !== 'multi' ? Math.round(shadowXOffsetValue) : shadowXOffsetValue);
   }, [shadowXOffsetValue, selected]);
 
   const handleChange = (e: any) => {
@@ -28,15 +28,15 @@ const ShadowXInput = (props: ShadowXInputProps): ReactElement => {
 
   const handleSubmit = (e: any) => {
     try {
-      const newXOffset = evaluate(`${shadowXOffset}`);
-      if (newXOffset !== shadowXOffsetValue && !isNaN(newXOffset)) {
-        setLayersShadowXOffset({layers: selected, shadowXOffset: newXOffset});
-        setShadowXOffset(newXOffset);
+      const newXOffset = mexp.eval(`${shadowXOffset}`) as any;
+      if (newXOffset !== shadowXOffsetValue) {
+        setLayersShadowXOffset({layers: selected, shadowXOffset: Math.round(newXOffset)});
+        setShadowXOffset(Math.round(newXOffset));
       } else {
-        setShadowXOffset(shadowXOffsetValue);
+        setShadowXOffset(shadowXOffsetValue !== 'multi' ? Math.round(shadowXOffsetValue) : shadowXOffsetValue);
       }
     } catch(error) {
-      setShadowXOffset(shadowXOffsetValue);
+      setShadowXOffset(shadowXOffsetValue !== 'multi' ? Math.round(shadowXOffsetValue) : shadowXOffsetValue);
     }
   }
 

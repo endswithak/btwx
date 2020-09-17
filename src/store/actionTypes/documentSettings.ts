@@ -1,6 +1,18 @@
 export const SAVE_DOCUMENT_AS = 'SAVE_DOCUMENT_AS';
 export const SAVE_DOCUMENT = 'SAVE_DOCUMENT';
+
+export const SET_CANVAS_MATRIX = 'SET_CANVAS_MATRIX';
+
 export const ADD_DOCUMENT_IMAGE = 'ADD_DOCUMENT_IMAGE';
+
+export const SET_LEFT_SIDEBAR_WIDTH = 'SET_LEFT_SIDEBAR_WIDTH';
+export const SET_RIGHT_SIDEBAR_WIDTH = 'SET_RIGHT_SIDEBAR_WIDTH';
+export const SET_TWEEN_DRAWER_HEIGHT = 'SET_TWEEN_DRAWER_HEIGHT';
+export const SET_TWEEN_DRAWER_LAYERS_WIDTH = 'SET_TWEEN_DRAWER_LAYERS_WIDTH';
+
+export const ADD_ARTBOARD_PRESET = 'ADD_ARTBOARD_PRESET';
+export const REMOVE_ARTBOARD_PRESET = 'REMOVE_ARTBOARD_PRESET';
+export const UPDATE_ARTBOARD_PRESET = 'UPDATE_ARTBOARD_PRESET';
 
 export interface SaveDocumentAsPayload {
   id?: string;
@@ -23,6 +35,15 @@ export interface SaveDocument {
   payload: SaveDocumentPayload;
 }
 
+export interface SetCanvasMatrixPayload {
+  matrix: number[];
+}
+
+export interface SetCanvasMatrix {
+  type: typeof SET_CANVAS_MATRIX;
+  payload: SetCanvasMatrixPayload;
+}
+
 export interface AddDocumentImagePayload {
   id: string;
   buffer: Buffer;
@@ -33,4 +54,83 @@ export interface AddDocumentImage {
   payload: AddDocumentImagePayload;
 }
 
-export type DocumentSettingsTypes = SaveDocumentAs | SaveDocument | AddDocumentImage;
+export interface SetLeftSidebarWidthPayload {
+  width: number;
+}
+
+export interface SetLeftSidebarWidth {
+  type: typeof SET_LEFT_SIDEBAR_WIDTH;
+  payload: SetLeftSidebarWidthPayload;
+}
+
+export interface SetRightSidebarWidthPayload {
+  width: number;
+}
+
+export interface SetRightSidebarWidth {
+  type: typeof SET_RIGHT_SIDEBAR_WIDTH;
+  payload: SetRightSidebarWidthPayload;
+}
+
+export interface SetTweenDrawerHeightPayload {
+  height: number;
+}
+
+export interface SetTweenDrawerHeight {
+  type: typeof SET_TWEEN_DRAWER_HEIGHT;
+  payload: SetTweenDrawerHeightPayload;
+}
+
+export interface SetTweenDrawerLayersWidthPayload {
+  width: number;
+}
+
+export interface SetTweenDrawerLayersWidth {
+  type: typeof SET_TWEEN_DRAWER_LAYERS_WIDTH;
+  payload: SetTweenDrawerLayersWidthPayload;
+}
+
+export interface AddArtboardPresetPayload {
+  id: string;
+  type: string;
+  width: number;
+  height: number;
+}
+
+export interface AddArtboardPreset {
+  type: typeof ADD_ARTBOARD_PRESET;
+  payload: AddArtboardPresetPayload;
+}
+
+export interface RemoveArtboardPresetPayload {
+  id: string;
+}
+
+export interface RemoveArtboardPreset {
+  type: typeof REMOVE_ARTBOARD_PRESET;
+  payload: RemoveArtboardPresetPayload;
+}
+
+export interface UpdateArtboardPresetPayload {
+  id: string;
+  type: string;
+  width: number;
+  height: number;
+}
+
+export interface UpdateArtboardPreset {
+  type: typeof UPDATE_ARTBOARD_PRESET;
+  payload: UpdateArtboardPresetPayload;
+}
+
+export type DocumentSettingsTypes = SaveDocumentAs |
+                                    SaveDocument |
+                                    SetCanvasMatrix |
+                                    AddDocumentImage |
+                                    SetLeftSidebarWidth |
+                                    SetRightSidebarWidth |
+                                    SetTweenDrawerHeight |
+                                    SetTweenDrawerLayersWidth |
+                                    AddArtboardPreset |
+                                    RemoveArtboardPreset |
+                                    UpdateArtboardPreset;

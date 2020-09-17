@@ -30,7 +30,7 @@ const SelectionFrame = (props: SelectionFrameProps): ReactElement => {
   }, [selectedWithChildren, selected]);
 
   return (
-    <div />
+    <></>
   );
 }
 

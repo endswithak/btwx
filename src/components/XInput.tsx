@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { evaluate } from 'mathjs';
+import mexp from 'math-expression-evaluator';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
 import { SetLayersXPayload, LayerTypes } from '../store/actionTypes/layer';
@@ -28,10 +28,10 @@ const XInput = (props: XInputProps): ReactElement => {
 
   const handleSubmit = (e: any): void => {
     try {
-      const nextX = evaluate(`${x}`);
-      if (nextX !== xValue && !isNaN(nextX)) {
-        setLayersX({layers: selected, x: nextX});
-        setX(nextX);
+      const nextX = mexp.eval(`${x}`) as any;
+      if (nextX !== xValue) {
+        setLayersX({layers: selected, x: Math.round(nextX)});
+        setX(Math.round(nextX));
       } else {
         setX(xValue !== 'multi' ? Math.round(xValue as number) : xValue);
       }

@@ -1,13 +1,15 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { SetCanvasMatrixPayload, CanvasSettingsTypes, SetCanvasZoomingPayload } from '../store/actionTypes/canvasSettings';
-import { setCanvasMatrix, setCanvasZooming } from '../store/actions/canvasSettings';
+import { SetCanvasMatrixPayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
+import { setCanvasMatrix } from '../store/actions/documentSettings';
+import { SetCanvasZoomingPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
+import { setCanvasZooming } from '../store/actions/canvasSettings';
 import { paperMain } from '../canvas';
 import TopbarButton from './TopbarButton';
 
 interface ZoomOutButtonProps {
-  setCanvasMatrix?(payload: SetCanvasMatrixPayload): CanvasSettingsTypes;
+  setCanvasMatrix?(payload: SetCanvasMatrixPayload): DocumentSettingsTypes;
   setCanvasZooming?(payload: SetCanvasZoomingPayload): CanvasSettingsTypes;
   disabled: boolean;
 }
@@ -40,8 +42,8 @@ const ZoomOutButton = (props: ZoomOutButtonProps): ReactElement => {
 const mapStateToProps = (state: RootState): {
   disabled: boolean;
 } => {
-  const { canvasSettings } = state;
-  const disabled = canvasSettings.matrix[0] === 0.01;
+  const { documentSettings } = state;
+  const disabled = documentSettings.matrix[0] === 0.01;
   return { disabled };
 };
 

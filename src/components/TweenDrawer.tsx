@@ -54,9 +54,9 @@ const mapStateToProps = (state: RootState): {
   tweenEvent: em.TweenEvent;
   isEmpty: boolean;
 } => {
-  const { layer, tweenDrawer, canvasSettings } = state;
+  const { layer, tweenDrawer, documentSettings } = state;
   const tweenEvent = layer.present.tweenEventById[tweenDrawer.event];
-  const tweenDrawerHeight = canvasSettings.tweenDrawerHeight;
+  const tweenDrawerHeight = documentSettings.tweenDrawerHeight;
   const isEmpty = layer.present.allTweenEventIds.length === 0;
   return { tweenEvent, tweenDrawerHeight, isEmpty };
 };

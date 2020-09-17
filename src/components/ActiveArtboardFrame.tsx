@@ -25,7 +25,7 @@ const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
   }, [activeArtboard, activeArtboardItem, zoom]);
 
   return (
-    <div />
+    <></>
   );
 }
 
@@ -34,10 +34,10 @@ const mapStateToProps = (state: RootState): {
   activeArtboardItem: em.Artboard;
   zoom: number;
 } => {
-  const { layer, canvasSettings } = state;
+  const { layer, documentSettings } = state;
   const activeArtboard = layer.present.activeArtboard;
   const activeArtboardItem = layer.present.byId[activeArtboard] as em.Artboard;
-  const zoom = canvasSettings.matrix[0];
+  const zoom = documentSettings.matrix[0];
   return { activeArtboard, activeArtboardItem, zoom };
 };
 

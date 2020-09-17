@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement, useState, useEffect } from 'react';
+import mexp from 'math-expression-evaluator';
 import { ThemeContext } from './ThemeProvider';
 import SidebarInput from './SidebarInput';
 import tinyColor from 'tinycolor2';
@@ -32,17 +33,28 @@ const ColorPickerBlueInput = (props: ColorPickerBlueInputProps): ReactElement =>
   };
 
   const handleSubmit = (e: any): void => {
-    if (blueValue <= 255 && blueValue >= 0 && blueValue !== blue) {
-      const nextColor = tinyColor({r: red !== 'multi' ? red : 0, g: green !== 'multi' ? green : 0, b: blueValue});
-      const hsl = nextColor.toHsl();
-      const hsv = nextColor.toHsv();
-      setBlue(blueValue);
-      setHue(hsl.h);
-      setSaturation(hsl.s);
-      setLightness(hsl.l);
-      setValue(hsv.v);
-      onChange({ h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v, a: alpha !== 'multi' ? alpha : 1 });
-    } else {
+    try {
+      let nextBlue = mexp.eval(`${blueValue}`) as any;
+      if (nextBlue > 255) {
+        nextBlue = 255;
+      }
+      if (nextBlue < 0) {
+        nextBlue = 0;
+      }
+      if (nextBlue !== blue) {
+        const nextColor = tinyColor({r: red !== 'multi' ? red : 0, g: green !== 'multi' ? green : 0, b: Math.round(nextBlue)});
+        const hsl = nextColor.toHsl();
+        const hsv = nextColor.toHsv();
+        setBlue(Math.round(nextBlue));
+        setHue(hsl.h);
+        setSaturation(hsl.s);
+        setLightness(hsl.l);
+        setValue(hsv.v);
+        onChange({ h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v, a: alpha !== 'multi' ? alpha : 1 });
+      } else {
+        setBlueValue(blue !== 'multi' ? Math.round(blue) : 0);
+      }
+    } catch(error) {
       setBlueValue(blue !== 'multi' ? Math.round(blue) : 0);
     }
   };

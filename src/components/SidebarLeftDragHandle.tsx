@@ -3,8 +3,8 @@ import { connect } from 'react-redux';
 import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
 import styled from 'styled-components';
-import { setLeftSidebarWidth } from '../store/actions/canvasSettings';
-import { SetLeftSidebarWidthPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
+import { setLeftSidebarWidth } from '../store/actions/documentSettings';
+import { SetLeftSidebarWidthPayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 import { paperMain } from '../canvas';
@@ -13,7 +13,7 @@ gsap.registerPlugin(Draggable);
 
 interface SidebarLeftDragHandleProps {
   sidebarWidth?: number;
-  setLeftSidebarWidth?(payload: SetLeftSidebarWidthPayload): CanvasSettingsTypes;
+  setLeftSidebarWidth?(payload: SetLeftSidebarWidthPayload): DocumentSettingsTypes;
 }
 
 interface DragHandleProps {
@@ -71,8 +71,8 @@ const SidebarLeftDragHandle = (props: SidebarLeftDragHandleProps): ReactElement 
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { canvasSettings } = state;
-  const sidebarWidth = canvasSettings.leftSidebarWidth;
+  const { documentSettings } = state;
+  const sidebarWidth = documentSettings.leftSidebarWidth;
   return { sidebarWidth };
 };
 

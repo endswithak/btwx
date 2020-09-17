@@ -1,12 +1,14 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
-import { SetCanvasMatrixPayload, CanvasSettingsTypes, SetCanvasZoomingPayload } from '../store/actionTypes/canvasSettings';
-import { setCanvasMatrix, setCanvasZooming } from '../store/actions/canvasSettings';
+import { SetCanvasMatrixPayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
+import { setCanvasMatrix } from '../store/actions/documentSettings';
+import { SetCanvasZoomingPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
+import { setCanvasZooming } from '../store/actions/canvasSettings';
 import { paperMain } from '../canvas';
 import TopbarButton from './TopbarButton';
 
 interface ZoomInButtonProps {
-  setCanvasMatrix?(payload: SetCanvasMatrixPayload): CanvasSettingsTypes;
+  setCanvasMatrix?(payload: SetCanvasMatrixPayload): DocumentSettingsTypes;
   setCanvasZooming?(payload: SetCanvasZoomingPayload): CanvasSettingsTypes;
 }
 

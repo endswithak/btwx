@@ -1,17 +1,15 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { evaluate } from 'mathjs';
+import mexp from 'math-expression-evaluator';
+import { paperMain } from '../canvas';
 import { RootState } from '../store/reducers';
 import { SetPolygonsSidesPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setPolygonsSides } from '../store/actions/layer';
 import { getPaperLayer } from '../store/selectors/layer';
-import SidebarSection from './SidebarSection';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarInput from './SidebarInput';
 import SidebarSlider from './SidebarSlider';
-import { paperMain } from '../canvas';
-import { applyShapeMethods } from '../canvas/shapeUtils';
 
 interface PolygonSidesInputProps {
   selected?: string[];
@@ -22,10 +20,10 @@ interface PolygonSidesInputProps {
 
 const PolygonSidesInput = (props: PolygonSidesInputProps): ReactElement => {
   const { selected, setPolygonsSides, sidesValue, layerItems } = props;
-  const [sides, setSides] = useState(sidesValue);
+  const [sides, setSides] = useState(sidesValue !== 'multi' ? Math.round(sidesValue) : sidesValue);
 
   useEffect(() => {
-    setSides(sidesValue);
+    setSides(sidesValue !== 'multi' ? Math.round(sidesValue) : sidesValue);
   }, [sidesValue, selected]);
 
   const handleChange = (e: any): void => {
@@ -56,8 +54,8 @@ const PolygonSidesInput = (props: PolygonSidesInputProps): ReactElement => {
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
     try {
-      let nextSides = evaluate(`${sides}`);
-      if (Math.round(nextSides) !== sidesValue) {
+      let nextSides = mexp.eval(`${sides}`) as any;
+      if (nextSides !== sidesValue) {
         if (Math.round(nextSides) > 10) {
           nextSides = 10;
         }
@@ -68,7 +66,7 @@ const PolygonSidesInput = (props: PolygonSidesInputProps): ReactElement => {
         setSides(Math.round(nextSides));
       }
     } catch(error) {
-      setSides(sidesValue);
+      setSides(sidesValue !== 'multi' ? Math.round(sidesValue) : sidesValue);
     }
   }
 

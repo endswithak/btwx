@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { evaluate } from 'mathjs';
+import mexp from 'math-expression-evaluator';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
 import { SetLayersHeightPayload, LayerTypes } from '../store/actionTypes/layer';
@@ -28,13 +28,13 @@ const HeightInput = (props: HeightInputProps): ReactElement => {
 
   const handleSubmit = (e: any) => {
     try {
-      let nextHeight = evaluate(`${height}`);
-      if (height !== heightValue && !isNaN(nextHeight)) {
+      let nextHeight = mexp.eval(`${height}`) as any;
+      if (height !== heightValue) {
         if (nextHeight < 1) {
           nextHeight = 1;
         }
-        setLayersHeight({layers: selected, height: nextHeight});
-        setHeight(nextHeight);
+        setLayersHeight({layers: selected, height: Math.round(nextHeight)});
+        setHeight(Math.round(nextHeight));
       } else {
         setHeight(heightValue !== 'multi' ? Math.round(heightValue) : heightValue);
       }

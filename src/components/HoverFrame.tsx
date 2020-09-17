@@ -25,7 +25,7 @@ const HoverFrame = (props: HoverFrameProps): ReactElement => {
   }, [selected, hover, hoverItem]);
 
   return (
-    <div />
+    <></>
   );
 }
 

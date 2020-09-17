@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { evaluate } from 'mathjs';
+import mexp from 'math-expression-evaluator';
 import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
 import { colorsMatch } from '../store/selectors/layer';
@@ -59,8 +59,8 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
 
   const handleOpacitySubmit = (e: any): void => {
     try {
-      let nextOpacity = evaluate(`${opacity}`);
-      if (nextOpacity !== opacityValue && !isNaN(nextOpacity)) {
+      let nextOpacity = mexp.eval(`${opacity}`) as any;
+      if (nextOpacity !== opacityValue) {
         if (nextOpacity > 100) {
           nextOpacity = 100;
         }

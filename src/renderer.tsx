@@ -65,8 +65,8 @@ const titleBar = new Titlebar({
 
 (window as any).getSaveState = (): string => {
   const state = store.getState();
-  const { documentSettings, layer, canvasSettings } = state;
-  const fileState = { layer: layer.present, documentSettings, canvasSettings };
+  const { documentSettings, layer } = state;
+  const fileState = { layer: layer.present, documentSettings };
   return JSON.stringify(fileState);
 };
 

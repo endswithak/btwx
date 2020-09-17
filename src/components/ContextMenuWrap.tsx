@@ -7,8 +7,8 @@ import { ContextMenuTypes, OpenContextMenuPayload } from '../store/actionTypes/c
 import { closeContextMenu, openContextMenu } from '../store/actions/contextMenu';
 import { AddLayerTweenEventPayload, LayerTypes, RemoveLayersPayload, SelectLayerPayload, SendLayersBackwardPayload, SendLayersForwardPayload, GroupLayersPayload, UngroupLayersPayload, AddLayersMaskPayload } from '../store/actionTypes/layer';
 import { addLayerTweenEvent, removeLayers, selectLayer, selectAllLayers, copyLayersThunk, pasteLayersThunk, sendLayersBackward, sendLayersForward, groupLayersThunk, ungroupLayers, addLayersMaskThunk } from '../store/actions/layer';
-import { RemoveArtboardPresetPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
-import { removeArtboardPreset } from '../store/actions/canvasSettings';
+import { RemoveArtboardPresetPayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
+import { removeArtboardPreset } from '../store/actions/documentSettings';
 import { ArtboardPresetEditorTypes } from '../store/actionTypes/artboardPresetEditor';
 import { openArtboardPresetEditor } from '../store/actions/artboardPresetEditor';
 import { getLayerScope, orderLayersByDepth } from '../store/selectors/layer';
@@ -33,7 +33,7 @@ interface ContextMenuWrapProps {
   closeContextMenu?(): ContextMenuTypes;
   openContextMenu?(payload: OpenContextMenuPayload): ContextMenuTypes;
   addLayerTweenEvent?(payload: AddLayerTweenEventPayload): LayerTypes;
-  removeArtboardPreset?(payload: RemoveArtboardPresetPayload): CanvasSettingsTypes;
+  removeArtboardPreset?(payload: RemoveArtboardPresetPayload): DocumentSettingsTypes;
   openArtboardPresetEditor?(payload: em.ArtboardPreset): ArtboardPresetEditorTypes;
   removeLayers?(payload: RemoveLayersPayload): LayerTypes;
   selectLayer?(payload: SelectLayerPayload): LayerTypes;

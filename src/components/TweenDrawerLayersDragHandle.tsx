@@ -3,8 +3,8 @@ import { connect } from 'react-redux';
 import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
 import styled from 'styled-components';
-import { setTweenDrawerLayersWidth } from '../store/actions/canvasSettings';
-import { SetTweenDrawerLayersWidthPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
+import { setTweenDrawerLayersWidth } from '../store/actions/documentSettings';
+import { SetTweenDrawerLayersWidthPayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 
@@ -13,7 +13,7 @@ gsap.registerPlugin(Draggable);
 interface TweenDrawerLayersDragHandleProps {
   tweenDrawerLayersWidth?: number;
   tweenDrawerHeight?: number;
-  setTweenDrawerLayersWidth?(payload: SetTweenDrawerLayersWidthPayload): CanvasSettingsTypes;
+  setTweenDrawerLayersWidth?(payload: SetTweenDrawerLayersWidthPayload): DocumentSettingsTypes;
 }
 
 interface DragHandleProps {
@@ -78,9 +78,9 @@ const TweenDrawerLayersDragHandle = (props: TweenDrawerLayersDragHandleProps): R
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { canvasSettings } = state;
-  const tweenDrawerLayersWidth = canvasSettings.tweenDrawerLayersWidth;
-  const tweenDrawerHeight = canvasSettings.tweenDrawerHeight;
+  const { documentSettings } = state;
+  const tweenDrawerLayersWidth = documentSettings.tweenDrawerLayersWidth;
+  const tweenDrawerHeight = documentSettings.tweenDrawerHeight;
   return { tweenDrawerLayersWidth, tweenDrawerHeight };
 };
 

@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { evaluate } from 'mathjs';
+import mexp from 'math-expression-evaluator';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
 import { SetLayersShadowYOffsetPayload, LayerTypes } from '../store/actionTypes/layer';
@@ -15,10 +15,10 @@ interface ShadowYInputProps {
 
 const ShadowYInput = (props: ShadowYInputProps): ReactElement => {
   const { selected, shadowYOffsetValue, disabled, setLayersShadowYOffset } = props;
-  const [shadowYOffset, setShadowYOffset] = useState(shadowYOffsetValue);
+  const [shadowYOffset, setShadowYOffset] = useState(shadowYOffsetValue !== 'multi' ? Math.round(shadowYOffsetValue) : shadowYOffsetValue);
 
   useEffect(() => {
-    setShadowYOffset(shadowYOffsetValue);
+    setShadowYOffset(shadowYOffsetValue !== 'multi' ? Math.round(shadowYOffsetValue) : shadowYOffsetValue);
   }, [shadowYOffsetValue, selected]);
 
   const handleChange = (e: any) => {
@@ -28,15 +28,15 @@ const ShadowYInput = (props: ShadowYInputProps): ReactElement => {
 
   const handleSubmit = (e: any) => {
     try {
-      const newYOffset = evaluate(`${shadowYOffset}`);
-      if (newYOffset !== shadowYOffsetValue && !isNaN(newYOffset)) {
-        setLayersShadowYOffset({layers: selected, shadowYOffset: newYOffset});
-        setShadowYOffset(newYOffset);
+      const newYOffset = mexp.eval(`${shadowYOffset}`) as any;
+      if (newYOffset !== shadowYOffsetValue) {
+        setLayersShadowYOffset({layers: selected, shadowYOffset: Math.round(newYOffset)});
+        setShadowYOffset(Math.round(newYOffset));
       } else {
-        setShadowYOffset(shadowYOffsetValue);
+        setShadowYOffset(shadowYOffsetValue !== 'multi' ? Math.round(shadowYOffsetValue) : shadowYOffsetValue);
       }
     } catch(error) {
-      setShadowYOffset(shadowYOffsetValue);
+      setShadowYOffset(shadowYOffsetValue !== 'multi' ? Math.round(shadowYOffsetValue) : shadowYOffsetValue);
     }
   }
 

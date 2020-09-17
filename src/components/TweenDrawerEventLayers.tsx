@@ -123,12 +123,12 @@ const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElemen
 }
 
 const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventLayersProps) => {
-  const { layer, tweenDrawer, canvasSettings } = state;
+  const { layer, tweenDrawer, documentSettings } = state;
   const tweenEventLayers = getTweenEventLayers(layer.present, tweenDrawer.event);
   const isEmpty = tweenEventLayers.allIds.length === 0;
   const eventItem = layer.present.tweenEventById[tweenDrawer.event];
   const artboardItem = layer.present.byId[eventItem.artboard];
-  const tweenDrawerLayersWidth = canvasSettings.tweenDrawerLayersWidth;
+  const tweenDrawerLayersWidth = documentSettings.tweenDrawerLayersWidth;
   const scrollLayerItem = ownProps.scrollLayer ? layer.present.byId[ownProps.scrollLayer] : null;
   const mask = scrollLayerItem && scrollLayerItem.type === 'Group' && (scrollLayerItem as em.Group).clipped ? (() => {
     return (scrollLayerItem as em.Group).children.find((id) => layer.present.byId[id].mask);
