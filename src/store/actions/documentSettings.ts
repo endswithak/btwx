@@ -5,6 +5,7 @@ import {
   SAVE_DOCUMENT,
   ADD_DOCUMENT_IMAGE,
   SET_CANVAS_MATRIX,
+  SET_CANVAS_COLOR_FORMAT,
   ADD_ARTBOARD_PRESET,
   REMOVE_ARTBOARD_PRESET,
   UPDATE_ARTBOARD_PRESET,
@@ -16,6 +17,7 @@ import {
   SaveDocumentPayload,
   AddDocumentImagePayload,
   SetCanvasMatrixPayload,
+  SetCanvasColorFormatPayload,
   AddArtboardPresetPayload,
   RemoveArtboardPresetPayload,
   UpdateArtboardPresetPayload,
@@ -46,6 +48,11 @@ export const addDocumentImage = (payload: AddDocumentImagePayload): DocumentSett
 
 export const setCanvasMatrix = (payload: SetCanvasMatrixPayload): DocumentSettingsTypes => ({
   type: SET_CANVAS_MATRIX,
+  payload
+});
+
+export const setCanvasColorFormat = (payload: SetCanvasColorFormatPayload): DocumentSettingsTypes => ({
+  type: SET_CANVAS_COLOR_FORMAT,
   payload
 });
 

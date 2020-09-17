@@ -287,7 +287,7 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
       }
       case 'TweenEventDestination': {
         const tweenDestinations = artboards.reduce((result, current) => {
-          const disabled = tweenEventItems && tweenEventItems.some((tweenEvent) => tweenEvent.layer === contextMenu.id && tweenEvent.event === contextMenu.data.tweenEvent);
+          const disabled = tweenEventItems && tweenEventItems.some((tweenEvent) => tweenEvent.layer === contextMenu.id && tweenEvent.event === contextMenu.data.tweenEvent && tweenEvent.destinationArtboard === current.id );
           if (current.id !== activeArtboard) {
             result = [
               ...result,

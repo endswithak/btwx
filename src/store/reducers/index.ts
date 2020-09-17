@@ -389,7 +389,7 @@ const rootReducer = (state: any, action: fileTypes) => {
       }
     });
     paperMain.view.viewSize = new paperMain.Size(canvas.clientWidth, canvas.clientHeight);
-    paperMain.view.matrix.set(currentState.canvasSettings.matrix);
+    paperMain.view.matrix.set(currentState.documentSettings.matrix);
   }
   return appReducer(currentState, action);
 }

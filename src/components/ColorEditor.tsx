@@ -24,6 +24,7 @@ interface ColorEditorProps {
   includesTextLayer?: boolean;
   colorEditor?: ColorEditorState;
   colorValue?: em.Color;
+  colorFormat?: em.ColorFormat;
   canvasFocusing?: boolean;
   closeColorEditor?(): ColorEditorTypes;
   openGradientEditor?(payload: OpenGradientEditorPayload): GradientEditorTypes;
@@ -40,7 +41,7 @@ interface ColorEditorProps {
 const ColorEditor = (props: ColorEditorProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const editorRef = useRef<HTMLDivElement>(null);
-  const { includesTextLayer, colorEditor, colorValue, closeColorEditor, setLayersFillColor, setLayersStrokeFillType, setLayersGradientType, setLayersFillType, setLayersStrokeColor, openGradientEditor, setLayersShadowColor, setTextSettingsFillColor, setCanvasFocusing, canvasFocusing } = props;
+  const { includesTextLayer, colorEditor, colorValue, colorFormat, closeColorEditor, setLayersFillColor, setLayersStrokeFillType, setLayersGradientType, setLayersFillType, setLayersStrokeColor, openGradientEditor, setLayersShadowColor, setTextSettingsFillColor, setCanvasFocusing, canvasFocusing } = props;
 
   const debounceColor = useCallback(
     debounce((color: em.Color) => {
@@ -172,7 +173,7 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
         }
         <ColorPicker
           colorValue={colorValue}
-          colorType='rgb'
+          colorType={colorFormat}
           onChange={handleColorChange} />
       </div>
     </div>
@@ -184,8 +185,9 @@ const mapStateToProps = (state: RootState): {
   colorValue: em.Color;
   includesTextLayer: boolean;
   canvasFocusing: boolean;
+  colorFormat: em.ColorFormat;
 } => {
-  const { colorEditor, layer, canvasSettings } = state;
+  const { colorEditor, layer, canvasSettings, documentSettings } = state;
   const layerItems: em.Layer[] = colorEditor.layers.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
@@ -203,7 +205,8 @@ const mapStateToProps = (state: RootState): {
   }, []);
   const colorValue = styleValues[0].color;
   const canvasFocusing = canvasSettings.focusing;
-  return { colorEditor, colorValue, includesTextLayer, canvasFocusing };
+  const colorFormat = documentSettings.colorFormat;
+  return { colorEditor, colorValue, includesTextLayer, canvasFocusing, colorFormat };
 };
 
 export default connect(

@@ -26,7 +26,8 @@ const SidebarRight = (props: SidebarRightProps): ReactElement => {
           ? <SidebarEmptyState
               icon='right-sidebar'
               text='Styles'
-              detail={<span>View and edit document<br/> layer styles here.</span>} />
+              detail='View and edit document layer styles here.'
+              style={{width: 211}} />
           : null
         }
         {

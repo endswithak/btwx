@@ -69,7 +69,7 @@ const mapStateToProps = (state: RootState) => {
     if (parent) {
       result = [...result, getPositionInArtboard(layerItem, parent).y];
     } else {
-      result = [...result, Math.round(layerItem.frame.y)];
+      result = [...result, layerItem.frame.y];
     }
     return result;
   }, []);

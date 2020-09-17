@@ -318,41 +318,6 @@ export const addColorToNullFSTween = (props: AddTweenProps, style: 'fill' | 'str
   }, tween.delay);
 };
 
-export const addGradientToGradientFSTween = (props: AddTweenProps, style: 'fill' | 'stroke'): void => {
-  const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
-  // // origin
-  // addFSGradientOriginTween(props, style);
-  // // destination
-  // addFSGradientDestinationTween(props, style);
-  // stops
-  const layerStopCount = originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops.length;
-  const destinationStopCount = destinationPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops.length;
-  if (destinationStopCount > layerStopCount) {
-    const diff = destinationStopCount - layerStopCount;
-    for (let i = 0; i < diff; i++) {
-      const test = originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[0].clone();
-      originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops.push(test);
-    }
-  }
-  originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops.forEach((stop, index) => {
-    const closestDestinationStop = destinationPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops.reduce((result, current) => {
-      return (Math.abs(current.offset - stop.offset) < Math.abs(result.offset - stop.offset) ? current : result);
-    });
-    timelineTweenProps[`${tween.prop}-stop-${index}-color`] = originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.toCSS(true);
-    timelineTweenProps[`${tween.prop}-stop-${index}-offset`] = originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].offset;
-    timeline.to(timelineTweenProps, {
-      duration: tween.duration,
-      [`${tween.prop}-stop-${index}-color`]: destinationPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index] ? destinationPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.toCSS(true) : closestDestinationStop.color.toCSS(true),
-      [`${tween.prop}-stop-${index}-offset`]: destinationPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index] ? destinationPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].offset : closestDestinationStop.offset,
-      onUpdate: () => {
-        originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color = timelineTweenProps[`${tween.prop}-stop-${index}-color`];
-        originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].offset = timelineTweenProps[`${tween.prop}-stop-${index}-offset`];
-      },
-      ease: tween.ease,
-    }, tween.delay);
-  });
-};
-
 export const addGradientOriginXFSTween = (props: AddTweenProps, style: 'fill' | 'stroke'): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
   timelineTweenProps[tween.prop] = originLayerItem.style[style].gradient.origin.x;
@@ -429,15 +394,51 @@ export const addGradientDestinationYFSTween = (props: AddTweenProps, style: 'fil
   }, tween.delay);
 };
 
+export const addGradientToGradientFSTween = (props: AddTweenProps, style: 'fill' | 'stroke'): void => {
+  const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
+  const layerStopCount = originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops.length;
+  const destinationStopCount = destinationPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops.length;
+  if (destinationStopCount > layerStopCount) {
+    const diff = destinationStopCount - layerStopCount;
+    for (let i = 0; i < diff; i++) {
+      const test = originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[0].clone();
+      originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops.push(test);
+    }
+  }
+  originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops.forEach((stop, index) => {
+    const closestDestinationStop = destinationPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops.reduce((result, current) => {
+      return (Math.abs(current.offset - stop.offset) < Math.abs(result.offset - stop.offset) ? current : result);
+    });
+    timelineTweenProps[`${tween.prop}-stop-${index}-alpha`] = originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha;
+    timelineTweenProps[`${tween.prop}-stop-${index}-color`] = originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.toCSS(true);
+    timelineTweenProps[`${tween.prop}-stop-${index}-offset`] = originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].offset;
+    timeline.to(timelineTweenProps, {
+      duration: tween.duration,
+      [`${tween.prop}-stop-${index}-alpha`]: destinationPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index] ? destinationPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha : closestDestinationStop.color.alpha,
+      [`${tween.prop}-stop-${index}-color`]: destinationPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index] ? destinationPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.toCSS(true) : closestDestinationStop.color.toCSS(true),
+      [`${tween.prop}-stop-${index}-offset`]: destinationPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index] ? destinationPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].offset : closestDestinationStop.offset,
+      onUpdate: () => {
+        originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color = timelineTweenProps[`${tween.prop}-stop-${index}-color`];
+        originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha = timelineTweenProps[`${tween.prop}-stop-${index}-alpha`];
+        originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].offset = timelineTweenProps[`${tween.prop}-stop-${index}-offset`];
+      },
+      ease: tween.ease,
+    }, tween.delay);
+  });
+};
+
 export const addGradientToColorFSTween = (props: AddTweenProps, style: 'fill' | 'stroke'): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
   originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops.forEach((stop, index) => {
     timelineTweenProps[`${tween.prop}-stop-${index}-color`] = originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.toCSS(true);
+    timelineTweenProps[`${tween.prop}-stop-${index}-alpha`] = originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha;
     timeline.to(timelineTweenProps, {
       duration: tween.duration,
       [`${tween.prop}-stop-${index}-color`]: destinationPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].toCSS(true),
+      [`${tween.prop}-stop-${index}-alpha`]: destinationPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].alpha,
       onUpdate: () => {
         originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color = timelineTweenProps[`${tween.prop}-stop-${index}-color`];
+        originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha = timelineTweenProps[`${tween.prop}-stop-${index}-alpha`];
       },
       ease: tween.ease
     }, tween.delay);
@@ -456,7 +457,7 @@ export const addColorToGradientFSTween = (props: AddTweenProps, style: 'fill' | 
     gradient: {
       stops: destinationLayerItem.style[style].gradient.stops.map((stop) => {
         return new paperPreview.GradientStop(
-          new paperPreview.Color(originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].toCSS(true)),
+          originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'],
           stop.position
         );
       }),
@@ -467,11 +468,14 @@ export const addColorToGradientFSTween = (props: AddTweenProps, style: 'fill' | 
   } as em.PaperGradientFill;
   originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops.forEach((stop, index) => {
     timelineTweenProps[`${tween.prop}-stop-${index}-color`] = originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.toCSS(true);
+    timelineTweenProps[`${tween.prop}-stop-${index}-alpha`] = originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha;
     timeline.to(timelineTweenProps, {
       duration: tween.duration,
       [`${tween.prop}-stop-${index}-color`]: destinationPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.toCSS(true),
+      [`${tween.prop}-stop-${index}-alpha`]: destinationPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha,
       onUpdate: () => {
         originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color = timelineTweenProps[`${tween.prop}-stop-${index}-color`];
+        originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha = timelineTweenProps[`${tween.prop}-stop-${index}-alpha`];
       },
       ease: tween.ease,
     }, tween.delay);

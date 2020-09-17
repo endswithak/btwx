@@ -1,21 +1,30 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { ReactElement } from 'react';
+import { connect } from 'react-redux';
+import { setCanvasColorFormat } from '../store/actions/documentSettings';
+import { SetCanvasColorFormatPayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
 import SidebarToggleButton from './SidebarToggleButton';
 import Icon from './Icon';
 
 interface ColorPickerTypeToggleProps {
-  type: 'rgb' | 'hsl';
+  type: em.ColorFormat;
   setType: any;
+  setCanvasColorFormat?(payload: SetCanvasColorFormatPayload): DocumentSettingsTypes;
 }
 
 const ColorPickerTypeToggle = (props: ColorPickerTypeToggleProps): ReactElement => {
-  const { type, setType } = props;
+  const { type, setType, setCanvasColorFormat } = props;
 
   const handleClick = () => {
-    if (type === 'rgb') {
-      setType('hsl');
-    } else if (type === 'hsl') {
-      setType('rgb');
+    switch(type) {
+      case 'rgb':
+        setType('hsl');
+        setCanvasColorFormat({colorFormat: 'hsl'});
+        break;
+      case 'hsl':
+        setType('rgb');
+        setCanvasColorFormat({colorFormat: 'rgb'});
+        break;
     }
   }
 
@@ -30,4 +39,7 @@ const ColorPickerTypeToggle = (props: ColorPickerTypeToggleProps): ReactElement 
   );
 }
 
-export default ColorPickerTypeToggle;
+export default connect(
+  null,
+  { setCanvasColorFormat }
+)(ColorPickerTypeToggle);

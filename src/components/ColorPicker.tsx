@@ -18,7 +18,7 @@ import tinyColor from 'tinycolor2';
 
 interface ColorPickerProps {
   colorValue: em.Color | 'multi';
-  colorType: 'hsl' | 'rgb';
+  colorType: em.ColorFormat;
   onChange?(color: em.Color): void;
 }
 

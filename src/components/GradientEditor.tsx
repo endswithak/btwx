@@ -22,6 +22,7 @@ import GradientFrame from './GradientFrame';
 interface GradientEditorProps {
   gradientValue?: em.Gradient;
   gradientEditor?: GradientEditorState;
+  colorFormat?: em.ColorFormat;
   activeStopValue?: em.GradientStop;
   closeGradientEditor?(): GradientEditorTypes;
   openColorEditor?(payload: OpenColorEditorPayload): ColorEditorTypes;
@@ -37,7 +38,7 @@ interface GradientEditorProps {
 const GradientEditor = (props: GradientEditorProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const editorRef = useRef<HTMLDivElement>(null);
-  const { gradientEditor, gradientValue, activeStopValue, setLayersGradientType, setLayersGradientStopColor, setLayerActiveGradientStop, setLayersGradientStopPosition, addLayersGradientStop, setLayersStrokeFillType, setLayersFillType, openColorEditor, closeGradientEditor } = props;
+  const { gradientEditor, gradientValue, colorFormat, activeStopValue, setLayersGradientType, setLayersGradientStopColor, setLayerActiveGradientStop, setLayersGradientStopPosition, addLayersGradientStop, setLayersStrokeFillType, setLayersFillType, openColorEditor, closeGradientEditor } = props;
 
   const debounceStopColorChange = useCallback(
     debounce((stopIndex: number, color: em.Color) => {
@@ -194,7 +195,7 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
         />
         <ColorPicker
           colorValue={activeStopValue.color}
-          colorType='rgb'
+          colorType={colorFormat}
           onChange={handleActiveStopColorChange} />
         <GradientFrame
           layer={gradientEditor.layers[0]}
@@ -209,8 +210,9 @@ const mapStateToProps = (state: RootState): {
   gradientValue: em.Gradient;
   gradientEditor: GradientEditorState;
   activeStopValue: em.GradientStop;
+  colorFormat: em.ColorFormat;
 } => {
-  const { gradientEditor, layer } = state;
+  const { gradientEditor, layer, documentSettings } = state;
   const layerItems: em.Layer[] = gradientEditor.layers.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
@@ -233,7 +235,8 @@ const mapStateToProps = (state: RootState): {
   }, []);
   const gradientValue = gradientValues[0];
   const activeStopValue = gradientValue.stops.find((stop, index) => index === gradientValue.activeStopIndex);
-  return { gradientEditor, gradientValue, activeStopValue };
+  const colorFormat = documentSettings.colorFormat;
+  return { gradientEditor, gradientValue, activeStopValue, colorFormat };
 };
 
 export default connect(

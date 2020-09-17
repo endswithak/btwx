@@ -34,7 +34,8 @@ const TweenDrawer = (props: TweenDrawerProps): ReactElement => {
           ? <SidebarEmptyState
               icon='tweens'
               text='Events'
-              detail={<span>View and edit document events here.<br/> You can add events when you have <br/>two or more artboards.</span>} />
+              detail='View and edit document events here. You can add events when you have two or more artboards.'
+              style={{width: 411}} />
           : null
         }
         {

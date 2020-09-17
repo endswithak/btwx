@@ -12,6 +12,7 @@ interface SidebarEmptyStateProps {
   actionDisabled?: boolean;
   actionText?: string;
   actionIcon?: string;
+  style?: any;
   actionClick?(): void;
 }
 
@@ -54,10 +55,10 @@ const Button = styled.button<ButtonProps>`
 
 const SidebarEmptyState = (props: SidebarEmptyStateProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { icon, text, detail, action, actionText, actionIcon, actionClick, actionActive, actionDisabled } = props;
+  const { icon, text, detail, action, actionText, actionIcon, actionClick, actionActive, actionDisabled, style } = props;
   return (
     <div className='c-sidebar__empty-state'>
-      <div className='c-sidebar-empty-state__inner'>
+      <div className='c-sidebar-empty-state__inner' style={{...style}}>
         {
           icon
           ? <div className='c-sidebar-empty-state__icon'>

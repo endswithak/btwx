@@ -165,9 +165,6 @@ const titleBar = new Titlebar({
 };
 
 (window as any).renderPreviewWindow = (): void => {
-  window.onbeforeunload = (e: any): void => {
-    store.dispatch(closePreview());
-  }
   titleBar.updateTitle('Preview');
   ReactDOM.render(
     <Provider store={store}>

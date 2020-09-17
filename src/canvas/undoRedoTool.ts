@@ -117,7 +117,7 @@ class UndoRedoTool {
               updateHoverFrame(state.layer.present);
               updateSelectionFrame(state.layer.present);
               updateActiveArtboardFrame(state.layer.present);
-              if (state.tweenDrawer.isOpen) {
+              if (state.tweenDrawer.isOpen && state.layer.present.allTweenEventIds.length > 0) {
                 updateTweenEventsFrame(state.layer.present, state.tweenDrawer.event === null ? state.layer.present.allTweenEventIds.reduce((result, current) => {
                   const tweenEvent = state.layer.present.tweenEventById[current];
                   if (tweenEvent.artboard === state.layer.present.activeArtboard || current === state.tweenDrawer.eventHover) {
@@ -152,7 +152,7 @@ class UndoRedoTool {
               updateHoverFrame(state.layer.present);
               updateSelectionFrame(state.layer.present);
               updateActiveArtboardFrame(state.layer.present);
-              if (state.tweenDrawer.isOpen) {
+              if (state.tweenDrawer.isOpen && state.layer.present.allTweenEventIds.length > 0) {
                 updateTweenEventsFrame(state.layer.present, state.tweenDrawer.event === null ? state.layer.present.allTweenEventIds.reduce((result, current) => {
                   const tweenEvent = state.layer.present.tweenEventById[current];
                   if (tweenEvent.artboard === state.layer.present.activeArtboard || current === state.tweenDrawer.eventHover) {

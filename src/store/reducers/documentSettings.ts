@@ -1,12 +1,13 @@
 import { addItem, removeItem } from '../utils/general';
 import { remote } from 'electron';
-import { DEFAULT_LEFT_SIDEBAR_WIDTH, DEFAULT_RIGHT_SIDEBAR_WIDTH, DEFAULT_TWEEN_DRAWER_HEIGHT, DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH } from '../../constants';
+import { DEFAULT_LEFT_SIDEBAR_WIDTH, DEFAULT_RIGHT_SIDEBAR_WIDTH, DEFAULT_TWEEN_DRAWER_HEIGHT, DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH, DEFAULT_COLOR_FORMAT } from '../../constants';
 
 import {
   SAVE_DOCUMENT_AS,
   ADD_DOCUMENT_IMAGE,
   SAVE_DOCUMENT,
   SET_CANVAS_MATRIX,
+  SET_CANVAS_COLOR_FORMAT,
   ADD_ARTBOARD_PRESET,
   REMOVE_ARTBOARD_PRESET,
   UPDATE_ARTBOARD_PRESET,
@@ -27,7 +28,6 @@ export interface DocumentSettingsState {
     byId: {
       [id: string]: em.ArtboardPreset;
     };
-    editing: string;
   };
   images: {
     allIds: string[];
@@ -35,6 +35,7 @@ export interface DocumentSettingsState {
       [id: string]: em.DocumentImage;
     };
   };
+  colorFormat: em.ColorFormat;
   leftSidebarWidth: number;
   rightSidebarWidth: number;
   tweenDrawerHeight: number;
@@ -49,13 +50,13 @@ const initialState: DocumentSettingsState = {
   matrix: [1, 0, 0, 1, 0, 0],
   artboardPresets: {
     allIds: [],
-    byId: {},
-    editing: null
+    byId: {}
   },
   images: {
     allIds: [],
     byId: {}
   },
+  colorFormat: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('colorFormat', 'string') : DEFAULT_COLOR_FORMAT,
   leftSidebarWidth: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('leftSidebarWidth', 'integer') : DEFAULT_LEFT_SIDEBAR_WIDTH,
   rightSidebarWidth: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('rightSidebarWidth', 'integer') : DEFAULT_RIGHT_SIDEBAR_WIDTH,
   tweenDrawerHeight: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('tweenDrawerHeight', 'integer') : DEFAULT_TWEEN_DRAWER_HEIGHT,
@@ -99,6 +100,15 @@ export default (state = initialState, action: DocumentSettingsTypes): DocumentSe
         matrix: action.payload.matrix
       };
     }
+    case SET_CANVAS_COLOR_FORMAT: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('colorFormat', 'string', action.payload.colorFormat);
+      }
+      return {
+        ...state,
+        colorFormat: action.payload.colorFormat
+      };
+    }
     case ADD_ARTBOARD_PRESET: {
       return {
         ...state,
@@ -135,7 +145,6 @@ export default (state = initialState, action: DocumentSettingsTypes): DocumentSe
         ...state,
         artboardPresets: {
           ...state.artboardPresets,
-          editing: null,
           byId: Object.keys(state.artboardPresets.byId).reduce((result: { [id: string]: em.ArtboardPreset }, id) => {
             if (id !== action.payload.id) {
               result[id] = state.artboardPresets.byId[id];

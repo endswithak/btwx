@@ -44,7 +44,7 @@ import {
   getLayerIndex, getLayer, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor,
   getLayerScope, getPaperLayer, getSelectionTopLeft, getSelectionBottomRight, getClipboardCenter,
   getSelectionCenter, getLayerAndDescendants, getLayerDescendants, getDestinationEquivalent, getEquivalentTweenProps,
-  getTweensByDestinationLayer, getAllArtboardTweenEvents, getTweensEventsByDestinationArtboard, getTweensByLayer,
+  getTweensByDestinationLayer, getTweensEventsByOriginArtboard, getTweensEventsByDestinationArtboard, getTweensByLayer,
   getLayersBounds, getGradientOriginPoint, getGradientDestinationPoint, getGradientStops, getLayerSnapPoints,
   orderLayersByDepth, orderLayersByLeft, orderLayersByTop, savePaperProjectJSON, getTweensByProp,
   getEquivalentTweenProp, getTweensWithLayer, gradientsMatch, getPaperProp, getArtboardsTopTop, getSelectionBounds,
@@ -2236,7 +2236,7 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
   if (layerScope.some((id: string) => currentState.allArtboardIds.includes(id))) {
     const artboard = layerScope.find((id: string) => currentState.allArtboardIds.includes(id));
     const tweensByProp = getTweensByProp(currentState, layerId, prop);
-    const eventsWithArtboardAsOrigin = getAllArtboardTweenEvents(currentState, artboard);
+    const eventsWithArtboardAsOrigin = getTweensEventsByOriginArtboard(currentState, artboard);
     const eventsWithArtboardAsDestination = getTweensEventsByDestinationArtboard(currentState, artboard);
     // filter tweens by prop
     // if new layer prop matches destination prop, remove tween
@@ -2299,7 +2299,7 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
         const equivalentLayerItem = result.byId[originEquivalent.id] as em.Layer;
         const artboardItem = result.byId[tweenEvent.artboard] as em.Artboard;
         const destinationArtboardItem = result.byId[tweenEvent.destinationArtboard] as em.Artboard;
-        const hasTween = getEquivalentTweenProp(layerItem, equivalentLayerItem, artboardItem, destinationArtboardItem, prop);
+        const hasTween = getEquivalentTweenProp(layerItem, equivalentLayerItem, destinationArtboardItem, artboardItem, prop);
         const tweenExists = tweenEvent.tweens.some((id: string) => {
           const tween = result.tweenById[id];
           return tween.layer === originEquivalent.id && tween.prop === prop;
@@ -2420,22 +2420,22 @@ export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
   if (layerScope.some((id: string) => currentState.allArtboardIds.includes(id))) {
     const artboard = layerScope.find((id: string) => currentState.allArtboardIds.includes(id));
     const artboardItem = state.byId[artboard];
-    x = Math.round(x + (artboardItem.frame.x - (artboardItem.frame.width / 2)));
+    x = x + (artboardItem.frame.x - (artboardItem.frame.width / 2));
   }
   paperLayer.position.x = x;
-  currentState = {
-    ...currentState,
-    byId: {
-      ...currentState.byId,
-      [action.payload.id]: {
-        ...currentState.byId[action.payload.id],
-        frame: {
-          ...currentState.byId[action.payload.id].frame,
-          x: x
-        }
-      }
-    }
-  }
+  // currentState = {
+  //   ...currentState,
+  //   byId: {
+  //     ...currentState.byId,
+  //     [action.payload.id]: {
+  //       ...currentState.byId[action.payload.id],
+  //       frame: {
+  //         ...currentState.byId[action.payload.id].frame,
+  //         x: x
+  //       }
+  //     }
+  //   }
+  // }
   currentState = updateLayerBounds(currentState, action.payload.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x']);
   return currentState;
@@ -2458,22 +2458,22 @@ export const setLayerY = (state: LayerState, action: SetLayerY): LayerState => {
   if (layerScope.some((id: string) => currentState.allArtboardIds.includes(id))) {
     const artboard = layerScope.find((id: string) => currentState.allArtboardIds.includes(id));
     const artboardItem = state.byId[artboard];
-    y = Math.round(y + (artboardItem.frame.y - (artboardItem.frame.height / 2)));
+    y = y + (artboardItem.frame.y - (artboardItem.frame.height / 2));
   }
   paperLayer.position.y = y;
-  currentState = {
-    ...currentState,
-    byId: {
-      ...currentState.byId,
-      [action.payload.id]: {
-        ...currentState.byId[action.payload.id],
-        frame: {
-          ...currentState.byId[action.payload.id].frame,
-          y: y
-        }
-      }
-    }
-  }
+  // currentState = {
+  //   ...currentState,
+  //   byId: {
+  //     ...currentState.byId,
+  //     [action.payload.id]: {
+  //       ...currentState.byId[action.payload.id],
+  //       frame: {
+  //         ...currentState.byId[action.payload.id].frame,
+  //         y: y
+  //       }
+  //     }
+  //   }
+  // }
   currentState = updateLayerBounds(currentState, action.payload.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
   return currentState;
@@ -2984,7 +2984,7 @@ export const setLayerGradient = (state: LayerState, action: SetLayerGradient): L
       }
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, [action.payload.prop]);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, [action.payload.prop, `${action.payload.prop}GradientOriginX`, `${action.payload.prop}GradientOriginY`, `${action.payload.prop}GradientDestinationX`, `${action.payload.prop}GradientDestinationY`] as any);
   return currentState;
 };
 

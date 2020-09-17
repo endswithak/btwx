@@ -2,6 +2,7 @@ export const SAVE_DOCUMENT_AS = 'SAVE_DOCUMENT_AS';
 export const SAVE_DOCUMENT = 'SAVE_DOCUMENT';
 
 export const SET_CANVAS_MATRIX = 'SET_CANVAS_MATRIX';
+export const SET_CANVAS_COLOR_FORMAT = 'SET_CANVAS_COLOR_FORMAT';
 
 export const ADD_DOCUMENT_IMAGE = 'ADD_DOCUMENT_IMAGE';
 
@@ -42,6 +43,15 @@ export interface SetCanvasMatrixPayload {
 export interface SetCanvasMatrix {
   type: typeof SET_CANVAS_MATRIX;
   payload: SetCanvasMatrixPayload;
+}
+
+export interface SetCanvasColorFormatPayload {
+  colorFormat: em.ColorFormat;
+}
+
+export interface SetCanvasColorFormat {
+  type: typeof SET_CANVAS_COLOR_FORMAT;
+  payload: SetCanvasColorFormatPayload;
 }
 
 export interface AddDocumentImagePayload {
@@ -126,6 +136,7 @@ export interface UpdateArtboardPreset {
 export type DocumentSettingsTypes = SaveDocumentAs |
                                     SaveDocument |
                                     SetCanvasMatrix |
+                                    SetCanvasColorFormat |
                                     AddDocumentImage |
                                     SetLeftSidebarWidth |
                                     SetRightSidebarWidth |

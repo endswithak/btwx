@@ -70,7 +70,8 @@ const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElemen
             <SidebarEmptyState
               icon='ease-curve'
               text='Event Layers'
-              detail={<span>View and edit event<br/> layer eases here.</span>} />
+              detail='View and edit event layer ease curves here.'
+              style={{width: 211}} />
           </div>
         : <>
             {

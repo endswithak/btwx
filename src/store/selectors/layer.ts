@@ -315,7 +315,7 @@ export const getDestinationEquivalent = (store: LayerState, layer: string, desti
 export const getPositionInArtboard = (layer: em.Layer, artboard: em.Artboard): paper.Point => {
   const xDiff = layer.frame.x - (artboard.frame.x - (artboard.frame.width / 2));
   const yDiff = layer.frame.y - (artboard.frame.y - (artboard.frame.height / 2));
-  return new paper.Point(xDiff, yDiff);
+  return new paper.Point(parseInt(xDiff.toFixed(2)), parseInt(yDiff.toFixed(2)));
 };
 
 export const hasImageTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
@@ -356,28 +356,28 @@ export const hasFillTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer)
 export const hasFillGradientOriginXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   const fillTween = hasFillTween(layerItem, equivalentLayerItem);
   const hasFillGradientTween = fillTween && (layerItem.style.fill.fillType === 'gradient' && equivalentLayerItem.style.fill.fillType === 'gradient');
-  const sameOriginX =  layerItem.style.fill.gradient.origin.x === equivalentLayerItem.style.fill.gradient.origin.x;
+  const sameOriginX =  layerItem.style.fill.gradient.origin.x.toFixed(2) === equivalentLayerItem.style.fill.gradient.origin.x.toFixed(2);
   return hasFillGradientTween && !sameOriginX;
 };
 
 export const hasFillGradientOriginYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   const fillTween = hasFillTween(layerItem, equivalentLayerItem);
   const hasFillGradientTween = fillTween && (layerItem.style.fill.fillType === 'gradient' && equivalentLayerItem.style.fill.fillType === 'gradient');
-  const sameOriginY =  layerItem.style.fill.gradient.origin.y === equivalentLayerItem.style.fill.gradient.origin.y;
+  const sameOriginY =  layerItem.style.fill.gradient.origin.y.toFixed(2) === equivalentLayerItem.style.fill.gradient.origin.y.toFixed(2);
   return hasFillGradientTween && !sameOriginY;
 };
 
 export const hasFillGradientDestinationXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   const fillTween = hasFillTween(layerItem, equivalentLayerItem);
   const hasFillGradientTween = fillTween && (layerItem.style.fill.fillType === 'gradient' && equivalentLayerItem.style.fill.fillType === 'gradient');
-  const sameOriginX =  layerItem.style.fill.gradient.destination.x === equivalentLayerItem.style.fill.gradient.destination.x;
+  const sameOriginX =  layerItem.style.fill.gradient.destination.x.toFixed(2) === equivalentLayerItem.style.fill.gradient.destination.x.toFixed(2);
   return hasFillGradientTween && !sameOriginX;
 };
 
 export const hasFillGradientDestinationYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   const fillTween = hasFillTween(layerItem, equivalentLayerItem);
   const hasFillGradientTween = fillTween && (layerItem.style.fill.fillType === 'gradient' && equivalentLayerItem.style.fill.fillType === 'gradient');
-  const sameOriginY =  layerItem.style.fill.gradient.destination.y === equivalentLayerItem.style.fill.gradient.destination.y;
+  const sameOriginY =  layerItem.style.fill.gradient.destination.y.toFixed(2) === equivalentLayerItem.style.fill.gradient.destination.y.toFixed(2);
   return hasFillGradientTween && !sameOriginY;
 };
 
@@ -408,7 +408,7 @@ export const hasYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer, ar
 export const hasRotationTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   const lineToLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType === 'Line';
   const groupToGroup = layerItem.type === 'Group' && equivalentLayerItem.type === 'Group';
-  const rotationsMatch = layerItem.transform.rotation === equivalentLayerItem.transform.rotation;
+  const rotationsMatch = layerItem.transform.rotation.toFixed(2) === equivalentLayerItem.transform.rotation.toFixed(2);
   return !lineToLine && !groupToGroup && !rotationsMatch;
 };
 
@@ -446,28 +446,28 @@ export const hasStrokeTween = (layerItem: em.Layer, equivalentLayerItem: em.Laye
 export const hasStrokeGradientOriginXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   const strokeTween = hasStrokeTween(layerItem, equivalentLayerItem);
   const hasStrokeGradientTween = strokeTween && (layerItem.style.stroke.fillType === 'gradient' && equivalentLayerItem.style.stroke.fillType === 'gradient');
-  const sameOriginX =  layerItem.style.stroke.gradient.origin.x === equivalentLayerItem.style.stroke.gradient.origin.x;
+  const sameOriginX = layerItem.style.stroke.gradient.origin.x.toFixed(2) === equivalentLayerItem.style.stroke.gradient.origin.x.toFixed(2);
   return hasStrokeGradientTween && !sameOriginX;
 };
 
 export const hasStrokeGradientOriginYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   const strokeTween = hasStrokeTween(layerItem, equivalentLayerItem);
   const hasStrokeGradientTween = strokeTween && (layerItem.style.stroke.fillType === 'gradient' && equivalentLayerItem.style.stroke.fillType === 'gradient');
-  const sameOriginY =  layerItem.style.stroke.gradient.origin.y === equivalentLayerItem.style.stroke.gradient.origin.y;
+  const sameOriginY =  layerItem.style.stroke.gradient.origin.y.toFixed(2) === equivalentLayerItem.style.stroke.gradient.origin.y.toFixed(2);
   return hasStrokeGradientTween && !sameOriginY;
 };
 
 export const hasStrokeGradientDestinationXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   const strokeTween = hasStrokeTween(layerItem, equivalentLayerItem);
   const hasStrokeGradientTween = strokeTween && (layerItem.style.stroke.fillType === 'gradient' && equivalentLayerItem.style.stroke.fillType === 'gradient');
-  const sameOriginX =  layerItem.style.stroke.gradient.destination.x === equivalentLayerItem.style.stroke.gradient.destination.x;
+  const sameOriginX =  layerItem.style.stroke.gradient.destination.x.toFixed(2) === equivalentLayerItem.style.stroke.gradient.destination.x.toFixed(2);
   return hasStrokeGradientTween && !sameOriginX;
 };
 
 export const hasStrokeGradientDestinationYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   const strokeTween = hasStrokeTween(layerItem, equivalentLayerItem);
   const hasStrokeGradientTween = strokeTween && (layerItem.style.stroke.fillType === 'gradient' && equivalentLayerItem.style.stroke.fillType === 'gradient');
-  const sameOriginY =  layerItem.style.stroke.gradient.destination.y === equivalentLayerItem.style.stroke.gradient.destination.y;
+  const sameOriginY =  layerItem.style.stroke.gradient.destination.y.toFixed(2) === equivalentLayerItem.style.stroke.gradient.destination.y.toFixed(2);
   return hasStrokeGradientTween && !sameOriginY;
 };
 
@@ -476,7 +476,7 @@ export const hasDashOffsetTween = (layerItem: em.Layer, equivalentLayerItem: em.
     (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
     (layerItem.style.stroke.enabled || equivalentLayerItem.style.stroke.enabled) &&
-    layerItem.style.strokeOptions.dashOffset !== equivalentLayerItem.style.strokeOptions.dashOffset
+    layerItem.style.strokeOptions.dashOffset.toFixed(2) !== equivalentLayerItem.style.strokeOptions.dashOffset.toFixed(2)
   );
 };
 
@@ -485,7 +485,7 @@ export const hasDashArrayWidthTween = (layerItem: em.Layer, equivalentLayerItem:
     (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
     (layerItem.style.stroke.enabled || equivalentLayerItem.style.stroke.enabled) &&
-    layerItem.style.strokeOptions.dashArray[0] !== equivalentLayerItem.style.strokeOptions.dashArray[0]
+    layerItem.style.strokeOptions.dashArray[0].toFixed(2) !== equivalentLayerItem.style.strokeOptions.dashArray[0].toFixed(2)
   );
 };
 
@@ -494,7 +494,7 @@ export const hasDashArrayGapTween = (layerItem: em.Layer, equivalentLayerItem: e
     (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
     (layerItem.style.stroke.enabled || equivalentLayerItem.style.stroke.enabled) &&
-    layerItem.style.strokeOptions.dashArray[1] !== equivalentLayerItem.style.strokeOptions.dashArray[1]
+    layerItem.style.strokeOptions.dashArray[1].toFixed(2) !== equivalentLayerItem.style.strokeOptions.dashArray[1].toFixed(2)
   );
 };
 
@@ -505,7 +505,7 @@ export const hasStrokeWidthTween = (layerItem: em.Layer, equivalentLayerItem: em
     (
       (layerItem.style.stroke.enabled && !equivalentLayerItem.style.stroke.enabled) ||
       (!layerItem.style.stroke.enabled && equivalentLayerItem.style.stroke.enabled) ||
-      layerItem.style.stroke.width !== equivalentLayerItem.style.stroke.width
+      layerItem.style.stroke.width.toFixed(2) !== equivalentLayerItem.style.stroke.width.toFixed(2)
     )
   );
 };
@@ -529,7 +529,7 @@ export const hasShadowOffsetXTween = (layerItem: em.Layer, equivalentLayerItem: 
     (
       (layerItem.style.shadow.enabled && !equivalentLayerItem.style.shadow.enabled) ||
       (!layerItem.style.shadow.enabled && equivalentLayerItem.style.shadow.enabled) ||
-      layerItem.style.shadow.offset.x !== equivalentLayerItem.style.shadow.offset.x
+      layerItem.style.shadow.offset.x.toFixed(2) !== equivalentLayerItem.style.shadow.offset.x.toFixed(2)
     )
   );
 };
@@ -541,7 +541,7 @@ export const hasShadowOffsetYTween = (layerItem: em.Layer, equivalentLayerItem: 
     (
       (layerItem.style.shadow.enabled && !equivalentLayerItem.style.shadow.enabled) ||
       (!layerItem.style.shadow.enabled && equivalentLayerItem.style.shadow.enabled) ||
-      layerItem.style.shadow.offset.y !== equivalentLayerItem.style.shadow.offset.y
+      layerItem.style.shadow.offset.y.toFixed(2) !== equivalentLayerItem.style.shadow.offset.y.toFixed(2)
     )
   );
 };
@@ -553,20 +553,20 @@ export const hasShadowBlurTween = (layerItem: em.Layer, equivalentLayerItem: em.
     (
       (layerItem.style.shadow.enabled && !equivalentLayerItem.style.shadow.enabled) ||
       (!layerItem.style.shadow.enabled && equivalentLayerItem.style.shadow.enabled) ||
-      layerItem.style.shadow.blur!== equivalentLayerItem.style.shadow.blur
+      layerItem.style.shadow.blur.toFixed(2) !== equivalentLayerItem.style.shadow.blur.toFixed(2)
     )
   );
 };
 
 export const hasOpacityTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
-  return layerItem.style.opacity !== equivalentLayerItem.style.opacity;
+  return layerItem.style.opacity.toFixed(2) !== equivalentLayerItem.style.opacity.toFixed(2);
 };
 
 export const hasFontSizeTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   return (
     layerItem.type === 'Text' &&
     equivalentLayerItem.type === 'Text' &&
-    (layerItem as em.Text).textStyle.fontSize !== (equivalentLayerItem as em.Text).textStyle.fontSize
+    (layerItem as em.Text).textStyle.fontSize.toFixed(2) !== (equivalentLayerItem as em.Text).textStyle.fontSize.toFixed(2)
   );
 };
 
@@ -574,34 +574,34 @@ export const hasLineHeightTween = (layerItem: em.Layer, equivalentLayerItem: em.
   return (
     layerItem.type === 'Text' &&
     equivalentLayerItem.type === 'Text' &&
-    (layerItem as em.Text).textStyle.leading !== (equivalentLayerItem as em.Text).textStyle.leading
+    (layerItem as em.Text).textStyle.leading.toFixed(2) !== (equivalentLayerItem as em.Text).textStyle.leading.toFixed(2)
   );
 };
 
 export const hasFromXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   const lineToLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType === 'Line';
-  const fromXMatch = lineToLine && (layerItem as em.Line).from.x === (equivalentLayerItem as em.Line).from.x;
+  const fromXMatch = lineToLine && (layerItem as em.Line).from.x.toFixed(2) === (equivalentLayerItem as em.Line).from.x.toFixed(2);
   const widthsMatch = Math.round(layerItem.frame.innerWidth) === Math.round(equivalentLayerItem.frame.innerWidth);
   return lineToLine && (!fromXMatch || !widthsMatch);
 };
 
 export const hasFromYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   const lineToLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType === 'Line';
-  const fromYMatch = lineToLine && (layerItem as em.Line).from.y === (equivalentLayerItem as em.Line).from.y;
+  const fromYMatch = lineToLine && (layerItem as em.Line).from.y.toFixed(2) === (equivalentLayerItem as em.Line).from.y.toFixed(2);
   const widthsMatch = Math.round(layerItem.frame.innerWidth) === Math.round(equivalentLayerItem.frame.innerWidth);
   return lineToLine && (!fromYMatch || !widthsMatch);
 };
 
 export const hasToXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   const lineToLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType === 'Line';
-  const toXMatch = lineToLine && (layerItem as em.Line).to.x === (equivalentLayerItem as em.Line).to.x;
+  const toXMatch = lineToLine && (layerItem as em.Line).to.x.toFixed(2) === (equivalentLayerItem as em.Line).to.x.toFixed(2);
   const widthsMatch = Math.round(layerItem.frame.innerWidth) === Math.round(equivalentLayerItem.frame.innerWidth);
   return lineToLine && (!toXMatch || !widthsMatch);
 };
 
 export const hasToYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
   const lineToLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType === 'Line';
-  const toYMatch = lineToLine && (layerItem as em.Line).to.y === (equivalentLayerItem as em.Line).to.y;
+  const toYMatch = lineToLine && (layerItem as em.Line).to.y.toFixed(2) === (equivalentLayerItem as em.Line).to.y.toFixed(2);
   const widthsMatch = Math.round(layerItem.frame.innerWidth) === Math.round(equivalentLayerItem.frame.innerWidth);
   return lineToLine && (!toYMatch || !widthsMatch);
 };
@@ -727,7 +727,7 @@ export const isTweenDestinationLayer = (store: LayerState, layer: string): boole
   return layerTweens.length > 0 && layerTweens.some((tween) => store.tweenById[tween].destinationLayer === layer);
 };
 
-export const getAllArtboardTweenEvents = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: em.TweenEvent } } => {
+export const getTweensEventsByOriginArtboard = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: em.TweenEvent } } => {
   const allIds: string[] = [];
   const byId = Object.keys(store.tweenEventById).reduce((result: {[id: string]: em.TweenEvent}, current) => {
     const tweenEvent = store.tweenEventById[current];
@@ -744,7 +744,7 @@ export const getAllArtboardTweenEvents = (store: LayerState, artboard: string): 
 };
 
 export const getAllArtboardTweenEventArtboards = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: em.Artboard } } => {
-  const allArtboardAnimationEvents = getAllArtboardTweenEvents(store, artboard);
+  const allArtboardAnimationEvents = getTweensEventsByOriginArtboard(store, artboard);
   const allIds: string[] = [];
   const byId = Object.keys(allArtboardAnimationEvents.byId).reduce((result: { [id: string]: em.Artboard }, current) => {
     const event = allArtboardAnimationEvents.byId[current];
@@ -765,7 +765,7 @@ export const getAllArtboardTweenEventArtboards = (store: LayerState, artboard: s
 };
 
 export const getAllArtboardTweenEventDestinations = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: em.Artboard } } => {
-  const allArtboardAnimationEvents = getAllArtboardTweenEvents(store, artboard);
+  const allArtboardAnimationEvents = getTweensEventsByOriginArtboard(store, artboard);
   const allIds: string[] = [];
   const byId = Object.keys(allArtboardAnimationEvents.byId).reduce((result: { [id: string]: em.Artboard }, current) => {
     const event = allArtboardAnimationEvents.byId[current];
@@ -782,7 +782,7 @@ export const getAllArtboardTweenEventDestinations = (store: LayerState, artboard
 };
 
 export const getAllArtboardTweenEventLayers = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: em.Layer } } => {
-  const allArtboardAnimationEvents = getAllArtboardTweenEvents(store, artboard);
+  const allArtboardAnimationEvents = getTweensEventsByOriginArtboard(store, artboard);
   const allIds: string[] = [];
   const byId = Object.keys(allArtboardAnimationEvents.byId).reduce((result: { [id: string]: em.Layer }, current) => {
     const event = allArtboardAnimationEvents.byId[current];
@@ -799,7 +799,7 @@ export const getAllArtboardTweenEventLayers = (store: LayerState, artboard: stri
 };
 
 export const getAllArtboardTweens = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: em.Tween } } => {
-  const allArtboardAnimationEvents = getAllArtboardTweenEvents(store, artboard);
+  const allArtboardAnimationEvents = getTweensEventsByOriginArtboard(store, artboard);
   const allIds: string[] = [];
   const byId = Object.keys(allArtboardAnimationEvents.byId).reduce((result: { [id: string]: em.Tween }, current) => {
     const event = allArtboardAnimationEvents.byId[current];
@@ -951,7 +951,7 @@ export const getTweensEventsByDestinationArtboard = (store: LayerState, artboard
 };
 
 export const getTweenEventsWithArtboard = (store: LayerState, artboardId: string): { allIds: string[]; byId: { [id: string]: em.TweenEvent } } => {
-  const eventsWithArtboardAsOrigin = getAllArtboardTweenEvents(store, artboardId);
+  const eventsWithArtboardAsOrigin = getTweensEventsByOriginArtboard(store, artboardId);
   const eventsWithArtboardAsDestination = getTweensEventsByDestinationArtboard(store, artboardId);
   return {
     allIds: [...eventsWithArtboardAsOrigin.allIds, ...eventsWithArtboardAsDestination.allIds],

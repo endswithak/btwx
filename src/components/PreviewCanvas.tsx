@@ -7,7 +7,7 @@ import { RootState } from '../store/reducers';
 import { paperPreview } from '../canvas';
 import { setActiveArtboard } from '../store/actions/layer';
 import { SetActiveArtboardPayload, LayerTypes } from '../store/actionTypes/layer';
-import { getAllArtboardTweenEvents, getAllArtboardTweenEventArtboards, getAllArtboardTweens, getAllArtboardTweenLayers, getAllArtboardTweenLayerDestinations, getAllArtboardTweenEventLayers } from '../store/selectors/layer';
+import { getTweensEventsByOriginArtboard, getAllArtboardTweenEventArtboards, getAllArtboardTweens, getAllArtboardTweenLayers, getAllArtboardTweenLayerDestinations, getAllArtboardTweenEventLayers } from '../store/selectors/layer';
 import { bufferToBase64 } from '../utils';
 import * as previewUtils from '../previewUtils';
 
@@ -200,7 +200,7 @@ const mapStateToProps = (state: RootState) => {
     const base64 = `data:image/webp;base64,${rasterBase64}`;
     return result.replace(`"source":"${current}"`, `"source":"${base64}"`);
   }, layer.present.paperProject);
-  const tweenEvents = getAllArtboardTweenEvents(layer.present, layer.present.activeArtboard);
+  const tweenEvents = getTweensEventsByOriginArtboard(layer.present, layer.present.activeArtboard);
   const tweenEventDestinations = getAllArtboardTweenEventArtboards(layer.present, layer.present.activeArtboard);
   const tweenEventLayers = getAllArtboardTweenEventLayers(layer.present, layer.present.activeArtboard);
   const tweens = getAllArtboardTweens(layer.present, layer.present.activeArtboard);

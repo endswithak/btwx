@@ -13,19 +13,20 @@ import {
   DEFAULT_RIGHT_SIDEBAR_WIDTH,
   DEFAULT_TWEEN_DRAWER_HEIGHT,
   DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH,
+  DEFAULT_COLOR_FORMAT,
   APP_NAME
 } from './constants';
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
 
-const windowBackground = ((): string => {
-  let theme = getTheme('dark');
+const getWindowBackground = (themeName?: em.ThemeName): string => {
+  let theme = getTheme(themeName ? themeName : 'dark');
   if (isMac) {
     const themeName = systemPreferences.getUserDefault('theme', 'string');
     theme = getTheme(themeName);
   }
   return theme.background.z0;
-})();
+};
 
 // export let preferencesWindow: electron.BrowserWindow;
 // export let sketchImporterWindow: electron.BrowserWindow;
@@ -33,7 +34,10 @@ const windowBackground = ((): string => {
 const isMac = process.platform === 'darwin';
 
 if (isMac) {
-  if (!systemPreferences.getUserDefault('theme', 'string')) {
+  if (!systemPreferences.getUserDefault('colorFormat', 'string') || (systemPreferences.getUserDefault('colorFormat', 'string') !== 'rgb' || systemPreferences.getUserDefault('colorFormat', 'string') !== 'hsl')) {
+    systemPreferences.setUserDefault('colorFormat', 'string', DEFAULT_COLOR_FORMAT as any);
+  }
+  if (!systemPreferences.getUserDefault('theme', 'string') || (systemPreferences.getUserDefault('theme', 'string') !== 'light' || systemPreferences.getUserDefault('theme', 'string') !== 'dark')) {
     systemPreferences.setUserDefault('theme', 'string', nativeTheme.shouldUseDarkColors ? 'dark' : 'light');
   }
   if (!systemPreferences.getUserDefault('leftSidebarWidth', 'integer')) {
@@ -65,7 +69,7 @@ export const createNewDocument = (width?: number, height?: number): Promise<elec
       minHeight: 800,
       frame: false,
       titleBarStyle: 'hidden',
-      backgroundColor: windowBackground,
+      backgroundColor: getWindowBackground(),
       webPreferences: {
         nodeIntegration: true
       }
@@ -156,7 +160,7 @@ const createPreviewWindow = ({width, height}: {width: number; height: number}): 
     height: height + PREVIEW_TOPBAR_HEIGHT + (process.platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT),
     frame: false,
     titleBarStyle: 'hidden',
-    backgroundColor: windowBackground,
+    backgroundColor: getWindowBackground(),
     webPreferences: {
       nodeIntegration: true
     }
@@ -169,6 +173,10 @@ const createPreviewWindow = ({width, height}: {width: number; height: number}): 
 
   previewWindow.webContents.on('did-finish-load', () => {
     previewWindow.webContents.executeJavaScript(`renderPreviewWindow()`);
+  });
+
+  previewWindow.on('close', () => {
+    previewWindow.getParentWindow().webContents.executeJavaScript(`previewClosed()`);
   });
 };
 
@@ -327,9 +335,10 @@ ipcMain.on('openPreview', (event, windowSize) => {
   });
 });
 
-ipcMain.on('updateTheme', (event, theme) => {
+ipcMain.on('updateTheme', (event, theme: em.ThemeName) => {
   BrowserWindow.getAllWindows().forEach((window) => {
     const documentWindow = !window.getParentWindow();
+    window.setBackgroundColor(getWindowBackground(theme));
     if (window.webContents) {
       window.webContents.executeJavaScript(`setTitleBarTheme(${JSON.stringify(theme)})`);
       if (documentWindow) {

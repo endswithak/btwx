@@ -37,7 +37,8 @@ const TweenDrawerEventLayersTimeline = (props: TweenDrawerEventLayersTimelinePro
               <SidebarEmptyState
                 icon='tweens'
                 text='Event Timelines'
-                detail={<span>View and edit event<br/> layer timelines here.</span>} />
+                detail='Timelines are added when the event origin and destination have corresponding layers (same name and type) with mismatched style props.'
+                style={{width: 550}} />
             </div>
           </div>
         : <div className='c-tween-drawer-event__layers-timeline'>

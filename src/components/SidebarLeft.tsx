@@ -75,13 +75,13 @@ const SidebarLeft = (props: SidebarLeftProps): ReactElement => {
     // eslint-disable-next-line react/prop-types
     switch(tool.type) {
       case 'Shape':
-        return <span>Click and drag on canvas<br/> to draw layer.</span>;
+        return 'Click and drag on canvas to draw layer.';
       case 'Artboard':
-        return <span>Click and drag on canvas<br/> to draw layer. Or select a<br/> preset in styles.</span>;
+        return 'Click and drag on canvas to draw layer. Or select a preset in styles.';
       case 'Text':
-        return <span>Click on canvas to add<br/> text layer.</span>;
+        return 'Click on canvas to add text layer.';
       default:
-        return <span>View and edit document<br/> layers here.</span>;
+        return 'View and edit document layers here.';
     }
   }
 
@@ -114,7 +114,8 @@ const SidebarLeft = (props: SidebarLeftProps): ReactElement => {
               actionText={getEmptyStateActionText()}
               actionActive={tool.type === 'Artboard' || tool.type === 'Shape' || tool.type === 'Text' || insertKnobOpen}
               actionDisabled={insertKnobOpen}
-              actionClick={handleEmptyStateActionClick} />
+              actionClick={handleEmptyStateActionClick}
+              style={{width: 211}} />
         }
       </Sidebar>
     </>
