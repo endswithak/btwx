@@ -1,12 +1,12 @@
 import store from '../store';
 import { enableSelectionTool } from '../store/actions/tool';
-import { addArtboard, addArtboardThunk } from '../store/actions/layer';
-import { applyArtboardMethods } from './artboardUtils';
+import { addArtboardThunk } from '../store/actions/layer';
+import { isBetween } from '../utils';
 import { paperMain } from './index';
 import Tooltip from './tooltip';
 import SnapTool from './snapTool';
 import InsertTool from './insertTool';
-import { DEFAULT_ARTBOARD_BACKGROUND_COLOR, THEME_PRIMARY_COLOR } from '../constants';
+import { THEME_PRIMARY_COLOR } from '../constants';
 
 class ArtboardTool {
   tool: paper.Tool;
@@ -121,13 +121,14 @@ class ArtboardTool {
         break;
       }
       case 'escape': {
-        if (this.tooltip) {
-          this.tooltip.paperLayer.remove();
+        if (!state.artboardPresetEditor.isOpen) {
+          if (this.tooltip) {
+            this.tooltip.paperLayer.remove();
+          }
+          if (this.outline) {
+            this.outline.remove();
+          }
         }
-        if (this.outline) {
-          this.outline.remove();
-        }
-        store.dispatch(enableSelectionTool());
         break;
       }
     }
@@ -240,7 +241,6 @@ class ArtboardTool {
   onMouseDown(event: paper.ToolEvent): void {
     const state = store.getState();
     this.drawing = true;
-    this.insertTool.enabled = false;
     const from = event.point;
     if (this.snapTool.snap.x) {
       from.x = this.snapTool.snap.x.point;
@@ -251,10 +251,10 @@ class ArtboardTool {
     this.from = new paperMain.Point(from.x, from.y);
     this.snapTool.snapPoints = state.layer.present.inView.snapPoints.filter((snapPoint) => {
       if (snapPoint.axis === 'x') {
-        return snapPoint.point !== this.from.x;
+        return !isBetween(snapPoint.point, this.from.x - 1, this.from.x + 1);
       }
       if (snapPoint.axis === 'y') {
-        return snapPoint.point !== this.from.y;
+        return !isBetween(snapPoint.point, this.from.y - 1, this.from.y + 1);
       }
     });
   }

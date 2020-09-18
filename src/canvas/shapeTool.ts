@@ -1,6 +1,6 @@
 import store from '../store';
 import { enableSelectionTool } from '../store/actions/tool';
-import { addShape, addShapeThunk } from '../store/actions/layer';
+import { addShapeThunk } from '../store/actions/layer';
 import { getPagePaperLayer } from '../store/selectors/layer';
 import { paperMain } from './index';
 import { isBetween } from '../utils';
@@ -370,7 +370,6 @@ class ShapeTool {
   onMouseDown(event: paper.ToolEvent): void {
     const state = store.getState();
     this.drawing = true;
-    this.insertTool.enabled = false;
     this.from = new paperMain.Point((
       this.snapTool.snap.x ? this.snapTool.snap.x.point : event.point.x
     ),(
@@ -378,10 +377,10 @@ class ShapeTool {
     ));
     this.snapTool.snapPoints = state.layer.present.inView.snapPoints.filter((snapPoint) => {
       if (snapPoint.axis === 'x') {
-        return snapPoint.point !== this.from.x && (snapPoint.point > this.from.x + 1 || snapPoint.point < this.from.x - 1);
+        return !isBetween(snapPoint.point, this.from.x - 1, this.from.x + 1);
       }
       if (snapPoint.axis === 'y') {
-        return snapPoint.point !== this.from.y && (snapPoint.point > this.from.y + 1 || snapPoint.point < this.from.y - 1);
+        return !isBetween(snapPoint.point, this.from.y - 1, this.from.y + 1);
       }
     });
   }

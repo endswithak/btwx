@@ -1,15 +1,3 @@
-.c-artboard-preset-editor-wrap
-  +absolute-full
-  position: fixed
-  background: none
-  display: flex
-  align-items: center
-  justify-content: center
-  z-index: 999999999999
-
-.c-artboard-preset-editor-overlay
-  +absolute-full
-
 .c-artboard-preset-editor
   position: absolute
   border: none
@@ -17,9 +5,13 @@
   outline: none
   overflow: hidden
   backdrop-filter: blur(17px)
+  left: 50%
+  top: 50%
+  transform: translate(-50%, -50%)
   width: $unit * 121
   height: $unit * 58
   border-radius: $unit
+  z-index: 999999999999
 
   &::selection
     background: none

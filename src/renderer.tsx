@@ -77,7 +77,13 @@ const titleBar = new Titlebar({
 
 (window as any).getCurrentEdit = (): string => {
   const state = store.getState();
-  return JSON.stringify(state.layer.present.edit);
+  const currentEdit = {
+    edit: state.layer.present.edit,
+    dirty: state.documentSettings.edit !== state.layer.present.edit,
+    path: state.documentSettings.path,
+    name: state.documentSettings.name
+  }
+  return JSON.stringify(currentEdit);
 };
 
 (window as any).getCurrentTheme = (): string => {
@@ -94,11 +100,13 @@ const titleBar = new Titlebar({
 (window as any).saveDocumentAs = (documentSettings: { base: string; fullPath: string }): void => {
   const state = store.getState();
   store.dispatch(saveDocumentAs({name: documentSettings.base, path: documentSettings.fullPath, edit: state.layer.present.edit}));
+  titleBar.updateTitle(documentSettings.base);
   return (window as any).getSaveState();
 };
 
 (window as any).openFile = (fileJSON: any): void => {
   store.dispatch(openFile({file: fileJSON}));
+  titleBar.updateTitle(fileJSON.documentSettings.name);
   store.dispatch(ActionCreators.clearHistory());
 };
 
@@ -123,35 +131,8 @@ const titleBar = new Titlebar({
 };
 
 (window as any).renderNewDocument = (): void => {
-  window.onbeforeunload = (e: any): void => {
-    const state = store.getState();
-    if (state.documentSettings.edit !== state.layer.present.edit) {
-      e.returnValue = false;
-      remote.dialog.showMessageBox({
-        type: 'question',
-        buttons: ['Save', 'Cancel', 'Dont Save'],
-        cancelId: 1,
-        message: `Do you want to save the changes made to the document “${state.documentSettings.name}”?`,
-        detail: 'Your changes will be lost if you don’t save them.'
-      }).then((data: any) => {
-        switch(data.response) {
-          case 0: {
-            if (state.documentSettings.path) {
-              ipcRenderer.send('saveDocument', state.documentSettings.path);
-            } else {
-              ipcRenderer.send('saveDocumentAs');
-            }
-            break;
-          }
-          case 2: {
-            store.dispatch(saveDocument({edit: state.layer.present.edit}));
-            remote.getCurrentWindow().close();
-            break;
-          }
-        }
-      });
-    }
-  }
+  const state = store.getState();
+  titleBar.updateTitle(state.documentSettings.name);
   ReactDOM.render(
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>

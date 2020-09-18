@@ -28,6 +28,14 @@ const getWindowBackground = (themeName?: em.ThemeName): string => {
   return theme.background.z0;
 };
 
+export const getFocusedDocument = (): electron.BrowserWindow => {
+  return BrowserWindow.getFocusedWindow() ? BrowserWindow.getFocusedWindow().getParentWindow() ? BrowserWindow.getFocusedWindow().getParentWindow() : BrowserWindow.getFocusedWindow() : null;
+};
+
+export const getAllOpenDocuments = (): electron.BrowserWindow[] => {
+  return BrowserWindow.getAllWindows().filter((window) => window.getTitle() !== 'Preview');
+};
+
 // export let preferencesWindow: electron.BrowserWindow;
 // export let sketchImporterWindow: electron.BrowserWindow;
 
@@ -63,10 +71,10 @@ export const createNewDocument = (width?: number, height?: number): Promise<elec
   return new Promise((resolve) => {
     // Create the browser window.
     const newDocument = new BrowserWindow({
-      height: height ? height : 800,
-      width: width ? width : 1024,
-      minWidth: 1024,
-      minHeight: 800,
+      height: height ? height : 768,
+      width: width ? width : 1200,
+      minWidth: 1200,
+      minHeight: 768,
       frame: false,
       titleBarStyle: 'hidden',
       backgroundColor: getWindowBackground(),
@@ -88,6 +96,30 @@ export const createNewDocument = (width?: number, height?: number): Promise<elec
         newDocument.webContents.executeJavaScript(`renderNewDocument()`).then(() => {
           resolve(newDocument);
         });
+      });
+    });
+
+    newDocument.on('close', (event) => {
+      event.preventDefault();
+      newDocument.webContents.executeJavaScript(`getCurrentEdit()`).then((currentEditJSON) => {
+        const editState = JSON.parse(currentEditJSON) as { edit: string; dirty: boolean; name: string; path: string };
+        if (editState.dirty) {
+          openSaveDialog({
+            documentState: editState,
+            onSave: () => {
+              if (editState.path) {
+                handleSave(newDocument, editState.path, {close: true});
+              } else {
+                handleSaveAs(newDocument, {close: true});
+              }
+            },
+            onDontSave: () => {
+              newDocument.destroy();
+            }
+          });
+        } else {
+          newDocument.destroy();
+        }
       });
     });
   });
@@ -175,8 +207,11 @@ const createPreviewWindow = ({width, height}: {width: number; height: number}): 
     previewWindow.webContents.executeJavaScript(`renderPreviewWindow()`);
   });
 
-  previewWindow.on('close', () => {
-    previewWindow.getParentWindow().webContents.executeJavaScript(`previewClosed()`);
+  previewWindow.on('close', (event) => {
+    event.preventDefault();
+    previewWindow.getParentWindow().webContents.executeJavaScript(`previewClosed()`).then(() => {
+      previewWindow.destroy();
+    });
   });
 };
 
@@ -186,6 +221,114 @@ const createPreviewWindow = ({width, height}: {width: number; height: number}): 
 app.on('ready', () => {
   Menu.setApplicationMenu(menu);
   createNewDocument();
+});
+
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
+// Some APIs can only be used after this event occurs.
+app.on('before-quit', (event) => {
+  const openDocuments = getAllOpenDocuments();
+  if (openDocuments.length > 0) {
+    event.preventDefault();
+    const promises = [] as Promise<{editState: { edit: string; dirty: boolean; name: string; path: string }; windowIndex: number}>[];
+    const focusedDocument = getFocusedDocument();
+    const focusedFirst = openDocuments.reduce((result, current) => {
+      if (focusedDocument && focusedDocument.id === current.id) {
+        result = [current, ...result];
+      } else {
+        result = [...result, current];
+      }
+      return result;
+    }, []);
+    focusedFirst.forEach((document, index) => {
+      promises.push(
+        new Promise((resolve) => {
+          document.webContents.executeJavaScript(`getCurrentEdit()`).then((documentJSON: any) => resolve({editState: JSON.parse(documentJSON), windowIndex: index}));
+        })
+      )
+    });
+    Promise.all(promises).then((documents) => {
+      const dirtyDocuments = documents.filter((document) => document.editState.dirty);
+      if (dirtyDocuments.length > 0) {
+        if (dirtyDocuments.length > 1) {
+          dialog.showMessageBox({
+            type: 'question',
+            buttons: ['Review Changes...', 'Cancel', 'Discard Changes'],
+            cancelId: 1,
+            message: `You have ${dirtyDocuments.length} ${APP_NAME} documents with unsaved changes. Do you want to review these changes before quitting?`,
+            detail: 'If you don’t review your documents, all your unsaved changes will be lost.'
+          }).then((data: any) => {
+            switch(data.response) {
+              case 0: {
+                let reviewedDocuments = 0;
+                const documentState = dirtyDocuments[reviewedDocuments];
+                const documentWindow = focusedFirst[documentState.windowIndex];
+                const handleNextSaveDialog = (dState: { edit: string; dirty: boolean; name: string; path: string }, dWindow: electron.BrowserWindow): void => {
+                  dWindow.focus();
+                  const handleNext = () => {
+                    reviewedDocuments++;
+                    if (reviewedDocuments < dirtyDocuments.length) {
+                      const nextDocumentState = dirtyDocuments[reviewedDocuments];
+                      const nextDocumentWindow = focusedFirst[nextDocumentState.windowIndex];
+                      handleNextSaveDialog(nextDocumentState.editState, nextDocumentWindow);
+                    } else {
+                      app.exit();
+                      app.quit();
+                    }
+                  }
+                  openSaveDialog({
+                    documentState: dState,
+                    onSave: () => {
+                      if (dState.path) {
+                        handleSave(documentWindow, dState.path, { close: true }).then(() => {
+                          handleNext();
+                        });
+                      } else {
+                        handleSaveAs(documentWindow, { close: true }).then(() => {
+                          handleNext();
+                        });
+                      }
+                    },
+                    onDontSave: () => {
+                      documentWindow.destroy();
+                      handleNext();
+                    }
+                  });
+                }
+                handleNextSaveDialog(documentState.editState, documentWindow);
+                break;
+              }
+              case 2: {
+                app.exit();
+                app.quit();
+                break;
+              }
+            }
+          });
+        } else {
+          const documentState = dirtyDocuments[0];
+          const documentWindow = focusedFirst[documentState.windowIndex];
+          openSaveDialog({
+            documentState: documentState.editState,
+            onSave: () => {
+              if (documentState.editState.path) {
+                handleSave(documentWindow, documentState.editState.path, {quit: true});
+              } else {
+                handleSaveAs(documentWindow, {quit: true});
+              }
+            },
+            onDontSave: () => {
+              app.exit();
+              app.quit();
+            }
+          });
+        }
+      } else {
+        app.exit();
+        app.quit();
+      }
+    });
+  }
 });
 
 // Quit when all windows are closed.
@@ -213,9 +356,6 @@ app.on('open-file', (event, path) => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
-export const getFocusedDocument = (): electron.BrowserWindow => {
-  return BrowserWindow.getFocusedWindow() ? BrowserWindow.getFocusedWindow().getParentWindow() ? BrowserWindow.getFocusedWindow().getParentWindow() : BrowserWindow.getFocusedWindow() : null;
-};
 
 // export const handleSketchImport = () => {
 //   const document = getFocusedDocument();
@@ -235,43 +375,94 @@ export const getFocusedDocument = (): electron.BrowserWindow => {
 //   });
 // };
 
-export const handleSave = (path: string, closeOnSave?: boolean): void => {
-  const document = getFocusedDocument();
+export const openSaveDialog = ({documentState, onSave, onDontSave, onCancel}: {documentState: { edit: string; dirty: boolean; name: string; path: string }; onSave: any; onDontSave: any; onCancel?: any}): void => {
+  dialog.showMessageBox({
+    type: 'question',
+    buttons: ['Save', 'Cancel', 'Dont Save'],
+    cancelId: 1,
+    message: `Do you want to save the changes made to the document “${documentState.name}”?`,
+    detail: 'Your changes will be lost if you don’t save them.'
+  }).then((data: any) => {
+    switch(data.response) {
+      case 0: {
+        onSave();
+        break;
+      }
+      case 1: {
+        if (onCancel) {
+          onCancel();
+        }
+        break;
+      }
+      case 2: {
+        onDontSave();
+        break;
+      }
+    }
+  });
+};
+
+export const handleSave = (document: any, path: string, onSave?: { reload?: boolean; close?: boolean; quit?: boolean }): Promise<any> => {
   if (document) {
-    document.webContents.executeJavaScript(`saveDocument()`).then((documentJSON) => {
-      fs.writeFile(`${path}.${APP_NAME}`, documentJSON, function(err) {
-        if(err) {
-          return console.log(err);
-        }
-        if (closeOnSave) {
-          document.close();
-        }
+    return new Promise((resolve, reject) => {
+      document.webContents.executeJavaScript(`saveDocument()`).then((documentJSON: any) => {
+        fs.writeFile(`${path}.${APP_NAME}`, documentJSON, function(err) {
+          if (err) {
+            resolve(err);
+          }
+          if (onSave && onSave.close) {
+            document.destroy();
+            resolve();
+          }
+          if (onSave && onSave.reload) {
+            document.reload();
+            resolve();
+          }
+          if (onSave && onSave.quit) {
+            app.exit();
+            app.quit();
+          }
+        });
       });
     });
+  } else {
+    return Promise.resolve();
   }
 };
 
-export const handleSaveAs = (closeOnSave?: boolean): void => {
-  const document = getFocusedDocument();
+export const handleSaveAs = (document: any, onSave?: { reload?: boolean; close?: boolean; quit?: boolean }): Promise<any> => {
   if (document) {
-    dialog.showSaveDialog(document, {}).then((result) => {
-      if (!result.canceled) {
-        const base = path.basename(result.filePath);
-        const fullPath = result.filePath;
-        const documentSettings = {base, fullPath};
-        document.webContents.executeJavaScript(`saveDocumentAs(${JSON.stringify(documentSettings)})`).then((documentJSON) => {
-          // app.addRecentDocument(result.filePath);
-          fs.writeFile(`${result.filePath}.${APP_NAME}`, documentJSON, function(err) {
-            if(err) {
-              return console.log(err);
-            }
-            if (closeOnSave) {
-              document.close();
-            }
+    return new Promise((resolve, reject) => {
+      dialog.showSaveDialog(document, {}).then((result) => {
+        if (!result.canceled) {
+          const base = path.basename(result.filePath);
+          const documentSettings = {base, fullPath: result.filePath};
+          document.webContents.executeJavaScript(`saveDocumentAs(${JSON.stringify(documentSettings)})`).then((documentJSON: any) => {
+            fs.writeFile(`${result.filePath}.${APP_NAME}`, documentJSON, function(err) {
+              if (err) {
+                resolve(err);
+              } else {
+                app.addRecentDocument(`${result.filePath}.${APP_NAME}`);
+              }
+              if (onSave && onSave.close) {
+                document.destroy();
+                resolve();
+              }
+              if (onSave && onSave.reload) {
+                document.reload();
+                resolve();
+              }
+              if (onSave && onSave.quit) {
+                app.exit();
+                app.quit();
+              }
+            });
           });
-        });
-      }
+        }
+      });
     });
+  } else {
+    return Promise.resolve();
   }
 };
 
@@ -279,8 +470,8 @@ export const handleOpenDocument = (filePath: string): void => {
   const document = getFocusedDocument();
   if (document) {
     document.webContents.executeJavaScript(`getCurrentEdit()`).then((currentEditJSON) => {
-      const documentClean = JSON.parse(currentEditJSON);
-      if (documentClean) {
+      const editState = JSON.parse(currentEditJSON) as { edit: string; dirty: boolean; name: string; path: string };
+      if (editState.dirty || editState.path) {
         fs.readFile(filePath, {encoding: 'utf-8'}, function(err, data) {
           if(err) {
             return console.log(err);
@@ -346,12 +537,4 @@ ipcMain.on('updateTheme', (event, theme: em.ThemeName) => {
       }
     }
   });
-});
-
-ipcMain.on('saveDocument', (event, path) => {
-  handleSave(path, true);
-});
-
-ipcMain.on('saveDocumentAs', () => {
-  handleSaveAs(true);
 });

@@ -31,6 +31,15 @@ export default Menu.buildFromTemplate([
         }
       },
       { type: 'separator' },
+      {
+        label: 'Reload',
+        accelerator: process.platform === 'darwin' ? 'Cmd+R' : 'Ctrl+R',
+        click: (): void => {
+          const document = getFocusedDocument();
+          document.webContents.reload();
+        }
+      },
+      { type: 'separator' },
       { role: 'services' },
       { type: 'separator' },
       { role: 'hide' },
@@ -67,9 +76,9 @@ export default Menu.buildFromTemplate([
           document.webContents.executeJavaScript(`getDocumentSettings()`).then((documentSettingsJSON) => {
             const documentSettings = JSON.parse(documentSettingsJSON);
             if (documentSettings.path) {
-              handleSave(documentSettings.path);
+              handleSave(document, documentSettings.path);
             } else {
-              handleSaveAs();
+              handleSaveAs(document);
             }
           });
         }
@@ -79,7 +88,8 @@ export default Menu.buildFromTemplate([
         accelerator: process.platform === 'darwin' ? 'Cmd+Shift+S' : 'Ctrl+Shift+S',
         // enabled: getFocusedDocument(),
         click: (): void => {
-          handleSaveAs();
+          const document = getFocusedDocument();
+          handleSaveAs(document);
         }
       },
       {
@@ -98,15 +108,15 @@ export default Menu.buildFromTemplate([
           });
         }
       },
-      // {
-      //   label: 'Open Recent',
-      //   role: 'recentDocuments',
-      //   submenu: [
-      //     {
-      //       role: 'clearRecentDocuments'
-      //     }
-      //   ]
-      // },
+      {
+        label: 'Open Recent',
+        role: 'recentDocuments',
+        submenu: [
+          {
+            role: 'clearRecentDocuments'
+          }
+        ]
+      },
       isMac ? { role: 'close' } : { role: 'quit' }
     ]
   },
@@ -154,8 +164,6 @@ export default Menu.buildFromTemplate([
   {
     label: 'View',
     submenu: [
-      { role: 'reload' },
-      { role: 'forcereload' },
       { role: 'toggledevtools' },
       { type: 'separator' },
       { role: 'resetzoom' },

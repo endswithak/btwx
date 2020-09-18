@@ -22,6 +22,7 @@ interface SidebarInputProps {
   disableSelectionToolToggle?: boolean;
   canvasFocusing?: boolean;
   removedOnSubmit?: boolean;
+  manualCanvasFocus?: boolean;
   setCanvasFocusing?(payload: SetCanvasFocusingPayload): CanvasSettingsTypes;
 }
 
@@ -52,7 +53,7 @@ const Input = styled.div`
 const SidebarInput = (props: SidebarInputProps): ReactElement => {
   const inputRef = useRef<HTMLInputElement>(null);
   const theme = useContext(ThemeContext);
-  const { value, onChange, onSubmit, onFocus, onBlur, removedOnSubmit, label, leftLabel, bottomLabel, disabled, selectOnMount, submitOnBlur, setCanvasFocusing, canvasFocusing } = props;
+  const { value, onChange, onSubmit, onFocus, onBlur, manualCanvasFocus, removedOnSubmit, label, leftLabel, bottomLabel, disabled, selectOnMount, submitOnBlur, setCanvasFocusing, canvasFocusing } = props;
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
@@ -68,9 +69,11 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
       if (inputRef.current) {
         inputRef.current.blur();
       }
-      setCanvasFocusing({focusing: true});
-      document.removeEventListener('mousedown', handleMouseDown);
-      document.removeEventListener('keydown', handleKeyDown);
+      if (!manualCanvasFocus) {
+        setCanvasFocusing({focusing: true});
+        document.removeEventListener('mousedown', handleMouseDown);
+        document.removeEventListener('keydown', handleKeyDown);
+      }
     }
   }
 
@@ -79,15 +82,19 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
       if (inputRef.current) {
         inputRef.current.blur();
       }
-      setCanvasFocusing({focusing: true});
-      document.removeEventListener('mousedown', handleMouseDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    }
-    if (event.key === 'Enter') {
-      if (removedOnSubmit) {
+      if (!manualCanvasFocus) {
         setCanvasFocusing({focusing: true});
         document.removeEventListener('mousedown', handleMouseDown);
         document.removeEventListener('keydown', handleKeyDown);
+      }
+    }
+    if (event.key === 'Enter') {
+      if (removedOnSubmit) {
+        if (!manualCanvasFocus) {
+          setCanvasFocusing({focusing: true});
+          document.removeEventListener('mousedown', handleMouseDown);
+          document.removeEventListener('keydown', handleKeyDown);
+        }
       } else {
         inputRef.current.select();
       }
@@ -98,7 +105,7 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
     if (onFocus) {
       onFocus(e);
     }
-    if (canvasFocusing) {
+    if (canvasFocusing && !manualCanvasFocus) {
       setCanvasFocusing({focusing: false});
       document.addEventListener('mousedown', handleMouseDown);
       document.addEventListener('keydown', handleKeyDown);

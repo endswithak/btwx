@@ -47,14 +47,11 @@ const SidebarArtboardPlatformDevice = (props: SidebarArtboardPlatformDeviceProps
 
   useEffect(() => {
     setActive(isActive);
-  }, [isActive]);
-
-  useEffect(() => {
     return () => {
       document.removeEventListener('mousedown', handleMouseDown);
       document.removeEventListener('keydown', handleKeyDown);
     }
-  }, []);
+  }, [isActive]);
 
   const handleMouseDown = (e: any) => {
     if (!ref.current.contains(e.target)) {

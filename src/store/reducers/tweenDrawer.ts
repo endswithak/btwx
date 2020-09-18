@@ -19,7 +19,7 @@ export interface TweenDrawerState {
 }
 
 const initialState: TweenDrawerState = {
-  isOpen: false,
+  isOpen: true,
   event: null,
   eventHover: null,
   tweenHover: null,

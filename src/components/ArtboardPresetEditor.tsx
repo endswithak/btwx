@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { useContext, ReactElement, useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
@@ -51,8 +51,9 @@ const SaveButton = styled.button`
 `;
 
 const ArtboardPresetEditor = (props: ArtboardPresetEditorProps): ReactElement => {
+  const ref = useRef(null);
   const theme = useContext(ThemeContext);
-  const { exists, closeArtboardPresetEditor, canvasFocusing, platformType, artboardPresetEditor, addArtboardPreset, updateArtboardPreset, setArtboardToolDevicePlatform } = props;
+  const { exists, closeArtboardPresetEditor, canvasFocusing, platformType, artboardPresetEditor, addArtboardPreset, updateArtboardPreset, setArtboardToolDevicePlatform, setCanvasFocusing } = props;
   const [name, setName] = useState(artboardPresetEditor.type);
   const [width, setWidth] = useState(artboardPresetEditor.width);
   const [height, setHeight] = useState(artboardPresetEditor.height);
@@ -73,6 +74,18 @@ const ArtboardPresetEditor = (props: ArtboardPresetEditorProps): ReactElement =>
     const target = e.target;
     if (!isNaN(target.value)) {
       setHeight(target.value);
+    }
+  };
+
+  const handleKeyDown = (e: any) => {
+    if (e.key === 'Escape') {
+      closeArtboardPresetEditor();
+    }
+  };
+
+  const handleMouseDown = (e: any) => {
+    if (!ref.current.contains(e.target)) {
+      closeArtboardPresetEditor();
     }
   };
 
@@ -99,99 +112,99 @@ const ArtboardPresetEditor = (props: ArtboardPresetEditorProps): ReactElement =>
   }
 
   useEffect(() => {
-    if (canvasFocusing) {
-      setCanvasFocusing({focusing: false});
-    }
+    setCanvasFocusing({focusing: false});
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('mousedown', handleMouseDown);
     return () => {
       setCanvasFocusing({focusing: true});
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('mousedown', handleMouseDown);
     }
   }, []);
 
   return (
     <div
-      className='c-artboard-preset-editor-wrap'>
-      <div
-        className='c-artboard-preset-editor-overlay'
-        onClick={closeArtboardPresetEditor} />
-      <div
-        className='c-artboard-preset-editor'
-        style={{
-          background: tinyColor(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).setAlpha(0.88).toRgbString(),
-          boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
-        }}>
-        <div className='c-artboard-preset-editor__aside'>
-          <div className='c-artboard-preset-editor__icon'>
-            <div
-              className='c-artboard-preset-editor-icon__plane c-artboard-preset-editor-icon__plane--bg'
-              style={{
-                background: theme.name === 'dark' ? theme.background.z4 : theme.background.z6
-              }} />
-            <div
-              className='c-artboard-preset-editor-icon__plane c-artboard-preset-editor-icon__plane--fg'
-              style={{
-                background: tinyColor(theme.palette.primary).setAlpha(0.77).toRgbString(),
-                backdropFilter: 'opacity(50%)'
-              }} />
-          </div>
-          <p
-            className='c-artboard-preset-editor__head'
+      className='c-artboard-preset-editor'
+      ref={ref}
+      style={{
+        background: tinyColor(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).setAlpha(0.88).toRgbString(),
+        boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
+      }}>
+      <div className='c-artboard-preset-editor__aside'>
+        <div className='c-artboard-preset-editor__icon'>
+          <div
+            className='c-artboard-preset-editor-icon__plane c-artboard-preset-editor-icon__plane--bg'
             style={{
-              color: theme.text.base
-            }}>
-            Custom Preset
-          </p>
-          <p
-            className='c-artboard-preset-editor__body'
+              background: theme.name === 'dark' ? theme.background.z4 : theme.background.z6
+            }} />
+          <div
+            className='c-artboard-preset-editor-icon__plane c-artboard-preset-editor-icon__plane--fg'
             style={{
-              color: theme.text.lighter
-            }}>
-            Create custom presets for your frequently used artboard sizes.
-          </p>
+              background: tinyColor(theme.palette.primary).setAlpha(0.77).toRgbString(),
+              backdropFilter: 'opacity(50%)'
+            }} />
         </div>
-        <div
-          className='c-artboard-preset-editor__main'
+        <p
+          className='c-artboard-preset-editor__head'
           style={{
-            background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
-            boxShadow: `-1px 0 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
+            color: theme.text.base
           }}>
-          <div className='c-artboard-preset-editor__form'>
-            <div className='c-artboard-preset-editor__name-input'>
-              <SidebarInput
-                value={name}
-                onChange={handleNameChange}
-                onSubmit={handleSave}
-                bottomLabel={'Name'}
-                selectOnMount />
-            </div>
-            <div className='c-artboard-preset-editor__size-input'>
-              <SidebarInput
-                value={width}
-                onChange={handleWidthChange}
-                onSubmit={handleSave}
-                bottomLabel={'Width'}
-                label='px' />
-              <SidebarInput
-                value={height}
-                onChange={handleHeightChange}
-                onSubmit={handleSave}
-                bottomLabel={'Height'}
-                label='px' />
-            </div>
+          Custom Preset
+        </p>
+        <p
+          className='c-artboard-preset-editor__body'
+          style={{
+            color: theme.text.lighter
+          }}>
+          Create custom presets for your frequently used artboard sizes.
+        </p>
+      </div>
+      <div
+        className='c-artboard-preset-editor__main'
+        style={{
+          background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
+          boxShadow: `-1px 0 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
+        }}>
+        <div className='c-artboard-preset-editor__form'>
+          <div className='c-artboard-preset-editor__name-input'>
+            <SidebarInput
+              value={name}
+              onChange={handleNameChange}
+              onSubmit={handleSave}
+              bottomLabel={'Name'}
+              selectOnMount
+              manualCanvasFocus />
           </div>
-          <div className='c-artboard-preset-editor__buttons'>
-            <CancelButton
-              className='c-artboard-preset-editor__button c-artboard-preset-editor__button--cancel'
-              theme={theme}
-              onClick={closeArtboardPresetEditor}>
-              Cancel
-            </CancelButton>
-            <SaveButton
-              className='c-artboard-preset-editor__button c-artboard-preset-editor__button--save'
-              theme={theme}
-              onClick={handleSave}>
-              Save
-            </SaveButton>
+          <div className='c-artboard-preset-editor__size-input'>
+            <SidebarInput
+              value={width}
+              onChange={handleWidthChange}
+              onSubmit={handleSave}
+              bottomLabel={'Width'}
+              label='px'
+              manualCanvasFocus />
+            <SidebarInput
+              value={height}
+              onChange={handleHeightChange}
+              onSubmit={handleSave}
+              bottomLabel={'Height'}
+              label='px'
+              manualCanvasFocus />
           </div>
+        </div>
+        <div className='c-artboard-preset-editor__buttons'>
+          <CancelButton
+            className='c-artboard-preset-editor__button c-artboard-preset-editor__button--cancel'
+            theme={theme}
+            onClick={closeArtboardPresetEditor}>
+            Cancel
+          </CancelButton>
+          <SaveButton
+            className='c-artboard-preset-editor__button c-artboard-preset-editor__button--save'
+            theme={theme}
+            onClick={handleSave}>
+            Save
+          </SaveButton>
         </div>
       </div>
     </div>
