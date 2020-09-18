@@ -1,6 +1,6 @@
 {
-  "name": "e-sketch",
-  "productName": "e-sketch",
+  "name": "btwix",
+  "productName": "btwix",
   "version": "1.0.0",
   "description": "My Electron application description",
   "main": ".webpack/main",
@@ -12,18 +12,18 @@
     "lint": "eslint --ext .ts ."
   },
   "keywords": [],
-  "author": "erik",
+  "author": "erik.design",
   "license": "MIT",
   "config": {
     "forge": {
       "packagerConfig": {
-        "icon": "assets/icon.png"
+        "icon": "./src/assets/icon.icns"
       },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "e_sketch"
+            "name": "btwix"
           }
         },
         {

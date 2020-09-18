@@ -75,6 +75,7 @@ export const createNewDocument = (width?: number, height?: number): Promise<elec
       width: width ? width : 1200,
       minWidth: 1200,
       minHeight: 768,
+      show: false,
       frame: false,
       titleBarStyle: 'hidden',
       backgroundColor: getWindowBackground(),
@@ -86,14 +87,12 @@ export const createNewDocument = (width?: number, height?: number): Promise<elec
     // and load the index.html of the app.
     newDocument.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-    // Open the DevTools.
-    newDocument.webContents.openDevTools();
-
     newDocument.webContents.session.clearStorageData();
 
     newDocument.webContents.on('did-finish-load', () => {
       newDocument.webContents.session.clearStorageData().then(() => {
         newDocument.webContents.executeJavaScript(`renderNewDocument()`).then(() => {
+          newDocument.show();
           resolve(newDocument);
         });
       });
@@ -192,6 +191,7 @@ const createPreviewWindow = ({width, height}: {width: number; height: number}): 
     height: height + PREVIEW_TOPBAR_HEIGHT + (process.platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT),
     frame: false,
     titleBarStyle: 'hidden',
+    show: false,
     backgroundColor: getWindowBackground(),
     webPreferences: {
       nodeIntegration: true
@@ -200,11 +200,10 @@ const createPreviewWindow = ({width, height}: {width: number; height: number}): 
 
   previewWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-  // Open the DevTools.
-  previewWindow.webContents.openDevTools();
-
   previewWindow.webContents.on('did-finish-load', () => {
-    previewWindow.webContents.executeJavaScript(`renderPreviewWindow()`);
+    previewWindow.webContents.executeJavaScript(`renderPreviewWindow()`).then(() => {
+      previewWindow.show();
+    });
   });
 
   previewWindow.on('close', (event) => {
