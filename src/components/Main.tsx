@@ -1,6 +1,6 @@
 import { remote } from 'electron';
 import React, { ReactElement } from 'react';
-import Canvas from './Canvas';
+import CanvasWrap from './CanvasWrap';
 import SidebarLeft from './SidebarLeft';
 import SidebarRight from './SidebarRight';
 import TweenDrawerWrap from './TweenDrawerWrap';
@@ -22,7 +22,7 @@ const Main = (props: MainProps): ReactElement => {
       <div
         id='main-canvas'
         className='c-app__canvas'>
-        <Canvas setReady={setReady} />
+        <CanvasWrap setReady={setReady} />
         <TweenDrawerWrap ready={ready} />
         <TextEditor ready={ready} />
         <InsertKnobWrap />

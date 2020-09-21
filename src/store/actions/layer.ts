@@ -2,16 +2,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { clipboard } from 'electron';
 import { paperMain } from '../../canvas';
 import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_VALUE } from '../../constants';
-import { applyImageMethods } from '../../canvas/imageUtils';
-import { applyShapeMethods } from '../../canvas/shapeUtils';
-import { applyTextMethods } from '../../canvas/textUtils';
-import { applyArtboardMethods } from '../../canvas/artboardUtils';
 import { getPaperFillColor, getPaperStrokeColor, getPaperLayer, getPaperShadowColor } from '../utils/paper';
 import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayersBounds } from '../selectors/layer';
 import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle } from '../utils/actions';
 import { bufferToBase64 } from '../../utils';
 
 import { addDocumentImage } from './documentSettings';
+import { RootState } from '../reducers';
 
 import {
   ADD_ARTBOARD,
@@ -408,7 +405,6 @@ import {
   SetLayerEditPayload,
   LayerTypes
 } from '../actionTypes/layer';
-import { RootState } from '../reducers';
 
 // Artboard
 
@@ -427,22 +423,20 @@ export const addArtboardThunk = (payload: AddArtboardPayload) => {
     const artboardBackground = new paperMain.Path.Rectangle({
       point: new paperMain.Point(0,0),
       size: [payload.layer.frame.width, payload.layer.frame.height],
-      data: { id: 'ArtboardBackground', type: 'ArtboardBackground' },
+      data: { id: 'ArtboardBackground', type: 'LayerChild', layerType: 'Artboard' },
       fillColor: paperFillColor,
       position: new paperMain.Point(payload.layer.frame.x, payload.layer.frame.y),
     });
     // create mask
     const artboardMask = artboardBackground.clone();
-    artboardMask.data = { id: 'ArtboardMask', type: 'ArtboardMask' };
+    artboardMask.data = { id: 'ArtboardMask', type: 'LayerChild', layerType: 'Artboard' };
     artboardMask.clipMask = true;
     // create artboard group
     const artboard = new paperMain.Group({
-      data: { id: id, type: 'Artboard' },
+      data: { id: id, type: 'Layer', layerType: 'Artboard' },
       children: [artboardMask, artboardBackground],
       parent: getPaperLayer('page')
     });
-    // apply artboard methods to background
-    applyArtboardMethods(artboard);
     // dispatch action
     const newLayer = {
       type: 'Artboard',
@@ -486,7 +480,7 @@ export const addGroupThunk = (payload: AddGroupPayload) => {
     const masked = payload.layer.masked ? payload.layer.masked : false;
     const clipped = payload.layer.clipped ? payload.layer.clipped : false;
     new paperMain.Group({
-      data: { id: id, type: 'Group' },
+      data: { id: id, type: 'Layer', layerType: 'Group' },
       parent: getPaperLayer(parent)
     });
     const newLayer = {
@@ -555,14 +549,13 @@ export const addShapeThunk = (payload: AddShapePayload) => {
       strokeCap: style.strokeOptions.cap,
       strokeJoin: style.strokeOptions.join,
       clipMask: mask,
-      data: { id, type: 'Shape' },
+      data: { id, type: 'Layer', layerType: 'Shape' },
       parent: getPaperLayer(parent)
     });
-    paperLayer.children.forEach((item) => item.data = { id: 'ShapePartial' });
+    paperLayer.children.forEach((item) => item.data = { id: 'ShapePartial', type: 'LayerChild', layerType: 'Shape' });
     paperLayer.position = new paperMain.Point(frame.x, frame.y);
     paperLayer.fillColor = paperFillColor;
     paperLayer.strokeColor = paperStrokeColor;
-    applyShapeMethods(paperLayer);
     const newLayer = {
       type: 'Shape',
       id: id,
@@ -614,7 +607,7 @@ export const addTextThunk = (payload: AddTextPayload) => {
     const paperLayer = new paperMain.PointText({
       point: new paperMain.Point(0, 0),
       content: textContent,
-      data: { id, type: 'Text' },
+      data: { id, type: 'Layer', layerType: 'Text' },
       parent: getPaperLayer(parent),
       strokeWidth: style.stroke.width,
       shadowColor: paperShadowColor,
@@ -638,7 +631,6 @@ export const addTextThunk = (payload: AddTextPayload) => {
     paperLayer.position = new paperMain.Point(frame.x, frame.y);
     paperLayer.fillColor = paperFillColor;
     paperLayer.strokeColor = paperStrokeColor;
-    applyTextMethods(paperLayer);
     const newLayer = {
       type: 'Text',
       id: id,
@@ -693,18 +685,17 @@ export const addImageThunk = (payload: AddImagePayload) => {
       const paperLayer = new paperMain.Raster(`data:image/webp;base64,${base64}`);
       const imageContainer = new paperMain.Group({
         parent: getPaperLayer(parent),
-        data: { id, imageId, type: 'Image' },
+        data: { id, imageId, type: 'Layer', layerType: 'Image' },
         children: [paperLayer]
       });
       paperLayer.onLoad = (): void => {
-        paperLayer.data = { type: 'Raster', id: 'Raster' };
+        paperLayer.data = { id: 'Raster', type: 'LayerChild', layerType: 'Image' };
         imageContainer.bounds.width = frame.innerWidth;
         imageContainer.bounds.height = frame.innerHeight;
         imageContainer.position = new paperMain.Point(frame.x, frame.y);
         imageContainer.shadowColor = paperShadowColor;
         imageContainer.shadowOffset = paperShadowOffset;
         imageContainer.shadowBlur = paperShadowBlur;
-        applyImageMethods(paperLayer);
         const newLayer = {
           type: 'Image',
           id: id,

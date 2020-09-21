@@ -8,7 +8,7 @@ import store from '../store';
 import { RootState } from '../store/reducers';
 import { activateInsertKnob, deactivateInsertKnob, setInsertKnobIndex } from '../store/actions/insertKnob';
 import { InsertKnobTypes, SetInsertKnobIndexPayload } from '../store/actionTypes/insertKnob';
-import { enableSelectionTool, enableRectangleShapeTool, enableEllipseShapeTool, enableStarShapeTool, enablePolygonShapeTool, enableRoundedShapeTool, enableLineShapeTool, enableArtboardTool, enableTextTool } from '../store/actions/tool';
+import { enableSelectionToolThunk, enableRectangleShapeToolThunk, enableEllipseShapeToolThunk, enableStarShapeToolThunk, enablePolygonShapeToolThunk, enableRoundedShapeToolThunk, enableLineShapeToolThunk, enableArtboardToolThunk, enableTextToolThunk } from '../store/actions/tool';
 import { ToolTypes } from '../store/actionTypes/tool';
 import { AddImagePayload } from '../store/actionTypes/layer';
 import { addImageThunk } from '../store/actions/layer';
@@ -42,7 +42,7 @@ if (remote.process.platform === 'darwin') {
       case 'right': {
         if (!knobActive) {
           knobActive = true;
-          store.dispatch(enableSelectionTool());
+          store.dispatch(enableSelectionToolThunk() as any);
           store.dispatch(activateInsertKnob());
         }
         break;
@@ -57,15 +57,15 @@ interface InsertKnobProps {
   setInsertKnobIndex?(payload: SetInsertKnobIndexPayload): InsertKnobTypes;
   activateInsertKnob?(): InsertKnobTypes;
   deactivateInsertKnob?(): InsertKnobTypes;
-  enableRectangleShapeTool?(): ToolTypes;
-  enableEllipseShapeTool?(): ToolTypes;
-  enableStarShapeTool?(): ToolTypes;
-  enablePolygonShapeTool?(): ToolTypes;
-  enableRoundedShapeTool?(): ToolTypes;
-  enableLineShapeTool?(): ToolTypes;
-  enableSelectionTool?(): ToolTypes;
-  enableArtboardTool?(): ToolTypes;
-  enableTextTool?(): ToolTypes;
+  enableRectangleShapeToolThunk?(): ToolTypes;
+  enableEllipseShapeToolThunk?(): ToolTypes;
+  enableStarShapeToolThunk?(): ToolTypes;
+  enablePolygonShapeToolThunk?(): ToolTypes;
+  enableRoundedShapeToolThunk?(): ToolTypes;
+  enableLineShapeToolThunk?(): ToolTypes;
+  enableSelectionToolThunk?(): ToolTypes;
+  enableArtboardToolThunk?(): ToolTypes;
+  enableTextToolThunk?(): ToolTypes;
   addImageThunk?(payload: AddImagePayload): void;
   setCanvasFocusing?(payload: SetCanvasFocusingPayload): CanvasSettingsTypes;
 }
@@ -76,15 +76,15 @@ const InsertKnob = (props: InsertKnobProps): ReactElement => {
     activeIndex,
     setInsertKnobIndex,
     deactivateInsertKnob,
-    enableRectangleShapeTool,
-    enableEllipseShapeTool,
-    enableStarShapeTool,
-    enablePolygonShapeTool,
-    enableRoundedShapeTool,
-    enableLineShapeTool,
-    enableSelectionTool,
-    enableArtboardTool,
-    enableTextTool,
+    enableRectangleShapeToolThunk,
+    enableEllipseShapeToolThunk,
+    enableStarShapeToolThunk,
+    enablePolygonShapeToolThunk,
+    enableRoundedShapeToolThunk,
+    enableLineShapeToolThunk,
+    enableSelectionToolThunk,
+    enableArtboardToolThunk,
+    enableTextToolThunk,
     addImageThunk,
     setCanvasFocusing
   } = props;
@@ -95,41 +95,41 @@ const InsertKnob = (props: InsertKnobProps): ReactElement => {
   const insertKnobItems = [{
     label: 'Artboard',
     icon: 'artboard',
-    onSelection: tool.type === 'Artboard' ? enableSelectionTool : enableArtboardTool
+    onSelection: tool.type === 'Artboard' ? enableSelectionToolThunk : enableArtboardToolThunk
   },{
     label: 'Rectangle',
     icon: 'rectangle',
-    onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Rectangle' ? enableSelectionTool : enableRectangleShapeTool
+    onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Rectangle' ? enableSelectionToolThunk : enableRectangleShapeToolThunk
   },{
     label: 'Rounded',
     icon: 'rounded',
-    onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Rounded' ? enableSelectionTool : enableRoundedShapeTool
+    onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Rounded' ? enableSelectionToolThunk : enableRoundedShapeToolThunk
   },{
     label: 'Ellipse',
     icon: 'ellipse',
-    onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Ellipse' ? enableSelectionTool : enableEllipseShapeTool
+    onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Ellipse' ? enableSelectionToolThunk : enableEllipseShapeToolThunk
   },{
     label: 'Star',
     icon: 'star',
-    onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Star' ? enableSelectionTool : enableStarShapeTool
+    onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Star' ? enableSelectionToolThunk : enableStarShapeToolThunk
   },{
     label: 'Polygon',
     icon: 'polygon',
-    onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Polygon' ? enableSelectionTool : enablePolygonShapeTool
+    onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Polygon' ? enableSelectionToolThunk : enablePolygonShapeToolThunk
   },{
     label: 'Line',
     icon: 'line',
-    onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Line' ? enableSelectionTool : enableLineShapeTool
+    onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Line' ? enableSelectionToolThunk : enableLineShapeToolThunk
   },{
     label: 'Text',
     icon: 'text',
-    onSelection: tool.type === 'Text' ? enableSelectionTool : enableTextTool
+    onSelection: tool.type === 'Text' ? enableSelectionToolThunk : enableTextToolThunk
   },{
     label: 'Image',
     icon: 'image',
     onSelection: (): void => {
       if (tool.type !== 'Selection') {
-        enableSelectionTool();
+        enableSelectionToolThunk();
       }
       remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
         filters: [
@@ -296,15 +296,15 @@ const mapStateToProps = (state: RootState): {
 export default connect(
   mapStateToProps,
   {
-    enableRectangleShapeTool,
-    enableEllipseShapeTool,
-    enableStarShapeTool,
-    enablePolygonShapeTool,
-    enableRoundedShapeTool,
-    enableLineShapeTool,
-    enableSelectionTool,
-    enableArtboardTool,
-    enableTextTool,
+    enableRectangleShapeToolThunk,
+    enableEllipseShapeToolThunk,
+    enableStarShapeToolThunk,
+    enablePolygonShapeToolThunk,
+    enableRoundedShapeToolThunk,
+    enableLineShapeToolThunk,
+    enableSelectionToolThunk,
+    enableArtboardToolThunk,
+    enableTextToolThunk,
     addImageThunk,
     activateInsertKnob,
     deactivateInsertKnob,

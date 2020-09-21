@@ -1,6 +1,13 @@
 import { addItem, removeItem } from '../utils/general';
 import { remote } from 'electron';
-import { DEFAULT_LEFT_SIDEBAR_WIDTH, DEFAULT_RIGHT_SIDEBAR_WIDTH, DEFAULT_TWEEN_DRAWER_HEIGHT, DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH, DEFAULT_COLOR_FORMAT } from '../../constants';
+import {
+  DEFAULT_LEFT_SIDEBAR_WIDTH,
+  DEFAULT_RIGHT_SIDEBAR_WIDTH,
+  DEFAULT_TWEEN_DRAWER_HEIGHT,
+  DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH,
+  DEFAULT_COLOR_FORMAT,
+  DEFAULT_DEVICE_ORIENTATION
+} from '../../constants';
 
 import {
   SAVE_DOCUMENT_AS,
@@ -15,6 +22,8 @@ import {
   SET_RIGHT_SIDEBAR_WIDTH,
   SET_TWEEN_DRAWER_HEIGHT,
   SET_TWEEN_DRAWER_LAYERS_WIDTH,
+  SET_ARTBOARD_PRESET_DEVICE_PLATFORM,
+  SET_ARTBOARD_PRESET_DEVICE_ORIENTATION,
   DocumentSettingsTypes,
 } from '../actionTypes/documentSettings';
 
@@ -28,6 +37,8 @@ export interface DocumentSettingsState {
     byId: {
       [id: string]: em.ArtboardPreset;
     };
+    orientation: em.DeviceOrientationType;
+    platform: em.DevicePlatformType;
   };
   images: {
     allIds: string[];
@@ -50,7 +61,9 @@ const initialState: DocumentSettingsState = {
   matrix: [1, 0, 0, 1, 0, 0],
   artboardPresets: {
     allIds: [],
-    byId: {}
+    byId: {},
+    orientation: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('artboardPresetDeviceOrientation', 'string') : DEFAULT_DEVICE_ORIENTATION,
+    platform: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('artboardPresetDevicePlatform', 'string') : 'Android'
   },
   images: {
     allIds: [],
@@ -193,6 +206,30 @@ export default (state = initialState, action: DocumentSettingsTypes): DocumentSe
       return {
         ...state,
         tweenDrawerLayersWidth: action.payload.width
+      };
+    }
+    case SET_ARTBOARD_PRESET_DEVICE_ORIENTATION: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('artboardPresetDeviceOrientation', 'string', action.payload.orientation);
+      }
+      return {
+        ...state,
+        artboardPresets: {
+          ...state.artboardPresets,
+          orientation: action.payload.orientation
+        }
+      };
+    }
+    case SET_ARTBOARD_PRESET_DEVICE_PLATFORM: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('artboardPresetDevicePlatform', 'string', action.payload.platform);
+      }
+      return {
+        ...state,
+        artboardPresets: {
+          ...state.artboardPresets,
+          platform: action.payload.platform
+        }
       };
     }
     default:

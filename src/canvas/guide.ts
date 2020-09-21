@@ -10,7 +10,14 @@ class Guide {
       from: from,
       to: to,
       strokeColor: THEME_GUIDE_COLOR,
-      strokeWidth: 1 / paperMain.view.zoom
+      strokeWidth: 1 / paperMain.view.zoom,
+      data: {
+        id: 'Guide',
+        type: 'UIElement',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'Guide'
+      }
     });
     if (removeOpts) {
       guide.removeOn({

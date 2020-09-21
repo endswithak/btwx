@@ -7,7 +7,6 @@ import { paperMain } from './index';
 import Tooltip from './tooltip';
 import SnapTool from './snapTool';
 import { RootState } from '../store/reducers';
-import { applyShapeMethods } from './shapeUtils';
 
 class ResizeTool {
   state: RootState;
@@ -144,7 +143,7 @@ class ResizeTool {
     });
   }
   clearLayerScale(paperLayer: paper.Item, layerItem: em.Layer): void {
-    switch(paperLayer.data.type) {
+    switch(paperLayer.data.layerType) {
       case 'Artboard': {
         const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
         const mask = paperLayer.getItem({data: { id: 'ArtboardMask' }});
@@ -178,7 +177,7 @@ class ResizeTool {
   scaleLayer(id: string, hor: number, ver: number): void {
     const paperLayer = getPaperLayer(id);
     const layerItem = this.state.layer.present.byId[id];
-    switch(paperLayer.data.type) {
+    switch(paperLayer.data.layerType) {
       case 'Artboard': {
         const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
         const mask = paperLayer.getItem({data: { id: 'ArtboardMask' }});
@@ -221,7 +220,7 @@ class ResizeTool {
   }
   setLayerPivot(id: string): void {
     const paperLayer = getPaperLayer(id);
-    switch(paperLayer.data.type) {
+    switch(paperLayer.data.layerType) {
       case 'Artboard': {
         const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
         const mask = paperLayer.getItem({data: { id: 'ArtboardMask' }});
@@ -644,7 +643,7 @@ class ResizeTool {
     if (this.state.layer.present.selected.length > 0) {
       this.state.layer.present.selected.forEach((layer) => {
         const paperLayer = getPaperLayer(layer);
-        if (paperLayer.data.type !== 'Text') {
+        if (paperLayer.data.layerType !== 'Text') {
           const layerItem = this.state.layer.present.byId[layer];
           paperLayer.pivot = paperLayer.bounds.center;
           paperLayer.bounds.width = layerItem.frame.width;
@@ -836,10 +835,10 @@ class ResizeTool {
             // needs to be before resize dispatch to correctly set layer position
             scaledLayers.forEach((id) => {
               const paperLayer = getPaperLayer(id);
-              const layerItem = this.state.layer.present.byId[id];
-              if (layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Rounded') {
-                applyShapeMethods(paperLayer);
-              }
+              // const layerItem = this.state.layer.present.byId[id];
+              // if (layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Rounded') {
+              //   applyShapeMethods(paperLayer);
+              // }
               paperLayer.pivot = null;
             });
             // dispatch resize layers

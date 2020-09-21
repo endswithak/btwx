@@ -6,8 +6,10 @@ import SidebarLayer from './SidebarLayer';
 import SidebarLayerDragGhosts from './SidebarLayerDragGhosts';
 
 interface SidebarLayerTreeProps {
-  page: em.Group;
-  layers: string[];
+  search: string;
+  searchActive: boolean;
+  page?: em.Group;
+  layers?: string[];
 }
 
 const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
@@ -50,11 +52,26 @@ const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
   )
 }
 
-const mapStateToProps = (state: RootState) => {
+const mapStateToProps = (state: RootState, ownProps: SidebarLayerTreeProps) => {
   const { layer } = state;
   const page = layer.present.byId[layer.present.page];
-  const layers = [...page.children].reverse();
-  return {page, layers};
+  let layers: string[];
+  if (ownProps.searchActive) {
+    if (!ownProps.search || ownProps.search.replace(/\s/g, '').length === 0) {
+      layers = [...page.children].reverse();
+    } else {
+      layers = layer.present.allIds.reduce((result, current) => {
+        if (layer.present.byId[current].name.toUpperCase().includes(ownProps.search.replace(/\s/g, '').toUpperCase()) && current !== 'page') {
+          return [...result, current];
+        } else {
+          return [...result];
+        }
+      }, []);
+    }
+  } else {
+    layers = [...page.children].reverse();
+  }
+  return { page, layers };
 };
 
 export default connect(

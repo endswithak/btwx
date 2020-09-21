@@ -12,6 +12,8 @@ declare namespace em {
 
   type TweenEventType = 'click' | 'doubleclick' | 'mouseenter' | 'mouseleave';
 
+  type UIElement = 'SelectionFrame' | 'HoverFrame' | 'DragFrame' | 'GradientFrame' | 'ActiveArtboardFrame' | 'TweenEventsFrame';
+
   type CubicBezier = 'linear' | 'power1' | 'power2' | 'power3' | 'power4' | 'back' | 'elastic' | 'bounce' | 'rough' | 'slow' | 'steps' | 'circ' | 'expo' | 'sine' | 'custom';
 
   type CubicBezierType = 'in' | 'inOut' | 'out';
@@ -85,6 +87,19 @@ declare namespace em {
   type TweenEventSort = 'none' | 'layer-asc' | 'layer-dsc' | 'event-asc' | 'event-dsc' | 'artboard-asc' | 'artboard-dsc' | 'destinationArtboard-asc' | 'destinationArtboard-dsc';
 
   type FillStrokeTween = 'colorToColor' | 'nullToColor' | 'colorToNull' | 'gradientToGradient' | 'gradientToColor' | 'colorToGradient' | 'gradientToNull' | 'nullToGradient';
+
+  interface HitResult {
+    type: 'Layer' | 'UIElement';
+    layerProps: {
+      layerItem: Layer;
+      nearestScopeAncestor: Layer;
+    };
+    uiElementProps: {
+      elementId: em.UIElement;
+      interactive: boolean;
+      interactiveType: string;
+    };
+  }
 
   interface Icon {
     name: string;

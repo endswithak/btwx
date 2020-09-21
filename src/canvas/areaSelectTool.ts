@@ -1,6 +1,6 @@
 import paper from 'paper';
 import { getPagePaperLayer, getNearestScopeAncestor } from '../store/selectors/layer';
-import { deselectAllLayers, deselectLayer, selectLayer } from '../store/actions/layer';
+import { deselectAllLayers, deselectLayer, selectLayer, selectLayers } from '../store/actions/layer';
 import { setCanvasSelecting } from '../store/actions/canvasSettings';
 import store from '../store';
 import { paperMain } from './index';
@@ -71,7 +71,7 @@ class AreaSelectTool {
     // get overlapped page layers
     const overlappedLayers = getPagePaperLayer(this.state.layer.present).getItems({
       data: (data: any) => {
-        if (data.id !== 'ArtboardBackground' && data.id !== 'ArtboardMask' && data.id !== 'Raster' && data.id !== 'ShapePartial') {
+        if (data.type !== 'LayerChild' && data.type !== 'UIElement' && data.type !== 'UIElementChild') {
           const topParent = getNearestScopeAncestor(this.state.layer.present, data.id);
           return topParent.id === data.id;
         }
@@ -82,13 +82,13 @@ class AreaSelectTool {
     // partially overlapped artboards, and overlapped page layers
     // to final layers array
     overlappedLayers.forEach((item: paper.Item) => {
-      if (item.data.type === 'Artboard') {
+      if (item.data.layerType === 'Artboard') {
         if (item.isInside(this.shape.bounds)) {
           layers.push(item.data.id);
         } else {
           item.getItems({
             data: (data: any) => {
-              if (data.id !== 'ArtboardBackground' && data.id !== 'ArtboardMask' && data.id !== 'Raster' && data.id !== 'ShapePartial') {
+              if (data.type !== 'LayerChild' && data.type !== 'UIElement' && data.type !== 'UIElementChild') {
                 if (this.state.layer.present.byId[item.data.id].children.includes(data.id)) {
                   layers.push(data.id);
                 }
@@ -150,60 +150,73 @@ class AreaSelectTool {
   }
   onMouseDrag(event: paper.ToolEvent): void {
     if (this.enabled) {
+      this.update(event.point);
+      // if (!this.to) {
+      //   store.dispatch(setCanvasSelecting({selecting: true}));
+      //   this.state = store.getState();
+      // }
+      // // update to point and area select shape
+      // this.update(event.point);
+      // if (this.to) {
+      //   // get hit test layers
+      //   const hitTestLayers = this.hitTestLayers();
+      //   // loop through hit test layers
+      //   hitTestLayers.forEach((id: string) => {
+      //     // process layer if not included in overlapped
+      //     if (!this.overlapped.includes(id)) {
+      //       // if shift modifier, add or remove layer from selected
+      //       if (this.shiftModifier) {
+      //         if (this.state.layer.present.selected.includes(id)) {
+      //           store.dispatch(deselectLayer({id}));
+      //         } else {
+      //           store.dispatch(selectLayer({id, noActiveArtboardUpdate: true}));
+      //         }
+      //       }
+      //       // else, add layer to selected
+      //       else {
+      //         store.dispatch(selectLayer({id, noActiveArtboardUpdate: true}));
+      //       }
+      //       // push layer id to overlapped
+      //       this.overlapped.push(id);
+      //     }
+      //   });
+      //   // loop through overlapped
+      //   this.overlapped.forEach((id: string) => {
+      //     // process layer if not included in hitTestLayers
+      //     if (!hitTestLayers.includes(id)) {
+      //       // if shift modifier, add or remove layer from selected
+      //       if (this.shiftModifier) {
+      //         if (this.state.layer.present.selected.includes(id)) {
+      //           store.dispatch(deselectLayer({id}));
+      //         } else {
+      //           store.dispatch(selectLayer({id, noActiveArtboardUpdate: true}));
+      //         }
+      //       }
+      //       // else, remove layer from selected
+      //       else {
+      //         store.dispatch(deselectLayer({id}));
+      //       }
+      //       // remove layer from overlapped
+      //       this.overlapped = this.overlapped.filter((layer) => layer !== id);
+      //     }
+      //   });
+      // }
+    }
+  }
+  onMouseUp(event: paper.ToolEvent): void {
+    // if (this.enabled) {
+    //   this.disable();
+    // }
+    if (this.enabled) {
       if (!this.to) {
         store.dispatch(setCanvasSelecting({selecting: true}));
         this.state = store.getState();
       }
-      // update to point and area select shape
-      this.update(event.point);
       if (this.to) {
         // get hit test layers
         const hitTestLayers = this.hitTestLayers();
-        // loop through hit test layers
-        hitTestLayers.forEach((id: string) => {
-          // process layer if not included in overlapped
-          if (!this.overlapped.includes(id)) {
-            // if shift modifier, add or remove layer from selected
-            if (this.shiftModifier) {
-              if (this.state.layer.present.selected.includes(id)) {
-                store.dispatch(deselectLayer({id}));
-              } else {
-                store.dispatch(selectLayer({id, noActiveArtboardUpdate: true}));
-              }
-            }
-            // else, add layer to selected
-            else {
-              store.dispatch(selectLayer({id, noActiveArtboardUpdate: true}));
-            }
-            // push layer id to overlapped
-            this.overlapped.push(id);
-          }
-        });
-        // loop through overlapped
-        this.overlapped.forEach((id: string) => {
-          // process layer if not included in hitTestLayers
-          if (!hitTestLayers.includes(id)) {
-            // if shift modifier, add or remove layer from selected
-            if (this.shiftModifier) {
-              if (this.state.layer.present.selected.includes(id)) {
-                store.dispatch(deselectLayer({id}));
-              } else {
-                store.dispatch(selectLayer({id, noActiveArtboardUpdate: true}));
-              }
-            }
-            // else, remove layer from selected
-            else {
-              store.dispatch(deselectLayer({id}));
-            }
-            // remove layer from overlapped
-            this.overlapped = this.overlapped.filter((layer) => layer !== id);
-          }
-        });
+        store.dispatch(selectLayers({layers: hitTestLayers, deselectIfSelected: this.shiftModifier, noActiveArtboardUpdate: true}));
       }
-    }
-  }
-  onMouseUp(event: paper.ToolEvent): void {
-    if (this.enabled) {
       this.disable();
     }
   }

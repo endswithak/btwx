@@ -14,6 +14,7 @@ import {
   DEFAULT_TWEEN_DRAWER_HEIGHT,
   DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH,
   DEFAULT_COLOR_FORMAT,
+  DEFAULT_DEVICE_ORIENTATION,
   APP_NAME
 } from './constants';
 
@@ -42,6 +43,12 @@ export const getAllOpenDocuments = (): electron.BrowserWindow[] => {
 const isMac = process.platform === 'darwin';
 
 if (isMac) {
+  if (!systemPreferences.getUserDefault('artboardPresetDevicePlatform', 'string')) {
+    systemPreferences.setUserDefault('artboardPresetDevicePlatform', 'string', 'Apple' as any);
+  }
+  if (!systemPreferences.getUserDefault('artboardPresetDeviceOrientation', 'string')) {
+    systemPreferences.setUserDefault('artboardPresetDeviceOrientation', 'string', DEFAULT_DEVICE_ORIENTATION as any);
+  }
   if (!systemPreferences.getUserDefault('colorFormat', 'string') || (systemPreferences.getUserDefault('colorFormat', 'string') !== 'rgb' || systemPreferences.getUserDefault('colorFormat', 'string') !== 'hsl')) {
     systemPreferences.setUserDefault('colorFormat', 'string', DEFAULT_COLOR_FORMAT as any);
   }
@@ -75,7 +82,6 @@ export const createNewDocument = (width?: number, height?: number): Promise<elec
       width: width ? width : 1200,
       minWidth: 1200,
       minHeight: 768,
-      show: false,
       frame: false,
       titleBarStyle: 'hidden',
       backgroundColor: getWindowBackground(),
@@ -92,7 +98,6 @@ export const createNewDocument = (width?: number, height?: number): Promise<elec
     newDocument.webContents.on('did-finish-load', () => {
       newDocument.webContents.session.clearStorageData().then(() => {
         newDocument.webContents.executeJavaScript(`renderNewDocument()`).then(() => {
-          newDocument.show();
           resolve(newDocument);
         });
       });
@@ -191,7 +196,6 @@ const createPreviewWindow = ({width, height}: {width: number; height: number}): 
     height: height + PREVIEW_TOPBAR_HEIGHT + (process.platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT),
     frame: false,
     titleBarStyle: 'hidden',
-    show: false,
     backgroundColor: getWindowBackground(),
     webPreferences: {
       nodeIntegration: true
@@ -201,9 +205,7 @@ const createPreviewWindow = ({width, height}: {width: number; height: number}): 
   previewWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   previewWindow.webContents.on('did-finish-load', () => {
-    previewWindow.webContents.executeJavaScript(`renderPreviewWindow()`).then(() => {
-      previewWindow.show();
-    });
+    previewWindow.webContents.executeJavaScript(`renderPreviewWindow()`);
   });
 
   previewWindow.on('close', (event) => {

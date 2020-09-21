@@ -1,4 +1,4 @@
-import { enableSelectionTool, enableRectangleShapeTool, enableEllipseShapeTool, enableStarShapeTool, enablePolygonShapeTool, enableLineShapeTool, enableRoundedShapeTool, enableArtboardTool, enableTextTool } from '../store/actions/tool';
+import { enableSelectionToolThunk, enableRectangleShapeToolThunk, enableEllipseShapeToolThunk, enableStarShapeToolThunk, enablePolygonShapeToolThunk, enableLineShapeToolThunk, enableRoundedShapeToolThunk, enableArtboardToolThunk, enableTextToolThunk } from '../store/actions/tool';
 import { resetCanvasSettings } from '../store/actions/canvasSettings';
 import store from '../store';
 
@@ -13,7 +13,7 @@ class InsertTool {
         case 'escape': {
           const state = store.getState();
           if (state.tool.type !== 'Selection' && state.canvasSettings.focusing) {
-            store.dispatch(enableSelectionTool());
+            store.dispatch(enableSelectionToolThunk() as any);
           }
           break;
         }
@@ -21,9 +21,9 @@ class InsertTool {
           const state = store.getState();
           if (state.canvasSettings.focusing) {
             if (state.tool.type === 'Artboard') {
-              store.dispatch(enableSelectionTool());
+              store.dispatch(enableSelectionToolThunk() as any);
             } else {
-              store.dispatch(enableArtboardTool());
+              store.dispatch(enableArtboardToolThunk() as any);
             }
           }
           break;
@@ -34,14 +34,14 @@ class InsertTool {
             // remove any tools if meta modifier (window refresh)
             if (event.modifiers.meta) {
               if (state.tool.type !== 'Selection') {
-                store.dispatch(enableSelectionTool());
+                store.dispatch(enableSelectionToolThunk() as any);
               }
             // else handle rectangle tool toggle
             } else {
               if (state.tool.type === 'Shape' && state.tool.shapeToolType === 'Rectangle') {
-                store.dispatch(enableSelectionTool());
+                store.dispatch(enableSelectionToolThunk() as any);
               } else {
-                store.dispatch(enableRectangleShapeTool());
+                store.dispatch(enableRectangleShapeToolThunk() as any);
               }
             }
           } else {
@@ -55,9 +55,9 @@ class InsertTool {
           const state = store.getState();
           if (state.canvasSettings.focusing) {
             if (state.tool.type === 'Shape' && state.tool.shapeToolType === 'Ellipse') {
-              store.dispatch(enableSelectionTool());
+              store.dispatch(enableSelectionToolThunk() as any);
             } else {
-              store.dispatch(enableEllipseShapeTool());
+              store.dispatch(enableEllipseShapeToolThunk() as any);
             }
           }
           break;
@@ -66,9 +66,9 @@ class InsertTool {
           const state = store.getState();
           if (state.canvasSettings.focusing) {
             if (state.tool.type === 'Shape' && state.tool.shapeToolType === 'Rounded') {
-              store.dispatch(enableSelectionTool());
+              store.dispatch(enableSelectionToolThunk() as any);
             } else {
-              store.dispatch(enableRoundedShapeTool());
+              store.dispatch(enableRoundedShapeToolThunk() as any);
             }
           }
           break;
@@ -77,9 +77,9 @@ class InsertTool {
           const state = store.getState();
           if (state.canvasSettings.focusing) {
             if (state.tool.type === 'Text') {
-              store.dispatch(enableSelectionTool());
+              store.dispatch(enableSelectionToolThunk() as any);
             } else {
-              store.dispatch(enableTextTool());
+              store.dispatch(enableTextToolThunk() as any);
             }
           }
           break;
@@ -88,9 +88,9 @@ class InsertTool {
           const state = store.getState();
           if (state.canvasSettings.focusing) {
             if (state.tool.type === 'Shape' && state.tool.shapeToolType === 'Line') {
-              store.dispatch(enableSelectionTool());
+              store.dispatch(enableSelectionToolThunk() as any);
             } else {
-              store.dispatch(enableLineShapeTool());
+              store.dispatch(enableLineShapeToolThunk() as any);
             }
           }
           break;

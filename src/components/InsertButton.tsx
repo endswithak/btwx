@@ -3,7 +3,7 @@ import sharp from 'sharp';
 import { remote } from 'electron';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
-import { enableSelectionTool, enableRectangleShapeTool, enableEllipseShapeTool, enableStarShapeTool, enablePolygonShapeTool, enableRoundedShapeTool, enableLineShapeTool, enableArtboardTool, enableTextTool } from '../store/actions/tool';
+import { enableSelectionToolThunk, enableRectangleShapeToolThunk, enableEllipseShapeToolThunk, enableStarShapeToolThunk, enablePolygonShapeToolThunk, enableRoundedShapeToolThunk, enableLineShapeToolThunk, enableArtboardToolThunk, enableTextToolThunk } from '../store/actions/tool';
 import { ToolTypes } from '../store/actionTypes/tool';
 import { AddImagePayload } from '../store/actionTypes/layer';
 import { addImageThunk } from '../store/actions/layer';
@@ -14,15 +14,15 @@ import TopbarDropdownButton from './TopbarDropdownButton';
 interface InsertButtonProps {
   tool: ToolState;
   insertKnobOpen: boolean;
-  enableRectangleShapeTool(): ToolTypes;
-  enableEllipseShapeTool(): ToolTypes;
-  enableStarShapeTool(): ToolTypes;
-  enablePolygonShapeTool(): ToolTypes;
-  enableRoundedShapeTool(): ToolTypes;
-  enableLineShapeTool(): ToolTypes;
-  enableSelectionTool(): ToolTypes;
-  enableArtboardTool(): ToolTypes;
-  enableTextTool(): ToolTypes;
+  enableRectangleShapeToolThunk(): ToolTypes;
+  enableEllipseShapeToolThunk(): ToolTypes;
+  enableStarShapeToolThunk(): ToolTypes;
+  enablePolygonShapeToolThunk(): ToolTypes;
+  enableRoundedShapeToolThunk(): ToolTypes;
+  enableLineShapeToolThunk(): ToolTypes;
+  enableSelectionToolThunk(): ToolTypes;
+  enableArtboardToolThunk(): ToolTypes;
+  enableTextToolThunk(): ToolTypes;
   addImageThunk?(payload: AddImagePayload): void;
 }
 
@@ -30,21 +30,21 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
   const {
     tool,
     insertKnobOpen,
-    enableRectangleShapeTool,
-    enableEllipseShapeTool,
-    enableSelectionTool,
-    enableStarShapeTool,
-    enablePolygonShapeTool,
-    enableRoundedShapeTool,
-    enableLineShapeTool,
-    enableArtboardTool,
-    enableTextTool,
+    enableRectangleShapeToolThunk,
+    enableEllipseShapeToolThunk,
+    enableSelectionToolThunk,
+    enableStarShapeToolThunk,
+    enablePolygonShapeToolThunk,
+    enableRoundedShapeToolThunk,
+    enableLineShapeToolThunk,
+    enableArtboardToolThunk,
+    enableTextToolThunk,
     addImageThunk
   } = props;
 
   const handleImageClick = (): void => {
     if (tool.type !== 'Selection') {
-      enableSelectionTool();
+      enableSelectionToolThunk();
     }
     remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
       filters: [
@@ -106,42 +106,42 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
       isActive={ tool.type === 'Artboard' || tool.type === 'Shape' || tool.type === 'Text' || insertKnobOpen }
       options={[{
         label: 'Artboard',
-        onClick: tool.type === 'Artboard' ? enableSelectionTool : enableArtboardTool,
+        onClick: tool.type === 'Artboard' ? enableSelectionToolThunk : enableArtboardToolThunk,
         icon: 'artboard',
         isActive: tool.type === 'Artboard'
       },{
         label: 'Rectangle',
-        onClick: tool.type === 'Shape' && tool.shapeToolType === 'Rectangle' ? enableSelectionTool : enableRectangleShapeTool,
+        onClick: tool.type === 'Shape' && tool.shapeToolType === 'Rectangle' ? enableSelectionToolThunk : enableRectangleShapeToolThunk,
         icon: 'rectangle',
         isActive: tool.type === 'Shape' && tool.shapeToolType === 'Rectangle'
       },{
         label: 'Rounded',
-        onClick: tool.type === 'Shape' && tool.shapeToolType === 'Rounded' ? enableSelectionTool : enableRoundedShapeTool,
+        onClick: tool.type === 'Shape' && tool.shapeToolType === 'Rounded' ? enableSelectionToolThunk : enableRoundedShapeToolThunk,
         icon: 'rounded',
         isActive: tool.type === 'Shape' && tool.shapeToolType === 'Rounded'
       },{
         label: 'Ellipse',
-        onClick: tool.type === 'Shape' && tool.shapeToolType === 'Ellipse' ? enableSelectionTool : enableEllipseShapeTool,
+        onClick: tool.type === 'Shape' && tool.shapeToolType === 'Ellipse' ? enableSelectionToolThunk : enableEllipseShapeToolThunk,
         icon: 'ellipse',
         isActive: tool.type === 'Shape' && tool.shapeToolType === 'Ellipse'
       },{
         label: 'Star',
-        onClick: tool.type === 'Shape' && tool.shapeToolType === 'Star' ? enableSelectionTool : enableStarShapeTool,
+        onClick: tool.type === 'Shape' && tool.shapeToolType === 'Star' ? enableSelectionToolThunk : enableStarShapeToolThunk,
         icon: 'star',
         isActive: tool.type === 'Shape' && tool.shapeToolType === 'Star'
       },{
         label: 'Polygon',
-        onClick: tool.type === 'Shape' && tool.shapeToolType === 'Polygon' ? enableSelectionTool : enablePolygonShapeTool,
+        onClick: tool.type === 'Shape' && tool.shapeToolType === 'Polygon' ? enableSelectionToolThunk : enablePolygonShapeToolThunk,
         icon: 'polygon',
         isActive: tool.type === 'Shape' && tool.shapeToolType === 'Polygon'
       },{
         label: 'Line',
-        onClick: tool.type === 'Shape' && tool.shapeToolType === 'Line' ? enableSelectionTool : enableLineShapeTool,
+        onClick: tool.type === 'Shape' && tool.shapeToolType === 'Line' ? enableSelectionToolThunk : enableLineShapeToolThunk,
         icon: 'line',
         isActive: tool.type === 'Shape' && tool.shapeToolType === 'Line'
       },{
         label: 'Text',
-        onClick: tool.type === 'Text' ? enableSelectionTool : enableTextTool,
+        onClick: tool.type === 'Text' ? enableSelectionToolThunk : enableTextToolThunk,
         icon: 'text',
         isActive: tool.type === 'Text'
       },{
@@ -164,15 +164,15 @@ const mapStateToProps = (state: RootState): {
 export default connect(
   mapStateToProps,
   {
-    enableRectangleShapeTool,
-    enableEllipseShapeTool,
-    enableStarShapeTool,
-    enablePolygonShapeTool,
-    enableRoundedShapeTool,
-    enableLineShapeTool,
-    enableSelectionTool,
-    enableArtboardTool,
-    enableTextTool,
+    enableRectangleShapeToolThunk,
+    enableEllipseShapeToolThunk,
+    enableStarShapeToolThunk,
+    enablePolygonShapeToolThunk,
+    enableRoundedShapeToolThunk,
+    enableLineShapeToolThunk,
+    enableSelectionToolThunk,
+    enableArtboardToolThunk,
+    enableTextToolThunk,
     addImageThunk,
     addDocumentImage
   }

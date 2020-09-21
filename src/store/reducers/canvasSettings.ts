@@ -1,4 +1,6 @@
 import {
+  SET_CANVAS_DRAWING,
+  SET_CANVAS_TYPING,
   SET_CANVAS_ZOOMING,
   SET_CANVAS_SELECTING,
   SET_CANVAS_ZOOMING_TYPE,
@@ -10,7 +12,20 @@ import {
   CanvasSettingsTypes,
 } from '../actionTypes/canvasSettings';
 
+// export interface CanvasSettingsState {
+//   activeTool: em.ToolType;
+//   drawing: boolean;
+//   resizing: boolean;
+//   dragging: boolean;
+//   selecting: boolean;
+//   measuring: boolean;
+//   focusing: boolean;
+//   zooming: boolean;
+// }
+
 export interface CanvasSettingsState {
+  drawing: boolean;
+  typing: boolean;
   resizing: boolean;
   resizingType: em.ResizingType;
   dragging: boolean;
@@ -22,6 +37,8 @@ export interface CanvasSettingsState {
 }
 
 const initialState: CanvasSettingsState = {
+  drawing: false,
+  typing: false,
   resizing: false,
   resizingType: null,
   dragging: false,
@@ -34,6 +51,18 @@ const initialState: CanvasSettingsState = {
 
 export default (state = initialState, action: CanvasSettingsTypes): CanvasSettingsState => {
   switch (action.type) {
+    case SET_CANVAS_DRAWING: {
+      return {
+        ...state,
+        drawing: action.payload.drawing
+      };
+    }
+    case SET_CANVAS_TYPING: {
+      return {
+        ...state,
+        typing: action.payload.typing
+      };
+    }
     case SET_CANVAS_RESIZING: {
       return {
         ...state,
@@ -81,14 +110,7 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
     case RESET_CANVAS_SETTINGS: {
       return {
         ...state,
-        resizing: false,
-        resizingType: null,
-        dragging: false,
-        selecting: false,
-        measuring: false,
-        focusing: true,
-        zooming: false,
-        zoomingType: null,
+        ...initialState
       };
     }
     default:

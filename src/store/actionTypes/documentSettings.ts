@@ -14,6 +14,8 @@ export const SET_TWEEN_DRAWER_LAYERS_WIDTH = 'SET_TWEEN_DRAWER_LAYERS_WIDTH';
 export const ADD_ARTBOARD_PRESET = 'ADD_ARTBOARD_PRESET';
 export const REMOVE_ARTBOARD_PRESET = 'REMOVE_ARTBOARD_PRESET';
 export const UPDATE_ARTBOARD_PRESET = 'UPDATE_ARTBOARD_PRESET';
+export const SET_ARTBOARD_PRESET_DEVICE_ORIENTATION = 'SET_ARTBOARD_PRESET_DEVICE_ORIENTATION';
+export const SET_ARTBOARD_PRESET_DEVICE_PLATFORM = 'SET_ARTBOARD_PRESET_DEVICE_PLATFORM';
 
 export interface SaveDocumentAsPayload {
   id?: string;
@@ -133,6 +135,24 @@ export interface UpdateArtboardPreset {
   payload: UpdateArtboardPresetPayload;
 }
 
+export interface SetArtboardPresetDeviceOrientationPayload {
+  orientation: em.DeviceOrientationType;
+}
+
+export interface SetArtboardPresetDeviceOrientation {
+  type: typeof SET_ARTBOARD_PRESET_DEVICE_ORIENTATION;
+  payload: SetArtboardPresetDeviceOrientationPayload;
+}
+
+export interface SetArtboardPresetDevicePlatformPayload {
+  platform: em.DevicePlatformType;
+}
+
+export interface SetArtboardPresetDevicePlatform {
+  type: typeof SET_ARTBOARD_PRESET_DEVICE_PLATFORM;
+  payload: SetArtboardPresetDevicePlatformPayload;
+}
+
 export type DocumentSettingsTypes = SaveDocumentAs |
                                     SaveDocument |
                                     SetCanvasMatrix |
@@ -144,4 +164,6 @@ export type DocumentSettingsTypes = SaveDocumentAs |
                                     SetTweenDrawerLayersWidth |
                                     AddArtboardPreset |
                                     RemoveArtboardPreset |
-                                    UpdateArtboardPreset;
+                                    UpdateArtboardPreset |
+                                    SetArtboardPresetDeviceOrientation |
+                                    SetArtboardPresetDevicePlatform;

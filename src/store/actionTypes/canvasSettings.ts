@@ -1,3 +1,5 @@
+export const SET_CANVAS_DRAWING = 'SET_CANVAS_DRAWING';
+export const SET_CANVAS_TYPING = 'SET_CANVAS_TYPING';
 export const SET_CANVAS_RESIZING = 'SET_CANVAS_RESIZING';
 export const SET_CANVAS_SELECTING = 'SET_CANVAS_SELECTING';
 export const SET_CANVAS_DRAGGING = 'SET_CANVAS_DRAGGING';
@@ -6,6 +8,24 @@ export const SET_CANVAS_ZOOMING_TYPE = 'SET_CANVAS_ZOOMING_TYPE';
 export const SET_CANVAS_MEASURING = 'SET_CANVAS_MEASURING';
 export const SET_CANVAS_FOCUSING = 'SET_CANVAS_FOCUSING';
 export const RESET_CANVAS_SETTINGS = 'RESET_CANVAS_SETTINGS';
+
+export interface SetCanvasDrawingPayload {
+  drawing: boolean;
+}
+
+export interface SetCanvasDrawing {
+  type: typeof SET_CANVAS_DRAWING;
+  payload: SetCanvasDrawingPayload;
+}
+
+export interface SetCanvasTypingPayload {
+  typing: boolean;
+}
+
+export interface SetCanvasTyping {
+  type: typeof SET_CANVAS_TYPING;
+  payload: SetCanvasTypingPayload;
+}
 
 export interface SetCanvasResizingPayload {
   resizing: boolean;
@@ -76,7 +96,9 @@ export interface ResetCanvasSettings {
   type: typeof RESET_CANVAS_SETTINGS;
 }
 
-export type CanvasSettingsTypes = SetCanvasResizing |
+export type CanvasSettingsTypes = SetCanvasDrawing |
+                                  SetCanvasTyping |
+                                  SetCanvasResizing |
                                   SetCanvasSelecting |
                                   SetCanvasDragging |
                                   SetCanvasZooming |

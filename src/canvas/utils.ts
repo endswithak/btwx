@@ -5,6 +5,7 @@ import { enableSelectionTool, enableDragTool } from '../store/actions/tool';
 import { addShape, setLayerHover, increaseLayerScope, selectLayer, newLayerScope, deselectLayer, moveLayerBy, moveLayersBy, enableLayerDrag, disableLayerDrag, deepSelectLayer } from '../store/actions/layer';
 import { getNearestScopeAncestor, isScopeGroupLayer, getPaperLayer, getLayer } from '../store/selectors/layer';
 import { updateHoverFrame, updateSelectionFrame } from '../store/utils/layer';
+import { paperMain } from './';
 
 interface GetSymbolsPage {
   sketchPages: FileFormat.Page[];
@@ -137,16 +138,8 @@ export const setSelection = ({artboard, path, dispatch}: SetSelection): void => 
   selectionFrame.selected = true;
 }
 
-// interface GetParent {
-//   item: paper.Item;
-// }
-
-// export const getParent = ({ item }: GetParent) => {
-//   if (item) {
-//     let currentItem = item;
-//     while(!currentItem.isGroup) {
-//       currentItem = currentItem.parent;
-//     }
-//     return currentItem.layersGroup();
-//   }
-// }
+export const removeActiveTools = () => {
+  paperMain.tools.forEach((tool) => {
+    tool.remove();
+  });
+}

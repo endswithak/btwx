@@ -1,5 +1,5 @@
-import { getPaperLayer, getLayerAndDescendants } from '../store/selectors/layer';
-import { removeLayers, escapeLayerScope } from '../store/actions/layer';
+import { getPaperLayer, getLayerAndDescendants, getNearestScopeAncestor } from '../store/selectors/layer';
+import { removeLayers, escapeLayerScope, setLayerHover } from '../store/actions/layer';
 import { openContextMenu } from '../store/actions/contextMenu';
 import { setTweenDrawerEvent } from '../store/actions/tweenDrawer';
 import { setCanvasMeasuring } from '../store/actions/canvasSettings';
@@ -14,6 +14,8 @@ import LineTool from './lineTool';
 import InsertTool from './insertTool';
 import UndoRedoTool from './undoRedoTool';
 import { paperMain } from './index';
+import debounce from 'lodash.debounce';
+import { RootState } from '../store/reducers';
 
 class SelectionTool {
   tool: paper.Tool;
@@ -27,8 +29,11 @@ class SelectionTool {
   gradientTool: GradientTool;
   lineTool: LineTool;
   undoRedoTool: UndoRedoTool;
-  altModifier: boolean;
-  constructor() {
+  dragging: boolean;
+  resizing: boolean;
+  selecting: boolean;
+  measuring: boolean;
+  constructor(e?: any) {
     this.tool = new paperMain.Tool();
     this.tool.activate();
     this.tool.minDistance = 1;
@@ -46,7 +51,23 @@ class SelectionTool {
     this.gradientTool = new GradientTool();
     this.undoRedoTool = new UndoRedoTool();
     this.lineTool = new LineTool();
-    this.altModifier = false;
+    this.dragging = false;
+    this.resizing = false;
+    this.selecting = false;
+    this.measuring = false;
+    if (e) {
+      const event = {
+        ...e,
+        point: paperMain.view.getEventPoint(e),
+        modifiers: {
+          shift: e.shiftKey,
+          alt: e.altKey,
+          meta: e.metaKey,
+          ctrl: e.ctrlKey
+        }
+      };
+      this.onMouseDown(event);
+    }
   }
   onKeyDown(event: paper.KeyEvent): void {
     this.resizeTool.onKeyDown(event);
@@ -59,7 +80,10 @@ class SelectionTool {
     this.lineTool.onKeyDown(event);
     switch(event.key) {
       case 'alt': {
-        store.dispatch(setCanvasMeasuring({measuring: true}));
+        if (!this.measuring) {
+          this.measuring = true;
+          store.dispatch(setCanvasMeasuring({measuring: true}));
+        }
         break;
       }
       case 'escape': {
@@ -102,66 +126,133 @@ class SelectionTool {
     this.lineTool.onKeyUp(event);
     switch(event.key) {
       case 'alt': {
-        store.dispatch(setCanvasMeasuring({measuring: false}));
+        if (this.measuring) {
+          this.measuring = false;
+          store.dispatch(setCanvasMeasuring({measuring: false}));
+        }
         break;
       }
+    }
+  }
+  handleMouseDownLayerHitResult(state: RootState, event: paper.ToolEvent, paperLayer: paper.Item) {
+    switch(paperLayer.data.layerType) {
+      case 'Shape':
+      case 'Image':
+      case 'Text':
+      case 'Group':
+        if (this.measuring) {
+          this.measuring = false;
+          store.dispatch(setCanvasMeasuring({measuring: false}));
+        }
+        this.dragging = true;
+        this.dragTool.enable(state, event);
+        this.dragTool.onMouseDown(event);
+        break;
+      case 'Artboard':
+        if (this.measuring) {
+          this.measuring = false;
+          store.dispatch(setCanvasMeasuring({measuring: false}));
+        }
+        this.selecting = true;
+        this.areaSelectTool.enable(state);
+        this.areaSelectTool.onMouseDown(event);
+        break;
+    }
+  }
+  handleMouseDownUIElementHitResult(state: RootState, event: paper.ToolEvent, paperLayer: paper.Item) {
+    if (paperLayer.data.interactive) {
+      switch(paperLayer.data.interactiveType) {
+        case 'move': {
+          if (this.measuring) {
+            this.measuring = false;
+            store.dispatch(setCanvasMeasuring({measuring: false}));
+          }
+          this.dragging = true;
+          this.dragTool.enable(state, event, true);
+          this.dragTool.onMouseDown(event);
+          break;
+        }
+        case 'topLeft':
+        case 'topCenter':
+        case 'topRight':
+        case 'bottomLeft':
+        case 'bottomCenter':
+        case 'bottomRight':
+        case 'leftCenter':
+        case 'rightCenter': {
+          const selectedWithChildren = state.layer.present.selected.reduce((result: { allIds: string[]; byId: { [id: string]: em.Layer } }, current) => {
+            const layerAndChildren = getLayerAndDescendants(state.layer.present, current);
+            result.allIds = [...result.allIds, ...layerAndChildren];
+            layerAndChildren.forEach((id) => {
+              result.byId[id] = state.layer.present.byId[id];
+            });
+            return result;
+          }, { allIds: [], byId: {} });
+          if (state.layer.present.selected.some((id) => state.layer.present.byId[id].type === 'Artboard') || !selectedWithChildren.allIds.some((id: string) => state.layer.present.byId[id].type === 'Text' || state.layer.present.byId[id].type === 'Group')) {
+            if (this.measuring) {
+              this.measuring = false;
+              store.dispatch(setCanvasMeasuring({measuring: false}));
+            }
+            this.resizing = true;
+            this.resizeTool.enable(state, paperLayer.data.interactiveType);
+            this.resizeTool.onMouseDown(event);
+          }
+          break;
+        }
+        case 'from':
+        case 'to': {
+          this.lineTool.enable(state, paperLayer.data.interactiveType);
+          this.lineTool.onMouseDown(event);
+          break;
+        }
+        case 'origin':
+        case 'destination': {
+          this.gradientTool.enable(paperLayer.data.interactiveType, state.gradientEditor.prop as 'fill' | 'stroke');
+          this.gradientTool.onMouseDown(event);
+          break;
+        }
+      }
+    }
+  }
+  handleHitTest(event: any): { paperLayer: paper.Item; type: 'Layer' | 'UIElement' } {
+    const hitResult = paperMain.project.hitTest(event.point);
+    const validHitResult = hitResult && hitResult.item && hitResult.item.data && hitResult.item.data.type;
+    if (validHitResult) {
+      // handle layer hit results
+      if (hitResult.item.data.type === 'Layer' || hitResult.item.data.type === 'LayerChild') {
+        return {
+          paperLayer: hitResult.item.data.type === 'Layer' ? hitResult.item : hitResult.item.parent,
+          type: 'Layer'
+        };
+      }
+      // handle UI element hit results
+      if (hitResult.item.data.type === 'UIElement' || hitResult.item.data.type === 'UIElementChild') {
+        return {
+          paperLayer: hitResult.item,
+          type: 'UIElement'
+        };
+      }
+    } else {
+      return null;
     }
   }
   onMouseDown(event: any): void {
     this.insertTool.enabled = false;
     const state = store.getState();
-    const layerState = state.layer.present;
-    const hitResult = paperMain.project.hitTest(event.point);
-    const isGradientEditorOpen = state.gradientEditor.isOpen;
-    const selectedWithChildren = layerState.selected.reduce((result: { allIds: string[]; byId: { [id: string]: em.Layer } }, current) => {
-      const layerAndChildren = getLayerAndDescendants(layerState, current);
-      result.allIds = [...result.allIds, ...layerAndChildren];
-      layerAndChildren.forEach((id) => {
-        result.byId[id] = layerState.byId[id];
-      });
-      return result;
-    }, { allIds: [], byId: {} });
+    const hitResult = this.handleHitTest(event);
     if (hitResult) {
-      // if hit result is selection frame handle
-      if (hitResult.item.data.id === 'selectionFrameHandle') {
-        // if move handle, enable drag tool
-        if (hitResult.item.data.handle === 'move') {
-          this.dragTool.enable(state, true);
-          this.dragTool.onMouseDown(event);
-        }
-        // if from or to handle, enable line tool
-        else if (hitResult.item.data.handle === 'from' || hitResult.item.data.handle === 'to') {
-          this.lineTool.enable(state, hitResult.item.data.handle);
-          this.lineTool.onMouseDown(event);
-        }
-        // else (hit result is resize handle), enable resize tool if no text layers are selected
-        else {
-          if (layerState.selected.some((id) => layerState.byId[id].type === 'Artboard') || !selectedWithChildren.allIds.some((id: string) => layerState.byId[id].type === 'Text' || layerState.byId[id].type === 'Group')) {
-            this.resizeTool.enable(state, hitResult.item.data.handle);
-            this.resizeTool.onMouseDown(event);
-          }
-        }
-      // if hit result is gradient handle, enable gradient tool
-      } else if (hitResult.item.data.id === 'gradientFrameHandle') {
-        this.gradientTool.enable(hitResult.item.data.handle, state.gradientEditor.prop as 'fill' | 'stroke');
-        this.gradientTool.onMouseDown(event);
-      // if hit result is shape, group, text, or image, enable drag tool
-      } else if (hitResult.item.data.type && (hitResult.item.data.type === 'Shape' || hitResult.item.data.type === 'Group' || hitResult.item.data.type === 'Image' || hitResult.item.data.type === 'Raster' || hitResult.item.data.type === 'Text')) {
-        this.dragTool.enable(state);
-        this.dragTool.onMouseDown(event);
-      } else if (hitResult.item.data.type && (hitResult.item.data.type === 'Artboard' || hitResult.item.data.type === 'ArtboardBackground') && hitResult.item.parent.data.id === state.layer.present.activeArtboard) {
-        this.areaSelectTool.enable(state);
-        this.areaSelectTool.onMouseDown(event);
+      switch(hitResult.type) {
+        case 'Layer':
+          this.handleMouseDownLayerHitResult(state, event, hitResult.paperLayer);
+          break;
+        case 'UIElement':
+          this.handleMouseDownUIElementHitResult(state, event, hitResult.paperLayer);
+          break;
       }
-    // if no hit result, enable area select tool
     } else {
-      if (event.event.which === 3) {
-        store.dispatch(openContextMenu({type: 'LayerEdit', id: 'page', x: event.event.clientX, y: event.event.clientY, paperX: event.point.x, paperY: event.point.y}));
-      } else {
-        if (!isGradientEditorOpen) {
-          this.areaSelectTool.enable(state);
-          this.areaSelectTool.onMouseDown(event, true);
-        }
+      if (!state.gradientEditor.isOpen) {
+        this.areaSelectTool.enable(state);
+        this.areaSelectTool.onMouseDown(event, true);
       }
     }
   }
@@ -179,6 +270,15 @@ class SelectionTool {
     this.resizeTool.onMouseUp(event);
     this.gradientTool.onMouseUp(event);
     this.lineTool.onMouseUp(event);
+    if (this.measuring) {
+      this.measuring = false;
+    }
+    if (this.dragging) {
+      this.dragging = false;
+    }
+    if (this.resizing) {
+      this.resizing = false;
+    }
   }
 }
 

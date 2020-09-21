@@ -17,7 +17,7 @@ const MeasureFrame = (props: MeasureFrameProps): ReactElement => {
 
   const handleWheel = (e: WheelEvent) => {
     if (e.ctrlKey) {
-      const measureFrame = paperMain.project.getItem({ data: { id: 'measureFrame' } });
+      const measureFrame = paperMain.project.getItem({ data: { id: 'MeasureFrame' } });
       if (measureFrame) {
         measureFrame.remove();
       }
@@ -28,7 +28,7 @@ const MeasureFrame = (props: MeasureFrameProps): ReactElement => {
     updateMeasureFrame({selected: selected, hover: hover} as LayerState, { all: hover });
     document.getElementById('canvas').addEventListener('wheel', handleWheel);
     return () => {
-      const measureFrame = paperMain.project.getItem({ data: { id: 'measureFrame' } });
+      const measureFrame = paperMain.project.getItem({ data: { id: 'MeasureFrame' } });
       document.getElementById('canvas').removeEventListener('wheel', handleWheel);
       if (measureFrame) {
         measureFrame.remove();

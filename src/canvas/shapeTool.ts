@@ -1,5 +1,6 @@
 import store from '../store';
-import { enableSelectionTool } from '../store/actions/tool';
+import { setCanvasDrawing } from '../store/actions/canvasSettings';
+import { enableSelectionToolThunk } from '../store/actions/tool';
 import { addShapeThunk } from '../store/actions/layer';
 import { getPagePaperLayer } from '../store/selectors/layer';
 import { paperMain } from './index';
@@ -369,6 +370,7 @@ class ShapeTool {
   }
   onMouseDown(event: paper.ToolEvent): void {
     const state = store.getState();
+    store.dispatch(setCanvasDrawing({drawing: true}));
     this.drawing = true;
     this.from = new paperMain.Point((
       this.snapTool.snap.x ? this.snapTool.snap.x.point : event.point.x
@@ -499,7 +501,8 @@ class ShapeTool {
           }
         }) as any);
       }
-      store.dispatch(enableSelectionTool());
+      store.dispatch(setCanvasDrawing({drawing: false}));
+      store.dispatch(enableSelectionToolThunk() as any);
     }
   }
 }

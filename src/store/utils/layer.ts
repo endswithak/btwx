@@ -53,11 +53,6 @@ import {
 
 import { paperMain } from '../../canvas';
 
-import { applyShapeMethods } from '../../canvas/shapeUtils';
-import { applyTextMethods } from '../../canvas/textUtils';
-import { applyArtboardMethods } from '../../canvas/artboardUtils';
-import { applyImageMethods } from '../../canvas/imageUtils';
-
 import { THEME_PRIMARY_COLOR, DEFAULT_TRANSFORM } from '../../constants';
 import { bufferToBase64 } from '../../utils';
 import MeasureGuide from '../../canvas/measureGuide';
@@ -358,7 +353,7 @@ export const removeLayers = (state: LayerState, action: RemoveLayers): LayerStat
 }
 
 export const updateActiveArtboardFrame = (state: LayerState, useLayerItem = false): void => {
-  const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'activeArtboardFrame' } });
+  const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'ActiveArtboardFrame' } });
   if (activeArtboardFrame) {
     activeArtboardFrame.remove();
   }
@@ -380,14 +375,18 @@ export const updateActiveArtboardFrame = (state: LayerState, useLayerItem = fals
       strokeColor: THEME_PRIMARY_COLOR,
       strokeWidth: 3 / paperMain.view.zoom,
       data: {
-        id: 'activeArtboardFrame'
+        id: 'ActiveArtboardFrame',
+        type: 'UIElement',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'ActiveArtboardFrame'
       }
     });
   }
 }
 
 export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', useLayerItem = false) => {
-  const selectionFrame = paperMain.project.getItem({ data: { id: 'selectionFrame' } });
+  const selectionFrame = paperMain.project.getItem({ data: { id: 'SelectionFrame' } });
   if (selectionFrame) {
     selectionFrame.remove();
   }
@@ -419,8 +418,10 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         opacity: 1,
         visible: visibleHandle === 'all' || visibleHandle === 'move',
         data: {
-          id: 'selectionFrameHandle',
-          handle: 'move'
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: 'move',
+          elementId: 'SelectionFrame'
         },
         onMouseEnter: function() {
           document.body.style.cursor = 'move';
@@ -436,8 +437,10 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         ...baseProps,
         visible: visibleHandle === 'all' || visibleHandle === 'from',
         data: {
-          id: 'selectionFrameHandle',
-          handle: 'from'
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: 'from',
+          elementId: 'SelectionFrame'
         },
         onMouseEnter: function() {
           if (resizeDisabled) {
@@ -457,8 +460,10 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         ...baseProps,
         visible: visibleHandle === 'all' || visibleHandle === 'to',
         data: {
-          id: 'selectionFrameHandle',
-          handle: 'to'
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: 'to',
+          elementId: 'SelectionFrame'
         },
         onMouseEnter: function() {
           if (resizeDisabled) {
@@ -477,7 +482,11 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
       new paperMain.Group({
         children: [fromHandle, moveHandle, toHandle],
         data: {
-          id: 'selectionFrame'
+          id: 'SelectionFrame',
+          type: 'UIElement',
+          interactive: false,
+          interactiveType: null,
+          elementId: 'SelectionFrame'
         }
       });
     }
@@ -489,7 +498,10 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         strokeWidth: 1 / paperMain.view.zoom,
         insert: false,
         data: {
-          id: 'selectionFrameBase'
+          type: 'UIElementChild',
+          interactive: false,
+          interactiveType: null,
+          elementId: 'SelectionFrame'
         }
       });
       const moveHandle = new paperMain.Path.Ellipse({
@@ -497,8 +509,10 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         opacity: 1,
         visible: visibleHandle === 'all' || visibleHandle === 'move',
         data: {
-          id: 'selectionFrameHandle',
-          handle: 'move'
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: 'move',
+          elementId: 'SelectionFrame'
         },
         onMouseEnter: function() {
           document.body.style.cursor = 'move';
@@ -515,8 +529,10 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         ...baseProps,
         visible: visibleHandle === 'all' || visibleHandle === 'topLeft',
         data: {
-          id: 'selectionFrameHandle',
-          handle: 'topLeft'
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: 'topLeft',
+          elementId: 'SelectionFrame'
         },
         onMouseEnter: function() {
           if (resizeDisabled) {
@@ -536,8 +552,10 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         ...baseProps,
         visible: visibleHandle === 'all' || visibleHandle === 'topCenter',
         data: {
-          id: 'selectionFrameHandle',
-          handle: 'topCenter'
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: 'topCenter',
+          elementId: 'SelectionFrame'
         },
         onMouseEnter: function() {
           if (resizeDisabled) {
@@ -557,8 +575,10 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         ...baseProps,
         visible: visibleHandle === 'all' || visibleHandle === 'topRight',
         data: {
-          id: 'selectionFrameHandle',
-          handle: 'topRight'
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: 'topRight',
+          elementId: 'SelectionFrame'
         },
         onMouseEnter: function() {
           if (resizeDisabled) {
@@ -578,8 +598,10 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         ...baseProps,
         visible: visibleHandle === 'all' || visibleHandle === 'bottomLeft',
         data: {
-          id: 'selectionFrameHandle',
-          handle: 'bottomLeft'
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: 'bottomLeft',
+          elementId: 'SelectionFrame'
         },
         onMouseEnter: function() {
           if (resizeDisabled) {
@@ -599,8 +621,10 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         ...baseProps,
         visible: visibleHandle === 'all' || visibleHandle === 'bottomCenter',
         data: {
-          id: 'selectionFrameHandle',
-          handle: 'bottomCenter'
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: 'bottomCenter',
+          elementId: 'SelectionFrame'
         },
         onMouseEnter: function() {
           if (resizeDisabled) {
@@ -620,8 +644,10 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         ...baseProps,
         visible: visibleHandle === 'all' || visibleHandle === 'bottomRight',
         data: {
-          id: 'selectionFrameHandle',
-          handle: 'bottomRight'
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: 'bottomRight',
+          elementId: 'SelectionFrame'
         },
         onMouseEnter: function() {
           if (resizeDisabled) {
@@ -641,8 +667,10 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         ...baseProps,
         visible: visibleHandle === 'all' || visibleHandle === 'rightCenter',
         data: {
-          id: 'selectionFrameHandle',
-          handle: 'rightCenter'
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: 'rightCenter',
+          elementId: 'SelectionFrame'
         },
         onMouseEnter: function() {
           if (resizeDisabled) {
@@ -662,8 +690,10 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
         ...baseProps,
         visible: visibleHandle === 'all' || visibleHandle === 'leftCenter',
         data: {
-          id: 'selectionFrameHandle',
-          handle: 'leftCenter'
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: 'leftCenter',
+          elementId: 'SelectionFrame'
         },
         onMouseEnter: function() {
           if (resizeDisabled) {
@@ -682,7 +712,11 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
       new paperMain.Group({
         children: [baseFrame, moveHandle, topLeftHandle, topCenterHandle, topRightHandle, bottomLeftHandle, bottomCenterHandle, bottomRightHandle, leftCenterHandle, rightCenterHandle],
         data: {
-          id: 'selectionFrame'
+          id: 'SelectionFrame',
+          type: 'UIElement',
+          interactive: false,
+          interactiveType: null,
+          elementId: 'SelectionFrame'
         }
       });
     }
@@ -690,14 +724,18 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
 }
 
 export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[], hover: string, themeName: em.ThemeName) => {
-  const tweenEventsFrame = paperMain.project.getItem({ data: { id: 'tweenEventsFrame' } });
+  const tweenEventsFrame = paperMain.project.getItem({ data: { id: 'TweenEventsFrame' } });
   if (tweenEventsFrame) {
     tweenEventsFrame.remove();
   }
   if (events) {
     const tweenEventsFrame = new paperMain.Group({
       data: {
-        id: 'tweenEventsFrame'
+        id: 'TweenEventsFrame',
+        type: 'UIElement',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'TweenEventsFrame'
       }
     });
     const theme = getTheme(themeName);
@@ -708,14 +746,16 @@ export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[
       const artboardTopTop = getArtboardsTopTop(state);
       const origin = state.byId[event.artboard];
       const destination = state.byId[event.destinationArtboard];
-      const destinationIndicator = new paperMain.Path.Ellipse({
+      const tweenEventDestinationIndicator = new paperMain.Path.Ellipse({
         center: new paperMain.Point(destination.frame.x, artboardTopTop - ((1 / paperMain.view.zoom) * 48)),
         radius: ((1 / paperMain.view.zoom) * 4),
         fillColor: elementColor,
         insert: false,
         data: {
-          id: 'tweenEventFrameIndicator',
-          indicator: 'destination'
+          type: 'UIElementChild',
+          interactive: false,
+          interactiveType: null,
+          elementId: 'TweenEventsFrame'
         }
       });
       // const originIndicator = new paperMain.Path.Line({
@@ -725,30 +765,34 @@ export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[
       //   strokeWidth: 1 / paperMain.view.zoom,
       //   insert: false,
       //   data: {
-      //     id: 'tweenEventFrameIndicator',
+      //     id: 'TweenEventFrameIndicator',
       //     indicator: 'origin'
       //   }
       // });
-      const originIndicator = new paperMain.Path.Ellipse({
+      const tweenEventOriginIndicator = new paperMain.Path.Ellipse({
         center: new paperMain.Point(origin.frame.x, artboardTopTop - ((1 / paperMain.view.zoom) * 48)),
         radius: ((1 / paperMain.view.zoom) * 10),
         insert: false,
         data: {
-          id: 'tweenEventFrameIndicator',
-          indicator: 'origin'
+          type: 'UIElementChild',
+          interactive: false,
+          interactiveType: null,
+          elementId: 'TweenEventsFrame'
         }
       });
-      const iconBackground = new paperMain.Path.Ellipse({
-        center: originIndicator.bounds.center,
+      const tweenEventIconBackground = new paperMain.Path.Ellipse({
+        center: tweenEventOriginIndicator.bounds.center,
         radius: ((1 / paperMain.view.zoom) * 14),
         fillColor: theme.background.z0,
         insert: false,
         data: {
-          id: 'tweenEventFrameIndicator',
-          indicator: 'origin'
+          type: 'UIElementChild',
+          interactive: false,
+          interactiveType: null,
+          elementId: 'TweenEventsFrame'
         }
       });
-      const icon = new paperMain.CompoundPath({
+      const tweenEventIcon = new paperMain.CompoundPath({
         pathData: (() => {
           switch(eventLayerItem.type) {
             case 'Artboard':
@@ -775,23 +819,27 @@ export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[
         fillRule: 'nonzero',
         insert: false,
         data: {
-          id: 'tweenEventFrameIndicator',
-          indicator: 'icon'
+          type: 'UIElementChild',
+          interactive: false,
+          interactiveType: null,
+          elementId: 'TweenEventsFrame'
         }
       });
-      icon.fitBounds(originIndicator.bounds);
-      const connector = new paperMain.Path.Line({
-        from: originIndicator.bounds.center,
-        to: destinationIndicator.bounds.center,
+      tweenEventIcon.fitBounds(tweenEventOriginIndicator.bounds);
+      const tweenEventConnector = new paperMain.Path.Line({
+        from: tweenEventOriginIndicator.bounds.center,
+        to: tweenEventDestinationIndicator.bounds.center,
         strokeColor: elementColor,
         strokeWidth: 1 / paperMain.view.zoom,
         insert: false,
         data: {
-          id: 'tweenEventFrameIndicator',
-          indicator: 'connector'
+          type: 'UIElementChild',
+          interactive: false,
+          interactiveType: null,
+          elementId: 'TweenEventsFrame'
         }
       });
-      const eventType = new paperMain.PointText({
+      const tweenEventText = new paperMain.PointText({
         content: ((): string => {
           switch(event.event) {
             case 'click':
@@ -804,45 +852,53 @@ export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[
               return 'Mouse Leave';
           }
         })(),
-        point: new paperMain.Point(connector.bounds.center.x, destinationIndicator.bounds.top - ((1 / paperMain.view.zoom) * 12)),
+        point: new paperMain.Point(tweenEventConnector.bounds.center.x, tweenEventDestinationIndicator.bounds.top - ((1 / paperMain.view.zoom) * 12)),
         justification: 'center',
         fontSize: ((1 / paperMain.view.zoom) * 12),
         fillColor: elementColor,
         insert: false,
-        fontFamily: 'Space Mono'
+        fontFamily: 'Space Mono',
+        data: {
+          type: 'UIElementChild',
+          interactive: false,
+          interactiveType: null,
+          elementId: 'TweenEventsFrame'
+        }
       });
       const tweenEventFrame = new paperMain.Group({
-        children: [connector, iconBackground, icon, destinationIndicator, eventType],
+        children: [tweenEventConnector, tweenEventIconBackground, tweenEventIcon, tweenEventDestinationIndicator, tweenEventText],
         data: {
-          id: 'tweenEventFrame',
-          tweenEvent: event.id
+          type: 'UIElementChild',
+          interactive: false,
+          interactiveType: null,
+          elementId: 'TweenEventsFrame'
         },
         parent: tweenEventsFrame,
-        opacity: groupOpacity,
-        onMouseEnter: function() {
-          document.body.style.cursor = 'pointer';
-          const eventFrames = this.parent.getItems({data: { id: 'tweenEventFrame' } });
-          const others = eventFrames.filter((item: paper.Item) => item.data.tweenEvent !== this.data.tweenEvent);
-          others.forEach((item: paper.Item) => {
-            item.opacity = 0.25;
-          });
-        },
-        onMouseLeave: function() {
-          document.body.style.cursor = 'auto';
-          const eventFrames = this.parent.getItems({data: { id: 'tweenEventFrame' } });
-          const others = eventFrames.filter((item: paper.Item) => item.data.tweenEvent !== this.data.tweenEvent);
-          others.forEach((item: paper.Item) => {
-            item.opacity = 1;
-          });
-        },
-        onClick: function() {
-          const state = store.getState();
-          if (!state.tweenDrawer.isOpen) {
-            paperMain.view.viewSize = new paperMain.Size(paperMain.view.viewSize.width, paperMain.view.viewSize.height - state.documentSettings.tweenDrawerHeight);
-            store.dispatch(openTweenDrawer());
-          }
-          store.dispatch(setTweenDrawerEvent({id: event.id}));
-        }
+        // opacity: groupOpacity,
+        // onMouseEnter: function() {
+        //   document.body.style.cursor = 'pointer';
+        //   const eventFrames = this.parent.getItems({data: { id: 'TweenEventFrame' } });
+        //   const others = eventFrames.filter((item: paper.Item) => item.data.tweenEvent !== this.data.tweenEvent);
+        //   others.forEach((item: paper.Item) => {
+        //     item.opacity = 0.25;
+        //   });
+        // },
+        // onMouseLeave: function() {
+        //   document.body.style.cursor = 'auto';
+        //   const eventFrames = this.parent.getItems({data: { id: 'TweenEventFrame' } });
+        //   const others = eventFrames.filter((item: paper.Item) => item.data.tweenEvent !== this.data.tweenEvent);
+        //   others.forEach((item: paper.Item) => {
+        //     item.opacity = 1;
+        //   });
+        // },
+        // onClick: function() {
+        //   const state = store.getState();
+        //   if (!state.tweenDrawer.isOpen) {
+        //     paperMain.view.viewSize = new paperMain.Size(paperMain.view.viewSize.width, paperMain.view.viewSize.height - state.documentSettings.tweenDrawerHeight);
+        //     store.dispatch(openTweenDrawer());
+        //   }
+        //   store.dispatch(setTweenDrawerEvent({id: event.id}));
+        // }
       });
       const tweenEventFrameBackground = new paperMain.Path.Rectangle({
         from: tweenEventFrame.bounds.topLeft,
@@ -851,8 +907,10 @@ export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[
         opacity: 0.01,
         parent: tweenEventFrame,
         data: {
-          id: 'tweenEventFrameIndicator',
-          indicator: 'background'
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: event.id,
+          elementId: 'TweenEventsFrame'
         }
       });
       tweenEventFrame.position.y -= (tweenEventFrame.bounds.height + ((1 / paperMain.view.zoom) * 12)) * index;
@@ -861,7 +919,7 @@ export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[
 }
 
 export const updateMeasureFrame = (state: LayerState, guides: { top?: string; bottom?: string; left?: string; right?: string; all?: string }): void => {
-  const measureFrame = paperMain.project.getItem({ data: { id: 'measureFrame' } });
+  const measureFrame = paperMain.project.getItem({ data: { id: 'MeasureFrame' } });
   if (measureFrame) {
     measureFrame.remove();
   }
@@ -974,7 +1032,11 @@ export const updateMeasureFrame = (state: LayerState, guides: { top?: string; bo
     new paperMain.Group({
       children: measureFrameGuides,
       data: {
-        id: 'measureFrame'
+        id: 'MeasureFrame',
+        type: 'UIElement',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'MeasureFrame'
       }
     });
   }
@@ -1087,9 +1149,9 @@ export const deepSelectLayer = (state: LayerState, action: DeepSelectLayer): Lay
   if (isScopeGroupLayer(currentState, nearestScopeAncestor.id)) {
     currentState = increaseLayerScope(currentState, layerActions.increaseLayerScope({id: nearestScopeAncestor.id}) as IncreaseLayerScope);
     const nearestScopeAncestorDeep = getNearestScopeAncestor(currentState, action.payload.id);
-    if (currentState.hover === nearestScopeAncestor.id) {
-      currentState = setLayerHover(currentState, layerActions.setLayerHover({id: nearestScopeAncestorDeep.id}) as SetLayerHover);
-    }
+    // if (currentState.hover === nearestScopeAncestor.id) {
+    //   currentState = setLayerHover(currentState, layerActions.setLayerHover({id: nearestScopeAncestorDeep.id}) as SetLayerHover);
+    // }
     return selectLayer(currentState, layerActions.selectLayer({id: nearestScopeAncestorDeep.id, newSelection: true}) as SelectLayer);
   }
   return currentState;
@@ -1101,19 +1163,20 @@ export const selectLayers = (state: LayerState, action: SelectLayers): LayerStat
     currentState = deselectAllLayers(currentState, layerActions.deselectAllLayers() as DeselectAllLayers);
   }
   return action.payload.layers.reduce((result, current) => {
-    return selectLayer(result, layerActions.selectLayer({id: current}) as SelectLayer);
+    if (state.byId[current].selected) {
+      return deselectLayer(result, layerActions.deselectLayer({id: current}) as DeselectLayer);
+    } else {
+      return selectLayer(result, layerActions.selectLayer({id: current}) as SelectLayer);
+    }
   }, currentState);
 };
 
 export const updateHoverFrame = (state: LayerState) => {
-  const hoverFrame = paperMain.project.getItem({ data: { id: 'hoverFrame' } });
+  const hoverFrame = paperMain.project.getItem({ data: { id: 'HoverFrame' } });
   const hoverFrameConstants = {
     strokeColor: THEME_PRIMARY_COLOR,
     strokeWidth: 1 / paperMain.view.zoom,
-    //applyMatrix: false,
-    data: {
-      id: 'hoverFrame'
-    }
+    data: { id: 'HoverFrame', type: 'UIElement', interactive: false }
   }
   if (hoverFrame) {
     hoverFrame.remove();
@@ -1604,27 +1667,19 @@ const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any) => 
   const paperLayer = getPaperLayer(id);
   const parentLayer = getLayer(state, state.scope.length > 0 ? state.scope[state.scope.length - 1] : state.page);
   const paperParentLayer = getPaperLayer(parentLayer.id);
-  const paperLayerClone = paperLayer.clone({deep: paperLayer.className === 'CompoundPath', insert: true});
-  if (paperLayer.data.type === 'Artboard') {
+  const paperLayerClone = paperLayer.clone({deep: paperLayer.data.layerType === 'Shape', insert: true});
+  if (paperLayer.data.layerType === 'Artboard') {
     const artboardMask = paperLayer.getItem({ data: { id: 'ArtboardMask' }});
     const artboardMaskClone = artboardMask.clone({deep: false, insert: true});
     artboardMaskClone.parent = paperLayerClone;
     const artboardBackground = paperLayer.getItem({ data: { id: 'ArtboardBackground' }});
     const artboardBackgroundClone = artboardBackground.clone({deep: false, insert: true});
     artboardBackgroundClone.parent = paperLayerClone;
-    applyArtboardMethods(paperLayerClone);
   }
-  if (paperLayer.data.type === 'Shape') {
-    applyShapeMethods(paperLayerClone);
-  }
-  if (paperLayer.data.type === 'Text') {
-    applyTextMethods(paperLayerClone);
-  }
-  if (paperLayer.data.type === 'Image') {
+  if (paperLayer.data.layerType === 'Image') {
     const raster = paperLayer.getItem({ data: { id: 'Raster' }});
     const rasterClone = raster.clone({deep: false, insert: true});
     rasterClone.parent = paperLayerClone;
-    applyImageMethods(rasterClone);
   }
   paperLayerClone.data.id = layerCloneMap[id];
   paperLayerClone.parent = paperParentLayer;
@@ -1640,17 +1695,10 @@ const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any) => 
         const childPaperLayerClone = childPaperLayer.clone({deep: childPaperLayer.className === 'CompoundPath', insert: true});
         childPaperLayerClone.data.id = layerCloneMap[child];
         childPaperLayerClone.parent = groupClonePaperLayer;
-        if (childPaperLayer.data.type === 'Shape') {
-          applyShapeMethods(childPaperLayerClone);
-        }
-        if (childPaperLayer.data.type === 'Text') {
-          applyTextMethods(childPaperLayerClone);
-        }
         if (childPaperLayer.data.type === 'Image') {
           const raster = childPaperLayer.getItem({ data: { id: 'Raster' }});
           const rasterClone = raster.clone({deep: false, insert: true});
           rasterClone.parent = childPaperLayerClone;
-          applyImageMethods(rasterClone);
         }
         if (childLayer.children && childLayer.children.length > 0) {
           groups.push(child);

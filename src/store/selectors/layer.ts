@@ -80,7 +80,7 @@ export const getLayerDepth = (store: LayerState, id: string): number => {
 };
 
 export const getScopeLayers = (store: LayerState): string[] => {
-  const rootItems = getPage(store).children;
+  const rootItems = getLayer(store, 'page').children;
   const expandedItems = store.scope.reduce((result, current) => {
     const layer = getLayer(store, current);
     result = [...result, ...layer.children];
@@ -116,6 +116,16 @@ export const getNearestScopeAncestor = (store: LayerState, id: string): em.Layer
     currentNode = getParentLayer(store, currentNode.id);
   }
   return currentNode;
+};
+
+export const getDeepSelectItem = (store: LayerState, id: string): em.Layer => {
+  const nearestScopeAncestor = getNearestScopeAncestor(store, id);
+  let deepSelectItem = nearestScopeAncestor;
+  if (isScopeGroupLayer(store, nearestScopeAncestor.id)) {
+    const newStore = {...store, scope: [...store.scope, nearestScopeAncestor.id]};
+    deepSelectItem = getNearestScopeAncestor(newStore, id);
+  }
+  return deepSelectItem;
 };
 
 export const getNearestScopeGroupAncestor = (store: LayerState, id: string): em.Layer => {
@@ -1015,7 +1025,7 @@ export const getGradientStops = (stops: em.GradientStop[]): paper.GradientStop[]
 export const getLayerSnapPoints = (id: string): em.SnapPoint[] => {
   const paperLayer = getPaperLayer(id);
   let bounds;
-  if (paperLayer.data.type === 'Artboard') {
+  if (paperLayer.data.layerType === 'Artboard') {
     bounds = paperLayer.getItem({data: { id: 'ArtboardBackground' }}).bounds;
   } else {
     bounds = paperLayer.bounds;
@@ -1120,29 +1130,11 @@ export const orderLayersByTop = (layers: string[]): string[] => {
 };
 
 export const savePaperProjectJSON = (state: LayerState): string => {
-  const selectionFrame = paperMain.project.getItem({data: {id: 'selectionFrame'}});
-  const hoverFrame = paperMain.project.getItem({data: {id: 'hoverFrame'}});
-  const gradientFrame = paperMain.project.getItem({data: {id: 'gradientFrame'}});
-  const activeArtboardFrame = paperMain.project.getItem({data: {id: 'activeArtboard'}});
-  const measureFrame = paperMain.project.getItem({data: {id: 'measureFrame'}});
-  const tweenEventsFrame = paperMain.project.getItem({data: {id: 'tweenEventsFrame'}});
-  if (selectionFrame) {
-    selectionFrame.remove();
-  }
-  if (hoverFrame) {
-    hoverFrame.remove();
-  }
-  if (gradientFrame) {
-    gradientFrame.remove();
-  }
-  if (activeArtboardFrame) {
-    activeArtboardFrame.remove();
-  }
-  if (measureFrame) {
-    measureFrame.remove();
-  }
-  if (tweenEventsFrame) {
-    tweenEventsFrame.remove();
+  const uiElements = paperMain.project.getItems({data: {type: 'UIElement', recursive: false}});
+  if (uiElements && uiElements.length > 0) {
+    uiElements.forEach((element) => {
+      element.remove();
+    });
   }
   const projectJSON = paperMain.project.exportJSON();
   const canvasImageBase64ById = state.allImageIds.reduce((result: { [id: string]: string }, current) => {
@@ -1178,19 +1170,19 @@ export const importPaperProject = ({documentImages, paperProject, layers}: Impor
     return result.replace(`"source":"${current}"`, `"source":"${base64}"`);
   }, paperProject);
   paperMain.project.importJSON(newPaperProject);
-  layers.shape.forEach((shapeId) => {
-    applyShapeMethods(getPaperLayer(shapeId));
-  });
-  layers.artboard.forEach((artboardId) => {
-    applyArtboardMethods(getPaperLayer(artboardId));
-  });
-  layers.text.forEach((textId) => {
-    applyTextMethods(getPaperLayer(textId));
-  });
-  layers.image.forEach((imageId) => {
-    const raster = getPaperLayer(imageId).getItem({data: {id: 'Raster'}});
-    applyImageMethods(raster);
-  });
+  // layers.shape.forEach((shapeId) => {
+  //   applyShapeMethods(getPaperLayer(shapeId));
+  // });
+  // layers.artboard.forEach((artboardId) => {
+  //   applyArtboardMethods(getPaperLayer(artboardId));
+  // });
+  // layers.text.forEach((textId) => {
+  //   applyTextMethods(getPaperLayer(textId));
+  // });
+  // layers.image.forEach((imageId) => {
+  //   const raster = getPaperLayer(imageId).getItem({data: {id: 'Raster'}});
+  //   applyImageMethods(raster);
+  // });
 };
 
 export const colorsMatch = (color1: em.Color, color2: em.Color): boolean => {

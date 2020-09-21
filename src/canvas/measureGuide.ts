@@ -11,32 +11,38 @@ class MeasureGuide {
     this.from = from;
     this.to = to;
     this.guide = guide;
-    const guideLine = new paperMain.Path.Line({
+    const measureGuideLine = new paperMain.Path.Line({
       from: this.from,
       to: this.to,
       strokeColor: THEME_PRIMARY_COLOR,
       strokeWidth: 1 / paperMain.view.zoom,
       insert: false,
       data: {
-        id: 'measureFrameGuideElement',
-        element: 'guide',
+        id: 'MeasureGuideLine',
+        type: 'UIElementChild',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'MeasureFrame',
         guide: this.guide
       }
     });
-    this.distance = Math.round(guideLine.length);
-    const guideLineCap = new paperMain.Path.Line({
+    this.distance = Math.round(measureGuideLine.length);
+    const measureGuideLineCap = new paperMain.Path.Line({
       from: this.guide === 'top' || this.guide === 'bottom' ? new paperMain.Point(this.to.x - ((1 / paperMain.view.zoom) * 4), this.to.y) : new paperMain.Point(this.to.x, this.to.y - ((1 / paperMain.view.zoom) * 4)),
       to: this.guide === 'top' || this.guide === 'bottom' ? new paperMain.Point(this.to.x + ((1 / paperMain.view.zoom) * 4), this.to.y) : new paperMain.Point(this.to.x, this.to.y + ((1 / paperMain.view.zoom) * 4)),
       strokeColor: THEME_PRIMARY_COLOR,
       strokeWidth: 1 / paperMain.view.zoom,
       insert: false,
       data: {
-        id: 'measureFrameGuideElement',
-        element: 'guideCap',
+        id: 'MeasureGuideCap',
+        type: 'UIElementChild',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'MeasureFrame',
         guide: this.guide
       }
     });
-    const guideText = new paperMain.PointText({
+    const measureGuideText = new paperMain.PointText({
       fillColor: 'white',
       fontFamily: 'Space Mono',
       fontSize: 10 / paperMain.view.zoom,
@@ -44,39 +50,49 @@ class MeasureGuide {
       justification: 'center',
       insert: false,
       data: {
-        id: 'measureFrameGuideElement',
-        element: 'text',
+        id: 'MeasureGuideText',
+        type: 'UIElementChild',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'MeasureFrame',
         guide: this.guide
       }
     });
-    const guideTextBackground = new paperMain.Path.Rectangle({
-      point: guideLine.bounds.center,
-      size: [guideText.bounds.width + (8 / paperMain.view.zoom), guideText.bounds.height + (8 / paperMain.view.zoom)],
+    const measureGuideTextBackground = new paperMain.Path.Rectangle({
+      point: measureGuideLine.bounds.center,
+      size: [measureGuideText.bounds.width + (8 / paperMain.view.zoom), measureGuideText.bounds.height + (8 / paperMain.view.zoom)],
       fillColor: THEME_PRIMARY_COLOR,
       radius: (4 / paperMain.view.zoom),
       insert: false,
       data: {
-        id: 'measureFrameGuideElement',
-        element: 'textBackground',
+        id: 'MeasureGuideBackground',
+        type: 'UIElementChild',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'MeasureFrame',
         guide: this.guide
       }
     });
-    guideTextBackground.position = guideLine.bounds.center;
-    guideText.position = guideTextBackground.position;
-    const guideGroup = new paperMain.Group({
-      children: [guideLine, guideLineCap, guideTextBackground, guideText],
+    measureGuideTextBackground.position = measureGuideLine.bounds.center;
+    measureGuideText.position = measureGuideTextBackground.position;
+    const measureGuide = new paperMain.Group({
+      children: [measureGuideLine, measureGuideLineCap, measureGuideTextBackground, measureGuideText],
       data: {
-        id: 'measureFrameGuide',
+        id: 'MeasureGuide',
+        type: 'UIElement',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'MeasureFrame',
         guide: this.guide
       },
       insert: false
     });
     if (removeOpts) {
-      guideGroup.removeOn({
+      measureGuide.removeOn({
         ...removeOpts
       });
     }
-    this.paperLayer = guideGroup;
+    this.paperLayer = measureGuide;
   }
 }
 

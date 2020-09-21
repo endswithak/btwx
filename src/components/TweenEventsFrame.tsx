@@ -30,7 +30,7 @@ const TweenEventsFrame = (props: TweenEventsFrameProps): ReactElement => {
   useEffect(() => {
     updateTweenEventsFrame({allArtboardIds, byId: {...artboardsById, ...tweenEventLayers.byId}, activeArtboard} as LayerState, tweenEventItems, eventHover, themeName);
     return () => {
-      const tweenEventsFrame = paperMain.project.getItem({ data: { id: 'tweenEventsFrame' } });
+      const tweenEventsFrame = paperMain.project.getItem({ data: { id: 'TweenEventsFrame' } });
       if (tweenEventsFrame) {
         tweenEventsFrame.remove();
       }

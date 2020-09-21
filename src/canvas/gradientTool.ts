@@ -48,9 +48,9 @@ class GradientTool {
     this.enabled = true;
     this.handle = handle;
     this.prop = prop;
-    this.originHandle = paperMain.project.getItem({data: {id: 'gradientFrameOriginHandle'}}) as paper.Shape;
-    this.destinationHandle = paperMain.project.getItem({data: {id: 'gradientFrameDestinationHandle'}}) as paper.Shape;
-    this.gradientLines = paperMain.project.getItems({data: {id: 'gradientFrameLine'}}) as paper.Path.Line[];
+    this.originHandle = paperMain.project.getItem({data: {id: 'GradientFrameOriginHandle'}}) as paper.Shape;
+    this.destinationHandle = paperMain.project.getItem({data: {id: 'GradientFrameDestinationHandle'}}) as paper.Shape;
+    this.gradientLines = paperMain.project.getItems({data: {id: 'GradientFrameLine'}}) as paper.Path.Line[];
     this.fromBounds = new paperMain.Rectangle(handle === 'origin' ? this.originHandle.bounds : this.destinationHandle.bounds);
     this.snapTool = new SnapTool();
   }

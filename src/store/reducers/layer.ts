@@ -454,7 +454,7 @@ const initialState: LayerState = {
     snapPoints: []
   },
   hover: null,
-  paperProject: '[["Layer",{"applyMatrix":true,"children":[["Group",{"applyMatrix":true,"data":{"id":"page","type":"Page"}}]]}]]',
+  paperProject: '[["Layer",{"applyMatrix":true,"children":[["Group",{"applyMatrix":true,"data":{"id":"page","type":"Layer","layerType":"Page"}}]]}]]',
   allTweenEventIds: [],
   tweenEventById: {},
   allTweenIds: [],

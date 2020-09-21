@@ -1,4 +1,6 @@
 import {
+  SET_CANVAS_DRAWING,
+  SET_CANVAS_TYPING,
   SET_CANVAS_RESIZING,
   SET_CANVAS_SELECTING,
   SET_CANVAS_DRAGGING,
@@ -7,6 +9,8 @@ import {
   SET_CANVAS_MEASURING,
   SET_CANVAS_FOCUSING,
   RESET_CANVAS_SETTINGS,
+  SetCanvasDrawingPayload,
+  SetCanvasTypingPayload,
   SetCanvasResizingPayload,
   SetCanvasDraggingPayload,
   SetCanvasZoomingPayload,
@@ -16,6 +20,16 @@ import {
   SetCanvasFocusingPayload,
   CanvasSettingsTypes
 } from '../actionTypes/canvasSettings';
+
+export const setCanvasDrawing = (payload: SetCanvasDrawingPayload): CanvasSettingsTypes => ({
+  type: SET_CANVAS_DRAWING,
+  payload
+});
+
+export const setCanvasTyping = (payload: SetCanvasTypingPayload): CanvasSettingsTypes => ({
+  type: SET_CANVAS_TYPING,
+  payload
+});
 
 export const setCanvasResizing = (payload: SetCanvasResizingPayload): CanvasSettingsTypes => ({
   type: SET_CANVAS_RESIZING,

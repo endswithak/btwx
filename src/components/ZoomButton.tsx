@@ -26,6 +26,34 @@ interface ZoomButtonProps {
   setCanvasZooming?(payload: SetCanvasZoomingPayload): CanvasSettingsTypes;
 }
 
+export const handleSelectionZoom = (canSelectedZoom, canArtboardZoom, selected, layerById) => {
+  if (canSelectedZoom || canArtboardZoom) {
+    const selectionBounds = getSelectionBounds({selected: selected, byId: layerById} as LayerState, true);
+    const selectionCenter = getSelectionCenter({selected: selected, byId: layerById} as LayerState, true);
+    const viewWidth: number = paperMain.view.bounds.width;
+    const viewHeight: number = paperMain.view.bounds.height;
+    const selectionWidth: number = selectionBounds.width;
+    const selectionHeight: number = selectionBounds.height;
+    const viewRatio: number = viewWidth / viewHeight;
+    const selectionRatio: number = selectionWidth / selectionHeight;
+    const constrainingDim = viewRatio > selectionRatio ? {dim: selectionHeight, type: 'height'} : {dim: selectionWidth, type: 'width'};
+    const viewDim = (() => {
+      switch(constrainingDim.type) {
+        case 'height':
+          return viewHeight;
+        case 'width':
+          return viewWidth;
+      }
+    })();
+    const newZoom = (viewDim / constrainingDim.dim) * paperMain.view.zoom;
+    paperMain.view.center = selectionCenter;
+    paperMain.view.zoom = newZoom;
+    setCanvasZooming({zooming: true});
+    setCanvasMatrix({matrix: paperMain.view.matrix.values});
+    setCanvasZooming({zooming: false});
+  }
+}
+
 const ZoomButton = (props: ZoomButtonProps): ReactElement => {
   const { zoom, selected, canArtboardZoom, allLayerIds, layerById, canSelectedZoom, canCanvasZoom, setCanvasMatrix, setCanvasZooming } = props;
 
@@ -66,30 +94,32 @@ const ZoomButton = (props: ZoomButtonProps): ReactElement => {
     }
   }
 
-  const handleSelectionZoom = () => {
-    if (canSelectedZoom || canArtboardZoom) {
-      const selectionBounds = getSelectionBounds({selected: selected, byId: layerById} as LayerState, true);
-      const selectionCenter = getSelectionCenter({selected: selected, byId: layerById} as LayerState, true);
-      const viewWidth: number = paperMain.view.bounds.width;
-      const viewHeight: number = paperMain.view.bounds.height;
-      const selectionWidth: number = selectionBounds.width;
-      const selectionHeight: number = selectionBounds.height;
-      const viewRatio: number = viewWidth / viewHeight;
-      const selectionRatio: number = selectionWidth / selectionHeight;
-      const constrainingDim = viewRatio > selectionRatio ? {dim: selectionHeight, type: 'height'} : {dim: selectionWidth, type: 'width'};
-      const viewDim = (() => {
-        switch(constrainingDim.type) {
-          case 'height':
-            return viewHeight;
-          case 'width':
-            return viewWidth;
-        }
-      })();
-      const newZoom = (viewDim / constrainingDim.dim) * paperMain.view.zoom;
-      paperMain.view.center = selectionCenter;
-      paperMain.view.zoom = newZoom;
-      setZoom();
-    }
+  const handleSZ = () => {
+    handleSelectionZoom(canSelectedZoom, canArtboardZoom, selected, layerById);
+    // if (canSelectedZoom || canArtboardZoom) {
+    //   const selectionBounds = getSelectionBounds({selected: selected, byId: layerById} as LayerState, true);
+    //   const selectionCenter = getSelectionCenter({selected: selected, byId: layerById} as LayerState, true);
+    //   const viewWidth: number = paperMain.view.bounds.width;
+    //   const viewHeight: number = paperMain.view.bounds.height;
+    //   const selectionWidth: number = selectionBounds.width;
+    //   const selectionHeight: number = selectionBounds.height;
+    //   const viewRatio: number = viewWidth / viewHeight;
+    //   const selectionRatio: number = selectionWidth / selectionHeight;
+    //   const constrainingDim = viewRatio > selectionRatio ? {dim: selectionHeight, type: 'height'} : {dim: selectionWidth, type: 'width'};
+    //   const viewDim = (() => {
+    //     switch(constrainingDim.type) {
+    //       case 'height':
+    //         return viewHeight;
+    //       case 'width':
+    //         return viewWidth;
+    //     }
+    //   })();
+    //   const newZoom = (viewDim / constrainingDim.dim) * paperMain.view.zoom;
+    //   paperMain.view.center = selectionCenter;
+    //   paperMain.view.zoom = newZoom;
+    //   setZoom();
+    // }
+
   }
 
   return (
@@ -113,11 +143,11 @@ const ZoomButton = (props: ZoomButtonProps): ReactElement => {
           disabled: !canCanvasZoom
         },{
           label: 'Selection',
-          onClick: handleSelectionZoom,
+          onClick: handleSZ,
           disabled: !canSelectedZoom
         },{
           label: 'Artboard',
-          onClick: handleSelectionZoom,
+          onClick: handleSZ,
           disabled: !canArtboardZoom
         }]} />
       <ZoomInButton />

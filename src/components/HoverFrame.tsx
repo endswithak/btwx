@@ -17,7 +17,7 @@ const HoverFrame = (props: HoverFrameProps): ReactElement => {
   useEffect(() => {
     updateHoverFrame({byId: hoverItem ? {[hover]: hoverItem} : {}, selected: selected, hover: hover} as LayerState);
     return () => {
-      const hoverFrame = paperMain.project.getItem({ data: { id: 'hoverFrame' } });
+      const hoverFrame = paperMain.project.getItem({ data: { id: 'HoverFrame' } });
       if (hoverFrame) {
         hoverFrame.remove();
       }

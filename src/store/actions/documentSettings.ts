@@ -13,6 +13,8 @@ import {
   SET_RIGHT_SIDEBAR_WIDTH,
   SET_TWEEN_DRAWER_HEIGHT,
   SET_TWEEN_DRAWER_LAYERS_WIDTH,
+  SET_ARTBOARD_PRESET_DEVICE_ORIENTATION,
+  SET_ARTBOARD_PRESET_DEVICE_PLATFORM,
   SaveDocumentAsPayload,
   SaveDocumentPayload,
   AddDocumentImagePayload,
@@ -25,6 +27,8 @@ import {
   SetRightSidebarWidthPayload,
   SetTweenDrawerHeightPayload,
   SetTweenDrawerLayersWidthPayload,
+  SetArtboardPresetDeviceOrientationPayload,
+  SetArtboardPresetDevicePlatformPayload,
   DocumentSettingsTypes
 } from '../actionTypes/documentSettings';
 
@@ -88,5 +92,15 @@ export const setTweenDrawerHeight = (payload: SetTweenDrawerHeightPayload): Docu
 
 export const setTweenDrawerLayersWidth = (payload: SetTweenDrawerLayersWidthPayload): DocumentSettingsTypes => ({
   type: SET_TWEEN_DRAWER_LAYERS_WIDTH,
+  payload
+});
+
+export const setArtboardPresetDeviceOrientation = (payload: SetArtboardPresetDeviceOrientationPayload): DocumentSettingsTypes => ({
+  type: SET_ARTBOARD_PRESET_DEVICE_ORIENTATION,
+  payload
+});
+
+export const setArtboardPresetDevicePlatform = (payload: SetArtboardPresetDevicePlatformPayload): DocumentSettingsTypes => ({
+  type: SET_ARTBOARD_PRESET_DEVICE_PLATFORM,
   payload
 });

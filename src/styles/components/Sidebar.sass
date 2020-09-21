@@ -10,6 +10,7 @@
   overflow-x: hidden
   overflow-y: hidden
   z-index: 2
+  flex-direction: column
 
 .c-sidebar__scroll
   position: relative
@@ -17,6 +18,39 @@
   width: 100%
   height: 100%
   overflow-y: scroll
+
+.c-sidebar__search
+  position: relative
+  width: 100%
+  height: $unit * 8
+  display: flex
+  align-items: center
+
+.c-sidebar-search__icon,
+.c-sidebar-search__clear
+  position: absolute
+  width: $unit * 6
+  height: $unit * 8
+  display: flex
+  align-items: center
+  justify-content: center
+  z-index: 3
+
+.c-sidebar-search__clear
+  right: 0
+
+.c-sidebar-search__input
+  flex-grow: 2
+
+  .c-sidebar-input
+    padding: 0
+
+    input
+      height: $unit * 8
+      line-height: $unit * 8
+      padding-left: $unit * 6
+      padding-right: $unit * 6
+      border-radius: 0
 
 .c-sidebar__empty-state
   +absolute-full

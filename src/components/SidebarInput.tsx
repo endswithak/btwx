@@ -23,6 +23,7 @@ interface SidebarInputProps {
   canvasFocusing?: boolean;
   removedOnSubmit?: boolean;
   manualCanvasFocus?: boolean;
+  placeholder?: string;
   setCanvasFocusing?(payload: SetCanvasFocusingPayload): CanvasSettingsTypes;
 }
 
@@ -53,7 +54,7 @@ const Input = styled.div`
 const SidebarInput = (props: SidebarInputProps): ReactElement => {
   const inputRef = useRef<HTMLInputElement>(null);
   const theme = useContext(ThemeContext);
-  const { value, onChange, onSubmit, onFocus, onBlur, manualCanvasFocus, removedOnSubmit, label, leftLabel, bottomLabel, disabled, selectOnMount, submitOnBlur, setCanvasFocusing, canvasFocusing } = props;
+  const { value, onChange, onSubmit, placeholder, onFocus, onBlur, manualCanvasFocus, removedOnSubmit, label, leftLabel, bottomLabel, disabled, selectOnMount, submitOnBlur, setCanvasFocusing, canvasFocusing } = props;
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
@@ -145,6 +146,7 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
             onChange={handleChange}
             onBlur={handleBlur}
             disabled={disabled}
+            placeholder={placeholder}
             className={
               `c-sidebar-input__field ${
                 label

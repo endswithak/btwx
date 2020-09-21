@@ -69,7 +69,7 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
       if (event.target.id === 'canvas') {
         const eventPoint = paperMain.view.getEventPoint(event);
         const hitResult = paperMain.project.hitTest(eventPoint);
-        if (!hitResult || hitResult.item.data.id !== 'gradientFrameHandle') {
+        if (!hitResult || !(hitResult.item && hitResult.item.data && hitResult.item.data.interactive && hitResult.item.data.elementId === 'GradientFrame')) {
           closeGradientEditor();
         }
       } else {

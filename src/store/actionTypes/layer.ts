@@ -369,6 +369,7 @@ export interface SelectLayersPayload {
   layers: string[];
   newSelection?: boolean;
   noActiveArtboardUpdate?: boolean;
+  deselectIfSelected?: boolean;
 }
 
 export interface SelectLayers {

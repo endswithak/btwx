@@ -11,17 +11,36 @@ class Tooltip {
       fillColor: 'white',
       fontFamily: 'Space Mono',
       fontSize: 12 / paperMain.view.zoom,
-      content: this.text
+      content: this.text,
+      data: {
+        type: 'UIElementChild',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'Tooltip'
+      }
     });
     const tooltipBackground = new paperMain.Path.Rectangle({
       point: [this.point.x + (24 / paperMain.view.zoom), this.point.y + (24 / paperMain.view.zoom)],
       size: [tooltipText.bounds.width + (12 / paperMain.view.zoom), tooltipText.bounds.height + (12 / paperMain.view.zoom)],
       fillColor: new paperMain.Color(0,0,0,0.5),
       radius: (4 / paperMain.view.zoom),
+      data: {
+        type: 'UIElementChild',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'Tooltip'
+      }
     });
     tooltipText.position = tooltipBackground.position;
     const tooltipGroup = new paperMain.Group({
-      children: [tooltipBackground, tooltipText]
+      children: [tooltipBackground, tooltipText],
+      data: {
+        id: 'Tooltip',
+        type: 'UIElement',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'Tooltip'
+      }
     });
     if (removeOpts) {
       tooltipGroup.removeOn({

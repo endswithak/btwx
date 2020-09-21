@@ -22,7 +22,7 @@ const SelectionFrame = (props: SelectionFrameProps): ReactElement => {
   useEffect(() => {
     updateSelectionFrame({selected: selected, byId: selectedWithChildren.byId} as LayerState, 'all', true);
     return () => {
-      const selectionFrame = paperMain.project.getItem({ data: { id: 'selectionFrame' } });
+      const selectionFrame = paperMain.project.getItem({ data: { id: 'SelectionFrame' } });
       if (selectionFrame) {
         selectionFrame.remove();
       }

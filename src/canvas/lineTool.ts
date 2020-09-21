@@ -43,8 +43,8 @@ class LineTool {
     this.state = state;
     this.enabled = true;
     this.handle = handle;
-    this.fromHandle = paperMain.project.getItem({data: {id: 'selectionFrameHandle', handle: 'from'}}) as paper.Shape;
-    this.toHandle = paperMain.project.getItem({data: {id: 'selectionFrameHandle', handle: 'to'}}) as paper.Shape;
+    this.fromHandle = paperMain.project.getItem({data: { interactiveType: 'from'}}) as paper.Shape;
+    this.toHandle = paperMain.project.getItem({data: { interactiveType: 'to'}}) as paper.Shape;
     this.fromBounds = new paperMain.Rectangle(handle === 'from' ? this.fromHandle.bounds : this.toHandle.bounds);
     this.snapTool = new SnapTool();
     store.dispatch(setCanvasResizing({resizing: true, resizingType: 'ew'}));
