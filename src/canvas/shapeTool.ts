@@ -1,6 +1,6 @@
 import store from '../store';
 import { setCanvasDrawing } from '../store/actions/canvasSettings';
-import { enableSelectionToolThunk } from '../store/actions/tool';
+import { disableActiveToolThunk } from '../store/actions/tool';
 import { addShapeThunk } from '../store/actions/layer';
 import { getPagePaperLayer } from '../store/selectors/layer';
 import { paperMain } from './index';
@@ -8,7 +8,6 @@ import { isBetween } from '../utils';
 import Tooltip from './tooltip';
 import { DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_POINTS, THEME_PRIMARY_COLOR, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../constants';
 import SnapTool from './snapTool';
-import InsertTool from './insertTool';
 
 class ShapeTool {
   ref: paper.Path.Rectangle;
@@ -30,7 +29,7 @@ class ShapeTool {
   shiftModifier: boolean;
   snapTool: SnapTool;
   toBounds: paper.Rectangle;
-  insertTool: InsertTool;
+  // insertTool: InsertTool;
   constructor(shapeType: em.ShapeType) {
     this.ref = null;
     this.drawing = false;
@@ -57,7 +56,18 @@ class ShapeTool {
     this.shiftModifier = false;
     this.snapTool = new SnapTool();
     this.toBounds = null;
-    this.insertTool = new InsertTool();
+    // this.insertTool = new InsertTool();
+  }
+  disable() {
+    if (this.tooltip) {
+      this.tooltip.paperLayer.remove();
+    }
+    if (this.outline) {
+      this.outline.remove();
+    }
+    this.snapTool.removeGuides();
+    store.dispatch(setCanvasDrawing({drawing: false}));
+    store.dispatch(disableActiveToolThunk() as any);
   }
   updateRef() {
     if (this.ref) {
@@ -260,16 +270,11 @@ class ShapeTool {
         break;
       }
       case 'escape': {
-        if (this.tooltip) {
-          this.tooltip.paperLayer.remove();
-        }
-        if (this.outline) {
-          this.outline.remove();
-        }
+        this.disable();
         break;
       }
     }
-    this.insertTool.onKeyDown(event);
+    // this.insertTool.onKeyDown(event);
   }
   onKeyUp(event: paper.KeyEvent): void {
     switch(event.key) {
@@ -285,7 +290,7 @@ class ShapeTool {
         break;
       }
     }
-    this.insertTool.onKeyUp(event);
+    // this.insertTool.onKeyUp(event);
   }
   onMouseMove(event: paper.ToolEvent): void {
     if (!this.drawing) {
@@ -501,8 +506,7 @@ class ShapeTool {
           }
         }) as any);
       }
-      store.dispatch(setCanvasDrawing({drawing: false}));
-      store.dispatch(enableSelectionToolThunk() as any);
+      this.disable();
     }
   }
 }

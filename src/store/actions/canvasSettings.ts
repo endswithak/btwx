@@ -1,3 +1,5 @@
+import { disableActiveToolThunk } from './tool';
+
 import {
   SET_CANVAS_DRAWING,
   SET_CANVAS_TYPING,
@@ -69,3 +71,10 @@ export const setCanvasFocusing = (payload: SetCanvasFocusingPayload): CanvasSett
 export const resetCanvasSettings = (): CanvasSettingsTypes => ({
   type: RESET_CANVAS_SETTINGS
 });
+
+export const resetCanvasSettingsThunk = () => {
+  return (dispatch: any, getState: any) => {
+    dispatch(disableActiveToolThunk());
+    dispatch(resetCanvasSettings());
+  }
+}

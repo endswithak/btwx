@@ -1,13 +1,18 @@
 import { v4 as uuidv4 } from 'uuid';
+import { ActionCreators } from 'redux-undo';
 import { clipboard } from 'electron';
 import { paperMain } from '../../canvas';
 import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_VALUE } from '../../constants';
 import { getPaperFillColor, getPaperStrokeColor, getPaperLayer, getPaperShadowColor } from '../utils/paper';
-import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayersBounds } from '../selectors/layer';
+import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayersBounds, importPaperProject, colorsMatch, gradientsMatch } from '../selectors/layer';
 import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle } from '../utils/actions';
 import { bufferToBase64 } from '../../utils';
 
 import { addDocumentImage } from './documentSettings';
+import { setTweenDrawerEvent } from './tweenDrawer';
+import { updateHoverFrame, updateSelectionFrame, updateActiveArtboardFrame, updateTweenEventsFrame } from '../utils/layer';
+import { openColorEditor, closeColorEditor } from './colorEditor';
+import { openGradientEditor, closeGradientEditor } from './gradientEditor';
 import { RootState } from '../reducers';
 
 import {
@@ -776,6 +781,27 @@ export const removeLayers = (payload: RemoveLayersPayload): LayerTypes => ({
   type: REMOVE_LAYERS,
   payload
 });
+
+export const removeLayersThunk = (payload: RemoveLayersPayload) => {
+  return (dispatch: any, getState: any) => {
+    const state = getState();
+    if (state.layer.present.selected.length > 0 && state.canvasSettings.focusing) {
+      if (state.tweenDrawer.isOpen && state.tweenDrawer.event) {
+        const tweenEvent = state.layer.present.tweenEventById[state.tweenDrawer.event];
+        let layersAndChildren: string[] = [];
+        state.layer.present.selected.forEach((id) => {
+          layersAndChildren = [...layersAndChildren, ...getLayerAndDescendants(state.layer.present, id)];
+        });
+        if (layersAndChildren.includes(tweenEvent.layer) || layersAndChildren.includes(tweenEvent.artboard) || layersAndChildren.includes(tweenEvent.destinationArtboard)) {
+          dispatch(setTweenDrawerEvent({id: null}));
+        }
+      }
+      dispatch(removeLayers({layers: state.layer.present.selected}));
+    } else {
+      return;
+    }
+  }
+}
 
 // Select
 
@@ -2019,5 +2045,176 @@ export const pasteLayersThunk = ({ overSelection, overPoint, overLayer }: { over
         resolve();
       }
     });
+  }
+};
+
+const undo = () => {
+  return (dispatch: any, getState: any) => {
+    return new Promise((resolve, reject) => {
+      dispatch(ActionCreators.undo());
+      resolve();
+    });
+  }
+}
+
+const redo = () => {
+  return (dispatch: any, getState: any) => {
+    return new Promise((resolve, reject) => {
+      dispatch(ActionCreators.redo());
+      resolve();
+    });
+  }
+}
+
+const updateEditors = (dispatch: any, state: RootState, type: 'redo' | 'undo') => {
+  if (state.colorEditor.isOpen) {
+    // const layerItem = state.layer.present.byId[state.colorEditor.layer];
+    const layerItems = state.colorEditor.layers.reduce((result, current) => {
+      return [...result, state.layer.present.byId[current]];
+    }, []);
+    // const prevLayerItem = type === 'redo' ? state.layer.past[state.layer.past.length - 1].byId[state.colorEditor.layer] : state.layer.future[0].byId[state.colorEditor.layer];
+    const prevLayerItems = type === 'redo' ? state.colorEditor.layers.reduce((result, current) => {
+      return [...result, state.layer.past[state.layer.past.length - 1].byId[current]];
+    }, []) : state.colorEditor.layers.reduce((result, current) => {
+      return [...result, state.layer.future[0].byId[current]];
+    }, []);
+    // check if items exist and matches selection
+    if (layerItems.every((id) => id) && prevLayerItems.every((id) => id) && state.layer.present.selected.every((id, index) => state.layer.present.selected[index] === state.colorEditor.layers[index])) {
+      const style = layerItems[0].style[state.colorEditor.prop];
+      const prevStyle = prevLayerItems[0].style[state.colorEditor.prop];
+      // check if fill types match
+      if (style.fillType === prevStyle.fillType) {
+        // check if prev action creator was for color
+        if (colorsMatch(style.color, prevStyle.color)) {
+          dispatch(closeColorEditor());
+        }
+      } else {
+        // if fill types dont match, open relevant editor
+        switch(style.fillType) {
+          case 'gradient': {
+            dispatch(closeColorEditor());
+            dispatch(openGradientEditor({layers: state.colorEditor.layers, x: state.colorEditor.x, y: state.colorEditor.y, prop: state.colorEditor.prop}));
+          }
+        }
+      }
+    } else {
+      dispatch(closeColorEditor());
+    }
+  }
+  if (state.gradientEditor.isOpen) {
+    // const layerItem = state.layer.present.byId[state.gradientEditor.layer];
+    const layerItems = state.gradientEditor.layers.reduce((result, current) => {
+      return [...result, state.layer.present.byId[current]];
+    }, []);
+    // const prevLayerItem = type === 'redo' ? state.layer.past[state.layer.past.length - 1].byId[state.gradientEditor.layer] : state.layer.future[0].byId[state.gradientEditor.layer];
+    const prevLayerItems = type === 'redo' ? state.gradientEditor.layers.reduce((result, current) => {
+      return [...result, state.layer.past[state.layer.past.length - 1].byId[current]];
+    }, []) : state.gradientEditor.layers.reduce((result, current) => {
+      return [...result, state.layer.future[0].byId[current]];
+    }, []);
+    // check if items exist and matches selection
+    if (layerItems.every((id) => id) && prevLayerItems.every((id) => id) && state.layer.present.selected.every((id, index) => state.layer.present.selected[index] === state.gradientEditor.layers[index])) {
+      const style = layerItems[0].style[state.gradientEditor.prop];
+      const prevStyle = prevLayerItems[0].style[state.gradientEditor.prop];
+      // check if fill types match
+      if (style.fillType === prevStyle.fillType) {
+        // check if prev action creator was for gradient
+        if (gradientsMatch((style as em.Fill | em.Stroke).gradient, (prevStyle as em.Fill | em.Stroke).gradient)) {
+          dispatch(closeGradientEditor());
+        }
+      } else {
+        // if fill types dont match, open relevant editor
+        switch(style.fillType) {
+          case 'color': {
+            dispatch(closeGradientEditor());
+            dispatch(openColorEditor({layers: state.gradientEditor.layers, x: state.gradientEditor.x, y: state.gradientEditor.y, prop: state.gradientEditor.prop}));
+            break;
+          }
+        }
+      }
+    } else {
+      dispatch(closeGradientEditor());
+    }
+  }
+}
+
+export const undoThunk = () => {
+  return (dispatch: any, getState: any) => {
+    let state = getState() as RootState;
+    if (state.layer.past.length > 0) {
+      // remove hover
+      dispatch(setLayerHover({id: null}));
+      // undo
+      dispatch(undo()).then(() => {
+        state = getState() as RootState;
+        // import past paper project
+        importPaperProject({
+          paperProject: state.layer.present.paperProject,
+          documentImages: state.documentSettings.images.byId,
+          layers: {
+            shape: state.layer.present.allShapeIds,
+            artboard: state.layer.present.allArtboardIds,
+            text: state.layer.present.allTextIds,
+            image: state.layer.present.allImageIds
+          }
+        });
+        // update editors
+        updateEditors(dispatch, state, 'undo');
+        // update frames
+        updateHoverFrame(state.layer.present);
+        updateSelectionFrame(state.layer.present);
+        updateActiveArtboardFrame(state.layer.present);
+        if (state.tweenDrawer.isOpen && state.layer.present.allTweenEventIds.length > 0) {
+          updateTweenEventsFrame(state.layer.present, state.tweenDrawer.event === null ? state.layer.present.allTweenEventIds.reduce((result, current) => {
+            const tweenEvent = state.layer.present.tweenEventById[current];
+            if (tweenEvent.artboard === state.layer.present.activeArtboard || current === state.tweenDrawer.eventHover) {
+              result = [...result, tweenEvent];
+            }
+            return result;
+          }, []) : [state.layer.present.tweenEventById[state.tweenDrawer.event]], state.tweenDrawer.eventHover, state.theme.theme);
+        }
+      });
+    }
+  }
+};
+
+export const redoThunk = () => {
+  return (dispatch: any, getState: any) => {
+    let state = getState() as RootState;
+    if (state.layer.future.length > 0) {
+      // remove hover
+      dispatch(setLayerHover({id: null}));
+      // redo
+      dispatch(redo()).then(() => {
+        // get state
+        state = getState() as RootState;
+        // import future paper project
+        importPaperProject({
+          paperProject: state.layer.present.paperProject,
+          documentImages: state.documentSettings.images.byId,
+          layers: {
+            shape: state.layer.present.allShapeIds,
+            artboard: state.layer.present.allArtboardIds,
+            text: state.layer.present.allTextIds,
+            image: state.layer.present.allImageIds
+          }
+        });
+        // update editors
+        updateEditors(dispatch, state, 'redo');
+        // update frames
+        updateHoverFrame(state.layer.present);
+        updateSelectionFrame(state.layer.present);
+        updateActiveArtboardFrame(state.layer.present);
+        if (state.tweenDrawer.isOpen && state.layer.present.allTweenEventIds.length > 0) {
+          updateTweenEventsFrame(state.layer.present, state.tweenDrawer.event === null ? state.layer.present.allTweenEventIds.reduce((result, current) => {
+            const tweenEvent = state.layer.present.tweenEventById[current];
+            if (tweenEvent.artboard === state.layer.present.activeArtboard || current === state.tweenDrawer.eventHover) {
+              result = [...result, tweenEvent];
+            }
+            return result;
+          }, []) : [state.layer.present.tweenEventById[state.tweenDrawer.event]], state.tweenDrawer.eventHover, state.theme.theme);
+        }
+      });
+    }
   }
 };

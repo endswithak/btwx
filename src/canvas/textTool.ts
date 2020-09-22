@@ -1,31 +1,41 @@
 import store from '../store';
 import { openTextEditor } from '../store/actions/textEditor';
+import { disableActiveToolThunk } from '../store/actions/tool';
+import { setCanvasTyping } from '../store/actions/canvasSettings';
 import { addText, addTextThunk } from '../store/actions/layer';
 import { getPagePaperLayer } from '../store/selectors/layer';
 import { enableSelectionTool } from '../store/actions/tool';
 import { paperMain } from './index';
 import { DEFAULT_TEXT_VALUE, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../constants';
-import InsertTool from './insertTool';
 
 class TextTool {
   tool: paper.Tool;
-  insertTool: InsertTool;
+  // insertTool: InsertTool;
   constructor() {
     this.tool = new paperMain.Tool();
     this.tool.activate();
     this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
     this.tool.onKeyUp = (e: paper.KeyEvent): void => this.onKeyUp(e);
     this.tool.onMouseUp = (e: paper.ToolEvent): void => this.onMouseUp(e);
-    this.insertTool = new InsertTool();
+    // this.insertTool = new InsertTool();
+  }
+  disable() {
+    store.dispatch(disableActiveToolThunk() as any);
   }
   onKeyDown(event: paper.KeyEvent): void {
-    this.insertTool.onKeyDown(event);
+    switch(event.key) {
+      case 'escape': {
+        this.disable();
+        break;
+      }
+    }
+    // this.insertTool.onKeyDown(event);
   }
   onKeyUp(event: paper.KeyEvent): void {
-    this.insertTool.onKeyUp(event);
+    // this.insertTool.onKeyUp(event);
   }
   onMouseUp(event: paper.ToolEvent): void {
-    this.insertTool.enabled = false;
+    // this.insertTool.enabled = false;
     let state = store.getState();
     // create new text layer
     const paperLayer = new paperMain.PointText({
@@ -107,7 +117,7 @@ class TextTool {
         }
       })()
     }));
-    store.dispatch(enableSelectionTool());
+    this.disable();
   }
 }
 

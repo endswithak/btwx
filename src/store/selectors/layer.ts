@@ -3,10 +3,6 @@ import paper from 'paper';
 import { LayerState } from '../reducers/layer';
 import { paperMain } from '../../canvas';
 import { bufferToBase64 } from '../../utils';
-import { applyShapeMethods } from '../../canvas/shapeUtils';
-import { applyArtboardMethods } from '../../canvas/artboardUtils';
-import { applyTextMethods } from '../../canvas/textUtils';
-import { applyImageMethods } from '../../canvas/imageUtils';
 
 export const getLayer = (store: LayerState, id: string): em.Layer => {
   return store.byId[id] as em.Layer;
@@ -1170,19 +1166,6 @@ export const importPaperProject = ({documentImages, paperProject, layers}: Impor
     return result.replace(`"source":"${current}"`, `"source":"${base64}"`);
   }, paperProject);
   paperMain.project.importJSON(newPaperProject);
-  // layers.shape.forEach((shapeId) => {
-  //   applyShapeMethods(getPaperLayer(shapeId));
-  // });
-  // layers.artboard.forEach((artboardId) => {
-  //   applyArtboardMethods(getPaperLayer(artboardId));
-  // });
-  // layers.text.forEach((textId) => {
-  //   applyTextMethods(getPaperLayer(textId));
-  // });
-  // layers.image.forEach((imageId) => {
-  //   const raster = getPaperLayer(imageId).getItem({data: {id: 'Raster'}});
-  //   applyImageMethods(raster);
-  // });
 };
 
 export const colorsMatch = (color1: em.Color, color2: em.Color): boolean => {

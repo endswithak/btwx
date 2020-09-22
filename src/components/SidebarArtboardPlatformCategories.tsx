@@ -1,9 +1,8 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { setArtboardToolDevicePlatform } from '../store/actions/tool';
-import SidebarArtboardPlatformCategory from './SidebarArtboardPlatformCategory';
 import { DEVICES } from '../constants';
+import SidebarArtboardPlatformCategory from './SidebarArtboardPlatformCategory';
 
 interface SidebarArtboardPlatformCategoriesProps {
   categories?: em.DeviceCategory[];
@@ -30,8 +29,8 @@ const SidebarArtboardPlatformCategories = (props: SidebarArtboardPlatformCategor
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { tool, documentSettings } = state;
-  const platformValue = tool.artboardToolDevicePlatform;
+  const { documentSettings } = state;
+  const platformValue = documentSettings.artboardPresets.platform;
   const categories = platformValue === 'Custom' ? [{
     type: 'Custom',
     devices: documentSettings.artboardPresets.allIds.reduce((result: em.ArtboardPreset[], current) => {
@@ -43,6 +42,5 @@ const mapStateToProps = (state: RootState) => {
 };
 
 export default connect(
-  mapStateToProps,
-  { setArtboardToolDevicePlatform }
+  mapStateToProps
 )(SidebarArtboardPlatformCategories);

@@ -1,13 +1,13 @@
 import {
-  ENABLE_RECTANGLE_SHAPE_TOOL,
-  ENABLE_ELLIPSE_SHAPE_TOOL,
-  ENABLE_STAR_SHAPE_TOOL,
-  ENABLE_POLYGON_SHAPE_TOOL,
-  ENABLE_ROUNDED_SHAPE_TOOL,
-  ENABLE_LINE_SHAPE_TOOL,
+  ENABLE_SHAPE_TOOL,
+  DISABLE_SHAPE_TOOL,
   ENABLE_SELECTION_TOOL,
+  DISABLE_SELECTION_TOOL,
   ENABLE_ARTBOARD_TOOL,
+  DISABLE_ARTBOARD_TOOL,
   ENABLE_TEXT_TOOL,
+  DISABLE_TEXT_TOOL,
+  DISABLE_ACTIVE_TOOL,
   ToolTypes,
 } from '../actionTypes/tool';
 
@@ -23,46 +23,18 @@ const initialState: ToolState = {
 
 export default (state = initialState, action: ToolTypes): ToolState => {
   switch (action.type) {
-    case ENABLE_RECTANGLE_SHAPE_TOOL: {
+    case ENABLE_SHAPE_TOOL: {
       return {
         ...state,
         type: 'Shape',
-        shapeToolType: 'Rectangle'
+        shapeToolType: action.payload.shapeType
       };
     }
-    case ENABLE_ELLIPSE_SHAPE_TOOL: {
+    case DISABLE_SHAPE_TOOL: {
       return {
         ...state,
-        type: 'Shape',
-        shapeToolType: 'Ellipse'
-      };
-    }
-    case ENABLE_STAR_SHAPE_TOOL: {
-      return {
-        ...state,
-        type: 'Shape',
-        shapeToolType: 'Star'
-      };
-    }
-    case ENABLE_POLYGON_SHAPE_TOOL: {
-      return {
-        ...state,
-        type: 'Shape',
-        shapeToolType: 'Polygon'
-      };
-    }
-    case ENABLE_ROUNDED_SHAPE_TOOL: {
-      return {
-        ...state,
-        type: 'Shape',
-        shapeToolType: 'Rounded'
-      };
-    }
-    case ENABLE_LINE_SHAPE_TOOL: {
-      return {
-        ...state,
-        type: 'Shape',
-        shapeToolType: 'Line'
+        type: null,
+        shapeToolType: null
       };
     }
     case ENABLE_SELECTION_TOOL: {
@@ -71,16 +43,41 @@ export default (state = initialState, action: ToolTypes): ToolState => {
         type: 'Selection'
       };
     }
+    case DISABLE_SELECTION_TOOL: {
+      return {
+        ...state,
+        type: null
+      };
+    }
     case ENABLE_ARTBOARD_TOOL: {
       return {
         ...state,
         type: 'Artboard'
       };
     }
+    case DISABLE_ARTBOARD_TOOL: {
+      return {
+        ...state,
+        type: null
+      };
+    }
     case ENABLE_TEXT_TOOL: {
       return {
         ...state,
         type: 'Text'
+      };
+    }
+    case DISABLE_TEXT_TOOL: {
+      return {
+        ...state,
+        type: null
+      };
+    }
+    case DISABLE_ACTIVE_TOOL: {
+      return {
+        ...state,
+        type: null,
+        shapeToolType: null
       };
     }
     default:

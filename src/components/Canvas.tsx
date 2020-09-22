@@ -10,7 +10,7 @@ import { OpenTextEditorPayload, TextEditorTypes } from '../store/actionTypes/tex
 import { openTextEditor } from '../store/actions/textEditor';
 import { SetTextSettingsPayload, TextSettingsTypes } from '../store/actionTypes/textSettings';
 import { setTextSettings } from '../store/actions/textSettings';
-import { enableSelectionToolThunk } from '../store/actions/tool';
+import { toggleSelectionToolThunk } from '../store/actions/tool';
 import { ToolTypes } from '../store/actionTypes/tool';
 import { SetCanvasZoomingPayload, SetCanvasZoomingTypePayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
 import { setCanvasZooming, setCanvasZoomingType } from '../store/actions/canvasSettings';
@@ -22,7 +22,7 @@ import { ThemeContext } from './ThemeProvider';
 gsap.registerPlugin(ScrollToPlugin);
 
 interface CanvasProps {
-  selectionToolEnabled?: boolean;
+  noActiveTools?: boolean;
   cursor?: string;
   scope?: string[];
   layer?: {
@@ -50,12 +50,12 @@ interface CanvasProps {
   setTextSettings?(payload: SetTextSettingsPayload): TextSettingsTypes;
   setCanvasZooming?(payload: SetCanvasZoomingPayload): CanvasSettingsTypes;
   setCanvasZoomingType(payload: SetCanvasZoomingTypePayload): CanvasSettingsTypes;
-  enableSelectionToolThunk?(e?: any): ToolTypes;
+  toggleSelectionToolThunk?(nativeEvent: any, hitResult: em.HitResult): ToolTypes;
 }
 
 const Canvas = (props: CanvasProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { cursor, selectionToolEnabled, zooming, dragging, resizing, selecting, zoomingType, setCanvasZooming, setCanvasZoomingType, scope, layer, textJustification, setTextSettings, selected, hover, setLayerHover, selectLayer, deselectLayer, deepSelectLayer, deselectAllLayers, openContextMenu, closeContextMenu, openTextEditor, enableSelectionToolThunk } = props;
+  const { cursor, noActiveTools, zooming, dragging, resizing, selecting, zoomingType, setCanvasZooming, setCanvasZoomingType, scope, layer, textJustification, setTextSettings, selected, hover, setLayerHover, selectLayer, deselectLayer, deepSelectLayer, deselectAllLayers, openContextMenu, closeContextMenu, openTextEditor, toggleSelectionToolThunk } = props;
 
   const handleHitResult = (point: paper.Point, includeNearestScopeAncestor?: boolean): em.HitResult => {
     const result: em.HitResult = {
@@ -162,14 +162,13 @@ const Canvas = (props: CanvasProps): ReactElement => {
         break;
       }
       default: {
-        if (selected.length > 0) {
+        if (selected.length > 0 && !e.shiftKey) {
           deselectAllLayers();
         }
         break;
       }
     }
-    console.log(e);
-    enableSelectionToolThunk(e);
+    toggleSelectionToolThunk(e, hitResult);
   }
 
   const handleTextDoubleClick = (e: any, layerItem: em.Text) => {
@@ -330,10 +329,10 @@ const Canvas = (props: CanvasProps): ReactElement => {
   return (
     <canvas
       id='canvas'
-      onMouseDown={selectionToolEnabled ? handleMouseDown : null}
-      onDoubleClick={selectionToolEnabled ? handleDoubleClick : null}
-      onContextMenu={selectionToolEnabled ? handleContextMenu : null}
-      onMouseMove={selectionToolEnabled ? handleMouseMove : null}
+      onMouseDown={noActiveTools ? handleMouseDown : null}
+      onDoubleClick={noActiveTools ? handleDoubleClick : null}
+      onContextMenu={handleContextMenu}
+      onMouseMove={noActiveTools ? handleMouseMove : null}
       onWheel={handleWheel}
       tabIndex={0}
       style={{
@@ -344,7 +343,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState): {
-  selectionToolEnabled: boolean;
+  noActiveTools: boolean;
   cursor: string;
   scope: string[];
   layer: {
@@ -398,11 +397,11 @@ const mapStateToProps = (state: RootState): {
     dragging: canvasSettings.dragging,
     resizing: canvasSettings.resizing,
     selecting: canvasSettings.selecting,
-    selectionToolEnabled: tool.type === 'Selection'
+    noActiveTools: !tool.type
   };
 };
 
 export default connect(
   mapStateToProps,
-  { setLayerHover, selectLayer, deselectLayer, deepSelectLayer, deselectAllLayers, openContextMenu, closeContextMenu, openTextEditor, setTextSettings, setCanvasZooming, setCanvasZoomingType, enableSelectionToolThunk }
+  { setLayerHover, selectLayer, deselectLayer, deepSelectLayer, deselectAllLayers, openContextMenu, closeContextMenu, openTextEditor, setTextSettings, setCanvasZooming, setCanvasZoomingType, toggleSelectionToolThunk }
 )(Canvas);

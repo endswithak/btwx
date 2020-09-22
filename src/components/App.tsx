@@ -11,6 +11,7 @@ import TweenEventsFrameWrap from './TweenEventsFrameWrap';
 import HoverFrameWrap from './HoverFrameWrap';
 import ArtboardPresetEditorWrap from './ArtboardPresetEditorWrap';
 import ContextMenuWrap from './ContextMenuWrap';
+import KeyBindings from './KeyBindings';
 
 const App = (): ReactElement => {
   const theme = useContext(ThemeContext);
@@ -39,6 +40,7 @@ const App = (): ReactElement => {
               <ArtboardPresetEditorWrap />
               <ContextMenuWrap />
               <TweenEventsFrameWrap />
+              <KeyBindings />
             </>
           : null
         }

@@ -1,11 +1,11 @@
 import store from '../store';
-import { enableSelectionTool } from '../store/actions/tool';
+import { disableActiveToolThunk } from '../store/actions/tool';
+import { setCanvasDrawing } from '../store/actions/canvasSettings';
 import { addArtboardThunk } from '../store/actions/layer';
 import { isBetween } from '../utils';
 import { paperMain } from './index';
 import Tooltip from './tooltip';
 import SnapTool from './snapTool';
-import InsertTool from './insertTool';
 import { THEME_PRIMARY_COLOR } from '../constants';
 
 class ArtboardTool {
@@ -23,7 +23,7 @@ class ArtboardTool {
   shiftModifier: boolean;
   snapTool: SnapTool;
   toBounds: paper.Rectangle;
-  insertTool: InsertTool;
+  // insertTool: InsertTool;
   constructor() {
     this.tool = new paperMain.Tool();
     this.tool.activate();
@@ -46,7 +46,7 @@ class ArtboardTool {
     this.shiftModifier = false;
     this.snapTool = new SnapTool();
     this.toBounds = null;
-    this.insertTool = new InsertTool();
+    // this.insertTool = new InsertTool();
   }
   renderShape(shapeOpts: any): paper.Path.Rectangle {
     const shape = new paperMain.Path.Rectangle({
@@ -103,9 +103,9 @@ class ArtboardTool {
   }
   onKeyDown(event: paper.KeyEvent): void {
     const state = store.getState();
-    if (!state.artboardPresetEditor.isOpen) {
-      this.insertTool.onKeyDown(event);
-    }
+    // if (!state.artboardPresetEditor.isOpen) {
+    //   this.insertTool.onKeyDown(event);
+    // }
     switch(event.key) {
       case 'shift': {
         this.shiftModifier = true;
@@ -135,9 +135,9 @@ class ArtboardTool {
   }
   onKeyUp(event: paper.KeyEvent): void {
     const state = store.getState();
-    if (!state.artboardPresetEditor.isOpen) {
-      this.insertTool.onKeyUp(event);
-    }
+    // if (!state.artboardPresetEditor.isOpen) {
+    //   this.insertTool.onKeyUp(event);
+    // }
     switch(event.key) {
       case 'shift': {
         this.shiftModifier = false;
@@ -240,6 +240,7 @@ class ArtboardTool {
   }
   onMouseDown(event: paper.ToolEvent): void {
     const state = store.getState();
+    store.dispatch(setCanvasDrawing({drawing: true}));
     this.drawing = true;
     const from = event.point;
     if (this.snapTool.snap.x) {
@@ -311,7 +312,9 @@ class ArtboardTool {
           }
         }) as any);
       }
-      store.dispatch(enableSelectionTool());
+      // store.dispatch(toggleSelectionToolThunk());
+      store.dispatch(setCanvasDrawing({drawing: false}));
+      store.dispatch(disableActiveToolThunk() as any);
     }
   }
 }

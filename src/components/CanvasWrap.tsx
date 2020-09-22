@@ -1,7 +1,7 @@
 import { remote } from 'electron';
 import React, { useRef, useContext, useEffect, ReactElement } from 'react';
 import { connect } from 'react-redux';
-import { enableSelectionToolThunk } from '../store/actions/tool';
+import { toggleSelectionToolThunk } from '../store/actions/tool';
 import { ToolTypes } from '../store/actionTypes/tool';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
@@ -25,7 +25,7 @@ interface CanvasWrapProps {
   allTextIds?: string[];
   allImageIds?: string[];
   matrix?: number[];
-  enableSelectionToolThunk(): ToolTypes;
+  toggleSelectionToolThunk(): ToolTypes;
   updateInViewLayers(): LayerTypes;
   setReady(ready: boolean): void;
   addArtboardThunk?(payload: AddArtboardPayload): Promise<em.Artboard>;
@@ -34,7 +34,7 @@ interface CanvasWrapProps {
 const CanvasWrap = (props: CanvasWrapProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
-  const { matrix, addArtboardThunk, documentImages, enableSelectionToolThunk, updateInViewLayers, paperProject, allArtboardIds, allShapeIds, allTextIds, allImageIds, setReady } = props;
+  const { matrix, addArtboardThunk, documentImages, toggleSelectionToolThunk, updateInViewLayers, paperProject, allArtboardIds, allShapeIds, allTextIds, allImageIds, setReady } = props;
 
   useEffect(() => {
     // init canvas
@@ -53,7 +53,7 @@ const CanvasWrap = (props: CanvasWrapProps): ReactElement => {
     paperMain.view.matrix.set(matrix);
     // update inview layers
     updateInViewLayers();
-    enableSelectionToolThunk();
+    // toggleSelectionToolThunk();
     // add artboard if doc is empty
     if (allArtboardIds.length === 0) {
       const artboardDevice = remote.process.platform === 'darwin' ? APPLE_IPHONE_DEVICES.find((device) => device.type === 'iPhone 11') : ANDROID_MOBILE_DEVICES.find((device) => device.type === 'Galaxy S10e');
@@ -117,5 +117,5 @@ const mapStateToProps = (state: RootState): {
 
 export default connect(
   mapStateToProps,
-  { enableSelectionToolThunk, updateInViewLayers, addArtboardThunk }
+  { toggleSelectionToolThunk, updateInViewLayers, addArtboardThunk }
 )(CanvasWrap);

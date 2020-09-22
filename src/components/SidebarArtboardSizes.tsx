@@ -1,8 +1,10 @@
 import React, { useContext, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { setArtboardToolDeviceOrientation, enableSelectionTool } from '../store/actions/tool';
-import { SetArtboardToolDeviceOrientationPayload, ToolTypes } from '../store/actionTypes/tool';
+import { toggleSelectionToolThunk } from '../store/actions/tool';
+import { ToolTypes } from '../store/actionTypes/tool';
+import { setArtboardPresetDeviceOrientation } from '../store/actions/documentSettings';
+import { SetArtboardPresetDeviceOrientationPayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
 import { addArtboardThunk } from '../store/actions/layer';
 import { AddArtboardPayload } from '../store/actionTypes/layer';
 import { paperMain } from '../canvas';
@@ -16,26 +18,26 @@ interface SidebarArtboardPlatformOrientationProps {
   selected?: string[];
   orientation?: em.DeviceOrientationType;
   platform?: em.DevicePlatformType;
-  setArtboardToolDeviceOrientation?(payload: SetArtboardToolDeviceOrientationPayload): ToolTypes;
+  setArtboardPresetDeviceOrientation?(payload: SetArtboardPresetDeviceOrientationPayload): DocumentSettingsTypes;
   addArtboardThunk?(payload: AddArtboardPayload): void;
-  enableSelectionTool?(): ToolTypes;
+  toggleSelectionToolThunk?(): ToolTypes;
 }
 
 const SidebarArtboardSizes = (props: SidebarArtboardPlatformOrientationProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { selected, orientation, platform, setArtboardToolDeviceOrientation, addArtboardThunk, enableSelectionTool } = props;
+  const { selected, orientation, platform, setArtboardPresetDeviceOrientation, addArtboardThunk, toggleSelectionToolThunk } = props;
 
   const handleOrientationClick = (type: em.DeviceOrientationType) => {
     switch(type) {
       case 'Landscape': {
         if (orientation !== 'Landscape') {
-          setArtboardToolDeviceOrientation({orientation: 'Landscape'});
+          setArtboardPresetDeviceOrientation({orientation: 'Landscape'});
         }
         break;
       }
       case 'Portrait': {
         if (orientation !== 'Portrait') {
-          setArtboardToolDeviceOrientation({orientation: 'Portrait'});
+          setArtboardPresetDeviceOrientation({orientation: 'Portrait'});
         }
         break;
       }
@@ -62,7 +64,7 @@ const SidebarArtboardSizes = (props: SidebarArtboardPlatformOrientationProps): R
         }
       } as any
     });
-    enableSelectionTool();
+    // toggleSelectionToolThunk();
   }
 
   return (
@@ -101,14 +103,14 @@ const SidebarArtboardSizes = (props: SidebarArtboardPlatformOrientationProps): R
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { tool, layer } = state;
+  const { documentSettings, layer } = state;
   const selected = layer.present.selected;
-  const orientation = tool.artboardToolOrientation;
-  const platform = tool.artboardToolDevicePlatform;
+  const orientation = documentSettings.artboardPresets.orientation;
+  const platform = documentSettings.artboardPresets.platform;
   return { orientation, platform, selected };
 };
 
 export default connect(
   mapStateToProps,
-  { setArtboardToolDeviceOrientation, addArtboardThunk, enableSelectionTool }
+  { setArtboardPresetDeviceOrientation, addArtboardThunk, toggleSelectionToolThunk }
 )(SidebarArtboardSizes);

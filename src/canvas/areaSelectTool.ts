@@ -1,7 +1,9 @@
 import paper from 'paper';
 import { getPagePaperLayer, getNearestScopeAncestor } from '../store/selectors/layer';
+import { disableActiveToolThunk } from '../store/actions/tool';
 import { deselectAllLayers, deselectLayer, selectLayer, selectLayers } from '../store/actions/layer';
 import { setCanvasSelecting } from '../store/actions/canvasSettings';
+import { updateSelectionFrame } from '../store/utils/layer';
 import store from '../store';
 import { paperMain } from './index';
 import { THEME_PRIMARY_COLOR } from '../constants';
@@ -33,9 +35,7 @@ class AreaSelectTool {
     this.state = state;
   }
   disable() {
-    if (this.state.canvasSettings.selecting) {
-      store.dispatch(setCanvasSelecting({selecting: false}));
-    }
+    store.dispatch(setCanvasSelecting({selecting: false}));
     if (this.shape) {
       this.shape.remove();
     }
@@ -106,6 +106,11 @@ class AreaSelectTool {
   }
   onKeyDown(event: paper.KeyEvent) {
     switch(event.key) {
+      case 'escape': {
+        this.disable();
+        store.dispatch(disableActiveToolThunk() as any);
+        break;
+      }
       case 'shift': {
         this.shiftModifier = true;
         break;
@@ -150,6 +155,11 @@ class AreaSelectTool {
   }
   onMouseDrag(event: paper.ToolEvent): void {
     if (this.enabled) {
+      if (!this.to) {
+        store.dispatch(setCanvasSelecting({selecting: true}));
+        this.state = store.getState();
+        updateSelectionFrame(this.state.layer.present, 'all');
+      }
       this.update(event.point);
       // if (!this.to) {
       //   store.dispatch(setCanvasSelecting({selecting: true}));
@@ -208,14 +218,14 @@ class AreaSelectTool {
     //   this.disable();
     // }
     if (this.enabled) {
-      if (!this.to) {
-        store.dispatch(setCanvasSelecting({selecting: true}));
-        this.state = store.getState();
-      }
+      // if (!this.to) {
+      //   store.dispatch(setCanvasSelecting({selecting: true}));
+      //   this.state = store.getState();
+      // }
       if (this.to) {
         // get hit test layers
         const hitTestLayers = this.hitTestLayers();
-        store.dispatch(selectLayers({layers: hitTestLayers, deselectIfSelected: this.shiftModifier, noActiveArtboardUpdate: true}));
+        store.dispatch(selectLayers({layers: hitTestLayers, toggleSelected: this.shiftModifier, noActiveArtboardUpdate: true}));
       }
       this.disable();
     }

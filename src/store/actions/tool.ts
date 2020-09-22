@@ -1,126 +1,125 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import ShapeTool from '../../canvas/shapeTool';
 import SelectionTool from '../../canvas/selectionTool';
 import ArtboardTool from '../../canvas/artboardTool';
 import TextTool from '../../canvas/textTool';
 import { removeActiveTools } from '../../canvas/utils';
+import { RootState } from '../reducers';
 
 import {
-  ENABLE_RECTANGLE_SHAPE_TOOL,
-  ENABLE_ELLIPSE_SHAPE_TOOL,
-  ENABLE_STAR_SHAPE_TOOL,
-  ENABLE_POLYGON_SHAPE_TOOL,
-  ENABLE_ROUNDED_SHAPE_TOOL,
-  ENABLE_LINE_SHAPE_TOOL,
+  ENABLE_SHAPE_TOOL,
+  DISABLE_SHAPE_TOOL,
   ENABLE_SELECTION_TOOL,
+  DISABLE_SELECTION_TOOL,
   ENABLE_ARTBOARD_TOOL,
+  DISABLE_ARTBOARD_TOOL,
   ENABLE_TEXT_TOOL,
+  DISABLE_TEXT_TOOL,
+  DISABLE_ACTIVE_TOOL,
+  EnableShapeToolPayload,
   ToolTypes
 } from '../actionTypes/tool';
 
-export const enableRectangleShapeTool = (): ToolTypes => ({
-  type: ENABLE_RECTANGLE_SHAPE_TOOL
+export const enableShapeTool = (payload: EnableShapeToolPayload): ToolTypes => ({
+  type: ENABLE_SHAPE_TOOL,
+  payload
 });
 
-export const enableRectangleShapeToolThunk = () => {
+export const toggleShapeToolThunk = (shapeType: em.ShapeType) => {
   return (dispatch: any, getState: any): void => {
-    removeActiveTools();
-    new ShapeTool('Rectangle');
-    dispatch(enableRectangleShapeTool());
+    const state = getState() as RootState;
+    if (state.canvasSettings.focusing) {
+      if (state.tool.type === 'Shape' && state.tool.shapeToolType === shapeType) {
+        dispatch(disableActiveToolThunk() as any);
+      } else {
+        removeActiveTools();
+        new ShapeTool(shapeType);
+        dispatch(enableShapeTool({shapeType}));
+      }
+    }
   }
 };
 
-export const enableEllipseShapeTool = (): ToolTypes => ({
-  type: ENABLE_ELLIPSE_SHAPE_TOOL
+export const disableShapeTool = (): ToolTypes => ({
+  type: DISABLE_SHAPE_TOOL
 });
-
-export const enableEllipseShapeToolThunk = () => {
-  return (dispatch: any, getState: any): void => {
-    removeActiveTools();
-    new ShapeTool('Ellipse');
-    dispatch(enableEllipseShapeTool());
-  }
-};
-
-export const enableStarShapeTool = (): ToolTypes => ({
-  type: ENABLE_STAR_SHAPE_TOOL
-});
-
-export const enableStarShapeToolThunk = () => {
-  return (dispatch: any, getState: any): void => {
-    removeActiveTools();
-    new ShapeTool('Star');
-    dispatch(enableStarShapeTool());
-  }
-};
-
-export const enablePolygonShapeTool = (): ToolTypes => ({
-  type: ENABLE_POLYGON_SHAPE_TOOL
-});
-
-export const enablePolygonShapeToolThunk = () => {
-  return (dispatch: any, getState: any): void => {
-    removeActiveTools();
-    new ShapeTool('Polygon');
-    dispatch(enablePolygonShapeTool());
-  }
-};
-
-export const enableRoundedShapeTool = (): ToolTypes => ({
-  type: ENABLE_ROUNDED_SHAPE_TOOL
-});
-
-export const enableRoundedShapeToolThunk = () => {
-  return (dispatch: any, getState: any): void => {
-    removeActiveTools();
-    new ShapeTool('Rounded');
-    dispatch(enableRoundedShapeTool());
-  }
-};
-
-export const enableLineShapeTool = (): ToolTypes => ({
-  type: ENABLE_LINE_SHAPE_TOOL
-});
-
-export const enableLineShapeToolThunk = () => {
-  return (dispatch: any, getState: any): void => {
-    removeActiveTools();
-    new ShapeTool('Line');
-    dispatch(enableLineShapeTool());
-  }
-};
 
 export const enableSelectionTool = (): ToolTypes => ({
   type: ENABLE_SELECTION_TOOL
 });
 
-export const enableSelectionToolThunk = (e?: any) => {
+export const toggleSelectionToolThunk = (nativeEvent: any, hitResult: em.HitResult) => {
   return (dispatch: any, getState: any): void => {
-    removeActiveTools();
-    new SelectionTool(e);
-    dispatch(enableSelectionTool());
+    const state = getState() as RootState;
+    if (state.canvasSettings.focusing) {
+      if (state.tool.type === 'Selection') {
+        dispatch(disableActiveToolThunk() as any);
+      } else {
+        removeActiveTools();
+        new SelectionTool(nativeEvent, hitResult);
+        dispatch(enableSelectionTool());
+      }
+    }
   }
 };
+
+export const disableSelectionTool = (): ToolTypes => ({
+  type: DISABLE_SELECTION_TOOL
+});
 
 export const enableTextTool = (): ToolTypes => ({
   type: ENABLE_TEXT_TOOL
 });
 
-export const enableTextToolThunk = () => {
+export const toggleTextToolThunk = () => {
   return (dispatch: any, getState: any): void => {
-    removeActiveTools();
-    new TextTool();
-    dispatch(enableTextTool());
+    const state = getState() as RootState;
+    if (state.canvasSettings.focusing) {
+      if (state.tool.type === 'Text') {
+        dispatch(disableActiveToolThunk() as any);
+      } else {
+        removeActiveTools();
+        new TextTool();
+        dispatch(enableTextTool());
+      }
+    }
   }
 };
+
+export const disableTextTool = (): ToolTypes => ({
+  type: DISABLE_TEXT_TOOL
+});
 
 export const enableArtboardTool = (): ToolTypes => ({
   type: ENABLE_ARTBOARD_TOOL
 });
 
-export const enableArtboardToolThunk = () => {
+export const toggleArtboardToolThunk = () => {
   return (dispatch: any, getState: any): void => {
-    removeActiveTools();
-    new ArtboardTool();
-    dispatch(enableArtboardTool());
+    const state = getState() as RootState;
+    if (state.canvasSettings.focusing) {
+      if (state.tool.type === 'Artboard') {
+        dispatch(disableActiveToolThunk() as any);
+      } else {
+        removeActiveTools();
+        new ArtboardTool();
+        dispatch(enableArtboardTool());
+      }
+    }
   }
 };
+
+export const disableArtboardTool = (): ToolTypes => ({
+  type: DISABLE_ARTBOARD_TOOL
+});
+
+export const disableActiveTool = (): ToolTypes => ({
+  type: DISABLE_ACTIVE_TOOL
+});
+
+export const disableActiveToolThunk = () => {
+  return (dispatch: any, getState: any): void => {
+    removeActiveTools();
+    dispatch(disableActiveTool());
+  }
+}

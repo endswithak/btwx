@@ -53,12 +53,9 @@ import {
 
 import { paperMain } from '../../canvas';
 
-import { THEME_PRIMARY_COLOR, DEFAULT_TRANSFORM } from '../../constants';
-import { bufferToBase64 } from '../../utils';
+import { THEME_PRIMARY_COLOR } from '../../constants';
 import MeasureGuide from '../../canvas/measureGuide';
 import getTheme from '../theme';
-import store from '../index';
-import { setTweenDrawerEventHover, setTweenDrawerEvent, openTweenDrawer } from '../actions/tweenDrawer';
 
 export const addArtboard = (state: LayerState, action: AddArtboard): LayerState => {
   let currentState = state;
@@ -1163,7 +1160,7 @@ export const selectLayers = (state: LayerState, action: SelectLayers): LayerStat
     currentState = deselectAllLayers(currentState, layerActions.deselectAllLayers() as DeselectAllLayers);
   }
   return action.payload.layers.reduce((result, current) => {
-    if (state.byId[current].selected) {
+    if (state.byId[current].selected && action.payload.toggleSelected) {
       return deselectLayer(result, layerActions.deselectLayer({id: current}) as DeselectLayer);
     } else {
       return selectLayer(result, layerActions.selectLayer({id: current}) as SelectLayer);
@@ -4407,12 +4404,11 @@ export const updateInViewLayers = (state: LayerState, action: UpdateInViewLayers
   let currentState = state;
   // get in view layers
   const visibleLayers = paperMain.project.getItem({data: { id: 'page' }}).getItems({
-    overlapping: paperMain.view.bounds
+    overlapping: paperMain.view.bounds,
+    data: { type: 'Layer' }
   });
   const visibleLayerIds = visibleLayers.reduce((result, current) => {
-    if (current.data.id !== 'ArtboardBackground' && current.data.id !== 'ArtboardMask' && current.data.id !== 'Raster') {
-      result = [...result, current.data.id];
-    }
+    result = [...result, current.data.id];
     return result;
   }, []);
   // remove out of view layers

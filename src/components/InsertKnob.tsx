@@ -8,12 +8,9 @@ import store from '../store';
 import { RootState } from '../store/reducers';
 import { activateInsertKnob, deactivateInsertKnob, setInsertKnobIndex } from '../store/actions/insertKnob';
 import { InsertKnobTypes, SetInsertKnobIndexPayload } from '../store/actionTypes/insertKnob';
-import { enableSelectionToolThunk, enableRectangleShapeToolThunk, enableEllipseShapeToolThunk, enableStarShapeToolThunk, enablePolygonShapeToolThunk, enableRoundedShapeToolThunk, enableLineShapeToolThunk, enableArtboardToolThunk, enableTextToolThunk } from '../store/actions/tool';
-import { ToolTypes } from '../store/actionTypes/tool';
+import { toggleShapeToolThunk, toggleArtboardToolThunk, toggleTextToolThunk } from '../store/actions/tool';
 import { AddImagePayload } from '../store/actionTypes/layer';
 import { addImageThunk } from '../store/actions/layer';
-import { SetCanvasFocusingPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
-import { setCanvasFocusing } from '../store/actions/canvasSettings';
 import { ToolState } from '../store/reducers/tool';
 import { ThemeContext } from './ThemeProvider';
 import InsertKnobItem from './InsertKnobItem';
@@ -35,14 +32,12 @@ if (remote.process.platform === 'darwin') {
           currentKnobPosThreshold = 0;
           knobActive = false;
           store.dispatch(deactivateInsertKnob());
-          store.dispatch(setCanvasFocusing({focusing: true}));
         }
         break;
       }
       case 'right': {
         if (!knobActive) {
           knobActive = true;
-          store.dispatch(enableSelectionToolThunk() as any);
           store.dispatch(activateInsertKnob());
         }
         break;
@@ -57,36 +52,21 @@ interface InsertKnobProps {
   setInsertKnobIndex?(payload: SetInsertKnobIndexPayload): InsertKnobTypes;
   activateInsertKnob?(): InsertKnobTypes;
   deactivateInsertKnob?(): InsertKnobTypes;
-  enableRectangleShapeToolThunk?(): ToolTypes;
-  enableEllipseShapeToolThunk?(): ToolTypes;
-  enableStarShapeToolThunk?(): ToolTypes;
-  enablePolygonShapeToolThunk?(): ToolTypes;
-  enableRoundedShapeToolThunk?(): ToolTypes;
-  enableLineShapeToolThunk?(): ToolTypes;
-  enableSelectionToolThunk?(): ToolTypes;
-  enableArtboardToolThunk?(): ToolTypes;
-  enableTextToolThunk?(): ToolTypes;
+  toggleShapeToolThunk?(shapeType: em.ShapeType): void;
+  toggleArtboardToolThunk?(): void;
+  toggleTextToolThunk?(): void;
   addImageThunk?(payload: AddImagePayload): void;
-  setCanvasFocusing?(payload: SetCanvasFocusingPayload): CanvasSettingsTypes;
 }
 
 const InsertKnob = (props: InsertKnobProps): ReactElement => {
   const {
-    tool,
     activeIndex,
     setInsertKnobIndex,
     deactivateInsertKnob,
-    enableRectangleShapeToolThunk,
-    enableEllipseShapeToolThunk,
-    enableStarShapeToolThunk,
-    enablePolygonShapeToolThunk,
-    enableRoundedShapeToolThunk,
-    enableLineShapeToolThunk,
-    enableSelectionToolThunk,
-    enableArtboardToolThunk,
-    enableTextToolThunk,
-    addImageThunk,
-    setCanvasFocusing
+    toggleShapeToolThunk,
+    toggleArtboardToolThunk,
+    toggleTextToolThunk,
+    addImageThunk
   } = props;
 
   const insertKnobRef = useRef<HTMLUListElement>(null);
@@ -95,42 +75,39 @@ const InsertKnob = (props: InsertKnobProps): ReactElement => {
   const insertKnobItems = [{
     label: 'Artboard',
     icon: 'artboard',
-    onSelection: tool.type === 'Artboard' ? enableSelectionToolThunk : enableArtboardToolThunk
+    onSelection: toggleArtboardToolThunk
   },{
     label: 'Rectangle',
     icon: 'rectangle',
-    onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Rectangle' ? enableSelectionToolThunk : enableRectangleShapeToolThunk
+    onSelection: () => toggleShapeToolThunk('Rectangle')
   },{
     label: 'Rounded',
     icon: 'rounded',
-    onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Rounded' ? enableSelectionToolThunk : enableRoundedShapeToolThunk
+    onSelection: () => toggleShapeToolThunk('Rounded')
   },{
     label: 'Ellipse',
     icon: 'ellipse',
-    onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Ellipse' ? enableSelectionToolThunk : enableEllipseShapeToolThunk
+    onSelection: () => toggleShapeToolThunk('Ellipse')
   },{
     label: 'Star',
     icon: 'star',
-    onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Star' ? enableSelectionToolThunk : enableStarShapeToolThunk
+    onSelection: () => toggleShapeToolThunk('Star')
   },{
     label: 'Polygon',
     icon: 'polygon',
-    onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Polygon' ? enableSelectionToolThunk : enablePolygonShapeToolThunk
+    onSelection: () => toggleShapeToolThunk('Polygon')
   },{
     label: 'Line',
     icon: 'line',
-    onSelection: tool.type === 'Shape' && tool.shapeToolType === 'Line' ? enableSelectionToolThunk : enableLineShapeToolThunk
+    onSelection: () => toggleShapeToolThunk('Line')
   },{
     label: 'Text',
     icon: 'text',
-    onSelection: tool.type === 'Text' ? enableSelectionToolThunk : enableTextToolThunk
+    onSelection: toggleTextToolThunk
   },{
     label: 'Image',
     icon: 'image',
     onSelection: (): void => {
-      if (tool.type !== 'Selection') {
-        enableSelectionToolThunk();
-      }
       remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
         filters: [
           { name: 'Images', extensions: ['jpg', 'png'] }
@@ -188,7 +165,6 @@ const InsertKnob = (props: InsertKnobProps): ReactElement => {
     currentKnobPosThreshold = 0;
     knobActive = false;
     deactivateInsertKnob();
-    setCanvasFocusing({focusing: true});
   }
 
   const handleMouseEnter = (index: number): void => {
@@ -236,7 +212,6 @@ const InsertKnob = (props: InsertKnobProps): ReactElement => {
   }
 
   useEffect(() => {
-    setCanvasFocusing({focusing: false});
     knobActive = true;
     document.addEventListener('mousedown', handleMouseDown, false);
     document.addEventListener('keydown', handleKeyDown, false);
@@ -285,30 +260,22 @@ const InsertKnob = (props: InsertKnobProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState): {
-  tool: ToolState;
   activeIndex: number;
 } => {
-  const { tool, insertKnob } = state;
+  const { insertKnob } = state;
   const activeIndex = insertKnob.index;
-  return { tool, activeIndex };
+  return { activeIndex };
 };
 
 export default connect(
   mapStateToProps,
   {
-    enableRectangleShapeToolThunk,
-    enableEllipseShapeToolThunk,
-    enableStarShapeToolThunk,
-    enablePolygonShapeToolThunk,
-    enableRoundedShapeToolThunk,
-    enableLineShapeToolThunk,
-    enableSelectionToolThunk,
-    enableArtboardToolThunk,
-    enableTextToolThunk,
+    toggleShapeToolThunk,
+    toggleArtboardToolThunk,
+    toggleTextToolThunk,
     addImageThunk,
     activateInsertKnob,
     deactivateInsertKnob,
-    setInsertKnobIndex,
-    setCanvasFocusing
+    setInsertKnobIndex
   }
 )(InsertKnob);

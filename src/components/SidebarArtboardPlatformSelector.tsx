@@ -1,19 +1,19 @@
-import React, { useContext, ReactElement, useState, useEffect } from 'react';
+import React, { ReactElement, useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { setArtboardToolDevicePlatform } from '../store/actions/tool';
-import { SetArtboardToolDevicePlatformPayload, ToolTypes } from '../store/actionTypes/tool';
-import SidebarSelect from './SidebarSelect';
+import { setArtboardPresetDevicePlatform } from '../store/actions/documentSettings';
+import { SetArtboardPresetDevicePlatformPayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
 import { DEVICES } from '../constants';
+import SidebarSelect from './SidebarSelect';
 
 interface SidebarArtboardPlatformSelectorProps {
   platformValue?: em.DevicePlatformType;
-  setArtboardToolDevicePlatform?(payload: SetArtboardToolDevicePlatformPayload): ToolTypes;
+  setArtboardPresetDevicePlatform?(payload: SetArtboardPresetDevicePlatformPayload): DocumentSettingsTypes;
   optionValues?: em.DevicePlatform[];
 }
 
 const SidebarArtboardPlatformSelector = (props: SidebarArtboardPlatformSelectorProps): ReactElement => {
-  const { platformValue, setArtboardToolDevicePlatform, optionValues } = props;
+  const { platformValue, setArtboardPresetDevicePlatform, optionValues } = props;
 
   const options: { value: em.DevicePlatformType; label: em.DevicePlatformType }[] = optionValues.map((device) => {
     return {
@@ -26,7 +26,7 @@ const SidebarArtboardPlatformSelector = (props: SidebarArtboardPlatformSelectorP
 
   const handleChange = (selectedOption: { value: em.DevicePlatformType; label: em.DevicePlatformType }) => {
     setPlatform(selectedOption);
-    setArtboardToolDevicePlatform({platform: selectedOption.value});
+    setArtboardPresetDevicePlatform({platform: selectedOption.value});
   }
 
   useEffect(() => {
@@ -45,7 +45,7 @@ const SidebarArtboardPlatformSelector = (props: SidebarArtboardPlatformSelectorP
 
 const mapStateToProps = (state: RootState) => {
   const { tool, documentSettings } = state;
-  const platformValue = tool.artboardToolDevicePlatform;
+  const platformValue = documentSettings.artboardPresets.platform;
   const optionValues = [
     ...DEVICES,
     {
@@ -64,5 +64,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { setArtboardToolDevicePlatform }
+  { setArtboardPresetDevicePlatform }
 )(SidebarArtboardPlatformSelector);
