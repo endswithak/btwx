@@ -1,19 +1,24 @@
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCreators } from 'redux-undo';
 import { clipboard } from 'electron';
+import { gsap } from 'gsap';
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import { paperMain } from '../../canvas';
 import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_VALUE } from '../../constants';
 import { getPaperFillColor, getPaperStrokeColor, getPaperLayer, getPaperShadowColor } from '../utils/paper';
-import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayersBounds, importPaperProject, colorsMatch, gradientsMatch } from '../selectors/layer';
+import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayersBounds, importPaperProject, colorsMatch, gradientsMatch, getNearestScopeAncestor } from '../selectors/layer';
 import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle } from '../utils/actions';
+
 import { bufferToBase64 } from '../../utils';
 
 import { addDocumentImage } from './documentSettings';
 import { setTweenDrawerEvent } from './tweenDrawer';
-import { updateHoverFrame, updateSelectionFrame, updateActiveArtboardFrame, updateTweenEventsFrame } from '../utils/layer';
+import { updateHoverFrame, updateSelectionFrame, updateActiveArtboardFrame, updateTweenEventsFrame, updateGradientFrame } from '../utils/layer';
 import { openColorEditor, closeColorEditor } from './colorEditor';
 import { openGradientEditor, closeGradientEditor } from './gradientEditor';
 import { RootState } from '../reducers';
+
+gsap.registerPlugin(ScrollToPlugin);
 
 import {
   ADD_ARTBOARD,
@@ -917,6 +922,39 @@ export const newLayerScope = (payload: NewLayerScopePayload): LayerTypes => ({
 export const escapeLayerScope = (): LayerTypes => ({
   type: ESCAPE_LAYER_SCOPE
 });
+
+export const escapeLayerScopeThunk = () => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    const nextScope = state.layer.present.scope.filter((id, index) => index !== state.layer.present.scope.length - 1);
+    if (state.layer.present.scope.length > 0) {
+      const leftSidebar = document.getElementById('sidebar-scroll-left');
+      const layerDomItem = document.getElementById(state.layer.present.scope[state.layer.present.scope.length - 1]);
+      if (layerDomItem) {
+        gsap.set(leftSidebar, {
+          scrollTo: layerDomItem
+        });
+      }
+    }
+    if (state.canvasSettings.mouse) {
+      const point = new paperMain.Point(state.canvasSettings.mouse.paperX, state.canvasSettings.mouse.paperY)
+      const hitResult = paperMain.project.hitTest(point);
+      const validHitResult = hitResult && hitResult.item && hitResult.item.data && hitResult.item.data.type && (hitResult.item.data.type === 'Layer' || hitResult.item.data.type === 'LayerChild');
+      if (validHitResult) {
+        const layerItem = state.layer.present.byId[hitResult.item.data.type === 'Layer' ? hitResult.item.data.id : hitResult.item.parent.data.id];
+        const nearestScopeAncestor = getNearestScopeAncestor({...state.layer.present, scope: nextScope}, layerItem.id);
+        if (state.layer.present.hover !== nearestScopeAncestor.id) {
+          dispatch(setLayerHover({id: nearestScopeAncestor.id}));
+        }
+      } else {
+        if (state.layer.present.hover !== null) {
+          dispatch(setLayerHover({id: null}));
+        }
+      }
+    }
+    dispatch(escapeLayerScope());
+  }
+}
 
 // Group
 
@@ -2118,6 +2156,7 @@ const updateEditors = (dispatch: any, state: RootState, type: 'redo' | 'undo') =
       const prevStyle = prevLayerItems[0].style[state.gradientEditor.prop];
       // check if fill types match
       if (style.fillType === prevStyle.fillType) {
+        updateGradientFrame(layerItems[0], (style as em.Fill | em.Stroke).gradient, state.theme.theme);
         // check if prev action creator was for gradient
         if (gradientsMatch((style as em.Fill | em.Stroke).gradient, (prevStyle as em.Fill | em.Stroke).gradient)) {
           dispatch(closeGradientEditor());
@@ -2161,8 +2200,10 @@ export const undoThunk = () => {
         // update editors
         updateEditors(dispatch, state, 'undo');
         // update frames
-        updateHoverFrame(state.layer.present);
-        updateSelectionFrame(state.layer.present);
+        if (!state.gradientEditor.isOpen) {
+          updateHoverFrame(state.layer.present);
+          updateSelectionFrame(state.layer.present);
+        }
         updateActiveArtboardFrame(state.layer.present);
         if (state.tweenDrawer.isOpen && state.layer.present.allTweenEventIds.length > 0) {
           updateTweenEventsFrame(state.layer.present, state.tweenDrawer.event === null ? state.layer.present.allTweenEventIds.reduce((result, current) => {
@@ -2202,8 +2243,10 @@ export const redoThunk = () => {
         // update editors
         updateEditors(dispatch, state, 'redo');
         // update frames
-        updateHoverFrame(state.layer.present);
-        updateSelectionFrame(state.layer.present);
+        if (!state.gradientEditor.isOpen) {
+          updateHoverFrame(state.layer.present);
+          updateSelectionFrame(state.layer.present);
+        }
         updateActiveArtboardFrame(state.layer.present);
         if (state.tweenDrawer.isOpen && state.layer.present.allTweenEventIds.length > 0) {
           updateTweenEventsFrame(state.layer.present, state.tweenDrawer.event === null ? state.layer.present.allTweenEventIds.reduce((result, current) => {

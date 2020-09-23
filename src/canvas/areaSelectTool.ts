@@ -71,7 +71,7 @@ class AreaSelectTool {
     // get overlapped page layers
     const overlappedLayers = getPagePaperLayer(this.state.layer.present).getItems({
       data: (data: any) => {
-        if (data.type !== 'LayerChild' && data.type !== 'UIElement' && data.type !== 'UIElementChild') {
+        if (data.type === 'Layer') {
           const topParent = getNearestScopeAncestor(this.state.layer.present, data.id);
           return topParent.id === data.id;
         }
@@ -88,7 +88,7 @@ class AreaSelectTool {
         } else {
           item.getItems({
             data: (data: any) => {
-              if (data.type !== 'LayerChild' && data.type !== 'UIElement' && data.type !== 'UIElementChild') {
+              if (data.type === 'Layer') {
                 if (this.state.layer.present.byId[item.data.id].children.includes(data.id)) {
                   layers.push(data.id);
                 }
@@ -146,7 +146,7 @@ class AreaSelectTool {
       // set from point
       this.from = event.point;
       // deselect all if layers if no shift modifier
-      if (deselectAll && !this.shiftModifier) {
+      if (deselectAll && !event.modifiers.shift) {
         if (this.state.layer.present.selected.length > 0) {
           store.dispatch(deselectAllLayers());
         }
@@ -225,7 +225,7 @@ class AreaSelectTool {
       if (this.to) {
         // get hit test layers
         const hitTestLayers = this.hitTestLayers();
-        store.dispatch(selectLayers({layers: hitTestLayers, toggleSelected: this.shiftModifier, noActiveArtboardUpdate: true}));
+        store.dispatch(selectLayers({layers: hitTestLayers, toggleSelected: event.modifiers.shift, noActiveArtboardUpdate: true}));
       }
       this.disable();
     }

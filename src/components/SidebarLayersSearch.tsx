@@ -78,7 +78,11 @@ const SidebarLayersSearch = (props: SidebarLayersSearchProps): ReactElement => {
 
   return (
     <div
-      className='c-sidebar__search'>
+      className='c-sidebar__search'
+      style={{
+        background: theme.name === 'dark' ? theme.background.z3 : theme.background.z0,
+        boxShadow: `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
+      }}>
       <div className='c-sidebar-search__icon'>
         <Icon
           name='search'
@@ -87,7 +91,8 @@ const SidebarLayersSearch = (props: SidebarLayersSearchProps): ReactElement => {
             fill: focused ? theme.palette.primary : theme.text.lighter
           }} />
       </div>
-      <div className='c-sidebar-search__input'>
+      <div
+        className='c-sidebar-search__input'>
         <SidebarInput
           value={inputValue}
           onFocus={handleSearchFocus}

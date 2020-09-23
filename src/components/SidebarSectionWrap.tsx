@@ -1,16 +1,17 @@
-import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
+import React, { useContext, ReactElement } from 'react';
 import { ThemeContext } from './ThemeProvider';
 
 interface SidebarSectionWrapProps {
   children: ReactElement | ReactElement[];
   bottomBorder?: boolean;
   whiteSpace?: boolean;
+  bg?: boolean;
   style?: any;
 }
 
 const SidebarSectionWrap = (props: SidebarSectionWrapProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { children, bottomBorder, whiteSpace, style } = props;
+  const { children, bottomBorder, whiteSpace, style, bg } = props;
 
   return (
     <div
@@ -25,6 +26,9 @@ const SidebarSectionWrap = (props: SidebarSectionWrapProps): ReactElement => {
         paddingBottom: whiteSpace
         ? theme.unit
         : 0,
+        background: bg
+        ? theme.name === 'dark' ? theme.background.z3 : theme.background.z0
+        : 'none',
         ...style
       }}>
       { children }

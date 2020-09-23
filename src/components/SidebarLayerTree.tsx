@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import SidebarDropzone from './SidebarDropzone';
 import SidebarLayer from './SidebarLayer';
 import SidebarLayerDragGhosts from './SidebarLayerDragGhosts';
+import SidebarLeftSearchEmptyState from './SidebarLeftSearchEmptyState';
 
 interface SidebarLayerTreeProps {
   search: string;
@@ -15,7 +16,7 @@ interface SidebarLayerTreeProps {
 const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
   const [dragging, setDragging] = useState(false);
   const [dragLayers, setDragLayers] = useState<string[]>(null);
-  const { page, layers } = props;
+  const { page, layers, search } = props;
 
   return (
     <>
@@ -30,16 +31,18 @@ const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
         : null
       }
       {
-        layers.map((layer: string, index: number) => (
-          <SidebarLayer
-            key={index}
-            layer={layer}
-            dragLayers={dragLayers}
-            setDragLayers={setDragLayers}
-            dragging={dragging}
-            setDragging={setDragging}
-            depth={0} />
-        ))
+        layers.length > 0
+        ? layers.map((layer: string, index: number) => (
+            <SidebarLayer
+              key={index}
+              layer={layer}
+              dragLayers={dragLayers}
+              setDragLayers={setDragLayers}
+              dragging={dragging}
+              setDragging={setDragging}
+              depth={0} />
+          ))
+        : <SidebarLeftSearchEmptyState searchText={search} />
       }
       {
         dragLayers

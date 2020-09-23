@@ -1126,7 +1126,7 @@ export const orderLayersByTop = (layers: string[]): string[] => {
 };
 
 export const savePaperProjectJSON = (state: LayerState): string => {
-  const uiElements = paperMain.project.getItems({data: {type: 'UIElement', recursive: false}});
+  const uiElements = paperMain.project.getItems({data: {type: 'UIElement'}});
   if (uiElements && uiElements.length > 0) {
     uiElements.forEach((element) => {
       element.remove();

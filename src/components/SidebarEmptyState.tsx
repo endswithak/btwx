@@ -24,13 +24,13 @@ const Button = styled.button<ButtonProps>`
   cursor: pointer;
   background: ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
   box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5} inset;
-  color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.lighter};
+  color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.light};
   svg {
-    fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.lighter};
+    fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.light};
   }
   :disabled {
     svg {
-      fill: ${props => props.theme.text.lighter};
+      fill: ${props => props.theme.text.light};
     }
   }
   :hover {
@@ -44,7 +44,7 @@ const Button = styled.button<ButtonProps>`
         background: ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
         color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.light};
         svg {
-          fill: ${props => props.theme.text.lighter};
+          fill: ${props => props.theme.text.light};
         }
       }
     }
@@ -65,7 +65,7 @@ const SidebarEmptyState = (props: SidebarEmptyStateProps): ReactElement => {
               <Icon
                 name={icon}
                 style={{
-                  fill: theme.text.lightest
+                  fill: theme.text.lighter
                 }} />
             </div>
           : null
@@ -73,7 +73,7 @@ const SidebarEmptyState = (props: SidebarEmptyStateProps): ReactElement => {
         <div
           className='c-sidebar-empty-state__text'
           style={{
-            color: theme.text.lighter
+            color: theme.text.light
           }}>
           { text }
         </div>
@@ -82,7 +82,7 @@ const SidebarEmptyState = (props: SidebarEmptyStateProps): ReactElement => {
           ? <div
               className='c-sidebar-empty-state__detail'
               style={{
-                color: theme.text.lightest
+                color: theme.text.lighter
               }}>
               { detail }
             </div>

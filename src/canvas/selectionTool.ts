@@ -7,19 +7,16 @@ import DragTool from './dragTool';
 import ResizeTool from './resizeTool';
 import GradientTool from './gradientTool';
 import LineTool from './lineTool';
-import UndoRedoTool from './undoRedoTool';
 import { paperMain } from './index';
 import { RootState } from '../store/reducers';
 
 class SelectionTool {
   tool: paper.Tool;
-  hitResult: paper.HitResult;
   areaSelectTool: AreaSelectTool;
   dragTool: DragTool;
   resizeTool: ResizeTool;
   gradientTool: GradientTool;
   lineTool: LineTool;
-  undoRedoTool: UndoRedoTool;
   dragging: boolean;
   resizing: boolean;
   selecting: boolean;
@@ -37,7 +34,6 @@ class SelectionTool {
     this.dragTool = new DragTool();
     this.resizeTool = new ResizeTool();
     this.gradientTool = new GradientTool();
-    this.undoRedoTool = new UndoRedoTool();
     this.lineTool = new LineTool();
     this.dragging = false;
     this.resizing = false;
@@ -62,53 +58,6 @@ class SelectionTool {
     this.areaSelectTool.onKeyDown(event);
     this.dragTool.onKeyDown(event);
   }
-  // onKeyDown(event: paper.KeyEvent): void {
-  //   this.resizeTool.onKeyDown(event);
-  //   this.areaSelectTool.onKeyDown(event);
-  //   this.dragTool.onKeyDown(event);
-  //   this.copyTool.onKeyDown(event);
-  //   this.groupTool.onKeyDown(event);
-  //   this.insertTool.onKeyDown(event);
-  //   this.undoRedoTool.onKeyDown(event);
-  //   this.lineTool.onKeyDown(event);
-  //   switch(event.key) {
-  //     case 'alt': {
-  //       if (!this.measuring && !this.dragging && !this.resizing && !this.selecting) {
-  //         this.measuring = true;
-  //         store.dispatch(setCanvasMeasuring({measuring: true}));
-  //       }
-  //       break;
-  //     }
-  //     case 'escape': {
-  //       const state = store.getState();
-  //       if (state.canvasSettings.focusing) {
-  //         store.dispatch(escapeLayerScope());
-  //         if (state.layer.present.hover) {
-  //           const paperLayer = getPaperLayer(state.layer.present.hover);
-  //           paperLayer.emit('mouseenter', event);
-  //         }
-  //       }
-  //       break;
-  //     }
-  //     case 'backspace': {
-  //       const state = store.getState();
-  //       if (state.layer.present.selected.length > 0 && state.canvasSettings.focusing) {
-  //         if (state.tweenDrawer.isOpen && state.tweenDrawer.event) {
-  //           const tweenEvent = state.layer.present.tweenEventById[state.tweenDrawer.event];
-  //           let layersAndChildren: string[] = [];
-  //           state.layer.present.selected.forEach((id) => {
-  //             layersAndChildren = [...layersAndChildren, ...getLayerAndDescendants(state.layer.present, id)];
-  //           });
-  //           if (layersAndChildren.includes(tweenEvent.layer) || layersAndChildren.includes(tweenEvent.artboard) || layersAndChildren.includes(tweenEvent.destinationArtboard)) {
-  //             store.dispatch(setTweenDrawerEvent({id: null}));
-  //           }
-  //         }
-  //         store.dispatch(removeLayers({layers: state.layer.present.selected}));
-  //       }
-  //       break;
-  //     }
-  //   }
-  // }
   onKeyUp(event: paper.KeyEvent): void {
     this.resizeTool.onKeyUp(event);
     this.areaSelectTool.onKeyUp(event);

@@ -26,11 +26,13 @@ const SidebarLeft = (props: SidebarLeftProps): ReactElement => {
         position='left'
         header
         headerChildren={(
-          <SidebarLayersSearch
-            searchActive={searchActive}
-            search={search}
-            setSearchActive={setSearchActive}
-            setSearch={setSearch} />
+          ready && !isEmpty
+          ? <SidebarLayersSearch
+              searchActive={searchActive}
+              search={search}
+              setSearchActive={setSearchActive}
+              setSearch={setSearch} />
+          : null
         )}>
         {
           ready && !isEmpty

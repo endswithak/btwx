@@ -1,6 +1,5 @@
 import React, { useContext, ReactElement, useEffect } from 'react';
-import { getGradientOriginPoint, getGradientDestinationPoint } from '../store/selectors/layer';
-import { LayerState } from '../store/reducers/layer';
+import { updateGradientFrame } from '../store/utils/layer';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
@@ -18,161 +17,6 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { layer, gradient, onStopPress, zoom, layerItem } = props;
 
-  const updateGradientFrame = () => {
-    const stopsWithIndex = gradient.stops.map((stop, index) => {
-      return {
-        ...stop,
-        index
-      }
-    });
-    const sortedStops = stopsWithIndex.sort((a,b) => { return a.position - b.position });
-    const originStop = sortedStops[0];
-    const destStop = sortedStops[sortedStops.length - 1];
-    const oldGradientFrame = paperMain.project.getItem({ data: { id: 'GradientFrame' } });
-    if (oldGradientFrame) {
-      oldGradientFrame.remove();
-    }
-    const gradientFrameHandleBgProps = {
-      radius: (theme.unit * 2) / paperMain.view.zoom,
-      fillColor: '#fff',
-      shadowColor: new paperMain.Color(0, 0, 0, 0.5),
-      shadowBlur: theme.unit / 2,
-      insert: false,
-      strokeWidth: 1 / paperMain.view.zoom
-    }
-    const gradientFrameHandleSwatchProps = {
-      radius: (theme.unit + 2) / paperMain.view.zoom,
-      fillColor: '#fff',
-      insert: false
-    }
-    const gradientFrameLineProps = {
-      from: getGradientOriginPoint(layerItem, gradient.origin),
-      to: getGradientDestinationPoint(layerItem, gradient.destination),
-      insert: false
-    }
-    const gradientFrameOriginHandleBg  = new paperMain.Shape.Circle({
-      ...gradientFrameHandleBgProps,
-      center: getGradientOriginPoint(layerItem, gradient.origin),
-      data: {
-        type: 'UIElementChild',
-        interactive: true,
-        interactiveType: 'origin',
-        elementId: 'GradientFrame'
-      },
-      strokeColor: originStop.index === gradient.activeStopIndex ? theme.palette.primary : null
-    });
-    const gradientFrameOriginHandleSwatch  = new paperMain.Shape.Circle({
-      ...gradientFrameHandleSwatchProps,
-      fillColor: { hue: originStop.color.h, saturation: originStop.color.s, lightness: originStop.color.l, alpha: originStop.color.a },
-      center: getGradientOriginPoint(layerItem, gradient.origin),
-      data: {
-        type: 'UIElementChild',
-        interactive: true,
-        interactiveType: 'origin',
-        elementId: 'GradientFrame'
-      }
-    });
-    const gradientFrameDestinationHandleBg = new paperMain.Shape.Circle({
-      ...gradientFrameHandleBgProps,
-      center: getGradientDestinationPoint(layerItem, gradient.destination),
-      data: {
-        type: 'UIElementChild',
-        interactive: true,
-        interactiveType: 'destination',
-        elementId: 'GradientFrame'
-      },
-      strokeColor: destStop.index === gradient.activeStopIndex ? theme.palette.primary : null
-    });
-    const gradientFrameDestinationHandleSwatch = new paperMain.Shape.Circle({
-      ...gradientFrameHandleSwatchProps,
-      fillColor: { hue: destStop.color.h, saturation: destStop.color.s, lightness: destStop.color.l, alpha: destStop.color.a },
-      center: getGradientDestinationPoint(layerItem, gradient.destination),
-      data: {
-        type: 'UIElementChild',
-        interactive: true,
-        interactiveType: 'destination',
-        elementId: 'GradientFrame'
-      }
-    });
-    const gradientFrameLineDark = new paperMain.Path.Line({
-      ...gradientFrameLineProps,
-      strokeColor: new paperMain.Color(0, 0, 0, 0.25),
-      strokeWidth: 3 / paperMain.view.zoom,
-      data: {
-        id: 'GradientFrameLine',
-        type: 'UIElementChild',
-        interactive: false,
-        interactiveType: null,
-        elementId: 'GradientFrame'
-      }
-    });
-    const gradientFrameLineLight = new paperMain.Path.Line({
-      ...gradientFrameLineProps,
-      strokeColor: '#fff',
-      strokeWidth: 1 / paperMain.view.zoom,
-      data: {
-        id: 'GradientFrameLine',
-        type: 'UIElementChild',
-        interactive: false,
-        interactiveType: null,
-        elementId: 'GradientFrame'
-      }
-    });
-    const gradientFrameOriginHandle = new paperMain.Group({
-      data: {
-        id: 'GradientFrameOriginHandle',
-        type: 'UIElementChild',
-        interactive: true,
-        interactiveType: 'origin',
-        elementId: 'GradientFrame'
-      },
-      insert: false,
-      children: [gradientFrameOriginHandleBg, gradientFrameOriginHandleSwatch],
-      onMouseDown: () => {
-        if (originStop.index !== gradient.activeStopIndex) {
-          onStopPress(originStop.index);
-        }
-      }
-    });
-    const gradientFrameDestinationHandle = new paperMain.Group({
-      data: {
-        id: 'GradientFrameDestinationHandle',
-        type: 'UIElementChild',
-        interactive: true,
-        interactiveType: 'destination',
-        elementId: 'GradientFrame'
-      },
-      insert: false,
-      children: [gradientFrameDestinationHandleBg, gradientFrameDestinationHandleSwatch],
-      onMouseDown: () => {
-        if (destStop.index !== gradient.activeStopIndex) {
-          onStopPress(destStop.index);
-        }
-      }
-    });
-    const gradientFrameLines = new paperMain.Group({
-      data: {
-        id: 'GradientFrameLines',
-        type: 'UIElementChild',
-        interactive: false,
-        interactiveType: null,
-        elementId: 'GradientFrame'
-      },
-      insert: false,
-      children: [gradientFrameLineDark, gradientFrameLineLight]
-    });
-    const newGradientFrame = new paperMain.Group({
-      data: {
-        id: 'GradientFrame',
-        type: 'UIElement',
-        interactive: false,
-        interactiveType: null,
-        elementId: 'GradientFrame'
-      },
-      children: [gradientFrameLines, gradientFrameOriginHandle, gradientFrameDestinationHandle]
-    });
-  }
-
   const handleWheel = (e: WheelEvent) => {
     if (e.ctrlKey) {
       const oldGradientFrame = paperMain.project.getItem({ data: { id: 'GradientFrame' } });
@@ -183,7 +27,7 @@ const GradientFrame = (props: GradientFrameProps): ReactElement => {
   }
 
   useEffect(() => {
-    updateGradientFrame();
+    updateGradientFrame(layerItem, gradient, theme.name);
     document.getElementById('canvas').addEventListener('wheel', handleWheel);
     return () => {
       const oldGradientFrame = paperMain.project.getItem({ data: { id: 'GradientFrame' } });

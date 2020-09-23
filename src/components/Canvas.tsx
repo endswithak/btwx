@@ -3,8 +3,8 @@ import { connect } from 'react-redux';
 import { gsap } from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import { RootState } from '../store/reducers';
-import { SetLayerHoverPayload, SelectLayerPayload, DeselectLayerPayload, DeepSelectLayerPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayerHover, selectLayer, deselectLayer, deepSelectLayer, deselectAllLayers } from '../store/actions/layer';
+import { SetLayerHoverPayload, SelectLayerPayload, DeselectLayerPayload, DeepSelectLayerPayload, LayerTypes, SetLayerActiveGradientStopPayload } from '../store/actionTypes/layer';
+import { setLayerHover, selectLayer, deselectLayer, deepSelectLayer, deselectAllLayers, setLayerActiveGradientStop } from '../store/actions/layer';
 import { openContextMenu, closeContextMenu } from '../store/actions/contextMenu';
 import { OpenTextEditorPayload, TextEditorTypes } from '../store/actionTypes/textEditor';
 import { openTextEditor } from '../store/actions/textEditor';
@@ -12,16 +12,23 @@ import { SetTextSettingsPayload, TextSettingsTypes } from '../store/actionTypes/
 import { setTextSettings } from '../store/actions/textSettings';
 import { toggleSelectionToolThunk } from '../store/actions/tool';
 import { ToolTypes } from '../store/actionTypes/tool';
-import { SetCanvasZoomingPayload, SetCanvasZoomingTypePayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
-import { setCanvasZooming, setCanvasZoomingType } from '../store/actions/canvasSettings';
+import { SetCanvasZoomingPayload, SetCanvasZoomingTypePayload, CanvasSettingsTypes, SetCanvasMousePositionPayload } from '../store/actionTypes/canvasSettings';
+import { setCanvasZooming, setCanvasZoomingType, setCanvasMousePosition } from '../store/actions/canvasSettings';
 import { OpenContextMenuPayload, ContextMenuTypes } from '../store/actionTypes/contextMenu';
 import { getNearestScopeAncestor, getDeepSelectItem, getPaperLayer } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
 import { ThemeContext } from './ThemeProvider';
+import gradientEditor, { GradientEditorState } from '../store/reducers/gradientEditor';
+import { SetTweenDrawerEventPayload, SetTweenDrawerEventHoverPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
+import { setTweenDrawerEvent, openTweenDrawer, setTweenDrawerEventHoverThunk } from '../store/actions/tweenDrawer';
+import TweenDrawerEvent from './TweenDrawerEvent';
 
 gsap.registerPlugin(ScrollToPlugin);
 
 interface CanvasProps {
+  tweenDrawerOpen?: boolean;
+  tweenDrawerEventHover?: string;
+  gradientEditor?: GradientEditorState;
   noActiveTools?: boolean;
   cursor?: string;
   scope?: string[];
@@ -51,11 +58,16 @@ interface CanvasProps {
   setCanvasZooming?(payload: SetCanvasZoomingPayload): CanvasSettingsTypes;
   setCanvasZoomingType(payload: SetCanvasZoomingTypePayload): CanvasSettingsTypes;
   toggleSelectionToolThunk?(nativeEvent: any, hitResult: em.HitResult): ToolTypes;
+  setCanvasMousePosition?(payload: SetCanvasMousePositionPayload): CanvasSettingsTypes;
+  setLayerActiveGradientStop?(payload: SetLayerActiveGradientStopPayload): LayerTypes;
+  setTweenDrawerEvent?(payload: SetTweenDrawerEventPayload): TweenDrawerTypes;
+  openTweenDrawer?(): TweenDrawerTypes;
+  setTweenDrawerEventHoverThunk?(payload: SetTweenDrawerEventHoverPayload): TweenDrawerTypes;
 }
 
 const Canvas = (props: CanvasProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { cursor, noActiveTools, zooming, dragging, resizing, selecting, zoomingType, setCanvasZooming, setCanvasZoomingType, scope, layer, textJustification, setTextSettings, selected, hover, setLayerHover, selectLayer, deselectLayer, deepSelectLayer, deselectAllLayers, openContextMenu, closeContextMenu, openTextEditor, toggleSelectionToolThunk } = props;
+  const { tweenDrawerEventHover, setTweenDrawerEventHoverThunk, openTweenDrawer, tweenDrawerOpen, setTweenDrawerEvent, gradientEditor, setLayerActiveGradientStop, setCanvasMousePosition, cursor, noActiveTools, zooming, dragging, resizing, selecting, zoomingType, setCanvasZooming, setCanvasZoomingType, scope, layer, textJustification, setTextSettings, selected, hover, setLayerHover, selectLayer, deselectLayer, deepSelectLayer, deselectAllLayers, openContextMenu, closeContextMenu, openTextEditor, toggleSelectionToolThunk } = props;
 
   const handleHitResult = (point: paper.Point, includeNearestScopeAncestor?: boolean): em.HitResult => {
     const result: em.HitResult = {
@@ -145,6 +157,28 @@ const Canvas = (props: CanvasProps): ReactElement => {
           }
           break;
         }
+        case 'GradientFrame': {
+          const gradient = (layer.byId[gradientEditor.layers[0]].style[gradientEditor.prop] as em.Fill | em.Stroke).gradient;
+          const stopsWithIndex = gradient.stops.map((stop, index) => {
+            return { ...stop, index };
+          });
+          const sortedStops = stopsWithIndex.sort((a,b) => { return a.position - b.position });
+          const originStop = sortedStops[0];
+          const destinationStop = sortedStops[sortedStops.length - 1];
+          switch(props.interactiveType) {
+            case 'origin':
+              setLayerActiveGradientStop({stopIndex: originStop.index, id: gradientEditor.layers[0], prop: gradientEditor.prop as 'fill' | 'stroke'});
+              break;
+            case 'destination':
+              setLayerActiveGradientStop({stopIndex: destinationStop.index, id: gradientEditor.layers[0], prop: gradientEditor.prop as 'fill' | 'stroke'});
+              break;
+          }
+          break;
+        }
+        case 'TweenEventsFrame': {
+          console.log(props.interactiveType);
+          break;
+        }
       }
     }
   }
@@ -215,12 +249,31 @@ const Canvas = (props: CanvasProps): ReactElement => {
     }
   }
 
+  const handleUIElementDoubleClick = (e: any, hitResult: em.HitResult) => {
+    const props = hitResult.uiElementProps;
+    if (props.interactive) {
+      switch(props.elementId) {
+        case 'TweenEventsFrame': {
+          if (!tweenDrawerOpen) {
+            openTweenDrawer();
+          }
+          setTweenDrawerEvent({id: props.interactiveType});
+          break;
+        }
+      }
+    }
+  }
+
   const handleDoubleClick = (e: any) => {
     const paperPoint = paperMain.view.getEventPoint(e);
     const hitResult = handleHitResult(paperPoint, true);
     switch(hitResult.type) {
       case 'Layer': {
         handleLayerDoubleClick(e, hitResult);
+        break;
+      }
+      case 'UIElement': {
+        handleUIElementDoubleClick(e, hitResult);
         break;
       }
     }
@@ -265,16 +318,38 @@ const Canvas = (props: CanvasProps): ReactElement => {
     });
   }
 
+  const handleLayerMouseMove = (e: any, hitResult: em.HitResult) => {
+    const props = hitResult.layerProps;
+    if (hover !== props.nearestScopeAncestor.id) {
+      setLayerHover({id: props.nearestScopeAncestor.id});
+    }
+  }
+
+  const handleUIElementMouseMove = (e: any, hitResult: em.HitResult) => {
+    const props = hitResult.uiElementProps;
+    if (props.interactive) {
+      switch(props.elementId) {
+        case 'TweenEventsFrame': {
+          if (props.interactiveType && tweenDrawerEventHover !== props.interactiveType) {
+            setTweenDrawerEventHoverThunk({id: props.interactiveType});
+          }
+          break;
+        }
+      }
+    }
+  }
+
   const handleMouseMove = (e: any) => {
+    const paperPoint = paperMain.view.getEventPoint(e);
     if (!selecting && !dragging && !resizing) {
-      const paperPoint = paperMain.view.getEventPoint(e);
       const hitResult = handleHitResult(paperPoint, true);
       switch(hitResult.type) {
         case 'Layer': {
-          const props = hitResult.layerProps;
-          if (hover !== props.nearestScopeAncestor.id) {
-            setLayerHover({id: props.nearestScopeAncestor.id});
-          }
+          handleLayerMouseMove(e, hitResult);
+          break;
+        }
+        case 'UIElement': {
+          handleUIElementMouseMove(e, hitResult);
           break;
         }
         default: {
@@ -284,7 +359,15 @@ const Canvas = (props: CanvasProps): ReactElement => {
           break;
         }
       }
+      if (tweenDrawerEventHover !== null && (!hitResult.type || hitResult.type === 'Layer' || (hitResult.type === 'UIElement' && hitResult.uiElementProps.elementId !== 'TweenEventsFrame'))) {
+        setTweenDrawerEventHoverThunk({id: null});
+      }
     }
+    setCanvasMousePosition({mouse: {x: e.clientX, y: e.clientY, paperX: paperPoint.x, paperY: paperPoint.y}});
+  }
+
+  const handleMouseLeave = (e: any) => {
+    setCanvasMousePosition({mouse: null});
   }
 
   const handleWheel = (e: any): void => {
@@ -333,6 +416,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
       onDoubleClick={noActiveTools ? handleDoubleClick : null}
       onContextMenu={handleContextMenu}
       onMouseMove={noActiveTools ? handleMouseMove : null}
+      onMouseLeave={noActiveTools ? handleMouseLeave : null}
       onWheel={handleWheel}
       tabIndex={0}
       style={{
@@ -343,6 +427,9 @@ const Canvas = (props: CanvasProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState): {
+  tweenDrawerOpen: boolean;
+  tweenDrawerEventHover: string;
+  gradientEditor: GradientEditorState;
   noActiveTools: boolean;
   cursor: string;
   scope: string[];
@@ -361,7 +448,7 @@ const mapStateToProps = (state: RootState): {
   resizing: boolean;
   selecting: boolean;
 } => {
-  const { tool, canvasSettings, layer, textSettings } = state;
+  const { tool, canvasSettings, layer, textSettings, gradientEditor, tweenDrawer } = state;
   const cursor = (() => {
     if (tool.type === 'Shape' || tool.type === 'Artboard') {
       return 'crosshair';
@@ -384,6 +471,7 @@ const mapStateToProps = (state: RootState): {
   })();
   return {
     cursor,
+    gradientEditor,
     scope: layer.present.scope,
     layer: {
       allIds: layer.present.allIds,
@@ -397,11 +485,13 @@ const mapStateToProps = (state: RootState): {
     dragging: canvasSettings.dragging,
     resizing: canvasSettings.resizing,
     selecting: canvasSettings.selecting,
-    noActiveTools: !tool.type
+    noActiveTools: !tool.type,
+    tweenDrawerOpen: tweenDrawer.isOpen,
+    tweenDrawerEventHover: tweenDrawer.eventHover
   };
 };
 
 export default connect(
   mapStateToProps,
-  { setLayerHover, selectLayer, deselectLayer, deepSelectLayer, deselectAllLayers, openContextMenu, closeContextMenu, openTextEditor, setTextSettings, setCanvasZooming, setCanvasZoomingType, toggleSelectionToolThunk }
+  { setTweenDrawerEventHoverThunk, openTweenDrawer, setTweenDrawerEvent, setCanvasMousePosition, setLayerHover, selectLayer, deselectLayer, deepSelectLayer, deselectAllLayers, openContextMenu, closeContextMenu, openTextEditor, setTextSettings, setCanvasZooming, setCanvasZoomingType, toggleSelectionToolThunk, setLayerActiveGradientStop }
 )(Canvas);

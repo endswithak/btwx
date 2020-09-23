@@ -161,6 +161,9 @@ class GradientTool {
   onMouseDrag(event: paper.ToolEvent): void {
     if (this.enabled) {
       const state = store.getState();
+      this.originHandle = paperMain.project.getItem({data: {id: 'GradientFrameOriginHandle'}}) as paper.Shape;
+      this.destinationHandle = paperMain.project.getItem({data: {id: 'GradientFrameDestinationHandle'}}) as paper.Shape;
+      this.gradientLines = paperMain.project.getItems({data: {id: 'GradientFrameLine'}}) as paper.Path.Line[];
       this.to = event.point;
       this.x += event.delta.x;
       this.y += event.delta.y;

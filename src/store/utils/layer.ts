@@ -382,6 +382,162 @@ export const updateActiveArtboardFrame = (state: LayerState, useLayerItem = fals
   }
 }
 
+export const updateGradientFrame = (layerItem: em.Layer, gradient: em.Gradient, themeName: em.ThemeName) => {
+  const theme = getTheme(themeName);
+  const stopsWithIndex = gradient.stops.map((stop, index) => {
+    return {
+      ...stop,
+      index
+    }
+  });
+  const sortedStops = stopsWithIndex.sort((a,b) => { return a.position - b.position });
+  const originStop = sortedStops[0];
+  const destStop = sortedStops[sortedStops.length - 1];
+  const oldGradientFrame = paperMain.project.getItem({ data: { id: 'GradientFrame' } });
+  if (oldGradientFrame) {
+    oldGradientFrame.remove();
+  }
+  const gradientFrameHandleBgProps = {
+    radius: (theme.unit * 2) / paperMain.view.zoom,
+    fillColor: '#fff',
+    shadowColor: new paperMain.Color(0, 0, 0, 0.5),
+    shadowBlur: theme.unit / 2,
+    insert: false,
+    strokeWidth: 1 / paperMain.view.zoom
+  }
+  const gradientFrameHandleSwatchProps = {
+    radius: (theme.unit + 2) / paperMain.view.zoom,
+    fillColor: '#fff',
+    insert: false
+  }
+  const gradientFrameLineProps = {
+    from: getGradientOriginPoint(layerItem, gradient.origin),
+    to: getGradientDestinationPoint(layerItem, gradient.destination),
+    insert: false
+  }
+  const gradientFrameOriginHandleBg  = new paperMain.Shape.Circle({
+    ...gradientFrameHandleBgProps,
+    center: getGradientOriginPoint(layerItem, gradient.origin),
+    data: {
+      type: 'UIElementChild',
+      interactive: true,
+      interactiveType: 'origin',
+      elementId: 'GradientFrame'
+    },
+    strokeColor: originStop.index === gradient.activeStopIndex ? theme.palette.primary : null
+  });
+  const gradientFrameOriginHandleSwatch  = new paperMain.Shape.Circle({
+    ...gradientFrameHandleSwatchProps,
+    fillColor: { hue: originStop.color.h, saturation: originStop.color.s, lightness: originStop.color.l, alpha: originStop.color.a },
+    center: getGradientOriginPoint(layerItem, gradient.origin),
+    data: {
+      type: 'UIElementChild',
+      interactive: true,
+      interactiveType: 'origin',
+      elementId: 'GradientFrame'
+    }
+  });
+  const gradientFrameDestinationHandleBg = new paperMain.Shape.Circle({
+    ...gradientFrameHandleBgProps,
+    center: getGradientDestinationPoint(layerItem, gradient.destination),
+    data: {
+      type: 'UIElementChild',
+      interactive: true,
+      interactiveType: 'destination',
+      elementId: 'GradientFrame'
+    },
+    strokeColor: destStop.index === gradient.activeStopIndex ? theme.palette.primary : null
+  });
+  const gradientFrameDestinationHandleSwatch = new paperMain.Shape.Circle({
+    ...gradientFrameHandleSwatchProps,
+    fillColor: { hue: destStop.color.h, saturation: destStop.color.s, lightness: destStop.color.l, alpha: destStop.color.a },
+    center: getGradientDestinationPoint(layerItem, gradient.destination),
+    data: {
+      type: 'UIElementChild',
+      interactive: true,
+      interactiveType: 'destination',
+      elementId: 'GradientFrame'
+    }
+  });
+  const gradientFrameLineDark = new paperMain.Path.Line({
+    ...gradientFrameLineProps,
+    strokeColor: new paperMain.Color(0, 0, 0, 0.25),
+    strokeWidth: 3 / paperMain.view.zoom,
+    data: {
+      id: 'GradientFrameLine',
+      type: 'UIElementChild',
+      interactive: false,
+      interactiveType: null,
+      elementId: 'GradientFrame'
+    }
+  });
+  const gradientFrameLineLight = new paperMain.Path.Line({
+    ...gradientFrameLineProps,
+    strokeColor: '#fff',
+    strokeWidth: 1 / paperMain.view.zoom,
+    data: {
+      id: 'GradientFrameLine',
+      type: 'UIElementChild',
+      interactive: false,
+      interactiveType: null,
+      elementId: 'GradientFrame'
+    }
+  });
+  const gradientFrameOriginHandle = new paperMain.Group({
+    data: {
+      id: 'GradientFrameOriginHandle',
+      type: 'UIElementChild',
+      interactive: true,
+      interactiveType: 'origin',
+      elementId: 'GradientFrame'
+    },
+    insert: false,
+    children: [gradientFrameOriginHandleBg, gradientFrameOriginHandleSwatch],
+    // onMouseDown: () => {
+    //   if (originStop.index !== gradient.activeStopIndex) {
+    //     onStopPress(originStop.index);
+    //   }
+    // }
+  });
+  const gradientFrameDestinationHandle = new paperMain.Group({
+    data: {
+      id: 'GradientFrameDestinationHandle',
+      type: 'UIElementChild',
+      interactive: true,
+      interactiveType: 'destination',
+      elementId: 'GradientFrame'
+    },
+    insert: false,
+    children: [gradientFrameDestinationHandleBg, gradientFrameDestinationHandleSwatch],
+    // onMouseDown: () => {
+    //   if (destStop.index !== gradient.activeStopIndex) {
+    //     onStopPress(destStop.index);
+    //   }
+    // }
+  });
+  const gradientFrameLines = new paperMain.Group({
+    data: {
+      id: 'GradientFrameLines',
+      type: 'UIElementChild',
+      interactive: false,
+      interactiveType: null,
+      elementId: 'GradientFrame'
+    },
+    insert: false,
+    children: [gradientFrameLineDark, gradientFrameLineLight]
+  });
+  const newGradientFrame = new paperMain.Group({
+    data: {
+      id: 'GradientFrame',
+      type: 'UIElement',
+      interactive: false,
+      interactiveType: null,
+      elementId: 'GradientFrame'
+    },
+    children: [gradientFrameLines, gradientFrameOriginHandle, gradientFrameDestinationHandle]
+  });
+}
+
 export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', useLayerItem = false) => {
   const selectionFrame = paperMain.project.getItem({ data: { id: 'SelectionFrame' } });
   if (selectionFrame) {
@@ -865,13 +1021,20 @@ export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[
       const tweenEventFrame = new paperMain.Group({
         children: [tweenEventConnector, tweenEventIconBackground, tweenEventIcon, tweenEventDestinationIndicator, tweenEventText],
         data: {
+          id: 'TweenEventFrame',
           type: 'UIElementChild',
-          interactive: false,
-          interactiveType: null,
+          interactive: true,
+          interactiveType: event.id,
           elementId: 'TweenEventsFrame'
         },
         parent: tweenEventsFrame,
-        // opacity: groupOpacity,
+        opacity: groupOpacity,
+        onMouseEnter: function() {
+          document.body.style.cursor = 'pointer';
+        },
+        onMouseLeave: function() {
+          document.body.style.cursor = 'auto';
+        },
         // onMouseEnter: function() {
         //   document.body.style.cursor = 'pointer';
         //   const eventFrames = this.parent.getItems({data: { id: 'TweenEventFrame' } });
@@ -1105,6 +1268,10 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
       currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: layerScopeRoot, scope: 1}) as SetActiveArtboard);
     }
   }
+  // handle hover
+  if (layer.id !== currentState.hover) {
+    currentState = setLayerHover(currentState, layerActions.setLayerHover({id: action.payload.id}) as SetLayerHover);
+  }
   // if new selection, create selection with just that layer
   if (action.payload.newSelection) {
     const deselectAll = deselectAllLayers(currentState, layerActions.deselectAllLayers() as DeselectAllLayers)
@@ -1146,9 +1313,9 @@ export const deepSelectLayer = (state: LayerState, action: DeepSelectLayer): Lay
   if (isScopeGroupLayer(currentState, nearestScopeAncestor.id)) {
     currentState = increaseLayerScope(currentState, layerActions.increaseLayerScope({id: nearestScopeAncestor.id}) as IncreaseLayerScope);
     const nearestScopeAncestorDeep = getNearestScopeAncestor(currentState, action.payload.id);
-    // if (currentState.hover === nearestScopeAncestor.id) {
-    //   currentState = setLayerHover(currentState, layerActions.setLayerHover({id: nearestScopeAncestorDeep.id}) as SetLayerHover);
-    // }
+    if (currentState.hover === nearestScopeAncestor.id) {
+      currentState = setLayerHover(currentState, layerActions.setLayerHover({id: nearestScopeAncestorDeep.id}) as SetLayerHover);
+    }
     return selectLayer(currentState, layerActions.selectLayer({id: nearestScopeAncestorDeep.id, newSelection: true}) as SelectLayer);
   }
   return currentState;

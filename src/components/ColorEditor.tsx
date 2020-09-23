@@ -65,15 +65,11 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
   );
 
   useEffect(() => {
-    if (canvasFocusing) {
-      setCanvasFocusing({focusing: false});
-    }
     document.addEventListener('mousedown', onMouseDown, false);
     return (): void => {
       if (colorEditor.isOpen) {
         closeColorEditor();
       }
-      setCanvasFocusing({focusing: true});
       document.removeEventListener('mousedown', onMouseDown);
     }
   }, []);

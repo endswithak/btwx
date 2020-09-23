@@ -8,6 +8,7 @@ export const SET_CANVAS_ZOOMING_TYPE = 'SET_CANVAS_ZOOMING_TYPE';
 export const SET_CANVAS_MEASURING = 'SET_CANVAS_MEASURING';
 export const SET_CANVAS_FOCUSING = 'SET_CANVAS_FOCUSING';
 export const RESET_CANVAS_SETTINGS = 'RESET_CANVAS_SETTINGS';
+export const SET_CANVAS_MOUSE_POSITION = 'SET_CANVAS_MOUSE_POSITION';
 
 export interface SetCanvasDrawingPayload {
   drawing: boolean;
@@ -96,6 +97,20 @@ export interface ResetCanvasSettings {
   type: typeof RESET_CANVAS_SETTINGS;
 }
 
+export interface SetCanvasMousePositionPayload {
+  mouse: {
+    x: number;
+    y: number;
+    paperX: number;
+    paperY: number;
+  };
+}
+
+export interface SetCanvasMousePosition {
+  type: typeof SET_CANVAS_MOUSE_POSITION;
+  payload: SetCanvasMousePositionPayload;
+}
+
 export type CanvasSettingsTypes = SetCanvasDrawing |
                                   SetCanvasTyping |
                                   SetCanvasResizing |
@@ -105,4 +120,5 @@ export type CanvasSettingsTypes = SetCanvasDrawing |
                                   SetCanvasZoomingType |
                                   SetCanvasMeasuring |
                                   SetCanvasFocusing |
-                                  ResetCanvasSettings;
+                                  ResetCanvasSettings |
+                                  SetCanvasMousePosition;

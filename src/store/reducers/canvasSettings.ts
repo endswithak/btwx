@@ -9,6 +9,7 @@ import {
   SET_CANVAS_MEASURING,
   SET_CANVAS_FOCUSING,
   RESET_CANVAS_SETTINGS,
+  SET_CANVAS_MOUSE_POSITION,
   CanvasSettingsTypes,
 } from '../actionTypes/canvasSettings';
 
@@ -24,6 +25,12 @@ import {
 // }
 
 export interface CanvasSettingsState {
+  mouse: {
+    x: number;
+    y: number;
+    paperX: number;
+    paperY: number;
+  };
   drawing: boolean;
   typing: boolean;
   resizing: boolean;
@@ -37,6 +44,7 @@ export interface CanvasSettingsState {
 }
 
 const initialState: CanvasSettingsState = {
+  mouse: null,
   drawing: false,
   typing: false,
   resizing: false,
@@ -111,6 +119,12 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
       return {
         ...state,
         ...initialState
+      };
+    }
+    case SET_CANVAS_MOUSE_POSITION: {
+      return {
+        ...state,
+        mouse: action.payload.mouse
       };
     }
     default:

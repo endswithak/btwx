@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { UngroupLayersPayload, SendLayersBackwardPayload, SendLayersForwardPayload, SendLayersToBackPayload, GroupLayersPayload, SendLayersToFrontPayload, LayerTypes } from '../store/actionTypes/layer';
-import { pasteLayersThunk, copyLayersThunk, removeLayersThunk, redoThunk, undoThunk, ungroupLayers, groupLayersThunk, sendLayersForward, sendLayersToFront, sendLayersBackward, sendLayersToBack } from '../store/actions/layer';
+import { pasteLayersThunk, copyLayersThunk, removeLayersThunk, redoThunk, undoThunk, ungroupLayers, groupLayersThunk, sendLayersForward, sendLayersToFront, sendLayersBackward, sendLayersToBack, escapeLayerScopeThunk } from '../store/actions/layer';
 import { resetCanvasSettingsThunk } from '../store/actions/canvasSettings';
 import { toggleArtboardToolThunk, toggleTextToolThunk, toggleShapeToolThunk } from '../store/actions/tool';
 
@@ -28,10 +28,11 @@ interface KeyBindingsProps {
   sendLayersBackward?(payload: SendLayersBackwardPayload): LayerTypes;
   sendLayersToBack?(payload: SendLayersToBackPayload): LayerTypes;
   resetCanvasSettingsThunk?(): void;
+  escapeLayerScopeThunk?(): void;
 }
 
 const KeyBindings = (props: KeyBindingsProps): ReactElement => {
-  const { selected, focusing, canMoveBackward, canMoveForward, canGroup, canUngroup, copyLayersThunk, pasteLayersThunk, removeLayersThunk, toggleArtboardToolThunk, toggleTextToolThunk, toggleShapeToolThunk, redoThunk, undoThunk, ungroupLayers, groupLayersThunk, sendLayersForward, sendLayersToFront, sendLayersBackward, sendLayersToBack, resetCanvasSettingsThunk } = props;
+  const { escapeLayerScopeThunk, selected, focusing, canMoveBackward, canMoveForward, canGroup, canUngroup, copyLayersThunk, pasteLayersThunk, removeLayersThunk, toggleArtboardToolThunk, toggleTextToolThunk, toggleShapeToolThunk, redoThunk, undoThunk, ungroupLayers, groupLayersThunk, sendLayersForward, sendLayersToFront, sendLayersBackward, sendLayersToBack, resetCanvasSettingsThunk } = props;
 
   const handleKeyDown = (e: any) => {
     if (focusing) {
@@ -48,6 +49,10 @@ const KeyBindings = (props: KeyBindingsProps): ReactElement => {
           if (e.metaKey) {
             copyLayersThunk();
           }
+          break;
+        }
+        case 'Escape': {
+          escapeLayerScopeThunk();
           break;
         }
         case 'g': {
@@ -185,5 +190,5 @@ const mapStateToProps = (state: RootState): {
 
 export default connect(
   mapStateToProps,
-  { pasteLayersThunk, copyLayersThunk, removeLayersThunk, toggleArtboardToolThunk, toggleTextToolThunk, toggleShapeToolThunk, redoThunk, undoThunk, ungroupLayers, groupLayersThunk, sendLayersForward, sendLayersToFront, sendLayersBackward, sendLayersToBack, resetCanvasSettingsThunk }
+  { escapeLayerScopeThunk, pasteLayersThunk, copyLayersThunk, removeLayersThunk, toggleArtboardToolThunk, toggleTextToolThunk, toggleShapeToolThunk, redoThunk, undoThunk, ungroupLayers, groupLayersThunk, sendLayersForward, sendLayersToFront, sendLayersBackward, sendLayersToBack, resetCanvasSettingsThunk }
 )(KeyBindings);
