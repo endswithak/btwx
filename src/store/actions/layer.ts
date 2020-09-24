@@ -9,7 +9,7 @@ import { getPaperFillColor, getPaperStrokeColor, getPaperLayer, getPaperShadowCo
 import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayersBounds, importPaperProject, colorsMatch, gradientsMatch, getNearestScopeAncestor } from '../selectors/layer';
 import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle } from '../utils/actions';
 
-import { bufferToBase64 } from '../../utils';
+import { bufferToBase64, scrollToLayer } from '../../utils';
 
 import { addDocumentImage } from './documentSettings';
 import { setTweenDrawerEvent } from './tweenDrawer';
@@ -789,7 +789,7 @@ export const removeLayers = (payload: RemoveLayersPayload): LayerTypes => ({
 
 export const removeLayersThunk = (payload: RemoveLayersPayload) => {
   return (dispatch: any, getState: any) => {
-    const state = getState();
+    const state = getState() as RootState;
     if (state.layer.present.selected.length > 0 && state.canvasSettings.focusing) {
       if (state.tweenDrawer.isOpen && state.tweenDrawer.event) {
         const tweenEvent = state.layer.present.tweenEventById[state.tweenDrawer.event];
@@ -928,13 +928,7 @@ export const escapeLayerScopeThunk = () => {
     const state = getState() as RootState;
     const nextScope = state.layer.present.scope.filter((id, index) => index !== state.layer.present.scope.length - 1);
     if (state.layer.present.scope.length > 0) {
-      const leftSidebar = document.getElementById('sidebar-scroll-left');
-      const layerDomItem = document.getElementById(state.layer.present.scope[state.layer.present.scope.length - 1]);
-      if (layerDomItem) {
-        gsap.set(leftSidebar, {
-          scrollTo: layerDomItem
-        });
-      }
+      scrollToLayer(state.layer.present.scope[state.layer.present.scope.length - 1]);
     }
     if (state.canvasSettings.mouse) {
       const point = new paperMain.Point(state.canvasSettings.mouse.paperX, state.canvasSettings.mouse.paperY)

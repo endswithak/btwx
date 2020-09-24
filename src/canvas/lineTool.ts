@@ -1,5 +1,6 @@
 import store from '../store';
 import { setLineFrom, setLineTo } from '../store/actions/layer';
+import { setSelectionToolResizeType } from '../store/actions/selectionTool';
 import { getPaperLayer, getLineFromPoint, getLineToPoint } from '../store/selectors/layer';
 import { paperMain } from './index';
 import SnapTool from './snapTool';
@@ -47,7 +48,8 @@ class LineTool {
     this.toHandle = paperMain.project.getItem({data: { interactiveType: 'to'}}) as paper.Shape;
     this.fromBounds = new paperMain.Rectangle(handle === 'from' ? this.fromHandle.bounds : this.toHandle.bounds);
     this.snapTool = new SnapTool();
-    store.dispatch(setCanvasResizing({resizing: true, resizingType: 'ew'}));
+    store.dispatch(setCanvasResizing({resizing: true}));
+    store.dispatch(setSelectionToolResizeType({resizeType: 'ew'}));
     updateSelectionFrame(this.state.layer.present, this.handle);
   }
   disable(): void {

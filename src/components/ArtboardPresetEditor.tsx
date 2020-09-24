@@ -8,10 +8,8 @@ import { ThemeContext } from './ThemeProvider';
 import tinyColor from 'tinycolor2';
 import { closeArtboardPresetEditor } from '../store/actions/artboardPresetEditor';
 import { ArtboardPresetEditorTypes } from '../store/actionTypes/artboardPresetEditor';
-import { setArtboardToolDevicePlatform } from '../store/actions/tool';
-import { ToolTypes, SetArtboardToolDevicePlatformPayload } from '../store/actionTypes/tool';
-import { addArtboardPreset, updateArtboardPreset } from '../store/actions/documentSettings';
-import { DocumentSettingsTypes, AddArtboardPresetPayload, UpdateArtboardPresetPayload } from '../store/actionTypes/documentSettings';
+import { addArtboardPreset, updateArtboardPreset, setArtboardPresetDevicePlatform } from '../store/actions/documentSettings';
+import { DocumentSettingsTypes, AddArtboardPresetPayload, UpdateArtboardPresetPayload, SetArtboardPresetDevicePlatformPayload } from '../store/actionTypes/documentSettings';
 import { setCanvasFocusing } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasFocusingPayload } from '../store/actionTypes/canvasSettings';
 import SidebarInput from './SidebarInput';
@@ -22,7 +20,7 @@ interface ArtboardPresetEditorProps {
   platformType?: em.DevicePlatformType;
   canvasFocusing?: boolean;
   closeArtboardPresetEditor?(): ArtboardPresetEditorTypes;
-  setArtboardToolDevicePlatform?(payload: SetArtboardToolDevicePlatformPayload): ToolTypes;
+  setArtboardPresetDevicePlatform?(payload: SetArtboardPresetDevicePlatformPayload): DocumentSettingsTypes;
   addArtboardPreset?(payload: AddArtboardPresetPayload): DocumentSettingsTypes;
   updateArtboardPreset?(payload: UpdateArtboardPresetPayload): DocumentSettingsTypes;
   setCanvasFocusing?(payload: SetCanvasFocusingPayload): CanvasSettingsTypes;
@@ -53,7 +51,7 @@ const SaveButton = styled.button`
 const ArtboardPresetEditor = (props: ArtboardPresetEditorProps): ReactElement => {
   const ref = useRef(null);
   const theme = useContext(ThemeContext);
-  const { exists, closeArtboardPresetEditor, canvasFocusing, platformType, artboardPresetEditor, addArtboardPreset, updateArtboardPreset, setArtboardToolDevicePlatform, setCanvasFocusing } = props;
+  const { exists, closeArtboardPresetEditor, canvasFocusing, platformType, artboardPresetEditor, addArtboardPreset, updateArtboardPreset, setArtboardPresetDevicePlatform, setCanvasFocusing } = props;
   const [name, setName] = useState(artboardPresetEditor.type);
   const [width, setWidth] = useState(artboardPresetEditor.width);
   const [height, setHeight] = useState(artboardPresetEditor.height);
@@ -105,7 +103,7 @@ const ArtboardPresetEditor = (props: ArtboardPresetEditorProps): ReactElement =>
         height: height
       });
     }
-    setArtboardToolDevicePlatform({
+    setArtboardPresetDevicePlatform({
       platform: 'Custom'
     });
     closeArtboardPresetEditor();
@@ -212,8 +210,8 @@ const ArtboardPresetEditor = (props: ArtboardPresetEditorProps): ReactElement =>
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { artboardPresetEditor, tool, documentSettings, canvasSettings } = state;
-  const platformType = tool.artboardToolDevicePlatform;
+  const { artboardPresetEditor, documentSettings, canvasSettings } = state;
+  const platformType = documentSettings.artboardPresets.platform;
   const exists = documentSettings.artboardPresets.allIds.includes(artboardPresetEditor.id);
   const canvasFocusing = canvasSettings.focusing;
   return { artboardPresetEditor, platformType, exists, canvasFocusing };
@@ -221,5 +219,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { closeArtboardPresetEditor, addArtboardPreset, updateArtboardPreset, setArtboardToolDevicePlatform, setCanvasFocusing }
+  { closeArtboardPresetEditor, addArtboardPreset, updateArtboardPreset, setArtboardPresetDevicePlatform, setCanvasFocusing }
 )(ArtboardPresetEditor);

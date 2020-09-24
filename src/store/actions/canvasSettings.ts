@@ -1,29 +1,32 @@
-import { disableActiveToolThunk } from './tool';
-
 import {
+  SET_CANVAS_ACTIVE_TOOL,
   SET_CANVAS_DRAWING,
   SET_CANVAS_TYPING,
   SET_CANVAS_RESIZING,
   SET_CANVAS_SELECTING,
   SET_CANVAS_DRAGGING,
   SET_CANVAS_ZOOMING,
-  SET_CANVAS_ZOOMING_TYPE,
   SET_CANVAS_MEASURING,
   SET_CANVAS_FOCUSING,
   RESET_CANVAS_SETTINGS,
   SET_CANVAS_MOUSE_POSITION,
+  SetCanvasActiveToolPayload,
   SetCanvasDrawingPayload,
   SetCanvasTypingPayload,
   SetCanvasResizingPayload,
   SetCanvasDraggingPayload,
   SetCanvasZoomingPayload,
   SetCanvasSelectingPayload,
-  SetCanvasZoomingTypePayload,
   SetCanvasMeasuringPayload,
   SetCanvasFocusingPayload,
   SetCanvasMousePositionPayload,
   CanvasSettingsTypes
 } from '../actionTypes/canvasSettings';
+
+export const setCanvasActiveTool = (payload: SetCanvasActiveToolPayload): CanvasSettingsTypes => ({
+  type: SET_CANVAS_ACTIVE_TOOL,
+  payload
+});
 
 export const setCanvasDrawing = (payload: SetCanvasDrawingPayload): CanvasSettingsTypes => ({
   type: SET_CANVAS_DRAWING,
@@ -55,11 +58,6 @@ export const setCanvasZooming = (payload: SetCanvasZoomingPayload): CanvasSettin
   payload
 });
 
-export const setCanvasZoomingType = (payload: SetCanvasZoomingTypePayload): CanvasSettingsTypes => ({
-  type: SET_CANVAS_ZOOMING_TYPE,
-  payload
-});
-
 export const setCanvasMeasuring = (payload: SetCanvasMeasuringPayload): CanvasSettingsTypes => ({
   type: SET_CANVAS_MEASURING,
   payload
@@ -81,7 +79,6 @@ export const setCanvasMousePosition = (payload: SetCanvasMousePositionPayload): 
 
 export const resetCanvasSettingsThunk = () => {
   return (dispatch: any, getState: any) => {
-    dispatch(disableActiveToolThunk());
     dispatch(resetCanvasSettings());
   }
 }

@@ -1,5 +1,6 @@
 import store from '../store';
 import { setCanvasResizing } from '../store/actions/canvasSettings';
+import { setSelectionToolResizeType } from '../store/actions/selectionTool';
 import { scaleLayers } from '../store/actions/layer';
 import { getPaperLayer, getSelectionBounds, getLayerAndDescendants } from '../store/selectors/layer';
 import { updateSelectionFrame, updateMeasureFrame } from '../store/utils/layer';
@@ -55,7 +56,7 @@ class ResizeTool {
     this.preserveAspectRatio = false;
   }
   enable(state: RootState, handle: string): void {
-    const resizingType = (() => {
+    const resizeType = (() => {
       switch(handle) {
         case 'topLeft':
         case 'bottomRight':
@@ -70,8 +71,9 @@ class ResizeTool {
         case 'rightCenter':
           return 'ew';
       }
-    })() as em.ResizingType;
-    store.dispatch(setCanvasResizing({resizing: true, resizingType}));
+    })() as em.ResizeType;
+    store.dispatch(setCanvasResizing({resizing: true}));
+    store.dispatch(setSelectionToolResizeType({resizeType}));
     this.enabled = true;
     this.handle = handle;
     this.snapTool = new SnapTool();

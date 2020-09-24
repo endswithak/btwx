@@ -1,28 +1,18 @@
 import React, { useEffect, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import debounce from 'lodash.debounce';
-import { SetCanvasZoomingPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
-import { setCanvasZooming } from '../store/actions/canvasSettings';
-import { SetCanvasMatrixPayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
-import { setCanvasMatrix } from '../store/actions/documentSettings';
-import { LayerTypes } from '../store/actionTypes/layer';
-import { updateInViewLayers } from '../store/actions/layer';
-import { paperMain } from '../canvas';
+import { disableZoomToolThunk } from '../store/actions/zoomTool';
 
 interface CanvasZoomWrapProps {
   children: ReactElement | ReactElement[];
-  setCanvasMatrix?(payload: SetCanvasMatrixPayload): DocumentSettingsTypes;
-  setCanvasZooming?(payload: SetCanvasZoomingPayload): CanvasSettingsTypes;
-  updateInViewLayers?(): LayerTypes;
+  disableZoomToolThunk?(): void;
 }
 
 const CanvasZoomWrap = (props: CanvasZoomWrapProps): ReactElement => {
-  const { children, setCanvasMatrix, setCanvasZooming, updateInViewLayers } = props;
+  const { children, disableZoomToolThunk } = props;
 
   const handleWheel = debounce((e: any) => {
-    setCanvasZooming({zooming: false});
-    setCanvasMatrix({matrix: paperMain.view.matrix.values});
-    updateInViewLayers();
+    disableZoomToolThunk();
   }, 150);
 
   useEffect(() => {
@@ -42,5 +32,5 @@ const CanvasZoomWrap = (props: CanvasZoomWrapProps): ReactElement => {
 
 export default connect(
   null,
-  { setCanvasMatrix, updateInViewLayers, setCanvasZooming }
+  { disableZoomToolThunk }
 )(CanvasZoomWrap);

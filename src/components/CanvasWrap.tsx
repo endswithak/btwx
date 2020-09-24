@@ -1,16 +1,14 @@
 import { remote } from 'electron';
 import React, { useRef, useContext, useEffect, ReactElement } from 'react';
 import { connect } from 'react-redux';
-import { toggleSelectionToolThunk } from '../store/actions/tool';
-import { ToolTypes } from '../store/actionTypes/tool';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { importPaperProject } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
-import { LayerTypes, AddArtboardPayload } from '../store/actionTypes/layer';
-import { updateInViewLayers, addArtboardThunk } from '../store/actions/layer';
+import { LayerTypes, SelectLayerPayload, AddArtboardPayload } from '../store/actionTypes/layer';
+import { updateInViewLayers, addArtboardThunk, selectLayer } from '../store/actions/layer';
 import { APPLE_IPHONE_DEVICES, ANDROID_MOBILE_DEVICES } from '../constants';
-import { handleSelectionZoom } from './ZoomButton';
+import { zoomSelectionThunk } from '../store/actions/zoomTool';
 import Canvas from './Canvas';
 import CanvasResizeWrap from './CanvasResizeWrap';
 import CanvasZoomWrap from './CanvasZoomWrap';
@@ -25,16 +23,17 @@ interface CanvasWrapProps {
   allTextIds?: string[];
   allImageIds?: string[];
   matrix?: number[];
-  toggleSelectionToolThunk(): ToolTypes;
   updateInViewLayers(): LayerTypes;
   setReady(ready: boolean): void;
   addArtboardThunk?(payload: AddArtboardPayload): Promise<em.Artboard>;
+  zoomSelectionThunk?(): void;
+  selectLayer?(payload: SelectLayerPayload): LayerTypes;
 }
 
 const CanvasWrap = (props: CanvasWrapProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
-  const { matrix, addArtboardThunk, documentImages, toggleSelectionToolThunk, updateInViewLayers, paperProject, allArtboardIds, allShapeIds, allTextIds, allImageIds, setReady } = props;
+  const { selectLayer, zoomSelectionThunk, matrix, addArtboardThunk, documentImages, updateInViewLayers, paperProject, allArtboardIds, allShapeIds, allTextIds, allImageIds, setReady } = props;
 
   useEffect(() => {
     // init canvas
@@ -70,8 +69,9 @@ const CanvasWrap = (props: CanvasWrapProps): ReactElement => {
             innerHeight: artboardDevice.height
           }
         } as any
-      }).then((newArtboard) => {
-        handleSelectionZoom(true, true, [newArtboard.id], {[newArtboard.id]: newArtboard});
+      }).then((artboard) => {
+        selectLayer({id: artboard.id, newSelection: true});
+        zoomSelectionThunk();
       });
     }
     // set app ready
@@ -117,5 +117,5 @@ const mapStateToProps = (state: RootState): {
 
 export default connect(
   mapStateToProps,
-  { toggleSelectionToolThunk, updateInViewLayers, addArtboardThunk }
+  { updateInViewLayers, addArtboardThunk, zoomSelectionThunk, selectLayer }
 )(CanvasWrap);

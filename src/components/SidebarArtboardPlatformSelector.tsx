@@ -44,7 +44,7 @@ const SidebarArtboardPlatformSelector = (props: SidebarArtboardPlatformSelectorP
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { tool, documentSettings } = state;
+  const { documentSettings } = state;
   const platformValue = documentSettings.artboardPresets.platform;
   const optionValues = [
     ...DEVICES,

@@ -3,34 +3,28 @@ import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { activateInsertKnob } from '../store/actions/insertKnob';
 import { InsertKnobTypes } from '../store/actionTypes/insertKnob';
-import { enableSelectionTool } from '../store/actions/tool';
-import { ToolTypes } from '../store/actionTypes/tool';
-import { ToolState } from '../store/reducers/tool';
 import SidebarEmptyState from './SidebarEmptyState';
 
 interface SidebarLeftEmptyStateProps {
+  activeTool?: em.ToolType;
+  shapeToolShapeType?: em.ShapeType;
   isEmpty?: boolean;
-  tool?: ToolState;
   insertKnobOpen?: boolean;
   emptyStateActionActive?: boolean;
   activateInsertKnob?(): InsertKnobTypes;
-  enableSelectionTool?(): ToolTypes;
 }
 
 const SidebarLeftEmptyState = (props: SidebarLeftEmptyStateProps): ReactElement => {
-  const { isEmpty, insertKnobOpen, tool, activateInsertKnob, enableSelectionTool } = props;
+  const { isEmpty, activeTool, shapeToolShapeType, insertKnobOpen, activateInsertKnob } = props;
 
   const handleEmptyStateActionClick = () => {
-    if (tool.type !== 'Selection') {
-      enableSelectionTool();
-    }
     activateInsertKnob();
   }
 
   const getEmptyStateIcon = () => {
-    switch(tool.type) {
+    switch(activeTool) {
       case 'Shape':
-        switch(tool.shapeToolType) {
+        switch(shapeToolShapeType) {
           case 'Rectangle':
             return 'rectangle';
           case 'Rounded':
@@ -55,12 +49,12 @@ const SidebarLeftEmptyState = (props: SidebarLeftEmptyStateProps): ReactElement 
   }
 
   const getEmptyStateText = () => {
-    switch(tool.type) {
+    switch(activeTool) {
       case 'Shape':
-        return tool.shapeToolType;
+        return shapeToolShapeType;
       case 'Text':
       case 'Artboard':
-        return tool.type;
+        return activeTool;
       default:
         return 'Layers';
     }
@@ -68,7 +62,7 @@ const SidebarLeftEmptyState = (props: SidebarLeftEmptyStateProps): ReactElement 
 
   const getEmptyStateDetail = () => {
     // eslint-disable-next-line react/prop-types
-    switch(tool.type) {
+    switch(activeTool) {
       case 'Shape':
         return 'Click and drag on canvas to draw layer.';
       case 'Artboard':
@@ -81,12 +75,12 @@ const SidebarLeftEmptyState = (props: SidebarLeftEmptyStateProps): ReactElement 
   }
 
   const getEmptyStateActionText = () => {
-    switch(tool.type) {
+    switch(activeTool) {
       case 'Shape':
-        return `Adding ${tool.shapeToolType}...`;
+        return `Adding ${shapeToolShapeType}...`;
       case 'Text':
       case 'Artboard':
-        return `Adding ${tool.type}...`;
+        return `Adding ${activeTool}...`;
       default:
         return 'Add Layer';
     }
@@ -99,7 +93,7 @@ const SidebarLeftEmptyState = (props: SidebarLeftEmptyStateProps): ReactElement 
       detail={getEmptyStateDetail()}
       action
       actionText={getEmptyStateActionText()}
-      actionActive={tool.type === 'Artboard' || tool.type === 'Shape' || tool.type === 'Text' || insertKnobOpen}
+      actionActive={activeTool === 'Artboard' || activeTool === 'Shape' || activeTool === 'Text' || insertKnobOpen}
       actionDisabled={insertKnobOpen}
       actionClick={handleEmptyStateActionClick}
       style={{width: 211}} />
@@ -107,14 +101,16 @@ const SidebarLeftEmptyState = (props: SidebarLeftEmptyStateProps): ReactElement 
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { documentSettings, layer, tool, insertKnob } = state;
+  const { documentSettings, layer, insertKnob, canvasSettings, shapeTool } = state;
   const sidebarWidth = documentSettings.leftSidebarWidth;
   const isEmpty = layer.present.allIds.length <= 1;
   const insertKnobOpen = insertKnob.isActive;
-  return { sidebarWidth, isEmpty, insertKnobOpen, tool };
+  const activeTool = canvasSettings.activeTool;
+  const shapeToolShapeType = shapeTool.shapeType;
+  return { sidebarWidth, isEmpty, insertKnobOpen, activeTool, shapeToolShapeType };
 };
 
 export default connect(
   mapStateToProps,
-  { activateInsertKnob, enableSelectionTool }
+  { activateInsertKnob }
 )(SidebarLeftEmptyState);

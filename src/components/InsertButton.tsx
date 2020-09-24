@@ -3,14 +3,16 @@ import sharp from 'sharp';
 import { remote } from 'electron';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { toggleShapeToolThunk, toggleArtboardToolThunk, toggleTextToolThunk } from '../store/actions/tool';
+import { toggleArtboardToolThunk} from '../store/actions/artboardTool';
+import { toggleTextToolThunk } from '../store/actions/textTool';
+import { toggleShapeToolThunk } from '../store/actions/shapeTool';
 import { AddImagePayload } from '../store/actionTypes/layer';
 import { addImageThunk } from '../store/actions/layer';
-import { ToolState } from '../store/reducers/tool';
 import TopbarDropdownButton from './TopbarDropdownButton';
 
 interface InsertButtonProps {
-  tool?: ToolState;
+  activeTool?: em.ToolType;
+  shapeToolShapeType?: em.ShapeType;
   insertKnobOpen?: boolean;
   toggleShapeToolThunk?(shapeType: em.ShapeType): void;
   toggleArtboardToolThunk?(): void;
@@ -20,7 +22,8 @@ interface InsertButtonProps {
 
 const InsertButton = (props: InsertButtonProps): ReactElement => {
   const {
-    tool,
+    activeTool,
+    shapeToolShapeType,
     insertKnobOpen,
     toggleShapeToolThunk,
     toggleArtboardToolThunk,
@@ -56,9 +59,9 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
   }
 
   const getInsertButtonIcon = () => {
-    switch(tool.type) {
+    switch(activeTool) {
       case 'Shape':
-        switch(tool.shapeToolType) {
+        switch(shapeToolShapeType) {
           case 'Rectangle':
             return 'rectangle';
           case 'Rounded':
@@ -86,47 +89,47 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
     <TopbarDropdownButton
       label='Insert'
       icon={getInsertButtonIcon()}
-      isActive={ tool.type === 'Artboard' || tool.type === 'Shape' || tool.type === 'Text' || insertKnobOpen }
+      isActive={ activeTool === 'Artboard' || activeTool === 'Shape' || activeTool === 'Text' || insertKnobOpen }
       options={[{
         label: 'Artboard',
         onClick: toggleArtboardToolThunk,
         icon: 'artboard',
-        isActive: tool.type === 'Artboard'
+        isActive: activeTool === 'Artboard'
       },{
         label: 'Rectangle',
         onClick: () => toggleShapeToolThunk('Rectangle'),
         icon: 'rectangle',
-        isActive: tool.type === 'Shape' && tool.shapeToolType === 'Rectangle'
+        isActive: activeTool === 'Shape' && shapeToolShapeType === 'Rectangle'
       },{
         label: 'Rounded',
         onClick: () => toggleShapeToolThunk('Rounded'),
         icon: 'rounded',
-        isActive: tool.type === 'Shape' && tool.shapeToolType === 'Rounded'
+        isActive: activeTool === 'Shape' && shapeToolShapeType === 'Rounded'
       },{
         label: 'Ellipse',
         onClick: () => toggleShapeToolThunk('Ellipse'),
         icon: 'ellipse',
-        isActive: tool.type === 'Shape' && tool.shapeToolType === 'Ellipse'
+        isActive: activeTool === 'Shape' && shapeToolShapeType === 'Ellipse'
       },{
         label: 'Star',
         onClick: () => toggleShapeToolThunk('Star'),
         icon: 'star',
-        isActive: tool.type === 'Shape' && tool.shapeToolType === 'Star'
+        isActive: activeTool === 'Shape' && shapeToolShapeType === 'Star'
       },{
         label: 'Polygon',
         onClick: () => toggleShapeToolThunk('Polygon'),
         icon: 'polygon',
-        isActive: tool.type === 'Shape' && tool.shapeToolType === 'Polygon'
+        isActive: activeTool === 'Shape' && shapeToolShapeType === 'Polygon'
       },{
         label: 'Line',
         onClick: () => toggleShapeToolThunk('Line'),
         icon: 'line',
-        isActive: tool.type === 'Shape' && tool.shapeToolType === 'Line'
+        isActive: activeTool === 'Shape' && shapeToolShapeType === 'Line'
       },{
         label: 'Text',
         onClick: toggleTextToolThunk,
         icon: 'text',
-        isActive: tool.type === 'Text'
+        isActive: activeTool === 'Text'
       },{
         label: 'Image',
         onClick: handleImageClick,
@@ -136,12 +139,15 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState): {
-  tool: ToolState;
+  activeTool: em.ToolType;
+  shapeToolShapeType: em.ShapeType;
   insertKnobOpen: boolean;
 } => {
-  const { tool, insertKnob } = state;
+  const { canvasSettings, insertKnob, shapeTool } = state;
+  const activeTool = canvasSettings.activeTool;
+  const shapeToolShapeType = shapeTool.shapeType;
   const insertKnobOpen = insertKnob.isActive;
-  return { tool, insertKnobOpen };
+  return { activeTool, shapeToolShapeType, insertKnobOpen };
 };
 
 export default connect(

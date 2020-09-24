@@ -732,7 +732,8 @@ export const addShadowXOffsetTween = (props: AddTweenProps): void => {
     duration: tween.duration,
     [tween.prop]: dsx,
     onUpdate: () => {
-      originPaperLayer.shadowOffset = new paperPreview.Point(timelineTweenProps[tween.prop], originPaperLayer.shadowOffset.y);
+      const y = originPaperLayer.shadowOffset ? originPaperLayer.shadowOffset.y : originShadow.offset.y;
+      originPaperLayer.shadowOffset = new paperPreview.Point(timelineTweenProps[tween.prop], y);
     },
     ease: tween.ease,
   }, tween.delay);
@@ -755,7 +756,8 @@ export const addShadowYOffsetTween = (props: AddTweenProps): void => {
     duration: tween.duration,
     [tween.prop]: dsy,
     onUpdate: () => {
-      originPaperLayer.shadowOffset = new paperPreview.Point(originPaperLayer.shadowOffset.x, timelineTweenProps[tween.prop]);
+      const x = originPaperLayer.shadowOffset ? originPaperLayer.shadowOffset.x : originShadow.offset.x;
+      originPaperLayer.shadowOffset = new paperPreview.Point(x, timelineTweenProps[tween.prop]);
     },
     ease: tween.ease,
   }, tween.delay);

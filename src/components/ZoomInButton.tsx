@@ -1,32 +1,20 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
-import { SetCanvasMatrixPayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
-import { setCanvasMatrix } from '../store/actions/documentSettings';
-import { SetCanvasZoomingPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
-import { setCanvasZooming } from '../store/actions/canvasSettings';
-import { paperMain } from '../canvas';
+import { zoomInThunk } from '../store/actions/zoomTool';
 import TopbarButton from './TopbarButton';
 
 interface ZoomInButtonProps {
-  setCanvasMatrix?(payload: SetCanvasMatrixPayload): DocumentSettingsTypes;
-  setCanvasZooming?(payload: SetCanvasZoomingPayload): CanvasSettingsTypes;
+  zoomInThunk?(): void;
 }
 
 const ZoomInButton = (props: ZoomInButtonProps): ReactElement => {
-  const { setCanvasMatrix, setCanvasZooming } = props;
-
-  const handleZoomInClick = (): void => {
-    paperMain.view.zoom *= 2;
-    setCanvasZooming({zooming: true});
-    setCanvasMatrix({matrix: paperMain.view.matrix.values});
-    setCanvasZooming({zooming: false});
-  }
+  const { zoomInThunk } = props;
 
   return (
     <TopbarButton
       hideLabel
       label='Zoom In'
-      onClick={handleZoomInClick}
+      onClick={zoomInThunk}
       icon='zoom-in'
       />
   );
@@ -34,5 +22,5 @@ const ZoomInButton = (props: ZoomInButtonProps): ReactElement => {
 
 export default connect(
   null,
-  { setCanvasMatrix, setCanvasZooming }
+  { zoomInThunk }
 )(ZoomInButton);

@@ -1,4 +1,5 @@
 import { setLayerHover } from './layer';
+import { scrollToLayer } from '../../utils';
 
 import {
   OPEN_TWEEN_DRAWER,
@@ -34,6 +35,8 @@ export const setTweenDrawerEventHoverThunk = (payload: SetTweenDrawerEventHoverP
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     const eventLayer = payload.id ? state.layer.present.tweenEventById[payload.id].layer : payload.id;
+    console.log(eventLayer);
+    scrollToLayer(eventLayer);
     dispatch(setTweenDrawerEventHover(payload));
     dispatch(setLayerHover({ id: eventLayer }));
   }

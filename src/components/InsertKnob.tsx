@@ -8,10 +8,11 @@ import store from '../store';
 import { RootState } from '../store/reducers';
 import { activateInsertKnob, deactivateInsertKnob, setInsertKnobIndex } from '../store/actions/insertKnob';
 import { InsertKnobTypes, SetInsertKnobIndexPayload } from '../store/actionTypes/insertKnob';
-import { toggleShapeToolThunk, toggleArtboardToolThunk, toggleTextToolThunk } from '../store/actions/tool';
+import { toggleArtboardToolThunk} from '../store/actions/artboardTool';
+import { toggleTextToolThunk } from '../store/actions/textTool';
+import { toggleShapeToolThunk } from '../store/actions/shapeTool';
 import { AddImagePayload } from '../store/actionTypes/layer';
 import { addImageThunk } from '../store/actions/layer';
-import { ToolState } from '../store/reducers/tool';
 import { ThemeContext } from './ThemeProvider';
 import InsertKnobItem from './InsertKnobItem';
 
@@ -47,7 +48,6 @@ if (remote.process.platform === 'darwin') {
 }
 
 interface InsertKnobProps {
-  tool?: ToolState;
   activeIndex?: number;
   setInsertKnobIndex?(payload: SetInsertKnobIndexPayload): InsertKnobTypes;
   activateInsertKnob?(): InsertKnobTypes;

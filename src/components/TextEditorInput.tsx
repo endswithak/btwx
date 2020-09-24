@@ -6,8 +6,6 @@ import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
 import { closeTextEditor } from '../store/actions/textEditor';
 import { TextEditorTypes } from '../store/actionTypes/textEditor';
-import { enableSelectionTool, disableSelectionTool } from '../store/actions/tool';
-import { ToolTypes } from '../store/actionTypes/tool';
 import { setLayerText, selectLayer } from '../store/actions/layer';
 import { SetLayerTextPayload, SelectLayerPayload, LayerTypes } from '../store/actionTypes/layer';
 import { paperMain } from '../canvas';
@@ -22,8 +20,6 @@ interface TextEditorInputProps {
   layerItem?: em.Text;
   canvasFocusing?: boolean;
   closeTextEditor?(): TextEditorTypes;
-  disableSelectionTool?(): ToolTypes;
-  enableSelectionTool?(): ToolTypes;
   setLayerText?(payload: SetLayerTextPayload): LayerTypes;
   selectLayer?(payload: SelectLayerPayload): LayerTypes;
   setCanvasFocusing?(payload: SetCanvasFocusingPayload): CanvasSettingsTypes;
@@ -238,5 +234,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { closeTextEditor, disableSelectionTool, enableSelectionTool, setLayerText, selectLayer, setCanvasFocusing }
+  { closeTextEditor, setLayerText, selectLayer, setCanvasFocusing }
 )(TextEditorInput);

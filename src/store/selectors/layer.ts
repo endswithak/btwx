@@ -306,15 +306,29 @@ export const getClipboardCenter = (layerItems: em.Layer[]): paper.Point => {
 };
 
 export const getDestinationEquivalent = (store: LayerState, layer: string, destinationChildren: string[]): em.Layer => {
-  let equivalent = null;
   const layerItem = store.byId[layer];
-  for(let i = 0; i < destinationChildren.length; i++) {
-    const childLayer = store.byId[destinationChildren[i]];
+  const equivalent = destinationChildren.reduce((result: em.Layer, current) => {
+    const childLayer = store.byId[current];
     if (childLayer.name === layerItem.name && childLayer.type === layerItem.type) {
-      equivalent = childLayer;
-      break;
+      if (result) {
+        const layerScope = getLayerScope(store, layer);
+        const layerArtboard = store.byId[layerScope.find((id) => store.allArtboardIds.includes(id))] as em.Artboard;
+        const resultScope = getLayerScope(store, result.id);
+        const childArtboard = store.byId[resultScope.find((id) => store.allArtboardIds.includes(id))] as em.Artboard;
+        const layerArtboardPosition = getPositionInArtboard(layerItem, layerArtboard);
+        const resultArtboardPosition = getPositionInArtboard(result, childArtboard);
+        const childArtboardPosition = getPositionInArtboard(childLayer, childArtboard);
+        const resultDistance = new paperMain.Point(resultArtboardPosition.x, resultArtboardPosition.y).subtract(new paperMain.Point(layerArtboardPosition.x, layerArtboardPosition.y));
+        const childDistance = new paperMain.Point(childArtboardPosition.x, childArtboardPosition.y).subtract(new paperMain.Point(layerArtboardPosition.x, layerArtboardPosition.y));
+        if (childDistance.length < resultDistance.length) {
+          result = childLayer;
+        }
+      } else {
+        result = childLayer;
+      }
     }
-  }
+    return result;
+  }, null);
   return equivalent;
 };
 

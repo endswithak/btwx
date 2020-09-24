@@ -2,7 +2,6 @@ import store from '../store';
 import { setLayersGradientOrigin, setLayersGradientDestination } from '../store/actions/layer';
 import { getPaperLayer, getGradientOriginPoint, getGradientDestinationPoint } from '../store/selectors/layer';
 import { paperMain } from './index';
-import InsertTool from './insertTool';
 import SnapTool from './snapTool';
 import { RootState } from '../store/reducers';
 
@@ -10,7 +9,6 @@ class GradientTool {
   enabled: boolean;
   handle: 'origin' | 'destination';
   prop: 'fill' | 'stroke';
-  insertTool: InsertTool;
   from: paper.Point;
   to: paper.Point;
   toBounds: paper.Rectangle;
@@ -144,10 +142,10 @@ class GradientTool {
     });
   }
   onKeyDown(event: paper.KeyEvent): void {
-    this.insertTool.onKeyDown(event);
+
   }
   onKeyUp(event: paper.KeyEvent): void {
-    this.insertTool.onKeyUp(event);
+
   }
   onMouseDown(event: paper.ToolEvent): void {
     if (this.enabled) {

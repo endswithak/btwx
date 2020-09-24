@@ -1,8 +1,6 @@
 import React, { useContext, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { toggleSelectionToolThunk } from '../store/actions/tool';
-import { ToolTypes } from '../store/actionTypes/tool';
 import { setArtboardPresetDeviceOrientation } from '../store/actions/documentSettings';
 import { SetArtboardPresetDeviceOrientationPayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
 import { addArtboardThunk } from '../store/actions/layer';
@@ -15,17 +13,15 @@ import SidebarArtboardPlatformAdd from './SidebarArtboardPlatformAdd';
 import { ThemeContext } from './ThemeProvider';
 
 interface SidebarArtboardPlatformOrientationProps {
-  selected?: string[];
   orientation?: em.DeviceOrientationType;
   platform?: em.DevicePlatformType;
   setArtboardPresetDeviceOrientation?(payload: SetArtboardPresetDeviceOrientationPayload): DocumentSettingsTypes;
   addArtboardThunk?(payload: AddArtboardPayload): void;
-  toggleSelectionToolThunk?(): ToolTypes;
 }
 
 const SidebarArtboardSizes = (props: SidebarArtboardPlatformOrientationProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { selected, orientation, platform, setArtboardPresetDeviceOrientation, addArtboardThunk, toggleSelectionToolThunk } = props;
+  const { orientation, platform, setArtboardPresetDeviceOrientation, addArtboardThunk } = props;
 
   const handleOrientationClick = (type: em.DeviceOrientationType) => {
     switch(type) {
@@ -64,7 +60,6 @@ const SidebarArtboardSizes = (props: SidebarArtboardPlatformOrientationProps): R
         }
       } as any
     });
-    // toggleSelectionToolThunk();
   }
 
   return (
@@ -104,13 +99,12 @@ const SidebarArtboardSizes = (props: SidebarArtboardPlatformOrientationProps): R
 
 const mapStateToProps = (state: RootState) => {
   const { documentSettings, layer } = state;
-  const selected = layer.present.selected;
   const orientation = documentSettings.artboardPresets.orientation;
   const platform = documentSettings.artboardPresets.platform;
-  return { orientation, platform, selected };
+  return { orientation, platform };
 };
 
 export default connect(
   mapStateToProps,
-  { setArtboardPresetDeviceOrientation, addArtboardThunk, toggleSelectionToolThunk }
+  { setArtboardPresetDeviceOrientation, addArtboardThunk }
 )(SidebarArtboardSizes);

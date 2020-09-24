@@ -1,5 +1,5 @@
 import store from '../store';
-import { disableActiveToolThunk } from '../store/actions/tool';
+import { toggleArtboardToolThunk } from '../store/actions/artboardTool';
 import { setCanvasDrawing } from '../store/actions/canvasSettings';
 import { addArtboardThunk } from '../store/actions/layer';
 import { isBetween } from '../utils';
@@ -47,6 +47,16 @@ class ArtboardTool {
     this.snapTool = new SnapTool();
     this.toBounds = null;
     // this.insertTool = new InsertTool();
+  }
+  disable(): void {
+    if (this.tooltip) {
+      this.tooltip.paperLayer.remove();
+    }
+    if (this.outline) {
+      this.outline.remove();
+    }
+    store.dispatch(setCanvasDrawing({drawing: false}));
+    store.dispatch(toggleArtboardToolThunk() as any);
   }
   renderShape(shapeOpts: any): paper.Path.Rectangle {
     const shape = new paperMain.Path.Rectangle({
@@ -122,12 +132,7 @@ class ArtboardTool {
       }
       case 'escape': {
         if (!state.artboardPresetEditor.isOpen) {
-          if (this.tooltip) {
-            this.tooltip.paperLayer.remove();
-          }
-          if (this.outline) {
-            this.outline.remove();
-          }
+          this.disable();
         }
         break;
       }
@@ -312,10 +317,8 @@ class ArtboardTool {
           }
         }) as any);
       }
-      // store.dispatch(toggleSelectionToolThunk());
-      store.dispatch(setCanvasDrawing({drawing: false}));
-      store.dispatch(disableActiveToolThunk() as any);
     }
+    this.disable();
   }
 }
 

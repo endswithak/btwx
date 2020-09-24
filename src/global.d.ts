@@ -2,9 +2,9 @@ declare module 'lodash.debounce';
 declare module 'react-scroll-sync';
 declare namespace em {
 
-  type ResizingType = 'n' | 'e' | 's' | 'w' | 'ne' | 'nw' | 'se' | 'sw' | 'ew' | 'ns' | 'nesw' | 'nwses';
+  type ResizeType = 'n' | 'e' | 's' | 'w' | 'ne' | 'nw' | 'se' | 'sw' | 'ew' | 'ns' | 'nesw' | 'nwses';
 
-  type ZoomingType = 'in' | 'out';
+  type ZoomType = 'in' | 'out';
 
   type ToolType = 'Shape' | 'Selection' | 'Artboard' | 'Text';
 

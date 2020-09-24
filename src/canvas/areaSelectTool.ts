@@ -1,6 +1,6 @@
 import paper from 'paper';
 import { getPagePaperLayer, getNearestScopeAncestor } from '../store/selectors/layer';
-import { disableActiveToolThunk } from '../store/actions/tool';
+import { toggleSelectionToolThunk } from '../store/actions/selectionTool';
 import { deselectAllLayers, deselectLayer, selectLayer, selectLayers } from '../store/actions/layer';
 import { setCanvasSelecting } from '../store/actions/canvasSettings';
 import { updateSelectionFrame } from '../store/utils/layer';
@@ -108,7 +108,7 @@ class AreaSelectTool {
     switch(event.key) {
       case 'escape': {
         this.disable();
-        store.dispatch(disableActiveToolThunk() as any);
+        store.dispatch(toggleSelectionToolThunk(null, null) as any);
         break;
       }
       case 'shift': {

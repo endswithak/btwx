@@ -11,8 +11,6 @@ import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { closeEaseEditor } from '../store/actions/easeEditor';
 import { EaseEditorTypes } from '../store/actionTypes/easeEditor';
-import { enableSelectionTool, disableSelectionTool } from '../store/actions/tool';
-import { ToolTypes } from '../store/actionTypes/tool';
 import { setLayerTweenEase, setLayerTweenPower, setLayerTweenDuration, setLayerTweenDelay } from '../store/actions/layer';
 import { SetLayerTweenEasePayload, SetLayerTweenPowerPayload, SetLayerTweenDurationPayload, SetLayerTweenDelayPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setTweenDrawerTweenEditing } from '../store/actions/tweenDrawer';
@@ -39,8 +37,6 @@ interface EaseEditorProps {
   setLayerTweenDelay?(payload: SetLayerTweenDelayPayload): LayerTypes;
   setTweenDrawerTweenEditing?(payload: SetTweenDrawerTweenEditingPayload): TweenDrawerTypes;
   setCanvasFocusing?(payload: SetCanvasFocusingPayload): CanvasSettingsTypes;
-  disableSelectionTool?(): ToolTypes;
-  enableSelectionTool?(): ToolTypes;
 }
 
 const EaseEditor = (props: EaseEditorProps): ReactElement => {
@@ -342,5 +338,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { closeEaseEditor, setLayerTweenEase, setLayerTweenPower, enableSelectionTool, disableSelectionTool, setLayerTweenDuration, setLayerTweenDelay, setTweenDrawerTweenEditing, setCanvasFocusing }
+  { closeEaseEditor, setLayerTweenEase, setLayerTweenPower, setLayerTweenDuration, setLayerTweenDelay, setTweenDrawerTweenEditing, setCanvasFocusing }
 )(EaseEditor);

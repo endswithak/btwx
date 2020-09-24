@@ -1,7 +1,6 @@
 import { combineReducers } from 'redux';
 import undoable, { includeAction } from 'redux-undo';
 import layer from './layer';
-import tool from './tool';
 import contextMenu from './contextMenu';
 import tweenDrawer from './tweenDrawer';
 import easeEditor from './easeEditor';
@@ -16,6 +15,11 @@ import rightSidebar from './rightSidebar';
 import preview from './preview';
 import insertKnob from './insertKnob';
 import theme from './theme';
+import zoomTool from './zoomTool';
+import shapeTool from './shapeTool';
+import artboardTool from './artboardTool';
+import textTool from './textTool';
+import selectionTool from './selectionTool';
 import { importPaperProject } from '../selectors/layer';
 import { paperMain } from '../../canvas';
 
@@ -333,7 +337,6 @@ const appReducer = combineReducers({
   layer: undoable(layer, { filter: includeAction(reduxUndoActions as any)}),
   documentSettings,
   canvasSettings,
-  tool,
   contextMenu,
   tweenDrawer,
   easeEditor,
@@ -345,7 +348,12 @@ const appReducer = combineReducers({
   rightSidebar,
   theme,
   preview,
-  insertKnob
+  insertKnob,
+  zoomTool,
+  shapeTool,
+  artboardTool,
+  selectionTool,
+  textTool
 });
 
 const OPEN_FILE = 'OPEN_FILE';

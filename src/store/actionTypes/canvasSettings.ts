@@ -1,14 +1,23 @@
+export const SET_CANVAS_ACTIVE_TOOL = 'SET_CANVAS_ACTIVE_TOOL';
 export const SET_CANVAS_DRAWING = 'SET_CANVAS_DRAWING';
 export const SET_CANVAS_TYPING = 'SET_CANVAS_TYPING';
 export const SET_CANVAS_RESIZING = 'SET_CANVAS_RESIZING';
 export const SET_CANVAS_SELECTING = 'SET_CANVAS_SELECTING';
 export const SET_CANVAS_DRAGGING = 'SET_CANVAS_DRAGGING';
 export const SET_CANVAS_ZOOMING = 'SET_CANVAS_ZOOMING';
-export const SET_CANVAS_ZOOMING_TYPE = 'SET_CANVAS_ZOOMING_TYPE';
 export const SET_CANVAS_MEASURING = 'SET_CANVAS_MEASURING';
 export const SET_CANVAS_FOCUSING = 'SET_CANVAS_FOCUSING';
 export const RESET_CANVAS_SETTINGS = 'RESET_CANVAS_SETTINGS';
 export const SET_CANVAS_MOUSE_POSITION = 'SET_CANVAS_MOUSE_POSITION';
+
+export interface SetCanvasActiveToolPayload {
+  activeTool: em.ToolType;
+}
+
+export interface SetCanvasActiveTool {
+  type: typeof SET_CANVAS_ACTIVE_TOOL;
+  payload: SetCanvasActiveToolPayload;
+}
 
 export interface SetCanvasDrawingPayload {
   drawing: boolean;
@@ -30,7 +39,6 @@ export interface SetCanvasTyping {
 
 export interface SetCanvasResizingPayload {
   resizing: boolean;
-  resizingType?: em.ResizingType;
 }
 
 export interface SetCanvasResizing {
@@ -58,21 +66,11 @@ export interface SetCanvasDragging {
 
 export interface SetCanvasZoomingPayload {
   zooming: boolean;
-  zoomingType?: em.ZoomingType;
 }
 
 export interface SetCanvasZooming {
   type: typeof SET_CANVAS_ZOOMING;
   payload: SetCanvasZoomingPayload;
-}
-
-export interface SetCanvasZoomingTypePayload {
-  zoomingType: em.ZoomingType;
-}
-
-export interface SetCanvasZoomingType {
-  type: typeof SET_CANVAS_ZOOMING_TYPE;
-  payload: SetCanvasZoomingTypePayload;
 }
 
 export interface SetCanvasMeasuringPayload {
@@ -111,13 +109,13 @@ export interface SetCanvasMousePosition {
   payload: SetCanvasMousePositionPayload;
 }
 
-export type CanvasSettingsTypes = SetCanvasDrawing |
+export type CanvasSettingsTypes = SetCanvasActiveTool |
+                                  SetCanvasDrawing |
                                   SetCanvasTyping |
                                   SetCanvasResizing |
                                   SetCanvasSelecting |
                                   SetCanvasDragging |
                                   SetCanvasZooming |
-                                  SetCanvasZoomingType |
                                   SetCanvasMeasuring |
                                   SetCanvasFocusing |
                                   ResetCanvasSettings |

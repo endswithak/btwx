@@ -1,6 +1,6 @@
 import { getLayerAndDescendants } from '../store/selectors/layer';
 import { setCanvasMeasuring } from '../store/actions/canvasSettings';
-import { disableActiveToolThunk } from '../store/actions/tool';
+import { toggleSelectionToolThunk, setSelectionToolResizeType } from '../store/actions/selectionTool';
 import store from '../store';
 import AreaSelectTool from './areaSelectTool';
 import DragTool from './dragTool';
@@ -192,7 +192,7 @@ class SelectionTool {
     if (this.resizing) {
       this.resizing = false;
     }
-    store.dispatch(disableActiveToolThunk() as any);
+    store.dispatch(toggleSelectionToolThunk(null, null) as any);
   }
 }
 

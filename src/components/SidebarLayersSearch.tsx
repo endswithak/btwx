@@ -1,16 +1,13 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { ReactElement, useEffect, useContext, useState, useCallback } from 'react';
 import { connect } from 'react-redux';
-import { gsap } from 'gsap';
-import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import { RootState } from '../store/reducers';
+import debounce from 'lodash.debounce';
+import { scrollToLayer } from '../utils';
 import { ThemeContext } from './ThemeProvider';
 import SidebarInput from './SidebarInput';
 import Icon from './Icon';
 import IconButton from './IconButton';
-import debounce from 'lodash.debounce';
-
-gsap.registerPlugin(ScrollToPlugin);
 
 interface SidebarLayersSearchProps {
   searchActive: boolean;
@@ -28,13 +25,7 @@ const SidebarLayersSearch = (props: SidebarLayersSearchProps): ReactElement => {
 
   useEffect(() => {
     if (selected.length > 0) {
-      const leftSidebar = document.getElementById('sidebar-scroll-left');
-      const layerDomItem = document.getElementById(selected[0]);
-      if (layerDomItem) {
-        gsap.set(leftSidebar, {
-          scrollTo: layerDomItem
-        });
-      }
+      scrollToLayer(selected[0]);
     }
   }, [search])
 

@@ -4,7 +4,9 @@ import { RootState } from '../store/reducers';
 import { UngroupLayersPayload, SendLayersBackwardPayload, SendLayersForwardPayload, SendLayersToBackPayload, GroupLayersPayload, SendLayersToFrontPayload, LayerTypes } from '../store/actionTypes/layer';
 import { pasteLayersThunk, copyLayersThunk, removeLayersThunk, redoThunk, undoThunk, ungroupLayers, groupLayersThunk, sendLayersForward, sendLayersToFront, sendLayersBackward, sendLayersToBack, escapeLayerScopeThunk } from '../store/actions/layer';
 import { resetCanvasSettingsThunk } from '../store/actions/canvasSettings';
-import { toggleArtboardToolThunk, toggleTextToolThunk, toggleShapeToolThunk } from '../store/actions/tool';
+import { toggleArtboardToolThunk} from '../store/actions/artboardTool';
+import { toggleTextToolThunk } from '../store/actions/textTool';
+import { toggleShapeToolThunk } from '../store/actions/shapeTool';
 
 interface KeyBindingsProps {
   selected?: string[];
