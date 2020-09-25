@@ -48,7 +48,11 @@ class AreaSelectTool {
   }
   update(to: paper.Point) {
     this.to = to;
-    this.shape = this.renderAreaSelectShape({});
+    this.shape = this.renderAreaSelectShape({
+      data: {
+        id: 'AreaSelectPreview'
+      }
+    });
   }
   renderAreaSelectShape(shapeOpts: any) {
     if (this.shape) {

@@ -1,6 +1,5 @@
 import store from '../store';
 import { toggleArtboardToolThunk } from '../store/actions/artboardTool';
-import { setCanvasDrawing } from '../store/actions/canvasSettings';
 import { addArtboardThunk } from '../store/actions/layer';
 import { isBetween } from '../utils';
 import { paperMain } from './index';
@@ -23,7 +22,6 @@ class ArtboardTool {
   shiftModifier: boolean;
   snapTool: SnapTool;
   toBounds: paper.Rectangle;
-  // insertTool: InsertTool;
   constructor() {
     this.tool = new paperMain.Tool();
     this.tool.activate();
@@ -46,17 +44,6 @@ class ArtboardTool {
     this.shiftModifier = false;
     this.snapTool = new SnapTool();
     this.toBounds = null;
-    // this.insertTool = new InsertTool();
-  }
-  disable(): void {
-    if (this.tooltip) {
-      this.tooltip.paperLayer.remove();
-    }
-    if (this.outline) {
-      this.outline.remove();
-    }
-    store.dispatch(setCanvasDrawing({drawing: false}));
-    store.dispatch(toggleArtboardToolThunk() as any);
   }
   renderShape(shapeOpts: any): paper.Path.Rectangle {
     const shape = new paperMain.Path.Rectangle({
@@ -81,7 +68,10 @@ class ArtboardTool {
     }
     this.outline = this.renderShape({
       strokeColor: THEME_PRIMARY_COLOR,
-      strokeWidth: 1 / paperMain.view.zoom
+      strokeWidth: 1 / paperMain.view.zoom,
+      data: {
+        id: 'ArtboardToolPreview'
+      }
     });
     this.outline.removeOn({
       drag: true,
@@ -112,10 +102,6 @@ class ArtboardTool {
     this.snapTool.snapBounds = this.toBounds;
   }
   onKeyDown(event: paper.KeyEvent): void {
-    const state = store.getState();
-    // if (!state.artboardPresetEditor.isOpen) {
-    //   this.insertTool.onKeyDown(event);
-    // }
     switch(event.key) {
       case 'shift': {
         this.shiftModifier = true;
@@ -130,19 +116,9 @@ class ArtboardTool {
         }
         break;
       }
-      case 'escape': {
-        if (!state.artboardPresetEditor.isOpen) {
-          this.disable();
-        }
-        break;
-      }
     }
   }
   onKeyUp(event: paper.KeyEvent): void {
-    const state = store.getState();
-    // if (!state.artboardPresetEditor.isOpen) {
-    //   this.insertTool.onKeyUp(event);
-    // }
     switch(event.key) {
       case 'shift': {
         this.shiftModifier = false;
@@ -245,7 +221,6 @@ class ArtboardTool {
   }
   onMouseDown(event: paper.ToolEvent): void {
     const state = store.getState();
-    store.dispatch(setCanvasDrawing({drawing: true}));
     this.drawing = true;
     const from = event.point;
     if (this.snapTool.snap.x) {
@@ -318,7 +293,7 @@ class ArtboardTool {
         }) as any);
       }
     }
-    this.disable();
+    store.dispatch(toggleArtboardToolThunk() as any);
   }
 }
 

@@ -12,6 +12,9 @@ import HoverFrameWrap from './HoverFrameWrap';
 import ArtboardPresetEditorWrap from './ArtboardPresetEditorWrap';
 import ContextMenuWrap from './ContextMenuWrap';
 import KeyBindings from './KeyBindings';
+import ShapeToolWrap from './ShapeToolWrap';
+import ArtboardToolWrap from './ArtboardToolWrap';
+import TextToolWrap from './TextToolWrap';
 
 const App = (): ReactElement => {
   const theme = useContext(ThemeContext);
@@ -41,6 +44,9 @@ const App = (): ReactElement => {
               <ContextMenuWrap />
               <TweenEventsFrameWrap />
               <KeyBindings />
+              <ShapeToolWrap />
+              <ArtboardToolWrap />
+              <TextToolWrap />
             </>
           : null
         }

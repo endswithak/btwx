@@ -5,17 +5,20 @@ import { RootState } from '../store/reducers';
 import { ContextMenuState } from '../store/reducers/contextMenu';
 import { ContextMenuTypes, OpenContextMenuPayload } from '../store/actionTypes/contextMenu';
 import { closeContextMenu, openContextMenu } from '../store/actions/contextMenu';
-import { AddLayerTweenEventPayload, LayerTypes, RemoveLayersPayload, SelectLayerPayload, SendLayersBackwardPayload, SendLayersForwardPayload, GroupLayersPayload, UngroupLayersPayload, AddLayersMaskPayload } from '../store/actionTypes/layer';
-import { addLayerTweenEvent, removeLayers, selectLayer, selectAllLayers, copyLayersThunk, pasteLayersThunk, sendLayersBackward, sendLayersForward, groupLayersThunk, ungroupLayers, addLayersMaskThunk } from '../store/actions/layer';
+import { AddLayerTweenEventPayload, LayerTypes, RemoveLayersPayload, SelectLayerPayload, SendLayersBackwardPayload, SendLayersForwardPayload, GroupLayersPayload, UngroupLayersPayload, AddLayersMaskPayload, RemoveLayerTweenEventPayload } from '../store/actionTypes/layer';
+import { addLayerTweenEvent, removeLayers, selectLayer, selectAllLayers, copyLayersThunk, pasteLayersThunk, sendLayersBackward, sendLayersForward, groupLayersThunk, ungroupLayers, addLayersMaskThunk, removeLayerTweenEvent } from '../store/actions/layer';
 import { RemoveArtboardPresetPayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
 import { removeArtboardPreset } from '../store/actions/documentSettings';
 import { ArtboardPresetEditorTypes } from '../store/actionTypes/artboardPresetEditor';
 import { openArtboardPresetEditor } from '../store/actions/artboardPresetEditor';
 import { getLayerScope, orderLayersByDepth } from '../store/selectors/layer';
-import { APP_NAME } from '../constants';
+import { setTweenDrawerEventHoverThunk, setTweenDrawerEvent } from '../store/actions/tweenDrawer';
+import { SetTweenDrawerEventHoverPayload, SetTweenDrawerEventPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
+import { APP_NAME, DEFAULT_TWEEN_EVENTS } from '../constants';
 import ContextMenu from './ContextMenu';
 
 interface ContextMenuWrapProps {
+  canSetTweenDrawerEventHover?: boolean;
   contextMenu?: ContextMenuState;
   activeArtboard?: string;
   artboards?: em.Artboard[];
@@ -45,10 +48,13 @@ interface ContextMenuWrapProps {
   addLayersMaskThunk?(payload: AddLayersMaskPayload): Promise<any>;
   copyLayersThunk?(): Promise<any>;
   pasteLayersThunk?({overSelection, overPoint, overLayer}: { overSelection?: boolean; overPoint?: em.Point; overLayer?: string }): Promise<any>;
+  setTweenDrawerEventHoverThunk?(payload: SetTweenDrawerEventHoverPayload): TweenDrawerTypes;
+  setTweenDrawerEvent?(payload: SetTweenDrawerEventPayload): TweenDrawerTypes;
+  removeLayerTweenEvent?(payload: RemoveLayerTweenEventPayload): LayerTypes;
 }
 
 const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
-  const { clipboardType, canMask, addLayersMaskThunk, canGroup, canUngroup, ungroupLayers, groupLayersThunk, canMoveForward, canMoveBackward, contextMenu, closeContextMenu, currentX, currentY, openContextMenu, canAddTweenEvent, artboards, activeArtboard, tweenEventItems, selected, addLayerTweenEvent, selectAllLayers, removeArtboardPreset, openArtboardPresetEditor, removeLayers, selectLayer, copyLayersThunk, pasteLayersThunk, sendLayersBackward, sendLayersForward } = props;
+  const { setTweenDrawerEvent, removeLayerTweenEvent, canSetTweenDrawerEventHover, setTweenDrawerEventHoverThunk, clipboardType, canMask, addLayersMaskThunk, canGroup, canUngroup, ungroupLayers, groupLayersThunk, canMoveForward, canMoveBackward, contextMenu, closeContextMenu, currentX, currentY, openContextMenu, canAddTweenEvent, artboards, activeArtboard, tweenEventItems, selected, addLayerTweenEvent, selectAllLayers, removeArtboardPreset, openArtboardPresetEditor, removeLayers, selectLayer, copyLayersThunk, pasteLayersThunk, sendLayersBackward, sendLayersForward } = props;
 
   const getOptions = () => {
     switch(contextMenu.type) {
@@ -223,67 +229,41 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
               type: 'LayerEdit'
             });
           }
-        },{
-          type: 'MenuItem',
-          text: 'Click',
-          onClick: (): void => {
-            closeContextMenu();
-            openContextMenu({
-              ...contextMenu,
-              x: currentX,
-              y: currentY,
-              type: 'TweenEventDestination',
-              data: {
-                tweenEvent: 'click'
+        }, ...DEFAULT_TWEEN_EVENTS.reduce((result, current) => {
+          const isDisabled = tweenEventItems && tweenEventItems.some((tweenEvent) => tweenEvent.layer === contextMenu.id && tweenEvent.event === current.event);
+          const eventItem = tweenEventItems && tweenEventItems.find((tweenEvent) => tweenEvent.layer === contextMenu.id && tweenEvent.event === current.event);
+          result = [
+            ...result,
+            {
+              type: 'MenuItem',
+              text: current.titleCase,
+              disabled: isDisabled,
+              onMouseEnter(): void {
+                if (eventItem && canSetTweenDrawerEventHover) {
+                  setTweenDrawerEventHoverThunk({id: eventItem.id});
+                }
+              },
+              onMouseLeave(): void {
+                if (eventItem && canSetTweenDrawerEventHover) {
+                  setTweenDrawerEventHoverThunk({id: null});
+                }
+              },
+              onClick(): void {
+                closeContextMenu();
+                openContextMenu({
+                  ...contextMenu,
+                  x: currentX,
+                  y: currentY,
+                  type: 'TweenEventDestination',
+                  data: {
+                    tweenEvent: current.event
+                  }
+                });
               }
-            });
-          }
-        },{
-          type: 'MenuItem',
-          text: 'Double Click',
-          onClick: (): void => {
-            closeContextMenu();
-            openContextMenu({
-              ...contextMenu,
-              x: currentX,
-              y: currentY,
-              type: 'TweenEventDestination',
-              data: {
-                tweenEvent: 'doubleclick'
-              }
-            });
-          }
-        },{
-          type: 'MenuItem',
-          text: 'Mouse Enter',
-          onClick: (): void => {
-            closeContextMenu();
-            openContextMenu({
-              ...contextMenu,
-              x: currentX,
-              y: currentY,
-              type: 'TweenEventDestination',
-              data: {
-                tweenEvent: 'mouseenter'
-              }
-            });
-          }
-        },{
-          type: 'MenuItem',
-          text: 'Mouse Leave',
-          onClick: (): void => {
-            closeContextMenu();
-            openContextMenu({
-              ...contextMenu,
-              x: currentX,
-              y: currentY,
-              type: 'TweenEventDestination',
-              data: {
-                tweenEvent: 'mouseleave'
-              }
-            });
-          }
-        }]
+            }
+          ]
+          return result;
+        }, [])];
       }
       case 'TweenEventDestination': {
         const tweenDestinations = artboards.reduce((result, current) => {
@@ -349,6 +329,23 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
           }
         }]
       }
+      case 'TweenDrawerEvent': {
+        return [{
+          type: 'MenuItem',
+          text: 'Edit',
+          onClick: (): void => {
+            closeContextMenu();
+            setTweenDrawerEvent({id: contextMenu.id});
+          }
+        },{
+          type: 'MenuItem',
+          text: 'Remove',
+          onClick: (): void => {
+            closeContextMenu();
+            removeLayerTweenEvent({id: contextMenu.id});
+          }
+        }]
+      }
     }
   }
 
@@ -376,7 +373,7 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { contextMenu, layer } = state;
+  const { contextMenu, layer, tweenDrawer } = state;
   const activeArtboard = layer.present.activeArtboard;
   const artboards = layer.present.allArtboardIds.reduce((result, current) => {
     if (layer.present.byId[current]) {
@@ -392,6 +389,7 @@ const mapStateToProps = (state: RootState) => {
     }
     return result;
   }, {});
+  const canSetTweenDrawerEventHover = tweenDrawer.isOpen && !tweenDrawer.event;
   const selectedByDepth = orderLayersByDepth(state.layer.present, selected);
   const layerItem = contextMenu.id && contextMenu.id !== 'page' ? layer.present.byId[contextMenu.id] : null;
   const isMask = layerItem ? layerItem.mask : null;
@@ -439,10 +437,10 @@ const mapStateToProps = (state: RootState) => {
       return null;
     }
   })();
-  return { contextMenu, canGroup, canMask, canUngroup, activeArtboard, artboards, selected, canAddTweenEvent, tweenEventItems, currentY, currentX, clipboardType, canMoveBackward, canMoveForward };
+  return { canSetTweenDrawerEventHover, contextMenu, canGroup, canMask, canUngroup, activeArtboard, artboards, selected, canAddTweenEvent, tweenEventItems, currentY, currentX, clipboardType, canMoveBackward, canMoveForward };
 };
 
 export default connect(
   mapStateToProps,
-  { openContextMenu, closeContextMenu, addLayerTweenEvent, removeArtboardPreset, openArtboardPresetEditor, removeLayers, selectLayer, copyLayersThunk, pasteLayersThunk, sendLayersBackward, sendLayersForward, ungroupLayers, selectAllLayers, groupLayersThunk, addLayersMaskThunk }
+  { setTweenDrawerEvent, removeLayerTweenEvent,setTweenDrawerEventHoverThunk, openContextMenu, closeContextMenu, addLayerTweenEvent, removeArtboardPreset, openArtboardPresetEditor, removeLayers, selectLayer, copyLayersThunk, pasteLayersThunk, sendLayersBackward, sendLayersForward, ungroupLayers, selectAllLayers, groupLayersThunk, addLayersMaskThunk }
 )(ContextMenuWrap);

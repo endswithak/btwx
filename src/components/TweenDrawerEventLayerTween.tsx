@@ -2,10 +2,8 @@ import React, { useContext, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
-import { setTweenDrawerTweenHover } from '../store/actions/tweenDrawer';
-import { SetTweenDrawerTweenHoverPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
-import { setLayerHover } from '../store/actions/layer';
-import { SetLayerHoverPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setTweenDrawerTweenHoverThunk } from '../store/actions/tweenDrawer';
+import { SetTweenDrawerTweenHoverPayload } from '../store/actionTypes/tweenDrawer';
 import TweenDrawerEditEase from './TweenDrawerEditEase';
 
 interface TweenDrawerEventLayerTweenProps {
@@ -15,28 +13,19 @@ interface TweenDrawerEventLayerTweenProps {
   tweenEditing?: string;
   tween?: em.Tween;
   titleCaseProp?: string;
-  hover?: string;
-  setTweenDrawerTweenHover?(payload: SetTweenDrawerTweenHoverPayload): TweenDrawerTypes;
-  setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
+  setTweenDrawerTweenHoverThunk?(payload: SetTweenDrawerTweenHoverPayload): void;
 }
 
 const TweenDrawerEventLayerTween = (props: TweenDrawerEventLayerTweenProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { tweenId, index, tween, setTweenDrawerTweenHover, tweenEditing, tweenHover, titleCaseProp, hover, setLayerHover } = props;
+  const { tweenId, index, tween, setTweenDrawerTweenHoverThunk, tweenEditing, tweenHover, titleCaseProp } = props;
 
   const handleMouseEnter = () => {
-    if (!tweenEditing) {
-      if (hover !== tween.layer) {
-        setLayerHover({id: tween.layer});
-      }
-      setTweenDrawerTweenHover({id: tweenId});
-    }
+    setTweenDrawerTweenHoverThunk({id: tweenId});
   }
 
   const handleMouseLeave = () => {
-    if (!tweenEditing) {
-      setTweenDrawerTweenHover({id: null});
-    }
+    setTweenDrawerTweenHoverThunk({id: null});
   }
 
   return (
@@ -80,5 +69,5 @@ const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventLayerTweenP
 
 export default connect(
   mapStateToProps,
-  { setTweenDrawerTweenHover, setLayerHover }
+  { setTweenDrawerTweenHoverThunk }
 )(TweenDrawerEventLayerTween);

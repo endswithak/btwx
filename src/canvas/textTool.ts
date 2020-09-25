@@ -3,37 +3,113 @@ import { openTextEditor } from '../store/actions/textEditor';
 import { toggleTextToolThunk } from '../store/actions/textTool';
 import { addTextThunk } from '../store/actions/layer';
 import { getPagePaperLayer } from '../store/selectors/layer';
+import SnapTool from './snapTool';
 import { paperMain } from './index';
 import { DEFAULT_TEXT_VALUE, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../constants';
 
 class TextTool {
   tool: paper.Tool;
+  snapTool: SnapTool;
+  toBounds: paper.Rectangle;
   constructor() {
     this.tool = new paperMain.Tool();
     this.tool.activate();
     this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
     this.tool.onKeyUp = (e: paper.KeyEvent): void => this.onKeyUp(e);
-    this.tool.onMouseUp = (e: paper.ToolEvent): void => this.onMouseUp(e);
-  }
-  disable() {
-    store.dispatch(toggleTextToolThunk() as any);
+    this.tool.onMouseMove = (e: paper.ToolEvent): void => this.onMouseMove(e);
+    this.tool.onMouseDown = (e: paper.ToolEvent): void => this.onMouseDown(e);
+    this.snapTool = new SnapTool();
+    this.toBounds = null;
   }
   onKeyDown(event: paper.KeyEvent): void {
-    switch(event.key) {
-      case 'escape': {
-        this.disable();
-        break;
-      }
-    }
+
   }
   onKeyUp(event: paper.KeyEvent): void {
 
   }
-  onMouseUp(event: paper.ToolEvent): void {
-    let state = store.getState();
+  onMouseMove(event: paper.ToolEvent): void {
+    const state = store.getState();
+    this.toBounds = new paperMain.Rectangle({
+      point: event.point,
+      size: new paperMain.Size(1, 1)
+    });
+    this.snapTool.snapPoints = state.layer.present.inView.snapPoints;
+    this.snapTool.snapBounds = this.toBounds;
+    this.snapTool.updateXSnap({
+      event: event,
+      snapTo: {
+        left: true,
+        right: false,
+        center: false
+      },
+      handleSnapped: (snapPoint) => {
+        switch(snapPoint.boundsSide) {
+          case 'left':
+            this.toBounds.center.x = snapPoint.point + (this.toBounds.width / 2);
+            break;
+          case 'center':
+            this.toBounds.center.x = snapPoint.point;
+            break;
+          case 'right':
+            this.toBounds.center.x = snapPoint.point - (this.toBounds.width / 2);
+            break;
+        }
+      },
+      handleSnap: (closestXSnap) => {
+        switch(closestXSnap.bounds.side) {
+          case 'left':
+            this.toBounds.center.x = closestXSnap.snapPoint.point + (this.toBounds.width / 2);
+            break;
+          case 'center':
+            this.toBounds.center.x = closestXSnap.snapPoint.point;
+            break;
+          case 'right':
+            this.toBounds.center.x = closestXSnap.snapPoint.point - (this.toBounds.width / 2);
+            break;
+        }
+      }
+    });
+    this.snapTool.updateYSnap({
+      event: event,
+      snapTo: {
+        top: true,
+        bottom: false,
+        center: false
+      },
+      handleSnapped: (snapPoint) => {
+        switch(snapPoint.boundsSide) {
+          case 'top':
+            this.toBounds.center.y = snapPoint.point + (this.toBounds.height / 2);
+            break;
+          case 'center':
+            this.toBounds.center.y = snapPoint.point;
+            break;
+          case 'bottom':
+            this.toBounds.center.y = snapPoint.point - (this.toBounds.height / 2);
+            break;
+        }
+      },
+      handleSnap: (closestYSnap) => {
+        switch(closestYSnap.bounds.side) {
+          case 'top':
+            this.toBounds.center.y = closestYSnap.snapPoint.point + (this.toBounds.height / 2);
+            break;
+          case 'center':
+            this.toBounds.center.y = closestYSnap.snapPoint.point;
+            break;
+          case 'bottom':
+            this.toBounds.center.y = closestYSnap.snapPoint.point - (this.toBounds.height / 2);
+            break;
+        }
+      }
+    });
+    this.snapTool.updateGuides();
+  }
+  onMouseDown(event: paper.ToolEvent): void {
+    const state = store.getState();
     // create new text layer
     const paperLayer = new paperMain.PointText({
-      point: event.point,
+      point: new paperMain.Point(this.snapTool.snap.x ? this.snapTool.snap.x.point : event.point.x, this.snapTool.snap.y ? this.snapTool.snap.y.point : event.point.y),
       content: DEFAULT_TEXT_VALUE,
       ...state.textSettings,
       insert: false
@@ -80,38 +156,37 @@ class TextTool {
           justification: state.textSettings.justification
         }
       }
-    }) as any);
-    // get new state with text layer
-    state = store.getState();
-    // get new layer bounds
-    const topLeft = paperMain.view.projectToView(paperLayer.bounds.topLeft);
-    const topCenter = paperMain.view.projectToView(paperLayer.bounds.topCenter);
-    const topRight = paperMain.view.projectToView(paperLayer.bounds.topRight);
-    // open text editor with new text layer props
-    store.dispatch(openTextEditor({
-      layer: state.layer.present.allIds[state.layer.present.allIds.length - 1],
-      x: (() => {
-        switch(state.textSettings.justification) {
-          case 'left':
-            return topLeft.x;
-          case 'center':
-            return topCenter.x;
-          case 'right':
-            return topRight.x;
-        }
-      })(),
-      y: (() => {
-        switch(state.textSettings.justification) {
-          case 'left':
-            return topLeft.y;
-          case 'center':
-            return topCenter.y;
-          case 'right':
-            return topRight.y;
-        }
-      })()
-    }));
-    this.disable();
+    }) as any).then((textLayer: em.Text) => {
+      // get new layer bounds
+      const topLeft = paperMain.view.projectToView(paperLayer.bounds.topLeft);
+      const topCenter = paperMain.view.projectToView(paperLayer.bounds.topCenter);
+      const topRight = paperMain.view.projectToView(paperLayer.bounds.topRight);
+      // open text editor with new text layer props
+      store.dispatch(openTextEditor({
+        layer: textLayer.id,
+        x: (() => {
+          switch(state.textSettings.justification) {
+            case 'left':
+              return topLeft.x;
+            case 'center':
+              return topCenter.x;
+            case 'right':
+              return topRight.x;
+          }
+        })(),
+        y: (() => {
+          switch(state.textSettings.justification) {
+            case 'left':
+              return topLeft.y;
+            case 'center':
+              return topCenter.y;
+            case 'right':
+              return topRight.y;
+          }
+        })()
+      }));
+    });
+    store.dispatch(toggleTextToolThunk() as any);
   }
 }
 

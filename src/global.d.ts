@@ -18,7 +18,7 @@ declare namespace em {
 
   type CubicBezierType = 'in' | 'inOut' | 'out';
 
-  type ContextMenu = 'LayerEdit' | 'TweenEvent' | 'TweenEventDestination' | 'ArtboardCustomPreset';
+  type ContextMenu = 'LayerEdit' | 'TweenEvent' | 'TweenEventDestination' | 'ArtboardCustomPreset' | 'TweenDrawerEvent';
 
   type ColorFormat = 'rgb' | 'hsl';
 

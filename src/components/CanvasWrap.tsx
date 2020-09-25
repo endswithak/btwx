@@ -14,6 +14,7 @@ import CanvasResizeWrap from './CanvasResizeWrap';
 import CanvasZoomWrap from './CanvasZoomWrap';
 
 interface CanvasWrapProps {
+  ready: boolean;
   documentImages: {
     [id: string]: em.DocumentImage;
   };
@@ -33,7 +34,7 @@ interface CanvasWrapProps {
 const CanvasWrap = (props: CanvasWrapProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
-  const { selectLayer, zoomSelectionThunk, matrix, addArtboardThunk, documentImages, updateInViewLayers, paperProject, allArtboardIds, allShapeIds, allTextIds, allImageIds, setReady } = props;
+  const { ready, selectLayer, zoomSelectionThunk, matrix, addArtboardThunk, documentImages, updateInViewLayers, paperProject, allArtboardIds, allShapeIds, allTextIds, allImageIds, setReady } = props;
 
   useEffect(() => {
     // init canvas
@@ -85,7 +86,7 @@ const CanvasWrap = (props: CanvasWrapProps): ReactElement => {
       ref={canvasContainerRef}>
       <CanvasResizeWrap>
         <CanvasZoomWrap>
-          <Canvas />
+          <Canvas ready={ready} />
         </CanvasZoomWrap>
       </CanvasResizeWrap>
     </div>

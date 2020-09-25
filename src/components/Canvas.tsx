@@ -25,6 +25,7 @@ import TweenDrawerEvent from './TweenDrawerEvent';
 
 
 interface CanvasProps {
+  ready: boolean;
   tweenDrawerOpen?: boolean;
   tweenDrawerEventHover?: string;
   gradientEditor?: GradientEditorState;
@@ -66,7 +67,7 @@ interface CanvasProps {
 
 const Canvas = (props: CanvasProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { enableZoomToolThunk, setZoomToolType, tweenDrawerEventHover, setTweenDrawerEventHoverThunk, openTweenDrawer, tweenDrawerOpen, setTweenDrawerEvent, gradientEditor, setLayerActiveGradientStop, setCanvasMousePosition, cursor, noActiveTool, zooming, dragging, resizing, selecting, zoomType, scope, layer, textJustification, setTextSettings, selected, hover, setLayerHover, selectLayer, deselectLayer, deepSelectLayer, deselectAllLayers, openContextMenu, closeContextMenu, openTextEditor, toggleSelectionToolThunk } = props;
+  const { ready, enableZoomToolThunk, setZoomToolType, tweenDrawerEventHover, setTweenDrawerEventHoverThunk, openTweenDrawer, tweenDrawerOpen, setTweenDrawerEvent, gradientEditor, setLayerActiveGradientStop, setCanvasMousePosition, cursor, noActiveTool, zooming, dragging, resizing, selecting, zoomType, scope, layer, textJustification, setTextSettings, selected, hover, setLayerHover, selectLayer, deselectLayer, deepSelectLayer, deselectAllLayers, openContextMenu, closeContextMenu, openTextEditor, toggleSelectionToolThunk } = props;
 
   const handleHitResult = (point: paper.Point, includeNearestScopeAncestor?: boolean): em.HitResult => {
     const result: em.HitResult = {
@@ -405,12 +406,12 @@ const Canvas = (props: CanvasProps): ReactElement => {
   return (
     <canvas
       id='canvas'
-      onMouseDown={noActiveTool ? handleMouseDown : null}
-      onDoubleClick={noActiveTool ? handleDoubleClick : null}
-      onContextMenu={handleContextMenu}
-      onMouseMove={noActiveTool ? handleMouseMove : null}
-      onMouseLeave={noActiveTool ? handleMouseLeave : null}
-      onWheel={handleWheel}
+      onMouseDown={ready && noActiveTool ? handleMouseDown : null}
+      onDoubleClick={ready && noActiveTool ? handleDoubleClick : null}
+      onContextMenu={ready ? handleContextMenu : null}
+      onMouseMove={ready && noActiveTool ? handleMouseMove : null}
+      onMouseLeave={ready && noActiveTool ? handleMouseLeave : null}
+      onWheel={ready ? handleWheel : null}
       tabIndex={0}
       style={{
         background: theme.background.z0,

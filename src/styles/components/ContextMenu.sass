@@ -14,16 +14,28 @@
 
 .c-context-menu__item,
 .c-context-menu__head
+  display: flex
+  position: relative
+  align-items: flex-start
   line-height: $unit * 6
   font-family: $fontFamily
   font-size: $fontSizeSm
-  text-align: left
   width: 100%
   height: $unit * 6
-  padding: 0 $unit * 6
 
   &::selection
     background: none
+
+.c-context-menu__item
+  button
+    position: relative
+    line-height: $unit * 6
+    font-family: $fontFamily
+    font-size: $fontSizeSm
+    text-align: left
+    width: 100%
+    height: 100%
+    padding: 0 $unit * 6
 
 .c-context-menu__divider
   display: flex
@@ -40,13 +52,9 @@
     top: 50%
     transform: translateY(-50%)
 
-.c-context-menu__item
-  cursor: pointer
-
 .c-context-menu__head
   text-transform: uppercase
-  display: flex
-  align-items: center
+  padding: 0 $unit * 6
 
   &.c-context-menu__head--back
     padding-left: 0

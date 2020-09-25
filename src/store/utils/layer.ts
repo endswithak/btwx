@@ -1259,7 +1259,7 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
     }
   }
   // if layer is an artboard, make it the active artboard
-  if (layer.type === 'Artboard') {
+  if (layer.type === 'Artboard' && !action.payload.noActiveArtboardUpdate) {
     currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: action.payload.id, scope: 1}) as SetActiveArtboard);
   }
   // if layer scope root is an artboard, make the layer scope root the active artboard
@@ -1330,7 +1330,7 @@ export const selectLayers = (state: LayerState, action: SelectLayers): LayerStat
     if (state.byId[current].selected && action.payload.toggleSelected) {
       return deselectLayer(result, layerActions.deselectLayer({id: current}) as DeselectLayer);
     } else {
-      return selectLayer(result, layerActions.selectLayer({id: current}) as SelectLayer);
+      return selectLayer(result, layerActions.selectLayer({id: current, noActiveArtboardUpdate: action.payload.noActiveArtboardUpdate}) as SelectLayer);
     }
   }, currentState);
 };

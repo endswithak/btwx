@@ -20,6 +20,8 @@ interface ContextMenuProps {
     onClick(): void;
     backButton?: boolean;
     backButtonClick?(): void;
+    onMouseEnter?(): void;
+    onMouseLeave?(): void;
   }[];
   emptyState?: string;
   contextMenu?: ContextMenuState;
@@ -63,7 +65,7 @@ const ContextMenu = (props: ContextMenuProps): ReactElement => {
       }}>
       {
         options.length > 0
-        ? options.map((option: {type: 'MenuItem' | 'MenuHead' | 'MenuDivider'; text: string; onClick(): void; disabled: boolean; hidden: boolean; backButton: boolean; backButtonClick(): void }, index: number) => {
+        ? options.map((option: {type: 'MenuItem' | 'MenuHead' | 'MenuDivider'; text: string; onClick(): void; disabled: boolean; hidden: boolean; backButton: boolean; backButtonClick(): void; onMouseEnter(): void; onMouseLeave(): void }, index: number) => {
             if (!option.hidden) {
               switch(option.type) {
                 case 'MenuItem': {
@@ -72,6 +74,8 @@ const ContextMenu = (props: ContextMenuProps): ReactElement => {
                       key={index}
                       disabled={option.disabled}
                       onClick={option.onClick}
+                      onMouseEnter={option.onMouseEnter}
+                      onMouseLeave={option.onMouseLeave}
                       text={option.text} />
                   )
                 }

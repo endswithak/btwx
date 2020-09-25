@@ -5,6 +5,13 @@ export const THEME_RECORDING_COLOR = 'red';
 export const THEME_UNIT_SIZE = 4;
 export const DEFAULT_ARTBOARD_BACKGROUND_COLOR = { h: 0, s: 0, l: 1, v: 0, a: 1 };
 
+export const DEFAULT_TWEEN_EVENTS = [
+  { event: 'click', titleCase: 'Click' },
+  { event: 'doubleclick', titleCase: 'Double Click' },
+  { event: 'mouseenter', titleCase: 'Mouse Enter' },
+  { event: 'mouseleave', titleCase: 'Mouse Leave' }
+];
+
 export const DEFAULT_COLOR_FORMAT = 'rgb';
 export const DEFAULT_DEVICE_ORIENTATION = 'Portrait';
 

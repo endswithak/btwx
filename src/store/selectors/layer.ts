@@ -3,6 +3,7 @@ import paper from 'paper';
 import { LayerState } from '../reducers/layer';
 import { paperMain } from '../../canvas';
 import { bufferToBase64 } from '../../utils';
+import { RootState } from '../reducers';
 
 export const getLayer = (store: LayerState, id: string): em.Layer => {
   return store.byId[id] as em.Layer;
@@ -1224,4 +1225,116 @@ export const getArtboardsTopTop = (state: LayerState): number => {
     }
     return result;
   }, state.byId[artboards[0]].frame.y - (state.byId[artboards[0]].frame.height / 2));
+};
+
+export const getSortedTweenEvents = (store: RootState): string[] => {
+  const tweenEvents = store.layer.present.allTweenEventIds;
+  const eventSort = store.tweenDrawer.eventSort;
+  const getSort = (sortBy: 'layer' | 'event' | 'artboard' | 'destinationArtboard'): string[] => {
+    return [...tweenEvents].sort((a, b) => {
+      const eventA = store.layer.present.tweenEventById[a];
+      const eventB = store.layer.present.tweenEventById[b];
+      let sortA;
+      let sortB;
+      switch(sortBy) {
+        case 'layer':
+        case 'artboard':
+        case 'destinationArtboard':
+          sortA = store.layer.present.byId[eventA[sortBy]].name.toUpperCase();
+          sortB = store.layer.present.byId[eventB[sortBy]].name.toUpperCase();
+          break;
+        case 'event':
+          sortA = eventA[sortBy].toUpperCase();
+          sortB = eventB[sortBy].toUpperCase();
+          break;
+      }
+      if (sortA < sortB) {
+        return -1;
+      }
+      if (sortA > sortB) {
+        return 1;
+      }
+      return 0;
+    });
+  }
+  return (() => {
+    if (eventSort !== 'none') {
+      switch(eventSort) {
+        case 'layer-asc':
+          return getSort('layer');
+        case 'layer-dsc':
+          return getSort('layer').reverse();
+        case 'event-asc':
+          return getSort('event');
+        case 'event-dsc':
+          return getSort('event').reverse();
+        case 'artboard-asc':
+          return getSort('artboard');
+        case 'artboard-dsc':
+          return getSort('artboard').reverse();
+        case 'destinationArtboard-asc':
+          return getSort('destinationArtboard');
+        case 'destinationArtboard-dsc':
+          return getSort('destinationArtboard').reverse();
+      }
+    } else {
+      return tweenEvents;
+    }
+  })();
+};
+
+export const getTweenEventsFrameItems = (store: RootState): {
+  tweenEventItems: em.TweenEvent[];
+  tweenEventLayers: {
+    allIds: string[];
+    byId: {
+      [id: string]: em.Layer;
+    };
+  };
+} => {
+  const { layer, tweenDrawer } = store;
+  const activeArtboard = layer.present.activeArtboard;
+  const eventHover = tweenDrawer.eventHover;
+  const eventHoverItem = layer.present.tweenEventById[eventHover]
+  const tweenEventItems = !tweenDrawer.event ? getSortedTweenEvents(store).reduce((result, current) => {
+    const tweenEvent = layer.present.tweenEventById[current];
+    if (tweenEvent.artboard === activeArtboard) {
+      result = [...result, tweenEvent];
+    }
+    return result;
+  }, []) as em.TweenEvent[] : [layer.present.tweenEventById[tweenDrawer.event]] as em.TweenEvent[];
+  if (eventHoverItem && !tweenEventItems.some((item: em.TweenEvent) => item.id === eventHoverItem.id)) {
+    tweenEventItems.unshift(eventHoverItem);
+  }
+  const tweenEventLayers = tweenEventItems.reduce((result, current) => {
+    const layerItem = layer.present.byId[current.layer];
+    if (layerItem.type === 'Group' && (layerItem as em.Group).clipped) {
+      const childLayers = (layerItem as em.Group).children.reduce((childrenResult, currentChild) => {
+        const childItem = layer.present.byId[currentChild];
+        if (!result.allIds.includes(currentChild)) {
+          childrenResult.allIds = [...childrenResult.allIds, currentChild];
+          childrenResult.byId = {
+            ...childrenResult.byId,
+            [currentChild]: childItem
+          }
+        }
+        return childrenResult;
+      }, { allIds: [], byId: {} });
+      result.allIds = [...result.allIds, ...childLayers.allIds];
+      result.byId = {...result.byId, ...childLayers.byId};
+    }
+    if (!result.allIds.includes(current.layer)) {
+      result.allIds = [...result.allIds, current.layer];
+      result.byId = {
+        ...result.byId,
+        [current.layer]: layerItem
+      }
+    }
+    return result;
+  }, { allIds: [], byId: {} });
+
+  return {
+    tweenEventItems,
+    tweenEventLayers
+  };
 };

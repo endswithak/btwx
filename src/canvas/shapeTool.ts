@@ -1,5 +1,4 @@
 import store from '../store';
-import { setCanvasDrawing } from '../store/actions/canvasSettings';
 import { toggleShapeToolThunk } from '../store/actions/shapeTool';
 import { addShapeThunk } from '../store/actions/layer';
 import { getPagePaperLayer } from '../store/selectors/layer';
@@ -55,17 +54,6 @@ class ShapeTool {
     this.shiftModifier = false;
     this.snapTool = new SnapTool();
     this.toBounds = null;
-  }
-  disable() {
-    if (this.tooltip) {
-      this.tooltip.paperLayer.remove();
-    }
-    if (this.outline) {
-      this.outline.remove();
-    }
-    this.snapTool.removeGuides();
-    store.dispatch(setCanvasDrawing({drawing: false}));
-    store.dispatch(toggleShapeToolThunk(this.shapeType) as any);
   }
   updateRef() {
     if (this.ref) {
@@ -178,7 +166,10 @@ class ShapeTool {
     }
     this.outline = this.renderShape({
       strokeColor: THEME_PRIMARY_COLOR,
-      strokeWidth: 1 / paperMain.view.zoom
+      strokeWidth: 1 / paperMain.view.zoom,
+      data: {
+        id: 'ShapeToolPreview'
+      }
     });
     this.outline.removeOn({
       up: true
@@ -265,10 +256,6 @@ class ShapeTool {
           this.snapTool.updateGuides();
           //this.updateRef();
         }
-        break;
-      }
-      case 'escape': {
-        this.disable();
         break;
       }
     }
@@ -371,7 +358,6 @@ class ShapeTool {
   }
   onMouseDown(event: paper.ToolEvent): void {
     const state = store.getState();
-    store.dispatch(setCanvasDrawing({drawing: true}));
     this.drawing = true;
     this.from = new paperMain.Point((
       this.snapTool.snap.x ? this.snapTool.snap.x.point : event.point.x
@@ -503,7 +489,7 @@ class ShapeTool {
         }) as any);
       }
     }
-    this.disable();
+    store.dispatch(toggleShapeToolThunk(this.shapeType) as any);
   }
 }
 
