@@ -71,7 +71,7 @@ const BlendModeSelector = (props: BlendModeSelectorProps): ReactElement => {
       onChange={handleChange}
       options={options}
       placeholder='multi'
-      bottomLabel='Blend Mode'
+      bottomLabel='Blend'
     />
   );
 }

@@ -39,7 +39,7 @@ const HorizontalFlipInput = (props: HorizontalFlipInputProps): ReactElement => {
       active={horizontalFlip}
       onClick={handleClick}
       disabled={disabled}>
-      <Icon name='horizontal-flip' />
+      <Icon name='horizontal-flip' small />
     </SidebarToggleButton>
   );
 }

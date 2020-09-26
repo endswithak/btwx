@@ -57,7 +57,8 @@ const TweenDrawerEventLayersHeader = (props: TweenDrawerEventLayersProps): React
           className='c-tween-drawer-event-layer-tween__name'
           style={{
             color: sticky ? theme.text.base : theme.text.lighter,
-            textTransform: sticky ? 'none' : 'uppercase'
+            textTransform: sticky ? 'none' : 'uppercase',
+            fontWeight: sticky ? 400 : 700
           }}>
           { text }
         </div>

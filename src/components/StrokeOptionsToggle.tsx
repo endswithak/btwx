@@ -14,7 +14,7 @@ const StrokeOptionsToggle = (props: StrokeOptionsToggleProps): ReactElement => {
   return (
     <IconButton
       onClick={onClick}
-      icon='gear'
+      icon='more'
       isActive={showOptions}
       variant='small' />
   );

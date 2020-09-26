@@ -17,9 +17,13 @@ import insertKnob from './insertKnob';
 import theme from './theme';
 import zoomTool from './zoomTool';
 import shapeTool from './shapeTool';
+import dragTool from './dragTool';
+import areaSelectTool from './areaSelectTool';
 import artboardTool from './artboardTool';
 import textTool from './textTool';
-import selectionTool from './selectionTool';
+import resizeTool from './resizeTool';
+import lineTool from './lineTool';
+import gradientTool from './gradientTool';
 import { importPaperProject } from '../selectors/layer';
 import { paperMain } from '../../canvas';
 
@@ -352,8 +356,12 @@ const appReducer = combineReducers({
   zoomTool,
   shapeTool,
   artboardTool,
-  selectionTool,
-  textTool
+  dragTool,
+  areaSelectTool,
+  textTool,
+  resizeTool,
+  gradientTool,
+  lineTool
 });
 
 const OPEN_FILE = 'OPEN_FILE';

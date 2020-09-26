@@ -15,6 +15,11 @@ import KeyBindings from './KeyBindings';
 import ShapeToolWrap from './ShapeToolWrap';
 import ArtboardToolWrap from './ArtboardToolWrap';
 import TextToolWrap from './TextToolWrap';
+import DragToolWrap from './DragToolWrap';
+import AreaSelectToolWrap from './AreaSelectToolWrap';
+import ResizeToolWrap from './ResizeToolWrap';
+import LineToolWrap from './LineToolWrap';
+import GradientToolWrap from './GradientToolWrap';
 
 const App = (): ReactElement => {
   const theme = useContext(ThemeContext);
@@ -31,22 +36,31 @@ const App = (): ReactElement => {
         {/* flex items */}
         <Topbar />
         <Main ready={ready} setReady={setReady} />
-        {/* modals */}
+        {/* abs elements */}
         {
           ready
           ? <>
-              <EaseEditorWrap />
+              {/* canvas ui */}
               <ActiveArtboardFrameWrap />
               <HoverFrameWrap />
               <SelectionFrameWrap />
               <MeasureFrameWrap />
+              <TweenEventsFrameWrap />
+              {/* modals */}
+              <EaseEditorWrap />
               <ArtboardPresetEditorWrap />
               <ContextMenuWrap />
-              <TweenEventsFrameWrap />
-              <KeyBindings />
+              {/* tools */}
               <ShapeToolWrap />
               <ArtboardToolWrap />
               <TextToolWrap />
+              <DragToolWrap />
+              <AreaSelectToolWrap />
+              <ResizeToolWrap />
+              <LineToolWrap />
+              <GradientToolWrap />
+              {/* misc */}
+              <KeyBindings />
             </>
           : null
         }

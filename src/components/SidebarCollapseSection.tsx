@@ -27,7 +27,7 @@ const SidebarCollapseSection = (props: SidebarCollapseSectionProps): ReactElemen
             </SidebarSectionRow>
           </SidebarSectionColumn>
           <SidebarSectionColumn width='50%'>
-            <SidebarSectionRow justifyContent='flex-end'>
+            <SidebarSectionRow justifyContent='flex-end' alignItems='center'>
               <>
                 { actions }
                 <IconButton

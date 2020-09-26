@@ -39,7 +39,7 @@ const VerticalFlipInput = (props: VerticalFlipInputProps): ReactElement => {
       active={verticalFlip}
       onClick={handleClick}
       disabled={disabled}>
-      <Icon name='vertical-flip' />
+      <Icon name='vertical-flip' small />
     </SidebarToggleButton>
   );
 }

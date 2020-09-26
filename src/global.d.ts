@@ -2,11 +2,19 @@ declare module 'lodash.debounce';
 declare module 'react-scroll-sync';
 declare namespace em {
 
+  type ResizeHandle = 'topLeft' | 'topCenter' | 'topRight' | 'bottomLeft' | 'bottomCenter' | 'bottomRight' | 'leftCenter' | 'rightCenter';
+
+  type LineHandle = 'from' | 'to';
+
+  type GradientHandle = 'origin' | 'destination';
+
+  type GradientProp = 'fill' | 'stroke';
+
   type ResizeType = 'n' | 'e' | 's' | 'w' | 'ne' | 'nw' | 'se' | 'sw' | 'ew' | 'ns' | 'nesw' | 'nwses';
 
   type ZoomType = 'in' | 'out';
 
-  type ToolType = 'Shape' | 'Selection' | 'Artboard' | 'Text';
+  type ToolType = 'Shape' | 'Selection' | 'Artboard' | 'Text' | 'Drag' | 'AreaSelect' | 'Resize' | 'Line' | 'Gradient';
 
   type Orientation = 'Portrait' | 'Landscape';
 

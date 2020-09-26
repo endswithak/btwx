@@ -1,15 +1,15 @@
 import store from '../store';
 import { setLineFrom, setLineTo } from '../store/actions/layer';
-import { setSelectionToolResizeType } from '../store/actions/selectionTool';
+import { toggleLineToolThunk } from '../store/actions/lineTool';
 import { getPaperLayer, getLineFromPoint, getLineToPoint } from '../store/selectors/layer';
 import { paperMain } from './index';
 import SnapTool from './snapTool';
 import { RootState } from '../store/reducers';
 import { updateSelectionFrame } from '../store/utils/layer';
-import { setCanvasResizing } from '../store/actions/canvasSettings';
 import { isBetween } from '../utils';
 
 class LineTool {
+  tool: paper.Tool;
   state: RootState;
   enabled: boolean;
   handle: 'from' | 'to';
@@ -26,44 +26,41 @@ class LineTool {
   shiftModifier: boolean;
   isHorizontal: boolean;
   isVertical: boolean;
-  constructor() {
-    this.handle = null;
-    this.enabled = false;
-    this.toBounds = null;
-    this.fromBounds = null;
-    this.x = 0;
-    this.y = 0;
-    this.fromHandle = null;
-    this.toHandle = null;
-    this.snapTool = null;
-    this.shiftModifier = false;
-    this.isHorizontal = false;
-    this.isVertical = false;
-  }
-  enable(state: RootState, handle: 'from' | 'to'): void {
-    this.state = state;
-    this.enabled = true;
+  constructor(handle: em.LineHandle, nativeEvent: any) {
+    this.tool = new paperMain.Tool();
+    this.tool.activate();
+    this.tool.minDistance = 1;
+    this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
+    this.tool.onKeyUp = (e: paper.KeyEvent): void => this.onKeyUp(e);
+    this.tool.onMouseDown = (e: paper.ToolEvent): void => this.onMouseDown(e);
+    this.tool.onMouseDrag = (e: paper.ToolEvent): void => this.onMouseDrag(e);
+    this.tool.onMouseUp = (e: paper.ToolEvent): void => this.onMouseUp(e);
+    this.state = store.getState();
     this.handle = handle;
+    this.snapTool = new SnapTool();
     this.fromHandle = paperMain.project.getItem({data: { interactiveType: 'from'}}) as paper.Shape;
     this.toHandle = paperMain.project.getItem({data: { interactiveType: 'to'}}) as paper.Shape;
     this.fromBounds = new paperMain.Rectangle(handle === 'from' ? this.fromHandle.bounds : this.toHandle.bounds);
-    this.snapTool = new SnapTool();
-    store.dispatch(setCanvasResizing({resizing: true}));
-    store.dispatch(setSelectionToolResizeType({resizeType: 'ew'}));
-    updateSelectionFrame(this.state.layer.present, this.handle);
-  }
-  disable(): void {
-    store.dispatch(setCanvasResizing({resizing: false}));
-    this.state = null;
-    this.enabled = false;
-    this.handle = null;
     this.toBounds = null;
-    this.fromBounds = null;
     this.x = 0;
     this.y = 0;
-    this.fromHandle = null;
-    this.toHandle = null;
-    this.snapTool = null;
+    this.shiftModifier = false;
+    this.isHorizontal = false;
+    this.isVertical = false;
+    updateSelectionFrame(this.state.layer.present, this.handle);
+    if (nativeEvent) {
+      const event = {
+        ...nativeEvent,
+        point: paperMain.view.getEventPoint(nativeEvent),
+        modifiers: {
+          shift: nativeEvent.shiftKey,
+          alt: nativeEvent.altKey,
+          meta: nativeEvent.metaKey,
+          ctrl: nativeEvent.ctrlKey
+        }
+      };
+      this.onMouseDown(event);
+    }
   }
   updateHandles(): void {
     const paperLayer = getPaperLayer(this.state.layer.present.selected[0]) as paper.CompoundPath;
@@ -141,13 +138,11 @@ class LineTool {
     switch(event.key) {
       case 'shift': {
         this.shiftModifier = true;
-        if (this.enabled) {
-          this.updateVector();
-          this.updateToBounds();
-          this.updateHandles();
-          updateSelectionFrame(this.state.layer.present, this.handle);
-          this.snapTool.updateGuides();
-        }
+        this.updateVector();
+        this.updateToBounds();
+        this.updateHandles();
+        updateSelectionFrame(this.state.layer.present, this.handle);
+        this.snapTool.updateGuides();
         break;
       }
     }
@@ -156,73 +151,65 @@ class LineTool {
     switch(event.key) {
       case 'shift': {
         this.shiftModifier = false;
-        if (this.enabled) {
-          this.updateVector();
-          this.updateToBounds();
-          this.updateHandles();
-          updateSelectionFrame(this.state.layer.present, this.handle);
-          this.snapTool.updateGuides();
-        }
+        this.updateVector();
+        this.updateToBounds();
+        this.updateHandles();
+        updateSelectionFrame(this.state.layer.present, this.handle);
+        this.snapTool.updateGuides();
         break;
       }
     }
   }
   onMouseDown(event: paper.ToolEvent): void {
-    if (this.enabled) {
-      this.from = event.point;
-      this.toBounds = new paperMain.Rectangle(this.fromBounds);
-      this.snapTool.snapPoints = this.state.layer.present.inView.snapPoints.filter((snapPoint) => snapPoint.id !== this.state.layer.present.selected[0]);
-      this.snapTool.snapBounds = this.toBounds;
-    }
+    this.from = event.point;
+    this.toBounds = new paperMain.Rectangle(this.fromBounds);
+    this.snapTool.snapPoints = this.state.layer.present.inView.snapPoints.filter((snapPoint) => snapPoint.id !== this.state.layer.present.selected[0]);
+    this.snapTool.snapBounds = this.toBounds;
   }
   onMouseDrag(event: paper.ToolEvent): void {
-    if (this.enabled) {
-      this.state = store.getState();
-      this.to = event.point;
-      this.x += event.delta.x;
-      this.y += event.delta.y;
-      this.snapTool.updateXSnap({
-        event: event,
-        snapTo: {
-          left: false,
-          right: false,
-          center: true
-        }
-      });
-      this.snapTool.updateYSnap({
-        event: event,
-        snapTo: {
-          top: false,
-          bottom: false,
-          center: true
-        }
-      });
-      this.updateVector();
-      this.updateToBounds();
-      this.updateHandles();
-      updateSelectionFrame(this.state.layer.present, this.handle);
-      this.snapTool.updateGuides();
-    }
+    this.state = store.getState();
+    this.to = event.point;
+    this.x += event.delta.x;
+    this.y += event.delta.y;
+    this.snapTool.updateXSnap({
+      event: event,
+      snapTo: {
+        left: false,
+        right: false,
+        center: true
+      }
+    });
+    this.snapTool.updateYSnap({
+      event: event,
+      snapTo: {
+        top: false,
+        bottom: false,
+        center: true
+      }
+    });
+    this.updateVector();
+    this.updateToBounds();
+    this.updateHandles();
+    updateSelectionFrame(this.state.layer.present, this.handle);
+    this.snapTool.updateGuides();
   }
   onMouseUp(event: paper.ToolEvent): void {
-    if (this.enabled) {
-      if (this.x !== 0 || this.y !== 0) {
-        const paperLayer = getPaperLayer(this.state.layer.present.selected[0]) as paper.CompoundPath;
-        const newX = (this.to.x - (paperLayer.children[0] as paper.Path).position.x) / this.vector.length;
-        const newY = (this.to.y - (paperLayer.children[0] as paper.Path).position.y) / this.vector.length;
-        switch(this.handle) {
-          case 'from': {
-            store.dispatch(setLineFrom({id: this.state.layer.present.selected[0], x: newX, y: newY}));
-            break;
-          }
-          case 'to': {
-            store.dispatch(setLineTo({id: this.state.layer.present.selected[0], x: newX, y: newY}));
-            break;
-          }
+    if (this.x !== 0 || this.y !== 0) {
+      const paperLayer = getPaperLayer(this.state.layer.present.selected[0]) as paper.CompoundPath;
+      const newX = (this.to.x - (paperLayer.children[0] as paper.Path).position.x) / this.vector.length;
+      const newY = (this.to.y - (paperLayer.children[0] as paper.Path).position.y) / this.vector.length;
+      switch(this.handle) {
+        case 'from': {
+          store.dispatch(setLineFrom({id: this.state.layer.present.selected[0], x: newX, y: newY}));
+          break;
+        }
+        case 'to': {
+          store.dispatch(setLineTo({id: this.state.layer.present.selected[0], x: newX, y: newY}));
+          break;
         }
       }
-      this.disable();
     }
+    store.dispatch(toggleLineToolThunk(null, null) as any);
   }
 }
 

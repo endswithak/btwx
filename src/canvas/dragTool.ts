@@ -1,5 +1,5 @@
 import store from '../store';
-import { setCanvasDragging } from '../store/actions/canvasSettings';
+import { toggleDragToolThunk } from '../store/actions/dragTool';
 import { moveLayersBy, duplicateLayers, removeDuplicatedLayers } from '../store/actions/layer';
 import { getPaperLayer, getSelectionBounds, getLayerAndDescendants } from '../store/selectors/layer';
 import { updateSelectionFrame, updateMeasureFrame } from '../store/utils/layer';
@@ -9,10 +9,10 @@ import SnapTool from './snapTool';
 import { RootState } from '../store/reducers';
 
 class DragTool {
+  tool: paper.Tool;
   state: RootState;
   originalSelection: string[];
   duplicateSelection: string[];
-  enabled: boolean;
   x: number;
   y: number;
   from: paper.Point;
@@ -25,13 +25,20 @@ class DragTool {
   fromBounds: paper.Rectangle;
   toBounds: paper.Rectangle;
   centerOffset: paper.Point;
-  moveHandle: boolean;
-  constructor() {
+  handle: boolean;
+  constructor(handle: boolean, nativeEvent: any) {
+    this.tool = new paperMain.Tool();
+    this.tool.activate();
+    this.tool.minDistance = 1;
+    this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
+    this.tool.onKeyUp = (e: paper.KeyEvent): void => this.onKeyUp(e);
+    this.tool.onMouseDown = (e: paper.ToolEvent): void => this.onMouseDown(e);
+    this.tool.onMouseDrag = (e: paper.ToolEvent): void => this.onMouseDrag(e);
+    this.tool.onMouseUp = (e: paper.ToolEvent): void => this.onMouseUp(e);
     this.state = null;
-    this.moveHandle = false;
+    this.handle = handle;
     this.originalSelection = null;
     this.duplicateSelection = null;
-    this.enabled = false;
     this.x = null;
     this.y = null;
     this.from = null;
@@ -42,31 +49,21 @@ class DragTool {
     this.ref = null;
     this.fromBounds = null;
     this.toBounds = null;
-    this.snapTool = null;
-  }
-  enable(state: RootState, event: paper.ToolEvent, moveHandle = false): void {
-    this.state = state;
-    this.enabled = true;
     this.snapTool = new SnapTool();
-    this.moveHandle = moveHandle;
-  }
-  disable(): void {
-    if (this.state.canvasSettings.dragging) {
-      store.dispatch(setCanvasDragging({dragging: false}));
+    this.state = store.getState();
+    if (nativeEvent) {
+      const event = {
+        ...nativeEvent,
+        point: paperMain.view.getEventPoint(nativeEvent),
+        modifiers: {
+          shift: nativeEvent.shiftKey,
+          alt: nativeEvent.altKey,
+          meta: nativeEvent.metaKey,
+          ctrl: nativeEvent.ctrlKey
+        }
+      };
+      this.onMouseDown(event);
     }
-    this.state = null;
-    this.moveHandle = false;
-    this.originalSelection = null;
-    this.duplicateSelection = null;
-    this.enabled = false;
-    this.x = null;
-    this.y = null;
-    this.from = null;
-    this.to = null;
-    this.ref = null;
-    this.fromBounds = null;
-    this.toBounds = null;
-    this.snapTool = null;
   }
   updateRef(): void {
     if (this.ref) {
@@ -141,7 +138,7 @@ class DragTool {
     });
     this.updateSnapPoints();
     this.snapTool.updateGuides();
-    updateSelectionFrame(this.state.layer.present, this.moveHandle ? 'move' : 'none');
+    updateSelectionFrame(this.state.layer.present, this.handle ? 'move' : 'none');
     updateMeasureFrame(this.state.layer.present, this.getMeasureGuides());
   }
   onKeyDown(event: paper.KeyEvent): void {
@@ -185,121 +182,111 @@ class DragTool {
     }
   }
   onMouseDown(event: paper.ToolEvent): void {
-    if (this.enabled) {
-      // get selection bounds
-      const selectionBounds = getSelectionBounds(this.state.layer.present);
-      this.originalSelection = this.state.layer.present.selected;
-      this.fromBounds = selectionBounds;
-      this.from = event.point;
-      this.to = event.point;
-      this.toBounds = new paperMain.Rectangle(this.fromBounds);
-      this.snapTool.snapBounds = this.toBounds.clone();
-      this.updateSnapPoints();
-      if (event.modifiers.alt) {
-        this.altModifier = true;
-        if ((this.x || this.y) && !this.duplicateSelection) {
-          this.duplicate();
-          this.translateLayers();
-        }
+    // get selection bounds
+    const selectionBounds = getSelectionBounds(this.state.layer.present);
+    this.originalSelection = this.state.layer.present.selected;
+    this.fromBounds = selectionBounds;
+    this.from = event.point;
+    this.to = event.point;
+    this.toBounds = new paperMain.Rectangle(this.fromBounds);
+    this.snapTool.snapBounds = this.toBounds.clone();
+    this.updateSnapPoints();
+    if (event.modifiers.alt) {
+      this.altModifier = true;
+      if ((this.x || this.y) && !this.duplicateSelection) {
+        this.duplicate();
+        this.translateLayers();
       }
     }
   }
   onMouseDrag(event: paper.ToolEvent): void {
-    if (this.enabled) {
-      if (!this.x) {
-        store.dispatch(setCanvasDragging({dragging: true}));
-        this.state = store.getState();
+    this.x += event.delta.x;
+    this.y += event.delta.y;
+    this.to = event.point;
+    this.toBounds.center.x = this.fromBounds.center.x + this.x;
+    this.toBounds.center.y = this.fromBounds.center.y + this.y;
+    this.snapTool.snapBounds = this.toBounds.clone();
+    this.snapTool.updateXSnap({
+      event: event,
+      snapTo: {
+        left: true,
+        right: true,
+        center: true
+      },
+      handleSnapped: (snapPoint: em.SnapPoint) => {
+        switch(snapPoint.boundsSide) {
+          case 'left':
+            this.snapTool.snapBounds.center.x = snapPoint.point + (this.fromBounds.width / 2);
+            break;
+          case 'center':
+            this.snapTool.snapBounds.center.x = snapPoint.point;
+            break;
+          case 'right':
+            this.snapTool.snapBounds.center.x = snapPoint.point - (this.fromBounds.width / 2);
+            break;
+        }
+      },
+      handleSnap: (closestXSnap: { bounds: em.SnapBound; snapPoint: em.SnapPoint; distance: number }) => {
+        switch(closestXSnap.bounds.side) {
+          case 'left':
+            this.snapTool.snapBounds.center.x = closestXSnap.snapPoint.point + (this.fromBounds.width / 2);
+            break;
+          case 'center':
+            this.snapTool.snapBounds.center.x = closestXSnap.snapPoint.point;
+            break;
+          case 'right':
+            this.snapTool.snapBounds.center.x = closestXSnap.snapPoint.point - (this.fromBounds.width / 2);
+            break;
+        }
       }
-      this.x += event.delta.x;
-      this.y += event.delta.y;
-      this.to = event.point;
-      this.toBounds.center.x = this.fromBounds.center.x + this.x;
-      this.toBounds.center.y = this.fromBounds.center.y + this.y;
-      this.snapTool.snapBounds = this.toBounds.clone();
-      this.snapTool.updateXSnap({
-        event: event,
-        snapTo: {
-          left: true,
-          right: true,
-          center: true
-        },
-        handleSnapped: (snapPoint: em.SnapPoint) => {
-          switch(snapPoint.boundsSide) {
-            case 'left':
-              this.snapTool.snapBounds.center.x = snapPoint.point + (this.fromBounds.width / 2);
-              break;
-            case 'center':
-              this.snapTool.snapBounds.center.x = snapPoint.point;
-              break;
-            case 'right':
-              this.snapTool.snapBounds.center.x = snapPoint.point - (this.fromBounds.width / 2);
-              break;
-          }
-        },
-        handleSnap: (closestXSnap: { bounds: em.SnapBound; snapPoint: em.SnapPoint; distance: number }) => {
-          switch(closestXSnap.bounds.side) {
-            case 'left':
-              this.snapTool.snapBounds.center.x = closestXSnap.snapPoint.point + (this.fromBounds.width / 2);
-              break;
-            case 'center':
-              this.snapTool.snapBounds.center.x = closestXSnap.snapPoint.point;
-              break;
-            case 'right':
-              this.snapTool.snapBounds.center.x = closestXSnap.snapPoint.point - (this.fromBounds.width / 2);
-              break;
-          }
+    });
+    this.snapTool.updateYSnap({
+      event: event,
+      snapTo: {
+        top: true,
+        bottom: true,
+        center: true
+      },
+      handleSnapped: (snapPoint: em.SnapPoint) => {
+        switch(snapPoint.boundsSide) {
+          case 'top':
+            this.snapTool.snapBounds.center.y = snapPoint.point + (this.fromBounds.height / 2);
+            break;
+          case 'center':
+            this.snapTool.snapBounds.center.y = snapPoint.point;
+            break;
+          case 'bottom':
+            this.snapTool.snapBounds.center.y = snapPoint.point - (this.fromBounds.height / 2);
+            break;
         }
-      });
-      this.snapTool.updateYSnap({
-        event: event,
-        snapTo: {
-          top: true,
-          bottom: true,
-          center: true
-        },
-        handleSnapped: (snapPoint: em.SnapPoint) => {
-          switch(snapPoint.boundsSide) {
-            case 'top':
-              this.snapTool.snapBounds.center.y = snapPoint.point + (this.fromBounds.height / 2);
-              break;
-            case 'center':
-              this.snapTool.snapBounds.center.y = snapPoint.point;
-              break;
-            case 'bottom':
-              this.snapTool.snapBounds.center.y = snapPoint.point - (this.fromBounds.height / 2);
-              break;
-          }
-        },
-        handleSnap: (closestYSnap: { bounds: em.SnapBound; snapPoint: em.SnapPoint; distance: number }) => {
-          switch(closestYSnap.bounds.side) {
-            case 'top':
-              this.snapTool.snapBounds.center.y = closestYSnap.snapPoint.point + (this.fromBounds.height / 2);
-              break;
-            case 'center':
-              this.snapTool.snapBounds.center.y = closestYSnap.snapPoint.point;
-              break;
-            case 'bottom':
-              this.snapTool.snapBounds.center.y = closestYSnap.snapPoint.point - (this.fromBounds.height / 2);
-              break;
-          }
+      },
+      handleSnap: (closestYSnap: { bounds: em.SnapBound; snapPoint: em.SnapPoint; distance: number }) => {
+        switch(closestYSnap.bounds.side) {
+          case 'top':
+            this.snapTool.snapBounds.center.y = closestYSnap.snapPoint.point + (this.fromBounds.height / 2);
+            break;
+          case 'center':
+            this.snapTool.snapBounds.center.y = closestYSnap.snapPoint.point;
+            break;
+          case 'bottom':
+            this.snapTool.snapBounds.center.y = closestYSnap.snapPoint.point - (this.fromBounds.height / 2);
+            break;
         }
-      });
-      this.toBounds = this.snapTool.snapBounds;
-      this.translateLayers();
-    }
+      }
+    });
+    this.toBounds = this.snapTool.snapBounds;
+    this.translateLayers();
   }
   onMouseUp(event: paper.ToolEvent): void {
-    if (this.enabled) {
-      if (this.x || this.y) {
-        if (this.state.layer.present.selected.length > 0) {
-          store.dispatch(moveLayersBy({layers: this.state.layer.present.selected, x: this.x, y: this.y}));
-        }
-        if (this.ref) {
-          this.ref.remove();
-        }
+    if (this.x || this.y) {
+      if (this.state.layer.present.selected.length > 0) {
+        store.dispatch(moveLayersBy({layers: this.state.layer.present.selected, x: this.x, y: this.y}));
       }
-      this.disable();
+      if (this.ref) {
+        this.ref.remove();
+      }
     }
+    store.dispatch(toggleDragToolThunk(null, null) as any);
   }
 }
 

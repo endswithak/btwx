@@ -73,7 +73,7 @@ const SidebarEmptyState = (props: SidebarEmptyStateProps): ReactElement => {
         <div
           className='c-sidebar-empty-state__text'
           style={{
-            color: theme.text.light
+            color: theme.text.lighter
           }}>
           { text }
         </div>

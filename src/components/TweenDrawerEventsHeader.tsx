@@ -21,7 +21,7 @@ interface HeaderItemProps {
 
 const HeaderItem = styled.button<HeaderItemProps>`
   color: ${props => props.isActive ? props.theme.palette.primary : props.theme.text.lighter};
-  font-weight: ${props => props.isActive ? 'bold' : 'normal'};
+  font-weight: 700;
   cursor:  ${props => props.isDisabled ? 'default' : 'pointer'};
   :hover {
     color: ${props => props.isActive && !props.isDisabled ? props.theme.palette.primaryHover : props.isDisabled ? props.theme.text.lighter : props.theme.text.base};

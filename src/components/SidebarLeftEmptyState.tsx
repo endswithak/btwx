@@ -70,7 +70,7 @@ const SidebarLeftEmptyState = (props: SidebarLeftEmptyStateProps): ReactElement 
       case 'Text':
         return 'Click on canvas to add text layer.';
       default:
-        return 'View and edit document layers here.';
+        return null;
     }
   }
 
