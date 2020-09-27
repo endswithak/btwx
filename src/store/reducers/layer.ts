@@ -194,6 +194,8 @@ import {
   SET_LINES_TO_Y,
   SET_LINE_TO,
   SET_LAYER_EDIT,
+  SET_LAYER_STYLE,
+  SET_LAYERS_STYLE,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -392,7 +394,9 @@ import {
   setLineToY,
   setLinesToY,
   setLineTo,
-  setLayerEdit
+  setLayerEdit,
+  setLayerStyle,
+  setLayersStyle
 } from '../utils/layer';
 
 export interface LayerState {
@@ -854,6 +858,10 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setLineTo(state, action);
     case SET_LAYER_EDIT:
       return setLayerEdit(state, action);
+    case SET_LAYER_STYLE:
+      return setLayerStyle(state, action);
+    case SET_LAYERS_STYLE:
+      return setLayersStyle(state, action);
     default:
       return state;
   }

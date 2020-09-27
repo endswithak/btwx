@@ -119,7 +119,7 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
         <GradientTypeSelector
           gradientTypeValue={gradientTypeValue}
           disabled={!enabled || enabled === 'multi'}
-          prop='fill' />
+          prop={prop} />
       </SidebarSectionColumn>
       <SidebarSectionColumn width={'33.33%'}>
         <SidebarInput

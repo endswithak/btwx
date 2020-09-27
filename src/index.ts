@@ -519,6 +519,21 @@ export const handleThemeToggle = (): void => {
   }
 }
 
+export const handleSetTheme = (theme: em.ThemeName): void => {
+  const document = getFocusedDocument();
+  if (document) {
+    BrowserWindow.getAllWindows().forEach((window) => {
+      const documentWindow = !window.getParentWindow();
+      if (window.webContents) {
+        window.webContents.executeJavaScript(`setTitleBarTheme(${JSON.stringify(theme)})`);
+        if (documentWindow) {
+          window.webContents.executeJavaScript(`setTheme(${JSON.stringify(theme)})`);
+        }
+      }
+    });
+  }
+}
+
 ipcMain.on('openPreview', (event, windowSize) => {
   const size = JSON.parse(windowSize);
   createPreviewWindow({

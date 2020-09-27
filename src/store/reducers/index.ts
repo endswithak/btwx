@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux';
-import undoable, { includeAction } from 'redux-undo';
+import undoable, { excludeAction, includeAction, combineFilters } from 'redux-undo';
 import layer from './layer';
 import contextMenu from './contextMenu';
 import tweenDrawer from './tweenDrawer';
@@ -179,7 +179,9 @@ import {
   SEND_LAYERS_BACKWARD,
   SEND_LAYERS_FORWARD,
   SEND_LAYERS_TO_BACK,
-  SEND_LAYERS_TO_FRONT
+  SEND_LAYERS_TO_FRONT,
+  SET_LAYER_STYLE,
+  SET_LAYERS_STYLE
 } from '../actionTypes/layer';
 
 const reduxUndoActions = [
@@ -334,11 +336,17 @@ const reduxUndoActions = [
   SEND_LAYERS_BACKWARD,
   SEND_LAYERS_FORWARD,
   SEND_LAYERS_TO_BACK,
-  SEND_LAYERS_TO_FRONT
+  SEND_LAYERS_TO_FRONT,
+  SET_LAYER_STYLE,
+  SET_LAYERS_STYLE
 ];
 
 const appReducer = combineReducers({
-  layer: undoable(layer, { filter: includeAction(reduxUndoActions as any)}),
+  layer: undoable(layer, {
+    filter: (action: any) => {
+      return (action.payload && action.payload.includeInHistory) || reduxUndoActions.includes(action.type);
+    }
+  }),
   documentSettings,
   canvasSettings,
   contextMenu,

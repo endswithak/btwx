@@ -119,6 +119,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
 
   const handleLayerMouseDown = (e: any, hitResult: em.HitResult) => {
     const props = hitResult.layerProps;
+    const deepSelectItem = getDeepSelectItem({scope, ...layer} as any, props.layerItem.id);
     // text settings
     if (props.nearestScopeAncestor.id === props.layerItem.id && props.layerItem.type === 'Text') {
       setTextSettings({
@@ -137,7 +138,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
       if (!props.layerItem.selected) {
         let layerId: string;
         if (props.nearestScopeAncestor.type === 'Artboard') {
-          layerId = getDeepSelectItem({scope, ...layer} as any, props.layerItem.id).id;
+          layerId = deepSelectItem.id;
           deepSelectLayer({id: props.layerItem.id});
         } else {
           layerId = props.nearestScopeAncestor.id;
@@ -149,11 +150,11 @@ const Canvas = (props: CanvasProps): ReactElement => {
       }
     }
     // drag tool
-    if (props.nearestScopeAncestor.type !== 'Artboard') {
+    if (props.nearestScopeAncestor.type !== 'Artboard' || deepSelectItem.type !== 'Artboard') {
       toggleDragToolThunk(false, e);
     }
     // area select tool
-    if (props.nearestScopeAncestor.type === 'Artboard') {
+    if (props.nearestScopeAncestor.type === 'Artboard' && deepSelectItem.type === 'Artboard') {
       toggleAreaSelectToolThunk(e);
     }
   }

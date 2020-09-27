@@ -26,7 +26,7 @@ declare namespace em {
 
   type CubicBezierType = 'in' | 'inOut' | 'out';
 
-  type ContextMenu = 'LayerEdit' | 'TweenEvent' | 'TweenEventDestination' | 'ArtboardCustomPreset' | 'TweenDrawerEvent';
+  type ContextMenu = 'LayerEdit' | 'TweenEvent' | 'TweenEventDestination' | 'ArtboardCustomPreset' | 'TweenDrawerEvent' | 'Input';
 
   type ColorFormat = 'rgb' | 'hsl';
 
@@ -238,6 +238,12 @@ declare namespace em {
     images: {
       [id: string]: DocumentImage;
     };
+  }
+
+  interface ClipboardStyle {
+    type: ClipboardType;
+    style: em.Style;
+    textStyle: em.TextStyle;
   }
 
   interface Group extends Layer {

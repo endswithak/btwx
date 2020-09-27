@@ -238,6 +238,9 @@ export const SET_LINE_TO = 'SET_LINE_TO';
 
 export const SET_LAYER_EDIT = 'SET_LAYER_EDIT';
 
+export const SET_LAYER_STYLE = 'SET_LAYER_STYLE';
+export const SET_LAYERS_STYLE = 'SET_LAYERS_STYLE';
+
 // Artboard
 
 export type AddArtboardPayload = {
@@ -1892,6 +1895,7 @@ export interface DuplicateLayer {
 
 export interface DuplicateLayersPayload {
   layers: string[];
+  includeInHistory?: boolean;
 }
 
 export interface DuplicateLayers {
@@ -2255,6 +2259,28 @@ export interface SetLayerEdit {
   payload: SetLayerEditPayload;
 }
 
+export interface SetLayerStylePayload {
+  id: string;
+  style: em.Style;
+  textStyle?: em.TextStyle;
+}
+
+export interface SetLayerStyle {
+  type: typeof SET_LAYER_STYLE;
+  payload: SetLayerStylePayload;
+}
+
+export interface SetLayersStylePayload {
+  layers: string[];
+  style: em.Style;
+  textStyle?: em.TextStyle;
+}
+
+export interface SetLayersStyle {
+  type: typeof SET_LAYERS_STYLE;
+  payload: SetLayersStylePayload;
+}
+
 export type LayerTypes = AddArtboard |
                          AddGroup |
                          AddShape |
@@ -2456,4 +2482,6 @@ export type LayerTypes = AddArtboard |
                          SetLineToY |
                          SetLinesToY |
                          SetLineTo |
-                         SetLayerEdit;
+                         SetLayerEdit |
+                         SetLayerStyle |
+                         SetLayersStyle;

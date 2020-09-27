@@ -37,7 +37,7 @@ import {
   RemoveLayerGradientStop, RemoveLayersGradientStop, SetLayerActiveGradientStop, SetLayersShadowBlur, SetLayersShadowXOffset,
   SetLayersShadowYOffset, SetLayersFontSize, SetLayersFontWeight, SetLayersFontFamily, SetLayersLeading, SetLayersJustification,
   SetLayerTweenTiming, SetRoundedRadii, SetPolygonsSides, SetStarsPoints, SetStarsRadius, SetLayerEdit, AddLayers, SetLineFromX,
-  SetLineFromY, SetLineFrom, SetLineToX, SetLineToY, SetLineTo, SetLinesFromX, SetLinesFromY, SetLinesToX, SetLinesToY, SelectAllLayers
+  SetLineFromY, SetLineFrom, SetLineToX, SetLineToY, SetLineTo, SetLinesFromX, SetLinesFromY, SetLinesToX, SetLinesToY, SelectAllLayers, SetLayerStyle, SetLayersStyle
 } from '../actionTypes/layer';
 
 import {
@@ -1286,7 +1286,6 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
       },
       selected: [action.payload.id]
     }
-    currentState = newLayerScope(currentState, layerActions.newLayerScope({id: action.payload.id}) as NewLayerScope);
   }
   // else, add layer to current selection
   else {
@@ -1304,6 +1303,9 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
       }
     }
   }
+  // update scope
+  currentState = newLayerScope(currentState, layerActions.newLayerScope({id: action.payload.id}) as NewLayerScope);
+  // return final state
   return currentState;
 };
 
@@ -1347,11 +1349,6 @@ export const updateHoverFrame = (state: LayerState) => {
   }
   if (state.hover && !state.selected.includes(state.hover)) {
     const hoverItem = state.byId[state.hover];
-    // new paperMain.Path.Rectangle({
-    //   ...hoverFrameConstants,
-    //   point: new paperMain.Point(hoverItem.frame.x - (hoverItem.frame.width / 2), hoverItem.frame.y - (hoverItem.frame.height / 2)),
-    //   size: [hoverItem.frame.width, hoverItem.frame.height]
-    // });
     if (hoverItem.type === 'Shape') {
       new paperMain.CompoundPath({
         ...hoverFrameConstants,
@@ -5352,5 +5349,195 @@ export const setLayerEdit = (state: LayerState, action: SetLayerEdit): LayerStat
     edit: action.payload.edit,
     paperProject: savePaperProjectJSON(currentState)
   }
+  return currentState;
+};
+
+export const setLayerStyle = (state: LayerState, action: SetLayerStyle): LayerState => {
+  let currentState = state;
+  const layerItem = currentState.byId[action.payload.id];
+  const paperLayer = getPaperLayer(action.payload.id);
+  if (action.payload.style && action.payload.style.fill) {
+    if (action.payload.style.fill.enabled) {
+      switch(action.payload.style.fill.fillType) {
+        case 'color': {
+          const fillColor = action.payload.style.fill.color;
+          paperLayer.fillColor = { hue: fillColor.h, saturation: fillColor.s, lightness: fillColor.l, alpha: fillColor.a } as paper.Color;
+          break;
+        }
+        case 'gradient': {
+          const fillGradient = action.payload.style.fill.gradient;
+          paperLayer.fillColor = {
+            gradient: {
+              stops: getGradientStops(fillGradient.stops),
+              radial: fillGradient.gradientType === 'radial'
+            },
+            origin: getGradientOriginPoint(layerItem, fillGradient.origin),
+            destination: getGradientDestinationPoint(layerItem, fillGradient.destination)
+          } as any
+          break;
+        }
+      }
+    } else {
+      paperLayer.fillColor = null;
+    }
+  }
+  if (action.payload.style && action.payload.style.stroke) {
+    // stroke color
+    if (action.payload.style.stroke.enabled) {
+      switch(action.payload.style.stroke.fillType) {
+        case 'color': {
+          const strokeColor = action.payload.style.stroke.color;
+          paperLayer.strokeColor = { hue: strokeColor.h, saturation: strokeColor.s, lightness: strokeColor.l, alpha: strokeColor.a } as paper.Color;
+          break;
+        }
+        case 'gradient': {
+          const strokeGradient = action.payload.style.stroke.gradient;
+          paperLayer.strokeColor = {
+            gradient: {
+              stops: getGradientStops(strokeGradient.stops),
+              radial: strokeGradient.gradientType === 'radial'
+            },
+            origin: getGradientOriginPoint(layerItem, strokeGradient.origin),
+            destination: getGradientDestinationPoint(layerItem, strokeGradient.destination)
+          } as any
+          break;
+        }
+      }
+    } else {
+      paperLayer.strokeColor = null;
+    }
+    // stroke width
+    if (action.payload.style.stroke.width) {
+      paperLayer.strokeWidth = action.payload.style.stroke.width;
+    }
+  }
+  if (action.payload.style && action.payload.style.strokeOptions) {
+    if (action.payload.style.strokeOptions.cap) {
+      paperLayer.strokeCap = action.payload.style.strokeOptions.cap;
+    }
+    if (action.payload.style.strokeOptions.join) {
+      paperLayer.strokeJoin = action.payload.style.strokeOptions.join;
+    }
+    if (action.payload.style.strokeOptions.dashOffset) {
+      paperLayer.dashOffset = action.payload.style.strokeOptions.dashOffset;
+    }
+    if (action.payload.style.strokeOptions.dashArray) {
+      paperLayer.dashArray = action.payload.style.strokeOptions.dashArray;
+    }
+  }
+  if (action.payload.style && action.payload.style.shadow) {
+    // shadow color
+    if (action.payload.style.shadow.enabled) {
+      const shadowColor = action.payload.style.shadow.color;
+      paperLayer.shadowColor = { hue: shadowColor.h, saturation: shadowColor.s, lightness: shadowColor.l, alpha: shadowColor.a } as paper.Color;
+    } else {
+      paperLayer.shadowColor = null;
+    }
+    if (action.payload.style.shadow.offset) {
+      const offset = action.payload.style.shadow.offset;
+      paperLayer.shadowOffset = new paperMain.Point(offset.x ? offset.x : layerItem.style.shadow.offset.x, offset.y ? offset.y : layerItem.style.shadow.offset.y);
+    }
+    if (action.payload.style.shadow.blur) {
+      paperLayer.shadowBlur = action.payload.style.shadow.blur;
+    }
+  }
+  if (action.payload.style && action.payload.style.opacity) {
+    paperLayer.opacity = action.payload.style.opacity;
+  }
+  if (action.payload.style && action.payload.style.blendMode) {
+    paperLayer.blendMode = action.payload.style.blendMode;
+  }
+  if (layerItem.type === 'Text') {
+    if (action.payload.textStyle && action.payload.textStyle.fontSize) {
+      (paperLayer as paper.PointText).fontSize = action.payload.textStyle.fontSize;
+    }
+    if (action.payload.textStyle && action.payload.textStyle.leading) {
+      (paperLayer as paper.PointText).leading = action.payload.textStyle.leading;
+    }
+    if (action.payload.textStyle && action.payload.textStyle.fontWeight) {
+      (paperLayer as paper.PointText).fontWeight = action.payload.textStyle.fontWeight;
+    }
+    if (action.payload.textStyle && action.payload.textStyle.fontFamily) {
+      (paperLayer as paper.PointText).fontFamily = action.payload.textStyle.fontFamily;
+    }
+    if (action.payload.textStyle && action.payload.textStyle.justification) {
+      const prevJustification = (layerItem as em.Text).textStyle.justification;
+      const newJustification = action.payload.textStyle.justification;
+      (paperLayer as paper.PointText).justification = newJustification;
+      switch(prevJustification) {
+        case 'left':
+          switch(newJustification) {
+            case 'left':
+              break;
+            case 'center':
+              paperLayer.position.x += paperLayer.bounds.width / 2
+              break;
+            case 'right':
+              paperLayer.position.x += paperLayer.bounds.width
+              break;
+          }
+          break;
+        case 'center':
+          switch(newJustification) {
+            case 'left':
+              paperLayer.position.x -= paperLayer.bounds.width / 2
+              break;
+            case 'center':
+              break;
+            case 'right':
+              paperLayer.position.x += paperLayer.bounds.width / 2
+              break;
+          }
+          break;
+        case 'right':
+          switch(newJustification) {
+            case 'left':
+              paperLayer.position.x -= paperLayer.bounds.width;
+              break;
+            case 'center':
+              paperLayer.position.x -= paperLayer.bounds.width / 2;
+              break;
+            case 'right':
+              break;
+          }
+          break;
+      }
+    }
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          textStyle: {
+            ...(currentState.byId[action.payload.id] as em.Text).textStyle,
+            ...action.payload.textStyle
+          }
+        } as em.Text
+      }
+    }
+  }
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          ...action.payload.style
+        }
+      }
+    }
+  }
+  return currentState;
+};
+
+export const setLayersStyle = (state: LayerState, action: SetLayersStyle): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
+    return setLayerStyle(result, layerActions.setLayerStyle({id: current, style: action.payload.style, textStyle: action.payload.textStyle}) as SetLayerStyle);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };

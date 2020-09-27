@@ -4,6 +4,7 @@ import { RootState } from '../store/reducers';
 import { setArtboardPresetDeviceOrientation } from '../store/actions/documentSettings';
 import { SetArtboardPresetDeviceOrientationPayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
 import { addArtboardThunk } from '../store/actions/layer';
+import { toggleArtboardToolThunk } from '../store/actions/artboardTool';
 import { AddArtboardPayload } from '../store/actionTypes/layer';
 import { paperMain } from '../canvas';
 import SidebarArtboardPlatformSelector from './SidebarArtboardPlatformSelector';
@@ -17,11 +18,12 @@ interface SidebarArtboardPlatformOrientationProps {
   platform?: em.DevicePlatformType;
   setArtboardPresetDeviceOrientation?(payload: SetArtboardPresetDeviceOrientationPayload): DocumentSettingsTypes;
   addArtboardThunk?(payload: AddArtboardPayload): void;
+  toggleArtboardToolThunk?(): void;
 }
 
 const SidebarArtboardSizes = (props: SidebarArtboardPlatformOrientationProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { orientation, platform, setArtboardPresetDeviceOrientation, addArtboardThunk } = props;
+  const { toggleArtboardToolThunk, orientation, platform, setArtboardPresetDeviceOrientation, addArtboardThunk } = props;
 
   const handleOrientationClick = (type: em.DeviceOrientationType) => {
     switch(type) {
@@ -60,6 +62,7 @@ const SidebarArtboardSizes = (props: SidebarArtboardPlatformOrientationProps): R
         }
       } as any
     });
+    toggleArtboardToolThunk();
   }
 
   return (
@@ -98,7 +101,7 @@ const SidebarArtboardSizes = (props: SidebarArtboardPlatformOrientationProps): R
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { documentSettings, layer } = state;
+  const { documentSettings } = state;
   const orientation = documentSettings.artboardPresets.orientation;
   const platform = documentSettings.artboardPresets.platform;
   return { orientation, platform };
@@ -106,5 +109,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { setArtboardPresetDeviceOrientation, addArtboardThunk }
+  { setArtboardPresetDeviceOrientation, addArtboardThunk, toggleArtboardToolThunk }
 )(SidebarArtboardSizes);

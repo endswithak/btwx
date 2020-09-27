@@ -221,6 +221,8 @@ import {
   SET_LINES_TO_Y,
   SET_LINE_TO,
   SET_LAYER_EDIT,
+  SET_LAYER_STYLE,
+  SET_LAYERS_STYLE,
   AddArtboardPayload,
   AddGroupPayload,
   AddShapePayload,
@@ -413,6 +415,8 @@ import {
   SetLinesToYPayload,
   SetLineToPayload,
   SetLayerEditPayload,
+  SetLayerStylePayload,
+  SetLayersStylePayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -787,7 +791,7 @@ export const removeLayers = (payload: RemoveLayersPayload): LayerTypes => ({
   payload
 });
 
-export const removeLayersThunk = (payload: RemoveLayersPayload) => {
+export const removeLayersThunk = () => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     if (state.layer.present.selected.length > 0 && state.canvasSettings.focusing) {
@@ -1932,6 +1936,16 @@ export const setLayerEdit = (payload: SetLayerEditPayload): LayerTypes => ({
   }
 });
 
+export const setLayerStyle = (payload: SetLayerStylePayload): LayerTypes => ({
+  type: SET_LAYER_STYLE,
+  payload
+});
+
+export const setLayersStyle = (payload: SetLayersStylePayload): LayerTypes => ({
+  type: SET_LAYERS_STYLE,
+  payload
+});
+
 export const copyLayersThunk = () => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
@@ -1968,6 +1982,39 @@ export const copyLayersThunk = () => {
         return result;
       }, { type: 'layers', main: [], allIds: [], byId: {}, images: {} } as em.ClipboardLayers);
       clipboard.writeText(JSON.stringify(layers));
+    }
+  }
+};
+
+export const copyStyleThunk = () => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    if (state.canvasSettings.focusing && state.layer.present.selected.length === 1) {
+      const layerItem = state.layer.present.byId[state.layer.present.selected[0]];
+      const style = layerItem.style;
+      const textStyle = layerItem.type === 'Text' ? layerItem.textStyle : null;
+      clipboard.writeText(JSON.stringify({
+        type: 'style',
+        style,
+        textStyle
+      }));
+    }
+  }
+};
+
+export const pasteStyleThunk = () => {
+  return (dispatch: any, getState: any): Promise<any> => {
+    const state = getState() as RootState;
+    if (state.canvasSettings.focusing && state.layer.present.selected.length > 0) {
+      try {
+        const text = clipboard.readText();
+        const parsedText: em.ClipboardStyle = JSON.parse(text);
+        if (parsedText.type && parsedText.type === 'style') {
+          dispatch(setLayersStyle({layers: state.layer.present.selected, style: parsedText.style, textStyle: parsedText.textStyle}));
+        }
+      } catch(error) {
+        return;
+      }
     }
   }
 };
