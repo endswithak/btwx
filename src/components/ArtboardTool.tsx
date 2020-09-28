@@ -17,9 +17,14 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
     setCanvasDrawing({drawing: true});
   }
 
+  const handleMouseUp = () => {
+    setCanvasDrawing({drawing: false});
+  }
+
   useEffect(() => {
     const canvas = document.getElementById('canvas-container');
     canvas.addEventListener('mousedown', handleMouseDown);
+    canvas.addEventListener('mouseup', handleMouseUp);
     return () => {
       const tooltip = paperMain.project.getItem({ data: { id: 'Tooltip' } });
       const preview = paperMain.project.getItem({ data: { id: 'ArtboardToolPreview' } });
@@ -27,6 +32,7 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
       const measureGuides = paperMain.project.getItems({data: { id: 'MeasureGuide' }});
       const canvas = document.getElementById('canvas-container');
       canvas.removeEventListener('mousedown', handleMouseDown);
+      canvas.removeEventListener('mouseup', handleMouseUp);
       if (tooltip) {
         tooltip.remove();
       }
@@ -38,9 +44,6 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
       }
       if (measureGuides.length > 0) {
         measureGuides.forEach(measureGuide => measureGuide.remove());
-      }
-      if (drawing) {
-        setCanvasDrawing({drawing: false});
       }
     }
   });

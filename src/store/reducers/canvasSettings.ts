@@ -10,6 +10,7 @@ import {
   SET_CANVAS_FOCUSING,
   RESET_CANVAS_SETTINGS,
   SET_CANVAS_MOUSE_POSITION,
+  SET_CANVAS_TRANSLATING,
   CanvasSettingsTypes,
 } from '../actionTypes/canvasSettings';
 
@@ -29,6 +30,7 @@ export interface CanvasSettingsState {
   measuring: boolean;
   focusing: boolean;
   zooming: boolean;
+  translating: boolean;
 }
 
 const initialState: CanvasSettingsState = {
@@ -42,6 +44,7 @@ const initialState: CanvasSettingsState = {
   measuring: false,
   focusing: true,
   zooming: false,
+  translating: false
 };
 
 export default (state = initialState, action: CanvasSettingsTypes): CanvasSettingsState => {
@@ -110,6 +113,12 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
       return {
         ...state,
         mouse: action.payload.mouse
+      };
+    }
+    case SET_CANVAS_TRANSLATING: {
+      return {
+        ...state,
+        translating: action.payload.translating
       };
     }
     default:

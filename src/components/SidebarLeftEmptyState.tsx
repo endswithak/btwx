@@ -44,7 +44,7 @@ const SidebarLeftEmptyState = (props: SidebarLeftEmptyStateProps): ReactElement 
       case 'Artboard':
         return 'artboard';
       default:
-        return 'insert';
+        return 'left-sidebar';
     }
   }
 
@@ -101,13 +101,12 @@ const SidebarLeftEmptyState = (props: SidebarLeftEmptyStateProps): ReactElement 
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { documentSettings, layer, insertKnob, canvasSettings, shapeTool } = state;
-  const sidebarWidth = documentSettings.leftSidebarWidth;
+  const { layer, insertKnob, canvasSettings, shapeTool } = state;
   const isEmpty = layer.present.allIds.length <= 1;
   const insertKnobOpen = insertKnob.isActive;
   const activeTool = canvasSettings.activeTool;
   const shapeToolShapeType = shapeTool.shapeType;
-  return { sidebarWidth, isEmpty, insertKnobOpen, activeTool, shapeToolShapeType };
+  return { isEmpty, insertKnobOpen, activeTool, shapeToolShapeType };
 };
 
 export default connect(

@@ -24,6 +24,7 @@ import textTool from './textTool';
 import resizeTool from './resizeTool';
 import lineTool from './lineTool';
 import gradientTool from './gradientTool';
+import translateTool from './translateTool';
 import { importPaperProject } from '../selectors/layer';
 import { paperMain } from '../../canvas';
 
@@ -369,7 +370,8 @@ const appReducer = combineReducers({
   textTool,
   resizeTool,
   gradientTool,
-  lineTool
+  lineTool,
+  translateTool
 });
 
 const OPEN_FILE = 'OPEN_FILE';

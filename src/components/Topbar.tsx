@@ -5,7 +5,7 @@ import MaskButton from './MaskButton';
 import PreviewButton from './PreviewButton';
 import UngroupButton from './UngroupButton';
 import MoveBackwardButton from './MoveBackwardButton';
-import TweensButton from './TweensButton';
+// import TweensButton from './TweensButton';
 import GroupButton from './GroupButton';
 import MoveForwardButton from './MoveForwardButton';
 import ZoomButton from './ZoomButton';
@@ -13,7 +13,8 @@ import UniteButton from './UniteButton';
 import SubtractButton from './SubtractButton';
 import IntersectButton from './IntersectButton';
 import ExcludeButton from './ExcludeButton';
-import RightSidebarButton from './RightSidebarButton';
+// import SidebarRightButton from './SidebarRightButton';
+import ViewButton from './ViewButton';
 
 const Topbar = (): ReactElement => {
   const theme = useContext(ThemeContext);
@@ -29,6 +30,12 @@ const Topbar = (): ReactElement => {
         <InsertButton />
       </div>
       <div className='c-topbar__button-group'>
+        <UniteButton />
+        <SubtractButton />
+        <IntersectButton />
+        <ExcludeButton />
+      </div>
+      <div className='c-topbar__button-group'>
         <MaskButton />
         <MoveForwardButton />
         <MoveBackwardButton />
@@ -36,15 +43,10 @@ const Topbar = (): ReactElement => {
         <UngroupButton />
       </div>
       <div className='c-topbar__button-group'>
-        <UniteButton />
-        <SubtractButton />
-        <IntersectButton />
-        <ExcludeButton />
-      </div>
-      <div className='c-topbar__button-group'>
         <ZoomButton />
-        <TweensButton />
-        <RightSidebarButton />
+        <ViewButton />
+        {/* <TweensButton />
+        <SidebarRightButton /> */}
       </div>
       <div className='c-topbar__button-group'>
         <PreviewButton />

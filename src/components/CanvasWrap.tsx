@@ -1,17 +1,15 @@
-import { remote } from 'electron';
+// import { remote } from 'electron';
 import React, { useRef, useContext, useEffect, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { importPaperProject } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
-import { LayerTypes, SelectLayerPayload, AddArtboardPayload } from '../store/actionTypes/layer';
-import { updateInViewLayers, addArtboardThunk, selectLayer } from '../store/actions/layer';
-import { APPLE_IPHONE_DEVICES, ANDROID_MOBILE_DEVICES } from '../constants';
-import { zoomSelectionThunk } from '../store/actions/zoomTool';
+import { LayerTypes } from '../store/actionTypes/layer';
+import { updateInViewLayers } from '../store/actions/layer';
+// import { APPLE_IPHONE_DEVICES, ANDROID_MOBILE_DEVICES } from '../constants';
+// import { zoomSelectionThunk } from '../store/actions/zoomTool';
 import Canvas from './Canvas';
-import CanvasResizeWrap from './CanvasResizeWrap';
-import CanvasZoomWrap from './CanvasZoomWrap';
 
 interface CanvasWrapProps {
   ready: boolean;
@@ -26,15 +24,15 @@ interface CanvasWrapProps {
   matrix?: number[];
   updateInViewLayers(): LayerTypes;
   setReady(ready: boolean): void;
-  addArtboardThunk?(payload: AddArtboardPayload): Promise<em.Artboard>;
-  zoomSelectionThunk?(): void;
-  selectLayer?(payload: SelectLayerPayload): LayerTypes;
+  // addArtboardThunk?(payload: AddArtboardPayload): Promise<em.Artboard>;
+  // zoomSelectionThunk?(): void;
+  // selectLayer?(payload: SelectLayerPayload): LayerTypes;
 }
 
 const CanvasWrap = (props: CanvasWrapProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
-  const { ready, selectLayer, zoomSelectionThunk, matrix, addArtboardThunk, documentImages, updateInViewLayers, paperProject, allArtboardIds, allShapeIds, allTextIds, allImageIds, setReady } = props;
+  const { ready, matrix, documentImages, updateInViewLayers, paperProject, allArtboardIds, allShapeIds, allTextIds, allImageIds, setReady } = props;
 
   useEffect(() => {
     // init canvas
@@ -55,26 +53,26 @@ const CanvasWrap = (props: CanvasWrapProps): ReactElement => {
     updateInViewLayers();
     // toggleSelectionToolThunk();
     // add artboard if doc is empty
-    if (allArtboardIds.length === 0) {
-      const artboardDevice = remote.process.platform === 'darwin' ? APPLE_IPHONE_DEVICES.find((device) => device.type === 'iPhone 11') : ANDROID_MOBILE_DEVICES.find((device) => device.type === 'Galaxy S10e');
-      addArtboardThunk({
-        layer: {
-          parent: 'page',
-          name: artboardDevice.type,
-          frame: {
-            x: paperMain.view.center.x,
-            y: paperMain.view.center.x,
-            width: artboardDevice.width,
-            height: artboardDevice.height,
-            innerWidth: artboardDevice.width,
-            innerHeight: artboardDevice.height
-          }
-        } as any
-      }).then((artboard) => {
-        selectLayer({id: artboard.id, newSelection: true});
-        zoomSelectionThunk();
-      });
-    }
+    // if (allArtboardIds.length === 0) {
+    //   const artboardDevice = remote.process.platform === 'darwin' ? APPLE_IPHONE_DEVICES.find((device) => device.type === 'iPhone 11') : ANDROID_MOBILE_DEVICES.find((device) => device.type === 'Galaxy S10e');
+    //   addArtboardThunk({
+    //     layer: {
+    //       parent: 'page',
+    //       name: artboardDevice.type,
+    //       frame: {
+    //         x: paperMain.view.center.x,
+    //         y: paperMain.view.center.x,
+    //         width: artboardDevice.width,
+    //         height: artboardDevice.height,
+    //         innerWidth: artboardDevice.width,
+    //         innerHeight: artboardDevice.height
+    //       }
+    //     } as any
+    //   }).then((artboard) => {
+    //     selectLayer({id: artboard.id, newSelection: true});
+    //     zoomSelectionThunk();
+    //   });
+    // }
     // set app ready
     setReady(true);
   }, []);
@@ -84,11 +82,7 @@ const CanvasWrap = (props: CanvasWrapProps): ReactElement => {
       id='canvas-container'
       className='c-canvas'
       ref={canvasContainerRef}>
-      <CanvasResizeWrap>
-        <CanvasZoomWrap>
-          <Canvas ready={ready} />
-        </CanvasZoomWrap>
-      </CanvasResizeWrap>
+      <Canvas ready={ready} />
     </div>
   );
 }
@@ -118,5 +112,5 @@ const mapStateToProps = (state: RootState): {
 
 export default connect(
   mapStateToProps,
-  { updateInViewLayers, addArtboardThunk, zoomSelectionThunk, selectLayer }
+  { updateInViewLayers }
 )(CanvasWrap);

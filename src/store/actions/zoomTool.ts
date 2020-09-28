@@ -45,6 +45,17 @@ export const disableZoomToolThunk = () => {
   }
 };
 
+export const toggleZoomToolThunk = (payload?: EnableZoomToolPayload) => {
+  return (dispatch: any, getState: any): void => {
+    const state = getState() as RootState;
+    if (state.zoomTool.isEnabled) {
+      dispatch(disableZoomToolThunk());
+    } else {
+      dispatch(enableZoomToolThunk(payload));
+    }
+  }
+};
+
 export const zoomInThunk = () => {
   return (dispatch: any, getState: any): void => {
     dispatch(enableZoomToolThunk({zoomType: 'in'}));
@@ -73,7 +84,7 @@ export const zoomPercentThunk = (percent: number) => {
   }
 };
 
-export const zoomCanvasThunk = (percent: number) => {
+export const zoomCanvasThunk = () => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
     const canCanvasZoom = state.layer.present.allIds.length > 1;

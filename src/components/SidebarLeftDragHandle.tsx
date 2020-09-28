@@ -6,8 +6,8 @@ import styled from 'styled-components';
 import { setLeftSidebarWidth } from '../store/actions/documentSettings';
 import { SetLeftSidebarWidthPayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
 import { RootState } from '../store/reducers';
-import { ThemeContext } from './ThemeProvider';
 import { paperMain } from '../canvas';
+import { ThemeContext } from './ThemeProvider';
 
 gsap.registerPlugin(Draggable);
 
@@ -72,7 +72,7 @@ const SidebarLeftDragHandle = (props: SidebarLeftDragHandleProps): ReactElement 
 
 const mapStateToProps = (state: RootState) => {
   const { documentSettings } = state;
-  const sidebarWidth = documentSettings.leftSidebarWidth;
+  const sidebarWidth = documentSettings.view.leftSidebar.width;
   return { sidebarWidth };
 };
 

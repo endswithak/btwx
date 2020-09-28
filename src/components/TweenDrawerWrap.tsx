@@ -21,8 +21,8 @@ const TweenDrawerWrap = (props: TweenDrawerWrapProps): ReactElement => {
 const mapStateToProps = (state: RootState): {
   isOpen: boolean;
 } => {
-  const { tweenDrawer } = state;
-  const isOpen = tweenDrawer.isOpen;
+  const { documentSettings } = state;
+  const isOpen = documentSettings.view.tweenDrawer.isOpen;
   return { isOpen };
 };
 

@@ -79,8 +79,8 @@ const TweenDrawerLayersDragHandle = (props: TweenDrawerLayersDragHandleProps): R
 
 const mapStateToProps = (state: RootState) => {
   const { documentSettings } = state;
-  const tweenDrawerLayersWidth = documentSettings.tweenDrawerLayersWidth;
-  const tweenDrawerHeight = documentSettings.tweenDrawerHeight;
+  const tweenDrawerLayersWidth = documentSettings.view.tweenDrawer.layersWidth;
+  const tweenDrawerHeight = documentSettings.view.tweenDrawer.height;
   return { tweenDrawerLayersWidth, tweenDrawerHeight };
 };
 

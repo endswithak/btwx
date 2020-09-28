@@ -45,11 +45,11 @@ const SidebarRight = (props: SidebarRightProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer, documentSettings, rightSidebar, canvasSettings } = state;
-  const isOpen = rightSidebar.isOpen;
+  const { layer, documentSettings, canvasSettings } = state;
+  const isOpen = documentSettings.view.rightSidebar.isOpen;
   const selected = layer.present.selected;
   const activeTool = canvasSettings.activeTool;
-  const sidebarWidth = documentSettings.rightSidebarWidth;
+  const sidebarWidth = documentSettings.view.rightSidebar.width;
   return { isOpen, selected, activeTool, sidebarWidth };
 };
 

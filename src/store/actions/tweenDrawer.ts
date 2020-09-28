@@ -1,9 +1,8 @@
 import { setLayerHover } from './layer';
 import { scrollToLayer } from '../../utils';
+import { RootState } from '../reducers';
 
 import {
-  OPEN_TWEEN_DRAWER,
-  CLOSE_TWEEN_DRAWER,
   SET_TWEEN_DRAWER_EVENT_HOVER,
   SET_TWEEN_DRAWER_EVENT,
   SET_TWEEN_DRAWER_TWEEN_HOVER,
@@ -16,15 +15,6 @@ import {
   SetTweenDrawerEventSortPayload,
   TweenDrawerTypes
 } from '../actionTypes/tweenDrawer';
-import { RootState } from '../reducers';
-
-export const openTweenDrawer = (): TweenDrawerTypes => ({
-  type: OPEN_TWEEN_DRAWER
-});
-
-export const closeTweenDrawer = (): TweenDrawerTypes => ({
-  type: CLOSE_TWEEN_DRAWER
-});
 
 export const setTweenDrawerEventHover = (payload: SetTweenDrawerEventHoverPayload): TweenDrawerTypes => ({
   type: SET_TWEEN_DRAWER_EVENT_HOVER,

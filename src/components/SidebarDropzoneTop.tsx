@@ -96,7 +96,7 @@ const mapStateToProps = (state: RootState, ownProps: SidebarDropzoneTopProps) =>
     result[current] = layer.present.byId[current];
     return result;
   }, {}) : {};
-  const leftSidebarWidth = documentSettings.leftSidebarWidth;
+  const leftSidebarWidth = documentSettings.view.leftSidebar.width;
   return { dragLayerById, leftSidebarWidth };
 };
 

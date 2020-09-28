@@ -24,6 +24,12 @@ import {
   SET_TWEEN_DRAWER_LAYERS_WIDTH,
   SET_ARTBOARD_PRESET_DEVICE_PLATFORM,
   SET_ARTBOARD_PRESET_DEVICE_ORIENTATION,
+  OPEN_LEFT_SIDEBAR,
+  CLOSE_LEFT_SIDEBAR,
+  OPEN_RIGHT_SIDEBAR,
+  CLOSE_RIGHT_SIDEBAR,
+  OPEN_TWEEN_DRAWER,
+  CLOSE_TWEEN_DRAWER,
   DocumentSettingsTypes,
 } from '../actionTypes/documentSettings';
 
@@ -46,11 +52,22 @@ export interface DocumentSettingsState {
       [id: string]: em.DocumentImage;
     };
   };
+  view: {
+    leftSidebar: {
+      isOpen: boolean;
+      width: number;
+    };
+    rightSidebar: {
+      isOpen: boolean;
+      width: number;
+    };
+    tweenDrawer: {
+      isOpen: boolean;
+      height: number;
+      layersWidth: number;
+    };
+  };
   colorFormat: em.ColorFormat;
-  leftSidebarWidth: number;
-  rightSidebarWidth: number;
-  tweenDrawerHeight: number;
-  tweenDrawerLayersWidth: number;
   edit: string;
 }
 
@@ -70,10 +87,21 @@ const initialState: DocumentSettingsState = {
     byId: {}
   },
   colorFormat: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('colorFormat', 'string') : DEFAULT_COLOR_FORMAT,
-  leftSidebarWidth: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('leftSidebarWidth', 'integer') : DEFAULT_LEFT_SIDEBAR_WIDTH,
-  rightSidebarWidth: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('rightSidebarWidth', 'integer') : DEFAULT_RIGHT_SIDEBAR_WIDTH,
-  tweenDrawerHeight: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('tweenDrawerHeight', 'integer') : DEFAULT_TWEEN_DRAWER_HEIGHT,
-  tweenDrawerLayersWidth: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('tweenDrawerLayersWidth', 'integer') : DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH,
+  view: {
+    leftSidebar: {
+      isOpen: true,
+      width: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('leftSidebarWidth', 'integer') : DEFAULT_LEFT_SIDEBAR_WIDTH,
+    },
+    rightSidebar: {
+      isOpen: true,
+      width: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('rightSidebarWidth', 'integer') : DEFAULT_RIGHT_SIDEBAR_WIDTH,
+    },
+    tweenDrawer: {
+      isOpen: true,
+      height: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('tweenDrawerHeight', 'integer') : DEFAULT_TWEEN_DRAWER_HEIGHT,
+      layersWidth: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('tweenDrawerLayersWidth', 'integer') : DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH,
+    }
+  },
   edit: null
 };
 
@@ -172,13 +200,67 @@ export default (state = initialState, action: DocumentSettingsTypes): DocumentSe
         }
       };
     }
+    case OPEN_LEFT_SIDEBAR: {
+      return {
+        ...state,
+        view: {
+          ...state.view,
+          leftSidebar: {
+            ...state.view.leftSidebar,
+            isOpen: true
+          }
+        }
+      };
+    }
+    case CLOSE_LEFT_SIDEBAR: {
+      return {
+        ...state,
+        view: {
+          ...state.view,
+          leftSidebar: {
+            ...state.view.leftSidebar,
+            isOpen: false
+          }
+        }
+      };
+    }
     case SET_LEFT_SIDEBAR_WIDTH: {
       if (remote.process.platform === 'darwin') {
         remote.systemPreferences.setUserDefault('leftSidebarWidth', 'integer', parseInt(action.payload.width as any) as any);
       }
       return {
         ...state,
-        leftSidebarWidth: action.payload.width
+        view: {
+          ...state.view,
+          leftSidebar: {
+            ...state.view.leftSidebar,
+            width: action.payload.width
+          }
+        }
+      };
+    }
+    case OPEN_RIGHT_SIDEBAR: {
+      return {
+        ...state,
+        view: {
+          ...state.view,
+          rightSidebar: {
+            ...state.view.rightSidebar,
+            isOpen: true
+          }
+        }
+      };
+    }
+    case CLOSE_RIGHT_SIDEBAR: {
+      return {
+        ...state,
+        view: {
+          ...state.view,
+          rightSidebar: {
+            ...state.view.rightSidebar,
+            isOpen: false
+          }
+        }
       };
     }
     case SET_RIGHT_SIDEBAR_WIDTH: {
@@ -187,7 +269,37 @@ export default (state = initialState, action: DocumentSettingsTypes): DocumentSe
       }
       return {
         ...state,
-        rightSidebarWidth: action.payload.width
+        view: {
+          ...state.view,
+          rightSidebar: {
+            ...state.view.rightSidebar,
+            width: action.payload.width
+          }
+        }
+      };
+    }
+    case OPEN_TWEEN_DRAWER: {
+      return {
+        ...state,
+        view: {
+          ...state.view,
+          tweenDrawer: {
+            ...state.view.tweenDrawer,
+            isOpen: true
+          }
+        }
+      };
+    }
+    case CLOSE_TWEEN_DRAWER: {
+      return {
+        ...state,
+        view: {
+          ...state.view,
+          tweenDrawer: {
+            ...state.view.tweenDrawer,
+            isOpen: false
+          }
+        }
       };
     }
     case SET_TWEEN_DRAWER_HEIGHT: {
@@ -196,7 +308,13 @@ export default (state = initialState, action: DocumentSettingsTypes): DocumentSe
       }
       return {
         ...state,
-        tweenDrawerHeight: action.payload.height
+        view: {
+          ...state.view,
+          tweenDrawer: {
+            ...state.view.tweenDrawer,
+            height: action.payload.height
+          }
+        }
       };
     }
     case SET_TWEEN_DRAWER_LAYERS_WIDTH: {
@@ -205,7 +323,13 @@ export default (state = initialState, action: DocumentSettingsTypes): DocumentSe
       }
       return {
         ...state,
-        tweenDrawerLayersWidth: action.payload.width
+        view: {
+          ...state.view,
+          tweenDrawer: {
+            ...state.view.tweenDrawer,
+            layersWidth: action.payload.width
+          }
+        }
       };
     }
     case SET_ARTBOARD_PRESET_DEVICE_ORIENTATION: {

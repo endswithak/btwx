@@ -10,7 +10,7 @@ import { toggleTextToolThunk } from '../store/actions/textTool';
 import { toggleShapeToolThunk } from '../store/actions/shapeTool';
 import { toggleDragToolThunk } from '../store/actions/dragTool';
 import { toggleAreaSelectToolThunk } from '../store/actions/areaSelectTool';
-import { getLayerAndDescendants } from '../store/selectors/layer';
+import { getLayerAndDescendants, canGroupSelection, canUngroupSelection, canSendBackwardSelection, canBringForwardSelection } from '../store/selectors/layer';
 
 interface KeyBindingsProps {
   themeName?: em.ThemeName;
@@ -32,6 +32,15 @@ interface KeyBindingsProps {
   canUngroup?: boolean;
   canUndo?: boolean;
   canRedo?: boolean;
+  canArtboardZoom?: boolean;
+  canSelectedZoom?: boolean;
+  canCanvasZoom?: boolean;
+  canZoomOut?: boolean;
+  layersOpen?: boolean;
+  stylesOpen?: boolean;
+  eventsOpen?: boolean;
+  canSelectAll?: boolean;
+  canSelectAllArtboards?: boolean;
   copyLayersThunk?(): void;
   copyStyleThunk?(): void;
   pasteLayersThunk?({overSelection, overPoint, overLayer}: { overSelection?: boolean; overPoint?: em.Point; overLayer?: string }): Promise<any>;
@@ -56,151 +65,42 @@ interface KeyBindingsProps {
 }
 
 const KeyBindings = (props: KeyBindingsProps): ReactElement => {
-  const { themeName, canUndo, canRedo, selectedWithDescendents, clipboardType, copyStyleThunk, pasteStyleThunk, toggleDragToolThunk, toggleAreaSelectToolThunk, scope, activeToolShapeType, toggleSelectionToolThunk, activeTool, escapeLayerScopeThunk, selected, focusing, canMoveBackward, canMoveForward, canGroup, canUngroup, copyLayersThunk, pasteLayersThunk, removeLayersThunk, toggleArtboardToolThunk, toggleTextToolThunk, toggleShapeToolThunk, redoThunk, undoThunk, ungroupLayers, groupLayersThunk, sendLayersForward, sendLayersToFront, sendLayersBackward, sendLayersToBack, resetCanvasSettingsThunk } = props;
+  const { canSelectAll, canSelectAllArtboards, layersOpen, canZoomOut, stylesOpen, eventsOpen, canArtboardZoom, canSelectedZoom, canCanvasZoom, themeName, canUndo, canRedo, selectedWithDescendents, clipboardType, copyStyleThunk, pasteStyleThunk, toggleDragToolThunk, toggleAreaSelectToolThunk, scope, activeToolShapeType, toggleSelectionToolThunk, activeTool, escapeLayerScopeThunk, selected, focusing, canMoveBackward, canMoveForward, canGroup, canUngroup, copyLayersThunk, pasteLayersThunk, removeLayersThunk, toggleArtboardToolThunk, toggleTextToolThunk, toggleShapeToolThunk, redoThunk, undoThunk, ungroupLayers, groupLayersThunk, sendLayersForward, sendLayersToFront, sendLayersBackward, sendLayersToBack, resetCanvasSettingsThunk } = props;
 
-  // const handleKeyDown = (e: any) => {
-  //   if (focusing) {
-  //     switch(e.key) {
-  //       case 'a': {
-  //         toggleArtboardToolThunk();
-  //         break;
-  //       }
-  //       case 'Backspace': {
-  //         removeLayersThunk();
-  //         break;
-  //       }
-  //       case 'c': {
-  //         if (e.metaKey) {
-  //           copyLayersThunk();
-  //         }
-  //         break;
-  //       }
-  //       case 'ç': {
-  //         if (e.metaKey && e.altKey) {
-  //           copyStyleThunk() as any;
-  //         }
-  //         break;
-  //       }
-  //       case 'Escape': {
-  //         if (activeTool) {
-  //           switch(activeTool) {
-  //             case 'Artboard':
-  //               toggleArtboardToolThunk();
-  //               break;
-  //             case 'Selection':
-  //               toggleSelectionToolThunk();
-  //               break;
-  //             case 'Shape':
-  //               toggleShapeToolThunk(activeToolShapeType);
-  //               break;
-  //             case 'Text':
-  //               toggleTextToolThunk();
-  //               break;
-  //             // case 'Drag':
-  //             //   toggleDragToolThunk();
-  //             //   break;
-  //             case 'AreaSelect':
-  //               toggleAreaSelectToolThunk();
-  //               break;
-  //           }
-  //         }
-  //         if (scope.length > 0) {
-  //           escapeLayerScopeThunk();
-  //         }
-  //         break;
-  //       }
-  //       case 'g': {
-  //         if (e.metaKey) {
-  //           if (e.shiftKey) {
-  //             if (canUngroup) {
-  //               ungroupLayers({layers: selected});
-  //             }
-  //           } else {
-  //             if (canGroup) {
-  //               groupLayersThunk({layers: selected});
-  //             }
-  //           }
-  //         }
-  //         break;
-  //       }
-  //       case 'l': {
-  //         toggleShapeToolThunk('Line');
-  //         break;
-  //       }
-  //       case 'o': {
-  //         toggleShapeToolThunk('Ellipse');
-  //         break;
-  //       }
-  //       case 'r': {
-  //         if (!e.metaKey) {
-  //           toggleShapeToolThunk('Rectangle');
-  //         }
-  //         break;
-  //       }
-  //       case 't': {
-  //         toggleTextToolThunk();
-  //         break;
-  //       }
-  //       case 'u': {
-  //         toggleShapeToolThunk('Rounded');
-  //         break;
-  //       }
-  //       case 'v': {
-  //         if (e.metaKey) {
-  //           pasteLayersThunk({overSelection: e.shiftKey}) as any;
-  //         }
-  //         break;
-  //       }
-  //       case '√': {
-  //         if (e.metaKey && e.altKey) {
-  //           pasteStyleThunk() as any;
-  //         }
-  //         break;
-  //       }
-  //       case 'z': {
-  //         if (e.metaKey) {
-  //           if (e.shiftKey) {
-  //             redoThunk();
-  //           } else {
-  //             undoThunk();
-  //           }
-  //         }
-  //         break;
-  //       }
-  //       case '[': {
-  //         if (e.metaKey && canMoveBackward) {
-  //           if (e.shiftKey) {
-  //             sendLayersToBack({layers: selected});
-  //           } else {
-  //             sendLayersBackward({layers: selected});
-  //           }
-  //         }
-  //         break;
-  //       }
-  //       case ']': {
-  //         if (e.metaKey && canMoveForward) {
-  //           if (e.shiftKey) {
-  //             sendLayersToFront({layers: selected});
-  //           } else {
-  //             sendLayersForward({layers: selected});
-  //           }
-  //         }
-  //         break;
-  //       }
-  //     }
-  //   } else {
-  //     switch(e.key) {
-  //       case 'r': {
-  //         if (e.metaKey) {
-  //           resetCanvasSettingsThunk();
-  //         }
-  //         break;
-  //       }
-  //     }
-  //   }
-  // }
+  const handleKeyDown = (e: any) => {
+    if (focusing) {
+      switch(e.key) {
+        case 'Escape': {
+          if (activeTool) {
+            switch(activeTool) {
+              case 'Artboard':
+                toggleArtboardToolThunk();
+                break;
+              case 'Selection':
+                toggleSelectionToolThunk();
+                break;
+              case 'Shape':
+                toggleShapeToolThunk(activeToolShapeType);
+                break;
+              case 'Text':
+                toggleTextToolThunk();
+                break;
+              case 'AreaSelect':
+                toggleAreaSelectToolThunk();
+                break;
+            }
+          }
+          if (scope.length > 0) {
+            escapeLayerScopeThunk();
+          }
+          break;
+        }
+      }
+    }
+  }
 
   useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
     const menu = remote.Menu.getApplicationMenu();
     const menuItems = {
       appDarkTheme: {
@@ -248,6 +148,18 @@ const KeyBindings = (props: KeyBindingsProps): ReactElement => {
       editDelete: {
         id: 'editDelete',
         enabled: focusing && selected.length > 0
+      },
+      editDuplicate: {
+        id: 'editDuplicate',
+        enabled: focusing && selected.length > 0
+      },
+      editSelectAll: {
+        id: 'editSelectAll',
+        enabled: focusing && canSelectAll
+      },
+      editSelectAllArtboards: {
+        id: 'editSelectAllArtboards',
+        enabled: focusing && canSelectAllArtboards
       },
       editCopy: {
         id: 'editCopy',
@@ -364,16 +276,58 @@ const KeyBindings = (props: KeyBindingsProps): ReactElement => {
       arrangeUngroup: {
         id: 'arrangeUngroup',
         enabled: focusing && canUngroup
+      },
+      viewZoomIn: {
+        id: 'viewZoomIn',
+        enabled: true
+      },
+      viewZoomOut: {
+        id: 'viewZoomOut',
+        enabled: canZoomOut
+      },
+      viewZoomFitCanvas: {
+        id: 'viewZoomFitCanvas',
+        enabled: canCanvasZoom
+      },
+      viewZoomFitSelection: {
+        id: 'viewZoomFitSelection',
+        enabled: canSelectedZoom
+      },
+      viewZoomFitArtboard: {
+        id: 'viewZoomFitArtboard',
+        enabled: canArtboardZoom
+      },
+      viewCenterSelection: {
+        id: 'viewCenterSelection',
+        enabled: selected.length > 0
+      },
+      viewShowLayers: {
+        id: 'viewShowLayers',
+        checked: layersOpen,
+        enabled: true
+      },
+      viewShowStyles: {
+        id: 'viewShowStyles',
+        checked: stylesOpen,
+        enabled: true
+      },
+      viewShowEvents: {
+        id: 'viewShowEvents',
+        checked: eventsOpen,
+        enabled: true
       }
     }
     Object.keys(menuItems).forEach((key: string) => {
-      const menuItem = menuItems[key] as { id: string; enabled: boolean; checked?: boolean };
+      const menuItem = (menuItems as any)[key] as { id: string; enabled: boolean; checked?: boolean };
       const electronMenuItem = menu.getMenuItemById(key);
       electronMenuItem.enabled = menuItem.enabled;
       if (menuItem.checked) {
         electronMenuItem.checked = menuItem.checked;
       }
     });
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    }
   });
 
   return (
@@ -401,34 +355,34 @@ const mapStateToProps = (state: RootState): {
   canUngroup: boolean;
   canUndo: boolean;
   canRedo: boolean;
+  canArtboardZoom: boolean;
+  canSelectedZoom: boolean;
+  canCanvasZoom: boolean;
+  layersOpen: boolean;
+  stylesOpen: boolean;
+  eventsOpen: boolean;
+  canZoomOut: boolean;
+  canSelectAll: boolean;
+  canSelectAllArtboards: boolean;
 } => {
-  const { canvasSettings, layer, shapeTool, theme } = state;
+  const { canvasSettings, layer, shapeTool, theme, documentSettings } = state;
+  const layersOpen = documentSettings.view.leftSidebar.isOpen;
+  const stylesOpen = documentSettings.view.rightSidebar.isOpen;
+  const eventsOpen = documentSettings.view.tweenDrawer.isOpen;
   const focusing = canvasSettings.focusing;
   const selected = layer.present.selected;
-  const emptySelection = selected.length === 0;
+  const canArtboardZoom = selected.length === 1 && layer.present.byId[selected[0]].type === 'Artboard';
+  const canSelectedZoom = selected.length > 0;
+  const canCanvasZoom = layer.present.allIds.length > 1;
   const canUndo = state.layer.past.length > 0;
   const canRedo = state.layer.future.length > 0;
-  const canMoveBackward = !emptySelection && !selected.some((id: string) => {
-    const layerItem = layer.present.byId[id];
-    const parent = layer.present.byId[layerItem.parent];
-    const inMaskedGroup = parent.type === 'Group' && (parent as em.Group).clipped;
-    const isFirstMaskChild = inMaskedGroup && parent.children[1] === id;
-    return parent.children[0] === id || isFirstMaskChild;
-  });
-  const canMoveForward = !emptySelection && !selected.some((id: string) => {
-    const layerItem = layer.present.byId[id];
-    const parent = state.layer.present.byId[layerItem.parent];
-    const isMask = layerItem.mask;
-    return parent.children[parent.children.length - 1] === id || isMask;
-  });
-  const canGroup = !emptySelection && !selected.some((id: string) => {
-    const layerItem = layer.present.byId[id];
-    return layerItem.type === 'Artboard';
-  });
-  const canUngroup = !emptySelection && selected.some((id: string) => {
-    const layerItem = layer.present.byId[id];
-    return layerItem.type === 'Group';
-  });
+  const canZoomOut = documentSettings.matrix[0] !== 0.01;
+  const canSelectAll = layer.present.allIds.length > 1;
+  const canSelectAllArtboards = layer.present.allArtboardIds.length > 0;
+  const canMoveBackward = canSendBackwardSelection(layer.present);
+  const canMoveForward = canBringForwardSelection(layer.present);
+  const canGroup = canGroupSelection(layer.present);
+  const canUngroup = canUngroupSelection(layer.present);
   const clipboardType: em.ClipboardType = ((): em.ClipboardType => {
     try {
       const text = clipboard.readText();
@@ -450,7 +404,7 @@ const mapStateToProps = (state: RootState): {
     return result;
   }, { allIds: [], byId: {} });
   const themeName = theme.theme;
-  return { themeName, canUndo, canRedo, selectedWithDescendents, clipboardType, selected, focusing, canMoveBackward, canMoveForward, canGroup, canUngroup, activeTool, activeToolShapeType, scope };
+  return { canSelectAll, canSelectAllArtboards, layersOpen, canZoomOut, stylesOpen, eventsOpen, canArtboardZoom, canSelectedZoom, canCanvasZoom, themeName, canUndo, canRedo, selectedWithDescendents, clipboardType, selected, focusing, canMoveBackward, canMoveForward, canGroup, canUngroup, activeTool, activeToolShapeType, scope };
 };
 
 export default connect(

@@ -227,6 +227,12 @@ const Icon = (props: IconProps): ReactElement => {
           fill: 'M15.001,8 L21,8 L21,8 L21,21 L15,21 L15,8.001 C15,8.00044772 15.0004477,8 15.001,8 Z',
           opacity: 'M14,8 L14,21 L3,21 L3,8 L14,8 Z M21,3 L21,7 L3,7 L3,3.001 C3,3.00044772 3.00044772,3 3.001,3 L21,3 L21,3 Z'
         }
+      case 'left-sidebar':
+        return {
+          name: 'left-sidebar',
+          fill: 'M3.001,8 L9,8 L9,8 L9,21 L3,21 L3,8.001 C3,8.00044772 3.00044772,8 3.001,8 Z',
+          opacity: 'M10,8 L10,21 L21,21 L21,8 L10,8 Z M3,3 L3,7 L21,7 L20.999,3 L20.999,3 L3,3 Z'
+        }
       case 'palette':
         return {
           name: 'palette',

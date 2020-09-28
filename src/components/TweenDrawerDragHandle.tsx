@@ -72,7 +72,7 @@ const TweenDrawerDragHandle = (props: TweenDrawerDragHandleProps): ReactElement 
 
 const mapStateToProps = (state: RootState) => {
   const { documentSettings } = state;
-  const tweenDrawerHeight = documentSettings.tweenDrawerHeight;
+  const tweenDrawerHeight = documentSettings.view.tweenDrawer.height;
   return { tweenDrawerHeight };
 };
 

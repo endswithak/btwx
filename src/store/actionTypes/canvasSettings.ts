@@ -7,6 +7,7 @@ export const SET_CANVAS_DRAGGING = 'SET_CANVAS_DRAGGING';
 export const SET_CANVAS_ZOOMING = 'SET_CANVAS_ZOOMING';
 export const SET_CANVAS_MEASURING = 'SET_CANVAS_MEASURING';
 export const SET_CANVAS_FOCUSING = 'SET_CANVAS_FOCUSING';
+export const SET_CANVAS_TRANSLATING = 'SET_CANVAS_TRANSLATING';
 export const RESET_CANVAS_SETTINGS = 'RESET_CANVAS_SETTINGS';
 export const SET_CANVAS_MOUSE_POSITION = 'SET_CANVAS_MOUSE_POSITION';
 
@@ -91,6 +92,15 @@ export interface SetCanvasFocusing {
   payload: SetCanvasFocusingPayload;
 }
 
+export interface SetCanvasTranslatingPayload {
+  translating: boolean;
+}
+
+export interface SetCanvasTranslating {
+  type: typeof SET_CANVAS_TRANSLATING;
+  payload: SetCanvasTranslatingPayload;
+}
+
 export interface ResetCanvasSettings {
   type: typeof RESET_CANVAS_SETTINGS;
 }
@@ -118,5 +128,6 @@ export type CanvasSettingsTypes = SetCanvasActiveTool |
                                   SetCanvasZooming |
                                   SetCanvasMeasuring |
                                   SetCanvasFocusing |
+                                  SetCanvasTranslating |
                                   ResetCanvasSettings |
                                   SetCanvasMousePosition;

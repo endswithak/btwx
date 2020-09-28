@@ -21,11 +21,7 @@ import {
 declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
 
 const getWindowBackground = (themeName?: em.ThemeName): string => {
-  let theme = getTheme(themeName ? themeName : 'dark');
-  if (isMac) {
-    const themeName = systemPreferences.getUserDefault('theme', 'string');
-    theme = getTheme(themeName);
-  }
+  const theme = getTheme(themeName ? themeName : isMac ? systemPreferences.getUserDefault('theme', 'string') : 'dark');
   return theme.background.z0;
 };
 
@@ -49,10 +45,10 @@ if (isMac) {
   if (!systemPreferences.getUserDefault('artboardPresetDeviceOrientation', 'string')) {
     systemPreferences.setUserDefault('artboardPresetDeviceOrientation', 'string', DEFAULT_DEVICE_ORIENTATION as any);
   }
-  if (!systemPreferences.getUserDefault('colorFormat', 'string') || (systemPreferences.getUserDefault('colorFormat', 'string') !== 'rgb' || systemPreferences.getUserDefault('colorFormat', 'string') !== 'hsl')) {
+  if (!systemPreferences.getUserDefault('colorFormat', 'string')) {
     systemPreferences.setUserDefault('colorFormat', 'string', DEFAULT_COLOR_FORMAT as any);
   }
-  if (!systemPreferences.getUserDefault('theme', 'string') || (systemPreferences.getUserDefault('theme', 'string') !== 'light' || systemPreferences.getUserDefault('theme', 'string') !== 'dark')) {
+  if (!systemPreferences.getUserDefault('theme', 'string')) {
     systemPreferences.setUserDefault('theme', 'string', nativeTheme.shouldUseDarkColors ? 'dark' : 'light');
   }
   if (!systemPreferences.getUserDefault('leftSidebarWidth', 'integer')) {
@@ -79,8 +75,8 @@ export const createNewDocument = (width?: number, height?: number): Promise<elec
     // Create the browser window.
     const newDocument = new BrowserWindow({
       height: height ? height : 768,
-      width: width ? width : 1200,
-      minWidth: 1200,
+      width: width ? width : 1024,
+      minWidth: 1024,
       minHeight: 768,
       frame: false,
       titleBarStyle: 'hidden',
@@ -126,6 +122,14 @@ export const createNewDocument = (width?: number, height?: number): Promise<elec
         }
       });
     });
+
+    // newDocument.on('focus', (event: any) => {
+    //   event.preventDefault();
+    //   newDocument.webContents.executeJavaScript(`getDocumentSettings()`).then((documentSettingsJSON) => {
+    //     const documentSettings = JSON.parse(documentSettingsJSON) as { edit: string; dirty: boolean; name: string; path: string };
+    //     const menuItem = Menu.getApplicationMenu().getMenuItemById('')
+    //   });
+    // });
   });
 };
 
@@ -524,6 +528,7 @@ export const handleSetTheme = (theme: em.ThemeName): void => {
   if (document) {
     BrowserWindow.getAllWindows().forEach((window) => {
       const documentWindow = !window.getParentWindow();
+      window.setBackgroundColor(getWindowBackground(theme));
       if (window.webContents) {
         window.webContents.executeJavaScript(`setTitleBarTheme(${JSON.stringify(theme)})`);
         if (documentWindow) {

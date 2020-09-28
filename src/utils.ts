@@ -30,7 +30,7 @@ export const layerInScrollView = (id: string) => {
 export const scrollToLayer = (id: string) => {
   const leftSidebar = document.getElementById('sidebar-scroll-left');
   const layerDomItem = document.getElementById(id);
-  if (layerDomItem && !layerInScrollView(id)) {
+  if (leftSidebar && layerDomItem && !layerInScrollView(id)) {
     gsap.set(leftSidebar, {
       scrollTo: {
         y: layerDomItem

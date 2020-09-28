@@ -1,6 +1,4 @@
 import {
-  OPEN_RIGHT_SIDEBAR,
-  CLOSE_RIGHT_SIDEBAR,
   EXPAND_SHAPE_STYLES,
   COLLAPSE_SHAPE_STYLES,
   EXPAND_OPACITY_STYLES,
@@ -19,7 +17,6 @@ import {
 } from '../actionTypes/rightSidebar';
 
 export interface RightSidebarState {
-  isOpen: boolean;
   shapeStylesCollapsed: boolean;
   opacityStylesCollapsed: boolean;
   textStylesCollapsed: boolean;
@@ -30,7 +27,6 @@ export interface RightSidebarState {
 }
 
 const initialState: RightSidebarState = {
-  isOpen: true,
   shapeStylesCollapsed: false,
   opacityStylesCollapsed: false,
   textStylesCollapsed: false,
@@ -42,18 +38,6 @@ const initialState: RightSidebarState = {
 
 export default (state = initialState, action: RightSidebarTypes): RightSidebarState => {
   switch (action.type) {
-    case OPEN_RIGHT_SIDEBAR: {
-      return {
-        ...state,
-        isOpen: true
-      };
-    }
-    case CLOSE_RIGHT_SIDEBAR: {
-      return {
-        ...state,
-        isOpen: false
-      };
-    }
     case EXPAND_SHAPE_STYLES: {
       return {
         ...state,

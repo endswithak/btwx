@@ -1338,3 +1338,77 @@ export const getTweenEventsFrameItems = (store: RootState): {
     tweenEventLayers
   };
 };
+
+export const canGroupLayers = (store: LayerState, layers: string[]): boolean => {
+  return layers && layers.length > 0 && layers.every((id: string) => {
+    const layer = store.byId[id];
+    return layer.type !== 'Artboard';
+  });
+};
+
+export const canGroupSelection = (store: LayerState): boolean => {
+  return canGroupLayers(store, store.selected);
+};
+
+export const canUngroupLayers = (store: LayerState, layers: string[]): boolean => {
+  return layers && layers.length > 0 && layers.some((id: string) => {
+    const layer = store.byId[id];
+    return layer.type === 'Group';
+  });
+};
+
+export const canUngroupSelection = (store: LayerState): boolean => {
+  return canUngroupLayers(store, store.selected);
+};
+
+export const canBringForward = (store: LayerState, layers: string[]): boolean => {
+  return layers && layers.length > 0 && !layers.some((id: string) => {
+    const layer = store.byId[id];
+    const parent = store.byId[layer.parent];
+    const isMask = layer.mask;
+    return parent.children[parent.children.length - 1] === id || isMask;
+  });
+};
+
+export const canBringForwardSelection = (store: LayerState): boolean => {
+  return canBringForward(store, store.selected);
+};
+
+export const canSendBackward = (store: LayerState, layers: string[]): boolean => {
+  return layers && layers.length > 0 && !layers.some((id: string) => {
+    const layer = store.byId[id];
+    const parent = store.byId[layer.parent];
+    const inMaskedGroup = parent.type === 'Group' && (parent as em.Group).clipped;
+    const isFirstMaskChild = inMaskedGroup && parent.children[1] === id;
+    return parent.children[0] === id || isFirstMaskChild;
+  });
+};
+
+export const canSendBackwardSelection = (store: LayerState): boolean => {
+  return canSendBackward(store, store.selected);
+};
+
+export const canMaskLayers = (store: LayerState, layers: string[]): boolean => {
+  const layersByDepth = layers && layers.length > 0 ? orderLayersByDepth(store, layers) : [];
+  return layers &&
+         layers.length > 0 &&
+         layers.every((id: string) => store.byId[id].type !== 'Artboard') &&
+         store.byId[layersByDepth[0]].type === 'Shape' &&
+         (store.byId[layersByDepth[0]] as em.Shape).shapeType !== 'Line' &&
+         !(store.byId[layersByDepth[0]] as em.Shape).mask
+};
+
+export const canMaskSelection = (store: LayerState): boolean => {
+  return canMaskLayers(store, store.selected);
+};
+
+export const canBooleanOperation = (store: LayerState, layers: string[]): boolean => {
+  return layers && layers.length === 2 && layers.every((id: string) => {
+    const layer = store.byId[id];
+    return layer.type === 'Shape' && (layer as em.Shape).shapeType !== 'Line';
+  });
+};
+
+export const canBooleanOperationSelection = (store: LayerState): boolean => {
+  return canBooleanOperation(store, store.selected);
+};

@@ -795,7 +795,7 @@ export const removeLayersThunk = () => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     if (state.layer.present.selected.length > 0 && state.canvasSettings.focusing) {
-      if (state.tweenDrawer.isOpen && state.tweenDrawer.event) {
+      if (state.documentSettings.view.tweenDrawer.isOpen && state.tweenDrawer.event) {
         const tweenEvent = state.layer.present.tweenEventById[state.tweenDrawer.event];
         let layersAndChildren: string[] = [];
         state.layer.present.selected.forEach((id) => {
@@ -2228,7 +2228,7 @@ export const undoThunk = () => {
         updateSelectionFrame(layerState);
       }
       updateActiveArtboardFrame(layerState);
-      if (state.tweenDrawer.isOpen && layerState.allTweenEventIds.length > 0) {
+      if (state.documentSettings.view.tweenDrawer.isOpen && layerState.allTweenEventIds.length > 0) {
         const sortedEventItems = getTweenEventsFrameItems({...state, layer: { ...state.layer, present: layerState }});
         updateTweenEventsFrame(layerState, sortedEventItems.tweenEventItems, state.tweenDrawer.eventHover, state.theme.theme);
       }
@@ -2264,7 +2264,7 @@ export const redoThunk = () => {
         updateSelectionFrame(layerState);
       }
       updateActiveArtboardFrame(layerState);
-      if (state.tweenDrawer.isOpen && layerState.allTweenEventIds.length > 0) {
+      if (state.documentSettings.view.tweenDrawer.isOpen && layerState.allTweenEventIds.length > 0) {
         const sortedEventItems = getTweenEventsFrameItems({...state, layer: { ...state.layer, present: layerState }});
         updateTweenEventsFrame(layerState, sortedEventItems.tweenEventItems, state.tweenDrawer.eventHover, state.theme.theme);
       }

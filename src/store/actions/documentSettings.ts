@@ -1,4 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
+import { paperMain } from '../../canvas';
+import { RootState } from '../reducers';
+import { updateInViewLayers } from './layer';
 
 import {
   SAVE_DOCUMENT_AS,
@@ -15,6 +18,12 @@ import {
   SET_TWEEN_DRAWER_LAYERS_WIDTH,
   SET_ARTBOARD_PRESET_DEVICE_ORIENTATION,
   SET_ARTBOARD_PRESET_DEVICE_PLATFORM,
+  OPEN_RIGHT_SIDEBAR,
+  CLOSE_RIGHT_SIDEBAR,
+  OPEN_LEFT_SIDEBAR,
+  CLOSE_LEFT_SIDEBAR,
+  OPEN_TWEEN_DRAWER,
+  CLOSE_TWEEN_DRAWER,
   SaveDocumentAsPayload,
   SaveDocumentPayload,
   AddDocumentImagePayload,
@@ -104,3 +113,72 @@ export const setArtboardPresetDevicePlatform = (payload: SetArtboardPresetDevice
   type: SET_ARTBOARD_PRESET_DEVICE_PLATFORM,
   payload
 });
+
+export const openRightSidebar = (): DocumentSettingsTypes => ({
+  type: OPEN_RIGHT_SIDEBAR
+});
+
+export const closeRightSidebar = (): DocumentSettingsTypes => ({
+  type: CLOSE_RIGHT_SIDEBAR
+});
+
+export const toggleRightSidebarThunk = () => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    if (state.documentSettings.view.rightSidebar.isOpen) {
+      paperMain.view.viewSize = new paperMain.Size(paperMain.view.viewSize.width + state.documentSettings.view.rightSidebar.width, paperMain.view.viewSize.height);
+      dispatch(closeRightSidebar());
+    } else {
+      paperMain.view.viewSize = new paperMain.Size(paperMain.view.viewSize.width - state.documentSettings.view.rightSidebar.width, paperMain.view.viewSize.height);
+      dispatch(openRightSidebar());
+    }
+    dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
+    dispatch(updateInViewLayers());
+  }
+};
+
+export const openLeftSidebar = (): DocumentSettingsTypes => ({
+  type: OPEN_LEFT_SIDEBAR
+});
+
+export const closeLeftSidebar = (): DocumentSettingsTypes => ({
+  type: CLOSE_LEFT_SIDEBAR
+});
+
+export const toggleLeftSidebarThunk = () => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    if (state.documentSettings.view.leftSidebar.isOpen) {
+      paperMain.view.viewSize = new paperMain.Size(paperMain.view.viewSize.width + state.documentSettings.view.leftSidebar.width, paperMain.view.viewSize.height);
+      dispatch(closeLeftSidebar());
+    } else {
+      paperMain.view.viewSize = new paperMain.Size(paperMain.view.viewSize.width - state.documentSettings.view.leftSidebar.width, paperMain.view.viewSize.height);
+      dispatch(openLeftSidebar());
+    }
+    dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
+    dispatch(updateInViewLayers());
+  }
+};
+
+export const openTweenDrawer = (): DocumentSettingsTypes => ({
+  type: OPEN_TWEEN_DRAWER
+});
+
+export const closeTweenDrawer = (): DocumentSettingsTypes => ({
+  type: CLOSE_TWEEN_DRAWER
+});
+
+export const toggleTweenDrawerThunk = () => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    if (state.documentSettings.view.tweenDrawer.isOpen) {
+      paperMain.view.viewSize = new paperMain.Size(paperMain.view.viewSize.width, paperMain.view.viewSize.height + state.documentSettings.view.tweenDrawer.height);
+      dispatch(closeTweenDrawer());
+    } else {
+      paperMain.view.viewSize = new paperMain.Size(paperMain.view.viewSize.width, paperMain.view.viewSize.height - state.documentSettings.view.tweenDrawer.height);
+      dispatch(openTweenDrawer());
+    }
+    dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
+    dispatch(updateInViewLayers());
+  }
+};

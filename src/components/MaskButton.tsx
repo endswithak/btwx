@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { AddLayersMaskPayload } from '../store/actionTypes/layer';
 import { addLayersMaskThunk } from '../store/actions/layer';
-import { orderLayersByDepth } from '../store/selectors/layer';
+import { canMaskSelection } from '../store/selectors/layer';
 import TopbarButton from './TopbarButton';
 
 interface MaskButtonProps {
@@ -36,15 +36,7 @@ const mapStateToProps = (state: RootState): {
 } => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const selectedById: {[id: string]: em.Page | em.Artboard | em.Group | em.Shape | em.Text} = selected.reduce((result, current) => {
-    result = {
-      ...result,
-      [current]: layer.present.byId[current]
-    }
-    return result;
-  }, {});
-  const selectedByDepth = orderLayersByDepth(state.layer.present, selected);
-  const canMask = selected.length > 0 && selectedById[selectedByDepth[0]].type === 'Shape' && (selectedById[selectedByDepth[0]] as em.Shape).shapeType !== 'Line' && !(selectedById[selectedByDepth[0]] as em.Shape).mask;
+  const canMask = canMaskSelection(layer.present);
   return { selected, canMask };
 };
 

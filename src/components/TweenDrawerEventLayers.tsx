@@ -129,7 +129,7 @@ const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventLayersProps
   const isEmpty = tweenEventLayers.allIds.length === 0;
   const eventItem = layer.present.tweenEventById[tweenDrawer.event];
   const artboardItem = layer.present.byId[eventItem.artboard];
-  const tweenDrawerLayersWidth = documentSettings.tweenDrawerLayersWidth;
+  const tweenDrawerLayersWidth = documentSettings.view.tweenDrawer.layersWidth;
   const scrollLayerItem = ownProps.scrollLayer ? layer.present.byId[ownProps.scrollLayer] : null;
   const mask = scrollLayerItem && scrollLayerItem.type === 'Group' && (scrollLayerItem as em.Group).clipped ? (() => {
     return (scrollLayerItem as em.Group).children.find((id) => layer.present.byId[id].mask);

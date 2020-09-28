@@ -17,6 +17,15 @@ export const UPDATE_ARTBOARD_PRESET = 'UPDATE_ARTBOARD_PRESET';
 export const SET_ARTBOARD_PRESET_DEVICE_ORIENTATION = 'SET_ARTBOARD_PRESET_DEVICE_ORIENTATION';
 export const SET_ARTBOARD_PRESET_DEVICE_PLATFORM = 'SET_ARTBOARD_PRESET_DEVICE_PLATFORM';
 
+export const OPEN_LEFT_SIDEBAR = 'OPEN_LEFT_SIDEBAR';
+export const CLOSE_LEFT_SIDEBAR = 'CLOSE_LEFT_SIDEBAR';
+
+export const OPEN_RIGHT_SIDEBAR = 'OPEN_RIGHT_SIDEBAR';
+export const CLOSE_RIGHT_SIDEBAR = 'CLOSE_RIGHT_SIDEBAR';
+
+export const OPEN_TWEEN_DRAWER = 'OPEN_TWEEN_DRAWER';
+export const CLOSE_TWEEN_DRAWER = 'CLOSE_TWEEN_DRAWER';
+
 export interface SaveDocumentAsPayload {
   id?: string;
   name: string;
@@ -153,6 +162,30 @@ export interface SetArtboardPresetDevicePlatform {
   payload: SetArtboardPresetDevicePlatformPayload;
 }
 
+export interface OpenRightSidebar {
+  type: typeof OPEN_RIGHT_SIDEBAR;
+}
+
+export interface CloseRightSidebar {
+  type: typeof CLOSE_RIGHT_SIDEBAR;
+}
+
+export interface OpenLeftSidebar {
+  type: typeof OPEN_LEFT_SIDEBAR;
+}
+
+export interface CloseLeftSidebar {
+  type: typeof CLOSE_LEFT_SIDEBAR;
+}
+
+export interface OpenTweenDrawer {
+  type: typeof OPEN_TWEEN_DRAWER;
+}
+
+export interface CloseTweenDrawer {
+  type: typeof CLOSE_TWEEN_DRAWER;
+}
+
 export type DocumentSettingsTypes = SaveDocumentAs |
                                     SaveDocument |
                                     SetCanvasMatrix |
@@ -166,4 +199,10 @@ export type DocumentSettingsTypes = SaveDocumentAs |
                                     RemoveArtboardPreset |
                                     UpdateArtboardPreset |
                                     SetArtboardPresetDeviceOrientation |
-                                    SetArtboardPresetDevicePlatform;
+                                    SetArtboardPresetDevicePlatform |
+                                    OpenLeftSidebar |
+                                    CloseLeftSidebar |
+                                    OpenRightSidebar |
+                                    CloseRightSidebar |
+                                    OpenTweenDrawer |
+                                    CloseTweenDrawer;

@@ -1,4 +1,5 @@
-import React, { useContext, ReactElement, useState } from 'react';
+import React, { useContext, ReactElement, useState, useEffect } from 'react';
+import { paperMain } from '../canvas';
 import Topbar from './Topbar';
 import TopbarTitle from './TopbarTitle';
 import EaseEditorWrap from './EaseEditorWrap';
@@ -20,10 +21,24 @@ import AreaSelectToolWrap from './AreaSelectToolWrap';
 import ResizeToolWrap from './ResizeToolWrap';
 import LineToolWrap from './LineToolWrap';
 import GradientToolWrap from './GradientToolWrap';
+import TranslateToolWrap from './TranslateToolWrap';
+import ZoomToolWrap from './ZoomToolWrap';
 
 const App = (): ReactElement => {
   const theme = useContext(ThemeContext);
   const [ready, setReady] = useState(false);
+
+  const handleResize = (): void => {
+    const canvasWrap = document.getElementById('canvas-container');
+    paperMain.view.viewSize = new paperMain.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
+  }
+
+  useEffect(() => {
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    }
+  }, []);
 
   return (
     <div
@@ -59,6 +74,8 @@ const App = (): ReactElement => {
               <ResizeToolWrap />
               <LineToolWrap />
               <GradientToolWrap />
+              <TranslateToolWrap />
+              <ZoomToolWrap />
               {/* misc */}
               <KeyBindings />
             </>

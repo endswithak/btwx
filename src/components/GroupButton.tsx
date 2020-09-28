@@ -1,7 +1,8 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { GroupLayersPayload, LayerTypes } from '../store/actionTypes/layer';
+import { GroupLayersPayload } from '../store/actionTypes/layer';
+import { canGroupSelection } from '../store/selectors/layer';
 import { groupLayersThunk } from '../store/actions/layer';
 import TopbarButton from './TopbarButton';
 
@@ -35,10 +36,7 @@ const mapStateToProps = (state: RootState): {
 } => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const canGroup = selected.length > 0 && !layer.present.selected.some((id: string) => {
-    const layer = state.layer.present.byId[id];
-    return layer.type === 'Artboard';
-  });
+  const canGroup = canGroupSelection(layer.present);
   return { selected, canGroup };
 };
 

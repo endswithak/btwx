@@ -1,6 +1,3 @@
-export const OPEN_RIGHT_SIDEBAR = 'OPEN_RIGHT_SIDEBAR';
-export const CLOSE_RIGHT_SIDEBAR = 'CLOSE_RIGHT_SIDEBAR';
-
 export const EXPAND_SHAPE_STYLES = 'EXPAND_SHAPE_STYLES';
 export const COLLAPSE_SHAPE_STYLES = 'COLLAPSE_SHAPE_STYLES';
 
@@ -21,14 +18,6 @@ export const COLLAPSE_STROKE_OPTIONS_STYLES = 'COLLAPSE_STROKE_OPTIONS_STYLES';
 
 export const EXPAND_SHADOW_STYLES = 'EXPAND_SHADOW_STYLES';
 export const COLLAPSE_SHADOW_STYLES = 'COLLAPSE_SHADOW_STYLES';
-
-export interface OpenRightSidebar {
-  type: typeof OPEN_RIGHT_SIDEBAR;
-}
-
-export interface CloseRightSidebar {
-  type: typeof CLOSE_RIGHT_SIDEBAR;
-}
 
 export interface ExpandShapeStyles {
   type: typeof EXPAND_SHAPE_STYLES;
@@ -86,9 +75,7 @@ export interface CollapseShadowStyles {
   type: typeof COLLAPSE_SHADOW_STYLES;
 }
 
-export type RightSidebarTypes = OpenRightSidebar |
-                                CloseRightSidebar |
-                                ExpandShapeStyles |
+export type RightSidebarTypes = ExpandShapeStyles |
                                 CollapseShapeStyles |
                                 ExpandOpacityStyles |
                                 CollapseOpacityStyles |

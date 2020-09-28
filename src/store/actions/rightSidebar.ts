@@ -1,6 +1,4 @@
 import {
-  OPEN_RIGHT_SIDEBAR,
-  CLOSE_RIGHT_SIDEBAR,
   EXPAND_SHAPE_STYLES,
   COLLAPSE_SHAPE_STYLES,
   EXPAND_OPACITY_STYLES,
@@ -17,14 +15,6 @@ import {
   COLLAPSE_SHADOW_STYLES,
   RightSidebarTypes
 } from '../actionTypes/rightSidebar';
-
-export const openRightSidebar = (): RightSidebarTypes => ({
-  type: OPEN_RIGHT_SIDEBAR
-});
-
-export const closeRightSidebar = (): RightSidebarTypes => ({
-  type: CLOSE_RIGHT_SIDEBAR
-});
 
 export const expandShapeStyles = (): RightSidebarTypes => ({
   type: EXPAND_SHAPE_STYLES

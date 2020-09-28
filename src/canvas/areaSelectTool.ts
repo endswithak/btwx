@@ -215,7 +215,7 @@ class AreaSelectTool {
     if (this.to) {
       // get hit test layers
       const hitTestLayers = this.hitTestLayers();
-      store.dispatch(selectLayers({layers: hitTestLayers, toggleSelected: event.modifiers.shift, noActiveArtboardUpdate: true}));
+      store.dispatch(selectLayers({layers: hitTestLayers, toggleSelected: event.modifiers.shift}));
     }
     store.dispatch(toggleAreaSelectToolThunk(null) as any);
   }

@@ -51,6 +51,11 @@ import { pasteLayersThunk, pasteStyleThunk, copyStyleThunk, copyLayersThunk, rem
 import { toggleArtboardToolThunk} from './store/actions/artboardTool';
 import { toggleTextToolThunk } from './store/actions/textTool';
 import { toggleShapeToolThunk } from './store/actions/shapeTool';
+import { zoomInThunk, zoomOutThunk, zoomSelectionThunk, zoomCanvasThunk } from './store/actions/zoomTool';
+import { toggleTweenDrawerThunk, toggleRightSidebarThunk, toggleLeftSidebarThunk } from './store/actions/documentSettings';
+import { centerSelectionThunk } from './store/actions/translateTool';
+import { duplicateLayers, selectAllLayers, selectLayers } from './store/actions/layer';
+import { canGroupSelection, canUngroupSelection, canSendBackwardSelection, canBringForwardSelection } from './store/selectors/layer';
 
 import './styles/index.sass';
 
@@ -77,17 +82,11 @@ const titleBar = new Titlebar({
 };
 
 (window as any).editCopy = (): void => {
-  const state = store.getState();
-  if (state.canvasSettings.focusing) {
-    store.dispatch(copyLayersThunk() as any);
-  }
+  store.dispatch(copyLayersThunk() as any);
 };
 
 (window as any).editCopyStyle = (): void => {
-  const state = store.getState();
-  if (state.canvasSettings.focusing) {
-    store.dispatch(copyStyleThunk() as any);
-  }
+  store.dispatch(copyStyleThunk() as any);
 };
 
 (window as any).editPaste = (): void => {
@@ -110,60 +109,57 @@ const titleBar = new Titlebar({
   store.dispatch(removeLayersThunk() as any);
 };
 
-(window as any).insertArtboard = (): void => {
+(window as any).editDuplicate = (): void => {
   const state = store.getState();
-  if (state.canvasSettings.focusing) {
-    store.dispatch(toggleArtboardToolThunk() as any);
+  if (state.layer.present.selected.length > 0) {
+    store.dispatch(duplicateLayers({layers: state.layer.present.selected}));
   }
+};
+
+(window as any).editSelectAll = (): void => {
+  const state = store.getState();
+  if (state.layer.present.allIds.length > 0) {
+    store.dispatch(selectAllLayers());
+  }
+};
+
+(window as any).editSelectAllArtboards = (): void => {
+  const state = store.getState();
+  if (state.layer.present.allArtboardIds.length > 0) {
+    store.dispatch(selectLayers({layers: state.layer.present.allArtboardIds, newSelection: true}));
+  }
+};
+
+(window as any).insertArtboard = (): void => {
+  store.dispatch(toggleArtboardToolThunk() as any);
 };
 
 (window as any).insertRectangle = (): void => {
-  const state = store.getState();
-  if (state.canvasSettings.focusing) {
-    store.dispatch(toggleShapeToolThunk('Rectangle') as any);
-  }
+  store.dispatch(toggleShapeToolThunk('Rectangle') as any);
 };
 
 (window as any).insertRounded = (): void => {
-  const state = store.getState();
-  if (state.canvasSettings.focusing) {
-    store.dispatch(toggleShapeToolThunk('Rounded') as any);
-  }
+  store.dispatch(toggleShapeToolThunk('Rounded') as any);
 };
 
 (window as any).insertEllipse = (): void => {
-  const state = store.getState();
-  if (state.canvasSettings.focusing) {
-    store.dispatch(toggleShapeToolThunk('Ellipse') as any);
-  }
+  store.dispatch(toggleShapeToolThunk('Ellipse') as any);
 };
 
 (window as any).insertPolygon = (): void => {
-  const state = store.getState();
-  if (state.canvasSettings.focusing) {
-    store.dispatch(toggleShapeToolThunk('Polygon') as any);
-  }
+  store.dispatch(toggleShapeToolThunk('Polygon') as any);
 };
 
 (window as any).insertStar = (): void => {
-  const state = store.getState();
-  if (state.canvasSettings.focusing) {
-    store.dispatch(toggleShapeToolThunk('Star') as any);
-  }
+  store.dispatch(toggleShapeToolThunk('Star') as any);
 };
 
 (window as any).insertLine = (): void => {
-  const state = store.getState();
-  if (state.canvasSettings.focusing) {
-    store.dispatch(toggleShapeToolThunk('Line') as any);
-  }
+  store.dispatch(toggleShapeToolThunk('Line') as any);
 };
 
 (window as any).insertText = (): void => {
-  const state = store.getState();
-  if (state.canvasSettings.focusing) {
-    store.dispatch(toggleTextToolThunk() as any);
-  }
+  store.dispatch(toggleTextToolThunk() as any);
 };
 
 (window as any).insertImage = (): void => {
@@ -198,54 +194,28 @@ const titleBar = new Titlebar({
 
 (window as any).arrangeBringForward = (): void => {
   const state = store.getState();
-  const canBringForward = state.layer.present.selected.length > 0 && !state.layer.present.selected.some((id: string) => {
-    const layerItem = state.layer.present.byId[id];
-    const parent = state.layer.present.byId[layerItem.parent];
-    const isMask = layerItem.mask;
-    return parent.children[parent.children.length - 1] === id || isMask;
-  });
-  if (state.canvasSettings.focusing && canBringForward) {
+  if (state.canvasSettings.focusing && canBringForwardSelection(state.layer.present)) {
     store.dispatch(sendLayersForward({layers: state.layer.present.selected}) as any);
   }
 };
 
 (window as any).arrangeBringToFront = (): void => {
   const state = store.getState();
-  const canBringForward = state.layer.present.selected.length > 0 && !state.layer.present.selected.some((id: string) => {
-    const layerItem = state.layer.present.byId[id];
-    const parent = state.layer.present.byId[layerItem.parent];
-    const isMask = layerItem.mask;
-    return parent.children[parent.children.length - 1] === id || isMask;
-  });
-  if (state.canvasSettings.focusing && canBringForward) {
+  if (state.canvasSettings.focusing && canBringForwardSelection(state.layer.present)) {
     store.dispatch(sendLayersToFront({layers: state.layer.present.selected}) as any);
   }
 };
 
 (window as any).arrangeSendBackward = (): void => {
   const state = store.getState();
-  const canSendBackward = state.layer.present.selected.length > 0 && !state.layer.present.selected.some((id: string) => {
-    const layerItem = state.layer.present.byId[id];
-    const parent = state.layer.present.byId[layerItem.parent];
-    const inMaskedGroup = parent.type === 'Group' && (parent as em.Group).clipped;
-    const isFirstMaskChild = inMaskedGroup && parent.children[1] === id;
-    return parent.children[0] === id || isFirstMaskChild;
-  });
-  if (state.canvasSettings.focusing && canSendBackward) {
+  if (state.canvasSettings.focusing && canSendBackwardSelection(state.layer.present)) {
     store.dispatch(sendLayersBackward({layers: state.layer.present.selected}) as any);
   }
 };
 
 (window as any).arrangeSendToBack = (): void => {
   const state = store.getState();
-  const canSendBackward = state.layer.present.selected.length > 0 && !state.layer.present.selected.some((id: string) => {
-    const layerItem = state.layer.present.byId[id];
-    const parent = state.layer.present.byId[layerItem.parent];
-    const inMaskedGroup = parent.type === 'Group' && (parent as em.Group).clipped;
-    const isFirstMaskChild = inMaskedGroup && parent.children[1] === id;
-    return parent.children[0] === id || isFirstMaskChild;
-  });
-  if (state.canvasSettings.focusing && canSendBackward) {
+  if (state.canvasSettings.focusing && canSendBackwardSelection(state.layer.present)) {
     store.dispatch(sendLayersToBack({layers: state.layer.present.selected}) as any);
   }
 };
@@ -308,26 +278,53 @@ const titleBar = new Titlebar({
 
 (window as any).arrangeGroup = (): void => {
   const state = store.getState();
-  const canGroup = state.layer.present.selected.length > 0 && !state.layer.present.selected.some((id: string) => {
-    const layerItem = state.layer.present.byId[id];
-    return layerItem.type === 'Artboard';
-  });
-  if (state.canvasSettings.focusing && canGroup) {
+  if (state.canvasSettings.focusing && canGroupSelection(state.layer.present)) {
     store.dispatch(groupLayersThunk({layers: state.layer.present.selected}) as any);
   }
 };
 
 (window as any).arrangeUngroup = (): void => {
   const state = store.getState();
-  const canUngroup = state.layer.present.selected.length > 0 && state.layer.present.selected.some((id: string) => {
-    const layerItem = state.layer.present.byId[id];
-    return layerItem.type === 'Group';
-  });
-  if (state.canvasSettings.focusing && canUngroup) {
+  if (state.canvasSettings.focusing && canUngroupSelection(state.layer.present)) {
     store.dispatch(ungroupLayers({layers: state.layer.present.selected}) as any);
   }
 };
 
+(window as any).viewZoomIn = (): void => {
+  store.dispatch(zoomInThunk() as any);
+};
+
+(window as any).viewZoomOut = (): void => {
+  store.dispatch(zoomOutThunk() as any);
+};
+
+(window as any).viewZoomFitCanvas = (): void => {
+  store.dispatch(zoomCanvasThunk() as any);
+};
+
+(window as any).viewZoomFitSelection = (): void => {
+  store.dispatch(zoomSelectionThunk() as any);
+};
+
+(window as any).viewZoomFitArtboard = (): void => {
+  store.dispatch(zoomSelectionThunk() as any);
+};
+
+(window as any).viewCenterSelection = (): void => {
+  store.dispatch(centerSelectionThunk() as any);
+};
+
+(window as any).viewShowLayers = (): void => {
+  store.dispatch(toggleLeftSidebarThunk() as any);
+};
+
+(window as any).viewShowStyles = (): void => {
+  store.dispatch(toggleRightSidebarThunk() as any);
+};
+
+(window as any).viewShowEvents = (): void => {
+  store.dispatch(toggleTweenDrawerThunk() as any);
+};
 
 (window as any).getSaveState = (): string => {
   const state = store.getState();

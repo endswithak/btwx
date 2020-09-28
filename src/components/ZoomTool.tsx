@@ -1,36 +1,34 @@
-import React, { useEffect, ReactElement } from 'react';
+import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
-import debounce from 'lodash.debounce';
 import { disableZoomToolThunk } from '../store/actions/zoomTool';
+import debounce from 'lodash.debounce';
 
-interface CanvasZoomWrapProps {
-  children: ReactElement | ReactElement[];
+interface ZoomToolProps {
   disableZoomToolThunk?(): void;
 }
 
-const CanvasZoomWrap = (props: CanvasZoomWrapProps): ReactElement => {
-  const { children, disableZoomToolThunk } = props;
+const ZoomTool = (props: ZoomToolProps): ReactElement => {
+  const { disableZoomToolThunk } = props;
 
   const handleWheel = debounce((e: any) => {
     disableZoomToolThunk();
-  }, 150);
+  }, 50);
 
   useEffect(() => {
     const canvasWrap = document.getElementById('canvas-container');
     canvasWrap.addEventListener('wheel', handleWheel);
+    handleWheel();
     return () => {
       canvasWrap.removeEventListener('wheel', handleWheel);
     }
   }, []);
 
   return (
-    <>
-      { children }
-    </>
+    <></>
   );
 }
 
 export default connect(
   null,
   { disableZoomToolThunk }
-)(CanvasZoomWrap);
+)(ZoomTool);

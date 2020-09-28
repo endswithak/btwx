@@ -60,7 +60,7 @@ class ArtboardTool {
     if (this.tooltip) {
       this.tooltip.paperLayer.remove();
     }
-    this.tooltip = new Tooltip(`${Math.round(this.toBounds.width)} x ${Math.round(this.toBounds.height)}`, this.to, {up: true});
+    this.tooltip = new Tooltip(`${Math.round(this.snapTool.snapBounds.width)} x ${Math.round(this.snapTool.snapBounds.height)}`, this.to, {up: true});
   }
   updateOutline(): void {
     if (this.outline) {
@@ -291,9 +291,9 @@ class ArtboardTool {
             }
           }
         }) as any);
+        store.dispatch(toggleArtboardToolThunk() as any);
       }
     }
-    store.dispatch(toggleArtboardToolThunk() as any);
   }
 }
 

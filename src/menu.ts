@@ -258,6 +258,43 @@ export default Menu.buildFromTemplate([
           const document = getFocusedDocument();
           document.webContents.executeJavaScript(`editDelete()`);
         }
+      },
+      { type: 'separator' },
+      {
+        label: 'Duplicate',
+        id: 'editDuplicate',
+        enabled: false,
+        accelerator: process.platform === 'darwin' ? 'Cmd+D' : 'Ctrl+D',
+        click: (): void => {
+          const document = getFocusedDocument();
+          document.webContents.executeJavaScript(`editDuplicate()`);
+        }
+      },
+      { type: 'separator' },
+      {
+        label: 'Select',
+        submenu: [
+          {
+            label: 'Select All',
+            id: 'editSelectAll',
+            enabled: false,
+            accelerator: process.platform === 'darwin' ? 'Cmd+A' : 'Ctrl+A',
+            click: () => {
+              const document = getFocusedDocument();
+              document.webContents.executeJavaScript(`editSelectAll()`);
+            }
+          },
+          {
+            label: 'Select All Artboards',
+            id: 'editSelectAllArtboards',
+            enabled: false,
+            accelerator: process.platform === 'darwin' ? 'Cmd+Shift+A' : 'Ctrl+Shift+A',
+            click: () => {
+              const document = getFocusedDocument();
+              document.webContents.executeJavaScript(`editSelectAllArtboards()`);
+            }
+          }
+        ]
       }
     ]
   },
@@ -527,13 +564,115 @@ export default Menu.buildFromTemplate([
   {
     label: 'View',
     submenu: [
-
+      {
+        label: 'Zoom In',
+        id: 'viewZoomIn',
+        enabled: false,
+        accelerator: process.platform === 'darwin' ? 'Cmd+Plus' : 'Ctrl+Plus',
+        click: () => {
+          const document = getFocusedDocument();
+          document.webContents.executeJavaScript(`viewZoomIn()`);
+        }
+      },
+      {
+        label: 'Zoom Out',
+        id: 'viewZoomOut',
+        enabled: false,
+        accelerator: process.platform === 'darwin' ? 'Cmd+-' : 'Ctrl+-',
+        click: () => {
+          const document = getFocusedDocument();
+          document.webContents.executeJavaScript(`viewZoomOut()`);
+        }
+      },
+      {
+        label: 'Zoom To',
+        submenu: [
+          {
+            label: 'Fit Canvas',
+            id: 'viewZoomFitCanvas',
+            enabled: false,
+            accelerator: process.platform === 'darwin' ? 'Cmd+1' : 'Ctrl+1',
+            click: () => {
+              const document = getFocusedDocument();
+              document.webContents.executeJavaScript(`viewZoomFitCanvas()`);
+            }
+          },
+          {
+            label: 'Fit Selection',
+            id: 'viewZoomFitSelection',
+            enabled: false,
+            accelerator: process.platform === 'darwin' ? 'Cmd+2' : 'Ctrl+2',
+            click: () => {
+              const document = getFocusedDocument();
+              document.webContents.executeJavaScript(`viewZoomFitSelection()`);
+            }
+          },
+          {
+            label: 'Fit Artboard',
+            id: 'viewZoomFitArtboard',
+            enabled: false,
+            accelerator: process.platform === 'darwin' ? 'Cmd+4' : 'Ctrl+4',
+            click: () => {
+              const document = getFocusedDocument();
+              document.webContents.executeJavaScript(`viewZoomFitArtboard()`);
+            }
+          }
+        ]
+      },
+      { type: 'separator' },
+      {
+        label: 'Center Selection',
+        id: 'viewCenterSelection',
+        enabled: false,
+        accelerator: process.platform === 'darwin' ? 'Cmd+3' : 'Ctrl+3',
+        click: () => {
+          const document = getFocusedDocument();
+          document.webContents.executeJavaScript(`viewCenterSelection()`);
+        }
+      },
+      { type: 'separator' },
+      {
+        label: 'Show Layers',
+        id: 'viewShowLayers',
+        type: 'checkbox',
+        checked: false,
+        enabled: false,
+        accelerator: process.platform === 'darwin' ? 'Cmd+Alt+1' : 'Ctrl+Alt+1',
+        click: () => {
+          const document = getFocusedDocument();
+          document.webContents.executeJavaScript(`viewShowLayers()`);
+        }
+      },
+      {
+        label: 'Show Styles',
+        id: 'viewShowStyles',
+        type: 'checkbox',
+        checked: false,
+        enabled: false,
+        accelerator: process.platform === 'darwin' ? 'Cmd+Alt+2' : 'Ctrl+Alt+2',
+        click: () => {
+          const document = getFocusedDocument();
+          document.webContents.executeJavaScript(`viewShowStyles()`);
+        }
+      },
+      {
+        label: 'Show Events',
+        id: 'viewShowEvents',
+        type: 'checkbox',
+        checked: false,
+        enabled: false,
+        accelerator: process.platform === 'darwin' ? 'Cmd+Alt+3' : 'Ctrl+Alt+3',
+        click: () => {
+          const document = getFocusedDocument();
+          document.webContents.executeJavaScript(`viewShowEvents()`);
+        }
+      },
       { type: 'separator' },
       { role: 'toggledevtools' },
-      { type: 'separator' },
-      { role: 'resetzoom' },
-      { role: 'zoomin' },
-      { role: 'zoomout' },
+      // { type: 'separator' },
+      // { role: 'resetzoom' },
+      // { role: 'zoomin' },
+      // { role: 'zoomout' },
       { type: 'separator' },
       { role: 'togglefullscreen' }
     ]
