@@ -47,7 +47,7 @@ import Preview from './components/Preview';
 // import SketchImporter from './components/SketchImporter';
 import ThemeProvider from './components/ThemeProvider';
 // import importSketchArtboards from './canvas/sketch';
-import { pasteLayersThunk, pasteStyleThunk, copyStyleThunk, copyLayersThunk, removeLayersThunk, redoThunk, undoThunk, ungroupLayers, groupLayersThunk, sendLayersForward, sendLayersToFront, sendLayersBackward, sendLayersToBack, escapeLayerScopeThunk, removeLayers, addImageThunk, alignLayersToBottom, alignLayersToCenter, alignLayersToLeft, alignLayersToMiddle, alignLayersToRight, alignLayersToTop, distributeLayersHorizontally, distributeLayersVertically } from './store/actions/layer';
+import { pasteLayersThunk, pasteStyleThunk, copyStyleThunk, copyLayersThunk, removeLayersThunk, redoThunk, undoThunk, ungroupLayers, groupLayersThunk, sendLayersForward, sendLayersToFront, sendLayersBackward, sendLayersToBack, escapeLayerScopeThunk, removeLayers, addImageThunk, alignLayersToBottom, alignLayersToCenter, alignLayersToLeft, alignLayersToMiddle, alignLayersToRight, alignLayersToTop, distributeLayersHorizontally, distributeLayersVertically, applyBooleanOperationThunk, toggleSelectionFillThunk, toggleSelectionShadowThunk, toggleSelectionStrokeThunk, addSelectionMaskThunk, toggleSelectionHorizontalFlipThunk, toggleSelectionVerticalFlipThunk, copySVGThunk, pasteSVGThunk } from './store/actions/layer';
 import { toggleArtboardToolThunk} from './store/actions/artboardTool';
 import { toggleTextToolThunk } from './store/actions/textTool';
 import { toggleShapeToolThunk } from './store/actions/shapeTool';
@@ -89,12 +89,20 @@ const titleBar = new Titlebar({
   store.dispatch(copyStyleThunk() as any);
 };
 
+(window as any).editCopySVG = (): void => {
+  store.dispatch(copySVGThunk() as any);
+};
+
 (window as any).editPaste = (): void => {
   store.dispatch(pasteLayersThunk({}) as any);
 };
 
 (window as any).editPasteOverSelection = (): void => {
   store.dispatch(pasteLayersThunk({overSelection: true}) as any);
+};
+
+(window as any).editPasteSVG = (): void => {
+  store.dispatch(pasteSVGThunk() as any);
 };
 
 (window as any).editPasteStyle = (): void => {
@@ -324,6 +332,39 @@ const titleBar = new Titlebar({
 
 (window as any).viewShowEvents = (): void => {
   store.dispatch(toggleTweenDrawerThunk() as any);
+};
+
+(window as any).layerStyleFill = (): void => {
+  store.dispatch(toggleSelectionFillThunk() as any);
+};
+
+(window as any).layerStyleStroke = (): void => {
+  store.dispatch(toggleSelectionStrokeThunk() as any);
+};
+
+(window as any).layerStyleShadow = (): void => {
+  store.dispatch(toggleSelectionShadowThunk() as any);
+};
+
+(window as any).layerMask = (): void => {
+  store.dispatch(addSelectionMaskThunk() as any);
+};
+
+(window as any).layerCombine = (booleanOperation: em.BooleanOperation): void => {
+  const state = store.getState();
+  store.dispatch(applyBooleanOperationThunk({layers: state.layer.present.selected}, booleanOperation) as any);
+};
+
+(window as any).layerMask = (): void => {
+  store.dispatch(addSelectionMaskThunk() as any);
+};
+
+(window as any).layerTransformFlipHorizontally = (): void => {
+  store.dispatch(toggleSelectionHorizontalFlipThunk() as any);
+};
+
+(window as any).layerTransformFlipVertically = (): void => {
+  store.dispatch(toggleSelectionVerticalFlipThunk() as any);
 };
 
 (window as any).getSaveState = (): string => {

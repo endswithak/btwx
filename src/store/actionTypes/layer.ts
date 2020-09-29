@@ -85,8 +85,12 @@ export const SET_LAYERS_ROTATION = 'SET_LAYERS_ROTATION';
 
 export const ENABLE_LAYER_HORIZONTAL_FLIP = 'ENABLE_LAYER_HORIZONTAL_FLIP';
 export const DISABLE_LAYER_HORIZONTAL_FLIP = 'DISABLE_LAYER_HORIZONTAL_FLIP';
+export const ENABLE_LAYERS_HORIZONTAL_FLIP = 'ENABLE_LAYERS_HORIZONTAL_FLIP';
+export const DISABLE_LAYERS_HORIZONTAL_FLIP = 'DISABLE_LAYERS_HORIZONTAL_FLIP';
 export const ENABLE_LAYER_VERTICAL_FLIP = 'ENABLE_LAYER_VERTICAL_FLIP';
 export const DISABLE_LAYER_VERTICAL_FLIP = 'DISABLE_LAYER_VERTICAL_FLIP';
+export const ENABLE_LAYERS_VERTICAL_FLIP = 'ENABLE_LAYERS_VERTICAL_FLIP';
+export const DISABLE_LAYERS_VERTICAL_FLIP = 'DISABLE_LAYERS_VERTICAL_FLIP';
 
 export const SET_LAYER_OPACITY = 'SET_LAYER_OPACITY';
 export const SET_LAYERS_OPACITY = 'SET_LAYERS_OPACITY';
@@ -935,6 +939,15 @@ export interface EnableLayerHorizontalFlip {
   payload: EnableLayerHorizontalFlipPayload;
 }
 
+export interface EnableLayersHorizontalFlipPayload {
+  layers: string[];
+}
+
+export interface EnableLayersHorizontalFlip {
+  type: typeof ENABLE_LAYERS_HORIZONTAL_FLIP;
+  payload: EnableLayersHorizontalFlipPayload;
+}
+
 export interface DisableLayerHorizontalFlipPayload {
   id: string;
 }
@@ -942,6 +955,15 @@ export interface DisableLayerHorizontalFlipPayload {
 export interface DisableLayerHorizontalFlip {
   type: typeof DISABLE_LAYER_HORIZONTAL_FLIP;
   payload: DisableLayerHorizontalFlipPayload;
+}
+
+export interface DisableLayersHorizontalFlipPayload {
+  layers: string[];
+}
+
+export interface DisableLayersHorizontalFlip {
+  type: typeof DISABLE_LAYERS_HORIZONTAL_FLIP;
+  payload: DisableLayersHorizontalFlipPayload;
 }
 
 export interface EnableLayerVerticalFlipPayload {
@@ -953,6 +975,15 @@ export interface EnableLayerVerticalFlip {
   payload: EnableLayerVerticalFlipPayload;
 }
 
+export interface EnableLayersVerticalFlipPayload {
+  layers: string[];
+}
+
+export interface EnableLayersVerticalFlip {
+  type: typeof ENABLE_LAYERS_VERTICAL_FLIP;
+  payload: EnableLayersVerticalFlipPayload;
+}
+
 export interface DisableLayerVerticalFlipPayload {
   id: string;
 }
@@ -960,6 +991,15 @@ export interface DisableLayerVerticalFlipPayload {
 export interface DisableLayerVerticalFlip {
   type: typeof DISABLE_LAYER_VERTICAL_FLIP;
   payload: DisableLayerVerticalFlipPayload;
+}
+
+export interface DisableLayersVerticalFlipPayload {
+  layers: string[];
+}
+
+export interface DisableLayersVerticalFlip {
+  type: typeof DISABLE_LAYERS_VERTICAL_FLIP;
+  payload: DisableLayersVerticalFlipPayload;
 }
 
 export interface EnableLayerFillPayload {
@@ -2006,8 +2046,7 @@ export interface SetLayersBlendMode {
 }
 
 export interface UniteLayersPayload {
-  id: string;
-  unite: string;
+  layers: string[];
   booleanLayer?: em.Shape;
 }
 
@@ -2017,8 +2056,7 @@ export interface UniteLayers {
 }
 
 export interface IntersectLayersPayload {
-  id: string;
-  intersect: string;
+  layers: string[];
   booleanLayer?: em.Shape;
 }
 
@@ -2028,8 +2066,7 @@ export interface IntersectLayers {
 }
 
 export interface SubtractLayersPayload {
-  id: string;
-  subtract: string;
+  layers: string[];
   booleanLayer?: em.Shape;
 }
 
@@ -2039,8 +2076,7 @@ export interface SubtractLayers {
 }
 
 export interface ExcludeLayersPayload {
-  id: string;
-  exclude: string;
+  layers: string[];
   booleanLayer?: em.Shape;
 }
 
@@ -2050,8 +2086,7 @@ export interface ExcludeLayers {
 }
 
 export interface DivideLayersPayload {
-  id: string;
-  divide: string;
+  layers: string[];
   booleanLayer?: em.Shape;
 }
 
@@ -2350,9 +2385,13 @@ export type LayerTypes = AddArtboard |
                          SetLayerOpacity |
                          SetLayersOpacity |
                          EnableLayerHorizontalFlip |
+                         EnableLayersHorizontalFlip |
                          DisableLayerHorizontalFlip |
+                         DisableLayersHorizontalFlip |
                          EnableLayerVerticalFlip |
+                         EnableLayersVerticalFlip |
                          DisableLayerVerticalFlip |
+                         DisableLayersVerticalFlip |
                          EnableLayerFill |
                          EnableLayersFill |
                          DisableLayerFill |

@@ -2,7 +2,6 @@ import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { remote, clipboard } from 'electron';
 import { RootState } from '../store/reducers';
-import { UngroupLayersPayload, SendLayersBackwardPayload, SendLayersForwardPayload, SendLayersToBackPayload, GroupLayersPayload, SendLayersToFrontPayload, LayerTypes } from '../store/actionTypes/layer';
 import { pasteLayersThunk, pasteStyleThunk, copyStyleThunk, copyLayersThunk, removeLayersThunk, redoThunk, undoThunk, ungroupLayers, groupLayersThunk, sendLayersForward, sendLayersToFront, sendLayersBackward, sendLayersToBack, escapeLayerScopeThunk } from '../store/actions/layer';
 import { resetCanvasSettingsThunk } from '../store/actions/canvasSettings';
 import { toggleArtboardToolThunk} from '../store/actions/artboardTool';
@@ -10,7 +9,7 @@ import { toggleTextToolThunk } from '../store/actions/textTool';
 import { toggleShapeToolThunk } from '../store/actions/shapeTool';
 import { toggleDragToolThunk } from '../store/actions/dragTool';
 import { toggleAreaSelectToolThunk } from '../store/actions/areaSelectTool';
-import { getLayerAndDescendants, canGroupSelection, canUngroupSelection, canSendBackwardSelection, canBringForwardSelection } from '../store/selectors/layer';
+import { getLayerAndDescendants, canGroupSelection, canUngroupSelection, canSendBackwardSelection, canBringForwardSelection, canToggleSelectionStroke, canToggleSelectionShadow, canToggleSelectionFill, canTransformFlipSelection, canMaskSelection, canBooleanOperationSelection, canPasteSVG } from '../store/selectors/layer';
 
 interface KeyBindingsProps {
   themeName?: em.ThemeName;
@@ -41,31 +40,28 @@ interface KeyBindingsProps {
   eventsOpen?: boolean;
   canSelectAll?: boolean;
   canSelectAllArtboards?: boolean;
-  copyLayersThunk?(): void;
-  copyStyleThunk?(): void;
-  pasteLayersThunk?({overSelection, overPoint, overLayer}: { overSelection?: boolean; overPoint?: em.Point; overLayer?: string }): Promise<any>;
-  pasteStyleThunk?(): void;
-  removeLayersThunk?(): void;
+  canToggleStroke?: boolean;
+  canToggleShadow?: boolean;
+  canToggleFill?: boolean;
+  canToggleFlip?: boolean;
+  canMask?: boolean;
+  canBooleanOperation?: boolean;
+  fillsEnabled?: boolean;
+  strokesEnabled?: boolean;
+  shadowsEnabled?: boolean;
+  horizontalFlipEnabled?: boolean;
+  verticalFlipEnabled?: boolean;
+  canPasteAsSVG?: boolean;
   toggleArtboardToolThunk?(): void;
   toggleTextToolThunk?(): void;
   toggleShapeToolThunk?(shapeType: em.ShapeType): void;
-  redoThunk?(): void;
-  undoThunk?(): void;
-  ungroupLayers?(payload: UngroupLayersPayload): LayerTypes;
-  groupLayersThunk?(payload: GroupLayersPayload): Promise<em.Group>;
-  sendLayersForward?(payload: SendLayersForwardPayload): LayerTypes;
-  sendLayersToFront?(payload: SendLayersToFrontPayload): LayerTypes;
-  sendLayersBackward?(payload: SendLayersBackwardPayload): LayerTypes;
-  sendLayersToBack?(payload: SendLayersToBackPayload): LayerTypes;
   toggleSelectionToolThunk?(): void;
-  resetCanvasSettingsThunk?(): void;
   escapeLayerScopeThunk?(): void;
-  toggleDragToolThunk?(): void;
   toggleAreaSelectToolThunk?(): void;
 }
 
 const KeyBindings = (props: KeyBindingsProps): ReactElement => {
-  const { canSelectAll, canSelectAllArtboards, layersOpen, canZoomOut, stylesOpen, eventsOpen, canArtboardZoom, canSelectedZoom, canCanvasZoom, themeName, canUndo, canRedo, selectedWithDescendents, clipboardType, copyStyleThunk, pasteStyleThunk, toggleDragToolThunk, toggleAreaSelectToolThunk, scope, activeToolShapeType, toggleSelectionToolThunk, activeTool, escapeLayerScopeThunk, selected, focusing, canMoveBackward, canMoveForward, canGroup, canUngroup, copyLayersThunk, pasteLayersThunk, removeLayersThunk, toggleArtboardToolThunk, toggleTextToolThunk, toggleShapeToolThunk, redoThunk, undoThunk, ungroupLayers, groupLayersThunk, sendLayersForward, sendLayersToFront, sendLayersBackward, sendLayersToBack, resetCanvasSettingsThunk } = props;
+  const { canPasteAsSVG, fillsEnabled, strokesEnabled, shadowsEnabled, horizontalFlipEnabled, verticalFlipEnabled, canToggleStroke, canToggleShadow, canToggleFill, canToggleFlip, canMask, canBooleanOperation, canSelectAll, canSelectAllArtboards, layersOpen, canZoomOut, stylesOpen, eventsOpen, canArtboardZoom, canSelectedZoom, canCanvasZoom, themeName, canUndo, canRedo, selectedWithDescendents, clipboardType, toggleAreaSelectToolThunk, scope, activeToolShapeType, toggleSelectionToolThunk, activeTool, escapeLayerScopeThunk, selected, focusing, canMoveBackward, canMoveForward, canGroup, canUngroup, toggleArtboardToolThunk, toggleTextToolThunk, toggleShapeToolThunk } = props;
 
   const handleKeyDown = (e: any) => {
     if (focusing) {
@@ -167,10 +163,10 @@ const KeyBindings = (props: KeyBindingsProps): ReactElement => {
       },
       editCopySVG: {
         id: 'editCopySVG',
-        enabled: focusing && selected.length === 1 && selectedWithDescendents.byId[selected[0]].type === 'Shape'
+        enabled: focusing && selected.length > 0
       },
       editCopyStyle: {
-        id: 'editCopySVG',
+        id: 'editCopyStyle',
         enabled: focusing && selected.length === 1
       },
       editPaste: {
@@ -184,6 +180,10 @@ const KeyBindings = (props: KeyBindingsProps): ReactElement => {
       editPasteStyle: {
         id: 'editPasteStyle',
         enabled: focusing && clipboardType === 'style' && selected.length > 0
+      },
+      editPasteSVG: {
+        id: 'editPasteSVG',
+        enabled: focusing && canPasteAsSVG
       },
       insertArtboard: {
         id: 'insertArtboard',
@@ -315,20 +315,65 @@ const KeyBindings = (props: KeyBindingsProps): ReactElement => {
         id: 'viewShowEvents',
         checked: eventsOpen,
         enabled: true
+      },
+      layerStyleFill: {
+        id: 'layerStyleFill',
+        checked: fillsEnabled,
+        enabled: canToggleFill
+      },
+      layerStyleStroke: {
+        id: 'layerStyleStroke',
+        checked: strokesEnabled,
+        enabled: canToggleStroke
+      },
+      layerStyleShadow: {
+        id: 'layerStyleShadow',
+        checked: shadowsEnabled,
+        enabled: canToggleShadow
+      },
+      layerTransformFlipHorizontally: {
+        id: 'layerTransformFlipHorizontally',
+        checked: horizontalFlipEnabled,
+        enabled: canToggleFlip
+      },
+      layerTransformFlipVertically: {
+        id: 'layerTransformFlipVertically',
+        checked: verticalFlipEnabled,
+        enabled: canToggleFlip
+      },
+      layerMask: {
+        id: 'layerMask',
+        enabled: canMask
+      },
+      layerCombineUnion: {
+        id: 'layerCombineUnion',
+        enabled: canBooleanOperation
+      },
+      layerCombineDifference: {
+        id: 'layerCombineDifference',
+        enabled: canBooleanOperation
+      },
+      layerCombineSubtract: {
+        id: 'layerCombineSubtract',
+        enabled: canBooleanOperation
+      },
+      layerCombineIntersect: {
+        id: 'layerCombineIntersect',
+        enabled: canBooleanOperation
       }
     }
     Object.keys(menuItems).forEach((key: string) => {
       const menuItem = (menuItems as any)[key] as { id: string; enabled: boolean; checked?: boolean };
       const electronMenuItem = menu.getMenuItemById(key);
       electronMenuItem.enabled = menuItem.enabled;
-      if (menuItem.checked) {
+      if (menuItem.checked !== null || menuItem.checked !== undefined) {
         electronMenuItem.checked = menuItem.checked;
       }
     });
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     }
-  });
+  }, [selectedWithDescendents, focusing]);
 
   return (
     <></>
@@ -364,6 +409,18 @@ const mapStateToProps = (state: RootState): {
   canZoomOut: boolean;
   canSelectAll: boolean;
   canSelectAllArtboards: boolean;
+  canToggleStroke: boolean;
+  canToggleShadow: boolean;
+  canToggleFill: boolean;
+  canToggleFlip: boolean;
+  canMask: boolean;
+  canBooleanOperation: boolean;
+  fillsEnabled: boolean;
+  strokesEnabled: boolean;
+  shadowsEnabled: boolean;
+  horizontalFlipEnabled: boolean;
+  verticalFlipEnabled: boolean;
+  canPasteAsSVG: boolean;
 } => {
   const { canvasSettings, layer, shapeTool, theme, documentSettings } = state;
   const layersOpen = documentSettings.view.leftSidebar.isOpen;
@@ -371,6 +428,7 @@ const mapStateToProps = (state: RootState): {
   const eventsOpen = documentSettings.view.tweenDrawer.isOpen;
   const focusing = canvasSettings.focusing;
   const selected = layer.present.selected;
+  const canPasteAsSVG = canPasteSVG();
   const canArtboardZoom = selected.length === 1 && layer.present.byId[selected[0]].type === 'Artboard';
   const canSelectedZoom = selected.length > 0;
   const canCanvasZoom = layer.present.allIds.length > 1;
@@ -383,6 +441,17 @@ const mapStateToProps = (state: RootState): {
   const canMoveForward = canBringForwardSelection(layer.present);
   const canGroup = canGroupSelection(layer.present);
   const canUngroup = canUngroupSelection(layer.present);
+  const canToggleStroke = canToggleSelectionStroke(layer.present);
+  const canToggleShadow = canToggleSelectionShadow(layer.present);
+  const canToggleFill = canToggleSelectionFill(layer.present);
+  const canToggleFlip = canTransformFlipSelection(layer.present);
+  const fillsEnabled = canToggleFill ? selected.every((id) => layer.present.byId[id].style.fill.enabled) : false;
+  const strokesEnabled = canToggleStroke ? selected.every((id) => layer.present.byId[id].style.stroke.enabled) : false;
+  const shadowsEnabled = canToggleShadow ? selected.every((id) => layer.present.byId[id].style.shadow.enabled) : false;
+  const horizontalFlipEnabled = canToggleFlip ? selected.every((id) => layer.present.byId[id].transform.horizontalFlip) : false;
+  const verticalFlipEnabled = canToggleFlip ? selected.every((id) => layer.present.byId[id].transform.verticalFlip) : false;
+  const canMask = canMaskSelection(layer.present);
+  const canBooleanOperation = canBooleanOperationSelection(layer.present);
   const clipboardType: em.ClipboardType = ((): em.ClipboardType => {
     try {
       const text = clipboard.readText();
@@ -404,7 +473,7 @@ const mapStateToProps = (state: RootState): {
     return result;
   }, { allIds: [], byId: {} });
   const themeName = theme.theme;
-  return { canSelectAll, canSelectAllArtboards, layersOpen, canZoomOut, stylesOpen, eventsOpen, canArtboardZoom, canSelectedZoom, canCanvasZoom, themeName, canUndo, canRedo, selectedWithDescendents, clipboardType, selected, focusing, canMoveBackward, canMoveForward, canGroup, canUngroup, activeTool, activeToolShapeType, scope };
+  return { canPasteAsSVG, fillsEnabled, strokesEnabled, shadowsEnabled, horizontalFlipEnabled, verticalFlipEnabled, canToggleStroke, canToggleShadow, canToggleFill, canToggleFlip, canMask, canBooleanOperation, canSelectAll, canSelectAllArtboards, layersOpen, canZoomOut, stylesOpen, eventsOpen, canArtboardZoom, canSelectedZoom, canCanvasZoom, themeName, canUndo, canRedo, selectedWithDescendents, clipboardType, selected, focusing, canMoveBackward, canMoveForward, canGroup, canUngroup, activeTool, activeToolShapeType, scope };
 };
 
 export default connect(

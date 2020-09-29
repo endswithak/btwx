@@ -194,7 +194,7 @@ export default Menu.buildFromTemplate([
             }
           },
           {
-            label: 'Copy SVG',
+            label: 'Copy SVG Code',
             id: 'editCopySVG',
             enabled: false,
             click: () => {
@@ -235,6 +235,15 @@ export default Menu.buildFromTemplate([
             click: () => {
               const document = getFocusedDocument();
               document.webContents.executeJavaScript(`editPasteOverSelection()`);
+            }
+          },
+          {
+            label: 'Paste SVG Code',
+            id: 'editPasteSVG',
+            enabled: false,
+            click: () => {
+              const document = getFocusedDocument();
+              document.webContents.executeJavaScript(`editPasteSVG()`);
             }
           },
           {
@@ -395,6 +404,155 @@ export default Menu.buildFromTemplate([
           document.webContents.executeJavaScript(`insertImage()`);
         }
       }
+    ]
+  },
+  {
+    label: 'Layer',
+    submenu: [
+      {
+        label: 'Style',
+        submenu: [
+          {
+            label: 'Fill',
+            id: 'layerStyleFill',
+            enabled: false,
+            type: 'checkbox',
+            checked: false,
+            click: () => {
+              const document = getFocusedDocument();
+              document.webContents.executeJavaScript(`layerStyleFill()`);
+            }
+          },
+          {
+            label: 'Stroke',
+            id: 'layerStyleStroke',
+            enabled: false,
+            type: 'checkbox',
+            checked: false,
+            click: () => {
+              const document = getFocusedDocument();
+              document.webContents.executeJavaScript(`layerStyleStroke()`);
+            }
+          },
+          {
+            label: 'Shadow',
+            id: 'layerStyleShadow',
+            enabled: false,
+            type: 'checkbox',
+            checked: false,
+            click: () => {
+              const document = getFocusedDocument();
+              document.webContents.executeJavaScript(`layerStyleShadow()`);
+            }
+          }
+        ]
+      },
+      {
+        label: 'Transform',
+        submenu: [
+          {
+            label: 'Flip Horizontally',
+            id: 'layerTransformFlipHorizontally',
+            enabled: false,
+            type: 'checkbox',
+            checked: false,
+            click: () => {
+              const document = getFocusedDocument();
+              document.webContents.executeJavaScript(`layerTransformFlipHorizontally()`);
+            }
+          },
+          {
+            label: 'Flip Vertically',
+            id: 'layerTransformFlipVertically',
+            enabled: false,
+            type: 'checkbox',
+            checked: false,
+            click: () => {
+              const document = getFocusedDocument();
+              document.webContents.executeJavaScript(`layerTransformFlipVertically()`);
+            }
+          }
+        ]
+      },
+      {
+        label: 'Combine',
+        submenu: [
+          {
+            label: 'Union',
+            id: 'layerCombineUnion',
+            enabled: false,
+            accelerator: process.platform === 'darwin' ? 'Cmd+Alt+U' : 'Ctrl+Alt+U',
+            click: () => {
+              const document = getFocusedDocument();
+              document.webContents.executeJavaScript(`layerCombine(${JSON.stringify('unite')})`);
+            }
+          },
+          {
+            label: 'Subtract',
+            id: 'layerCombineSubtract',
+            enabled: false,
+            accelerator: process.platform === 'darwin' ? 'Cmd+Alt+S' : 'Ctrl+Alt+S',
+            click: () => {
+              const document = getFocusedDocument();
+              document.webContents.executeJavaScript(`layerCombine(${JSON.stringify('subtract')})`);
+            }
+          },
+          {
+            label: 'Intersect',
+            id: 'layerCombineIntersect',
+            enabled: false,
+            accelerator: process.platform === 'darwin' ? 'Cmd+Alt+I' : 'Ctrl+Alt+I',
+            click: () => {
+              const document = getFocusedDocument();
+              document.webContents.executeJavaScript(`layerCombine(${JSON.stringify('intersect')})`);
+            }
+          },
+          {
+            label: 'Difference',
+            id: 'layerCombineDifference',
+            enabled: false,
+            accelerator: process.platform === 'darwin' ? 'Cmd+Alt+X' : 'Ctrl+Alt+X',
+            click: () => {
+              const document = getFocusedDocument();
+              document.webContents.executeJavaScript(`layerCombine(${JSON.stringify('exclude')})`);
+            }
+          }
+        ]
+      },
+      {
+        label: 'Image',
+        submenu: [
+          {
+            label: 'Replace...',
+            id: 'layerImageReplace',
+            enabled: false,
+            click: () => {
+              const document = getFocusedDocument();
+              document.webContents.executeJavaScript(`layerImageReplace()`);
+            }
+          },
+          {
+            label: 'Set to Original Dimensions',
+            id: 'layerImageOriginalDimensions',
+            enabled: false,
+            click: () => {
+              const document = getFocusedDocument();
+              document.webContents.executeJavaScript(`layerImageOriginalDimensions()`);
+            }
+          }
+        ]
+      },
+      { type: 'separator' },
+      {
+        label: 'Mask',
+        id: 'layerMask',
+        enabled: false,
+        accelerator: process.platform === 'darwin' ? 'Cmd+Ctrl+M' : 'Ctrl+Shift+M',
+        click: () => {
+          const document = getFocusedDocument();
+          document.webContents.executeJavaScript(`layerMask()`);
+        }
+      },
     ]
   },
   {

@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import paper from 'paper';
+import isSVG from 'is-svg';
+import { clipboard } from 'electron';
 import { LayerState } from '../reducers/layer';
 import { paperMain } from '../../canvas';
 import { bufferToBase64 } from '../../utils';
@@ -1403,7 +1405,7 @@ export const canMaskSelection = (store: LayerState): boolean => {
 };
 
 export const canBooleanOperation = (store: LayerState, layers: string[]): boolean => {
-  return layers && layers.length === 2 && layers.every((id: string) => {
+  return layers && layers.length >= 2 && layers.every((id: string) => {
     const layer = store.byId[id];
     return layer.type === 'Shape' && (layer as em.Shape).shapeType !== 'Line';
   });
@@ -1411,4 +1413,57 @@ export const canBooleanOperation = (store: LayerState, layers: string[]): boolea
 
 export const canBooleanOperationSelection = (store: LayerState): boolean => {
   return canBooleanOperation(store, store.selected);
+};
+
+export const canToggleFill = (store: LayerState, layers: string[]): boolean => {
+  return layers && layers.length > 0 && layers.every((id: string) => {
+    const layer = store.byId[id];
+    return layer.type === 'Shape' || layer.type === 'Text';
+  });
+};
+
+export const canToggleSelectionFill = (store: LayerState): boolean => {
+  return canToggleFill(store, store.selected);
+};
+
+export const canToggleStroke = (store: LayerState, layers: string[]): boolean => {
+  return layers && layers.length > 0 && layers.every((id: string) => {
+    const layer = store.byId[id];
+    return layer.type === 'Shape' || layer.type === 'Text';
+  });
+};
+
+export const canToggleSelectionStroke = (store: LayerState): boolean => {
+  return canToggleStroke(store, store.selected);
+};
+
+export const canToggleShadow = (store: LayerState, layers: string[]): boolean => {
+  return layers && layers.length > 0 && layers.every((id: string) => {
+    const layer = store.byId[id];
+    return layer.type === 'Shape' || layer.type === 'Text' || layer.type === 'Image';
+  });
+};
+
+export const canToggleSelectionShadow = (store: LayerState): boolean => {
+  return canToggleShadow(store, store.selected);
+};
+
+export const canTransformFlip = (store: LayerState, layers: string[]): boolean => {
+  return layers && layers.length > 0 && layers.every((id: string) => {
+    const layer = store.byId[id];
+    return layer.type !== 'Artboard';
+  });
+};
+
+export const canTransformFlipSelection = (store: LayerState): boolean => {
+  return canTransformFlip(store, store.selected);
+};
+
+export const canPasteSVG = (): boolean => {
+  try {
+    const clipboardText = clipboard.readText();
+    return isSVG(clipboardText);
+  } catch(error) {
+    return false;
+  }
 };

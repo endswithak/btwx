@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { UniteLayersPayload } from '../store/actionTypes/layer';
 import { applyBooleanOperationThunk } from '../store/actions/layer';
-import { orderLayersByDepth, canBooleanOperationSelection } from '../store/selectors/layer';
+import { canBooleanOperationSelection } from '../store/selectors/layer';
 import TopbarButton from './TopbarButton';
 
 interface UniteButtonProps {
@@ -17,13 +17,13 @@ const UniteButton = (props: UniteButtonProps): ReactElement => {
 
   const handleUniteClick = (): void => {
     if (canUnite) {
-      applyBooleanOperationThunk({id: selected[0], unite: selected[1]}, 'unite');
+      applyBooleanOperationThunk({layers: selected}, 'unite');
     }
   }
 
   return (
     <TopbarButton
-      label='Unite'
+      label='Union'
       onClick={handleUniteClick}
       icon='unite'
       disabled={!canUnite} />
@@ -35,7 +35,7 @@ const mapStateToProps = (state: RootState): {
   canUnite: boolean;
 } => {
   const { layer } = state;
-  const selected = orderLayersByDepth(state.layer.present, layer.present.selected);
+  const selected = layer.present.selected;
   const canUnite = canBooleanOperationSelection(state.layer.present);
   return { selected, canUnite };
 };

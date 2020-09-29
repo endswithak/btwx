@@ -62,9 +62,13 @@ import {
   SET_LAYER_OPACITY,
   SET_LAYERS_OPACITY,
   ENABLE_LAYER_HORIZONTAL_FLIP,
+  ENABLE_LAYERS_HORIZONTAL_FLIP,
   DISABLE_LAYER_HORIZONTAL_FLIP,
+  DISABLE_LAYERS_HORIZONTAL_FLIP,
   ENABLE_LAYER_VERTICAL_FLIP,
+  ENABLE_LAYERS_VERTICAL_FLIP,
   DISABLE_LAYER_VERTICAL_FLIP,
+  DISABLE_LAYERS_VERTICAL_FLIP,
   ENABLE_LAYER_FILL,
   ENABLE_LAYERS_FILL,
   DISABLE_LAYER_FILL,
@@ -263,9 +267,13 @@ import {
   setLayerOpacity,
   setLayersOpacity,
   enableLayerHorizontalFlip,
+  enableLayersHorizontalFlip,
   disableLayerHorizontalFlip,
+  disableLayersHorizontalFlip,
   enableLayerVerticalFlip,
+  enableLayersVerticalFlip,
   disableLayerVerticalFlip,
+  disableLayersVerticalFlip,
   enableLayerFill,
   enableLayersFill,
   disableLayerFill,
@@ -594,12 +602,20 @@ export default (state = initialState, action: LayerTypes): LayerState => {
       return setLayersOpacity(state, action);
     case ENABLE_LAYER_HORIZONTAL_FLIP:
       return enableLayerHorizontalFlip(state, action);
+    case ENABLE_LAYERS_HORIZONTAL_FLIP:
+      return enableLayersHorizontalFlip(state, action);
     case DISABLE_LAYER_HORIZONTAL_FLIP:
       return disableLayerHorizontalFlip(state, action);
+    case DISABLE_LAYERS_HORIZONTAL_FLIP:
+      return disableLayersHorizontalFlip(state, action);
     case ENABLE_LAYER_VERTICAL_FLIP:
       return enableLayerVerticalFlip(state, action);
+    case ENABLE_LAYERS_VERTICAL_FLIP:
+      return enableLayersVerticalFlip(state, action);
     case DISABLE_LAYER_VERTICAL_FLIP:
       return disableLayerVerticalFlip(state, action);
+    case DISABLE_LAYERS_VERTICAL_FLIP:
+      return disableLayersVerticalFlip(state, action);
     case ENABLE_LAYER_FILL:
       return enableLayerFill(state, action);
     case ENABLE_LAYERS_FILL:

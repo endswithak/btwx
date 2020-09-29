@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { SubtractLayersPayload } from '../store/actionTypes/layer';
 import { applyBooleanOperationThunk } from '../store/actions/layer';
-import { orderLayersByDepth, canBooleanOperationSelection } from '../store/selectors/layer';
+import { canBooleanOperationSelection } from '../store/selectors/layer';
 import TopbarButton from './TopbarButton';
 
 interface SubtractButtonProps {
@@ -17,7 +17,7 @@ const SubtractButton = (props: SubtractButtonProps): ReactElement => {
 
   const handleSubtractClick = (): void => {
     if (canSubtract) {
-      applyBooleanOperationThunk({id: selected[0], subtract: selected[1]}, 'subtract');
+      applyBooleanOperationThunk({layers: selected}, 'subtract');
     }
   }
 
@@ -35,7 +35,7 @@ const mapStateToProps = (state: RootState): {
   canSubtract: boolean;
 } => {
   const { layer } = state;
-  const selected = orderLayersByDepth(state.layer.present, layer.present.selected);
+  const selected = layer.present.selected;
   const canSubtract = canBooleanOperationSelection(state.layer.present);
   return { selected, canSubtract };
 };

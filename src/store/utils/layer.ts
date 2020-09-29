@@ -37,7 +37,7 @@ import {
   RemoveLayerGradientStop, RemoveLayersGradientStop, SetLayerActiveGradientStop, SetLayersShadowBlur, SetLayersShadowXOffset,
   SetLayersShadowYOffset, SetLayersFontSize, SetLayersFontWeight, SetLayersFontFamily, SetLayersLeading, SetLayersJustification,
   SetLayerTweenTiming, SetRoundedRadii, SetPolygonsSides, SetStarsPoints, SetStarsRadius, SetLayerEdit, AddLayers, SetLineFromX,
-  SetLineFromY, SetLineFrom, SetLineToX, SetLineToY, SetLineTo, SetLinesFromX, SetLinesFromY, SetLinesToX, SetLinesToY, SelectAllLayers, SetLayerStyle, SetLayersStyle
+  SetLineFromY, SetLineFrom, SetLineToX, SetLineToY, SetLineTo, SetLinesFromX, SetLinesFromY, SetLinesToX, SetLinesToY, SelectAllLayers, SetLayerStyle, SetLayersStyle, EnableLayersHorizontalFlip, DisableLayersHorizontalFlip, DisableLayersVerticalFlip, EnableLayersVerticalFlip
 } from '../actionTypes/layer';
 
 import {
@@ -2882,6 +2882,8 @@ export const setLayersRotation = (state: LayerState, action: SetLayersRotation):
 
 export const enableLayerHorizontalFlip = (state: LayerState, action: EnableLayerHorizontalFlip): LayerState => {
   let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  paperLayer.scale(-1, 1);
   currentState = {
     ...currentState,
     byId: {
@@ -2896,12 +2898,22 @@ export const enableLayerHorizontalFlip = (state: LayerState, action: EnableLayer
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
+  return currentState;
+};
+
+export const enableLayersHorizontalFlip = (state: LayerState, action: EnableLayersHorizontalFlip): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
+    return enableLayerHorizontalFlip(result, layerActions.enableLayerHorizontalFlip({id: current}) as EnableLayerHorizontalFlip);
+  }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
 export const disableLayerHorizontalFlip = (state: LayerState, action: DisableLayerHorizontalFlip): LayerState => {
   let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  paperLayer.scale(-1, 1);
   currentState = {
     ...currentState,
     byId: {
@@ -2916,12 +2928,22 @@ export const disableLayerHorizontalFlip = (state: LayerState, action: DisableLay
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
+  return currentState;
+};
+
+export const disableLayersHorizontalFlip = (state: LayerState, action: DisableLayersHorizontalFlip): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
+    return disableLayerHorizontalFlip(result, layerActions.disableLayerHorizontalFlip({id: current}) as DisableLayerHorizontalFlip);
+  }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
 export const enableLayerVerticalFlip = (state: LayerState, action: EnableLayerVerticalFlip): LayerState => {
   let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  paperLayer.scale(1, -1);
   currentState = {
     ...currentState,
     byId: {
@@ -2936,12 +2958,22 @@ export const enableLayerVerticalFlip = (state: LayerState, action: EnableLayerVe
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
+  return currentState;
+};
+
+export const enableLayersVerticalFlip = (state: LayerState, action: EnableLayersVerticalFlip): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
+    return enableLayerVerticalFlip(result, layerActions.enableLayerVerticalFlip({id: current}) as EnableLayerVerticalFlip);
+  }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
 export const disableLayerVerticalFlip = (state: LayerState, action: DisableLayerVerticalFlip): LayerState => {
   let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  paperLayer.scale(1, -1);
   currentState = {
     ...currentState,
     byId: {
@@ -2956,6 +2988,14 @@ export const disableLayerVerticalFlip = (state: LayerState, action: DisableLayer
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
+  return currentState;
+};
+
+export const disableLayersVerticalFlip = (state: LayerState, action: DisableLayersVerticalFlip): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
+    return disableLayerVerticalFlip(result, layerActions.disableLayerVerticalFlip({id: current}) as DisableLayerVerticalFlip);
+  }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -5020,7 +5060,7 @@ export const setLayersBlendMode = (state: LayerState, action: SetLayersBlendMode
 
 export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState => {
   let currentState = state;
-  currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.unite]}) as RemoveLayers);
+  currentState = removeLayers(currentState, layerActions.removeLayers({layers: action.payload.layers}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
     layer: action.payload.booleanLayer
   }) as AddShape);
@@ -5029,7 +5069,7 @@ export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState 
 
 export const intersectLayers = (state: LayerState, action: IntersectLayers): LayerState => {
   let currentState = state;
-  currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.intersect]}) as RemoveLayers);
+  currentState = removeLayers(currentState, layerActions.removeLayers({layers: action.payload.layers}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
     layer: action.payload.booleanLayer
   }) as AddShape);
@@ -5038,7 +5078,7 @@ export const intersectLayers = (state: LayerState, action: IntersectLayers): Lay
 
 export const subtractLayers = (state: LayerState, action: SubtractLayers): LayerState => {
   let currentState = state;
-  currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.subtract]}) as RemoveLayers);
+  currentState = removeLayers(currentState, layerActions.removeLayers({layers: action.payload.layers}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
     layer: action.payload.booleanLayer
   }) as AddShape);
@@ -5047,7 +5087,7 @@ export const subtractLayers = (state: LayerState, action: SubtractLayers): Layer
 
 export const excludeLayers = (state: LayerState, action: ExcludeLayers): LayerState => {
   let currentState = state;
-  currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.exclude]}) as RemoveLayers);
+  currentState = removeLayers(currentState, layerActions.removeLayers({layers: action.payload.layers}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
     layer: action.payload.booleanLayer
   }) as AddShape);
@@ -5056,7 +5096,7 @@ export const excludeLayers = (state: LayerState, action: ExcludeLayers): LayerSt
 
 export const divideLayers = (state: LayerState, action: DivideLayers): LayerState => {
   let currentState = state;
-  currentState = removeLayers(currentState, layerActions.removeLayers({layers: [action.payload.id, action.payload.divide]}) as RemoveLayers);
+  currentState = removeLayers(currentState, layerActions.removeLayers({layers: action.payload.layers}) as RemoveLayers);
   currentState = addShape(currentState, layerActions.addShape({
     layer: action.payload.booleanLayer
   }) as AddShape);

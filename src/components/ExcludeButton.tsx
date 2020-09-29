@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { ExcludeLayersPayload } from '../store/actionTypes/layer';
 import { applyBooleanOperationThunk } from '../store/actions/layer';
-import { orderLayersByDepth, canBooleanOperationSelection } from '../store/selectors/layer';
+import { canBooleanOperationSelection } from '../store/selectors/layer';
 import TopbarButton from './TopbarButton';
 
 interface ExcludeButtonProps {
@@ -17,13 +17,13 @@ const ExcludeButton = (props: ExcludeButtonProps): ReactElement => {
 
   const handleExcludeClick = (): void => {
     if (canExclude) {
-      applyBooleanOperationThunk({id: selected[0], exclude: selected[1]}, 'exclude');
+      applyBooleanOperationThunk({layers: selected}, 'exclude');
     }
   }
 
   return (
     <TopbarButton
-      label='Exclude'
+      label='Difference'
       onClick={handleExcludeClick}
       icon='exclude'
       disabled={!canExclude} />
@@ -35,7 +35,7 @@ const mapStateToProps = (state: RootState): {
   canExclude: boolean;
 } => {
   const { layer } = state;
-  const selected = orderLayersByDepth(state.layer.present, layer.present.selected);
+  const selected = layer.present.selected;
   const canExclude = canBooleanOperationSelection(state.layer.present);
   return { selected, canExclude };
 };

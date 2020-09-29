@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCreators } from 'redux-undo';
 import { clipboard } from 'electron';
@@ -6,7 +7,7 @@ import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import { paperMain } from '../../canvas';
 import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_VALUE } from '../../constants';
 import { getPaperFillColor, getPaperStrokeColor, getPaperLayer, getPaperShadowColor } from '../utils/paper';
-import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayersBounds, importPaperProject, colorsMatch, gradientsMatch, getNearestScopeAncestor, getTweenEventsFrameItems } from '../selectors/layer';
+import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayersBounds, importPaperProject, colorsMatch, gradientsMatch, getNearestScopeAncestor, getTweenEventsFrameItems, canToggleFill, canToggleShadow, canToggleStroke, orderLayersByDepth, canBooleanOperation, canMaskLayers, canTransformFlip, canTransformFlipSelection, canToggleSelectionFill, canToggleSelectionStroke, canToggleSelectionShadow, canMaskSelection, canPasteSVG } from '../selectors/layer';
 import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle } from '../utils/actions';
 
 import { bufferToBase64, scrollToLayer } from '../../utils';
@@ -88,9 +89,13 @@ import {
   SET_LAYER_OPACITY,
   SET_LAYERS_OPACITY,
   ENABLE_LAYER_HORIZONTAL_FLIP,
+  ENABLE_LAYERS_HORIZONTAL_FLIP,
   DISABLE_LAYER_HORIZONTAL_FLIP,
+  DISABLE_LAYERS_HORIZONTAL_FLIP,
   ENABLE_LAYER_VERTICAL_FLIP,
+  ENABLE_LAYERS_VERTICAL_FLIP,
   DISABLE_LAYER_VERTICAL_FLIP,
+  DISABLE_LAYERS_VERTICAL_FLIP,
   ENABLE_LAYER_FILL,
   ENABLE_LAYERS_FILL,
   DISABLE_LAYER_FILL,
@@ -283,9 +288,13 @@ import {
   SetLayerOpacityPayload,
   SetLayersOpacityPayload,
   EnableLayerHorizontalFlipPayload,
+  EnableLayersHorizontalFlipPayload,
   DisableLayerHorizontalFlipPayload,
+  DisableLayersHorizontalFlipPayload,
   EnableLayerVerticalFlipPayload,
+  EnableLayersVerticalFlipPayload,
   DisableLayerVerticalFlipPayload,
+  DisableLayersVerticalFlipPayload,
   EnableLayerFillPayload,
   EnableLayersFillPayload,
   DisableLayerFillPayload,
@@ -1185,13 +1194,48 @@ export const enableLayerHorizontalFlip = (payload: EnableLayerHorizontalFlipPayl
   payload
 });
 
+export const enableLayersHorizontalFlip = (payload: EnableLayersHorizontalFlipPayload): LayerTypes => ({
+  type: ENABLE_LAYERS_HORIZONTAL_FLIP,
+  payload
+});
+
 export const disableLayerHorizontalFlip = (payload: DisableLayerHorizontalFlipPayload): LayerTypes => ({
   type: DISABLE_LAYER_HORIZONTAL_FLIP,
   payload
 });
 
+export const disableLayersHorizontalFlip = (payload: DisableLayersHorizontalFlipPayload): LayerTypes => ({
+  type: DISABLE_LAYERS_HORIZONTAL_FLIP,
+  payload
+});
+
+export const toggleSelectionHorizontalFlipThunk = () => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    if (canTransformFlipSelection(state.layer.present)) {
+      const mixed = !state.layer.present.selected.every((id) => state.layer.present.byId[id].transform.horizontalFlip);
+      if (mixed) {
+        const unFlipped = state.layer.present.selected.filter((id) => !state.layer.present.byId[id].transform.horizontalFlip);
+        dispatch(enableLayersHorizontalFlip({layers: unFlipped}));
+      } else {
+        const flipped = state.layer.present.selected.every((id) => state.layer.present.byId[id].transform.horizontalFlip);
+        if (flipped) {
+          dispatch(disableLayersHorizontalFlip({layers: state.layer.present.selected}));
+        } else {
+          dispatch(enableLayersHorizontalFlip({layers: state.layer.present.selected}));
+        }
+      }
+    }
+  }
+};
+
 export const enableLayerVerticalFlip = (payload: EnableLayerVerticalFlipPayload): LayerTypes => ({
   type: ENABLE_LAYER_VERTICAL_FLIP,
+  payload
+});
+
+export const enableLayersVerticalFlip = (payload: EnableLayersVerticalFlipPayload): LayerTypes => ({
+  type: ENABLE_LAYERS_VERTICAL_FLIP,
   payload
 });
 
@@ -1199,6 +1243,31 @@ export const disableLayerVerticalFlip = (payload: DisableLayerVerticalFlipPayloa
   type: DISABLE_LAYER_VERTICAL_FLIP,
   payload
 });
+
+export const disableLayersVerticalFlip = (payload: DisableLayersVerticalFlipPayload): LayerTypes => ({
+  type: DISABLE_LAYERS_VERTICAL_FLIP,
+  payload
+});
+
+export const toggleSelectionVerticalFlipThunk = () => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    if (canTransformFlipSelection(state.layer.present)) {
+      const mixed = !state.layer.present.selected.every((id) => state.layer.present.byId[id].transform.verticalFlip);
+      if (mixed) {
+        const unFlipped = state.layer.present.selected.filter((id) => !state.layer.present.byId[id].transform.verticalFlip);
+        dispatch(enableLayersVerticalFlip({layers: unFlipped}));
+      } else {
+        const flipped = state.layer.present.selected.every((id) => state.layer.present.byId[id].transform.verticalFlip);
+        if (flipped) {
+          dispatch(disableLayersVerticalFlip({layers: state.layer.present.selected}));
+        } else {
+          dispatch(enableLayersVerticalFlip({layers: state.layer.present.selected}));
+        }
+      }
+    }
+  }
+};
 
 export const enableLayerFill = (payload: EnableLayerFillPayload): LayerTypes => ({
   type: ENABLE_LAYER_FILL,
@@ -1209,6 +1278,26 @@ export const enableLayersFill = (payload: EnableLayersFillPayload): LayerTypes =
   type: ENABLE_LAYERS_FILL,
   payload
 });
+
+export const toggleSelectionFillThunk = () => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    if (canToggleSelectionFill(state.layer.present)) {
+      const mixed = !state.layer.present.selected.every((id) => state.layer.present.byId[id].style.fill.enabled);
+      if (mixed) {
+        const disabled = state.layer.present.selected.filter((id) => !state.layer.present.byId[id].style.fill.enabled);
+        dispatch(enableLayersFill({layers: disabled}));
+      } else {
+        const enabled = state.layer.present.selected.every((id) => state.layer.present.byId[id].style.fill.enabled);
+        if (enabled) {
+          dispatch(disableLayersFill({layers: state.layer.present.selected}));
+        } else {
+          dispatch(enableLayersFill({layers: state.layer.present.selected}));
+        }
+      }
+    }
+  }
+};
 
 export const disableLayerFill = (payload: DisableLayerFillPayload): LayerTypes => ({
   type: DISABLE_LAYER_FILL,
@@ -1239,6 +1328,26 @@ export const enableLayersStroke = (payload: EnableLayersStrokePayload): LayerTyp
   type: ENABLE_LAYERS_STROKE,
   payload
 });
+
+export const toggleSelectionStrokeThunk = () => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    if (canToggleSelectionStroke(state.layer.present)) {
+      const mixed = !state.layer.present.selected.every((id) => state.layer.present.byId[id].style.stroke.enabled);
+      if (mixed) {
+        const disabled = state.layer.present.selected.filter((id) => !state.layer.present.byId[id].style.stroke.enabled);
+        dispatch(enableLayersStroke({layers: disabled}));
+      } else {
+        const enabled = state.layer.present.selected.every((id) => state.layer.present.byId[id].style.stroke.enabled);
+        if (enabled) {
+          dispatch(disableLayersStroke({layers: state.layer.present.selected}));
+        } else {
+          dispatch(enableLayersStroke({layers: state.layer.present.selected}));
+        }
+      }
+    }
+  }
+};
 
 export const disableLayerStroke = (payload: DisableLayerStrokePayload): LayerTypes => ({
   type: DISABLE_LAYER_STROKE,
@@ -1440,6 +1549,26 @@ export const enableLayersShadow = (payload: EnableLayersShadowPayload): LayerTyp
   payload
 });
 
+export const toggleSelectionShadowThunk = () => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    if (canToggleSelectionShadow(state.layer.present)) {
+      const mixed = !state.layer.present.selected.every((id) => state.layer.present.byId[id].style.shadow.enabled);
+      if (mixed) {
+        const disabled = state.layer.present.selected.filter((id) => !state.layer.present.byId[id].style.shadow.enabled);
+        dispatch(enableLayersShadow({layers: disabled}));
+      } else {
+        const enabled = state.layer.present.selected.every((id) => state.layer.present.byId[id].style.shadow.enabled);
+        if (enabled) {
+          dispatch(disableLayersShadow({layers: state.layer.present.selected}));
+        } else {
+          dispatch(enableLayersShadow({layers: state.layer.present.selected}));
+        }
+      }
+    }
+  }
+};
+
 export const disableLayerShadow = (payload: DisableLayerShadowPayload): LayerTypes => ({
   type: DISABLE_LAYER_SHADOW,
   payload
@@ -1602,19 +1731,46 @@ export const addLayersMask = (payload: AddLayersMaskPayload): LayerTypes => ({
 export const addLayersMaskThunk = (payload: AddLayersMaskPayload) => {
   return (dispatch: any, getState: any): Promise<any> => {
     return new Promise((resolve, reject) => {
-      dispatch(addGroupThunk({
-        layer: {
-          clipped: true,
-          name: 'Masked Group'
-        },
-        batch: true
-      })).then((newGroup: em.Group) => {
-        dispatch(addLayersMask({...payload, group: newGroup}));
+      const state = getState() as RootState;
+      if (canMaskLayers(state.layer.present, payload.layers)) {
+        dispatch(addGroupThunk({
+          layer: {
+            clipped: true,
+            name: 'Masked Group'
+          },
+          batch: true
+        })).then((newGroup: em.Group) => {
+          dispatch(addLayersMask({...payload, group: newGroup}));
+          resolve();
+        });
+      } else {
         resolve();
-      });
+      }
     });
   }
-}
+};
+
+export const addSelectionMaskThunk = () => {
+  return (dispatch: any, getState: any): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      const state = getState() as RootState;
+      if (canMaskSelection(state.layer.present)) {
+        dispatch(addGroupThunk({
+          layer: {
+            clipped: true,
+            name: 'Masked Group'
+          },
+          batch: true
+        })).then((newGroup: em.Group) => {
+          dispatch(addLayersMask({layers: state.layer.present.selected, group: newGroup}));
+          resolve();
+        });
+      } else {
+        resolve();
+      }
+    });
+  }
+};
 
 export const removeLayersMask = (payload: RemoveLayersMaskPayload): LayerTypes => ({
   type: REMOVE_LAYERS_MASK,
@@ -1775,65 +1931,67 @@ export const applyBooleanOperationThunk = (payload: UniteLayersPayload | Interse
   return (dispatch: any, getState: any): Promise<em.Shape> => {
     return new Promise((resolve, reject) => {
       const state = getState() as RootState;
-      const layerItem = state.layer.present.byId[payload.id];
-      const paperLayer = getPaperLayer(payload.id) as paper.Path | paper.CompoundPath;
-      const booleanPaperLayer = getPaperLayer((payload as any)[booleanOperation]) as paper.Path | paper.CompoundPath;
-      const booleanLayers = paperLayer[booleanOperation](booleanPaperLayer, { insert: false }) as paper.Path | paper.CompoundPath;
-      dispatch(addShapeThunk({
-        layer: {
-          shapeType: 'Custom',
-          pathData: booleanLayers.pathData,
-          parent: layerItem.parent,
-          frame: {
-            x: booleanLayers.position.x,
-            y: booleanLayers.position.y,
-            width: booleanLayers.bounds.width,
-            height: booleanLayers.bounds.height,
-            innerWidth: booleanLayers.bounds.width,
-            innerHeight: booleanLayers.bounds.height
-          }
-        },
-        batch: true
-      })).then((newShape: em.Shape) => {
-        switch(booleanOperation) {
-          case 'divide':
-            dispatch(divideLayers({
-              id: payload.id,
-              [booleanOperation]: (payload as DivideLayersPayload)[booleanOperation],
-              booleanLayer: newShape
-            }));
-            break;
-          case 'exclude':
-            dispatch(excludeLayers({
-              id: payload.id,
-              [booleanOperation]: (payload as ExcludeLayersPayload)[booleanOperation],
-              booleanLayer: newShape
-            }));
-            break;
-          case 'intersect':
-            dispatch(intersectLayers({
-              id: payload.id,
-              [booleanOperation]: (payload as IntersectLayersPayload)[booleanOperation],
-              booleanLayer: newShape
-            }));
-            break;
-          case 'subtract':
-            dispatch(subtractLayers({
-              id: payload.id,
-              [booleanOperation]: (payload as SubtractLayersPayload)[booleanOperation],
-              booleanLayer: newShape
-            }));
-            break;
-          case 'unite':
-            dispatch(uniteLayers({
-              id: payload.id,
-              [booleanOperation]: (payload as UniteLayersPayload)[booleanOperation],
-              booleanLayer: newShape
-            }));
-            break;
+      if (canBooleanOperation(state.layer.present, payload.layers)) {
+        const orderedLayers = orderLayersByDepth(state.layer.present, payload.layers);
+        const topLayer = orderedLayers[0];
+        const layerItem = state.layer.present.byId[topLayer];
+        let booleanLayers = getPaperLayer(topLayer) as paper.Path | paper.CompoundPath;
+        for (let i = 1; i < orderedLayers.length; i++) {
+          booleanLayers = booleanLayers[booleanOperation](getPaperLayer(orderedLayers[i]) as paper.Path | paper.CompoundPath, { insert: false }) as paper.Path | paper.CompoundPath;
         }
-        resolve(newShape);
-      });
+        dispatch(addShapeThunk({
+          layer: {
+            shapeType: 'Custom',
+            pathData: booleanLayers.pathData,
+            parent: layerItem.parent,
+            frame: {
+              x: booleanLayers.position.x,
+              y: booleanLayers.position.y,
+              width: booleanLayers.bounds.width,
+              height: booleanLayers.bounds.height,
+              innerWidth: booleanLayers.bounds.width,
+              innerHeight: booleanLayers.bounds.height
+            }
+          },
+          batch: true
+        })).then((newShape: em.Shape) => {
+          switch(booleanOperation) {
+            case 'divide':
+              dispatch(divideLayers({
+                layers: payload.layers,
+                booleanLayer: newShape
+              }));
+              break;
+            case 'exclude':
+              dispatch(excludeLayers({
+                layers: payload.layers,
+                booleanLayer: newShape
+              }));
+              break;
+            case 'intersect':
+              dispatch(intersectLayers({
+                layers: payload.layers,
+                booleanLayer: newShape
+              }));
+              break;
+            case 'subtract':
+              dispatch(subtractLayers({
+                layers: payload.layers,
+                booleanLayer: newShape
+              }));
+              break;
+            case 'unite':
+              dispatch(uniteLayers({
+                layers: payload.layers,
+                booleanLayer: newShape
+              }));
+              break;
+          }
+          resolve(newShape);
+        });
+      } else {
+        resolve(null);
+      }
     });
   }
 };
@@ -2002,6 +2160,22 @@ export const copyStyleThunk = () => {
   }
 };
 
+export const copySVGThunk = () => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    if (state.canvasSettings.focusing && state.layer.present.selected.length > 0) {
+      const group = new paperMain.Group({insert: false});
+      state.layer.present.selected.forEach((id) => {
+        const paperLayer = getPaperLayer(id);
+        const clone = paperLayer.clone({insert: false});
+        clone.parent = group;
+      });
+      const svg = group.exportSVG({asString: true}) as string;
+      clipboard.writeText(`<svg>${svg}</svg>`);
+    }
+  }
+};
+
 export const pasteStyleThunk = () => {
   return (dispatch: any, getState: any): Promise<any> => {
     const state = getState() as RootState;
@@ -2015,6 +2189,17 @@ export const pasteStyleThunk = () => {
       } catch(error) {
         return;
       }
+    }
+  }
+};
+
+export const pasteSVGThunk = () => {
+  return (dispatch: any, getState: any): void => {
+    const state = getState() as RootState;
+    if (state.canvasSettings.focusing && canPasteSVG()) {
+      const clipboardText = clipboard.readText();
+      const svg = paperMain.project.importSVG(clipboardText, {insert: false});
+      console.log(svg);
     }
   }
 };

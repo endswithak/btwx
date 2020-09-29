@@ -110,6 +110,7 @@
     "custom-electron-titlebar": "^3.2.2-hotfix62",
     "electron-squirrel-startup": "^1.0.0",
     "gsap": "file:gsap-bonus.tgz",
+    "is-svg": "^4.2.1",
     "lodash.debounce": "^4.0.8",
     "lodash.throttle": "^4.1.1",
     "math-expression-evaluator": "^1.2.22",
