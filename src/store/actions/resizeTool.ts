@@ -1,7 +1,4 @@
-import { RootState } from '../reducers';
-import ResizeTool from '../../canvas/resizeTool';
 import { setCanvasActiveTool } from './canvasSettings';
-import { removeActiveTools } from '../../canvas/utils';
 
 import {
   ENABLE_RESIZE_TOOL,
@@ -15,24 +12,20 @@ export const enableResizeTool = (payload: EnableResizeToolPayload): ResizeToolTy
   payload
 });
 
+export const enableResizeToolThunk = (handle?: em.ResizeHandle) => {
+  return (dispatch: any, getState: any): void => {
+    dispatch(enableResizeTool({handle}));
+    dispatch(setCanvasActiveTool({activeTool: 'Resize', resizing: true}));
+  }
+};
+
 export const disableResizeTool = (): ResizeToolTypes => ({
   type: DISABLE_RESIZE_TOOL
 });
 
-export const toggleResizeToolThunk = (handle: em.ResizeHandle, nativeEvent: any) => {
+export const disableResizeToolThunk = (handle?: em.ResizeHandle) => {
   return (dispatch: any, getState: any): void => {
-    const state = getState() as RootState;
-    if (state.canvasSettings.focusing) {
-      if (state.canvasSettings.activeTool === 'Resize') {
-        removeActiveTools();
-        dispatch(disableResizeTool());
-        dispatch(setCanvasActiveTool({activeTool: null}));
-      } else {
-        removeActiveTools();
-        new ResizeTool(handle, nativeEvent);
-        dispatch(enableResizeTool({handle}));
-        dispatch(setCanvasActiveTool({activeTool: 'Resize'}));
-      }
-    }
+    dispatch(enableResizeTool({handle}));
+    dispatch(setCanvasActiveTool({activeTool: null, resizing: false}));
   }
 };

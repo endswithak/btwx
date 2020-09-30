@@ -1,14 +1,14 @@
 import store from '../store';
-import { toggleArtboardToolThunk } from '../store/actions/artboardTool';
 import { addArtboardThunk } from '../store/actions/layer';
 import { isBetween } from '../utils';
 import { paperMain } from './index';
 import Tooltip from './tooltip';
+import { RootState } from '../store/reducers';
 import SnapTool from './snapTool';
 import { THEME_PRIMARY_COLOR } from '../constants';
 
 class ArtboardTool {
-  tool: paper.Tool;
+  state: RootState;
   drawing: boolean;
   outline: paper.Path;
   tooltip: Tooltip;
@@ -23,14 +23,6 @@ class ArtboardTool {
   snapTool: SnapTool;
   toBounds: paper.Rectangle;
   constructor() {
-    this.tool = new paperMain.Tool();
-    this.tool.activate();
-    this.tool.onMouseMove = (e: paper.ToolEvent): void => this.onMouseMove(e);
-    this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
-    this.tool.onKeyUp = (e: paper.KeyEvent): void => this.onKeyUp(e);
-    this.tool.onMouseDown = (e: paper.ToolEvent): void => this.onMouseDown(e);
-    this.tool.onMouseDrag = (e: paper.ToolEvent): void => this.onMouseDrag(e);
-    this.tool.onMouseUp = (e: paper.ToolEvent): void => this.onMouseUp(e);
     this.drawing = false;
     this.outline = null;
     this.tooltip = null;
@@ -137,13 +129,12 @@ class ArtboardTool {
   }
   onMouseMove(event: paper.ToolEvent): void {
     if (!this.drawing) {
-      const state = store.getState();
       this.toBounds = new paperMain.Rectangle({
         point: event.point,
         size: new paperMain.Size(4, 4)
       });
       const snapBounds = this.toBounds.clone();
-      this.snapTool.snapPoints = state.layer.present.inView.snapPoints;
+      this.snapTool.snapPoints = this.state.layer.present.inView.snapPoints;
       this.snapTool.snapBounds = this.toBounds;
       this.snapTool.updateXSnap({
         event: event,
@@ -220,7 +211,6 @@ class ArtboardTool {
     }
   }
   onMouseDown(event: paper.ToolEvent): void {
-    const state = store.getState();
     this.drawing = true;
     const from = event.point;
     if (this.snapTool.snap.x) {
@@ -230,7 +220,7 @@ class ArtboardTool {
       from.y = this.snapTool.snap.y.point;
     }
     this.from = new paperMain.Point(from.x, from.y);
-    this.snapTool.snapPoints = state.layer.present.inView.snapPoints.filter((snapPoint) => {
+    this.snapTool.snapPoints = this.state.layer.present.inView.snapPoints.filter((snapPoint) => {
       if (snapPoint.axis === 'x') {
         return !isBetween(snapPoint.point, this.from.x - 1, this.from.x + 1);
       }
@@ -291,7 +281,6 @@ class ArtboardTool {
             }
           }
         }) as any);
-        store.dispatch(toggleArtboardToolThunk() as any);
       }
     }
   }

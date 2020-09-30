@@ -1,5 +1,5 @@
 import store from '../store';
-import { toggleDragToolThunk } from '../store/actions/dragTool';
+import { disableDragToolThunk } from '../store/actions/dragTool';
 import { moveLayersBy, duplicateLayers, removeDuplicatedLayers } from '../store/actions/layer';
 import { getPaperLayer, getSelectionBounds, getLayerAndDescendants } from '../store/selectors/layer';
 import { updateSelectionFrame, updateMeasureFrame } from '../store/utils/layer';
@@ -24,18 +24,17 @@ class DragTool {
   ref: paper.Path.Rectangle;
   fromBounds: paper.Rectangle;
   toBounds: paper.Rectangle;
-  centerOffset: paper.Point;
   handle: boolean;
-  constructor(handle: boolean, nativeEvent: any) {
-    this.tool = new paperMain.Tool();
-    this.tool.activate();
-    this.tool.minDistance = 1;
-    this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
-    this.tool.onKeyUp = (e: paper.KeyEvent): void => this.onKeyUp(e);
-    this.tool.onMouseDown = (e: paper.ToolEvent): void => this.onMouseDown(e);
-    this.tool.onMouseDrag = (e: paper.ToolEvent): void => this.onMouseDrag(e);
-    this.tool.onMouseUp = (e: paper.ToolEvent): void => this.onMouseUp(e);
-    this.state = null;
+  constructor(handle?: boolean) {
+    // this.tool = new paperMain.Tool();
+    // this.tool.activate();
+    // this.tool.minDistance = 1;
+    // this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
+    // this.tool.onKeyUp = (e: paper.KeyEvent): void => this.onKeyUp(e);
+    // this.tool.onMouseDown = (e: paper.ToolEvent): void => this.onMouseDown(e);
+    // this.tool.onMouseDrag = (e: paper.ToolEvent): void => this.onMouseDrag(e);
+    // this.tool.onMouseUp = (e: paper.ToolEvent): void => this.onMouseUp(e);
+    // this.state = state;
     this.handle = handle;
     this.originalSelection = null;
     this.duplicateSelection = null;
@@ -51,19 +50,19 @@ class DragTool {
     this.toBounds = null;
     this.snapTool = new SnapTool();
     this.state = store.getState();
-    if (nativeEvent) {
-      const event = {
-        ...nativeEvent,
-        point: paperMain.view.getEventPoint(nativeEvent),
-        modifiers: {
-          shift: nativeEvent.shiftKey,
-          alt: nativeEvent.altKey,
-          meta: nativeEvent.metaKey,
-          ctrl: nativeEvent.ctrlKey
-        }
-      };
-      this.onMouseDown(event);
-    }
+    // if (nativeEvent) {
+    //   const event = {
+    //     ...nativeEvent,
+    //     point: paperMain.view.getEventPoint(nativeEvent),
+    //     modifiers: {
+    //       shift: nativeEvent.shiftKey,
+    //       alt: nativeEvent.altKey,
+    //       meta: nativeEvent.metaKey,
+    //       ctrl: nativeEvent.ctrlKey
+    //     }
+    //   };
+    //   this.onMouseDown(event);
+    // }
   }
   updateRef(): void {
     if (this.ref) {
@@ -286,7 +285,7 @@ class DragTool {
         this.ref.remove();
       }
     }
-    store.dispatch(toggleDragToolThunk(null, null) as any);
+    // store.dispatch(disableDragToolThunk() as any);
   }
 }
 

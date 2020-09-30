@@ -52,7 +52,11 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
     case SET_CANVAS_ACTIVE_TOOL: {
       return {
         ...state,
-        activeTool: action.payload.activeTool
+        activeTool: action.payload.activeTool,
+        dragging: Object.prototype.hasOwnProperty.call(action.payload, 'dragging') ? action.payload.dragging : state.dragging,
+        resizing: Object.prototype.hasOwnProperty.call(action.payload, 'resizing') ? action.payload.resizing : state.resizing,
+        selecting: Object.prototype.hasOwnProperty.call(action.payload, 'selecting') ? action.payload.selecting : state.selecting,
+        drawing: Object.prototype.hasOwnProperty.call(action.payload, 'drawing') ? action.payload.drawing : state.drawing
       };
     }
     case SET_CANVAS_DRAWING: {

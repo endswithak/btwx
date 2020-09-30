@@ -1,7 +1,5 @@
 import { RootState } from '../reducers';
-import ArtboardTool from '../../canvas/artboardTool';
 import { setCanvasActiveTool } from './canvasSettings';
-import { removeActiveTools } from '../../canvas/utils';
 
 import {
   ENABLE_ARTBOARD_TOOL,
@@ -22,12 +20,12 @@ export const toggleArtboardToolThunk = () => {
     const state = getState() as RootState;
     if (state.canvasSettings.focusing) {
       if (state.canvasSettings.activeTool === 'Artboard') {
-        removeActiveTools();
+        // removeActiveTools();
         dispatch(disableArtboardTool());
         dispatch(setCanvasActiveTool({activeTool: null}));
       } else {
-        removeActiveTools();
-        new ArtboardTool();
+        // removeActiveTools();
+        // new ArtboardTool();
         dispatch(enableArtboardTool());
         dispatch(setCanvasActiveTool({activeTool: 'Artboard'}));
       }

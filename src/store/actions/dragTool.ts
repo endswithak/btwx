@@ -1,7 +1,4 @@
-import { RootState } from '../reducers';
-import DragTool from '../../canvas/dragTool';
 import { setCanvasActiveTool } from './canvasSettings';
-import { removeActiveTools } from '../../canvas/utils';
 
 import {
   ENABLE_DRAG_TOOL,
@@ -15,24 +12,20 @@ export const enableDragTool = (payload: EnableDragToolPayload): DragToolTypes =>
   payload
 });
 
+export const enableDragToolThunk = (handle?: boolean) => {
+  return (dispatch: any, getState: any): void => {
+    dispatch(enableDragTool({handle}));
+    dispatch(setCanvasActiveTool({activeTool: 'Drag', dragging: true}));
+  }
+};
+
 export const disableDragTool = (): DragToolTypes => ({
   type: DISABLE_DRAG_TOOL
 });
 
-export const toggleDragToolThunk = (handle: boolean, nativeEvent: any) => {
+export const disableDragToolThunk = (handle?: boolean) => {
   return (dispatch: any, getState: any): void => {
-    const state = getState() as RootState;
-    if (state.canvasSettings.focusing) {
-      if (state.canvasSettings.activeTool === 'Drag') {
-        removeActiveTools();
-        dispatch(disableDragTool());
-        dispatch(setCanvasActiveTool({activeTool: null}));
-      } else {
-        removeActiveTools();
-        new DragTool(handle, nativeEvent);
-        dispatch(enableDragTool({handle}));
-        dispatch(setCanvasActiveTool({activeTool: 'Drag'}));
-      }
-    }
+    dispatch(disableDragTool());
+    dispatch(setCanvasActiveTool({activeTool: null, dragging: false}));
   }
 };

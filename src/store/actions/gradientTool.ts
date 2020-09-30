@@ -19,17 +19,17 @@ export const disableGradientTool = (): GradientToolTypes => ({
   type: DISABLE_GRADIENT_TOOL
 });
 
-export const toggleGradientToolThunk = (handle: em.GradientHandle, nativeEvent: any) => {
+export const toggleGradientToolThunk = (handle?: em.GradientHandle) => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
     if (state.canvasSettings.focusing) {
       if (state.canvasSettings.activeTool === 'Gradient') {
-        removeActiveTools();
+        // removeActiveTools();
         dispatch(disableGradientTool());
         dispatch(setCanvasActiveTool({activeTool: null}));
       } else {
-        removeActiveTools();
-        new GradientTool(handle, state.gradientEditor.prop as em.GradientProp, nativeEvent);
+        // removeActiveTools();
+        // new GradientTool(handle, state.gradientEditor.prop as em.GradientProp, nativeEvent);
         dispatch(enableGradientTool({handle}));
         dispatch(setCanvasActiveTool({activeTool: 'Gradient'}));
       }

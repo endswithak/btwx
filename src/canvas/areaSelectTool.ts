@@ -1,16 +1,12 @@
 import paper from 'paper';
 import { getPagePaperLayer, getNearestScopeAncestor } from '../store/selectors/layer';
-import { toggleAreaSelectToolThunk } from '../store/actions/areaSelectTool';
-import { deselectAllLayers, deselectLayer, selectLayer, selectLayers } from '../store/actions/layer';
-import { setCanvasSelecting } from '../store/actions/canvasSettings';
-import { updateSelectionFrame } from '../store/utils/layer';
+import { selectLayers } from '../store/actions/layer';
 import store from '../store';
 import { paperMain } from './index';
 import { THEME_PRIMARY_COLOR } from '../constants';
 import { RootState } from '../store/reducers';
 
 class AreaSelectTool {
-  tool: paper.Tool;
   state: RootState;
   from: paper.Point;
   to: paper.Point;
@@ -19,16 +15,15 @@ class AreaSelectTool {
   shiftModifier: boolean;
   metaModifier: boolean;
   altModifier: boolean;
-  constructor(nativeEvent: any) {
-    this.tool = new paperMain.Tool();
-    this.tool.activate();
-    this.tool.minDistance = 1;
-    this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
-    this.tool.onKeyUp = (e: paper.KeyEvent): void => this.onKeyUp(e);
-    this.tool.onMouseDown = (e: paper.ToolEvent): void => this.onMouseDown(e);
-    this.tool.onMouseDrag = (e: paper.ToolEvent): void => this.onMouseDrag(e);
-    this.tool.onMouseUp = (e: paper.ToolEvent): void => this.onMouseUp(e);
-    this.state = store.getState();
+  constructor() {
+    // this.tool = new paperMain.Tool();
+    // this.tool.activate();
+    // this.tool.minDistance = 1;
+    // this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
+    // this.tool.onKeyUp = (e: paper.KeyEvent): void => this.onKeyUp(e);
+    // this.tool.onMouseDown = (e: paper.ToolEvent): void => this.onMouseDown(e);
+    // this.tool.onMouseDrag = (e: paper.ToolEvent): void => this.onMouseDrag(e);
+    // this.tool.onMouseUp = (e: paper.ToolEvent): void => this.onMouseUp(e);
     this.from = null;
     this.to = null;
     this.shape = null;
@@ -36,27 +31,23 @@ class AreaSelectTool {
     this.metaModifier = false;
     this.altModifier = false;
     this.overlapped = [];
-    if (nativeEvent) {
-      const event = {
-        ...nativeEvent,
-        point: paperMain.view.getEventPoint(nativeEvent),
-        modifiers: {
-          shift: nativeEvent.shiftKey,
-          alt: nativeEvent.altKey,
-          meta: nativeEvent.metaKey,
-          ctrl: nativeEvent.ctrlKey
-        }
-      };
-      this.onMouseDown(event);
-    }
+    // if (nativeEvent) {
+    //   const event = {
+    //     ...nativeEvent,
+    //     point: paperMain.view.getEventPoint(nativeEvent),
+    //     modifiers: {
+    //       shift: nativeEvent.shiftKey,
+    //       alt: nativeEvent.altKey,
+    //       meta: nativeEvent.metaKey,
+    //       ctrl: nativeEvent.ctrlKey
+    //     }
+    //   };
+    //   this.onMouseDown(event);
+    // }
   }
   update(to: paper.Point) {
     this.to = to;
-    this.shape = this.renderAreaSelectShape({
-      data: {
-        id: 'AreaSelectToolPreview'
-      }
-    });
+    this.shape = this.renderAreaSelectShape({});
   }
   renderAreaSelectShape(shapeOpts: any) {
     if (this.shape) {
@@ -145,13 +136,13 @@ class AreaSelectTool {
     }
   }
   onMouseDown(event: paper.ToolEvent): void {
+    this.state = store.getState();
     // set from point
     this.from = event.point;
     // deselect all if layers if no shift modifier
     // if (!event.modifiers.shift) {
-    //   if (this.state.layer.present.selected.length > 0) {
-    //     store.dispatch(deselectAllLayers());
-    //   }
+    //   store.dispatch(deselectAllLayers());
+    //   this.state = store.getState();
     // }
   }
   onMouseDrag(event: paper.ToolEvent): void {
@@ -215,9 +206,12 @@ class AreaSelectTool {
     if (this.to) {
       // get hit test layers
       const hitTestLayers = this.hitTestLayers();
-      store.dispatch(selectLayers({layers: hitTestLayers, toggleSelected: event.modifiers.shift}));
+      store.dispatch(selectLayers({layers: hitTestLayers, toggleSelected: event.modifiers.shift, noActiveArtboardUpdate: true}));
     }
-    store.dispatch(toggleAreaSelectToolThunk(null) as any);
+    if (this.shape) {
+      this.shape.remove();
+    }
+    // store.dispatch(disableAreaSelectToolThunk() as any);
   }
 }
 

@@ -1,7 +1,5 @@
 import { RootState } from '../reducers';
-import TextTool from '../../canvas/textTool';
 import { setCanvasActiveTool } from './canvasSettings';
-import { removeActiveTools } from '../../canvas/utils';
 
 import {
   ENABLE_TEXT_TOOL,
@@ -22,12 +20,12 @@ export const toggleTextToolThunk = () => {
     const state = getState() as RootState;
     if (state.canvasSettings.focusing) {
       if (state.canvasSettings.activeTool === 'Text') {
-        removeActiveTools();
+        // removeActiveTools();
         dispatch(disableTextTool());
         dispatch(setCanvasActiveTool({activeTool: null}));
       } else {
-        removeActiveTools();
-        new TextTool();
+        // removeActiveTools();
+        // new TextTool();
         dispatch(enableTextTool());
         dispatch(setCanvasActiveTool({activeTool: 'Text'}));
       }

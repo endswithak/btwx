@@ -1,5 +1,4 @@
 import store from '../store';
-import { toggleResizeToolThunk } from '../store/actions/resizeTool';
 import { scaleLayers } from '../store/actions/layer';
 import { getPaperLayer, getSelectionBounds, getLayerAndDescendants } from '../store/selectors/layer';
 import { updateSelectionFrame, updateMeasureFrame } from '../store/utils/layer';
@@ -9,7 +8,6 @@ import SnapTool from './snapTool';
 import { RootState } from '../store/reducers';
 
 class ResizeTool {
-  tool: paper.Tool;
   state: RootState;
   ref: paper.Path.Rectangle;
   x: number;
@@ -31,16 +29,7 @@ class ResizeTool {
   altModifier: boolean;
   snapTool: SnapTool;
   preserveAspectRatio: boolean;
-  constructor(handle: any, nativeEvent: any) {
-    this.tool = new paperMain.Tool();
-    this.tool.activate();
-    this.tool.minDistance = 1;
-    this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
-    this.tool.onKeyUp = (e: paper.KeyEvent): void => this.onKeyUp(e);
-    this.tool.onMouseDown = (e: paper.ToolEvent): void => this.onMouseDown(e);
-    this.tool.onMouseDrag = (e: paper.ToolEvent): void => this.onMouseDrag(e);
-    this.tool.onMouseUp = (e: paper.ToolEvent): void => this.onMouseUp(e);
-    this.state = store.getState();
+  constructor(handle?: any) {
     this.ref = null;
     this.x = 0;
     this.y = 0;
@@ -62,35 +51,6 @@ class ResizeTool {
     this.preserveAspectRatio = false;
     this.handle = handle;
     this.snapTool = new SnapTool();
-    if (
-      (
-        this.state.layer.present.selected.length > 1 &&
-        (
-          this.state.layer.present.selected.some((id) => this.state.layer.present.byId[id].type === 'Group') ||
-          this.state.layer.present.selected.some((id) => this.state.layer.present.byId[id].transform.rotation !== 0)
-        )
-      ) ||
-      this.state.layer.present.selected.length === 1 && (
-        this.state.layer.present.byId[this.state.layer.present.selected[0]].type === 'Group' ||
-        this.state.layer.present.byId[this.state.layer.present.selected[0]].transform.rotation !== 0
-      )
-    ) {
-      this.preserveAspectRatio = true;
-    }
-    updateSelectionFrame(this.state.layer.present, this.handle);
-    if (nativeEvent) {
-      const event = {
-        ...nativeEvent,
-        point: paperMain.view.getEventPoint(nativeEvent),
-        modifiers: {
-          shift: nativeEvent.shiftKey,
-          alt: nativeEvent.altKey,
-          meta: nativeEvent.metaKey,
-          ctrl: nativeEvent.ctrlKey
-        }
-      };
-      this.onMouseDown(event);
-    }
   }
   getMeasureGuides(): { top?: string; bottom?: string; left?: string; right?: string; all?: string } {
     const measureGuides: { top?: string; bottom?: string; left?: string; right?: string; all?: string } = {};
@@ -212,20 +172,6 @@ class ResizeTool {
       this.tooltip.paperLayer.remove();
     }
     this.tooltip = new Tooltip(`${Math.round(this.snapTool.snapBounds.width)} x ${Math.round(this.snapTool.snapBounds.height)}`, this.to, {up: true});
-  }
-  updateRef(): void {
-    if (this.ref) {
-      this.ref.remove();
-    }
-    this.ref = new paperMain.Path.Rectangle({
-      rectangle: this.toBounds,
-      strokeColor: 'red',
-    });
-    this.ref.removeOn({
-      drag: true,
-      up: true
-    });
-    this.updateTooltip();
   }
   scaleLayers(): void {
     // used when dragging
@@ -668,6 +614,21 @@ class ResizeTool {
   }
   onMouseDown(event: paper.ToolEvent): void {
     const selectionBounds = getSelectionBounds(this.state.layer.present);
+    if (
+      (
+        this.state.layer.present.selected.length > 1 &&
+        (
+          this.state.layer.present.selected.some((id) => this.state.layer.present.byId[id].type === 'Group') ||
+          this.state.layer.present.selected.some((id) => this.state.layer.present.byId[id].transform.rotation !== 0)
+        )
+      ) ||
+      this.state.layer.present.selected.length === 1 && (
+        this.state.layer.present.byId[this.state.layer.present.selected[0]].type === 'Group' ||
+        this.state.layer.present.byId[this.state.layer.present.selected[0]].transform.rotation !== 0
+      )
+    ) {
+      this.preserveAspectRatio = true;
+    }
     // set from point to handle pivot point
     switch(this.handle) {
       case 'topLeft':
@@ -814,7 +775,6 @@ class ResizeTool {
         }
       }
     }
-    store.dispatch(toggleResizeToolThunk(null, null) as any);
   }
 }
 

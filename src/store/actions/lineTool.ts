@@ -19,17 +19,17 @@ export const disableLineTool = (): LineToolTypes => ({
   type: DISABLE_LINE_TOOL
 });
 
-export const toggleLineToolThunk = (handle: em.LineHandle, nativeEvent: any) => {
+export const toggleLineToolThunk = (handle?: em.LineHandle) => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
     if (state.canvasSettings.focusing) {
       if (state.canvasSettings.activeTool === 'Line') {
-        removeActiveTools();
+        // removeActiveTools();
         dispatch(disableLineTool());
         dispatch(setCanvasActiveTool({activeTool: null}));
       } else {
-        removeActiveTools();
-        new LineTool(handle, nativeEvent);
+        // removeActiveTools();
+        // new LineTool(handle, nativeEvent);
         dispatch(enableLineTool({handle}));
         dispatch(setCanvasActiveTool({activeTool: 'Line'}));
       }

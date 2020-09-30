@@ -21,13 +21,11 @@ const mapStateToProps = (state: RootState): {
   isEnabled: boolean;
 } => {
   const { layer, gradientEditor, textEditor, canvasSettings } = state;
-  const isResizing = canvasSettings.resizing;
-  const isDragging = canvasSettings.dragging;
   const isZooming = canvasSettings.zooming;
   const isGradientEditorOpen = gradientEditor.isOpen;
   const isTextEditorOpen = textEditor.isOpen;
   const selected = layer.present.selected;
-  const isEnabled = selected.length > 0 && !isGradientEditorOpen && !isTextEditorOpen && !isResizing && !isDragging && !isZooming;
+  const isEnabled = selected.length > 0 && !isGradientEditorOpen && !isTextEditorOpen && !isZooming;
   return { isEnabled };
 };
 

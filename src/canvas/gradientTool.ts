@@ -1,5 +1,4 @@
 import store from '../store';
-import { toggleGradientToolThunk } from '../store/actions/gradientTool';
 import { setLayersGradientOrigin, setLayersGradientDestination } from '../store/actions/layer';
 import { getPaperLayer, getGradientOriginPoint, getGradientDestinationPoint } from '../store/selectors/layer';
 import { paperMain } from './index';
@@ -7,7 +6,7 @@ import SnapTool from './snapTool';
 import { RootState } from '../store/reducers';
 
 class GradientTool {
-  tool: paper.Tool;
+  state: RootState;
   handle: em.GradientHandle;
   prop: em.GradientProp;
   from: paper.Point;
@@ -28,21 +27,9 @@ class GradientTool {
     x: number;
     y: number;
   }
-  constructor(handle: em.GradientHandle, prop: em.GradientProp, nativeEvent: any) {
-    this.tool = new paperMain.Tool();
-    this.tool.activate();
-    this.tool.minDistance = 1;
-    this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
-    this.tool.onKeyUp = (e: paper.KeyEvent): void => this.onKeyUp(e);
-    this.tool.onMouseDown = (e: paper.ToolEvent): void => this.onMouseDown(e);
-    this.tool.onMouseDrag = (e: paper.ToolEvent): void => this.onMouseDrag(e);
-    this.tool.onMouseUp = (e: paper.ToolEvent): void => this.onMouseUp(e);
+  constructor(handle?: em.GradientHandle, prop?: em.GradientProp) {
     this.handle = handle;
     this.prop = prop;
-    this.originHandle = paperMain.project.getItem({data: {id: 'GradientFrameOriginHandle'}}) as paper.Shape;
-    this.destinationHandle = paperMain.project.getItem({data: {id: 'GradientFrameDestinationHandle'}}) as paper.Shape;
-    this.gradientLines = paperMain.project.getItems({data: {id: 'GradientFrameLine'}}) as paper.Path.Line[];
-    this.fromBounds = new paperMain.Rectangle(handle === 'origin' ? this.originHandle.bounds : this.destinationHandle.bounds);
     this.toBounds = null;
     this.x = 0;
     this.y = 0;
@@ -52,19 +39,6 @@ class GradientTool {
     this.snapTool = new SnapTool();
     this.origin = null;
     this.destination = null;
-    if (nativeEvent) {
-      const event = {
-        ...nativeEvent,
-        point: paperMain.view.getEventPoint(nativeEvent),
-        modifiers: {
-          shift: nativeEvent.shiftKey,
-          alt: nativeEvent.altKey,
-          meta: nativeEvent.metaKey,
-          ctrl: nativeEvent.ctrlKey
-        }
-      };
-      this.onMouseDown(event);
-    }
   }
   updateOrigin(event: paper.ToolEvent, state: RootState): void {
     const layerItem = state.layer.present.byId[state.gradientEditor.layers[0]];
@@ -94,14 +68,11 @@ class GradientTool {
       x: (style.origin.x - layerItem.frame.x) / (isLine ? layerItem.frame.width : layerItem.frame.innerWidth),
       y: (style.origin.y - layerItem.frame.y) / (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)
     }
-    state.gradientEditor.layers.forEach((id, index) => {
-      const paperLayer = getPaperLayer(id);
-      paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] = {
-        gradient: paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'].gradient,
-        origin: getGradientOriginPoint(layerItem, this.origin),
-        destination: (paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).destination
-      } as em.PaperGradientFill
-    });
+    paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] = {
+      gradient: paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'].gradient,
+      origin: getGradientOriginPoint(layerItem, this.origin),
+      destination: (paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).destination
+    } as em.PaperGradientFill
   }
   updateDestination(event: paper.ToolEvent, state: RootState): void {
     const layerItem = state.layer.present.byId[state.gradientEditor.layers[0]];
@@ -131,14 +102,11 @@ class GradientTool {
       x: (style.destination.x - layerItem.frame.x) / (isLine ? layerItem.frame.width : layerItem.frame.innerWidth),
       y: (style.destination.y - layerItem.frame.y) / (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)
     }
-    state.gradientEditor.layers.forEach((id, index) => {
-      const paperLayer = getPaperLayer(id);
-      paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] = {
-        gradient: paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'].gradient,
-        origin: (paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).origin,
-        destination: getGradientDestinationPoint(layerItem, this.destination)
-      } as em.PaperGradientFill
-    });
+    paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] = {
+      gradient: paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'].gradient,
+      origin: (paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).origin,
+      destination: getGradientDestinationPoint(layerItem, this.destination)
+    } as em.PaperGradientFill
   }
   onKeyDown(event: paper.KeyEvent): void {
 
@@ -147,17 +115,16 @@ class GradientTool {
 
   }
   onMouseDown(event: paper.ToolEvent): void {
-    const state = store.getState();
     this.from = event.point;
-    this.toBounds = new paperMain.Rectangle(this.fromBounds);
-    this.snapTool.snapPoints = state.layer.present.inView.snapPoints.filter((snapPoint) => snapPoint.id === state.gradientEditor.layers[0]);
-    this.snapTool.snapBounds = this.toBounds;
-  }
-  onMouseDrag(event: paper.ToolEvent): void {
-    const state = store.getState();
     this.originHandle = paperMain.project.getItem({data: {id: 'GradientFrameOriginHandle'}}) as paper.Shape;
     this.destinationHandle = paperMain.project.getItem({data: {id: 'GradientFrameDestinationHandle'}}) as paper.Shape;
     this.gradientLines = paperMain.project.getItems({data: {id: 'GradientFrameLine'}}) as paper.Path.Line[];
+    this.fromBounds = new paperMain.Rectangle(this.handle === 'origin' ? this.originHandle.bounds : this.destinationHandle.bounds);
+    this.toBounds = new paperMain.Rectangle(this.fromBounds);
+    this.snapTool.snapPoints = this.state.layer.present.inView.snapPoints.filter((snapPoint) => snapPoint.id === this.state.gradientEditor.layers[0]);
+    this.snapTool.snapBounds = this.toBounds;
+  }
+  onMouseDrag(event: paper.ToolEvent): void {
     this.to = event.point;
     this.x += event.delta.x;
     this.y += event.delta.y;
@@ -194,11 +161,11 @@ class GradientTool {
     });
     switch(this.handle) {
       case 'origin': {
-        this.updateOrigin(event, state);
+        this.updateOrigin(event, this.state);
         break;
       }
       case 'destination': {
-        this.updateDestination(event, state);
+        this.updateDestination(event, this.state);
         break;
       }
     }
@@ -206,17 +173,16 @@ class GradientTool {
   }
   onMouseUp(event: paper.ToolEvent): void {
     if (this.x !== 0 || this.y !== 0) {
-      const state = store.getState().layer.present;
       switch(this.handle) {
         case 'origin':
-          store.dispatch(setLayersGradientOrigin({layers: state.selected, prop: this.prop, origin: this.origin}));
+          store.dispatch(setLayersGradientOrigin({layers: this.state.layer.present.selected, prop: this.prop, origin: this.origin}));
           break;
         case 'destination':
-          store.dispatch(setLayersGradientDestination({layers: state.selected, prop: this.prop, destination: this.destination}));
+          store.dispatch(setLayersGradientDestination({layers: this.state.layer.present.selected, prop: this.prop, destination: this.destination}));
           break;
       }
     }
-    store.dispatch(toggleGradientToolThunk(null, null) as any);
+    // store.dispatch(toggleGradientToolThunk(null, null) as any);
   }
 }
 

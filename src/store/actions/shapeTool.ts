@@ -31,12 +31,12 @@ export const toggleShapeToolThunk = (shapeType: em.ShapeType) => {
     const state = getState() as RootState;
     if (state.canvasSettings.focusing) {
       if (state.canvasSettings.activeTool === 'Shape' && state.shapeTool.shapeType === shapeType) {
-        removeActiveTools();
+        // removeActiveTools();
         dispatch(disableShapeTool());
         dispatch(setCanvasActiveTool({activeTool: null}));
       } else {
-        removeActiveTools();
-        new ShapeTool(shapeType);
+        // removeActiveTools();
+        // new ShapeTool(shapeType);
         dispatch(enableShapeTool({shapeType}));
         dispatch(setCanvasActiveTool({activeTool: 'Shape'}));
       }

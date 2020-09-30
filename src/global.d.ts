@@ -97,13 +97,15 @@ declare namespace em {
   type FillStrokeTween = 'colorToColor' | 'nullToColor' | 'colorToNull' | 'gradientToGradient' | 'gradientToColor' | 'colorToGradient' | 'gradientToNull' | 'nullToGradient';
 
   interface HitResult {
-    type: 'Layer' | 'UIElement';
+    type: 'Layer' | 'UIElement' | 'Empty';
+    event: paper.ToolEvent;
     layerProps: {
       layerItem: Layer;
       nearestScopeAncestor: Layer;
+      deepSelectItem: Layer;
     };
     uiElementProps: {
-      elementId: em.UIElement;
+      elementId: UIElement;
       interactive: boolean;
       interactiveType: string;
     };

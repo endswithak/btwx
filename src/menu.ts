@@ -326,60 +326,60 @@ export default Menu.buildFromTemplate([
         submenu: [
           {
             label: 'Rectangle',
-            id: 'insertRectangle',
+            id: 'insertShapeRectangle',
             enabled: false,
             accelerator: 'R',
             click: () => {
               const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`insertRectangle()`);
+              document.webContents.executeJavaScript(`insertShape(${JSON.stringify('Rectangle')})`);
             }
           },
           {
             label: 'Rounded',
-            id: 'insertRounded',
+            id: 'insertShapeRounded',
             enabled: false,
             accelerator: 'U',
             click: () => {
               const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`insertRounded()`);
+              document.webContents.executeJavaScript(`insertShape(${JSON.stringify('Rounded')})`);
             }
           },
           {
             label: 'Ellipse',
-            id: 'insertEllipse',
+            id: 'insertShapeEllipse',
             enabled: false,
             accelerator: 'O',
             click: () => {
               const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`insertEllipse()`);
+              document.webContents.executeJavaScript(`insertShape(${JSON.stringify('Ellipse')})`);
             }
           },
           {
             label: 'Star',
-            id: 'insertStar',
+            id: 'insertShapeStar',
             enabled: false,
             click: () => {
               const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`insertStar()`);
+              document.webContents.executeJavaScript(`insertShape(${JSON.stringify('Star')})`);
             }
           },
           {
             label: 'Polygon',
-            id: 'insertPolygon',
+            id: 'insertShapePolygon',
             enabled: false,
             click: () => {
               const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`insertPolygon()`);
+              document.webContents.executeJavaScript(`insertShape(${JSON.stringify('Polygon')})`);
             }
           },
           {
             label: 'Line',
-            id: 'insertLine',
+            id: 'insertShapeLine',
             enabled: false,
             accelerator: 'L',
             click: () => {
               const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`insertLine()`);
+              document.webContents.executeJavaScript(`insertShape(${JSON.stringify('Line')})`);
             }
           },
         ]

@@ -1,23 +1,18 @@
 import store from '../store';
 import { openTextEditor } from '../store/actions/textEditor';
-import { toggleTextToolThunk } from '../store/actions/textTool';
 import { addTextThunk } from '../store/actions/layer';
 import { getPagePaperLayer } from '../store/selectors/layer';
 import SnapTool from './snapTool';
 import { paperMain } from './index';
 import { DEFAULT_TEXT_VALUE, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../constants';
+import { RootState } from '../store/reducers';
 
 class TextTool {
+  state: RootState;
   tool: paper.Tool;
   snapTool: SnapTool;
   toBounds: paper.Rectangle;
   constructor() {
-    this.tool = new paperMain.Tool();
-    this.tool.activate();
-    this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
-    this.tool.onKeyUp = (e: paper.KeyEvent): void => this.onKeyUp(e);
-    this.tool.onMouseMove = (e: paper.ToolEvent): void => this.onMouseMove(e);
-    this.tool.onMouseDown = (e: paper.ToolEvent): void => this.onMouseDown(e);
     this.snapTool = new SnapTool();
     this.toBounds = null;
   }
@@ -28,12 +23,11 @@ class TextTool {
 
   }
   onMouseMove(event: paper.ToolEvent): void {
-    const state = store.getState();
     this.toBounds = new paperMain.Rectangle({
       point: event.point,
       size: new paperMain.Size(1, 1)
     });
-    this.snapTool.snapPoints = state.layer.present.inView.snapPoints;
+    this.snapTool.snapPoints = this.state.layer.present.inView.snapPoints;
     this.snapTool.snapBounds = this.toBounds;
     this.snapTool.updateXSnap({
       event: event,
@@ -106,22 +100,21 @@ class TextTool {
     this.snapTool.updateGuides();
   }
   onMouseDown(event: paper.ToolEvent): void {
-    const state = store.getState();
     // create new text layer
     const paperLayer = new paperMain.PointText({
       point: new paperMain.Point(this.snapTool.snap.x ? this.snapTool.snap.x.point : event.point.x, this.snapTool.snap.y ? this.snapTool.snap.y.point : event.point.y),
       content: DEFAULT_TEXT_VALUE,
-      ...state.textSettings,
+      ...this.state.textSettings,
       insert: false
     });
     const parent = (() => {
-      const overlappedArtboard = getPagePaperLayer(state.layer.present).getItem({
+      const overlappedArtboard = getPagePaperLayer(this.state.layer.present).getItem({
         data: (data: any) => {
           return data.id === 'ArtboardBackground';
         },
         overlapping: paperLayer.bounds
       });
-      return overlappedArtboard ? overlappedArtboard.parent.data.id : state.layer.present.page;
+      return overlappedArtboard ? overlappedArtboard.parent.data.id : this.state.layer.present.page;
     })();
     store.dispatch(addTextThunk({
       layer: {
@@ -141,7 +134,7 @@ class TextTool {
           ...DEFAULT_STYLE,
           fill: {
             ...DEFAULT_STYLE.fill,
-            color: state.textSettings.fillColor
+            color: this.state.textSettings.fillColor
           },
           stroke: {
             ...DEFAULT_STYLE.stroke,
@@ -149,11 +142,11 @@ class TextTool {
           }
         },
         textStyle: {
-          fontSize: state.textSettings.fontSize,
-          leading: state.textSettings.leading,
-          fontWeight: state.textSettings.fontWeight,
-          fontFamily: state.textSettings.fontFamily,
-          justification: state.textSettings.justification
+          fontSize: this.state.textSettings.fontSize,
+          leading: this.state.textSettings.leading,
+          fontWeight: this.state.textSettings.fontWeight,
+          fontFamily: this.state.textSettings.fontFamily,
+          justification: this.state.textSettings.justification
         }
       }
     }) as any).then((textLayer: em.Text) => {
@@ -165,7 +158,7 @@ class TextTool {
       store.dispatch(openTextEditor({
         layer: textLayer.id,
         x: (() => {
-          switch(state.textSettings.justification) {
+          switch(this.state.textSettings.justification) {
             case 'left':
               return topLeft.x;
             case 'center':
@@ -175,7 +168,7 @@ class TextTool {
           }
         })(),
         y: (() => {
-          switch(state.textSettings.justification) {
+          switch(this.state.textSettings.justification) {
             case 'left':
               return topLeft.y;
             case 'center':
@@ -186,7 +179,7 @@ class TextTool {
         })()
       }));
     });
-    store.dispatch(toggleTextToolThunk() as any);
+    // store.dispatch(toggleTextToolThunk() as any);
   }
 }
 

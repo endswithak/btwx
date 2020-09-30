@@ -142,28 +142,8 @@ const titleBar = new Titlebar({
   store.dispatch(toggleArtboardToolThunk() as any);
 };
 
-(window as any).insertRectangle = (): void => {
-  store.dispatch(toggleShapeToolThunk('Rectangle') as any);
-};
-
-(window as any).insertRounded = (): void => {
-  store.dispatch(toggleShapeToolThunk('Rounded') as any);
-};
-
-(window as any).insertEllipse = (): void => {
-  store.dispatch(toggleShapeToolThunk('Ellipse') as any);
-};
-
-(window as any).insertPolygon = (): void => {
-  store.dispatch(toggleShapeToolThunk('Polygon') as any);
-};
-
-(window as any).insertStar = (): void => {
-  store.dispatch(toggleShapeToolThunk('Star') as any);
-};
-
-(window as any).insertLine = (): void => {
-  store.dispatch(toggleShapeToolThunk('Line') as any);
+(window as any).insertShape = (shapeType: em.ShapeType): void => {
+  store.dispatch(toggleShapeToolThunk(shapeType) as any);
 };
 
 (window as any).insertText = (): void => {

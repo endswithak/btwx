@@ -28,18 +28,17 @@ class ShapeTool {
   shiftModifier: boolean;
   snapTool: SnapTool;
   toBounds: paper.Rectangle;
-  constructor(shapeType: em.ShapeType) {
+  constructor() {
+    // this.tool = new paperMain.Tool();
+    // this.tool.activate();
+    // this.tool.onMouseMove = (e: paper.ToolEvent): void => this.onMouseMove(e);
+    // this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
+    // this.tool.onKeyUp = (e: paper.KeyEvent): void => this.onKeyUp(e);
+    // this.tool.onMouseDown = (e: paper.ToolEvent): void => this.onMouseDown(e);
+    // this.tool.onMouseDrag = (e: paper.ToolEvent): void => this.onMouseDrag(e);
+    // this.tool.onMouseUp = (e: paper.ToolEvent): void => this.onMouseUp(e);
     this.ref = null;
     this.drawing = false;
-    this.tool = new paperMain.Tool();
-    this.tool.activate();
-    this.tool.onMouseMove = (e: paper.ToolEvent): void => this.onMouseMove(e);
-    this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
-    this.tool.onKeyUp = (e: paper.KeyEvent): void => this.onKeyUp(e);
-    this.tool.onMouseDown = (e: paper.ToolEvent): void => this.onMouseDown(e);
-    this.tool.onMouseDrag = (e: paper.ToolEvent): void => this.onMouseDrag(e);
-    this.tool.onMouseUp = (e: paper.ToolEvent): void => this.onMouseUp(e);
-    this.shapeType = shapeType;
     this.outline = null;
     this.tooltip = null;
     this.from = null;

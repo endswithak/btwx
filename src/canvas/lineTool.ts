@@ -1,6 +1,5 @@
 import store from '../store';
 import { setLineFrom, setLineTo } from '../store/actions/layer';
-import { toggleLineToolThunk } from '../store/actions/lineTool';
 import { getPaperLayer, getLineFromPoint, getLineToPoint } from '../store/selectors/layer';
 import { paperMain } from './index';
 import SnapTool from './snapTool';
@@ -9,7 +8,6 @@ import { updateSelectionFrame } from '../store/utils/layer';
 import { isBetween } from '../utils';
 
 class LineTool {
-  tool: paper.Tool;
   state: RootState;
   enabled: boolean;
   handle: 'from' | 'to';
@@ -26,41 +24,15 @@ class LineTool {
   shiftModifier: boolean;
   isHorizontal: boolean;
   isVertical: boolean;
-  constructor(handle: em.LineHandle, nativeEvent: any) {
-    this.tool = new paperMain.Tool();
-    this.tool.activate();
-    this.tool.minDistance = 1;
-    this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
-    this.tool.onKeyUp = (e: paper.KeyEvent): void => this.onKeyUp(e);
-    this.tool.onMouseDown = (e: paper.ToolEvent): void => this.onMouseDown(e);
-    this.tool.onMouseDrag = (e: paper.ToolEvent): void => this.onMouseDrag(e);
-    this.tool.onMouseUp = (e: paper.ToolEvent): void => this.onMouseUp(e);
-    this.state = store.getState();
+  constructor(handle?: em.LineHandle) {
     this.handle = handle;
     this.snapTool = new SnapTool();
-    this.fromHandle = paperMain.project.getItem({data: { interactiveType: 'from'}}) as paper.Shape;
-    this.toHandle = paperMain.project.getItem({data: { interactiveType: 'to'}}) as paper.Shape;
-    this.fromBounds = new paperMain.Rectangle(handle === 'from' ? this.fromHandle.bounds : this.toHandle.bounds);
     this.toBounds = null;
     this.x = 0;
     this.y = 0;
     this.shiftModifier = false;
     this.isHorizontal = false;
     this.isVertical = false;
-    updateSelectionFrame(this.state.layer.present, this.handle);
-    if (nativeEvent) {
-      const event = {
-        ...nativeEvent,
-        point: paperMain.view.getEventPoint(nativeEvent),
-        modifiers: {
-          shift: nativeEvent.shiftKey,
-          alt: nativeEvent.altKey,
-          meta: nativeEvent.metaKey,
-          ctrl: nativeEvent.ctrlKey
-        }
-      };
-      this.onMouseDown(event);
-    }
   }
   updateHandles(): void {
     const paperLayer = getPaperLayer(this.state.layer.present.selected[0]) as paper.CompoundPath;
@@ -162,12 +134,15 @@ class LineTool {
   }
   onMouseDown(event: paper.ToolEvent): void {
     this.from = event.point;
+    this.fromHandle = paperMain.project.getItem({data: { interactiveType: 'from'}}) as paper.Shape;
+    this.toHandle = paperMain.project.getItem({data: { interactiveType: 'to'}}) as paper.Shape;
+    this.fromBounds = new paperMain.Rectangle(this.handle === 'from' ? this.fromHandle.bounds : this.toHandle.bounds);
     this.toBounds = new paperMain.Rectangle(this.fromBounds);
     this.snapTool.snapPoints = this.state.layer.present.inView.snapPoints.filter((snapPoint) => snapPoint.id !== this.state.layer.present.selected[0]);
     this.snapTool.snapBounds = this.toBounds;
+    updateSelectionFrame(this.state.layer.present, this.handle);
   }
   onMouseDrag(event: paper.ToolEvent): void {
-    this.state = store.getState();
     this.to = event.point;
     this.x += event.delta.x;
     this.y += event.delta.y;
@@ -209,7 +184,7 @@ class LineTool {
         }
       }
     }
-    store.dispatch(toggleLineToolThunk(null, null) as any);
+    // store.dispatch(toggleLineToolThunk(null, null) as any);
   }
 }
 

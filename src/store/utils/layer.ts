@@ -538,6 +538,34 @@ export const updateGradientFrame = (layerItem: em.Layer, gradient: em.Gradient, 
   });
 }
 
+export const updateHoverFrame = (state: LayerState) => {
+  const hoverFrame = paperMain.project.getItem({ data: { id: 'HoverFrame' } });
+  const hoverFrameConstants = {
+    strokeColor: THEME_PRIMARY_COLOR,
+    strokeWidth: 2 / paperMain.view.zoom,
+    data: { id: 'HoverFrame', type: 'UIElement', interactive: false }
+  }
+  if (hoverFrame) {
+    hoverFrame.remove();
+  }
+  if (state.hover && !state.selected.includes(state.hover)) {
+    const hoverItem = state.byId[state.hover];
+    if (hoverItem.type === 'Shape') {
+      new paperMain.CompoundPath({
+        ...hoverFrameConstants,
+        closed: (hoverItem as em.Shape).shapeType !== 'Line',
+        pathData: hoverItem.pathData
+      });
+    } else {
+      new paperMain.Path.Rectangle({
+        ...hoverFrameConstants,
+        point: new paperMain.Point(hoverItem.frame.x - (hoverItem.frame.width / 2), hoverItem.frame.y - (hoverItem.frame.height / 2)),
+        size: [hoverItem.frame.width, hoverItem.frame.height]
+      });
+    }
+  }
+}
+
 export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', useLayerItem = false) => {
   const selectionFrame = paperMain.project.getItem({ data: { id: 'SelectionFrame' } });
   if (selectionFrame) {
@@ -1336,34 +1364,6 @@ export const selectLayers = (state: LayerState, action: SelectLayers): LayerStat
     }
   }, currentState);
 };
-
-export const updateHoverFrame = (state: LayerState) => {
-  const hoverFrame = paperMain.project.getItem({ data: { id: 'HoverFrame' } });
-  const hoverFrameConstants = {
-    strokeColor: THEME_PRIMARY_COLOR,
-    strokeWidth: 1 / paperMain.view.zoom,
-    data: { id: 'HoverFrame', type: 'UIElement', interactive: false }
-  }
-  if (hoverFrame) {
-    hoverFrame.remove();
-  }
-  if (state.hover && !state.selected.includes(state.hover)) {
-    const hoverItem = state.byId[state.hover];
-    if (hoverItem.type === 'Shape') {
-      new paperMain.CompoundPath({
-        ...hoverFrameConstants,
-        closed: (hoverItem as em.Shape).shapeType !== 'Line',
-        pathData: hoverItem.pathData
-      });
-    } else {
-      new paperMain.Path.Rectangle({
-        ...hoverFrameConstants,
-        point: new paperMain.Point(hoverItem.frame.x - (hoverItem.frame.width / 2), hoverItem.frame.y - (hoverItem.frame.height / 2)),
-        size: [hoverItem.frame.width, hoverItem.frame.height]
-      });
-    }
-  }
-}
 
 export const setLayerHover = (state: LayerState, action: SetLayerHover): LayerState => {
   let currentState = state;

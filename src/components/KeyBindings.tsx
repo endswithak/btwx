@@ -189,28 +189,28 @@ const KeyBindings = (props: KeyBindingsProps): ReactElement => {
         id: 'insertArtboard',
         enabled: focusing
       },
-      insertRectangle: {
-        id: 'insertRectangle',
+      insertShapeRectangle: {
+        id: 'insertShapeRectangle',
         enabled: focusing
       },
-      insertRounded: {
-        id: 'insertRounded',
+      insertShapeRounded: {
+        id: 'insertShapeRounded',
         enabled: focusing
       },
-      insertEllipse: {
-        id: 'insertEllipse',
+      insertShapeEllipse: {
+        id: 'insertShapeEllipse',
         enabled: focusing
       },
-      insertStar: {
-        id: 'insertStar',
+      insertShapeStar: {
+        id: 'insertShapeStar',
         enabled: focusing
       },
-      insertPolygon: {
-        id: 'insertPolygon',
+      insertShapePolygon: {
+        id: 'insertShapePolygon',
         enabled: focusing
       },
-      insertLine: {
-        id: 'insertLine',
+      insertShapeLine: {
+        id: 'insertShapeLine',
         enabled: focusing
       },
       insertText: {

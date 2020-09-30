@@ -13,6 +13,10 @@ export const SET_CANVAS_MOUSE_POSITION = 'SET_CANVAS_MOUSE_POSITION';
 
 export interface SetCanvasActiveToolPayload {
   activeTool: em.ToolType;
+  dragging?: boolean;
+  resizing?: boolean;
+  drawing?: boolean;
+  selecting?: boolean;
 }
 
 export interface SetCanvasActiveTool {

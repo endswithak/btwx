@@ -17,12 +17,12 @@ import ShapeToolWrap from './ShapeToolWrap';
 import ArtboardToolWrap from './ArtboardToolWrap';
 import TextToolWrap from './TextToolWrap';
 import DragToolWrap from './DragToolWrap';
+import MasterTool from './MasterTool';
 import AreaSelectToolWrap from './AreaSelectToolWrap';
 import ResizeToolWrap from './ResizeToolWrap';
 import LineToolWrap from './LineToolWrap';
 import GradientToolWrap from './GradientToolWrap';
 import TranslateToolWrap from './TranslateToolWrap';
-import ZoomToolWrap from './ZoomToolWrap';
 
 const App = (): ReactElement => {
   const theme = useContext(ThemeContext);
@@ -66,16 +66,16 @@ const App = (): ReactElement => {
               <ArtboardPresetEditorWrap />
               <ContextMenuWrap />
               {/* tools */}
-              <ShapeToolWrap />
-              <ArtboardToolWrap />
-              <TextToolWrap />
-              <DragToolWrap />
-              <AreaSelectToolWrap />
-              <ResizeToolWrap />
-              <LineToolWrap />
-              <GradientToolWrap />
-              <TranslateToolWrap />
-              <ZoomToolWrap />
+              {/* <ShapeToolWrap /> */}
+              {/* <ArtboardToolWrap />
+              <TextToolWrap /> */}
+              {/* <DragToolWrap /> */}
+              {/* <AreaSelectToolWrap /> */}
+              {/* <ResizeToolWrap /> */}
+              {/* <LineToolWrap />
+              <GradientToolWrap /> */}
+              <MasterTool />
+              {/* <TranslateToolWrap /> */}
               {/* misc */}
               <KeyBindings />
             </>
