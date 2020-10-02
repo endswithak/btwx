@@ -10,6 +10,7 @@ export const SET_CANVAS_FOCUSING = 'SET_CANVAS_FOCUSING';
 export const SET_CANVAS_TRANSLATING = 'SET_CANVAS_TRANSLATING';
 export const RESET_CANVAS_SETTINGS = 'RESET_CANVAS_SETTINGS';
 export const SET_CANVAS_MOUSE_POSITION = 'SET_CANVAS_MOUSE_POSITION';
+export const SET_CANVAS_ZOOM_TYPE = 'SET_CANVAS_ZOOM_TYPE';
 
 export interface SetCanvasActiveToolPayload {
   activeTool: em.ToolType;
@@ -17,6 +18,10 @@ export interface SetCanvasActiveToolPayload {
   resizing?: boolean;
   drawing?: boolean;
   selecting?: boolean;
+  zooming?: boolean;
+  translating?: boolean;
+  zoomType?: em.ZoomType;
+  resizeType?: em.ResizeType;
 }
 
 export interface SetCanvasActiveTool {
@@ -44,6 +49,7 @@ export interface SetCanvasTyping {
 
 export interface SetCanvasResizingPayload {
   resizing: boolean;
+  resizeType: em.ResizeType;
 }
 
 export interface SetCanvasResizing {
@@ -71,6 +77,7 @@ export interface SetCanvasDragging {
 
 export interface SetCanvasZoomingPayload {
   zooming: boolean;
+  zoomType?: em.ZoomType;
 }
 
 export interface SetCanvasZooming {
@@ -123,6 +130,15 @@ export interface SetCanvasMousePosition {
   payload: SetCanvasMousePositionPayload;
 }
 
+export interface SetCanvasZoomTypePayload {
+  zoomType: em.ZoomType;
+}
+
+export interface SetCanvasZoomType {
+  type: typeof SET_CANVAS_ZOOM_TYPE;
+  payload: SetCanvasZoomTypePayload;
+}
+
 export type CanvasSettingsTypes = SetCanvasActiveTool |
                                   SetCanvasDrawing |
                                   SetCanvasTyping |
@@ -134,4 +150,5 @@ export type CanvasSettingsTypes = SetCanvasActiveTool |
                                   SetCanvasFocusing |
                                   SetCanvasTranslating |
                                   ResetCanvasSettings |
-                                  SetCanvasMousePosition;
+                                  SetCanvasMousePosition |
+                                  SetCanvasZoomType;

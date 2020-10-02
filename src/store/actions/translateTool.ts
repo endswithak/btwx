@@ -1,48 +1,21 @@
 import { RootState } from '../reducers';
-import { setCanvasTranslating } from './canvasSettings';
+import { setCanvasActiveTool } from './canvasSettings';
 import { setCanvasMatrix } from './documentSettings';
 import { updateInViewLayers } from './layer';
 import { getSelectionCenter } from '../selectors/layer';
 import { paperMain } from '../../canvas';
 
-import {
-  ENABLE_TRANSLATE_TOOL,
-  DISABLE_TRANSLATE_TOOL,
-  TranslateToolTypes
-} from '../actionTypes/translateTool';
-
-export const enableTranslateTool = (): TranslateToolTypes => ({
-  type: ENABLE_TRANSLATE_TOOL
-});
-
 export const enableTranslateToolThunk = () => {
   return (dispatch: any, getState: any): void => {
-    dispatch(setCanvasTranslating({translating: true}));
-    dispatch(enableTranslateTool());
+    dispatch(setCanvasActiveTool({activeTool: 'Translate', translating: true}));
   }
 };
-
-export const disableTranslateTool = (): TranslateToolTypes => ({
-  type: DISABLE_TRANSLATE_TOOL
-});
 
 export const disableTranslateToolThunk = () => {
   return (dispatch: any, getState: any): void => {
-    dispatch(setCanvasTranslating({translating: false}));
-    dispatch(disableTranslateTool());
+    dispatch(setCanvasActiveTool({activeTool: null, translating: false}));
     dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
     dispatch(updateInViewLayers());
-  }
-};
-
-export const toggleTranslateToolThunk = () => {
-  return (dispatch: any, getState: any): void => {
-    const state = getState() as RootState;
-    if (state.translateTool.isEnabled) {
-      dispatch(disableTranslateToolThunk());
-    } else {
-      dispatch(enableTranslateToolThunk());
-    }
   }
 };
 

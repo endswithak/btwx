@@ -16,14 +16,6 @@ class AreaSelectTool {
   metaModifier: boolean;
   altModifier: boolean;
   constructor() {
-    // this.tool = new paperMain.Tool();
-    // this.tool.activate();
-    // this.tool.minDistance = 1;
-    // this.tool.onKeyDown = (e: paper.KeyEvent): void => this.onKeyDown(e);
-    // this.tool.onKeyUp = (e: paper.KeyEvent): void => this.onKeyUp(e);
-    // this.tool.onMouseDown = (e: paper.ToolEvent): void => this.onMouseDown(e);
-    // this.tool.onMouseDrag = (e: paper.ToolEvent): void => this.onMouseDrag(e);
-    // this.tool.onMouseUp = (e: paper.ToolEvent): void => this.onMouseUp(e);
     this.from = null;
     this.to = null;
     this.shape = null;
@@ -31,19 +23,6 @@ class AreaSelectTool {
     this.metaModifier = false;
     this.altModifier = false;
     this.overlapped = [];
-    // if (nativeEvent) {
-    //   const event = {
-    //     ...nativeEvent,
-    //     point: paperMain.view.getEventPoint(nativeEvent),
-    //     modifiers: {
-    //       shift: nativeEvent.shiftKey,
-    //       alt: nativeEvent.altKey,
-    //       meta: nativeEvent.metaKey,
-    //       ctrl: nativeEvent.ctrlKey
-    //     }
-    //   };
-    //   this.onMouseDown(event);
-    // }
   }
   update(to: paper.Point) {
     this.to = to;

@@ -4,6 +4,7 @@ import { RootState } from '../reducers';
 import { updateInViewLayers } from './layer';
 
 import {
+  OPEN_DOCUMENT,
   SAVE_DOCUMENT_AS,
   SAVE_DOCUMENT,
   ADD_DOCUMENT_IMAGE,
@@ -24,6 +25,7 @@ import {
   CLOSE_LEFT_SIDEBAR,
   OPEN_TWEEN_DRAWER,
   CLOSE_TWEEN_DRAWER,
+  OpenDocumentPayload,
   SaveDocumentAsPayload,
   SaveDocumentPayload,
   AddDocumentImagePayload,
@@ -40,6 +42,11 @@ import {
   SetArtboardPresetDevicePlatformPayload,
   DocumentSettingsTypes
 } from '../actionTypes/documentSettings';
+
+export const openDocument = (payload: OpenDocumentPayload): DocumentSettingsTypes => ({
+  type: OPEN_DOCUMENT,
+  payload
+});
 
 export const saveDocumentAs = (payload: SaveDocumentAsPayload): DocumentSettingsTypes => ({
   type: SAVE_DOCUMENT_AS,

@@ -13,16 +13,7 @@ import HoverFrameWrap from './HoverFrameWrap';
 import ArtboardPresetEditorWrap from './ArtboardPresetEditorWrap';
 import ContextMenuWrap from './ContextMenuWrap';
 import KeyBindings from './KeyBindings';
-import ShapeToolWrap from './ShapeToolWrap';
-import ArtboardToolWrap from './ArtboardToolWrap';
-import TextToolWrap from './TextToolWrap';
-import DragToolWrap from './DragToolWrap';
 import MasterTool from './MasterTool';
-import AreaSelectToolWrap from './AreaSelectToolWrap';
-import ResizeToolWrap from './ResizeToolWrap';
-import LineToolWrap from './LineToolWrap';
-import GradientToolWrap from './GradientToolWrap';
-import TranslateToolWrap from './TranslateToolWrap';
 
 const App = (): ReactElement => {
   const theme = useContext(ThemeContext);
@@ -65,18 +56,8 @@ const App = (): ReactElement => {
               <EaseEditorWrap />
               <ArtboardPresetEditorWrap />
               <ContextMenuWrap />
-              {/* tools */}
-              {/* <ShapeToolWrap /> */}
-              {/* <ArtboardToolWrap />
-              <TextToolWrap /> */}
-              {/* <DragToolWrap /> */}
-              {/* <AreaSelectToolWrap /> */}
-              {/* <ResizeToolWrap /> */}
-              {/* <LineToolWrap />
-              <GradientToolWrap /> */}
-              <MasterTool />
-              {/* <TranslateToolWrap /> */}
               {/* misc */}
+              <MasterTool />
               <KeyBindings />
             </>
           : null

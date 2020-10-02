@@ -7,8 +7,6 @@ import { resetCanvasSettingsThunk } from '../store/actions/canvasSettings';
 import { toggleArtboardToolThunk} from '../store/actions/artboardTool';
 import { toggleTextToolThunk } from '../store/actions/textTool';
 import { toggleShapeToolThunk } from '../store/actions/shapeTool';
-import { toggleDragToolThunk } from '../store/actions/dragTool';
-import { toggleAreaSelectToolThunk } from '../store/actions/areaSelectTool';
 import { getLayerAndDescendants, canGroupSelection, canUngroupSelection, canSendBackwardSelection, canBringForwardSelection, canToggleSelectionStroke, canToggleSelectionShadow, canToggleSelectionFill, canTransformFlipSelection, canMaskSelection, canBooleanOperationSelection, canPasteSVG } from '../store/selectors/layer';
 
 interface KeyBindingsProps {
@@ -72,17 +70,11 @@ const KeyBindings = (props: KeyBindingsProps): ReactElement => {
               case 'Artboard':
                 toggleArtboardToolThunk();
                 break;
-              case 'Selection':
-                toggleSelectionToolThunk();
-                break;
               case 'Shape':
                 toggleShapeToolThunk(activeToolShapeType);
                 break;
               case 'Text':
                 toggleTextToolThunk();
-                break;
-              case 'AreaSelect':
-                toggleAreaSelectToolThunk();
                 break;
             }
           }
@@ -478,5 +470,5 @@ const mapStateToProps = (state: RootState): {
 
 export default connect(
   mapStateToProps,
-  { copyStyleThunk, pasteStyleThunk, toggleDragToolThunk, toggleAreaSelectToolThunk, escapeLayerScopeThunk, pasteLayersThunk, copyLayersThunk, removeLayersThunk, toggleArtboardToolThunk, toggleTextToolThunk, toggleShapeToolThunk, redoThunk, undoThunk, ungroupLayers, groupLayersThunk, sendLayersForward, sendLayersToFront, sendLayersBackward, sendLayersToBack, resetCanvasSettingsThunk }
+  { copyStyleThunk, pasteStyleThunk, escapeLayerScopeThunk, pasteLayersThunk, copyLayersThunk, removeLayersThunk, toggleArtboardToolThunk, toggleTextToolThunk, toggleShapeToolThunk, redoThunk, undoThunk, ungroupLayers, groupLayersThunk, sendLayersForward, sendLayersToFront, sendLayersBackward, sendLayersToBack, resetCanvasSettingsThunk }
 )(KeyBindings);

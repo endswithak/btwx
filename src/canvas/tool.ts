@@ -1,4 +1,3 @@
-import debounce from 'lodash.debounce';
 import store from '../store';
 import { RootState } from '../store/reducers';
 import { getNearestScopeAncestor, getDeepSelectItem, getPaperLayer, getLayerAndDescendants, getLayerScope } from '../store/selectors/layer';
@@ -16,6 +15,8 @@ import ArtboardTool from './artboardTool';
 import GradientTool from './gradientTool';
 import TextTool from './textTool';
 import { openTextEditor } from '../store/actions/textEditor';
+import { disableShapeTool } from '../store/actions/shapeTool';
+import { disableArtboardTool } from '../store/actions/artboardTool';
 import { openContextMenu, closeContextMenu } from '../store/actions/contextMenu';
 import { setTweenDrawerEvent, setTweenDrawerEventHoverThunk } from '../store/actions/tweenDrawer';
 
@@ -106,10 +107,15 @@ class MasterTool {
     }
     // selecting
     if (hitResult.event.modifiers.shift) {
-      if (props.layerItem.selected) {
-        store.dispatch(deselectLayer({id: props.nearestScopeAncestor.id}));
+      if (props.nearestScopeAncestor.type === 'Artboard' && this.state.layer.present.selected.length > 0) {
+        store.dispatch(setCanvasActiveTool({activeTool: 'AreaSelect', selecting: true}));
+        this.areaSelectTool.onMouseDown(hitResult.event);
       } else {
-        store.dispatch(selectLayer({id: props.nearestScopeAncestor.id}));
+        if (props.layerItem.selected) {
+          store.dispatch(deselectLayer({id: props.nearestScopeAncestor.id}));
+        } else {
+          store.dispatch(selectLayer({id: props.nearestScopeAncestor.id}));
+        }
       }
     } else {
       if (!selectedWithChildren.allIds.includes(props.layerItem.id) || (props.nearestScopeAncestor.type === 'Artboard' && props.nearestScopeAncestor.selected)) {
@@ -165,7 +171,26 @@ class MasterTool {
                 return result;
               }, { allIds: [], byId: {} });
               if (this.state.layer.present.selected.some((id) => this.state.layer.present.byId[id].type === 'Artboard') || !selectedWithChildren.allIds.some((id: string) => this.state.layer.present.byId[id].type === 'Text' || this.state.layer.present.byId[id].type === 'Group')) {
-                store.dispatch(setCanvasActiveTool({activeTool: 'Resize', resizing: true}));
+                store.dispatch(setCanvasActiveTool({
+                  activeTool: 'Resize',
+                  resizing: true,
+                  resizeType: (() => {
+                    switch(props.interactiveType) {
+                      case 'topLeft':
+                      case 'bottomRight':
+                        return 'nwse'
+                      case 'topRight':
+                      case 'bottomLeft':
+                        return 'nesw'
+                      case 'topCenter':
+                      case 'bottomCenter':
+                        return 'ns';
+                      case 'leftCenter':
+                      case 'rightCenter':
+                        return 'ew';
+                    }
+                  })() as em.ResizeType
+                }));
                 this.resizeTool.handle = props.interactiveType;
                 this.resizeTool.onMouseDown(hitResult.event);
               }
@@ -173,7 +198,7 @@ class MasterTool {
             }
             case 'from':
             case 'to':
-              store.dispatch(setCanvasActiveTool({activeTool: 'Line', resizing: true}));
+              store.dispatch(setCanvasActiveTool({activeTool: 'Line', resizing: true, resizeType: 'ew'}));
               this.lineTool.handle = props.interactiveType;
               this.lineTool.onMouseDown(hitResult.event);
               break;
@@ -353,7 +378,7 @@ class MasterTool {
     }
   }
   onMouseMove(event: paper.ToolEvent): void {
-    if (!this.state.canvasSettings.dragging || !this.state.canvasSettings.selecting || !this.state.canvasSettings.resizing || !this.state.canvasSettings.drawing) {
+    if (!this.state.contextMenu.isOpen && (!this.state.canvasSettings.dragging || !this.state.canvasSettings.selecting || !this.state.canvasSettings.resizing || !this.state.canvasSettings.drawing)) {
       switch(this.type) {
         case 'Shape':
           this.shapeTool.onMouseMove(event);
@@ -386,6 +411,7 @@ class MasterTool {
     }
   }
   onMouseDown(event: paper.ToolEvent): void {
+    const hitResult = this.handleHitResult(event);
     switch(this.type) {
       case 'Shape':
         store.dispatch(setCanvasDrawing({drawing: true}));
@@ -401,7 +427,6 @@ class MasterTool {
         this.textTool = new TextTool();
         break;
       default: {
-        const hitResult = this.handleHitResult(event);
         switch(hitResult.type) {
           case 'Layer':
             this.handleLayerMouseDown(hitResult);
@@ -415,6 +440,26 @@ class MasterTool {
         }
         break;
       }
+    }
+    // handle context menu
+    if ((hitResult.event as any).event.which === 3) {
+      let contextMenuId = 'page';
+      if (hitResult.type === 'Layer') {
+        const props = hitResult.layerProps;
+        if (props.nearestScopeAncestor.type === 'Artboard') {
+          contextMenuId = props.deepSelectItem.id;
+        } else {
+          contextMenuId = props.nearestScopeAncestor.id;
+        }
+      }
+      store.dispatch(openContextMenu({
+        type: 'LayerEdit',
+        id: contextMenuId,
+        x: (hitResult.event as any).event.clientX,
+        y: (hitResult.event as any).event.clientY,
+        paperX: hitResult.event.point.x,
+        paperY: hitResult.event.point.y
+      }));
     }
   }
   onMouseDrag(event: paper.ToolEvent): void {
@@ -458,8 +503,15 @@ class MasterTool {
     switch(this.type) {
       case 'Shape':
         this.shapeTool.onMouseUp(event);
+        store.dispatch(disableShapeTool());
         store.dispatch(setCanvasActiveTool({activeTool: null, drawing: false}));
         this.shapeTool = new ShapeTool();
+        break;
+      case 'Artboard':
+        this.artboardTool.onMouseUp(event);
+        store.dispatch(disableArtboardTool());
+        store.dispatch(setCanvasActiveTool({activeTool: null, drawing: false}));
+        this.artboardTool = new ArtboardTool();
         break;
       case 'AreaSelect':
         this.areaSelectTool.onMouseUp(event);
@@ -473,7 +525,7 @@ class MasterTool {
         break;
       case 'Resize':
         this.resizeTool.onMouseUp(event);
-        store.dispatch(setCanvasActiveTool({activeTool: null, resizing: false}));
+        store.dispatch(setCanvasActiveTool({activeTool: null, resizing: false, resizeType: null}));
         this.resizeTool = new ResizeTool();
         break;
       case 'Gradient':
@@ -483,13 +535,8 @@ class MasterTool {
         break;
       case 'Line':
         this.lineTool.onMouseUp(event);
-        store.dispatch(setCanvasActiveTool({activeTool: null, resizing: false}));
+        store.dispatch(setCanvasActiveTool({activeTool: null, resizing: false, resizeType: null}));
         this.lineTool = new LineTool();
-        break;
-      case 'Artboard':
-        this.artboardTool.onMouseUp(event);
-        store.dispatch(setCanvasActiveTool({activeTool: null, drawing: false}));
-        this.artboardTool = new ArtboardTool();
         break;
       default: {
         const hitResult = this.handleHitResult(event);

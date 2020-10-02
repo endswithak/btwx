@@ -1,7 +1,6 @@
 import { RootState } from '../reducers';
-import ShapeTool from '../../canvas/shapeTool';
 import { setCanvasActiveTool } from './canvasSettings';
-import { removeActiveTools } from '../../canvas/utils';
+import { paperMain } from '../../canvas';
 
 import {
   ENABLE_SHAPE_TOOL,
@@ -31,12 +30,17 @@ export const toggleShapeToolThunk = (shapeType: em.ShapeType) => {
     const state = getState() as RootState;
     if (state.canvasSettings.focusing) {
       if (state.canvasSettings.activeTool === 'Shape' && state.shapeTool.shapeType === shapeType) {
-        // removeActiveTools();
+        const tooltip = paperMain.project.getItem({ data: { id: 'Tooltip' } });
+        const preview = paperMain.project.getItem({ data: { id: 'ShapeToolPreview' } });
+        if (tooltip) {
+          tooltip.remove();
+        }
+        if (preview) {
+          preview.remove();
+        }
         dispatch(disableShapeTool());
         dispatch(setCanvasActiveTool({activeTool: null}));
       } else {
-        // removeActiveTools();
-        // new ShapeTool(shapeType);
         dispatch(enableShapeTool({shapeType}));
         dispatch(setCanvasActiveTool({activeTool: 'Shape'}));
       }

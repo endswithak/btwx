@@ -1,4 +1,7 @@
+import { RootState } from '../reducers';
+
 export const OPEN_PREVIEW = 'OPEN_PREVIEW';
+export const HYDRATE_PREVIEW = 'HYDRATE_PREVIEW';
 export const CLOSE_PREVIEW = 'CLOSE_PREVIEW';
 export const START_PREVIEW_RECORDING = 'START_PREVIEW_RECORDING';
 export const STOP_PREVIEW_RECORDING = 'STOP_PREVIEW_RECORDING';
@@ -7,6 +10,15 @@ export const DISABLE_TOUCH_CURSOR = 'DISABLE_TOUCH_CURSOR';
 
 export interface OpenPreview {
   type: typeof OPEN_PREVIEW;
+}
+
+export interface HydratePreviewPayload {
+  state: RootState;
+}
+
+export interface HydratePreview {
+  type: typeof HYDRATE_PREVIEW;
+  payload: HydratePreviewPayload;
 }
 
 export interface ClosePreview {
@@ -29,4 +41,10 @@ export interface DisableTouchCursor {
   type: typeof DISABLE_TOUCH_CURSOR;
 }
 
-export type PreviewTypes = OpenPreview | ClosePreview | StartPreviewRecording | StopPreviewRecording | EnableTouchCursor | DisableTouchCursor;
+export type PreviewTypes = OpenPreview |
+                           HydratePreview |
+                           ClosePreview |
+                           StartPreviewRecording |
+                           StopPreviewRecording |
+                           EnableTouchCursor |
+                           DisableTouchCursor;

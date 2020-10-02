@@ -207,7 +207,6 @@ class ArtboardTool {
       this.toBounds = snapBounds;
       this.snapTool.snapBounds = this.toBounds;
       this.snapTool.updateGuides();
-      //this.updateRef();
     }
   }
   onMouseDown(event: paper.ToolEvent): void {
@@ -264,7 +263,6 @@ class ArtboardTool {
   onMouseUp(event: paper.ToolEvent): void {
     if (this.to) {
       if (this.to.x - this.from.x !== 0 && this.to.y - this.from.y !== 0) {
-        // const state = store.getState();
         const newArtboard = this.renderShape({
           insert: false
         });

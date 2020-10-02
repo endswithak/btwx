@@ -17,9 +17,11 @@ const Preview = (props: PreviewProps): ReactElement => {
   const { activeArtboard, recording } = props;
 
   useEffect(() => {
-    const windowSize = remote.getCurrentWindow().getSize();
-    if ((windowSize[0] !== Math.round(activeArtboard.frame.width) || windowSize[1] !== (Math.round(activeArtboard.frame.height) + PREVIEW_TOPBAR_HEIGHT + (remote.process.platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT))) && !recording) {
-      remote.getCurrentWindow().setSize(Math.round(activeArtboard.frame.width), Math.round(activeArtboard.frame.height) + PREVIEW_TOPBAR_HEIGHT + (remote.process.platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT), true);
+    if (activeArtboard) {
+      const windowSize = remote.getCurrentWindow().getSize();
+      if ((windowSize[0] !== Math.round(activeArtboard.frame.width) || windowSize[1] !== (Math.round(activeArtboard.frame.height) + PREVIEW_TOPBAR_HEIGHT + (remote.process.platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT))) && !recording) {
+        remote.getCurrentWindow().setSize(Math.round(activeArtboard.frame.width), Math.round(activeArtboard.frame.height) + PREVIEW_TOPBAR_HEIGHT + (remote.process.platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT), true);
+      }
     }
   }, [activeArtboard]);
 
@@ -29,16 +31,22 @@ const Preview = (props: PreviewProps): ReactElement => {
       style={{
         background: theme.background.z0
       }}>
-      <PreviewTopbar />
-      <div className='c-app__canvas'>
-        <PreviewCanvas />
-      </div>
-      <video
-        id='preview-video'
-        style={{
-        position: 'absolute',
-        opacity: 0
-      }} />
+      {
+        activeArtboard
+        ? <>
+            <PreviewTopbar />
+            <div className='c-app__canvas'>
+              <PreviewCanvas />
+            </div>
+            <video
+              id='preview-video'
+              style={{
+              position: 'absolute',
+              opacity: 0
+            }} />
+          </>
+        : null
+      }
     </div>
   );
 }

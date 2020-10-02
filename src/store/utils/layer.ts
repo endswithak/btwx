@@ -280,7 +280,7 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
     }
     // if layer is the active artboard, set active artboard to null
     if (layer.id === result.activeArtboard) {
-      result = setActiveArtboard(result, layerActions.setActiveArtboard({id: result.allArtboardIds.length > 0 ? result.allArtboardIds[0] : null, scope: 1}) as SetActiveArtboard);
+      result = setActiveArtboard(result, layerActions.setActiveArtboard({id: result.allArtboardIds.length > 0 ? result.allArtboardIds[0] : null}) as SetActiveArtboard);
     }
     // if layer is a destination layer for any tween, remove that tween
     if (tweensByDestinationLayer.allIds.length > 0) {
@@ -1288,12 +1288,12 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
   }
   // if layer is an artboard, make it the active artboard
   if (layer.type === 'Artboard' && !action.payload.noActiveArtboardUpdate) {
-    currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: action.payload.id, scope: 1}) as SetActiveArtboard);
+    currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: action.payload.id}) as SetActiveArtboard);
   }
   // if layer scope root is an artboard, make the layer scope root the active artboard
   if (layerScopeRoot && currentState.byId[layerScopeRoot].type === 'Artboard' && layerScopeRoot !== currentState.activeArtboard) {
     if (!action.payload.noActiveArtboardUpdate) {
-      currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: layerScopeRoot, scope: 1}) as SetActiveArtboard);
+      currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: layerScopeRoot}) as SetActiveArtboard);
     }
   }
   // handle hover

@@ -1,64 +1,28 @@
 import { RootState } from '../reducers';
-import { setCanvasZooming } from './canvasSettings';
+import { setCanvasActiveTool } from './canvasSettings';
 import { setCanvasMatrix } from './documentSettings';
 import { updateInViewLayers } from './layer';
 import { paperMain } from '../../canvas';
 import { getSelectionBounds, getCanvasBounds, getSelectionCenter, getCanvasCenter } from '../selectors/layer';
 import { LayerState } from '../reducers/layer';
 
-import {
-  ENABLE_ZOOM_TOOL,
-  SET_ZOOM_TOOL_TYPE,
-  DISABLE_ZOOM_TOOL,
-  EnableZoomToolPayload,
-  SetZoomToolTypePayload,
-  ZoomToolTypes
-} from '../actionTypes/zoomTool';
-
-export const enableZoomTool = (payload: EnableZoomToolPayload): ZoomToolTypes => ({
-  type: ENABLE_ZOOM_TOOL,
-  payload
-});
-
-export const enableZoomToolThunk = (payload: EnableZoomToolPayload) => {
+export const enableZoomToolThunk = (zoomType: em.ZoomType) => {
   return (dispatch: any, getState: any): void => {
-    dispatch(setCanvasZooming({zooming: true}));
-    dispatch(enableZoomTool(payload));
+    dispatch(setCanvasActiveTool({activeTool: 'Zoom', zooming: true, zoomType: zoomType ? zoomType : 'in'}));
   }
 };
 
-export const setZoomToolType = (payload: SetZoomToolTypePayload): ZoomToolTypes => ({
-  type: SET_ZOOM_TOOL_TYPE,
-  payload
-});
-
-export const disableZoomTool = (): ZoomToolTypes => ({
-  type: DISABLE_ZOOM_TOOL
-});
-
 export const disableZoomToolThunk = () => {
   return (dispatch: any, getState: any): void => {
-    dispatch(setCanvasZooming({zooming: false}));
-    dispatch(disableZoomTool());
+    dispatch(setCanvasActiveTool({activeTool: null, zooming: false, zoomType: null}));
     dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
     dispatch(updateInViewLayers());
   }
 };
 
-export const toggleZoomToolThunk = (payload?: EnableZoomToolPayload) => {
-  return (dispatch: any, getState: any): void => {
-    const state = getState() as RootState;
-    if (state.zoomTool.isEnabled) {
-      dispatch(disableZoomToolThunk());
-    } else {
-      dispatch(enableZoomToolThunk(payload));
-    }
-  }
-};
-
 export const zoomInThunk = () => {
   return (dispatch: any, getState: any): void => {
-    dispatch(enableZoomToolThunk({zoomType: 'in'}));
+    dispatch(enableZoomToolThunk('in'));
     paperMain.view.zoom *= 2;
     dispatch(disableZoomToolThunk());
   }
@@ -66,7 +30,7 @@ export const zoomInThunk = () => {
 
 export const zoomOutThunk = () => {
   return (dispatch: any, getState: any): void => {
-    dispatch(enableZoomToolThunk({zoomType: 'in'}));
+    dispatch(enableZoomToolThunk('out'));
     if (paperMain.view.zoom / 2 >= 0.01) {
       paperMain.view.zoom /= 2;
     } else {
@@ -78,7 +42,7 @@ export const zoomOutThunk = () => {
 
 export const zoomPercentThunk = (percent: number) => {
   return (dispatch: any, getState: any): void => {
-    dispatch(enableZoomToolThunk({zoomType: 'in'}));
+    dispatch(enableZoomToolThunk('in'));
     paperMain.view.zoom = percent;
     dispatch(disableZoomToolThunk());
   }
@@ -89,7 +53,7 @@ export const zoomCanvasThunk = () => {
     const state = getState() as RootState;
     const canCanvasZoom = state.layer.present.allIds.length > 1;
     if (canCanvasZoom) {
-      dispatch(enableZoomToolThunk({zoomType: 'in'}));
+      dispatch(enableZoomToolThunk('in'));
       const canvasBounds = getCanvasBounds({allIds: state.layer.present.allIds, byId: state.layer.present.byId} as LayerState, true);
       const canvasCenter = getCanvasCenter({allIds: state.layer.present.allIds, byId: state.layer.present.byId} as LayerState, true);
       const viewWidth: number = paperMain.view.bounds.width;
@@ -121,7 +85,7 @@ export const zoomSelectionThunk = () => {
     const selected = state.layer.present.selected;
     const canSelectedZoom = selected.length > 0;
     if (canSelectedZoom) {
-      dispatch(enableZoomToolThunk({zoomType: 'in'}));
+      dispatch(enableZoomToolThunk('in'));
       const selectionBounds = getSelectionBounds({selected: selected, byId: state.layer.present.byId} as LayerState, true);
       const selectionCenter = getSelectionCenter({selected: selected, byId: state.layer.present.byId} as LayerState, true);
       const viewWidth: number = paperMain.view.bounds.width;

@@ -1,3 +1,8 @@
+import { LayerState } from '../reducers/layer';
+import { DocumentSettingsState } from '../reducers/documentSettings';
+
+export const OPEN_DOCUMENT = 'OPEN_DOCUMENT';
+
 export const SAVE_DOCUMENT_AS = 'SAVE_DOCUMENT_AS';
 export const SAVE_DOCUMENT = 'SAVE_DOCUMENT';
 
@@ -25,6 +30,18 @@ export const CLOSE_RIGHT_SIDEBAR = 'CLOSE_RIGHT_SIDEBAR';
 
 export const OPEN_TWEEN_DRAWER = 'OPEN_TWEEN_DRAWER';
 export const CLOSE_TWEEN_DRAWER = 'CLOSE_TWEEN_DRAWER';
+
+export interface OpenDocumentPayload {
+  document: {
+    layer: LayerState;
+    documentSettings: DocumentSettingsState;
+  };
+}
+
+export interface OpenDocument {
+  type: typeof OPEN_DOCUMENT;
+  payload: OpenDocumentPayload;
+}
 
 export interface SaveDocumentAsPayload {
   id?: string;
@@ -186,7 +203,8 @@ export interface CloseTweenDrawer {
   type: typeof CLOSE_TWEEN_DRAWER;
 }
 
-export type DocumentSettingsTypes = SaveDocumentAs |
+export type DocumentSettingsTypes = OpenDocument |
+                                    SaveDocumentAs |
                                     SaveDocument |
                                     SetCanvasMatrix |
                                     SetCanvasColorFormat |

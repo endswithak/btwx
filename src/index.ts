@@ -79,6 +79,7 @@ export const createNewDocument = (width?: number, height?: number): Promise<elec
       minWidth: 1024,
       minHeight: 768,
       frame: false,
+      title: APP_NAME,
       titleBarStyle: 'hidden',
       backgroundColor: getWindowBackground(),
       webPreferences: {
@@ -199,6 +200,7 @@ const createPreviewWindow = ({width, height}: {width: number; height: number}): 
     width: width,
     height: height + PREVIEW_TOPBAR_HEIGHT + (process.platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT),
     frame: false,
+    title: 'preview',
     titleBarStyle: 'hidden',
     backgroundColor: getWindowBackground(),
     webPreferences: {
@@ -209,7 +211,11 @@ const createPreviewWindow = ({width, height}: {width: number; height: number}): 
   previewWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   previewWindow.webContents.on('did-finish-load', () => {
-    previewWindow.webContents.executeJavaScript(`renderPreviewWindow()`);
+    previewWindow.webContents.executeJavaScript(`renderPreviewWindow()`).then(() => {
+      previewWindow.getParentWindow().webContents.executeJavaScript(`getState()`).then((documentJSON) => {
+        previewWindow.webContents.executeJavaScript(`hydratePreview(${documentJSON})`);
+      });
+    });
   });
 
   previewWindow.on('close', (event) => {

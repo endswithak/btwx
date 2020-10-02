@@ -45,7 +45,7 @@ const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement =>
 
   const handleMouseEnter = (): void => {
     if (activeArtboard !== tweenEvent.artboard) {
-      setActiveArtboard({id: tweenEvent.artboard, scope: 1});
+      setActiveArtboard({id: tweenEvent.artboard});
     }
     setTweenDrawerEventHoverThunk({id});
   }

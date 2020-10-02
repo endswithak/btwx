@@ -16,7 +16,7 @@ const PreviewRewindButton = (props: PreviewRewindButtonProps): ReactElement => {
 
   const handleRewind = () => {
     if (canRewind) {
-      setActiveArtboard({id: rewindOrigin, scope: 2});
+      setActiveArtboard({id: rewindOrigin});
     }
   }
 

@@ -26,21 +26,18 @@
  * ```
  */
 
-import { remote, ipcRenderer } from 'electron';
+import { remote } from 'electron';
 import React from 'react';
 import sharp from 'sharp';
 import { ActionCreators } from 'redux-undo';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { PersistGate } from 'redux-persist/integration/react';
 import { Titlebar, Color } from 'custom-electron-titlebar';
-import store, { persistor, persistConfig } from './store';
-import persist from './store/utils/persist';
+import store from './store';
 import getTheme from './store/theme';
-import { openFile } from './store/reducers';
 import { enableDarkTheme, enableLightTheme } from './store/actions/theme';
-import { saveDocumentAs, saveDocument } from './store/actions/documentSettings';
-import { closePreview } from './store/actions/preview';
+import { saveDocumentAs, saveDocument, openDocument } from './store/actions/documentSettings';
+import { closePreview, hydratePreview } from './store/actions/preview';
 import App from './components/App';
 import Preview from './components/Preview';
 // import Preferences from './components/Preferences';
@@ -54,12 +51,10 @@ import { toggleShapeToolThunk } from './store/actions/shapeTool';
 import { zoomInThunk, zoomOutThunk, zoomSelectionThunk, zoomCanvasThunk } from './store/actions/zoomTool';
 import { toggleTweenDrawerThunk, toggleRightSidebarThunk, toggleLeftSidebarThunk } from './store/actions/documentSettings';
 import { centerSelectionThunk } from './store/actions/translateTool';
-import { duplicateLayers, selectAllLayers, selectLayers } from './store/actions/layer';
+import { duplicateLayers, selectAllLayers, selectLayers, setActiveArtboard } from './store/actions/layer';
 import { canGroupSelection, canUngroupSelection, canSendBackwardSelection, canBringForwardSelection } from './store/selectors/layer';
 
 import './styles/index.sass';
-
-window.addEventListener('storage', persist(store, persistConfig));
 
 const themePref = remote.systemPreferences.getUserDefault('theme', 'string');
 let themeObject = getTheme(themePref);
@@ -347,11 +342,9 @@ const titleBar = new Titlebar({
   store.dispatch(toggleSelectionVerticalFlipThunk() as any);
 };
 
-(window as any).getSaveState = (): string => {
+(window as any).getState = (): string => {
   const state = store.getState();
-  const { documentSettings, layer } = state;
-  const fileState = { layer: layer.present, documentSettings };
-  return JSON.stringify(fileState);
+  return JSON.stringify(state);
 };
 
 (window as any).getSaveState = (): string => {
@@ -396,7 +389,7 @@ const titleBar = new Titlebar({
 };
 
 (window as any).openFile = (fileJSON: any): void => {
-  store.dispatch(openFile({file: fileJSON}));
+  store.dispatch(openDocument({document: fileJSON}));
   titleBar.updateTitle(fileJSON.documentSettings.name);
   store.dispatch(ActionCreators.clearHistory());
 };
@@ -404,6 +397,10 @@ const titleBar = new Titlebar({
 (window as any).setTitleBarTheme = (theme: em.ThemeName): void => {
   themeObject = getTheme(theme);
   titleBar.updateBackground(Color.fromHex(theme === 'dark' ? themeObject.background.z1 : themeObject.background.z2));
+};
+
+(window as any).setActiveArtboard = (activeArtboard: string): void => {
+  store.dispatch(setActiveArtboard({id: activeArtboard}));
 };
 
 (window as any).setTheme = (theme: em.ThemeName): void => {
@@ -417,6 +414,10 @@ const titleBar = new Titlebar({
   }
 };
 
+(window as any).hydratePreview = (stateJSON: any): void => {
+  store.dispatch(hydratePreview({state: stateJSON}));
+};
+
 (window as any).previewClosed = (): void => {
   store.dispatch(closePreview());
 };
@@ -426,25 +427,21 @@ const titleBar = new Titlebar({
   titleBar.updateTitle(state.documentSettings.name);
   ReactDOM.render(
     <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <ThemeProvider>
-          <App />
-        </ThemeProvider>
-      </PersistGate>
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
     </Provider>,
     document.getElementById('root')
   );
 };
 
 (window as any).renderPreviewWindow = (): void => {
-  titleBar.updateTitle('Preview');
+  titleBar.updateTitle('preview');
   ReactDOM.render(
     <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <ThemeProvider>
-          <Preview />
-        </ThemeProvider>
-      </PersistGate>
+      <ThemeProvider>
+        <Preview />
+      </ThemeProvider>
     </Provider>,
     document.getElementById('root')
   );

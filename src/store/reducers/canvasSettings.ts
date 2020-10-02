@@ -11,6 +11,7 @@ import {
   RESET_CANVAS_SETTINGS,
   SET_CANVAS_MOUSE_POSITION,
   SET_CANVAS_TRANSLATING,
+  SET_CANVAS_ZOOM_TYPE,
   CanvasSettingsTypes,
 } from '../actionTypes/canvasSettings';
 
@@ -31,6 +32,8 @@ export interface CanvasSettingsState {
   focusing: boolean;
   zooming: boolean;
   translating: boolean;
+  zoomType: em.ZoomType;
+  resizeType: em.ResizeType;
 }
 
 const initialState: CanvasSettingsState = {
@@ -44,7 +47,9 @@ const initialState: CanvasSettingsState = {
   measuring: false,
   focusing: true,
   zooming: false,
-  translating: false
+  translating: false,
+  zoomType: null,
+  resizeType: null
 };
 
 export default (state = initialState, action: CanvasSettingsTypes): CanvasSettingsState => {
@@ -56,7 +61,11 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
         dragging: Object.prototype.hasOwnProperty.call(action.payload, 'dragging') ? action.payload.dragging : state.dragging,
         resizing: Object.prototype.hasOwnProperty.call(action.payload, 'resizing') ? action.payload.resizing : state.resizing,
         selecting: Object.prototype.hasOwnProperty.call(action.payload, 'selecting') ? action.payload.selecting : state.selecting,
-        drawing: Object.prototype.hasOwnProperty.call(action.payload, 'drawing') ? action.payload.drawing : state.drawing
+        zooming: Object.prototype.hasOwnProperty.call(action.payload, 'zooming') ? action.payload.zooming : state.zooming,
+        translating: Object.prototype.hasOwnProperty.call(action.payload, 'translating') ? action.payload.translating : state.translating,
+        drawing: Object.prototype.hasOwnProperty.call(action.payload, 'drawing') ? action.payload.drawing : state.drawing,
+        zoomType: Object.prototype.hasOwnProperty.call(action.payload, 'zoomType') ? action.payload.zoomType : state.zoomType,
+        resizeType: Object.prototype.hasOwnProperty.call(action.payload, 'resizeType') ? action.payload.resizeType : state.resizeType
       };
     }
     case SET_CANVAS_DRAWING: {
@@ -74,7 +83,8 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
     case SET_CANVAS_RESIZING: {
       return {
         ...state,
-        resizing: action.payload.resizing
+        resizing: action.payload.resizing,
+        resizeType: Object.prototype.hasOwnProperty.call(action.payload, 'resizeType') ? action.payload.resizeType : state.resizeType
       };
     }
     case SET_CANVAS_SELECTING: {
@@ -93,6 +103,7 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
       return {
         ...state,
         zooming: action.payload.zooming,
+        zoomType: Object.prototype.hasOwnProperty.call(action.payload, 'zoomType') ? action.payload.zoomType : state.zoomType
       };
     }
     case SET_CANVAS_MEASURING: {
@@ -123,6 +134,12 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
       return {
         ...state,
         translating: action.payload.translating
+      };
+    }
+    case SET_CANVAS_ZOOM_TYPE: {
+      return {
+        ...state,
+        zoomType: action.payload.zoomType
       };
     }
     default:

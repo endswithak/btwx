@@ -674,6 +674,9 @@ class ResizeTool {
     this.snapTool.snapPoints = this.state.layer.present.inView.snapPoints.filter((snapPoint: em.SnapPoint) => !allSelectedLayers.includes(snapPoint.id));
   }
   onMouseDrag(event: paper.ToolEvent): void {
+    // if (!this.state.canvasSettings.resizing && !this.x && !this.y) {
+    //   store.dispatch(setCanvasResizing({resizing: true}));
+    // }
     this.x += event.delta.x;
     this.y += event.delta.y;
     this.to = event.point;
@@ -754,7 +757,7 @@ class ResizeTool {
     this.scaleLayers();
   }
   onMouseUp(event: paper.ToolEvent): void {
-    if (this.scale.x || this.scale.y) {
+    if (this.x || this.y) {
       if (this.state.layer.present.selected.length > 0) {
         const scaledLayers = this.state.layer.present.selected.filter((id) => this.state.layer.present.byId[id].type !== 'Text');
         if (scaledLayers.length > 0) {

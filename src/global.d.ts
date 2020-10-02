@@ -14,7 +14,7 @@ declare namespace em {
 
   type ZoomType = 'in' | 'out';
 
-  type ToolType = 'Shape' | 'Selection' | 'Artboard' | 'Text' | 'Drag' | 'AreaSelect' | 'Resize' | 'Line' | 'Gradient';
+  type ToolType = 'Shape' | 'Selection' | 'Artboard' | 'Text' | 'Drag' | 'AreaSelect' | 'Resize' | 'Line' | 'Gradient' | 'Translate' | 'Zoom';
 
   type Orientation = 'Portrait' | 'Landscape';
 

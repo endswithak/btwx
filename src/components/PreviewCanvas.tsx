@@ -144,7 +144,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
           });
         },
         onComplete: () => {
-          setActiveArtboard({id: tweenEvent.destinationArtboard, scope: 2});
+          setActiveArtboard({id: tweenEvent.destinationArtboard});
         }
       });
       // add tween timelines to event timeline

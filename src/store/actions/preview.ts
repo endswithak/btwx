@@ -1,15 +1,22 @@
 import {
   OPEN_PREVIEW,
+  HYDRATE_PREVIEW,
   CLOSE_PREVIEW,
   START_PREVIEW_RECORDING,
   STOP_PREVIEW_RECORDING,
   ENABLE_TOUCH_CURSOR,
   DISABLE_TOUCH_CURSOR,
+  HydratePreviewPayload,
   PreviewTypes
 } from '../actionTypes/preview';
 
 export const openPreview = (): PreviewTypes => ({
   type: OPEN_PREVIEW
+});
+
+export const hydratePreview = (payload: HydratePreviewPayload): PreviewTypes => ({
+  type: HYDRATE_PREVIEW,
+  payload
 });
 
 export const closePreview = (): PreviewTypes => ({

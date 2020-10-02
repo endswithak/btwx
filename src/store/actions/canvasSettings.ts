@@ -11,6 +11,7 @@ import {
   RESET_CANVAS_SETTINGS,
   SET_CANVAS_MOUSE_POSITION,
   SET_CANVAS_TRANSLATING,
+  SET_CANVAS_ZOOM_TYPE,
   SetCanvasActiveToolPayload,
   SetCanvasDrawingPayload,
   SetCanvasTypingPayload,
@@ -22,6 +23,7 @@ import {
   SetCanvasFocusingPayload,
   SetCanvasMousePositionPayload,
   SetCanvasTranslatingPayload,
+  SetCanvasZoomTypePayload,
   CanvasSettingsTypes
 } from '../actionTypes/canvasSettings';
 
@@ -87,5 +89,10 @@ export const resetCanvasSettingsThunk = () => {
 
 export const setCanvasTranslating = (payload: SetCanvasTranslatingPayload): CanvasSettingsTypes => ({
   type: SET_CANVAS_TRANSLATING,
+  payload
+});
+
+export const setCanvasZoomType = (payload: SetCanvasZoomTypePayload): CanvasSettingsTypes => ({
+  type: SET_CANVAS_ZOOM_TYPE,
   payload
 });

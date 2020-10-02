@@ -1,4 +1,4 @@
-import React, { ReactElement, useState, useRef } from 'react';
+import React, { ReactElement, useState } from 'react';
 import throttle from 'lodash.throttle';
 import { connect } from 'react-redux';
 import { ScrollSync } from 'react-scroll-sync';
@@ -20,25 +20,25 @@ interface TweenDrawerEventProps {
 
 const TweenDrawerEvent = (props: TweenDrawerEventProps): ReactElement => {
   const { tweenEventLayers, scrollPositions } = props;
-  const eventRef = useRef<HTMLDivElement>(null);
   const [scrollLayer, setScrollLayer] = useState(tweenEventLayers.allIds[0]);
 
   const handleScroll = throttle(() => {
     const tweenLayers = document.getElementById('tween-drawer-event-layers');
-    const scrollTop = tweenLayers.scrollTop;
-    let index = 0;
-    while(scrollTop >= (scrollPositions[index] - 16)) {
-      index++;
-    }
-    if (scrollLayer !== tweenEventLayers.allIds[index]) {
-      setScrollLayer(tweenEventLayers.allIds[index]);
+    if (tweenLayers) {
+      const scrollTop = tweenLayers.scrollTop;
+      let index = 0;
+      while(scrollTop >= (scrollPositions[index] - 16)) {
+        index++;
+      }
+      if (scrollLayer !== tweenEventLayers.allIds[index]) {
+        setScrollLayer(tweenEventLayers.allIds[index]);
+      }
     }
   }, 150);
 
   return (
     <ScrollSync>
       <div
-        ref={eventRef}
         className='c-tween-drawer-event'
         onScroll={tweenEventLayers.allIds.length > 0 ? handleScroll : null}>
         <TweenDrawerLayersDragHandle />
