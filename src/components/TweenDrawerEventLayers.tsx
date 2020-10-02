@@ -3,14 +3,14 @@ import { connect } from 'react-redux';
 import { ScrollSyncPane } from 'react-scroll-sync';
 import { RootState } from '../store/reducers';
 import { getTweenEventLayers } from '../store/selectors/layer';
-import { setTweenDrawerEvent } from '../store/actions/tweenDrawer';
+import { setTweenDrawerEventThunk } from '../store/actions/tweenDrawer';
 import { SetTweenDrawerEventPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
 import { setLayerHover, selectLayers } from '../store/actions/layer';
 import { SetLayerHoverPayload, SelectLayersPayload, LayerTypes } from '../store/actionTypes/layer';
 import { ThemeContext } from './ThemeProvider';
 import TweenDrawerEventLayer from './TweenDrawerEventLayer';
 import TweenDrawerEventLayersHeader from './TweenDrawerEventLayersHeader';
-import SidebarEmptyState from './SidebarEmptyState';
+import EmptyState from './EmptyState';
 
 interface TweenDrawerEventLayersProps {
   isEmpty?: boolean;
@@ -25,14 +25,14 @@ interface TweenDrawerEventLayersProps {
   scrollLayerItem?: em.Layer;
   scrollLayerMaskItem?: em.Layer;
   scrollLayer: string;
-  setTweenDrawerEvent?(payload: SetTweenDrawerEventPayload): TweenDrawerTypes;
+  setTweenDrawerEventThunk?(payload: SetTweenDrawerEventPayload): void;
   setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
   selectLayers?(payload: SelectLayersPayload): LayerTypes;
 }
 
 const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isEmpty, scrollLayer, scrollLayerItem, scrollLayerMaskItem, tweenDrawerLayersWidth, tweenEventLayers, setTweenDrawerEvent, artboardItem, setLayerHover, selectLayers } = props;
+  const { isEmpty, scrollLayer, scrollLayerItem, scrollLayerMaskItem, tweenDrawerLayersWidth, tweenEventLayers, setTweenDrawerEventThunk, artboardItem, setLayerHover, selectLayers } = props;
 
   const handleMouseEnter = (id: string) => {
     setLayerHover({id: id});
@@ -63,11 +63,11 @@ const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElemen
         onClick={() => handleClick(artboardItem.id)}
         onMouseEnter={() => handleMouseEnter(artboardItem.id)}
         onMouseLeave={handleMouseLeave}
-        onIconClick={() => setTweenDrawerEvent({id: null})} />
+        onIconClick={() => setTweenDrawerEventThunk({id: null})} />
       {
         isEmpty
         ? <div style={{position: 'relative', display: 'flex', flexDirection: 'column', width: '100%', height: '100%', overflow: 'hidden'}}>
-            <SidebarEmptyState
+            <EmptyState
               icon='ease-curve'
               text='Event Layers'
               detail='View and edit event layer ease curves here.'
@@ -140,5 +140,5 @@ const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventLayersProps
 
 export default connect(
   mapStateToProps,
-  { setTweenDrawerEvent, setLayerHover, selectLayers }
+  { setTweenDrawerEventThunk, setLayerHover, selectLayers }
 )(TweenDrawerEventLayers);

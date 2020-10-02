@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { activateInsertKnob } from '../store/actions/insertKnob';
 import { InsertKnobTypes } from '../store/actionTypes/insertKnob';
-import SidebarEmptyState from './SidebarEmptyState';
+import EmptyState from './EmptyState';
 
 interface SidebarLeftEmptyStateProps {
   activeTool?: em.ToolType;
@@ -87,7 +87,7 @@ const SidebarLeftEmptyState = (props: SidebarLeftEmptyStateProps): ReactElement 
   }
 
   return (
-    <SidebarEmptyState
+    <EmptyState
       icon={getEmptyStateIcon()}
       text={getEmptyStateText()}
       detail={getEmptyStateDetail()}

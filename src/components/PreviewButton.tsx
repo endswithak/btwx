@@ -4,11 +4,12 @@ import { ipcRenderer, remote } from 'electron';
 import { RootState } from '../store/reducers';
 import { PreviewTypes } from '../store/actionTypes/preview';
 import { openPreview, stopPreviewRecording } from '../store/actions/preview';
+import { DEFAULT_MAC_DEVICE, DEFAULT_WINDOWS_DEVICE, PREVIEW_PREFIX } from '../constants';
+import { getPreviewWindow } from '../utils';
 import TopbarButton from './TopbarButton';
 
 interface PreviewButtonProps {
   activeArtboard?: em.Artboard;
-  canPreview?: boolean;
   isOpen?: boolean;
   recording?: boolean;
   stopPreviewRecording?(): PreviewTypes;
@@ -16,21 +17,23 @@ interface PreviewButtonProps {
 }
 
 const PreviewButton = (props: PreviewButtonProps): ReactElement => {
-  const { activeArtboard, canPreview, isOpen, openPreview, recording, stopPreviewRecording } = props;
+  const { activeArtboard, isOpen, openPreview, recording, stopPreviewRecording } = props;
 
   const handlePreviewClick = (): void => {
+    const defaultSize = remote.process.platform === 'darwin' ? DEFAULT_MAC_DEVICE : DEFAULT_WINDOWS_DEVICE;
     const windowSize = {
-      width: activeArtboard.frame.width,
-      height: activeArtboard.frame.height
+      width: activeArtboard ? activeArtboard.frame.width : defaultSize.width,
+      height: activeArtboard ? activeArtboard.frame.height : defaultSize.height
     }
     if (isOpen) {
-      const previewWindow = remote.getCurrentWindow().getChildWindows().find((window) => window.getTitle() === 'Preview');
+      const previewWindow = getPreviewWindow();
       if (!previewWindow) {
         ipcRenderer.send('openPreview', JSON.stringify(windowSize));
       }
       if (recording) {
         const previewContents = previewWindow.webContents;
         stopPreviewRecording();
+        previewContents.executeJavaScript('stopPreviewRecording()');
         ipcRenderer.sendTo(previewContents.id, 'stopPreviewRecording');
       }
     } else {
@@ -44,7 +47,6 @@ const PreviewButton = (props: PreviewButtonProps): ReactElement => {
       label='Preview'
       onClick={handlePreviewClick}
       icon={recording ? 'stop-recording' : 'preview'}
-      disabled={!canPreview}
       isActive={isOpen}
       recording={recording} />
   );
@@ -52,16 +54,14 @@ const PreviewButton = (props: PreviewButtonProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   activeArtboard: em.Artboard;
-  canPreview: boolean;
   isOpen: boolean;
   recording: boolean;
 } => {
   const { layer, preview } = state;
   const activeArtboard = layer.present.byId[layer.present.activeArtboard] as em.Artboard;
-  const canPreview = layer.present.allTweenEventIds.length > 0;
   const isOpen = preview.isOpen;
   const recording = preview.recording;
-  return { activeArtboard, canPreview, isOpen, recording };
+  return { activeArtboard, isOpen, recording };
 };
 
 export default connect(

@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 export const APP_NAME = 'btwix';
+export const PREVIEW_PREFIX = '(preview)';
 export const THEME_PRIMARY_COLOR = '#3C88FD';
 export const THEME_GUIDE_COLOR = 'red';
 export const THEME_RECORDING_COLOR = 'red';
@@ -422,3 +424,6 @@ export const DEVICES: em.DevicePlatform[] = [
     categories: RESPONSIVE_WEB_DEVICES
   }
 ];
+
+export const DEFAULT_WINDOWS_DEVICE = ANDROID_MOBILE_DEVICES.find((device) => device.type === 'Galaxy S10e');
+export const DEFAULT_MAC_DEVICE = APPLE_IPHONE_DEVICES.find((device) => device.type === 'iPhone 11 Pro');

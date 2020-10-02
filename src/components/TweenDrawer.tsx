@@ -5,7 +5,7 @@ import { RootState } from '../store/reducers';
 import TweenDrawerEvents from './TweenDrawerEvents';
 import TweenDrawerEvent from './TweenDrawerEvent';
 import TweenDrawerDragHandle from './TweenDrawerDragHandle';
-import SidebarEmptyState from './SidebarEmptyState';
+import EmptyState from './EmptyState';
 
 interface TweenDrawerProps {
   ready?: boolean;
@@ -31,7 +31,7 @@ const TweenDrawer = (props: TweenDrawerProps): ReactElement => {
         }}>
         {
           isEmpty
-          ? <SidebarEmptyState
+          ? <EmptyState
               icon='tweens'
               text='Events'
               detail='You can add events when you have two or more artboards.'

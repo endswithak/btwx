@@ -1,3 +1,4 @@
+import { remote } from 'electron';
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
@@ -16,7 +17,9 @@ const PreviewRewindButton = (props: PreviewRewindButtonProps): ReactElement => {
 
   const handleRewind = () => {
     if (canRewind) {
+      const currentWindow = remote.getCurrentWindow();
       setActiveArtboard({id: rewindOrigin});
+      currentWindow.webContents.executeJavaScript(JSON.stringify(`setActiveArtboard(${rewindOrigin})`));
     }
   }
 

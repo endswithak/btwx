@@ -1,6 +1,7 @@
 import { setLayerHover } from './layer';
 import { scrollToLayer } from '../../utils';
 import { RootState } from '../reducers';
+import { isPreviewWindow, getPreviewWindow } from '../../utils';
 
 import {
   SET_TWEEN_DRAWER_EVENT_HOVER,
@@ -35,6 +36,17 @@ export const setTweenDrawerEvent = (payload: SetTweenDrawerEventPayload): TweenD
   type: SET_TWEEN_DRAWER_EVENT,
   payload
 });
+
+export const setTweenDrawerEventThunk = (payload: SetTweenDrawerEventPayload) => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    if (state.preview.isOpen && !isPreviewWindow()) {
+      const previewWindow = getPreviewWindow();
+      previewWindow.webContents.executeJavaScript(`setTweenDrawerEvent(${payload.id})`)
+    }
+    dispatch(setTweenDrawerEvent(payload));
+  }
+};
 
 export const setTweenDrawerTweenHover = (payload: SetTweenDrawerTweenHoverPayload): TweenDrawerTypes => ({
   type: SET_TWEEN_DRAWER_TWEEN_HOVER,

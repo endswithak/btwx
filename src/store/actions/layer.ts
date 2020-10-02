@@ -13,7 +13,7 @@ import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, get
 import { bufferToBase64, scrollToLayer } from '../../utils';
 
 import { addDocumentImage } from './documentSettings';
-import { setTweenDrawerEvent } from './tweenDrawer';
+import { setTweenDrawerEventThunk } from './tweenDrawer';
 import { updateHoverFrame, updateSelectionFrame, updateActiveArtboardFrame, updateTweenEventsFrame, updateGradientFrame } from '../utils/layer';
 import { openColorEditor, closeColorEditor } from './colorEditor';
 import { openGradientEditor, closeGradientEditor } from './gradientEditor';
@@ -811,7 +811,7 @@ export const removeLayersThunk = () => {
           layersAndChildren = [...layersAndChildren, ...getLayerAndDescendants(state.layer.present, id)];
         });
         if (layersAndChildren.includes(tweenEvent.layer) || layersAndChildren.includes(tweenEvent.artboard) || layersAndChildren.includes(tweenEvent.destinationArtboard)) {
-          dispatch(setTweenDrawerEvent({id: null}));
+          dispatch(setTweenDrawerEventThunk({id: null}));
         }
       }
       dispatch(removeLayers({layers: state.layer.present.selected}));

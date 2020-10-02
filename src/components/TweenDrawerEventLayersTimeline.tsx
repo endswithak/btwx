@@ -5,7 +5,7 @@ import { RootState } from '../store/reducers';
 import { getTweenEventLayers } from '../store/selectors/layer';
 import { ThemeContext } from './ThemeProvider';
 import TweenDrawerEventLayerTimeline from './TweenDrawerEventLayerTimeline';
-import SidebarEmptyState from './SidebarEmptyState';
+import EmptyState from './EmptyState';
 
 interface TweenDrawerEventLayersTimelineProps {
   isEmpty?: boolean;
@@ -34,7 +34,7 @@ const TweenDrawerEventLayersTimeline = (props: TweenDrawerEventLayersTimelinePro
                 boxShadow: `0 -1px 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
               }} />
             <div style={{position: 'relative', display: 'flex', flexDirection: 'column', width: '100%', height: '100%', overflow: 'hidden'}}>
-              <SidebarEmptyState
+              <EmptyState
                 icon='tweens'
                 text='Event Timelines'
                 detail='Timelines are added when the event origin and destination have corresponding layers (same name and type) with mismatched style props.'

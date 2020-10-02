@@ -1,5 +1,7 @@
+import { BrowserWindow, remote } from 'electron';
 import { gsap } from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
+import { PREVIEW_PREFIX } from './constants';
 
 gsap.registerPlugin(ScrollToPlugin);
 
@@ -37,4 +39,17 @@ export const scrollToLayer = (id: string) => {
       }
     });
   }
+};
+
+export const isPreviewWindow = (): boolean => {
+  const currentWindow = remote.getCurrentWindow();
+  const hasParent = currentWindow.getParentWindow();
+  const previewPrefix = currentWindow.getTitle().startsWith(PREVIEW_PREFIX);
+  return hasParent && previewPrefix;
+};
+
+export const getPreviewWindow = (): BrowserWindow => {
+  const currentWindow = remote.getCurrentWindow();
+  const childWindows = currentWindow.getChildWindows();
+  return childWindows.find((window) => window.getTitle().startsWith(PREVIEW_PREFIX));
 };

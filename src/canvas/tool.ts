@@ -18,7 +18,7 @@ import { openTextEditor } from '../store/actions/textEditor';
 import { disableShapeTool } from '../store/actions/shapeTool';
 import { disableArtboardTool } from '../store/actions/artboardTool';
 import { openContextMenu, closeContextMenu } from '../store/actions/contextMenu';
-import { setTweenDrawerEvent, setTweenDrawerEventHoverThunk } from '../store/actions/tweenDrawer';
+import { setTweenDrawerEventThunk, setTweenDrawerEventHoverThunk } from '../store/actions/tweenDrawer';
 
 class MasterTool {
   type: em.ToolType;
@@ -311,7 +311,7 @@ class MasterTool {
     if (props.interactive) {
       switch(props.elementId) {
         case 'TweenEventsFrame': {
-          store.dispatch(setTweenDrawerEvent({id: props.interactiveType}));
+          store.dispatch(setTweenDrawerEventThunk({id: props.interactiveType}) as any);
           break;
         }
       }

@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import SidebarEmptyState from './SidebarEmptyState';
+import EmptyState from './EmptyState';
 
 interface SidebarLeftSearchEmptyStateProps {
   searchText: string;
@@ -9,7 +9,7 @@ const SidebarLeftSearchEmptyState = (props: SidebarLeftSearchEmptyStateProps): R
   const { searchText } = props;
 
   return (
-    <SidebarEmptyState
+    <EmptyState
       icon='search'
       text='No Layers Found'
       detail={`Could not find any layers matching "${searchText}"`}

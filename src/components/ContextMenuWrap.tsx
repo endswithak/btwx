@@ -12,7 +12,7 @@ import { removeArtboardPreset } from '../store/actions/documentSettings';
 import { ArtboardPresetEditorTypes } from '../store/actionTypes/artboardPresetEditor';
 import { openArtboardPresetEditor } from '../store/actions/artboardPresetEditor';
 import { getLayerScope, orderLayersByDepth, canGroupLayers, canUngroupLayers, canMaskLayers, canBringForward, canSendBackward } from '../store/selectors/layer';
-import { setTweenDrawerEventHoverThunk, setTweenDrawerEvent } from '../store/actions/tweenDrawer';
+import { setTweenDrawerEventHoverThunk, setTweenDrawerEventThunk } from '../store/actions/tweenDrawer';
 import { SetTweenDrawerEventHoverPayload, SetTweenDrawerEventPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
 import { APP_NAME, DEFAULT_TWEEN_EVENTS } from '../constants';
 import ContextMenu from './ContextMenu';
@@ -52,14 +52,14 @@ interface ContextMenuWrapProps {
   copyLayersThunk?(): Promise<any>;
   pasteLayersThunk?({overSelection, overPoint, overLayer}: { overSelection?: boolean; overPoint?: em.Point; overLayer?: string }): Promise<any>;
   setTweenDrawerEventHoverThunk?(payload: SetTweenDrawerEventHoverPayload): TweenDrawerTypes;
-  setTweenDrawerEvent?(payload: SetTweenDrawerEventPayload): TweenDrawerTypes;
+  setTweenDrawerEventThunk?(payload: SetTweenDrawerEventPayload): void;
   removeLayerTweenEvent?(payload: RemoveLayerTweenEventPayload): LayerTypes;
   duplicateLayers?(payload: DuplicateLayersPayload): LayerTypes;
   setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
 }
 
 const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
-  const { canSelectAll, artboard, setLayerHover, duplicateLayers, canDuplicate, setTweenDrawerEvent, removeLayerTweenEvent, canSetTweenDrawerEventHover, setTweenDrawerEventHoverThunk, clipboardType, canMask, addLayersMaskThunk, canGroup, canUngroup, ungroupLayers, groupLayersThunk, canMoveForward, canMoveBackward, contextMenu, closeContextMenu, currentX, currentY, openContextMenu, canAddTweenEvent, artboards, activeArtboard, tweenEventItems, selected, addLayerTweenEvent, selectAllLayers, removeArtboardPreset, openArtboardPresetEditor, removeLayers, selectLayer, copyLayersThunk, pasteLayersThunk, sendLayersBackward, sendLayersForward } = props;
+  const { canSelectAll, artboard, setLayerHover, duplicateLayers, canDuplicate, setTweenDrawerEventThunk, removeLayerTweenEvent, canSetTweenDrawerEventHover, setTweenDrawerEventHoverThunk, clipboardType, canMask, addLayersMaskThunk, canGroup, canUngroup, ungroupLayers, groupLayersThunk, canMoveForward, canMoveBackward, contextMenu, closeContextMenu, currentX, currentY, openContextMenu, canAddTweenEvent, artboards, activeArtboard, tweenEventItems, selected, addLayerTweenEvent, selectAllLayers, removeArtboardPreset, openArtboardPresetEditor, removeLayers, selectLayer, copyLayersThunk, pasteLayersThunk, sendLayersBackward, sendLayersForward } = props;
 
   const getOptions = () => {
     switch(contextMenu.type) {
@@ -360,7 +360,7 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
           text: 'Edit',
           onClick: (): void => {
             closeContextMenu();
-            setTweenDrawerEvent({id: contextMenu.id});
+            setTweenDrawerEventThunk({id: contextMenu.id});
           }
         },{
           type: 'MenuItem',
@@ -442,5 +442,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { setLayerHover, duplicateLayers, setTweenDrawerEvent, removeLayerTweenEvent,setTweenDrawerEventHoverThunk, openContextMenu, closeContextMenu, addLayerTweenEvent, removeArtboardPreset, openArtboardPresetEditor, removeLayers, selectLayer, copyLayersThunk, pasteLayersThunk, sendLayersBackward, sendLayersForward, ungroupLayers, selectAllLayers, groupLayersThunk, addLayersMaskThunk }
+  { setLayerHover, duplicateLayers, setTweenDrawerEventThunk, removeLayerTweenEvent,setTweenDrawerEventHoverThunk, openContextMenu, closeContextMenu, addLayerTweenEvent, removeArtboardPreset, openArtboardPresetEditor, removeLayers, selectLayer, copyLayersThunk, pasteLayersThunk, sendLayersBackward, sendLayersForward, ungroupLayers, selectAllLayers, groupLayersThunk, addLayersMaskThunk }
 )(ContextMenuWrap);

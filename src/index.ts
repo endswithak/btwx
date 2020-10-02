@@ -15,7 +15,7 @@ import {
   DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH,
   DEFAULT_COLOR_FORMAT,
   DEFAULT_DEVICE_ORIENTATION,
-  APP_NAME
+  APP_NAME, PREVIEW_PREFIX
 } from './constants';
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
@@ -30,7 +30,7 @@ export const getFocusedDocument = (): electron.BrowserWindow => {
 };
 
 export const getAllOpenDocuments = (): electron.BrowserWindow[] => {
-  return BrowserWindow.getAllWindows().filter((window) => window.getTitle() !== 'Preview');
+  return BrowserWindow.getAllWindows().filter((window) => !window.getTitle().startsWith(PREVIEW_PREFIX));
 };
 
 // export let preferencesWindow: electron.BrowserWindow;
@@ -79,7 +79,6 @@ export const createNewDocument = (width?: number, height?: number): Promise<elec
       minWidth: 1024,
       minHeight: 768,
       frame: false,
-      title: APP_NAME,
       titleBarStyle: 'hidden',
       backgroundColor: getWindowBackground(),
       webPreferences: {
@@ -200,7 +199,6 @@ const createPreviewWindow = ({width, height}: {width: number; height: number}): 
     width: width,
     height: height + PREVIEW_TOPBAR_HEIGHT + (process.platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT),
     frame: false,
-    title: 'preview',
     titleBarStyle: 'hidden',
     backgroundColor: getWindowBackground(),
     webPreferences: {
@@ -517,12 +515,9 @@ export const handleThemeToggle = (): void => {
     document.webContents.executeJavaScript(`getCurrentTheme()`).then((currentTheme) => {
       const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
       BrowserWindow.getAllWindows().forEach((window) => {
-        const documentWindow = !window.getParentWindow();
         if (window.webContents) {
           window.webContents.executeJavaScript(`setTitleBarTheme(${JSON.stringify(newTheme)})`);
-          if (documentWindow) {
-            window.webContents.executeJavaScript(`setTheme(${JSON.stringify(newTheme)})`);
-          }
+          window.webContents.executeJavaScript(`setTheme(${JSON.stringify(newTheme)})`);
         }
       });
     });
@@ -533,13 +528,10 @@ export const handleSetTheme = (theme: em.ThemeName): void => {
   const document = getFocusedDocument();
   if (document) {
     BrowserWindow.getAllWindows().forEach((window) => {
-      const documentWindow = !window.getParentWindow();
       window.setBackgroundColor(getWindowBackground(theme));
       if (window.webContents) {
         window.webContents.executeJavaScript(`setTitleBarTheme(${JSON.stringify(theme)})`);
-        if (documentWindow) {
-          window.webContents.executeJavaScript(`setTheme(${JSON.stringify(theme)})`);
-        }
+        window.webContents.executeJavaScript(`setTheme(${JSON.stringify(theme)})`);
       }
     });
   }
@@ -559,9 +551,7 @@ ipcMain.on('updateTheme', (event, theme: em.ThemeName) => {
     window.setBackgroundColor(getWindowBackground(theme));
     if (window.webContents) {
       window.webContents.executeJavaScript(`setTitleBarTheme(${JSON.stringify(theme)})`);
-      if (documentWindow) {
-        window.webContents.executeJavaScript(`setTheme(${JSON.stringify(theme)})`);
-      }
+      window.webContents.executeJavaScript(`setTheme(${JSON.stringify(theme)})`);
     }
   });
 });

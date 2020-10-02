@@ -5,6 +5,7 @@ import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 import PreviewCanvas from './PreviewCanvas';
 import PreviewTopbar from './PreviewTopbar';
+import EmptyState from './EmptyState';
 import { PREVIEW_TOPBAR_HEIGHT, MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT } from '../constants';
 
 interface PreviewProps {
@@ -45,7 +46,10 @@ const Preview = (props: PreviewProps): ReactElement => {
               opacity: 0
             }} />
           </>
-        : null
+        : <EmptyState
+            icon='preview'
+            text='Preview'
+            style={{width: 211}} />
       }
     </div>
   );

@@ -3,6 +3,7 @@ import thunk from 'redux-thunk';
 import { remote } from 'electron';
 import logger from 'redux-logger';
 import rootReducer, { RootState } from './reducers';
+import { PREVIEW_PREFIX } from '../constants';
 
 const store = createStore(rootReducer, applyMiddleware(logger, thunk));
 export type StoreDispatch = typeof store.dispatch;
@@ -19,7 +20,7 @@ const handleChange = () => {
   currentEdit = currentState.layer.present.edit;
   currentActiveArtboard = currentState.layer.present.activeArtboard;
   if (isMainWindow && (previousEdit !== currentEdit || previousActiveArtboard !== currentActiveArtboard)) {
-    const previewWindow = remote.getCurrentWindow().getChildWindows().find((window) => window.getTitle() === 'preview');
+    const previewWindow = remote.getCurrentWindow().getChildWindows().find((window) => window.getTitle().startsWith(PREVIEW_PREFIX));
     if (previewWindow) {
       previewWindow.webContents.executeJavaScript(`hydratePreview(${JSON.stringify(currentState)})`);
     }

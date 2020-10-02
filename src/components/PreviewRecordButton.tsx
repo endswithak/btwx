@@ -7,11 +7,12 @@ import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { startPreviewRecording } from '../store/actions/preview';
 import { PreviewTypes } from '../store/actionTypes/preview';
-import { PREVIEW_TOPBAR_HEIGHT, MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT } from '../constants';
+import { PREVIEW_TOPBAR_HEIGHT, MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT, PREVIEW_PREFIX } from '../constants';
 import TopbarButton from './TopbarButton';
 
 interface PreviewRecordButtonProps {
   recording?: boolean;
+  documentName?: string;
   startPreviewRecording?(): PreviewTypes;
 }
 
@@ -59,7 +60,7 @@ ipcRenderer.on('stopPreviewRecording', () => {
 });
 
 const PreviewRecordButton = (props: PreviewRecordButtonProps): ReactElement => {
-  const { recording, startPreviewRecording } = props;
+  const { recording, startPreviewRecording, documentName } = props;
 
   const handleVideoData = (e: any): void => {
     previewVideoChunks.push(e.data);
@@ -87,10 +88,11 @@ const PreviewRecordButton = (props: PreviewRecordButtonProps): ReactElement => {
 
   const handleRecord = () => {
     if (!recording) {
+      const currentWindow = remote.getCurrentWindow();
       if (remote.process.platform === 'darwin') {
-        remote.getCurrentWindow().setWindowButtonVisibility(false);
+        currentWindow.setWindowButtonVisibility(false);
       }
-      const currentWindowSize = remote.getCurrentWindow().getSize();
+      const currentWindowSize = currentWindow.getSize();
       const titlebarContent = document.getElementsByClassName('container-after-titlebar')[0];
       windowSize = {
         width: currentWindowSize[0],
@@ -100,6 +102,7 @@ const PreviewRecordButton = (props: PreviewRecordButtonProps): ReactElement => {
         onComplete: () => {
           setTimeout(() => {
             startPreviewRecording();
+            currentWindow.getParentWindow().webContents.executeJavaScript('startPreviewRecording()');
             previewMediaRecorder.start();
           }, 0.15);
         }
@@ -135,7 +138,7 @@ const PreviewRecordButton = (props: PreviewRecordButtonProps): ReactElement => {
 
   useEffect(() => {
     desktopCapturer.getSources({ types: ['window', 'screen'] }).then(async sources => {
-      const source = sources.find((s) => s.name === 'Preview');
+      const source = sources.find((s) => s.name.startsWith(`${PREVIEW_PREFIX}${documentName}`));
       const videoElement = document.getElementById('preview-video') as HTMLVideoElement;
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: false,
@@ -164,10 +167,12 @@ const PreviewRecordButton = (props: PreviewRecordButtonProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   recording: boolean;
+  documentName: string;
 } => {
-  const { preview } = state;
+  const { preview, documentSettings } = state;
   const recording = preview.recording;
-  return { recording };
+  const documentName = documentSettings.name
+  return { recording, documentName };
 };
 
 export default connect(

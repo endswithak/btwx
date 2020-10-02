@@ -4,7 +4,7 @@ import { RootState } from '../store/reducers';
 import Sidebar from './Sidebar';
 import SidebarLayerStyles from './SidebarLayerStyles';
 import SidebarArtboardSizes from './SidebarArtboardSizes';
-import SidebarEmptyState from './SidebarEmptyState';
+import EmptyState from './EmptyState';
 
 interface SidebarRightProps {
   isOpen: boolean;
@@ -23,7 +23,7 @@ const SidebarRight = (props: SidebarRightProps): ReactElement => {
         position='right'>
         {
           activeTool !== 'Artboard' && selected.length === 0
-          ? <SidebarEmptyState
+          ? <EmptyState
               icon='right-sidebar'
               text='Styles'
               style={{width: 211}} />

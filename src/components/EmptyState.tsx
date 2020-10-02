@@ -3,7 +3,7 @@ import Icon from './Icon';
 import styled from 'styled-components';
 import { ThemeContext } from './ThemeProvider';
 
-interface SidebarEmptyStateProps {
+interface EmptyStateProps {
   icon?: string;
   text: string | ReactElement;
   detail?: string | ReactElement;
@@ -53,7 +53,7 @@ const Button = styled.button<ButtonProps>`
   }
 `;
 
-const SidebarEmptyState = (props: SidebarEmptyStateProps): ReactElement => {
+const EmptyState = (props: EmptyStateProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { icon, text, detail, action, actionText, actionIcon, actionClick, actionActive, actionDisabled, style } = props;
   return (
@@ -115,4 +115,4 @@ const SidebarEmptyState = (props: SidebarEmptyStateProps): ReactElement => {
   );
 }
 
-export default SidebarEmptyState;
+export default EmptyState;

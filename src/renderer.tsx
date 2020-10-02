@@ -37,7 +37,7 @@ import store from './store';
 import getTheme from './store/theme';
 import { enableDarkTheme, enableLightTheme } from './store/actions/theme';
 import { saveDocumentAs, saveDocument, openDocument } from './store/actions/documentSettings';
-import { closePreview, hydratePreview } from './store/actions/preview';
+import { closePreview, hydratePreview, startPreviewRecording, stopPreviewRecording } from './store/actions/preview';
 import App from './components/App';
 import Preview from './components/Preview';
 // import Preferences from './components/Preferences';
@@ -53,6 +53,7 @@ import { toggleTweenDrawerThunk, toggleRightSidebarThunk, toggleLeftSidebarThunk
 import { centerSelectionThunk } from './store/actions/translateTool';
 import { duplicateLayers, selectAllLayers, selectLayers, setActiveArtboard } from './store/actions/layer';
 import { canGroupSelection, canUngroupSelection, canSendBackwardSelection, canBringForwardSelection } from './store/selectors/layer';
+import { PREVIEW_PREFIX } from './constants';
 
 import './styles/index.sass';
 
@@ -385,6 +386,10 @@ const titleBar = new Titlebar({
   const state = store.getState();
   store.dispatch(saveDocumentAs({name: documentSettings.base, path: documentSettings.fullPath, edit: state.layer.present.edit}));
   titleBar.updateTitle(documentSettings.base);
+  const previewWindow = remote.getCurrentWindow().getChildWindows().find((window) => window.getTitle().startsWith(PREVIEW_PREFIX));
+  if (previewWindow) {
+    previewWindow.webContents.executeJavaScript(`setTitleBarTitle(${JSON.stringify(`${PREVIEW_PREFIX}${documentSettings.base}`)})`);
+  }
   return (window as any).getSaveState();
 };
 
@@ -397,6 +402,10 @@ const titleBar = new Titlebar({
 (window as any).setTitleBarTheme = (theme: em.ThemeName): void => {
   themeObject = getTheme(theme);
   titleBar.updateBackground(Color.fromHex(theme === 'dark' ? themeObject.background.z1 : themeObject.background.z2));
+};
+
+(window as any).setTitleBarTitle = (title: string): void => {
+  titleBar.updateTitle(title);
 };
 
 (window as any).setActiveArtboard = (activeArtboard: string): void => {
@@ -422,6 +431,14 @@ const titleBar = new Titlebar({
   store.dispatch(closePreview());
 };
 
+(window as any).startPreviewRecording = () => {
+  store.dispatch(startPreviewRecording());
+};
+
+(window as any).stopPreviewRecording = () => {
+  store.dispatch(stopPreviewRecording());
+};
+
 (window as any).renderNewDocument = (): void => {
   const state = store.getState();
   titleBar.updateTitle(state.documentSettings.name);
@@ -436,7 +453,8 @@ const titleBar = new Titlebar({
 };
 
 (window as any).renderPreviewWindow = (): void => {
-  titleBar.updateTitle('preview');
+  const state = store.getState();
+  titleBar.updateTitle(`${PREVIEW_PREFIX}${state.documentSettings.name}`);
   ReactDOM.render(
     <Provider store={store}>
       <ThemeProvider>

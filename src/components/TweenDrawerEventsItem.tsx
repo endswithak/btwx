@@ -2,7 +2,7 @@ import React, { useContext, ReactElement } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { setTweenDrawerEvent, setTweenDrawerEventHoverThunk } from '../store/actions/tweenDrawer';
+import { setTweenDrawerEventThunk, setTweenDrawerEventHoverThunk } from '../store/actions/tweenDrawer';
 import { SetTweenDrawerEventPayload, TweenDrawerTypes, SetTweenDrawerEventHoverPayload } from '../store/actionTypes/tweenDrawer';
 import { setLayerHover, setActiveArtboard } from '../store/actions/layer';
 import { SetLayerHoverPayload, LayerTypes, SetActiveArtboardPayload } from '../store/actionTypes/layer';
@@ -22,7 +22,7 @@ interface TweenDrawerEventItemProps {
   destinationName?: string;
   tweenEventDisplayName?: string;
   hovering?: boolean;
-  setTweenDrawerEvent?(payload: SetTweenDrawerEventPayload): TweenDrawerTypes;
+  setTweenDrawerEventThunk?(payload: SetTweenDrawerEventPayload): void;
   setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
   setTweenDrawerEventHoverThunk?(payload: SetTweenDrawerEventHoverPayload): TweenDrawerTypes;
   setActiveArtboard?(payload: SetActiveArtboardPayload): LayerTypes;
@@ -41,7 +41,7 @@ const Item = styled.div<ItemProps>`
 
 const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { openContextMenu, activeArtboard, id, tweenEvent, layerItem, artboardName, destinationName, setTweenDrawerEvent, setLayerHover, tweenEventDisplayName, setTweenDrawerEventHoverThunk, hovering, setActiveArtboard } = props;
+  const { openContextMenu, activeArtboard, id, tweenEvent, layerItem, artboardName, destinationName, setTweenDrawerEventThunk, setLayerHover, tweenEventDisplayName, setTweenDrawerEventHoverThunk, hovering, setActiveArtboard } = props;
 
   const handleMouseEnter = (): void => {
     if (activeArtboard !== tweenEvent.artboard) {
@@ -57,7 +57,7 @@ const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement =>
   const handleDoubleClick = (e: any): void => {
     // ignore clicks on edit / remove buttons
     if (e.target.nodeName !== 'path' && e.target.nodeName !== 'svg') {
-      setTweenDrawerEvent({id});
+      setTweenDrawerEventThunk({id});
       setLayerHover({id: null});
     }
   }
@@ -140,5 +140,5 @@ const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventItemProps):
 
 export default connect(
   mapStateToProps,
-  { openContextMenu, setTweenDrawerEvent, setLayerHover, setTweenDrawerEventHoverThunk, setActiveArtboard }
+  { openContextMenu, setTweenDrawerEventThunk, setLayerHover, setTweenDrawerEventHoverThunk, setActiveArtboard }
 )(TweenDrawerEventItem);
