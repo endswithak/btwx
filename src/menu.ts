@@ -1,12 +1,9 @@
-import electron, { app, BrowserWindow, Menu, dialog } from 'electron';
+import { app, Menu, dialog } from 'electron';
 import { handleSetTheme, createNewDocument, handleSave, handleSaveAs, handleOpenDocument } from './index';
+import { getFocusedDocument } from './utils';
 import { APP_NAME } from './constants';
 
 const isMac = process.platform === 'darwin';
-
-const getFocusedDocument = (): electron.BrowserWindow => {
-  return BrowserWindow.getFocusedWindow() ? BrowserWindow.getFocusedWindow().getParentWindow() ? BrowserWindow.getFocusedWindow().getParentWindow() : BrowserWindow.getFocusedWindow() : null;
-}
 
 export default Menu.buildFromTemplate([
   // { role: 'appMenu' }
@@ -55,8 +52,11 @@ export default Menu.buildFromTemplate([
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+R' : 'Ctrl+R',
         click: (): void => {
-          const document = getFocusedDocument();
-          document.webContents.reload();
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              focusedDocument.webContents.reload();
+            }
+          });
         }
       },
       { type: 'separator' },
@@ -80,13 +80,14 @@ export default Menu.buildFromTemplate([
         accelerator: process.platform === 'darwin' ? 'Cmd+N' : 'Ctrl+N',
         click: (): void => {
           // if document already open, set new document size to focused document size
-          const focusedDocument = getFocusedDocument();
-          if (focusedDocument) {
-            const size = focusedDocument.getSize();
-            createNewDocument(size[0], size[1]);
-          } else {
-            createNewDocument();
-          }
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              const size = focusedDocument.getSize();
+              createNewDocument(size[0], size[1]);
+            } else {
+              createNewDocument();
+            }
+          });
         }
       },
       {
@@ -95,13 +96,16 @@ export default Menu.buildFromTemplate([
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+S' : 'Ctrl+S',
         click: (): void => {
-          const document = getFocusedDocument();
-          document.webContents.executeJavaScript(`getDocumentSettings()`).then((documentSettingsJSON) => {
-            const documentSettings = JSON.parse(documentSettingsJSON);
-            if (documentSettings.path) {
-              handleSave(document, documentSettings.path);
-            } else {
-              handleSaveAs(document);
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              focusedDocument.webContents.executeJavaScript(`getDocumentSettings()`).then((documentSettingsJSON) => {
+                const documentSettings = JSON.parse(documentSettingsJSON);
+                if (documentSettings.path) {
+                  handleSave(focusedDocument, documentSettings.path);
+                } else {
+                  handleSaveAs(focusedDocument);
+                }
+              });
             }
           });
         }
@@ -112,8 +116,11 @@ export default Menu.buildFromTemplate([
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+Shift+S' : 'Ctrl+Shift+S',
         click: (): void => {
-          const document = getFocusedDocument();
-          handleSaveAs(document);
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              handleSaveAs(focusedDocument);
+            }
+          });
         }
       },
       {
@@ -156,8 +163,11 @@ export default Menu.buildFromTemplate([
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+Z' : 'Ctrl+Z',
         click: (): void => {
-          const document = getFocusedDocument();
-          document.webContents.executeJavaScript(`editUndo()`);
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              focusedDocument.webContents.executeJavaScript(`editUndo()`);
+            }
+          });
         }
       },
       {
@@ -166,8 +176,11 @@ export default Menu.buildFromTemplate([
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+Shift+Z' : 'Ctrl+Shift+Z',
         click: (): void => {
-          const document = getFocusedDocument();
-          document.webContents.executeJavaScript(`editRedo()`);
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              focusedDocument.webContents.executeJavaScript(`editRedo()`);
+            }
+          });
         }
       },
       { type: 'separator' },
@@ -176,8 +189,11 @@ export default Menu.buildFromTemplate([
         id: 'editCut',
         enabled: false,
         click: (): void => {
-          const document = getFocusedDocument();
-          document.webContents.executeJavaScript(`editCut()`);
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              focusedDocument.webContents.executeJavaScript(`editCut()`);
+            }
+          });
         }
       },
       {
@@ -189,8 +205,11 @@ export default Menu.buildFromTemplate([
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+C' : 'Ctrl+C',
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`editCopy()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`editCopy()`);
+                }
+              });
             }
           },
           {
@@ -198,8 +217,11 @@ export default Menu.buildFromTemplate([
             id: 'editCopySVG',
             enabled: false,
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`editCopySVG()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`editCopySVG()`);
+                }
+              });
             }
           },
           {
@@ -208,8 +230,11 @@ export default Menu.buildFromTemplate([
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+Alt+C' : 'Ctrl+Alt+C',
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`editCopyStyle()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`editCopyStyle()`);
+                }
+              });
             }
           }
         ]
@@ -223,8 +248,11 @@ export default Menu.buildFromTemplate([
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+V' : 'Ctrl+V',
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`editPaste()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`editPaste()`);
+                }
+              });
             }
           },
           {
@@ -233,8 +261,11 @@ export default Menu.buildFromTemplate([
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+Shift+V' : 'Ctrl+Shift+V',
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`editPasteOverSelection()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`editPasteOverSelection()`);
+                }
+              });
             }
           },
           {
@@ -242,8 +273,11 @@ export default Menu.buildFromTemplate([
             id: 'editPasteSVG',
             enabled: false,
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`editPasteSVG()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`editPasteSVG()`);
+                }
+              });
             }
           },
           {
@@ -252,8 +286,11 @@ export default Menu.buildFromTemplate([
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+Alt+V' : 'Ctrl+Alt+V',
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`editPasteStyle()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`editPasteStyle()`);
+                }
+              });
             }
           }
         ]
@@ -264,8 +301,11 @@ export default Menu.buildFromTemplate([
         enabled: false,
         accelerator: 'Backspace',
         click: (): void => {
-          const document = getFocusedDocument();
-          document.webContents.executeJavaScript(`editDelete()`);
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              focusedDocument.webContents.executeJavaScript(`editDelete()`);
+            }
+          });
         }
       },
       { type: 'separator' },
@@ -275,8 +315,11 @@ export default Menu.buildFromTemplate([
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+D' : 'Ctrl+D',
         click: (): void => {
-          const document = getFocusedDocument();
-          document.webContents.executeJavaScript(`editDuplicate()`);
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              focusedDocument.webContents.executeJavaScript(`editDuplicate()`);
+            }
+          });
         }
       },
       { type: 'separator' },
@@ -289,8 +332,11 @@ export default Menu.buildFromTemplate([
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+A' : 'Ctrl+A',
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`editSelectAll()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`editSelectAll()`);
+                }
+              });
             }
           },
           {
@@ -299,8 +345,11 @@ export default Menu.buildFromTemplate([
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+Shift+A' : 'Ctrl+Shift+A',
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`editSelectAllArtboards()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`editSelectAllArtboards()`);
+                }
+              });
             }
           }
         ]
@@ -316,8 +365,11 @@ export default Menu.buildFromTemplate([
         enabled: false,
         accelerator: 'A',
         click: () => {
-          const document = getFocusedDocument();
-          document.webContents.executeJavaScript(`insertArtboard()`);
+          return getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              focusedDocument.webContents.executeJavaScript(`insertArtboard()`);
+            }
+          });
         }
       },
       { type: 'separator' },
@@ -330,8 +382,11 @@ export default Menu.buildFromTemplate([
             enabled: false,
             accelerator: 'R',
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`insertShape(${JSON.stringify('Rectangle')})`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`insertShape(${JSON.stringify('Rectangle')})`);
+                }
+              });
             }
           },
           {
@@ -340,8 +395,11 @@ export default Menu.buildFromTemplate([
             enabled: false,
             accelerator: 'U',
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`insertShape(${JSON.stringify('Rounded')})`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`insertShape(${JSON.stringify('Rounded')})`);
+                }
+              });
             }
           },
           {
@@ -350,8 +408,11 @@ export default Menu.buildFromTemplate([
             enabled: false,
             accelerator: 'O',
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`insertShape(${JSON.stringify('Ellipse')})`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`insertShape(${JSON.stringify('Ellipse')})`);
+                }
+              });
             }
           },
           {
@@ -359,8 +420,11 @@ export default Menu.buildFromTemplate([
             id: 'insertShapeStar',
             enabled: false,
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`insertShape(${JSON.stringify('Star')})`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`insertShape(${JSON.stringify('Star')})`);
+                }
+              });
             }
           },
           {
@@ -368,8 +432,11 @@ export default Menu.buildFromTemplate([
             id: 'insertShapePolygon',
             enabled: false,
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`insertShape(${JSON.stringify('Polygon')})`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`insertShape(${JSON.stringify('Polygon')})`);
+                }
+              });
             }
           },
           {
@@ -378,8 +445,11 @@ export default Menu.buildFromTemplate([
             enabled: false,
             accelerator: 'L',
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`insertShape(${JSON.stringify('Line')})`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`insertShape(${JSON.stringify('Line')})`);
+                }
+              });
             }
           },
         ]
@@ -391,8 +461,11 @@ export default Menu.buildFromTemplate([
         enabled: false,
         accelerator: 'T',
         click: () => {
-          const document = getFocusedDocument();
-          document.webContents.executeJavaScript(`insertText()`);
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              focusedDocument.webContents.executeJavaScript(`insertText()`);
+            }
+          });
         }
       },
       {
@@ -400,8 +473,11 @@ export default Menu.buildFromTemplate([
         id: 'insertImage',
         enabled: false,
         click: () => {
-          const document = getFocusedDocument();
-          document.webContents.executeJavaScript(`insertImage()`);
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              focusedDocument.webContents.executeJavaScript(`insertImage()`);
+            }
+          });
         }
       }
     ]
@@ -419,8 +495,11 @@ export default Menu.buildFromTemplate([
             type: 'checkbox',
             checked: false,
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`layerStyleFill()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`layerStyleFill()`);
+                }
+              });
             }
           },
           {
@@ -430,8 +509,11 @@ export default Menu.buildFromTemplate([
             type: 'checkbox',
             checked: false,
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`layerStyleStroke()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`layerStyleStroke()`);
+                }
+              });
             }
           },
           {
@@ -441,8 +523,11 @@ export default Menu.buildFromTemplate([
             type: 'checkbox',
             checked: false,
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`layerStyleShadow()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`layerStyleShadow()`);
+                }
+              });
             }
           }
         ]
@@ -457,8 +542,11 @@ export default Menu.buildFromTemplate([
             type: 'checkbox',
             checked: false,
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`layerTransformFlipHorizontally()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`layerTransformFlipHorizontally()`);
+                }
+              });
             }
           },
           {
@@ -468,8 +556,11 @@ export default Menu.buildFromTemplate([
             type: 'checkbox',
             checked: false,
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`layerTransformFlipVertically()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`layerTransformFlipVertically()`);
+                }
+              });
             }
           }
         ]
@@ -483,8 +574,11 @@ export default Menu.buildFromTemplate([
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+Alt+U' : 'Ctrl+Alt+U',
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`layerCombine(${JSON.stringify('unite')})`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`layerCombine(${JSON.stringify('unite')})`);
+                }
+              });
             }
           },
           {
@@ -493,8 +587,11 @@ export default Menu.buildFromTemplate([
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+Alt+S' : 'Ctrl+Alt+S',
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`layerCombine(${JSON.stringify('subtract')})`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`layerCombine(${JSON.stringify('subtract')})`);
+                }
+              });
             }
           },
           {
@@ -503,8 +600,11 @@ export default Menu.buildFromTemplate([
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+Alt+I' : 'Ctrl+Alt+I',
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`layerCombine(${JSON.stringify('intersect')})`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`layerCombine(${JSON.stringify('intersect')})`);
+                }
+              });
             }
           },
           {
@@ -513,8 +613,11 @@ export default Menu.buildFromTemplate([
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+Alt+X' : 'Ctrl+Alt+X',
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`layerCombine(${JSON.stringify('exclude')})`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`layerCombine(${JSON.stringify('exclude')})`);
+                }
+              });
             }
           }
         ]
@@ -527,8 +630,11 @@ export default Menu.buildFromTemplate([
             id: 'layerImageReplace',
             enabled: false,
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`layerImageReplace()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`layerImageReplace()`);
+                }
+              });
             }
           },
           {
@@ -536,8 +642,11 @@ export default Menu.buildFromTemplate([
             id: 'layerImageOriginalDimensions',
             enabled: false,
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`layerImageOriginalDimensions()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`layerImageOriginalDimensions()`);
+                }
+              });
             }
           }
         ]
@@ -549,8 +658,11 @@ export default Menu.buildFromTemplate([
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+Ctrl+M' : 'Ctrl+Shift+M',
         click: () => {
-          const document = getFocusedDocument();
-          document.webContents.executeJavaScript(`layerMask()`);
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              focusedDocument.webContents.executeJavaScript(`layerMask()`);
+            }
+          });
         }
       },
     ]
@@ -564,8 +676,11 @@ export default Menu.buildFromTemplate([
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+]' : 'Ctrl+]',
         click: () => {
-          const document = getFocusedDocument();
-          document.webContents.executeJavaScript(`arrangeBringForward()`);
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              focusedDocument.webContents.executeJavaScript(`arrangeBringForward()`);
+            }
+          });
         }
       },
       {
@@ -574,8 +689,11 @@ export default Menu.buildFromTemplate([
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+Alt+]' : 'Ctrl+Alt+]',
         click: () => {
-          const document = getFocusedDocument();
-          document.webContents.executeJavaScript(`arrangeBringToFront()`);
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              focusedDocument.webContents.executeJavaScript(`arrangeBringToFront()`);
+            }
+          });
         }
       },
       {
@@ -584,8 +702,11 @@ export default Menu.buildFromTemplate([
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+[' : 'Ctrl+[',
         click: () => {
-          const document = getFocusedDocument();
-          document.webContents.executeJavaScript(`arrangeSendBackward()`);
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              focusedDocument.webContents.executeJavaScript(`arrangeSendBackward()`);
+            }
+          });
         }
       },
       {
@@ -594,8 +715,11 @@ export default Menu.buildFromTemplate([
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+Alt+[' : 'Ctrl+Alt+[',
         click: () => {
-          const document = getFocusedDocument();
-          document.webContents.executeJavaScript(`arrangeSendToBack()`);
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              focusedDocument.webContents.executeJavaScript(`arrangeSendToBack()`);
+            }
+          });
         }
       },
       { type: 'separator' },
@@ -607,8 +731,11 @@ export default Menu.buildFromTemplate([
             id: 'arrangeAlignLeft',
             enabled: false,
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`arrangeAlignLeft()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`arrangeAlignLeft()`);
+                }
+              });
             }
           },
           {
@@ -616,8 +743,11 @@ export default Menu.buildFromTemplate([
             id: 'arrangeAlignHorizontally',
             enabled: false,
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`arrangeAlignHorizontally()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`arrangeAlignHorizontally()`);
+                }
+              });
             }
           },
           {
@@ -625,8 +755,11 @@ export default Menu.buildFromTemplate([
             id: 'arrangeAlignRight',
             enabled: false,
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`arrangeAlignRight()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`arrangeAlignRight()`);
+                }
+              });
             }
           },
           { type: 'separator' },
@@ -635,8 +768,11 @@ export default Menu.buildFromTemplate([
             id: 'arrangeAlignTop',
             enabled: false,
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`arrangeAlignTop()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`arrangeAlignTop()`);
+                }
+              });
             }
           },
           {
@@ -644,8 +780,11 @@ export default Menu.buildFromTemplate([
             id: 'arrangeAlignVertically',
             enabled: false,
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`arrangeAlignVertically()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`arrangeAlignVertically()`);
+                }
+              });
             }
           },
           {
@@ -653,8 +792,11 @@ export default Menu.buildFromTemplate([
             id: 'arrangeAlignBottom',
             enabled: false,
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`arrangeAlignBottom()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`arrangeAlignBottom()`);
+                }
+              });
             }
           }
         ]
@@ -668,8 +810,11 @@ export default Menu.buildFromTemplate([
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Ctrl+Cmd+H' : 'Ctrl+Shift+H',
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`arrangeDistributeHorizontally()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`arrangeDistributeHorizontally()`);
+                }
+              });
             }
           },
           {
@@ -678,8 +823,11 @@ export default Menu.buildFromTemplate([
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Ctrl+Cmd+V' : 'Ctrl+Shift+V',
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`arrangeDistributeVertically()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`arrangeDistributeVertically()`);
+                }
+              });
             }
           }
         ]
@@ -691,8 +839,11 @@ export default Menu.buildFromTemplate([
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+G' : 'Ctrl+G',
         click: () => {
-          const document = getFocusedDocument();
-          document.webContents.executeJavaScript(`arrangeGroup()`);
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              focusedDocument.webContents.executeJavaScript(`arrangeGroup()`);
+            }
+          });
         }
       },
       {
@@ -701,8 +852,11 @@ export default Menu.buildFromTemplate([
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+Shift+G' : 'Ctrl+Shift+G',
         click: () => {
-          const document = getFocusedDocument();
-          document.webContents.executeJavaScript(`arrangeUngroup()`);
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              focusedDocument.webContents.executeJavaScript(`arrangeUngroup()`);
+            }
+          });
         }
       },
     ]
@@ -728,8 +882,11 @@ export default Menu.buildFromTemplate([
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+Plus' : 'Ctrl+Plus',
         click: () => {
-          const document = getFocusedDocument();
-          document.webContents.executeJavaScript(`viewZoomIn()`);
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              focusedDocument.webContents.executeJavaScript(`viewZoomIn()`);
+            }
+          });
         }
       },
       {
@@ -738,8 +895,11 @@ export default Menu.buildFromTemplate([
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+-' : 'Ctrl+-',
         click: () => {
-          const document = getFocusedDocument();
-          document.webContents.executeJavaScript(`viewZoomOut()`);
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              focusedDocument.webContents.executeJavaScript(`viewZoomOut()`);
+            }
+          });
         }
       },
       {
@@ -751,8 +911,11 @@ export default Menu.buildFromTemplate([
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+1' : 'Ctrl+1',
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`viewZoomFitCanvas()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`viewZoomFitCanvas()`);
+                }
+              });
             }
           },
           {
@@ -761,8 +924,11 @@ export default Menu.buildFromTemplate([
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+2' : 'Ctrl+2',
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`viewZoomFitSelection()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`viewZoomFitSelection()`);
+                }
+              });
             }
           },
           {
@@ -771,8 +937,11 @@ export default Menu.buildFromTemplate([
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+4' : 'Ctrl+4',
             click: () => {
-              const document = getFocusedDocument();
-              document.webContents.executeJavaScript(`viewZoomFitArtboard()`);
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`viewZoomFitArtboard()`);
+                }
+              });
             }
           }
         ]
@@ -784,8 +953,11 @@ export default Menu.buildFromTemplate([
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+3' : 'Ctrl+3',
         click: () => {
-          const document = getFocusedDocument();
-          document.webContents.executeJavaScript(`viewCenterSelection()`);
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              focusedDocument.webContents.executeJavaScript(`viewCenterSelection()`);
+            }
+          });
         }
       },
       { type: 'separator' },
@@ -797,8 +969,11 @@ export default Menu.buildFromTemplate([
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+Alt+1' : 'Ctrl+Alt+1',
         click: () => {
-          const document = getFocusedDocument();
-          document.webContents.executeJavaScript(`viewShowLayers()`);
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              focusedDocument.webContents.executeJavaScript(`viewShowLayers()`);
+            }
+          });
         }
       },
       {
@@ -809,8 +984,11 @@ export default Menu.buildFromTemplate([
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+Alt+2' : 'Ctrl+Alt+2',
         click: () => {
-          const document = getFocusedDocument();
-          document.webContents.executeJavaScript(`viewShowStyles()`);
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              focusedDocument.webContents.executeJavaScript(`viewShowStyles()`);
+            }
+          });
         }
       },
       {
@@ -821,8 +999,11 @@ export default Menu.buildFromTemplate([
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+Alt+3' : 'Ctrl+Alt+3',
         click: () => {
-          const document = getFocusedDocument();
-          document.webContents.executeJavaScript(`viewShowEvents()`);
+          getFocusedDocument().then((focusedDocument) => {
+            if (focusedDocument) {
+              focusedDocument.webContents.executeJavaScript(`viewShowEvents()`);
+            }
+          });
         }
       },
       { type: 'separator' },

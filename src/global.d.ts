@@ -18,7 +18,7 @@ declare namespace em {
 
   type Orientation = 'Portrait' | 'Landscape';
 
-  type TweenEventType = 'click' | 'doubleclick' | 'mouseenter' | 'mouseleave';
+  type TweenEventType = 'mousedown' | 'mouseup' | 'mousedrag' | 'click' | 'rightclick' | 'doubleclick' | 'mousemove' | 'mouseenter' | 'mouseleave';
 
   type UIElement = 'SelectionFrame' | 'HoverFrame' | 'DragFrame' | 'GradientFrame' | 'ActiveArtboardFrame' | 'TweenEventsFrame';
 
@@ -426,5 +426,14 @@ declare namespace em {
   interface Point {
     x: number;
     y: number;
+  }
+
+  interface DocumentWindows {
+    [id: number]: DocumentWindow;
+  }
+
+  interface DocumentWindow {
+    document: number;
+    preview: number;
   }
 }

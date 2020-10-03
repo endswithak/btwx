@@ -1,23 +1,25 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
-import { ipcRenderer, remote } from 'electron';
+import { BrowserWindow, ipcRenderer, remote } from 'electron';
 import { RootState } from '../store/reducers';
-import { PreviewTypes } from '../store/actionTypes/preview';
+import { PreviewTypes, OpenPreviewPayload } from '../store/actionTypes/preview';
 import { openPreview, stopPreviewRecording } from '../store/actions/preview';
 import { DEFAULT_MAC_DEVICE, DEFAULT_WINDOWS_DEVICE, PREVIEW_PREFIX } from '../constants';
-import { getPreviewWindow } from '../utils';
 import TopbarButton from './TopbarButton';
 
 interface PreviewButtonProps {
   activeArtboard?: em.Artboard;
   isOpen?: boolean;
   recording?: boolean;
+  focusing?: boolean;
+  previewWindowId?: number;
+  documentWindowId?: number;
   stopPreviewRecording?(): PreviewTypes;
-  openPreview?(): PreviewTypes;
+  openPreview?(payload: OpenPreviewPayload): PreviewTypes;
 }
 
 const PreviewButton = (props: PreviewButtonProps): ReactElement => {
-  const { activeArtboard, isOpen, openPreview, recording, stopPreviewRecording } = props;
+  const { activeArtboard, isOpen, openPreview, recording, stopPreviewRecording, focusing, previewWindowId, documentWindowId } = props;
 
   const handlePreviewClick = (): void => {
     const defaultSize = remote.process.platform === 'darwin' ? DEFAULT_MAC_DEVICE : DEFAULT_WINDOWS_DEVICE;
@@ -26,19 +28,39 @@ const PreviewButton = (props: PreviewButtonProps): ReactElement => {
       height: activeArtboard ? activeArtboard.frame.height : defaultSize.height
     }
     if (isOpen) {
-      const previewWindow = getPreviewWindow();
-      if (!previewWindow) {
-        ipcRenderer.send('openPreview', JSON.stringify(windowSize));
-      }
-      if (recording) {
+      if (!previewWindowId) {
+        ipcRenderer.send('openPreview', JSON.stringify({windowSize, documentWindowId}));
+      } else {
+        const previewWindow = remote.BrowserWindow.fromId(previewWindowId);
         const previewContents = previewWindow.webContents;
-        stopPreviewRecording();
-        previewContents.executeJavaScript('stopPreviewRecording()');
-        ipcRenderer.sendTo(previewContents.id, 'stopPreviewRecording');
+        if (recording) {
+          stopPreviewRecording();
+          previewContents.executeJavaScript('stopPreviewRecording()');
+          ipcRenderer.sendTo(previewContents.id, 'stopPreviewRecording');
+        }
+        if (!focusing) {
+          previewWindow.focus();
+        }
       }
     } else {
-      ipcRenderer.send('openPreview', JSON.stringify(windowSize));
-      openPreview();
+      ipcRenderer.send('openPreview', JSON.stringify({windowSize, documentWindowId}));
+      openPreview({});
+    }
+  }
+
+  const buttonIcon = () => {
+    if (isOpen) {
+      if (recording) {
+        return 'stop-recording';
+      } else {
+        if (focusing) {
+          return 'preview';
+        } else {
+          return 'move-forward';
+        }
+      }
+    } else {
+      return 'preview';
     }
   }
 
@@ -46,7 +68,7 @@ const PreviewButton = (props: PreviewButtonProps): ReactElement => {
     <TopbarButton
       label='Preview'
       onClick={handlePreviewClick}
-      icon={recording ? 'stop-recording' : 'preview'}
+      icon={buttonIcon()}
       isActive={isOpen}
       recording={recording} />
   );
@@ -56,12 +78,18 @@ const mapStateToProps = (state: RootState): {
   activeArtboard: em.Artboard;
   isOpen: boolean;
   recording: boolean;
+  focusing: boolean;
+  previewWindowId: number;
+  documentWindowId: number;
 } => {
   const { layer, preview } = state;
   const activeArtboard = layer.present.byId[layer.present.activeArtboard] as em.Artboard;
   const isOpen = preview.isOpen;
   const recording = preview.recording;
-  return { activeArtboard, isOpen, recording };
+  const focusing = preview.focusing;
+  const previewWindowId = preview.windowId;
+  const documentWindowId = preview.documentWindowId;
+  return { activeArtboard, isOpen, recording, focusing, previewWindowId, documentWindowId };
 };
 
 export default connect(

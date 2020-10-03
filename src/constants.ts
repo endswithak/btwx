@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 export const APP_NAME = 'btwix';
-export const PREVIEW_PREFIX = '(preview)';
+export const PREVIEW_PREFIX = '**preview**';
 export const THEME_PRIMARY_COLOR = '#3C88FD';
 export const THEME_GUIDE_COLOR = 'red';
 export const THEME_RECORDING_COLOR = 'red';
@@ -8,8 +8,13 @@ export const THEME_UNIT_SIZE = 4;
 export const DEFAULT_ARTBOARD_BACKGROUND_COLOR = { h: 0, s: 0, l: 1, v: 0, a: 1 };
 
 export const DEFAULT_TWEEN_EVENTS = [
+  { event: 'mousedown', titleCase: 'Mouse Down' },
+  { event: 'mouseup', titleCase: 'Mouse Up' },
+  { event: 'mousedrag', titleCase: 'Mouse Drag' },
   { event: 'click', titleCase: 'Click' },
+  { event: 'rightclick', titleCase: 'Right Click' },
   { event: 'doubleclick', titleCase: 'Double Click' },
+  { event: 'mousemove', titleCase: 'Mouse Move' },
   { event: 'mouseenter', titleCase: 'Mouse Enter' },
   { event: 'mouseleave', titleCase: 'Mouse Leave' }
 ];

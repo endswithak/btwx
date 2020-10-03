@@ -26,7 +26,7 @@
  * ```
  */
 
-import { remote } from 'electron';
+import { BrowserWindow, remote } from 'electron';
 import React from 'react';
 import sharp from 'sharp';
 import { ActionCreators } from 'redux-undo';
@@ -37,7 +37,7 @@ import store from './store';
 import getTheme from './store/theme';
 import { enableDarkTheme, enableLightTheme } from './store/actions/theme';
 import { saveDocumentAs, saveDocument, openDocument } from './store/actions/documentSettings';
-import { closePreview, hydratePreview, startPreviewRecording, stopPreviewRecording } from './store/actions/preview';
+import { closePreview, hydratePreview, startPreviewRecording, stopPreviewRecording, setPreviewFocusing, setPreviewWindowId, setPreviewDocumentWindowId } from './store/actions/preview';
 import App from './components/App';
 import Preview from './components/Preview';
 // import Preferences from './components/Preferences';
@@ -56,6 +56,7 @@ import { canGroupSelection, canUngroupSelection, canSendBackwardSelection, canBr
 import { PREVIEW_PREFIX } from './constants';
 
 import './styles/index.sass';
+import { RootState } from './store/reducers';
 
 const themePref = remote.systemPreferences.getUserDefault('theme', 'string');
 let themeObject = getTheme(themePref);
@@ -386,9 +387,9 @@ const titleBar = new Titlebar({
   const state = store.getState();
   store.dispatch(saveDocumentAs({name: documentSettings.base, path: documentSettings.fullPath, edit: state.layer.present.edit}));
   titleBar.updateTitle(documentSettings.base);
-  const previewWindow = remote.getCurrentWindow().getChildWindows().find((window) => window.getTitle().startsWith(PREVIEW_PREFIX));
-  if (previewWindow) {
-    previewWindow.webContents.executeJavaScript(`setTitleBarTitle(${JSON.stringify(`${PREVIEW_PREFIX}${documentSettings.base}`)})`);
+  const previewWindowId = state.preview.windowId;
+  if (previewWindowId) {
+    remote.BrowserWindow.fromId(previewWindowId).webContents.executeJavaScript(`setTitleBarTitle(${JSON.stringify(`${PREVIEW_PREFIX}${documentSettings.base}`)})`);
   }
   return (window as any).getSaveState();
 };
@@ -423,20 +424,37 @@ const titleBar = new Titlebar({
   }
 };
 
-(window as any).hydratePreview = (stateJSON: any): void => {
-  store.dispatch(hydratePreview({state: stateJSON}));
+(window as any).hydratePreview = (state: RootState): void => {
+  store.dispatch(hydratePreview({state: state}));
 };
 
 (window as any).previewClosed = (): void => {
   store.dispatch(closePreview());
 };
 
-(window as any).startPreviewRecording = () => {
+(window as any).startPreviewRecording = (): void => {
   store.dispatch(startPreviewRecording());
 };
 
-(window as any).stopPreviewRecording = () => {
+(window as any).stopPreviewRecording = (): void => {
   store.dispatch(stopPreviewRecording());
+};
+
+(window as any).setPreviewFocusing = (focusing: boolean): void => {
+  store.dispatch(setPreviewFocusing({focusing}));
+};
+
+(window as any).setPreviewWindowId = (windowId: number): void => {
+  store.dispatch(setPreviewWindowId({windowId}));
+};
+
+(window as any).setPreviewDocumentWindowId = (documentWindowId: number): void => {
+  store.dispatch(setPreviewDocumentWindowId({documentWindowId}));
+};
+
+(window as any).getPreviewState = (): string => {
+  const state = store.getState() as RootState;
+  return JSON.stringify(state.preview);
 };
 
 (window as any).renderNewDocument = (): void => {

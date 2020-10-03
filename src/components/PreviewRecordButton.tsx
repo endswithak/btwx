@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import { desktopCapturer, remote, ipcRenderer } from 'electron';
+import { desktopCapturer, remote, ipcRenderer, BrowserWindow } from 'electron';
 import { gsap } from 'gsap';
 import { writeFile } from 'fs';
 import React, { ReactElement, useEffect } from 'react';
@@ -13,6 +13,8 @@ import TopbarButton from './TopbarButton';
 interface PreviewRecordButtonProps {
   recording?: boolean;
   documentName?: string;
+  documentWindowId?: number;
+  previewWindowId?: number;
   startPreviewRecording?(): PreviewTypes;
 }
 
@@ -60,7 +62,7 @@ ipcRenderer.on('stopPreviewRecording', () => {
 });
 
 const PreviewRecordButton = (props: PreviewRecordButtonProps): ReactElement => {
-  const { recording, startPreviewRecording, documentName } = props;
+  const { recording, startPreviewRecording, documentName, documentWindowId, previewWindowId } = props;
 
   const handleVideoData = (e: any): void => {
     previewVideoChunks.push(e.data);
@@ -102,7 +104,7 @@ const PreviewRecordButton = (props: PreviewRecordButtonProps): ReactElement => {
         onComplete: () => {
           setTimeout(() => {
             startPreviewRecording();
-            currentWindow.getParentWindow().webContents.executeJavaScript('startPreviewRecording()');
+            remote.BrowserWindow.fromId(documentWindowId).webContents.executeJavaScript('startPreviewRecording()');
             previewMediaRecorder.start();
           }, 0.15);
         }
@@ -138,7 +140,8 @@ const PreviewRecordButton = (props: PreviewRecordButtonProps): ReactElement => {
 
   useEffect(() => {
     desktopCapturer.getSources({ types: ['window', 'screen'] }).then(async sources => {
-      const source = sources.find((s) => s.name.startsWith(`${PREVIEW_PREFIX}${documentName}`));
+      const mediaSourceId = remote.BrowserWindow.fromId(previewWindowId).getMediaSourceId();
+      const source = sources.find((s) => s.id === mediaSourceId);
       const videoElement = document.getElementById('preview-video') as HTMLVideoElement;
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: false,
@@ -167,12 +170,14 @@ const PreviewRecordButton = (props: PreviewRecordButtonProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   recording: boolean;
-  documentName: string;
+  documentWindowId: number;
+  previewWindowId: number;
 } => {
-  const { preview, documentSettings } = state;
+  const { preview } = state;
   const recording = preview.recording;
-  const documentName = documentSettings.name
-  return { recording, documentName };
+  const documentWindowId = preview.documentWindowId;
+  const previewWindowId = preview.windowId;
+  return { recording, documentWindowId, previewWindowId };
 };
 
 export default connect(

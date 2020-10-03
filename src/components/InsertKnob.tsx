@@ -33,6 +33,11 @@ if (remote.process.platform === 'darwin') {
           currentKnobPosThreshold = 0;
           knobActive = false;
           store.dispatch(deactivateInsertKnob());
+        } else {
+          const state = store.getState();
+          if (state.preview.isOpen && !state.preview.focusing) {
+            remote.BrowserWindow.fromId(state.preview.windowId).focus();
+          }
         }
         break;
       }

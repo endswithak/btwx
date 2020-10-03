@@ -169,10 +169,16 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
       });
       // set event layer function
       eventLayerFunctions[eventId] = (e: paper.MouseEvent | paper.KeyEvent) => {
-        timelines[eventId].play();
+        if (tweenEvent.event === 'rightclick') {
+          if ((e as any).event.which === 3) {
+            timelines[eventId].play();
+          }
+        } else {
+          timelines[eventId].play();
+        }
       };
       // play timeline on event
-      tweenEventPaperLayer.on(tweenEvent.event, eventLayerFunctions[eventId]);
+      tweenEventPaperLayer.on(tweenEvent.event === 'rightclick' ? 'click' : tweenEvent.event, eventLayerFunctions[eventId]);
     });
   }, [paperProject, activeArtboard]);
 

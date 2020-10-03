@@ -8,6 +8,7 @@ import { setLayerHover, setActiveArtboard } from '../store/actions/layer';
 import { SetLayerHoverPayload, LayerTypes, SetActiveArtboardPayload } from '../store/actionTypes/layer';
 import { ContextMenuTypes, OpenContextMenuPayload } from '../store/actionTypes/contextMenu';
 import { openContextMenu } from '../store/actions/contextMenu';
+import { DEFAULT_TWEEN_EVENTS } from '../constants';
 import { ThemeContext } from './ThemeProvider';
 import TweenDrawerEventsItemEdit from './TweenDrawerEventsItemEdit';
 import TweenDrawerEventsItemRemove from './TweenDrawerEventsItemRemove';
@@ -122,18 +123,7 @@ const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventItemProps):
   const layerItem = layer.present.byId[tweenEvent.layer];
   const destination = layer.present.byId[tweenEvent.destinationArtboard];
   const destinationName = destination.name;
-  const tweenEventDisplayName = ((): string => {
-    switch(tweenEvent.event) {
-      case 'click':
-        return 'Click';
-      case 'doubleclick':
-        return 'Double Click';
-      case 'mouseenter':
-        return 'Mouse Enter';
-      case 'mouseleave':
-        return 'Mouse Leave';
-    }
-  })();
+  const tweenEventDisplayName = DEFAULT_TWEEN_EVENTS.find((defaultEvent) => defaultEvent.event === tweenEvent.event).titleCase;
   const hovering = tweenDrawer.eventHover === ownProps.id;
   return { activeArtboard, artboardName, tweenEvent, layerItem, destinationName, tweenEventDisplayName, hovering };
 };

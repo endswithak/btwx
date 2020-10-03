@@ -5,6 +5,9 @@ import {
   STOP_PREVIEW_RECORDING,
   ENABLE_TOUCH_CURSOR,
   DISABLE_TOUCH_CURSOR,
+  SET_PREVIEW_FOCUSING,
+  SET_PREVIEW_WINDOW_ID,
+  SET_PREVIEW_DOCUMENT_WINDOW_ID,
   PreviewTypes
 } from '../actionTypes/preview';
 
@@ -12,12 +15,18 @@ export interface PreviewState {
   isOpen: boolean;
   recording: boolean;
   touchCursor: boolean;
+  focusing: boolean;
+  windowId: number;
+  documentWindowId: number;
 }
 
 export const initialState: PreviewState = {
   isOpen: false,
   recording: false,
-  touchCursor: false
+  touchCursor: false,
+  focusing: false,
+  windowId: null,
+  documentWindowId: null
 };
 
 export default (state = initialState, action: PreviewTypes): PreviewState => {
@@ -25,13 +34,18 @@ export default (state = initialState, action: PreviewTypes): PreviewState => {
     case OPEN_PREVIEW: {
       return {
         ...state,
-        isOpen: true
+        isOpen: true,
+        focusing: true,
+        windowId: Object.prototype.hasOwnProperty.call(action.payload, 'windowId') ? action.payload.windowId : state.windowId,
+        documentWindowId: Object.prototype.hasOwnProperty.call(action.payload, 'documentWindowId') ? action.payload.documentWindowId : state.documentWindowId
       };
     }
     case CLOSE_PREVIEW: {
       return {
         ...state,
-        isOpen: false
+        isOpen: false,
+        windowId: null,
+        focusing: false
       };
     }
     case START_PREVIEW_RECORDING: {
@@ -56,6 +70,24 @@ export default (state = initialState, action: PreviewTypes): PreviewState => {
       return {
         ...state,
         touchCursor: false
+      };
+    }
+    case SET_PREVIEW_FOCUSING: {
+      return {
+        ...state,
+        focusing: action.payload.focusing
+      };
+    }
+    case SET_PREVIEW_WINDOW_ID: {
+      return {
+        ...state,
+        windowId: action.payload.windowId
+      };
+    }
+    case SET_PREVIEW_DOCUMENT_WINDOW_ID: {
+      return {
+        ...state,
+        documentWindowId: action.payload.documentWindowId
       };
     }
     default:

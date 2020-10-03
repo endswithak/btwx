@@ -6,12 +6,20 @@ import {
   STOP_PREVIEW_RECORDING,
   ENABLE_TOUCH_CURSOR,
   DISABLE_TOUCH_CURSOR,
+  SET_PREVIEW_FOCUSING,
+  SET_PREVIEW_WINDOW_ID,
+  SET_PREVIEW_DOCUMENT_WINDOW_ID,
   HydratePreviewPayload,
+  OpenPreviewPayload,
+  SetPreviewFocusingPayload,
+  SetPreviewWindowIdPayload,
+  SetPreviewDocumentWindowIdPayload,
   PreviewTypes
 } from '../actionTypes/preview';
 
-export const openPreview = (): PreviewTypes => ({
-  type: OPEN_PREVIEW
+export const openPreview = (payload: OpenPreviewPayload): PreviewTypes => ({
+  type: OPEN_PREVIEW,
+  payload
 });
 
 export const hydratePreview = (payload: HydratePreviewPayload): PreviewTypes => ({
@@ -37,4 +45,19 @@ export const enableTouchCursor = (): PreviewTypes => ({
 
 export const disableTouchCursor = (): PreviewTypes => ({
   type: DISABLE_TOUCH_CURSOR
+});
+
+export const setPreviewFocusing = (payload: SetPreviewFocusingPayload): PreviewTypes => ({
+  type: SET_PREVIEW_FOCUSING,
+  payload
+});
+
+export const setPreviewWindowId = (payload: SetPreviewWindowIdPayload): PreviewTypes => ({
+  type: SET_PREVIEW_WINDOW_ID,
+  payload
+});
+
+export const setPreviewDocumentWindowId = (payload: SetPreviewDocumentWindowIdPayload): PreviewTypes => ({
+  type: SET_PREVIEW_DOCUMENT_WINDOW_ID,
+  payload
 });

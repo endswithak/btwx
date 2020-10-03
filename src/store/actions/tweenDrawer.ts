@@ -16,6 +16,7 @@ import {
   SetTweenDrawerEventSortPayload,
   TweenDrawerTypes
 } from '../actionTypes/tweenDrawer';
+import { remote } from 'electron';
 
 export const setTweenDrawerEventHover = (payload: SetTweenDrawerEventHoverPayload): TweenDrawerTypes => ({
   type: SET_TWEEN_DRAWER_EVENT_HOVER,
@@ -40,9 +41,11 @@ export const setTweenDrawerEvent = (payload: SetTweenDrawerEventPayload): TweenD
 export const setTweenDrawerEventThunk = (payload: SetTweenDrawerEventPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
-    if (state.preview.isOpen && !isPreviewWindow()) {
-      const previewWindow = getPreviewWindow();
-      previewWindow.webContents.executeJavaScript(`setTweenDrawerEvent(${payload.id})`)
+    if (state.preview.isOpen && state.preview.documentWindowId === remote.getCurrentWindow().id) {
+      const previewWindow = state.preview.windowId ? remote.BrowserWindow.fromId(state.preview.windowId) : null;
+      if (previewWindow) {
+        previewWindow.webContents.executeJavaScript(`setTweenDrawerEvent(${payload.id})`);
+      }
     }
     dispatch(setTweenDrawerEvent(payload));
   }

@@ -53,7 +53,7 @@ import {
 
 import { paperMain } from '../../canvas';
 
-import { THEME_PRIMARY_COLOR } from '../../constants';
+import { THEME_PRIMARY_COLOR, DEFAULT_TWEEN_EVENTS } from '../../constants';
 import MeasureGuide from '../../canvas/measureGuide';
 import getTheme from '../theme';
 
@@ -1021,18 +1021,7 @@ export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[
         }
       });
       const tweenEventText = new paperMain.PointText({
-        content: ((): string => {
-          switch(event.event) {
-            case 'click':
-              return 'Click';
-            case 'doubleclick':
-              return 'Double Click';
-            case 'mouseenter':
-              return 'Mouse Enter';
-            case 'mouseleave':
-              return 'Mouse Leave';
-          }
-        })(),
+        content: DEFAULT_TWEEN_EVENTS.find((tweenEvent) => event.event === tweenEvent.event).titleCase,
         point: new paperMain.Point(tweenEventConnector.bounds.center.x, tweenEventDestinationIndicator.bounds.top - ((1 / paperMain.view.zoom) * 12)),
         justification: 'center',
         fontSize: ((1 / paperMain.view.zoom) * 12),
