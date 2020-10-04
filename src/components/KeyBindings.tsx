@@ -91,13 +91,13 @@ const KeyBindings = (props: KeyBindingsProps): ReactElement => {
     document.addEventListener('keydown', handleKeyDown);
     const menu = remote.Menu.getApplicationMenu();
     const menuItems = {
-      appDarkTheme: {
-        id: 'appDarkTheme',
+      appThemeDark: {
+        id: 'appThemeDark',
         enabled: true,
         checked: themeName === 'dark'
       },
-      appLightTheme: {
-        id: 'appLightTheme',
+      appThemeLight: {
+        id: 'appThemeLight',
         enabled: true,
         checked: themeName === 'light'
       },
@@ -414,10 +414,10 @@ const mapStateToProps = (state: RootState): {
   verticalFlipEnabled: boolean;
   canPasteAsSVG: boolean;
 } => {
-  const { canvasSettings, layer, shapeTool, theme, documentSettings } = state;
-  const layersOpen = documentSettings.view.leftSidebar.isOpen;
-  const stylesOpen = documentSettings.view.rightSidebar.isOpen;
-  const eventsOpen = documentSettings.view.tweenDrawer.isOpen;
+  const { canvasSettings, layer, shapeTool, viewSettings, documentSettings } = state;
+  const layersOpen = viewSettings.leftSidebar.isOpen;
+  const stylesOpen = viewSettings.rightSidebar.isOpen;
+  const eventsOpen = viewSettings.tweenDrawer.isOpen;
   const focusing = canvasSettings.focusing;
   const selected = layer.present.selected;
   const canPasteAsSVG = canPasteSVG();
@@ -464,7 +464,7 @@ const mapStateToProps = (state: RootState): {
     });
     return result;
   }, { allIds: [], byId: {} });
-  const themeName = theme.theme;
+  const themeName = viewSettings.theme;
   return { canPasteAsSVG, fillsEnabled, strokesEnabled, shadowsEnabled, horizontalFlipEnabled, verticalFlipEnabled, canToggleStroke, canToggleShadow, canToggleFill, canToggleFlip, canMask, canBooleanOperation, canSelectAll, canSelectAllArtboards, layersOpen, canZoomOut, stylesOpen, eventsOpen, canArtboardZoom, canSelectedZoom, canCanvasZoom, themeName, canUndo, canRedo, selectedWithDescendents, clipboardType, selected, focusing, canMoveBackward, canMoveForward, canGroup, canUngroup, activeTool, activeToolShapeType, scope };
 };
 

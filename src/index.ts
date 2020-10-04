@@ -103,66 +103,6 @@ export const createNewDocument = (width?: number, height?: number): Promise<elec
   });
 };
 
-// export const createPreferencesWindow = (): void => {
-//   preferencesWindow = new BrowserWindow({
-//     parent: getFocusedDocument(),
-//     height: 600,
-//     width: 800,
-//     frame: false,
-//     titleBarStyle: 'hidden',
-//     show: false,
-//     backgroundColor: windowBackground,
-//     webPreferences: {
-//       nodeIntegration: true
-//     }
-//   });
-
-//   preferencesWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-
-//   // Open the DevTools.
-//   preferencesWindow.webContents.openDevTools();
-
-//   preferencesWindow.webContents.on('did-finish-load', () => {
-//     preferencesWindow.webContents.executeJavaScript(`renderPreferencesWindow()`).then(() => {
-//       preferencesWindow.show();
-//     });
-//   });
-
-//   preferencesWindow.on('closed', () => {
-//     preferencesWindow = null;
-//   });
-// };
-
-// export const createSketchImporterWindow = (sketchFile: any): void => {
-//   sketchImporterWindow = new BrowserWindow({
-//     parent: getFocusedDocument(),
-//     height: 600,
-//     width: 800,
-//     frame: false,
-//     titleBarStyle: 'hidden',
-//     show: false,
-//     backgroundColor: windowBackground,
-//     webPreferences: {
-//       nodeIntegration: true
-//     }
-//   });
-
-//   sketchImporterWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-
-//   // Open the DevTools.
-//   sketchImporterWindow.webContents.openDevTools();
-
-//   sketchImporterWindow.webContents.on('did-finish-load', () => {
-//     sketchImporterWindow.webContents.executeJavaScript(`renderSketchImporterWindow(${JSON.stringify(sketchFile)})`).then(() => {
-//       sketchImporterWindow.show();
-//     });
-//   });
-
-//   sketchImporterWindow.on('closed', () => {
-//     sketchImporterWindow = null;
-//   });
-// };
-
 const createPreviewWindow = ({width, height, documentWindowId}: {width: number; height: number; documentWindowId: number}): void => {
   const previewWindow = new BrowserWindow({
     // parent: getFocusedDocument(),
@@ -352,24 +292,6 @@ app.on('open-file', (event, path) => {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
 
-// export const handleSketchImport = () => {
-//   const document = getFocusedDocument();
-//   dialog.showOpenDialog(document, {
-//     buttonLabel: 'Import',
-//     filters: [{ name: 'Custom File Type', extensions: ['sketch'] }],
-//     properties: ['openFile']
-//   }).then(result => {
-//     if (!result.canceled && result.filePaths.length > 0) {
-//       const sketchFilePath = result.filePaths[0];
-//       readSketchFile(sketchFilePath).then((sketchJSON) => {
-//         if (!sketchImporterWindow) {
-//           createSketchImporterWindow(sketchJSON);
-//         }
-//       });
-//     }
-//   });
-// };
-
 export const openSaveDialog = ({documentState, onSave, onDontSave, onCancel}: {documentState: { edit: string; dirty: boolean; name: string; path: string }; onSave: any; onDontSave: any; onCancel?: any}): void => {
   dialog.showMessageBox({
     type: 'question',
@@ -524,3 +446,81 @@ ipcMain.on('updateTheme', (event, theme: em.ThemeName) => {
     }
   });
 });
+
+// export const createPreferencesWindow = (): void => {
+//   preferencesWindow = new BrowserWindow({
+//     parent: getFocusedDocument(),
+//     height: 600,
+//     width: 800,
+//     frame: false,
+//     titleBarStyle: 'hidden',
+//     show: false,
+//     backgroundColor: windowBackground,
+//     webPreferences: {
+//       nodeIntegration: true
+//     }
+//   });
+
+//   preferencesWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+
+//   // Open the DevTools.
+//   preferencesWindow.webContents.openDevTools();
+
+//   preferencesWindow.webContents.on('did-finish-load', () => {
+//     preferencesWindow.webContents.executeJavaScript(`renderPreferencesWindow()`).then(() => {
+//       preferencesWindow.show();
+//     });
+//   });
+
+//   preferencesWindow.on('closed', () => {
+//     preferencesWindow = null;
+//   });
+// };
+
+// export const createSketchImporterWindow = (sketchFile: any): void => {
+//   sketchImporterWindow = new BrowserWindow({
+//     parent: getFocusedDocument(),
+//     height: 600,
+//     width: 800,
+//     frame: false,
+//     titleBarStyle: 'hidden',
+//     show: false,
+//     backgroundColor: windowBackground,
+//     webPreferences: {
+//       nodeIntegration: true
+//     }
+//   });
+
+//   sketchImporterWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+
+//   // Open the DevTools.
+//   sketchImporterWindow.webContents.openDevTools();
+
+//   sketchImporterWindow.webContents.on('did-finish-load', () => {
+//     sketchImporterWindow.webContents.executeJavaScript(`renderSketchImporterWindow(${JSON.stringify(sketchFile)})`).then(() => {
+//       sketchImporterWindow.show();
+//     });
+//   });
+
+//   sketchImporterWindow.on('closed', () => {
+//     sketchImporterWindow = null;
+//   });
+// };
+
+// export const handleSketchImport = () => {
+//   const document = getFocusedDocument();
+//   dialog.showOpenDialog(document, {
+//     buttonLabel: 'Import',
+//     filters: [{ name: 'Custom File Type', extensions: ['sketch'] }],
+//     properties: ['openFile']
+//   }).then(result => {
+//     if (!result.canceled && result.filePaths.length > 0) {
+//       const sketchFilePath = result.filePaths[0];
+//       readSketchFile(sketchFilePath).then((sketchJSON) => {
+//         if (!sketchImporterWindow) {
+//           createSketchImporterWindow(sketchJSON);
+//         }
+//       });
+//     }
+//   });
+// };

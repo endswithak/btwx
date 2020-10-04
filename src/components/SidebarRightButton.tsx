@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { toggleRightSidebarThunk } from '../store/actions/documentSettings';
+import { toggleRightSidebarThunk } from '../store/actions/viewSettings';
 import TopbarButton from './TopbarButton';
 
 interface SidebarRightButtonProps {
@@ -28,8 +28,8 @@ const SidebarRightButton = (props: SidebarRightButtonProps): ReactElement => {
 const mapStateToProps = (state: RootState): {
   isRightSidebarOpen: boolean;
 } => {
-  const { documentSettings } = state;
-  const isRightSidebarOpen = documentSettings.view.rightSidebar.isOpen;
+  const { viewSettings } = state;
+  const isRightSidebarOpen = viewSettings.rightSidebar.isOpen;
   return { isRightSidebarOpen };
 };
 

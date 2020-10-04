@@ -59,7 +59,7 @@ const mapStateToProps = (state: RootState): {
   themeName: em.ThemeName;
   eventSort: em.TweenEventSort;
 } => {
-  const { layer, tweenDrawer, theme } = state;
+  const { layer, tweenDrawer, viewSettings } = state;
   const eventSort = tweenDrawer.eventSort;
   const activeArtboard = layer.present.activeArtboard;
   const allArtboardIds = layer.present.allArtboardIds;
@@ -72,7 +72,7 @@ const mapStateToProps = (state: RootState): {
   }, []);
   const eventHover = tweenDrawer.eventHover;
   const sortedTweenEventItems = getTweenEventsFrameItems(state);
-  const themeName = theme.theme;
+  const themeName = viewSettings.theme;
   return { tweenEventLayers: sortedTweenEventItems.tweenEventLayers, allArtboardIds, tweenEventItems: sortedTweenEventItems.tweenEventItems, allArtboardItems, eventHover, artboardsById, activeArtboard, themeName, eventSort };
 };
 

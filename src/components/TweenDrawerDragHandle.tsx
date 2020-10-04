@@ -3,8 +3,8 @@ import { connect } from 'react-redux';
 import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
 import styled from 'styled-components';
-import { setTweenDrawerHeight } from '../store/actions/documentSettings';
-import { SetTweenDrawerHeightPayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
+import { setTweenDrawerHeight } from '../store/actions/viewSettings';
+import { SetTweenDrawerHeightPayload, ViewSettingsTypes } from '../store/actionTypes/viewSettings';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 import { paperMain } from '../canvas';
@@ -13,7 +13,7 @@ gsap.registerPlugin(Draggable);
 
 interface TweenDrawerDragHandleProps {
   tweenDrawerHeight?: number;
-  setTweenDrawerHeight?(payload: SetTweenDrawerHeightPayload): DocumentSettingsTypes;
+  setTweenDrawerHeight?(payload: SetTweenDrawerHeightPayload): ViewSettingsTypes;
 }
 
 interface DragHandleProps {
@@ -71,8 +71,8 @@ const TweenDrawerDragHandle = (props: TweenDrawerDragHandleProps): ReactElement 
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { documentSettings } = state;
-  const tweenDrawerHeight = documentSettings.view.tweenDrawer.height;
+  const { viewSettings } = state;
+  const tweenDrawerHeight = viewSettings.tweenDrawer.height;
   return { tweenDrawerHeight };
 };
 

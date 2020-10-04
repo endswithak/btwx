@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { toggleTweenDrawerThunk } from '../store/actions/documentSettings';
+import { toggleTweenDrawerThunk } from '../store/actions/viewSettings';
 import { TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
 import TopbarButton from './TopbarButton';
 
@@ -29,8 +29,8 @@ const TweensButton = (props: TweensButtonProps): ReactElement => {
 const mapStateToProps = (state: RootState): {
   isTweenDrawerOpen: boolean;
 } => {
-  const { documentSettings } = state;
-  const isTweenDrawerOpen = documentSettings.view.tweenDrawer.isOpen;
+  const { viewSettings } = state;
+  const isTweenDrawerOpen = viewSettings.tweenDrawer.isOpen;
   return { isTweenDrawerOpen };
 };
 

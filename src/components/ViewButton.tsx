@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { toggleLeftSidebarThunk, toggleRightSidebarThunk, toggleTweenDrawerThunk } from '../store/actions/documentSettings';
+import { toggleLeftSidebarThunk, toggleRightSidebarThunk, toggleTweenDrawerThunk } from '../store/actions/viewSettings';
 import TopbarDropdownButton from './TopbarDropdownButton';
 
 interface InsertButtonProps {
@@ -51,10 +51,10 @@ const mapStateToProps = (state: RootState): {
   rightSidebarOpen: boolean;
   tweenDrawerOpen: boolean;
 } => {
-  const { documentSettings } = state;
-  const leftSidebarOpen = documentSettings.view.leftSidebar.isOpen;
-  const rightSidebarOpen = documentSettings.view.rightSidebar.isOpen;
-  const tweenDrawerOpen = documentSettings.view.tweenDrawer.isOpen;
+  const { viewSettings } = state;
+  const leftSidebarOpen = viewSettings.leftSidebar.isOpen;
+  const rightSidebarOpen = viewSettings.rightSidebar.isOpen;
+  const tweenDrawerOpen = viewSettings.tweenDrawer.isOpen;
   return { leftSidebarOpen, rightSidebarOpen, tweenDrawerOpen };
 };
 

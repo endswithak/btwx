@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import { desktopCapturer, remote, ipcRenderer, BrowserWindow } from 'electron';
+import { desktopCapturer, remote, ipcRenderer } from 'electron';
 import { gsap } from 'gsap';
 import { writeFile } from 'fs';
 import React, { ReactElement, useEffect } from 'react';
@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { startPreviewRecording } from '../store/actions/preview';
 import { PreviewTypes } from '../store/actionTypes/preview';
-import { PREVIEW_TOPBAR_HEIGHT, MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT, PREVIEW_PREFIX } from '../constants';
+import { PREVIEW_TOPBAR_HEIGHT, MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT } from '../constants';
 import TopbarButton from './TopbarButton';
 
 interface PreviewRecordButtonProps {

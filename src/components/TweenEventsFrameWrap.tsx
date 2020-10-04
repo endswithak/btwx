@@ -18,7 +18,7 @@ const TweenEventsFrameWrap = (props: TweenEventsFrameWrapProps): ReactElement =>
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer, tweenDrawer, canvasSettings, textEditor, documentSettings } = state;
+  const { layer, tweenDrawer, canvasSettings, textEditor, viewSettings } = state;
   const activeArtboard = layer.present.activeArtboard;
   const selected = layer.present.selected;
   const artboardSelected = selected.some(id => layer.present.allArtboardIds.includes(id));
@@ -28,7 +28,7 @@ const mapStateToProps = (state: RootState) => {
   const isTextEditorOpen = textEditor.isOpen;
   const tweenEvents = layer.present.allTweenEventIds.length > 0;
   const hasTweenEvent = tweenEvents && activeArtboard && layer.present.allTweenEventIds.some((id) => layer.present.tweenEventById[id].artboard === activeArtboard);
-  const isEnabled = documentSettings.view.tweenDrawer.isOpen && tweenEvents && (tweenDrawer.event || hasTweenEvent) && !isTextEditorOpen && !(isResizing && artboardSelected) && !(isDragging && artboardSelected) && !isZooming;
+  const isEnabled = viewSettings.tweenDrawer.isOpen && tweenEvents && (tweenDrawer.event || hasTweenEvent) && !isTextEditorOpen && !(isResizing && artboardSelected) && !(isDragging && artboardSelected) && !isZooming;
   return { isEnabled };
 };
 

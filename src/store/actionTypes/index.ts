@@ -4,6 +4,7 @@ import { CanvasSettingsTypes } from './canvasSettings';
 import { ColorEditorTypes } from './colorEditor';
 import { ContextMenuTypes } from './contextMenu';
 import { DocumentSettingsTypes } from './documentSettings';
+import { ViewSettingsTypes } from './viewSettings';
 import { EaseEditorTypes } from './easeEditor';
 import { GradientEditorTypes } from './gradientEditor';
 import { InsertKnobTypes } from './insertKnob';
@@ -14,7 +15,6 @@ import { ShapeToolTypes } from './shapeTool';
 import { TextEditorTypes } from './textEditor';
 import { TextSettingsTypes } from './textSettings';
 import { TextToolTypes } from './textTool';
-import { ThemeTypes } from './theme';
 import { TweenDrawerTypes } from './tweenDrawer';
 
 export type RootAction = ArtboardPresetEditorTypes |
@@ -33,5 +33,5 @@ export type RootAction = ArtboardPresetEditorTypes |
                          TextEditorTypes |
                          TextSettingsTypes |
                          TextToolTypes |
-                         ThemeTypes |
-                         TweenDrawerTypes;
+                         TweenDrawerTypes |
+                         ViewSettingsTypes;

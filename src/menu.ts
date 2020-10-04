@@ -6,28 +6,17 @@ import { APP_NAME } from './constants';
 const isMac = process.platform === 'darwin';
 
 export default Menu.buildFromTemplate([
-  // { role: 'appMenu' }
   ...(isMac ? [{
     label: app.name,
     submenu: [
-      { role: 'about' },
-      { type: 'separator' },
-      // {
-      //   label: 'Preferences',
-      //   click: () => {
-      //     if (!preferencesWindow) {
-      //       createPreferencesWindow();
-      //     }
-      //   }
-      // },
       {
         label: 'Theme',
         submenu: [
           {
             label: 'Dark',
-            type: 'radio',
+            type: 'checkbox',
             checked: false,
-            id: 'appDarkTheme',
+            id: 'appThemeDark',
             enabled: false,
             click: () => {
               handleSetTheme('dark');
@@ -35,9 +24,9 @@ export default Menu.buildFromTemplate([
           },
           {
             label: 'Light',
-            type: 'radio',
+            type: 'checkbox',
             checked: false,
-            id: 'appLightTheme',
+            id: 'appThemeLight',
             enabled: false,
             click: () => {
               handleSetTheme('light');
@@ -69,7 +58,6 @@ export default Menu.buildFromTemplate([
       { role: 'quit' }
     ]
   }] : []),
-  // { role: 'fileMenu' }
   {
     label: 'File',
     submenu: [
@@ -153,7 +141,6 @@ export default Menu.buildFromTemplate([
       isMac ? { role: 'close' } : { role: 'quit' }
     ]
   },
-  // { role: 'editMenu' }
   {
     label: 'Edit',
     submenu: [
@@ -1008,15 +995,10 @@ export default Menu.buildFromTemplate([
       },
       { type: 'separator' },
       { role: 'toggledevtools' },
-      // { type: 'separator' },
-      // { role: 'resetzoom' },
-      // { role: 'zoomin' },
-      // { role: 'zoomout' },
       { type: 'separator' },
       { role: 'togglefullscreen' }
     ]
   },
-  // { role: 'windowMenu' }
   {
     label: 'Window',
     submenu: [

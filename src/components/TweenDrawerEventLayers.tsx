@@ -4,7 +4,7 @@ import { ScrollSyncPane } from 'react-scroll-sync';
 import { RootState } from '../store/reducers';
 import { getTweenEventLayers } from '../store/selectors/layer';
 import { setTweenDrawerEventThunk } from '../store/actions/tweenDrawer';
-import { SetTweenDrawerEventPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
+import { SetTweenDrawerEventPayload } from '../store/actionTypes/tweenDrawer';
 import { setLayerHover, selectLayers } from '../store/actions/layer';
 import { SetLayerHoverPayload, SelectLayersPayload, LayerTypes } from '../store/actionTypes/layer';
 import { ThemeContext } from './ThemeProvider';
@@ -124,12 +124,12 @@ const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElemen
 }
 
 const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventLayersProps) => {
-  const { layer, tweenDrawer, documentSettings } = state;
+  const { layer, tweenDrawer, viewSettings } = state;
   const tweenEventLayers = getTweenEventLayers(layer.present, tweenDrawer.event);
   const isEmpty = tweenEventLayers.allIds.length === 0;
   const eventItem = layer.present.tweenEventById[tweenDrawer.event];
   const artboardItem = layer.present.byId[eventItem.artboard];
-  const tweenDrawerLayersWidth = documentSettings.view.tweenDrawer.layersWidth;
+  const tweenDrawerLayersWidth = viewSettings.tweenDrawer.layersWidth;
   const scrollLayerItem = ownProps.scrollLayer ? layer.present.byId[ownProps.scrollLayer] : null;
   const mask = scrollLayerItem && scrollLayerItem.type === 'Group' && (scrollLayerItem as em.Group).clipped ? (() => {
     return (scrollLayerItem as em.Group).children.find((id) => layer.present.byId[id].mask);

@@ -21,8 +21,8 @@ const ThemeProvider = (props: ThemeProviderProps) => {
 };
 
 const mapStateToProps = (state: RootState) => {
-  const { theme } = state;
-  return { theme: theme.theme };
+  const { viewSettings } = state;
+  return { theme: viewSettings.theme };
 };
 
 export default connect(

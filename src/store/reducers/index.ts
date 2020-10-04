@@ -11,10 +11,10 @@ import textEditor from './textEditor';
 import textSettings from './textSettings';
 import canvasSettings from './canvasSettings';
 import documentSettings from './documentSettings';
+import viewSettings from './viewSettings';
 import rightSidebar from './rightSidebar';
 import preview from './preview';
 import insertKnob from './insertKnob';
-import theme from './theme';
 import shapeTool from './shapeTool';
 import artboardTool from './artboardTool';
 import textTool from './textTool';
@@ -27,6 +27,7 @@ export const reducers = {
   layer,
   documentSettings,
   canvasSettings,
+  viewSettings,
   contextMenu,
   tweenDrawer,
   easeEditor,
@@ -36,7 +37,6 @@ export const reducers = {
   gradientEditor,
   artboardPresetEditor,
   rightSidebar,
-  theme,
   preview,
   insertKnob,
   shapeTool,

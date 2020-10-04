@@ -26,7 +26,7 @@
  * ```
  */
 
-import { BrowserWindow, remote } from 'electron';
+import { remote } from 'electron';
 import React from 'react';
 import sharp from 'sharp';
 import { ActionCreators } from 'redux-undo';
@@ -35,21 +35,20 @@ import { Provider } from 'react-redux';
 import { Titlebar, Color } from 'custom-electron-titlebar';
 import store from './store';
 import getTheme from './store/theme';
-import { enableDarkTheme, enableLightTheme } from './store/actions/theme';
 import { saveDocumentAs, saveDocument, openDocument } from './store/actions/documentSettings';
 import { closePreview, hydratePreview, startPreviewRecording, stopPreviewRecording, setPreviewFocusing, setPreviewWindowId, setPreviewDocumentWindowId } from './store/actions/preview';
 import App from './components/App';
 import Preview from './components/Preview';
 // import Preferences from './components/Preferences';
 // import SketchImporter from './components/SketchImporter';
-import ThemeProvider from './components/ThemeProvider';
 // import importSketchArtboards from './canvas/sketch';
+import ThemeProvider from './components/ThemeProvider';
 import { pasteLayersThunk, pasteStyleThunk, copyStyleThunk, copyLayersThunk, removeLayersThunk, redoThunk, undoThunk, ungroupLayers, groupLayersThunk, sendLayersForward, sendLayersToFront, sendLayersBackward, sendLayersToBack, escapeLayerScopeThunk, removeLayers, addImageThunk, alignLayersToBottom, alignLayersToCenter, alignLayersToLeft, alignLayersToMiddle, alignLayersToRight, alignLayersToTop, distributeLayersHorizontally, distributeLayersVertically, applyBooleanOperationThunk, toggleSelectionFillThunk, toggleSelectionShadowThunk, toggleSelectionStrokeThunk, addSelectionMaskThunk, toggleSelectionHorizontalFlipThunk, toggleSelectionVerticalFlipThunk, copySVGThunk, pasteSVGThunk } from './store/actions/layer';
 import { toggleArtboardToolThunk} from './store/actions/artboardTool';
 import { toggleTextToolThunk } from './store/actions/textTool';
 import { toggleShapeToolThunk } from './store/actions/shapeTool';
 import { zoomInThunk, zoomOutThunk, zoomSelectionThunk, zoomCanvasThunk } from './store/actions/zoomTool';
-import { toggleTweenDrawerThunk, toggleRightSidebarThunk, toggleLeftSidebarThunk } from './store/actions/documentSettings';
+import { toggleTweenDrawerThunk, toggleRightSidebarThunk, toggleLeftSidebarThunk, enableDarkTheme, enableLightTheme } from './store/actions/viewSettings';
 import { centerSelectionThunk } from './store/actions/translateTool';
 import { duplicateLayers, selectAllLayers, selectLayers, setActiveArtboard } from './store/actions/layer';
 import { canGroupSelection, canUngroupSelection, canSendBackwardSelection, canBringForwardSelection } from './store/selectors/layer';
@@ -374,7 +373,7 @@ const titleBar = new Titlebar({
 
 (window as any).getCurrentTheme = (): string => {
   const state = store.getState();
-  return state.theme.theme;
+  return state.viewSettings.theme;
 };
 
 (window as any).saveDocument = (): void => {

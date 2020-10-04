@@ -50,9 +50,9 @@ const SidebarLeft = (props: SidebarLeftProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { documentSettings, layer } = state;
-  const isOpen = documentSettings.view.leftSidebar.isOpen;
-  const sidebarWidth = documentSettings.view.leftSidebar.width;
+  const { viewSettings, layer } = state;
+  const isOpen = viewSettings.leftSidebar.isOpen;
+  const sidebarWidth = viewSettings.leftSidebar.width;
   const isEmpty = layer.present.allIds.length <= 1;
   return { isOpen, sidebarWidth, isEmpty };
 };

@@ -1,10 +1,10 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
-import { BrowserWindow, ipcRenderer, remote } from 'electron';
+import { ipcRenderer, remote } from 'electron';
 import { RootState } from '../store/reducers';
 import { PreviewTypes, OpenPreviewPayload } from '../store/actionTypes/preview';
 import { openPreview, stopPreviewRecording } from '../store/actions/preview';
-import { DEFAULT_MAC_DEVICE, DEFAULT_WINDOWS_DEVICE, PREVIEW_PREFIX } from '../constants';
+import { DEFAULT_MAC_DEVICE, DEFAULT_WINDOWS_DEVICE } from '../constants';
 import TopbarButton from './TopbarButton';
 
 interface PreviewButtonProps {

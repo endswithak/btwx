@@ -34,8 +34,8 @@ const TweenDrawer = (props: TweenDrawerProps): ReactElement => {
           ? <EmptyState
               icon='tweens'
               text='Events'
-              detail='You can add events when you have two or more artboards.'
-              style={{width: 411}} />
+              detail='Events can be added when the document has two or more artboards.'
+              style={{paddingLeft: 24, paddingRight: 24}} />
           : null
         }
         {
@@ -55,9 +55,9 @@ const mapStateToProps = (state: RootState): {
   tweenEvent: em.TweenEvent;
   isEmpty: boolean;
 } => {
-  const { layer, tweenDrawer, documentSettings } = state;
+  const { layer, tweenDrawer, viewSettings } = state;
   const tweenEvent = layer.present.tweenEventById[tweenDrawer.event];
-  const tweenDrawerHeight = documentSettings.view.tweenDrawer.height;
+  const tweenDrawerHeight = viewSettings.tweenDrawer.height;
   const isEmpty = layer.present.allTweenEventIds.length === 0;
   return { tweenEvent, tweenDrawerHeight, isEmpty };
 };

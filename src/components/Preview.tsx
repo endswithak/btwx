@@ -64,7 +64,8 @@ const Preview = (props: PreviewProps): ReactElement => {
         : <EmptyState
             icon='preview'
             text='Preview'
-            style={{width: 211}} />
+            detail='Add an artboard to preview it.'
+            style={{paddingRight: 24, paddingLeft: 24}} />
       }
     </div>
   );

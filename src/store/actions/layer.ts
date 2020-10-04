@@ -804,7 +804,7 @@ export const removeLayersThunk = () => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     if (state.layer.present.selected.length > 0 && state.canvasSettings.focusing) {
-      if (state.documentSettings.view.tweenDrawer.isOpen && state.tweenDrawer.event) {
+      if (state.viewSettings.tweenDrawer.isOpen && state.tweenDrawer.event) {
         const tweenEvent = state.layer.present.tweenEventById[state.tweenDrawer.event];
         let layersAndChildren: string[] = [];
         state.layer.present.selected.forEach((id) => {
@@ -2364,7 +2364,7 @@ const updateEditors = (dispatch: any, state: RootState, type: 'redo' | 'undo') =
       const prevStyle = prevLayerItems[0].style[state.gradientEditor.prop];
       // check if fill types match
       if (style.fillType === prevStyle.fillType) {
-        updateGradientFrame(layerItems[0], (style as em.Fill | em.Stroke).gradient, state.theme.theme);
+        updateGradientFrame(layerItems[0], (style as em.Fill | em.Stroke).gradient, state.viewSettings.theme);
         // check if prev action creator was for gradient
         if (gradientsMatch((style as em.Fill | em.Stroke).gradient, (prevStyle as em.Fill | em.Stroke).gradient)) {
           dispatch(closeGradientEditor());
@@ -2413,9 +2413,9 @@ export const undoThunk = () => {
         updateSelectionFrame(layerState);
       }
       updateActiveArtboardFrame(layerState);
-      if (state.documentSettings.view.tweenDrawer.isOpen && layerState.allTweenEventIds.length > 0) {
+      if (state.viewSettings.tweenDrawer.isOpen && layerState.allTweenEventIds.length > 0) {
         const sortedEventItems = getTweenEventsFrameItems({...state, layer: { ...state.layer, present: layerState }});
-        updateTweenEventsFrame(layerState, sortedEventItems.tweenEventItems, state.tweenDrawer.eventHover, state.theme.theme);
+        updateTweenEventsFrame(layerState, sortedEventItems.tweenEventItems, state.tweenDrawer.eventHover, state.viewSettings.theme);
       }
     }
   }
@@ -2449,9 +2449,9 @@ export const redoThunk = () => {
         updateSelectionFrame(layerState);
       }
       updateActiveArtboardFrame(layerState);
-      if (state.documentSettings.view.tweenDrawer.isOpen && layerState.allTweenEventIds.length > 0) {
+      if (state.viewSettings.tweenDrawer.isOpen && layerState.allTweenEventIds.length > 0) {
         const sortedEventItems = getTweenEventsFrameItems({...state, layer: { ...state.layer, present: layerState }});
-        updateTweenEventsFrame(layerState, sortedEventItems.tweenEventItems, state.tweenDrawer.eventHover, state.theme.theme);
+        updateTweenEventsFrame(layerState, sortedEventItems.tweenEventItems, state.tweenDrawer.eventHover, state.viewSettings.theme);
       }
     }
   }
