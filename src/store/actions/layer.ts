@@ -11,6 +11,7 @@ import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLaye
 import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle } from '../utils/actions';
 
 import { bufferToBase64, scrollToLayer } from '../../utils';
+import { renderShapeGroup } from '../../canvas/sketch/utils/shapeGroup';
 
 import { addDocumentImage } from './documentSettings';
 import { setTweenDrawerEventThunk } from './tweenDrawer';
@@ -439,6 +440,7 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => ({
 export const addArtboardThunk = (payload: AddArtboardPayload) => {
   return (dispatch: any, getState: any): Promise<em.Artboard> => {
     const id = payload.layer.id ? payload.layer.id : uuidv4();
+    const name = payload.layer.name ? payload.layer.name : 'Artboard';
     const style = getLayerStyle(payload, {}, { fill: { color: DEFAULT_ARTBOARD_BACKGROUND_COLOR } as em.Fill, stroke: { enabled: false } as em.Stroke, shadow: { enabled: false } as em.Shadow });
     const frame = getLayerFrame(payload);
     const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as em.PaperGradientFill : null;
@@ -456,6 +458,7 @@ export const addArtboardThunk = (payload: AddArtboardPayload) => {
     artboardMask.clipMask = true;
     // create artboard group
     const artboard = new paperMain.Group({
+      name: name,
       data: { id: id, type: 'Layer', layerType: 'Artboard' },
       children: [artboardMask, artboardBackground],
       parent: getPaperLayer('page')
@@ -464,7 +467,7 @@ export const addArtboardThunk = (payload: AddArtboardPayload) => {
     const newLayer = {
       type: 'Artboard',
       id: id,
-      name: payload.layer.name ? payload.layer.name : 'Artboard',
+      name: name,
       parent: payload.layer.parent,
       frame: payload.layer.frame,
       children: [],
@@ -503,6 +506,7 @@ export const addGroupThunk = (payload: AddGroupPayload) => {
     const masked = payload.layer.masked ? payload.layer.masked : false;
     const clipped = payload.layer.clipped ? payload.layer.clipped : false;
     new paperMain.Group({
+      name: name,
       data: { id: id, type: 'Layer', layerType: 'Group' },
       parent: getPaperLayer(parent)
     });
@@ -559,8 +563,9 @@ export const addShapeThunk = (payload: AddShapePayload) => {
     const mask = payload.layer.mask ? payload.layer.mask : false;
     const masked = payload.layer.masked ? payload.layer.masked : false;
     const paperLayer = new paperMain.CompoundPath({
+      name: name,
       pathData: pathData,
-      closed: shapeType !== 'Line',
+      closed: payload.layer.closed,
       strokeWidth: style.stroke.width,
       shadowColor: paperShadowColor,
       shadowOffset: paperShadowOffset,
@@ -607,6 +612,80 @@ export const addShapeThunk = (payload: AddShapePayload) => {
   }
 };
 
+export const addShapeGroupThunk = (payload: AddShapePayload) => {
+  return (dispatch: any, getState: any): Promise<em.Shape> => {
+    const id = payload.layer.id ? payload.layer.id : uuidv4();
+    const parent = payload.layer.parent ? payload.layer.parent : 'page';
+    const shapeType = payload.layer.shapeType ? payload.layer.shapeType : 'Rectangle';
+    const name = payload.layer.name ? payload.layer.name : shapeType;
+    const frame = getLayerFrame(payload);
+    const shapeOpts = getLayerShapeOpts(payload);
+    const style = getLayerStyle(payload);
+    const transform = getLayerTransform(payload);
+    const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as em.Shadow) : null;
+    const paperShadowOffset = style.shadow.enabled ? new paperMain.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
+    const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
+    const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as em.PaperGradientFill : null;
+    const paperStrokeColor = style.stroke.enabled ? getPaperStrokeColor(style.stroke, frame) as em.PaperGradientFill : null;
+    const mask = payload.layer.mask ? payload.layer.mask : false;
+    const masked = payload.layer.masked ? payload.layer.masked : false;
+    const shapeContainer = renderShapeGroup(payload.layer.sketchLayer);
+    const paperLayer = new paperMain.CompoundPath({
+      name: name,
+      pathData: shapeContainer.lastChild.pathData,
+      closed: payload.layer.closed,
+      strokeWidth: style.stroke.width,
+      shadowColor: paperShadowColor,
+      shadowOffset: paperShadowOffset,
+      shadowBlur: paperShadowBlur,
+      blendMode: style.blendMode,
+      opacity: style.opacity,
+      dashArray: style.strokeOptions.dashArray,
+      dashOffset: style.strokeOptions.dashOffset,
+      strokeCap: style.strokeOptions.cap,
+      strokeJoin: style.strokeOptions.join,
+      clipMask: mask,
+      data: { id, type: 'Layer', layerType: 'Shape' },
+      parent: getPaperLayer(parent)
+    });
+    paperLayer.children.forEach((item) => item.data = { id: 'ShapePartial', type: 'LayerChild', layerType: 'Shape' });
+    paperLayer.position = new paperMain.Point(frame.x, frame.y);
+    // wonky fix to make sure gradient destination and origin are in correct place
+    paperLayer.rotation = -transform.rotation;
+    paperLayer.scale(transform.horizontalFlip ? -1 : 1, transform.verticalFlip ? -1 : 1);
+    paperLayer.fillColor = paperFillColor;
+    paperLayer.strokeColor = paperStrokeColor;
+    paperLayer.rotation = transform.rotation;
+    paperLayer.scale(transform.horizontalFlip ? -1 : 1, transform.verticalFlip ? -1 : 1);
+    //
+    const newLayer = {
+      type: 'Shape',
+      id: id,
+      name: name,
+      parent: parent,
+      shapeType: 'Custom',
+      frame: frame,
+      selected: false,
+      children: null,
+      tweenEvents: [],
+      tweens: [],
+      mask,
+      masked,
+      style,
+      transform,
+      pathData: shapeContainer.lastChild.pathData,
+      ...shapeOpts
+    } as em.Shape;
+    if (!payload.batch) {
+      dispatch(addShape({
+        layer: newLayer,
+        batch: payload.batch
+      }));
+    }
+    return Promise.resolve(newLayer);
+  }
+};
+
 // Text
 
 export const addText = (payload: AddTextPayload): LayerTypes => ({
@@ -628,6 +707,7 @@ export const addTextThunk = (payload: AddTextPayload) => {
     const paperShadowOffset = style.shadow.enabled ? new paperMain.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
     const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
     const paperLayer = new paperMain.PointText({
+      name: name,
       point: new paperMain.Point(0, 0),
       content: textContent,
       data: { id, type: 'Layer', layerType: 'Text' },
@@ -693,6 +773,7 @@ export const addImageThunk = (payload: AddImagePayload) => {
     return new Promise((resolve, reject) => {
       const state = getState() as RootState;
       const frame = getLayerFrame(payload);
+      const name = payload.layer.name ? payload.layer.name : 'Image';
       const newBuffer = Buffer.from(payload.buffer);
       const exists = state.documentSettings.images.allIds.length > 0 && state.documentSettings.images.allIds.find((id) => Buffer.from(state.documentSettings.images.byId[id].buffer).equals(newBuffer));
       const base64 = bufferToBase64(newBuffer);
@@ -707,6 +788,7 @@ export const addImageThunk = (payload: AddImagePayload) => {
       const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
       const paperLayer = new paperMain.Raster(`data:image/webp;base64,${base64}`);
       const imageContainer = new paperMain.Group({
+        name: name,
         parent: getPaperLayer(parent),
         data: { id, imageId, type: 'Layer', layerType: 'Image' },
         children: [paperLayer]
@@ -722,7 +804,7 @@ export const addImageThunk = (payload: AddImagePayload) => {
         const newLayer = {
           type: 'Image',
           id: id,
-          name: payload.layer.name ? payload.layer.name : 'Image',
+          name: name,
           parent: parent,
           frame: frame,
           selected: false,
@@ -769,6 +851,9 @@ export const addLayersThunk = (payload: AddLayersPayload) => {
           case 'Shape':
             promises.push(dispatch(addShapeThunk({layer: layer as em.Shape, batch: true})));
             break;
+          case 'ShapeGroup':
+            promises.push(dispatch(addShapeGroupThunk({layer: layer as em.Shape, batch: true})));
+            break;
           case 'Image':
             promises.push(dispatch(addImageThunk({layer: layer as em.Image, batch: true, buffer: payload.buffers[(layer as em.Image).imageId].buffer})));
             break;
@@ -780,8 +865,8 @@ export const addLayersThunk = (payload: AddLayersPayload) => {
             break;
         }
       });
-      Promise.all(promises).then(() => {
-        dispatch(addLayers({layers: payload.layers}));
+      Promise.all(promises).then((layers) => {
+        dispatch(addLayers({layers: layers}));
         resolve();
       });
     });
@@ -1942,6 +2027,7 @@ export const applyBooleanOperationThunk = (payload: UniteLayersPayload | Interse
         dispatch(addShapeThunk({
           layer: {
             shapeType: 'Custom',
+            name: 'Combined Shape',
             pathData: booleanLayers.pathData,
             parent: layerItem.parent,
             frame: {
@@ -2212,7 +2298,7 @@ export const pasteLayersThunk = ({ overSelection, overPoint, overLayer }: { over
         try {
           const text = clipboard.readText();
           const parsedText: em.ClipboardLayers = JSON.parse(text);
-          if (parsedText.type && parsedText.type === 'layers') {
+          if (parsedText.type && (parsedText.type === 'layers' || parsedText.type === 'sketch-layers')) {
             const replaceAll = (str: string, find: string, replace: string) => {
               return str.replace(new RegExp(find, 'g'), replace);
             };
@@ -2298,6 +2384,11 @@ export const pasteLayersThunk = ({ overSelection, overPoint, overLayer }: { over
               });
             }
             dispatch(addLayersThunk({layers: newLayers, buffers: newParse.images}) as any).then(() => {
+              // if (parsedText.type === 'sketch-layers') {
+              //   if (newParse.main.length > 1) {
+
+              //   }
+              // }
               dispatch(selectLayers({layers: newParse.main, newSelection: true}));
               resolve();
             });

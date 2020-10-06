@@ -2232,6 +2232,8 @@ export const moveLayersBy = (state: LayerState, action: MoveLayersBy): LayerStat
 
 export const setLayerName = (state: LayerState, action: SetLayerName): LayerState => {
   let currentState = state;
+  const paperLayer = getPaperLayer(action.payload.id);
+  paperLayer.name = action.payload.name;
   // remove existing tweens
   const layerScope = getLayerScope(currentState, action.payload.id);
   if (layerScope.some((id: string) => currentState.allArtboardIds.includes(id))) {

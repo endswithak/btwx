@@ -228,7 +228,7 @@ declare namespace em {
     mask: boolean;
   }
 
-  type ClipboardType = 'layers' | 'style';
+  type ClipboardType = 'layers' | 'style' | 'sketch-layers';
 
   interface ClipboardLayers {
     type: ClipboardType;
@@ -278,6 +278,7 @@ declare namespace em {
     shapeType: ShapeType;
     children: null;
     pathData: string;
+    closed: boolean;
     sides?: number;
     points?: number;
     radius?: number;

@@ -442,6 +442,7 @@ class ShapeTool {
               rotation: this.shapeType === 'Line' ? vector.angle : DEFAULT_TRANSFORM.rotation
             },
             pathData: paperLayer.pathData,
+            closed: this.shapeType !== 'Line',
             ...(() => {
               switch(this.shapeType) {
                 case 'Ellipse':

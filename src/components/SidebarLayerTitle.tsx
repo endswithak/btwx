@@ -78,11 +78,16 @@ const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
   return (
     <div
       className={`
-      c-sidebar-layer__name
-      ${editing
-        ? 'c-sidebar-layer__name--editing'
-        : null
-      }`}
+        c-sidebar-layer__name
+        ${editing
+          ? 'c-sidebar-layer__name--editing'
+          : null
+        }
+        ${layer.type === 'Artboard'
+          ? 'c-sidebar-layer__name--artboard'
+          : null
+        }`
+      }
       style={{
         color: layer.selected && !dragGhost
         ? theme.text.onPrimary

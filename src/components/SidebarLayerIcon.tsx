@@ -38,7 +38,7 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
           fill: layer.selected && !dragGhost
           ? theme.text.onPrimary
           : theme.text.lighter,
-          stroke: layer.type === 'Shape' && (layer as em.Shape).shapeType === 'Line'
+          stroke: layer.type === 'Shape' && !(layer as em.Shape).closed
           ? layer.selected && !dragGhost
             ? theme.text.onPrimary
             : theme.text.lighter

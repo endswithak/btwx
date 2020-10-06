@@ -431,5 +431,8 @@ export const DEVICES: em.DevicePlatform[] = [
   }
 ];
 
-export const DEFAULT_WINDOWS_DEVICE = ANDROID_MOBILE_DEVICES.find((device) => device.type === 'Galaxy S10e');
-export const DEFAULT_MAC_DEVICE = APPLE_IPHONE_DEVICES.find((device) => device.type === 'iPhone 11 Pro');
+export const DEFAULT_WINDOWS_DEVICE_NAME = 'Galaxy S10e';
+export const DEFAULT_MAC_DEVICE_NAME = 'iPhone 11 Pro';
+
+export const DEFAULT_WINDOWS_DEVICE = ANDROID_MOBILE_DEVICES.find((device) => device.type === DEFAULT_WINDOWS_DEVICE_NAME);
+export const DEFAULT_MAC_DEVICE = APPLE_IPHONE_DEVICES.find((device) => device.type === DEFAULT_MAC_DEVICE_NAME);
