@@ -120,20 +120,10 @@ const InsertKnob = (props: InsertKnobProps): ReactElement => {
         properties: ['openFile']
       }).then(result => {
         if (result.filePaths.length > 0 && !result.canceled) {
-          sharp(result.filePaths[0]).metadata().then(({ width }) => {
-            sharp(result.filePaths[0]).resize(Math.round(width * 0.5)).webp({quality: 50}).toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
-              const newBuffer = Buffer.from(data);
-              addImageThunk({
-                layer: {
-                  frame: {
-                    width: info.width,
-                    height: info.height,
-                    innerWidth: info.width,
-                    innerHeight: info.height
-                  } as em.Frame
-                },
-                buffer: newBuffer
-              });
+          sharp(result.filePaths[0]).toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
+            addImageThunk({
+              layer: {},
+              buffer: data
             });
           });
         }

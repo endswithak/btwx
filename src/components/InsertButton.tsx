@@ -39,19 +39,10 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
       properties: ['openFile']
     }).then(result => {
       if (result.filePaths.length > 0 && !result.canceled) {
-        sharp(result.filePaths[0]).metadata().then(({ width, height }) => {
-          sharp(result.filePaths[0]).resize(Math.round(width * 0.5)).webp({quality: 50}).toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
-            addImageThunk({
-              layer: {
-                frame: {
-                  width: info.width,
-                  height: info.height,
-                  innerWidth: info.width,
-                  innerHeight: info.height
-                } as em.Frame
-              },
-              buffer: data
-            });
+        sharp(result.filePaths[0]).toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
+          addImageThunk({
+            layer: {},
+            buffer: data
           });
         });
       }

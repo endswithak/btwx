@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
+import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCreators } from 'redux-undo';
 import { clipboard } from 'electron';
@@ -595,6 +596,7 @@ export const addShapeThunk = (payload: AddShapePayload) => {
       children: null,
       tweenEvents: [],
       tweens: [],
+      closed: payload.layer.closed,
       mask,
       masked,
       style,
@@ -669,6 +671,7 @@ export const addShapeGroupThunk = (payload: AddShapePayload) => {
       children: null,
       tweenEvents: [],
       tweens: [],
+      closed: true,
       mask,
       masked,
       style,
@@ -771,63 +774,68 @@ export const addImage = (payload: AddImagePayload): LayerTypes => ({
 export const addImageThunk = (payload: AddImagePayload) => {
   return (dispatch: any, getState: any): Promise<em.Image> => {
     return new Promise((resolve, reject) => {
-      const state = getState() as RootState;
-      const frame = getLayerFrame(payload);
-      const name = payload.layer.name ? payload.layer.name : 'Image';
-      const newBuffer = Buffer.from(payload.buffer);
-      const exists = state.documentSettings.images.allIds.length > 0 && state.documentSettings.images.allIds.find((id) => Buffer.from(state.documentSettings.images.byId[id].buffer).equals(newBuffer));
-      const base64 = bufferToBase64(newBuffer);
-      const id = payload.layer.id ? payload.layer.id : uuidv4();
-      const imageId = exists ? exists : payload.layer.imageId ? payload.layer.imageId : uuidv4();
-      const masked = payload.layer.masked ? payload.layer.masked : false;
-      const parent = payload.layer.parent ? payload.layer.parent : 'page';
-      const style = getLayerStyle(payload, {}, { fill: { enabled: false } as em.Fill, stroke: { enabled: false } as em.Stroke });
-      const transform = getLayerTransform(payload);
-      const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as em.Shadow) : null;
-      const paperShadowOffset = style.shadow.enabled ? new paperMain.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
-      const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
-      const paperLayer = new paperMain.Raster(`data:image/webp;base64,${base64}`);
-      const imageContainer = new paperMain.Group({
-        name: name,
-        parent: getPaperLayer(parent),
-        data: { id, imageId, type: 'Layer', layerType: 'Image' },
-        children: [paperLayer]
+      const buffer = Buffer.from(payload.buffer);
+      sharp(buffer).metadata().then(({ width, height }) => {
+        sharp(buffer).resize(Math.round(width * 0.5)).webp({quality: 50}).toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
+          const state = getState() as RootState;
+          const frame = getLayerFrame(payload);
+          const name = payload.layer.name ? payload.layer.name : 'Image';
+          const newBuffer = Buffer.from(data);
+          const exists = state.documentSettings.images.allIds.length > 0 && state.documentSettings.images.allIds.find((id) => Buffer.from(state.documentSettings.images.byId[id].buffer).equals(newBuffer));
+          const base64 = bufferToBase64(newBuffer);
+          const id = payload.layer.id ? payload.layer.id : uuidv4();
+          const imageId = exists ? exists : payload.layer.imageId ? payload.layer.imageId : uuidv4();
+          const masked = payload.layer.masked ? payload.layer.masked : false;
+          const parent = payload.layer.parent ? payload.layer.parent : 'page';
+          const style = getLayerStyle(payload, {}, { fill: { enabled: false } as em.Fill, stroke: { enabled: false } as em.Stroke });
+          const transform = getLayerTransform(payload);
+          const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as em.Shadow) : null;
+          const paperShadowOffset = style.shadow.enabled ? new paperMain.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
+          const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
+          const paperLayer = new paperMain.Raster(`data:image/webp;base64,${base64}`);
+          const imageContainer = new paperMain.Group({
+            name: name,
+            parent: getPaperLayer(parent),
+            data: { id, imageId, type: 'Layer', layerType: 'Image' },
+            children: [paperLayer]
+          });
+          paperLayer.onLoad = (): void => {
+            paperLayer.data = { id: 'Raster', type: 'LayerChild', layerType: 'Image' };
+            imageContainer.bounds.width = frame.innerWidth;
+            imageContainer.bounds.height = frame.innerHeight;
+            imageContainer.position = new paperMain.Point(frame.x, frame.y);
+            imageContainer.shadowColor = paperShadowColor;
+            imageContainer.shadowOffset = paperShadowOffset;
+            imageContainer.shadowBlur = paperShadowBlur;
+            const newLayer = {
+              type: 'Image',
+              id: id,
+              name: name,
+              parent: parent,
+              frame: frame,
+              selected: false,
+              mask: false,
+              masked: masked,
+              children: null,
+              tweenEvents: [],
+              tweens: [],
+              style,
+              transform,
+              imageId
+            } as em.Image;
+            if (!exists) {
+              dispatch(addDocumentImage({id: imageId, buffer: newBuffer}));
+            }
+            if (!payload.batch) {
+              dispatch(addImage({
+                layer: newLayer,
+                batch: payload.batch
+              }));
+            }
+            resolve(newLayer);
+          }
+        });
       });
-      paperLayer.onLoad = (): void => {
-        paperLayer.data = { id: 'Raster', type: 'LayerChild', layerType: 'Image' };
-        imageContainer.bounds.width = frame.innerWidth;
-        imageContainer.bounds.height = frame.innerHeight;
-        imageContainer.position = new paperMain.Point(frame.x, frame.y);
-        imageContainer.shadowColor = paperShadowColor;
-        imageContainer.shadowOffset = paperShadowOffset;
-        imageContainer.shadowBlur = paperShadowBlur;
-        const newLayer = {
-          type: 'Image',
-          id: id,
-          name: name,
-          parent: parent,
-          frame: frame,
-          selected: false,
-          mask: false,
-          masked: masked,
-          children: null,
-          tweenEvents: [],
-          tweens: [],
-          style,
-          transform,
-          imageId
-        } as em.Image;
-        if (!exists) {
-          dispatch(addDocumentImage({id: imageId, buffer: newBuffer}));
-        }
-        if (!payload.batch) {
-          dispatch(addImage({
-            layer: newLayer,
-            batch: payload.batch
-          }));
-        }
-        resolve(newLayer);
-      }
     });
   }
 };
@@ -2384,11 +2392,6 @@ export const pasteLayersThunk = ({ overSelection, overPoint, overLayer }: { over
               });
             }
             dispatch(addLayersThunk({layers: newLayers, buffers: newParse.images}) as any).then(() => {
-              // if (parsedText.type === 'sketch-layers') {
-              //   if (newParse.main.length > 1) {
-
-              //   }
-              // }
               dispatch(selectLayers({layers: newParse.main, newSelection: true}));
               resolve();
             });

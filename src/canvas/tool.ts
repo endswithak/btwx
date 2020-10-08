@@ -1,4 +1,5 @@
 import store from '../store';
+import throttle from 'lodash.throttle';
 import { RootState } from '../store/reducers';
 import { getNearestScopeAncestor, getDeepSelectItem, getPaperLayer, getLayerAndDescendants, getLayerScope } from '../store/selectors/layer';
 import { setTextSettings } from '../store/actions/textSettings';

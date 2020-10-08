@@ -13,7 +13,7 @@ const SidebarLayerMaskedIcon = (props: SidebarLayerMaskedIconProps): ReactElemen
   const { layer, dragGhost, maskedParent } = props;
 
   return (
-    layer.masked
+    layer.masked && !layer.mask
     ? <div
         className='c-sidebar-layer__icon'
         >
@@ -25,13 +25,7 @@ const SidebarLayerMaskedIcon = (props: SidebarLayerMaskedIconProps): ReactElemen
             : theme.text.lighter
           }} />
       </div>
-    : maskedParent
-      ? <div
-        className='c-sidebar-layer__icon c-sidebar-layer__icon--chevron'
-        style={{
-          pointerEvents: 'none'
-        }} />
-      : null
+    : null
   );
 }
 

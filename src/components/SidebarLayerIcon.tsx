@@ -35,10 +35,12 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
         small={layer.type === 'Shape' || maskItem !== null}
         shapeId={layer.type === 'Shape' ? layer.id : maskItem ? maskItem.id : null}
         style={{
-          fill: layer.selected && !dragGhost
-          ? theme.text.onPrimary
-          : theme.text.lighter,
-          stroke: layer.type === 'Shape' && !(layer as em.Shape).closed
+          fill: layer.type === 'Shape' && (!(layer as em.Shape).closed || (layer as em.Shape).mask)
+          ? 'none'
+          : layer.selected && !dragGhost
+            ? theme.text.onPrimary
+            : theme.text.lighter,
+          stroke: layer.type === 'Shape' && (!(layer as em.Shape).closed || (layer as em.Shape).mask)
           ? layer.selected && !dragGhost
             ? theme.text.onPrimary
             : theme.text.lighter

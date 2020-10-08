@@ -244,8 +244,8 @@ declare namespace em {
 
   interface ClipboardStyle {
     type: ClipboardType;
-    style: em.Style;
-    textStyle: em.TextStyle;
+    style: Style;
+    textStyle: TextStyle;
   }
 
   interface Group extends Layer {
