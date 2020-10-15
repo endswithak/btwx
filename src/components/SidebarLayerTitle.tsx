@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement, useState } from 'react';
+import React, { useContext, ReactElement, useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { setLayerName } from '../store/actions/layer';
 import { LayerTypes, SetLayerNamePayload } from '../store/actionTypes/layer';
@@ -10,7 +10,6 @@ import { ThemeContext } from './ThemeProvider';
 
 interface SidebarLayerTitleProps {
   layer: string;
-  dragGhost: boolean;
   editing?: boolean;
   isArtboard?: boolean;
   isSelected?: boolean;
@@ -21,8 +20,12 @@ interface SidebarLayerTitleProps {
 
 const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isArtboard, isSelected, layerName, layer, editing, setEditing, dragGhost, setLayerName } = props;
+  const { isArtboard, isSelected, layerName, layer, editing, setEditing, setLayerName } = props;
   const [nameInput, setNameInput] = useState(layerName);
+
+  useEffect(() => {
+    console.log('LAYER TITLE');
+  }, []);
 
   const handleSubmit = () => {
     if (nameInput.replace(/\s/g, '').length > 0 && nameInput !== layerName) {
@@ -49,7 +52,7 @@ const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
         }`
       }
       style={{
-        color: isSelected && !dragGhost
+        color: isSelected
         ? theme.text.onPrimary
         : theme.text.base
       }}>

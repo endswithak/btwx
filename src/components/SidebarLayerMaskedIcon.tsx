@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement } from 'react';
+import React, { useContext, ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
@@ -6,23 +6,27 @@ import Icon from './Icon';
 
 interface SidebarLayerMaskedIconProps {
   layer: string;
-  dragGhost: boolean;
-  layerItem?: em.Layer;
+  isEnabled?: boolean;
+  isSelected?: boolean;
 }
 
 const SidebarLayerMaskedIcon = (props: SidebarLayerMaskedIconProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layer, dragGhost, layerItem } = props;
+  const { layer, isEnabled, isSelected } = props;
+
+  useEffect(() => {
+    console.log('LAYER MASKED ICON');
+  }, []);
 
   return (
-    layerItem.masked && !layerItem.mask
+    isEnabled
     ? <div
         className='c-sidebar-layer__icon'
         >
         <Icon
-          name={layerItem.mask ? 'masked-mask' : 'masked'}
+          name='masked'
           style={{
-            fill: layerItem.selected && !dragGhost
+            fill: isSelected
             ? theme.text.onPrimary
             : theme.text.lighter
           }} />
@@ -32,11 +36,14 @@ const SidebarLayerMaskedIcon = (props: SidebarLayerMaskedIconProps): ReactElemen
 }
 
 const mapStateToProps = (state: RootState, ownProps: SidebarLayerMaskedIconProps): {
-  layerItem?: em.Layer;
+  isEnabled?: boolean;
+  isSelected?: boolean;
 } => {
   const { layer } = state;
   const layerItem = layer.present.byId[ownProps.layer];
-  return { layerItem };
+  const isEnabled = layerItem.masked && !layerItem.mask;
+  const isSelected = layerItem.selected;
+  return { isEnabled, isSelected };
 };
 
 export default connect(

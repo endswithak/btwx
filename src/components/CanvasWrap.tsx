@@ -29,7 +29,7 @@ const CanvasWrap = (props: CanvasWrapProps): ReactElement => {
     paperMain.setup(document.getElementById('canvas') as HTMLCanvasElement);
     importPaperProject({
       paperProject,
-      documentImages: documentImages
+      documentImages
     });
     paperMain.view.viewSize = new paperMain.Size(canvasContainerRef.current.clientWidth, canvasContainerRef.current.clientHeight);
     paperMain.view.matrix.set(matrix);

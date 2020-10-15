@@ -41,9 +41,9 @@ import {
 } from '../actionTypes/layer';
 
 import {
-  getLayerIndex, getLayer, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor,
-  getLayerScope, getPaperLayer, getSelectionTopLeft, getSelectionBottomRight, getClipboardCenter,
-  getSelectionCenter, getLayerAndDescendants, getLayerDescendants, getDestinationEquivalent, getEquivalentTweenProps,
+  getLayerIndex, getLayer, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor, getPaperLayer, getSelectionTopLeft,
+  getSelectionBottomRight, getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayerDescendants,
+  getDestinationEquivalent, getEquivalentTweenProps, getDeepSelectItem,
   getTweensByDestinationLayer, getTweensEventsByOriginArtboard, getTweensEventsByDestinationArtboard, getTweensByLayer,
   getLayersBounds, getGradientOriginPoint, getGradientDestinationPoint, getGradientStops, getLayerSnapPoints,
   orderLayersByDepth, orderLayersByLeft, orderLayersByTop, savePaperProjectJSON, getTweensByProp,
@@ -1293,15 +1293,15 @@ export const deselectLayers = (state: LayerState, action: DeselectLayers): Layer
 };
 
 export const selectAllLayers = (state: LayerState, action: SelectAllLayers): LayerState => {
-  const pageScopeLayers = state.allIds.filter((id) => state.byId[id].parent && state.byId[id].parent === 'page');
-  return selectLayers(state, layerActions.selectLayers({layers: pageScopeLayers, newSelection: true}) as SelectLayers);
+  const pageItem = state.byId['page'];
+  return selectLayers(state, layerActions.selectLayers({layers: pageItem.children, newSelection: true}) as SelectLayers);
 };
 
 export const deselectAllLayers = (state: LayerState, action: DeselectAllLayers): LayerState => {
-  const deselectedLayersState = state.selected.reduce((result, current) => {
-    return deselectLayer(result, layerActions.deselectLayer({id: current}) as DeselectLayer);
-  }, state);
-  return clearLayerScope(deselectedLayersState, layerActions.clearLayerScope() as ClearLayerScope);
+  let currentState = state;
+  currentState = deselectLayers(currentState, layerActions.deselectLayers({layers: currentState.selected}) as DeselectLayers);
+  currentState = clearLayerScope(currentState, layerActions.clearLayerScope() as ClearLayerScope);
+  return currentState;
 };
 
 export const selectLayer = (state: LayerState, action: SelectLayer): LayerState => {
@@ -1362,22 +1362,21 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
     }
   }
   // update scope
-  currentState = setGlobalScope(currentState, layerActions.setGlobalScope({scope: layerItem.scope}) as SetGlobalScope)
+  if (layerItem.scope[layerItem.scope.length - 1] !== currentState.scope[currentState.scope.length - 1]) {
+    currentState = setGlobalScope(currentState, layerActions.setGlobalScope({scope: layerItem.scope}) as SetGlobalScope);
+  }
   // return final state
   return currentState;
 };
 
 export const deepSelectLayer = (state: LayerState, action: DeepSelectLayer): LayerState => {
   let currentState = state;
-  const nearestScopeAncestor = getNearestScopeAncestor(currentState, action.payload.id);
-  if (isScopeGroupLayer(currentState, nearestScopeAncestor.id)) {
-    currentState = increaseLayerScope(currentState, layerActions.increaseLayerScope({id: nearestScopeAncestor.id}) as IncreaseLayerScope);
-    const nearestScopeAncestorDeep = getNearestScopeAncestor(currentState, action.payload.id);
-    if (currentState.hover === nearestScopeAncestor.id) {
-      currentState = setLayerHover(currentState, layerActions.setLayerHover({id: nearestScopeAncestorDeep.id}) as SetLayerHover);
-    }
-    return selectLayer(currentState, layerActions.selectLayer({id: nearestScopeAncestorDeep.id, newSelection: true}) as SelectLayer);
+  const layerItem = state.byId[action.payload.id];
+  const deepSelectItem = getDeepSelectItem(currentState, action.payload.id);
+  if ((layerItem.type === 'Group' || layerItem.type === 'Artboard') && !(layerItem as em.Group | em.Artboard).showChildren) {
+    currentState = showLayerChildren(currentState, layerActions.showLayerChildren({id: action.payload.id}) as ShowLayerChildren);
   }
+  currentState = selectLayer(currentState, layerActions.selectLayer({id: deepSelectItem.id, newSelection: true}) as SelectLayer);
   return currentState;
 };
 
@@ -1781,7 +1780,7 @@ export const setLayerScope = (state: LayerState, action: SetLayerScope): LayerSt
     ...state.byId,
     [action.payload.id]: {
       ...state.byId[action.payload.id],
-      scope: action.payload.scope
+      scope: [...action.payload.scope]
     }
   }
 });
@@ -1796,7 +1795,7 @@ export const setLayersScope = (state: LayerState, action: SetLayersScope): Layer
 
 export const setGlobalScope = (state: LayerState, action: SetGlobalScope): LayerState => ({
   ...state,
-  scope: action.payload.scope
+  scope: [...action.payload.scope]
 });
 
 export const updateNestedScopes = (state: LayerState, id: string): LayerState => {

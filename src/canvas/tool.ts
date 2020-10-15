@@ -129,9 +129,9 @@ class MasterTool {
           layerId = props.nearestScopeAncestor.id;
           store.dispatch(selectLayer({id: props.nearestScopeAncestor.id, newSelection: true}));
         }
-        // if (layerId) {
-        //   scrollToLayer(layerId);
-        // }
+        if (layerId) {
+          scrollToLayer(layerId);
+        }
       }
     }
     // drag tool

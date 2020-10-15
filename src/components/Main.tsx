@@ -1,5 +1,5 @@
 import { remote } from 'electron';
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useEffect } from 'react';
 import CanvasWrap from './CanvasWrap';
 import SidebarLeft from './SidebarLeft';
 import SidebarRight from './SidebarRight';
@@ -14,6 +14,11 @@ interface MainProps {
 
 const Main = (props: MainProps): ReactElement => {
   const { ready, setReady } = props;
+
+  useEffect(() => {
+    console.log('MAIN');
+  });
+
   return (
     <div
       id='main'
@@ -24,10 +29,10 @@ const Main = (props: MainProps): ReactElement => {
         className='c-app__canvas'>
         <CanvasWrap setReady={setReady} ready={ready} />
         {/* <TweenDrawerWrap ready={ready} /> */}
-        <TextEditor ready={ready} />
+        {/* <TextEditor ready={ready} /> */}
         {/* <InsertKnobWrap /> */}
       </div>
-      <SidebarRight ready={ready} />
+      {/* <SidebarRight ready={ready} /> */}
     </div>
   );
 }

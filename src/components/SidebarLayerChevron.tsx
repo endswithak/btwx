@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement } from 'react';
+import React, { useContext, ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { showLayerChildren, hideLayerChildren } from '../store/actions/layer';
@@ -8,7 +8,6 @@ import Icon from './Icon';
 
 interface SidebarLayerChevronProps {
   layer: string;
-  dragGhost: boolean;
   showChildren?: boolean;
   isGroup?: boolean;
   isSelected?: boolean;
@@ -18,7 +17,11 @@ interface SidebarLayerChevronProps {
 
 const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { showChildren, isGroup, isSelected, layer, showLayerChildren, hideLayerChildren, dragGhost } = props;
+  const { showChildren, isGroup, isSelected, layer, showLayerChildren, hideLayerChildren } = props;
+
+  useEffect(() => {
+    console.log('LAYER CHEVRON');
+  }, []);
 
   const handleChevronClick = (): void => {
     if (showChildren) {
@@ -29,25 +32,25 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
   }
 
   return (
-    isGroup
-    ? <div
-        className='c-sidebar-layer__icon c-sidebar-layer__icon--chevron'
-        onClick={handleChevronClick}
-        >
-        <Icon
-          name={showChildren ? 'thicc-chevron-down' : 'thicc-chevron-right'}
-          small
-          style={{
-            fill: isSelected && !dragGhost
-            ? theme.text.onPrimary
-            : theme.text.lighter
-          }} />
-      </div>
-    : <div
-        className='c-sidebar-layer__icon c-sidebar-layer__icon--chevron'
-        style={{
-          pointerEvents: 'none'
-        }} />
+    <div
+      className='c-sidebar-layer__icon c-sidebar-layer__icon--chevron'
+      onClick={isGroup ? handleChevronClick : null}
+      style={{
+        pointerEvents: isGroup ? 'auto' : 'none'
+      }}>
+      {
+        isGroup
+        ? <Icon
+            name={showChildren ? 'thicc-chevron-down' : 'thicc-chevron-right'}
+            small
+            style={{
+              fill: isSelected
+              ? theme.text.onPrimary
+              : theme.text.lighter
+            }} />
+        : null
+      }
+    </div>
   );
 }
 

@@ -40,7 +40,7 @@ const App = (): ReactElement => {
       }}>
         <TopbarTitle />
         {/* flex items */}
-        <Topbar />
+        {/* <Topbar /> */}
         <Main ready={ready} setReady={setReady} />
         {/* abs elements */}
         {
@@ -53,9 +53,9 @@ const App = (): ReactElement => {
               <MeasureFrameWrap />
               <TweenEventsFrameWrap />
               {/* modals */}
-              <EaseEditorWrap />
+              {/* <EaseEditorWrap />
               <ArtboardPresetEditorWrap />
-              <ContextMenuWrap />
+              <ContextMenuWrap /> */}
               {/* misc */}
               <MasterTool />
               <KeyBindings />

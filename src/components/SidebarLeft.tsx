@@ -17,9 +17,9 @@ interface SidebarLeftProps {
 const SidebarLeft = (props: SidebarLeftProps): ReactElement => {
   const { isOpen, sidebarWidth, ready, isEmpty } = props;
 
-  // useEffect(() => {
-  //   console.log('LEFT SIDEBAR');
-  // })
+  useEffect(() => {
+    console.log('LEFT SIDEBAR');
+  }, [isOpen, isEmpty, ready]);
 
   return (
     isOpen

@@ -1,31 +1,38 @@
 import React, { ReactElement } from 'react';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
-import SidebarLayer from './SidebarLayer';
+import SidebarLayerItem from './SidebarLayerItem';
+import SidebarLayerChildren from './SidebarLayerChildren';
 import { orderLayersByDepth } from '../store/selectors/layer';
 
 interface SidebarLayerDragGhostsProps {
   orderedLayers?: string[];
+  leftSidebarWidth?: number;
 }
 
 const SidebarLayerDragGhosts = (props: SidebarLayerDragGhostsProps): ReactElement => {
-  const { orderedLayers } = props;
+  const { orderedLayers, leftSidebarWidth } = props;
 
   return (
     <div
       id='sidebarDragGhosts'
       style={{
         position: 'fixed',
-        width: '100%',
+        width: leftSidebarWidth,
         left: 999999999999
       }}>
       {
-        orderedLayers.map((id, index) => (
-          <SidebarLayer
-            dragGhost
+        orderedLayers.map((layer, index) => (
+          <div
+            id={`ghost-${layer}`}
             key={index}
-            layer={id}
-            depth={0} />
+            draggable
+            className='c-sidebar-layer'>
+            <SidebarLayerItem
+              layer={layer} />
+            <SidebarLayerChildren
+              layer={layer} />
+          </div>
         ))
       }
     </div>
@@ -33,9 +40,10 @@ const SidebarLayerDragGhosts = (props: SidebarLayerDragGhostsProps): ReactElemen
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
+  const { layer, viewSettings } = state;
   const orderedLayers = orderLayersByDepth(layer.present, layer.present.selected);
-  return { orderedLayers };
+  const leftSidebarWidth = viewSettings.leftSidebar.width;
+  return { orderedLayers, leftSidebarWidth };
 };
 
 export default connect(

@@ -11,12 +11,12 @@ import { getLayerAndDescendants, canGroupSelection, canUngroupSelection, canSend
 
 interface KeyBindingsProps {
   themeName?: em.ThemeName;
-  selectedWithDescendents?: {
-    allIds: string[];
-    byId: {
-      [id: string]: em.Layer;
-    };
-  };
+  // selectedWithDescendents?: {
+  //   allIds: string[];
+  //   byId: {
+  //     [id: string]: em.Layer;
+  //   };
+  // };
   clipboardType?: em.ClipboardType;
   scope?: string[];
   activeTool?: em.ToolType;
@@ -59,7 +59,7 @@ interface KeyBindingsProps {
 }
 
 const KeyBindings = (props: KeyBindingsProps): ReactElement => {
-  const { canPasteAsSVG, fillsEnabled, strokesEnabled, shadowsEnabled, horizontalFlipEnabled, verticalFlipEnabled, canToggleStroke, canToggleShadow, canToggleFill, canToggleFlip, canMask, canBooleanOperation, canSelectAll, canSelectAllArtboards, layersOpen, canZoomOut, stylesOpen, eventsOpen, canArtboardZoom, canSelectedZoom, canCanvasZoom, themeName, canUndo, canRedo, selectedWithDescendents, clipboardType, toggleAreaSelectToolThunk, scope, activeToolShapeType, toggleSelectionToolThunk, activeTool, escapeLayerScopeThunk, selected, focusing, canMoveBackward, canMoveForward, canGroup, canUngroup, toggleArtboardToolThunk, toggleTextToolThunk, toggleShapeToolThunk } = props;
+  const { canPasteAsSVG, fillsEnabled, strokesEnabled, shadowsEnabled, horizontalFlipEnabled, verticalFlipEnabled, canToggleStroke, canToggleShadow, canToggleFill, canToggleFlip, canMask, canBooleanOperation, canSelectAll, canSelectAllArtboards, layersOpen, canZoomOut, stylesOpen, eventsOpen, canArtboardZoom, canSelectedZoom, canCanvasZoom, themeName, canUndo, canRedo, clipboardType, toggleAreaSelectToolThunk, scope, activeToolShapeType, toggleSelectionToolThunk, activeTool, escapeLayerScopeThunk, selected, focusing, canMoveBackward, canMoveForward, canGroup, canUngroup, toggleArtboardToolThunk, toggleTextToolThunk, toggleShapeToolThunk } = props;
 
   const handleKeyDown = (e: any) => {
     if (focusing) {
@@ -365,7 +365,7 @@ const KeyBindings = (props: KeyBindingsProps): ReactElement => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     }
-  }, [selectedWithDescendents, focusing]);
+  }, [selected, focusing]);
 
   return (
     <></>
@@ -374,12 +374,12 @@ const KeyBindings = (props: KeyBindingsProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   themeName: em.ThemeName;
-  selectedWithDescendents: {
-    allIds: string[];
-    byId: {
-      [id: string]: em.Layer;
-    };
-  };
+  // selectedWithDescendents: {
+  //   allIds: string[];
+  //   byId: {
+  //     [id: string]: em.Layer;
+  //   };
+  // };
   clipboardType: em.ClipboardType;
   activeTool: em.ToolType;
   activeToolShapeType: em.ShapeType;
@@ -456,16 +456,16 @@ const mapStateToProps = (state: RootState): {
   const activeTool = canvasSettings.activeTool;
   const activeToolShapeType = shapeTool.shapeType;
   const scope = layer.present.scope;
-  const selectedWithDescendents = selected.reduce((result: { allIds: string[]; byId: { [id: string]: em.Layer } }, current) => {
-    const layerAndChildren = getLayerAndDescendants(state.layer.present, current);
-    result.allIds = [...result.allIds, ...layerAndChildren];
-    layerAndChildren.forEach((id) => {
-      result.byId[id] = state.layer.present.byId[id];
-    });
-    return result;
-  }, { allIds: [], byId: {} });
+  // const selectedWithDescendents = selected.reduce((result: { allIds: string[]; byId: { [id: string]: em.Layer } }, current) => {
+  //   const layerAndChildren = getLayerAndDescendants(state.layer.present, current);
+  //   result.allIds = [...result.allIds, ...layerAndChildren];
+  //   layerAndChildren.forEach((id) => {
+  //     result.byId[id] = state.layer.present.byId[id];
+  //   });
+  //   return result;
+  // }, { allIds: [], byId: {} });
   const themeName = viewSettings.theme;
-  return { canPasteAsSVG, fillsEnabled, strokesEnabled, shadowsEnabled, horizontalFlipEnabled, verticalFlipEnabled, canToggleStroke, canToggleShadow, canToggleFill, canToggleFlip, canMask, canBooleanOperation, canSelectAll, canSelectAllArtboards, layersOpen, canZoomOut, stylesOpen, eventsOpen, canArtboardZoom, canSelectedZoom, canCanvasZoom, themeName, canUndo, canRedo, selectedWithDescendents, clipboardType, selected, focusing, canMoveBackward, canMoveForward, canGroup, canUngroup, activeTool, activeToolShapeType, scope };
+  return { canPasteAsSVG, fillsEnabled, strokesEnabled, shadowsEnabled, horizontalFlipEnabled, verticalFlipEnabled, canToggleStroke, canToggleShadow, canToggleFill, canToggleFlip, canMask, canBooleanOperation, canSelectAll, canSelectAllArtboards, layersOpen, canZoomOut, stylesOpen, eventsOpen, canArtboardZoom, canSelectedZoom, canCanvasZoom, themeName, canUndo, canRedo, clipboardType, selected, focusing, canMoveBackward, canMoveForward, canGroup, canUngroup, activeTool, activeToolShapeType, scope };
 };
 
 export default connect(

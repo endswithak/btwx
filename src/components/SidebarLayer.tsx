@@ -9,15 +9,13 @@ import SidebarLayerChildren from './SidebarLayerChildren';
 
 interface SidebarLayerProps {
   layer: string;
-  isSelected?: boolean;
-  isDropzone?: boolean;
-  dragging?: boolean;
-  dragGhost?: boolean;
+  // isSelected?: boolean;
+  // dragging?: boolean;
   setDragging?(payload: SetDraggingPayload): LeftSidebarTypes;
 }
 
 const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
-  const { layer, dragGhost, isDropzone, isSelected, dragging, setDragging } = props;
+  const { layer, setDragging } = props;
 
   const handleDragStart = (e: any): void => {
     setDragging({dragging: true});
@@ -28,46 +26,40 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
     setDragging({dragging: false});
   }
 
-  // useEffect(() => {
-  //   console.log('LAYER');
-  // }, [layer]);
+  useEffect(() => {
+    console.log('LAYER');
+  }, []);
 
   return (
     <div
-      id={dragGhost ? `${layer}-dragGhost` : layer}
+      id={layer}
       draggable
       className='c-sidebar-layer'
-      onDragStart={dragGhost ? null : handleDragStart}
-      onDragEnd={dragGhost ? null : handleDragEnd}
-      style={{
-        opacity: dragging && isSelected ? 0.5 : 1
-      }}>
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      // style={{
+      //   opacity: dragging && isSelected ? 0.5 : 1
+      // }}
+      >
       <SidebarLayerItem
-        layer={layer}
-        dragGhost={dragGhost} />
-      {
-        isDropzone
-        ? <SidebarDropzone
-            layer={layer} />
-        : null
-      }
+        layer={layer} />
+      <SidebarDropzone
+        layer={layer} />
       <SidebarLayerChildren
-        layer={layer}
-        dragGhost={dragGhost} />
+        layer={layer} />
     </div>
   );
 }
 
-const mapStateToProps = (state: RootState, ownProps: SidebarLayerProps) => {
-  const { layer, leftSidebar } = state;
-  const layerItem = layer.present.byId[ownProps.layer];
-  const isSelected = layerItem.selected;
-  const isDropzone = leftSidebar.dragging && !ownProps.dragGhost;
-  const dragging = leftSidebar.dragging;
-  return { isSelected, dragging, isDropzone };
-};
+// const mapStateToProps = (state: RootState, ownProps: SidebarLayerProps) => {
+//   const { layer, leftSidebar } = state;
+//   const layerItem = layer.present.byId[ownProps.layer];
+//   const isSelected = layerItem.selected;
+//   const dragging = leftSidebar.dragging;
+//   return { isSelected, dragging };
+// };
 
 export default connect(
-  mapStateToProps,
+  null,
   { setDragging }
 )(SidebarLayer);

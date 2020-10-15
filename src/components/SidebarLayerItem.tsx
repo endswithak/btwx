@@ -19,7 +19,6 @@ interface SidebarLayerItemProps {
   depth?: number;
   isSelected?: boolean;
   editing?: boolean;
-  dragGhost?: boolean;
   setEditing?(payload: SetEditingPayload): LeftSidebarTypes;
   selectLayer?(payload: SelectLayerPayload): LayerTypes;
   deselectLayer?(payload: DeselectLayerPayload): LayerTypes;
@@ -29,7 +28,7 @@ interface SidebarLayerItemProps {
 
 const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layer, dragGhost, isSelected, depth, editing, setLayerHover, openContextMenu, selectLayer, deselectLayer, setEditing } = props;
+  const { layer, isSelected, depth, editing, setLayerHover, openContextMenu, selectLayer, deselectLayer, setEditing } = props;
 
   const handleMouseDown = (e: any): void => {
     if (!editing) {
@@ -75,9 +74,9 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
     setEditing({editing: layer});
   }
 
-  // useEffect(() => {
-  //   console.log('LAYER ITEM');
-  // }, []);
+  useEffect(() => {
+    console.log('LAYER ITEM');
+  }, []);
 
   return (
     <div
@@ -85,26 +84,21 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
       style={{
         paddingLeft: depth * (theme.unit * 1.44)
       }}
-      onMouseDown={dragGhost ? null : handleMouseDown}
-      onMouseEnter={dragGhost ? null : handleMouseEnter}
-      onMouseLeave={dragGhost ? null : handleMouseLeave}
-      onContextMenu={dragGhost ? null : handleContextMenu}
-      onDoubleClick={dragGhost ? null : handleDoubleClick}>
+      onMouseDown={handleMouseDown}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onContextMenu={handleContextMenu}
+      onDoubleClick={handleDoubleClick}>
       <SidebarLayerBackground
-        layer={layer}
-        dragGhost={dragGhost} />
+        layer={layer} />
       <SidebarLayerChevron
-        layer={layer}
-        dragGhost={dragGhost} />
+        layer={layer} />
       <SidebarLayerMaskedIcon
-        layer={layer}
-        dragGhost={dragGhost} />
+        layer={layer} />
       <SidebarLayerIcon
-        layer={layer}
-        dragGhost={dragGhost} />
+        layer={layer} />
       <SidebarLayerTitle
-        layer={layer}
-        dragGhost={dragGhost} />
+        layer={layer} />
     </div>
   );
 }

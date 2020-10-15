@@ -3,11 +3,10 @@ import SidebarLayer from './SidebarLayer';
 
 interface SidebarLayersProps {
   layers: string[];
-  dragGhost?: boolean;
 }
 
 const SidebarLayers = (props: SidebarLayersProps): ReactElement => {
-  const { layers, dragGhost } = props;
+  const { layers } = props;
 
   return (
     <>
@@ -15,8 +14,7 @@ const SidebarLayers = (props: SidebarLayersProps): ReactElement => {
         layers.map((layer: string, index: number) => (
           <SidebarLayer
             key={index}
-            layer={layer}
-            dragGhost={dragGhost} />
+            layer={layer} />
         ))
       }
     </>
