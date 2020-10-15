@@ -37,7 +37,7 @@ import {
   RemoveLayerGradientStop, RemoveLayersGradientStop, SetLayerActiveGradientStop, SetLayersShadowBlur, SetLayersShadowXOffset,
   SetLayersShadowYOffset, SetLayersFontSize, SetLayersFontWeight, SetLayersFontFamily, SetLayersLeading, SetLayersJustification,
   SetLayerTweenTiming, SetRoundedRadii, SetPolygonsSides, SetStarsPoints, SetStarsRadius, SetLayerEdit, AddLayers, SetLineFromX,
-  SetLineFromY, SetLineFrom, SetLineToX, SetLineToY, SetLineTo, SetLinesFromX, SetLinesFromY, SetLinesToX, SetLinesToY, SelectAllLayers, SetLayerStyle, SetLayersStyle, EnableLayersHorizontalFlip, DisableLayersHorizontalFlip, DisableLayersVerticalFlip, EnableLayersVerticalFlip
+  SetLineFromY, SetLineFrom, SetLineToX, SetLineToY, SetLineTo, SetLinesFromX, SetLinesFromY, SetLinesToX, SetLinesToY, SelectAllLayers, SetLayerStyle, SetLayersStyle, EnableLayersHorizontalFlip, DisableLayersHorizontalFlip, DisableLayersVerticalFlip, EnableLayersVerticalFlip, SetLayerScope, SetLayersScope, SetGlobalScope
 } from '../actionTypes/layer';
 
 import {
@@ -65,7 +65,10 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
     allIds: addItem(currentState.allIds, action.payload.layer.id),
     byId: {
       ...currentState.byId,
-      [action.payload.layer.id]: action.payload.layer as em.Artboard,
+      [action.payload.layer.id]: {
+        ...action.payload.layer as em.Artboard,
+        scope: ['page']
+      },
       [currentState.page]: {
         ...currentState.byId[currentState.page],
         children: addItem(currentState.byId[currentState.page].children, action.payload.layer.id)
@@ -86,13 +89,17 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
 export const addShape = (state: LayerState, action: AddShape): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.layer.id);
+  const parentItem = state.byId[action.payload.layer.parent];
   // add shape
   currentState = {
     ...currentState,
     allIds: addItem(currentState.allIds, action.payload.layer.id),
     byId: {
       ...currentState.byId,
-      [action.payload.layer.id]: action.payload.layer as em.Shape,
+      [action.payload.layer.id]: {
+        ...action.payload.layer as em.Shape,
+        scope: [...parentItem.scope, action.payload.layer.parent]
+      },
       [action.payload.layer.parent]: {
         ...currentState.byId[action.payload.layer.parent],
         children: addItem((currentState.byId[action.payload.layer.parent] as em.Group).children, action.payload.layer.id),
@@ -116,12 +123,16 @@ export const addShape = (state: LayerState, action: AddShape): LayerState => {
 export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.layer.id);
+  const parentItem = state.byId[action.payload.layer.parent];
   currentState = {
     ...currentState,
     allIds: addItem(currentState.allIds, action.payload.layer.id),
     byId: {
       ...currentState.byId,
-      [action.payload.layer.id]: action.payload.layer as em.Group,
+      [action.payload.layer.id]: {
+        ...action.payload.layer as em.Group,
+        scope: [...parentItem.scope, action.payload.layer.parent]
+      },
       [action.payload.layer.parent]: {
         ...currentState.byId[action.payload.layer.parent],
         children: addItem((currentState.byId[action.payload.layer.parent] as em.Group).children, action.payload.layer.id),
@@ -144,12 +155,16 @@ export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
 export const addText = (state: LayerState, action: AddText): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.layer.id);
+  const parentItem = state.byId[action.payload.layer.parent];
   currentState = {
     ...currentState,
     allIds: addItem(currentState.allIds, action.payload.layer.id),
     byId: {
       ...currentState.byId,
-      [action.payload.layer.id]: action.payload.layer as em.Text,
+      [action.payload.layer.id]: {
+        ...action.payload.layer as em.Text,
+        scope: [...parentItem.scope, action.payload.layer.parent]
+      },
       [action.payload.layer.parent]: {
         ...currentState.byId[action.payload.layer.parent],
         children: addItem((currentState.byId[action.payload.layer.parent] as em.Group).children, action.payload.layer.id),
@@ -173,12 +188,16 @@ export const addText = (state: LayerState, action: AddText): LayerState => {
 export const addImage = (state: LayerState, action: AddImage): LayerState => {
   let currentState = state;
   const paperLayer = getPaperLayer(action.payload.layer.id);
+  const parentItem = state.byId[action.payload.layer.parent];
   currentState = {
     ...currentState,
     allIds: addItem(currentState.allIds, action.payload.layer.id),
     byId: {
       ...currentState.byId,
-      [action.payload.layer.id]: action.payload.layer as em.Image,
+      [action.payload.layer.id]: {
+        ...action.payload.layer as em.Image,
+        scope: [...parentItem.scope, action.payload.layer.parent]
+      },
       [action.payload.layer.parent]: {
         ...currentState.byId[action.payload.layer.parent],
         children: addItem((currentState.byId[action.payload.layer.parent] as em.Group).children, action.payload.layer.id),
@@ -227,12 +246,12 @@ export const addLayers = (state: LayerState, action: AddLayers): LayerState => {
 
 export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState => {
   let currentState = state;
-  const layer = state.byId[action.payload.id];
+  const layerItem = state.byId[action.payload.id];
   const layersToRemove = getLayerAndDescendants(state, action.payload.id);
   currentState = layersToRemove.reduce((result, current) => {
     const tweensByDestinationLayer = getTweensByDestinationLayer(result, current);
     const tweensByLayer = getTweensByLayer(result, current);
-    const layer = getLayer(result, current);
+    const layer = result.byId[current];
     // remove layer from type array
     switch(layer.type) {
       case 'Artboard':
@@ -321,7 +340,7 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
     allIds: currentState.allIds.filter((id) => !layersToRemove.includes(id)),
     byId: Object.keys(currentState.byId).reduce((result: any, key) => {
       if (!layersToRemove.includes(key)) {
-        if (layer.parent && layer.parent === key) {
+        if (layerItem.parent && layerItem.parent === key) {
           result[key] = {
             ...currentState.byId[key],
             children: removeItem(currentState.byId[key].children, action.payload.id)
@@ -331,11 +350,15 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
         }
       }
       return result;
-    }, {}),
-    scope: currentState.scope.filter((id) => !layersToRemove.includes(id))
+    }, {})
   }
-  if (layer.parent !== 'page') {
-    currentState = updateLayerBounds(currentState, layer.parent);
+  if (layerItem.scope.includes(action.payload.id)) {
+    currentState = setGlobalScope(currentState, layerActions.setGlobalScope({
+      scope: layerItem.scope
+    }) as SetGlobalScope);
+  }
+  if (layerItem.parent !== 'page') {
+    currentState = updateLayerBounds(currentState, layerItem.parent);
   }
   return currentState;
 };
@@ -550,18 +573,44 @@ export const updateHoverFrame = (state: LayerState) => {
   }
   if (state.hover && !state.selected.includes(state.hover)) {
     const hoverItem = state.byId[state.hover];
-    if (hoverItem.type === 'Shape') {
-      new paperMain.CompoundPath({
-        ...hoverFrameConstants,
-        closed: (hoverItem as em.Shape).shapeType !== 'Line',
-        pathData: hoverItem.pathData
-      });
-    } else {
-      new paperMain.Path.Rectangle({
-        ...hoverFrameConstants,
-        point: new paperMain.Point(hoverItem.frame.x - (hoverItem.frame.width / 2), hoverItem.frame.y - (hoverItem.frame.height / 2)),
-        size: [hoverItem.frame.width, hoverItem.frame.height]
-      });
+    switch(hoverItem.type) {
+      case 'Shape':
+        new paperMain.CompoundPath({
+          ...hoverFrameConstants,
+          closed: (hoverItem as em.Shape).shapeType !== 'Line',
+          pathData: hoverItem.pathData
+        });
+        break;
+      case 'Text': {
+        const paperLayer = getPaperLayer(state.hover) as paper.PointText;
+        const linesGroup = new paperMain.Group({
+          data: { id: 'HoverFrame', type: 'UIElement', interactive: false }
+        });
+        const initialPoint = paperLayer.point;
+        paperLayer._lines.forEach((line: any, index: number) => {
+          new paperMain.Path.Line({
+            from: new paperMain.Point(initialPoint.x, initialPoint.y + ((paperLayer.leading as number) * index)),
+            to: new paperMain.Point(initialPoint.x + paperLayer.bounds.width, initialPoint.y + ((paperLayer.leading as number) * index)),
+            strokeColor: THEME_PRIMARY_COLOR,
+            strokeWidth: 2 / paperMain.view.zoom,
+            data: {
+              type: 'UIElementChild',
+              interactive: false,
+              interactiveType: null,
+              elementId: 'HoverFrame'
+            },
+            parent: linesGroup
+          });
+        });
+        break;
+      }
+      default:
+        new paperMain.Path.Rectangle({
+          ...hoverFrameConstants,
+          point: new paperMain.Point(hoverItem.frame.x - (hoverItem.frame.width / 2), hoverItem.frame.y - (hoverItem.frame.height / 2)),
+          size: [hoverItem.frame.width, hoverItem.frame.height]
+        });
+        break;
     }
   }
 }
@@ -587,10 +636,12 @@ export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', u
       point: selectionTopLeft,
       size: [8, 8],
       fillColor: '#fff',
-      strokeColor: THEME_PRIMARY_COLOR,
+      strokeColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.15 },
       strokeWidth: 1 / paperMain.view.zoom,
+      shadowColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.5 },
+      shadowBlur: 1 / paperMain.view.zoom,
       insert: false,
-      opacity: resizeDisabled ? 0.5 : 1
+      opacity: resizeDisabled ? 1 : 1
     }
     if (state.selected.length === 1 && state.byId[state.selected[0]].type === 'Shape' && (state.byId[state.selected[0]] as em.Shape).shapeType === 'Line') {
       const layerItem = state.byId[state.selected[0]] as em.Line;
@@ -1255,40 +1306,30 @@ export const deselectAllLayers = (state: LayerState, action: DeselectAllLayers):
 
 export const selectLayer = (state: LayerState, action: SelectLayer): LayerState => {
   let currentState = state;
-  const layer = getLayer(currentState, action.payload.id);
-  const layerScope = getLayerScope(currentState, action.payload.id);
-  const layerScopeRoot = layerScope[0];
-  // if layer has a scope, and any of those scope layers are selected,
-  // deselect the scope layers
-  if (layerScope.length > 0) {
-    if (state.selected.some((selectedItem) => layerScope.includes(selectedItem))) {
-      const layersToDeselect = state.selected.filter((selectedItem) => layerScope.includes(selectedItem));
-      currentState = deselectLayers(currentState, layerActions.deselectLayers({layers:layersToDeselect }) as DeselectLayers);
-    }
-  }
+  const layerItem = currentState.byId[action.payload.id];
+  const hasArtboardParent = layerItem.scope.length > 1 && state.byId[layerItem.scope[1]].type === 'Artboard';
   // if layer is an artboard or group and current selection includes...
   // any of its descendants, deselect those descendants
-  if (layer.type === 'Artboard' || layer.type === 'Group') {
-    const layerDescendants = getLayerDescendants(currentState, action.payload.id);
-    if (state.selected.some((selectedItem) => layerDescendants.includes(selectedItem))) {
-      const layersToDeselect = state.selected.filter((selectedItem) => layerDescendants.includes(selectedItem));
+  if (layerItem.type === 'Artboard' || layerItem.type === 'Group') {
+    if (state.selected.some((selectedItem) => currentState.byId[selectedItem].scope.includes(action.payload.id))) {
+      const layersToDeselect = state.selected.filter((selectedItem) => currentState.byId[selectedItem].scope.includes(action.payload.id));
       currentState = deselectLayers(currentState, layerActions.deselectLayers({layers:layersToDeselect }) as DeselectLayers);
     }
   }
   // if layer is an artboard, make it the active artboard
-  if (layer.type === 'Artboard' && !action.payload.noActiveArtboardUpdate) {
+  if (layerItem.type === 'Artboard' && currentState.activeArtboard !== action.payload.id && !action.payload.noActiveArtboardUpdate) {
     currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: action.payload.id}) as SetActiveArtboard);
   }
   // if layer scope root is an artboard, make the layer scope root the active artboard
-  if (layerScopeRoot && currentState.byId[layerScopeRoot].type === 'Artboard' && layerScopeRoot !== currentState.activeArtboard) {
+  if (hasArtboardParent && currentState.activeArtboard !== layerItem.scope[1]) {
     if (!action.payload.noActiveArtboardUpdate) {
-      currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: layerScopeRoot}) as SetActiveArtboard);
+      currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: layerItem.scope[1]}) as SetActiveArtboard);
     }
   }
   // handle hover
-  if (layer.id !== currentState.hover) {
-    currentState = setLayerHover(currentState, layerActions.setLayerHover({id: action.payload.id}) as SetLayerHover);
-  }
+  // if (layer.id !== currentState.hover) {
+  //   currentState = setLayerHover(currentState, layerActions.setLayerHover({id: action.payload.id}) as SetLayerHover);
+  // }
   // if new selection, create selection with just that layer
   if (action.payload.newSelection) {
     const deselectAll = deselectAllLayers(currentState, layerActions.deselectAllLayers() as DeselectAllLayers)
@@ -1321,7 +1362,7 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
     }
   }
   // update scope
-  currentState = newLayerScope(currentState, layerActions.newLayerScope({id: action.payload.id}) as NewLayerScope);
+  currentState = setGlobalScope(currentState, layerActions.setGlobalScope({scope: layerItem.scope}) as SetGlobalScope)
   // return final state
   return currentState;
 };
@@ -1404,7 +1445,8 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
         } as em.Group,
         [action.payload.child]: {
           ...currentState.byId[action.payload.child],
-          parent: action.payload.id
+          parent: action.payload.id,
+          scope: [...layer.scope, action.payload.id]
         },
         [action.payload.id]: {
           ...currentState.byId[action.payload.id],
@@ -1413,6 +1455,9 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
         } as em.Group
       }
     };
+    if (child.type === 'Group') {
+      currentState = updateNestedScopes(currentState, action.payload.child);
+    }
     if (child.parent !== 'page') {
       currentState = updateLayerBounds(currentState, child.parent);
     }
@@ -1478,7 +1523,8 @@ export const insertLayerChild = (state: LayerState, action: InsertLayerChild): L
         } as em.Group,
         [action.payload.child]: {
           ...currentState.byId[action.payload.child],
-          parent: action.payload.id
+          parent: action.payload.id,
+          scope: [...layer.scope, action.payload.id]
         },
         [action.payload.id]: {
           ...currentState.byId[action.payload.id],
@@ -1486,6 +1532,9 @@ export const insertLayerChild = (state: LayerState, action: InsertLayerChild): L
         } as em.Group
       }
     };
+    if (child.type === 'Group') {
+      currentState = updateNestedScopes(currentState, action.payload.child);
+    }
     if (child.parent !== 'page') {
       currentState = updateLayerBounds(currentState, child.parent);
     }
@@ -1554,7 +1603,8 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
         ...currentState.byId,
         [action.payload.id]: {
           ...currentState.byId[action.payload.id],
-          parent: above.parent
+          parent: above.parent,
+          scope: [...aboveParent.scope, above.parent]
         },
         [layer.parent]: {
           ...currentState.byId[layer.parent],
@@ -1566,6 +1616,9 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
         } as em.Group
       }
     };
+    if (layer.type === 'Group') {
+      currentState = updateNestedScopes(currentState, action.payload.id);
+    }
     if (layer.parent !== 'page') {
       currentState = updateLayerBounds(currentState, layer.parent);
     }
@@ -1630,7 +1683,8 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
         ...currentState.byId,
         [action.payload.id]: {
           ...currentState.byId[action.payload.id],
-          parent: below.parent
+          parent: below.parent,
+          scope: [...belowParent.scope, below.parent]
         },
         [layer.parent]: {
           ...currentState.byId[layer.parent],
@@ -1642,6 +1696,9 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
         } as em.Group
       }
     };
+    if (layer.type === 'Group') {
+      currentState = updateNestedScopes(currentState, action.payload.id);
+    }
     if (layer.parent !== 'page') {
       currentState = updateLayerBounds(currentState, layer.parent);
     }
@@ -1689,31 +1746,25 @@ export const increaseLayerScope = (state: LayerState, action: IncreaseLayerScope
   }
 };
 
-export const decreaseLayerScope = (state: LayerState, action: DecreaseLayerScope): LayerState => {
-  return {
-    ...state,
-    scope: state.scope.filter((id, index) => index !== state.scope.length - 1)
-  }
-};
+export const decreaseLayerScope = (state: LayerState, action: DecreaseLayerScope): LayerState => ({
+  ...state,
+  scope: state.scope.filter((id, index) => index !== state.scope.length - 1)
+});
 
-export const clearLayerScope = (state: LayerState, action: ClearLayerScope): LayerState => {
-  return {
-    ...state,
-    scope: []
-  }
-};
+export const clearLayerScope = (state: LayerState, action: ClearLayerScope): LayerState => ({
+  ...state,
+  scope: ['page']
+});
 
-export const newLayerScope = (state: LayerState, action: NewLayerScope): LayerState => {
-  return {
-    ...state,
-    scope: getLayerScope(state, action.payload.id)
-  }
-};
+export const newLayerScope = (state: LayerState, action: NewLayerScope): LayerState => ({
+  ...state,
+  scope: state.byId[action.payload.id].scope
+});
 
 export const escapeLayerScope = (state: LayerState, action: EscapeLayerScope): LayerState => {
   const nextScope = state.scope.filter((id, index) => index !== state.scope.length - 1);
   let currentState = state;
-  if (state.scope.length > 0) {
+  if (state.scope.length > 1) {
     currentState = selectLayer(state, layerActions.selectLayer({id: state.scope[state.scope.length - 1], newSelection: true}) as SelectLayer);
   } else {
     currentState = deselectAllLayers(state, layerActions.deselectAllLayers() as DeselectAllLayers);
@@ -1723,6 +1774,62 @@ export const escapeLayerScope = (state: LayerState, action: EscapeLayerScope): L
     scope: nextScope
   }
 };
+
+export const setLayerScope = (state: LayerState, action: SetLayerScope): LayerState => ({
+  ...state,
+  byId: {
+    ...state.byId,
+    [action.payload.id]: {
+      ...state.byId[action.payload.id],
+      scope: action.payload.scope
+    }
+  }
+});
+
+export const setLayersScope = (state: LayerState, action: SetLayersScope): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
+    return setLayerScope(result, layerActions.setLayerScope({id: current, scope: action.payload.scope}) as SetLayerScope);
+  }, state);
+  return currentState;
+};
+
+export const setGlobalScope = (state: LayerState, action: SetGlobalScope): LayerState => ({
+  ...state,
+  scope: action.payload.scope
+});
+
+export const updateNestedScopes = (state: LayerState, id: string): LayerState => {
+  let currentState = state;
+  const layerItem = state.byId[id];
+  const groups: string[] = [id];
+  let i = 0;
+  const currentScope = [...layerItem.scope, id];
+  while(i < groups.length) {
+    const groupLayer = state.byId[groups[i]];
+    if (groupLayer.children) {
+      groupLayer.children.forEach((child) => {
+        const childLayerItem = state.byId[child];
+        if (childLayerItem.children && childLayerItem.children.length > 0) {
+          groups.push(child);
+          currentScope.push(child);
+        }
+        currentState = {
+          ...currentState,
+          byId: {
+            ...currentState.byId,
+            [child]: {
+              ...currentState.byId[child],
+              scope: currentScope
+            }
+          }
+        }
+      });
+    }
+    i++;
+  }
+  return currentState;
+}
 
 export const groupLayers = (state: LayerState, action: GroupLayers): LayerState => {
   let currentState = state;
@@ -1815,7 +1922,7 @@ const getLayerCloneMap = (state: LayerState, id: string) => {
 
 const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: any) => {
   const paperLayer = getPaperLayer(id);
-  const parentLayer = getLayer(state, state.scope.length > 0 ? state.scope[state.scope.length - 1] : state.page);
+  const parentLayer = state.byId[state.scope[state.scope.length - 1]];
   const paperParentLayer = getPaperLayer(parentLayer.id);
   const paperLayerClone = paperLayer.clone({deep: paperLayer.data.layerType === 'Shape', insert: true});
   if (paperLayer.data.layerType === 'Artboard') {
@@ -1863,7 +1970,7 @@ const cloneLayerAndChildren = (state: LayerState, id: string) => {
   const layerCloneMap = getLayerCloneMap(state, id);
   clonePaperLayers(state, id, layerCloneMap);
   const rootLayer = state.byId[id];
-  const rootParent = getLayer(state, state.scope.length > 0 ? state.scope[state.scope.length - 1] : state.page);
+  const rootParent = state.byId[state.scope[state.scope.length - 1]];
   return Object.keys(layerCloneMap).reduce((result: any, key: string, index: number) => {
     const layer = state.byId[key];
     const cloneId = layerCloneMap[key];
@@ -1905,8 +2012,8 @@ const cloneLayerAndChildren = (state: LayerState, id: string) => {
 // };
 
 export const updateParentBounds = (state: LayerState, id: string): LayerState => {
-  const layerScope = getLayerScope(state, id);
-  return layerScope.reduce((result, current) => {
+  const layerItem = state.byId[id];
+  return layerItem.scope.reduce((result, current) => {
     const paperLayer = getPaperLayer(current);
     const layerItem = result.byId[current];
     result = updateLayerInView(result, current);
@@ -2232,11 +2339,11 @@ export const moveLayersBy = (state: LayerState, action: MoveLayersBy): LayerStat
 
 export const setLayerName = (state: LayerState, action: SetLayerName): LayerState => {
   let currentState = state;
+  const layerItem = state.byId[action.payload.id];
   const paperLayer = getPaperLayer(action.payload.id);
   paperLayer.name = action.payload.name;
   // remove existing tweens
-  const layerScope = getLayerScope(currentState, action.payload.id);
-  if (layerScope.some((id: string) => currentState.allArtboardIds.includes(id))) {
+  if (layerItem.scope.length > 1 && state.byId[layerItem.scope[1]].type === 'Artboard') {
     const tweensWithLayer = getTweensWithLayer(currentState, action.payload.id);
     currentState = tweensWithLayer.allIds.reduce((result: LayerState, current) => {
       result = removeLayerTween(result, layerActions.removeLayerTween({id: current}) as RemoveLayerTween);
@@ -2432,9 +2539,9 @@ export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): L
 
 export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop: em.TweenProp): LayerState => {
   let currentState = state;
-  const layerScope = getLayerScope(currentState, layerId);
-  if (layerScope.some((id: string) => currentState.allArtboardIds.includes(id))) {
-    const artboard = layerScope.find((id: string) => currentState.allArtboardIds.includes(id));
+  const layerItem = state.byId[layerId];
+  if (layerItem.scope.length > 1 && state.byId[layerItem.scope[1]].type === 'Artboard') {
+    const artboard = layerItem.scope[1];
     const tweensByProp = getTweensByProp(currentState, layerId, prop);
     const eventsWithArtboardAsOrigin = getTweensEventsByOriginArtboard(currentState, artboard);
     const eventsWithArtboardAsDestination = getTweensEventsByDestinationArtboard(currentState, artboard);
@@ -2615,10 +2722,10 @@ export const setLayerTweenPower = (state: LayerState, action: SetLayerTweenPower
 export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
   let currentState = state;
   let x = action.payload.x;
+  const layerItem = state.byId[action.payload.id];
   const paperLayer = getPaperLayer(action.payload.id);
-  const layerScope = getLayerScope(currentState, action.payload.id);
-  if (layerScope.some((id: string) => currentState.allArtboardIds.includes(id))) {
-    const artboard = layerScope.find((id: string) => currentState.allArtboardIds.includes(id));
+  if (layerItem.scope.length > 1 && state.byId[layerItem.scope[1]].type === 'Artboard') {
+    const artboard = layerItem.scope[1];
     const artboardItem = state.byId[artboard];
     x = x + (artboardItem.frame.x - (artboardItem.frame.width / 2));
   }
@@ -2653,10 +2760,10 @@ export const setLayersX = (state: LayerState, action: SetLayersX): LayerState =>
 export const setLayerY = (state: LayerState, action: SetLayerY): LayerState => {
   let currentState = state;
   let y = action.payload.y;
+  const layerItem = state.byId[action.payload.id];
   const paperLayer = getPaperLayer(action.payload.id);
-  const layerScope = getLayerScope(currentState, action.payload.id);
-  if (layerScope.some((id: string) => currentState.allArtboardIds.includes(id))) {
-    const artboard = layerScope.find((id: string) => currentState.allArtboardIds.includes(id));
+  if (layerItem.scope.length > 1 && state.byId[layerItem.scope[1]].type === 'Artboard') {
+    const artboard = layerItem.scope[1];
     const artboardItem = state.byId[artboard];
     y = y + (artboardItem.frame.y - (artboardItem.frame.height / 2));
   }

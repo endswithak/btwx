@@ -1,7 +1,7 @@
 import store from '../store';
 import throttle from 'lodash.throttle';
 import { RootState } from '../store/reducers';
-import { getNearestScopeAncestor, getDeepSelectItem, getPaperLayer, getLayerAndDescendants, getLayerScope } from '../store/selectors/layer';
+import { getNearestScopeAncestor, getDeepSelectItem, getPaperLayer, getLayerAndDescendants } from '../store/selectors/layer';
 import { setTextSettings } from '../store/actions/textSettings';
 import { setCanvasActiveTool, setCanvasDrawing } from '../store/actions/canvasSettings';
 import { setLayerHover, selectLayer, deselectLayer, deepSelectLayer, deselectAllLayers, setLayerActiveGradientStop } from '../store/actions/layer';
@@ -91,14 +91,14 @@ class MasterTool {
   }
   handleLayerMouseDown(hitResult: em.HitResult) {
     const props = hitResult.layerProps;
-    const selectedWithChildren = this.state.layer.present.selected.reduce((result: { allIds: string[]; byId: { [id: string]: em.Layer } }, current) => {
-      const layerAndChildren = getLayerAndDescendants(this.state.layer.present, current);
-      result.allIds = [...result.allIds, ...layerAndChildren];
-      layerAndChildren.forEach((id) => {
-        result.byId[id] = this.state.layer.present.byId[id];
-      });
-      return result;
-    }, { allIds: [], byId: {} });
+    // const selectedWithChildren = this.state.layer.present.selected.reduce((result: { allIds: string[]; byId: { [id: string]: em.Layer } }, current) => {
+    //   const layerAndChildren = getLayerAndDescendants(this.state.layer.present, current);
+    //   result.allIds = [...result.allIds, ...layerAndChildren];
+    //   layerAndChildren.forEach((id) => {
+    //     result.byId[id] = this.state.layer.present.byId[id];
+    //   });
+    //   return result;
+    // }, { allIds: [], byId: {} });
     // text settings
     if (props.nearestScopeAncestor.id === props.layerItem.id && props.layerItem.type === 'Text') {
       store.dispatch(setTextSettings({
@@ -119,7 +119,8 @@ class MasterTool {
         }
       }
     } else {
-      if (!selectedWithChildren.allIds.includes(props.layerItem.id) || (props.nearestScopeAncestor.type === 'Artboard' && props.nearestScopeAncestor.selected)) {
+      // !selectedWithChildren.allIds.includes(props.layerItem.id)
+      if (!props.layerItem.selected || (props.nearestScopeAncestor.type === 'Artboard' && props.nearestScopeAncestor.selected)) {
         let layerId: string;
         if (props.nearestScopeAncestor.type === 'Artboard') {
           layerId = props.deepSelectItem.id;
@@ -128,9 +129,9 @@ class MasterTool {
           layerId = props.nearestScopeAncestor.id;
           store.dispatch(selectLayer({id: props.nearestScopeAncestor.id, newSelection: true}));
         }
-        if (layerId) {
-          scrollToLayer(layerId);
-        }
+        // if (layerId) {
+        //   scrollToLayer(layerId);
+        // }
       }
     }
     // drag tool

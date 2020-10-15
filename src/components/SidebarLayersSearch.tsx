@@ -4,22 +4,24 @@ import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import debounce from 'lodash.debounce';
 import { scrollToLayer } from '../utils';
+import { SetSearchPayload, SetSearchingPayload, LeftSidebarTypes } from '../store/actionTypes/leftSidebar';
+import { setSearch, setSearching } from '../store/actions/leftSidebar';
 import { ThemeContext } from './ThemeProvider';
 import SidebarInput from './SidebarInput';
 import Icon from './Icon';
 import IconButton from './IconButton';
 
 interface SidebarLayersSearchProps {
-  searchActive: boolean;
-  search: string;
-  setSearchActive(searchActive: boolean): void;
-  setSearch(search: string): void;
+  searchActive?: boolean;
+  search?: string;
+  setSearching(payload: SetSearchingPayload): LeftSidebarTypes;
+  setSearch(payload: SetSearchPayload): LeftSidebarTypes;
   selected?: string[];
 }
 
 const SidebarLayersSearch = (props: SidebarLayersSearchProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { searchActive, search, setSearchActive, setSearch, selected } = props;
+  const { searchActive, search, setSearching, setSearch, selected } = props;
   const [focused, setFocused] = useState(false);
   const [inputValue, setInputValue] = useState(search);
 
@@ -31,7 +33,7 @@ const SidebarLayersSearch = (props: SidebarLayersSearchProps): ReactElement => {
 
   const debounceSearch = useCallback(
     debounce((value: string) => {
-      setSearch(value);
+      setSearch({search: value});
     }, 100),
     []
   );
@@ -50,14 +52,14 @@ const SidebarLayersSearch = (props: SidebarLayersSearchProps): ReactElement => {
     if (inputValue.replace(/\s/g, '').length === 0) {
       setInputValue('');
       debounceSearch('');
-      setSearchActive(false);
+      setSearching({searching: false});
     }
     setFocused(false);
   }
 
   const handleSearchFocus = () => {
     if (!searchActive) {
-      setSearchActive(true);
+      setSearching({searching: true});
     }
     setFocused(true);
   }
@@ -109,12 +111,17 @@ const SidebarLayersSearch = (props: SidebarLayersSearchProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   selected: string[];
+  searchActive: boolean;
+  search: string;
 } => {
-  const { layer } = state;
+  const { layer, leftSidebar } = state;
   const selected = layer.present.selected;
-  return { selected };
+  const searchActive = leftSidebar.searching;
+  const search = leftSidebar.search;
+  return { selected, searchActive, search };
 };
 
 export default connect(
-  mapStateToProps
+  mapStateToProps,
+  { setSearch, setSearching }
 )(SidebarLayersSearch);

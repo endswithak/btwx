@@ -1,115 +1,124 @@
-import React, { useContext, ReactElement, useState } from 'react';
+import React, { useContext, ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
-import styled from 'styled-components';
+import { RootState } from '../store/reducers';
+import { SetEditingPayload, LeftSidebarTypes } from '../store/actionTypes/leftSidebar';
+import { setEditing } from '../store/actions/leftSidebar';
+import { setLayerHover, selectLayer, deselectLayer } from '../store/actions/layer';
+import { SelectLayerPayload, DeselectLayerPayload, SetLayerHoverPayload, LayerTypes } from '../store/actionTypes/layer';
+import { openContextMenu } from '../store/actions/contextMenu';
+import { OpenContextMenuPayload, ContextMenuTypes } from '../store/actionTypes/contextMenu';
 import { ThemeContext } from './ThemeProvider';
 import SidebarLayerTitle from './SidebarLayerTitle';
 import SidebarLayerChevron from './SidebarLayerChevron';
 import SidebarLayerIcon from './SidebarLayerIcon';
+import SidebarLayerBackground from './SidebarLayerBackground';
 import SidebarLayerMaskedIcon from './SidebarLayerMaskedIcon';
-import { setLayerHover, selectLayer, deselectLayer } from '../store/actions/layer';
-import { SetLayerHoverPayload, SelectLayerPayload, DeselectLayerPayload, LayerTypes } from '../store/actionTypes/layer';
-import { RootState } from '../store/reducers';
-import { getLayerScope } from '../store/selectors/layer';
 
 interface SidebarLayerItemProps {
   layer: string;
-  layerItem?: em.Layer;
-  maskedParent?: boolean;
-  depth: number;
-  hover?: string;
+  depth?: number;
+  isSelected?: boolean;
+  editing?: boolean;
   dragGhost?: boolean;
-  setDraggable?(draggable: boolean): void;
-  setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
+  setEditing?(payload: SetEditingPayload): LeftSidebarTypes;
   selectLayer?(payload: SelectLayerPayload): LayerTypes;
   deselectLayer?(payload: DeselectLayerPayload): LayerTypes;
+  setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
+  openContextMenu?(payload: OpenContextMenuPayload): ContextMenuTypes;
 }
-
-interface BackgroundProps {
-  dragGhost: boolean;
-  isSelected: boolean;
-  isEditing: boolean;
-  isArtboard: boolean;
-  isHovering: boolean;
-}
-
-const Background = styled.div<BackgroundProps>`
-  background: ${
-    props => (props.isSelected || props.isEditing) && !props.dragGhost
-    ? props.theme.palette.primary
-    : props.isArtboard && !props.dragGhost
-      ? props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0
-      : 'none'
-  };
-  box-shadow: 0 0 0 1px ${
-    props => (props.isSelected || props.isHovering) && !props.dragGhost
-    ? props.theme.palette.primary
-    : props.isArtboard && !props.dragGhost
-      ? props.theme.name === 'dark'
-        ? props.theme.background.z4
-        : props.theme.background.z5
-      : 'none'
-  } inset;
-`;
 
 const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
-  const [editing, setEditing] = useState(false);
   const theme = useContext(ThemeContext);
-  const { layer, layerItem, depth, hover, setLayerHover, setDraggable, selectLayer, deselectLayer, dragGhost, maskedParent } = props;
+  const { layer, dragGhost, isSelected, depth, editing, setLayerHover, openContextMenu, selectLayer, deselectLayer, setEditing } = props;
 
-  const handleMouseEnter = () => {
+  const handleMouseDown = (e: any): void => {
+    if (!editing) {
+      if (e.metaKey) {
+        if (isSelected) {
+          deselectLayer({id: layer});
+        } else {
+          selectLayer({id: layer});
+        }
+      } else {
+        if (!isSelected) {
+          selectLayer({id: layer, newSelection: true});
+        }
+      }
+    }
+  }
+
+  const handleMouseEnter = (): void => {
     setLayerHover({id: layer});
   }
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = (): void => {
     setLayerHover({id: null});
   }
+
+  const handleContextMenu = (e: any) => {
+    if (!editing) {
+      openContextMenu({
+        type: 'LayerEdit',
+        id: layer,
+        x: e.clientX,
+        y: e.clientY,
+        paperX: e.clientX,
+        paperY: e.clientY,
+        data: {
+          origin: 'sidebar'
+        }
+      });
+    }
+  }
+
+  const handleDoubleClick = (e: any): void => {
+    setEditing({editing: layer});
+  }
+
+  // useEffect(() => {
+  //   console.log('LAYER ITEM');
+  // }, []);
 
   return (
     <div
       className='c-layers-sidebar__layer-item'
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
       style={{
         paddingLeft: depth * (theme.unit * 1.44)
-      }}>
-      <Background
-        dragGhost={dragGhost}
-        isSelected={layerItem.selected}
-        isEditing={editing}
-        isArtboard={layerItem.type === 'Artboard'}
-        isHovering={hover === layer}
-        theme={theme}
-        className='c-layers-sidebar-layer-item__background' />
+      }}
+      onMouseDown={dragGhost ? null : handleMouseDown}
+      onMouseEnter={dragGhost ? null : handleMouseEnter}
+      onMouseLeave={dragGhost ? null : handleMouseLeave}
+      onContextMenu={dragGhost ? null : handleContextMenu}
+      onDoubleClick={dragGhost ? null : handleDoubleClick}>
+      <SidebarLayerBackground
+        layer={layer}
+        dragGhost={dragGhost} />
       <SidebarLayerChevron
-        dragGhost={dragGhost}
-        layer={layerItem} />
+        layer={layer}
+        dragGhost={dragGhost} />
       <SidebarLayerMaskedIcon
-        dragGhost={dragGhost}
-        layer={layerItem}
-        maskedParent={maskedParent} />
+        layer={layer}
+        dragGhost={dragGhost} />
       <SidebarLayerIcon
-        dragGhost={dragGhost}
-        layer={layerItem} />
+        layer={layer}
+        dragGhost={dragGhost} />
       <SidebarLayerTitle
-        dragGhost={dragGhost}
-        layer={layerItem}
-        setDraggable={setDraggable}
-        editing={editing}
-        setEditing={setEditing} />
+        layer={layer}
+        dragGhost={dragGhost} />
     </div>
   );
 }
 
 const mapStateToProps = (state: RootState, ownProps: SidebarLayerItemProps) => {
-  const { layer } = state;
-  const hover = layer.present.hover;
+  const { layer, leftSidebar } = state;
   const layerItem = layer.present.byId[ownProps.layer];
-  const scope = getLayerScope(layer.present, ownProps.layer);
-  const maskedParent = scope.some((id) => layer.present.byId[id].masked);
-  return { hover, layerItem, maskedParent };
+  const isSelected = layerItem.selected;
+  const editing = leftSidebar.editing === ownProps.layer;
+  const depth = layerItem.scope.length - 1;
+  return { isSelected, editing, depth };
 };
 
 export default connect(
   mapStateToProps,
-  { setLayerHover, selectLayer, deselectLayer }
+  { setLayerHover, openContextMenu, selectLayer, deselectLayer, setEditing }
 )(SidebarLayerItem);

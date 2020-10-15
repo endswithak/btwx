@@ -100,8 +100,8 @@ export const getScopeGroupLayers = (store: LayerState): string[] => {
 };
 
 export const isScopeLayer = (store: LayerState, id: string): boolean => {
-  const expandedLayers = getScopeLayers(store);
-  return expandedLayers.includes(id);
+  const scope = store.byId[id].scope;
+  return store.scope.includes(scope[scope.length - 1]);
 };
 
 export const isScopeGroupLayer = (store: LayerState, id: string): boolean => {
@@ -110,21 +110,27 @@ export const isScopeGroupLayer = (store: LayerState, id: string): boolean => {
 };
 
 export const getNearestScopeAncestor = (store: LayerState, id: string): em.Layer => {
-  let currentNode = getLayer(store, id);
-  while(!isScopeLayer(store, currentNode.id)) {
-    currentNode = getParentLayer(store, currentNode.id);
+  let currentNode = store.byId[id];
+  while(currentNode.scope.length > 1 && currentNode.scope[currentNode.scope.length - 1] !== store.scope[store.scope.length - 1]) {
+    currentNode = store.byId[currentNode.parent];
   }
   return currentNode;
 };
 
 export const getDeepSelectItem = (store: LayerState, id: string): em.Layer => {
+  const layerItem = store.byId[id];
+  const layerScope = layerItem.scope;
   const nearestScopeAncestor = getNearestScopeAncestor(store, id);
-  let deepSelectItem = nearestScopeAncestor;
-  if (isScopeGroupLayer(store, nearestScopeAncestor.id)) {
-    const newStore = {...store, scope: [...store.scope, nearestScopeAncestor.id]};
-    deepSelectItem = getNearestScopeAncestor(newStore, id);
+  const nearestScopeAncestorIndex = layerScope.indexOf(nearestScopeAncestor.id);
+  if (nearestScopeAncestor.id !== id) {
+    if (nearestScopeAncestor.type === 'Artboard' && layerItem.type !== 'Group') {
+      return store.byId[id];
+    } else {
+      return store.byId[layerScope[nearestScopeAncestorIndex + 1]];
+    }
+  } else {
+    return store.byId[id];
   }
-  return deepSelectItem;
 };
 
 export const getNearestScopeGroupAncestor = (store: LayerState, id: string): em.Layer => {
@@ -133,16 +139,6 @@ export const getNearestScopeGroupAncestor = (store: LayerState, id: string): em.
     currentNode = getParentLayer(store, currentNode.id);
   }
   return currentNode;
-};
-
-export const getLayerScope = (store: LayerState, id: string): string[] => {
-  const newScope = [];
-  let parent = getParentLayer(store, id);
-  while(parent.type === 'Group' || parent.type === 'Artboard' || parent.type === 'CompoundShape') {
-    newScope.push(parent.id);
-    parent = getParentLayer(store, parent.id);
-  }
-  return newScope.reverse();
 };
 
 export const getLayersTopLeft = (store: LayerState, layers: string[]): paper.Point => {
@@ -222,47 +218,11 @@ export const getSelectionCenter = (store: LayerState, useLayerItem?: boolean): p
 };
 
 export const getCanvasTopLeft = (store: LayerState, useLayerItem?: boolean): paper.Point => {
-  const paperLayerPoints = store.allIds.reduce((result, current) => {
-    if (current !== 'page') {
-      if (useLayerItem) {
-        const layerScope = getLayerScope(store, current);
-        const layerItem = store.byId[current];
-        if (!layerScope.some((id) => store.byId[id].type === 'Artboard') && !layerItem.masked) {
-          const topLeft = new paperMain.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
-          result = [...result, topLeft];
-        }
-        return result;
-      } else {
-        const paperLayer = getPaperLayer(current);
-        return [...result, paperLayer.bounds.topLeft];
-      }
-    } else {
-      return result;
-    }
-  }, []);
-  return paperLayerPoints.reduce(paper.Point.min);
+  return getPaperLayer('page').bounds.topLeft;
 };
 
 export const getCanvasBottomRight = (store: LayerState, useLayerItem?: boolean): paper.Point => {
-  const paperLayerPoints = store.allIds.reduce((result, current) => {
-    if (current !== 'page') {
-      if (useLayerItem) {
-        const layerScope = getLayerScope(store, current);
-        const layerItem = store.byId[current];
-        if (!layerScope.some((id) => store.byId[id].type === 'Artboard') && !layerItem.masked) {
-          const bottomRight = new paperMain.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
-          result = [...result, bottomRight];
-        }
-        return result;
-      } else {
-        const paperLayer = getPaperLayer(current);
-        return [...result, paperLayer.bounds.bottomRight];
-      }
-    } else {
-      return result;
-    }
-  }, []);
-  return paperLayerPoints.reduce(paper.Point.max);
+  return getPaperLayer('page').bounds.bottomRight;
 };
 
 export const getCanvasBounds = (store: LayerState, useLayerItem?: boolean): paper.Rectangle => {
@@ -314,10 +274,10 @@ export const getDestinationEquivalent = (store: LayerState, layer: string, desti
     const childLayer = store.byId[current];
     if (childLayer.name === layerItem.name && childLayer.type === layerItem.type) {
       if (result) {
-        const layerScope = getLayerScope(store, layer);
-        const layerArtboard = store.byId[layerScope.find((id) => store.allArtboardIds.includes(id))] as em.Artboard;
-        const resultScope = getLayerScope(store, result.id);
-        const childArtboard = store.byId[resultScope.find((id) => store.allArtboardIds.includes(id))] as em.Artboard;
+        const layerScope = layerItem.scope;
+        const layerArtboard = store.byId[layerScope[1]] as em.Artboard;
+        const resultScope = store.byId[result.id].scope;
+        const childArtboard = store.byId[resultScope[1]] as em.Artboard;
         const layerArtboardPosition = getPositionInArtboard(layerItem, layerArtboard);
         const resultArtboardPosition = getPositionInArtboard(result, childArtboard);
         const childArtboardPosition = getPositionInArtboard(childLayer, childArtboard);
@@ -1095,7 +1055,7 @@ export const orderLayersByDepth = (state: LayerState, layers: string[]): string[
   while(ordered.length !== layers.length) {
     const filtered = layers.filter((id) => !ordered.includes(id));
     const topLayer = filtered.reduce((result, current) => {
-      const layerDepth = getLayerDepth(state, current);
+      const layerDepth = state.byId[current].scope.length - 1;
       const layerIndex = getLayerIndex(state, current);
       if (layerDepth < result.depth) {
         return {
@@ -1119,7 +1079,7 @@ export const orderLayersByDepth = (state: LayerState, layers: string[]): string[
     }, {
       id: filtered[0],
       index: getLayerIndex(state, filtered[0]),
-      depth: getLayerDepth(state, filtered[0])
+      depth: state.byId[filtered[0]].scope.length - 1
     });
     ordered.unshift(topLayer.id);
   }
@@ -1167,15 +1127,9 @@ interface ImportPaperProject {
     [id: string]: em.DocumentImage;
   };
   paperProject: string;
-  layers: {
-    shape: string[];
-    artboard: string[];
-    text: string[];
-    image: string[];
-  };
 }
 
-export const importPaperProject = ({documentImages, paperProject, layers}: ImportPaperProject): void => {
+export const importPaperProject = ({documentImages, paperProject}: ImportPaperProject): void => {
   paperMain.project.clear();
   const newPaperProject = Object.keys(documentImages).reduce((result, current) => {
     const rasterBase64 = bufferToBase64(Buffer.from(documentImages[current].buffer));

@@ -11,7 +11,7 @@ import { RemoveArtboardPresetPayload, DocumentSettingsTypes } from '../store/act
 import { removeArtboardPreset } from '../store/actions/documentSettings';
 import { ArtboardPresetEditorTypes } from '../store/actionTypes/artboardPresetEditor';
 import { openArtboardPresetEditor } from '../store/actions/artboardPresetEditor';
-import { getLayerScope, orderLayersByDepth, canGroupLayers, canUngroupLayers, canMaskLayers, canBringForward, canSendBackward } from '../store/selectors/layer';
+import { orderLayersByDepth, canGroupLayers, canUngroupLayers, canMaskLayers, canBringForward, canSendBackward } from '../store/selectors/layer';
 import { setTweenDrawerEventHoverThunk, setTweenDrawerEventThunk } from '../store/actions/tweenDrawer';
 import { SetTweenDrawerEventHoverPayload, SetTweenDrawerEventPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
 import { APP_NAME, DEFAULT_TWEEN_EVENTS } from '../constants';
@@ -419,8 +419,10 @@ const mapStateToProps = (state: RootState) => {
   const selected = layer.present.selected;
   const canSetTweenDrawerEventHover = viewSettings.tweenDrawer.isOpen && !tweenDrawer.event;
   const layerItem = Object.prototype.hasOwnProperty.call(layer.present.byId, contextMenu.id) && contextMenu.id !== 'page' ? layer.present.byId[contextMenu.id] : null;
-  const tweenEventLayerScope = layerItem ? getLayerScope(layer.present, contextMenu.id) : null;
-  const artboardParent = layerItem ? layerItem.type === 'Artboard' ? layerItem.id : tweenEventLayerScope.find((id) => layer.present.allArtboardIds.includes(id)) : null;
+  const tweenEventLayerScope = layerItem ? layerItem.scope : null;
+  const hasArtboardParent = layerItem ? tweenEventLayerScope[1] && layer.present.byId[tweenEventLayerScope[1]].type === 'Artboard' : false;
+  const isArtboard = layerItem ? layerItem.type === 'Artboard' : false;
+  const artboardParent = isArtboard ? layerItem.id : hasArtboardParent ? tweenEventLayerScope[1] : null;
   const canAddTweenEvent = layerItem && (selected.length === 0 || (selected.length === 1 && selected[0] === contextMenu.id)) && (tweenEventLayerScope.some(id => layer.present.allArtboardIds.includes(id)) || layer.present.allArtboardIds.includes(contextMenu.id));
   const tweenEvents = layerItem && canAddTweenEvent ? layer.present.allTweenEventIds.filter((id) => layer.present.tweenEventById[id].layer === contextMenu.id && layer.present.tweenEventById[id].artboard === artboardParent) : null;
   const tweenEventItems = tweenEvents ? tweenEvents.reduce((result, current) => {

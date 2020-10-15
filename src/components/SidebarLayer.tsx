@@ -1,103 +1,73 @@
-import React, { ReactElement, useState, SyntheticEvent } from 'react';
-import { RootState } from '../store/reducers';
+import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
+import { RootState } from '../store/reducers';
+import { SetDraggingPayload, LeftSidebarTypes } from '../store/actionTypes/leftSidebar';
+import { setDragging } from '../store/actions/leftSidebar';
 import SidebarDropzone from './SidebarDropzone';
 import SidebarLayerItem from './SidebarLayerItem';
-import SidebarLayers from './SidebarLayers';
+import SidebarLayerChildren from './SidebarLayerChildren';
 
 interface SidebarLayerProps {
   layer: string;
-  selected?: string[];
-  dragLayers: string[];
-  depth: number;
-  layerItem?: em.Layer;
-  dragging: boolean;
+  isSelected?: boolean;
+  isDropzone?: boolean;
+  dragging?: boolean;
   dragGhost?: boolean;
-  hasChildren?: boolean;
-  setDragging(dragging: boolean): void;
-  setDragLayers(layers: string[]): void;
+  setDragging?(payload: SetDraggingPayload): LeftSidebarTypes;
 }
 
 const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
-  const [draggable, setDraggable] = useState(true);
-  const { layer, depth, dragGhost, dragLayers, setDragLayers, layerItem, selected, dragging, setDragging, hasChildren } = props;
+  const { layer, dragGhost, isDropzone, isSelected, dragging, setDragging } = props;
 
-  const handleMouseDown = (e: any) => {
-    e.stopPropagation();
-    if (e.buttons !== 2) {
-      if (selected.length > 0 && selected.includes(layer)) {
-        setDragLayers(selected);
-      } else {
-        setDragLayers([layer]);
-      }
-    }
-  }
-
-  const handleMouseUp = (e: any) => {
-    setDragLayers(null);
-  }
-
-  const handleDragStart = (e: any) => {
-    setDragging(true);
+  const handleDragStart = (e: any): void => {
+    setDragging({dragging: true});
     e.dataTransfer.setDragImage(document.getElementById('sidebarDragGhosts'), 0, 0);
   }
 
-  const handleDragEnd = (e: any) => {
-    setDragLayers(null);
-    setDragging(false);
+  const handleDragEnd = (e: any): void => {
+    setDragging({dragging: false});
   }
+
+  // useEffect(() => {
+  //   console.log('LAYER');
+  // }, [layer]);
 
   return (
     <div
       id={dragGhost ? `${layer}-dragGhost` : layer}
-      draggable={draggable}
+      draggable
       className='c-sidebar-layer'
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
+      onDragStart={dragGhost ? null : handleDragStart}
+      onDragEnd={dragGhost ? null : handleDragEnd}
       style={{
-        opacity: !dragGhost && dragging && dragLayers && dragLayers.includes(layer) ? 0.5 : 1
+        opacity: dragging && isSelected ? 0.5 : 1
       }}>
       <SidebarLayerItem
-        dragGhost={dragGhost}
         layer={layer}
-        depth={depth}
-        setDraggable={setDraggable} />
+        dragGhost={dragGhost} />
       {
-        dragging && !dragGhost
+        isDropzone
         ? <SidebarDropzone
-            layer={layerItem}
-            depth={depth}
-            dragLayers={dragLayers}
-            setDragLayers={setDragLayers}
-            setDragging={setDragging} />
+            layer={layer} />
         : null
       }
-      {
-        hasChildren && (layerItem as em.Group | em.Artboard).showChildren
-        ? <SidebarLayers
-            layers={[...(layerItem as em.Group | em.Artboard).children].reverse()}
-            depth={depth + 1}
-            dragLayers={dragLayers}
-            setDragLayers={setDragLayers}
-            setDragging={setDragging}
-            dragging={dragging}
-            dragGhost={dragGhost} />
-        : null
-      }
+      <SidebarLayerChildren
+        layer={layer}
+        dragGhost={dragGhost} />
     </div>
   );
 }
 
 const mapStateToProps = (state: RootState, ownProps: SidebarLayerProps) => {
-  const { layer } = state;
+  const { layer, leftSidebar } = state;
   const layerItem = layer.present.byId[ownProps.layer];
-  const selected = layer.present.selected;
-  const hasChildren = layerItem.type === 'Group' || layerItem.type === 'Artboard';
-  return { layerItem, selected, hasChildren };
+  const isSelected = layerItem.selected;
+  const isDropzone = leftSidebar.dragging && !ownProps.dragGhost;
+  const dragging = leftSidebar.dragging;
+  return { isSelected, dragging, isDropzone };
 };
 
 export default connect(
-  mapStateToProps
+  mapStateToProps,
+  { setDragging }
 )(SidebarLayer);

@@ -1,26 +1,28 @@
 import React, { useContext, ReactElement } from 'react';
+import { connect } from 'react-redux';
+import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 import Icon from './Icon';
 
 interface SidebarLayerMaskedIconProps {
-  layer: em.Layer;
-  maskedParent: boolean;
+  layer: string;
   dragGhost: boolean;
+  layerItem?: em.Layer;
 }
 
 const SidebarLayerMaskedIcon = (props: SidebarLayerMaskedIconProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layer, dragGhost, maskedParent } = props;
+  const { layer, dragGhost, layerItem } = props;
 
   return (
-    layer.masked && !layer.mask
+    layerItem.masked && !layerItem.mask
     ? <div
         className='c-sidebar-layer__icon'
         >
         <Icon
-          name={layer.mask ? 'masked-mask' : 'masked'}
+          name={layerItem.mask ? 'masked-mask' : 'masked'}
           style={{
-            fill: layer.selected && !dragGhost
+            fill: layerItem.selected && !dragGhost
             ? theme.text.onPrimary
             : theme.text.lighter
           }} />
@@ -29,4 +31,14 @@ const SidebarLayerMaskedIcon = (props: SidebarLayerMaskedIconProps): ReactElemen
   );
 }
 
-export default SidebarLayerMaskedIcon;
+const mapStateToProps = (state: RootState, ownProps: SidebarLayerMaskedIconProps): {
+  layerItem?: em.Layer;
+} => {
+  const { layer } = state;
+  const layerItem = layer.present.byId[ownProps.layer];
+  return { layerItem };
+};
+
+export default connect(
+  mapStateToProps
+)(SidebarLayerMaskedIcon);

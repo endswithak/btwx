@@ -23,9 +23,9 @@ const Main = (props: MainProps): ReactElement => {
         id='main-canvas'
         className='c-app__canvas'>
         <CanvasWrap setReady={setReady} ready={ready} />
-        <TweenDrawerWrap ready={ready} />
+        {/* <TweenDrawerWrap ready={ready} /> */}
         <TextEditor ready={ready} />
-        <InsertKnobWrap />
+        {/* <InsertKnobWrap /> */}
       </div>
       <SidebarRight ready={ready} />
     </div>

@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement, useEffect } from 'react';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
 import SidebarDropzone from './SidebarDropzone';
@@ -7,27 +7,23 @@ import SidebarLayerDragGhosts from './SidebarLayerDragGhosts';
 import SidebarLeftSearchEmptyState from './SidebarLeftSearchEmptyState';
 
 interface SidebarLayerTreeProps {
-  search: string;
-  searchActive: boolean;
-  page?: em.Group;
+  isDropzone?: boolean;
   layers?: string[];
 }
 
 const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
-  const [dragging, setDragging] = useState(false);
-  const [dragLayers, setDragLayers] = useState<string[]>(null);
-  const { page, layers, search } = props;
+  const { layers, isDropzone } = props;
+
+  // useEffect(() => {
+  //   console.log('LAYER TREE');
+  // }, []);
 
   return (
     <>
       {
-        dragging
+        isDropzone
         ? <SidebarDropzone
-            layer={page}
-            depth={0}
-            dragLayers={dragLayers}
-            setDragging={setDragging}
-            setDragLayers={setDragLayers} />
+            layer={'page'} />
         : null
       }
       {
@@ -35,36 +31,25 @@ const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
         ? layers.map((layer: string, index: number) => (
             <SidebarLayer
               key={index}
-              layer={layer}
-              dragLayers={dragLayers}
-              setDragLayers={setDragLayers}
-              dragging={dragging}
-              setDragging={setDragging}
-              depth={0} />
+              layer={layer} />
           ))
-        : <SidebarLeftSearchEmptyState searchText={search} />
+        : <SidebarLeftSearchEmptyState />
       }
-      {
-        dragLayers
-        ? <SidebarLayerDragGhosts
-            dragLayers={dragLayers}
-            dragging={dragging} />
-        : null
-      }
+      <SidebarLayerDragGhosts />
     </>
   )
 }
 
-const mapStateToProps = (state: RootState, ownProps: SidebarLayerTreeProps) => {
-  const { layer } = state;
+const mapStateToProps = (state: RootState) => {
+  const { layer, leftSidebar } = state;
   const page = layer.present.byId[layer.present.page];
   let layers: string[];
-  if (ownProps.searchActive) {
-    if (!ownProps.search || ownProps.search.replace(/\s/g, '').length === 0) {
+  if (leftSidebar.searching) {
+    if (!leftSidebar.search || leftSidebar.search.replace(/\s/g, '').length === 0) {
       layers = [...page.children].reverse();
     } else {
       layers = layer.present.allIds.reduce((result, current) => {
-        if (layer.present.byId[current].name.toUpperCase().includes(ownProps.search.replace(/\s/g, '').toUpperCase()) && current !== 'page') {
+        if (layer.present.byId[current].name.toUpperCase().includes(leftSidebar.search.replace(/\s/g, '').toUpperCase()) && current !== 'page') {
           return [...result, current];
         } else {
           return [...result];
@@ -74,7 +59,8 @@ const mapStateToProps = (state: RootState, ownProps: SidebarLayerTreeProps) => {
   } else {
     layers = [...page.children].reverse();
   }
-  return { page, layers };
+  const isDropzone = leftSidebar.dragging;
+  return { layers, isDropzone };
 };
 
 export default connect(

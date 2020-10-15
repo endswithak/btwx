@@ -221,6 +221,7 @@ declare namespace em {
     selected: boolean;
     children: string[] | null;
     tweenEvents: string[];
+    scope: string[];
     tweens: string[];
     style: Style;
     transform: Transform;

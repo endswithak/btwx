@@ -54,6 +54,9 @@ import {
   NEW_LAYER_SCOPE,
   CLEAR_LAYER_SCOPE,
   ESCAPE_LAYER_SCOPE,
+  SET_LAYER_SCOPE,
+  SET_LAYERS_SCOPE,
+  SET_GLOBAL_SCOPE,
   GROUP_LAYERS,
   UNGROUP_LAYER,
   UNGROUP_LAYERS,
@@ -255,6 +258,9 @@ import {
   InsertLayersBelowPayload,
   IncreaseLayerScopePayload,
   NewLayerScopePayload,
+  SetLayerScopePayload,
+  SetLayersScopePayload,
+  SetGlobalScopePayload,
   GroupLayersPayload,
   UngroupLayerPayload,
   UngroupLayersPayload,
@@ -1027,6 +1033,21 @@ export const newLayerScope = (payload: NewLayerScopePayload): LayerTypes => ({
 
 export const escapeLayerScope = (): LayerTypes => ({
   type: ESCAPE_LAYER_SCOPE
+});
+
+export const setLayerScope = (payload: SetLayerScopePayload): LayerTypes => ({
+  type: SET_LAYER_SCOPE,
+  payload
+});
+
+export const setLayersScope = (payload: SetLayersScopePayload): LayerTypes => ({
+  type: SET_LAYERS_SCOPE,
+  payload
+});
+
+export const setGlobalScope = (payload: SetGlobalScopePayload): LayerTypes => ({
+  type: SET_GLOBAL_SCOPE,
+  payload
 });
 
 export const escapeLayerScopeThunk = () => {
@@ -2491,13 +2512,7 @@ export const undoThunk = () => {
       // import past paper project
       importPaperProject({
         paperProject: layerState.paperProject,
-        documentImages: state.documentSettings.images.byId,
-        layers: {
-          shape: layerState.allShapeIds,
-          artboard: layerState.allArtboardIds,
-          text: layerState.allTextIds,
-          image: layerState.allImageIds
-        }
+        documentImages: state.documentSettings.images.byId
       });
       // update editors
       updateEditors(dispatch, state, 'undo');
@@ -2527,13 +2542,7 @@ export const redoThunk = () => {
       // import future paper project
       importPaperProject({
         paperProject: layerState.paperProject,
-        documentImages: state.documentSettings.images.byId,
-        layers: {
-          shape: layerState.allShapeIds,
-          artboard: layerState.allArtboardIds,
-          text: layerState.allTextIds,
-          image: layerState.allImageIds
-        }
+        documentImages: state.documentSettings.images.byId
       });
       // update editors
       updateEditors(dispatch, state, 'redo');

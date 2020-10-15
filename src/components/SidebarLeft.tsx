@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement, useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import Sidebar from './Sidebar';
@@ -16,8 +16,10 @@ interface SidebarLeftProps {
 
 const SidebarLeft = (props: SidebarLeftProps): ReactElement => {
   const { isOpen, sidebarWidth, ready, isEmpty } = props;
-  const [searchActive, setSearchActive] = useState(false);
-  const [search, setSearch] = useState('');
+
+  // useEffect(() => {
+  //   console.log('LEFT SIDEBAR');
+  // })
 
   return (
     isOpen
@@ -29,18 +31,12 @@ const SidebarLeft = (props: SidebarLeftProps): ReactElement => {
           header
           headerChildren={(
             ready && !isEmpty
-            ? <SidebarLayersSearch
-                searchActive={searchActive}
-                search={search}
-                setSearchActive={setSearchActive}
-                setSearch={setSearch} />
+            ? <SidebarLayersSearch />
             : null
           )}>
           {
             ready && !isEmpty
-            ? <SidebarLayerTree
-                searchActive={searchActive}
-                search={search} />
+            ? <SidebarLayerTree />
             : <SidebarLeftEmptyState />
           }
         </Sidebar>

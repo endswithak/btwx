@@ -1,17 +1,15 @@
-import React, { ReactElement, useState, useRef } from 'react';
+import React, { ReactElement } from 'react';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
 import SidebarLayer from './SidebarLayer';
 import { orderLayersByDepth } from '../store/selectors/layer';
 
 interface SidebarLayerDragGhostsProps {
-  dragLayers: string[];
-  dragging: boolean;
   orderedLayers?: string[];
 }
 
 const SidebarLayerDragGhosts = (props: SidebarLayerDragGhostsProps): ReactElement => {
-  const { dragLayers, orderedLayers, dragging } = props;
+  const { orderedLayers } = props;
 
   return (
     <div
@@ -27,10 +25,6 @@ const SidebarLayerDragGhosts = (props: SidebarLayerDragGhostsProps): ReactElemen
             dragGhost
             key={index}
             layer={id}
-            dragLayers={dragLayers}
-            setDragLayers={() => {return;}}
-            dragging={dragging}
-            setDragging={() => {return;}}
             depth={0} />
         ))
       }
@@ -38,12 +32,10 @@ const SidebarLayerDragGhosts = (props: SidebarLayerDragGhostsProps): ReactElemen
   )
 }
 
-const mapStateToProps = (state: RootState, ownProps: SidebarLayerDragGhostsProps) => {
+const mapStateToProps = (state: RootState) => {
   const { layer } = state;
-  const orderedLayers = orderLayersByDepth(layer.present, ownProps.dragLayers);
-  return {
-    orderedLayers
-  };
+  const orderedLayers = orderLayersByDepth(layer.present, layer.present.selected);
+  return { orderedLayers };
 };
 
 export default connect(

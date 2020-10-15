@@ -13,6 +13,7 @@ import canvasSettings from './canvasSettings';
 import documentSettings from './documentSettings';
 import viewSettings from './viewSettings';
 import rightSidebar from './rightSidebar';
+import leftSidebar from './leftSidebar';
 import preview from './preview';
 import insertKnob from './insertKnob';
 import shapeTool from './shapeTool';
@@ -37,6 +38,7 @@ export const reducers = {
   gradientEditor,
   artboardPresetEditor,
   rightSidebar,
+  leftSidebar,
   preview,
   insertKnob,
   shapeTool,
@@ -63,13 +65,7 @@ const rootReducer = (state: RootState, action: RootAction): RootState => {
       const canvas = document.getElementById('canvas-container') as HTMLCanvasElement;
       importPaperProject({
         paperProject: currentState.layer.present.paperProject,
-        documentImages: currentState.documentSettings.images.byId,
-        layers: {
-          shape: currentState.layer.present.allShapeIds,
-          artboard: currentState.layer.present.allArtboardIds,
-          text: currentState.layer.present.allTextIds,
-          image: currentState.layer.present.allImageIds
-        }
+        documentImages: currentState.documentSettings.images.byId
       });
       paperMain.view.viewSize = new paperMain.Size(canvas.clientWidth, canvas.clientHeight);
       paperMain.view.matrix.set(currentState.documentSettings.matrix);

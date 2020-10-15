@@ -5,7 +5,7 @@ import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
 import { SetLayersYPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setLayersY } from '../store/actions/layer';
-import { getLayerScope, getPositionInArtboard } from '../store/selectors/layer';
+import { getPositionInArtboard } from '../store/selectors/layer';
 
 interface YInputProps {
   selected?: string[];
@@ -54,10 +54,10 @@ const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
   const artboardParents = selected.reduce((result: em.Artboard[], current: string) => {
-    const layerScope = getLayerScope(layer.present, current);
-    if (layerScope.some((id: string) => layer.present.allArtboardIds.includes(id))) {
-      const artboard = layerScope.find((id: string) => layer.present.allArtboardIds.includes(id));
-      result = [...result, layer.present.byId[artboard] as em.Artboard];
+    const layerItem = layer.present.byId[current];
+    const layerScope = layerItem.scope;
+    if (layerScope.length > 1 && layer.present.byId[layerScope[1]].type === 'Artboard') {
+      result = [...result, layer.present.byId[layerScope[1]] as em.Artboard];
     } else {
       result = [...result, null];
     }

@@ -1,4 +1,5 @@
 import undoable from 'redux-undo';
+import { DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../../constants';
 
 import {
   ADD_ARTBOARD,
@@ -31,6 +32,9 @@ import {
   CLEAR_LAYER_SCOPE,
   NEW_LAYER_SCOPE,
   ESCAPE_LAYER_SCOPE,
+  SET_LAYER_SCOPE,
+  SET_LAYERS_SCOPE,
+  SET_GLOBAL_SCOPE,
   GROUP_LAYERS,
   UNGROUP_LAYER,
   UNGROUP_LAYERS,
@@ -236,6 +240,9 @@ import {
   newLayerScope,
   clearLayerScope,
   escapeLayerScope,
+  setLayerScope,
+  setLayersScope,
+  setGlobalScope,
   groupLayers,
   ungroupLayer,
   moveLayer,
@@ -447,10 +454,21 @@ const initialState: LayerState = {
       id: 'page',
       name: 'Page',
       parent: null,
+      frame: {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+        innerHeight: 0,
+        innerWidth: 0
+      },
       children: [],
       selected: false,
       tweenEvents: [],
-      tweens: []
+      scope: [],
+      tweens: [],
+      style: DEFAULT_STYLE,
+      transform: DEFAULT_TRANSFORM
     } as em.Page
   },
   allIds: ['page'],
@@ -462,7 +480,7 @@ const initialState: LayerState = {
   allGroupIds: [],
   allTextIds: [],
   allImageIds: [],
-  scope: [],
+  scope: ['page'],
   inView: {
     allIds: [],
     snapPoints: []
@@ -538,6 +556,12 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return clearLayerScope(state, action);
     case ESCAPE_LAYER_SCOPE:
       return escapeLayerScope(state, action);
+    case SET_LAYER_SCOPE:
+      return setLayerScope(state, action);
+    case SET_LAYERS_SCOPE:
+      return setLayersScope(state, action);
+    case SET_GLOBAL_SCOPE:
+      return setGlobalScope(state, action);
     case GROUP_LAYERS:
       return groupLayers(state, action);
     case UNGROUP_LAYER:
@@ -886,7 +910,7 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
 }
 
 export default undoable(baseReducer, {
-  limit: 44,
+  limit: 20,
   filter: (action: any) => {
     return (action.payload && action.payload.includeInHistory) || [
       ADD_ARTBOARD,

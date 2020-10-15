@@ -36,6 +36,9 @@ export const DECREASE_LAYER_SCOPE = 'DECREASE_LAYER_SCOPE';
 export const CLEAR_LAYER_SCOPE = 'CLEAR_LAYER_SCOPE';
 export const NEW_LAYER_SCOPE = 'NEW_LAYER_SCOPE';
 export const ESCAPE_LAYER_SCOPE = 'ESCAPE_LAYER_SCOPE';
+export const SET_GLOBAL_SCOPE = 'SET_GLOBAL_SCOPE';
+export const SET_LAYER_SCOPE = 'SET_LAYER_SCOPE';
+export const SET_LAYERS_SCOPE = 'SET_LAYERS_SCOPE';
 
 export const GROUP_LAYERS = 'GROUP_LAYERS';
 export const UNGROUP_LAYER = 'UNGROUP_LAYER';
@@ -562,6 +565,35 @@ export interface NewLayerScope {
 
 export interface EscapeLayerScope {
   type: typeof ESCAPE_LAYER_SCOPE;
+}
+
+export interface SetGlobalScopePayload {
+  scope: string[];
+}
+
+export interface SetGlobalScope {
+  type: typeof SET_GLOBAL_SCOPE;
+  payload: SetGlobalScopePayload;
+}
+
+export interface SetLayerScopePayload {
+  id: string;
+  scope: string[];
+}
+
+export interface SetLayerScope {
+  type: typeof SET_LAYER_SCOPE;
+  payload: SetLayerScopePayload;
+}
+
+export interface SetLayersScopePayload {
+  layers: string[];
+  scope: string[];
+}
+
+export interface SetLayersScope {
+  type: typeof SET_LAYERS_SCOPE;
+  payload: SetLayersScopePayload;
 }
 
 // Group
@@ -2347,6 +2379,9 @@ export type LayerTypes = AddArtboard |
                          NewLayerScope |
                          ClearLayerScope |
                          EscapeLayerScope |
+                         SetLayerScope |
+                         SetLayersScope |
+                         SetGlobalScope |
                          GroupLayers |
                          UngroupLayer |
                          UngroupLayers |

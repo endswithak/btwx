@@ -1,31 +1,21 @@
-import React, { useContext, ReactElement, useEffect } from 'react';
+import React, { ReactElement } from 'react';
 import SidebarLayer from './SidebarLayer';
 
 interface SidebarLayersProps {
   layers: string[];
-  dragLayers: string[];
-  depth: number;
-  dragging: boolean;
   dragGhost?: boolean;
-  setDragLayers(layers: string[]): void;
-  setDragging(dragging: boolean): void;
 }
 
 const SidebarLayers = (props: SidebarLayersProps): ReactElement => {
-  const { layers, depth, dragging, dragGhost, dragLayers, setDragLayers, setDragging } = props;
+  const { layers, dragGhost } = props;
 
   return (
     <>
       {
-        layers.map((child: string, index: number) => (
+        layers.map((layer: string, index: number) => (
           <SidebarLayer
             key={index}
-            layer={child}
-            depth={depth + 1}
-            dragLayers={dragLayers}
-            setDragLayers={setDragLayers}
-            setDragging={setDragging}
-            dragging={dragging}
+            layer={layer}
             dragGhost={dragGhost} />
         ))
       }

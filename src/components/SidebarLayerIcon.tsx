@@ -5,21 +5,22 @@ import { ThemeContext } from './ThemeProvider';
 import Icon from './Icon';
 
 interface SidebarLayerIconProps {
-  layer: em.Layer;
+  layer: string;
   dragGhost: boolean;
+  layerItem?: em.Layer;
   maskItem?: em.Shape;
 }
 
 const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layer, dragGhost, maskItem } = props;
+  const { layerItem, layer, dragGhost, maskItem } = props;
 
   return (
     <div
       className='c-sidebar-layer__icon'>
       <Icon
         name={(() => {
-          switch(layer.type) {
+          switch(layerItem.type) {
             case 'Artboard':
               return 'artboard'
             case 'Group':
@@ -32,16 +33,16 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
               return 'image';
           }
         })()}
-        small={layer.type === 'Shape' || maskItem !== null}
-        shapeId={layer.type === 'Shape' ? layer.id : maskItem ? maskItem.id : null}
+        small={layerItem.type === 'Shape' || maskItem !== null}
+        shapeId={layerItem.type === 'Shape' ? layer : maskItem ? maskItem.id : null}
         style={{
-          fill: layer.type === 'Shape' && (!(layer as em.Shape).closed || (layer as em.Shape).mask)
+          fill: layerItem.type === 'Shape' && (!(layerItem as em.Shape).closed || (layerItem as em.Shape).mask)
           ? 'none'
-          : layer.selected && !dragGhost
+          : layerItem.selected && !dragGhost
             ? theme.text.onPrimary
             : theme.text.lighter,
-          stroke: layer.type === 'Shape' && (!(layer as em.Shape).closed || (layer as em.Shape).mask)
-          ? layer.selected && !dragGhost
+          stroke: layerItem.type === 'Shape' && (!(layerItem as em.Shape).closed || (layerItem as em.Shape).mask)
+          ? layerItem.selected && !dragGhost
             ? theme.text.onPrimary
             : theme.text.lighter
           : 'none',
@@ -53,12 +54,12 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
 
 const mapStateToProps = (state: RootState, ownProps: SidebarLayerIconProps) => {
   const { layer } = state;
-  const layerItem = ownProps.layer;
+  const layerItem = layer.present.byId[ownProps.layer];
   const mask = layerItem.type === 'Group' && (layerItem as em.Group).clipped ? (() => {
     return (layerItem as em.Group).children.find((id) => layer.present.byId[id].mask);
   })() : null;
   const maskItem = mask ? layer.present.byId[mask] : null;
-  return { maskItem };
+  return { layerItem, maskItem };
 };
 
 export default connect(

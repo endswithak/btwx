@@ -4,18 +4,20 @@ import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
 import { insertLayersAbove } from '../store/actions/layer';
 import { InsertLayersAbovePayload, LayerTypes } from '../store/actionTypes/layer';
+import { SetDraggingPayload, LeftSidebarTypes } from '../store/actionTypes/leftSidebar';
+import { setDragging } from '../store/actions/leftSidebar';
 import { ThemeContext } from './ThemeProvider';
 
 interface SidebarDropzoneBottomProps {
   leftSidebarWidth?: number;
-  layer: em.Layer;
-  depth: number;
-  dragLayers: string[];
-  dragLayerById?: {
+  layerItem?: em.Layer;
+  layer: string;
+  depth?: number;
+  selected?: string[];
+  selectedById?: {
     [id: string]: em.Layer;
   };
-  setDragLayers(layers: string[]): void;
-  setDragging(dragging: boolean): void;
+  setDragging?(payload: SetDraggingPayload): LeftSidebarTypes;
   insertLayersAbove?(payload: InsertLayersAbovePayload): LayerTypes;
 }
 
@@ -43,11 +45,11 @@ const SidebarDropzoneBottom = (props: SidebarDropzoneBottomProps): ReactElement 
   const ref = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(false);
   const theme = useContext(ThemeContext);
-  const { layer, depth, dragLayers, dragLayerById, setDragLayers, setDragging, insertLayersAbove, leftSidebarWidth } = props;
+  const { layerItem, layer, depth, selected, selectedById, setDragging, insertLayersAbove, leftSidebarWidth } = props;
 
   const handleDragOver = (e: any) => {
-    if (dragLayers && !dragLayers.some((id) => document.getElementById(id).contains(ref.current))) {
-      if (dragLayers.some((id) => dragLayerById[id].type === 'Artboard') && layer.parent !== 'page') {
+    if (!selected.some((id) => document.getElementById(id).contains(ref.current))) {
+      if (selected.some((id) => selectedById[id].type === 'Artboard') && layerItem.parent !== 'page') {
         return;
       } else {
         e.preventDefault();
@@ -64,12 +66,12 @@ const SidebarDropzoneBottom = (props: SidebarDropzoneBottomProps): ReactElement 
     if (active) {
       e.preventDefault();
       insertLayersAbove({
-        layers: dragLayers,
-        above: layer.id
+        layers: selected,
+        above: layer
       });
     }
-    setDragLayers(null);
-    setDragging(false);
+    // setDragLayers({dragLayers: null});
+    setDragging({dragging: false});
   }
 
   return (
@@ -81,7 +83,7 @@ const SidebarDropzoneBottom = (props: SidebarDropzoneBottomProps): ReactElement 
       onDrop={handleDrop}
       style={{
         width: leftSidebarWidth - (depth * (theme.unit * 1.44)),
-        height: layer.children ? theme.unit * 2 : theme.unit * 4
+        height: layerItem.children ? theme.unit * 2 : theme.unit * 4
       }}>
       <Dropzone
         active={active}
@@ -92,15 +94,18 @@ const SidebarDropzoneBottom = (props: SidebarDropzoneBottomProps): ReactElement 
 
 const mapStateToProps = (state: RootState, ownProps: SidebarDropzoneBottomProps) => {
   const { layer, viewSettings } = state;
-  const dragLayerById = ownProps.dragLayers ? ownProps.dragLayers.reduce((result: {[id: string]: em.Layer}, current) => {
+  const layerItem = layer.present.byId[ownProps.layer];
+  const selected = layer.present.selected;
+  const selectedById = selected.reduce((result: {[id: string]: em.Layer}, current) => {
     result[current] = layer.present.byId[current];
     return result;
-  }, {}) : {};
+  }, {});
   const leftSidebarWidth = viewSettings.leftSidebar.width;
-  return { dragLayerById, leftSidebarWidth };
+  const depth = layerItem.scope.length - 1;
+  return { layerItem, selectedById, leftSidebarWidth, selected, depth };
 };
 
 export default connect(
   mapStateToProps,
-  { insertLayersAbove }
+  { insertLayersAbove, setDragging }
 )(SidebarDropzoneBottom);
