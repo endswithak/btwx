@@ -6,6 +6,7 @@ import Icon from './Icon';
 
 interface SidebarLayerIconProps {
   layer: string;
+  isDragGhost?: boolean;
   name?: string;
   small?: boolean;
   shapeId?: string;
@@ -69,7 +70,7 @@ const mapStateToProps = (state: RootState, ownProps: SidebarLayerIconProps) => {
   const small = layerItem.type === 'Shape' || maskItem !== null;
   const shapeId = layerItem.type === 'Shape' ? ownProps.layer : maskItem ? maskItem.id : null;
   const isMaskOrOpenShape = layerItem.type === 'Shape' && (!(layerItem as em.Shape).closed || (layerItem as em.Shape).mask);
-  const isSelected = layerItem.selected;
+  const isSelected = layerItem.selected && !ownProps.isDragGhost;
   return { name, small, shapeId, isMaskOrOpenShape, isSelected };
 };
 

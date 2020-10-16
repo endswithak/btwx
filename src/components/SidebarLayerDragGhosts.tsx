@@ -1,17 +1,15 @@
 import React, { ReactElement } from 'react';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
-import SidebarLayerItem from './SidebarLayerItem';
-import SidebarLayerChildren from './SidebarLayerChildren';
-import { orderLayersByDepth } from '../store/selectors/layer';
+import SidebarLayer from './SidebarLayer';
 
 interface SidebarLayerDragGhostsProps {
-  orderedLayers?: string[];
+  selected?: string[];
   leftSidebarWidth?: number;
 }
 
 const SidebarLayerDragGhosts = (props: SidebarLayerDragGhostsProps): ReactElement => {
-  const { orderedLayers, leftSidebarWidth } = props;
+  const { selected, leftSidebarWidth } = props;
 
   return (
     <div
@@ -19,20 +17,15 @@ const SidebarLayerDragGhosts = (props: SidebarLayerDragGhostsProps): ReactElemen
       style={{
         position: 'fixed',
         width: leftSidebarWidth,
-        left: 999999999999
+        left: 999999999999,
+        opacity: 0.5
       }}>
       {
-        orderedLayers.map((layer, index) => (
-          <div
-            id={`ghost-${layer}`}
+        selected.map((layer, index) => (
+          <SidebarLayer
             key={index}
-            draggable
-            className='c-sidebar-layer'>
-            <SidebarLayerItem
-              layer={layer} />
-            <SidebarLayerChildren
-              layer={layer} />
-          </div>
+            layer={layer}
+            isDragGhost />
         ))
       }
     </div>
@@ -41,9 +34,9 @@ const SidebarLayerDragGhosts = (props: SidebarLayerDragGhostsProps): ReactElemen
 
 const mapStateToProps = (state: RootState) => {
   const { layer, viewSettings } = state;
-  const orderedLayers = orderLayersByDepth(layer.present, layer.present.selected);
+  const selected = [...layer.present.selected].reverse();
   const leftSidebarWidth = viewSettings.leftSidebar.width;
-  return { orderedLayers, leftSidebarWidth };
+  return { selected, leftSidebarWidth };
 };
 
 export default connect(

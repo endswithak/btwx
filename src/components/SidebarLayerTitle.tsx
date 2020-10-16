@@ -10,6 +10,7 @@ import { ThemeContext } from './ThemeProvider';
 
 interface SidebarLayerTitleProps {
   layer: string;
+  isDragGhost?: boolean;
   editing?: boolean;
   isArtboard?: boolean;
   isSelected?: boolean;
@@ -23,9 +24,9 @@ const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
   const { isArtboard, isSelected, layerName, layer, editing, setEditing, setLayerName } = props;
   const [nameInput, setNameInput] = useState(layerName);
 
-  useEffect(() => {
-    console.log('LAYER TITLE');
-  }, []);
+  // useEffect(() => {
+  //   console.log('LAYER TITLE');
+  // }, []);
 
   const handleSubmit = () => {
     if (nameInput.replace(/\s/g, '').length > 0 && nameInput !== layerName) {
@@ -80,9 +81,9 @@ const mapStateToProps = (state: RootState, ownProps: SidebarLayerTitleProps): {
   const { layer, leftSidebar } = state;
   const layerItem = layer.present.byId[ownProps.layer];
   const layerName = layerItem.name;
-  const editing = leftSidebar.editing === ownProps.layer;
+  const editing = leftSidebar.editing === ownProps.layer && !ownProps.isDragGhost;
   const isArtboard = layerItem.type === 'Artboard';
-  const isSelected = layerItem.selected;
+  const isSelected = layerItem.selected && !ownProps.isDragGhost;
   return { editing, isArtboard, isSelected, layerName };
 };
 

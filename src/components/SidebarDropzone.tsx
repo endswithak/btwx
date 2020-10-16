@@ -7,14 +7,15 @@ import SidebarDropzoneBottom from './SidebarDropzoneBottom';
 
 interface SidebarLayerDropzoneProps {
   layer: string;
+  isDragGhost?: boolean;
   dragging?: boolean;
 }
 
 const SidebarLayerDropzone = (props: SidebarLayerDropzoneProps): ReactElement => {
-  const { dragging } = props;
+  const { dragging, isDragGhost } = props;
 
   return (
-    dragging
+    dragging && !isDragGhost
     ? <div className='c-sidebar-dropzone'>
         <SidebarDropzoneCenter
           {...props} />

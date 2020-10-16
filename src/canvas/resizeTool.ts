@@ -1,7 +1,6 @@
 import store from '../store';
-import { scaleLayers } from '../store/actions/layer';
+import { scaleLayers, updateSelectionFrame, updateMeasureFrame } from '../store/actions/layer';
 import { getPaperLayer, getSelectionBounds, getLayerAndDescendants } from '../store/selectors/layer';
-import { updateSelectionFrame, updateMeasureFrame } from '../store/utils/layer';
 import { paperMain } from './index';
 import Tooltip from './tooltip';
 import SnapTool from './snapTool';
@@ -219,10 +218,10 @@ class ResizeTool {
         break;
       }
     }
-    updateSelectionFrame(this.state.layer.present, this.handle);
+    updateSelectionFrame(this.state, this.handle);
     this.updateTooltip();
     this.snapTool.updateGuides();
-    updateMeasureFrame(this.state.layer.present, this.getMeasureGuides());
+    updateMeasureFrame(this.state, this.getMeasureGuides());
   }
   updateToBounds(overrides?: any): void {
     if (this.shiftModifier || this.preserveAspectRatio) {
@@ -773,8 +772,6 @@ class ResizeTool {
           });
           // dispatch resize layers
           store.dispatch(scaleLayers({layers: scaledLayers, scale: this.scale, verticalFlip: this.verticalFlip, horizontalFlip: this.horizontalFlip}));
-          // update selection frame
-          updateSelectionFrame(this.state.layer.present);
         }
       }
     }

@@ -3,8 +3,8 @@ import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import TweenDrawerEventLayerTweens from './TweenDrawerEventLayerTweens';
-import { setLayerHover, selectLayer } from '../store/actions/layer';
-import { SetLayerHoverPayload, SelectLayerPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayerHover, selectLayers } from '../store/actions/layer';
+import { SetLayerHoverPayload, SelectLayersPayload, LayerTypes } from '../store/actionTypes/layer';
 import SidebarLayerIcon from './SidebarLayerIcon';
 
 interface TweenDrawerEventLayerProps {
@@ -13,12 +13,12 @@ interface TweenDrawerEventLayerProps {
   layer?: em.Layer;
   hover?: string;
   setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
-  selectLayer?(payload: SelectLayerPayload): LayerTypes;
+  selectLayers?(payload: SelectLayersPayload): LayerTypes;
 }
 
 const TweenDrawerEventLayer = (props: TweenDrawerEventLayerProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { id, index, layer, hover, setLayerHover, selectLayer } = props;
+  const { id, index, layer, hover, setLayerHover, selectLayers } = props;
 
   const handleMouseEnter = () => {
     setLayerHover({ id });
@@ -29,7 +29,7 @@ const TweenDrawerEventLayer = (props: TweenDrawerEventLayerProps): ReactElement 
   }
 
   const handleClick = () => {
-    selectLayer({id: id, newSelection: true});
+    selectLayers({layers: [id], newSelection: true});
   }
 
   return (
@@ -47,7 +47,7 @@ const TweenDrawerEventLayer = (props: TweenDrawerEventLayerProps): ReactElement 
         <div className='c-tween-drawer__icon'>
           <SidebarLayerIcon
             layer={layer.id}
-            dragGhost={true} />
+            isDragGhost />
         </div>
         <div
           className='c-tween-drawer-event-layer-tween__name'
@@ -73,5 +73,5 @@ const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventLayerProps)
 
 export default connect(
   mapStateToProps,
-  { setLayerHover, selectLayer }
+  { setLayerHover, selectLayers }
 )(TweenDrawerEventLayer);

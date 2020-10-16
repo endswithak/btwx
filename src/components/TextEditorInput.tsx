@@ -6,8 +6,8 @@ import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
 import { closeTextEditor } from '../store/actions/textEditor';
 import { TextEditorTypes } from '../store/actionTypes/textEditor';
-import { setLayerText, selectLayer } from '../store/actions/layer';
-import { SetLayerTextPayload, SelectLayerPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayerText, selectLayers } from '../store/actions/layer';
+import { SetLayerTextPayload, SelectLayersPayload, LayerTypes } from '../store/actionTypes/layer';
 import { paperMain } from '../canvas';
 import { TextEditorState } from '../store/reducers/textEditor';
 import { TextSettingsState } from '../store/reducers/textSettings';
@@ -21,7 +21,7 @@ interface TextEditorInputProps {
   canvasFocusing?: boolean;
   closeTextEditor?(): TextEditorTypes;
   setLayerText?(payload: SetLayerTextPayload): LayerTypes;
-  selectLayer?(payload: SelectLayerPayload): LayerTypes;
+  selectLayers?(payload: SelectLayersPayload): LayerTypes;
   setCanvasFocusing?(payload: SetCanvasFocusingPayload): CanvasSettingsTypes;
 }
 
@@ -29,7 +29,7 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const textSpanRef = useRef<HTMLTextAreaElement>(null);
-  const { textEditor, textSettings, layerItem, closeTextEditor, setCanvasFocusing, canvasFocusing, setLayerText, selectLayer } = props;
+  const { textEditor, textSettings, layerItem, closeTextEditor, setCanvasFocusing, canvasFocusing, setLayerText, selectLayers } = props;
   const [text, setText] = useState(layerItem.text);
   const [prevText, setPrevText] = useState(layerItem.text);
   const debounceText = useCallback(
@@ -102,7 +102,7 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
     return () => {
       setCanvasFocusing({focusing: true});
       paperMain.project.getItem({data: { id: textEditor.layer }}).visible = true;
-      selectLayer({id: textEditor.layer, newSelection: true });
+      selectLayers({layers: [textEditor.layer], newSelection: true });
       document.removeEventListener('mousedown', onMouseDown);
     }
   }, []);
@@ -234,5 +234,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { closeTextEditor, setLayerText, selectLayer, setCanvasFocusing }
+  { closeTextEditor, setLayerText, selectLayers, setCanvasFocusing }
 )(TextEditorInput);

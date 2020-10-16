@@ -86,7 +86,7 @@ const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement =>
       <div className='c-tween-drawer-events-item__module'>
         <SidebarLayerIcon
           layer={layerItem.id}
-          dragGhost={true} />
+          isDragGhost />
         <span style={{marginLeft: 8}}>{layerItem.name}</span>
       </div>
       <div className='c-tween-drawer-events-item__module'>

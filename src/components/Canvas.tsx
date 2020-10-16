@@ -42,7 +42,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
   // );
 
   useEffect(() => {
-    console.log('rerender');
+    console.log('CANVAS');
   }, []);
 
   const handleWheel = (e: any): void => {

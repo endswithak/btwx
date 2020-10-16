@@ -424,6 +424,12 @@ export interface LayerState {
   page: string;
   activeArtboard: string;
   selected: string[];
+  selectedBounds: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
   allArtboardIds: string[];
   allShapeIds: string[];
   allGroupIds: string[];
@@ -475,6 +481,7 @@ const initialState: LayerState = {
   page: 'page',
   activeArtboard: null,
   selected: [],
+  selectedBounds: null,
   allArtboardIds: [],
   allShapeIds: [],
   allGroupIds: [],

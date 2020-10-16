@@ -15,7 +15,7 @@ export const disableTranslateToolThunk = () => {
   return (dispatch: any, getState: any): void => {
     dispatch(setCanvasActiveTool({activeTool: null, translating: false}));
     dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
-    dispatch(updateInViewLayers());
+    // dispatch(updateInViewLayers());
   }
 };
 
@@ -26,7 +26,7 @@ export const centerSelectionThunk = () => {
       const selectionCenter = getSelectionCenter(state.layer.present, true);
       paperMain.view.center = selectionCenter;
       dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
-      dispatch(updateInViewLayers());
+      // dispatch(updateInViewLayers());
     }
   }
 };

@@ -123,7 +123,7 @@ export const getDeepSelectItem = (store: LayerState, id: string): em.Layer => {
   const nearestScopeAncestor = getNearestScopeAncestor(store, id);
   const nearestScopeAncestorIndex = layerScope.indexOf(nearestScopeAncestor.id);
   if (nearestScopeAncestor.id !== id) {
-    if (nearestScopeAncestor.type === 'Artboard' && layerItem.type !== 'Group') {
+    if (layerScope[layerScope.length - 1] === nearestScopeAncestor.id) {
       return store.byId[id];
     } else {
       return store.byId[layerScope[nearestScopeAncestorIndex + 1]];
@@ -172,49 +172,61 @@ export const getLayersBounds = (store: LayerState, layers: string[]): paper.Rect
   });
 };
 
-export const getSelectionTopLeft = (store: LayerState, useLayerItem?: boolean): paper.Point => {
-  const paperLayerPoints = store.selected.reduce((result, current) => {
-    if (useLayerItem) {
-      const layerItem = store.byId[current];
-      const topLeft = new paperMain.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
-      return [...result, topLeft];
-    } else {
+export const getSelectionTopLeft = (store: LayerState, useStore?: boolean): paper.Point => {
+  if (useStore && store.selectedBounds) {
+    const x = store.selectedBounds.x - (store.selectedBounds.width / 2);
+    const y = store.selectedBounds.y - (store.selectedBounds.height / 2);
+    return new paperMain.Point(x, y);
+  } else {
+    const paperLayerPoints = store.selected.reduce((result, current) => {
       const paperLayer = getPaperLayer(current);
       return [...result, paperLayer.bounds.topLeft];
-    }
-  }, []);
-  return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.min) : null;
+    }, []);
+    return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.min) : null;
+  }
 };
 
-export const getSelectionBottomRight = (store: LayerState, useLayerItem?: boolean): paper.Point => {
-  const paperLayerPoints = store.selected.reduce((result, current) => {
-    if (useLayerItem) {
-      const layerItem = store.byId[current];
-      const bottomRight = new paperMain.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
-      return [...result, bottomRight];
-    } else {
+export const getSelectionBottomRight = (store: LayerState, useStore?: boolean): paper.Point => {
+  if (useStore && store.selectedBounds) {
+    const x = store.selectedBounds.x + (store.selectedBounds.width / 2);
+    const y = store.selectedBounds.y + (store.selectedBounds.height / 2);
+    return new paperMain.Point(x, y);
+  } else {
+    const paperLayerPoints = store.selected.reduce((result, current) => {
       const paperLayer = getPaperLayer(current);
       return [...result, paperLayer.bounds.bottomRight];
+    }, []);
+    return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.max) : null;
+  }
+};
+
+export const getSelectionBounds = (store: LayerState, useStore?: boolean): paper.Rectangle => {
+  const topLeft = getSelectionTopLeft(store, useStore);
+  const bottomRight = getSelectionBottomRight(store, useStore);
+  if (topLeft && bottomRight) {
+    return new paper.Rectangle({
+      from: topLeft,
+      to: bottomRight
+    });
+  } else {
+    return null;
+  }
+};
+
+export const getSelectionCenter = (store: LayerState, useStore?: boolean): paper.Point => {
+  if (useStore && store.selectedBounds) {
+    return new paper.Point(store.selectedBounds.x, store.selectedBounds.y);
+  } else {
+    const topLeft = getSelectionTopLeft(store, useStore);
+    const bottomRight = getSelectionBottomRight(store, useStore);
+    if (topLeft && bottomRight) {
+      const xMid = (topLeft.x + bottomRight.x) / 2;
+      const yMid = (topLeft.y + bottomRight.y) / 2;
+      return new paper.Point(xMid, yMid);
+    } else {
+      return null;
     }
-  }, []);
-  return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.max) : null;
-};
-
-export const getSelectionBounds = (store: LayerState, useLayerItem?: boolean): paper.Rectangle => {
-  const topLeft = getSelectionTopLeft(store, useLayerItem);
-  const bottomRight = getSelectionBottomRight(store, useLayerItem);
-  return new paper.Rectangle({
-    from: topLeft,
-    to: bottomRight
-  });
-};
-
-export const getSelectionCenter = (store: LayerState, useLayerItem?: boolean): paper.Point => {
-  const topLeft = getSelectionTopLeft(store, useLayerItem);
-  const bottomRight = getSelectionBottomRight(store, useLayerItem);
-  const xMid = (topLeft.x + bottomRight.x) / 2;
-  const yMid = (topLeft.y + bottomRight.y) / 2;
-  return new paper.Point(xMid, yMid);
+  }
 };
 
 export const getCanvasTopLeft = (store: LayerState, useLayerItem?: boolean): paper.Point => {
@@ -1051,39 +1063,13 @@ export const getInViewSnapPoints = (state: LayerState): em.SnapPoint[] => {
 };
 
 export const orderLayersByDepth = (state: LayerState, layers: string[]): string[] => {
-  const ordered: string[] = [];
-  while(ordered.length !== layers.length) {
-    const filtered = layers.filter((id) => !ordered.includes(id));
-    const topLayer = filtered.reduce((result, current) => {
-      const layerDepth = state.byId[current].scope.length - 1;
-      const layerIndex = getLayerIndex(state, current);
-      if (layerDepth < result.depth) {
-        return {
-          id: current,
-          index: layerIndex,
-          depth: layerDepth
-        }
-      } else if (layerDepth === result.depth) {
-        if (layerIndex > result.index) {
-          return {
-            id: current,
-            index: layerIndex,
-            depth: layerDepth
-          }
-        } else {
-          return result;
-        }
-      } else {
-        return result;
-      }
-    }, {
-      id: filtered[0],
-      index: getLayerIndex(state, filtered[0]),
-      depth: state.byId[filtered[0]].scope.length - 1
-    });
-    ordered.unshift(topLayer.id);
-  }
-  return ordered;
+  return layers.sort((a, b) => {
+    const layerItemA = state.byId[a];
+    const layerItemB = state.byId[b];
+    const layerItemAIndex = getLayerIndex(state, a);
+    const layerItemBIndex = getLayerIndex(state, b);
+    return (layerItemA.scope.length + layerItemAIndex) - (layerItemB.scope.length + layerItemBIndex);
+  });
 };
 
 export const orderLayersByLeft = (layers: string[]): string[] => {

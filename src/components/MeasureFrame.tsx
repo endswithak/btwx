@@ -1,40 +1,27 @@
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getLayerAndDescendants } from '../store/selectors/layer';
-import { updateMeasureFrame } from '../store/utils/layer';
-import { LayerState } from '../store/reducers/layer';
+import { updateMeasureFrameThunk } from '../store/actions/layer';
 import { paperMain } from '../canvas';
 
 interface MeasureFrameProps {
   selected?: string[];
-  zoom: number;
-  hover: string;
+  hover?: string;
+  updateMeasureFrameThunk?(): void;
 }
 
 const MeasureFrame = (props: MeasureFrameProps): ReactElement => {
-  const { selected, zoom, hover } = props;
-
-  const handleWheel = (e: WheelEvent) => {
-    if (e.ctrlKey) {
-      const measureFrame = paperMain.project.getItem({ data: { id: 'MeasureFrame' } });
-      if (measureFrame) {
-        measureFrame.remove();
-      }
-    }
-  }
+  const { selected, hover, updateMeasureFrameThunk } = props;
 
   useEffect(() => {
-    updateMeasureFrame({selected: selected, hover: hover} as LayerState, { all: hover });
-    document.getElementById('canvas').addEventListener('wheel', handleWheel);
+    updateMeasureFrameThunk();
     return () => {
       const measureFrame = paperMain.project.getItem({ data: { id: 'MeasureFrame' } });
-      document.getElementById('canvas').removeEventListener('wheel', handleWheel);
       if (measureFrame) {
         measureFrame.remove();
       }
     }
-  }, [selected, zoom, hover]);
+  }, [selected, hover]);
 
   return (
     <></>
@@ -42,13 +29,13 @@ const MeasureFrame = (props: MeasureFrameProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer, documentSettings } = state;
+  const { layer } = state;
   const selected = layer.present.selected;
   const hover = layer.present.hover;
-  const zoom = documentSettings.matrix[0];
-  return { selected, zoom, hover };
+  return { selected, hover };
 };
 
 export default connect(
-  mapStateToProps
+  mapStateToProps,
+  { updateMeasureFrameThunk }
 )(MeasureFrame);

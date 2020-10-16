@@ -6,19 +6,20 @@ import SidebarLayers from './SidebarLayers';
 
 interface SidebarLayerChildrenProps {
   layer: string;
+  isDragGhost?: boolean;
   showChildren?: boolean;
   children?: string[];
 }
 
 const SidebarLayerChildren = (props: SidebarLayerChildrenProps): ReactElement => {
-  const { layer, showChildren, children } = props;
+  const { layer, showChildren, children, isDragGhost } = props;
 
   useEffect(() => {
     console.log('LAYER CHILDREN');
   }, []);
 
   return (
-    showChildren
+    showChildren && !isDragGhost
     ? <SidebarLayers
         layers={children} />
     : null

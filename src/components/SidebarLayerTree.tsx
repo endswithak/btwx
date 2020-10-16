@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getLeftSidebarLayers } from '../store/selectors';
 import SidebarDropzone from './SidebarDropzone';
-import SidebarLayer from './SidebarLayer';
+import SidebarLayers from './SidebarLayers';
 import SidebarLayerDragGhosts from './SidebarLayerDragGhosts';
 import SidebarLeftSearchEmptyState from './SidebarLeftSearchEmptyState';
 
@@ -24,14 +24,11 @@ const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
         layer={'page'} />
       {
         layers.length > 0
-        ? layers.map((layer: string, index: number) => (
-            <SidebarLayer
-              key={index}
-              layer={layer} />
-          ))
+        ? <SidebarLayers
+            layers={layers} />
         : <SidebarLeftSearchEmptyState />
       }
-      {/* <SidebarLayerDragGhosts /> */}
+      <SidebarLayerDragGhosts />
     </>
   )
 }

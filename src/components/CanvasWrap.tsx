@@ -26,6 +26,7 @@ const CanvasWrap = (props: CanvasWrapProps): ReactElement => {
   const { ready, matrix, documentImages, updateInViewLayers, paperProject, setReady } = props;
 
   useEffect(() => {
+    console.log('CANVAS WRAP');
     paperMain.setup(document.getElementById('canvas') as HTMLCanvasElement);
     importPaperProject({
       paperProject,

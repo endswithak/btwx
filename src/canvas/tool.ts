@@ -4,7 +4,7 @@ import { RootState } from '../store/reducers';
 import { getNearestScopeAncestor, getDeepSelectItem, getPaperLayer, getLayerAndDescendants } from '../store/selectors/layer';
 import { setTextSettings } from '../store/actions/textSettings';
 import { setCanvasActiveTool, setCanvasDrawing } from '../store/actions/canvasSettings';
-import { setLayerHover, selectLayer, deselectLayer, deepSelectLayer, deselectAllLayers, setLayerActiveGradientStop } from '../store/actions/layer';
+import { setLayerHover, selectLayers, deselectLayers, deepSelectLayer, deselectAllLayers, setLayerActiveGradientStop } from '../store/actions/layer';
 import { paperMain } from './index';
 import { scrollToLayer } from '../utils';
 import ShapeTool from './shapeTool';
@@ -113,9 +113,9 @@ class MasterTool {
         this.areaSelectTool.onMouseDown(hitResult.event);
       } else {
         if (props.layerItem.selected) {
-          store.dispatch(deselectLayer({id: props.nearestScopeAncestor.id}));
+          store.dispatch(deselectLayers({layers: [props.nearestScopeAncestor.id]}));
         } else {
-          store.dispatch(selectLayer({id: props.nearestScopeAncestor.id}));
+          store.dispatch(selectLayers({layers: [props.nearestScopeAncestor.id]}));
         }
       }
     } else {
@@ -127,7 +127,7 @@ class MasterTool {
           store.dispatch(deepSelectLayer({id: props.layerItem.id}));
         } else {
           layerId = props.nearestScopeAncestor.id;
-          store.dispatch(selectLayer({id: props.nearestScopeAncestor.id, newSelection: true}));
+          store.dispatch(selectLayers({layers: [props.nearestScopeAncestor.id], newSelection: true}));
         }
         if (layerId) {
           scrollToLayer(layerId);

@@ -6,6 +6,7 @@ import { ThemeContext } from './ThemeProvider';
 
 interface SidebarLayerBackgroundProps {
   layer: string;
+  isDragGhost?: boolean;
   isSelected?: boolean;
   isHovering?: boolean;
   isArtboard?: boolean;
@@ -66,10 +67,10 @@ const mapStateToProps = (state: RootState, ownProps: SidebarLayerBackgroundProps
   const { layer, leftSidebar } = state;
   const hover = layer.present.hover;
   const layerItem = layer.present.byId[ownProps.layer];
-  const isSelected = layerItem.selected;
-  const isHovering = hover === ownProps.layer;
-  const isArtboard = layerItem.type === 'Artboard';
-  const editing = leftSidebar.editing === ownProps.layer;
+  const isSelected = layerItem.selected && !ownProps.isDragGhost;
+  const isHovering = hover === ownProps.layer && !ownProps.isDragGhost;
+  const isArtboard = layerItem.type === 'Artboard' && !ownProps.isDragGhost;
+  const editing = leftSidebar.editing === ownProps.layer && !ownProps.isDragGhost;
   return { isSelected, isHovering, isArtboard, editing };
 };
 

@@ -1,28 +1,26 @@
 import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { updateHoverFrame } from '../store/utils/layer';
-import { LayerState } from '../store/reducers/layer';
+import { updateHoverFrameThunk } from '../store/actions/layer';
 import { paperMain } from '../canvas';
 
 interface HoverFrameProps {
-  selected?: string[];
   hover?: string;
-  hoverItem?: em.Layer;
+  updateHoverFrameThunk?(): void;
 }
 
 const HoverFrame = (props: HoverFrameProps): ReactElement => {
-  const { selected, hover, hoverItem } = props;
+  const { hover, updateHoverFrameThunk } = props;
 
   useEffect(() => {
-    updateHoverFrame({byId: hoverItem ? {[hover]: hoverItem} : {}, selected: selected, hover: hover} as LayerState);
+    updateHoverFrameThunk();
     return () => {
       const hoverFrame = paperMain.project.getItem({ data: { id: 'HoverFrame' } });
       if (hoverFrame) {
         hoverFrame.remove();
       }
     }
-  }, [selected, hover, hoverItem]);
+  }, [hover]);
 
   return (
     <></>
@@ -30,17 +28,14 @@ const HoverFrame = (props: HoverFrameProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState): {
-  selected: string[];
   hover: string;
-  hoverItem: em.Layer;
 } => {
   const { layer } = state;
   const hover = layer.present.hover;
-  const hoverItem = layer.present.byId[hover];
-  const selected = layer.present.selected;
-  return { hover, hoverItem, selected };
+  return { hover };
 };
 
 export default connect(
-  mapStateToProps
+  mapStateToProps,
+  { updateHoverFrameThunk }
 )(HoverFrame);

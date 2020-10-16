@@ -80,7 +80,7 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
     currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.layer.id}) as AddInViewLayer);
   }
   if (!action.payload.batch) {
-    currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.layer.id, newSelection: true}) as SelectLayer);
+    currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.layer.id], newSelection: true}) as SelectLayers);
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   }
   return currentState;
@@ -103,7 +103,7 @@ export const addShape = (state: LayerState, action: AddShape): LayerState => {
       [action.payload.layer.parent]: {
         ...currentState.byId[action.payload.layer.parent],
         children: addItem((currentState.byId[action.payload.layer.parent] as em.Group).children, action.payload.layer.id),
-        showChildren: true
+        // showChildren: true
       } as em.Group
     },
     allShapeIds: addItem(state.allShapeIds, action.payload.layer.id)
@@ -114,7 +114,10 @@ export const addShape = (state: LayerState, action: AddShape): LayerState => {
   currentState = updateLayerBounds(currentState, action.payload.layer.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.layer.id, 'all');
   if (!action.payload.batch) {
-    currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.layer.id, newSelection: true}) as SelectLayer);
+    if (parentItem.type !== 'Page' && !(parentItem as em.Group | em.Artboard).showChildren) {
+      currentState = showLayerChildren(currentState, layerActions.showLayerChildren({id: action.payload.layer.parent}) as ShowLayerChildren);
+    }
+    currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.layer.id], newSelection: true}) as SelectLayers);
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   }
   return currentState;
@@ -136,7 +139,7 @@ export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
       [action.payload.layer.parent]: {
         ...currentState.byId[action.payload.layer.parent],
         children: addItem((currentState.byId[action.payload.layer.parent] as em.Group).children, action.payload.layer.id),
-        showChildren: true
+        // showChildren: true
       } as em.Group
     },
     allGroupIds: addItem(state.allGroupIds, action.payload.layer.id)
@@ -146,7 +149,10 @@ export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
   }
   currentState = updateLayerBounds(currentState, action.payload.layer.id);
   if (!action.payload.batch) {
-    currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.layer.id, newSelection: true}) as SelectLayer);
+    if (parentItem.type !== 'Page' && !(parentItem as em.Group | em.Artboard).showChildren) {
+      currentState = showLayerChildren(currentState, layerActions.showLayerChildren({id: action.payload.layer.parent}) as ShowLayerChildren);
+    }
+    currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.layer.id], newSelection: true}) as SelectLayers);
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   }
   return currentState;
@@ -168,7 +174,7 @@ export const addText = (state: LayerState, action: AddText): LayerState => {
       [action.payload.layer.parent]: {
         ...currentState.byId[action.payload.layer.parent],
         children: addItem((currentState.byId[action.payload.layer.parent] as em.Group).children, action.payload.layer.id),
-        showChildren: true
+        // showChildren: true
       } as em.Group
     },
     allTextIds: addItem(state.allTextIds, action.payload.layer.id)
@@ -179,7 +185,10 @@ export const addText = (state: LayerState, action: AddText): LayerState => {
   currentState = updateLayerBounds(currentState, action.payload.layer.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.layer.id, 'all');
   if (!action.payload.batch) {
-    currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.layer.id, newSelection: true}) as SelectLayer);
+    if (parentItem.type !== 'Page' && !(parentItem as em.Group | em.Artboard).showChildren) {
+      currentState = showLayerChildren(currentState, layerActions.showLayerChildren({id: action.payload.layer.parent}) as ShowLayerChildren);
+    }
+    currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.layer.id], newSelection: true}) as SelectLayers);
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   }
   return currentState;
@@ -201,7 +210,7 @@ export const addImage = (state: LayerState, action: AddImage): LayerState => {
       [action.payload.layer.parent]: {
         ...currentState.byId[action.payload.layer.parent],
         children: addItem((currentState.byId[action.payload.layer.parent] as em.Group).children, action.payload.layer.id),
-        showChildren: true
+        // showChildren: true
       } as em.Group
     },
     allImageIds: addItem(state.allImageIds, action.payload.layer.id)
@@ -212,7 +221,10 @@ export const addImage = (state: LayerState, action: AddImage): LayerState => {
   currentState = updateLayerBounds(currentState, action.payload.layer.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.layer.id, 'all');
   if (!action.payload.batch) {
-    currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.layer.id, newSelection: true}) as SelectLayer);
+    if (parentItem.type !== 'Page' && !(parentItem as em.Group | em.Artboard).showChildren) {
+      currentState = showLayerChildren(currentState, layerActions.showLayerChildren({id: action.payload.layer.parent}) as ShowLayerChildren);
+    }
+    currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.layer.id], newSelection: true}) as SelectLayers);
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   }
   return currentState;
@@ -321,7 +333,7 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
     }
     // if selection includes layer, remove layer from selection
     if (result.selected.includes(current)) {
-      result = deselectLayer(result, layerActions.deselectLayer({id: current}) as DeselectLayer);
+      result = deselectLayers(result, layerActions.deselectLayers({layers: [current]}) as DeselectLayers);
     }
     // if artboard, remove any tween events with artboard as origin or destination
     if (layer.type === 'Artboard') {
@@ -370,39 +382,6 @@ export const removeLayers = (state: LayerState, action: RemoveLayers): LayerStat
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
-}
-
-export const updateActiveArtboardFrame = (state: LayerState, useLayerItem = false): void => {
-  const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'ActiveArtboardFrame' } });
-  if (activeArtboardFrame) {
-    activeArtboardFrame.remove();
-  }
-  if (state.activeArtboard) {
-    let topLeft;
-    let bottomRight;
-    if (useLayerItem) {
-      const layerItem = state.byId[state.activeArtboard];
-      topLeft = new paperMain.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
-      bottomRight = new paperMain.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
-    } else {
-      const paperActiveArtboardLayer = getPaperLayer(state.activeArtboard);
-      topLeft = paperActiveArtboardLayer.bounds.topLeft;
-      bottomRight = paperActiveArtboardLayer.bounds.bottomRight;
-    }
-    new paperMain.Path.Rectangle({
-      from: new paperMain.Point(topLeft.x - (4 / paperMain.view.zoom), topLeft.y - (4 / paperMain.view.zoom)),
-      to: new paperMain.Point(bottomRight.x + (4 / paperMain.view.zoom), bottomRight.y + (4 / paperMain.view.zoom)),
-      strokeColor: THEME_PRIMARY_COLOR,
-      strokeWidth: 3 / paperMain.view.zoom,
-      data: {
-        id: 'ActiveArtboardFrame',
-        type: 'UIElement',
-        interactive: false,
-        interactiveType: null,
-        elementId: 'ActiveArtboardFrame'
-      }
-    });
-  }
 }
 
 export const updateGradientFrame = (layerItem: em.Layer, gradient: em.Gradient, themeName: em.ThemeName) => {
@@ -561,715 +540,6 @@ export const updateGradientFrame = (layerItem: em.Layer, gradient: em.Gradient, 
   });
 }
 
-export const updateHoverFrame = (state: LayerState) => {
-  const hoverFrame = paperMain.project.getItem({ data: { id: 'HoverFrame' } });
-  const hoverFrameConstants = {
-    strokeColor: THEME_PRIMARY_COLOR,
-    strokeWidth: 2 / paperMain.view.zoom,
-    data: { id: 'HoverFrame', type: 'UIElement', interactive: false }
-  }
-  if (hoverFrame) {
-    hoverFrame.remove();
-  }
-  if (state.hover && !state.selected.includes(state.hover)) {
-    const hoverItem = state.byId[state.hover];
-    switch(hoverItem.type) {
-      case 'Shape':
-        new paperMain.CompoundPath({
-          ...hoverFrameConstants,
-          closed: (hoverItem as em.Shape).shapeType !== 'Line',
-          pathData: hoverItem.pathData
-        });
-        break;
-      case 'Text': {
-        const paperLayer = getPaperLayer(state.hover) as paper.PointText;
-        const linesGroup = new paperMain.Group({
-          data: { id: 'HoverFrame', type: 'UIElement', interactive: false }
-        });
-        const initialPoint = paperLayer.point;
-        paperLayer._lines.forEach((line: any, index: number) => {
-          new paperMain.Path.Line({
-            from: new paperMain.Point(initialPoint.x, initialPoint.y + ((paperLayer.leading as number) * index)),
-            to: new paperMain.Point(initialPoint.x + paperLayer.bounds.width, initialPoint.y + ((paperLayer.leading as number) * index)),
-            strokeColor: THEME_PRIMARY_COLOR,
-            strokeWidth: 2 / paperMain.view.zoom,
-            data: {
-              type: 'UIElementChild',
-              interactive: false,
-              interactiveType: null,
-              elementId: 'HoverFrame'
-            },
-            parent: linesGroup
-          });
-        });
-        break;
-      }
-      default:
-        new paperMain.Path.Rectangle({
-          ...hoverFrameConstants,
-          point: new paperMain.Point(hoverItem.frame.x - (hoverItem.frame.width / 2), hoverItem.frame.y - (hoverItem.frame.height / 2)),
-          size: [hoverItem.frame.width, hoverItem.frame.height]
-        });
-        break;
-    }
-  }
-}
-
-export const updateSelectionFrame = (state: LayerState, visibleHandle = 'all', useLayerItem = false) => {
-  const selectionFrame = paperMain.project.getItem({ data: { id: 'SelectionFrame' } });
-  if (selectionFrame) {
-    selectionFrame.remove();
-  }
-  if (state.selected.length > 0) {
-    const selectedWithChildren = state.selected.reduce((result: { allIds: string[]; byId: { [id: string]: em.Layer } }, current) => {
-      const layerAndChildren = getLayerAndDescendants(state, current);
-      result.allIds = [...result.allIds, ...layerAndChildren];
-      layerAndChildren.forEach((id) => {
-        result.byId[id] = state.byId[id];
-      });
-      return result;
-    }, { allIds: [], byId: {} });
-    const resizeDisabled = state.selected.length >= 1 && !state.selected.some((id) => state.byId[id].type === 'Artboard') && selectedWithChildren.allIds.some((id) => state.byId[id].type === 'Text' || state.byId[id].type === 'Group');
-    const selectionTopLeft = getSelectionTopLeft(state, useLayerItem);
-    const selectionBottomRight = getSelectionBottomRight(state, useLayerItem);
-    const baseProps = {
-      point: selectionTopLeft,
-      size: [8, 8],
-      fillColor: '#fff',
-      strokeColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.15 },
-      strokeWidth: 1 / paperMain.view.zoom,
-      shadowColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.5 },
-      shadowBlur: 1 / paperMain.view.zoom,
-      insert: false,
-      opacity: resizeDisabled ? 1 : 1
-    }
-    if (state.selected.length === 1 && state.byId[state.selected[0]].type === 'Shape' && (state.byId[state.selected[0]] as em.Shape).shapeType === 'Line') {
-      const layerItem = state.byId[state.selected[0]] as em.Line;
-      const moveHandle = new paperMain.Path.Ellipse({
-        ...baseProps,
-        opacity: 1,
-        visible: visibleHandle === 'all' || visibleHandle === 'move',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'move',
-          elementId: 'SelectionFrame'
-        },
-        onMouseEnter: function() {
-          document.body.style.cursor = 'move';
-        },
-        onMouseLeave: function() {
-          document.body.style.cursor = 'auto';
-        }
-      });
-      moveHandle.position = useLayerItem ? new paperMain.Point(layerItem.frame.x, layerItem.frame.y) : (getPaperLayer(state.selected[0]) as paper.Path).bounds.center;
-      moveHandle.scaling.x = 1 / paperMain.view.zoom;
-      moveHandle.scaling.y = 1 / paperMain.view.zoom;
-      const fromHandle = new paperMain.Path.Rectangle({
-        ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'from',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'from',
-          elementId: 'SelectionFrame'
-        },
-        onMouseEnter: function() {
-          if (resizeDisabled) {
-            document.body.style.cursor = 'not-allowed';
-          } else {
-            document.body.style.cursor = 'ew-resize';
-          }
-        },
-        onMouseLeave: function() {
-          document.body.style.cursor = 'auto';
-        }
-      });
-      fromHandle.position = useLayerItem ? getLineFromPoint(layerItem) : (getPaperLayer(state.selected[0]) as paper.Path).firstSegment.point;
-      fromHandle.scaling.x = 1 / paperMain.view.zoom;
-      fromHandle.scaling.y = 1 / paperMain.view.zoom;
-      const toHandle = new paperMain.Path.Rectangle({
-        ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'to',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'to',
-          elementId: 'SelectionFrame'
-        },
-        onMouseEnter: function() {
-          if (resizeDisabled) {
-            document.body.style.cursor = 'not-allowed';
-          } else {
-            document.body.style.cursor = 'ew-resize';
-          }
-        },
-        onMouseLeave: function() {
-          document.body.style.cursor = 'auto';
-        }
-      });
-      toHandle.position = useLayerItem ? getLineToPoint(layerItem) : (getPaperLayer(state.selected[0]) as paper.Path).lastSegment.point;
-      toHandle.scaling.x = 1 / paperMain.view.zoom;
-      toHandle.scaling.y = 1 / paperMain.view.zoom;
-      new paperMain.Group({
-        children: [fromHandle, moveHandle, toHandle],
-        data: {
-          id: 'SelectionFrame',
-          type: 'UIElement',
-          interactive: false,
-          interactiveType: null,
-          elementId: 'SelectionFrame'
-        }
-      });
-    }
-    else {
-      const baseFrame = new paperMain.Path.Rectangle({
-        from: selectionTopLeft,
-        to: selectionBottomRight,
-        strokeColor: THEME_PRIMARY_COLOR,
-        strokeWidth: 1 / paperMain.view.zoom,
-        insert: false,
-        data: {
-          type: 'UIElementChild',
-          interactive: false,
-          interactiveType: null,
-          elementId: 'SelectionFrame'
-        }
-      });
-      const moveHandle = new paperMain.Path.Ellipse({
-        ...baseProps,
-        opacity: 1,
-        visible: visibleHandle === 'all' || visibleHandle === 'move',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'move',
-          elementId: 'SelectionFrame'
-        },
-        onMouseEnter: function() {
-          document.body.style.cursor = 'move';
-        },
-        onMouseLeave: function() {
-          document.body.style.cursor = 'auto';
-        }
-      });
-      moveHandle.position = new paperMain.Point(baseFrame.bounds.topCenter.x, baseFrame.bounds.topCenter.y - ((1 / paperMain.view.zoom) * 24));
-      // moveHandle.position = new paperMain.Point(baseFrame.bounds.center.x, baseFrame.bounds.center.y);
-      moveHandle.scaling.x = 1 / paperMain.view.zoom;
-      moveHandle.scaling.y = 1 / paperMain.view.zoom;
-      const topLeftHandle = new paperMain.Path.Rectangle({
-        ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'topLeft',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'topLeft',
-          elementId: 'SelectionFrame'
-        },
-        onMouseEnter: function() {
-          if (resizeDisabled) {
-            document.body.style.cursor = 'not-allowed';
-          } else {
-            document.body.style.cursor = 'nwse-resize';
-          }
-        },
-        onMouseLeave: function() {
-          document.body.style.cursor = 'auto';
-        }
-      });
-      topLeftHandle.position = baseFrame.bounds.topLeft;
-      topLeftHandle.scaling.x = 1 / paperMain.view.zoom;
-      topLeftHandle.scaling.y = 1 / paperMain.view.zoom;
-      const topCenterHandle = new paperMain.Path.Rectangle({
-        ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'topCenter',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'topCenter',
-          elementId: 'SelectionFrame'
-        },
-        onMouseEnter: function() {
-          if (resizeDisabled) {
-            document.body.style.cursor = 'not-allowed';
-          } else {
-            document.body.style.cursor = 'ns-resize';
-          }
-        },
-        onMouseLeave: function() {
-          document.body.style.cursor = 'auto';
-        }
-      });
-      topCenterHandle.position = baseFrame.bounds.topCenter;
-      topCenterHandle.scaling.x = 1 / paperMain.view.zoom;
-      topCenterHandle.scaling.y = 1 / paperMain.view.zoom;
-      const topRightHandle = new paperMain.Path.Rectangle({
-        ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'topRight',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'topRight',
-          elementId: 'SelectionFrame'
-        },
-        onMouseEnter: function() {
-          if (resizeDisabled) {
-            document.body.style.cursor = 'not-allowed';
-          } else {
-            document.body.style.cursor = 'nesw-resize';
-          }
-        },
-        onMouseLeave: function() {
-          document.body.style.cursor = 'auto';
-        }
-      });
-      topRightHandle.position = baseFrame.bounds.topRight;
-      topRightHandle.scaling.x = 1 / paperMain.view.zoom;
-      topRightHandle.scaling.y = 1 / paperMain.view.zoom;
-      const bottomLeftHandle = new paperMain.Path.Rectangle({
-        ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'bottomLeft',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'bottomLeft',
-          elementId: 'SelectionFrame'
-        },
-        onMouseEnter: function() {
-          if (resizeDisabled) {
-            document.body.style.cursor = 'not-allowed';
-          } else {
-            document.body.style.cursor = 'nesw-resize';
-          }
-        },
-        onMouseLeave: function() {
-          document.body.style.cursor = 'auto';
-        }
-      });
-      bottomLeftHandle.position = baseFrame.bounds.bottomLeft;
-      bottomLeftHandle.scaling.x = 1 / paperMain.view.zoom;
-      bottomLeftHandle.scaling.y = 1 / paperMain.view.zoom;
-      const bottomCenterHandle = new paperMain.Path.Rectangle({
-        ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'bottomCenter',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'bottomCenter',
-          elementId: 'SelectionFrame'
-        },
-        onMouseEnter: function() {
-          if (resizeDisabled) {
-            document.body.style.cursor = 'not-allowed';
-          } else {
-            document.body.style.cursor = 'ns-resize';
-          }
-        },
-        onMouseLeave: function() {
-          document.body.style.cursor = 'auto';
-        }
-      });
-      bottomCenterHandle.position = baseFrame.bounds.bottomCenter;
-      bottomCenterHandle.scaling.x = 1 / paperMain.view.zoom;
-      bottomCenterHandle.scaling.y = 1 / paperMain.view.zoom;
-      const bottomRightHandle = new paperMain.Path.Rectangle({
-        ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'bottomRight',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'bottomRight',
-          elementId: 'SelectionFrame'
-        },
-        onMouseEnter: function() {
-          if (resizeDisabled) {
-            document.body.style.cursor = 'not-allowed';
-          } else {
-            document.body.style.cursor = 'nwse-resize';
-          }
-        },
-        onMouseLeave: function() {
-          document.body.style.cursor = 'auto';
-        }
-      });
-      bottomRightHandle.position = baseFrame.bounds.bottomRight;
-      bottomRightHandle.scaling.x = 1 / paperMain.view.zoom;
-      bottomRightHandle.scaling.y = 1 / paperMain.view.zoom;
-      const rightCenterHandle = new paperMain.Path.Rectangle({
-        ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'rightCenter',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'rightCenter',
-          elementId: 'SelectionFrame'
-        },
-        onMouseEnter: function() {
-          if (resizeDisabled) {
-            document.body.style.cursor = 'not-allowed';
-          } else {
-            document.body.style.cursor = 'ew-resize';
-          }
-        },
-        onMouseLeave: function() {
-          document.body.style.cursor = 'auto';
-        }
-      });
-      rightCenterHandle.position = baseFrame.bounds.rightCenter;
-      rightCenterHandle.scaling.x = 1 / paperMain.view.zoom;
-      rightCenterHandle.scaling.y = 1 / paperMain.view.zoom;
-      const leftCenterHandle = new paperMain.Path.Rectangle({
-        ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'leftCenter',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'leftCenter',
-          elementId: 'SelectionFrame'
-        },
-        onMouseEnter: function() {
-          if (resizeDisabled) {
-            document.body.style.cursor = 'not-allowed';
-          } else {
-            document.body.style.cursor = 'ew-resize';
-          }
-        },
-        onMouseLeave: function() {
-          document.body.style.cursor = 'auto';
-        }
-      });
-      leftCenterHandle.position = baseFrame.bounds.leftCenter;
-      leftCenterHandle.scaling.x = 1 / paperMain.view.zoom;
-      leftCenterHandle.scaling.y = 1 / paperMain.view.zoom;
-      new paperMain.Group({
-        children: [baseFrame, moveHandle, topLeftHandle, topCenterHandle, topRightHandle, bottomLeftHandle, bottomCenterHandle, bottomRightHandle, leftCenterHandle, rightCenterHandle],
-        data: {
-          id: 'SelectionFrame',
-          type: 'UIElement',
-          interactive: false,
-          interactiveType: null,
-          elementId: 'SelectionFrame'
-        }
-      });
-    }
-  }
-}
-
-export const updateTweenEventsFrame = (state: LayerState, events: em.TweenEvent[], hover: string, themeName: em.ThemeName) => {
-  const tweenEventsFrame = paperMain.project.getItem({ data: { id: 'TweenEventsFrame' } });
-  if (tweenEventsFrame) {
-    tweenEventsFrame.remove();
-  }
-  if (events) {
-    const tweenEventsFrame = new paperMain.Group({
-      data: {
-        id: 'TweenEventsFrame',
-        type: 'UIElement',
-        interactive: false,
-        interactiveType: null,
-        elementId: 'TweenEventsFrame'
-      }
-    });
-    const theme = getTheme(themeName);
-    events.forEach((event, index) => {
-      const eventLayerItem = state.byId[event.layer];
-      const groupOpacity = hover ? hover === event.id ? 1 : 0.25 : 1;
-      const elementColor = event.artboard === state.activeArtboard ? THEME_PRIMARY_COLOR : theme.text.lighter;
-      const artboardTopTop = getArtboardsTopTop(state);
-      const origin = state.byId[event.artboard];
-      const destination = state.byId[event.destinationArtboard];
-      const tweenEventDestinationIndicator = new paperMain.Path.Ellipse({
-        center: new paperMain.Point(destination.frame.x, artboardTopTop - ((1 / paperMain.view.zoom) * 48)),
-        radius: ((1 / paperMain.view.zoom) * 4),
-        fillColor: elementColor,
-        insert: false,
-        data: {
-          type: 'UIElementChild',
-          interactive: false,
-          interactiveType: null,
-          elementId: 'TweenEventsFrame'
-        }
-      });
-      // const originIndicator = new paperMain.Path.Line({
-      //   from: new paperMain.Point(origin.frame.x, destinationIndicator.bounds.top),
-      //   to: new paperMain.Point(origin.frame.x, destinationIndicator.bounds.bottom),
-      //   strokeColor: elementColor,
-      //   strokeWidth: 1 / paperMain.view.zoom,
-      //   insert: false,
-      //   data: {
-      //     id: 'TweenEventFrameIndicator',
-      //     indicator: 'origin'
-      //   }
-      // });
-      const tweenEventOriginIndicator = new paperMain.Path.Ellipse({
-        center: new paperMain.Point(origin.frame.x, artboardTopTop - ((1 / paperMain.view.zoom) * 48)),
-        radius: ((1 / paperMain.view.zoom) * 10),
-        insert: false,
-        data: {
-          type: 'UIElementChild',
-          interactive: false,
-          interactiveType: null,
-          elementId: 'TweenEventsFrame'
-        }
-      });
-      const tweenEventIconBackground = new paperMain.Path.Ellipse({
-        center: tweenEventOriginIndicator.bounds.center,
-        radius: ((1 / paperMain.view.zoom) * 14),
-        fillColor: theme.background.z0,
-        insert: false,
-        data: {
-          type: 'UIElementChild',
-          interactive: false,
-          interactiveType: null,
-          elementId: 'TweenEventsFrame'
-        }
-      });
-      const tweenEventIcon = new paperMain.CompoundPath({
-        pathData: (() => {
-          switch(eventLayerItem.type) {
-            case 'Artboard':
-              return 'M12.4743416,2.84188612 L12.859,3.99988612 L21,4 L21,15 L22,15 L22,16 L16.859,15.9998861 L18.4743416,20.8418861 L17.5256584,21.1581139 L16.805,18.9998861 L7.193,18.9998861 L6.47434165,21.1581139 L5.52565835,20.8418861 L7.139,15.9998861 L2,16 L2,15 L3,15 L3,4 L11.139,3.99988612 L11.5256584,2.84188612 L12.4743416,2.84188612 Z M15.805,15.9998861 L8.193,15.9998861 L7.526,17.9998861 L16.472,17.9998861 L15.805,15.9998861 Z M20,5 L4,5 L4,15 L20,15 L20,5 Z';
-            case 'Group': {
-              if (eventLayerItem.type === 'Group' && eventLayerItem.clipped) {
-                const mask = eventLayerItem.children.find((id) => state.byId[id].mask);
-                const maskItem = state.byId[mask] as em.Shape;
-                return maskItem.pathData;
-              } else {
-                return 'M21,9 L21,20 L3,20 L3,9 L21,9 Z M9,4 C10.480515,4 11.7731656,4.80434324 12.4648015,5.99987956 L21,6 L21,8 L3,8 L3,4 L9,4 Z';
-              }
-            }
-            case 'Shape':
-              return eventLayerItem.pathData;
-            case 'Text':
-              return 'M12.84,18.999 L12.84,6.56 L12.84,6.56 L16.92,6.56 L16.92,5 L7.08,5 L7.08,6.56 L11.16,6.56 L11.16,19 L12.839,19 C12.8395523,19 12.84,18.9995523 12.84,18.999 Z';
-            case 'Image':
-              return themeName === 'dark' ? 'M21,4 L21,20 L3,20 L3,4 L21,4 Z M20,5 L4,5 L4,14.916 L7.55555556,11 L12.7546667,16.728 L16,13.6703297 L20,17.44 L20,5 Z M16.6243657,6.71118154 C16.9538983,6.79336861 17.2674833,6.9606172 17.5297066,7.21384327 C18.3242674,7.98114172 18.3463679,9.24727881 17.5790695,10.0418396 C16.811771,10.8364004 15.5456339,10.8585009 14.7510731,10.0912025 C14.4888499,9.8379764 14.3107592,9.53041925 14.21741,9.2034121 C14.8874902,9.37067575 15.6260244,9.1851639 16.1403899,8.65252287 C16.6547553,8.11988184 16.8143797,7.37532327 16.6243657,6.71118154 Z' : 'M21,4 L21,20 L3,20 L3,4 L21,4 Z M20,5 L4,5 L4,14.916 L7.55555556,11 L12.7546667,16.728 L16,13.6703297 L20,17.44 L20,5 Z M16,7 C17.1045695,7 18,7.8954305 18,9 C18,10.1045695 17.1045695,11 16,11 C14.8954305,11 14,10.1045695 14,9 C14,7.8954305 14.8954305,7 16,7 Z';
-          }
-        })(),
-        fillColor: elementColor,
-        closed: true,
-        fillRule: 'nonzero',
-        insert: false,
-        data: {
-          type: 'UIElementChild',
-          interactive: false,
-          interactiveType: null,
-          elementId: 'TweenEventsFrame'
-        }
-      });
-      tweenEventIcon.fitBounds(tweenEventOriginIndicator.bounds);
-      const tweenEventConnector = new paperMain.Path.Line({
-        from: tweenEventOriginIndicator.bounds.center,
-        to: tweenEventDestinationIndicator.bounds.center,
-        strokeColor: elementColor,
-        strokeWidth: 1 / paperMain.view.zoom,
-        insert: false,
-        data: {
-          type: 'UIElementChild',
-          interactive: false,
-          interactiveType: null,
-          elementId: 'TweenEventsFrame'
-        }
-      });
-      const tweenEventText = new paperMain.PointText({
-        content: DEFAULT_TWEEN_EVENTS.find((tweenEvent) => event.event === tweenEvent.event).titleCase,
-        point: new paperMain.Point(tweenEventConnector.bounds.center.x, tweenEventDestinationIndicator.bounds.top - ((1 / paperMain.view.zoom) * 12)),
-        justification: 'center',
-        fontSize: ((1 / paperMain.view.zoom) * 12),
-        fillColor: elementColor,
-        insert: false,
-        fontFamily: 'Space Mono',
-        data: {
-          type: 'UIElementChild',
-          interactive: false,
-          interactiveType: null,
-          elementId: 'TweenEventsFrame'
-        }
-      });
-      const tweenEventFrame = new paperMain.Group({
-        children: [tweenEventConnector, tweenEventIconBackground, tweenEventIcon, tweenEventDestinationIndicator, tweenEventText],
-        data: {
-          id: 'TweenEventFrame',
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: event.id,
-          elementId: 'TweenEventsFrame'
-        },
-        parent: tweenEventsFrame,
-        opacity: groupOpacity,
-        onMouseEnter: function() {
-          document.body.style.cursor = 'pointer';
-        },
-        onMouseLeave: function() {
-          document.body.style.cursor = 'auto';
-        },
-        // onMouseEnter: function() {
-        //   document.body.style.cursor = 'pointer';
-        //   const eventFrames = this.parent.getItems({data: { id: 'TweenEventFrame' } });
-        //   const others = eventFrames.filter((item: paper.Item) => item.data.tweenEvent !== this.data.tweenEvent);
-        //   others.forEach((item: paper.Item) => {
-        //     item.opacity = 0.25;
-        //   });
-        // },
-        // onMouseLeave: function() {
-        //   document.body.style.cursor = 'auto';
-        //   const eventFrames = this.parent.getItems({data: { id: 'TweenEventFrame' } });
-        //   const others = eventFrames.filter((item: paper.Item) => item.data.tweenEvent !== this.data.tweenEvent);
-        //   others.forEach((item: paper.Item) => {
-        //     item.opacity = 1;
-        //   });
-        // },
-        // onClick: function() {
-        //   const state = store.getState();
-        //   if (!state.tweenDrawer.isOpen) {
-        //     paperMain.view.viewSize = new paperMain.Size(paperMain.view.viewSize.width, paperMain.view.viewSize.height - state.documentSettings.tweenDrawerHeight);
-        //     store.dispatch(openTweenDrawer());
-        //   }
-        //   store.dispatch(setTweenDrawerEvent({id: event.id}));
-        // }
-      });
-      const tweenEventFrameBackground = new paperMain.Path.Rectangle({
-        from: tweenEventFrame.bounds.topLeft,
-        to: tweenEventFrame.bounds.bottomRight,
-        fillColor: theme.background.z0,
-        opacity: 0.01,
-        parent: tweenEventFrame,
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: event.id,
-          elementId: 'TweenEventsFrame'
-        }
-      });
-      tweenEventFrame.position.y -= (tweenEventFrame.bounds.height + ((1 / paperMain.view.zoom) * 12)) * index;
-    });
-  }
-}
-
-export const updateMeasureFrame = (state: LayerState, guides: { top?: string; bottom?: string; left?: string; right?: string; all?: string }): void => {
-  const measureFrame = paperMain.project.getItem({ data: { id: 'MeasureFrame' } });
-  if (measureFrame) {
-    measureFrame.remove();
-  }
-  if (state.selected.length > 0) {
-    const selectionBounds = getSelectionBounds(state);
-    const measureFrameGuides = [];
-    let hasTopMeasure;
-    let hasBottomMeasure;
-    let hasLeftMeasure;
-    let hasRightMeasure;
-    let topMeasureTo;
-    let bottomMeasureTo;
-    let leftMeasureTo;
-    let rightMeasureTo;
-    Object.keys(guides).forEach((current: 'top' | 'bottom' | 'left' | 'right' | 'all') => {
-      const guideMeasureToId = guides[current] as any;
-      const measureToBounds = getPaperLayer(guideMeasureToId).bounds;
-      if (measureToBounds.contains(selectionBounds)) {
-        switch(current) {
-          case 'top':
-            hasTopMeasure = true;
-            topMeasureTo = measureToBounds.top;
-            break;
-          case 'bottom':
-            hasBottomMeasure = true;
-            bottomMeasureTo = measureToBounds.bottom;
-            break;
-          case 'left':
-            hasLeftMeasure = true;
-            leftMeasureTo = measureToBounds.left;
-            break;
-          case 'right':
-            hasRightMeasure = true;
-            rightMeasureTo = measureToBounds.right;
-            break;
-          case 'all':
-            hasTopMeasure = true;
-            hasBottomMeasure = true;
-            hasLeftMeasure = true;
-            hasRightMeasure = true;
-            topMeasureTo = measureToBounds.top;
-            bottomMeasureTo = measureToBounds.bottom;
-            leftMeasureTo = measureToBounds.left;
-            rightMeasureTo = measureToBounds.right;
-            break;
-        }
-      } else {
-        switch(current) {
-          case 'top':
-            hasTopMeasure = selectionBounds.top > measureToBounds.top;
-            topMeasureTo = selectionBounds.top > measureToBounds.bottom ? measureToBounds.bottom : measureToBounds.top;
-            break;
-          case 'bottom':
-            hasBottomMeasure = selectionBounds.bottom < measureToBounds.bottom;
-            bottomMeasureTo = selectionBounds.bottom < measureToBounds.top ? measureToBounds.top : measureToBounds.bottom;
-            break;
-          case 'left':
-            hasLeftMeasure = selectionBounds.left > measureToBounds.left;
-            leftMeasureTo = selectionBounds.left > measureToBounds.right ? measureToBounds.right : measureToBounds.left;
-            break;
-          case 'right':
-            hasRightMeasure = selectionBounds.right < measureToBounds.right;
-            rightMeasureTo = selectionBounds.right < measureToBounds.left ? measureToBounds.left : measureToBounds.right;
-            break;
-          case 'all':
-            hasTopMeasure = selectionBounds.top > measureToBounds.top;
-            hasBottomMeasure = selectionBounds.bottom < measureToBounds.bottom;
-            hasLeftMeasure = selectionBounds.left > measureToBounds.left;
-            hasRightMeasure = selectionBounds.right < measureToBounds.right;
-            topMeasureTo = selectionBounds.top > measureToBounds.bottom ? measureToBounds.bottom : measureToBounds.top;
-            bottomMeasureTo = selectionBounds.bottom < measureToBounds.top ? measureToBounds.top : measureToBounds.bottom;
-            leftMeasureTo = selectionBounds.left > measureToBounds.right ? measureToBounds.right : measureToBounds.left;
-            rightMeasureTo = selectionBounds.right < measureToBounds.left ? measureToBounds.left : measureToBounds.right;
-            break;
-        }
-      }
-    });
-    if (hasTopMeasure && (guides['all'] || guides['top'])) {
-      const topMeasureFromPoint = selectionBounds.topCenter;
-      const topMeasureToPoint = new paperMain.Point(topMeasureFromPoint.x, topMeasureTo);
-      const measureGuide = new MeasureGuide(topMeasureFromPoint, topMeasureToPoint, 'top', { down: true, up: true });
-      if (measureGuide.distance > 0) {
-        measureFrameGuides.push(measureGuide.paperLayer);
-      }
-    }
-    if (hasBottomMeasure && (guides['all'] || guides['bottom'])) {
-      const bottomMeasureFromPoint = selectionBounds.bottomCenter;
-      const bottomMeasureToPoint = new paperMain.Point(bottomMeasureFromPoint.x, bottomMeasureTo);
-      const measureGuide = new MeasureGuide(bottomMeasureFromPoint, bottomMeasureToPoint, 'bottom', { down: true, up: true });
-      if (measureGuide.distance > 0) {
-        measureFrameGuides.push(measureGuide.paperLayer);
-      }
-    }
-    if (hasLeftMeasure && (guides['all'] || guides['left'])) {
-      const leftMeasureFromPoint = selectionBounds.leftCenter;
-      const leftMeasureToPoint = new paperMain.Point(leftMeasureTo, leftMeasureFromPoint.y);
-      const measureGuide = new MeasureGuide(leftMeasureFromPoint, leftMeasureToPoint, 'left', { down: true, up: true });
-      if (measureGuide.distance > 0) {
-        measureFrameGuides.push(measureGuide.paperLayer);
-      }
-    }
-    if (hasRightMeasure && (guides['all'] || guides['right'])) {
-      const rightMeasureFromPoint = selectionBounds.rightCenter;
-      const rightMeasureToPoint = new paperMain.Point(rightMeasureTo, rightMeasureFromPoint.y);
-      const measureGuide = new MeasureGuide(rightMeasureFromPoint, rightMeasureToPoint, 'right', { down: true, up: true });
-      if (measureGuide.distance > 0) {
-        measureFrameGuides.push(measureGuide.paperLayer);
-      }
-    }
-    new paperMain.Group({
-      children: measureFrameGuides,
-      data: {
-        id: 'MeasureFrame',
-        type: 'UIElement',
-        interactive: false,
-        interactiveType: null,
-        elementId: 'MeasureFrame'
-      }
-    });
-  }
-}
-
 export const deselectLayer = (state: LayerState, action: DeselectLayer): LayerState => {
   const layer = state.byId[action.payload.id] as em.Layer;
   const newState = {
@@ -1287,9 +557,12 @@ export const deselectLayer = (state: LayerState, action: DeselectLayer): LayerSt
 };
 
 export const deselectLayers = (state: LayerState, action: DeselectLayers): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
     return deselectLayer(result, layerActions.deselectLayer({id: current}) as DeselectLayer);
-  }, state);
+  }, currentState);
+  currentState = updateSelectedBounds(currentState);
+  return currentState;
 };
 
 export const selectAllLayers = (state: LayerState, action: SelectAllLayers): LayerState => {
@@ -1327,9 +600,9 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
     }
   }
   // handle hover
-  // if (layer.id !== currentState.hover) {
-  //   currentState = setLayerHover(currentState, layerActions.setLayerHover({id: action.payload.id}) as SetLayerHover);
-  // }
+  if (layerItem.id !== currentState.hover) {
+    currentState = setLayerHover(currentState, layerActions.setLayerHover({id: action.payload.id}) as SetLayerHover);
+  }
   // if new selection, create selection with just that layer
   if (action.payload.newSelection) {
     const deselectAll = deselectAllLayers(currentState, layerActions.deselectAllLayers() as DeselectAllLayers)
@@ -1365,6 +638,12 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
   if (layerItem.scope[layerItem.scope.length - 1] !== currentState.scope[currentState.scope.length - 1]) {
     currentState = setGlobalScope(currentState, layerActions.setGlobalScope({scope: layerItem.scope}) as SetGlobalScope);
   }
+  // order selected by depth
+  const orderedSelected = orderLayersByDepth(currentState, currentState.selected);
+  currentState = {
+    ...currentState,
+    selected: [...orderedSelected]
+  }
   // return final state
   return currentState;
 };
@@ -1372,11 +651,12 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
 export const deepSelectLayer = (state: LayerState, action: DeepSelectLayer): LayerState => {
   let currentState = state;
   const layerItem = state.byId[action.payload.id];
+  const nearestScopeAncestor = getNearestScopeAncestor(currentState, action.payload.id);
   const deepSelectItem = getDeepSelectItem(currentState, action.payload.id);
-  if ((layerItem.type === 'Group' || layerItem.type === 'Artboard') && !(layerItem as em.Group | em.Artboard).showChildren) {
-    currentState = showLayerChildren(currentState, layerActions.showLayerChildren({id: action.payload.id}) as ShowLayerChildren);
+  if ((nearestScopeAncestor.type === 'Group' || nearestScopeAncestor.type === 'Artboard') && !(nearestScopeAncestor as em.Group | em.Artboard).showChildren) {
+    currentState = showLayerChildren(currentState, layerActions.showLayerChildren({id: nearestScopeAncestor.id}) as ShowLayerChildren);
   }
-  currentState = selectLayer(currentState, layerActions.selectLayer({id: deepSelectItem.id, newSelection: true}) as SelectLayer);
+  currentState = selectLayers(currentState, layerActions.selectLayers({layers: [deepSelectItem.id], newSelection: true}) as SelectLayers);
   return currentState;
 };
 
@@ -1385,13 +665,42 @@ export const selectLayers = (state: LayerState, action: SelectLayers): LayerStat
   if (action.payload.newSelection) {
     currentState = deselectAllLayers(currentState, layerActions.deselectAllLayers() as DeselectAllLayers);
   }
-  return action.payload.layers.reduce((result, current) => {
+  currentState = action.payload.layers.reduce((result, current) => {
     if (state.byId[current].selected && action.payload.toggleSelected) {
       return deselectLayer(result, layerActions.deselectLayer({id: current}) as DeselectLayer);
     } else {
       return selectLayer(result, layerActions.selectLayer({id: current, noActiveArtboardUpdate: action.payload.noActiveArtboardUpdate}) as SelectLayer);
     }
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
+  return currentState;
+};
+
+export const updateSelectedBounds = (state: LayerState): LayerState => {
+  let currentState = state;
+  const selectionBounds = getSelectionBounds(state) as any;
+  if (selectionBounds) {
+    const boundsMatch = state.selectedBounds && Object.keys(state.selectedBounds).every((key) => (state.selectedBounds as any)[key] === selectionBounds[key]);
+    if (!boundsMatch) {
+      currentState = {
+        ...currentState,
+        selectedBounds: {
+          x: parseInt(selectionBounds.center.x.toFixed(2)),
+          y: parseInt(selectionBounds.center.y.toFixed(2)),
+          width: parseInt(selectionBounds.width.toFixed(2)),
+          height: parseInt(selectionBounds.height.toFixed(2))
+        }
+      }
+    }
+  } else {
+    if (currentState.selectedBounds) {
+      currentState = {
+        ...currentState,
+        selectedBounds: null
+      }
+    }
+  }
+  return currentState;
 };
 
 export const setLayerHover = (state: LayerState, action: SetLayerHover): LayerState => {
@@ -1464,7 +773,7 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
       currentState = updateLayerBounds(currentState, action.payload.id);
     }
   }
-  currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.child, newSelection: true}) as SelectLayer);
+  currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.child], newSelection: true}) as SelectLayers);
   return currentState;
 };
 
@@ -1541,7 +850,7 @@ export const insertLayerChild = (state: LayerState, action: InsertLayerChild): L
       currentState = updateLayerBounds(currentState, action.payload.id);
     }
   }
-  currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.child, newSelection: true}) as SelectLayer);
+  currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.child], newSelection: true}) as SelectLayers);
   return currentState;
 };
 
@@ -1639,7 +948,7 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
       }
     };
   }
-  currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.id], newSelection: true}) as SelectLayers);
   return currentState;
 };
 
@@ -1719,7 +1028,7 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
       }
     };
   }
-  currentState = selectLayer(currentState, layerActions.selectLayer({id: action.payload.id, newSelection: true}) as SelectLayer);
+  currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.id], newSelection: true}) as SelectLayers);
   return currentState;
 };
 
@@ -1764,7 +1073,7 @@ export const escapeLayerScope = (state: LayerState, action: EscapeLayerScope): L
   const nextScope = state.scope.filter((id, index) => index !== state.scope.length - 1);
   let currentState = state;
   if (state.scope.length > 1) {
-    currentState = selectLayer(state, layerActions.selectLayer({id: state.scope[state.scope.length - 1], newSelection: true}) as SelectLayer);
+    currentState = selectLayers(state, layerActions.selectLayers({layers: [state.scope[state.scope.length - 1]], newSelection: true}) as SelectLayers);
   } else {
     currentState = deselectAllLayers(state, layerActions.deselectAllLayers() as DeselectAllLayers);
   }
@@ -1848,7 +1157,7 @@ export const groupLayers = (state: LayerState, action: GroupLayers): LayerState 
     return result;
   }, currentState);
   // select final group
-  currentState = selectLayer(currentState, {payload: {id: action.payload.group.id, newSelection: true}} as SelectLayer);
+  currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.group.id], newSelection: true}) as SelectLayers);
   // set layer edit
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   // return final state
@@ -1874,7 +1183,7 @@ export const ungroupLayer = (state: LayerState, action: UngroupLayer): LayerStat
     // remove group
     currentState = removeLayer(currentState, layerActions.removeLayer({id: layer.id}) as RemoveLayer);
   } else {
-    currentState = selectLayer(state, layerActions.selectLayer({id: layer.id, newSelection: true}) as SelectLayer);
+    currentState = selectLayers(state, layerActions.selectLayers({layers: [layer.id], newSelection: true}) as SelectLayers);
   }
   return currentState;
 };
@@ -2281,6 +1590,7 @@ export const moveLayers = (state: LayerState, action: MoveLayers): LayerState =>
   currentState = action.payload.layers.reduce((result, current) => {
     return moveLayer(result, layerActions.moveLayer({id: current}) as MoveLayer);
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -2311,6 +1621,7 @@ export const moveLayersTo = (state: LayerState, action: MoveLayersTo): LayerStat
   currentState = action.payload.layers.reduce((result, current) => {
     return moveLayerTo(result, layerActions.moveLayerTo({id: current, x: action.payload.x, y: action.payload.y}) as MoveLayerTo);
   }, state);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -2332,6 +1643,7 @@ export const moveLayersBy = (state: LayerState, action: MoveLayersBy): LayerStat
   currentState = action.payload.layers.reduce((result, current) => {
     return moveLayerBy(result, layerActions.moveLayerBy({id: current, x: action.payload.x, y: action.payload.y}) as MoveLayerBy);
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -2752,6 +2064,7 @@ export const setLayersX = (state: LayerState, action: SetLayersX): LayerState =>
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerX(result, layerActions.setLayerX({id: current, x: action.payload.x}) as SetLayerX);
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -2790,6 +2103,7 @@ export const setLayersY = (state: LayerState, action: SetLayersY): LayerState =>
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerY(result, layerActions.setLayerY({id: current, y: action.payload.y}) as SetLayerY);
   }, state);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -2840,6 +2154,7 @@ export const setLayersWidth = (state: LayerState, action: SetLayersWidth): Layer
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerWidth(result, layerActions.setLayerWidth({id: current, width: action.payload.width}) as SetLayerWidth);
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -2890,6 +2205,7 @@ export const setLayersHeight = (state: LayerState, action: SetLayersHeight): Lay
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerHeight(result, layerActions.setLayerHeight({id: current, height: action.payload.height}) as SetLayerHeight);
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -2973,6 +2289,7 @@ export const setLayersRotation = (state: LayerState, action: SetLayersRotation):
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerRotation(result, layerActions.setLayerRotation({id: current, rotation: action.payload.rotation}) as SetLayerRotation);
   }, state);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -3003,6 +2320,7 @@ export const enableLayersHorizontalFlip = (state: LayerState, action: EnableLaye
   currentState = action.payload.layers.reduce((result, current) => {
     return enableLayerHorizontalFlip(result, layerActions.enableLayerHorizontalFlip({id: current}) as EnableLayerHorizontalFlip);
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -3033,6 +2351,7 @@ export const disableLayersHorizontalFlip = (state: LayerState, action: DisableLa
   currentState = action.payload.layers.reduce((result, current) => {
     return disableLayerHorizontalFlip(result, layerActions.disableLayerHorizontalFlip({id: current}) as DisableLayerHorizontalFlip);
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -3063,6 +2382,7 @@ export const enableLayersVerticalFlip = (state: LayerState, action: EnableLayers
   currentState = action.payload.layers.reduce((result, current) => {
     return enableLayerVerticalFlip(result, layerActions.enableLayerVerticalFlip({id: current}) as EnableLayerVerticalFlip);
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -3093,6 +2413,7 @@ export const disableLayersVerticalFlip = (state: LayerState, action: DisableLaye
   currentState = action.payload.layers.reduce((result, current) => {
     return disableLayerVerticalFlip(result, layerActions.disableLayerVerticalFlip({id: current}) as DisableLayerVerticalFlip);
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4377,6 +3698,7 @@ export const scaleLayers = (state: LayerState, action: ScaleLayers): LayerState 
   currentState = action.payload.layers.reduce((result, current) => {
     return scaleLayer(result, layerActions.scaleLayer({id: current, scale: action.payload.scale, verticalFlip: action.payload.verticalFlip, horizontalFlip: action.payload.horizontalFlip}) as ScaleLayer);
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4408,6 +3730,7 @@ export const setLayerText = (state: LayerState, action: SetLayerText): LayerStat
   if (layerItem.style.stroke.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
   }
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4448,6 +3771,7 @@ export const setLayersFontSize = (state: LayerState, action: SetLayersFontSize):
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerFontSize(result, layerActions.setLayerFontSize({id: current, fontSize: action.payload.fontSize}) as SetLayerFontSize);
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4487,6 +3811,7 @@ export const setLayersFontWeight = (state: LayerState, action: SetLayersFontWeig
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerFontWeight(result, layerActions.setLayerFontWeight({id: current, fontWeight: action.payload.fontWeight}) as SetLayerFontWeight);
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4526,6 +3851,7 @@ export const setLayersFontFamily = (state: LayerState, action: SetLayersFontFami
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerFontFamily(result, layerActions.setLayerFontFamily({id: current, fontFamily: action.payload.fontFamily}) as SetLayerFontFamily);
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4565,6 +3891,7 @@ export const setLayersLeading = (state: LayerState, action: SetLayersLeading): L
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerLeading(result, layerActions.setLayerLeading({id: current, leading: action.payload.leading}) as SetLayerLeading);
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4643,6 +3970,7 @@ export const setLayersJustification = (state: LayerState, action: SetLayersJusti
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerJustification(result, layerActions.setLayerJustification({id: current, justification: action.payload.justification}) as SetLayerJustification);
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4709,7 +4037,9 @@ export const updateInViewLayers = (state: LayerState, action: UpdateInViewLayers
     data: { type: 'Layer' }
   });
   const visibleLayerIds = visibleLayers.reduce((result, current) => {
-    result = [...result, current.data.id];
+    if (current.data.layerType !== 'Group') {
+      result = [...result, current.data.id];
+    }
     return result;
   }, []);
   // remove out of view layers
@@ -4842,6 +4172,7 @@ export const alignLayersToLeft = (state: LayerState, action: AlignLayersToLeft):
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4855,6 +4186,7 @@ export const alignLayersToRight = (state: LayerState, action: AlignLayersToRight
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4868,6 +4200,7 @@ export const alignLayersToTop = (state: LayerState, action: AlignLayersToTop): L
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4881,6 +4214,7 @@ export const alignLayersToBottom = (state: LayerState, action: AlignLayersToBott
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4894,6 +4228,7 @@ export const alignLayersToCenter = (state: LayerState, action: AlignLayersToCent
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4907,6 +4242,7 @@ export const alignLayersToMiddle = (state: LayerState, action: AlignLayersToMidd
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4931,6 +4267,7 @@ export const distributeLayersHorizontally = (state: LayerState, action: Distribu
     }
     return result;
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4955,6 +4292,7 @@ export const distributeLayersVertically = (state: LayerState, action: Distribute
     }
     return result;
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -5016,7 +4354,7 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): Layer
     }
   }, currentState);
   // select layer
-  currentState = selectLayer(currentState, layerActions.selectLayer({id: rootLayer.id}) as SelectLayer);
+  currentState = selectLayers(currentState, layerActions.selectLayers({layers: [rootLayer.id]}) as SelectLayers);
   return currentState;
 };
 
@@ -5236,6 +4574,7 @@ export const setRoundedRadii = (state: LayerState, action: SetRoundedRadii): Lay
   currentState = action.payload.layers.reduce((result, current) => {
     return setRoundedRadius(result, layerActions.setRoundedRadius({id: current, radius: action.payload.radius}) as SetRoundedRadius);
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -5285,6 +4624,7 @@ export const setPolygonsSides = (state: LayerState, action: SetPolygonsSides): L
   currentState = action.payload.layers.reduce((result, current) => {
     return setPolygonSides(result, layerActions.setPolygonSides({id: current, sides: action.payload.sides}) as SetPolygonSides);
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -5330,6 +4670,7 @@ export const setStarsPoints = (state: LayerState, action: SetStarsPoints): Layer
   currentState = action.payload.layers.reduce((result, current) => {
     return setStarPoints(result, layerActions.setStarPoints({id: current, points: action.payload.points}) as SetStarPoints);
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -5375,6 +4716,7 @@ export const setStarsRadius = (state: LayerState, action: SetStarsRadius): Layer
   currentState = action.payload.layers.reduce((result, current) => {
     return setStarRadius(result, layerActions.setStarRadius({id: current, radius: action.payload.radius}) as SetStarRadius);
   }, currentState);
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -5425,6 +4767,7 @@ export const setLineFrom = (state: LayerState, action: SetLineFrom): LayerState 
   if (layerItem.style.stroke.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
   }
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -5475,6 +4818,7 @@ export const setLineTo = (state: LayerState, action: SetLineTo): LayerState => {
   if (layerItem.style.stroke.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
   }
+  currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };

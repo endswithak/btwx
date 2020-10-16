@@ -1,10 +1,9 @@
 import store from '../store';
-import { setLineFrom, setLineTo } from '../store/actions/layer';
+import { setLineFrom, setLineTo, updateSelectionFrame } from '../store/actions/layer';
 import { getPaperLayer, getLineFromPoint, getLineToPoint } from '../store/selectors/layer';
 import { paperMain } from './index';
 import SnapTool from './snapTool';
 import { RootState } from '../store/reducers';
-import { updateSelectionFrame } from '../store/utils/layer';
 import { isBetween } from '../utils';
 
 class LineTool {
@@ -113,7 +112,7 @@ class LineTool {
         this.updateVector();
         this.updateToBounds();
         this.updateHandles();
-        updateSelectionFrame(this.state.layer.present, this.handle);
+        updateSelectionFrame(this.state, this.handle);
         this.snapTool.updateGuides();
         break;
       }
@@ -126,7 +125,7 @@ class LineTool {
         this.updateVector();
         this.updateToBounds();
         this.updateHandles();
-        updateSelectionFrame(this.state.layer.present, this.handle);
+        updateSelectionFrame(this.state, this.handle);
         this.snapTool.updateGuides();
         break;
       }
@@ -140,7 +139,7 @@ class LineTool {
     this.toBounds = new paperMain.Rectangle(this.fromBounds);
     this.snapTool.snapPoints = this.state.layer.present.inView.snapPoints.filter((snapPoint) => snapPoint.id !== this.state.layer.present.selected[0]);
     this.snapTool.snapBounds = this.toBounds;
-    updateSelectionFrame(this.state.layer.present, this.handle);
+    updateSelectionFrame(this.state, this.handle);
   }
   onMouseDrag(event: paper.ToolEvent): void {
     this.to = event.point;
@@ -165,7 +164,7 @@ class LineTool {
     this.updateVector();
     this.updateToBounds();
     this.updateHandles();
-    updateSelectionFrame(this.state.layer.present, this.handle);
+    updateSelectionFrame(this.state, this.handle);
     this.snapTool.updateGuides();
   }
   onMouseUp(event: paper.ToolEvent): void {

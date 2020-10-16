@@ -6,6 +6,7 @@ import Icon from './Icon';
 
 interface SidebarLayerMaskedIconProps {
   layer: string;
+  isDragGhost?: boolean;
   isEnabled?: boolean;
   isSelected?: boolean;
 }
@@ -42,7 +43,7 @@ const mapStateToProps = (state: RootState, ownProps: SidebarLayerMaskedIconProps
   const { layer } = state;
   const layerItem = layer.present.byId[ownProps.layer];
   const isEnabled = layerItem.masked && !layerItem.mask;
-  const isSelected = layerItem.selected;
+  const isSelected = layerItem.selected && !ownProps.isDragGhost;
   return { isEnabled, isSelected };
 };
 

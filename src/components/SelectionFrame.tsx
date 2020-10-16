@@ -1,33 +1,28 @@
 import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { updateSelectionFrame } from '../store/utils/layer';
-import { LayerState } from '../store/reducers/layer';
-import { getLayerAndDescendants } from '../store/selectors/layer';
+import { updateSelectionFrameThunk } from '../store/actions/layer';
 import { paperMain } from '../canvas';
 
 interface SelectionFrameProps {
-  selected: string[];
-  selectedWithChildren?: {
-    allIds: string[];
-    byId: {
-      [id: string]: em.Layer;
-    };
-  };
+  selected?: string[];
+  theme?: string;
+  selectedBounds?: any;
+  updateSelectionFrameThunk?(): void;
 }
 
 const SelectionFrame = (props: SelectionFrameProps): ReactElement => {
-  const { selected, selectedWithChildren } = props;
+  const { selected, theme, selectedBounds, updateSelectionFrameThunk } = props;
 
   useEffect(() => {
-    updateSelectionFrame({selected: selected, byId: selectedWithChildren.byId} as LayerState, 'all', true);
+    updateSelectionFrameThunk();
     return () => {
       const selectionFrame = paperMain.project.getItem({ data: { id: 'SelectionFrame' } });
       if (selectionFrame) {
         selectionFrame.remove();
       }
     }
-  }, [selectedWithChildren, selected]);
+  }, [selected, theme, selectedBounds]);
 
   return (
     <></>
@@ -36,26 +31,17 @@ const SelectionFrame = (props: SelectionFrameProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   selected: string[];
-  selectedWithChildren: {
-    allIds: string[];
-    byId: {
-      [id: string]: em.Layer;
-    };
-  };
+  theme: string;
+  selectedBounds: any;
 } => {
-  const { layer } = state;
+  const { layer, viewSettings } = state;
   const selected = layer.present.selected;
-  const selectedWithChildren = layer.present.selected.reduce((result: { allIds: string[]; byId: { [id: string]: em.Layer } }, current) => {
-    const layerAndChildren = getLayerAndDescendants(layer.present, current);
-    result.allIds = [...result.allIds, ...layerAndChildren];
-    layerAndChildren.forEach((id) => {
-      result.byId[id] = layer.present.byId[id];
-    });
-    return result;
-  }, { allIds: [], byId: {} });
-  return { selected, selectedWithChildren };
+  const theme = viewSettings.theme;
+  const selectedBounds = layer.present.selectedBounds;
+  return { selected, theme, selectedBounds };
 };
 
 export default connect(
-  mapStateToProps
+  mapStateToProps,
+  { updateSelectionFrameThunk }
 )(SelectionFrame);

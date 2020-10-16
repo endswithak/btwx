@@ -1,7 +1,6 @@
 import store from '../store';
-import { moveLayersBy, duplicateLayers, removeDuplicatedLayers } from '../store/actions/layer';
+import { moveLayersBy, duplicateLayers, removeDuplicatedLayers, updateSelectionFrame, updateMeasureFrame } from '../store/actions/layer';
 import { getPaperLayer, getSelectionBounds, getLayerAndDescendants } from '../store/selectors/layer';
-import { updateSelectionFrame, updateMeasureFrame } from '../store/utils/layer';
 import { paperMain } from './index';
 import SnapTool from './snapTool';
 import { RootState } from '../store/reducers';
@@ -94,8 +93,8 @@ class DragTool {
       paperLayer.position.y = layerItem.frame.y + translate.y;
     });
     this.snapTool.updateGuides();
-    updateSelectionFrame(this.state.layer.present, this.handle ? 'move' : 'none');
-    updateMeasureFrame(this.state.layer.present, this.getMeasureGuides());
+    updateSelectionFrame(this.state, this.handle ? 'move' : 'none') as any
+    updateMeasureFrame(this.state, this.getMeasureGuides()) as any
   }
   onKeyDown(event: paper.KeyEvent): void {
     switch(event.key) {

@@ -1,28 +1,27 @@
 import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { updateActiveArtboardFrame } from '../store/utils/layer';
-import { LayerState } from '../store/reducers/layer';
+import { updateActiveArtboardFrameThunk } from '../store/actions/layer';
 import { paperMain } from '../canvas';
 
 interface ActiveArtboardFrameProps {
   activeArtboard?: string;
-  activeArtboardItem?: em.Artboard;
-  zoom?: number;
+  activeArtboardFrame?: em.Frame;
+  updateActiveArtboardFrameThunk?(): void;
 }
 
 const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
-  const { activeArtboard, activeArtboardItem, zoom } = props;
+  const { activeArtboard, activeArtboardFrame, updateActiveArtboardFrameThunk } = props;
 
   useEffect(() => {
-    updateActiveArtboardFrame({activeArtboard: activeArtboard, byId: {[activeArtboard]: activeArtboardItem}} as LayerState, true);
+    updateActiveArtboardFrameThunk();
     return () => {
       const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'ActiveArtboardFrame' } });
       if (activeArtboardFrame) {
         activeArtboardFrame.remove();
       }
     }
-  }, [activeArtboard, activeArtboardItem, zoom]);
+  }, [activeArtboard, activeArtboardFrame]);
 
   return (
     <></>
@@ -31,16 +30,15 @@ const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   activeArtboard: string;
-  activeArtboardItem: em.Artboard;
-  zoom: number;
+  activeArtboardFrame: em.Frame;
 } => {
-  const { layer, documentSettings } = state;
+  const { layer } = state;
   const activeArtboard = layer.present.activeArtboard;
-  const activeArtboardItem = layer.present.byId[activeArtboard] as em.Artboard;
-  const zoom = documentSettings.matrix[0];
-  return { activeArtboard, activeArtboardItem, zoom };
+  const activeArtboardFrame = layer.present.byId[activeArtboard].frame;
+  return { activeArtboard, activeArtboardFrame };
 };
 
 export default connect(
-  mapStateToProps
+  mapStateToProps,
+  { updateActiveArtboardFrameThunk }
 )(ActiveArtboardFrame);
