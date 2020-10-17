@@ -35,6 +35,7 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
   return (
     <div
       className='c-sidebar-layer__icon c-sidebar-layer__icon--chevron'
+      id={`${layer}-expand`}
       onClick={isGroup && !isDragGhost ? handleChevronClick : null}
       style={{
         pointerEvents: isGroup ? 'auto' : 'none'

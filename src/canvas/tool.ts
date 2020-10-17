@@ -244,8 +244,14 @@ class MasterTool {
   }
   handleLayerMouseMove(hitResult: em.HitResult): void {
     const props = hitResult.layerProps;
-    if (this.state.layer.present.hover !== props.nearestScopeAncestor.id) {
-      store.dispatch(setLayerHover({id: props.nearestScopeAncestor.id}))
+    if (props.nearestScopeAncestor.type === 'Artboard') {
+      if (this.state.layer.present.hover !== props.deepSelectItem.id) {
+        store.dispatch(setLayerHover({id: props.deepSelectItem.id}));
+      }
+    } else {
+      if (this.state.layer.present.hover !== props.nearestScopeAncestor.id) {
+        store.dispatch(setLayerHover({id: props.nearestScopeAncestor.id}));
+      }
     }
   }
   handleUIElementMouseMove(hitResult: em.HitResult) {
@@ -270,6 +276,7 @@ class MasterTool {
     const props = hitResult.layerProps;
     if (props.nearestScopeAncestor.id !== props.layerItem.id) {
       store.dispatch(deepSelectLayer({id: props.layerItem.id}));
+      scrollToLayer(props.deepSelectItem.id);
     } else {
       switch(props.layerItem.type) {
         case 'Text': {

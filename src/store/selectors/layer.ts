@@ -111,7 +111,7 @@ export const isScopeGroupLayer = (store: LayerState, id: string): boolean => {
 
 export const getNearestScopeAncestor = (store: LayerState, id: string): em.Layer => {
   let currentNode = store.byId[id];
-  while(currentNode.scope.length > 1 && currentNode.scope[currentNode.scope.length - 1] !== store.scope[store.scope.length - 1]) {
+  while(currentNode.scope.length > 1 && !store.scope.includes(currentNode.scope[currentNode.scope.length - 1])) {
     currentNode = store.byId[currentNode.parent];
   }
   return currentNode;
@@ -172,13 +172,13 @@ export const getLayersBounds = (store: LayerState, layers: string[]): paper.Rect
   });
 };
 
-export const getSelectionTopLeft = (store: LayerState, useStore?: boolean): paper.Point => {
-  if (useStore && store.selectedBounds) {
-    const x = store.selectedBounds.x - (store.selectedBounds.width / 2);
-    const y = store.selectedBounds.y - (store.selectedBounds.height / 2);
+export const getSelectionTopLeft = (store: RootState, useStore?: boolean): paper.Point => {
+  if (useStore && store.selection.bounds) {
+    const x = store.selection.bounds.x - (store.selection.bounds.width / 2);
+    const y = store.selection.bounds.y - (store.selection.bounds.height / 2);
     return new paperMain.Point(x, y);
   } else {
-    const paperLayerPoints = store.selected.reduce((result, current) => {
+    const paperLayerPoints = store.layer.present.selected.reduce((result, current) => {
       const paperLayer = getPaperLayer(current);
       return [...result, paperLayer.bounds.topLeft];
     }, []);
@@ -186,13 +186,13 @@ export const getSelectionTopLeft = (store: LayerState, useStore?: boolean): pape
   }
 };
 
-export const getSelectionBottomRight = (store: LayerState, useStore?: boolean): paper.Point => {
-  if (useStore && store.selectedBounds) {
-    const x = store.selectedBounds.x + (store.selectedBounds.width / 2);
-    const y = store.selectedBounds.y + (store.selectedBounds.height / 2);
+export const getSelectionBottomRight = (store: RootState, useStore?: boolean): paper.Point => {
+  if (useStore && store.selection.bounds) {
+    const x = store.selection.bounds.x + (store.selection.bounds.width / 2);
+    const y = store.selection.bounds.y + (store.selection.bounds.height / 2);
     return new paperMain.Point(x, y);
   } else {
-    const paperLayerPoints = store.selected.reduce((result, current) => {
+    const paperLayerPoints = store.layer.present.selected.reduce((result, current) => {
       const paperLayer = getPaperLayer(current);
       return [...result, paperLayer.bounds.bottomRight];
     }, []);
@@ -200,7 +200,7 @@ export const getSelectionBottomRight = (store: LayerState, useStore?: boolean): 
   }
 };
 
-export const getSelectionBounds = (store: LayerState, useStore?: boolean): paper.Rectangle => {
+export const getSelectionBounds = (store: RootState, useStore?: boolean): paper.Rectangle => {
   const topLeft = getSelectionTopLeft(store, useStore);
   const bottomRight = getSelectionBottomRight(store, useStore);
   if (topLeft && bottomRight) {
@@ -213,9 +213,9 @@ export const getSelectionBounds = (store: LayerState, useStore?: boolean): paper
   }
 };
 
-export const getSelectionCenter = (store: LayerState, useStore?: boolean): paper.Point => {
-  if (useStore && store.selectedBounds) {
-    return new paper.Point(store.selectedBounds.x, store.selectedBounds.y);
+export const getSelectionCenter = (store: RootState, useStore?: boolean): paper.Point => {
+  if (useStore && store.selection.bounds) {
+    return new paper.Point(store.selection.bounds.x, store.selection.bounds.y);
   } else {
     const topLeft = getSelectionTopLeft(store, useStore);
     const bottomRight = getSelectionBottomRight(store, useStore);
@@ -1397,6 +1397,18 @@ export const canTransformFlip = (store: LayerState, layers: string[]): boolean =
 
 export const canTransformFlipSelection = (store: LayerState): boolean => {
   return canTransformFlip(store, store.selected);
+};
+
+export const canResizeSelection = (store: LayerState): boolean => {
+  const selectedWithChildren = store.selected.reduce((result: { allIds: string[]; byId: { [id: string]: em.Layer } }, current) => {
+    const layerAndChildren = getLayerAndDescendants(store, current);
+    result.allIds = [...result.allIds, ...layerAndChildren];
+    layerAndChildren.forEach((id) => {
+      result.byId[id] = store.byId[id];
+    });
+    return result;
+  }, { allIds: [], byId: {} });
+  return store.selected.length >= 1 && !store.selected.some((id) => store.byId[id].type === 'Artboard') && selectedWithChildren.allIds.some((id) => store.byId[id].type === 'Text' || store.byId[id].type === 'Group');
 };
 
 export const canPasteSVG = (): boolean => {

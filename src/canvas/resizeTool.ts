@@ -612,7 +612,7 @@ class ResizeTool {
     }
   }
   onMouseDown(event: paper.ToolEvent): void {
-    const selectionBounds = getSelectionBounds(this.state.layer.present);
+    const selectionBounds = getSelectionBounds(this.state);
     if (
       (
         this.state.layer.present.selected.length > 1 &&

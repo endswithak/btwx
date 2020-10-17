@@ -7,7 +7,7 @@ const createScale = (min: string, max: string, count: number) => {
 
 const accent = chroma('magenta').css();
 
-const darkBgMin = '#1a1a1a';
+const darkBgMin = '#111';
 const darkBgMax = '#555';
 const darkBgScale = createScale(darkBgMin, darkBgMax, 7);
 

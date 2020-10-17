@@ -24,9 +24,11 @@ const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
   const { isArtboard, isSelected, layerName, layer, editing, setEditing, setLayerName } = props;
   const [nameInput, setNameInput] = useState(layerName);
 
-  // useEffect(() => {
-  //   console.log('LAYER TITLE');
-  // }, []);
+  useEffect(() => {
+    if (isSelected) {
+      setNameInput(layerName);
+    }
+  }, [isSelected]);
 
   const handleSubmit = () => {
     if (nameInput.replace(/\s/g, '').length > 0 && nameInput !== layerName) {

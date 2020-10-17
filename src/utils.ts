@@ -197,3 +197,15 @@ export const handleDocumentClose = (id: number): Promise<void> => {
     BrowserWindow.fromId(id).destroy();
   });
 };
+
+export const setMenuItems = (menuItems: any) => {
+  const menu = remote.Menu.getApplicationMenu();
+  Object.keys(menuItems).forEach((key: string) => {
+    const menuItem = (menuItems as any)[key] as { id: string; enabled: boolean; checked?: boolean };
+    const electronMenuItem = menu.getMenuItemById(key);
+    electronMenuItem.enabled = menuItem.enabled;
+    if (menuItem.checked !== null || menuItem.checked !== undefined) {
+      electronMenuItem.checked = menuItem.checked;
+    }
+  });
+}

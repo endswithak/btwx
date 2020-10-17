@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { ExcludeLayersPayload } from '../store/actionTypes/layer';
 import { applyBooleanOperationThunk } from '../store/actions/layer';
-import { canBooleanOperationSelection } from '../store/selectors/layer';
 import TopbarButton from './TopbarButton';
 
 interface ExcludeButtonProps {
@@ -34,9 +33,9 @@ const mapStateToProps = (state: RootState): {
   selected: string[];
   canExclude: boolean;
 } => {
-  const { layer } = state;
+  const { layer, selection } = state;
   const selected = layer.present.selected;
-  const canExclude = canBooleanOperationSelection(state.layer.present);
+  const canExclude = selection.canBoolean;
   return { selected, canExclude };
 };
 

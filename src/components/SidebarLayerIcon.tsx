@@ -24,7 +24,8 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
 
   return (
     <div
-      className='c-sidebar-layer__icon'>
+      className='c-sidebar-layer__icon'
+      id={`${layer}-icon`}>
       <Icon
         name={name}
         small={small}

@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { SendLayersBackwardPayload, LayerTypes } from '../store/actionTypes/layer';
 import { sendLayersBackward } from '../store/actions/layer';
-import { canSendBackwardSelection } from '../store/selectors/layer';
 import TopbarButton from './TopbarButton';
 
 interface MoveBackwardButtonProps {
@@ -34,9 +33,9 @@ const mapStateToProps = (state: RootState): {
   selected: string[];
   canMoveBackward: boolean;
 } => {
-  const { layer } = state;
+  const { layer, selection } = state;
   const selected = layer.present.selected;
-  const canMoveBackward = canSendBackwardSelection(layer.present);
+  const canMoveBackward = selection.canMoveBackward;
   return { selected, canMoveBackward };
 };
 

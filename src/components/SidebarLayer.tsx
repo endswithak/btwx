@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect } from 'react';
+import React, { ReactElement, useEffect, memo } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { SetDraggingPayload, LeftSidebarTypes } from '../store/actionTypes/leftSidebar';
@@ -13,7 +13,7 @@ interface SidebarLayerProps {
   setDragging?(payload: SetDraggingPayload): LeftSidebarTypes;
 }
 
-const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
+const SidebarLayer = memo(function SidebarLayer(props: SidebarLayerProps) {
   const { layer, setDragging, isDragGhost } = props;
 
   const handleDragStart = (e: any): void => {
@@ -47,7 +47,7 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
         isDragGhost={isDragGhost} />
     </div>
   );
-}
+});
 
 export default connect(
   null,

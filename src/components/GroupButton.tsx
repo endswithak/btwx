@@ -2,7 +2,6 @@ import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { GroupLayersPayload } from '../store/actionTypes/layer';
-import { canGroupSelection } from '../store/selectors/layer';
 import { groupLayersThunk } from '../store/actions/layer';
 import TopbarButton from './TopbarButton';
 
@@ -34,9 +33,9 @@ const mapStateToProps = (state: RootState): {
   selected: string[];
   canGroup: boolean;
 } => {
-  const { layer } = state;
+  const { layer, selection } = state;
   const selected = layer.present.selected;
-  const canGroup = canGroupSelection(layer.present);
+  const canGroup = selection.canGroup;
   return { selected, canGroup };
 };
 

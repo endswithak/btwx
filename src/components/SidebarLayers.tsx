@@ -1,11 +1,11 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, memo } from 'react';
 import SidebarLayer from './SidebarLayer';
 
 interface SidebarLayersProps {
   layers: string[];
 }
 
-const SidebarLayers = (props: SidebarLayersProps): ReactElement => {
+const SidebarLayers = memo(function SidebarLayers(props: SidebarLayersProps) {
   const { layers } = props;
 
   return (
@@ -19,6 +19,6 @@ const SidebarLayers = (props: SidebarLayersProps): ReactElement => {
       }
     </>
   )
-}
+});
 
 export default SidebarLayers;

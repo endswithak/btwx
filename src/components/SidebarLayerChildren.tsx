@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect } from 'react';
+import React, { ReactElement, useEffect, memo } from 'react';
 import { connect } from 'react-redux';
 import { makeReversedChildren } from '../store/selectors';
 import { RootState } from '../store/reducers';
@@ -11,7 +11,7 @@ interface SidebarLayerChildrenProps {
   children?: string[];
 }
 
-const SidebarLayerChildren = (props: SidebarLayerChildrenProps): ReactElement => {
+const SidebarLayerChildren = memo(function SidebarLayerChildren(props: SidebarLayerChildrenProps) {
   const { layer, showChildren, children, isDragGhost } = props;
 
   useEffect(() => {
@@ -24,7 +24,7 @@ const SidebarLayerChildren = (props: SidebarLayerChildrenProps): ReactElement =>
         layers={children} />
     : null
   );
-}
+});
 
 const makeMapStateToProps = () => {
   const getReversedChildren = makeReversedChildren()

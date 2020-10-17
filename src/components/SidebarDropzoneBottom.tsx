@@ -70,7 +70,6 @@ const SidebarDropzoneBottom = (props: SidebarDropzoneBottomProps): ReactElement 
         above: layer
       });
     }
-    // setDragLayers({dragLayers: null});
     setDragging({dragging: false});
   }
 
@@ -82,7 +81,7 @@ const SidebarDropzoneBottom = (props: SidebarDropzoneBottomProps): ReactElement 
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       style={{
-        width: leftSidebarWidth - (depth * (theme.unit * 1.44)),
+        width: document.getElementById(`${layer}-icon`) ? document.getElementById(`${layer}-mask-icon`) ? leftSidebarWidth - document.getElementById(`${layer}-mask-icon`).getBoundingClientRect().x : leftSidebarWidth - document.getElementById(`${layer}-icon`).getBoundingClientRect().x : 0,
         height: layerItem.children ? theme.unit * 2 : theme.unit * 4
       }}>
       <Dropzone

@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement, useEffect } from 'react';
+import React, { useContext, ReactElement, useEffect, memo } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { SetEditingPayload, LeftSidebarTypes } from '../store/actionTypes/leftSidebar';
@@ -27,7 +27,7 @@ interface SidebarLayerItemProps {
   openContextMenu?(payload: OpenContextMenuPayload): ContextMenuTypes;
 }
 
-const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
+const SidebarLayerItem = memo(function SidebarLayerItem(props: SidebarLayerItemProps) {
   const theme = useContext(ThemeContext);
   const { layer, isSelected, depth, setLayerHover, openContextMenu, selectLayers, deselectLayers, setEditing, isDragGhost } = props;
 
@@ -72,7 +72,10 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
   }
 
   const handleDoubleClick = (e: any): void => {
-    setEditing({editing: layer});
+    const layerExpand = document.getElementById(`${layer}-expand`);
+    if (e.target !== layerExpand && !layerExpand.contains(e.target)) {
+      setEditing({editing: layer});
+    }
   }
 
   useEffect(() => {
@@ -83,7 +86,7 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
     <div
       className='c-layers-sidebar__layer-item'
       style={{
-        paddingLeft: depth * (theme.unit * 1.44)
+        paddingLeft: depth * (theme.unit * 3)
       }}
       onMouseDown={isDragGhost ? null : handleMouseDown}
       onMouseEnter={isDragGhost ? null : handleMouseEnter}
@@ -107,7 +110,7 @@ const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
         isDragGhost={isDragGhost} />
     </div>
   );
-}
+});
 
 const mapStateToProps = (state: RootState, ownProps: SidebarLayerItemProps) => {
   const { layer, leftSidebar } = state;

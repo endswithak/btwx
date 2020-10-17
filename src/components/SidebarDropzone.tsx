@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, memo } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import SidebarDropzoneTop from './SidebarDropzoneTop';
@@ -11,7 +11,7 @@ interface SidebarLayerDropzoneProps {
   dragging?: boolean;
 }
 
-const SidebarLayerDropzone = (props: SidebarLayerDropzoneProps): ReactElement => {
+const SidebarLayerDropzone = memo(function SidebarLayerDropzone(props: SidebarLayerDropzoneProps) {
   const { dragging, isDragGhost } = props;
 
   return (
@@ -26,7 +26,7 @@ const SidebarLayerDropzone = (props: SidebarLayerDropzoneProps): ReactElement =>
       </div>
     : null
   );
-}
+});
 
 const mapStateToProps = (state: RootState) => {
   const { leftSidebar } = state;

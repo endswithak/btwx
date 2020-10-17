@@ -561,7 +561,7 @@ export const deselectLayers = (state: LayerState, action: DeselectLayers): Layer
   currentState = action.payload.layers.reduce((result, current) => {
     return deselectLayer(result, layerActions.deselectLayer({id: current}) as DeselectLayer);
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   return currentState;
 };
 
@@ -672,36 +672,36 @@ export const selectLayers = (state: LayerState, action: SelectLayers): LayerStat
       return selectLayer(result, layerActions.selectLayer({id: current, noActiveArtboardUpdate: action.payload.noActiveArtboardUpdate}) as SelectLayer);
     }
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   return currentState;
 };
 
-export const updateSelectedBounds = (state: LayerState): LayerState => {
-  let currentState = state;
-  const selectionBounds = getSelectionBounds(state) as any;
-  if (selectionBounds) {
-    const boundsMatch = state.selectedBounds && Object.keys(state.selectedBounds).every((key) => (state.selectedBounds as any)[key] === selectionBounds[key]);
-    if (!boundsMatch) {
-      currentState = {
-        ...currentState,
-        selectedBounds: {
-          x: parseInt(selectionBounds.center.x.toFixed(2)),
-          y: parseInt(selectionBounds.center.y.toFixed(2)),
-          width: parseInt(selectionBounds.width.toFixed(2)),
-          height: parseInt(selectionBounds.height.toFixed(2))
-        }
-      }
-    }
-  } else {
-    if (currentState.selectedBounds) {
-      currentState = {
-        ...currentState,
-        selectedBounds: null
-      }
-    }
-  }
-  return currentState;
-};
+// export const updateSelectedBounds = (state: LayerState): LayerState => {
+//   let currentState = state;
+//   const selectionBounds = getSelectionBounds(state) as any;
+//   if (selectionBounds) {
+//     const boundsMatch = state.selectedBounds && Object.keys(state.selectedBounds).every((key) => (state.selectedBounds as any)[key] === selectionBounds[key]);
+//     if (!boundsMatch) {
+//       currentState = {
+//         ...currentState,
+//         selectedBounds: {
+//           x: parseInt(selectionBounds.center.x.toFixed(2)),
+//           y: parseInt(selectionBounds.center.y.toFixed(2)),
+//           width: parseInt(selectionBounds.width.toFixed(2)),
+//           height: parseInt(selectionBounds.height.toFixed(2))
+//         }
+//       }
+//     }
+//   } else {
+//     if (currentState.selectedBounds) {
+//       currentState = {
+//         ...currentState,
+//         selectedBounds: null
+//       }
+//     }
+//   }
+//   return currentState;
+// };
 
 export const setLayerHover = (state: LayerState, action: SetLayerHover): LayerState => {
   let currentState = state;
@@ -1590,7 +1590,7 @@ export const moveLayers = (state: LayerState, action: MoveLayers): LayerState =>
   currentState = action.payload.layers.reduce((result, current) => {
     return moveLayer(result, layerActions.moveLayer({id: current}) as MoveLayer);
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -1621,7 +1621,7 @@ export const moveLayersTo = (state: LayerState, action: MoveLayersTo): LayerStat
   currentState = action.payload.layers.reduce((result, current) => {
     return moveLayerTo(result, layerActions.moveLayerTo({id: current, x: action.payload.x, y: action.payload.y}) as MoveLayerTo);
   }, state);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -1643,7 +1643,7 @@ export const moveLayersBy = (state: LayerState, action: MoveLayersBy): LayerStat
   currentState = action.payload.layers.reduce((result, current) => {
     return moveLayerBy(result, layerActions.moveLayerBy({id: current, x: action.payload.x, y: action.payload.y}) as MoveLayerBy);
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -2064,7 +2064,7 @@ export const setLayersX = (state: LayerState, action: SetLayersX): LayerState =>
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerX(result, layerActions.setLayerX({id: current, x: action.payload.x}) as SetLayerX);
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -2103,7 +2103,7 @@ export const setLayersY = (state: LayerState, action: SetLayersY): LayerState =>
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerY(result, layerActions.setLayerY({id: current, y: action.payload.y}) as SetLayerY);
   }, state);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -2154,7 +2154,7 @@ export const setLayersWidth = (state: LayerState, action: SetLayersWidth): Layer
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerWidth(result, layerActions.setLayerWidth({id: current, width: action.payload.width}) as SetLayerWidth);
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -2205,7 +2205,7 @@ export const setLayersHeight = (state: LayerState, action: SetLayersHeight): Lay
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerHeight(result, layerActions.setLayerHeight({id: current, height: action.payload.height}) as SetLayerHeight);
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -2289,7 +2289,7 @@ export const setLayersRotation = (state: LayerState, action: SetLayersRotation):
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerRotation(result, layerActions.setLayerRotation({id: current, rotation: action.payload.rotation}) as SetLayerRotation);
   }, state);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -2320,7 +2320,7 @@ export const enableLayersHorizontalFlip = (state: LayerState, action: EnableLaye
   currentState = action.payload.layers.reduce((result, current) => {
     return enableLayerHorizontalFlip(result, layerActions.enableLayerHorizontalFlip({id: current}) as EnableLayerHorizontalFlip);
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -2351,7 +2351,7 @@ export const disableLayersHorizontalFlip = (state: LayerState, action: DisableLa
   currentState = action.payload.layers.reduce((result, current) => {
     return disableLayerHorizontalFlip(result, layerActions.disableLayerHorizontalFlip({id: current}) as DisableLayerHorizontalFlip);
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -2382,7 +2382,7 @@ export const enableLayersVerticalFlip = (state: LayerState, action: EnableLayers
   currentState = action.payload.layers.reduce((result, current) => {
     return enableLayerVerticalFlip(result, layerActions.enableLayerVerticalFlip({id: current}) as EnableLayerVerticalFlip);
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -2413,7 +2413,7 @@ export const disableLayersVerticalFlip = (state: LayerState, action: DisableLaye
   currentState = action.payload.layers.reduce((result, current) => {
     return disableLayerVerticalFlip(result, layerActions.disableLayerVerticalFlip({id: current}) as DisableLayerVerticalFlip);
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -3698,7 +3698,7 @@ export const scaleLayers = (state: LayerState, action: ScaleLayers): LayerState 
   currentState = action.payload.layers.reduce((result, current) => {
     return scaleLayer(result, layerActions.scaleLayer({id: current, scale: action.payload.scale, verticalFlip: action.payload.verticalFlip, horizontalFlip: action.payload.horizontalFlip}) as ScaleLayer);
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -3730,7 +3730,7 @@ export const setLayerText = (state: LayerState, action: SetLayerText): LayerStat
   if (layerItem.style.stroke.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
   }
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -3771,7 +3771,7 @@ export const setLayersFontSize = (state: LayerState, action: SetLayersFontSize):
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerFontSize(result, layerActions.setLayerFontSize({id: current, fontSize: action.payload.fontSize}) as SetLayerFontSize);
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -3811,7 +3811,7 @@ export const setLayersFontWeight = (state: LayerState, action: SetLayersFontWeig
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerFontWeight(result, layerActions.setLayerFontWeight({id: current, fontWeight: action.payload.fontWeight}) as SetLayerFontWeight);
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -3851,7 +3851,7 @@ export const setLayersFontFamily = (state: LayerState, action: SetLayersFontFami
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerFontFamily(result, layerActions.setLayerFontFamily({id: current, fontFamily: action.payload.fontFamily}) as SetLayerFontFamily);
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -3891,7 +3891,7 @@ export const setLayersLeading = (state: LayerState, action: SetLayersLeading): L
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerLeading(result, layerActions.setLayerLeading({id: current, leading: action.payload.leading}) as SetLayerLeading);
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -3970,7 +3970,7 @@ export const setLayersJustification = (state: LayerState, action: SetLayersJusti
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerJustification(result, layerActions.setLayerJustification({id: current, justification: action.payload.justification}) as SetLayerJustification);
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4172,7 +4172,7 @@ export const alignLayersToLeft = (state: LayerState, action: AlignLayersToLeft):
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4186,7 +4186,7 @@ export const alignLayersToRight = (state: LayerState, action: AlignLayersToRight
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4200,7 +4200,7 @@ export const alignLayersToTop = (state: LayerState, action: AlignLayersToTop): L
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4214,7 +4214,7 @@ export const alignLayersToBottom = (state: LayerState, action: AlignLayersToBott
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4228,7 +4228,7 @@ export const alignLayersToCenter = (state: LayerState, action: AlignLayersToCent
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4242,7 +4242,7 @@ export const alignLayersToMiddle = (state: LayerState, action: AlignLayersToMidd
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4267,7 +4267,7 @@ export const distributeLayersHorizontally = (state: LayerState, action: Distribu
     }
     return result;
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4292,7 +4292,7 @@ export const distributeLayersVertically = (state: LayerState, action: Distribute
     }
     return result;
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4574,7 +4574,7 @@ export const setRoundedRadii = (state: LayerState, action: SetRoundedRadii): Lay
   currentState = action.payload.layers.reduce((result, current) => {
     return setRoundedRadius(result, layerActions.setRoundedRadius({id: current, radius: action.payload.radius}) as SetRoundedRadius);
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4624,7 +4624,7 @@ export const setPolygonsSides = (state: LayerState, action: SetPolygonsSides): L
   currentState = action.payload.layers.reduce((result, current) => {
     return setPolygonSides(result, layerActions.setPolygonSides({id: current, sides: action.payload.sides}) as SetPolygonSides);
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4670,7 +4670,7 @@ export const setStarsPoints = (state: LayerState, action: SetStarsPoints): Layer
   currentState = action.payload.layers.reduce((result, current) => {
     return setStarPoints(result, layerActions.setStarPoints({id: current, points: action.payload.points}) as SetStarPoints);
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4716,7 +4716,7 @@ export const setStarsRadius = (state: LayerState, action: SetStarsRadius): Layer
   currentState = action.payload.layers.reduce((result, current) => {
     return setStarRadius(result, layerActions.setStarRadius({id: current, radius: action.payload.radius}) as SetStarRadius);
   }, currentState);
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4767,7 +4767,7 @@ export const setLineFrom = (state: LayerState, action: SetLineFrom): LayerState 
   if (layerItem.style.stroke.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
   }
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -4818,7 +4818,7 @@ export const setLineTo = (state: LayerState, action: SetLineTo): LayerState => {
   if (layerItem.style.stroke.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
   }
-  currentState = updateSelectedBounds(currentState);
+  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };

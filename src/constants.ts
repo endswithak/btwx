@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-export const APP_NAME = 'btwix';
+export const APP_NAME = 'btwx';
 export const PREVIEW_PREFIX = '**preview**';
 export const THEME_PRIMARY_COLOR = '#3C88FD';
 export const THEME_GUIDE_COLOR = 'red';

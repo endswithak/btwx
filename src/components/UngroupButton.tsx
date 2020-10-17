@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { UngroupLayersPayload, LayerTypes } from '../store/actionTypes/layer';
 import { ungroupLayers } from '../store/actions/layer';
-import { canUngroupSelection } from '../store/selectors/layer';
 import TopbarButton from './TopbarButton';
 
 interface UngroupButtonProps {
@@ -34,9 +33,9 @@ const mapStateToProps = (state: RootState): {
   selected: string[];
   canUngroup: boolean;
 } => {
-  const { layer } = state;
+  const { layer, selection } = state;
   const selected = layer.present.selected;
-  const canUngroup = canUngroupSelection(layer.present);
+  const canUngroup = selection.canUngroup;
   return { selected, canUngroup };
 };
 

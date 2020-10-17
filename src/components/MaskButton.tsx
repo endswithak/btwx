@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { AddLayersMaskPayload } from '../store/actionTypes/layer';
 import { addLayersMaskThunk } from '../store/actions/layer';
-import { canMaskSelection } from '../store/selectors/layer';
 import TopbarButton from './TopbarButton';
 
 interface MaskButtonProps {
@@ -34,9 +33,9 @@ const mapStateToProps = (state: RootState): {
   canMask?: boolean;
   selected?: string[];
 } => {
-  const { layer } = state;
+  const { layer, selection } = state;
   const selected = layer.present.selected;
-  const canMask = canMaskSelection(layer.present);
+  const canMask = selection.canMask;
   return { selected, canMask };
 };
 

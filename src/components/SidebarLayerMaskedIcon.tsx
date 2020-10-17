@@ -23,6 +23,7 @@ const SidebarLayerMaskedIcon = (props: SidebarLayerMaskedIconProps): ReactElemen
     isEnabled
     ? <div
         className='c-sidebar-layer__icon'
+        id={`${layer}-mask-icon`}
         >
         <Icon
           name='masked'

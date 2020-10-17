@@ -34,10 +34,10 @@ const mapStateToProps = (state: RootState): {
   theme: string;
   selectedBounds: any;
 } => {
-  const { layer, viewSettings } = state;
+  const { viewSettings, selection, layer } = state;
   const selected = layer.present.selected;
   const theme = viewSettings.theme;
-  const selectedBounds = layer.present.selectedBounds;
+  const selectedBounds = selection.bounds;
   return { selected, theme, selectedBounds };
 };
 

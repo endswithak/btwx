@@ -14,6 +14,8 @@ import ArtboardPresetEditorWrap from './ArtboardPresetEditorWrap';
 import ContextMenuWrap from './ContextMenuWrap';
 import KeyBindings from './KeyBindings';
 import MasterTool from './MasterTool';
+import Selection from './Selection';
+import Menu from './Menu';
 
 const App = (): ReactElement => {
   const theme = useContext(ThemeContext);
@@ -40,24 +42,26 @@ const App = (): ReactElement => {
       }}>
         <TopbarTitle />
         {/* flex items */}
-        {/* <Topbar /> */}
+        <Topbar />
         <Main ready={ready} setReady={setReady} />
         {/* abs elements */}
         {
           ready
           ? <>
-              {/* canvas ui */}
+              {/* Canvas UI */}
               <ActiveArtboardFrameWrap />
               <HoverFrameWrap />
               <SelectionFrameWrap />
               <MeasureFrameWrap />
               <TweenEventsFrameWrap />
-              {/* modals */}
+              {/* Modals */}
               {/* <EaseEditorWrap />
               <ArtboardPresetEditorWrap />
               <ContextMenuWrap /> */}
-              {/* misc */}
+              {/* Misx */}
+              <Menu />
               <MasterTool />
+              <Selection />
               <KeyBindings />
             </>
           : null

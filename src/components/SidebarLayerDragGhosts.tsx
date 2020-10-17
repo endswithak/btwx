@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, memo } from 'react';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
 import SidebarLayer from './SidebarLayer';
@@ -8,7 +8,7 @@ interface SidebarLayerDragGhostsProps {
   leftSidebarWidth?: number;
 }
 
-const SidebarLayerDragGhosts = (props: SidebarLayerDragGhostsProps): ReactElement => {
+const SidebarLayerDragGhosts = memo(function SidebarLayerDragGhosts(props: SidebarLayerDragGhostsProps) {
   const { selected, leftSidebarWidth } = props;
 
   return (
@@ -30,7 +30,7 @@ const SidebarLayerDragGhosts = (props: SidebarLayerDragGhostsProps): ReactElemen
       }
     </div>
   )
-}
+});
 
 const mapStateToProps = (state: RootState) => {
   const { layer, viewSettings } = state;

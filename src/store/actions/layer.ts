@@ -2063,6 +2063,7 @@ export const applyBooleanOperationThunk = (payload: UniteLayersPayload | Interse
             name: 'Combined Shape',
             pathData: booleanLayers.pathData,
             parent: layerItem.parent,
+            closed: true,
             frame: {
               x: booleanLayers.position.x,
               y: booleanLayers.position.y,
@@ -2359,7 +2360,7 @@ export const pasteLayersThunk = ({ overSelection, overPoint, overLayer }: { over
             if (overSelection && state.layer.present.selected.length > 0) {
               const singleSelection = state.layer.present.selected.length === 1;
               const overSelectionItem = state.layer.present.byId[state.layer.present.selected[0]];
-              const selectionPosition = getSelectionCenter(state.layer.present, true);
+              const selectionPosition = getSelectionCenter(state, true);
               const pointDiff = selectionPosition.subtract(clipboardPosition);
               newLayers.forEach((layerItem) => {
                 if (singleSelection && newParse.main.includes(layerItem.id) && layerItem.type !== 'Artboard') {
@@ -2681,13 +2682,13 @@ export const updateSelectionFrame = (state: RootState, visibleHandle = 'all', us
       return result;
     }, { allIds: [], byId: {} });
     const resizeDisabled = state.layer.present.selected.length >= 1 && !state.layer.present.selected.some((id) => state.layer.present.byId[id].type === 'Artboard') && selectedWithChildren.allIds.some((id) => state.layer.present.byId[id].type === 'Text' || state.layer.present.byId[id].type === 'Group');
-    const selectionTopLeft =  getSelectionTopLeft(state.layer.present, useStore);
-    const selectionBottomRight = getSelectionBottomRight(state.layer.present, useStore);
+    const selectionTopLeft =  getSelectionTopLeft(state, useStore);
+    const selectionBottomRight = getSelectionBottomRight(state, useStore);
     const baseProps = {
       point: selectionTopLeft,
       size: [8, 8],
       fillColor: '#fff',
-      strokeColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.15 },
+      strokeColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.24 },
       strokeWidth: 1 / paperMain.view.zoom,
       shadowColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.5 },
       shadowBlur: 1 / paperMain.view.zoom,
@@ -3213,7 +3214,7 @@ export const updateMeasureFrame = (state: RootState, guides: { top?: string; bot
     measureFrame.remove();
   }
   if (state.layer.present.selected.length > 0) {
-    const selectionBounds = getSelectionBounds(state.layer.present);
+    const selectionBounds = getSelectionBounds(state);
     const measureFrameGuides = [];
     let hasTopMeasure;
     let hasBottomMeasure;

@@ -19,6 +19,7 @@ import insertKnob from './insertKnob';
 import shapeTool from './shapeTool';
 import artboardTool from './artboardTool';
 import textTool from './textTool';
+import selection from './selection';
 import { importPaperProject } from '../selectors/layer';
 import { paperMain } from '../../canvas';
 import { OPEN_DOCUMENT } from '../actionTypes/documentSettings';
@@ -43,7 +44,8 @@ export const reducers = {
   insertKnob,
   shapeTool,
   artboardTool,
-  textTool
+  textTool,
+  selection
 };
 
 const appReducer = combineReducers(reducers);
