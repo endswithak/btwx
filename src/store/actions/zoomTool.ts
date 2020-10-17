@@ -15,7 +15,7 @@ export const enableZoomToolThunk = (zoomType: em.ZoomType) => {
 export const disableZoomToolThunk = () => {
   return (dispatch: any, getState: any): void => {
     dispatch(setCanvasActiveTool({activeTool: null, zooming: false, zoomType: null}));
-    dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
+    // dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
     // dispatch(updateInViewLayers());
   }
 };

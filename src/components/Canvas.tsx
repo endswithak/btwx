@@ -27,12 +27,12 @@ const Canvas = (props: CanvasProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { disableZoomToolThunk, disableTranslateToolThunk, enableTranslateToolThunk, translating, ready, enableZoomToolThunk, cursor, zooming, zoomType } = props;
 
-  // const debounceZoom = useCallback(
-  //   debounce(() => {
-  //     disableZoomToolThunk();
-  //   }, 100),
-  //   []
-  // );
+  const debounceZoom = useCallback(
+    debounce(() => {
+      disableZoomToolThunk();
+    }, 100),
+    []
+  );
 
   // const debounceTranslate = useCallback(
   //   debounce(() => {
@@ -47,10 +47,10 @@ const Canvas = (props: CanvasProps): ReactElement => {
 
   const handleWheel = (e: any): void => {
     if (e.ctrlKey) {
-      // if (!zooming) {
-      //   enableZoomToolThunk(e.deltaY < 0 ? 'in' : 'out');
-      // }
-      // debounceZoom();
+      if (!zooming) {
+        enableZoomToolThunk(e.deltaY < 0 ? 'in' : 'out');
+      }
+      debounceZoom();
       const cursorPoint = paperMain.view.getEventPoint(e as any);
       const pointDiff = new paperMain.Point(cursorPoint.x - paperMain.view.center.x, cursorPoint.y - paperMain.view.center.y);
       const prevZoom = paperMain.view.zoom;
@@ -101,46 +101,46 @@ const Canvas = (props: CanvasProps): ReactElement => {
   );
 }
 
-export default Canvas;
+// export default Canvas;
 
-// const mapStateToProps = (state: RootState): {
-//   cursor: string;
-//   zooming: boolean;
-//   zoomType: em.ZoomType;
-//   translating: boolean;
-// } => {
-//   const { canvasSettings } = state;
-//   const activeTool = canvasSettings.activeTool;
-//   const cursor = (() => {
-//     switch(activeTool) {
-//       case 'Shape':
-//       case 'Artboard':
-//         return 'crosshair';
-//       case 'Text':
-//         return 'text';
-//       case 'Line':
-//       case 'Resize': {
-//         if (canvasSettings.resizeType) {
-//           return `${canvasSettings.resizeType}-resize`;
-//         }
-//         return null;
-//       }
-//       case 'Zoom':
-//         if (canvasSettings.zoomType) {
-//           return `zoom-${canvasSettings.zoomType}`;
-//         }
-//         return null;
-//     }
-//   })();
-//   return {
-//     cursor,
-//     zooming: canvasSettings.zooming,
-//     zoomType: canvasSettings.zoomType,
-//     translating: canvasSettings.translating
-//   };
-// };
+const mapStateToProps = (state: RootState): {
+  cursor: string;
+  zooming: boolean;
+  zoomType: em.ZoomType;
+  translating: boolean;
+} => {
+  const { canvasSettings } = state;
+  const activeTool = canvasSettings.activeTool;
+  const cursor = (() => {
+    switch(activeTool) {
+      case 'Shape':
+      case 'Artboard':
+        return 'crosshair';
+      case 'Text':
+        return 'text';
+      case 'Line':
+      case 'Resize': {
+        if (canvasSettings.resizeType) {
+          return `${canvasSettings.resizeType}-resize`;
+        }
+        return null;
+      }
+      case 'Zoom':
+        if (canvasSettings.zoomType) {
+          return `zoom-${canvasSettings.zoomType}`;
+        }
+        return null;
+    }
+  })();
+  return {
+    cursor,
+    zooming: canvasSettings.zooming,
+    zoomType: canvasSettings.zoomType,
+    translating: canvasSettings.translating
+  };
+};
 
-// export default connect(
-//   mapStateToProps,
-//   { disableZoomToolThunk, disableTranslateToolThunk, enableTranslateToolThunk, setCanvasMousePosition, enableZoomToolThunk }
-// )(Canvas);
+export default connect(
+  mapStateToProps,
+  { disableZoomToolThunk, disableTranslateToolThunk, enableTranslateToolThunk, setCanvasMousePosition, enableZoomToolThunk }
+)(Canvas);
