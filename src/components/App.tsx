@@ -58,7 +58,7 @@ const App = (): ReactElement => {
               {/* <EaseEditorWrap />
               <ArtboardPresetEditorWrap />
               <ContextMenuWrap /> */}
-              {/* Misx */}
+              {/* Listeners */}
               <Menu />
               <MasterTool />
               <Selection />

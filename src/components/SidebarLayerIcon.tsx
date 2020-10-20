@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 import Icon from './Icon';
+import { capitalize } from '../utils';
 
 interface SidebarLayerIconProps {
   layer: string;
@@ -50,16 +51,12 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
 const mapStateToProps = (state: RootState, ownProps: SidebarLayerIconProps) => {
   const { layer } = state;
   const layerItem = layer.present.byId[ownProps.layer];
-  const mask = layerItem.type === 'Group' && (layerItem as em.Group).clipped ? (() => {
-    return (layerItem as em.Group).children.find((id) => layer.present.byId[id].mask);
-  })() : null;
-  const maskItem = mask ? layer.present.byId[mask] : null;
   const name = (() => {
     switch(layerItem.type) {
       case 'Artboard':
         return 'artboard'
       case 'Group':
-        return maskItem ? 'shape' : 'folder';
+        return 'folder';
       case 'Shape':
         return 'shape';
       case 'Text':
@@ -68,9 +65,12 @@ const mapStateToProps = (state: RootState, ownProps: SidebarLayerIconProps) => {
         return 'image';
     }
   })();
-  const small = layerItem.type === 'Shape' || maskItem !== null;
-  const shapeId = layerItem.type === 'Shape' ? ownProps.layer : maskItem ? maskItem.id : null;
-  const isMaskOrOpenShape = layerItem.type === 'Shape' && (!(layerItem as em.Shape).closed || (layerItem as em.Shape).mask);
+  const isShape = layerItem.type === 'Shape';
+  const isMask = isShape && (layerItem as em.Shape).mask;
+  const isOpen = isShape && !(layerItem as em.Shape).closed;
+  const small = isShape;
+  const shapeId = isShape ? ownProps.layer : null;
+  const isMaskOrOpenShape = isOpen || isMask;
   const isSelected = layerItem.selected && !ownProps.isDragGhost;
   return { name, small, shapeId, isMaskOrOpenShape, isSelected };
 };

@@ -638,19 +638,40 @@ export default Menu.buildFromTemplate([
           }
         ]
       },
-      { type: 'separator' },
       {
         label: 'Mask',
-        id: 'layerMask',
-        enabled: false,
-        accelerator: process.platform === 'darwin' ? 'Cmd+Ctrl+M' : 'Ctrl+Shift+M',
-        click: () => {
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              focusedDocument.webContents.executeJavaScript(`layerMask()`);
+        submenu: [
+          {
+            label: 'Use As Mask',
+            id: 'layerMaskUseAsMask',
+            enabled: false,
+            accelerator: process.platform === 'darwin' ? 'Cmd+M' : 'Ctrl+M',
+            type: 'checkbox',
+            checked: false,
+            click: () => {
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`layerMaskUseAsMask()`);
+                }
+              });
             }
-          });
-        }
+          },
+          {
+            label: 'Ignore Underlying Mask',
+            id: 'layerMaskIgnoreUnderlyingMask',
+            enabled: false,
+            accelerator: process.platform === 'darwin' ? 'Cmd+Shift+M' : 'Ctrl+Shift+M',
+            type: 'checkbox',
+            checked: false,
+            click: () => {
+              getFocusedDocument().then((focusedDocument) => {
+                if (focusedDocument) {
+                  focusedDocument.webContents.executeJavaScript(`layerMaskIgnoreUnderlyingMask()`);
+                }
+              });
+            }
+          }
+        ]
       },
     ]
   },

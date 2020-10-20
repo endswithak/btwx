@@ -17,17 +17,20 @@ import {
   SET_SHADOW_ENABLED,
   SET_HORIZONTAL_FLIP_ENABLED,
   SET_VERTICAL_FLIP_ENABLED,
-  UPDATE_SELECTION_PROPS,
+  UPDATE_SELECTION,
+  SET_IGNORE_UNDERLYING_ENABLED,
+  SET_USE_AS_MASK_ENABLED,
+  SET_CAN_TOGGLE_USE_AS_MASK,
   SelectionTypes,
 } from '../actionTypes/selection';
 
 export interface SelectionState {
-  bounds: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  };
+  // bounds: {
+  //   x: number;
+  //   y: number;
+  //   width: number;
+  //   height: number;
+  // };
   canAlign: boolean;
   canDistribute: boolean;
   canBoolean: boolean;
@@ -41,15 +44,18 @@ export interface SelectionState {
   canToggleStroke: boolean;
   canToggleShadow: boolean;
   canToggleFlip: boolean;
+  canToggleUseAsMask: boolean;
   fillEnabled: boolean;
   strokeEnabled: boolean;
   shadowEnabled: boolean;
   horizontalFlipEnabled: boolean;
   verticalFlipEnabled: boolean;
+  useAsMaskEnabled: boolean;
+  ignoreUnderlyingMaskEnabled: boolean;
 }
 
 const initialState: SelectionState = {
-  bounds: null,
+  // bounds: null,
   canAlign: false,
   canDistribute: false,
   canBoolean: false,
@@ -63,11 +69,14 @@ const initialState: SelectionState = {
   canToggleStroke: false,
   canToggleShadow: false,
   canToggleFlip: false,
+  canToggleUseAsMask: false,
   fillEnabled: false,
   strokeEnabled: false,
   shadowEnabled: false,
   horizontalFlipEnabled: false,
-  verticalFlipEnabled: false
+  verticalFlipEnabled: false,
+  useAsMaskEnabled: false,
+  ignoreUnderlyingMaskEnabled: false
 };
 
 export default (state = initialState, action: SelectionTypes): SelectionState => {
@@ -180,10 +189,28 @@ export default (state = initialState, action: SelectionTypes): SelectionState =>
         verticalFlipEnabled: action.payload.verticalFlipEnabled
       };
     }
-    case UPDATE_SELECTION_PROPS: {
+    case UPDATE_SELECTION: {
       return {
         ...state,
         ...action.payload
+      };
+    }
+    case SET_CAN_TOGGLE_USE_AS_MASK: {
+      return {
+        ...state,
+        canToggleUseAsMask: action.payload.canToggleUseAsMask
+      };
+    }
+    case SET_IGNORE_UNDERLYING_ENABLED: {
+      return {
+        ...state,
+        ignoreUnderlyingMaskEnabled: action.payload.ignoreUnderlyingMaskEnabled
+      };
+    }
+    case SET_USE_AS_MASK_ENABLED: {
+      return {
+        ...state,
+        useAsMaskEnabled: action.payload.useAsMaskEnabled
       };
     }
     default:

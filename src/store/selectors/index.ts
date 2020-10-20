@@ -1,6 +1,8 @@
 import { createSelector } from 'reselect';
 import { RootState } from '../reducers';
 
+const getSelected = (state: RootState) => state.layer.present.selected;
+const getLayersById = (state: RootState) => state.layer.present.byId;
 const getLayerChildren = (state: RootState, props: any) => state.layer.present.byId[props.layer].children;
 const getPageChildren = (state: RootState) => state.layer.present.byId['page'].children;
 const getLeftSidebarSearching = (state: RootState) => state.leftSidebar.searching;
@@ -26,6 +28,19 @@ export const getLeftSidebarLayers = createSelector(
       layers = [...children].reverse();
     }
     return layers;
+  }
+);
+
+export const getSelectedById = createSelector(
+  [ getSelected, getLayersById ],
+  (selected, byId) => {
+    return selected.reduce((result, current) => {
+      result = {
+        ...result,
+        [current]: byId[current]
+      }
+      return result;
+    }, {});
   }
 );
 

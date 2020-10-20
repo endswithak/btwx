@@ -154,11 +154,15 @@ import {
   SET_LAYER_FILL_TYPE,
   SET_LAYERS_FILL_TYPE,
   ADD_LAYERS_MASK,
+  SET_LAYER_UNDERLYING_MASK,
+  SET_LAYERS_UNDERLYING_MASK,
+  TOGGLE_LAYER_IGNORE_UNDERLYING_MASK,
+  TOGGLE_LAYERS_IGNORE_UNDERLYING_MASK,
+  SET_LAYER_MASKED,
+  SET_LAYERS_MASKED,
+  TOGGLE_LAYER_MASK,
+  TOGGLE_LAYERS_MASK,
   REMOVE_LAYERS_MASK,
-  MASK_LAYER,
-  UNMASK_LAYER,
-  MASK_LAYERS,
-  UNMASK_LAYERS,
   ALIGN_LAYERS_TO_LEFT,
   ALIGN_LAYERS_TO_RIGHT,
   ALIGN_LAYERS_TO_TOP,
@@ -362,11 +366,15 @@ import {
   removeLayersGradientStop,
   setLayerActiveGradientStop,
   addLayersMask,
-  removeLayersMask,
-  maskLayer,
-  unmaskLayer,
-  maskLayers,
-  unmaskLayers,
+  setLayerUnderlyingMask,
+  setLayersUnderlyingMask,
+  toggleLayerIgnoreUnderlyingMask,
+  toggleLayersIgnoreUnderlyingMask,
+  setLayerMasked,
+  setLayersMasked,
+  toggleLayerMask,
+  toggleLayersMask,
+  // removeLayersMask,
   alignLayersToLeft,
   alignLayersToRight,
   alignLayersToTop,
@@ -429,6 +437,7 @@ export interface LayerState {
   allGroupIds: string[];
   allTextIds: string[];
   allImageIds: string[];
+  allMaskIds: string[];
   scope: string[];
   inView: {
     allIds: string[];
@@ -480,13 +489,14 @@ const initialState: LayerState = {
   allGroupIds: [],
   allTextIds: [],
   allImageIds: [],
+  allMaskIds: [],
   scope: ['page'],
   inView: {
     allIds: [],
     snapPoints: []
   },
   hover: null,
-  paperProject: '[["Layer",{"applyMatrix":true,"children":[["Group",{"applyMatrix":true,"data":{"id":"page","type":"Layer","layerType":"Page"}}]]}]]',
+  paperProject: '[["Layer",{"applyMatrix":true,"children":[["Group",{"applyMatrix":true,"name":"Page","data":{"id":"page","type":"Layer","layerType":"Page"}}]]}]]',
   allTweenEventIds: [],
   tweenEventById: {},
   allTweenIds: [],
@@ -800,16 +810,24 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return setLayerActiveGradientStop(state, action);
     case ADD_LAYERS_MASK:
       return addLayersMask(state, action);
-    case REMOVE_LAYERS_MASK:
-      return removeLayersMask(state, action);
-    case MASK_LAYER:
-      return maskLayer(state, action);
-    case UNMASK_LAYER:
-      return unmaskLayer(state, action);
-    case MASK_LAYERS:
-      return maskLayers(state, action);
-    case UNMASK_LAYERS:
-      return unmaskLayers(state, action);
+    case SET_LAYER_UNDERLYING_MASK:
+      return setLayerUnderlyingMask(state, action);
+    case SET_LAYERS_UNDERLYING_MASK:
+      return setLayersUnderlyingMask(state, action);
+    case TOGGLE_LAYER_IGNORE_UNDERLYING_MASK:
+      return toggleLayerIgnoreUnderlyingMask(state, action);
+    case TOGGLE_LAYERS_IGNORE_UNDERLYING_MASK:
+      return toggleLayersIgnoreUnderlyingMask(state, action);
+    case SET_LAYER_MASKED:
+      return setLayerMasked(state, action);
+    case SET_LAYERS_MASKED:
+      return setLayersMasked(state, action);
+    case TOGGLE_LAYER_MASK:
+      return toggleLayerMask(state, action);
+    case TOGGLE_LAYERS_MASK:
+      return toggleLayersMask(state, action);
+    // case REMOVE_LAYERS_MASK:
+    //   return removeLayersMask(state, action);
     case ALIGN_LAYERS_TO_LEFT:
       return alignLayersToLeft(state, action);
     case ALIGN_LAYERS_TO_RIGHT:
@@ -1033,6 +1051,10 @@ export default undoable(baseReducer, {
       SET_LAYER_JUSTIFICATION,
       SET_LAYERS_JUSTIFICATION,
       ADD_LAYERS_MASK,
+      TOGGLE_LAYER_IGNORE_UNDERLYING_MASK,
+      TOGGLE_LAYERS_IGNORE_UNDERLYING_MASK,
+      TOGGLE_LAYER_MASK,
+      TOGGLE_LAYERS_MASK,
       ALIGN_LAYERS_TO_LEFT,
       ALIGN_LAYERS_TO_RIGHT,
       ALIGN_LAYERS_TO_TOP,

@@ -4,20 +4,28 @@ import { RootState } from '../store/reducers';
 import { setMenuItems } from '../utils';
 
 interface MenuLayerMaskProps {
-  canMask?: boolean;
+  ignoreUnderlyingMaskEnabled: boolean;
+  useAsMaskEnabled: boolean;
+  canToggleUseAsMask: boolean;
 }
 
 const MenuLayerMask = (props: MenuLayerMaskProps): ReactElement => {
-  const { canMask } = props;
+  const { ignoreUnderlyingMaskEnabled, useAsMaskEnabled, canToggleUseAsMask } = props;
 
   useEffect(() => {
     setMenuItems({
-      layerMask: {
-        id: 'layerMask',
-        enabled: canMask
+      layerMaskUseAsMask: {
+        id: 'layerMaskUseAsMask',
+        enabled: canToggleUseAsMask,
+        checked: useAsMaskEnabled
+      },
+      layerMaskIgnoreUnderlyingMask: {
+        id: 'layerMaskIgnoreUnderlyingMask',
+        enabled: true,
+        checked: ignoreUnderlyingMaskEnabled
       }
     });
-  }, [canMask]);
+  }, [ignoreUnderlyingMaskEnabled, useAsMaskEnabled, canToggleUseAsMask]);
 
   return (
     <></>
@@ -25,11 +33,15 @@ const MenuLayerMask = (props: MenuLayerMaskProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState): {
-  canMask: boolean;
+  ignoreUnderlyingMaskEnabled: boolean;
+  useAsMaskEnabled: boolean;
+  canToggleUseAsMask: boolean;
 } => {
   const { selection } = state;
-  const canMask = selection.canMask;
-  return { canMask };
+  const ignoreUnderlyingMaskEnabled = selection.ignoreUnderlyingMaskEnabled;
+  const useAsMaskEnabled = selection.useAsMaskEnabled;
+  const canToggleUseAsMask = selection.canToggleUseAsMask;
+  return { ignoreUnderlyingMaskEnabled, useAsMaskEnabled, canToggleUseAsMask };
 };
 
 export default connect(

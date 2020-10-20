@@ -5,14 +5,12 @@ import { updateSelectionFrameThunk } from '../store/actions/layer';
 import { paperMain } from '../canvas';
 
 interface SelectionFrameProps {
-  selected?: string[];
   theme?: string;
-  selectedBounds?: any;
   updateSelectionFrameThunk?(): void;
 }
 
 const SelectionFrame = (props: SelectionFrameProps): ReactElement => {
-  const { selected, theme, selectedBounds, updateSelectionFrameThunk } = props;
+  const { theme, updateSelectionFrameThunk } = props;
 
   useEffect(() => {
     updateSelectionFrameThunk();
@@ -22,7 +20,7 @@ const SelectionFrame = (props: SelectionFrameProps): ReactElement => {
         selectionFrame.remove();
       }
     }
-  }, [selected, theme, selectedBounds]);
+  }, [theme]);
 
   return (
     <></>
@@ -30,15 +28,11 @@ const SelectionFrame = (props: SelectionFrameProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState): {
-  selected: string[];
   theme: string;
-  selectedBounds: any;
 } => {
-  const { viewSettings, selection, layer } = state;
-  const selected = layer.present.selected;
+  const { viewSettings } = state;
   const theme = viewSettings.theme;
-  const selectedBounds = selection.bounds;
-  return { selected, theme, selectedBounds };
+  return { theme };
 };
 
 export default connect(

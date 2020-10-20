@@ -7,6 +7,8 @@ import SidebarDropzone from './SidebarDropzone';
 import SidebarLayerItem from './SidebarLayerItem';
 import SidebarLayerChildren from './SidebarLayerChildren';
 
+// add drag enter/exit event to conditionaly load dropzones with new "dragHover" prop...so they dont all render at once
+
 interface SidebarLayerProps {
   layer: string;
   isDragGhost?: boolean;

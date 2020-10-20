@@ -34,7 +34,7 @@ declare namespace em {
 
   type TweenPropMap = { [K in TweenProp]: boolean; }
 
-  type LayerType = 'Group' | 'Shape' | 'Page' | 'Artboard' | 'Text' | 'Image';
+  type LayerType = 'Group' | 'Shape' | 'Page' | 'Artboard' | 'Text' | 'Image' | 'Mask';
 
   type BlendMode = 'normal' | 'darken' | 'multiply' | 'color-burn' | 'lighten' | 'screen' | 'color-dodge' | 'overlay' | 'soft-light' | 'hard-light' | 'difference' | 'exclusion' | 'hue' | 'saturation' | 'color' | 'luminosity' | 'add' | 'subtract' | 'average' | 'pin-light' | 'negation' | 'source-over' | 'source-in' | 'source-out' | 'source-atop' | 'destination-over' | 'destination-in' | 'destination-out' | 'destination-atop' | 'lighter' | 'darker' | 'copy' | 'xor';
 
@@ -225,8 +225,11 @@ declare namespace em {
     tweens: string[];
     style: Style;
     transform: Transform;
+    ignoreUnderlyingMask: boolean;
+    underlyingMask: string;
     masked: boolean;
-    mask: boolean;
+    // masked: boolean;
+    // mask: boolean;
   }
 
   type ClipboardType = 'layers' | 'style' | 'sketch-layers';
@@ -253,7 +256,12 @@ declare namespace em {
     type: 'Group';
     children: string[];
     showChildren: boolean;
-    clipped: boolean;
+  }
+
+  interface Mask extends Layer {
+    type: 'Mask';
+    shape: string;
+    children: string[];
   }
 
   interface Artboard extends Layer {
@@ -279,6 +287,7 @@ declare namespace em {
     shapeType: ShapeType;
     children: null;
     pathData: string;
+    mask: boolean;
     closed: boolean;
     sides?: number;
     points?: number;

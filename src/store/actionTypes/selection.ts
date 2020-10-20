@@ -12,14 +12,17 @@ export const SET_CAN_TOGGLE_STROKE = 'SET_CAN_TOGGLE_STROKE';
 export const SET_CAN_TOGGLE_FILL = 'SET_CAN_TOGGLE_FILL';
 export const SET_CAN_TOGGLE_SHADOW = 'SET_CAN_TOGGLE_SHADOW';
 export const SET_CAN_TOGGLE_FLIP = 'SET_CAN_TOGGLE_FLIP';
+export const SET_CAN_ALIGN = 'SET_CAN_ALIGN';
+export const SET_CAN_DISTRIBUTE = 'SET_CAN_DISTRIBUTE';
+export const SET_CAN_TOGGLE_USE_AS_MASK = 'SET_CAN_TOGGLE_USE_AS_MASK';
 export const SET_FILL_ENABLED = 'SET_FILL_ENABLED';
 export const SET_STROKE_ENABLED = 'SET_STROKE_ENABLED';
 export const SET_SHADOW_ENABLED = 'SET_SHADOW_ENABLED';
 export const SET_HORIZONTAL_FLIP_ENABLED = 'SET_HORIZONTAL_FLIP_ENABLED';
 export const SET_VERTICAL_FLIP_ENABLED = 'SET_VERTICAL_FLIP_ENABLED';
-export const UPDATE_SELECTION_PROPS = 'UPDATE_SELECTION_PROPS';
-export const SET_CAN_ALIGN = 'SET_CAN_ALIGN';
-export const SET_CAN_DISTRIBUTE = 'SET_CAN_DISTRIBUTE';
+export const SET_USE_AS_MASK_ENABLED = 'SET_USE_AS_MASK_ENABLED';
+export const SET_IGNORE_UNDERLYING_ENABLED = 'SET_IGNORE_UNDERLYING_ENABLED';
+export const UPDATE_SELECTION = 'UPDATE_SELECTION';
 
 export interface SetSelectionBoundsPayload {
   bounds: {
@@ -51,6 +54,15 @@ export interface SetCanDistributePayload {
 export interface SetCanDistribute {
   type: typeof SET_CAN_DISTRIBUTE;
   payload: SetCanDistributePayload;
+}
+
+export interface SetCanToggleUseAsMaskPayload {
+  canToggleUseAsMask: boolean;
+}
+
+export interface SetCanToggleUseAsMask {
+  type: typeof SET_CAN_TOGGLE_USE_AS_MASK;
+  payload: SetCanToggleUseAsMaskPayload;
 }
 
 export interface SetCanBooleanPayload {
@@ -197,13 +209,31 @@ export interface SetVerticalFlipEnabled {
   payload: SetVerticalFlipEnabledPayload;
 }
 
-export type UpdateSelectionPropsPayload  = {
+export interface SetUseAsMaskEnabledPayload {
+  useAsMaskEnabled: boolean;
+}
+
+export interface SetUseAsMaskEnabled {
+  type: typeof SET_USE_AS_MASK_ENABLED;
+  payload: SetUseAsMaskEnabledPayload;
+}
+
+export interface SetIgnoreUnderlyingMaskEnabledPayload {
+  ignoreUnderlyingMaskEnabled: boolean;
+}
+
+export interface SetIgnoreUnderlyingMaskEnabled {
+  type: typeof SET_IGNORE_UNDERLYING_ENABLED;
+  payload: SetIgnoreUnderlyingMaskEnabledPayload;
+}
+
+export type UpdateSelectionPayload  = {
   [P in keyof SelectionState]?: SelectionState[P];
 }
 
-export interface UpdateSelectionProps {
-  type: typeof UPDATE_SELECTION_PROPS;
-  payload: UpdateSelectionPropsPayload;
+export interface UpdateSelection {
+  type: typeof UPDATE_SELECTION;
+  payload: UpdateSelectionPayload;
 }
 
 export type SelectionTypes = SetSelectionBounds |
@@ -220,9 +250,12 @@ export type SelectionTypes = SetSelectionBounds |
                              SetCanToggleFlip |
                              SetCanToggleShadow |
                              SetCanToggleStroke |
+                             SetCanToggleUseAsMask |
                              SetFillEnabled |
                              SetStrokeEnabled |
                              SetShadowEnabled |
                              SetHorizontalFlipEnabled |
                              SetVerticalFlipEnabled |
-                             UpdateSelectionProps;
+                             SetUseAsMaskEnabled |
+                             SetIgnoreUnderlyingMaskEnabled |
+                             UpdateSelection;

@@ -7,6 +7,8 @@ import {
   DEFAULT_SHAPE_HEIGHT, DEFAULT_STAR_POINTS, DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS,
   DEFAULT_POLYGON_SIDES, DEFAULT_STROKE_OPTIONS_STYLE, DEFAULT_LINE_FROM, DEFAULT_LINE_TO
 } from '../../constants';
+import { RootState } from '../reducers';
+import { LayerState } from '../reducers/layer';
 
 export const getLayerFillStyle = (payload: any, overrides = {}): em.Fill => {
   const fill = payload.layer.style && payload.layer.style.fill ? { ...DEFAULT_FILL_STYLE, ...payload.layer.style.fill } : DEFAULT_FILL_STYLE;
@@ -98,4 +100,24 @@ export const getLayerPathData = (payload: any): string => {
   const shapeOpts = getLayerShapeOpts(payload);
   const pathData = payload.layer.pathData && payload.layer.pathData ? payload.layer.pathData : getPaperShapePathData(shapeType, frame.innerWidth, frame.innerHeight, frame.x, frame.y, shapeOpts);
   return pathData;
+}
+
+export const getLayerMasked = (state: LayerState, payload: any): boolean => {
+  const parent = payload.layer.parent ? payload.layer.parent : 'page';
+  const parentLayerItem = state.byId[parent];
+  const parentChildren = parentLayerItem.children;
+  const hasChildren = parentChildren.length > 0;
+  const lastChildId = hasChildren ? parentChildren[parentChildren.length - 1] : null;
+  const lastChildItem = lastChildId ? state.byId[lastChildId] : null;
+  return lastChildItem ? lastChildItem.masked : false;
+}
+
+export const getLayerUnderlyingMask = (state: LayerState, payload: any): string => {
+  const parent = payload.layer.parent ? payload.layer.parent : 'page';
+  const parentLayerItem = state.byId[parent];
+  const parentChildren = parentLayerItem.children;
+  const hasChildren = parentChildren.length > 0;
+  const lastChildId = hasChildren ? parentChildren[parentChildren.length - 1] : null;
+  const lastChildItem = lastChildId ? state.byId[lastChildId] : null;
+  return lastChildItem ? lastChildItem.underlyingMask : null;
 }

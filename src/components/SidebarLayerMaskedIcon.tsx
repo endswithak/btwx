@@ -43,7 +43,7 @@ const mapStateToProps = (state: RootState, ownProps: SidebarLayerMaskedIconProps
 } => {
   const { layer } = state;
   const layerItem = layer.present.byId[ownProps.layer];
-  const isEnabled = layerItem.masked && !layerItem.mask;
+  const isEnabled = layerItem.masked;
   const isSelected = layerItem.selected && !ownProps.isDragGhost;
   return { isEnabled, isSelected };
 };

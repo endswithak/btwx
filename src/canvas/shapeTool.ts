@@ -418,7 +418,7 @@ class ShapeTool {
                 },
                 overlapping: this.outline.bounds
               });
-              return overlappedArtboard ? overlappedArtboard.parent.data.id : state.layer.present.page;
+              return overlappedArtboard && state.layer.present.scope[state.layer.present.scope.length - 1] === 'page' ? overlappedArtboard.parent.data.id : state.layer.present.scope[state.layer.present.scope.length - 1];
             })(),
             name: this.shapeType,
             frame: {

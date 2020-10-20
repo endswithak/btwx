@@ -1,21 +1,22 @@
 import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { updateSelectionPropsThunk } from '../store/actions/selection';
+import { getSelectedById } from '../store/selectors';
+import { updateSelectionThunk } from '../store/actions/selection';
 
 interface SelectionProps {
   selected?: string[];
   selectedById?: {
     [id: string]: em.Layer;
   };
-  updateSelectionPropsThunk?(): void;
+  updateSelectionThunk?(): void;
 }
 
 const Selection = (props: SelectionProps): ReactElement => {
-  const { selected, selectedById, updateSelectionPropsThunk } = props;
+  const { selected, selectedById, updateSelectionThunk } = props;
 
   useEffect(() => {
-    updateSelectionPropsThunk();
+    updateSelectionThunk();
   }, [selected, selectedById]);
 
   return (
@@ -31,17 +32,13 @@ const mapStateToProps = (state: RootState): {
 } => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const selectedById = layer.present.selected.reduce((result, current) => {
-    result = {
-      ...result,
-      [current]: layer.present.byId[current]
-    }
-    return result;
-  }, {});
-  return { selected, selectedById };
+  return {
+    selected,
+    selectedById: getSelectedById(state)
+  };
 };
 
 export default connect(
   mapStateToProps,
-  { updateSelectionPropsThunk }
+  { updateSelectionThunk }
 )(Selection);

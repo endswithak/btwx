@@ -18,7 +18,13 @@ import {
   SET_SHADOW_ENABLED,
   SET_HORIZONTAL_FLIP_ENABLED,
   SET_VERTICAL_FLIP_ENABLED,
-  UPDATE_SELECTION_PROPS,
+  UPDATE_SELECTION,
+  SET_CAN_TOGGLE_USE_AS_MASK,
+  SET_USE_AS_MASK_ENABLED,
+  SET_IGNORE_UNDERLYING_ENABLED,
+  SetCanToggleUseAsMaskPayload,
+  SetUseAsMaskEnabledPayload,
+  SetIgnoreUnderlyingMaskEnabledPayload,
   SetSelectionBoundsPayload,
   SetCanAlignPayload,
   SetCanDistributePayload,
@@ -38,15 +44,15 @@ import {
   SetShadowEnabledPayload,
   SetHorizontalFlipEnabledPayload,
   SetVerticalFlipEnabledPayload,
-  UpdateSelectionPropsPayload,
+  UpdateSelectionPayload,
   SelectionTypes
 } from '../actionTypes/selection';
 
 import { RootState } from '../reducers';
 import { SelectionState } from '../reducers/selection';
-// import { updateSelectionFrame } from '../actions/layer';
+import { updateSelectionFrame } from '../actions/layer';
 
-import { getLayerAndDescendants, getSelectionBounds, canGroupSelection, canUngroupSelection, canSendBackwardSelection, canBringForwardSelection, canToggleSelectionStroke, canToggleSelectionShadow, canToggleSelectionFill, canTransformFlipSelection, canMaskSelection, canResizeSelection, canBooleanOperationSelection, canPasteSVG } from '../selectors/layer';
+import { getLayerAndDescendants, getSelectionBounds, canToggleUseAsMaskSelection, canGroupSelection, canUngroupSelection, canSendBackwardSelection, canBringForwardSelection, canToggleSelectionStroke, canToggleSelectionShadow, canToggleSelectionFill, canTransformFlipSelection, canMaskSelection, canResizeSelection, canBooleanOperationSelection, canPasteSVG } from '../selectors/layer';
 
 export const setSelectionBounds = (payload: SetSelectionBoundsPayload): SelectionTypes => ({
   type: SET_SELECTION_BOUNDS,
@@ -143,17 +149,32 @@ export const setVerticalFlipEnabled = (payload: SetVerticalFlipEnabledPayload): 
   payload
 });
 
-export const updateSelectionProps = (payload: UpdateSelectionPropsPayload): SelectionTypes => ({
-  type: UPDATE_SELECTION_PROPS,
+export const updateSelection = (payload: UpdateSelectionPayload): SelectionTypes => ({
+  type: UPDATE_SELECTION,
   payload
 });
 
-export const updateSelectionPropsThunk = () => {
+export const setCanToggleUseAsMask = (payload: SetCanToggleUseAsMaskPayload): SelectionTypes => ({
+  type: SET_CAN_TOGGLE_USE_AS_MASK,
+  payload
+});
+
+export const setUseAsMaskEnabled = (payload: SetUseAsMaskEnabledPayload): SelectionTypes => ({
+  type: SET_USE_AS_MASK_ENABLED,
+  payload
+});
+
+export const setIgnoreUnderlyingMaskEnabled = (payload: SetIgnoreUnderlyingMaskEnabledPayload): SelectionTypes => ({
+  type: SET_IGNORE_UNDERLYING_ENABLED,
+  payload
+});
+
+export const updateSelectionThunk = () => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     const { layer } = state;
     const selected = layer.present.selected;
-    const selectionBounds = getSelectionBounds(state);
+    // const selectionBounds = getSelectionBounds(state);
     const canResize = canResizeSelection(layer.present);
     const canMoveBackward = canSendBackwardSelection(layer.present);
     const canMoveForward = canBringForwardSelection(layer.present);
@@ -169,31 +190,42 @@ export const updateSelectionPropsThunk = () => {
     const horizontalFlipEnabled = canToggleFlip ? selected.every((id) => layer.present.byId[id].transform.horizontalFlip) : false;
     const verticalFlipEnabled = canToggleFlip ? selected.every((id) => layer.present.byId[id].transform.verticalFlip) : false;
     const canMask = canMaskSelection(layer.present);
+    const canToggleUseAsMask = canToggleUseAsMaskSelection(layer.present);
+    const useAsMaskEnabled = canToggleUseAsMask ? selected.every((id) => (layer.present.byId[id] as em.Shape).mask) : false;
+    const ignoreUnderlyingMaskEnabled = selected.every((id) => layer.present.byId[id].ignoreUnderlyingMask);
     const canBoolean = canBooleanOperationSelection(layer.present);
     const canAlign = selected.length >= 2;
     const canDistribute = selected.length >= 3;
+    // const bounds = selectionBounds ? {
+    //   x: parseInt(selectionBounds.center.x.toFixed(2)),
+    //   y: parseInt(selectionBounds.center.y.toFixed(2)),
+    //   width: parseInt(selectionBounds.width.toFixed(2)),
+    //   height: parseInt(selectionBounds.height.toFixed(2))
+    // } : null;
     const props: SelectionState = {
       canMoveBackward, canMoveForward, canGroup, canUngroup, canToggleStroke, canToggleShadow, canToggleFill, canToggleFlip,
       fillEnabled, strokeEnabled, shadowEnabled, horizontalFlipEnabled, verticalFlipEnabled, canMask, canBoolean, canResize,
-      bounds: selectionBounds ? { x: parseInt(selectionBounds.center.x.toFixed(2)), y: parseInt(selectionBounds.center.y.toFixed(2)), width: parseInt(selectionBounds.width.toFixed(2)), height: parseInt(selectionBounds.height.toFixed(2))} : null,
-      canAlign, canDistribute
+      canAlign, canDistribute, canToggleUseAsMask, useAsMaskEnabled, ignoreUnderlyingMaskEnabled
     };
     const keysToUpdate = Object.keys(state.selection).reduce((result, current) => {
-      if (current === 'bounds') {
-        if (props[current]) {
-          const boundsMatch = state.selection.bounds && Object.keys(state.selection.bounds).every((key) => (state.selection.bounds as any)[key] === (props as any)[current][key]);
-          if (!boundsMatch) {
-            result = [...result, current];
-          }
-        } else {
-          if (state.selection.bounds) {
-            result = [...result, current];
-          }
-        }
-      } else {
-        if ((state.selection as any)[current] !== (props as any)[current]) {
-          result = [...result, current];
-        }
+      // if (current === 'bounds') {
+      //   if (bounds) {
+      //     const boundsMatch = state.selection.bounds && Object.keys(state.selection.bounds).every((key) => (state.selection.bounds as any)[key] === (bounds as any)[key]);
+      //     if (!boundsMatch) {
+      //       result = [...result, current];
+      //     }
+      //   } else {
+      //     if (state.selection.bounds) {
+      //       result = [...result, current];
+      //     }
+      //   }
+      // } else {
+      //   if ((state.selection as any)[current] !== (props as any)[current]) {
+      //     result = [...result, current];
+      //   }
+      // }
+      if ((state.selection as any)[current] !== (props as any)[current]) {
+        result = [...result, current];
       }
       return result;
     }, []);
@@ -205,8 +237,8 @@ export const updateSelectionPropsThunk = () => {
         }
         return result;
       }, {});
-      dispatch(updateSelectionProps(payload));
+      dispatch(updateSelection(payload));
     }
-    // updateSelectionFrame(state);
+    updateSelectionFrame(state);
   }
 };

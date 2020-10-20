@@ -3,6 +3,7 @@ export const ADD_SHAPE = 'ADD_SHAPE';
 export const ADD_ARTBOARD = 'ADD_ARTBOARD';
 export const ADD_TEXT = 'ADD_TEXT';
 export const ADD_IMAGE = 'ADD_IMAGE';
+export const ADD_MASK = 'ADD_MASK';
 export const ADD_LAYERS = 'ADD_LAYERS';
 
 export const REMOVE_LAYER = 'REMOVE_LAYER';
@@ -185,12 +186,20 @@ export const ADD_IN_VIEW_LAYERS = 'ADD_IN_VIEW_LAYERS';
 export const REMOVE_IN_VIEW_LAYERS = 'REMOVE_IN_VIEW_LAYERS';
 export const UPDATE_IN_VIEW_LAYERS = 'UPDATE_IN_VIEW_LAYERS';
 
+export const SET_LAYER_UNDERLYING_MASK = 'SET_LAYER_UNDERLYING_MASK';
+export const SET_LAYERS_UNDERLYING_MASK = 'SET_LAYERS_UNDERLYING_MASK';
+export const TOGGLE_LAYER_IGNORE_UNDERLYING_MASK = 'TOGGLE_LAYER_IGNORE_UNDERLYING_MASK';
+export const TOGGLE_LAYERS_IGNORE_UNDERLYING_MASK = 'TOGGLE_LAYERS_IGNORE_UNDERLYING_MASK';
+export const SET_LAYER_MASKED = 'SET_LAYER_MASKED';
+export const SET_LAYERS_MASKED = 'SET_LAYERS_MASKED';
+export const TOGGLE_LAYER_MASK = 'TOGGLE_LAYER_MASK';
+export const TOGGLE_LAYERS_MASK = 'TOGGLE_LAYERS_MASK';
 export const ADD_LAYERS_MASK = 'ADD_LAYERS_MASK';
 export const REMOVE_LAYERS_MASK = 'REMOVE_LAYERS_MASK';
-export const MASK_LAYER = 'MASK_LAYER';
-export const UNMASK_LAYER = 'UNMASK_LAYER';
-export const MASK_LAYERS = 'MASK_LAYERS';
-export const UNMASK_LAYERS = 'UNMASK_LAYERS';
+// export const MASK_LAYER = 'MASK_LAYER';
+// export const UNMASK_LAYER = 'UNMASK_LAYER';
+// export const MASK_LAYERS = 'MASK_LAYERS';
+// export const UNMASK_LAYERS = 'UNMASK_LAYERS';
 
 export const ALIGN_LAYERS_TO_LEFT = 'ALIGN_LAYERS_TO_LEFT';
 export const ALIGN_LAYERS_TO_RIGHT = 'ALIGN_LAYERS_TO_RIGHT';
@@ -260,6 +269,20 @@ export type AddArtboardPayload = {
 export interface AddArtboard {
   type: typeof ADD_ARTBOARD;
   payload: AddArtboardPayload;
+}
+
+// Mask
+
+export type AddMaskPayload = {
+  layer: {
+    [P in keyof em.Mask]?: em.Mask[P];
+  };
+  batch?: boolean;
+}
+
+export interface AddMask {
+  type: typeof ADD_MASK;
+  payload: AddMaskPayload;
 }
 
 // Group
@@ -1828,6 +1851,82 @@ export interface SetLayersFillType {
   payload: SetLayersFillTypePayload;
 }
 
+export interface SetLayerUnderlyingMaskPayload {
+  id: string;
+  underlyingMask: string;
+}
+
+export interface SetLayerUnderlyingMask {
+  type: typeof SET_LAYER_UNDERLYING_MASK;
+  payload: SetLayerUnderlyingMaskPayload;
+}
+
+export interface SetLayersUnderlyingMaskPayload {
+  layers: string[];
+  underlyingMask: string;
+}
+
+export interface SetLayersUnderlyingMask {
+  type: typeof SET_LAYERS_UNDERLYING_MASK;
+  payload: SetLayersUnderlyingMaskPayload;
+}
+
+export interface ToggleLayerIgnoreUnderlyingMaskPayload {
+  id: string;
+}
+
+export interface ToggleLayerIgnoreUnderlyingMask {
+  type: typeof TOGGLE_LAYER_IGNORE_UNDERLYING_MASK;
+  payload: ToggleLayerIgnoreUnderlyingMaskPayload;
+}
+
+export interface ToggleLayersIgnoreUnderlyingMaskPayload {
+  layers: string[];
+}
+
+export interface ToggleLayersIgnoreUnderlyingMask {
+  type: typeof TOGGLE_LAYERS_IGNORE_UNDERLYING_MASK;
+  payload: ToggleLayersIgnoreUnderlyingMaskPayload;
+}
+
+export interface ToggleLayerMaskPayload {
+  id: string;
+}
+
+export interface ToggleLayerMask {
+  type: typeof TOGGLE_LAYER_MASK;
+  payload: ToggleLayerMaskPayload;
+}
+
+export interface ToggleLayersMaskPayload {
+  layers: string[];
+}
+
+export interface ToggleLayersMask {
+  type: typeof TOGGLE_LAYERS_MASK;
+  payload: ToggleLayersMaskPayload;
+}
+
+export interface SetLayerMaskedPayload {
+  id: string;
+  masked: boolean;
+}
+
+export interface SetLayerMasked {
+  type: typeof SET_LAYER_MASKED;
+  payload: SetLayerMaskedPayload;
+}
+
+export interface SetLayersMaskedPayload {
+  layers: string[];
+  masked: boolean;
+}
+
+export interface SetLayersMasked {
+  type: typeof SET_LAYERS_MASKED;
+  payload: SetLayersMaskedPayload;
+}
+
 export interface AddLayersMaskPayload {
   layers: string[];
   group?: em.Group;
@@ -1845,42 +1944,6 @@ export interface RemoveLayersMaskPayload {
 export interface RemoveLayersMask {
   type: typeof REMOVE_LAYERS_MASK;
   payload: RemoveLayersMaskPayload;
-}
-
-export interface MaskLayerPayload {
-  id: string;
-}
-
-export interface MaskLayer {
-  type: typeof MASK_LAYER;
-  payload: MaskLayerPayload;
-}
-
-export interface UnmaskLayerPayload {
-  id: string;
-}
-
-export interface UnmaskLayer {
-  type: typeof UNMASK_LAYER;
-  payload: UnmaskLayerPayload;
-}
-
-export interface MaskLayersPayload {
-  layers: string[];
-}
-
-export interface MaskLayers {
-  type: typeof MASK_LAYERS;
-  payload: MaskLayersPayload;
-}
-
-export interface UnmaskLayersPayload {
-  layers: string[];
-}
-
-export interface UnmaskLayers {
-  type: typeof UNMASK_LAYERS;
-  payload: UnmaskLayersPayload;
 }
 
 export interface AlignLayersToLeftPayload {
@@ -2349,6 +2412,7 @@ export interface SetLayersStyle {
 
 export type LayerTypes = AddArtboard |
                          AddGroup |
+                         AddMask |
                          AddShape |
                          AddText |
                          AddImage |
@@ -2505,12 +2569,16 @@ export type LayerTypes = AddArtboard |
                          RemoveInViewLayer |
                          RemoveInViewLayers |
                          UpdateInViewLayers |
+                         SetLayerUnderlyingMask |
+                         SetLayersUnderlyingMask |
+                         ToggleLayerIgnoreUnderlyingMask |
+                         ToggleLayersIgnoreUnderlyingMask |
+                         ToggleLayerMask |
+                         ToggleLayersMask |
+                         SetLayerMasked |
+                         SetLayersMasked |
                          AddLayersMask |
                          RemoveLayersMask |
-                         MaskLayer |
-                         UnmaskLayer |
-                         MaskLayers |
-                         UnmaskLayers |
                          AlignLayersToLeft |
                          AlignLayersToRight |
                          AlignLayersToTop |

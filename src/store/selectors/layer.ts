@@ -17,8 +17,12 @@ export const getParentLayer = (store: LayerState, id: string): em.Group => {
 };
 
 export const getLayerIndex = (store: LayerState, id: string): number => {
-  const parent = getParentLayer(store, id);
-  return parent.children.indexOf(id);
+  if (store.byId[id].type === 'Page') {
+    return 0;
+  } else {
+    const parent = getParentLayer(store, id);
+    return parent.children.indexOf(id);
+  }
 };
 
 export const getLayerType = (store: LayerState, id: string): em.LayerType => {
@@ -32,6 +36,40 @@ export const getPaperLayerByPaperId = (id: string): paper.Item => {
 
 export const getPaperLayer = (id: string): paper.Item => {
   return paperMain.project.getItem({ data: { id } });
+};
+
+export const getParentPaperLayer = (store: LayerState, id: string): paper.Item => {
+  const parentLayerItem = store.byId[id];
+  const paperLayer = getPaperLayer(id);
+  const parentChildren = parentLayerItem.children;
+  const hasChildren = parentChildren.length > 0;
+  const lastChildId = hasChildren ? parentChildren[parentChildren.length - 1] : null;
+  const lastChildItem = lastChildId ? store.byId[lastChildId] : null;
+  const lastChildUnderlyingMask = lastChildItem ? lastChildItem.underlyingMask : null;
+  // let continueMaskChain = true;
+  // let mask = null;
+  // let i = 0;
+  // while(i < layerIndex && continueMaskChain) {
+  //   const child = parentItem.children[i];
+  //   const childItem = store.byId[child];
+  //   if (childItem.type === 'Shape' && (childItem as em.Shape).mask) {
+  //     mask = childItem.id;
+  //   }
+  //   if (childItem.ignoreUnderlyingMask) {
+  //     mask = null;
+  //     continueMaskChain = false;
+  //   }
+  //   i++;
+  // }
+  if (lastChildUnderlyingMask) {
+    return getPaperLayer(`${lastChildUnderlyingMask}-MaskGroup`);
+  } else {
+    if (paperLayer.data.layerType === 'Artboard') {
+      return paperLayer.getItem({ data: { id: 'ArtboardLayers' } });
+    } else {
+      return paperLayer;
+    }
+  }
 };
 
 export const getPage = (store: LayerState): em.Page => {
@@ -66,6 +104,65 @@ export const getLayerDescendants = (state: LayerState, layer: string): string[] 
 export const getLayerAndDescendants = (state: LayerState, layer: string): string[] => {
   const children = getLayerDescendants(state, layer);
   return [layer, ...children];
+};
+
+export const getLayerUnderlyingSiblings = (state: LayerState, id: string) => {
+  const layerItem = state.byId[id];
+  const parentLayerItem = state.byId[layerItem.parent];
+  const layerIndex = parentLayerItem.children.indexOf(id);
+  return parentLayerItem.children.reduce((result, current, index) => {
+    if (index > layerIndex) {
+      result = [...result, current];
+    }
+    return result;
+  }, []);
+};
+
+export const getMaskableUnderlyingSiblings = (state: LayerState, id: string) => {
+  const maskableUnderlyingSiblings = [];
+  const underlyingSiblings = getLayerUnderlyingSiblings(state, id);
+  let continueMaskChain = true;
+  let i = 0;
+  while(i < underlyingSiblings.length && continueMaskChain) {
+    const child = underlyingSiblings[i];
+    const childItem = state.byId[child];
+    if (childItem.ignoreUnderlyingMask) {
+      continueMaskChain = false;
+    } else {
+      if (childItem.type === 'Shape' && (childItem as em.Shape).mask) {
+        continueMaskChain = false;
+      }
+      maskableUnderlyingSiblings.push(child);
+    }
+    i++;
+  }
+  return maskableUnderlyingSiblings;
+};
+
+export const getLayerUnderlyingMaskRoot = (state: LayerState, id: string): string => {
+  let layerItem = state.byId[id];
+  while(layerItem.underlyingMask) {
+    layerItem = state.byId[layerItem.underlyingMask];
+  }
+  return layerItem.id;
+};
+
+export const getSiblingLayersWithUnderlyingMask = (state: LayerState, id: string) => {
+  const maskableUnderlyingSiblings = [];
+  const underlyingSiblings = getLayerUnderlyingSiblings(state, id);
+  let continueMaskChain = true;
+  let i = 0;
+  while(i < underlyingSiblings.length && continueMaskChain) {
+    const child = underlyingSiblings[i];
+    const childItem = state.byId[child];
+    if (childItem.type === 'Shape' && (childItem as em.Shape).mask) {
+      continueMaskChain = false;
+    } else {
+      maskableUnderlyingSiblings.push(child);
+    }
+    i++;
+  }
+  return maskableUnderlyingSiblings;
 };
 
 export const getLayerDepth = (store: LayerState, id: string): number => {
@@ -146,8 +243,6 @@ export const getLayersTopLeft = (store: LayerState, layers: string[]): paper.Poi
     const layerItem = store.byId[current];
     const topLeft = new paperMain.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
     return [...result, topLeft];
-    //const paperLayer = getPaperLayer(current);
-    //return [...result, paperLayer.bounds.topLeft];
   }, []);
   return paperLayerPoints.reduce(paper.Point.min);
 };
@@ -157,8 +252,6 @@ export const getLayersBottomRight = (store: LayerState, layers: string[]): paper
     const layerItem = store.byId[current];
     const bottomRight = new paperMain.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
     return [...result, bottomRight];
-    // const paperLayer = getPaperLayer(current);
-    // return [...result, paperLayer.bounds.bottomRight];
   }, []);
   return paperLayerPoints.reduce(paper.Point.max);
 };
@@ -172,37 +265,25 @@ export const getLayersBounds = (store: LayerState, layers: string[]): paper.Rect
   });
 };
 
-export const getSelectionTopLeft = (store: RootState, useStore?: boolean): paper.Point => {
-  if (useStore && store.selection.bounds) {
-    const x = store.selection.bounds.x - (store.selection.bounds.width / 2);
-    const y = store.selection.bounds.y - (store.selection.bounds.height / 2);
-    return new paperMain.Point(x, y);
-  } else {
-    const paperLayerPoints = store.layer.present.selected.reduce((result, current) => {
-      const paperLayer = getPaperLayer(current);
-      return [...result, paperLayer.bounds.topLeft];
-    }, []);
-    return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.min) : null;
-  }
+export const getSelectionTopLeft = (store: RootState): paper.Point => {
+  const paperLayerPoints = store.layer.present.selected.reduce((result, current) => {
+    const paperLayer = getPaperLayer(current);
+    return [...result, paperLayer.bounds.topLeft];
+  }, []);
+  return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.min) : null;
 };
 
-export const getSelectionBottomRight = (store: RootState, useStore?: boolean): paper.Point => {
-  if (useStore && store.selection.bounds) {
-    const x = store.selection.bounds.x + (store.selection.bounds.width / 2);
-    const y = store.selection.bounds.y + (store.selection.bounds.height / 2);
-    return new paperMain.Point(x, y);
-  } else {
-    const paperLayerPoints = store.layer.present.selected.reduce((result, current) => {
-      const paperLayer = getPaperLayer(current);
-      return [...result, paperLayer.bounds.bottomRight];
-    }, []);
-    return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.max) : null;
-  }
+export const getSelectionBottomRight = (store: RootState): paper.Point => {
+  const paperLayerPoints = store.layer.present.selected.reduce((result, current) => {
+    const paperLayer = getPaperLayer(current);
+    return [...result, paperLayer.bounds.bottomRight];
+  }, []);
+  return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.max) : null;
 };
 
-export const getSelectionBounds = (store: RootState, useStore?: boolean): paper.Rectangle => {
-  const topLeft = getSelectionTopLeft(store, useStore);
-  const bottomRight = getSelectionBottomRight(store, useStore);
+export const getSelectionBounds = (store: RootState): paper.Rectangle => {
+  const topLeft = getSelectionTopLeft(store);
+  const bottomRight = getSelectionBottomRight(store);
   if (topLeft && bottomRight) {
     return new paper.Rectangle({
       from: topLeft,
@@ -213,19 +294,15 @@ export const getSelectionBounds = (store: RootState, useStore?: boolean): paper.
   }
 };
 
-export const getSelectionCenter = (store: RootState, useStore?: boolean): paper.Point => {
-  if (useStore && store.selection.bounds) {
-    return new paper.Point(store.selection.bounds.x, store.selection.bounds.y);
+export const getSelectionCenter = (store: RootState): paper.Point => {
+  const topLeft = getSelectionTopLeft(store);
+  const bottomRight = getSelectionBottomRight(store);
+  if (topLeft && bottomRight) {
+    const xMid = (topLeft.x + bottomRight.x) / 2;
+    const yMid = (topLeft.y + bottomRight.y) / 2;
+    return new paper.Point(xMid, yMid);
   } else {
-    const topLeft = getSelectionTopLeft(store, useStore);
-    const bottomRight = getSelectionBottomRight(store, useStore);
-    if (topLeft && bottomRight) {
-      const xMid = (topLeft.x + bottomRight.x) / 2;
-      const yMid = (topLeft.y + bottomRight.y) / 2;
-      return new paper.Point(xMid, yMid);
-    } else {
-      return null;
-    }
+    return null;
   }
 };
 
@@ -1250,21 +1327,21 @@ export const getTweenEventsFrameItems = (store: RootState): {
   }
   const tweenEventLayers = tweenEventItems.reduce((result, current) => {
     const layerItem = layer.present.byId[current.layer];
-    if (layerItem.type === 'Group' && (layerItem as em.Group).clipped) {
-      const childLayers = (layerItem as em.Group).children.reduce((childrenResult, currentChild) => {
-        const childItem = layer.present.byId[currentChild];
-        if (!result.allIds.includes(currentChild)) {
-          childrenResult.allIds = [...childrenResult.allIds, currentChild];
-          childrenResult.byId = {
-            ...childrenResult.byId,
-            [currentChild]: childItem
-          }
-        }
-        return childrenResult;
-      }, { allIds: [], byId: {} });
-      result.allIds = [...result.allIds, ...childLayers.allIds];
-      result.byId = {...result.byId, ...childLayers.byId};
-    }
+    // if (layerItem.type === 'Group' && (layerItem as em.Group).clipped) {
+    //   const childLayers = (layerItem as em.Group).children.reduce((childrenResult, currentChild) => {
+    //     const childItem = layer.present.byId[currentChild];
+    //     if (!result.allIds.includes(currentChild)) {
+    //       childrenResult.allIds = [...childrenResult.allIds, currentChild];
+    //       childrenResult.byId = {
+    //         ...childrenResult.byId,
+    //         [currentChild]: childItem
+    //       }
+    //     }
+    //     return childrenResult;
+    //   }, { allIds: [], byId: {} });
+    //   result.allIds = [...result.allIds, ...childLayers.allIds];
+    //   result.byId = {...result.byId, ...childLayers.byId};
+    // }
     if (!result.allIds.includes(current.layer)) {
       result.allIds = [...result.allIds, current.layer];
       result.byId = {
@@ -1307,8 +1384,7 @@ export const canBringForward = (store: LayerState, layers: string[]): boolean =>
   return layers && layers.length > 0 && !layers.some((id: string) => {
     const layer = store.byId[id];
     const parent = store.byId[layer.parent];
-    const isMask = layer.mask;
-    return parent.children[parent.children.length - 1] === id || isMask;
+    return parent.children[parent.children.length - 1] === id;
   });
 };
 
@@ -1320,14 +1396,23 @@ export const canSendBackward = (store: LayerState, layers: string[]): boolean =>
   return layers && layers.length > 0 && !layers.some((id: string) => {
     const layer = store.byId[id];
     const parent = store.byId[layer.parent];
-    const inMaskedGroup = parent.type === 'Group' && (parent as em.Group).clipped;
-    const isFirstMaskChild = inMaskedGroup && parent.children[1] === id;
-    return parent.children[0] === id || isFirstMaskChild;
+    return parent.children[0] === id;
   });
 };
 
 export const canSendBackwardSelection = (store: LayerState): boolean => {
   return canSendBackward(store, store.selected);
+};
+
+export const canToggleUseAsMask = (store: LayerState, layers: string[]): boolean => {
+  return layers && layers.length > 0 && layers.every((id: string) => {
+    const layer = store.byId[id];
+    return layer.type === 'Shape';
+  });
+};
+
+export const canToggleUseAsMaskSelection = (store: LayerState) => {
+  return canToggleUseAsMask(store, store.selected);
 };
 
 export const canMaskLayers = (store: LayerState, layers: string[]): boolean => {

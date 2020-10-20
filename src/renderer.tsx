@@ -43,7 +43,7 @@ import Preview from './components/Preview';
 // import SketchImporter from './components/SketchImporter';
 // import importSketchArtboards from './canvas/sketch';
 import ThemeProvider from './components/ThemeProvider';
-import { pasteLayersThunk, pasteStyleThunk, copyStyleThunk, copyLayersThunk, removeLayersThunk, redoThunk, undoThunk, ungroupLayers, groupLayersThunk, sendLayersForward, sendLayersToFront, sendLayersBackward, sendLayersToBack, escapeLayerScopeThunk, removeLayers, addImageThunk, alignLayersToBottom, alignLayersToCenter, alignLayersToLeft, alignLayersToMiddle, alignLayersToRight, alignLayersToTop, distributeLayersHorizontally, distributeLayersVertically, applyBooleanOperationThunk, toggleSelectionFillThunk, toggleSelectionShadowThunk, toggleSelectionStrokeThunk, addSelectionMaskThunk, toggleSelectionHorizontalFlipThunk, toggleSelectionVerticalFlipThunk, copySVGThunk, pasteSVGThunk } from './store/actions/layer';
+import { pasteLayersThunk, pasteStyleThunk, copyStyleThunk, copyLayersThunk, removeLayersThunk, redoThunk, undoThunk, ungroupLayers, groupLayersThunk, sendLayersForward, sendLayersToFront, sendLayersBackward, sendLayersToBack, escapeLayerScopeThunk, removeLayers, addImageThunk, alignLayersToBottom, alignLayersToCenter, alignLayersToLeft, alignLayersToMiddle, alignLayersToRight, alignLayersToTop, distributeLayersHorizontally, distributeLayersVertically, applyBooleanOperationThunk, toggleSelectionFillThunk, toggleSelectionShadowThunk, toggleSelectionStrokeThunk, addSelectionMaskThunk, toggleSelectionMaskThunk, toggleSelectionIgnoreUnderlyingMask, toggleSelectionHorizontalFlipThunk, toggleSelectionVerticalFlipThunk, copySVGThunk, pasteSVGThunk, setLayerIgnoreUnderlyingMask } from './store/actions/layer';
 import { toggleArtboardToolThunk} from './store/actions/artboardTool';
 import { toggleTextToolThunk } from './store/actions/textTool';
 import { toggleShapeToolThunk } from './store/actions/shapeTool';
@@ -322,8 +322,12 @@ const titleBar = new Titlebar({
   store.dispatch(toggleSelectionShadowThunk() as any);
 };
 
-(window as any).layerMask = (): void => {
-  store.dispatch(addSelectionMaskThunk() as any);
+(window as any).layerMaskUseAsMask = (): void => {
+  store.dispatch(toggleSelectionMaskThunk() as any);
+};
+
+(window as any).layerMaskIgnoreUnderlyingMask = (): void => {
+  store.dispatch(toggleSelectionIgnoreUnderlyingMask() as any);
 };
 
 (window as any).layerCombine = (booleanOperation: em.BooleanOperation): void => {
