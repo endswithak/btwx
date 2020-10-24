@@ -232,7 +232,7 @@ import {
   setLayerHover,
   addLayerChild,
   addLayerChildren,
-  insertLayerChild,
+  // insertLayerChild,
   showLayerChildren,
   hideLayerChildren,
   insertLayerAbove,
@@ -542,8 +542,8 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return addLayerChild(state, action);
     case ADD_LAYER_CHILDREN:
       return addLayerChildren(state, action);
-    case INSERT_LAYER_CHILD:
-      return insertLayerChild(state, action);
+    // case INSERT_LAYER_CHILD:
+    //   return insertLayerChild(state, action);
     case SHOW_LAYER_CHILDREN:
       return showLayerChildren(state, action);
     case HIDE_LAYER_CHILDREN:

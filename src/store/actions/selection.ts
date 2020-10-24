@@ -174,7 +174,6 @@ export const updateSelectionThunk = () => {
     const state = getState() as RootState;
     const { layer } = state;
     const selected = layer.present.selected;
-    // const selectionBounds = getSelectionBounds(state);
     const canResize = canResizeSelection(layer.present);
     const canMoveBackward = canSendBackwardSelection(layer.present);
     const canMoveForward = canBringForwardSelection(layer.present);
@@ -196,34 +195,12 @@ export const updateSelectionThunk = () => {
     const canBoolean = canBooleanOperationSelection(layer.present);
     const canAlign = selected.length >= 2;
     const canDistribute = selected.length >= 3;
-    // const bounds = selectionBounds ? {
-    //   x: parseInt(selectionBounds.center.x.toFixed(2)),
-    //   y: parseInt(selectionBounds.center.y.toFixed(2)),
-    //   width: parseInt(selectionBounds.width.toFixed(2)),
-    //   height: parseInt(selectionBounds.height.toFixed(2))
-    // } : null;
     const props: SelectionState = {
       canMoveBackward, canMoveForward, canGroup, canUngroup, canToggleStroke, canToggleShadow, canToggleFill, canToggleFlip,
       fillEnabled, strokeEnabled, shadowEnabled, horizontalFlipEnabled, verticalFlipEnabled, canMask, canBoolean, canResize,
       canAlign, canDistribute, canToggleUseAsMask, useAsMaskEnabled, ignoreUnderlyingMaskEnabled
     };
     const keysToUpdate = Object.keys(state.selection).reduce((result, current) => {
-      // if (current === 'bounds') {
-      //   if (bounds) {
-      //     const boundsMatch = state.selection.bounds && Object.keys(state.selection.bounds).every((key) => (state.selection.bounds as any)[key] === (bounds as any)[key]);
-      //     if (!boundsMatch) {
-      //       result = [...result, current];
-      //     }
-      //   } else {
-      //     if (state.selection.bounds) {
-      //       result = [...result, current];
-      //     }
-      //   }
-      // } else {
-      //   if ((state.selection as any)[current] !== (props as any)[current]) {
-      //     result = [...result, current];
-      //   }
-      // }
       if ((state.selection as any)[current] !== (props as any)[current]) {
         result = [...result, current];
       }

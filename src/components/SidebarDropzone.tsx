@@ -1,4 +1,4 @@
-import React, { ReactElement, memo } from 'react';
+import React, { memo } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import SidebarDropzoneTop from './SidebarDropzoneTop';
@@ -8,30 +8,28 @@ import SidebarDropzoneBottom from './SidebarDropzoneBottom';
 interface SidebarLayerDropzoneProps {
   layer: string;
   isDragGhost?: boolean;
-  dragging?: boolean;
+  isEnabled?: boolean;
 }
 
 const SidebarLayerDropzone = memo(function SidebarLayerDropzone(props: SidebarLayerDropzoneProps) {
-  const { dragging, isDragGhost } = props;
+  const { layer, isEnabled } = props;
 
   return (
-    dragging && !isDragGhost
-    ? <div className='c-sidebar-dropzone'>
-        <SidebarDropzoneCenter
-          {...props} />
-        <SidebarDropzoneTop
-          {...props}/>
-        <SidebarDropzoneBottom
-          {...props} />
-      </div>
+    isEnabled
+    ?  <div
+          className='c-sidebar-dropzone'>
+          <SidebarDropzoneCenter layer={layer} />
+          <SidebarDropzoneTop layer={layer}/>
+          <SidebarDropzoneBottom layer={layer} />
+        </div>
     : null
   );
 });
 
-const mapStateToProps = (state: RootState) => {
+const mapStateToProps = (state: RootState, ownProps: SidebarLayerDropzoneProps) => {
   const { leftSidebar } = state;
-  const dragging = leftSidebar.dragging;
-  return { dragging };
+  const isEnabled = leftSidebar.dragOver === ownProps.layer && leftSidebar.dragOver !== leftSidebar.dragging && !ownProps.isDragGhost;
+  return { isEnabled };
 };
 
 export default connect(

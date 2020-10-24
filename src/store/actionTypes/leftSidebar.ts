@@ -1,5 +1,7 @@
 export const SET_EDITING = 'SET_EDITING';
 export const SET_DRAGGING = 'SET_DRAGGING';
+export const SET_DRAG_OVER = 'SET_DRAG_OVER';
+export const SET_DROPZONE = 'SET_DROPZONE';
 export const SET_DRAG_LAYERS = 'SET_DRAG_LAYERS';
 export const SET_SEARCHING = 'SET_SEARCHING';
 export const SET_SEARCH = 'SET_SEARCH';
@@ -14,12 +16,30 @@ export interface SetEditing {
 }
 
 export interface SetDraggingPayload {
-  dragging: boolean;
+  dragging: string;
 }
 
 export interface SetDragging {
   type: typeof SET_DRAGGING;
   payload: SetDraggingPayload;
+}
+
+export interface SetDragOverPayload {
+  dragOver: string;
+}
+
+export interface SetDragOver {
+  type: typeof SET_DRAG_OVER;
+  payload: SetDragOverPayload;
+}
+
+export interface SetDropzonePayload {
+  dropzone: em.Dropzone;
+}
+
+export interface SetDropzone {
+  type: typeof SET_DROPZONE;
+  payload: SetDropzonePayload;
 }
 
 export interface SetDragLayersPayload {
@@ -50,6 +70,8 @@ export interface SetSearch {
 }
 
 export type LeftSidebarTypes = SetDragging |
+                               SetDragOver |
+                               SetDropzone |
                                SetEditing |
                                SetDragLayers |
                                SetSearching |

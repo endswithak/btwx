@@ -3,7 +3,6 @@ export const ADD_SHAPE = 'ADD_SHAPE';
 export const ADD_ARTBOARD = 'ADD_ARTBOARD';
 export const ADD_TEXT = 'ADD_TEXT';
 export const ADD_IMAGE = 'ADD_IMAGE';
-export const ADD_MASK = 'ADD_MASK';
 export const ADD_LAYERS = 'ADD_LAYERS';
 
 export const REMOVE_LAYER = 'REMOVE_LAYER';
@@ -269,20 +268,6 @@ export type AddArtboardPayload = {
 export interface AddArtboard {
   type: typeof ADD_ARTBOARD;
   payload: AddArtboardPayload;
-}
-
-// Mask
-
-export type AddMaskPayload = {
-  layer: {
-    [P in keyof em.Mask]?: em.Mask[P];
-  };
-  batch?: boolean;
-}
-
-export interface AddMask {
-  type: typeof ADD_MASK;
-  payload: AddMaskPayload;
 }
 
 // Group
@@ -2412,7 +2397,6 @@ export interface SetLayersStyle {
 
 export type LayerTypes = AddArtboard |
                          AddGroup |
-                         AddMask |
                          AddShape |
                          AddText |
                          AddImage |

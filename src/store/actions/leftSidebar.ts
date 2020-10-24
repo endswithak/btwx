@@ -1,11 +1,15 @@
 import {
   SET_EDITING,
   SET_DRAGGING,
+  SET_DRAG_OVER,
+  SET_DROPZONE,
   SET_DRAG_LAYERS,
   SET_SEARCHING,
   SET_SEARCH,
   SetEditingPayload,
   SetDraggingPayload,
+  SetDragOverPayload,
+  SetDropzonePayload,
   SetDragLayersPayload,
   SetSearchingPayload,
   SetSearchPayload,
@@ -19,6 +23,16 @@ export const setEditing = (payload: SetEditingPayload): LeftSidebarTypes => ({
 
 export const setDragging = (payload: SetDraggingPayload): LeftSidebarTypes => ({
   type: SET_DRAGGING,
+  payload
+});
+
+export const setDragOver = (payload: SetDragOverPayload): LeftSidebarTypes => ({
+  type: SET_DRAG_OVER,
+  payload
+});
+
+export const setDropzone = (payload: SetDropzonePayload): LeftSidebarTypes => ({
+  type: SET_DROPZONE,
   payload
 });
 

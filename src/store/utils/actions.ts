@@ -109,7 +109,8 @@ export const getLayerMasked = (state: LayerState, payload: any): boolean => {
   const hasChildren = parentChildren.length > 0;
   const lastChildId = hasChildren ? parentChildren[parentChildren.length - 1] : null;
   const lastChildItem = lastChildId ? state.byId[lastChildId] : null;
-  return lastChildItem ? lastChildItem.masked : false;
+  const lastChildItemIsMask = lastChildItem ? lastChildItem.type === 'Shape' && (lastChildItem as em.Shape).mask : false;
+  return lastChildItem ? (lastChildItem.masked || lastChildItemIsMask) : false;
 }
 
 export const getLayerUnderlyingMask = (state: LayerState, payload: any): string => {
@@ -119,5 +120,6 @@ export const getLayerUnderlyingMask = (state: LayerState, payload: any): string 
   const hasChildren = parentChildren.length > 0;
   const lastChildId = hasChildren ? parentChildren[parentChildren.length - 1] : null;
   const lastChildItem = lastChildId ? state.byId[lastChildId] : null;
-  return lastChildItem ? lastChildItem.underlyingMask : null;
+  const lastChildItemIsMask = lastChildItem ? lastChildItem.type === 'Shape' && (lastChildItem as em.Shape).mask : false;
+  return lastChildItem ? lastChildItemIsMask ? lastChildId : lastChildItem.underlyingMask : null;
 }

@@ -27,7 +27,6 @@ gsap.registerPlugin(ScrollToPlugin);
 
 import {
   ADD_ARTBOARD,
-  ADD_MASK,
   ADD_GROUP,
   ADD_SHAPE,
   ADD_TEXT,
@@ -241,7 +240,6 @@ import {
   SET_LAYER_STYLE,
   SET_LAYERS_STYLE,
   AddArtboardPayload,
-  AddMaskPayload,
   AddGroupPayload,
   AddShapePayload,
   AddTextPayload,
@@ -514,67 +512,6 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
     } as em.Artboard;
     if (!payload.batch) {
       dispatch(addArtboard({
-        layer: newLayer,
-        batch: payload.batch
-      }));
-    }
-    return Promise.resolve(newLayer);
-  }
-};
-
-// Mask
-
-export const addMask = (payload: AddMaskPayload): LayerTypes => ({
-  type: ADD_MASK,
-  payload
-});
-
-export const addMaskThunk = (payload: AddMaskPayload, providedState?: RootState) => {
-  return (dispatch: any, getState: any): Promise<em.Mask> => {
-    const state = providedState ? providedState : getState() as RootState;
-    const parent = payload.layer.parent ? payload.layer.parent : 'page';
-    const id = payload.layer.id ? payload.layer.id : uuidv4();
-    const name = payload.layer.name ? payload.layer.name : 'Mask';
-    const shapeItem = state.layer.present.byId[payload.layer.shape] as em.Shape;
-    const shapePaperLayer = getPaperLayer(payload.layer.shape);
-    const style = shapeItem.style;
-    const frame = shapeItem.frame;
-    const transform = shapeItem.transform;
-    // create mask
-    const maskMask = shapePaperLayer.clone();
-    maskMask.name = 'Mask Mask';
-    maskMask.data = { id: `${payload.layer.shape}-Mask`, type: 'LayerChild', layerType: 'Mask' };
-    maskMask.clipMask = true;
-    //
-    const maskLayers = new paperMain.Group({
-      name: 'Mask Layers',
-      data: { id: 'MaskLayers', type: 'LayerChild', layerType: 'Mask' }
-    });
-    // create mask group
-    const mask = new paperMain.Group({
-      name: name,
-      data: { id: id, type: 'Layer', layerType: 'Mask' },
-      children: [maskMask, shapePaperLayer.clone(), maskLayers],
-    });
-    //
-    shapePaperLayer.replaceWith(mask);
-    // dispatch action
-    const newLayer = {
-      type: 'Mask',
-      id: id,
-      name: name,
-      parent: parent,
-      shape: payload.layer.shape,
-      frame: frame,
-      children: [],
-      selected: false,
-      tweenEvents: [],
-      tweens: [],
-      transform: transform,
-      style: style
-    } as em.Mask;
-    if (!payload.batch) {
-      dispatch(addMask({
         layer: newLayer,
         batch: payload.batch
       }));
@@ -984,9 +921,6 @@ export const addLayersThunk = (payload: AddLayersPayload) => {
             break;
           case 'Group':
             promises.push(dispatch(addGroupThunk({layer: layer as em.Group, batch: true}, state)));
-            break;
-          case 'Mask':
-            promises.push(dispatch(addMaskThunk({layer: layer as em.Mask, batch: true}, state)));
             break;
           case 'Text':
             promises.push(dispatch(addTextThunk({layer: layer as em.Text, batch: true}, state)));

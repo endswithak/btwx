@@ -354,7 +354,7 @@ declare namespace em {
     frozen: boolean;
   }
 
-  type Dropzone = 'Top' | 'Center' | 'Bottom';
+  type Dropzone = 'top' | 'center' | 'bottom';
 
   interface Frame {
     x: number;

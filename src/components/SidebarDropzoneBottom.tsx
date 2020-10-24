@@ -1,11 +1,12 @@
-import React, { useContext, ReactElement, useState, useRef } from 'react';
+import React, { useContext, ReactElement, useState, useRef, useCallback } from 'react';
 import styled from 'styled-components';
+import debounce from 'lodash.debounce';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
-import { insertLayersAbove } from '../store/actions/layer';
-import { InsertLayersAbovePayload, LayerTypes } from '../store/actionTypes/layer';
-import { SetDraggingPayload, LeftSidebarTypes } from '../store/actionTypes/leftSidebar';
-import { setDragging } from '../store/actions/leftSidebar';
+import { insertLayersBelow } from '../store/actions/layer';
+import { InsertLayersBelowPayload, LayerTypes } from '../store/actionTypes/layer';
+import { SetDraggingPayload, SetDropzonePayload, LeftSidebarTypes } from '../store/actionTypes/leftSidebar';
+import { setDragging, setDropzone } from '../store/actions/leftSidebar';
 import { ThemeContext } from './ThemeProvider';
 
 interface SidebarDropzoneBottomProps {
@@ -17,8 +18,11 @@ interface SidebarDropzoneBottomProps {
   selectedById?: {
     [id: string]: em.Layer;
   };
+  dropzone?: em.Dropzone;
+  isActive?: boolean;
   setDragging?(payload: SetDraggingPayload): LeftSidebarTypes;
-  insertLayersAbove?(payload: InsertLayersAbovePayload): LayerTypes;
+  setDropzone?(payload: SetDropzonePayload): LeftSidebarTypes;
+  insertLayersBelow?(payload: InsertLayersBelowPayload): LayerTypes;
 }
 
 interface DropzoneProps {
@@ -43,9 +47,16 @@ const Dropzone = styled.div<DropzoneProps>`
 
 const SidebarDropzoneBottom = (props: SidebarDropzoneBottomProps): ReactElement => {
   const ref = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(false);
+  // const [active, setActive] = useState(false);
   const theme = useContext(ThemeContext);
-  const { layerItem, layer, depth, selected, selectedById, setDragging, insertLayersAbove, leftSidebarWidth } = props;
+  const { layerItem, dropzone, isActive, layer, depth, selected, selectedById, setDragging, insertLayersBelow, leftSidebarWidth, setDropzone } = props;
+
+  const debounceDropzone = useCallback(
+    debounce((payload: SetDropzonePayload) => {
+      setDropzone(payload);
+    }, 20),
+    []
+  );
 
   const handleDragOver = (e: any) => {
     if (!selected.some((id) => document.getElementById(id).contains(ref.current))) {
@@ -53,24 +64,34 @@ const SidebarDropzoneBottom = (props: SidebarDropzoneBottomProps): ReactElement 
         return;
       } else {
         e.preventDefault();
-        setActive(true);
+        debounceDropzone({dropzone: 'bottom'});
+        // setActive(true);
       }
     }
   }
 
   const handleDragLeave = (e: any) => {
-    setActive(false);
+    // setActive(false);
   }
 
   const handleDrop = (e: any) => {
-    if (active) {
+    if (isActive) {
       e.preventDefault();
-      insertLayersAbove({
+      insertLayersBelow({
         layers: selected,
-        above: layer
+        below: layer
       });
+      setDragging({dragging: null});
     }
-    setDragging({dragging: false});
+    // if (active) {
+    //   e.preventDefault();
+    //   insertLayersBelow({
+    //     layers: selected,
+    //     below: layer
+    //   });
+    //   setActive(false);
+    // }
+    // setDragging({dragging: null});
   }
 
   return (
@@ -85,14 +106,14 @@ const SidebarDropzoneBottom = (props: SidebarDropzoneBottomProps): ReactElement 
         height: layerItem.children ? theme.unit * 2 : theme.unit * 4
       }}>
       <Dropzone
-        active={active}
+        active={isActive}
         theme={theme} />
     </div>
   );
 }
 
 const mapStateToProps = (state: RootState, ownProps: SidebarDropzoneBottomProps) => {
-  const { layer, viewSettings } = state;
+  const { layer, viewSettings, leftSidebar } = state;
   const layerItem = layer.present.byId[ownProps.layer];
   const selected = layer.present.selected;
   const selectedById = selected.reduce((result: {[id: string]: em.Layer}, current) => {
@@ -101,10 +122,12 @@ const mapStateToProps = (state: RootState, ownProps: SidebarDropzoneBottomProps)
   }, {});
   const leftSidebarWidth = viewSettings.leftSidebar.width;
   const depth = layerItem.scope.length - 1;
-  return { layerItem, selectedById, leftSidebarWidth, selected, depth };
+  const dropzone = leftSidebar.dropzone;
+  const isActive = dropzone === 'bottom';
+  return { layerItem, selectedById, leftSidebarWidth, selected, depth, dropzone, isActive };
 };
 
 export default connect(
   mapStateToProps,
-  { insertLayersAbove, setDragging }
+  { insertLayersBelow, setDragging, setDropzone }
 )(SidebarDropzoneBottom);

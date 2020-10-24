@@ -86,8 +86,8 @@ export const zoomSelectionThunk = () => {
     const canSelectedZoom = selected.length > 0;
     if (canSelectedZoom) {
       dispatch(enableZoomToolThunk('in'));
-      const selectionBounds = getSelectionBounds(state, true);
-      const selectionCenter = getSelectionCenter(state, true);
+      const selectionBounds = getSelectionBounds(state);
+      const selectionCenter = getSelectionCenter(state);
       const viewWidth: number = paperMain.view.bounds.width;
       const viewHeight: number = paperMain.view.bounds.height;
       const selectionWidth: number = selectionBounds.width;

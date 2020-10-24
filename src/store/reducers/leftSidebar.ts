@@ -1,5 +1,7 @@
 import {
   SET_DRAGGING,
+  SET_DRAG_OVER,
+  SET_DROPZONE,
   SET_EDITING,
   SET_SEARCHING,
   SET_SEARCH,
@@ -7,14 +9,18 @@ import {
 } from '../actionTypes/leftSidebar';
 
 export interface LeftSidebarState {
-  dragging: boolean;
+  dragging: string;
+  dragOver: string;
+  dropzone: em.Dropzone;
   editing: string;
   searching: boolean;
   search: string;
 }
 
 const initialState: LeftSidebarState = {
-  dragging: false,
+  dragging: null,
+  dragOver: null,
+  dropzone: null,
   editing: null,
   searching: false,
   search: ''
@@ -25,7 +31,21 @@ export default (state = initialState, action: LeftSidebarTypes): LeftSidebarStat
     case SET_DRAGGING: {
       return {
         ...state,
-        dragging: action.payload.dragging
+        dragging: action.payload.dragging,
+        dragOver: action.payload.dragging ? state.dragOver : null,
+        dropzone: action.payload.dragging ? state.dropzone : null
+      };
+    }
+    case SET_DRAG_OVER: {
+      return {
+        ...state,
+        dragOver: action.payload.dragOver
+      };
+    }
+    case SET_DROPZONE: {
+      return {
+        ...state,
+        dropzone: action.payload.dropzone
       };
     }
     case SET_EDITING: {
