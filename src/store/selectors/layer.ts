@@ -258,8 +258,8 @@ export const getLayersBounds = (store: LayerState, layers: string[]): paper.Rect
   });
 };
 
-export const getSelectionTopLeft = (store: RootState): paper.Point => {
-  const paperLayerPoints = store.layer.present.selected.reduce((result, current) => {
+export const getSelectionTopLeft = (selected: string[]): paper.Point => {
+  const paperLayerPoints = selected.reduce((result, current) => {
     const paperLayer = getPaperLayer(current);
     if (paperLayer) {
       return [...result, paperLayer.bounds.topLeft];
@@ -270,8 +270,8 @@ export const getSelectionTopLeft = (store: RootState): paper.Point => {
   return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.min) : null;
 };
 
-export const getSelectionBottomRight = (store: RootState): paper.Point => {
-  const paperLayerPoints = store.layer.present.selected.reduce((result, current) => {
+export const getSelectionBottomRight = (selected: string[]): paper.Point => {
+  const paperLayerPoints = selected.reduce((result, current) => {
     const paperLayer = getPaperLayer(current);
     if (paperLayer) {
       return [...result, paperLayer.bounds.bottomRight];
@@ -282,9 +282,9 @@ export const getSelectionBottomRight = (store: RootState): paper.Point => {
   return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.max) : null;
 };
 
-export const getSelectionBounds = (store: RootState): paper.Rectangle => {
-  const topLeft = getSelectionTopLeft(store);
-  const bottomRight = getSelectionBottomRight(store);
+export const getSelectionBounds = (selected: string[]): paper.Rectangle => {
+  const topLeft = getSelectionTopLeft(selected);
+  const bottomRight = getSelectionBottomRight(selected);
   if (topLeft && bottomRight) {
     return new paper.Rectangle({
       from: topLeft,
@@ -295,9 +295,9 @@ export const getSelectionBounds = (store: RootState): paper.Rectangle => {
   }
 };
 
-export const getSelectionCenter = (store: RootState): paper.Point => {
-  const topLeft = getSelectionTopLeft(store);
-  const bottomRight = getSelectionBottomRight(store);
+export const getSelectionCenter = (selected: string[]): paper.Point => {
+  const topLeft = getSelectionTopLeft(selected);
+  const bottomRight = getSelectionBottomRight(selected);
   if (topLeft && bottomRight) {
     const xMid = (topLeft.x + bottomRight.x) / 2;
     const yMid = (topLeft.y + bottomRight.y) / 2;
@@ -307,26 +307,26 @@ export const getSelectionCenter = (store: RootState): paper.Point => {
   }
 };
 
-export const getCanvasTopLeft = (store: LayerState, useLayerItem?: boolean): paper.Point => {
+export const getCanvasTopLeft = (): paper.Point => {
   return getPaperLayer('page').bounds.topLeft;
 };
 
-export const getCanvasBottomRight = (store: LayerState, useLayerItem?: boolean): paper.Point => {
+export const getCanvasBottomRight = (): paper.Point => {
   return getPaperLayer('page').bounds.bottomRight;
 };
 
-export const getCanvasBounds = (store: LayerState, useLayerItem?: boolean): paper.Rectangle => {
-  const topLeft = getCanvasTopLeft(store, useLayerItem);
-  const bottomRight = getCanvasBottomRight(store, useLayerItem);
+export const getCanvasBounds = (): paper.Rectangle => {
+  const topLeft = getCanvasTopLeft();
+  const bottomRight = getCanvasBottomRight();
   return new paper.Rectangle({
     from: topLeft,
     to: bottomRight
   });
 };
 
-export const getCanvasCenter = (store: LayerState, useLayerItem?: boolean): paper.Point => {
-  const topLeft = getCanvasTopLeft(store, useLayerItem);
-  const bottomRight = getCanvasBottomRight(store, useLayerItem);
+export const getCanvasCenter = (): paper.Point => {
+  const topLeft = getCanvasTopLeft();
+  const bottomRight = getCanvasBottomRight();
   const xMid = (topLeft.x + bottomRight.x) / 2;
   const yMid = (topLeft.y + bottomRight.y) / 2;
   return new paper.Point(xMid, yMid);

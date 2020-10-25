@@ -60,7 +60,7 @@ const App = (): ReactElement => {
               <ContextMenuWrap /> */}
               {/* Listeners */}
               <Menu />
-              <MasterTool />
+              {/* <MasterTool /> */}
               <Selection />
               <KeyBindings />
             </>

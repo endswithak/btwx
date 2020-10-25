@@ -112,33 +112,33 @@ class MasterTool {
         store.dispatch(setCanvasActiveTool({activeTool: 'AreaSelect', selecting: true}));
         this.areaSelectTool.onMouseDown(hitResult.event);
       } else {
-        if (props.layerItem.selected) {
-          store.dispatch(deselectLayers({layers: [props.nearestScopeAncestor.id]}));
-        } else {
-          store.dispatch(selectLayers({layers: [props.nearestScopeAncestor.id]}));
-        }
+        // if (props.layerItem.selected) {
+        //   store.dispatch(deselectLayers({layers: [props.nearestScopeAncestor.id]}));
+        // } else {
+        //   store.dispatch(selectLayers({layers: [props.nearestScopeAncestor.id]}));
+        // }
       }
     } else {
       // !selectedWithChildren.allIds.includes(props.layerItem.id)
-      if (!props.layerItem.selected || (props.nearestScopeAncestor.type === 'Artboard' && props.nearestScopeAncestor.selected)) {
-        let layerId: string;
-        if (props.nearestScopeAncestor.type === 'Artboard') {
-          layerId = props.deepSelectItem.id;
-          store.dispatch(deepSelectLayer({id: props.layerItem.id}));
-        } else {
-          layerId = props.nearestScopeAncestor.id;
-          store.dispatch(selectLayers({layers: [props.nearestScopeAncestor.id], newSelection: true}));
-        }
-        if (layerId) {
-          scrollToLayer(layerId);
-        }
-      }
+      // if (!props.layerItem.selected || (props.nearestScopeAncestor.type === 'Artboard' && props.nearestScopeAncestor.selected)) {
+      //   let layerId: string;
+      //   if (props.nearestScopeAncestor.type === 'Artboard') {
+      //     layerId = props.deepSelectItem.id;
+      //     store.dispatch(deepSelectLayer({id: props.layerItem.id}));
+      //   } else {
+      //     layerId = props.nearestScopeAncestor.id;
+      //     store.dispatch(selectLayers({layers: [props.nearestScopeAncestor.id], newSelection: true}));
+      //   }
+      //   if (layerId) {
+      //     scrollToLayer(layerId);
+      //   }
+      // }
     }
     // drag tool
-    if (props.nearestScopeAncestor.type !== 'Artboard' || props.deepSelectItem.type !== 'Artboard') {
-      store.dispatch(setCanvasActiveTool({activeTool: 'Drag', dragging: true}));
-      this.dragTool.onMouseDown(hitResult.event);
-    }
+    // if (props.nearestScopeAncestor.type !== 'Artboard' || props.deepSelectItem.type !== 'Artboard') {
+    //   store.dispatch(setCanvasActiveTool({activeTool: 'Drag', dragging: true}));
+    //   this.dragTool.onMouseDown(hitResult.event);
+    // }
     // area select tool
     if (props.nearestScopeAncestor.type === 'Artboard' && props.deepSelectItem.type === 'Artboard') {
       store.dispatch(setCanvasActiveTool({activeTool: 'AreaSelect', selecting: true}));
@@ -236,24 +236,24 @@ class MasterTool {
     }
   }
   handleEmptyMouseDown(hitResult: em.HitResult) {
-    if (this.state.layer.present.selected.length > 0 && !hitResult.event.modifiers.shift) {
-      store.dispatch(deselectAllLayers());
-    }
+    // if (this.state.layer.present.selected.length > 0 && !hitResult.event.modifiers.shift) {
+    //   store.dispatch(deselectAllLayers());
+    // }
     store.dispatch(setCanvasActiveTool({activeTool: 'AreaSelect', selecting: true}));
     this.areaSelectTool.onMouseDown(hitResult.event);
   }
-  handleLayerMouseMove(hitResult: em.HitResult): void {
-    const props = hitResult.layerProps;
-    if (props.nearestScopeAncestor.type === 'Artboard') {
-      if (this.state.layer.present.hover !== props.deepSelectItem.id) {
-        store.dispatch(setLayerHover({id: props.deepSelectItem.id}));
-      }
-    } else {
-      if (this.state.layer.present.hover !== props.nearestScopeAncestor.id) {
-        store.dispatch(setLayerHover({id: props.nearestScopeAncestor.id}));
-      }
-    }
-  }
+  // handleLayerMouseMove(hitResult: em.HitResult): void {
+  //   const props = hitResult.layerProps;
+  //   if (props.nearestScopeAncestor.type === 'Artboard') {
+  //     if (this.state.layer.present.hover !== props.deepSelectItem.id) {
+  //       store.dispatch(setLayerHover({id: props.deepSelectItem.id}));
+  //     }
+  //   } else {
+  //     if (this.state.layer.present.hover !== props.nearestScopeAncestor.id) {
+  //       store.dispatch(setLayerHover({id: props.nearestScopeAncestor.id}));
+  //     }
+  //   }
+  // }
   handleUIElementMouseMove(hitResult: em.HitResult) {
     const props = hitResult.uiElementProps;
     if (props.interactive) {
@@ -267,11 +267,11 @@ class MasterTool {
       }
     }
   }
-  handleEmptyMouseMove(hitResult: em.HitResult): void {
-    if (this.state.layer.present.hover !== null) {
-      store.dispatch(setLayerHover({id: null}));
-    }
-  }
+  // handleEmptyMouseMove(hitResult: em.HitResult): void {
+  //   if (this.state.layer.present.hover !== null) {
+  //     store.dispatch(setLayerHover({id: null}));
+  //   }
+  // }
   handleLayerDoubleClick(hitResult: em.HitResult) {
     const props = hitResult.layerProps;
     if (props.nearestScopeAncestor.id !== props.layerItem.id) {
@@ -401,15 +401,15 @@ class MasterTool {
         default: {
           const hitResult = this.handleHitResult(event);
           switch(hitResult.type) {
-            case 'Layer':
-              this.handleLayerMouseMove(hitResult);
-              break;
+            // case 'Layer':
+            //   this.handleLayerMouseMove(hitResult);
+            //   break;
             case 'UIElement':
               this.handleUIElementMouseMove(hitResult);
               break;
-            case 'Empty':
-              this.handleEmptyMouseMove(hitResult);
-              break;
+            // case 'Empty':
+            //   this.handleEmptyMouseMove(hitResult);
+            //   break;
           }
           if (this.state.tweenDrawer.eventHover !== null && (hitResult.type === 'Empty' || hitResult.type === 'Layer' || (hitResult.type === 'UIElement' && hitResult.uiElementProps.elementId !== 'TweenEventsFrame'))) {
             store.dispatch(setTweenDrawerEventHoverThunk({id: null}) as any);
@@ -564,10 +564,10 @@ class MasterTool {
   onDoubleClick(event: paper.ToolEvent): void {
     const hitResult = this.handleHitResult(event);
     switch(hitResult.type) {
-      case 'Layer': {
-        this.handleLayerDoubleClick(hitResult);
-        break;
-      }
+      // case 'Layer': {
+      //   this.handleLayerDoubleClick(hitResult);
+      //   break;
+      // }
       case 'UIElement': {
         this.handleUIElementDoubleClick(hitResult);
         break;

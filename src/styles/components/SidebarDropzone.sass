@@ -1,18 +1,15 @@
 .c-sidebar-dropzone
   +absolute-full
 
-.c-sidebar-dropzone__zone--top
-  width: 100%
+.c-sidebar-dropzone__tbi
+  width: $unit * 2
+  height: $unit * 2
   position: absolute
-  top: 0
-  right: 0
+  left: -$unit
+  border-radius: 50%
 
-.c-sidebar-dropzone__zone--center
-  +absolute-full
-  border-radius: $unit
+.c-sidebar-dropzone__tbi--top
+  top: -3.5px
 
-.c-sidebar-dropzone__zone--bottom
-  width: 100%
-  position: absolute
-  bottom: 0
-  right: 0
+.c-sidebar-dropzone__tbi--bottom
+  bottom: -4.5px

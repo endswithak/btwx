@@ -4,7 +4,7 @@ import { RootState } from '../store/reducers';
 import debounce from 'lodash.debounce';
 import { SetDraggingPayload, SetDragOverPayload, LeftSidebarTypes } from '../store/actionTypes/leftSidebar';
 import { setDragging, setDragOver } from '../store/actions/leftSidebar';
-import SidebarDropzone from './SidebarDropzone';
+import SidebarLayerDropzoneWrap from './SidebarLayerDropzoneWrap';
 import SidebarLayerItem from './SidebarLayerItem';
 import SidebarLayerChildren from './SidebarLayerChildren';
 import SidebarDropzoneGroupContext from './SidebarDropzoneGroupContext';
@@ -60,13 +60,10 @@ const SidebarLayer = memo(function SidebarLayer(props: SidebarLayerProps) {
       <SidebarLayerItem
         layer={layer}
         isDragGhost={isDragGhost} />
-      <SidebarDropzone
+      <SidebarLayerDropzoneWrap
         layer={layer}
         isDragGhost={isDragGhost} />
       <SidebarLayerChildren
-        layer={layer}
-        isDragGhost={isDragGhost} />
-      <SidebarDropzoneGroupContext
         layer={layer}
         isDragGhost={isDragGhost} />
     </div>

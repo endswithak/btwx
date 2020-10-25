@@ -8,6 +8,7 @@ import { paperMain } from '../canvas';
 import { LayerTypes } from '../store/actionTypes/layer';
 import { updateInViewLayers } from '../store/actions/layer';
 import Canvas from './Canvas';
+import CanvasInteractionsWrap from './CanvasInteractionsWrap';
 
 interface CanvasWrapProps {
   ready: boolean;
@@ -43,7 +44,10 @@ const CanvasWrap = (props: CanvasWrapProps): ReactElement => {
       id='canvas-container'
       className='c-canvas'
       ref={canvasContainerRef}>
-      <Canvas ready={ready} />
+      <CanvasInteractionsWrap
+        ready={ready}>
+        <Canvas ready={ready} />
+      </CanvasInteractionsWrap>
     </div>
   );
 }

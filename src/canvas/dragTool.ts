@@ -138,7 +138,7 @@ class DragTool {
     }
   }
   onMouseDown(event: paper.ToolEvent): void {
-    const selectionBounds = getSelectionBounds(this.state);
+    const selectionBounds = getSelectionBounds(this.state.layer.present.selected);
     this.originalSelection = this.state.layer.present.selected;
     this.fromBounds = selectionBounds;
     this.from = event.point;

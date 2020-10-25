@@ -2466,7 +2466,7 @@ export const pasteLayersThunk = ({ overSelection, overPoint, overLayer }: { over
             if (overSelection && state.layer.present.selected.length > 0) {
               const singleSelection = state.layer.present.selected.length === 1;
               const overSelectionItem = state.layer.present.byId[state.layer.present.selected[0]];
-              const selectionPosition = getSelectionCenter(state);
+              const selectionPosition = getSelectionCenter(state.layer.present.selected);
               const pointDiff = selectionPosition.subtract(clipboardPosition);
               newLayers.forEach((layerItem) => {
                 if (singleSelection && newParse.main.includes(layerItem.id) && layerItem.type !== 'Artboard') {
@@ -2788,8 +2788,8 @@ export const updateSelectionFrame = (state: RootState, visibleHandle = 'all') =>
       return result;
     }, { allIds: [], byId: {} });
     const resizeDisabled = state.layer.present.selected.length >= 1 && !state.layer.present.selected.some((id) => state.layer.present.byId[id].type === 'Artboard') && selectedWithChildren.allIds.some((id) => state.layer.present.byId[id].type === 'Text' || state.layer.present.byId[id].type === 'Group');
-    const selectionTopLeft =  getSelectionTopLeft(state);
-    const selectionBottomRight = getSelectionBottomRight(state);
+    const selectionTopLeft =  getSelectionTopLeft(state.layer.present.selected);
+    const selectionBottomRight = getSelectionBottomRight(state.layer.present.selected);
     const baseProps = {
       point: selectionTopLeft,
       size: [8, 8],
@@ -3320,7 +3320,7 @@ export const updateMeasureFrame = (state: RootState, guides: { top?: string; bot
     measureFrame.remove();
   }
   if (state.layer.present.selected.length > 0) {
-    const selectionBounds = getSelectionBounds(state);
+    const selectionBounds = getSelectionBounds(state.layer.present.selected);
     const measureFrameGuides = [];
     let hasTopMeasure;
     let hasBottomMeasure;

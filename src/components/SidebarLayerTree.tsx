@@ -2,11 +2,10 @@ import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getLeftSidebarLayers } from '../store/selectors';
-// import SidebarDropzone from './SidebarDropzone';
+// import SidebarLayerDropzoneWrap from './SidebarLayerDropzoneWrap';
 import SidebarLayers from './SidebarLayers';
 import SidebarLayerDragGhosts from './SidebarLayerDragGhosts';
 import SidebarLeftSearchEmptyState from './SidebarLeftSearchEmptyState';
-import SidebarDropzoneGroupContext from './SidebarDropzoneGroupContext';
 
 interface SidebarLayerTreeProps {
   layers?: string[];
@@ -21,16 +20,14 @@ const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
 
   return (
     <>
-      {/* <SidebarDropzone
-        layer={'page'} /> */}
+      {/* <SidebarLayerDropzoneWrap
+        layer='page' /> */}
       {
         layers.length > 0
         ? <SidebarLayers
             layers={layers} />
         : <SidebarLeftSearchEmptyState />
       }
-      <SidebarDropzoneGroupContext
-        layer='page' />
       <SidebarLayerDragGhosts />
     </>
   )
