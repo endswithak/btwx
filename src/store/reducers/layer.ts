@@ -174,10 +174,10 @@ import {
   DUPLICATE_LAYER,
   DUPLICATE_LAYERS,
   REMOVE_DUPLICATED_LAYERS,
-  SEND_LAYER_FORWARD,
-  SEND_LAYERS_FORWARD,
-  SEND_LAYER_TO_FRONT,
-  SEND_LAYERS_TO_FRONT,
+  BRING_LAYER_FORWARD,
+  BRING_LAYERS_FORWARD,
+  BRING_LAYER_TO_FRONT,
+  BRING_LAYERS_TO_FRONT,
   SEND_LAYER_BACKWARD,
   SEND_LAYERS_BACKWARD,
   SEND_LAYER_TO_BACK,
@@ -386,10 +386,10 @@ import {
   duplicateLayer,
   duplicateLayers,
   removeDuplicatedLayers,
-  sendLayerForward,
-  sendLayersForward,
-  sendLayerToFront,
-  sendLayersToFront,
+  bringLayerForward,
+  bringLayersForward,
+  bringLayerToFront,
+  bringLayersToFront,
   sendLayerBackward,
   sendLayersBackward,
   sendLayerToBack,
@@ -850,14 +850,14 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return duplicateLayers(state, action);
     case REMOVE_DUPLICATED_LAYERS:
       return removeDuplicatedLayers(state, action);
-    case SEND_LAYER_FORWARD:
-      return sendLayerForward(state, action);
-    case SEND_LAYERS_FORWARD:
-      return sendLayersForward(state, action);
-    case SEND_LAYER_TO_FRONT:
-      return sendLayerToFront(state, action);
-    case SEND_LAYERS_TO_FRONT:
-      return sendLayersToFront(state, action);
+    case BRING_LAYER_FORWARD:
+      return bringLayerForward(state, action);
+    case BRING_LAYERS_FORWARD:
+      return bringLayersForward(state, action);
+    case BRING_LAYER_TO_FRONT:
+      return bringLayerToFront(state, action);
+    case BRING_LAYERS_TO_FRONT:
+      return bringLayersToFront(state, action);
     case SEND_LAYER_BACKWARD:
       return sendLayerBackward(state, action);
     case SEND_LAYERS_BACKWARD:
@@ -1088,9 +1088,9 @@ export default undoable(baseReducer, {
       SET_LINES_TO_Y,
       SET_LINE_TO,
       SEND_LAYERS_BACKWARD,
-      SEND_LAYERS_FORWARD,
+      BRING_LAYERS_FORWARD,
       SEND_LAYERS_TO_BACK,
-      SEND_LAYERS_TO_FRONT,
+      BRING_LAYERS_TO_FRONT,
       SET_LAYER_STYLE,
       SET_LAYERS_STYLE
     ].includes(action.type);

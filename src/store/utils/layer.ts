@@ -23,7 +23,7 @@ import {
   SetLayerStrokeFillType, AddLayersMask, RemoveLayersMask, SetLayerFill,
   AlignLayersToLeft, AlignLayersToRight, AlignLayersToTop, AlignLayersToBottom, AlignLayersToCenter, AlignLayersToMiddle,
   DistributeLayersHorizontally, DistributeLayersVertically, DuplicateLayer, DuplicateLayers, RemoveDuplicatedLayers,
-  SendLayerForward, SendLayerBackward, SendLayersForward, SendLayersBackward, SendLayerToFront, SendLayersToFront,
+  BringLayerForward, SendLayerBackward, BringLayersForward, SendLayersBackward, BringLayerToFront, BringLayersToFront,
   SendLayerToBack, SendLayersToBack, AddImage, InsertLayersAbove, InsertLayersBelow, AddLayerChildren, SetLayerBlendMode,
   UniteLayers, SetRoundedRadius, SetPolygonSides, SetStarPoints, IntersectLayers, SubtractLayers, ExcludeLayers, DivideLayers,
   SetStarRadius, SetLayerStrokeDashOffset, SetLayersOpacity, SetLayersBlendMode, SetLayersX, SetLayersY, SetLayersWidth,
@@ -5070,7 +5070,7 @@ export const removeDuplicatedLayers = (state: LayerState, action: RemoveDuplicat
   return currentState;
 };
 
-export const sendLayerForward = (state: LayerState, action: SendLayerForward): LayerState => {
+export const bringLayerForward = (state: LayerState, action: BringLayerForward): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
   const parentItem = currentState.byId[layerItem.parent];
@@ -5083,17 +5083,17 @@ export const sendLayerForward = (state: LayerState, action: SendLayerForward): L
   return currentState;
 };
 
-export const sendLayersForward = (state: LayerState, action: SendLayersForward): LayerState => {
+export const bringLayersForward = (state: LayerState, action: BringLayersForward): LayerState => {
   let currentState = state;
   currentState = orderLayersByDepth(currentState, action.payload.layers).reverse().reduce((result, current) => {
-    return sendLayerForward(result, layerActions.sendLayerForward({id: current}) as SendLayerForward);
+    return bringLayerForward(result, layerActions.bringLayerForward({id: current}) as BringLayerForward);
   }, currentState);
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.layers, newSelection: true}) as SelectLayers);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
 
-export const sendLayerToFront = (state: LayerState, action: SendLayerToFront): LayerState => {
+export const bringLayerToFront = (state: LayerState, action: BringLayerToFront): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
   const parentItem = currentState.byId[layerItem.parent];
@@ -5105,10 +5105,10 @@ export const sendLayerToFront = (state: LayerState, action: SendLayerToFront): L
   return currentState;
 };
 
-export const sendLayersToFront = (state: LayerState, action: SendLayersToFront): LayerState => {
+export const bringLayersToFront = (state: LayerState, action: BringLayersToFront): LayerState => {
   let currentState = state;
   currentState = orderLayersByDepth(currentState, action.payload.layers).reverse().reduce((result, current) => {
-    return sendLayerToFront(result, layerActions.sendLayerToFront({id: current}) as SendLayerToFront);
+    return bringLayerToFront(result, layerActions.bringLayerToFront({id: current}) as BringLayerToFront);
   }, currentState);
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.layers, newSelection: true}) as SelectLayers);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);

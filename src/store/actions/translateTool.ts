@@ -1,5 +1,5 @@
 import { RootState } from '../reducers';
-import { setCanvasActiveTool } from './canvasSettings';
+import { setCanvasActiveTool, setCanvasTranslating } from './canvasSettings';
 import { setCanvasMatrix } from './documentSettings';
 import { updateInViewLayers } from './layer';
 import { getSelectionCenter } from '../selectors/layer';
@@ -19,13 +19,15 @@ export const disableTranslateToolThunk = () => {
   }
 };
 
-export const centerSelectionThunk = () => {
+export const centerSelectedThunk = () => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
     if (state.layer.present.selected.length > 0) {
+      dispatch(setCanvasTranslating({translating: true}));
       const selectionCenter = getSelectionCenter(state.layer.present.selected);
       paperMain.view.center = selectionCenter;
-      dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
+      dispatch(setCanvasTranslating({translating: false}));
+      // dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
       // dispatch(updateInViewLayers());
     }
   }

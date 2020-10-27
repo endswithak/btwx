@@ -1,51 +1,14 @@
-import React, { ReactElement, useEffect } from 'react';
-import { connect } from 'react-redux';
-import { RootState } from '../store/reducers';
-import { setMenuItems } from '../utils';
+import React, { ReactElement } from 'react';
+import MenuFileSave from './MenuFileSave';
+import MenuFileSaveAs from './MenuFileSaveAs';
+import MenuFileOpen from './MenuFileOpen';
 
-// interface MenuFileProps {
-//   focusing?: boolean;
-// }
-
-const MenuFile = (): ReactElement => {
-  // const { focusing } = props;
-
-  useEffect(() => {
-    setMenuItems({
-      fileSave: {
-        id: 'fileSave',
-        enabled: true
-      },
-      fileSaveAs: {
-        id: 'fileSaveAs',
-        enabled: true
-      },
-      fileOpen: {
-        id: 'fileOpen',
-        enabled: true
-      },
-      fileNew: {
-        id: 'fileNew',
-        enabled: true
-      }
-    });
-  }, []);
-
-  return (
-    <></>
-  );
-}
+const MenuFile = (): ReactElement => (
+  <>
+    <MenuFileSave />
+    <MenuFileSaveAs />
+    <MenuFileOpen />
+  </>
+);
 
 export default MenuFile;
-
-// const mapStateToProps = (state: RootState): {
-//   focusing: boolean;
-// } => {
-//   const { canvasSettings } = state;
-//   const focusing = canvasSettings.focusing;
-//   return { focusing };
-// };
-
-// export default connect(
-//   mapStateToProps
-// )(MenuFile);

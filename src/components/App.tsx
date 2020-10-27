@@ -61,8 +61,8 @@ const App = (): ReactElement => {
               {/* Listeners */}
               <Menu />
               {/* <MasterTool /> */}
-              <Selection />
-              <KeyBindings />
+              {/* <Selection /> */}
+              {/* <KeyBindings /> */}
             </>
           : null
         }

@@ -172,7 +172,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
     setPreview(nextPreview);
   }
 
-  const handleToolMouseDown = (e: paper.ToolEvent): void => {
+  const handleMouseDown = (e: paper.ToolEvent): void => {
     const nextFrom = e.point;
     const nextX = 1;
     const nextY = 1;
@@ -198,7 +198,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
     setToBounds(nextToBounds);
   }
 
-  const handleToolMouseDrag = (e: paper.ToolEvent): void => {
+  const handleMouseDrag = (e: paper.ToolEvent): void => {
     const nextTo = e.point;
     const nextX = x + e.delta.x;
     const nextY = y + e.delta.y;
@@ -224,7 +224,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
     updatePreview();
   }
 
-  const handleToolMouseUp = (e: paper.ToolEvent): void => {
+  const handleMouseUp = (e: paper.ToolEvent): void => {
     if (vector && vector.x !== 0 && vector.y !== 0) {
       const paperLayer = renderShape({
         insert: false
@@ -300,17 +300,17 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
             }
           })()
         }
-      }) as any
+      }) as any;
+      paperMain.tool = null;
+      setCanvasActiveTool({activeTool: null, drawing: false});
+      resetState();
     }
-    paperMain.tool = null;
-    setCanvasActiveTool({activeTool: null, drawing: false});
-    resetState();
   }
 
   useEffect(() => {
     if (isEnabled) {
-      tool.onMouseDrag = handleToolMouseDrag;
-      tool.onMouseUp = handleToolMouseUp;
+      tool.onMouseDrag = handleMouseDrag;
+      tool.onMouseUp = handleMouseUp;
     }
   }, [toBounds]);
 
@@ -326,14 +326,15 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
 
   useEffect(() => {
     const shapeTool = new paperMain.Tool();
-    shapeTool.onMouseDown = handleToolMouseDown;
-    shapeTool.onMouseDrag = handleToolMouseDrag;
-    shapeTool.onMouseUp = handleToolMouseUp;
+    shapeTool.onMouseDown = handleMouseDown;
+    shapeTool.onMouseDrag = handleMouseDrag;
+    shapeTool.onMouseUp = handleMouseUp;
     setTool(shapeTool);
+    paperMain.tool = null;
   }, []);
 
   return (
-    <div />
+    <></>
   );
 }
 

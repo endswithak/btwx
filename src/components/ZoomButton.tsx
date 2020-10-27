@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
-import { zoomCanvasThunk, zoomPercentThunk, zoomSelectionThunk } from '../store/actions/zoomTool';
+import { zoomFitCanvasThunk, zoomPercentThunk, zoomFitSelectedThunk } from '../store/actions/zoomTool';
 import TopbarDropdownButton from './TopbarDropdownButton';
 import ZoomOutButton from './ZoomOutButton';
 import ZoomInButton from './ZoomInButton';
@@ -11,13 +11,13 @@ interface ZoomButtonProps {
   canArtboardZoom?: boolean;
   canSelectedZoom?: boolean;
   canCanvasZoom?: boolean;
-  zoomCanvasThunk?(): void;
+  zoomFitCanvasThunk?(): void;
   zoomPercentThunk?(percent: number): void;
-  zoomSelectionThunk?(): void;
+  zoomFitSelectedThunk?(): void;
 }
 
 const ZoomButton = (props: ZoomButtonProps): ReactElement => {
-  const { zoom, zoomCanvasThunk, canArtboardZoom, zoomPercentThunk, zoomSelectionThunk, canSelectedZoom, canCanvasZoom } = props;
+  const { zoom, zoomFitCanvasThunk, canArtboardZoom, zoomPercentThunk, zoomFitSelectedThunk, canSelectedZoom, canCanvasZoom } = props;
 
   return (
     <div className='c-topbar-button c-topbar-button--split'>
@@ -36,15 +36,15 @@ const ZoomButton = (props: ZoomButtonProps): ReactElement => {
           onClick: () => zoomPercentThunk(2)
         },{
           label: 'Fit Canvas',
-          onClick: zoomCanvasThunk,
+          onClick: zoomFitCanvasThunk,
           disabled: !canCanvasZoom
         },{
           label: 'Selection',
-          onClick: zoomSelectionThunk,
+          onClick: zoomFitSelectedThunk,
           disabled: !canSelectedZoom
         },{
           label: 'Artboard',
-          onClick: zoomSelectionThunk,
+          onClick: zoomFitSelectedThunk,
           disabled: !canArtboardZoom
         }]} />
       <ZoomInButton />
@@ -69,5 +69,5 @@ const mapStateToProps = (state: RootState): {
 
 export default connect(
   mapStateToProps,
-  { zoomCanvasThunk, zoomPercentThunk, zoomSelectionThunk }
+  { zoomFitCanvasThunk, zoomPercentThunk, zoomFitSelectedThunk }
 )(ZoomButton);

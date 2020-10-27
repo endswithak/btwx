@@ -1,6 +1,6 @@
 import { remote } from 'electron';
 import React, { ReactElement, useEffect } from 'react';
-import CanvasWrap from './CanvasWrap';
+import Canvas from './Canvas';
 import SidebarLeft from './SidebarLeft';
 import SidebarRight from './SidebarRight';
 import TweenDrawerWrap from './TweenDrawerWrap';
@@ -17,7 +17,7 @@ const Main = (props: MainProps): ReactElement => {
 
   useEffect(() => {
     console.log('MAIN');
-  });
+  }, []);
 
   return (
     <div
@@ -27,7 +27,7 @@ const Main = (props: MainProps): ReactElement => {
       <div
         id='main-canvas'
         className='c-app__canvas'>
-        <CanvasWrap setReady={setReady} ready={ready} />
+        <Canvas setReady={setReady} ready={ready} />
         {/* <TweenDrawerWrap ready={ready} /> */}
         {/* <TextEditor ready={ready} />
         <InsertKnobWrap /> */}

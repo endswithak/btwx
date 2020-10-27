@@ -2,28 +2,16 @@
 // import { remote } from 'electron';
 import React, { useRef, useContext, useEffect, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
-import { scrollToLayer } from '../utils';
 import { RootState } from '../store/reducers';
-import { importPaperProject, getDeepSelectItem, getNearestScopeAncestor, getSelectionBounds, getPaperLayer } from '../store/selectors/layer';
+import { getDeepSelectItem, getNearestScopeAncestor, getSelectionBounds, getPaperLayer } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
 import { setCanvasActiveTool } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasActiveToolPayload } from '../store/actionTypes/canvasSettings';
 import { moveLayersBy, duplicateLayers, removeDuplicatedLayers } from '../store/actions/layer';
 import { LayerTypes, MoveLayersByPayload, DuplicateLayersPayload, RemoveDuplicatedLayersPayload } from '../store/actionTypes/layer';
 import { ThemeContext } from './ThemeProvider';
-import { getSelectedById } from '../store/selectors';
 
 interface DragToolProps {
-  hitResult: {
-    hitResult: paper.HitResult;
-    empty: boolean;
-    eventType: 'mouseMove' | 'mouseDown' | 'mouseUp' | 'doubleClick' | 'contextMenu';
-    event: any;
-  };
-  layerItem?: em.Layer;
-  nearestScopeAncestor?: em.Layer;
-  deepSelectItem?: em.Layer;
-  hover?: string;
   selected?: string[];
   selectedById?: {
     [id: string]: em.Layer;
@@ -37,33 +25,29 @@ interface DragToolProps {
 
 const DragTool = (props: DragToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { hitResult, isEnabled, hover, selected, moveLayersBy, layerItem, nearestScopeAncestor, deepSelectItem, duplicateLayers, removeDuplicatedLayers, setCanvasActiveTool, selectedById } = props;
+  const { isEnabled, selected, moveLayersBy, setCanvasActiveTool, selectedById } = props;
+  const [tool, setTool] = useState<paper.Tool>(null);
   const [originalSelection, setOriginalSelection] = useState(null);
   const [duplicateSelection, setDuplicateSelection] = useState(null);
-  const [x, setX] = useState(null);
-  const [y, setY] = useState(null);
+  const [x, setX] = useState(0);
+  const [y, setY] = useState(0);
   const [from, setFrom] = useState(null);
   const [to, setTo] = useState(null);
   const [fromBounds, setFromBounds] = useState(null);
   const [toBounds, setToBounds] = useState(null);
 
-  const handleMouseDown = (): void => {
-    if (!hitResult.empty) {
-      if (nearestScopeAncestor.type !== 'Artboard' || deepSelectItem.type !== 'Artboard') {
-        setCanvasActiveTool({activeTool: 'Drag', dragging: true});
-        paperMain.tool.onMouseDown = handleToolMouseDown;
-        paperMain.tool.onMouseDrag = handleToolMouseDrag;
-        paperMain.tool.onMouseUp = handleToolMouseUp;
-        paperMain.tool.emit('mousedown', hitResult.event);
-      }
-    }
+  const resetState = () => {
+    setOriginalSelection(null);
+    setDuplicateSelection(null);
+    setFrom(null);
+    setTo(null);
+    setX(0);
+    setY(0);
+    setToBounds(null);
+    setFromBounds(null);
   }
 
-  const handleMouseUp = (): void => {
-
-  }
-
-  const handleToolMouseDown = (e: paper.ToolEvent): void => {
+  const handleMouseDown = (e: paper.ToolEvent): void => {
     const selectionBounds = getSelectionBounds(selected);
     setOriginalSelection(selected);
     setFromBounds(selectionBounds);
@@ -72,15 +56,30 @@ const DragTool = (props: DragToolProps): ReactElement => {
     setToBounds(new paperMain.Rectangle(selectionBounds));
   }
 
-  const handleToolMouseDrag = (e: paper.ToolEvent): void => {
+  const handleMouseDrag = (e: paper.ToolEvent): void => {
+    let initialToBounds;
+    let initialFromBounds;
+    let initialFrom;
+    let initialTo;
+    if (!originalSelection) {
+      initialFrom = e.point;
+      initialTo = e.point;
+      initialFromBounds = getSelectionBounds(selected);
+      initialToBounds = new paperMain.Rectangle(initialFromBounds);
+      setOriginalSelection(selected);
+      setFromBounds(initialFromBounds);
+      setFrom(initialFrom);
+      setTo(initialTo);
+      setToBounds(initialToBounds);
+    }
     const nextX = x + e.delta.x;
     const nextY = y + e.delta.y;
     const nextToBounds = {
-      ...toBounds,
+      ...(toBounds ? toBounds : initialToBounds),
       center: {
-        ...toBounds.center,
-        x: fromBounds.center.x + nextX,
-        y: fromBounds.center.y + nextY,
+        ...(toBounds ? toBounds : initialToBounds).center,
+        x: (fromBounds ? fromBounds.center.x : initialFromBounds.center.x) + nextX,
+        y: (fromBounds ? fromBounds.center.y : initialFromBounds.center.y) + nextY,
       }
     }
     setX(nextX);
@@ -88,8 +87,8 @@ const DragTool = (props: DragToolProps): ReactElement => {
     setTo(e.point);
     setToBounds(nextToBounds);
     const translate = {
-      x: nextToBounds.center.x - fromBounds.center.x,
-      y: nextToBounds.center.y - fromBounds.center.y
+      x: nextToBounds.center.x - (fromBounds ? fromBounds.center.x : initialFromBounds.center.x),
+      y: nextToBounds.center.y - (fromBounds ? fromBounds.center.y : initialFromBounds.center.y)
     };
     selected.forEach((id) => {
       const paperLayer = getPaperLayer(id);
@@ -99,33 +98,47 @@ const DragTool = (props: DragToolProps): ReactElement => {
     });
   }
 
-  const handleToolMouseUp = (e: paper.ToolEvent): void => {
-
+  const handleMouseUp = (e: paper.ToolEvent): void => {
+    if (selected.length > 0 && (x !== 0 || y !== 0)) {
+      moveLayersBy({layers: selected, x: x, y: y});
+    }
+    paperMain.tool = null;
+    setCanvasActiveTool({activeTool: null, drawing: false});
+    resetState();
   }
 
   useEffect(() => {
-    if (hitResult) {
-      switch(hitResult.eventType) {
-        case 'mouseDown':
-          handleMouseDown();
-          break;
-        case 'mouseUp':
-          handleMouseUp();
-          break;
-      }
+    if (isEnabled) {
+      tool.onMouseDrag = handleMouseDrag;
+      tool.onMouseUp = handleMouseUp;
     }
-  }, [hitResult]);
+  }, [toBounds]);
+
+  useEffect(() => {
+    if (isEnabled) {
+      if (tool) {
+        tool.activate();
+      }
+    } else {
+      paperMain.tool = null;
+    }
+  }, [isEnabled]);
+
+  useEffect(() => {
+    const dragTool = new paperMain.Tool();
+    dragTool.onMouseDown = handleMouseDown;
+    dragTool.onMouseDrag = handleMouseDrag;
+    dragTool.onMouseUp = handleMouseUp;
+    setTool(dragTool);
+    paperMain.tool = null;
+  }, []);
 
   return (
-    <div />
+    <></>
   );
 }
 
 const mapStateToProps = (state: RootState, ownProps: DragToolProps): {
-  layerItem: em.Layer;
-  nearestScopeAncestor: em.Layer;
-  deepSelectItem: em.Layer;
-  hover: string;
   selected: string[];
   isEnabled: boolean;
   selectedById: {
@@ -133,12 +146,6 @@ const mapStateToProps = (state: RootState, ownProps: DragToolProps): {
   };
 } => {
   const { layer, canvasSettings } = state;
-  const hitResult = ownProps.hitResult;
-  const result = hitResult ? ownProps.hitResult.hitResult : null;
-  const layerItem = hitResult && !hitResult.empty ? layer.present.byId[result.item.data.type === 'Layer' ? result.item.data.id : result.item.parent.data.id] : null;
-  const nearestScopeAncestor = layerItem ? getNearestScopeAncestor(layer.present, layerItem.id) : null;
-  const deepSelectItem = layerItem ? getDeepSelectItem(layer.present, layerItem.id) : null;
-  const hover = layer.present.hover;
   const selected = layer.present.selected;
   const isEnabled = canvasSettings.activeTool === 'Drag';
   const selectedById = selected.reduce((result: {[id: string]: em.Layer}, current) => {
@@ -146,10 +153,6 @@ const mapStateToProps = (state: RootState, ownProps: DragToolProps): {
     return result;
   }, {});
   return {
-    layerItem,
-    nearestScopeAncestor,
-    deepSelectItem,
-    hover,
     selected,
     isEnabled,
     selectedById

@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { EnableLayersHorizontalFlipPayload, DisableLayersHorizontalFlipPayload, LayerTypes } from '../store/actionTypes/layer';
 import { enableLayersHorizontalFlip, disableLayersHorizontalFlip } from '../store/actions/layer';
-import { canTransformFlipSelection } from '../store/selectors/layer';
+import { canFlipSeleted } from '../store/selectors/layer';
 import SidebarToggleButton from './SidebarToggleButton';
 import Icon from './Icon';
 
@@ -46,7 +46,7 @@ const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
   const horizontalFlipValue = layer.present.selected.every((id) => layer.present.byId[id].transform.horizontalFlip);
-  const disabled = !canTransformFlipSelection(layer.present);
+  const disabled = !canFlipSeleted(state);
   return { selected, horizontalFlipValue, disabled };
 };
 

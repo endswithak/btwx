@@ -198,6 +198,15 @@ export const handleDocumentClose = (id: number): Promise<void> => {
   });
 };
 
+export const setMenuItem = (menuItem: { id: string; enabled: boolean; checked?: boolean }) => {
+  const menu = remote.Menu.getApplicationMenu();
+  const electronMenuItem = menu.getMenuItemById(menuItem.id);
+  electronMenuItem.enabled = menuItem.enabled;
+  if (menuItem.checked !== null || menuItem.checked !== undefined) {
+    electronMenuItem.checked = menuItem.checked;
+  }
+}
+
 export const setMenuItems = (menuItems: any) => {
   const menu = remote.Menu.getApplicationMenu();
   Object.keys(menuItems).forEach((key: string) => {

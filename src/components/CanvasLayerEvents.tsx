@@ -5,12 +5,14 @@ import { scrollToLayer } from '../utils';
 import { RootState } from '../store/reducers';
 import { importPaperProject, getDeepSelectItem, getNearestScopeAncestor } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
+import { setCanvasActiveTool } from '../store/actions/canvasSettings';
+import { CanvasSettingsTypes, SetCanvasActiveToolPayload } from '../store/actionTypes/canvasSettings';
 import { LayerTypes, SetLayerHoverPayload, DeepSelectLayerPayload, SelectLayersPayload, DeselectLayersPayload } from '../store/actionTypes/layer';
 import { setLayerHover, deepSelectLayer, selectLayers, deselectLayers, deselectAllLayers } from '../store/actions/layer';
 import { ThemeContext } from './ThemeProvider';
 
-interface CanvasInteractionsLayerProps {
-  hitResult: {
+interface CanvasLayerEventsProps {
+  layerEvent: {
     hitResult: paper.HitResult;
     empty: boolean;
     eventType: 'mouseMove' | 'mouseDown' | 'mouseUp' | 'doubleClick' | 'contextMenu';
@@ -26,14 +28,15 @@ interface CanvasInteractionsLayerProps {
   deepSelectLayer?(payload: DeepSelectLayerPayload): LayerTypes;
   deselectLayers?(payload: DeselectLayersPayload): LayerTypes;
   deselectAllLayers?(): LayerTypes;
+  setCanvasActiveTool?(payload: SetCanvasActiveToolPayload): CanvasSettingsTypes;
 }
 
-const CanvasInteractionsLayer = (props: CanvasInteractionsLayerProps): ReactElement => {
+const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { hitResult, hover, selected, deselectLayers, deselectAllLayers, layerItem, nearestScopeAncestor, deepSelectItem, setLayerHover, selectLayers, deepSelectLayer } = props;
+  const { layerEvent, hover, selected, deselectLayers, deselectAllLayers, layerItem, nearestScopeAncestor, deepSelectItem, setLayerHover, selectLayers, deepSelectLayer, setCanvasActiveTool } = props;
 
   const handleMouseMove = (): void => {
-    if (hitResult.empty) {
+    if (layerEvent.empty) {
       if (hover !== null) {
         setLayerHover({id: null});
       }
@@ -51,12 +54,12 @@ const CanvasInteractionsLayer = (props: CanvasInteractionsLayerProps): ReactElem
   }
 
   const handleMouseDown = (): void => {
-    if (hitResult.empty) {
-      if (selected.length > 0 && !hitResult.event.shiftKey) {
+    if (layerEvent.empty) {
+      if (selected.length > 0 && !layerEvent.event.shiftKey) {
         deselectAllLayers()
       }
     } else {
-      if (hitResult.event.shiftKey) {
+      if (layerEvent.event.shiftKey) {
         if (!(nearestScopeAncestor.type === 'Artboard' && selected.length > 0)) {
           if (layerItem.selected) {
             deselectLayers({layers: [nearestScopeAncestor.id]});
@@ -79,15 +82,18 @@ const CanvasInteractionsLayer = (props: CanvasInteractionsLayerProps): ReactElem
           }
         }
       }
+      if (nearestScopeAncestor.type !== 'Artboard' || deepSelectItem.type !== 'Artboard') {
+        setCanvasActiveTool({activeTool: 'Drag', dragging: true});
+      }
     }
   }
 
   const handleMouseUp = (): void => {
-
+    return;
   }
 
   const handleDoubleClick = (): void => {
-    if (!hitResult.empty) {
+    if (!layerEvent.empty) {
       if (nearestScopeAncestor.id !== layerItem.id) {
         deepSelectLayer({id: layerItem.id});
         scrollToLayer(deepSelectItem.id);
@@ -96,12 +102,12 @@ const CanvasInteractionsLayer = (props: CanvasInteractionsLayerProps): ReactElem
   }
 
   const handleContextMenu = (): void => {
-
+    return;
   }
 
   useEffect(() => {
-    if (hitResult) {
-      switch(hitResult.eventType) {
+    if (layerEvent) {
+      switch(layerEvent.eventType) {
         case 'contextMenu':
           handleContextMenu();
           break;
@@ -119,14 +125,14 @@ const CanvasInteractionsLayer = (props: CanvasInteractionsLayerProps): ReactElem
           break;
       }
     }
-  }, [hitResult]);
+  }, [layerEvent]);
 
   return (
-    <div />
+    <></>
   );
 }
 
-const mapStateToProps = (state: RootState, ownProps: CanvasInteractionsLayerProps): {
+const mapStateToProps = (state: RootState, ownProps: CanvasLayerEventsProps): {
   layerItem: em.Layer;
   nearestScopeAncestor: em.Layer;
   deepSelectItem: em.Layer;
@@ -134,9 +140,9 @@ const mapStateToProps = (state: RootState, ownProps: CanvasInteractionsLayerProp
   selected: string[];
 } => {
   const { layer } = state;
-  const hitResult = ownProps.hitResult;
-  const result = hitResult ? ownProps.hitResult.hitResult : null;
-  const layerItem = hitResult && !hitResult.empty ? layer.present.byId[result.item.data.type === 'Layer' ? result.item.data.id : result.item.parent.data.id] : null;
+  const layerEvent = ownProps.layerEvent;
+  const hitResult = layerEvent ? ownProps.layerEvent.hitResult : null;
+  const layerItem = hitResult && !layerEvent.empty ? layer.present.byId[hitResult.item.data.type === 'Layer' ? hitResult.item.data.id : hitResult.item.parent.data.id] : null;
   const nearestScopeAncestor = layerItem ? getNearestScopeAncestor(layer.present, layerItem.id) : null;
   const deepSelectItem = layerItem ? getDeepSelectItem(layer.present, layerItem.id) : null;
   const hover = layer.present.hover;
@@ -152,5 +158,5 @@ const mapStateToProps = (state: RootState, ownProps: CanvasInteractionsLayerProp
 
 export default connect(
   mapStateToProps,
-  { setLayerHover, selectLayers, deepSelectLayer, deselectLayers, deselectAllLayers }
-)(CanvasInteractionsLayer);
+  { setLayerHover, selectLayers, deepSelectLayer, deselectLayers, deselectAllLayers, setCanvasActiveTool }
+)(CanvasLayerEvents);

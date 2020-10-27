@@ -48,38 +48,40 @@ export const reducers = {
   selection
 };
 
-const appReducer = combineReducers(reducers);
-
-export type RootState = ReturnType<typeof appReducer>;
-
-const rootReducer = (state: RootState, action: RootAction): RootState => {
-  let currentState = state;
-  switch (action.type) {
-    case OPEN_DOCUMENT: {
-      currentState = {
-        ...currentState,
-        layer: {
-          ...currentState.layer,
-          present: action.payload.document.layer
-        },
-        documentSettings: action.payload.document.documentSettings
-      };
-      const canvas = document.getElementById('canvas-container') as HTMLCanvasElement;
-      importPaperProject({
-        paperProject: currentState.layer.present.paperProject,
-        documentImages: currentState.documentSettings.images.byId
-      });
-      paperMain.view.viewSize = new paperMain.Size(canvas.clientWidth, canvas.clientHeight);
-      paperMain.view.matrix.set(currentState.documentSettings.matrix);
-      return currentState;
-    }
-    case HYDRATE_PREVIEW: {
-      return action.payload.state;
-    }
-    default: {
-      return appReducer(state, action);
-    }
-  }
-}
+const rootReducer = combineReducers(reducers);
 
 export default rootReducer;
+
+export type RootState = ReturnType<typeof rootReducer>;
+
+// const rootReducer = (state: RootState, action: RootAction): RootState => {
+//   let currentState = state;
+//   switch (action.type) {
+//     case OPEN_DOCUMENT: {
+//       currentState = {
+//         ...currentState,
+//         layer: {
+//           ...currentState.layer,
+//           present: action.payload.document.layer
+//         },
+//         documentSettings: action.payload.document.documentSettings
+//       };
+//       const canvas = document.getElementById('canvas-container') as HTMLCanvasElement;
+//       importPaperProject({
+//         paperProject: currentState.layer.present.paperProject,
+//         documentImages: currentState.documentSettings.images.byId
+//       });
+//       paperMain.view.viewSize = new paperMain.Size(canvas.clientWidth, canvas.clientHeight);
+//       paperMain.view.matrix.set(currentState.documentSettings.matrix);
+//       return currentState;
+//     }
+//     case HYDRATE_PREVIEW: {
+//       return action.payload.state;
+//     }
+//     default: {
+//       return appReducer(state, action);
+//     }
+//   }
+// }
+
+// export default rootReducer;

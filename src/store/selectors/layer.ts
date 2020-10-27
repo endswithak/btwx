@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
+import { createSelector } from 'reselect';
 import paper from 'paper';
 import isSVG from 'is-svg';
 import { clipboard } from 'electron';
@@ -6,6 +7,255 @@ import { LayerState } from '../reducers/layer';
 import { paperMain } from '../../canvas';
 import { bufferToBase64 } from '../../utils';
 import { RootState } from '../reducers';
+
+export const getSelected = (state: RootState) => state.layer.present.selected;
+export const getLayersById = (state: RootState) => state.layer.present.byId;
+export const getLayerById = (state: RootState, id: string) => state.layer.present.byId[id];
+export const getLayerChildren = (state: RootState, id: string) => state.layer.present.byId[id].children;
+export const getPageChildren = (state: RootState) => state.layer.present.byId['page'].children;
+
+export const getSelectedById = createSelector(
+  [ getSelected, getLayersById ],
+  (selected, byId) => {
+    return selected.reduce((result, current) => {
+      result = {
+        ...result,
+        [current]: byId[current]
+      }
+      return result;
+    }, {}) as { [id: string]: em.Layer };
+  }
+);
+
+export const getSelectedWithDescendentsById = createSelector(
+  [ getSelected, getLayersById ],
+  (selected, byId) => {
+    const groups: string[] = [selected[0]];
+    const layers: { [id: string]: em.Layer } = {};
+    let i = 0;
+    while(i < groups.length) {
+      const layerItem = byId[groups[i]];
+      if (layerItem.children) {
+        layerItem.children.forEach((child) => {
+          const childLayerItem = byId[child];
+          if (childLayerItem.children && childLayerItem.children.length > 0) {
+            groups.push(child);
+          }
+          layers[child] = childLayerItem;
+        });
+      }
+      i++;
+    }
+    return layers;
+  }
+);
+
+export const getSelectedWithParentsById = createSelector(
+  [ getSelected, getLayersById ],
+  (selected, byId) => {
+    return selected.reduce((result, current) => {
+      const layerItem = byId[current];
+      const parentItem = byId[layerItem.parent];
+      result = {
+        ...result,
+        [current]: layerItem,
+        [layerItem.parent]: parentItem
+      }
+      return result;
+    }, {}) as { [id: string]: em.Layer };
+  }
+);
+
+export const getSelectedTopLeft = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(getSelectedById).reduce((result: paper.Point, current: string) => {
+      const layerItem = selectedById[current] as em.Layer;
+      const topLeft = new paperMain.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
+      if (result === null) {
+        return topLeft;
+      } else {
+        return paper.Point.min(result, topLeft);
+      }
+    }, null) as paper.Point;
+  }
+);
+
+export const getSelectedBottomRight = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(getSelectedById).reduce((result: paper.Point, current: string) => {
+      const layerItem = selectedById[current] as em.Layer;
+      const bottomRight = new paperMain.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
+      if (result === null) {
+        return bottomRight;
+      } else {
+        return paper.Point.max(result, bottomRight);
+      }
+    }, null) as paper.Point;
+  }
+);
+
+export const getSelectedBounds = createSelector(
+  [ getSelectedTopLeft, getSelectedBottomRight ],
+  (topLeft, bottomRight) => {
+    return topLeft && bottomRight
+    ? new paper.Rectangle({
+        from: topLeft,
+        to: bottomRight
+      })
+    : null as paper.Rectangle;
+  }
+);
+
+export const canToggleSelectedFillOrStroke = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    const keys = Object.keys(selectedById);
+    return keys.length > 0 && keys.every((id: string) => {
+      const layerItem = selectedById[id];
+      return layerItem.type === 'Shape' || layerItem.type === 'Text';
+    });
+  }
+);
+
+export const selectedFillsEnabled = createSelector(
+  [ canToggleSelectedFillOrStroke, getSelectedById ],
+  (canToggle, selectedById) => {
+    const keys = Object.keys(selectedById);
+    return canToggle && keys.every((id) => selectedById[id].style.fill.enabled);
+  }
+);
+
+export const selectedStrokesEnabled = createSelector(
+  [ canToggleSelectedFillOrStroke, getSelectedById ],
+  (canToggle, selectedById) => {
+    const keys = Object.keys(selectedById);
+    return canToggle && keys.every((id) => selectedById[id].style.stroke.enabled);
+  }
+);
+
+export const canToggleSelectedShadow = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    const keys = Object.keys(selectedById);
+    return keys.length > 0 && keys.every((id: string) => {
+      const layerItem = selectedById[id];
+      return layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image';
+    });
+  }
+);
+
+export const selectedShadowsEnabled = createSelector(
+  [ canToggleSelectedShadow, getSelectedById ],
+  (canToggle, selectedById) => {
+    const keys = Object.keys(selectedById);
+    return canToggle && keys.every((id) => selectedById[id].style.shadow.enabled);
+  }
+);
+
+export const canBooleanSelected = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    const keys = Object.keys(selectedById);
+    return keys.length >= 2 && keys.every((id: string) => {
+      const layerItem = selectedById[id];
+      return layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType !== 'Line';
+    });
+  }
+);
+
+export const canFlipSeleted = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    const keys = Object.keys(selectedById);
+    return keys.length > 0 && keys.every((id: string) => {
+      const layerItem = selectedById[id];
+      return layerItem.type !== 'Artboard';
+    });
+  }
+);
+
+export const selectedHorizontalFlipEnabled = createSelector(
+  [ canFlipSeleted, getSelectedById ],
+  (canFlip, selectedById) => {
+    const keys = Object.keys(selectedById);
+    return canFlip && keys.every((id) => selectedById[id].transform.horizontalFlip);
+  }
+);
+
+export const selectedVerticalFlipEnabled = createSelector(
+  [ canFlipSeleted, getSelectedById ],
+  (canFlip, selectedById) => {
+    const keys = Object.keys(selectedById);
+    return canFlip && keys.every((id) => selectedById[id].transform.verticalFlip);
+  }
+);
+
+export const canToggleSelectedUseAsMask = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    const keys = Object.keys(selectedById);
+    return keys.length > 0 && keys.every((id: string) => {
+      const layerItem = selectedById[id];
+      return layerItem.type === 'Shape';
+    });
+  }
+);
+
+export const selectedUseAsMaskEnabled = createSelector(
+  [ canToggleSelectedUseAsMask, getSelectedById ],
+  (canToggle, selectedById) => {
+    const keys = Object.keys(selectedById);
+    return canToggle && keys.every((id) => (selectedById[id] as em.Shape).mask);
+  }
+);
+
+export const selectedIgnoreUnderlyingMaskEnabled = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    const keys = Object.keys(selectedById);
+    return keys.every((id) => selectedById[id].ignoreUnderlyingMask);
+  }
+);
+
+export const canBringSelectedForward = createSelector(
+  [ getSelected, getSelectedWithParentsById ],
+  (selected, selectedWithParentsById) => {
+    return selected.length > 0 && !selected.some((id: string) => {
+      const layerItem = selectedWithParentsById[id];
+      const parentItem = selectedWithParentsById[layerItem.parent];
+      return parentItem.children[parentItem.children.length - 1] === id;
+    });
+  }
+);
+
+export const canSendSelectedBackward = createSelector(
+  [ getSelected, getSelectedWithParentsById ],
+  (selected, selectedWithParentsById) => {
+    return selected.length > 0 && !selected.some((id: string) => {
+      const layerItem = selectedWithParentsById[id];
+      const parentItem = selectedWithParentsById[layerItem.parent];
+      return parentItem.children[0] === id;
+    });
+  }
+);
+
+export const canGroupSelected = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    const keys = Object.keys(selectedById);
+    return keys.length > 0 && keys.every((id) => selectedById[id].type !== 'Artboard');
+  }
+);
+
+export const canUngroupSelected = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    const keys = Object.keys(selectedById);
+    return keys.length > 0 && keys.some((id) => selectedById[id].type === 'Group');
+  }
+);
 
 export const getLayer = (store: LayerState, id: string): em.Layer => {
   return store.byId[id] as em.Layer;
@@ -307,30 +557,39 @@ export const getSelectionCenter = (selected: string[]): paper.Point => {
   }
 };
 
-export const getCanvasTopLeft = (): paper.Point => {
-  return getPaperLayer('page').bounds.topLeft;
+export const getCanvasTopLeft = (state: LayerState): paper.Point => {
+  // return getPaperLayer('page').bounds.topLeft;
+  const page = state.byId['page'];
+  return new paperMain.Point(page.frame.x - (page.frame.width / 2), page.frame.y - (page.frame.height / 2));
 };
 
-export const getCanvasBottomRight = (): paper.Point => {
-  return getPaperLayer('page').bounds.bottomRight;
+export const getCanvasBottomRight = (state: LayerState): paper.Point => {
+  // return getPaperLayer('page').bounds.bottomRight;
+  const page = state.byId['page'];
+  return new paperMain.Point(page.frame.x + (page.frame.width / 2), page.frame.y + (page.frame.height / 2));
 };
 
-export const getCanvasBounds = (): paper.Rectangle => {
-  const topLeft = getCanvasTopLeft();
-  const bottomRight = getCanvasBottomRight();
+export const getCanvasBounds = (state: LayerState): paper.Rectangle => {
+  const topLeft = getCanvasTopLeft(state);
+  const bottomRight = getCanvasBottomRight(state);
   return new paper.Rectangle({
     from: topLeft,
     to: bottomRight
   });
 };
 
-export const getCanvasCenter = (): paper.Point => {
-  const topLeft = getCanvasTopLeft();
-  const bottomRight = getCanvasBottomRight();
-  const xMid = (topLeft.x + bottomRight.x) / 2;
-  const yMid = (topLeft.y + bottomRight.y) / 2;
-  return new paper.Point(xMid, yMid);
-};
+// export const getCanvasCenter = (state: LayerState): paper.Point => {
+//   const page = state.byId['page'];
+//   return new paperMain.Point(page.frame.x, page.frame.y);
+// };
+
+// export const getCanvasCenter = (state: LayerState): paper.Point => {
+//   const page = state.byId['page'];
+//   const bottomRight = getCanvasBottomRight();
+//   const xMid = (topLeft.x + bottomRight.x) / 2;
+//   const yMid = (topLeft.y + bottomRight.y) / 2;
+//   return new paper.Point(xMid, yMid);
+// };
 
 export const getClipboardTopLeft = (layerItems: em.Layer[]): paper.Point => {
   const paperLayerPoints = layerItems.reduce((result, current) => {
@@ -1359,16 +1618,16 @@ export const getTweenEventsFrameItems = (store: RootState): {
   };
 };
 
-export const canGroupLayers = (store: LayerState, layers: string[]): boolean => {
-  return layers && layers.length > 0 && layers.every((id: string) => {
-    const layer = store.byId[id];
-    return layer.type !== 'Artboard';
-  });
-};
+// export const canGroupLayers = (store: LayerState, layers: string[]): boolean => {
+//   return layers && layers.length > 0 && layers.every((id: string) => {
+//     const layer = store.byId[id];
+//     return layer.type !== 'Artboard';
+//   });
+// };
 
-export const canGroupSelection = (store: LayerState): boolean => {
-  return canGroupLayers(store, store.selected);
-};
+// export const canGroupSelection = (store: LayerState): boolean => {
+//   return canGroupLayers(store, store.selected);
+// };
 
 export const canUngroupLayers = (store: LayerState, layers: string[]): boolean => {
   return layers && layers.length > 0 && layers.some((id: string) => {
@@ -1381,40 +1640,40 @@ export const canUngroupSelection = (store: LayerState): boolean => {
   return canUngroupLayers(store, store.selected);
 };
 
-export const canBringForward = (store: LayerState, layers: string[]): boolean => {
-  return layers && layers.length > 0 && !layers.some((id: string) => {
-    const layer = store.byId[id];
-    const parent = store.byId[layer.parent];
-    return parent.children[parent.children.length - 1] === id;
-  });
-};
+// export const canBringForward = (store: LayerState, layers: string[]): boolean => {
+//   return layers && layers.length > 0 && !layers.some((id: string) => {
+//     const layer = store.byId[id];
+//     const parent = store.byId[layer.parent];
+//     return parent.children[parent.children.length - 1] === id;
+//   });
+// };
 
-export const canBringForwardSelection = (store: LayerState): boolean => {
-  return canBringForward(store, store.selected);
-};
+// export const canBringForwardSelection = (store: LayerState): boolean => {
+//   return canBringForward(store, store.selected);
+// };
 
-export const canSendBackward = (store: LayerState, layers: string[]): boolean => {
-  return layers && layers.length > 0 && !layers.some((id: string) => {
-    const layer = store.byId[id];
-    const parent = store.byId[layer.parent];
-    return parent.children[0] === id;
-  });
-};
+// export const canSendBackward = (store: LayerState, layers: string[]): boolean => {
+//   return layers && layers.length > 0 && !layers.some((id: string) => {
+//     const layer = store.byId[id];
+//     const parent = store.byId[layer.parent];
+//     return parent.children[0] === id;
+//   });
+// };
 
-export const canSendBackwardSelection = (store: LayerState): boolean => {
-  return canSendBackward(store, store.selected);
-};
+// export const canSendBackwardSelection = (store: LayerState): boolean => {
+//   return canSendBackward(store, store.selected);
+// };
 
-export const canToggleUseAsMask = (store: LayerState, layers: string[]): boolean => {
-  return layers && layers.length > 0 && layers.every((id: string) => {
-    const layer = store.byId[id];
-    return layer.type === 'Shape';
-  });
-};
+// export const canToggleUseAsMask = (store: LayerState, layers: string[]): boolean => {
+//   return layers && layers.length > 0 && layers.every((id: string) => {
+//     const layer = store.byId[id];
+//     return layer.type === 'Shape';
+//   });
+// };
 
-export const canToggleUseAsMaskSelection = (store: LayerState) => {
-  return canToggleUseAsMask(store, store.selected);
-};
+// export const canToggleUseAsMaskSelection = (store: LayerState) => {
+//   return canToggleUseAsMask(store, store.selected);
+// };
 
 export const canMaskLayers = (store: LayerState, layers: string[]): boolean => {
   const layersByDepth = layers && layers.length > 0 ? orderLayersByDepth(store, layers) : [];
@@ -1430,60 +1689,60 @@ export const canMaskSelection = (store: LayerState): boolean => {
   return canMaskLayers(store, store.selected);
 };
 
-export const canBooleanOperation = (store: LayerState, layers: string[]): boolean => {
-  return layers && layers.length >= 2 && layers.every((id: string) => {
-    const layer = store.byId[id];
-    return layer.type === 'Shape' && (layer as em.Shape).shapeType !== 'Line';
-  });
-};
+// export const canBooleanOperation = (store: LayerState, layers: string[]): boolean => {
+//   return layers && layers.length >= 2 && layers.every((id: string) => {
+//     const layer = store.byId[id];
+//     return layer.type === 'Shape' && (layer as em.Shape).shapeType !== 'Line';
+//   });
+// };
 
-export const canBooleanOperationSelection = (store: LayerState): boolean => {
-  return canBooleanOperation(store, store.selected);
-};
+// export const canBooleanOperationSelection = (store: LayerState): boolean => {
+//   return canBooleanOperation(store, store.selected);
+// };
 
-export const canToggleFill = (store: LayerState, layers: string[]): boolean => {
-  return layers && layers.length > 0 && layers.every((id: string) => {
-    const layer = store.byId[id];
-    return layer.type === 'Shape' || layer.type === 'Text';
-  });
-};
+// export const canToggleFill = (store: LayerState, layers: string[]): boolean => {
+//   return layers && layers.length > 0 && layers.every((id: string) => {
+//     const layer = store.byId[id];
+//     return layer.type === 'Shape' || layer.type === 'Text';
+//   });
+// };
 
-export const canToggleSelectionFill = (store: LayerState): boolean => {
-  return canToggleFill(store, store.selected);
-};
+// export const canToggleSelectionFill = (store: LayerState): boolean => {
+//   return canToggleFill(store, store.selected);
+// };
 
-export const canToggleStroke = (store: LayerState, layers: string[]): boolean => {
-  return layers && layers.length > 0 && layers.every((id: string) => {
-    const layer = store.byId[id];
-    return layer.type === 'Shape' || layer.type === 'Text';
-  });
-};
+// export const canToggleStroke = (store: LayerState, layers: string[]): boolean => {
+//   return layers && layers.length > 0 && layers.every((id: string) => {
+//     const layer = store.byId[id];
+//     return layer.type === 'Shape' || layer.type === 'Text';
+//   });
+// };
 
-export const canToggleSelectionStroke = (store: LayerState): boolean => {
-  return canToggleStroke(store, store.selected);
-};
+// export const canToggleSelectionStroke = (store: LayerState): boolean => {
+//   return canToggleStroke(store, store.selected);
+// };
 
-export const canToggleShadow = (store: LayerState, layers: string[]): boolean => {
-  return layers && layers.length > 0 && layers.every((id: string) => {
-    const layer = store.byId[id];
-    return layer.type === 'Shape' || layer.type === 'Text' || layer.type === 'Image';
-  });
-};
+// export const canToggleShadow = (store: LayerState, layers: string[]): boolean => {
+//   return layers && layers.length > 0 && layers.every((id: string) => {
+//     const layer = store.byId[id];
+//     return layer.type === 'Shape' || layer.type === 'Text' || layer.type === 'Image';
+//   });
+// };
 
-export const canToggleSelectionShadow = (store: LayerState): boolean => {
-  return canToggleShadow(store, store.selected);
-};
+// export const canToggleSelectionShadow = (store: LayerState): boolean => {
+//   return canToggleShadow(store, store.selected);
+// };
 
-export const canTransformFlip = (store: LayerState, layers: string[]): boolean => {
-  return layers && layers.length > 0 && layers.every((id: string) => {
-    const layer = store.byId[id];
-    return layer.type !== 'Artboard';
-  });
-};
+// export const canTransformFlip = (store: LayerState, layers: string[]): boolean => {
+//   return layers && layers.length > 0 && layers.every((id: string) => {
+//     const layer = store.byId[id];
+//     return layer.type !== 'Artboard';
+//   });
+// };
 
-export const canTransformFlipSelection = (store: LayerState): boolean => {
-  return canTransformFlip(store, store.selected);
-};
+// export const canTransformFlipSelection = (store: LayerState): boolean => {
+//   return canTransformFlip(store, store.selected);
+// };
 
 export const canResizeSelection = (store: LayerState): boolean => {
   const selectedWithChildren = store.selected.reduce((result: { allIds: string[]; byId: { [id: string]: em.Layer } }, current) => {

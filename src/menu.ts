@@ -1,7 +1,5 @@
-import { app, Menu, dialog } from 'electron';
-import { handleSetTheme, createNewDocument, handleSave, handleSaveAs, handleOpenDocument } from './index';
-import { getFocusedDocument } from './utils';
-import { APP_NAME } from './constants';
+import { app, Menu } from 'electron';
+import { createNewDocument } from './index';
 
 const isMac = process.platform === 'darwin';
 
@@ -14,22 +12,26 @@ export default Menu.buildFromTemplate([
         submenu: [
           {
             label: 'Dark',
-            type: 'checkbox',
+            type: 'radio',
             checked: false,
             id: 'appThemeDark',
             enabled: false,
-            click: () => {
-              handleSetTheme('dark');
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`appThemeDark(true)`);
+              }
             }
           },
           {
             label: 'Light',
-            type: 'checkbox',
+            type: 'radio',
             checked: false,
             id: 'appThemeLight',
             enabled: false,
-            click: () => {
-              handleSetTheme('light');
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`appThemeLight(true)`);
+              }
             }
           }
         ]
@@ -40,12 +42,10 @@ export default Menu.buildFromTemplate([
         id: 'appReload',
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+R' : 'Ctrl+R',
-        click: (): void => {
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              focusedDocument.webContents.reload();
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`appReload()`);
+          }
         }
       },
       { type: 'separator' },
@@ -64,18 +64,15 @@ export default Menu.buildFromTemplate([
       {
         label: 'New',
         id: 'fileNew',
-        enabled: false,
+        enabled: true,
         accelerator: process.platform === 'darwin' ? 'Cmd+N' : 'Ctrl+N',
-        click: (): void => {
-          // if document already open, set new document size to focused document size
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              const size = focusedDocument.getSize();
-              createNewDocument(size[0], size[1]);
-            } else {
-              createNewDocument();
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            const size = browserWindow.getSize();
+            createNewDocument({width: size[0], height: size[1]});
+          } else {
+            createNewDocument({});
+          }
         }
       },
       {
@@ -83,19 +80,10 @@ export default Menu.buildFromTemplate([
         id: 'fileSave',
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+S' : 'Ctrl+S',
-        click: (): void => {
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              focusedDocument.webContents.executeJavaScript(`getDocumentSettings()`).then((documentSettingsJSON) => {
-                const documentSettings = JSON.parse(documentSettingsJSON);
-                if (documentSettings.path) {
-                  handleSave(focusedDocument, documentSettings.path);
-                } else {
-                  handleSaveAs(focusedDocument);
-                }
-              });
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`fileSave()`);
+          }
         }
       },
       {
@@ -103,12 +91,10 @@ export default Menu.buildFromTemplate([
         id: 'fileSaveAs',
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+Shift+S' : 'Ctrl+Shift+S',
-        click: (): void => {
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              handleSaveAs(focusedDocument);
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`fileSaveAs()`);
+          }
         }
       },
       {
@@ -116,17 +102,20 @@ export default Menu.buildFromTemplate([
         id: 'fileOpen',
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+O' : 'Ctrl+O',
-        click: (): void => {
-          dialog.showOpenDialog({
-            filters: [
-              { name: 'Custom File Type', extensions: [APP_NAME] }
-            ],
-            properties: ['openFile']
-          }).then((result) => {
-            if (result.filePaths.length > 0 && !result.canceled) {
-              handleOpenDocument(result.filePaths[0]);
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`fileOpen()`);
+          }
+          // dialog.showOpenDialog({
+          //   filters: [
+          //     { name: 'Custom File Type', extensions: [APP_NAME] }
+          //   ],
+          //   properties: ['openFile']
+          // }).then((result) => {
+          //   if (result.filePaths.length > 0 && !result.canceled) {
+          //     handleOpenDocument(result.filePaths[0]);
+          //   }
+          // });
         }
       },
       {
@@ -149,12 +138,10 @@ export default Menu.buildFromTemplate([
         id: 'editUndo',
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+Z' : 'Ctrl+Z',
-        click: (): void => {
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              focusedDocument.webContents.executeJavaScript(`editUndo()`);
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`editUndo()`);
+          }
         }
       },
       {
@@ -162,12 +149,10 @@ export default Menu.buildFromTemplate([
         id: 'editRedo',
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+Shift+Z' : 'Ctrl+Shift+Z',
-        click: (): void => {
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              focusedDocument.webContents.executeJavaScript(`editRedo()`);
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`editRedo()`);
+          }
         }
       },
       { type: 'separator' },
@@ -175,12 +160,10 @@ export default Menu.buildFromTemplate([
         label: 'Cut',
         id: 'editCut',
         enabled: false,
-        click: (): void => {
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              focusedDocument.webContents.executeJavaScript(`editCut()`);
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`editCut()`);
+          }
         }
       },
       {
@@ -191,24 +174,20 @@ export default Menu.buildFromTemplate([
             id: 'editCopy',
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+C' : 'Ctrl+C',
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`editCopy()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`editCopy()`);
+              }
             }
           },
           {
             label: 'Copy SVG Code',
             id: 'editCopySVG',
             enabled: false,
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`editCopySVG()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`editCopySVG()`);
+              }
             }
           },
           {
@@ -216,12 +195,10 @@ export default Menu.buildFromTemplate([
             id: 'editCopyStyle',
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+Alt+C' : 'Ctrl+Alt+C',
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`editCopyStyle()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`editCopyStyle()`);
+              }
             }
           }
         ]
@@ -234,12 +211,10 @@ export default Menu.buildFromTemplate([
             id: 'editPaste',
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+V' : 'Ctrl+V',
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`editPaste()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`editPaste()`);
+              }
             }
           },
           {
@@ -247,24 +222,20 @@ export default Menu.buildFromTemplate([
             id: 'editPasteOverSelection',
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+Shift+V' : 'Ctrl+Shift+V',
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`editPasteOverSelection()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`editPasteOverSelection()`);
+              }
             }
           },
           {
             label: 'Paste SVG Code',
             id: 'editPasteSVG',
             enabled: false,
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`editPasteSVG()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`editPasteSVG()`);
+              }
             }
           },
           {
@@ -272,12 +243,10 @@ export default Menu.buildFromTemplate([
             id: 'editPasteStyle',
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+Alt+V' : 'Ctrl+Alt+V',
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`editPasteStyle()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`editPasteStyle()`);
+              }
             }
           }
         ]
@@ -287,12 +256,10 @@ export default Menu.buildFromTemplate([
         id: 'editDelete',
         enabled: false,
         accelerator: 'Backspace',
-        click: (): void => {
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              focusedDocument.webContents.executeJavaScript(`editDelete()`);
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`editDelete()`);
+          }
         }
       },
       { type: 'separator' },
@@ -301,12 +268,10 @@ export default Menu.buildFromTemplate([
         id: 'editDuplicate',
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+D' : 'Ctrl+D',
-        click: (): void => {
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              focusedDocument.webContents.executeJavaScript(`editDuplicate()`);
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`editDuplicate()`);
+          }
         }
       },
       { type: 'separator' },
@@ -318,12 +283,10 @@ export default Menu.buildFromTemplate([
             id: 'editSelectAll',
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+A' : 'Ctrl+A',
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`editSelectAll()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`editSelectAll()`);
+              }
             }
           },
           {
@@ -331,12 +294,10 @@ export default Menu.buildFromTemplate([
             id: 'editSelectAllArtboards',
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+Shift+A' : 'Ctrl+Shift+A',
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`editSelectAllArtboards()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`editSelectAllArtboards()`);
+              }
             }
           }
         ]
@@ -349,14 +310,14 @@ export default Menu.buildFromTemplate([
       {
         label: 'Artboard',
         id: 'insertArtboard',
+        type: 'radio',
+        checked: false,
         enabled: false,
         accelerator: 'A',
-        click: () => {
-          return getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              focusedDocument.webContents.executeJavaScript(`insertArtboard()`);
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`insertArtboard()`);
+          }
         }
       },
       { type: 'separator' },
@@ -366,77 +327,77 @@ export default Menu.buildFromTemplate([
           {
             label: 'Rectangle',
             id: 'insertShapeRectangle',
+            type: 'radio',
+            checked: false,
             enabled: false,
             accelerator: 'R',
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`insertShape(${JSON.stringify('Rectangle')})`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`insertShapeRectangle()`);
+              }
             }
           },
           {
             label: 'Rounded',
             id: 'insertShapeRounded',
+            type: 'radio',
+            checked: false,
             enabled: false,
             accelerator: 'U',
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`insertShape(${JSON.stringify('Rounded')})`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`insertShapeRounded()`);
+              }
             }
           },
           {
             label: 'Ellipse',
             id: 'insertShapeEllipse',
+            type: 'radio',
+            checked: false,
             enabled: false,
             accelerator: 'O',
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`insertShape(${JSON.stringify('Ellipse')})`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`insertShapeEllipse()`);
+              }
             }
           },
           {
             label: 'Star',
             id: 'insertShapeStar',
+            type: 'radio',
+            checked: false,
             enabled: false,
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`insertShape(${JSON.stringify('Star')})`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`insertShapeStar()`);
+              }
             }
           },
           {
             label: 'Polygon',
             id: 'insertShapePolygon',
+            type: 'radio',
+            checked: false,
             enabled: false,
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`insertShape(${JSON.stringify('Polygon')})`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`insertShapePolygon()`);
+              }
             }
           },
           {
             label: 'Line',
             id: 'insertShapeLine',
+            type: 'radio',
+            checked: false,
             enabled: false,
             accelerator: 'L',
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`insertShape(${JSON.stringify('Line')})`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`insertShapeLine()`);
+              }
             }
           },
         ]
@@ -445,26 +406,24 @@ export default Menu.buildFromTemplate([
       {
         label: 'Text',
         id: 'insertText',
+        type: 'radio',
+        checked: false,
         enabled: false,
         accelerator: 'T',
-        click: () => {
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              focusedDocument.webContents.executeJavaScript(`insertText()`);
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`insertText()`);
+          }
         }
       },
       {
         label: 'Image...',
         id: 'insertImage',
         enabled: false,
-        click: () => {
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              focusedDocument.webContents.executeJavaScript(`insertImage()`);
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`insertImage()`);
+          }
         }
       }
     ]
@@ -481,12 +440,10 @@ export default Menu.buildFromTemplate([
             enabled: false,
             type: 'checkbox',
             checked: false,
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`layerStyleFill()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`layerStyleFill()`);
+              }
             }
           },
           {
@@ -495,12 +452,10 @@ export default Menu.buildFromTemplate([
             enabled: false,
             type: 'checkbox',
             checked: false,
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`layerStyleStroke()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`layerStyleStroke()`);
+              }
             }
           },
           {
@@ -509,12 +464,10 @@ export default Menu.buildFromTemplate([
             enabled: false,
             type: 'checkbox',
             checked: false,
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`layerStyleShadow()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`layerStyleShadow()`);
+              }
             }
           }
         ]
@@ -528,12 +481,10 @@ export default Menu.buildFromTemplate([
             enabled: false,
             type: 'checkbox',
             checked: false,
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`layerTransformFlipHorizontally()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`layerTransformFlipHorizontally()`);
+              }
             }
           },
           {
@@ -542,12 +493,10 @@ export default Menu.buildFromTemplate([
             enabled: false,
             type: 'checkbox',
             checked: false,
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`layerTransformFlipVertically()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`layerTransformFlipVertically()`);
+              }
             }
           }
         ]
@@ -560,12 +509,10 @@ export default Menu.buildFromTemplate([
             id: 'layerCombineUnion',
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+Alt+U' : 'Ctrl+Alt+U',
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`layerCombine(${JSON.stringify('unite')})`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`layerCombineUnion()`);
+              }
             }
           },
           {
@@ -573,12 +520,10 @@ export default Menu.buildFromTemplate([
             id: 'layerCombineSubtract',
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+Alt+S' : 'Ctrl+Alt+S',
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`layerCombine(${JSON.stringify('subtract')})`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`layerCombineSubtract()`);
+              }
             }
           },
           {
@@ -586,12 +531,10 @@ export default Menu.buildFromTemplate([
             id: 'layerCombineIntersect',
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+Alt+I' : 'Ctrl+Alt+I',
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`layerCombine(${JSON.stringify('intersect')})`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`layerCombineIntersect()`);
+              }
             }
           },
           {
@@ -599,12 +542,10 @@ export default Menu.buildFromTemplate([
             id: 'layerCombineDifference',
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+Alt+X' : 'Ctrl+Alt+X',
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`layerCombine(${JSON.stringify('exclude')})`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`layerCombineDifference()`);
+              }
             }
           }
         ]
@@ -616,24 +557,20 @@ export default Menu.buildFromTemplate([
             label: 'Replace...',
             id: 'layerImageReplace',
             enabled: false,
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`layerImageReplace()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`layerImageReplace()`);
+              }
             }
           },
           {
             label: 'Set to Original Dimensions',
             id: 'layerImageOriginalDimensions',
             enabled: false,
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`layerImageOriginalDimensions()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`layerImageOriginalDimensions()`);
+              }
             }
           }
         ]
@@ -648,12 +585,10 @@ export default Menu.buildFromTemplate([
             accelerator: process.platform === 'darwin' ? 'Cmd+M' : 'Ctrl+M',
             type: 'checkbox',
             checked: false,
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`layerMaskUseAsMask()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`layerMaskUseAsMask()`);
+              }
             }
           },
           {
@@ -663,12 +598,10 @@ export default Menu.buildFromTemplate([
             accelerator: process.platform === 'darwin' ? 'Cmd+Shift+M' : 'Ctrl+Shift+M',
             type: 'checkbox',
             checked: false,
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`layerMaskIgnoreUnderlyingMask()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`layerMaskIgnoreUnderlyingMask()`);
+              }
             }
           }
         ]
@@ -683,12 +616,10 @@ export default Menu.buildFromTemplate([
         id: 'arrangeBringForward',
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+]' : 'Ctrl+]',
-        click: () => {
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              focusedDocument.webContents.executeJavaScript(`arrangeBringForward()`);
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`arrangeBringForward()`);
+          }
         }
       },
       {
@@ -696,12 +627,10 @@ export default Menu.buildFromTemplate([
         id: 'arrangeBringToFront',
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+Alt+]' : 'Ctrl+Alt+]',
-        click: () => {
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              focusedDocument.webContents.executeJavaScript(`arrangeBringToFront()`);
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`arrangeBringToFront()`);
+          }
         }
       },
       {
@@ -709,12 +638,10 @@ export default Menu.buildFromTemplate([
         id: 'arrangeSendBackward',
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+[' : 'Ctrl+[',
-        click: () => {
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              focusedDocument.webContents.executeJavaScript(`arrangeSendBackward()`);
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`arrangeSendBackward()`);
+          }
         }
       },
       {
@@ -722,12 +649,10 @@ export default Menu.buildFromTemplate([
         id: 'arrangeSendToBack',
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+Alt+[' : 'Ctrl+Alt+[',
-        click: () => {
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              focusedDocument.webContents.executeJavaScript(`arrangeSendToBack()`);
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`arrangeSendToBack()`);
+          }
         }
       },
       { type: 'separator' },
@@ -738,36 +663,30 @@ export default Menu.buildFromTemplate([
             label: 'Left',
             id: 'arrangeAlignLeft',
             enabled: false,
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`arrangeAlignLeft()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`arrangeAlignLeft()`);
+              }
             }
           },
           {
             label: 'Horizontally',
             id: 'arrangeAlignHorizontally',
             enabled: false,
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`arrangeAlignHorizontally()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`arrangeAlignHorizontally()`);
+              }
             }
           },
           {
             label: 'Right',
             id: 'arrangeAlignRight',
             enabled: false,
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`arrangeAlignRight()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`arrangeAlignRight()`);
+              }
             }
           },
           { type: 'separator' },
@@ -775,36 +694,30 @@ export default Menu.buildFromTemplate([
             label: 'Top',
             id: 'arrangeAlignTop',
             enabled: false,
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`arrangeAlignTop()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`arrangeAlignTop()`);
+              }
             }
           },
           {
             label: 'Vertically',
             id: 'arrangeAlignVertically',
             enabled: false,
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`arrangeAlignVertically()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`arrangeAlignVertically()`);
+              }
             }
           },
           {
             label: 'Bottom',
             id: 'arrangeAlignBottom',
             enabled: false,
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`arrangeAlignBottom()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`arrangeAlignBottom()`);
+              }
             }
           }
         ]
@@ -817,12 +730,10 @@ export default Menu.buildFromTemplate([
             id: 'arrangeDistributeHorizontally',
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Ctrl+Cmd+H' : 'Ctrl+Shift+H',
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`arrangeDistributeHorizontally()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`arrangeDistributeHorizontally()`);
+              }
             }
           },
           {
@@ -830,12 +741,10 @@ export default Menu.buildFromTemplate([
             id: 'arrangeDistributeVertically',
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Ctrl+Cmd+V' : 'Ctrl+Shift+V',
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`arrangeDistributeVertically()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`arrangeDistributeVertically()`);
+              }
             }
           }
         ]
@@ -846,12 +755,10 @@ export default Menu.buildFromTemplate([
         id: 'arrangeGroup',
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+G' : 'Ctrl+G',
-        click: () => {
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              focusedDocument.webContents.executeJavaScript(`arrangeGroup()`);
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`arrangeGroup()`);
+          }
         }
       },
       {
@@ -859,28 +766,14 @@ export default Menu.buildFromTemplate([
         id: 'arrangeUngroup',
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+Shift+G' : 'Ctrl+Shift+G',
-        click: () => {
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              focusedDocument.webContents.executeJavaScript(`arrangeUngroup()`);
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`arrangeUngroup()`);
+          }
         }
       },
     ]
   },
-  // {
-  //   label: 'Import',
-  //   submenu: [
-  //     {
-  //       label: 'Sketch Artboard...',
-  //       click: (): void => {
-  //         handleSketchImport();
-  //       }
-  //     }
-  //   ]
-  // },
-  // { role: 'viewMenu' }
   {
     label: 'View',
     submenu: [
@@ -889,12 +782,10 @@ export default Menu.buildFromTemplate([
         id: 'viewZoomIn',
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+Plus' : 'Ctrl+Plus',
-        click: () => {
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              focusedDocument.webContents.executeJavaScript(`viewZoomIn()`);
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`viewZoomIn()`);
+          }
         }
       },
       {
@@ -902,12 +793,10 @@ export default Menu.buildFromTemplate([
         id: 'viewZoomOut',
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+-' : 'Ctrl+-',
-        click: () => {
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              focusedDocument.webContents.executeJavaScript(`viewZoomOut()`);
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`viewZoomOut()`);
+          }
         }
       },
       {
@@ -918,25 +807,21 @@ export default Menu.buildFromTemplate([
             id: 'viewZoomFitCanvas',
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+1' : 'Ctrl+1',
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`viewZoomFitCanvas()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`viewZoomFitCanvas()`);
+              }
             }
           },
           {
             label: 'Fit Selection',
-            id: 'viewZoomFitSelection',
+            id: 'viewZoomFitSelected',
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+2' : 'Ctrl+2',
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`viewZoomFitSelection()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`viewZoomFitSelected()`);
+              }
             }
           },
           {
@@ -944,12 +829,10 @@ export default Menu.buildFromTemplate([
             id: 'viewZoomFitArtboard',
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+4' : 'Ctrl+4',
-            click: () => {
-              getFocusedDocument().then((focusedDocument) => {
-                if (focusedDocument) {
-                  focusedDocument.webContents.executeJavaScript(`viewZoomFitArtboard()`);
-                }
-              });
+            click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+              if (browserWindow) {
+                browserWindow.webContents.executeJavaScript(`viewZoomFitArtboard()`);
+              }
             }
           }
         ]
@@ -957,15 +840,13 @@ export default Menu.buildFromTemplate([
       { type: 'separator' },
       {
         label: 'Center Selection',
-        id: 'viewCenterSelection',
+        id: 'viewCenterSelected',
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+3' : 'Ctrl+3',
-        click: () => {
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              focusedDocument.webContents.executeJavaScript(`viewCenterSelection()`);
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`viewCenterSelected()`);
+          }
         }
       },
       { type: 'separator' },
@@ -976,12 +857,10 @@ export default Menu.buildFromTemplate([
         checked: false,
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+Alt+1' : 'Ctrl+Alt+1',
-        click: () => {
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              focusedDocument.webContents.executeJavaScript(`viewShowLayers()`);
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`viewShowLayers()`);
+          }
         }
       },
       {
@@ -991,12 +870,10 @@ export default Menu.buildFromTemplate([
         checked: false,
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+Alt+2' : 'Ctrl+Alt+2',
-        click: () => {
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              focusedDocument.webContents.executeJavaScript(`viewShowStyles()`);
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`viewShowStyles()`);
+          }
         }
       },
       {
@@ -1006,12 +883,10 @@ export default Menu.buildFromTemplate([
         checked: false,
         enabled: false,
         accelerator: process.platform === 'darwin' ? 'Cmd+Alt+3' : 'Ctrl+Alt+3',
-        click: () => {
-          getFocusedDocument().then((focusedDocument) => {
-            if (focusedDocument) {
-              focusedDocument.webContents.executeJavaScript(`viewShowEvents()`);
-            }
-          });
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            browserWindow.webContents.executeJavaScript(`viewShowEvents()`);
+          }
         }
       },
       { type: 'separator' },

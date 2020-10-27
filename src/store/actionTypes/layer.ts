@@ -218,10 +218,10 @@ export const SEND_LAYER_BACKWARD = 'SEND_LAYER_BACKWARD';
 export const SEND_LAYERS_BACKWARD = 'SEND_LAYERS_BACKWARD';
 export const SEND_LAYER_TO_BACK = 'SEND_LAYER_TO_BACK';
 export const SEND_LAYERS_TO_BACK = 'SEND_LAYERS_TO_BACK';
-export const SEND_LAYER_FORWARD = 'SEND_LAYER_FORWARD';
-export const SEND_LAYERS_FORWARD = 'SEND_LAYERS_FORWARD';
-export const SEND_LAYER_TO_FRONT = 'SEND_LAYER_TO_FRONT';
-export const SEND_LAYERS_TO_FRONT = 'SEND_LAYERS_TO_FRONT';
+export const BRING_LAYER_FORWARD = 'BRING_LAYER_FORWARD';
+export const BRING_LAYERS_FORWARD = 'BRING_LAYERS_FORWARD';
+export const BRING_LAYER_TO_FRONT = 'BRING_LAYER_TO_FRONT';
+export const BRING_LAYERS_TO_FRONT = 'BRING_LAYERS_TO_FRONT';
 
 export const SET_LAYER_BLEND_MODE = 'SET_LAYER_BLEND_MODE';
 export const SET_LAYERS_BLEND_MODE = 'SET_LAYERS_BLEND_MODE';
@@ -2068,40 +2068,40 @@ export interface SendLayersToBack {
   payload: SendLayersToBackPayload;
 }
 
-export interface SendLayerForwardPayload {
+export interface BringLayerForwardPayload {
   id: string;
 }
 
-export interface SendLayerForward {
-  type: typeof SEND_LAYER_FORWARD;
-  payload: SendLayerForwardPayload;
+export interface BringLayerForward {
+  type: typeof BRING_LAYER_FORWARD;
+  payload: BringLayerForwardPayload;
 }
 
-export interface SendLayersForwardPayload {
+export interface BringLayersForwardPayload {
   layers: string[];
 }
 
-export interface SendLayersForward {
-  type: typeof SEND_LAYERS_FORWARD;
-  payload: SendLayersForwardPayload;
+export interface BringLayersForward {
+  type: typeof BRING_LAYERS_FORWARD;
+  payload: BringLayersForwardPayload;
 }
 
-export interface SendLayerToFrontPayload {
+export interface BringLayerToFrontPayload {
   id: string;
 }
 
-export interface SendLayerToFront {
-  type: typeof SEND_LAYER_TO_FRONT;
-  payload: SendLayerToFrontPayload;
+export interface BringLayerToFront {
+  type: typeof BRING_LAYER_TO_FRONT;
+  payload: BringLayerToFrontPayload;
 }
 
-export interface SendLayersToFrontPayload {
+export interface BringLayersToFrontPayload {
   layers: string[];
 }
 
-export interface SendLayersToFront {
-  type: typeof SEND_LAYERS_TO_FRONT;
-  payload: SendLayersToFrontPayload;
+export interface BringLayersToFront {
+  type: typeof BRING_LAYERS_TO_FRONT;
+  payload: BringLayersToFrontPayload;
 }
 
 export interface SetLayerBlendModePayload {
@@ -2574,10 +2574,10 @@ export type LayerTypes = AddArtboard |
                          DuplicateLayer |
                          DuplicateLayers |
                          RemoveDuplicatedLayers |
-                         SendLayerForward |
-                         SendLayersForward |
-                         SendLayerToFront |
-                         SendLayersToFront |
+                         BringLayerForward |
+                         BringLayersForward |
+                         BringLayerToFront |
+                         BringLayersToFront |
                          SendLayerBackward |
                          SendLayersBackward |
                          SendLayerToBack |

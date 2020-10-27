@@ -2,8 +2,8 @@
 import React, { useRef, useContext, ReactElement, useState, useEffect } from 'react';
 import { ThemeContext } from './ThemeProvider';
 import { paperMain } from '../canvas';
-import CanvasInteractionsLayer from './CanvasInteractionsLayer';
-import CanvasInteractionsUI from './CanvasInteractionsUI';
+import CanvasInteractionsLayer from './CanvasLayers';
+import CanvasInteractionsUI from './CanvasUI';
 import DragTool from './DragTool';
 import ShapeTool from './ShapeTool';
 

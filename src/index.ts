@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import menu from './menu';
 import { handleDocumentClose, getFocusedDocument, getWindowBackground, isMac, getAllDocumentWindows } from './utils';
+import { initialState as initialPreviewState } from './store/reducers/preview';
 
 import {
   PREVIEW_TOPBAR_HEIGHT,
@@ -52,7 +53,7 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
   app.quit();
 }
 
-export const createNewDocument = (width?: number, height?: number): Promise<electron.BrowserWindow> => {
+export const createNewDocument = ({width, height, document}: {width?: number; height?: number; document?: string}): Promise<electron.BrowserWindow> => {
   return new Promise((resolve) => {
     // Create the browser window.
     const newDocument = new BrowserWindow({
@@ -71,35 +72,36 @@ export const createNewDocument = (width?: number, height?: number): Promise<elec
     newDocument.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
     newDocument.webContents.on('did-finish-load', () => {
-      newDocument.webContents.executeJavaScript(`renderNewDocument()`).then(() => {
-        newDocument.webContents.executeJavaScript(`setPreviewDocumentWindowId(${JSON.stringify(newDocument.id)})`);
+      const preloadedState = {...(document ? JSON.parse(document) : {}), preview: { ...initialPreviewState, documentWindowId: newDocument.id }};
+      newDocument.webContents.executeJavaScript(`renderNewDocument(${JSON.stringify(preloadedState)})`).then(() => {
+        // newDocument.webContents.executeJavaScript(`setPreviewDocumentWindowId(${JSON.stringify(newDocument.id)})`);
         resolve(newDocument);
       });
     });
 
-    newDocument.on('close', (event) => {
-      event.preventDefault();
-      newDocument.webContents.executeJavaScript(`getCurrentEdit()`).then((currentEditJSON) => {
-        const editState = JSON.parse(currentEditJSON) as { edit: string; dirty: boolean; name: string; path: string };
-        if (editState.dirty) {
-          openSaveDialog({
-            documentState: editState,
-            onSave: () => {
-              if (editState.path) {
-                handleSave(newDocument, editState.path, {close: true});
-              } else {
-                handleSaveAs(newDocument, {close: true});
-              }
-            },
-            onDontSave: () => {
-              handleDocumentClose(newDocument.id);
-            }
-          });
-        } else {
-          handleDocumentClose(newDocument.id);
-        }
-      });
-    });
+    // newDocument.on('close', (event) => {
+    //   event.preventDefault();
+    //   newDocument.webContents.executeJavaScript(`getCurrentEdit()`).then((currentEditJSON) => {
+    //     const editState = JSON.parse(currentEditJSON) as { edit: string; dirty: boolean; name: string; path: string };
+    //     if (editState.dirty) {
+    //       openSaveDialog({
+    //         documentState: editState,
+    //         onSave: () => {
+    //           if (editState.path) {
+    //             handleSave(newDocument, editState.path, {close: true});
+    //           } else {
+    //             handleSaveAs(newDocument, {close: true});
+    //           }
+    //         },
+    //         onDontSave: () => {
+    //           handleDocumentClose(newDocument.id);
+    //         }
+    //       });
+    //     } else {
+    //       handleDocumentClose(newDocument.id);
+    //     }
+    //   });
+    // });
   });
 };
 
@@ -151,7 +153,7 @@ const createPreviewWindow = ({width, height, documentWindowId}: {width: number; 
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
   Menu.setApplicationMenu(menu);
-  createNewDocument();
+  createNewDocument({});
 });
 
 // This method will be called when Electron has finished
@@ -279,7 +281,7 @@ app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
-    createNewDocument();
+    createNewDocument({});
   }
 });
 
@@ -393,7 +395,7 @@ export const handleOpenDocument = (filePath: string): void => {
             if(err) {
               return console.log(err);
             } else {
-              createNewDocument().then((documentWindow) => {
+              createNewDocument({}).then((documentWindow) => {
                 documentWindow.webContents.executeJavaScript(`openFile(${data})`);
               });
             }
@@ -410,7 +412,7 @@ export const handleOpenDocument = (filePath: string): void => {
       });
     } else {
       fs.readFile(filePath, {encoding: 'utf-8'}, function(err, data) {
-        createNewDocument().then((documentWindow) => {
+        createNewDocument({}).then((documentWindow) => {
           documentWindow.webContents.executeJavaScript(`openFile(${data})`);
         });
       });
@@ -437,15 +439,20 @@ ipcMain.on('openPreview', (event, payload) => {
   });
 });
 
-ipcMain.on('updateTheme', (event, theme: em.ThemeName) => {
-  BrowserWindow.getAllWindows().forEach((window) => {
-    window.setBackgroundColor(getWindowBackground(theme));
-    if (window.webContents) {
-      window.webContents.executeJavaScript(`setTitleBarTheme(${JSON.stringify(theme)})`);
-      window.webContents.executeJavaScript(`setTheme(${JSON.stringify(theme)})`);
-    }
-  });
+ipcMain.on('createNewDocument', (event, payload) => {
+  createNewDocument({document: payload});
 });
+
+// ipcMain.on('updateTheme', (event, theme: em.ThemeName) => {
+//   console.log(event);
+//   BrowserWindow.getAllWindows().forEach((window) => {
+//     window.setBackgroundColor(getWindowBackground(theme));
+//     if (window.webContents) {
+//       // window.webContents.executeJavaScript(`setTitleBarTheme(${JSON.stringify(theme)})`);
+//       window.webContents.executeJavaScript(`setTheme(${JSON.stringify(theme)})`);
+//     }
+//   });
+// });
 
 // export const createPreferencesWindow = (): void => {
 //   preferencesWindow = new BrowserWindow({

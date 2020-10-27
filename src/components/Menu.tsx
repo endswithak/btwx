@@ -1,44 +1,22 @@
-import React, { ReactElement, useEffect } from 'react';
+import React, { ReactElement } from 'react';
 import MenuInsert from './MenuInsert';
 import MenuApp from './MenuApp';
 import MenuFile from './MenuFile';
 import MenuEdit from './MenuEdit';
-import MenuViewShow from './MenuViewShow';
-import MenuViewZoom from './MenuViewZoom';
-import MenuArrangeGroup from './MenuArrangeGroup';
-import MenuArrangeAlign from './MenuArrangeAlign';
-import MenuArrangeDistribute from './MenuArrangeDistribute';
-import MenuLayerCombine from './MenuLayerCombine';
-import MenuLayerMask from './MenuLayerMask';
-import MenuLayerTransform from './MenuLayerTransform';
-import MenuLayerStyle from './MenuLayerStyle';
+import MenuLayer from './MenuLayer';
+import MenuArrange from './MenuArrange';
+import MenuView from './MenuView';
 
-const Menu = (): ReactElement => {
-
-  return (
-    <>
-      {/* App */}
-      <MenuApp />
-      {/* File */}
-      <MenuFile />
-      {/* Edit */}
-      <MenuEdit />
-      {/* View */}
-      <MenuViewShow />
-      <MenuViewZoom />
-      {/* Insert */}
-      <MenuInsert />
-      {/* Arrange */}
-      <MenuArrangeGroup />
-      <MenuArrangeAlign />
-      <MenuArrangeDistribute />
-      {/* Layer */}
-      <MenuLayerCombine />
-      <MenuLayerMask />
-      <MenuLayerTransform />
-      <MenuLayerStyle />
-    </>
-  );
-}
+const Menu = (): ReactElement => (
+  <>
+    <MenuApp />
+    <MenuFile />
+    <MenuEdit />
+    <MenuInsert />
+    <MenuLayer />
+    <MenuArrange />
+    <MenuView />
+  </>
+);
 
 export default Menu;
