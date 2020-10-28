@@ -15,7 +15,7 @@ interface ColorPickerRedInputProps {
   setSaturation(saturation: number): void;
   setLightness(lightness: number): void;
   setValue(value: number): void;
-  onChange(color: em.Color): void;
+  onChange(color: Btwx.Color): void;
 }
 
 const ColorPickerRedInput = (props: ColorPickerRedInputProps): ReactElement => {

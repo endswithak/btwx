@@ -9,7 +9,7 @@ export const MENU_ITEM_ID = 'insertShapeStar';
 interface MenuInsertShapeStarProps {
   canInsert?: boolean;
   isChecked?: boolean;
-  toggleShapeToolThunk?(shapeType: em.ShapeType): void;
+  toggleShapeToolThunk?(shapeType: Btwx.ShapeType): void;
 }
 
 const MenuInsertShapeStar = (props: MenuInsertShapeStarProps): ReactElement => {

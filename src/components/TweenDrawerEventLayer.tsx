@@ -10,7 +10,7 @@ import SidebarLayerIcon from './SidebarLayerIcon';
 interface TweenDrawerEventLayerProps {
   id: string;
   index: number;
-  layer?: em.Layer;
+  layer?: Btwx.Layer;
   hover?: string;
   setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
   selectLayers?(payload: SelectLayersPayload): LayerTypes;

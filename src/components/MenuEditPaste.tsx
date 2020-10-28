@@ -8,7 +8,7 @@ export const MENU_ITEM_ID = 'editPaste';
 
 interface MenuEditPasteProps {
   canPaste?: boolean;
-  pasteLayersThunk?(props?: { overSelection?: boolean; overPoint?: em.Point; overLayer?: string }): any;
+  pasteLayersThunk?(props?: { overSelection?: boolean; overPoint?: Btwx.Point; overLayer?: string }): any;
 }
 
 const MenuEditPaste = (props: MenuEditPasteProps): ReactElement => {
@@ -21,7 +21,7 @@ const MenuEditPaste = (props: MenuEditPasteProps): ReactElement => {
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      pasteLayersThunk();
+      pasteLayersThunk({});
     };
   }, []);
 

@@ -19,7 +19,7 @@ interface ColorPickerSaturationProps {
   setSaturation(saturation: number): void;
   setValue(value: number): void;
   setLightness(lightness: number): void;
-  onChange?(color: em.Color): void;
+  onChange?(color: Btwx.Color): void;
 }
 
 const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement => {

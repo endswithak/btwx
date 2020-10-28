@@ -14,7 +14,7 @@ import SidebarSlider from './SidebarSlider';
 interface PolygonSidesInputProps {
   selected?: string[];
   sidesValue?: number | 'multi';
-  layerItems?: em.Polygon[];
+  layerItems?: Btwx.Polygon[];
   setPolygonsSides?(payload: SetPolygonsSidesPayload): LayerTypes;
 }
 
@@ -98,11 +98,11 @@ const PolygonSidesInput = (props: PolygonSidesInputProps): ReactElement => {
 const mapStateToProps = (state: RootState): {
   selected: string[];
   sidesValue: number | 'multi';
-  layerItems: em.Polygon[];
+  layerItems: Btwx.Polygon[];
 } => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const layerItems: em.Polygon[] = selected.reduce((result, current) => {
+  const layerItems: Btwx.Polygon[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);

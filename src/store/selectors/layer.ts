@@ -13,6 +13,7 @@ export const getLayersById = (state: RootState) => state.layer.present.byId;
 export const getLayerById = (state: RootState, id: string) => state.layer.present.byId[id];
 export const getLayerChildren = (state: RootState, id: string) => state.layer.present.byId[id].children;
 export const getPageChildren = (state: RootState) => state.layer.present.byId['page'].children;
+export const getHoverItem = (state: RootState) => state.layer.present.byId[state.layer.present.hover];
 
 export const getSelectedById = createSelector(
   [ getSelected, getLayersById ],
@@ -23,7 +24,7 @@ export const getSelectedById = createSelector(
         [current]: byId[current]
       }
       return result;
-    }, {}) as { [id: string]: em.Layer };
+    }, {}) as { [id: string]: Btwx.Layer };
   }
 );
 
@@ -31,7 +32,7 @@ export const getSelectedWithDescendentsById = createSelector(
   [ getSelected, getLayersById ],
   (selected, byId) => {
     const groups: string[] = [selected[0]];
-    const layers: { [id: string]: em.Layer } = {};
+    const layers: { [id: string]: Btwx.Layer } = {};
     let i = 0;
     while(i < groups.length) {
       const layerItem = byId[groups[i]];
@@ -62,15 +63,15 @@ export const getSelectedWithParentsById = createSelector(
         [layerItem.parent]: parentItem
       }
       return result;
-    }, {}) as { [id: string]: em.Layer };
+    }, {}) as { [id: string]: Btwx.Layer };
   }
 );
 
 export const getSelectedTopLeft = createSelector(
   [ getSelectedById ],
   (selectedById) => {
-    return Object.keys(getSelectedById).reduce((result: paper.Point, current: string) => {
-      const layerItem = selectedById[current] as em.Layer;
+    return Object.keys(selectedById).reduce((result: paper.Point, current: string) => {
+      const layerItem = selectedById[current] as Btwx.Layer;
       const topLeft = new paperMain.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
       if (result === null) {
         return topLeft;
@@ -84,8 +85,8 @@ export const getSelectedTopLeft = createSelector(
 export const getSelectedBottomRight = createSelector(
   [ getSelectedById ],
   (selectedById) => {
-    return Object.keys(getSelectedById).reduce((result: paper.Point, current: string) => {
-      const layerItem = selectedById[current] as em.Layer;
+    return Object.keys(selectedById).reduce((result: paper.Point, current: string) => {
+      const layerItem = selectedById[current] as Btwx.Layer;
       const bottomRight = new paperMain.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
       if (result === null) {
         return bottomRight;
@@ -98,6 +99,40 @@ export const getSelectedBottomRight = createSelector(
 
 export const getSelectedBounds = createSelector(
   [ getSelectedTopLeft, getSelectedBottomRight ],
+  (topLeft, bottomRight) => {
+    return topLeft && bottomRight
+    ? new paper.Rectangle({
+        from: topLeft,
+        to: bottomRight
+      })
+    : null as paper.Rectangle;
+  }
+);
+
+export const getHoverTopLeft = createSelector(
+  [ getHoverItem ],
+  (hoverItem) => {
+    if (hoverItem) {
+      return new paperMain.Point(hoverItem.frame.x - (hoverItem.frame.width / 2), hoverItem.frame.y - (hoverItem.frame.height / 2));
+    } else {
+      return null;
+    }
+  }
+);
+
+export const getHoverBottomRight = createSelector(
+  [ getHoverItem ],
+  (hoverItem) => {
+    if (hoverItem) {
+      return new paperMain.Point(hoverItem.frame.x + (hoverItem.frame.width / 2), hoverItem.frame.y + (hoverItem.frame.height / 2));
+    } else {
+      return null;
+    }
+  }
+);
+
+export const getHoverBounds = createSelector(
+  [ getHoverTopLeft, getHoverBottomRight ],
   (topLeft, bottomRight) => {
     return topLeft && bottomRight
     ? new paper.Rectangle({
@@ -160,7 +195,7 @@ export const canBooleanSelected = createSelector(
     const keys = Object.keys(selectedById);
     return keys.length >= 2 && keys.every((id: string) => {
       const layerItem = selectedById[id];
-      return layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType !== 'Line';
+      return layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line';
     });
   }
 );
@@ -207,7 +242,7 @@ export const selectedUseAsMaskEnabled = createSelector(
   [ canToggleSelectedUseAsMask, getSelectedById ],
   (canToggle, selectedById) => {
     const keys = Object.keys(selectedById);
-    return canToggle && keys.every((id) => (selectedById[id] as em.Shape).mask);
+    return canToggle && keys.every((id) => (selectedById[id] as Btwx.Shape).mask);
   }
 );
 
@@ -257,13 +292,13 @@ export const canUngroupSelected = createSelector(
   }
 );
 
-export const getLayer = (store: LayerState, id: string): em.Layer => {
-  return store.byId[id] as em.Layer;
+export const getLayer = (store: LayerState, id: string): Btwx.Layer => {
+  return store.byId[id] as Btwx.Layer;
 };
 
-export const getParentLayer = (store: LayerState, id: string): em.Group => {
+export const getParentLayer = (store: LayerState, id: string): Btwx.Group => {
   const layer = getLayer(store, id);
-  return store.byId[layer.parent] as em.Group;
+  return store.byId[layer.parent] as Btwx.Group;
 };
 
 export const getLayerIndex = (store: LayerState, id: string): number => {
@@ -275,7 +310,7 @@ export const getLayerIndex = (store: LayerState, id: string): number => {
   }
 };
 
-export const getLayerType = (store: LayerState, id: string): em.LayerType => {
+export const getLayerType = (store: LayerState, id: string): Btwx.LayerType => {
   const layer = getLayer(store, id);
   return layer.type;
 };
@@ -288,17 +323,29 @@ export const getPaperLayer = (id: string): paper.Item => {
   return paperMain.project.getItem({ data: { id } });
 };
 
-export const getParentPaperLayer = (store: LayerState, id: string, index?: number): paper.Item => {
+export const getParentPaperLayer = (store: LayerState, id: string, ignoreUnderlyingMask?: boolean): paper.Item => {
   const parentLayerItem = store.byId[id];
   const paperLayer = getPaperLayer(id);
   const parentChildren = parentLayerItem.children;
   const hasChildren = parentChildren.length > 0;
-  const lastChildId = hasChildren ? parentChildren[index ? index : parentChildren.length - 1] : null;
+  const lastChildId = hasChildren ? parentChildren[parentChildren.length - 1] : null;
   const lastChildItem = lastChildId ? store.byId[lastChildId] : null;
-  const isLastChildMask = lastChildItem && lastChildItem.type === 'Shape' && (lastChildItem as em.Shape).mask;
-  const lastChildUnderlyingMask = lastChildItem ? isLastChildMask ? lastChildItem.id : lastChildItem.underlyingMask : null;
-  if (lastChildUnderlyingMask) {
-    return getPaperLayer(`${lastChildUnderlyingMask}-MaskGroup`);
+  const isLastChildMask = lastChildItem && lastChildItem.type === 'Shape' && (lastChildItem as Btwx.Shape).mask;
+  const underlyingMask = lastChildItem ? isLastChildMask ? lastChildItem.id : lastChildItem.underlyingMask : null;
+  if (underlyingMask) {
+    if (isLastChildMask) {
+      if (ignoreUnderlyingMask) {
+        return getPaperLayer(`${underlyingMask}-MaskGroup`).parent;
+      } else {
+        return getPaperLayer(`${underlyingMask}-MaskGroup`);
+      }
+    } else {
+      if (lastChildItem.ignoreUnderlyingMask || ignoreUnderlyingMask) {
+        return getPaperLayer(`${underlyingMask}-MaskGroup`).parent;
+      } else {
+        return getPaperLayer(`${underlyingMask}-MaskGroup`);
+      }
+    }
   } else {
     if (paperLayer.data.layerType === 'Artboard') {
       return paperLayer.getItem({ data: { id: 'ArtboardLayers' } });
@@ -308,8 +355,8 @@ export const getParentPaperLayer = (store: LayerState, id: string, index?: numbe
   }
 };
 
-export const getPage = (store: LayerState): em.Page => {
-  return store.byId[store.page] as em.Page;
+export const getPage = (store: LayerState): Btwx.Page => {
+  return store.byId[store.page] as Btwx.Page;
 };
 
 export const getPagePaperLayer = (store: LayerState): paper.Item => {
@@ -365,7 +412,7 @@ export const getMaskableUnderlyingSiblings = (state: LayerState, id: string, sup
     if (childItem.ignoreUnderlyingMask) {
       continueMaskChain = false;
     } else {
-      if (childItem.type === 'Shape' && (childItem as em.Shape).mask) {
+      if (childItem.type === 'Shape' && (childItem as Btwx.Shape).mask) {
         continueMaskChain = false;
       }
       maskableUnderlyingSiblings.push(child);
@@ -396,7 +443,7 @@ export const getOlderSiblingIgnoringUnderlyingMask = (state: LayerState, id: str
   let i = layerIndex - 1;
   while(i > 0) {
     const siblingItem = state.byId[parentItem.children[i]];
-    if (siblingItem.type === 'Shape' && (siblingItem as em.Shape).mask) {
+    if (siblingItem.type === 'Shape' && (siblingItem as Btwx.Shape).mask) {
       break;
     } else {
       if (siblingItem.ignoreUnderlyingMask) {
@@ -449,7 +496,7 @@ export const isScopeGroupLayer = (store: LayerState, id: string): boolean => {
   return expandableLayers.includes(id);
 };
 
-export const getNearestScopeAncestor = (store: LayerState, id: string): em.Layer => {
+export const getNearestScopeAncestor = (store: LayerState, id: string): Btwx.Layer => {
   let currentNode = store.byId[id];
   while(currentNode.scope.length > 1 && !store.scope.includes(currentNode.scope[currentNode.scope.length - 1])) {
     currentNode = store.byId[currentNode.parent];
@@ -457,7 +504,7 @@ export const getNearestScopeAncestor = (store: LayerState, id: string): em.Layer
   return currentNode;
 };
 
-export const getDeepSelectItem = (store: LayerState, id: string): em.Layer => {
+export const getDeepSelectItem = (store: LayerState, id: string): Btwx.Layer => {
   const layerItem = store.byId[id];
   const layerScope = layerItem.scope;
   const nearestScopeAncestor = getNearestScopeAncestor(store, id);
@@ -473,7 +520,7 @@ export const getDeepSelectItem = (store: LayerState, id: string): em.Layer => {
   }
 };
 
-export const getNearestScopeGroupAncestor = (store: LayerState, id: string): em.Layer => {
+export const getNearestScopeGroupAncestor = (store: LayerState, id: string): Btwx.Layer => {
   let currentNode = getLayer(store, id);
   while(!isScopeGroupLayer(store, currentNode.id)) {
     currentNode = getParentLayer(store, currentNode.id);
@@ -591,7 +638,7 @@ export const getCanvasBounds = (state: LayerState): paper.Rectangle => {
 //   return new paper.Point(xMid, yMid);
 // };
 
-export const getClipboardTopLeft = (layerItems: em.Layer[]): paper.Point => {
+export const getClipboardTopLeft = (layerItems: Btwx.Layer[]): paper.Point => {
   const paperLayerPoints = layerItems.reduce((result, current) => {
     const layerItem = current;
     const topLeft = new paperMain.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
@@ -600,7 +647,7 @@ export const getClipboardTopLeft = (layerItems: em.Layer[]): paper.Point => {
   return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.min) : null;
 };
 
-export const getClipboardBottomRight = (layerItems: em.Layer[]): paper.Point => {
+export const getClipboardBottomRight = (layerItems: Btwx.Layer[]): paper.Point => {
   const paperLayerPoints = layerItems.reduce((result, current) => {
     const layerItem = current;
     const bottomRight = new paperMain.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
@@ -609,7 +656,7 @@ export const getClipboardBottomRight = (layerItems: em.Layer[]): paper.Point => 
   return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.max) : null;
 };
 
-export const getClipboardCenter = (layerItems: em.Layer[]): paper.Point => {
+export const getClipboardCenter = (layerItems: Btwx.Layer[]): paper.Point => {
   const topLeft = getClipboardTopLeft(layerItems);
   const bottomRight = getClipboardBottomRight(layerItems);
   const xMid = (topLeft.x + bottomRight.x) / 2;
@@ -617,16 +664,16 @@ export const getClipboardCenter = (layerItems: em.Layer[]): paper.Point => {
   return new paper.Point(xMid, yMid);
 };
 
-export const getDestinationEquivalent = (store: LayerState, layer: string, destinationChildren: string[]): em.Layer => {
+export const getDestinationEquivalent = (store: LayerState, layer: string, destinationChildren: string[]): Btwx.Layer => {
   const layerItem = store.byId[layer];
-  const equivalent = destinationChildren.reduce((result: em.Layer, current) => {
+  const equivalent = destinationChildren.reduce((result: Btwx.Layer, current) => {
     const childLayer = store.byId[current];
     if (childLayer.name === layerItem.name && childLayer.type === layerItem.type) {
       if (result) {
         const layerScope = layerItem.scope;
-        const layerArtboard = store.byId[layerScope[1]] as em.Artboard;
+        const layerArtboard = store.byId[layerScope[1]] as Btwx.Artboard;
         const resultScope = store.byId[result.id].scope;
-        const childArtboard = store.byId[resultScope[1]] as em.Artboard;
+        const childArtboard = store.byId[resultScope[1]] as Btwx.Artboard;
         const layerArtboardPosition = getPositionInArtboard(layerItem, layerArtboard);
         const resultArtboardPosition = getPositionInArtboard(result, childArtboard);
         const childArtboardPosition = getPositionInArtboard(childLayer, childArtboard);
@@ -644,33 +691,33 @@ export const getDestinationEquivalent = (store: LayerState, layer: string, desti
   return equivalent;
 };
 
-export const getPositionInArtboard = (layer: em.Layer, artboard: em.Artboard): paper.Point => {
+export const getPositionInArtboard = (layer: Btwx.Layer, artboard: Btwx.Artboard): paper.Point => {
   const xDiff = layer.frame.x - (artboard.frame.x - (artboard.frame.width / 2));
   const yDiff = layer.frame.y - (artboard.frame.y - (artboard.frame.height / 2));
   return new paper.Point(parseInt(xDiff.toFixed(2)), parseInt(yDiff.toFixed(2)));
 };
 
-export const hasImageTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasImageTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   return (
     layerItem.type === 'Image' &&
     equivalentLayerItem.type === 'Image' &&
-    (layerItem as em.Image).imageId !== (equivalentLayerItem as em.Image).imageId
+    (layerItem as Btwx.Image).imageId !== (equivalentLayerItem as Btwx.Image).imageId
   );
 };
 
-export const hasShapeTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasShapeTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   return (
     layerItem.type === 'Shape' &&
     equivalentLayerItem.type === 'Shape' &&
     (
-      (layerItem as em.Shape).shapeType !== (equivalentLayerItem as em.Shape).shapeType ||
-      (layerItem as em.Shape).shapeType === 'Polygon' && (equivalentLayerItem as em.Shape).shapeType === 'Polygon' && (layerItem as em.Polygon).sides !== (equivalentLayerItem as em.Polygon).sides ||
-      (layerItem as em.Shape).shapeType === 'Star' && (equivalentLayerItem as em.Shape).shapeType === 'Star' && (layerItem as em.Star).points !== (equivalentLayerItem as em.Star).points
+      (layerItem as Btwx.Shape).shapeType !== (equivalentLayerItem as Btwx.Shape).shapeType ||
+      (layerItem as Btwx.Shape).shapeType === 'Polygon' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Polygon' && (layerItem as Btwx.Polygon).sides !== (equivalentLayerItem as Btwx.Polygon).sides ||
+      (layerItem as Btwx.Shape).shapeType === 'Star' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Star' && (layerItem as Btwx.Star).points !== (equivalentLayerItem as Btwx.Star).points
     )
   );
 };
 
-export const hasFillTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasFillTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   return (
     (layerItem.type === 'Shape' || layerItem.type === 'Text') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text') &&
@@ -685,82 +732,82 @@ export const hasFillTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer)
   );
 };
 
-export const hasFillGradientOriginXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasFillGradientOriginXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const fillTween = hasFillTween(layerItem, equivalentLayerItem);
   const hasFillGradientTween = fillTween && (layerItem.style.fill.fillType === 'gradient' && equivalentLayerItem.style.fill.fillType === 'gradient');
   const sameOriginX =  layerItem.style.fill.gradient.origin.x.toFixed(2) === equivalentLayerItem.style.fill.gradient.origin.x.toFixed(2);
   return hasFillGradientTween && !sameOriginX;
 };
 
-export const hasFillGradientOriginYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasFillGradientOriginYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const fillTween = hasFillTween(layerItem, equivalentLayerItem);
   const hasFillGradientTween = fillTween && (layerItem.style.fill.fillType === 'gradient' && equivalentLayerItem.style.fill.fillType === 'gradient');
   const sameOriginY =  layerItem.style.fill.gradient.origin.y.toFixed(2) === equivalentLayerItem.style.fill.gradient.origin.y.toFixed(2);
   return hasFillGradientTween && !sameOriginY;
 };
 
-export const hasFillGradientDestinationXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasFillGradientDestinationXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const fillTween = hasFillTween(layerItem, equivalentLayerItem);
   const hasFillGradientTween = fillTween && (layerItem.style.fill.fillType === 'gradient' && equivalentLayerItem.style.fill.fillType === 'gradient');
   const sameOriginX =  layerItem.style.fill.gradient.destination.x.toFixed(2) === equivalentLayerItem.style.fill.gradient.destination.x.toFixed(2);
   return hasFillGradientTween && !sameOriginX;
 };
 
-export const hasFillGradientDestinationYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasFillGradientDestinationYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const fillTween = hasFillTween(layerItem, equivalentLayerItem);
   const hasFillGradientTween = fillTween && (layerItem.style.fill.fillType === 'gradient' && equivalentLayerItem.style.fill.fillType === 'gradient');
   const sameOriginY =  layerItem.style.fill.gradient.destination.y.toFixed(2) === equivalentLayerItem.style.fill.gradient.destination.y.toFixed(2);
   return hasFillGradientTween && !sameOriginY;
 };
 
-export const hasXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer, artboardLayerItem: em.Artboard, destinationArtboardLayerItem: em.Artboard): boolean => {
+export const hasXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer, artboardLayerItem: Btwx.Artboard, destinationArtboardLayerItem: Btwx.Artboard): boolean => {
   const layerArtboardPosition = getPositionInArtboard(layerItem, artboardLayerItem);
   const equivalentArtboardPosition = getPositionInArtboard(equivalentLayerItem, destinationArtboardLayerItem);
-  const lineToLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType === 'Line';
+  const lineToLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
   const groupToGroup = layerItem.type === 'Group' && equivalentLayerItem.type === 'Group';
   const textToText = layerItem.type === 'Text' && equivalentLayerItem.type === 'Text';
-  const fontSizeMatch = textToText && (layerItem as em.Text).textStyle.fontSize === (equivalentLayerItem as em.Text).textStyle.fontSize;
-  const leadingsMatch = textToText && (layerItem as em.Text).textStyle.leading === (equivalentLayerItem as em.Text).textStyle.leading;
+  const fontSizeMatch = textToText && (layerItem as Btwx.Text).textStyle.fontSize === (equivalentLayerItem as Btwx.Text).textStyle.fontSize;
+  const leadingsMatch = textToText && (layerItem as Btwx.Text).textStyle.leading === (equivalentLayerItem as Btwx.Text).textStyle.leading;
   const positionsMatch = layerArtboardPosition.x === equivalentArtboardPosition.x;
   return (!lineToLine && !groupToGroup && !positionsMatch) || (textToText && (!fontSizeMatch || !leadingsMatch));
 };
 
-export const hasYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer, artboardLayerItem: em.Artboard, destinationArtboardLayerItem: em.Artboard): boolean => {
+export const hasYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer, artboardLayerItem: Btwx.Artboard, destinationArtboardLayerItem: Btwx.Artboard): boolean => {
   const layerArtboardPosition = getPositionInArtboard(layerItem, artboardLayerItem);
   const equivalentArtboardPosition = getPositionInArtboard(equivalentLayerItem, destinationArtboardLayerItem);
-  const lineToLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType === 'Line';
+  const lineToLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
   const groupToGroup = layerItem.type === 'Group' && equivalentLayerItem.type === 'Group';
   const textToText = layerItem.type === 'Text' && equivalentLayerItem.type === 'Text';
-  const fontSizeMatch = textToText && (layerItem as em.Text).textStyle.fontSize === (equivalentLayerItem as em.Text).textStyle.fontSize;
-  const leadingsMatch = textToText && (layerItem as em.Text).textStyle.leading === (equivalentLayerItem as em.Text).textStyle.leading;
+  const fontSizeMatch = textToText && (layerItem as Btwx.Text).textStyle.fontSize === (equivalentLayerItem as Btwx.Text).textStyle.fontSize;
+  const leadingsMatch = textToText && (layerItem as Btwx.Text).textStyle.leading === (equivalentLayerItem as Btwx.Text).textStyle.leading;
   const positionsMatch = layerArtboardPosition.y === equivalentArtboardPosition.y;
   return (!lineToLine && !groupToGroup && !positionsMatch) || (textToText && (!fontSizeMatch || !leadingsMatch));
 };
 
-export const hasRotationTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
-  const lineToLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType === 'Line';
+export const hasRotationTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const lineToLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
   const groupToGroup = layerItem.type === 'Group' && equivalentLayerItem.type === 'Group';
   const rotationsMatch = layerItem.transform.rotation.toFixed(2) === equivalentLayerItem.transform.rotation.toFixed(2);
   return !lineToLine && !groupToGroup && !rotationsMatch;
 };
 
-export const hasWidthTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
-  const lineToLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType === 'Line';
-  const layerItemValid = ((layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType !== 'Line') || layerItem.type === 'Image');
-  const equivalentLayerItemValid = ((equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType !== 'Line') || equivalentLayerItem.type === 'Image');
+export const hasWidthTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const lineToLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
+  const layerItemValid = ((layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image');
+  const equivalentLayerItemValid = ((equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType !== 'Line') || equivalentLayerItem.type === 'Image');
   const widthsMatch = Math.round(layerItem.frame.innerWidth) === Math.round(equivalentLayerItem.frame.innerWidth);
   return !lineToLine && (layerItemValid && equivalentLayerItemValid) && !widthsMatch;
 };
 
-export const hasHeightTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasHeightTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   return (
-    ((layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType !== 'Line') || layerItem.type === 'Image') &&
-    ((equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType !== 'Line') || equivalentLayerItem.type === 'Image') &&
+    ((layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image') &&
+    ((equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType !== 'Line') || equivalentLayerItem.type === 'Image') &&
     Math.round(layerItem.frame.innerHeight) !== Math.round(equivalentLayerItem.frame.innerHeight)
   );
 };
 
-export const hasStrokeTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasStrokeTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   return (
     (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
@@ -775,35 +822,35 @@ export const hasStrokeTween = (layerItem: em.Layer, equivalentLayerItem: em.Laye
   );
 };
 
-export const hasStrokeGradientOriginXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasStrokeGradientOriginXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const strokeTween = hasStrokeTween(layerItem, equivalentLayerItem);
   const hasStrokeGradientTween = strokeTween && (layerItem.style.stroke.fillType === 'gradient' && equivalentLayerItem.style.stroke.fillType === 'gradient');
   const sameOriginX = layerItem.style.stroke.gradient.origin.x.toFixed(2) === equivalentLayerItem.style.stroke.gradient.origin.x.toFixed(2);
   return hasStrokeGradientTween && !sameOriginX;
 };
 
-export const hasStrokeGradientOriginYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasStrokeGradientOriginYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const strokeTween = hasStrokeTween(layerItem, equivalentLayerItem);
   const hasStrokeGradientTween = strokeTween && (layerItem.style.stroke.fillType === 'gradient' && equivalentLayerItem.style.stroke.fillType === 'gradient');
   const sameOriginY =  layerItem.style.stroke.gradient.origin.y.toFixed(2) === equivalentLayerItem.style.stroke.gradient.origin.y.toFixed(2);
   return hasStrokeGradientTween && !sameOriginY;
 };
 
-export const hasStrokeGradientDestinationXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasStrokeGradientDestinationXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const strokeTween = hasStrokeTween(layerItem, equivalentLayerItem);
   const hasStrokeGradientTween = strokeTween && (layerItem.style.stroke.fillType === 'gradient' && equivalentLayerItem.style.stroke.fillType === 'gradient');
   const sameOriginX =  layerItem.style.stroke.gradient.destination.x.toFixed(2) === equivalentLayerItem.style.stroke.gradient.destination.x.toFixed(2);
   return hasStrokeGradientTween && !sameOriginX;
 };
 
-export const hasStrokeGradientDestinationYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasStrokeGradientDestinationYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const strokeTween = hasStrokeTween(layerItem, equivalentLayerItem);
   const hasStrokeGradientTween = strokeTween && (layerItem.style.stroke.fillType === 'gradient' && equivalentLayerItem.style.stroke.fillType === 'gradient');
   const sameOriginY =  layerItem.style.stroke.gradient.destination.y.toFixed(2) === equivalentLayerItem.style.stroke.gradient.destination.y.toFixed(2);
   return hasStrokeGradientTween && !sameOriginY;
 };
 
-export const hasDashOffsetTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasDashOffsetTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   return (
     (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
@@ -812,7 +859,7 @@ export const hasDashOffsetTween = (layerItem: em.Layer, equivalentLayerItem: em.
   );
 };
 
-export const hasDashArrayWidthTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasDashArrayWidthTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   return (
     (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
@@ -821,7 +868,7 @@ export const hasDashArrayWidthTween = (layerItem: em.Layer, equivalentLayerItem:
   );
 };
 
-export const hasDashArrayGapTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasDashArrayGapTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   return (
     (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
@@ -830,7 +877,7 @@ export const hasDashArrayGapTween = (layerItem: em.Layer, equivalentLayerItem: e
   );
 };
 
-export const hasStrokeWidthTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasStrokeWidthTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   return (
     (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
@@ -842,7 +889,7 @@ export const hasStrokeWidthTween = (layerItem: em.Layer, equivalentLayerItem: em
   );
 };
 
-export const hasShadowColorTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasShadowColorTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   return (
     (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
@@ -854,7 +901,7 @@ export const hasShadowColorTween = (layerItem: em.Layer, equivalentLayerItem: em
   );
 };
 
-export const hasShadowOffsetXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasShadowOffsetXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   return (
     (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
@@ -866,7 +913,7 @@ export const hasShadowOffsetXTween = (layerItem: em.Layer, equivalentLayerItem: 
   );
 };
 
-export const hasShadowOffsetYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasShadowOffsetYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   return (
     (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
@@ -878,7 +925,7 @@ export const hasShadowOffsetYTween = (layerItem: em.Layer, equivalentLayerItem: 
   );
 };
 
-export const hasShadowBlurTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasShadowBlurTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   return (
     (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
     (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
@@ -890,55 +937,55 @@ export const hasShadowBlurTween = (layerItem: em.Layer, equivalentLayerItem: em.
   );
 };
 
-export const hasOpacityTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasOpacityTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   return layerItem.style.opacity.toFixed(2) !== equivalentLayerItem.style.opacity.toFixed(2);
 };
 
-export const hasFontSizeTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasFontSizeTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   return (
     layerItem.type === 'Text' &&
     equivalentLayerItem.type === 'Text' &&
-    (layerItem as em.Text).textStyle.fontSize.toFixed(2) !== (equivalentLayerItem as em.Text).textStyle.fontSize.toFixed(2)
+    (layerItem as Btwx.Text).textStyle.fontSize.toFixed(2) !== (equivalentLayerItem as Btwx.Text).textStyle.fontSize.toFixed(2)
   );
 };
 
-export const hasLineHeightTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
+export const hasLineHeightTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   return (
     layerItem.type === 'Text' &&
     equivalentLayerItem.type === 'Text' &&
-    (layerItem as em.Text).textStyle.leading.toFixed(2) !== (equivalentLayerItem as em.Text).textStyle.leading.toFixed(2)
+    (layerItem as Btwx.Text).textStyle.leading.toFixed(2) !== (equivalentLayerItem as Btwx.Text).textStyle.leading.toFixed(2)
   );
 };
 
-export const hasFromXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
-  const lineToLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType === 'Line';
-  const fromXMatch = lineToLine && (layerItem as em.Line).from.x.toFixed(2) === (equivalentLayerItem as em.Line).from.x.toFixed(2);
+export const hasFromXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const lineToLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
+  const fromXMatch = lineToLine && (layerItem as Btwx.Line).from.x.toFixed(2) === (equivalentLayerItem as Btwx.Line).from.x.toFixed(2);
   const widthsMatch = Math.round(layerItem.frame.innerWidth) === Math.round(equivalentLayerItem.frame.innerWidth);
   return lineToLine && (!fromXMatch || !widthsMatch);
 };
 
-export const hasFromYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
-  const lineToLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType === 'Line';
-  const fromYMatch = lineToLine && (layerItem as em.Line).from.y.toFixed(2) === (equivalentLayerItem as em.Line).from.y.toFixed(2);
+export const hasFromYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const lineToLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
+  const fromYMatch = lineToLine && (layerItem as Btwx.Line).from.y.toFixed(2) === (equivalentLayerItem as Btwx.Line).from.y.toFixed(2);
   const widthsMatch = Math.round(layerItem.frame.innerWidth) === Math.round(equivalentLayerItem.frame.innerWidth);
   return lineToLine && (!fromYMatch || !widthsMatch);
 };
 
-export const hasToXTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
-  const lineToLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType === 'Line';
-  const toXMatch = lineToLine && (layerItem as em.Line).to.x.toFixed(2) === (equivalentLayerItem as em.Line).to.x.toFixed(2);
+export const hasToXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const lineToLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
+  const toXMatch = lineToLine && (layerItem as Btwx.Line).to.x.toFixed(2) === (equivalentLayerItem as Btwx.Line).to.x.toFixed(2);
   const widthsMatch = Math.round(layerItem.frame.innerWidth) === Math.round(equivalentLayerItem.frame.innerWidth);
   return lineToLine && (!toXMatch || !widthsMatch);
 };
 
-export const hasToYTween = (layerItem: em.Layer, equivalentLayerItem: em.Layer): boolean => {
-  const lineToLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as em.Shape).shapeType === 'Line';
-  const toYMatch = lineToLine && (layerItem as em.Line).to.y.toFixed(2) === (equivalentLayerItem as em.Line).to.y.toFixed(2);
+export const hasToYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const lineToLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
+  const toYMatch = lineToLine && (layerItem as Btwx.Line).to.y.toFixed(2) === (equivalentLayerItem as Btwx.Line).to.y.toFixed(2);
   const widthsMatch = Math.round(layerItem.frame.innerWidth) === Math.round(equivalentLayerItem.frame.innerWidth);
   return lineToLine && (!toYMatch || !widthsMatch);
 };
 
-export const getEquivalentTweenProp = (layerItem: em.Layer, equivalentLayerItem: em.Layer, artboardLayerItem: em.Artboard, destinationArtboardLayerItem: em.Artboard, prop: em.TweenProp): boolean => {
+export const getEquivalentTweenProp = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer, artboardLayerItem: Btwx.Artboard, destinationArtboardLayerItem: Btwx.Artboard, prop: Btwx.TweenProp): boolean => {
   switch(prop) {
     case 'image':
       return hasImageTween(layerItem, equivalentLayerItem);
@@ -1007,7 +1054,7 @@ export const getEquivalentTweenProp = (layerItem: em.Layer, equivalentLayerItem:
   }
 };
 
-export const getEquivalentTweenProps = (layerItem: em.Layer, equivalentLayerItem: em.Layer, artboardLayerItem: em.Artboard, destinationArtboardLayerItem: em.Artboard): em.TweenPropMap => ({
+export const getEquivalentTweenProps = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer, artboardLayerItem: Btwx.Artboard, destinationArtboardLayerItem: Btwx.Artboard): Btwx.TweenPropMap => ({
   image: hasImageTween(layerItem, equivalentLayerItem),
   shape: hasShapeTween(layerItem, equivalentLayerItem),
   fill: hasFillTween(layerItem, equivalentLayerItem),
@@ -1043,8 +1090,8 @@ export const getEquivalentTweenProps = (layerItem: em.Layer, equivalentLayerItem
   toY: hasToYTween(layerItem, equivalentLayerItem)
 });
 
-export const getLongestEventTween = (tweensById: {[id: string]: em.Tween}): em.Tween => {
-  return Object.keys(tweensById).reduce((result: em.Tween, current: string) => {
+export const getLongestEventTween = (tweensById: {[id: string]: Btwx.Tween}): Btwx.Tween => {
+  return Object.keys(tweensById).reduce((result: Btwx.Tween, current: string) => {
     if (tweensById[current].duration + tweensById[current].delay >= result.duration + result.delay) {
       return tweensById[current];
     } else {
@@ -1059,9 +1106,9 @@ export const isTweenDestinationLayer = (store: LayerState, layer: string): boole
   return layerTweens.length > 0 && layerTweens.some((tween) => store.tweenById[tween].destinationLayer === layer);
 };
 
-export const getTweensEventsByOriginArtboard = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: em.TweenEvent } } => {
+export const getTweensEventsByOriginArtboard = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: Btwx.TweenEvent } } => {
   const allIds: string[] = [];
-  const byId = Object.keys(store.tweenEventById).reduce((result: {[id: string]: em.TweenEvent}, current) => {
+  const byId = Object.keys(store.tweenEventById).reduce((result: {[id: string]: Btwx.TweenEvent}, current) => {
     const tweenEvent = store.tweenEventById[current];
     if (tweenEvent.artboard === artboard) {
       result[current] = store.tweenEventById[current];
@@ -1075,17 +1122,17 @@ export const getTweensEventsByOriginArtboard = (store: LayerState, artboard: str
   };
 };
 
-export const getAllArtboardTweenEventArtboards = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: em.Artboard } } => {
+export const getAllArtboardTweenEventArtboards = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: Btwx.Artboard } } => {
   const allArtboardAnimationEvents = getTweensEventsByOriginArtboard(store, artboard);
   const allIds: string[] = [];
-  const byId = Object.keys(allArtboardAnimationEvents.byId).reduce((result: { [id: string]: em.Artboard }, current) => {
+  const byId = Object.keys(allArtboardAnimationEvents.byId).reduce((result: { [id: string]: Btwx.Artboard }, current) => {
     const event = allArtboardAnimationEvents.byId[current];
     if (!allIds.includes(event.destinationArtboard)) {
-      result[event.destinationArtboard] = store.byId[event.destinationArtboard] as em.Artboard;
+      result[event.destinationArtboard] = store.byId[event.destinationArtboard] as Btwx.Artboard;
       allIds.push(event.destinationArtboard);
     }
     if (!allIds.includes(event.artboard)) {
-      result[event.artboard] = store.byId[event.artboard] as em.Artboard;
+      result[event.artboard] = store.byId[event.artboard] as Btwx.Artboard;
       allIds.push(event.artboard);
     }
     return result;
@@ -1096,13 +1143,13 @@ export const getAllArtboardTweenEventArtboards = (store: LayerState, artboard: s
   };
 };
 
-export const getAllArtboardTweenEventDestinations = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: em.Artboard } } => {
+export const getAllArtboardTweenEventDestinations = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: Btwx.Artboard } } => {
   const allArtboardAnimationEvents = getTweensEventsByOriginArtboard(store, artboard);
   const allIds: string[] = [];
-  const byId = Object.keys(allArtboardAnimationEvents.byId).reduce((result: { [id: string]: em.Artboard }, current) => {
+  const byId = Object.keys(allArtboardAnimationEvents.byId).reduce((result: { [id: string]: Btwx.Artboard }, current) => {
     const event = allArtboardAnimationEvents.byId[current];
     if (!allIds.includes(event.destinationArtboard)) {
-      result[event.destinationArtboard] = store.byId[event.destinationArtboard] as em.Artboard;
+      result[event.destinationArtboard] = store.byId[event.destinationArtboard] as Btwx.Artboard;
       allIds.push(event.destinationArtboard);
     }
     return result;
@@ -1113,13 +1160,13 @@ export const getAllArtboardTweenEventDestinations = (store: LayerState, artboard
   };
 };
 
-export const getAllArtboardTweenEventLayers = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: em.Layer } } => {
+export const getAllArtboardTweenEventLayers = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: Btwx.Layer } } => {
   const allArtboardAnimationEvents = getTweensEventsByOriginArtboard(store, artboard);
   const allIds: string[] = [];
-  const byId = Object.keys(allArtboardAnimationEvents.byId).reduce((result: { [id: string]: em.Layer }, current) => {
+  const byId = Object.keys(allArtboardAnimationEvents.byId).reduce((result: { [id: string]: Btwx.Layer }, current) => {
     const event = allArtboardAnimationEvents.byId[current];
     if (!allIds.includes(event.layer)) {
-      result[event.layer] = store.byId[event.layer] as em.Artboard;
+      result[event.layer] = store.byId[event.layer] as Btwx.Artboard;
       allIds.push(event.layer);
     }
     return result;
@@ -1130,10 +1177,10 @@ export const getAllArtboardTweenEventLayers = (store: LayerState, artboard: stri
   };
 };
 
-export const getAllArtboardTweens = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: em.Tween } } => {
+export const getAllArtboardTweens = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: Btwx.Tween } } => {
   const allArtboardAnimationEvents = getTweensEventsByOriginArtboard(store, artboard);
   const allIds: string[] = [];
-  const byId = Object.keys(allArtboardAnimationEvents.byId).reduce((result: { [id: string]: em.Tween }, current) => {
+  const byId = Object.keys(allArtboardAnimationEvents.byId).reduce((result: { [id: string]: Btwx.Tween }, current) => {
     const event = allArtboardAnimationEvents.byId[current];
     event.tweens.forEach((tween) => {
       result[tween] = store.tweenById[tween];
@@ -1147,10 +1194,10 @@ export const getAllArtboardTweens = (store: LayerState, artboard: string): { all
   };
 };
 
-export const getAllArtboardTweenLayers = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: em.Layer } } => {
+export const getAllArtboardTweenLayers = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: Btwx.Layer } } => {
   const allArtboardTweens = getAllArtboardTweens(store, artboard);
   const allIds: string[] = [];
-  const byId = Object.keys(allArtboardTweens.byId).reduce((result: { [id: string]: em.Layer }, current) => {
+  const byId = Object.keys(allArtboardTweens.byId).reduce((result: { [id: string]: Btwx.Layer }, current) => {
     const layerId = allArtboardTweens.byId[current].layer;
     if (!allIds.includes(layerId)) {
       result[layerId] = store.byId[layerId];
@@ -1164,10 +1211,10 @@ export const getAllArtboardTweenLayers = (store: LayerState, artboard: string): 
   };
 };
 
-export const getAllArtboardTweenLayerDestinations = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: em.Layer } } => {
+export const getAllArtboardTweenLayerDestinations = (store: LayerState, artboard: string): { allIds: string[]; byId: { [id: string]: Btwx.Layer } } => {
   const allArtboardTweens = getAllArtboardTweens(store, artboard);
   const allIds: string[] = [];
-  const byId = Object.keys(allArtboardTweens.byId).reduce((result: { [id: string]: em.Layer }, current) => {
+  const byId = Object.keys(allArtboardTweens.byId).reduce((result: { [id: string]: Btwx.Layer }, current) => {
     const layerId = allArtboardTweens.byId[current].destinationLayer;
     if (!allIds.includes(layerId)) {
       result[layerId] = store.byId[layerId];
@@ -1181,10 +1228,10 @@ export const getAllArtboardTweenLayerDestinations = (store: LayerState, artboard
   };
 };
 
-export const getTweenEventLayers = (store: LayerState, eventId: string): { allIds: string[]; byId: { [id: string]: em.Layer } } => {
+export const getTweenEventLayers = (store: LayerState, eventId: string): { allIds: string[]; byId: { [id: string]: Btwx.Layer } } => {
   const tweenEvent = store.tweenEventById[eventId];
   const allIds: string[] = [];
-  const byId = tweenEvent.tweens.reduce((result: { [id: string]: em.Layer }, current) => {
+  const byId = tweenEvent.tweens.reduce((result: { [id: string]: Btwx.Layer }, current) => {
     const tween = store.tweenById[current];
     if (!allIds.includes(tween.layer)) {
       result[tween.layer] = store.byId[tween.layer];
@@ -1198,10 +1245,10 @@ export const getTweenEventLayers = (store: LayerState, eventId: string): { allId
   };
 };
 
-export const getTweenEventLayerTweens = (store: LayerState, eventId: string, layerId: string): { allIds: string[]; byId: { [id: string]: em.Tween } } => {
+export const getTweenEventLayerTweens = (store: LayerState, eventId: string, layerId: string): { allIds: string[]; byId: { [id: string]: Btwx.Tween } } => {
   const tweenEvent = store.tweenEventById[eventId];
   const allIds: string[] = [];
-  const byId = tweenEvent.tweens.reduce((result: { [id: string]: em.Tween }, current) => {
+  const byId = tweenEvent.tweens.reduce((result: { [id: string]: Btwx.Tween }, current) => {
     const tween = store.tweenById[current];
     if (tween.layer === layerId) {
       result[current] = tween;
@@ -1215,9 +1262,9 @@ export const getTweenEventLayerTweens = (store: LayerState, eventId: string, lay
   };
 };
 
-export const getTweensByDestinationLayer = (store: LayerState, layerId: string): { allIds: string[]; byId: { [id: string]: em.Tween } } => {
+export const getTweensByDestinationLayer = (store: LayerState, layerId: string): { allIds: string[]; byId: { [id: string]: Btwx.Tween } } => {
   const allIds: string[] = [];
-  const byId = Object.keys(store.tweenById).reduce((result: { [id: string]: em.Tween }, current) => {
+  const byId = Object.keys(store.tweenById).reduce((result: { [id: string]: Btwx.Tween }, current) => {
     const tween = store.tweenById[current];
     if (tween.destinationLayer === layerId) {
       allIds.push(current);
@@ -1231,9 +1278,9 @@ export const getTweensByDestinationLayer = (store: LayerState, layerId: string):
   };
 };
 
-export const getTweensByLayer = (store: LayerState, layerId: string): { allIds: string[]; byId: { [id: string]: em.Tween } } => {
+export const getTweensByLayer = (store: LayerState, layerId: string): { allIds: string[]; byId: { [id: string]: Btwx.Tween } } => {
   const allIds: string[] = [];
-  const byId = Object.keys(store.tweenById).reduce((result: { [id: string]: em.Tween }, current) => {
+  const byId = Object.keys(store.tweenById).reduce((result: { [id: string]: Btwx.Tween }, current) => {
     const tween = store.tweenById[current];
     if (tween.layer === layerId) {
       allIds.push(current);
@@ -1247,13 +1294,13 @@ export const getTweensByLayer = (store: LayerState, layerId: string): { allIds: 
   };
 };
 
-export const getTweensByProp = (store: LayerState, layerId: string, prop: em.TweenProp): { allIds: string[]; byId: { [id: string]: em.Tween } } => {
+export const getTweensByProp = (store: LayerState, layerId: string, prop: Btwx.TweenProp): { allIds: string[]; byId: { [id: string]: Btwx.Tween } } => {
   const tweensByDestinationLayer = getTweensByDestinationLayer(store, layerId);
   const tweensByLayer = getTweensByLayer(store, layerId);
   const tweensByDestinationLayerAndProp = tweensByDestinationLayer.allIds.filter((id: string) => tweensByDestinationLayer.byId[id].prop === prop);
   const tweensByLayerAndProp = tweensByLayer.allIds.filter((id: string) => tweensByLayer.byId[id].prop === prop);
   const allIds = [...tweensByDestinationLayerAndProp, ...tweensByLayerAndProp];
-  const byId = Object.keys({...tweensByDestinationLayer.byId, ...tweensByLayer.byId}).reduce((result: { [id: string]: em.Tween }, current) => {
+  const byId = Object.keys({...tweensByDestinationLayer.byId, ...tweensByLayer.byId}).reduce((result: { [id: string]: Btwx.Tween }, current) => {
     const tween = store.tweenById[current];
     if (allIds.includes(current)) {
       result[current] = tween;
@@ -1266,9 +1313,9 @@ export const getTweensByProp = (store: LayerState, layerId: string, prop: em.Twe
   }
 };
 
-export const getTweensEventsByDestinationArtboard = (store: LayerState, artboardId: string): { allIds: string[]; byId: { [id: string]: em.TweenEvent } } => {
+export const getTweensEventsByDestinationArtboard = (store: LayerState, artboardId: string): { allIds: string[]; byId: { [id: string]: Btwx.TweenEvent } } => {
   const allIds: string[] = [];
-  const byId = Object.keys(store.tweenEventById).reduce((result: { [id: string]: em.TweenEvent }, current) => {
+  const byId = Object.keys(store.tweenEventById).reduce((result: { [id: string]: Btwx.TweenEvent }, current) => {
     const tweenEvent = store.tweenEventById[current];
     if (tweenEvent.destinationArtboard === artboardId) {
       allIds.push(current);
@@ -1282,7 +1329,7 @@ export const getTweensEventsByDestinationArtboard = (store: LayerState, artboard
   };
 };
 
-export const getTweenEventsWithArtboard = (store: LayerState, artboardId: string): { allIds: string[]; byId: { [id: string]: em.TweenEvent } } => {
+export const getTweenEventsWithArtboard = (store: LayerState, artboardId: string): { allIds: string[]; byId: { [id: string]: Btwx.TweenEvent } } => {
   const eventsWithArtboardAsOrigin = getTweensEventsByOriginArtboard(store, artboardId);
   const eventsWithArtboardAsDestination = getTweensEventsByDestinationArtboard(store, artboardId);
   return {
@@ -1294,9 +1341,9 @@ export const getTweenEventsWithArtboard = (store: LayerState, artboardId: string
   }
 };
 
-export const getTweensWithLayer = (store: LayerState, layerId: string): { allIds: string[]; byId: { [id: string]: em.Tween } } => {
+export const getTweensWithLayer = (store: LayerState, layerId: string): { allIds: string[]; byId: { [id: string]: Btwx.Tween } } => {
   const allIds: string[] = [];
-  const byId = store.allTweenIds.reduce((result: { [id: string]: em.Tween }, current) => {
+  const byId = store.allTweenIds.reduce((result: { [id: string]: Btwx.Tween }, current) => {
     const tween = store.tweenById[current];
     if (tween.layer === layerId || tween.destinationLayer === layerId) {
       result[current] = tween;
@@ -1310,31 +1357,31 @@ export const getTweensWithLayer = (store: LayerState, layerId: string): { allIds
   };
 };
 
-export const getGradientOriginPoint = (layerItem: em.Layer, origin: em.Point): paper.Point => {
-  const isLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line';
+export const getGradientOriginPoint = (layerItem: Btwx.Layer, origin: Btwx.Point): paper.Point => {
+  const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   return new paperMain.Point((origin.x * (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)) + layerItem.frame.x, (origin.y * (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)) + layerItem.frame.y);
 };
 
-export const getGradientDestinationPoint = (layerItem: em.Layer, destination: em.Point): paper.Point => {
-  const isLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line';
+export const getGradientDestinationPoint = (layerItem: Btwx.Layer, destination: Btwx.Point): paper.Point => {
+  const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   return new paperMain.Point((destination.x * (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)) + layerItem.frame.x, (destination.y * (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)) + layerItem.frame.y);
 };
 
-export const getLineFromPoint = (layerItem: em.Line): paper.Point => {
+export const getLineFromPoint = (layerItem: Btwx.Line): paper.Point => {
   return new paperMain.Point((layerItem.from.x * layerItem.frame.innerWidth) + layerItem.frame.x, (layerItem.from.y * layerItem.frame.innerWidth) + layerItem.frame.y);
 };
 
-export const getLineToPoint = (layerItem: em.Line): paper.Point => {
+export const getLineToPoint = (layerItem: Btwx.Line): paper.Point => {
   return new paperMain.Point((layerItem.to.x * layerItem.frame.innerWidth) + layerItem.frame.x, (layerItem.to.y * layerItem.frame.innerWidth) + layerItem.frame.y);
 };
 
-export const getLineVector = (layerItem: em.Line): paper.Point => {
+export const getLineVector = (layerItem: Btwx.Line): paper.Point => {
   const from = getLineFromPoint(layerItem);
   const to = getLineToPoint(layerItem);
   return to.subtract(from)
 };
 
-export const getGradientStops = (stops: em.GradientStop[]): paper.GradientStop[] => {
+export const getGradientStops = (stops: Btwx.GradientStop[]): paper.GradientStop[] => {
   return stops.reduce((result, current) => {
     result = [
       ...result,
@@ -1344,7 +1391,7 @@ export const getGradientStops = (stops: em.GradientStop[]): paper.GradientStop[]
   }, []);
 };
 
-export const getLayerSnapPoints = (id: string): em.SnapPoint[] => {
+export const getLayerSnapPoints = (id: string): Btwx.SnapPoint[] => {
   const paperLayer = getPaperLayer(id);
   let bounds;
   if (paperLayer.data.layerType === 'Artboard') {
@@ -1357,41 +1404,41 @@ export const getLayerSnapPoints = (id: string): em.SnapPoint[] => {
     axis: 'x',
     side: 'left',
     point: bounds.left
-  } as em.SnapPoint;
+  } as Btwx.SnapPoint;
   const centerX = {
     id: id,
     axis: 'x',
     side: 'center',
     point: bounds.center.x
-  } as em.SnapPoint;
+  } as Btwx.SnapPoint;
   const centerY = {
     id: id,
     axis: 'y',
     side: 'center',
     point: bounds.center.y
-  } as em.SnapPoint;
+  } as Btwx.SnapPoint;
   const right = {
     id: id,
     axis: 'x',
     side: 'right',
     point: bounds.right
-  } as em.SnapPoint;
+  } as Btwx.SnapPoint;
   const top = {
     id: id,
     axis: 'y',
     side: 'top',
     point: bounds.top
-  } as em.SnapPoint;
+  } as Btwx.SnapPoint;
   const bottom = {
     id: id,
     axis: 'y',
     side: 'bottom',
     point: bounds.bottom
-  } as em.SnapPoint;
+  } as Btwx.SnapPoint;
   return [left, right, top, bottom, centerX, centerY];
 };
 
-export const getInViewSnapPoints = (state: LayerState): em.SnapPoint[] => {
+export const getInViewSnapPoints = (state: LayerState): Btwx.SnapPoint[] => {
   return state.inView.allIds.reduce((result, current) => {
     const snapPoints = getLayerSnapPoints(current);
     result = [...result, ...snapPoints];
@@ -1434,7 +1481,7 @@ export const savePaperProjectJSON = (state: LayerState): string => {
   }
   const projectJSON = paperMain.project.exportJSON();
   const canvasImageBase64ById = state.allImageIds.reduce((result: { [id: string]: string }, current) => {
-    const layer = state.byId[current] as em.Image;
+    const layer = state.byId[current] as Btwx.Image;
     const paperLayer = getPaperLayer(current).getItem({data: {id: 'Raster'}}) as paper.Raster;
     result[layer.imageId] = paperLayer.source as string;
     return result;
@@ -1447,7 +1494,7 @@ export const savePaperProjectJSON = (state: LayerState): string => {
 
 interface ImportPaperProject {
   documentImages: {
-    [id: string]: em.DocumentImage;
+    [id: string]: Btwx.DocumentImage;
   };
   paperProject: string;
 }
@@ -1462,11 +1509,11 @@ export const importPaperProject = ({documentImages, paperProject}: ImportPaperPr
   paperMain.project.importJSON(newPaperProject);
 };
 
-export const colorsMatch = (color1: em.Color, color2: em.Color): boolean => {
+export const colorsMatch = (color1: Btwx.Color, color2: Btwx.Color): boolean => {
   return Object.keys(color1).every((prop: 'h' | 's' | 'l' | 'v' | 'a') => color1[prop] === color2[prop]);
 };
 
-export const gradientsMatch = (gradient1: em.Gradient, gradient2: em.Gradient): boolean => {
+export const gradientsMatch = (gradient1: Btwx.Gradient, gradient2: Btwx.Gradient): boolean => {
   const gradientTypesMatch = gradient1.gradientType === gradient2.gradientType;
   const originsMatch = gradient1.origin.x === gradient2.origin.x && gradient1.origin.y === gradient2.origin.y;
   const destinationsMatch = gradient1.destination.x === gradient2.destination.x && gradient1.destination.y === gradient2.destination.y;
@@ -1563,11 +1610,11 @@ export const getSortedTweenEvents = (store: RootState): string[] => {
 };
 
 export const getTweenEventsFrameItems = (store: RootState): {
-  tweenEventItems: em.TweenEvent[];
+  tweenEventItems: Btwx.TweenEvent[];
   tweenEventLayers: {
     allIds: string[];
     byId: {
-      [id: string]: em.Layer;
+      [id: string]: Btwx.Layer;
     };
   };
 } => {
@@ -1581,14 +1628,14 @@ export const getTweenEventsFrameItems = (store: RootState): {
       result = [...result, tweenEvent];
     }
     return result;
-  }, []) as em.TweenEvent[] : [layer.present.tweenEventById[tweenDrawer.event]] as em.TweenEvent[];
-  if (eventHoverItem && !tweenEventItems.some((item: em.TweenEvent) => item.id === eventHoverItem.id)) {
+  }, []) as Btwx.TweenEvent[] : [layer.present.tweenEventById[tweenDrawer.event]] as Btwx.TweenEvent[];
+  if (eventHoverItem && !tweenEventItems.some((item: Btwx.TweenEvent) => item.id === eventHoverItem.id)) {
     tweenEventItems.unshift(eventHoverItem);
   }
   const tweenEventLayers = tweenEventItems.reduce((result, current) => {
     const layerItem = layer.present.byId[current.layer];
-    // if (layerItem.type === 'Group' && (layerItem as em.Group).clipped) {
-    //   const childLayers = (layerItem as em.Group).children.reduce((childrenResult, currentChild) => {
+    // if (layerItem.type === 'Group' && (layerItem as Btwx.Group).clipped) {
+    //   const childLayers = (layerItem as Btwx.Group).children.reduce((childrenResult, currentChild) => {
     //     const childItem = layer.present.byId[currentChild];
     //     if (!result.allIds.includes(currentChild)) {
     //       childrenResult.allIds = [...childrenResult.allIds, currentChild];
@@ -1681,8 +1728,8 @@ export const canMaskLayers = (store: LayerState, layers: string[]): boolean => {
          layers.length > 0 &&
          layers.every((id: string) => store.byId[id].type !== 'Artboard') &&
          store.byId[layersByDepth[0]].type === 'Shape' &&
-         (store.byId[layersByDepth[0]] as em.Shape).shapeType !== 'Line' &&
-         !(store.byId[layersByDepth[0]] as em.Shape).mask
+         (store.byId[layersByDepth[0]] as Btwx.Shape).shapeType !== 'Line' &&
+         !(store.byId[layersByDepth[0]] as Btwx.Shape).mask
 };
 
 export const canMaskSelection = (store: LayerState): boolean => {
@@ -1692,7 +1739,7 @@ export const canMaskSelection = (store: LayerState): boolean => {
 // export const canBooleanOperation = (store: LayerState, layers: string[]): boolean => {
 //   return layers && layers.length >= 2 && layers.every((id: string) => {
 //     const layer = store.byId[id];
-//     return layer.type === 'Shape' && (layer as em.Shape).shapeType !== 'Line';
+//     return layer.type === 'Shape' && (layer as Btwx.Shape).shapeType !== 'Line';
 //   });
 // };
 
@@ -1745,7 +1792,7 @@ export const canMaskSelection = (store: LayerState): boolean => {
 // };
 
 export const canResizeSelection = (store: LayerState): boolean => {
-  const selectedWithChildren = store.selected.reduce((result: { allIds: string[]; byId: { [id: string]: em.Layer } }, current) => {
+  const selectedWithChildren = store.selected.reduce((result: { allIds: string[]; byId: { [id: string]: Btwx.Layer } }, current) => {
     const layerAndChildren = getLayerAndDescendants(store, current);
     result.allIds = [...result.allIds, ...layerAndChildren];
     layerAndChildren.forEach((id) => {

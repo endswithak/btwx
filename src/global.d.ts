@@ -1,6 +1,7 @@
 declare module 'lodash.debounce';
 declare module 'react-scroll-sync';
-declare namespace em {
+
+declare namespace Btwx {
 
   type ResizeHandle = 'topLeft' | 'topCenter' | 'topRight' | 'bottomLeft' | 'bottomCenter' | 'bottomRight' | 'leftCenter' | 'rightCenter';
 
@@ -96,6 +97,66 @@ declare namespace em {
 
   type FillStrokeTween = 'colorToColor' | 'nullToColor' | 'colorToNull' | 'gradientToGradient' | 'gradientToColor' | 'colorToGradient' | 'gradientToNull' | 'nullToGradient';
 
+  interface DocumentSettingsState {
+    id: string;
+    name: string;
+    path: string;
+    matrix: number[];
+    artboardPresets: {
+      allIds: string[];
+      byId: {
+        [id: string]: ArtboardPreset;
+      };
+      orientation: DeviceOrientationType;
+      platform: DevicePlatformType;
+    };
+    images: {
+      allIds: string[];
+      byId: {
+        [id: string]: DocumentImage;
+      };
+    };
+    colorFormat: ColorFormat;
+    edit: string;
+  }
+
+  interface LayerState {
+    byId: {
+      [id: string]: Page | Artboard | Group | Shape | Text | Image;
+    };
+    allIds: string[];
+    page: string;
+    activeArtboard: string;
+    selected: string[];
+    allArtboardIds: string[];
+    allShapeIds: string[];
+    allGroupIds: string[];
+    allTextIds: string[];
+    allImageIds: string[];
+    allMaskIds: string[];
+    scope: string[];
+    inView: {
+      allIds: string[];
+      snapPoints: Btwx.SnapPoint[];
+    };
+    hover: string;
+    paperProject: string;
+    allTweenEventIds: string[];
+    tweenEventById: {
+      [id: string]: Btwx.TweenEvent;
+    };
+    allTweenIds: string[];
+    tweenById: {
+      [id: string]: Btwx.Tween;
+    };
+    edit: string;
+  }
+
+  interface Document {
+    layer: LayerState;
+    documentSettings: DocumentSettingsState;
+  }
+
   interface HitResult {
     type: 'Layer' | 'UIElement' | 'Empty';
     event: paper.ToolEvent;
@@ -140,12 +201,12 @@ declare namespace em {
 
   interface DeviceCategory {
     type: DeviceCategoryType;
-    devices: em.Device[];
+    devices: Device[];
   }
 
   interface DevicePlatform {
     type: DevicePlatformType;
-    categories: em.DeviceCategory[];
+    categories: DeviceCategory[];
   }
 
   interface Style {
@@ -170,7 +231,7 @@ declare namespace em {
   interface Fill {
     fillType: FillType;
     enabled: boolean;
-    color: em.Color;
+    color: Color;
     gradient: Gradient;
   }
 
@@ -186,13 +247,13 @@ declare namespace em {
 
   interface GradientStop {
     position: number;
-    color: em.Color;
+    color: Color;
   }
 
   interface Stroke {
     fillType: FillType;
     enabled: boolean;
-    color: em.Color;
+    color: Color;
     width: number;
     gradient: Gradient;
   }
@@ -207,7 +268,7 @@ declare namespace em {
   interface Shadow {
     fillType: FillType;
     enabled: boolean;
-    color: em.Color;
+    color: Color;
     blur: number;
     offset: Point;
   }
@@ -216,7 +277,7 @@ declare namespace em {
     type: LayerType;
     id: string;
     name: string;
-    frame: em.Frame;
+    frame: Frame;
     parent: string;
     selected: boolean;
     children: string[] | null;

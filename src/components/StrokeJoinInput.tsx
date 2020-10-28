@@ -11,7 +11,7 @@ import Icon from './Icon';
 
 interface StrokeJoinInputProps {
   selected?: string[];
-  strokeJoinValue?: em.StrokeJoin | 'multi';
+  strokeJoinValue?: Btwx.StrokeJoin | 'multi';
   disabled?: boolean;
   setLayersStrokeJoin?(payload: SetLayersStrokeJoinPayload): LayerTypes;
 }
@@ -25,7 +25,7 @@ const StrokeJoinInput = (props: StrokeJoinInputProps): ReactElement => {
     setStrokeJoin(strokeJoinValue);
   }, [strokeJoinValue, disabled, selected]);
 
-  const handleClick = (strokeJoinType: em.StrokeJoin) => {
+  const handleClick = (strokeJoinType: Btwx.StrokeJoin) => {
     setLayersStrokeJoin({layers: selected, strokeJoin: strokeJoinType})
     setStrokeJoin(strokeJoinType);
   };
@@ -76,15 +76,15 @@ const StrokeJoinInput = (props: StrokeJoinInputProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const layerItems: (em.Shape | em.Image | em.Text)[] = selected.reduce((result, current) => {
+  const layerItems: (Btwx.Shape | Btwx.Image | Btwx.Text)[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);
-  const strokeJoinValues = layerItems.reduce((result: em.StrokeJoin[], current: em.Shape | em.Image | em.Text) => {
+  const strokeJoinValues = layerItems.reduce((result: Btwx.StrokeJoin[], current: Btwx.Shape | Btwx.Image | Btwx.Text) => {
     return [...result, current.style.strokeOptions.join];
   }, []);
-  const strokeJoinValue = strokeJoinValues.every((join: em.StrokeJoin) => join === strokeJoinValues[0]) ? strokeJoinValues[0] : 'multi';
-  const disabled = !layerItems.every((layerItem) => layerItem.style.stroke.enabled) || !layerItems.every((layerItem) => layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType !== 'Line');
+  const strokeJoinValue = strokeJoinValues.every((join: Btwx.StrokeJoin) => join === strokeJoinValues[0]) ? strokeJoinValues[0] : 'multi';
+  const disabled = !layerItems.every((layerItem) => layerItem.style.stroke.enabled) || !layerItems.every((layerItem) => layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line');
   return { selected, strokeJoinValue, disabled };
 };
 

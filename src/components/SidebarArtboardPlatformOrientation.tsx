@@ -2,8 +2,8 @@ import React, { useContext, ReactElement, useState } from 'react';
 import SidebarToggleButton from './SidebarToggleButton';
 
 interface SidebarArtboardPlatformOrientationProps {
-  orientation?: em.DeviceOrientationType;
-  onClick(orientation: em.DeviceOrientationType): void;
+  orientation?: Btwx.DeviceOrientationType;
+  onClick(orientation: Btwx.DeviceOrientationType): void;
   isDisabled?: boolean;
 }
 

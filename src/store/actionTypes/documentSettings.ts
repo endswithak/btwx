@@ -60,7 +60,7 @@ export interface SetCanvasMatrix {
 }
 
 export interface SetCanvasColorFormatPayload {
-  colorFormat: em.ColorFormat;
+  colorFormat: Btwx.ColorFormat;
 }
 
 export interface SetCanvasColorFormat {
@@ -112,7 +112,7 @@ export interface UpdateArtboardPreset {
 }
 
 export interface SetArtboardPresetDeviceOrientationPayload {
-  orientation: em.DeviceOrientationType;
+  orientation: Btwx.DeviceOrientationType;
 }
 
 export interface SetArtboardPresetDeviceOrientation {
@@ -121,7 +121,7 @@ export interface SetArtboardPresetDeviceOrientation {
 }
 
 export interface SetArtboardPresetDevicePlatformPayload {
-  platform: em.DevicePlatformType;
+  platform: Btwx.DevicePlatformType;
 }
 
 export interface SetArtboardPresetDevicePlatform {

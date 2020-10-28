@@ -1,5 +1,4 @@
 import { combineReducers } from 'redux';
-import { RootAction } from '../actionTypes';
 import layer from './layer';
 import contextMenu from './contextMenu';
 import tweenDrawer from './tweenDrawer';
@@ -19,11 +18,6 @@ import insertKnob from './insertKnob';
 import shapeTool from './shapeTool';
 import artboardTool from './artboardTool';
 import textTool from './textTool';
-import selection from './selection';
-import { importPaperProject } from '../selectors/layer';
-import { paperMain } from '../../canvas';
-import { OPEN_DOCUMENT } from '../actionTypes/documentSettings';
-import { HYDRATE_PREVIEW } from '../actionTypes/preview';
 
 export const reducers = {
   layer,
@@ -44,8 +38,7 @@ export const reducers = {
   insertKnob,
   shapeTool,
   artboardTool,
-  textTool,
-  selection
+  textTool
 };
 
 const rootReducer = combineReducers(reducers);
@@ -53,6 +46,13 @@ const rootReducer = combineReducers(reducers);
 export default rootReducer;
 
 export type RootState = ReturnType<typeof rootReducer>;
+
+// import { RootAction } from '../actionTypes';
+// import selection from './selection';
+// import { importPaperProject } from '../selectors/layer';
+// import { paperMain } from '../../canvas';
+// import { OPEN_DOCUMENT } from '../actionTypes/documentSettings';
+// import { HYDRATE_PREVIEW } from '../actionTypes/preview';
 
 // const rootReducer = (state: RootState, action: RootAction): RootState => {
 //   let currentState = state;

@@ -57,7 +57,7 @@ const WidthInput = (props: WidthInputProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const layerItems: em.Layer[] = selected.reduce((result, current) => {
+  const layerItems: Btwx.Layer[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);

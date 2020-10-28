@@ -11,7 +11,7 @@ class ShapeTool {
   ref: paper.Path.Rectangle;
   drawing: boolean;
   tool: paper.Tool;
-  shapeType: em.ShapeType;
+  shapeType: Btwx.ShapeType;
   pivot: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
   outline: paper.Path;
   tooltip: Tooltip;

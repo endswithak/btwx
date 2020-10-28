@@ -18,11 +18,13 @@ interface CanvasLayerEventsProps {
     eventType: 'mouseMove' | 'mouseDown' | 'mouseUp' | 'doubleClick' | 'contextMenu';
     event: any;
   };
-  layerItem?: em.Layer;
-  nearestScopeAncestor?: em.Layer;
-  deepSelectItem?: em.Layer;
+  layerItem?: Btwx.Layer;
+  nearestScopeAncestor?: Btwx.Layer;
+  deepSelectItem?: Btwx.Layer;
   hover?: string;
   selected?: string[];
+  activeTool?: Btwx.ToolType;
+  dragging?: boolean;
   setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
   selectLayers?(payload: SelectLayersPayload): LayerTypes;
   deepSelectLayer?(payload: DeepSelectLayerPayload): LayerTypes;
@@ -33,12 +35,15 @@ interface CanvasLayerEventsProps {
 
 const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layerEvent, hover, selected, deselectLayers, deselectAllLayers, layerItem, nearestScopeAncestor, deepSelectItem, setLayerHover, selectLayers, deepSelectLayer, setCanvasActiveTool } = props;
+  const { layerEvent, activeTool, dragging, hover, selected, deselectLayers, deselectAllLayers, layerItem, nearestScopeAncestor, deepSelectItem, setLayerHover, selectLayers, deepSelectLayer, setCanvasActiveTool } = props;
 
   const handleMouseMove = (): void => {
     if (layerEvent.empty) {
       if (hover !== null) {
         setLayerHover({id: null});
+      }
+      if (activeTool === 'Drag' && !dragging) {
+        setCanvasActiveTool({activeTool: null});
       }
     } else {
       if (nearestScopeAncestor.type === 'Artboard') {
@@ -49,6 +54,9 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
         if (hover !== nearestScopeAncestor.id) {
           setLayerHover({id: nearestScopeAncestor.id});
         }
+      }
+      if (!activeTool) {
+        setCanvasActiveTool({activeTool: 'Drag'});
       }
     }
   }
@@ -82,9 +90,6 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
           }
         }
       }
-      if (nearestScopeAncestor.type !== 'Artboard' || deepSelectItem.type !== 'Artboard') {
-        setCanvasActiveTool({activeTool: 'Drag', dragging: true});
-      }
     }
   }
 
@@ -106,7 +111,7 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
   }
 
   useEffect(() => {
-    if (layerEvent) {
+    if (layerEvent && activeTool !== 'Shape' && activeTool !== 'Artboard') {
       switch(layerEvent.eventType) {
         case 'contextMenu':
           handleContextMenu();
@@ -133,13 +138,15 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState, ownProps: CanvasLayerEventsProps): {
-  layerItem: em.Layer;
-  nearestScopeAncestor: em.Layer;
-  deepSelectItem: em.Layer;
+  layerItem: Btwx.Layer;
+  nearestScopeAncestor: Btwx.Layer;
+  deepSelectItem: Btwx.Layer;
   hover: string;
   selected: string[];
+  activeTool: Btwx.ToolType;
+  dragging: boolean;
 } => {
-  const { layer } = state;
+  const { layer, canvasSettings } = state;
   const layerEvent = ownProps.layerEvent;
   const hitResult = layerEvent ? ownProps.layerEvent.hitResult : null;
   const layerItem = hitResult && !layerEvent.empty ? layer.present.byId[hitResult.item.data.type === 'Layer' ? hitResult.item.data.id : hitResult.item.parent.data.id] : null;
@@ -147,12 +154,16 @@ const mapStateToProps = (state: RootState, ownProps: CanvasLayerEventsProps): {
   const deepSelectItem = layerItem ? getDeepSelectItem(layer.present, layerItem.id) : null;
   const hover = layer.present.hover;
   const selected = layer.present.selected;
+  const activeTool = canvasSettings.activeTool;
+  const dragging = canvasSettings.dragging;
   return {
     layerItem,
     nearestScopeAncestor,
     deepSelectItem,
     hover,
-    selected
+    selected,
+    activeTool,
+    dragging
   };
 };
 

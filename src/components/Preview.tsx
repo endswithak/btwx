@@ -10,7 +10,7 @@ import PreviewTopbar from './PreviewTopbar';
 import EmptyState from './EmptyState';
 
 interface PreviewProps {
-  activeArtboard: em.Artboard;
+  activeArtboard: Btwx.Artboard;
   recording: boolean;
 }
 

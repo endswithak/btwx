@@ -57,7 +57,7 @@ interface InsertKnobProps {
   setInsertKnobIndex?(payload: SetInsertKnobIndexPayload): InsertKnobTypes;
   activateInsertKnob?(): InsertKnobTypes;
   deactivateInsertKnob?(): InsertKnobTypes;
-  toggleShapeToolThunk?(shapeType: em.ShapeType): void;
+  toggleShapeToolThunk?(shapeType: Btwx.ShapeType): void;
   toggleArtboardToolThunk?(): void;
   toggleTextToolThunk?(): void;
   addImageThunk?(payload: AddImagePayload): void;

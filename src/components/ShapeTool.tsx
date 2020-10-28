@@ -16,7 +16,7 @@ import { ThemeContext } from './ThemeProvider';
 
 interface ShapeToolProps {
   isEnabled?: boolean;
-  shapeType?: em.ShapeType;
+  shapeType?: Btwx.ShapeType;
   scope?: string[];
   setCanvasActiveTool?(payload: SetCanvasActiveToolPayload): CanvasSettingsTypes;
   addShapeThunk?(payload: AddShapePayload): void;
@@ -341,7 +341,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
 const mapStateToProps = (state: RootState, ownProps: ShapeToolProps): {
   isEnabled: boolean;
   scope: string[];
-  shapeType: em.ShapeType;
+  shapeType: Btwx.ShapeType;
 } => {
   const { layer, canvasSettings, shapeTool } = state;
   const isEnabled = canvasSettings.activeTool === 'Shape';

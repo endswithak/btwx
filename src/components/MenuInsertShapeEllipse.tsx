@@ -9,7 +9,7 @@ export const MENU_ITEM_ID = 'insertShapeEllipse';
 interface MenuInsertShapeEllipseProps {
   canInsert?: boolean;
   isChecked?: boolean;
-  toggleShapeToolThunk?(shapeType: em.ShapeType): void;
+  toggleShapeToolThunk?(shapeType: Btwx.ShapeType): void;
 }
 
 const MenuInsertShapeEllipse = (props: MenuInsertShapeEllipseProps): ReactElement => {

@@ -38,7 +38,7 @@ export interface ViewSettingsState {
     height: number;
     layersWidth: number;
   };
-  theme: em.ThemeName;
+  theme: Btwx.ThemeName;
 }
 
 const initialState: ViewSettingsState = {

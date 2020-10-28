@@ -36,7 +36,7 @@ interface ConvertLayers {
 
 export const convertLayers = ({ sketchLayers, parentId, parentFrame, images, symbolMasters, path, overrides, symbolPath }: ConvertLayers): Promise<em.Layer[]> => {
   return new Promise((resolve, reject) => {
-    let layers: em.Layer[] = [];
+    let layers: Btwx.Layer[] = [];
     const promises: Promise<em.Layer[]>[] = [];
     sketchLayers.forEach((sketchLayer) => {
       promises.push(convertLayer({sketchLayer, parentId, parentFrame, images, symbolMasters, path, overrides, symbolPath}));
@@ -103,7 +103,7 @@ export const convertArtboard = ({ sketchLayer, parentId, parentFrame, images, sy
             }
           },
           ...layers
-        ] as em.Layer[]
+        ] as Btwx.Layer[]
       );
     });
   });
@@ -176,7 +176,7 @@ export const convertShapePath = ({ sketchLayer, parentId, parentFrame, images, s
             horizontalFlip: sketchLayer.isFlippedHorizontal
           },
           ...radius
-        } as em.Shape
+        } as Btwx.Shape
       ]
     );
   });
@@ -226,7 +226,7 @@ export const convertShapeGroup = ({ sketchLayer, parentId, parentFrame, images, 
             verticalFlip: sketchLayer.isFlippedVertical,
             horizontalFlip: sketchLayer.isFlippedHorizontal
           }
-        } as em.Shape
+        } as Btwx.Shape
       ]
     );
   });
@@ -267,7 +267,7 @@ export const convertGroup = ({ sketchLayer, parentId, parentFrame, images, symbo
             }
           },
           ...layers
-        ] as em.Layer[]
+        ] as Btwx.Layer[]
       );
     });
   });
@@ -315,11 +315,11 @@ export const convertSymbolInstance = ({ sketchLayer, parentId, parentFrame, imag
               }
             },
             ...layers
-          ] as em.Layer[]
+          ] as Btwx.Layer[]
         );
       });
     } else {
-      resolve([] as em.Layer[]);
+      resolve([] as Btwx.Layer[]);
     }
   });
 }

@@ -11,10 +11,10 @@ import { addImageThunk } from '../store/actions/layer';
 import TopbarDropdownButton from './TopbarDropdownButton';
 
 interface InsertButtonProps {
-  activeTool?: em.ToolType;
-  shapeToolShapeType?: em.ShapeType;
+  activeTool?: Btwx.ToolType;
+  shapeToolShapeType?: Btwx.ShapeType;
   insertKnobOpen?: boolean;
-  toggleShapeToolThunk?(shapeType: em.ShapeType): void;
+  toggleShapeToolThunk?(shapeType: Btwx.ShapeType): void;
   toggleArtboardToolThunk?(): void;
   toggleTextToolThunk?(): void;
   addImageThunk?(payload: AddImagePayload): void;
@@ -130,8 +130,8 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState): {
-  activeTool: em.ToolType;
-  shapeToolShapeType: em.ShapeType;
+  activeTool: Btwx.ToolType;
+  shapeToolShapeType: Btwx.ShapeType;
   insertKnobOpen: boolean;
 } => {
   const { canvasSettings, insertKnob, shapeTool } = state;

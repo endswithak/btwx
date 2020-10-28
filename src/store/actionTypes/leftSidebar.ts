@@ -34,7 +34,7 @@ export interface SetDragOver {
 }
 
 export interface SetDropzonePayload {
-  dropzone: em.Dropzone;
+  dropzone: Btwx.Dropzone;
 }
 
 export interface SetDropzone {

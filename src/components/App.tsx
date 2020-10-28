@@ -1,7 +1,6 @@
 import React, { useContext, ReactElement, useState, useEffect } from 'react';
 import { paperMain } from '../canvas';
 import Topbar from './Topbar';
-import TopbarTitle from './TopbarTitle';
 import EaseEditorWrap from './EaseEditorWrap';
 import Main from './Main';
 import { ThemeContext } from './ThemeProvider';
@@ -12,10 +11,6 @@ import TweenEventsFrameWrap from './TweenEventsFrameWrap';
 import HoverFrameWrap from './HoverFrameWrap';
 import ArtboardPresetEditorWrap from './ArtboardPresetEditorWrap';
 import ContextMenuWrap from './ContextMenuWrap';
-import KeyBindings from './KeyBindings';
-import MasterTool from './MasterTool';
-import Selection from './Selection';
-import Menu from './Menu';
 
 const App = (): ReactElement => {
   const theme = useContext(ThemeContext);
@@ -40,7 +35,6 @@ const App = (): ReactElement => {
       style={{
         background: theme.background.z0
       }}>
-        <TopbarTitle />
         {/* flex items */}
         <Topbar />
         <Main ready={ready} setReady={setReady} />
@@ -58,11 +52,6 @@ const App = (): ReactElement => {
               {/* <EaseEditorWrap />
               <ArtboardPresetEditorWrap />
               <ContextMenuWrap /> */}
-              {/* Listeners */}
-              <Menu />
-              {/* <MasterTool /> */}
-              {/* <Selection /> */}
-              {/* <KeyBindings /> */}
             </>
           : null
         }

@@ -62,7 +62,7 @@ export const isDocumentWindowFromRenderer = (): boolean => {
 //   return childWindows.find((w) => w.getTitle().startsWith(PREVIEW_PREFIX));
 // };
 
-// export const getWindows = (windowMap: em.DocumentWindows, id: number): em.DocumentWindow => {
+// export const getWindows = (windowMap: Btwx.DocumentWindows, id: number): Btwx.DocumentWindow => {
 //   if (Object.keys(windowMap).includes(id)) {
 //     return windowMap[id];
 //   }
@@ -73,7 +73,7 @@ export const isDocumentWindowFromRenderer = (): boolean => {
 //   return null;
 // };
 
-// export const getPreviewWindow = (windowMap: em.DocumentWindows, id: number): number => {
+// export const getPreviewWindow = (windowMap: Btwx.DocumentWindows, id: number): number => {
 //   const windows = getWindows(windowMap, id);
 //   if (windows) {
 //     return windows.preview;
@@ -107,7 +107,7 @@ export const getFocusedDocument = (): Promise<BrowserWindow> => {
 
 export const isMac = process.platform === 'darwin';
 
-export const getWindowBackground = (themeName?: em.ThemeName): string => {
+export const getWindowBackground = (themeName?: Btwx.ThemeName): string => {
   const theme = getTheme(themeName ? themeName : isMac ? systemPreferences.getUserDefault('theme', 'string') : 'dark');
   return theme.background.z0;
 };

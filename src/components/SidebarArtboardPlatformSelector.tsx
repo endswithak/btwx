@@ -7,15 +7,15 @@ import { DEVICES } from '../constants';
 import SidebarSelect from './SidebarSelect';
 
 interface SidebarArtboardPlatformSelectorProps {
-  platformValue?: em.DevicePlatformType;
+  platformValue?: Btwx.DevicePlatformType;
   setArtboardPresetDevicePlatform?(payload: SetArtboardPresetDevicePlatformPayload): DocumentSettingsTypes;
-  optionValues?: em.DevicePlatform[];
+  optionValues?: Btwx.DevicePlatform[];
 }
 
 const SidebarArtboardPlatformSelector = (props: SidebarArtboardPlatformSelectorProps): ReactElement => {
   const { platformValue, setArtboardPresetDevicePlatform, optionValues } = props;
 
-  const options: { value: em.DevicePlatformType; label: em.DevicePlatformType }[] = optionValues.map((device) => {
+  const options: { value: Btwx.DevicePlatformType; label: Btwx.DevicePlatformType }[] = optionValues.map((device) => {
     return {
       value: device.type,
       label: device.type
@@ -24,7 +24,7 @@ const SidebarArtboardPlatformSelector = (props: SidebarArtboardPlatformSelectorP
 
   const [platform, setPlatform] = useState(options.find((option) => option.value === platformValue));
 
-  const handleChange = (selectedOption: { value: em.DevicePlatformType; label: em.DevicePlatformType }) => {
+  const handleChange = (selectedOption: { value: Btwx.DevicePlatformType; label: Btwx.DevicePlatformType }) => {
     setPlatform(selectedOption);
     setArtboardPresetDevicePlatform({platform: selectedOption.value});
   }
@@ -52,7 +52,7 @@ const mapStateToProps = (state: RootState) => {
       type: 'Custom',
       categories: [{
         type: 'Custom',
-        devices: documentSettings.artboardPresets.allIds.reduce((result: em.ArtboardPreset[], current) => {
+        devices: documentSettings.artboardPresets.allIds.reduce((result: Btwx.ArtboardPreset[], current) => {
           result = [...result, documentSettings.artboardPresets.byId[current]];
           return result;
         }, [])

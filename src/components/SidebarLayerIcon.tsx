@@ -66,8 +66,8 @@ const mapStateToProps = (state: RootState, ownProps: SidebarLayerIconProps) => {
     }
   })();
   const isShape = layerItem.type === 'Shape';
-  const isMask = isShape && (layerItem as em.Shape).mask;
-  const isOpen = isShape && !(layerItem as em.Shape).closed;
+  const isMask = isShape && (layerItem as Btwx.Shape).mask;
+  const isOpen = isShape && !(layerItem as Btwx.Shape).closed;
   const small = isShape;
   const shapeId = isShape ? ownProps.layer : null;
   const isMaskOrOpenShape = isOpen || isMask;

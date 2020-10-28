@@ -8,7 +8,7 @@ import { DEFAULT_MAC_DEVICE, DEFAULT_WINDOWS_DEVICE } from '../constants';
 import TopbarButton from './TopbarButton';
 
 interface PreviewButtonProps {
-  activeArtboard?: em.Artboard;
+  activeArtboard?: Btwx.Artboard;
   isOpen?: boolean;
   recording?: boolean;
   focusing?: boolean;
@@ -75,7 +75,7 @@ const PreviewButton = (props: PreviewButtonProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState): {
-  activeArtboard: em.Artboard;
+  activeArtboard: Btwx.Artboard;
   isOpen: boolean;
   recording: boolean;
   focusing: boolean;
@@ -83,7 +83,7 @@ const mapStateToProps = (state: RootState): {
   documentWindowId: number;
 } => {
   const { layer, preview } = state;
-  const activeArtboard = layer.present.byId[layer.present.activeArtboard] as em.Artboard;
+  const activeArtboard = layer.present.byId[layer.present.activeArtboard] as Btwx.Artboard;
   const isOpen = preview.isOpen;
   const recording = preview.recording;
   const focusing = preview.focusing;

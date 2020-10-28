@@ -24,7 +24,7 @@ import SidebarSectionRow from './SidebarSectionRow';
 gsap.registerPlugin(CustomEase, MotionPathPlugin, MotionPathHelper, DrawSVGPlugin);
 
 interface EaseEditorProps {
-  tween?: em.Tween;
+  tween?: Btwx.Tween;
   easeEditor?: {
     isOpen: boolean;
     tween: string;
@@ -54,11 +54,11 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
   const easeTypes = ['linear', 'power1', 'power2', 'power3', 'power4', 'back', 'bounce', 'circ', 'expo', 'sine'];
   const easePowerTypes = ['in', 'inOut', 'out'];
 
-  const handleTypePresetClick = (preset: em.CubicBezier) => {
+  const handleTypePresetClick = (preset: Btwx.CubicBezier) => {
     setLayerTweenEase({id: tween.id, ease: preset});
   }
 
-  const handlePowerPresetClick = (preset: em.CubicBezierType) => {
+  const handlePowerPresetClick = (preset: Btwx.CubicBezierType) => {
     setLayerTweenPower({id: tween.id, power: preset});
   }
 
@@ -188,7 +188,7 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
               Ease Curve
             </div>
             {
-              easeTypes.map((preset: em.CubicBezier, index) => (
+              easeTypes.map((preset: Btwx.CubicBezier, index) => (
                 <button
                   className='c-ease-editor__preset'
                   onClick={() => handleTypePresetClick(preset)}
@@ -215,7 +215,7 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
               Type
             </div> */}
             {
-              easePowerTypes.map((preset: em.CubicBezierType, index) => (
+              easePowerTypes.map((preset: Btwx.CubicBezierType, index) => (
                 <button
                   className='c-ease-editor__preset'
                   onClick={() => handlePowerPresetClick(preset)}

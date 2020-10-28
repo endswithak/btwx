@@ -23,7 +23,7 @@ class LineTool {
   shiftModifier: boolean;
   isHorizontal: boolean;
   isVertical: boolean;
-  constructor(handle?: em.LineHandle) {
+  constructor(handle?: Btwx.LineHandle) {
     this.handle = handle;
     this.snapTool = new SnapTool();
     this.toBounds = null;
@@ -56,7 +56,7 @@ class LineTool {
     const x = this.snapTool.snap.x ? this.snapTool.snap.x.point : this.fromBounds.center.x + this.x;
     const y = this.snapTool.snap.y ? this.snapTool.snap.y.point : this.fromBounds.center.y + this.y;
     if (this.shiftModifier) {
-      const layerItem = this.state.layer.present.byId[this.state.layer.present.selected[0]] as em.Line;
+      const layerItem = this.state.layer.present.byId[this.state.layer.present.selected[0]] as Btwx.Line;
       const toPoint = getLineToPoint(layerItem);
       const fromPoint = getLineFromPoint(layerItem);
       if (this.isHorizontal) {

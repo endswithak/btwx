@@ -14,46 +14,46 @@ import * as previewUtils from '../previewUtils';
 interface PreviewCanvasProps {
   layer?: any;
   paperProject?: string;
-  activeArtboard?: em.Artboard;
+  activeArtboard?: Btwx.Artboard;
   page?: string;
   tweenEvents: {
     allIds: string[];
     byId: {
-      [id: string]: em.TweenEvent;
+      [id: string]: Btwx.TweenEvent;
     };
   };
   tweenEventLayers: {
     allIds: string[];
     byId: {
-      [id: string]: em.Layer;
+      [id: string]: Btwx.Layer;
     };
   };
   tweenEventDestinations: {
     allIds: string[];
     byId: {
-      [id: string]: em.Artboard;
+      [id: string]: Btwx.Artboard;
     };
   };
   tweens: {
     allIds: string[];
     byId: {
-      [id: string]: em.Tween;
+      [id: string]: Btwx.Tween;
     };
   };
   tweenLayers: {
     allIds: string[];
     byId: {
-      [id: string]: em.Layer;
+      [id: string]: Btwx.Layer;
     };
   };
   tweenLayerDestinations: {
     allIds: string[];
     byId: {
-      [id: string]: em.Layer;
+      [id: string]: Btwx.Layer;
     };
   };
   documentImagesById: {
-    [id: string]: em.DocumentImage;
+    [id: string]: Btwx.DocumentImage;
   };
   touchCursor: boolean;
   setActiveArtboard?(payload: SetActiveArtboardPayload): LayerTypes;
@@ -130,7 +130,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
     tweenEvents.allIds.forEach((eventId) => {
       const tweenEvent = tweenEvents.byId[eventId];
       const tweenEventPaperLayer = paperTweenEventLayersById[tweenEvent.layer];
-      const tweenEventTweensById = tweenEvent.tweens.reduce((result: { [id: string]: em.Tween }, current): {[id: string]: em.Tween} => {
+      const tweenEventTweensById = tweenEvent.tweens.reduce((result: { [id: string]: Btwx.Tween }, current): {[id: string]: Btwx.Tween} => {
         result[current] = tweens.byId[current];
         return result;
       }, {});
@@ -160,8 +160,8 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
           destinationLayerItem: tweenLayerDestinations.byId[tween.destinationLayer],
           originPaperLayer: paperTweenLayersById[tween.layer],
           destinationPaperLayer: paperTweenLayerDestinationsById[tween.destinationLayer],
-          originArtboardLayerItem: tweenEventDestinations.byId[tweenEvent.artboard] as em.Artboard,
-          destinationArtboardLayerItem: tweenEventDestinations.byId[tweenEvent.destinationArtboard] as em.Artboard,
+          originArtboardLayerItem: tweenEventDestinations.byId[tweenEvent.artboard] as Btwx.Artboard,
+          destinationArtboardLayerItem: tweenEventDestinations.byId[tweenEvent.destinationArtboard] as Btwx.Artboard,
           originArtboardPaperLayer: paperTweenEventDestinationsById[tweenEvent.artboard],
           destinationArtboardPaperLayer: paperTweenEventDestinationsById[tweenEvent.destinationArtboard]
         });

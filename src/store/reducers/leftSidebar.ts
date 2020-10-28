@@ -11,7 +11,7 @@ import {
 export interface LeftSidebarState {
   dragging: string;
   dragOver: string;
-  dropzone: em.Dropzone;
+  dropzone: Btwx.Dropzone;
   editing: string;
   searching: boolean;
   search: string;

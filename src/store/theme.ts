@@ -28,7 +28,7 @@ const textOnColor = (color: string | chroma.Color) => {
   return contrast > 3 ? darkTextMax : lightTextMax;
 }
 
-const createPalette = (theme: em.ThemeName): em.Palette => ({
+const createPalette = (theme: Btwx.ThemeName): Btwx.Palette => ({
   primary: THEME_PRIMARY_COLOR,
   primaryHover: theme === 'dark' ? chroma(THEME_PRIMARY_COLOR).brighten(0.5).css() : chroma(THEME_PRIMARY_COLOR).darken(0.5).css(),
   accent: chroma(accent).css(),
@@ -37,7 +37,7 @@ const createPalette = (theme: em.ThemeName): em.Palette => ({
   recordingHover: theme === 'dark' ? chroma(THEME_RECORDING_COLOR).brighten(0.5).css() : chroma(THEME_RECORDING_COLOR).darken(0.5).css()
 });
 
-const createDarkBackgrounds = (scale: string[]): em.BackgroundScale => ({
+const createDarkBackgrounds = (scale: string[]): Btwx.BackgroundScale => ({
   z6: scale[6],
   z5: scale[5],
   z4: scale[4],
@@ -47,7 +47,7 @@ const createDarkBackgrounds = (scale: string[]): em.BackgroundScale => ({
   z0: scale[0]
 });
 
-const createLightBackgrounds = (scale: string[]): em.BackgroundScale => ({
+const createLightBackgrounds = (scale: string[]): Btwx.BackgroundScale => ({
   z6: scale[6],
   z5: scale[5],
   z4: scale[4],
@@ -57,7 +57,7 @@ const createLightBackgrounds = (scale: string[]): em.BackgroundScale => ({
   z0: scale[0]
 });
 
-const createText = (scale: string[], palette: em.Palette): em.TextScale => ({
+const createText = (scale: string[], palette: Btwx.Palette): Btwx.TextScale => ({
   base: scale[3],
   light: scale[2],
   lighter: scale[1],
@@ -66,7 +66,7 @@ const createText = (scale: string[], palette: em.Palette): em.TextScale => ({
   onAccent: textOnColor(palette.accent),
 });
 
-export const darkTheme: em.Theme = {
+export const darkTheme: Btwx.Theme = {
   name: 'dark',
   palette: createPalette('dark'),
   background: createDarkBackgrounds(darkBgScale),
@@ -75,7 +75,7 @@ export const darkTheme: em.Theme = {
   unit: THEME_UNIT_SIZE
 }
 
-export const lightTheme: em.Theme = {
+export const lightTheme: Btwx.Theme = {
   name: 'light',
   palette: createPalette('light'),
   background: createLightBackgrounds(lightBgScale),
@@ -84,7 +84,7 @@ export const lightTheme: em.Theme = {
   unit: THEME_UNIT_SIZE
 }
 
-const getTheme = (theme: em.ThemeName): em.Theme => {
+const getTheme = (theme: Btwx.ThemeName): Btwx.Theme => {
   switch(theme) {
     case 'dark':
       return darkTheme;

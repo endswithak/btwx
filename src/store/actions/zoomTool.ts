@@ -6,7 +6,7 @@ import { paperMain } from '../../canvas';
 import { getCanvasBounds, getSelectedBounds } from '../selectors/layer';
 import { LayerState } from '../reducers/layer';
 
-export const enableZoomToolThunk = (zoomType: em.ZoomType) => {
+export const enableZoomToolThunk = (zoomType: Btwx.ZoomType) => {
   return (dispatch: any, getState: any): void => {
     dispatch(setCanvasActiveTool({activeTool: 'Zoom', zooming: true, zoomType: zoomType ? zoomType : 'in'}));
   }

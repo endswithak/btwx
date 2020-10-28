@@ -15,7 +15,7 @@ interface ColorPickerLighnessInputProps {
   setGreen(green: number): void;
   setBlue(blue: number): void;
   setLightness(lightness: number): void;
-  onChange(color: em.Color): void;
+  onChange(color: Btwx.Color): void;
 }
 
 const ColorPickerLighnessInput = (props: ColorPickerLighnessInputProps): ReactElement => {

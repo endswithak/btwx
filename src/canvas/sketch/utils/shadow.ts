@@ -2,7 +2,7 @@ import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { convertColor } from './general';
 import { DEFAULT_SHADOW_STYLE } from '../../../constants';
 
-export const convertShadow = (layer: FileFormat.AnyLayer): em.Shadow => {
+export const convertShadow = (layer: FileFormat.AnyLayer): Btwx.Shadow => {
   const shadow = layer.style.shadows[0];
   if (shadow) {
     return {

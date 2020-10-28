@@ -7,7 +7,7 @@ import { setLayersGradientType } from '../store/actions/layer';
 
 interface GradientTypeSelectorProps {
   selected?: string[];
-  gradientTypeValue: em.GradientType | 'multi';
+  gradientTypeValue: Btwx.GradientType | 'multi';
   disabled?: boolean;
   prop: 'fill' | 'stroke';
   setLayersGradientType?(payload: SetLayersGradientTypePayload): LayerTypes;
@@ -16,7 +16,7 @@ interface GradientTypeSelectorProps {
 const GradientTypeSelector = (props: GradientTypeSelectorProps): ReactElement => {
   const { selected, prop, disabled, gradientTypeValue, setLayersGradientType } = props;
 
-  const options: { value: em.GradientType; label: string }[] = [
+  const options: { value: Btwx.GradientType; label: string }[] = [
     { value: 'linear', label: 'Linear' },
     { value: 'radial', label: 'Radial' }
   ];
@@ -31,7 +31,7 @@ const GradientTypeSelector = (props: GradientTypeSelectorProps): ReactElement =>
     }
   }, [gradientTypeValue, selected]);
 
-  const handleChange = (selectedOption: { value: em.GradientType; label: string }) => {
+  const handleChange = (selectedOption: { value: Btwx.GradientType; label: string }) => {
     setGradientType(selectedOption);
     setLayersGradientType({layers: selected, prop: prop, gradientType: selectedOption.value});
   }
@@ -51,11 +51,11 @@ const GradientTypeSelector = (props: GradientTypeSelectorProps): ReactElement =>
 const mapStateToProps = (state: RootState, ownProps: GradientTypeSelectorProps) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const layerItems: em.Layer[] = selected.reduce((result, current) => {
+  const layerItems: Btwx.Layer[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);
-  const styleValues: (em.Fill | em.Stroke)[] = layerItems.reduce((result, current) => {
+  const styleValues: (em.Fill | Btwx.Stroke)[] = layerItems.reduce((result, current) => {
     switch(ownProps.prop) {
       case 'fill':
         return [...result, current.style.fill];

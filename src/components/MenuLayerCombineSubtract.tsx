@@ -9,7 +9,7 @@ export const MENU_ITEM_ID = 'layerCombineSubtract';
 
 interface MenuLayerCombineSubtractProps {
   isEnabled?: boolean;
-  applyBooleanOperationThunk?(operation: em.BooleanOperation): void;
+  applyBooleanOperationThunk?(operation: Btwx.BooleanOperation): void;
 }
 
 const MenuLayerCombineSubtract = (props: MenuLayerCombineSubtractProps): ReactElement => {

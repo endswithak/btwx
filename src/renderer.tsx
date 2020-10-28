@@ -30,16 +30,15 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import App from './components/App';
-import configureStore from './store/configure';
+import configureStore from './store';
+import Menu from './components/Menu';
 import Titlebar from './components/Titlebar';
 import Preview from './components/Preview';
 import ThemeProvider from './components/ThemeProvider';
-import { setPreviewDocumentWindowId } from './store/actions/preview';
 
 import './styles/index.sass';
 
-(window as any).renderNewDocument = (preloadedState?: any): void => {
-  console.log(preloadedState);
+(window as any).renderNewDocument = (preloadedState?: Btwx.Document): void => {
   const store = configureStore(preloadedState);
   (window as any).getCurrentEdit = (): string => {
     const state = store.getState();
@@ -54,6 +53,7 @@ import './styles/index.sass';
   ReactDOM.render(
     <Provider store={store}>
       <ThemeProvider>
+        <Menu />
         <Titlebar />
         <App />
       </ThemeProvider>
@@ -62,8 +62,8 @@ import './styles/index.sass';
   );
 };
 
-(window as any).renderPreviewWindow = (): void => {
-  const store = configureStore(document);
+(window as any).renderPreviewWindow = (preloadedState?: Btwx.Document): void => {
+  const store = configureStore(preloadedState);
   ReactDOM.render(
     <Provider store={store}>
       <ThemeProvider>
@@ -132,7 +132,7 @@ import './styles/index.sass';
 //   return (window as any).getSaveState();
 // };
 
-// (window as any).setTitleBarTheme = (theme: em.ThemeName): void => {
+// (window as any).setTitleBarTheme = (theme: Btwx.ThemeName): void => {
 //   themeObject = getTheme(theme);
 //   titleBar.updateBackground(Color.fromHex(theme === 'dark' ? themeObject.background.z1 : themeObject.background.z2));
 // };
@@ -145,7 +145,7 @@ import './styles/index.sass';
 //   store.dispatch(setActiveArtboard({id: activeArtboard}));
 // };
 
-// (window as any).setTheme = (theme: em.ThemeName): void => {
+// (window as any).setTheme = (theme: Btwx.ThemeName): void => {
 //   switch(theme) {
 //     case 'light':
 //       store.dispatch(enableLightTheme());

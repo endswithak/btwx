@@ -9,7 +9,7 @@ export const MENU_ITEM_ID = 'insertShapeRectangle';
 interface MenuInsertShapeRectangleProps {
   canInsert?: boolean;
   isChecked?: boolean;
-  toggleShapeToolThunk?(shapeType: em.ShapeType): void;
+  toggleShapeToolThunk?(shapeType: Btwx.ShapeType): void;
 }
 
 const MenuInsertShapeRectangle = (props: MenuInsertShapeRectangleProps): ReactElement => {

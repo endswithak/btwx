@@ -17,9 +17,9 @@ import ColorPickerTypeToggle from './ColorPickerTypeToggle';
 import tinyColor from 'tinycolor2';
 
 interface ColorPickerProps {
-  colorValue: em.Color | 'multi';
-  colorType: em.ColorFormat;
-  onChange?(color: em.Color): void;
+  colorValue: Btwx.Color | 'multi';
+  colorType: Btwx.ColorFormat;
+  onChange?(color: Btwx.Color): void;
 }
 
 const ColorPicker = (props: ColorPickerProps): ReactElement => {

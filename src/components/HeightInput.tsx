@@ -57,7 +57,7 @@ const HeightInput = (props: HeightInputProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const layerItems: em.Layer[] = selected.reduce((result, current) => {
+  const layerItems: Btwx.Layer[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);
@@ -71,7 +71,7 @@ const mapStateToProps = (state: RootState) => {
       return 'multi';
     }
   })();
-  const disabled = layerItems.some((layerItem) => layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line' || layerItem.type === 'Text' || layerItem.type === 'Group');
+  const disabled = layerItems.some((layerItem) => layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' || layerItem.type === 'Text' || layerItem.type === 'Group');
   return { selected, heightValue, disabled };
 };
 

@@ -17,7 +17,7 @@ import { SetCanvasFocusingPayload, CanvasSettingsTypes } from '../store/actionTy
 interface TextEditorInputProps {
   textEditor?: TextEditorState;
   textSettings?: TextSettingsState;
-  layerItem?: em.Text;
+  layerItem?: Btwx.Text;
   canvasFocusing?: boolean;
   closeTextEditor?(): TextEditorTypes;
   setLayerText?(payload: SetLayerTextPayload): LayerTypes;
@@ -30,8 +30,8 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const textSpanRef = useRef<HTMLTextAreaElement>(null);
   const { textEditor, textSettings, layerItem, closeTextEditor, setCanvasFocusing, canvasFocusing, setLayerText, selectLayers } = props;
-  const [text, setText] = useState(layerItem.text);
-  const [prevText, setPrevText] = useState(layerItem.text);
+  const [text, setText] = useState(layerItBtwx.Text);
+  const [prevText, setPrevText] = useState(layerItBtwx.Text);
   const debounceText = useCallback(
     debounce((dText: string) => setLayerText({id: textEditor.layer, text: dText }), 250),
     []
@@ -110,7 +110,7 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
   useEffect(() => {
     const paperLayer = paperMain.project.getItem({data: { id: textEditor.layer }}) as paper.PointText;
     paperLayer.visible = false;
-  }, [layerItem.text]);
+  }, [layerItBtwx.Text]);
 
   useEffect(() => {
     updateTextAreaSize();
@@ -227,7 +227,7 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
 
 const mapStateToProps = (state: RootState) => {
   const { textEditor, textSettings, layer, canvasSettings } = state;
-  const layerItem = (layer.present.byId[textEditor.layer] as em.Text);
+  const layerItem = (layer.present.byId[textEditor.layer] as Btwx.Text);
   const canvasFocusing = canvasSettings.focusing;
   return { textEditor, textSettings, layerItem, canvasFocusing };
 };

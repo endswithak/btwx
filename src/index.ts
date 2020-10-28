@@ -5,6 +5,8 @@ import path from 'path';
 import menu from './menu';
 import { handleDocumentClose, getFocusedDocument, getWindowBackground, isMac, getAllDocumentWindows } from './utils';
 import { initialState as initialPreviewState } from './store/reducers/preview';
+import { initialState as initialLayerState } from './store/reducers/layer';
+import { initialState as initialDocumentSettingsState } from './store/reducers/documentSettings';
 
 import {
   PREVIEW_TOPBAR_HEIGHT,
@@ -53,7 +55,7 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
   app.quit();
 }
 
-export const createNewDocument = ({width, height, document}: {width?: number; height?: number; document?: string}): Promise<electron.BrowserWindow> => {
+export const createNewDocument = ({width, height, document}: {width?: number; height?: number; document?: Btwx.Document}): Promise<electron.BrowserWindow> => {
   return new Promise((resolve) => {
     // Create the browser window.
     const newDocument = new BrowserWindow({
@@ -72,7 +74,7 @@ export const createNewDocument = ({width, height, document}: {width?: number; he
     newDocument.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
     newDocument.webContents.on('did-finish-load', () => {
-      const preloadedState = {...(document ? JSON.parse(document) : {}), preview: { ...initialPreviewState, documentWindowId: newDocument.id }};
+      const preloadedState = {...(document ? document : {}), preview: { ...initialPreviewState, documentWindowId: newDocument.id }};
       newDocument.webContents.executeJavaScript(`renderNewDocument(${JSON.stringify(preloadedState)})`).then(() => {
         // newDocument.webContents.executeJavaScript(`setPreviewDocumentWindowId(${JSON.stringify(newDocument.id)})`);
         resolve(newDocument);
@@ -420,7 +422,7 @@ export const handleOpenDocument = (filePath: string): void => {
   });
 };
 
-export const handleSetTheme = (theme: em.ThemeName): void => {
+export const handleSetTheme = (theme: Btwx.ThemeName): void => {
   BrowserWindow.getAllWindows().forEach((window) => {
     window.setBackgroundColor(getWindowBackground(theme));
     if (window.webContents) {
@@ -440,10 +442,10 @@ ipcMain.on('openPreview', (event, payload) => {
 });
 
 ipcMain.on('createNewDocument', (event, payload) => {
-  createNewDocument({document: payload});
+  createNewDocument({document: JSON.parse(payload)});
 });
 
-// ipcMain.on('updateTheme', (event, theme: em.ThemeName) => {
+// ipcMain.on('updateTheme', (event, theme: Btwx.ThemeName) => {
 //   console.log(event);
 //   BrowserWindow.getAllWindows().forEach((window) => {
 //     window.setBackgroundColor(getWindowBackground(theme));

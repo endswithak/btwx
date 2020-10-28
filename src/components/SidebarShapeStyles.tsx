@@ -67,9 +67,9 @@ const mapStateToProps = (state: RootState): {
   const { layer, rightSidebar } = state;
   const selected = layer.present.selected;
   const allShapes = selected.every((id: string) => layer.present.byId[id].type === 'Shape');
-  const allRounded = allShapes && selected.every((id: string) => (layer.present.byId[id] as em.Shape).shapeType === 'Rounded');
-  const allPolygons = allShapes && selected.every((id: string) => (layer.present.byId[id] as em.Shape).shapeType === 'Polygon');
-  const allStars = allShapes && selected.every((id: string) => (layer.present.byId[id] as em.Shape).shapeType === 'Star');
+  const allRounded = allShapes && selected.every((id: string) => (layer.present.byId[id] as Btwx.Shape).shapeType === 'Rounded');
+  const allPolygons = allShapes && selected.every((id: string) => (layer.present.byId[id] as Btwx.Shape).shapeType === 'Polygon');
+  const allStars = allShapes && selected.every((id: string) => (layer.present.byId[id] as Btwx.Shape).shapeType === 'Star');
   const shapeStylesCollapsed = rightSidebar.shapeStylesCollapsed;
   return { allRounded, allPolygons, allStars, shapeStylesCollapsed };
 };

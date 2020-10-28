@@ -9,7 +9,7 @@ export const MENU_ITEM_ID = 'editPasteOverSelection';
 
 interface MenuEditPasteOverSelectionProps {
   canPasteOverSelection?: boolean;
-  pasteLayersThunk?(props?: { overSelection?: boolean; overPoint?: em.Point; overLayer?: string }): any;
+  pasteLayersThunk?(props?: { overSelection?: boolean; overPoint?: Btwx.Point; overLayer?: string }): any;
 }
 
 const MenuEditPasteOverSelection = (props: MenuEditPasteOverSelectionProps): ReactElement => {

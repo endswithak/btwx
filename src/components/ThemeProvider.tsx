@@ -5,7 +5,7 @@ import { RootState } from '../store/reducers';
 
 interface ThemeProviderProps {
   children: React.ReactNode;
-  theme: em.ThemeName;
+  theme: Btwx.ThemeName;
 }
 
 const ThemeContext = createContext(darkTheme);

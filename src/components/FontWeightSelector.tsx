@@ -9,7 +9,7 @@ import { setTextSettingsFontWeight } from '../store/actions/textSettings';
 
 interface FontWeightSelectorProps {
   selected?: string[];
-  fontWeightValue?: em.FontWeight | 'multi';
+  fontWeightValue?: Btwx.FontWeight | 'multi';
   fontFamily?: string;
   setLayersFontWeight?(payload: SetLayersFontWeightPayload): LayerTypes;
   setTextSettingsFontWeight?(payload: SetTextSettingsFontWeightPayload): TextSettingsTypes;
@@ -38,7 +38,7 @@ const FontWeightSelector = (props: FontWeightSelectorProps): ReactElement => {
   const handleChange = (selectedOption: { value: string; label: string }) => {
     setFontWeight(selectedOption);
     setLayersFontWeight({layers: selected, fontWeight: selectedOption.value});
-    setTextSettingsFontWeight({fontWeight: selectedOption.value as em.FontWeight});
+    setTextSettingsFontWeight({fontWeight: selectedOption.value as Btwx.FontWeight});
   }
 
   return (
@@ -57,7 +57,7 @@ const FontWeightSelector = (props: FontWeightSelectorProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer, textSettings } = state;
   const selected = layer.present.selected;
-  const layerItems: em.Text[] = selected.reduce((result, current) => {
+  const layerItems: Btwx.Text[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);

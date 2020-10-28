@@ -13,15 +13,15 @@ export const SET_CANVAS_MOUSE_POSITION = 'SET_CANVAS_MOUSE_POSITION';
 export const SET_CANVAS_ZOOM_TYPE = 'SET_CANVAS_ZOOM_TYPE';
 
 export interface SetCanvasActiveToolPayload {
-  activeTool: em.ToolType;
+  activeTool: Btwx.ToolType;
   dragging?: boolean;
   resizing?: boolean;
   drawing?: boolean;
   selecting?: boolean;
   zooming?: boolean;
   translating?: boolean;
-  zoomType?: em.ZoomType;
-  resizeType?: em.ResizeType;
+  zoomType?: Btwx.ZoomType;
+  resizeType?: Btwx.ResizeType;
 }
 
 export interface SetCanvasActiveTool {
@@ -49,7 +49,7 @@ export interface SetCanvasTyping {
 
 export interface SetCanvasResizingPayload {
   resizing: boolean;
-  resizeType: em.ResizeType;
+  resizeType: Btwx.ResizeType;
 }
 
 export interface SetCanvasResizing {
@@ -77,7 +77,7 @@ export interface SetCanvasDragging {
 
 export interface SetCanvasZoomingPayload {
   zooming: boolean;
-  zoomType?: em.ZoomType;
+  zoomType?: Btwx.ZoomType;
 }
 
 export interface SetCanvasZooming {
@@ -131,7 +131,7 @@ export interface SetCanvasMousePosition {
 }
 
 export interface SetCanvasZoomTypePayload {
-  zoomType: em.ZoomType;
+  zoomType: Btwx.ZoomType;
 }
 
 export interface SetCanvasZoomType {

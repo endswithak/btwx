@@ -7,7 +7,7 @@ import SidebarToggleButton from './SidebarToggleButton';
 import Icon from './Icon';
 
 interface ColorPickerTypeToggleProps {
-  type: em.ColorFormat;
+  type: Btwx.ColorFormat;
   setType: any;
   setCanvasColorFormat?(payload: SetCanvasColorFormatPayload): DocumentSettingsTypes;
 }

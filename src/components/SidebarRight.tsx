@@ -8,7 +8,7 @@ import EmptyState from './EmptyState';
 
 interface SidebarRightProps {
   isOpen: boolean;
-  activeTool: em.ToolType;
+  activeTool: Btwx.ToolType;
   selected: string[];
   sidebarWidth: number;
   ready: boolean;

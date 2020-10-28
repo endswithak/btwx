@@ -3,7 +3,7 @@ import { convertColor, convertGradientDestination, convertGradientOrigin, conver
 import { convertFillType } from './fill';
 import { DEFAULT_STROKE_STYLE, DEFAULT_STROKE_OPTIONS_STYLE } from '../../../constants';
 
-export const convertStroke = (layer: FileFormat.AnyLayer): em.Stroke => {
+export const convertStroke = (layer: FileFormat.AnyLayer): Btwx.Stroke => {
   const stroke = layer.style.borders.find(border => border.fillType === 0 || border.fillType === 1);
   if (!stroke) {
     return {
@@ -55,7 +55,7 @@ export const convertStrokeDashArray = (sketchStrokeJoin: number[]): number[] => 
   return [width, gap];
 };
 
-export const convertStrokeOptions = (layer: FileFormat.AnyLayer): em.StrokeOptions => ({
+export const convertStrokeOptions = (layer: FileFormat.AnyLayer): Btwx.StrokeOptions => ({
   cap: convertStrokeCap(layer.style.borderOptions.lineCapStyle),
   join: convertStrokeJoin(layer.style.borderOptions.lineJoinStyle),
   dashArray: convertStrokeDashArray(layer.style.borderOptions.dashPattern),

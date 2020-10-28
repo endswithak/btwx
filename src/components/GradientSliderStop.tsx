@@ -7,7 +7,7 @@ import { Draggable } from 'gsap/Draggable';
 gsap.registerPlugin(Draggable);
 
 interface GradientSliderProps {
-  stop: em.GradientStop;
+  stop: Btwx.GradientStop;
   index: number;
   activeStopIndex: number;
   onStopPress(index: number): void;

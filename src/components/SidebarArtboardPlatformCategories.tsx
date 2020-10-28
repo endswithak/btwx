@@ -5,9 +5,9 @@ import { DEVICES } from '../constants';
 import SidebarArtboardPlatformCategory from './SidebarArtboardPlatformCategory';
 
 interface SidebarArtboardPlatformCategoriesProps {
-  categories?: em.DeviceCategory[];
-  onDeviceClick(device: em.Device): void;
-  orientation: em.DeviceOrientationType;
+  categories?: Btwx.DeviceCategory[];
+  onDeviceClick(device: Btwx.Device): void;
+  orientation: Btwx.DeviceOrientationType;
 }
 
 const SidebarArtboardPlatformCategories = (props: SidebarArtboardPlatformCategoriesProps): ReactElement => {
@@ -33,7 +33,7 @@ const mapStateToProps = (state: RootState) => {
   const platformValue = documentSettings.artboardPresets.platform;
   const categories = platformValue === 'Custom' ? [{
     type: 'Custom',
-    devices: documentSettings.artboardPresets.allIds.reduce((result: em.ArtboardPreset[], current) => {
+    devices: documentSettings.artboardPresets.allIds.reduce((result: Btwx.ArtboardPreset[], current) => {
       result = [...result, documentSettings.artboardPresets.byId[current]];
       return result;
     }, [])

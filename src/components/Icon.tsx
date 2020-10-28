@@ -478,7 +478,7 @@ const Icon = (props: IconProps): ReactElement => {
 
 const mapStateToProps = (state: RootState, ownProps: IconProps) => {
   const { layer } = state;
-  let pathData = ownProps.name === 'shape' && ownProps.shapeId && layer.present.byId[ownProps.shapeId] ? (layer.present.byId[ownProps.shapeId] as em.Shape).pathData : null;
+  let pathData = ownProps.name === 'shape' && ownProps.shapeId && layer.present.byId[ownProps.shapeId] ? (layer.present.byId[ownProps.shapeId] as Btwx.Shape).pathData : null;
   if (pathData) {
     const layerIcon = new paperMain.CompoundPath({
       pathData: pathData,

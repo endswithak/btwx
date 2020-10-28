@@ -9,7 +9,7 @@ export const MENU_ITEM_ID = 'layerCombineDifference';
 
 interface MenuLayerCombineDifferenceProps {
   isEnabled?: boolean;
-  applyBooleanOperationThunk?(operation: em.BooleanOperation): void;
+  applyBooleanOperationThunk?(operation: Btwx.BooleanOperation): void;
 }
 
 const MenuLayerCombineDifference = (props: MenuLayerCombineDifferenceProps): ReactElement => {

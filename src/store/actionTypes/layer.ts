@@ -260,7 +260,7 @@ export const SET_LAYERS_STYLE = 'SET_LAYERS_STYLE';
 
 export type AddArtboardPayload = {
   layer: {
-    [P in keyof em.Artboard]?: em.Artboard[P];
+    [P in keyof Btwx.Artboard]?: Btwx.Artboard[P];
   };
   batch?: boolean;
 }
@@ -274,7 +274,7 @@ export interface AddArtboard {
 
 export type AddGroupPayload = {
   layer: {
-    [P in keyof em.Group]?: em.Group[P];
+    [P in keyof Btwx.Group]?: Btwx.Group[P];
   };
   batch?: boolean;
 }
@@ -288,7 +288,7 @@ export interface AddGroup {
 
 export type AddShapePayload = {
   layer: {
-    [P in keyof em.Shape]?: em.Shape[P];
+    [P in keyof Btwx.Shape]?: Btwx.Shape[P];
   };
   batch?: boolean;
 }
@@ -302,7 +302,7 @@ export interface AddShape {
 
 export type AddTextPayload = {
   layer: {
-    [P in keyof em.Text]?: em.Text[P];
+    [P in keyof Btwx.Text]?: Btwx.Text[P];
   };
   batch?: boolean;
 }
@@ -316,7 +316,7 @@ export interface AddText {
 
 export type AddImagePayload = {
   layer: {
-    [P in keyof em.Image]?: em.Image[P];
+    [P in keyof Btwx.Image]?: Btwx.Image[P];
   };
   batch?: boolean;
   buffer?: Buffer;
@@ -330,9 +330,9 @@ export interface AddImage {
 // layers
 
 export interface AddLayersPayload {
-  layers: em.Layer[];
+  layers: Btwx.Layer[];
   buffers?: {
-    [id: string]: em.DocumentImage;
+    [id: string]: Btwx.DocumentImage;
   };
 }
 
@@ -608,7 +608,7 @@ export interface SetLayersScope {
 
 export interface GroupLayersPayload {
   layers: string[];
-  group?: em.Group;
+  group?: Btwx.Group;
 }
 
 export interface GroupLayers {
@@ -743,7 +743,7 @@ export interface SetActiveArtboard {
 // Tween Event
 
 export type AddLayerTweenEventPayload = {
-  [P in keyof em.TweenEvent]?: em.TweenEvent[P];
+  [P in keyof Btwx.TweenEvent]?: Btwx.TweenEvent[P];
 }
 
 export interface AddLayerTweenEvent {
@@ -763,7 +763,7 @@ export interface RemoveLayerTweenEvent {
 // Tween
 
 export type AddLayerTweenPayload = {
-  [P in keyof em.Tween]?: em.Tween[P];
+  [P in keyof Btwx.Tween]?: Btwx.Tween[P];
 }
 
 export interface AddLayerTween {
@@ -813,7 +813,7 @@ export interface SetLayerTweenDelay {
 
 export interface SetLayerTweenEasePayload {
   id: string;
-  ease: em.CubicBezier;
+  ease: Btwx.CubicBezier;
 }
 
 export interface SetLayerTweenEase {
@@ -823,7 +823,7 @@ export interface SetLayerTweenEase {
 
 export interface SetLayerTweenPowerPayload {
   id: string;
-  power: em.CubicBezierType;
+  power: Btwx.CubicBezierType;
 }
 
 export interface SetLayerTweenPower {
@@ -1079,7 +1079,7 @@ export interface DisableLayersFill {
 
 export interface SetLayerFillColorPayload {
   id: string;
-  fillColor: em.Color;
+  fillColor: Btwx.Color;
 }
 
 export interface SetLayerFillColor {
@@ -1089,7 +1089,7 @@ export interface SetLayerFillColor {
 
 export interface SetLayersFillColorPayload {
   layers: string[];
-  fillColor: em.Color;
+  fillColor: Btwx.Color;
 }
 
 export interface SetLayersFillColor {
@@ -1135,7 +1135,7 @@ export interface DisableLayersStroke {
 
 export interface SetLayerStrokeColorPayload {
   id: string;
-  strokeColor: em.Color;
+  strokeColor: Btwx.Color;
 }
 
 export interface SetLayerStrokeColor {
@@ -1145,7 +1145,7 @@ export interface SetLayerStrokeColor {
 
 export interface SetLayersStrokeColorPayload {
   layers: string[];
-  strokeColor: em.Color;
+  strokeColor: Btwx.Color;
 }
 
 export interface SetLayersStrokeColor {
@@ -1155,7 +1155,7 @@ export interface SetLayersStrokeColor {
 
 export interface SetLayerStrokeFillTypePayload {
   id: string;
-  fillType: em.FillType;
+  fillType: Btwx.FillType;
 }
 
 export interface SetLayerStrokeFillType {
@@ -1165,7 +1165,7 @@ export interface SetLayerStrokeFillType {
 
 export interface SetLayersStrokeFillTypePayload {
   layers: string[];
-  fillType: em.FillType;
+  fillType: Btwx.FillType;
 }
 
 export interface SetLayersStrokeFillType {
@@ -1176,7 +1176,7 @@ export interface SetLayersStrokeFillType {
 export interface SetLayerGradientPayload {
   id: string;
   prop: 'fill' | 'stroke';
-  gradient: em.Gradient;
+  gradient: Btwx.Gradient;
 }
 
 export interface SetLayerGradient {
@@ -1187,7 +1187,7 @@ export interface SetLayerGradient {
 export interface SetLayersGradientPayload {
   layers: string[];
   prop: 'fill' | 'stroke';
-  gradient: em.Gradient;
+  gradient: Btwx.Gradient;
 }
 
 export interface SetLayersGradient {
@@ -1198,7 +1198,7 @@ export interface SetLayersGradient {
 export interface SetLayerGradientTypePayload {
   id: string;
   prop: 'fill' | 'stroke';
-  gradientType: em.GradientType;
+  gradientType: Btwx.GradientType;
 }
 
 export interface SetLayerGradientType {
@@ -1209,7 +1209,7 @@ export interface SetLayerGradientType {
 export interface SetLayersGradientTypePayload {
   layers: string[];
   prop: 'fill' | 'stroke';
-  gradientType: em.GradientType;
+  gradientType: Btwx.GradientType;
 }
 
 export interface SetLayersGradientType {
@@ -1220,7 +1220,7 @@ export interface SetLayersGradientType {
 export interface SetLayerGradientOriginPayload {
   id: string;
   prop: 'fill' | 'stroke';
-  origin: em.Point;
+  origin: Btwx.Point;
 }
 
 export interface SetLayerGradientOrigin {
@@ -1231,7 +1231,7 @@ export interface SetLayerGradientOrigin {
 export interface SetLayersGradientOriginPayload {
   layers: string[];
   prop: 'fill' | 'stroke';
-  origin: em.Point;
+  origin: Btwx.Point;
 }
 
 export interface SetLayersGradientOrigin {
@@ -1242,7 +1242,7 @@ export interface SetLayersGradientOrigin {
 export interface SetLayerGradientDestinationPayload {
   id: string;
   prop: 'fill' | 'stroke';
-  destination: em.Point;
+  destination: Btwx.Point;
 }
 
 export interface SetLayerGradientDestination {
@@ -1253,7 +1253,7 @@ export interface SetLayerGradientDestination {
 export interface SetLayersGradientDestinationPayload {
   layers: string[];
   prop: 'fill' | 'stroke';
-  destination: em.Point;
+  destination: Btwx.Point;
 }
 
 export interface SetLayersGradientDestination {
@@ -1265,7 +1265,7 @@ export interface SetLayerGradientStopColorPayload {
   id: string;
   stopIndex: number;
   prop: 'fill' | 'stroke';
-  color: em.Color;
+  color: Btwx.Color;
 }
 
 export interface SetLayerGradientStopColor {
@@ -1277,7 +1277,7 @@ export interface SetLayersGradientStopColorPayload {
   layers: string[];
   stopIndex: number;
   prop: 'fill' | 'stroke';
-  color: em.Color;
+  color: Btwx.Color;
 }
 
 export interface SetLayersGradientStopColor {
@@ -1312,7 +1312,7 @@ export interface SetLayersGradientStopPosition {
 export interface AddLayerGradientStopPayload {
   id: string;
   prop: 'fill' | 'stroke';
-  gradientStop: em.GradientStop;
+  gradientStop: Btwx.GradientStop;
 }
 
 export interface AddLayerGradientStop {
@@ -1323,7 +1323,7 @@ export interface AddLayerGradientStop {
 export interface AddLayersGradientStopPayload {
   layers: string[];
   prop: 'fill' | 'stroke';
-  gradientStop: em.GradientStop;
+  gradientStop: Btwx.GradientStop;
 }
 
 export interface AddLayersGradientStop {
@@ -1386,7 +1386,7 @@ export interface SetLayersStrokeWidth {
 
 export interface SetLayerStrokeCapPayload {
   id: string;
-  strokeCap: em.StrokeCap;
+  strokeCap: Btwx.StrokeCap;
 }
 
 export interface SetLayerStrokeCap {
@@ -1396,7 +1396,7 @@ export interface SetLayerStrokeCap {
 
 export interface SetLayersStrokeCapPayload {
   layers: string[];
-  strokeCap: em.StrokeCap;
+  strokeCap: Btwx.StrokeCap;
 }
 
 export interface SetLayersStrokeCap {
@@ -1406,7 +1406,7 @@ export interface SetLayersStrokeCap {
 
 export interface SetLayerStrokeJoinPayload {
   id: string;
-  strokeJoin: em.StrokeJoin;
+  strokeJoin: Btwx.StrokeJoin;
 }
 
 export interface SetLayerStrokeJoin {
@@ -1416,7 +1416,7 @@ export interface SetLayerStrokeJoin {
 
 export interface SetLayersStrokeJoinPayload {
   layers: string[];
-  strokeJoin: em.StrokeJoin;
+  strokeJoin: Btwx.StrokeJoin;
 }
 
 export interface SetLayersStrokeJoin {
@@ -1552,7 +1552,7 @@ export interface DisableLayersShadow {
 
 export interface SetLayerShadowColorPayload {
   id: string;
-  shadowColor: em.Color;
+  shadowColor: Btwx.Color;
 }
 
 export interface SetLayerShadowColor {
@@ -1562,7 +1562,7 @@ export interface SetLayerShadowColor {
 
 export interface SetLayersShadowColorPayload {
   layers: string[];
-  shadowColor: em.Color;
+  shadowColor: Btwx.Color;
 }
 
 export interface SetLayersShadowColor {
@@ -1632,7 +1632,7 @@ export interface SetLayersShadowYOffset {
 
 export interface ScaleLayerPayload {
   id: string;
-  scale: em.Point;
+  scale: Btwx.Point;
   verticalFlip: boolean;
   horizontalFlip: boolean;
 }
@@ -1644,7 +1644,7 @@ export interface ScaleLayer {
 
 export interface ScaleLayersPayload {
   layers: string[];
-  scale: em.Point;
+  scale: Btwx.Point;
   verticalFlip: boolean;
   horizontalFlip: boolean;
 }
@@ -1746,7 +1746,7 @@ export interface SetLayersFontFamily {
 
 export interface SetLayerJustificationPayload {
   id: string;
-  justification: em.Jusftification;
+  justification: Btwx.Jusftification;
 }
 
 export interface SetLayerJustification {
@@ -1756,7 +1756,7 @@ export interface SetLayerJustification {
 
 export interface SetLayersJustificationPayload {
   layers: string[];
-  justification: em.Jusftification;
+  justification: Btwx.Jusftification;
 }
 
 export interface SetLayersJustification {
@@ -1808,7 +1808,7 @@ export interface UpdateInViewLayers {
 
 export interface SetLayerFillPayload {
   id: string;
-  fill: em.Fill;
+  fill: Btwx.Fill;
 }
 
 export interface SetLayerFill {
@@ -1818,7 +1818,7 @@ export interface SetLayerFill {
 
 export interface SetLayerFillTypePayload {
   id: string;
-  fillType: em.FillType;
+  fillType: Btwx.FillType;
 }
 
 export interface SetLayerFillType {
@@ -1828,7 +1828,7 @@ export interface SetLayerFillType {
 
 export interface SetLayersFillTypePayload {
   layers: string[];
-  fillType: em.FillType;
+  fillType: Btwx.FillType;
 }
 
 export interface SetLayersFillType {
@@ -1914,7 +1914,7 @@ export interface SetLayersMasked {
 
 export interface AddLayersMaskPayload {
   layers: string[];
-  group?: em.Group;
+  group?: Btwx.Group;
 }
 
 export interface AddLayersMask {
@@ -2106,7 +2106,7 @@ export interface BringLayersToFront {
 
 export interface SetLayerBlendModePayload {
   id: string;
-  blendMode: em.BlendMode;
+  blendMode: Btwx.BlendMode;
 }
 
 export interface SetLayerBlendMode {
@@ -2116,7 +2116,7 @@ export interface SetLayerBlendMode {
 
 export interface SetLayersBlendModePayload {
   layers: string[];
-  blendMode: em.BlendMode;
+  blendMode: Btwx.BlendMode;
 }
 
 export interface SetLayersBlendMode {
@@ -2126,7 +2126,7 @@ export interface SetLayersBlendMode {
 
 export interface UniteLayersPayload {
   layers: string[];
-  booleanLayer?: em.Shape;
+  booleanLayer?: Btwx.Shape;
 }
 
 export interface UniteLayers {
@@ -2136,7 +2136,7 @@ export interface UniteLayers {
 
 export interface IntersectLayersPayload {
   layers: string[];
-  booleanLayer?: em.Shape;
+  booleanLayer?: Btwx.Shape;
 }
 
 export interface IntersectLayers {
@@ -2146,7 +2146,7 @@ export interface IntersectLayers {
 
 export interface SubtractLayersPayload {
   layers: string[];
-  booleanLayer?: em.Shape;
+  booleanLayer?: Btwx.Shape;
 }
 
 export interface SubtractLayers {
@@ -2156,7 +2156,7 @@ export interface SubtractLayers {
 
 export interface ExcludeLayersPayload {
   layers: string[];
-  booleanLayer?: em.Shape;
+  booleanLayer?: Btwx.Shape;
 }
 
 export interface ExcludeLayers {
@@ -2166,7 +2166,7 @@ export interface ExcludeLayers {
 
 export interface DivideLayersPayload {
   layers: string[];
-  booleanLayer?: em.Shape;
+  booleanLayer?: Btwx.Shape;
 }
 
 export interface DivideLayers {
@@ -2375,8 +2375,8 @@ export interface SetLayerEdit {
 
 export interface SetLayerStylePayload {
   id: string;
-  style: em.Style;
-  textStyle?: em.TextStyle;
+  style: Btwx.Style;
+  textStyle?: Btwx.TextStyle;
 }
 
 export interface SetLayerStyle {
@@ -2386,8 +2386,8 @@ export interface SetLayerStyle {
 
 export interface SetLayersStylePayload {
   layers: string[];
-  style: em.Style;
-  textStyle?: em.TextStyle;
+  style: Btwx.Style;
+  textStyle?: Btwx.TextStyle;
 }
 
 export interface SetLayersStyle {

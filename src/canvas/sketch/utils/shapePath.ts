@@ -89,8 +89,8 @@ interface ConvertPoints {
   layer: FileFormat.ShapePath | FileFormat.Rectangle | FileFormat.Star | FileFormat.Polygon | FileFormat.Oval;
 }
 
-export const convertPoints = ({ layer }: ConvertPoints): em.CurvePoint[] => {
-  const curvePoints: em.CurvePoint[] = [];
+export const convertPoints = ({ layer }: ConvertPoints): Btwx.CurvePoint[] => {
+  const curvePoints: Btwx.CurvePoint[] = [];
   const newPoint = (sketchPoint: any) => {
     curvePoints.push({
       point: {

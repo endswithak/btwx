@@ -11,7 +11,7 @@ export const MENU_ITEM_ID = 'editDuplicate';
 interface MenuEditDuplicateProps {
   selected?: string[];
   selectedById?: {
-    [id: string]: em.Layer;
+    [id: string]: Btwx.Layer;
   };
   canDuplicate?: boolean;
   duplicateLayers?(payload: DuplicateLayersPayload): LayerTypes;
@@ -39,7 +39,7 @@ const MenuEditDuplicate = (props: MenuEditDuplicateProps): ReactElement => {
 const mapStateToProps = (state: RootState): {
   selected: string[];
   selectedById: {
-    [id: string]: em.Layer;
+    [id: string]: Btwx.Layer;
   };
   canDuplicate: boolean;
 } => {

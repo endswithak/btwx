@@ -10,7 +10,7 @@ interface IconButtonProps {
   icon: string;
   variant?: 'small' | 'medium' | 'large';
   activeIcon?: string;
-  theme?: em.Theme;
+  theme?: Btwx.Theme;
 }
 
 const Button = styled.button<IconButtonProps>`

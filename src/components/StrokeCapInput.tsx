@@ -11,7 +11,7 @@ import Icon from './Icon';
 
 interface StrokeCapInputProps {
   selected?: string[];
-  strokeCapValue?: em.StrokeCap | 'multi';
+  strokeCapValue?: Btwx.StrokeCap | 'multi';
   disabled?: boolean;
   setLayersStrokeCap?(payload: SetLayersStrokeCapPayload): LayerTypes;
 }
@@ -25,7 +25,7 @@ const StrokeCapInput = (props: StrokeCapInputProps): ReactElement => {
     setStrokeCap(strokeCapValue);
   }, [strokeCapValue, disabled, selected]);
 
-  const handleClick = (strokeCapType: em.StrokeCap) => {
+  const handleClick = (strokeCapType: Btwx.StrokeCap) => {
     setLayersStrokeCap({layers: selected, strokeCap: strokeCapType})
     setStrokeCap(strokeCapType);
   };
@@ -76,15 +76,15 @@ const StrokeCapInput = (props: StrokeCapInputProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const layerItems: (em.Shape | em.Image | em.Text)[] = selected.reduce((result, current) => {
+  const layerItems: (Btwx.Shape | Btwx.Image | Btwx.Text)[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);
-  const strokeCapValues = layerItems.reduce((result: em.StrokeCap[], current: em.Shape | em.Image | em.Text) => {
+  const strokeCapValues = layerItems.reduce((result: Btwx.StrokeCap[], current: Btwx.Shape | Btwx.Image | Btwx.Text) => {
     return [...result, current.style.strokeOptions.cap];
   }, []);
-  const strokeCapValue = strokeCapValues.every((cap: em.StrokeCap) => cap === strokeCapValues[0]) ? strokeCapValues[0] : 'multi';
-  const disabled = !layerItems.every((layerItem) => layerItem.style.stroke.enabled) || layerItems.every((layerItem) => layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType !== 'Line');
+  const strokeCapValue = strokeCapValues.every((cap: Btwx.StrokeCap) => cap === strokeCapValues[0]) ? strokeCapValues[0] : 'multi';
+  const disabled = !layerItems.every((layerItem) => layerItem.style.stroke.enabled) || layerItems.every((layerItem) => layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line');
   return { selected, strokeCapValue, disabled };
 };
 

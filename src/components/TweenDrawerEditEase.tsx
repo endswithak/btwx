@@ -11,7 +11,7 @@ gsap.registerPlugin(CustomEase);
 
 interface TweenDrawerEditEaseProps {
   tweenId: string;
-  tween?: em.Tween;
+  tween?: Btwx.Tween;
   editingEase?: boolean;
   openEaseEditor?(payload: OpenEaseEditorPayload): EaseEditorTypes;
 }

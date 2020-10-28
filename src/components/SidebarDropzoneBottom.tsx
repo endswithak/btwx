@@ -11,14 +11,14 @@ import { ThemeContext } from './ThemeProvider';
 
 interface SidebarDropzoneBottomProps {
   leftSidebarWidth?: number;
-  layerItem?: em.Layer;
+  layerItem?: Btwx.Layer;
   layer: string;
   depth?: number;
   selected?: string[];
   selectedById?: {
-    [id: string]: em.Layer;
+    [id: string]: Btwx.Layer;
   };
-  dropzone?: em.Dropzone;
+  dropzone?: Btwx.Dropzone;
   isActive?: boolean;
   setDragging?(payload: SetDraggingPayload): LeftSidebarTypes;
   setDropzone?(payload: SetDropzonePayload): LeftSidebarTypes;
@@ -116,7 +116,7 @@ const mapStateToProps = (state: RootState, ownProps: SidebarDropzoneBottomProps)
   const { layer, viewSettings, leftSidebar } = state;
   const layerItem = layer.present.byId[ownProps.layer];
   const selected = layer.present.selected;
-  const selectedById = selected.reduce((result: {[id: string]: em.Layer}, current) => {
+  const selectedById = selected.reduce((result: {[id: string]: Btwx.Layer}, current) => {
     result[current] = layer.present.byId[current];
     return result;
   }, {});

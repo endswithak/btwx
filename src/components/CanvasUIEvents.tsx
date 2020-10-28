@@ -31,7 +31,7 @@ export default CanvasUIEvents;
 
 // const mapStateToProps = (state: RootState): {
 //   documentImages: {
-//     [id: string]: em.DocumentImage;
+//     [id: string]: Btwx.DocumentImage;
 //   };
 //   paperProject: string;
 //   matrix: number[];

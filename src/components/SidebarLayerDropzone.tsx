@@ -13,10 +13,10 @@ import { isBetween } from '../utils';
 interface SidebarLayerDropzoneProps {
   layer: string;
   isParent: boolean;
-  layerItem?: em.Layer;
+  layerItem?: Btwx.Layer;
   selected?: string[];
   selectedById?: {
-    [id: string]: em.Layer;
+    [id: string]: Btwx.Layer;
   };
   setDragging?(payload: SetDraggingPayload): LeftSidebarTypes;
   // setDropzone?(payload: SetDropzonePayload): LeftSidebarTypes;
@@ -69,7 +69,7 @@ const SidebarLayerDropzone = (props: SidebarLayerDropzoneProps): ReactElement =>
     return !something1 && !something2;
   }
 
-  const getCanDrop = (dropzone: em.Dropzone) => {
+  const getCanDrop = (dropzone: Btwx.Dropzone) => {
     switch(dropzone) {
       case 'top':
       case 'bottom':
@@ -162,16 +162,16 @@ const SidebarLayerDropzone = (props: SidebarLayerDropzoneProps): ReactElement =>
 }
 
 const mapStateToProps = (state: RootState, ownProps: SidebarLayerDropzoneProps): {
-  layerItem: em.Layer;
+  layerItem: Btwx.Layer;
   selected: string[];
   selectedById?: {
-    [id: string]: em.Layer;
+    [id: string]: Btwx.Layer;
   };
 } => {
   const { layer } = state;
   const layerItem = layer.present.byId[ownProps.layer];
   const selected = layer.present.selected;
-  const selectedById = selected.reduce((result: {[id: string]: em.Layer}, current) => {
+  const selectedById = selected.reduce((result: {[id: string]: Btwx.Layer}, current) => {
     result[current] = layer.present.byId[current];
     return result;
   }, {});

@@ -25,7 +25,7 @@ export const disableShapeTool = (): ShapeToolTypes => ({
   type: DISABLE_SHAPE_TOOL
 });
 
-export const toggleShapeToolThunk = (shapeType: em.ShapeType) => {
+export const toggleShapeToolThunk = (shapeType: Btwx.ShapeType) => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
     if (state.canvasSettings.focusing) {

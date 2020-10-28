@@ -1,22 +1,21 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { SendLayersForwardPayload, LayerTypes } from '../store/actionTypes/layer';
-import { sendLayersForward } from '../store/actions/layer';
+import { bringSelectedForwardThunk } from '../store/actions/layer';
+import { canBringSelectedForward } from '../store/selectors/layer';
 import TopbarButton from './TopbarButton';
 
 interface MoveForwardButtonProps {
-  selected: string[];
   canMoveForward: boolean;
-  sendLayersForward(payload: SendLayersForwardPayload): LayerTypes;
+  bringSelectedForwardThunk(): void;
 }
 
 const MoveForwardButton = (props: MoveForwardButtonProps): ReactElement => {
-  const { selected, canMoveForward, sendLayersForward } = props;
+  const { canMoveForward, bringSelectedForwardThunk } = props;
 
   const handleMoveForwardClick = (): void => {
     if (canMoveForward) {
-      sendLayersForward({layers: selected});
+      bringSelectedForwardThunk();
     }
   }
 
@@ -30,16 +29,13 @@ const MoveForwardButton = (props: MoveForwardButtonProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState): {
-  selected: string[];
   canMoveForward: boolean;
 } => {
-  const { layer, selection } = state;
-  const selected = layer.present.selected;
-  const canMoveForward = selection.canMoveForward;
-  return { selected, canMoveForward };
+  const canMoveForward = canBringSelectedForward(state);
+  return { canMoveForward };
 };
 
 export default connect(
   mapStateToProps,
-  { sendLayersForward }
+  { bringSelectedForwardThunk }
 )(MoveForwardButton);

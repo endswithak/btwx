@@ -9,9 +9,9 @@ import SidebarSectionRow from './SidebarSectionRow';
 import { ThemeContext } from './ThemeProvider';
 
 interface SidebarArtboardPlatformDeviceProps {
-  device: em.Device | em.ArtboardPreset;
-  orientation: em.DeviceOrientationType;
-  onClick(device: em.Device): void;
+  device: Btwx.Device | Btwx.ArtboardPreset;
+  orientation: Btwx.DeviceOrientationType;
+  onClick(device: Btwx.Device): void;
   isActive?: boolean;
   openContextMenu?(payload: OpenContextMenuPayload): ContextMenuTypes;
 }
@@ -76,7 +76,7 @@ const SidebarArtboardPlatformDevice = (props: SidebarArtboardPlatformDeviceProps
     if (device.category === 'Custom') {
       openContextMenu({
         type: 'ArtboardCustomPreset',
-        id: (device as em.ArtboardPreset).id,
+        id: (device as Btwx.ArtboardPreset).id,
         x: e.clientX,
         y: e.clientY,
         paperX: e.clientX,
@@ -119,7 +119,7 @@ const SidebarArtboardPlatformDevice = (props: SidebarArtboardPlatformDeviceProps
 
 const mapStateToProps = (state: RootState, ownProps: SidebarArtboardPlatformDeviceProps) => {
   const { artboardPresetEditor } = state;
-  const isActive = ownProps.device.category === 'Custom' && (ownProps.device as em.ArtboardPreset).id === artboardPresetEditor.id;
+  const isActive = ownProps.device.category === 'Custom' && (ownProps.device as Btwx.ArtboardPreset).id === artboardPresetEditor.id;
   return { isActive };
 };
 

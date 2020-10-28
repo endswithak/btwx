@@ -64,7 +64,7 @@ const mapStateToProps = (state: RootState, ownProps: SidebarLayerChevronProps): 
   const { layer } = state;
   const layerItem = layer.present.byId[ownProps.layer];
   const isGroup = layerItem.type === 'Group' || layerItem.type === 'Artboard';
-  const showChildren = (isGroup ? (layerItem as em.Group).showChildren : false) && !ownProps.isDragGhost;
+  const showChildren = (isGroup ? (layerItem as Btwx.Group).showChildren : false) && !ownProps.isDragGhost;
   const isSelected = layerItem.selected && !ownProps.isDragGhost;
   return { showChildren, isGroup, isSelected };
 };

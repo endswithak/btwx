@@ -6,8 +6,8 @@ import { InsertKnobTypes } from '../store/actionTypes/insertKnob';
 import EmptyState from './EmptyState';
 
 interface SidebarLeftEmptyStateProps {
-  activeTool?: em.ToolType;
-  shapeToolShapeType?: em.ShapeType;
+  activeTool?: Btwx.ToolType;
+  shapeToolShapeType?: Btwx.ShapeType;
   isEmpty?: boolean;
   insertKnobOpen?: boolean;
   emptyStateActionActive?: boolean;

@@ -25,16 +25,16 @@ interface ContextMenuWrapProps {
   artboards?: {
     allIds: string[];
     byId: {
-      [id: string]: em.Artboard;
+      [id: string]: Btwx.Artboard;
     };
   };
   artboardParent?: string;
   selected?: string[];
   canAddTweenEvent?: boolean;
-  tweenEventItems?: em.TweenEvent[];
+  tweenEventItems?: Btwx.TweenEvent[];
   currentX?: number;
   currentY?: number;
-  clipboardType?: em.ClipboardType;
+  clipboardType?: Btwx.ClipboardType;
   canMoveForward?: boolean;
   canMoveBackward?: boolean;
   canGroup?: boolean;
@@ -45,7 +45,7 @@ interface ContextMenuWrapProps {
   openContextMenu?(payload: OpenContextMenuPayload): ContextMenuTypes;
   addLayerTweenEvent?(payload: AddLayerTweenEventPayload): LayerTypes;
   removeArtboardPreset?(payload: RemoveArtboardPresetPayload): DocumentSettingsTypes;
-  openArtboardPresetEditor?(payload: em.ArtboardPreset): ArtboardPresetEditorTypes;
+  openArtboardPresetEditor?(payload: Btwx.ArtboardPreset): ArtboardPresetEditorTypes;
   removeLayers?(payload: RemoveLayersPayload): LayerTypes;
   selectLayers?(payload: SelectLayersPayload): LayerTypes;
   selectAllLayers?(): LayerTypes;
@@ -55,7 +55,7 @@ interface ContextMenuWrapProps {
   groupLayersThunk?(payload: GroupLayersPayload): Promise<any>;
   addLayersMaskThunk?(payload: AddLayersMaskPayload): Promise<any>;
   copyLayersThunk?(): Promise<any>;
-  pasteLayersThunk?({overSelection, overPoint, overLayer}: { overSelection?: boolean; overPoint?: em.Point; overLayer?: string }): Promise<any>;
+  pasteLayersThunk?({overSelection, overPoint, overLayer}: { overSelection?: boolean; overPoint?: Btwx.Point; overLayer?: string }): Promise<any>;
   setTweenDrawerEventHoverThunk?(payload: SetTweenDrawerEventHoverPayload): TweenDrawerTypes;
   setTweenDrawerEventThunk?(payload: SetTweenDrawerEventPayload): void;
   removeLayerTweenEvent?(payload: RemoveLayerTweenEventPayload): LayerTypes;
@@ -438,10 +438,10 @@ const mapStateToProps = (state: RootState) => {
   const canUngroup = canUngroupLayers(state.layer.present, selected) || canUngroupLayers(state.layer.present, layerItem ? [contextMenu.id] : []);
   const canMask = canMaskLayers(state.layer.present, selected) || canMaskLayers(state.layer.present, layerItem ? [contextMenu.id] : []);
   const canDuplicate = selected.length > 0 || layerItem !== null;
-  const clipboardType: em.ClipboardType = ((): em.ClipboardType => {
+  const clipboardType: Btwx.ClipboardType = ((): Btwx.ClipboardType => {
     try {
       const text = clipboard.readText();
-      const parsedText: em.ClipboardLayers = JSON.parse(text);
+      const parsedText: Btwx.ClipboardLayers = JSON.parse(text);
       return parsedText.type ? parsedText.type : null;
     } catch (error) {
       return null;

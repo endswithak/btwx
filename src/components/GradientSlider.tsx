@@ -6,11 +6,11 @@ import GradientSliderGradient from './GradientSliderGradient';
 import GradientSliderRemove from './GradientSliderRemove';
 
 interface GradientSliderProps {
-  gradientStops: em.GradientStop[];
+  gradientStops: Btwx.GradientStop[];
   activeStopIndex: number;
   onStopPress(index: number): void;
   onStopDrag(index: number, position: number): void;
-  onSliderClick(stop: em.GradientStop): void;
+  onSliderClick(stop: Btwx.GradientStop): void;
 }
 
 const GradientSlider = (props: GradientSliderProps): ReactElement => {

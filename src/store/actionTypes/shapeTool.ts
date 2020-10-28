@@ -3,7 +3,7 @@ export const SET_SHAPE_TOOL_TYPE = 'SET_SHAPE_TOOL_TYPE';
 export const DISABLE_SHAPE_TOOL = 'DISABLE_SHAPE_TOOL';
 
 export interface EnableShapeToolPayload {
-  shapeType: em.ShapeType;
+  shapeType: Btwx.ShapeType;
 }
 
 interface EnableShapeTool {
@@ -12,7 +12,7 @@ interface EnableShapeTool {
 }
 
 export interface SetShapeToolTypePayload {
-  shapeType: em.ShapeType;
+  shapeType: Btwx.ShapeType;
 }
 
 interface SetShapeToolType {

@@ -11,7 +11,7 @@ interface TweenDrawerProps {
   ready?: boolean;
   tweenDrawerHeight?: number;
   isEmpty?: boolean;
-  tweenEvent?: em.TweenEvent;
+  tweenEvent?: Btwx.TweenEvent;
 }
 
 const TweenDrawer = (props: TweenDrawerProps): ReactElement => {
@@ -52,7 +52,7 @@ const TweenDrawer = (props: TweenDrawerProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   tweenDrawerHeight: number;
-  tweenEvent: em.TweenEvent;
+  tweenEvent: Btwx.TweenEvent;
   isEmpty: boolean;
 } => {
   const { layer, tweenDrawer, viewSettings } = state;

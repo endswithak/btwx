@@ -14,7 +14,7 @@ gsap.registerPlugin(Draggable);
 
 interface TimelineTweenHandleProps {
   tweenId: string;
-  tween?: em.Tween;
+  tween?: Btwx.Tween;
   setLayerTweenDuration?(payload: SetLayerTweenDurationPayload): LayerTypes;
   setLayerTweenDelay?(payload: SetLayerTweenDelayPayload): LayerTypes;
   setTweenDrawerTweenEditing?(payload: SetTweenDrawerTweenEditingPayload): TweenDrawerTypes;
@@ -136,7 +136,7 @@ const TimelineTweenHandle = (props: TimelineTweenHandleProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState, ownProps: TimelineTweenHandleProps): {
-  tween: em.Tween;
+  tween: Btwx.Tween;
 } => {
   const { layer } = state;
   const tween = layer.present.tweenById[ownProps.tweenId];

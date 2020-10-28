@@ -426,7 +426,7 @@ import {
 
 export interface LayerState {
   byId: {
-    [id: string]: em.Page | em.Artboard | em.Group | em.Shape | em.Text | em.Image;
+    [id: string]: Btwx.Page | Btwx.Artboard | Btwx.Group | Btwx.Shape | Btwx.Text | Btwx.Image;
   };
   allIds: string[];
   page: string;
@@ -441,22 +441,22 @@ export interface LayerState {
   scope: string[];
   inView: {
     allIds: string[];
-    snapPoints: em.SnapPoint[];
+    snapPoints: Btwx.SnapPoint[];
   };
   hover: string;
   paperProject: string;
   allTweenEventIds: string[];
   tweenEventById: {
-    [id: string]: em.TweenEvent;
+    [id: string]: Btwx.TweenEvent;
   };
   allTweenIds: string[];
   tweenById: {
-    [id: string]: em.Tween;
+    [id: string]: Btwx.Tween;
   };
   edit: string;
 }
 
-const initialState: LayerState = {
+export const initialState: LayerState = {
   byId: {
     'page': {
       type: 'Page',
@@ -478,7 +478,7 @@ const initialState: LayerState = {
       tweens: [],
       style: DEFAULT_STYLE,
       transform: DEFAULT_TRANSFORM
-    } as em.Page
+    } as Btwx.Page
   },
   allIds: ['page'],
   page: 'page',
@@ -1093,6 +1093,6 @@ export default undoable(baseReducer, {
       BRING_LAYERS_TO_FRONT,
       SET_LAYER_STYLE,
       SET_LAYERS_STYLE
-    ].includes(action.type);
+    ].includes(action.type) && !action.payload.batch;
   }
 });

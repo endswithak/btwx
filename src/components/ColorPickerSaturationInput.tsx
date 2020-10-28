@@ -15,7 +15,7 @@ interface ColorPickerSaturationInputProps {
   setGreen(green: number): void;
   setBlue(blue: number): void;
   setSaturation(saturation: number): void;
-  onChange(color: em.Color): void;
+  onChange(color: Btwx.Color): void;
 }
 
 const ColorPickerSaturationInput = (props: ColorPickerSaturationInputProps): ReactElement => {

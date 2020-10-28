@@ -9,7 +9,7 @@ export const MENU_ITEM_ID = 'layerCombineIntersect';
 
 interface MenuLayerCombineIntersectProps {
   isEnabled?: boolean;
-  applyBooleanOperationThunk?(operation: em.BooleanOperation): void;
+  applyBooleanOperationThunk?(operation: Btwx.BooleanOperation): void;
 }
 
 const MenuLayerCombineIntersect = (props: MenuLayerCombineIntersectProps): ReactElement => {

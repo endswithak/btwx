@@ -12,7 +12,7 @@ export interface TweenDrawerState {
   eventHover: string;
   tweenHover: string;
   tweenEditing: string;
-  eventSort: em.TweenEventSort;
+  eventSort: Btwx.TweenEventSort;
 }
 
 const initialState: TweenDrawerState = {

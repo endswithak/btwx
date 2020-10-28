@@ -8,7 +8,7 @@ import { SetLayerHoverPayload, LayerTypes } from '../store/actionTypes/layer';
 
 interface TweenDrawerEventLayerTimelineProps {
   id: string;
-  layer?: em.Layer;
+  layer?: Btwx.Layer;
   setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
 }
 

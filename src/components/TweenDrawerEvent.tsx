@@ -12,7 +12,7 @@ interface TweenDrawerEventProps {
   tweenEventLayers?: {
     allIds: string[];
     byId: {
-      [id: string]: em.Layer;
+      [id: string]: Btwx.Layer;
     };
   };
   scrollPositions?: number[];

@@ -11,7 +11,7 @@ interface TweenDrawerEventLayerTweenProps {
   index: number;
   tweenHover?: string;
   tweenEditing?: string;
-  tween?: em.Tween;
+  tween?: Btwx.Tween;
   titleCaseProp?: string;
   setTweenDrawerTweenHoverThunk?(payload: SetTweenDrawerTweenHoverPayload): void;
 }

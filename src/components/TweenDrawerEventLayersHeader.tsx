@@ -10,8 +10,8 @@ interface TweenDrawerEventLayersProps {
     small?: boolean;
     style?: any;
   };
-  layerItem?: em.Layer;
-  maskItem?: em.Layer;
+  layerItem?: Btwx.Layer;
+  maskItem?: Btwx.Layer;
   sticky?: boolean;
   onMouseEnter?(): void;
   onMouseLeave?(): void;
@@ -47,7 +47,7 @@ const TweenDrawerEventLayersHeader = (props: TweenDrawerEventLayersProps): React
             small={icon.small}
             style={{
               fill: theme.text.lighter,
-              stroke: layerItem && layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line'
+              stroke: layerItem && layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line'
               ? theme.text.lighter
               : 'none',
               strokeWidth: 1

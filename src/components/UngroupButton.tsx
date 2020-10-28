@@ -1,22 +1,21 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { UngroupLayersPayload, LayerTypes } from '../store/actionTypes/layer';
-import { ungroupLayers } from '../store/actions/layer';
+import { canUngroupSelected } from '../store/selectors/layer';
+import { ungroupSelectedThunk } from '../store/actions/layer';
 import TopbarButton from './TopbarButton';
 
 interface UngroupButtonProps {
-  selected: string[];
   canUngroup: boolean;
-  ungroupLayers(payload: UngroupLayersPayload): LayerTypes;
+  ungroupSelectedThunk(): void;
 }
 
 const UngroupButton = (props: UngroupButtonProps): ReactElement => {
-  const { selected, canUngroup, ungroupLayers } = props;
+  const { canUngroup, ungroupSelectedThunk } = props;
 
   const handleUngroupClick = (): void => {
     if (canUngroup) {
-      ungroupLayers({layers: selected});
+      ungroupSelectedThunk();
     }
   }
 
@@ -30,16 +29,13 @@ const UngroupButton = (props: UngroupButtonProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState): {
-  selected: string[];
   canUngroup: boolean;
 } => {
-  const { layer, selection } = state;
-  const selected = layer.present.selected;
-  const canUngroup = selection.canUngroup;
-  return { selected, canUngroup };
+  const canUngroup = canUngroupSelected(state);
+  return { canUngroup };
 };
 
 export default connect(
   mapStateToProps,
-  { ungroupLayers }
+  { ungroupSelectedThunk }
 )(UngroupButton);

@@ -16,7 +16,7 @@ import {
 } from '../actionTypes/canvasSettings';
 
 export interface CanvasSettingsState {
-  activeTool: em.ToolType;
+  activeTool: Btwx.ToolType;
   mouse: {
     x: number;
     y: number;
@@ -32,8 +32,8 @@ export interface CanvasSettingsState {
   focusing: boolean;
   zooming: boolean;
   translating: boolean;
-  zoomType: em.ZoomType;
-  resizeType: em.ResizeType;
+  zoomType: Btwx.ZoomType;
+  resizeType: Btwx.ResizeType;
 }
 
 const initialState: CanvasSettingsState = {

@@ -149,7 +149,7 @@ class TextTool {
           justification: this.state.textSettings.justification
         }
       }
-    }) as any).then((textLayer: em.Text) => {
+    }) as any).then((textLayer: Btwx.Text) => {
       // get new layer bounds
       const topLeft = paperMain.view.projectToView(paperLayer.bounds.topLeft);
       const topCenter = paperMain.view.projectToView(paperLayer.bounds.topCenter);

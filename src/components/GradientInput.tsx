@@ -16,15 +16,15 @@ import GradientTypeSelector from './GradientTypeSelector';
 
 interface GradientInputProps {
   prop: 'fill' | 'stroke';
-  displayGradient?: em.Gradient | 'multi';
-  gradientTypeValue?: em.GradientType | 'multi';
+  displayGradient?: Btwx.Gradient | 'multi';
+  gradientTypeValue?: Btwx.GradientType | 'multi';
   enabledValue?: boolean | 'multi';
   selected?: string[];
-  gradientValue?: em.Gradient;
+  gradientValue?: Btwx.Gradient;
   gradientOpacity?: number | 'multi';
   isGradientEditorOpen?: boolean;
   stopById?: {
-    [id: string]: em.GradientStop;
+    [id: string]: Btwx.GradientStop;
   };
   cssGradient?: string;
   enableLayersFill?(payload: EnableLayersFillPayload): LayerTypes;
@@ -138,11 +138,11 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
 const mapStateToProps = (state: RootState, ownProps: GradientInputProps) => {
   const { layer, gradientEditor } = state;
   const selected = layer.present.selected;
-  const layerItems: em.Layer[] = selected.reduce((result, current) => {
+  const layerItems: Btwx.Layer[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);
-  const styleValues: (em.Fill | em.Stroke)[] = layerItems.reduce((result, current) => {
+  const styleValues: (em.Fill | Btwx.Stroke)[] = layerItems.reduce((result, current) => {
     switch(ownProps.prop) {
       case 'fill':
         return [...result, current.style.fill];
@@ -151,21 +151,21 @@ const mapStateToProps = (state: RootState, ownProps: GradientInputProps) => {
     }
   }, []);
   const enabledValue = ((): boolean | 'multi' => {
-    if (styleValues.every((value: em.Fill | em.Stroke) => value.enabled === styleValues[0].enabled)) {
+    if (styleValues.every((value: Btwx.Fill | Btwx.Stroke) => value.enabled === styleValues[0].enabled)) {
       return styleValues[0].enabled;
     } else {
       return 'multi';
     }
   })();
-  const gradientTypeValue = ((): em.GradientType | 'multi' => {
-    if (styleValues.every((value: em.Fill | em.Stroke) => value.gradient.gradientType === styleValues[0].gradient.gradientType)) {
+  const gradientTypeValue = ((): Btwx.GradientType | 'multi' => {
+    if (styleValues.every((value: Btwx.Fill | Btwx.Stroke) => value.gradient.gradientType === styleValues[0].gradient.gradientType)) {
       return styleValues[0].gradient.gradientType;
     } else {
       return 'multi';
     }
   })();
-  const displayGradient = ((): em.Gradient | 'multi' => {
-    if (styleValues.every((value: em.Fill | em.Stroke) => gradientsMatch(value.gradient, styleValues[0].gradient))) {
+  const displayGradient = ((): Btwx.Gradient | 'multi' => {
+    if (styleValues.every((value: Btwx.Fill | Btwx.Stroke) => gradientsMatch(value.gradient, styleValues[0].gradient))) {
       return styleValues[0].gradient;
     } else {
       return 'multi';

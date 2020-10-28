@@ -5,7 +5,7 @@ import {
 } from '../actionTypes/contextMenu';
 
 export interface ContextMenuState {
-  type: em.ContextMenu;
+  type: Btwx.ContextMenu;
   id: string;
   isOpen: boolean;
   x: number;

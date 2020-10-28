@@ -6,7 +6,7 @@ import ColorInput from './ColorInput';
 import MultiInput from './MultiInput';
 
 interface FillInputProps {
-  fillType: em.FillType & 'multi';
+  fillType: Btwx.FillType & 'multi';
 }
 
 const FillInput = (props: FillInputProps): ReactElement => {
@@ -24,7 +24,7 @@ const FillInput = (props: FillInputProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const layerItems: em.Layer[] = selected.reduce((result, current) => {
+  const layerItems: Btwx.Layer[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);

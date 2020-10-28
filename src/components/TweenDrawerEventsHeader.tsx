@@ -8,7 +8,7 @@ import { SetTweenDrawerEventSortPayload, TweenDrawerTypes } from '../store/actio
 import Icon from './Icon';
 
 interface TweenDrawerEventsHeaderProps {
-  eventSort?: em.TweenEventSort;
+  eventSort?: Btwx.TweenEventSort;
   sortOrder?: 'asc' | 'dsc';
   sortBy?: 'layer' | 'event' | 'artboard' | 'destinationArtboard';
   setTweenDrawerEventSort?(payload: SetTweenDrawerEventSortPayload): TweenDrawerTypes;
@@ -37,17 +37,17 @@ const TweenDrawerEventsHeader = (props: TweenDrawerEventsHeaderProps): ReactElem
       if (sortBy === by) {
         switch(sortOrder) {
           case 'asc':
-            setTweenDrawerEventSort({eventSort: `${by}-dsc` as em.TweenEventSort});
+            setTweenDrawerEventSort({eventSort: `${by}-dsc` as Btwx.TweenEventSort});
             break;
           case 'dsc':
             setTweenDrawerEventSort({eventSort: 'none'});
             break;
         }
       } else {
-        setTweenDrawerEventSort({eventSort: `${by}-asc` as em.TweenEventSort});
+        setTweenDrawerEventSort({eventSort: `${by}-asc` as Btwx.TweenEventSort});
       }
     } else {
-      setTweenDrawerEventSort({eventSort: `${by}-asc` as em.TweenEventSort});
+      setTweenDrawerEventSort({eventSort: `${by}-asc` as Btwx.TweenEventSort});
     }
   }
 
@@ -139,7 +139,7 @@ const TweenDrawerEventsHeader = (props: TweenDrawerEventsHeaderProps): ReactElem
 }
 
 const mapStateToProps = (state: RootState): {
-  eventSort: em.TweenEventSort;
+  eventSort: Btwx.TweenEventSort;
   sortOrder: 'asc' | 'dsc';
   sortBy: 'layer' | 'event' | 'artboard' | 'destinationArtboard';
 } => {

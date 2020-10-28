@@ -15,7 +15,7 @@ interface ColorPickerHueInputProps {
   setGreen(green: number): void;
   setBlue(blue: number): void;
   setHue(hue: number): void;
-  onChange(color: em.Color): void;
+  onChange(color: Btwx.Color): void;
 }
 
 const ColorPickerHueInput = (props: ColorPickerHueInputProps): ReactElement => {

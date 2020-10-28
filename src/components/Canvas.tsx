@@ -16,7 +16,7 @@ import KeyBindings from './KeyBindings';
 interface CanvasProps {
   ready: boolean;
   documentImages?: {
-    [id: string]: em.DocumentImage;
+    [id: string]: Btwx.DocumentImage;
   };
   paperProject?: string;
   matrix?: number[];
@@ -129,7 +129,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   documentImages: {
-    [id: string]: em.DocumentImage;
+    [id: string]: Btwx.DocumentImage;
   };
   paperProject: string;
   matrix: number[];
@@ -147,7 +147,7 @@ export default connect(
 )(Canvas);
 
 // const mapStateToProps = (state: RootState): {
-//   activeTool: em.ToolType;
+//   activeTool: Btwx.ToolType;
 // } => {
 //   const { canvasSettings } = state;
 //   const activeTool = canvasSettings.activeTool;
@@ -175,10 +175,10 @@ export default connect(
 //   ready: boolean;
 //   cursor?: string;
 //   zooming?: boolean;
-//   zoomType?: em.ZoomType;
+//   zoomType?: Btwx.ZoomType;
 //   translating?: boolean;
 //   setCanvasMousePosition?(payload: SetCanvasMousePositionPayload): CanvasSettingsTypes;
-//   enableZoomToolThunk?(zoomType: em.ZoomType): void;
+//   enableZoomToolThunk?(zoomType: Btwx.ZoomType): void;
 //   disableZoomToolThunk?(): void;
 //   enableTranslateToolThunk?(): void;
 //   disableTranslateToolThunk?(): void;
@@ -267,7 +267,7 @@ export default connect(
 // const mapStateToProps = (state: RootState): {
 //   cursor: string;
 //   zooming: boolean;
-//   zoomType: em.ZoomType;
+//   zoomType: Btwx.ZoomType;
 //   translating: boolean;
 // } => {
 //   const { canvasSettings } = state;

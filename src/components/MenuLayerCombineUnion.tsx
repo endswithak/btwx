@@ -9,7 +9,7 @@ export const MENU_ITEM_ID = 'layerCombineUnion';
 
 interface MenuLayerCombineUnionProps {
   isEnabled?: boolean;
-  applyBooleanOperationThunk?(operation: em.BooleanOperation): void;
+  applyBooleanOperationThunk?(operation: Btwx.BooleanOperation): void;
 }
 
 const MenuLayerCombineUnion = (props: MenuLayerCombineUnionProps): ReactElement => {

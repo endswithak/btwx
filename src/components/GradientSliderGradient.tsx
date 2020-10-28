@@ -4,8 +4,8 @@ import { ThemeContext } from './ThemeProvider';
 import tinyColor from 'tinycolor2';
 
 interface GradientSliderGradientProps {
-  stops: em.GradientStop[];
-  onSliderClick(stop: em.GradientStop): void;
+  stops: Btwx.GradientStop[];
+  onSliderClick(stop: Btwx.GradientStop): void;
 }
 
 const GradientSliderGradient = (props: GradientSliderGradientProps): ReactElement => {
@@ -42,7 +42,7 @@ const GradientSliderGradient = (props: GradientSliderGradientProps): ReactElemen
     const colorAvg = tinyColor.mix(color1, color2, 50);
     const hsl = colorAvg.toHsl();
     const hsv = colorAvg.toHsv();
-    const newStop = { position, color: { ...hsl, v: hsv.v } } as em.GradientStop;
+    const newStop = { position, color: { ...hsl, v: hsv.v } } as Btwx.GradientStop;
     onSliderClick(newStop);
   }
 

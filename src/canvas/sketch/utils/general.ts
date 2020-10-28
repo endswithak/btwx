@@ -25,7 +25,7 @@ export const convertBooleanOperation = (operation: FileFormat.BooleanOperation):
   }
 };
 
-export const convertPointString = (point: string): em.Point => {
+export const convertPointString = (point: string): Btwx.Point => {
   const str = point.replace(/\s/g, '');
   const commaPos = str.indexOf(',');
   const x = Number(str.substring(1, commaPos));
@@ -33,12 +33,12 @@ export const convertPointString = (point: string): em.Point => {
   return {x,y};
 }
 
-export const convertPosition = (layer: FileFormat.AnyLayer): em.Point => ({
+export const convertPosition = (layer: FileFormat.AnyLayer): Btwx.Point => ({
   x: layer.frame.x + (layer.frame.width / 2),
   y: layer.frame.y + (layer.frame.height / 2)
 });
 
-export const convertColor = (sketchColor: FileFormat.Color): em.Color => {
+export const convertColor = (sketchColor: FileFormat.Color): Btwx.Color => {
   const color = tinyColor({r: sketchColor.red * 255, g: sketchColor.green * 255, b: sketchColor.blue * 255, a: sketchColor.alpha});
   const hsl = color.toHsl();
   const hsv = color.toHsv();
@@ -51,7 +51,7 @@ export const convertColor = (sketchColor: FileFormat.Color): em.Color => {
   }
 };
 
-export const convertGradientType = (sketchGradientType: FileFormat.GradientType): em.GradientType => {
+export const convertGradientType = (sketchGradientType: FileFormat.GradientType): Btwx.GradientType => {
   switch(sketchGradientType) {
     case 0:
       return 'linear';
@@ -60,7 +60,7 @@ export const convertGradientType = (sketchGradientType: FileFormat.GradientType)
   }
 };
 
-export const convertGradientOrigin = (sketchGradientOrigin: string): em.Point => {
+export const convertGradientOrigin = (sketchGradientOrigin: string): Btwx.Point => {
   const point = convertPointString(sketchGradientOrigin);
   return {
     x: point.x - 0.5,
@@ -68,7 +68,7 @@ export const convertGradientOrigin = (sketchGradientOrigin: string): em.Point =>
   }
 };
 
-export const convertGradientDestination = (sketchGradientDestination: string): em.Point => {
+export const convertGradientDestination = (sketchGradientDestination: string): Btwx.Point => {
   const point = convertPointString(sketchGradientDestination);
   return {
     x: point.x - 0.5,
@@ -76,7 +76,7 @@ export const convertGradientDestination = (sketchGradientDestination: string): e
   }
 };
 
-export const convertGradientStops = (sketchGradientStops: FileFormat.GradientStop[]): em.GradientStop[] => {
+export const convertGradientStops = (sketchGradientStops: FileFormat.GradientStop[]): Btwx.GradientStop[] => {
   return sketchGradientStops.reduce((result, current) => {
     result = [...result, {
       position: current.position,
@@ -86,7 +86,7 @@ export const convertGradientStops = (sketchGradientStops: FileFormat.GradientSto
   }, []);
 };
 
-export const convertBlendMode = (layer: FileFormat.AnyLayer): em.BlendMode => {
+export const convertBlendMode = (layer: FileFormat.AnyLayer): Btwx.BlendMode => {
   const blendMode = layer.style.contextSettings.blendMode;
   switch(blendMode) {
     case 0:

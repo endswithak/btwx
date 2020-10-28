@@ -38,7 +38,7 @@ const StrokeToggle = (props: StrokeToggleProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const layerItems: (em.Shape | em.Text | em.Image)[] = selected.reduce((result, current) => {
+  const layerItems: (Btwx.Shape | Btwx.Text | Btwx.Image)[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);

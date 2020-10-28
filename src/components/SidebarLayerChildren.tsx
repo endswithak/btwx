@@ -32,7 +32,7 @@ const makeMapStateToProps = () => {
     const { layer } = state;
     const layerItem = layer.present.byId[ownProps.layer];
     const hasChildren = layerItem.type === 'Group' || layerItem.type === 'Artboard';
-    const showChildren = hasChildren && (layerItem as em.Group | em.Artboard).showChildren;
+    const showChildren = hasChildren && (layerItem as Btwx.Group | Btwx.Artboard).showChildren;
     const children = getReversedChildren(state, ownProps);
     return {
       showChildren,

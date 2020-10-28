@@ -16,7 +16,7 @@ interface ColorInputProps {
   prop: 'fill' | 'stroke' | 'shadow';
   enabledValue?: boolean | 'multi';
   selected?: string[];
-  colorValue?: em.Color | 'multi';
+  colorValue?: Btwx.Color | 'multi';
   opacityValue?: number | 'multi';
   colorEditorOpen?: boolean;
   openColorEditor?(payload: OpenColorEditorPayload): ColorEditorTypes;
@@ -100,16 +100,16 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
 const mapStateToProps = (state: RootState, ownProps: ColorInputProps): {
   enabledValue: boolean | 'multi';
   selected: string[];
-  colorValue: em.Color | 'multi';
+  colorValue: Btwx.Color | 'multi';
   colorEditorOpen: boolean;
 } => {
   const { layer, colorEditor } = state;
   const selected = layer.present.selected;
-  const layerItems: em.Layer[] = selected.reduce((result, current) => {
+  const layerItems: Btwx.Layer[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);
-  const styleValues: (em.Fill | em.Stroke | em.Shadow)[] = layerItems.reduce((result, current) => {
+  const styleValues: (em.Fill | Btwx.Stroke | Btwx.Shadow)[] = layerItems.reduce((result, current) => {
     switch(ownProps.prop) {
       case 'fill':
         return [...result, current.style.fill];
@@ -119,15 +119,15 @@ const mapStateToProps = (state: RootState, ownProps: ColorInputProps): {
         return [...result, current.style.shadow];
     }
   }, []);
-  const colorValue = ((): em.Color | 'multi' => {
-    if (styleValues.every((value: em.Fill | em.Stroke | em.Shadow) => colorsMatch(value.color, styleValues[0].color))) {
+  const colorValue = ((): Btwx.Color | 'multi' => {
+    if (styleValues.every((value: Btwx.Fill | Btwx.Stroke | Btwx.Shadow) => colorsMatch(value.color, styleValues[0].color))) {
       return styleValues[0].color;
     } else {
       return 'multi';
     }
   })();
   const enabledValue = ((): boolean | 'multi' => {
-    if (styleValues.every((value: em.Fill | em.Stroke | em.Shadow) => value.enabled === styleValues[0].enabled)) {
+    if (styleValues.every((value: Btwx.Fill | Btwx.Stroke | Btwx.Shadow) => value.enabled === styleValues[0].enabled)) {
       return styleValues[0].enabled;
     } else {
       return 'multi';

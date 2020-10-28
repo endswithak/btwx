@@ -2,7 +2,7 @@ export const OPEN_CONTEXT_MENU = 'OPEN_CONTEXT_MENU';
 export const CLOSE_CONTEXT_MENU = 'CLOSE_CONTEXT_MENU';
 
 export interface OpenContextMenuPayload {
-  type: em.ContextMenu;
+  type: Btwx.ContextMenu;
   id: string;
   x: number;
   y: number;

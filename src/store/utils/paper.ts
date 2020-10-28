@@ -5,7 +5,7 @@ export const getPaperLayer = (id: string): paper.Item => {
   return paperMain.project.getItem({ data: { id } });
 };
 
-export const getPaperFillColor = (fill: em.Fill, frame: em.Frame): any => {
+export const getPaperFillColor = (fill: Btwx.Fill, frame: Btwx.Frame): any => {
   return fill.fillType === 'color' ? { hue: fill.color.h, saturation: fill.color.s, lightness: fill.color.l, alpha: fill.color.a } : {
     gradient: {
       stops: fill.gradient.stops.reduce((result, current) => {
@@ -19,7 +19,7 @@ export const getPaperFillColor = (fill: em.Fill, frame: em.Frame): any => {
   }
 };
 
-export const getPaperStrokeColor = (stroke: em.Stroke, frame: em.Frame): any => {
+export const getPaperStrokeColor = (stroke: Btwx.Stroke, frame: Btwx.Frame): any => {
   return stroke.fillType === 'color' ? { hue: stroke.color.h, saturation: stroke.color.s, lightness: stroke.color.l, alpha: stroke.color.a } : {
     gradient: {
       stops: stroke.gradient.stops.reduce((result, current) => {
@@ -33,11 +33,11 @@ export const getPaperStrokeColor = (stroke: em.Stroke, frame: em.Frame): any => 
   }
 };
 
-export const getPaperShadowColor = (shadow: em.Shadow): any => {
+export const getPaperShadowColor = (shadow: Btwx.Shadow): any => {
   return { hue: shadow.color.h, saturation: shadow.color.s, lightness: shadow.color.l, alpha: shadow.color.a };
 };
 
-export const getPaperShapePathData = (shapeType: em.ShapeType, width?: number, height?: number, x?: number, y?: number, shapeOpts?: { radius?: number; sides?: number; points?: number }): any => {
+export const getPaperShapePathData = (shapeType: Btwx.ShapeType, width?: number, height?: number, x?: number, y?: number, shapeOpts?: { radius?: number; sides?: number; points?: number }): any => {
   let shape;
   x = x ? x : paperMain.view.center.x;
   y = y ? y : paperMain.view.center.y;

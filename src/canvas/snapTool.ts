@@ -11,11 +11,11 @@ class SnapTool {
   centerYGuide: Guide;
   snapBreakThreshholdMin: number;
   snapBreakThreshholdMax: number;
-  snapPoints: em.SnapPoint[];
+  snapPoints: Btwx.SnapPoint[];
   snapBounds: paper.Rectangle;
   snap: {
-    x: em.SnapPoint;
-    y: em.SnapPoint;
+    x: Btwx.SnapPoint;
+    y: Btwx.SnapPoint;
   };
   constructor() {
     this.snapBounds = null;
@@ -149,7 +149,7 @@ class SnapTool {
       this.centerYGuide = new Guide(minLeftCenter, maxLeftCenter, { up: true, move: true });
     }
   }
-  closestSnapPoint({snapPoints, side}: {snapPoints: em.SnapPoint[]; side: em.SnapBound}): { snapPoint: em.SnapPoint; distance: number } {
+  closestSnapPoint({snapPoints, side}: {snapPoints: Btwx.SnapPoint[]; side: Btwx.SnapBound}): { snapPoint: Btwx.SnapPoint; distance: number } {
     let closestSnap;
     let distance;
     for(let i = 0; i < snapPoints.length; i++) {
@@ -167,9 +167,9 @@ class SnapTool {
       distance: distance
     }
   }
-  closestXSnapPoint({snapTo}: {snapTo: { left: boolean; right: boolean; center: boolean }}): { bounds: em.SnapBound; snapPoint: em.SnapPoint; distance: number } {
+  closestXSnapPoint({snapTo}: {snapTo: { left: boolean; right: boolean; center: boolean }}): { bounds: Btwx.SnapBound; snapPoint: Btwx.SnapPoint; distance: number } {
     const xSnaps = this.snapPoints.filter((snapPoint) => snapPoint.axis === 'x');
-    const snapBounds = Object.keys(snapTo).reduce((result: em.SnapBound[], current: 'left' | 'right' | 'center') => {
+    const snapBounds = Object.keys(snapTo).reduce((result: Btwx.SnapBound[], current: 'left' | 'right' | 'center') => {
       if (snapTo[current]) {
         switch(current) {
           case 'left':
@@ -211,9 +211,9 @@ class SnapTool {
       distance: distance
     }
   }
-  closestYSnapPoint({snapTo}: {snapTo: { top: boolean; bottom: boolean; center: boolean }}): { bounds: em.SnapBound; snapPoint: em.SnapPoint; distance: number } {
+  closestYSnapPoint({snapTo}: {snapTo: { top: boolean; bottom: boolean; center: boolean }}): { bounds: Btwx.SnapBound; snapPoint: Btwx.SnapPoint; distance: number } {
     const ySnaps = this.snapPoints.filter((snapPoint) => snapPoint.axis === 'y');
-    const snapBounds = Object.keys(snapTo).reduce((result: em.SnapBound[], current: 'top' | 'bottom' | 'center') => {
+    const snapBounds = Object.keys(snapTo).reduce((result: Btwx.SnapBound[], current: 'top' | 'bottom' | 'center') => {
       if (snapTo[current]) {
         switch(current) {
           case 'top':
@@ -263,8 +263,8 @@ class SnapTool {
   }: {
     event: paper.ToolEvent;
     snapTo: { left: boolean; right: boolean; center: boolean };
-    handleSnapped?(snapPoint: em.SnapPoint): void;
-    handleSnap?({ bounds, snapPoint, distance }: { bounds: em.SnapBound; snapPoint: em.SnapPoint; distance: number }): void;
+    handleSnapped?(snapPoint: Btwx.SnapPoint): void;
+    handleSnap?({ bounds, snapPoint, distance }: { bounds: Btwx.SnapBound; snapPoint: Btwx.SnapPoint; distance: number }): void;
   }): void {
     if (this.snap.x) {
       // check if event delta will exceed X snap point min/max threshold
@@ -305,8 +305,8 @@ class SnapTool {
   }: {
     event: paper.ToolEvent;
     snapTo: { top: boolean; bottom: boolean; center: boolean };
-    handleSnapped?(snapPoint: em.SnapPoint): void;
-    handleSnap?({ bounds, snapPoint, distance }: { bounds: em.SnapBound; snapPoint: em.SnapPoint; distance: number }): void;
+    handleSnapped?(snapPoint: Btwx.SnapPoint): void;
+    handleSnap?({ bounds, snapPoint, distance }: { bounds: Btwx.SnapBound; snapPoint: Btwx.SnapPoint; distance: number }): void;
   }): void {
     if (this.snap.y) {
       // check if event delta will exceed Y snap point min/max threshold

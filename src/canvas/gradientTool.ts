@@ -7,8 +7,8 @@ import { RootState } from '../store/reducers';
 
 class GradientTool {
   state: RootState;
-  handle: em.GradientHandle;
-  prop: em.GradientProp;
+  handle: Btwx.GradientHandle;
+  prop: Btwx.GradientProp;
   from: paper.Point;
   to: paper.Point;
   toBounds: paper.Rectangle;
@@ -27,7 +27,7 @@ class GradientTool {
     x: number;
     y: number;
   }
-  constructor(handle?: em.GradientHandle, prop?: em.GradientProp) {
+  constructor(handle?: Btwx.GradientHandle, prop?: Btwx.GradientProp) {
     this.handle = handle;
     this.prop = prop;
     this.toBounds = null;
@@ -42,14 +42,14 @@ class GradientTool {
   }
   updateOrigin(event: paper.ToolEvent, state: RootState): void {
     const layerItem = state.layer.present.byId[state.gradientEditor.layers[0]];
-    const isLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line';
+    const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
     const paperLayer = getPaperLayer(state.gradientEditor.layers[0]);
     const newOriginPoint = new paperMain.Point(this.toBounds.center.x, this.toBounds.center.y);
     paperLayer[`${state.gradientEditor.prop}Color` as 'fillColor' | 'strokeColor'] = {
       gradient: paperLayer[`${state.gradientEditor.prop}Color` as 'fillColor' | 'strokeColor'].gradient,
       origin: newOriginPoint,
-      destination: (paperLayer[`${state.gradientEditor.prop}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).destination
-    } as em.PaperGradientFill
+      destination: (paperLayer[`${state.gradientEditor.prop}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).destination
+    } as Btwx.PaperGradientFill
     this.originHandle.bounds.center.x = newOriginPoint.x;
     this.originHandle.bounds.center.y = newOriginPoint.y;
     this.gradientLines.forEach((line) => {
@@ -63,7 +63,7 @@ class GradientTool {
         case 'stroke':
           return paperLayer.strokeColor;
       }
-    })() as em.PaperGradientFill;
+    })() as Btwx.PaperGradientFill;
     this.origin = {
       x: (style.origin.x - layerItem.frame.x) / (isLine ? layerItem.frame.width : layerItem.frame.innerWidth),
       y: (style.origin.y - layerItem.frame.y) / (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)
@@ -71,19 +71,19 @@ class GradientTool {
     paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] = {
       gradient: paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'].gradient,
       origin: getGradientOriginPoint(layerItem, this.origin),
-      destination: (paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).destination
-    } as em.PaperGradientFill
+      destination: (paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).destination
+    } as Btwx.PaperGradientFill
   }
   updateDestination(event: paper.ToolEvent, state: RootState): void {
     const layerItem = state.layer.present.byId[state.gradientEditor.layers[0]];
-    const isLine = layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Line';
+    const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
     const paperLayer = getPaperLayer(state.gradientEditor.layers[0]);
     const newDestinationPoint = new paperMain.Point(this.toBounds.center.x, this.toBounds.center.y);
     paperLayer[`${state.gradientEditor.prop}Color` as 'fillColor' | 'strokeColor'] = {
       gradient: paperLayer[`${state.gradientEditor.prop}Color` as 'fillColor' | 'strokeColor'].gradient,
-      origin: (paperLayer[`${state.gradientEditor.prop}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).origin,
+      origin: (paperLayer[`${state.gradientEditor.prop}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).origin,
       destination: newDestinationPoint
-    } as em.PaperGradientFill
+    } as Btwx.PaperGradientFill
     this.destinationHandle.bounds.center.x = newDestinationPoint.x;
     this.destinationHandle.bounds.center.y = newDestinationPoint.y;
     this.gradientLines.forEach((line) => {
@@ -97,16 +97,16 @@ class GradientTool {
         case 'stroke':
           return paperLayer.strokeColor;
       }
-    })() as em.PaperGradientFill;
+    })() as Btwx.PaperGradientFill;
     this.destination = {
       x: (style.destination.x - layerItem.frame.x) / (isLine ? layerItem.frame.width : layerItem.frame.innerWidth),
       y: (style.destination.y - layerItem.frame.y) / (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)
     }
     paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] = {
       gradient: paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'].gradient,
-      origin: (paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] as em.PaperGradientFill).origin,
+      origin: (paperLayer[`${this.prop}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).origin,
       destination: getGradientDestinationPoint(layerItem, this.destination)
-    } as em.PaperGradientFill
+    } as Btwx.PaperGradientFill
   }
   onKeyDown(event: paper.KeyEvent): void {
 

@@ -44,7 +44,7 @@ const SidebarFillStyles = (props: SidebarFillStylesProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer, rightSidebar } = state;
   const selected = layer.present.selected;
-  const validFillSelection = !selected.some((id: string) => layer.present.byId[id].type === 'Artboard' || layer.present.byId[id].type === 'Group' || layer.present.byId[id].type === 'Image' || (layer.present.byId[id].type === 'Shape' && (layer.present.byId[id] as em.Shape).shapeType === 'Line'));
+  const validFillSelection = !selected.some((id: string) => layer.present.byId[id].type === 'Artboard' || layer.present.byId[id].type === 'Group' || layer.present.byId[id].type === 'Image' || (layer.present.byId[id].type === 'Shape' && (layer.present.byId[id] as Btwx.Shape).shapeType === 'Line'));
   const fillStylesCollapsed = rightSidebar.fillStylesCollapsed;
   return { selected, validFillSelection, fillStylesCollapsed };
 };

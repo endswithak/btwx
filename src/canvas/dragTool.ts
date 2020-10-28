@@ -41,7 +41,7 @@ class DragTool {
       const layerAndDescendants = getLayerAndDescendants(this.state.layer.present, id);
       allSelectedLayers = [...allSelectedLayers, ...layerAndDescendants];
     });
-    this.snapTool.snapPoints = this.state.layer.present.inView.snapPoints.filter((snapPoint: em.SnapPoint) => !allSelectedLayers.includes(snapPoint.id));
+    this.snapTool.snapPoints = this.state.layer.present.inView.snapPoints.filter((snapPoint: Btwx.SnapPoint) => !allSelectedLayers.includes(snapPoint.id));
   }
   duplicate(): void {
     store.dispatch(duplicateLayers({layers: this.originalSelection}));
@@ -168,7 +168,7 @@ class DragTool {
         right: true,
         center: true
       },
-      handleSnapped: (snapPoint: em.SnapPoint) => {
+      handleSnapped: (snapPoint: Btwx.SnapPoint) => {
         switch(snapPoint.boundsSide) {
           case 'left':
             this.snapTool.snapBounds.center.x = snapPoint.point + (this.fromBounds.width / 2);
@@ -181,7 +181,7 @@ class DragTool {
             break;
         }
       },
-      handleSnap: (closestXSnap: { bounds: em.SnapBound; snapPoint: em.SnapPoint; distance: number }) => {
+      handleSnap: (closestXSnap: { bounds: Btwx.SnapBound; snapPoint: Btwx.SnapPoint; distance: number }) => {
         switch(closestXSnap.bounds.side) {
           case 'left':
             this.snapTool.snapBounds.center.x = closestXSnap.snapPoint.point + (this.fromBounds.width / 2);
@@ -202,7 +202,7 @@ class DragTool {
         bottom: true,
         center: true
       },
-      handleSnapped: (snapPoint: em.SnapPoint) => {
+      handleSnapped: (snapPoint: Btwx.SnapPoint) => {
         switch(snapPoint.boundsSide) {
           case 'top':
             this.snapTool.snapBounds.center.y = snapPoint.point + (this.fromBounds.height / 2);
@@ -215,7 +215,7 @@ class DragTool {
             break;
         }
       },
-      handleSnap: (closestYSnap: { bounds: em.SnapBound; snapPoint: em.SnapPoint; distance: number }) => {
+      handleSnap: (closestYSnap: { bounds: Btwx.SnapBound; snapPoint: Btwx.SnapPoint; distance: number }) => {
         switch(closestYSnap.bounds.side) {
           case 'top':
             this.snapTool.snapBounds.center.y = closestYSnap.snapPoint.point + (this.fromBounds.height / 2);

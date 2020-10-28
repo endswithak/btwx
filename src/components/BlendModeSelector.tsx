@@ -14,7 +14,7 @@ interface BlendModeSelectorProps {
 const BlendModeSelector = (props: BlendModeSelectorProps): ReactElement => {
   const { selected, blendModeValue, setLayersBlendMode } = props;
 
-  const options: { value: em.BlendMode; label: string }[] = [
+  const options: { value: Btwx.BlendMode; label: string }[] = [
     { value: 'normal', label: 'Normal' },
     { value: 'darken', label: 'Darken' },
     { value: 'multiply', label: 'Multiply' },
@@ -60,7 +60,7 @@ const BlendModeSelector = (props: BlendModeSelectorProps): ReactElement => {
     }
   }, [blendModeValue, selected]);
 
-  const handleChange = (selectedOption: { value: em.BlendMode; label: string }): void => {
+  const handleChange = (selectedOption: { value: Btwx.BlendMode; label: string }): void => {
     setBlendMode(selectedOption);
     setLayersBlendMode({layers: selected, blendMode: selectedOption.value});
   }

@@ -41,7 +41,7 @@ export interface SetTweenDrawerTweenEditing {
 }
 
 export interface SetTweenDrawerEventSortPayload {
-  eventSort: em.TweenEventSort;
+  eventSort: Btwx.TweenEventSort;
 }
 
 export interface SetTweenDrawerEventSort {

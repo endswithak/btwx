@@ -14,7 +14,7 @@ import { paperMain } from '../canvas';
 interface StarRadiusInputProps {
   selected?: string[];
   radiusValue?: number | 'multi';
-  layerItems?: em.Star[];
+  layerItems?: Btwx.Star[];
   setStarsRadius?(payload: SetStarsRadiusPayload): LayerTypes;
 }
 
@@ -43,7 +43,7 @@ const StarRadiusInput = (props: StarRadiusInputProps): ReactElement => {
         center: paperLayer.bounds.center,
         radius1: maxDim / 2,
         radius2: (maxDim / 2) * (e.target.value / 100),
-        points: (layerItem as em.Star).points,
+        points: (layerItem as Btwx.Star).points,
         insert: false
       });
       newShape.bounds.width = paperLayer.bounds.width;
@@ -100,11 +100,11 @@ const StarRadiusInput = (props: StarRadiusInputProps): ReactElement => {
 const mapStateToProps = (state: RootState): {
   selected: string[];
   radiusValue: number | 'multi';
-  layerItems: em.Star[];
+  layerItems: Btwx.Star[];
 } => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const layerItems: em.Star[] = selected.reduce((result, current) => {
+  const layerItems: Btwx.Star[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);

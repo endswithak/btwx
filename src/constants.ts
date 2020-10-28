@@ -62,7 +62,7 @@ export const DEFAULT_GRADIENT_STOP_1_COLOR = { h: 0, s: 0, l: 0, v: 0, a: 1 };
 export const DEFAULT_GRADIENT_STOP_1 = { position: DEFAULT_GRADIENT_STOP_1_POSITION, color: DEFAULT_GRADIENT_STOP_1_COLOR };
 export const DEFAULT_GRADIENT_STOPS = [DEFAULT_GRADIENT_STOP_0, DEFAULT_GRADIENT_STOP_1];
 
-export const DEFAULT_GRADIENT_STYLE: em.Gradient = {
+export const DEFAULT_GRADIENT_STYLE: Btwx.Gradient = {
   gradientType: DEFAULT_GRADIENT_TYPE,
   origin: DEFAULT_GRADIENT_ORIGIN,
   destination: DEFAULT_GRADIENT_DESTINATION,
@@ -73,7 +73,7 @@ export const DEFAULT_GRADIENT_STYLE: em.Gradient = {
 export const DEFAULT_FILL_FILL_TYPE = 'color';
 export const DEFAULT_FILL_COLOR = { h: 0, s: 0, l: 0.8, v: 0.8, a: 1 };
 
-export const DEFAULT_FILL_STYLE: em.Fill = {
+export const DEFAULT_FILL_STYLE: Btwx.Fill = {
   fillType: DEFAULT_FILL_FILL_TYPE,
   enabled: true,
   color: DEFAULT_FILL_COLOR,
@@ -84,7 +84,7 @@ export const DEFAULT_STROKE_FILL_TYPE = 'color';
 export const DEFAULT_STROKE_COLOR = { h: 0, s: 0, l: 0.6, v: 0.6, a: 1 };
 export const DEFAULT_STROKE_WIDTH = 1;
 
-export const DEFAULT_STROKE_STYLE: em.Stroke = {
+export const DEFAULT_STROKE_STYLE: Btwx.Stroke = {
   fillType: DEFAULT_STROKE_FILL_TYPE,
   enabled: true,
   color: DEFAULT_STROKE_COLOR,
@@ -99,7 +99,7 @@ export const DEFAULT_STROKE_DASH_ARRAY_GAP = 0;
 export const DEFAULT_STROKE_DASH_ARRAY = [DEFAULT_STROKE_DASH_ARRAY_WIDTH, DEFAULT_STROKE_DASH_ARRAY_GAP];
 export const DEFAULT_STROKE_DASH_OFFSET = 0;
 
-export const DEFAULT_STROKE_OPTIONS_STYLE: em.StrokeOptions = {
+export const DEFAULT_STROKE_OPTIONS_STYLE: Btwx.StrokeOptions = {
   cap: DEFAULT_STROKE_CAP,
   join: DEFAULT_STROKE_JOIN,
   dashArray: DEFAULT_STROKE_DASH_ARRAY,
@@ -113,7 +113,7 @@ export const DEFAULT_SHADOW_OFFSET_X = 0;
 export const DEFAULT_SHADOW_OFFSET_Y = 0;
 export const DEFAULT_SHADOW_OFFSET = { x: DEFAULT_SHADOW_OFFSET_X, y: DEFAULT_SHADOW_OFFSET_Y };
 
-export const DEFAULT_SHADOW_STYLE: em.Shadow = {
+export const DEFAULT_SHADOW_STYLE: Btwx.Shadow = {
   fillType: DEFAULT_SHADOW_FILL_TYPE,
   enabled: false,
   color: DEFAULT_SHADOW_COLOR,
@@ -124,7 +124,7 @@ export const DEFAULT_SHADOW_STYLE: em.Shadow = {
 export const DEFAULT_OPACITY = 1;
 export const DEFAULT_BLEND_MODE = 'normal';
 
-export const DEFAULT_STYLE: em.Style = {
+export const DEFAULT_STYLE: Btwx.Style = {
   fill: DEFAULT_FILL_STYLE,
   stroke: DEFAULT_STROKE_STYLE,
   strokeOptions: DEFAULT_STROKE_OPTIONS_STYLE,
@@ -137,7 +137,7 @@ export const DEFAULT_ROTATION = 0;
 export const DEFAULT_VERTICAL_FLIP = false;
 export const DEFAULT_HORIZONTAL_FLIP = false;
 
-export const DEFAULT_TRANSFORM: em.Transform = {
+export const DEFAULT_TRANSFORM: Btwx.Transform = {
   rotation: DEFAULT_ROTATION,
   horizontalFlip: DEFAULT_HORIZONTAL_FLIP,
   verticalFlip: DEFAULT_VERTICAL_FLIP
@@ -151,7 +151,7 @@ export const DEFAULT_JUSTIFICATION = 'left';
 export const DEFAULT_LEADING = 16;
 export const DEFAULT_TEXT_FILL_COLOR = { h: 0, s: 0, l: 0, v: 0, a: 1 };
 
-export const DEFAULT_TEXT_STYLE: em.TextStyle = {
+export const DEFAULT_TEXT_STYLE: Btwx.TextStyle = {
   fontSize: DEFAULT_FONT_SIZE,
   leading: DEFAULT_LEADING,
   fontWeight: DEFAULT_FONT_WEIGHT,
@@ -159,7 +159,7 @@ export const DEFAULT_TEXT_STYLE: em.TextStyle = {
   justification: DEFAULT_JUSTIFICATION
 }
 
-export const APPLE_IPHONE_DEVICES: em.Device[] = [
+export const APPLE_IPHONE_DEVICES: Btwx.Device[] = [
   {
     type: 'iPhone 8',
     category: 'Apple',
@@ -193,7 +193,7 @@ export const APPLE_IPHONE_DEVICES: em.Device[] = [
   }
 ];
 
-export const APPLE_IPAD_DEVICES: em.Device[] = [
+export const APPLE_IPAD_DEVICES: Btwx.Device[] = [
   {
     type: '7.9" iPad mini',
     category: 'Apple',
@@ -222,7 +222,7 @@ export const APPLE_IPAD_DEVICES: em.Device[] = [
   }
 ];
 
-export const APPLE_WATCH_DEVICES: em.Device[] = [
+export const APPLE_WATCH_DEVICES: Btwx.Device[] = [
   {
     type: 'Apple Watch 38mm',
     category: 'Apple',
@@ -246,7 +246,7 @@ export const APPLE_WATCH_DEVICES: em.Device[] = [
   }
 ];
 
-export const APPLE_TV_DEVICES: em.Device[] = [
+export const APPLE_TV_DEVICES: Btwx.Device[] = [
   {
     type: 'Apple TV',
     category: 'Apple',
@@ -255,7 +255,7 @@ export const APPLE_TV_DEVICES: em.Device[] = [
   }
 ];
 
-export const APPLE_MAC_DEVICES: em.Device[] = [
+export const APPLE_MAC_DEVICES: Btwx.Device[] = [
   {
     type: 'Touch Bar',
     category: 'Apple',
@@ -264,7 +264,7 @@ export const APPLE_MAC_DEVICES: em.Device[] = [
   }
 ];
 
-export const APPLE_DEVICES: em.DeviceCategory[] = [
+export const APPLE_DEVICES: Btwx.DeviceCategory[] = [
   {
     type: 'iPhone',
     devices: APPLE_IPHONE_DEVICES
@@ -283,7 +283,7 @@ export const APPLE_DEVICES: em.DeviceCategory[] = [
   }
 ];
 
-export const ANDROID_MOBILE_DEVICES: em.Device[] = [
+export const ANDROID_MOBILE_DEVICES: Btwx.Device[] = [
   {
     type: 'Android',
     category: 'Android',
@@ -327,7 +327,7 @@ export const ANDROID_MOBILE_DEVICES: em.Device[] = [
   }
 ];
 
-export const ANDROID_TABLET_DEVICES: em.Device[] = [
+export const ANDROID_TABLET_DEVICES: Btwx.Device[] = [
   {
     type: 'Nexus 7',
     category: 'Android',
@@ -346,7 +346,7 @@ export const ANDROID_TABLET_DEVICES: em.Device[] = [
   }
 ];
 
-export const ANDROID_CHROMEBOOK_DEVICES: em.Device[] = [
+export const ANDROID_CHROMEBOOK_DEVICES: Btwx.Device[] = [
   {
     type: 'Pixel State',
     category: 'Android',
@@ -360,7 +360,7 @@ export const ANDROID_CHROMEBOOK_DEVICES: em.Device[] = [
   }
 ];
 
-export const ANDROID_DEVICES: em.DeviceCategory[] = [
+export const ANDROID_DEVICES: Btwx.DeviceCategory[] = [
   {
     type: 'Common Mobile',
     devices: ANDROID_MOBILE_DEVICES
@@ -373,7 +373,7 @@ export const ANDROID_DEVICES: em.DeviceCategory[] = [
   }
 ];
 
-export const RESPONSIVE_WEB_MOBILE_DEVICES: em.Device[] = [
+export const RESPONSIVE_WEB_MOBILE_DEVICES: Btwx.Device[] = [
   {
     type: 'Mobile',
     category: 'Responsive Web',
@@ -382,7 +382,7 @@ export const RESPONSIVE_WEB_MOBILE_DEVICES: em.Device[] = [
   }
 ];
 
-export const RESPONSIVE_WEB_TABLET_DEVICES: em.Device[] = [
+export const RESPONSIVE_WEB_TABLET_DEVICES: Btwx.Device[] = [
   {
     type: 'Tablet',
     category: 'Responsive Web',
@@ -391,7 +391,7 @@ export const RESPONSIVE_WEB_TABLET_DEVICES: em.Device[] = [
   }
 ];
 
-export const RESPONSIVE_WEB_DESKTOP_DEVICES: em.Device[] = [
+export const RESPONSIVE_WEB_DESKTOP_DEVICES: Btwx.Device[] = [
   {
     type: 'Desktop',
     category: 'Responsive Web',
@@ -405,7 +405,7 @@ export const RESPONSIVE_WEB_DESKTOP_DEVICES: em.Device[] = [
   }
 ];
 
-export const RESPONSIVE_WEB_DEVICES: em.DeviceCategory[] = [
+export const RESPONSIVE_WEB_DEVICES: Btwx.DeviceCategory[] = [
   {
     type: 'Mobile',
     devices: RESPONSIVE_WEB_MOBILE_DEVICES
@@ -418,7 +418,7 @@ export const RESPONSIVE_WEB_DEVICES: em.DeviceCategory[] = [
   }
 ];
 
-export const DEVICES: em.DevicePlatform[] = [
+export const DEVICES: Btwx.DevicePlatform[] = [
   {
     type: 'Apple',
     categories: APPLE_DEVICES

@@ -35,7 +35,7 @@ const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventLayerTweens
     result = [...result, tween.prop];
     return result;
   }, []).sort();
-  const orderedLayerTweensByProp = sortedProps.reduce((result, current: em.TweenProp) => {
+  const orderedLayerTweensByProp = sortedProps.reduce((result, current: Btwx.TweenProp) => {
     const tween = tweenEventLayerTweens.allIds.find((id: string) => tweenEventLayerTweens.byId[id].prop === current);
     result = [...result, tween];
     return result;

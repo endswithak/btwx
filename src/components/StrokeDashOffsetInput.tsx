@@ -54,11 +54,11 @@ const StrokeDashOffsetInput = (props: StrokeDashOffsetInputProps): ReactElement 
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const layerItems: (em.Shape | em.Image | em.Text)[] = selected.reduce((result, current) => {
+  const layerItems: (Btwx.Shape | Btwx.Image | Btwx.Text)[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);
-  const strokeDashOffsetValues = layerItems.reduce((result: number[], current: em.Shape | em.Image | em.Text) => {
+  const strokeDashOffsetValues = layerItems.reduce((result: number[], current: Btwx.Shape | Btwx.Image | Btwx.Text) => {
     return [...result, current.style.strokeOptions.dashOffset];
   }, []);
   const strokeDashOffsetValue = strokeDashOffsetValues.every((dashOffset: number) => dashOffset === strokeDashOffsetValues[0]) ? strokeDashOffsetValues[0] : 'multi';

@@ -11,7 +11,7 @@ interface ColorPickerAlphaInputProps {
   value: number | 'multi';
   alpha: number | 'multi';
   setAlpha(alpha: number): void;
-  onChange(color: em.Color): void;
+  onChange(color: Btwx.Color): void;
 }
 
 const ColorPickerAlphaInput = (props: ColorPickerAlphaInputProps): ReactElement => {

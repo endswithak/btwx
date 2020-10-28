@@ -14,8 +14,8 @@ import SidebarArtboardPlatformAdd from './SidebarArtboardPlatformAdd';
 import { ThemeContext } from './ThemeProvider';
 
 interface SidebarArtboardPlatformOrientationProps {
-  orientation?: em.DeviceOrientationType;
-  platform?: em.DevicePlatformType;
+  orientation?: Btwx.DeviceOrientationType;
+  platform?: Btwx.DevicePlatformType;
   setArtboardPresetDeviceOrientation?(payload: SetArtboardPresetDeviceOrientationPayload): DocumentSettingsTypes;
   addArtboardThunk?(payload: AddArtboardPayload): void;
   toggleArtboardToolThunk?(): void;
@@ -25,7 +25,7 @@ const SidebarArtboardSizes = (props: SidebarArtboardPlatformOrientationProps): R
   const theme = useContext(ThemeContext);
   const { toggleArtboardToolThunk, orientation, platform, setArtboardPresetDeviceOrientation, addArtboardThunk } = props;
 
-  const handleOrientationClick = (type: em.DeviceOrientationType) => {
+  const handleOrientationClick = (type: Btwx.DeviceOrientationType) => {
     switch(type) {
       case 'Landscape': {
         if (orientation !== 'Landscape') {
@@ -42,7 +42,7 @@ const SidebarArtboardSizes = (props: SidebarArtboardPlatformOrientationProps): R
     }
   }
 
-  const handleDeviceClick = (device: em.Device) => {
+  const handleDeviceClick = (device: Btwx.Device) => {
     const newArtboard = new paperMain.Path.Rectangle({
       from: new paperMain.Point(paperMain.view.center.x - ((orientation === 'Landscape' ? device.height : device.width) / 2), paperMain.view.center.y - ((orientation === 'Landscape' ? device.width : device.height) / 2)),
       to: new paperMain.Point(paperMain.view.center.x + ((orientation === 'Landscape' ? device.height : device.width) / 2), paperMain.view.center.y + ((orientation === 'Landscape' ? device.width : device.height) / 2)),

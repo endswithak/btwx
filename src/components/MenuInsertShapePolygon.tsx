@@ -9,7 +9,7 @@ export const MENU_ITEM_ID = 'insertShapePolygon';
 interface MenuInsertShapePolygonProps {
   canInsert?: boolean;
   isChecked?: boolean;
-  toggleShapeToolThunk?(shapeType: em.ShapeType): void;
+  toggleShapeToolThunk?(shapeType: Btwx.ShapeType): void;
 }
 
 const MenuInsertShapePolygon = (props: MenuInsertShapePolygonProps): ReactElement => {

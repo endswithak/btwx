@@ -23,8 +23,8 @@ import FillTypeSelector from './FillTypeSelector';
 interface ColorEditorProps {
   includesTextLayer?: boolean;
   colorEditor?: ColorEditorState;
-  colorValue?: em.Color;
-  colorFormat?: em.ColorFormat;
+  colorValue?: Btwx.Color;
+  colorFormat?: Btwx.ColorFormat;
   canvasFocusing?: boolean;
   closeColorEditor?(): ColorEditorTypes;
   openGradientEditor?(payload: OpenGradientEditorPayload): GradientEditorTypes;
@@ -44,7 +44,7 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
   const { includesTextLayer, colorEditor, colorValue, colorFormat, closeColorEditor, setLayersFillColor, setLayersStrokeFillType, setLayersGradientType, setLayersFillType, setLayersStrokeColor, openGradientEditor, setLayersShadowColor, setTextSettingsFillColor, setCanvasFocusing, canvasFocusing } = props;
 
   const debounceColor = useCallback(
-    debounce((color: em.Color) => {
+    debounce((color: Btwx.Color) => {
       switch(colorEditor.prop) {
         case 'fill': {
           setLayersFillColor({layers: colorEditor.layers, fillColor: color});
@@ -80,7 +80,7 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
     }
   }
 
-  const handleColorChange = (color: em.Color): void => {
+  const handleColorChange = (color: Btwx.Color): void => {
     // colorEditor.layers.forEach((layer) => {
     //   const paperLayer = getPaperLayer(layer);
     //   switch(colorEditor.prop) {
@@ -178,18 +178,18 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   colorEditor: ColorEditorState;
-  colorValue: em.Color;
+  colorValue: Btwx.Color;
   includesTextLayer: boolean;
   canvasFocusing: boolean;
-  colorFormat: em.ColorFormat;
+  colorFormat: Btwx.ColorFormat;
 } => {
   const { colorEditor, layer, canvasSettings, documentSettings } = state;
-  const layerItems: em.Layer[] = colorEditor.layers.reduce((result, current) => {
+  const layerItems: Btwx.Layer[] = colorEditor.layers.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);
-  const includesTextLayer = layerItems.some((layerItem: em.Layer) => layerItem.type === 'Text');
-  const styleValues: (em.Fill | em.Stroke | em.Shadow)[] = layerItems.reduce((result, current) => {
+  const includesTextLayer = layerItems.some((layerItem: Btwx.Layer) => layerItem.type === 'Text');
+  const styleValues: (em.Fill | Btwx.Stroke | Btwx.Shadow)[] = layerItems.reduce((result, current) => {
     switch(colorEditor.prop) {
       case 'fill':
         return [...result, current.style.fill];

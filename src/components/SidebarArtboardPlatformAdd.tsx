@@ -10,7 +10,7 @@ import { ThemeContext } from './ThemeProvider';
 
 interface SidebarArtboardPlatformAddProps {
   artboardPresetEditor?: ArtboardPresetEditorState;
-  openArtboardPresetEditor?(payload: em.ArtboardPreset): ArtboardPresetEditorTypes;
+  openArtboardPresetEditor?(payload: Btwx.ArtboardPreset): ArtboardPresetEditorTypes;
   isActive?: boolean;
 }
 

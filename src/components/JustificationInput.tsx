@@ -14,7 +14,7 @@ import Icon from './Icon';
 
 interface JustificationInputProps {
   selected?: string[];
-  justificationValue?: em.Jusftification | 'multi';
+  justificationValue?: Btwx.Jusftification | 'multi';
   setLayersJustification?(payload: SetLayersJustificationPayload): LayerTypes;
   setTextSettingsJustification?(payload: SetTextSettingsJustificationPayload): TextSettingsTypes;
 }
@@ -28,10 +28,10 @@ const JustificationInput = (props: JustificationInputProps): ReactElement => {
     setJustification(justificationValue);
   }, [justificationValue, selected]);
 
-  const handleClick = (justificationButtonValue: em.Jusftification) => {
-    setLayersJustification({layers: selected, justification: justificationButtonValue as em.Jusftification})
+  const handleClick = (justificationButtonValue: Btwx.Jusftification) => {
+    setLayersJustification({layers: selected, justification: justificationButtonValue as Btwx.Jusftification})
     setJustification(justificationButtonValue);
-    setTextSettingsJustification({justification: justificationButtonValue as em.Jusftification});
+    setTextSettingsJustification({justification: justificationButtonValue as Btwx.Jusftification});
   };
 
   return (
@@ -66,14 +66,14 @@ const JustificationInput = (props: JustificationInputProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const layerItems: em.Text[] = selected.reduce((result, current) => {
+  const layerItems: Btwx.Text[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);
-  const justificationValues: em.Jusftification[] = layerItems.reduce((result, current) => {
+  const justificationValues: Btwx.Jusftification[] = layerItems.reduce((result, current) => {
     return [...result, current.textStyle.justification];
   }, []);
-  const justificationValue = justificationValues.every((justification: em.Jusftification) => justification === justificationValues[0]) ? justificationValues[0] : 'multi';
+  const justificationValue = justificationValues.every((justification: Btwx.Jusftification) => justification === justificationValues[0]) ? justificationValues[0] : 'multi';
   return { selected, justificationValue };
 };
 

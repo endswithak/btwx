@@ -24,22 +24,22 @@ export interface DocumentSettingsState {
   artboardPresets: {
     allIds: string[];
     byId: {
-      [id: string]: em.ArtboardPreset;
+      [id: string]: Btwx.ArtboardPreset;
     };
-    orientation: em.DeviceOrientationType;
-    platform: em.DevicePlatformType;
+    orientation: Btwx.DeviceOrientationType;
+    platform: Btwx.DevicePlatformType;
   };
   images: {
     allIds: string[];
     byId: {
-      [id: string]: em.DocumentImage;
+      [id: string]: Btwx.DocumentImage;
     };
   };
-  colorFormat: em.ColorFormat;
+  colorFormat: Btwx.ColorFormat;
   edit: string;
 }
 
-const initialState: DocumentSettingsState = {
+export const initialState: DocumentSettingsState = {
   id: null,
   name: 'Untitled',
   path: null,
@@ -125,7 +125,7 @@ export default (state = initialState, action: DocumentSettingsTypes): DocumentSe
         artboardPresets: {
           ...state.artboardPresets,
           allIds: removeItem(state.artboardPresets.allIds, action.payload.id),
-          byId: Object.keys(state.artboardPresets.byId).reduce((result: { [id: string]: em.ArtboardPreset }, id) => {
+          byId: Object.keys(state.artboardPresets.byId).reduce((result: { [id: string]: Btwx.ArtboardPreset }, id) => {
             if (id !== action.payload.id) {
               result[id] = state.artboardPresets.byId[id];
             }
@@ -139,7 +139,7 @@ export default (state = initialState, action: DocumentSettingsTypes): DocumentSe
         ...state,
         artboardPresets: {
           ...state.artboardPresets,
-          byId: Object.keys(state.artboardPresets.byId).reduce((result: { [id: string]: em.ArtboardPreset }, id) => {
+          byId: Object.keys(state.artboardPresets.byId).reduce((result: { [id: string]: Btwx.ArtboardPreset }, id) => {
             if (id !== action.payload.id) {
               result[id] = state.artboardPresets.byId[id];
             } else {

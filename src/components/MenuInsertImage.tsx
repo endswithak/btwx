@@ -38,7 +38,7 @@ const MenuInsertImage = (props: MenuInsertImageProps): ReactElement => {
                     height: info.height,
                     innerWidth: info.width,
                     innerHeight: info.height
-                  } as em.Frame
+                  } as Btwx.Frame
                 },
                 buffer: data
               }) as any

@@ -22,7 +22,7 @@ import { openContextMenu, closeContextMenu } from '../store/actions/contextMenu'
 import { setTweenDrawerEventThunk, setTweenDrawerEventHoverThunk } from '../store/actions/tweenDrawer';
 
 class MasterTool {
-  type: em.ToolType;
+  type: Btwx.ToolType;
   tool: paper.Tool;
   state: RootState;
   shapeTool: ShapeTool;
@@ -54,8 +54,8 @@ class MasterTool {
     this.gradientTool = new GradientTool();
     this.textTool = new TextTool();
   }
-  handleHitResult(event: paper.ToolEvent): em.HitResult {
-    const result: em.HitResult = {
+  handleHitResult(event: paper.ToolEvent): Btwx.HitResult {
+    const result: Btwx.HitResult = {
       type: 'Empty',
       event: event,
       layerProps: {
@@ -89,9 +89,9 @@ class MasterTool {
     }
     return result;
   }
-  handleLayerMouseDown(hitResult: em.HitResult) {
+  handleLayerMouseDown(hitResult: Btwx.HitResult) {
     const props = hitResult.layerProps;
-    // const selectedWithChildren = this.state.layer.present.selected.reduce((result: { allIds: string[]; byId: { [id: string]: em.Layer } }, current) => {
+    // const selectedWithChildren = this.state.layer.present.selected.reduce((result: { allIds: string[]; byId: { [id: string]: Btwx.Layer } }, current) => {
     //   const layerAndChildren = getLayerAndDescendants(this.state.layer.present, current);
     //   result.allIds = [...result.allIds, ...layerAndChildren];
     //   layerAndChildren.forEach((id) => {
@@ -102,8 +102,8 @@ class MasterTool {
     // text settings
     if (props.nearestScopeAncestor.id === props.layerItem.id && props.layerItem.type === 'Text') {
       store.dispatch(setTextSettings({
-        fillColor: (props.layerItem as em.Text).style.fill.color,
-        ...(props.layerItem as em.Text).textStyle
+        fillColor: (props.layerItem as Btwx.Text).style.fill.color,
+        ...(props.layerItem as Btwx.Text).textStyle
       }));
     }
     // selecting
@@ -145,7 +145,7 @@ class MasterTool {
       this.areaSelectTool.onMouseDown(hitResult.event);
     }
   }
-  handleUIElementMouseDown(hitResult: em.HitResult) {
+  handleUIElementMouseDown(hitResult: Btwx.HitResult) {
     const props = hitResult.uiElementProps;
     if (props.interactive) {
       switch(props.elementId) {
@@ -164,7 +164,7 @@ class MasterTool {
             case 'bottomRight':
             case 'leftCenter':
             case 'rightCenter': {
-              const selectedWithChildren = this.state.layer.present.selected.reduce((result: { allIds: string[]; byId: { [id: string]: em.Layer } }, current) => {
+              const selectedWithChildren = this.state.layer.present.selected.reduce((result: { allIds: string[]; byId: { [id: string]: Btwx.Layer } }, current) => {
                 const layerAndChildren = getLayerAndDescendants(this.state.layer.present, current);
                 result.allIds = [...result.allIds, ...layerAndChildren];
                 layerAndChildren.forEach((id) => {
@@ -191,7 +191,7 @@ class MasterTool {
                       case 'rightCenter':
                         return 'ew';
                     }
-                  })() as em.ResizeType
+                  })() as Btwx.ResizeType
                 }));
                 this.resizeTool.handle = props.interactiveType;
                 this.resizeTool.onMouseDown(hitResult.event);
@@ -208,7 +208,7 @@ class MasterTool {
           break;
         }
         case 'GradientFrame': {
-          const gradient = (this.state.layer.present.byId[this.state.gradientEditor.layers[0]].style[this.state.gradientEditor.prop] as em.Fill | em.Stroke).gradient;
+          const gradient = (this.state.layer.present.byId[this.state.gradientEditor.layers[0]].style[this.state.gradientEditor.prop] as Btwx.Fill | Btwx.Stroke).gradient;
           const stopsWithIndex = gradient.stops.map((stop, index) => {
             return { ...stop, index };
           });
@@ -224,7 +224,7 @@ class MasterTool {
               break;
           }
           store.dispatch(setCanvasActiveTool({activeTool: 'Gradient', resizing: true}));
-          this.gradientTool.handle = props.interactiveType as em.GradientHandle;
+          this.gradientTool.handle = props.interactiveType as Btwx.GradientHandle;
           this.gradientTool.prop = this.state.gradientEditor.prop as 'fill' | 'stroke';
           this.gradientTool.onMouseDown(hitResult.event);
           break;
@@ -235,14 +235,14 @@ class MasterTool {
       }
     }
   }
-  handleEmptyMouseDown(hitResult: em.HitResult) {
+  handleEmptyMouseDown(hitResult: Btwx.HitResult) {
     // if (this.state.layer.present.selected.length > 0 && !hitResult.event.modifiers.shift) {
     //   store.dispatch(deselectAllLayers());
     // }
     store.dispatch(setCanvasActiveTool({activeTool: 'AreaSelect', selecting: true}));
     this.areaSelectTool.onMouseDown(hitResult.event);
   }
-  // handleLayerMouseMove(hitResult: em.HitResult): void {
+  // handleLayerMouseMove(hitResult: Btwx.HitResult): void {
   //   const props = hitResult.layerProps;
   //   if (props.nearestScopeAncestor.type === 'Artboard') {
   //     if (this.state.layer.present.hover !== props.deepSelectItem.id) {
@@ -254,7 +254,7 @@ class MasterTool {
   //     }
   //   }
   // }
-  handleUIElementMouseMove(hitResult: em.HitResult) {
+  handleUIElementMouseMove(hitResult: Btwx.HitResult) {
     const props = hitResult.uiElementProps;
     if (props.interactive) {
       switch(props.elementId) {
@@ -267,12 +267,12 @@ class MasterTool {
       }
     }
   }
-  // handleEmptyMouseMove(hitResult: em.HitResult): void {
+  // handleEmptyMouseMove(hitResult: Btwx.HitResult): void {
   //   if (this.state.layer.present.hover !== null) {
   //     store.dispatch(setLayerHover({id: null}));
   //   }
   // }
-  handleLayerDoubleClick(hitResult: em.HitResult) {
+  handleLayerDoubleClick(hitResult: Btwx.HitResult) {
     const props = hitResult.layerProps;
     if (props.nearestScopeAncestor.id !== props.layerItem.id) {
       store.dispatch(deepSelectLayer({id: props.layerItem.id}));
@@ -286,7 +286,7 @@ class MasterTool {
       }
     }
   }
-  handleTextDoubleClick(hitResult: em.HitResult) {
+  handleTextDoubleClick(hitResult: Btwx.HitResult) {
     const paperLayer = getPaperLayer(hitResult.layerProps.layerItem.id);
     const topLeft = paperMain.view.projectToView(paperLayer.bounds.topLeft);
     const topCenter = paperMain.view.projectToView(paperLayer.bounds.topCenter);
@@ -315,7 +315,7 @@ class MasterTool {
       })()
     }));
   }
-  handleUIElementDoubleClick(hitResult: em.HitResult) {
+  handleUIElementDoubleClick(hitResult: Btwx.HitResult) {
     const props = hitResult.uiElementProps;
     if (props.interactive) {
       switch(props.elementId) {

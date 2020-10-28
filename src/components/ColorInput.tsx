@@ -19,7 +19,7 @@ interface ColorInputProps {
   prop: 'fill' | 'stroke' | 'shadow';
   enabledValue?: boolean | 'multi';
   selected?: string[];
-  colorValue?: em.Color | 'multi';
+  colorValue?: Btwx.Color | 'multi';
   opacityValue?: number | 'multi';
   colorEditorOpen?: boolean;
   textLayerSelected?: boolean;
@@ -67,7 +67,7 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
         if (nextOpacity < 0) {
           nextOpacity = 0;
         }
-        const nextAlpha = { a: nextOpacity / 100 } as em.Color;
+        const nextAlpha = { a: nextOpacity / 100 } as Btwx.Color;
         switch(prop) {
           case 'fill':
             setLayersFillColor({layers: selected, fillColor: nextAlpha});
@@ -92,7 +92,7 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
     if (nextHex.isValid()) {
       const hsl = nextHex.toHsl();
       const hsv = nextHex.toHsv();
-      const nextColor = { h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v } as em.Color;
+      const nextColor = { h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v } as Btwx.Color;
       switch(prop) {
         case 'fill': {
           setLayersFillColor({layers: selected, fillColor: nextColor});
@@ -176,19 +176,19 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
 const mapStateToProps = (state: RootState, ownProps: ColorInputProps): {
   enabledValue: boolean | 'multi';
   selected: string[];
-  colorValue: em.Color | 'multi';
+  colorValue: Btwx.Color | 'multi';
   opacityValue: number | 'multi';
   colorEditorOpen: boolean;
   textLayerSelected: boolean;
 } => {
   const { layer, colorEditor } = state;
   const selected = layer.present.selected;
-  const layerItems: em.Layer[] = selected.reduce((result, current) => {
+  const layerItems: Btwx.Layer[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);
-  const textLayerSelected = layerItems.some((layerItem: em.Layer) => layerItem.type === 'Text');
-  const styleValues: (em.Fill | em.Stroke | em.Shadow)[] = layerItems.reduce((result, current) => {
+  const textLayerSelected = layerItems.some((layerItem: Btwx.Layer) => layerItem.type === 'Text');
+  const styleValues: (em.Fill | Btwx.Stroke | Btwx.Shadow)[] = layerItems.reduce((result, current) => {
     switch(ownProps.prop) {
       case 'fill':
         return [...result, current.style.fill];
@@ -198,22 +198,22 @@ const mapStateToProps = (state: RootState, ownProps: ColorInputProps): {
         return [...result, current.style.shadow];
     }
   }, []);
-  const colorValue = ((): em.Color | 'multi' => {
-    if (styleValues.every((value: em.Fill | em.Stroke | em.Shadow) => colorsMatch(value.color, styleValues[0].color))) {
+  const colorValue = ((): Btwx.Color | 'multi' => {
+    if (styleValues.every((value: Btwx.Fill | Btwx.Stroke | Btwx.Shadow) => colorsMatch(value.color, styleValues[0].color))) {
       return styleValues[0].color;
     } else {
       return 'multi';
     }
   })();
   const opacityValue = ((): number | 'multi' => {
-    if (styleValues.every((value: em.Fill | em.Stroke | em.Shadow) => value.color.a === styleValues[0].color.a)) {
+    if (styleValues.every((value: Btwx.Fill | Btwx.Stroke | Btwx.Shadow) => value.color.a === styleValues[0].color.a)) {
       return styleValues[0].color.a;
     } else {
       return 'multi';
     }
   })();
   const enabledValue = ((): boolean | 'multi' => {
-    if (styleValues.every((value: em.Fill | em.Stroke | em.Shadow) => value.enabled === styleValues[0].enabled)) {
+    if (styleValues.every((value: Btwx.Fill | Btwx.Stroke | Btwx.Shadow) => value.enabled === styleValues[0].enabled)) {
       return styleValues[0].enabled;
     } else {
       return 'multi';

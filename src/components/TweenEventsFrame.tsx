@@ -6,27 +6,27 @@ import { paperMain } from '../canvas';
 
 interface TweenEventsFrameProps {
   activeArtboard?: string;
-  theme?: em.ThemeName;
-  tweenDrawerEventSort?: em.TweenEventSort;
+  theme?: Btwx.ThemeName;
+  tweenDrawerEventSort?: Btwx.TweenEventSort;
   tweenDrawerEventHover?: string;
   tweenDrawerEvent?: string;
   updateTweenEventsFrameThunk?(): void;
   // tweenEventLayers?: {
   //   allIds: string[];
   //   byId: {
-  //     [id: string]: em.Layer;
+  //     [id: string]: Btwx.Layer;
   //   };
   // };
   // activeArtboard?: string;
   // allArtboardIds?: string[];
   // artboardsById?: {
-  //   [id: string]: em.Artboard;
+  //   [id: string]: Btwx.Artboard;
   // };
-  // tweenEventItems?: em.TweenEvent[];
-  // allArtboardItems?: em.Artboard[];
+  // tweenEventItems?: Btwx.TweenEvent[];
+  // allArtboardItems?: Btwx.Artboard[];
   // eventHover?: string;
-  // themeName?: em.ThemeName;
-  // eventSort?: em.TweenEventSort;
+  // themeName?: Btwx.ThemeName;
+  // eventSort?: Btwx.TweenEventSort;
 }
 
 const TweenEventsFrame = (props: TweenEventsFrameProps): ReactElement => {
@@ -50,20 +50,20 @@ const TweenEventsFrame = (props: TweenEventsFrameProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   activeArtboard: string;
-  theme: em.ThemeName;
-  tweenDrawerEventSort: em.TweenEventSort;
+  theme: Btwx.ThemeName;
+  tweenDrawerEventSort: Btwx.TweenEventSort;
   tweenDrawerEventHover: string;
   tweenDrawerEvent: string;
   // allArtboardIds: string[];
-  // artboardsById: { [id: string]: em.Artboard };
-  // tweenEventItems: em.TweenEvent[];
+  // artboardsById: { [id: string]: Btwx.Artboard };
+  // tweenEventItems: Btwx.TweenEvent[];
   // tweenEventLayers: {
   //   allIds: string[];
   //   byId: {
-  //     [id: string]: em.Layer;
+  //     [id: string]: Btwx.Layer;
   //   };
   // };
-  // allArtboardItems: em.Artboard[];
+  // allArtboardItems: Btwx.Artboard[];
 } => {
   const { layer, tweenDrawer, viewSettings } = state;
   const activeArtboard = layer.present.activeArtboard;
@@ -72,8 +72,8 @@ const mapStateToProps = (state: RootState): {
   const tweenDrawerEventHover = tweenDrawer.eventHover;
   const tweenDrawerEvent = tweenDrawer.event;
   // const allArtboardIds = layer.present.allArtboardIds;
-  // const artboardsById = allArtboardIds.reduce((result: {[id: string]: em.Artboard}, current) => {
-  //   result[current] = layer.present.byId[current] as em.Artboard;
+  // const artboardsById = allArtboardIds.reduce((result: {[id: string]: Btwx.Artboard}, current) => {
+  //   result[current] = layer.present.byId[current] as Btwx.Artboard;
   //   return result;
   // }, {});
   // const allArtboardItems = allArtboardIds.reduce((result, current) => {

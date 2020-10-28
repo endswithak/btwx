@@ -14,7 +14,7 @@ interface ColorPickerHueProps {
   setRed(red: number): void;
   setGreen(green: number): void;
   setBlue(blue: number): void;
-  onChange?(color: em.Color): void;
+  onChange?(color: Btwx.Color): void;
 }
 
 interface SliderProps {

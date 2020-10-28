@@ -7,8 +7,8 @@ export const SET_TEXT_SETTINGS_LEADING = 'SET_TEXT_SETTINGS_LEADING';
 export const SET_TEXT_SETTINGS_JUSTIFICATION = 'SET_TEXT_SETTINGS_JUSTIFICATION';
 
 export type SetTextSettingsPayload = {
-  [P in keyof em.TextStyle]?: em.TextStyle[P];
-} & { fillColor?: em.Color }
+  [P in keyof Btwx.TextStyle]?: Btwx.TextStyle[P];
+} & { fillColor?: Btwx.Color }
 
 export interface SetTextSettings {
   type: typeof SET_TEXT_SETTINGS;
@@ -16,7 +16,7 @@ export interface SetTextSettings {
 }
 
 export interface SetTextSettingsFillColorPayload {
-  fillColor: em.Color;
+  fillColor: Btwx.Color;
 }
 
 export interface SetTextSettingsFillColor {
@@ -34,7 +34,7 @@ export interface SetTextSettingsFontSize {
 }
 
 export interface SetTextSettingsFontWeightPayload {
-  fontWeight: em.FontWeight;
+  fontWeight: Btwx.FontWeight;
 }
 
 export interface SetTextSettingsFontWeight {
@@ -61,7 +61,7 @@ export interface SetTextSettingsLeading {
 }
 
 export interface SetTextSettingsJustificationPayload {
-  justification: em.Jusftification;
+  justification: Btwx.Jusftification;
 }
 
 export interface SetTextSettingsJustification {

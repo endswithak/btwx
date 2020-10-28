@@ -53,11 +53,11 @@ const YInput = (props: YInputProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const artboardParents = selected.reduce((result: em.Artboard[], current: string) => {
+  const artboardParents = selected.reduce((result: Btwx.Artboard[], current: string) => {
     const layerItem = layer.present.byId[current];
     const layerScope = layerItem.scope;
     if (layerScope.length > 1 && layer.present.byId[layerScope[1]].type === 'Artboard') {
-      result = [...result, layer.present.byId[layerScope[1]] as em.Artboard];
+      result = [...result, layer.present.byId[layerScope[1]] as Btwx.Artboard];
     } else {
       result = [...result, null];
     }

@@ -7,13 +7,13 @@ import { toggleTextToolThunk } from '../store/actions/textTool';
 import { toggleShapeToolThunk } from '../store/actions/shapeTool';
 
 interface KeyBindingsProps {
-  activeTool?: em.ToolType;
+  activeTool?: Btwx.ToolType;
   focusing?: boolean;
   scope?: string[];
-  activeToolShapeType?: em.ShapeType;
+  activeToolShapeType?: Btwx.ShapeType;
   toggleArtboardToolThunk?(): void;
   toggleTextToolThunk?(): void;
-  toggleShapeToolThunk?(shapeType: em.ShapeType): void;
+  toggleShapeToolThunk?(shapeType: Btwx.ShapeType): void;
   escapeLayerScopeThunk?(): void;
 }
 
@@ -59,8 +59,8 @@ const KeyBindings = (props: KeyBindingsProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState): {
-  activeTool: em.ToolType;
-  activeToolShapeType: em.ShapeType;
+  activeTool: Btwx.ToolType;
+  activeToolShapeType: Btwx.ShapeType;
   focusing: boolean;
   scope: string[];
 } => {

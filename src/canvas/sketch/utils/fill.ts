@@ -2,7 +2,7 @@ import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { convertColor, convertGradientDestination, convertGradientOrigin, convertGradientType, convertGradientStops } from './general';
 import { DEFAULT_FILL_FILL_TYPE, DEFAULT_GRADIENT_STYLE, DEFAULT_FILL_STYLE } from '../../../constants';
 
-export const convertFillType = (sketchFillType: FileFormat.FillType): em.FillType => {
+export const convertFillType = (sketchFillType: FileFormat.FillType): Btwx.FillType => {
   switch(sketchFillType) {
     case 0:
       return 'color';
@@ -13,7 +13,7 @@ export const convertFillType = (sketchFillType: FileFormat.FillType): em.FillTyp
   }
 };
 
-export const convertFill = (layer: FileFormat.AnyLayer): em.Fill => {
+export const convertFill = (layer: FileFormat.AnyLayer): Btwx.Fill => {
   const fill = layer.style.fills.find(fill => fill.fillType === 0 || fill.fillType === 1);
   if (!fill) {
     if (layer._class === 'text') {

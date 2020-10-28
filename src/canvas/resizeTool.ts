@@ -72,7 +72,7 @@ class ResizeTool {
       this.scaleLayer(layer, hor, ver);
     });
   }
-  clearLayerScale(paperLayer: paper.Item, layerItem: em.Layer): void {
+  clearLayerScale(paperLayer: paper.Item, layerItem: Btwx.Layer): void {
     switch(paperLayer.data.layerType) {
       case 'Artboard': {
         const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
@@ -116,7 +116,7 @@ class ResizeTool {
         break;
       }
       case 'Shape': {
-        switch((layerItem as em.Shape).shapeType) {
+        switch((layerItem as Btwx.Shape).shapeType) {
           case 'Ellipse':
           case 'Polygon':
           case 'Rectangle':
@@ -131,7 +131,7 @@ class ResizeTool {
               const newShape = new paperMain.Path.Rectangle({
                 from: paperLayer.bounds.topLeft,
                 to: paperLayer.bounds.bottomRight,
-                radius: (Math.max(paperLayer.bounds.width, paperLayer.bounds.height) / 2) * (layerItem as em.Rounded).radius,
+                radius: (Math.max(paperLayer.bounds.width, paperLayer.bounds.height) / 2) * (layerItem as Btwx.Rounded).radius,
                 insert: false
               });
               (paperLayer as paper.Path).pathData = newShape.pathData;
@@ -670,7 +670,7 @@ class ResizeTool {
       const layerAndDescendants = getLayerAndDescendants(this.state.layer.present, id);
       allSelectedLayers = [...allSelectedLayers, ...layerAndDescendants];
     });
-    this.snapTool.snapPoints = this.state.layer.present.inView.snapPoints.filter((snapPoint: em.SnapPoint) => !allSelectedLayers.includes(snapPoint.id));
+    this.snapTool.snapPoints = this.state.layer.present.inView.snapPoints.filter((snapPoint: Btwx.SnapPoint) => !allSelectedLayers.includes(snapPoint.id));
   }
   onMouseDrag(event: paper.ToolEvent): void {
     // if (!this.state.canvasSettings.resizing && !this.x && !this.y) {
@@ -765,7 +765,7 @@ class ResizeTool {
           scaledLayers.forEach((id) => {
             const paperLayer = getPaperLayer(id);
             // const layerItem = this.state.layer.present.byId[id];
-            // if (layerItem.type === 'Shape' && (layerItem as em.Shape).shapeType === 'Rounded') {
+            // if (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Rounded') {
             //   applyShapeMethods(paperLayer);
             // }
             paperLayer.pivot = null;

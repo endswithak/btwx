@@ -17,8 +17,8 @@ import SidebarLayerIcon from './SidebarLayerIcon';
 interface TweenDrawerEventItemProps {
   id: string;
   activeArtboard?: string;
-  tweenEvent?: em.TweenEvent;
-  layerItem?: em.Layer;
+  tweenEvent?: Btwx.TweenEvent;
+  layerItem?: Btwx.Layer;
   artboardName?: string;
   destinationName?: string;
   tweenEventDisplayName?: string;
@@ -108,8 +108,8 @@ const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement =>
 
 const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventItemProps): {
   activeArtboard: string;
-  tweenEvent: em.TweenEvent;
-  layerItem: em.Layer;
+  tweenEvent: Btwx.TweenEvent;
+  layerItem: Btwx.Layer;
   artboardName: string;
   destinationName: string;
   tweenEventDisplayName: string;

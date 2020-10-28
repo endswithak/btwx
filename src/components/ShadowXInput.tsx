@@ -54,11 +54,11 @@ const ShadowXInput = (props: ShadowXInputProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const layerItems: (em.Shape | em.Image | em.Text)[] = selected.reduce((result, current) => {
+  const layerItems: (Btwx.Shape | Btwx.Image | Btwx.Text)[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);
-  const shadowXOffsetValues = layerItems.reduce((result: number[], current: em.Shape | em.Image | em.Text) => {
+  const shadowXOffsetValues = layerItems.reduce((result: number[], current: Btwx.Shape | Btwx.Image | Btwx.Text) => {
     return [...result, current.style.shadow.offset.x];
   }, []);
   const shadowXOffsetValue = shadowXOffsetValues.every((shadowXOffset: number) => shadowXOffset === shadowXOffsetValues[0]) ? shadowXOffsetValues[0] : 'multi';

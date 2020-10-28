@@ -52,7 +52,7 @@ import { RootState } from '../reducers';
 import { SelectionState } from '../reducers/selection';
 import { updateSelectionFrame } from '../actions/layer';
 
-import { getLayerAndDescendants, getSelectionBounds, canToggleUseAsMaskSelection, canGroupSelection, canUngroupSelection, canSendBackwardSelection, canBringForwardSelection, canToggleSelectionStroke, canToggleSelectionShadow, canToggleSelectionFill, canTransformFlipSelection, canMaskSelection, canResizeSelection, canBooleanOperationSelection, canPasteSVG } from '../selectors/layer';
+import { getLayerAndDescendants, getSelectionBounds, canUngroupSelection, canMaskSelection, canResizeSelection, canPasteSVG } from '../selectors/layer';
 
 export const setSelectionBounds = (payload: SetSelectionBoundsPayload): SelectionTypes => ({
   type: SET_SELECTION_BOUNDS,
@@ -169,53 +169,53 @@ export const setIgnoreUnderlyingMaskEnabled = (payload: SetIgnoreUnderlyingMaskE
   payload
 });
 
-export const updateSelectionThunk = () => {
-  return (dispatch: any, getState: any) => {
-    const state = getState() as RootState;
-    const { layer } = state;
-    const selected = layer.present.selected;
-    const canResize = canResizeSelection(layer.present);
-    const canMoveBackward = canSendBackwardSelection(layer.present);
-    const canMoveForward = canBringForwardSelection(layer.present);
-    const canGroup = canGroupSelection(layer.present);
-    const canUngroup = canUngroupSelection(layer.present);
-    const canToggleStroke = canToggleSelectionStroke(layer.present);
-    const canToggleShadow = canToggleSelectionShadow(layer.present);
-    const canToggleFill = canToggleSelectionFill(layer.present);
-    const canToggleFlip = canTransformFlipSelection(layer.present);
-    const fillEnabled = canToggleFill ? selected.every((id) => layer.present.byId[id].style.fill.enabled) : false;
-    const strokeEnabled = canToggleStroke ? selected.every((id) => layer.present.byId[id].style.stroke.enabled) : false;
-    const shadowEnabled = canToggleShadow ? selected.every((id) => layer.present.byId[id].style.shadow.enabled) : false;
-    const horizontalFlipEnabled = canToggleFlip ? selected.every((id) => layer.present.byId[id].transform.horizontalFlip) : false;
-    const verticalFlipEnabled = canToggleFlip ? selected.every((id) => layer.present.byId[id].transform.verticalFlip) : false;
-    const canMask = canMaskSelection(layer.present);
-    const canToggleUseAsMask = canToggleUseAsMaskSelection(layer.present);
-    const useAsMaskEnabled = canToggleUseAsMask ? selected.every((id) => (layer.present.byId[id] as em.Shape).mask) : false;
-    const ignoreUnderlyingMaskEnabled = selected.every((id) => layer.present.byId[id].ignoreUnderlyingMask);
-    const canBoolean = canBooleanOperationSelection(layer.present);
-    const canAlign = selected.length >= 2;
-    const canDistribute = selected.length >= 3;
-    const props: SelectionState = {
-      canMoveBackward, canMoveForward, canGroup, canUngroup, canToggleStroke, canToggleShadow, canToggleFill, canToggleFlip,
-      fillEnabled, strokeEnabled, shadowEnabled, horizontalFlipEnabled, verticalFlipEnabled, canMask, canBoolean, canResize,
-      canAlign, canDistribute, canToggleUseAsMask, useAsMaskEnabled, ignoreUnderlyingMaskEnabled
-    };
-    const keysToUpdate = Object.keys(state.selection).reduce((result, current) => {
-      if ((state.selection as any)[current] !== (props as any)[current]) {
-        result = [...result, current];
-      }
-      return result;
-    }, []);
-    if (keysToUpdate.length > 0) {
-      const payload = keysToUpdate.reduce((result, current) => {
-        result = {
-          ...result,
-          [current]: (props as any)[current]
-        }
-        return result;
-      }, {});
-      dispatch(updateSelection(payload));
-    }
-    updateSelectionFrame(state);
-  }
-};
+// export const updateSelectionThunk = () => {
+//   return (dispatch: any, getState: any) => {
+//     const state = getState() as RootState;
+//     const { layer } = state;
+//     const selected = layer.present.selected;
+//     const canResize = canResizeSelection(layer.present);
+//     const canMoveBackward = canSendBackwardSelection(layer.present);
+//     const canMoveForward = canBringForwardSelection(layer.present);
+//     const canGroup = canGroupSelection(layer.present);
+//     const canUngroup = canUngroupSelection(layer.present);
+//     const canToggleStroke = canToggleSelectionStroke(layer.present);
+//     const canToggleShadow = canToggleSelectionShadow(layer.present);
+//     const canToggleFill = canToggleSelectionFill(layer.present);
+//     const canToggleFlip = canTransformFlipSelection(layer.present);
+//     const fillEnabled = canToggleFill ? selected.every((id) => layer.present.byId[id].style.fill.enabled) : false;
+//     const strokeEnabled = canToggleStroke ? selected.every((id) => layer.present.byId[id].style.stroke.enabled) : false;
+//     const shadowEnabled = canToggleShadow ? selected.every((id) => layer.present.byId[id].style.shadow.enabled) : false;
+//     const horizontalFlipEnabled = canToggleFlip ? selected.every((id) => layer.present.byId[id].transform.horizontalFlip) : false;
+//     const verticalFlipEnabled = canToggleFlip ? selected.every((id) => layer.present.byId[id].transform.verticalFlip) : false;
+//     const canMask = canMaskSelection(layer.present);
+//     const canToggleUseAsMask = canToggleUseAsMaskSelection(layer.present);
+//     const useAsMaskEnabled = canToggleUseAsMask ? selected.every((id) => (layer.present.byId[id] as Btwx.Shape).mask) : false;
+//     const ignoreUnderlyingMaskEnabled = selected.every((id) => layer.present.byId[id].ignoreUnderlyingMask);
+//     const canBoolean = canBooleanOperationSelection(layer.present);
+//     const canAlign = selected.length >= 2;
+//     const canDistribute = selected.length >= 3;
+//     const props: SelectionState = {
+//       canMoveBackward, canMoveForward, canGroup, canUngroup, canToggleStroke, canToggleShadow, canToggleFill, canToggleFlip,
+//       fillEnabled, strokeEnabled, shadowEnabled, horizontalFlipEnabled, verticalFlipEnabled, canMask, canBoolean, canResize,
+//       canAlign, canDistribute, canToggleUseAsMask, useAsMaskEnabled, ignoreUnderlyingMaskEnabled
+//     };
+//     const keysToUpdate = Object.keys(state.selection).reduce((result, current) => {
+//       if ((state.selection as any)[current] !== (props as any)[current]) {
+//         result = [...result, current];
+//       }
+//       return result;
+//     }, []);
+//     if (keysToUpdate.length > 0) {
+//       const payload = keysToUpdate.reduce((result, current) => {
+//         result = {
+//           ...result,
+//           [current]: (props as any)[current]
+//         }
+//         return result;
+//       }, {});
+//       dispatch(updateSelection(payload));
+//     }
+//     updateSelectionFrame(state);
+//   }
+// };

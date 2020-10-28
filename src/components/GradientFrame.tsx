@@ -7,9 +7,9 @@ import { ThemeContext } from './ThemeProvider';
 
 interface GradientFrameProps {
   layer: string;
-  gradient: em.Gradient;
+  gradient: Btwx.Gradient;
   onStopPress(index: number): void;
-  layerItem?: em.Layer;
+  layerItem?: Btwx.Layer;
   zoom?: number;
 }
 

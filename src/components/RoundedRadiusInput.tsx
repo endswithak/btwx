@@ -14,7 +14,7 @@ import { paperMain } from '../canvas';
 interface RoundedRadiusInputProps {
   selected?: string[];
   radiusValue?: number | 'multi';
-  layerItems?: em.Rounded[];
+  layerItems?: Btwx.Rounded[];
   setRoundedRadii?(payload: SetRoundedRadiiPayload): LayerTypes;
 }
 
@@ -96,11 +96,11 @@ const RoundedRadiusInput = (props: RoundedRadiusInputProps): ReactElement => {
 const mapStateToProps = (state: RootState): {
   selected: string[];
   radiusValue: number | 'multi';
-  layerItems: em.Rounded[];
+  layerItems: Btwx.Rounded[];
 } => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const layerItems: em.Rounded[] = selected.reduce((result, current) => {
+  const layerItems: Btwx.Rounded[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);

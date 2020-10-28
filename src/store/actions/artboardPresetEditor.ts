@@ -4,7 +4,7 @@ import {
   ArtboardPresetEditorTypes
 } from '../actionTypes/artboardPresetEditor';
 
-export const openArtboardPresetEditor = (payload: em.ArtboardPreset): ArtboardPresetEditorTypes => ({
+export const openArtboardPresetEditor = (payload: Btwx.ArtboardPreset): ArtboardPresetEditorTypes => ({
   type: OPEN_ARTBOARD_PRESET_EDITOR,
   payload
 });

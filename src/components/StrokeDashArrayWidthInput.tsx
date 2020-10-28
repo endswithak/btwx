@@ -54,11 +54,11 @@ const StrokeDashArrayWidthInput = (props: StrokeDashArrayWidthInputProps): React
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const layerItems: (em.Shape | em.Image | em.Text)[] = selected.reduce((result, current) => {
+  const layerItems: (Btwx.Shape | Btwx.Image | Btwx.Text)[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);
-  const strokeDashArrayValues = layerItems.reduce((result: (number[])[], current: em.Shape | em.Image | em.Text) => {
+  const strokeDashArrayValues = layerItems.reduce((result: (number[])[], current: Btwx.Shape | Btwx.Image | Btwx.Text) => {
     return [...result, current.style.strokeOptions.dashArray];
   }, []);
   const strokeDashArrayWidthValues = strokeDashArrayValues.reduce((result: number[], current: number[]) => {

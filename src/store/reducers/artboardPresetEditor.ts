@@ -4,7 +4,7 @@ import {
   ArtboardPresetEditorTypes,
 } from '../actionTypes/artboardPresetEditor';
 
-export interface ArtboardPresetEditorState extends em.ArtboardPreset {
+export interface ArtboardPresetEditorState extends Btwx.ArtboardPreset {
   isOpen: boolean;
 }
 

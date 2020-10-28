@@ -6,7 +6,7 @@ import { paperMain } from '../canvas';
 
 interface ActiveArtboardFrameProps {
   activeArtboard?: string;
-  activeArtboardFrame?: em.Frame;
+  activeArtboardFrame?: Btwx.Frame;
   updateActiveArtboardFrameThunk?(): void;
 }
 
@@ -30,7 +30,7 @@ const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   activeArtboard: string;
-  activeArtboardFrame: em.Frame;
+  activeArtboardFrame: Btwx.Frame;
 } => {
   const { layer } = state;
   const activeArtboard = layer.present.activeArtboard;

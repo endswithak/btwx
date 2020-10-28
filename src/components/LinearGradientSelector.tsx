@@ -5,7 +5,7 @@ import styled from 'styled-components';
 interface LinearGradientSelectorProps {
   onClick(): void;
   isActive: boolean;
-  theme?: em.Theme;
+  theme?: Btwx.Theme;
 }
 
 const Button = styled.button<LinearGradientSelectorProps>`

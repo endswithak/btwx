@@ -55,11 +55,11 @@ const StrokeWidthInput = (props: StrokeWidthInputProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const layerItems: (em.Shape | em.Image | em.Text)[] = selected.reduce((result, current) => {
+  const layerItems: (Btwx.Shape | Btwx.Image | Btwx.Text)[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);
-  const strokeWidthValues = layerItems.reduce((result: number[], current: em.Shape | em.Image | em.Text) => {
+  const strokeWidthValues = layerItems.reduce((result: number[], current: Btwx.Shape | Btwx.Image | Btwx.Text) => {
     return [...result, current.style.stroke.width];
   }, []);
   const strokeWidthValue = strokeWidthValues.every((strokeWidth: number) => strokeWidth === strokeWidthValues[0]) ? strokeWidthValues[0] : 'multi';

@@ -9,7 +9,7 @@ export const MENU_ITEM_ID = 'insertShapeLine';
 interface MenuInsertShapeLineProps {
   canInsert?: boolean;
   isChecked?: boolean;
-  toggleShapeToolThunk?(shapeType: em.ShapeType): void;
+  toggleShapeToolThunk?(shapeType: Btwx.ShapeType): void;
 }
 
 const MenuInsertShapeLine = (props: MenuInsertShapeLineProps): ReactElement => {

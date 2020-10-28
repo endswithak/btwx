@@ -17,7 +17,7 @@ import SidebarInput from './SidebarInput';
 interface ArtboardPresetEditorProps {
   exists?: boolean;
   artboardPresetEditor?: ArtboardPresetEditorState;
-  platformType?: em.DevicePlatformType;
+  platformType?: Btwx.DevicePlatformType;
   canvasFocusing?: boolean;
   closeArtboardPresetEditor?(): ArtboardPresetEditorTypes;
   setArtboardPresetDevicePlatform?(payload: SetArtboardPresetDevicePlatformPayload): DocumentSettingsTypes;

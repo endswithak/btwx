@@ -7,7 +7,7 @@ import { updateSelectionThunk } from '../store/actions/selection';
 interface SelectionProps {
   selected?: string[];
   selectedById?: {
-    [id: string]: em.Layer;
+    [id: string]: Btwx.Layer;
   };
   updateSelectionThunk?(): void;
 }
@@ -27,7 +27,7 @@ const Selection = (props: SelectionProps): ReactElement => {
 const mapStateToProps = (state: RootState): {
   selected: string[];
   selectedById: {
-    [id: string]: em.Layer;
+    [id: string]: Btwx.Layer;
   };
 } => {
   const { layer } = state;

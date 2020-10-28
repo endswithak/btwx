@@ -15,15 +15,15 @@ import EmptyState from './EmptyState';
 interface TweenDrawerEventLayersProps {
   isEmpty?: boolean;
   tweenDrawerLayersWidth?: number;
-  artboardItem?: em.Artboard;
+  artboardItem?: Btwx.Artboard;
   tweenEventLayers?: {
     allIds: string[];
     byId: {
-      [id: string]: em.Layer;
+      [id: string]: Btwx.Layer;
     };
   };
-  scrollLayerItem?: em.Layer;
-  scrollLayerMaskItem?: em.Layer;
+  scrollLayerItem?: Btwx.Layer;
+  scrollLayerMaskItem?: Btwx.Layer;
   scrollLayer: string;
   setTweenDrawerEventThunk?(payload: SetTweenDrawerEventPayload): void;
   setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
@@ -128,11 +128,11 @@ const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventLayersProps
   const tweenEventLayers = getTweenEventLayers(layer.present, tweenDrawer.event);
   const isEmpty = tweenEventLayers.allIds.length === 0;
   const eventItem = layer.present.tweenEventById[tweenDrawer.event];
-  const artboardItem = layer.present.byId[eventItem.artboard];
+  const artboardItem = layer.present.byId[eventItBtwx.Artboard];
   const tweenDrawerLayersWidth = viewSettings.tweenDrawer.layersWidth;
   const scrollLayerItem = ownProps.scrollLayer ? layer.present.byId[ownProps.scrollLayer] : null;
-  const mask = scrollLayerItem && scrollLayerItem.type === 'Group' && (scrollLayerItem as em.Group).clipped ? (() => {
-    return (scrollLayerItem as em.Group).children.find((id) => layer.present.byId[id].mask);
+  const mask = scrollLayerItem && scrollLayerItem.type === 'Group' && (scrollLayerItem as Btwx.Group).clipped ? (() => {
+    return (scrollLayerItem as Btwx.Group).children.find((id) => layer.present.byId[id].mask);
   })() : null;
   const scrollLayerMaskItem = mask ? layer.present.byId[mask] : null;
   return { tweenEventLayers, artboardItem, tweenDrawerLayersWidth, scrollLayerItem, scrollLayerMaskItem, isEmpty };

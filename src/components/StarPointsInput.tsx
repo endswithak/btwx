@@ -14,7 +14,7 @@ import { paperMain } from '../canvas';
 interface StarPointsInputProps {
   selected?: string[];
   pointsValue?: number | 'multi';
-  layerItems?: em.Star[];
+  layerItems?: Btwx.Star[];
   setStarsPoints?(payload: SetStarsPointsPayload): LayerTypes;
 }
 
@@ -42,7 +42,7 @@ const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
       const newShape = new paperMain.Path.Star({
         center: paperLayer.bounds.center,
         radius1: maxDim / 2,
-        radius2: (maxDim / 2) * (layerItem as em.Star).radius,
+        radius2: (maxDim / 2) * (layerItem as Btwx.Star).radius,
         points: e.target.value,
         insert: false
       });
@@ -100,11 +100,11 @@ const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
 const mapStateToProps = (state: RootState): {
   selected: string[];
   pointsValue: number | 'multi';
-  layerItems: em.Star[];
+  layerItems: Btwx.Star[];
 } => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const layerItems: em.Star[] = selected.reduce((result, current) => {
+  const layerItems: Btwx.Star[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);

@@ -12,7 +12,7 @@ import Canvas from './Canvas';
 interface CanvasWrapProps {
   ready: boolean;
   documentImages: {
-    [id: string]: em.DocumentImage;
+    [id: string]: Btwx.DocumentImage;
   };
   paperProject?: string;
   matrix?: number[];
@@ -50,7 +50,7 @@ const CanvasWrap = (props: CanvasWrapProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   documentImages: {
-    [id: string]: em.DocumentImage;
+    [id: string]: Btwx.DocumentImage;
   };
   paperProject: string;
   matrix: number[];

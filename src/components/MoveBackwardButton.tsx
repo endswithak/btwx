@@ -1,22 +1,21 @@
 import React, { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { SendLayersBackwardPayload, LayerTypes } from '../store/actionTypes/layer';
-import { sendLayersBackward } from '../store/actions/layer';
+import { canSendSelectedBackward } from '../store/selectors/layer';
+import { sendSelectedBackwardThunk } from '../store/actions/layer';
 import TopbarButton from './TopbarButton';
 
 interface MoveBackwardButtonProps {
-  selected: string[];
   canMoveBackward: boolean;
-  sendLayersBackward(payload: SendLayersBackwardPayload): LayerTypes;
+  sendSelectedBackwardThunk(): void;
 }
 
 const MoveBackwardButton = (props: MoveBackwardButtonProps): ReactElement => {
-  const { selected, canMoveBackward, sendLayersBackward } = props;
+  const { canMoveBackward, sendSelectedBackwardThunk } = props;
 
   const handleMoveBackwardClick = (): void => {
     if (canMoveBackward) {
-      sendLayersBackward({layers: selected});
+      sendSelectedBackwardThunk();
     }
   }
 
@@ -30,16 +29,13 @@ const MoveBackwardButton = (props: MoveBackwardButtonProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState): {
-  selected: string[];
   canMoveBackward: boolean;
 } => {
-  const { layer, selection } = state;
-  const selected = layer.present.selected;
-  const canMoveBackward = selection.canMoveBackward;
-  return { selected, canMoveBackward };
+  const canMoveBackward = canSendSelectedBackward(state);
+  return { canMoveBackward };
 };
 
 export default connect(
   mapStateToProps,
-  { sendLayersBackward }
+  { sendSelectedBackwardThunk }
 )(MoveBackwardButton);

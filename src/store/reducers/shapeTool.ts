@@ -7,7 +7,7 @@ import {
 
 export interface ShapeToolState {
   isEnabled: boolean;
-  shapeType: em.ShapeType;
+  shapeType: Btwx.ShapeType;
 }
 
 const initialState: ShapeToolState = {
