@@ -2126,7 +2126,7 @@ export interface SetLayersBlendMode {
 
 export interface UniteLayersPayload {
   layers: string[];
-  booleanLayer?: Btwx.Shape;
+  booleanLayer?: string;
 }
 
 export interface UniteLayers {
@@ -2136,7 +2136,7 @@ export interface UniteLayers {
 
 export interface IntersectLayersPayload {
   layers: string[];
-  booleanLayer?: Btwx.Shape;
+  booleanLayer?: string;
 }
 
 export interface IntersectLayers {
@@ -2146,7 +2146,7 @@ export interface IntersectLayers {
 
 export interface SubtractLayersPayload {
   layers: string[];
-  booleanLayer?: Btwx.Shape;
+  booleanLayer?: string;
 }
 
 export interface SubtractLayers {
@@ -2156,7 +2156,7 @@ export interface SubtractLayers {
 
 export interface ExcludeLayersPayload {
   layers: string[];
-  booleanLayer?: Btwx.Shape;
+  booleanLayer?: string;
 }
 
 export interface ExcludeLayers {
@@ -2166,7 +2166,7 @@ export interface ExcludeLayers {
 
 export interface DivideLayersPayload {
   layers: string[];
-  booleanLayer?: Btwx.Shape;
+  booleanLayer?: string;
 }
 
 export interface DivideLayers {

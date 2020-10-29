@@ -111,7 +111,7 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
   }
 
   useEffect(() => {
-    if (layerEvent && activeTool !== 'Shape' && activeTool !== 'Artboard') {
+    if (layerEvent) {
       switch(layerEvent.eventType) {
         case 'contextMenu':
           handleContextMenu();

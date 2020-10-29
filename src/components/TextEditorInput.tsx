@@ -30,8 +30,8 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const textSpanRef = useRef<HTMLTextAreaElement>(null);
   const { textEditor, textSettings, layerItem, closeTextEditor, setCanvasFocusing, canvasFocusing, setLayerText, selectLayers } = props;
-  const [text, setText] = useState(layerItBtwx.Text);
-  const [prevText, setPrevText] = useState(layerItBtwx.Text);
+  const [text, setText] = useState(layerItem.Text);
+  const [prevText, setPrevText] = useState(layerItem.Text);
   const debounceText = useCallback(
     debounce((dText: string) => setLayerText({id: textEditor.layer, text: dText }), 250),
     []
@@ -110,7 +110,7 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
   useEffect(() => {
     const paperLayer = paperMain.project.getItem({data: { id: textEditor.layer }}) as paper.PointText;
     paperLayer.visible = false;
-  }, [layerItBtwx.Text]);
+  }, [layerItem.Text]);
 
   useEffect(() => {
     updateTextAreaSize();

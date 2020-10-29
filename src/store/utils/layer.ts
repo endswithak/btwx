@@ -5190,46 +5190,36 @@ export const setLayersBlendMode = (state: LayerState, action: SetLayersBlendMode
 
 export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState => {
   let currentState = state;
+  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: action.payload.booleanLayer, above: action.payload.layers[0]}) as InsertLayerAbove);
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: action.payload.layers}) as RemoveLayers);
-  currentState = addShape(currentState, layerActions.addShape({
-    layer: action.payload.booleanLayer
-  }) as AddShape);
   return currentState;
 };
 
 export const intersectLayers = (state: LayerState, action: IntersectLayers): LayerState => {
   let currentState = state;
+  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: action.payload.booleanLayer, above: action.payload.layers[0]}) as InsertLayerAbove);
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: action.payload.layers}) as RemoveLayers);
-  currentState = addShape(currentState, layerActions.addShape({
-    layer: action.payload.booleanLayer
-  }) as AddShape);
   return currentState;
 };
 
 export const subtractLayers = (state: LayerState, action: SubtractLayers): LayerState => {
   let currentState = state;
+  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: action.payload.booleanLayer, above: action.payload.layers[0]}) as InsertLayerAbove);
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: action.payload.layers}) as RemoveLayers);
-  currentState = addShape(currentState, layerActions.addShape({
-    layer: action.payload.booleanLayer
-  }) as AddShape);
   return currentState;
 };
 
 export const excludeLayers = (state: LayerState, action: ExcludeLayers): LayerState => {
   let currentState = state;
+  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: action.payload.booleanLayer, above: action.payload.layers[0]}) as InsertLayerAbove);
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: action.payload.layers}) as RemoveLayers);
-  currentState = addShape(currentState, layerActions.addShape({
-    layer: action.payload.booleanLayer
-  }) as AddShape);
   return currentState;
 };
 
 export const divideLayers = (state: LayerState, action: DivideLayers): LayerState => {
   let currentState = state;
+  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: action.payload.booleanLayer, above: action.payload.layers[0]}) as InsertLayerAbove);
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: action.payload.layers}) as RemoveLayers);
-  currentState = addShape(currentState, layerActions.addShape({
-    layer: action.payload.booleanLayer
-  }) as AddShape);
   return currentState;
 };
 

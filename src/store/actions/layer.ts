@@ -579,7 +579,6 @@ export const addShape = (payload: AddShapePayload): LayerTypes => ({
 
 export const addShapeThunk = (payload: AddShapePayload) => {
   return (dispatch: any, getState: any): Promise<Btwx.Shape> => {
-    console.log(payload.layer.masked);
     const state = getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const parent = payload.layer.parent ? payload.layer.parent : 'page';
@@ -2268,17 +2267,16 @@ export const divideLayers = (payload: DivideLayersPayload): LayerTypes => ({
   payload
 });
 
-export const applyBooleanOperationThunk = (booleanOperation: Btwx.BooleanOperation, layers?: string[]) => {
+export const applyBooleanOperationThunk = (booleanOperation: Btwx.BooleanOperation) => {
   return (dispatch: any, getState: any): Promise<Btwx.Shape> => {
     return new Promise((resolve, reject) => {
       const state = getState() as RootState;
-      const payloadLayers = layers ? layers : state.layer.present.selected;
-      const orderedLayers = layers ? orderLayersByDepth(state.layer.present, layers) : state.layer.present.selected;
-      const topLayer = orderedLayers[0];
+      const selected = state.layer.present.selected;
+      const topLayer = selected[0];
       const layerItem = state.layer.present.byId[topLayer];
       let booleanLayers = getPaperLayer(topLayer) as paper.Path | paper.CompoundPath;
-      for (let i = 1; i < orderedLayers.length; i++) {
-        booleanLayers = booleanLayers[booleanOperation](getPaperLayer(orderedLayers[i]) as paper.Path | paper.CompoundPath, { insert: false }) as paper.Path | paper.CompoundPath;
+      for (let i = 1; i < selected.length; i++) {
+        booleanLayers = booleanLayers[booleanOperation](getPaperLayer(selected[i]) as paper.Path | paper.CompoundPath, { insert: false }) as paper.Path | paper.CompoundPath;
       }
       dispatch(addShapeThunk({
         layer: {
@@ -2302,32 +2300,32 @@ export const applyBooleanOperationThunk = (booleanOperation: Btwx.BooleanOperati
         switch(booleanOperation) {
           case 'divide':
             dispatch(divideLayers({
-              layers: payloadLayers,
-              booleanLayer: newShape
+              layers: selected,
+              booleanLayer: newShape.id
             }));
             break;
           case 'exclude':
             dispatch(excludeLayers({
-              layers: payloadLayers,
-              booleanLayer: newShape
+              layers: selected,
+              booleanLayer: newShape.id
             }));
             break;
           case 'intersect':
             dispatch(intersectLayers({
-              layers: payloadLayers,
-              booleanLayer: newShape
+              layers: selected,
+              booleanLayer: newShape.id
             }));
             break;
           case 'subtract':
             dispatch(subtractLayers({
-              layers: payloadLayers,
-              booleanLayer: newShape
+              layers: selected,
+              booleanLayer: newShape.id
             }));
             break;
           case 'unite':
             dispatch(uniteLayers({
-              layers: payloadLayers,
-              booleanLayer: newShape
+              layers: selected,
+              booleanLayer: newShape.id
             }));
             break;
         }
@@ -2492,7 +2490,7 @@ export const copyStyleThunk = () => {
     if (state.canvasSettings.focusing && state.layer.present.selected.length === 1) {
       const layerItem = state.layer.present.byId[state.layer.present.selected[0]];
       const style = layerItem.style;
-      const textStyle = layerItem.type === 'Text' ? layerItBtwx.TextStyle : null;
+      const textStyle = layerItem.type === 'Text' ? layerItem.textStyle : null;
       clipboard.writeText(JSON.stringify({
         type: 'style',
         style,

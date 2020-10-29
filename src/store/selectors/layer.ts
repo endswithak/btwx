@@ -28,6 +28,32 @@ export const getSelectedById = createSelector(
   }
 );
 
+export const getSelectedAndDescendents = createSelector(
+  [ getSelected, getLayersById ],
+  (selected, byId) => {
+    return selected.reduce((result, current) => {
+      const groups: string[] = [current];
+      const layers: string[] = [];
+      let i = 0;
+      while(i < groups.length) {
+        const layerItem = byId[groups[i]];
+        if (layerItem.children) {
+          layerItem.children.forEach((child) => {
+            const childLayerItem = byId[child];
+            if (childLayerItem.children && childLayerItem.children.length > 0) {
+              groups.push(child);
+            }
+            layers.push(child);
+          });
+        }
+        i++;
+      }
+      result = [...result, ...layers];
+      return result;
+    }, [...selected]);
+  }
+);
+
 export const getSelectedWithDescendentsById = createSelector(
   [ getSelected, getLayersById ],
   (selected, byId) => {
@@ -1436,6 +1462,39 @@ export const getLayerSnapPoints = (id: string): Btwx.SnapPoint[] => {
     point: bounds.bottom
   } as Btwx.SnapPoint;
   return [left, right, top, bottom, centerX, centerY];
+};
+
+// export const getSnapPointsByBounds = (bounds: paper.Rectangle, ignoreLayers: string[] = []): Btwx.SnapPoint[] => {
+//   const page = getPaperLayer('page');
+//   const layers = page.getItems({
+//     overlapping: paperMain.view.bounds,
+//     data: { type: 'Layer' },
+//     inside: bounds
+//   });
+//   return layers.reduce((result, current) => {
+//     if (current.data.layerType !== 'Group' && !ignoreLayers.includes(current.data.id)) {
+//       result = [...result, ...getLayerSnapPoints(current.data.id)];
+//     }
+//     return result;
+//   }, []);
+// };
+
+export const getSnapPointsByBounds = (bounds: paper.Rectangle, ignoreBounds: paper.Rectangle): Btwx.SnapPoint[] => {
+  const page = getPaperLayer('page');
+  const layers = page.getItems({
+    overlapping: bounds,
+    data: { type: 'Layer' }
+  });
+  const ignoreLayers = page.getItems({
+    overlapping: ignoreBounds,
+    data: { type: 'Layer' }
+  });
+  return layers.reduce((result, current) => {
+    if (current.data.layerType !== 'Group' && !ignoreLayers.includes(current)) {
+      result = [...result, ...getLayerSnapPoints(current.data.id)];
+    }
+    return result;
+  }, []);
 };
 
 export const getInViewSnapPoints = (state: LayerState): Btwx.SnapPoint[] => {

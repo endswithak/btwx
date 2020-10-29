@@ -30,14 +30,14 @@ export const toggleShapeToolThunk = (shapeType: Btwx.ShapeType) => {
     const state = getState() as RootState;
     if (state.canvasSettings.focusing) {
       if (state.canvasSettings.activeTool === 'Shape' && state.shapeTool.shapeType === shapeType) {
-        const tooltip = paperMain.project.getItem({ data: { id: 'Tooltip' } });
-        const preview = paperMain.project.getItem({ data: { id: 'ShapeToolPreview' } });
-        if (tooltip) {
-          tooltip.remove();
-        }
-        if (preview) {
-          preview.remove();
-        }
+        // const tooltip = paperMain.project.getItem({ data: { id: 'Tooltip' } });
+        // const preview = paperMain.project.getItem({ data: { id: 'ShapeToolPreview' } });
+        // if (tooltip) {
+        //   tooltip.remove();
+        // }
+        // if (preview) {
+        //   preview.remove();
+        // }
         dispatch(disableShapeTool());
         dispatch(setCanvasActiveTool({activeTool: null}));
       } else {

@@ -4,7 +4,7 @@ import React, { useRef, useContext, useEffect, ReactElement, useState } from 're
 import { connect } from 'react-redux';
 import { scrollToLayer, isBetween } from '../utils';
 import { RootState } from '../store/reducers';
-import { DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_POINTS, THEME_PRIMARY_COLOR, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../constants';
+import { DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_POINTS, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../constants';
 import Tooltip from '../canvas/tooltip';
 import { importPaperProject, getDeepSelectItem, getNearestScopeAncestor, getSelectionBounds, getPaperLayer } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
@@ -159,7 +159,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
       preview.remove();
     }
     const nextPreview = renderShape({
-      strokeColor: THEME_PRIMARY_COLOR,
+      strokeColor: theme.palette.primary,
       strokeWidth: 1 / paperMain.view.zoom,
       data: {
         id: 'ShapeToolPreview'
@@ -320,7 +320,9 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
         tool.activate();
       }
     } else {
-      paperMain.tool = null;
+      if (tool && paperMain.tool && (paperMain.tool as any)._index === (tool as any)._index) {
+        paperMain.tool = null;
+      }
     }
   }, [isEnabled]);
 
@@ -338,7 +340,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState, ownProps: ShapeToolProps): {
+const mapStateToProps = (state: RootState): {
   isEnabled: boolean;
   scope: string[];
   shapeType: Btwx.ShapeType;
