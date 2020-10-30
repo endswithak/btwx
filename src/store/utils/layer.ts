@@ -19,8 +19,7 @@ import {
   DisableLayerStroke, DisableLayerShadow, EnableLayerShadow, SetLayerStrokeCap, SetLayerStrokeJoin, ScaleLayer,
   ScaleLayers, EnableLayerHorizontalFlip, DisableLayerHorizontalFlip, EnableLayerVerticalFlip, DisableLayerVerticalFlip,
   AddText, SetLayerText, SetLayerFontSize, SetLayerFontWeight, SetLayerFontFamily, SetLayerLeading, SetLayerJustification,
-  AddInViewLayer, AddInViewLayers, RemoveInViewLayer, RemoveInViewLayers, UpdateInViewLayers, SetLayerFillType,
-  SetLayerStrokeFillType, AddLayersMask, RemoveLayersMask, SetLayerFill,
+  SetLayerFillType, SetLayerStrokeFillType, AddLayersMask, RemoveLayersMask, SetLayerFill,
   AlignLayersToLeft, AlignLayersToRight, AlignLayersToTop, AlignLayersToBottom, AlignLayersToCenter, AlignLayersToMiddle,
   DistributeLayersHorizontally, DistributeLayersVertically, DuplicateLayer, DuplicateLayers, RemoveDuplicatedLayers,
   BringLayerForward, SendLayerBackward, BringLayersForward, SendLayersBackward, BringLayerToFront, BringLayersToFront,
@@ -80,9 +79,6 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
     },
     allArtboardIds: addItem(currentState.allArtboardIds, action.payload.layer.id)
   }
-  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.layer.id)) {
-    currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.layer.id}) as AddInViewLayer);
-  }
   if (!action.payload.batch) {
     currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.layer.id], newSelection: true}) as SelectLayers);
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
@@ -111,9 +107,6 @@ export const addShape = (state: LayerState, action: AddShape): LayerState => {
       } as Btwx.Group
     },
     allShapeIds: addItem(state.allShapeIds, action.payload.layer.id)
-  }
-  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.layer.id)) {
-    currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.layer.id}) as AddInViewLayer);
   }
   currentState = updateLayerBounds(currentState, action.payload.layer.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.layer.id, 'all');
@@ -148,9 +141,6 @@ export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
     },
     allGroupIds: addItem(state.allGroupIds, action.payload.layer.id)
   }
-  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.layer.id)) {
-    currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.layer.id}) as AddInViewLayer);
-  }
   currentState = updateLayerBounds(currentState, action.payload.layer.id);
   if (!action.payload.batch) {
     if (parentItem.type !== 'Page' && !(parentItem as Btwx.Group | Btwx.Artboard).showChildren) {
@@ -183,9 +173,6 @@ export const addText = (state: LayerState, action: AddText): LayerState => {
     },
     allTextIds: addItem(state.allTextIds, action.payload.layer.id)
   }
-  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.layer.id)) {
-    currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.layer.id}) as AddInViewLayer);
-  }
   currentState = updateLayerBounds(currentState, action.payload.layer.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.layer.id, 'all');
   if (!action.payload.batch) {
@@ -217,9 +204,6 @@ export const addImage = (state: LayerState, action: AddImage): LayerState => {
       } as Btwx.Group
     },
     allImageIds: addItem(state.allImageIds, action.payload.layer.id)
-  }
-  if (paperMain.view.bounds.intersects(paperLayer.bounds) && !currentState.inView.allIds.includes(action.payload.layer.id)) {
-    currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id: action.payload.layer.id}) as AddInViewLayer);
   }
   currentState = updateLayerBounds(currentState, action.payload.layer.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.layer.id, 'all');
@@ -304,10 +288,6 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
     // check hover
     if (result.hover === current) {
       result = setLayerHover(result, layerActions.setLayerHover({id: null}) as SetLayerHover);
-    }
-    // if layer is inView, remove from inView
-    if (result.inView.allIds.includes(current)) {
-      result = removeInViewLayer(result, layerActions.removeInViewLayer({id: current}) as RemoveInViewLayer);
     }
     // if layer is the active artboard, set active artboard to null
     if (layer.id === result.activeArtboard) {
@@ -550,6 +530,8 @@ export const updateGradientFrame = (layerItem: Btwx.Layer, gradient: Btwx.Gradie
 
 export const deselectLayer = (state: LayerState, action: DeselectLayer): LayerState => {
   const layer = state.byId[action.payload.id] as Btwx.Layer;
+  const paperLayer = getPaperLayer(action.payload.id);
+  paperLayer.data.selected = false;
   const newState = {
     ...state,
     byId: {
@@ -589,6 +571,8 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
   const hasArtboardParent = layerItem.scope.length > 1 && state.byId[layerItem.scope[1]].type === 'Artboard';
+  const paperLayer = getPaperLayer(action.payload.id);
+  paperLayer.data.selected = true;
   // if layer is an artboard or group and current selection includes...
   // any of its descendants, deselect those descendants
   if (layerItem.type === 'Artboard' || layerItem.type === 'Group') {
@@ -713,6 +697,16 @@ export const selectLayers = (state: LayerState, action: SelectLayers): LayerStat
 
 export const setLayerHover = (state: LayerState, action: SetLayerHover): LayerState => {
   let currentState = state;
+  const currentHover = state.hover;
+  const nextHover = action.payload.id;
+  if (currentHover) {
+    const currentHoverPaperLayer = getPaperLayer(currentHover);
+    currentHoverPaperLayer.data.hover = false;
+  }
+  if (nextHover) {
+    const nextHoverPaperLayer = getPaperLayer(nextHover);
+    nextHoverPaperLayer.data.hover = true;
+  }
   currentState = {
     ...currentState,
     hover: action.payload.id
@@ -1832,7 +1826,6 @@ export const updateParentBounds = (state: LayerState, id: string): LayerState =>
   return layerItem.scope.reduce((result, current) => {
     const paperLayer = getPaperLayer(current);
     const layerItem = result.byId[current];
-    result = updateLayerInView(result, current);
     if (layerItem.transform.rotation !== 0) {
       const clone = paperLayer.clone({insert: false});
       clone.rotation = -layerItem.transform.rotation;
@@ -1891,7 +1884,6 @@ export const updateChildrenBounds = (state: LayerState, id: string): LayerState 
   return layerDescendants.reduce((result, current) => {
     const paperLayer = getPaperLayer(current);
     const layerItem = result.byId[current];
-    result = updateLayerInView(result, current);
     if (result.byId[current].type === 'Shape') {
       result = {
         ...result,
@@ -2064,7 +2056,6 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
       }
     }
   }
-  currentState = updateLayerInView(currentState, id);
   currentState = updateParentBounds(currentState, id);
   if (state.byId[id].type === 'Group' || state.byId[id].type === 'Artboard') {
     currentState = updateChildrenBounds(currentState, id);
@@ -2189,11 +2180,22 @@ export const setLayerName = (state: LayerState, action: SetLayerName): LayerStat
 };
 
 export const setActiveArtboard = (state: LayerState, action: SetActiveArtboard): LayerState => {
-  const activeArtboardState = {
-    ...state,
+  let currentState = state;
+  const currentActiveArtboard = state.activeArtboard;
+  const nextActiveArtboard = action.payload.id;
+  if (currentActiveArtboard) {
+    const currentActiveArtboardPaperLayer = getPaperLayer(currentActiveArtboard);
+    currentActiveArtboardPaperLayer.data.activeArtboard = false;
+  }
+  if (nextActiveArtboard) {
+    const nextActiveArtboardPaperLayer = getPaperLayer(nextActiveArtboard);
+    nextActiveArtboardPaperLayer.data.activeArtboard = true;
+  }
+  currentState = {
+    ...currentState,
     activeArtboard: action.payload.id
   }
-  return activeArtboardState;
+  return currentState;
 };
 
 export const addLayerTweenEvent = (state: LayerState, action: AddLayerTweenEvent): LayerState => {
@@ -4483,90 +4485,6 @@ export const setLayersJustification = (state: LayerState, action: SetLayersJusti
   return currentState;
 };
 
-export const addInViewLayer = (state: LayerState, action: AddInViewLayer): LayerState => {
-  let currentState = state;
-  currentState = {
-    ...currentState,
-    inView: {
-      ...currentState.inView,
-      allIds: addItem(currentState.inView.allIds, action.payload.id),
-      snapPoints: [...currentState.inView.snapPoints, ...getLayerSnapPoints(action.payload.id)]
-    }
-  }
-  return currentState;
-};
-
-export const addInViewLayers = (state: LayerState, action: AddInViewLayers): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
-    return addInViewLayer(result, layerActions.addInViewLayer({id: current}) as AddInViewLayer);
-  }, state);
-};
-
-export const removeInViewLayer = (state: LayerState, action: RemoveInViewLayer): LayerState => {
-  let currentState = state;
-  currentState = {
-    ...currentState,
-    inView: {
-      ...currentState.inView,
-      allIds: removeItem(currentState.inView.allIds, action.payload.id),
-      snapPoints: currentState.inView.snapPoints.filter((snapPoint) => snapPoint.id !== action.payload.id)
-    }
-  }
-  return currentState;
-};
-
-export const removeInViewLayers = (state: LayerState, action: RemoveInViewLayers): LayerState => {
-  return action.payload.layers.reduce((result, current) => {
-    return removeInViewLayer(result, layerActions.removeInViewLayer({id: current}) as RemoveInViewLayer);
-  }, state);
-};
-
-// utility to update inView layer after bounds change
-export const updateLayerInView = (state: LayerState, id: string): LayerState => {
-  let currentState = state;
-  const paperLayer = getPaperLayer(id);
-  if (paperMain.view.bounds.intersects(paperLayer.bounds)) {
-    if (currentState.inView.allIds.includes(id)) {
-      currentState = removeInViewLayer(currentState, layerActions.removeInViewLayer({id}) as RemoveInViewLayer);
-    }
-    currentState = addInViewLayer(currentState, layerActions.addInViewLayer({id}) as AddInViewLayer);
-  }
-  if (!paperMain.view.bounds.intersects(paperLayer.bounds) && currentState.inView.allIds.includes(id)) {
-    currentState = removeInViewLayer(currentState, layerActions.removeInViewLayer({id}) as RemoveInViewLayer);
-  }
-  return currentState;
-};
-
-export const updateInViewLayers = (state: LayerState, action: UpdateInViewLayers): LayerState => {
-  let currentState = state;
-  // get in view layers
-  const visibleLayers = paperMain.project.getItem({data: { id: 'page' }}).getItems({
-    overlapping: paperMain.view.bounds,
-    data: { type: 'Layer' }
-  });
-  const visibleLayerIds = visibleLayers.reduce((result, current) => {
-    if (current.data.layerType !== 'Group') {
-      result = [...result, current.data.id];
-    }
-    return result;
-  }, []);
-  // remove out of view layers
-  currentState = currentState.inView.allIds.reduce((result, current) => {
-    if (!visibleLayerIds.includes(current)) {
-      result = removeInViewLayer(result, layerActions.removeInViewLayer({id: current}) as RemoveInViewLayer);
-    }
-    return result;
-  }, currentState);
-  // add new in view layers
-  currentState = visibleLayerIds.reduce((result, current) => {
-    if (!currentState.inView.allIds.includes(current)) {
-      result = addInViewLayer(result, layerActions.addInViewLayer({id: current}) as AddInViewLayer);
-    }
-    return result;
-  }, currentState);
-  return currentState;
-};
-
 export const addLayersMask = (state: LayerState, action: AddLayersMask): LayerState => {
   let currentState = state;
   const layerItem = state.byId[action.payload.layers[0]];
@@ -5024,8 +4942,6 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): Layer
         }
         break;
     }
-    // update inView layers
-    result = updateLayerInView(result, current);
     // add layer
     return {
       ...result,

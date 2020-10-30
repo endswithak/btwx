@@ -12,7 +12,7 @@ export default Menu.buildFromTemplate([
         submenu: [
           {
             label: 'Dark',
-            type: 'radio',
+            type: 'checkbox',
             checked: false,
             id: 'appThemeDark',
             enabled: false,
@@ -24,7 +24,7 @@ export default Menu.buildFromTemplate([
           },
           {
             label: 'Light',
-            type: 'radio',
+            type: 'checkbox',
             checked: false,
             id: 'appThemeLight',
             enabled: false,
@@ -310,7 +310,7 @@ export default Menu.buildFromTemplate([
       {
         label: 'Artboard',
         id: 'insertArtboard',
-        type: 'radio',
+        type: 'checkbox',
         checked: false,
         enabled: false,
         accelerator: 'A',
@@ -327,7 +327,7 @@ export default Menu.buildFromTemplate([
           {
             label: 'Rectangle',
             id: 'insertShapeRectangle',
-            type: 'radio',
+            type: 'checkbox',
             checked: false,
             enabled: false,
             accelerator: 'R',
@@ -340,7 +340,7 @@ export default Menu.buildFromTemplate([
           {
             label: 'Rounded',
             id: 'insertShapeRounded',
-            type: 'radio',
+            type: 'checkbox',
             checked: false,
             enabled: false,
             accelerator: 'U',
@@ -353,7 +353,7 @@ export default Menu.buildFromTemplate([
           {
             label: 'Ellipse',
             id: 'insertShapeEllipse',
-            type: 'radio',
+            type: 'checkbox',
             checked: false,
             enabled: false,
             accelerator: 'O',
@@ -366,7 +366,7 @@ export default Menu.buildFromTemplate([
           {
             label: 'Star',
             id: 'insertShapeStar',
-            type: 'radio',
+            type: 'checkbox',
             checked: false,
             enabled: false,
             click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
@@ -378,7 +378,7 @@ export default Menu.buildFromTemplate([
           {
             label: 'Polygon',
             id: 'insertShapePolygon',
-            type: 'radio',
+            type: 'checkbox',
             checked: false,
             enabled: false,
             click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
@@ -390,7 +390,7 @@ export default Menu.buildFromTemplate([
           {
             label: 'Line',
             id: 'insertShapeLine',
-            type: 'radio',
+            type: 'checkbox',
             checked: false,
             enabled: false,
             accelerator: 'L',
@@ -406,7 +406,7 @@ export default Menu.buildFromTemplate([
       {
         label: 'Text',
         id: 'insertText',
-        type: 'radio',
+        type: 'checkbox',
         checked: false,
         enabled: false,
         accelerator: 'T',

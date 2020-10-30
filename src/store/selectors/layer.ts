@@ -135,39 +135,39 @@ export const getSelectedBounds = createSelector(
   }
 );
 
-export const getHoverTopLeft = createSelector(
-  [ getHoverItem ],
-  (hoverItem) => {
-    if (hoverItem) {
-      return new paperMain.Point(hoverItem.frame.x - (hoverItem.frame.width / 2), hoverItem.frame.y - (hoverItem.frame.height / 2));
-    } else {
-      return null;
-    }
-  }
-);
+// export const getHoverTopLeft = createSelector(
+//   [ getHoverItem ],
+//   (hoverItem) => {
+//     if (hoverItem) {
+//       return new paperMain.Point(hoverItem.frame.x - (hoverItem.frame.width / 2), hoverItem.frame.y - (hoverItem.frame.height / 2));
+//     } else {
+//       return null;
+//     }
+//   }
+// );
 
-export const getHoverBottomRight = createSelector(
-  [ getHoverItem ],
-  (hoverItem) => {
-    if (hoverItem) {
-      return new paperMain.Point(hoverItem.frame.x + (hoverItem.frame.width / 2), hoverItem.frame.y + (hoverItem.frame.height / 2));
-    } else {
-      return null;
-    }
-  }
-);
+// export const getHoverBottomRight = createSelector(
+//   [ getHoverItem ],
+//   (hoverItem) => {
+//     if (hoverItem) {
+//       return new paperMain.Point(hoverItem.frame.x + (hoverItem.frame.width / 2), hoverItem.frame.y + (hoverItem.frame.height / 2));
+//     } else {
+//       return null;
+//     }
+//   }
+// );
 
-export const getHoverBounds = createSelector(
-  [ getHoverTopLeft, getHoverBottomRight ],
-  (topLeft, bottomRight) => {
-    return topLeft && bottomRight
-    ? new paper.Rectangle({
-        from: topLeft,
-        to: bottomRight
-      })
-    : null as paper.Rectangle;
-  }
-);
+// export const getHoverBounds = createSelector(
+//   [ getHoverTopLeft, getHoverBottomRight ],
+//   (topLeft, bottomRight) => {
+//     return topLeft && bottomRight
+//     ? new paper.Rectangle({
+//         from: topLeft,
+//         to: bottomRight
+//       })
+//     : null as paper.Rectangle;
+//   }
+// );
 
 export const canToggleSelectedFillOrStroke = createSelector(
   [ getSelectedById ],
@@ -581,11 +581,11 @@ export const getLayersBounds = (store: LayerState, layers: string[]): paper.Rect
   });
 };
 
-export const getSelectionTopLeft = (selected: string[]): paper.Point => {
+export const getSelectionTopLeft = (providedSelection?: paper.Item[]): paper.Point => {
+  const selected = providedSelection ? providedSelection : paperMain.project.getItems({ data: { selected: true } });
   const paperLayerPoints = selected.reduce((result, current) => {
-    const paperLayer = getPaperLayer(current);
-    if (paperLayer) {
-      return [...result, paperLayer.bounds.topLeft];
+    if (current) {
+      return [...result, current.bounds.topLeft];
     } else {
       return result;
     }
@@ -593,11 +593,11 @@ export const getSelectionTopLeft = (selected: string[]): paper.Point => {
   return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.min) : null;
 };
 
-export const getSelectionBottomRight = (selected: string[]): paper.Point => {
+export const getSelectionBottomRight = (providedSelection?: paper.Item[]): paper.Point => {
+  const selected = providedSelection ? providedSelection : paperMain.project.getItems({ data: { selected: true } });
   const paperLayerPoints = selected.reduce((result, current) => {
-    const paperLayer = getPaperLayer(current);
-    if (paperLayer) {
-      return [...result, paperLayer.bounds.bottomRight];
+    if (current) {
+      return [...result, current.bounds.bottomRight];
     } else {
       return result;
     }
@@ -605,9 +605,9 @@ export const getSelectionBottomRight = (selected: string[]): paper.Point => {
   return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.max) : null;
 };
 
-export const getSelectionBounds = (selected: string[]): paper.Rectangle => {
-  const topLeft = getSelectionTopLeft(selected);
-  const bottomRight = getSelectionBottomRight(selected);
+export const getSelectionBounds = (providedSelection?: paper.Item[]): paper.Rectangle => {
+  const topLeft = getSelectionTopLeft(providedSelection);
+  const bottomRight = getSelectionBottomRight(providedSelection);
   if (topLeft && bottomRight) {
     return new paper.Rectangle({
       from: topLeft,
@@ -618,9 +618,18 @@ export const getSelectionBounds = (selected: string[]): paper.Rectangle => {
   }
 };
 
-export const getSelectionCenter = (selected: string[]): paper.Point => {
-  const topLeft = getSelectionTopLeft(selected);
-  const bottomRight = getSelectionBottomRight(selected);
+export const getHoverBounds = (): paper.Rectangle => {
+  const hoverPaperLayer = paperMain.project.getItem({data: { hover: true }});
+  if (hoverPaperLayer) {
+    return hoverPaperLayer.bounds;
+  } else {
+    return null;
+  }
+};
+
+export const getSelectionCenter = (providedSelection?: paper.Item[]): paper.Point => {
+  const topLeft = getSelectionTopLeft(providedSelection);
+  const bottomRight = getSelectionBottomRight(providedSelection);
   if (topLeft && bottomRight) {
     const xMid = (topLeft.x + bottomRight.x) / 2;
     const yMid = (topLeft.y + bottomRight.y) / 2;
@@ -1417,7 +1426,7 @@ export const getGradientStops = (stops: Btwx.GradientStop[]): paper.GradientStop
   }, []);
 };
 
-export const getLayerSnapPoints = (id: string): Btwx.SnapPoint[] => {
+export const getSplitLayerSnapPoints = (id: string): { allSnapPoints: Btwx.SnapPoint[]; xSnapPoints: Btwx.SnapPoint[]; ySnapPoints: Btwx.SnapPoint[] } => {
   const paperLayer = getPaperLayer(id);
   let bounds;
   if (paperLayer.data.layerType === 'Artboard') {
@@ -1461,7 +1470,15 @@ export const getLayerSnapPoints = (id: string): Btwx.SnapPoint[] => {
     side: 'bottom',
     point: bounds.bottom
   } as Btwx.SnapPoint;
-  return [left, right, top, bottom, centerX, centerY];
+  const allSnapPoints = [left, right, top, bottom, centerX, centerY];
+  const xSnapPoints = [left, right, centerX];
+  const ySnapPoints = [top, bottom, centerY];
+  return {
+    allSnapPoints,
+    xSnapPoints,
+    ySnapPoints
+  }
+  // return [left, right, top, bottom, centerX, centerY];
 };
 
 // export const getSnapPointsByBounds = (bounds: paper.Rectangle, ignoreLayers: string[] = []): Btwx.SnapPoint[] => {
@@ -1479,28 +1496,49 @@ export const getLayerSnapPoints = (id: string): Btwx.SnapPoint[] => {
 //   }, []);
 // };
 
-export const getSnapPointsByBounds = (bounds: paper.Rectangle, ignoreBounds: paper.Rectangle): Btwx.SnapPoint[] => {
+export const getSnapPointsByBounds = (bounds: paper.Rectangle, scope: string[], axis: 'x' | 'y' | 'both' = 'both'): Btwx.SnapPoint[] => {
   const page = getPaperLayer('page');
   const layers = page.getItems({
     overlapping: bounds,
-    data: { type: 'Layer' }
-  });
-  const ignoreLayers = page.getItems({
-    overlapping: ignoreBounds,
-    data: { type: 'Layer' }
+    data: function(data: any) {
+      const isArtboard = data.type === 'Layer' && data.layerType === 'Artboard';
+      const validTypeValue = data.type === 'Layer';
+      const validSelectedValue = data.selected === false;
+      const validScopeValue = isArtboard ? true : data.id && !scope.includes(data.id);
+      return validTypeValue && validSelectedValue && validScopeValue;
+    },
+    parent: function(parent: paper.Item) {
+      let layerParent = null; // paper layers can have abstractions with masks and such
+      let parentInScope = false;
+      let currentParent = parent;
+      let selectedParent = false;
+      while(currentParent) {
+        if (currentParent.data && currentParent.data.type === 'Layer' && !layerParent) {
+          layerParent = currentParent;
+          parentInScope = scope.includes(currentParent.data.id);
+        }
+        if (currentParent.data && currentParent.data.selected) {
+          selectedParent = true;
+          break;
+        }
+        currentParent = currentParent.parent;
+      }
+      return !selectedParent && parentInScope;
+    }
   });
   return layers.reduce((result, current) => {
-    if (current.data.layerType !== 'Group' && !ignoreLayers.includes(current)) {
-      result = [...result, ...getLayerSnapPoints(current.data.id)];
+    const snapPoints = getSplitLayerSnapPoints(current.data.id);
+    switch(axis) {
+      case 'both':
+        result = [...result, ...snapPoints.allSnapPoints];
+        break;
+      case 'x':
+        result = [...result, ...snapPoints.xSnapPoints];
+        break;
+      case 'y':
+        result = [...result, ...snapPoints.ySnapPoints];
+        break;
     }
-    return result;
-  }, []);
-};
-
-export const getInViewSnapPoints = (state: LayerState): Btwx.SnapPoint[] => {
-  return state.inView.allIds.reduce((result, current) => {
-    const snapPoints = getLayerSnapPoints(current);
-    result = [...result, ...snapPoints];
     return result;
   }, []);
 };

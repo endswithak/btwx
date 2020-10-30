@@ -146,11 +146,6 @@ import {
   SET_LAYERS_FONT_FAMILY,
   SET_LAYER_JUSTIFICATION,
   SET_LAYERS_JUSTIFICATION,
-  ADD_IN_VIEW_LAYER,
-  ADD_IN_VIEW_LAYERS,
-  REMOVE_IN_VIEW_LAYER,
-  REMOVE_IN_VIEW_LAYERS,
-  UPDATE_IN_VIEW_LAYERS,
   SET_LAYER_FILL_TYPE,
   SET_LAYERS_FILL_TYPE,
   ADD_LAYERS_MASK,
@@ -344,11 +339,6 @@ import {
   setLayerJustification,
   setLayersJustification,
   setLayerText,
-  addInViewLayer,
-  addInViewLayers,
-  removeInViewLayer,
-  removeInViewLayers,
-  updateInViewLayers,
   setLayerFill,
   setLayerFillType,
   setLayersFillType,
@@ -439,10 +429,6 @@ export interface LayerState {
   allImageIds: string[];
   allMaskIds: string[];
   scope: string[];
-  inView: {
-    allIds: string[];
-    snapPoints: Btwx.SnapPoint[];
-  };
   hover: string;
   paperProject: string;
   allTweenEventIds: string[];
@@ -491,10 +477,6 @@ export const initialState: LayerState = {
   allImageIds: [],
   allMaskIds: [],
   scope: ['page'],
-  inView: {
-    allIds: [],
-    snapPoints: []
-  },
   hover: null,
   paperProject: '[["Layer",{"applyMatrix":true,"children":[["Group",{"applyMatrix":true,"name":"Page","data":{"id":"page","type":"Layer","layerType":"Page"}}]]}]]',
   allTweenEventIds: [],
@@ -766,16 +748,6 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return setLayerJustification(state, action);
     case SET_LAYERS_JUSTIFICATION:
       return setLayersJustification(state, action);
-    case ADD_IN_VIEW_LAYER:
-      return addInViewLayer(state, action);
-    case ADD_IN_VIEW_LAYERS:
-      return addInViewLayers(state, action);
-    case REMOVE_IN_VIEW_LAYER:
-      return removeInViewLayer(state, action);
-    case REMOVE_IN_VIEW_LAYERS:
-      return removeInViewLayers(state, action);
-    case UPDATE_IN_VIEW_LAYERS:
-      return updateInViewLayers(state, action);
     case SET_LAYER_FILL:
       return setLayerFill(state, action);
     case SET_LAYER_FILL_TYPE:

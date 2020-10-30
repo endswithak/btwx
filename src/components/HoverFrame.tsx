@@ -1,19 +1,18 @@
 import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { updateHoverFrameThunk } from '../store/actions/layer';
+import { updateHoverFrame } from '../store/actions/layer';
 import { paperMain } from '../canvas';
 
 interface HoverFrameProps {
   hover?: string;
-  updateHoverFrameThunk?(): void;
 }
 
 const HoverFrame = (props: HoverFrameProps): ReactElement => {
-  const { hover, updateHoverFrameThunk } = props;
+  const { hover } = props;
 
   useEffect(() => {
-    updateHoverFrameThunk();
+    updateHoverFrame();
     return () => {
       const hoverFrame = paperMain.project.getItem({ data: { id: 'HoverFrame' } });
       if (hoverFrame) {
@@ -36,6 +35,5 @@ const mapStateToProps = (state: RootState): {
 };
 
 export default connect(
-  mapStateToProps,
-  { updateHoverFrameThunk }
+  mapStateToProps
 )(HoverFrame);

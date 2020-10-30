@@ -24,7 +24,7 @@ export const centerSelectedThunk = () => {
     const state = getState() as RootState;
     if (state.layer.present.selected.length > 0) {
       dispatch(setCanvasTranslating({translating: true}));
-      const selectionCenter = getSelectionCenter(state.layer.present.selected);
+      const selectionCenter = getSelectionCenter();
       paperMain.view.center = selectionCenter;
       dispatch(setCanvasTranslating({translating: false}));
       // dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));

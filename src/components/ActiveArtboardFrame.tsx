@@ -1,20 +1,19 @@
 import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { updateActiveArtboardFrameThunk } from '../store/actions/layer';
+import { updateActiveArtboardFrame } from '../store/actions/layer';
 import { paperMain } from '../canvas';
 
 interface ActiveArtboardFrameProps {
   activeArtboard?: string;
   activeArtboardFrame?: Btwx.Frame;
-  updateActiveArtboardFrameThunk?(): void;
 }
 
 const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
-  const { activeArtboard, activeArtboardFrame, updateActiveArtboardFrameThunk } = props;
+  const { activeArtboard, activeArtboardFrame } = props;
 
   useEffect(() => {
-    updateActiveArtboardFrameThunk();
+    updateActiveArtboardFrame();
     return () => {
       const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'ActiveArtboardFrame' } });
       if (activeArtboardFrame) {
@@ -39,6 +38,5 @@ const mapStateToProps = (state: RootState): {
 };
 
 export default connect(
-  mapStateToProps,
-  { updateActiveArtboardFrameThunk }
+  mapStateToProps
 )(ActiveArtboardFrame);

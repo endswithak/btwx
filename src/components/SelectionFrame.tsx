@@ -2,20 +2,19 @@ import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getSelectedBounds } from '../store/selectors/layer';
-import { updateSelectionFrameThunk } from '../store/actions/layer';
+import { updateSelectionFrame } from '../store/actions/layer';
 import { paperMain } from '../canvas';
 
 interface SelectionFrameProps {
   theme?: string;
   selectedBounds?: any;
-  updateSelectionFrameThunk?(): void;
 }
 
 const SelectionFrame = (props: SelectionFrameProps): ReactElement => {
-  const { theme, updateSelectionFrameThunk, selectedBounds } = props;
+  const { theme, selectedBounds } = props;
 
   useEffect(() => {
-    updateSelectionFrameThunk();
+    updateSelectionFrame();
     return () => {
       const selectionFrame = paperMain.project.getItem({ data: { id: 'SelectionFrame' } });
       if (selectionFrame) {
@@ -40,6 +39,5 @@ const mapStateToProps = (state: RootState): {
 };
 
 export default connect(
-  mapStateToProps,
-  { updateSelectionFrameThunk }
+  mapStateToProps
 )(SelectionFrame);

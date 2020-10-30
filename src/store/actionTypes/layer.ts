@@ -179,12 +179,6 @@ export const SET_LAYERS_FONT_FAMILY = 'SET_LAYERS_FONT_FAMILY';
 export const SET_LAYER_JUSTIFICATION = 'SET_LAYER_JUSTIFICATION';
 export const SET_LAYERS_JUSTIFICATION = 'SET_LAYERS_JUSTIFICATION';
 
-export const ADD_IN_VIEW_LAYER = 'ADD_IN_VIEW_LAYER';
-export const REMOVE_IN_VIEW_LAYER = 'REMOVE_IN_VIEW_LAYER';
-export const ADD_IN_VIEW_LAYERS = 'ADD_IN_VIEW_LAYERS';
-export const REMOVE_IN_VIEW_LAYERS = 'REMOVE_IN_VIEW_LAYERS';
-export const UPDATE_IN_VIEW_LAYERS = 'UPDATE_IN_VIEW_LAYERS';
-
 export const SET_LAYER_UNDERLYING_MASK = 'SET_LAYER_UNDERLYING_MASK';
 export const SET_LAYERS_UNDERLYING_MASK = 'SET_LAYERS_UNDERLYING_MASK';
 export const TOGGLE_LAYER_IGNORE_UNDERLYING_MASK = 'TOGGLE_LAYER_IGNORE_UNDERLYING_MASK';
@@ -1764,48 +1758,6 @@ export interface SetLayersJustification {
   payload: SetLayersJustificationPayload;
 }
 
-// InView
-
-export interface AddInViewLayerPayload {
-  id: string;
-}
-
-export interface AddInViewLayer {
-  type: typeof ADD_IN_VIEW_LAYER;
-  payload: AddInViewLayerPayload;
-}
-
-export interface AddInViewLayersPayload {
-  layers: string[];
-}
-
-export interface AddInViewLayers {
-  type: typeof ADD_IN_VIEW_LAYERS;
-  payload: AddInViewLayersPayload;
-}
-
-export interface RemoveInViewLayerPayload {
-  id: string;
-}
-
-export interface RemoveInViewLayer {
-  type: typeof REMOVE_IN_VIEW_LAYER;
-  payload: RemoveInViewLayerPayload;
-}
-
-export interface RemoveInViewLayersPayload {
-  layers: string[];
-}
-
-export interface RemoveInViewLayers {
-  type: typeof REMOVE_IN_VIEW_LAYERS;
-  payload: RemoveInViewLayersPayload;
-}
-
-export interface UpdateInViewLayers {
-  type: typeof UPDATE_IN_VIEW_LAYERS;
-}
-
 export interface SetLayerFillPayload {
   id: string;
   fill: Btwx.Fill;
@@ -2548,11 +2500,6 @@ export type LayerTypes = AddArtboard |
                          SetLayersFontFamily |
                          SetLayerJustification |
                          SetLayersJustification |
-                         AddInViewLayer |
-                         AddInViewLayers |
-                         RemoveInViewLayer |
-                         RemoveInViewLayers |
-                         UpdateInViewLayers |
                          SetLayerUnderlyingMask |
                          SetLayersUnderlyingMask |
                          ToggleLayerIgnoreUnderlyingMask |
