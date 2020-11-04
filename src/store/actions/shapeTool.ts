@@ -39,7 +39,7 @@ export const toggleShapeToolThunk = (shapeType: Btwx.ShapeType) => {
         //   preview.remove();
         // }
         dispatch(disableShapeTool());
-        dispatch(setCanvasActiveTool({activeTool: null}));
+        dispatch(setCanvasActiveTool({activeTool: null, drawing: false}));
       } else {
         dispatch(enableShapeTool({shapeType}));
         dispatch(setCanvasActiveTool({activeTool: 'Shape'}));

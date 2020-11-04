@@ -1,30 +1,31 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 // import { remote } from 'electron';
-import React, { useRef, useContext, useEffect, ReactElement, useState, useCallback } from 'react';
+import React, { useContext, useEffect, ReactElement, useCallback } from 'react';
 import debounce from 'lodash.debounce';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getDeepSelectItem, getNearestScopeAncestor, getSelectionBounds, getPaperLayer } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
-import { setCanvasActiveTool, setCanvasZooming } from '../store/actions/canvasSettings';
-import { CanvasSettingsTypes, SetCanvasActiveToolPayload, SetCanvasZoomingPayload } from '../store/actionTypes/canvasSettings';
-import { moveLayersBy, duplicateLayers, removeDuplicatedLayers } from '../store/actions/layer';
-import { LayerTypes, MoveLayersByPayload, DuplicateLayersPayload, RemoveDuplicatedLayersPayload } from '../store/actionTypes/layer';
+import { setCanvasZooming } from '../store/actions/canvasSettings';
+import { CanvasSettingsTypes, SetCanvasZoomingPayload } from '../store/actionTypes/canvasSettings';
+import { setCanvasMatrix } from '../store/actions/documentSettings';
+import { DocumentSettingsTypes, SetCanvasMatrixPayload } from '../store/actionTypes/documentSettings';
 import { ThemeContext } from './ThemeProvider';
 
 interface ZoomToolProps {
   zoomEvent: WheelEvent;
   isEnabled?: boolean;
   setCanvasZooming?(payload: SetCanvasZoomingPayload): CanvasSettingsTypes;
+  setCanvasMatrix?(payload: SetCanvasMatrixPayload): DocumentSettingsTypes;
 }
 
 const ZoomTool = (props: ZoomToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { zoomEvent, isEnabled, setCanvasZooming } = props;
+  const { zoomEvent, isEnabled, setCanvasZooming, setCanvasMatrix } = props;
 
   const debounceZoom = useCallback(
     debounce(() => {
       setCanvasZooming({zooming: false});
+      setCanvasMatrix({matrix: paperMain.view.matrix.values});
     }, 100),
     []
   );
@@ -61,7 +62,7 @@ const ZoomTool = (props: ZoomToolProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState, ownProps: ZoomToolProps): {
+const mapStateToProps = (state: RootState): {
   isEnabled: boolean;
 } => {
   const { canvasSettings } = state;
@@ -73,5 +74,5 @@ const mapStateToProps = (state: RootState, ownProps: ZoomToolProps): {
 
 export default connect(
   mapStateToProps,
-  { setCanvasZooming }
+  { setCanvasZooming, setCanvasMatrix }
 )(ZoomTool);

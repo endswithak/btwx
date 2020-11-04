@@ -1,30 +1,31 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 // import { remote } from 'electron';
-import React, { useRef, useContext, useEffect, ReactElement, useState, useCallback } from 'react';
+import React, { useContext, useEffect, ReactElement, useCallback } from 'react';
 import debounce from 'lodash.debounce';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getDeepSelectItem, getNearestScopeAncestor, getSelectionBounds, getPaperLayer } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
-import { setCanvasActiveTool, setCanvasTranslating } from '../store/actions/canvasSettings';
-import { CanvasSettingsTypes, SetCanvasActiveToolPayload, SetCanvasTranslatingPayload } from '../store/actionTypes/canvasSettings';
-import { moveLayersBy, duplicateLayers, removeDuplicatedLayers } from '../store/actions/layer';
-import { LayerTypes, MoveLayersByPayload, DuplicateLayersPayload, RemoveDuplicatedLayersPayload } from '../store/actionTypes/layer';
+import { setCanvasTranslating } from '../store/actions/canvasSettings';
+import { CanvasSettingsTypes, SetCanvasTranslatingPayload } from '../store/actionTypes/canvasSettings';
+import { setCanvasMatrix } from '../store/actions/documentSettings';
+import { DocumentSettingsTypes, SetCanvasMatrixPayload } from '../store/actionTypes/documentSettings';
 import { ThemeContext } from './ThemeProvider';
 
 interface TranslateToolProps {
   translateEvent: WheelEvent;
   isEnabled?: boolean;
   setCanvasTranslating?(payload: SetCanvasTranslatingPayload): CanvasSettingsTypes;
+  setCanvasMatrix?(payload: SetCanvasMatrixPayload): DocumentSettingsTypes;
 }
 
 const TranslateTool = (props: TranslateToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { translateEvent, setCanvasTranslating, isEnabled } = props;
+  const { translateEvent, setCanvasTranslating, isEnabled, setCanvasMatrix } = props;
 
   const debounceTranslate = useCallback(
     debounce(() => {
       setCanvasTranslating({translating: false});
+      setCanvasMatrix({matrix: paperMain.view.matrix.values});
     }, 100),
     []
   );
@@ -49,7 +50,7 @@ const TranslateTool = (props: TranslateToolProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState, ownProps: TranslateToolProps): {
+const mapStateToProps = (state: RootState): {
   isEnabled: boolean;
 } => {
   const { canvasSettings } = state;
@@ -61,5 +62,5 @@ const mapStateToProps = (state: RootState, ownProps: TranslateToolProps): {
 
 export default connect(
   mapStateToProps,
-  { setCanvasTranslating }
+  { setCanvasTranslating, setCanvasMatrix }
 )(TranslateTool);

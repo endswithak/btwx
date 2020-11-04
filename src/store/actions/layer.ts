@@ -451,6 +451,7 @@ export const addArtboardThunk = (payload: AddArtboardPayload) => {
     const state = getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const name = payload.layer.name ? payload.layer.name : 'Artboard';
+    const scope = ['page'];
     const masked = payload.layer.masked ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = payload.layer.underlyingMask ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = payload.layer.ignoreUnderlyingMask ? payload.layer.ignoreUnderlyingMask : false;
@@ -480,7 +481,7 @@ export const addArtboardThunk = (payload: AddArtboardPayload) => {
     // create artboard group
     const artboard = new paperMain.Group({
       name: name,
-      data: { id: id, type: 'Layer', layerType: 'Artboard', selected: false, hover: false, activeArtboard: false },
+      data: { id: id, type: 'Layer', layerType: 'Artboard', selected: false, hover: false, activeArtboard: false, scope: scope },
       children: [artboardMask, artboardBackground, artboardLayers],
       parent: getPaperLayer('page')
     });
@@ -491,6 +492,7 @@ export const addArtboardThunk = (payload: AddArtboardPayload) => {
       name: name,
       parent: payload.layer.parent,
       frame: payload.layer.frame,
+      scope: scope,
       children: [],
       selected: false,
       showChildren: showChildren,
@@ -524,6 +526,8 @@ export const addGroupThunk = (payload: AddGroupPayload) => {
     const style = getLayerStyle(payload, {}, { fill: { enabled: false } as Btwx.Fill, stroke: { enabled: false } as Btwx.Stroke, shadow: { enabled: false } as Btwx.Shadow });
     const name = payload.layer.name ? payload.layer.name : 'Group';
     const parent = payload.layer.parent ? payload.layer.parent : 'page';
+    const parentItem = state.layer.present.byId[parent];
+    const scope = [...parentItem.scope, parent];
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
@@ -534,7 +538,7 @@ export const addGroupThunk = (payload: AddGroupPayload) => {
     const showChildren = payload.layer.showChildren ? payload.layer.showChildren : false;
     const group = new paperMain.Group({
       name: name,
-      data: { id: id, type: 'Layer', layerType: 'Group', selected: false, hover: false },
+      data: { id: id, type: 'Layer', layerType: 'Group', selected: false, hover: false, scope: scope },
       parent: parentPaperLayer
     });
     const newLayer = {
@@ -543,6 +547,7 @@ export const addGroupThunk = (payload: AddGroupPayload) => {
       name,
       parent,
       frame,
+      scope,
       children: [],
       selected: false,
       tweenEvents: [],
@@ -574,6 +579,8 @@ export const addShapeThunk = (payload: AddShapePayload) => {
     const state = getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const parent = payload.layer.parent ? payload.layer.parent : 'page';
+    const parentItem = state.layer.present.byId[parent];
+    const scope = [...parentItem.scope, parent];
     const shapeType = payload.layer.shapeType ? payload.layer.shapeType : 'Rectangle';
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
@@ -606,7 +613,7 @@ export const addShapeThunk = (payload: AddShapePayload) => {
       strokeCap: style.strokeOptions.cap,
       clipMask: mask,
       strokeJoin: style.strokeOptions.join,
-      data: { id, type: 'Layer', layerType: 'Shape', shapeType: shapeType, selected: false, hover: false },
+      data: { id, type: 'Layer', layerType: 'Shape', shapeType: shapeType, selected: false, hover: false, scope: scope },
       parent: parentPaperLayer
     });
     paperLayer.children.forEach((item) => item.data = { id: 'ShapePartial', type: 'LayerChild', layerType: 'Shape' });
@@ -628,6 +635,7 @@ export const addShapeThunk = (payload: AddShapePayload) => {
       parent: parent,
       shapeType: shapeType,
       frame: frame,
+      scope: scope,
       selected: false,
       children: null,
       tweenEvents: [],
@@ -655,6 +663,8 @@ export const addShapeGroupThunk = (payload: AddShapePayload) => {
     const state = getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const parent = payload.layer.parent ? payload.layer.parent : 'page';
+    const parentItem = state.layer.present.byId[parent];
+    const scope = [...parentItem.scope, parent];
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
@@ -687,7 +697,7 @@ export const addShapeGroupThunk = (payload: AddShapePayload) => {
       strokeCap: style.strokeOptions.cap,
       strokeJoin: style.strokeOptions.join,
       clipMask: mask,
-      data: { id, type: 'Layer', layerType: 'Shape', shapeType: 'Custom', selected: false, hover: false },
+      data: { id, type: 'Layer', layerType: 'Shape', shapeType: 'Custom', selected: false, hover: false, scope: scope },
       parent: parentPaperLayer
     });
     paperLayer.children.forEach((item) => item.data = { id: 'ShapePartial', type: 'LayerChild', layerType: 'Shape' });
@@ -715,6 +725,7 @@ export const addShapeGroupThunk = (payload: AddShapePayload) => {
       name: name,
       parent: parent,
       shapeType: 'Custom',
+      scope: scope,
       frame: frame,
       selected: false,
       children: null,
@@ -755,6 +766,8 @@ export const addTextThunk = (payload: AddTextPayload) => {
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
     const parent = payload.layer.parent ? payload.layer.parent : 'page';
+    const parentItem = state.layer.present.byId[parent];
+    const scope = [...parentItem.scope, parent];
     const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
     const style = getLayerStyle(payload);
     const textStyle = getLayerTextStyle(payload);
@@ -763,10 +776,9 @@ export const addTextThunk = (payload: AddTextPayload) => {
     const paperShadowOffset = style.shadow.enabled ? new paperMain.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
     const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
     const paperLayer = new paperMain.PointText({
-      name: name,
       point: new paperMain.Point(0, 0),
       content: textContent,
-      data: { id, type: 'Layer', layerType: 'Text', selected: false, hover: false },
+      data: { id: 'TextContent', type: 'LayerChild', layerType: 'Text' },
       parent: parentPaperLayer,
       strokeWidth: style.stroke.width,
       shadowColor: paperShadowColor,
@@ -784,18 +796,34 @@ export const addTextThunk = (payload: AddTextPayload) => {
       fontFamily: textStyle.fontFamily,
       justification: textStyle.justification
     });
-    const frame = getLayerFrame(payload, { width: paperLayer.bounds.width, height: paperLayer.bounds.height, innerWidth: paperLayer.bounds.width, innerHeight: paperLayer.bounds.height });
+    const frame = getLayerFrame(payload);
+    // const frame = getLayerFrame(payload, { width: paperLayer.bounds.width, height: paperLayer.bounds.height, innerWidth: paperLayer.bounds.width, innerHeight: paperLayer.bounds.height });
     const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as Btwx.PaperGradientFill : null;
     const paperStrokeColor = style.stroke.enabled ? getPaperStrokeColor(style.stroke, frame) as Btwx.PaperGradientFill : null;
     paperLayer.position = new paperMain.Point(frame.x, frame.y);
     paperLayer.fillColor = paperFillColor;
     paperLayer.strokeColor = paperStrokeColor;
+    const textBackground = new paperMain.Path.Rectangle({
+      from: new paperMain.Point(frame.x - frame.width / 2, frame.y - frame.height / 2),
+      to: new paperMain.Point(frame.x + frame.width / 2, frame.y + frame.height / 2),
+      fillColor: '#fff',
+      opacity: 0,
+      insert: false,
+      data: { id: 'TextBackground', type: 'LayerChild', layerType: 'Text' },
+    });
+    const textContainer = new paperMain.Group({
+      name: name,
+      parent: parentPaperLayer,
+      data: { id, type: 'Layer', layerType: 'Text', selected: false, hover: false, scope: scope },
+      children: [textBackground, paperLayer]
+    });
     const newLayer = {
       type: 'Text',
       id: id,
       name: name,
       parent: parent,
       text: textContent,
+      scope: scope,
       frame: frame,
       selected: false,
       children: null,
@@ -841,6 +869,8 @@ export const addImageThunk = (payload: AddImagePayload) => {
           const id = payload.layer.id ? payload.layer.id : uuidv4();
           const imageId = exists ? exists : payload.layer.imageId ? payload.layer.imageId : uuidv4();
           const parent = payload.layer.parent ? payload.layer.parent : 'page';
+          const parentItem = state.layer.present.byId[parent];
+          const scope = [...parentItem.scope, parent];
           const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
           const style = getLayerStyle(payload, {}, { fill: { enabled: false } as Btwx.Fill, stroke: { enabled: false } as Btwx.Stroke });
           const transform = getLayerTransform(payload);
@@ -851,7 +881,7 @@ export const addImageThunk = (payload: AddImagePayload) => {
           const imageContainer = new paperMain.Group({
             name: name,
             parent: parentPaperLayer,
-            data: { id, imageId, type: 'Layer', layerType: 'Image', selected: false, hover: false },
+            data: { id, imageId, type: 'Layer', layerType: 'Image', selected: false, hover: false, scope: scope },
             children: [paperLayer]
           });
           paperLayer.onLoad = (): void => {
@@ -867,6 +897,7 @@ export const addImageThunk = (payload: AddImagePayload) => {
               id: id,
               name: name,
               parent: parent,
+              scope: scope,
               frame: frame,
               selected: false,
               children: null,
@@ -2692,7 +2723,7 @@ const updateEditors = (dispatch: any, state: RootState, type: 'redo' | 'undo') =
       dispatch(closeGradientEditor());
     }
   }
-}
+};
 
 export const undoThunk = () => {
   return (dispatch: any, getState: any) => {
@@ -2754,40 +2785,6 @@ export const redoThunk = () => {
   }
 };
 
-// export const updateActiveArtboardFrame = (state: RootState) => {
-//   const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'ActiveArtboardFrame' } });
-//   if (activeArtboardFrame) {
-//     activeArtboardFrame.remove();
-//   }
-//   if (state.layer.present.activeArtboard) {
-//     const paperActiveArtboardLayer = getPaperLayer(state.layer.present.activeArtboard);
-//     const topLeft = paperActiveArtboardLayer.bounds.topLeft;
-//     const bottomRight = paperActiveArtboardLayer.bounds.bottomRight;
-//     // if (useLayerItem) {
-//     //   const layerItem = state.byId[state.activeArtboard];
-//     //   topLeft = new paperMain.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
-//     //   bottomRight = new paperMain.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
-//     // } else {
-//     //   const paperActiveArtboardLayer = getPaperLayer(state.activeArtboard);
-//     //   topLeft = paperActiveArtboardLayer.bounds.topLeft;
-//     //   bottomRight = paperActiveArtboardLayer.bounds.bottomRight;
-//     // }
-//     new paperMain.Path.Rectangle({
-//       from: new paperMain.Point(topLeft.x - (4 / paperMain.view.zoom), topLeft.y - (4 / paperMain.view.zoom)),
-//       to: new paperMain.Point(bottomRight.x + (4 / paperMain.view.zoom), bottomRight.y + (4 / paperMain.view.zoom)),
-//       strokeColor: THEME_PRIMARY_COLOR,
-//       strokeWidth: 3 / paperMain.view.zoom,
-//       data: {
-//         id: 'ActiveArtboardFrame',
-//         type: 'UIElement',
-//         interactive: false,
-//         interactiveType: null,
-//         elementId: 'ActiveArtboardFrame'
-//       }
-//     });
-//   }
-// };
-
 export const updateActiveArtboardFrame = () => {
   const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'ActiveArtboardFrame' } });
   const activeArtboardPaperLayer = paperMain.project.getItem({ data: { activeArtboard: true } });
@@ -2812,63 +2809,6 @@ export const updateActiveArtboardFrame = () => {
     });
   }
 };
-
-// export const updateHoverFrame = (state: RootState) => {
-//   const hoverFrame = paperMain.project.getItem({ data: { id: 'HoverFrame' } });
-//   const hoverFrameConstants = {
-//     strokeColor: THEME_PRIMARY_COLOR,
-//     strokeWidth: 2 / paperMain.view.zoom,
-//     data: { id: 'HoverFrame', type: 'UIElement', interactive: false }
-//   }
-//   if (hoverFrame) {
-//     hoverFrame.remove();
-//   }
-//   if (state.layer.present.hover && !state.layer.present.selected.includes(state.layer.present.hover)) {
-//     const hoverItem = state.layer.present.byId[state.layer.present.hover];
-//     const hoverPaperLayer = getPaperLayer('page').getItem({
-//       data: { hover: true }
-//     });
-//     switch(hoverItem.type) {
-//       case 'Shape':
-//         new paperMain.CompoundPath({
-//           ...hoverFrameConstants,
-//           closed: (hoverItem as Btwx.Shape).shapeType !== 'Line',
-//           pathData: hoverItem.pathData
-//         });
-//         break;
-//       case 'Text': {
-//         const paperLayer = getPaperLayer(state.layer.present.hover) as paper.PointText;
-//         const linesGroup = new paperMain.Group({
-//           data: { id: 'HoverFrame', type: 'UIElement', interactive: false }
-//         });
-//         const initialPoint = paperLayer.point;
-//         (paperLayer as any)._lines.forEach((line: any, index: number) => {
-//           new paperMain.Path.Line({
-//             from: new paperMain.Point(initialPoint.x, initialPoint.y + ((paperLayer.leading as number) * index)),
-//             to: new paperMain.Point(initialPoint.x + paperLayer.bounds.width, initialPoint.y + ((paperLayer.leading as number) * index)),
-//             strokeColor: THEME_PRIMARY_COLOR,
-//             strokeWidth: 2 / paperMain.view.zoom,
-//             data: {
-//               type: 'UIElementChild',
-//               interactive: false,
-//               interactiveType: null,
-//               elementId: 'HoverFrame'
-//             },
-//             parent: linesGroup
-//           });
-//         });
-//         break;
-//       }
-//       default:
-//         new paperMain.Path.Rectangle({
-//           ...hoverFrameConstants,
-//           point: new paperMain.Point(hoverItem.frame.x - (hoverItem.frame.width / 2), hoverItem.frame.y - (hoverItem.frame.height / 2)),
-//           size: [hoverItem.frame.width, hoverItem.frame.height]
-//         });
-//         break;
-//     }
-//   }
-// };
 
 export const updateHoverFrame = () => {
   const hoverFrame = paperMain.project.getItem({ data: { id: 'HoverFrame' } });
@@ -2923,349 +2863,7 @@ export const updateHoverFrame = () => {
   }
 };
 
-// export const updateSelectionFrame = (state: RootState, visibleHandle = 'all') => {
-//   const selectionFrame = paperMain.project.getItem({ data: { id: 'SelectionFrame' } });
-//   if (selectionFrame) {
-//     selectionFrame.remove();
-//   }
-//   if (state.layer.present.selected.length > 0) {
-//     const selectedWithChildren = state.layer.present.selected.reduce((result: { allIds: string[]; byId: { [id: string]: Btwx.Layer } }, current) => {
-//       const layerAndChildren = getLayerAndDescendants(state.layer.present, current);
-//       result.allIds = [...result.allIds, ...layerAndChildren];
-//       layerAndChildren.forEach((id) => {
-//         result.byId[id] = state.layer.present.byId[id];
-//       });
-//       return result;
-//     }, { allIds: [], byId: {} });
-//     const resizeDisabled = state.layer.present.selected.length >= 1 && !state.layer.present.selected.some((id) => state.layer.present.byId[id].type === 'Artboard') && selectedWithChildren.allIds.some((id) => state.layer.present.byId[id].type === 'Text' || state.layer.present.byId[id].type === 'Group');
-//     const selectionTopLeft =  getSelectionTopLeft();
-//     const selectionBottomRight = getSelectionBottomRight();
-//     const baseProps = {
-//       point: selectionTopLeft,
-//       size: [8, 8],
-//       fillColor: '#fff',
-//       strokeColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.24 },
-//       strokeWidth: 1 / paperMain.view.zoom,
-//       shadowColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.5 },
-//       shadowBlur: 1 / paperMain.view.zoom,
-//       insert: false,
-//       opacity: resizeDisabled ? 1 : 1
-//     }
-//     if (state.layer.present.selected.length === 1 && state.layer.present.byId[state.layer.present.selected[0]].type === 'Shape' && (state.layer.present.byId[state.layer.present.selected[0]] as Btwx.Shape).shapeType === 'Line') {
-//       const layerItem = state.layer.present.byId[state.layer.present.selected[0]] as Btwx.Line;
-//       const paperLayer = getPaperLayer(state.layer.present.selected[0]) as paper.Path;
-//       const moveHandle = new paperMain.Path.Ellipse({
-//         ...baseProps,
-//         opacity: 1,
-//         visible: visibleHandle === 'all' || visibleHandle === 'move',
-//         data: {
-//           type: 'UIElementChild',
-//           interactive: true,
-//           interactiveType: 'move',
-//           elementId: 'SelectionFrame'
-//         },
-//         onMouseEnter: function() {
-//           document.body.style.cursor = 'move';
-//         },
-//         onMouseLeave: function() {
-//           document.body.style.cursor = 'auto';
-//         }
-//       });
-//       moveHandle.position = paperLayer.bounds.center; // useLayerItem ? new paperMain.Point(layerItem.frame.x, layerItem.frame.y) : (getPaperLayer(state.layer.present.selected[0]) as paper.Path).bounds.center;
-//       moveHandle.scaling.x = 1 / paperMain.view.zoom;
-//       moveHandle.scaling.y = 1 / paperMain.view.zoom;
-//       const fromHandle = new paperMain.Path.Rectangle({
-//         ...baseProps,
-//         visible: visibleHandle === 'all' || visibleHandle === 'from',
-//         data: {
-//           type: 'UIElementChild',
-//           interactive: true,
-//           interactiveType: 'from',
-//           elementId: 'SelectionFrame'
-//         },
-//         onMouseEnter: function() {
-//           if (resizeDisabled) {
-//             document.body.style.cursor = 'not-allowed';
-//           } else {
-//             document.body.style.cursor = 'ew-resize';
-//           }
-//         },
-//         onMouseLeave: function() {
-//           document.body.style.cursor = 'auto';
-//         }
-//       });
-//       fromHandle.position = paperLayer.firstSegment.point; // useLayerItem ? getLineFromPoint(layerItem) : (getPaperLayer(state.layer.present.selected[0]) as paper.Path).firstSegment.point;
-//       fromHandle.scaling.x = 1 / paperMain.view.zoom;
-//       fromHandle.scaling.y = 1 / paperMain.view.zoom;
-//       const toHandle = new paperMain.Path.Rectangle({
-//         ...baseProps,
-//         visible: visibleHandle === 'all' || visibleHandle === 'to',
-//         data: {
-//           type: 'UIElementChild',
-//           interactive: true,
-//           interactiveType: 'to',
-//           elementId: 'SelectionFrame'
-//         },
-//         onMouseEnter: function() {
-//           if (resizeDisabled) {
-//             document.body.style.cursor = 'not-allowed';
-//           } else {
-//             document.body.style.cursor = 'ew-resize';
-//           }
-//         },
-//         onMouseLeave: function() {
-//           document.body.style.cursor = 'auto';
-//         }
-//       });
-//       toHandle.position = paperLayer.lastSegment.point; // useLayerItem ? getLineToPoint(layerItem) : (getPaperLayer(state.layer.present.selected[0]) as paper.Path).lastSegment.point;
-//       toHandle.scaling.x = 1 / paperMain.view.zoom;
-//       toHandle.scaling.y = 1 / paperMain.view.zoom;
-//       new paperMain.Group({
-//         children: [fromHandle, moveHandle, toHandle],
-//         data: {
-//           id: 'SelectionFrame',
-//           type: 'UIElement',
-//           interactive: false,
-//           interactiveType: null,
-//           elementId: 'SelectionFrame'
-//         }
-//       });
-//     }
-//     else {
-//       const baseFrame = new paperMain.Path.Rectangle({
-//         from: selectionTopLeft,
-//         to: selectionBottomRight,
-//         strokeColor: state.viewSettings.theme === 'dark' ? '#fff' : '#000',
-//         opacity: 0.2,
-//         strokeWidth: 1 / paperMain.view.zoom,
-//         insert: false,
-//         data: {
-//           type: 'UIElementChild',
-//           interactive: false,
-//           interactiveType: null,
-//           elementId: 'SelectionFrame'
-//         }
-//       });
-//       const moveHandle = new paperMain.Path.Ellipse({
-//         ...baseProps,
-//         opacity: 1,
-//         visible: visibleHandle === 'all' || visibleHandle === 'move',
-//         data: {
-//           type: 'UIElementChild',
-//           interactive: true,
-//           interactiveType: 'move',
-//           elementId: 'SelectionFrame'
-//         },
-//         onMouseEnter: function() {
-//           document.body.style.cursor = 'move';
-//         },
-//         onMouseLeave: function() {
-//           document.body.style.cursor = 'auto';
-//         }
-//       });
-//       moveHandle.position = new paperMain.Point(baseFrame.bounds.topCenter.x, baseFrame.bounds.topCenter.y - ((1 / paperMain.view.zoom) * 24));
-//       // moveHandle.position = new paperMain.Point(baseFrame.bounds.center.x, baseFrame.bounds.center.y);
-//       moveHandle.scaling.x = 1 / paperMain.view.zoom;
-//       moveHandle.scaling.y = 1 / paperMain.view.zoom;
-//       const topLeftHandle = new paperMain.Path.Rectangle({
-//         ...baseProps,
-//         visible: visibleHandle === 'all' || visibleHandle === 'topLeft',
-//         data: {
-//           type: 'UIElementChild',
-//           interactive: true,
-//           interactiveType: 'topLeft',
-//           elementId: 'SelectionFrame'
-//         },
-//         onMouseEnter: function() {
-//           if (resizeDisabled) {
-//             document.body.style.cursor = 'not-allowed';
-//           } else {
-//             document.body.style.cursor = 'nwse-resize';
-//           }
-//         },
-//         onMouseLeave: function() {
-//           document.body.style.cursor = 'auto';
-//         }
-//       });
-//       topLeftHandle.position = baseFrame.bounds.topLeft;
-//       topLeftHandle.scaling.x = 1 / paperMain.view.zoom;
-//       topLeftHandle.scaling.y = 1 / paperMain.view.zoom;
-//       const topCenterHandle = new paperMain.Path.Rectangle({
-//         ...baseProps,
-//         visible: visibleHandle === 'all' || visibleHandle === 'topCenter',
-//         data: {
-//           type: 'UIElementChild',
-//           interactive: true,
-//           interactiveType: 'topCenter',
-//           elementId: 'SelectionFrame'
-//         },
-//         onMouseEnter: function() {
-//           if (resizeDisabled) {
-//             document.body.style.cursor = 'not-allowed';
-//           } else {
-//             document.body.style.cursor = 'ns-resize';
-//           }
-//         },
-//         onMouseLeave: function() {
-//           document.body.style.cursor = 'auto';
-//         }
-//       });
-//       topCenterHandle.position = baseFrame.bounds.topCenter;
-//       topCenterHandle.scaling.x = 1 / paperMain.view.zoom;
-//       topCenterHandle.scaling.y = 1 / paperMain.view.zoom;
-//       const topRightHandle = new paperMain.Path.Rectangle({
-//         ...baseProps,
-//         visible: visibleHandle === 'all' || visibleHandle === 'topRight',
-//         data: {
-//           type: 'UIElementChild',
-//           interactive: true,
-//           interactiveType: 'topRight',
-//           elementId: 'SelectionFrame'
-//         },
-//         onMouseEnter: function() {
-//           if (resizeDisabled) {
-//             document.body.style.cursor = 'not-allowed';
-//           } else {
-//             document.body.style.cursor = 'nesw-resize';
-//           }
-//         },
-//         onMouseLeave: function() {
-//           document.body.style.cursor = 'auto';
-//         }
-//       });
-//       topRightHandle.position = baseFrame.bounds.topRight;
-//       topRightHandle.scaling.x = 1 / paperMain.view.zoom;
-//       topRightHandle.scaling.y = 1 / paperMain.view.zoom;
-//       const bottomLeftHandle = new paperMain.Path.Rectangle({
-//         ...baseProps,
-//         visible: visibleHandle === 'all' || visibleHandle === 'bottomLeft',
-//         data: {
-//           type: 'UIElementChild',
-//           interactive: true,
-//           interactiveType: 'bottomLeft',
-//           elementId: 'SelectionFrame'
-//         },
-//         onMouseEnter: function() {
-//           if (resizeDisabled) {
-//             document.body.style.cursor = 'not-allowed';
-//           } else {
-//             document.body.style.cursor = 'nesw-resize';
-//           }
-//         },
-//         onMouseLeave: function() {
-//           document.body.style.cursor = 'auto';
-//         }
-//       });
-//       bottomLeftHandle.position = baseFrame.bounds.bottomLeft;
-//       bottomLeftHandle.scaling.x = 1 / paperMain.view.zoom;
-//       bottomLeftHandle.scaling.y = 1 / paperMain.view.zoom;
-//       const bottomCenterHandle = new paperMain.Path.Rectangle({
-//         ...baseProps,
-//         visible: visibleHandle === 'all' || visibleHandle === 'bottomCenter',
-//         data: {
-//           type: 'UIElementChild',
-//           interactive: true,
-//           interactiveType: 'bottomCenter',
-//           elementId: 'SelectionFrame'
-//         },
-//         onMouseEnter: function() {
-//           if (resizeDisabled) {
-//             document.body.style.cursor = 'not-allowed';
-//           } else {
-//             document.body.style.cursor = 'ns-resize';
-//           }
-//         },
-//         onMouseLeave: function() {
-//           document.body.style.cursor = 'auto';
-//         }
-//       });
-//       bottomCenterHandle.position = baseFrame.bounds.bottomCenter;
-//       bottomCenterHandle.scaling.x = 1 / paperMain.view.zoom;
-//       bottomCenterHandle.scaling.y = 1 / paperMain.view.zoom;
-//       const bottomRightHandle = new paperMain.Path.Rectangle({
-//         ...baseProps,
-//         visible: visibleHandle === 'all' || visibleHandle === 'bottomRight',
-//         data: {
-//           type: 'UIElementChild',
-//           interactive: true,
-//           interactiveType: 'bottomRight',
-//           elementId: 'SelectionFrame'
-//         },
-//         onMouseEnter: function() {
-//           if (resizeDisabled) {
-//             document.body.style.cursor = 'not-allowed';
-//           } else {
-//             document.body.style.cursor = 'nwse-resize';
-//           }
-//         },
-//         onMouseLeave: function() {
-//           document.body.style.cursor = 'auto';
-//         }
-//       });
-//       bottomRightHandle.position = baseFrame.bounds.bottomRight;
-//       bottomRightHandle.scaling.x = 1 / paperMain.view.zoom;
-//       bottomRightHandle.scaling.y = 1 / paperMain.view.zoom;
-//       const rightCenterHandle = new paperMain.Path.Rectangle({
-//         ...baseProps,
-//         visible: visibleHandle === 'all' || visibleHandle === 'rightCenter',
-//         data: {
-//           type: 'UIElementChild',
-//           interactive: true,
-//           interactiveType: 'rightCenter',
-//           elementId: 'SelectionFrame'
-//         },
-//         onMouseEnter: function() {
-//           if (resizeDisabled) {
-//             document.body.style.cursor = 'not-allowed';
-//           } else {
-//             document.body.style.cursor = 'ew-resize';
-//           }
-//         },
-//         onMouseLeave: function() {
-//           document.body.style.cursor = 'auto';
-//         }
-//       });
-//       rightCenterHandle.position = baseFrame.bounds.rightCenter;
-//       rightCenterHandle.scaling.x = 1 / paperMain.view.zoom;
-//       rightCenterHandle.scaling.y = 1 / paperMain.view.zoom;
-//       const leftCenterHandle = new paperMain.Path.Rectangle({
-//         ...baseProps,
-//         visible: visibleHandle === 'all' || visibleHandle === 'leftCenter',
-//         data: {
-//           type: 'UIElementChild',
-//           interactive: true,
-//           interactiveType: 'leftCenter',
-//           elementId: 'SelectionFrame'
-//         },
-//         onMouseEnter: function() {
-//           if (resizeDisabled) {
-//             document.body.style.cursor = 'not-allowed';
-//           } else {
-//             document.body.style.cursor = 'ew-resize';
-//           }
-//         },
-//         onMouseLeave: function() {
-//           document.body.style.cursor = 'auto';
-//         }
-//       });
-//       leftCenterHandle.position = baseFrame.bounds.leftCenter;
-//       leftCenterHandle.scaling.x = 1 / paperMain.view.zoom;
-//       leftCenterHandle.scaling.y = 1 / paperMain.view.zoom;
-//       new paperMain.Group({
-//         children: [baseFrame, moveHandle, topLeftHandle, topCenterHandle, topRightHandle, bottomLeftHandle, bottomCenterHandle, bottomRightHandle, leftCenterHandle, rightCenterHandle],
-//         data: {
-//           id: 'SelectionFrame',
-//           type: 'UIElement',
-//           interactive: false,
-//           interactiveType: null,
-//           elementId: 'SelectionFrame'
-//         }
-//       });
-//     }
-//   }
-// };
-
-export const updateSelectionFrame = (visibleHandle = 'all') => {
+export const updateSelectionFrame = (visibleHandle: Btwx.SelectionFrameHandle = 'all'): void => {
   const selectionFrame = paperMain.project.getItem({ data: { id: 'SelectionFrame' } });
   if (selectionFrame) {
     selectionFrame.remove();
@@ -3525,17 +3123,6 @@ export const updateTweenEventsFrame = (state: RootState) => {
           elementId: 'TweenEventsFrame'
         }
       });
-      // const originIndicator = new paperMain.Path.Line({
-      //   from: new paperMain.Point(origin.frame.x, destinationIndicator.bounds.top),
-      //   to: new paperMain.Point(origin.frame.x, destinationIndicator.bounds.bottom),
-      //   strokeColor: elementColor,
-      //   strokeWidth: 1 / paperMain.view.zoom,
-      //   insert: false,
-      //   data: {
-      //     id: 'TweenEventFrameIndicator',
-      //     indicator: 'origin'
-      //   }
-      // });
       const tweenEventOriginIndicator = new paperMain.Path.Ellipse({
         center: new paperMain.Point(origin.frame.x, artboardTopTop - ((1 / paperMain.view.zoom) * 48)),
         radius: ((1 / paperMain.view.zoom) * 10),
@@ -3630,31 +3217,7 @@ export const updateTweenEventsFrame = (state: RootState) => {
         },
         onMouseLeave: function() {
           document.body.style.cursor = 'auto';
-        },
-        // onMouseEnter: function() {
-        //   document.body.style.cursor = 'pointer';
-        //   const eventFrames = this.parent.getItems({data: { id: 'TweenEventFrame' } });
-        //   const others = eventFrames.filter((item: paper.Item) => item.data.tweenEvent !== this.data.tweenEvent);
-        //   others.forEach((item: paper.Item) => {
-        //     item.opacity = 0.25;
-        //   });
-        // },
-        // onMouseLeave: function() {
-        //   document.body.style.cursor = 'auto';
-        //   const eventFrames = this.parent.getItems({data: { id: 'TweenEventFrame' } });
-        //   const others = eventFrames.filter((item: paper.Item) => item.data.tweenEvent !== this.data.tweenEvent);
-        //   others.forEach((item: paper.Item) => {
-        //     item.opacity = 1;
-        //   });
-        // },
-        // onClick: function() {
-        //   const state = store.getState();
-        //   if (!state.tweenDrawer.isOpen) {
-        //     paperMain.view.viewSize = new paperMain.Size(paperMain.view.viewSize.width, paperMain.view.viewSize.height - state.documentSettings.tweenDrawerHeight);
-        //     store.dispatch(openTweenDrawer());
-        //   }
-        //   store.dispatch(setTweenDrawerEvent({id: event.id}));
-        // }
+        }
       });
       const tweenEventFrameBackground = new paperMain.Path.Rectangle({
         from: tweenEventFrame.bounds.topLeft,
@@ -3687,7 +3250,7 @@ export const updateMeasureFrame = (state: RootState, guides: { top?: string; bot
     measureFrame.remove();
   }
   if (state.layer.present.selected.length > 0) {
-    const selectionBounds = getSelectionBounds(state.layer.present.selected);
+    const selectionBounds = getSelectionBounds();
     const measureFrameGuides = [];
     let hasTopMeasure;
     let hasBottomMeasure;

@@ -10,6 +10,7 @@ import CanvasUIEvents from './CanvasUIEvents';
 import ZoomTool from './ZoomTool';
 import TranslateTool from './TranslateTool';
 import DragTool from './DragTool';
+import ResizeTool from './ResizeTool';
 import ShapeTool from './ShapeTool';
 import KeyBindings from './KeyBindings';
 
@@ -119,7 +120,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
               translateEvent={translateEvent} />
             <ShapeTool />
             <DragTool />
-            <KeyBindings />
+            <ResizeTool />
           </>
         : null
       }

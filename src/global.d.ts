@@ -7,6 +7,8 @@ declare namespace Btwx {
 
   type LineHandle = 'from' | 'to';
 
+  type SelectionFrameHandle = ResizeHandle | LineHandle | 'move' | 'none' | 'all';
+
   type GradientHandle = 'origin' | 'destination';
 
   type GradientProp = 'fill' | 'stroke';
@@ -96,6 +98,35 @@ declare namespace Btwx {
   type TweenEventSort = 'none' | 'layer-asc' | 'layer-dsc' | 'event-asc' | 'event-dsc' | 'artboard-asc' | 'artboard-dsc' | 'destinationArtboard-asc' | 'destinationArtboard-dsc';
 
   type FillStrokeTween = 'colorToColor' | 'nullToColor' | 'colorToNull' | 'gradientToGradient' | 'gradientToColor' | 'colorToGradient' | 'gradientToNull' | 'nullToGradient';
+
+  type SnapZoneType = 'left' | 'right' | 'top' | 'bottom' | 'center' | 'middle';
+
+  interface SnapZones {
+    top: paper.Rectangle;
+    middle: paper.Rectangle;
+    bottom: paper.Rectangle;
+    left: paper.Rectangle;
+    center: paper.Rectangle;
+    right: paper.Rectangle;
+  }
+
+  interface SnapPoint {
+    side: SnapZoneType;
+    point: paper.Point;
+  }
+
+  interface SnapToLayer {
+    layer: paper.Item;
+    snapPoint: SnapPoint;
+    snapBoundsPoint: SnapPoint;
+    distance: number;
+  }
+
+  interface SnapZoneSnapToLayers {
+    snapZone: SnapZoneType;
+    layers: SnapZoneLayer[];
+    bounds: paper.Rectangle;
+  }
 
   interface DocumentSettingsState {
     id: string;
@@ -481,14 +512,14 @@ declare namespace Btwx {
 
   type ShapeType = 'Rectangle' | 'Ellipse' | 'Rounded' | 'Polygon' | 'Star' | 'Line' | 'Custom';
 
-  interface SnapPoint {
-    id: string;
-    axis: 'x' | 'y';
-    side: 'left' | 'right' | 'center' | 'top' | 'bottom';
-    point: number;
-    breakThreshold?: number;
-    boundsSide?: 'left' | 'right' | 'center' | 'top' | 'bottom';
-  }
+  // interface SnapPoint {
+  //   id: string;
+  //   axis: 'x' | 'y';
+  //   side: 'left' | 'right' | 'center' | 'top' | 'bottom';
+  //   point: number;
+  //   breakThreshold?: number;
+  //   boundsSide?: 'left' | 'right' | 'center' | 'top' | 'bottom';
+  // }
 
   interface SnapBound {
     side: 'left' | 'right' | 'center' | 'top' | 'bottom';

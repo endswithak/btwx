@@ -21,7 +21,8 @@ export interface SetCanvasActiveToolPayload {
   zooming?: boolean;
   translating?: boolean;
   zoomType?: Btwx.ZoomType;
-  resizeType?: Btwx.ResizeType;
+  resizeHandle?: Btwx.ResizeHandle;
+  dragHandle?: boolean;
 }
 
 export interface SetCanvasActiveTool {
@@ -49,7 +50,6 @@ export interface SetCanvasTyping {
 
 export interface SetCanvasResizingPayload {
   resizing: boolean;
-  resizeType: Btwx.ResizeType;
 }
 
 export interface SetCanvasResizing {

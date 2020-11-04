@@ -157,7 +157,6 @@ import {
   SET_LAYERS_MASKED,
   TOGGLE_LAYER_MASK,
   TOGGLE_LAYERS_MASK,
-  REMOVE_LAYERS_MASK,
   ALIGN_LAYERS_TO_LEFT,
   ALIGN_LAYERS_TO_RIGHT,
   ALIGN_LAYERS_TO_TOP,
@@ -798,8 +797,6 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return toggleLayerMask(state, action);
     case TOGGLE_LAYERS_MASK:
       return toggleLayersMask(state, action);
-    // case REMOVE_LAYERS_MASK:
-    //   return removeLayersMask(state, action);
     case ALIGN_LAYERS_TO_LEFT:
       return alignLayersToLeft(state, action);
     case ALIGN_LAYERS_TO_RIGHT:

@@ -33,7 +33,8 @@ export interface CanvasSettingsState {
   zooming: boolean;
   translating: boolean;
   zoomType: Btwx.ZoomType;
-  resizeType: Btwx.ResizeType;
+  resizeHandle: Btwx.ResizeHandle;
+  dragHandle: boolean;
 }
 
 const initialState: CanvasSettingsState = {
@@ -49,7 +50,8 @@ const initialState: CanvasSettingsState = {
   zooming: false,
   translating: false,
   zoomType: null,
-  resizeType: null
+  resizeHandle: null,
+  dragHandle: false,
 };
 
 export default (state = initialState, action: CanvasSettingsTypes): CanvasSettingsState => {
@@ -65,7 +67,8 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
         translating: Object.prototype.hasOwnProperty.call(action.payload, 'translating') ? action.payload.translating : state.translating,
         drawing: Object.prototype.hasOwnProperty.call(action.payload, 'drawing') ? action.payload.drawing : state.drawing,
         zoomType: Object.prototype.hasOwnProperty.call(action.payload, 'zoomType') ? action.payload.zoomType : state.zoomType,
-        resizeType: Object.prototype.hasOwnProperty.call(action.payload, 'resizeType') ? action.payload.resizeType : state.resizeType
+        resizeHandle: Object.prototype.hasOwnProperty.call(action.payload, 'resizeHandle') ? action.payload.resizeHandle : state.resizeHandle,
+        dragHandle: Object.prototype.hasOwnProperty.call(action.payload, 'dragHandle') ? action.payload.dragHandle : state.dragHandle
       };
     }
     case SET_CANVAS_DRAWING: {
@@ -83,8 +86,7 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
     case SET_CANVAS_RESIZING: {
       return {
         ...state,
-        resizing: action.payload.resizing,
-        resizeType: Object.prototype.hasOwnProperty.call(action.payload, 'resizeType') ? action.payload.resizeType : state.resizeType
+        resizing: action.payload.resizing
       };
     }
     case SET_CANVAS_SELECTING: {

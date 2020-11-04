@@ -37,6 +37,7 @@ export const zoomOutThunk = () => {
       paperMain.view.zoom = 0.01;
     }
     dispatch(setCanvasZooming({zooming: false}));
+    dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
   }
 };
 
@@ -45,6 +46,7 @@ export const zoomPercentThunk = (percent: number) => {
     dispatch(setCanvasZooming({zooming: true}));
     paperMain.view.zoom = percent;
     dispatch(setCanvasZooming({zooming: false}));
+    dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
   }
 };
 
@@ -73,6 +75,7 @@ export const zoomFitCanvasThunk = () => {
     paperMain.view.center = canvasCenter;
     paperMain.view.zoom = newZoom;
     dispatch(setCanvasZooming({zooming: false}));
+    dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
   }
 };
 
@@ -102,5 +105,6 @@ export const zoomFitSelectedThunk = () => {
     paperMain.view.center = selectionCenter;
     paperMain.view.zoom = newZoom;
     dispatch(setCanvasZooming({zooming: false}));
+    dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
   }
 };

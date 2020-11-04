@@ -3,7 +3,7 @@ import { createSelector } from 'reselect';
 import paper from 'paper';
 import isSVG from 'is-svg';
 import { clipboard } from 'electron';
-import { LayerState } from '../reducers/layer';
+import layer, { LayerState } from '../reducers/layer';
 import { paperMain } from '../../canvas';
 import { bufferToBase64 } from '../../utils';
 import { RootState } from '../reducers';
@@ -552,6 +552,41 @@ export const getNearestScopeGroupAncestor = (store: LayerState, id: string): Btw
     currentNode = getParentLayer(store, currentNode.id);
   }
   return currentNode;
+};
+
+export const getPaperLayersTopLeft = (layers: paper.Item[]): paper.Point => {
+  const paperLayerPoints = layers.reduce((result, current) => {
+    if (current) {
+      return [...result, current.bounds.topLeft];
+    } else {
+      return result;
+    }
+  }, []);
+  return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.min) : null;
+};
+
+export const getPaperLayersBottomRight = (layers: paper.Item[]): paper.Point => {
+  const paperLayerPoints = layers.reduce((result, current) => {
+    if (current) {
+      return [...result, current.bounds.bottomRight];
+    } else {
+      return result;
+    }
+  }, []);
+  return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.max) : null;
+};
+
+export const getPaperLayersBounds = (layers: paper.Item[]): paper.Rectangle => {
+  const topLeft = getSelectionTopLeft(layers);
+  const bottomRight = getSelectionBottomRight(layers);
+  if (topLeft && bottomRight) {
+    return new paper.Rectangle({
+      from: topLeft,
+      to: bottomRight
+    });
+  } else {
+    return null;
+  }
 };
 
 export const getLayersTopLeft = (store: LayerState, layers: string[]): paper.Point => {
@@ -1422,123 +1457,6 @@ export const getGradientStops = (stops: Btwx.GradientStop[]): paper.GradientStop
       ...result,
       new paperMain.GradientStop({ hue: current.color.h, saturation: current.color.s, lightness: current.color.l, alpha: current.color.a } as paper.Color, current.position)
     ];
-    return result;
-  }, []);
-};
-
-export const getSplitLayerSnapPoints = (id: string): { allSnapPoints: Btwx.SnapPoint[]; xSnapPoints: Btwx.SnapPoint[]; ySnapPoints: Btwx.SnapPoint[] } => {
-  const paperLayer = getPaperLayer(id);
-  let bounds;
-  if (paperLayer.data.layerType === 'Artboard') {
-    bounds = paperLayer.getItem({data: { id: 'ArtboardBackground' }}).bounds;
-  } else {
-    bounds = paperLayer.bounds;
-  }
-  const left = {
-    id: id,
-    axis: 'x',
-    side: 'left',
-    point: bounds.left
-  } as Btwx.SnapPoint;
-  const centerX = {
-    id: id,
-    axis: 'x',
-    side: 'center',
-    point: bounds.center.x
-  } as Btwx.SnapPoint;
-  const centerY = {
-    id: id,
-    axis: 'y',
-    side: 'center',
-    point: bounds.center.y
-  } as Btwx.SnapPoint;
-  const right = {
-    id: id,
-    axis: 'x',
-    side: 'right',
-    point: bounds.right
-  } as Btwx.SnapPoint;
-  const top = {
-    id: id,
-    axis: 'y',
-    side: 'top',
-    point: bounds.top
-  } as Btwx.SnapPoint;
-  const bottom = {
-    id: id,
-    axis: 'y',
-    side: 'bottom',
-    point: bounds.bottom
-  } as Btwx.SnapPoint;
-  const allSnapPoints = [left, right, top, bottom, centerX, centerY];
-  const xSnapPoints = [left, right, centerX];
-  const ySnapPoints = [top, bottom, centerY];
-  return {
-    allSnapPoints,
-    xSnapPoints,
-    ySnapPoints
-  }
-  // return [left, right, top, bottom, centerX, centerY];
-};
-
-// export const getSnapPointsByBounds = (bounds: paper.Rectangle, ignoreLayers: string[] = []): Btwx.SnapPoint[] => {
-//   const page = getPaperLayer('page');
-//   const layers = page.getItems({
-//     overlapping: paperMain.view.bounds,
-//     data: { type: 'Layer' },
-//     inside: bounds
-//   });
-//   return layers.reduce((result, current) => {
-//     if (current.data.layerType !== 'Group' && !ignoreLayers.includes(current.data.id)) {
-//       result = [...result, ...getLayerSnapPoints(current.data.id)];
-//     }
-//     return result;
-//   }, []);
-// };
-
-export const getSnapPointsByBounds = (bounds: paper.Rectangle, scope: string[], axis: 'x' | 'y' | 'both' = 'both'): Btwx.SnapPoint[] => {
-  const page = getPaperLayer('page');
-  const layers = page.getItems({
-    overlapping: bounds,
-    data: function(data: any) {
-      const isArtboard = data.type === 'Layer' && data.layerType === 'Artboard';
-      const validTypeValue = data.type === 'Layer';
-      const validSelectedValue = data.selected === false;
-      const validScopeValue = isArtboard ? true : data.id && !scope.includes(data.id);
-      return validTypeValue && validSelectedValue && validScopeValue;
-    },
-    parent: function(parent: paper.Item) {
-      let layerParent = null; // paper layers can have abstractions with masks and such
-      let parentInScope = false;
-      let currentParent = parent;
-      let selectedParent = false;
-      while(currentParent) {
-        if (currentParent.data && currentParent.data.type === 'Layer' && !layerParent) {
-          layerParent = currentParent;
-          parentInScope = scope.includes(currentParent.data.id);
-        }
-        if (currentParent.data && currentParent.data.selected) {
-          selectedParent = true;
-          break;
-        }
-        currentParent = currentParent.parent;
-      }
-      return !selectedParent && parentInScope;
-    }
-  });
-  return layers.reduce((result, current) => {
-    const snapPoints = getSplitLayerSnapPoints(current.data.id);
-    switch(axis) {
-      case 'both':
-        result = [...result, ...snapPoints.allSnapPoints];
-        break;
-      case 'x':
-        result = [...result, ...snapPoints.xSnapPoints];
-        break;
-      case 'y':
-        result = [...result, ...snapPoints.ySnapPoints];
-        break;
-    }
     return result;
   }, []);
 };
