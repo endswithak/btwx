@@ -26,6 +26,8 @@ interface CanvasLayerEventsProps {
   activeTool?: Btwx.ToolType;
   dragging?: boolean;
   resizing?: boolean;
+  selecting?: boolean;
+  dragHandle?: boolean;
   setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
   selectLayers?(payload: SelectLayersPayload): LayerTypes;
   deepSelectLayer?(payload: DeepSelectLayerPayload): LayerTypes;
@@ -36,15 +38,12 @@ interface CanvasLayerEventsProps {
 
 const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layerEvent, activeTool, dragging, resizing, hover, selected, deselectLayers, deselectAllLayers, layerItem, nearestScopeAncestor, deepSelectItem, setLayerHover, selectLayers, deepSelectLayer, setCanvasActiveTool } = props;
+  const { layerEvent, activeTool, dragging, resizing, selecting, hover, selected, deselectLayers, deselectAllLayers, layerItem, nearestScopeAncestor, deepSelectItem, setLayerHover, selectLayers, deepSelectLayer, setCanvasActiveTool, dragHandle } = props;
 
   const handleMouseMove = (): void => {
     if (layerEvent.empty) {
       if (hover !== null) {
         setLayerHover({id: null});
-      }
-      if (activeTool === 'Drag' && !dragging) {
-        setCanvasActiveTool({activeTool: null});
       }
     } else {
       if (nearestScopeAncestor.type === 'Artboard') {
@@ -56,7 +55,11 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
           setLayerHover({id: nearestScopeAncestor.id});
         }
       }
-      if (!activeTool || activeTool === 'Resize' && !resizing) {
+      if (
+        !activeTool ||
+        activeTool === 'Resize' && !resizing ||
+        activeTool === 'AreaSelect' && !selecting
+      ) {
         setCanvasActiveTool({activeTool: 'Drag'});
       }
     }
@@ -147,6 +150,8 @@ const mapStateToProps = (state: RootState, ownProps: CanvasLayerEventsProps): {
   activeTool: Btwx.ToolType;
   dragging: boolean;
   resizing: boolean;
+  selecting: boolean;
+  dragHandle: boolean;
 } => {
   const { layer, canvasSettings } = state;
   const layerEvent = ownProps.layerEvent;
@@ -159,6 +164,8 @@ const mapStateToProps = (state: RootState, ownProps: CanvasLayerEventsProps): {
   const activeTool = canvasSettings.activeTool;
   const dragging = canvasSettings.dragging;
   const resizing = canvasSettings.resizing;
+  const selecting = canvasSettings.selecting;
+  const dragHandle = canvasSettings.dragHandle;
   return {
     layerItem,
     nearestScopeAncestor,
@@ -167,7 +174,9 @@ const mapStateToProps = (state: RootState, ownProps: CanvasLayerEventsProps): {
     selected,
     activeTool,
     dragging,
-    resizing
+    resizing,
+    selecting,
+    dragHandle
   };
 };
 

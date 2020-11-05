@@ -39,7 +39,7 @@ import {
   SetLineFromY, SetLineFrom, SetLineToX, SetLineToY, SetLineTo, SetLinesFromX, SetLinesFromY, SetLinesToX, SetLinesToY, SelectAllLayers,
   SetLayerStyle, SetLayersStyle, EnableLayersHorizontalFlip, DisableLayersHorizontalFlip, DisableLayersVerticalFlip, EnableLayersVerticalFlip,
   SetLayerScope, SetLayersScope, SetGlobalScope, SetLayerUnderlyingMask, SetLayersUnderlyingMask, SetLayerMasked, SetLayersMasked, ToggleLayerMask,
-  ToggleLayersMask, ToggleLayersIgnoreUnderlyingMask, ToggleLayerIgnoreUnderlyingMask
+  ToggleLayersMask, ToggleLayersIgnoreUnderlyingMask, ToggleLayerIgnoreUnderlyingMask, AreaSelectLayers
 } from '../actionTypes/layer';
 
 import {
@@ -648,6 +648,17 @@ export const selectLayers = (state: LayerState, action: SelectLayers): LayerStat
       return selectLayer(result, layerActions.selectLayer({id: current, noActiveArtboardUpdate: action.payload.noActiveArtboardUpdate}) as SelectLayer);
     }
   }, currentState);
+  return currentState;
+};
+
+export const areaSelectLayers = (state: LayerState, action: AreaSelectLayers): LayerState => {
+  let currentState = state;
+  if (action.payload.deselect && action.payload.deselect.length > 0) {
+    currentState = deselectLayers(currentState, layerActions.deselectLayers({layers: action.payload.deselect}) as DeselectLayers);
+  }
+  if (action.payload.select && action.payload.select.length > 0) {
+    currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.select}) as SelectLayers);
+  }
   return currentState;
 };
 

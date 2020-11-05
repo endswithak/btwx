@@ -12,7 +12,8 @@ import TranslateTool from './TranslateTool';
 import DragTool from './DragTool';
 import ResizeTool from './ResizeTool';
 import ShapeTool from './ShapeTool';
-import KeyBindings from './KeyBindings';
+import AreaSelectTool from './AreaSelectTool';
+// import KeyBindings from './KeyBindings';
 
 interface CanvasProps {
   ready: boolean;
@@ -121,6 +122,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
             <ShapeTool />
             <DragTool />
             <ResizeTool />
+            <AreaSelectTool />
           </>
         : null
       }

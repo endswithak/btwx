@@ -585,9 +585,11 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
       setSnapZoneLeft(snapZones.left);
       setSnapZoneRight(snapZones.right);
       setSnapZoneMiddle(snapZones.middle);
-      setSnapBounds(nextSnapBounds);
-      if (onUpdate) {
-        onUpdate(nextSnapBounds);
+      if (!nextSnapBounds.equals(snapBounds)) {
+        setSnapBounds(nextSnapBounds);
+        if (onUpdate) {
+          onUpdate(nextSnapBounds);
+        }
       }
     }
   }, [toolEvent]);

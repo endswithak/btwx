@@ -42,6 +42,7 @@ import {
   DESELECT_LAYERS,
   SELECT_ALL_LAYERS,
   DESELECT_ALL_LAYERS,
+  AREA_SELECT_LAYERS,
   SET_LAYER_HOVER,
   ADD_LAYER_CHILD,
   ADD_LAYER_CHILDREN,
@@ -248,6 +249,7 @@ import {
   SelectLayersPayload,
   DeselectLayerPayload,
   DeselectLayersPayload,
+  AreaSelectLayersPayload,
   SetLayerHoverPayload,
   AddLayerChildPayload,
   AddLayerChildrenPayload,
@@ -1032,6 +1034,11 @@ export const deselectAllLayers = (): LayerTypes => ({
 
 export const selectAllLayers = (): LayerTypes => ({
   type: SELECT_ALL_LAYERS
+});
+
+export const areaSelectLayers = (payload: AreaSelectLayersPayload): LayerTypes => ({
+  type: AREA_SELECT_LAYERS,
+  payload
 });
 
 // Hover
@@ -2817,7 +2824,7 @@ export const updateHoverFrame = () => {
     strokeWidth: 2 / paperMain.view.zoom,
     data: { id: 'HoverFrame', type: 'UIElement', interactive: false }
   }
-  const hoverPaperLayer = paperMain.project.getItem({ data: { hover: true, selected: false } });
+  const hoverPaperLayer = paperMain.project.getItem({ data: { hover: true } });
   if (hoverFrame) {
     hoverFrame.remove();
   }
@@ -2831,14 +2838,15 @@ export const updateHoverFrame = () => {
         });
         break;
       case 'Text': {
+        const textLayer = hoverPaperLayer.getItem({data: { id: 'TextContent' }});
         const linesGroup = new paperMain.Group({
           data: { id: 'HoverFrame', type: 'UIElement', interactive: false }
         });
-        const initialPoint = (hoverPaperLayer as paper.PointText).point;
-        (hoverPaperLayer as any)._lines.forEach((line: any, index: number) => {
+        const initialPoint = (textLayer as paper.PointText).point;
+        (textLayer as any)._lines.forEach((line: any, index: number) => {
           new paperMain.Path.Line({
-            from: new paperMain.Point(initialPoint.x, initialPoint.y + (((hoverPaperLayer as paper.PointText).leading as number) * index)),
-            to: new paperMain.Point(initialPoint.x + hoverPaperLayer.bounds.width, initialPoint.y + (((hoverPaperLayer as paper.PointText).leading as number) * index)),
+            from: new paperMain.Point(initialPoint.x, initialPoint.y + (((textLayer as paper.PointText).leading as number) * index)),
+            to: new paperMain.Point(initialPoint.x + textLayer.bounds.width, initialPoint.y + (((textLayer as paper.PointText).leading as number) * index)),
             strokeColor: THEME_PRIMARY_COLOR,
             strokeWidth: 2 / paperMain.view.zoom,
             data: {

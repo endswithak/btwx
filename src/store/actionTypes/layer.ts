@@ -15,6 +15,7 @@ export const DESELECT_LAYER = 'DESELECT_LAYER';
 export const DESELECT_LAYERS = 'DESELECT_LAYERS';
 export const SELECT_ALL_LAYERS = 'SELECT_ALL_LAYERS';
 export const DESELECT_ALL_LAYERS = 'DESELECT_ALL_LAYERS';
+export const AREA_SELECT_LAYERS = 'AREA_SELECT_LAYERS';
 
 export const SET_LAYER_HOVER = 'SET_LAYER_HOVER';
 export const ENABLE_LAYER_HOVER = 'ENABLE_LAYER_HOVER';
@@ -413,6 +414,16 @@ export interface SelectAllLayers {
 
 export interface DeselectAllLayers {
   type: typeof DESELECT_ALL_LAYERS;
+}
+
+export interface AreaSelectLayersPayload {
+  select: string[];
+  deselect: string[];
+}
+
+export interface AreaSelectLayers {
+  type: typeof AREA_SELECT_LAYERS;
+  payload: AreaSelectLayersPayload;
 }
 
 // Hover
@@ -2362,6 +2373,7 @@ export type LayerTypes = AddArtboard |
                          DeselectLayers |
                          SelectAllLayers |
                          DeselectAllLayers |
+                         AreaSelectLayers |
                          SetLayerHover |
                          EnableLayerHover |
                          DisableLayerHover |

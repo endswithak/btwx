@@ -17,6 +17,7 @@ import {
   DESELECT_LAYERS,
   SELECT_ALL_LAYERS,
   DESELECT_ALL_LAYERS,
+  AREA_SELECT_LAYERS,
   SET_LAYER_HOVER,
   ADD_LAYER_CHILD,
   ADD_LAYER_CHILDREN,
@@ -223,6 +224,7 @@ import {
   deselectLayers,
   selectAllLayers,
   deselectAllLayers,
+  areaSelectLayers,
   setLayerHover,
   addLayerChild,
   addLayerChildren,
@@ -517,6 +519,8 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return selectAllLayers(state, action);
     case DESELECT_ALL_LAYERS:
       return deselectAllLayers(state, action);
+    case AREA_SELECT_LAYERS:
+      return areaSelectLayers(state, action);
     case SET_LAYER_HOVER:
       return setLayerHover(state, action);
     case ADD_LAYER_CHILD:

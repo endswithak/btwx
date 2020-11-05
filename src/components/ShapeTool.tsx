@@ -189,12 +189,13 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
   }
 
   const handleMouseMove = (e: paper.ToolEvent): void => {
-    const nextSnapBounds = new paperMain.Rectangle({
-      point: e.point,
-      size: new paperMain.Size(1, 1)
-    });
-    setToolEvent(e);
-    setSnapBounds(nextSnapBounds);
+    // const nextSnapBounds = new paperMain.Rectangle({
+    //   point: e.point,
+    //   size: new paperMain.Size(1, 1)
+    // });
+    // setToolEvent(e);
+    // setSnapBounds(nextSnapBounds);
+    return;
   }
 
   const handleMouseDown = (e: paper.ToolEvent): void => {
@@ -298,7 +299,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
       tool.onMouseDrag = handleMouseDrag;
       tool.onMouseUp = handleMouseUp;
     }
-  }, [snapBounds, drawing]);
+  }, [toBounds, drawing]);
 
   useEffect(() => {
     if (tool) {
@@ -325,7 +326,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
       setDims(nextDims);
       setMaxDim(nextMaxDim);
       setConstrainedDims(nextContrainedDims);
-      setSnapBounds(nextToBounds);
+      setToBounds(nextToBounds);
     }
   }, [to]);
 
@@ -344,7 +345,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
         to: shiftModifier ? constrainedDims : to
       });
       setToBounds(nextToBounds);
-      setSnapBounds(null);
+      // setSnapBounds(null);
     }
   }, [shiftModifier]);
 
@@ -377,16 +378,17 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
   }, []);
 
   return (
-    isEnabled
-    ? <SnapTool
-        bounds={snapBounds}
-        snapRule={drawing ? 'resize' : 'move'}
-        hitTestZones={drawing ? { top: true, bottom: true } : { center: true, middle: true }}
-        preserveAspectRatio={shiftModifier}
-        onUpdate={setToBounds}
-        toolEvent={toolEvent}
-        resizePivot={pivot} />
-    : null
+    <></>
+    // isEnabled
+    // ? <SnapTool
+    //     bounds={snapBounds}
+    //     snapRule={drawing ? 'resize' : 'move'}
+    //     hitTestZones={drawing ? { top: true, bottom: true } : { center: true, middle: true }}
+    //     preserveAspectRatio={shiftModifier}
+    //     onUpdate={setToBounds}
+    //     toolEvent={toolEvent}
+    //     resizePivot={pivot} />
+    // : null
   );
 }
 

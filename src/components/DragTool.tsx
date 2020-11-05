@@ -28,28 +28,36 @@ const DragTool = (props: DragToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { isEnabled, hover, dragHandle, setCanvasDragging, dragging, selected, moveLayersBy, duplicateLayers, removeDuplicatedLayers} = props;
   const [tool, setTool] = useState<paper.Tool>(null);
+
   const [originalSelection, setOriginalSelection] = useState<string[]>(null);
   const [originalPaperSelection, setOriginalPaperSelection] = useState<paper.Item[]>(null);
   const [duplicateSelection, setDuplicateSelection] = useState<string[]>(null);
-  const [from, setFrom] = useState<paper.Point>(null);
-  const [to, setTo] = useState<paper.Point>(null);
+
+  const [fromEvent, setFromEvent] = useState<paper.ToolEvent>(null);
   const [fromBounds, setFromBounds] = useState<paper.Rectangle>(null);
+
+  const [toEvent, setToEvent] = useState<paper.ToolEvent>(null);
   const [toBounds, setToBounds] = useState<paper.Rectangle>(null);
-  const [toolEvent, setToolEvent] = useState(null);
+
+  const [endEvent, setEndEvent] = useState<paper.ToolEvent>(null);
+
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
-  const [altModifier, setAltModifier] = useState<boolean>(false);
+
+  const [keyDownEvent, setKeyDownEvent] = useState<paper.KeyEvent>(null);
+  const [keyUpEvent, setKeyUpEvent] = useState<paper.KeyEvent>(null);
 
   const resetState = (): void => {
     setOriginalSelection(null);
     setDuplicateSelection(null);
-    setFrom(null);
-    setTo(null);
+    setFromEvent(null);
     setFromBounds(null);
+    setToEvent(null);
     setToBounds(null);
-    setToolEvent(null);
+    setEndEvent(null);
     setSnapBounds(null);
     setOriginalPaperSelection(null);
-    setAltModifier(false);
+    setKeyUpEvent(null);
+    setKeyDownEvent(null);
   }
 
   const translateLayers = (): void => {
@@ -67,25 +75,11 @@ const DragTool = (props: DragToolProps): ReactElement => {
   }
 
   const handleKeyDown = (e: paper.KeyEvent): void => {
-    switch(e.key) {
-      case 'alt':
-        setAltModifier(true);
-        if (originalSelection && !duplicateSelection) {
-          duplicateLayers({layers: originalSelection});
-        }
-        break;
-    }
+    setKeyDownEvent(e);
   }
 
   const handleKeyUp = (e: paper.KeyEvent): void => {
-    switch(e.key) {
-      case 'alt':
-        setAltModifier(false);
-        if (originalSelection && duplicateSelection) {
-          removeDuplicatedLayers({layers: duplicateSelection, newSelection: originalSelection});
-        }
-        break;
-    }
+    setKeyUpEvent(e);
   }
 
   // tool mousedown will fire before selected is updated...
@@ -121,90 +115,69 @@ const DragTool = (props: DragToolProps): ReactElement => {
   }
 
   const handleMouseDown = (e: paper.ToolEvent): void => {
-    const dragLayers = getDragLayers(e);
-    const dragPaperLayers = dragLayers.reduce((result, current) => {
-      result = [...result, getPaperLayer(current).clone({ insert: false })];
-      return result;
-    }, []);
-    const nextFromBounds = getPaperLayersBounds(dragPaperLayers);
-    setFrom(e.point);
-    setFromBounds(nextFromBounds);
-    setOriginalPaperSelection(dragPaperLayers);
-    setOriginalSelection(dragLayers);
-    if (altModifier) {
-      duplicateLayers({layers: dragLayers});
-      setCanvasDragging({dragging: true});
-    }
+    setFromEvent(e);
   }
 
   const handleMouseDrag = (e: paper.ToolEvent): void => {
-    if (from && originalSelection && selected.length > 0) {
-      setToolEvent(e);
-      setTo(e.point);
-      if (!dragging) {
-        setCanvasDragging({dragging: true});
-      }
-    }
+    setToEvent(e);
   }
 
   const handleMouseUp = (e: paper.ToolEvent): void => {
-    if (selected.length > 0) {
-      moveLayersBy({layers: selected, x: 0, y: 0});
-    }
-    if (dragging) {
-      setCanvasDragging({dragging: false});
-    }
-    resetState();
+    setEndEvent(e);
   }
 
   useEffect(() => {
-    if (tool && !dragging) {
-      tool.onKeyDown = handleKeyDown;
-      tool.onKeyUp = handleKeyUp;
-      tool.onMouseDown = handleMouseDown;
-      tool.onMouseDrag = handleMouseDrag;
-      tool.onMouseUp = handleMouseUp;
+    if (fromEvent && isEnabled) {
+      const dragLayers = getDragLayers(fromEvent);
+      const dragPaperLayers = dragLayers.reduce((result, current) => {
+        result = [...result, getPaperLayer(current).clone({ insert: false })];
+        return result;
+      }, []);
+      const nextFromBounds = getPaperLayersBounds(dragPaperLayers);
+      setFromBounds(nextFromBounds);
+      setOriginalPaperSelection(dragPaperLayers);
+      setOriginalSelection(dragLayers);
+      if (fromEvent.modifiers.alt) {
+        duplicateLayers({layers: dragLayers});
+      }
     }
-  }, [snapBounds, selected, fromBounds, originalSelection, hover, dragging, isEnabled, dragHandle, duplicateSelection, altModifier]);
+  }, [fromEvent]);
 
   useEffect(() => {
-    if (tool) {
-      tool.onMouseDrag = handleMouseDrag;
-      tool.onMouseUp = handleMouseUp;
-    }
-  }, [dragging]);
-
-  useEffect(() => {
-    if (tool) {
-      tool.onKeyDown = handleKeyDown;
-      tool.onKeyUp = handleKeyUp;
-    }
-  }, [duplicateSelection, altModifier, originalSelection]);
-
-  // update snap bounds
-  useEffect(() => {
-    if (to && tool && isEnabled && dragging) {
-      const x = to.x - from.x;
-      const y = to.y - from.y;
+    if (toEvent && isEnabled) {
+      const x = toEvent.point.x - toEvent.downPoint.x;
+      const y = toEvent.point.y - toEvent.downPoint.y;
       const nextSnapBounds = new paperMain.Rectangle(fromBounds);
       nextSnapBounds.center.x = fromBounds.center.x + x;
       nextSnapBounds.center.y = fromBounds.center.y + y;
       setSnapBounds(nextSnapBounds);
+      if (!dragging) {
+        setCanvasDragging({dragging: true});
+      }
     }
-  }, [to]);
+  }, [toEvent]);
 
-  // handle duplicateSelection...
-  // duplicateLayers & removeDuplicatedLayers actions update selected
   useEffect(() => {
-    if (tool && isEnabled) {
-      if (altModifier) {
-        if (originalSelection && !duplicateSelection) {
-          setDuplicateSelection(selected);
-        }
-      } else {
-        if (originalSelection && duplicateSelection) {
-          setDuplicateSelection(null);
-        }
+    if (endEvent && isEnabled) {
+      if (selected.length > 0) {
+        moveLayersBy({layers: selected, x: 0, y: 0});
+      }
+      if (dragging) {
+        setCanvasDragging({dragging: false});
+      }
+      resetState();
+    }
+  }, [endEvent]);
+
+  useEffect(() => {
+    if (selected && isEnabled && originalSelection) {
+      const lengthsMatch = selected.length === originalSelection.length;
+      const itemsMatch = selected.every((id) => originalSelection.includes(id));
+      if ((!lengthsMatch || lengthsMatch && !itemsMatch) && !duplicateSelection) {
+        setDuplicateSelection(selected);
+      }
+      if (lengthsMatch && itemsMatch && duplicateSelection) {
+        setDuplicateSelection(null);
       }
     }
   }, [selected]);
@@ -213,7 +186,7 @@ const DragTool = (props: DragToolProps): ReactElement => {
   // if duplicateSelection, move original selection back to original position,
   // else, move original selection to current translation
   useEffect(() => {
-    if (tool && isEnabled && dragging) {
+    if (isEnabled && originalSelection && dragging) {
       if (duplicateSelection) {
         originalSelection.forEach((id, index) => {
           const paperLayer = getPaperLayer(id);
@@ -222,21 +195,32 @@ const DragTool = (props: DragToolProps): ReactElement => {
           paperLayer.position.y = copyLayer.position.y;
         });
       } else {
-        if (originalSelection) {
-          translateLayers();
-        }
+        translateLayers();
       }
     }
   }, [duplicateSelection]);
 
-  // handle layer translation on toBounds update
   useEffect(() => {
-    if (tool && isEnabled && dragging) {
-      if (originalSelection || duplicateSelection) {
-        translateLayers();
-      }
+    if (toBounds && isEnabled) {
+      translateLayers();
     }
   }, [toBounds]);
+
+  useEffect(() => {
+    if (keyDownEvent && isEnabled && dragging && !duplicateSelection) {
+      if (keyDownEvent.key === 'alt' && originalSelection) {
+        duplicateLayers({layers: originalSelection});
+      }
+    }
+  }, [keyDownEvent]);
+
+  useEffect(() => {
+    if (keyUpEvent && isEnabled && dragging && duplicateSelection) {
+      if (keyUpEvent.key === 'alt' && originalSelection) {
+        removeDuplicatedLayers({layers: duplicateSelection, newSelection: originalSelection});
+      }
+    }
+  }, [keyUpEvent]);
 
   // handle tool enable / disable
   useEffect(() => {
@@ -272,7 +256,7 @@ const DragTool = (props: DragToolProps): ReactElement => {
         snapRule='move'
         hitTestZones={{all: true}}
         onUpdate={setToBounds}
-        toolEvent={toolEvent}
+        toolEvent={toEvent}
         blackListLayers={selected} />
     : null
   );

@@ -18,6 +18,7 @@ interface CanvasUIEventsProps {
   hover?: string;
   resizing?: boolean;
   dragging?: boolean;
+  selecting?: boolean;
   activeTool?: Btwx.ToolType;
   setCanvasActiveTool?(payload: SetCanvasActiveToolPayload): CanvasSettingsTypes;
   setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
@@ -25,17 +26,17 @@ interface CanvasUIEventsProps {
 
 const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { uiEvent, activeTool, setCanvasActiveTool, resizing, dragging, setLayerHover, hover } = props;
+  const { uiEvent, activeTool, setCanvasActiveTool, resizing, dragging, selecting, setLayerHover, hover } = props;
 
   const handleMouseMove = (): void => {
     if (uiEvent.empty) {
-      if (activeTool === 'Resize' && !resizing) {
-        setCanvasActiveTool({activeTool: null, resizeHandle: null});
+      if (
+        activeTool === 'Resize' && !resizing ||
+        activeTool === 'Drag' && !dragging ||
+        !activeTool
+      ) {
+        setCanvasActiveTool({activeTool: 'AreaSelect', resizeHandle: null, dragHandle: null});
       }
-      if (activeTool === 'Drag' && !dragging) {
-        setCanvasActiveTool({activeTool: null, dragHandle: false});
-      }
-      return;
     } else {
       if (hover) {
         setLayerHover({id: null});
@@ -44,7 +45,12 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
         case 'SelectionFrame': {
           switch(uiEvent.hitResult.item.data.interactiveType) {
             case 'move':
-              if (!activeTool || activeTool === 'Drag' && !dragging || activeTool === 'Resize' && !resizing) {
+              if (
+                !activeTool ||
+                activeTool === 'Drag' && !dragging ||
+                activeTool === 'Resize' && !resizing ||
+                activeTool === 'AreaSelect' && !selecting
+              ) {
                 setCanvasActiveTool({activeTool: 'Drag', dragHandle: true});
               }
               break;
@@ -56,7 +62,11 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
             case 'bottomRight':
             case 'leftCenter':
             case 'rightCenter': {
-              if (!activeTool || activeTool === 'Drag' && !dragging) {
+              if (
+                !activeTool ||
+                activeTool === 'Drag' && !dragging ||
+                activeTool === 'AreaSelect' && !selecting
+              ) {
                 setCanvasActiveTool({activeTool: 'Resize', resizeHandle: uiEvent.hitResult.item.data.interactiveType});
               }
               break;
@@ -133,12 +143,14 @@ const mapStateToProps = (state: RootState): {
   activeTool: Btwx.ToolType;
   resizing: boolean;
   dragging: boolean;
+  selecting: boolean;
 } => {
   const { canvasSettings, layer } = state;
   return {
     activeTool: canvasSettings.activeTool,
     resizing: canvasSettings.resizing,
     dragging: canvasSettings.dragging,
+    selecting: canvasSettings.selecting,
     hover: layer.present.hover
   };
 };
