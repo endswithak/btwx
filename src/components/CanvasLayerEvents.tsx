@@ -115,7 +115,7 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
   }
 
   useEffect(() => {
-    if (layerEvent && !dragging && !resizing) {
+    if (layerEvent && !dragging && !resizing && !selecting) {
       switch(layerEvent.eventType) {
         case 'contextMenu':
           handleContextMenu();

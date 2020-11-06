@@ -26,77 +26,90 @@ interface ResizeToolProps {
 const ResizeTool = (props: ResizeToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { initialHandle, isEnabled, setCanvasResizing, resizing, selected, scaleLayers, setCanvasActiveTool } = props;
+
   const [tool, setTool] = useState<paper.Tool>(null);
   const [originalSelection, setOriginalSelection] = useState<any>(null);
-  const [from, setFrom] = useState<paper.Point>(null);
-  const [to, setTo] = useState<paper.Point>(null);
-  const [fromBounds, setFromBounds] = useState<paper.Rectangle>(null);
-  const [toBounds, setToBounds] = useState<paper.Rectangle>(null);
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
-  const [toolEvent, setToolEvent] = useState(null);
   const [horizontalFlip, setHorizontalFlip] = useState<boolean>(false);
   const [verticalFlip, setVerticalFlip] = useState<boolean>(false);
   const [preserveAspectRatio, setPreserveAspectRatio] = useState<boolean>(false);
   const [handle, setHandle] = useState<Btwx.ResizeHandle>(null);
   const [shiftModifier, setShiftModifier] = useState<boolean>(false);
 
+  const [fromEvent, setFromEvent] = useState<paper.ToolEvent>(null);
+  const [fromBounds, setFromBounds] = useState<paper.Rectangle>(null);
+  const [fromPivot, setFromPivot] = useState<paper.Point>(null);
+
+  const [toEvent, setToEvent] = useState<paper.ToolEvent>(null);
+  const [toBounds, setToBounds] = useState<paper.Rectangle>(null);
+
+  const [endEvent, setEndEvent] = useState<paper.ToolEvent>(null);
+
+  const [keyDownEvent, setKeyDownEvent] = useState<paper.KeyEvent>(null);
+  const [keyUpEvent, setKeyUpEvent] = useState<paper.KeyEvent>(null);
 
   const resetState = () => {
     setOriginalSelection(null);
-    setFrom(null);
-    setTo(null);
+    setFromEvent(null);
     setFromBounds(null);
+    setToEvent(null);
     setToBounds(null);
-    setToolEvent(null);
+    setEndEvent(null);
+    setKeyDownEvent(null);
+    setKeyUpEvent(null);
     setHorizontalFlip(false);
     setVerticalFlip(false);
     setPreserveAspectRatio(false);
-    setShiftModifier(false);
     setSnapBounds(null);
+    setHandle(null);
+    setShiftModifier(false);
   }
 
   const clearLayerScale = (paperLayer: paper.Item): void => {
     const originalLayer = originalSelection[paperLayer.data.id];
-    switch(paperLayer.data.layerType) {
-      case 'Artboard': {
-        const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
-        const mask = paperLayer.getItem({data: { id: 'ArtboardMask' }});
-        background.pivot = paperLayer.bounds.center;
-        background.bounds.width = originalLayer.bounds.width;
-        background.bounds.height = originalLayer.bounds.height;
-        background.position.x = originalLayer.position.x;
-        background.position.y = originalLayer.position.y;
-        background.scale(horizontalFlip ? -1 : 1, verticalFlip ? -1 : 1);
-        mask.pivot = paperLayer.bounds.center;
-        mask.bounds.width = originalLayer.bounds.width;
-        mask.bounds.height = originalLayer.bounds.height;
-        mask.position.x = originalLayer.position.x;
-        mask.position.y = originalLayer.positione.y;
-        mask.scale(horizontalFlip ? -1 : 1, verticalFlip ? -1 : 1);
-        break;
-      }
-      case 'Text': {
-        const background = paperLayer.getItem({data: { id: 'TextBackground' }});
-        background.pivot = paperLayer.bounds.center;
-        background.bounds.width = originalLayer.bounds.width;
-        background.bounds.height = originalLayer.bounds.height;
-        background.position.x = originalLayer.position.x;
-        background.position.y = originalLayer.position.y;
-        paperLayer.scale(horizontalFlip ? -1 : 1, verticalFlip ? -1 : 1);
-        break;
-      }
-      case 'Group':
-      case 'Shape':
-      case 'Image': {
-        paperLayer.pivot = paperLayer.bounds.center;
-        paperLayer.bounds.width = originalLayer.bounds.width;
-        paperLayer.bounds.height = originalLayer.bounds.height;
-        paperLayer.position.x = originalLayer.position.x;
-        paperLayer.position.y = originalLayer.position.y;
-        paperLayer.scale(horizontalFlip ? -1 : 1, verticalFlip ? -1 : 1);
-        break;
-      }
-    }
+    paperLayer.replaceWith(originalLayer.clone());
+    // switch(paperLayer.data.layerType) {
+    //   case 'Artboard': {
+    //     const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
+    //     const mask = paperLayer.getItem({data: { id: 'ArtboardLayersMask' }});
+    //     const maskedLayers = paperLayer.getItem({data: { id: 'ArtboardMaskedLayers' }});
+    //     const layers = paperLayer.getItem({data: { id: 'ArtboardLayers' }});
+    //     background.pivot = paperLayer.bounds.center;
+    //     background.bounds.width = originalLayer.bounds.width;
+    //     background.bounds.height = originalLayer.bounds.height;
+    //     background.position.x = originalLayer.position.x;
+    //     background.position.y = originalLayer.position.y;
+    //     background.scale(horizontalFlip ? -1 : 1, verticalFlip ? -1 : 1);
+    //     mask.pivot = paperLayer.bounds.center;
+    //     mask.bounds.width = originalLayer.bounds.width;
+    //     mask.bounds.height = originalLayer.bounds.height;
+    //     mask.position.x = originalLayer.position.x;
+    //     mask.position.y = originalLayer.position.y;
+    //     mask.scale(horizontalFlip ? -1 : 1, verticalFlip ? -1 : 1);
+    //     break;
+    //   }
+    //   case 'Text': {
+    //     const background = paperLayer.getItem({data: { id: 'TextBackground' }});
+    //     background.pivot = paperLayer.bounds.center;
+    //     background.bounds.width = originalLayer.bounds.width;
+    //     background.bounds.height = originalLayer.bounds.height;
+    //     background.position.x = originalLayer.position.x;
+    //     background.position.y = originalLayer.position.y;
+    //     paperLayer.scale(horizontalFlip ? -1 : 1, verticalFlip ? -1 : 1);
+    //     break;
+    //   }
+    //   case 'Group':
+    //   case 'Shape':
+    //   case 'Image': {
+    //     paperLayer.pivot = paperLayer.bounds.center;
+    //     paperLayer.bounds.width = originalLayer.bounds.width;
+    //     paperLayer.bounds.height = originalLayer.bounds.height;
+    //     paperLayer.position.x = originalLayer.position.x;
+    //     paperLayer.position.y = originalLayer.position.y;
+    //     paperLayer.scale(horizontalFlip ? -1 : 1, verticalFlip ? -1 : 1);
+    //     break;
+    //   }
+    // }
   }
 
   const scaleLayer = (id: string, hor: number, ver: number): void => {
@@ -104,7 +117,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
     switch(paperLayer.data.layerType) {
       case 'Artboard': {
         const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
-        const mask = paperLayer.getItem({data: { id: 'ArtboardMask' }});
+        const mask = paperLayer.getItem({data: { id: 'ArtboardLayersMask' }});
         background.scale(hor, ver);
         mask.scale(hor, ver);
         break;
@@ -148,52 +161,6 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
     }
   }
 
-  // const resizeLayers = (): void => {
-  //   switch(handle) {
-  //     case 'topLeft':
-  //     case 'topRight':
-  //     case 'bottomLeft':
-  //     case 'bottomRight': {
-  //       const fb = fromBounds;
-  //       const maxDim = fb.width > fb.height ? scaleX : scaleY;
-  //       selected.forEach((layer: string) => {
-  //         const paperLayer = getPaperLayer(layer);
-  //         clearLayerScale(paperLayer);
-  //         setLayerPivot(layer);
-  //         scaleLayer(layer, horizontalFlip ? -1 : 1, verticalFlip ? -1 : 1);
-  //         if (shiftModifier || preserveAspectRatio) {
-  //           scaleLayer(layer, maxDim, maxDim);
-  //         } else {
-  //           scaleLayer(layer, scaleX, scaleY);
-  //         }
-  //       });
-  //       break;
-  //     }
-  //     case 'topCenter':
-  //     case 'bottomCenter': {
-  //       selected.forEach((layer: string) => {
-  //         const paperLayer = getPaperLayer(layer);
-  //         clearLayerScale(paperLayer);
-  //         setLayerPivot(layer);
-  //         scaleLayer(layer, horizontalFlip ? -1 : 1, verticalFlip ? -1 : 1);
-  //         scaleLayer(layer, shiftModifier || preserveAspectRatio ? scaleY : 1, scaleY);
-  //       });
-  //       break;
-  //     }
-  //     case 'leftCenter':
-  //     case 'rightCenter': {
-  //       selected.forEach((layer: string) => {
-  //         const paperLayer = getPaperLayer(layer);
-  //         clearLayerScale(paperLayer);
-  //         setLayerPivot(layer);
-  //         scaleLayer(layer, horizontalFlip ? -1 : 1, verticalFlip ? -1 : 1);
-  //         scaleLayer(layer, scaleX, shiftModifier || preserveAspectRatio ? scaleX : 1);
-  //       });
-  //       break;
-  //     }
-  //   }
-  // }
-
   const resizeLayers = (): void => {
     const totalWidthDiff = toBounds.width / fromBounds.width;
     const totalHeightDiff = toBounds.height / fromBounds.height;
@@ -213,68 +180,68 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
     switch(paperLayer.data.layerType) {
       case 'Artboard': {
         const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
-        const mask = paperLayer.getItem({data: { id: 'ArtboardMask' }});
-        background.pivot = from;
-        mask.pivot = from;
+        const mask = paperLayer.getItem({data: { id: 'ArtboardLayersMask' }});
+        background.pivot = fromPivot;
+        mask.pivot = fromPivot;
         break;
       }
       case 'Text': {
         const background = paperLayer.getItem({data: { id: 'TextBackground' }});
-        background.pivot = from;
+        background.pivot = fromPivot;
         break;
       }
       case 'Group':
       case 'Shape':
       case 'Image': {
-        paperLayer.pivot = from;
+        paperLayer.pivot = fromPivot;
         break;
       }
     }
   }
 
-  const getNextSnapBounds = (nextHandle: Btwx.ResizeHandle, nextHorizontalFlip: boolean, nextVerticalFlip: boolean) => {
+  const getNextSnapBounds = (nextToEvent: paper.ToolEvent, nextHandle: Btwx.ResizeHandle, nextHorizontalFlip: boolean, nextVerticalFlip: boolean, shiftOverride?: boolean) => {
     let nextSnapBounds;
-    if (shiftModifier) {
+    if (nextToEvent.modifiers.shift || shiftOverride) {
       const aspect = fromBounds.width / fromBounds.height;
       const fb = fromBounds;
       switch(nextHandle) {
         case 'topLeft':
           nextSnapBounds = new paperMain.Rectangle({
-            top: fb.width > fb.height ? (nextHorizontalFlip ? fromBounds.bottom : fromBounds.top) + ((to.x - (nextVerticalFlip ? fromBounds.right : fromBounds.left)) / aspect) : to.y,
+            top: fb.width > fb.height ? (nextHorizontalFlip ? fromBounds.bottom : fromBounds.top) + ((nextToEvent.point.x - (nextVerticalFlip ? fromBounds.right : fromBounds.left)) / aspect) : nextToEvent.point.y,
             bottom: nextVerticalFlip ? fromBounds.top : fromBounds.bottom,
-            left: fb.width > fb.height ? to.x : (nextVerticalFlip ? fromBounds.right : fromBounds.left) + ((to.y - (nextHorizontalFlip ? fromBounds.bottom : fromBounds.top)) * aspect),
+            left: fb.width > fb.height ? nextToEvent.point.x : (nextVerticalFlip ? fromBounds.right : fromBounds.left) + ((nextToEvent.point.y - (nextHorizontalFlip ? fromBounds.bottom : fromBounds.top)) * aspect),
             right: nextHorizontalFlip ? fromBounds.left : fromBounds.right,
           });
           break;
         case 'topRight':
           nextSnapBounds = new paperMain.Rectangle({
-            top: fb.width > fb.height ? (nextHorizontalFlip ? fromBounds.bottom : fromBounds.top) - ((to.x - (nextVerticalFlip ? fromBounds.left : fromBounds.right)) / aspect) : to.y,
+            top: fb.width > fb.height ? (nextHorizontalFlip ? fromBounds.bottom : fromBounds.top) - ((nextToEvent.point.x - (nextVerticalFlip ? fromBounds.left : fromBounds.right)) / aspect) : nextToEvent.point.y,
             bottom: nextVerticalFlip ? fromBounds.top : fromBounds.bottom,
             left: nextHorizontalFlip ? fromBounds.right : fromBounds.left,
-            right: fb.width > fb.height ? to.x : (nextVerticalFlip ? fromBounds.left : fromBounds.right) - ((to.y - (nextHorizontalFlip ? fromBounds.bottom : fromBounds.top)) * aspect),
+            right: fb.width > fb.height ? nextToEvent.point.x : (nextVerticalFlip ? fromBounds.left : fromBounds.right) - ((nextToEvent.point.y - (nextHorizontalFlip ? fromBounds.bottom : fromBounds.top)) * aspect),
           });
           break;
         case 'bottomLeft':
           nextSnapBounds = new paperMain.Rectangle({
             top: nextVerticalFlip ? fromBounds.bottom : fromBounds.top,
-            bottom: fb.width > fb.height ? (nextHorizontalFlip ? fromBounds.top : fromBounds.bottom) - ((to.x - (nextVerticalFlip ? fromBounds.right : fromBounds.left)) / aspect) : to.y,
-            left: fb.width > fb.height ? to.x : (nextVerticalFlip ? fromBounds.right : fromBounds.left) - ((to.y - (nextHorizontalFlip ? fromBounds.top : fromBounds.bottom)) * aspect),
+            bottom: fb.width > fb.height ? (nextHorizontalFlip ? fromBounds.top : fromBounds.bottom) - ((nextToEvent.point.x - (nextVerticalFlip ? fromBounds.right : fromBounds.left)) / aspect) : nextToEvent.point.y,
+            left: fb.width > fb.height ? nextToEvent.point.x : (nextVerticalFlip ? fromBounds.right : fromBounds.left) - ((nextToEvent.point.y - (nextHorizontalFlip ? fromBounds.top : fromBounds.bottom)) * aspect),
             right: nextHorizontalFlip ? fromBounds.left : fromBounds.right
           });
           break;
         case 'bottomRight':
           nextSnapBounds = new paperMain.Rectangle({
             top: nextVerticalFlip ? fromBounds.bottom : fromBounds.top,
-            bottom: fb.width > fb.height ? (nextHorizontalFlip ? fromBounds.top : fromBounds.bottom) + ((to.x - (nextVerticalFlip ? fromBounds.left : fromBounds.right)) / aspect) : to.y,
+            bottom: fb.width > fb.height ? (nextHorizontalFlip ? fromBounds.top : fromBounds.bottom) + ((nextToEvent.point.x - (nextVerticalFlip ? fromBounds.left : fromBounds.right)) / aspect) : nextToEvent.point.y,
             left: nextHorizontalFlip ? fromBounds.right : fromBounds.left,
-            right: fb.width > fb.height ? to.x : (nextVerticalFlip ? fromBounds.left : fromBounds.right) + ((to.y - (nextHorizontalFlip ? fromBounds.top : fromBounds.bottom)) * aspect),
+            right: fb.width > fb.height ? nextToEvent.point.x : (nextVerticalFlip ? fromBounds.left : fromBounds.right) + ((nextToEvent.point.y - (nextHorizontalFlip ? fromBounds.top : fromBounds.bottom)) * aspect),
           });
           break;
         case 'topCenter': {
-          const distance = to.y - (nextVerticalFlip ? fromBounds.bottom : fromBounds.top);
+          const distance = nextToEvent.point.y - (nextVerticalFlip ? fromBounds.bottom : fromBounds.top);
           const xDelta = distance * aspect;
           nextSnapBounds = new paperMain.Rectangle({
-            top: to.y,
+            top: nextToEvent.point.y,
             bottom: nextVerticalFlip ? fromBounds.top : fromBounds.bottom,
             left: nextVerticalFlip ? fromBounds.right + (xDelta / 2) : fromBounds.left + (xDelta / 2),
             right: nextVerticalFlip ? fromBounds.left - (xDelta / 2) : fromBounds.right - (xDelta / 2)
@@ -282,35 +249,35 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
           break;
         }
         case 'bottomCenter': {
-          const distance = to.y - (nextVerticalFlip ? fromBounds.top : fromBounds.bottom);
+          const distance = nextToEvent.point.y - (nextVerticalFlip ? fromBounds.top : fromBounds.bottom);
           const xDelta = distance * aspect;
           nextSnapBounds = new paperMain.Rectangle({
             top: nextVerticalFlip ? fromBounds.bottom : fromBounds.top,
-            bottom: to.y,
+            bottom: nextToEvent.point.y,
             left: nextVerticalFlip ? fromBounds.right - (xDelta / 2) : fromBounds.left - (xDelta / 2),
             right: nextVerticalFlip ? fromBounds.left + (xDelta / 2) : fromBounds.right + (xDelta / 2)
           });
           break;
         }
         case 'leftCenter': {
-          const distance = to.x - (nextHorizontalFlip ? fromBounds.right : fromBounds.left);
+          const distance = nextToEvent.point.x - (nextHorizontalFlip ? fromBounds.right : fromBounds.left);
           const yDelta = distance / aspect;
           nextSnapBounds = new paperMain.Rectangle({
             top: nextHorizontalFlip ? fromBounds.bottom + (yDelta / 2) : fromBounds.top + (yDelta / 2),
             bottom: nextHorizontalFlip ? fromBounds.top - (yDelta / 2) : fromBounds.bottom - (yDelta / 2),
-            left: to.x,
+            left: nextToEvent.point.x,
             right: nextHorizontalFlip ? fromBounds.left : fromBounds.right
           });
           break;
         }
         case 'rightCenter': {
-          const distance = to.x - (nextHorizontalFlip ? fromBounds.left : fromBounds.right);
+          const distance = nextToEvent.point.x - (nextHorizontalFlip ? fromBounds.left : fromBounds.right);
           const yDelta = distance / aspect;
           nextSnapBounds = new paperMain.Rectangle({
             top: nextHorizontalFlip ? fromBounds.bottom - (yDelta / 2) : fromBounds.top - (yDelta / 2),
             bottom: nextHorizontalFlip ? fromBounds.top + (yDelta / 2) : fromBounds.bottom + (yDelta / 2),
             left: nextHorizontalFlip ? fromBounds.right : fromBounds.left,
-            right: to.x
+            right: nextToEvent.point.x
           });
           break;
         }
@@ -319,39 +286,39 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
       switch(nextHandle) {
         case 'topLeft':
           nextSnapBounds = new paperMain.Rectangle({
-            top: to.y,
+            top: nextToEvent.point.y,
             bottom: nextVerticalFlip ? fromBounds.top : fromBounds.bottom,
-            left: to.x,
+            left: nextToEvent.point.x,
             right: nextHorizontalFlip ? fromBounds.left : fromBounds.right
           });
           break;
         case 'topRight':
           nextSnapBounds = new paperMain.Rectangle({
-            top: to.y,
+            top: nextToEvent.point.y,
             bottom: nextVerticalFlip ? fromBounds.top : fromBounds.bottom,
             left: nextHorizontalFlip ? fromBounds.right : fromBounds.left,
-            right: to.x
+            right: nextToEvent.point.x
           });
           break;
         case 'bottomLeft':
           nextSnapBounds = new paperMain.Rectangle({
             top: nextVerticalFlip ? fromBounds.bottom : fromBounds.top,
-            bottom: to.y,
-            left: to.x,
+            bottom: nextToEvent.point.y,
+            left: nextToEvent.point.x,
             right: nextHorizontalFlip ? fromBounds.left : fromBounds.right
           });
           break;
         case 'bottomRight':
           nextSnapBounds = new paperMain.Rectangle({
             top: nextVerticalFlip ? fromBounds.bottom : fromBounds.top,
-            bottom: to.y,
+            bottom: nextToEvent.point.y,
             left: nextHorizontalFlip ? fromBounds.right : fromBounds.left,
-            right: to.x
+            right: nextToEvent.point.x
           });
           break;
         case 'topCenter':
           nextSnapBounds = new paperMain.Rectangle({
-            top: to.y,
+            top: nextToEvent.point.y,
             bottom: nextVerticalFlip ? fromBounds.top : fromBounds.bottom,
             left: fromBounds.left,
             right: fromBounds.right
@@ -360,7 +327,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
         case 'bottomCenter':
           nextSnapBounds = new paperMain.Rectangle({
             top: nextVerticalFlip ? fromBounds.bottom : fromBounds.top,
-            bottom: to.y,
+            bottom: nextToEvent.point.y,
             left: fromBounds.left,
             right: fromBounds.right
           });
@@ -369,7 +336,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
           nextSnapBounds = new paperMain.Rectangle({
             top: fromBounds.top,
             bottom: fromBounds.bottom,
-            left: to.x,
+            left: nextToEvent.point.x,
             right: nextHorizontalFlip ? fromBounds.left : fromBounds.right
           });
           break;
@@ -378,7 +345,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
             top: fromBounds.top,
             bottom: fromBounds.bottom,
             left: nextHorizontalFlip ? fromBounds.right : fromBounds.left,
-            right: to.x
+            right: nextToEvent.point.x
           });
           break;
         default:
@@ -388,99 +355,76 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
     return nextSnapBounds;
   }
 
-  const handleKeyDown = (e: paper.KeyEvent) => {
-    switch(e.key) {
-      case 'shift':
-        setShiftModifier(true);
-        break;
-    }
+  const handleKeyDown = (e: paper.KeyEvent): void => {
+    setKeyDownEvent(e);
   }
 
-  const handleKeyUp = (e: paper.KeyEvent) => {
-    switch(e.key) {
-      case 'shift':
-        setShiftModifier(false);
-        break;
-    }
+  const handleKeyUp = (e: paper.KeyEvent): void => {
+    setKeyUpEvent(e);
   }
 
   const handleMouseDown = (e: paper.ToolEvent): void => {
-    const selectedItems = paperMain.project.getItems({ data: { selected: true } });
-    const nextFromBounds = getSelectionBounds();
-    const nextOriginalSelection = selectedItems.reduce((result, current) => ({
-      ...result,
-      [current.data.id]: current.clone({insert: false})
-    }), {} as { [id: string]: paper.Item });
-    const nextFrom = (() => {
-      switch(initialHandle) {
-        case 'topLeft':
-          return nextFromBounds.bottomRight;
-        case 'topCenter':
-          return nextFromBounds.bottomCenter;
-        case 'topRight':
-          return nextFromBounds.bottomLeft;
-        case 'bottomLeft':
-          return nextFromBounds.topRight;
-        case 'bottomCenter':
-          return nextFromBounds.topCenter;
-        case 'bottomRight':
-          return nextFromBounds.topLeft;
-        case 'leftCenter':
-          return nextFromBounds.rightCenter;
-        case 'rightCenter':
-          return nextFromBounds.leftCenter;
-      }
-    })();
-    setFrom(nextFrom);
-    setFromBounds(nextFromBounds);
-    setOriginalSelection(nextOriginalSelection);
-    setCanvasResizing({resizing: true});
-    setHandle(initialHandle);
-    updateSelectionFrame(initialHandle);
-    selected.forEach((layer) => {
-      setLayerPivot(layer);
-    });
+    setFromEvent(e);
   }
 
   const handleMouseDrag = (e: paper.ToolEvent): void => {
-    if (from && originalSelection && selected.length > 0) {
-      setToolEvent(e);
-      setTo(e.point);
-    }
+    setToEvent(e);
   }
 
   const handleMouseUp = (e: paper.ToolEvent): void => {
-    if (selected.length > 0) {
-      selected.forEach((id) => {
-        const paperLayer = getPaperLayer(id);
-        paperLayer.pivot = null;
-      });
-      scaleLayers({layers: selected, scale: { x: 1, y: 1 }, horizontalFlip, verticalFlip});
-    }
-    if (resizing) {
-      setCanvasResizing({resizing: false});
-    }
-    resetState();
+    setEndEvent(e);
   }
 
   useEffect(() => {
-    if (tool) {
-      tool.onKeyDown = handleKeyDown;
-      tool.onKeyUp = handleKeyUp;
-      tool.onMouseDown = handleMouseDown;
-      tool.onMouseDrag = handleMouseDrag;
-      tool.onMouseUp = handleMouseUp;
+    if (fromEvent && isEnabled) {
+      const selectedItems = paperMain.project.getItems({ data: { selected: true } });
+      const nextFromBounds = getSelectionBounds();
+      const nextOriginalSelection = selectedItems.reduce((result, current) => ({
+        ...result,
+        [current.data.id]: current.clone({insert: false})
+      }), {} as { [id: string]: paper.Item });
+      const nextFromPivot = (() => {
+        switch(initialHandle) {
+          case 'topLeft':
+            return nextFromBounds.bottomRight;
+          case 'topCenter':
+            return nextFromBounds.bottomCenter;
+          case 'topRight':
+            return nextFromBounds.bottomLeft;
+          case 'bottomLeft':
+            return nextFromBounds.topRight;
+          case 'bottomCenter':
+            return nextFromBounds.topCenter;
+          case 'bottomRight':
+            return nextFromBounds.topLeft;
+          case 'leftCenter':
+            return nextFromBounds.rightCenter;
+          case 'rightCenter':
+            return nextFromBounds.leftCenter;
+        }
+      })();
+      setFromPivot(nextFromPivot);
+      setFromBounds(nextFromBounds);
+      setOriginalSelection(nextOriginalSelection);
+      setHandle(initialHandle);
+      updateSelectionFrame(initialHandle);
+      selected.forEach((layer) => {
+        setLayerPivot(layer);
+      });
+      if (fromEvent.modifiers.shift && !shiftModifier) {
+        setShiftModifier(true);
+      }
     }
-  }, [snapBounds, selected, fromBounds, originalSelection, resizing, isEnabled, initialHandle]);
+  }, [fromEvent]);
 
   useEffect(() => {
-    if (to && tool && isEnabled && resizing) {
+    if (toEvent && isEnabled) {
       let nextHandle = handle;
       let nextHorizontalFlip = horizontalFlip;
       let nextVerticalFlip = verticalFlip;
       switch(handle) {
         case 'topLeft': {
-          if (to.x > from.x && to.y > from.y) {
+          if (toEvent.point.x > fromPivot.x && toEvent.point.y > fromPivot.y) {
             nextHorizontalFlip = !horizontalFlip;
             nextVerticalFlip = !verticalFlip;
             nextHandle = 'bottomRight';
@@ -488,14 +432,14 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
               scaleLayer(layer, -1, -1);
             });
           } else {
-            if (to.x > from.x) {
+            if (toEvent.point.x > fromPivot.x) {
               nextHorizontalFlip = !horizontalFlip;
               nextHandle = 'topRight';
               selected.forEach((layer: string) => {
                 scaleLayer(layer, -1, 1);
               });
             }
-            if (to.y > from.y) {
+            if (toEvent.point.y > fromPivot.y) {
               nextVerticalFlip = !verticalFlip;
               nextHandle = 'bottomLeft';
               selected.forEach((layer: string) => {
@@ -506,7 +450,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
           break;
         }
         case 'topRight': {
-          if (to.x < from.x && to.y > from.y) {
+          if (toEvent.point.x < fromPivot.x && toEvent.point.y > fromPivot.y) {
             nextHorizontalFlip = !horizontalFlip;
             nextVerticalFlip = !verticalFlip;
             nextHandle = 'bottomLeft';
@@ -514,14 +458,14 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
               scaleLayer(layer, -1, -1);
             });
           } else {
-            if (to.x < from.x) {
+            if (toEvent.point.x < fromPivot.x) {
               nextHorizontalFlip = !horizontalFlip;
               nextHandle = 'topLeft';
               selected.forEach((layer: string) => {
                 scaleLayer(layer, -1, 1);
               });
             }
-            if (to.y > from.y) {
+            if (toEvent.point.y > fromPivot.y) {
               nextVerticalFlip = !verticalFlip;
               nextHandle = 'bottomRight';
               selected.forEach((layer: string) => {
@@ -532,7 +476,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
           break;
         }
         case 'bottomLeft': {
-          if (to.x > from.x && to.y < from.y) {
+          if (toEvent.point.x > fromPivot.x && toEvent.point.y < fromPivot.y) {
             nextHorizontalFlip = !horizontalFlip;
             nextVerticalFlip = !verticalFlip;
             nextHandle = 'topRight';
@@ -540,14 +484,14 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
               scaleLayer(layer, -1, -1);
             });
           } else {
-            if (to.x > from.x) {
+            if (toEvent.point.x > fromPivot.x) {
               nextHorizontalFlip = !horizontalFlip;
               nextHandle = 'bottomRight';
               selected.forEach((layer: string) => {
                 scaleLayer(layer, -1, 1);
               });
             }
-            if (to.y < from.y) {
+            if (toEvent.point.y < fromPivot.y) {
               nextVerticalFlip = !verticalFlip;
               nextHandle = 'topLeft';
               selected.forEach((layer: string) => {
@@ -558,7 +502,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
           break;
         }
         case 'bottomRight': {
-          if (to.x < from.x && to.y < from.y) {
+          if (toEvent.point.x < fromPivot.x && toEvent.point.y < fromPivot.y) {
             nextHorizontalFlip = !horizontalFlip;
             nextVerticalFlip = !verticalFlip;
             nextHandle = 'topLeft';
@@ -566,14 +510,14 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
               scaleLayer(layer, -1, -1);
             });
           } else {
-            if (to.x < from.x) {
+            if (toEvent.point.x < fromPivot.x) {
               nextHorizontalFlip = !horizontalFlip;
               nextHandle = 'bottomLeft';
               selected.forEach((layer: string) => {
                 scaleLayer(layer, -1, 1);
               });
             }
-            if (to.y < from.y) {
+            if (toEvent.point.y < fromPivot.y) {
               nextVerticalFlip = !verticalFlip;
               nextHandle = 'topRight';
               selected.forEach((layer: string) => {
@@ -584,7 +528,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
           break;
         }
         case 'topCenter': {
-          if (to.y > from.y) {
+          if (toEvent.point.y > fromPivot.y) {
             nextVerticalFlip = !verticalFlip;
             nextHandle = 'bottomCenter';
             selected.forEach((layer: string) => {
@@ -594,7 +538,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
           break;
         }
         case 'bottomCenter': {
-          if (to.y < from.y) {
+          if (toEvent.point.y < fromPivot.y) {
             nextVerticalFlip = !verticalFlip;
             nextHandle = 'topCenter';
             selected.forEach((layer: string) => {
@@ -604,7 +548,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
           break;
         }
         case 'leftCenter': {
-          if (to.x > from.x) {
+          if (toEvent.point.x > fromPivot.x) {
             nextHorizontalFlip = !horizontalFlip;
             nextHandle = 'rightCenter';
             selected.forEach((layer: string) => {
@@ -614,7 +558,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
           break;
         }
         case 'rightCenter': {
-          if (to.x < from.x) {
+          if (toEvent.point.x < fromPivot.x) {
             nextHorizontalFlip = !horizontalFlip;
             nextHandle = 'leftCenter';
             selected.forEach((layer: string) => {
@@ -624,28 +568,67 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
           break;
         }
       }
-      const nextSnapBounds = getNextSnapBounds(nextHandle, nextHorizontalFlip, nextVerticalFlip);
+      const nextSnapBounds = getNextSnapBounds(toEvent, nextHandle, nextHorizontalFlip, nextVerticalFlip);
       setSnapBounds(nextSnapBounds);
       setHandle(nextHandle);
       setHorizontalFlip(nextHorizontalFlip);
       setVerticalFlip(nextVerticalFlip);
+      if (!resizing) {
+        setCanvasResizing({resizing: true});
+      }
+      if (toEvent.modifiers.shift && !shiftModifier) {
+        setShiftModifier(true);
+      }
+      if (!toEvent.modifiers.shift && shiftModifier) {
+        setShiftModifier(false);
+      }
     }
-  }, [to]);
+  }, [toEvent]);
 
   useEffect(() => {
-    if (tool && isEnabled && resizing) {
+    if (endEvent && isEnabled) {
+      if (selected.length > 0) {
+        selected.forEach((id) => {
+          const paperLayer = getPaperLayer(id);
+          paperLayer.pivot = null;
+        });
+        scaleLayers({layers: selected, scale: { x: 1, y: 1 }, horizontalFlip, verticalFlip});
+      }
+      if (resizing) {
+        setCanvasResizing({resizing: false});
+      }
+      resetState();
+    }
+  }, [endEvent]);
+
+  useEffect(() => {
+    if (keyDownEvent && isEnabled && resizing) {
+      if (keyDownEvent.key === 'shift' && originalSelection) {
+        const nextSnapBounds = getNextSnapBounds(toEvent, handle, horizontalFlip, verticalFlip, true);
+        setSnapBounds(nextSnapBounds);
+        setShiftModifier(true);
+        return;
+      }
+    }
+  }, [keyDownEvent]);
+
+  useEffect(() => {
+    if (keyUpEvent && isEnabled && resizing) {
+      if (keyUpEvent.key === 'shift' && originalSelection) {
+        const nextSnapBounds = getNextSnapBounds(toEvent, handle, horizontalFlip, verticalFlip);
+        setSnapBounds(nextSnapBounds);
+        setShiftModifier(false);
+        return;
+      }
+    }
+  }, [keyUpEvent]);
+
+  useEffect(() => {
+    if (toBounds && isEnabled) {
       resizeLayers();
       updateSelectionFrame(handle);
     }
   }, [toBounds]);
-
-  useEffect(() => {
-    if (tool && isEnabled && resizing) {
-      const nextSnapBounds = getNextSnapBounds(handle, horizontalFlip, verticalFlip);
-      setToBounds(nextSnapBounds);
-      setSnapBounds(nextSnapBounds);
-    }
-  }, [shiftModifier]);
 
   useEffect(() => {
     if (isEnabled) {
@@ -678,8 +661,8 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
         bounds={snapBounds}
         snapRule='resize'
         hitTestZones={(() => {
-          const x = to && from ? to.x - from.x : 0;
-          const y = to && from ? to.y - from.y : 0;
+          const x = toEvent ? toEvent.point.x - toEvent.downPoint.x : 0;
+          const y = toEvent ? toEvent.point.y - toEvent.downPoint.y : 0;
           switch(handle) {
             case 'topCenter':
               return { top: true };
@@ -690,11 +673,10 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
             case 'rightCenter':
               return { right: true };
             case 'topLeft':
-              // return { top: true, left: true };
-              if (shiftModifier) {
-                if (fromBounds.width > fromBounds.height) {
+              if (toEvent && toEvent.modifiers.shift) {
+                if (snapBounds.width > snapBounds.height) {
                   return { left: true };
-                } else if (fromBounds.width < fromBounds.height) {
+                } else if (snapBounds.width < snapBounds.height) {
                   return { top: true };
                 } else {
                   if (Math.abs(x) > Math.abs(y)) {
@@ -709,11 +691,10 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
                 return { top: true, left: true };
               }
             case 'topRight':
-              // return { top: true, right: true };
-              if (shiftModifier) {
-                if (fromBounds.width > fromBounds.height) {
+              if (toEvent && toEvent.modifiers.shift) {
+                if (snapBounds.width > snapBounds.height) {
                   return { right: true };
-                } else if (fromBounds.width < fromBounds.height) {
+                } else if (snapBounds.width < snapBounds.height) {
                   return { top: true };
                 } else {
                   if (Math.abs(x) > Math.abs(y)) {
@@ -728,11 +709,10 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
                 return { top: true, right: true };
               }
             case 'bottomLeft':
-              // return { bottom: true, left: true };
-              if (shiftModifier) {
-                if (fromBounds.width > fromBounds.height) {
+              if (toEvent && toEvent.modifiers.shift) {
+                if (snapBounds.width > snapBounds.height) {
                   return { left: true };
-                } else if (fromBounds.width < fromBounds.height) {
+                } else if (snapBounds.width < snapBounds.height) {
                   return { bottom: true };
                 } else {
                   if (Math.abs(x) > Math.abs(y)) {
@@ -747,11 +727,10 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
                 return { bottom: true, left: true };
               }
             case 'bottomRight':
-              // return { bottom: true, right: true };
-              if (shiftModifier) {
-                if (fromBounds.width > fromBounds.height) {
+              if (toEvent && toEvent.modifiers.shift) {
+                if (snapBounds.width > snapBounds.height) {
                   return { right: true };
-                } else if (fromBounds.width < fromBounds.height) {
+                } else if (snapBounds.width < snapBounds.height) {
                   return { bottom: true };
                 } else {
                   if (Math.abs(x) > Math.abs(y)) {
@@ -768,30 +747,10 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
           }
         })()}
         onUpdate={setToBounds}
-        toolEvent={toolEvent}
+        toolEvent={toEvent}
         preserveAspectRatio={shiftModifier}
         aspectRatio={fromBounds ? fromBounds.width / fromBounds.height : 1}
         resizeHandle={handle}
-        resizePivot={(() => {
-          switch(handle) {
-            case 'topCenter':
-              return 'bottomCenter';
-            case 'bottomCenter':
-              return 'topCenter';
-            case 'leftCenter':
-              return 'rightCenter';
-            case 'rightCenter':
-              return 'leftCenter';
-            case 'topLeft':
-              return 'bottomRight';
-            case 'bottomRight':
-              return 'topLeft';
-            case 'topRight':
-              return 'bottomLeft';
-            case 'bottomLeft':
-              return 'topRight';
-          }
-        })()}
         blackListLayers={selected} />
     : null
   );

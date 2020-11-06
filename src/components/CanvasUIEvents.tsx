@@ -112,7 +112,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
   }
 
   useEffect(() => {
-    if (uiEvent) {
+    if (uiEvent && !dragging && !resizing && !selecting) {
       switch(uiEvent.eventType) {
         case 'contextMenu':
           handleContextMenu();

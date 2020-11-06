@@ -469,22 +469,31 @@ export const addArtboardThunk = (payload: AddArtboardPayload) => {
       data: { id: 'ArtboardBackground', type: 'LayerChild', layerType: 'Artboard' },
       fillColor: paperFillColor,
       position: new paperMain.Point(payload.layer.frame.x, payload.layer.frame.y),
+      shadowColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.20 },
+      shadowOffset: new paperMain.Point(0, 2),
+      shadowBlur: 10,
     });
     // create mask
-    const artboardMask = artboardBackground.clone();
-    artboardMask.name = 'Artboard Mask';
-    artboardMask.data = { id: 'ArtboardMask', type: 'LayerChild', layerType: 'Artboard' };
-    artboardMask.clipMask = true;
+    const artboardLayersMask = artboardBackground.clone();
+    artboardLayersMask.name = 'Artboard Layers Mask';
+    artboardLayersMask.data = { id: 'ArtboardLayersMask', type: 'LayerChild', layerType: 'Artboard' };
+    artboardLayersMask.clipMask = true;
     //
     const artboardLayers = new paperMain.Group({
       name: 'Artboard Layers',
       data: { id: 'ArtboardLayers', type: 'LayerChild', layerType: 'Artboard' }
     });
+    //
+    const artboardMaskedLayers = new paperMain.Group({
+      name: 'Artboard Masked Layers',
+      data: { id: 'ArtboardMaskedLayers', type: 'LayerChild', layerType: 'Artboard' },
+      children: [artboardLayersMask, artboardLayers]
+    });
     // create artboard group
     const artboard = new paperMain.Group({
       name: name,
       data: { id: id, type: 'Layer', layerType: 'Artboard', selected: false, hover: false, activeArtboard: false, scope: scope },
-      children: [artboardMask, artboardBackground, artboardLayers],
+      children: [artboardBackground, artboardMaskedLayers],
       parent: getPaperLayer('page')
     });
     // dispatch action
@@ -2802,10 +2811,10 @@ export const updateActiveArtboardFrame = () => {
     const topLeft = activeArtboardPaperLayer.bounds.topLeft;
     const bottomRight = activeArtboardPaperLayer.bounds.bottomRight;
     new paperMain.Path.Rectangle({
-      from: new paperMain.Point(topLeft.x - (4 / paperMain.view.zoom), topLeft.y - (4 / paperMain.view.zoom)),
-      to: new paperMain.Point(bottomRight.x + (4 / paperMain.view.zoom), bottomRight.y + (4 / paperMain.view.zoom)),
+      from: new paperMain.Point(topLeft.x - (2 / paperMain.view.zoom), topLeft.y - (2 / paperMain.view.zoom)),
+      to: new paperMain.Point(bottomRight.x + (2 / paperMain.view.zoom), bottomRight.y + (2 / paperMain.view.zoom)),
       strokeColor: THEME_PRIMARY_COLOR,
-      strokeWidth: 3 / paperMain.view.zoom,
+      strokeWidth: 4 / paperMain.view.zoom,
       data: {
         id: 'ActiveArtboardFrame',
         type: 'UIElement',
@@ -2829,9 +2838,10 @@ export const updateHoverFrame = () => {
     hoverFrame.remove();
   }
   if (hoverPaperLayer) {
+    let nextHoverFrame: paper.Item;
     switch(hoverPaperLayer.data.layerType) {
       case 'Shape':
-        new paperMain.CompoundPath({
+        nextHoverFrame = new paperMain.CompoundPath({
           ...hoverFrameConstants,
           closed: hoverPaperLayer.data.shapeType !== 'Line',
           pathData: (hoverPaperLayer as paper.Path | paper.CompoundPath).pathData
@@ -2839,7 +2849,7 @@ export const updateHoverFrame = () => {
         break;
       case 'Text': {
         const textLayer = hoverPaperLayer.getItem({data: { id: 'TextContent' }});
-        const linesGroup = new paperMain.Group({
+        nextHoverFrame = new paperMain.Group({
           data: { id: 'HoverFrame', type: 'UIElement', interactive: false }
         });
         const initialPoint = (textLayer as paper.PointText).point;
@@ -2855,18 +2865,22 @@ export const updateHoverFrame = () => {
               interactiveType: null,
               elementId: 'HoverFrame'
             },
-            parent: linesGroup
+            parent: nextHoverFrame
           });
         });
         break;
       }
       default:
-        new paperMain.Path.Rectangle({
+        nextHoverFrame = new paperMain.Path.Rectangle({
           ...hoverFrameConstants,
           from: hoverPaperLayer.bounds.topLeft,
           to: hoverPaperLayer.bounds.bottomRight
         });
         break;
+    }
+    if (getPaperLayer('SelectionFrame')) {
+      const selectionFrame = getPaperLayer('SelectionFrame');
+      nextHoverFrame.insertBelow(selectionFrame);
     }
   }
 };

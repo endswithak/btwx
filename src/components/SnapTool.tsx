@@ -21,7 +21,6 @@ interface SnapToolProps {
   };
   snapRule: 'move' | 'resize';
   resizeHandle?: Btwx.ResizeHandle;
-  resizePivot?: Btwx.ResizeHandle;
   preserveAspectRatio?: boolean;
   aspectRatio?: number;
   onUpdate?(snapBounds: paper.Rectangle): any;
@@ -100,15 +99,15 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
       data: (data: any) => {
         const notPage = data.type === 'Layer' && data.layerType !== 'Page';
         const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
-        const other = data.id && data.id !== scope[scope.length - 1];
+        const isTopScopeGroup = data.id && data.type === 'Group' && data.id === scope[scope.length - 1];
         if (whiteListLayers && whiteListLayers.length > 0) {
           const whiteListed = data.scope && whiteListLayers.includes(data.id) || data.scope.some((id: string) => whiteListLayers.includes(id));
-          return whiteListed && notPage && isScopeLayer && other;
+          return whiteListed && notPage && isScopeLayer && !isTopScopeGroup;
         } else if (blackListLayers && blackListLayers.length > 0) {
           const notBlackListed = data.scope && !blackListLayers.includes(data.id) && data.scope.every((id: string) => !blackListLayers.includes(id));
-          return notBlackListed && notPage && isScopeLayer && other;
+          return notBlackListed && notPage && isScopeLayer && !isTopScopeGroup;
         } else {
-          return notPage && isScopeLayer && other;
+          return notPage && isScopeLayer && !isTopScopeGroup;
         }
       },
       bounds: (bounds: paper.Rectangle) => {
@@ -139,15 +138,15 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
       data: (data: any) => {
         const notPage = data.type === 'Layer' && data.layerType !== 'Page';
         const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
-        const other = data.id && data.id !== scope[scope.length - 1];
+        const isTopScopeGroup = data.id && data.type === 'Group' && data.id === scope[scope.length - 1];
         if (whiteListLayers && whiteListLayers.length > 0) {
           const whiteListed = data.scope && whiteListLayers.includes(data.id) || data.scope.some((id: string) => whiteListLayers.includes(id));
-          return whiteListed && notPage && isScopeLayer && other;
+          return whiteListed && notPage && isScopeLayer && !isTopScopeGroup;
         } else if (blackListLayers && blackListLayers.length > 0) {
           const notBlackListed = data.scope && !blackListLayers.includes(data.id) && data.scope.every((id: string) => !blackListLayers.includes(id));
-          return notBlackListed && notPage && isScopeLayer && other;
+          return notBlackListed && notPage && isScopeLayer && !isTopScopeGroup;
         } else {
-          return notPage && isScopeLayer && other;
+          return notPage && isScopeLayer && !isTopScopeGroup;
         }
       },
       bounds: (bounds: paper.Rectangle) => {
@@ -171,15 +170,15 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
       data: (data: any) => {
         const notPage = data.type === 'Layer' && data.layerType !== 'Page';
         const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
-        const other = data.id && data.id !== scope[scope.length - 1];
+        const isTopScopeGroup = data.id && data.type === 'Group' && data.id === scope[scope.length - 1];
         if (whiteListLayers && whiteListLayers.length > 0) {
           const whiteListed = data.scope && whiteListLayers.includes(data.id) || data.scope.some((id: string) => whiteListLayers.includes(id));
-          return whiteListed && notPage && isScopeLayer && other;
+          return whiteListed && notPage && isScopeLayer && !isTopScopeGroup;
         } else if (blackListLayers && blackListLayers.length > 0) {
           const notBlackListed = data.scope && !blackListLayers.includes(data.id) && data.scope.every((id: string) => !blackListLayers.includes(id));
-          return notBlackListed && notPage && isScopeLayer && other;
+          return notBlackListed && notPage && isScopeLayer && !isTopScopeGroup;
         } else {
-          return notPage && isScopeLayer && other;
+          return notPage && isScopeLayer && !isTopScopeGroup;
         }
       },
       bounds: (bounds: paper.Rectangle) => {
@@ -354,11 +353,20 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
 
   const getNextYSnapState = (snapZones: any) => {
     if (ySnapPoint) {
-      if (ySnapPointBreakThreshold + toolEvent.delta.y < snapBreakThreshholdMin || ySnapPointBreakThreshold + toolEvent.delta.y > snapBreakThreshholdMax) {
-        return {
-          snapPoint: null,
-          breakThreshold: 0
-        };
+      const breaksMinThreshold = ySnapPointBreakThreshold + toolEvent.delta.y < snapBreakThreshholdMin;
+      const breaksMaxThreshold = ySnapPointBreakThreshold + toolEvent.delta.y > snapBreakThreshholdMax;
+      if (breaksMinThreshold || breaksMaxThreshold) {
+        if (breaksMinThreshold) {
+          return {
+            snapPoint: getYSnapPoint(snapZones),
+            breakThreshold: (ySnapPointBreakThreshold + toolEvent.delta.y) - snapBreakThreshholdMin
+          };
+        } else if (breaksMaxThreshold) {
+          return {
+            snapPoint: getYSnapPoint(snapZones),
+            breakThreshold: (ySnapPointBreakThreshold + toolEvent.delta.y) - snapBreakThreshholdMax
+          };
+        }
       } else {
         return {
           snapPoint: ySnapPoint,
@@ -375,11 +383,20 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
 
   const getNextXSnapState = (snapZones: any) => {
     if (xSnapPoint) {
-      if (xSnapPointBreakThreshold + toolEvent.delta.x < snapBreakThreshholdMin || xSnapPointBreakThreshold + toolEvent.delta.x > snapBreakThreshholdMax) {
-        return {
-          snapPoint: null,
-          breakThreshold: 0
-        };
+      const breaksMinThreshold = xSnapPointBreakThreshold + toolEvent.delta.x < snapBreakThreshholdMin;
+      const breaksMaxThreshold = xSnapPointBreakThreshold + toolEvent.delta.x > snapBreakThreshholdMax;
+      if (breaksMinThreshold || breaksMaxThreshold) {
+        if (breaksMinThreshold) {
+          return {
+            snapPoint: getXSnapPoint(snapZones),
+            breakThreshold: (xSnapPointBreakThreshold + toolEvent.delta.x) - snapBreakThreshholdMin
+          };
+        } else if (breaksMaxThreshold) {
+          return {
+            snapPoint: getXSnapPoint(snapZones),
+            breakThreshold: (xSnapPointBreakThreshold + toolEvent.delta.x) - snapBreakThreshholdMax
+          };
+        }
       } else {
         return {
           snapPoint: xSnapPoint,
@@ -416,25 +433,25 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           let bottom;
           let left;
           let right
-          let yDelta;
           switch(nextYSnapPoint.snapPoint.snapZone) {
             case 'top': {
               if (preserveAspectRatio) {
-                yDelta = nextYSnapPoint.snapPoint.y - currentSnapBounds.top;
+                const height = currentSnapBounds.bottom - nextYSnapPoint.snapPoint.y;
+                const width = height * aspectRatio;
                 top = nextYSnapPoint.snapPoint.y;
                 bottom = currentSnapBounds.bottom;
                 switch(resizeHandle) {
                   case 'topLeft':
-                    left = currentSnapBounds.top + yDelta;
+                    left = currentSnapBounds.right - width;
                     right = currentSnapBounds.right;
                     break;
                   case 'topRight':
                     left = currentSnapBounds.left;
-                    right = currentSnapBounds.right + yDelta;
+                    right = currentSnapBounds.left + width;
                     break;
                   case 'topCenter':
-                    left = currentSnapBounds.top + (yDelta / 2);
-                    right = currentSnapBounds.right + (yDelta / 2);
+                    left = currentSnapBounds.center.x - (width / 2);
+                    right = currentSnapBounds.center.x + (width / 2);
                     break;
                 }
               } else {
@@ -447,21 +464,22 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
             }
             case 'bottom': {
               if (preserveAspectRatio) {
-                yDelta = nextYSnapPoint.snapPoint.y - currentSnapBounds.bottom;
+                const height = currentSnapBounds.top - nextYSnapPoint.snapPoint.y;
+                const width = height * aspectRatio;
                 top = currentSnapBounds.top;
                 bottom = nextYSnapPoint.snapPoint.y;
                 switch(resizeHandle) {
                   case 'bottomLeft':
-                    left = currentSnapBounds.top + yDelta;
+                    left = currentSnapBounds.right + width;
                     right = currentSnapBounds.right;
                     break;
                   case 'bottomRight':
                     left = currentSnapBounds.left;
-                    right = currentSnapBounds.right + yDelta;
+                    right = currentSnapBounds.left - width;
                     break;
                   case 'bottomCenter':
-                    left = currentSnapBounds.top + (yDelta / 2);
-                    right = currentSnapBounds.right + (yDelta / 2);
+                    left = currentSnapBounds.center.x + (width / 2);
+                    right = currentSnapBounds.center.x - (width / 2);
                     break;
                 }
               } else {
@@ -500,27 +518,25 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           let bottom;
           let left;
           let right
-          let xDelta;
           switch(nextXSnapPoint.snapPoint.snapZone) {
             case 'left': {
               if (preserveAspectRatio) {
                 const width = currentSnapBounds.right - nextXSnapPoint.snapPoint.x;
-                const height = width * aspectRatio;
-                xDelta = nextXSnapPoint.snapPoint.x - currentSnapBounds.left;
+                const height = width / aspectRatio;
                 left = nextXSnapPoint.snapPoint.x;
                 right = currentSnapBounds.right;
                 switch(resizeHandle) {
                   case 'topLeft':
-                    top = currentSnapBounds.bottom - (height / 2);
+                    top = currentSnapBounds.bottom - height;
                     bottom = currentSnapBounds.bottom;
                     break;
                   case 'bottomLeft':
                     top = currentSnapBounds.top;
-                    bottom = currentSnapBounds.top + (height / 2);
+                    bottom = currentSnapBounds.top + height;
                     break;
                   case 'leftCenter':
-                    top = currentSnapBounds.top + (xDelta / 2);
-                    bottom = currentSnapBounds.bottom + (xDelta / 2);
+                    top = currentSnapBounds.center.y - (height / 2);
+                    bottom = currentSnapBounds.center.y + (height / 2);
                     break;
                 }
               } else {
@@ -533,21 +549,22 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
             }
             case 'right': {
               if (preserveAspectRatio) {
-                xDelta = nextXSnapPoint.snapPoint.x - currentSnapBounds.right;
+                const width = currentSnapBounds.left - nextXSnapPoint.snapPoint.x;
+                const height = width / aspectRatio;
                 left = currentSnapBounds.left;
                 right = nextXSnapPoint.snapPoint.x;
                 switch(resizeHandle) {
                   case 'topRight':
-                    top = currentSnapBounds.top + xDelta;
+                    top = currentSnapBounds.bottom + height;
                     bottom = currentSnapBounds.bottom;
                     break;
                   case 'bottomRight':
                     top = currentSnapBounds.top;
-                    bottom = currentSnapBounds.bottom + xDelta;
+                    bottom = currentSnapBounds.top - height;
                     break;
                   case 'rightCenter':
-                    top = currentSnapBounds.top + (xDelta / 2);
-                    bottom = currentSnapBounds.bottom + (xDelta / 2);
+                    top = currentSnapBounds.center.y + (height / 2);
+                    bottom = currentSnapBounds.center.y - (height / 2);
                     break;
                 }
               } else {
@@ -592,7 +609,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
         }
       }
     }
-  }, [toolEvent]);
+  }, [toolEvent, preserveAspectRatio]);
 
   useEffect(() => {
     setSnapBreakThreshholdMin(-8 / paperMain.view.zoom);

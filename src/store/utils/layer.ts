@@ -1992,7 +1992,7 @@ export const setLayerWidth = (state: LayerState, action: SetLayerWidth): LayerSt
   const paperLayer = getPaperLayer(action.payload.id);
   const layerItem = state.byId[action.payload.id];
   if (layerItem.type === 'Artboard') {
-    const mask = paperLayer.getItem({data: { id: 'ArtboardMask' }});
+    const mask = paperLayer.getItem({data: { id: 'ArtboardLayersMask' }});
     const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
     mask.bounds.width = action.payload.width;
     background.bounds.width = action.payload.width;
@@ -2043,7 +2043,7 @@ export const setLayerHeight = (state: LayerState, action: SetLayerHeight): Layer
   const paperLayer = getPaperLayer(action.payload.id);
   const layerItem = state.byId[action.payload.id];
   if (layerItem.type === 'Artboard') {
-    const mask = paperLayer.getItem({data: { id: 'ArtboardMask' }});
+    const mask = paperLayer.getItem({data: { id: 'ArtboardLayersMask' }});
     const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
     mask.bounds.height = action.payload.height;
     background.bounds.height = action.payload.height;
@@ -4301,15 +4301,16 @@ const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: {[id: st
   const paperLayer = getPaperLayer(id);
   const paperLayerClone = paperLayer.clone({deep: paperLayer.data.layerType === 'Shape' || paperLayer.data.layerType === 'Text', insert: true});
   if (paperLayer.data.layerType === 'Artboard') {
-    const artboardMask = paperLayer.getItem({ data: { id: 'ArtboardMask' }});
-    const artboardMaskClone = artboardMask.clone({deep: false, insert: true});
-    artboardMaskClone.parent = paperLayerClone;
+    const artboardLayersMask = paperLayer.getItem({ data: { id: 'ArtboardLayersMask' }});
+    const artboardLayersMaskClone = artboardLayersMask.clone({deep: false, insert: true});
     const artboardBackground = paperLayer.getItem({ data: { id: 'ArtboardBackground' }});
     const artboardBackgroundClone = artboardBackground.clone({deep: false, insert: true});
-    artboardBackgroundClone.parent = paperLayerClone;
+    const artboardMaskedLayers = paperLayer.getItem({ data: { id: 'ArtboardMaskedLayers' }});
+    const artboardMaskedLayersClone = artboardMaskedLayers.clone({deep: false, insert: true});
     const artboardLayers = paperLayer.getItem({ data: { id: 'ArtboardLayers' }});
     const artboardLayersClone = artboardLayers.clone({deep: false, insert: true});
-    artboardLayersClone.parent = paperLayerClone;
+    artboardMaskedLayersClone.children = [artboardLayersMaskClone, artboardLayersClone];
+    paperLayerClone.children = [artboardBackgroundClone, artboardMaskedLayersClone];
   }
   if (paperLayer.data.layerType === 'Image') {
     const raster = paperLayer.getItem({ data: { id: 'Raster' }});

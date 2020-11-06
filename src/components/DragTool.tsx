@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-// import { remote } from 'electron';
-import React, { useRef, useContext, useEffect, ReactElement, useState } from 'react';
+import React, { useContext, useEffect, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getHoverBounds, getPaperLayer, getPaperLayersBounds, getSelectionBounds } from '../store/selectors/layer';
+import { getPaperLayer, getPaperLayersBounds } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
 import { setCanvasDragging } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasDraggingPayload } from '../store/actionTypes/canvasSettings';
@@ -170,6 +169,22 @@ const DragTool = (props: DragToolProps): ReactElement => {
   }, [endEvent]);
 
   useEffect(() => {
+    if (keyDownEvent && isEnabled && dragging && !duplicateSelection) {
+      if (keyDownEvent.key === 'alt' && originalSelection) {
+        duplicateLayers({layers: originalSelection});
+      }
+    }
+  }, [keyDownEvent]);
+
+  useEffect(() => {
+    if (keyUpEvent && isEnabled && dragging && duplicateSelection) {
+      if (keyUpEvent.key === 'alt' && originalSelection) {
+        removeDuplicatedLayers({layers: duplicateSelection, newSelection: originalSelection});
+      }
+    }
+  }, [keyUpEvent]);
+
+  useEffect(() => {
     if (selected && isEnabled && originalSelection) {
       const lengthsMatch = selected.length === originalSelection.length;
       const itemsMatch = selected.every((id) => originalSelection.includes(id));
@@ -205,22 +220,6 @@ const DragTool = (props: DragToolProps): ReactElement => {
       translateLayers();
     }
   }, [toBounds]);
-
-  useEffect(() => {
-    if (keyDownEvent && isEnabled && dragging && !duplicateSelection) {
-      if (keyDownEvent.key === 'alt' && originalSelection) {
-        duplicateLayers({layers: originalSelection});
-      }
-    }
-  }, [keyDownEvent]);
-
-  useEffect(() => {
-    if (keyUpEvent && isEnabled && dragging && duplicateSelection) {
-      if (keyUpEvent.key === 'alt' && originalSelection) {
-        removeDuplicatedLayers({layers: duplicateSelection, newSelection: originalSelection});
-      }
-    }
-  }, [keyUpEvent]);
 
   // handle tool enable / disable
   useEffect(() => {

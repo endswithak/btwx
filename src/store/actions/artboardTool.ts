@@ -21,16 +21,16 @@ export const toggleArtboardToolThunk = () => {
     const state = getState() as RootState;
     if (state.canvasSettings.focusing) {
       if (state.canvasSettings.activeTool === 'Artboard') {
-        const tooltip = paperMain.project.getItem({ data: { id: 'Tooltip' } });
-        const preview = paperMain.project.getItem({ data: { id: 'ArtboardToolPreview' } });
-        if (tooltip) {
-          tooltip.remove();
-        }
-        if (preview) {
-          preview.remove();
-        }
+        // const tooltip = paperMain.project.getItem({ data: { id: 'Tooltip' } });
+        // const preview = paperMain.project.getItem({ data: { id: 'ArtboardToolPreview' } });
+        // if (tooltip) {
+        //   tooltip.remove();
+        // }
+        // if (preview) {
+        //   preview.remove();
+        // }
         dispatch(disableArtboardTool());
-        dispatch(setCanvasActiveTool({activeTool: null}));
+        dispatch(setCanvasActiveTool({activeTool: null, drawing: false}));
       } else {
         dispatch(enableArtboardTool());
         dispatch(setCanvasActiveTool({activeTool: 'Artboard'}));

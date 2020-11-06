@@ -7,13 +7,14 @@ import { paperMain } from '../canvas';
 import { ThemeContext } from './ThemeProvider';
 import CanvasLayerEvents from './CanvasLayerEvents';
 import CanvasUIEvents from './CanvasUIEvents';
+import CanvasToast from './CanvasToast';
 import ZoomTool from './ZoomTool';
 import TranslateTool from './TranslateTool';
 import DragTool from './DragTool';
 import ResizeTool from './ResizeTool';
 import ShapeTool from './ShapeTool';
+import ArtboardTool from './ArtboardTool';
 import AreaSelectTool from './AreaSelectTool';
-// import KeyBindings from './KeyBindings';
 
 interface CanvasProps {
   ready: boolean;
@@ -119,10 +120,12 @@ const Canvas = (props: CanvasProps): ReactElement => {
               zoomEvent={zoomEvent} />
             <TranslateTool
               translateEvent={translateEvent} />
+            <ArtboardTool />
             <ShapeTool />
             <DragTool />
             <ResizeTool />
             <AreaSelectTool />
+            <CanvasToast />
           </>
         : null
       }

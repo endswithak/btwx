@@ -132,10 +132,10 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
     }
     const areaSelectPreview = new paperMain.Path.Rectangle({
       rectangle: areaSelectBounds,
-      fillColor: theme.text.lightest,
+      fillColor: theme.name === 'light' ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.5)',
       strokeWidth: 1 / paperMain.view.zoom,
-      strokeColor: theme.text.lighter,
-      opacity: theme.name === 'light' ? 0.20 : 0.5,
+      strokeColor: theme.name === 'light' ? '#000' : '#fff',
+      opacity: 0.2,
       data: { id: 'AreaSelectPreview' }
     });
     areaSelectPreview.removeOn({
