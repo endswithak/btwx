@@ -92,6 +92,7 @@ class MeasureGuide {
         ...removeOpts
       });
     }
+    measureGuide.bringToFront();
     this.paperLayer = measureGuide;
   }
 }

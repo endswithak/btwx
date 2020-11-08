@@ -1,9 +1,10 @@
 import React, { ReactElement, useEffect } from 'react';
-import { remote, ipcRenderer } from 'electron';
+import { remote } from 'electron';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { ViewSettingsTypes } from '../store/actionTypes/viewSettings';
 import { enableDarkTheme } from '../store/actions/viewSettings';
+import { THEME_DARK_BACKGROUND_MIN } from '../constants';
 
 export const MENU_ITEM_ID = 'appThemeDark';
 
@@ -31,6 +32,7 @@ const MenuAppThemeDark = (props: MenuAppThemeDarkProps): ReactElement => {
           if (window.id !== browserWindowId) {
             window.webContents.executeJavaScript(`${MENU_ITEM_ID}(false)`);
           }
+          window.setBackgroundColor(THEME_DARK_BACKGROUND_MIN);
         });
       }
     };

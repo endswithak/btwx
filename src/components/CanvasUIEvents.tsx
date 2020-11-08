@@ -49,7 +49,8 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
                 !activeTool ||
                 activeTool === 'Drag' && !dragging ||
                 activeTool === 'Resize' && !resizing ||
-                activeTool === 'AreaSelect' && !selecting
+                activeTool === 'AreaSelect' && !selecting ||
+                activeTool === 'Line' && !resizing
               ) {
                 setCanvasActiveTool({activeTool: 'Drag', dragHandle: true});
               }
@@ -65,7 +66,8 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
               if (
                 !activeTool ||
                 activeTool === 'Drag' && !dragging ||
-                activeTool === 'AreaSelect' && !selecting
+                activeTool === 'AreaSelect' && !selecting ||
+                activeTool === 'Line' && !resizing
               ) {
                 setCanvasActiveTool({activeTool: 'Resize', resizeHandle: uiEvent.hitResult.item.data.interactiveType});
               }
@@ -73,6 +75,14 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
             }
             case 'from':
             case 'to':
+              if (
+                !activeTool ||
+                activeTool === 'Drag' && !dragging ||
+                activeTool === 'Resize' && !resizing ||
+                activeTool === 'AreaSelect' && !selecting
+              ) {
+                setCanvasActiveTool({activeTool: 'Line', resizeHandle: uiEvent.hitResult.item.data.interactiveType});
+              }
               break;
           }
           break;

@@ -5,7 +5,8 @@ import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
 import { ThemeContext } from './ThemeProvider';
-import { getPaperLayer, getPaperLayersBounds } from '../store/selectors/layer';
+import { updateMeasureFrame } from '../store/actions/layer';
+import { getPaperLayer, getPaperLayersBounds, getClosestPaperLayer } from '../store/selectors/layer';
 
 interface SnapToolProps {
   toolEvent: paper.ToolEvent;
@@ -23,24 +24,25 @@ interface SnapToolProps {
   resizeHandle?: Btwx.ResizeHandle;
   preserveAspectRatio?: boolean;
   aspectRatio?: number;
-  onUpdate?(snapBounds: paper.Rectangle): any;
   scope?: string[];
   whiteListLayers?: string[];
   blackListLayers?: string[];
+  measure?: boolean;
+  onUpdate?(snapBounds: paper.Rectangle, xSnapPoint: any, ySnapPoint: any): any;
 }
 
 const snapToolDebug = true;
 
 const SnapTool = memo(function SnapTool(props: SnapToolProps) {
   const theme = useContext(ThemeContext);
-  const { toolEvent, bounds, scope, onUpdate, hitTestZones, snapRule, whiteListLayers, blackListLayers, preserveAspectRatio, aspectRatio, resizeHandle } = props;
-  const [snapBounds, setSnapBounds] = useState(null);
-  const [xSnapPoint, setXSnapPoint] = useState(null);
-  const [ySnapPoint, setYSnapPoint] = useState(null);
-  const [xSnapPointBreakThreshold, setXSnapPointBreakThreshold] = useState(0);
-  const [ySnapPointBreakThreshold, setYSnapPointBreakThreshold] = useState(0);
-  const [snapBreakThreshholdMin, setSnapBreakThreshholdMin] = useState(null);
-  const [snapBreakThreshholdMax, setSnapBreakThreshholdMax] = useState(null);
+  const { toolEvent, bounds, scope, onUpdate, hitTestZones, snapRule, whiteListLayers, blackListLayers, preserveAspectRatio, aspectRatio, resizeHandle, measure } = props;
+  const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
+  const [xSnapPoint, setXSnapPoint] = useState<Btwx.SnapPoint>(null);
+  const [ySnapPoint, setYSnapPoint] = useState<Btwx.SnapPoint>(null);
+  const [xSnapPointBreakThreshold, setXSnapPointBreakThreshold] = useState<number>(0);
+  const [ySnapPointBreakThreshold, setYSnapPointBreakThreshold] = useState<number>(0);
+  const [snapBreakThreshholdMin, setSnapBreakThreshholdMin] = useState<number>(null);
+  const [snapBreakThreshholdMax, setSnapBreakThreshholdMax] = useState<number>(null);
   const [snapZoneTop, setSnapZoneTop] = useState<paper.Rectangle>(null);
   const [snapZoneMiddle, setSnapZoneMiddle] = useState<paper.Rectangle>(null);
   const [snapZoneBottom, setSnapZoneBottom] = useState<paper.Rectangle>(null);
@@ -48,14 +50,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
   const [snapZoneCenter, setSnapZoneCenter] = useState<paper.Rectangle>(null);
   const [snapZoneRight, setSnapZoneRight] = useState<paper.Rectangle>(null);
 
-  const getSnapZones = (currentToBounds: paper.Rectangle, scaleOverride?: number): {
-    top: paper.Rectangle;
-    middle: paper.Rectangle;
-    bottom: paper.Rectangle;
-    left: paper.Rectangle;
-    center: paper.Rectangle;
-    right: paper.Rectangle;
-  } => {
+  const getSnapZones = (currentToBounds: paper.Rectangle, scaleOverride?: number): Btwx.SnapZones => {
     const zoneMin = 0.5;
     const zoneMax = 20;
     const zoneScale = scaleOverride ? scaleOverride : 0.5 * (16 / paperMain.view.zoom);
@@ -94,7 +89,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
     }
   }
 
-  const getGuideLayersBySnapZone = (snapZones: any, snapZone: Btwx.SnapZoneType): paper.Item[] => {
+  const getGuideLayersBySnapZone = (snapZones: Btwx.SnapZones, snapZone: Btwx.SnapZoneType): paper.Item[] => {
     return paperMain.project.getItems({
       data: (data: any) => {
         const notPage = data.type === 'Layer' && data.layerType !== 'Page';
@@ -133,7 +128,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
     });
   }
 
-  const getYSnapToLayer = (snapZones: any): paper.Item => {
+  const getYSnapToLayer = (snapZones: Btwx.SnapZones): paper.Item => {
     return paperMain.project.getItem({
       data: (data: any) => {
         const notPage = data.type === 'Layer' && data.layerType !== 'Page';
@@ -165,7 +160,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
     });
   }
 
-  const getXSnapToLayer = (snapZones: any): paper.Item => {
+  const getXSnapToLayer = (snapZones: Btwx.SnapZones): paper.Item => {
     return paperMain.project.getItem({
       data: (data: any) => {
         const notPage = data.type === 'Layer' && data.layerType !== 'Page';
@@ -197,12 +192,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
     });
   }
 
-  const getYSnapPoint = (snapZones: any): {
-    snapZone: Btwx.SnapZoneType;
-    layerSnapZone: Btwx.SnapZoneType;
-    layerBounds: paper.Rectangle;
-    y: number;
-  } => {
+  const getYSnapPoint = (snapZones: Btwx.SnapZones): Btwx.SnapPoint => {
     const ySnapToLayer = getYSnapToLayer(snapZones);
     if (ySnapToLayer) {
       if (ySnapToLayer.bounds.topCenter.isInside(snapZones.top)) {
@@ -210,6 +200,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           snapZone: 'top',
           layerSnapZone: 'top',
           layerBounds: ySnapToLayer.bounds,
+          layerId: ySnapToLayer.data.id,
           y: ySnapToLayer.bounds.topCenter.y
         }
       } else if (ySnapToLayer.bounds.center.isInside(snapZones.top)) {
@@ -217,6 +208,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           snapZone: 'top',
           layerSnapZone: 'middle',
           layerBounds: ySnapToLayer.bounds,
+          layerId: ySnapToLayer.data.id,
           y: ySnapToLayer.bounds.center.y
         }
       } else if (ySnapToLayer.bounds.bottomCenter.isInside(snapZones.top)) {
@@ -224,6 +216,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           snapZone: 'top',
           layerSnapZone: 'bottom',
           layerBounds: ySnapToLayer.bounds,
+          layerId: ySnapToLayer.data.id,
           y: ySnapToLayer.bounds.bottomCenter.y
         }
       } else if (ySnapToLayer.bounds.topCenter.isInside(snapZones.middle)) {
@@ -231,6 +224,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           snapZone: 'middle',
           layerSnapZone: 'top',
           layerBounds: ySnapToLayer.bounds,
+          layerId: ySnapToLayer.data.id,
           y: ySnapToLayer.bounds.topCenter.y
         }
       } else if (ySnapToLayer.bounds.center.isInside(snapZones.middle)) {
@@ -238,6 +232,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           snapZone: 'middle',
           layerSnapZone: 'middle',
           layerBounds: ySnapToLayer.bounds,
+          layerId: ySnapToLayer.data.id,
           y: ySnapToLayer.bounds.center.y
         }
       } else if (ySnapToLayer.bounds.bottomCenter.isInside(snapZones.middle)) {
@@ -245,6 +240,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           snapZone: 'middle',
           layerSnapZone: 'bottom',
           layerBounds: ySnapToLayer.bounds,
+          layerId: ySnapToLayer.data.id,
           y: ySnapToLayer.bounds.bottomCenter.y
         }
       } else if (ySnapToLayer.bounds.topCenter.isInside(snapZones.bottom)) {
@@ -252,6 +248,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           snapZone: 'bottom',
           layerSnapZone: 'top',
           layerBounds: ySnapToLayer.bounds,
+          layerId: ySnapToLayer.data.id,
           y: ySnapToLayer.bounds.topCenter.y
         }
       } else if (ySnapToLayer.bounds.center.isInside(snapZones.bottom)) {
@@ -259,6 +256,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           snapZone: 'bottom',
           layerSnapZone: 'middle',
           layerBounds: ySnapToLayer.bounds,
+          layerId: ySnapToLayer.data.id,
           y: ySnapToLayer.bounds.center.y
         }
       } else if (ySnapToLayer.bounds.bottomCenter.isInside(snapZones.bottom)) {
@@ -266,6 +264,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           snapZone: 'bottom',
           layerSnapZone: 'bottom',
           layerBounds: ySnapToLayer.bounds,
+          layerId: ySnapToLayer.data.id,
           y: ySnapToLayer.bounds.bottomCenter.y
         }
       }
@@ -274,12 +273,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
     }
   }
 
-  const getXSnapPoint = (snapZones: any): {
-    snapZone: Btwx.SnapZoneType;
-    layerSnapZone: Btwx.SnapZoneType;
-    layerBounds: paper.Rectangle;
-    x: number;
-  } => {
+  const getXSnapPoint = (snapZones: Btwx.SnapZones): Btwx.SnapPoint => {
     const xSnapToLayer = getXSnapToLayer(snapZones);
     if (xSnapToLayer) {
       if (xSnapToLayer.bounds.leftCenter.isInside(snapZones.left)) {
@@ -287,6 +281,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           snapZone: 'left',
           layerSnapZone: 'left',
           layerBounds: xSnapToLayer.bounds,
+          layerId: xSnapToLayer.data.id,
           x: xSnapToLayer.bounds.leftCenter.x
         }
       } else if (xSnapToLayer.bounds.center.isInside(snapZones.left)) {
@@ -294,6 +289,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           snapZone: 'left',
           layerSnapZone: 'center',
           layerBounds: xSnapToLayer.bounds,
+          layerId: xSnapToLayer.data.id,
           x: xSnapToLayer.bounds.center.x
         }
       } else if (xSnapToLayer.bounds.rightCenter.isInside(snapZones.left)) {
@@ -301,6 +297,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           snapZone: 'left',
           layerSnapZone: 'right',
           layerBounds: xSnapToLayer.bounds,
+          layerId: xSnapToLayer.data.id,
           x: xSnapToLayer.bounds.rightCenter.x
         }
       } else if (xSnapToLayer.bounds.leftCenter.isInside(snapZones.center)) {
@@ -308,6 +305,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           snapZone: 'center',
           layerSnapZone: 'left',
           layerBounds: xSnapToLayer.bounds,
+          layerId: xSnapToLayer.data.id,
           x: xSnapToLayer.bounds.leftCenter.x
         }
       } else if (xSnapToLayer.bounds.center.isInside(snapZones.center)) {
@@ -315,6 +313,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           snapZone: 'center',
           layerSnapZone: 'center',
           layerBounds: xSnapToLayer.bounds,
+          layerId: xSnapToLayer.data.id,
           x: xSnapToLayer.bounds.center.x
         }
       } else if (xSnapToLayer.bounds.rightCenter.isInside(snapZones.center)) {
@@ -322,6 +321,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           snapZone: 'center',
           layerSnapZone: 'right',
           layerBounds: xSnapToLayer.bounds,
+          layerId: xSnapToLayer.data.id,
           x: xSnapToLayer.bounds.rightCenter.x
         }
       } else if (xSnapToLayer.bounds.leftCenter.isInside(snapZones.right)) {
@@ -329,6 +329,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           snapZone: 'right',
           layerSnapZone: 'left',
           layerBounds: xSnapToLayer.bounds,
+          layerId: xSnapToLayer.data.id,
           x: xSnapToLayer.bounds.leftCenter.x
         }
       } else if (xSnapToLayer.bounds.center.isInside(snapZones.right)) {
@@ -336,6 +337,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           snapZone: 'right',
           layerSnapZone: 'center',
           layerBounds: xSnapToLayer.bounds,
+          layerId: xSnapToLayer.data.id,
           x: xSnapToLayer.bounds.center.x
         }
       } else if (xSnapToLayer.bounds.rightCenter.isInside(snapZones.right)) {
@@ -343,6 +345,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           snapZone: 'right',
           layerSnapZone: 'right',
           layerBounds: xSnapToLayer.bounds,
+          layerId: xSnapToLayer.data.id,
           x: xSnapToLayer.bounds.rightCenter.x
         }
       }
@@ -351,7 +354,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
     }
   }
 
-  const getNextYSnapState = (snapZones: any) => {
+  const getNextYSnapState = (snapZones: Btwx.SnapZones): Btwx.SnapState => {
     if (ySnapPoint) {
       const breaksMinThreshold = ySnapPointBreakThreshold + toolEvent.delta.y < snapBreakThreshholdMin;
       const breaksMaxThreshold = ySnapPointBreakThreshold + toolEvent.delta.y > snapBreakThreshholdMax;
@@ -381,7 +384,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
     }
   }
 
-  const getNextXSnapState = (snapZones: any) => {
+  const getNextXSnapState = (snapZones: Btwx.SnapZones): Btwx.SnapState => {
     if (xSnapPoint) {
       const breaksMinThreshold = xSnapPointBreakThreshold + toolEvent.delta.x < snapBreakThreshholdMin;
       const breaksMaxThreshold = xSnapPointBreakThreshold + toolEvent.delta.x > snapBreakThreshholdMax;
@@ -411,20 +414,20 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
     }
   }
 
-  const getNextSnapBounds = (nextXSnapPoint: any, nextYSnapPoint: any) => {
+  const getNextSnapBounds = (nextXSnapState: Btwx.SnapState, nextYSnapState: Btwx.SnapState): paper.Rectangle => {
     let currentSnapBounds = new paperMain.Rectangle(bounds);
-    if (nextYSnapPoint.snapPoint) {
+    if (nextYSnapState.snapPoint) {
       switch(snapRule) {
         case 'move':
-          switch(nextYSnapPoint.snapPoint.snapZone) {
+          switch(nextYSnapState.snapPoint.snapZone) {
             case 'top':
-              currentSnapBounds.center.y = nextYSnapPoint.snapPoint.y + (bounds.height / 2);
+              currentSnapBounds.center.y = nextYSnapState.snapPoint.y + (bounds.height / 2);
               break;
             case 'middle':
-              currentSnapBounds.center.y = nextYSnapPoint.snapPoint.y;
+              currentSnapBounds.center.y = nextYSnapState.snapPoint.y;
               break;
             case 'bottom':
-              currentSnapBounds.center.y = nextYSnapPoint.snapPoint.y - (bounds.height / 2);
+              currentSnapBounds.center.y = nextYSnapState.snapPoint.y - (bounds.height / 2);
               break;
           }
           break;
@@ -433,12 +436,12 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           let bottom;
           let left;
           let right
-          switch(nextYSnapPoint.snapPoint.snapZone) {
+          switch(nextYSnapState.snapPoint.snapZone) {
             case 'top': {
               if (preserveAspectRatio) {
-                const height = currentSnapBounds.bottom - nextYSnapPoint.snapPoint.y;
+                const height = currentSnapBounds.bottom - nextYSnapState.snapPoint.y;
                 const width = height * aspectRatio;
-                top = nextYSnapPoint.snapPoint.y;
+                top = nextYSnapState.snapPoint.y;
                 bottom = currentSnapBounds.bottom;
                 switch(resizeHandle) {
                   case 'topLeft':
@@ -455,7 +458,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
                     break;
                 }
               } else {
-                top = nextYSnapPoint.snapPoint.y;
+                top = nextYSnapState.snapPoint.y;
                 left = currentSnapBounds.left;
                 right = currentSnapBounds.right;
                 bottom = currentSnapBounds.bottom;
@@ -464,10 +467,10 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
             }
             case 'bottom': {
               if (preserveAspectRatio) {
-                const height = currentSnapBounds.top - nextYSnapPoint.snapPoint.y;
+                const height = currentSnapBounds.top - nextYSnapState.snapPoint.y;
                 const width = height * aspectRatio;
                 top = currentSnapBounds.top;
-                bottom = nextYSnapPoint.snapPoint.y;
+                bottom = nextYSnapState.snapPoint.y;
                 switch(resizeHandle) {
                   case 'bottomLeft':
                     left = currentSnapBounds.right + width;
@@ -486,7 +489,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
                 top = currentSnapBounds.top;
                 left = currentSnapBounds.left;
                 right = currentSnapBounds.right;
-                bottom = nextYSnapPoint.snapPoint.y;
+                bottom = nextYSnapState.snapPoint.y;
               }
               break;
             }
@@ -498,18 +501,18 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
         }
       }
     }
-    if (nextXSnapPoint.snapPoint) {
+    if (nextXSnapState.snapPoint) {
       switch(snapRule) {
         case 'move':
-          switch(nextXSnapPoint.snapPoint.snapZone) {
+          switch(nextXSnapState.snapPoint.snapZone) {
             case 'left':
-              currentSnapBounds.center.x = nextXSnapPoint.snapPoint.x + (bounds.width / 2);
+              currentSnapBounds.center.x = nextXSnapState.snapPoint.x + (bounds.width / 2);
               break;
             case 'center':
-              currentSnapBounds.center.x = nextXSnapPoint.snapPoint.x;
+              currentSnapBounds.center.x = nextXSnapState.snapPoint.x;
               break;
             case 'right':
-              currentSnapBounds.center.x = nextXSnapPoint.snapPoint.x - (bounds.width / 2);
+              currentSnapBounds.center.x = nextXSnapState.snapPoint.x - (bounds.width / 2);
               break;
           }
           break;
@@ -518,12 +521,12 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           let bottom;
           let left;
           let right
-          switch(nextXSnapPoint.snapPoint.snapZone) {
+          switch(nextXSnapState.snapPoint.snapZone) {
             case 'left': {
               if (preserveAspectRatio) {
-                const width = currentSnapBounds.right - nextXSnapPoint.snapPoint.x;
+                const width = currentSnapBounds.right - nextXSnapState.snapPoint.x;
                 const height = width / aspectRatio;
-                left = nextXSnapPoint.snapPoint.x;
+                left = nextXSnapState.snapPoint.x;
                 right = currentSnapBounds.right;
                 switch(resizeHandle) {
                   case 'topLeft':
@@ -541,7 +544,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
                 }
               } else {
                 top = currentSnapBounds.top;
-                left = nextXSnapPoint.snapPoint.x;
+                left = nextXSnapState.snapPoint.x;
                 right = currentSnapBounds.right;
                 bottom = currentSnapBounds.bottom;
               }
@@ -549,10 +552,10 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
             }
             case 'right': {
               if (preserveAspectRatio) {
-                const width = currentSnapBounds.left - nextXSnapPoint.snapPoint.x;
+                const width = currentSnapBounds.left - nextXSnapState.snapPoint.x;
                 const height = width / aspectRatio;
                 left = currentSnapBounds.left;
-                right = nextXSnapPoint.snapPoint.x;
+                right = nextXSnapState.snapPoint.x;
                 switch(resizeHandle) {
                   case 'topRight':
                     top = currentSnapBounds.bottom + height;
@@ -570,7 +573,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
               } else {
                 top = currentSnapBounds.top;
                 left = currentSnapBounds.left;
-                right = nextXSnapPoint.snapPoint.x;
+                right = nextXSnapState.snapPoint.x;
                 bottom = currentSnapBounds.bottom;
               }
               break;
@@ -605,7 +608,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
       if (!nextSnapBounds.equals(snapBounds)) {
         setSnapBounds(nextSnapBounds);
         if (onUpdate) {
-          onUpdate(nextSnapBounds);
+          onUpdate(nextSnapBounds, nextXSnapState.snapPoint, nextYSnapState.snapPoint);
         }
       }
     }
@@ -628,7 +631,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
 
   useEffect(() => {
     if (snapBounds) {
-      const guideIds = ['SnapGuideTop', 'SnapGuideMiddle', 'SnapGuideBottom', 'SnapGuideLeft', 'SnapGuideCenter', 'SnapGuideRight'];
+      const guideIds = ['MeasureFrame', 'SnapGuideTop', 'SnapGuideMiddle', 'SnapGuideBottom', 'SnapGuideLeft', 'SnapGuideCenter', 'SnapGuideRight'];
       guideIds.forEach((elementId) => {
         const paperLayer = getPaperLayer(elementId);
         if (paperLayer) {
@@ -678,6 +681,23 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           guide.removeOn({
             up: true
           });
+          if (measure) {
+            const measureGuides: { top?: string; bottom?: string; left?: string; right?: string; all?: string } = {};
+            const closestLayer = getClosestPaperLayer(snapBounds.center, guideLayers);
+            if (xSnapPoint) {
+              if (!snapBounds.intersects(closestLayer.bounds, 1)) {
+                measureGuides['top'] = closestLayer.data.id;
+                measureGuides['bottom'] = closestLayer.data.id;
+              }
+            }
+            if (ySnapPoint) {
+              if (!snapBounds.intersects(closestLayer.bounds, 1)) {
+                measureGuides['left'] = closestLayer.data.id;
+                measureGuides['right'] = closestLayer.data.id;
+              }
+            }
+            updateMeasureFrame(measureGuides, snapBounds);
+          }
         }
       });
     }

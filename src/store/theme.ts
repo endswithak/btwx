@@ -1,5 +1,5 @@
 import chroma, { Color } from 'chroma-js';
-import { THEME_PRIMARY_COLOR, THEME_UNIT_SIZE, THEME_RECORDING_COLOR } from '../constants';
+import { THEME_PRIMARY_COLOR, THEME_UNIT_SIZE, THEME_RECORDING_COLOR, THEME_DARK_BACKGROUND_MIN, THEME_LIGHT_BACKGROUND_MIN, THEME_DARK_BACKGROUND_MAX, THEME_LIGHT_BACKGROUND_MAX } from '../constants';
 
 const createScale = (min: string, max: string, count: number) => {
   return chroma.scale([min, max]).mode('lch').colors(count);
@@ -7,12 +7,12 @@ const createScale = (min: string, max: string, count: number) => {
 
 const accent = chroma('magenta').css();
 
-const darkBgMin = '#111';
-const darkBgMax = '#555';
+const darkBgMin = THEME_DARK_BACKGROUND_MIN;
+const darkBgMax = THEME_DARK_BACKGROUND_MAX;
 const darkBgScale = createScale(darkBgMin, darkBgMax, 7);
 
-const lightBgMin = '#f7f7f7';
-const lightBgMax = '#ccc';
+const lightBgMin = THEME_LIGHT_BACKGROUND_MIN;
+const lightBgMax = THEME_LIGHT_BACKGROUND_MAX;
 const lightBgScale = createScale(lightBgMin, lightBgMax, 7);
 
 const darkTextMin = 'rgba(255,255,255,0.25)';

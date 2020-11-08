@@ -2963,19 +2963,41 @@ export const updateSelectionFrame = (visibleHandle: Btwx.SelectionFrameHandle = 
     }
     // All other selection frames
     else {
-      const baseFrame = new paperMain.Path.Rectangle({
+      const baseFrameOverlay = new paperMain.Path.Rectangle({
         from: selectionTopLeft,
         to: selectionBottomRight,
-        strokeColor: tinycolor(paperMain.view.element.style.background).isDark() ? '#fff' : '#000',
-        opacity: 0.2,
+        strokeColor: '#fff',
         strokeWidth: 1 / paperMain.view.zoom,
-        insert: false,
+        blendMode: 'multiply',
         data: {
           type: 'UIElementChild',
           interactive: false,
           interactiveType: null,
           elementId: 'SelectionFrame'
         }
+      });
+      const baseFrameDifference = new paperMain.Path.Rectangle({
+        from: selectionTopLeft,
+        to: selectionBottomRight,
+        strokeColor: '#999',
+        strokeWidth: 1 / paperMain.view.zoom,
+        blendMode: 'difference',
+        data: {
+          type: 'UIElementChild',
+          interactive: false,
+          interactiveType: null,
+          elementId: 'SelectionFrame'
+        }
+      });
+      const baseFrame = new paperMain.Group({
+        opacity: 0.33,
+        data: {
+          type: 'UIElementChild',
+          interactive: false,
+          interactiveType: null,
+          elementId: 'SelectionFrame'
+        },
+        children: [baseFrameDifference, baseFrameOverlay]
       });
       const moveHandle = new paperMain.Path.Ellipse({
         ...baseProps,
@@ -3266,13 +3288,14 @@ export const updateTweenEventsFrameThunk = () => {
   }
 };
 
-export const updateMeasureFrame = (state: RootState, guides: { top?: string; bottom?: string; left?: string; right?: string; all?: string }) => {
+export const updateMeasureFrame = (guides: { top?: string; bottom?: string; left?: string; right?: string; all?: string }, bounds?: paper.Rectangle) => {
   const measureFrame = paperMain.project.getItem({ data: { id: 'MeasureFrame' } });
+  const selected = paperMain.project.getItems({ data: { selected: true } });
   if (measureFrame) {
     measureFrame.remove();
   }
-  if (state.layer.present.selected.length > 0) {
-    const selectionBounds = getSelectionBounds();
+  if (selected.length > 0) {
+    const selectionBounds = bounds ? bounds : getSelectionBounds();
     const measureFrameGuides = [];
     let hasTopMeasure;
     let hasBottomMeasure;
@@ -3387,12 +3410,5 @@ export const updateMeasureFrame = (state: RootState, guides: { top?: string; bot
         elementId: 'MeasureFrame'
       }
     });
-  }
-};
-
-export const updateMeasureFrameThunk = (guides: { top?: string; bottom?: string; left?: string; right?: string; all?: string }) => {
-  return (dispatch: any, getState: any) => {
-    const state = getState() as RootState;
-    updateMeasureFrame(state, guides);
   }
 };

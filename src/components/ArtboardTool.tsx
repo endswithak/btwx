@@ -9,42 +9,39 @@ import { paperMain } from '../canvas';
 import { setCanvasDrawing } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasDrawingPayload } from '../store/actionTypes/canvasSettings';
 import { addArtboardThunk } from '../store/actions/layer';
-import { LayerTypes, AddArtboardPayload } from '../store/actionTypes/layer';
+import { AddArtboardPayload } from '../store/actionTypes/layer';
 import { toggleArtboardToolThunk } from '../store/actions/artboardTool';
 import { ThemeContext } from './ThemeProvider';
 import SnapTool from './SnapTool';
+import PaperTool, { PaperToolProps } from './PaperTool';
 
-interface ArtboardToolProps {
+interface ArtboardToolStateProps {
   isEnabled?: boolean;
   drawing?: boolean;
+}
+
+interface ArtboardToolDispatchProps {
   addArtboardThunk?(payload: AddArtboardPayload): void;
   setCanvasDrawing?(payload: SetCanvasDrawingPayload): CanvasSettingsTypes;
   toggleArtboardToolThunk?(): void;
 }
 
+type ArtboardToolProps = (
+  ArtboardToolStateProps &
+  ArtboardToolDispatchProps &
+  PaperToolProps
+);
+
 const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isEnabled, addArtboardThunk, setCanvasDrawing, drawing, toggleArtboardToolThunk } = props;
-  const [tool, setTool] = useState<paper.Tool>(null);
+  const { isEnabled, addArtboardThunk, setCanvasDrawing, drawing, toggleArtboardToolThunk, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent } = props;
   const [handle, setHandle] = useState<Btwx.ResizeHandle>(null);
   const [constrainedDims, setConstrainedDims] = useState<paper.Point>(null);
   const [shiftModifier, setShiftModifier] = useState<boolean>(false);
-
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
-
-  const [moveEvent, setMoveEvent] = useState<paper.ToolEvent>(null);
-
-  const [fromEvent, setFromEvent] = useState<paper.ToolEvent>(null);
   const [from, setFrom] = useState<paper.Point>(null);
-
-  const [toEvent, setToEvent] = useState<paper.ToolEvent>(null);
   const [toBounds, setToBounds] = useState<paper.Rectangle>(null);
   const [initialToBounds, setInitialToBounds] = useState<paper.Rectangle>(null);
-
-  const [endEvent, setEndEvent] = useState<paper.ToolEvent>(null);
-
-  const [keyDownEvent, setKeyDownEvent] = useState<paper.KeyEvent>(null);
-  const [keyUpEvent, setKeyUpEvent] = useState<paper.KeyEvent>(null);
 
   const resetState = () => {
     if (getPaperLayer('Tooltip')) {
@@ -54,16 +51,11 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
       getPaperLayer('ArtboardToolPreview').remove();
     }
     setFrom(null);
-    setFromEvent(null);
-    setToEvent(null);
-    setEndEvent(null);
     setHandle(null);
     setConstrainedDims(null);
     setToBounds(null);
     setShiftModifier(false);
     setSnapBounds(null);
-    setKeyDownEvent(null);
-    setKeyUpEvent(null);
     setInitialToBounds(null);
   }
 
@@ -74,7 +66,7 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
     if (getPaperLayer('Tooltip')) {
       getPaperLayer('Tooltip').remove();
     }
-    const nextTooltip = new Tooltip(`${Math.round(toBounds.width)} x ${Math.round(toBounds.height)}`, toEvent.point, {up: true});
+    const nextTooltip = new Tooltip(`${Math.round(toBounds.width)} x ${Math.round(toBounds.height)}`, dragEvent.point, {up: true});
     const nextPreview = new paperMain.Path.Rectangle({
       rectangle: toBounds,
       strokeColor: theme.palette.primary,
@@ -88,28 +80,103 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
     });
   }
 
-  const handleKeyDown = (e: paper.KeyEvent): void => {
-    setKeyDownEvent(e);
+  const getSnapToolHitTestZones = () => {
+    if (drawing) {
+      const x = dragEvent ? dragEvent.point.x - dragEvent.downPoint.x : 0;
+      const y = dragEvent ? dragEvent.point.y - dragEvent.downPoint.y : 0;
+      switch(handle) {
+        case 'topCenter':
+          return { top: true };
+        case 'bottomCenter':
+          return { bottom: true };
+        case 'leftCenter':
+          return { left: true };
+        case 'rightCenter':
+          return { right: true };
+        case 'topLeft':
+          if (dragEvent && dragEvent.modifiers.shift) {
+            if (snapBounds.width > snapBounds.height) {
+              return { left: true };
+            } else if (snapBounds.width < snapBounds.height) {
+              return { top: true };
+            } else {
+              if (Math.abs(x) > Math.abs(y)) {
+                return { left: true };
+              } else if (Math.abs(x) < Math.abs(y)) {
+                return { top: true };
+              } else {
+                return { top: true, left: true };
+              }
+            }
+          } else {
+            return { top: true, left: true };
+          }
+        case 'topRight':
+          if (dragEvent && dragEvent.modifiers.shift) {
+            if (snapBounds.width > snapBounds.height) {
+              return { right: true };
+            } else if (snapBounds.width < snapBounds.height) {
+              return { top: true };
+            } else {
+              if (Math.abs(x) > Math.abs(y)) {
+                return { right: true };
+              } else if (Math.abs(x) < Math.abs(y)) {
+                return { top: true };
+              } else {
+                return { top: true, right: true };
+              }
+            }
+          } else {
+            return { top: true, right: true };
+          }
+        case 'bottomLeft':
+          if (dragEvent && dragEvent.modifiers.shift) {
+            if (snapBounds.width > snapBounds.height) {
+              return { left: true };
+            } else if (snapBounds.width < snapBounds.height) {
+              return { bottom: true };
+            } else {
+              if (Math.abs(x) > Math.abs(y)) {
+                return { left: true };
+              } else if (Math.abs(x) < Math.abs(y)) {
+                return { bottom: true };
+              } else {
+                return { bottom: true, left: true };
+              }
+            }
+          } else {
+            return { bottom: true, left: true };
+          }
+        case 'bottomRight':
+          if (dragEvent && dragEvent.modifiers.shift) {
+            if (snapBounds.width > snapBounds.height) {
+              return { right: true };
+            } else if (snapBounds.width < snapBounds.height) {
+              return { bottom: true };
+            } else {
+              if (Math.abs(x) > Math.abs(y)) {
+                return { right: true };
+              } else if (Math.abs(x) < Math.abs(y)) {
+                return { bottom: true };
+              } else {
+                return { bottom: true, right: true };
+              }
+            }
+          } else {
+            return { bottom: true, right: true };
+          }
+      }
+    } else {
+      return { center: true, middle: true };
+    }
   }
 
-  const handleKeyUp = (e: paper.KeyEvent): void => {
-    setKeyUpEvent(e);
-  }
-
-  const handleMouseMove = (e: paper.ToolEvent): void => {
-    setMoveEvent(e);
-  }
-
-  const handleMouseDown = (e: paper.ToolEvent): void => {
-    setFromEvent(e);
-  }
-
-  const handleMouseDrag = (e: paper.ToolEvent): void => {
-    setToEvent(e);
-  }
-
-  const handleMouseUp = (e: paper.ToolEvent): void => {
-    setEndEvent(e);
+  const handleSnapToolUpdate = (snapToolBounds: paper.Rectangle, xSnapPoint: Btwx.SnapPoint, ySnapPoint: Btwx.SnapPoint): void => {
+    if (drawing) {
+      setToBounds(snapToolBounds);
+    } else {
+      setInitialToBounds(snapToolBounds);
+    }
   }
 
   useEffect(() => {
@@ -123,28 +190,28 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
   }, [moveEvent])
 
   useEffect(() => {
-    if (fromEvent && isEnabled) {
+    if (downEvent && isEnabled) {
       if (initialToBounds) {
         setFrom(initialToBounds.center);
       } else {
-        setFrom(fromEvent.point);
+        setFrom(downEvent.point);
       }
     }
-  }, [fromEvent])
+  }, [downEvent])
 
   useEffect(() => {
-    if (toEvent && isEnabled) {
-      const fromPoint = from ? from : toEvent.downPoint;
-      const x = toEvent.point.x - fromPoint.x;
-      const y = toEvent.point.y - fromPoint.y;
+    if (dragEvent && isEnabled) {
+      const fromPoint = from ? from : dragEvent.downPoint;
+      const x = dragEvent.point.x - fromPoint.x;
+      const y = dragEvent.point.y - fromPoint.y;
       const nextHandle = `${y > 0 ? 'bottom' : 'top'}${x > 0 ? 'Right' : 'Left'}` as 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
-      const nextVector = toEvent.point.subtract(fromPoint);
-      const nextDims = new paperMain.Rectangle({from: fromPoint, to: toEvent.point}).size;
+      const nextVector = dragEvent.point.subtract(fromPoint);
+      const nextDims = new paperMain.Rectangle({from: fromPoint, to: dragEvent.point}).size;
       const nextMaxDim = Math.max(nextDims.width, nextDims.height);
       const nextContrainedDims = new paperMain.Point(nextVector.x < 0 ? fromPoint.x - nextMaxDim : fromPoint.x + nextMaxDim, nextVector.y < 0 ? fromPoint.y - nextMaxDim : fromPoint.y + nextMaxDim);
       const nextSnapBounds = new paperMain.Rectangle({
         from: fromPoint,
-        to: toEvent.modifiers.shift ? nextContrainedDims : toEvent.point
+        to: dragEvent.modifiers.shift ? nextContrainedDims : dragEvent.point
       });
       setHandle(nextHandle);
       setConstrainedDims(nextContrainedDims);
@@ -152,17 +219,17 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
       if (!drawing) {
         setCanvasDrawing({drawing: true});
       }
-      if (toEvent.modifiers.shift && !shiftModifier) {
+      if (dragEvent.modifiers.shift && !shiftModifier) {
         setShiftModifier(true);
       }
-      if (!toEvent.modifiers.shift && shiftModifier) {
+      if (!dragEvent.modifiers.shift && shiftModifier) {
         setShiftModifier(false);
       }
     }
-  }, [toEvent]);
+  }, [dragEvent]);
 
   useEffect(() => {
-    if (endEvent && isEnabled && drawing) {
+    if (upEvent && isEnabled && drawing) {
       addArtboardThunk({
         layer: {
           parent: 'page',
@@ -179,7 +246,7 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
       toggleArtboardToolThunk();
       resetState();
     }
-  }, [endEvent]);
+  }, [upEvent]);
 
   useEffect(() => {
     if (keyDownEvent && isEnabled && drawing) {
@@ -198,7 +265,7 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
       if (keyUpEvent.key === 'shift') {
         setSnapBounds(new paperMain.Rectangle({
           from: from,
-          to: toEvent.point
+          to: dragEvent.point
         }));
         setShiftModifier(false);
       }
@@ -226,124 +293,22 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
     }
   }, [isEnabled]);
 
-  // handle initial tool setup
-  useEffect(() => {
-    const artboardTool = new paperMain.Tool();
-    artboardTool.minDistance = 1;
-    artboardTool.onKeyDown = handleKeyDown;
-    artboardTool.onKeyUp = handleKeyUp;
-    artboardTool.onMouseMove = handleMouseMove;
-    artboardTool.onMouseDown = handleMouseDown;
-    artboardTool.onMouseDrag = handleMouseDrag;
-    artboardTool.onMouseUp = handleMouseUp;
-    setTool(artboardTool);
-    paperMain.tool = null;
-  }, []);
-
   return (
     isEnabled
     ? <SnapTool
         bounds={snapBounds}
         snapRule={drawing ? 'resize' : 'move'}
-        hitTestZones={drawing ? (() => {
-          const x = toEvent ? toEvent.point.x - toEvent.downPoint.x : 0;
-          const y = toEvent ? toEvent.point.y - toEvent.downPoint.y : 0;
-          switch(handle) {
-            case 'topCenter':
-              return { top: true };
-            case 'bottomCenter':
-              return { bottom: true };
-            case 'leftCenter':
-              return { left: true };
-            case 'rightCenter':
-              return { right: true };
-            case 'topLeft':
-              if (toEvent && toEvent.modifiers.shift) {
-                if (snapBounds.width > snapBounds.height) {
-                  return { left: true };
-                } else if (snapBounds.width < snapBounds.height) {
-                  return { top: true };
-                } else {
-                  if (Math.abs(x) > Math.abs(y)) {
-                    return { left: true };
-                  } else if (Math.abs(x) < Math.abs(y)) {
-                    return { top: true };
-                  } else {
-                    return { top: true, left: true };
-                  }
-                }
-              } else {
-                return { top: true, left: true };
-              }
-            case 'topRight':
-              if (toEvent && toEvent.modifiers.shift) {
-                if (snapBounds.width > snapBounds.height) {
-                  return { right: true };
-                } else if (snapBounds.width < snapBounds.height) {
-                  return { top: true };
-                } else {
-                  if (Math.abs(x) > Math.abs(y)) {
-                    return { right: true };
-                  } else if (Math.abs(x) < Math.abs(y)) {
-                    return { top: true };
-                  } else {
-                    return { top: true, right: true };
-                  }
-                }
-              } else {
-                return { top: true, right: true };
-              }
-            case 'bottomLeft':
-              if (toEvent && toEvent.modifiers.shift) {
-                if (snapBounds.width > snapBounds.height) {
-                  return { left: true };
-                } else if (snapBounds.width < snapBounds.height) {
-                  return { bottom: true };
-                } else {
-                  if (Math.abs(x) > Math.abs(y)) {
-                    return { left: true };
-                  } else if (Math.abs(x) < Math.abs(y)) {
-                    return { bottom: true };
-                  } else {
-                    return { bottom: true, left: true };
-                  }
-                }
-              } else {
-                return { bottom: true, left: true };
-              }
-            case 'bottomRight':
-              if (toEvent && toEvent.modifiers.shift) {
-                if (snapBounds.width > snapBounds.height) {
-                  return { right: true };
-                } else if (snapBounds.width < snapBounds.height) {
-                  return { bottom: true };
-                } else {
-                  if (Math.abs(x) > Math.abs(y)) {
-                    return { right: true };
-                  } else if (Math.abs(x) < Math.abs(y)) {
-                    return { bottom: true };
-                  } else {
-                    return { bottom: true, right: true };
-                  }
-                }
-              } else {
-                return { bottom: true, right: true };
-              }
-          }
-        })() : { center: true, middle: true }}
+        hitTestZones={getSnapToolHitTestZones()}
         preserveAspectRatio={shiftModifier}
         aspectRatio={1}
-        onUpdate={drawing ? setToBounds : setInitialToBounds}
-        toolEvent={drawing ? toEvent : moveEvent}
+        onUpdate={handleSnapToolUpdate}
+        toolEvent={drawing ? dragEvent : moveEvent}
         resizeHandle={handle} />
     : null
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  isEnabled: boolean;
-  drawing: boolean;
-} => {
+const mapStateToProps = (state: RootState): ArtboardToolStateProps => {
   const { canvasSettings, artboardTool } = state;
   const isEnabled = artboardTool.isEnabled;
   const drawing = canvasSettings.drawing;
@@ -353,7 +318,15 @@ const mapStateToProps = (state: RootState): {
   };
 };
 
-export default connect(
-  mapStateToProps,
-  { addArtboardThunk, setCanvasDrawing, toggleArtboardToolThunk }
-)(ArtboardTool);
+const mapDispatchToProps = {
+  addArtboardThunk,
+  setCanvasDrawing,
+  toggleArtboardToolThunk
+};
+
+export default PaperTool(
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )(ArtboardTool)
+);

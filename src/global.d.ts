@@ -111,8 +111,17 @@ declare namespace Btwx {
   }
 
   interface SnapPoint {
-    side: SnapZoneType;
-    point: paper.Point;
+    snapZone: SnapZoneType;
+    layerSnapZone: SnapZoneType;
+    layerBounds: paper.Rectangle;
+    layerId: string;
+    x?: number;
+    y?: number;
+  }
+
+  interface SnapState {
+    snapPoint: SnapPoint;
+    breakThreshold: number;
   }
 
   interface SnapToLayer {

@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { ViewSettingsTypes } from '../store/actionTypes/viewSettings';
 import { enableLightTheme } from '../store/actions/viewSettings';
+import { THEME_LIGHT_BACKGROUND_MIN } from '../constants';
 
 export const MENU_ITEM_ID = 'appThemeLight';
 
@@ -31,6 +32,7 @@ const MenuAppThemeLight = (props: MenuAppThemeLightProps): ReactElement => {
           if (window.id !== browserWindowId) {
             window.webContents.executeJavaScript(`${MENU_ITEM_ID}(false)`);
           }
+          window.setBackgroundColor(THEME_LIGHT_BACKGROUND_MIN);
         });
       }
     };

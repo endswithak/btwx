@@ -589,6 +589,21 @@ export const getPaperLayersBounds = (layers: paper.Item[]): paper.Rectangle => {
   }
 };
 
+export const getClosestPaperLayer = (point: paper.Point, layers: paper.Item[]): paper.Item => {
+  return layers.reduce((result: { paperLayer: paper.Item; distance: number }, current) => {
+    const currentDistance = point.getDistance(current.bounds.center);
+    if (result.distance) {
+      if (currentDistance < result.distance) {
+        return { paperLayer: current, distance: currentDistance };
+      } else {
+        return result;
+      }
+    } else {
+      return { paperLayer: current, distance: currentDistance };
+    }
+  }, { paperLayer: null, distance: null }).paperLayer;
+};
+
 export const getLayersTopLeft = (store: LayerState, layers: string[]): paper.Point => {
   const paperLayerPoints = layers.reduce((result, current) => {
     const layerItem = store.byId[current];

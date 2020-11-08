@@ -8,27 +8,33 @@ import { setCanvasSelecting } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasSelectingPayload } from '../store/actionTypes/canvasSettings';
 import { areaSelectLayers } from '../store/actions/layer';
 import { LayerTypes, AreaSelectLayersPayload } from '../store/actionTypes/layer';
-import { ThemeContext } from './ThemeProvider';
 import { getPaperLayer } from '../store/selectors/layer';
+import PaperTool, { PaperToolProps } from './PaperTool';
+import { ThemeContext } from './ThemeProvider';
 
-interface AreaSelectToolProps {
+interface AreaSelectToolStateProps {
   isEnabled?: boolean;
   selecting?: boolean;
   scope?: string[];
   selected?: string[];
+}
+
+interface AreaSelectToolDispatchProps {
   setCanvasSelecting?(payload: SetCanvasSelectingPayload): CanvasSettingsTypes;
   areaSelectLayers?(payload: AreaSelectLayersPayload): LayerTypes;
 }
 
+type AreaSelectToolProps = (
+  AreaSelectToolStateProps &
+  AreaSelectToolDispatchProps &
+  PaperToolProps
+);
+
 const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isEnabled, selecting, setCanvasSelecting, areaSelectLayers, scope, selected } = props;
-  const [tool, setTool] = useState<paper.Tool>(null);
-  const [from, setFrom] = useState<paper.Point>(null);
-  const [to, setTo] = useState<paper.Point>(null);
+  const { isEnabled, selecting, setCanvasSelecting, areaSelectLayers, scope, selected, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent } = props;
   const [areaSelectBounds, setAreaSelectBounds] = useState<paper.Rectangle>(null);
   const [originalSelection, setOriginalSelection] = useState<string[]>(null);
-  const [toolEvent, setToolEvent] = useState<paper.ToolEvent>(null);
 
   const debounceSelection = useCallback(
     debounce((asBounds: paper.Rectangle, asEvent: paper.ToolEvent, asOriginalSelection: string[], asScope: string[]) => {
@@ -121,8 +127,6 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
     if (getPaperLayer('AreaSelectPreview')) {
       getPaperLayer('AreaSelectPreview').remove();
     }
-    setFrom(null);
-    setTo(null);
     setOriginalSelection(null);
   }
 
@@ -143,44 +147,37 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
     });
   }
 
-  const handleMouseDown = (e: paper.ToolEvent): void => {
-    setFrom(e.point);
-    setOriginalSelection(selected);
-  }
-
-  const handleMouseDrag = (e: paper.ToolEvent): void => {
-    setTo(e.point);
-    setToolEvent(e);
-    if (!selecting) {
-      setCanvasSelecting({selecting: true});
+  useEffect(() => {
+    if (downEvent && isEnabled) {
+      setOriginalSelection(selected);
     }
-  }
-
-  const handleMouseUp = (e: paper.ToolEvent): void => {
-    if (selecting) {
-      setCanvasSelecting({selecting: false});
-    }
-    resetState();
-  }
+  }, [downEvent]);
 
   useEffect(() => {
-    if (tool) {
-      tool.onMouseDown = handleMouseDown;
-      tool.onMouseDrag = handleMouseDrag;
-      tool.onMouseUp = handleMouseUp;
+    if (dragEvent && isEnabled) {
+      setAreaSelectBounds(new paperMain.Rectangle({
+        from: dragEvent.downPoint,
+        to: dragEvent.point
+      }));
+      if (!selecting) {
+        setCanvasSelecting({selecting: true});
+      }
     }
-  }, [selecting, isEnabled, selected]);
+  }, [dragEvent]);
 
   useEffect(() => {
-    if (to && tool && isEnabled && selecting) {
-      setAreaSelectBounds(new paperMain.Rectangle({ from, to }));
+    if (upEvent && isEnabled) {
+      if (selecting) {
+        setCanvasSelecting({selecting: false});
+      }
+      resetState();
     }
-  }, [to]);
+  }, [upEvent]);
 
   useEffect(() => {
-    if (tool && isEnabled && selecting) {
+    if (areaSelectBounds && isEnabled) {
       updateAreaSelectPreview();
-      debounceSelection(areaSelectBounds, toolEvent, originalSelection, scope);
+      debounceSelection(areaSelectBounds, dragEvent, originalSelection, scope);
     }
   }, [areaSelectBounds]);
 
@@ -197,27 +194,12 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
     }
   }, [isEnabled]);
 
-  useEffect(() => {
-    const areaSelectTool = new paperMain.Tool();
-    areaSelectTool.minDistance = 1;
-    areaSelectTool.onMouseDown = handleMouseDown;
-    areaSelectTool.onMouseDrag = handleMouseDrag;
-    areaSelectTool.onMouseUp = handleMouseUp;
-    setTool(areaSelectTool);
-    paperMain.tool = null;
-  }, []);
-
   return (
     <></>
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  isEnabled: boolean;
-  selecting: boolean;
-  scope: string[];
-  selected: string[];
-} => {
+const mapStateToProps = (state: RootState): AreaSelectToolStateProps => {
   const { canvasSettings, layer } = state;
   const selecting = canvasSettings.selecting;
   const isEnabled = canvasSettings.activeTool === 'AreaSelect';
@@ -231,7 +213,14 @@ const mapStateToProps = (state: RootState): {
   };
 };
 
-export default connect(
-  mapStateToProps,
-  { setCanvasSelecting, areaSelectLayers }
-)(AreaSelectTool);
+const mapDispatchToProps = {
+  setCanvasSelecting,
+  areaSelectLayers
+};
+
+export default PaperTool(
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )(AreaSelectTool)
+);

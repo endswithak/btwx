@@ -33,7 +33,7 @@ export interface CanvasSettingsState {
   zooming: boolean;
   translating: boolean;
   zoomType: Btwx.ZoomType;
-  resizeHandle: Btwx.ResizeHandle;
+  resizeHandle: Btwx.ResizeHandle | Btwx.LineHandle;
   dragHandle: boolean;
 }
 
