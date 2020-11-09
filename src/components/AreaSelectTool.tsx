@@ -128,6 +128,7 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
       getPaperLayer('AreaSelectPreview').remove();
     }
     setOriginalSelection(null);
+    setAreaSelectBounds(null);
   }
 
   const updateAreaSelectPreview = () => {

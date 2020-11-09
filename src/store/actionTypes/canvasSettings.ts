@@ -23,6 +23,7 @@ export interface SetCanvasActiveToolPayload {
   zoomType?: Btwx.ZoomType;
   resizeHandle?: Btwx.ResizeHandle;
   dragHandle?: boolean;
+  lineHandle?: Btwx.LineHandle;
 }
 
 export interface SetCanvasActiveTool {

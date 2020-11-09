@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
 import { ipcRenderer, remote } from 'electron';
-import { ActionCreators } from 'redux-undo';
 import fs from 'fs';
 import path from 'path';
 import { RootState } from '../reducers';
@@ -92,7 +91,6 @@ export const setArtboardPresetDevicePlatform = (payload: SetArtboardPresetDevice
 
 export const openDocumentThunk = (filePath: string) => {
   return (dispatch: any, getState: any): void => {
-    // const state = getState() as RootState;
     fs.readFile(filePath, {encoding: 'utf-8'}, function(err, data) {
       if(err) {
         return console.log(err);
@@ -100,34 +98,6 @@ export const openDocumentThunk = (filePath: string) => {
         ipcRenderer.send('createNewDocument', data);
       }
     });
-    // const editState = {
-    //   edit: state.layer.present.edit,
-    //   dirty: state.documentSettings.edit !== state.layer.present.edit,
-    //   path: state.documentSettings.path,
-    //   name: state.documentSettings.name
-    // }
-    // if (editState.dirty || editState.path) {
-    //   fs.readFile(filePath, {encoding: 'utf-8'}, function(err, data) {
-    //     if(err) {
-    //       return console.log(err);
-    //     } else {
-    //       ipcRenderer.send('createNewDocument', JSON.stringify(data));
-    //       // createNewDocument().then((documentWindow) => {
-    //       //   documentWindow.webContents.executeJavaScript(`openFile(${data})`);
-    //       // });
-    //     }
-    //   });
-    // } else {
-    //   fs.readFile(filePath, {encoding: 'utf-8'}, function(err, document) {
-    //     if(err) {
-    //       return console.log(err);
-    //     } else {
-    //       dispatch(openDocument({document} as any));
-    //       // dispatch(ActionCreators.clearHistory());
-    //       // focusedDocument.webContents.executeJavaScript(`openFile(${data})`);
-    //     }
-    //   });
-    // }
   }
 };
 
@@ -163,15 +133,20 @@ export const saveDocumentThunk = () => {
 };
 
 export const saveDocumentAsThunk = () => {
-  return (dispatch: any, getState: any): void => {
-    const state = getState() as RootState;
-    remote.dialog.showSaveDialog({}).then((result) => {
-      if (!result.canceled) {
-        const base = path.basename(result.filePath);
-        const documentSettings = {base, fullPath: result.filePath};
-        dispatch(saveDocumentAs({name: documentSettings.base, path: documentSettings.fullPath, edit: state.layer.present.edit}));
-        dispatch(writeFileThunk());
-      }
+  return (dispatch: any, getState: any): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      const state = getState() as RootState;
+      remote.dialog.showSaveDialog({}).then((result) => {
+        if (!result.canceled) {
+          const base = path.basename(result.filePath);
+          const documentSettings = {base, fullPath: result.filePath};
+          dispatch(saveDocumentAs({name: documentSettings.base, path: documentSettings.fullPath, edit: state.layer.present.edit}));
+          dispatch(writeFileThunk());
+          resolve();
+        } else {
+          reject('canceled');
+        }
+      });
     });
   }
 };

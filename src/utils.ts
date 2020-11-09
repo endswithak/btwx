@@ -43,48 +43,9 @@ export const scrollToLayer = (id: string) => {
   }
 };
 
-// export const isPreviewWindow = (window = remote.getCurrentWindow()): boolean => {
-//   const hasParent = window.getParentWindow();
-//   const previewPrefix = window.getTitle().startsWith(PREVIEW_PREFIX);
-//   return hasParent && previewPrefix;
-// };
-
-export const isPreviewWindowFromRenderer = (): boolean => {
-  return ipcRenderer.sendSync('isPreviewWindow', JSON.stringify(remote.getCurrentWindow().id));
-};
-
-export const isDocumentWindowFromRenderer = (): boolean => {
-  return ipcRenderer.sendSync('isDocumentWindow', JSON.stringify(remote.getCurrentWindow().id));
-};
-
-// export const getPreviewWindow = (window = remote.getCurrentWindow()): BrowserWindow => {
-//   const childWindows = window.getChildWindows();
-//   return childWindows.find((w) => w.getTitle().startsWith(PREVIEW_PREFIX));
-// };
-
-// export const getWindows = (windowMap: Btwx.DocumentWindows, id: number): Btwx.DocumentWindow => {
-//   if (Object.keys(windowMap).includes(id)) {
-//     return windowMap[id];
-//   }
-//   if (Object.keys(windowMap).some((key) => windowMap[key].preview === id)) {
-//     const key = Object.keys(windowMap).find((key) => windowMap[key].preview === id);
-//     return windowMap[key];
-//   }
-//   return null;
-// };
-
-// export const getPreviewWindow = (windowMap: Btwx.DocumentWindows, id: number): number => {
-//   const windows = getWindows(windowMap, id);
-//   if (windows) {
-//     return windows.preview;
-//   } else {
-//     return null;
-//   }
-// };
-
-export const getFocusedDocument = (): Promise<BrowserWindow> => {
+export const getFocusedDocument = (focused?: BrowserWindow): Promise<BrowserWindow> => {
   return new Promise((resolve, reject) => {
-    const focusedWindow = BrowserWindow.getFocusedWindow();
+    const focusedWindow = focused ? focused : BrowserWindow.getFocusedWindow();
     if (focusedWindow) {
       isPreviewWindow(focusedWindow.id).then((previewWindow) => {
         if (previewWindow) {
@@ -101,10 +62,6 @@ export const getFocusedDocument = (): Promise<BrowserWindow> => {
   })
 };
 
-// export const getAllOpenDocuments = (): BrowserWindow[] => {
-//   return BrowserWindow.getAllWindows().filter((window) => !isPreviewWindow(window));
-// };
-
 export const isMac = process.platform === 'darwin';
 
 export const getWindowBackground = (themeName?: Btwx.ThemeName): string => {
@@ -112,8 +69,8 @@ export const getWindowBackground = (themeName?: Btwx.ThemeName): string => {
   return theme.background.z0;
 };
 
-export const getAllWindowPreviewStates = (): Promise<{previewState: PreviewState; windowId: number}[]> => {
-  const allWindows = BrowserWindow.getAllWindows();
+export const getAllWindowPreviewStates = (fromRenderer?: boolean): Promise<{previewState: PreviewState; windowId: number}[]> => {
+  const allWindows = fromRenderer ? remote.BrowserWindow.getAllWindows() : BrowserWindow.getAllWindows();
   const promises = [] as Promise<{previewState: PreviewState; windowId: number}>[];
   allWindows.forEach((window, index) => {
     promises.push(
@@ -127,48 +84,48 @@ export const getAllWindowPreviewStates = (): Promise<{previewState: PreviewState
   });
 };
 
-export const getAllDocumentWindows = (): Promise<BrowserWindow[]> => {
-  return getAllWindowPreviewStates().then((previewStates: {previewState: PreviewState; windowId: number}[]) => {
+export const getAllDocumentWindows = (fromRenderer?: boolean): Promise<BrowserWindow[]> => {
+  return getAllWindowPreviewStates(fromRenderer).then((previewStates: {previewState: PreviewState; windowId: number}[]) => {
     return previewStates.reduce((result, current) => {
       if (current.previewState.documentWindowId === current.windowId) {
-        result = [...result, BrowserWindow.fromId(current.windowId)];
+        result = [...result, fromRenderer ? remote.BrowserWindow.fromId(current.windowId) : BrowserWindow.fromId(current.windowId)];
       }
       return result;
     }, []) as BrowserWindow[];
   });
 };
 
-export const getAllPreviewWindows = (): Promise<BrowserWindow[]> => {
-  return getAllWindowPreviewStates().then((previewStates: {previewState: PreviewState; windowId: number}[]) => {
+export const getAllPreviewWindows = (fromRenderer?: boolean): Promise<BrowserWindow[]> => {
+  return getAllWindowPreviewStates(fromRenderer).then((previewStates: {previewState: PreviewState; windowId: number}[]) => {
     return previewStates.reduce((result, current) => {
       if (current.previewState.windowId === current.windowId) {
-        result = [...result, BrowserWindow.fromId(current.windowId)];
+        result = [...result, fromRenderer ? remote.BrowserWindow.fromId(current.windowId) : BrowserWindow.fromId(current.windowId)];
       }
       return result;
     }, []) as BrowserWindow[];
   });
 };
 
-export const getDocumentWindow = (previewWindowId: number): Promise<BrowserWindow> => {
-  return getAllWindowPreviewStates().then((previewStates: {previewState: PreviewState; windowId: number}[]) => {
+export const getDocumentWindow = (previewWindowId: number, fromRenderer?: boolean): Promise<BrowserWindow> => {
+  return getAllWindowPreviewStates(fromRenderer).then((previewStates: {previewState: PreviewState; windowId: number}[]) => {
     const windowState = previewStates.find((state: {previewState: PreviewState; windowId: number}) => {
       return state.previewState.documentWindowId === state.windowId && state.previewState.windowId === previewWindowId;
     });
     if (windowState) {
-      return BrowserWindow.fromId(windowState.windowId);
+      return fromRenderer ? remote.BrowserWindow.fromId(windowState.windowId) : BrowserWindow.fromId(windowState.windowId);
     } else {
       return null;
     }
   });
 };
 
-export const getPreviewWindow = (documentWindowId: number): Promise<BrowserWindow> => {
-  return getAllWindowPreviewStates().then((previewStates: {previewState: PreviewState; windowId: number}[]) => {
+export const getPreviewWindow = (documentWindowId: number, fromRenderer?: boolean): Promise<BrowserWindow> => {
+  return getAllWindowPreviewStates(fromRenderer).then((previewStates: {previewState: PreviewState; windowId: number}[]) => {
     const windowState = previewStates.find((state: {previewState: PreviewState; windowId: number}) => {
       return state.previewState.windowId === state.windowId && state.previewState.documentWindowId === documentWindowId;
     });
     if (windowState) {
-      return BrowserWindow.fromId(windowState.windowId);
+      return fromRenderer ? remote.BrowserWindow.fromId(windowState.windowId) : BrowserWindow.fromId(windowState.windowId);
     } else {
       return null;
     }

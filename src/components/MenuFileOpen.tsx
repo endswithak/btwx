@@ -1,7 +1,6 @@
 import React, { ReactElement, useEffect } from 'react';
 import { remote } from 'electron';
 import { connect } from 'react-redux';
-// import { RootState } from '../store/reducers';
 import { openDocumentThunk } from '../store/actions/documentSettings';
 import { APP_NAME } from '../constants';
 
@@ -35,14 +34,6 @@ const MenuFileOpen = (props: MenuFileOpenProps): ReactElement => {
     <></>
   );
 }
-
-// const mapStateToProps = (state: RootState): {
-//   canSave: boolean;
-// } => {
-//   const { layer, documentSettings } = state;
-//   const canSave = layer.present.edit !== documentSettings.edit || documentSettings.edit === null;
-//   return { canSave };
-// };
 
 export default connect(
   null,

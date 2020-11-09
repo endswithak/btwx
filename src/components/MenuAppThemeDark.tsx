@@ -5,16 +5,18 @@ import { RootState } from '../store/reducers';
 import { ViewSettingsTypes } from '../store/actionTypes/viewSettings';
 import { enableDarkTheme } from '../store/actions/viewSettings';
 import { THEME_DARK_BACKGROUND_MIN } from '../constants';
+import { getAllDocumentWindows } from '../utils';
 
 export const MENU_ITEM_ID = 'appThemeDark';
 
 interface MenuAppThemeDarkProps {
   checked?: boolean;
+  previewWindowId?: number;
   enableDarkTheme?(): ViewSettingsTypes;
 }
 
 const MenuAppThemeDark = (props: MenuAppThemeDarkProps): ReactElement => {
-  const { checked, enableDarkTheme } = props;
+  const { checked, enableDarkTheme, previewWindowId } = props;
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
@@ -24,19 +26,25 @@ const MenuAppThemeDark = (props: MenuAppThemeDarkProps): ReactElement => {
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (updateOtherWindows?: boolean): void => {
+      const currentWindow = remote.getCurrentWindow();
       enableDarkTheme();
+      currentWindow.setBackgroundColor(THEME_DARK_BACKGROUND_MIN);
+      if (previewWindowId) {
+        const previewWindow = remote.BrowserWindow.fromId(previewWindowId);
+        previewWindow.webContents.executeJavaScript(`setTheme('dark')`);
+        previewWindow.setBackgroundColor(THEME_DARK_BACKGROUND_MIN);
+      }
       if (updateOtherWindows) {
-        const browserWindowId = remote.getCurrentWindow().id;
-        const allWindows = remote.BrowserWindow.getAllWindows();
-        allWindows.forEach((window) => {
-          if (window.id !== browserWindowId) {
-            window.webContents.executeJavaScript(`${MENU_ITEM_ID}(false)`);
-          }
-          window.setBackgroundColor(THEME_DARK_BACKGROUND_MIN);
+        getAllDocumentWindows(true).then((documentWindows) => {
+          documentWindows.forEach((window) => {
+            if (window.id !== currentWindow.id) {
+              window.webContents.executeJavaScript(`${MENU_ITEM_ID}(false)`);
+            }
+          });
         });
       }
     };
-  }, []);
+  }, [previewWindowId]);
 
   return (
     <></>
@@ -45,10 +53,12 @@ const MenuAppThemeDark = (props: MenuAppThemeDarkProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   checked: boolean;
+  previewWindowId: number;
 } => {
-  const { viewSettings } = state;
+  const { viewSettings, preview } = state;
   const checked = viewSettings.theme === 'dark';
-  return { checked };
+  const previewWindowId = preview.windowId;
+  return { checked, previewWindowId };
 };
 
 export default connect(

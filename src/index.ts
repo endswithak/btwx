@@ -36,18 +36,18 @@ if (isMac) {
   if (!systemPreferences.getUserDefault('theme', 'string')) {
     systemPreferences.setUserDefault('theme', 'string', nativeTheme.shouldUseDarkColors ? 'dark' : 'light');
   }
-  if (!systemPreferences.getUserDefault('leftSidebarWidth', 'integer')) {
-    systemPreferences.setUserDefault('leftSidebarWidth', 'integer', DEFAULT_LEFT_SIDEBAR_WIDTH as any);
-  }
-  if (!systemPreferences.getUserDefault('rightSidebarWidth', 'integer')) {
-    systemPreferences.setUserDefault('rightSidebarWidth', 'integer', DEFAULT_RIGHT_SIDEBAR_WIDTH as any);
-  }
-  if (!systemPreferences.getUserDefault('tweenDrawerHeight', 'integer')) {
-    systemPreferences.setUserDefault('tweenDrawerHeight', 'integer', DEFAULT_TWEEN_DRAWER_HEIGHT as any);
-  }
-  if (!systemPreferences.getUserDefault('tweenDrawerLayersWidth', 'integer')) {
-    systemPreferences.setUserDefault('tweenDrawerLayersWidth', 'integer', DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH as any);
-  }
+  // if (!systemPreferences.getUserDefault('leftSidebarWidth', 'integer')) {
+  //   systemPreferences.setUserDefault('leftSidebarWidth', 'integer', DEFAULT_LEFT_SIDEBAR_WIDTH as any);
+  // }
+  // if (!systemPreferences.getUserDefault('rightSidebarWidth', 'integer')) {
+  //   systemPreferences.setUserDefault('rightSidebarWidth', 'integer', DEFAULT_RIGHT_SIDEBAR_WIDTH as any);
+  // }
+  // if (!systemPreferences.getUserDefault('tweenDrawerHeight', 'integer')) {
+  //   systemPreferences.setUserDefault('tweenDrawerHeight', 'integer', DEFAULT_TWEEN_DRAWER_HEIGHT as any);
+  // }
+  // if (!systemPreferences.getUserDefault('tweenDrawerLayersWidth', 'integer')) {
+  //   systemPreferences.setUserDefault('tweenDrawerLayersWidth', 'integer', DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH as any);
+  // }
 }
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -76,40 +76,38 @@ export const createNewDocument = ({width, height, document}: {width?: number; he
     newDocument.webContents.on('did-finish-load', () => {
       const preloadedState = {...(document ? document : {}), preview: { ...initialPreviewState, documentWindowId: newDocument.id }};
       newDocument.webContents.executeJavaScript(`renderNewDocument(${JSON.stringify(preloadedState)})`).then(() => {
-        // newDocument.webContents.executeJavaScript(`setPreviewDocumentWindowId(${JSON.stringify(newDocument.id)})`);
         resolve(newDocument);
       });
     });
 
-    // newDocument.on('close', (event) => {
-    //   event.preventDefault();
-    //   newDocument.webContents.executeJavaScript(`getCurrentEdit()`).then((currentEditJSON) => {
-    //     const editState = JSON.parse(currentEditJSON) as { edit: string; dirty: boolean; name: string; path: string };
-    //     if (editState.dirty) {
-    //       openSaveDialog({
-    //         documentState: editState,
-    //         onSave: () => {
-    //           if (editState.path) {
-    //             handleSave(newDocument, editState.path, {close: true});
-    //           } else {
-    //             handleSaveAs(newDocument, {close: true});
-    //           }
-    //         },
-    //         onDontSave: () => {
-    //           handleDocumentClose(newDocument.id);
-    //         }
-    //       });
-    //     } else {
-    //       handleDocumentClose(newDocument.id);
-    //     }
-    //   });
-    // });
+    newDocument.on('close', (event) => {
+      event.preventDefault();
+      newDocument.webContents.executeJavaScript(`getCurrentEdit()`).then((currentEditJSON) => {
+        const editState = JSON.parse(currentEditJSON) as { edit: string; dirty: boolean; name: string; path: string };
+        if (editState.dirty) {
+          openSaveDialog({
+            documentState: editState,
+            onSave: () => {
+              if (editState.path) {
+                handleSave(newDocument, editState.path, {close: true});
+              } else {
+                handleSaveAs(newDocument, {close: true});
+              }
+            },
+            onDontSave: () => {
+              handleDocumentClose(newDocument.id);
+            }
+          });
+        } else {
+          handleDocumentClose(newDocument.id);
+        }
+      });
+    });
   });
 };
 
 const createPreviewWindow = ({width, height, documentWindowId}: {width: number; height: number; documentWindowId: number}): void => {
   const previewWindow = new BrowserWindow({
-    // parent: getFocusedDocument(),
     width: width,
     height: height + PREVIEW_TOPBAR_HEIGHT + (process.platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT),
     frame: false,
@@ -290,7 +288,7 @@ app.on('activate', () => {
 app.on('open-file', (event, path) => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
-  handleOpenDocument(path);
+  createNewDocument({});
 });
 
 // In this file you can include the rest of your app's specific main process
@@ -326,24 +324,19 @@ export const openSaveDialog = ({documentState, onSave, onDontSave, onCancel}: {d
 export const handleSave = (document: BrowserWindow, path: string, onSave?: { reload?: boolean; close?: boolean; quit?: boolean }): Promise<any> => {
   if (document) {
     return new Promise((resolve, reject) => {
-      document.webContents.executeJavaScript(`saveDocument()`).then((documentJSON: any) => {
-        fs.writeFile(`${path}.${APP_NAME}`, documentJSON, function(err) {
-          if (err) {
-            resolve(err);
-          }
-          if (onSave && onSave.close) {
-            handleDocumentClose(document.id);
-            resolve();
-          }
-          if (onSave && onSave.reload) {
-            document.reload();
-            resolve();
-          }
-          if (onSave && onSave.quit) {
-            app.exit();
-            app.quit();
-          }
-        });
+      document.webContents.executeJavaScript(`fileSave()`).then(() => {
+        if (onSave && onSave.close) {
+          handleDocumentClose(document.id);
+          resolve();
+        }
+        if (onSave && onSave.reload) {
+          document.reload();
+          resolve();
+        }
+        if (onSave && onSave.quit) {
+          app.exit();
+          app.quit();
+        }
       });
     });
   } else {
@@ -354,31 +347,18 @@ export const handleSave = (document: BrowserWindow, path: string, onSave?: { rel
 export const handleSaveAs = (document: BrowserWindow, onSave?: { reload?: boolean; close?: boolean; quit?: boolean }): Promise<any> => {
   if (document) {
     return new Promise((resolve, reject) => {
-      dialog.showSaveDialog(document, {}).then((result) => {
-        if (!result.canceled) {
-          const base = path.basename(result.filePath);
-          const documentSettings = {base, fullPath: result.filePath};
-          document.webContents.executeJavaScript(`saveDocumentAs(${JSON.stringify(documentSettings)})`).then((documentJSON: any) => {
-            fs.writeFile(`${result.filePath}.${APP_NAME}`, documentJSON, function(err) {
-              if (err) {
-                resolve(err);
-              } else {
-                app.addRecentDocument(`${result.filePath}.${APP_NAME}`);
-              }
-              if (onSave && onSave.close) {
-                handleDocumentClose(document.id);
-                resolve();
-              }
-              if (onSave && onSave.reload) {
-                document.reload();
-                resolve();
-              }
-              if (onSave && onSave.quit) {
-                app.exit();
-                app.quit();
-              }
-            });
-          });
+      document.webContents.executeJavaScript(`fileSaveAs()`).then(() => {
+        if (onSave && onSave.close) {
+          handleDocumentClose(document.id);
+          resolve();
+        }
+        if (onSave && onSave.reload) {
+          document.reload();
+          resolve();
+        }
+        if (onSave && onSave.quit) {
+          app.exit();
+          app.quit();
         }
       });
     });
@@ -386,51 +366,6 @@ export const handleSaveAs = (document: BrowserWindow, onSave?: { reload?: boolea
     return Promise.resolve();
   }
 };
-
-export const handleOpenDocument = (filePath: string): void => {
-  getFocusedDocument().then((focusedDocument) => {
-    if (focusedDocument) {
-      focusedDocument.webContents.executeJavaScript(`getCurrentEdit()`).then((currentEditJSON) => {
-        const editState = JSON.parse(currentEditJSON) as { edit: string; dirty: boolean; name: string; path: string };
-        if (editState.dirty || editState.path) {
-          fs.readFile(filePath, {encoding: 'utf-8'}, function(err, data) {
-            if(err) {
-              return console.log(err);
-            } else {
-              createNewDocument({}).then((documentWindow) => {
-                documentWindow.webContents.executeJavaScript(`openFile(${data})`);
-              });
-            }
-          });
-        } else {
-          fs.readFile(filePath, {encoding: 'utf-8'}, function(err, data) {
-            if(err) {
-              return console.log(err);
-            } else {
-              focusedDocument.webContents.executeJavaScript(`openFile(${data})`);
-            }
-          });
-        }
-      });
-    } else {
-      fs.readFile(filePath, {encoding: 'utf-8'}, function(err, data) {
-        createNewDocument({}).then((documentWindow) => {
-          documentWindow.webContents.executeJavaScript(`openFile(${data})`);
-        });
-      });
-    }
-  });
-};
-
-export const handleSetTheme = (theme: Btwx.ThemeName): void => {
-  BrowserWindow.getAllWindows().forEach((window) => {
-    window.setBackgroundColor(getWindowBackground(theme));
-    if (window.webContents) {
-      window.webContents.executeJavaScript(`setTitleBarTheme(${JSON.stringify(theme)})`);
-      window.webContents.executeJavaScript(`setTheme(${JSON.stringify(theme)})`);
-    }
-  });
-}
 
 ipcMain.on('openPreview', (event, payload) => {
   const parsedJSON = JSON.parse(payload) as { windowSize: { width: number; height: number }; documentWindowId: number };
@@ -445,90 +380,36 @@ ipcMain.on('createNewDocument', (event, payload) => {
   createNewDocument({document: JSON.parse(payload)});
 });
 
-// ipcMain.on('updateTheme', (event, theme: Btwx.ThemeName) => {
-//   console.log(event);
-//   BrowserWindow.getAllWindows().forEach((window) => {
-//     window.setBackgroundColor(getWindowBackground(theme));
-//     if (window.webContents) {
-//       // window.webContents.executeJavaScript(`setTitleBarTheme(${JSON.stringify(theme)})`);
-//       window.webContents.executeJavaScript(`setTheme(${JSON.stringify(theme)})`);
-//     }
-//   });
-// });
-
-// export const createPreferencesWindow = (): void => {
-//   preferencesWindow = new BrowserWindow({
-//     parent: getFocusedDocument(),
-//     height: 600,
-//     width: 800,
-//     frame: false,
-//     titleBarStyle: 'hidden',
-//     show: false,
-//     backgroundColor: windowBackground,
-//     webPreferences: {
-//       nodeIntegration: true
-//     }
-//   });
-
-//   preferencesWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-
-//   // Open the DevTools.
-//   preferencesWindow.webContents.openDevTools();
-
-//   preferencesWindow.webContents.on('did-finish-load', () => {
-//     preferencesWindow.webContents.executeJavaScript(`renderPreferencesWindow()`).then(() => {
-//       preferencesWindow.show();
-//     });
-//   });
-
-//   preferencesWindow.on('closed', () => {
-//     preferencesWindow = null;
-//   });
-// };
-
-// export const createSketchImporterWindow = (sketchFile: any): void => {
-//   sketchImporterWindow = new BrowserWindow({
-//     parent: getFocusedDocument(),
-//     height: 600,
-//     width: 800,
-//     frame: false,
-//     titleBarStyle: 'hidden',
-//     show: false,
-//     backgroundColor: windowBackground,
-//     webPreferences: {
-//       nodeIntegration: true
-//     }
-//   });
-
-//   sketchImporterWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-
-//   // Open the DevTools.
-//   sketchImporterWindow.webContents.openDevTools();
-
-//   sketchImporterWindow.webContents.on('did-finish-load', () => {
-//     sketchImporterWindow.webContents.executeJavaScript(`renderSketchImporterWindow(${JSON.stringify(sketchFile)})`).then(() => {
-//       sketchImporterWindow.show();
-//     });
-//   });
-
-//   sketchImporterWindow.on('closed', () => {
-//     sketchImporterWindow = null;
-//   });
-// };
-
-// export const handleSketchImport = () => {
-//   const document = getFocusedDocument();
-//   dialog.showOpenDialog(document, {
-//     buttonLabel: 'Import',
-//     filters: [{ name: 'Custom File Type', extensions: ['sketch'] }],
-//     properties: ['openFile']
-//   }).then(result => {
-//     if (!result.canceled && result.filePaths.length > 0) {
-//       const sketchFilePath = result.filePaths[0];
-//       readSketchFile(sketchFilePath).then((sketchJSON) => {
-//         if (!sketchImporterWindow) {
-//           createSketchImporterWindow(sketchJSON);
+// export const handleOpenDocument = (filePath: string): void => {
+//   getFocusedDocument().then((focusedDocument) => {
+//     if (focusedDocument) {
+//       focusedDocument.webContents.executeJavaScript(`getCurrentEdit()`).then((currentEditJSON) => {
+//         const editState = JSON.parse(currentEditJSON) as { edit: string; dirty: boolean; name: string; path: string };
+//         if (editState.dirty || editState.path) {
+//           fs.readFile(filePath, {encoding: 'utf-8'}, function(err, data) {
+//             if(err) {
+//               return console.log(err);
+//             } else {
+//               createNewDocument({}).then((documentWindow) => {
+//                 documentWindow.webContents.executeJavaScript(`openFile(${data})`);
+//               });
+//             }
+//           });
+//         } else {
+//           fs.readFile(filePath, {encoding: 'utf-8'}, function(err, data) {
+//             if(err) {
+//               return console.log(err);
+//             } else {
+//               focusedDocument.webContents.executeJavaScript(`openFile(${data})`);
+//             }
+//           });
 //         }
+//       });
+//     } else {
+//       fs.readFile(filePath, {encoding: 'utf-8'}, function(err, data) {
+//         createNewDocument({}).then((documentWindow) => {
+//           documentWindow.webContents.executeJavaScript(`openFile(${data})`);
+//         });
 //       });
 //     }
 //   });

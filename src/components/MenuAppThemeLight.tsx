@@ -5,16 +5,18 @@ import { RootState } from '../store/reducers';
 import { ViewSettingsTypes } from '../store/actionTypes/viewSettings';
 import { enableLightTheme } from '../store/actions/viewSettings';
 import { THEME_LIGHT_BACKGROUND_MIN } from '../constants';
+import { getAllDocumentWindows } from '../utils';
 
 export const MENU_ITEM_ID = 'appThemeLight';
 
 interface MenuAppThemeLightProps {
   checked?: boolean;
+  previewWindowId?: number;
   enableLightTheme?(): ViewSettingsTypes;
 }
 
 const MenuAppThemeLight = (props: MenuAppThemeLightProps): ReactElement => {
-  const { checked, enableLightTheme } = props;
+  const { checked, enableLightTheme, previewWindowId } = props;
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
@@ -24,19 +26,25 @@ const MenuAppThemeLight = (props: MenuAppThemeLightProps): ReactElement => {
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (updateOtherWindows?: boolean): void => {
+      const currentWindow = remote.getCurrentWindow();
       enableLightTheme();
+      currentWindow.setBackgroundColor(THEME_LIGHT_BACKGROUND_MIN);
+      if (previewWindowId) {
+        const previewWindow = remote.BrowserWindow.fromId(previewWindowId);
+        previewWindow.webContents.executeJavaScript(`setTheme('light')`);
+        previewWindow.setBackgroundColor(THEME_LIGHT_BACKGROUND_MIN);
+      }
       if (updateOtherWindows) {
-        const browserWindowId = remote.getCurrentWindow().id;
-        const allWindows = remote.BrowserWindow.getAllWindows();
-        allWindows.forEach((window) => {
-          if (window.id !== browserWindowId) {
-            window.webContents.executeJavaScript(`${MENU_ITEM_ID}(false)`);
-          }
-          window.setBackgroundColor(THEME_LIGHT_BACKGROUND_MIN);
+        getAllDocumentWindows(true).then((documentWindows) => {
+          documentWindows.forEach((window) => {
+            if (window.id !== currentWindow.id) {
+              window.webContents.executeJavaScript(`${MENU_ITEM_ID}(false)`);
+            }
+          });
         });
       }
     };
-  }, []);
+  }, [previewWindowId]);
 
   return (
     <></>
@@ -45,10 +53,12 @@ const MenuAppThemeLight = (props: MenuAppThemeLightProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   checked: boolean;
+  previewWindowId: number;
 } => {
-  const { viewSettings } = state;
+  const { viewSettings, preview } = state;
   const checked = viewSettings.theme === 'light';
-  return { checked };
+  const previewWindowId = preview.windowId;
+  return { checked, previewWindowId };
 };
 
 export default connect(

@@ -1,32 +1,27 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-// import { remote } from 'electron';
-import React, { useContext, useEffect, ReactElement, useState } from 'react';
+import React, { useEffect, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
 import { isBetween } from '../utils';
 import { RootState } from '../store/reducers';
-import { DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_POINTS, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../constants';
-import Tooltip from '../canvas/tooltip';
-import { getPaperLayer } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
-import { setCanvasDrawing } from '../store/actions/canvasSettings';
-import { CanvasSettingsTypes, SetCanvasDrawingPayload } from '../store/actionTypes/canvasSettings';
-import { setLineFrom, setLineTo } from '../store/actions/layer';
+import { setCanvasResizing } from '../store/actions/canvasSettings';
+import { CanvasSettingsTypes, SetCanvasResizingPayload } from '../store/actionTypes/canvasSettings';
+import { setLineFrom, setLineTo, updateSelectionFrame } from '../store/actions/layer';
 import { SetLineFromPayload, SetLineToPayload, LayerTypes } from '../store/actionTypes/layer';
-import { toggleShapeToolThunk } from '../store/actions/shapeTool';
-import { ThemeContext } from './ThemeProvider';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
 
 interface LineToolStateProps {
   isEnabled?: boolean;
-  scope?: string[];
   resizing?: boolean;
-  initialHandle?: Btwx.LineHandle | Btwx.ResizeHandle;
+  initialHandle?: Btwx.LineHandle;
+  selected?: string[];
 }
 
 interface LineToolDispatchProps {
   setLineFrom?(payload: SetLineFromPayload): LayerTypes;
   setLineTo?(payload: SetLineToPayload): LayerTypes;
+  setCanvasResizing?(payload: SetCanvasResizingPayload): CanvasSettingsTypes;
 }
 
 type LineToolProps = (
@@ -36,210 +31,165 @@ type LineToolProps = (
 );
 
 const LineTool = (props: LineToolProps): ReactElement => {
-  const theme = useContext(ThemeContext);
-  const { isEnabled, scope, resizing, initialHandle, setLineFrom, setLineTo, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent } = props;
-  const [handle, setHandle] = useState<Btwx.ResizeHandle>(null);
-  const [maxDim, setMaxDim] = useState<number>(null);
+  const { isEnabled, resizing, initialHandle, setLineFrom, setLineTo, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent, setCanvasResizing, selected } = props;
+  const [handle, setHandle] = useState<Btwx.LineHandle>(null);
+  const [fromHandlePosition, setFromHandlePosition] = useState<paper.Point>(null);
+  const [toHandlePosition, setToHandlePosition] = useState<paper.Point>(null);
   const [vector, setVector] = useState<paper.Point>(null);
-  const [dims, setDims] = useState<paper.Size>(null);
-  const [constrainedDims, setConstrainedDims] = useState<paper.Point>(null);
   const [shiftModifier, setShiftModifier] = useState<boolean>(false);
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
-  const [from, setFrom] = useState<paper.Point>(null);
   const [toBounds, setToBounds] = useState<paper.Rectangle>(null);
-  const [initialToBounds, setInitialToBounds] = useState<paper.Rectangle>(null);
+  const [isHorizontal, setIsHorizontal] = useState<boolean>(false);
+  const [isVertical, setIsVertical] = useState<boolean>(false);
+  const [originalPaperSelection, setOriginalPaperSelection] = useState<paper.Path>(null);
 
   const resetState = () => {
-    if (getPaperLayer('Tooltip')) {
-      getPaperLayer('Tooltip').remove();
-    }
-    if (getPaperLayer('LineToolPreview')) {
-      getPaperLayer('LineToolPreview').remove();
-    }
-    setFrom(null);
     setHandle(null);
     setVector(null);
-    setDims(null);
-    setMaxDim(null);
-    setConstrainedDims(null);
     setToBounds(null);
     setShiftModifier(false);
     setSnapBounds(null);
-    setInitialToBounds(null);
-  }
-
-  const getSnapToolHitTestZones = () => {
-    if (drawing) {
-      const x = dragEvent ? dragEvent.point.x - dragEvent.downPoint.x : 0;
-      const y = dragEvent ? dragEvent.point.y - dragEvent.downPoint.y : 0;
-      switch(handle) {
-        case 'topCenter':
-          return { top: true };
-        case 'bottomCenter':
-          return { bottom: true };
-        case 'leftCenter':
-          return { left: true };
-        case 'rightCenter':
-          return { right: true };
-        case 'topLeft':
-          if (dragEvent && dragEvent.modifiers.shift) {
-            if (snapBounds.width > snapBounds.height) {
-              return { left: true };
-            } else if (snapBounds.width < snapBounds.height) {
-              return { top: true };
-            } else {
-              if (Math.abs(x) > Math.abs(y)) {
-                return { left: true };
-              } else if (Math.abs(x) < Math.abs(y)) {
-                return { top: true };
-              } else {
-                return { top: true, left: true };
-              }
-            }
-          } else {
-            return { top: true, left: true };
-          }
-        case 'topRight':
-          if (dragEvent && dragEvent.modifiers.shift) {
-            if (snapBounds.width > snapBounds.height) {
-              return { right: true };
-            } else if (snapBounds.width < snapBounds.height) {
-              return { top: true };
-            } else {
-              if (Math.abs(x) > Math.abs(y)) {
-                return { right: true };
-              } else if (Math.abs(x) < Math.abs(y)) {
-                return { top: true };
-              } else {
-                return { top: true, right: true };
-              }
-            }
-          } else {
-            return { top: true, right: true };
-          }
-        case 'bottomLeft':
-          if (dragEvent && dragEvent.modifiers.shift) {
-            if (snapBounds.width > snapBounds.height) {
-              return { left: true };
-            } else if (snapBounds.width < snapBounds.height) {
-              return { bottom: true };
-            } else {
-              if (Math.abs(x) > Math.abs(y)) {
-                return { left: true };
-              } else if (Math.abs(x) < Math.abs(y)) {
-                return { bottom: true };
-              } else {
-                return { bottom: true, left: true };
-              }
-            }
-          } else {
-            return { bottom: true, left: true };
-          }
-        case 'bottomRight':
-          if (dragEvent && dragEvent.modifiers.shift) {
-            if (snapBounds.width > snapBounds.height) {
-              return { right: true };
-            } else if (snapBounds.width < snapBounds.height) {
-              return { bottom: true };
-            } else {
-              if (Math.abs(x) > Math.abs(y)) {
-                return { right: true };
-              } else if (Math.abs(x) < Math.abs(y)) {
-                return { bottom: true };
-              } else {
-                return { bottom: true, right: true };
-              }
-            }
-          } else {
-            return { bottom: true, right: true };
-          }
-      }
-    } else {
-      return { center: true, middle: true };
-    }
+    setFromHandlePosition(null);
+    setToHandlePosition(null);
+    setIsHorizontal(false);
+    setIsVertical(false);
+    setOriginalPaperSelection(null);
   }
 
   const handleSnapToolUpdate = (snapToolBounds: paper.Rectangle, xSnapPoint: Btwx.SnapPoint, ySnapPoint: Btwx.SnapPoint): void => {
-    if (drawing) {
-      setToBounds(snapToolBounds);
-    } else {
-      setInitialToBounds(snapToolBounds);
-    }
+    setToBounds(snapToolBounds);
   }
 
   useEffect(() => {
-    if (moveEvent && isEnabled && !drawing) {
-      const nextSnapBounds = new paperMain.Rectangle({
-        point: moveEvent.point,
-        size: new paperMain.Size(1, 1)
-      });
-      setSnapBounds(nextSnapBounds);
-    }
-  }, [moveEvent])
-
-  useEffect(() => {
     if (downEvent && isEnabled) {
-      switch(initialHandle) {
-        case 'from':
-        case 'to':
-      }
+      const selectedItem = paperMain.project.getItem({ data: { selected: true } });
+      const fromHandle = paperMain.project.getItem({data: { interactiveType: 'from' }});
+      const toHandle = paperMain.project.getItem({data: { interactiveType: 'to' }});
+      setFromHandlePosition(fromHandle.position);
+      setToHandlePosition(toHandle.position);
+      setHandle(initialHandle as Btwx.LineHandle);
+      setOriginalPaperSelection(selectedItem.children[0] as paper.Path);
+      updateSelectionFrame(initialHandle);
     }
   }, [downEvent])
 
   useEffect(() => {
     if (dragEvent && isEnabled) {
-      const fromPoint = from ? from : dragEvent.downPoint;
-      const x = dragEvent.point.x - fromPoint.x;
-      const y = dragEvent.point.y - fromPoint.y;
-      const nextHandle = `${y > 0 ? 'bottom' : 'top'}${x > 0 ? 'Right' : 'Left'}` as 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
-      const nextVector = dragEvent.point.subtract(fromPoint);
-      const nextDims = new paperMain.Rectangle({from: fromPoint, to: dragEvent.point}).size;
-      const nextMaxDim = Math.max(nextDims.width, nextDims.height);
-      const nextContrainedDims = new paperMain.Point(nextVector.x < 0 ? fromPoint.x - nextMaxDim : fromPoint.x + nextMaxDim, nextVector.y < 0 ? fromPoint.y - nextMaxDim : fromPoint.y + nextMaxDim);
-      const nextSnapBounds = new paperMain.Rectangle({
-        from: fromPoint,
-        to: dragEvent.modifiers.shift ? nextContrainedDims : dragEvent.point
-      });
-      setHandle(nextHandle);
-      setVector(nextVector);
-      setDims(nextDims);
-      setMaxDim(nextMaxDim);
-      setConstrainedDims(nextContrainedDims);
-      setSnapBounds(nextSnapBounds);
-      if (dragEvent.modifiers.shift && !shiftModifier) {
-        setShiftModifier(true);
+      let nextVector: paper.Point;
+      switch(handle) {
+        case 'from': {
+          const toPoint = toHandlePosition;
+          nextVector = toPoint.subtract(dragEvent.point);
+          break;
+        }
+        case 'to': {
+          const fromPoint = fromHandlePosition;
+          nextVector = fromPoint.subtract(dragEvent.point);
+          break;
+        }
       }
-      if (!dragEvent.modifiers.shift && shiftModifier) {
+      const nextIsHorizontal = (isBetween(nextVector.angle, 0, 45) || isBetween(nextVector.angle, -45, 0) || isBetween(nextVector.angle, 135, 180) || isBetween(nextVector.angle, -180, -135));
+      const nextIsVertical = (isBetween(nextVector.angle, -90, -45) || isBetween(nextVector.angle, -135, -90) || isBetween(nextVector.angle, 45, 90) || isBetween(nextVector.angle, 90, 135));
+      const nextSnapBounds = new paperMain.Rectangle({
+        from: new paperMain.Point(dragEvent.point.x - 0.5, dragEvent.point.y - 0.5),
+        to: new paperMain.Point(dragEvent.point.x + 0.5, dragEvent.point.y + 0.5)
+      });
+      if (!resizing) {
+        setCanvasResizing({resizing: true});
+      }
+      if (dragEvent.modifiers.shift) {
+        if (isHorizontal) {
+          switch(handle) {
+            case 'to':
+              nextSnapBounds.center.y = fromHandlePosition.y;
+              break;
+            case 'from':
+              nextSnapBounds.center.y = toHandlePosition.y;
+              break;
+          }
+        }
+        if (isVertical) {
+          switch(handle) {
+            case 'to':
+              nextSnapBounds.center.x = fromHandlePosition.x;
+              break;
+            case 'from':
+              nextSnapBounds.center.x = toHandlePosition.x;
+              break;
+          }
+        }
+        setShiftModifier(true);
+      } else {
         setShiftModifier(false);
       }
+      setSnapBounds(nextSnapBounds);
+      setVector(nextVector);
+      setIsHorizontal(nextIsHorizontal);
+      setIsVertical(nextIsVertical);
     }
   }, [dragEvent]);
 
   useEffect(() => {
-    if (upEvent && isEnabled && drawing) {
-
+    if (upEvent && isEnabled && resizing) {
+      const newX = (upEvent.point.x - originalPaperSelection.position.x) / vector.length;
+      const newY = (upEvent.point.y - originalPaperSelection.position.y) / vector.length;
+      switch(handle) {
+        case 'from': {
+          setLineFrom({id: selected[0], x: newX, y: newY});
+          break;
+        }
+        case 'to': {
+          setLineTo({id: selected[0], x: newX, y: newY});
+          break;
+        }
+      }
+      if (resizing) {
+        setCanvasResizing({resizing: false});
+      }
     }
   }, [upEvent]);
 
   useEffect(() => {
-    if (keyDownEvent && isEnabled && drawing) {
+    if (keyDownEvent && isEnabled && resizing) {
       if (keyDownEvent.key === 'shift') {
-        setSnapBounds(new paperMain.Rectangle({
-          from: from,
-          to: constrainedDims
-        }));
+        const nextSnapBounds = new paperMain.Rectangle({
+          from: new paperMain.Point(dragEvent.point.x - 0.5, dragEvent.point.y - 0.5),
+          to: new paperMain.Point(dragEvent.point.x + 0.5, dragEvent.point.y + 0.5)
+        });
+        if (isHorizontal) {
+          switch(handle) {
+            case 'to':
+              nextSnapBounds.center.y = fromHandlePosition.y;
+              break;
+            case 'from':
+              nextSnapBounds.center.y = toHandlePosition.y;
+              break;
+          }
+        }
+        if (isVertical) {
+          switch(handle) {
+            case 'to':
+              nextSnapBounds.center.x = fromHandlePosition.x;
+              break;
+            case 'from':
+              nextSnapBounds.center.x = toHandlePosition.x;
+              break;
+          }
+        }
+        setSnapBounds(nextSnapBounds);
         setShiftModifier(true);
       }
     }
   }, [keyDownEvent]);
 
   useEffect(() => {
-    if (keyUpEvent && isEnabled && drawing) {
+    if (keyUpEvent && isEnabled && resizing) {
       if (keyUpEvent.key === 'shift') {
-        setSnapBounds(new paperMain.Rectangle({
-          from: from,
-          to: dragEvent.point
-        }));
+        const nextSnapBounds = new paperMain.Rectangle({
+          from: new paperMain.Point(dragEvent.point.x - 0.5, dragEvent.point.y - 0.5),
+          to: new paperMain.Point(dragEvent.point.x + 0.5, dragEvent.point.y + 0.5)
+        });
+        setSnapBounds(nextSnapBounds);
         setShiftModifier(false);
       }
     }
@@ -247,7 +197,18 @@ const LineTool = (props: LineToolProps): ReactElement => {
 
   useEffect(() => {
     if (toBounds && isEnabled) {
-      updatePreview();
+      const nextPosition = new paperMain.Point(toBounds.center.x, toBounds.center.y);
+      switch(handle) {
+        case 'to': {
+          originalPaperSelection.lastSegment.point = nextPosition;
+          break;
+        }
+        case 'from': {
+          originalPaperSelection.firstSegment.point = nextPosition;
+          break;
+        }
+      }
+      updateSelectionFrame(handle);
     }
   }, [toBounds]);
 
@@ -265,16 +226,15 @@ const LineTool = (props: LineToolProps): ReactElement => {
   }, [isEnabled]);
 
   return (
-    isEnabled
+    isEnabled && resizing
     ? <SnapTool
         bounds={snapBounds}
-        snapRule={'resize'}
-        hitTestZones={getSnapToolHitTestZones()}
-        preserveAspectRatio={shiftModifier}
-        aspectRatio={1}
+        snapRule={'move'}
+        hitTestZones={{center: true, middle: true}}
         onUpdate={handleSnapToolUpdate}
-        toolEvent={drawing ? dragEvent : moveEvent}
-        resizeHandle={handle} />
+        preserveAspectRatio={shiftModifier}
+        toolEvent={dragEvent}
+        blackListLayers={selected} />
     : null
   );
 }
@@ -282,20 +242,21 @@ const LineTool = (props: LineToolProps): ReactElement => {
 const mapStateToProps = (state: RootState): LineToolStateProps => {
   const { layer, canvasSettings } = state;
   const isEnabled = canvasSettings.activeTool === 'Line';
-  const scope = layer.present.scope;
   const resizing = canvasSettings.resizing;
-  const initialHandle = canvasSettings.resizeHandle as Btwx.LineHandle | Btwx.ResizeHandle;
+  const initialHandle = canvasSettings.lineHandle;
+  const selected = layer.present.selected;
   return {
     isEnabled,
-    scope,
     resizing,
-    initialHandle
+    initialHandle,
+    selected
   };
 };
 
 const mapDispatchToProps = {
   setLineFrom,
-  setLineTo
+  setLineTo,
+  setCanvasResizing
 };
 
 export default PaperTool(

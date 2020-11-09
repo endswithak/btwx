@@ -30,12 +30,13 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
 
   const handleMouseMove = (): void => {
     if (uiEvent.empty) {
-      if (
-        activeTool === 'Resize' && !resizing ||
-        activeTool === 'Drag' && !dragging ||
-        !activeTool
-      ) {
-        setCanvasActiveTool({activeTool: 'AreaSelect', resizeHandle: null, dragHandle: null});
+      if (activeTool !== 'AreaSelect') {
+        setCanvasActiveTool({
+          activeTool: 'AreaSelect',
+          resizeHandle: null,
+          dragHandle: null,
+          lineHandle: null
+        });
       }
     } else {
       if (hover) {
@@ -45,14 +46,13 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
         case 'SelectionFrame': {
           switch(uiEvent.hitResult.item.data.interactiveType) {
             case 'move':
-              if (
-                !activeTool ||
-                activeTool === 'Drag' && !dragging ||
-                activeTool === 'Resize' && !resizing ||
-                activeTool === 'AreaSelect' && !selecting ||
-                activeTool === 'Line' && !resizing
-              ) {
-                setCanvasActiveTool({activeTool: 'Drag', dragHandle: true});
+              if (activeTool !== 'Drag') {
+                setCanvasActiveTool({
+                  activeTool: 'Drag',
+                  dragHandle: true,
+                  resizeHandle: null,
+                  lineHandle: null
+                });
               }
               break;
             case 'topLeft':
@@ -63,25 +63,25 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
             case 'bottomRight':
             case 'leftCenter':
             case 'rightCenter': {
-              if (
-                !activeTool ||
-                activeTool === 'Drag' && !dragging ||
-                activeTool === 'AreaSelect' && !selecting ||
-                activeTool === 'Line' && !resizing
-              ) {
-                setCanvasActiveTool({activeTool: 'Resize', resizeHandle: uiEvent.hitResult.item.data.interactiveType});
+              if (activeTool !== 'Resize') {
+                setCanvasActiveTool({
+                  activeTool: 'Resize',
+                  resizeHandle: uiEvent.hitResult.item.data.interactiveType,
+                  dragHandle: false,
+                  lineHandle: null
+                });
               }
               break;
             }
             case 'from':
             case 'to':
-              if (
-                !activeTool ||
-                activeTool === 'Drag' && !dragging ||
-                activeTool === 'Resize' && !resizing ||
-                activeTool === 'AreaSelect' && !selecting
-              ) {
-                setCanvasActiveTool({activeTool: 'Line', resizeHandle: uiEvent.hitResult.item.data.interactiveType});
+              if (activeTool !== 'Line') {
+                setCanvasActiveTool({
+                  activeTool: 'Line',
+                  lineHandle: uiEvent.hitResult.item.data.interactiveType,
+                  dragHandle: false,
+                  resizeHandle: null
+                });
               }
               break;
           }
@@ -122,7 +122,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
   }
 
   useEffect(() => {
-    if (uiEvent && !dragging && !resizing && !selecting) {
+    if (uiEvent && !dragging && !resizing && !selecting && activeTool !== 'Artboard' && activeTool !== 'Shape') {
       switch(uiEvent.eventType) {
         case 'contextMenu':
           handleContextMenu();

@@ -684,7 +684,7 @@ const mapStateToProps = (state: RootState): ResizeToolStateProps => {
   const selected = layer.present.selected;
   const isEnabled = canvasSettings.activeTool === 'Resize';
   const resizing = canvasSettings.resizing;
-  const initialHandle = canvasSettings.resizeHandle;
+  const initialHandle = canvasSettings.resizeHandle as Btwx.ResizeHandle;
   return {
     selected,
     isEnabled,

@@ -1,10 +1,9 @@
 // import { remote } from 'electron';
-import React, { useRef, useContext, useEffect, ReactElement, useState } from 'react';
+import React, { useContext, useEffect, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { scrollToLayer } from '../utils';
 import { RootState } from '../store/reducers';
-import { importPaperProject, getDeepSelectItem, getNearestScopeAncestor } from '../store/selectors/layer';
-import { paperMain } from '../canvas';
+import { getDeepSelectItem, getNearestScopeAncestor } from '../store/selectors/layer';
 import { setCanvasActiveTool } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasActiveToolPayload } from '../store/actionTypes/canvasSettings';
 import { LayerTypes, SetLayerHoverPayload, DeepSelectLayerPayload, SelectLayersPayload, DeselectLayersPayload } from '../store/actionTypes/layer';
@@ -55,11 +54,7 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
           setLayerHover({id: nearestScopeAncestor.id});
         }
       }
-      if (
-        !activeTool ||
-        activeTool === 'Resize' && !resizing ||
-        activeTool === 'AreaSelect' && !selecting
-      ) {
+      if (activeTool !== 'Drag') {
         setCanvasActiveTool({activeTool: 'Drag'});
       }
     }
@@ -115,7 +110,7 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
   }
 
   useEffect(() => {
-    if (layerEvent && !dragging && !resizing && !selecting) {
+    if (layerEvent && !dragging && !resizing && !selecting && activeTool !== 'Artboard' && activeTool !== 'Shape') {
       switch(layerEvent.eventType) {
         case 'contextMenu':
           handleContextMenu();

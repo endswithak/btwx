@@ -33,8 +33,9 @@ export interface CanvasSettingsState {
   zooming: boolean;
   translating: boolean;
   zoomType: Btwx.ZoomType;
-  resizeHandle: Btwx.ResizeHandle | Btwx.LineHandle;
+  resizeHandle: Btwx.ResizeHandle;
   dragHandle: boolean;
+  lineHandle: Btwx.LineHandle;
 }
 
 const initialState: CanvasSettingsState = {
@@ -52,6 +53,7 @@ const initialState: CanvasSettingsState = {
   zoomType: null,
   resizeHandle: null,
   dragHandle: false,
+  lineHandle: null
 };
 
 export default (state = initialState, action: CanvasSettingsTypes): CanvasSettingsState => {
@@ -68,7 +70,8 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
         drawing: Object.prototype.hasOwnProperty.call(action.payload, 'drawing') ? action.payload.drawing : state.drawing,
         zoomType: Object.prototype.hasOwnProperty.call(action.payload, 'zoomType') ? action.payload.zoomType : state.zoomType,
         resizeHandle: Object.prototype.hasOwnProperty.call(action.payload, 'resizeHandle') ? action.payload.resizeHandle : state.resizeHandle,
-        dragHandle: Object.prototype.hasOwnProperty.call(action.payload, 'dragHandle') ? action.payload.dragHandle : state.dragHandle
+        dragHandle: Object.prototype.hasOwnProperty.call(action.payload, 'dragHandle') ? action.payload.dragHandle : state.dragHandle,
+        lineHandle: Object.prototype.hasOwnProperty.call(action.payload, 'lineHandle') ? action.payload.lineHandle : state.lineHandle,
       };
     }
     case SET_CANVAS_DRAWING: {

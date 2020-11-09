@@ -3,15 +3,19 @@ import { remote } from 'electron';
 import styled from 'styled-components';
 import { Titlebar as ElectronTitlebar, Color } from 'custom-electron-titlebar';
 import { connect } from 'react-redux';
-import { MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT } from '../constants';
+import { MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT, PREVIEW_PREFIX } from '../constants';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 
-interface TitlebarProps {
+interface TitlebarStateProps {
   documentName?: string;
   themeName?: string;
   recording?: boolean;
   unsavedEdits?: boolean;
+}
+
+interface TitlebarProps {
+  isPreview?: boolean;
 }
 
 interface TitleProps {
@@ -29,9 +33,9 @@ const Title = styled.div<TitleProps>`
   }
 `;
 
-const Titlebar = (props: TitlebarProps): ReactElement => {
+const Titlebar = (props: TitlebarProps & TitlebarStateProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { documentName, themeName, recording, unsavedEdits } = props;
+  const { documentName, themeName, recording, unsavedEdits, isPreview } = props;
   const [titlebar, setTitlebar] = useState(null);
 
   const handleDoubleClick = () => {
@@ -48,7 +52,11 @@ const Titlebar = (props: TitlebarProps): ReactElement => {
 
   useEffect(() => {
     if (titlebar && documentName) {
-      titlebar.updateTitle(documentName);
+      if (isPreview) {
+        titlebar.updateTitle(`${PREVIEW_PREFIX}${documentName}`);
+      } else {
+        titlebar.updateTitle(documentName);
+      }
     }
   }, [documentName]);
 
@@ -59,20 +67,22 @@ const Titlebar = (props: TitlebarProps): ReactElement => {
   }, [themeName]);
 
   return (
-    <Title
-      className='c-topbar-title'
-      theme={theme}
-      recording={recording}
-      onDoubleClick={handleDoubleClick}>
-      <span>
-        <span className='c-topbar-title__title'>{documentName}</span>
-        {
-          unsavedEdits
-          ? <span className='c-topbar-title__unsaved-indicator'>(unsaved changes)</span>
-          : null
-        }
-      </span>
-    </Title>
+    isPreview
+    ? null
+    : <Title
+        className='c-topbar-title'
+        theme={theme}
+        recording={recording}
+        onDoubleClick={handleDoubleClick}>
+        <span>
+          <span className='c-topbar-title__title'>{documentName}</span>
+          {
+            unsavedEdits
+            ? <span className='c-topbar-title__unsaved-indicator'>(unsaved changes)</span>
+            : null
+          }
+        </span>
+      </Title>
   );
 }
 
