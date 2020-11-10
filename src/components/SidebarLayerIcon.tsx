@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 import Icon from './Icon';
-import { capitalize } from '../utils';
 
 interface SidebarLayerIconProps {
   layer: string;

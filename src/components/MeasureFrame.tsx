@@ -1,20 +1,20 @@
 import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { updateMeasureFrameThunk } from '../store/actions/layer';
+import { updateMeasureFrame } from '../store/actions/layer';
 import { paperMain } from '../canvas';
 
 interface MeasureFrameProps {
   selected?: string[];
   hover?: string;
-  updateMeasureFrameThunk?(): void;
+  updateMeasureFrame?(): void;
 }
 
 const MeasureFrame = (props: MeasureFrameProps): ReactElement => {
-  const { selected, hover, updateMeasureFrameThunk } = props;
+  const { selected, hover, updateMeasureFrame } = props;
 
   useEffect(() => {
-    updateMeasureFrameThunk();
+    updateMeasureFrame();
     return () => {
       const measureFrame = paperMain.project.getItem({ data: { id: 'MeasureFrame' } });
       if (measureFrame) {
@@ -37,5 +37,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { updateMeasureFrameThunk }
+  { updateMeasureFrame }
 )(MeasureFrame);

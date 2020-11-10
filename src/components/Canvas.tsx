@@ -16,6 +16,7 @@ import ShapeTool from './ShapeTool';
 import ArtboardTool from './ArtboardTool';
 import AreaSelectTool from './AreaSelectTool';
 import LineTool from './LineTool';
+import TextTool from './TextTool';
 
 interface CanvasProps {
   ready: boolean;
@@ -127,6 +128,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
             <ResizeTool />
             <AreaSelectTool />
             <LineTool />
+            <TextTool />
             <CanvasToast />
           </>
         : null

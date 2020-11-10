@@ -182,8 +182,8 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
   useEffect(() => {
     if (moveEvent && isEnabled && !drawing) {
       const nextSnapBounds = new paperMain.Rectangle({
-        point: moveEvent.point,
-        size: new paperMain.Size(1, 1)
+        from: new paperMain.Point(moveEvent.point.x - 0.5, moveEvent.point.y - 0.5),
+        to: new paperMain.Point(moveEvent.point.x + 0.5, moveEvent.point.y + 0.5)
       });
       setSnapBounds(nextSnapBounds);
     }

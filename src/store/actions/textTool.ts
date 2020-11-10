@@ -20,12 +20,9 @@ export const toggleTextToolThunk = () => {
     const state = getState() as RootState;
     if (state.canvasSettings.focusing) {
       if (state.canvasSettings.activeTool === 'Text') {
-        // removeActiveTools();
         dispatch(disableTextTool());
         dispatch(setCanvasActiveTool({activeTool: null}));
       } else {
-        // removeActiveTools();
-        // new TextTool();
         dispatch(enableTextTool());
         dispatch(setCanvasActiveTool({activeTool: 'Text'}));
       }

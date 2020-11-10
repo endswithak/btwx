@@ -4,6 +4,8 @@ import tinyColor from 'tinycolor2';
 import { LayerState } from '../reducers/layer';
 import * as layerActions from '../actions/layer';
 import { addItem, removeItem, insertItem, moveItemAbove, moveItemBelow } from './general';
+import { paperMain } from '../../canvas';
+import { THEME_PRIMARY_COLOR } from '../../constants';
 
 import {
   AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer,
@@ -47,18 +49,12 @@ import {
   getSelectionBottomRight, getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayerDescendants,
   getDestinationEquivalent, getEquivalentTweenProps, getDeepSelectItem,
   getTweensByDestinationLayer, getTweensEventsByOriginArtboard, getTweensEventsByDestinationArtboard, getTweensByLayer,
-  getLayersBounds, getGradientOriginPoint, getGradientDestinationPoint, getGradientStops, getLayerSnapPoints,
+  getLayersBounds, getGradientOriginPoint, getGradientDestinationPoint, getGradientStops,
   orderLayersByDepth, orderLayersByLeft, orderLayersByTop, savePaperProjectJSON, getTweensByProp,
   getEquivalentTweenProp, getTweensWithLayer, gradientsMatch, getPaperProp, getArtboardsTopTop, getSelectionBounds,
   getTweenEventsWithArtboard, getLineFromPoint, getLineToPoint, getLineVector, getParentPaperLayer, getLayerUnderlyingSiblings,
   getMaskableUnderlyingSiblings, getSiblingLayersWithUnderlyingMask, getLayerUnderlyingMaskRoot, getOlderSiblingIgnoringUnderlyingMask
 } from '../selectors/layer';
-
-import { paperMain } from '../../canvas';
-
-import { THEME_PRIMARY_COLOR, DEFAULT_TWEEN_EVENTS } from '../../constants';
-import MeasureGuide from '../../canvas/measureGuide';
-import getTheme from '../theme';
 
 export const addArtboard = (state: LayerState, action: AddArtboard): LayerState => {
   let currentState = state;
@@ -95,7 +91,6 @@ export const addShape = (state: LayerState, action: AddShape): LayerState => {
       [action.payload.layer.parent]: {
         ...currentState.byId[action.payload.layer.parent],
         children: addItem((currentState.byId[action.payload.layer.parent] as Btwx.Group).children, action.payload.layer.id),
-        // showChildren: true
       } as Btwx.Group
     },
     allShapeIds: addItem(state.allShapeIds, action.payload.layer.id)
@@ -350,162 +345,6 @@ export const removeLayers = (state: LayerState, action: RemoveLayers): LayerStat
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
-}
-
-export const updateGradientFrame = (layerItem: Btwx.Layer, gradient: Btwx.Gradient, themeName: Btwx.ThemeName) => {
-  const theme = getTheme(themeName);
-  const stopsWithIndex = gradient.stops.map((stop, index) => {
-    return {
-      ...stop,
-      index
-    }
-  });
-  const sortedStops = stopsWithIndex.sort((a,b) => { return a.position - b.position });
-  const originStop = sortedStops[0];
-  const destStop = sortedStops[sortedStops.length - 1];
-  const oldGradientFrame = paperMain.project.getItem({ data: { id: 'GradientFrame' } });
-  if (oldGradientFrame) {
-    oldGradientFrame.remove();
-  }
-  const gradientFrameHandleBgProps = {
-    radius: (theme.unit * 2) / paperMain.view.zoom,
-    fillColor: '#fff',
-    shadowColor: new paperMain.Color(0, 0, 0, 0.5),
-    shadowBlur: theme.unit / 2,
-    insert: false,
-    strokeWidth: 1 / paperMain.view.zoom
-  }
-  const gradientFrameHandleSwatchProps = {
-    radius: (theme.unit + 2) / paperMain.view.zoom,
-    fillColor: '#fff',
-    insert: false
-  }
-  const gradientFrameLineProps = {
-    from: getGradientOriginPoint(layerItem, gradient.origin),
-    to: getGradientDestinationPoint(layerItem, gradient.destination),
-    insert: false
-  }
-  const gradientFrameOriginHandleBg  = new paperMain.Shape.Circle({
-    ...gradientFrameHandleBgProps,
-    center: getGradientOriginPoint(layerItem, gradient.origin),
-    data: {
-      type: 'UIElementChild',
-      interactive: true,
-      interactiveType: 'origin',
-      elementId: 'GradientFrame'
-    },
-    strokeColor: originStop.index === gradient.activeStopIndex ? theme.palette.primary : null
-  });
-  const gradientFrameOriginHandleSwatch  = new paperMain.Shape.Circle({
-    ...gradientFrameHandleSwatchProps,
-    fillColor: { hue: originStop.color.h, saturation: originStop.color.s, lightness: originStop.color.l, alpha: originStop.color.a },
-    center: getGradientOriginPoint(layerItem, gradient.origin),
-    data: {
-      type: 'UIElementChild',
-      interactive: true,
-      interactiveType: 'origin',
-      elementId: 'GradientFrame'
-    }
-  });
-  const gradientFrameDestinationHandleBg = new paperMain.Shape.Circle({
-    ...gradientFrameHandleBgProps,
-    center: getGradientDestinationPoint(layerItem, gradient.destination),
-    data: {
-      type: 'UIElementChild',
-      interactive: true,
-      interactiveType: 'destination',
-      elementId: 'GradientFrame'
-    },
-    strokeColor: destStop.index === gradient.activeStopIndex ? theme.palette.primary : null
-  });
-  const gradientFrameDestinationHandleSwatch = new paperMain.Shape.Circle({
-    ...gradientFrameHandleSwatchProps,
-    fillColor: { hue: destStop.color.h, saturation: destStop.color.s, lightness: destStop.color.l, alpha: destStop.color.a },
-    center: getGradientDestinationPoint(layerItem, gradient.destination),
-    data: {
-      type: 'UIElementChild',
-      interactive: true,
-      interactiveType: 'destination',
-      elementId: 'GradientFrame'
-    }
-  });
-  const gradientFrameLineDark = new paperMain.Path.Line({
-    ...gradientFrameLineProps,
-    strokeColor: new paperMain.Color(0, 0, 0, 0.25),
-    strokeWidth: 3 / paperMain.view.zoom,
-    data: {
-      id: 'GradientFrameLine',
-      type: 'UIElementChild',
-      interactive: false,
-      interactiveType: null,
-      elementId: 'GradientFrame'
-    }
-  });
-  const gradientFrameLineLight = new paperMain.Path.Line({
-    ...gradientFrameLineProps,
-    strokeColor: '#fff',
-    strokeWidth: 1 / paperMain.view.zoom,
-    data: {
-      id: 'GradientFrameLine',
-      type: 'UIElementChild',
-      interactive: false,
-      interactiveType: null,
-      elementId: 'GradientFrame'
-    }
-  });
-  const gradientFrameOriginHandle = new paperMain.Group({
-    data: {
-      id: 'GradientFrameOriginHandle',
-      type: 'UIElementChild',
-      interactive: true,
-      interactiveType: 'origin',
-      elementId: 'GradientFrame'
-    },
-    insert: false,
-    children: [gradientFrameOriginHandleBg, gradientFrameOriginHandleSwatch],
-    // onMouseDown: () => {
-    //   if (originStop.index !== gradient.activeStopIndex) {
-    //     onStopPress(originStop.index);
-    //   }
-    // }
-  });
-  const gradientFrameDestinationHandle = new paperMain.Group({
-    data: {
-      id: 'GradientFrameDestinationHandle',
-      type: 'UIElementChild',
-      interactive: true,
-      interactiveType: 'destination',
-      elementId: 'GradientFrame'
-    },
-    insert: false,
-    children: [gradientFrameDestinationHandleBg, gradientFrameDestinationHandleSwatch],
-    // onMouseDown: () => {
-    //   if (destStop.index !== gradient.activeStopIndex) {
-    //     onStopPress(destStop.index);
-    //   }
-    // }
-  });
-  const gradientFrameLines = new paperMain.Group({
-    data: {
-      id: 'GradientFrameLines',
-      type: 'UIElementChild',
-      interactive: false,
-      interactiveType: null,
-      elementId: 'GradientFrame'
-    },
-    insert: false,
-    children: [gradientFrameLineDark, gradientFrameLineLight]
-  });
-  const newGradientFrame = new paperMain.Group({
-    data: {
-      id: 'GradientFrame',
-      type: 'UIElement',
-      interactive: false,
-      interactiveType: null,
-      elementId: 'GradientFrame'
-    },
-    children: [gradientFrameLines, gradientFrameOriginHandle, gradientFrameDestinationHandle]
-  });
 }
 
 export const deselectLayer = (state: LayerState, action: DeselectLayer): LayerState => {

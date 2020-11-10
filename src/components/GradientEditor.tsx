@@ -217,7 +217,7 @@ const mapStateToProps = (state: RootState): {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);
-  const styles: (em.Fill | Btwx.Stroke)[] = layerItems.reduce((result, current) => {
+  const styles: (Btwx.Fill | Btwx.Stroke)[] = layerItems.reduce((result, current) => {
     switch(gradientEditor.prop) {
       case 'fill':
         return [...result, current.style.fill];

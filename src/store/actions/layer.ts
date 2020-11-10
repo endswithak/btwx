@@ -10,7 +10,7 @@ import { paperMain } from '../../canvas';
 import MeasureGuide from '../../canvas/measureGuide';
 import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_VALUE, THEME_PRIMARY_COLOR, DEFAULT_TWEEN_EVENTS } from '../../constants';
 import { getPaperFillColor, getPaperStrokeColor, getPaperLayer, getPaperShadowColor } from '../utils/paper';
-import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayersBounds, importPaperProject, colorsMatch, gradientsMatch, getNearestScopeAncestor, getTweenEventsFrameItems, orderLayersByDepth, canMaskLayers, canMaskSelection, canPasteSVG, getLineToPoint, getSelectionTopLeft, getSelectionBottomRight, getLineFromPoint, getArtboardsTopTop, getSelectionBounds, getSelectedBounds, getParentPaperLayer } from '../selectors/layer';
+import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayersBounds, importPaperProject, colorsMatch, gradientsMatch, getNearestScopeAncestor, getTweenEventsFrameItems, orderLayersByDepth, canMaskLayers, canMaskSelection, canPasteSVG, getLineToPoint, getSelectionTopLeft, getSelectionBottomRight, getLineFromPoint, getArtboardsTopTop, getSelectionBounds, getSelectedBounds, getParentPaperLayer, getGradientOriginPoint, getGradientDestinationPoint } from '../selectors/layer';
 import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle, getLayerMasked, getLayerUnderlyingMask } from '../utils/actions';
 
 import { bufferToBase64, scrollToLayer } from '../../utils';
@@ -19,7 +19,6 @@ import getTheme from '../theme';
 
 import { addDocumentImage } from './documentSettings';
 import { setTweenDrawerEventThunk } from './tweenDrawer';
-import { updateGradientFrame } from '../utils/layer';
 import { openColorEditor, closeColorEditor } from './colorEditor';
 import { openGradientEditor, closeGradientEditor } from './gradientEditor';
 import { RootState } from '../reducers';
@@ -868,7 +867,7 @@ export const addImageThunk = (payload: AddImagePayload) => {
       const state = getState() as RootState;
       const buffer = Buffer.from(payload.buffer);
       sharp(buffer).metadata().then(({ width, height }) => {
-        sharp(buffer).resize(Math.round(width * 0.5)).webp({quality: 50}).toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
+        sharp(buffer).resize(Math.round(width * 0.5)).webp().toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
           const frame = getLayerFrame(payload);
           const name = payload.layer.name ? payload.layer.name : 'Image';
           const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
@@ -2720,7 +2719,7 @@ const updateEditors = (dispatch: any, state: RootState, type: 'redo' | 'undo') =
       const prevStyle = prevLayerItems[0].style[state.gradientEditor.prop];
       // check if fill types match
       if (style.fillType === prevStyle.fillType) {
-        updateGradientFrame(layerItems[0], (style as Btwx.Fill | Btwx.Stroke).gradient, state.viewSettings.theme);
+        updateGradientFrame(layerItems[0], (style as Btwx.Fill | Btwx.Stroke).gradient);
         // check if prev action creator was for gradient
         if (gradientsMatch((style as Btwx.Fill | Btwx.Stroke).gradient, (prevStyle as Btwx.Fill | Btwx.Stroke).gradient)) {
           dispatch(closeGradientEditor());
@@ -2800,6 +2799,161 @@ export const redoThunk = () => {
     }
   }
 };
+
+export const updateGradientFrame = (layerItem: Btwx.Layer, gradient: Btwx.Gradient) => {
+  const stopsWithIndex = gradient.stops.map((stop, index) => {
+    return {
+      ...stop,
+      index
+    }
+  });
+  const sortedStops = stopsWithIndex.sort((a,b) => { return a.position - b.position });
+  const originStop = sortedStops[0];
+  const destStop = sortedStops[sortedStops.length - 1];
+  const oldGradientFrame = paperMain.project.getItem({ data: { id: 'GradientFrame' } });
+  if (oldGradientFrame) {
+    oldGradientFrame.remove();
+  }
+  const gradientFrameHandleBgProps = {
+    radius: 8 / paperMain.view.zoom,
+    fillColor: '#fff',
+    shadowColor: new paperMain.Color(0, 0, 0, 0.5),
+    shadowBlur: 2,
+    insert: false,
+    strokeWidth: 1 / paperMain.view.zoom
+  }
+  const gradientFrameHandleSwatchProps = {
+    radius: 6 / paperMain.view.zoom,
+    fillColor: '#fff',
+    insert: false
+  }
+  const gradientFrameLineProps = {
+    from: getGradientOriginPoint(layerItem, gradient.origin),
+    to: getGradientDestinationPoint(layerItem, gradient.destination),
+    insert: false
+  }
+  const gradientFrameOriginHandleBg  = new paperMain.Shape.Circle({
+    ...gradientFrameHandleBgProps,
+    center: getGradientOriginPoint(layerItem, gradient.origin),
+    data: {
+      type: 'UIElementChild',
+      interactive: true,
+      interactiveType: 'origin',
+      elementId: 'GradientFrame'
+    },
+    strokeColor: originStop.index === gradient.activeStopIndex ? THEME_PRIMARY_COLOR : null
+  });
+  const gradientFrameOriginHandleSwatch  = new paperMain.Shape.Circle({
+    ...gradientFrameHandleSwatchProps,
+    fillColor: {
+      hue: originStop.color.h,
+      saturation: originStop.color.s,
+      lightness: originStop.color.l,
+      alpha: originStop.color.a
+    },
+    center: getGradientOriginPoint(layerItem, gradient.origin),
+    data: {
+      type: 'UIElementChild',
+      interactive: true,
+      interactiveType: 'origin',
+      elementId: 'GradientFrame'
+    }
+  });
+  const gradientFrameDestinationHandleBg = new paperMain.Shape.Circle({
+    ...gradientFrameHandleBgProps,
+    center: getGradientDestinationPoint(layerItem, gradient.destination),
+    data: {
+      type: 'UIElementChild',
+      interactive: true,
+      interactiveType: 'destination',
+      elementId: 'GradientFrame'
+    },
+    strokeColor: destStop.index === gradient.activeStopIndex ? THEME_PRIMARY_COLOR : null
+  });
+  const gradientFrameDestinationHandleSwatch = new paperMain.Shape.Circle({
+    ...gradientFrameHandleSwatchProps,
+    fillColor: {
+      hue: destStop.color.h,
+      saturation: destStop.color.s,
+      lightness: destStop.color.l,
+      alpha: destStop.color.a
+    },
+    center: getGradientDestinationPoint(layerItem, gradient.destination),
+    data: {
+      type: 'UIElementChild',
+      interactive: true,
+      interactiveType: 'destination',
+      elementId: 'GradientFrame'
+    }
+  });
+  const gradientFrameLineDark = new paperMain.Path.Line({
+    ...gradientFrameLineProps,
+    strokeColor: new paperMain.Color(0, 0, 0, 0.25),
+    strokeWidth: 3 / paperMain.view.zoom,
+    data: {
+      id: 'GradientFrameLine',
+      type: 'UIElementChild',
+      interactive: false,
+      interactiveType: null,
+      elementId: 'GradientFrame'
+    }
+  });
+  const gradientFrameLineLight = new paperMain.Path.Line({
+    ...gradientFrameLineProps,
+    strokeColor: '#fff',
+    strokeWidth: 1 / paperMain.view.zoom,
+    data: {
+      id: 'GradientFrameLine',
+      type: 'UIElementChild',
+      interactive: false,
+      interactiveType: null,
+      elementId: 'GradientFrame'
+    }
+  });
+  const gradientFrameOriginHandle = new paperMain.Group({
+    data: {
+      id: 'GradientFrameOriginHandle',
+      type: 'UIElementChild',
+      interactive: true,
+      interactiveType: 'origin',
+      elementId: 'GradientFrame'
+    },
+    insert: false,
+    children: [gradientFrameOriginHandleBg, gradientFrameOriginHandleSwatch]
+  });
+  const gradientFrameDestinationHandle = new paperMain.Group({
+    data: {
+      id: 'GradientFrameDestinationHandle',
+      type: 'UIElementChild',
+      interactive: true,
+      interactiveType: 'destination',
+      elementId: 'GradientFrame'
+    },
+    insert: false,
+    children: [gradientFrameDestinationHandleBg, gradientFrameDestinationHandleSwatch]
+  });
+  const gradientFrameLines = new paperMain.Group({
+    data: {
+      id: 'GradientFrameLines',
+      type: 'UIElementChild',
+      interactive: false,
+      interactiveType: null,
+      elementId: 'GradientFrame'
+    },
+    insert: false,
+    children: [gradientFrameLineDark, gradientFrameLineLight]
+  });
+  const newGradientFrame = new paperMain.Group({
+    data: {
+      id: 'GradientFrame',
+      type: 'UIElement',
+      interactive: false,
+      interactiveType: null,
+      elementId: 'GradientFrame'
+    },
+    children: [gradientFrameLines, gradientFrameOriginHandle, gradientFrameDestinationHandle]
+  });
+}
 
 export const updateActiveArtboardFrame = () => {
   const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'ActiveArtboardFrame' } });

@@ -29,7 +29,7 @@ interface ColorInputProps {
 const ColorInput = (props: ColorInputProps): ReactElement => {
   const { prop, enabledValue, selected, colorValue, opacityValue, colorEditorOpen, enableLayersFill, enableLayersStroke, openColorEditor, setLayersFillType, setLayersStrokeFillType } = props;
   const [enabled, setEnabled] = useState<boolean | 'multi'>(enabledValue);
-  const [color, setColor] = useState<em.Color | 'multi'>(colorValue);
+  const [color, setColor] = useState<Btwx.Color | 'multi'>(colorValue);
 
   useEffect(() => {
     setEnabled(enabledValue);
@@ -86,8 +86,8 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
       <SidebarSectionColumn width={'33.33%'}>
         <SidebarInput
           value={'multi'}
-          onChange={() => {}}
-          onSubmit={() => {}}
+          onChange={null}
+          onSubmit={null}
           submitOnBlur
           label={'%'}
           disabled={true}
@@ -109,7 +109,7 @@ const mapStateToProps = (state: RootState, ownProps: ColorInputProps): {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
   }, []);
-  const styleValues: (em.Fill | Btwx.Stroke | Btwx.Shadow)[] = layerItems.reduce((result, current) => {
+  const styleValues: (Btwx.Fill | Btwx.Stroke | Btwx.Shadow)[] = layerItems.reduce((result, current) => {
     switch(ownProps.prop) {
       case 'fill':
         return [...result, current.style.fill];

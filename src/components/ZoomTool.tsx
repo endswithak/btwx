@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 // import { remote } from 'electron';
-import React, { useContext, useEffect, ReactElement, useCallback } from 'react';
+import React, { useEffect, ReactElement, useCallback } from 'react';
 import debounce from 'lodash.debounce';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
@@ -9,7 +9,6 @@ import { setCanvasZooming } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasZoomingPayload } from '../store/actionTypes/canvasSettings';
 import { setCanvasMatrix } from '../store/actions/documentSettings';
 import { DocumentSettingsTypes, SetCanvasMatrixPayload } from '../store/actionTypes/documentSettings';
-import { ThemeContext } from './ThemeProvider';
 
 interface ZoomToolProps {
   zoomEvent: WheelEvent;
@@ -19,7 +18,6 @@ interface ZoomToolProps {
 }
 
 const ZoomTool = (props: ZoomToolProps): ReactElement => {
-  const theme = useContext(ThemeContext);
   const { zoomEvent, isEnabled, setCanvasZooming, setCanvasMatrix } = props;
 
   const debounceZoom = useCallback(

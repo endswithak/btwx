@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { remote } from 'electron';
-import store from '../store';
+// import store from '../store';
 import { RootState } from '../store/reducers';
 import { PREVIEW_TOPBAR_HEIGHT, MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT } from '../constants';
 import { ThemeContext } from './ThemeProvider';
@@ -14,19 +14,19 @@ interface PreviewProps {
   recording: boolean;
 }
 
-if (remote.process.platform === 'darwin') {
-  remote.getCurrentWindow().addListener('swipe', (event: any, direction: any) => {
-    switch(direction) {
-      case 'right': {
-        const state = store.getState();
-        if (state.preview.isOpen && state.preview.focusing) {
-          remote.BrowserWindow.fromId(state.preview.documentWindowId).focus();
-        }
-        break;
-      }
-    }
-  });
-}
+// if (remote.process.platform === 'darwin') {
+//   remote.getCurrentWindow().addListener('swipe', (event: any, direction: any) => {
+//     switch(direction) {
+//       case 'right': {
+//         const state = store.getState();
+//         if (state.preview.isOpen && state.preview.focusing) {
+//           remote.BrowserWindow.fromId(state.preview.documentWindowId).focus();
+//         }
+//         break;
+//       }
+//     }
+//   });
+// }
 
 const Preview = (props: PreviewProps): ReactElement => {
   const theme = useContext(ThemeContext);

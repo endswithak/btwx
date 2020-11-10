@@ -19,7 +19,7 @@ interface StrokeCapInputProps {
 const StrokeCapInput = (props: StrokeCapInputProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { selected, strokeCapValue, setLayersStrokeCap, disabled } = props;
-  const [strokeCap, setStrokeCap] = useState<em.StrokeCap | 'multi'>(strokeCapValue);
+  const [strokeCap, setStrokeCap] = useState<Btwx.StrokeCap | 'multi'>(strokeCapValue);
 
   useEffect(() => {
     setStrokeCap(strokeCapValue);

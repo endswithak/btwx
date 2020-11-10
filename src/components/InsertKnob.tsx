@@ -4,7 +4,7 @@ import sharp from 'sharp';
 import React, { useContext, ReactElement, useEffect, useRef } from 'react';
 import { connect } from 'react-redux';
 import tinyColor from 'tinycolor2';
-import store from '../store';
+// import store from '../store';
 import { RootState } from '../store/reducers';
 import { activateInsertKnob, deactivateInsertKnob, setInsertKnobIndex } from '../store/actions/insertKnob';
 import { InsertKnobTypes, SetInsertKnobIndexPayload } from '../store/actionTypes/insertKnob';
@@ -16,41 +16,41 @@ import { addImageThunk } from '../store/actions/layer';
 import { ThemeContext } from './ThemeProvider';
 import InsertKnobItem from './InsertKnobItem';
 
-const knobLength = 8;
-const knobSwitchThreshold = 360 / knobLength;
+// const knobLength = 8;
+// const knobSwitchThreshold = 360 / knobLength;
 let knobActive = false;
 let knobIndex = 0;
 
-let currentKnobPosThreshold = 0;
-let currentKnobNegThreshold = 0;
+// let currentKnobPosThreshold = 0;
+// let currentKnobNegThreshold = 0;
 
-if (remote.process.platform === 'darwin') {
-  remote.getCurrentWindow().addListener('swipe', (event: any, direction: any) => {
-    switch(direction) {
-      case 'left': {
-        if (knobActive) {
-          currentKnobNegThreshold = 0;
-          currentKnobPosThreshold = 0;
-          knobActive = false;
-          store.dispatch(deactivateInsertKnob());
-        } else {
-          const state = store.getState();
-          if (state.preview.isOpen && !state.preview.focusing) {
-            remote.BrowserWindow.fromId(state.preview.windowId).focus();
-          }
-        }
-        break;
-      }
-      case 'right': {
-        if (!knobActive) {
-          knobActive = true;
-          store.dispatch(activateInsertKnob());
-        }
-        break;
-      }
-    }
-  });
-}
+// if (remote.process.platform === 'darwin') {
+//   remote.getCurrentWindow().addListener('swipe', (event: any, direction: any) => {
+//     switch(direction) {
+//       case 'left': {
+//         if (knobActive) {
+//           currentKnobNegThreshold = 0;
+//           currentKnobPosThreshold = 0;
+//           knobActive = false;
+//           store.dispatch(deactivateInsertKnob());
+//         } else {
+//           const state = store.getState();
+//           if (state.preview.isOpen && !state.preview.focusing) {
+//             remote.BrowserWindow.fromId(state.preview.windowId).focus();
+//           }
+//         }
+//         break;
+//       }
+//       case 'right': {
+//         if (!knobActive) {
+//           knobActive = true;
+//           store.dispatch(activateInsertKnob());
+//         }
+//         break;
+//       }
+//     }
+//   });
+// }
 
 interface InsertKnobProps {
   activeIndex?: number;
@@ -156,15 +156,15 @@ const InsertKnob = (props: InsertKnobProps): ReactElement => {
   }
 
   const handleDeactivation = (): void => {
-    currentKnobNegThreshold = 0;
-    currentKnobPosThreshold = 0;
+    // currentKnobNegThreshold = 0;
+    // currentKnobPosThreshold = 0;
     knobActive = false;
     deactivateInsertKnob();
   }
 
   const handleMouseEnter = (index: number): void => {
-    currentKnobNegThreshold = 0;
-    currentKnobPosThreshold = 0;
+    // currentKnobNegThreshold = 0;
+    // currentKnobPosThreshold = 0;
     setInsertKnobIndex({index});
   }
 
@@ -173,53 +173,53 @@ const InsertKnob = (props: InsertKnobProps): ReactElement => {
     handleDeactivation();
   }
 
-  const handleRotate = (event: any, rotation: any): void => {
-    if (knobActive) {
-      if ((rotation * knobLength) < 0) {
-        currentKnobPosThreshold -= (rotation * knobLength);
-        if (currentKnobPosThreshold >= knobSwitchThreshold) {
-          if (knobIndex === knobLength) {
-            store.dispatch(setInsertKnobIndex({index: 0}));
-          } else {
-            store.dispatch(setInsertKnobIndex({index: knobIndex + 1}));
-          }
-          currentKnobNegThreshold = 0;
-          currentKnobPosThreshold = 0;
-        }
-      }
-      if ((rotation * knobLength) > 0) {
-        currentKnobNegThreshold -= (rotation * knobLength);
-        if (currentKnobNegThreshold <= -knobSwitchThreshold) {
-          if (knobIndex === 0) {
-            store.dispatch(setInsertKnobIndex({index: knobLength}));
-          } else {
-            store.dispatch(setInsertKnobIndex({index: knobIndex - 1}));
-          }
-          currentKnobNegThreshold = 0;
-          currentKnobPosThreshold = 0;
-        }
-      }
-      if (rotation === 0) {
-        currentKnobNegThreshold = 0;
-        currentKnobPosThreshold = 0;
-      }
-    }
-  }
+  // const handleRotate = (event: any, rotation: any): void => {
+  //   if (knobActive) {
+  //     if ((rotation * knobLength) < 0) {
+  //       currentKnobPosThreshold -= (rotation * knobLength);
+  //       if (currentKnobPosThreshold >= knobSwitchThreshold) {
+  //         if (knobIndex === knobLength) {
+  //           store.dispatch(setInsertKnobIndex({index: 0}));
+  //         } else {
+  //           store.dispatch(setInsertKnobIndex({index: knobIndex + 1}));
+  //         }
+  //         currentKnobNegThreshold = 0;
+  //         currentKnobPosThreshold = 0;
+  //       }
+  //     }
+  //     if ((rotation * knobLength) > 0) {
+  //       currentKnobNegThreshold -= (rotation * knobLength);
+  //       if (currentKnobNegThreshold <= -knobSwitchThreshold) {
+  //         if (knobIndex === 0) {
+  //           store.dispatch(setInsertKnobIndex({index: knobLength}));
+  //         } else {
+  //           store.dispatch(setInsertKnobIndex({index: knobIndex - 1}));
+  //         }
+  //         currentKnobNegThreshold = 0;
+  //         currentKnobPosThreshold = 0;
+  //       }
+  //     }
+  //     if (rotation === 0) {
+  //       currentKnobNegThreshold = 0;
+  //       currentKnobPosThreshold = 0;
+  //     }
+  //   }
+  // }
 
   useEffect(() => {
     knobActive = true;
     document.addEventListener('mousedown', handleMouseDown, false);
     document.addEventListener('keydown', handleKeyDown, false);
-    if (remote.process.platform === 'darwin') {
-      remote.getCurrentWindow().addListener('rotate-gesture', handleRotate);
-    }
+    // if (remote.process.platform === 'darwin') {
+    //   remote.getCurrentWindow().addListener('rotate-gesture', handleRotate);
+    // }
     return (): void => {
       knobActive = false;
       document.removeEventListener('mousedown', handleMouseDown);
       document.removeEventListener('keydown', handleKeyDown);
-      if (remote.process.platform === 'darwin') {
-        remote.getCurrentWindow().removeListener('rotate-gesture', handleRotate);
-      }
+      // if (remote.process.platform === 'darwin') {
+      //   remote.getCurrentWindow().removeListener('rotate-gesture', handleRotate);
+      // }
     }
   }, []);
 

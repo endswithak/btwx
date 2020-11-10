@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-// import { remote } from 'electron';
-import React, { useContext, useEffect, ReactElement, useCallback } from 'react';
+import React, { useEffect, ReactElement, useCallback } from 'react';
 import debounce from 'lodash.debounce';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
@@ -9,7 +8,6 @@ import { setCanvasTranslating } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasTranslatingPayload } from '../store/actionTypes/canvasSettings';
 import { setCanvasMatrix } from '../store/actions/documentSettings';
 import { DocumentSettingsTypes, SetCanvasMatrixPayload } from '../store/actionTypes/documentSettings';
-import { ThemeContext } from './ThemeProvider';
 
 interface TranslateToolProps {
   translateEvent: WheelEvent;
@@ -19,7 +17,6 @@ interface TranslateToolProps {
 }
 
 const TranslateTool = (props: TranslateToolProps): ReactElement => {
-  const theme = useContext(ThemeContext);
   const { translateEvent, setCanvasTranslating, isEnabled, setCanvasMatrix } = props;
 
   const debounceTranslate = useCallback(

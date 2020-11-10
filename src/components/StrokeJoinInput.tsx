@@ -19,7 +19,7 @@ interface StrokeJoinInputProps {
 const StrokeJoinInput = (props: StrokeJoinInputProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { selected, strokeJoinValue, setLayersStrokeJoin, disabled } = props;
-  const [strokeJoin, setStrokeJoin] = useState<em.StrokeJoin | 'multi'>(strokeJoinValue);
+  const [strokeJoin, setStrokeJoin] = useState<Btwx.StrokeJoin | 'multi'>(strokeJoinValue);
 
   useEffect(() => {
     setStrokeJoin(strokeJoinValue);

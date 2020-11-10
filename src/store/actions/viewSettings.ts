@@ -1,6 +1,5 @@
 import { paperMain } from '../../canvas';
 import { RootState } from '../reducers';
-import { updateInViewLayers } from './layer';
 import { setCanvasMatrix } from './documentSettings';
 
 import {
@@ -62,7 +61,6 @@ export const toggleRightSidebarThunk = () => {
       dispatch(openRightSidebar());
     }
     dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
-    dispatch(updateInViewLayers());
   }
 };
 
@@ -85,7 +83,6 @@ export const toggleLeftSidebarThunk = () => {
       dispatch(openLeftSidebar());
     }
     dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
-    dispatch(updateInViewLayers());
   }
 };
 
@@ -108,7 +105,6 @@ export const toggleTweenDrawerThunk = () => {
       dispatch(openTweenDrawer());
     }
     dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
-    dispatch(updateInViewLayers());
   }
 };
 

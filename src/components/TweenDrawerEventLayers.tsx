@@ -23,7 +23,6 @@ interface TweenDrawerEventLayersProps {
     };
   };
   scrollLayerItem?: Btwx.Layer;
-  scrollLayerMaskItem?: Btwx.Layer;
   scrollLayer: string;
   setTweenDrawerEventThunk?(payload: SetTweenDrawerEventPayload): void;
   setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
@@ -32,7 +31,7 @@ interface TweenDrawerEventLayersProps {
 
 const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isEmpty, scrollLayer, scrollLayerItem, scrollLayerMaskItem, tweenDrawerLayersWidth, tweenEventLayers, setTweenDrawerEventThunk, artboardItem, setLayerHover, selectLayers } = props;
+  const { isEmpty, scrollLayer, scrollLayerItem, tweenDrawerLayersWidth, tweenEventLayers, setTweenDrawerEventThunk, artboardItem, setLayerHover, selectLayers } = props;
 
   const handleMouseEnter = (id: string) => {
     setLayerHover({id: id});
@@ -84,7 +83,7 @@ const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElemen
                         case 'Artboard':
                           return 'artboard'
                         case 'Group':
-                          return scrollLayerMaskItem ? 'shape' : 'folder';
+                          return 'folder';
                         case 'Shape':
                           return 'shape';
                         case 'Text':
@@ -93,8 +92,8 @@ const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElemen
                           return 'image';
                       }
                     })(),
-                    small: scrollLayerItem.type === 'Shape' || scrollLayerMaskItem !== null,
-                    shapeId: scrollLayerItem.type === 'Shape' ? scrollLayerItem.id : scrollLayerMaskItem ? scrollLayerMaskItem.id : null
+                    small: scrollLayerItem.type === 'Shape',
+                    shapeId: scrollLayerItem.type === 'Shape' ? scrollLayerItem.id : null
                   }}
                   layerItem={scrollLayerItem}
                   onClick={() => handleClick(scrollLayerItem.id)}
@@ -128,14 +127,10 @@ const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventLayersProps
   const tweenEventLayers = getTweenEventLayers(layer.present, tweenDrawer.event);
   const isEmpty = tweenEventLayers.allIds.length === 0;
   const eventItem = layer.present.tweenEventById[tweenDrawer.event];
-  const artboardItem = layer.present.byId[eventItBtwx.Artboard];
+  const artboardItem = layer.present.byId[eventItem.artboard];
   const tweenDrawerLayersWidth = viewSettings.tweenDrawer.layersWidth;
   const scrollLayerItem = ownProps.scrollLayer ? layer.present.byId[ownProps.scrollLayer] : null;
-  const mask = scrollLayerItem && scrollLayerItem.type === 'Group' && (scrollLayerItem as Btwx.Group).clipped ? (() => {
-    return (scrollLayerItem as Btwx.Group).children.find((id) => layer.present.byId[id].mask);
-  })() : null;
-  const scrollLayerMaskItem = mask ? layer.present.byId[mask] : null;
-  return { tweenEventLayers, artboardItem, tweenDrawerLayersWidth, scrollLayerItem, scrollLayerMaskItem, isEmpty };
+  return { tweenEventLayers, artboardItem, tweenDrawerLayersWidth, scrollLayerItem, isEmpty };
 };
 
 export default connect(

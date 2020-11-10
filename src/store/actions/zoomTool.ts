@@ -1,10 +1,8 @@
 import { RootState } from '../reducers';
 import { setCanvasActiveTool, setCanvasZooming } from './canvasSettings';
 import { setCanvasMatrix } from './documentSettings';
-import { updateInViewLayers } from './layer';
 import { paperMain } from '../../canvas';
 import { getCanvasBounds, getSelectedBounds } from '../selectors/layer';
-import { LayerState } from '../reducers/layer';
 
 export const enableZoomToolThunk = (zoomType: Btwx.ZoomType) => {
   return (dispatch: any, getState: any): void => {
@@ -15,8 +13,7 @@ export const enableZoomToolThunk = (zoomType: Btwx.ZoomType) => {
 export const disableZoomToolThunk = () => {
   return (dispatch: any, getState: any): void => {
     dispatch(setCanvasActiveTool({activeTool: null, zooming: false, zoomType: null}));
-    // dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
-    // dispatch(updateInViewLayers());
+    dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
   }
 };
 
