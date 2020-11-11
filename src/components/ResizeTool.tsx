@@ -2,7 +2,7 @@
 import React, { useContext, useEffect, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getPaperLayer, getSelectionBounds } from '../store/selectors/layer';
+import { getPaperLayer, getSelectionBounds, getSelectedById } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
 import { setCanvasResizing } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasResizingPayload } from '../store/actionTypes/canvasSettings';
@@ -18,6 +18,9 @@ interface ResizeToolStateProps {
   selected?: string[];
   isEnabled?: boolean;
   resizing?: boolean;
+  selectedById?: {
+    [id: string]: Btwx.Layer;
+  };
 }
 
 interface ResizeToolDispatchProps {
@@ -33,7 +36,7 @@ type ResizeToolProps = (
 
 const ResizeTool = (props: ResizeToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { initialHandle, isEnabled, setCanvasResizing, resizing, selected, scaleLayers, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent } = props;
+  const { initialHandle, isEnabled, setCanvasResizing, resizing, selected, scaleLayers, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent, selectedById } = props;
   const [originalSelection, setOriginalSelection] = useState<any>(null);
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
   const [horizontalFlip, setHorizontalFlip] = useState<boolean>(false);
@@ -64,6 +67,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
 
   const scaleLayer = (id: string, hor: number, ver: number): void => {
     const paperLayer = getPaperLayer(id);
+    const layerItem = selectedById[id];
     switch(paperLayer.data.layerType) {
       case 'Artboard': {
         const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
@@ -89,15 +93,15 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
             break;
           case 'Rounded': {
             paperLayer.scale(hor, ver);
-            // if (!preserveAspectRatio) {
-            //   const newShape = new paperMain.Path.Rectangle({
-            //     from: paperLayer.bounds.topLeft,
-            //     to: paperLayer.bounds.bottomRight,
-            //     radius: (Math.max(paperLayer.bounds.width, paperLayer.bounds.height) / 2) * (layerItem as Btwx.Rounded).radius,
-            //     insert: false
-            //   });
-            //   (paperLayer as paper.Path).pathData = newShape.pathData;
-            // }
+            if (!preserveAspectRatio) {
+              const newShape = new paperMain.Path.Rectangle({
+                from: paperLayer.bounds.topLeft,
+                to: paperLayer.bounds.bottomRight,
+                radius: (Math.max(paperLayer.bounds.width, paperLayer.bounds.height) / 2) * (layerItem as Btwx.Rounded).radius,
+                insert: false
+              });
+              (paperLayer as paper.Path).pathData = newShape.pathData;
+            }
             break;
           }
         }
@@ -439,7 +443,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
   }, [downEvent]);
 
   useEffect(() => {
-    if (dragEvent && isEnabled) {
+    if (dragEvent && isEnabled && handle && fromPivot && fromBounds) {
       let nextHandle = handle;
       let nextHorizontalFlip = horizontalFlip;
       let nextVerticalFlip = verticalFlip;
@@ -685,11 +689,13 @@ const mapStateToProps = (state: RootState): ResizeToolStateProps => {
   const isEnabled = canvasSettings.activeTool === 'Resize';
   const resizing = canvasSettings.resizing;
   const initialHandle = canvasSettings.resizeHandle as Btwx.ResizeHandle;
+  const selectedById = getSelectedById(state);
   return {
     selected,
     isEnabled,
     resizing,
-    initialHandle
+    initialHandle,
+    selectedById
   };
 };
 

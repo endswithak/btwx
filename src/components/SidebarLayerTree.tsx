@@ -20,8 +20,6 @@ const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
 
   return (
     <>
-      {/* <SidebarLayerDropzoneWrap
-        layer='page' /> */}
       {
         layers.length > 0
         ? <SidebarLayers
@@ -34,24 +32,6 @@ const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  // const { layer, leftSidebar } = state;
-  // const page = layer.present.byId[layer.present.page];
-  // let layers: string[];
-  // if (leftSidebar.searching) {
-  //   if (!leftSidebar.search || leftSidebar.search.replace(/\s/g, '').length === 0) {
-  //     layers = [...page.children].reverse();
-  //   } else {
-  //     layers = layer.present.allIds.reduce((result, current) => {
-  //       if (layer.present.byId[current].name.toUpperCase().includes(leftSidebar.search.replace(/\s/g, '').toUpperCase()) && current !== 'page') {
-  //         return [...result, current];
-  //       } else {
-  //         return [...result];
-  //       }
-  //     }, []);
-  //   }
-  // } else {
-  //   layers = [...page.children].reverse();
-  // }
   return {
     layers: getLeftSidebarLayers(state)
   };

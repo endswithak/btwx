@@ -118,7 +118,7 @@ const DragTool = (props: DragToolProps): ReactElement => {
   }, [downEvent]);
 
   useEffect(() => {
-    if (dragEvent && isEnabled) {
+    if (dragEvent && isEnabled && fromBounds) {
       const x = dragEvent.point.x - dragEvent.downPoint.x;
       const y = dragEvent.point.y - dragEvent.downPoint.y;
       const nextSnapBounds = new paperMain.Rectangle(fromBounds);

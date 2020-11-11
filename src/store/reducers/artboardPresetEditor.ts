@@ -27,11 +27,7 @@ export default (state = initialState, action: ArtboardPresetEditorTypes): Artboa
       };
     }
     case CLOSE_ARTBOARD_PRESET_EDITOR: {
-      return {
-        ...state,
-        isOpen: false,
-        id: null
-      };
+      return initialState;
     }
     default:
       return state;

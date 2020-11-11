@@ -1,6 +1,8 @@
 import { RootState } from '../reducers';
 import { setCanvasActiveTool } from './canvasSettings';
 import { paperMain } from '../../canvas';
+import { disableShapeTool } from './shapeTool';
+import { disableTextTool } from './textTool';
 
 import {
   ENABLE_ARTBOARD_TOOL,
@@ -21,17 +23,15 @@ export const toggleArtboardToolThunk = () => {
     const state = getState() as RootState;
     if (state.canvasSettings.focusing) {
       if (state.canvasSettings.activeTool === 'Artboard') {
-        // const tooltip = paperMain.project.getItem({ data: { id: 'Tooltip' } });
-        // const preview = paperMain.project.getItem({ data: { id: 'ArtboardToolPreview' } });
-        // if (tooltip) {
-        //   tooltip.remove();
-        // }
-        // if (preview) {
-        //   preview.remove();
-        // }
         dispatch(disableArtboardTool());
         dispatch(setCanvasActiveTool({activeTool: null, drawing: false}));
       } else {
+        if (state.canvasSettings.activeTool === 'Shape') {
+          dispatch(disableShapeTool() as any);
+        }
+        if (state.canvasSettings.activeTool === 'Text') {
+          dispatch(disableTextTool() as any);
+        }
         dispatch(enableArtboardTool());
         dispatch(setCanvasActiveTool({activeTool: 'Artboard'}));
       }

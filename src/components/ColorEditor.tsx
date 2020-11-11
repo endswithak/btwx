@@ -189,7 +189,7 @@ const mapStateToProps = (state: RootState): {
     return [...result, layerItem];
   }, []);
   const includesTextLayer = layerItems.some((layerItem: Btwx.Layer) => layerItem.type === 'Text');
-  const styleValues: (em.Fill | Btwx.Stroke | Btwx.Shadow)[] = layerItems.reduce((result, current) => {
+  const styleValues: (Btwx.Fill | Btwx.Stroke | Btwx.Shadow)[] = layerItems.reduce((result, current) => {
     switch(colorEditor.prop) {
       case 'fill':
         return [...result, current.style.fill];

@@ -272,6 +272,17 @@ export const selectedUseAsMaskEnabled = createSelector(
   }
 );
 
+export const canToggleSelectedIgnoreUnderlyingMask = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    const keys = Object.keys(selectedById);
+    return keys.length > 0 && keys.some((id: string) => {
+      const layerItem = selectedById[id];
+      return layerItem.underlyingMask;
+    });
+  }
+);
+
 export const selectedIgnoreUnderlyingMaskEnabled = createSelector(
   [ getSelectedById ],
   (selectedById) => {

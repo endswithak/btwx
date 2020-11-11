@@ -1,8 +1,9 @@
 import { RootState } from '../reducers';
-import { setCanvasActiveTool, setCanvasZooming } from './canvasSettings';
+import { setCanvasActiveTool } from './canvasSettings';
 import { setCanvasMatrix } from './documentSettings';
 import { paperMain } from '../../canvas';
 import { getCanvasBounds, getSelectedBounds } from '../selectors/layer';
+import { updateSelectionFrame } from '../actions/layer';
 
 export const enableZoomToolThunk = (zoomType: Btwx.ZoomType) => {
   return (dispatch: any, getState: any): void => {
@@ -19,38 +20,34 @@ export const disableZoomToolThunk = () => {
 
 export const zoomInThunk = () => {
   return (dispatch: any, getState: any): void => {
-    dispatch(setCanvasZooming({zooming: true}));
     paperMain.view.zoom *= 2;
-    dispatch(setCanvasZooming({zooming: false}));
+    updateSelectionFrame();
   }
 };
 
 export const zoomOutThunk = () => {
   return (dispatch: any, getState: any): void => {
-    dispatch(setCanvasZooming({zooming: true}));
     if (paperMain.view.zoom / 2 >= 0.01) {
       paperMain.view.zoom /= 2;
     } else {
       paperMain.view.zoom = 0.01;
     }
-    dispatch(setCanvasZooming({zooming: false}));
     dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
+    updateSelectionFrame();
   }
 };
 
 export const zoomPercentThunk = (percent: number) => {
   return (dispatch: any, getState: any): void => {
-    dispatch(setCanvasZooming({zooming: true}));
     paperMain.view.zoom = percent;
-    dispatch(setCanvasZooming({zooming: false}));
     dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
+    updateSelectionFrame();
   }
 };
 
 export const zoomFitCanvasThunk = () => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
-    dispatch(setCanvasZooming({zooming: true}));
     const canvasBounds = getCanvasBounds(state.layer.present);
     const canvasCenter = canvasBounds.center;
     const viewWidth: number = paperMain.view.bounds.width;
@@ -59,7 +56,7 @@ export const zoomFitCanvasThunk = () => {
     const canvasHeight: number = canvasBounds.height;
     const viewRatio: number = viewWidth / viewHeight;
     const canvasRatio: number = canvasWidth / canvasHeight;
-    const constrainingDim = viewRatio > canvasRatio ? {dim: canvasHeight, type: 'height'} : {dim: canvasWidth, type: 'width'};
+    const constrainingDim = viewRatio > canvasRatio ? { dim: canvasHeight, type: 'height' } : { dim: canvasWidth, type: 'width' };
     const viewDim = (() => {
       switch(constrainingDim.type) {
         case 'height':
@@ -71,16 +68,14 @@ export const zoomFitCanvasThunk = () => {
     const newZoom = (viewDim / constrainingDim.dim) * paperMain.view.zoom;
     paperMain.view.center = canvasCenter;
     paperMain.view.zoom = newZoom;
-    dispatch(setCanvasZooming({zooming: false}));
     dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
+    updateSelectionFrame();
   }
 };
 
 export const zoomFitSelectedThunk = () => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
-    const selected = state.layer.present.selected;
-    dispatch(setCanvasZooming({zooming: true}));
     const selectionBounds = getSelectedBounds(state);
     const selectionCenter = selectionBounds.center;
     const viewWidth: number = paperMain.view.bounds.width;
@@ -101,7 +96,7 @@ export const zoomFitSelectedThunk = () => {
     const newZoom = (viewDim / constrainingDim.dim) * paperMain.view.zoom;
     paperMain.view.center = selectionCenter;
     paperMain.view.zoom = newZoom;
-    dispatch(setCanvasZooming({zooming: false}));
     dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
+    updateSelectionFrame();
   }
 };

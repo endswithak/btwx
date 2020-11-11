@@ -49,9 +49,9 @@ const App = (): ReactElement => {
               <MeasureFrameWrap />
               <TweenEventsFrameWrap />
               {/* Modals */}
-              {/* <EaseEditorWrap />
+              {/* <EaseEditorWrap /> */}
               <ArtboardPresetEditorWrap />
-              <ContextMenuWrap /> */}
+              <ContextMenuWrap />
             </>
           : null
         }

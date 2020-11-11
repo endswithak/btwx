@@ -1,6 +1,7 @@
 import { RootState } from '../reducers';
 import { setCanvasActiveTool } from './canvasSettings';
-import { paperMain } from '../../canvas';
+import { disableArtboardTool } from './artboardTool';
+import { disableTextTool } from './textTool';
 
 import {
   ENABLE_SHAPE_TOOL,
@@ -30,17 +31,15 @@ export const toggleShapeToolThunk = (shapeType: Btwx.ShapeType) => {
     const state = getState() as RootState;
     if (state.canvasSettings.focusing) {
       if (state.canvasSettings.activeTool === 'Shape' && state.shapeTool.shapeType === shapeType) {
-        // const tooltip = paperMain.project.getItem({ data: { id: 'Tooltip' } });
-        // const preview = paperMain.project.getItem({ data: { id: 'ShapeToolPreview' } });
-        // if (tooltip) {
-        //   tooltip.remove();
-        // }
-        // if (preview) {
-        //   preview.remove();
-        // }
         dispatch(disableShapeTool());
         dispatch(setCanvasActiveTool({activeTool: null, drawing: false}));
       } else {
+        if (state.canvasSettings.activeTool === 'Artboard') {
+          dispatch(disableArtboardTool() as any);
+        }
+        if (state.canvasSettings.activeTool === 'Text') {
+          dispatch(disableTextTool() as any);
+        }
         dispatch(enableShapeTool({shapeType}));
         dispatch(setCanvasActiveTool({activeTool: 'Shape'}));
       }

@@ -1,5 +1,7 @@
 import { RootState } from '../reducers';
 import { setCanvasActiveTool } from './canvasSettings';
+import { disableShapeTool } from './shapeTool';
+import { disableArtboardTool } from './artboardTool';
 
 import {
   ENABLE_TEXT_TOOL,
@@ -23,6 +25,12 @@ export const toggleTextToolThunk = () => {
         dispatch(disableTextTool());
         dispatch(setCanvasActiveTool({activeTool: null}));
       } else {
+        if (state.canvasSettings.activeTool === 'Artboard') {
+          dispatch(disableArtboardTool() as any);
+        }
+        if (state.canvasSettings.activeTool === 'Shape') {
+          dispatch(disableShapeTool() as any);
+        }
         dispatch(enableTextTool());
         dispatch(setCanvasActiveTool({activeTool: 'Text'}));
       }

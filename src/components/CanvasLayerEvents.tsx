@@ -1,4 +1,3 @@
-// import { remote } from 'electron';
 import React, { useContext, useEffect, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { paperMain } from '../canvas';
@@ -7,6 +6,8 @@ import { RootState } from '../store/reducers';
 import { getDeepSelectItem, getNearestScopeAncestor, getPaperLayer } from '../store/selectors/layer';
 import { setCanvasActiveTool } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasActiveToolPayload } from '../store/actionTypes/canvasSettings';
+import { openContextMenu } from '../store/actions/contextMenu';
+import { OpenContextMenuPayload, ContextMenuTypes } from '../store/actionTypes/contextMenu';
 import { LayerTypes, SetLayerHoverPayload, DeepSelectLayerPayload, SelectLayersPayload, DeselectLayersPayload } from '../store/actionTypes/layer';
 import { setLayerHover, deepSelectLayer, selectLayers, deselectLayers, deselectAllLayers } from '../store/actions/layer';
 import { openTextEditor } from '../store/actions/textEditor';
@@ -39,11 +40,12 @@ interface CanvasLayerEventsProps {
   deselectAllLayers?(): LayerTypes;
   setCanvasActiveTool?(payload: SetCanvasActiveToolPayload): CanvasSettingsTypes;
   openTextEditor?(payload: OpenTextEditorPayload): TextEditorTypes;
+  openContextMenu?(payload: OpenContextMenuPayload): ContextMenuTypes;
 }
 
 const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layerEvent, activeTool, dragging, resizing, selecting, hover, selected, deselectLayers, deselectAllLayers, layerItem, nearestScopeAncestor, deepSelectItem, setLayerHover, selectLayers, deepSelectLayer, setCanvasActiveTool, dragHandle, textSettings, openTextEditor } = props;
+  const { layerEvent, activeTool, dragging, resizing, selecting, hover, selected, deselectLayers, deselectAllLayers, layerItem, nearestScopeAncestor, deepSelectItem, setLayerHover, selectLayers, deepSelectLayer, setCanvasActiveTool, dragHandle, textSettings, openTextEditor, openContextMenu } = props;
 
   const handleMouseMove = (): void => {
     if (layerEvent.empty) {
@@ -142,7 +144,23 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
   }
 
   const handleContextMenu = (): void => {
-    return;
+    let contextMenuId = 'page';
+    const paperPoint = paperMain.view.getEventPoint(layerEvent.event);
+    if (!layerEvent.empty) {
+      if (nearestScopeAncestor.type === 'Artboard') {
+        contextMenuId = deepSelectItem.id;
+      } else {
+        contextMenuId = nearestScopeAncestor.id;
+      }
+    }
+    openContextMenu({
+      type: 'LayerEdit',
+      id: contextMenuId,
+      x: layerEvent.event.clientX,
+      y: layerEvent.event.clientY,
+      paperX: paperPoint.x,
+      paperY: paperPoint.y
+    });
   }
 
   useEffect(() => {
@@ -213,7 +231,18 @@ const mapStateToProps = (state: RootState, ownProps: CanvasLayerEventsProps): {
   };
 };
 
+const mapDispatchToProps = {
+  setLayerHover,
+  selectLayers,
+  deepSelectLayer,
+  deselectLayers,
+  deselectAllLayers,
+  setCanvasActiveTool,
+  openTextEditor,
+  openContextMenu
+};
+
 export default connect(
   mapStateToProps,
-  { setLayerHover, selectLayers, deepSelectLayer, deselectLayers, deselectAllLayers, setCanvasActiveTool, openTextEditor }
+  mapDispatchToProps
 )(CanvasLayerEvents);

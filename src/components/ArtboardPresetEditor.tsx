@@ -56,38 +56,38 @@ const ArtboardPresetEditor = (props: ArtboardPresetEditorProps): ReactElement =>
   const [width, setWidth] = useState(artboardPresetEditor.width);
   const [height, setHeight] = useState(artboardPresetEditor.height);
 
-  const handleNameChange = (e: any) => {
+  const handleNameChange = (e: any): void => {
     const target = e.target;
     setName(target.value);
   };
 
-  const handleWidthChange = (e: any) => {
+  const handleWidthChange = (e: any): void => {
     const target = e.target;
     if (!isNaN(target.value)) {
       setWidth(target.value);
     }
   };
 
-  const handleHeightChange = (e: any) => {
+  const handleHeightChange = (e: any): void => {
     const target = e.target;
     if (!isNaN(target.value)) {
       setHeight(target.value);
     }
   };
 
-  const handleKeyDown = (e: any) => {
+  const handleKeyDown = (e: any): void => {
     if (e.key === 'Escape') {
       closeArtboardPresetEditor();
     }
   };
 
-  const handleMouseDown = (e: any) => {
+  const handleMouseDown = (e: any): void => {
     if (!ref.current.contains(e.target)) {
       closeArtboardPresetEditor();
     }
   };
 
-  const handleSave = () => {
+  const handleSave = (): void => {
     if (exists) {
       updateArtboardPreset({
         id: artboardPresetEditor.id,

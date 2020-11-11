@@ -36,7 +36,7 @@ interface ColorInputProps {
 const ColorInput = (props: ColorInputProps): ReactElement => {
   const { prop, enabledValue, selected, textLayerSelected, colorValue, opacityValue, colorEditorOpen, enableLayersFill, enableLayersStroke, enableLayersShadow, openColorEditor, setTextSettingsFillColor, setLayersFillColor, setLayersStrokeColor, setLayersShadowColor } = props;
   const [enabled, setEnabled] = useState<boolean | 'multi'>(enabledValue);
-  const [color, setColor] = useState<em.Color | 'multi'>(colorValue);
+  const [color, setColor] = useState<Btwx.Color | 'multi'>(colorValue);
   const [opacity, setOpacity] = useState(opacityValue !== 'multi' ? Math.round(opacityValue * 100) : opacityValue);
   const [hex, setHex] = useState(colorValue !== 'multi' ? tinyColor({h: colorValue.h, s: colorValue.s, l: colorValue.l}).toHex() : colorValue);
 
@@ -188,7 +188,7 @@ const mapStateToProps = (state: RootState, ownProps: ColorInputProps): {
     return [...result, layerItem];
   }, []);
   const textLayerSelected = layerItems.some((layerItem: Btwx.Layer) => layerItem.type === 'Text');
-  const styleValues: (em.Fill | Btwx.Stroke | Btwx.Shadow)[] = layerItems.reduce((result, current) => {
+  const styleValues: (Btwx.Fill | Btwx.Stroke | Btwx.Shadow)[] = layerItems.reduce((result, current) => {
     switch(ownProps.prop) {
       case 'fill':
         return [...result, current.style.fill];
