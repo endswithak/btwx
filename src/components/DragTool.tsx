@@ -40,6 +40,7 @@ const DragTool = (props: DragToolProps): ReactElement => {
   const [fromBounds, setFromBounds] = useState<paper.Rectangle>(null);
   const [toBounds, setToBounds] = useState<paper.Rectangle>(null);
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
+  const [minDistance, setMinDistance] = useState<number>(0);
 
   const resetState = (): void => {
     setOriginalSelection(null);
@@ -48,6 +49,7 @@ const DragTool = (props: DragToolProps): ReactElement => {
     setToBounds(null);
     setSnapBounds(null);
     setOriginalPaperSelection(null);
+    setMinDistance(0);
   }
 
   const translateLayers = (): void => {
@@ -119,21 +121,25 @@ const DragTool = (props: DragToolProps): ReactElement => {
 
   useEffect(() => {
     if (dragEvent && isEnabled && fromBounds) {
-      const x = dragEvent.point.x - dragEvent.downPoint.x;
-      const y = dragEvent.point.y - dragEvent.downPoint.y;
-      const nextSnapBounds = new paperMain.Rectangle(fromBounds);
-      nextSnapBounds.center.x = fromBounds.center.x + x;
-      nextSnapBounds.center.y = fromBounds.center.y + y;
-      setSnapBounds(nextSnapBounds);
-      if (!dragging) {
-        setCanvasDragging({dragging: true});
+      if (minDistance > 4) {
+        const x = dragEvent.point.x - dragEvent.downPoint.x;
+        const y = dragEvent.point.y - dragEvent.downPoint.y;
+        const nextSnapBounds = new paperMain.Rectangle(fromBounds);
+        nextSnapBounds.center.x = fromBounds.center.x + x;
+        nextSnapBounds.center.y = fromBounds.center.y + y;
+        setSnapBounds(nextSnapBounds);
+      } else {
+        if (!dragging) {
+          setCanvasDragging({dragging: true});
+        }
+        setMinDistance(minDistance + 1);
       }
     }
   }, [dragEvent]);
 
   useEffect(() => {
     if (upEvent && isEnabled) {
-      if (selected.length > 0) {
+      if (selected.length > 0 && minDistance > 4) {
         moveLayersBy({layers: selected, x: 0, y: 0});
       }
       if (dragging) {

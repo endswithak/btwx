@@ -37,7 +37,7 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
   const [originalSelection, setOriginalSelection] = useState<string[]>(null);
 
   const debounceSelection = useCallback(
-    debounce((asBounds: paper.Rectangle, asEvent: paper.ToolEvent, asOriginalSelection: string[], asScope: string[]) => {
+    (asBounds: paper.Rectangle, asEvent: paper.ToolEvent, asOriginalSelection: string[], asScope: string[]) => {
       const nextSelectedLayers: string[] = [];
       const nextDeselectedLayers: string[] = [];
       if (asEvent.modifiers.shift) {
@@ -119,7 +119,7 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
           deselect: nextDeselectedLayers
         });
       }
-    }, 7),
+    },
     []
   );
 
@@ -168,6 +168,7 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
 
   useEffect(() => {
     if (upEvent && isEnabled) {
+      debounceSelection(areaSelectBounds, dragEvent, originalSelection, scope);
       if (selecting) {
         setCanvasSelecting({selecting: false});
       }
@@ -178,7 +179,7 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
   useEffect(() => {
     if (areaSelectBounds && isEnabled) {
       updateAreaSelectPreview();
-      debounceSelection(areaSelectBounds, dragEvent, originalSelection, scope);
+      // debounceSelection(areaSelectBounds, dragEvent, originalSelection, scope);
     }
   }, [areaSelectBounds]);
 
