@@ -1,12 +1,10 @@
 import React, { useContext, useEffect, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { remote } from 'electron';
-// import store from '../store';
 import { RootState } from '../store/reducers';
 import { PREVIEW_TOPBAR_HEIGHT, MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT } from '../constants';
 import { ThemeContext } from './ThemeProvider';
-import PreviewCanvas from './PreviewCanvas';
-import PreviewTopbar from './PreviewTopbar';
+import PreviewMain from './PreviewMain';
 import EmptyState from './EmptyState';
 
 interface PreviewProps {
@@ -49,18 +47,7 @@ const Preview = (props: PreviewProps): ReactElement => {
       }}>
       {
         activeArtboard
-        ? <>
-            <PreviewTopbar />
-            <div className='c-app__canvas'>
-              <PreviewCanvas />
-            </div>
-            <video
-              id='preview-video'
-              style={{
-              position: 'absolute',
-              opacity: 0
-            }} />
-          </>
+        ? <PreviewMain />
         : <EmptyState
             icon='preview'
             text='Preview'

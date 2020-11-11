@@ -1,21 +1,21 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useRef, useContext, useEffect, ReactElement } from 'react';
+import { remote } from 'electron';
 import { connect } from 'react-redux';
 import { gsap } from 'gsap';
-import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { paperPreview } from '../canvas';
-import { setActiveArtboard } from '../store/actions/layer';
-import { SetActiveArtboardPayload, LayerTypes } from '../store/actionTypes/layer';
 import { getTweensEventsByOriginArtboard, getAllArtboardTweenEventArtboards, getAllArtboardTweens, getAllArtboardTweenLayers, getAllArtboardTweenLayerDestinations, getAllArtboardTweenEventLayers } from '../store/selectors/layer';
 import { bufferToBase64 } from '../utils';
 import * as previewUtils from '../previewUtils';
+import { ThemeContext } from './ThemeProvider';
 
 interface PreviewCanvasProps {
   layer?: any;
   paperProject?: string;
   activeArtboard?: Btwx.Artboard;
   page?: string;
+  documentWindowId?: number;
   tweenEvents: {
     allIds: string[];
     byId: {
@@ -56,14 +56,13 @@ interface PreviewCanvasProps {
     [id: string]: Btwx.DocumentImage;
   };
   touchCursor: boolean;
-  setActiveArtboard?(payload: SetActiveArtboardPayload): LayerTypes;
 }
 
 const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useContext(ThemeContext);
-  const { paperProject, activeArtboard, page, touchCursor, tweenEvents, tweenEventLayers, tweenEventDestinations, tweens, tweenLayers, tweenLayerDestinations, setActiveArtboard, documentImagesById } = props;
+  const { paperProject, activeArtboard, page, touchCursor, tweenEvents, tweenEventLayers, tweenEventDestinations, tweens, tweenLayers, tweenLayerDestinations, documentWindowId, documentImagesById } = props;
 
   const handleResize = (): void => {
     paperPreview.view.viewSize = new paperPreview.Size(
@@ -144,7 +143,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
           });
         },
         onComplete: () => {
-          setActiveArtboard({id: tweenEvent.destinationArtboard});
+          remote.BrowserWindow.fromId(documentWindowId).webContents.executeJavaScript(`setActiveArtboard(${JSON.stringify(tweenEvent.destinationArtboard)})`);
         }
       });
       // add tween timelines to event timeline
@@ -214,6 +213,7 @@ const mapStateToProps = (state: RootState) => {
   const tweenLayerDestinations = getAllArtboardTweenLayerDestinations(layer.present, layer.present.activeArtboard);
   const documentImagesById = documentSettings.images.byId;
   const touchCursor = preview.touchCursor;
+  const documentWindowId = preview.documentWindowId;
   return {
     activeArtboard: layer.present.byId[layer.present.activeArtboard],
     page: layer.present.page,
@@ -225,11 +225,11 @@ const mapStateToProps = (state: RootState) => {
     tweenLayers,
     tweenLayerDestinations,
     documentImagesById,
-    touchCursor
+    touchCursor,
+    documentWindowId
   };
 };
 
 export default connect(
-  mapStateToProps,
-  { setActiveArtboard }
+  mapStateToProps
 )(PreviewCanvas);

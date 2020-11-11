@@ -26,12 +26,6 @@ const configureStore = ({ preloadedState, windowType }: { preloadedState: any; w
         remote.BrowserWindow.fromId(previewWindowId).webContents.executeJavaScript(`hydratePreview(${JSON.stringify(currentState)})`);
       }
     }
-    if (!isMainWindow && previousActiveArtboard !== currentActiveArtboard) {
-      const documentWindowId = currentState.preview.documentWindowId;
-      if (documentWindowId) {
-        remote.BrowserWindow.fromId(documentWindowId).webContents.executeJavaScript(`setActiveArtboard(${JSON.stringify(currentActiveArtboard)})`);
-      }
-    }
   }
   store.subscribe(handleChange);
   // document & preview window specific functions
