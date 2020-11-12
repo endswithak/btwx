@@ -5,7 +5,7 @@ import { LayerState } from '../reducers/layer';
 import * as layerActions from '../actions/layer';
 import { addItem, removeItem, insertItem, moveItemAbove, moveItemBelow } from './general';
 import { paperMain } from '../../canvas';
-import { THEME_PRIMARY_COLOR } from '../../constants';
+import { TWEEN_PROPS } from '../../constants';
 
 import {
   AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer,
@@ -47,12 +47,10 @@ import {
 import {
   getLayerIndex, getLayer, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor, getPaperLayer, getSelectionTopLeft,
   getSelectionBottomRight, getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayerDescendants,
-  getDestinationEquivalent, getEquivalentTweenProps, getDeepSelectItem,
-  getTweensByDestinationLayer, getTweensEventsByOriginArtboard, getTweensEventsByDestinationArtboard, getTweensByLayer,
-  getLayersBounds, getGradientOriginPoint, getGradientDestinationPoint, getGradientStops,
-  orderLayersByDepth, orderLayersByLeft, orderLayersByTop, savePaperProjectJSON, getTweensByProp,
-  getEquivalentTweenProp, getTweensWithLayer, gradientsMatch, getPaperProp, getArtboardsTopTop, getSelectionBounds,
-  getTweenEventsWithArtboard, getLineFromPoint, getLineToPoint, getLineVector, getParentPaperLayer, getLayerUnderlyingSiblings,
+  getDestinationEquivalent, getEquivalentTweenProps, getDeepSelectItem, getTweensByDestinationLayer, getTweensByLayer,
+  getLayersBounds, getGradientOriginPoint, getGradientDestinationPoint, getGradientStops, orderLayersByDepth, orderLayersByLeft,
+  orderLayersByTop, savePaperProjectJSON, getTweensByProp, getEquivalentTweenProp, getTweensWithLayer, gradientsMatch, getPaperProp,
+  getArtboardsTopTop, getSelectionBounds, getLineFromPoint, getLineToPoint, getLineVector, getParentPaperLayer, getLayerUnderlyingSiblings,
   getMaskableUnderlyingSiblings, getSiblingLayersWithUnderlyingMask, getLayerUnderlyingMaskRoot, getOlderSiblingIgnoringUnderlyingMask
 } from '../selectors/layer';
 
@@ -226,9 +224,9 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
   currentState = layersToRemove.reduce((result, current) => {
     const tweensByDestinationLayer = getTweensByDestinationLayer(result, current);
     const tweensByLayer = getTweensByLayer(result, current);
-    const layer = result.byId[current];
+    const currentLayerItem = result.byId[current];
     // remove layer from type array
-    switch(layer.type) {
+    switch(currentLayerItem.type) {
       case 'Artboard':
         result = {
           ...result,
@@ -265,7 +263,7 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
       result = setLayerHover(result, layerActions.setLayerHover({id: null}) as SetLayerHover);
     }
     // if layer is the active artboard, set active artboard to null
-    if (layer.id === result.activeArtboard) {
+    if (currentLayerItem.id === result.activeArtboard) {
       result = setActiveArtboard(result, layerActions.setActiveArtboard({id: result.allArtboardIds.length > 0 ? result.allArtboardIds[0] : null}) as SetActiveArtboard);
     }
     // if layer is a destination layer for any tween, remove that tween
@@ -281,15 +279,15 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
       }, result);
     }
     // if layer has any tween events, remove those events
-    if (layer.tweenEvents.length > 0) {
-      result = layer.tweenEvents.reduce((tweenResult, tweenCurrent) => {
+    if (currentLayerItem.tweenEvents.length > 0) {
+      result = currentLayerItem.tweenEvents.reduce((tweenResult, tweenCurrent) => {
         return removeLayerTweenEvent(tweenResult, layerActions.removeLayerTweenEvent({id: tweenCurrent}) as RemoveLayerTweenEvent);
       }, result);
     }
     // if artboard, remove any tween events with artboard as origin or destination
-    if (layer.type === 'Artboard') {
-      const tweenEventsWithArtboard = getTweenEventsWithArtboard(result, layer.id);
-      result = tweenEventsWithArtboard.allIds.reduce((tweenResult, tweenCurrent) => {
+    if (currentLayerItem.type === 'Artboard' && ((currentLayerItem as Btwx.Artboard).originArtboardForEvents.length > 0 || (currentLayerItem as Btwx.Artboard).destinationArtboardForEvents.length > 0)) {
+      const tweenEventsWithArtboard = [...(currentLayerItem as Btwx.Artboard).originArtboardForEvents, ...(currentLayerItem as Btwx.Artboard).destinationArtboardForEvents];
+      result = tweenEventsWithArtboard.reduce((tweenResult, tweenCurrent) => {
         return removeLayerTweenEvent(tweenResult, layerActions.removeLayerTweenEvent({id: tweenCurrent}) as RemoveLayerTweenEvent);
       }, result);
     }
@@ -1426,7 +1424,15 @@ export const addLayerTweenEvent = (state: LayerState, action: AddLayerTweenEvent
         [action.payload.layer]: {
           ...currentState.byId[action.payload.layer],
           tweenEvents: addItem(currentState.byId[action.payload.layer].tweenEvents, action.payload.id)
-        }
+        },
+        [action.payload.artboard]: {
+          ...currentState.byId[action.payload.artboard],
+          originArtboardForEvents: addItem((currentState.byId[action.payload.artboard] as Btwx.Artboard).originArtboardForEvents, action.payload.id)
+        } as Btwx.Artboard,
+        [action.payload.destinationArtboard]: {
+          ...currentState.byId[action.payload.destinationArtboard],
+          destinationArtboardForEvents: addItem((currentState.byId[action.payload.destinationArtboard] as Btwx.Artboard).destinationArtboardForEvents, action.payload.id)
+        } as Btwx.Artboard
       },
       allTweenEventIds: addItem(currentState.allTweenEventIds, action.payload.id),
       tweenEventById: {
@@ -1493,7 +1499,15 @@ export const removeLayerTweenEvent = (state: LayerState, action: RemoveLayerTwee
       [animEvent.layer]: {
         ...currentState.byId[animEvent.layer],
         tweenEvents: removeItem(currentState.byId[animEvent.layer].tweenEvents, action.payload.id)
-      }
+      },
+      [animEvent.artboard]: {
+        ...currentState.byId[animEvent.artboard],
+        originArtboardForEvents: removeItem((currentState.byId[animEvent.artboard] as Btwx.Artboard).originArtboardForEvents, action.payload.id)
+      } as Btwx.Artboard,
+      [animEvent.destinationArtboard]: {
+        ...currentState.byId[animEvent.destinationArtboard],
+        destinationArtboardForEvents: removeItem((currentState.byId[animEvent.destinationArtboard] as Btwx.Artboard).destinationArtboardForEvents, action.payload.id)
+      } as Btwx.Artboard
     },
     allTweenEventIds: removeItem(currentState.allTweenEventIds, action.payload.id),
     tweenEventById: Object.keys(currentState.tweenEventById).reduce((result: any, key) => {
@@ -1522,7 +1536,26 @@ export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerSt
       ...currentState.byId,
       [action.payload.layer]: {
         ...currentState.byId[action.payload.layer],
-        tweens: addItem(currentState.byId[action.payload.layer].tweens, action.payload.id)
+        tweens: addItem(currentState.byId[action.payload.layer].tweens, action.payload.id),
+        originLayerForTweens: {
+          ...currentState.byId[action.payload.layer].originLayerForTweens,
+          allIds: addItem(currentState.byId[action.payload.layer].originLayerForTweens.allIds, action.payload.id),
+          byProp: {
+            ...currentState.byId[action.payload.layer].originLayerForTweens.byProp,
+            [action.payload.prop]: addItem(currentState.byId[action.payload.layer].originLayerForTweens.byProp[action.payload.prop], action.payload.id)
+          }
+        }
+      },
+      [action.payload.destinationLayer]: {
+        ...currentState.byId[action.payload.destinationLayer],
+        destinationLayerForTweens: {
+          ...currentState.byId[action.payload.destinationLayer].destinationLayerForTweens,
+          allIds: addItem(currentState.byId[action.payload.destinationLayer].destinationLayerForTweens.allIds, action.payload.id),
+          byProp: {
+            ...currentState.byId[action.payload.destinationLayer].destinationLayerForTweens.byProp,
+            [action.payload.prop]: addItem(currentState.byId[action.payload.destinationLayer].destinationLayerForTweens.byProp[action.payload.prop], action.payload.id)
+          }
+        }
       }
     },
     allTweenIds: addItem(currentState.allTweenIds, action.payload.id),
@@ -1551,7 +1584,26 @@ export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): L
       ...currentState.byId,
       [tween.layer]: {
         ...currentState.byId[tween.layer],
-        tweens: removeItem(currentState.byId[tween.layer].tweens, action.payload.id)
+        tweens: removeItem(currentState.byId[tween.layer].tweens, action.payload.id),
+        originLayerForTweens: {
+          ...currentState.byId[tween.layer].originLayerForTweens,
+          allIds: removeItem(currentState.byId[tween.layer].originLayerForTweens.allIds, action.payload.id),
+          byProp: {
+            ...currentState.byId[tween.layer].originLayerForTweens.byProp,
+            [tween.prop]: removeItem(currentState.byId[tween.layer].originLayerForTweens.byProp[tween.prop], action.payload.id)
+          }
+        }
+      },
+      [tween.destinationLayer]: {
+        ...currentState.byId[tween.destinationLayer],
+        destinationLayerForTweens: {
+          ...currentState.byId[tween.destinationLayer].destinationLayerForTweens,
+          allIds: addItem(currentState.byId[tween.destinationLayer].destinationLayerForTweens.allIds, action.payload.id),
+          byProp: {
+            ...currentState.byId[tween.destinationLayer].destinationLayerForTweens.byProp,
+            [tween.prop]: addItem(currentState.byId[tween.destinationLayer].destinationLayerForTweens.byProp[tween.prop], action.payload.id)
+          }
+        }
       }
     },
     allTweenIds: removeItem(currentState.allTweenIds, action.payload.id),
@@ -1571,14 +1623,17 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
   const layerItem = state.byId[layerId];
   if (layerItem.scope.length > 1 && state.byId[layerItem.scope[1]].type === 'Artboard') {
     const artboard = layerItem.scope[1];
-    const tweensByProp = getTweensByProp(currentState, layerId, prop);
-    const eventsWithArtboardAsOrigin = getTweensEventsByOriginArtboard(currentState, artboard);
-    const eventsWithArtboardAsDestination = getTweensEventsByDestinationArtboard(currentState, artboard);
+    const artboardItem = state.byId[artboard] as Btwx.Artboard;
+    const eventsWithArtboardAsOrigin = artboardItem.originArtboardForEvents;
+    const eventsWithArtboardAsDestination = artboardItem.destinationArtboardForEvents;
+    const originLayerTweensByProp = layerItem.originLayerForTweens.byProp[prop];
+    const destinationLayerTweensByProp = layerItem.destinationLayerForTweens.byProp[prop];
+    const tweensByProp = [...originLayerTweensByProp, ...destinationLayerTweensByProp];
     // filter tweens by prop
     // if new layer prop matches destination prop, remove tween
     // if new destination prop matches layer prop, remove tween
-    if (tweensByProp.allIds.length > 0) {
-      currentState = tweensByProp.allIds.reduce((result: LayerState, current: string) => {
+    if (tweensByProp.length > 0) {
+      currentState = tweensByProp.reduce((result: LayerState, current: string) => {
         const tween = result.tweenById[current];
         const tweenEvent = result.tweenEventById[tween.event];
         const layerItem = result.byId[tween.layer] as Btwx.Layer;
@@ -1594,7 +1649,7 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
     }
     // add tween to events with artboard as origin
     // if it doesnt already exist
-    currentState = eventsWithArtboardAsOrigin.allIds.reduce((result: LayerState, current: string) => {
+    currentState = eventsWithArtboardAsOrigin.reduce((result: LayerState, current: string) => {
       const tweenEvent = result.tweenEventById[current];
       const destinationArtboardChildren = getLayerDescendants(result, tweenEvent.destinationArtboard);
       const destinationEquivalent = getDestinationEquivalent(result, layerId, destinationArtboardChildren);
@@ -1626,7 +1681,7 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
     }, currentState);
     // add tween to events with artboard as destination
     // if it doesnt already exist
-    currentState = eventsWithArtboardAsDestination.allIds.reduce((result: LayerState, current: string) => {
+    currentState = eventsWithArtboardAsDestination.reduce((result: LayerState, current: string) => {
       const tweenEvent = result.tweenEventById[current];
       const originArtboardChildren = getLayerDescendants(result, tweenEvent.artboard);
       const originEquivalent = getDestinationEquivalent(result, layerId, originArtboardChildren);
@@ -1663,8 +1718,7 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
 export const updateLayerTweensByProps = (state: LayerState, layerId: string, props: Btwx.TweenProp[] | 'all'): LayerState => {
   let currentState = state;
   if (props === 'all') {
-    const tweenProps = ['image', 'shape', 'fill', 'fillGradientOriginX', 'fillGradientOriginY', 'fillGradientDestinationX', 'fillGradientDestinationY', 'x', 'y', 'radius', 'rotation', 'width', 'height', 'stroke', 'strokeGradientOriginX', 'strokeGradientOriginY', 'strokeGradientDestinationX', 'strokeGradientDestinationY', 'strokeDashWidth', 'strokeDashGap', 'strokeWidth', 'shadowColor', 'shadowOffsetX', 'shadowOffsetY', 'shadowBlur', 'opacity', 'fontSize', 'lineHeight', 'fromX', 'fromY', 'toX', 'toY'] as Btwx.TweenProp[];
-    currentState = tweenProps.reduce((result: LayerState, current: Btwx.TweenProp) => {
+    currentState = TWEEN_PROPS.reduce((result: LayerState, current: Btwx.TweenProp) => {
       result = updateLayerTweensByProp(result, layerId, current);
       return result;
     }, currentState);

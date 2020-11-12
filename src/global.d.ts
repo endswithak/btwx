@@ -324,6 +324,18 @@ declare namespace Btwx {
     tweenEvents: string[];
     scope: string[];
     tweens: string[];
+    originLayerForTweens: {
+      allIds: string[];
+      byProp: {
+        [prop: string]: string[];
+      };
+    };
+    destinationLayerForTweens: {
+      allIds: string[];
+      byProp: {
+        [prop: string]: string[];
+      };
+    };
     style: Style;
     transform: Transform;
     ignoreUnderlyingMask: boolean;
@@ -369,6 +381,8 @@ declare namespace Btwx {
     type: 'Artboard';
     children: string[];
     showChildren: boolean;
+    originArtboardForEvents: string[];
+    destinationArtboardForEvents: string[];
   }
 
   interface Page extends Layer {

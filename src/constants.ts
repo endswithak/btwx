@@ -8,6 +8,8 @@ export const THEME_UNIT_SIZE = 4;
 export const DEFAULT_ARTBOARD_BACKGROUND_COLOR = { h: 0, s: 0, l: 1, v: 0, a: 1 };
 export const DEFAULT_THEME = 'dark';
 
+export const TWEEN_PROPS = ['image', 'shape', 'fill', 'fillGradientOriginX', 'fillGradientOriginY', 'fillGradientDestinationX', 'fillGradientDestinationY', 'x', 'y', 'radius', 'rotation', 'width', 'height', 'stroke', 'strokeGradientOriginX', 'strokeGradientOriginY', 'strokeGradientDestinationX', 'strokeGradientDestinationY', 'strokeDashWidth', 'strokeDashGap', 'strokeWidth', 'shadowColor', 'shadowOffsetX', 'shadowOffsetY', 'shadowBlur', 'opacity', 'fontSize', 'lineHeight', 'fromX', 'fromY', 'toX', 'toY'];
+
 export const DEFAULT_TWEEN_EVENTS = [
   { event: 'mousedown', titleCase: 'Mouse Down' },
   { event: 'mouseup', titleCase: 'Mouse Up' },

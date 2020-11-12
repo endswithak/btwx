@@ -36,92 +36,92 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
   const [areaSelectBounds, setAreaSelectBounds] = useState<paper.Rectangle>(null);
   const [originalSelection, setOriginalSelection] = useState<string[]>(null);
 
-  const debounceSelection = useCallback(
-    (asBounds: paper.Rectangle, asEvent: paper.ToolEvent, asOriginalSelection: string[], asScope: string[]) => {
-      const nextSelectedLayers: string[] = [];
-      const nextDeselectedLayers: string[] = [];
-      if (asEvent.modifiers.shift) {
-        paperMain.project.getItems({
-          data: (data: any) => {
-            const notPage = data.type === 'Layer' && data.layerType !== 'Page';
-            const isScopeLayer = data.scope && asScope.includes(data.scope[data.scope.length - 1]);
-            const other = data.id && data.id !== asScope[asScope.length - 1];
-            const isNotSelected = !data.selected;
-            const isPartOfOriginalSelection = data.id && asOriginalSelection.includes(data.id);
-            return notPage && isScopeLayer && (isNotSelected || isPartOfOriginalSelection) && other;
-          },
-          bounds: (bounds: paper.Rectangle) => {
-            return bounds.intersects(asBounds);
-          }
-        }).forEach((current) => {
-          if (asOriginalSelection.includes(current.data.id)) {
-            if (current.data.selected) {
-              nextDeselectedLayers.push(current.data.id);
-            }
-          } else {
-            nextSelectedLayers.push(current.data.id);
-          }
-        });
-        paperMain.project.getItems({
-          data: (data: any) => {
-            const notPage = data.type === 'Layer' && data.layerType !== 'Page';
-            const isScopeLayer = data.scope && asScope.includes(data.scope[data.scope.length - 1]);
-            const other = data.id && data.id !== asScope[asScope.length - 1];
-            const isSelected = data.selected;
-            const isPartOfOriginalSelection = data.id && asOriginalSelection.includes(data.id);
-            return notPage && isScopeLayer && (isSelected || isPartOfOriginalSelection) && other;
-          },
-          bounds: (bounds: paper.Rectangle) => {
-            return !bounds.intersects(asBounds);
-          }
-        }).forEach((current) => {
-          if (asOriginalSelection.includes(current.data.id)) {
-            if (!current.data.selected) {
-              nextSelectedLayers.push(current.data.id);
-            }
-          } else {
-            nextDeselectedLayers.push(current.data.id);
-          }
-        });
-      } else {
-        paperMain.project.getItems({
-          data: (data: any) => {
-            const notPage = data.type === 'Layer' && data.layerType !== 'Page';
-            const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
-            const other = data.id && data.id !== scope[scope.length - 1];
-            const isNotSelected = !data.selected;
-            return notPage && isScopeLayer && isNotSelected && other;
-          },
-          bounds: (bounds: paper.Rectangle) => {
-            return bounds.intersects(asBounds);
-          }
-        }).forEach((current) => {
-          nextSelectedLayers.push(current.data.id);
-        });
-        paperMain.project.getItems({
-          data: (data: any) => {
-            const notPage = data.type === 'Layer' && data.layerType !== 'Page';
-            const isScopeLayer = data.scope && asScope.includes(data.scope[data.scope.length - 1]);
-            const other = data.id && data.id !== asScope[asScope.length - 1];
-            const isSelected = data.selected;
-            return notPage && isScopeLayer && isSelected && other;
-          },
-          bounds: (bounds: paper.Rectangle) => {
-            return !bounds.intersects(asBounds);
-          }
-        }).forEach((current) => {
-          nextDeselectedLayers.push(current.data.id);
-        });
-      }
-      if (nextSelectedLayers.length > 0 || nextDeselectedLayers.length > 0) {
-        areaSelectLayers({
-          select: nextSelectedLayers,
-          deselect: nextDeselectedLayers
-        });
-      }
-    },
-    []
-  );
+  // const debounceSelection = useCallback(
+  //   (asBounds: paper.Rectangle, asEvent: paper.ToolEvent, asOriginalSelection: string[], asScope: string[]) => {
+  //     const nextSelectedLayers: string[] = [];
+  //     const nextDeselectedLayers: string[] = [];
+  //     if (asEvent.modifiers.shift) {
+  //       paperMain.project.getItems({
+  //         data: (data: any) => {
+  //           const notPage = data.type === 'Layer' && data.layerType !== 'Page';
+  //           const isScopeLayer = data.scope && asScope.includes(data.scope[data.scope.length - 1]);
+  //           const other = data.id && data.id !== asScope[asScope.length - 1];
+  //           const isNotSelected = !data.selected;
+  //           const isPartOfOriginalSelection = data.id && asOriginalSelection.includes(data.id);
+  //           return notPage && isScopeLayer && (isNotSelected || isPartOfOriginalSelection) && other;
+  //         },
+  //         bounds: (bounds: paper.Rectangle) => {
+  //           return bounds.intersects(asBounds);
+  //         }
+  //       }).forEach((current) => {
+  //         if (asOriginalSelection.includes(current.data.id)) {
+  //           if (current.data.selected) {
+  //             nextDeselectedLayers.push(current.data.id);
+  //           }
+  //         } else {
+  //           nextSelectedLayers.push(current.data.id);
+  //         }
+  //       });
+  //       paperMain.project.getItems({
+  //         data: (data: any) => {
+  //           const notPage = data.type === 'Layer' && data.layerType !== 'Page';
+  //           const isScopeLayer = data.scope && asScope.includes(data.scope[data.scope.length - 1]);
+  //           const other = data.id && data.id !== asScope[asScope.length - 1];
+  //           const isSelected = data.selected;
+  //           const isPartOfOriginalSelection = data.id && asOriginalSelection.includes(data.id);
+  //           return notPage && isScopeLayer && (isSelected || isPartOfOriginalSelection) && other;
+  //         },
+  //         bounds: (bounds: paper.Rectangle) => {
+  //           return !bounds.intersects(asBounds);
+  //         }
+  //       }).forEach((current) => {
+  //         if (asOriginalSelection.includes(current.data.id)) {
+  //           if (!current.data.selected) {
+  //             nextSelectedLayers.push(current.data.id);
+  //           }
+  //         } else {
+  //           nextDeselectedLayers.push(current.data.id);
+  //         }
+  //       });
+  //     } else {
+  //       paperMain.project.getItems({
+  //         data: (data: any) => {
+  //           const notPage = data.type === 'Layer' && data.layerType !== 'Page';
+  //           const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
+  //           const other = data.id && data.id !== scope[scope.length - 1];
+  //           const isNotSelected = !data.selected;
+  //           return notPage && isScopeLayer && isNotSelected && other;
+  //         },
+  //         bounds: (bounds: paper.Rectangle) => {
+  //           return bounds.intersects(asBounds);
+  //         }
+  //       }).forEach((current) => {
+  //         nextSelectedLayers.push(current.data.id);
+  //       });
+  //       paperMain.project.getItems({
+  //         data: (data: any) => {
+  //           const notPage = data.type === 'Layer' && data.layerType !== 'Page';
+  //           const isScopeLayer = data.scope && asScope.includes(data.scope[data.scope.length - 1]);
+  //           const other = data.id && data.id !== asScope[asScope.length - 1];
+  //           const isSelected = data.selected;
+  //           return notPage && isScopeLayer && isSelected && other;
+  //         },
+  //         bounds: (bounds: paper.Rectangle) => {
+  //           return !bounds.intersects(asBounds);
+  //         }
+  //       }).forEach((current) => {
+  //         nextDeselectedLayers.push(current.data.id);
+  //       });
+  //     }
+  //     if (nextSelectedLayers.length > 0 || nextDeselectedLayers.length > 0) {
+  //       areaSelectLayers({
+  //         select: nextSelectedLayers,
+  //         deselect: nextDeselectedLayers
+  //       });
+  //     }
+  //   },
+  //   []
+  // );
 
   const resetState = (): void => {
     if (getPaperLayer('AreaSelectPreview')) {
@@ -168,7 +168,87 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
 
   useEffect(() => {
     if (upEvent && isEnabled) {
-      debounceSelection(areaSelectBounds, dragEvent, originalSelection, scope);
+      const nextSelectedLayers: string[] = [];
+      const nextDeselectedLayers: string[] = [];
+      if (upEvent.modifiers.shift) {
+        paperMain.project.getItems({
+          data: (data: any) => {
+            const notPage = data.type === 'Layer' && data.layerType !== 'Page';
+            const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
+            const other = data.id && data.id !== scope[scope.length - 1];
+            const isNotSelected = !data.selected;
+            const isPartOfOriginalSelection = data.id && originalSelection.includes(data.id);
+            return notPage && isScopeLayer && (isNotSelected || isPartOfOriginalSelection) && other;
+          },
+          bounds: (bounds: paper.Rectangle) => {
+            return bounds.intersects(areaSelectBounds);
+          }
+        }).forEach((current) => {
+          if (originalSelection.includes(current.data.id)) {
+            if (current.data.selected) {
+              nextDeselectedLayers.push(current.data.id);
+            }
+          } else {
+            nextSelectedLayers.push(current.data.id);
+          }
+        });
+        paperMain.project.getItems({
+          data: (data: any) => {
+            const notPage = data.type === 'Layer' && data.layerType !== 'Page';
+            const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
+            const other = data.id && data.id !== scope[scope.length - 1];
+            const isSelected = data.selected;
+            const isPartOfOriginalSelection = data.id && originalSelection.includes(data.id);
+            return notPage && isScopeLayer && (isSelected || isPartOfOriginalSelection) && other;
+          },
+          bounds: (bounds: paper.Rectangle) => {
+            return !bounds.intersects(areaSelectBounds);
+          }
+        }).forEach((current) => {
+          if (originalSelection.includes(current.data.id)) {
+            if (!current.data.selected) {
+              nextSelectedLayers.push(current.data.id);
+            }
+          } else {
+            nextDeselectedLayers.push(current.data.id);
+          }
+        });
+      } else {
+        paperMain.project.getItems({
+          data: (data: any) => {
+            const notPage = data.type === 'Layer' && data.layerType !== 'Page';
+            const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
+            const other = data.id && data.id !== scope[scope.length - 1];
+            const isNotSelected = !data.selected;
+            return notPage && isScopeLayer && isNotSelected && other;
+          },
+          bounds: (bounds: paper.Rectangle) => {
+            return bounds.intersects(areaSelectBounds);
+          }
+        }).forEach((current) => {
+          nextSelectedLayers.push(current.data.id);
+        });
+        paperMain.project.getItems({
+          data: (data: any) => {
+            const notPage = data.type === 'Layer' && data.layerType !== 'Page';
+            const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
+            const other = data.id && data.id !== scope[scope.length - 1];
+            const isSelected = data.selected;
+            return notPage && isScopeLayer && isSelected && other;
+          },
+          bounds: (bounds: paper.Rectangle) => {
+            return !bounds.intersects(areaSelectBounds);
+          }
+        }).forEach((current) => {
+          nextDeselectedLayers.push(current.data.id);
+        });
+      }
+      if (nextSelectedLayers.length > 0 || nextDeselectedLayers.length > 0) {
+        areaSelectLayers({
+          select: nextSelectedLayers,
+          deselect: nextDeselectedLayers
+        });
+      }
       if (selecting) {
         setCanvasSelecting({selecting: false});
       }
@@ -179,7 +259,6 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
   useEffect(() => {
     if (areaSelectBounds && isEnabled) {
       updateAreaSelectPreview();
-      // debounceSelection(areaSelectBounds, dragEvent, originalSelection, scope);
     }
   }, [areaSelectBounds]);
 

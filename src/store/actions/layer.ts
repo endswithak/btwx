@@ -8,7 +8,7 @@ import { gsap } from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import { paperMain } from '../../canvas';
 import MeasureGuide from '../../canvas/measureGuide';
-import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_VALUE, THEME_PRIMARY_COLOR, DEFAULT_TWEEN_EVENTS } from '../../constants';
+import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_VALUE, THEME_PRIMARY_COLOR, DEFAULT_TWEEN_EVENTS, TWEEN_PROPS } from '../../constants';
 import { getPaperFillColor, getPaperStrokeColor, getPaperLayer, getPaperShadowColor } from '../utils/paper';
 import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayersBounds, importPaperProject, colorsMatch, gradientsMatch, getNearestScopeAncestor, getTweenEventsFrameItems, orderLayersByDepth, canMaskLayers, canMaskSelection, canPasteSVG, getLineToPoint, getSelectionTopLeft, getSelectionBottomRight, getLineFromPoint, getArtboardsTopTop, getSelectionBounds, getSelectedBounds, getParentPaperLayer, getGradientOriginPoint, getGradientDestinationPoint } from '../selectors/layer';
 import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle, getLayerMasked, getLayerUnderlyingMask } from '../utils/actions';
@@ -508,6 +508,22 @@ export const addArtboardThunk = (payload: AddArtboardPayload) => {
       showChildren: showChildren,
       tweenEvents: [],
       tweens: [],
+      originArtboardForEvents: [],
+      destinationArtboardForEvents: [],
+      originLayerForTweens: {
+        allIds: [],
+        byProp: TWEEN_PROPS.reduce((result, current) => ({
+          ...result,
+          [current]: []
+        }), {})
+      },
+      destinationLayerForTweens: {
+        allIds: [],
+        byProp: TWEEN_PROPS.reduce((result, current) => ({
+          ...result,
+          [current]: []
+        }), {})
+      },
       transform: DEFAULT_TRANSFORM,
       style: DEFAULT_STYLE,
       masked,
@@ -562,6 +578,20 @@ export const addGroupThunk = (payload: AddGroupPayload) => {
       selected: false,
       tweenEvents: [],
       tweens: [],
+      originLayerForTweens: {
+        allIds: [],
+        byProp: TWEEN_PROPS.reduce((result, current) => ({
+          ...result,
+          [current]: []
+        }), {})
+      },
+      destinationLayerForTweens: {
+        allIds: [],
+        byProp: TWEEN_PROPS.reduce((result, current) => ({
+          ...result,
+          [current]: []
+        }), {})
+      },
       transform: DEFAULT_TRANSFORM,
       showChildren,
       style,
@@ -650,6 +680,20 @@ export const addShapeThunk = (payload: AddShapePayload) => {
       children: null,
       tweenEvents: [],
       tweens: [],
+      originLayerForTweens: {
+        allIds: [],
+        byProp: TWEEN_PROPS.reduce((result, current) => ({
+          ...result,
+          [current]: []
+        }), {})
+      },
+      destinationLayerForTweens: {
+        allIds: [],
+        byProp: TWEEN_PROPS.reduce((result, current) => ({
+          ...result,
+          [current]: []
+        }), {})
+      },
       closed: payload.layer.closed,
       mask,
       underlyingMask,
@@ -741,6 +785,20 @@ export const addShapeGroupThunk = (payload: AddShapePayload) => {
       children: null,
       tweenEvents: [],
       tweens: [],
+      originLayerForTweens: {
+        allIds: [],
+        byProp: TWEEN_PROPS.reduce((result, current) => ({
+          ...result,
+          [current]: []
+        }), {})
+      },
+      destinationLayerForTweens: {
+        allIds: [],
+        byProp: TWEEN_PROPS.reduce((result, current) => ({
+          ...result,
+          [current]: []
+        }), {})
+      },
       closed: true,
       mask,
       underlyingMask,
@@ -839,6 +897,20 @@ export const addTextThunk = (payload: AddTextPayload) => {
       children: null,
       tweenEvents: [],
       tweens: [],
+      originLayerForTweens: {
+        allIds: [],
+        byProp: TWEEN_PROPS.reduce((result, current) => ({
+          ...result,
+          [current]: []
+        }), {})
+      },
+      destinationLayerForTweens: {
+        allIds: [],
+        byProp: TWEEN_PROPS.reduce((result, current) => ({
+          ...result,
+          [current]: []
+        }), {})
+      },
       underlyingMask,
       ignoreUnderlyingMask,
       masked,
@@ -913,6 +985,20 @@ export const addImageThunk = (payload: AddImagePayload) => {
               children: null,
               tweenEvents: [],
               tweens: [],
+              originLayerForTweens: {
+                allIds: [],
+                byProp: TWEEN_PROPS.reduce((result, current) => ({
+                  ...result,
+                  [current]: []
+                }), {})
+              },
+              destinationLayerForTweens: {
+                allIds: [],
+                byProp: TWEEN_PROPS.reduce((result, current) => ({
+                  ...result,
+                  [current]: []
+                }), {})
+              },
               underlyingMask,
               ignoreUnderlyingMask,
               masked,
