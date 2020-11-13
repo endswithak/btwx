@@ -12,12 +12,18 @@ export const getArtboardEventDestinationIds = (state: RootState, id: string): st
 export const getArtboardEventOriginIds = (state: RootState, id: string): string[] => (state.layer.present.byId[id] as Btwx.Artboard).originArtboardForEvents;
 export const getSelected = (state: RootState): string[] => state.layer.present.selected;
 export const getLayersById = (state: RootState): { [id: string]: Btwx.Layer } => state.layer.present.byId;
+export const getAllEventIds = (state: RootState): string[] => state.layer.present.allTweenEventIds;
 export const getEventsById = (state: RootState): { [id: string]: Btwx.TweenEvent } => state.layer.present.tweenEventById;
 export const getTweensById = (state: RootState): { [id: string]: Btwx.Tween } => state.layer.present.tweenById;
 export const getLayerById = (state: RootState, id: string): Btwx.Layer => state.layer.present.byId[id];
 export const getLayerChildren = (state: RootState, id: string): string[] => state.layer.present.byId[id].children;
 export const getPageChildren = (state: RootState): string[] => state.layer.present.byId['page'].children;
 export const getHoverItem = (state: RootState): Btwx.Layer => state.layer.present.byId[state.layer.present.hover];
+export const getEventDrawerEvent = (state: RootState): string => state.tweenDrawer.event;
+export const getEventDrawerSort = (state: RootState): string => state.tweenDrawer.eventSort;
+export const getEventDrawerHover = (state: RootState): string => state.tweenDrawer.eventHover;
+export const getActiveArtboard = (state: RootState): string => state.layer.present.activeArtboard;
+
 
 export const getSelectedById = createSelector(
   [ getSelected, getLayersById ],
@@ -417,6 +423,180 @@ export const getAllArtboardTweenDestinationLayers = createSelector(
     }, { allIds: [], byId: {} })
   }
 );
+
+export const getSortedEvents = createSelector(
+  [ getAllEventIds, getEventsById, getEventDrawerSort, getLayersById ],
+  (allEventIds, eventById, eventSort, layerById) => {
+    const getSort = (sortBy: 'layer' | 'event' | 'artboard' | 'destinationArtboard'): string[] => {
+      return [...allEventIds].sort((a, b) => {
+        const eventA = eventById[a];
+        const eventB = eventById[b];
+        let sortA;
+        let sortB;
+        switch(sortBy) {
+          case 'layer':
+          case 'artboard':
+          case 'destinationArtboard':
+            sortA = layerById[eventA[sortBy]].name.toUpperCase();
+            sortB = layerById[eventB[sortBy]].name.toUpperCase();
+            break;
+          case 'event':
+            sortA = eventA[sortBy].toUpperCase();
+            sortB = eventB[sortBy].toUpperCase();
+            break;
+        }
+        if (sortA < sortB) {
+          return -1;
+        }
+        if (sortA > sortB) {
+          return 1;
+        }
+        return 0;
+      });
+    }
+    if (eventSort !== 'none') {
+      switch(eventSort) {
+        case 'layer-asc':
+          return getSort('layer');
+        case 'layer-dsc':
+          return getSort('layer').reverse();
+        case 'event-asc':
+          return getSort('event');
+        case 'event-dsc':
+          return getSort('event').reverse();
+        case 'artboard-asc':
+          return getSort('artboard');
+        case 'artboard-dsc':
+          return getSort('artboard').reverse();
+        case 'destinationArtboard-asc':
+          return getSort('destinationArtboard');
+        case 'destinationArtboard-dsc':
+          return getSort('destinationArtboard').reverse();
+      }
+    } else {
+      return allEventIds;
+    }
+  }
+);
+
+export const getActiveArtboardSortedEvents = createSelector(
+  [ getSortedEvents, getActiveArtboard, getEventsById  ],
+  (sortedEvents, activeArtboard, eventById) => {
+    const activeArtboardEvents = activeArtboard ? sortedEvents.filter((id) => eventById[id].artboard === activeArtboard).reverse() : [];
+    const otherEventIds = activeArtboard ? sortedEvents.filter((id) => eventById[id].artboard !== activeArtboard).reverse() : sortedEvents.reverse();
+    const eventIds = [...activeArtboardEvents, ...otherEventIds];
+    return {
+      allIds: eventIds,
+      activeArtboardEvents,
+      otherEventIds
+    };
+  }
+);
+
+export const getArtboardEventItems = createSelector(
+  [ getSortedEvents, getActiveArtboard, getEventDrawerEvent, getEventsById, getLayersById  ],
+  (sortedEvents, activeArtboard, eventDrawerEvent, eventById, layerById) => {
+    let eventItems: Btwx.TweenEvent[];
+    let eventLayers: {
+      allIds: string[];
+      byId: {
+        [id: string]: Btwx.Layer;
+      };
+    };
+    if (eventDrawerEvent) {
+      const eventItem = eventById[eventDrawerEvent];
+      const eventLayer = eventItem.layer;
+      const eventLayerItem = layerById[eventLayer];
+      eventItems = [eventById[eventDrawerEvent]],
+      eventLayers = {
+        allIds: [eventLayer],
+        byId: {
+          [eventLayer]: eventLayerItem
+        }
+      }
+    } else {
+      const activeArtboardEvents = activeArtboard ? sortedEvents.filter((id) => eventById[id].artboard === activeArtboard) : [];
+      const otherEventIds = activeArtboard ? sortedEvents.filter((id) => eventById[id].artboard !== activeArtboard) : sortedEvents;
+      const eventIds = [...activeArtboardEvents, ...otherEventIds];
+      eventItems = eventIds.reduce((result, current) => {
+        return [...result, eventById[current]];
+      }, []);
+      eventLayers = eventItems.reduce((result, current) => {
+        const eventLayer = current.layer;
+        const eventLayerItem = layerById[eventLayer];
+        result.allIds = [...result.allIds, eventLayer];
+        result.byId = {
+          ...result.byId,
+          [eventLayer]: eventLayerItem
+        }
+        return result;
+      }, {
+        allIds: [],
+        byId: {}
+      });
+    }
+    return {
+      tweenEventItems: eventItems,
+      tweenEventLayers: eventLayers
+    }
+  }
+);
+
+// export const getTweenEventsFrameItems = (store: RootState): {
+//   tweenEventItems: Btwx.TweenEvent[];
+//   tweenEventLayers: {
+//     allIds: string[];
+//     byId: {
+//       [id: string]: Btwx.Layer;
+//     };
+//   };
+// } => {
+//   const { layer, tweenDrawer } = store;
+//   const activeArtboard = layer.present.activeArtboard;
+//   const eventHover = tweenDrawer.eventHover;
+//   const eventHoverItem = layer.present.tweenEventById[eventHover]
+//   const tweenEventItems = !tweenDrawer.event ? getSortedEvents(store).reduce((result, current) => {
+//     const tweenEvent = layer.present.tweenEventById[current];
+//     if (tweenEvent.artboard === activeArtboard) {
+//       result = [...result, tweenEvent];
+//     }
+//     return result;
+//   }, []) as Btwx.TweenEvent[] : [layer.present.tweenEventById[tweenDrawer.event]] as Btwx.TweenEvent[];
+//   if (eventHoverItem && !tweenEventItems.some((item: Btwx.TweenEvent) => item.id === eventHoverItem.id)) {
+//     tweenEventItems.unshift(eventHoverItem);
+//   }
+//   const tweenEventLayers = tweenEventItems.reduce((result, current) => {
+//     const layerItem = layer.present.byId[current.layer];
+//     // if (layerItem.type === 'Group' && (layerItem as Btwx.Group).clipped) {
+//     //   const childLayers = (layerItem as Btwx.Group).children.reduce((childrenResult, currentChild) => {
+//     //     const childItem = layer.present.byId[currentChild];
+//     //     if (!result.allIds.includes(currentChild)) {
+//     //       childrenResult.allIds = [...childrenResult.allIds, currentChild];
+//     //       childrenResult.byId = {
+//     //         ...childrenResult.byId,
+//     //         [currentChild]: childItem
+//     //       }
+//     //     }
+//     //     return childrenResult;
+//     //   }, { allIds: [], byId: {} });
+//     //   result.allIds = [...result.allIds, ...childLayers.allIds];
+//     //   result.byId = {...result.byId, ...childLayers.byId};
+//     // }
+//     if (!result.allIds.includes(current.layer)) {
+//       result.allIds = [...result.allIds, current.layer];
+//       result.byId = {
+//         ...result.byId,
+//         [current.layer]: layerItem
+//       }
+//     }
+//     return result;
+//   }, { allIds: [], byId: {} });
+
+//   return {
+//     tweenEventItems,
+//     tweenEventLayers
+//   };
+// };
 
 export const getLayer = (store: LayerState, id: string): Btwx.Layer => {
   return store.byId[id] as Btwx.Layer;
@@ -1714,117 +1894,117 @@ export const getArtboardsTopTop = (state: LayerState): number => {
   }, state.byId[artboards[0]].frame.y - (state.byId[artboards[0]].frame.height / 2));
 };
 
-export const getSortedTweenEvents = (store: RootState): string[] => {
-  const tweenEvents = store.layer.present.allTweenEventIds;
-  const eventSort = store.tweenDrawer.eventSort;
-  const getSort = (sortBy: 'layer' | 'event' | 'artboard' | 'destinationArtboard'): string[] => {
-    return [...tweenEvents].sort((a, b) => {
-      const eventA = store.layer.present.tweenEventById[a];
-      const eventB = store.layer.present.tweenEventById[b];
-      let sortA;
-      let sortB;
-      switch(sortBy) {
-        case 'layer':
-        case 'artboard':
-        case 'destinationArtboard':
-          sortA = store.layer.present.byId[eventA[sortBy]].name.toUpperCase();
-          sortB = store.layer.present.byId[eventB[sortBy]].name.toUpperCase();
-          break;
-        case 'event':
-          sortA = eventA[sortBy].toUpperCase();
-          sortB = eventB[sortBy].toUpperCase();
-          break;
-      }
-      if (sortA < sortB) {
-        return -1;
-      }
-      if (sortA > sortB) {
-        return 1;
-      }
-      return 0;
-    });
-  }
-  return (() => {
-    if (eventSort !== 'none') {
-      switch(eventSort) {
-        case 'layer-asc':
-          return getSort('layer');
-        case 'layer-dsc':
-          return getSort('layer').reverse();
-        case 'event-asc':
-          return getSort('event');
-        case 'event-dsc':
-          return getSort('event').reverse();
-        case 'artboard-asc':
-          return getSort('artboard');
-        case 'artboard-dsc':
-          return getSort('artboard').reverse();
-        case 'destinationArtboard-asc':
-          return getSort('destinationArtboard');
-        case 'destinationArtboard-dsc':
-          return getSort('destinationArtboard').reverse();
-      }
-    } else {
-      return tweenEvents;
-    }
-  })();
-};
+// export const getSortedEvents = (store: RootState): string[] => {
+//   const tweenEvents = store.layer.present.allTweenEventIds;
+//   const eventSort = store.tweenDrawer.eventSort;
+//   const getSort = (sortBy: 'layer' | 'event' | 'artboard' | 'destinationArtboard'): string[] => {
+//     return [...tweenEvents].sort((a, b) => {
+//       const eventA = store.layer.present.tweenEventById[a];
+//       const eventB = store.layer.present.tweenEventById[b];
+//       let sortA;
+//       let sortB;
+//       switch(sortBy) {
+//         case 'layer':
+//         case 'artboard':
+//         case 'destinationArtboard':
+//           sortA = store.layer.present.byId[eventA[sortBy]].name.toUpperCase();
+//           sortB = store.layer.present.byId[eventB[sortBy]].name.toUpperCase();
+//           break;
+//         case 'event':
+//           sortA = eventA[sortBy].toUpperCase();
+//           sortB = eventB[sortBy].toUpperCase();
+//           break;
+//       }
+//       if (sortA < sortB) {
+//         return -1;
+//       }
+//       if (sortA > sortB) {
+//         return 1;
+//       }
+//       return 0;
+//     });
+//   }
+//   return (() => {
+//     if (eventSort !== 'none') {
+//       switch(eventSort) {
+//         case 'layer-asc':
+//           return getSort('layer');
+//         case 'layer-dsc':
+//           return getSort('layer').reverse();
+//         case 'event-asc':
+//           return getSort('event');
+//         case 'event-dsc':
+//           return getSort('event').reverse();
+//         case 'artboard-asc':
+//           return getSort('artboard');
+//         case 'artboard-dsc':
+//           return getSort('artboard').reverse();
+//         case 'destinationArtboard-asc':
+//           return getSort('destinationArtboard');
+//         case 'destinationArtboard-dsc':
+//           return getSort('destinationArtboard').reverse();
+//       }
+//     } else {
+//       return tweenEvents;
+//     }
+//   })();
+// };
 
-export const getTweenEventsFrameItems = (store: RootState): {
-  tweenEventItems: Btwx.TweenEvent[];
-  tweenEventLayers: {
-    allIds: string[];
-    byId: {
-      [id: string]: Btwx.Layer;
-    };
-  };
-} => {
-  const { layer, tweenDrawer } = store;
-  const activeArtboard = layer.present.activeArtboard;
-  const eventHover = tweenDrawer.eventHover;
-  const eventHoverItem = layer.present.tweenEventById[eventHover]
-  const tweenEventItems = !tweenDrawer.event ? getSortedTweenEvents(store).reduce((result, current) => {
-    const tweenEvent = layer.present.tweenEventById[current];
-    if (tweenEvent.artboard === activeArtboard) {
-      result = [...result, tweenEvent];
-    }
-    return result;
-  }, []) as Btwx.TweenEvent[] : [layer.present.tweenEventById[tweenDrawer.event]] as Btwx.TweenEvent[];
-  if (eventHoverItem && !tweenEventItems.some((item: Btwx.TweenEvent) => item.id === eventHoverItem.id)) {
-    tweenEventItems.unshift(eventHoverItem);
-  }
-  const tweenEventLayers = tweenEventItems.reduce((result, current) => {
-    const layerItem = layer.present.byId[current.layer];
-    // if (layerItem.type === 'Group' && (layerItem as Btwx.Group).clipped) {
-    //   const childLayers = (layerItem as Btwx.Group).children.reduce((childrenResult, currentChild) => {
-    //     const childItem = layer.present.byId[currentChild];
-    //     if (!result.allIds.includes(currentChild)) {
-    //       childrenResult.allIds = [...childrenResult.allIds, currentChild];
-    //       childrenResult.byId = {
-    //         ...childrenResult.byId,
-    //         [currentChild]: childItem
-    //       }
-    //     }
-    //     return childrenResult;
-    //   }, { allIds: [], byId: {} });
-    //   result.allIds = [...result.allIds, ...childLayers.allIds];
-    //   result.byId = {...result.byId, ...childLayers.byId};
-    // }
-    if (!result.allIds.includes(current.layer)) {
-      result.allIds = [...result.allIds, current.layer];
-      result.byId = {
-        ...result.byId,
-        [current.layer]: layerItem
-      }
-    }
-    return result;
-  }, { allIds: [], byId: {} });
+// export const getTweenEventsFrameItems = (store: RootState): {
+//   tweenEventItems: Btwx.TweenEvent[];
+//   tweenEventLayers: {
+//     allIds: string[];
+//     byId: {
+//       [id: string]: Btwx.Layer;
+//     };
+//   };
+// } => {
+//   const { layer, tweenDrawer } = store;
+//   const activeArtboard = layer.present.activeArtboard;
+//   const eventHover = tweenDrawer.eventHover;
+//   const eventHoverItem = layer.present.tweenEventById[eventHover]
+//   const tweenEventItems = !tweenDrawer.event ? getSortedEvents(store).reduce((result, current) => {
+//     const tweenEvent = layer.present.tweenEventById[current];
+//     if (tweenEvent.artboard === activeArtboard) {
+//       result = [...result, tweenEvent];
+//     }
+//     return result;
+//   }, []) as Btwx.TweenEvent[] : [layer.present.tweenEventById[tweenDrawer.event]] as Btwx.TweenEvent[];
+//   if (eventHoverItem && !tweenEventItems.some((item: Btwx.TweenEvent) => item.id === eventHoverItem.id)) {
+//     tweenEventItems.unshift(eventHoverItem);
+//   }
+//   const tweenEventLayers = tweenEventItems.reduce((result, current) => {
+//     const layerItem = layer.present.byId[current.layer];
+//     // if (layerItem.type === 'Group' && (layerItem as Btwx.Group).clipped) {
+//     //   const childLayers = (layerItem as Btwx.Group).children.reduce((childrenResult, currentChild) => {
+//     //     const childItem = layer.present.byId[currentChild];
+//     //     if (!result.allIds.includes(currentChild)) {
+//     //       childrenResult.allIds = [...childrenResult.allIds, currentChild];
+//     //       childrenResult.byId = {
+//     //         ...childrenResult.byId,
+//     //         [currentChild]: childItem
+//     //       }
+//     //     }
+//     //     return childrenResult;
+//     //   }, { allIds: [], byId: {} });
+//     //   result.allIds = [...result.allIds, ...childLayers.allIds];
+//     //   result.byId = {...result.byId, ...childLayers.byId};
+//     // }
+//     if (!result.allIds.includes(current.layer)) {
+//       result.allIds = [...result.allIds, current.layer];
+//       result.byId = {
+//         ...result.byId,
+//         [current.layer]: layerItem
+//       }
+//     }
+//     return result;
+//   }, { allIds: [], byId: {} });
 
-  return {
-    tweenEventItems,
-    tweenEventLayers
-  };
-};
+//   return {
+//     tweenEventItems,
+//     tweenEventLayers
+//   };
+// };
 
 // export const canGroupLayers = (store: LayerState, layers: string[]): boolean => {
 //   return layers && layers.length > 0 && layers.every((id: string) => {

@@ -45,9 +45,9 @@ const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement =>
   const { openContextMenu, activeArtboard, id, tweenEvent, layerItem, artboardName, destinationName, setTweenDrawerEventThunk, setLayerHover, tweenEventDisplayName, setTweenDrawerEventHoverThunk, hovering, setActiveArtboard } = props;
 
   const handleMouseEnter = (): void => {
-    if (activeArtboard !== tweenEvent.artboard) {
-      setActiveArtboard({id: tweenEvent.artboard});
-    }
+    // if (activeArtboard !== tweenEvent.artboard) {
+    //   setActiveArtboard({id: tweenEvent.artboard});
+    // }
     setTweenDrawerEventHoverThunk({id});
   }
 

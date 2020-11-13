@@ -10,7 +10,7 @@ import { paperMain } from '../../canvas';
 import MeasureGuide from '../../canvas/measureGuide';
 import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_VALUE, THEME_PRIMARY_COLOR, DEFAULT_TWEEN_EVENTS, TWEEN_PROPS } from '../../constants';
 import { getPaperFillColor, getPaperStrokeColor, getPaperLayer, getPaperShadowColor } from '../utils/paper';
-import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayersBounds, importPaperProject, colorsMatch, gradientsMatch, getNearestScopeAncestor, getTweenEventsFrameItems, orderLayersByDepth, canMaskLayers, canMaskSelection, canPasteSVG, getLineToPoint, getSelectionTopLeft, getSelectionBottomRight, getLineFromPoint, getArtboardsTopTop, getSelectionBounds, getSelectedBounds, getParentPaperLayer, getGradientOriginPoint, getGradientDestinationPoint } from '../selectors/layer';
+import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayersBounds, importPaperProject, colorsMatch, gradientsMatch, getNearestScopeAncestor, getArtboardEventItems, orderLayersByDepth, canMaskLayers, canMaskSelection, canPasteSVG, getLineToPoint, getSelectionTopLeft, getSelectionBottomRight, getLineFromPoint, getArtboardsTopTop, getSelectionBounds, getSelectedBounds, getParentPaperLayer, getGradientOriginPoint, getGradientDestinationPoint } from '../selectors/layer';
 import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle, getLayerMasked, getLayerUnderlyingMask } from '../utils/actions';
 
 import { bufferToBase64, scrollToLayer } from '../../utils';
@@ -3064,9 +3064,6 @@ export const updateActiveArtboardFrame = () => {
   const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'ActiveArtboardFrame' } });
   const activeArtboardPaperLayer = paperMain.project.getItem({ data: { activeArtboard: true } });
   activeArtboardFrame.removeChildren();
-  // if (activeArtboardFrame) {
-  //   activeArtboardFrame.remove();
-  // }
   if (activeArtboardPaperLayer) {
     const artboardBackground = activeArtboardPaperLayer.getItem({ data: { id: 'ArtboardBackground' } });
     const topLeft = artboardBackground.bounds.topLeft;
@@ -3076,13 +3073,6 @@ export const updateActiveArtboardFrame = () => {
       to: new paperMain.Point(bottomRight.x + (2 / paperMain.view.zoom), bottomRight.y + (2 / paperMain.view.zoom)),
       strokeColor: THEME_PRIMARY_COLOR,
       strokeWidth: 4 / paperMain.view.zoom,
-      data: {
-        id: 'ActiveArtboardFrame',
-        type: 'UIElement',
-        interactive: false,
-        interactiveType: null,
-        elementId: 'ActiveArtboardFrame'
-      },
       parent: activeArtboardFrame
     });
   }
@@ -3094,26 +3084,21 @@ export const updateHoverFrame = () => {
   const hoverFrameConstants = {
     strokeColor: THEME_PRIMARY_COLOR,
     strokeWidth: 2 / paperMain.view.zoom,
-    // data: { id: 'HoverFrame', type: 'UIElement', interactive: false },
     parent: hoverFrame
   }
   const hoverPaperLayer = paperMain.project.getItem({ data: { hover: true } });
-  // if (hoverFrame) {
-  //   hoverFrame.remove();
-  // }
   if (hoverPaperLayer) {
-    let nextHoverFrame: paper.Item;
     switch(hoverPaperLayer.data.layerType) {
       case 'Artboard': {
         const artboardBackground = hoverPaperLayer.getItem({ data: { id: 'ArtboardBackground' } });
-        nextHoverFrame = new paperMain.Path.Rectangle({
+        new paperMain.Path.Rectangle({
           ...hoverFrameConstants,
-          rectangle: artboardBackground
+          rectangle: artboardBackground.bounds
         });
         break;
       }
       case 'Shape':
-        nextHoverFrame = new paperMain.CompoundPath({
+        new paperMain.CompoundPath({
           ...hoverFrameConstants,
           closed: hoverPaperLayer.data.shapeType !== 'Line',
           pathData: (hoverPaperLayer as paper.Path | paper.CompoundPath).pathData
@@ -3121,9 +3106,6 @@ export const updateHoverFrame = () => {
         break;
       case 'Text': {
         const textLayer = hoverPaperLayer.getItem({data: { id: 'TextContent' }});
-        nextHoverFrame = new paperMain.Group({
-          data: { id: 'HoverFrame', type: 'UIElement', interactive: false }
-        });
         const initialPoint = (textLayer as paper.PointText).point;
         (textLayer as any)._lines.forEach((line: any, index: number) => {
           new paperMain.Path.Line({
@@ -3137,16 +3119,16 @@ export const updateHoverFrame = () => {
               interactiveType: null,
               elementId: 'HoverFrame'
             },
-            parent: nextHoverFrame
+            parent: hoverFrame
           });
         });
         break;
       }
       default:
-        nextHoverFrame = new paperMain.Path.Rectangle({
+        new paperMain.Path.Rectangle({
           ...hoverFrameConstants,
           from: hoverPaperLayer.bounds.topLeft,
-          to: hoverPaperLayer.bounds.bottomRight
+          to: hoverPaperLayer.bounds.bottomRight,
         });
         break;
     }
@@ -3404,13 +3386,21 @@ export const updateSelectionFrame = (visibleHandle: Btwx.SelectionFrameHandle = 
 
 export const updateTweenEventsFrame = (state: RootState) => {
   const tweenEventsFrame = paperMain.project.getItem({ data: { id: 'ArtboardEvents' } });
-  const events = getTweenEventsFrameItems(state).tweenEventItems;
+  const events = (getArtboardEventItems(state) as {
+    tweenEventItems: Btwx.TweenEvent[];
+    tweenEventLayers: {
+      allIds: string[];
+      byId: {
+        [id: string]: Btwx.Layer;
+      };
+    };
+  }).tweenEventItems;
   tweenEventsFrame.removeChildren();
   if (events) {
     const theme = getTheme(state.viewSettings.theme);
     events.forEach((event, index) => {
       const eventLayerItem = state.layer.present.byId[event.layer];
-      const groupOpacity = state.layer.present.hover ? state.layer.present.hover === event.id ? 1 : 0.25 : 1;
+      // const groupOpacity = state.layer.present.hover ? state.layer.present.hover === event.id ? 1 : 0.25 : 1;
       const elementColor = event.artboard === state.layer.present.activeArtboard ? THEME_PRIMARY_COLOR : theme.text.lighter;
       const artboardTopTop = getArtboardsTopTop(state.layer.present);
       const origin = state.layer.present.byId[event.artboard];
@@ -3515,7 +3505,7 @@ export const updateTweenEventsFrame = (state: RootState) => {
           elementId: 'TweenEventsFrame'
         },
         parent: tweenEventsFrame,
-        opacity: groupOpacity
+        // opacity: groupOpacity
       });
       const tweenEventFrameBackground = new paperMain.Path.Rectangle({
         from: tweenEventFrame.bounds.topLeft,

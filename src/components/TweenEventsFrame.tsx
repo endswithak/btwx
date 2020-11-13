@@ -10,6 +10,7 @@ interface TweenEventsFrameProps {
   tweenDrawerEventSort?: Btwx.TweenEventSort;
   tweenDrawerEventHover?: string;
   tweenDrawerEvent?: string;
+  activeArtboardEvents?: string[];
   updateTweenEventsFrameThunk?(): void;
   // tweenEventLayers?: {
   //   allIds: string[];
@@ -30,18 +31,16 @@ interface TweenEventsFrameProps {
 }
 
 const TweenEventsFrame = (props: TweenEventsFrameProps): ReactElement => {
-  const { activeArtboard, theme, tweenDrawerEventSort, tweenDrawerEventHover, tweenDrawerEvent, updateTweenEventsFrameThunk } = props;
+  const { activeArtboard, theme, tweenDrawerEventSort, tweenDrawerEventHover, tweenDrawerEvent, updateTweenEventsFrameThunk, activeArtboardEvents } = props;
 
   useEffect(() => {
     updateTweenEventsFrameThunk();
     // updateTweenEventsFrame({allArtboardIds, byId: {...artboardsById, ...tweenEventLayers.byId}, activeArtboard} as LayerState, tweenEventItems, eventHover, themeName);
     return () => {
-      const tweenEventsFrame = paperMain.project.getItem({ data: { id: 'TweenEventsFrame' } });
-      if (tweenEventsFrame) {
-        tweenEventsFrame.remove();
-      }
+      const tweenEventsFrame = paperMain.project.getItem({ data: { id: 'ArtboardEvents' } });
+      tweenEventsFrame.removeChildren();
     }
-  }, [activeArtboard, theme, tweenDrawerEventSort, tweenDrawerEventHover, tweenDrawerEvent]);
+  }, [activeArtboard, theme, tweenDrawerEventSort, tweenDrawerEventHover, tweenDrawerEvent, activeArtboardEvents]);
 
   return (
     <></>
@@ -54,35 +53,16 @@ const mapStateToProps = (state: RootState): {
   tweenDrawerEventSort: Btwx.TweenEventSort;
   tweenDrawerEventHover: string;
   tweenDrawerEvent: string;
-  // allArtboardIds: string[];
-  // artboardsById: { [id: string]: Btwx.Artboard };
-  // tweenEventItems: Btwx.TweenEvent[];
-  // tweenEventLayers: {
-  //   allIds: string[];
-  //   byId: {
-  //     [id: string]: Btwx.Layer;
-  //   };
-  // };
-  // allArtboardItems: Btwx.Artboard[];
+  activeArtboardEvents: string[];
 } => {
   const { layer, tweenDrawer, viewSettings } = state;
   const activeArtboard = layer.present.activeArtboard;
+  const activeArtboardEvents = (layer.present.byId[activeArtboard] as Btwx.Artboard).originArtboardForEvents;
   const theme = viewSettings.theme;
   const tweenDrawerEventSort = tweenDrawer.eventSort;
   const tweenDrawerEventHover = tweenDrawer.eventHover;
   const tweenDrawerEvent = tweenDrawer.event;
-  // const allArtboardIds = layer.present.allArtboardIds;
-  // const artboardsById = allArtboardIds.reduce((result: {[id: string]: Btwx.Artboard}, current) => {
-  //   result[current] = layer.present.byId[current] as Btwx.Artboard;
-  //   return result;
-  // }, {});
-  // const allArtboardItems = allArtboardIds.reduce((result, current) => {
-  //   return [...result, layer.present.byId[current]];
-  // }, []);
-  // const eventHover = tweenDrawer.eventHover;
-  // const sortedTweenEventItems = getTweenEventsFrameItems(state);
-  // const themeName = viewSettings.theme;
-  return { activeArtboard, theme, tweenDrawerEventSort, tweenDrawerEventHover, tweenDrawerEvent };
+  return { activeArtboard, theme, tweenDrawerEventSort, tweenDrawerEventHover, tweenDrawerEvent, activeArtboardEvents };
 };
 
 export default connect(
