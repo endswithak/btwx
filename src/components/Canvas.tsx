@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement, useEffect, useState, useRef } from 'react';
 import { connect } from 'react-redux';
-import { importPaperProject } from '../store/selectors/layer';
+import { importPaperProject, getPaperLayer } from '../store/selectors/layer';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
 import { ThemeContext } from './ThemeProvider';
@@ -39,18 +39,18 @@ const Canvas = (props: CanvasProps): ReactElement => {
 
   const handleHitResult = (e: any, eventType: 'mouseMove' | 'mouseDown' | 'mouseUp' | 'doubleClick' | 'contextMenu'): void => {
     const point = paperMain.view.getEventPoint(e);
-    const hitResult = paperMain.project.hitTest(point);
-    const validHitResult = hitResult && hitResult.item && hitResult.item.data && hitResult.item.data.type;
-    if (validHitResult) {
-      if (hitResult.item.data.type === 'Layer' || hitResult.item.data.type === 'LayerChild') {
-        setLayerEvent({hitResult, eventType, event: e.nativeEvent, empty: false});
-      }
-      if (hitResult.item.data.type === 'UIElement' || hitResult.item.data.type === 'UIElementChild') {
-        setUIEvent({hitResult, eventType, event: e.nativeEvent, empty: false});
-      }
+    const layersHitResult = getPaperLayer('page').hitTest(point);
+    const uiHitResult = getPaperLayer('ui').hitTest(point);
+    const validHitResult = (hitResult: paper.HitResult): boolean => hitResult && hitResult.item && hitResult.item.data && hitResult.item.data.type;
+    if (validHitResult(uiHitResult)) {
+      setUIEvent({hitResult: uiHitResult, eventType: eventType, event: e.nativeEvent, empty: false});
     } else {
-      setLayerEvent({hitResult, eventType, event: e.nativeEvent, empty: true});
-      setUIEvent({hitResult, eventType, event: e.nativeEvent, empty: true});
+      if (validHitResult(layersHitResult)) {
+        setLayerEvent({hitResult: layersHitResult, eventType: eventType, event: e.nativeEvent, empty: false});
+      } else {
+        setUIEvent({hitResult: uiHitResult, eventType: eventType, event: e.nativeEvent, empty: true});
+        setLayerEvent({hitResult: layersHitResult, eventType: eventType, event: e.nativeEvent, empty: true});
+      }
     }
   }
 

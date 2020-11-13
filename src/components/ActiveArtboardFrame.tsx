@@ -16,9 +16,7 @@ const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
     updateActiveArtboardFrame();
     return () => {
       const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'ActiveArtboardFrame' } });
-      if (activeArtboardFrame) {
-        activeArtboardFrame.remove();
-      }
+      activeArtboardFrame.removeChildren();
     }
   }, [activeArtboard, activeArtboardFrame]);
 

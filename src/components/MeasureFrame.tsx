@@ -17,9 +17,7 @@ const MeasureFrame = (props: MeasureFrameProps): ReactElement => {
     updateMeasureFrame();
     return () => {
       const measureFrame = paperMain.project.getItem({ data: { id: 'MeasureFrame' } });
-      if (measureFrame) {
-        measureFrame.remove();
-      }
+      measureFrame.removeChildren();
     }
   }, [selected, hover]);
 

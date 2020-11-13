@@ -17,9 +17,7 @@ const SelectionFrame = (props: SelectionFrameProps): ReactElement => {
     updateSelectionFrame();
     return () => {
       const selectionFrame = paperMain.project.getItem({ data: { id: 'SelectionFrame' } });
-      if (selectionFrame) {
-        selectionFrame.remove();
-      }
+      selectionFrame.removeChildren();
     }
   }, [theme, selectedBounds]);
 

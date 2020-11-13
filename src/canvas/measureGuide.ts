@@ -1,5 +1,6 @@
 import { paperMain } from './index';
 import { THEME_PRIMARY_COLOR } from '../constants';
+import { getPaperLayer } from '../store/utils/paper';
 
 class MeasureGuide {
   guide: 'top' | 'bottom' | 'left' | 'right';
@@ -27,14 +28,29 @@ class MeasureGuide {
       }
     });
     this.distance = Math.round(measureGuideLine.length);
-    const measureGuideLineCap = new paperMain.Path.Line({
+    const measureGuideLineStartLeg = new paperMain.Path.Line({
+      from: this.guide === 'top' || this.guide === 'bottom' ? new paperMain.Point(this.from.x - ((1 / paperMain.view.zoom) * 4), this.from.y) : new paperMain.Point(this.from.x, this.from.y - ((1 / paperMain.view.zoom) * 4)),
+      to: this.guide === 'top' || this.guide === 'bottom' ? new paperMain.Point(this.from.x + ((1 / paperMain.view.zoom) * 4), this.from.y) : new paperMain.Point(this.from.x, this.from.y + ((1 / paperMain.view.zoom) * 4)),
+      strokeColor: THEME_PRIMARY_COLOR,
+      strokeWidth: 1 / paperMain.view.zoom,
+      insert: false,
+      data: {
+        id: 'MeasureGuideStartLeg',
+        type: 'UIElementChild',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'MeasureFrame',
+        guide: this.guide
+      }
+    });
+    const measureGuideLineEndLeg = new paperMain.Path.Line({
       from: this.guide === 'top' || this.guide === 'bottom' ? new paperMain.Point(this.to.x - ((1 / paperMain.view.zoom) * 4), this.to.y) : new paperMain.Point(this.to.x, this.to.y - ((1 / paperMain.view.zoom) * 4)),
       to: this.guide === 'top' || this.guide === 'bottom' ? new paperMain.Point(this.to.x + ((1 / paperMain.view.zoom) * 4), this.to.y) : new paperMain.Point(this.to.x, this.to.y + ((1 / paperMain.view.zoom) * 4)),
       strokeColor: THEME_PRIMARY_COLOR,
       strokeWidth: 1 / paperMain.view.zoom,
       insert: false,
       data: {
-        id: 'MeasureGuideCap',
+        id: 'MeasureGuideEndLeg',
         type: 'UIElementChild',
         interactive: false,
         interactiveType: null,
@@ -76,7 +92,7 @@ class MeasureGuide {
     measureGuideTextBackground.position = measureGuideLine.bounds.center;
     measureGuideText.position = measureGuideTextBackground.position;
     const measureGuide = new paperMain.Group({
-      children: [measureGuideLine, measureGuideLineCap, measureGuideTextBackground, measureGuideText],
+      children: [measureGuideLineStartLeg, measureGuideLine, measureGuideLineEndLeg, measureGuideTextBackground, measureGuideText],
       data: {
         id: 'MeasureGuide',
         type: 'UIElement',
@@ -85,14 +101,13 @@ class MeasureGuide {
         elementId: 'MeasureFrame',
         guide: this.guide
       },
-      insert: false
+      parent: getPaperLayer('MeasureGuides')
     });
     if (removeOpts) {
       measureGuide.removeOn({
         ...removeOpts
       });
     }
-    measureGuide.bringToFront();
     this.paperLayer = measureGuide;
   }
 }

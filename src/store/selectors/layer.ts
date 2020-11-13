@@ -449,35 +449,19 @@ export const getPaperLayer = (id: string): paper.Item => {
   return paperMain.project.getItem({ data: { id } });
 };
 
-export const getParentPaperLayer = (store: LayerState, id: string, ignoreUnderlyingMask?: boolean): paper.Item => {
-  const parentLayerItem = store.byId[id];
+export const getParentPaperLayer = (id: string, ignoreUnderlyingMask?: boolean): paper.Item => {
   const paperLayer = getPaperLayer(id);
-  const parentChildren = parentLayerItem.children;
+  const isArtboard = paperLayer.data.layerType === 'Artboard';
+  const nextPaperLayer = isArtboard ? paperLayer.getItem({ data: { id: 'ArtboardLayers' } }) : paperLayer;
+  const parentChildren = nextPaperLayer.children;
   const hasChildren = parentChildren.length > 0;
-  const lastChildId = hasChildren ? parentChildren[parentChildren.length - 1] : null;
-  const lastChildItem = lastChildId ? store.byId[lastChildId] : null;
-  const isLastChildMask = lastChildItem && lastChildItem.type === 'Shape' && (lastChildItem as Btwx.Shape).mask;
-  const underlyingMask = lastChildItem ? isLastChildMask ? lastChildItem.id : lastChildItem.underlyingMask : null;
-  if (underlyingMask) {
-    if (isLastChildMask) {
-      if (ignoreUnderlyingMask) {
-        return getPaperLayer(`${underlyingMask}-MaskGroup`).parent;
-      } else {
-        return getPaperLayer(`${underlyingMask}-MaskGroup`);
-      }
-    } else {
-      if (lastChildItem.ignoreUnderlyingMask || ignoreUnderlyingMask) {
-        return getPaperLayer(`${underlyingMask}-MaskGroup`).parent;
-      } else {
-        return getPaperLayer(`${underlyingMask}-MaskGroup`);
-      }
-    }
+  const lastChildPaperLayer = hasChildren ? nextPaperLayer.lastChild : null;
+  const isLastChildMask = lastChildPaperLayer && (lastChildPaperLayer.data.id as string).endsWith('MaskGroup');
+  const underlyingMask = lastChildPaperLayer ? isLastChildMask ? lastChildPaperLayer : lastChildPaperLayer.parent : null;
+  if (underlyingMask && !ignoreUnderlyingMask) {
+    return underlyingMask;
   } else {
-    if (paperLayer.data.layerType === 'Artboard') {
-      return paperLayer.getItem({ data: { id: 'ArtboardLayers' } });
-    } else {
-      return paperLayer;
-    }
+    return nextPaperLayer;
   }
 };
 
@@ -735,7 +719,12 @@ export const getSelectionTopLeft = (providedSelection?: paper.Item[]): paper.Poi
   const selected = providedSelection ? providedSelection : paperMain.project.getItems({ data: { selected: true } });
   const paperLayerPoints = selected.reduce((result, current) => {
     if (current) {
-      return [...result, current.bounds.topLeft];
+      if (current.data.layerType === 'Artboard') {
+        const background = current.getItem({data: { id: 'ArtboardBackground' }});
+        return [...result, background.bounds.topLeft];
+      } else {
+        return [...result, current.bounds.topLeft];
+      }
     } else {
       return result;
     }
@@ -747,7 +736,12 @@ export const getSelectionBottomRight = (providedSelection?: paper.Item[]): paper
   const selected = providedSelection ? providedSelection : paperMain.project.getItems({ data: { selected: true } });
   const paperLayerPoints = selected.reduce((result, current) => {
     if (current) {
-      return [...result, current.bounds.bottomRight];
+      if (current.data.layerType === 'Artboard') {
+        const background = current.getItem({data: { id: 'ArtboardBackground' }});
+        return [...result, background.bounds.bottomRight];
+      } else {
+        return [...result, current.bounds.bottomRight];
+      }
     } else {
       return result;
     }

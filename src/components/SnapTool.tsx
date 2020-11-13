@@ -5,8 +5,9 @@ import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
 import { ThemeContext } from './ThemeProvider';
-import { updateMeasureFrame } from '../store/actions/layer';
+import { updateMeasureGuides } from '../store/actions/layer';
 import { getPaperLayer, getPaperLayersBounds, getClosestPaperLayer } from '../store/selectors/layer';
+import Guide from '../canvas/guide';
 
 interface SnapToolProps {
   toolEvent: paper.ToolEvent;
@@ -31,7 +32,7 @@ interface SnapToolProps {
   onUpdate?(snapBounds: paper.Rectangle, xSnapPoint: any, ySnapPoint: any): any;
 }
 
-const snapToolDebug = true;
+const snapToolDebug = false;
 
 const SnapTool = memo(function SnapTool(props: SnapToolProps) {
   const theme = useContext(ThemeContext);
@@ -90,19 +91,18 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
   }
 
   const getGuideLayersBySnapZone = (snapZones: Btwx.SnapZones, snapZone: Btwx.SnapZoneType): paper.Item[] => {
-    return paperMain.project.getItems({
+    return paperMain.project.getItem({ data: { id: 'page' } }).getItems({
       data: (data: any) => {
-        const notPage = data.type === 'Layer' && data.layerType !== 'Page';
         const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
-        const isTopScopeGroup = data.id && data.type === 'Group' && data.id === scope[scope.length - 1];
+        const isTopScopeGroup = data.id && data.layerType === 'Group' && data.id === scope[scope.length - 1];
         if (whiteListLayers && whiteListLayers.length > 0) {
           const whiteListed = data.scope && whiteListLayers.includes(data.id) || data.scope.some((id: string) => whiteListLayers.includes(id));
-          return whiteListed && notPage && isScopeLayer && !isTopScopeGroup;
+          return whiteListed && isScopeLayer && !isTopScopeGroup;
         } else if (blackListLayers && blackListLayers.length > 0) {
           const notBlackListed = data.scope && !blackListLayers.includes(data.id) && data.scope.every((id: string) => !blackListLayers.includes(id));
-          return notBlackListed && notPage && isScopeLayer && !isTopScopeGroup;
+          return notBlackListed && isScopeLayer && !isTopScopeGroup;
         } else {
-          return notPage && isScopeLayer && !isTopScopeGroup;
+          return isScopeLayer && !isTopScopeGroup;
         }
       },
       bounds: (bounds: paper.Rectangle) => {
@@ -129,19 +129,18 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
   }
 
   const getYSnapToLayer = (snapZones: Btwx.SnapZones): paper.Item => {
-    return paperMain.project.getItem({
+    return paperMain.project.getItem({ data: { id: 'page' } }).getItem({
       data: (data: any) => {
-        const notPage = data.type === 'Layer' && data.layerType !== 'Page';
         const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
-        const isTopScopeGroup = data.id && data.type === 'Group' && data.id === scope[scope.length - 1];
+        const isTopScopeGroup = data.id && data.layerType === 'Group' && data.id === scope[scope.length - 1];
         if (whiteListLayers && whiteListLayers.length > 0) {
           const whiteListed = data.scope && whiteListLayers.includes(data.id) || data.scope.some((id: string) => whiteListLayers.includes(id));
-          return whiteListed && notPage && isScopeLayer && !isTopScopeGroup;
+          return whiteListed && isScopeLayer && !isTopScopeGroup;
         } else if (blackListLayers && blackListLayers.length > 0) {
           const notBlackListed = data.scope && !blackListLayers.includes(data.id) && data.scope.every((id: string) => !blackListLayers.includes(id));
-          return notBlackListed && notPage && isScopeLayer && !isTopScopeGroup;
+          return notBlackListed && isScopeLayer && !isTopScopeGroup;
         } else {
-          return notPage && isScopeLayer && !isTopScopeGroup;
+          return isScopeLayer && !isTopScopeGroup;
         }
       },
       bounds: (bounds: paper.Rectangle) => {
@@ -161,19 +160,18 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
   }
 
   const getXSnapToLayer = (snapZones: Btwx.SnapZones): paper.Item => {
-    return paperMain.project.getItem({
+    return paperMain.project.getItem({ data: { id: 'page' } }).getItem({
       data: (data: any) => {
-        const notPage = data.type === 'Layer' && data.layerType !== 'Page';
         const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
-        const isTopScopeGroup = data.id && data.type === 'Group' && data.id === scope[scope.length - 1];
+        const isTopScopeGroup = data.id && data.layerType === 'Group' && data.id === scope[scope.length - 1];
         if (whiteListLayers && whiteListLayers.length > 0) {
           const whiteListed = data.scope && whiteListLayers.includes(data.id) || data.scope.some((id: string) => whiteListLayers.includes(id));
-          return whiteListed && notPage && isScopeLayer && !isTopScopeGroup;
+          return whiteListed && isScopeLayer && !isTopScopeGroup;
         } else if (blackListLayers && blackListLayers.length > 0) {
           const notBlackListed = data.scope && !blackListLayers.includes(data.id) && data.scope.every((id: string) => !blackListLayers.includes(id));
-          return notBlackListed && notPage && isScopeLayer && !isTopScopeGroup;
+          return notBlackListed && isScopeLayer && !isTopScopeGroup;
         } else {
-          return notPage && isScopeLayer && !isTopScopeGroup;
+          return isScopeLayer && !isTopScopeGroup;
         }
       },
       bounds: (bounds: paper.Rectangle) => {
@@ -618,27 +616,22 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
     setSnapBreakThreshholdMin(-8 / paperMain.view.zoom);
     setSnapBreakThreshholdMax(8 / paperMain.view.zoom);
     return () => {
-      const guideIds = ['SnapGuideTop', 'SnapGuideMiddle', 'SnapGuideBottom', 'SnapGuideLeft', 'SnapGuideCenter', 'SnapGuideRight'];
-      const uiElementIds = ['SnapPointXGuide', 'SnapPointYGuide', 'SnapZoneTop', 'SnapZoneMiddle', 'SnapZoneBottom', 'SnapZoneLeft', 'SnapZoneCenter', 'SnapZoneRight'];
-      [...uiElementIds, ...guideIds].forEach((elementId) => {
-        const paperLayer = getPaperLayer(elementId);
-        if (paperLayer) {
-          paperLayer.remove();
-        }
-      });
+      const measureGuides = getPaperLayer('MeasureGuides');
+      const snapGuides = getPaperLayer('SnapGuides');
+      measureGuides.removeChildren();
+      snapGuides.removeChildren();
     }
   }, []);
 
   useEffect(() => {
     if (snapBounds) {
-      const guideIds = ['MeasureFrame', 'SnapGuideTop', 'SnapGuideMiddle', 'SnapGuideBottom', 'SnapGuideLeft', 'SnapGuideCenter', 'SnapGuideRight'];
-      guideIds.forEach((elementId) => {
-        const paperLayer = getPaperLayer(elementId);
-        if (paperLayer) {
-          paperLayer.remove();
-        }
-      });
+      const measureGuides = getPaperLayer('MeasureGuides');
+      const snapGuides = getPaperLayer('SnapGuides');
+      measureGuides.removeChildren();
+      snapGuides.removeChildren();
       const guideSnapZones = getSnapZones(snapBounds, 0.5);
+      const xGuideLayers: paper.Item[] = [];
+      const yGuideLayers: paper.Item[] = [];
       Object.keys(guideSnapZones).forEach((key: Btwx.SnapZoneType) => {
         const guideLayers = getGuideLayersBySnapZone(guideSnapZones, key);
         if (guideLayers.length > 0) {
@@ -649,57 +642,63 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
             case 'top':
               from = new paperMain.Point(paperLayerBounds.left, snapBounds.top);
               to = new paperMain.Point(paperLayerBounds.right, snapBounds.top);
+              yGuideLayers.push(...guideLayers);
               break;
             case 'middle':
               from = new paperMain.Point(paperLayerBounds.left, snapBounds.center.y);
               to = new paperMain.Point(paperLayerBounds.right, snapBounds.center.y);
+              yGuideLayers.push(...guideLayers);
               break;
             case 'bottom':
               from = new paperMain.Point(paperLayerBounds.left, snapBounds.bottom);
               to = new paperMain.Point(paperLayerBounds.right, snapBounds.bottom);
+              yGuideLayers.push(...guideLayers);
               break;
             case 'left':
               from = new paperMain.Point(snapBounds.left, paperLayerBounds.top);
               to = new paperMain.Point(snapBounds.left, paperLayerBounds.bottom);
+              xGuideLayers.push(...guideLayers);
               break;
             case 'center':
               from = new paperMain.Point(snapBounds.center.x, paperLayerBounds.top);
               to = new paperMain.Point(snapBounds.center.x, paperLayerBounds.bottom);
+              xGuideLayers.push(...guideLayers);
               break;
             case 'right':
               from = new paperMain.Point(snapBounds.right, paperLayerBounds.top);
               to = new paperMain.Point(snapBounds.right, paperLayerBounds.bottom);
+              xGuideLayers.push(...guideLayers);
               break;
           }
-          const guide = new paperMain.Path.Line({
-            from,
-            to,
-            data: { id: `SnapGuide${capitalize(key)}`, type: 'UIElement' },
-            strokeColor: theme.palette.recording,
-            strokeWidth: 1
-          });
-          guide.removeOn({
-            up: true
-          });
-          if (measure) {
-            const measureGuides: { top?: string; bottom?: string; left?: string; right?: string; all?: string } = {};
-            const closestLayer = getClosestPaperLayer(snapBounds.center, guideLayers);
-            if (xSnapPoint) {
-              if (!snapBounds.intersects(closestLayer.bounds, 1)) {
-                measureGuides['top'] = closestLayer.data.id;
-                measureGuides['bottom'] = closestLayer.data.id;
-              }
-            }
-            if (ySnapPoint) {
-              if (!snapBounds.intersects(closestLayer.bounds, 1)) {
-                measureGuides['left'] = closestLayer.data.id;
-                measureGuides['right'] = closestLayer.data.id;
-              }
-            }
-            updateMeasureFrame(measureGuides, snapBounds);
-          }
+          new Guide({from, to, guideType: 'snap', removeOpts: {up: true}});
         }
       });
+      if (measure) {
+        let measureGuides: { top?: string; bottom?: string; left?: string; right?: string; all?: string } = null;
+        if (xSnapPoint) {
+          const closestLayer = getClosestPaperLayer(snapBounds.center, xGuideLayers);
+          if (closestLayer && !snapBounds.intersects(closestLayer.bounds, 1)) {
+            if (!measureGuides) {
+              measureGuides = {};
+            }
+            measureGuides['top'] = closestLayer.data.id;
+            measureGuides['bottom'] = closestLayer.data.id;
+          }
+        }
+        if (ySnapPoint) {
+          const closestLayer = getClosestPaperLayer(snapBounds.center, yGuideLayers);
+          if (closestLayer && !snapBounds.intersects(closestLayer.bounds, 1)) {
+            if (!measureGuides) {
+              measureGuides = {};
+            }
+            measureGuides['left'] = closestLayer.data.id;
+            measureGuides['right'] = closestLayer.data.id;
+          }
+        }
+        if (measureGuides) {
+          updateMeasureGuides(measureGuides, snapBounds);
+        }
+      }
     }
   }, [snapBounds]);
 

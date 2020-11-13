@@ -479,7 +479,7 @@ export const initialState: LayerState = {
   allMaskIds: [],
   scope: ['page'],
   hover: null,
-  paperProject: '[["Layer",{"applyMatrix":true,"children":[["Group",{"applyMatrix":true,"name":"Page","data":{"id":"page","type":"Layer","layerType":"Page"}}]]}]]',
+  paperProject: '[["Layer",{"applyMatrix":true,"children":[["Group",{"applyMatrix":true,"name":"Page","data":{"id":"page","type":"Layer","layerType":"Page","scope":[]}}],["Group",{"applyMatrix":true,"name":"UI","data":{"id":"ui","type":"UI"},"children":[["Group",{"applyMatrix":true,"name":"Active Artboard Frame","data":{"id":"ActiveArtboardFrame"}}],["Group",{"applyMatrix":true,"name":"Artboard Events","data":{"id":"ArtboardEvents"}}],["Group",{"applyMatrix":true,"name":"Hover Frame","data":{"id":"HoverFrame"}}],["Group",{"applyMatrix":true,"name":"Selection Frame","data":{"id":"SelectionFrame"}}],["Group",{"applyMatrix":true,"name":"Guides","data":{"id":"Guides"},"children":[["Group",{"applyMatrix":true,"name":"Snap Guides","data":{"id":"SnapGuides"}}],["Group",{"applyMatrix":true,"name":"Static Guides","data":{"id":"StaticGuides"}}]]}],["Group",{"applyMatrix":true,"name":"Measure Guides","data":{"id":"MeasureGuides"}}]]}]]}]]',
   allTweenEventIds: [],
   tweenEventById: {},
   allTweenIds: [],

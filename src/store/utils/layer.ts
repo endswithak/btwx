@@ -192,26 +192,26 @@ export const addImage = (state: LayerState, action: AddImage): LayerState => {
 
 export const addLayers = (state: LayerState, action: AddLayers): LayerState => {
   let currentState = state;
-  // currentState = action.payload.layers.reduce((result: LayerState, current) => {
-  //   switch(current.type) {
-  //     case 'Artboard':
-  //       result = addArtboard(result, layerActions.addArtboard({layer: current as Btwx.Artboard, batch: true}) as AddArtboard);
-  //       break;
-  //     case 'Shape':
-  //       result = addShape(result, layerActions.addShape({layer: current as Btwx.Shape, batch: true}) as AddShape);
-  //       break;
-  //     case 'Image':
-  //       result = addImage(result, layerActions.addImage({layer: current as Btwx.Image, batch: true}) as AddImage);
-  //       break;
-  //     case 'Group':
-  //       result = addGroup(result, layerActions.addGroup({layer: current as Btwx.Group, batch: true}) as AddGroup);
-  //       break;
-  //     case 'Text':
-  //       result = addText(result, layerActions.addText({layer: current as Btwx.Text, batch: true}) as AddText);
-  //       break;
-  //   }
-  //   return result;
-  // }, currentState);
+  currentState = action.payload.layers.reduce((result: LayerState, current) => {
+    switch(current.type) {
+      case 'Artboard':
+        result = addArtboard(result, layerActions.addArtboard({layer: current as Btwx.Artboard, batch: true}) as AddArtboard);
+        break;
+      case 'Shape':
+        result = addShape(result, layerActions.addShape({layer: current as Btwx.Shape, batch: true}) as AddShape);
+        break;
+      case 'Image':
+        result = addImage(result, layerActions.addImage({layer: current as Btwx.Image, batch: true}) as AddImage);
+        break;
+      case 'Group':
+        result = addGroup(result, layerActions.addGroup({layer: current as Btwx.Group, batch: true}) as AddGroup);
+        break;
+      case 'Text':
+        result = addText(result, layerActions.addText({layer: current as Btwx.Text, batch: true}) as AddText);
+        break;
+    }
+    return result;
+  }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };
@@ -413,9 +413,9 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
     }
   }
   // handle hover
-  if (layerItem.id !== currentState.hover) {
-    currentState = setLayerHover(currentState, layerActions.setLayerHover({id: action.payload.id}) as SetLayerHover);
-  }
+  // if (layerItem.id !== currentState.hover) {
+  //   currentState = setLayerHover(currentState, layerActions.setLayerHover({id: action.payload.id}) as SetLayerHover);
+  // }
   // if new selection, create selection with just that layer
   if (action.payload.newSelection) {
     const deselectAll = deselectAllLayers(currentState, layerActions.deselectAllLayers() as DeselectAllLayers)
@@ -470,6 +470,7 @@ export const deepSelectLayer = (state: LayerState, action: DeepSelectLayer): Lay
     currentState = showLayerChildren(currentState, layerActions.showLayerChildren({id: nearestScopeAncestor.id}) as ShowLayerChildren);
   }
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: [deepSelectItem.id], newSelection: true}) as SelectLayers);
+  currentState = setLayerHover(currentState, layerActions.setLayerHover({id: deepSelectItem.id}) as SetLayerHover);
   return currentState;
 };
 
@@ -523,7 +524,7 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
   const layerItem = currentState.byId[action.payload.id];
   const childItem = currentState.byId[action.payload.child];
   const isChildMask = childItem.type === 'Shape' && (childItem as Btwx.Shape).mask;
-  const paperLayer = getParentPaperLayer(state, action.payload.id);
+  const paperLayer = getParentPaperLayer(action.payload.id);
   const childPaperLayer = isChildMask ? getPaperLayer(action.payload.child).parent : getPaperLayer(action.payload.child);
   const aboveId = layerItem.children.length > 0 && layerItem.children[layerItem.children.length - 1] !== action.payload.child ? layerItem.children[layerItem.children.length - 1] : null;
   const aboveItem = aboveId ? currentState.byId[aboveId] : null;
@@ -946,9 +947,9 @@ export const updateNestedScopes = (state: LayerState, id: string): LayerState =>
 export const groupLayers = (state: LayerState, action: GroupLayers): LayerState => {
   let currentState = state;
   // add group
-  // currentState = addGroup(currentState, layerActions.addGroup({layer: action.payload.group}) as AddGroup);
+  currentState = addGroup(currentState, layerActions.addGroup({layer: action.payload.group, batch: true}) as AddGroup);
   // order children
-  const orderedChildren = orderLayersByDepth(currentState, action.payload.layers);
+  // const orderedChildren = orderLayersByDepth(currentState, action.payload.layers);
   // if (orderedChildren.find((id) => state.byId[id].mask)) {
   //   const mask = orderedChildren.find((id) => state.byId[id].mask);
   //   currentState = removeLayersMask(currentState, layerActions.removeLayersMask({id: mask}) as RemoveLayersMask);
@@ -4467,35 +4468,40 @@ export const setLayersBlendMode = (state: LayerState, action: SetLayersBlendMode
 
 export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState => {
   let currentState = state;
-  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: action.payload.booleanLayer, above: action.payload.layers[0]}) as InsertLayerAbove);
+  currentState = addShape(currentState, layerActions.addShape({layer: action.payload.booleanLayer, batch: true}) as AddShape);
+  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: action.payload.booleanLayer.id, above: action.payload.layers[0]}) as InsertLayerAbove);
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: action.payload.layers}) as RemoveLayers);
   return currentState;
 };
 
 export const intersectLayers = (state: LayerState, action: IntersectLayers): LayerState => {
   let currentState = state;
-  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: action.payload.booleanLayer, above: action.payload.layers[0]}) as InsertLayerAbove);
+  currentState = addShape(currentState, layerActions.addShape({layer: action.payload.booleanLayer, batch: true}) as AddShape);
+  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: action.payload.booleanLayer.id, above: action.payload.layers[0]}) as InsertLayerAbove);
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: action.payload.layers}) as RemoveLayers);
   return currentState;
 };
 
 export const subtractLayers = (state: LayerState, action: SubtractLayers): LayerState => {
   let currentState = state;
-  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: action.payload.booleanLayer, above: action.payload.layers[0]}) as InsertLayerAbove);
+  currentState = addShape(currentState, layerActions.addShape({layer: action.payload.booleanLayer, batch: true}) as AddShape);
+  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: action.payload.booleanLayer.id, above: action.payload.layers[0]}) as InsertLayerAbove);
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: action.payload.layers}) as RemoveLayers);
   return currentState;
 };
 
 export const excludeLayers = (state: LayerState, action: ExcludeLayers): LayerState => {
   let currentState = state;
-  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: action.payload.booleanLayer, above: action.payload.layers[0]}) as InsertLayerAbove);
+  currentState = addShape(currentState, layerActions.addShape({layer: action.payload.booleanLayer, batch: true}) as AddShape);
+  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: action.payload.booleanLayer.id, above: action.payload.layers[0]}) as InsertLayerAbove);
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: action.payload.layers}) as RemoveLayers);
   return currentState;
 };
 
 export const divideLayers = (state: LayerState, action: DivideLayers): LayerState => {
   let currentState = state;
-  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: action.payload.booleanLayer, above: action.payload.layers[0]}) as InsertLayerAbove);
+  currentState = addShape(currentState, layerActions.addShape({layer: action.payload.booleanLayer, batch: true}) as AddShape);
+  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: action.payload.booleanLayer.id, above: action.payload.layers[0]}) as InsertLayerAbove);
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: action.payload.layers}) as RemoveLayers);
   return currentState;
 };

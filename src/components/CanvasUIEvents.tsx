@@ -30,7 +30,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
 
   const handleMouseMove = (): void => {
     if (uiEvent.empty) {
-      if (activeTool !== 'AreaSelect') {
+      if (activeTool !== 'AreaSelect' && !hover) {
         setCanvasActiveTool({
           activeTool: 'AreaSelect',
           resizeHandle: null,

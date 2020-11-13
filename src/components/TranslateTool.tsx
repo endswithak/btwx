@@ -29,16 +29,16 @@ const TranslateTool = (props: TranslateToolProps): ReactElement => {
 
   useEffect(() => {
     if (translateEvent) {
-      if (!isEnabled) {
-        setCanvasTranslating({translating: true});
-      }
+      // if (!isEnabled) {
+      //   setCanvasTranslating({translating: true});
+      // }
       paperMain.view.translate(
         new paperMain.Point(
           (translateEvent.deltaX * ( 1 / paperMain.view.zoom)) * -1,
           (translateEvent.deltaY * ( 1 / paperMain.view.zoom)) * -1
         )
       );
-      debounceTranslate();
+      // debounceTranslate();
     }
   }, [translateEvent]);
 

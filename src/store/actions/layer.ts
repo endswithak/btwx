@@ -447,9 +447,9 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => ({
   payload
 });
 
-export const addArtboardThunk = (payload: AddArtboardPayload) => {
+export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: RootState) => {
   return (dispatch: any, getState: any): Promise<Btwx.Artboard> => {
-    const state = getState() as RootState;
+    const state = providedState ? providedState : getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const name = payload.layer.name ? payload.layer.name : 'Artboard';
     const scope = ['page'];
@@ -530,10 +530,12 @@ export const addArtboardThunk = (payload: AddArtboardPayload) => {
       underlyingMask,
       ignoreUnderlyingMask,
     } as Btwx.Artboard;
-    dispatch(addArtboard({
-      layer: newLayer,
-      batch: payload.batch
-    }));
+    if (!payload.batch) {
+      dispatch(addArtboard({
+        layer: newLayer,
+        batch: payload.batch
+      }));
+    }
     return Promise.resolve(newLayer);
   }
 };
@@ -545,22 +547,21 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => ({
   payload
 });
 
-export const addGroupThunk = (payload: AddGroupPayload) => {
+export const addGroupThunk = (payload: AddGroupPayload, providedState?: RootState) => {
   return (dispatch: any, getState: any): Promise<Btwx.Group> => {
-    const state = getState() as RootState;
+    const state = providedState ? providedState : getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const style = getLayerStyle(payload, {}, { fill: { enabled: false } as Btwx.Fill, stroke: { enabled: false } as Btwx.Stroke, shadow: { enabled: false } as Btwx.Shadow });
     const name = payload.layer.name ? payload.layer.name : 'Group';
     const parent = payload.layer.parent ? payload.layer.parent : 'page';
-    const parentItem = state.layer.present.byId[parent];
-    const scope = [...parentItem.scope, parent];
+    const parentLayer = getPaperLayer(parent);
+    const scope = [...parentLayer.data.scope, parent];
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
-    const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
+    const parentPaperLayer = getParentPaperLayer(parent, ignoreUnderlyingMask);
     const frame = payload.layer.frame ? payload.layer.frame : { x: 0, y: 0, width: 0, height: 0, innerWidth: 0, innerHeight: 0 };
     // const masked = payload.layer.masked ? payload.layer.masked : false;
-    // const clipped = payload.layer.clipped ? payload.layer.clipped : false;
     const showChildren = payload.layer.showChildren ? payload.layer.showChildren : false;
     const group = new paperMain.Group({
       name: name,
@@ -599,10 +600,12 @@ export const addGroupThunk = (payload: AddGroupPayload) => {
       ignoreUnderlyingMask,
       masked
     } as Btwx.Group;
-    dispatch(addGroup({
-      layer: newLayer,
-      batch: payload.batch
-    }));
+    if (!payload.batch) {
+      dispatch(addGroup({
+        layer: newLayer,
+        batch: payload.batch
+      }));
+    }
     return Promise.resolve(newLayer);
   }
 };
@@ -614,18 +617,18 @@ export const addShape = (payload: AddShapePayload): LayerTypes => ({
   payload
 });
 
-export const addShapeThunk = (payload: AddShapePayload) => {
+export const addShapeThunk = (payload: AddShapePayload, providedState?: RootState) => {
   return (dispatch: any, getState: any): Promise<Btwx.Shape> => {
-    const state = getState() as RootState;
+    const state = providedState ? providedState : getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const parent = payload.layer.parent ? payload.layer.parent : 'page';
-    const parentItem = state.layer.present.byId[parent];
-    const scope = [...parentItem.scope, parent];
+    const parentLayer = getPaperLayer(parent);
+    const scope = [...parentLayer.data.scope, parent];
     const shapeType = payload.layer.shapeType ? payload.layer.shapeType : 'Rectangle';
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
-    const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
+    const parentPaperLayer = getParentPaperLayer(parent, ignoreUnderlyingMask);
     const name = payload.layer.name ? payload.layer.name : shapeType;
     const frame = getLayerFrame(payload);
     const shapeOpts = getLayerShapeOpts(payload);
@@ -704,25 +707,27 @@ export const addShapeThunk = (payload: AddShapePayload) => {
       pathData,
       ...shapeOpts
     } as Btwx.Shape;
-    dispatch(addShape({
-      layer: newLayer,
-      batch: payload.batch
-    }));
+    if (!payload.batch) {
+      dispatch(addShape({
+        layer: newLayer,
+        batch: payload.batch
+      }));
+    }
     return Promise.resolve(newLayer);
   }
 };
 
-export const addShapeGroupThunk = (payload: AddShapePayload) => {
+export const addShapeGroupThunk = (payload: AddShapePayload, providedState?: RootState) => {
   return (dispatch: any, getState: any): Promise<Btwx.Shape> => {
-    const state = getState() as RootState;
+    const state = providedState ? providedState : getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const parent = payload.layer.parent ? payload.layer.parent : 'page';
-    const parentItem = state.layer.present.byId[parent];
-    const scope = [...parentItem.scope, parent];
+    const parentLayer = getPaperLayer(parent);
+    const scope = [...parentLayer.data.scope, parent];
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
-    const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
+    const parentPaperLayer = getParentPaperLayer(parent, ignoreUnderlyingMask);
     const shapeType = payload.layer.shapeType ? payload.layer.shapeType : 'Rectangle';
     const name = payload.layer.name ? payload.layer.name : shapeType;
     const frame = getLayerFrame(payload);
@@ -809,10 +814,12 @@ export const addShapeGroupThunk = (payload: AddShapePayload) => {
       pathData: shapeContainer.lastChild.pathData,
       ...shapeOpts
     } as Btwx.Shape;
-    dispatch(addShape({
-      layer: newLayer,
-      batch: payload.batch
-    }));
+    if (!payload.batch) {
+      dispatch(addShape({
+        layer: newLayer,
+        batch: payload.batch
+      }));
+    }
     return Promise.resolve(newLayer);
   }
 };
@@ -824,9 +831,9 @@ export const addText = (payload: AddTextPayload): LayerTypes => ({
   payload
 });
 
-export const addTextThunk = (payload: AddTextPayload) => {
+export const addTextThunk = (payload: AddTextPayload, providedState?: RootState) => {
   return (dispatch: any, getState: any): Promise<Btwx.Text> => {
-    const state = getState() as RootState;
+    const state = providedState ? providedState : getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const textContent = payload.layer.text ? payload.layer.text : DEFAULT_TEXT_VALUE;
     const name = payload.layer.name ? payload.layer.name : textContent;
@@ -834,9 +841,9 @@ export const addTextThunk = (payload: AddTextPayload) => {
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
     const parent = payload.layer.parent ? payload.layer.parent : 'page';
-    const parentItem = state.layer.present.byId[parent];
-    const scope = [...parentItem.scope, parent];
-    const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
+    const parentLayer = getPaperLayer(parent);
+    const scope = [...parentLayer.data.scope, parent];
+    const parentPaperLayer = getParentPaperLayer(parent, ignoreUnderlyingMask);
     const style = getLayerStyle(payload);
     const textStyle = getLayerTextStyle(payload);
     const transform = getLayerTransform(payload);
@@ -865,7 +872,6 @@ export const addTextThunk = (payload: AddTextPayload) => {
       justification: textStyle.justification
     });
     const frame = getLayerFrame(payload);
-    // const frame = getLayerFrame(payload, { width: paperLayer.bounds.width, height: paperLayer.bounds.height, innerWidth: paperLayer.bounds.width, innerHeight: paperLayer.bounds.height });
     const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as Btwx.PaperGradientFill : null;
     const paperStrokeColor = style.stroke.enabled ? getPaperStrokeColor(style.stroke, frame) as Btwx.PaperGradientFill : null;
     paperLayer.position = new paperMain.Point(frame.x, frame.y);
@@ -918,10 +924,12 @@ export const addTextThunk = (payload: AddTextPayload) => {
       transform,
       textStyle
     } as Btwx.Text;
-    dispatch(addText({
-      layer: newLayer,
-      batch: payload.batch
-    }));
+    if (!payload.batch) {
+      dispatch(addText({
+        layer: newLayer,
+        batch: payload.batch
+      }));
+    }
     return Promise.resolve(newLayer);
   }
 };
@@ -933,27 +941,27 @@ export const addImage = (payload: AddImagePayload): LayerTypes => ({
   payload
 });
 
-export const addImageThunk = (payload: AddImagePayload) => {
+export const addImageThunk = (payload: AddImagePayload, providedState?: RootState) => {
   return (dispatch: any, getState: any): Promise<Btwx.Image> => {
     return new Promise((resolve, reject) => {
-      const state = getState() as RootState;
+      const state = providedState ? providedState : getState() as RootState;
       const buffer = Buffer.from(payload.buffer);
+      const parent = payload.layer.parent ? payload.layer.parent : 'page';
+      const parentLayer = getPaperLayer(parent);
+      const scope = [...parentLayer.data.scope, parent];
+      const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
+      const parentPaperLayer = getParentPaperLayer(parent, ignoreUnderlyingMask);
       sharp(buffer).metadata().then(({ width, height }) => {
         sharp(buffer).resize(Math.round(width * 0.5)).webp().toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
           const frame = getLayerFrame(payload);
           const name = payload.layer.name ? payload.layer.name : 'Image';
           const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
           const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
-          const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
           const newBuffer = Buffer.from(data);
           const exists = state.documentSettings.images.allIds.length > 0 && state.documentSettings.images.allIds.find((id) => Buffer.from(state.documentSettings.images.byId[id].buffer).equals(newBuffer));
           const base64 = bufferToBase64(newBuffer);
           const id = payload.layer.id ? payload.layer.id : uuidv4();
           const imageId = exists ? exists : payload.layer.imageId ? payload.layer.imageId : uuidv4();
-          const parent = payload.layer.parent ? payload.layer.parent : 'page';
-          const parentItem = state.layer.present.byId[parent];
-          const scope = [...parentItem.scope, parent];
-          const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
           const style = getLayerStyle(payload, {}, { fill: { enabled: false } as Btwx.Fill, stroke: { enabled: false } as Btwx.Stroke });
           const transform = getLayerTransform(payload);
           const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as Btwx.Shadow) : null;
@@ -1009,10 +1017,12 @@ export const addImageThunk = (payload: AddImagePayload) => {
             if (!exists) {
               dispatch(addDocumentImage({id: imageId, buffer: newBuffer}));
             }
-            dispatch(addImage({
-              layer: newLayer,
-              batch: payload.batch
-            }));
+            if (!payload.batch) {
+              dispatch(addImage({
+                layer: newLayer,
+                batch: payload.batch
+              }));
+            }
             resolve(newLayer);
           }
         });
@@ -1030,27 +1040,28 @@ export const addLayers = (payload: AddLayersPayload): LayerTypes => ({
 
 export const addLayersThunk = (payload: AddLayersPayload) => {
   return (dispatch: any, getState: any): Promise<any> => {
+    const state = getState() as RootState;
     return new Promise((resolve, reject) => {
       const promises: Promise<any>[] = [];
       payload.layers.forEach((layer) => {
         switch(layer.type as Btwx.LayerType | 'ShapeGroup') {
           case 'Artboard':
-            promises.push(dispatch(addArtboardThunk({layer: layer as Btwx.Artboard, batch: true})));
+            promises.push(dispatch(addArtboardThunk({layer: layer as Btwx.Artboard, batch: true}, state)));
             break;
           case 'Shape':
-            promises.push(dispatch(addShapeThunk({layer: layer as Btwx.Shape, batch: true})));
+            promises.push(dispatch(addShapeThunk({layer: layer as Btwx.Shape, batch: true}, state)));
             break;
           case 'ShapeGroup':
-            promises.push(dispatch(addShapeGroupThunk({layer: layer as Btwx.Shape, batch: true})));
+            promises.push(dispatch(addShapeGroupThunk({layer: layer as Btwx.Shape, batch: true}, state)));
             break;
           case 'Image':
-            promises.push(dispatch(addImageThunk({layer: layer as Btwx.Image, batch: true, buffer: payload.buffers[(layer as Btwx.Image).imageId].buffer})));
+            promises.push(dispatch(addImageThunk({layer: layer as Btwx.Image, batch: true, buffer: payload.buffers[(layer as Btwx.Image).imageId].buffer}, state)));
             break;
           case 'Group':
-            promises.push(dispatch(addGroupThunk({layer: layer as Btwx.Group, batch: true})));
+            promises.push(dispatch(addGroupThunk({layer: layer as Btwx.Group, batch: true}, state)));
             break;
           case 'Text':
-            promises.push(dispatch(addTextThunk({layer: layer as Btwx.Text, batch: true})));
+            promises.push(dispatch(addTextThunk({layer: layer as Btwx.Text, batch: true}, state)));
             break;
         }
       });
@@ -1106,6 +1117,13 @@ export const deepSelectLayer = (payload: DeepSelectLayerPayload): LayerTypes => 
   type: DEEP_SELECT_LAYER,
   payload
 });
+
+export const deepSelectLayerThunk = (payload: DeepSelectLayerPayload) => {
+  return (dispatch: any, getState: any) => {
+    dispatch(deepSelectLayer(payload));
+    return Promise.resolve();
+  }
+}
 
 export const selectLayers = (payload: SelectLayersPayload): LayerTypes => ({
   type: SELECT_LAYERS,
@@ -2401,31 +2419,31 @@ export const applyBooleanOperationThunk = (booleanOperation: Btwx.BooleanOperati
           case 'divide':
             dispatch(divideLayers({
               layers: selected,
-              booleanLayer: newShape.id
+              booleanLayer: newShape
             }));
             break;
           case 'exclude':
             dispatch(excludeLayers({
               layers: selected,
-              booleanLayer: newShape.id
+              booleanLayer: newShape
             }));
             break;
           case 'intersect':
             dispatch(intersectLayers({
               layers: selected,
-              booleanLayer: newShape.id
+              booleanLayer: newShape
             }));
             break;
           case 'subtract':
             dispatch(subtractLayers({
               layers: selected,
-              booleanLayer: newShape.id
+              booleanLayer: newShape
             }));
             break;
           case 'unite':
             dispatch(uniteLayers({
               layers: selected,
-              booleanLayer: newShape.id
+              booleanLayer: newShape
             }));
             break;
         }
@@ -3037,19 +3055,22 @@ export const updateGradientFrame = (layerItem: Btwx.Layer, gradient: Btwx.Gradie
       interactiveType: null,
       elementId: 'GradientFrame'
     },
-    children: [gradientFrameLines, gradientFrameOriginHandle, gradientFrameDestinationHandle]
+    children: [gradientFrameLines, gradientFrameOriginHandle, gradientFrameDestinationHandle],
+    parent: getPaperLayer('ui')
   });
 }
 
 export const updateActiveArtboardFrame = () => {
   const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'ActiveArtboardFrame' } });
   const activeArtboardPaperLayer = paperMain.project.getItem({ data: { activeArtboard: true } });
-  if (activeArtboardFrame) {
-    activeArtboardFrame.remove();
-  }
+  activeArtboardFrame.removeChildren();
+  // if (activeArtboardFrame) {
+  //   activeArtboardFrame.remove();
+  // }
   if (activeArtboardPaperLayer) {
-    const topLeft = activeArtboardPaperLayer.bounds.topLeft;
-    const bottomRight = activeArtboardPaperLayer.bounds.bottomRight;
+    const artboardBackground = activeArtboardPaperLayer.getItem({ data: { id: 'ArtboardBackground' } });
+    const topLeft = artboardBackground.bounds.topLeft;
+    const bottomRight = artboardBackground.bounds.bottomRight;
     new paperMain.Path.Rectangle({
       from: new paperMain.Point(topLeft.x - (2 / paperMain.view.zoom), topLeft.y - (2 / paperMain.view.zoom)),
       to: new paperMain.Point(bottomRight.x + (2 / paperMain.view.zoom), bottomRight.y + (2 / paperMain.view.zoom)),
@@ -3061,25 +3082,36 @@ export const updateActiveArtboardFrame = () => {
         interactive: false,
         interactiveType: null,
         elementId: 'ActiveArtboardFrame'
-      }
+      },
+      parent: activeArtboardFrame
     });
   }
 };
 
 export const updateHoverFrame = () => {
   const hoverFrame = paperMain.project.getItem({ data: { id: 'HoverFrame' } });
+  hoverFrame.removeChildren();
   const hoverFrameConstants = {
     strokeColor: THEME_PRIMARY_COLOR,
     strokeWidth: 2 / paperMain.view.zoom,
-    data: { id: 'HoverFrame', type: 'UIElement', interactive: false }
+    // data: { id: 'HoverFrame', type: 'UIElement', interactive: false },
+    parent: hoverFrame
   }
   const hoverPaperLayer = paperMain.project.getItem({ data: { hover: true } });
-  if (hoverFrame) {
-    hoverFrame.remove();
-  }
+  // if (hoverFrame) {
+  //   hoverFrame.remove();
+  // }
   if (hoverPaperLayer) {
     let nextHoverFrame: paper.Item;
     switch(hoverPaperLayer.data.layerType) {
+      case 'Artboard': {
+        const artboardBackground = hoverPaperLayer.getItem({ data: { id: 'ArtboardBackground' } });
+        nextHoverFrame = new paperMain.Path.Rectangle({
+          ...hoverFrameConstants,
+          rectangle: artboardBackground
+        });
+        break;
+      }
       case 'Shape':
         nextHoverFrame = new paperMain.CompoundPath({
           ...hoverFrameConstants,
@@ -3118,18 +3150,15 @@ export const updateHoverFrame = () => {
         });
         break;
     }
-    if (getPaperLayer('SelectionFrame')) {
-      const selectionFrame = getPaperLayer('SelectionFrame');
-      nextHoverFrame.insertBelow(selectionFrame);
-    }
   }
 };
 
 export const updateSelectionFrame = (visibleHandle: Btwx.SelectionFrameHandle = 'all'): void => {
   const selectionFrame = paperMain.project.getItem({ data: { id: 'SelectionFrame' } });
-  if (selectionFrame) {
-    selectionFrame.remove();
-  }
+  // if (selectionFrame) {
+  //   selectionFrame.remove();
+  // }
+  selectionFrame.removeChildren();
   const selected = paperMain.project.getItems({ data: { selected: true } });
   const linesSelected = paperMain.project.getItems({ data: { selected: true, shapeType: 'Line' } });
   if (selected.length > 0) {
@@ -3357,37 +3386,28 @@ export const updateSelectionFrame = (visibleHandle: Btwx.SelectionFrameHandle = 
       leftCenterHandle.position = baseFrame.bounds.leftCenter;
       leftCenterHandle.scaling.x = 1 / paperMain.view.zoom;
       leftCenterHandle.scaling.y = 1 / paperMain.view.zoom;
-      new paperMain.Group({
-        children: [baseFrame, moveHandle, topLeftHandle, topCenterHandle, topRightHandle, bottomLeftHandle, bottomCenterHandle, bottomRightHandle, leftCenterHandle, rightCenterHandle],
-        data: {
-          id: 'SelectionFrame',
-          type: 'UIElement',
-          interactive: false,
-          interactiveType: null,
-          elementId: 'SelectionFrame'
-        }
-      });
+      selectionFrame.children = [baseFrame, moveHandle, topLeftHandle, topCenterHandle, topRightHandle, bottomLeftHandle, bottomCenterHandle, bottomRightHandle, leftCenterHandle, rightCenterHandle];
+      // new paperMain.Group({
+      //   children: [baseFrame, moveHandle, topLeftHandle, topCenterHandle, topRightHandle, bottomLeftHandle, bottomCenterHandle, bottomRightHandle, leftCenterHandle, rightCenterHandle],
+      //   data: {
+      //     id: 'SelectionFrame',
+      //     type: 'UIElement',
+      //     interactive: false,
+      //     interactiveType: null,
+      //     elementId: 'SelectionFrame'
+      //   },
+      //   parent: getPaperLayer('ui')
+      // });
     }
   }
 };
 
 export const updateTweenEventsFrame = (state: RootState) => {
-  const tweenEventsFrame = paperMain.project.getItem({ data: { id: 'TweenEventsFrame' } });
+  const tweenEventsFrame = paperMain.project.getItem({ data: { id: 'ArtboardEvents' } });
   const events = getTweenEventsFrameItems(state).tweenEventItems;
-  if (tweenEventsFrame) {
-    tweenEventsFrame.remove();
-  }
+  tweenEventsFrame.removeChildren();
   if (events) {
     const theme = getTheme(state.viewSettings.theme);
-    const tweenEventsFrame = new paperMain.Group({
-      data: {
-        id: 'TweenEventsFrame',
-        type: 'UIElement',
-        interactive: false,
-        interactiveType: null,
-        elementId: 'TweenEventsFrame'
-      }
-    });
     events.forEach((event, index) => {
       const eventLayerItem = state.layer.present.byId[event.layer];
       const groupOpacity = state.layer.present.hover ? state.layer.present.hover === event.id ? 1 : 0.25 : 1;
@@ -3495,13 +3515,7 @@ export const updateTweenEventsFrame = (state: RootState) => {
           elementId: 'TweenEventsFrame'
         },
         parent: tweenEventsFrame,
-        opacity: groupOpacity,
-        onMouseEnter: function() {
-          document.body.style.cursor = 'pointer';
-        },
-        onMouseLeave: function() {
-          document.body.style.cursor = 'auto';
-        }
+        opacity: groupOpacity
       });
       const tweenEventFrameBackground = new paperMain.Path.Rectangle({
         from: tweenEventFrame.bounds.topLeft,
@@ -3528,15 +3542,12 @@ export const updateTweenEventsFrameThunk = () => {
   }
 };
 
-export const updateMeasureFrame = (guides: { top?: string; bottom?: string; left?: string; right?: string; all?: string }, bounds?: paper.Rectangle) => {
-  const measureFrame = paperMain.project.getItem({ data: { id: 'MeasureFrame' } });
+export const updateMeasureGuides = (guides: { top?: string; bottom?: string; left?: string; right?: string; all?: string }, bounds?: paper.Rectangle): void => {
+  const measureGuides = paperMain.project.getItem({ data: { id: 'MeasureGuides' } });
   const selected = paperMain.project.getItems({ data: { selected: true } });
-  if (measureFrame) {
-    measureFrame.remove();
-  }
+  measureGuides.removeChildren();
   if (selected.length > 0) {
     const selectionBounds = bounds ? bounds : getSelectionBounds();
-    const measureFrameGuides = [];
     let hasTopMeasure;
     let hasBottomMeasure;
     let hasLeftMeasure;
@@ -3611,44 +3622,22 @@ export const updateMeasureFrame = (guides: { top?: string; bottom?: string; left
     if (hasTopMeasure && (guides['all'] || guides['top'])) {
       const topMeasureFromPoint = selectionBounds.topCenter;
       const topMeasureToPoint = new paperMain.Point(topMeasureFromPoint.x, topMeasureTo);
-      const measureGuide = new MeasureGuide(topMeasureFromPoint, topMeasureToPoint, 'top', { down: true, up: true });
-      if (measureGuide.distance > 0) {
-        measureFrameGuides.push(measureGuide.paperLayer);
-      }
+      new MeasureGuide(topMeasureFromPoint, topMeasureToPoint, 'top', { down: true, up: true });
     }
     if (hasBottomMeasure && (guides['all'] || guides['bottom'])) {
       const bottomMeasureFromPoint = selectionBounds.bottomCenter;
       const bottomMeasureToPoint = new paperMain.Point(bottomMeasureFromPoint.x, bottomMeasureTo);
-      const measureGuide = new MeasureGuide(bottomMeasureFromPoint, bottomMeasureToPoint, 'bottom', { down: true, up: true });
-      if (measureGuide.distance > 0) {
-        measureFrameGuides.push(measureGuide.paperLayer);
-      }
+      new MeasureGuide(bottomMeasureFromPoint, bottomMeasureToPoint, 'bottom', { down: true, up: true });
     }
     if (hasLeftMeasure && (guides['all'] || guides['left'])) {
       const leftMeasureFromPoint = selectionBounds.leftCenter;
       const leftMeasureToPoint = new paperMain.Point(leftMeasureTo, leftMeasureFromPoint.y);
-      const measureGuide = new MeasureGuide(leftMeasureFromPoint, leftMeasureToPoint, 'left', { down: true, up: true });
-      if (measureGuide.distance > 0) {
-        measureFrameGuides.push(measureGuide.paperLayer);
-      }
+      new MeasureGuide(leftMeasureFromPoint, leftMeasureToPoint, 'left', { down: true, up: true });
     }
     if (hasRightMeasure && (guides['all'] || guides['right'])) {
       const rightMeasureFromPoint = selectionBounds.rightCenter;
       const rightMeasureToPoint = new paperMain.Point(rightMeasureTo, rightMeasureFromPoint.y);
-      const measureGuide = new MeasureGuide(rightMeasureFromPoint, rightMeasureToPoint, 'right', { down: true, up: true });
-      if (measureGuide.distance > 0) {
-        measureFrameGuides.push(measureGuide.paperLayer);
-      }
+      new MeasureGuide(rightMeasureFromPoint, rightMeasureToPoint, 'right', { down: true, up: true });
     }
-    new paperMain.Group({
-      children: measureFrameGuides,
-      data: {
-        id: 'MeasureFrame',
-        type: 'UIElement',
-        interactive: false,
-        interactiveType: null,
-        elementId: 'MeasureFrame'
-      }
-    });
   }
 };

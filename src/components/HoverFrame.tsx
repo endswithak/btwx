@@ -15,9 +15,7 @@ const HoverFrame = (props: HoverFrameProps): ReactElement => {
     updateHoverFrame();
     return () => {
       const hoverFrame = paperMain.project.getItem({ data: { id: 'HoverFrame' } });
-      if (hoverFrame) {
-        hoverFrame.remove();
-      }
+      hoverFrame.removeChildren();
     }
   }, [hover]);
 

@@ -9,7 +9,7 @@ import { CanvasSettingsTypes, SetCanvasActiveToolPayload } from '../store/action
 import { openContextMenu } from '../store/actions/contextMenu';
 import { OpenContextMenuPayload, ContextMenuTypes } from '../store/actionTypes/contextMenu';
 import { LayerTypes, SetLayerHoverPayload, DeepSelectLayerPayload, SelectLayersPayload, DeselectLayersPayload } from '../store/actionTypes/layer';
-import { setLayerHover, deepSelectLayer, selectLayers, deselectLayers, deselectAllLayers } from '../store/actions/layer';
+import { setLayerHover, deepSelectLayer, deepSelectLayerThunk, selectLayers, deselectLayers, deselectAllLayers } from '../store/actions/layer';
 import { openTextEditor } from '../store/actions/textEditor';
 import { OpenTextEditorPayload, TextEditorTypes } from '../store/actionTypes/textEditor';
 import { TextSettingsState } from '../store/reducers/textSettings';
@@ -36,6 +36,7 @@ interface CanvasLayerEventsProps {
   setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
   selectLayers?(payload: SelectLayersPayload): LayerTypes;
   deepSelectLayer?(payload: DeepSelectLayerPayload): LayerTypes;
+  deepSelectLayerThunk?(payload: DeepSelectLayerPayload): Promise<any>;
   deselectLayers?(payload: DeselectLayersPayload): LayerTypes;
   deselectAllLayers?(): LayerTypes;
   setCanvasActiveTool?(payload: SetCanvasActiveToolPayload): CanvasSettingsTypes;
@@ -45,7 +46,7 @@ interface CanvasLayerEventsProps {
 
 const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layerEvent, activeTool, dragging, resizing, selecting, hover, selected, deselectLayers, deselectAllLayers, layerItem, nearestScopeAncestor, deepSelectItem, setLayerHover, selectLayers, deepSelectLayer, setCanvasActiveTool, dragHandle, textSettings, openTextEditor, openContextMenu } = props;
+  const { layerEvent, activeTool, dragging, resizing, selecting, hover, selected, deselectLayers, deselectAllLayers, layerItem, nearestScopeAncestor, deepSelectItem, setLayerHover, selectLayers, deepSelectLayer, deepSelectLayerThunk, setCanvasActiveTool, dragHandle, textSettings, openTextEditor, openContextMenu } = props;
 
   const handleMouseMove = (): void => {
     if (layerEvent.empty) {
@@ -107,8 +108,9 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
   const handleDoubleClick = (): void => {
     if (!layerEvent.empty) {
       if (nearestScopeAncestor.id !== layerItem.id) {
-        deepSelectLayer({id: layerItem.id});
-        scrollToLayer(deepSelectItem.id);
+        deepSelectLayerThunk({id: layerItem.id}).then(() => {
+          scrollToLayer(deepSelectItem.id);
+        });
       } else {
         if (layerItem.type === 'Text') {
           const paperLayer = getPaperLayer(layerItem.id);
@@ -235,6 +237,7 @@ const mapDispatchToProps = {
   setLayerHover,
   selectLayers,
   deepSelectLayer,
+  deepSelectLayerThunk,
   deselectLayers,
   deselectAllLayers,
   setCanvasActiveTool,
