@@ -472,9 +472,9 @@ const Icon = (props: IconProps): ReactElement => {
         transform: small ? `scale(0.75)` : 'none',
         ...style
       }}>
-      <path d={iconData.fill} />
+      <path d={iconData && iconData.fill ? iconData.fill : null} />
       {
-        iconData.opacity
+        iconData && iconData.opacity
         ? <path style={{ opacity: 0.5 }} d={iconData.opacity} />
         : null
       }
@@ -484,18 +484,18 @@ const Icon = (props: IconProps): ReactElement => {
 
 const mapStateToProps = (state: RootState, ownProps: IconProps) => {
   const { layer } = state;
-  let pathData = ownProps.name === 'shape' && ownProps.shapeId && layer.present.byId[ownProps.shapeId] ? (layer.present.byId[ownProps.shapeId] as Btwx.Shape).pathData : null;
-  if (pathData) {
-    const layerIcon = new paperMain.CompoundPath({
-      pathData: pathData,
-      insert: false
-    });
-    layerIcon.fitBounds(new paperMain.Rectangle({
-      point: new paperMain.Point(0,0),
-      size: new paperMain.Size(24,24)
-    }));
-    pathData = layerIcon.pathData;
-  }
+  const pathData = ownProps.name === 'shape' && ownProps.shapeId && layer.present.shapeIcons[ownProps.shapeId] ? layer.present.shapeIcons[ownProps.shapeId] : null;
+  // if (pathData) {
+  //   const layerIcon = new paperMain.CompoundPath({
+  //     pathData: pathData,
+  //     insert: false
+  //   });
+  //   layerIcon.fitBounds(new paperMain.Rectangle({
+  //     point: new paperMain.Point(0,0),
+  //     size: new paperMain.Size(24,24)
+  //   }));
+  //   pathData = layerIcon.pathData;
+  // }
   return { pathData };
 };
 

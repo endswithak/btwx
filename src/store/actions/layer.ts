@@ -8,7 +8,7 @@ import { gsap } from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import { paperMain } from '../../canvas';
 import MeasureGuide from '../../canvas/measureGuide';
-import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_VALUE, THEME_PRIMARY_COLOR, DEFAULT_TWEEN_EVENTS, TWEEN_PROPS } from '../../constants';
+import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_VALUE, THEME_PRIMARY_COLOR, DEFAULT_TWEEN_EVENTS, TWEEN_PROPS_MAP } from '../../constants';
 import { getPaperFillColor, getPaperStrokeColor, getPaperLayer, getPaperShadowColor } from '../utils/paper';
 import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayersBounds, importPaperProject, colorsMatch, gradientsMatch, getNearestScopeAncestor, getArtboardEventItems, orderLayersByDepth, canMaskLayers, canMaskSelection, canPasteSVG, getLineToPoint, getSelectionTopLeft, getSelectionBottomRight, getLineFromPoint, getArtboardsTopTop, getSelectionBounds, getSelectedBounds, getParentPaperLayer, getGradientOriginPoint, getGradientDestinationPoint } from '../selectors/layer';
 import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle, getLayerMasked, getLayerUnderlyingMask } from '../utils/actions';
@@ -439,6 +439,7 @@ import {
   SetLayersStylePayload,
   LayerTypes
 } from '../actionTypes/layer';
+import { replaceAllStr } from '../utils/general';
 
 // Artboard
 
@@ -504,31 +505,26 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
       frame: payload.layer.frame,
       scope: scope,
       children: [],
+      allDescendents: [],
       selected: false,
+      hover: false,
       showChildren: showChildren,
-      tweenEvents: [],
-      tweens: [],
+      events: [],
       originArtboardForEvents: [],
       destinationArtboardForEvents: [],
-      originLayerForTweens: {
+      tweens: {
         allIds: [],
-        byProp: TWEEN_PROPS.reduce((result, current) => ({
-          ...result,
-          [current]: []
-        }), {})
-      },
-      destinationLayerForTweens: {
-        allIds: [],
-        byProp: TWEEN_PROPS.reduce((result, current) => ({
-          ...result,
-          [current]: []
-        }), {})
+        asOrigin: [],
+        asDestination: [],
+        byProp: TWEEN_PROPS_MAP
       },
       transform: DEFAULT_TRANSFORM,
       style: DEFAULT_STYLE,
-      masked,
-      underlyingMask,
-      ignoreUnderlyingMask,
+      mask: false,
+      masked: masked,
+      underlyingMask: underlyingMask,
+      ignoreUnderlyingMask: ignoreUnderlyingMask,
+      pathData: null
     } as Btwx.Artboard;
     if (!payload.batch) {
       dispatch(addArtboard({
@@ -576,29 +572,24 @@ export const addGroupThunk = (payload: AddGroupPayload, providedState?: RootStat
       frame,
       scope,
       children: [],
+      allDescendents: [],
       selected: false,
-      tweenEvents: [],
-      tweens: [],
-      originLayerForTweens: {
+      hover: false,
+      events: [],
+      tweens: {
         allIds: [],
-        byProp: TWEEN_PROPS.reduce((result, current) => ({
-          ...result,
-          [current]: []
-        }), {})
-      },
-      destinationLayerForTweens: {
-        allIds: [],
-        byProp: TWEEN_PROPS.reduce((result, current) => ({
-          ...result,
-          [current]: []
-        }), {})
+        asOrigin: [],
+        asDestination: [],
+        byProp: TWEEN_PROPS_MAP
       },
       transform: DEFAULT_TRANSFORM,
-      showChildren,
-      style,
-      underlyingMask,
-      ignoreUnderlyingMask,
-      masked
+      showChildren: showChildren,
+      style: style,
+      mask: false,
+      underlyingMask: underlyingMask,
+      ignoreUnderlyingMask: ignoreUnderlyingMask,
+      masked: masked,
+      pathData: null
     } as Btwx.Group;
     if (!payload.batch) {
       dispatch(addGroup({
@@ -680,31 +671,23 @@ export const addShapeThunk = (payload: AddShapePayload, providedState?: RootStat
       frame: frame,
       scope: scope,
       selected: false,
+      hover: false,
       children: null,
-      tweenEvents: [],
-      tweens: [],
-      originLayerForTweens: {
+      events: [],
+      tweens: {
         allIds: [],
-        byProp: TWEEN_PROPS.reduce((result, current) => ({
-          ...result,
-          [current]: []
-        }), {})
-      },
-      destinationLayerForTweens: {
-        allIds: [],
-        byProp: TWEEN_PROPS.reduce((result, current) => ({
-          ...result,
-          [current]: []
-        }), {})
+        asOrigin: [],
+        asDestination: [],
+        byProp: TWEEN_PROPS_MAP
       },
       closed: payload.layer.closed,
-      mask,
-      underlyingMask,
-      ignoreUnderlyingMask,
-      masked,
-      style,
-      transform,
-      pathData,
+      mask: mask,
+      underlyingMask: underlyingMask,
+      ignoreUnderlyingMask: ignoreUnderlyingMask,
+      masked: masked,
+      style: style,
+      transform: transform,
+      pathData: pathData,
       ...shapeOpts
     } as Btwx.Shape;
     if (!payload.batch) {
@@ -787,30 +770,22 @@ export const addShapeGroupThunk = (payload: AddShapePayload, providedState?: Roo
       scope: scope,
       frame: frame,
       selected: false,
+      hover: false,
       children: null,
-      tweenEvents: [],
-      tweens: [],
-      originLayerForTweens: {
+      events: [],
+      tweens: {
         allIds: [],
-        byProp: TWEEN_PROPS.reduce((result, current) => ({
-          ...result,
-          [current]: []
-        }), {})
-      },
-      destinationLayerForTweens: {
-        allIds: [],
-        byProp: TWEEN_PROPS.reduce((result, current) => ({
-          ...result,
-          [current]: []
-        }), {})
+        asOrigin: [],
+        asDestination: [],
+        byProp: TWEEN_PROPS_MAP
       },
       closed: true,
-      mask,
-      underlyingMask,
-      ignoreUnderlyingMask,
-      masked,
-      style,
-      transform,
+      mask: mask,
+      underlyingMask: underlyingMask,
+      ignoreUnderlyingMask: ignoreUnderlyingMask,
+      masked: masked,
+      style: style,
+      transform: transform,
       pathData: shapeContainer.lastChild.pathData,
       ...shapeOpts
     } as Btwx.Shape;
@@ -900,29 +875,23 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
       scope: scope,
       frame: frame,
       selected: false,
+      hover: false,
       children: null,
-      tweenEvents: [],
-      tweens: [],
-      originLayerForTweens: {
+      events: [],
+      tweens: {
         allIds: [],
-        byProp: TWEEN_PROPS.reduce((result, current) => ({
-          ...result,
-          [current]: []
-        }), {})
+        asOrigin: [],
+        asDestination: [],
+        byProp: TWEEN_PROPS_MAP
       },
-      destinationLayerForTweens: {
-        allIds: [],
-        byProp: TWEEN_PROPS.reduce((result, current) => ({
-          ...result,
-          [current]: []
-        }), {})
-      },
-      underlyingMask,
-      ignoreUnderlyingMask,
-      masked,
-      style,
-      transform,
-      textStyle
+      mask: false,
+      underlyingMask: underlyingMask,
+      ignoreUnderlyingMask: ignoreUnderlyingMask,
+      masked: masked,
+      style: style,
+      transform: transform,
+      textStyle: textStyle,
+      pathData: null
     } as Btwx.Text;
     if (!payload.batch) {
       dispatch(addText({
@@ -991,21 +960,12 @@ export const addImageThunk = (payload: AddImagePayload, providedState?: RootStat
               frame: frame,
               selected: false,
               children: null,
-              tweenEvents: [],
-              tweens: [],
-              originLayerForTweens: {
+              events: [],
+              tweens: {
                 allIds: [],
-                byProp: TWEEN_PROPS.reduce((result, current) => ({
-                  ...result,
-                  [current]: []
-                }), {})
-              },
-              destinationLayerForTweens: {
-                allIds: [],
-                byProp: TWEEN_PROPS.reduce((result, current) => ({
-                  ...result,
-                  [current]: []
-                }), {})
+                asOrigin: [],
+                asDestination: [],
+                byProp: TWEEN_PROPS_MAP
               },
               underlyingMask,
               ignoreUnderlyingMask,
@@ -1090,7 +1050,7 @@ export const removeLayersThunk = () => {
     const state = getState() as RootState;
     if (state.layer.present.selected.length > 0 && state.canvasSettings.focusing) {
       if (state.viewSettings.tweenDrawer.isOpen && state.tweenDrawer.event) {
-        const tweenEvent = state.layer.present.tweenEventById[state.tweenDrawer.event];
+        const tweenEvent = state.layer.present.events.byId[state.tweenDrawer.event];
         let layersAndChildren: string[] = [];
         state.layer.present.selected.forEach((id) => {
           layersAndChildren = [...layersAndChildren, ...getLayerAndDescendants(state.layer.present, id)];
@@ -2277,10 +2237,30 @@ export const duplicateLayers = (payload: DuplicateLayersPayload): LayerTypes => 
   payload
 });
 
+export const duplicateLayersThunk = (payload: DuplicateLayersPayload) => {
+  return (dispatch: any, getState: any): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      dispatch(duplicateLayers(payload));
+      const newState = getState() as RootState;
+      resolve(newState.layer.present.selected);
+    });
+  }
+};
+
 export const removeDuplicatedLayers = (payload: RemoveDuplicatedLayersPayload): LayerTypes => ({
   type: REMOVE_DUPLICATED_LAYERS,
   payload
 });
+
+export const removeDuplicatedLayersThunk = (payload: RemoveDuplicatedLayersPayload) => {
+  return (dispatch: any, getState: any): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      dispatch(removeDuplicatedLayers(payload));
+      const newState = getState() as RootState;
+      resolve(newState.layer.present.selected);
+    });
+  }
+};
 
 export const bringLayerForward = (payload: BringLayerForwardPayload): LayerTypes => ({
   type: BRING_LAYER_FORWARD,
@@ -2564,40 +2544,51 @@ export const setLayersStyle = (payload: SetLayersStylePayload): LayerTypes => ({
 export const copyLayersThunk = () => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
-    if (state.canvasSettings.focusing && state.layer.present.selected.length > 0) {
-      const layers = state.layer.present.selected.reduce((result, current) => {
-        const layerAndDescendants = getLayerAndDescendants(state.layer.present, current);
-        const imageLayers = layerAndDescendants.filter(id => state.layer.present.byId[id].type === 'Image');
-        const imageBuffers = imageLayers.reduce((bufferResult, bufferCurrent) => {
-          const imageId = (state.layer.present.byId[bufferCurrent] as Btwx.Image).imageId;
-          if (!Object.keys(bufferResult).includes(imageId)) {
-            bufferResult[imageId] = state.documentSettings.images.byId[imageId];
-          }
-          return bufferResult;
-        }, {} as { [id: string]: Btwx.DocumentImage });
-        result.images = { ...result.images, ...imageBuffers };
-        result.main = [...result.main, current];
-        result.allIds = [...result.allIds, ...layerAndDescendants];
-        result.byId = layerAndDescendants.reduce((lr, cr) => {
-          lr = {
-            ...lr,
-            [cr]: {
-              ...state.layer.present.byId[cr],
-              parent: result.main.includes(cr) ? 'page' : state.layer.present.byId[cr].parent,
-              tweenEvents: [],
-              tweens: [],
-              children: ((): string[] => {
-                const layerItem = state.layer.present.byId[cr];
-                const hasChildren = layerItem.type === 'Artboard' || layerItem.type === 'Group';
-                return hasChildren ? [] : null;
-              })()
-            }
-          }
-          return lr;
-        }, result.byId);
+    const copyLayer = (copyState: Btwx.ClipboardLayers, layer: string, isChild?: boolean): Btwx.ClipboardLayers => {
+      let currentCopyState = copyState;
+      const layerItem = state.layer.present.byId[layer];
+      if (layerItem.children && layerItem.children.length > 0) {
+        currentCopyState = copyLayers(currentCopyState, layerItem.children, true);
+      }
+      if (!isChild) {
+        currentCopyState.main = [...currentCopyState.main, layer];
+      }
+      currentCopyState.allIds = [...currentCopyState.allIds, layer];
+      currentCopyState.byId = {
+        ...currentCopyState.byId,
+        [layer]: {
+          ...layerItem,
+          parent: isChild ? layerItem.parent : 'page',
+          children: layerItem.children ? [] : null,
+          events: [],
+          tweens: {
+            allIds: [],
+            asOrigin: [],
+            asDestination: [],
+            byProp: TWEEN_PROPS_MAP
+          },
+        }
+      };
+      if (layerItem.type === 'Image') {
+        const imageId = (layerItem as Btwx.Image).imageId;
+        if (!Object.keys(currentCopyState.images).includes(imageId)) {
+          currentCopyState.images[imageId] = state.documentSettings.images.byId[imageId];
+        }
+      }
+      return currentCopyState;
+    };
+    const copyLayers = (copyState: Btwx.ClipboardLayers, layers: string[], isChild?: boolean): Btwx.ClipboardLayers => {
+      let currentCopyState = copyState;
+      currentCopyState = layers.reduce((result, current) => {
+        result = copyLayer(result, current, isChild);
         return result;
-      }, { type: 'layers', main: [], allIds: [], byId: {}, images: {} } as Btwx.ClipboardLayers);
-      clipboard.writeText(JSON.stringify(layers));
+      }, currentCopyState);
+      return currentCopyState;
+    };
+    if (state.canvasSettings.focusing && state.layer.present.selected.length > 0) {
+      const nextCopyState = { type: 'layers', main: [], allIds: [], byId: {}, images: {} } as Btwx.ClipboardLayers;
+      const copyState = copyLayers(nextCopyState, state.layer.present.selected, false);
+      clipboard.writeText(JSON.stringify(copyState));
     }
   }
 };
@@ -2672,12 +2663,9 @@ export const pasteLayersThunk = (props?: { overSelection?: boolean; overPoint?: 
           const text = clipboard.readText();
           const parsedText: Btwx.ClipboardLayers = JSON.parse(text);
           if (parsedText.type && (parsedText.type === 'layers' || parsedText.type === 'sketch-layers')) {
-            const replaceAll = (str: string, find: string, replace: string) => {
-              return str.replace(new RegExp(find, 'g'), replace);
-            };
             const withNewIds: string = parsedText.allIds.reduce((result: string, current: string) => {
               const newId = uuidv4();
-              result = replaceAll(result, current, newId);
+              result = replaceAllStr(result, current, newId);
               return result;
             }, text);
             const newParse: Btwx.ClipboardLayers = JSON.parse(withNewIds);
@@ -2867,7 +2855,7 @@ export const undoThunk = () => {
         updateSelectionFrame();
       }
       updateActiveArtboardFrame();
-      if (state.viewSettings.tweenDrawer.isOpen && layerState.allTweenEventIds.length > 0) {
+      if (state.viewSettings.tweenDrawer.isOpen && layerState.events.allIds.length > 0) {
         updateTweenEventsFrame(fullState);
       }
     }
@@ -2897,7 +2885,7 @@ export const redoThunk = () => {
         updateSelectionFrame();
       }
       updateActiveArtboardFrame();
-      if (state.viewSettings.tweenDrawer.isOpen && layerState.allTweenEventIds.length > 0) {
+      if (state.viewSettings.tweenDrawer.isOpen && layerState.events.allIds.length > 0) {
         updateTweenEventsFrame(fullState);
       }
     }
@@ -3482,9 +3470,9 @@ export const updateTweenEventsFrame = (state: RootState) => {
       });
       const tweenEventText = new paperMain.PointText({
         content: DEFAULT_TWEEN_EVENTS.find((tweenEvent) => event.event === tweenEvent.event).titleCase,
-        point: new paperMain.Point(tweenEventConnector.bounds.center.x, tweenEventDestinationIndicator.bounds.top - ((1 / paperMain.view.zoom) * 12)),
+        point: new paperMain.Point(tweenEventConnector.bounds.center.x, tweenEventDestinationIndicator.bounds.top - ((1 / paperMain.view.zoom) * 10)),
         justification: 'center',
-        fontSize: ((1 / paperMain.view.zoom) * 12),
+        fontSize: ((1 / paperMain.view.zoom) * 10),
         fillColor: elementColor,
         insert: false,
         fontFamily: 'Space Mono',

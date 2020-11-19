@@ -2,6 +2,7 @@
 import { BrowserWindow, remote, systemPreferences, ipcRenderer } from 'electron';
 import { gsap } from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
+import { FixedSizeTree as Tree } from '../react-vtree';
 import { PreviewState } from './store/reducers/preview';
 import getTheme from './store/theme';
 
@@ -32,15 +33,16 @@ export const layerInScrollView = (id: string) => {
 };
 
 export const scrollToLayer = (id: string) => {
-  const leftSidebar = document.getElementById('sidebar-scroll-left');
-  const layerDomItem = document.getElementById(id);
-  if (leftSidebar && layerDomItem && !layerInScrollView(id)) {
-    gsap.set(leftSidebar, {
-      scrollTo: {
-        y: layerDomItem
-      }
-    });
-  }
+  console.log(Tree);
+  // const leftSidebar = document.getElementById('sidebar-scroll-left');
+  // const layerDomItem = document.getElementById(id);
+  // if (leftSidebar && layerDomItem && !layerInScrollView(id)) {
+  //   gsap.set(leftSidebar, {
+  //     scrollTo: {
+  //       y: layerDomItem
+  //     }
+  //   });
+  // }
 };
 
 export const getFocusedDocument = (focused?: BrowserWindow): Promise<BrowserWindow> => {

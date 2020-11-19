@@ -328,5 +328,8 @@ export default PaperTool(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(ArtboardTool)
+  )(ArtboardTool),
+  {
+    all: true
+  }
 );

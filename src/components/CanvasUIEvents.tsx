@@ -1,4 +1,3 @@
-// import { remote } from 'electron';
 import React, { useContext, useEffect, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
@@ -7,6 +6,8 @@ import { setCanvasActiveTool } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasActiveToolPayload } from '../store/actionTypes/canvasSettings';
 import { LayerTypes, SetLayerHoverPayload } from '../store/actionTypes/layer';
 import { setLayerHover } from '../store/actions/layer';
+import { setTweenDrawerEventThunk, setTweenDrawerEventHoverThunk } from '../store/actions/tweenDrawer';
+import { SetTweenDrawerEventPayload, TweenDrawerTypes, SetTweenDrawerEventHoverPayload } from '../store/actionTypes/tweenDrawer';
 
 interface CanvasUIEventsProps {
   uiEvent: {
@@ -19,14 +20,18 @@ interface CanvasUIEventsProps {
   resizing?: boolean;
   dragging?: boolean;
   selecting?: boolean;
+  eventDrawerHover?: string;
+  eventDrawerEvent?: string;
   activeTool?: Btwx.ToolType;
   setCanvasActiveTool?(payload: SetCanvasActiveToolPayload): CanvasSettingsTypes;
   setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
+  setTweenDrawerEventHoverThunk?(payload: SetTweenDrawerEventHoverPayload): void;
+  setTweenDrawerEventThunk?(payload: SetTweenDrawerEventPayload): void;
 }
 
 const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { uiEvent, activeTool, setCanvasActiveTool, resizing, dragging, selecting, setLayerHover, hover } = props;
+  const { uiEvent, activeTool, setCanvasActiveTool, resizing, dragging, selecting, setLayerHover, hover, eventDrawerHover, setTweenDrawerEventHoverThunk, eventDrawerEvent, setTweenDrawerEventThunk } = props;
 
   const handleMouseMove = (): void => {
     if (uiEvent.empty) {
@@ -38,12 +43,15 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           lineHandle: null
         });
       }
-    } else {
-      if (hover) {
-        setLayerHover({id: null});
+      if (eventDrawerHover !== null) {
+        setTweenDrawerEventHoverThunk({id: null});
       }
+    } else {
       switch(uiEvent.hitResult.item.data.elementId) {
         case 'SelectionFrame': {
+          if (hover) {
+            setLayerHover({id: null});
+          }
           switch(uiEvent.hitResult.item.data.interactiveType) {
             case 'move':
               if (activeTool !== 'Drag') {
@@ -91,6 +99,10 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           break;
         }
         case 'TweenEventsFrame': {
+          const interactiveType = uiEvent.hitResult.item.data.interactiveType;
+          if (interactiveType && eventDrawerHover !== interactiveType) {
+            setTweenDrawerEventHoverThunk({id: interactiveType});
+          }
           break;
         }
       }
@@ -113,7 +125,21 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
     if (uiEvent.empty) {
       return;
     } else {
-      return;
+      switch(uiEvent.hitResult.item.data.elementId) {
+        case 'SelectionFrame': {
+          break;
+        }
+        case 'GradientFrame': {
+          break;
+        }
+        case 'TweenEventsFrame': {
+          const interactiveType = uiEvent.hitResult.item.data.interactiveType;
+          if (interactiveType && eventDrawerEvent !== interactiveType) {
+            setTweenDrawerEventThunk({id: interactiveType});
+          }
+          break;
+        }
+      }
     }
   }
 
@@ -154,18 +180,22 @@ const mapStateToProps = (state: RootState): {
   resizing: boolean;
   dragging: boolean;
   selecting: boolean;
+  eventDrawerHover: string;
+  eventDrawerEvent: string;
 } => {
-  const { canvasSettings, layer } = state;
+  const { canvasSettings, layer, tweenDrawer } = state;
   return {
     activeTool: canvasSettings.activeTool,
     resizing: canvasSettings.resizing,
     dragging: canvasSettings.dragging,
     selecting: canvasSettings.selecting,
-    hover: layer.present.hover
+    hover: layer.present.hover,
+    eventDrawerHover: tweenDrawer.eventHover,
+    eventDrawerEvent: tweenDrawer.event
   };
 };
 
 export default connect(
   mapStateToProps,
-  { setCanvasActiveTool, setLayerHover }
+  { setCanvasActiveTool, setLayerHover, setTweenDrawerEventHoverThunk, setTweenDrawerEventThunk }
 )(CanvasUIEvents);

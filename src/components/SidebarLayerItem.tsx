@@ -15,11 +15,22 @@ import SidebarLayerBackground from './SidebarLayerBackground';
 import SidebarLayerMaskedIcon from './SidebarLayerMaskedIcon';
 
 interface SidebarLayerItemProps {
-  layer: string;
-  depth?: number;
-  isSelected?: boolean;
+  id: string;
+  isOpen: boolean;
+  name: string;
+  type: Btwx.LayerType;
+  mask: boolean;
+  underlyingMask: string;
+  ignoreUnderlyingMask: boolean;
+  masked: boolean;
+  selected: boolean;
+  hover: boolean;
+  pathData: string;
+  closed: boolean;
+  setOpen: any;
+  nestingLevel: number;
   isDragGhost?: boolean;
-  // editing?: boolean;
+  editing?: boolean;
   setEditing?(payload: SetEditingPayload): LeftSidebarTypes;
   selectLayers?(payload: SelectLayersPayload): LayerTypes;
   deselectLayers?(payload: DeselectLayersPayload): LayerTypes;
@@ -27,28 +38,28 @@ interface SidebarLayerItemProps {
   openContextMenu?(payload: OpenContextMenuPayload): ContextMenuTypes;
 }
 
-const SidebarLayerItem = memo(function SidebarLayerItem(props: SidebarLayerItemProps) {
+const SidebarLayerItem = (props: SidebarLayerItemProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layer, isSelected, depth, setLayerHover, openContextMenu, selectLayers, deselectLayers, setEditing, isDragGhost } = props;
+  const { id, name, type, mask, underlyingMask, ignoreUnderlyingMask, masked, selected, hover, pathData, closed, isOpen, setOpen, nestingLevel, setLayerHover, openContextMenu, selectLayers, deselectLayers, setEditing, isDragGhost, editing } = props;
 
   const handleMouseDown = (e: any): void => {
-    // if (!editing) {
-    // }
-    if (e.metaKey) {
-      if (isSelected) {
-        deselectLayers({layers: [layer]});
+    if (!editing) {
+      if (e.metaKey) {
+        if (selected) {
+          deselectLayers({layers: [id]});
+        } else {
+          selectLayers({layers: [id]});
+        }
       } else {
-        selectLayers({layers: [layer]});
-      }
-    } else {
-      if (!isSelected) {
-        selectLayers({layers: [layer], newSelection: true});
+        if (!selected) {
+          selectLayers({layers: [id], newSelection: true});
+        }
       }
     }
   }
 
   const handleMouseEnter = (): void => {
-    setLayerHover({id: layer});
+    setLayerHover({id: id});
   }
 
   const handleMouseLeave = (): void => {
@@ -56,69 +67,80 @@ const SidebarLayerItem = memo(function SidebarLayerItem(props: SidebarLayerItemP
   }
 
   const handleContextMenu = (e: any) => {
-    // if (!editing) {
-    // }
-    openContextMenu({
-      type: 'LayerEdit',
-      id: layer,
-      x: e.clientX,
-      y: e.clientY,
-      paperX: e.clientX,
-      paperY: e.clientY,
-      data: {
-        origin: 'sidebar'
-      }
-    });
-  }
-
-  const handleDoubleClick = (e: any): void => {
-    const layerExpand = document.getElementById(`${layer}-expand`);
-    if (e.target !== layerExpand && !layerExpand.contains(e.target)) {
-      setEditing({editing: layer});
+    if (!editing) {
+      openContextMenu({
+        type: 'LayerEdit',
+        id: id,
+        x: e.clientX,
+        y: e.clientY,
+        paperX: e.clientX,
+        paperY: e.clientY,
+        data: {
+          origin: 'sidebar'
+        }
+      });
     }
   }
 
-  useEffect(() => {
-    console.log('LAYER ITEM');
-  }, []);
+  const handleDoubleClick = (e: any): void => {
+    const layerExpand = document.getElementById(`${id}-expand`);
+    if (e.target !== layerExpand && !layerExpand.contains(e.target)) {
+      setEditing({editing: id, edit: name});
+    }
+  }
 
   return (
     <div
       className='c-layers-sidebar__layer-item'
       style={{
-        paddingLeft: depth * (theme.unit * 3)
+        paddingLeft: nestingLevel * (theme.unit * 3)
       }}
       onMouseDown={isDragGhost ? null : handleMouseDown}
       onMouseEnter={isDragGhost ? null : handleMouseEnter}
       onMouseLeave={isDragGhost ? null : handleMouseLeave}
       onContextMenu={isDragGhost ? null : handleContextMenu}
-      onDoubleClick={isDragGhost ? null : handleDoubleClick}>
+      onDoubleClick={isDragGhost ? null : handleDoubleClick}
+      >
       <SidebarLayerBackground
-        layer={layer}
+        id={id}
+        type={type}
+        selected={selected}
+        hover={hover}
         isDragGhost={isDragGhost} />
       <SidebarLayerChevron
-        layer={layer}
+        id={id}
+        type={type}
+        selected={selected}
+        isOpen={isOpen}
+        setOpen={setOpen}
         isDragGhost={isDragGhost} />
       <SidebarLayerMaskedIcon
-        layer={layer}
+        id={id}
+        masked={masked}
+        underlyingMask={underlyingMask}
+        selected={selected}
         isDragGhost={isDragGhost} />
       <SidebarLayerIcon
-        layer={layer}
+        id={id}
+        mask={mask}
+        selected={selected}
+        closed={closed}
+        type={type}
         isDragGhost={isDragGhost} />
       <SidebarLayerTitle
-        layer={layer}
+        id={id}
+        name={name}
+        selected={selected}
+        type={type}
         isDragGhost={isDragGhost} />
     </div>
   );
-});
+};
 
 const mapStateToProps = (state: RootState, ownProps: SidebarLayerItemProps) => {
-  const { layer, leftSidebar } = state;
-  const layerItem = layer.present.byId[ownProps.layer];
-  const isSelected = layerItem.selected;
-  // const editing = leftSidebar.editing === ownProps.layer;
-  const depth = layerItem.scope.length - 1;
-  return { isSelected, depth };
+  const { leftSidebar } = state;
+  const editing = leftSidebar.editing === ownProps.id;
+  return { editing };
 };
 
 export default connect(

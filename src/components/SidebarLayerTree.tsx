@@ -1,42 +1,65 @@
 import React, { ReactElement, useEffect } from 'react';
+import AutoSizer from 'react-virtualized-auto-sizer';
+import { FixedSizeTree as Tree } from '../../react-vtree';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getLeftSidebarLayers } from '../store/selectors';
-// import SidebarLayerDropzoneWrap from './SidebarLayerDropzoneWrap';
-import SidebarLayers from './SidebarLayers';
+import { getTreeWalker } from '../store/selectors/layer';
+import { setRef } from '../store/actions/leftSidebar';
+import { LeftSidebarTypes, SetRefPayload } from '../store/actionTypes/leftSidebar';
+import SidebarLayer from './SidebarLayer';
 import SidebarLayerDragGhosts from './SidebarLayerDragGhosts';
 import SidebarLeftSearchEmptyState from './SidebarLeftSearchEmptyState';
 
 interface SidebarLayerTreeProps {
-  layers?: string[];
+  treeWalker: any;
+  setRef?(payload: SetRefPayload): LeftSidebarTypes;
 }
 
 const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
-  const { layers } = props;
+  const { setRef, treeWalker } = props;
 
   useEffect(() => {
-    console.log('LAYER TREE');
+    console.log('LAYER TREEEEEE');
   }, []);
+
+  const handleRef = (newRef: Tree): void => {
+    setRef({ref: newRef});
+  }
+
+  const Node = ({data, style, isOpen, setOpen}: any): ReactElement => (
+    <SidebarLayer
+      {...data}
+      isOpen={isOpen}
+      setOpen={setOpen}
+      style={style} />
+  );
 
   return (
     <>
-      {
-        layers.length > 0
-        ? <SidebarLayers
-            layers={layers} />
-        : <SidebarLeftSearchEmptyState />
-      }
+      <AutoSizer>
+        {({height, width}) => (
+          <Tree
+            treeWalker={treeWalker}
+            itemSize={32}
+            height={height}
+            width={width}
+            ref={handleRef}
+            async>
+            {Node}
+          </Tree>
+        )}
+      </AutoSizer>
       <SidebarLayerDragGhosts />
     </>
+    // <SidebarLeftSearchEmptyState />
   )
 }
 
-const mapStateToProps = (state: RootState) => {
-  return {
-    layers: getLeftSidebarLayers(state)
-  };
-};
+const mapStateToProps = (state: RootState) => ({
+  treeWalker: getTreeWalker(state)
+});
 
 export default connect(
-  mapStateToProps
+  mapStateToProps,
+  { setRef }
 )(SidebarLayerTree);

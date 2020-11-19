@@ -57,10 +57,10 @@ const mapStateToProps = (state: RootState) => {
   const scrollPositions = tweenEventLayers.allIds.reduce((result: number[], current, index) => {
     const prevY = result[index - 1] ? result[index - 1] : 0;
     let y = itemHeight + prevY;
-    const event = layer.present.tweenEventById[tweenDrawer.event];
+    const event = layer.present.events.byId[tweenDrawer.event];
     const eventTweens = event.tweens;
     const eventLayer = tweenEventLayers.byId[current];
-    const layerTweens = eventLayer.tweens;
+    const layerTweens = eventLayer.tweens.asOrigin;
     layerTweens.forEach((id) => {
       if (eventTweens.includes(id)) {
         y += itemHeight;

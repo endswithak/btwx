@@ -126,7 +126,7 @@ const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventLayersProps
   const { layer, tweenDrawer, viewSettings } = state;
   const tweenEventLayers = getTweenEventLayers(layer.present, tweenDrawer.event);
   const isEmpty = tweenEventLayers.allIds.length === 0;
-  const eventItem = layer.present.tweenEventById[tweenDrawer.event];
+  const eventItem = layer.present.events.byId[tweenDrawer.event];
   const artboardItem = layer.present.byId[eventItem.artboard];
   const tweenDrawerLayersWidth = viewSettings.tweenDrawer.layersWidth;
   const scrollLayerItem = ownProps.scrollLayer ? layer.present.byId[ownProps.scrollLayer] : null;

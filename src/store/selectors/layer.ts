@@ -12,9 +12,10 @@ export const getArtboardEventDestinationIds = (state: RootState, id: string): st
 export const getArtboardEventOriginIds = (state: RootState, id: string): string[] => (state.layer.present.byId[id] as Btwx.Artboard).originArtboardForEvents;
 export const getSelected = (state: RootState): string[] => state.layer.present.selected;
 export const getLayersById = (state: RootState): { [id: string]: Btwx.Layer } => state.layer.present.byId;
-export const getAllEventIds = (state: RootState): string[] => state.layer.present.allTweenEventIds;
-export const getEventsById = (state: RootState): { [id: string]: Btwx.TweenEvent } => state.layer.present.tweenEventById;
-export const getTweensById = (state: RootState): { [id: string]: Btwx.Tween } => state.layer.present.tweenById;
+export const getChildrenById = (state: RootState): { [id: string]: string[] } => state.layer.present.childrenById;
+export const getAllEventIds = (state: RootState): string[] => state.layer.present.events.allIds;
+export const getEventsById = (state: RootState): { [id: string]: Btwx.TweenEvent } => state.layer.present.events.byId;
+export const getTweensById = (state: RootState): { [id: string]: Btwx.Tween } => state.layer.present.tweens.byId;
 export const getLayerById = (state: RootState, id: string): Btwx.Layer => state.layer.present.byId[id];
 export const getLayerChildren = (state: RootState, id: string): string[] => state.layer.present.byId[id].children;
 export const getPageChildren = (state: RootState): string[] => state.layer.present.byId['page'].children;
@@ -24,6 +25,44 @@ export const getEventDrawerSort = (state: RootState): string => state.tweenDrawe
 export const getEventDrawerHover = (state: RootState): string => state.tweenDrawer.eventHover;
 export const getActiveArtboard = (state: RootState): string => state.layer.present.activeArtboard;
 
+export const getTreeWalker = createSelector(
+  [ getChildrenById ],
+  (childrenById) => {
+    const getNodeData = (node: any, nestingLevel: number): any => ({
+      data: {
+        id: node.id, // mandatory
+        isLeaf: node.children && node.children.length === 0,
+        isOpenByDefault: true, // mandatory
+        nestingLevel,
+      },
+      nestingLevel,
+      node,
+    });
+    function* treeWalker(): any {
+      for (let i = childrenById['page'].length - 1; i >= 0; i--) {
+        const id = childrenById['page'][i];
+        yield getNodeData({
+          id: id,
+          children: childrenById[id]
+        }, 0);
+      }
+      while (true) {
+        const parent = yield;
+
+        if (parent.node.children) {
+          for (let i = parent.node.children.length - 1; i >= 0; i--) {
+            const id = parent.node.children[i];
+            yield getNodeData({
+              id: id,
+              children: childrenById[id]
+            }, parent.nestingLevel + 1);
+          }
+        }
+      }
+    }
+    return treeWalker;
+  }
+);
 
 export const getSelectedById = createSelector(
   [ getSelected, getLayersById ],
@@ -542,62 +581,6 @@ export const getArtboardEventItems = createSelector(
   }
 );
 
-// export const getTweenEventsFrameItems = (store: RootState): {
-//   tweenEventItems: Btwx.TweenEvent[];
-//   tweenEventLayers: {
-//     allIds: string[];
-//     byId: {
-//       [id: string]: Btwx.Layer;
-//     };
-//   };
-// } => {
-//   const { layer, tweenDrawer } = store;
-//   const activeArtboard = layer.present.activeArtboard;
-//   const eventHover = tweenDrawer.eventHover;
-//   const eventHoverItem = layer.present.tweenEventById[eventHover]
-//   const tweenEventItems = !tweenDrawer.event ? getSortedEvents(store).reduce((result, current) => {
-//     const tweenEvent = layer.present.tweenEventById[current];
-//     if (tweenEvent.artboard === activeArtboard) {
-//       result = [...result, tweenEvent];
-//     }
-//     return result;
-//   }, []) as Btwx.TweenEvent[] : [layer.present.tweenEventById[tweenDrawer.event]] as Btwx.TweenEvent[];
-//   if (eventHoverItem && !tweenEventItems.some((item: Btwx.TweenEvent) => item.id === eventHoverItem.id)) {
-//     tweenEventItems.unshift(eventHoverItem);
-//   }
-//   const tweenEventLayers = tweenEventItems.reduce((result, current) => {
-//     const layerItem = layer.present.byId[current.layer];
-//     // if (layerItem.type === 'Group' && (layerItem as Btwx.Group).clipped) {
-//     //   const childLayers = (layerItem as Btwx.Group).children.reduce((childrenResult, currentChild) => {
-//     //     const childItem = layer.present.byId[currentChild];
-//     //     if (!result.allIds.includes(currentChild)) {
-//     //       childrenResult.allIds = [...childrenResult.allIds, currentChild];
-//     //       childrenResult.byId = {
-//     //         ...childrenResult.byId,
-//     //         [currentChild]: childItem
-//     //       }
-//     //     }
-//     //     return childrenResult;
-//     //   }, { allIds: [], byId: {} });
-//     //   result.allIds = [...result.allIds, ...childLayers.allIds];
-//     //   result.byId = {...result.byId, ...childLayers.byId};
-//     // }
-//     if (!result.allIds.includes(current.layer)) {
-//       result.allIds = [...result.allIds, current.layer];
-//       result.byId = {
-//         ...result.byId,
-//         [current.layer]: layerItem
-//       }
-//     }
-//     return result;
-//   }, { allIds: [], byId: {} });
-
-//   return {
-//     tweenEventItems,
-//     tweenEventLayers
-//   };
-// };
-
 export const getLayer = (store: LayerState, id: string): Btwx.Layer => {
   return store.byId[id] as Btwx.Layer;
 };
@@ -984,19 +967,6 @@ export const getCanvasBounds = (state: LayerState): paper.Rectangle => {
   });
 };
 
-// export const getCanvasCenter = (state: LayerState): paper.Point => {
-//   const page = state.byId['page'];
-//   return new paperMain.Point(page.frame.x, page.frame.y);
-// };
-
-// export const getCanvasCenter = (state: LayerState): paper.Point => {
-//   const page = state.byId['page'];
-//   const bottomRight = getCanvasBottomRight();
-//   const xMid = (topLeft.x + bottomRight.x) / 2;
-//   const yMid = (topLeft.y + bottomRight.y) / 2;
-//   return new paper.Point(xMid, yMid);
-// };
-
 export const getClipboardTopLeft = (layerItems: Btwx.Layer[]): paper.Point => {
   const paperLayerPoints = layerItems.reduce((result, current) => {
     const layerItem = current;
@@ -1048,6 +1018,34 @@ export const getDestinationEquivalent = (store: LayerState, layer: string, desti
     return result;
   }, null);
   return equivalent;
+};
+
+export const getScopedPoint = (point: paper.Point, scope: string[]): paper.Point => {
+  return scope.reduce((result: paper.Point, current: string) => {
+    if (current !== 'page') {
+      const paperLayer = getPaperLayer(current);
+      if (paperLayer.data.layerType === 'Artboard') {
+        const artboardBackground = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
+        return result.subtract(artboardBackground.position);
+      } else {
+        return result.subtract(paperLayer.position);
+      }
+    } else {
+      return result;
+    }
+  }, point);
+};
+
+export const getScopedPosition = (store: LayerState, layer: string): paper.Point => {
+  const layerItem = store.byId[layer];
+  return layerItem.scope.reduce((result: paper.Point, current: string) => {
+    if (current !== 'page') {
+      const scopeLayerItem = store.byId[current];
+      return result.subtract(new paperMain.Point(scopeLayerItem.frame.x, scopeLayerItem.frame.y));
+    } else {
+      return result;
+    }
+  }, new paperMain.Point(layerItem.frame.x, layerItem.frame.y));
 };
 
 export const getPositionInArtboard = (layer: Btwx.Layer, artboard: Btwx.Artboard): paper.Point => {
@@ -1459,179 +1457,16 @@ export const getLongestEventTween = (tweensById: {[id: string]: Btwx.Tween}): Bt
   }, tweensById[Object.keys(tweensById)[0]]);
 };
 
-export const isTweenDestinationLayer = (store: LayerState, layer: string): boolean => {
-  const layerItem = getLayer(store, layer);
-  const layerTweens = layerItem.tweens;
-  return layerTweens.length > 0 && layerTweens.some((tween) => store.tweenById[tween].destinationLayer === layer);
-};
-
-// export const getTweensEventsByOriginArtboard = (store: LayerState, artboard: string): {
-//   allIds: string[];
-//   byId: {
-//     [id: string]: Btwx.TweenEvent;
-//   };
-// } => {
-//   const allIds: string[] = [];
-//   const byId = Object.keys(store.tweenEventById).reduce((result: {[id: string]: Btwx.TweenEvent}, current) => {
-//     const tweenEvent = store.tweenEventById[current];
-//     if (tweenEvent.artboard === artboard) {
-//       result[current] = store.tweenEventById[current];
-//       allIds.push(current);
-//     }
-//     return result;
-//   }, {});
-//   return {
-//     allIds,
-//     byId
-//   };
-// };
-
-// export const getAllArtboardTweenEventArtboards = (store: LayerState, artboard: string): {
-//   allIds: string[];
-//   byId: {
-//     [id: string]: Btwx.Artboard;
-//   };
-// } => {
-//   const allArtboardAnimationEvents = getTweensEventsByOriginArtboard(store, artboard);
-//   const allIds: string[] = [];
-//   const byId = Object.keys(allArtboardAnimationEvents.byId).reduce((result: { [id: string]: Btwx.Artboard }, current) => {
-//     const event = allArtboardAnimationEvents.byId[current];
-//     if (!allIds.includes(event.destinationArtboard)) {
-//       result[event.destinationArtboard] = store.byId[event.destinationArtboard] as Btwx.Artboard;
-//       allIds.push(event.destinationArtboard);
-//     }
-//     if (!allIds.includes(event.artboard)) {
-//       result[event.artboard] = store.byId[event.artboard] as Btwx.Artboard;
-//       allIds.push(event.artboard);
-//     }
-//     return result;
-//   }, {});
-//   return {
-//     allIds,
-//     byId
-//   };
-// };
-
-// export const getAllArtboardTweenEventDestinations = (store: LayerState, artboard: string): {
-//   allIds: string[];
-//   byId: {
-//     [id: string]: Btwx.Artboard;
-//   };
-// } => {
-//   const allArtboardAnimationEvents = getTweensEventsByOriginArtboard(store, artboard);
-//   const allIds: string[] = [];
-//   const byId = Object.keys(allArtboardAnimationEvents.byId).reduce((result: { [id: string]: Btwx.Artboard }, current) => {
-//     const event = allArtboardAnimationEvents.byId[current];
-//     if (!allIds.includes(event.destinationArtboard)) {
-//       result[event.destinationArtboard] = store.byId[event.destinationArtboard] as Btwx.Artboard;
-//       allIds.push(event.destinationArtboard);
-//     }
-//     return result;
-//   }, {});
-//   return {
-//     allIds,
-//     byId
-//   };
-// };
-
-// export const getAllArtboardTweenEventLayers = (store: LayerState, artboard: string): {
-//   allIds: string[];
-//   byId: {
-//     [id: string]: Btwx.Layer;
-//   };
-// } => {
-//   const allArtboardAnimationEvents = getTweensEventsByOriginArtboard(store, artboard);
-//   const allIds: string[] = [];
-//   const byId = Object.keys(allArtboardAnimationEvents.byId).reduce((result: { [id: string]: Btwx.Layer }, current) => {
-//     const event = allArtboardAnimationEvents.byId[current];
-//     if (!allIds.includes(event.layer)) {
-//       result[event.layer] = store.byId[event.layer] as Btwx.Artboard;
-//       allIds.push(event.layer);
-//     }
-//     return result;
-//   }, {});
-//   return {
-//     allIds,
-//     byId
-//   };
-// };
-
-// export const getAllArtboardTweens = (store: LayerState, artboard: string): {
-//   allIds: string[];
-//   byId: {
-//     [id: string]: Btwx.Tween;
-//   };
-// } => {
-//   const allArtboardAnimationEvents = getTweensEventsByOriginArtboard(store, artboard);
-//   const allIds: string[] = [];
-//   const byId = Object.keys(allArtboardAnimationEvents.byId).reduce((result: { [id: string]: Btwx.Tween }, current) => {
-//     const event = allArtboardAnimationEvents.byId[current];
-//     event.tweens.forEach((tween) => {
-//       result[tween] = store.tweenById[tween];
-//       allIds.push(tween);
-//     });
-//     return result;
-//   }, {});
-//   return {
-//     allIds,
-//     byId
-//   };
-// };
-
-// export const getAllArtboardTweenLayers = (store: LayerState, artboard: string): {
-//   allIds: string[];
-//   byId: {
-//     [id: string]: Btwx.Layer;
-//   };
-// } => {
-//   const allArtboardTweens = getAllArtboardTweens(store, artboard);
-//   const allIds: string[] = [];
-//   const byId = Object.keys(allArtboardTweens.byId).reduce((result: { [id: string]: Btwx.Layer }, current) => {
-//     const layerId = allArtboardTweens.byId[current].layer;
-//     if (!allIds.includes(layerId)) {
-//       result[layerId] = store.byId[layerId];
-//       allIds.push(layerId);
-//     }
-//     return result;
-//   }, {});
-//   return {
-//     allIds,
-//     byId
-//   };
-// };
-
-// export const getAllArtboardTweenLayerDestinations = (store: LayerState, artboard: string): {
-//   allIds: string[];
-//   byId: {
-//     [id: string]: Btwx.Layer;
-//   };
-// } => {
-//   const allArtboardTweens = getAllArtboardTweens(store, artboard);
-//   const allIds: string[] = [];
-//   const byId = Object.keys(allArtboardTweens.byId).reduce((result: { [id: string]: Btwx.Layer }, current) => {
-//     const layerId = allArtboardTweens.byId[current].destinationLayer;
-//     if (!allIds.includes(layerId)) {
-//       result[layerId] = store.byId[layerId];
-//       allIds.push(layerId);
-//     }
-//     return result;
-//   }, {});
-//   return {
-//     allIds,
-//     byId
-//   };
-// };
-
 export const getTweenEventLayers = (store: LayerState, eventId: string): {
   allIds: string[];
   byId: {
     [id: string]: Btwx.Layer;
   };
 } => {
-  const tweenEvent = store.tweenEventById[eventId];
+  const tweenEvent = store.events.byId[eventId];
   const allIds: string[] = [];
   const byId = tweenEvent.tweens.reduce((result: { [id: string]: Btwx.Layer }, current) => {
-    const tween = store.tweenById[current];
+    const tween = store.tweens.byId[current];
     if (!allIds.includes(tween.layer)) {
       result[tween.layer] = store.byId[tween.layer];
       allIds.push(tween.layer);
@@ -1650,98 +1485,11 @@ export const getTweenEventLayerTweens = (store: LayerState, eventId: string, lay
     [id: string]: Btwx.Tween;
   };
 } => {
-  const tweenEvent = store.tweenEventById[eventId];
+  const tweenEvent = store.events.byId[eventId];
   const allIds: string[] = [];
   const byId = tweenEvent.tweens.reduce((result: { [id: string]: Btwx.Tween }, current) => {
-    const tween = store.tweenById[current];
+    const tween = store.tweens.byId[current];
     if (tween.layer === layerId) {
-      result[current] = tween;
-      allIds.push(current);
-    }
-    return result;
-  }, {});
-  return {
-    allIds,
-    byId
-  };
-};
-
-export const getTweensByDestinationLayer = (store: LayerState, layerId: string): {
-  allIds: string[];
-  byId: {
-    [id: string]: Btwx.Tween;
-  };
-} => {
-  const allIds: string[] = [];
-  const byId = Object.keys(store.tweenById).reduce((result: { [id: string]: Btwx.Tween }, current) => {
-    const tween = store.tweenById[current];
-    if (tween.destinationLayer === layerId) {
-      allIds.push(current);
-      result[current] = tween;
-    }
-    return result;
-  }, {});
-  return {
-    allIds,
-    byId
-  };
-};
-
-export const getTweensByLayer = (store: LayerState, layerId: string): {
-  allIds: string[];
-  byId: {
-    [id: string]: Btwx.Tween;
-  };
-} => {
-  const allIds: string[] = [];
-  const byId = Object.keys(store.tweenById).reduce((result: { [id: string]: Btwx.Tween }, current) => {
-    const tween = store.tweenById[current];
-    if (tween.layer === layerId) {
-      allIds.push(current);
-      result[current] = tween;
-    }
-    return result;
-  }, {});
-  return {
-    allIds,
-    byId
-  };
-};
-
-export const getTweensByProp = (store: LayerState, layerId: string, prop: Btwx.TweenProp): {
-  allIds: string[];
-  byId: {
-    [id: string]: Btwx.Tween;
-  };
-} => {
-  const tweensByDestinationLayer = getTweensByDestinationLayer(store, layerId);
-  const tweensByLayer = getTweensByLayer(store, layerId);
-  const tweensByDestinationLayerAndProp = tweensByDestinationLayer.allIds.filter((id: string) => tweensByDestinationLayer.byId[id].prop === prop);
-  const tweensByLayerAndProp = tweensByLayer.allIds.filter((id: string) => tweensByLayer.byId[id].prop === prop);
-  const allIds = [...tweensByDestinationLayerAndProp, ...tweensByLayerAndProp];
-  const byId = Object.keys({...tweensByDestinationLayer.byId, ...tweensByLayer.byId}).reduce((result: { [id: string]: Btwx.Tween }, current) => {
-    const tween = store.tweenById[current];
-    if (allIds.includes(current)) {
-      result[current] = tween;
-    }
-    return result;
-  }, {});
-  return {
-    allIds,
-    byId
-  }
-};
-
-export const getTweensWithLayer = (store: LayerState, layerId: string): {
-  allIds: string[];
-  byId: {
-    [id: string]: Btwx.Tween;
-  };
-} => {
-  const allIds: string[] = [];
-  const byId = store.allTweenIds.reduce((result: { [id: string]: Btwx.Tween }, current) => {
-    const tween = store.tweenById[current];
-    if (tween.layer === layerId || tween.destinationLayer === layerId) {
       result[current] = tween;
       allIds.push(current);
     }
@@ -1817,7 +1565,7 @@ export const savePaperProjectJSON = (state: LayerState): string => {
   const uiElements = paperMain.project.getItems({data: {type: 'UIElement'}});
   if (uiElements && uiElements.length > 0) {
     uiElements.forEach((element) => {
-      element.remove();
+      element.removeChildren();
     });
   }
   const projectJSON = paperMain.project.exportJSON();
@@ -1894,129 +1642,6 @@ export const getArtboardsTopTop = (state: LayerState): number => {
   }, state.byId[artboards[0]].frame.y - (state.byId[artboards[0]].frame.height / 2));
 };
 
-// export const getSortedEvents = (store: RootState): string[] => {
-//   const tweenEvents = store.layer.present.allTweenEventIds;
-//   const eventSort = store.tweenDrawer.eventSort;
-//   const getSort = (sortBy: 'layer' | 'event' | 'artboard' | 'destinationArtboard'): string[] => {
-//     return [...tweenEvents].sort((a, b) => {
-//       const eventA = store.layer.present.tweenEventById[a];
-//       const eventB = store.layer.present.tweenEventById[b];
-//       let sortA;
-//       let sortB;
-//       switch(sortBy) {
-//         case 'layer':
-//         case 'artboard':
-//         case 'destinationArtboard':
-//           sortA = store.layer.present.byId[eventA[sortBy]].name.toUpperCase();
-//           sortB = store.layer.present.byId[eventB[sortBy]].name.toUpperCase();
-//           break;
-//         case 'event':
-//           sortA = eventA[sortBy].toUpperCase();
-//           sortB = eventB[sortBy].toUpperCase();
-//           break;
-//       }
-//       if (sortA < sortB) {
-//         return -1;
-//       }
-//       if (sortA > sortB) {
-//         return 1;
-//       }
-//       return 0;
-//     });
-//   }
-//   return (() => {
-//     if (eventSort !== 'none') {
-//       switch(eventSort) {
-//         case 'layer-asc':
-//           return getSort('layer');
-//         case 'layer-dsc':
-//           return getSort('layer').reverse();
-//         case 'event-asc':
-//           return getSort('event');
-//         case 'event-dsc':
-//           return getSort('event').reverse();
-//         case 'artboard-asc':
-//           return getSort('artboard');
-//         case 'artboard-dsc':
-//           return getSort('artboard').reverse();
-//         case 'destinationArtboard-asc':
-//           return getSort('destinationArtboard');
-//         case 'destinationArtboard-dsc':
-//           return getSort('destinationArtboard').reverse();
-//       }
-//     } else {
-//       return tweenEvents;
-//     }
-//   })();
-// };
-
-// export const getTweenEventsFrameItems = (store: RootState): {
-//   tweenEventItems: Btwx.TweenEvent[];
-//   tweenEventLayers: {
-//     allIds: string[];
-//     byId: {
-//       [id: string]: Btwx.Layer;
-//     };
-//   };
-// } => {
-//   const { layer, tweenDrawer } = store;
-//   const activeArtboard = layer.present.activeArtboard;
-//   const eventHover = tweenDrawer.eventHover;
-//   const eventHoverItem = layer.present.tweenEventById[eventHover]
-//   const tweenEventItems = !tweenDrawer.event ? getSortedEvents(store).reduce((result, current) => {
-//     const tweenEvent = layer.present.tweenEventById[current];
-//     if (tweenEvent.artboard === activeArtboard) {
-//       result = [...result, tweenEvent];
-//     }
-//     return result;
-//   }, []) as Btwx.TweenEvent[] : [layer.present.tweenEventById[tweenDrawer.event]] as Btwx.TweenEvent[];
-//   if (eventHoverItem && !tweenEventItems.some((item: Btwx.TweenEvent) => item.id === eventHoverItem.id)) {
-//     tweenEventItems.unshift(eventHoverItem);
-//   }
-//   const tweenEventLayers = tweenEventItems.reduce((result, current) => {
-//     const layerItem = layer.present.byId[current.layer];
-//     // if (layerItem.type === 'Group' && (layerItem as Btwx.Group).clipped) {
-//     //   const childLayers = (layerItem as Btwx.Group).children.reduce((childrenResult, currentChild) => {
-//     //     const childItem = layer.present.byId[currentChild];
-//     //     if (!result.allIds.includes(currentChild)) {
-//     //       childrenResult.allIds = [...childrenResult.allIds, currentChild];
-//     //       childrenResult.byId = {
-//     //         ...childrenResult.byId,
-//     //         [currentChild]: childItem
-//     //       }
-//     //     }
-//     //     return childrenResult;
-//     //   }, { allIds: [], byId: {} });
-//     //   result.allIds = [...result.allIds, ...childLayers.allIds];
-//     //   result.byId = {...result.byId, ...childLayers.byId};
-//     // }
-//     if (!result.allIds.includes(current.layer)) {
-//       result.allIds = [...result.allIds, current.layer];
-//       result.byId = {
-//         ...result.byId,
-//         [current.layer]: layerItem
-//       }
-//     }
-//     return result;
-//   }, { allIds: [], byId: {} });
-
-//   return {
-//     tweenEventItems,
-//     tweenEventLayers
-//   };
-// };
-
-// export const canGroupLayers = (store: LayerState, layers: string[]): boolean => {
-//   return layers && layers.length > 0 && layers.every((id: string) => {
-//     const layer = store.byId[id];
-//     return layer.type !== 'Artboard';
-//   });
-// };
-
-// export const canGroupSelection = (store: LayerState): boolean => {
-//   return canGroupLayers(store, store.selected);
-// };
-
 export const canUngroupLayers = (store: LayerState, layers: string[]): boolean => {
   return layers && layers.length > 0 && layers.some((id: string) => {
     const layer = store.byId[id];
@@ -2027,41 +1652,6 @@ export const canUngroupLayers = (store: LayerState, layers: string[]): boolean =
 export const canUngroupSelection = (store: LayerState): boolean => {
   return canUngroupLayers(store, store.selected);
 };
-
-// export const canBringForward = (store: LayerState, layers: string[]): boolean => {
-//   return layers && layers.length > 0 && !layers.some((id: string) => {
-//     const layer = store.byId[id];
-//     const parent = store.byId[layer.parent];
-//     return parent.children[parent.children.length - 1] === id;
-//   });
-// };
-
-// export const canBringForwardSelection = (store: LayerState): boolean => {
-//   return canBringForward(store, store.selected);
-// };
-
-// export const canSendBackward = (store: LayerState, layers: string[]): boolean => {
-//   return layers && layers.length > 0 && !layers.some((id: string) => {
-//     const layer = store.byId[id];
-//     const parent = store.byId[layer.parent];
-//     return parent.children[0] === id;
-//   });
-// };
-
-// export const canSendBackwardSelection = (store: LayerState): boolean => {
-//   return canSendBackward(store, store.selected);
-// };
-
-// export const canToggleUseAsMask = (store: LayerState, layers: string[]): boolean => {
-//   return layers && layers.length > 0 && layers.every((id: string) => {
-//     const layer = store.byId[id];
-//     return layer.type === 'Shape';
-//   });
-// };
-
-// export const canToggleUseAsMaskSelection = (store: LayerState) => {
-//   return canToggleUseAsMask(store, store.selected);
-// };
 
 export const canMaskLayers = (store: LayerState, layers: string[]): boolean => {
   const layersByDepth = layers && layers.length > 0 ? orderLayersByDepth(store, layers) : [];
@@ -2076,61 +1666,6 @@ export const canMaskLayers = (store: LayerState, layers: string[]): boolean => {
 export const canMaskSelection = (store: LayerState): boolean => {
   return canMaskLayers(store, store.selected);
 };
-
-// export const canBooleanOperation = (store: LayerState, layers: string[]): boolean => {
-//   return layers && layers.length >= 2 && layers.every((id: string) => {
-//     const layer = store.byId[id];
-//     return layer.type === 'Shape' && (layer as Btwx.Shape).shapeType !== 'Line';
-//   });
-// };
-
-// export const canBooleanOperationSelection = (store: LayerState): boolean => {
-//   return canBooleanOperation(store, store.selected);
-// };
-
-// export const canToggleFill = (store: LayerState, layers: string[]): boolean => {
-//   return layers && layers.length > 0 && layers.every((id: string) => {
-//     const layer = store.byId[id];
-//     return layer.type === 'Shape' || layer.type === 'Text';
-//   });
-// };
-
-// export const canToggleSelectionFill = (store: LayerState): boolean => {
-//   return canToggleFill(store, store.selected);
-// };
-
-// export const canToggleStroke = (store: LayerState, layers: string[]): boolean => {
-//   return layers && layers.length > 0 && layers.every((id: string) => {
-//     const layer = store.byId[id];
-//     return layer.type === 'Shape' || layer.type === 'Text';
-//   });
-// };
-
-// export const canToggleSelectionStroke = (store: LayerState): boolean => {
-//   return canToggleStroke(store, store.selected);
-// };
-
-// export const canToggleShadow = (store: LayerState, layers: string[]): boolean => {
-//   return layers && layers.length > 0 && layers.every((id: string) => {
-//     const layer = store.byId[id];
-//     return layer.type === 'Shape' || layer.type === 'Text' || layer.type === 'Image';
-//   });
-// };
-
-// export const canToggleSelectionShadow = (store: LayerState): boolean => {
-//   return canToggleShadow(store, store.selected);
-// };
-
-// export const canTransformFlip = (store: LayerState, layers: string[]): boolean => {
-//   return layers && layers.length > 0 && layers.every((id: string) => {
-//     const layer = store.byId[id];
-//     return layer.type !== 'Artboard';
-//   });
-// };
-
-// export const canTransformFlipSelection = (store: LayerState): boolean => {
-//   return canTransformFlip(store, store.selected);
-// };
 
 export const canResizeSelection = (store: LayerState): boolean => {
   const selectedWithChildren = store.selected.reduce((result: { allIds: string[]; byId: { [id: string]: Btwx.Layer } }, current) => {

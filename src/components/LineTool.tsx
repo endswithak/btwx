@@ -263,5 +263,8 @@ export default PaperTool(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(LineTool)
+  )(LineTool),
+  {
+    all: true
+  }
 );

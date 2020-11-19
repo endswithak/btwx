@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, useState, useEffect, memo } from 'react';
+import React, { useContext, useState, useEffect, ReactElement } from 'react';
 import capitalize from 'lodash.capitalize';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
@@ -34,7 +34,7 @@ interface SnapToolProps {
 
 const snapToolDebug = false;
 
-const SnapTool = memo(function SnapTool(props: SnapToolProps) {
+const SnapTool = (props: SnapToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { toolEvent, bounds, scope, onUpdate, hitTestZones, snapRule, whiteListLayers, blackListLayers, preserveAspectRatio, aspectRatio, resizeHandle, measure } = props;
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
@@ -673,32 +673,32 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
           new Guide({from, to, guideType: 'snap', removeOpts: {up: true}});
         }
       });
-      if (measure) {
-        let measureGuides: { top?: string; bottom?: string; left?: string; right?: string; all?: string } = null;
-        if (xSnapPoint) {
-          const closestLayer = getClosestPaperLayer(snapBounds.center, xGuideLayers);
-          if (closestLayer && !snapBounds.intersects(closestLayer.bounds, 1)) {
-            if (!measureGuides) {
-              measureGuides = {};
-            }
-            measureGuides['top'] = closestLayer.data.id;
-            measureGuides['bottom'] = closestLayer.data.id;
-          }
-        }
-        if (ySnapPoint) {
-          const closestLayer = getClosestPaperLayer(snapBounds.center, yGuideLayers);
-          if (closestLayer && !snapBounds.intersects(closestLayer.bounds, 1)) {
-            if (!measureGuides) {
-              measureGuides = {};
-            }
-            measureGuides['left'] = closestLayer.data.id;
-            measureGuides['right'] = closestLayer.data.id;
-          }
-        }
-        if (measureGuides) {
-          updateMeasureGuides(measureGuides, snapBounds);
-        }
-      }
+      // if (measure) {
+      //   let measureGuides: { top?: string; bottom?: string; left?: string; right?: string; all?: string } = null;
+      //   if (xSnapPoint) {
+      //     const closestLayer = getClosestPaperLayer(snapBounds.center, xGuideLayers);
+      //     if (closestLayer && !snapBounds.intersects(closestLayer.bounds, 1)) {
+      //       if (!measureGuides) {
+      //         measureGuides = {};
+      //       }
+      //       measureGuides['top'] = closestLayer.data.id;
+      //       measureGuides['bottom'] = closestLayer.data.id;
+      //     }
+      //   }
+      //   if (ySnapPoint) {
+      //     const closestLayer = getClosestPaperLayer(snapBounds.center, yGuideLayers);
+      //     if (closestLayer && !snapBounds.intersects(closestLayer.bounds, 1)) {
+      //       if (!measureGuides) {
+      //         measureGuides = {};
+      //       }
+      //       measureGuides['left'] = closestLayer.data.id;
+      //       measureGuides['right'] = closestLayer.data.id;
+      //     }
+      //   }
+      //   if (measureGuides) {
+      //     updateMeasureGuides(measureGuides, snapBounds);
+      //   }
+      // }
     }
   }, [snapBounds]);
 
@@ -838,7 +838,7 @@ const SnapTool = memo(function SnapTool(props: SnapToolProps) {
   return (
     <></>
   );
-});
+}
 
 const mapStateToProps = (state: RootState): {
   scope: string[];

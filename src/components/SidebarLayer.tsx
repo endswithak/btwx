@@ -1,26 +1,43 @@
-import React, { ReactElement, useEffect, memo, useCallback } from 'react';
+import React, { ReactElement, useEffect, useCallback } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import debounce from 'lodash.debounce';
-import { SetDraggingPayload, SetDragOverPayload, LeftSidebarTypes } from '../store/actionTypes/leftSidebar';
-import { setDragging, setDragOver } from '../store/actions/leftSidebar';
+import { SetDraggingPayload, SetDragOverPayload, SetEditingPayload, LeftSidebarTypes } from '../store/actionTypes/leftSidebar';
+import { setDragging, setEditing, setDragOver } from '../store/actions/leftSidebar';
+import { setLayerHover, selectLayers, deselectLayers } from '../store/actions/layer';
+import { SelectLayersPayload, DeselectLayersPayload, SetLayerHoverPayload, LayerTypes } from '../store/actionTypes/layer';
+import { openContextMenu } from '../store/actions/contextMenu';
+import { OpenContextMenuPayload, ContextMenuTypes } from '../store/actionTypes/contextMenu';
 import SidebarLayerDropzoneWrap from './SidebarLayerDropzoneWrap';
-import SidebarLayerItem from './SidebarLayerItem';
-import SidebarLayerChildren from './SidebarLayerChildren';
-import SidebarDropzoneGroupContext from './SidebarDropzoneGroupContext';
-
-// add drag enter/exit event to conditionaly load dropzones with new "dragHover" prop...so they dont all render at once
+import SidebarLayerTitle from './SidebarLayerTitle';
+import SidebarLayerChevron from './SidebarLayerChevron';
+import SidebarLayerIcon from './SidebarLayerIcon';
+import SidebarLayerBackground from './SidebarLayerBackground';
+import SidebarLayerMaskedIcon from './SidebarLayerMaskedIcon';
 
 interface SidebarLayerProps {
-  layer: string;
-  dragging?: string;
+  id: string;
+  isOpen: boolean;
+  setOpen: any;
+  nestingLevel: number;
+  style: any;
   isDragGhost?: boolean;
+  dragging?: string;
+  isSelected?: boolean;
+  isHover?: boolean;
+  underlyingMask?: string;
+  hover?: string;
   setDragging?(payload: SetDraggingPayload): LeftSidebarTypes;
   setDragOver?(payload: SetDragOverPayload): LeftSidebarTypes;
+  setEditing?(payload: SetEditingPayload): LeftSidebarTypes;
+  selectLayers?(payload: SelectLayersPayload): LayerTypes;
+  deselectLayers?(payload: DeselectLayersPayload): LayerTypes;
+  setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
+  openContextMenu?(payload: OpenContextMenuPayload): ContextMenuTypes;
 }
 
-const SidebarLayer = memo(function SidebarLayer(props: SidebarLayerProps) {
-  const { layer, setDragging, isDragGhost, dragging, setDragOver } = props;
+const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
+  const { id, nestingLevel, setDragging, isDragGhost, dragging, hover, setDragOver, setOpen, isOpen, style, setLayerHover, openContextMenu, selectLayers, deselectLayers, setEditing, isSelected, isHover, underlyingMask } = props;
 
   const debounceDragOver = useCallback(
     debounce((payload: SetDragOverPayload) => {
@@ -30,7 +47,7 @@ const SidebarLayer = memo(function SidebarLayer(props: SidebarLayerProps) {
   );
 
   const handleDragStart = (e: any): void => {
-    setDragging({dragging: layer});
+    setDragging({dragging: id});
     e.dataTransfer.setDragImage(document.getElementById('sidebarDragGhosts'), 0, 0);
   }
 
@@ -41,7 +58,73 @@ const SidebarLayer = memo(function SidebarLayer(props: SidebarLayerProps) {
   const handleDragEnter = (e: any) => {
     e.stopPropagation();
     if (dragging) {
-      debounceDragOver({dragOver: layer});
+      debounceDragOver({dragOver: id});
+    }
+  }
+
+  const handleMouseDown = (e: any): void => {
+    // if (!editing) {
+
+    // }
+    const openIcon = document.getElementById(`${id}-open-icon`);
+    const maskIcon = document.getElementById(`${id}-mask-icon`);
+    if (e.target === openIcon || openIcon.contains(e.target)) {
+      setOpen(!isOpen);
+    } else if (e.target === maskIcon || maskIcon.contains(e.target)) {
+      selectLayers({layers: [underlyingMask], newSelection: true});
+    } else {
+      if (e.metaKey) {
+        if (isSelected) {
+          deselectLayers({layers: [id]});
+        } else {
+          selectLayers({layers: [id]});
+        }
+      } else {
+        if (!isSelected) {
+          selectLayers({layers: [id], newSelection: true});
+        }
+      }
+    }
+  }
+
+  const handleMouseEnter = (e: any): void => {
+    // const maskIcon = document.getElementById(`${id}-mask-icon`);
+    // if (e.target === maskIcon || maskIcon.contains(e.target) && hover !== underlyingMask) {
+    //   e.stopPropagation();
+    //   setLayerHover({id: underlyingMask});
+    // } else {
+    //   if (!isHover) {
+    //     setLayerHover({id: id});
+    //   }
+    // }
+    setLayerHover({id: id});
+  }
+
+  const handleMouseLeave = (): void => {
+    setLayerHover({id: null});
+  }
+
+  const handleContextMenu = (e: any) => {
+    // if (!editing) {
+
+    // }
+    openContextMenu({
+      type: 'LayerEdit',
+      id: id,
+      x: e.clientX,
+      y: e.clientY,
+      paperX: e.clientX,
+      paperY: e.clientY,
+      data: {
+        origin: 'sidebar'
+      }
+    });
+  }
+
+  const handleDoubleClick = (e: any): void => {
+    const openIcon = document.getElementById(`${id}-open-icon`);
+    if (e.target !== openIcon && !openIcon.contains(e.target)) {
+      setEditing({editing: id, edit: name});
     }
   }
 
@@ -51,32 +134,56 @@ const SidebarLayer = memo(function SidebarLayer(props: SidebarLayerProps) {
 
   return (
     <div
-      id={isDragGhost ? `dragGhost-${layer}` : layer}
+      id={isDragGhost ? `dragGhost-${id}` : id}
       draggable={!isDragGhost}
       className='c-sidebar-layer'
+      style={{
+        ...style,
+        paddingLeft: nestingLevel * 12
+      }}
+      onMouseEnter={isDragGhost ? null : handleMouseEnter}
+      onMouseLeave={isDragGhost ? null : handleMouseLeave}
+      onMouseDown={isDragGhost ? null : handleMouseDown}
+      onContextMenu={isDragGhost ? null : handleContextMenu}
+      onDoubleClick={isDragGhost ? null : handleDoubleClick}
       onDragStart={isDragGhost ? null : handleDragStart}
       onDragEnd={isDragGhost ? null : handleDragEnd}
       onDragEnter={handleDragEnter}>
-      <SidebarLayerItem
-        layer={layer}
+      <SidebarLayerBackground
+        id={id}
+        isDragGhost={isDragGhost} />
+      <SidebarLayerChevron
+        id={id}
+        isOpen={isOpen}
+        isDragGhost={isDragGhost} />
+      <SidebarLayerMaskedIcon
+        id={id}
+        isDragGhost={isDragGhost} />
+      <SidebarLayerIcon
+        id={id}
+        isDragGhost={isDragGhost} />
+      <SidebarLayerTitle
+        id={id}
         isDragGhost={isDragGhost} />
       <SidebarLayerDropzoneWrap
-        layer={layer}
-        isDragGhost={isDragGhost} />
-      <SidebarLayerChildren
-        layer={layer}
+        layer={id}
         isDragGhost={isDragGhost} />
     </div>
   );
-});
+}
 
-const mapStateToProps = (state: RootState) => {
-  const { leftSidebar } = state;
+const mapStateToProps = (state: RootState, ownProps: SidebarLayerProps) => {
+  const { leftSidebar, layer } = state;
+  const layerItem = layer.present.byId[ownProps.id];
   const dragging = leftSidebar.dragging;
-  return { dragging };
+  const isSelected = layerItem.selected;
+  const isHover = layerItem.hover;
+  const hover = layer.present.hover;
+  const underlyingMask = layerItem.underlyingMask;
+  return { dragging, isSelected, isHover, underlyingMask, hover };
 };
 
 export default connect(
   mapStateToProps,
-  { setDragging, setDragOver }
+  { setDragging, setDragOver, setLayerHover, openContextMenu, selectLayers, deselectLayers, setEditing }
 )(SidebarLayer);

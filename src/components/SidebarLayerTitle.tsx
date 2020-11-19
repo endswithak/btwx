@@ -2,43 +2,50 @@ import React, { useContext, ReactElement, useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { setLayerName } from '../store/actions/layer';
 import { LayerTypes, SetLayerNamePayload } from '../store/actionTypes/layer';
-import { setEditing } from '../store/actions/leftSidebar';
-import { SetEditingPayload, LeftSidebarTypes } from '../store/actionTypes/leftSidebar';
+import { setEditing, setEdit } from '../store/actions/leftSidebar';
+import { SetEditingPayload, SetEditPayload, LeftSidebarTypes } from '../store/actionTypes/leftSidebar';
 import { RootState } from '../store/reducers';
 import SidebarInput from './SidebarInput';
 import { ThemeContext } from './ThemeProvider';
 
 interface SidebarLayerTitleProps {
-  layer: string;
+  id: string;
+  name?: string;
   isDragGhost?: boolean;
-  editing?: boolean;
   isArtboard?: boolean;
   isSelected?: boolean;
-  layerName?: string;
+  editing?: boolean;
+  edit?: string;
   setEditing?(payload: SetEditingPayload): LeftSidebarTypes;
+  setEdit?(payload: SetEditPayload): LeftSidebarTypes;
   setLayerName?(payload: SetLayerNamePayload): LayerTypes;
 }
 
 const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isArtboard, isSelected, layerName, layer, editing, setEditing, setLayerName } = props;
-  const [nameInput, setNameInput] = useState(layerName);
+  const { id, name, isArtboard, isSelected, setEditing, setLayerName, editing, edit, setEdit } = props;
+  // const [nameInput, setNameInput] = useState(editing ? edit : name);
+
+  // useEffect(() => {
+  //   if (editing) {
+  //     setNameInput(name);
+  //   }
+  // }, []);
 
   useEffect(() => {
-    if (isSelected) {
-      setNameInput(layerName);
-    }
-  }, [isSelected]);
+    console.log('LAYER TITLE');
+  }, []);
 
   const handleSubmit = () => {
-    if (nameInput.replace(/\s/g, '').length > 0 && nameInput !== layerName) {
-      setLayerName({id: layer, name: nameInput});
+    if (edit.replace(/\s/g, '').length > 0 && edit !== name) {
+      setLayerName({id: id, name: edit});
     }
     setEditing({editing: null});
   }
 
   const handleChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    setNameInput((e.target as HTMLInputElement).value);
+    // setNameInput((e.target as HTMLInputElement).value);
+    setEdit({edit: (e.target as HTMLInputElement).value});
   }
 
   return (
@@ -63,33 +70,132 @@ const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
         editing
         ? <SidebarInput
             onChange={handleChange}
-            value={nameInput}
+            value={editing ? edit : name}
             onSubmit={handleSubmit}
             submitOnBlur
             removedOnSubmit
             selectOnMount />
-        : layerName
+        : name
       }
     </div>
   );
 }
 
 const mapStateToProps = (state: RootState, ownProps: SidebarLayerTitleProps): {
-  editing: boolean;
-  isArtboard: boolean;
+  name: string;
   isSelected: boolean;
-  layerName: string;
+  isArtboad: boolean;
+  editing: boolean;
+  edit: string;
 } => {
   const { layer, leftSidebar } = state;
-  const layerItem = layer.present.byId[ownProps.layer];
-  const layerName = layerItem.name;
-  const editing = leftSidebar.editing === ownProps.layer && !ownProps.isDragGhost;
-  const isArtboard = layerItem.type === 'Artboard';
-  const isSelected = layerItem.selected && !ownProps.isDragGhost;
-  return { editing, isArtboard, isSelected, layerName };
+  const layerItem = layer.present.byId[ownProps.id];
+  const name = layerItem.name;
+  const isArtboad = layerItem.type === 'Artboard';
+  const isSelected = layerItem.selected;
+  const editing = leftSidebar.editing === ownProps.id && !ownProps.isDragGhost;
+  const edit = leftSidebar.edit;
+  return { name, isSelected, isArtboad, editing, edit };
 };
 
 export default connect(
   mapStateToProps,
-  { setLayerName, setEditing }
+  { setLayerName, setEditing, setEdit }
 )(SidebarLayerTitle);
+
+// import React, { useContext, ReactElement, useState, useEffect } from 'react';
+// import { connect } from 'react-redux';
+// import { setLayerName } from '../store/actions/layer';
+// import { LayerTypes, SetLayerNamePayload } from '../store/actionTypes/layer';
+// import { setEditing, setEdit } from '../store/actions/leftSidebar';
+// import { SetEditingPayload, SetEditPayload, LeftSidebarTypes } from '../store/actionTypes/leftSidebar';
+// import { RootState } from '../store/reducers';
+// import SidebarInput from './SidebarInput';
+// import { ThemeContext } from './ThemeProvider';
+
+// interface SidebarLayerTitleProps {
+//   id: string;
+//   name: string;
+//   type: Btwx.LayerType;
+//   selected: boolean;
+//   isDragGhost?: boolean;
+//   isArtboard?: boolean;
+//   isSelected?: boolean;
+//   layerName?: string;
+//   editing?: boolean;
+//   edit?: string;
+//   setEditing?(payload: SetEditingPayload): LeftSidebarTypes;
+//   setEdit?(payload: SetEditPayload): LeftSidebarTypes;
+//   setLayerName?(payload: SetLayerNamePayload): LayerTypes;
+// }
+
+// const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
+//   const theme = useContext(ThemeContext);
+//   const { id, name, type, selected, setEditing, setLayerName, editing, edit, setEdit } = props;
+//   // const [nameInput, setNameInput] = useState(editing ? edit : name);
+
+//   // useEffect(() => {
+//   //   if (editing) {
+//   //     setNameInput(name);
+//   //   }
+//   // }, []);
+
+//   const handleSubmit = () => {
+//     if (edit.replace(/\s/g, '').length > 0 && edit !== name) {
+//       setLayerName({id: id, name: edit});
+//     }
+//     setEditing({editing: null});
+//   }
+
+//   const handleChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
+//     // setNameInput((e.target as HTMLInputElement).value);
+//     setEdit({edit: (e.target as HTMLInputElement).value});
+//   }
+
+//   return (
+//     <div
+//       className={`
+//         c-sidebar-layer__name
+//         ${editing
+//           ? 'c-sidebar-layer__name--editing'
+//           : null
+//         }
+//         ${type === 'Artboard'
+//           ? 'c-sidebar-layer__name--artboard'
+//           : null
+//         }`
+//       }
+//       style={{
+//         color: selected
+//         ? theme.text.onPrimary
+//         : theme.text.base
+//       }}>
+//       {
+//         editing
+//         ? <SidebarInput
+//             onChange={handleChange}
+//             value={editing ? edit : name}
+//             onSubmit={handleSubmit}
+//             submitOnBlur
+//             removedOnSubmit
+//             selectOnMount />
+//         : name
+//       }
+//     </div>
+//   );
+// }
+
+// const mapStateToProps = (state: RootState, ownProps: SidebarLayerTitleProps): {
+//   editing: boolean;
+//   edit: string;
+// } => {
+//   const { leftSidebar } = state;
+//   const editing = leftSidebar.editing === ownProps.id && !ownProps.isDragGhost;
+//   const edit = leftSidebar.edit;
+//   return { editing, edit };
+// };
+
+// export default connect(
+//   mapStateToProps,
+//   { setLayerName, setEditing, setEdit }
+// )(SidebarLayerTitle);

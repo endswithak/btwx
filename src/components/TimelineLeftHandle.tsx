@@ -154,7 +154,7 @@ const mapStateToProps = (state: RootState, ownProps: TimelineLeftHandleProps): {
   tween: Btwx.Tween;
 } => {
   const { layer } = state;
-  const tween = layer.present.tweenById[ownProps.tweenId];
+  const tween = layer.present.tweens.byId[ownProps.tweenId];
   return { tween };
 };
 

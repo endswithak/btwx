@@ -56,7 +56,7 @@ const TweenDrawerEventLayerTween = (props: TweenDrawerEventLayerTweenProps): Rea
 
 const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventLayerTweenProps) => {
   const { layer, tweenDrawer } = state;
-  const tween = layer.present.tweenById[ownProps.tweenId];
+  const tween = layer.present.tweens.byId[ownProps.tweenId];
   const tweenHover = tweenDrawer.tweenHover;
   const tweenEditing = tweenDrawer.tweenEditing;
   const titleCaseProp = ((): string => {

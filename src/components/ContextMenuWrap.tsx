@@ -446,9 +446,9 @@ const mapStateToProps = (state: RootState) => {
   const isArtboard = layerItem ? layerItem.type === 'Artboard' : false;
   const artboardParent = isArtboard ? layerItem.id : hasArtboardParent ? tweenEventLayerScope[1] : null;
   const canAddTweenEvent = layerItem && (selected.length === 0 || (selected.length === 1 && selected[0] === contextMenu.id)) && (tweenEventLayerScope.some(id => layer.present.allArtboardIds.includes(id)) || layer.present.allArtboardIds.includes(contextMenu.id));
-  const tweenEvents = layerItem && canAddTweenEvent ? layer.present.allTweenEventIds.filter((id) => layer.present.tweenEventById[id].layer === contextMenu.id && layer.present.tweenEventById[id].artboard === artboardParent) : null;
+  const tweenEvents = layerItem && canAddTweenEvent ? layer.present.events.allIds.filter((id) => layer.present.events.byId[id].layer === contextMenu.id && layer.present.events.byId[id].artboard === artboardParent) : null;
   const tweenEventItems = tweenEvents ? tweenEvents.reduce((result, current) => {
-    result = [...result, layer.present.tweenEventById[current]];
+    result = [...result, layer.present.events.byId[current]];
     return result;
    }, []) : null;
   const currentY = contextMenu.y && document.getElementById('context-menu') ? document.getElementById('context-menu').offsetTop : contextMenu.y;

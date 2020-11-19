@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { paperMain } from '../canvas';
-import { scrollToLayer } from '../utils';
 import { RootState } from '../store/reducers';
 import { getDeepSelectItem, getNearestScopeAncestor, getPaperLayer } from '../store/selectors/layer';
 import { setCanvasActiveTool } from '../store/actions/canvasSettings';
@@ -32,6 +31,7 @@ interface CanvasLayerEventsProps {
   resizing?: boolean;
   selecting?: boolean;
   dragHandle?: boolean;
+  layerTreeRef?: any;
   textSettings?: TextSettingsState;
   setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
   selectLayers?(payload: SelectLayersPayload): LayerTypes;
@@ -46,7 +46,7 @@ interface CanvasLayerEventsProps {
 
 const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layerEvent, activeTool, dragging, resizing, selecting, hover, selected, deselectLayers, deselectAllLayers, layerItem, nearestScopeAncestor, deepSelectItem, setLayerHover, selectLayers, deepSelectLayer, deepSelectLayerThunk, setCanvasActiveTool, dragHandle, textSettings, openTextEditor, openContextMenu } = props;
+  const { layerEvent, activeTool, dragging, resizing, selecting, hover, selected, deselectLayers, deselectAllLayers, layerItem, nearestScopeAncestor, deepSelectItem, setLayerHover, selectLayers, deepSelectLayer, deepSelectLayerThunk, setCanvasActiveTool, dragHandle, textSettings, openTextEditor, openContextMenu, layerTreeRef } = props;
 
   const handleMouseMove = (): void => {
     if (layerEvent.empty) {
@@ -93,8 +93,9 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
             layerId = nearestScopeAncestor.id;
             selectLayers({layers: [nearestScopeAncestor.id], newSelection: true});
           }
-          if (layerId) {
-            scrollToLayer(layerId);
+          if (layerId && layerTreeRef) {
+            layerTreeRef.scrollToItem(layerId);
+            // scrollToLayer(layerId);
           }
         }
       }
@@ -109,7 +110,10 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
     if (!layerEvent.empty) {
       if (nearestScopeAncestor.id !== layerItem.id) {
         deepSelectLayerThunk({id: layerItem.id}).then(() => {
-          scrollToLayer(deepSelectItem.id);
+          // scrollToLayer(deepSelectItem.id);
+          if (layerTreeRef) {
+            layerTreeRef.scrollToItem(deepSelectItem.id);
+          }
         });
       } else {
         if (layerItem.type === 'Text') {
@@ -204,8 +208,9 @@ const mapStateToProps = (state: RootState, ownProps: CanvasLayerEventsProps): {
   selecting: boolean;
   dragHandle: boolean;
   textSettings: TextSettingsState;
+  layerTreeRef: any;
 } => {
-  const { layer, canvasSettings, textSettings } = state;
+  const { layer, canvasSettings, textSettings, leftSidebar } = state;
   const layerEvent = ownProps.layerEvent;
   const hitResult = layerEvent ? ownProps.layerEvent.hitResult : null;
   const layerItem = hitResult && !layerEvent.empty ? layer.present.byId[hitResult.item.data.type === 'Layer' ? hitResult.item.data.id : hitResult.item.parent.data.id] : null;
@@ -218,6 +223,7 @@ const mapStateToProps = (state: RootState, ownProps: CanvasLayerEventsProps): {
   const resizing = canvasSettings.resizing;
   const selecting = canvasSettings.selecting;
   const dragHandle = canvasSettings.dragHandle;
+  const layerTreeRef = leftSidebar.ref;
   return {
     layerItem,
     nearestScopeAncestor,
@@ -229,7 +235,8 @@ const mapStateToProps = (state: RootState, ownProps: CanvasLayerEventsProps): {
     resizing,
     selecting,
     dragHandle,
-    textSettings
+    textSettings,
+    layerTreeRef
   };
 };
 

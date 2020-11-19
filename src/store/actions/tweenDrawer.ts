@@ -26,7 +26,7 @@ export const setTweenDrawerEventHover = (payload: SetTweenDrawerEventHoverPayloa
 export const setTweenDrawerEventHoverThunk = (payload: SetTweenDrawerEventHoverPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
-    const eventLayer = payload.id ? state.layer.present.tweenEventById[payload.id].layer : payload.id;
+    const eventLayer = payload.id ? state.layer.present.events.byId[payload.id].layer : payload.id;
     scrollToLayer(eventLayer);
     dispatch(setTweenDrawerEventHover(payload));
     dispatch(setLayerHover({ id: eventLayer }));
@@ -60,7 +60,7 @@ export const setTweenDrawerTweenHoverThunk = (payload: SetTweenDrawerEventHoverP
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     if (!state.tweenDrawer.tweenEditing) {
-      const tweenLayer = payload.id ? state.layer.present.tweenById[payload.id].layer : payload.id;
+      const tweenLayer = payload.id ? state.layer.present.tweens.byId[payload.id].layer : payload.id;
       // scrollToLayer(tweenLayer);
       dispatch(setTweenDrawerTweenHover(payload));
       if (state.layer.present.hover !== tweenLayer) {

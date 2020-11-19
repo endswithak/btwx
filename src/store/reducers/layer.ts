@@ -1,5 +1,5 @@
 import undoable from 'redux-undo';
-import { DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../../constants';
+import { DEFAULT_STYLE, DEFAULT_TRANSFORM, TWEEN_PROPS_MAP } from '../../constants';
 
 import {
   ADD_ARTBOARD,
@@ -431,21 +431,31 @@ export interface LayerState {
   allMaskIds: string[];
   scope: string[];
   hover: string;
+  events: {
+    allIds: string[];
+    byId: {
+      [id: string]: Btwx.TweenEvent;
+    };
+  };
+  tweens: {
+    allIds: string[];
+    byId: {
+      [id: string]: Btwx.Tween;
+    };
+  };
+  shapeIcons: {
+    [id: string]: string;
+  };
+  childrenById: {
+    [id: string]: string[];
+  };
   paperProject: string;
-  allTweenEventIds: string[];
-  tweenEventById: {
-    [id: string]: Btwx.TweenEvent;
-  };
-  allTweenIds: string[];
-  tweenById: {
-    [id: string]: Btwx.Tween;
-  };
   edit: string;
 }
 
 export const initialState: LayerState = {
   byId: {
-    'page': {
+    page: {
       type: 'Page',
       id: 'page',
       name: 'Page',
@@ -460,9 +470,14 @@ export const initialState: LayerState = {
       },
       children: [],
       selected: false,
-      tweenEvents: [],
       scope: [],
-      tweens: [],
+      events: [],
+      tweens: {
+        allIds: [],
+        asOrigin: [],
+        asDestination: [],
+        byProp: TWEEN_PROPS_MAP
+      },
       style: DEFAULT_STYLE,
       transform: DEFAULT_TRANSFORM
     } as Btwx.Page
@@ -479,11 +494,19 @@ export const initialState: LayerState = {
   allMaskIds: [],
   scope: ['page'],
   hover: null,
-  paperProject: '[["Layer",{"applyMatrix":true,"children":[["Group",{"applyMatrix":true,"name":"Page","data":{"id":"page","type":"Layer","layerType":"Page","scope":[]}}],["Group",{"applyMatrix":true,"name":"UI","data":{"id":"ui","type":"UI"},"children":[["Group",{"applyMatrix":true,"name":"Active Artboard Frame","data":{"id":"ActiveArtboardFrame"}}],["Group",{"applyMatrix":true,"name":"Artboard Events","data":{"id":"ArtboardEvents"}}],["Group",{"applyMatrix":true,"name":"Hover Frame","data":{"id":"HoverFrame"}}],["Group",{"applyMatrix":true,"name":"Selection Frame","data":{"id":"SelectionFrame"}}],["Group",{"applyMatrix":true,"name":"Guides","data":{"id":"Guides"},"children":[["Group",{"applyMatrix":true,"name":"Snap Guides","data":{"id":"SnapGuides"}}],["Group",{"applyMatrix":true,"name":"Static Guides","data":{"id":"StaticGuides"}}]]}],["Group",{"applyMatrix":true,"name":"Measure Guides","data":{"id":"MeasureGuides"}}]]}]]}]]',
-  allTweenEventIds: [],
-  tweenEventById: {},
-  allTweenIds: [],
-  tweenById: {},
+  events: {
+    allIds: [],
+    byId: {}
+  },
+  tweens: {
+    allIds: [],
+    byId: {}
+  },
+  shapeIcons: {},
+  childrenById: {
+    page: []
+  },
+  paperProject: '[["Layer",{"applyMatrix":true,"children":[["Group",{"applyMatrix":true,"name":"Page","data":{"id":"page","type":"Layer","layerType":"Page","scope":[]}}],["Group",{"applyMatrix":true,"name":"UI","data":{"id":"ui","type":"UI"},"children":[["Group",{"applyMatrix":true,"name":"Active Artboard Frame","data":{"id":"ActiveArtboardFrame","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Artboard Events","data":{"id":"ArtboardEvents","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Hover Frame","data":{"id":"HoverFrame","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Selection Frame","data":{"id":"SelectionFrame","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Guides","data":{"id":"Guides"},"children":[["Group",{"applyMatrix":true,"name":"Snap Guides","data":{"id":"SnapGuides","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Static Guides","data":{"id":"StaticGuides","type":"UIElement"}}]]}],["Group",{"applyMatrix":true,"name":"Measure Guides","data":{"id":"MeasureGuides","type":"UIElement"}}]]}]]}]]',
   edit: null
 };
 

@@ -1,27 +1,35 @@
+import { FixedSizeTree } from '../../../react-vtree';
+
 import {
   SET_DRAGGING,
   SET_DRAG_OVER,
   SET_DROPZONE,
   SET_EDITING,
+  SET_EDIT,
   SET_SEARCHING,
   SET_SEARCH,
+  SET_REF,
   LeftSidebarTypes,
 } from '../actionTypes/leftSidebar';
 
 export interface LeftSidebarState {
+  ref: FixedSizeTree;
   dragging: string;
   dragOver: string;
   dropzone: Btwx.Dropzone;
   editing: string;
+  edit: string;
   searching: boolean;
   search: string;
 }
 
 const initialState: LeftSidebarState = {
+  ref: null,
   dragging: null,
   dragOver: null,
   dropzone: null,
   editing: null,
+  edit: '',
   searching: false,
   search: ''
 };
@@ -51,7 +59,14 @@ export default (state = initialState, action: LeftSidebarTypes): LeftSidebarStat
     case SET_EDITING: {
       return {
         ...state,
-        editing: action.payload.editing
+        editing: action.payload.editing,
+        edit: action.payload.editing === null ? '' : Object.prototype.hasOwnProperty.call(action.payload, 'edit') ? action.payload.edit : state.edit
+      };
+    }
+    case SET_EDIT: {
+      return {
+        ...state,
+        edit: action.payload.edit
       };
     }
     case SET_SEARCHING: {
@@ -64,6 +79,12 @@ export default (state = initialState, action: LeftSidebarTypes): LeftSidebarStat
       return {
         ...state,
         search: action.payload.search
+      };
+    }
+    case SET_REF: {
+      return {
+        ...state,
+        ref: action.payload.ref
       };
     }
     default:

@@ -26,9 +26,9 @@ const mapStateToProps = (state: RootState) => {
   const isDragging = canvasSettings.dragging;
   const isZooming = canvasSettings.zooming;
   const isTextEditorOpen = textEditor.isOpen;
-  const tweenEvents = layer.present.allTweenEventIds.length > 0;
-  const hasTweenEvent = tweenEvents && activeArtboard && layer.present.allTweenEventIds.some((id) => layer.present.tweenEventById[id].artboard === activeArtboard);
-  const isEnabled = viewSettings.tweenDrawer.isOpen && tweenEvents && (tweenDrawer.event || hasTweenEvent) && !isTextEditorOpen && !(isResizing && artboardSelected) && !(isDragging && artboardSelected) && !isZooming;
+  const events = layer.present.events.allIds.length > 0;
+  const hasTweenEvent = events && activeArtboard && layer.present.events.allIds.some((id) => layer.present.events.byId[id].artboard === activeArtboard);
+  const isEnabled = viewSettings.tweenDrawer.isOpen && events && (tweenDrawer.event || hasTweenEvent) && !isTextEditorOpen && !(isResizing && artboardSelected) && !(isDragging && artboardSelected) && !isZooming;
   return { isEnabled };
 };
 

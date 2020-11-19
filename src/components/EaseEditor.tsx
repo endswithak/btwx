@@ -331,7 +331,7 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
 
 const mapStateToProps = (state: RootState) => {
   const { layer, easeEditor, canvasSettings } = state;
-  const tween = layer.present.tweenById[easeEditor.tween];
+  const tween = layer.present.tweens.byId[easeEditor.tween];
   const canvasFocusing = canvasSettings.focusing;
   return { tween, easeEditor, canvasFocusing };
 };

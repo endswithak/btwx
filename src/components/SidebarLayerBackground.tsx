@@ -5,19 +5,19 @@ import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 
 interface SidebarLayerBackgroundProps {
-  layer: string;
+  id: string;
   isDragGhost?: boolean;
   isSelected?: boolean;
-  isHovering?: boolean;
   isArtboard?: boolean;
+  isHovering?: boolean;
   editing?: boolean;
 }
 
 interface BackgroundProps {
   isSelected: boolean;
-  editing: boolean;
   isArtboard: boolean;
   isHovering: boolean;
+  editing: boolean;
 }
 
 const Background = styled.div<BackgroundProps>`
@@ -29,8 +29,10 @@ const Background = styled.div<BackgroundProps>`
       : 'none'
   };
   box-shadow: 0 0 0 1px ${
-    props => (props.isSelected || props.isHovering)
-    ? props.theme.palette.primary
+    props => props.isHovering
+    ? (props.isSelected || props.editing)
+      ? props.theme.palette.primaryHover
+      : props.theme.palette.primary
     : props.isArtboard
       ? props.theme.name === 'dark'
         ? props.theme.background.z4
@@ -41,7 +43,7 @@ const Background = styled.div<BackgroundProps>`
 
 const SidebarLayerBackground = (props: SidebarLayerBackgroundProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layer, isHovering, isSelected, isArtboard, editing } = props;
+  const { isHovering, isSelected, isArtboard, isDragGhost, editing } = props;
 
   useEffect(() => {
     console.log('LAYER BACKGROUND');
@@ -49,31 +51,90 @@ const SidebarLayerBackground = (props: SidebarLayerBackgroundProps): ReactElemen
 
   return (
     <Background
+      className='c-sidebar-layer__background'
       isSelected={isSelected}
-      editing={editing}
       isArtboard={isArtboard}
       isHovering={isHovering}
-      theme={theme}
-      className='c-layers-sidebar-layer-item__background' />
+      editing={editing}
+      theme={theme} />
   );
 }
 
 const mapStateToProps = (state: RootState, ownProps: SidebarLayerBackgroundProps): {
   isSelected: boolean;
-  isHovering: boolean;
   isArtboard: boolean;
+  isHovering: boolean;
   editing: boolean;
 } => {
-  const { layer, leftSidebar } = state;
-  const hover = layer.present.hover;
-  const layerItem = layer.present.byId[ownProps.layer];
-  const isSelected = layerItem.selected && !ownProps.isDragGhost;
-  const isHovering = hover === ownProps.layer && !ownProps.isDragGhost;
+  const { leftSidebar, layer } = state;
+  const layerItem = layer.present.byId[ownProps.id];
+  const editing = leftSidebar.editing === ownProps.id;
   const isArtboard = layerItem.type === 'Artboard' && !ownProps.isDragGhost;
-  const editing = leftSidebar.editing === ownProps.layer && !ownProps.isDragGhost;
-  return { isSelected, isHovering, isArtboard, editing };
+  const isSelected = layerItem.selected && !ownProps.isDragGhost;
+  const isHovering = layerItem.hover && !ownProps.isDragGhost;
+  return { isArtboard, isSelected, isHovering, editing };
 };
 
 export default connect(
   mapStateToProps
 )(SidebarLayerBackground);
+
+// import React, { useContext, ReactElement } from 'react';
+// import { connect } from 'react-redux';
+// import styled from 'styled-components';
+// import { RootState } from '../store/reducers';
+// import { ThemeContext } from './ThemeProvider';
+
+// interface SidebarLayerBackgroundProps {
+//   id: string;
+//   selected: boolean;
+//   hover: boolean;
+//   type: Btwx.LayerType;
+//   isDragGhost?: boolean;
+//   editing?: boolean;
+// }
+
+// interface BackgroundProps {
+//   isSelected: boolean;
+//   editing: boolean;
+//   isArtboard: boolean;
+//   isHovering: boolean;
+// }
+
+// const Background = styled.div<BackgroundProps>`
+//   background: ${
+//     props => props.isSelected
+//     ? props.theme.palette.primary
+//     : props.isArtboard
+//       ? props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0
+//       : 'none'
+//   };
+//   box-shadow: 0 0 0 1px ${
+//     props => props.isHovering
+//     ? props.isSelected
+//       ? props.theme.palette.primaryHover
+//       : props.theme.palette.primary
+//     : props.isArtboard
+//       ? props.theme.name === 'dark'
+//         ? props.theme.background.z4
+//         : props.theme.background.z5
+//       : 'none'
+//   } inset;
+// `;
+
+// const SidebarLayerBackground = (props: SidebarLayerBackgroundProps): ReactElement => {
+//   const theme = useContext(ThemeContext);
+//   const { hover, selected, type, isDragGhost, editing } = props;
+
+//   return (
+//     <Background
+//       isSelected={selected && !isDragGhost}
+//       editing={editing}
+//       isArtboard={type === 'Artboard' && !isDragGhost}
+//       isHovering={hover && !isDragGhost}
+//       theme={theme}
+//       className='c-sidebar-layer__background' />
+//   );
+// }
+
+// export default SidebarLayerBackground;

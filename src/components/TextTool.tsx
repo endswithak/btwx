@@ -191,5 +191,8 @@ export default PaperTool(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(TextTool)
+  )(TextTool),
+  {
+    all: true
+  }
 );

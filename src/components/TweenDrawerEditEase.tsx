@@ -68,7 +68,7 @@ const TweenDrawerEditEase = (props: TweenDrawerEditEaseProps): ReactElement => {
 
 const mapStateToProps = (state: RootState, ownProps: TweenDrawerEditEaseProps) => {
   const { layer, easeEditor } = state;
-  const tween = layer.present.tweenById[ownProps.tweenId];
+  const tween = layer.present.tweens.byId[ownProps.tweenId];
   const editingEase = easeEditor.tween && easeEditor.tween === ownProps.tweenId;
   return { tween, editingEase };
 };

@@ -53,24 +53,25 @@ const XInput = (props: XInputProps): ReactElement => {
 const mapStateToProps = (state: RootState) => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const artboardParents = selected.reduce((result: Btwx.Artboard[], current: string) => {
-    const layerItem = layer.present.byId[current];
-    const layerScope = layerItem.scope;
-    if (layerScope.length > 1 && layer.present.byId[layerScope[1]].type === 'Artboard') {
-      result = [...result, layer.present.byId[layerScope[1]] as Btwx.Artboard];
-    } else {
-      result = [...result, null];
-    }
-    return result;
-  }, []);
+  // const artboardParents = selected.reduce((result: Btwx.Artboard[], current: string) => {
+  //   const layerItem = layer.present.byId[current];
+  //   const layerScope = layerItem.scope;
+  //   if (layerScope.length > 1 && layer.present.byId[layerScope[1]].type === 'Artboard') {
+  //     result = [...result, layer.present.byId[layerScope[1]] as Btwx.Artboard];
+  //   } else {
+  //     result = [...result, null];
+  //   }
+  //   return result;
+  // }, []);
   const xValues = selected.reduce((result: number[], current: string, index: number) => {
     const layerItem = layer.present.byId[current];
-    const parent = artboardParents[index];
-    if (parent) {
-      result = [...result, getPositionInArtboard(layerItem, parent).x];
-    } else {
-      result = [...result, layerItem.frame.x];
-    }
+    // const parent = artboardParents[index];
+    // if (parent) {
+    //   result = [...result, getPositionInArtboard(layerItem, parent).x];
+    // } else {
+    //   result = [...result, layerItem.frame.x];
+    // }
+    result = [...result, layerItem.frame.x];
     return result;
   }, []);
   const xValue = (() => {

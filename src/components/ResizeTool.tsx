@@ -6,7 +6,7 @@ import { getPaperLayer, getSelectionBounds, getSelectedById } from '../store/sel
 import { paperMain } from '../canvas';
 import { setCanvasResizing } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasResizingPayload } from '../store/actionTypes/canvasSettings';
-import { scaleLayers, updateSelectionFrame, updateMeasureFrame } from '../store/actions/layer';
+import { scaleLayers, updateSelectionFrame } from '../store/actions/layer';
 import { LayerTypes, ScaleLayersPayload } from '../store/actionTypes/layer';
 import { ThemeContext } from './ThemeProvider';
 import SnapTool from './SnapTool';
@@ -708,5 +708,8 @@ export default PaperTool(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(ResizeTool)
+  )(ResizeTool),
+  {
+    all: true
+  }
 );

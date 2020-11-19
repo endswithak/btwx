@@ -1,20 +1,20 @@
 import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { updateMeasureFrame } from '../store/actions/layer';
+import { updateMeasureGuides } from '../store/actions/layer';
 import { paperMain } from '../canvas';
 
 interface MeasureFrameProps {
   selected?: string[];
   hover?: string;
-  updateMeasureFrame?(): void;
+  updateMeasureGuides?(): void;
 }
 
 const MeasureFrame = (props: MeasureFrameProps): ReactElement => {
-  const { selected, hover, updateMeasureFrame } = props;
+  const { selected, hover, updateMeasureGuides } = props;
 
   useEffect(() => {
-    updateMeasureFrame();
+    updateMeasureGuides();
     return () => {
       const measureFrame = paperMain.project.getItem({ data: { id: 'MeasureFrame' } });
       measureFrame.removeChildren();
@@ -35,5 +35,5 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(
   mapStateToProps,
-  { updateMeasureFrame }
+  { updateMeasureGuides }
 )(MeasureFrame);

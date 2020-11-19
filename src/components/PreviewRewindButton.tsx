@@ -36,7 +36,7 @@ const mapStateToProps = (state: RootState): {
   rewindOrigin: string;
 } => {
   const { tweenDrawer, layer } = state;
-  const rewindOrigin = tweenDrawer.event ? layer.present.tweenEventById[tweenDrawer.event].artboard : null;
+  const rewindOrigin = tweenDrawer.event ? layer.present.events.byId[tweenDrawer.event].artboard : null;
   const canRewind = tweenDrawer.event !== null && rewindOrigin !== layer.present.activeArtboard;
   return { canRewind, rewindOrigin };
 };

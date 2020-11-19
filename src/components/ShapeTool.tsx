@@ -6,7 +6,7 @@ import { isBetween } from '../utils';
 import { RootState } from '../store/reducers';
 import { DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_POINTS, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../constants';
 import Tooltip from '../canvas/tooltip';
-import { getPaperLayer } from '../store/selectors/layer';
+import { getPaperLayer, getScopedPoint } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
 import { setCanvasDrawing } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasDrawingPayload } from '../store/actionTypes/canvasSettings';
@@ -333,21 +333,24 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
       const fromPoint = (paperLayer as paper.Path).firstSegment.point;
       const toPoint = (paperLayer as paper.Path).lastSegment.point;
       const vector = toPoint.subtract(fromPoint);
+      const parent = (() => {
+        const overlappedArtboard = getPaperLayer('page').getItem({
+          data: (data: any) => {
+            return data.id === 'ArtboardBackground';
+          },
+          overlapping: paperLayer.bounds
+        });
+        return overlappedArtboard && scope[scope.length - 1] === 'page' ? overlappedArtboard.parent.data.id : scope[scope.length - 1];
+      })();
+      const parentPaperLayer = getPaperLayer(parent);
+      const position = getScopedPoint(paperLayer.position, parentPaperLayer.data.scope);
       addShapeThunk({
         layer: {
-          parent: (() => {
-            const overlappedArtboard = getPaperLayer('page').getItem({
-              data: (data: any) => {
-                return data.id === 'ArtboardBackground';
-              },
-              overlapping: paperLayer.bounds
-            });
-            return overlappedArtboard && scope[scope.length - 1] === 'page' ? overlappedArtboard.parent.data.id : scope[scope.length - 1];
-          })(),
+          parent: parent,
           name: shapeType,
           frame: {
-            x: paperLayer.position.x,
-            y: paperLayer.position.y,
+            x: position.x,
+            y: position.y,
             width: paperLayer.bounds.width,
             height: paperLayer.bounds.height,
             innerWidth: shapeType === 'Line' ? vector.length : paperLayer.bounds.width,
@@ -489,5 +492,8 @@ export default PaperTool(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(ShapeTool)
+  )(ShapeTool),
+  {
+    all: true
+  }
 );

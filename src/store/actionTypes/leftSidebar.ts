@@ -1,18 +1,41 @@
+import { FixedSizeTree } from '../../../react-vtree';
+
 export const SET_EDITING = 'SET_EDITING';
+export const SET_EDIT = 'SET_EDIT';
 export const SET_DRAGGING = 'SET_DRAGGING';
 export const SET_DRAG_OVER = 'SET_DRAG_OVER';
 export const SET_DROPZONE = 'SET_DROPZONE';
 export const SET_DRAG_LAYERS = 'SET_DRAG_LAYERS';
 export const SET_SEARCHING = 'SET_SEARCHING';
 export const SET_SEARCH = 'SET_SEARCH';
+export const SET_REF = 'SET_REF';
+
+export interface SetRefPayload {
+  ref: FixedSizeTree;
+}
+
+export interface SetRef{
+  type: typeof SET_REF;
+  payload: SetRefPayload;
+}
 
 export interface SetEditingPayload {
   editing: string;
+  edit?: string;
 }
 
 export interface SetEditing {
   type: typeof SET_EDITING;
   payload: SetEditingPayload;
+}
+
+export interface SetEditPayload {
+  edit: string;
+}
+
+export interface SetEdit {
+  type: typeof SET_EDIT;
+  payload: SetEditPayload;
 }
 
 export interface SetDraggingPayload {
@@ -70,9 +93,11 @@ export interface SetSearch {
 }
 
 export type LeftSidebarTypes = SetDragging |
+                               SetRef |
                                SetDragOver |
                                SetDropzone |
                                SetEditing |
                                SetDragLayers |
                                SetSearching |
-                               SetSearch;
+                               SetSearch |
+                               SetEdit;

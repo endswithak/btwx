@@ -175,20 +175,20 @@ declare namespace Btwx {
     allImageIds: string[];
     allMaskIds: string[];
     scope: string[];
-    inView: {
-      allIds: string[];
-      snapPoints: Btwx.SnapPoint[];
-    };
     hover: string;
+    events: {
+      allIds: string[];
+      byId: {
+        [id: string]: Btwx.TweenEvent;
+      };
+    };
+    tweens: {
+      allIds: string[];
+      byId: {
+        [id: string]: Btwx.Tween;
+      };
+    };
     paperProject: string;
-    allTweenEventIds: string[];
-    tweenEventById: {
-      [id: string]: Btwx.TweenEvent;
-    };
-    allTweenIds: string[];
-    tweenById: {
-      [id: string]: Btwx.Tween;
-    };
     edit: string;
   }
 
@@ -320,18 +320,14 @@ declare namespace Btwx {
     frame: Frame;
     parent: string;
     selected: boolean;
+    hover: boolean;
     children: string[] | null;
-    tweenEvents: string[];
     scope: string[];
-    tweens: string[];
-    originLayerForTweens: {
+    events: string[];
+    tweens: {
       allIds: string[];
-      byProp: {
-        [prop: string]: string[];
-      };
-    };
-    destinationLayerForTweens: {
-      allIds: string[];
+      asOrigin: string[];
+      asDestination: string[];
       byProp: {
         [prop: string]: string[];
       };
@@ -341,8 +337,8 @@ declare namespace Btwx {
     ignoreUnderlyingMask: boolean;
     underlyingMask: string;
     masked: boolean;
-    // masked: boolean;
-    // mask: boolean;
+    mask: boolean;
+    pathData: string;
   }
 
   type ClipboardType = 'layers' | 'style' | 'sketch-layers';
@@ -371,12 +367,6 @@ declare namespace Btwx {
     showChildren: boolean;
   }
 
-  interface Mask extends Layer {
-    type: 'Mask';
-    shape: string;
-    children: string[];
-  }
-
   interface Artboard extends Layer {
     type: 'Artboard';
     children: string[];
@@ -401,8 +391,6 @@ declare namespace Btwx {
     type: 'Shape';
     shapeType: ShapeType;
     children: null;
-    pathData: string;
-    mask: boolean;
     closed: boolean;
     sides?: number;
     points?: number;

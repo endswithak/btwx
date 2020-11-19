@@ -8,6 +8,10 @@ export const removeItem = (array: string[], item: string): string[] => {
   return array.filter(id => id !== item);
 }
 
+export const removeItems = (array: string[], items: string[]): string[] => {
+  return array.filter(id => !items.includes(id));
+}
+
 export const addItem = (array: string[], item: string): string[] => {
   return [...array, item];
 }
@@ -31,3 +35,7 @@ export const moveItemAbove = (array: string[], index: number, aboveIndex: number
 export const moveItemBelow = (array: string[], index: number, belowIndex: number) => {
   return moveItem(array, index, index >= belowIndex ? belowIndex + 1 : belowIndex);
 }
+
+export const replaceAllStr = (str: string, find: string, replace: string): string => {
+  return str.replace(new RegExp(find, 'g'), replace);
+};

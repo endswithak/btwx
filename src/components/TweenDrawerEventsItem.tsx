@@ -85,7 +85,7 @@ const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement =>
       hovering={hovering}>
       <div className='c-tween-drawer-events-item__module'>
         <SidebarLayerIcon
-          layer={layerItem.id}
+          id={layerItem.id}
           isDragGhost />
         <span style={{marginLeft: 8}}>{layerItem.name}</span>
       </div>
@@ -117,7 +117,7 @@ const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventItemProps):
 } => {
   const { layer, tweenDrawer } = state;
   const activeArtboard = layer.present.activeArtboard;
-  const tweenEvent = layer.present.tweenEventById[ownProps.id];
+  const tweenEvent = layer.present.events.byId[ownProps.id];
   const artboard = layer.present.byId[tweenEvent.artboard];
   const artboardName = artboard.name;
   const layerItem = layer.present.byId[tweenEvent.layer];

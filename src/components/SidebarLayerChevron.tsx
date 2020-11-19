@@ -1,49 +1,36 @@
 import React, { useContext, ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { showLayerChildren, hideLayerChildren } from '../store/actions/layer';
-import { ShowLayerChildrenPayload, HideLayerChildrenPayload, LayerTypes } from '../store/actionTypes/layer';
 import { ThemeContext } from './ThemeProvider';
 import Icon from './Icon';
 
 interface SidebarLayerChevronProps {
-  layer: string;
+  id: string;
+  isOpen: boolean;
   isDragGhost?: boolean;
-  showChildren?: boolean;
-  isGroup?: boolean;
   isSelected?: boolean;
-  showLayerChildren?(payload: ShowLayerChildrenPayload): LayerTypes;
-  hideLayerChildren?(payload: HideLayerChildrenPayload): LayerTypes;
+  canOpen?: boolean;
 }
 
 const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { showChildren, isGroup, isSelected, layer, showLayerChildren, hideLayerChildren, isDragGhost } = props;
+  const { id, isSelected, canOpen, isDragGhost, isOpen } = props;
 
   useEffect(() => {
     console.log('LAYER CHEVRON');
   }, []);
 
-  const handleChevronClick = (): void => {
-    if (showChildren) {
-      hideLayerChildren({id: layer});
-    } else {
-      showLayerChildren({id: layer});
-    }
-  }
-
   return (
     <div
       className='c-sidebar-layer__icon c-sidebar-layer__icon--chevron'
-      id={`${layer}-expand`}
-      onClick={isGroup && !isDragGhost ? handleChevronClick : null}
+      id={`${id}-open-icon`}
       style={{
-        pointerEvents: isGroup ? 'auto' : 'none'
+        pointerEvents: canOpen ? 'auto' : 'none'
       }}>
       {
-        isGroup
+        canOpen
         ? <Icon
-            name={showChildren ? 'thicc-chevron-down' : 'thicc-chevron-right'}
+            name={isOpen ? 'thicc-chevron-down' : 'thicc-chevron-right'}
             small
             style={{
               fill: isSelected
@@ -57,19 +44,56 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState, ownProps: SidebarLayerChevronProps): {
-  showChildren: boolean;
-  isGroup: boolean;
   isSelected: boolean;
+  canOpen: boolean;
 } => {
   const { layer } = state;
-  const layerItem = layer.present.byId[ownProps.layer];
-  const isGroup = layerItem.type === 'Group' || layerItem.type === 'Artboard';
-  const showChildren = (isGroup ? (layerItem as Btwx.Group).showChildren : false) && !ownProps.isDragGhost;
-  const isSelected = layerItem.selected && !ownProps.isDragGhost;
-  return { showChildren, isGroup, isSelected };
+  const layerItem = layer.present.byId[ownProps.id];
+  const canOpen = layerItem.type === 'Group' || layerItem.type === 'Artboard';
+  const isSelected = layerItem.selected;
+  return { canOpen, isSelected };
 };
-
 export default connect(
   mapStateToProps,
-  { showLayerChildren, hideLayerChildren }
 )(SidebarLayerChevron);
+
+// import React, { useContext, ReactElement } from 'react';
+// import { ThemeContext } from './ThemeProvider';
+// import Icon from './Icon';
+
+// interface SidebarLayerChevronProps {
+//   id: string;
+//   type: Btwx.LayerType;
+//   selected: boolean;
+//   isOpen: boolean;
+//   isDragGhost?: boolean;
+// }
+
+// const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
+//   const theme = useContext(ThemeContext);
+//   const { id, type, selected, isDragGhost, isOpen } = props;
+
+//   return (
+//     <div
+//       className='c-sidebar-layer__icon c-sidebar-layer__icon--chevron'
+//       id={`${id}-open-icon`}
+//       style={{
+//         pointerEvents: (type === 'Group' || type === 'Artboard' || type === 'Page') ? 'auto' : 'none'
+//       }}>
+//       {
+//         (type === 'Group' || type === 'Artboard' || type === 'Page')
+//         ? <Icon
+//             name={isOpen ? 'thicc-chevron-down' : 'thicc-chevron-right'}
+//             small
+//             style={{
+//               fill: selected
+//               ? theme.text.onPrimary
+//               : theme.text.lighter
+//             }} />
+//         : null
+//       }
+//     </div>
+//   );
+// }
+
+// export default SidebarLayerChevron;

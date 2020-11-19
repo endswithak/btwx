@@ -1,4 +1,5 @@
 import {
+  SET_REF,
   SET_EDITING,
   SET_DRAGGING,
   SET_DRAG_OVER,
@@ -6,6 +7,8 @@ import {
   SET_DRAG_LAYERS,
   SET_SEARCHING,
   SET_SEARCH,
+  SET_EDIT,
+  SetRefPayload,
   SetEditingPayload,
   SetDraggingPayload,
   SetDragOverPayload,
@@ -13,8 +16,14 @@ import {
   SetDragLayersPayload,
   SetSearchingPayload,
   SetSearchPayload,
+  SetEditPayload,
   LeftSidebarTypes
 } from '../actionTypes/leftSidebar';
+
+export const setRef = (payload: SetRefPayload): LeftSidebarTypes => ({
+  type: SET_REF,
+  payload
+});
 
 export const setEditing = (payload: SetEditingPayload): LeftSidebarTypes => ({
   type: SET_EDITING,
@@ -48,5 +57,10 @@ export const setSearching = (payload: SetSearchingPayload): LeftSidebarTypes => 
 
 export const setSearch = (payload: SetSearchPayload): LeftSidebarTypes => ({
   type: SET_SEARCH,
+  payload
+});
+
+export const setEdit = (payload: SetEditPayload): LeftSidebarTypes => ({
+  type: SET_EDIT,
   payload
 });

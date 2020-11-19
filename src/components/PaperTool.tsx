@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useEffect, ReactElement, useState } from 'react';
+import React, { useEffect, ReactElement, useState, useCallback } from 'react';
+import throttle from 'lodash.throttle';
 import { paperMain } from '../canvas';
 
 export interface PaperToolProps {
@@ -10,9 +11,21 @@ export interface PaperToolProps {
   downEvent?: paper.ToolEvent;
   dragEvent?: paper.ToolEvent;
   upEvent?: paper.ToolEvent;
+  altModifier?: boolean;
+  shiftModifier?: boolean;
 }
 
-const PaperToolWrap = (Component: any) => {
+interface EventProps {
+  all?: boolean;
+  keyDown?: boolean;
+  keyUp?: boolean;
+  mouseMove?: boolean;
+  mouseDown?: boolean;
+  mouseDrag?: boolean;
+  mouseUp?: boolean;
+}
+
+const PaperToolWrap = (Component: any, events: EventProps) => {
   const PaperTool = (): ReactElement => {
     const [tool, setTool] = useState<paper.Tool>(null);
     const [keyDownEvent, setKeyDownEvent] = useState<paper.KeyEvent>(null);
@@ -21,6 +34,22 @@ const PaperToolWrap = (Component: any) => {
     const [downEvent, setDownEvent] = useState<paper.ToolEvent>(null);
     const [dragEvent, setDragEvent] = useState<paper.ToolEvent>(null);
     const [upEvent, setUpEvent] = useState<paper.ToolEvent>(null);
+    const [altModifier, setAltModifier] = useState<boolean>(false);
+    const [shiftModifier, setShiftModifier] = useState<boolean>(false);
+
+    const handleDrag = useCallback(
+      throttle((e: paper.ToolEvent) => {
+        setDragEvent(e);
+      }, 25),
+      []
+    );
+
+    const handleMove = useCallback(
+      throttle((e: paper.ToolEvent) => {
+        setMoveEvent(e);
+      }, 25),
+      []
+    );
 
     const handleKeyDown = (e: paper.KeyEvent): void => {
       setKeyDownEvent(e);
@@ -31,7 +60,8 @@ const PaperToolWrap = (Component: any) => {
     }
 
     const handleMouseMove = (e: paper.ToolEvent): void => {
-      setMoveEvent(e);
+      // setMoveEvent(e);
+      handleMove(e);
     }
 
     const handleDownEvent = (e: paper.ToolEvent): void => {
@@ -39,24 +69,53 @@ const PaperToolWrap = (Component: any) => {
     }
 
     const handleDragEvent = (e: paper.ToolEvent): void => {
-      setDragEvent(e);
+      // setDragEvent(e);
+      handleDrag(e);
     }
 
     const handleUpEvent = (e: paper.ToolEvent): void => {
       setUpEvent(e);
     }
 
+    const handleKeyDownModifiers = (event: any) => {
+      switch(event.key) {
+        case 'Alt':
+          setAltModifier(true);
+          break;
+        case 'Shift':
+          setShiftModifier(true);
+          break;
+      }
+    }
+
+    const handleKeyUpModifiers = (event: any) => {
+      switch(event.key) {
+        case 'Alt':
+          setAltModifier(false);
+          break;
+        case 'Shift':
+          setShiftModifier(false);
+          break;
+      }
+    }
+
     useEffect(() => {
       const newTool = new paperMain.Tool();
       newTool.minDistance = 1;
-      newTool.onKeyDown = handleKeyDown;
-      newTool.onKeyUp = handleKeyUp;
-      newTool.onMouseMove = handleMouseMove;
-      newTool.onMouseDown = handleDownEvent;
-      newTool.onMouseDrag = handleDragEvent;
-      newTool.onMouseUp = handleUpEvent;
+      newTool.onKeyDown = events.all || events.keyDown ? handleKeyDown : null;
+      newTool.onKeyUp = events.all || events.keyUp ? handleKeyUp : null;
+      newTool.onMouseMove = events.all || events.mouseMove ? handleMouseMove : null;
+      newTool.onMouseDown = events.all || events.mouseDown ? handleDownEvent : null
+      newTool.onMouseDrag = events.all || events.mouseDrag ? handleDragEvent : null;
+      newTool.onMouseUp = events.all || events.mouseUp ? handleUpEvent : null;
       setTool(newTool);
       paperMain.tool = null;
+      document.addEventListener('keydown', handleKeyDownModifiers);
+      document.addEventListener('keyup', handleKeyUpModifiers);
+      return () => {
+        document.removeEventListener('keydown', handleKeyDownModifiers);
+        document.removeEventListener('keyup', handleKeyUpModifiers);
+      }
     }, []);
 
     return (
@@ -67,7 +126,9 @@ const PaperToolWrap = (Component: any) => {
         moveEvent={moveEvent}
         downEvent={downEvent}
         dragEvent={dragEvent}
-        upEvent={upEvent} />
+        upEvent={upEvent}
+        altModifier={altModifier}
+        shiftModifier={shiftModifier} />
     );
   }
   return PaperTool;

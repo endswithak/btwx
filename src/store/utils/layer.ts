@@ -3,9 +3,9 @@ import { v4 as uuidv4 } from 'uuid';
 import tinyColor from 'tinycolor2';
 import { LayerState } from '../reducers/layer';
 import * as layerActions from '../actions/layer';
-import { addItem, removeItem, insertItem, moveItemAbove, moveItemBelow } from './general';
+import { addItem, removeItem, insertItem, moveItemAbove, moveItemBelow, replaceAllStr } from './general';
 import { paperMain } from '../../canvas';
-import { TWEEN_PROPS } from '../../constants';
+import { TWEEN_PROPS_MAP } from '../../constants';
 
 import {
   AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer,
@@ -47,11 +47,11 @@ import {
 import {
   getLayerIndex, getLayer, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor, getPaperLayer, getSelectionTopLeft,
   getSelectionBottomRight, getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayerDescendants,
-  getDestinationEquivalent, getEquivalentTweenProps, getDeepSelectItem, getTweensByDestinationLayer, getTweensByLayer,
-  getLayersBounds, getGradientOriginPoint, getGradientDestinationPoint, getGradientStops, orderLayersByDepth, orderLayersByLeft,
-  orderLayersByTop, savePaperProjectJSON, getTweensByProp, getEquivalentTweenProp, getTweensWithLayer, gradientsMatch, getPaperProp,
-  getArtboardsTopTop, getSelectionBounds, getLineFromPoint, getLineToPoint, getLineVector, getParentPaperLayer, getLayerUnderlyingSiblings,
-  getMaskableUnderlyingSiblings, getSiblingLayersWithUnderlyingMask, getLayerUnderlyingMaskRoot, getOlderSiblingIgnoringUnderlyingMask
+  getDestinationEquivalent, getEquivalentTweenProps, getDeepSelectItem, getLayersBounds, getGradientOriginPoint,
+  getGradientDestinationPoint, getGradientStops, orderLayersByDepth, orderLayersByLeft, orderLayersByTop, savePaperProjectJSON,
+  getEquivalentTweenProp, gradientsMatch, getPaperProp, getArtboardsTopTop, getSelectionBounds, getLineFromPoint, getLineToPoint,
+  getLineVector, getParentPaperLayer, getLayerUnderlyingSiblings, getMaskableUnderlyingSiblings, getSiblingLayersWithUnderlyingMask,
+  getLayerUnderlyingMaskRoot, getOlderSiblingIgnoringUnderlyingMask, getScopedPoint
 } from '../selectors/layer';
 
 export const addArtboard = (state: LayerState, action: AddArtboard): LayerState => {
@@ -67,7 +67,12 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
         children: addItem(currentState.byId[currentState.page].children, action.payload.layer.id)
       } as Btwx.Page
     },
-    allArtboardIds: addItem(currentState.allArtboardIds, action.payload.layer.id)
+    allArtboardIds: addItem(currentState.allArtboardIds, action.payload.layer.id),
+    childrenById: {
+      ...currentState.childrenById,
+      [action.payload.layer.id]: action.payload.layer.children,
+      [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id),
+    }
   }
   if (!action.payload.batch) {
     currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.layer.id], newSelection: true}) as SelectLayers);
@@ -91,7 +96,12 @@ export const addShape = (state: LayerState, action: AddShape): LayerState => {
         children: addItem((currentState.byId[action.payload.layer.parent] as Btwx.Group).children, action.payload.layer.id),
       } as Btwx.Group
     },
-    allShapeIds: addItem(state.allShapeIds, action.payload.layer.id)
+    allShapeIds: addItem(state.allShapeIds, action.payload.layer.id),
+    childrenById: {
+      ...currentState.childrenById,
+      [action.payload.layer.id]: action.payload.layer.children,
+      [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
+    }
   }
   currentState = updateLayerBounds(currentState, action.payload.layer.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.layer.id, 'all');
@@ -120,7 +130,12 @@ export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
         // showChildren: true
       } as Btwx.Group
     },
-    allGroupIds: addItem(state.allGroupIds, action.payload.layer.id)
+    allGroupIds: addItem(state.allGroupIds, action.payload.layer.id),
+    childrenById: {
+      ...currentState.childrenById,
+      [action.payload.layer.id]: action.payload.layer.children,
+      [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
+    }
   }
   currentState = updateLayerBounds(currentState, action.payload.layer.id);
   if (!action.payload.batch) {
@@ -148,7 +163,12 @@ export const addText = (state: LayerState, action: AddText): LayerState => {
         // showChildren: true
       } as Btwx.Group
     },
-    allTextIds: addItem(state.allTextIds, action.payload.layer.id)
+    allTextIds: addItem(state.allTextIds, action.payload.layer.id),
+    childrenById: {
+      ...currentState.childrenById,
+      [action.payload.layer.id]: action.payload.layer.children,
+      [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
+    }
   }
   currentState = updateLayerBounds(currentState, action.payload.layer.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.layer.id, 'all');
@@ -176,7 +196,12 @@ export const addImage = (state: LayerState, action: AddImage): LayerState => {
         children: addItem((currentState.byId[action.payload.layer.parent] as Btwx.Group).children, action.payload.layer.id),
       } as Btwx.Group
     },
-    allImageIds: addItem(state.allImageIds, action.payload.layer.id)
+    allImageIds: addItem(state.allImageIds, action.payload.layer.id),
+    childrenById: {
+      ...currentState.childrenById,
+      [action.payload.layer.id]: action.payload.layer.children,
+      [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
+    }
   }
   currentState = updateLayerBounds(currentState, action.payload.layer.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.layer.id, 'all');
@@ -218,14 +243,11 @@ export const addLayers = (state: LayerState, action: AddLayers): LayerState => {
 
 export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState => {
   let currentState = state;
+  const layerAndDescendants = getLayerAndDescendants(currentState, action.payload.id);
   const layerItem = state.byId[action.payload.id];
-  const layersToRemove = getLayerAndDescendants(state, action.payload.id);
-  const isMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
-  currentState = layersToRemove.reduce((result, current) => {
-    const tweensByDestinationLayer = getTweensByDestinationLayer(result, current);
-    const tweensByLayer = getTweensByLayer(result, current);
+  currentState = layerAndDescendants.reduce((result: LayerState, current) => {
     const currentLayerItem = result.byId[current];
-    // remove layer from type array
+    const isMask = currentLayerItem.type === 'Shape' && (currentLayerItem as Btwx.Shape).mask;
     switch(currentLayerItem.type) {
       case 'Artboard':
         result = {
@@ -263,24 +285,18 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
       result = setLayerHover(result, layerActions.setLayerHover({id: null}) as SetLayerHover);
     }
     // if layer is the active artboard, set active artboard to null
-    if (currentLayerItem.id === result.activeArtboard) {
+    if (result.activeArtboard === current) {
       result = setActiveArtboard(result, layerActions.setActiveArtboard({id: result.allArtboardIds.length > 0 ? result.allArtboardIds[0] : null}) as SetActiveArtboard);
     }
     // if layer is a destination layer for any tween, remove that tween
-    if (tweensByDestinationLayer.allIds.length > 0) {
-      result = tweensByDestinationLayer.allIds.reduce((tweenResult, tweenCurrent) => {
-        return removeLayerTween(tweenResult, layerActions.removeLayerTween({id: tweenCurrent}) as RemoveLayerTween);
-      }, result);
-    }
-    // if layer is a layer for any tween, remove that tween
-    if (tweensByLayer.allIds.length > 0) {
-      result = tweensByLayer.allIds.reduce((tweenResult, tweenCurrent) => {
+    if (currentLayerItem.tweens.allIds) {
+      result = currentLayerItem.tweens.allIds.reduce((tweenResult, tweenCurrent) => {
         return removeLayerTween(tweenResult, layerActions.removeLayerTween({id: tweenCurrent}) as RemoveLayerTween);
       }, result);
     }
     // if layer has any tween events, remove those events
-    if (currentLayerItem.tweenEvents.length > 0) {
-      result = currentLayerItem.tweenEvents.reduce((tweenResult, tweenCurrent) => {
+    if (currentLayerItem.events.length > 0) {
+      result = currentLayerItem.events.reduce((tweenResult, tweenCurrent) => {
         return removeLayerTweenEvent(tweenResult, layerActions.removeLayerTweenEvent({id: tweenCurrent}) as RemoveLayerTweenEvent);
       }, result);
     }
@@ -291,40 +307,48 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
         return removeLayerTweenEvent(tweenResult, layerActions.removeLayerTweenEvent({id: tweenCurrent}) as RemoveLayerTweenEvent);
       }, result);
     }
+    // if ignoring underlying mask
+    if (currentLayerItem.ignoreUnderlyingMask) {
+      result = toggleLayerIgnoreUnderlyingMask(result, layerActions.toggleLayerIgnoreUnderlyingMask({id: current}) as ToggleLayerIgnoreUnderlyingMask);
+    }
+    // if layer mask
+    if (isMask) {
+      result = toggleLayerMask(result, layerActions.toggleLayerMask({id: current}) as ToggleLayerMask);
+    }
+    // if selection includes layer, remove layer from selection
+    if (result.selected.includes(current)) {
+      result = deselectLayers(result, layerActions.deselectLayers({layers: [current]}) as DeselectLayers);
+    }
+    result = {
+      ...result,
+      allIds: removeItem(result.allIds, current),
+      byId: Object.keys(result.byId).reduce((byIdResult: any, key) => {
+        if (key !== current) {
+          if (currentLayerItem.parent === key) {
+            byIdResult[key] = {
+              ...result.byId[key],
+              children: removeItem(result.byId[key].children, action.payload.id)
+            }
+          } else {
+            byIdResult[key] = result.byId[key];
+          }
+        }
+        return byIdResult;
+      }, {}),
+      childrenById: Object.keys(result.childrenById).reduce((childrenResult: any, key) => {
+        if (key !== current) {
+          if (currentLayerItem.parent === key) {
+            childrenResult[key] = removeItem(result.childrenById[key], action.payload.id)
+          } else {
+            childrenResult[key] = result.childrenById[key];
+          }
+        }
+        return childrenResult;
+      }, {})
+    }
     return result;
   }, currentState);
-  // if ignoring underlying mask
-  if (layerItem.ignoreUnderlyingMask) {
-    currentState = toggleLayerIgnoreUnderlyingMask(currentState, layerActions.toggleLayerIgnoreUnderlyingMask({id: action.payload.id}) as ToggleLayerIgnoreUnderlyingMask);
-  }
-  // if layer mask
-  if (isMask) {
-    currentState = toggleLayerMask(currentState, layerActions.toggleLayerMask({id: action.payload.id}) as ToggleLayerMask);
-  }
-  // if selection includes layer, remove layer from selection
-  if (currentState.selected.includes(action.payload.id)) {
-    currentState = deselectLayers(currentState, layerActions.deselectLayers({layers: [action.payload.id]}) as DeselectLayers);
-  }
-  // remove paper layer
   getPaperLayer(action.payload.id).remove();
-  // remove layer
-  currentState = {
-    ...currentState,
-    allIds: currentState.allIds.filter((id) => !layersToRemove.includes(id)),
-    byId: Object.keys(currentState.byId).reduce((result: any, key) => {
-      if (!layersToRemove.includes(key)) {
-        if (layerItem.parent && layerItem.parent === key) {
-          result[key] = {
-            ...currentState.byId[key],
-            children: removeItem(currentState.byId[key].children, action.payload.id)
-          }
-        } else {
-          result[key] = currentState.byId[key];
-        }
-      }
-      return result;
-    }, {})
-  }
   if (layerItem.scope.includes(action.payload.id)) {
     currentState = setGlobalScope(currentState, layerActions.setGlobalScope({
       scope: layerItem.scope
@@ -341,7 +365,9 @@ export const removeLayers = (state: LayerState, action: RemoveLayers): LayerStat
   currentState = action.payload.layers.reduce((result, current) => {
     return removeLayer(result, layerActions.removeLayer({id: current}) as RemoveLayer);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  if (!action.payload.batch) {
+    currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  }
   return currentState;
 }
 
@@ -504,17 +530,57 @@ export const setLayerHover = (state: LayerState, action: SetLayerHover): LayerSt
   let currentState = state;
   const currentHover = state.hover;
   const nextHover = action.payload.id;
-  if (currentHover) {
+  if (currentHover !==  null) {
     const currentHoverPaperLayer = getPaperLayer(currentHover);
     currentHoverPaperLayer.data.hover = false;
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [currentHover]: {
+          ...currentState.byId[currentHover],
+          hover: false
+        }
+      }
+    };
   }
-  if (nextHover) {
+  if (nextHover !== null) {
     const nextHoverPaperLayer = getPaperLayer(nextHover);
     nextHoverPaperLayer.data.hover = true;
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [nextHover]: {
+          ...currentState.byId[nextHover],
+          hover: true
+        }
+      }
+    };
   }
   currentState = {
     ...currentState,
     hover: action.payload.id
+  };
+  return currentState;
+};
+
+export const setShapeIcon = (state: LayerState, id: string, pathData: string): LayerState => {
+  let currentState = state;
+  const layerIcon = new paperMain.CompoundPath({
+    pathData: pathData,
+    insert: false
+  });
+  layerIcon.fitBounds(new paperMain.Rectangle({
+    point: new paperMain.Point(0,0),
+    size: new paperMain.Size(24,24)
+  }));
+  currentState = {
+    ...currentState,
+    shapeIcons: {
+      ...currentState.shapeIcons,
+      [id]: layerIcon.pathData
+    }
   };
   return currentState;
 };
@@ -573,6 +639,11 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
           showChildren: true,
           children: addItem((currentState.byId[action.payload.id] as Btwx.Group).children, action.payload.child)
         } as Btwx.Group
+      },
+      childrenById: {
+        ...currentState.childrenById,
+        [childItem.parent]: removeItem(currentState.childrenById[childItem.parent], action.payload.child),
+        [action.payload.id]: addItem(currentState.childrenById[action.payload.id], action.payload.child)
       }
     };
     currentState = setLayerScope(currentState, layerActions.setLayerScope({id: action.payload.child, scope: [...layerItem.scope, action.payload.id]}) as SetLayerScope);
@@ -600,6 +671,10 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
           showChildren: true,
           children: addItem(removeItem((currentState.byId[action.payload.id] as Btwx.Group).children, action.payload.child), action.payload.child)
         } as Btwx.Group
+      },
+      childrenById: {
+        ...currentState.childrenById,
+        [action.payload.id]: addItem(removeItem(currentState.childrenById[action.payload.id], action.payload.child), action.payload.child)
       }
     };
   }
@@ -691,6 +766,11 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
           ...currentState.byId[belowItem.parent],
           children: insertItem((currentState.byId[belowItem.parent] as Btwx.Group).children, action.payload.id, belowIndex)
         } as Btwx.Group
+      },
+      childrenById: {
+        ...currentState.childrenById,
+        [layerItem.parent]: removeItem(currentState.childrenById[layerItem.parent], action.payload.id),
+        [belowItem.parent]: insertItem(currentState.childrenById[belowItem.parent], action.payload.id, belowIndex)
       }
     };
     currentState = setLayerScope(currentState, layerActions.setLayerScope({id: action.payload.id, scope: [...belowParent.scope, belowItem.parent]}) as SetLayerScope);
@@ -717,6 +797,10 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
           ...currentState.byId[layerItem.parent],
           children: moveItemAbove(currentState.byId[layerItem.parent].children, layerIndex, belowIndex)
         } as Btwx.Group
+      },
+      childrenById: {
+        ...currentState.childrenById,
+        [layerItem.parent]: moveItemAbove(currentState.childrenById[layerItem.parent], layerIndex, belowIndex)
       }
     };
   }
@@ -795,6 +879,11 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
           ...currentState.byId[aboveItem.parent],
           children: insertItem((currentState.byId[aboveItem.parent] as Btwx.Group).children, action.payload.id, aboveIndex + 1)
         } as Btwx.Group
+      },
+      childrenById: {
+        ...currentState.childrenById,
+        [layerItem.parent]: removeItem(currentState.childrenById[layerItem.parent], action.payload.id),
+        [aboveItem.parent]: insertItem(currentState.childrenById[aboveItem.parent], action.payload.id, aboveIndex + 1)
       }
     };
     currentState = setLayerScope(currentState, layerActions.setLayerScope({id: action.payload.id, scope: [...aboveParentItem.scope, aboveItem.parent]}) as SetLayerScope);
@@ -821,6 +910,10 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
           ...currentState.byId[layerItem.parent],
           children: moveItemBelow(currentState.byId[layerItem.parent].children, layerIndex, aboveIndex)
         } as Btwx.Group
+      },
+      childrenById: {
+        ...currentState.childrenById,
+        [layerItem.parent]: moveItemBelow(currentState.childrenById[layerItem.parent], layerIndex, aboveIndex)
       }
     };
   }
@@ -1028,139 +1121,168 @@ export const ungroupLayers = (state: LayerState, action: UngroupLayers): LayerSt
 //   return currentState;
 // };
 
-export const updateParentBounds = (state: LayerState, id: string): LayerState => {
-  const layerItem = state.byId[id];
-  return layerItem.scope.reduce((result, current) => {
-    const paperLayer = getPaperLayer(current);
-    const layerItem = result.byId[current];
-    if (layerItem.transform.rotation !== 0) {
-      const clone = paperLayer.clone({insert: false});
-      clone.rotation = -layerItem.transform.rotation;
-      result = {
-        ...result,
-        byId: {
-          ...result.byId,
-          [current]: {
-            ...result.byId[current],
-            frame: {
-              ...result.byId[current].frame,
-              innerWidth: clone.bounds.width,
-              innerHeight: clone.bounds.height
-            }
-          }
-        }
-      }
-    } else {
-      result = {
-        ...result,
-        byId: {
-          ...result.byId,
-          [current]: {
-            ...result.byId[current],
-            frame: {
-              ...result.byId[current].frame,
-              innerWidth: paperLayer.bounds.width,
-              innerHeight: paperLayer.bounds.height
-            }
-          }
-        }
-      }
-    }
-    result = {
-      ...result,
-      byId: {
-        ...result.byId,
-        [current]: {
-          ...result.byId[current],
-          frame: {
-            ...result.byId[current].frame,
-            x: paperLayer.position.x,
-            y: paperLayer.position.y,
-            width: paperLayer.bounds.width,
-            height: paperLayer.bounds.height
-          }
-        }
-      }
-    }
-    return result;
-  }, state);
-};
+// export const updateParentBounds = (state: LayerState, id: string): LayerState => {
+//   const layerItem = state.byId[id];
+//   return layerItem.scope.reduce((result, current) => {
+//     const paperLayer = getPaperLayer(current);
+//     const layerItem = result.byId[current];
+//     const positionInParent = getScopedPoint(paperLayer.position, layerItem.scope);
+//     if (layerItem.transform.rotation !== 0) {
+//       const clone = paperLayer.clone({insert: false});
+//       clone.rotation = -layerItem.transform.rotation;
+//       result = {
+//         ...result,
+//         byId: {
+//           ...result.byId,
+//           [current]: {
+//             ...result.byId[current],
+//             frame: {
+//               ...result.byId[current].frame,
+//               innerWidth: clone.bounds.width,
+//               innerHeight: clone.bounds.height
+//             }
+//           }
+//         }
+//       }
+//     } else {
+//       result = {
+//         ...result,
+//         byId: {
+//           ...result.byId,
+//           [current]: {
+//             ...result.byId[current],
+//             frame: {
+//               ...result.byId[current].frame,
+//               innerWidth: paperLayer.bounds.width,
+//               innerHeight: paperLayer.bounds.height
+//             }
+//           }
+//         }
+//       }
+//     }
+//     result = {
+//       ...result,
+//       byId: {
+//         ...result.byId,
+//         [current]: {
+//           ...result.byId[current],
+//           frame: {
+//             ...result.byId[current].frame,
+//             x: positionInParent.x,
+//             y: positionInParent.y,
+//             width: paperLayer.bounds.width,
+//             height: paperLayer.bounds.height
+//           }
+//         }
+//       }
+//     }
+//     return result;
+//   }, state);
+// };
 
-export const updateChildrenBounds = (state: LayerState, id: string): LayerState => {
-  const layerDescendants = getLayerDescendants(state, id);
-  return layerDescendants.reduce((result, current) => {
-    const paperLayer = getPaperLayer(current);
-    const layerItem = result.byId[current];
-    if (result.byId[current].type === 'Shape') {
-      result = {
-        ...result,
-        byId: {
-          ...result.byId,
-          [current]: {
-            ...result.byId[current],
-            pathData: (paperLayer as paper.Path | paper.CompoundPath).pathData
-          } as Btwx.Shape
-        }
-      }
-    }
-    if (layerItem.transform.rotation !== 0) {
-      const clone = paperLayer.clone({insert: false});
-      clone.rotation = -layerItem.transform.rotation;
-      result = {
-        ...result,
-        byId: {
-          ...result.byId,
-          [current]: {
-            ...result.byId[current],
-            frame: {
-              ...result.byId[current].frame,
-              innerWidth: clone.bounds.width,
-              innerHeight: clone.bounds.height
-            }
-          }
-        }
-      }
-    } else {
-      result = {
-        ...result,
-        byId: {
-          ...result.byId,
-          [current]: {
-            ...result.byId[current],
-            frame: {
-              ...result.byId[current].frame,
-              innerWidth: paperLayer.bounds.width,
-              innerHeight: paperLayer.bounds.height
-            }
-          }
-        }
-      }
-    }
-    result = {
-      ...result,
-      byId: {
-        ...result.byId,
-        [current]: {
-          ...result.byId[current],
-          frame: {
-            ...result.byId[current].frame,
-            x: paperLayer.position.x,
-            y: paperLayer.position.y,
-            width: paperLayer.bounds.width,
-            height: paperLayer.bounds.height
-          }
-        }
-      }
-    }
-    return result;
-  }, state);
-};
+// export const updateSiblingPositions = (state: LayerState, id: string): LayerState => {
+//   const layerItem = state.byId[id];
+//   const parentItem = state.byId[layerItem.parent];
+//   const siblings = parentItem.children.filter((childId) => childId !== id);
+//   return siblings.reduce((result, current) => {
+//     const paperLayer = getPaperLayer(current);
+//     const layerItem = result.byId[current];
+//     const positionInParent = getScopedPoint(paperLayer.position, layerItem.scope);
+//     result = {
+//       ...result,
+//       byId: {
+//         ...result.byId,
+//         [current]: {
+//           ...result.byId[current],
+//           frame: {
+//             ...result.byId[current].frame,
+//             x: positionInParent.x,
+//             y: positionInParent.y
+//           }
+//         }
+//       }
+//     }
+//     return result;
+//   }, state);
+// };
 
-export const updateLayerBounds = (state: LayerState, id: string): LayerState => {
+// export const updateChildrenBounds = (state: LayerState, id: string): LayerState => {
+//   const layerDescendants = getLayerDescendants(state, id);
+//   return layerDescendants.reduce((result, current) => {
+//     const paperLayer = getPaperLayer(current);
+//     const layerItem = result.byId[current];
+//     if (result.byId[current].type === 'Shape') {
+//       result = {
+//         ...result,
+//         byId: {
+//           ...result.byId,
+//           [current]: {
+//             ...result.byId[current],
+//             pathData: (paperLayer as paper.Path | paper.CompoundPath).pathData
+//           } as Btwx.Shape
+//         }
+//       }
+//     }
+//     if (layerItem.transform.rotation !== 0) {
+//       const clone = paperLayer.clone({insert: false});
+//       clone.rotation = -layerItem.transform.rotation;
+//       result = {
+//         ...result,
+//         byId: {
+//           ...result.byId,
+//           [current]: {
+//             ...result.byId[current],
+//             frame: {
+//               ...result.byId[current].frame,
+//               innerWidth: clone.bounds.width,
+//               innerHeight: clone.bounds.height
+//             }
+//           }
+//         }
+//       }
+//     } else {
+//       result = {
+//         ...result,
+//         byId: {
+//           ...result.byId,
+//           [current]: {
+//             ...result.byId[current],
+//             frame: {
+//               ...result.byId[current].frame,
+//               innerWidth: paperLayer.bounds.width,
+//               innerHeight: paperLayer.bounds.height
+//             }
+//           }
+//         }
+//       }
+//     }
+//     result = {
+//       ...result,
+//       byId: {
+//         ...result.byId,
+//         [current]: {
+//           ...result.byId[current],
+//           frame: {
+//             ...result.byId[current].frame,
+//             x: paperLayer.position.x,
+//             y: paperLayer.position.y,
+//             width: paperLayer.bounds.width,
+//             height: paperLayer.bounds.height
+//           }
+//         }
+//       }
+//     }
+//     return result;
+//   }, state);
+// };
+
+export const updateLayerBounds = (state: LayerState, id: string, updateScope?: boolean): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(id);
   const layerItem = state.byId[id];
+  const paperLayer = getPaperLayer(id);
+  const positionInParent = getScopedPoint(paperLayer.position, layerItem.scope);
   if (layerItem.type === 'Shape') {
+    currentState = setShapeIcon(currentState, id, (paperLayer as paper.PathItem).pathData);
     currentState = {
       ...currentState,
       byId: {
@@ -1255,17 +1377,35 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
         ...currentState.byId[id],
         frame: {
           ...currentState.byId[id].frame,
-          x: paperLayer.position.x,
-          y: paperLayer.position.y,
+          x: positionInParent.x,
+          y: positionInParent.y,
           width: paperLayer.bounds.width,
           height: paperLayer.bounds.height
         }
       }
     }
   }
-  currentState = updateParentBounds(currentState, id);
-  if (state.byId[id].type === 'Group' || state.byId[id].type === 'Artboard') {
-    currentState = updateChildrenBounds(currentState, id);
+  // if layer bounds exceeds any scope bounds, update scope and scope children
+  if (layerItem.scope.length > 1 && updateScope) {
+    currentState = layerItem.scope.reduce((result, current) => {
+      const scopeLayerItem = currentState.byId[current] as Btwx.Page | Btwx.Artboard | Btwx.Group;
+      const scopeItemTopLeft = new paperMain.Point(scopeLayerItem.frame.x - (scopeLayerItem.frame.width / 2), scopeLayerItem.frame.y - (scopeLayerItem.frame.height / 2));
+      const scopeItemBottomRight = new paperMain.Point(scopeLayerItem.frame.x + (scopeLayerItem.frame.width / 2), scopeLayerItem.frame.y + (scopeLayerItem.frame.height / 2));
+      if (
+        current !== 'page' &&
+        paperLayer.bounds.topLeft.x < scopeItemTopLeft.x ||
+        paperLayer.bounds.topLeft.y < scopeItemTopLeft.y ||
+        paperLayer.bounds.bottomRight.x > scopeItemBottomRight.x ||
+        paperLayer.bounds.bottomRight.y > scopeItemBottomRight.y
+      ) {
+        result = updateLayerBounds(result, id, false);
+        result = scopeLayerItem.children.reduce((cr, cc) => {
+          cr = updateLayerBounds(cr, cc, false);
+          return cr;
+        }, result);
+      }
+      return result;
+    }, currentState);
   }
   return currentState;
 };
@@ -1287,7 +1427,7 @@ export const moveLayer = (state: LayerState, action: MoveLayer): LayerState => {
       }
     }
   }
-  currentState = updateParentBounds(currentState, action.payload.id);
+  // currentState = updateParentBounds(currentState, action.payload.id);
   return currentState;
 };
 
@@ -1318,7 +1458,7 @@ export const moveLayerTo = (state: LayerState, action: MoveLayerTo): LayerState 
       }
     }
   }
-  currentState = updateParentBounds(currentState, action.payload.id);
+  // currentState = updateParentBounds(currentState, action.payload.id);
   return currentState;
 };
 
@@ -1360,9 +1500,9 @@ export const setLayerName = (state: LayerState, action: SetLayerName): LayerStat
   const paperLayer = getPaperLayer(action.payload.id);
   paperLayer.name = action.payload.name;
   // remove existing tweens
-  if (layerItem.scope.length > 1 && state.byId[layerItem.scope[1]].type === 'Artboard') {
-    const tweensWithLayer = getTweensWithLayer(currentState, action.payload.id);
-    currentState = tweensWithLayer.allIds.reduce((result: LayerState, current) => {
+  if (layerItem.scope.length > 1 && state.byId[layerItem.scope[1]].type === 'Artboard' && action.payload.name !== layerItem.name) {
+    // const tweensWithLayer = getTweensWithLayer(currentState, action.payload.id);
+    currentState = layerItem.tweens.allIds.reduce((result: LayerState, current) => {
       result = removeLayerTween(result, layerActions.removeLayerTween({id: current}) as RemoveLayerTween);
       return result;
     }, currentState);
@@ -1410,11 +1550,11 @@ export const addLayerTweenEvent = (state: LayerState, action: AddLayerTweenEvent
   let currentState = state;
   // if an event doesnt already exist with the same layer, event, and destination
   // add tween event
-  if (!currentState.allTweenEventIds.some((id: string) => {
+  if (!currentState.events.allIds.some((id: string) => {
     return (
-      currentState.tweenEventById[id].layer === action.payload.layer &&
-      currentState.tweenEventById[id].event === action.payload.event &&
-      currentState.tweenEventById[id].destinationArtboard === action.payload.destinationArtboard
+      currentState.events.byId[id].layer === action.payload.layer &&
+      currentState.events.byId[id].event === action.payload.event &&
+      currentState.events.byId[id].destinationArtboard === action.payload.destinationArtboard
     )
   })) {
     // add animation event
@@ -1424,7 +1564,7 @@ export const addLayerTweenEvent = (state: LayerState, action: AddLayerTweenEvent
         ...currentState.byId,
         [action.payload.layer]: {
           ...currentState.byId[action.payload.layer],
-          tweenEvents: addItem(currentState.byId[action.payload.layer].tweenEvents, action.payload.id)
+          events: addItem(currentState.byId[action.payload.layer].events, action.payload.id)
         },
         [action.payload.artboard]: {
           ...currentState.byId[action.payload.artboard],
@@ -1435,10 +1575,13 @@ export const addLayerTweenEvent = (state: LayerState, action: AddLayerTweenEvent
           destinationArtboardForEvents: addItem((currentState.byId[action.payload.destinationArtboard] as Btwx.Artboard).destinationArtboardForEvents, action.payload.id)
         } as Btwx.Artboard
       },
-      allTweenEventIds: addItem(currentState.allTweenEventIds, action.payload.id),
-      tweenEventById: {
-        ...currentState.tweenEventById,
-        [action.payload.id]: action.payload as Btwx.TweenEvent
+      events: {
+        ...currentState.events,
+        allIds: addItem(currentState.events.allIds, action.payload.id),
+        byId: {
+          ...currentState.events.byId,
+          [action.payload.id]: action.payload as Btwx.TweenEvent
+        }
       }
     }
     // add animation event tweens
@@ -1456,7 +1599,7 @@ export const addLayerTweenEvent = (state: LayerState, action: AddLayerTweenEvent
 
 export const addTweenEventLayerTweens = (state: LayerState, eventId: string, layerId: string): LayerState => {
   let currentState = state;
-  const tweenEvent = currentState.tweenEventById[eventId];
+  const tweenEvent = currentState.events.byId[eventId];
   const destinationArtboardChildren = getLayerDescendants(currentState, tweenEvent.destinationArtboard);
   const destinationEquivalent = getDestinationEquivalent(currentState, layerId, destinationArtboardChildren);
   if (destinationEquivalent) {
@@ -1487,7 +1630,7 @@ export const addTweenEventLayerTweens = (state: LayerState, eventId: string, lay
 
 export const removeLayerTweenEvent = (state: LayerState, action: RemoveLayerTweenEvent): LayerState => {
   let currentState = state;
-  const animEvent = state.tweenEventById[action.payload.id];
+  const animEvent = state.events.byId[action.payload.id];
   // remove animation event tweens
   currentState = animEvent.tweens.reduce((result, current) => {
     return removeLayerTween(result, layerActions.removeLayerTween({id: current}) as RemoveLayerTween);
@@ -1499,7 +1642,7 @@ export const removeLayerTweenEvent = (state: LayerState, action: RemoveLayerTwee
       ...currentState.byId,
       [animEvent.layer]: {
         ...currentState.byId[animEvent.layer],
-        tweenEvents: removeItem(currentState.byId[animEvent.layer].tweenEvents, action.payload.id)
+        events: removeItem(currentState.byId[animEvent.layer].events, action.payload.id)
       },
       [animEvent.artboard]: {
         ...currentState.byId[animEvent.artboard],
@@ -1510,13 +1653,16 @@ export const removeLayerTweenEvent = (state: LayerState, action: RemoveLayerTwee
         destinationArtboardForEvents: removeItem((currentState.byId[animEvent.destinationArtboard] as Btwx.Artboard).destinationArtboardForEvents, action.payload.id)
       } as Btwx.Artboard
     },
-    allTweenEventIds: removeItem(currentState.allTweenEventIds, action.payload.id),
-    tweenEventById: Object.keys(currentState.tweenEventById).reduce((result: any, key) => {
-      if (key !== action.payload.id) {
-        result[key] = currentState.tweenEventById[key];
-      }
-      return result;
-    }, {})
+    events: {
+      ...currentState.events,
+      allIds: removeItem(currentState.events.allIds, action.payload.id),
+      byId: Object.keys(currentState.events.byId).reduce((result: any, key) => {
+        if (key !== action.payload.id) {
+          result[key] = currentState.events.byId[key];
+        }
+        return result;
+      }, {})
+    }
   }
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
@@ -1526,43 +1672,50 @@ export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerSt
   let currentState = state;
   currentState = {
     ...currentState,
-    tweenEventById: {
-      ...currentState.tweenEventById,
-      [action.payload.event]: {
-        ...currentState.tweenEventById[action.payload.event],
-        tweens: addItem(currentState.tweenEventById[action.payload.event].tweens, action.payload.id)
+    events: {
+      ...currentState.events,
+      byId: {
+        ...currentState.events.byId,
+        [action.payload.event]: {
+          ...currentState.events.byId[action.payload.event],
+          tweens: addItem(currentState.events.byId[action.payload.event].tweens, action.payload.id)
+        }
       }
     },
     byId: {
       ...currentState.byId,
       [action.payload.layer]: {
         ...currentState.byId[action.payload.layer],
-        tweens: addItem(currentState.byId[action.payload.layer].tweens, action.payload.id),
-        originLayerForTweens: {
-          ...currentState.byId[action.payload.layer].originLayerForTweens,
-          allIds: addItem(currentState.byId[action.payload.layer].originLayerForTweens.allIds, action.payload.id),
+        tweens: {
+          ...currentState.byId[action.payload.layer].tweens,
+          allIds: addItem(currentState.byId[action.payload.layer].tweens.allIds, action.payload.id),
+          asOrigin: addItem(currentState.byId[action.payload.layer].tweens.asOrigin, action.payload.id),
           byProp: {
-            ...currentState.byId[action.payload.layer].originLayerForTweens.byProp,
-            [action.payload.prop]: addItem(currentState.byId[action.payload.layer].originLayerForTweens.byProp[action.payload.prop], action.payload.id)
+            ...currentState.byId[action.payload.layer].tweens.byProp,
+            [action.payload.prop]: addItem(currentState.byId[action.payload.layer].tweens.byProp[action.payload.prop], action.payload.id)
           }
         }
       },
       [action.payload.destinationLayer]: {
         ...currentState.byId[action.payload.destinationLayer],
-        destinationLayerForTweens: {
-          ...currentState.byId[action.payload.destinationLayer].destinationLayerForTweens,
-          allIds: addItem(currentState.byId[action.payload.destinationLayer].destinationLayerForTweens.allIds, action.payload.id),
+        tweens: {
+          ...currentState.byId[action.payload.destinationLayer].tweens,
+          allIds: addItem(currentState.byId[action.payload.destinationLayer].tweens.allIds, action.payload.id),
+          asDestination: addItem(currentState.byId[action.payload.destinationLayer].tweens.asDestination, action.payload.id),
           byProp: {
-            ...currentState.byId[action.payload.destinationLayer].destinationLayerForTweens.byProp,
-            [action.payload.prop]: addItem(currentState.byId[action.payload.destinationLayer].destinationLayerForTweens.byProp[action.payload.prop], action.payload.id)
+            ...currentState.byId[action.payload.destinationLayer].tweens.byProp,
+            [action.payload.prop]: addItem(currentState.byId[action.payload.destinationLayer].tweens.byProp[action.payload.prop], action.payload.id)
           }
         }
       }
     },
-    allTweenIds: addItem(currentState.allTweenIds, action.payload.id),
-    tweenById: {
-      ...currentState.tweenById,
-      [action.payload.id]: action.payload as Btwx.Tween
+    tweens: {
+      ...currentState.tweens,
+      allIds: addItem(currentState.tweens.allIds, action.payload.id),
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: action.payload as Btwx.Tween
+      }
     }
   }
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
@@ -1570,50 +1723,57 @@ export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerSt
 };
 
 export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): LayerState => {
-  const tween = state.tweenById[action.payload.id];
+  const tween = state.tweens.byId[action.payload.id];
   let currentState = state;
   currentState = {
-    ...state,
-    tweenEventById: {
-      ...currentState.tweenEventById,
-      [tween.event]: {
-        ...currentState.tweenEventById[tween.event],
-        tweens: removeItem(currentState.tweenEventById[tween.event].tweens, action.payload.id)
+    ...currentState,
+    events: {
+      ...currentState.events,
+      byId: {
+        ...currentState.events.byId,
+        [tween.event]: {
+          ...currentState.events.byId[tween.event],
+          tweens: removeItem(currentState.events.byId[tween.event].tweens, action.payload.id)
+        }
       }
     },
     byId: {
       ...currentState.byId,
       [tween.layer]: {
         ...currentState.byId[tween.layer],
-        tweens: removeItem(currentState.byId[tween.layer].tweens, action.payload.id),
-        originLayerForTweens: {
-          ...currentState.byId[tween.layer].originLayerForTweens,
-          allIds: removeItem(currentState.byId[tween.layer].originLayerForTweens.allIds, action.payload.id),
+        tweens: {
+          ...currentState.byId[tween.layer].tweens,
+          allIds: removeItem(currentState.byId[tween.layer].tweens.allIds, action.payload.id),
+          asOrigin: removeItem(currentState.byId[tween.layer].tweens.asOrigin, action.payload.id),
           byProp: {
-            ...currentState.byId[tween.layer].originLayerForTweens.byProp,
-            [tween.prop]: removeItem(currentState.byId[tween.layer].originLayerForTweens.byProp[tween.prop], action.payload.id)
+            ...currentState.byId[tween.layer].tweens.byProp,
+            [tween.prop]: removeItem(currentState.byId[tween.layer].tweens.byProp[tween.prop], action.payload.id)
           }
         }
       },
       [tween.destinationLayer]: {
         ...currentState.byId[tween.destinationLayer],
-        destinationLayerForTweens: {
-          ...currentState.byId[tween.destinationLayer].destinationLayerForTweens,
-          allIds: addItem(currentState.byId[tween.destinationLayer].destinationLayerForTweens.allIds, action.payload.id),
+        tweens: {
+          ...currentState.byId[tween.destinationLayer].tweens,
+          allIds: removeItem(currentState.byId[tween.destinationLayer].tweens.allIds, action.payload.id),
+          asDestination: removeItem(currentState.byId[tween.destinationLayer].tweens.asDestination, action.payload.id),
           byProp: {
-            ...currentState.byId[tween.destinationLayer].destinationLayerForTweens.byProp,
-            [tween.prop]: addItem(currentState.byId[tween.destinationLayer].destinationLayerForTweens.byProp[tween.prop], action.payload.id)
+            ...currentState.byId[tween.destinationLayer].tweens.byProp,
+            [tween.prop]: removeItem(currentState.byId[tween.destinationLayer].tweens.byProp[tween.prop], action.payload.id)
           }
         }
       }
     },
-    allTweenIds: removeItem(currentState.allTweenIds, action.payload.id),
-    tweenById: Object.keys(currentState.tweenById).reduce((result: any, key) => {
-      if (key !== action.payload.id) {
-        result[key] = currentState.tweenById[key];
-      }
-      return result;
-    }, {})
+    tweens: {
+      ...currentState.tweens,
+      allIds: removeItem(currentState.tweens.allIds, action.payload.id),
+      byId: Object.keys(currentState.tweens.byId).reduce((result: any, key) => {
+        if (key !== action.payload.id) {
+          result[key] = currentState.tweens.byId[key];
+        }
+        return result;
+      }, {})
+    }
   }
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
@@ -1627,16 +1787,14 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
     const artboardItem = state.byId[artboard] as Btwx.Artboard;
     const eventsWithArtboardAsOrigin = artboardItem.originArtboardForEvents;
     const eventsWithArtboardAsDestination = artboardItem.destinationArtboardForEvents;
-    const originLayerTweensByProp = layerItem.originLayerForTweens.byProp[prop];
-    const destinationLayerTweensByProp = layerItem.destinationLayerForTweens.byProp[prop];
-    const tweensByProp = [...originLayerTweensByProp, ...destinationLayerTweensByProp];
+    const tweensByProp = layerItem.tweens.byProp[prop];
     // filter tweens by prop
     // if new layer prop matches destination prop, remove tween
     // if new destination prop matches layer prop, remove tween
     if (tweensByProp.length > 0) {
       currentState = tweensByProp.reduce((result: LayerState, current: string) => {
-        const tween = result.tweenById[current];
-        const tweenEvent = result.tweenEventById[tween.event];
+        const tween = result.tweens.byId[current];
+        const tweenEvent = result.events.byId[tween.event];
         const layerItem = result.byId[tween.layer] as Btwx.Layer;
         const destinationLayerItem = result.byId[tween.destinationLayer] as Btwx.Layer;
         const artboardItem = result.byId[tweenEvent.artboard] as Btwx.Artboard;
@@ -1651,7 +1809,7 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
     // add tween to events with artboard as origin
     // if it doesnt already exist
     currentState = eventsWithArtboardAsOrigin.reduce((result: LayerState, current: string) => {
-      const tweenEvent = result.tweenEventById[current];
+      const tweenEvent = result.events.byId[current];
       const destinationArtboardChildren = getLayerDescendants(result, tweenEvent.destinationArtboard);
       const destinationEquivalent = getDestinationEquivalent(result, layerId, destinationArtboardChildren);
       if (destinationEquivalent) {
@@ -1661,7 +1819,7 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
         const destinationArtboardItem = result.byId[tweenEvent.destinationArtboard] as Btwx.Artboard;
         const hasTween = getEquivalentTweenProp(layerItem, equivalentLayerItem, artboardItem, destinationArtboardItem, prop);
         const tweenExists = tweenEvent.tweens.some((id: string) => {
-          const tween = result.tweenById[id];
+          const tween = result.tweens.byId[id];
           return tween.layer === layerId && tween.prop === prop;
         });
         if (hasTween && !tweenExists) {
@@ -1683,7 +1841,7 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
     // add tween to events with artboard as destination
     // if it doesnt already exist
     currentState = eventsWithArtboardAsDestination.reduce((result: LayerState, current: string) => {
-      const tweenEvent = result.tweenEventById[current];
+      const tweenEvent = result.events.byId[current];
       const originArtboardChildren = getLayerDescendants(result, tweenEvent.artboard);
       const originEquivalent = getDestinationEquivalent(result, layerId, originArtboardChildren);
       if (originEquivalent) {
@@ -1693,7 +1851,7 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
         const destinationArtboardItem = result.byId[tweenEvent.destinationArtboard] as Btwx.Artboard;
         const hasTween = getEquivalentTweenProp(layerItem, equivalentLayerItem, destinationArtboardItem, artboardItem, prop);
         const tweenExists = tweenEvent.tweens.some((id: string) => {
-          const tween = result.tweenById[id];
+          const tween = result.tweens.byId[id];
           return tween.layer === originEquivalent.id && tween.prop === prop;
         });
         if (hasTween && !tweenExists) {
@@ -1719,7 +1877,7 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
 export const updateLayerTweensByProps = (state: LayerState, layerId: string, props: Btwx.TweenProp[] | 'all'): LayerState => {
   let currentState = state;
   if (props === 'all') {
-    currentState = TWEEN_PROPS.reduce((result: LayerState, current: Btwx.TweenProp) => {
+    currentState = Object.keys(TWEEN_PROPS_MAP).reduce((result: LayerState, current: Btwx.TweenProp) => {
       result = updateLayerTweensByProp(result, layerId, current);
       return result;
     }, currentState);
@@ -1736,11 +1894,14 @@ export const setLayerTweenDuration = (state: LayerState, action: SetLayerTweenDu
   let currentState = state;
   currentState = {
     ...currentState,
-    tweenById: {
-      ...currentState.tweenById,
-      [action.payload.id]: {
-        ...currentState.tweenById[action.payload.id],
-        duration: Math.round((action.payload.duration + Number.EPSILON) * 100) / 100
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          duration: Math.round((action.payload.duration + Number.EPSILON) * 100) / 100
+        }
       }
     }
   }
@@ -1751,12 +1912,15 @@ export const setLayerTweenDuration = (state: LayerState, action: SetLayerTweenDu
 export const setLayerTweenDelay = (state: LayerState, action: SetLayerTweenDelay): LayerState => {
   let currentState = state;
   currentState = {
-    ...state,
-    tweenById: {
-      ...state.tweenById,
-      [action.payload.id]: {
-        ...state.tweenById[action.payload.id],
-        delay: Math.round((action.payload.delay + Number.EPSILON) * 100) / 100
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          delay: Math.round((action.payload.delay + Number.EPSILON) * 100) / 100
+        }
       }
     }
   }
@@ -1774,12 +1938,15 @@ export const setLayerTweenTiming = (state: LayerState, action: SetLayerTweenTimi
 export const setLayerTweenEase = (state: LayerState, action: SetLayerTweenEase): LayerState => {
   let currentState = state;
   currentState = {
-    ...state,
-    tweenById: {
-      ...state.tweenById,
-      [action.payload.id]: {
-        ...state.tweenById[action.payload.id],
-        ease: action.payload.ease
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          ease: action.payload.ease
+        }
       }
     }
   }
@@ -1790,12 +1957,15 @@ export const setLayerTweenEase = (state: LayerState, action: SetLayerTweenEase):
 export const setLayerTweenPower = (state: LayerState, action: SetLayerTweenPower): LayerState => {
   let currentState = state;
   currentState = {
-    ...state,
-    tweenById: {
-      ...state.tweenById,
-      [action.payload.id]: {
-        ...state.tweenById[action.payload.id],
-        power: action.payload.power
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          power: action.payload.power
+        }
       }
     }
   }
@@ -4151,159 +4321,191 @@ export const distributeLayersVertically = (state: LayerState, action: Distribute
   return currentState;
 };
 
-const getLayerCloneMap = (state: LayerState, id: string): {
-  [id: string]: {
-    id: string;
-    scope: string[];
-    children: string[];
-  };
-} => {
-  const groups: string[] = [id];
-  const layerCloneMap: {[id: string]: { id: string; scope: string[]; children: string[] }} = {
-    [id]: {
-      id: uuidv4(),
-      scope: state.byId[id].scope,
-      children: null
-    }
-  };
-  let i = 0;
-  while(i < groups.length) {
-    const layer = state.byId[groups[i]];
-    const layerClone = layerCloneMap[groups[i]];
-    if (layer.children) {
-      layerClone.children = [];
-      layer.children.forEach((child) => {
-        const newChildId = uuidv4();
-        const childLayer = state.byId[child];
-        if (childLayer.children && childLayer.children.length > 0) {
-          groups.push(child);
-        }
-        layerCloneMap[child] = {
-          id: newChildId,
-          scope: [...layerClone.scope, layerClone.id],
-          children: null
-        };
-        layerClone.children.push(newChildId);
-      });
-    }
-    i++;
-  }
-  return layerCloneMap;
-}
+// const getLayerCloneMap = (state: LayerState, id: string): {
+//   [id: string]: {
+//     id: string;
+//     scope: string[];
+//     children: string[];
+//   };
+// } => {
+//   const groups: string[] = [id];
+//   const layerCloneMap: {[id: string]: { id: string; scope: string[]; children: string[] }} = {
+//     [id]: {
+//       id: uuidv4(),
+//       scope: state.byId[id].scope,
+//       children: null
+//     }
+//   };
+//   let i = 0;
+//   while(i < groups.length) {
+//     const layer = state.byId[groups[i]];
+//     const layerClone = layerCloneMap[groups[i]];
+//     if (layer.children) {
+//       layerClone.children = [];
+//       layer.children.forEach((child) => {
+//         const newChildId = uuidv4();
+//         const childLayer = state.byId[child];
+//         if (childLayer.children && childLayer.children.length > 0) {
+//           groups.push(child);
+//         }
+//         layerCloneMap[child] = {
+//           id: newChildId,
+//           scope: [...layerClone.scope, layerClone.id],
+//           children: null
+//         };
+//         layerClone.children.push(newChildId);
+//       });
+//     }
+//     i++;
+//   }
+//   return layerCloneMap;
+// }
 
-const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: {[id: string]: { id: string; scope: string[]; children: string[] }}): void => {
-  const paperLayer = getPaperLayer(id);
-  const paperLayerClone = paperLayer.clone({deep: paperLayer.data.layerType === 'Shape' || paperLayer.data.layerType === 'Text', insert: true});
-  if (paperLayer.data.layerType === 'Artboard') {
-    const artboardLayersMask = paperLayer.getItem({ data: { id: 'ArtboardLayersMask' }});
-    const artboardLayersMaskClone = artboardLayersMask.clone({deep: false, insert: true});
-    const artboardBackground = paperLayer.getItem({ data: { id: 'ArtboardBackground' }});
-    const artboardBackgroundClone = artboardBackground.clone({deep: false, insert: true});
-    const artboardMaskedLayers = paperLayer.getItem({ data: { id: 'ArtboardMaskedLayers' }});
-    const artboardMaskedLayersClone = artboardMaskedLayers.clone({deep: false, insert: true});
-    const artboardLayers = paperLayer.getItem({ data: { id: 'ArtboardLayers' }});
-    const artboardLayersClone = artboardLayers.clone({deep: false, insert: true});
-    artboardMaskedLayersClone.children = [artboardLayersMaskClone, artboardLayersClone];
-    paperLayerClone.children = [artboardBackgroundClone, artboardMaskedLayersClone];
-  }
-  if (paperLayer.data.layerType === 'Image') {
-    const raster = paperLayer.getItem({ data: { id: 'Raster' }});
-    const rasterClone = raster.clone({deep: false, insert: true});
-    rasterClone.parent = paperLayerClone;
-  }
-  paperLayerClone.data.id = layerCloneMap[id].id;
-  paperLayerClone.data.scope = layerCloneMap[id].scope;
-  // paperLayerClone.data.selected = false;
-  // paperLayerClone.data.hover = false;
-  paperLayerClone.parent = paperLayer.parent;
-  const groups: string[] = [id];
-  let i = 0;
-  while(i < groups.length) {
-    const group = state.byId[groups[i]];
-    const groupClone = layerCloneMap[groups[i]];
-    const groupClonePaperLayer = getPaperLayer(groupClone.id);
-    if (group.children) {
-      group.children.forEach((child) => {
-        const childLayer = state.byId[child];
-        const childPaperLayer = getPaperLayer(child);
-        const childPaperLayerClone = childPaperLayer.clone({deep: childPaperLayer.className === 'CompoundPath', insert: true});
-        childPaperLayerClone.data.id = layerCloneMap[child].id;
-        childPaperLayerClone.data.scope = layerCloneMap[child].scope;
-        // childPaperLayerClone.data.selected = false;
-        // childPaperLayerClone.data.hover = false;
-        childPaperLayerClone.parent = groupClonePaperLayer;
-        if (childPaperLayer.data.type === 'Image') {
-          const raster = childPaperLayer.getItem({ data: { id: 'Raster' }});
-          const rasterClone = raster.clone({deep: false, insert: true});
-          rasterClone.parent = childPaperLayerClone;
-        }
-        if (childLayer.children && childLayer.children.length > 0) {
-          groups.push(child);
-        }
-      });
-    }
-    i++;
-  }
-}
+// const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: {[id: string]: { id: string; scope: string[]; children: string[] }}): void => {
+//   const paperLayer = getPaperLayer(id);
+//   const paperLayerClone = paperLayer.clone({deep: paperLayer.data.layerType === 'Shape' || paperLayer.data.layerType === 'Text', insert: true});
+//   if (paperLayer.data.layerType === 'Artboard') {
+//     const artboardLayersMask = paperLayer.getItem({ data: { id: 'ArtboardLayersMask' }});
+//     const artboardLayersMaskClone = artboardLayersMask.clone({deep: false, insert: true});
+//     const artboardBackground = paperLayer.getItem({ data: { id: 'ArtboardBackground' }});
+//     const artboardBackgroundClone = artboardBackground.clone({deep: false, insert: true});
+//     const artboardMaskedLayers = paperLayer.getItem({ data: { id: 'ArtboardMaskedLayers' }});
+//     const artboardMaskedLayersClone = artboardMaskedLayers.clone({deep: false, insert: true});
+//     const artboardLayers = paperLayer.getItem({ data: { id: 'ArtboardLayers' }});
+//     const artboardLayersClone = artboardLayers.clone({deep: false, insert: true});
+//     artboardMaskedLayersClone.children = [artboardLayersMaskClone, artboardLayersClone];
+//     paperLayerClone.children = [artboardBackgroundClone, artboardMaskedLayersClone];
+//   }
+//   if (paperLayer.data.layerType === 'Image') {
+//     const raster = paperLayer.getItem({ data: { id: 'Raster' }});
+//     const rasterClone = raster.clone({deep: false, insert: true});
+//     rasterClone.parent = paperLayerClone;
+//   }
+//   paperLayerClone.data.id = layerCloneMap[id].id;
+//   paperLayerClone.data.scope = layerCloneMap[id].scope;
+//   // paperLayerClone.data.selected = false;
+//   // paperLayerClone.data.hover = false;
+//   paperLayerClone.parent = paperLayer.parent;
+//   const groups: string[] = [id];
+//   let i = 0;
+//   while(i < groups.length) {
+//     const group = state.byId[groups[i]];
+//     const groupClone = layerCloneMap[groups[i]];
+//     const groupClonePaperLayer = getPaperLayer(groupClone.id);
+//     if (group.children) {
+//       group.children.forEach((child) => {
+//         const childLayer = state.byId[child];
+//         const childPaperLayer = getPaperLayer(child);
+//         const childPaperLayerClone = childPaperLayer.clone({deep: childPaperLayer.className === 'CompoundPath', insert: true});
+//         childPaperLayerClone.data.id = layerCloneMap[child].id;
+//         childPaperLayerClone.data.scope = layerCloneMap[child].scope;
+//         // childPaperLayerClone.data.selected = false;
+//         // childPaperLayerClone.data.hover = false;
+//         childPaperLayerClone.parent = groupClonePaperLayer;
+//         if (childPaperLayer.data.layerType === 'Image') {
+//           const raster = childPaperLayer.getItem({ data: { id: 'Raster' }});
+//           const rasterClone = raster.clone({deep: false, insert: true});
+//           rasterClone.parent = childPaperLayerClone;
+//         }
+//         if (childLayer.children && childLayer.children.length > 0) {
+//           groups.push(child);
+//         }
+//       });
+//     }
+//     i++;
+//   }
+// }
 
 export const duplicateLayer = (state: LayerState, action: DuplicateLayer): LayerState => {
   let currentState = state;
   const layerItem = state.byId[action.payload.id];
-  const layerCloneMap = getLayerCloneMap(state, action.payload.id);
-  clonePaperLayers(state, action.payload.id, layerCloneMap);
-  currentState = Object.keys(layerCloneMap).reduce((result: any, key: string, index: number) => {
-    const mapLayerItem = result.byId[key];
-    const cloneId = layerCloneMap[key].id;
-    const cloneScope = layerCloneMap[key].scope;
-    const cloneChildren = layerCloneMap[key].children;
-    const underlyingMaskCloned = mapLayerItem.underlyingMask && Object.prototype.hasOwnProperty.call(layerCloneMap, mapLayerItem.underlyingMask);
-    switch(mapLayerItem.type) {
+  const isMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
+  const paperLayer = getPaperLayer(action.payload.id);
+  const duplicatePaperLayer = isMask ? paperLayer.parent.clone() : paperLayer.clone();
+  const layerCloneMap = getLayerAndDescendants(currentState, action.payload.id).reduce((result: { [id: string]: string }, current) => ({
+    ...result,
+    [current]: uuidv4()
+  }), {} as { [id: string]: string });
+  currentState = Object.keys(layerCloneMap).reduce((result: LayerState, key: string, index: number) => {
+    const itemToCopy = currentState.byId[key];
+    const copyId = layerCloneMap[key];
+    const copyParent = index === 0 ? itemToCopy.parent : layerCloneMap[itemToCopy.parent];
+    const parentLayerItem = result.byId[copyParent];
+    const copyScope = [...parentLayerItem.scope, copyParent];
+    const copyUnderlyingMask = index === 0 ? itemToCopy.underlyingMask : Object.prototype.hasOwnProperty.call(layerCloneMap, itemToCopy.underlyingMask) ? layerCloneMap[itemToCopy.underlyingMask] : itemToCopy.underlyingMask;
+    const copyChildred = itemToCopy.children ? itemToCopy.children.reduce((result, current) => {
+        if (Object.prototype.hasOwnProperty.call(layerCloneMap, current)) {
+          return [...result, layerCloneMap[current]];
+        } else {
+          return [...result, current];
+        }
+      }, [])
+    : null;
+    const copyPaperLayer = index === 0 ? duplicatePaperLayer : duplicatePaperLayer.getItem({ data: { id: key } });
+    copyPaperLayer.data.id = copyId;
+    copyPaperLayer.data.selected = false;
+    copyPaperLayer.data.hover = false;
+    copyPaperLayer.data.scope = copyScope;
+    switch(itemToCopy.type) {
       case 'Artboard':
         result = {
           ...result,
-          allArtboardIds: addItem(result.allArtboardIds, cloneId)
+          allArtboardIds: addItem(result.allArtboardIds, copyId)
         }
         break;
       case 'Shape':
         result = {
           ...result,
-          allShapeIds: addItem(result.allShapeIds, cloneId)
+          allShapeIds: addItem(result.allShapeIds, copyId),
+          shapeIcons: {
+            ...result.shapeIcons,
+            [copyId]: result.shapeIcons[key]
+          }
         }
         break;
       case 'Group':
         result = {
           ...result,
-          allGroupIds: addItem(result.allGroupIds, cloneId)
+          allGroupIds: addItem(result.allGroupIds, copyId)
         }
         break;
       case 'Text':
         result = {
           ...result,
-          allTextIds: addItem(result.allTextIds, cloneId)
+          allTextIds: addItem(result.allTextIds, copyId)
         }
         break;
       case 'Image':
         result = {
           ...result,
-          allImageIds: addItem(result.allImageIds, cloneId)
+          allImageIds: addItem(result.allImageIds, copyId)
         }
         break;
     }
     result = {
       ...result,
-      allIds: [...result.allIds, cloneId],
+      allIds: [...result.allIds, copyId],
       byId: {
         ...result.byId,
-        [cloneId]: {
-          ...mapLayerItem,
-          id: cloneId,
-          parent: cloneScope[cloneScope.length - 1],
-          scope: cloneScope,
-          underlyingMask: underlyingMaskCloned ? layerCloneMap[mapLayerItem.underlyingMask].id : mapLayerItem.underlyingMask,
-          children: cloneChildren,
-          tweenEvents: [],
-          tweens: []
+        [copyId]: {
+          ...itemToCopy,
+          id: copyId,
+          parent: copyParent,
+          scope: copyScope,
+          underlyingMask: copyUnderlyingMask,
+          children: copyChildred,
+          events: [],
+          tweens: {
+            allIds: [],
+            asOrigin: [],
+            asDestination: [],
+            byProp: TWEEN_PROPS_MAP
+          }
         }
+      } as any,
+      childrenById: {
+        ...result.childrenById,
+        [copyId]: copyChildred
       }
     };
     return result;
@@ -4314,9 +4516,16 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): Layer
       ...currentState.byId,
       [layerItem.parent]: {
         ...currentState.byId[layerItem.parent],
-        children: addItem(currentState.byId[layerItem.parent].children, layerCloneMap[action.payload.id].id)
+        children: addItem(currentState.byId[layerItem.parent].children, layerCloneMap[action.payload.id])
       } as Btwx.Page | Btwx.Group | Btwx.Artboard
+    },
+    childrenById: {
+      ...currentState.childrenById,
+      [layerItem.parent]: addItem(currentState.childrenById[layerItem.parent], layerCloneMap[action.payload.id])
     }
+  }
+  if (layerItem.id === currentState.hover) {
+    currentState = setLayerHover(currentState, layerActions.setLayerHover({id: layerCloneMap[action.payload.id]}) as SetLayerHover);
   }
   return currentState;
 };
@@ -4329,9 +4538,9 @@ export const duplicateLayers = (state: LayerState, action: DuplicateLayers): Lay
   const newLayers = currentState.allIds.slice(state.allIds.length, currentState.allIds.length);
   const inScopeLayers = newLayers.filter((id) => currentState.scope.includes(currentState.byId[id].parent));
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: inScopeLayers, newSelection: true}) as SelectLayers);
-  // if (state.selected.length > 0) {
-  //   currentState = deselectLayers(currentState, layerActions.deselectLayers({layers: state.selected}) as DeselectLayers);
-  // }
+  if (state.selected.length > 0) {
+    currentState = deselectLayers(currentState, layerActions.deselectLayers({layers: state.selected}) as DeselectLayers);
+  }
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
   return currentState;
 };

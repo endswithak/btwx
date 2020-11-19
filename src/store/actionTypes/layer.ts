@@ -349,6 +349,7 @@ export interface RemoveLayer {
 
 export interface RemoveLayersPayload {
   layers: string[];
+  batch?: boolean;
 }
 
 export interface RemoveLayers {

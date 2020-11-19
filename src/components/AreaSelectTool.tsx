@@ -303,5 +303,8 @@ export default PaperTool(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(AreaSelectTool)
+  )(AreaSelectTool),
+  {
+    all: true
+  }
 );
