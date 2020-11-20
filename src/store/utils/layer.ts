@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { v4 as uuidv4 } from 'uuid';
 import tinyColor from 'tinycolor2';
-import { LayerState } from '../reducers/layer';
+import layer, { LayerState } from '../reducers/layer';
 import * as layerActions from '../actions/layer';
 import { addItem, removeItem, insertItem, moveItemAbove, moveItemBelow, replaceAllStr } from './general';
 import { paperMain } from '../../canvas';
@@ -429,14 +429,12 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
     currentState = deselectLayers(currentState, layerActions.deselectLayers({layers: deselectParents }) as DeselectLayers);
   }
   // if layer is an artboard, make it the active artboard
-  if (layerItem.type === 'Artboard' && currentState.activeArtboard !== action.payload.id && !action.payload.noActiveArtboardUpdate) {
+  if (layerItem.type === 'Artboard' && currentState.activeArtboard !== action.payload.id) {
     currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: action.payload.id}) as SetActiveArtboard);
   }
   // if layer scope root is an artboard, make the layer scope root the active artboard
   if (hasArtboardParent && currentState.activeArtboard !== layerItem.scope[1]) {
-    if (!action.payload.noActiveArtboardUpdate) {
-      currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: layerItem.scope[1]}) as SetActiveArtboard);
-    }
+    currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: layerItem.scope[1]}) as SetActiveArtboard);
   }
   // handle hover
   // if (layerItem.id !== currentState.hover) {
@@ -481,7 +479,7 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
   const orderedSelected = orderLayersByDepth(currentState, currentState.selected);
   currentState = {
     ...currentState,
-    selected: [...orderedSelected]
+    selected: orderedSelected
   }
   // return final state
   return currentState;
@@ -506,22 +504,26 @@ export const selectLayers = (state: LayerState, action: SelectLayers): LayerStat
     currentState = deselectAllLayers(currentState, layerActions.deselectAllLayers() as DeselectAllLayers);
   }
   currentState = action.payload.layers.reduce((result, current) => {
-    if (state.byId[current].selected && action.payload.toggleSelected) {
-      return deselectLayer(result, layerActions.deselectLayer({id: current}) as DeselectLayer);
-    } else {
-      return selectLayer(result, layerActions.selectLayer({id: current, noActiveArtboardUpdate: action.payload.noActiveArtboardUpdate}) as SelectLayer);
-    }
+    return selectLayer(result, layerActions.selectLayer({id: current}) as SelectLayer);
   }, currentState);
   return currentState;
 };
 
 export const areaSelectLayers = (state: LayerState, action: AreaSelectLayers): LayerState => {
   let currentState = state;
-  if (action.payload.deselect && action.payload.deselect.length > 0) {
-    currentState = deselectLayers(currentState, layerActions.deselectLayers({layers: action.payload.deselect}) as DeselectLayers);
-  }
-  if (action.payload.select && action.payload.select.length > 0) {
-    currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.select}) as SelectLayers);
+  const shiftModifier = action.payload.shiftModifier;
+  if (shiftModifier) {
+    currentState = action.payload.layers.reduce((result, current) => {
+      const layerItem = result.byId[current];
+      if (layerItem.selected) {
+        result = deselectLayer(result, layerActions.deselectLayer({id: current}) as DeselectLayer);
+      } else {
+        result = selectLayer(result, layerActions.selectLayer({id: current}) as SelectLayer);
+      }
+      return result;
+    }, currentState);
+  } else {
+    currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.layers, newSelection: true}) as SelectLayers);
   }
   return currentState;
 };

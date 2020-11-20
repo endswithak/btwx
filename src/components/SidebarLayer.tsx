@@ -17,10 +17,10 @@ import SidebarLayerMaskedIcon from './SidebarLayerMaskedIcon';
 
 interface SidebarLayerProps {
   id: string;
-  isOpen: boolean;
-  setOpen: any;
-  nestingLevel: number;
-  style: any;
+  isOpen?: boolean;
+  setOpen?: any;
+  nestingLevel?: number;
+  style?: any;
   isDragGhost?: boolean;
   dragging?: string;
   isSelected?: boolean;
@@ -63,40 +63,20 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
   }
 
   const handleMouseDown = (e: any): void => {
-    // if (!editing) {
-
-    // }
-    const openIcon = document.getElementById(`${id}-open-icon`);
-    const maskIcon = document.getElementById(`${id}-mask-icon`);
-    if (e.target === openIcon || openIcon.contains(e.target)) {
-      setOpen(!isOpen);
-    } else if (e.target === maskIcon || maskIcon.contains(e.target)) {
-      selectLayers({layers: [underlyingMask], newSelection: true});
-    } else {
-      if (e.metaKey) {
-        if (isSelected) {
-          deselectLayers({layers: [id]});
-        } else {
-          selectLayers({layers: [id]});
-        }
+    if (e.metaKey) {
+      if (isSelected) {
+        deselectLayers({layers: [id]});
       } else {
-        if (!isSelected) {
-          selectLayers({layers: [id], newSelection: true});
-        }
+        selectLayers({layers: [id]});
+      }
+    } else {
+      if (!isSelected) {
+        selectLayers({layers: [id], newSelection: true});
       }
     }
   }
 
   const handleMouseEnter = (e: any): void => {
-    // const maskIcon = document.getElementById(`${id}-mask-icon`);
-    // if (e.target === maskIcon || maskIcon.contains(e.target) && hover !== underlyingMask) {
-    //   e.stopPropagation();
-    //   setLayerHover({id: underlyingMask});
-    // } else {
-    //   if (!isHover) {
-    //     setLayerHover({id: id});
-    //   }
-    // }
     setLayerHover({id: id});
   }
 
@@ -105,9 +85,6 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
   }
 
   const handleContextMenu = (e: any) => {
-    // if (!editing) {
-
-    // }
     openContextMenu({
       type: 'LayerEdit',
       id: id,
@@ -155,6 +132,7 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
       <SidebarLayerChevron
         id={id}
         isOpen={isOpen}
+        setOpen={setOpen}
         isDragGhost={isDragGhost} />
       <SidebarLayerMaskedIcon
         id={id}
@@ -172,7 +150,14 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState, ownProps: SidebarLayerProps) => {
+const mapStateToProps = (state: RootState, ownProps: SidebarLayerProps): {
+  dragging: string;
+  isSelected: boolean;
+  isHover: boolean;
+  underlyingMask: string;
+  hover: string;
+  editing: boolean;
+} => {
   const { leftSidebar, layer } = state;
   const layerItem = layer.present.byId[ownProps.id];
   const dragging = leftSidebar.dragging;
@@ -180,7 +165,8 @@ const mapStateToProps = (state: RootState, ownProps: SidebarLayerProps) => {
   const isHover = layerItem.hover;
   const hover = layer.present.hover;
   const underlyingMask = layerItem.underlyingMask;
-  return { dragging, isSelected, isHover, underlyingMask, hover };
+  const editing = ownProps.id === leftSidebar.editing;
+  return { dragging, isSelected, isHover, underlyingMask, hover, editing };
 };
 
 export default connect(

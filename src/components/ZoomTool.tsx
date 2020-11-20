@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-// import { remote } from 'electron';
 import React, { useEffect, ReactElement, useCallback } from 'react';
 import debounce from 'lodash.debounce';
 import { connect } from 'react-redux';
@@ -20,11 +19,11 @@ interface ZoomToolProps {
 const ZoomTool = (props: ZoomToolProps): ReactElement => {
   const { zoomEvent, isEnabled, setCanvasZooming, setCanvasMatrix } = props;
 
-  const debounceZoom = useCallback(
+  const debounceZoomEnd = useCallback(
     debounce(() => {
       setCanvasZooming({zooming: false});
       setCanvasMatrix({matrix: paperMain.view.matrix.values});
-    }, 100),
+    }, 50),
     []
   );
 
@@ -36,8 +35,8 @@ const ZoomTool = (props: ZoomToolProps): ReactElement => {
       const cursorPoint = paperMain.view.getEventPoint(zoomEvent as any);
       const pointDiff = new paperMain.Point(cursorPoint.x - paperMain.view.center.x, cursorPoint.y - paperMain.view.center.y);
       const prevZoom = paperMain.view.zoom;
-      const nextZoom = paperMain.view.zoom - zoomEvent.deltaY * 0.01;
-      if (zoomEvent.deltaY < 0 && nextZoom < 30) {
+      const nextZoom = paperMain.view.zoom - zoomEvent.deltaY * (0.01 * paperMain.view.zoom);
+      if (zoomEvent.deltaY < 0 && nextZoom < 25) {
         paperMain.view.zoom = nextZoom;
       } else if (zoomEvent.deltaY > 0 && nextZoom > 0) {
         paperMain.view.zoom = nextZoom;
@@ -47,11 +46,11 @@ const ZoomTool = (props: ZoomToolProps): ReactElement => {
       const zoomDiff = paperMain.view.zoom - prevZoom;
       paperMain.view.translate(
         new paperMain.Point(
-          ((zoomDiff * pointDiff.x) * ( 1 / paperMain.view.zoom)) * -1,
-          ((zoomDiff * pointDiff.y) * ( 1 / paperMain.view.zoom)) * -1
+          ((zoomDiff * pointDiff.x) * (1 / paperMain.view.zoom)) * -1,
+          ((zoomDiff * pointDiff.y) * (1 / paperMain.view.zoom)) * -1
         )
       );
-      debounceZoom();
+      debounceZoomEnd();
     }
   }, [zoomEvent]);
 

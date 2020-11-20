@@ -32,235 +32,74 @@ type AreaSelectToolProps = (
 
 const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isEnabled, selecting, setCanvasSelecting, areaSelectLayers, scope, selected, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent } = props;
-  const [areaSelectBounds, setAreaSelectBounds] = useState<paper.Rectangle>(null);
-  const [originalSelection, setOriginalSelection] = useState<string[]>(null);
+  const { isEnabled, selecting, setCanvasSelecting, areaSelectLayers, scope, selected, tool, downEvent, dragEvent, upEvent } = props;
 
-  // const debounceSelection = useCallback(
-  //   (asBounds: paper.Rectangle, asEvent: paper.ToolEvent, asOriginalSelection: string[], asScope: string[]) => {
-  //     const nextSelectedLayers: string[] = [];
-  //     const nextDeselectedLayers: string[] = [];
-  //     if (asEvent.modifiers.shift) {
-  //       paperMain.project.getItems({
-  //         data: (data: any) => {
-  //           const notPage = data.type === 'Layer' && data.layerType !== 'Page';
-  //           const isScopeLayer = data.scope && asScope.includes(data.scope[data.scope.length - 1]);
-  //           const other = data.id && data.id !== asScope[asScope.length - 1];
-  //           const isNotSelected = !data.selected;
-  //           const isPartOfOriginalSelection = data.id && asOriginalSelection.includes(data.id);
-  //           return notPage && isScopeLayer && (isNotSelected || isPartOfOriginalSelection) && other;
-  //         },
-  //         bounds: (bounds: paper.Rectangle) => {
-  //           return bounds.intersects(asBounds);
-  //         }
-  //       }).forEach((current) => {
-  //         if (asOriginalSelection.includes(current.data.id)) {
-  //           if (current.data.selected) {
-  //             nextDeselectedLayers.push(current.data.id);
-  //           }
-  //         } else {
-  //           nextSelectedLayers.push(current.data.id);
-  //         }
-  //       });
-  //       paperMain.project.getItems({
-  //         data: (data: any) => {
-  //           const notPage = data.type === 'Layer' && data.layerType !== 'Page';
-  //           const isScopeLayer = data.scope && asScope.includes(data.scope[data.scope.length - 1]);
-  //           const other = data.id && data.id !== asScope[asScope.length - 1];
-  //           const isSelected = data.selected;
-  //           const isPartOfOriginalSelection = data.id && asOriginalSelection.includes(data.id);
-  //           return notPage && isScopeLayer && (isSelected || isPartOfOriginalSelection) && other;
-  //         },
-  //         bounds: (bounds: paper.Rectangle) => {
-  //           return !bounds.intersects(asBounds);
-  //         }
-  //       }).forEach((current) => {
-  //         if (asOriginalSelection.includes(current.data.id)) {
-  //           if (!current.data.selected) {
-  //             nextSelectedLayers.push(current.data.id);
-  //           }
-  //         } else {
-  //           nextDeselectedLayers.push(current.data.id);
-  //         }
-  //       });
-  //     } else {
-  //       paperMain.project.getItems({
-  //         data: (data: any) => {
-  //           const notPage = data.type === 'Layer' && data.layerType !== 'Page';
-  //           const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
-  //           const other = data.id && data.id !== scope[scope.length - 1];
-  //           const isNotSelected = !data.selected;
-  //           return notPage && isScopeLayer && isNotSelected && other;
-  //         },
-  //         bounds: (bounds: paper.Rectangle) => {
-  //           return bounds.intersects(asBounds);
-  //         }
-  //       }).forEach((current) => {
-  //         nextSelectedLayers.push(current.data.id);
-  //       });
-  //       paperMain.project.getItems({
-  //         data: (data: any) => {
-  //           const notPage = data.type === 'Layer' && data.layerType !== 'Page';
-  //           const isScopeLayer = data.scope && asScope.includes(data.scope[data.scope.length - 1]);
-  //           const other = data.id && data.id !== asScope[asScope.length - 1];
-  //           const isSelected = data.selected;
-  //           return notPage && isScopeLayer && isSelected && other;
-  //         },
-  //         bounds: (bounds: paper.Rectangle) => {
-  //           return !bounds.intersects(asBounds);
-  //         }
-  //       }).forEach((current) => {
-  //         nextDeselectedLayers.push(current.data.id);
-  //       });
-  //     }
-  //     if (nextSelectedLayers.length > 0 || nextDeselectedLayers.length > 0) {
-  //       areaSelectLayers({
-  //         select: nextSelectedLayers,
-  //         deselect: nextDeselectedLayers
-  //       });
-  //     }
-  //   },
-  //   []
-  // );
-
-  const resetState = (): void => {
+  const updateAreaSelectPreview = (areaSelectBounds: paper.Rectangle): void => {
     if (getPaperLayer('AreaSelectPreview')) {
       getPaperLayer('AreaSelectPreview').remove();
     }
-    setOriginalSelection(null);
-    setAreaSelectBounds(null);
-  }
-
-  const updateAreaSelectPreview = () => {
-    if (getPaperLayer('AreaSelectPreview')) {
-      getPaperLayer('AreaSelectPreview').remove();
+    if (areaSelectBounds) {
+      const areaSelectPreview = new paperMain.Path.Rectangle({
+        rectangle: areaSelectBounds,
+        fillColor: theme.name === 'light' ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.5)',
+        strokeWidth: 1 / paperMain.view.zoom,
+        strokeColor: theme.name === 'light' ? '#000' : '#fff',
+        opacity: 0.2,
+        data: { id: 'AreaSelectPreview' }
+      });
+      areaSelectPreview.removeOn({
+        up: true
+      });
     }
-    const areaSelectPreview = new paperMain.Path.Rectangle({
-      rectangle: areaSelectBounds,
-      fillColor: theme.name === 'light' ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.5)',
-      strokeWidth: 1 / paperMain.view.zoom,
-      strokeColor: theme.name === 'light' ? '#000' : '#fff',
-      opacity: 0.2,
-      data: { id: 'AreaSelectPreview' }
-    });
-    areaSelectPreview.removeOn({
-      up: true
-    });
   }
 
   useEffect(() => {
-    if (downEvent && isEnabled) {
-      setOriginalSelection(selected);
+    if (dragEvent && isEnabled) {
+      updateAreaSelectPreview(null);
+      setCanvasSelecting({selecting: true});
     }
   }, [downEvent]);
 
   useEffect(() => {
     if (dragEvent && isEnabled) {
-      setAreaSelectBounds(new paperMain.Rectangle({
-        from: dragEvent.downPoint,
-        to: dragEvent.point
-      }));
-      if (!selecting) {
-        setCanvasSelecting({selecting: true});
-      }
+      updateAreaSelectPreview(
+        new paperMain.Rectangle({
+          from: dragEvent.downPoint,
+          to: dragEvent.point
+        })
+      );
     }
   }, [dragEvent]);
 
   useEffect(() => {
     if (upEvent && isEnabled) {
-      const nextSelectedLayers: string[] = [];
-      const nextDeselectedLayers: string[] = [];
-      if (upEvent.modifiers.shift) {
-        paperMain.project.getItems({
+      const areaSelectBounds = new paperMain.Rectangle({
+        from: upEvent.downPoint,
+        to: upEvent.point
+      });
+      if (areaSelectBounds && (areaSelectBounds.width > 0 || areaSelectBounds.height > 0)) {
+        const layers = paperMain.project.getItems({
           data: (data: any) => {
             const notPage = data.type === 'Layer' && data.layerType !== 'Page';
             const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
             const other = data.id && data.id !== scope[scope.length - 1];
-            const isNotSelected = !data.selected;
-            const isPartOfOriginalSelection = data.id && originalSelection.includes(data.id);
-            return notPage && isScopeLayer && (isNotSelected || isPartOfOriginalSelection) && other;
+            return notPage && isScopeLayer && other;
           },
-          bounds: (bounds: paper.Rectangle) => {
-            return bounds.intersects(areaSelectBounds);
-          }
-        }).forEach((current) => {
-          if (originalSelection.includes(current.data.id)) {
-            if (current.data.selected) {
-              nextDeselectedLayers.push(current.data.id);
-            }
-          } else {
-            nextSelectedLayers.push(current.data.id);
-          }
-        });
-        paperMain.project.getItems({
-          data: (data: any) => {
-            const notPage = data.type === 'Layer' && data.layerType !== 'Page';
-            const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
-            const other = data.id && data.id !== scope[scope.length - 1];
-            const isSelected = data.selected;
-            const isPartOfOriginalSelection = data.id && originalSelection.includes(data.id);
-            return notPage && isScopeLayer && (isSelected || isPartOfOriginalSelection) && other;
-          },
-          bounds: (bounds: paper.Rectangle) => {
-            return !bounds.intersects(areaSelectBounds);
-          }
-        }).forEach((current) => {
-          if (originalSelection.includes(current.data.id)) {
-            if (!current.data.selected) {
-              nextSelectedLayers.push(current.data.id);
-            }
-          } else {
-            nextDeselectedLayers.push(current.data.id);
-          }
-        });
-      } else {
-        paperMain.project.getItems({
-          data: (data: any) => {
-            const notPage = data.type === 'Layer' && data.layerType !== 'Page';
-            const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
-            const other = data.id && data.id !== scope[scope.length - 1];
-            const isNotSelected = !data.selected;
-            return notPage && isScopeLayer && isNotSelected && other;
-          },
-          bounds: (bounds: paper.Rectangle) => {
-            return bounds.intersects(areaSelectBounds);
-          }
-        }).forEach((current) => {
-          nextSelectedLayers.push(current.data.id);
-        });
-        paperMain.project.getItems({
-          data: (data: any) => {
-            const notPage = data.type === 'Layer' && data.layerType !== 'Page';
-            const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
-            const other = data.id && data.id !== scope[scope.length - 1];
-            const isSelected = data.selected;
-            return notPage && isScopeLayer && isSelected && other;
-          },
-          bounds: (bounds: paper.Rectangle) => {
-            return !bounds.intersects(areaSelectBounds);
-          }
-        }).forEach((current) => {
-          nextDeselectedLayers.push(current.data.id);
-        });
+          overlapping: areaSelectBounds
+        }).reduce((result, current) => {
+          return [...result, current.data.id];
+        }, []);
+        if (layers.length > 0) {
+          areaSelectLayers({
+            layers: layers,
+            shiftModifier: upEvent.modifiers.shift
+          });
+        }
       }
-      if (nextSelectedLayers.length > 0 || nextDeselectedLayers.length > 0) {
-        areaSelectLayers({
-          select: nextSelectedLayers,
-          deselect: nextDeselectedLayers
-        });
-      }
-      if (selecting) {
-        setCanvasSelecting({selecting: false});
-      }
-      resetState();
+      setCanvasSelecting({selecting: false});
+      updateAreaSelectPreview(null);
     }
   }, [upEvent]);
-
-  useEffect(() => {
-    if (areaSelectBounds && isEnabled) {
-      updateAreaSelectPreview();
-    }
-  }, [areaSelectBounds]);
 
   useEffect(() => {
     if (isEnabled) {
@@ -270,7 +109,7 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
     } else {
       if (tool && paperMain.tool && (paperMain.tool as any)._index === (tool as any)._index) {
         paperMain.tool = null;
-        resetState();
+        updateAreaSelectPreview(null);
       }
     }
   }, [isEnabled]);
@@ -305,6 +144,8 @@ export default PaperTool(
     mapDispatchToProps
   )(AreaSelectTool),
   {
-    all: true
+    mouseDown: true,
+    mouseDrag: true,
+    mouseUp: true
   }
 );

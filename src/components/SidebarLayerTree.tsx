@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect } from 'react';
+import React, { ReactElement, useEffect, memo } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeTree as Tree } from '../../react-vtree';
 import { connect } from 'react-redux';
@@ -22,17 +22,24 @@ const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
     console.log('LAYER TREEEEEE');
   }, []);
 
+  useEffect(() => {
+    console.log('TREEEEE WALKER');
+  }, [treeWalker]);
+
   const handleRef = (newRef: Tree): void => {
     setRef({ref: newRef});
   }
 
-  const Node = ({data, style, isOpen, setOpen}: any): ReactElement => (
-    <SidebarLayer
-      {...data}
-      isOpen={isOpen}
-      setOpen={setOpen}
-      style={style} />
-  );
+  const Node = memo(function Node(props: any) {
+    const {data, style, isOpen, setOpen} = props;
+    return (
+      <SidebarLayer
+        {...data}
+        isOpen={isOpen}
+        setOpen={setOpen}
+        style={style} />
+    )
+  });
 
   return (
     <>

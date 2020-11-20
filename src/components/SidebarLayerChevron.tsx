@@ -10,11 +10,17 @@ interface SidebarLayerChevronProps {
   isDragGhost?: boolean;
   isSelected?: boolean;
   canOpen?: boolean;
+  setOpen?(isOpen: boolean): void;
 }
 
 const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { id, isSelected, canOpen, isDragGhost, isOpen } = props;
+  const { id, isSelected, canOpen, isDragGhost, isOpen, setOpen } = props;
+
+  const handleMouseDown = (e: any) => {
+    e.stopPropagation();
+    setOpen(!isOpen);
+  }
 
   useEffect(() => {
     console.log('LAYER CHEVRON');
@@ -24,6 +30,7 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
     <div
       className='c-sidebar-layer__icon c-sidebar-layer__icon--chevron'
       id={`${id}-open-icon`}
+      onMouseDown={canOpen ? handleMouseDown : null}
       style={{
         pointerEvents: canOpen ? 'auto' : 'none'
       }}>

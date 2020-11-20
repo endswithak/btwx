@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useEffect, ReactElement, useState, useCallback } from 'react';
-import throttle from 'lodash.throttle';
+import React, { useEffect, ReactElement, useState } from 'react';
 import { paperMain } from '../canvas';
 
 export interface PaperToolProps {
@@ -37,20 +36,6 @@ const PaperToolWrap = (Component: any, events: EventProps) => {
     const [altModifier, setAltModifier] = useState<boolean>(false);
     const [shiftModifier, setShiftModifier] = useState<boolean>(false);
 
-    const handleDrag = useCallback(
-      throttle((e: paper.ToolEvent) => {
-        setDragEvent(e);
-      }, 25),
-      []
-    );
-
-    const handleMove = useCallback(
-      throttle((e: paper.ToolEvent) => {
-        setMoveEvent(e);
-      }, 25),
-      []
-    );
-
     const handleKeyDown = (e: paper.KeyEvent): void => {
       setKeyDownEvent(e);
     }
@@ -60,8 +45,7 @@ const PaperToolWrap = (Component: any, events: EventProps) => {
     }
 
     const handleMouseMove = (e: paper.ToolEvent): void => {
-      // setMoveEvent(e);
-      handleMove(e);
+      setMoveEvent(e);
     }
 
     const handleDownEvent = (e: paper.ToolEvent): void => {
@@ -69,8 +53,7 @@ const PaperToolWrap = (Component: any, events: EventProps) => {
     }
 
     const handleDragEvent = (e: paper.ToolEvent): void => {
-      // setDragEvent(e);
-      handleDrag(e);
+      setDragEvent(e);
     }
 
     const handleUpEvent = (e: paper.ToolEvent): void => {

@@ -1,19 +1,20 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useEffect } from 'react';
 import { RootState } from '../store/reducers';
+import { getReverseSelected } from '../store/selectors/layer';
 import { connect } from 'react-redux';
 import SidebarLayer from './SidebarLayer';
-import { getLayersById } from '../store/selectors/layer';
 
 interface SidebarLayerDragGhostsProps {
   selected?: string[];
   leftSidebarWidth?: number;
-  byId?: {
-    [id: string]: Btwx.Layer;
-  };
 }
 
 const SidebarLayerDragGhosts = (props: SidebarLayerDragGhostsProps): ReactElement => {
-  const { selected, leftSidebarWidth, byId } = props;
+  const { selected, leftSidebarWidth } = props;
+
+  useEffect(() => {
+    console.log('DRAG GHOSTS');
+  }, []);
 
   return (
     <div
@@ -25,41 +26,22 @@ const SidebarLayerDragGhosts = (props: SidebarLayerDragGhostsProps): ReactElemen
         opacity: 0.5
       }}>
       {
-        selected.map((layer, index) => {
-          const layerItem = byId[layer];
-          const { id, name, type, mask, underlyingMask, ignoreUnderlyingMask, masked, selected, hover, pathData, scope } = layerItem;
-          return (
-            <SidebarLayer
-              key={index}
-              id={id}
-              name={name}
-              type={type}
-              mask={mask}
-              underlyingMask={underlyingMask}
-              ignoreUnderlyingMask={ignoreUnderlyingMask}
-              masked={masked}
-              selected={selected}
-              hover={hover}
-              pathData={pathData}
-              closed={closed}
-              nestingLevel={scope.length - 1}
-              isOpen={false}
-              setOpen={null}
-              style={{}}
-              isDragGhost />
-          )
-        })
+        selected.map((layer, index) => (
+          <SidebarLayer
+            key={index}
+            id={layer}
+            isDragGhost />
+        ))
       }
     </div>
   )
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { layer, viewSettings } = state;
-  const selected = [...layer.present.selected].reverse();
+  const { viewSettings } = state;
+  const selected = getReverseSelected(state);
   const leftSidebarWidth = viewSettings.leftSidebar.width;
-  const byId = getLayersById(state);
-  return { selected, leftSidebarWidth, byId };
+  return { selected, leftSidebarWidth };
 };
 
 export default connect(

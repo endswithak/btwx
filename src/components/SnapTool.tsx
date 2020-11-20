@@ -54,7 +54,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
   const getSnapZones = (currentToBounds: paper.Rectangle, scaleOverride?: number): Btwx.SnapZones => {
     const zoneMin = 0.5;
     const zoneMax = 20;
-    const zoneScale = scaleOverride ? scaleOverride : 0.5 * (16 / paperMain.view.zoom);
+    const zoneScale = scaleOverride ? scaleOverride : 0.5 * (8 / paperMain.view.zoom);
     const scale = zoneScale < zoneMin ? zoneMin : zoneScale > zoneMax ? zoneMax : zoneScale;
     const top = hitTestZones.all || hitTestZones.top ? new paperMain.Rectangle({
       from: new paperMain.Point(paperMain.view.bounds.left, currentToBounds.top - scale),
@@ -105,6 +105,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
           return isScopeLayer && !isTopScopeGroup;
         }
       },
+      overlapping: paperMain.view.bounds,
       bounds: (bounds: paper.Rectangle) => {
         switch(snapZone) {
           case 'top':
@@ -143,6 +144,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
           return isScopeLayer && !isTopScopeGroup;
         }
       },
+      overlapping: paperMain.view.bounds,
       bounds: (bounds: paper.Rectangle) => {
         return (
           bounds.topCenter.isInside(snapZones.top) ||
@@ -174,6 +176,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
           return isScopeLayer && !isTopScopeGroup;
         }
       },
+      overlapping: paperMain.view.bounds,
       bounds: (bounds: paper.Rectangle) => {
         return (
           bounds.leftCenter.isInside(snapZones.left) ||
@@ -613,8 +616,8 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
   }, [toolEvent, preserveAspectRatio]);
 
   useEffect(() => {
-    setSnapBreakThreshholdMin(-8 / paperMain.view.zoom);
-    setSnapBreakThreshholdMax(8 / paperMain.view.zoom);
+    setSnapBreakThreshholdMin(-4 / paperMain.view.zoom);
+    setSnapBreakThreshholdMax(4 / paperMain.view.zoom);
     return () => {
       const measureGuides = getPaperLayer('MeasureGuides');
       const snapGuides = getPaperLayer('SnapGuides');
@@ -673,32 +676,32 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
           new Guide({from, to, guideType: 'snap', removeOpts: {up: true}});
         }
       });
-      // if (measure) {
-      //   let measureGuides: { top?: string; bottom?: string; left?: string; right?: string; all?: string } = null;
-      //   if (xSnapPoint) {
-      //     const closestLayer = getClosestPaperLayer(snapBounds.center, xGuideLayers);
-      //     if (closestLayer && !snapBounds.intersects(closestLayer.bounds, 1)) {
-      //       if (!measureGuides) {
-      //         measureGuides = {};
-      //       }
-      //       measureGuides['top'] = closestLayer.data.id;
-      //       measureGuides['bottom'] = closestLayer.data.id;
-      //     }
-      //   }
-      //   if (ySnapPoint) {
-      //     const closestLayer = getClosestPaperLayer(snapBounds.center, yGuideLayers);
-      //     if (closestLayer && !snapBounds.intersects(closestLayer.bounds, 1)) {
-      //       if (!measureGuides) {
-      //         measureGuides = {};
-      //       }
-      //       measureGuides['left'] = closestLayer.data.id;
-      //       measureGuides['right'] = closestLayer.data.id;
-      //     }
-      //   }
-      //   if (measureGuides) {
-      //     updateMeasureGuides(measureGuides, snapBounds);
-      //   }
-      // }
+      if (measure) {
+        let measureGuides: { top?: string; bottom?: string; left?: string; right?: string; all?: string } = null;
+        if (xSnapPoint) {
+          const closestLayer = getClosestPaperLayer(snapBounds.center, xGuideLayers);
+          if (closestLayer && !snapBounds.intersects(closestLayer.bounds, 1)) {
+            if (!measureGuides) {
+              measureGuides = {};
+            }
+            measureGuides['top'] = closestLayer.data.id;
+            measureGuides['bottom'] = closestLayer.data.id;
+          }
+        }
+        if (ySnapPoint) {
+          const closestLayer = getClosestPaperLayer(snapBounds.center, yGuideLayers);
+          if (closestLayer && !snapBounds.intersects(closestLayer.bounds, 1)) {
+            if (!measureGuides) {
+              measureGuides = {};
+            }
+            measureGuides['left'] = closestLayer.data.id;
+            measureGuides['right'] = closestLayer.data.id;
+          }
+        }
+        if (measureGuides) {
+          updateMeasureGuides(measureGuides, snapBounds);
+        }
+      }
     }
   }, [snapBounds]);
 

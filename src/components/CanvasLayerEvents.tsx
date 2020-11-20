@@ -170,7 +170,7 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
   }
 
   useEffect(() => {
-    if (layerEvent && !dragging && !resizing && !selecting && activeTool !== 'Artboard' && activeTool !== 'Shape' && activeTool !== 'Text') {
+    if (layerEvent && !dragging && !resizing && activeTool !== 'Artboard' && activeTool !== 'Shape' && activeTool !== 'Text') {
       switch(layerEvent.eventType) {
         case 'contextMenu':
           handleContextMenu();

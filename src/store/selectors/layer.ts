@@ -25,6 +25,13 @@ export const getEventDrawerSort = (state: RootState): string => state.tweenDrawe
 export const getEventDrawerHover = (state: RootState): string => state.tweenDrawer.eventHover;
 export const getActiveArtboard = (state: RootState): string => state.layer.present.activeArtboard;
 
+export const getReverseSelected = createSelector(
+  [ getSelected ],
+  (selected) => {
+    return selected.reverse();
+  }
+);
+
 export const getTreeWalker = createSelector(
   [ getChildrenById ],
   (childrenById) => {
@@ -947,15 +954,15 @@ export const getSelectionCenter = (providedSelection?: paper.Item[]): paper.Poin
 };
 
 export const getCanvasTopLeft = (state: LayerState): paper.Point => {
-  // return getPaperLayer('page').bounds.topLeft;
-  const page = state.byId['page'];
-  return new paperMain.Point(page.frame.x - (page.frame.width / 2), page.frame.y - (page.frame.height / 2));
+  return getPaperLayer('page').bounds.topLeft;
+  // const page = state.byId['page'];
+  // return new paperMain.Point(page.frame.x - (page.frame.width / 2), page.frame.y - (page.frame.height / 2));
 };
 
 export const getCanvasBottomRight = (state: LayerState): paper.Point => {
-  // return getPaperLayer('page').bounds.bottomRight;
-  const page = state.byId['page'];
-  return new paperMain.Point(page.frame.x + (page.frame.width / 2), page.frame.y + (page.frame.height / 2));
+  return getPaperLayer('page').bounds.bottomRight;
+  // const page = state.byId['page'];
+  // return new paperMain.Point(page.frame.x + (page.frame.width / 2), page.frame.y + (page.frame.height / 2));
 };
 
 export const getCanvasBounds = (state: LayerState): paper.Rectangle => {

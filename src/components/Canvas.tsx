@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useEffect, useState, useRef, useCallback } from 'react';
-import throttle from 'lodash.throttle';
+import React, { useContext, ReactElement, useEffect, useState, useRef } from 'react';
 import { connect } from 'react-redux';
 import { importPaperProject, getPaperLayer } from '../store/selectors/layer';
 import { RootState } from '../store/reducers';
@@ -26,14 +25,14 @@ interface CanvasProps {
   };
   paperProject?: string;
   matrix?: number[];
-  interactionDisabled?: boolean;
+  interactionEnabled?: boolean;
   setReady(ready: boolean): void;
 }
 
 const Canvas = (props: CanvasProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const ref = useRef<HTMLCanvasElement>(null);
-  const { ready, matrix, documentImages, paperProject, setReady, interactionDisabled } = props;
+  const { ready, matrix, documentImages, paperProject, setReady, interactionEnabled } = props;
   const [layerEvent, setLayerEvent] = useState(null);
   const [uiEvent, setUIEvent] = useState(null);
   const [translateEvent, setTranslateEvent] = useState(null);
@@ -104,11 +103,11 @@ const Canvas = (props: CanvasProps): ReactElement => {
         id='canvas'
         ref={ref}
         onWheel={ready ? handleWheel : null}
-        onMouseMove={ready && !interactionDisabled ? handleMouseMove : null}
-        onMouseDown={ready && !interactionDisabled ? handleMouseDown : null}
-        onMouseUp={ready && !interactionDisabled ? handleMouseUp : null}
-        onDoubleClick={ready && !interactionDisabled ? handleDoubleClick : null}
-        onContextMenu={ready && !interactionDisabled ? handleContextMenu : null}
+        onMouseMove={ready && interactionEnabled ? handleMouseMove : null}
+        onMouseDown={ready ? handleMouseDown : null}
+        onMouseUp={ready ? handleMouseUp : null}
+        onDoubleClick={ready ? handleDoubleClick : null}
+        onContextMenu={ready ? handleContextMenu : null}
         tabIndex={0}
         style={{
           background: theme.background.z0
@@ -145,14 +144,14 @@ const mapStateToProps = (state: RootState): {
   };
   paperProject: string;
   matrix: number[];
-  interactionDisabled: boolean;
+  interactionEnabled: boolean;
 } => {
   const { layer, documentSettings, canvasSettings } = state;
   return {
     documentImages: documentSettings.images.byId,
     paperProject: layer.present.paperProject,
     matrix: documentSettings.matrix,
-    interactionDisabled: canvasSettings.selecting || canvasSettings.resizing || canvasSettings.drawing || canvasSettings.zooming || canvasSettings.translating || canvasSettings.dragging
+    interactionEnabled: !canvasSettings.selecting && !canvasSettings.resizing && !canvasSettings.drawing && !canvasSettings.zooming && !canvasSettings.translating && !canvasSettings.dragging
   };
 };
 
