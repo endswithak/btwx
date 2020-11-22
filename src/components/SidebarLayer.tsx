@@ -116,7 +116,7 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
       className='c-sidebar-layer'
       style={{
         ...style,
-        paddingLeft: nestingLevel * 12
+        paddingLeft: !isDragGhost ? nestingLevel * 12 : 0
       }}
       onMouseEnter={isDragGhost ? null : handleMouseEnter}
       onMouseLeave={isDragGhost ? null : handleMouseLeave}

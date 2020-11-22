@@ -37,7 +37,7 @@ declare namespace Btwx {
 
   type TweenPropMap = { [K in TweenProp]: boolean; }
 
-  type LayerType = 'Group' | 'Shape' | 'Page' | 'Artboard' | 'Text' | 'Image' | 'Mask';
+  type LayerType = 'Group' | 'Shape' | 'Page' | 'Artboard' | 'Text' | 'Image';
 
   type BlendMode = 'normal' | 'darken' | 'multiply' | 'color-burn' | 'lighten' | 'screen' | 'color-dodge' | 'overlay' | 'soft-light' | 'hard-light' | 'difference' | 'exclusion' | 'hue' | 'saturation' | 'color' | 'luminosity' | 'add' | 'subtract' | 'average' | 'pin-light' | 'negation' | 'source-over' | 'source-in' | 'source-out' | 'source-atop' | 'destination-over' | 'destination-in' | 'destination-out' | 'destination-atop' | 'lighter' | 'darker' | 'copy' | 'xor';
 
@@ -319,9 +319,10 @@ declare namespace Btwx {
     name: string;
     frame: Frame;
     parent: string;
+    children: string[];
+    showChildren: boolean;
     selected: boolean;
     hover: boolean;
-    children: string[] | null;
     scope: string[];
     events: string[];
     tweens: {
@@ -337,72 +338,44 @@ declare namespace Btwx {
     ignoreUnderlyingMask: boolean;
     underlyingMask: string;
     masked: boolean;
-    mask: boolean;
-    pathData: string;
+    artboardLayer: boolean;
   }
 
-  type ClipboardType = 'layers' | 'style' | 'sketch-layers';
-
-  interface ClipboardLayers {
-    type: ClipboardType;
-    main: string[];
-    allIds: string[];
-    byId: {
-      [id: string]: Layer;
-    };
-    images: {
-      [id: string]: DocumentImage;
-    };
-  }
-
-  interface ClipboardStyle {
-    type: ClipboardType;
-    style: Style;
-    textStyle: TextStyle;
-  }
-
-  interface Group extends Layer {
-    type: 'Group';
-    children: string[];
-    showChildren: boolean;
-  }
-
-  interface Artboard extends Layer {
-    type: 'Artboard';
-    children: string[];
-    showChildren: boolean;
-    originArtboardForEvents: string[];
-    destinationArtboardForEvents: string[];
+  interface ArtboardLayer extends Layer {
+    artboard: string;
   }
 
   interface Page extends Layer {
     type: 'Page';
-    children: string[];
   }
 
-  interface Text extends Layer {
+  interface Group extends Layer {
+    type: 'Group';
+  }
+
+  interface Artboard extends Layer {
+    type: 'Artboard';
+    originArtboardForEvents: string[];
+    destinationArtboardForEvents: string[];
+  }
+
+  interface Text extends ArtboardLayer {
     type: 'Text';
     text: string;
-    children: null;
     textStyle: TextStyle;
   }
 
-  interface Shape extends Layer {
-    type: 'Shape';
-    shapeType: ShapeType;
-    children: null;
-    closed: boolean;
-    sides?: number;
-    points?: number;
-    radius?: number;
-    from?: Point;
-    to?: Point;
+  interface Image extends ArtboardLayer {
+    type: 'Image';
+    imageId: string;
   }
 
-  interface CurvePoint {
-    point: Point;
-    handleIn: Point;
-    handleOut: Point;
+  interface Shape extends ArtboardLayer {
+    type: 'Shape';
+    shapeType: ShapeType;
+    closed: boolean;
+    pathData: string;
+    mask: boolean;
   }
 
   interface Polygon extends Shape {
@@ -423,15 +396,35 @@ declare namespace Btwx {
     to: Point;
   }
 
-  interface Image extends Layer {
-    type: 'Image';
-    imageId: string;
-    children: null;
+  interface CurvePoint {
+    point: Point;
+    handleIn: Point;
+    handleOut: Point;
   }
 
   interface DocumentImage {
     id: string;
     buffer: Buffer;
+  }
+
+  type ClipboardType = 'layers' | 'style' | 'sketch-layers';
+
+  interface ClipboardLayers {
+    type: ClipboardType;
+    main: string[];
+    allIds: string[];
+    byId: {
+      [id: string]: Layer;
+    };
+    images: {
+      [id: string]: DocumentImage;
+    };
+  }
+
+  interface ClipboardStyle {
+    type: ClipboardType;
+    style: Style;
+    textStyle: TextStyle;
   }
 
   interface TweenEvent {

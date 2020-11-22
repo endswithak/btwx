@@ -3,7 +3,7 @@ import React, { useEffect, ReactElement, useState, useCallback } from 'react';
 import throttle from 'lodash.throttle';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getPaperLayer, getPaperLayersBounds } from '../store/selectors/layer';
+import { getPaperLayer, getPaperLayersBounds, getSelectedProjectIndex } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
 import { setCanvasDragging } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasDraggingPayload } from '../store/actionTypes/canvasSettings';
@@ -18,6 +18,9 @@ interface DragToolStateProps {
   isEnabled?: boolean;
   dragging?: boolean;
   dragHandle?: boolean;
+  selectedProjectIndex?: {
+    [id: string]: number;
+  };
 }
 
 interface DragToolDispatchProps {
@@ -34,7 +37,7 @@ type DragToolProps = (
 );
 
 const DragTool = (props: DragToolProps): ReactElement => {
-  const { isEnabled, hover, dragHandle, setCanvasDragging, dragging, selected, moveLayersBy, duplicateLayersThunk, removeDuplicatedLayersThunk, tool, altModifier, downEvent, dragEvent, upEvent } = props;
+  const { isEnabled, hover, dragHandle, setCanvasDragging, dragging, selected, moveLayersBy, duplicateLayersThunk, removeDuplicatedLayersThunk, tool, altModifier, downEvent, dragEvent, upEvent, selectedProjectIndex } = props;
   const [originalSelection, setOriginalSelection] = useState<string[]>(null);
   const [duplicateSelection, setDuplicateSelection] = useState<string[]>(null);
   const [fromBounds, setFromBounds] = useState<paper.Rectangle>(null);
@@ -56,11 +59,11 @@ const DragTool = (props: DragToolProps): ReactElement => {
   const throttleDrag = useCallback(
     throttle((tb: paper.Rectangle, fb: paper.Rectangle, selected: string[], ops: paper.Item[], dh: boolean) => {
       const translate = {
-        x: tb.center.x - fb.center.x,
-        y: tb.center.y - fb.center.y
+        x: (tb.center.x - fb.center.x) | 0,
+        y: (tb.center.y - fb.center.y) | 0
       };
       selected.forEach((id, index) => {
-        const paperLayer = getPaperLayer(id);
+        const paperLayer = getPaperLayer(id, selectedProjectIndex[id]);
         const ogLayer = ops[index];
         if (paperLayer && ogLayer) {
           const absPosition = ogLayer.position;
@@ -232,12 +235,14 @@ const mapStateToProps = (state: RootState): DragToolStateProps => {
   const isEnabled = canvasSettings.activeTool === 'Drag';
   const dragging = canvasSettings.dragging;
   const dragHandle = canvasSettings.dragHandle;
+  const selectedProjectIndex = getSelectedProjectIndex(state);
   return {
     hover,
     selected,
     isEnabled,
     dragging,
-    dragHandle
+    dragHandle,
+    selectedProjectIndex
   };
 };
 

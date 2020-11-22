@@ -417,7 +417,7 @@ import {
 
 export interface LayerState {
   byId: {
-    [id: string]: Btwx.Page | Btwx.Artboard | Btwx.Group | Btwx.Shape | Btwx.Text | Btwx.Image;
+    [id: string]: Btwx.Layer;
   };
   allIds: string[];
   page: string;
@@ -428,7 +428,6 @@ export interface LayerState {
   allGroupIds: string[];
   allTextIds: string[];
   allImageIds: string[];
-  allMaskIds: string[];
   scope: string[];
   hover: string;
   events: {
@@ -449,7 +448,10 @@ export interface LayerState {
   childrenById: {
     [id: string]: string[];
   };
-  paperProject: string;
+  paperProjects: {
+    [id: string]: string;
+  };
+  // paperProject: string;
   edit: string;
 }
 
@@ -491,7 +493,6 @@ export const initialState: LayerState = {
   allGroupIds: [],
   allTextIds: [],
   allImageIds: [],
-  allMaskIds: [],
   scope: ['page'],
   hover: null,
   events: {
@@ -506,7 +507,10 @@ export const initialState: LayerState = {
   childrenById: {
     page: []
   },
-  paperProject: '[["Layer",{"applyMatrix":true,"children":[["Group",{"applyMatrix":true,"name":"Page","data":{"id":"page","type":"Layer","layerType":"Page","scope":[]}}],["Group",{"applyMatrix":true,"name":"UI","data":{"id":"ui","type":"UI"},"children":[["Group",{"applyMatrix":true,"name":"Active Artboard Frame","data":{"id":"ActiveArtboardFrame","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Artboard Events","data":{"id":"ArtboardEvents","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Hover Frame","data":{"id":"HoverFrame","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Selection Frame","data":{"id":"SelectionFrame","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Guides","data":{"id":"Guides"},"children":[["Group",{"applyMatrix":true,"name":"Snap Guides","data":{"id":"SnapGuides","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Static Guides","data":{"id":"StaticGuides","type":"UIElement"}}]]}],["Group",{"applyMatrix":true,"name":"Measure Guides","data":{"id":"MeasureGuides","type":"UIElement"}}]]}]]}]]',
+  paperProjects: {
+    page: '[["Layer",{"applyMatrix":true,"children":[["Group",{"applyMatrix":true,"data":{"id":"page","type":"Layer","layerType":"Page","scope":[]}}]]}]]'
+  },
+  // paperProject: '[["Layer",{"applyMatrix":true,"children":[["Group",{"applyMatrix":true,"name":"UI","data":{"id":"ui","type":"UI"},"children":[["Group",{"applyMatrix":true,"name":"Active Artboard Frame","data":{"id":"ActiveArtboardFrame","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Artboard Events","data":{"id":"ArtboardEvents","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Hover Frame","data":{"id":"HoverFrame","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Selection Frame","data":{"id":"SelectionFrame","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Guides","data":{"id":"Guides"},"children":[["Group",{"applyMatrix":true,"name":"Snap Guides","data":{"id":"SnapGuides","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Static Guides","data":{"id":"StaticGuides","type":"UIElement"}}]]}],["Group",{"applyMatrix":true,"name":"Measure Guides","data":{"id":"MeasureGuides","type":"UIElement"}}]]}]]}]]',
   edit: null
 };
 
@@ -550,8 +554,6 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return addLayerChild(state, action);
     case ADD_LAYER_CHILDREN:
       return addLayerChildren(state, action);
-    // case INSERT_LAYER_CHILD:
-    //   return insertLayerChild(state, action);
     case SHOW_LAYER_CHILDREN:
       return showLayerChildren(state, action);
     case HIDE_LAYER_CHILDREN:

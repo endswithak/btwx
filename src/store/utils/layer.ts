@@ -51,7 +51,7 @@ import {
   getGradientDestinationPoint, getGradientStops, orderLayersByDepth, orderLayersByLeft, orderLayersByTop, savePaperProjectJSON,
   getEquivalentTweenProp, gradientsMatch, getPaperProp, getArtboardsTopTop, getSelectionBounds, getLineFromPoint, getLineToPoint,
   getLineVector, getParentPaperLayer, getLayerUnderlyingSiblings, getMaskableUnderlyingSiblings, getSiblingLayersWithUnderlyingMask,
-  getLayerUnderlyingMaskRoot, getOlderSiblingIgnoringUnderlyingMask, getScopedPoint
+  getScopedPoint, getScopedPosition, getAbsPosition, getItemLayers, getLayerProjectIndex
 } from '../selectors/layer';
 
 export const addArtboard = (state: LayerState, action: AddArtboard): LayerState => {
@@ -76,7 +76,7 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
   }
   if (!action.payload.batch) {
     currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.layer.id], newSelection: true}) as SelectLayers);
-    currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+    currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: [action.payload.layer.id]}) as SetLayerEdit);
   }
   return currentState;
 };
@@ -110,7 +110,7 @@ export const addShape = (state: LayerState, action: AddShape): LayerState => {
       currentState = showLayerChildren(currentState, layerActions.showLayerChildren({id: action.payload.layer.parent}) as ShowLayerChildren);
     }
     currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.layer.id], newSelection: true}) as SelectLayers);
-    currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+    currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: [action.payload.layer.id]}) as SetLayerEdit);
   }
   return currentState;
 };
@@ -143,7 +143,7 @@ export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
       currentState = showLayerChildren(currentState, layerActions.showLayerChildren({id: action.payload.layer.parent}) as ShowLayerChildren);
     }
     currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.layer.id], newSelection: true}) as SelectLayers);
-    currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+    currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: [action.payload.layer.id]}) as SetLayerEdit);
   }
   return currentState;
 };
@@ -177,7 +177,7 @@ export const addText = (state: LayerState, action: AddText): LayerState => {
       currentState = showLayerChildren(currentState, layerActions.showLayerChildren({id: action.payload.layer.parent}) as ShowLayerChildren);
     }
     currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.layer.id], newSelection: true}) as SelectLayers);
-    currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+    currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: [action.payload.layer.id]}) as SetLayerEdit);
   }
   return currentState;
 };
@@ -210,14 +210,16 @@ export const addImage = (state: LayerState, action: AddImage): LayerState => {
       currentState = showLayerChildren(currentState, layerActions.showLayerChildren({id: action.payload.layer.parent}) as ShowLayerChildren);
     }
     currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.layer.id], newSelection: true}) as SelectLayers);
-    currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+    currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: [action.payload.layer.id]}) as SetLayerEdit);
   }
   return currentState;
 };
 
 export const addLayers = (state: LayerState, action: AddLayers): LayerState => {
   let currentState = state;
+  const layers: string[] = [];
   currentState = action.payload.layers.reduce((result: LayerState, current) => {
+    layers.push(current.id);
     switch(current.type) {
       case 'Artboard':
         result = addArtboard(result, layerActions.addArtboard({layer: current as Btwx.Artboard, batch: true}) as AddArtboard);
@@ -237,14 +239,14 @@ export const addLayers = (state: LayerState, action: AddLayers): LayerState => {
     }
     return result;
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState => {
   let currentState = state;
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const layerAndDescendants = getLayerAndDescendants(currentState, action.payload.id);
-  const layerItem = state.byId[action.payload.id];
   currentState = layerAndDescendants.reduce((result: LayerState, current) => {
     const currentLayerItem = result.byId[current];
     const isMask = currentLayerItem.type === 'Shape' && (currentLayerItem as Btwx.Shape).mask;
@@ -348,7 +350,7 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
     }
     return result;
   }, currentState);
-  getPaperLayer(action.payload.id).remove();
+  paperLayer.remove();
   if (layerItem.scope.includes(action.payload.id)) {
     currentState = setGlobalScope(currentState, layerActions.setGlobalScope({
       scope: layerItem.scope
@@ -366,27 +368,27 @@ export const removeLayers = (state: LayerState, action: RemoveLayers): LayerStat
     return removeLayer(result, layerActions.removeLayer({id: current}) as RemoveLayer);
   }, currentState);
   if (!action.payload.batch) {
-    currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+    currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   }
   return currentState;
 }
 
 export const deselectLayer = (state: LayerState, action: DeselectLayer): LayerState => {
-  const layer = state.byId[action.payload.id] as Btwx.Layer;
-  const paperLayer = getPaperLayer(action.payload.id);
+  let currentState = state;
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   paperLayer.data.selected = false;
-  const newState = {
-    ...state,
+  currentState = {
+    ...currentState,
     byId: {
-      ...state.byId,
+      ...currentState.byId,
       [action.payload.id]: {
-        ...state.byId[action.payload.id],
+        ...currentState.byId[action.payload.id],
         selected: false
       }
     },
-    selected: state.selected.filter((id) => id !== layer.id)
+    selected: currentState.selected.filter((id) => id !== action.payload.id)
   }
-  return newState;
+  return currentState;
 };
 
 export const deselectLayers = (state: LayerState, action: DeselectLayers): LayerState => {
@@ -411,9 +413,8 @@ export const deselectAllLayers = (state: LayerState, action: DeselectAllLayers):
 
 export const selectLayer = (state: LayerState, action: SelectLayer): LayerState => {
   let currentState = state;
-  const layerItem = currentState.byId[action.payload.id];
-  const hasArtboardParent = layerItem.scope.length > 1 && state.byId[layerItem.scope[1]].type === 'Artboard';
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
+  const hasArtboardParent = layerItem.artboardLayer && (layerItem as Btwx.ArtboardLayer).artboard;
   paperLayer.data.selected = true;
   // if layer is an artboard or group and current selection includes...
   // any of its descendants, deselect those descendants
@@ -533,8 +534,8 @@ export const setLayerHover = (state: LayerState, action: SetLayerHover): LayerSt
   const currentHover = state.hover;
   const nextHover = action.payload.id;
   if (currentHover !==  null) {
-    const currentHoverPaperLayer = getPaperLayer(currentHover);
-    currentHoverPaperLayer.data.hover = false;
+    const { layerItem, paperLayer } = getItemLayers(currentState, currentHover);
+    paperLayer.data.hover = false;
     currentState = {
       ...currentState,
       byId: {
@@ -547,8 +548,8 @@ export const setLayerHover = (state: LayerState, action: SetLayerHover): LayerSt
     };
   }
   if (nextHover !== null) {
-    const nextHoverPaperLayer = getPaperLayer(nextHover);
-    nextHoverPaperLayer.data.hover = true;
+    const { layerItem, paperLayer } = getItemLayers(currentState, nextHover);
+    paperLayer.data.hover = true;
     currentState = {
       ...currentState,
       byId: {
@@ -589,24 +590,27 @@ export const setShapeIcon = (state: LayerState, id: string, pathData: string): L
 
 export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerState => {
   let currentState = state;
-  const layerItem = currentState.byId[action.payload.id];
-  const childItem = currentState.byId[action.payload.child];
+  const { layerItem } = getItemLayers(currentState, action.payload.id);
+  const childItemLayers = getItemLayers(currentState, action.payload.child);
+  const childItem = childItemLayers.layerItem;
   const isChildMask = childItem.type === 'Shape' && (childItem as Btwx.Shape).mask;
   const paperLayer = getParentPaperLayer(action.payload.id);
-  const childPaperLayer = isChildMask ? getPaperLayer(action.payload.child).parent : getPaperLayer(action.payload.child);
+  const childPaperLayer = isChildMask ? childItemLayers.paperLayer.parent : childItemLayers.paperLayer;
   const aboveId = layerItem.children.length > 0 && layerItem.children[layerItem.children.length - 1] !== action.payload.child ? layerItem.children[layerItem.children.length - 1] : null;
-  const aboveItem = aboveId ? currentState.byId[aboveId] : null;
+  const aboveItemLayers = aboveId ? getItemLayers(currentState, aboveId) : null;
+  const aboveItem = aboveId ? aboveItemLayers.layerItem : null;
   const isAboveMask = aboveItem && aboveItem.type === 'Shape' && (aboveItem as Btwx.Shape).mask;
-  const abovePaperLayer = aboveItem ? (isAboveMask ? getPaperLayer(aboveId).parent : getPaperLayer(aboveId)) : null;
+  const abovePaperLayer = aboveItem ? (isAboveMask ? aboveItemLayers.paperLayer.parent : aboveItemLayers.paperLayer) : null;
   // if mask, handle previous underlying siblings
   if (isChildMask) {
     const maskSiblings = getMaskableUnderlyingSiblings(currentState, action.payload.child);
     if (maskSiblings.length > 0) {
       currentState = maskSiblings.reduce((result: LayerState, current) => {
-        const siblingItem = result.byId[current];
+        const siblingLayerItems = getItemLayers(currentState, current);
+        const siblingItem = siblingLayerItems.layerItem;
         const isShape = siblingItem.type === 'Shape';
         const isMask = isShape && (siblingItem as Btwx.Shape).mask;
-        const siblingPaperLayer = isMask ? getPaperLayer(current).parent : getPaperLayer(current);
+        const siblingPaperLayer = isMask ? siblingLayerItems.paperLayer.parent : siblingLayerItems.paperLayer;
         siblingPaperLayer.insertAbove(childPaperLayer);
         if (siblingItem.underlyingMask === action.payload.child) {
           result = setLayerUnderlyingMask(result, layerActions.setLayerUnderlyingMask({id: current, underlyingMask: childItem.underlyingMask}) as SetLayerUnderlyingMask);
@@ -655,9 +659,9 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
     if (childItem.parent !== 'page') {
       currentState = updateLayerBounds(currentState, childItem.parent);
     }
-    if (action.payload.id !== 'page') {
-      currentState = updateLayerBounds(currentState, action.payload.id);
-    }
+    // if (action.payload.id !== 'page') {
+    //   currentState = updateLayerBounds(currentState, action.payload.id);
+    // }
   } else {
     currentState = {
       ...currentState,
@@ -680,6 +684,7 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
       }
     };
   }
+  currentState = updateLayerBounds(currentState, action.payload.child);
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.child], newSelection: true}) as SelectLayers);
   return currentState;
 };
@@ -691,7 +696,7 @@ export const addLayerChildren = (state: LayerState, action: AddLayerChildren) =>
     return addLayerChild(result, layerActions.addLayerChild({id: action.payload.id, child: current}) as AddLayerChild);
   }, currentState);
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.children, newSelection: true}) as SelectLayers);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: [action.payload.id, ...action.payload.children]}) as SetLayerEdit);
   return currentState;
 };
 
@@ -723,17 +728,19 @@ export const hideLayerChildren = (state: LayerState, action: HideLayerChildren):
 
 export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): LayerState => {
   let currentState = state;
-  const layerItem = currentState.byId[action.payload.id];
+  const layerItemLayers = getItemLayers(currentState, action.payload.id);
+  const belowItemLayers = getItemLayers(currentState, action.payload.below);
+  const layerItem = layerItemLayers.layerItem;
   const layerIndex = getLayerIndex(currentState, action.payload.id);
   const isLayerMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
   const isLayerIgnoringUnderlyingMask = layerItem.ignoreUnderlyingMask;
-  const belowItem = currentState.byId[action.payload.below];
+  const belowItem = belowItemLayers.layerItem;
   const belowParent = currentState.byId[belowItem.parent] as Btwx.Group;
-  const belowIndex = getLayerIndex(currentState, action.payload.below)
+  const belowIndex = getLayerIndex(currentState, action.payload.below);
   const isBelowMask = belowItem.type === 'Shape' && (belowItem as Btwx.Shape).mask;
   const isBelowIgnoringUnderlyingMask = belowItem.ignoreUnderlyingMask;
-  const paperLayer = getPaperLayer(action.payload.id);
-  const belowPaperLayer = getPaperLayer(action.payload.below);
+  const paperLayer = layerItemLayers.paperLayer;
+  const belowPaperLayer = belowItemLayers.paperLayer;
   if (isLayerIgnoringUnderlyingMask) {
     currentState = toggleLayerIgnoreUnderlyingMask(currentState, layerActions.toggleLayerIgnoreUnderlyingMask({id: action.payload.id}) as ToggleLayerIgnoreUnderlyingMask);
   }
@@ -782,9 +789,9 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
     if (layerItem.parent !== 'page') {
       currentState = updateLayerBounds(currentState, layerItem.parent);
     }
-    if (belowItem.parent !== 'page') {
-      currentState = updateLayerBounds(currentState, belowItem.parent);
-    }
+    // if (belowItem.parent !== 'page') {
+    //   currentState = updateLayerBounds(currentState, belowItem.parent);
+    // }
   } else {
     currentState = {
       ...currentState,
@@ -818,6 +825,7 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
   if (isBelowMask) {
     currentState = toggleLayerMask(currentState, layerActions.toggleLayerMask({id: action.payload.below}) as ToggleLayerMask);
   }
+  currentState = updateLayerBounds(currentState, action.payload.id);
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.id], newSelection: true}) as SelectLayers);
   return currentState;
 };
@@ -829,23 +837,25 @@ export const insertLayersBelow = (state: LayerState, action: InsertLayersBelow) 
     return insertLayerBelow(result, layerActions.insertLayerBelow({id: current, below: action.payload.below}) as InsertLayerBelow);
   }, currentState);
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.layers, newSelection: true}) as SelectLayers);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: [action.payload.below, ...action.payload.layers]}) as SetLayerEdit);
   return currentState;
 };
 
 export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): LayerState => {
   let currentState = state;
-  const layerItem = state.byId[action.payload.id];
+  const layerItemLayers = getItemLayers(currentState, action.payload.id);
+  const aboveItemLayers = getItemLayers(currentState, action.payload.above);
+  const layerItem = layerItemLayers.layerItem;
   // const layerParentItem = state.byId[layerItem.parent];
   const layerIndex = getLayerIndex(currentState, action.payload.id);
   const isLayerMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
   const isLayerIgnoringUnderlyingMask = layerItem.ignoreUnderlyingMask;
-  const aboveItem = state.byId[action.payload.above];
+  const aboveItem = aboveItemLayers.layerItem;
   const aboveIndex = getLayerIndex(currentState, action.payload.above);
   const isAboveMask = aboveItem.type === 'Shape' && (aboveItem as Btwx.Shape).mask;
   const isAboveIgnoringUnderlyingMask = aboveItem.ignoreUnderlyingMask;
-  const paperLayer = getPaperLayer(action.payload.id);
-  const abovePaperLayer = getPaperLayer(action.payload.above);
+  const paperLayer = layerItemLayers.paperLayer;
+  const abovePaperLayer = aboveItemLayers.paperLayer;
   const aboveParentItem = currentState.byId[aboveItem.parent];
   if (isAboveIgnoringUnderlyingMask) {
     currentState = toggleLayerIgnoreUnderlyingMask(currentState, layerActions.toggleLayerIgnoreUnderlyingMask({id: action.payload.above}) as ToggleLayerIgnoreUnderlyingMask);
@@ -895,9 +905,9 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
     if (layerItem.parent !== 'page') {
       currentState = updateLayerBounds(currentState, layerItem.parent);
     }
-    if (aboveItem.parent !== 'page') {
-      currentState = updateLayerBounds(currentState, aboveItem.parent);
-    }
+    // if (aboveItem.parent !== 'page') {
+    //   currentState = updateLayerBounds(currentState, aboveItem.parent);
+    // }
   } else {
     currentState = {
       ...currentState,
@@ -931,6 +941,7 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
   if (isLayerMask) {
     currentState = toggleLayerMask(currentState, layerActions.toggleLayerMask({id: action.payload.id}) as ToggleLayerMask);
   }
+  currentState = updateLayerBounds(currentState, action.payload.id);
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.id], newSelection: true}) as SelectLayers);
   return currentState;
 };
@@ -942,7 +953,7 @@ export const insertLayersAbove = (state: LayerState, action: InsertLayersAbove):
     return insertLayerAbove(result, layerActions.insertLayerAbove({id: current, above: action.payload.above}) as InsertLayerAbove);
   }, currentState);
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.layers, newSelection: true}) as SelectLayers);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: [action.payload.above, ...action.payload.layers]}) as SetLayerEdit);
   return currentState;
 };
 
@@ -988,7 +999,7 @@ export const escapeLayerScope = (state: LayerState, action: EscapeLayerScope): L
 
 export const setLayerScope = (state: LayerState, action: SetLayerScope): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   paperLayer.data.scope = action.payload.scope;
   currentState = {
     ...currentState,
@@ -1043,12 +1054,6 @@ export const groupLayers = (state: LayerState, action: GroupLayers): LayerState 
   let currentState = state;
   // add group
   currentState = addGroup(currentState, layerActions.addGroup({layer: action.payload.group, batch: true}) as AddGroup);
-  // order children
-  // const orderedChildren = orderLayersByDepth(currentState, action.payload.layers);
-  // if (orderedChildren.find((id) => state.byId[id].mask)) {
-  //   const mask = orderedChildren.find((id) => state.byId[id].mask);
-  //   currentState = removeLayersMask(currentState, layerActions.removeLayersMask({id: mask}) as RemoveLayersMask);
-  // }
   // move group above top layer
   currentState = insertLayerBelow(currentState, layerActions.insertLayerBelow({id: action.payload.group.id, below: action.payload.layers[0]}) as InsertLayerBelow);
   // add layers to group
@@ -1059,7 +1064,7 @@ export const groupLayers = (state: LayerState, action: GroupLayers): LayerState 
   // select final group
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.group.id], newSelection: true}) as SelectLayers);
   // set layer edit
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: [action.payload.group.id, ...action.payload.layers]}) as SetLayerEdit);
   // return final state
   return currentState;
 };
@@ -1068,12 +1073,6 @@ export const ungroupLayer = (state: LayerState, action: UngroupLayer): LayerStat
   const layer = getLayer(state, action.payload.id);
   let currentState = state;
   if (layer.type === 'Group') {
-    // check if contains clip mask
-    const paperLayer = getPaperLayer(action.payload.id) as paper.Group;
-    // if (paperLayer.clipped) {
-    //   const maskLayer = layer.children.find((id) => state.byId[id].mask);
-    //   currentState = removeLayersMask(currentState, layerActions.removeLayersMask({id: maskLayer}) as RemoveLayersMask);
-    // }
     // move children out of group
     currentState = layer.children.reduce((result: LayerState, current: string) => {
       return insertLayerBelow(result, layerActions.insertLayerBelow({id: current, below: layer.id}) as InsertLayerBelow);
@@ -1102,7 +1101,7 @@ export const ungroupLayers = (state: LayerState, action: UngroupLayers): LayerSt
   // select newSelection
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: newSelection, newSelection: true}) as SelectLayers);
   // return final state
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
@@ -1278,11 +1277,11 @@ export const ungroupLayers = (state: LayerState, action: UngroupLayers): LayerSt
 //   }, state);
 // };
 
-export const updateLayerBounds = (state: LayerState, id: string, updateScope?: boolean): LayerState => {
+export const updateLayerBounds = (state: LayerState, id: string): LayerState => {
   let currentState = state;
-  const layerItem = state.byId[id];
-  const paperLayer = getPaperLayer(id);
-  const positionInParent = getScopedPoint(paperLayer.position, layerItem.scope);
+  const { layerItem, paperLayer } = getItemLayers(currentState, id);
+  // const relativePosition = getScopedPosition(currentState, id, true);
+  // const absolutePosition = getAbsPosition(currentState, id, true);
   if (layerItem.type === 'Shape') {
     currentState = setShapeIcon(currentState, id, (paperLayer as paper.PathItem).pathData);
     currentState = {
@@ -1371,50 +1370,49 @@ export const updateLayerBounds = (state: LayerState, id: string, updateScope?: b
       }
     }
   }
-  currentState = {
-    ...currentState,
-    byId: {
-      ...currentState.byId,
-      [id]: {
-        ...currentState.byId[id],
-        frame: {
-          ...currentState.byId[id].frame,
-          x: positionInParent.x,
-          y: positionInParent.y,
-          width: paperLayer.bounds.width,
-          height: paperLayer.bounds.height
+  if (layerItem.artboardLayer && (layerItem as Btwx.ArtboardLayer).artboard) {
+    const artboardParent = currentState.byId[(layerItem as Btwx.ArtboardLayer).artboard];
+    const positionInArtboard = paperLayer.position.subtract(new paperMain.Point(artboardParent.frame.x, artboardParent.frame.y));
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [id]: {
+          ...currentState.byId[id],
+          frame: {
+            ...currentState.byId[id].frame,
+            x: positionInArtboard.x,
+            y: positionInArtboard.y,
+            width: paperLayer.bounds.width,
+            height: paperLayer.bounds.height
+          }
         }
       }
     }
-  }
-  // if layer bounds exceeds any scope bounds, update scope and scope children
-  if (layerItem.scope.length > 1 && updateScope) {
-    currentState = layerItem.scope.reduce((result, current) => {
-      const scopeLayerItem = currentState.byId[current] as Btwx.Page | Btwx.Artboard | Btwx.Group;
-      const scopeItemTopLeft = new paperMain.Point(scopeLayerItem.frame.x - (scopeLayerItem.frame.width / 2), scopeLayerItem.frame.y - (scopeLayerItem.frame.height / 2));
-      const scopeItemBottomRight = new paperMain.Point(scopeLayerItem.frame.x + (scopeLayerItem.frame.width / 2), scopeLayerItem.frame.y + (scopeLayerItem.frame.height / 2));
-      if (
-        current !== 'page' &&
-        paperLayer.bounds.topLeft.x < scopeItemTopLeft.x ||
-        paperLayer.bounds.topLeft.y < scopeItemTopLeft.y ||
-        paperLayer.bounds.bottomRight.x > scopeItemBottomRight.x ||
-        paperLayer.bounds.bottomRight.y > scopeItemBottomRight.y
-      ) {
-        result = updateLayerBounds(result, id, false);
-        result = scopeLayerItem.children.reduce((cr, cc) => {
-          cr = updateLayerBounds(cr, cc, false);
-          return cr;
-        }, result);
+  } else {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [id]: {
+          ...currentState.byId[id],
+          frame: {
+            ...currentState.byId[id].frame,
+            x: paperLayer.position.x,
+            y: paperLayer.position.y,
+            width: paperLayer.bounds.width,
+            height: paperLayer.bounds.height
+          }
+        }
       }
-      return result;
-    }, currentState);
+    }
   }
   return currentState;
 };
 
 export const moveLayer = (state: LayerState, action: MoveLayer): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   currentState = {
     ...currentState,
     byId: {
@@ -1439,13 +1437,13 @@ export const moveLayers = (state: LayerState, action: MoveLayers): LayerState =>
     return moveLayer(result, layerActions.moveLayer({id: current}) as MoveLayer);
   }, currentState);
   // currentState = updateSelectedBounds(currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const moveLayerTo = (state: LayerState, action: MoveLayerTo): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   currentState = {
     ...currentState,
     byId: {
@@ -1470,7 +1468,7 @@ export const moveLayersTo = (state: LayerState, action: MoveLayersTo): LayerStat
     return moveLayerTo(result, layerActions.moveLayerTo({id: current, x: action.payload.x, y: action.payload.y}) as MoveLayerTo);
   }, state);
   // currentState = updateSelectedBounds(currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
@@ -1492,14 +1490,13 @@ export const moveLayersBy = (state: LayerState, action: MoveLayersBy): LayerStat
     return moveLayerBy(result, layerActions.moveLayerBy({id: current, x: action.payload.x, y: action.payload.y}) as MoveLayerBy);
   }, currentState);
   // currentState = updateSelectedBounds(currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerName = (state: LayerState, action: SetLayerName): LayerState => {
   let currentState = state;
-  const layerItem = state.byId[action.payload.id];
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   paperLayer.name = action.payload.name;
   // remove existing tweens
   if (layerItem.scope.length > 1 && state.byId[layerItem.scope[1]].type === 'Artboard' && action.payload.name !== layerItem.name) {
@@ -1523,7 +1520,7 @@ export const setLayerName = (state: LayerState, action: SetLayerName): LayerStat
   // add new tweens
   currentState = updateLayerTweensByProps(currentState, action.payload.id, 'all');
   // set layer edit
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: [action.payload.id]}) as SetLayerEdit);
   // return final state
   return currentState;
 };
@@ -1533,12 +1530,12 @@ export const setActiveArtboard = (state: LayerState, action: SetActiveArtboard):
   const currentActiveArtboard = state.activeArtboard;
   const nextActiveArtboard = action.payload.id;
   if (currentActiveArtboard) {
-    const currentActiveArtboardPaperLayer = getPaperLayer(currentActiveArtboard);
-    currentActiveArtboardPaperLayer.data.activeArtboard = false;
+    const { layerItem, paperLayer } = getItemLayers(currentState, currentActiveArtboard);
+    paperLayer.data.activeArtboard = false;
   }
   if (nextActiveArtboard) {
-    const nextActiveArtboardPaperLayer = getPaperLayer(nextActiveArtboard);
-    nextActiveArtboardPaperLayer.data.activeArtboard = true;
+    const { layerItem, paperLayer } = getItemLayers(currentState, nextActiveArtboard);
+    paperLayer.data.activeArtboard = true;
   }
   currentState = {
     ...currentState,
@@ -1595,7 +1592,7 @@ export const addLayerTweenEvent = (state: LayerState, action: AddLayerTweenEvent
       }
     }, currentState);
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: null}) as SetLayerEdit);
   return currentState;
 };
 
@@ -1666,7 +1663,7 @@ export const removeLayerTweenEvent = (state: LayerState, action: RemoveLayerTwee
       }, {})
     }
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: null}) as SetLayerEdit);
   return currentState;
 };
 
@@ -1720,7 +1717,7 @@ export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerSt
       }
     }
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: null}) as SetLayerEdit);
   return currentState;
 };
 
@@ -1777,7 +1774,7 @@ export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): L
       }, {})
     }
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: null}) as SetLayerEdit);
   return currentState;
 };
 
@@ -1907,7 +1904,7 @@ export const setLayerTweenDuration = (state: LayerState, action: SetLayerTweenDu
       }
     }
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: null}) as SetLayerEdit);
   return currentState;
 };
 
@@ -1926,7 +1923,7 @@ export const setLayerTweenDelay = (state: LayerState, action: SetLayerTweenDelay
       }
     }
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: null}) as SetLayerEdit);
   return currentState;
 };
 
@@ -1952,7 +1949,7 @@ export const setLayerTweenEase = (state: LayerState, action: SetLayerTweenEase):
       }
     }
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: null}) as SetLayerEdit);
   return currentState;
 };
 
@@ -1971,19 +1968,17 @@ export const setLayerTweenPower = (state: LayerState, action: SetLayerTweenPower
       }
     }
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: null}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
   let currentState = state;
   let x = action.payload.x;
-  const layerItem = state.byId[action.payload.id];
-  const paperLayer = getPaperLayer(action.payload.id);
-  if (layerItem.scope.length > 1 && state.byId[layerItem.scope[1]].type === 'Artboard') {
-    const artboard = layerItem.scope[1];
-    const artboardItem = state.byId[artboard];
-    x = x + (artboardItem.frame.x - (artboardItem.frame.width / 2));
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
+  if (layerItem.artboardLayer && (layerItem as Btwx.ArtboardLayer).artboard) {
+    const artboardItem = state.byId[(layerItem as Btwx.ArtboardLayer).artboard];
+    x += artboardItem.frame.y;
   }
   paperLayer.position.x = x;
   // currentState = {
@@ -2009,20 +2004,17 @@ export const setLayersX = (state: LayerState, action: SetLayersX): LayerState =>
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerX(result, layerActions.setLayerX({id: current, x: action.payload.x}) as SetLayerX);
   }, currentState);
-  // currentState = updateSelectedBounds(currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerY = (state: LayerState, action: SetLayerY): LayerState => {
   let currentState = state;
   let y = action.payload.y;
-  const layerItem = state.byId[action.payload.id];
-  const paperLayer = getPaperLayer(action.payload.id);
-  if (layerItem.scope.length > 1 && state.byId[layerItem.scope[1]].type === 'Artboard') {
-    const artboard = layerItem.scope[1];
-    const artboardItem = state.byId[artboard];
-    y = y + (artboardItem.frame.y - (artboardItem.frame.height / 2));
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
+  if (layerItem.artboardLayer && (layerItem as Btwx.ArtboardLayer).artboard) {
+    const artboardItem = state.byId[(layerItem as Btwx.ArtboardLayer).artboard];
+    y += artboardItem.frame.y;
   }
   paperLayer.position.y = y;
   // currentState = {
@@ -2048,15 +2040,13 @@ export const setLayersY = (state: LayerState, action: SetLayersY): LayerState =>
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerY(result, layerActions.setLayerY({id: current, y: action.payload.y}) as SetLayerY);
   }, state);
-  // currentState = updateSelectedBounds(currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerWidth = (state: LayerState, action: SetLayerWidth): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = state.byId[action.payload.id];
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   if (layerItem.type === 'Artboard') {
     const mask = paperLayer.getItem({data: { id: 'ArtboardLayersMask' }});
     const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
@@ -2099,15 +2089,13 @@ export const setLayersWidth = (state: LayerState, action: SetLayersWidth): Layer
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerWidth(result, layerActions.setLayerWidth({id: current, width: action.payload.width}) as SetLayerWidth);
   }, currentState);
-  // currentState = updateSelectedBounds(currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerHeight = (state: LayerState, action: SetLayerHeight): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = state.byId[action.payload.id];
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   if (layerItem.type === 'Artboard') {
     const mask = paperLayer.getItem({data: { id: 'ArtboardLayersMask' }});
     const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
@@ -2150,14 +2138,13 @@ export const setLayersHeight = (state: LayerState, action: SetLayersHeight): Lay
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerHeight(result, layerActions.setLayerHeight({id: current, height: action.payload.height}) as SetLayerHeight);
   }, currentState);
-  // currentState = updateSelectedBounds(currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerOpacity = (state: LayerState, action: SetLayerOpacity): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   paperLayer.opacity = action.payload.opacity;
   currentState = {
     ...currentState,
@@ -2181,14 +2168,13 @@ export const setLayersOpacity = (state: LayerState, action: SetLayersOpacity): L
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerOpacity(result, layerActions.setLayerOpacity({id: current, opacity: action.payload.opacity}) as SetLayerOpacity);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerRotation = (state: LayerState, action: SetLayerRotation): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = currentState.byId[action.payload.id];
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const startPosition = paperLayer.position;
   paperLayer.rotation = -layerItem.transform.rotation;
   paperLayer.rotation = action.payload.rotation;
@@ -2234,14 +2220,13 @@ export const setLayersRotation = (state: LayerState, action: SetLayersRotation):
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerRotation(result, layerActions.setLayerRotation({id: current, rotation: action.payload.rotation}) as SetLayerRotation);
   }, state);
-  // currentState = updateSelectedBounds(currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const enableLayerHorizontalFlip = (state: LayerState, action: EnableLayerHorizontalFlip): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   paperLayer.scale(-1, 1);
   currentState = {
     ...currentState,
@@ -2265,14 +2250,13 @@ export const enableLayersHorizontalFlip = (state: LayerState, action: EnableLaye
   currentState = action.payload.layers.reduce((result, current) => {
     return enableLayerHorizontalFlip(result, layerActions.enableLayerHorizontalFlip({id: current}) as EnableLayerHorizontalFlip);
   }, currentState);
-  // currentState = updateSelectedBounds(currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const disableLayerHorizontalFlip = (state: LayerState, action: DisableLayerHorizontalFlip): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   paperLayer.scale(-1, 1);
   currentState = {
     ...currentState,
@@ -2296,14 +2280,13 @@ export const disableLayersHorizontalFlip = (state: LayerState, action: DisableLa
   currentState = action.payload.layers.reduce((result, current) => {
     return disableLayerHorizontalFlip(result, layerActions.disableLayerHorizontalFlip({id: current}) as DisableLayerHorizontalFlip);
   }, currentState);
-  // currentState = updateSelectedBounds(currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const enableLayerVerticalFlip = (state: LayerState, action: EnableLayerVerticalFlip): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   paperLayer.scale(1, -1);
   currentState = {
     ...currentState,
@@ -2327,14 +2310,13 @@ export const enableLayersVerticalFlip = (state: LayerState, action: EnableLayers
   currentState = action.payload.layers.reduce((result, current) => {
     return enableLayerVerticalFlip(result, layerActions.enableLayerVerticalFlip({id: current}) as EnableLayerVerticalFlip);
   }, currentState);
-  // currentState = updateSelectedBounds(currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const disableLayerVerticalFlip = (state: LayerState, action: DisableLayerVerticalFlip): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   paperLayer.scale(1, -1);
   currentState = {
     ...currentState,
@@ -2358,15 +2340,13 @@ export const disableLayersVerticalFlip = (state: LayerState, action: DisableLaye
   currentState = action.payload.layers.reduce((result, current) => {
     return disableLayerVerticalFlip(result, layerActions.disableLayerVerticalFlip({id: current}) as DisableLayerVerticalFlip);
   }, currentState);
-  // currentState = updateSelectedBounds(currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const enableLayerFill = (state: LayerState, action: EnableLayerFill): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = currentState.byId[action.payload.id];
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const fill = currentState.byId[action.payload.id].style.fill;
   switch(fill.fillType) {
     case 'color':
@@ -2408,13 +2388,13 @@ export const enableLayersFill = (state: LayerState, action: EnableLayersFill): L
   currentState = action.payload.layers.reduce((result, current) => {
     return enableLayerFill(result, layerActions.enableLayerFill({id: current}) as EnableLayerFill);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const disableLayerFill = (state: LayerState, action: DisableLayerFill): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   paperLayer.fillColor = null;
   currentState = {
     ...currentState,
@@ -2441,14 +2421,13 @@ export const disableLayersFill = (state: LayerState, action: DisableLayersFill):
   currentState = action.payload.layers.reduce((result, current) => {
     return disableLayerFill(result, layerActions.disableLayerFill({id: current}) as DisableLayerFill);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerFillColor = (state: LayerState, action: SetLayerFillColor): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = state.byId[action.payload.id];
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const fillColor = action.payload.fillColor;
   const newFill = { ...layerItem.style.fill.color, ...fillColor } as Btwx.Color;
   paperLayer.fillColor = { hue: newFill.h, saturation: newFill.s, lightness: newFill.l, alpha: newFill.a } as paper.Color;
@@ -2477,14 +2456,13 @@ export const setLayersFillColor = (state: LayerState, action: SetLayersFillColor
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerFillColor(result, layerActions.setLayerFillColor({id: current, fillColor: action.payload.fillColor}) as SetLayerFillColor);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerFill = (state: LayerState, action: SetLayerFill): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = currentState.byId[action.payload.id];
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const fill = action.payload.fill;
   switch(fill.fillType) {
     case 'color':
@@ -2515,14 +2493,13 @@ export const setLayerFill = (state: LayerState, action: SetLayerFill): LayerStat
     }
   }
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fill', 'fillGradientOriginX', 'fillGradientOriginY', 'fillGradientDestinationX', 'fillGradientDestinationY']);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: [action.payload.id]}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerFillType = (state: LayerState, action: SetLayerFillType): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = currentState.byId[action.payload.id];
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const fill = layerItem.style.fill;
   switch(action.payload.fillType) {
     case 'color':
@@ -2564,14 +2541,13 @@ export const setLayersFillType = (state: LayerState, action: SetLayersFillType):
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerFillType(result, layerActions.setLayerFillType({id: current, fillType: action.payload.fillType}) as SetLayerFillType);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerGradient = (state: LayerState, action: SetLayerGradient): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = currentState.byId[action.payload.id];
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   paperLayer[action.payload.prop === 'fill' ? 'fillColor' : 'strokeColor'] = {
     gradient: {
       stops: getGradientStops(action.payload.gradient.stops),
@@ -2605,13 +2581,13 @@ export const setLayersGradient = (state: LayerState, action: SetLayersGradient):
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerGradient(result, layerActions.setLayerGradient({id: current, prop: action.payload.prop, gradient: action.payload.gradient}) as SetLayerGradient);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerGradientType = (state: LayerState, action: SetLayerGradientType): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const paperProp = getPaperProp(action.payload.prop);
   switch(action.payload.gradientType) {
     case 'linear':
@@ -2649,14 +2625,13 @@ export const setLayersGradientType = (state: LayerState, action: SetLayersGradie
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerGradientType(result, layerActions.setLayerGradientType({id: current, prop: action.payload.prop, gradientType: action.payload.gradientType}) as SetLayerGradientType);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerGradientOrigin = (state: LayerState, action: SetLayerGradientOrigin): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = currentState.byId[action.payload.id];
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const gradient = layerItem.style[action.payload.prop].gradient;
   const paperProp = getPaperProp(action.payload.prop);
   paperLayer[paperProp] = {
@@ -2695,14 +2670,13 @@ export const setLayersGradientOrigin = (state: LayerState, action: SetLayersGrad
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerGradientOrigin(result, layerActions.setLayerGradientOrigin({id: current, prop: action.payload.prop, origin: action.payload.origin}) as SetLayerGradientOrigin);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerGradientDestination = (state: LayerState, action: SetLayerGradientDestination): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = currentState.byId[action.payload.id];
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const gradient = layerItem.style[action.payload.prop].gradient;
   const paperProp = getPaperProp(action.payload.prop);
   paperLayer[paperProp] = {
@@ -2741,14 +2715,13 @@ export const setLayersGradientDestination = (state: LayerState, action: SetLayer
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerGradientDestination(result, layerActions.setLayerGradientDestination({id: current, prop: action.payload.prop, destination: action.payload.destination}) as SetLayerGradientDestination);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerGradientStopColor = (state: LayerState, action: SetLayerGradientStopColor): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = currentState.byId[action.payload.id];
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const gradient = layerItem.style[action.payload.prop].gradient;
   const paperProp = getPaperProp(action.payload.prop);
   const newStops = gradient.stops.reduce((result, current, index) => {
@@ -2817,14 +2790,13 @@ export const setLayersGradientStopColor = (state: LayerState, action: SetLayersG
   let currentState = state;
   currentState = setLayerGradientStopColor(currentState, layerActions.setLayerGradientStopColor({id: action.payload.layers[0], prop: action.payload.prop, stopIndex: action.payload.stopIndex, color: action.payload.color}) as SetLayerGradientStopColor);
   currentState = updateGradients(currentState, action.payload.layers, action.payload.prop);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerGradientStopPosition = (state: LayerState, action: SetLayerGradientStopPosition): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = currentState.byId[action.payload.id];
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const gradient = layerItem.style[action.payload.prop].gradient;
   const paperProp = getPaperProp(action.payload.prop);
   const newStops = gradient.stops.reduce((result: Btwx.GradientStop[], current, index) => {
@@ -2873,14 +2845,13 @@ export const setLayersGradientStopPosition = (state: LayerState, action: SetLaye
   let currentState = state;
   currentState = setLayerGradientStopPosition(currentState, layerActions.setLayerGradientStopPosition({id: action.payload.layers[0], prop: action.payload.prop, stopIndex: action.payload.stopIndex, position: action.payload.position}) as SetLayerGradientStopPosition);
   currentState = updateGradients(currentState, action.payload.layers, action.payload.prop);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const addLayerGradientStop = (state: LayerState, action: AddLayerGradientStop): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = currentState.byId[action.payload.id];
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const gradient = layerItem.style[action.payload.prop].gradient;
   const paperProp = getPaperProp(action.payload.prop);
   const newStops = [...gradient.stops, action.payload.gradientStop];
@@ -2924,14 +2895,13 @@ export const addLayersGradientStop = (state: LayerState, action: AddLayersGradie
   let currentState = state;
   currentState = addLayerGradientStop(currentState, layerActions.addLayerGradientStop({id: action.payload.layers[0], prop: action.payload.prop, gradientStop: action.payload.gradientStop}) as AddLayerGradientStop);
   currentState = updateGradients(currentState, action.payload.layers, action.payload.prop);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const removeLayerGradientStop = (state: LayerState, action: RemoveLayerGradientStop): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = currentState.byId[action.payload.id];
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const paperProp = getPaperProp(action.payload.prop);
   const gradient = layerItem.style[action.payload.prop].gradient;
   const newStops = gradient.stops.filter((id, index) => index !== action.payload.stopIndex);
@@ -2971,7 +2941,7 @@ export const removeLayersGradientStop = (state: LayerState, action: RemoveLayers
   let currentState = state;
   currentState = removeLayerGradientStop(currentState, layerActions.removeLayerGradientStop({id: action.payload.layers[0], prop: action.payload.prop, stopIndex: action.payload.stopIndex}) as RemoveLayerGradientStop);
   currentState = updateGradients(currentState, action.payload.layers, action.payload.prop);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3001,8 +2971,7 @@ export const setLayerActiveGradientStop = (state: LayerState, action: SetLayerAc
 
 export const enableLayerStroke = (state: LayerState, action: EnableLayerStroke): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = state.byId[action.payload.id];
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const stroke = currentState.byId[action.payload.id].style.stroke;
   switch(stroke.fillType) {
     case 'color':
@@ -3044,13 +3013,13 @@ export const enableLayersStroke = (state: LayerState, action: EnableLayersStroke
   currentState = action.payload.layers.reduce((result, current) => {
     return enableLayerStroke(result, layerActions.enableLayerStroke({id: current}) as EnableLayerStroke);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const disableLayerStroke = (state: LayerState, action: DisableLayerStroke): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   paperLayer.strokeColor = null;
   currentState = {
     ...currentState,
@@ -3077,14 +3046,13 @@ export const disableLayersStroke = (state: LayerState, action: DisableLayersStro
   currentState = action.payload.layers.reduce((result, current) => {
     return disableLayerStroke(result, layerActions.disableLayerStroke({id: current}) as DisableLayerStroke);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerStrokeColor = (state: LayerState, action: SetLayerStrokeColor): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = state.byId[action.payload.id];
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const strokeColor = action.payload.strokeColor;
   const newStroke = { ...layerItem.style.stroke.color, ...strokeColor } as Btwx.Color;
   paperLayer.strokeColor = { hue: newStroke.h, saturation: newStroke.s, lightness: newStroke.l, alpha: newStroke.a } as paper.Color;
@@ -3113,14 +3081,13 @@ export const setLayersStrokeColor = (state: LayerState, action: SetLayersStrokeC
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerStrokeColor(result, layerActions.setLayerStrokeColor({id: current, strokeColor: action.payload.strokeColor}) as SetLayerStrokeColor);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerStrokeFillType = (state: LayerState, action: SetLayerStrokeFillType): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = currentState.byId[action.payload.id];
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const stroke = layerItem.style.stroke;
   switch(action.payload.fillType) {
     case 'color':
@@ -3162,13 +3129,13 @@ export const setLayersStrokeFillType = (state: LayerState, action: SetLayersStro
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerStrokeFillType(result, layerActions.setLayerStrokeFillType({id: current, fillType: action.payload.fillType}) as SetLayerStrokeFillType);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerStrokeWidth = (state: LayerState, action: SetLayerStrokeWidth): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   paperLayer.strokeWidth = action.payload.strokeWidth;
   currentState = {
     ...currentState,
@@ -3195,13 +3162,13 @@ export const setLayersStrokeWidth = (state: LayerState, action: SetLayersStrokeW
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerStrokeWidth(result, layerActions.setLayerStrokeWidth({id: current, strokeWidth: action.payload.strokeWidth}) as SetLayerStrokeWidth);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerStrokeCap = (state: LayerState, action: SetLayerStrokeCap): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   paperLayer.strokeCap = action.payload.strokeCap;
   currentState = {
     ...currentState,
@@ -3227,13 +3194,13 @@ export const setLayersStrokeCap = (state: LayerState, action: SetLayersStrokeCap
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerStrokeCap(result, layerActions.setLayerStrokeCap({id: current, strokeCap: action.payload.strokeCap}) as SetLayerStrokeCap);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerStrokeJoin = (state: LayerState, action: SetLayerStrokeJoin): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   paperLayer.strokeJoin = action.payload.strokeJoin;
   currentState = {
     ...currentState,
@@ -3259,13 +3226,13 @@ export const setLayersStrokeJoin = (state: LayerState, action: SetLayersStrokeJo
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerStrokeJoin(result, layerActions.setLayerStrokeJoin({id: current, strokeJoin: action.payload.strokeJoin}) as SetLayerStrokeJoin);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerStrokeDashOffset = (state: LayerState, action: SetLayerStrokeDashOffset): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   paperLayer.dashOffset = action.payload.strokeDashOffset;
   currentState = {
     ...currentState,
@@ -3292,13 +3259,13 @@ export const setLayersStrokeDashOffset = (state: LayerState, action: SetLayersSt
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerStrokeDashOffset(result, layerActions.setLayerStrokeDashOffset({id: current, strokeDashOffset: action.payload.strokeDashOffset}) as SetLayerStrokeDashOffset);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerStrokeDashArray = (state: LayerState, action: SetLayerStrokeDashArray): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   paperLayer.dashArray = action.payload.strokeDashArray;
   currentState = {
     ...currentState,
@@ -3325,14 +3292,13 @@ export const setLayersStrokeDashArray = (state: LayerState, action: SetLayersStr
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerStrokeDashArray(result, layerActions.setLayerStrokeDashArray({id: current, strokeDashArray: action.payload.strokeDashArray}) as SetLayerStrokeDashArray);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerStrokeDashArrayWidth = (state: LayerState, action: SetLayerStrokeDashArrayWidth): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = state.byId[action.payload.id];
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const dashArray = layerItem.style.strokeOptions.dashArray;
   const newDashArray = [action.payload.strokeDashArrayWidth, dashArray[1]];
   paperLayer.dashArray = newDashArray;
@@ -3361,14 +3327,13 @@ export const setLayersStrokeDashArrayWidth = (state: LayerState, action: SetLaye
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerStrokeDashArrayWidth(result, layerActions.setLayerStrokeDashArrayWidth({id: current, strokeDashArrayWidth: action.payload.strokeDashArrayWidth}) as SetLayerStrokeDashArrayWidth);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerStrokeDashArrayGap = (state: LayerState, action: SetLayerStrokeDashArrayGap): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = state.byId[action.payload.id];
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const dashArray = layerItem.style.strokeOptions.dashArray;
   const newDashArray = [dashArray[0], action.payload.strokeDashArrayGap];
   paperLayer.dashArray = newDashArray;
@@ -3397,14 +3362,13 @@ export const setLayersStrokeDashArrayGap = (state: LayerState, action: SetLayers
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerStrokeDashArrayGap(result, layerActions.setLayerStrokeDashArrayGap({id: current, strokeDashArrayGap: action.payload.strokeDashArrayGap}) as SetLayerStrokeDashArrayGap);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const enableLayerShadow = (state: LayerState, action: EnableLayerShadow): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = state.byId[action.payload.id];
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const shadow = layerItem.style.shadow;
   paperLayer.shadowColor = { hue: shadow.color.h, saturation: shadow.color.s, lightness: shadow.color.l, alpha: shadow.color.a } as paper.Color;
   paperLayer.shadowBlur = shadow.blur;
@@ -3434,13 +3398,13 @@ export const enableLayersShadow = (state: LayerState, action: EnableLayersShadow
   currentState = action.payload.layers.reduce((result, current) => {
     return enableLayerShadow(result, layerActions.enableLayerShadow({id: current}) as EnableLayerShadow);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const disableLayerShadow = (state: LayerState, action: DisableLayerShadow): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   paperLayer.shadowColor = null;
   currentState = {
     ...currentState,
@@ -3467,14 +3431,13 @@ export const disableLayersShadow = (state: LayerState, action: DisableLayersShad
   currentState = action.payload.layers.reduce((result, current) => {
     return disableLayerShadow(result, layerActions.disableLayerShadow({id: current}) as DisableLayerShadow);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerShadowColor = (state: LayerState, action: SetLayerShadowColor): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
-  const layerItem = state.byId[action.payload.id];
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const shadowColor = action.payload.shadowColor;
   const newShadow = { ...layerItem.style.shadow.color, ...shadowColor };
   paperLayer.shadowColor = { hue: newShadow.h, saturation: newShadow.s, lightness: newShadow.l, alpha: newShadow.a } as paper.Color;
@@ -3503,13 +3466,13 @@ export const setLayersShadowColor = (state: LayerState, action: SetLayersShadowC
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerShadowColor(result, layerActions.setLayerShadowColor({id: current, shadowColor: action.payload.shadowColor}) as SetLayerShadowColor);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerShadowBlur = (state: LayerState, action: SetLayerShadowBlur): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   paperLayer.shadowBlur = action.payload.shadowBlur;
   currentState = {
     ...currentState,
@@ -3536,13 +3499,13 @@ export const setLayersShadowBlur = (state: LayerState, action: SetLayersShadowBl
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerShadowBlur(result, layerActions.setLayerShadowBlur({id: current, shadowBlur: action.payload.shadowBlur}) as SetLayerShadowBlur);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerShadowXOffset = (state: LayerState, action: SetLayerShadowXOffset): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   paperLayer.shadowOffset.x = action.payload.shadowXOffset;
   currentState = {
     ...currentState,
@@ -3572,13 +3535,13 @@ export const setLayersShadowXOffset = (state: LayerState, action: SetLayersShado
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerShadowXOffset(result, layerActions.setLayerShadowXOffset({id: current, shadowXOffset: action.payload.shadowXOffset}) as SetLayerShadowXOffset);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerShadowYOffset = (state: LayerState, action: SetLayerShadowYOffset): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   paperLayer.shadowOffset.y = action.payload.shadowYOffset;
   currentState = {
     ...currentState,
@@ -3608,7 +3571,7 @@ export const setLayersShadowYOffset = (state: LayerState, action: SetLayersShado
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerShadowYOffset(result, layerActions.setLayerShadowYOffset({id: current, shadowYOffset: action.payload.shadowYOffset}) as SetLayerShadowYOffset);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
@@ -3643,14 +3606,13 @@ export const scaleLayers = (state: LayerState, action: ScaleLayers): LayerState 
   currentState = action.payload.layers.reduce((result, current) => {
     return scaleLayer(result, layerActions.scaleLayer({id: current, scale: action.payload.scale, verticalFlip: action.payload.verticalFlip, horizontalFlip: action.payload.horizontalFlip}) as ScaleLayer);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerText = (state: LayerState, action: SetLayerText): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id) as paper.PointText;
-  const layerItem = state.byId[action.payload.id];
+  const { layerItem, paperLayer, paperProjectIndex } = getItemLayers(currentState, action.payload.id) as { layerItem: Btwx.Text; paperLayer: paper.PointText; paperProjectIndex: number };
   paperLayer.content = action.payload.text;
   if (!paperLayer.visible) {
     paperLayer.visible = true;
@@ -3674,14 +3636,13 @@ export const setLayerText = (state: LayerState, action: SetLayerText): LayerStat
   if (layerItem.style.stroke.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: [action.payload.id]}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerFontSize = (state: LayerState, action: SetLayerFontSize): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id) as paper.PointText;
-  const layerItem = state.byId[action.payload.id];
+  const { layerItem, paperLayer, paperProjectIndex } = getItemLayers(currentState, action.payload.id) as { layerItem: Btwx.Text; paperLayer: paper.PointText; paperProjectIndex: number };
   paperLayer.fontSize = action.payload.fontSize;
   currentState = {
     ...currentState,
@@ -3714,14 +3675,13 @@ export const setLayersFontSize = (state: LayerState, action: SetLayersFontSize):
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerFontSize(result, layerActions.setLayerFontSize({id: current, fontSize: action.payload.fontSize}) as SetLayerFontSize);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerFontWeight = (state: LayerState, action: SetLayerFontWeight): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id) as paper.PointText;
-  const layerItem = state.byId[action.payload.id];
+  const { layerItem, paperLayer, paperProjectIndex } = getItemLayers(currentState, action.payload.id) as { layerItem: Btwx.Text; paperLayer: paper.PointText; paperProjectIndex: number };
   paperLayer.fontWeight = action.payload.fontWeight;
   currentState = {
     ...currentState,
@@ -3753,14 +3713,13 @@ export const setLayersFontWeight = (state: LayerState, action: SetLayersFontWeig
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerFontWeight(result, layerActions.setLayerFontWeight({id: current, fontWeight: action.payload.fontWeight}) as SetLayerFontWeight);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerFontFamily = (state: LayerState, action: SetLayerFontFamily): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id) as paper.PointText;
-  const layerItem = state.byId[action.payload.id];
+  const { layerItem, paperLayer, paperProjectIndex } = getItemLayers(currentState, action.payload.id) as { layerItem: Btwx.Text; paperLayer: paper.PointText; paperProjectIndex: number };
   paperLayer.fontFamily = action.payload.fontFamily;
   currentState = {
     ...currentState,
@@ -3792,14 +3751,13 @@ export const setLayersFontFamily = (state: LayerState, action: SetLayersFontFami
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerFontFamily(result, layerActions.setLayerFontFamily({id: current, fontFamily: action.payload.fontFamily}) as SetLayerFontFamily);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerLeading = (state: LayerState, action: SetLayerLeading): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id) as paper.PointText;
-  const layerItem = state.byId[action.payload.id];
+  const { layerItem, paperLayer, paperProjectIndex } = getItemLayers(currentState, action.payload.id) as { layerItem: Btwx.Text; paperLayer: paper.PointText; paperProjectIndex: number };
   paperLayer.leading = action.payload.leading;
   currentState = {
     ...currentState,
@@ -3831,14 +3789,13 @@ export const setLayersLeading = (state: LayerState, action: SetLayersLeading): L
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerLeading(result, layerActions.setLayerLeading({id: current, leading: action.payload.leading}) as SetLayerLeading);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerJustification = (state: LayerState, action: SetLayerJustification): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id) as paper.PointText;
-  const layerItem = state.byId[action.payload.id];
+  const { layerItem, paperLayer, paperProjectIndex } = getItemLayers(currentState, action.payload.id) as { layerItem: Btwx.Text; paperLayer: paper.PointText; paperProjectIndex: number };
   const prevJustification = paperLayer.justification;
   paperLayer.justification = action.payload.justification;
   switch(prevJustification) {
@@ -3909,16 +3866,15 @@ export const setLayersJustification = (state: LayerState, action: SetLayersJusti
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerJustification(result, layerActions.setLayerJustification({id: current, justification: action.payload.justification}) as SetLayerJustification);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const addLayersMask = (state: LayerState, action: AddLayersMask): LayerState => {
   let currentState = state;
-  const layerItem = state.byId[action.payload.layers[0]];
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.layers[0]);
   const parentLayerItem = state.byId[layerItem.parent];
   const layerIndex = parentLayerItem.children.indexOf(action.payload.layers[0]);
-  const paperLayer = getPaperLayer(action.payload.layers[0]);
   const underlyingSiblings = getLayerUnderlyingSiblings(currentState, action.payload.layers[0]);
   const mask = paperLayer.clone();
   mask.clipMask = true;
@@ -3954,8 +3910,9 @@ export const addLayersMask = (state: LayerState, action: AddLayersMask): LayerSt
   if (underlyingSiblings.length > 0) {
     let continueMaskChain = true;
     currentState = underlyingSiblings.reduce((result, current) => {
-      const siblingItem = currentState.byId[current];
-      const siblingPaperLayer = getPaperLayer(current);
+      const siblingLayerItems = getItemLayers(currentState, current);
+      const siblingItem = siblingLayerItems.layerItem;
+      const siblingPaperLayer = siblingLayerItems.paperLayer;
       const underlyingMask = siblingItem.underlyingMask;
       const underlyingMaskIndex = underlyingMask ? parentLayerItem.children.indexOf(underlyingMask) : null;
       if (siblingItem.ignoreUnderlyingMask && continueMaskChain) {
@@ -3995,15 +3952,14 @@ export const addLayersMask = (state: LayerState, action: AddLayersMask): LayerSt
   // currentState = setLayerName(currentState, layerActions.setLayerName({id: mask, name: 'Mask'}) as SetLayerName);
   // currentState = maskLayers(currentState, layerActions.maskLayers({layers: currentState.byId[action.payload.group.id].children.filter((id) => id !== mask)}) as MaskLayers);
   // currentState = updateLayerBounds(currentState, action.payload.group.id);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const toggleLayerMask = (state: LayerState, action: ToggleLayerMask): LayerState => {
   let currentState = state;
-  const layerItem = state.byId[action.payload.id] as Btwx.Shape;
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const parentLayerItem = state.byId[layerItem.parent];
-  const paperLayer = getPaperLayer(action.payload.id);
   const isMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
   const underlyingSiblings = getLayerUnderlyingSiblings(currentState, action.payload.id);
   const maskableUnderlyingSiblings = getMaskableUnderlyingSiblings(currentState, action.payload.id, underlyingSiblings);
@@ -4022,10 +3978,11 @@ export const toggleLayerMask = (state: LayerState, action: ToggleLayerMask): Lay
       currentState = enableLayerShadow(currentState, layerActions.enableLayerShadow({id: action.payload.id}) as EnableLayerShadow);
     }
     underlyingSiblings.forEach((sibling) => {
-      const siblingItem = currentState.byId[sibling];
+      const siblingItemLayers = getItemLayers(currentState, sibling);
+      const siblingItem = siblingItemLayers.layerItem;
       const isShape = siblingItem.type === 'Shape';
       const isMask = isShape && (siblingItem as Btwx.Shape).mask;
-      const siblingPaperLayer = isMask ? getPaperLayer(sibling).parent : getPaperLayer(sibling);
+      const siblingPaperLayer = isMask ? siblingItemLayers.paperLayer.parent : siblingItemLayers.paperLayer;
       if (maskableUnderlyingSiblings.includes(sibling)) {
         siblingPaperLayer.insertBelow(maskGroupPaperLayer);
         if (!layerItem.masked) {
@@ -4048,10 +4005,11 @@ export const toggleLayerMask = (state: LayerState, action: ToggleLayerMask): Lay
     paperLayer.replaceWith(maskGroup);
     if (maskableUnderlyingSiblings.length > 0) {
       maskableUnderlyingSiblings.forEach((sibling) => {
-        const siblingItem = currentState.byId[sibling];
+        const siblingItemLayers = getItemLayers(currentState, sibling);
+        const siblingItem = siblingItemLayers.layerItem;
         const isShape = siblingItem.type === 'Shape';
         const isMask = isShape && (siblingItem as Btwx.Shape).mask;
-        const siblingPaperLayer = isMask ? getPaperLayer(sibling).parent : getPaperLayer(sibling);
+        const siblingPaperLayer = isMask ? siblingItemLayers.paperLayer.parent : siblingItemLayers.paperLayer;
         maskGroup.addChild(siblingPaperLayer);
         currentState = setLayerUnderlyingMask(currentState, layerActions.setLayerUnderlyingMask({id: sibling, underlyingMask: action.payload.id}) as SetLayerUnderlyingMask);
         if (!siblingItem.masked) {
@@ -4078,7 +4036,7 @@ export const toggleLayersMask = (state: LayerState, action: ToggleLayersMask): L
   currentState = action.payload.layers.reduce((result, current) => {
     return toggleLayerMask(result, layerActions.toggleLayerMask({id: current}) as ToggleLayerMask);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4107,19 +4065,21 @@ export const setLayersUnderlyingMask = (state: LayerState, action: SetLayersUnde
 
 export const toggleLayerIgnoreUnderlyingMask = (state: LayerState, action: ToggleLayerIgnoreUnderlyingMask): LayerState => {
   let currentState = state;
-  const layerItem = state.byId[action.payload.id];
+  const layerItemLayers = getItemLayers(currentState, action.payload.id);
+  const layerItem = layerItemLayers.layerItem;
   const isMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
   const parentItem = state.byId[layerItem.parent];
   const layerIndex = parentItem.children.indexOf(action.payload.id);
   const aboveSiblingId = layerIndex !== 0 ? parentItem.children[layerIndex - 1] : null;
-  const aboveSiblingItem: Btwx.Layer = aboveSiblingId ? currentState.byId[aboveSiblingId] : null;
+  const aboveSiblingItemLayers = aboveSiblingId ? getItemLayers(currentState, aboveSiblingId) : null;
+  const aboveSiblingItem: Btwx.Layer = aboveSiblingId ? aboveSiblingItemLayers.layerItem : null;
   const isAboveSiblingMask = aboveSiblingItem && aboveSiblingItem.type === 'Shape' && (aboveSiblingItem as Btwx.Shape).mask;
   const isAboveSiblingMasked = aboveSiblingItem && aboveSiblingItem.masked;
-  const paperLayer = isMask ? getPaperLayer(action.payload.id).parent : getPaperLayer(action.payload.id);
+  const paperLayer = isMask ? layerItemLayers.paperLayer.parent : layerItemLayers.paperLayer;
   const maskableUnderlyingSiblings = getMaskableUnderlyingSiblings(currentState, action.payload.id);
   if (layerItem.ignoreUnderlyingMask) {
     if (layerItem.underlyingMask && (isAboveSiblingMasked || isAboveSiblingMask)) {
-      const aboveSiblingPaperLayer = isAboveSiblingMask ? getPaperLayer(aboveSiblingId).parent : getPaperLayer(aboveSiblingId);
+      const aboveSiblingPaperLayer = isAboveSiblingMask ? aboveSiblingItemLayers.paperLayer.parent : aboveSiblingItemLayers.paperLayer;
       if (isAboveSiblingMask) {
         aboveSiblingPaperLayer.addChild(paperLayer);
       } else {
@@ -4127,9 +4087,10 @@ export const toggleLayerIgnoreUnderlyingMask = (state: LayerState, action: Toggl
       }
       if (maskableUnderlyingSiblings.length > 0 && !isMask) {
         maskableUnderlyingSiblings.forEach((sibling) => {
-          const siblingItem = currentState.byId[sibling];
+          const siblingItemLayers = getItemLayers(currentState, sibling);
+          const siblingItem = siblingItemLayers.layerItem;
           const isSiblingMask = siblingItem.type === 'Shape' && (siblingItem as Btwx.Shape).mask;
-          const siblingPaperLayer = isSiblingMask ? getPaperLayer(sibling).parent : getPaperLayer(sibling);
+          const siblingPaperLayer = isSiblingMask ? siblingItemLayers.paperLayer.parent : siblingItemLayers.paperLayer;
           siblingPaperLayer.insertAbove(paperLayer);
         });
       }
@@ -4137,12 +4098,14 @@ export const toggleLayerIgnoreUnderlyingMask = (state: LayerState, action: Toggl
     }
   } else {
     if (layerItem.underlyingMask && layerItem.masked) {
-      const maskGroupPaperLayer = getPaperLayer(`${layerItem.underlyingMask}-MaskGroup`);
+      const underlyingMaskItem = getItemLayers(currentState, layerItem.underlyingMask);
+      const maskGroupPaperLayer = underlyingMaskItem.paperLayer.parent;
       if (maskableUnderlyingSiblings.length > 0 && !isMask) {
         maskableUnderlyingSiblings.reverse().forEach((sibling) => {
-          const siblingItem = currentState.byId[sibling];
+          const siblingItemLayers = getItemLayers(currentState, sibling);
+          const siblingItem = siblingItemLayers.layerItem;
           const isSiblingMask = siblingItem.type === 'Shape' && (siblingItem as Btwx.Shape).mask;
-          const siblingPaperLayer = isSiblingMask ? getPaperLayer(sibling).parent : getPaperLayer(sibling);
+          const siblingPaperLayer = isSiblingMask ? siblingItemLayers.paperLayer.parent : siblingItemLayers.paperLayer;
           siblingPaperLayer.insertAbove(maskGroupPaperLayer);
           currentState = setLayerMasked(currentState, layerActions.setLayerMasked({id: sibling, masked: false}) as SetLayerMasked);
         });
@@ -4169,7 +4132,7 @@ export const toggleLayersIgnoreUnderlyingMask = (state: LayerState, action: Togg
   currentState = action.payload.layers.reduce((result, current) => {
     return toggleLayerIgnoreUnderlyingMask(result, layerActions.toggleLayerIgnoreUnderlyingMask({id: current}) as ToggleLayerIgnoreUnderlyingMask);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4198,88 +4161,87 @@ export const setLayersMasked = (state: LayerState, action: SetLayersMasked): Lay
 
 export const alignLayersToLeft = (state: LayerState, action: AlignLayersToLeft): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(currentState, action.payload.layers);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers, true);
   currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
-    const paperLayer = getPaperLayer(current);
+    const { layerItem, paperLayer } = getItemLayers(currentState, current);
     paperLayer.bounds.left = layersBounds.left;
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
-  // currentState = updateSelectedBounds(currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const alignLayersToRight = (state: LayerState, action: AlignLayersToRight): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(currentState, action.payload.layers);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers, true);
   currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
-    const paperLayer = getPaperLayer(current);
+    const { layerItem, paperLayer } = getItemLayers(currentState, current);
     paperLayer.bounds.right = layersBounds.right;
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const alignLayersToTop = (state: LayerState, action: AlignLayersToTop): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(currentState, action.payload.layers);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers, true);
   currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
-    const paperLayer = getPaperLayer(current);
+    const { layerItem, paperLayer } = getItemLayers(currentState, current);
     paperLayer.bounds.top = layersBounds.top;
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const alignLayersToBottom = (state: LayerState, action: AlignLayersToBottom): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(currentState, action.payload.layers);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers, true);
   currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
-    const paperLayer = getPaperLayer(current);
+    const { layerItem, paperLayer } = getItemLayers(currentState, current);
     paperLayer.bounds.bottom = layersBounds.bottom;
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const alignLayersToCenter = (state: LayerState, action: AlignLayersToCenter): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(currentState, action.payload.layers);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers, true);
   currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
-    const paperLayer = getPaperLayer(current);
+    const { layerItem, paperLayer } = getItemLayers(currentState, current);
     paperLayer.bounds.center.x = layersBounds.center.x;
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const alignLayersToMiddle = (state: LayerState, action: AlignLayersToMiddle): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(currentState, action.payload.layers);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers, true);
   currentState = action.payload.layers.reduce((result: LayerState, current: string) => {
-    const paperLayer = getPaperLayer(current);
+    const { layerItem, paperLayer } = getItemLayers(currentState, current);
     paperLayer.bounds.center.y = layersBounds.center.y;
     result = updateLayerBounds(result, current);
     return result;
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const distributeLayersHorizontally = (state: LayerState, action: DistributeLayersHorizontally): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(currentState, action.payload.layers);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers, true);
   const layersWidth = action.payload.layers.reduce((result, current) => {
-    const paperLayer = getPaperLayer(current);
+    const { layerItem, paperLayer } = getItemLayers(currentState, current);
     result = result + paperLayer.bounds.width;
     return result;
   }, 0);
@@ -4287,23 +4249,24 @@ export const distributeLayersHorizontally = (state: LayerState, action: Distribu
   const orderedLayers = orderLayersByLeft(action.payload.layers);
   currentState = orderedLayers.reduce((result: LayerState, current: string, index: number) => {
     if (index !== 0 && index !== orderedLayers.length - 1) {
-      const paperLayer = getPaperLayer(current);
+      const { layerItem, paperLayer } = getItemLayers(currentState, current);
       const prevLayer = orderedLayers[index - 1];
-      const prevPaperLayer = getPaperLayer(prevLayer);
+      const prevItemLayers = getItemLayers(currentState, prevLayer);
+      const prevPaperLayer = prevItemLayers.paperLayer;
       paperLayer.bounds.left = prevPaperLayer.bounds.right + diff;
       result = updateLayerBounds(result, current);
     }
     return result;
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const distributeLayersVertically = (state: LayerState, action: DistributeLayersVertically): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(currentState, action.payload.layers);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers, true);
   const layersHeight = action.payload.layers.reduce((result, current) => {
-    const paperLayer = getPaperLayer(current);
+    const { layerItem, paperLayer } = getItemLayers(currentState, current);
     result = result + paperLayer.bounds.height;
     return result;
   }, 0);
@@ -4311,118 +4274,23 @@ export const distributeLayersVertically = (state: LayerState, action: Distribute
   const orderedLayers = orderLayersByTop(action.payload.layers);
   currentState = orderedLayers.reduce((result: LayerState, current: string, index: number) => {
     if (index !== 0 && index !== orderedLayers.length - 1) {
-      const paperLayer = getPaperLayer(current);
+      const { layerItem, paperLayer } = getItemLayers(currentState, current);
       const prevLayer = orderedLayers[index - 1];
-      const prevPaperLayer = getPaperLayer(prevLayer);
+      const prevItemLayers = getItemLayers(currentState, prevLayer);
+      const prevPaperLayer = prevItemLayers.paperLayer;
       paperLayer.bounds.top = prevPaperLayer.bounds.bottom + diff;
       result = updateLayerBounds(result, current);
     }
     return result;
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
-// const getLayerCloneMap = (state: LayerState, id: string): {
-//   [id: string]: {
-//     id: string;
-//     scope: string[];
-//     children: string[];
-//   };
-// } => {
-//   const groups: string[] = [id];
-//   const layerCloneMap: {[id: string]: { id: string; scope: string[]; children: string[] }} = {
-//     [id]: {
-//       id: uuidv4(),
-//       scope: state.byId[id].scope,
-//       children: null
-//     }
-//   };
-//   let i = 0;
-//   while(i < groups.length) {
-//     const layer = state.byId[groups[i]];
-//     const layerClone = layerCloneMap[groups[i]];
-//     if (layer.children) {
-//       layerClone.children = [];
-//       layer.children.forEach((child) => {
-//         const newChildId = uuidv4();
-//         const childLayer = state.byId[child];
-//         if (childLayer.children && childLayer.children.length > 0) {
-//           groups.push(child);
-//         }
-//         layerCloneMap[child] = {
-//           id: newChildId,
-//           scope: [...layerClone.scope, layerClone.id],
-//           children: null
-//         };
-//         layerClone.children.push(newChildId);
-//       });
-//     }
-//     i++;
-//   }
-//   return layerCloneMap;
-// }
-
-// const clonePaperLayers = (state: LayerState, id: string, layerCloneMap: {[id: string]: { id: string; scope: string[]; children: string[] }}): void => {
-//   const paperLayer = getPaperLayer(id);
-//   const paperLayerClone = paperLayer.clone({deep: paperLayer.data.layerType === 'Shape' || paperLayer.data.layerType === 'Text', insert: true});
-//   if (paperLayer.data.layerType === 'Artboard') {
-//     const artboardLayersMask = paperLayer.getItem({ data: { id: 'ArtboardLayersMask' }});
-//     const artboardLayersMaskClone = artboardLayersMask.clone({deep: false, insert: true});
-//     const artboardBackground = paperLayer.getItem({ data: { id: 'ArtboardBackground' }});
-//     const artboardBackgroundClone = artboardBackground.clone({deep: false, insert: true});
-//     const artboardMaskedLayers = paperLayer.getItem({ data: { id: 'ArtboardMaskedLayers' }});
-//     const artboardMaskedLayersClone = artboardMaskedLayers.clone({deep: false, insert: true});
-//     const artboardLayers = paperLayer.getItem({ data: { id: 'ArtboardLayers' }});
-//     const artboardLayersClone = artboardLayers.clone({deep: false, insert: true});
-//     artboardMaskedLayersClone.children = [artboardLayersMaskClone, artboardLayersClone];
-//     paperLayerClone.children = [artboardBackgroundClone, artboardMaskedLayersClone];
-//   }
-//   if (paperLayer.data.layerType === 'Image') {
-//     const raster = paperLayer.getItem({ data: { id: 'Raster' }});
-//     const rasterClone = raster.clone({deep: false, insert: true});
-//     rasterClone.parent = paperLayerClone;
-//   }
-//   paperLayerClone.data.id = layerCloneMap[id].id;
-//   paperLayerClone.data.scope = layerCloneMap[id].scope;
-//   // paperLayerClone.data.selected = false;
-//   // paperLayerClone.data.hover = false;
-//   paperLayerClone.parent = paperLayer.parent;
-//   const groups: string[] = [id];
-//   let i = 0;
-//   while(i < groups.length) {
-//     const group = state.byId[groups[i]];
-//     const groupClone = layerCloneMap[groups[i]];
-//     const groupClonePaperLayer = getPaperLayer(groupClone.id);
-//     if (group.children) {
-//       group.children.forEach((child) => {
-//         const childLayer = state.byId[child];
-//         const childPaperLayer = getPaperLayer(child);
-//         const childPaperLayerClone = childPaperLayer.clone({deep: childPaperLayer.className === 'CompoundPath', insert: true});
-//         childPaperLayerClone.data.id = layerCloneMap[child].id;
-//         childPaperLayerClone.data.scope = layerCloneMap[child].scope;
-//         // childPaperLayerClone.data.selected = false;
-//         // childPaperLayerClone.data.hover = false;
-//         childPaperLayerClone.parent = groupClonePaperLayer;
-//         if (childPaperLayer.data.layerType === 'Image') {
-//           const raster = childPaperLayer.getItem({ data: { id: 'Raster' }});
-//           const rasterClone = raster.clone({deep: false, insert: true});
-//           rasterClone.parent = childPaperLayerClone;
-//         }
-//         if (childLayer.children && childLayer.children.length > 0) {
-//           groups.push(child);
-//         }
-//       });
-//     }
-//     i++;
-//   }
-// }
-
 export const duplicateLayer = (state: LayerState, action: DuplicateLayer): LayerState => {
   let currentState = state;
-  const layerItem = state.byId[action.payload.id];
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const isMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
-  const paperLayer = getPaperLayer(action.payload.id);
   const duplicatePaperLayer = isMask ? paperLayer.parent.clone() : paperLayer.clone();
   const layerCloneMap = getLayerAndDescendants(currentState, action.payload.id).reduce((result: { [id: string]: string }, current) => ({
     ...result,
@@ -4543,7 +4411,7 @@ export const duplicateLayers = (state: LayerState, action: DuplicateLayers): Lay
   if (state.selected.length > 0) {
     currentState = deselectLayers(currentState, layerActions.deselectLayers({layers: state.selected}) as DeselectLayers);
   }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, currentState, layerActions.setLayerEdit({layers: newLayers}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4565,8 +4433,6 @@ export const bringLayerForward = (state: LayerState, action: BringLayerForward):
   const parentItem = currentState.byId[layerItem.parent];
   const layerIndex = getLayerIndex(currentState, action.payload.id);
   if (layerIndex !== parentItem.children.length - 1) {
-    // currentState = insertLayerChild(currentState, layerActions.insertLayerChild({id: layerItem.parent, child: action.payload.id, index: layerIndex + 1}) as InsertLayerChild);
-    // const aboveLayer = parentItem.children[layerIndex + 1]
     currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: action.payload.id, above: parentItem.children[layerIndex + 1]}) as InsertLayerAbove);
   }
   return currentState;
@@ -4578,7 +4444,7 @@ export const bringLayersForward = (state: LayerState, action: BringLayersForward
     return bringLayerForward(result, layerActions.bringLayerForward({id: current}) as BringLayerForward);
   }, currentState);
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.layers, newSelection: true}) as SelectLayers);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4588,7 +4454,6 @@ export const bringLayerToFront = (state: LayerState, action: BringLayerToFront):
   const parentItem = currentState.byId[layerItem.parent];
   const layerIndex = getLayerIndex(currentState, action.payload.id);
   if (layerIndex !== parentItem.children.length - 1) {
-    // currentState = insertLayerChild(currentState, layerActions.insertLayerChild({id: layerItem.parent, child: action.payload.id, index: parentItem.children.length - 1}) as InsertLayerChild);
     currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: action.payload.id, above: parentItem.children[parentItem.children.length - 1]}) as InsertLayerAbove);
   }
   return currentState;
@@ -4600,7 +4465,7 @@ export const bringLayersToFront = (state: LayerState, action: BringLayersToFront
     return bringLayerToFront(result, layerActions.bringLayerToFront({id: current}) as BringLayerToFront);
   }, currentState);
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.layers, newSelection: true}) as SelectLayers);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4610,7 +4475,6 @@ export const sendLayerBackward = (state: LayerState, action: SendLayerBackward):
   const parentItem = currentState.byId[layerItem.parent];
   const layerIndex = getLayerIndex(currentState, action.payload.id);
   if (layerIndex !== 0) {
-    // currentState = insertLayerChild(currentState, layerActions.insertLayerChild({id: layerItem.parent, child: action.payload.id, index: layerIndex - 1}) as InsertLayerChild);
     currentState = insertLayerBelow(currentState, layerActions.insertLayerBelow({id: action.payload.id, below: parentItem.children[layerIndex - 1]}) as InsertLayerBelow);
   }
   return currentState;
@@ -4622,7 +4486,7 @@ export const sendLayersBackward = (state: LayerState, action: SendLayersBackward
     return sendLayerBackward(result, layerActions.sendLayerBackward({id: current}) as SendLayerBackward);
   }, currentState);
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.layers, newSelection: true}) as SelectLayers);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4632,7 +4496,6 @@ export const sendLayerToBack = (state: LayerState, action: SendLayerToBack): Lay
   const parentItem = currentState.byId[layerItem.parent];
   const layerIndex = getLayerIndex(currentState, action.payload.id);
   if (layerIndex !== 0) {
-    // currentState = insertLayerChild(currentState, layerActions.insertLayerChild({id: layerItem.parent, child: action.payload.id, index: 0}) as InsertLayerChild);
     currentState = insertLayerBelow(currentState, layerActions.insertLayerBelow({id: action.payload.id, below: parentItem.children[0]}) as InsertLayerBelow);
   }
   return currentState;
@@ -4644,13 +4507,13 @@ export const sendLayersToBack = (state: LayerState, action: SendLayersToBack): L
     return sendLayerToBack(result, layerActions.sendLayerToBack({id: current}) as SendLayerToBack);
   }, currentState);
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.layers, newSelection: true}) as SelectLayers);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setLayerBlendMode = (state: LayerState, action: SetLayerBlendMode): LayerState => {
   let currentState = state;
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   paperLayer.blendMode = action.payload.blendMode;
   currentState = {
     ...currentState,
@@ -4673,7 +4536,7 @@ export const setLayersBlendMode = (state: LayerState, action: SetLayersBlendMode
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerBlendMode(result, layerActions.setLayerBlendMode({id: current, blendMode: action.payload.blendMode}) as SetLayerBlendMode);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4719,19 +4582,18 @@ export const divideLayers = (state: LayerState, action: DivideLayers): LayerStat
 
 export const setRoundedRadius = (state: LayerState, action: SetRoundedRadius): LayerState => {
   let currentState = state;
-  const paperLayerCompound = getPaperLayer(action.payload.id) as paper.CompoundPath;
-  const paperLayer = paperLayerCompound.children[0] as paper.Path;
-  const layerItem = currentState.byId[action.payload.id] as Btwx.Rounded;
-  paperLayer.rotation = -layerItem.transform.rotation;
-  const maxDim = Math.max(paperLayer.bounds.width, paperLayer.bounds.height);
+  const { layerItem, paperLayer, paperProjectIndex } = getItemLayers(currentState, action.payload.id) as { layerItem: Btwx.Layer; paperLayer: paper.CompoundPath; paperProjectIndex: number };
+  const paperLayerPath = paperLayer.children[0] as paper.Path;
+  paperLayerPath.rotation = -layerItem.transform.rotation;
+  const maxDim = Math.max(paperLayerPath.bounds.width, paperLayerPath.bounds.height);
   const newShape = new paperMain.Path.Rectangle({
-    from: paperLayer.bounds.topLeft,
-    to: paperLayer.bounds.bottomRight,
+    from: paperLayerPath.bounds.topLeft,
+    to: paperLayerPath.bounds.bottomRight,
     radius: (maxDim / 2) * action.payload.radius,
     insert: false
   });
-  paperLayer.pathData = newShape.pathData;
-  paperLayer.rotation = layerItem.transform.rotation;
+  paperLayerPath.pathData = newShape.pathData;
+  paperLayerPath.rotation = layerItem.transform.rotation;
   currentState = {
     ...currentState,
     byId: {
@@ -4753,29 +4615,27 @@ export const setRoundedRadii = (state: LayerState, action: SetRoundedRadii): Lay
   currentState = action.payload.layers.reduce((result, current) => {
     return setRoundedRadius(result, layerActions.setRoundedRadius({id: current, radius: action.payload.radius}) as SetRoundedRadius);
   }, currentState);
-  // currentState = updateSelectedBounds(currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setPolygonSides = (state: LayerState, action: SetPolygonSides): LayerState => {
   let currentState = state;
-  const paperLayerCompound = getPaperLayer(action.payload.id) as paper.CompoundPath;
-  const paperLayer = paperLayerCompound.children[0] as paper.Path;
-  const startPosition = paperLayer.position;
-  const layerItem = state.byId[action.payload.id] as Btwx.Polygon;
-  paperLayer.rotation = -layerItem.transform.rotation;
+  const { layerItem, paperLayer, paperProjectIndex } = getItemLayers(currentState, action.payload.id) as { layerItem: Btwx.Layer; paperLayer: paper.CompoundPath; paperProjectIndex: number };
+  const paperLayerPath = paperLayer.children[0] as paper.Path;
+  const startPosition = paperLayerPath.position;
+  paperLayerPath.rotation = -layerItem.transform.rotation;
   const newShape = new paperMain.Path.RegularPolygon({
-    center: paperLayer.bounds.center,
-    radius: Math.max(paperLayer.bounds.width, paperLayer.bounds.height) / 2,
+    center: paperLayerPath.bounds.center,
+    radius: Math.max(paperLayerPath.bounds.width, paperLayerPath.bounds.height) / 2,
     sides: action.payload.sides,
     insert: false
   });
-  newShape.bounds.width = paperLayer.bounds.width;
-  newShape.bounds.height = paperLayer.bounds.height;
+  newShape.bounds.width = paperLayerPath.bounds.width;
+  newShape.bounds.height = paperLayerPath.bounds.height;
   newShape.rotation = layerItem.transform.rotation;
   newShape.position = startPosition;
-  paperLayer.pathData = newShape.pathData;
+  paperLayerPath.pathData = newShape.pathData;
   currentState = {
     ...currentState,
     byId: {
@@ -4803,31 +4663,29 @@ export const setPolygonsSides = (state: LayerState, action: SetPolygonsSides): L
   currentState = action.payload.layers.reduce((result, current) => {
     return setPolygonSides(result, layerActions.setPolygonSides({id: current, sides: action.payload.sides}) as SetPolygonSides);
   }, currentState);
-  // currentState = updateSelectedBounds(currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setStarPoints = (state: LayerState, action: SetStarPoints): LayerState => {
   let currentState = state;
-  const paperLayerCompound = getPaperLayer(action.payload.id) as paper.CompoundPath;
-  const paperLayer = paperLayerCompound.children[0] as paper.Path;
-  const startPosition = paperLayer.position;
-  const layerItem = state.byId[action.payload.id] as Btwx.Star;
-  paperLayer.rotation = -layerItem.transform.rotation;
-  const maxDim = Math.max(paperLayer.bounds.width, paperLayer.bounds.height);
+  const { layerItem, paperLayer, paperProjectIndex } = getItemLayers(currentState, action.payload.id) as { layerItem: Btwx.Layer; paperLayer: paper.CompoundPath; paperProjectIndex: number };
+  const paperLayerPath = paperLayer.children[0] as paper.Path;
+  const startPosition = paperLayerPath.position;
+  paperLayerPath.rotation = -layerItem.transform.rotation;
+  const maxDim = Math.max(paperLayerPath.bounds.width, paperLayerPath.bounds.height);
   const newShape = new paperMain.Path.Star({
-    center: paperLayer.bounds.center,
+    center: paperLayerPath.bounds.center,
     radius1: maxDim / 2,
     radius2: (maxDim / 2) * (layerItem as Btwx.Star).radius,
     points: action.payload.points,
     insert: false
   });
-  newShape.bounds.width = paperLayer.bounds.width;
-  newShape.bounds.height = paperLayer.bounds.height;
+  newShape.bounds.width = paperLayerPath.bounds.width;
+  newShape.bounds.height = paperLayerPath.bounds.height;
   newShape.rotation = layerItem.transform.rotation;
   newShape.position = startPosition;
-  paperLayer.pathData = newShape.pathData;
+  paperLayerPath.pathData = newShape.pathData;
   currentState = {
     ...currentState,
     byId: {
@@ -4849,31 +4707,29 @@ export const setStarsPoints = (state: LayerState, action: SetStarsPoints): Layer
   currentState = action.payload.layers.reduce((result, current) => {
     return setStarPoints(result, layerActions.setStarPoints({id: current, points: action.payload.points}) as SetStarPoints);
   }, currentState);
-  // currentState = updateSelectedBounds(currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
 export const setStarRadius = (state: LayerState, action: SetStarRadius): LayerState => {
   let currentState = state;
-  const paperLayerCompound = getPaperLayer(action.payload.id) as paper.CompoundPath;
-  const paperLayer = paperLayerCompound.children[0] as paper.Path;
-  const layerItem = state.byId[action.payload.id] as Btwx.Star;
-  const startPosition = paperLayer.position;
-  paperLayer.rotation = -layerItem.transform.rotation;
-  const maxDim = Math.max(paperLayer.bounds.width, paperLayer.bounds.height);
+  const { layerItem, paperLayer, paperProjectIndex } = getItemLayers(currentState, action.payload.id) as { layerItem: Btwx.Layer; paperLayer: paper.CompoundPath; paperProjectIndex: number };
+  const paperLayerPath = paperLayer.children[0] as paper.Path;
+  const startPosition = paperLayerPath.position;
+  paperLayerPath.rotation = -layerItem.transform.rotation;
+  const maxDim = Math.max(paperLayerPath.bounds.width, paperLayerPath.bounds.height);
   const newShape = new paperMain.Path.Star({
-    center: paperLayer.bounds.center,
+    center: paperLayerPath.bounds.center,
     radius1: maxDim / 2,
     radius2: (maxDim / 2) * action.payload.radius,
     points: (layerItem as Btwx.Star).points,
     insert: false
   });
-  newShape.bounds.width = paperLayer.bounds.width;
-  newShape.bounds.height = paperLayer.bounds.height;
+  newShape.bounds.width = paperLayerPath.bounds.width;
+  newShape.bounds.height = paperLayerPath.bounds.height;
   newShape.rotation = layerItem.transform.rotation;
   newShape.position = startPosition;
-  paperLayer.pathData = newShape.pathData;
+  paperLayerPath.pathData = newShape.pathData;
   currentState = {
     ...currentState,
     byId: {
@@ -4895,8 +4751,7 @@ export const setStarsRadius = (state: LayerState, action: SetStarsRadius): Layer
   currentState = action.payload.layers.reduce((result, current) => {
     return setStarRadius(result, layerActions.setStarRadius({id: current, radius: action.payload.radius}) as SetStarRadius);
   }, currentState);
-  // currentState = updateSelectedBounds(currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4905,7 +4760,7 @@ export const setLineFromX = (state: LayerState, action: SetLineFromX): LayerStat
   currentState = updateLayerBounds(currentState, action.payload.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fromX', 'fromY', 'toX', 'toY']);
   if (action.payload.setEdit) {
-    currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+    currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: [action.payload.id]}) as SetLayerEdit);
   }
   return currentState;
 };
@@ -4915,7 +4770,7 @@ export const setLinesFromX = (state: LayerState, action: SetLinesFromX): LayerSt
   currentState = action.payload.layers.reduce((result, current) => {
     return setLineFromX(result, layerActions.setLineFromX({id: current, x: action.payload.x, setEdit: false}) as SetLineFromX);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4924,7 +4779,7 @@ export const setLineFromY = (state: LayerState, action: SetLineFromY): LayerStat
   currentState = updateLayerBounds(currentState, action.payload.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fromX', 'fromY', 'toX', 'toY']);
   if (action.payload.setEdit) {
-    currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+    currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: [action.payload.id]}) as SetLayerEdit);
   }
   return currentState;
 };
@@ -4934,7 +4789,7 @@ export const setLinesFromY = (state: LayerState, action: SetLinesFromY): LayerSt
   currentState = action.payload.layers.reduce((result, current) => {
     return setLineFromY(result, layerActions.setLineFromY({id: current, y: action.payload.y, setEdit: false}) as SetLineFromY);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4946,8 +4801,7 @@ export const setLineFrom = (state: LayerState, action: SetLineFrom): LayerState 
   if (layerItem.style.stroke.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
   }
-  // currentState = updateSelectedBounds(currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: [action.payload.id]}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4956,7 +4810,7 @@ export const setLineToX = (state: LayerState, action: SetLineToX): LayerState =>
   currentState = updateLayerBounds(currentState, action.payload.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fromX', 'fromY', 'toX', 'toY']);
   if (action.payload.setEdit) {
-    currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+    currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: [action.payload.id]}) as SetLayerEdit);
   }
   return currentState;
 };
@@ -4966,7 +4820,7 @@ export const setLinesToX = (state: LayerState, action: SetLinesToX): LayerState 
   currentState = action.payload.layers.reduce((result, current) => {
     return setLineToX(result, layerActions.setLineToX({id: current, x: action.payload.x, setEdit: false}) as SetLineToX);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4975,7 +4829,7 @@ export const setLineToY = (state: LayerState, action: SetLineToY): LayerState =>
   currentState = updateLayerBounds(currentState, action.payload.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fromX', 'fromY', 'toX', 'toY']);
   if (action.payload.setEdit) {
-    currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+    currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: [action.payload.id]}) as SetLayerEdit);
   }
   return currentState;
 };
@@ -4985,7 +4839,7 @@ export const setLinesToY = (state: LayerState, action: SetLinesToY): LayerState 
   currentState = action.payload.layers.reduce((result, current) => {
     return setLineToY(result, layerActions.setLineToY({id: current, y: action.payload.y, setEdit: false}) as SetLineToY);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };
 
@@ -4997,25 +4851,35 @@ export const setLineTo = (state: LayerState, action: SetLineTo): LayerState => {
   if (layerItem.style.stroke.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
   }
-  // currentState = updateSelectedBounds(currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: [action.payload.id]}) as SetLayerEdit);
   return currentState;
 };
 
-export const setLayerEdit = (state: LayerState, action: SetLayerEdit): LayerState => {
+export const setLayerEdit = (state: LayerState, prevState: LayerState, action: SetLayerEdit): LayerState => {
   let currentState = state;
+  const paperProjects = !action.payload.layers ? null : action.payload.layers.reduce((result, current) => {
+    const layerProjectIndex = getLayerProjectIndex(prevState, current);
+    if (!result.includes(layerProjectIndex)) {
+      result = [...result, layerProjectIndex];
+    }
+    return result;
+  }, []);
   currentState = {
     ...currentState,
     edit: action.payload.edit,
-    paperProject: savePaperProjectJSON(currentState)
+    paperProjects: paperProjects ? Object.keys(currentState.paperProjects).reduce((result, current, index) => {
+      if (paperProjects.includes(index)) {
+        result[current] = savePaperProjectJSON(currentState, index)
+      }
+      return result;
+    }, currentState.paperProjects) : currentState.paperProjects
   }
   return currentState;
 };
 
 export const setLayerStyle = (state: LayerState, action: SetLayerStyle): LayerState => {
   let currentState = state;
-  const layerItem = currentState.byId[action.payload.id];
-  const paperLayer = getPaperLayer(action.payload.id);
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   if (action.payload.style && action.payload.style.fill) {
     if (action.payload.style.fill.enabled) {
       switch(action.payload.style.fill.fillType) {
@@ -5198,6 +5062,6 @@ export const setLayersStyle = (state: LayerState, action: SetLayersStyle): Layer
   currentState = action.payload.layers.reduce((result, current) => {
     return setLayerStyle(result, layerActions.setLayerStyle({id: current, style: action.payload.style, textStyle: action.payload.textStyle}) as SetLayerStyle);
   }, currentState);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({}) as SetLayerEdit);
+  currentState = setLayerEdit(currentState, state, layerActions.setLayerEdit({layers: action.payload.layers}) as SetLayerEdit);
   return currentState;
 };

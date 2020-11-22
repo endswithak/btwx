@@ -2327,6 +2327,7 @@ export interface SetLineTo {
 
 export interface SetLayerEditPayload {
   edit?: string;
+  layers: string[];
 }
 
 export interface SetLayerEdit {

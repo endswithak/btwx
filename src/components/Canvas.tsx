@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
+import paper from 'paper';
 import React, { useContext, ReactElement, useEffect, useState, useRef } from 'react';
 import { connect } from 'react-redux';
 import { importPaperProject, getPaperLayer } from '../store/selectors/layer';
@@ -17,42 +18,44 @@ import ArtboardTool from './ArtboardTool';
 import AreaSelectTool from './AreaSelectTool';
 import LineTool from './LineTool';
 import TextTool from './TextTool';
+import CanvasPage from './CanvasPage';
+import CanvasUI from './CanvasUI';
+import CanvasArtboards from './CanvasArtboards';
 
 interface CanvasProps {
   ready: boolean;
-  documentImages?: {
-    [id: string]: Btwx.DocumentImage;
-  };
-  paperProject?: string;
-  matrix?: number[];
   interactionEnabled?: boolean;
   setReady(ready: boolean): void;
 }
 
 const Canvas = (props: CanvasProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const ref = useRef<HTMLCanvasElement>(null);
-  const { ready, matrix, documentImages, paperProject, setReady, interactionEnabled } = props;
-  const [layerEvent, setLayerEvent] = useState(null);
-  const [uiEvent, setUIEvent] = useState(null);
+  const ref = useRef<HTMLDivElement>(null);
+  const { ready, setReady, interactionEnabled } = props;
+  // const [layerEvent, setLayerEvent] = useState(null);
+  // const [uiEvent, setUIEvent] = useState(null);
   const [translateEvent, setTranslateEvent] = useState(null);
   const [zoomEvent, setZoomEvent] = useState(null);
 
   const handleHitResult = (e: any, eventType: 'mouseMove' | 'mouseDown' | 'mouseUp' | 'doubleClick' | 'contextMenu'): void => {
-    const point = paperMain.view.getEventPoint(e);
-    const layersHitResult = getPaperLayer('page').hitTest(point);
-    const uiHitResult = getPaperLayer('ui').hitTest(point);
-    const validHitResult = (hitResult: paper.HitResult): boolean => hitResult && hitResult.item && hitResult.item.data && hitResult.item.data.type;
-    if (validHitResult(uiHitResult)) {
-      setUIEvent({hitResult: uiHitResult, eventType: eventType, event: e.nativeEvent, empty: false});
-    } else {
-      if (validHitResult(layersHitResult)) {
-        setLayerEvent({hitResult: layersHitResult, eventType: eventType, event: e.nativeEvent, empty: false});
-      } else {
-        setUIEvent({hitResult: uiHitResult, eventType: eventType, event: e.nativeEvent, empty: true});
-        setLayerEvent({hitResult: layersHitResult, eventType: eventType, event: e.nativeEvent, empty: true});
-      }
-    }
+    // const point = paperMain.projects[0].view.getEventPoint(e);
+    const hitResults = paperMain.projects.reduce((result, current) => {
+      return [...result, current.hitTest(current.view.getEventPoint(e))]
+    }, []);
+    console.log(hitResults);
+    // const layersHitResult = getPaperLayer('page').hitTest(point);
+    // const uiHitResult = getPaperLayer('ui').hitTest(point);
+    // const validHitResult = (hitResult: paper.HitResult): boolean => hitResult && hitResult.item && hitResult.item.data && hitResult.item.data.type;
+    // if (validHitResult(uiHitResult)) {
+    //   setUIEvent({hitResult: uiHitResult, eventType: eventType, event: e.nativeEvent, empty: false});
+    // } else {
+    //   if (validHitResult(layersHitResult)) {
+    //     setLayerEvent({hitResult: layersHitResult, eventType: eventType, event: e.nativeEvent, empty: false});
+    //   } else {
+    //     setUIEvent({hitResult: uiHitResult, eventType: eventType, event: e.nativeEvent, empty: true});
+    //     setLayerEvent({hitResult: layersHitResult, eventType: eventType, event: e.nativeEvent, empty: true});
+    //   }
+    // }
   }
 
   const handleMouseMove = (e: any): void => {
@@ -63,9 +66,9 @@ const Canvas = (props: CanvasProps): ReactElement => {
     handleHitResult(e, 'mouseDown');
   }
 
-  const handleMouseUp = (e: any): void => {
-    handleHitResult(e, 'mouseUp');
-  }
+  // const handleMouseUp = (e: any): void => {
+  //   handleHitResult(e, 'mouseUp');
+  // }
 
   const handleDoubleClick = (e: any): void => {
     handleHitResult(e, 'doubleClick');
@@ -85,52 +88,44 @@ const Canvas = (props: CanvasProps): ReactElement => {
 
   useEffect(() => {
     console.log('CANVAS');
-    paperMain.setup(ref.current);
-    importPaperProject({
-      paperProject,
-      documentImages
-    });
-    paperMain.view.viewSize = new paperMain.Size(ref.current.clientWidth, ref.current.clientHeight);
-    paperMain.view.matrix.set(matrix);
     setReady(true);
   }, []);
 
   return (
     <div
       id='canvas-container'
-      className='c-canvas'>
-      <canvas
-        id='canvas'
-        ref={ref}
-        onWheel={ready ? handleWheel : null}
-        onMouseMove={ready && interactionEnabled ? handleMouseMove : null}
-        onMouseDown={ready ? handleMouseDown : null}
-        onMouseUp={ready ? handleMouseUp : null}
-        onDoubleClick={ready ? handleDoubleClick : null}
-        onContextMenu={ready ? handleContextMenu : null}
-        tabIndex={0}
-        style={{
-          background: theme.background.z0
-        }} />
+      className='c-canvas'
+      ref={ref}
+      onMouseMove={ready && interactionEnabled ? handleMouseMove : null}
+      onMouseDown={ready ? handleMouseDown : null}
+      onDoubleClick={ready ? handleDoubleClick : null}
+      onContextMenu={ready ? handleContextMenu : null}
+      onWheel={ready ? handleWheel : null}
+      style={{
+        background: theme.background.z0
+      }}>
+      <CanvasPage />
+      <CanvasArtboards />
+      <CanvasUI />
       {
         ready
         ? <>
-            <CanvasLayerEvents
+            {/* <CanvasLayerEvents
               layerEvent={layerEvent} />
             <CanvasUIEvents
-              uiEvent={uiEvent} />
-            <ZoomTool
-              zoomEvent={zoomEvent} />
+              uiEvent={uiEvent} /> */}
+            {/* <ZoomTool
+              zoomEvent={zoomEvent} /> */}
             <TranslateTool
               translateEvent={translateEvent} />
-            <ArtboardTool />
+            {/* <ArtboardTool />
             <ShapeTool />
             <DragTool />
             <ResizeTool />
             <AreaSelectTool />
             <LineTool />
             <TextTool />
-            <CanvasToast />
+            <CanvasToast /> */}
           </>
         : null
       }
@@ -139,18 +134,10 @@ const Canvas = (props: CanvasProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState): {
-  documentImages: {
-    [id: string]: Btwx.DocumentImage;
-  };
-  paperProject: string;
-  matrix: number[];
   interactionEnabled: boolean;
 } => {
-  const { layer, documentSettings, canvasSettings } = state;
+  const { canvasSettings } = state;
   return {
-    documentImages: documentSettings.images.byId,
-    paperProject: layer.present.paperProject,
-    matrix: documentSettings.matrix,
     interactionEnabled: !canvasSettings.selecting && !canvasSettings.resizing && !canvasSettings.drawing && !canvasSettings.zooming && !canvasSettings.translating && !canvasSettings.dragging
   };
 };

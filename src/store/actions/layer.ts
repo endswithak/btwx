@@ -10,7 +10,7 @@ import { paperMain } from '../../canvas';
 import MeasureGuide from '../../canvas/measureGuide';
 import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_VALUE, THEME_PRIMARY_COLOR, DEFAULT_TWEEN_EVENTS, TWEEN_PROPS_MAP } from '../../constants';
 import { getPaperFillColor, getPaperStrokeColor, getPaperLayer, getPaperShadowColor } from '../utils/paper';
-import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayersBounds, importPaperProject, colorsMatch, gradientsMatch, getNearestScopeAncestor, getArtboardEventItems, orderLayersByDepth, canMaskLayers, canMaskSelection, canPasteSVG, getLineToPoint, getSelectionTopLeft, getSelectionBottomRight, getLineFromPoint, getArtboardsTopTop, getSelectionBounds, getSelectedBounds, getParentPaperLayer, getGradientOriginPoint, getGradientDestinationPoint } from '../selectors/layer';
+import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayersBounds, importPaperProject, colorsMatch, gradientsMatch, getNearestScopeAncestor, getArtboardEventItems, orderLayersByDepth, canMaskLayers, canMaskSelection, canPasteSVG, getLineToPoint, getSelectionTopLeft, getSelectionBottomRight, getLineFromPoint, getArtboardsTopTop, getSelectionBounds, getSelectedBounds, getParentPaperLayer, getGradientOriginPoint, getGradientDestinationPoint, getAbsolutePosition, getScopedPoint } from '../selectors/layer';
 import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle, getLayerMasked, getLayerUnderlyingMask } from '../utils/actions';
 
 import { bufferToBase64, scrollToLayer } from '../../utils';
@@ -505,10 +505,9 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
       frame: payload.layer.frame,
       scope: scope,
       children: [],
-      allDescendents: [],
+      showChildren: showChildren,
       selected: false,
       hover: false,
-      showChildren: showChildren,
       events: [],
       originArtboardForEvents: [],
       destinationArtboardForEvents: [],
@@ -520,11 +519,9 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
       },
       transform: DEFAULT_TRANSFORM,
       style: DEFAULT_STYLE,
-      mask: false,
       masked: masked,
       underlyingMask: underlyingMask,
-      ignoreUnderlyingMask: ignoreUnderlyingMask,
-      pathData: null
+      ignoreUnderlyingMask: ignoreUnderlyingMask
     } as Btwx.Artboard;
     if (!payload.batch) {
       dispatch(addArtboard({
@@ -557,12 +554,15 @@ export const addGroupThunk = (payload: AddGroupPayload, providedState?: RootStat
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
     const parentPaperLayer = getParentPaperLayer(parent, ignoreUnderlyingMask);
     const frame = payload.layer.frame ? payload.layer.frame : { x: 0, y: 0, width: 0, height: 0, innerWidth: 0, innerHeight: 0 };
+    const scopedPosition = new paperMain.Point(frame.x, frame.y);
+    const absolutePosition = getAbsolutePosition(scopedPosition, scope);
     // const masked = payload.layer.masked ? payload.layer.masked : false;
     const showChildren = payload.layer.showChildren ? payload.layer.showChildren : false;
     const group = new paperMain.Group({
       name: name,
       data: { id: id, type: 'Layer', layerType: 'Group', selected: false, hover: false, scope: scope },
-      parent: parentPaperLayer
+      parent: parentPaperLayer,
+      position: absolutePosition
     });
     const newLayer = {
       type: 'Group',
@@ -572,7 +572,7 @@ export const addGroupThunk = (payload: AddGroupPayload, providedState?: RootStat
       frame,
       scope,
       children: [],
-      allDescendents: [],
+      showChildren: showChildren,
       selected: false,
       hover: false,
       events: [],
@@ -583,13 +583,10 @@ export const addGroupThunk = (payload: AddGroupPayload, providedState?: RootStat
         byProp: TWEEN_PROPS_MAP
       },
       transform: DEFAULT_TRANSFORM,
-      showChildren: showChildren,
       style: style,
-      mask: false,
       underlyingMask: underlyingMask,
       ignoreUnderlyingMask: ignoreUnderlyingMask,
-      masked: masked,
-      pathData: null
+      masked: masked
     } as Btwx.Group;
     if (!payload.batch) {
       dispatch(addGroup({
@@ -622,6 +619,8 @@ export const addShapeThunk = (payload: AddShapePayload, providedState?: RootStat
     const parentPaperLayer = getParentPaperLayer(parent, ignoreUnderlyingMask);
     const name = payload.layer.name ? payload.layer.name : shapeType;
     const frame = getLayerFrame(payload);
+    const scopedPosition = new paperMain.Point(frame.x, frame.y);
+    const absolutePosition = getAbsolutePosition(scopedPosition, scope);
     const shapeOpts = getLayerShapeOpts(payload);
     const pathData = getLayerPathData(payload);
     const style = getLayerStyle(payload);
@@ -651,7 +650,7 @@ export const addShapeThunk = (payload: AddShapePayload, providedState?: RootStat
       parent: parentPaperLayer
     });
     paperLayer.children.forEach((item) => item.data = { id: 'ShapePartial', type: 'LayerChild', layerType: 'Shape' });
-    paperLayer.position = new paperMain.Point(frame.x, frame.y);
+    paperLayer.position = absolutePosition;
     paperLayer.fillColor = paperFillColor;
     paperLayer.strokeColor = paperStrokeColor;
     if (mask) {
@@ -667,12 +666,13 @@ export const addShapeThunk = (payload: AddShapePayload, providedState?: RootStat
       id: id,
       name: name,
       parent: parent,
+      children: null,
+      showChildren: null,
       shapeType: shapeType,
       frame: frame,
       scope: scope,
       selected: false,
       hover: false,
-      children: null,
       events: [],
       tweens: {
         allIds: [],
@@ -714,6 +714,8 @@ export const addShapeGroupThunk = (payload: AddShapePayload, providedState?: Roo
     const shapeType = payload.layer.shapeType ? payload.layer.shapeType : 'Rectangle';
     const name = payload.layer.name ? payload.layer.name : shapeType;
     const frame = getLayerFrame(payload);
+    const scopedPosition = new paperMain.Point(frame.x, frame.y);
+    const absolutePosition = getAbsolutePosition(scopedPosition, scope);
     const shapeOpts = getLayerShapeOpts(payload);
     const style = getLayerStyle(payload);
     const transform = getLayerTransform(payload);
@@ -743,7 +745,7 @@ export const addShapeGroupThunk = (payload: AddShapePayload, providedState?: Roo
       parent: parentPaperLayer
     });
     paperLayer.children.forEach((item) => item.data = { id: 'ShapePartial', type: 'LayerChild', layerType: 'Shape' });
-    paperLayer.position = new paperMain.Point(frame.x, frame.y);
+    paperLayer.position = absolutePosition;
     // wonky fix to make sure gradient destination and origin are in correct place
     paperLayer.rotation = -transform.rotation;
     paperLayer.scale(transform.horizontalFlip ? -1 : 1, transform.verticalFlip ? -1 : 1);
@@ -766,12 +768,13 @@ export const addShapeGroupThunk = (payload: AddShapePayload, providedState?: Roo
       id: id,
       name: name,
       parent: parent,
+      children: null,
+      showChildren: null,
       shapeType: 'Custom',
       scope: scope,
       frame: frame,
       selected: false,
       hover: false,
-      children: null,
       events: [],
       tweens: {
         allIds: [],
@@ -847,6 +850,8 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
       justification: textStyle.justification
     });
     const frame = getLayerFrame(payload);
+    const scopedPosition = new paperMain.Point(frame.x, frame.y);
+    const absolutePosition = getAbsolutePosition(scopedPosition, scope);
     const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as Btwx.PaperGradientFill : null;
     const paperStrokeColor = style.stroke.enabled ? getPaperStrokeColor(style.stroke, frame) as Btwx.PaperGradientFill : null;
     paperLayer.position = new paperMain.Point(frame.x, frame.y);
@@ -864,19 +869,21 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
       name: name,
       parent: parentPaperLayer,
       data: { id, type: 'Layer', layerType: 'Text', selected: false, hover: false, scope: scope },
-      children: [textBackground, paperLayer]
+      children: [textBackground, paperLayer],
+      position: absolutePosition
     });
     const newLayer = {
       type: 'Text',
       id: id,
       name: name,
       parent: parent,
+      children: null,
+      showChildren: null,
       text: textContent,
       scope: scope,
       frame: frame,
       selected: false,
       hover: false,
-      children: null,
       events: [],
       tweens: {
         allIds: [],
@@ -884,14 +891,12 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
         asDestination: [],
         byProp: TWEEN_PROPS_MAP
       },
-      mask: false,
       underlyingMask: underlyingMask,
       ignoreUnderlyingMask: ignoreUnderlyingMask,
       masked: masked,
       style: style,
       transform: transform,
-      textStyle: textStyle,
-      pathData: null
+      textStyle: textStyle
     } as Btwx.Text;
     if (!payload.batch) {
       dispatch(addText({
@@ -923,6 +928,8 @@ export const addImageThunk = (payload: AddImagePayload, providedState?: RootStat
       sharp(buffer).metadata().then(({ width, height }) => {
         sharp(buffer).resize(Math.round(width * 0.5)).webp().toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
           const frame = getLayerFrame(payload);
+          const scopedPosition = new paperMain.Point(frame.x, frame.y);
+          const absolutePosition = getAbsolutePosition(scopedPosition, scope);
           const name = payload.layer.name ? payload.layer.name : 'Image';
           const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
           const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
@@ -947,7 +954,7 @@ export const addImageThunk = (payload: AddImagePayload, providedState?: RootStat
             paperLayer.data = { id: 'Raster', type: 'LayerChild', layerType: 'Image' };
             imageContainer.bounds.width = frame.innerWidth;
             imageContainer.bounds.height = frame.innerHeight;
-            imageContainer.position = new paperMain.Point(frame.x, frame.y);
+            imageContainer.position = absolutePosition;
             imageContainer.shadowColor = paperShadowColor;
             imageContainer.shadowOffset = paperShadowOffset;
             imageContainer.shadowBlur = paperShadowBlur;
@@ -956,10 +963,11 @@ export const addImageThunk = (payload: AddImagePayload, providedState?: RootStat
               id: id,
               name: name,
               parent: parent,
+              children: null,
+              showChildren: null,
               scope: scope,
               frame: frame,
               selected: false,
-              children: null,
               events: [],
               tweens: {
                 allIds: [],
@@ -1248,13 +1256,15 @@ export const groupLayersThunk = (payload: GroupLayersPayload) => {
       const state = getState() as RootState;
       // get bounds of layers to group
       const layersBounds = getLayersBounds(state.layer.present, payload.layers);
+      const scope = state.layer.present.byId[state.layer.present.selected[0]].scope;
+      const scopedPosition = getScopedPoint(layersBounds.center, scope);
       // add group
       dispatch(addGroupThunk({
         layer: {
           selected: true,
           frame: {
-            x: layersBounds.center.x,
-            y: layersBounds.center.y,
+            x: scopedPosition.x,
+            y: scopedPosition.y,
             width: layersBounds.width,
             height: layersBounds.height,
             innerWidth: layersBounds.width,
@@ -1276,6 +1286,8 @@ export const groupSelectedThunk = () => {
       const state = getState() as RootState;
       // get bounds of layers to group
       const layersBounds = getSelectedBounds(state);
+      // const scope = state.layer.present.byId[state.layer.present.selected[0]].scope;
+      // const scopedPosition = getScopedPoint(layersBounds.center, scope);
       // add group
       dispatch(addGroupThunk({
         layer: {
@@ -2544,16 +2556,20 @@ export const setLayersStyle = (payload: SetLayersStylePayload): LayerTypes => ({
 export const copyLayersThunk = () => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
+    const groupThing = new paperMain.Group({insert: false});
     const copyLayer = (copyState: Btwx.ClipboardLayers, layer: string, isChild?: boolean): Btwx.ClipboardLayers => {
       let currentCopyState = copyState;
       const layerItem = state.layer.present.byId[layer];
+      currentCopyState.allIds = [...currentCopyState.allIds, layer];
       if (layerItem.children && layerItem.children.length > 0) {
         currentCopyState = copyLayers(currentCopyState, layerItem.children, true);
       }
       if (!isChild) {
+        const paperLayer = layerItem.mask ? getPaperLayer(layer).parent : getPaperLayer(layer);
+        const clone = paperLayer.clone({insert: false});
+        clone.parent = groupThing;
         currentCopyState.main = [...currentCopyState.main, layer];
       }
-      currentCopyState.allIds = [...currentCopyState.allIds, layer];
       currentCopyState.byId = {
         ...currentCopyState.byId,
         [layer]: {
@@ -2586,8 +2602,9 @@ export const copyLayersThunk = () => {
       return currentCopyState;
     };
     if (state.canvasSettings.focusing && state.layer.present.selected.length > 0) {
-      const nextCopyState = { type: 'layers', main: [], allIds: [], byId: {}, images: {} } as Btwx.ClipboardLayers;
+      const nextCopyState = { type: 'layers', main: [], allIds: [], byId: {}, images: {}, paperLayers: null } as Btwx.ClipboardLayers;
       const copyState = copyLayers(nextCopyState, state.layer.present.selected, false);
+      copyState.paperLayers = groupThing.exportJSON();
       clipboard.writeText(JSON.stringify(copyState));
     }
   }
@@ -2669,81 +2686,81 @@ export const pasteLayersThunk = (props?: { overSelection?: boolean; overPoint?: 
               return result;
             }, text);
             const newParse: Btwx.ClipboardLayers = JSON.parse(withNewIds);
-            const newLayers: Btwx.Layer[] = Object.keys(newParse.byId).reduce((result, current) => {
+            const newLayers: Btwx.Layer[] = newParse.allIds.reduce((result, current) => {
               result = [...result, newParse.byId[current]];
               return result;
             }, []);
-            const mainLayers = newLayers.filter(layerItem => newParse.main.includes(layerItem.id));
-            const clipboardPosition = getClipboardCenter(mainLayers);
+            // const mainLayers = newLayers.filter(layerItem => newParse.main.includes(layerItem.id));
+            // const clipboardPosition = getClipboardCenter(mainLayers);
             // handle if clipboard position is not within viewport
-            if (!clipboardPosition.isInside(paperMain.view.bounds)) {
-              const pointDiff = paperMain.view.center.subtract(clipboardPosition);
-              newLayers.forEach((layerItem) => {
-                layerItem.frame.x += pointDiff.x;
-                layerItem.frame.y += pointDiff.y;
-              });
-            }
+            // if (!clipboardPosition.isInside(paperMain.view.bounds)) {
+            //   const pointDiff = paperMain.view.center.subtract(clipboardPosition);
+            //   mainLayers.forEach((layerItem) => {
+            //     layerItem.frame.x += pointDiff.x;
+            //     layerItem.frame.y += pointDiff.y;
+            //   });
+            // }
             // handle paste over selection
-            if (overSelection && state.layer.present.selected.length > 0) {
-              const singleSelection = state.layer.present.selected.length === 1;
-              const overSelectionItem = state.layer.present.byId[state.layer.present.selected[0]];
-              const selectionPosition = getSelectionCenter();
-              const pointDiff = selectionPosition.subtract(clipboardPosition);
-              newLayers.forEach((layerItem) => {
-                if (singleSelection && newParse.main.includes(layerItem.id) && layerItem.type !== 'Artboard') {
-                  if (overSelectionItem.type === 'Group' || overSelectionItem.type === 'Artboard' || overSelectionItem.type === 'Page') {
-                    layerItem.parent = overSelectionItem.id;
-                  } else {
-                    layerItem.parent = overSelectionItem.parent;
-                  }
-                }
-                layerItem.frame.x += pointDiff.x;
-                layerItem.frame.y += pointDiff.y;
-              });
-            }
-            // handle paste at point
-            if (overPoint && !overLayer) {
-              const paperPoint = new paperMain.Point(overPoint.x, overPoint.y);
-              const pointDiff = paperPoint.subtract(clipboardPosition);
-              newLayers.forEach((layerItem) => {
-                layerItem.frame.x += pointDiff.x;
-                layerItem.frame.y += pointDiff.y;
-              });
-            }
-            // handle paste over layer
-            if (overLayer && !overPoint) {
-              const overLayerItem = state.layer.present.byId[overLayer];
-              const paperPoint = getPaperLayer(overLayer) as paper.Item;
-              const pointDiff = paperPoint.position.subtract(clipboardPosition);
-              newLayers.forEach((layerItem) => {
-                if (newParse.main.includes(layerItem.id) && layerItem.type !== 'Artboard') {
-                  if (overLayerItem.type === 'Group' || overLayerItem.type === 'Artboard' || overLayerItem.type === 'Page') {
-                    layerItem.parent = overLayerItem.id;
-                  } else {
-                    layerItem.parent = overLayerItem.parent;
-                  }
-                }
-                layerItem.frame.x += pointDiff.x;
-                layerItem.frame.y += pointDiff.y;
-              });
-            }
-            // handle paste over layer and over point
-            if (overPoint && overLayer) {
-              const overLayerItem = state.layer.present.byId[overLayer];
-              const paperPoint = new paperMain.Point(overPoint.x, overPoint.y);
-              const pointDiff = paperPoint.subtract(clipboardPosition);
-              newLayers.forEach((layerItem) => {
-                if (newParse.main.includes(layerItem.id) && layerItem.type !== 'Artboard') {
-                  if (overLayerItem.type === 'Group' || overLayerItem.type === 'Artboard' || overLayerItem.type === 'Page') {
-                    layerItem.parent = overLayerItem.id;
-                  } else {
-                    layerItem.parent = overLayerItem.parent;
-                  }
-                }
-                layerItem.frame.x += pointDiff.x;
-                layerItem.frame.y += pointDiff.y;
-              });
-            }
+            // if (overSelection && state.layer.present.selected.length > 0) {
+            //   const singleSelection = state.layer.present.selected.length === 1;
+            //   const overSelectionItem = state.layer.present.byId[state.layer.present.selected[0]];
+            //   const selectionPosition = getSelectionCenter();
+            //   const pointDiff = selectionPosition.subtract(clipboardPosition);
+            //   newLayers.forEach((layerItem) => {
+            //     if (singleSelection && newParse.main.includes(layerItem.id) && layerItem.type !== 'Artboard') {
+            //       if (overSelectionItem.type === 'Group' || overSelectionItem.type === 'Artboard' || overSelectionItem.type === 'Page') {
+            //         layerItem.parent = overSelectionItem.id;
+            //       } else {
+            //         layerItem.parent = overSelectionItem.parent;
+            //       }
+            //     }
+            //     layerItem.frame.x += pointDiff.x;
+            //     layerItem.frame.y += pointDiff.y;
+            //   });
+            // }
+            // // handle paste at point
+            // if (overPoint && !overLayer) {
+            //   const paperPoint = new paperMain.Point(overPoint.x, overPoint.y);
+            //   const pointDiff = paperPoint.subtract(clipboardPosition);
+            //   newLayers.forEach((layerItem) => {
+            //     layerItem.frame.x += pointDiff.x;
+            //     layerItem.frame.y += pointDiff.y;
+            //   });
+            // }
+            // // handle paste over layer
+            // if (overLayer && !overPoint) {
+            //   const overLayerItem = state.layer.present.byId[overLayer];
+            //   const paperPoint = getPaperLayer(overLayer) as paper.Item;
+            //   const pointDiff = paperPoint.position.subtract(clipboardPosition);
+            //   newLayers.forEach((layerItem) => {
+            //     if (newParse.main.includes(layerItem.id) && layerItem.type !== 'Artboard') {
+            //       if (overLayerItem.type === 'Group' || overLayerItem.type === 'Artboard' || overLayerItem.type === 'Page') {
+            //         layerItem.parent = overLayerItem.id;
+            //       } else {
+            //         layerItem.parent = overLayerItem.parent;
+            //       }
+            //     }
+            //     layerItem.frame.x += pointDiff.x;
+            //     layerItem.frame.y += pointDiff.y;
+            //   });
+            // }
+            // // handle paste over layer and over point
+            // if (overPoint && overLayer) {
+            //   const overLayerItem = state.layer.present.byId[overLayer];
+            //   const paperPoint = new paperMain.Point(overPoint.x, overPoint.y);
+            //   const pointDiff = paperPoint.subtract(clipboardPosition);
+            //   newLayers.forEach((layerItem) => {
+            //     if (newParse.main.includes(layerItem.id) && layerItem.type !== 'Artboard') {
+            //       if (overLayerItem.type === 'Group' || overLayerItem.type === 'Artboard' || overLayerItem.type === 'Page') {
+            //         layerItem.parent = overLayerItem.id;
+            //       } else {
+            //         layerItem.parent = overLayerItem.parent;
+            //       }
+            //     }
+            //     layerItem.frame.x += pointDiff.x;
+            //     layerItem.frame.y += pointDiff.y;
+            //   });
+            // }
             dispatch(addLayersThunk({layers: newLayers, buffers: newParse.images}) as any).then(() => {
               dispatch(selectLayers({layers: newParse.main, newSelection: true}));
               resolve();

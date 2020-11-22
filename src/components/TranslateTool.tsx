@@ -32,12 +32,21 @@ const TranslateTool = (props: TranslateToolProps): ReactElement => {
       // if (!isEnabled) {
       //   setCanvasTranslating({translating: true});
       // }
-      paperMain.view.translate(
-        new paperMain.Point(
-          (translateEvent.deltaX * ( 1 / paperMain.view.zoom)) * -1,
-          (translateEvent.deltaY * ( 1 / paperMain.view.zoom)) * -1
-        )
-      );
+      paperMain.projects.forEach((project, index) => {
+        // const scope = paperScopes[index];
+        project.view.translate(
+          new paperMain.Point(
+            (translateEvent.deltaX * ( 1 / project.view.zoom)) * -1,
+            (translateEvent.deltaY * ( 1 / project.view.zoom)) * -1
+          )
+        );
+      });
+      // paperMain.view.translate(
+      //   new paperMain.Point(
+      //     (translateEvent.deltaX * ( 1 / paperMain.view.zoom)) * -1,
+      //     (translateEvent.deltaY * ( 1 / paperMain.view.zoom)) * -1
+      //   )
+      // );
       // debounceTranslate();
     }
   }, [translateEvent]);

@@ -343,7 +343,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
         return overlappedArtboard && scope[scope.length - 1] === 'page' ? overlappedArtboard.parent.data.id : scope[scope.length - 1];
       })();
       const parentPaperLayer = getPaperLayer(parent);
-      const position = getScopedPoint(paperLayer.position, parentPaperLayer.data.scope);
+      const position = getScopedPoint(paperLayer.position, [...parentPaperLayer.data.scope, parent]);
       addShapeThunk({
         layer: {
           parent: parent,

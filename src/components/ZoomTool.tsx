@@ -11,45 +11,51 @@ import { DocumentSettingsTypes, SetCanvasMatrixPayload } from '../store/actionTy
 
 interface ZoomToolProps {
   zoomEvent: WheelEvent;
+  paperScopes: {
+    [id: number]: paper.PaperScope;
+  };
   isEnabled?: boolean;
   setCanvasZooming?(payload: SetCanvasZoomingPayload): CanvasSettingsTypes;
   setCanvasMatrix?(payload: SetCanvasMatrixPayload): DocumentSettingsTypes;
 }
 
 const ZoomTool = (props: ZoomToolProps): ReactElement => {
-  const { zoomEvent, isEnabled, setCanvasZooming, setCanvasMatrix } = props;
+  const { zoomEvent, isEnabled, setCanvasZooming, setCanvasMatrix, paperScopes } = props;
 
   const debounceZoomEnd = useCallback(
     debounce(() => {
       setCanvasZooming({zooming: false});
-      setCanvasMatrix({matrix: paperMain.view.matrix.values});
+      // setCanvasMatrix({matrix: paperMain.view.matrix.values});
     }, 50),
     []
   );
 
   useEffect(() => {
-    if (zoomEvent) {
+    if (zoomEvent && paperScopes) {
       if (!isEnabled) {
         setCanvasZooming({zooming: true});
       }
-      const cursorPoint = paperMain.view.getEventPoint(zoomEvent as any);
-      const pointDiff = new paperMain.Point(cursorPoint.x - paperMain.view.center.x, cursorPoint.y - paperMain.view.center.y);
-      const prevZoom = paperMain.view.zoom;
-      const nextZoom = paperMain.view.zoom - zoomEvent.deltaY * (0.01 * paperMain.view.zoom);
-      if (zoomEvent.deltaY < 0 && nextZoom < 25) {
-        paperMain.view.zoom = nextZoom;
-      } else if (zoomEvent.deltaY > 0 && nextZoom > 0) {
-        paperMain.view.zoom = nextZoom;
-      } else if (zoomEvent.deltaY > 0 && nextZoom < 0) {
-        paperMain.view.zoom = 0.01;
-      }
-      const zoomDiff = paperMain.view.zoom - prevZoom;
-      paperMain.view.translate(
-        new paperMain.Point(
-          ((zoomDiff * pointDiff.x) * (1 / paperMain.view.zoom)) * -1,
-          ((zoomDiff * pointDiff.y) * (1 / paperMain.view.zoom)) * -1
-        )
-      );
+      const cursorPoint = paperScopes[0].view.getEventPoint(zoomEvent as any);
+      const pointDiff = new paperScopes[0].Point(cursorPoint.x - paperScopes[0].view.center.x, cursorPoint.y - paperScopes[0].view.center.y);
+      const prevZoom = paperScopes[0].view.zoom;
+      const nextZoom = paperScopes[0].view.zoom - zoomEvent.deltaY * (0.01 * paperScopes[0].view.zoom);
+      Object.keys(paperScopes).forEach((key, index) => {
+        const scope = paperScopes[index];
+        if (zoomEvent.deltaY < 0 && nextZoom < 25) {
+          scope.view.zoom = nextZoom;
+        } else if (zoomEvent.deltaY > 0 && nextZoom > 0) {
+          scope.view.zoom = nextZoom;
+        } else if (zoomEvent.deltaY > 0 && nextZoom < 0) {
+          scope.view.zoom = 0.01;
+        }
+        const zoomDiff = scope.view.zoom - prevZoom;
+        scope.view.translate(
+          new paperMain.Point(
+            ((zoomDiff * pointDiff.x) * (1 / scope.view.zoom)) * -1,
+            ((zoomDiff * pointDiff.y) * (1 / scope.view.zoom)) * -1
+          )
+        );
+      });
       debounceZoomEnd();
     }
   }, [zoomEvent]);

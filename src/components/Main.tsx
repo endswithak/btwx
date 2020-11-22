@@ -23,16 +23,16 @@ const Main = (props: MainProps): ReactElement => {
     <div
       id='main'
       className='c-app__main'>
-      <SidebarLeft ready={ready} />
+      {/* <SidebarLeft ready={ready} /> */}
       <div
         id='main-canvas'
         className='c-app__canvas'>
         <Canvas setReady={setReady} ready={ready} />
-        <TweenDrawerWrap ready={ready} />
+        {/* <TweenDrawerWrap ready={ready} />
         <TextEditor ready={ready} />
-        <InsertKnobWrap />
+        <InsertKnobWrap /> */}
       </div>
-      <SidebarRight ready={ready} />
+      {/* <SidebarRight ready={ready} /> */}
     </div>
   );
 }
