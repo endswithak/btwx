@@ -25,8 +25,8 @@ export interface AddTweenProps {
 
 export const addImageTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
-  const beforeRaster = originPaperLayer.getItem({data: {id: 'Raster'}}) as paper.Raster;
-  const destinationRaster = destinationPaperLayer.getItem({data: {id: 'Raster'}}) as paper.Raster;
+  const beforeRaster = originPaperLayer.getItem({data: {id: 'raster'}}) as paper.Raster;
+  const destinationRaster = destinationPaperLayer.getItem({data: {id: 'raster'}}) as paper.Raster;
   const afterRaster = beforeRaster.clone({insert: false}) as paper.Raster;
   afterRaster.source = destinationRaster.source;
   afterRaster.bounds = beforeRaster.bounds;

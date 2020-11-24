@@ -32,30 +32,34 @@ const Canvas = (props: CanvasProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const ref = useRef<HTMLDivElement>(null);
   const { ready, setReady, interactionEnabled } = props;
-  // const [layerEvent, setLayerEvent] = useState(null);
-  // const [uiEvent, setUIEvent] = useState(null);
+  const [layerEvent, setLayerEvent] = useState(null);
+  const [uiEvent, setUIEvent] = useState(null);
   const [translateEvent, setTranslateEvent] = useState(null);
   const [zoomEvent, setZoomEvent] = useState(null);
 
   const handleHitResult = (e: any, eventType: 'mouseMove' | 'mouseDown' | 'mouseUp' | 'doubleClick' | 'contextMenu'): void => {
-    // const point = paperMain.projects[0].view.getEventPoint(e);
-    const hitResults = paperMain.projects.reduce((result, current) => {
-      return [...result, current.hitTest(current.view.getEventPoint(e))]
-    }, []);
-    console.log(hitResults);
-    // const layersHitResult = getPaperLayer('page').hitTest(point);
-    // const uiHitResult = getPaperLayer('ui').hitTest(point);
-    // const validHitResult = (hitResult: paper.HitResult): boolean => hitResult && hitResult.item && hitResult.item.data && hitResult.item.data.type;
-    // if (validHitResult(uiHitResult)) {
-    //   setUIEvent({hitResult: uiHitResult, eventType: eventType, event: e.nativeEvent, empty: false});
-    // } else {
-    //   if (validHitResult(layersHitResult)) {
-    //     setLayerEvent({hitResult: layersHitResult, eventType: eventType, event: e.nativeEvent, empty: false});
-    //   } else {
-    //     setUIEvent({hitResult: uiHitResult, eventType: eventType, event: e.nativeEvent, empty: true});
-    //     setLayerEvent({hitResult: layersHitResult, eventType: eventType, event: e.nativeEvent, empty: true});
-    //   }
-    // }
+    const { layerHitResult, uiHitResult } = paperMain.projects.reduce((result, current, index) => {
+      const hitResult = current.hitTest(current.view.getEventPoint(e));
+      if (hitResult) {
+        if (index === 1) {
+          result.uiHitResult = hitResult;
+        } else {
+          result.layerHitResult = hitResult
+        }
+      }
+      return result;
+    }, { layerHitResult: null, uiHitResult: null });
+    const validHitResult = (hitResult: paper.HitResult): boolean => hitResult && hitResult.item && hitResult.item.data && hitResult.item.data.type;
+    if (validHitResult(uiHitResult)) {
+      setUIEvent({hitResult: uiHitResult, eventType: eventType, event: e.nativeEvent, empty: false});
+    } else {
+      if (validHitResult(layerHitResult)) {
+        setLayerEvent({hitResult: layerHitResult, eventType: eventType, event: e.nativeEvent, empty: false});
+      } else {
+        setUIEvent({hitResult: uiHitResult, eventType: eventType, event: e.nativeEvent, empty: true});
+        setLayerEvent({hitResult: layerHitResult, eventType: eventType, event: e.nativeEvent, empty: true});
+      }
+    }
   }
 
   const handleMouseMove = (e: any): void => {
@@ -105,23 +109,23 @@ const Canvas = (props: CanvasProps): ReactElement => {
         background: theme.background.z0
       }}>
       <CanvasPage />
-      <CanvasArtboards />
       <CanvasUI />
+      <CanvasArtboards />
       {
         ready
         ? <>
-            {/* <CanvasLayerEvents
+            <CanvasLayerEvents
               layerEvent={layerEvent} />
             <CanvasUIEvents
-              uiEvent={uiEvent} /> */}
-            {/* <ZoomTool
-              zoomEvent={zoomEvent} /> */}
+              uiEvent={uiEvent} />
+            <ZoomTool
+              zoomEvent={zoomEvent} />
             <TranslateTool
               translateEvent={translateEvent} />
-            {/* <ArtboardTool />
+            <ArtboardTool />
             <ShapeTool />
             <DragTool />
-            <ResizeTool />
+            {/* <ResizeTool />
             <AreaSelectTool />
             <LineTool />
             <TextTool />

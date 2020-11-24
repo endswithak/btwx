@@ -9,8 +9,17 @@
   overflow: hidden
   z-index: 1
 
-  canvas
-    +absolute-full
+.c-canvas__layer
+  +absolute-full
 
-    &:focus
-      outline: none
+  &.c-canvas__layer--page
+    z-index: 1
+
+  &.c-canvas__layer--artboard
+    z-index: 2
+
+  &.c-canvas__layer--ui
+    z-index: 3
+
+  &:focus
+    outline: none

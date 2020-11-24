@@ -18,7 +18,7 @@ const configureStore = ({ preloadedState, windowType }: { preloadedState: any; w
     const previousEdit: string = currentEdit;
     const previousActiveArtboard: string = currentActiveArtboard;
     const isMainWindow = currentState.preview.documentWindowId === remote.getCurrentWindow().id;
-    currentEdit = currentState.layer.present.edit;
+    currentEdit = currentState.layer.present.edit.id;
     currentActiveArtboard = currentState.layer.present.activeArtboard;
     if (isMainWindow && (previousEdit !== currentEdit || previousActiveArtboard !== currentActiveArtboard)) {
       const previewWindowId = currentState.preview.windowId;
@@ -46,7 +46,7 @@ const configureStore = ({ preloadedState, windowType }: { preloadedState: any; w
       const state = store.getState();
       const currentEdit = {
         edit: state.layer.present.edit,
-        dirty: state.documentSettings.edit !== state.layer.present.edit,
+        dirty: state.documentSettings.edit !== state.layer.present.edit.id,
         path: state.documentSettings.path,
         name: state.documentSettings.name
       }

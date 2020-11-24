@@ -23,7 +23,7 @@ const Main = (props: MainProps): ReactElement => {
     <div
       id='main'
       className='c-app__main'>
-      {/* <SidebarLeft ready={ready} /> */}
+      <SidebarLeft ready={ready} />
       <div
         id='main-canvas'
         className='c-app__canvas'>
@@ -32,7 +32,7 @@ const Main = (props: MainProps): ReactElement => {
         <TextEditor ready={ready} />
         <InsertKnobWrap /> */}
       </div>
-      {/* <SidebarRight ready={ready} /> */}
+      <SidebarRight ready={ready} />
     </div>
   );
 }

@@ -11,30 +11,34 @@ interface CanvasArtboardProps {
     [id: string]: Btwx.DocumentImage;
   };
   matrix?: number[];
-  paperProject?: string;
+  projectJSON?: string;
+  projectIndex?: number;
 }
 
 const CanvasArtboard = (props: CanvasArtboardProps): ReactElement => {
   const ref = useRef<HTMLCanvasElement>(null);
-  const { id, paperProject, documentImages, matrix } = props;
-  const [project, setProject] = useState<paper.Project>(null);
+  const { id, projectJSON, projectIndex, documentImages, matrix } = props;
 
   useEffect(() => {
     if (ref.current) {
-      const project = new paperMain.Project(ref.current);
-      paperMain.projects.push(project);
+      let project = paperMain.projects[projectIndex];
+      const canvasWrap = document.getElementById('canvas-container');
+      if (!project) {
+        project = new paperMain.Project(ref.current);
+        paperMain.projects.push(project);
+      }
       importPaperProject({
-        paperProject,
-        documentImages,
-        project
+        projectJSON,
+        projectIndex,
+        documentImages
       });
-      project.view.viewSize = new paperMain.Size(ref.current.clientWidth, ref.current.clientHeight);
+      project.view.viewSize = new paperMain.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
       project.view.matrix.set(matrix);
-      setProject(project);
     }
-    return (): void => {
-      if (project) {
-        project.remove();
+    return () => {
+      if (paperMain.projects[projectIndex]) {
+        paperMain.projects[projectIndex].remove();
+        paperMain.projects = paperMain.projects.filter((project, index) => index !== projectIndex);
       }
     }
   }, []);
@@ -42,6 +46,7 @@ const CanvasArtboard = (props: CanvasArtboardProps): ReactElement => {
   return (
     <canvas
       id={`canvas-${id}`}
+      className='c-canvas__layer c-canvas__layer--artboard'
       ref={ref} />
   );
 }
@@ -51,13 +56,16 @@ const mapStateToProps = (state: RootState, ownProps: CanvasArtboardProps): {
     [id: string]: Btwx.DocumentImage;
   };
   matrix: number[];
-  paperProject: string;
+  projectJSON: string;
+  projectIndex: number;
 } => {
   const { layer, documentSettings } = state;
+  const artboard = layer.present.byId[ownProps.id] as Btwx.Artboard;
   return {
     documentImages: documentSettings.images.byId,
     matrix: documentSettings.matrix,
-    paperProject: layer.present.paperProjects[ownProps.id]
+    projectJSON: artboard.project,
+    projectIndex: artboard.projectIndex
   };
 };
 

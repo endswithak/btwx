@@ -21,6 +21,7 @@ interface ShapeToolStateProps {
   isEnabled?: boolean;
   shapeType?: Btwx.ShapeType;
   scope?: string[];
+  scopeProjectIndex?: number;
   drawing?: boolean;
 }
 
@@ -38,7 +39,7 @@ type ShapeToolProps = (
 
 const ShapeTool = (props: ShapeToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isEnabled, shapeType, addShapeThunk, scope, setCanvasDrawing, drawing, toggleShapeToolThunk, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent } = props;
+  const { isEnabled, shapeType, addShapeThunk, scope, scopeProjectIndex, setCanvasDrawing, drawing, toggleShapeToolThunk, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent } = props;
   const [handle, setHandle] = useState<Btwx.ResizeHandle>(null);
   const [maxDim, setMaxDim] = useState<number>(null);
   const [vector, setVector] = useState<paper.Point>(null);
@@ -51,12 +52,11 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
   const [initialToBounds, setInitialToBounds] = useState<paper.Rectangle>(null);
 
   const resetState = () => {
-    if (getPaperLayer('Tooltip')) {
-      getPaperLayer('Tooltip').remove();
-    }
-    if (getPaperLayer('ShapeToolPreview')) {
-      getPaperLayer('ShapeToolPreview').remove();
-    }
+    const UI = paperMain.projects[1];
+    const drawingPreview = UI.getItem({ data: { id: 'drawingPreview' }});
+    const tooltips = UI.getItem({ data: { id: 'tooltips' }});
+    drawingPreview.removeChildren();
+    tooltips.removeChildren();
     setFrom(null);
     setHandle(null);
     setVector(null);
@@ -155,19 +155,16 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
   }
 
   const updatePreview = (): void => {
-    if (getPaperLayer('ShapeToolPreview')) {
-      getPaperLayer('ShapeToolPreview').remove();
-    }
-    if (getPaperLayer('Tooltip')) {
-      getPaperLayer('Tooltip').remove();
-    }
+    const UI = paperMain.projects[1];
+    const drawingPreview = UI.getItem({ data: { id: 'drawingPreview' }});
+    const tooltips = UI.getItem({ data: { id: 'tooltips' }});
+    drawingPreview.removeChildren();
+    tooltips.removeChildren();
     const nextTooltip = new Tooltip(`${Math.round(toBounds.width)} x ${Math.round(toBounds.height)}`, dragEvent.point, {up: true});
     const nextPreview = renderShape({
       strokeColor: theme.palette.primary,
-      strokeWidth: 1 / paperMain.view.zoom,
-      data: {
-        id: 'ShapeToolPreview'
-      }
+      strokeWidth: 1 / paperMain.projects[0].view.zoom,
+      parent: drawingPreview
     });
     nextPreview.removeOn({
       up: true
@@ -333,24 +330,26 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
       const fromPoint = (paperLayer as paper.Path).firstSegment.point;
       const toPoint = (paperLayer as paper.Path).lastSegment.point;
       const vector = toPoint.subtract(fromPoint);
-      const parent = (() => {
-        const overlappedArtboard = getPaperLayer('page').getItem({
+      const parentItem = paperMain.projects.reduce((result, current, index) => {
+        const hitTest = current.getItem({
           data: (data: any) => {
-            return data.id === 'ArtboardBackground';
+            return data.id === 'artboardBackground';
           },
           overlapping: paperLayer.bounds
         });
-        return overlappedArtboard && scope[scope.length - 1] === 'page' ? overlappedArtboard.parent.data.id : scope[scope.length - 1];
-      })();
-      const parentPaperLayer = getPaperLayer(parent);
-      const position = getScopedPoint(paperLayer.position, [...parentPaperLayer.data.scope, parent]);
+        return hitTest && scope[scope.length - 1] === 'page' ? { id: hitTest.parent.data.id, projectIndex: index, paperLayer: hitTest.parent } : result;
+      }, {
+        id: scope[scope.length - 1],
+        projectIndex: scopeProjectIndex,
+        paperLayer: paperMain.projects[scopeProjectIndex].getItem({ data: { id: scope[scope.length - 1] }})
+      });
       addShapeThunk({
         layer: {
-          parent: parent,
+          parent: parentItem.id,
           name: shapeType,
           frame: {
-            x: position.x,
-            y: position.y,
+            x: parentItem.id === 'page' ? paperLayer.position.x : paperLayer.position.x - parentItem.paperLayer.position.x,
+            y: parentItem.id === 'page' ? paperLayer.position.y : paperLayer.position.y - parentItem.paperLayer.position.y,
             width: paperLayer.bounds.width,
             height: paperLayer.bounds.height,
             innerWidth: shapeType === 'Line' ? vector.length : paperLayer.bounds.width,
@@ -368,8 +367,8 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
             ...DEFAULT_TRANSFORM,
             rotation: shapeType === 'Line' ? vector.angle : DEFAULT_TRANSFORM.rotation
           },
-          pathData: paperLayer.pathData,
           closed: shapeType !== 'Line',
+          pathData: paperLayer.pathData,
           ...(() => {
             switch(shapeType) {
               case 'Ellipse':
@@ -473,11 +472,13 @@ const mapStateToProps = (state: RootState): ShapeToolStateProps => {
   const isEnabled = shapeTool.isEnabled;
   const shapeType = shapeTool.shapeType;
   const scope = layer.present.scope;
+  const scopeProjectIndex = layer.present.scopeProjectIndex;
   const drawing = canvasSettings.drawing;
   return {
     isEnabled,
     shapeType,
     scope,
+    scopeProjectIndex,
     drawing
   };
 };

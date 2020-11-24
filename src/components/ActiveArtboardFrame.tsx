@@ -6,19 +6,19 @@ import { paperMain } from '../canvas';
 
 interface ActiveArtboardFrameProps {
   activeArtboard?: string;
-  activeArtboardFrame?: Btwx.Frame;
+  activeArtboardItemFrame?: Btwx.Frame;
 }
 
 const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
-  const { activeArtboard, activeArtboardFrame } = props;
+  const { activeArtboard, activeArtboardItemFrame } = props;
 
   useEffect(() => {
-    updateActiveArtboardFrame();
+    updateActiveArtboardFrame(activeArtboardItemFrame);
     return () => {
-      const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'ActiveArtboardFrame' } });
+      const activeArtboardFrame = paperMain.projects[1].getItem({ data: { id: 'activeArtboardFrame' } });
       activeArtboardFrame.removeChildren();
     }
-  }, [activeArtboard, activeArtboardFrame]);
+  }, [activeArtboard, activeArtboardItemFrame]);
 
   return (
     <></>
@@ -27,12 +27,13 @@ const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   activeArtboard: string;
-  activeArtboardFrame: Btwx.Frame;
+  activeArtboardItemFrame: Btwx.Frame;
 } => {
   const { layer } = state;
   const activeArtboard = layer.present.activeArtboard;
-  const activeArtboardFrame = layer.present.byId[activeArtboard].frame;
-  return { activeArtboard, activeArtboardFrame };
+  const activeArtboardItem = layer.present.byId[activeArtboard] as Btwx.Artboard;
+  const activeArtboardItemFrame = activeArtboardItem.frame;
+  return { activeArtboard, activeArtboardItemFrame };
 };
 
 export default connect(

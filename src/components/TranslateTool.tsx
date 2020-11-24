@@ -22,7 +22,7 @@ const TranslateTool = (props: TranslateToolProps): ReactElement => {
   const debounceTranslate = useCallback(
     debounce(() => {
       setCanvasTranslating({translating: false});
-      setCanvasMatrix({matrix: paperMain.view.matrix.values});
+      setCanvasMatrix({matrix: paperMain.projects[0].view.matrix.values});
     }, 100),
     []
   );
@@ -36,8 +36,8 @@ const TranslateTool = (props: TranslateToolProps): ReactElement => {
         // const scope = paperScopes[index];
         project.view.translate(
           new paperMain.Point(
-            (translateEvent.deltaX * ( 1 / project.view.zoom)) * -1,
-            (translateEvent.deltaY * ( 1 / project.view.zoom)) * -1
+            (translateEvent.deltaX * ( 1 / paperMain.projects[0].view.zoom)) * -1,
+            (translateEvent.deltaY * ( 1 / paperMain.projects[0].view.zoom)) * -1
           )
         );
       });
@@ -47,7 +47,7 @@ const TranslateTool = (props: TranslateToolProps): ReactElement => {
       //     (translateEvent.deltaY * ( 1 / paperMain.view.zoom)) * -1
       //   )
       // );
-      // debounceTranslate();
+      debounceTranslate();
     }
   }, [translateEvent]);
 

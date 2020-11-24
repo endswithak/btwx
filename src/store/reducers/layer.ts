@@ -429,6 +429,7 @@ export interface LayerState {
   allTextIds: string[];
   allImageIds: string[];
   scope: string[];
+  scopeProjectIndex: number;
   hover: string;
   events: {
     allIds: string[];
@@ -448,11 +449,7 @@ export interface LayerState {
   childrenById: {
     [id: string]: string[];
   };
-  paperProjects: {
-    [id: string]: string;
-  };
-  // paperProject: string;
-  edit: string;
+  edit: Btwx.Edit;
 }
 
 export const initialState: LayerState = {
@@ -460,6 +457,7 @@ export const initialState: LayerState = {
     page: {
       type: 'Page',
       id: 'page',
+      projectIndex: 0,
       name: 'Page',
       parent: null,
       frame: {
@@ -481,7 +479,8 @@ export const initialState: LayerState = {
         byProp: TWEEN_PROPS_MAP
       },
       style: DEFAULT_STYLE,
-      transform: DEFAULT_TRANSFORM
+      transform: DEFAULT_TRANSFORM,
+      project: '[["Layer",{"applyMatrix":true,"data":{"id":"page","type":"Layer","layerType":"Page","scope":[]}}]]'
     } as Btwx.Page
   },
   allIds: ['page'],
@@ -494,6 +493,7 @@ export const initialState: LayerState = {
   allTextIds: [],
   allImageIds: [],
   scope: ['page'],
+  scopeProjectIndex: 0,
   hover: null,
   events: {
     allIds: [],
@@ -507,11 +507,13 @@ export const initialState: LayerState = {
   childrenById: {
     page: []
   },
-  paperProjects: {
-    page: '[["Layer",{"applyMatrix":true,"children":[["Group",{"applyMatrix":true,"data":{"id":"page","type":"Layer","layerType":"Page","scope":[]}}]]}]]'
-  },
-  // paperProject: '[["Layer",{"applyMatrix":true,"children":[["Group",{"applyMatrix":true,"name":"UI","data":{"id":"ui","type":"UI"},"children":[["Group",{"applyMatrix":true,"name":"Active Artboard Frame","data":{"id":"ActiveArtboardFrame","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Artboard Events","data":{"id":"ArtboardEvents","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Hover Frame","data":{"id":"HoverFrame","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Selection Frame","data":{"id":"SelectionFrame","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Guides","data":{"id":"Guides"},"children":[["Group",{"applyMatrix":true,"name":"Snap Guides","data":{"id":"SnapGuides","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Static Guides","data":{"id":"StaticGuides","type":"UIElement"}}]]}],["Group",{"applyMatrix":true,"name":"Measure Guides","data":{"id":"MeasureGuides","type":"UIElement"}}]]}]]}]]',
-  edit: null
+  edit: {
+    id: 'page',
+    actionType: null,
+    payload: null,
+    detail: '',
+    projects: ['page']
+  }
 };
 
 export const baseReducer = (state = initialState, action: LayerTypes): LayerState => {
@@ -949,6 +951,7 @@ export default undoable(baseReducer, {
       UNGROUP_LAYERS,
       MOVE_LAYER_TO,
       MOVE_LAYER_BY,
+      MOVE_LAYERS,
       MOVE_LAYERS_TO,
       MOVE_LAYERS_BY,
       SET_LAYER_NAME,

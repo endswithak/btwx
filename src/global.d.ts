@@ -317,13 +317,17 @@ declare namespace Btwx {
     type: LayerType;
     id: string;
     name: string;
-    frame: Frame;
     parent: string;
     children: string[];
+    scope: string[];
+    frame: Frame;
+    underlyingMask: string;
+    ignoreUnderlyingMask: boolean;
+    masked: boolean;
     showChildren: boolean;
     selected: boolean;
     hover: boolean;
-    scope: string[];
+    artboardLayer: boolean;
     events: string[];
     tweens: {
       allIds: string[];
@@ -333,30 +337,31 @@ declare namespace Btwx {
         [prop: string]: string[];
       };
     };
-    style: Style;
     transform: Transform;
-    ignoreUnderlyingMask: boolean;
-    underlyingMask: string;
-    masked: boolean;
-    artboardLayer: boolean;
+    style: Style;
+  }
+
+  interface ProjectLayer extends Layer {
+    projectIndex: number;
+    project: string;
   }
 
   interface ArtboardLayer extends Layer {
     artboard: string;
   }
 
-  interface Page extends Layer {
+  interface Page extends ProjectLayer {
     type: 'Page';
   }
 
-  interface Group extends Layer {
-    type: 'Group';
-  }
-
-  interface Artboard extends Layer {
+  interface Artboard extends ProjectLayer {
     type: 'Artboard';
     originArtboardForEvents: string[];
     destinationArtboardForEvents: string[];
+  }
+
+  interface Group extends ArtboardLayer {
+    type: 'Group';
   }
 
   interface Text extends ArtboardLayer {
@@ -516,15 +521,6 @@ declare namespace Btwx {
 
   type ShapeType = 'Rectangle' | 'Ellipse' | 'Rounded' | 'Polygon' | 'Star' | 'Line' | 'Custom';
 
-  // interface SnapPoint {
-  //   id: string;
-  //   axis: 'x' | 'y';
-  //   side: 'left' | 'right' | 'center' | 'top' | 'bottom';
-  //   point: number;
-  //   breakThreshold?: number;
-  //   boundsSide?: 'left' | 'right' | 'center' | 'top' | 'bottom';
-  // }
-
   interface SnapBound {
     side: 'left' | 'right' | 'center' | 'top' | 'bottom';
     point: number;
@@ -542,5 +538,13 @@ declare namespace Btwx {
   interface DocumentWindow {
     document: number;
     preview: number;
+  }
+
+  interface Edit {
+    id?: string;
+    actionType: string;
+    payload: any;
+    detail: string;
+    projects?: string[];
   }
 }

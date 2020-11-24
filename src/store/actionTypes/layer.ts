@@ -1966,6 +1966,7 @@ export interface DistributeLayersVertically {
 
 export interface DuplicateLayerPayload {
   id: string;
+  offset?: Btwx.Point;
 }
 
 export interface DuplicateLayer {
@@ -1975,6 +1976,7 @@ export interface DuplicateLayer {
 
 export interface DuplicateLayersPayload {
   layers: string[];
+  offset?: paper.Point;
   includeInHistory?: boolean;
 }
 
@@ -2326,8 +2328,7 @@ export interface SetLineTo {
 }
 
 export interface SetLayerEditPayload {
-  edit?: string;
-  layers: string[];
+  edit?: Btwx.Edit;
 }
 
 export interface SetLayerEdit {

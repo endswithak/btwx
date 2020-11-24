@@ -70,7 +70,7 @@ const TextTool = (props: TextToolProps): ReactElement => {
       const parent = (() => {
         const overlappedArtboard = getPaperLayer('page').getItem({
           data: (data: any) => {
-            return data.id === 'ArtboardBackground';
+            return data.id === 'artboardBackground';
           },
           overlapping: paperLayer.bounds
         });

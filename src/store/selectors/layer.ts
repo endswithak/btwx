@@ -86,13 +86,12 @@ export const getSelectedById = createSelector(
 );
 
 export const getSelectedProjectIndex = createSelector(
-  [ getSelected, getLayersById, getAllArtboardIds ],
-  (selected, byId, allArtboardIds) => {
-    return selected.reduce((result, current) => {
-      const projectIndex = getLayerProjectIndex({byId, allArtboardIds} as LayerState, current);
+  [ getSelectedById, getLayersById ],
+  (selectedById, byId) => {
+    return Object.keys(selectedById).reduce((result, current) => {
       result = {
         ...result,
-        [current]: projectIndex
+        [current]: getLayerProjectIndex({byId} as LayerState, current)
       }
       return result;
     }, {}) as { [id: string]: number };
@@ -631,9 +630,42 @@ export const getPaperLayerByPaperId = (id: string): paper.Item => {
   return paperMain.project.getItem({ data: { id } });
 };
 
+export const getSelectedPaperLayers = (): paper.Item[] => {
+  return paperMain.projects.reduce((result, current, index) => {
+    if (index !== 1) {
+      const selectedItems = current.getItems({data: {selected: true}});
+      result = selectedItems ? [...result, ...selectedItems] : result;
+    }
+    return result;
+  }, []);
+};
+
+export const getLayerProject = (store: LayerState, id: string): string => {
+  const layerItem = store.byId[id];
+  if (layerItem.type === 'Artboard') {
+    return layerItem.id;
+  } else if (layerItem.artboardLayer && (layerItem as Btwx.ArtboardLayer).artboard) {
+    return (layerItem as Btwx.ArtboardLayer).artboard;
+  } else {
+    return 'page';
+  }
+};
+
+export const getLayerProjectIndex = (store: LayerState, id: string): number => {
+  const layerItem = store.byId[id];
+  if (layerItem.type === 'Artboard') {
+    return (layerItem as Btwx.Artboard).projectIndex;
+  } else if (layerItem.artboardLayer && (layerItem as Btwx.ArtboardLayer).artboard) {
+    const artboardItem = store.byId[(layerItem as Btwx.ArtboardLayer).artboard] as Btwx.Artboard;
+    return artboardItem.projectIndex;
+  } else {
+    return 0;
+  }
+};
+
 export const getPaperLayer = (id: string, projectIndex?: number): paper.Item => {
   let layer = null;
-  if (projectIndex) {
+  if (projectIndex && paperMain.projects[projectIndex]) {
     layer = paperMain.projects[projectIndex].getItem({ data: { id } });
   } else {
     let i = 0;
@@ -648,44 +680,23 @@ export const getPaperLayer = (id: string, projectIndex?: number): paper.Item => 
   return layer;
 };
 
-export const getLayerProjectIndex = (store: LayerState, id: string): number => {
-  const layerItem = store.byId[id];
-  switch(layerItem.type) {
-    case 'Image':
-    case 'Shape':
-    case 'Group':
-    case 'Text': {
-      const hasArtboardParent = layerItem.artboardLayer && (layerItem as Btwx.ArtboardLayer).artboard;
-      const layerProjectIndex = hasArtboardParent ? store.allArtboardIds.indexOf((layerItem as Btwx.ArtboardLayer).artboard) + 1 : 0;
-      return layerProjectIndex;
-    }
-    case 'Artboard':
-      return store.allArtboardIds.indexOf(id) + 1;
-    case 'Page':
-      return 0;
-  }
-};
-
 export const getItemLayers = (store: LayerState, id: string): {
   layerItem: Btwx.Layer;
   paperLayer: paper.Item;
-  paperProjectIndex: number;
 } => {
   const layerItem = store.byId[id];
-  const hasArtboardParent = layerItem.artboardLayer && (layerItem as Btwx.ArtboardLayer).artboard;
-  const paperProjectIndex = hasArtboardParent ? store.allArtboardIds.indexOf((layerItem as Btwx.ArtboardLayer).artboard) + 1 : 0;
-  const paperLayer = getPaperLayer(id, paperProjectIndex);
-  return { layerItem, paperLayer, paperProjectIndex };
+  const paperLayer = getPaperLayer(id, getLayerProjectIndex(store, id));
+  return { layerItem, paperLayer };
 };
 
-export const getParentPaperLayer = (id: string, ignoreUnderlyingMask?: boolean): paper.Item => {
-  const paperLayer = getPaperLayer(id);
+export const getParentPaperLayer = (id: string, projectIndex: number, ignoreUnderlyingMask?: boolean): paper.Item => {
+  const paperLayer = getPaperLayer(id, projectIndex);
   const isArtboard = paperLayer.data.layerType === 'Artboard';
-  const nextPaperLayer = isArtboard ? paperLayer.getItem({ data: { id: 'ArtboardLayers' } }) : paperLayer;
+  const nextPaperLayer = isArtboard ? paperLayer.getItem({ data: { id: 'artboardLayers' } }) : paperLayer;
   const parentChildren = nextPaperLayer.children;
   const hasChildren = parentChildren.length > 0;
   const lastChildPaperLayer = hasChildren ? nextPaperLayer.lastChild : null;
-  const isLastChildMask = lastChildPaperLayer && (lastChildPaperLayer.data.id as string).endsWith('MaskGroup');
+  const isLastChildMask = lastChildPaperLayer && (lastChildPaperLayer.data.id as string).endsWith('maskGroup');
   const underlyingMask = lastChildPaperLayer ? isLastChildMask ? lastChildPaperLayer : lastChildPaperLayer.parent : null;
   if (underlyingMask && !ignoreUnderlyingMask) {
     return underlyingMask;
@@ -946,7 +957,7 @@ export const getSelectionTopLeft = (providedSelection?: paper.Item[]): paper.Poi
   const paperLayerPoints = selected.reduce((result, current) => {
     if (current) {
       if (current.data.layerType === 'Artboard') {
-        const background = current.getItem({data: { id: 'ArtboardBackground' }});
+        const background = current.getItem({data: { id: 'artboardBackground' }});
         return [...result, background.bounds.topLeft];
       } else {
         return [...result, current.bounds.topLeft];
@@ -963,7 +974,7 @@ export const getSelectionBottomRight = (providedSelection?: paper.Item[]): paper
   const paperLayerPoints = selected.reduce((result, current) => {
     if (current) {
       if (current.data.layerType === 'Artboard') {
-        const background = current.getItem({data: { id: 'ArtboardBackground' }});
+        const background = current.getItem({data: { id: 'artboardBackground' }});
         return [...result, background.bounds.bottomRight];
       } else {
         return [...result, current.bounds.bottomRight];
@@ -1090,7 +1101,7 @@ export const getScopedPoint = (point: paper.Point, scope: string[]): paper.Point
     if (current !== 'page') {
       const paperLayer = getPaperLayer(current);
       if (paperLayer.data.layerType === 'Artboard') {
-        const artboardBackground = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
+        const artboardBackground = paperLayer.getItem({data: { id: 'artboardBackground' }});
         return result.subtract(artboardBackground.position);
       } else {
         return result.subtract(paperLayer.position);
@@ -1659,35 +1670,42 @@ export const savePaperProjectJSON = (state: LayerState, projectIndex: number): s
   //     element.removeChildren();
   //   });
   // }
-  const projectJSON = project.exportJSON();
-  const canvasImageBase64ById = state.allImageIds.reduce((result: { [id: string]: string }, current) => {
-    const layer = state.byId[current] as Btwx.Image;
-    const paperLayer = getPaperLayer(current, projectIndex).getItem({data: {id: 'Raster'}}) as paper.Raster;
-    result[layer.imageId] = paperLayer.source as string;
-    return result;
-  }, {});
-  return Object.keys(canvasImageBase64ById).reduce((result, current) => {
-    result = result.replace(canvasImageBase64ById[current], current);
-    return result;
-  }, projectJSON);
+  if (project) {
+    const projectJSON = project.exportJSON();
+    const canvasImageBase64ById = state.allImageIds.reduce((result: { [id: string]: string }, current) => {
+      const layer = state.byId[current] as Btwx.Image;
+      const paperLayer = getPaperLayer(current, projectIndex).getItem({data: {id: 'raster'}}) as paper.Raster;
+      result[layer.imageId] = paperLayer.source as string;
+      return result;
+    }, {});
+    return Object.keys(canvasImageBase64ById).reduce((result, current) => {
+      result = result.replace(canvasImageBase64ById[current], current);
+      return result;
+    }, projectJSON);
+  } else {
+    return null;
+  }
 };
 
 interface ImportPaperProject {
   documentImages: {
     [id: string]: Btwx.DocumentImage;
   };
-  paperProject: string;
-  project: paper.Project;
+  projectJSON: string;
+  projectIndex: number;
 }
 
-export const importPaperProject = ({documentImages, paperProject, project}: ImportPaperProject): void => {
-  project.clear();
-  const newPaperProject = Object.keys(documentImages).reduce((result, current) => {
-    const rasterBase64 = bufferToBase64(Buffer.from(documentImages[current].buffer));
-    const base64 = `data:image/webp;base64,${rasterBase64}`;
-    return result.replace(`"source":"${current}"`, `"source":"${base64}"`);
-  }, paperProject);
-  project.importJSON(newPaperProject);
+export const importPaperProject = ({documentImages, projectJSON, projectIndex}: ImportPaperProject): void => {
+  const project = paperMain.projects[projectIndex];
+  if (project) {
+    paperMain.projects[projectIndex].clear();
+    const newPaperProject = Object.keys(documentImages).reduce((result, current) => {
+      const rasterBase64 = bufferToBase64(Buffer.from(documentImages[current].buffer));
+      const base64 = `data:image/webp;base64,${rasterBase64}`;
+      return result.replace(`"source":"${current}"`, `"source":"${base64}"`);
+    }, projectJSON);
+    paperMain.projects[projectIndex].importJSON(newPaperProject);
+  }
 };
 
 export const colorsMatch = (color1: Btwx.Color, color2: Btwx.Color): boolean => {

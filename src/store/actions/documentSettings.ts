@@ -124,7 +124,11 @@ export const saveDocumentThunk = () => {
         if (!result.canceled) {
           const base = path.basename(result.filePath);
           const documentSettings = {base, fullPath: result.filePath};
-          dispatch(saveDocumentAs({name: documentSettings.base, path: documentSettings.fullPath, edit: state.layer.present.edit}));
+          dispatch(saveDocumentAs({
+            name: documentSettings.base,
+            path: documentSettings.fullPath,
+            edit: state.layer.present.edit.id
+          }));
           dispatch(writeFileThunk());
         }
       });
@@ -140,7 +144,11 @@ export const saveDocumentAsThunk = () => {
         if (!result.canceled) {
           const base = path.basename(result.filePath);
           const documentSettings = {base, fullPath: result.filePath};
-          dispatch(saveDocumentAs({name: documentSettings.base, path: documentSettings.fullPath, edit: state.layer.present.edit}));
+          dispatch(saveDocumentAs({
+            name: documentSettings.base,
+            path: documentSettings.fullPath,
+            edit: state.layer.present.edit.id
+          }));
           dispatch(writeFileThunk());
           resolve();
         } else {

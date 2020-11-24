@@ -9,8 +9,8 @@ import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import { paperMain } from '../../canvas';
 import MeasureGuide from '../../canvas/measureGuide';
 import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_VALUE, THEME_PRIMARY_COLOR, DEFAULT_TWEEN_EVENTS, TWEEN_PROPS_MAP } from '../../constants';
-import { getPaperFillColor, getPaperStrokeColor, getPaperLayer, getPaperShadowColor } from '../utils/paper';
-import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayersBounds, importPaperProject, colorsMatch, gradientsMatch, getNearestScopeAncestor, getArtboardEventItems, orderLayersByDepth, canMaskLayers, canMaskSelection, canPasteSVG, getLineToPoint, getSelectionTopLeft, getSelectionBottomRight, getLineFromPoint, getArtboardsTopTop, getSelectionBounds, getSelectedBounds, getParentPaperLayer, getGradientOriginPoint, getGradientDestinationPoint, getAbsolutePosition, getScopedPoint } from '../selectors/layer';
+import { getPaperFillColor, getPaperStrokeColor, getPaperShadowColor } from '../utils/paper';
+import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayersBounds, importPaperProject, colorsMatch, gradientsMatch, getNearestScopeAncestor, getArtboardEventItems, orderLayersByDepth, canMaskLayers, canMaskSelection, canPasteSVG, getLineToPoint, getSelectionTopLeft, getSelectionBottomRight, getLineFromPoint, getArtboardsTopTop, getSelectionBounds, getSelectedBounds, getParentPaperLayer, getGradientOriginPoint, getGradientDestinationPoint, getAbsolutePosition, getScopedPoint, getPaperLayer, getSelectedPaperLayers } from '../selectors/layer';
 import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle, getLayerMasked, getLayerUnderlyingMask } from '../utils/actions';
 
 import { bufferToBase64, scrollToLayer } from '../../utils';
@@ -439,6 +439,7 @@ import {
   SetLayersStylePayload,
   LayerTypes
 } from '../actionTypes/layer';
+
 import { replaceAllStr } from '../utils/general';
 
 // Artboard
@@ -450,10 +451,13 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => ({
 
 export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: RootState) => {
   return (dispatch: any, getState: any): Promise<Btwx.Artboard> => {
-    const state = providedState ? providedState : getState() as RootState;
+    const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const name = payload.layer.name ? payload.layer.name : 'Artboard';
     const scope = ['page'];
+    const projectIndex = state.layer.present.allArtboardIds.length + 2;
+    // const project = new paperMain.Project(`canvas-${id}`);
+    // paperMain.projects = paperMain.projects.splice(projectIndex, 0, project);
     const masked = payload.layer.masked ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = payload.layer.underlyingMask ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = payload.layer.ignoreUnderlyingMask ? payload.layer.ignoreUnderlyingMask : false;
@@ -466,7 +470,7 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
       name: 'Artboard Background',
       point: new paperMain.Point(0,0),
       size: [payload.layer.frame.width, payload.layer.frame.height],
-      data: { id: 'ArtboardBackground', type: 'LayerChild', layerType: 'Artboard' },
+      data: { id: 'artboardBackground', type: 'LayerChild', layerType: 'Artboard' },
       fillColor: paperFillColor,
       position: new paperMain.Point(payload.layer.frame.x, payload.layer.frame.y),
       shadowColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.20 },
@@ -476,38 +480,44 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
     // create mask
     const artboardLayersMask = artboardBackground.clone();
     artboardLayersMask.name = 'Artboard Layers Mask';
-    artboardLayersMask.data = { id: 'ArtboardLayersMask', type: 'LayerChild', layerType: 'Artboard' };
+    artboardLayersMask.data = { id: 'artboardLayersMask', type: 'LayerChild', layerType: 'Artboard' };
     artboardLayersMask.clipMask = true;
     //
     const artboardLayers = new paperMain.Group({
       name: 'Artboard Layers',
-      data: { id: 'ArtboardLayers', type: 'LayerChild', layerType: 'Artboard' }
+      data: { id: 'artboardLayers', type: 'LayerChild', layerType: 'Artboard' }
     });
     //
     const artboardMaskedLayers = new paperMain.Group({
       name: 'Artboard Masked Layers',
-      data: { id: 'ArtboardMaskedLayers', type: 'LayerChild', layerType: 'Artboard' },
+      data: { id: 'artboardMaskedLayers', type: 'LayerChild', layerType: 'Artboard' },
       children: [artboardLayersMask, artboardLayers]
     });
     // create artboard group
-    const artboard = new paperMain.Group({
+    const artboard = new paperMain.Layer({
       name: name,
-      data: { id: id, type: 'Layer', layerType: 'Artboard', selected: false, hover: false, activeArtboard: false, scope: scope },
+      data: { id: id, type: 'Layer', layerType: 'Artboard', activeArtboard: !payload.batch, selected: !payload.batch, hover: false, scope: scope },
       children: [artboardBackground, artboardMaskedLayers],
-      parent: getPaperLayer('page')
+      insert: false
+      // parent: project.activeLayer
     });
     // dispatch action
     const newLayer = {
       type: 'Artboard',
       id: id,
       name: name,
+      projectIndex: projectIndex,
       parent: payload.layer.parent,
-      frame: payload.layer.frame,
-      scope: scope,
       children: [],
+      scope: scope,
+      frame: payload.layer.frame,
+      underlyingMask: underlyingMask,
+      ignoreUnderlyingMask: ignoreUnderlyingMask,
+      masked: masked,
       showChildren: showChildren,
       selected: false,
       hover: false,
+      artboardLayer: false,
       events: [],
       originArtboardForEvents: [],
       destinationArtboardForEvents: [],
@@ -519,16 +529,12 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
       },
       transform: DEFAULT_TRANSFORM,
       style: DEFAULT_STYLE,
-      masked: masked,
-      underlyingMask: underlyingMask,
-      ignoreUnderlyingMask: ignoreUnderlyingMask
+      project: artboard.exportJSON()
     } as Btwx.Artboard;
-    if (!payload.batch) {
-      dispatch(addArtboard({
-        layer: newLayer,
-        batch: payload.batch
-      }));
-    }
+    dispatch(addArtboard({
+      layer: newLayer,
+      batch: payload.batch
+    }));
     return Promise.resolve(newLayer);
   }
 };
@@ -542,39 +548,47 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => ({
 
 export const addGroupThunk = (payload: AddGroupPayload, providedState?: RootState) => {
   return (dispatch: any, getState: any): Promise<Btwx.Group> => {
-    const state = providedState ? providedState : getState() as RootState;
+    const state = getState() as RootState // providedState ? providedState : getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const style = getLayerStyle(payload, {}, { fill: { enabled: false } as Btwx.Fill, stroke: { enabled: false } as Btwx.Stroke, shadow: { enabled: false } as Btwx.Shadow });
     const name = payload.layer.name ? payload.layer.name : 'Group';
     const parent = payload.layer.parent ? payload.layer.parent : 'page';
-    const parentLayer = getPaperLayer(parent);
-    const scope = [...parentLayer.data.scope, parent];
+    const parentItem = state.layer.present.byId[parent];
+    const scope = [...parentItem.scope, parent];
+    const artboard = payload.layer.artboard ? payload.layer.artboard : scope.length > 1 && state.layer.present.byId[scope[1]].type === 'Artboard' ? scope[1] : null;
+    const artboardItem = artboard ? state.layer.present.byId[artboard] : null;
+    const projectIndex = artboard ? (artboardItem as Btwx.Artboard).projectIndex : 0;
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
-    const parentPaperLayer = getParentPaperLayer(parent, ignoreUnderlyingMask);
+    const parentPaperLayer = getParentPaperLayer(parent, projectIndex, ignoreUnderlyingMask);
     const frame = payload.layer.frame ? payload.layer.frame : { x: 0, y: 0, width: 0, height: 0, innerWidth: 0, innerHeight: 0 };
-    const scopedPosition = new paperMain.Point(frame.x, frame.y);
-    const absolutePosition = getAbsolutePosition(scopedPosition, scope);
-    // const masked = payload.layer.masked ? payload.layer.masked : false;
+    let position = new paperMain.Point(frame.x, frame.y);
+    if (artboard) {
+      position = position.add(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y))
+    }
     const showChildren = payload.layer.showChildren ? payload.layer.showChildren : false;
     const group = new paperMain.Group({
       name: name,
       data: { id: id, type: 'Layer', layerType: 'Group', selected: false, hover: false, scope: scope },
       parent: parentPaperLayer,
-      position: absolutePosition
+      position: position
     });
     const newLayer = {
       type: 'Group',
-      id,
-      name,
-      parent,
-      frame,
-      scope,
+      id: id,
+      name: name,
+      parent: parent,
       children: [],
+      scope: scope,
+      frame: frame,
+      underlyingMask: underlyingMask,
+      ignoreUnderlyingMask: ignoreUnderlyingMask,
+      masked: masked,
       showChildren: showChildren,
       selected: false,
       hover: false,
+      artboardLayer: true,
       events: [],
       tweens: {
         allIds: [],
@@ -584,16 +598,12 @@ export const addGroupThunk = (payload: AddGroupPayload, providedState?: RootStat
       },
       transform: DEFAULT_TRANSFORM,
       style: style,
-      underlyingMask: underlyingMask,
-      ignoreUnderlyingMask: ignoreUnderlyingMask,
-      masked: masked
+      artboard: artboard
     } as Btwx.Group;
-    if (!payload.batch) {
-      dispatch(addGroup({
-        layer: newLayer,
-        batch: payload.batch
-      }));
-    }
+    dispatch(addGroup({
+      layer: newLayer,
+      batch: payload.batch
+    }));
     return Promise.resolve(newLayer);
   }
 };
@@ -607,20 +617,25 @@ export const addShape = (payload: AddShapePayload): LayerTypes => ({
 
 export const addShapeThunk = (payload: AddShapePayload, providedState?: RootState) => {
   return (dispatch: any, getState: any): Promise<Btwx.Shape> => {
-    const state = providedState ? providedState : getState() as RootState;
+    const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const parent = payload.layer.parent ? payload.layer.parent : 'page';
-    const parentLayer = getPaperLayer(parent);
-    const scope = [...parentLayer.data.scope, parent];
+    const parentItem = state.layer.present.byId[parent];
+    const scope = [...parentItem.scope, parent];
+    const artboard = payload.layer.artboard ? payload.layer.artboard : scope.length > 1 && state.layer.present.byId[scope[1]].type === 'Artboard' ? scope[1] : null;
+    const artboardItem = artboard ? state.layer.present.byId[artboard] : null;
+    const projectIndex = artboard ? (artboardItem as Btwx.Artboard).projectIndex : 0;
     const shapeType = payload.layer.shapeType ? payload.layer.shapeType : 'Rectangle';
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
-    const parentPaperLayer = getParentPaperLayer(parent, ignoreUnderlyingMask);
+    const parentPaperLayer = getParentPaperLayer(parent, projectIndex, ignoreUnderlyingMask);
     const name = payload.layer.name ? payload.layer.name : shapeType;
     const frame = getLayerFrame(payload);
-    const scopedPosition = new paperMain.Point(frame.x, frame.y);
-    const absolutePosition = getAbsolutePosition(scopedPosition, scope);
+    let position = new paperMain.Point(frame.x, frame.y);
+    if (artboard) {
+      position = position.add(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y))
+    }
     const shapeOpts = getLayerShapeOpts(payload);
     const pathData = getLayerPathData(payload);
     const style = getLayerStyle(payload);
@@ -649,14 +664,14 @@ export const addShapeThunk = (payload: AddShapePayload, providedState?: RootStat
       data: { id, type: 'Layer', layerType: 'Shape', shapeType: shapeType, selected: false, hover: false, scope: scope },
       parent: parentPaperLayer
     });
-    paperLayer.children.forEach((item) => item.data = { id: 'ShapePartial', type: 'LayerChild', layerType: 'Shape' });
-    paperLayer.position = absolutePosition;
+    paperLayer.children.forEach((item) => item.data = { id: 'shapePartial', type: 'LayerChild', layerType: 'Shape' });
+    paperLayer.position = position;
     paperLayer.fillColor = paperFillColor;
     paperLayer.strokeColor = paperStrokeColor;
     if (mask) {
       const maskGroup = new paperMain.Group({
         name: 'MaskGroup',
-        data: { id: `${id}-MaskGroup`, type: 'LayerContainer', layerType: 'Shape' },
+        data: { id: 'maskGroup', type: 'LayerContainer', layerType: 'Shape' },
         children: [paperLayer.clone()]
       });
       paperLayer.replaceWith(maskGroup);
@@ -667,12 +682,15 @@ export const addShapeThunk = (payload: AddShapePayload, providedState?: RootStat
       name: name,
       parent: parent,
       children: null,
-      showChildren: null,
-      shapeType: shapeType,
-      frame: frame,
       scope: scope,
+      frame: frame,
+      underlyingMask: underlyingMask,
+      ignoreUnderlyingMask: ignoreUnderlyingMask,
+      masked: masked,
+      showChildren: null,
       selected: false,
       hover: false,
+      artboardLayer: true,
       events: [],
       tweens: {
         allIds: [],
@@ -680,42 +698,43 @@ export const addShapeThunk = (payload: AddShapePayload, providedState?: RootStat
         asDestination: [],
         byProp: TWEEN_PROPS_MAP
       },
+      transform: transform,
+      style: style,
       closed: payload.layer.closed,
       mask: mask,
-      underlyingMask: underlyingMask,
-      ignoreUnderlyingMask: ignoreUnderlyingMask,
-      masked: masked,
-      style: style,
-      transform: transform,
+      shapeType: shapeType,
       pathData: pathData,
       ...shapeOpts
     } as Btwx.Shape;
-    if (!payload.batch) {
-      dispatch(addShape({
-        layer: newLayer,
-        batch: payload.batch
-      }));
-    }
+    dispatch(addShape({
+      layer: newLayer,
+      batch: payload.batch
+    }));
     return Promise.resolve(newLayer);
   }
 };
 
 export const addShapeGroupThunk = (payload: AddShapePayload, providedState?: RootState) => {
   return (dispatch: any, getState: any): Promise<Btwx.Shape> => {
-    const state = providedState ? providedState : getState() as RootState;
+    const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const parent = payload.layer.parent ? payload.layer.parent : 'page';
-    const parentLayer = getPaperLayer(parent);
-    const scope = [...parentLayer.data.scope, parent];
+    const parentItem = state.layer.present.byId[parent];
+    const scope = [...parentItem.scope, parent];
+    const artboard = payload.layer.artboard ? payload.layer.artboard : scope.length > 1 && state.layer.present.byId[scope[1]].type === 'Artboard' ? scope[1] : null;
+    const artboardItem = artboard ? state.layer.present.byId[artboard] : null;
+    const projectIndex = artboard ? (artboardItem as Btwx.Artboard).projectIndex : 0;
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
-    const parentPaperLayer = getParentPaperLayer(parent, ignoreUnderlyingMask);
+    const parentPaperLayer = getParentPaperLayer(parent, projectIndex, ignoreUnderlyingMask);
     const shapeType = payload.layer.shapeType ? payload.layer.shapeType : 'Rectangle';
     const name = payload.layer.name ? payload.layer.name : shapeType;
     const frame = getLayerFrame(payload);
-    const scopedPosition = new paperMain.Point(frame.x, frame.y);
-    const absolutePosition = getAbsolutePosition(scopedPosition, scope);
+    let position = new paperMain.Point(frame.x, frame.y);
+    if (artboard) {
+      position = position.add(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y))
+    }
     const shapeOpts = getLayerShapeOpts(payload);
     const style = getLayerStyle(payload);
     const transform = getLayerTransform(payload);
@@ -744,8 +763,8 @@ export const addShapeGroupThunk = (payload: AddShapePayload, providedState?: Roo
       data: { id, type: 'Layer', layerType: 'Shape', shapeType: 'Custom', selected: false, hover: false, scope: scope },
       parent: parentPaperLayer
     });
-    paperLayer.children.forEach((item) => item.data = { id: 'ShapePartial', type: 'LayerChild', layerType: 'Shape' });
-    paperLayer.position = absolutePosition;
+    paperLayer.children.forEach((item) => item.data = { id: 'shapePartial', type: 'LayerChild', layerType: 'Shape' });
+    paperLayer.position = position;
     // wonky fix to make sure gradient destination and origin are in correct place
     paperLayer.rotation = -transform.rotation;
     paperLayer.scale(transform.horizontalFlip ? -1 : 1, transform.verticalFlip ? -1 : 1);
@@ -757,7 +776,7 @@ export const addShapeGroupThunk = (payload: AddShapePayload, providedState?: Roo
     if (mask) {
       const maskGroup = new paperMain.Group({
         name: 'MaskGroup',
-        data: { id: `${id}-MaskGroup`, type: 'LayerContainer', layerType: 'Shape' },
+        data: { id: 'maskGroup', type: 'LayerContainer', layerType: 'Shape' },
         children: [paperLayer.clone()]
       });
       paperLayer.replaceWith(maskGroup);
@@ -769,10 +788,12 @@ export const addShapeGroupThunk = (payload: AddShapePayload, providedState?: Roo
       name: name,
       parent: parent,
       children: null,
-      showChildren: null,
-      shapeType: 'Custom',
       scope: scope,
       frame: frame,
+      underlyingMask: underlyingMask,
+      ignoreUnderlyingMask: ignoreUnderlyingMask,
+      masked: masked,
+      showChildren: null,
       selected: false,
       hover: false,
       events: [],
@@ -782,22 +803,18 @@ export const addShapeGroupThunk = (payload: AddShapePayload, providedState?: Roo
         asDestination: [],
         byProp: TWEEN_PROPS_MAP
       },
+      transform: transform,
+      style: style,
       closed: true,
       mask: mask,
-      underlyingMask: underlyingMask,
-      ignoreUnderlyingMask: ignoreUnderlyingMask,
-      masked: masked,
-      style: style,
-      transform: transform,
+      shapeType: 'Custom',
       pathData: shapeContainer.lastChild.pathData,
       ...shapeOpts
     } as Btwx.Shape;
-    if (!payload.batch) {
-      dispatch(addShape({
-        layer: newLayer,
-        batch: payload.batch
-      }));
-    }
+    dispatch(addShape({
+      layer: newLayer,
+      batch: payload.batch
+    }));
     return Promise.resolve(newLayer);
   }
 };
@@ -811,7 +828,7 @@ export const addText = (payload: AddTextPayload): LayerTypes => ({
 
 export const addTextThunk = (payload: AddTextPayload, providedState?: RootState) => {
   return (dispatch: any, getState: any): Promise<Btwx.Text> => {
-    const state = providedState ? providedState : getState() as RootState;
+    const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const textContent = payload.layer.text ? payload.layer.text : DEFAULT_TEXT_VALUE;
     const name = payload.layer.name ? payload.layer.name : textContent;
@@ -819,9 +836,12 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
     const parent = payload.layer.parent ? payload.layer.parent : 'page';
-    const parentLayer = getPaperLayer(parent);
-    const scope = [...parentLayer.data.scope, parent];
-    const parentPaperLayer = getParentPaperLayer(parent, ignoreUnderlyingMask);
+    const parentItem = state.layer.present.byId[parent];
+    const scope = [...parentItem.scope, parent];
+    const artboard = payload.layer.artboard ? payload.layer.artboard : scope.length > 1 && state.layer.present.byId[scope[1]].type === 'Artboard' ? scope[1] : null;
+    const artboardItem = artboard ? state.layer.present.byId[artboard] : null;
+    const projectIndex = artboard ? (artboardItem as Btwx.Artboard).projectIndex : 0;
+    const parentPaperLayer = getParentPaperLayer(parent, projectIndex, ignoreUnderlyingMask);
     const style = getLayerStyle(payload);
     const textStyle = getLayerTextStyle(payload);
     const transform = getLayerTransform(payload);
@@ -831,7 +851,7 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
     const paperLayer = new paperMain.PointText({
       point: new paperMain.Point(0, 0),
       content: textContent,
-      data: { id: 'TextContent', type: 'LayerChild', layerType: 'Text' },
+      data: { id: 'textContent', type: 'LayerChild', layerType: 'Text' },
       parent: parentPaperLayer,
       strokeWidth: style.stroke.width,
       shadowColor: paperShadowColor,
@@ -850,8 +870,10 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
       justification: textStyle.justification
     });
     const frame = getLayerFrame(payload);
-    const scopedPosition = new paperMain.Point(frame.x, frame.y);
-    const absolutePosition = getAbsolutePosition(scopedPosition, scope);
+    let position = new paperMain.Point(frame.x, frame.y);
+    if (artboard) {
+      position = position.add(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y))
+    }
     const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as Btwx.PaperGradientFill : null;
     const paperStrokeColor = style.stroke.enabled ? getPaperStrokeColor(style.stroke, frame) as Btwx.PaperGradientFill : null;
     paperLayer.position = new paperMain.Point(frame.x, frame.y);
@@ -863,14 +885,14 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
       fillColor: '#fff',
       opacity: 0,
       insert: false,
-      data: { id: 'TextBackground', type: 'LayerChild', layerType: 'Text' },
+      data: { id: 'textBackground', type: 'LayerChild', layerType: 'Text' },
     });
     const textContainer = new paperMain.Group({
       name: name,
       parent: parentPaperLayer,
       data: { id, type: 'Layer', layerType: 'Text', selected: false, hover: false, scope: scope },
       children: [textBackground, paperLayer],
-      position: absolutePosition
+      position: position
     });
     const newLayer = {
       type: 'Text',
@@ -878,10 +900,12 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
       name: name,
       parent: parent,
       children: null,
-      showChildren: null,
-      text: textContent,
       scope: scope,
       frame: frame,
+      underlyingMask: underlyingMask,
+      ignoreUnderlyingMask: ignoreUnderlyingMask,
+      masked: masked,
+      showChildren: null,
       selected: false,
       hover: false,
       events: [],
@@ -891,19 +915,15 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
         asDestination: [],
         byProp: TWEEN_PROPS_MAP
       },
-      underlyingMask: underlyingMask,
-      ignoreUnderlyingMask: ignoreUnderlyingMask,
-      masked: masked,
-      style: style,
       transform: transform,
-      textStyle: textStyle
+      style: style,
+      textStyle: textStyle,
+      text: textContent
     } as Btwx.Text;
-    if (!payload.batch) {
-      dispatch(addText({
-        layer: newLayer,
-        batch: payload.batch
-      }));
-    }
+    dispatch(addText({
+      layer: newLayer,
+      batch: payload.batch
+    }));
     return Promise.resolve(newLayer);
   }
 };
@@ -918,18 +938,23 @@ export const addImage = (payload: AddImagePayload): LayerTypes => ({
 export const addImageThunk = (payload: AddImagePayload, providedState?: RootState) => {
   return (dispatch: any, getState: any): Promise<Btwx.Image> => {
     return new Promise((resolve, reject) => {
-      const state = providedState ? providedState : getState() as RootState;
+      const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
       const buffer = Buffer.from(payload.buffer);
       const parent = payload.layer.parent ? payload.layer.parent : 'page';
-      const parentLayer = getPaperLayer(parent);
-      const scope = [...parentLayer.data.scope, parent];
+      const parentItem = state.layer.present.byId[parent];
+      const scope = [...parentItem.scope, parent];
+      const artboard = payload.layer.artboard ? payload.layer.artboard : scope.length > 1 && state.layer.present.byId[scope[1]].type === 'Artboard' ? scope[1] : null;
+      const artboardItem = artboard ? state.layer.present.byId[artboard] : null;
+      const projectIndex = artboard ? (artboardItem as Btwx.Artboard).projectIndex : 0;
       const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
-      const parentPaperLayer = getParentPaperLayer(parent, ignoreUnderlyingMask);
+      const parentPaperLayer = getParentPaperLayer(parent, projectIndex, ignoreUnderlyingMask);
       sharp(buffer).metadata().then(({ width, height }) => {
         sharp(buffer).resize(Math.round(width * 0.5)).webp().toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
           const frame = getLayerFrame(payload);
-          const scopedPosition = new paperMain.Point(frame.x, frame.y);
-          const absolutePosition = getAbsolutePosition(scopedPosition, scope);
+          let position = new paperMain.Point(frame.x, frame.y);
+          if (artboard) {
+            position = position.add(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y))
+          }
           const name = payload.layer.name ? payload.layer.name : 'Image';
           const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
           const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
@@ -951,10 +976,10 @@ export const addImageThunk = (payload: AddImagePayload, providedState?: RootStat
             children: [paperLayer]
           });
           paperLayer.onLoad = (): void => {
-            paperLayer.data = { id: 'Raster', type: 'LayerChild', layerType: 'Image' };
+            paperLayer.data = { id: 'raster', type: 'LayerChild', layerType: 'Image' };
             imageContainer.bounds.width = frame.innerWidth;
             imageContainer.bounds.height = frame.innerHeight;
-            imageContainer.position = absolutePosition;
+            imageContainer.position = position;
             imageContainer.shadowColor = paperShadowColor;
             imageContainer.shadowOffset = paperShadowOffset;
             imageContainer.shadowBlur = paperShadowBlur;
@@ -964,10 +989,14 @@ export const addImageThunk = (payload: AddImagePayload, providedState?: RootStat
               name: name,
               parent: parent,
               children: null,
-              showChildren: null,
               scope: scope,
               frame: frame,
+              underlyingMask: underlyingMask,
+              ignoreUnderlyingMask: ignoreUnderlyingMask,
+              masked: masked,
+              showChildren: null,
               selected: false,
+              hover: false,
               events: [],
               tweens: {
                 allIds: [],
@@ -975,22 +1004,17 @@ export const addImageThunk = (payload: AddImagePayload, providedState?: RootStat
                 asDestination: [],
                 byProp: TWEEN_PROPS_MAP
               },
-              underlyingMask,
-              ignoreUnderlyingMask,
-              masked,
-              style,
-              transform,
-              imageId
+              transform: transform,
+              style: style,
+              imageId: imageId
             } as Btwx.Image;
             if (!exists) {
               dispatch(addDocumentImage({id: imageId, buffer: newBuffer}));
             }
-            if (!payload.batch) {
-              dispatch(addImage({
-                layer: newLayer,
-                batch: payload.batch
-              }));
-            }
+            dispatch(addImage({
+              layer: newLayer,
+              batch: payload.batch
+            }));
             resolve(newLayer);
           }
         });
@@ -1008,28 +1032,28 @@ export const addLayers = (payload: AddLayersPayload): LayerTypes => ({
 
 export const addLayersThunk = (payload: AddLayersPayload) => {
   return (dispatch: any, getState: any): Promise<any> => {
-    const state = getState() as RootState;
+    // const state = getState() as RootState;
     return new Promise((resolve, reject) => {
       const promises: Promise<any>[] = [];
       payload.layers.forEach((layer) => {
         switch(layer.type as Btwx.LayerType | 'ShapeGroup') {
           case 'Artboard':
-            promises.push(dispatch(addArtboardThunk({layer: layer as Btwx.Artboard, batch: true}, state)));
+            promises.push(dispatch(addArtboardThunk({layer: layer as Btwx.Artboard, batch: true})));
             break;
           case 'Shape':
-            promises.push(dispatch(addShapeThunk({layer: layer as Btwx.Shape, batch: true}, state)));
+            promises.push(dispatch(addShapeThunk({layer: layer as Btwx.Shape, batch: true})));
             break;
           case 'ShapeGroup':
-            promises.push(dispatch(addShapeGroupThunk({layer: layer as Btwx.Shape, batch: true}, state)));
+            promises.push(dispatch(addShapeGroupThunk({layer: layer as Btwx.Shape, batch: true})));
             break;
           case 'Image':
-            promises.push(dispatch(addImageThunk({layer: layer as Btwx.Image, batch: true, buffer: payload.buffers[(layer as Btwx.Image).imageId].buffer}, state)));
+            promises.push(dispatch(addImageThunk({layer: layer as Btwx.Image, batch: true, buffer: payload.buffers[(layer as Btwx.Image).imageId].buffer})));
             break;
           case 'Group':
-            promises.push(dispatch(addGroupThunk({layer: layer as Btwx.Group, batch: true}, state)));
+            promises.push(dispatch(addGroupThunk({layer: layer as Btwx.Group, batch: true})));
             break;
           case 'Text':
-            promises.push(dispatch(addTextThunk({layer: layer as Btwx.Text, batch: true}, state)));
+            promises.push(dispatch(addTextThunk({layer: layer as Btwx.Text, batch: true})));
             break;
         }
       });
@@ -2390,11 +2414,8 @@ export const applyBooleanOperationThunk = (booleanOperation: Btwx.BooleanOperati
       }
       dispatch(addShapeThunk({
         layer: {
-          shapeType: 'Custom',
           name: 'Combined Shape',
-          pathData: booleanLayers.pathData,
           parent: layerItem.parent,
-          closed: true,
           frame: {
             x: booleanLayers.position.x,
             y: booleanLayers.position.y,
@@ -2403,7 +2424,10 @@ export const applyBooleanOperationThunk = (booleanOperation: Btwx.BooleanOperati
             innerWidth: booleanLayers.bounds.width,
             innerHeight: booleanLayers.bounds.height
           },
-          style: layerItem.style
+          style: layerItem.style,
+          closed: true,
+          shapeType: 'Custom',
+          pathData: booleanLayers.pathData
         },
         batch: true
       })).then((newShape: Btwx.Shape) => {
@@ -2539,7 +2563,10 @@ export const setLayerEdit = (payload: SetLayerEditPayload): LayerTypes => ({
   type: SET_LAYER_EDIT,
   payload: {
     ...payload,
-    edit: uuidv4()
+    edit: {
+      ...payload.edit,
+      id: uuidv4()
+    }
   }
 });
 
@@ -2859,22 +2886,71 @@ export const undoThunk = () => {
       dispatch(setLayerHover({id: null}));
       // undo
       dispatch(ActionCreators.undo());
+      //
+      if (layerState.edit.projects) {
+        layerState.edit.projects.forEach((project: string) => {
+          const projectItem = layerState.byId[project] as Btwx.ProjectLayer;
+          const projectIndex = projectItem.projectIndex;
+          importPaperProject({
+            projectJSON: projectItem.project,
+            projectIndex: projectIndex,
+            documentImages: state.documentSettings.images.byId
+          });
+        });
+      }
+      // const undoEdit = state.layer.present.edit;
+      // // check if adding/removing artboard
+      // if (undoEdit.actionType) {
+      //   switch(undoEdit.actionType) {
+      //     case 'ADD_ARTBOARD': {
+      //       const artboard = state.layer.present.allArtboardIds[state.layer.present.allArtboardIds.length - 1];
+      //       const artboardItem = state.layer.present.byId[artboard];
+      //       const project = paperMain.projects[artboardItem.projectIndex];
+      //       project.remove();
+      //       break;
+      //     }
+      //     case 'ADD_LAYERS':
+      //     case 'DUPLICATE_LAYERS': {
+      //       if (undoEdit.layers && undoEdit.layers.some((id) => state.layer.present.allArtboardIds.includes(id))) {
+      //         state.layer.present.allArtboardIds.forEach((id) => {
+      //           if (undoEdit.layers.includes(id)) {
+      //             const artboardItem = state.layer.present.byId[id];
+      //             paperMain.projects[artboardItem.projectIndex].remove();
+      //           }
+      //         });
+      //       }
+      //       break;
+      //     }
+      //     case 'REMOVE_LAYERS': {
+      //       if (undoEdit.layers && undoEdit.layers.some((id) => layerState.allArtboardIds.includes(id))) {
+      //         layerState.allArtboardIds.forEach((id) => {
+      //           if (undoEdit.layers.includes(id)) {
+      //             const artboardItem = layerState.byId[id];
+      //             const project = new paperMain.Project(`canvas-${id}`);
+      //             paperMain.projects = paperMain.projects.splice(artboardItem.projectIndex, 0, project);
+      //           }
+      //         });
+      //       }
+      //       break;
+      //     }
+      //   }
+      // }
       // import past paper project
-      importPaperProject({
-        paperProject: layerState.paperProject,
-        documentImages: state.documentSettings.images.byId
-      });
+      // importPaperProject({
+      //   paperProject: layerState.paperProject,
+      //   documentImages: state.documentSettings.images.byId
+      // });
       // update editors
-      updateEditors(dispatch, state, 'undo');
-      // update frames
-      if (!state.gradientEditor.isOpen) {
-        updateHoverFrame();
-        updateSelectionFrame();
-      }
-      updateActiveArtboardFrame();
-      if (state.viewSettings.tweenDrawer.isOpen && layerState.events.allIds.length > 0) {
-        updateTweenEventsFrame(fullState);
-      }
+      // updateEditors(dispatch, state, 'undo');
+      // // update frames
+      // if (!state.gradientEditor.isOpen) {
+      //   updateHoverFrame();
+      //   updateSelectionFrame();
+      // }
+      // updateActiveArtboardFrame();
+      // if (state.viewSettings.tweenDrawer.isOpen && layerState.events.allIds.length > 0) {
+      //   updateTweenEventsFrame(fullState);
+      // }
     }
   }
 };
@@ -2889,22 +2965,73 @@ export const redoThunk = () => {
       dispatch(setLayerHover({id: null}));
       // redo
       dispatch(ActionCreators.redo());
+      //
+      // console.log(layerState.edit.projects);
+      if (layerState.edit.projects) {
+        layerState.edit.projects.forEach((project: string) => {
+          const projectItem = layerState.byId[project] as Btwx.ProjectLayer;
+          const projectIndex = projectItem.projectIndex;
+          importPaperProject({
+            projectJSON: projectItem.project,
+            projectIndex: projectIndex,
+            documentImages: state.documentSettings.images.byId
+          });
+        });
+      }
+      // const redoEdit = layerState.edit;
+      // // check if adding/removing artboard
+      // if (redoEdit.actionType) {
+      //   switch(redoEdit.actionType) {
+      //     case 'ADD_ARTBOARD': {
+      //       const artboard = layerState.allArtboardIds[layerState.allArtboardIds.length - 1];
+      //       const artboardItem = layerState.byId[artboard];
+      //       const project = new paperMain.Project(`canvas-${artboard}`);
+      //       paperMain.projects = paperMain.projects.splice(artboardItem.projectIndex, 0, project);
+      //       break;
+      //     }
+      //     case 'ADD_LAYERS':
+      //     case 'DUPLICATE_LAYERS': {
+      //       if (redoEdit.layers && redoEdit.layers.some((id) => layerState.allArtboardIds.includes(id))) {
+      //         layerState.allArtboardIds.forEach((id) => {
+      //           if (redoEdit.layers.includes(id)) {
+      //             const artboardItem = layerState.byId[id];
+      //             const project = new paperMain.Project(`canvas-${id}`);
+      //             paperMain.projects = paperMain.projects.splice(artboardItem.projectIndex, 0, project);
+      //           }
+      //         });
+      //       }
+      //       break;
+      //     }
+      //     case 'REMOVE_LAYERS': {
+      //       if (redoEdit.layers && redoEdit.layers.some((id) => state.layer.present.allArtboardIds.includes(id))) {
+      //         state.layer.present.allArtboardIds.forEach((id) => {
+      //           if (redoEdit.layers.includes(id)) {
+      //             const artboardItem = layerState.byId[id];
+      //             const project = paperMain.projects[artboardItem.projectIndex];
+      //             project.remove();
+      //           }
+      //         });
+      //       }
+      //       break;
+      //     }
+      //   }
+      // }
       // import future paper project
-      importPaperProject({
-        paperProject: layerState.paperProject,
-        documentImages: state.documentSettings.images.byId
-      });
+      // importPaperProject({
+      //   paperProject: layerState.paperProject,
+      //   documentImages: state.documentSettings.images.byId
+      // });
       // update editors
-      updateEditors(dispatch, state, 'redo');
-      // update frames
-      if (!state.gradientEditor.isOpen) {
-        updateHoverFrame();
-        updateSelectionFrame();
-      }
-      updateActiveArtboardFrame();
-      if (state.viewSettings.tweenDrawer.isOpen && layerState.events.allIds.length > 0) {
-        updateTweenEventsFrame(fullState);
-      }
+      // updateEditors(dispatch, state, 'redo');
+      // // update frames
+      // if (!state.gradientEditor.isOpen) {
+      //   updateHoverFrame();
+      //   updateSelectionFrame();
+      // }
+      // updateActiveArtboardFrame();
+      // if (state.viewSettings.tweenDrawer.isOpen && layerState.events.allIds.length > 0) {
+      //   updateTweenEventsFrame(fullState);
+      // }
     }
   }
 };
@@ -2924,15 +3051,15 @@ export const updateGradientFrame = (layerItem: Btwx.Layer, gradient: Btwx.Gradie
     oldGradientFrame.remove();
   }
   const gradientFrameHandleBgProps = {
-    radius: 8 / paperMain.view.zoom,
+    radius: 8 / paperMain.projects[0].view.zoom,
     fillColor: '#fff',
     shadowColor: new paperMain.Color(0, 0, 0, 0.5),
     shadowBlur: 2,
     insert: false,
-    strokeWidth: 1 / paperMain.view.zoom
+    strokeWidth: 1 / paperMain.projects[0].view.zoom
   }
   const gradientFrameHandleSwatchProps = {
-    radius: 6 / paperMain.view.zoom,
+    radius: 6 / paperMain.projects[0].view.zoom,
     fillColor: '#fff',
     insert: false
   }
@@ -2998,7 +3125,7 @@ export const updateGradientFrame = (layerItem: Btwx.Layer, gradient: Btwx.Gradie
   const gradientFrameLineDark = new paperMain.Path.Line({
     ...gradientFrameLineProps,
     strokeColor: new paperMain.Color(0, 0, 0, 0.25),
-    strokeWidth: 3 / paperMain.view.zoom,
+    strokeWidth: 3 / paperMain.projects[0].view.zoom,
     data: {
       id: 'GradientFrameLine',
       type: 'UIElementChild',
@@ -3010,7 +3137,7 @@ export const updateGradientFrame = (layerItem: Btwx.Layer, gradient: Btwx.Gradie
   const gradientFrameLineLight = new paperMain.Path.Line({
     ...gradientFrameLineProps,
     strokeColor: '#fff',
-    strokeWidth: 1 / paperMain.view.zoom,
+    strokeWidth: 1 / paperMain.projects[0].view.zoom,
     data: {
       id: 'GradientFrameLine',
       type: 'UIElementChild',
@@ -3065,37 +3192,39 @@ export const updateGradientFrame = (layerItem: Btwx.Layer, gradient: Btwx.Gradie
   });
 }
 
-export const updateActiveArtboardFrame = () => {
-  const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'ActiveArtboardFrame' } });
-  const activeArtboardPaperLayer = paperMain.project.getItem({ data: { activeArtboard: true } });
+export const updateActiveArtboardFrame = (artboardFrame: Btwx.Frame): void => {
+  const activeArtboardFrame = paperMain.projects[1].getItem({ data: { id: 'activeArtboardFrame' } });
+  // const activeArtboardProject = paperMain.projects[projectIndex];
   activeArtboardFrame.removeChildren();
-  if (activeArtboardPaperLayer) {
-    const artboardBackground = activeArtboardPaperLayer.getItem({ data: { id: 'ArtboardBackground' } });
-    const topLeft = artboardBackground.bounds.topLeft;
-    const bottomRight = artboardBackground.bounds.bottomRight;
+  if (artboardFrame) {
+    // const artboardBackground = activeArtboardProject.getItem({ data: { id: 'artboardBackground' } });
+    // const topLeft = artboardBackground.bounds.topLeft;
+    // const bottomRight = artboardBackground.bounds.bottomRight;
+    const topLeft = new paperMain.Point(artboardFrame.x - (artboardFrame.width / 2), artboardFrame.y - (artboardFrame.height / 2));
+    const bottomRight = new paperMain.Point(artboardFrame.x + (artboardFrame.width / 2), artboardFrame.y + (artboardFrame.height / 2));
     new paperMain.Path.Rectangle({
-      from: new paperMain.Point(topLeft.x - (2 / paperMain.view.zoom), topLeft.y - (2 / paperMain.view.zoom)),
-      to: new paperMain.Point(bottomRight.x + (2 / paperMain.view.zoom), bottomRight.y + (2 / paperMain.view.zoom)),
+      from: new paperMain.Point(topLeft.x - (2 / paperMain.projects[0].view.zoom), topLeft.y - (2 / paperMain.projects[0].view.zoom)),
+      to: new paperMain.Point(bottomRight.x + (2 / paperMain.projects[0].view.zoom), bottomRight.y + (2 / paperMain.projects[0].view.zoom)),
       strokeColor: THEME_PRIMARY_COLOR,
-      strokeWidth: 4 / paperMain.view.zoom,
+      strokeWidth: 4 / paperMain.projects[0].view.zoom,
       parent: activeArtboardFrame
     });
   }
 };
 
-export const updateHoverFrame = () => {
-  const hoverFrame = paperMain.project.getItem({ data: { id: 'HoverFrame' } });
+export const updateHoverFrame = (projectIndex: number): void => {
+  const hoverFrame = paperMain.projects[1].getItem({ data: { id: 'hoverFrame' } });
   hoverFrame.removeChildren();
   const hoverFrameConstants = {
     strokeColor: THEME_PRIMARY_COLOR,
-    strokeWidth: 2 / paperMain.view.zoom,
+    strokeWidth: 2 / paperMain.projects[0].view.zoom,
     parent: hoverFrame
   }
-  const hoverPaperLayer = paperMain.project.getItem({ data: { hover: true } });
+  const hoverPaperLayer = paperMain.projects[projectIndex].getItem({ data: { hover: true } });
   if (hoverPaperLayer) {
     switch(hoverPaperLayer.data.layerType) {
       case 'Artboard': {
-        const artboardBackground = hoverPaperLayer.getItem({ data: { id: 'ArtboardBackground' } });
+        const artboardBackground = hoverPaperLayer.getItem({ data: { id: 'artboardBackground' } });
         new paperMain.Path.Rectangle({
           ...hoverFrameConstants,
           rectangle: artboardBackground.bounds
@@ -3110,19 +3239,19 @@ export const updateHoverFrame = () => {
         });
         break;
       case 'Text': {
-        const textLayer = hoverPaperLayer.getItem({data: { id: 'TextContent' }});
+        const textLayer = hoverPaperLayer.getItem({data: { id: 'textContent' }});
         const initialPoint = (textLayer as paper.PointText).point;
         (textLayer as any)._lines.forEach((line: any, index: number) => {
           new paperMain.Path.Line({
             from: new paperMain.Point(initialPoint.x, initialPoint.y + (((textLayer as paper.PointText).leading as number) * index)),
             to: new paperMain.Point(initialPoint.x + textLayer.bounds.width, initialPoint.y + (((textLayer as paper.PointText).leading as number) * index)),
             strokeColor: THEME_PRIMARY_COLOR,
-            strokeWidth: 2 / paperMain.view.zoom,
+            strokeWidth: 2 / paperMain.projects[0].view.zoom,
             data: {
               type: 'UIElementChild',
               interactive: false,
               interactiveType: null,
-              elementId: 'HoverFrame'
+              elementId: 'hoverFrame'
             },
             parent: hoverFrame
           });
@@ -3141,13 +3270,12 @@ export const updateHoverFrame = () => {
 };
 
 export const updateSelectionFrame = (visibleHandle: Btwx.SelectionFrameHandle = 'all'): void => {
-  const selectionFrame = paperMain.project.getItem({ data: { id: 'SelectionFrame' } });
+  const selectionFrame = paperMain.projects[1].getItem({ data: { id: 'selectionFrame' } });
   // if (selectionFrame) {
   //   selectionFrame.remove();
   // }
   selectionFrame.removeChildren();
-  const selected = paperMain.project.getItems({ data: { selected: true } });
-  const linesSelected = paperMain.project.getItems({ data: { selected: true, shapeType: 'Line' } });
+  const selected = getSelectedPaperLayers();
   if (selected.length > 0) {
     const resizeDisabled = false;
     const selectionTopLeft =  getSelectionTopLeft(selected);
@@ -3157,14 +3285,14 @@ export const updateSelectionFrame = (visibleHandle: Btwx.SelectionFrameHandle = 
       size: [8, 8],
       fillColor: '#fff',
       strokeColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.24 },
-      strokeWidth: 1 / paperMain.view.zoom,
+      strokeWidth: 1 / paperMain.projects[0].view.zoom,
       shadowColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.5 },
-      shadowBlur: 1 / paperMain.view.zoom,
+      shadowBlur: 1 / paperMain.projects[0].view.zoom,
       insert: false,
       opacity: resizeDisabled ? 1 : 1
     }
     // Line selection frame
-    if (selected.length === 1 && linesSelected.length > 0) {
+    if (selected.length === 1 && selected[0].data.layerType === 'Line') {
       const paperLayer = selected[0] as paper.Path;
       const moveHandle = new paperMain.Path.Ellipse({
         ...baseProps,
@@ -3174,12 +3302,12 @@ export const updateSelectionFrame = (visibleHandle: Btwx.SelectionFrameHandle = 
           type: 'UIElementChild',
           interactive: true,
           interactiveType: 'move',
-          elementId: 'SelectionFrame'
+          elementId: 'selectionFrame'
         }
       });
       moveHandle.position = paperLayer.bounds.center;
-      moveHandle.scaling.x = 1 / paperMain.view.zoom;
-      moveHandle.scaling.y = 1 / paperMain.view.zoom;
+      moveHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+      moveHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
       const fromHandle = new paperMain.Path.Rectangle({
         ...baseProps,
         visible: visibleHandle === 'all' || visibleHandle === 'from',
@@ -3187,12 +3315,12 @@ export const updateSelectionFrame = (visibleHandle: Btwx.SelectionFrameHandle = 
           type: 'UIElementChild',
           interactive: true,
           interactiveType: 'from',
-          elementId: 'SelectionFrame'
+          elementId: 'selectionFrame'
         }
       });
       fromHandle.position = paperLayer.firstSegment.point;
-      fromHandle.scaling.x = 1 / paperMain.view.zoom;
-      fromHandle.scaling.y = 1 / paperMain.view.zoom;
+      fromHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+      fromHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
       const toHandle = new paperMain.Path.Rectangle({
         ...baseProps,
         visible: visibleHandle === 'all' || visibleHandle === 'to',
@@ -3200,22 +3328,13 @@ export const updateSelectionFrame = (visibleHandle: Btwx.SelectionFrameHandle = 
           type: 'UIElementChild',
           interactive: true,
           interactiveType: 'to',
-          elementId: 'SelectionFrame'
+          elementId: 'selectionFrame'
         }
       });
       toHandle.position = paperLayer.lastSegment.point;
-      toHandle.scaling.x = 1 / paperMain.view.zoom;
-      toHandle.scaling.y = 1 / paperMain.view.zoom;
-      new paperMain.Group({
-        children: [fromHandle, moveHandle, toHandle],
-        data: {
-          id: 'SelectionFrame',
-          type: 'UIElement',
-          interactive: false,
-          interactiveType: null,
-          elementId: 'SelectionFrame'
-        }
-      });
+      toHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+      toHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
+      selectionFrame.children = [fromHandle, moveHandle, toHandle];
     }
     // All other selection frames
     else {
@@ -3223,26 +3342,26 @@ export const updateSelectionFrame = (visibleHandle: Btwx.SelectionFrameHandle = 
         from: selectionTopLeft,
         to: selectionBottomRight,
         strokeColor: '#fff',
-        strokeWidth: 1 / paperMain.view.zoom,
+        strokeWidth: 1 / paperMain.projects[0].view.zoom,
         blendMode: 'multiply',
         data: {
           type: 'UIElementChild',
           interactive: false,
           interactiveType: null,
-          elementId: 'SelectionFrame'
+          elementId: 'selectionFrame'
         }
       });
       const baseFrameDifference = new paperMain.Path.Rectangle({
         from: selectionTopLeft,
         to: selectionBottomRight,
         strokeColor: '#999',
-        strokeWidth: 1 / paperMain.view.zoom,
+        strokeWidth: 1 / paperMain.projects[0].view.zoom,
         blendMode: 'difference',
         data: {
           type: 'UIElementChild',
           interactive: false,
           interactiveType: null,
-          elementId: 'SelectionFrame'
+          elementId: 'selectionFrame'
         }
       });
       const baseFrame = new paperMain.Group({
@@ -3251,7 +3370,7 @@ export const updateSelectionFrame = (visibleHandle: Btwx.SelectionFrameHandle = 
           type: 'UIElementChild',
           interactive: false,
           interactiveType: null,
-          elementId: 'SelectionFrame'
+          elementId: 'selectionFrame'
         },
         children: [baseFrameDifference, baseFrameOverlay]
       });
@@ -3263,12 +3382,12 @@ export const updateSelectionFrame = (visibleHandle: Btwx.SelectionFrameHandle = 
           type: 'UIElementChild',
           interactive: true,
           interactiveType: 'move',
-          elementId: 'SelectionFrame'
+          elementId: 'selectionFrame'
         }
       });
-      moveHandle.position = new paperMain.Point(baseFrame.bounds.topCenter.x, baseFrame.bounds.topCenter.y - ((1 / paperMain.view.zoom) * 24));
-      moveHandle.scaling.x = 1 / paperMain.view.zoom;
-      moveHandle.scaling.y = 1 / paperMain.view.zoom;
+      moveHandle.position = new paperMain.Point(baseFrame.bounds.topCenter.x, baseFrame.bounds.topCenter.y - ((1 / paperMain.projects[0].view.zoom) * 24));
+      moveHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+      moveHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
       const topLeftHandle = new paperMain.Path.Rectangle({
         ...baseProps,
         visible: visibleHandle === 'all' || visibleHandle === 'topLeft',
@@ -3276,12 +3395,12 @@ export const updateSelectionFrame = (visibleHandle: Btwx.SelectionFrameHandle = 
           type: 'UIElementChild',
           interactive: true,
           interactiveType: 'topLeft',
-          elementId: 'SelectionFrame'
+          elementId: 'selectionFrame'
         }
       });
       topLeftHandle.position = baseFrame.bounds.topLeft;
-      topLeftHandle.scaling.x = 1 / paperMain.view.zoom;
-      topLeftHandle.scaling.y = 1 / paperMain.view.zoom;
+      topLeftHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+      topLeftHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
       const topCenterHandle = new paperMain.Path.Rectangle({
         ...baseProps,
         visible: visibleHandle === 'all' || visibleHandle === 'topCenter',
@@ -3289,12 +3408,12 @@ export const updateSelectionFrame = (visibleHandle: Btwx.SelectionFrameHandle = 
           type: 'UIElementChild',
           interactive: true,
           interactiveType: 'topCenter',
-          elementId: 'SelectionFrame'
+          elementId: 'selectionFrame'
         }
       });
       topCenterHandle.position = baseFrame.bounds.topCenter;
-      topCenterHandle.scaling.x = 1 / paperMain.view.zoom;
-      topCenterHandle.scaling.y = 1 / paperMain.view.zoom;
+      topCenterHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+      topCenterHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
       const topRightHandle = new paperMain.Path.Rectangle({
         ...baseProps,
         visible: visibleHandle === 'all' || visibleHandle === 'topRight',
@@ -3302,12 +3421,12 @@ export const updateSelectionFrame = (visibleHandle: Btwx.SelectionFrameHandle = 
           type: 'UIElementChild',
           interactive: true,
           interactiveType: 'topRight',
-          elementId: 'SelectionFrame'
+          elementId: 'selectionFrame'
         }
       });
       topRightHandle.position = baseFrame.bounds.topRight;
-      topRightHandle.scaling.x = 1 / paperMain.view.zoom;
-      topRightHandle.scaling.y = 1 / paperMain.view.zoom;
+      topRightHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+      topRightHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
       const bottomLeftHandle = new paperMain.Path.Rectangle({
         ...baseProps,
         visible: visibleHandle === 'all' || visibleHandle === 'bottomLeft',
@@ -3315,12 +3434,12 @@ export const updateSelectionFrame = (visibleHandle: Btwx.SelectionFrameHandle = 
           type: 'UIElementChild',
           interactive: true,
           interactiveType: 'bottomLeft',
-          elementId: 'SelectionFrame'
+          elementId: 'selectionFrame'
         }
       });
       bottomLeftHandle.position = baseFrame.bounds.bottomLeft;
-      bottomLeftHandle.scaling.x = 1 / paperMain.view.zoom;
-      bottomLeftHandle.scaling.y = 1 / paperMain.view.zoom;
+      bottomLeftHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+      bottomLeftHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
       const bottomCenterHandle = new paperMain.Path.Rectangle({
         ...baseProps,
         visible: visibleHandle === 'all' || visibleHandle === 'bottomCenter',
@@ -3328,12 +3447,12 @@ export const updateSelectionFrame = (visibleHandle: Btwx.SelectionFrameHandle = 
           type: 'UIElementChild',
           interactive: true,
           interactiveType: 'bottomCenter',
-          elementId: 'SelectionFrame'
+          elementId: 'selectionFrame'
         }
       });
       bottomCenterHandle.position = baseFrame.bounds.bottomCenter;
-      bottomCenterHandle.scaling.x = 1 / paperMain.view.zoom;
-      bottomCenterHandle.scaling.y = 1 / paperMain.view.zoom;
+      bottomCenterHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+      bottomCenterHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
       const bottomRightHandle = new paperMain.Path.Rectangle({
         ...baseProps,
         visible: visibleHandle === 'all' || visibleHandle === 'bottomRight',
@@ -3341,12 +3460,12 @@ export const updateSelectionFrame = (visibleHandle: Btwx.SelectionFrameHandle = 
           type: 'UIElementChild',
           interactive: true,
           interactiveType: 'bottomRight',
-          elementId: 'SelectionFrame'
+          elementId: 'selectionFrame'
         }
       });
       bottomRightHandle.position = baseFrame.bounds.bottomRight;
-      bottomRightHandle.scaling.x = 1 / paperMain.view.zoom;
-      bottomRightHandle.scaling.y = 1 / paperMain.view.zoom;
+      bottomRightHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+      bottomRightHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
       const rightCenterHandle = new paperMain.Path.Rectangle({
         ...baseProps,
         visible: visibleHandle === 'all' || visibleHandle === 'rightCenter',
@@ -3354,12 +3473,12 @@ export const updateSelectionFrame = (visibleHandle: Btwx.SelectionFrameHandle = 
           type: 'UIElementChild',
           interactive: true,
           interactiveType: 'rightCenter',
-          elementId: 'SelectionFrame'
+          elementId: 'selectionFrame'
         }
       });
       rightCenterHandle.position = baseFrame.bounds.rightCenter;
-      rightCenterHandle.scaling.x = 1 / paperMain.view.zoom;
-      rightCenterHandle.scaling.y = 1 / paperMain.view.zoom;
+      rightCenterHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+      rightCenterHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
       const leftCenterHandle = new paperMain.Path.Rectangle({
         ...baseProps,
         visible: visibleHandle === 'all' || visibleHandle === 'leftCenter',
@@ -3367,12 +3486,12 @@ export const updateSelectionFrame = (visibleHandle: Btwx.SelectionFrameHandle = 
           type: 'UIElementChild',
           interactive: true,
           interactiveType: 'leftCenter',
-          elementId: 'SelectionFrame'
+          elementId: 'selectionFrame'
         }
       });
       leftCenterHandle.position = baseFrame.bounds.leftCenter;
-      leftCenterHandle.scaling.x = 1 / paperMain.view.zoom;
-      leftCenterHandle.scaling.y = 1 / paperMain.view.zoom;
+      leftCenterHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+      leftCenterHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
       selectionFrame.children = [baseFrame, moveHandle, topLeftHandle, topCenterHandle, topRightHandle, bottomLeftHandle, bottomCenterHandle, bottomRightHandle, leftCenterHandle, rightCenterHandle];
       // new paperMain.Group({
       //   children: [baseFrame, moveHandle, topLeftHandle, topCenterHandle, topRightHandle, bottomLeftHandle, bottomCenterHandle, bottomRightHandle, leftCenterHandle, rightCenterHandle],
@@ -3390,7 +3509,7 @@ export const updateSelectionFrame = (visibleHandle: Btwx.SelectionFrameHandle = 
 };
 
 export const updateTweenEventsFrame = (state: RootState) => {
-  const tweenEventsFrame = paperMain.project.getItem({ data: { id: 'ArtboardEvents' } });
+  const tweenEventsFrame = paperMain.projects[1].getItem({ data: { id: 'artboardEvents' } });
   const events = (getArtboardEventItems(state) as {
     tweenEventItems: Btwx.TweenEvent[];
     tweenEventLayers: {
@@ -3411,38 +3530,38 @@ export const updateTweenEventsFrame = (state: RootState) => {
       const origin = state.layer.present.byId[event.artboard];
       const destination = state.layer.present.byId[event.destinationArtboard];
       const tweenEventDestinationIndicator = new paperMain.Path.Ellipse({
-        center: new paperMain.Point(destination.frame.x, artboardTopTop - ((1 / paperMain.view.zoom) * 48)),
-        radius: ((1 / paperMain.view.zoom) * 4),
+        center: new paperMain.Point(destination.frame.x, artboardTopTop - ((1 / paperMain.projects[0].view.zoom) * 48)),
+        radius: ((1 / paperMain.projects[0].view.zoom) * 4),
         fillColor: elementColor,
         insert: false,
         data: {
           type: 'UIElementChild',
           interactive: false,
           interactiveType: null,
-          elementId: 'TweenEventsFrame'
+          elementId: 'tweenEventsFrame'
         }
       });
       const tweenEventOriginIndicator = new paperMain.Path.Ellipse({
-        center: new paperMain.Point(origin.frame.x, artboardTopTop - ((1 / paperMain.view.zoom) * 48)),
-        radius: ((1 / paperMain.view.zoom) * 10),
+        center: new paperMain.Point(origin.frame.x, artboardTopTop - ((1 / paperMain.projects[0].view.zoom) * 48)),
+        radius: ((1 / paperMain.projects[0].view.zoom) * 10),
         insert: false,
         data: {
           type: 'UIElementChild',
           interactive: false,
           interactiveType: null,
-          elementId: 'TweenEventsFrame'
+          elementId: 'tweenEventsFrame'
         }
       });
       const tweenEventIconBackground = new paperMain.Path.Ellipse({
         center: tweenEventOriginIndicator.bounds.center,
-        radius: ((1 / paperMain.view.zoom) * 14),
+        radius: ((1 / paperMain.projects[0].view.zoom) * 14),
         fillColor: theme.background.z0,
         insert: false,
         data: {
           type: 'UIElementChild',
           interactive: false,
           interactiveType: null,
-          elementId: 'TweenEventsFrame'
+          elementId: 'tweenEventsFrame'
         }
       });
       const tweenEventIcon = new paperMain.CompoundPath({
@@ -3453,7 +3572,7 @@ export const updateTweenEventsFrame = (state: RootState) => {
             case 'Group':
               return 'M21,9 L21,20 L3,20 L3,9 L21,9 Z M9,4 C10.480515,4 11.7731656,4.80434324 12.4648015,5.99987956 L21,6 L21,8 L3,8 L3,4 L9,4 Z';
             case 'Shape':
-              return eventLayerItem.pathData;
+              return (eventLayerItem as Btwx.Shape).pathData;
             case 'Text':
               return 'M12.84,18.999 L12.84,6.56 L12.84,6.56 L16.92,6.56 L16.92,5 L7.08,5 L7.08,6.56 L11.16,6.56 L11.16,19 L12.839,19 C12.8395523,19 12.84,18.9995523 12.84,18.999 Z';
             case 'Image':
@@ -3468,7 +3587,7 @@ export const updateTweenEventsFrame = (state: RootState) => {
           type: 'UIElementChild',
           interactive: false,
           interactiveType: null,
-          elementId: 'TweenEventsFrame'
+          elementId: 'tweenEventsFrame'
         }
       });
       tweenEventIcon.fitBounds(tweenEventOriginIndicator.bounds);
@@ -3476,20 +3595,20 @@ export const updateTweenEventsFrame = (state: RootState) => {
         from: tweenEventOriginIndicator.bounds.center,
         to: tweenEventDestinationIndicator.bounds.center,
         strokeColor: elementColor,
-        strokeWidth: 1 / paperMain.view.zoom,
+        strokeWidth: 1 / paperMain.projects[0].view.zoom,
         insert: false,
         data: {
           type: 'UIElementChild',
           interactive: false,
           interactiveType: null,
-          elementId: 'TweenEventsFrame'
+          elementId: 'tweenEventsFrame'
         }
       });
       const tweenEventText = new paperMain.PointText({
         content: DEFAULT_TWEEN_EVENTS.find((tweenEvent) => event.event === tweenEvent.event).titleCase,
-        point: new paperMain.Point(tweenEventConnector.bounds.center.x, tweenEventDestinationIndicator.bounds.top - ((1 / paperMain.view.zoom) * 10)),
+        point: new paperMain.Point(tweenEventConnector.bounds.center.x, tweenEventDestinationIndicator.bounds.top - ((1 / paperMain.projects[0].view.zoom) * 10)),
         justification: 'center',
-        fontSize: ((1 / paperMain.view.zoom) * 10),
+        fontSize: ((1 / paperMain.projects[0].view.zoom) * 10),
         fillColor: elementColor,
         insert: false,
         fontFamily: 'Space Mono',
@@ -3497,17 +3616,17 @@ export const updateTweenEventsFrame = (state: RootState) => {
           type: 'UIElementChild',
           interactive: false,
           interactiveType: null,
-          elementId: 'TweenEventsFrame'
+          elementId: 'tweenEventsFrame'
         }
       });
       const tweenEventFrame = new paperMain.Group({
         children: [tweenEventConnector, tweenEventIconBackground, tweenEventIcon, tweenEventDestinationIndicator, tweenEventText],
         data: {
-          id: 'TweenEventFrame',
+          id: 'tweenEventFrame',
           type: 'UIElementChild',
           interactive: true,
           interactiveType: event.id,
-          elementId: 'TweenEventsFrame'
+          elementId: 'tweenEventsFrame'
         },
         parent: tweenEventsFrame,
         // opacity: groupOpacity
@@ -3522,10 +3641,10 @@ export const updateTweenEventsFrame = (state: RootState) => {
           type: 'UIElementChild',
           interactive: true,
           interactiveType: event.id,
-          elementId: 'TweenEventsFrame'
+          elementId: 'tweenEventsFrame'
         }
       });
-      tweenEventFrame.position.y -= (tweenEventFrame.bounds.height + ((1 / paperMain.view.zoom) * 12)) * index;
+      tweenEventFrame.position.y -= (tweenEventFrame.bounds.height + ((1 / paperMain.projects[0].view.zoom) * 12)) * index;
     });
   }
 };
@@ -3538,8 +3657,8 @@ export const updateTweenEventsFrameThunk = () => {
 };
 
 export const updateMeasureGuides = (guides: { top?: string; bottom?: string; left?: string; right?: string; all?: string }, bounds?: paper.Rectangle): void => {
-  const measureGuides = paperMain.project.getItem({ data: { id: 'MeasureGuides' } });
-  const selected = paperMain.project.getItems({ data: { selected: true } });
+  const measureGuides = paperMain.projects[1].getItem({ data: { id: 'measureGuides' } });
+  const selected = getSelectedPaperLayers();
   measureGuides.removeChildren();
   if (selected.length > 0) {
     const selectionBounds = bounds ? bounds : getSelectionBounds();

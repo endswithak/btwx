@@ -70,14 +70,14 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
     const layerItem = selectedById[id];
     switch(paperLayer.data.layerType) {
       case 'Artboard': {
-        const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
-        const mask = paperLayer.getItem({data: { id: 'ArtboardLayersMask' }});
+        const background = paperLayer.getItem({data: { id: 'artboardBackground' }});
+        const mask = paperLayer.getItem({data: { id: 'artboardLayersMask' }});
         background.scale(hor, ver);
         mask.scale(hor, ver);
         break;
       }
       case 'Text': {
-        const background = paperLayer.getItem({data: { id: 'TextBackground' }});
+        const background = paperLayer.getItem({data: { id: 'textBackground' }});
         background.scale(hor, ver);
         break;
       }
@@ -133,14 +133,14 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
     const paperLayer = getPaperLayer(id);
     switch(paperLayer.data.layerType) {
       case 'Artboard': {
-        const background = paperLayer.getItem({data: { id: 'ArtboardBackground' }});
-        const mask = paperLayer.getItem({data: { id: 'ArtboardLayersMask' }});
+        const background = paperLayer.getItem({data: { id: 'artboardBackground' }});
+        const mask = paperLayer.getItem({data: { id: 'artboardLayersMask' }});
         background.pivot = fromPivot;
         mask.pivot = fromPivot;
         break;
       }
       case 'Text': {
-        const background = paperLayer.getItem({data: { id: 'TextBackground' }});
+        const background = paperLayer.getItem({data: { id: 'textBackground' }});
         background.pivot = fromPivot;
         break;
       }

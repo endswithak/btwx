@@ -16,76 +16,76 @@ class MeasureGuide {
       from: this.from,
       to: this.to,
       strokeColor: THEME_PRIMARY_COLOR,
-      strokeWidth: 1 / paperMain.view.zoom,
+      strokeWidth: 1 / paperMain.projects[0].view.zoom,
       insert: false,
       data: {
-        id: 'MeasureGuideLine',
+        id: 'measureGuideLine',
         type: 'UIElementChild',
         interactive: false,
         interactiveType: null,
-        elementId: 'MeasureFrame',
+        elementId: 'measureFrame',
         guide: this.guide
       }
     });
     this.distance = Math.round(measureGuideLine.length);
     const measureGuideLineStartLeg = new paperMain.Path.Line({
-      from: this.guide === 'top' || this.guide === 'bottom' ? new paperMain.Point(this.from.x - ((1 / paperMain.view.zoom) * 4), this.from.y) : new paperMain.Point(this.from.x, this.from.y - ((1 / paperMain.view.zoom) * 4)),
-      to: this.guide === 'top' || this.guide === 'bottom' ? new paperMain.Point(this.from.x + ((1 / paperMain.view.zoom) * 4), this.from.y) : new paperMain.Point(this.from.x, this.from.y + ((1 / paperMain.view.zoom) * 4)),
+      from: this.guide === 'top' || this.guide === 'bottom' ? new paperMain.Point(this.from.x - ((1 / paperMain.projects[0].view.zoom) * 4), this.from.y) : new paperMain.Point(this.from.x, this.from.y - ((1 / paperMain.projects[0].view.zoom) * 4)),
+      to: this.guide === 'top' || this.guide === 'bottom' ? new paperMain.Point(this.from.x + ((1 / paperMain.projects[0].view.zoom) * 4), this.from.y) : new paperMain.Point(this.from.x, this.from.y + ((1 / paperMain.projects[0].view.zoom) * 4)),
       strokeColor: THEME_PRIMARY_COLOR,
-      strokeWidth: 1 / paperMain.view.zoom,
+      strokeWidth: 1 / paperMain.projects[0].view.zoom,
       insert: false,
       data: {
-        id: 'MeasureGuideStartLeg',
+        id: 'measureGuideStartLeg',
         type: 'UIElementChild',
         interactive: false,
         interactiveType: null,
-        elementId: 'MeasureFrame',
+        elementId: 'measureFrame',
         guide: this.guide
       }
     });
     const measureGuideLineEndLeg = new paperMain.Path.Line({
-      from: this.guide === 'top' || this.guide === 'bottom' ? new paperMain.Point(this.to.x - ((1 / paperMain.view.zoom) * 4), this.to.y) : new paperMain.Point(this.to.x, this.to.y - ((1 / paperMain.view.zoom) * 4)),
-      to: this.guide === 'top' || this.guide === 'bottom' ? new paperMain.Point(this.to.x + ((1 / paperMain.view.zoom) * 4), this.to.y) : new paperMain.Point(this.to.x, this.to.y + ((1 / paperMain.view.zoom) * 4)),
+      from: this.guide === 'top' || this.guide === 'bottom' ? new paperMain.Point(this.to.x - ((1 / paperMain.projects[0].view.zoom) * 4), this.to.y) : new paperMain.Point(this.to.x, this.to.y - ((1 / paperMain.projects[0].view.zoom) * 4)),
+      to: this.guide === 'top' || this.guide === 'bottom' ? new paperMain.Point(this.to.x + ((1 / paperMain.projects[0].view.zoom) * 4), this.to.y) : new paperMain.Point(this.to.x, this.to.y + ((1 / paperMain.projects[0].view.zoom) * 4)),
       strokeColor: THEME_PRIMARY_COLOR,
-      strokeWidth: 1 / paperMain.view.zoom,
+      strokeWidth: 1 / paperMain.projects[0].view.zoom,
       insert: false,
       data: {
-        id: 'MeasureGuideEndLeg',
+        id: 'measureGuideEndLeg',
         type: 'UIElementChild',
         interactive: false,
         interactiveType: null,
-        elementId: 'MeasureFrame',
+        elementId: 'measureFrame',
         guide: this.guide
       }
     });
     const measureGuideText = new paperMain.PointText({
       fillColor: 'white',
       fontFamily: 'Space Mono',
-      fontSize: 10 / paperMain.view.zoom,
+      fontSize: 10 / paperMain.projects[0].view.zoom,
       content: this.distance,
       justification: 'center',
       insert: false,
       data: {
-        id: 'MeasureGuideText',
+        id: 'measureGuideText',
         type: 'UIElementChild',
         interactive: false,
         interactiveType: null,
-        elementId: 'MeasureFrame',
+        elementId: 'measureFrame',
         guide: this.guide
       }
     });
     const measureGuideTextBackground = new paperMain.Path.Rectangle({
       point: measureGuideLine.bounds.center,
-      size: [measureGuideText.bounds.width + (8 / paperMain.view.zoom), measureGuideText.bounds.height + (8 / paperMain.view.zoom)],
+      size: [measureGuideText.bounds.width + (8 / paperMain.projects[0].view.zoom), measureGuideText.bounds.height + (8 / paperMain.projects[0].view.zoom)],
       fillColor: THEME_PRIMARY_COLOR,
-      radius: (4 / paperMain.view.zoom),
+      radius: (4 / paperMain.projects[0].view.zoom),
       insert: false,
       data: {
-        id: 'MeasureGuideBackground',
+        id: 'measureGuideBackground',
         type: 'UIElementChild',
         interactive: false,
         interactiveType: null,
-        elementId: 'MeasureFrame',
+        elementId: 'measureFrame',
         guide: this.guide
       }
     });
@@ -94,14 +94,14 @@ class MeasureGuide {
     const measureGuide = new paperMain.Group({
       children: [measureGuideLineStartLeg, measureGuideLine, measureGuideLineEndLeg, measureGuideTextBackground, measureGuideText],
       data: {
-        id: 'MeasureGuide',
+        id: 'measureGuide',
         type: 'UIElement',
         interactive: false,
         interactiveType: null,
-        elementId: 'MeasureFrame',
+        elementId: 'measureFrame',
         guide: this.guide
       },
-      parent: getPaperLayer('MeasureGuides')
+      parent: paperMain.projects[1].getItem({data: {id: 'measureGuides'}})
     });
     if (removeOpts) {
       measureGuide.removeOn({

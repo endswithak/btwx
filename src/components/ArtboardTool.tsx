@@ -44,12 +44,11 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
   const [initialToBounds, setInitialToBounds] = useState<paper.Rectangle>(null);
 
   const resetState = () => {
-    if (getPaperLayer('Tooltip')) {
-      getPaperLayer('Tooltip').remove();
-    }
-    if (getPaperLayer('ArtboardToolPreview')) {
-      getPaperLayer('ArtboardToolPreview').remove();
-    }
+    const UI = paperMain.projects[1];
+    const drawingPreview = UI.getItem({ data: { id: 'drawingPreview' }});
+    const tooltips = UI.getItem({ data: { id: 'tooltips' }});
+    drawingPreview.removeChildren();
+    tooltips.removeChildren();
     setFrom(null);
     setHandle(null);
     setConstrainedDims(null);
@@ -60,20 +59,20 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
   }
 
   const updatePreview = (): void => {
-    if (getPaperLayer('ArtboardToolPreview')) {
-      getPaperLayer('ArtboardToolPreview').remove();
-    }
-    if (getPaperLayer('Tooltip')) {
-      getPaperLayer('Tooltip').remove();
-    }
+    const UI = paperMain.projects[1];
+    const drawingPreview = UI.getItem({ data: { id: 'drawingPreview' }});
+    const tooltips = UI.getItem({ data: { id: 'tooltips' }});
+    drawingPreview.removeChildren();
+    tooltips.removeChildren();
     const nextTooltip = new Tooltip(`${Math.round(toBounds.width)} x ${Math.round(toBounds.height)}`, dragEvent.point, {up: true});
     const nextPreview = new paperMain.Path.Rectangle({
       rectangle: toBounds,
       strokeColor: theme.palette.primary,
-      strokeWidth: 1 / paperMain.view.zoom,
+      strokeWidth: 1 / paperMain.projects[0].view.zoom,
       data: {
         id: 'ArtboardToolPreview'
-      }
+      },
+      parent: drawingPreview
     });
     nextPreview.removeOn({
       up: true

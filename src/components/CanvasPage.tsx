@@ -10,37 +10,32 @@ interface CanvasPageProps {
     [id: string]: Btwx.DocumentImage;
   };
   matrix?: number[];
-  paperProject?: string;
+  projectJSON?: string;
 }
 
 const CanvasPage = (props: CanvasPageProps): ReactElement => {
   const ref = useRef<HTMLCanvasElement>(null);
-  const { paperProject, documentImages, matrix } = props;
-  const [project, setProject] = useState<paper.Project>(null);
+  const { projectJSON, documentImages, matrix } = props;
 
   useEffect(() => {
     if (ref.current) {
+      const canvasWrap = document.getElementById('canvas-container');
       const project = new paperMain.Project(ref.current);
       paperMain.projects.push(project);
       importPaperProject({
-        paperProject,
+        projectJSON,
         documentImages,
-        project
+        projectIndex: 0
       });
-      project.view.viewSize = new paperMain.Size(ref.current.clientWidth, ref.current.clientHeight);
+      project.view.viewSize = new paperMain.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
       project.view.matrix.set(matrix);
-      setProject(project);
-    }
-    return (): void => {
-      if (project) {
-        project.remove();
-      }
     }
   }, []);
 
   return (
     <canvas
-      id={`canvas-page`}
+      id='canvas-page'
+      className='c-canvas__layer c-canvas__layer--page'
       ref={ref} />
   );
 }
@@ -50,13 +45,14 @@ const mapStateToProps = (state: RootState): {
     [id: string]: Btwx.DocumentImage;
   };
   matrix: number[];
-  paperProject: string;
+  projectJSON: string;
 } => {
   const { layer, documentSettings } = state;
+  const page = layer.present.byId['page'] as Btwx.Page;
   return {
     documentImages: documentSettings.images.byId,
     matrix: documentSettings.matrix,
-    paperProject: layer.present.paperProjects['page']
+    projectJSON: page.project
   };
 };
 

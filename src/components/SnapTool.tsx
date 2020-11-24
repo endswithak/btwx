@@ -26,6 +26,7 @@ interface SnapToolProps {
   preserveAspectRatio?: boolean;
   aspectRatio?: number;
   scope?: string[];
+  scopeProjectIndex?: number;
   whiteListLayers?: string[];
   blackListLayers?: string[];
   measure?: boolean;
@@ -36,7 +37,7 @@ const snapToolDebug = false;
 
 const SnapTool = (props: SnapToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { toolEvent, bounds, scope, onUpdate, hitTestZones, snapRule, whiteListLayers, blackListLayers, preserveAspectRatio, aspectRatio, resizeHandle, measure } = props;
+  const { toolEvent, bounds, scope, scopeProjectIndex, onUpdate, hitTestZones, snapRule, whiteListLayers, blackListLayers, preserveAspectRatio, aspectRatio, resizeHandle, measure } = props;
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
   const [xSnapPoint, setXSnapPoint] = useState<Btwx.SnapPoint>(null);
   const [ySnapPoint, setYSnapPoint] = useState<Btwx.SnapPoint>(null);
@@ -54,31 +55,31 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
   const getSnapZones = (currentToBounds: paper.Rectangle, scaleOverride?: number): Btwx.SnapZones => {
     const zoneMin = 0.5;
     const zoneMax = 20;
-    const zoneScale = scaleOverride ? scaleOverride : 0.5 * (8 / paperMain.view.zoom);
+    const zoneScale = scaleOverride ? scaleOverride : 0.5 * (8 / paperMain.projects[0].view.zoom);
     const scale = zoneScale < zoneMin ? zoneMin : zoneScale > zoneMax ? zoneMax : zoneScale;
     const top = hitTestZones.all || hitTestZones.top ? new paperMain.Rectangle({
-      from: new paperMain.Point(paperMain.view.bounds.left, currentToBounds.top - scale),
-      to: new paperMain.Point(paperMain.view.bounds.right, currentToBounds.top + scale)
+      from: new paperMain.Point(paperMain.projects[0].view.bounds.left, currentToBounds.top - scale),
+      to: new paperMain.Point(paperMain.projects[0].view.bounds.right, currentToBounds.top + scale)
     }) : null;
     const middle = hitTestZones.all || hitTestZones.middle ? new paperMain.Rectangle({
-      from: new paperMain.Point(paperMain.view.bounds.left, currentToBounds.center.y - scale),
-      to: new paperMain.Point(paperMain.view.bounds.right, currentToBounds.center.y + scale)
+      from: new paperMain.Point(paperMain.projects[0].view.bounds.left, currentToBounds.center.y - scale),
+      to: new paperMain.Point(paperMain.projects[0].view.bounds.right, currentToBounds.center.y + scale)
     }) : null;
     const bottom = hitTestZones.all || hitTestZones.bottom ? new paperMain.Rectangle({
-      from: new paperMain.Point(paperMain.view.bounds.left, currentToBounds.bottom - scale),
-      to: new paperMain.Point(paperMain.view.bounds.right, currentToBounds.bottom + scale)
+      from: new paperMain.Point(paperMain.projects[0].view.bounds.left, currentToBounds.bottom - scale),
+      to: new paperMain.Point(paperMain.projects[0].view.bounds.right, currentToBounds.bottom + scale)
     }) : null;
     const left = hitTestZones.all || hitTestZones.left ? new paperMain.Rectangle({
-      from: new paperMain.Point(currentToBounds.left - scale, paperMain.view.bounds.top),
-      to: new paperMain.Point(currentToBounds.left + scale, paperMain.view.bounds.bottom)
+      from: new paperMain.Point(currentToBounds.left - scale, paperMain.projects[0].view.bounds.top),
+      to: new paperMain.Point(currentToBounds.left + scale, paperMain.projects[0].view.bounds.bottom)
     }) : null;
     const center = hitTestZones.all || hitTestZones.center ? new paperMain.Rectangle({
-      from: new paperMain.Point(currentToBounds.center.x - scale, paperMain.view.bounds.top),
-      to: new paperMain.Point(currentToBounds.center.x + scale, paperMain.view.bounds.bottom)
+      from: new paperMain.Point(currentToBounds.center.x - scale, paperMain.projects[0].view.bounds.top),
+      to: new paperMain.Point(currentToBounds.center.x + scale, paperMain.projects[0].view.bounds.bottom)
     }) : null;
     const right = hitTestZones.all || hitTestZones.right ? new paperMain.Rectangle({
-      from: new paperMain.Point(currentToBounds.right - scale, paperMain.view.bounds.top),
-      to: new paperMain.Point(currentToBounds.right + scale, paperMain.view.bounds.bottom)
+      from: new paperMain.Point(currentToBounds.right - scale, paperMain.projects[0].view.bounds.top),
+      to: new paperMain.Point(currentToBounds.right + scale, paperMain.projects[0].view.bounds.bottom)
     }) : null;
     return {
       top,
@@ -91,106 +92,151 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
   }
 
   const getGuideLayersBySnapZone = (snapZones: Btwx.SnapZones, snapZone: Btwx.SnapZoneType): paper.Item[] => {
-    return paperMain.project.getItem({ data: { id: 'page' } }).getItems({
-      data: (data: any) => {
-        const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
-        const isTopScopeGroup = data.id && data.layerType === 'Group' && data.id === scope[scope.length - 1];
-        if (whiteListLayers && whiteListLayers.length > 0) {
-          const whiteListed = data.scope && whiteListLayers.includes(data.id) || data.scope.some((id: string) => whiteListLayers.includes(id));
-          return whiteListed && isScopeLayer && !isTopScopeGroup;
-        } else if (blackListLayers && blackListLayers.length > 0) {
-          const notBlackListed = data.scope && !blackListLayers.includes(data.id) && data.scope.every((id: string) => !blackListLayers.includes(id));
-          return notBlackListed && isScopeLayer && !isTopScopeGroup;
-        } else {
-          return isScopeLayer && !isTopScopeGroup;
+    const getProjectSnapLayers = (projectIndex: number): paper.Item[] => {
+      return paperMain.projects[projectIndex].getItems({
+        data: (data: any) => {
+          const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
+          const isTopScopeGroup = data.id && data.layerType === 'Group' && data.id === scope[scope.length - 1];
+          if (whiteListLayers && whiteListLayers.length > 0) {
+            const whiteListed = data.scope && whiteListLayers.includes(data.id) || data.scope.some((id: string) => whiteListLayers.includes(id));
+            return whiteListed && isScopeLayer && !isTopScopeGroup;
+          } else if (blackListLayers && blackListLayers.length > 0) {
+            const notBlackListed = data.scope && !blackListLayers.includes(data.id) && data.scope.every((id: string) => !blackListLayers.includes(id));
+            return notBlackListed && isScopeLayer && !isTopScopeGroup;
+          } else {
+            return isScopeLayer && !isTopScopeGroup;
+          }
+        },
+        overlapping: paperMain.projects[0].view.bounds,
+        bounds: (bounds: paper.Rectangle) => {
+          switch(snapZone) {
+            case 'top':
+            case 'middle':
+            case 'bottom':
+              return (
+                bounds.topCenter.isInside(snapZones[snapZone]) ||
+                bounds.center.isInside(snapZones[snapZone]) ||
+                bounds.bottomCenter.isInside(snapZones[snapZone])
+              );
+            case 'left':
+            case 'center':
+            case 'right':
+              return (
+                bounds.leftCenter.isInside(snapZones[snapZone]) ||
+                bounds.center.isInside(snapZones[snapZone]) ||
+                bounds.rightCenter.isInside(snapZones[snapZone])
+              );
+          }
         }
-      },
-      overlapping: paperMain.view.bounds,
-      bounds: (bounds: paper.Rectangle) => {
-        switch(snapZone) {
-          case 'top':
-          case 'middle':
-          case 'bottom':
-            return (
-              bounds.topCenter.isInside(snapZones[snapZone]) ||
-              bounds.center.isInside(snapZones[snapZone]) ||
-              bounds.bottomCenter.isInside(snapZones[snapZone])
-            );
-          case 'left':
-          case 'center':
-          case 'right':
-            return (
-              bounds.leftCenter.isInside(snapZones[snapZone]) ||
-              bounds.center.isInside(snapZones[snapZone]) ||
-              bounds.rightCenter.isInside(snapZones[snapZone])
-            );
+      });
+    }
+    if (scopeProjectIndex !== 0) {
+      return getProjectSnapLayers(scopeProjectIndex);
+    } else {
+      return paperMain.projects.reduce((result, current, index) => {
+        if (index !== 1) {
+          const projectSnapLayers = getProjectSnapLayers(index);
+          if (projectSnapLayers && projectSnapLayers.length > 0) {
+            result = [...result, ...projectSnapLayers];
+          }
         }
-      }
-    });
+        return result;
+      }, []);
+    }
   }
 
   const getYSnapToLayer = (snapZones: Btwx.SnapZones): paper.Item => {
-    return paperMain.project.getItem({ data: { id: 'page' } }).getItem({
-      data: (data: any) => {
-        const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
-        const isTopScopeGroup = data.id && data.layerType === 'Group' && data.id === scope[scope.length - 1];
-        if (whiteListLayers && whiteListLayers.length > 0) {
-          const whiteListed = data.scope && whiteListLayers.includes(data.id) || data.scope.some((id: string) => whiteListLayers.includes(id));
-          return whiteListed && isScopeLayer && !isTopScopeGroup;
-        } else if (blackListLayers && blackListLayers.length > 0) {
-          const notBlackListed = data.scope && !blackListLayers.includes(data.id) && data.scope.every((id: string) => !blackListLayers.includes(id));
-          return notBlackListed && isScopeLayer && !isTopScopeGroup;
-        } else {
-          return isScopeLayer && !isTopScopeGroup;
+    const getProjectSnapLayer = (projectIndex: number): paper.Item => {
+      return paperMain.projects[projectIndex].getItem({
+        data: (data: any) => {
+          const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
+          const isTopScopeGroup = data.id && data.layerType === 'Group' && data.id === scope[scope.length - 1];
+          if (whiteListLayers && whiteListLayers.length > 0) {
+            const whiteListed = data.scope && whiteListLayers.includes(data.id) || data.scope.some((id: string) => whiteListLayers.includes(id));
+            return whiteListed && isScopeLayer && !isTopScopeGroup;
+          } else if (blackListLayers && blackListLayers.length > 0) {
+            const notBlackListed = data.scope && !blackListLayers.includes(data.id) && data.scope.every((id: string) => !blackListLayers.includes(id));
+            return notBlackListed && isScopeLayer && !isTopScopeGroup;
+          } else {
+            return isScopeLayer && !isTopScopeGroup;
+          }
+        },
+        overlapping: paperMain.projects[0].view.bounds,
+        bounds: (bounds: paper.Rectangle) => {
+          return (
+            bounds.topCenter.isInside(snapZones.top) ||
+            bounds.center.isInside(snapZones.top) ||
+            bounds.bottomCenter.isInside(snapZones.top) ||
+            bounds.topCenter.isInside(snapZones.middle) ||
+            bounds.center.isInside(snapZones.middle) ||
+            bounds.bottomCenter.isInside(snapZones.middle) ||
+            bounds.topCenter.isInside(snapZones.bottom) ||
+            bounds.center.isInside(snapZones.bottom) ||
+            bounds.bottomCenter.isInside(snapZones.bottom)
+          )
         }
-      },
-      overlapping: paperMain.view.bounds,
-      bounds: (bounds: paper.Rectangle) => {
-        return (
-          bounds.topCenter.isInside(snapZones.top) ||
-          bounds.center.isInside(snapZones.top) ||
-          bounds.bottomCenter.isInside(snapZones.top) ||
-          bounds.topCenter.isInside(snapZones.middle) ||
-          bounds.center.isInside(snapZones.middle) ||
-          bounds.bottomCenter.isInside(snapZones.middle) ||
-          bounds.topCenter.isInside(snapZones.bottom) ||
-          bounds.center.isInside(snapZones.bottom) ||
-          bounds.bottomCenter.isInside(snapZones.bottom)
-        )
-      }
-    });
+      });
+    }
+    if (scopeProjectIndex !== 0) {
+      return getProjectSnapLayer(scopeProjectIndex);
+    } else {
+      return paperMain.projects.reduce((result: paper.Item, current, index) => {
+        if (index !== 1) {
+          const projectSnapLayer = getProjectSnapLayer(index);
+          if (projectSnapLayer) {
+            result = projectSnapLayer;
+          }
+        }
+        return result;
+      }, null);
+    }
   }
 
   const getXSnapToLayer = (snapZones: Btwx.SnapZones): paper.Item => {
-    return paperMain.project.getItem({ data: { id: 'page' } }).getItem({
-      data: (data: any) => {
-        const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
-        const isTopScopeGroup = data.id && data.layerType === 'Group' && data.id === scope[scope.length - 1];
-        if (whiteListLayers && whiteListLayers.length > 0) {
-          const whiteListed = data.scope && whiteListLayers.includes(data.id) || data.scope.some((id: string) => whiteListLayers.includes(id));
-          return whiteListed && isScopeLayer && !isTopScopeGroup;
-        } else if (blackListLayers && blackListLayers.length > 0) {
-          const notBlackListed = data.scope && !blackListLayers.includes(data.id) && data.scope.every((id: string) => !blackListLayers.includes(id));
-          return notBlackListed && isScopeLayer && !isTopScopeGroup;
-        } else {
-          return isScopeLayer && !isTopScopeGroup;
+    const getProjectSnapLayer = (projectIndex: number): paper.Item => {
+      return paperMain.projects[projectIndex].getItem({
+        data: (data: any) => {
+          const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
+          const isTopScopeGroup = data.id && data.layerType === 'Group' && data.id === scope[scope.length - 1];
+          if (whiteListLayers && whiteListLayers.length > 0) {
+            const whiteListed = data.scope && whiteListLayers.includes(data.id) || data.scope.some((id: string) => whiteListLayers.includes(id));
+            return whiteListed && isScopeLayer && !isTopScopeGroup;
+          } else if (blackListLayers && blackListLayers.length > 0) {
+            const notBlackListed = data.scope && !blackListLayers.includes(data.id) && data.scope.every((id: string) => !blackListLayers.includes(id));
+            return notBlackListed && isScopeLayer && !isTopScopeGroup;
+          } else {
+            return isScopeLayer && !isTopScopeGroup;
+          }
+        },
+        overlapping: paperMain.projects[0].view.bounds,
+        bounds: (bounds: paper.Rectangle) => {
+          return (
+            bounds.leftCenter.isInside(snapZones.left) ||
+            bounds.center.isInside(snapZones.left) ||
+            bounds.rightCenter.isInside(snapZones.left) ||
+            bounds.leftCenter.isInside(snapZones.center) ||
+            bounds.center.isInside(snapZones.center) ||
+            bounds.rightCenter.isInside(snapZones.center) ||
+            bounds.leftCenter.isInside(snapZones.right) ||
+            bounds.center.isInside(snapZones.right) ||
+            bounds.rightCenter.isInside(snapZones.right)
+          )
         }
-      },
-      overlapping: paperMain.view.bounds,
-      bounds: (bounds: paper.Rectangle) => {
-        return (
-          bounds.leftCenter.isInside(snapZones.left) ||
-          bounds.center.isInside(snapZones.left) ||
-          bounds.rightCenter.isInside(snapZones.left) ||
-          bounds.leftCenter.isInside(snapZones.center) ||
-          bounds.center.isInside(snapZones.center) ||
-          bounds.rightCenter.isInside(snapZones.center) ||
-          bounds.leftCenter.isInside(snapZones.right) ||
-          bounds.center.isInside(snapZones.right) ||
-          bounds.rightCenter.isInside(snapZones.right)
-        )
-      }
-    });
+      });
+    }
+    if (scopeProjectIndex !== 0) {
+      return getProjectSnapLayer(scopeProjectIndex);
+    } else {
+      return paperMain.projects.reduce((result: paper.Item, current, index) => {
+        if (index !== 1) {
+          const projectSnapLayer = getProjectSnapLayer(index);
+          if (projectSnapLayer) {
+            result = projectSnapLayer;
+          }
+        }
+        return result;
+      }, null);
+    }
   }
 
   const getYSnapPoint = (snapZones: Btwx.SnapZones): Btwx.SnapPoint => {
@@ -616,11 +662,12 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
   }, [toolEvent, preserveAspectRatio]);
 
   useEffect(() => {
-    setSnapBreakThreshholdMin(-4 / paperMain.view.zoom);
-    setSnapBreakThreshholdMax(4 / paperMain.view.zoom);
+    setSnapBreakThreshholdMin(-4 / paperMain.projects[0].view.zoom);
+    setSnapBreakThreshholdMax(4 / paperMain.projects[0].view.zoom);
     return () => {
-      const measureGuides = getPaperLayer('MeasureGuides');
-      const snapGuides = getPaperLayer('SnapGuides');
+      const UI = paperMain.projects[1];
+      const measureGuides = UI.getItem({data: {id: 'measureGuides'}});
+      const snapGuides =  UI.getItem({data: {id: 'snapGuides'}});
       measureGuides.removeChildren();
       snapGuides.removeChildren();
     }
@@ -628,8 +675,9 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
 
   useEffect(() => {
     if (snapBounds) {
-      const measureGuides = getPaperLayer('MeasureGuides');
-      const snapGuides = getPaperLayer('SnapGuides');
+      const UI = paperMain.projects[1];
+      const measureGuides = UI.getItem({data: {id: 'measureGuides'}});
+      const snapGuides =  UI.getItem({data: {id: 'snapGuides'}});
       measureGuides.removeChildren();
       snapGuides.removeChildren();
       const guideSnapZones = getSnapZones(snapBounds, 0.5);
@@ -845,11 +893,14 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   scope: string[];
+  scopeProjectIndex: number;
 } => {
   const { layer } = state;
   const scope = layer.present.scope;
+  const scopeProjectIndex = layer.present.scopeProjectIndex;
   return {
-    scope
+    scope,
+    scopeProjectIndex
   };
 };
 

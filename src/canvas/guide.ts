@@ -1,6 +1,5 @@
 import { paperMain } from './index';
 import { THEME_GUIDE_COLOR } from '../constants';
-import { getPaperLayer } from '../store/utils/paper';
 
 class Guide {
   from: paper.Point;
@@ -11,21 +10,20 @@ class Guide {
       from: from,
       to: to,
       strokeColor: THEME_GUIDE_COLOR,
-      strokeWidth: 1 / paperMain.view.zoom,
+      strokeWidth: 1 / paperMain.projects[0].view.zoom,
       data: {
-        id: 'Guide',
-        type: 'UIElement',
+        id: `${guideType}Guide`,
+        type: 'UIElementChild',
         interactive: false,
         interactiveType: null,
-        elementId: 'Guide',
-        guideType: guideType
+        elementId: `${guideType}Guide`
       },
       parent: (() => {
         switch(guideType) {
           case 'snap':
-            return getPaperLayer('SnapGuides');
+            return paperMain.projects[1].getItem({data: { id: 'snapGuides' }});
           case 'static':
-            return getPaperLayer('StaticGuides');
+            return paperMain.projects[1].getItem({data: { id: 'staticGuides' }});
         }
       })()
     });

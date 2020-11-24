@@ -16,7 +16,7 @@ const MeasureFrame = (props: MeasureFrameProps): ReactElement => {
   useEffect(() => {
     updateMeasureGuides();
     return () => {
-      const measureFrame = paperMain.project.getItem({ data: { id: 'MeasureFrame' } });
+      const measureFrame = paperMain.project.getItem({ data: { id: 'measureGuides' } });
       measureFrame.removeChildren();
     }
   }, [selected, hover]);

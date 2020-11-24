@@ -43,11 +43,11 @@ const App = (): ReactElement => {
           ready
           ? <>
               {/* Canvas UI */}
-              {/* <ActiveArtboardFrameWrap />
+              <ActiveArtboardFrameWrap />
               <HoverFrameWrap />
               <SelectionFrameWrap />
               <MeasureFrameWrap />
-              <TweenEventsFrameWrap /> */}
+              {/* <TweenEventsFrameWrap /> */}
               {/* Modals */}
               {/* <EaseEditorWrap /> */}
               {/* <ArtboardPresetEditorWrap />
