@@ -5,7 +5,7 @@ declare namespace Btwx {
 
   type ResizeHandle = 'topLeft' | 'topCenter' | 'topRight' | 'bottomLeft' | 'bottomCenter' | 'bottomRight' | 'leftCenter' | 'rightCenter';
 
-  type LineHandle = 'from' | 'to';
+  type LineHandle = 'lineFrom' | 'lineTo' | 'lineMove';
 
   type SelectionFrameHandle = ResizeHandle | LineHandle | 'move' | 'none' | 'all';
 

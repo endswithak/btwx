@@ -1976,8 +1976,7 @@ export interface DuplicateLayer {
 
 export interface DuplicateLayersPayload {
   layers: string[];
-  offset?: paper.Point;
-  includeInHistory?: boolean;
+  offset?: Btwx.Point;
 }
 
 export interface DuplicateLayers {

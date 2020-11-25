@@ -725,29 +725,29 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
         }
       });
       if (measure) {
-        let measureGuides: { top?: string; bottom?: string; left?: string; right?: string; all?: string } = null;
+        let measureTo: { top?: paper.Rectangle; bottom?: paper.Rectangle; left?: paper.Rectangle; right?: paper.Rectangle; all?: paper.Rectangle } = null;
         if (xSnapPoint) {
           const closestLayer = getClosestPaperLayer(snapBounds.center, xGuideLayers);
           if (closestLayer && !snapBounds.intersects(closestLayer.bounds, 1)) {
-            if (!measureGuides) {
-              measureGuides = {};
+            if (!measureTo) {
+              measureTo = {};
             }
-            measureGuides['top'] = closestLayer.data.id;
-            measureGuides['bottom'] = closestLayer.data.id;
+            measureTo['top'] = closestLayer.bounds;
+            measureTo['bottom'] = closestLayer.bounds;
           }
         }
         if (ySnapPoint) {
           const closestLayer = getClosestPaperLayer(snapBounds.center, yGuideLayers);
           if (closestLayer && !snapBounds.intersects(closestLayer.bounds, 1)) {
-            if (!measureGuides) {
-              measureGuides = {};
+            if (!measureTo) {
+              measureTo = {};
             }
-            measureGuides['left'] = closestLayer.data.id;
-            measureGuides['right'] = closestLayer.data.id;
+            measureTo['left'] = closestLayer.bounds;
+            measureTo['right'] = closestLayer.bounds;
           }
         }
-        if (measureGuides) {
-          updateMeasureGuides(measureGuides, snapBounds);
+        if (measureTo) {
+          updateMeasureGuides(snapBounds, measureTo);
         }
       }
     }

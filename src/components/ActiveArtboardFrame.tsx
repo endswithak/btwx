@@ -3,22 +3,22 @@ import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { updateActiveArtboardFrame } from '../store/actions/layer';
 import { paperMain } from '../canvas';
+import { getActiveArtboardBounds } from '../store/selectors/layer';
 
 interface ActiveArtboardFrameProps {
-  activeArtboard?: string;
-  activeArtboardItemFrame?: Btwx.Frame;
+  activeArtboardBounds?: paper.Rectangle;
 }
 
 const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
-  const { activeArtboard, activeArtboardItemFrame } = props;
+  const { activeArtboardBounds } = props;
 
   useEffect(() => {
-    updateActiveArtboardFrame(activeArtboardItemFrame);
+    updateActiveArtboardFrame(activeArtboardBounds);
     return () => {
       const activeArtboardFrame = paperMain.projects[1].getItem({ data: { id: 'activeArtboardFrame' } });
       activeArtboardFrame.removeChildren();
     }
-  }, [activeArtboard, activeArtboardItemFrame]);
+  }, [activeArtboardBounds]);
 
   return (
     <></>
@@ -26,16 +26,12 @@ const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState): {
-  activeArtboard: string;
-  activeArtboardItemFrame: Btwx.Frame;
+  activeArtboardBounds: paper.Rectangle;
 } => {
-  const { layer } = state;
-  const activeArtboard = layer.present.activeArtboard;
-  const activeArtboardItem = layer.present.byId[activeArtboard] as Btwx.Artboard;
-  const activeArtboardItemFrame = activeArtboardItem.frame;
-  return { activeArtboard, activeArtboardItemFrame };
+  const activeArtboardBounds = getActiveArtboardBounds(state);
+  return { activeArtboardBounds };
 };
 
 export default connect(
-  mapStateToProps
+  mapStateToProps,
 )(ActiveArtboardFrame);

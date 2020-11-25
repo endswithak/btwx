@@ -4,11 +4,6 @@ import Topbar from './Topbar';
 import EaseEditorWrap from './EaseEditorWrap';
 import Main from './Main';
 import { ThemeContext } from './ThemeProvider';
-import ActiveArtboardFrameWrap from './ActiveArtboardFrameWrap';
-import SelectionFrameWrap from './SelectionFrameWrap';
-import MeasureFrameWrap from './MeasureFrameWrap';
-import TweenEventsFrameWrap from './TweenEventsFrameWrap';
-import HoverFrameWrap from './HoverFrameWrap';
 import ArtboardPresetEditorWrap from './ArtboardPresetEditorWrap';
 import ContextMenuWrap from './ContextMenuWrap';
 
@@ -18,7 +13,9 @@ const App = (): ReactElement => {
 
   const handleResize = (): void => {
     const canvasWrap = document.getElementById('canvas-container');
-    paperMain.view.viewSize = new paperMain.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
+    paperMain.projects.forEach((project) => {
+      project.view.viewSize = new paperMain.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
+    });
   }
 
   useEffect(() => {
@@ -43,11 +40,6 @@ const App = (): ReactElement => {
           ready
           ? <>
               {/* Canvas UI */}
-              <ActiveArtboardFrameWrap />
-              <HoverFrameWrap />
-              <SelectionFrameWrap />
-              <MeasureFrameWrap />
-              {/* <TweenEventsFrameWrap /> */}
               {/* Modals */}
               {/* <EaseEditorWrap /> */}
               {/* <ArtboardPresetEditorWrap />

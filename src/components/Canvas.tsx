@@ -70,9 +70,9 @@ const Canvas = (props: CanvasProps): ReactElement => {
     handleHitResult(e, 'mouseDown');
   }
 
-  // const handleMouseUp = (e: any): void => {
-  //   handleHitResult(e, 'mouseUp');
-  // }
+  const handleMouseUp = (e: any): void => {
+    handleHitResult(e, 'mouseUp');
+  }
 
   const handleDoubleClick = (e: any): void => {
     handleHitResult(e, 'doubleClick');
@@ -102,6 +102,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
       ref={ref}
       onMouseMove={ready && interactionEnabled ? handleMouseMove : null}
       onMouseDown={ready ? handleMouseDown : null}
+      onMouseUp={ready ? handleMouseUp : null}
       onDoubleClick={ready ? handleDoubleClick : null}
       onContextMenu={ready ? handleContextMenu : null}
       onWheel={ready ? handleWheel : null}
@@ -125,6 +126,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
             <ArtboardTool />
             <ShapeTool />
             <DragTool />
+            <AreaSelectTool />
             {/* <ResizeTool />
             <AreaSelectTool />
             <LineTool />

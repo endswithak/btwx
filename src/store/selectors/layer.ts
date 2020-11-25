@@ -20,6 +20,7 @@ export const getTweensById = (state: RootState): { [id: string]: Btwx.Tween } =>
 export const getLayerById = (state: RootState, id: string): Btwx.Layer => state.layer.present.byId[id];
 export const getLayerChildren = (state: RootState, id: string): string[] => state.layer.present.byId[id].children;
 export const getPageChildren = (state: RootState): string[] => state.layer.present.byId['page'].children;
+export const getHover = (state: RootState): string => state.layer.present.hover;
 export const getHoverItem = (state: RootState): Btwx.Layer => state.layer.present.byId[state.layer.present.hover];
 export const getEventDrawerEvent = (state: RootState): string => state.tweenDrawer.event;
 export const getEventDrawerSort = (state: RootState): string => state.tweenDrawer.eventSort;
@@ -164,11 +165,18 @@ export const getSelectedWithParentsById = createSelector(
 );
 
 export const getSelectedTopLeft = createSelector(
-  [ getSelectedById ],
-  (selectedById) => {
-    return Object.keys(selectedById).reduce((result: paper.Point, current: string) => {
-      const layerItem = selectedById[current] as Btwx.Layer;
-      const topLeft = new paperMain.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
+  [ getSelected, getLayersById ],
+  (selected, byId) => {
+    return selected.reduce((result: paper.Point, current: string) => {
+      // const { layerItem, paperLayer } = getItemLayers({byId} as LayerState, current);
+      // const topLeft = paperLayer.bounds.topLeft;
+      const layerItem = byId[current] as Btwx.Layer;
+      const hasArtboard = layerItem.artboardLayer && (layerItem as Btwx.ArtboardLayer).artboard;
+      let topLeft = new paperMain.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
+      if (hasArtboard) {
+        const artboardItem = byId[(layerItem as Btwx.ArtboardLayer).artboard] as Btwx.Artboard;
+        topLeft = topLeft.add(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y));
+      }
       if (result === null) {
         return topLeft;
       } else {
@@ -179,11 +187,18 @@ export const getSelectedTopLeft = createSelector(
 );
 
 export const getSelectedBottomRight = createSelector(
-  [ getSelectedById ],
-  (selectedById) => {
-    return Object.keys(selectedById).reduce((result: paper.Point, current: string) => {
-      const layerItem = selectedById[current] as Btwx.Layer;
-      const bottomRight = new paperMain.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
+  [ getSelected, getLayersById ],
+  (selected, byId) => {
+    return selected.reduce((result: paper.Point, current: string) => {
+      // const { layerItem, paperLayer } = getItemLayers({byId} as LayerState, current);
+      // const bottomRight = paperLayer.bounds.bottomRight;
+      const layerItem = byId[current] as Btwx.Layer;
+      const hasArtboard = layerItem.artboardLayer && (layerItem as Btwx.ArtboardLayer).artboard;
+      let bottomRight = new paperMain.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
+      if (hasArtboard) {
+        const artboardItem = byId[(layerItem as Btwx.ArtboardLayer).artboard] as Btwx.Artboard;
+        bottomRight = bottomRight.add(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y));
+      }
       if (result === null) {
         return bottomRight;
       } else {
@@ -202,6 +217,33 @@ export const getSelectedBounds = createSelector(
         to: bottomRight
       })
     : null as paper.Rectangle;
+  }
+);
+
+export const getActiveArtboardBounds = createSelector(
+  [ getActiveArtboard, getLayersById ],
+  (activeArtboard, byId) => {
+    if (activeArtboard) {
+      const artboardItem = byId[activeArtboard];
+      return new paperMain.Rectangle({
+        from: new paperMain.Point(artboardItem.frame.x - (artboardItem.frame.width / 2), artboardItem.frame.y - (artboardItem.frame.height / 2)),
+        to: new paperMain.Point(artboardItem.frame.x + (artboardItem.frame.width / 2), artboardItem.frame.y + (artboardItem.frame.height / 2))
+      })
+    } else {
+      return null;
+    }
+  }
+);
+
+export const getHoverPaperItem = createSelector(
+  [ getHover, getLayersById ],
+  (hover, byId) => {
+    if (hover) {
+      const { layerItem, paperLayer } = getItemLayers({byId} as LayerState, hover);
+      return paperLayer;
+    } else {
+      return null;
+    }
   }
 );
 
@@ -952,43 +994,36 @@ export const getLayersBounds = (store: LayerState, layers: string[], absolute?: 
   });
 };
 
-export const getSelectionTopLeft = (providedSelection?: paper.Item[]): paper.Point => {
-  const selected = providedSelection ? providedSelection : paperMain.project.getItems({ data: { selected: true } });
-  const paperLayerPoints = selected.reduce((result, current) => {
-    if (current) {
-      if (current.data.layerType === 'Artboard') {
-        const background = current.getItem({data: { id: 'artboardBackground' }});
-        return [...result, background.bounds.topLeft];
-      } else {
-        return [...result, current.bounds.topLeft];
-      }
+export const getSelectionTopLeft = (selected: paper.Item[]): paper.Point => {
+  return selected.reduce((result: paper.Point, current: paper.Item) => {
+    const isArtboard = current.data.layerType === 'Artboard';
+    const artboardBackground = isArtboard ? current.getItem({data: { id: 'artboardBackground' }}) : null;
+    const topLeft = isArtboard ? artboardBackground.bounds.topLeft : current.bounds.topLeft;
+    if (result === null) {
+      return topLeft;
     } else {
-      return result;
+      return paper.Point.min(result, topLeft);
     }
-  }, []);
-  return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.min) : null;
+  }, null) as paper.Point;
 };
 
-export const getSelectionBottomRight = (providedSelection?: paper.Item[]): paper.Point => {
-  const selected = providedSelection ? providedSelection : paperMain.project.getItems({ data: { selected: true } });
-  const paperLayerPoints = selected.reduce((result, current) => {
-    if (current) {
-      if (current.data.layerType === 'Artboard') {
-        const background = current.getItem({data: { id: 'artboardBackground' }});
-        return [...result, background.bounds.bottomRight];
-      } else {
-        return [...result, current.bounds.bottomRight];
-      }
+export const getSelectionBottomRight = (selected: paper.Item[]): paper.Point => {
+  return selected.reduce((result: paper.Point, current: paper.Item) => {
+    const isArtboard = current.data.layerType === 'Artboard';
+    const artboardBackground = isArtboard ? current.getItem({data: { id: 'artboardBackground' }}) : null;
+    const bottomRight = isArtboard ? artboardBackground.bounds.bottomRight : current.bounds.bottomRight;
+    if (result === null) {
+      return bottomRight;
     } else {
-      return result;
+      return paper.Point.max(result, bottomRight);
     }
-  }, []);
-  return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.max) : null;
+  }, null) as paper.Point;
 };
 
 export const getSelectionBounds = (providedSelection?: paper.Item[]): paper.Rectangle => {
-  const topLeft = getSelectionTopLeft(providedSelection);
-  const bottomRight = getSelectionBottomRight(providedSelection);
+  const selection = providedSelection ? providedSelection : getSelectedPaperLayers();
+  const topLeft = getSelectionTopLeft(selection);
+  const bottomRight = getSelectionBottomRight(selection);
   if (topLeft && bottomRight) {
     return new paper.Rectangle({
       from: topLeft,
@@ -999,14 +1034,14 @@ export const getSelectionBounds = (providedSelection?: paper.Item[]): paper.Rect
   }
 };
 
-export const getHoverBounds = (): paper.Rectangle => {
-  const hoverPaperLayer = paperMain.project.getItem({data: { hover: true }});
-  if (hoverPaperLayer) {
-    return hoverPaperLayer.bounds;
-  } else {
-    return null;
-  }
-};
+// export const getHoverBounds = (): paper.Rectangle => {
+//   const hoverPaperLayer = paperMain.project.getItem({data: { hover: true }});
+//   if (hoverPaperLayer) {
+//     return hoverPaperLayer.bounds;
+//   } else {
+//     return null;
+//   }
+// };
 
 export const getSelectionCenter = (providedSelection?: paper.Item[]): paper.Point => {
   const topLeft = getSelectionTopLeft(providedSelection);

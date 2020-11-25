@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useEffect, ReactElement, useState, useCallback } from 'react';
-import throttle from 'lodash.throttle';
+import React, { useEffect, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getLayerProjectIndex, getPaperLayer, getPaperLayersBounds, getSelectedProjectIndex } from '../store/selectors/layer';
@@ -9,7 +8,7 @@ import { THEME_PRIMARY_COLOR } from '../constants';
 import { setCanvasDragging } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasDraggingPayload } from '../store/actionTypes/canvasSettings';
 import { moveLayers, duplicateLayers, updateSelectionFrame } from '../store/actions/layer';
-import { LayerTypes, MoveLayersPayload, DuplicateLayersPayload, RemoveDuplicatedLayersPayload } from '../store/actionTypes/layer';
+import { LayerTypes, MoveLayersPayload, DuplicateLayersPayload } from '../store/actionTypes/layer';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
 
@@ -28,8 +27,7 @@ interface DragToolStateProps {
 interface DragToolDispatchProps {
   setCanvasDragging?(payload: SetCanvasDraggingPayload): CanvasSettingsTypes;
   moveLayers?(payload: MoveLayersPayload): LayerTypes;
-  duplicateLayers?(payload: DuplicateLayersPayload): Promise<string[]>;
-  removeDuplicatedLayersThunk?(payload: RemoveDuplicatedLayersPayload): Promise<string[]>;
+  duplicateLayers?(payload: DuplicateLayersPayload): LayerTypes;
 }
 
 type DragToolProps = (
@@ -58,42 +56,37 @@ const DragTool = (props: DragToolProps): ReactElement => {
     setSnapBounds(null);
     setMinDistance(0);
     setOriginalPaperSelection(null);
+    setSelectionOutlines(null);
   }
 
-  const updateDuplicatePreview = (am: boolean, so: paper.Group, tb: paper.Rectangle) => {
+  const updateDuplicatePreview = () => {
     const ui = paperMain.projects[1];
     const drawingPreview = ui.getItem({data: {id: 'drawingPreview'}});
     drawingPreview.removeChildren();
-    if (am) {
-      const newPreview = so.clone({insert: false});
-      newPreview.position = tb.center;
+    if (altModifier && selectionOutlines) {
+      const newPreview = selectionOutlines.clone({insert: false});
+      newPreview.position = toBounds.center;
       drawingPreview.addChild(newPreview);
     }
   }
 
-  const throttleDrag = useCallback(
-    throttle((tb: paper.Rectangle, fb: paper.Rectangle, selected: string[], ops: paper.Item[], dh: boolean, am: boolean, so: paper.Group) => {
-      const translate = {
-        x: tb.center.x - fb.center.x,
-        y: tb.center.y - fb.center.y
-      };
-      if (am) {
-        updateDuplicatePreview(am, so, tb);
-      } else {
-        selected.forEach((id, index) => {
-          const paperLayer = getPaperLayer(id, selectedProjectIndex[id]);
-          const ogLayer = ops[index];
-          if (paperLayer && ogLayer) {
-            const absPosition = ogLayer.position;
-            paperLayer.position.x = absPosition.x + translate.x;
-            paperLayer.position.y = absPosition.y + translate.y;
-          }
-        });
-        updateSelectionFrame(dh ? 'move' : 'none');
-      }
-    }, 25),
-    []
-  );
+  const translateLayers = (): void => {
+    const vector = toBounds.center.subtract(fromBounds.center);
+    if (altModifier) {
+      updateDuplicatePreview();
+    } else {
+      selected.forEach((id, index) => {
+        const paperLayer = getPaperLayer(id, selectedProjectIndex[id]);
+        const ogLayer = originalPaperSelection[index];
+        if (paperLayer && ogLayer) {
+          const absPosition = ogLayer.position;
+          paperLayer.position.x = absPosition.x + vector.x;
+          paperLayer.position.y = absPosition.y + vector.y;
+        }
+      });
+      updateSelectionFrame(toBounds, dragHandle ? 'move' : 'none');
+    }
+  }
 
   // tool mousedown will fire before selected is updated...
   // so we need to determine next selection on mousedown
@@ -136,9 +129,11 @@ const DragTool = (props: DragToolProps): ReactElement => {
   }
 
   useEffect(() => {
-    if (isEnabled && originalSelection && dragging) {
+    if (isEnabled && originalSelection && dragging && toBounds) {
+      updateDuplicatePreview();
       if (altModifier) {
-        updateDuplicatePreview(altModifier, selectionOutlines, toBounds);
+        const selectionFrame = paperMain.projects[1].getItem({ data: { id: 'selectionFrame' } });
+        selectionFrame.removeChildren();
         originalSelection.forEach((item, index) => {
           const paperLayer = getPaperLayer(item.id, item.projectIndex);
           const ogLayer = originalPaperSelection[index];
@@ -148,10 +143,8 @@ const DragTool = (props: DragToolProps): ReactElement => {
             paperLayer.position.y = absPosition.y;
           }
         });
-        updateSelectionFrame(dragHandle ? 'move' : 'none');
       } else {
-        updateDuplicatePreview(altModifier, selectionOutlines, toBounds);
-        throttleDrag(toBounds, fromBounds, selected, originalPaperSelection, dragHandle, altModifier, selectionOutlines);
+        translateLayers();
       }
     }
   }, [altModifier]);
@@ -226,11 +219,10 @@ const DragTool = (props: DragToolProps): ReactElement => {
   useEffect(() => {
     if (dragEvent && isEnabled && fromBounds) {
       if (minDistance > 2) {
-        const x = dragEvent.point.x - dragEvent.downPoint.x;
-        const y = dragEvent.point.y - dragEvent.downPoint.y;
+        const vector = dragEvent.point.subtract(dragEvent.downPoint);
         const nextSnapBounds = new paperMain.Rectangle(fromBounds);
-        nextSnapBounds.center.x = fromBounds.center.x + x;
-        nextSnapBounds.center.y = fromBounds.center.y + y;
+        nextSnapBounds.center.x = fromBounds.center.x + vector.x;
+        nextSnapBounds.center.y = fromBounds.center.y + vector.y;
         setSnapBounds(nextSnapBounds);
       } else {
         if (!dragging) {
@@ -245,7 +237,7 @@ const DragTool = (props: DragToolProps): ReactElement => {
     if (upEvent && isEnabled) {
       if (selected.length > 0 && minDistance > 2) {
         if (altModifier) {
-          const offset = upEvent.point.subtract(upEvent.downPoint);
+          const offset = toBounds.center.subtract(fromBounds.center);
           duplicateLayers({layers: selected, offset: {x: offset.x, y: offset.y}});
         } else {
           moveLayers({layers: selected});
@@ -260,7 +252,7 @@ const DragTool = (props: DragToolProps): ReactElement => {
 
   useEffect(() => {
     if (toBounds && isEnabled) {
-      throttleDrag(toBounds, fromBounds, selected, originalPaperSelection, dragHandle, altModifier, selectionOutlines);
+      translateLayers();
     }
   }, [toBounds]);
 

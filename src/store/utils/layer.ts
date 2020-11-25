@@ -489,9 +489,6 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const hasArtboardParent = layerItem.artboardLayer && (layerItem as Btwx.ArtboardLayer).artboard;
-  if (paperLayer) {
-    paperLayer.data.selected = true;
-  }
   // if layer is an artboard or group and current selection includes...
   // any of its descendants, deselect those descendants
   if (layerItem.type === 'Artboard' || layerItem.type === 'Group') {
@@ -611,9 +608,6 @@ export const setLayerHover = (state: LayerState, action: SetLayerHover): LayerSt
   const nextHover = action.payload.id;
   if (currentHover !==  null) {
     const { layerItem, paperLayer } = getItemLayers(currentState, currentHover);
-    if (paperLayer) {
-      paperLayer.data.hover = false;
-    }
     currentState = {
       ...currentState,
       byId: {
@@ -627,9 +621,6 @@ export const setLayerHover = (state: LayerState, action: SetLayerHover): LayerSt
   }
   if (nextHover !== null) {
     const { layerItem, paperLayer } = getItemLayers(currentState, nextHover);
-    if (paperLayer) {
-      paperLayer.data.hover = true;
-    }
     currentState = {
       ...currentState,
       byId: {
@@ -674,7 +665,7 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
   const childItemLayers = getItemLayers(currentState, action.payload.child);
   const childItem = childItemLayers.layerItem;
   const isChildMask = childItem.type === 'Shape' && (childItem as Btwx.Shape).mask;
-  const paperLayer = getParentPaperLayer(action.payload.id, layerItem.projectIndex);
+  const paperLayer = getParentPaperLayer(action.payload.id, getLayerProjectIndex(currentState, action.payload.id));
   const childPaperLayer = isChildMask ? childItemLayers.paperLayer.parent : childItemLayers.paperLayer;
   const aboveId = layerItem.children.length > 0 && layerItem.children[layerItem.children.length - 1] !== action.payload.child ? layerItem.children[layerItem.children.length - 1] : null;
   const aboveItemLayers = aboveId ? getItemLayers(currentState, aboveId) : null;
@@ -1093,7 +1084,8 @@ export const decreaseLayerScope = (state: LayerState, action: DecreaseLayerScope
 
 export const clearLayerScope = (state: LayerState, action: ClearLayerScope): LayerState => ({
   ...state,
-  scope: ['page']
+  scope: ['page'],
+  scopeProjectIndex: 0
 });
 
 export const newLayerScope = (state: LayerState, action: NewLayerScope): LayerState => ({
@@ -1521,8 +1513,8 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
     }
   }
   if (layerItem.artboardLayer && (layerItem as Btwx.ArtboardLayer).artboard) {
-    const artboardParent = currentState.byId[(layerItem as Btwx.ArtboardLayer).artboard];
-    const positionInArtboard = paperLayer.position.subtract(new paperMain.Point(artboardParent.frame.x, artboardParent.frame.y));
+    const artboardItems = getItemLayers(currentState, (layerItem as Btwx.ArtboardLayer).artboard);
+    const positionInArtboard = paperLayer.position.subtract(artboardItems.paperLayer.position);
     currentState = {
       ...currentState,
       byId: {
@@ -5228,7 +5220,12 @@ export const distributeLayersVertically = (state: LayerState, action: Distribute
   return currentState;
 };
 
-export const duplicateLayer = (state: LayerState, action: DuplicateLayer): LayerState => {
+export const duplicateLayer = (state: LayerState, action: DuplicateLayer): {
+  state: LayerState;
+  cloneMap: {
+    [id: string]: string;
+  };
+} => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const isArtboard = layerItem.type === 'Artboard';
@@ -5249,7 +5246,7 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): Layer
     const parentLayerItem = result.byId[copyParent];
     const copyScope = [...parentLayerItem.scope, copyParent];
     const copyUnderlyingMask = index === 0 ? itemToCopy.underlyingMask : Object.prototype.hasOwnProperty.call(layerCloneMap, itemToCopy.underlyingMask) ? layerCloneMap[itemToCopy.underlyingMask] : itemToCopy.underlyingMask;
-    const copyChildred = itemToCopy.children ? itemToCopy.children.reduce((result, current) => {
+    const copyChildren = itemToCopy.children ? itemToCopy.children.reduce((result, current) => {
         if (Object.prototype.hasOwnProperty.call(layerCloneMap, current)) {
           return [...result, layerCloneMap[current]];
         } else {
@@ -5259,8 +5256,6 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): Layer
     : null;
     const copyPaperLayer = index === 0 ? duplicatePaperLayer : duplicatePaperLayer.getItem({ data: { id: key } });
     copyPaperLayer.data.id = copyId;
-    copyPaperLayer.data.selected = false;
-    copyPaperLayer.data.hover = false;
     copyPaperLayer.data.scope = copyScope;
     switch(itemToCopy.type) {
       case 'Artboard':
@@ -5307,7 +5302,7 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): Layer
           ...itemToCopy,
           id: copyId,
           parent: copyParent,
-          children: copyChildred,
+          children: copyChildren,
           scope: copyScope,
           underlyingMask: copyUnderlyingMask,
           events: [],
@@ -5321,7 +5316,7 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): Layer
       } as any,
       childrenById: {
         ...result.childrenById,
-        [copyId]: copyChildred
+        [copyId]: copyChildren
       }
     };
     if (itemToCopy.artboardLayer && (itemToCopy as Btwx.ArtboardLayer).artboard) {
@@ -5336,21 +5331,57 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): Layer
         }
       }
     }
-    if (itemToCopy.type === 'Artboard') {
-      result = {
-        ...result,
-        byId: {
-          ...result.byId,
-          [copyId]: {
-            ...result.byId[copyId],
-            projectIndex: result.allArtboardIds.length + 1,
-            project: copyPaperLayer.exportJSON()
-          } as Btwx.Artboard
+    if (index === 0 && action.payload.offset) {
+      if (itemToCopy.artboardLayer && (itemToCopy as Btwx.ArtboardLayer).artboard) {
+        const artboardItems = getItemLayers(result, (itemToCopy as Btwx.ArtboardLayer).artboard);
+        const positionInArtboard = copyPaperLayer.position.subtract(artboardItems.paperLayer.position);
+        result = {
+          ...result,
+          byId: {
+            ...result.byId,
+            [copyId]: {
+              ...result.byId[copyId],
+              frame: {
+                ...result.byId[copyId].frame,
+                x: positionInArtboard.x,
+                y: positionInArtboard.y
+              }
+            }
+          }
+        }
+      } else {
+        result = {
+          ...result,
+          byId: {
+            ...result.byId,
+            [copyId]: {
+              ...result.byId[copyId],
+              frame: {
+                ...result.byId[copyId].frame,
+                x: copyPaperLayer.position.x,
+                y: copyPaperLayer.position.y
+              }
+            }
+          }
         }
       }
     }
     return result;
   }, currentState);
+  if (isArtboard) {
+    const artboard = currentState.allArtboardIds[currentState.allArtboardIds.length - 1];
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [artboard]: {
+          ...currentState.byId[artboard],
+          projectIndex: currentState.allArtboardIds.length + 1,
+          project: duplicatePaperLayer.exportJSON()
+        } as Btwx.Artboard
+      }
+    }
+  }
   currentState = {
     ...currentState,
     byId: {
@@ -5368,34 +5399,39 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): Layer
   // if (layerItem.id === currentState.hover) {
   //   currentState = setLayerHover(currentState, layerActions.setLayerHover({id: layerCloneMap[action.payload.id]}) as SetLayerHover);
   // }
-  return currentState;
+  return {
+    state: currentState,
+    cloneMap: layerCloneMap
+  };
 };
 
 export const duplicateLayers = (state: LayerState, action: DuplicateLayers): LayerState => {
   let currentState = state;
+  let masterCloneMap: { [id: string]: string } = {};
   const projects: string[] = [];
+  const newSelection: string[] = [];
   currentState = action.payload.layers.reduce((result, current) => {
-    if (state.byId[current].type !== 'Artboard') {
-      const layerProject = getLayerProject(result, current);
-      if (!projects.includes(layerProject)) {
-        projects.push(layerProject);
-      }
+    const duplicate = duplicateLayer(result, layerActions.duplicateLayer({id: current, offset: action.payload.offset}) as DuplicateLayer);
+    const duplicateId = duplicate.cloneMap[current];
+    const layerProject = getLayerProject(duplicate.state, duplicateId);
+    if (!projects.includes(layerProject)) {
+      projects.push(layerProject);
     }
-    return duplicateLayer(result, layerActions.duplicateLayer({id: current, offset: action.payload.offset}) as DuplicateLayer);
+    masterCloneMap = {...masterCloneMap, ...duplicate.cloneMap};
+    newSelection.push(duplicateId);
+    result = duplicate.state;
+    return result;
   }, currentState);
-  const newArtboards = currentState.allArtboardIds.slice(state.allArtboardIds.length, currentState.allArtboardIds.length);
-  const newLayers = currentState.allIds.slice(state.allIds.length, currentState.allIds.length);
-  const inScopeLayers = newLayers.filter((id) => currentState.scope.includes(currentState.byId[id].parent));
-  currentState = selectLayers(currentState, layerActions.selectLayers({layers: inScopeLayers, newSelection: true}) as SelectLayers);
-  if (state.selected.length > 0) {
-    currentState = deselectLayers(currentState, layerActions.deselectLayers({layers: state.selected}) as DeselectLayers);
+  if (state.hover && masterCloneMap[state.hover]) {
+    currentState = setLayerHover(currentState, layerActions.setLayerHover({id: masterCloneMap[state.hover]}) as SetLayerHover);
   }
+  currentState = selectLayers(currentState, layerActions.selectLayers({layers: newSelection, newSelection: true}) as SelectLayers);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,
       payload: action.payload,
       detail: 'Duplicate Layers',
-      projects: [...projects, ...newArtboards]
+      projects: projects
     }
   }) as SetLayerEdit);
   return currentState;
@@ -6050,14 +6086,19 @@ export const setLayerEdit = (state: LayerState, action: SetLayerEdit): LayerStat
   // }, []);
   currentState = {
     ...currentState,
-    byId: Object.keys(currentState.byId).reduce((result, current) => {
-      if (action.payload.edit.projects.includes(current)) {
-        const projectJSON = savePaperProjectJSON(currentState, (currentState.byId[current] as Btwx.ProjectLayer).projectIndex);
-        result[current] = {
-          ...currentState.byId[current],
-          project: projectJSON ? projectJSON : (currentState.byId[current] as Btwx.ProjectLayer).project
-        } as Btwx.Page | Btwx.Artboard
-      }
+    byId: action.payload.edit.projects.reduce((result, current) => {
+      const projectJSON = savePaperProjectJSON(currentState, (currentState.byId[current] as Btwx.ProjectLayer).projectIndex);
+      result[current] = {
+        ...result[current],
+        project: projectJSON ? projectJSON : (currentState.byId[current] as Btwx.ProjectLayer).project
+      } as Btwx.Page | Btwx.Artboard
+      // if (action.payload.edit.projects.includes(current)) {
+      //   const projectJSON = savePaperProjectJSON(currentState, (currentState.byId[current] as Btwx.ProjectLayer).projectIndex);
+      //   result[current] = {
+      //     ...currentState.byId[current],
+      //     project: projectJSON ? projectJSON : (currentState.byId[current] as Btwx.ProjectLayer).project
+      //   } as Btwx.Page | Btwx.Artboard
+      // }
       return result;
     }, currentState.byId),
     edit: action.payload.edit

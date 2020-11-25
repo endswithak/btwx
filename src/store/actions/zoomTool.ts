@@ -3,7 +3,6 @@ import { setCanvasActiveTool } from './canvasSettings';
 import { setCanvasMatrix } from './documentSettings';
 import { paperMain } from '../../canvas';
 import { getCanvasBounds, getSelectedBounds } from '../selectors/layer';
-import { updateSelectionFrame } from '../actions/layer';
 
 export const enableZoomToolThunk = (zoomType: Btwx.ZoomType) => {
   return (dispatch: any, getState: any): void => {
@@ -21,7 +20,6 @@ export const disableZoomToolThunk = () => {
 export const zoomInThunk = () => {
   return (dispatch: any, getState: any): void => {
     paperMain.view.zoom *= 2;
-    updateSelectionFrame();
   }
 };
 
@@ -33,7 +31,6 @@ export const zoomOutThunk = () => {
       paperMain.view.zoom = 0.01;
     }
     dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
-    updateSelectionFrame();
   }
 };
 
@@ -41,7 +38,6 @@ export const zoomPercentThunk = (percent: number) => {
   return (dispatch: any, getState: any): void => {
     paperMain.view.zoom = percent;
     dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
-    updateSelectionFrame();
   }
 };
 
@@ -69,7 +65,6 @@ export const zoomFitCanvasThunk = () => {
     paperMain.view.center = canvasCenter;
     paperMain.view.zoom = newZoom;
     dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
-    updateSelectionFrame();
   }
 };
 
@@ -97,6 +92,5 @@ export const zoomFitSelectedThunk = () => {
     paperMain.view.center = selectionCenter;
     paperMain.view.zoom = newZoom;
     dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
-    updateSelectionFrame();
   }
 };

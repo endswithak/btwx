@@ -7,14 +7,14 @@ import { paperMain } from '../canvas';
 
 interface SelectionFrameProps {
   theme?: string;
-  selectedBounds?: any;
+  selectedBounds?: paper.Rectangle;
 }
 
 const SelectionFrame = (props: SelectionFrameProps): ReactElement => {
   const { theme, selectedBounds } = props;
 
   useEffect(() => {
-    updateSelectionFrame();
+    updateSelectionFrame(selectedBounds);
     return () => {
       const selectionFrame = paperMain.projects[1].getItem({ data: { id: 'selectionFrame' } });
       selectionFrame.removeChildren();
@@ -28,7 +28,7 @@ const SelectionFrame = (props: SelectionFrameProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   theme: string;
-  selectedBounds: any;
+  selectedBounds: paper.Rectangle;
 } => {
   const { viewSettings } = state;
   const theme = viewSettings.theme;

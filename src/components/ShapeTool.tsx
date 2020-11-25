@@ -293,10 +293,8 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
   useEffect(() => {
     if (dragEvent && isEnabled) {
       const fromPoint = from ? from : dragEvent.downPoint;
-      const x = dragEvent.point.x - fromPoint.x;
-      const y = dragEvent.point.y - fromPoint.y;
-      const nextHandle = `${y > 0 ? 'bottom' : 'top'}${x > 0 ? 'Right' : 'Left'}` as 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
       const nextVector = dragEvent.point.subtract(fromPoint);
+      const nextHandle = `${nextVector.y > 0 ? 'bottom' : 'top'}${nextVector.x > 0 ? 'Right' : 'Left'}` as 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
       const nextDims = new paperMain.Rectangle({from: fromPoint, to: dragEvent.point}).size;
       const nextMaxDim = Math.max(nextDims.width, nextDims.height);
       const nextContrainedDims = new paperMain.Point(nextVector.x < 0 ? fromPoint.x - nextMaxDim : fromPoint.x + nextMaxDim, nextVector.y < 0 ? fromPoint.y - nextMaxDim : fromPoint.y + nextMaxDim);

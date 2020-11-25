@@ -76,7 +76,7 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
       }
     } else {
       if (layerEvent.event.shiftKey) {
-        if (!(nearestScopeAncestor.type === 'Artboard' && selected.length > 0)) {
+        if (selected.length > 0) {
           if (nearestScopeAncestor.selected) {
             deselectLayers({layers: [nearestScopeAncestor.id]});
           } else {

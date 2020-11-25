@@ -3,18 +3,18 @@ import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { updateHoverFrame } from '../store/actions/layer';
 import { paperMain } from '../canvas';
-import { getLayerProjectIndex } from '../store/selectors/layer';
 
 interface HoverFrameProps {
   hover?: string;
-  hoverProjectIndex?: number;
+  hoverItem?: Btwx.Layer;
+  artboardItem?: Btwx.Artboard;
 }
 
 const HoverFrame = (props: HoverFrameProps): ReactElement => {
-  const { hover, hoverProjectIndex } = props;
+  const { hover, hoverItem, artboardItem } = props;
 
   useEffect(() => {
-    updateHoverFrame(hoverProjectIndex);
+    updateHoverFrame(hoverItem, artboardItem);
     return () => {
       const hoverFrame = paperMain.projects[1].getItem({ data: { id: 'hoverFrame' } });
       hoverFrame.removeChildren();
@@ -28,12 +28,16 @@ const HoverFrame = (props: HoverFrameProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   hover: string;
-  hoverProjectIndex: number;
+  hoverItem: Btwx.Layer;
+  artboardItem: Btwx.Artboard;
 } => {
   const { layer } = state;
   const hover = layer.present.hover;
-  const hoverProjectIndex = getLayerProjectIndex(layer.present, hover);
-  return { hover, hoverProjectIndex };
+  const hoverItem = hover ? layer.present.byId[hover] : null;
+  const artboardLayer = hoverItem ? hoverItem.artboardLayer : null;
+  const artboard = artboardLayer ? (hoverItem as Btwx.ArtboardLayer).artboard : null;
+  const artboardItem = artboard ? layer.present.byId[artboard] as Btwx.Artboard : null;
+  return { hover, hoverItem, artboardItem };
 };
 
 export default connect(

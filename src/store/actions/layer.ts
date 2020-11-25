@@ -10,7 +10,7 @@ import { paperMain } from '../../canvas';
 import MeasureGuide from '../../canvas/measureGuide';
 import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_VALUE, THEME_PRIMARY_COLOR, DEFAULT_TWEEN_EVENTS, TWEEN_PROPS_MAP } from '../../constants';
 import { getPaperFillColor, getPaperStrokeColor, getPaperShadowColor } from '../utils/paper';
-import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayersBounds, importPaperProject, colorsMatch, gradientsMatch, getNearestScopeAncestor, getArtboardEventItems, orderLayersByDepth, canMaskLayers, canMaskSelection, canPasteSVG, getLineToPoint, getSelectionTopLeft, getSelectionBottomRight, getLineFromPoint, getArtboardsTopTop, getSelectionBounds, getSelectedBounds, getParentPaperLayer, getGradientOriginPoint, getGradientDestinationPoint, getAbsolutePosition, getScopedPoint, getPaperLayer, getSelectedPaperLayers } from '../selectors/layer';
+import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayersBounds, importPaperProject, colorsMatch, gradientsMatch, getNearestScopeAncestor, getArtboardEventItems, orderLayersByDepth, canMaskLayers, canMaskSelection, canPasteSVG, getLineToPoint, getSelectionTopLeft, getSelectionBottomRight, getLineFromPoint, getArtboardsTopTop, getSelectionBounds, getSelectedBounds, getParentPaperLayer, getGradientOriginPoint, getGradientDestinationPoint, getAbsolutePosition, getScopedPoint, getPaperLayer, getSelectedPaperLayers, getSelectedTopLeft, getSelectedBottomRight, getItemLayers } from '../selectors/layer';
 import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle, getLayerMasked, getLayerUnderlyingMask } from '../utils/actions';
 
 import { bufferToBase64, scrollToLayer } from '../../utils';
@@ -496,7 +496,7 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
     // create artboard group
     const artboard = new paperMain.Layer({
       name: name,
-      data: { id: id, type: 'Layer', layerType: 'Artboard', activeArtboard: !payload.batch, selected: !payload.batch, hover: false, scope: scope },
+      data: { id: id, type: 'Layer', layerType: 'Artboard', scope: scope },
       children: [artboardBackground, artboardMaskedLayers],
       insert: false
       // parent: project.activeLayer
@@ -570,7 +570,7 @@ export const addGroupThunk = (payload: AddGroupPayload, providedState?: RootStat
     const showChildren = payload.layer.showChildren ? payload.layer.showChildren : false;
     const group = new paperMain.Group({
       name: name,
-      data: { id: id, type: 'Layer', layerType: 'Group', selected: false, hover: false, scope: scope },
+      data: { id: id, type: 'Layer', layerType: 'Group', scope: scope },
       parent: parentPaperLayer,
       position: position
     });
@@ -589,6 +589,7 @@ export const addGroupThunk = (payload: AddGroupPayload, providedState?: RootStat
       selected: false,
       hover: false,
       artboardLayer: true,
+      artboard: artboard,
       events: [],
       tweens: {
         allIds: [],
@@ -597,8 +598,7 @@ export const addGroupThunk = (payload: AddGroupPayload, providedState?: RootStat
         byProp: TWEEN_PROPS_MAP
       },
       transform: DEFAULT_TRANSFORM,
-      style: style,
-      artboard: artboard
+      style: style
     } as Btwx.Group;
     dispatch(addGroup({
       layer: newLayer,
@@ -661,7 +661,7 @@ export const addShapeThunk = (payload: AddShapePayload, providedState?: RootStat
       strokeCap: style.strokeOptions.cap,
       clipMask: mask,
       strokeJoin: style.strokeOptions.join,
-      data: { id, type: 'Layer', layerType: 'Shape', shapeType: shapeType, selected: false, hover: false, scope: scope },
+      data: { id, type: 'Layer', layerType: 'Shape', shapeType: shapeType, scope: scope },
       parent: parentPaperLayer
     });
     paperLayer.children.forEach((item) => item.data = { id: 'shapePartial', type: 'LayerChild', layerType: 'Shape' });
@@ -691,6 +691,7 @@ export const addShapeThunk = (payload: AddShapePayload, providedState?: RootStat
       selected: false,
       hover: false,
       artboardLayer: true,
+      artboard: artboard,
       events: [],
       tweens: {
         allIds: [],
@@ -760,7 +761,7 @@ export const addShapeGroupThunk = (payload: AddShapePayload, providedState?: Roo
       strokeCap: style.strokeOptions.cap,
       strokeJoin: style.strokeOptions.join,
       clipMask: mask,
-      data: { id, type: 'Layer', layerType: 'Shape', shapeType: 'Custom', selected: false, hover: false, scope: scope },
+      data: { id, type: 'Layer', layerType: 'Shape', shapeType: 'Custom', scope: scope },
       parent: parentPaperLayer
     });
     paperLayer.children.forEach((item) => item.data = { id: 'shapePartial', type: 'LayerChild', layerType: 'Shape' });
@@ -796,6 +797,8 @@ export const addShapeGroupThunk = (payload: AddShapePayload, providedState?: Roo
       showChildren: null,
       selected: false,
       hover: false,
+      artboardLayer: true,
+      artboard: artboard,
       events: [],
       tweens: {
         allIds: [],
@@ -890,7 +893,7 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
     const textContainer = new paperMain.Group({
       name: name,
       parent: parentPaperLayer,
-      data: { id, type: 'Layer', layerType: 'Text', selected: false, hover: false, scope: scope },
+      data: { id, type: 'Layer', layerType: 'Text', scope: scope },
       children: [textBackground, paperLayer],
       position: position
     });
@@ -908,6 +911,8 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
       showChildren: null,
       selected: false,
       hover: false,
+      artboardLayer: true,
+      artboard: artboard,
       events: [],
       tweens: {
         allIds: [],
@@ -972,7 +977,7 @@ export const addImageThunk = (payload: AddImagePayload, providedState?: RootStat
           const imageContainer = new paperMain.Group({
             name: name,
             parent: parentPaperLayer,
-            data: { id, imageId, type: 'Layer', layerType: 'Image', selected: false, hover: false, scope: scope },
+            data: { id, imageId, type: 'Layer', layerType: 'Image', scope: scope },
             children: [paperLayer]
           });
           paperLayer.onLoad = (): void => {
@@ -997,6 +1002,8 @@ export const addImageThunk = (payload: AddImagePayload, providedState?: RootStat
               showChildren: null,
               selected: false,
               hover: false,
+              artboardLayer: true,
+              artboard: artboard,
               events: [],
               tweens: {
                 allIds: [],
@@ -2586,14 +2593,15 @@ export const copyLayersThunk = () => {
     const groupThing = new paperMain.Group({insert: false});
     const copyLayer = (copyState: Btwx.ClipboardLayers, layer: string, isChild?: boolean): Btwx.ClipboardLayers => {
       let currentCopyState = copyState;
-      const layerItem = state.layer.present.byId[layer];
+      const { layerItem, paperLayer } = getItemLayers(state.layer.present, layer);
+      const isMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
       currentCopyState.allIds = [...currentCopyState.allIds, layer];
       if (layerItem.children && layerItem.children.length > 0) {
         currentCopyState = copyLayers(currentCopyState, layerItem.children, true);
       }
       if (!isChild) {
-        const paperLayer = layerItem.mask ? getPaperLayer(layer).parent : getPaperLayer(layer);
-        const clone = paperLayer.clone({insert: false});
+        const pl = isMask ? paperLayer.parent : paperLayer;
+        const clone = pl.clone({insert: false});
         clone.parent = groupThing;
         currentCopyState.main = [...currentCopyState.main, layer];
       }
@@ -2631,7 +2639,7 @@ export const copyLayersThunk = () => {
     if (state.canvasSettings.focusing && state.layer.present.selected.length > 0) {
       const nextCopyState = { type: 'layers', main: [], allIds: [], byId: {}, images: {}, paperLayers: null } as Btwx.ClipboardLayers;
       const copyState = copyLayers(nextCopyState, state.layer.present.selected, false);
-      copyState.paperLayers = groupThing.exportJSON();
+      // copyState.paperLayers = groupThing.exportJSON();
       clipboard.writeText(JSON.stringify(copyState));
     }
   }
@@ -2643,7 +2651,7 @@ export const copyStyleThunk = () => {
     if (state.canvasSettings.focusing && state.layer.present.selected.length === 1) {
       const layerItem = state.layer.present.byId[state.layer.present.selected[0]];
       const style = layerItem.style;
-      const textStyle = layerItem.type === 'Text' ? layerItem.textStyle : null;
+      const textStyle = layerItem.type === 'Text' ? (layerItem as Btwx.Text).textStyle : null;
       clipboard.writeText(JSON.stringify({
         type: 'style',
         style,
@@ -2882,71 +2890,31 @@ export const undoThunk = () => {
     if (state.layer.past.length > 0) {
       const layerState = state.layer.past[state.layer.past.length - 1];
       const fullState = {...state, layer: { ...state.layer, present: layerState }};
-      // remove hover
-      dispatch(setLayerHover({id: null}));
       // undo
       dispatch(ActionCreators.undo());
       //
+      dispatch(setLayerHover({id: null}));
+      //
       if (layerState.edit.projects) {
-        layerState.edit.projects.forEach((project: string) => {
+        state.layer.present.edit.projects.forEach((project: string) => {
           const projectItem = layerState.byId[project] as Btwx.ProjectLayer;
-          const projectIndex = projectItem.projectIndex;
-          importPaperProject({
-            projectJSON: projectItem.project,
-            projectIndex: projectIndex,
-            documentImages: state.documentSettings.images.byId
-          });
+          if (projectItem) {
+            const projectIndex = projectItem.projectIndex;
+            const projectJSON = projectItem.project;
+            importPaperProject({
+              projectJSON: projectJSON,
+              projectIndex: projectIndex,
+              documentImages: state.documentSettings.images.byId
+            });
+          }
         });
       }
-      // const undoEdit = state.layer.present.edit;
-      // // check if adding/removing artboard
-      // if (undoEdit.actionType) {
-      //   switch(undoEdit.actionType) {
-      //     case 'ADD_ARTBOARD': {
-      //       const artboard = state.layer.present.allArtboardIds[state.layer.present.allArtboardIds.length - 1];
-      //       const artboardItem = state.layer.present.byId[artboard];
-      //       const project = paperMain.projects[artboardItem.projectIndex];
-      //       project.remove();
-      //       break;
-      //     }
-      //     case 'ADD_LAYERS':
-      //     case 'DUPLICATE_LAYERS': {
-      //       if (undoEdit.layers && undoEdit.layers.some((id) => state.layer.present.allArtboardIds.includes(id))) {
-      //         state.layer.present.allArtboardIds.forEach((id) => {
-      //           if (undoEdit.layers.includes(id)) {
-      //             const artboardItem = state.layer.present.byId[id];
-      //             paperMain.projects[artboardItem.projectIndex].remove();
-      //           }
-      //         });
-      //       }
-      //       break;
-      //     }
-      //     case 'REMOVE_LAYERS': {
-      //       if (undoEdit.layers && undoEdit.layers.some((id) => layerState.allArtboardIds.includes(id))) {
-      //         layerState.allArtboardIds.forEach((id) => {
-      //           if (undoEdit.layers.includes(id)) {
-      //             const artboardItem = layerState.byId[id];
-      //             const project = new paperMain.Project(`canvas-${id}`);
-      //             paperMain.projects = paperMain.projects.splice(artboardItem.projectIndex, 0, project);
-      //           }
-      //         });
-      //       }
-      //       break;
-      //     }
-      //   }
-      // }
-      // import past paper project
-      // importPaperProject({
-      //   paperProject: layerState.paperProject,
-      //   documentImages: state.documentSettings.images.byId
-      // });
       // update editors
       // updateEditors(dispatch, state, 'undo');
-      // // update frames
-      // if (!state.gradientEditor.isOpen) {
-      //   updateHoverFrame();
-      //   updateSelectionFrame();
-      // }
+      // update frames
+      if (!state.gradientEditor.isOpen) {
+        updateSelectionFrame(getSelectedBounds(fullState));
+      }
       // updateActiveArtboardFrame();
       // if (state.viewSettings.tweenDrawer.isOpen && layerState.events.allIds.length > 0) {
       //   updateTweenEventsFrame(fullState);
@@ -2961,73 +2929,31 @@ export const redoThunk = () => {
     if (state.layer.future.length > 0) {
       const layerState = state.layer.future[0];
       const fullState = {...state, layer: { ...state.layer, present: layerState }};
-      // remove hover
-      dispatch(setLayerHover({id: null}));
       // redo
       dispatch(ActionCreators.redo());
       //
-      // console.log(layerState.edit.projects);
+      dispatch(setLayerHover({id: null}));
+      //
       if (layerState.edit.projects) {
         layerState.edit.projects.forEach((project: string) => {
           const projectItem = layerState.byId[project] as Btwx.ProjectLayer;
-          const projectIndex = projectItem.projectIndex;
-          importPaperProject({
-            projectJSON: projectItem.project,
-            projectIndex: projectIndex,
-            documentImages: state.documentSettings.images.byId
-          });
+          if (projectItem) {
+            const projectIndex = projectItem.projectIndex;
+            const projectJSON = projectItem.project;
+            importPaperProject({
+              projectJSON: projectJSON,
+              projectIndex: projectIndex,
+              documentImages: state.documentSettings.images.byId
+            });
+          }
         });
       }
-      // const redoEdit = layerState.edit;
-      // // check if adding/removing artboard
-      // if (redoEdit.actionType) {
-      //   switch(redoEdit.actionType) {
-      //     case 'ADD_ARTBOARD': {
-      //       const artboard = layerState.allArtboardIds[layerState.allArtboardIds.length - 1];
-      //       const artboardItem = layerState.byId[artboard];
-      //       const project = new paperMain.Project(`canvas-${artboard}`);
-      //       paperMain.projects = paperMain.projects.splice(artboardItem.projectIndex, 0, project);
-      //       break;
-      //     }
-      //     case 'ADD_LAYERS':
-      //     case 'DUPLICATE_LAYERS': {
-      //       if (redoEdit.layers && redoEdit.layers.some((id) => layerState.allArtboardIds.includes(id))) {
-      //         layerState.allArtboardIds.forEach((id) => {
-      //           if (redoEdit.layers.includes(id)) {
-      //             const artboardItem = layerState.byId[id];
-      //             const project = new paperMain.Project(`canvas-${id}`);
-      //             paperMain.projects = paperMain.projects.splice(artboardItem.projectIndex, 0, project);
-      //           }
-      //         });
-      //       }
-      //       break;
-      //     }
-      //     case 'REMOVE_LAYERS': {
-      //       if (redoEdit.layers && redoEdit.layers.some((id) => state.layer.present.allArtboardIds.includes(id))) {
-      //         state.layer.present.allArtboardIds.forEach((id) => {
-      //           if (redoEdit.layers.includes(id)) {
-      //             const artboardItem = layerState.byId[id];
-      //             const project = paperMain.projects[artboardItem.projectIndex];
-      //             project.remove();
-      //           }
-      //         });
-      //       }
-      //       break;
-      //     }
-      //   }
-      // }
-      // import future paper project
-      // importPaperProject({
-      //   paperProject: layerState.paperProject,
-      //   documentImages: state.documentSettings.images.byId
-      // });
       // update editors
       // updateEditors(dispatch, state, 'redo');
-      // // update frames
-      // if (!state.gradientEditor.isOpen) {
-      //   updateHoverFrame();
-      //   updateSelectionFrame();
-      // }
+      // update frames
+      if (!state.gradientEditor.isOpen) {
+        updateSelectionFrame(getSelectedBounds(fullState));
+      }
       // updateActiveArtboardFrame();
       // if (state.viewSettings.tweenDrawer.isOpen && layerState.events.allIds.length > 0) {
       //   updateTweenEventsFrame(fullState);
@@ -3192,16 +3118,13 @@ export const updateGradientFrame = (layerItem: Btwx.Layer, gradient: Btwx.Gradie
   });
 }
 
-export const updateActiveArtboardFrame = (artboardFrame: Btwx.Frame): void => {
+export const updateActiveArtboardFrame = (bounds: paper.Rectangle): void => {
   const activeArtboardFrame = paperMain.projects[1].getItem({ data: { id: 'activeArtboardFrame' } });
-  // const activeArtboardProject = paperMain.projects[projectIndex];
   activeArtboardFrame.removeChildren();
-  if (artboardFrame) {
-    // const artboardBackground = activeArtboardProject.getItem({ data: { id: 'artboardBackground' } });
-    // const topLeft = artboardBackground.bounds.topLeft;
-    // const bottomRight = artboardBackground.bounds.bottomRight;
-    const topLeft = new paperMain.Point(artboardFrame.x - (artboardFrame.width / 2), artboardFrame.y - (artboardFrame.height / 2));
-    const bottomRight = new paperMain.Point(artboardFrame.x + (artboardFrame.width / 2), artboardFrame.y + (artboardFrame.height / 2));
+  paperMain.projects[1].activate();
+  if (bounds) {
+    const topLeft = bounds.topLeft;
+    const bottomRight = bounds.bottomRight;
     new paperMain.Path.Rectangle({
       from: new paperMain.Point(topLeft.x - (2 / paperMain.projects[0].view.zoom), topLeft.y - (2 / paperMain.projects[0].view.zoom)),
       to: new paperMain.Point(bottomRight.x + (2 / paperMain.projects[0].view.zoom), bottomRight.y + (2 / paperMain.projects[0].view.zoom)),
@@ -3212,299 +3135,304 @@ export const updateActiveArtboardFrame = (artboardFrame: Btwx.Frame): void => {
   }
 };
 
-export const updateHoverFrame = (projectIndex: number): void => {
+export const updateActiveArtboardFrameThunk = () => {
+  return (dispatch: any, getState: any): void => {
+    const state = getState() as RootState;
+    const activeArtboard = state.layer.present.activeArtboard;
+    if (activeArtboard) {
+      const { layerItem, paperLayer } = getItemLayers(state.layer.present, activeArtboard);
+      updateActiveArtboardFrame(paperLayer.getItem({data: {id: 'artboardBackground'}}).bounds);
+    }
+  }
+};
+
+export const updateHoverFrame = (hoverItem: Btwx.Layer, artboardItem?: Btwx.Artboard): void => {
   const hoverFrame = paperMain.projects[1].getItem({ data: { id: 'hoverFrame' } });
   hoverFrame.removeChildren();
-  const hoverFrameConstants = {
-    strokeColor: THEME_PRIMARY_COLOR,
-    strokeWidth: 2 / paperMain.projects[0].view.zoom,
-    parent: hoverFrame
-  }
-  const hoverPaperLayer = paperMain.projects[projectIndex].getItem({ data: { hover: true } });
-  if (hoverPaperLayer) {
-    switch(hoverPaperLayer.data.layerType) {
-      case 'Artboard': {
-        const artboardBackground = hoverPaperLayer.getItem({ data: { id: 'artboardBackground' } });
-        new paperMain.Path.Rectangle({
-          ...hoverFrameConstants,
-          rectangle: artboardBackground.bounds
-        });
-        break;
-      }
-      case 'Shape':
-        new paperMain.CompoundPath({
-          ...hoverFrameConstants,
-          closed: hoverPaperLayer.data.shapeType !== 'Line',
-          pathData: (hoverPaperLayer as paper.Path | paper.CompoundPath).pathData
-        });
-        break;
-      case 'Text': {
-        const textLayer = hoverPaperLayer.getItem({data: { id: 'textContent' }});
-        const initialPoint = (textLayer as paper.PointText).point;
-        (textLayer as any)._lines.forEach((line: any, index: number) => {
-          new paperMain.Path.Line({
-            from: new paperMain.Point(initialPoint.x, initialPoint.y + (((textLayer as paper.PointText).leading as number) * index)),
-            to: new paperMain.Point(initialPoint.x + textLayer.bounds.width, initialPoint.y + (((textLayer as paper.PointText).leading as number) * index)),
-            strokeColor: THEME_PRIMARY_COLOR,
-            strokeWidth: 2 / paperMain.projects[0].view.zoom,
-            data: {
-              type: 'UIElementChild',
-              interactive: false,
-              interactiveType: null,
-              elementId: 'hoverFrame'
-            },
-            parent: hoverFrame
-          });
-        });
-        break;
-      }
+  paperMain.projects[1].activate();
+  if (hoverItem) {
+    const hoverFrameConstants = {
+      strokeColor: THEME_PRIMARY_COLOR,
+      strokeWidth: 2 / paperMain.projects[0].view.zoom,
+      parent: hoverFrame
+    }
+    let hoverPosition = new paperMain.Point(hoverItem.frame.x, hoverItem.frame.y);
+    if (artboardItem) {
+      const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
+      hoverPosition = hoverPosition.add(artboardPosition);
+    }
+    const hoverItemBounds = new paperMain.Rectangle({
+      from: new paperMain.Point(hoverPosition.x - (hoverItem.frame.width / 2), hoverPosition.y - (hoverItem.frame.height / 2)),
+      to: new paperMain.Point(hoverPosition.x + (hoverItem.frame.width / 2), hoverPosition.y + (hoverItem.frame.height / 2))
+    });
+    switch(hoverItem.type) {
+      // case 'Artboard': {
+      //   const artboardBackground = hoverPaperLayer.getItem({ data: { id: 'artboardBackground' } });
+      //   new paperMain.Path.Rectangle({
+      //     ...hoverFrameConstants,
+      //     rectangle: artboardBackground.bounds
+      //   });
+      //   break;
+      // }
+      // case 'Shape':
+      //   new paperMain.CompoundPath({
+      //     ...hoverFrameConstants,
+      //     closed: hoverPaperLayer.data.shapeType !== 'Line',
+      //     pathData: (hoverPaperLayer as paper.Path | paper.CompoundPath).pathData
+      //   });
+      //   break;
+      // case 'Text': {
+      //   const textLayer = hoverPaperLayer.getItem({data: { id: 'textContent' }});
+      //   const initialPoint = (textLayer as paper.PointText).point;
+      //   (textLayer as any)._lines.forEach((line: any, index: number) => {
+      //     new paperMain.Path.Line({
+      //       from: new paperMain.Point(initialPoint.x, initialPoint.y + (((textLayer as paper.PointText).leading as number) * index)),
+      //       to: new paperMain.Point(initialPoint.x + textLayer.bounds.width, initialPoint.y + (((textLayer as paper.PointText).leading as number) * index)),
+      //       strokeColor: THEME_PRIMARY_COLOR,
+      //       strokeWidth: 2 / paperMain.projects[0].view.zoom,
+      //       data: {
+      //         type: 'UIElementChild',
+      //         interactive: false,
+      //         interactiveType: null,
+      //         elementId: 'hoverFrame'
+      //       },
+      //       parent: hoverFrame
+      //     });
+      //   });
+      //   break;
+      // }
       default:
         new paperMain.Path.Rectangle({
           ...hoverFrameConstants,
-          from: hoverPaperLayer.bounds.topLeft,
-          to: hoverPaperLayer.bounds.bottomRight,
+          from: hoverItemBounds.topLeft,
+          to: hoverItemBounds.bottomRight,
         });
         break;
     }
   }
 };
 
-export const updateSelectionFrame = (visibleHandle: Btwx.SelectionFrameHandle = 'all'): void => {
+export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btwx.SelectionFrameHandle = 'all'): void => {
   const selectionFrame = paperMain.projects[1].getItem({ data: { id: 'selectionFrame' } });
-  // if (selectionFrame) {
-  //   selectionFrame.remove();
-  // }
   selectionFrame.removeChildren();
-  const selected = getSelectedPaperLayers();
-  if (selected.length > 0) {
+  paperMain.projects[1].activate();
+  if (bounds) {
     const resizeDisabled = false;
-    const selectionTopLeft =  getSelectionTopLeft(selected);
-    const selectionBottomRight = getSelectionBottomRight(selected);
     const baseProps = {
-      point: selectionTopLeft,
+      point: bounds.topLeft,
       size: [8, 8],
       fillColor: '#fff',
       strokeColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.24 },
       strokeWidth: 1 / paperMain.projects[0].view.zoom,
       shadowColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.5 },
       shadowBlur: 1 / paperMain.projects[0].view.zoom,
-      insert: false,
-      opacity: resizeDisabled ? 1 : 1
+      opacity: resizeDisabled ? 1 : 1,
+      parent: selectionFrame
     }
+    const selectionTopLeft = bounds.topLeft; // bounds ? bounds.topLeft : getSelectedTopLeft(state);
+    const selectionBottomRight = bounds.bottomRight; // bounds ? bounds.bottomRight : getSelectedBottomRight(state);
+    const baseFrame = new paperMain.Group({
+      opacity: 0.33,
+      data: {
+        type: 'UIElementChild',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'selectionFrame'
+      },
+      parent: selectionFrame
+    });
+    const baseFrameOverlay = new paperMain.Path.Rectangle({
+      from: selectionTopLeft,
+      to: selectionBottomRight,
+      strokeColor: '#fff',
+      strokeWidth: 1 / paperMain.projects[0].view.zoom,
+      blendMode: 'multiply',
+      data: {
+        type: 'UIElementChild',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'selectionFrame'
+      },
+      parent: baseFrame
+    });
+    const baseFrameDifference = new paperMain.Path.Rectangle({
+      from: selectionTopLeft,
+      to: selectionBottomRight,
+      strokeColor: '#999',
+      strokeWidth: 1 / paperMain.projects[0].view.zoom,
+      blendMode: 'difference',
+      data: {
+        type: 'UIElementChild',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'selectionFrame'
+      },
+      parent: baseFrame
+    });
+    const moveHandle = new paperMain.Path.Ellipse({
+      ...baseProps,
+      opacity: 1,
+      visible: visibleHandle === 'all' || visibleHandle === 'move',
+      data: {
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'move',
+        elementId: 'selectionFrame'
+      }
+    });
+    moveHandle.position = new paperMain.Point(baseFrame.bounds.topCenter.x, baseFrame.bounds.topCenter.y - ((1 / paperMain.projects[0].view.zoom) * 24));
+    moveHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+    moveHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
+    const topLeftHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      visible: visibleHandle === 'all' || visibleHandle === 'topLeft',
+      data: {
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'topLeft',
+        elementId: 'selectionFrame'
+      }
+    });
+    topLeftHandle.position = baseFrame.bounds.topLeft;
+    topLeftHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+    topLeftHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
+    const topCenterHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      visible: visibleHandle === 'all' || visibleHandle === 'topCenter',
+      data: {
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'topCenter',
+        elementId: 'selectionFrame'
+      }
+    });
+    topCenterHandle.position = baseFrame.bounds.topCenter;
+    topCenterHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+    topCenterHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
+    const topRightHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      visible: visibleHandle === 'all' || visibleHandle === 'topRight',
+      data: {
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'topRight',
+        elementId: 'selectionFrame'
+      }
+    });
+    topRightHandle.position = baseFrame.bounds.topRight;
+    topRightHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+    topRightHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
+    const bottomLeftHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      visible: visibleHandle === 'all' || visibleHandle === 'bottomLeft',
+      data: {
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'bottomLeft',
+        elementId: 'selectionFrame'
+      }
+    });
+    bottomLeftHandle.position = baseFrame.bounds.bottomLeft;
+    bottomLeftHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+    bottomLeftHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
+    const bottomCenterHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      visible: visibleHandle === 'all' || visibleHandle === 'bottomCenter',
+      data: {
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'bottomCenter',
+        elementId: 'selectionFrame'
+      }
+    });
+    bottomCenterHandle.position = baseFrame.bounds.bottomCenter;
+    bottomCenterHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+    bottomCenterHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
+    const bottomRightHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      visible: visibleHandle === 'all' || visibleHandle === 'bottomRight',
+      data: {
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'bottomRight',
+        elementId: 'selectionFrame'
+      }
+    });
+    bottomRightHandle.position = baseFrame.bounds.bottomRight;
+    bottomRightHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+    bottomRightHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
+    const rightCenterHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      visible: visibleHandle === 'all' || visibleHandle === 'rightCenter',
+      data: {
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'rightCenter',
+        elementId: 'selectionFrame'
+      }
+    });
+    rightCenterHandle.position = baseFrame.bounds.rightCenter;
+    rightCenterHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+    rightCenterHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
+    const leftCenterHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      visible: visibleHandle === 'all' || visibleHandle === 'leftCenter',
+      data: {
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'leftCenter',
+        elementId: 'selectionFrame'
+      }
+    });
+    leftCenterHandle.position = baseFrame.bounds.leftCenter;
+    leftCenterHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+    leftCenterHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
+    // selectionFrame.children = [baseFrame, moveHandle, topLeftHandle, topCenterHandle, topRightHandle, bottomLeftHandle, bottomCenterHandle, bottomRightHandle, leftCenterHandle, rightCenterHandle];
     // Line selection frame
-    if (selected.length === 1 && selected[0].data.layerType === 'Line') {
-      const paperLayer = selected[0] as paper.Path;
-      const moveHandle = new paperMain.Path.Ellipse({
-        ...baseProps,
-        opacity: 1,
-        visible: visibleHandle === 'all' || visibleHandle === 'move',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'move',
-          elementId: 'selectionFrame'
-        }
-      });
-      moveHandle.position = paperLayer.bounds.center;
-      moveHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-      moveHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
-      const fromHandle = new paperMain.Path.Rectangle({
-        ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'from',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'from',
-          elementId: 'selectionFrame'
-        }
-      });
-      fromHandle.position = paperLayer.firstSegment.point;
-      fromHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-      fromHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
-      const toHandle = new paperMain.Path.Rectangle({
-        ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'to',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'to',
-          elementId: 'selectionFrame'
-        }
-      });
-      toHandle.position = paperLayer.lastSegment.point;
-      toHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-      toHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
-      selectionFrame.children = [fromHandle, moveHandle, toHandle];
-    }
-    // All other selection frames
-    else {
-      const baseFrameOverlay = new paperMain.Path.Rectangle({
-        from: selectionTopLeft,
-        to: selectionBottomRight,
-        strokeColor: '#fff',
-        strokeWidth: 1 / paperMain.projects[0].view.zoom,
-        blendMode: 'multiply',
-        data: {
-          type: 'UIElementChild',
-          interactive: false,
-          interactiveType: null,
-          elementId: 'selectionFrame'
-        }
-      });
-      const baseFrameDifference = new paperMain.Path.Rectangle({
-        from: selectionTopLeft,
-        to: selectionBottomRight,
-        strokeColor: '#999',
-        strokeWidth: 1 / paperMain.projects[0].view.zoom,
-        blendMode: 'difference',
-        data: {
-          type: 'UIElementChild',
-          interactive: false,
-          interactiveType: null,
-          elementId: 'selectionFrame'
-        }
-      });
-      const baseFrame = new paperMain.Group({
-        opacity: 0.33,
-        data: {
-          type: 'UIElementChild',
-          interactive: false,
-          interactiveType: null,
-          elementId: 'selectionFrame'
-        },
-        children: [baseFrameDifference, baseFrameOverlay]
-      });
-      const moveHandle = new paperMain.Path.Ellipse({
-        ...baseProps,
-        opacity: 1,
-        visible: visibleHandle === 'all' || visibleHandle === 'move',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'move',
-          elementId: 'selectionFrame'
-        }
-      });
-      moveHandle.position = new paperMain.Point(baseFrame.bounds.topCenter.x, baseFrame.bounds.topCenter.y - ((1 / paperMain.projects[0].view.zoom) * 24));
-      moveHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-      moveHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
-      const topLeftHandle = new paperMain.Path.Rectangle({
-        ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'topLeft',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'topLeft',
-          elementId: 'selectionFrame'
-        }
-      });
-      topLeftHandle.position = baseFrame.bounds.topLeft;
-      topLeftHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-      topLeftHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
-      const topCenterHandle = new paperMain.Path.Rectangle({
-        ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'topCenter',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'topCenter',
-          elementId: 'selectionFrame'
-        }
-      });
-      topCenterHandle.position = baseFrame.bounds.topCenter;
-      topCenterHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-      topCenterHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
-      const topRightHandle = new paperMain.Path.Rectangle({
-        ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'topRight',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'topRight',
-          elementId: 'selectionFrame'
-        }
-      });
-      topRightHandle.position = baseFrame.bounds.topRight;
-      topRightHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-      topRightHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
-      const bottomLeftHandle = new paperMain.Path.Rectangle({
-        ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'bottomLeft',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'bottomLeft',
-          elementId: 'selectionFrame'
-        }
-      });
-      bottomLeftHandle.position = baseFrame.bounds.bottomLeft;
-      bottomLeftHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-      bottomLeftHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
-      const bottomCenterHandle = new paperMain.Path.Rectangle({
-        ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'bottomCenter',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'bottomCenter',
-          elementId: 'selectionFrame'
-        }
-      });
-      bottomCenterHandle.position = baseFrame.bounds.bottomCenter;
-      bottomCenterHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-      bottomCenterHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
-      const bottomRightHandle = new paperMain.Path.Rectangle({
-        ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'bottomRight',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'bottomRight',
-          elementId: 'selectionFrame'
-        }
-      });
-      bottomRightHandle.position = baseFrame.bounds.bottomRight;
-      bottomRightHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-      bottomRightHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
-      const rightCenterHandle = new paperMain.Path.Rectangle({
-        ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'rightCenter',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'rightCenter',
-          elementId: 'selectionFrame'
-        }
-      });
-      rightCenterHandle.position = baseFrame.bounds.rightCenter;
-      rightCenterHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-      rightCenterHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
-      const leftCenterHandle = new paperMain.Path.Rectangle({
-        ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'leftCenter',
-        data: {
-          type: 'UIElementChild',
-          interactive: true,
-          interactiveType: 'leftCenter',
-          elementId: 'selectionFrame'
-        }
-      });
-      leftCenterHandle.position = baseFrame.bounds.leftCenter;
-      leftCenterHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-      leftCenterHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
-      selectionFrame.children = [baseFrame, moveHandle, topLeftHandle, topCenterHandle, topRightHandle, bottomLeftHandle, bottomCenterHandle, bottomRightHandle, leftCenterHandle, rightCenterHandle];
-      // new paperMain.Group({
-      //   children: [baseFrame, moveHandle, topLeftHandle, topCenterHandle, topRightHandle, bottomLeftHandle, bottomCenterHandle, bottomRightHandle, leftCenterHandle, rightCenterHandle],
-      //   data: {
-      //     id: 'SelectionFrame',
-      //     type: 'UIElement',
-      //     interactive: false,
-      //     interactiveType: null,
-      //     elementId: 'SelectionFrame'
-      //   },
-      //   parent: getPaperLayer('ui')
-      // });
-    }
+    // if (visibleHandle === 'lineFrom' || visibleHandle === 'lineTo' || visibleHandle === 'lineMove') {
+    //   const paperLayer = bounds as paper.Path;
+    //   const moveHandle = new paperMain.Path.Ellipse({
+    //     ...baseProps,
+    //     opacity: 1,
+    //     visible: visibleHandle === 'lineMove',
+    //     data: {
+    //       type: 'UIElementChild',
+    //       interactive: true,
+    //       interactiveType: 'lineMove',
+    //       elementId: 'selectionFrame'
+    //     }
+    //   });
+    //   moveHandle.position = paperLayer.bounds.center;
+    //   moveHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+    //   moveHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
+    //   const fromHandle = new paperMain.Path.Rectangle({
+    //     ...baseProps,
+    //     visible: visibleHandle === 'lineFrom',
+    //     data: {
+    //       type: 'UIElementChild',
+    //       interactive: true,
+    //       interactiveType: 'lineFrom',
+    //       elementId: 'selectionFrame'
+    //     }
+    //   });
+    //   fromHandle.position = paperLayer.firstSegment.point;
+    //   fromHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+    //   fromHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
+    //   const toHandle = new paperMain.Path.Rectangle({
+    //     ...baseProps,
+    //     visible: visibleHandle === 'lineTo',
+    //     data: {
+    //       type: 'UIElementChild',
+    //       interactive: true,
+    //       interactiveType: 'lineTo',
+    //       elementId: 'selectionFrame'
+    //     }
+    //   });
+    //   toHandle.position = paperLayer.lastSegment.point;
+    //   toHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
+    //   toHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
+    //   selectionFrame.children = [fromHandle, moveHandle, toHandle];
+    // }
   }
 };
 
@@ -3656,12 +3584,10 @@ export const updateTweenEventsFrameThunk = () => {
   }
 };
 
-export const updateMeasureGuides = (guides: { top?: string; bottom?: string; left?: string; right?: string; all?: string }, bounds?: paper.Rectangle): void => {
+export const updateMeasureGuides = (bounds: paper.Rectangle, measureTo: { top?: paper.Rectangle; bottom?: paper.Rectangle; left?: paper.Rectangle; right?: paper.Rectangle; all?: paper.Rectangle }): void => {
   const measureGuides = paperMain.projects[1].getItem({ data: { id: 'measureGuides' } });
-  const selected = getSelectedPaperLayers();
   measureGuides.removeChildren();
-  if (selected.length > 0) {
-    const selectionBounds = bounds ? bounds : getSelectionBounds();
+  if (measureTo) {
     let hasTopMeasure;
     let hasBottomMeasure;
     let hasLeftMeasure;
@@ -3670,10 +3596,9 @@ export const updateMeasureGuides = (guides: { top?: string; bottom?: string; lef
     let bottomMeasureTo;
     let leftMeasureTo;
     let rightMeasureTo;
-    Object.keys(guides).forEach((current: 'top' | 'bottom' | 'left' | 'right' | 'all') => {
-      const guideMeasureToId = guides[current] as any;
-      const measureToBounds = getPaperLayer(guideMeasureToId).bounds;
-      if (measureToBounds.contains(selectionBounds)) {
+    Object.keys(measureTo).forEach((current: 'top' | 'bottom' | 'left' | 'right' | 'all') => {
+      const measureToBounds = measureTo[current];
+      if (measureToBounds.contains(bounds)) {
         switch(current) {
           case 'top':
             hasTopMeasure = true;
@@ -3705,51 +3630,51 @@ export const updateMeasureGuides = (guides: { top?: string; bottom?: string; lef
       } else {
         switch(current) {
           case 'top':
-            hasTopMeasure = selectionBounds.top > measureToBounds.top;
-            topMeasureTo = selectionBounds.top > measureToBounds.bottom ? measureToBounds.bottom : measureToBounds.top;
+            hasTopMeasure = bounds.top > measureToBounds.top;
+            topMeasureTo = bounds.top > measureToBounds.bottom ? measureToBounds.bottom : measureToBounds.top;
             break;
           case 'bottom':
-            hasBottomMeasure = selectionBounds.bottom < measureToBounds.bottom;
-            bottomMeasureTo = selectionBounds.bottom < measureToBounds.top ? measureToBounds.top : measureToBounds.bottom;
+            hasBottomMeasure = bounds.bottom < measureToBounds.bottom;
+            bottomMeasureTo = bounds.bottom < measureToBounds.top ? measureToBounds.top : measureToBounds.bottom;
             break;
           case 'left':
-            hasLeftMeasure = selectionBounds.left > measureToBounds.left;
-            leftMeasureTo = selectionBounds.left > measureToBounds.right ? measureToBounds.right : measureToBounds.left;
+            hasLeftMeasure = bounds.left > measureToBounds.left;
+            leftMeasureTo = bounds.left > measureToBounds.right ? measureToBounds.right : measureToBounds.left;
             break;
           case 'right':
-            hasRightMeasure = selectionBounds.right < measureToBounds.right;
-            rightMeasureTo = selectionBounds.right < measureToBounds.left ? measureToBounds.left : measureToBounds.right;
+            hasRightMeasure = bounds.right < measureToBounds.right;
+            rightMeasureTo = bounds.right < measureToBounds.left ? measureToBounds.left : measureToBounds.right;
             break;
           case 'all':
-            hasTopMeasure = selectionBounds.top > measureToBounds.top;
-            hasBottomMeasure = selectionBounds.bottom < measureToBounds.bottom;
-            hasLeftMeasure = selectionBounds.left > measureToBounds.left;
-            hasRightMeasure = selectionBounds.right < measureToBounds.right;
-            topMeasureTo = selectionBounds.top > measureToBounds.bottom ? measureToBounds.bottom : measureToBounds.top;
-            bottomMeasureTo = selectionBounds.bottom < measureToBounds.top ? measureToBounds.top : measureToBounds.bottom;
-            leftMeasureTo = selectionBounds.left > measureToBounds.right ? measureToBounds.right : measureToBounds.left;
-            rightMeasureTo = selectionBounds.right < measureToBounds.left ? measureToBounds.left : measureToBounds.right;
+            hasTopMeasure = bounds.top > measureToBounds.top;
+            hasBottomMeasure = bounds.bottom < measureToBounds.bottom;
+            hasLeftMeasure = bounds.left > measureToBounds.left;
+            hasRightMeasure = bounds.right < measureToBounds.right;
+            topMeasureTo = bounds.top > measureToBounds.bottom ? measureToBounds.bottom : measureToBounds.top;
+            bottomMeasureTo = bounds.bottom < measureToBounds.top ? measureToBounds.top : measureToBounds.bottom;
+            leftMeasureTo = bounds.left > measureToBounds.right ? measureToBounds.right : measureToBounds.left;
+            rightMeasureTo = bounds.right < measureToBounds.left ? measureToBounds.left : measureToBounds.right;
             break;
         }
       }
     });
-    if (hasTopMeasure && (guides['all'] || guides['top'])) {
-      const topMeasureFromPoint = selectionBounds.topCenter;
+    if (hasTopMeasure && (measureTo['all'] || measureTo['top'])) {
+      const topMeasureFromPoint = bounds.topCenter;
       const topMeasureToPoint = new paperMain.Point(topMeasureFromPoint.x, topMeasureTo);
       new MeasureGuide(topMeasureFromPoint, topMeasureToPoint, 'top', { down: true, up: true });
     }
-    if (hasBottomMeasure && (guides['all'] || guides['bottom'])) {
-      const bottomMeasureFromPoint = selectionBounds.bottomCenter;
+    if (hasBottomMeasure && (measureTo['all'] || measureTo['bottom'])) {
+      const bottomMeasureFromPoint = bounds.bottomCenter;
       const bottomMeasureToPoint = new paperMain.Point(bottomMeasureFromPoint.x, bottomMeasureTo);
       new MeasureGuide(bottomMeasureFromPoint, bottomMeasureToPoint, 'bottom', { down: true, up: true });
     }
-    if (hasLeftMeasure && (guides['all'] || guides['left'])) {
-      const leftMeasureFromPoint = selectionBounds.leftCenter;
+    if (hasLeftMeasure && (measureTo['all'] || measureTo['left'])) {
+      const leftMeasureFromPoint = bounds.leftCenter;
       const leftMeasureToPoint = new paperMain.Point(leftMeasureTo, leftMeasureFromPoint.y);
       new MeasureGuide(leftMeasureFromPoint, leftMeasureToPoint, 'left', { down: true, up: true });
     }
-    if (hasRightMeasure && (guides['all'] || guides['right'])) {
-      const rightMeasureFromPoint = selectionBounds.rightCenter;
+    if (hasRightMeasure && (measureTo['all'] || measureTo['right'])) {
+      const rightMeasureFromPoint = bounds.rightCenter;
       const rightMeasureToPoint = new paperMain.Point(rightMeasureTo, rightMeasureFromPoint.y);
       new MeasureGuide(rightMeasureFromPoint, rightMeasureToPoint, 'right', { down: true, up: true });
     }

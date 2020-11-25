@@ -35,17 +35,17 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
   const { isEnabled, selecting, setCanvasSelecting, areaSelectLayers, scope, selected, tool, downEvent, dragEvent, upEvent } = props;
 
   const updateAreaSelectPreview = (areaSelectBounds: paper.Rectangle): void => {
-    if (getPaperLayer('AreaSelectPreview')) {
-      getPaperLayer('AreaSelectPreview').remove();
-    }
+    const ui = paperMain.projects[1];
+    const drawingPreview = ui.getItem({data: {id: 'drawingPreview'}});
+    drawingPreview.removeChildren();
     if (areaSelectBounds) {
       const areaSelectPreview = new paperMain.Path.Rectangle({
         rectangle: areaSelectBounds,
         fillColor: theme.name === 'light' ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.5)',
-        strokeWidth: 1 / paperMain.view.zoom,
+        strokeWidth: 1 / paperMain.projects[0].view.zoom,
         strokeColor: theme.name === 'light' ? '#000' : '#fff',
         opacity: 0.2,
-        data: { id: 'AreaSelectPreview' }
+        parent: drawingPreview
       });
       areaSelectPreview.removeOn({
         up: true
@@ -78,16 +78,21 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
         to: upEvent.point
       });
       if (areaSelectBounds && (areaSelectBounds.width > 0 || areaSelectBounds.height > 0)) {
-        const layers = paperMain.project.getItems({
-          data: (data: any) => {
-            const notPage = data.type === 'Layer' && data.layerType !== 'Page';
-            const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
-            const other = data.id && data.id !== scope[scope.length - 1];
-            return notPage && isScopeLayer && other;
-          },
-          overlapping: areaSelectBounds
-        }).reduce((result, current) => {
-          return [...result, current.data.id];
+        const getProjectsLayers = (projectIndex: number): string[] => {
+          return paperMain.projects[projectIndex].getItems({
+            data: (data: any) => {
+              const notPage = data.type === 'Layer' && data.layerType !== 'Page';
+              const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
+              const other = data.id && data.id !== scope[scope.length - 1];
+              return notPage && isScopeLayer && other;
+            },
+            overlapping: areaSelectBounds
+          }).reduce((result, current) => {
+            return [...result, current.data.id];
+          }, []);
+        }
+        const layers = paperMain.projects.reduce((result, current, index) => {
+          return [...result, ...getProjectsLayers(index)]
         }, []);
         if (layers.length > 0) {
           areaSelectLayers({

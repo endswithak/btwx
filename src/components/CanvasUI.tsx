@@ -1,8 +1,13 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { ReactElement, useEffect, useState, useRef } from 'react';
+import React, { ReactElement, useEffect, useRef } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
+import ActiveArtboardFrameWrap from './ActiveArtboardFrameWrap';
+import SelectionFrameWrap from './SelectionFrameWrap';
+import MeasureFrameWrap from './MeasureFrameWrap';
+import TweenEventsFrameWrap from './TweenEventsFrameWrap';
+import HoverFrameWrap from './HoverFrameWrap';
 
 interface CanvasUIProps {
   documentImages?: {
@@ -29,10 +34,17 @@ const CanvasUI = (props: CanvasUIProps): ReactElement => {
   }, []);
 
   return (
-    <canvas
-      id='canvas-ui'
-      className='c-canvas__layer c-canvas__layer--ui'
-      ref={ref} />
+    <>
+      <canvas
+        id='canvas-ui'
+        className='c-canvas__layer c-canvas__layer--ui'
+        ref={ref} />
+      <ActiveArtboardFrameWrap />
+      <HoverFrameWrap />
+      <SelectionFrameWrap />
+      {/* <MeasureFrameWrap />
+      <TweenEventsFrameWrap /> */}
+    </>
   );
 }
 

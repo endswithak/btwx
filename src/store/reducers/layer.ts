@@ -845,7 +845,7 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
     case DISTRIBUTE_LAYERS_VERTICALLY:
       return distributeLayersVertically(state, action);
     case DUPLICATE_LAYER:
-      return duplicateLayer(state, action);
+      return duplicateLayer(state, action).state;
     case DUPLICATE_LAYERS:
       return duplicateLayers(state, action);
     case REMOVE_DUPLICATED_LAYERS:
@@ -949,6 +949,7 @@ export default undoable(baseReducer, {
       GROUP_LAYERS,
       UNGROUP_LAYER,
       UNGROUP_LAYERS,
+      DUPLICATE_LAYERS,
       MOVE_LAYER_TO,
       MOVE_LAYER_BY,
       MOVE_LAYERS,
