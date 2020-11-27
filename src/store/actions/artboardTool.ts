@@ -1,6 +1,5 @@
 import { RootState } from '../reducers';
 import { setCanvasActiveTool } from './canvasSettings';
-import { paperMain } from '../../canvas';
 import { disableShapeTool } from './shapeTool';
 import { disableTextTool } from './textTool';
 

@@ -1,22 +1,22 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, useEffect, ReactElement, useState, useCallback } from 'react';
-import debounce from 'lodash.debounce';
+import React, { useContext, useEffect, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { paperMain } from '../canvas';
+import { uiPaperScope } from '../canvas';
 import { setCanvasSelecting } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasSelectingPayload } from '../store/actionTypes/canvasSettings';
 import { areaSelectLayers } from '../store/actions/layer';
 import { LayerTypes, AreaSelectLayersPayload } from '../store/actionTypes/layer';
-import { getPaperLayer } from '../store/selectors/layer';
+import { getLayerPaperScopes } from '../store/selectors/layer';
 import PaperTool, { PaperToolProps } from './PaperTool';
 import { ThemeContext } from './ThemeProvider';
 
 interface AreaSelectToolStateProps {
   isEnabled?: boolean;
-  selecting?: boolean;
   scope?: string[];
-  selected?: string[];
+  layerPaperScopes?: {
+    [id: string]: paper.PaperScope;
+  };
 }
 
 interface AreaSelectToolDispatchProps {
@@ -32,17 +32,16 @@ type AreaSelectToolProps = (
 
 const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isEnabled, selecting, setCanvasSelecting, areaSelectLayers, scope, selected, tool, downEvent, dragEvent, upEvent } = props;
+  const { isEnabled, setCanvasSelecting, areaSelectLayers, scope, layerPaperScopes, tool, downEvent, dragEvent, upEvent } = props;
 
   const updateAreaSelectPreview = (areaSelectBounds: paper.Rectangle): void => {
-    const ui = paperMain.projects[1];
-    const drawingPreview = ui.getItem({data: {id: 'drawingPreview'}});
+    const drawingPreview = uiPaperScope.project.getItem({data: {id: 'drawingPreview'}});
     drawingPreview.removeChildren();
     if (areaSelectBounds) {
-      const areaSelectPreview = new paperMain.Path.Rectangle({
+      const areaSelectPreview = new uiPaperScope.Path.Rectangle({
         rectangle: areaSelectBounds,
         fillColor: theme.name === 'light' ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.5)',
-        strokeWidth: 1 / paperMain.projects[0].view.zoom,
+        strokeWidth: 1 / uiPaperScope.view.zoom,
         strokeColor: theme.name === 'light' ? '#000' : '#fff',
         opacity: 0.2,
         parent: drawingPreview
@@ -63,7 +62,7 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
   useEffect(() => {
     if (dragEvent && isEnabled) {
       updateAreaSelectPreview(
-        new paperMain.Rectangle({
+        new uiPaperScope.Rectangle({
           from: dragEvent.downPoint,
           to: dragEvent.point
         })
@@ -73,13 +72,13 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
 
   useEffect(() => {
     if (upEvent && isEnabled) {
-      const areaSelectBounds = new paperMain.Rectangle({
+      const areaSelectBounds = new uiPaperScope.Rectangle({
         from: upEvent.downPoint,
         to: upEvent.point
       });
       if (areaSelectBounds && (areaSelectBounds.width > 0 || areaSelectBounds.height > 0)) {
-        const getProjectsLayers = (projectIndex: number): string[] => {
-          return paperMain.projects[projectIndex].getItems({
+        const getProjectsLayers = (paperScope: paper.PaperScope): string[] => {
+          return paperScope.project.getItems({
             data: (data: any) => {
               const notPage = data.type === 'Layer' && data.layerType !== 'Page';
               const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
@@ -91,8 +90,9 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
             return [...result, current.data.id];
           }, []);
         }
-        const layers = paperMain.projects.reduce((result, current, index) => {
-          return [...result, ...getProjectsLayers(index)]
+        const layers = Object.keys(layerPaperScopes).reduce((result, current, index) => {
+          const scope = layerPaperScopes[current];
+          return [...result, ...getProjectsLayers(scope)]
         }, []);
         if (layers.length > 0) {
           areaSelectLayers({
@@ -112,8 +112,8 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
         tool.activate();
       }
     } else {
-      if (tool && paperMain.tool && (paperMain.tool as any)._index === (tool as any)._index) {
-        paperMain.tool = null;
+      if (tool && uiPaperScope.tool && (uiPaperScope.tool as any)._index === (tool as any)._index) {
+        uiPaperScope.tool = null;
         updateAreaSelectPreview(null);
       }
     }
@@ -126,15 +126,13 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): AreaSelectToolStateProps => {
   const { canvasSettings, layer } = state;
-  const selecting = canvasSettings.selecting;
   const isEnabled = canvasSettings.activeTool === 'AreaSelect';
   const scope = layer.present.scope;
-  const selected = layer.present.selected;
+  const layerPaperScopes = getLayerPaperScopes(state);
   return {
     isEnabled,
-    selecting,
     scope,
-    selected
+    layerPaperScopes
   };
 };
 

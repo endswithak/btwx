@@ -2,10 +2,9 @@
 // import { remote } from 'electron';
 import React, { useContext, useEffect, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
+import { uiPaperScope } from '../canvas';
 import { RootState } from '../store/reducers';
 import Tooltip from '../canvas/tooltip';
-import { getPaperLayer } from '../store/selectors/layer';
-import { paperMain } from '../canvas';
 import { setCanvasDrawing } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasDrawingPayload } from '../store/actionTypes/canvasSettings';
 import { addArtboardThunk } from '../store/actions/layer';
@@ -44,9 +43,8 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
   const [initialToBounds, setInitialToBounds] = useState<paper.Rectangle>(null);
 
   const resetState = () => {
-    const UI = paperMain.projects[1];
-    const drawingPreview = UI.getItem({ data: { id: 'drawingPreview' }});
-    const tooltips = UI.getItem({ data: { id: 'tooltips' }});
+    const drawingPreview = uiPaperScope.project.getItem({ data: { id: 'drawingPreview' }});
+    const tooltips = uiPaperScope.project.getItem({ data: { id: 'tooltips' }});
     drawingPreview.removeChildren();
     tooltips.removeChildren();
     setFrom(null);
@@ -59,22 +57,17 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
   }
 
   const updatePreview = (): void => {
-    const UI = paperMain.projects[1];
-    const drawingPreview = UI.getItem({ data: { id: 'drawingPreview' }});
-    const tooltips = UI.getItem({ data: { id: 'tooltips' }});
+    const drawingPreview = uiPaperScope.project.getItem({ data: { id: 'drawingPreview' }});
+    const tooltips = uiPaperScope.project.getItem({ data: { id: 'tooltips' }});
     drawingPreview.removeChildren();
     tooltips.removeChildren();
-    const nextTooltip = new Tooltip(`${Math.round(toBounds.width)} x ${Math.round(toBounds.height)}`, dragEvent.point, {up: true});
-    const nextPreview = new paperMain.Path.Rectangle({
+    new Tooltip(`${Math.round(toBounds.width)} x ${Math.round(toBounds.height)}`, dragEvent.point, {up: true});
+    new uiPaperScope.Path.Rectangle({
       rectangle: toBounds,
       strokeColor: theme.palette.primary,
-      strokeWidth: 1 / paperMain.projects[0].view.zoom,
-      data: {
-        id: 'ArtboardToolPreview'
-      },
+      strokeWidth: 1 / uiPaperScope.view.zoom,
       parent: drawingPreview
-    });
-    nextPreview.removeOn({
+    }).removeOn({
       up: true
     });
   }
@@ -180,9 +173,9 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
 
   useEffect(() => {
     if (moveEvent && isEnabled && !drawing) {
-      const nextSnapBounds = new paperMain.Rectangle({
-        from: new paperMain.Point(moveEvent.point.x - 0.5, moveEvent.point.y - 0.5),
-        to: new paperMain.Point(moveEvent.point.x + 0.5, moveEvent.point.y + 0.5)
+      const nextSnapBounds = new uiPaperScope.Rectangle({
+        from: new uiPaperScope.Point(moveEvent.point.x - 0.5, moveEvent.point.y - 0.5),
+        to: new uiPaperScope.Point(moveEvent.point.x + 0.5, moveEvent.point.y + 0.5)
       });
       setSnapBounds(nextSnapBounds);
     }
@@ -205,10 +198,10 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
       const y = dragEvent.point.y - fromPoint.y;
       const nextHandle = `${y > 0 ? 'bottom' : 'top'}${x > 0 ? 'Right' : 'Left'}` as 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
       const nextVector = dragEvent.point.subtract(fromPoint);
-      const nextDims = new paperMain.Rectangle({from: fromPoint, to: dragEvent.point}).size;
+      const nextDims = new uiPaperScope.Rectangle({from: fromPoint, to: dragEvent.point}).size;
       const nextMaxDim = Math.max(nextDims.width, nextDims.height);
-      const nextContrainedDims = new paperMain.Point(nextVector.x < 0 ? fromPoint.x - nextMaxDim : fromPoint.x + nextMaxDim, nextVector.y < 0 ? fromPoint.y - nextMaxDim : fromPoint.y + nextMaxDim);
-      const nextSnapBounds = new paperMain.Rectangle({
+      const nextContrainedDims = new uiPaperScope.Point(nextVector.x < 0 ? fromPoint.x - nextMaxDim : fromPoint.x + nextMaxDim, nextVector.y < 0 ? fromPoint.y - nextMaxDim : fromPoint.y + nextMaxDim);
+      const nextSnapBounds = new uiPaperScope.Rectangle({
         from: fromPoint,
         to: dragEvent.modifiers.shift ? nextContrainedDims : dragEvent.point
       });
@@ -250,7 +243,7 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
   useEffect(() => {
     if (keyDownEvent && isEnabled && drawing) {
       if (keyDownEvent.key === 'shift') {
-        setSnapBounds(new paperMain.Rectangle({
+        setSnapBounds(new uiPaperScope.Rectangle({
           from: from,
           to: constrainedDims
         }));
@@ -262,7 +255,7 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
   useEffect(() => {
     if (keyUpEvent && isEnabled && drawing) {
       if (keyUpEvent.key === 'shift') {
-        setSnapBounds(new paperMain.Rectangle({
+        setSnapBounds(new uiPaperScope.Rectangle({
           from: from,
           to: dragEvent.point
         }));
@@ -285,8 +278,8 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
         tool.activate();
       }
     } else {
-      if (tool && paperMain.tool && (paperMain.tool as any)._index === (tool as any)._index) {
-        paperMain.tool = null;
+      if (tool && uiPaperScope.tool && (uiPaperScope.tool as any)._index === (tool as any)._index) {
+        uiPaperScope.tool = null;
         resetState();
       }
     }

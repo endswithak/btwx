@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { ReactElement, useEffect, useState, useRef } from 'react';
+import React, { ReactElement, useEffect, useRef } from 'react';
 import { connect } from 'react-redux';
+import paper from 'paper';
 import { importPaperProject } from '../store/selectors/layer';
 import { RootState } from '../store/reducers';
-import { paperMain } from '../canvas';
 
 interface CanvasArtboardProps {
   id: string;
@@ -11,35 +11,26 @@ interface CanvasArtboardProps {
     [id: string]: Btwx.DocumentImage;
   };
   matrix?: number[];
-  projectJSON?: string;
-  projectIndex?: number;
+  paperJSON?: string;
+  paperScope?: number;
 }
 
 const CanvasArtboard = (props: CanvasArtboardProps): ReactElement => {
   const ref = useRef<HTMLCanvasElement>(null);
-  const { id, projectJSON, projectIndex, documentImages, matrix } = props;
+  const { id, paperJSON, paperScope, documentImages, matrix } = props;
 
   useEffect(() => {
     if (ref.current) {
-      let project = paperMain.projects[projectIndex];
+      const paperScopeItem = paper.PaperScope.get(paperScope);
       const canvasWrap = document.getElementById('canvas-container');
-      if (!project) {
-        project = new paperMain.Project(ref.current);
-        paperMain.projects.push(project);
-      }
+      paperScopeItem.setup(ref.current);
       importPaperProject({
-        projectJSON,
-        projectIndex,
+        paperJSON,
+        paperScope,
         documentImages
       });
-      project.view.viewSize = new paperMain.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
-      project.view.matrix.set(matrix);
-    }
-    return () => {
-      if (paperMain.projects[projectIndex]) {
-        paperMain.projects[projectIndex].remove();
-        paperMain.projects = paperMain.projects.filter((project, index) => index !== projectIndex);
-      }
+      paperScopeItem.view.viewSize = new paperScopeItem.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
+      paperScopeItem.view.matrix.set(matrix);
     }
   }, []);
 
@@ -56,16 +47,16 @@ const mapStateToProps = (state: RootState, ownProps: CanvasArtboardProps): {
     [id: string]: Btwx.DocumentImage;
   };
   matrix: number[];
-  projectJSON: string;
-  projectIndex: number;
+  paperJSON: string;
+  paperScope: number;
 } => {
   const { layer, documentSettings } = state;
   const artboard = layer.present.byId[ownProps.id] as Btwx.Artboard;
   return {
     documentImages: documentSettings.images.byId,
     matrix: documentSettings.matrix,
-    projectJSON: artboard.project,
-    projectIndex: artboard.projectIndex
+    paperJSON: artboard.paperJSON,
+    paperScope: artboard.paperScope
   };
 };
 

@@ -1,4 +1,4 @@
-import { paperMain } from '../../canvas';
+import { uiPaperScope } from '../../canvas';
 import { getPaperShapePathData } from './paper';
 
 import {
@@ -85,8 +85,8 @@ export const getLayerShapeOpts = (payload: any): { radius?: number; points?: num
 }
 
 export const getLayerFrame = (payload: any, overrides = {}): Btwx.Frame => {
-  const x = payload.layer.frame && (payload.layer.frame.x !== null && payload.layer.frame.x !== undefined) ? payload.layer.frame.x : paperMain.view.center.x;
-  const y = payload.layer.frame && (payload.layer.frame.y !== null && payload.layer.frame.y !== undefined) ? payload.layer.frame.y : paperMain.view.center.y;
+  const x = payload.layer.frame && (payload.layer.frame.x !== null && payload.layer.frame.x !== undefined) ? payload.layer.frame.x : uiPaperScope.view.center.x;
+  const y = payload.layer.frame && (payload.layer.frame.y !== null && payload.layer.frame.y !== undefined) ? payload.layer.frame.y : uiPaperScope.view.center.y;
   const width = payload.layer.frame && (payload.layer.frame.width !== null && payload.layer.frame.width !== undefined) ? payload.layer.frame.width : DEFAULT_SHAPE_WIDTH;
   const height = payload.layer.frame && (payload.layer.frame.height !== null && payload.layer.frame.height !== undefined) ? payload.layer.frame.height : DEFAULT_SHAPE_HEIGHT;
   const innerWidth = payload.layer.frame && (payload.layer.frame.innerWidth !== null && payload.layer.frame.innerWidth !== undefined) ? payload.layer.frame.innerWidth : DEFAULT_SHAPE_WIDTH;

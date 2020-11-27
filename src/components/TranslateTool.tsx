@@ -3,7 +3,8 @@ import React, { useEffect, ReactElement, useCallback } from 'react';
 import debounce from 'lodash.debounce';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { paperMain } from '../canvas';
+import { uiPaperScope } from '../canvas';
+import { getAllPaperScopes } from '../store/selectors/layer';
 import { setCanvasTranslating } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasTranslatingPayload } from '../store/actionTypes/canvasSettings';
 import { setCanvasMatrix } from '../store/actions/documentSettings';
@@ -12,41 +13,35 @@ import { DocumentSettingsTypes, SetCanvasMatrixPayload } from '../store/actionTy
 interface TranslateToolProps {
   translateEvent: WheelEvent;
   isEnabled?: boolean;
+  paperScopes?: {
+    [id: string]: paper.PaperScope;
+  };
   setCanvasTranslating?(payload: SetCanvasTranslatingPayload): CanvasSettingsTypes;
   setCanvasMatrix?(payload: SetCanvasMatrixPayload): DocumentSettingsTypes;
 }
 
 const TranslateTool = (props: TranslateToolProps): ReactElement => {
-  const { translateEvent, setCanvasTranslating, isEnabled, setCanvasMatrix } = props;
+  const { translateEvent, setCanvasTranslating, isEnabled, setCanvasMatrix, paperScopes } = props;
 
   const debounceTranslate = useCallback(
     debounce(() => {
       setCanvasTranslating({translating: false});
-      setCanvasMatrix({matrix: paperMain.projects[0].view.matrix.values});
+      setCanvasMatrix({matrix: uiPaperScope.view.matrix.values});
     }, 100),
     []
   );
 
   useEffect(() => {
     if (translateEvent) {
-      // if (!isEnabled) {
-      //   setCanvasTranslating({translating: true});
-      // }
-      paperMain.projects.forEach((project, index) => {
-        // const scope = paperScopes[index];
-        project.view.translate(
-          new paperMain.Point(
-            (translateEvent.deltaX * ( 1 / paperMain.projects[0].view.zoom)) * -1,
-            (translateEvent.deltaY * ( 1 / paperMain.projects[0].view.zoom)) * -1
+      Object.keys(paperScopes).forEach((key, index) => {
+        const paperScope = paperScopes[key];
+        paperScope.view.translate(
+          new paperScope.Point(
+            (translateEvent.deltaX * ( 1 / paperScope.view.zoom)) * -1,
+            (translateEvent.deltaY * ( 1 / paperScope.view.zoom)) * -1
           )
         );
       });
-      // paperMain.view.translate(
-      //   new paperMain.Point(
-      //     (translateEvent.deltaX * ( 1 / paperMain.view.zoom)) * -1,
-      //     (translateEvent.deltaY * ( 1 / paperMain.view.zoom)) * -1
-      //   )
-      // );
       debounceTranslate();
     }
   }, [translateEvent]);
@@ -58,11 +53,15 @@ const TranslateTool = (props: TranslateToolProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   isEnabled: boolean;
+  paperScopes: {
+    [id: string]: paper.PaperScope;
+  };
 } => {
   const { canvasSettings } = state;
   const isEnabled = canvasSettings.translating;
   return {
-    isEnabled
+    isEnabled,
+    paperScopes: getAllPaperScopes(state)
   };
 };
 

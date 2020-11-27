@@ -2,12 +2,13 @@
 // import { remote } from 'electron';
 import React, { useContext, useEffect, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
+import paper from 'paper';
 import { isBetween } from '../utils';
 import { RootState } from '../store/reducers';
 import { DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_POINTS, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../constants';
 import Tooltip from '../canvas/tooltip';
-import { getPaperLayer, getScopedPoint } from '../store/selectors/layer';
-import { paperMain } from '../canvas';
+import { getLayerPaperScopes } from '../store/selectors/layer';
+import { uiPaperScope } from '../canvas';
 import { setCanvasDrawing } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasDrawingPayload } from '../store/actionTypes/canvasSettings';
 import { addShapeThunk } from '../store/actions/layer';
@@ -21,7 +22,10 @@ interface ShapeToolStateProps {
   isEnabled?: boolean;
   shapeType?: Btwx.ShapeType;
   scope?: string[];
-  scopeProjectIndex?: number;
+  paperScope?: number;
+  layerPaperScopes?: {
+    [id: string]: paper.PaperScope;
+  };
   drawing?: boolean;
 }
 
@@ -39,7 +43,7 @@ type ShapeToolProps = (
 
 const ShapeTool = (props: ShapeToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isEnabled, shapeType, addShapeThunk, scope, scopeProjectIndex, setCanvasDrawing, drawing, toggleShapeToolThunk, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent } = props;
+  const { isEnabled, shapeType, addShapeThunk, scope, paperScope, layerPaperScopes, setCanvasDrawing, drawing, toggleShapeToolThunk, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent } = props;
   const [handle, setHandle] = useState<Btwx.ResizeHandle>(null);
   const [maxDim, setMaxDim] = useState<number>(null);
   const [vector, setVector] = useState<paper.Point>(null);
@@ -52,9 +56,8 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
   const [initialToBounds, setInitialToBounds] = useState<paper.Rectangle>(null);
 
   const resetState = () => {
-    const UI = paperMain.projects[1];
-    const drawingPreview = UI.getItem({ data: { id: 'drawingPreview' }});
-    const tooltips = UI.getItem({ data: { id: 'tooltips' }});
+    const drawingPreview = uiPaperScope.project.getItem({ data: { id: 'drawingPreview' }});
+    const tooltips = uiPaperScope.project.getItem({ data: { id: 'tooltips' }});
     drawingPreview.removeChildren();
     tooltips.removeChildren();
     setFrom(null);
@@ -73,27 +76,27 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
     const fromPoint = from ? from : dragEvent.downPoint;
     switch(shapeType) {
       case 'Rectangle':
-        return new paperMain.Path.Rectangle({
+        return new uiPaperScope.Path.Rectangle({
           from: toBounds.topLeft,
           to: toBounds.bottomRight,
           ...shapeOpts
         });
       case 'Ellipse':
-        return new paperMain.Path.Ellipse({
+        return new uiPaperScope.Path.Ellipse({
           from: toBounds.topLeft,
           to: toBounds.bottomRight,
           ...shapeOpts
         });
       case 'Rounded':
-        return new paperMain.Path.Rectangle({
+        return new uiPaperScope.Path.Rectangle({
           from: toBounds.topLeft,
           to: toBounds.bottomRight,
           radius: (maxDim / 2) * DEFAULT_ROUNDED_RADIUS,
           ...shapeOpts
         });
       case 'Polygon': {
-        const shape = new paperMain.Path.RegularPolygon({
-          center: new paperMain.Point(0, 0),
+        const shape = new uiPaperScope.Path.RegularPolygon({
+          center: new uiPaperScope.Point(0, 0),
           radius: maxDim / 2,
           sides: DEFAULT_POLYGON_SIDES,
           ...shapeOpts
@@ -104,8 +107,8 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
         return shape;
       }
       case 'Star': {
-        const shape = new paperMain.Path.Star({
-          center: new paperMain.Point(0, 0),
+        const shape = new uiPaperScope.Path.Star({
+          center: new uiPaperScope.Point(0, 0),
           radius1: maxDim / 2,
           radius2: (maxDim / 2) * DEFAULT_STAR_RADIUS,
           points: DEFAULT_STAR_POINTS,
@@ -122,9 +125,9 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
         const lineTo = (() => {
           if (shiftModifier) {
             if (isHorizontal) {
-              return new paperMain.Point(toBounds[handle].x, fromPoint.y);
+              return new uiPaperScope.Point(toBounds[handle].x, fromPoint.y);
             } else if (isVertical) {
-              return new paperMain.Point(fromPoint.x, toBounds[handle].y);
+              return new uiPaperScope.Point(fromPoint.x, toBounds[handle].y);
             } else {
               return toBounds[handle];
             }
@@ -132,7 +135,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
             return toBounds[handle];
           }
         })();
-        const shape = new paperMain.Path.Line({
+        const shape = new uiPaperScope.Path.Line({
           from: fromPoint,
           to: lineTo,
           ...shapeOpts
@@ -155,15 +158,14 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
   }
 
   const updatePreview = (): void => {
-    const UI = paperMain.projects[1];
-    const drawingPreview = UI.getItem({ data: { id: 'drawingPreview' }});
-    const tooltips = UI.getItem({ data: { id: 'tooltips' }});
+    const drawingPreview = uiPaperScope.project.getItem({ data: { id: 'drawingPreview' }});
+    const tooltips = uiPaperScope.project.getItem({ data: { id: 'tooltips' }});
     drawingPreview.removeChildren();
     tooltips.removeChildren();
     const nextTooltip = new Tooltip(`${Math.round(toBounds.width)} x ${Math.round(toBounds.height)}`, dragEvent.point, {up: true});
     const nextPreview = renderShape({
       strokeColor: theme.palette.primary,
-      strokeWidth: 1 / paperMain.projects[0].view.zoom,
+      strokeWidth: 1 / uiPaperScope.view.zoom,
       parent: drawingPreview
     });
     nextPreview.removeOn({
@@ -272,9 +274,9 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
 
   useEffect(() => {
     if (moveEvent && isEnabled && !drawing) {
-      const nextSnapBounds = new paperMain.Rectangle({
-        from: new paperMain.Point(moveEvent.point.x - 0.5, moveEvent.point.y - 0.5),
-        to: new paperMain.Point(moveEvent.point.x + 0.5, moveEvent.point.y + 0.5)
+      const nextSnapBounds = new uiPaperScope.Rectangle({
+        from: new uiPaperScope.Point(moveEvent.point.x - 0.5, moveEvent.point.y - 0.5),
+        to: new uiPaperScope.Point(moveEvent.point.x + 0.5, moveEvent.point.y + 0.5)
       });
       setSnapBounds(nextSnapBounds);
     }
@@ -295,10 +297,10 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
       const fromPoint = from ? from : dragEvent.downPoint;
       const nextVector = dragEvent.point.subtract(fromPoint);
       const nextHandle = `${nextVector.y > 0 ? 'bottom' : 'top'}${nextVector.x > 0 ? 'Right' : 'Left'}` as 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
-      const nextDims = new paperMain.Rectangle({from: fromPoint, to: dragEvent.point}).size;
+      const nextDims = new uiPaperScope.Rectangle({from: fromPoint, to: dragEvent.point}).size;
       const nextMaxDim = Math.max(nextDims.width, nextDims.height);
-      const nextContrainedDims = new paperMain.Point(nextVector.x < 0 ? fromPoint.x - nextMaxDim : fromPoint.x + nextMaxDim, nextVector.y < 0 ? fromPoint.y - nextMaxDim : fromPoint.y + nextMaxDim);
-      const nextSnapBounds = new paperMain.Rectangle({
+      const nextContrainedDims = new uiPaperScope.Point(nextVector.x < 0 ? fromPoint.x - nextMaxDim : fromPoint.x + nextMaxDim, nextVector.y < 0 ? fromPoint.y - nextMaxDim : fromPoint.y + nextMaxDim);
+      const nextSnapBounds = new uiPaperScope.Rectangle({
         from: fromPoint,
         to: dragEvent.modifiers.shift ? nextContrainedDims : dragEvent.point
       });
@@ -328,18 +330,23 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
       const fromPoint = (paperLayer as paper.Path).firstSegment.point;
       const toPoint = (paperLayer as paper.Path).lastSegment.point;
       const vector = toPoint.subtract(fromPoint);
-      const parentItem = paperMain.projects.reduce((result, current, index) => {
-        const hitTest = current.getItem({
-          data: (data: any) => {
-            return data.id === 'artboardBackground';
-          },
-          overlapping: paperLayer.bounds
-        });
-        return hitTest && scope[scope.length - 1] === 'page' ? { id: hitTest.parent.data.id, projectIndex: index, paperLayer: hitTest.parent } : result;
+      const parentItem = Object.keys(layerPaperScopes).reduce((result, current, index) => {
+        const paperScope = layerPaperScopes[current];
+        if (paperScope.project) {
+          const hitTest = paperScope.project.getItem({
+            data: (data: any) => {
+              return data.id === 'artboardBackground';
+            },
+            overlapping: paperLayer.bounds
+          });
+          return hitTest && scope[scope.length - 1] === 'page' ? { id: hitTest.parent.data.id, paperScope: index + 1, paperLayer: hitTest.parent } : result;
+        } else {
+          return result;
+        }
       }, {
         id: scope[scope.length - 1],
-        projectIndex: scopeProjectIndex,
-        paperLayer: paperMain.projects[scopeProjectIndex].getItem({ data: { id: scope[scope.length - 1] }})
+        paperScope: paperScope,
+        paperLayer: paper.PaperScope.get(paperScope).project.getItem({ data: { id: scope[scope.length - 1] }})
       });
       addShapeThunk({
         layer: {
@@ -410,7 +417,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
   useEffect(() => {
     if (keyDownEvent && isEnabled && drawing) {
       if (keyDownEvent.key === 'shift') {
-        setSnapBounds(new paperMain.Rectangle({
+        setSnapBounds(new uiPaperScope.Rectangle({
           from: from,
           to: constrainedDims
         }));
@@ -422,7 +429,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
   useEffect(() => {
     if (keyUpEvent && isEnabled && drawing) {
       if (keyUpEvent.key === 'shift') {
-        setSnapBounds(new paperMain.Rectangle({
+        setSnapBounds(new uiPaperScope.Rectangle({
           from: from,
           to: dragEvent.point
         }));
@@ -443,8 +450,8 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
         tool.activate();
       }
     } else {
-      if (tool && paperMain.tool && (paperMain.tool as any)._index === (tool as any)._index) {
-        paperMain.tool = null;
+      if (tool && uiPaperScope.tool && (uiPaperScope.tool as any)._index === (tool as any)._index) {
+        uiPaperScope.tool = null;
         resetState();
       }
     }
@@ -470,14 +477,16 @@ const mapStateToProps = (state: RootState): ShapeToolStateProps => {
   const isEnabled = shapeTool.isEnabled;
   const shapeType = shapeTool.shapeType;
   const scope = layer.present.scope;
-  const scopeProjectIndex = layer.present.scopeProjectIndex;
+  const paperScope = layer.present.paperScope;
   const drawing = canvasSettings.drawing;
+  const layerPaperScopes = getLayerPaperScopes(state);
   return {
     isEnabled,
     shapeType,
     scope,
-    scopeProjectIndex,
-    drawing
+    paperScope,
+    drawing,
+    layerPaperScopes
   };
 };
 

@@ -1,8 +1,8 @@
 import { RootState } from '../reducers';
 import { setCanvasActiveTool, setCanvasTranslating } from './canvasSettings';
 import { setCanvasMatrix } from './documentSettings';
-import { getSelectionCenter } from '../selectors/layer';
-import { paperMain } from '../../canvas';
+import { uiPaperScope } from '../../canvas';
+import { getSelectedBounds, getAllPaperScopes } from '../selectors/layer';
 
 export const enableTranslateToolThunk = () => {
   return (dispatch: any, getState: any): void => {
@@ -13,7 +13,7 @@ export const enableTranslateToolThunk = () => {
 export const disableTranslateToolThunk = () => {
   return (dispatch: any, getState: any): void => {
     dispatch(setCanvasActiveTool({activeTool: null, translating: false}));
-    dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
+    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
   }
 };
 
@@ -21,11 +21,13 @@ export const centerSelectedThunk = () => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
     if (state.layer.present.selected.length > 0) {
-      dispatch(setCanvasTranslating({translating: true}));
-      const selectionCenter = getSelectionCenter();
-      paperMain.view.center = selectionCenter;
-      dispatch(setCanvasTranslating({translating: false}));
-      dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
+      const selectedBounds = getSelectedBounds(state);
+      const paperScopes = getAllPaperScopes(state);
+      Object.keys(paperScopes).forEach((key, index) => {
+        const paperScope = paperScopes[key];
+        paperScope.view.center = selectedBounds.center;
+      });
+      dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
     }
   }
 };

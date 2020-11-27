@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { updateHoverFrame } from '../store/actions/layer';
-import { paperMain } from '../canvas';
+import { uiPaperScope } from '../canvas';
 
 interface HoverFrameProps {
   hover?: string;
@@ -16,7 +16,7 @@ const HoverFrame = (props: HoverFrameProps): ReactElement => {
   useEffect(() => {
     updateHoverFrame(hoverItem, artboardItem);
     return () => {
-      const hoverFrame = paperMain.projects[1].getItem({ data: { id: 'hoverFrame' } });
+      const hoverFrame = uiPaperScope.project.getItem({ data: { id: 'hoverFrame' } });
       hoverFrame.removeChildren();
     }
   }, [hover]);

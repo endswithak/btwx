@@ -4,7 +4,7 @@ import tinyColor from 'tinycolor2';
 import layer, { LayerState } from '../reducers/layer';
 import * as layerActions from '../actions/layer';
 import { addItem, removeItem, insertItem, moveItemAbove, moveItemBelow, replaceAllStr } from './general';
-import { paperMain } from '../../canvas';
+import { uiPaperScope } from '../../canvas';
 import { TWEEN_PROPS_MAP } from '../../constants';
 
 import {
@@ -45,15 +45,14 @@ import {
 } from '../actionTypes/layer';
 
 import {
-  getLayerIndex, getLayer, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor, getPaperLayer, getSelectionTopLeft,
-  getSelectionBottomRight, getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayerDescendants,
-  getDestinationEquivalent, getEquivalentTweenProps, getDeepSelectItem, getLayersBounds, getGradientOriginPoint,
-  getGradientDestinationPoint, getGradientStops, orderLayersByDepth, orderLayersByLeft, orderLayersByTop, savePaperProjectJSON,
-  getEquivalentTweenProp, gradientsMatch, getPaperProp, getArtboardsTopTop, getSelectionBounds, getLineFromPoint, getLineToPoint,
-  getLineVector, getParentPaperLayer, getLayerUnderlyingSiblings, getMaskableUnderlyingSiblings, getSiblingLayersWithUnderlyingMask,
-  getScopedPoint, getScopedPosition, getAbsPosition, getItemLayers, getLayerProjectIndex, getLayerProject
+  getLayerIndex, getLayer, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor, getPaperLayer,
+  getClipboardCenter, getLayerAndDescendants, getLayerDescendants, getDestinationEquivalent, getEquivalentTweenProps,
+  getDeepSelectItem, getLayersBounds, getGradientOriginPoint, getGradientDestinationPoint, getGradientStops,
+  orderLayersByDepth, orderLayersByLeft, orderLayersByTop, savePaperProjectJSON, getEquivalentTweenProp, gradientsMatch,
+  getPaperProp, getArtboardsTopTop, getLineFromPoint, getLineToPoint, getLineVector, getParentPaperLayer,
+  getLayerUnderlyingSiblings, getMaskableUnderlyingSiblings, getSiblingLayersWithUnderlyingMask, getItemLayers,
+  getLayerProject, getLayerPaperScope
 } from '../selectors/layer';
-import { project } from 'paper';
 
 export const addArtboard = (state: LayerState, action: AddArtboard): LayerState => {
   let currentState = state;
@@ -450,7 +449,6 @@ export const removeLayers = (state: LayerState, action: RemoveLayers): LayerStat
 export const deselectLayer = (state: LayerState, action: DeselectLayer): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
-  paperLayer.data.selected = false;
   currentState = {
     ...currentState,
     byId: {
@@ -607,7 +605,6 @@ export const setLayerHover = (state: LayerState, action: SetLayerHover): LayerSt
   const currentHover = state.hover;
   const nextHover = action.payload.id;
   if (currentHover !==  null) {
-    const { layerItem, paperLayer } = getItemLayers(currentState, currentHover);
     currentState = {
       ...currentState,
       byId: {
@@ -620,7 +617,6 @@ export const setLayerHover = (state: LayerState, action: SetLayerHover): LayerSt
     };
   }
   if (nextHover !== null) {
-    const { layerItem, paperLayer } = getItemLayers(currentState, nextHover);
     currentState = {
       ...currentState,
       byId: {
@@ -641,13 +637,13 @@ export const setLayerHover = (state: LayerState, action: SetLayerHover): LayerSt
 
 export const setShapeIcon = (state: LayerState, id: string, pathData: string): LayerState => {
   let currentState = state;
-  const layerIcon = new paperMain.CompoundPath({
+  const layerIcon = new uiPaperScope.CompoundPath({
     pathData: pathData,
     insert: false
   });
-  layerIcon.fitBounds(new paperMain.Rectangle({
-    point: new paperMain.Point(0,0),
-    size: new paperMain.Size(24,24)
+  layerIcon.fitBounds(new uiPaperScope.Rectangle({
+    point: new uiPaperScope.Point(0,0),
+    size: new uiPaperScope.Size(24,24)
   }));
   currentState = {
     ...currentState,
@@ -665,7 +661,7 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
   const childItemLayers = getItemLayers(currentState, action.payload.child);
   const childItem = childItemLayers.layerItem;
   const isChildMask = childItem.type === 'Shape' && (childItem as Btwx.Shape).mask;
-  const paperLayer = getParentPaperLayer(action.payload.id, getLayerProjectIndex(currentState, action.payload.id));
+  const paperLayer = getParentPaperLayer(action.payload.id, getLayerPaperScope(currentState, action.payload.id));
   const childPaperLayer = isChildMask ? childItemLayers.paperLayer.parent : childItemLayers.paperLayer;
   const aboveId = layerItem.children.length > 0 && layerItem.children[layerItem.children.length - 1] !== action.payload.child ? layerItem.children[layerItem.children.length - 1] : null;
   const aboveItemLayers = aboveId ? getItemLayers(currentState, aboveId) : null;
@@ -1085,7 +1081,7 @@ export const decreaseLayerScope = (state: LayerState, action: DecreaseLayerScope
 export const clearLayerScope = (state: LayerState, action: ClearLayerScope): LayerState => ({
   ...state,
   scope: ['page'],
-  scopeProjectIndex: 0
+  paperScope: 1
 });
 
 export const newLayerScope = (state: LayerState, action: NewLayerScope): LayerState => ({
@@ -1138,7 +1134,7 @@ export const setGlobalScope = (state: LayerState, action: SetGlobalScope): Layer
   currentState = {
     ...currentState,
     scope: [...action.payload.scope],
-    scopeProjectIndex: hasArtboard ? (currentState.byId[action.payload.scope[1]] as Btwx.Artboard).projectIndex : 0
+    paperScope: hasArtboard ? (currentState.byId[action.payload.scope[1]] as Btwx.Artboard).paperScope : 1
   }
   return currentState;
 };
@@ -1247,183 +1243,9 @@ export const ungroupLayers = (state: LayerState, action: UngroupLayers): LayerSt
   return currentState;
 };
 
-// export const pasteLayerFromClipboard = (payload: {state: LayerState; id: string; pasteOverSelection?: boolean; documentImages?: { [id: string]: Btwx.DocumentImage }}): LayerState => {
-//   let currentState = payload.state;
-//   currentState = duplicateLayer(currentState, layerActions.duplicateLayer({id: payload.id}) as DuplicateLayer, true, payload.documentImages);
-//   const clonedLayerAndChildren = currentState.allIds.filter((id) => !payload.state.allIds.includes(id));
-//   // paste over selection is specified
-//   if (payload.pasteOverSelection && payload.state.selected.length > 0) {
-//     const selectionCenter = getSelectionCenter(payload.state);
-//     const clipboardCenter = getClipboardCenter(payload.state, payload.documentImages);
-//     const paperLayer = getPaperLayer(clonedLayerAndChildren[0]);
-//     const paperLayerCenter = paperLayer.position;
-//     paperLayer.position.x = selectionCenter.x + (paperLayerCenter.x - clipboardCenter.x);
-//     paperLayer.position.y = selectionCenter.y + (paperLayerCenter.y - clipboardCenter.y);
-//     currentState = moveLayerTo(currentState, layerActions.moveLayerTo({id: clonedLayerAndChildren[0], x: paperLayer.position.x, y: paperLayer.position.y}) as MoveLayerTo);
-//   }
-//   return currentState;
-// };
-
-// export const updateParentBounds = (state: LayerState, id: string): LayerState => {
-//   const layerItem = state.byId[id];
-//   return layerItem.scope.reduce((result, current) => {
-//     const paperLayer = getPaperLayer(current);
-//     const layerItem = result.byId[current];
-//     const positionInParent = getScopedPoint(paperLayer.position, layerItem.scope);
-//     if (layerItem.transform.rotation !== 0) {
-//       const clone = paperLayer.clone({insert: false});
-//       clone.rotation = -layerItem.transform.rotation;
-//       result = {
-//         ...result,
-//         byId: {
-//           ...result.byId,
-//           [current]: {
-//             ...result.byId[current],
-//             frame: {
-//               ...result.byId[current].frame,
-//               innerWidth: clone.bounds.width,
-//               innerHeight: clone.bounds.height
-//             }
-//           }
-//         }
-//       }
-//     } else {
-//       result = {
-//         ...result,
-//         byId: {
-//           ...result.byId,
-//           [current]: {
-//             ...result.byId[current],
-//             frame: {
-//               ...result.byId[current].frame,
-//               innerWidth: paperLayer.bounds.width,
-//               innerHeight: paperLayer.bounds.height
-//             }
-//           }
-//         }
-//       }
-//     }
-//     result = {
-//       ...result,
-//       byId: {
-//         ...result.byId,
-//         [current]: {
-//           ...result.byId[current],
-//           frame: {
-//             ...result.byId[current].frame,
-//             x: positionInParent.x,
-//             y: positionInParent.y,
-//             width: paperLayer.bounds.width,
-//             height: paperLayer.bounds.height
-//           }
-//         }
-//       }
-//     }
-//     return result;
-//   }, state);
-// };
-
-// export const updateSiblingPositions = (state: LayerState, id: string): LayerState => {
-//   const layerItem = state.byId[id];
-//   const parentItem = state.byId[layerItem.parent];
-//   const siblings = parentItem.children.filter((childId) => childId !== id);
-//   return siblings.reduce((result, current) => {
-//     const paperLayer = getPaperLayer(current);
-//     const layerItem = result.byId[current];
-//     const positionInParent = getScopedPoint(paperLayer.position, layerItem.scope);
-//     result = {
-//       ...result,
-//       byId: {
-//         ...result.byId,
-//         [current]: {
-//           ...result.byId[current],
-//           frame: {
-//             ...result.byId[current].frame,
-//             x: positionInParent.x,
-//             y: positionInParent.y
-//           }
-//         }
-//       }
-//     }
-//     return result;
-//   }, state);
-// };
-
-// export const updateChildrenBounds = (state: LayerState, id: string): LayerState => {
-//   const layerDescendants = getLayerDescendants(state, id);
-//   return layerDescendants.reduce((result, current) => {
-//     const paperLayer = getPaperLayer(current);
-//     const layerItem = result.byId[current];
-//     if (result.byId[current].type === 'Shape') {
-//       result = {
-//         ...result,
-//         byId: {
-//           ...result.byId,
-//           [current]: {
-//             ...result.byId[current],
-//             pathData: (paperLayer as paper.Path | paper.CompoundPath).pathData
-//           } as Btwx.Shape
-//         }
-//       }
-//     }
-//     if (layerItem.transform.rotation !== 0) {
-//       const clone = paperLayer.clone({insert: false});
-//       clone.rotation = -layerItem.transform.rotation;
-//       result = {
-//         ...result,
-//         byId: {
-//           ...result.byId,
-//           [current]: {
-//             ...result.byId[current],
-//             frame: {
-//               ...result.byId[current].frame,
-//               innerWidth: clone.bounds.width,
-//               innerHeight: clone.bounds.height
-//             }
-//           }
-//         }
-//       }
-//     } else {
-//       result = {
-//         ...result,
-//         byId: {
-//           ...result.byId,
-//           [current]: {
-//             ...result.byId[current],
-//             frame: {
-//               ...result.byId[current].frame,
-//               innerWidth: paperLayer.bounds.width,
-//               innerHeight: paperLayer.bounds.height
-//             }
-//           }
-//         }
-//       }
-//     }
-//     result = {
-//       ...result,
-//       byId: {
-//         ...result.byId,
-//         [current]: {
-//           ...result.byId[current],
-//           frame: {
-//             ...result.byId[current].frame,
-//             x: paperLayer.position.x,
-//             y: paperLayer.position.y,
-//             width: paperLayer.bounds.width,
-//             height: paperLayer.bounds.height
-//           }
-//         }
-//       }
-//     }
-//     return result;
-//   }, state);
-// };
-
 export const updateLayerBounds = (state: LayerState, id: string): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, id);
-  // const relativePosition = getScopedPosition(currentState, id, true);
-  // const absolutePosition = getAbsPosition(currentState, id, true);
   if (layerItem.type === 'Shape') {
     currentState = setShapeIcon(currentState, id, (paperLayer as paper.PathItem).pathData);
     currentState = {
@@ -1553,24 +1375,6 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
 };
 
 export const moveLayer = (state: LayerState, action: MoveLayer): LayerState => {
-  // let currentState = state;
-  // const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
-  // currentState = {
-  //   ...currentState,
-  //   byId: {
-  //     ...currentState.byId,
-  //     [action.payload.id]: {
-  //       ...currentState.byId[action.payload.id],
-  //       frame: {
-  //         ...currentState.byId[action.payload.id].frame,
-  //         x: paperLayer.position.x,
-  //         y: paperLayer.position.y
-  //       }
-  //     }
-  //   }
-  // }
-  // // currentState = updateParentBounds(currentState, action.payload.id);
-  // return currentState;
   let currentState = state;
   currentState = updateLayerBounds(currentState, action.payload.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y']);
@@ -1587,7 +1391,6 @@ export const moveLayers = (state: LayerState, action: MoveLayers): LayerState =>
     }
     return moveLayer(result, layerActions.moveLayer({id: current}) as MoveLayer);
   }, currentState);
-  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,
@@ -1616,7 +1419,6 @@ export const moveLayerTo = (state: LayerState, action: MoveLayerTo): LayerState 
       }
     }
   }
-  // currentState = updateParentBounds(currentState, action.payload.id);
   return currentState;
 };
 
@@ -1630,7 +1432,6 @@ export const moveLayersTo = (state: LayerState, action: MoveLayersTo): LayerStat
     }
     return moveLayerTo(result, layerActions.moveLayerTo({id: current, x: action.payload.x, y: action.payload.y}) as MoveLayerTo);
   }, state);
-  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,
@@ -1716,20 +1517,6 @@ export const setLayerName = (state: LayerState, action: SetLayerName): LayerStat
 
 export const setActiveArtboard = (state: LayerState, action: SetActiveArtboard): LayerState => {
   let currentState = state;
-  const currentActiveArtboard = state.activeArtboard;
-  const nextActiveArtboard = action.payload.id;
-  if (currentActiveArtboard) {
-    const { layerItem, paperLayer } = getItemLayers(currentState, currentActiveArtboard);
-    if (paperLayer) {
-      paperLayer.data.activeArtboard = false;
-    }
-  }
-  if (nextActiveArtboard) {
-    const { layerItem, paperLayer } = getItemLayers(currentState, nextActiveArtboard);
-    if (paperLayer) {
-      paperLayer.data.activeArtboard = true;
-    }
-  }
   currentState = {
     ...currentState,
     activeArtboard: action.payload.id
@@ -4028,7 +3815,7 @@ export const enableLayerShadow = (state: LayerState, action: EnableLayerShadow):
   const shadow = layerItem.style.shadow;
   paperLayer.shadowColor = { hue: shadow.color.h, saturation: shadow.color.s, lightness: shadow.color.l, alpha: shadow.color.a } as paper.Color;
   paperLayer.shadowBlur = shadow.blur;
-  paperLayer.shadowOffset = new paperMain.Point(shadow.offset.x, shadow.offset.y);
+  paperLayer.shadowOffset = new uiPaperScope.Point(shadow.offset.x, shadow.offset.y);
   currentState = {
     ...currentState,
     byId: {
@@ -4685,7 +4472,7 @@ export const addLayersMask = (state: LayerState, action: AddLayersMask): LayerSt
   const underlyingSiblings = getLayerUnderlyingSiblings(currentState, action.payload.layers[0]);
   const mask = paperLayer.clone();
   mask.clipMask = true;
-  const maskGroup = new paperMain.Group({
+  const maskGroup = new uiPaperScope.Group({
     name: 'MaskGroup',
     data: { id: 'maskGroup', type: 'LayerContainer', layerType: 'Shape' },
     children: [mask]
@@ -4773,6 +4560,7 @@ export const toggleLayerMask = (state: LayerState, action: ToggleLayerMask): Lay
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const parentLayerItem = state.byId[layerItem.parent];
+  const paperScopeItem = paper.PaperScope.get(state.paperScope);
   const isMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
   const underlyingSiblings = getLayerUnderlyingSiblings(currentState, action.payload.id);
   const maskableUnderlyingSiblings = getMaskableUnderlyingSiblings(currentState, action.payload.id, underlyingSiblings);
@@ -4810,7 +4598,7 @@ export const toggleLayerMask = (state: LayerState, action: ToggleLayerMask): Lay
   } else {
     const mask = paperLayer.clone();
     mask.clipMask = true;
-    const maskGroup = new paperMain.Group({
+    const maskGroup = new paperScopeItem.Group({
       name: 'MaskGroup',
       data: { id: 'maskGroup', type: 'LayerContainer', layerType: 'Shape' },
       children: [mask]
@@ -4998,7 +4786,7 @@ export const setLayersMasked = (state: LayerState, action: SetLayersMasked): Lay
 
 export const alignLayersToLeft = (state: LayerState, action: AlignLayersToLeft): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(currentState, action.payload.layers, true);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers);
   const projects: string[] = [];
   currentState = action.payload.layers.reduce((result, current) => {
     const layerProject = getLayerProject(result, current);
@@ -5023,7 +4811,7 @@ export const alignLayersToLeft = (state: LayerState, action: AlignLayersToLeft):
 
 export const alignLayersToRight = (state: LayerState, action: AlignLayersToRight): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(currentState, action.payload.layers, true);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers);
   const projects: string[] = [];
   currentState = action.payload.layers.reduce((result, current) => {
     const layerProject = getLayerProject(result, current);
@@ -5048,7 +4836,7 @@ export const alignLayersToRight = (state: LayerState, action: AlignLayersToRight
 
 export const alignLayersToTop = (state: LayerState, action: AlignLayersToTop): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(currentState, action.payload.layers, true);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers);
   const projects: string[] = [];
   currentState = action.payload.layers.reduce((result, current) => {
     const layerProject = getLayerProject(result, current);
@@ -5073,7 +4861,7 @@ export const alignLayersToTop = (state: LayerState, action: AlignLayersToTop): L
 
 export const alignLayersToBottom = (state: LayerState, action: AlignLayersToBottom): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(currentState, action.payload.layers, true);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers);
   const projects: string[] = [];
   currentState = action.payload.layers.reduce((result, current) => {
     const layerProject = getLayerProject(result, current);
@@ -5098,7 +4886,7 @@ export const alignLayersToBottom = (state: LayerState, action: AlignLayersToBott
 
 export const alignLayersToCenter = (state: LayerState, action: AlignLayersToCenter): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(currentState, action.payload.layers, true);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers);
   const projects: string[] = [];
   currentState = action.payload.layers.reduce((result, current) => {
     const layerProject = getLayerProject(result, current);
@@ -5123,7 +4911,7 @@ export const alignLayersToCenter = (state: LayerState, action: AlignLayersToCent
 
 export const alignLayersToMiddle = (state: LayerState, action: AlignLayersToMiddle): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(currentState, action.payload.layers, true);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers);
   const projects: string[] = [];
   currentState = action.payload.layers.reduce((result, current) => {
     const layerProject = getLayerProject(result, current);
@@ -5148,7 +4936,7 @@ export const alignLayersToMiddle = (state: LayerState, action: AlignLayersToMidd
 
 export const distributeLayersHorizontally = (state: LayerState, action: DistributeLayersHorizontally): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(currentState, action.payload.layers, true);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers);
   const projects: string[] = [];
   const layersWidth = action.payload.layers.reduce((result, current) => {
     const layerProject = getLayerProject(currentState, current);
@@ -5160,7 +4948,7 @@ export const distributeLayersHorizontally = (state: LayerState, action: Distribu
     return result;
   }, 0);
   const diff = (layersBounds.width - layersWidth) / (action.payload.layers.length - 1);
-  const orderedLayers = orderLayersByLeft(action.payload.layers);
+  const orderedLayers = orderLayersByLeft(currentState, action.payload.layers);
   currentState = orderedLayers.reduce((result: LayerState, current: string, index: number) => {
     if (index !== 0 && index !== orderedLayers.length - 1) {
       const { layerItem, paperLayer } = getItemLayers(currentState, current);
@@ -5185,7 +4973,7 @@ export const distributeLayersHorizontally = (state: LayerState, action: Distribu
 
 export const distributeLayersVertically = (state: LayerState, action: DistributeLayersVertically): LayerState => {
   let currentState = state;
-  const layersBounds = getLayersBounds(currentState, action.payload.layers, true);
+  const layersBounds = getLayersBounds(currentState, action.payload.layers);
   const projects: string[] = [];
   const layersHeight = action.payload.layers.reduce((result, current) => {
     const layerProject = getLayerProject(currentState, current);
@@ -5197,7 +4985,7 @@ export const distributeLayersVertically = (state: LayerState, action: Distribute
     return result;
   }, 0);
   const diff = (layersBounds.height - layersHeight) / (action.payload.layers.length - 1);
-  const orderedLayers = orderLayersByTop(action.payload.layers);
+  const orderedLayers = orderLayersByTop(currentState, action.payload.layers);
   currentState = orderedLayers.reduce((result: LayerState, current: string, index: number) => {
     if (index !== 0 && index !== orderedLayers.length - 1) {
       const { layerItem, paperLayer } = getItemLayers(currentState, current);
@@ -5320,13 +5108,16 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): {
       }
     };
     if (itemToCopy.artboardLayer && (itemToCopy as Btwx.ArtboardLayer).artboard) {
+      const ogArtboard = (itemToCopy as Btwx.ArtboardLayer).artboard;
+      const copiedArtboard = layerCloneMap[ogArtboard];
+      const artboard = copiedArtboard ? copiedArtboard : ogArtboard;
       result = {
         ...result,
         byId: {
           ...result.byId,
           [copyId]: {
             ...result.byId[copyId],
-            artboard: layerCloneMap[(result.byId[copyId] as Btwx.ArtboardLayer).artboard]
+            artboard: artboard
           } as Btwx.ArtboardLayer
         }
       }
@@ -5376,8 +5167,8 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): {
         ...currentState.byId,
         [artboard]: {
           ...currentState.byId[artboard],
-          projectIndex: currentState.allArtboardIds.length + 1,
-          project: duplicatePaperLayer.exportJSON()
+          paperScope: currentState.allArtboardIds.length + 1,
+          paperJSON: duplicatePaperLayer.exportJSON()
         } as Btwx.Artboard
       }
     }
@@ -5668,7 +5459,7 @@ export const setRoundedRadius = (state: LayerState, action: SetRoundedRadius): L
   const paperLayerPath = paperLayer.children[0] as paper.Path;
   paperLayerPath.rotation = -layerItem.transform.rotation;
   const maxDim = Math.max(paperLayerPath.bounds.width, paperLayerPath.bounds.height);
-  const newShape = new paperMain.Path.Rectangle({
+  const newShape = new uiPaperScope.Path.Rectangle({
     from: paperLayerPath.bounds.topLeft,
     to: paperLayerPath.bounds.bottomRight,
     radius: (maxDim / 2) * action.payload.radius,
@@ -5719,7 +5510,7 @@ export const setPolygonSides = (state: LayerState, action: SetPolygonSides): Lay
   const paperLayerPath = paperLayer.children[0] as paper.Path;
   const startPosition = paperLayerPath.position;
   paperLayerPath.rotation = -layerItem.transform.rotation;
-  const newShape = new paperMain.Path.RegularPolygon({
+  const newShape = new uiPaperScope.Path.RegularPolygon({
     center: paperLayerPath.bounds.center,
     radius: Math.max(paperLayerPath.bounds.width, paperLayerPath.bounds.height) / 2,
     sides: action.payload.sides,
@@ -5780,7 +5571,7 @@ export const setStarPoints = (state: LayerState, action: SetStarPoints): LayerSt
   const startPosition = paperLayerPath.position;
   paperLayerPath.rotation = -layerItem.transform.rotation;
   const maxDim = Math.max(paperLayerPath.bounds.width, paperLayerPath.bounds.height);
-  const newShape = new paperMain.Path.Star({
+  const newShape = new uiPaperScope.Path.Star({
     center: paperLayerPath.bounds.center,
     radius1: maxDim / 2,
     radius2: (maxDim / 2) * (layerItem as Btwx.Star).radius,
@@ -5836,7 +5627,7 @@ export const setStarRadius = (state: LayerState, action: SetStarRadius): LayerSt
   const startPosition = paperLayerPath.position;
   paperLayerPath.rotation = -layerItem.transform.rotation;
   const maxDim = Math.max(paperLayerPath.bounds.width, paperLayerPath.bounds.height);
-  const newShape = new paperMain.Path.Star({
+  const newShape = new uiPaperScope.Path.Star({
     center: paperLayerPath.bounds.center,
     radius1: maxDim / 2,
     radius2: (maxDim / 2) * action.payload.radius,
@@ -6087,11 +5878,13 @@ export const setLayerEdit = (state: LayerState, action: SetLayerEdit): LayerStat
   currentState = {
     ...currentState,
     byId: action.payload.edit.projects.reduce((result, current) => {
-      const projectJSON = savePaperProjectJSON(currentState, (currentState.byId[current] as Btwx.ProjectLayer).projectIndex);
-      result[current] = {
-        ...result[current],
-        project: projectJSON ? projectJSON : (currentState.byId[current] as Btwx.ProjectLayer).project
-      } as Btwx.Page | Btwx.Artboard
+      if (currentState.byId[current]) {
+        const projectJSON = savePaperProjectJSON(currentState, (currentState.byId[current] as Btwx.ProjectLayer).paperScope);
+        result[current] = {
+          ...result[current],
+          paperJSON: projectJSON ? projectJSON : (currentState.byId[current] as Btwx.ProjectLayer).paperJSON
+        } as Btwx.Page | Btwx.Artboard
+      }
       // if (action.payload.edit.projects.includes(current)) {
       //   const projectJSON = savePaperProjectJSON(currentState, (currentState.byId[current] as Btwx.ProjectLayer).projectIndex);
       //   result[current] = {
@@ -6194,7 +5987,7 @@ export const setLayerStyle = (state: LayerState, action: SetLayerStyle): LayerSt
     }
     if (action.payload.style.shadow.offset) {
       const offset = action.payload.style.shadow.offset;
-      paperLayer.shadowOffset = new paperMain.Point(offset.x ? offset.x : layerItem.style.shadow.offset.x, offset.y ? offset.y : layerItem.style.shadow.offset.y);
+      paperLayer.shadowOffset = new uiPaperScope.Point(offset.x ? offset.x : layerItem.style.shadow.offset.x, offset.y ? offset.y : layerItem.style.shadow.offset.y);
     }
     if (action.payload.style.shadow.blur) {
       paperLayer.shadowBlur = action.payload.style.shadow.blur;

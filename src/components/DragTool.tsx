@@ -2,8 +2,8 @@
 import React, { useEffect, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getLayerProjectIndex, getPaperLayer, getPaperLayersBounds, getSelectedProjectIndex } from '../store/selectors/layer';
-import { paperMain } from '../canvas';
+import { getLayerPaperScope, getPaperLayer, getPaperLayersBounds, getSelectedPaperScopes } from '../store/selectors/layer';
+import { uiPaperScope } from '../canvas';
 import { THEME_PRIMARY_COLOR } from '../constants';
 import { setCanvasDragging } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasDraggingPayload } from '../store/actionTypes/canvasSettings';
@@ -18,10 +18,10 @@ interface DragToolStateProps {
   isEnabled?: boolean;
   dragging?: boolean;
   dragHandle?: boolean;
-  selectedProjectIndex?: {
+  selectedPaperScopes?: {
     [id: string]: number;
   };
-  hoverProjectIndex?: number;
+  hoverPaperScope?: number;
 }
 
 interface DragToolDispatchProps {
@@ -37,8 +37,8 @@ type DragToolProps = (
 );
 
 const DragTool = (props: DragToolProps): ReactElement => {
-  const { isEnabled, hover, dragHandle, setCanvasDragging, dragging, selected, moveLayers, duplicateLayers, tool, altModifier, downEvent, dragEvent, upEvent, selectedProjectIndex, hoverProjectIndex } = props;
-  const [originalSelection, setOriginalSelection] = useState<{id: string; projectIndex: number}[]>(null);
+  const { isEnabled, hover, dragHandle, setCanvasDragging, dragging, selected, moveLayers, duplicateLayers, tool, altModifier, downEvent, dragEvent, upEvent, selectedPaperScopes, hoverPaperScope } = props;
+  const [originalSelection, setOriginalSelection] = useState<{id: string; paperScope: number}[]>(null);
   const [fromBounds, setFromBounds] = useState<paper.Rectangle>(null);
   const [toBounds, setToBounds] = useState<paper.Rectangle>(null);
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
@@ -47,8 +47,7 @@ const DragTool = (props: DragToolProps): ReactElement => {
   const [selectionOutlines, setSelectionOutlines] = useState<paper.Group>(null);
 
   const resetState = (): void => {
-    const ui = paperMain.projects[1];
-    const drawingPreview = ui.getItem({data: {id: 'drawingPreview'}});
+    const drawingPreview = uiPaperScope.project.getItem({data: {id: 'drawingPreview'}});
     drawingPreview.removeChildren();
     setOriginalSelection(null);
     setFromBounds(null);
@@ -60,8 +59,7 @@ const DragTool = (props: DragToolProps): ReactElement => {
   }
 
   const updateDuplicatePreview = () => {
-    const ui = paperMain.projects[1];
-    const drawingPreview = ui.getItem({data: {id: 'drawingPreview'}});
+    const drawingPreview = uiPaperScope.project.getItem({data: {id: 'drawingPreview'}});
     drawingPreview.removeChildren();
     if (altModifier && selectionOutlines) {
       const newPreview = selectionOutlines.clone({insert: false});
@@ -76,7 +74,7 @@ const DragTool = (props: DragToolProps): ReactElement => {
       updateDuplicatePreview();
     } else {
       selected.forEach((id, index) => {
-        const paperLayer = getPaperLayer(id, selectedProjectIndex[id]);
+        const paperLayer = getPaperLayer(id, selectedPaperScopes[id]);
         const ogLayer = originalPaperSelection[index];
         if (paperLayer && ogLayer) {
           const absPosition = ogLayer.position;
@@ -90,15 +88,15 @@ const DragTool = (props: DragToolProps): ReactElement => {
 
   // tool mousedown will fire before selected is updated...
   // so we need to determine next selection on mousedown
-  const getDragLayers = (e: paper.ToolEvent): {id: string; projectIndex: number}[] => {
+  const getDragLayers = (e: paper.ToolEvent): {id: string; paperScope: number}[] => {
     const isHoverSelected = hover && selected.includes(hover);
-    const selectedWithProjectIndex = selected.reduce((result, current) => {
-      result = [...result, {id: current, projectIndex: selectedProjectIndex[current]}];
+    const selectedWithPaperScopes = selected.reduce((result, current) => {
+      result = [...result, {id: current, paperScope: selectedPaperScopes[current]}];
       return result;
-    }, []) as {id: string; projectIndex: number}[];
+    }, []) as {id: string; paperScope: number}[];
     if (e.modifiers.shift) {
       if (isHoverSelected) {
-        return selectedWithProjectIndex.reduce((result, current) => {
+        return selectedWithPaperScopes.reduce((result, current) => {
           if (current.id !== hover) {
             result = [...result, current];
           }
@@ -106,19 +104,19 @@ const DragTool = (props: DragToolProps): ReactElement => {
         }, []);
       } else {
         if (hover) {
-          return [...selectedWithProjectIndex, {id: hover, projectIndex: hoverProjectIndex}];
+          return [...selectedWithPaperScopes, {id: hover, paperScope: hoverPaperScope}];
         } else {
-          return selectedWithProjectIndex;
+          return selectedWithPaperScopes;
         }
       }
     } else {
       if (isHoverSelected) {
-        return selectedWithProjectIndex;
+        return selectedWithPaperScopes;
       } else {
         if (hover) {
-          return [{id: hover, projectIndex: hoverProjectIndex}];
+          return [{id: hover, paperScope: hoverPaperScope}];
         } else {
-          return selectedWithProjectIndex;
+          return selectedWithPaperScopes;
         }
       }
     }
@@ -132,10 +130,10 @@ const DragTool = (props: DragToolProps): ReactElement => {
     if (isEnabled && originalSelection && dragging && toBounds) {
       updateDuplicatePreview();
       if (altModifier) {
-        const selectionFrame = paperMain.projects[1].getItem({ data: { id: 'selectionFrame' } });
+        const selectionFrame = uiPaperScope.project.getItem({ data: { id: 'selectionFrame' } });
         selectionFrame.removeChildren();
         originalSelection.forEach((item, index) => {
-          const paperLayer = getPaperLayer(item.id, item.projectIndex);
+          const paperLayer = getPaperLayer(item.id, item.paperScope);
           const ogLayer = originalPaperSelection[index];
           if (paperLayer && ogLayer) {
             const absPosition = ogLayer.position;
@@ -152,26 +150,26 @@ const DragTool = (props: DragToolProps): ReactElement => {
   useEffect(() => {
     if (downEvent && isEnabled) {
       const dragLayers = getDragLayers(downEvent);
-      const dragOutlines = new paperMain.Group({insert: false});
+      const dragOutlines = new uiPaperScope.Group({insert: false});
       const dragPaperLayers: paper.Item[] = [];
       dragLayers.forEach((layer, index) => {
-        const paperLayer = getPaperLayer(layer.id, layer.projectIndex);
+        const paperLayer = getPaperLayer(layer.id, layer.paperScope);
         dragPaperLayers.push(paperLayer.clone({ insert: false }));
         switch(paperLayer.data.layerType) {
           case 'Artboard': {
             const artboardBackground = paperLayer.getItem({ data: { id: 'artboardBackground' } });
-            new paperMain.Path.Rectangle({
+            new uiPaperScope.Path.Rectangle({
               strokeColor: THEME_PRIMARY_COLOR,
-              strokeWidth: 2 / paperMain.projects[0].view.zoom,
+              strokeWidth: 2 / uiPaperScope.view.zoom,
               rectangle: artboardBackground.bounds,
               parent: dragOutlines
             });
             break;
           }
           case 'Shape':
-            new paperMain.CompoundPath({
+            new uiPaperScope.CompoundPath({
               strokeColor: THEME_PRIMARY_COLOR,
-              strokeWidth: 2 / paperMain.projects[0].view.zoom,
+              strokeWidth: 2 / uiPaperScope.view.zoom,
               closed: paperLayer.data.shapeType !== 'Line',
               pathData: (paperLayer as paper.Path | paper.CompoundPath).pathData,
               parent: dragOutlines
@@ -181,11 +179,11 @@ const DragTool = (props: DragToolProps): ReactElement => {
             const textLayer = paperLayer.getItem({data: { id: 'textContent' }});
             const initialPoint = (textLayer as paper.PointText).point;
             (textLayer as any)._lines.forEach((line: any, index: number) => {
-              new paperMain.Path.Line({
-                from: new paperMain.Point(initialPoint.x, initialPoint.y + (((textLayer as paper.PointText).leading as number) * index)),
-                to: new paperMain.Point(initialPoint.x + textLayer.bounds.width, initialPoint.y + (((textLayer as paper.PointText).leading as number) * index)),
+              new uiPaperScope.Path.Line({
+                from: new uiPaperScope.Point(initialPoint.x, initialPoint.y + (((textLayer as paper.PointText).leading as number) * index)),
+                to: new uiPaperScope.Point(initialPoint.x + textLayer.bounds.width, initialPoint.y + (((textLayer as paper.PointText).leading as number) * index)),
                 strokeColor: THEME_PRIMARY_COLOR,
-                strokeWidth: 2 / paperMain.projects[0].view.zoom,
+                strokeWidth: 2 / uiPaperScope.view.zoom,
                 data: {
                   type: 'UIElementChild',
                   interactive: false,
@@ -198,9 +196,9 @@ const DragTool = (props: DragToolProps): ReactElement => {
             break;
           }
           default:
-            new paperMain.Path.Rectangle({
+            new uiPaperScope.Path.Rectangle({
               strokeColor: THEME_PRIMARY_COLOR,
-              strokeWidth: 2 / paperMain.projects[0].view.zoom,
+              strokeWidth: 2 / uiPaperScope.view.zoom,
               from: paperLayer.bounds.topLeft,
               to: paperLayer.bounds.bottomRight,
               parent: dragOutlines
@@ -218,9 +216,9 @@ const DragTool = (props: DragToolProps): ReactElement => {
 
   useEffect(() => {
     if (dragEvent && isEnabled && fromBounds) {
-      if (minDistance > 2) {
+      if (minDistance > 3) {
         const vector = dragEvent.point.subtract(dragEvent.downPoint);
-        const nextSnapBounds = new paperMain.Rectangle(fromBounds);
+        const nextSnapBounds = new uiPaperScope.Rectangle(fromBounds);
         nextSnapBounds.center.x = fromBounds.center.x + vector.x;
         nextSnapBounds.center.y = fromBounds.center.y + vector.y;
         setSnapBounds(nextSnapBounds);
@@ -235,7 +233,7 @@ const DragTool = (props: DragToolProps): ReactElement => {
 
   useEffect(() => {
     if (upEvent && isEnabled) {
-      if (selected.length > 0 && minDistance > 2) {
+      if (selected.length > 0 && minDistance > 3) {
         if (altModifier) {
           const offset = toBounds.center.subtract(fromBounds.center);
           duplicateLayers({layers: selected, offset: {x: offset.x, y: offset.y}});
@@ -263,8 +261,8 @@ const DragTool = (props: DragToolProps): ReactElement => {
         tool.activate();
       }
     } else {
-      if (tool && paperMain.tool && (paperMain.tool as any)._index === (tool as any)._index) {
-        paperMain.tool = null;
+      if (tool && uiPaperScope.tool && (uiPaperScope.tool as any)._index === (tool as any)._index) {
+        uiPaperScope.tool = null;
         resetState();
       }
     }
@@ -291,16 +289,16 @@ const mapStateToProps = (state: RootState): DragToolStateProps => {
   const isEnabled = canvasSettings.activeTool === 'Drag';
   const dragging = canvasSettings.dragging;
   const dragHandle = canvasSettings.dragHandle;
-  const selectedProjectIndex = getSelectedProjectIndex(state);
-  const hoverProjectIndex = hover ? getLayerProjectIndex(layer.present, hover) : null;
+  const selectedPaperScopes = getSelectedPaperScopes(state);
+  const hoverPaperScope = hover ? getLayerPaperScope(layer.present, hover) : null;
   return {
     hover,
     selected,
     isEnabled,
     dragging,
     dragHandle,
-    selectedProjectIndex,
-    hoverProjectIndex
+    selectedPaperScopes,
+    hoverPaperScope
   };
 };
 

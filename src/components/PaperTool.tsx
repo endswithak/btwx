@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useEffect, ReactElement, useState } from 'react';
-import { paperMain } from '../canvas';
+import { uiPaperScope } from '../canvas';
 
 export interface PaperToolProps {
   tool?: paper.Tool;
@@ -83,7 +83,7 @@ const PaperToolWrap = (Component: any, events: EventProps) => {
     }
 
     useEffect(() => {
-      const newTool = new paperMain.Tool();
+      const newTool = new uiPaperScope.Tool();
       newTool.minDistance = 1;
       newTool.onKeyDown = events.all || events.keyDown ? handleKeyDown : null;
       newTool.onKeyUp = events.all || events.keyUp ? handleKeyUp : null;
@@ -92,7 +92,7 @@ const PaperToolWrap = (Component: any, events: EventProps) => {
       newTool.onMouseDrag = events.all || events.mouseDrag ? handleDragEvent : null;
       newTool.onMouseUp = events.all || events.mouseUp ? handleUpEvent : null;
       setTool(newTool);
-      paperMain.tool = null;
+      uiPaperScope.tool = null;
       document.addEventListener('keydown', handleKeyDownModifiers);
       document.addEventListener('keyup', handleKeyUpModifiers);
       return () => {

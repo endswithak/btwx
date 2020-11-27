@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import CanvasArtboard from './CanvasArtboard';
@@ -10,6 +10,7 @@ interface CanvasArtboardsProps {
 
 const CanvasArtboards = (props: CanvasArtboardsProps): ReactElement => {
   const { artboards } = props;
+
   return (
     <>
       {

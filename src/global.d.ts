@@ -342,8 +342,8 @@ declare namespace Btwx {
   }
 
   interface ProjectLayer extends Layer {
-    projectIndex: number;
-    project: string;
+    paperScope: number;
+    paperJSON: string;
   }
 
   interface ArtboardLayer extends Layer {

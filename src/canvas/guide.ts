@@ -1,4 +1,4 @@
-import { paperMain } from './index';
+import paper from 'paper';
 import { THEME_GUIDE_COLOR } from '../constants';
 
 class Guide {
@@ -6,11 +6,12 @@ class Guide {
   to: paper.Point;
   paperLayer: paper.Path.Line;
   constructor({from, to, removeOpts, guideType}: {from: paper.Point; to: paper.Point; guideType: 'snap' | 'static'; removeOpts?: any}) {
-    const guide = new paperMain.Path.Line({
+    const paperScope = paper.PaperScope.get(0);
+    const guide = new paperScope.Path.Line({
       from: from,
       to: to,
       strokeColor: THEME_GUIDE_COLOR,
-      strokeWidth: 1 / paperMain.projects[0].view.zoom,
+      strokeWidth: 1 / paperScope.view.zoom,
       data: {
         id: `${guideType}Guide`,
         type: 'UIElementChild',
@@ -21,9 +22,9 @@ class Guide {
       parent: (() => {
         switch(guideType) {
           case 'snap':
-            return paperMain.projects[1].getItem({data: { id: 'snapGuides' }});
+            return paperScope.project.getItem({data: { id: 'snapGuides' }});
           case 'static':
-            return paperMain.projects[1].getItem({data: { id: 'staticGuides' }});
+            return paperScope.project.getItem({data: { id: 'staticGuides' }});
         }
       })()
     });

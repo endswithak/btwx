@@ -6,11 +6,12 @@ import { ActionCreators } from 'redux-undo';
 import { clipboard } from 'electron';
 import { gsap } from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
-import { paperMain } from '../../canvas';
+import { uiPaperScope, pagePaperScope } from '../../canvas';
+import paper from 'paper';
 import MeasureGuide from '../../canvas/measureGuide';
 import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_VALUE, THEME_PRIMARY_COLOR, DEFAULT_TWEEN_EVENTS, TWEEN_PROPS_MAP } from '../../constants';
 import { getPaperFillColor, getPaperStrokeColor, getPaperShadowColor } from '../utils/paper';
-import { getClipboardCenter, getSelectionCenter, getLayerAndDescendants, getLayersBounds, importPaperProject, colorsMatch, gradientsMatch, getNearestScopeAncestor, getArtboardEventItems, orderLayersByDepth, canMaskLayers, canMaskSelection, canPasteSVG, getLineToPoint, getSelectionTopLeft, getSelectionBottomRight, getLineFromPoint, getArtboardsTopTop, getSelectionBounds, getSelectedBounds, getParentPaperLayer, getGradientOriginPoint, getGradientDestinationPoint, getAbsolutePosition, getScopedPoint, getPaperLayer, getSelectedPaperLayers, getSelectedTopLeft, getSelectedBottomRight, getItemLayers } from '../selectors/layer';
+import { getClipboardCenter, getLayerAndDescendants, getLayersBounds, importPaperProject, colorsMatch, gradientsMatch, getNearestScopeAncestor, getArtboardEventItems, orderLayersByDepth, canMaskLayers, canMaskSelection, canPasteSVG, getLineToPoint, getLineFromPoint, getArtboardsTopTop, getSelectedBounds, getParentPaperLayer, getGradientOriginPoint, getGradientDestinationPoint, getPaperLayer, getSelectedPaperLayers, getItemLayers, getLayerPaperScope, getSelectedPaperScopes } from '../selectors/layer';
 import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle, getLayerMasked, getLayerUnderlyingMask } from '../utils/actions';
 
 import { bufferToBase64, scrollToLayer } from '../../utils';
@@ -455,9 +456,7 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const name = payload.layer.name ? payload.layer.name : 'Artboard';
     const scope = ['page'];
-    const projectIndex = state.layer.present.allArtboardIds.length + 2;
-    // const project = new paperMain.Project(`canvas-${id}`);
-    // paperMain.projects = paperMain.projects.splice(projectIndex, 0, project);
+    const paperScope = state.layer.present.allArtboardIds.length + 2;
     const masked = payload.layer.masked ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = payload.layer.underlyingMask ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = payload.layer.ignoreUnderlyingMask ? payload.layer.ignoreUnderlyingMask : false;
@@ -466,16 +465,17 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
     const showChildren = payload.layer.showChildren ? payload.layer.showChildren : false;
     const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as Btwx.PaperGradientFill : null;
     // create background
-    const artboardBackground = new paperMain.Path.Rectangle({
+    const artboardBackground = new uiPaperScope.Path.Rectangle({
       name: 'Artboard Background',
-      point: new paperMain.Point(0,0),
+      point: new uiPaperScope.Point(0,0),
       size: [payload.layer.frame.width, payload.layer.frame.height],
       data: { id: 'artboardBackground', type: 'LayerChild', layerType: 'Artboard' },
       fillColor: paperFillColor,
-      position: new paperMain.Point(payload.layer.frame.x, payload.layer.frame.y),
+      position: new uiPaperScope.Point(payload.layer.frame.x, payload.layer.frame.y),
       shadowColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.20 },
-      shadowOffset: new paperMain.Point(0, 2),
+      shadowOffset: new uiPaperScope.Point(0, 2),
       shadowBlur: 10,
+      insert: false
     });
     // create mask
     const artboardLayersMask = artboardBackground.clone();
@@ -483,18 +483,20 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
     artboardLayersMask.data = { id: 'artboardLayersMask', type: 'LayerChild', layerType: 'Artboard' };
     artboardLayersMask.clipMask = true;
     //
-    const artboardLayers = new paperMain.Group({
+    const artboardLayers = new uiPaperScope.Group({
       name: 'Artboard Layers',
-      data: { id: 'artboardLayers', type: 'LayerChild', layerType: 'Artboard' }
+      data: { id: 'artboardLayers', type: 'LayerChild', layerType: 'Artboard' },
+      insert: false
     });
     //
-    const artboardMaskedLayers = new paperMain.Group({
+    const artboardMaskedLayers = new uiPaperScope.Group({
       name: 'Artboard Masked Layers',
       data: { id: 'artboardMaskedLayers', type: 'LayerChild', layerType: 'Artboard' },
-      children: [artboardLayersMask, artboardLayers]
+      children: [artboardLayersMask, artboardLayers],
+      insert: false
     });
     // create artboard group
-    const artboard = new paperMain.Layer({
+    const artboard = new uiPaperScope.Layer({
       name: name,
       data: { id: id, type: 'Layer', layerType: 'Artboard', scope: scope },
       children: [artboardBackground, artboardMaskedLayers],
@@ -506,7 +508,6 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
       type: 'Artboard',
       id: id,
       name: name,
-      projectIndex: projectIndex,
       parent: payload.layer.parent,
       children: [],
       scope: scope,
@@ -529,7 +530,8 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
       },
       transform: DEFAULT_TRANSFORM,
       style: DEFAULT_STYLE,
-      project: artboard.exportJSON()
+      paperScope: paperScope,
+      paperJSON: artboard.exportJSON()
     } as Btwx.Artboard;
     dispatch(addArtboard({
       layer: newLayer,
@@ -557,18 +559,19 @@ export const addGroupThunk = (payload: AddGroupPayload, providedState?: RootStat
     const scope = [...parentItem.scope, parent];
     const artboard = payload.layer.artboard ? payload.layer.artboard : scope.length > 1 && state.layer.present.byId[scope[1]].type === 'Artboard' ? scope[1] : null;
     const artboardItem = artboard ? state.layer.present.byId[artboard] : null;
-    const projectIndex = artboard ? (artboardItem as Btwx.Artboard).projectIndex : 0;
+    const paperScope = artboard ? (artboardItem as Btwx.Artboard).paperScope : 1;
+    const paperScopeItem = paper.PaperScope.get(paperScope);
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
-    const parentPaperLayer = getParentPaperLayer(parent, projectIndex, ignoreUnderlyingMask);
+    const parentPaperLayer = getParentPaperLayer(parent, paperScope, ignoreUnderlyingMask);
     const frame = payload.layer.frame ? payload.layer.frame : { x: 0, y: 0, width: 0, height: 0, innerWidth: 0, innerHeight: 0 };
-    let position = new paperMain.Point(frame.x, frame.y);
+    let position = new paperScopeItem.Point(frame.x, frame.y);
     if (artboard) {
-      position = position.add(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y))
+      position = position.add(new paperScopeItem.Point(artboardItem.frame.x, artboardItem.frame.y))
     }
     const showChildren = payload.layer.showChildren ? payload.layer.showChildren : false;
-    const group = new paperMain.Group({
+    const group = new paperScopeItem.Group({
       name: name,
       data: { id: id, type: 'Layer', layerType: 'Group', scope: scope },
       parent: parentPaperLayer,
@@ -624,29 +627,30 @@ export const addShapeThunk = (payload: AddShapePayload, providedState?: RootStat
     const scope = [...parentItem.scope, parent];
     const artboard = payload.layer.artboard ? payload.layer.artboard : scope.length > 1 && state.layer.present.byId[scope[1]].type === 'Artboard' ? scope[1] : null;
     const artboardItem = artboard ? state.layer.present.byId[artboard] : null;
-    const projectIndex = artboard ? (artboardItem as Btwx.Artboard).projectIndex : 0;
+    const paperScope = artboard ? (artboardItem as Btwx.Artboard).paperScope : 1;
+    const paperScopeItem = paper.PaperScope.get(paperScope);
     const shapeType = payload.layer.shapeType ? payload.layer.shapeType : 'Rectangle';
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
-    const parentPaperLayer = getParentPaperLayer(parent, projectIndex, ignoreUnderlyingMask);
+    const parentPaperLayer = getParentPaperLayer(parent, paperScope, ignoreUnderlyingMask);
     const name = payload.layer.name ? payload.layer.name : shapeType;
     const frame = getLayerFrame(payload);
-    let position = new paperMain.Point(frame.x, frame.y);
+    let position = new paperScopeItem.Point(frame.x, frame.y);
     if (artboard) {
-      position = position.add(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y))
+      position = position.add(new paperScopeItem.Point(artboardItem.frame.x, artboardItem.frame.y))
     }
     const shapeOpts = getLayerShapeOpts(payload);
     const pathData = getLayerPathData(payload);
     const style = getLayerStyle(payload);
     const transform = getLayerTransform(payload);
     const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as Btwx.Shadow) : null;
-    const paperShadowOffset = style.shadow.enabled ? new paperMain.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
+    const paperShadowOffset = style.shadow.enabled ? new paperScopeItem.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
     const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
     const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as Btwx.PaperGradientFill : null;
     const paperStrokeColor = style.stroke.enabled ? getPaperStrokeColor(style.stroke, frame) as Btwx.PaperGradientFill : null;
     const mask = payload.layer.mask ? payload.layer.mask : false;
-    const paperLayer = new paperMain.CompoundPath({
+    const paperLayer = new paperScopeItem.CompoundPath({
       name: name,
       pathData: pathData,
       closed: payload.layer.closed,
@@ -669,7 +673,7 @@ export const addShapeThunk = (payload: AddShapePayload, providedState?: RootStat
     paperLayer.fillColor = paperFillColor;
     paperLayer.strokeColor = paperStrokeColor;
     if (mask) {
-      const maskGroup = new paperMain.Group({
+      const maskGroup = new paperScopeItem.Group({
         name: 'MaskGroup',
         data: { id: 'maskGroup', type: 'LayerContainer', layerType: 'Shape' },
         children: [paperLayer.clone()]
@@ -724,29 +728,30 @@ export const addShapeGroupThunk = (payload: AddShapePayload, providedState?: Roo
     const scope = [...parentItem.scope, parent];
     const artboard = payload.layer.artboard ? payload.layer.artboard : scope.length > 1 && state.layer.present.byId[scope[1]].type === 'Artboard' ? scope[1] : null;
     const artboardItem = artboard ? state.layer.present.byId[artboard] : null;
-    const projectIndex = artboard ? (artboardItem as Btwx.Artboard).projectIndex : 0;
+    const paperScope = artboard ? (artboardItem as Btwx.Artboard).paperScope : 1;
+    const paperScopeItem = paper.PaperScope.get(paperScope);
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
-    const parentPaperLayer = getParentPaperLayer(parent, projectIndex, ignoreUnderlyingMask);
+    const parentPaperLayer = getParentPaperLayer(parent, paperScope, ignoreUnderlyingMask);
     const shapeType = payload.layer.shapeType ? payload.layer.shapeType : 'Rectangle';
     const name = payload.layer.name ? payload.layer.name : shapeType;
     const frame = getLayerFrame(payload);
-    let position = new paperMain.Point(frame.x, frame.y);
+    let position = new paperScopeItem.Point(frame.x, frame.y);
     if (artboard) {
-      position = position.add(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y))
+      position = position.add(new paperScopeItem.Point(artboardItem.frame.x, artboardItem.frame.y))
     }
     const shapeOpts = getLayerShapeOpts(payload);
     const style = getLayerStyle(payload);
     const transform = getLayerTransform(payload);
     const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as Btwx.Shadow) : null;
-    const paperShadowOffset = style.shadow.enabled ? new paperMain.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
+    const paperShadowOffset = style.shadow.enabled ? new paperScopeItem.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
     const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
     const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as Btwx.PaperGradientFill : null;
     const paperStrokeColor = style.stroke.enabled ? getPaperStrokeColor(style.stroke, frame) as Btwx.PaperGradientFill : null;
     const mask = payload.layer.mask ? payload.layer.mask : false;
     const shapeContainer = renderShapeGroup((payload.layer as any).sketchLayer);
-    const paperLayer = new paperMain.CompoundPath({
+    const paperLayer = new paperScopeItem.CompoundPath({
       name: name,
       pathData: shapeContainer.lastChild.pathData,
       closed: payload.layer.closed,
@@ -775,7 +780,7 @@ export const addShapeGroupThunk = (payload: AddShapePayload, providedState?: Roo
     paperLayer.scale(transform.horizontalFlip ? -1 : 1, transform.verticalFlip ? -1 : 1);
     //
     if (mask) {
-      const maskGroup = new paperMain.Group({
+      const maskGroup = new paperScopeItem.Group({
         name: 'MaskGroup',
         data: { id: 'maskGroup', type: 'LayerContainer', layerType: 'Shape' },
         children: [paperLayer.clone()]
@@ -843,16 +848,17 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
     const scope = [...parentItem.scope, parent];
     const artboard = payload.layer.artboard ? payload.layer.artboard : scope.length > 1 && state.layer.present.byId[scope[1]].type === 'Artboard' ? scope[1] : null;
     const artboardItem = artboard ? state.layer.present.byId[artboard] : null;
-    const projectIndex = artboard ? (artboardItem as Btwx.Artboard).projectIndex : 0;
-    const parentPaperLayer = getParentPaperLayer(parent, projectIndex, ignoreUnderlyingMask);
+    const paperScope = artboard ? (artboardItem as Btwx.Artboard).paperScope : 1;
+    const paperScopeItem = paper.PaperScope.get(paperScope);
+    const parentPaperLayer = getParentPaperLayer(parent, paperScope, ignoreUnderlyingMask);
     const style = getLayerStyle(payload);
     const textStyle = getLayerTextStyle(payload);
     const transform = getLayerTransform(payload);
     const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as Btwx.Shadow) : null;
-    const paperShadowOffset = style.shadow.enabled ? new paperMain.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
+    const paperShadowOffset = style.shadow.enabled ? new paperScopeItem.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
     const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
-    const paperLayer = new paperMain.PointText({
-      point: new paperMain.Point(0, 0),
+    const paperLayer = new paperScopeItem.PointText({
+      point: new paperScopeItem.Point(0, 0),
       content: textContent,
       data: { id: 'textContent', type: 'LayerChild', layerType: 'Text' },
       parent: parentPaperLayer,
@@ -873,24 +879,24 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
       justification: textStyle.justification
     });
     const frame = getLayerFrame(payload);
-    let position = new paperMain.Point(frame.x, frame.y);
+    let position = new paperScopeItem.Point(frame.x, frame.y);
     if (artboard) {
-      position = position.add(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y))
+      position = position.add(new paperScopeItem.Point(artboardItem.frame.x, artboardItem.frame.y))
     }
     const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as Btwx.PaperGradientFill : null;
     const paperStrokeColor = style.stroke.enabled ? getPaperStrokeColor(style.stroke, frame) as Btwx.PaperGradientFill : null;
-    paperLayer.position = new paperMain.Point(frame.x, frame.y);
+    paperLayer.position = new paperScopeItem.Point(frame.x, frame.y);
     paperLayer.fillColor = paperFillColor;
     paperLayer.strokeColor = paperStrokeColor;
-    const textBackground = new paperMain.Path.Rectangle({
-      from: new paperMain.Point(frame.x - frame.width / 2, frame.y - frame.height / 2),
-      to: new paperMain.Point(frame.x + frame.width / 2, frame.y + frame.height / 2),
+    const textBackground = new paperScopeItem.Path.Rectangle({
+      from: new paperScopeItem.Point(frame.x - frame.width / 2, frame.y - frame.height / 2),
+      to: new paperScopeItem.Point(frame.x + frame.width / 2, frame.y + frame.height / 2),
       fillColor: '#fff',
       opacity: 0,
       insert: false,
       data: { id: 'textBackground', type: 'LayerChild', layerType: 'Text' },
     });
-    const textContainer = new paperMain.Group({
+    const textContainer = new paperScopeItem.Group({
       name: name,
       parent: parentPaperLayer,
       data: { id, type: 'Layer', layerType: 'Text', scope: scope },
@@ -950,15 +956,16 @@ export const addImageThunk = (payload: AddImagePayload, providedState?: RootStat
       const scope = [...parentItem.scope, parent];
       const artboard = payload.layer.artboard ? payload.layer.artboard : scope.length > 1 && state.layer.present.byId[scope[1]].type === 'Artboard' ? scope[1] : null;
       const artboardItem = artboard ? state.layer.present.byId[artboard] : null;
-      const projectIndex = artboard ? (artboardItem as Btwx.Artboard).projectIndex : 0;
+      const paperScope = artboard ? (artboardItem as Btwx.Artboard).paperScope : 1;
+      const paperScopeItem = paper.PaperScope.get(paperScope);
       const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
-      const parentPaperLayer = getParentPaperLayer(parent, projectIndex, ignoreUnderlyingMask);
+      const parentPaperLayer = getParentPaperLayer(parent, paperScope, ignoreUnderlyingMask);
       sharp(buffer).metadata().then(({ width, height }) => {
         sharp(buffer).resize(Math.round(width * 0.5)).webp().toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
           const frame = getLayerFrame(payload);
-          let position = new paperMain.Point(frame.x, frame.y);
+          let position = new paperScopeItem.Point(frame.x, frame.y);
           if (artboard) {
-            position = position.add(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y))
+            position = position.add(new paperScopeItem.Point(artboardItem.frame.x, artboardItem.frame.y))
           }
           const name = payload.layer.name ? payload.layer.name : 'Image';
           const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
@@ -971,10 +978,10 @@ export const addImageThunk = (payload: AddImagePayload, providedState?: RootStat
           const style = getLayerStyle(payload, {}, { fill: { enabled: false } as Btwx.Fill, stroke: { enabled: false } as Btwx.Stroke });
           const transform = getLayerTransform(payload);
           const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as Btwx.Shadow) : null;
-          const paperShadowOffset = style.shadow.enabled ? new paperMain.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
+          const paperShadowOffset = style.shadow.enabled ? new paperScopeItem.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
           const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
-          const paperLayer = new paperMain.Raster(`data:image/webp;base64,${base64}`);
-          const imageContainer = new paperMain.Group({
+          const paperLayer = new paperScopeItem.Raster(`data:image/webp;base64,${base64}`);
+          const imageContainer = new paperScopeItem.Group({
             name: name,
             parent: parentPaperLayer,
             data: { id, imageId, type: 'Layer', layerType: 'Image', scope: scope },
@@ -1255,8 +1262,8 @@ export const escapeLayerScopeThunk = () => {
       scrollToLayer(state.layer.present.scope[state.layer.present.scope.length - 1]);
     }
     if (state.canvasSettings.mouse) {
-      const point = new paperMain.Point(state.canvasSettings.mouse.paperX, state.canvasSettings.mouse.paperY)
-      const hitResult = paperMain.project.hitTest(point);
+      const point = new uiPaperScope.Point(state.canvasSettings.mouse.paperX, state.canvasSettings.mouse.paperY)
+      const hitResult = uiPaperScope.project.hitTest(point);
       const validHitResult = hitResult && hitResult.item && hitResult.item.data && hitResult.item.data.type && (hitResult.item.data.type === 'Layer' || hitResult.item.data.type === 'LayerChild');
       if (validHitResult) {
         const layerItem = state.layer.present.byId[hitResult.item.data.type === 'Layer' ? hitResult.item.data.id : hitResult.item.parent.data.id];
@@ -1288,14 +1295,13 @@ export const groupLayersThunk = (payload: GroupLayersPayload) => {
       // get bounds of layers to group
       const layersBounds = getLayersBounds(state.layer.present, payload.layers);
       const scope = state.layer.present.byId[state.layer.present.selected[0]].scope;
-      const scopedPosition = getScopedPoint(layersBounds.center, scope);
       // add group
       dispatch(addGroupThunk({
         layer: {
           selected: true,
           frame: {
-            x: scopedPosition.x,
-            y: scopedPosition.y,
+            x: layersBounds.center.x,
+            y: layersBounds.center.y,
             width: layersBounds.width,
             height: layersBounds.height,
             innerWidth: layersBounds.width,
@@ -2412,12 +2418,14 @@ export const applyBooleanOperationThunk = (booleanOperation: Btwx.BooleanOperati
   return (dispatch: any, getState: any): Promise<Btwx.Shape> => {
     return new Promise((resolve, reject) => {
       const state = getState() as RootState;
+      const selectedPaperScopes = getSelectedPaperScopes(state);
       const selected = state.layer.present.selected;
       const topLayer = selected[0];
       const layerItem = state.layer.present.byId[topLayer];
-      let booleanLayers = getPaperLayer(topLayer) as paper.Path | paper.CompoundPath;
+      const topLayerPaperScope = selectedPaperScopes[topLayer];
+      let booleanLayers = getPaperLayer(topLayer, topLayerPaperScope) as paper.Path | paper.CompoundPath;
       for (let i = 1; i < selected.length; i++) {
-        booleanLayers = booleanLayers[booleanOperation](getPaperLayer(selected[i]) as paper.Path | paper.CompoundPath, { insert: false }) as paper.Path | paper.CompoundPath;
+        booleanLayers = booleanLayers[booleanOperation](getPaperLayer(selected[i], selectedPaperScopes[selected[i]]) as paper.Path | paper.CompoundPath, { insert: false }) as paper.Path | paper.CompoundPath;
       }
       dispatch(addShapeThunk({
         layer: {
@@ -2590,7 +2598,7 @@ export const setLayersStyle = (payload: SetLayersStylePayload): LayerTypes => ({
 export const copyLayersThunk = () => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
-    const groupThing = new paperMain.Group({insert: false});
+    const groupThing = new uiPaperScope.Group({insert: false});
     const copyLayer = (copyState: Btwx.ClipboardLayers, layer: string, isChild?: boolean): Btwx.ClipboardLayers => {
       let currentCopyState = copyState;
       const { layerItem, paperLayer } = getItemLayers(state.layer.present, layer);
@@ -2665,9 +2673,10 @@ export const copySVGThunk = () => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     if (state.canvasSettings.focusing && state.layer.present.selected.length > 0) {
-      const group = new paperMain.Group({insert: false});
+      const selectedPaperScopes = getSelectedPaperScopes(state);
+      const group = new uiPaperScope.Group({insert: false});
       state.layer.present.selected.forEach((id) => {
-        const paperLayer = getPaperLayer(id);
+        const paperLayer = getPaperLayer(id, selectedPaperScopes[id]);
         const clone = paperLayer.clone({insert: false});
         clone.parent = group;
       });
@@ -2699,7 +2708,7 @@ export const pasteSVGThunk = () => {
     const state = getState() as RootState;
     if (state.canvasSettings.focusing && canPasteSVG()) {
       const clipboardText = clipboard.readText();
-      const svg = paperMain.project.importSVG(clipboardText, {insert: false});
+      const svg = uiPaperScope.project.importSVG(clipboardText, {insert: false});
       console.log(svg);
     }
   }
@@ -2895,15 +2904,15 @@ export const undoThunk = () => {
       //
       dispatch(setLayerHover({id: null}));
       //
-      if (layerState.edit.projects) {
+      if (state.layer.present.edit.projects) {
         state.layer.present.edit.projects.forEach((project: string) => {
           const projectItem = layerState.byId[project] as Btwx.ProjectLayer;
           if (projectItem) {
-            const projectIndex = projectItem.projectIndex;
-            const projectJSON = projectItem.project;
+            const paperScope = projectItem.paperScope;
+            const paperJSON = projectItem.paperJSON;
             importPaperProject({
-              projectJSON: projectJSON,
-              projectIndex: projectIndex,
+              paperJSON,
+              paperScope,
               documentImages: state.documentSettings.images.byId
             });
           }
@@ -2938,11 +2947,11 @@ export const redoThunk = () => {
         layerState.edit.projects.forEach((project: string) => {
           const projectItem = layerState.byId[project] as Btwx.ProjectLayer;
           if (projectItem) {
-            const projectIndex = projectItem.projectIndex;
-            const projectJSON = projectItem.project;
+            const paperScope = projectItem.paperScope;
+            const paperJSON = projectItem.paperJSON;
             importPaperProject({
-              projectJSON: projectJSON,
-              projectIndex: projectIndex,
+              paperScope,
+              paperJSON,
               documentImages: state.documentSettings.images.byId
             });
           }
@@ -2963,6 +2972,8 @@ export const redoThunk = () => {
 };
 
 export const updateGradientFrame = (layerItem: Btwx.Layer, gradient: Btwx.Gradient) => {
+  const gradientFrame = uiPaperScope.project.getItem({ data: { id: 'gradientFrame' } });
+  gradientFrame.removeChildren();
   const stopsWithIndex = gradient.stops.map((stop, index) => {
     return {
       ...stop,
@@ -2972,20 +2983,16 @@ export const updateGradientFrame = (layerItem: Btwx.Layer, gradient: Btwx.Gradie
   const sortedStops = stopsWithIndex.sort((a,b) => { return a.position - b.position });
   const originStop = sortedStops[0];
   const destStop = sortedStops[sortedStops.length - 1];
-  const oldGradientFrame = paperMain.project.getItem({ data: { id: 'GradientFrame' } });
-  if (oldGradientFrame) {
-    oldGradientFrame.remove();
-  }
   const gradientFrameHandleBgProps = {
-    radius: 8 / paperMain.projects[0].view.zoom,
+    radius: 8 / uiPaperScope.view.zoom,
     fillColor: '#fff',
-    shadowColor: new paperMain.Color(0, 0, 0, 0.5),
+    shadowColor: new uiPaperScope.Color(0, 0, 0, 0.5),
     shadowBlur: 2,
     insert: false,
-    strokeWidth: 1 / paperMain.projects[0].view.zoom
+    strokeWidth: 1 / uiPaperScope.view.zoom
   }
   const gradientFrameHandleSwatchProps = {
-    radius: 6 / paperMain.projects[0].view.zoom,
+    radius: 6 / uiPaperScope.view.zoom,
     fillColor: '#fff',
     insert: false
   }
@@ -2994,18 +3001,18 @@ export const updateGradientFrame = (layerItem: Btwx.Layer, gradient: Btwx.Gradie
     to: getGradientDestinationPoint(layerItem, gradient.destination),
     insert: false
   }
-  const gradientFrameOriginHandleBg  = new paperMain.Shape.Circle({
+  const gradientFrameOriginHandleBg  = new uiPaperScope.Shape.Circle({
     ...gradientFrameHandleBgProps,
     center: getGradientOriginPoint(layerItem, gradient.origin),
     data: {
       type: 'UIElementChild',
       interactive: true,
       interactiveType: 'origin',
-      elementId: 'GradientFrame'
+      elementId: 'gradientFrame'
     },
     strokeColor: originStop.index === gradient.activeStopIndex ? THEME_PRIMARY_COLOR : null
   });
-  const gradientFrameOriginHandleSwatch  = new paperMain.Shape.Circle({
+  const gradientFrameOriginHandleSwatch  = new uiPaperScope.Shape.Circle({
     ...gradientFrameHandleSwatchProps,
     fillColor: {
       hue: originStop.color.h,
@@ -3018,21 +3025,21 @@ export const updateGradientFrame = (layerItem: Btwx.Layer, gradient: Btwx.Gradie
       type: 'UIElementChild',
       interactive: true,
       interactiveType: 'origin',
-      elementId: 'GradientFrame'
+      elementId: 'gradientFrame'
     }
   });
-  const gradientFrameDestinationHandleBg = new paperMain.Shape.Circle({
+  const gradientFrameDestinationHandleBg = new uiPaperScope.Shape.Circle({
     ...gradientFrameHandleBgProps,
     center: getGradientDestinationPoint(layerItem, gradient.destination),
     data: {
       type: 'UIElementChild',
       interactive: true,
       interactiveType: 'destination',
-      elementId: 'GradientFrame'
+      elementId: 'gradientFrame'
     },
     strokeColor: destStop.index === gradient.activeStopIndex ? THEME_PRIMARY_COLOR : null
   });
-  const gradientFrameDestinationHandleSwatch = new paperMain.Shape.Circle({
+  const gradientFrameDestinationHandleSwatch = new uiPaperScope.Shape.Circle({
     ...gradientFrameHandleSwatchProps,
     fillColor: {
       hue: destStop.color.h,
@@ -3045,91 +3052,90 @@ export const updateGradientFrame = (layerItem: Btwx.Layer, gradient: Btwx.Gradie
       type: 'UIElementChild',
       interactive: true,
       interactiveType: 'destination',
-      elementId: 'GradientFrame'
+      elementId: 'gradientFrame'
     }
   });
-  const gradientFrameLineDark = new paperMain.Path.Line({
+  const gradientFrameLineDark = new uiPaperScope.Path.Line({
     ...gradientFrameLineProps,
-    strokeColor: new paperMain.Color(0, 0, 0, 0.25),
-    strokeWidth: 3 / paperMain.projects[0].view.zoom,
+    strokeColor: new uiPaperScope.Color(0, 0, 0, 0.25),
+    strokeWidth: 3 / uiPaperScope.view.zoom,
     data: {
       id: 'GradientFrameLine',
       type: 'UIElementChild',
       interactive: false,
       interactiveType: null,
-      elementId: 'GradientFrame'
+      elementId: 'gradientFrame'
     }
   });
-  const gradientFrameLineLight = new paperMain.Path.Line({
+  const gradientFrameLineLight = new uiPaperScope.Path.Line({
     ...gradientFrameLineProps,
     strokeColor: '#fff',
-    strokeWidth: 1 / paperMain.projects[0].view.zoom,
+    strokeWidth: 1 / uiPaperScope.view.zoom,
     data: {
       id: 'GradientFrameLine',
       type: 'UIElementChild',
       interactive: false,
       interactiveType: null,
-      elementId: 'GradientFrame'
+      elementId: 'gradientFrame'
     }
   });
-  const gradientFrameOriginHandle = new paperMain.Group({
+  const gradientFrameOriginHandle = new uiPaperScope.Group({
     data: {
       id: 'GradientFrameOriginHandle',
       type: 'UIElementChild',
       interactive: true,
       interactiveType: 'origin',
-      elementId: 'GradientFrame'
+      elementId: 'gradientFrame'
     },
     insert: false,
     children: [gradientFrameOriginHandleBg, gradientFrameOriginHandleSwatch]
   });
-  const gradientFrameDestinationHandle = new paperMain.Group({
+  const gradientFrameDestinationHandle = new uiPaperScope.Group({
     data: {
       id: 'GradientFrameDestinationHandle',
       type: 'UIElementChild',
       interactive: true,
       interactiveType: 'destination',
-      elementId: 'GradientFrame'
+      elementId: 'gradientFrame'
     },
     insert: false,
     children: [gradientFrameDestinationHandleBg, gradientFrameDestinationHandleSwatch]
   });
-  const gradientFrameLines = new paperMain.Group({
+  const gradientFrameLines = new uiPaperScope.Group({
     data: {
       id: 'GradientFrameLines',
       type: 'UIElementChild',
       interactive: false,
       interactiveType: null,
-      elementId: 'GradientFrame'
+      elementId: 'gradientFrame'
     },
     insert: false,
     children: [gradientFrameLineDark, gradientFrameLineLight]
   });
-  const newGradientFrame = new paperMain.Group({
+  new uiPaperScope.Group({
     data: {
       id: 'GradientFrame',
       type: 'UIElement',
       interactive: false,
       interactiveType: null,
-      elementId: 'GradientFrame'
+      elementId: 'gradientFrame'
     },
     children: [gradientFrameLines, gradientFrameOriginHandle, gradientFrameDestinationHandle],
-    parent: getPaperLayer('ui')
+    parent: gradientFrame
   });
 }
 
 export const updateActiveArtboardFrame = (bounds: paper.Rectangle): void => {
-  const activeArtboardFrame = paperMain.projects[1].getItem({ data: { id: 'activeArtboardFrame' } });
+  const activeArtboardFrame = uiPaperScope.project.getItem({ data: { id: 'activeArtboardFrame' } });
   activeArtboardFrame.removeChildren();
-  paperMain.projects[1].activate();
   if (bounds) {
     const topLeft = bounds.topLeft;
     const bottomRight = bounds.bottomRight;
-    new paperMain.Path.Rectangle({
-      from: new paperMain.Point(topLeft.x - (2 / paperMain.projects[0].view.zoom), topLeft.y - (2 / paperMain.projects[0].view.zoom)),
-      to: new paperMain.Point(bottomRight.x + (2 / paperMain.projects[0].view.zoom), bottomRight.y + (2 / paperMain.projects[0].view.zoom)),
+    new uiPaperScope.Path.Rectangle({
+      from: new uiPaperScope.Point(topLeft.x - (2 / uiPaperScope.view.zoom), topLeft.y - (2 / uiPaperScope.view.zoom)),
+      to: new uiPaperScope.Point(bottomRight.x + (2 / uiPaperScope.view.zoom), bottomRight.y + (2 / uiPaperScope.view.zoom)),
       strokeColor: THEME_PRIMARY_COLOR,
-      strokeWidth: 4 / paperMain.projects[0].view.zoom,
+      strokeWidth: 4 / uiPaperScope.view.zoom,
       parent: activeArtboardFrame
     });
   }
@@ -3147,23 +3153,22 @@ export const updateActiveArtboardFrameThunk = () => {
 };
 
 export const updateHoverFrame = (hoverItem: Btwx.Layer, artboardItem?: Btwx.Artboard): void => {
-  const hoverFrame = paperMain.projects[1].getItem({ data: { id: 'hoverFrame' } });
+  const hoverFrame = uiPaperScope.project.getItem({ data: { id: 'hoverFrame' } });
   hoverFrame.removeChildren();
-  paperMain.projects[1].activate();
   if (hoverItem) {
     const hoverFrameConstants = {
       strokeColor: THEME_PRIMARY_COLOR,
-      strokeWidth: 2 / paperMain.projects[0].view.zoom,
+      strokeWidth: 2 / uiPaperScope.view.zoom,
       parent: hoverFrame
     }
-    let hoverPosition = new paperMain.Point(hoverItem.frame.x, hoverItem.frame.y);
+    let hoverPosition = new uiPaperScope.Point(hoverItem.frame.x, hoverItem.frame.y);
     if (artboardItem) {
-      const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
+      const artboardPosition = new uiPaperScope.Point(artboardItem.frame.x, artboardItem.frame.y);
       hoverPosition = hoverPosition.add(artboardPosition);
     }
-    const hoverItemBounds = new paperMain.Rectangle({
-      from: new paperMain.Point(hoverPosition.x - (hoverItem.frame.width / 2), hoverPosition.y - (hoverItem.frame.height / 2)),
-      to: new paperMain.Point(hoverPosition.x + (hoverItem.frame.width / 2), hoverPosition.y + (hoverItem.frame.height / 2))
+    const hoverItemBounds = new uiPaperScope.Rectangle({
+      from: new uiPaperScope.Point(hoverPosition.x - (hoverItem.frame.width / 2), hoverPosition.y - (hoverItem.frame.height / 2)),
+      to: new uiPaperScope.Point(hoverPosition.x + (hoverItem.frame.width / 2), hoverPosition.y + (hoverItem.frame.height / 2))
     });
     switch(hoverItem.type) {
       // case 'Artboard': {
@@ -3174,13 +3179,15 @@ export const updateHoverFrame = (hoverItem: Btwx.Layer, artboardItem?: Btwx.Artb
       //   });
       //   break;
       // }
-      // case 'Shape':
-      //   new paperMain.CompoundPath({
-      //     ...hoverFrameConstants,
-      //     closed: hoverPaperLayer.data.shapeType !== 'Line',
-      //     pathData: (hoverPaperLayer as paper.Path | paper.CompoundPath).pathData
-      //   });
-      //   break;
+      case 'Shape': {
+        const hoverItemPath = new uiPaperScope.CompoundPath({
+          ...hoverFrameConstants,
+          closed: (hoverItem as Btwx.Shape).closed,
+          pathData: (hoverItem as Btwx.Shape).pathData
+        });
+        hoverItemPath.position = hoverItemBounds.center;
+        break;
+      }
       // case 'Text': {
       //   const textLayer = hoverPaperLayer.getItem({data: { id: 'textContent' }});
       //   const initialPoint = (textLayer as paper.PointText).point;
@@ -3189,7 +3196,7 @@ export const updateHoverFrame = (hoverItem: Btwx.Layer, artboardItem?: Btwx.Artb
       //       from: new paperMain.Point(initialPoint.x, initialPoint.y + (((textLayer as paper.PointText).leading as number) * index)),
       //       to: new paperMain.Point(initialPoint.x + textLayer.bounds.width, initialPoint.y + (((textLayer as paper.PointText).leading as number) * index)),
       //       strokeColor: THEME_PRIMARY_COLOR,
-      //       strokeWidth: 2 / paperMain.projects[0].view.zoom,
+      //       strokeWidth: 2 / uiPaperScope.view.zoom,
       //       data: {
       //         type: 'UIElementChild',
       //         interactive: false,
@@ -3202,7 +3209,7 @@ export const updateHoverFrame = (hoverItem: Btwx.Layer, artboardItem?: Btwx.Artb
       //   break;
       // }
       default:
-        new paperMain.Path.Rectangle({
+        new uiPaperScope.Path.Rectangle({
           ...hoverFrameConstants,
           from: hoverItemBounds.topLeft,
           to: hoverItemBounds.bottomRight,
@@ -3213,9 +3220,8 @@ export const updateHoverFrame = (hoverItem: Btwx.Layer, artboardItem?: Btwx.Artb
 };
 
 export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btwx.SelectionFrameHandle = 'all'): void => {
-  const selectionFrame = paperMain.projects[1].getItem({ data: { id: 'selectionFrame' } });
+  const selectionFrame = uiPaperScope.project.getItem({ data: { id: 'selectionFrame' } });
   selectionFrame.removeChildren();
-  paperMain.projects[1].activate();
   if (bounds) {
     const resizeDisabled = false;
     const baseProps = {
@@ -3223,15 +3229,15 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
       size: [8, 8],
       fillColor: '#fff',
       strokeColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.24 },
-      strokeWidth: 1 / paperMain.projects[0].view.zoom,
+      strokeWidth: 1 / uiPaperScope.view.zoom,
       shadowColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.5 },
-      shadowBlur: 1 / paperMain.projects[0].view.zoom,
+      shadowBlur: 1 / uiPaperScope.view.zoom,
       opacity: resizeDisabled ? 1 : 1,
       parent: selectionFrame
     }
     const selectionTopLeft = bounds.topLeft; // bounds ? bounds.topLeft : getSelectedTopLeft(state);
     const selectionBottomRight = bounds.bottomRight; // bounds ? bounds.bottomRight : getSelectedBottomRight(state);
-    const baseFrame = new paperMain.Group({
+    const baseFrame = new uiPaperScope.Group({
       opacity: 0.33,
       data: {
         type: 'UIElementChild',
@@ -3241,11 +3247,11 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
       },
       parent: selectionFrame
     });
-    const baseFrameOverlay = new paperMain.Path.Rectangle({
+    const baseFrameOverlay = new uiPaperScope.Path.Rectangle({
       from: selectionTopLeft,
       to: selectionBottomRight,
       strokeColor: '#fff',
-      strokeWidth: 1 / paperMain.projects[0].view.zoom,
+      strokeWidth: 1 / uiPaperScope.view.zoom,
       blendMode: 'multiply',
       data: {
         type: 'UIElementChild',
@@ -3255,11 +3261,11 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
       },
       parent: baseFrame
     });
-    const baseFrameDifference = new paperMain.Path.Rectangle({
+    const baseFrameDifference = new uiPaperScope.Path.Rectangle({
       from: selectionTopLeft,
       to: selectionBottomRight,
       strokeColor: '#999',
-      strokeWidth: 1 / paperMain.projects[0].view.zoom,
+      strokeWidth: 1 / uiPaperScope.view.zoom,
       blendMode: 'difference',
       data: {
         type: 'UIElementChild',
@@ -3269,7 +3275,7 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
       },
       parent: baseFrame
     });
-    const moveHandle = new paperMain.Path.Ellipse({
+    const moveHandle = new uiPaperScope.Path.Ellipse({
       ...baseProps,
       opacity: 1,
       visible: visibleHandle === 'all' || visibleHandle === 'move',
@@ -3280,10 +3286,10 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
         elementId: 'selectionFrame'
       }
     });
-    moveHandle.position = new paperMain.Point(baseFrame.bounds.topCenter.x, baseFrame.bounds.topCenter.y - ((1 / paperMain.projects[0].view.zoom) * 24));
-    moveHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-    moveHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
-    const topLeftHandle = new paperMain.Path.Rectangle({
+    moveHandle.position = new uiPaperScope.Point(baseFrame.bounds.topCenter.x, baseFrame.bounds.topCenter.y - ((1 / uiPaperScope.view.zoom) * 24));
+    moveHandle.scaling.x = 1 / uiPaperScope.view.zoom;
+    moveHandle.scaling.y = 1 / uiPaperScope.view.zoom;
+    const topLeftHandle = new uiPaperScope.Path.Rectangle({
       ...baseProps,
       visible: visibleHandle === 'all' || visibleHandle === 'topLeft',
       data: {
@@ -3294,9 +3300,9 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
       }
     });
     topLeftHandle.position = baseFrame.bounds.topLeft;
-    topLeftHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-    topLeftHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
-    const topCenterHandle = new paperMain.Path.Rectangle({
+    topLeftHandle.scaling.x = 1 / uiPaperScope.view.zoom;
+    topLeftHandle.scaling.y = 1 / uiPaperScope.view.zoom;
+    const topCenterHandle = new uiPaperScope.Path.Rectangle({
       ...baseProps,
       visible: visibleHandle === 'all' || visibleHandle === 'topCenter',
       data: {
@@ -3307,9 +3313,9 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
       }
     });
     topCenterHandle.position = baseFrame.bounds.topCenter;
-    topCenterHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-    topCenterHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
-    const topRightHandle = new paperMain.Path.Rectangle({
+    topCenterHandle.scaling.x = 1 / uiPaperScope.view.zoom;
+    topCenterHandle.scaling.y = 1 / uiPaperScope.view.zoom;
+    const topRightHandle = new uiPaperScope.Path.Rectangle({
       ...baseProps,
       visible: visibleHandle === 'all' || visibleHandle === 'topRight',
       data: {
@@ -3320,9 +3326,9 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
       }
     });
     topRightHandle.position = baseFrame.bounds.topRight;
-    topRightHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-    topRightHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
-    const bottomLeftHandle = new paperMain.Path.Rectangle({
+    topRightHandle.scaling.x = 1 / uiPaperScope.view.zoom;
+    topRightHandle.scaling.y = 1 / uiPaperScope.view.zoom;
+    const bottomLeftHandle = new uiPaperScope.Path.Rectangle({
       ...baseProps,
       visible: visibleHandle === 'all' || visibleHandle === 'bottomLeft',
       data: {
@@ -3333,9 +3339,9 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
       }
     });
     bottomLeftHandle.position = baseFrame.bounds.bottomLeft;
-    bottomLeftHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-    bottomLeftHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
-    const bottomCenterHandle = new paperMain.Path.Rectangle({
+    bottomLeftHandle.scaling.x = 1 / uiPaperScope.view.zoom;
+    bottomLeftHandle.scaling.y = 1 / uiPaperScope.view.zoom;
+    const bottomCenterHandle = new uiPaperScope.Path.Rectangle({
       ...baseProps,
       visible: visibleHandle === 'all' || visibleHandle === 'bottomCenter',
       data: {
@@ -3346,9 +3352,9 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
       }
     });
     bottomCenterHandle.position = baseFrame.bounds.bottomCenter;
-    bottomCenterHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-    bottomCenterHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
-    const bottomRightHandle = new paperMain.Path.Rectangle({
+    bottomCenterHandle.scaling.x = 1 / uiPaperScope.view.zoom;
+    bottomCenterHandle.scaling.y = 1 / uiPaperScope.view.zoom;
+    const bottomRightHandle = new uiPaperScope.Path.Rectangle({
       ...baseProps,
       visible: visibleHandle === 'all' || visibleHandle === 'bottomRight',
       data: {
@@ -3359,9 +3365,9 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
       }
     });
     bottomRightHandle.position = baseFrame.bounds.bottomRight;
-    bottomRightHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-    bottomRightHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
-    const rightCenterHandle = new paperMain.Path.Rectangle({
+    bottomRightHandle.scaling.x = 1 / uiPaperScope.view.zoom;
+    bottomRightHandle.scaling.y = 1 / uiPaperScope.view.zoom;
+    const rightCenterHandle = new uiPaperScope.Path.Rectangle({
       ...baseProps,
       visible: visibleHandle === 'all' || visibleHandle === 'rightCenter',
       data: {
@@ -3372,9 +3378,9 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
       }
     });
     rightCenterHandle.position = baseFrame.bounds.rightCenter;
-    rightCenterHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-    rightCenterHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
-    const leftCenterHandle = new paperMain.Path.Rectangle({
+    rightCenterHandle.scaling.x = 1 / uiPaperScope.view.zoom;
+    rightCenterHandle.scaling.y = 1 / uiPaperScope.view.zoom;
+    const leftCenterHandle = new uiPaperScope.Path.Rectangle({
       ...baseProps,
       visible: visibleHandle === 'all' || visibleHandle === 'leftCenter',
       data: {
@@ -3385,8 +3391,8 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
       }
     });
     leftCenterHandle.position = baseFrame.bounds.leftCenter;
-    leftCenterHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-    leftCenterHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
+    leftCenterHandle.scaling.x = 1 / uiPaperScope.view.zoom;
+    leftCenterHandle.scaling.y = 1 / uiPaperScope.view.zoom;
     // selectionFrame.children = [baseFrame, moveHandle, topLeftHandle, topCenterHandle, topRightHandle, bottomLeftHandle, bottomCenterHandle, bottomRightHandle, leftCenterHandle, rightCenterHandle];
     // Line selection frame
     // if (visibleHandle === 'lineFrom' || visibleHandle === 'lineTo' || visibleHandle === 'lineMove') {
@@ -3403,8 +3409,8 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
     //     }
     //   });
     //   moveHandle.position = paperLayer.bounds.center;
-    //   moveHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-    //   moveHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
+    //   moveHandle.scaling.x = 1 / uiPaperScope.view.zoom;
+    //   moveHandle.scaling.y = 1 / uiPaperScope.view.zoom;
     //   const fromHandle = new paperMain.Path.Rectangle({
     //     ...baseProps,
     //     visible: visibleHandle === 'lineFrom',
@@ -3416,8 +3422,8 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
     //     }
     //   });
     //   fromHandle.position = paperLayer.firstSegment.point;
-    //   fromHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-    //   fromHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
+    //   fromHandle.scaling.x = 1 / uiPaperScope.view.zoom;
+    //   fromHandle.scaling.y = 1 / uiPaperScope.view.zoom;
     //   const toHandle = new paperMain.Path.Rectangle({
     //     ...baseProps,
     //     visible: visibleHandle === 'lineTo',
@@ -3429,15 +3435,15 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
     //     }
     //   });
     //   toHandle.position = paperLayer.lastSegment.point;
-    //   toHandle.scaling.x = 1 / paperMain.projects[0].view.zoom;
-    //   toHandle.scaling.y = 1 / paperMain.projects[0].view.zoom;
+    //   toHandle.scaling.x = 1 / uiPaperScope.view.zoom;
+    //   toHandle.scaling.y = 1 / uiPaperScope.view.zoom;
     //   selectionFrame.children = [fromHandle, moveHandle, toHandle];
     // }
   }
 };
 
 export const updateTweenEventsFrame = (state: RootState) => {
-  const tweenEventsFrame = paperMain.projects[1].getItem({ data: { id: 'artboardEvents' } });
+  const tweenEventsFrame = uiPaperScope.project.getItem({ data: { id: 'artboardEvents' } });
   const events = (getArtboardEventItems(state) as {
     tweenEventItems: Btwx.TweenEvent[];
     tweenEventLayers: {
@@ -3457,9 +3463,9 @@ export const updateTweenEventsFrame = (state: RootState) => {
       const artboardTopTop = getArtboardsTopTop(state.layer.present);
       const origin = state.layer.present.byId[event.artboard];
       const destination = state.layer.present.byId[event.destinationArtboard];
-      const tweenEventDestinationIndicator = new paperMain.Path.Ellipse({
-        center: new paperMain.Point(destination.frame.x, artboardTopTop - ((1 / paperMain.projects[0].view.zoom) * 48)),
-        radius: ((1 / paperMain.projects[0].view.zoom) * 4),
+      const tweenEventDestinationIndicator = new uiPaperScope.Path.Ellipse({
+        center: new uiPaperScope.Point(destination.frame.x, artboardTopTop - ((1 / uiPaperScope.view.zoom) * 48)),
+        radius: ((1 / uiPaperScope.view.zoom) * 4),
         fillColor: elementColor,
         insert: false,
         data: {
@@ -3469,9 +3475,9 @@ export const updateTweenEventsFrame = (state: RootState) => {
           elementId: 'tweenEventsFrame'
         }
       });
-      const tweenEventOriginIndicator = new paperMain.Path.Ellipse({
-        center: new paperMain.Point(origin.frame.x, artboardTopTop - ((1 / paperMain.projects[0].view.zoom) * 48)),
-        radius: ((1 / paperMain.projects[0].view.zoom) * 10),
+      const tweenEventOriginIndicator = new uiPaperScope.Path.Ellipse({
+        center: new uiPaperScope.Point(origin.frame.x, artboardTopTop - ((1 / uiPaperScope.view.zoom) * 48)),
+        radius: ((1 / uiPaperScope.view.zoom) * 10),
         insert: false,
         data: {
           type: 'UIElementChild',
@@ -3480,9 +3486,9 @@ export const updateTweenEventsFrame = (state: RootState) => {
           elementId: 'tweenEventsFrame'
         }
       });
-      const tweenEventIconBackground = new paperMain.Path.Ellipse({
+      const tweenEventIconBackground = new uiPaperScope.Path.Ellipse({
         center: tweenEventOriginIndicator.bounds.center,
-        radius: ((1 / paperMain.projects[0].view.zoom) * 14),
+        radius: ((1 / uiPaperScope.view.zoom) * 14),
         fillColor: theme.background.z0,
         insert: false,
         data: {
@@ -3492,7 +3498,7 @@ export const updateTweenEventsFrame = (state: RootState) => {
           elementId: 'tweenEventsFrame'
         }
       });
-      const tweenEventIcon = new paperMain.CompoundPath({
+      const tweenEventIcon = new uiPaperScope.CompoundPath({
         pathData: (() => {
           switch(eventLayerItem.type) {
             case 'Artboard':
@@ -3519,11 +3525,11 @@ export const updateTweenEventsFrame = (state: RootState) => {
         }
       });
       tweenEventIcon.fitBounds(tweenEventOriginIndicator.bounds);
-      const tweenEventConnector = new paperMain.Path.Line({
+      const tweenEventConnector = new uiPaperScope.Path.Line({
         from: tweenEventOriginIndicator.bounds.center,
         to: tweenEventDestinationIndicator.bounds.center,
         strokeColor: elementColor,
-        strokeWidth: 1 / paperMain.projects[0].view.zoom,
+        strokeWidth: 1 / uiPaperScope.view.zoom,
         insert: false,
         data: {
           type: 'UIElementChild',
@@ -3532,11 +3538,11 @@ export const updateTweenEventsFrame = (state: RootState) => {
           elementId: 'tweenEventsFrame'
         }
       });
-      const tweenEventText = new paperMain.PointText({
+      const tweenEventText = new uiPaperScope.PointText({
         content: DEFAULT_TWEEN_EVENTS.find((tweenEvent) => event.event === tweenEvent.event).titleCase,
-        point: new paperMain.Point(tweenEventConnector.bounds.center.x, tweenEventDestinationIndicator.bounds.top - ((1 / paperMain.projects[0].view.zoom) * 10)),
+        point: new uiPaperScope.Point(tweenEventConnector.bounds.center.x, tweenEventDestinationIndicator.bounds.top - ((1 / uiPaperScope.view.zoom) * 10)),
         justification: 'center',
-        fontSize: ((1 / paperMain.projects[0].view.zoom) * 10),
+        fontSize: ((1 / uiPaperScope.view.zoom) * 10),
         fillColor: elementColor,
         insert: false,
         fontFamily: 'Space Mono',
@@ -3547,7 +3553,7 @@ export const updateTweenEventsFrame = (state: RootState) => {
           elementId: 'tweenEventsFrame'
         }
       });
-      const tweenEventFrame = new paperMain.Group({
+      const tweenEventFrame = new uiPaperScope.Group({
         children: [tweenEventConnector, tweenEventIconBackground, tweenEventIcon, tweenEventDestinationIndicator, tweenEventText],
         data: {
           id: 'tweenEventFrame',
@@ -3559,7 +3565,7 @@ export const updateTweenEventsFrame = (state: RootState) => {
         parent: tweenEventsFrame,
         // opacity: groupOpacity
       });
-      const tweenEventFrameBackground = new paperMain.Path.Rectangle({
+      const tweenEventFrameBackground = new uiPaperScope.Path.Rectangle({
         from: tweenEventFrame.bounds.topLeft,
         to: tweenEventFrame.bounds.bottomRight,
         fillColor: theme.background.z0,
@@ -3572,7 +3578,7 @@ export const updateTweenEventsFrame = (state: RootState) => {
           elementId: 'tweenEventsFrame'
         }
       });
-      tweenEventFrame.position.y -= (tweenEventFrame.bounds.height + ((1 / paperMain.projects[0].view.zoom) * 12)) * index;
+      tweenEventFrame.position.y -= (tweenEventFrame.bounds.height + ((1 / uiPaperScope.view.zoom) * 12)) * index;
     });
   }
 };
@@ -3585,7 +3591,7 @@ export const updateTweenEventsFrameThunk = () => {
 };
 
 export const updateMeasureGuides = (bounds: paper.Rectangle, measureTo: { top?: paper.Rectangle; bottom?: paper.Rectangle; left?: paper.Rectangle; right?: paper.Rectangle; all?: paper.Rectangle }): void => {
-  const measureGuides = paperMain.projects[1].getItem({ data: { id: 'measureGuides' } });
+  const measureGuides = uiPaperScope.project.getItem({ data: { id: 'measureGuides' } });
   measureGuides.removeChildren();
   if (measureTo) {
     let hasTopMeasure;
@@ -3660,22 +3666,22 @@ export const updateMeasureGuides = (bounds: paper.Rectangle, measureTo: { top?: 
     });
     if (hasTopMeasure && (measureTo['all'] || measureTo['top'])) {
       const topMeasureFromPoint = bounds.topCenter;
-      const topMeasureToPoint = new paperMain.Point(topMeasureFromPoint.x, topMeasureTo);
+      const topMeasureToPoint = new uiPaperScope.Point(topMeasureFromPoint.x, topMeasureTo);
       new MeasureGuide(topMeasureFromPoint, topMeasureToPoint, 'top', { down: true, up: true });
     }
     if (hasBottomMeasure && (measureTo['all'] || measureTo['bottom'])) {
       const bottomMeasureFromPoint = bounds.bottomCenter;
-      const bottomMeasureToPoint = new paperMain.Point(bottomMeasureFromPoint.x, bottomMeasureTo);
+      const bottomMeasureToPoint = new uiPaperScope.Point(bottomMeasureFromPoint.x, bottomMeasureTo);
       new MeasureGuide(bottomMeasureFromPoint, bottomMeasureToPoint, 'bottom', { down: true, up: true });
     }
     if (hasLeftMeasure && (measureTo['all'] || measureTo['left'])) {
       const leftMeasureFromPoint = bounds.leftCenter;
-      const leftMeasureToPoint = new paperMain.Point(leftMeasureTo, leftMeasureFromPoint.y);
+      const leftMeasureToPoint = new uiPaperScope.Point(leftMeasureTo, leftMeasureFromPoint.y);
       new MeasureGuide(leftMeasureFromPoint, leftMeasureToPoint, 'left', { down: true, up: true });
     }
     if (hasRightMeasure && (measureTo['all'] || measureTo['right'])) {
       const rightMeasureFromPoint = bounds.rightCenter;
-      const rightMeasureToPoint = new paperMain.Point(rightMeasureTo, rightMeasureFromPoint.y);
+      const rightMeasureToPoint = new uiPaperScope.Point(rightMeasureTo, rightMeasureFromPoint.y);
       new MeasureGuide(rightMeasureFromPoint, rightMeasureToPoint, 'right', { down: true, up: true });
     }
   }

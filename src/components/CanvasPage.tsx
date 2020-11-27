@@ -1,34 +1,33 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { ReactElement, useEffect, useState, useRef } from 'react';
+import React, { ReactElement, useEffect, useRef } from 'react';
+import { pagePaperScope } from '../canvas';
 import { connect } from 'react-redux';
 import { importPaperProject } from '../store/selectors/layer';
 import { RootState } from '../store/reducers';
-import { paperMain } from '../canvas';
 
 interface CanvasPageProps {
   documentImages?: {
     [id: string]: Btwx.DocumentImage;
   };
   matrix?: number[];
-  projectJSON?: string;
+  paperJSON?: string;
 }
 
 const CanvasPage = (props: CanvasPageProps): ReactElement => {
   const ref = useRef<HTMLCanvasElement>(null);
-  const { projectJSON, documentImages, matrix } = props;
+  const { paperJSON, documentImages, matrix } = props;
 
   useEffect(() => {
     if (ref.current) {
       const canvasWrap = document.getElementById('canvas-container');
-      const project = new paperMain.Project(ref.current);
-      paperMain.projects.push(project);
+      pagePaperScope.setup(ref.current);
       importPaperProject({
-        projectJSON,
-        documentImages,
-        projectIndex: 0
+        paperJSON,
+        paperScope: 1,
+        documentImages
       });
-      project.view.viewSize = new paperMain.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
-      project.view.matrix.set(matrix);
+      pagePaperScope.view.viewSize = new pagePaperScope.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
+      pagePaperScope.view.matrix.set(matrix);
     }
   }, []);
 
@@ -45,14 +44,14 @@ const mapStateToProps = (state: RootState): {
     [id: string]: Btwx.DocumentImage;
   };
   matrix: number[];
-  projectJSON: string;
+  paperJSON: string;
 } => {
   const { layer, documentSettings } = state;
   const page = layer.present.byId['page'] as Btwx.Page;
   return {
     documentImages: documentSettings.images.byId,
     matrix: documentSettings.matrix,
-    projectJSON: page.project
+    paperJSON: page.paperJSON
   };
 };
 

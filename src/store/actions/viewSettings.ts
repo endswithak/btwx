@@ -1,4 +1,4 @@
-import { paperMain } from '../../canvas';
+import { uiPaperScope } from '../../canvas';
 import { RootState } from '../reducers';
 import { setCanvasMatrix } from './documentSettings';
 
@@ -21,6 +21,7 @@ import {
   SetTweenDrawerLayersWidthPayload,
   ViewSettingsTypes
 } from '../actionTypes/viewSettings';
+import { getAllPaperScopes } from '../selectors/layer';
 
 export const setLeftSidebarWidth = (payload: SetLeftSidebarWidthPayload): ViewSettingsTypes => ({
   type: SET_LEFT_SIDEBAR_WIDTH,
@@ -53,14 +54,21 @@ export const closeRightSidebar = (): ViewSettingsTypes => ({
 export const toggleRightSidebarThunk = () => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
+    const allPaperScopes = getAllPaperScopes(state);
     if (state.viewSettings.rightSidebar.isOpen) {
-      paperMain.view.viewSize = new paperMain.Size(paperMain.view.viewSize.width + state.viewSettings.rightSidebar.width, paperMain.view.viewSize.height);
+      Object.keys(allPaperScopes).forEach((key, index) => {
+        const paperScope = allPaperScopes[key];
+        paperScope.view.viewSize = new paperScope.Size(paperScope.view.viewSize.width + state.viewSettings.rightSidebar.width, paperScope.view.viewSize.height);
+      });
       dispatch(closeRightSidebar());
     } else {
-      paperMain.view.viewSize = new paperMain.Size(paperMain.view.viewSize.width - state.viewSettings.rightSidebar.width, paperMain.view.viewSize.height);
+      Object.keys(allPaperScopes).forEach((key, index) => {
+        const paperScope = allPaperScopes[key];
+        paperScope.view.viewSize = new paperScope.Size(paperScope.view.viewSize.width - state.viewSettings.rightSidebar.width, paperScope.view.viewSize.height);
+      });
       dispatch(openRightSidebar());
     }
-    dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
+    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
   }
 };
 
@@ -75,14 +83,21 @@ export const closeLeftSidebar = (): ViewSettingsTypes => ({
 export const toggleLeftSidebarThunk = () => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
+    const allPaperScopes = getAllPaperScopes(state);
     if (state.viewSettings.leftSidebar.isOpen) {
-      paperMain.view.viewSize = new paperMain.Size(paperMain.view.viewSize.width + state.viewSettings.leftSidebar.width, paperMain.view.viewSize.height);
+      Object.keys(allPaperScopes).forEach((key, index) => {
+        const paperScope = allPaperScopes[key];
+        paperScope.view.viewSize = new paperScope.Size(paperScope.view.viewSize.width + state.viewSettings.leftSidebar.width, paperScope.view.viewSize.height);
+      });
       dispatch(closeLeftSidebar());
     } else {
-      paperMain.view.viewSize = new paperMain.Size(paperMain.view.viewSize.width - state.viewSettings.leftSidebar.width, paperMain.view.viewSize.height);
+      Object.keys(allPaperScopes).forEach((key, index) => {
+        const paperScope = allPaperScopes[key];
+        paperScope.view.viewSize = new paperScope.Size(paperScope.view.viewSize.width - state.viewSettings.leftSidebar.width, paperScope.view.viewSize.height);
+      });
       dispatch(openLeftSidebar());
     }
-    dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
+    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
   }
 };
 
@@ -97,14 +112,21 @@ export const closeTweenDrawer = (): ViewSettingsTypes => ({
 export const toggleTweenDrawerThunk = () => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
+    const allPaperScopes = getAllPaperScopes(state);
     if (state.viewSettings.tweenDrawer.isOpen) {
-      paperMain.view.viewSize = new paperMain.Size(paperMain.view.viewSize.width, paperMain.view.viewSize.height + state.viewSettings.tweenDrawer.height);
+      Object.keys(allPaperScopes).forEach((key, index) => {
+        const paperScope = allPaperScopes[key];
+        paperScope.view.viewSize = new paperScope.Size(paperScope.view.viewSize.width, paperScope.view.viewSize.height + state.viewSettings.tweenDrawer.height);
+      });
       dispatch(closeTweenDrawer());
     } else {
-      paperMain.view.viewSize = new paperMain.Size(paperMain.view.viewSize.width, paperMain.view.viewSize.height - state.viewSettings.tweenDrawer.height);
+      Object.keys(allPaperScopes).forEach((key, index) => {
+        const paperScope = allPaperScopes[key];
+        paperScope.view.viewSize = new paperScope.Size(paperScope.view.viewSize.width, paperScope.view.viewSize.height - state.viewSettings.tweenDrawer.height);
+      });
       dispatch(openTweenDrawer());
     }
-    dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
+    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
   }
 };
 

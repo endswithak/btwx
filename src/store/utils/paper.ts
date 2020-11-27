@@ -1,21 +1,17 @@
-import { paperMain } from '../../canvas';
+import paper from 'paper';
 import { DEFAULT_ROUNDED_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_RADIUS, DEFAULT_STAR_POINTS, DEFAULT_LINE_FROM, DEFAULT_LINE_TO } from '../../constants';
-
-export const getPaperLayer = (id: string): paper.Item => {
-  return paperMain.project.getItem({ data: { id } });
-};
 
 export const getPaperFillColor = (fill: Btwx.Fill, frame: Btwx.Frame): any => {
   return fill.fillType === 'color' ? { hue: fill.color.h, saturation: fill.color.s, lightness: fill.color.l, alpha: fill.color.a } : {
     gradient: {
       stops: fill.gradient.stops.reduce((result, current) => {
-        result = [...result, new paperMain.GradientStop({ hue: current.color.h, saturation: current.color.s, lightness: current.color.l, alpha: current.color.a } as paper.Color, current.position)];
+        result = [...result, new paper.GradientStop({ hue: current.color.h, saturation: current.color.s, lightness: current.color.l, alpha: current.color.a } as paper.Color, current.position)];
         return result;
       }, []),
       radial: fill.gradient.gradientType === 'radial'
     },
-    origin: new paperMain.Point((fill.gradient.origin.x * frame.innerWidth) + frame.x, (fill.gradient.origin.y * frame.innerHeight) + frame.y),
-    destination: new paperMain.Point((fill.gradient.destination.x * frame.innerWidth) + frame.x, (fill.gradient.destination.y * frame.innerHeight) + frame.y)
+    origin: new paper.Point((fill.gradient.origin.x * frame.innerWidth) + frame.x, (fill.gradient.origin.y * frame.innerHeight) + frame.y),
+    destination: new paper.Point((fill.gradient.destination.x * frame.innerWidth) + frame.x, (fill.gradient.destination.y * frame.innerHeight) + frame.y)
   }
 };
 
@@ -23,13 +19,13 @@ export const getPaperStrokeColor = (stroke: Btwx.Stroke, frame: Btwx.Frame): any
   return stroke.fillType === 'color' ? { hue: stroke.color.h, saturation: stroke.color.s, lightness: stroke.color.l, alpha: stroke.color.a } : {
     gradient: {
       stops: stroke.gradient.stops.reduce((result, current) => {
-        result = [...result, new paperMain.GradientStop({ hue: current.color.h, saturation: current.color.s, lightness: current.color.l, alpha: current.color.a } as paper.Color, current.position)];
+        result = [...result, new paper.GradientStop({ hue: current.color.h, saturation: current.color.s, lightness: current.color.l, alpha: current.color.a } as paper.Color, current.position)];
         return result;
       }, []),
       radial: stroke.gradient.gradientType === 'radial'
     },
-    origin: new paperMain.Point((stroke.gradient.origin.x * frame.innerWidth) + frame.x, (stroke.gradient.origin.y * frame.innerHeight) + frame.y),
-    destination: new paperMain.Point((stroke.gradient.destination.x * frame.innerWidth) + frame.x, (stroke.gradient.destination.y * frame.innerHeight) + frame.y)
+    origin: new paper.Point((stroke.gradient.origin.x * frame.innerWidth) + frame.x, (stroke.gradient.origin.y * frame.innerHeight) + frame.y),
+    destination: new paper.Point((stroke.gradient.destination.x * frame.innerWidth) + frame.x, (stroke.gradient.destination.y * frame.innerHeight) + frame.y)
   }
 };
 
@@ -39,33 +35,33 @@ export const getPaperShadowColor = (shadow: Btwx.Shadow): any => {
 
 export const getPaperShapePathData = (shapeType: Btwx.ShapeType, width?: number, height?: number, x?: number, y?: number, shapeOpts?: { radius?: number; sides?: number; points?: number }): any => {
   let shape;
-  x = x ? x : paperMain.view.center.x;
-  y = y ? y : paperMain.view.center.y;
+  x = x ? x : paper.view.center.x;
+  y = y ? y : paper.view.center.y;
   width = width ? width : 200;
   height = height ? height : 200;
-  const topLeft = new paperMain.Point(x - (width / 2), y - (height / 2));
-  const bottomRight = new paperMain.Point(x + (width / 2), y + (height / 2));
+  const topLeft = new paper.Point(x - (width / 2), y - (height / 2));
+  const bottomRight = new paper.Point(x + (width / 2), y + (height / 2));
   const maxDim = Math.max(width, height);
-  const centerPoint = new paperMain.Point(x, y);
-  const lineFrom = new paperMain.Point((DEFAULT_LINE_FROM.x * width) + x, (DEFAULT_LINE_FROM.y * width) + y);
-  const lineTo = new paperMain.Point((DEFAULT_LINE_TO.x * width) + x, (DEFAULT_LINE_TO.y * width) + y);
+  const centerPoint = new paper.Point(x, y);
+  const lineFrom = new paper.Point((DEFAULT_LINE_FROM.x * width) + x, (DEFAULT_LINE_FROM.y * width) + y);
+  const lineTo = new paper.Point((DEFAULT_LINE_TO.x * width) + x, (DEFAULT_LINE_TO.y * width) + y);
   switch(shapeType) {
     case 'Rectangle':
-      shape = new paperMain.Path.Rectangle({
+      shape = new paper.Path.Rectangle({
         from: topLeft,
         to: bottomRight,
         insert: false
       });
       break;
     case 'Ellipse':
-      shape = new paperMain.Path.Ellipse({
+      shape = new paper.Path.Ellipse({
         from: topLeft,
         to: bottomRight,
         insert: false
       });
       break;
     case 'Rounded':
-      shape = new paperMain.Path.Rectangle({
+      shape = new paper.Path.Rectangle({
         from: topLeft,
         to: bottomRight,
         insert: false,
@@ -73,7 +69,7 @@ export const getPaperShapePathData = (shapeType: Btwx.ShapeType, width?: number,
       });
       break;
     case 'Polygon': {
-      shape = new paperMain.Path.RegularPolygon({
+      shape = new paper.Path.RegularPolygon({
         center: centerPoint,
         radius: maxDim / 2,
         sides: shapeOpts.sides ? shapeOpts.sides : DEFAULT_POLYGON_SIDES,
@@ -85,7 +81,7 @@ export const getPaperShapePathData = (shapeType: Btwx.ShapeType, width?: number,
       break;
     }
     case 'Star': {
-      shape = new paperMain.Path.Star({
+      shape = new paper.Path.Star({
         center: centerPoint,
         radius1: maxDim / 2,
         radius2: (maxDim / 2) * (shapeOpts.radius ? shapeOpts.radius : DEFAULT_STAR_RADIUS),
@@ -98,7 +94,7 @@ export const getPaperShapePathData = (shapeType: Btwx.ShapeType, width?: number,
       break;
     }
     case 'Line': {
-      shape = new paperMain.Path.Line({
+      shape = new paper.Path.Line({
         from: lineFrom,
         to: lineTo
       });

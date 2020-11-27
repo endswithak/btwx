@@ -1,4 +1,4 @@
-import { paperMain } from './index';
+import { uiPaperScope } from '../canvas';
 
 class Tooltip {
   paperLayer: paper.Group;
@@ -7,11 +7,11 @@ class Tooltip {
   constructor(text: string, point: paper.Point, removeOpts?: any) {
     this.point = point;
     this.text = text;
-    const parent = paperMain.projects[1].getItem({data: { id: 'tooltips' }});
-    const tooltipText = new paperMain.PointText({
+    const parent = uiPaperScope.project.getItem({data: { id: 'tooltips' }});
+    const tooltipText = new uiPaperScope.PointText({
       fillColor: 'white',
       fontFamily: 'Space Mono',
-      fontSize: 12 / paperMain.projects[0].view.zoom,
+      fontSize: 12 / uiPaperScope.view.zoom,
       content: this.text,
       data: {
         type: 'UIElementChild',
@@ -20,11 +20,11 @@ class Tooltip {
         elementId: 'tooltip'
       }
     });
-    const tooltipBackground = new paperMain.Path.Rectangle({
-      point: [this.point.x + (24 / paperMain.projects[0].view.zoom), this.point.y + (24 / paperMain.projects[0].view.zoom)],
-      size: [tooltipText.bounds.width + (12 / paperMain.projects[0].view.zoom), tooltipText.bounds.height + (12 / paperMain.projects[0].view.zoom)],
-      fillColor: new paperMain.Color(0,0,0,0.5),
-      radius: (4 / paperMain.projects[0].view.zoom),
+    const tooltipBackground = new uiPaperScope.Path.Rectangle({
+      point: [this.point.x + (24 / uiPaperScope.view.zoom), this.point.y + (24 / uiPaperScope.view.zoom)],
+      size: [tooltipText.bounds.width + (12 / uiPaperScope.view.zoom), tooltipText.bounds.height + (12 / uiPaperScope.view.zoom)],
+      fillColor: new uiPaperScope.Color(0,0,0,0.5),
+      radius: (4 / uiPaperScope.view.zoom),
       data: {
         type: 'UIElementChild',
         interactive: false,
@@ -33,7 +33,7 @@ class Tooltip {
       }
     });
     tooltipText.position = tooltipBackground.position;
-    const tooltipGroup = new paperMain.Group({
+    const tooltipGroup = new uiPaperScope.Group({
       children: [tooltipBackground, tooltipText],
       data: {
         id: 'tooltip',

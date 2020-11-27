@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import paper from 'paper';
 import React, { useContext, ReactElement, useEffect, useState, useRef } from 'react';
 import { connect } from 'react-redux';
-import { importPaperProject, getPaperLayer } from '../store/selectors/layer';
 import { RootState } from '../store/reducers';
-import { paperMain } from '../canvas';
+import { uiPaperScope } from '../canvas';
+import { getLayerPaperScopes } from '../store/selectors/layer';
 import { ThemeContext } from './ThemeProvider';
 import CanvasLayerEvents from './CanvasLayerEvents';
 import CanvasUIEvents from './CanvasUIEvents';
@@ -25,30 +24,34 @@ import CanvasArtboards from './CanvasArtboards';
 interface CanvasProps {
   ready: boolean;
   interactionEnabled?: boolean;
+  matrix?: number[];
+  layerPaperScopes?: {
+    [id: string]: paper.PaperScope;
+  };
   setReady(ready: boolean): void;
 }
 
 const Canvas = (props: CanvasProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const ref = useRef<HTMLDivElement>(null);
-  const { ready, setReady, interactionEnabled } = props;
+  const { ready, setReady, interactionEnabled, matrix, layerPaperScopes } = props;
   const [layerEvent, setLayerEvent] = useState(null);
   const [uiEvent, setUIEvent] = useState(null);
   const [translateEvent, setTranslateEvent] = useState(null);
   const [zoomEvent, setZoomEvent] = useState(null);
 
   const handleHitResult = (e: any, eventType: 'mouseMove' | 'mouseDown' | 'mouseUp' | 'doubleClick' | 'contextMenu'): void => {
-    const { layerHitResult, uiHitResult } = paperMain.projects.reduce((result, current, index) => {
-      const hitResult = current.hitTest(current.view.getEventPoint(e));
-      if (hitResult) {
-        if (index === 1) {
-          result.uiHitResult = hitResult;
-        } else {
-          result.layerHitResult = hitResult
+    const layerHitResult = Object.keys(layerPaperScopes).reduce((result: paper.HitResult, current, index) => {
+      const paperScope = layerPaperScopes[current];
+      if (paperScope.project) {
+        const hitResult = paperScope.project.hitTest(paperScope.view.getEventPoint(e));
+        if (hitResult) {
+          result = hitResult;
         }
       }
       return result;
-    }, { layerHitResult: null, uiHitResult: null });
+    }, null);
+    const uiHitResult = uiPaperScope.project.hitTest(uiPaperScope.view.getEventPoint(e));
     const validHitResult = (hitResult: paper.HitResult): boolean => hitResult && hitResult.item && hitResult.item.data && hitResult.item.data.type;
     if (validHitResult(uiHitResult)) {
       setUIEvent({hitResult: uiHitResult, eventType: eventType, event: e.nativeEvent, empty: false});
@@ -110,8 +113,8 @@ const Canvas = (props: CanvasProps): ReactElement => {
         background: theme.background.z0
       }}>
       <CanvasPage />
-      <CanvasUI />
       <CanvasArtboards />
+      <CanvasUI />
       {
         ready
         ? <>
@@ -128,7 +131,6 @@ const Canvas = (props: CanvasProps): ReactElement => {
             <DragTool />
             <AreaSelectTool />
             {/* <ResizeTool />
-            <AreaSelectTool />
             <LineTool />
             <TextTool />
             <CanvasToast /> */}
@@ -141,10 +143,16 @@ const Canvas = (props: CanvasProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   interactionEnabled: boolean;
+  matrix: number[];
+  layerPaperScopes: {
+    [id: string]: paper.PaperScope;
+  };
 } => {
-  const { canvasSettings } = state;
+  const { canvasSettings, documentSettings, layer } = state;
   return {
-    interactionEnabled: !canvasSettings.selecting && !canvasSettings.resizing && !canvasSettings.drawing && !canvasSettings.zooming && !canvasSettings.translating && !canvasSettings.dragging
+    interactionEnabled: !canvasSettings.selecting && !canvasSettings.resizing && !canvasSettings.drawing && !canvasSettings.zooming && !canvasSettings.translating && !canvasSettings.dragging,
+    matrix: documentSettings.matrix,
+    layerPaperScopes: getLayerPaperScopes(state)
   };
 };
 

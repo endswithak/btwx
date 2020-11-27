@@ -44,11 +44,11 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
         });
       }
       if (eventDrawerHover !== null) {
-        setTweenDrawerEventHoverThunk({id: null});
+        // setTweenDrawerEventHoverThunk({id: null});
       }
     } else {
       switch(uiEvent.hitResult.item.data.elementId) {
-        case 'SelectionFrame': {
+        case 'selectionFrame': {
           if (hover) {
             setLayerHover({id: null});
           }

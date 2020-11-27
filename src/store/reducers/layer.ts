@@ -429,7 +429,7 @@ export interface LayerState {
   allTextIds: string[];
   allImageIds: string[];
   scope: string[];
-  scopeProjectIndex: number;
+  paperScope: number;
   hover: string;
   events: {
     allIds: string[];
@@ -457,7 +457,6 @@ export const initialState: LayerState = {
     page: {
       type: 'Page',
       id: 'page',
-      projectIndex: 0,
       name: 'Page',
       parent: null,
       frame: {
@@ -480,7 +479,8 @@ export const initialState: LayerState = {
       },
       style: DEFAULT_STYLE,
       transform: DEFAULT_TRANSFORM,
-      project: '[["Layer",{"applyMatrix":true,"data":{"id":"page","type":"Layer","layerType":"Page","scope":[]}}]]'
+      paperScope: 1,
+      paperJSON: '[["Layer",{"applyMatrix":true,"name":"Page","data":{"id":"page","type":"Layer","layerType":"Page","scope":[]}}]]'
     } as Btwx.Page
   },
   allIds: ['page'],
@@ -493,7 +493,7 @@ export const initialState: LayerState = {
   allTextIds: [],
   allImageIds: [],
   scope: ['page'],
-  scopeProjectIndex: 0,
+  paperScope: 1,
   hover: null,
   events: {
     allIds: [],
