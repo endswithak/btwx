@@ -3,7 +3,7 @@ import React, { useContext, ReactElement, useRef, useEffect, useCallback } from 
 import { connect } from 'react-redux';
 import debounce from 'lodash.debounce';
 import tinyColor from 'tinycolor2';
-import { paperMain } from '../canvas';
+import { uiPaperScope } from '../canvas';
 import { RootState } from '../store/reducers';
 import { getPaperLayer, getGradientStops, getGradientOriginPoint, getGradientDestinationPoint, gradientsMatch } from '../store/selectors/layer';
 import { openColorEditor } from '../store/actions/colorEditor';
@@ -67,8 +67,8 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
   const onMouseDown = (event: any): void => {
     if (editorRef.current && !editorRef.current.contains(event.target)) {
       if (event.target.id === 'canvas') {
-        const eventPoint = paperMain.view.getEventPoint(event);
-        const hitResult = paperMain.project.hitTest(eventPoint);
+        const eventPoint = uiPaperScope.view.getEventPoint(event);
+        const hitResult = uiPaperScope.project.hitTest(eventPoint);
         if (!hitResult || !(hitResult.item && hitResult.item.data && hitResult.item.data.interactive && hitResult.item.data.elementId === 'GradientFrame')) {
           closeGradientEditor();
         }
@@ -199,6 +199,7 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
           onChange={handleActiveStopColorChange} />
         <GradientFrame
           layer={gradientEditor.layers[0]}
+          prop={gradientEditor.prop as 'fill' | 'stroke'}
           gradient={gradientValue}
           onStopPress={handleStopPress} />
       </div>

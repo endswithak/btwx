@@ -7,8 +7,9 @@ import { RootState } from '../store/reducers';
 import { closeTextEditor } from '../store/actions/textEditor';
 import { TextEditorTypes } from '../store/actionTypes/textEditor';
 import { setLayerText, selectLayers } from '../store/actions/layer';
+import { getPaperLayer } from '../store/selectors/layer';
 import { SetLayerTextPayload, SelectLayersPayload, LayerTypes } from '../store/actionTypes/layer';
-import { paperMain } from '../canvas';
+import { uiPaperScope } from '../canvas';
 import { TextEditorState } from '../store/reducers/textEditor';
 import { TextSettingsState } from '../store/reducers/textSettings';
 import { setCanvasFocusing } from '../store/actions/canvasSettings';
@@ -64,17 +65,12 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
         setCanvasFocusing({focusing: false});
       }
       document.addEventListener('mousedown', onMouseDown);
-      const paperLayer = paperMain.project.getItem({data: { id: textEditor.layer }}) as paper.PointText;
+      const paperLayer = getPaperLayer(textEditor.layer, textEditor.paperScope) as paper.PointText;
       textAreaRef.current.focus();
       textAreaRef.current.select();
-      const singleLineText = paperLayer.clone({insert: false}) as paper.PointText;
-      singleLineText.content = 'Text';
-      const anchorPoint = paperMain.view.projectToView(singleLineText.point);
-      const domAnchorPoint = paperMain.view.projectToView(singleLineText.bounds.leftCenter);
-      const topLeft = paperMain.view.projectToView(singleLineText.bounds.topLeft);
-      const topCenter = paperMain.view.projectToView(singleLineText.bounds.topCenter);
-      const topRight = paperMain.view.projectToView(singleLineText.bounds.topRight);
-      const anchorDiff = (anchorPoint.y - domAnchorPoint.y) - (((textSettings.fontSize * 0.8) * paperMain.view.zoom) / 2);
+      const topLeft = uiPaperScope.view.projectToView(paperLayer.bounds.topLeft);
+      const topCenter = uiPaperScope.view.projectToView(paperLayer.bounds.topCenter);
+      const topRight = uiPaperScope.view.projectToView(paperLayer.bounds.topRight);
       setPos({
         x: (() => {
           switch(textSettings.justification) {
@@ -89,26 +85,27 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
         y: (() => {
           switch(textSettings.justification) {
             case 'left':
-              return topLeft.y + anchorDiff;
+              return topLeft.y;
             case 'center':
-              return topCenter.y + anchorDiff;
+              return topCenter.y;
             case 'right':
-              return topRight.y + anchorDiff;
+              return topRight.y;
           }
         })()
       });
       updateTextAreaSize();
     }
     return () => {
+      const paperLayer = getPaperLayer(textEditor.layer, textEditor.paperScope) as paper.PointText;
       setCanvasFocusing({focusing: true});
-      paperMain.project.getItem({data: { id: textEditor.layer }}).visible = true;
+      paperLayer.visible = true;
       selectLayers({layers: [textEditor.layer], newSelection: true });
       document.removeEventListener('mousedown', onMouseDown);
     }
   }, []);
 
   useEffect(() => {
-    const paperLayer = paperMain.project.getItem({data: { id: textEditor.layer }}) as paper.PointText;
+    const paperLayer = getPaperLayer(textEditor.layer, textEditor.paperScope) as paper.PointText;
     paperLayer.visible = false;
   }, [layerItem.text]);
 
@@ -186,11 +183,11 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
           transform: (() => {
             switch(textSettings.justification) {
               case 'left':
-                return `scale(${paperMain.view.zoom})`;
+                return `scale(${uiPaperScope.view.zoom})`;
               case 'center':
-                return `scale(${paperMain.view.zoom}) translateX(-50%)`;
+                return `scale(${uiPaperScope.view.zoom}) translateX(-50%)`;
               case 'right':
-                return `scale(${paperMain.view.zoom}) translateX(-100%)`;
+                return `scale(${uiPaperScope.view.zoom}) translateX(-100%)`;
             }
           })()
         }} />

@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, ReactElement } from 'react';
 import { connect } from 'react-redux';
+import { uiPaperScope } from '../canvas';
 import { RootState } from '../store/reducers';
 import { getDeepSelectItem, getNearestScopeAncestor, getPaperLayer } from '../store/selectors/layer';
 import { setCanvasActiveTool } from '../store/actions/canvasSettings';
@@ -16,6 +17,7 @@ import { ThemeContext } from './ThemeProvider';
 interface CanvasLayerEventsProps {
   layerEvent: {
     hitResult: paper.HitResult;
+    paperScope: number;
     empty: boolean;
     eventType: 'mouseMove' | 'mouseDown' | 'mouseUp' | 'doubleClick' | 'contextMenu';
     event: any;
@@ -128,33 +130,34 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
         });
       } else {
         if (layerItem.type === 'Text') {
-          // const paperLayer = getPaperLayer(layerItem.id);
-          // const topLeft = paperMain.view.projectToView(paperLayer.bounds.topLeft);
-          // const topCenter = paperMain.view.projectToView(paperLayer.bounds.topCenter);
-          // const topRight = paperMain.view.projectToView(paperLayer.bounds.topRight);
-          // openTextEditor({
-          //   layer: layerItem.id,
-          //   x: ((): number => {
-          //     switch(textSettings.justification) {
-          //       case 'left':
-          //         return topLeft.x;
-          //       case 'center':
-          //         return topCenter.x;
-          //       case 'right':
-          //         return topRight.x;
-          //     }
-          //   })(),
-          //   y: ((): number => {
-          //     switch(textSettings.justification) {
-          //       case 'left':
-          //         return topLeft.y;
-          //       case 'center':
-          //         return topCenter.y;
-          //       case 'right':
-          //         return topRight.y;
-          //     }
-          //   })()
-          // })
+          const paperLayer = getPaperLayer(layerItem.id, layerEvent.paperScope);
+          const topLeft = uiPaperScope.view.projectToView(paperLayer.bounds.topLeft);
+          const topCenter = uiPaperScope.view.projectToView(paperLayer.bounds.topCenter);
+          const topRight = uiPaperScope.view.projectToView(paperLayer.bounds.topRight);
+          openTextEditor({
+            layer: layerItem.id,
+            paperScope: layerEvent.paperScope,
+            x: ((): number => {
+              switch(textSettings.justification) {
+                case 'left':
+                  return topLeft.x;
+                case 'center':
+                  return topCenter.x;
+                case 'right':
+                  return topRight.x;
+              }
+            })(),
+            y: ((): number => {
+              switch(textSettings.justification) {
+                case 'left':
+                  return topLeft.y;
+                case 'center':
+                  return topCenter.y;
+                case 'right':
+                  return topRight.y;
+              }
+            })()
+          });
         }
       }
     }

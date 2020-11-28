@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, useEffect, ReactElement, useState } from 'react';
+import React, { useEffect, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
+import paper from 'paper';
 import { RootState } from '../store/reducers';
-import { paperMain } from '../canvas';
+import { uiPaperScope } from '../canvas';
 import { setCanvasDrawing } from '../store/actions/canvasSettings';
 import { addTextThunk } from '../store/actions/layer';
 import { AddTextPayload } from '../store/actionTypes/layer';
@@ -11,8 +12,7 @@ import { openTextEditor } from '../store/actions/textEditor';
 import { OpenTextEditorPayload, TextEditorTypes } from '../store/actionTypes/textEditor';
 import { TextSettingsState } from '../store/reducers/textSettings';
 import { DEFAULT_TEXT_VALUE, DEFAULT_TRANSFORM, DEFAULT_STYLE } from '../constants';
-import { getPaperLayer } from '../store/selectors/layer';
-import { ThemeContext } from './ThemeProvider';
+import { getLayerPaperScopes } from '../store/selectors/layer';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
 
@@ -20,6 +20,10 @@ interface TextToolStateProps {
   isEnabled?: boolean;
   scope?: string[];
   textSettings?: TextSettingsState;
+  paperScope?: number;
+  layerPaperScopes?: {
+    [id: string]: paper.PaperScope;
+  };
 }
 
 interface TextToolDispatchProps {
@@ -35,8 +39,7 @@ type TextToolProps = (
 );
 
 const TextTool = (props: TextToolProps): ReactElement => {
-  const theme = useContext(ThemeContext);
-  const { isEnabled, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent, openTextEditor, textSettings, scope, addTextThunk, toggleTextToolThunk } = props;
+  const { isEnabled, tool, moveEvent, downEvent, paperScope, layerPaperScopes, openTextEditor, textSettings, scope, addTextThunk, toggleTextToolThunk } = props;
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
   const [toBounds, setToBounds] = useState<paper.Rectangle>(null);
 
@@ -51,9 +54,9 @@ const TextTool = (props: TextToolProps): ReactElement => {
 
   useEffect(() => {
     if (moveEvent && isEnabled) {
-      const nextSnapBounds = new paperMain.Rectangle({
-        from: new paperMain.Point(moveEvent.point.x - 0.5, moveEvent.point.y - 0.5),
-        to: new paperMain.Point(moveEvent.point.x + 0.5, moveEvent.point.y + 0.5)
+      const nextSnapBounds = new uiPaperScope.Rectangle({
+        from: new uiPaperScope.Point(moveEvent.point.x - 0.5, moveEvent.point.y - 0.5),
+        to: new uiPaperScope.Point(moveEvent.point.x + 0.5, moveEvent.point.y + 0.5)
       });
       setSnapBounds(nextSnapBounds);
     }
@@ -61,29 +64,38 @@ const TextTool = (props: TextToolProps): ReactElement => {
 
   useEffect(() => {
     if (downEvent && isEnabled) {
-      const paperLayer = new paperMain.PointText({
+      const paperLayer = new uiPaperScope.PointText({
         point: toBounds.center,
         content: DEFAULT_TEXT_VALUE,
         ...textSettings,
         insert: false
       });
-      const parent = (() => {
-        const overlappedArtboard = getPaperLayer('page').getItem({
-          data: (data: any) => {
-            return data.id === 'artboardBackground';
-          },
-          overlapping: paperLayer.bounds
-        });
-        return overlappedArtboard && scope[scope.length - 1] === 'page' ? overlappedArtboard.parent.data.id : scope[scope.length - 1];
-      })();
+      const parentItem = Object.keys(layerPaperScopes).reduce((result, current, index) => {
+        const paperScope = layerPaperScopes[current];
+        if (paperScope.project) {
+          const hitTest = paperScope.project.getItem({
+            data: (data: any) => {
+              return data.id === 'artboardBackground';
+            },
+            overlapping: paperLayer.bounds
+          });
+          return hitTest && scope[scope.length - 1] === 'page' ? { id: hitTest.parent.data.id, paperScope: index + 1, paperLayer: hitTest.parent } : result;
+        } else {
+          return result;
+        }
+      }, {
+        id: scope[scope.length - 1],
+        paperScope: paperScope,
+        paperLayer: paper.PaperScope.get(paperScope).project.getItem({ data: { id: scope[scope.length - 1] }})
+      });
       addTextThunk({
         layer: {
           text: DEFAULT_TEXT_VALUE,
           name: DEFAULT_TEXT_VALUE,
-          parent: parent,
+          parent: parentItem.id,
           frame: {
-            x: paperLayer.position.x,
-            y: paperLayer.position.y,
+            x: parentItem.id === 'page' ? paperLayer.position.x : paperLayer.position.x - parentItem.paperLayer.position.x,
+            y: parentItem.id === 'page' ? paperLayer.position.y : paperLayer.position.y - parentItem.paperLayer.position.y,
             width: paperLayer.bounds.width,
             height: paperLayer.bounds.height,
             innerWidth: paperLayer.bounds.width,
@@ -111,12 +123,13 @@ const TextTool = (props: TextToolProps): ReactElement => {
         }
       }).then((textLayer) => {
         // get new layer bounds
-        const topLeft = paperMain.view.projectToView(paperLayer.bounds.topLeft);
-        const topCenter = paperMain.view.projectToView(paperLayer.bounds.topCenter);
-        const topRight = paperMain.view.projectToView(paperLayer.bounds.topRight);
+        const topLeft = uiPaperScope.view.projectToView(paperLayer.bounds.topLeft);
+        const topCenter = uiPaperScope.view.projectToView(paperLayer.bounds.topCenter);
+        const topRight = uiPaperScope.view.projectToView(paperLayer.bounds.topRight);
         // open text editor with new text layer props
         openTextEditor({
           layer: textLayer.id,
+          paperScope: parentItem.paperScope,
           x: ((): number => {
             switch(textSettings.justification) {
               case 'left':
@@ -150,8 +163,8 @@ const TextTool = (props: TextToolProps): ReactElement => {
         tool.activate();
       }
     } else {
-      if (tool && paperMain.tool && (paperMain.tool as any)._index === (tool as any)._index) {
-        paperMain.tool = null;
+      if (tool && uiPaperScope.tool && (uiPaperScope.tool as any)._index === (tool as any)._index) {
+        uiPaperScope.tool = null;
         resetState();
       }
     }
@@ -173,10 +186,14 @@ const mapStateToProps = (state: RootState): TextToolStateProps => {
   const { textTool, textSettings, layer } = state;
   const isEnabled = textTool.isEnabled;
   const scope = layer.present.scope;
+  const paperScope = layer.present.paperScope;
+  const layerPaperScopes = getLayerPaperScopes(state);
   return {
     isEnabled,
     textSettings,
-    scope
+    scope,
+    paperScope,
+    layerPaperScopes
   };
 };
 
@@ -193,6 +210,7 @@ export default PaperTool(
     mapDispatchToProps
   )(TextTool),
   {
-    all: true
+    mouseMove: true,
+    mouseDown: true
   }
 );

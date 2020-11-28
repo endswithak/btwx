@@ -2,8 +2,8 @@
 import React, { useContext, useEffect, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getPaperLayer, getSelectionBounds, getSelectedById } from '../store/selectors/layer';
-import { paperMain } from '../canvas';
+import { getPaperLayer, getSelectedPaperScopes, getSelectedById, getSelectedBounds } from '../store/selectors/layer';
+import { uiPaperScope } from '../canvas';
 import { setCanvasResizing } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasResizingPayload } from '../store/actionTypes/canvasSettings';
 import { scaleLayers, updateSelectionFrame } from '../store/actions/layer';
@@ -21,6 +21,10 @@ interface ResizeToolStateProps {
   selectedById?: {
     [id: string]: Btwx.Layer;
   };
+  selectedPaperScopes?: {
+    [id: string]: number;
+  };
+  selectedBounds?: paper.Rectangle;
 }
 
 interface ResizeToolDispatchProps {
@@ -36,7 +40,7 @@ type ResizeToolProps = (
 
 const ResizeTool = (props: ResizeToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { initialHandle, isEnabled, setCanvasResizing, resizing, selected, scaleLayers, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent, selectedById } = props;
+  const { initialHandle, isEnabled, setCanvasResizing, resizing, selected, scaleLayers, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent, selectedById, selectedBounds, selectedPaperScopes } = props;
   const [originalSelection, setOriginalSelection] = useState<any>(null);
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
   const [horizontalFlip, setHorizontalFlip] = useState<boolean>(false);
@@ -66,7 +70,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
   }
 
   const scaleLayer = (id: string, hor: number, ver: number): void => {
-    const paperLayer = getPaperLayer(id);
+    const paperLayer = getPaperLayer(id, selectedPaperScopes[id]);
     const layerItem = selectedById[id];
     switch(paperLayer.data.layerType) {
       case 'Artboard': {
@@ -94,7 +98,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
           case 'Rounded': {
             paperLayer.scale(hor, ver);
             if (!preserveAspectRatio) {
-              const newShape = new paperMain.Path.Rectangle({
+              const newShape = new uiPaperScope.Path.Rectangle({
                 from: paperLayer.bounds.topLeft,
                 to: paperLayer.bounds.bottomRight,
                 radius: (Math.max(paperLayer.bounds.width, paperLayer.bounds.height) / 2) * (layerItem as Btwx.Rounded).radius,
@@ -121,7 +125,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
     const scaleX = isFinite(totalWidthDiff) && totalWidthDiff > 0 ? totalWidthDiff : 0.01;
     const scaleY = isFinite(totalHeightDiff) && totalHeightDiff > 0 ? totalHeightDiff : 0.01;
     selected.forEach((layer: string) => {
-      const paperLayer = getPaperLayer(layer);
+      const paperLayer = getPaperLayer(layer, selectedPaperScopes[layer]);
       clearLayerScale(paperLayer);
       setLayerPivot(layer);
       scaleLayer(layer, horizontalFlip ? -1 : 1, verticalFlip ? -1 : 1);
@@ -130,7 +134,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
   }
 
   const setLayerPivot = (id: string): void => {
-    const paperLayer = getPaperLayer(id);
+    const paperLayer = getPaperLayer(id, selectedPaperScopes[id]);
     switch(paperLayer.data.layerType) {
       case 'Artboard': {
         const background = paperLayer.getItem({data: { id: 'artboardBackground' }});
@@ -160,7 +164,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
       const fb = fromBounds;
       switch(nextHandle) {
         case 'topLeft':
-          nextSnapBounds = new paperMain.Rectangle({
+          nextSnapBounds = new uiPaperScope.Rectangle({
             top: fb.width > fb.height ? (nextHorizontalFlip ? fromBounds.bottom : fromBounds.top) + ((nextToEvent.point.x - (nextVerticalFlip ? fromBounds.right : fromBounds.left)) / aspect) : nextToEvent.point.y,
             bottom: nextVerticalFlip ? fromBounds.top : fromBounds.bottom,
             left: fb.width > fb.height ? nextToEvent.point.x : (nextVerticalFlip ? fromBounds.right : fromBounds.left) + ((nextToEvent.point.y - (nextHorizontalFlip ? fromBounds.bottom : fromBounds.top)) * aspect),
@@ -168,7 +172,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
           });
           break;
         case 'topRight':
-          nextSnapBounds = new paperMain.Rectangle({
+          nextSnapBounds = new uiPaperScope.Rectangle({
             top: fb.width > fb.height ? (nextHorizontalFlip ? fromBounds.bottom : fromBounds.top) - ((nextToEvent.point.x - (nextVerticalFlip ? fromBounds.left : fromBounds.right)) / aspect) : nextToEvent.point.y,
             bottom: nextVerticalFlip ? fromBounds.top : fromBounds.bottom,
             left: nextHorizontalFlip ? fromBounds.right : fromBounds.left,
@@ -176,7 +180,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
           });
           break;
         case 'bottomLeft':
-          nextSnapBounds = new paperMain.Rectangle({
+          nextSnapBounds = new uiPaperScope.Rectangle({
             top: nextVerticalFlip ? fromBounds.bottom : fromBounds.top,
             bottom: fb.width > fb.height ? (nextHorizontalFlip ? fromBounds.top : fromBounds.bottom) - ((nextToEvent.point.x - (nextVerticalFlip ? fromBounds.right : fromBounds.left)) / aspect) : nextToEvent.point.y,
             left: fb.width > fb.height ? nextToEvent.point.x : (nextVerticalFlip ? fromBounds.right : fromBounds.left) - ((nextToEvent.point.y - (nextHorizontalFlip ? fromBounds.top : fromBounds.bottom)) * aspect),
@@ -184,7 +188,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
           });
           break;
         case 'bottomRight':
-          nextSnapBounds = new paperMain.Rectangle({
+          nextSnapBounds = new uiPaperScope.Rectangle({
             top: nextVerticalFlip ? fromBounds.bottom : fromBounds.top,
             bottom: fb.width > fb.height ? (nextHorizontalFlip ? fromBounds.top : fromBounds.bottom) + ((nextToEvent.point.x - (nextVerticalFlip ? fromBounds.left : fromBounds.right)) / aspect) : nextToEvent.point.y,
             left: nextHorizontalFlip ? fromBounds.right : fromBounds.left,
@@ -194,7 +198,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
         case 'topCenter': {
           const distance = nextToEvent.point.y - (nextVerticalFlip ? fromBounds.bottom : fromBounds.top);
           const xDelta = distance * aspect;
-          nextSnapBounds = new paperMain.Rectangle({
+          nextSnapBounds = new uiPaperScope.Rectangle({
             top: nextToEvent.point.y,
             bottom: nextVerticalFlip ? fromBounds.top : fromBounds.bottom,
             left: nextVerticalFlip ? fromBounds.right + (xDelta / 2) : fromBounds.left + (xDelta / 2),
@@ -205,7 +209,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
         case 'bottomCenter': {
           const distance = nextToEvent.point.y - (nextVerticalFlip ? fromBounds.top : fromBounds.bottom);
           const xDelta = distance * aspect;
-          nextSnapBounds = new paperMain.Rectangle({
+          nextSnapBounds = new uiPaperScope.Rectangle({
             top: nextVerticalFlip ? fromBounds.bottom : fromBounds.top,
             bottom: nextToEvent.point.y,
             left: nextVerticalFlip ? fromBounds.right - (xDelta / 2) : fromBounds.left - (xDelta / 2),
@@ -216,7 +220,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
         case 'leftCenter': {
           const distance = nextToEvent.point.x - (nextHorizontalFlip ? fromBounds.right : fromBounds.left);
           const yDelta = distance / aspect;
-          nextSnapBounds = new paperMain.Rectangle({
+          nextSnapBounds = new uiPaperScope.Rectangle({
             top: nextHorizontalFlip ? fromBounds.bottom + (yDelta / 2) : fromBounds.top + (yDelta / 2),
             bottom: nextHorizontalFlip ? fromBounds.top - (yDelta / 2) : fromBounds.bottom - (yDelta / 2),
             left: nextToEvent.point.x,
@@ -227,7 +231,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
         case 'rightCenter': {
           const distance = nextToEvent.point.x - (nextHorizontalFlip ? fromBounds.left : fromBounds.right);
           const yDelta = distance / aspect;
-          nextSnapBounds = new paperMain.Rectangle({
+          nextSnapBounds = new uiPaperScope.Rectangle({
             top: nextHorizontalFlip ? fromBounds.bottom - (yDelta / 2) : fromBounds.top - (yDelta / 2),
             bottom: nextHorizontalFlip ? fromBounds.top + (yDelta / 2) : fromBounds.bottom + (yDelta / 2),
             left: nextHorizontalFlip ? fromBounds.right : fromBounds.left,
@@ -239,7 +243,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
     } else {
       switch(nextHandle) {
         case 'topLeft':
-          nextSnapBounds = new paperMain.Rectangle({
+          nextSnapBounds = new uiPaperScope.Rectangle({
             top: nextToEvent.point.y,
             bottom: nextVerticalFlip ? fromBounds.top : fromBounds.bottom,
             left: nextToEvent.point.x,
@@ -247,7 +251,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
           });
           break;
         case 'topRight':
-          nextSnapBounds = new paperMain.Rectangle({
+          nextSnapBounds = new uiPaperScope.Rectangle({
             top: nextToEvent.point.y,
             bottom: nextVerticalFlip ? fromBounds.top : fromBounds.bottom,
             left: nextHorizontalFlip ? fromBounds.right : fromBounds.left,
@@ -255,7 +259,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
           });
           break;
         case 'bottomLeft':
-          nextSnapBounds = new paperMain.Rectangle({
+          nextSnapBounds = new uiPaperScope.Rectangle({
             top: nextVerticalFlip ? fromBounds.bottom : fromBounds.top,
             bottom: nextToEvent.point.y,
             left: nextToEvent.point.x,
@@ -263,7 +267,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
           });
           break;
         case 'bottomRight':
-          nextSnapBounds = new paperMain.Rectangle({
+          nextSnapBounds = new uiPaperScope.Rectangle({
             top: nextVerticalFlip ? fromBounds.bottom : fromBounds.top,
             bottom: nextToEvent.point.y,
             left: nextHorizontalFlip ? fromBounds.right : fromBounds.left,
@@ -271,7 +275,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
           });
           break;
         case 'topCenter':
-          nextSnapBounds = new paperMain.Rectangle({
+          nextSnapBounds = new uiPaperScope.Rectangle({
             top: nextToEvent.point.y,
             bottom: nextVerticalFlip ? fromBounds.top : fromBounds.bottom,
             left: fromBounds.left,
@@ -279,7 +283,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
           });
           break;
         case 'bottomCenter':
-          nextSnapBounds = new paperMain.Rectangle({
+          nextSnapBounds = new uiPaperScope.Rectangle({
             top: nextVerticalFlip ? fromBounds.bottom : fromBounds.top,
             bottom: nextToEvent.point.y,
             left: fromBounds.left,
@@ -287,7 +291,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
           });
           break;
         case 'leftCenter':
-          nextSnapBounds = new paperMain.Rectangle({
+          nextSnapBounds = new uiPaperScope.Rectangle({
             top: fromBounds.top,
             bottom: fromBounds.bottom,
             left: nextToEvent.point.x,
@@ -295,7 +299,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
           });
           break;
         case 'rightCenter':
-          nextSnapBounds = new paperMain.Rectangle({
+          nextSnapBounds = new uiPaperScope.Rectangle({
             top: fromBounds.top,
             bottom: fromBounds.bottom,
             left: nextHorizontalFlip ? fromBounds.right : fromBounds.left,
@@ -402,11 +406,10 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
 
   useEffect(() => {
     if (downEvent && isEnabled) {
-      const selectedItems = paperMain.project.getItems({ data: { selected: true } });
-      const nextFromBounds = getSelectionBounds();
-      const nextOriginalSelection = selectedItems.reduce((result, current) => ({
+      const nextFromBounds = selectedBounds;
+      const nextOriginalSelection = selected.reduce((result, current) => ({
         ...result,
-        [current.data.id]: current.clone({insert: false})
+        [current]: getPaperLayer(current, selectedPaperScopes[current]).clone({insert: false})
       }), {} as { [id: string]: paper.Item });
       const nextFromPivot = (() => {
         switch(initialHandle) {
@@ -432,7 +435,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
       setFromBounds(nextFromBounds);
       setOriginalSelection(nextOriginalSelection);
       setHandle(initialHandle);
-      updateSelectionFrame(initialHandle);
+      updateSelectionFrame(nextFromBounds, initialHandle);
       selected.forEach((layer) => {
         setLayerPivot(layer);
       });
@@ -614,7 +617,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
     if (upEvent && isEnabled) {
       if (selected.length > 0) {
         selected.forEach((id) => {
-          const paperLayer = getPaperLayer(id);
+          const paperLayer = getPaperLayer(id, selectedPaperScopes[id]);
           paperLayer.pivot = null;
         });
         scaleLayers({layers: selected, scale: { x: 1, y: 1 }, horizontalFlip, verticalFlip});
@@ -649,7 +652,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
   useEffect(() => {
     if (toBounds && isEnabled) {
       resizeLayers();
-      updateSelectionFrame(handle);
+      updateSelectionFrame(toBounds, handle);
     }
   }, [toBounds]);
 
@@ -659,8 +662,8 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
         tool.activate();
       }
     } else {
-      if (tool && paperMain.tool && (paperMain.tool as any)._index === (tool as any)._index) {
-        paperMain.tool = null;
+      if (tool && uiPaperScope.tool && (uiPaperScope.tool as any)._index === (tool as any)._index) {
+        uiPaperScope.tool = null;
         resetState();
       }
     }
@@ -690,12 +693,16 @@ const mapStateToProps = (state: RootState): ResizeToolStateProps => {
   const resizing = canvasSettings.resizing;
   const initialHandle = canvasSettings.resizeHandle as Btwx.ResizeHandle;
   const selectedById = getSelectedById(state);
+  const selectedBounds = getSelectedBounds(state);
+  const selectedPaperScopes = getSelectedPaperScopes(state);
   return {
     selected,
     isEnabled,
     resizing,
     initialHandle,
-    selectedById
+    selectedById,
+    selectedBounds,
+    selectedPaperScopes
   };
 };
 

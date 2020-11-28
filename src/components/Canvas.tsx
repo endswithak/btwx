@@ -2,8 +2,7 @@
 import React, { useContext, ReactElement, useEffect, useState, useRef } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { uiPaperScope } from '../canvas';
-import { getLayerPaperScopes } from '../store/selectors/layer';
+import { getAllPaperScopes } from '../store/selectors/layer';
 import { ThemeContext } from './ThemeProvider';
 import CanvasLayerEvents from './CanvasLayerEvents';
 import CanvasUIEvents from './CanvasUIEvents';
@@ -24,8 +23,7 @@ import CanvasArtboards from './CanvasArtboards';
 interface CanvasProps {
   ready: boolean;
   interactionEnabled?: boolean;
-  matrix?: number[];
-  layerPaperScopes?: {
+  paperScopes?: {
     [id: string]: paper.PaperScope;
   };
   setReady(ready: boolean): void;
@@ -34,33 +32,39 @@ interface CanvasProps {
 const Canvas = (props: CanvasProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const ref = useRef<HTMLDivElement>(null);
-  const { ready, setReady, interactionEnabled, matrix, layerPaperScopes } = props;
+  const { ready, setReady, interactionEnabled, paperScopes } = props;
   const [layerEvent, setLayerEvent] = useState(null);
   const [uiEvent, setUIEvent] = useState(null);
   const [translateEvent, setTranslateEvent] = useState(null);
   const [zoomEvent, setZoomEvent] = useState(null);
 
   const handleHitResult = (e: any, eventType: 'mouseMove' | 'mouseDown' | 'mouseUp' | 'doubleClick' | 'contextMenu'): void => {
-    const layerHitResult = Object.keys(layerPaperScopes).reduce((result: paper.HitResult, current, index) => {
-      const paperScope = layerPaperScopes[current];
+    const { layerHitResult, uiHitResult } = Object.keys(paperScopes).reduce((result: { layerHitResult: { hitResult: paper.HitResult; paperScope: number }; uiHitResult: paper.HitResult }, current, index) => {
+      const paperScope = paperScopes[current];
       if (paperScope.project) {
         const hitResult = paperScope.project.hitTest(paperScope.view.getEventPoint(e));
         if (hitResult) {
-          result = hitResult;
+          if (current === 'ui') {
+            result.uiHitResult = hitResult;
+          } else {
+            result.layerHitResult = {
+              hitResult,
+              paperScope: index
+            };
+          }
         }
       }
       return result;
-    }, null);
-    const uiHitResult = uiPaperScope.project.hitTest(uiPaperScope.view.getEventPoint(e));
+    }, { layerHitResult: { hitResult: null, paperScope: null }, uiHitResult: null });
     const validHitResult = (hitResult: paper.HitResult): boolean => hitResult && hitResult.item && hitResult.item.data && hitResult.item.data.type;
     if (validHitResult(uiHitResult)) {
       setUIEvent({hitResult: uiHitResult, eventType: eventType, event: e.nativeEvent, empty: false});
     } else {
-      if (validHitResult(layerHitResult)) {
-        setLayerEvent({hitResult: layerHitResult, eventType: eventType, event: e.nativeEvent, empty: false});
+      if (validHitResult(layerHitResult.hitResult)) {
+        setLayerEvent({hitResult: layerHitResult.hitResult, paperScope: layerHitResult.paperScope, eventType: eventType, event: e.nativeEvent, empty: false});
       } else {
         setUIEvent({hitResult: uiHitResult, eventType: eventType, event: e.nativeEvent, empty: true});
-        setLayerEvent({hitResult: layerHitResult, eventType: eventType, event: e.nativeEvent, empty: true});
+        setLayerEvent({hitResult: layerHitResult, paperScope: null, eventType: eventType, event: e.nativeEvent, empty: true});
       }
     }
   }
@@ -93,9 +97,20 @@ const Canvas = (props: CanvasProps): ReactElement => {
     }
   }
 
+  const handleResize = (): void => {
+    Object.keys(paperScopes).forEach((key, index) => {
+      const paperScope = paperScopes[key];
+      paperScope.view.viewSize = new paperScope.Size(ref.current.clientWidth, ref.current.clientHeight);
+    });
+  }
+
   useEffect(() => {
+    window.addEventListener('resize', handleResize);
     console.log('CANVAS');
     setReady(true);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    }
   }, []);
 
   return (
@@ -130,10 +145,10 @@ const Canvas = (props: CanvasProps): ReactElement => {
             <ShapeTool />
             <DragTool />
             <AreaSelectTool />
-            {/* <ResizeTool />
+            <ResizeTool />
             <LineTool />
             <TextTool />
-            <CanvasToast /> */}
+            <CanvasToast />
           </>
         : null
       }
@@ -143,16 +158,14 @@ const Canvas = (props: CanvasProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   interactionEnabled: boolean;
-  matrix: number[];
-  layerPaperScopes: {
+  paperScopes: {
     [id: string]: paper.PaperScope;
   };
 } => {
-  const { canvasSettings, documentSettings, layer } = state;
+  const { canvasSettings } = state;
   return {
     interactionEnabled: !canvasSettings.selecting && !canvasSettings.resizing && !canvasSettings.drawing && !canvasSettings.zooming && !canvasSettings.translating && !canvasSettings.dragging,
-    matrix: documentSettings.matrix,
-    layerPaperScopes: getLayerPaperScopes(state)
+    paperScopes: getAllPaperScopes(state)
   };
 };
 

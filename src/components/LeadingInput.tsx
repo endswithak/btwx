@@ -16,7 +16,7 @@ interface LeadingInputProps {
 }
 
 const LeadingInput = (props: LeadingInputProps): ReactElement => {
-  const { selected, setLayersLeading, leadingValue } = props;
+  const { selected, setLayersLeading, leadingValue, setTextSettingsLeading } = props;
   const [leading, setLeading] = useState(leadingValue);
 
   useEffect(() => {

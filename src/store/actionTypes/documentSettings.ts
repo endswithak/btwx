@@ -52,6 +52,7 @@ export interface SaveDocument {
 
 export interface SetCanvasMatrixPayload {
   matrix: number[];
+  zoom?: number;
 }
 
 export interface SetCanvasMatrix {

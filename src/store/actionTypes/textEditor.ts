@@ -3,6 +3,7 @@ export const CLOSE_TEXT_EDITOR = 'CLOSE_TEXT_EDITOR';
 
 export interface OpenTextEditorPayload {
   layer: string;
+  paperScope: number;
   x: number;
   y: number;
 }

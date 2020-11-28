@@ -12,7 +12,7 @@ export const zoomInThunk = () => {
       const paperScope = allPaperScopes[key];
       paperScope.view.zoom *= 2;
     });
-    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
+    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values, zoom: uiPaperScope.view.zoom}));
   }
 };
 
@@ -28,7 +28,7 @@ export const zoomOutThunk = () => {
         paperScope.view.zoom = 0.01;
       }
     });
-    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
+    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values, zoom: uiPaperScope.view.zoom}));
   }
 };
 
@@ -40,7 +40,7 @@ export const zoomPercentThunk = (percent: number) => {
       const paperScope = allPaperScopes[key];
       paperScope.view.zoom = percent;
     });
-    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
+    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values, zoom: uiPaperScope.view.zoom}));
   }
 };
 
@@ -48,7 +48,7 @@ export const zoomFitCanvasThunk = () => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
     const allPaperScopes = getAllPaperScopes(state);
-    const canvasBounds = getCanvasBounds(state.layer.present);
+    const canvasBounds = getCanvasBounds(state);
     const canvasCenter = canvasBounds.center;
     const viewWidth: number = uiPaperScope.view.bounds.width;
     const viewHeight: number = uiPaperScope.view.bounds.height;
@@ -71,7 +71,7 @@ export const zoomFitCanvasThunk = () => {
       paperScope.view.center = canvasCenter;
       paperScope.view.zoom = newZoom;
     });
-    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
+    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values, zoom: uiPaperScope.view.zoom}));
   }
 };
 
@@ -102,6 +102,6 @@ export const zoomFitSelectedThunk = () => {
       paperScope.view.center = selectionCenter;
       paperScope.view.zoom = newZoom;
     });
-    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
+    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values, zoom: uiPaperScope.view.zoom}));
   }
 };

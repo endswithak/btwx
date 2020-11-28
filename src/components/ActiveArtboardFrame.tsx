@@ -7,10 +7,11 @@ import { getActiveArtboardBounds } from '../store/selectors/layer';
 
 interface ActiveArtboardFrameProps {
   activeArtboardBounds?: paper.Rectangle;
+  zoom?: number;
 }
 
 const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
-  const { activeArtboardBounds } = props;
+  const { activeArtboardBounds, zoom } = props;
 
   useEffect(() => {
     updateActiveArtboardFrame(activeArtboardBounds);
@@ -18,7 +19,7 @@ const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
       const activeArtboardFrame = uiPaperScope.project.getItem({ data: { id: 'activeArtboardFrame' } });
       activeArtboardFrame.removeChildren();
     }
-  }, [activeArtboardBounds]);
+  }, [activeArtboardBounds, zoom]);
 
   return (
     <></>
@@ -27,9 +28,11 @@ const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   activeArtboardBounds: paper.Rectangle;
+  zoom: number;
 } => {
   const activeArtboardBounds = getActiveArtboardBounds(state);
-  return { activeArtboardBounds };
+  const zoom = state.documentSettings.zoom;
+  return { activeArtboardBounds, zoom };
 };
 
 export default connect(

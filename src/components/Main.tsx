@@ -1,4 +1,3 @@
-import { remote } from 'electron';
 import React, { ReactElement, useEffect } from 'react';
 import Canvas from './Canvas';
 import SidebarLeft from './SidebarLeft';
@@ -28,8 +27,8 @@ const Main = (props: MainProps): ReactElement => {
         id='main-canvas'
         className='c-app__canvas'>
         <Canvas setReady={setReady} ready={ready} />
-        {/* <TweenDrawerWrap ready={ready} />
         <TextEditor ready={ready} />
+        {/* <TweenDrawerWrap ready={ready} />
         <InsertKnobWrap /> */}
       </div>
       <SidebarRight ready={ready} />

@@ -26,7 +26,7 @@ const ZoomTool = (props: ZoomToolProps): ReactElement => {
   const debounceZoomEnd = useCallback(
     debounce(() => {
       setCanvasZooming({zooming: false});
-      setCanvasMatrix({matrix: uiPaperScope.view.matrix.values});
+      setCanvasMatrix({matrix: uiPaperScope.view.matrix.values, zoom: uiPaperScope.view.zoom});
     }, 50),
     []
   );

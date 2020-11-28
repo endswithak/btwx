@@ -2971,18 +2971,9 @@ export const redoThunk = () => {
   }
 };
 
-export const updateGradientFrame = (layerItem: Btwx.Layer, gradient: Btwx.Gradient) => {
+export const updateGradientFrame = (origin: { position: paper.Point; color: any; selected: boolean; index: number }, destination: { position: paper.Point; color: any; selected: boolean; index: number }): void => {
   const gradientFrame = uiPaperScope.project.getItem({ data: { id: 'gradientFrame' } });
   gradientFrame.removeChildren();
-  const stopsWithIndex = gradient.stops.map((stop, index) => {
-    return {
-      ...stop,
-      index
-    }
-  });
-  const sortedStops = stopsWithIndex.sort((a,b) => { return a.position - b.position });
-  const originStop = sortedStops[0];
-  const destStop = sortedStops[sortedStops.length - 1];
   const gradientFrameHandleBgProps = {
     radius: 8 / uiPaperScope.view.zoom,
     fillColor: '#fff',
@@ -2997,62 +2988,66 @@ export const updateGradientFrame = (layerItem: Btwx.Layer, gradient: Btwx.Gradie
     insert: false
   }
   const gradientFrameLineProps = {
-    from: getGradientOriginPoint(layerItem, gradient.origin),
-    to: getGradientDestinationPoint(layerItem, gradient.destination),
+    from: origin.position,
+    to: destination.position,
     insert: false
   }
-  const gradientFrameOriginHandleBg  = new uiPaperScope.Shape.Circle({
+  const gradientFrameOriginHandleBg = new uiPaperScope.Shape.Circle({
     ...gradientFrameHandleBgProps,
-    center: getGradientOriginPoint(layerItem, gradient.origin),
+    center: origin.position,
     data: {
       type: 'UIElementChild',
       interactive: true,
       interactiveType: 'origin',
-      elementId: 'gradientFrame'
+      elementId: 'gradientFrame',
+      stopIndex: origin.index
     },
-    strokeColor: originStop.index === gradient.activeStopIndex ? THEME_PRIMARY_COLOR : null
+    strokeColor: origin.selected ? THEME_PRIMARY_COLOR : null
   });
   const gradientFrameOriginHandleSwatch  = new uiPaperScope.Shape.Circle({
     ...gradientFrameHandleSwatchProps,
     fillColor: {
-      hue: originStop.color.h,
-      saturation: originStop.color.s,
-      lightness: originStop.color.l,
-      alpha: originStop.color.a
+      hue: origin.color.h,
+      saturation: origin.color.s,
+      lightness: origin.color.l,
+      alpha: origin.color.a
     },
-    center: getGradientOriginPoint(layerItem, gradient.origin),
+    center: origin.position,
     data: {
       type: 'UIElementChild',
       interactive: true,
       interactiveType: 'origin',
-      elementId: 'gradientFrame'
+      elementId: 'gradientFrame',
+      stopIndex: origin.index
     }
   });
   const gradientFrameDestinationHandleBg = new uiPaperScope.Shape.Circle({
     ...gradientFrameHandleBgProps,
-    center: getGradientDestinationPoint(layerItem, gradient.destination),
+    center: destination.position,
     data: {
       type: 'UIElementChild',
       interactive: true,
       interactiveType: 'destination',
-      elementId: 'gradientFrame'
+      elementId: 'gradientFrame',
+      stopIndex: destination.index
     },
-    strokeColor: destStop.index === gradient.activeStopIndex ? THEME_PRIMARY_COLOR : null
+    strokeColor: destination.selected ? THEME_PRIMARY_COLOR : null
   });
   const gradientFrameDestinationHandleSwatch = new uiPaperScope.Shape.Circle({
     ...gradientFrameHandleSwatchProps,
     fillColor: {
-      hue: destStop.color.h,
-      saturation: destStop.color.s,
-      lightness: destStop.color.l,
-      alpha: destStop.color.a
+      hue: destination.color.h,
+      saturation: destination.color.s,
+      lightness: destination.color.l,
+      alpha: destination.color.a
     },
-    center: getGradientDestinationPoint(layerItem, gradient.destination),
+    center: destination.position,
     data: {
       type: 'UIElementChild',
       interactive: true,
       interactiveType: 'destination',
-      elementId: 'gradientFrame'
+      elementId: 'gradientFrame',
+      stopIndex: destination.index
     }
   });
   const gradientFrameLineDark = new uiPaperScope.Path.Line({
@@ -3085,7 +3080,8 @@ export const updateGradientFrame = (layerItem: Btwx.Layer, gradient: Btwx.Gradie
       type: 'UIElementChild',
       interactive: true,
       interactiveType: 'origin',
-      elementId: 'gradientFrame'
+      elementId: 'gradientFrame',
+      stopIndex: origin.index
     },
     insert: false,
     children: [gradientFrameOriginHandleBg, gradientFrameOriginHandleSwatch]
@@ -3096,7 +3092,8 @@ export const updateGradientFrame = (layerItem: Btwx.Layer, gradient: Btwx.Gradie
       type: 'UIElementChild',
       interactive: true,
       interactiveType: 'destination',
-      elementId: 'gradientFrame'
+      elementId: 'gradientFrame',
+      stopIndex: destination.index
     },
     insert: false,
     children: [gradientFrameDestinationHandleBg, gradientFrameDestinationHandleSwatch]
@@ -3124,6 +3121,160 @@ export const updateGradientFrame = (layerItem: Btwx.Layer, gradient: Btwx.Gradie
     parent: gradientFrame
   });
 }
+
+// export const updateGradientFrame = (layerItem: Btwx.Layer, gradient: Btwx.Gradient) => {
+//   const gradientFrame = uiPaperScope.project.getItem({ data: { id: 'gradientFrame' } });
+//   gradientFrame.removeChildren();
+//   const stopsWithIndex = gradient.stops.map((stop, index) => {
+//     return {
+//       ...stop,
+//       index
+//     }
+//   });
+//   const sortedStops = stopsWithIndex.sort((a,b) => { return a.position - b.position });
+//   const originStop = sortedStops[0];
+//   const destStop = sortedStops[sortedStops.length - 1];
+//   const gradientFrameHandleBgProps = {
+//     radius: 8 / uiPaperScope.view.zoom,
+//     fillColor: '#fff',
+//     shadowColor: new uiPaperScope.Color(0, 0, 0, 0.5),
+//     shadowBlur: 2,
+//     insert: false,
+//     strokeWidth: 1 / uiPaperScope.view.zoom
+//   }
+//   const gradientFrameHandleSwatchProps = {
+//     radius: 6 / uiPaperScope.view.zoom,
+//     fillColor: '#fff',
+//     insert: false
+//   }
+//   const gradientFrameLineProps = {
+//     from: getGradientOriginPoint(layerItem, gradient.origin),
+//     to: getGradientDestinationPoint(layerItem, gradient.destination),
+//     insert: false
+//   }
+//   const gradientFrameOriginHandleBg = new uiPaperScope.Shape.Circle({
+//     ...gradientFrameHandleBgProps,
+//     center: getGradientOriginPoint(layerItem, gradient.origin),
+//     data: {
+//       type: 'UIElementChild',
+//       interactive: true,
+//       interactiveType: 'origin',
+//       elementId: 'gradientFrame'
+//     },
+//     strokeColor: originStop.index === gradient.activeStopIndex ? THEME_PRIMARY_COLOR : null
+//   });
+//   const gradientFrameOriginHandleSwatch  = new uiPaperScope.Shape.Circle({
+//     ...gradientFrameHandleSwatchProps,
+//     fillColor: {
+//       hue: originStop.color.h,
+//       saturation: originStop.color.s,
+//       lightness: originStop.color.l,
+//       alpha: originStop.color.a
+//     },
+//     center: getGradientOriginPoint(layerItem, gradient.origin),
+//     data: {
+//       type: 'UIElementChild',
+//       interactive: true,
+//       interactiveType: 'origin',
+//       elementId: 'gradientFrame'
+//     }
+//   });
+//   const gradientFrameDestinationHandleBg = new uiPaperScope.Shape.Circle({
+//     ...gradientFrameHandleBgProps,
+//     center: getGradientDestinationPoint(layerItem, gradient.destination),
+//     data: {
+//       type: 'UIElementChild',
+//       interactive: true,
+//       interactiveType: 'destination',
+//       elementId: 'gradientFrame'
+//     },
+//     strokeColor: destStop.index === gradient.activeStopIndex ? THEME_PRIMARY_COLOR : null
+//   });
+//   const gradientFrameDestinationHandleSwatch = new uiPaperScope.Shape.Circle({
+//     ...gradientFrameHandleSwatchProps,
+//     fillColor: {
+//       hue: destStop.color.h,
+//       saturation: destStop.color.s,
+//       lightness: destStop.color.l,
+//       alpha: destStop.color.a
+//     },
+//     center: getGradientDestinationPoint(layerItem, gradient.destination),
+//     data: {
+//       type: 'UIElementChild',
+//       interactive: true,
+//       interactiveType: 'destination',
+//       elementId: 'gradientFrame'
+//     }
+//   });
+//   const gradientFrameLineDark = new uiPaperScope.Path.Line({
+//     ...gradientFrameLineProps,
+//     strokeColor: new uiPaperScope.Color(0, 0, 0, 0.25),
+//     strokeWidth: 3 / uiPaperScope.view.zoom,
+//     data: {
+//       id: 'GradientFrameLine',
+//       type: 'UIElementChild',
+//       interactive: false,
+//       interactiveType: null,
+//       elementId: 'gradientFrame'
+//     }
+//   });
+//   const gradientFrameLineLight = new uiPaperScope.Path.Line({
+//     ...gradientFrameLineProps,
+//     strokeColor: '#fff',
+//     strokeWidth: 1 / uiPaperScope.view.zoom,
+//     data: {
+//       id: 'GradientFrameLine',
+//       type: 'UIElementChild',
+//       interactive: false,
+//       interactiveType: null,
+//       elementId: 'gradientFrame'
+//     }
+//   });
+//   const gradientFrameOriginHandle = new uiPaperScope.Group({
+//     data: {
+//       id: 'GradientFrameOriginHandle',
+//       type: 'UIElementChild',
+//       interactive: true,
+//       interactiveType: 'origin',
+//       elementId: 'gradientFrame'
+//     },
+//     insert: false,
+//     children: [gradientFrameOriginHandleBg, gradientFrameOriginHandleSwatch]
+//   });
+//   const gradientFrameDestinationHandle = new uiPaperScope.Group({
+//     data: {
+//       id: 'GradientFrameDestinationHandle',
+//       type: 'UIElementChild',
+//       interactive: true,
+//       interactiveType: 'destination',
+//       elementId: 'gradientFrame'
+//     },
+//     insert: false,
+//     children: [gradientFrameDestinationHandleBg, gradientFrameDestinationHandleSwatch]
+//   });
+//   const gradientFrameLines = new uiPaperScope.Group({
+//     data: {
+//       id: 'GradientFrameLines',
+//       type: 'UIElementChild',
+//       interactive: false,
+//       interactiveType: null,
+//       elementId: 'gradientFrame'
+//     },
+//     insert: false,
+//     children: [gradientFrameLineDark, gradientFrameLineLight]
+//   });
+//   new uiPaperScope.Group({
+//     data: {
+//       id: 'GradientFrame',
+//       type: 'UIElement',
+//       interactive: false,
+//       interactiveType: null,
+//       elementId: 'gradientFrame'
+//     },
+//     children: [gradientFrameLines, gradientFrameOriginHandle, gradientFrameDestinationHandle],
+//     parent: gradientFrame
+//   });
+// }
 
 export const updateActiveArtboardFrame = (bounds: paper.Rectangle): void => {
   const activeArtboardFrame = uiPaperScope.project.getItem({ data: { id: 'activeArtboardFrame' } });
@@ -3219,7 +3370,7 @@ export const updateHoverFrame = (hoverItem: Btwx.Layer, artboardItem?: Btwx.Artb
   }
 };
 
-export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btwx.SelectionFrameHandle = 'all'): void => {
+export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btwx.SelectionFrameHandle = 'all', linePaperLayer?: any): void => {
   const selectionFrame = uiPaperScope.project.getItem({ data: { id: 'selectionFrame' } });
   selectionFrame.removeChildren();
   if (bounds) {
@@ -3289,156 +3440,140 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
     moveHandle.position = new uiPaperScope.Point(baseFrame.bounds.topCenter.x, baseFrame.bounds.topCenter.y - ((1 / uiPaperScope.view.zoom) * 24));
     moveHandle.scaling.x = 1 / uiPaperScope.view.zoom;
     moveHandle.scaling.y = 1 / uiPaperScope.view.zoom;
-    const topLeftHandle = new uiPaperScope.Path.Rectangle({
-      ...baseProps,
-      visible: visibleHandle === 'all' || visibleHandle === 'topLeft',
-      data: {
-        type: 'UIElementChild',
-        interactive: true,
-        interactiveType: 'topLeft',
-        elementId: 'selectionFrame'
-      }
-    });
-    topLeftHandle.position = baseFrame.bounds.topLeft;
-    topLeftHandle.scaling.x = 1 / uiPaperScope.view.zoom;
-    topLeftHandle.scaling.y = 1 / uiPaperScope.view.zoom;
-    const topCenterHandle = new uiPaperScope.Path.Rectangle({
-      ...baseProps,
-      visible: visibleHandle === 'all' || visibleHandle === 'topCenter',
-      data: {
-        type: 'UIElementChild',
-        interactive: true,
-        interactiveType: 'topCenter',
-        elementId: 'selectionFrame'
-      }
-    });
-    topCenterHandle.position = baseFrame.bounds.topCenter;
-    topCenterHandle.scaling.x = 1 / uiPaperScope.view.zoom;
-    topCenterHandle.scaling.y = 1 / uiPaperScope.view.zoom;
-    const topRightHandle = new uiPaperScope.Path.Rectangle({
-      ...baseProps,
-      visible: visibleHandle === 'all' || visibleHandle === 'topRight',
-      data: {
-        type: 'UIElementChild',
-        interactive: true,
-        interactiveType: 'topRight',
-        elementId: 'selectionFrame'
-      }
-    });
-    topRightHandle.position = baseFrame.bounds.topRight;
-    topRightHandle.scaling.x = 1 / uiPaperScope.view.zoom;
-    topRightHandle.scaling.y = 1 / uiPaperScope.view.zoom;
-    const bottomLeftHandle = new uiPaperScope.Path.Rectangle({
-      ...baseProps,
-      visible: visibleHandle === 'all' || visibleHandle === 'bottomLeft',
-      data: {
-        type: 'UIElementChild',
-        interactive: true,
-        interactiveType: 'bottomLeft',
-        elementId: 'selectionFrame'
-      }
-    });
-    bottomLeftHandle.position = baseFrame.bounds.bottomLeft;
-    bottomLeftHandle.scaling.x = 1 / uiPaperScope.view.zoom;
-    bottomLeftHandle.scaling.y = 1 / uiPaperScope.view.zoom;
-    const bottomCenterHandle = new uiPaperScope.Path.Rectangle({
-      ...baseProps,
-      visible: visibleHandle === 'all' || visibleHandle === 'bottomCenter',
-      data: {
-        type: 'UIElementChild',
-        interactive: true,
-        interactiveType: 'bottomCenter',
-        elementId: 'selectionFrame'
-      }
-    });
-    bottomCenterHandle.position = baseFrame.bounds.bottomCenter;
-    bottomCenterHandle.scaling.x = 1 / uiPaperScope.view.zoom;
-    bottomCenterHandle.scaling.y = 1 / uiPaperScope.view.zoom;
-    const bottomRightHandle = new uiPaperScope.Path.Rectangle({
-      ...baseProps,
-      visible: visibleHandle === 'all' || visibleHandle === 'bottomRight',
-      data: {
-        type: 'UIElementChild',
-        interactive: true,
-        interactiveType: 'bottomRight',
-        elementId: 'selectionFrame'
-      }
-    });
-    bottomRightHandle.position = baseFrame.bounds.bottomRight;
-    bottomRightHandle.scaling.x = 1 / uiPaperScope.view.zoom;
-    bottomRightHandle.scaling.y = 1 / uiPaperScope.view.zoom;
-    const rightCenterHandle = new uiPaperScope.Path.Rectangle({
-      ...baseProps,
-      visible: visibleHandle === 'all' || visibleHandle === 'rightCenter',
-      data: {
-        type: 'UIElementChild',
-        interactive: true,
-        interactiveType: 'rightCenter',
-        elementId: 'selectionFrame'
-      }
-    });
-    rightCenterHandle.position = baseFrame.bounds.rightCenter;
-    rightCenterHandle.scaling.x = 1 / uiPaperScope.view.zoom;
-    rightCenterHandle.scaling.y = 1 / uiPaperScope.view.zoom;
-    const leftCenterHandle = new uiPaperScope.Path.Rectangle({
-      ...baseProps,
-      visible: visibleHandle === 'all' || visibleHandle === 'leftCenter',
-      data: {
-        type: 'UIElementChild',
-        interactive: true,
-        interactiveType: 'leftCenter',
-        elementId: 'selectionFrame'
-      }
-    });
-    leftCenterHandle.position = baseFrame.bounds.leftCenter;
-    leftCenterHandle.scaling.x = 1 / uiPaperScope.view.zoom;
-    leftCenterHandle.scaling.y = 1 / uiPaperScope.view.zoom;
-    // selectionFrame.children = [baseFrame, moveHandle, topLeftHandle, topCenterHandle, topRightHandle, bottomLeftHandle, bottomCenterHandle, bottomRightHandle, leftCenterHandle, rightCenterHandle];
     // Line selection frame
-    // if (visibleHandle === 'lineFrom' || visibleHandle === 'lineTo' || visibleHandle === 'lineMove') {
-    //   const paperLayer = bounds as paper.Path;
-    //   const moveHandle = new paperMain.Path.Ellipse({
-    //     ...baseProps,
-    //     opacity: 1,
-    //     visible: visibleHandle === 'lineMove',
-    //     data: {
-    //       type: 'UIElementChild',
-    //       interactive: true,
-    //       interactiveType: 'lineMove',
-    //       elementId: 'selectionFrame'
-    //     }
-    //   });
-    //   moveHandle.position = paperLayer.bounds.center;
-    //   moveHandle.scaling.x = 1 / uiPaperScope.view.zoom;
-    //   moveHandle.scaling.y = 1 / uiPaperScope.view.zoom;
-    //   const fromHandle = new paperMain.Path.Rectangle({
-    //     ...baseProps,
-    //     visible: visibleHandle === 'lineFrom',
-    //     data: {
-    //       type: 'UIElementChild',
-    //       interactive: true,
-    //       interactiveType: 'lineFrom',
-    //       elementId: 'selectionFrame'
-    //     }
-    //   });
-    //   fromHandle.position = paperLayer.firstSegment.point;
-    //   fromHandle.scaling.x = 1 / uiPaperScope.view.zoom;
-    //   fromHandle.scaling.y = 1 / uiPaperScope.view.zoom;
-    //   const toHandle = new paperMain.Path.Rectangle({
-    //     ...baseProps,
-    //     visible: visibleHandle === 'lineTo',
-    //     data: {
-    //       type: 'UIElementChild',
-    //       interactive: true,
-    //       interactiveType: 'lineTo',
-    //       elementId: 'selectionFrame'
-    //     }
-    //   });
-    //   toHandle.position = paperLayer.lastSegment.point;
-    //   toHandle.scaling.x = 1 / uiPaperScope.view.zoom;
-    //   toHandle.scaling.y = 1 / uiPaperScope.view.zoom;
-    //   selectionFrame.children = [fromHandle, moveHandle, toHandle];
-    // }
+    if (linePaperLayer) {
+      const fromHandle = new uiPaperScope.Path.Rectangle({
+        ...baseProps,
+        visible: visibleHandle === 'lineFrom' || visibleHandle === 'all',
+        data: {
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: 'lineFrom',
+          elementId: 'selectionFrame'
+        }
+      });
+      fromHandle.position = linePaperLayer.firstSegment.point;
+      fromHandle.scaling.x = 1 / uiPaperScope.view.zoom;
+      fromHandle.scaling.y = 1 / uiPaperScope.view.zoom;
+      const toHandle = new uiPaperScope.Path.Rectangle({
+        ...baseProps,
+        visible: visibleHandle === 'lineTo' || visibleHandle === 'all',
+        data: {
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: 'lineTo',
+          elementId: 'selectionFrame'
+        }
+      });
+      toHandle.position = linePaperLayer.lastSegment.point;
+      toHandle.scaling.x = 1 / uiPaperScope.view.zoom;
+      toHandle.scaling.y = 1 / uiPaperScope.view.zoom;
+    } else {
+      const topLeftHandle = new uiPaperScope.Path.Rectangle({
+        ...baseProps,
+        visible: visibleHandle === 'all' || visibleHandle === 'topLeft',
+        data: {
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: 'topLeft',
+          elementId: 'selectionFrame'
+        }
+      });
+      topLeftHandle.position = baseFrame.bounds.topLeft;
+      topLeftHandle.scaling.x = 1 / uiPaperScope.view.zoom;
+      topLeftHandle.scaling.y = 1 / uiPaperScope.view.zoom;
+      const topCenterHandle = new uiPaperScope.Path.Rectangle({
+        ...baseProps,
+        visible: visibleHandle === 'all' || visibleHandle === 'topCenter',
+        data: {
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: 'topCenter',
+          elementId: 'selectionFrame'
+        }
+      });
+      topCenterHandle.position = baseFrame.bounds.topCenter;
+      topCenterHandle.scaling.x = 1 / uiPaperScope.view.zoom;
+      topCenterHandle.scaling.y = 1 / uiPaperScope.view.zoom;
+      const topRightHandle = new uiPaperScope.Path.Rectangle({
+        ...baseProps,
+        visible: visibleHandle === 'all' || visibleHandle === 'topRight',
+        data: {
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: 'topRight',
+          elementId: 'selectionFrame'
+        }
+      });
+      topRightHandle.position = baseFrame.bounds.topRight;
+      topRightHandle.scaling.x = 1 / uiPaperScope.view.zoom;
+      topRightHandle.scaling.y = 1 / uiPaperScope.view.zoom;
+      const bottomLeftHandle = new uiPaperScope.Path.Rectangle({
+        ...baseProps,
+        visible: visibleHandle === 'all' || visibleHandle === 'bottomLeft',
+        data: {
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: 'bottomLeft',
+          elementId: 'selectionFrame'
+        }
+      });
+      bottomLeftHandle.position = baseFrame.bounds.bottomLeft;
+      bottomLeftHandle.scaling.x = 1 / uiPaperScope.view.zoom;
+      bottomLeftHandle.scaling.y = 1 / uiPaperScope.view.zoom;
+      const bottomCenterHandle = new uiPaperScope.Path.Rectangle({
+        ...baseProps,
+        visible: visibleHandle === 'all' || visibleHandle === 'bottomCenter',
+        data: {
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: 'bottomCenter',
+          elementId: 'selectionFrame'
+        }
+      });
+      bottomCenterHandle.position = baseFrame.bounds.bottomCenter;
+      bottomCenterHandle.scaling.x = 1 / uiPaperScope.view.zoom;
+      bottomCenterHandle.scaling.y = 1 / uiPaperScope.view.zoom;
+      const bottomRightHandle = new uiPaperScope.Path.Rectangle({
+        ...baseProps,
+        visible: visibleHandle === 'all' || visibleHandle === 'bottomRight',
+        data: {
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: 'bottomRight',
+          elementId: 'selectionFrame'
+        }
+      });
+      bottomRightHandle.position = baseFrame.bounds.bottomRight;
+      bottomRightHandle.scaling.x = 1 / uiPaperScope.view.zoom;
+      bottomRightHandle.scaling.y = 1 / uiPaperScope.view.zoom;
+      const rightCenterHandle = new uiPaperScope.Path.Rectangle({
+        ...baseProps,
+        visible: visibleHandle === 'all' || visibleHandle === 'rightCenter',
+        data: {
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: 'rightCenter',
+          elementId: 'selectionFrame'
+        }
+      });
+      rightCenterHandle.position = baseFrame.bounds.rightCenter;
+      rightCenterHandle.scaling.x = 1 / uiPaperScope.view.zoom;
+      rightCenterHandle.scaling.y = 1 / uiPaperScope.view.zoom;
+      const leftCenterHandle = new uiPaperScope.Path.Rectangle({
+        ...baseProps,
+        visible: visibleHandle === 'all' || visibleHandle === 'leftCenter',
+        data: {
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: 'leftCenter',
+          elementId: 'selectionFrame'
+        }
+      });
+      leftCenterHandle.position = baseFrame.bounds.leftCenter;
+      leftCenterHandle.scaling.x = 1 / uiPaperScope.view.zoom;
+      leftCenterHandle.scaling.y = 1 / uiPaperScope.view.zoom;
+    }
   }
 };
 

@@ -8,10 +8,11 @@ interface HoverFrameProps {
   hover?: string;
   hoverItem?: Btwx.Layer;
   artboardItem?: Btwx.Artboard;
+  zoom?: number;
 }
 
 const HoverFrame = (props: HoverFrameProps): ReactElement => {
-  const { hover, hoverItem, artboardItem } = props;
+  const { hover, hoverItem, artboardItem, zoom } = props;
 
   useEffect(() => {
     updateHoverFrame(hoverItem, artboardItem);
@@ -19,7 +20,7 @@ const HoverFrame = (props: HoverFrameProps): ReactElement => {
       const hoverFrame = uiPaperScope.project.getItem({ data: { id: 'hoverFrame' } });
       hoverFrame.removeChildren();
     }
-  }, [hover]);
+  }, [hover, zoom]);
 
   return (
     <></>
@@ -30,14 +31,16 @@ const mapStateToProps = (state: RootState): {
   hover: string;
   hoverItem: Btwx.Layer;
   artboardItem: Btwx.Artboard;
+  zoom: number;
 } => {
-  const { layer } = state;
+  const { layer, documentSettings } = state;
   const hover = layer.present.hover;
   const hoverItem = hover ? layer.present.byId[hover] : null;
   const artboardLayer = hoverItem ? hoverItem.artboardLayer : null;
   const artboard = artboardLayer ? (hoverItem as Btwx.ArtboardLayer).artboard : null;
   const artboardItem = artboard ? layer.present.byId[artboard] as Btwx.Artboard : null;
-  return { hover, hoverItem, artboardItem };
+  const zoom = documentSettings.zoom;
+  return { hover, hoverItem, artboardItem, zoom };
 };
 
 export default connect(

@@ -4,8 +4,8 @@ import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { setCanvasActiveTool } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasActiveToolPayload } from '../store/actionTypes/canvasSettings';
-import { LayerTypes, SetLayerHoverPayload } from '../store/actionTypes/layer';
-import { setLayerHover } from '../store/actions/layer';
+import { LayerTypes, SetLayerHoverPayload, SetLayerActiveGradientStopPayload } from '../store/actionTypes/layer';
+import { setLayerHover, setLayerActiveGradientStop } from '../store/actions/layer';
 import { setTweenDrawerEventThunk, setTweenDrawerEventHoverThunk } from '../store/actions/tweenDrawer';
 import { SetTweenDrawerEventPayload, TweenDrawerTypes, SetTweenDrawerEventHoverPayload } from '../store/actionTypes/tweenDrawer';
 
@@ -23,6 +23,7 @@ interface CanvasUIEventsProps {
   eventDrawerHover?: string;
   eventDrawerEvent?: string;
   activeTool?: Btwx.ToolType;
+  setLayerActiveGradientStop?(payload: SetLayerActiveGradientStopPayload): LayerTypes;
   setCanvasActiveTool?(payload: SetCanvasActiveToolPayload): CanvasSettingsTypes;
   setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
   setTweenDrawerEventHoverThunk?(payload: SetTweenDrawerEventHoverPayload): void;
@@ -31,7 +32,7 @@ interface CanvasUIEventsProps {
 
 const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { uiEvent, activeTool, setCanvasActiveTool, resizing, dragging, selecting, setLayerHover, hover, eventDrawerHover, setTweenDrawerEventHoverThunk, eventDrawerEvent, setTweenDrawerEventThunk } = props;
+  const { uiEvent, activeTool, setCanvasActiveTool, resizing, dragging, selecting, setLayerHover, hover, eventDrawerHover, setTweenDrawerEventHoverThunk, eventDrawerEvent, setTweenDrawerEventThunk, setLayerActiveGradientStop } = props;
 
   const handleMouseMove = (): void => {
     if (uiEvent.empty) {
@@ -40,7 +41,8 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           activeTool: 'AreaSelect',
           resizeHandle: null,
           dragHandle: null,
-          lineHandle: null
+          lineHandle: null,
+          gradientHandle: null
         });
       }
       if (eventDrawerHover !== null) {
@@ -54,6 +56,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           }
           switch(uiEvent.hitResult.item.data.interactiveType) {
             case 'move':
+            case 'lineMove':
               if (activeTool !== 'Drag') {
                 setCanvasActiveTool({
                   activeTool: 'Drag',
@@ -81,8 +84,8 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
               }
               break;
             }
-            case 'from':
-            case 'to':
+            case 'lineFrom':
+            case 'lineTo':
               if (activeTool !== 'Line') {
                 setCanvasActiveTool({
                   activeTool: 'Line',
@@ -96,6 +99,15 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           break;
         }
         case 'GradientFrame': {
+          if (hover) {
+            setLayerHover({id: null});
+          }
+          if (activeTool !== 'Gradient') {
+            setCanvasActiveTool({
+              activeTool: 'Gradient',
+              gradientHandle: uiEvent.hitResult.item.data.interactiveType
+            });
+          }
           break;
         }
         case 'TweenEventsFrame': {
@@ -113,6 +125,17 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
     if (uiEvent.empty) {
       return;
     } else {
+      switch(uiEvent.hitResult.item.data.elementId) {
+        case 'SelectionFrame': {
+          break;
+        }
+        case 'GradientFrame': {
+          break;
+        }
+        case 'TweenEventsFrame': {
+          break;
+        }
+      }
       return;
     }
   }
@@ -197,5 +220,11 @@ const mapStateToProps = (state: RootState): {
 
 export default connect(
   mapStateToProps,
-  { setCanvasActiveTool, setLayerHover, setTweenDrawerEventHoverThunk, setTweenDrawerEventThunk }
+  {
+    setCanvasActiveTool,
+    setLayerHover,
+    setTweenDrawerEventHoverThunk,
+    setTweenDrawerEventThunk,
+    setLayerActiveGradientStop
+  }
 )(CanvasUIEvents);

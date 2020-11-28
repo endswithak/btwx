@@ -24,6 +24,7 @@ export interface SetCanvasActiveToolPayload {
   resizeHandle?: Btwx.ResizeHandle;
   dragHandle?: boolean;
   lineHandle?: Btwx.LineHandle;
+  gradientHandle?: Btwx.GradientHandle;
 }
 
 export interface SetCanvasActiveTool {

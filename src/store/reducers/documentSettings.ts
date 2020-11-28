@@ -20,6 +20,7 @@ export interface DocumentSettingsState {
   id: string;
   name: string;
   path: string;
+  zoom: number;
   matrix: number[];
   artboardPresets: {
     allIds: string[];
@@ -43,6 +44,7 @@ export const initialState: DocumentSettingsState = {
   id: null,
   name: 'Untitled',
   path: null,
+  zoom: 1,
   matrix: [1, 0, 0, 1, 0, 0],
   artboardPresets: {
     allIds: [],
@@ -91,7 +93,8 @@ export default (state = initialState, action: DocumentSettingsTypes): DocumentSe
     case SET_CANVAS_MATRIX: {
       return {
         ...state,
-        matrix: action.payload.matrix
+        matrix: action.payload.matrix,
+        zoom: Object.prototype.hasOwnProperty.call(action.payload, 'zoom') ? action.payload.zoom : state.zoom
       };
     }
     case SET_CANVAS_COLOR_FORMAT: {
