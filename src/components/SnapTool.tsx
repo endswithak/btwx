@@ -102,7 +102,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
             const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
             const isTopScopeGroup = data.id && data.layerType === 'Group' && data.id === scope[scope.length - 1];
             if (whiteListLayers && whiteListLayers.length > 0) {
-              const whiteListed = data.scope && whiteListLayers.includes(data.id) || data.scope.some((id: string) => whiteListLayers.includes(id));
+              const whiteListed = data.scope && (whiteListLayers.includes(data.id) || data.scope.some((id: string) => whiteListLayers.includes(id)));
               return whiteListed && isScopeLayer && !isTopScopeGroup;
             } else if (blackListLayers && blackListLayers.length > 0) {
               const notBlackListed = data.scope && !blackListLayers.includes(data.id) && data.scope.every((id: string) => !blackListLayers.includes(id));
@@ -160,7 +160,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
             const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
             const isTopScopeGroup = data.id && data.layerType === 'Group' && data.id === scope[scope.length - 1];
             if (whiteListLayers && whiteListLayers.length > 0) {
-              const whiteListed = data.scope && whiteListLayers.includes(data.id) || data.scope.some((id: string) => whiteListLayers.includes(id));
+              const whiteListed = data.scope && (whiteListLayers.includes(data.id) || data.scope.some((id: string) => whiteListLayers.includes(id)));
               return whiteListed && isScopeLayer && !isTopScopeGroup;
             } else if (blackListLayers && blackListLayers.length > 0) {
               const notBlackListed = data.scope && !blackListLayers.includes(data.id) && data.scope.every((id: string) => !blackListLayers.includes(id));
@@ -211,7 +211,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
             const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
             const isTopScopeGroup = data.id && data.layerType === 'Group' && data.id === scope[scope.length - 1];
             if (whiteListLayers && whiteListLayers.length > 0) {
-              const whiteListed = data.scope && whiteListLayers.includes(data.id) || data.scope.some((id: string) => whiteListLayers.includes(id));
+              const whiteListed = data.scope && (whiteListLayers.includes(data.id) || data.scope.some((id: string) => whiteListLayers.includes(id)));
               return whiteListed && isScopeLayer && !isTopScopeGroup;
             } else if (blackListLayers && blackListLayers.length > 0) {
               const notBlackListed = data.scope && !blackListLayers.includes(data.id) && data.scope.every((id: string) => !blackListLayers.includes(id));

@@ -20,7 +20,7 @@ import getTheme from '../theme';
 
 import { addDocumentImage } from './documentSettings';
 import { setTweenDrawerEventThunk } from './tweenDrawer';
-import { openColorEditor, closeColorEditor } from './colorEditor';
+import { openColorEditor, closeColorEditor, setColorEditorColor } from './colorEditor';
 import { openGradientEditor, closeGradientEditor } from './gradientEditor';
 import { RootState } from '../reducers';
 
@@ -2820,78 +2820,78 @@ export const pasteLayersThunk = (props?: { overSelection?: boolean; overPoint?: 
   }
 };
 
-const updateEditors = (dispatch: any, state: RootState, type: 'redo' | 'undo') => {
-  if (state.colorEditor.isOpen) {
-    // const layerItem = state.layer.present.byId[state.colorEditor.layer];
-    const layerItems = state.colorEditor.layers.reduce((result, current) => {
-      return [...result, state.layer.present.byId[current]];
-    }, []);
-    // const prevLayerItem = type === 'redo' ? state.layer.past[state.layer.past.length - 1].byId[state.colorEditor.layer] : state.layer.future[0].byId[state.colorEditor.layer];
-    const prevLayerItems = type === 'redo' ? state.colorEditor.layers.reduce((result, current) => {
-      return [...result, state.layer.past[state.layer.past.length - 1].byId[current]];
-    }, []) : state.colorEditor.layers.reduce((result, current) => {
-      return [...result, state.layer.future[0].byId[current]];
-    }, []);
-    // check if items exist and matches selection
-    if (layerItems.every((id) => id) && prevLayerItems.every((id) => id) && state.layer.present.selected.every((id, index) => state.layer.present.selected[index] === state.colorEditor.layers[index])) {
-      const style = layerItems[0].style[state.colorEditor.prop];
-      const prevStyle = prevLayerItems[0].style[state.colorEditor.prop];
-      // check if fill types match
-      if (style.fillType === prevStyle.fillType) {
-        // check if prev action creator was for color
-        if (colorsMatch(style.color, prevStyle.color)) {
-          dispatch(closeColorEditor());
-        }
-      } else {
-        // if fill types dont match, open relevant editor
-        switch(style.fillType) {
-          case 'gradient': {
-            dispatch(closeColorEditor());
-            dispatch(openGradientEditor({layers: state.colorEditor.layers, x: state.colorEditor.x, y: state.colorEditor.y, prop: state.colorEditor.prop}));
-          }
-        }
-      }
-    } else {
-      dispatch(closeColorEditor());
-    }
-  }
-  if (state.gradientEditor.isOpen) {
-    // const layerItem = state.layer.present.byId[state.gradientEditor.layer];
-    const layerItems = state.gradientEditor.layers.reduce((result, current) => {
-      return [...result, state.layer.present.byId[current]];
-    }, []);
-    // const prevLayerItem = type === 'redo' ? state.layer.past[state.layer.past.length - 1].byId[state.gradientEditor.layer] : state.layer.future[0].byId[state.gradientEditor.layer];
-    const prevLayerItems = type === 'redo' ? state.gradientEditor.layers.reduce((result, current) => {
-      return [...result, state.layer.past[state.layer.past.length - 1].byId[current]];
-    }, []) : state.gradientEditor.layers.reduce((result, current) => {
-      return [...result, state.layer.future[0].byId[current]];
-    }, []);
-    // check if items exist and matches selection
-    if (layerItems.every((id) => id) && prevLayerItems.every((id) => id) && state.layer.present.selected.every((id, index) => state.layer.present.selected[index] === state.gradientEditor.layers[index])) {
-      const style = layerItems[0].style[state.gradientEditor.prop];
-      const prevStyle = prevLayerItems[0].style[state.gradientEditor.prop];
-      // check if fill types match
-      if (style.fillType === prevStyle.fillType) {
-        updateGradientFrame(layerItems[0], (style as Btwx.Fill | Btwx.Stroke).gradient);
-        // check if prev action creator was for gradient
-        if (gradientsMatch((style as Btwx.Fill | Btwx.Stroke).gradient, (prevStyle as Btwx.Fill | Btwx.Stroke).gradient)) {
-          dispatch(closeGradientEditor());
-        }
-      } else {
-        // if fill types dont match, open relevant editor
-        switch(style.fillType) {
-          case 'color': {
-            dispatch(closeGradientEditor());
-            dispatch(openColorEditor({layers: state.gradientEditor.layers, x: state.gradientEditor.x, y: state.gradientEditor.y, prop: state.gradientEditor.prop}));
-            break;
-          }
-        }
-      }
-    } else {
-      dispatch(closeGradientEditor());
-    }
-  }
-};
+// const updateEditors = (dispatch: any, state: RootState, type: 'redo' | 'undo') => {
+//   if (state.colorEditor.isOpen) {
+//     // const layerItem = state.layer.present.byId[state.colorEditor.layer];
+//     const layerItems = state.colorEditor.layers.reduce((result, current) => {
+//       return [...result, state.layer.present.byId[current]];
+//     }, []);
+//     // const prevLayerItem = type === 'redo' ? state.layer.past[state.layer.past.length - 1].byId[state.colorEditor.layer] : state.layer.future[0].byId[state.colorEditor.layer];
+//     const prevLayerItems = type === 'redo' ? state.colorEditor.layers.reduce((result, current) => {
+//       return [...result, state.layer.past[state.layer.past.length - 1].byId[current]];
+//     }, []) : state.colorEditor.layers.reduce((result, current) => {
+//       return [...result, state.layer.future[0].byId[current]];
+//     }, []);
+//     // check if items exist and matches selection
+//     if (layerItems.every((id) => id) && prevLayerItems.every((id) => id) && state.layer.present.selected.every((id, index) => state.layer.present.selected[index] === state.colorEditor.layers[index])) {
+//       const style = layerItems[0].style[state.colorEditor.prop];
+//       const prevStyle = prevLayerItems[0].style[state.colorEditor.prop];
+//       // check if fill types match
+//       if (style.fillType === prevStyle.fillType) {
+//         // check if prev action creator was for color
+//         if (colorsMatch(style.color, prevStyle.color)) {
+//           dispatch(closeColorEditor());
+//         }
+//       } else {
+//         // if fill types dont match, open relevant editor
+//         switch(style.fillType) {
+//           case 'gradient': {
+//             dispatch(closeColorEditor());
+//             dispatch(openGradientEditor({layers: state.colorEditor.layers, x: state.colorEditor.x, y: state.colorEditor.y, prop: state.colorEditor.prop}));
+//           }
+//         }
+//       }
+//     } else {
+//       dispatch(closeColorEditor());
+//     }
+//   }
+//   if (state.gradientEditor.isOpen) {
+//     // const layerItem = state.layer.present.byId[state.gradientEditor.layer];
+//     const layerItems = state.gradientEditor.layers.reduce((result, current) => {
+//       return [...result, state.layer.present.byId[current]];
+//     }, []);
+//     // const prevLayerItem = type === 'redo' ? state.layer.past[state.layer.past.length - 1].byId[state.gradientEditor.layer] : state.layer.future[0].byId[state.gradientEditor.layer];
+//     const prevLayerItems = type === 'redo' ? state.gradientEditor.layers.reduce((result, current) => {
+//       return [...result, state.layer.past[state.layer.past.length - 1].byId[current]];
+//     }, []) : state.gradientEditor.layers.reduce((result, current) => {
+//       return [...result, state.layer.future[0].byId[current]];
+//     }, []);
+//     // check if items exist and matches selection
+//     if (layerItems.every((id) => id) && prevLayerItems.every((id) => id) && state.layer.present.selected.every((id, index) => state.layer.present.selected[index] === state.gradientEditor.layers[index])) {
+//       const style = layerItems[0].style[state.gradientEditor.prop];
+//       const prevStyle = prevLayerItems[0].style[state.gradientEditor.prop];
+//       // check if fill types match
+//       if (style.fillType === prevStyle.fillType) {
+//         updateGradientFrame(layerItems[0], (style as Btwx.Fill | Btwx.Stroke).gradient);
+//         // check if prev action creator was for gradient
+//         if (gradientsMatch((style as Btwx.Fill | Btwx.Stroke).gradient, (prevStyle as Btwx.Fill | Btwx.Stroke).gradient)) {
+//           dispatch(closeGradientEditor());
+//         }
+//       } else {
+//         // if fill types dont match, open relevant editor
+//         switch(style.fillType) {
+//           case 'color': {
+//             dispatch(closeGradientEditor());
+//             dispatch(openColorEditor({layers: state.gradientEditor.layers, x: state.gradientEditor.x, y: state.gradientEditor.y, prop: state.gradientEditor.prop}));
+//             break;
+//           }
+//         }
+//       }
+//     } else {
+//       dispatch(closeGradientEditor());
+//     }
+//   }
+// };
 
 export const undoThunk = () => {
   return (dispatch: any, getState: any) => {
@@ -2899,10 +2899,12 @@ export const undoThunk = () => {
     if (state.layer.past.length > 0) {
       const layerState = state.layer.past[state.layer.past.length - 1];
       const fullState = {...state, layer: { ...state.layer, present: layerState }};
+      //
+      if (state.layer.present.hover !== null) {
+        dispatch(setLayerHover({id: null}));
+      }
       // undo
       dispatch(ActionCreators.undo());
-      //
-      dispatch(setLayerHover({id: null}));
       //
       if (state.layer.present.edit.projects) {
         state.layer.present.edit.projects.forEach((project: string) => {
@@ -2919,7 +2921,79 @@ export const undoThunk = () => {
         });
       }
       // update editors
-      // updateEditors(dispatch, state, 'undo');
+      switch(state.layer.present.edit.actionType) {
+        case SET_LAYERS_FILL_COLOR: {
+          if (state.gradientEditor.isOpen) {
+            dispatch(closeGradientEditor());
+          }
+          if (state.colorEditor.isOpen && state.colorEditor.prop !== 'fill') {
+            dispatch(closeColorEditor());
+          }
+          break;
+        }
+        case SET_LAYERS_STROKE_COLOR: {
+          if (state.gradientEditor.isOpen) {
+            dispatch(closeGradientEditor());
+          }
+          if (state.colorEditor.isOpen && state.colorEditor.prop !== 'stroke') {
+            dispatch(closeColorEditor());
+          }
+          break;
+        }
+        case SET_LAYERS_SHADOW_COLOR: {
+          if (state.gradientEditor.isOpen) {
+            dispatch(closeGradientEditor());
+          }
+          if (state.colorEditor.isOpen && state.colorEditor.prop !== 'shadow') {
+            dispatch(closeColorEditor());
+          }
+          break;
+        }
+        case SET_LAYERS_FILL_TYPE:
+          switch(state.layer.present.edit.payload.fillType) {
+            case 'gradient': {
+              if (state.gradientEditor.isOpen) {
+                dispatch(closeGradientEditor());
+                if (state.gradientEditor.prop === 'fill') {
+                  dispatch(openColorEditor({x: state.gradientEditor.x, y: state.gradientEditor.y, prop: state.gradientEditor.prop}));
+                }
+              }
+              break;
+            }
+            case 'color': {
+              if (state.colorEditor.isOpen) {
+                dispatch(closeColorEditor());
+                if (state.colorEditor.prop === 'fill') {
+                  dispatch(openGradientEditor({x: state.colorEditor.x, y: state.colorEditor.y, prop: state.colorEditor.prop}));
+                }
+              }
+              break;
+            }
+          }
+          break;
+        case SET_LAYERS_STROKE_FILL_TYPE:
+          switch(state.layer.present.edit.payload.fillType) {
+            case 'gradient': {
+              if (state.gradientEditor.isOpen) {
+                dispatch(closeGradientEditor());
+                if (state.gradientEditor.prop === 'stroke') {
+                  dispatch(openColorEditor({x: state.gradientEditor.x, y: state.gradientEditor.y, prop: state.gradientEditor.prop}));
+                }
+              }
+              break;
+            }
+            case 'color': {
+              if (state.colorEditor.isOpen) {
+                dispatch(closeColorEditor());
+                if (state.colorEditor.prop === 'stroke') {
+                  dispatch(openGradientEditor({x: state.colorEditor.x, y: state.colorEditor.y, prop: state.colorEditor.prop}));
+                }
+              }
+              break;
+            }
+          }
+          break;
+      }
       // update frames
       if (!state.gradientEditor.isOpen) {
         updateSelectionFrame(getSelectedBounds(fullState));
@@ -2938,10 +3012,12 @@ export const redoThunk = () => {
     if (state.layer.future.length > 0) {
       const layerState = state.layer.future[0];
       const fullState = {...state, layer: { ...state.layer, present: layerState }};
+      //
+      if (state.layer.present.hover !== null) {
+        dispatch(setLayerHover({id: null}));
+      }
       // redo
       dispatch(ActionCreators.redo());
-      //
-      dispatch(setLayerHover({id: null}));
       //
       if (layerState.edit.projects) {
         layerState.edit.projects.forEach((project: string) => {
@@ -2958,7 +3034,79 @@ export const redoThunk = () => {
         });
       }
       // update editors
-      // updateEditors(dispatch, state, 'redo');
+      switch(layerState.edit.actionType) {
+        case SET_LAYERS_FILL_COLOR: {
+          if (state.gradientEditor.isOpen) {
+            dispatch(closeGradientEditor());
+          }
+          if (state.colorEditor.isOpen && state.colorEditor.prop !== 'fill') {
+            dispatch(closeColorEditor());
+          }
+          break;
+        }
+        case SET_LAYERS_STROKE_COLOR: {
+          if (state.gradientEditor.isOpen) {
+            dispatch(closeGradientEditor());
+          }
+          if (state.colorEditor.isOpen && state.colorEditor.prop !== 'stroke') {
+            dispatch(closeColorEditor());
+          }
+          break;
+        }
+        case SET_LAYERS_SHADOW_COLOR: {
+          if (state.gradientEditor.isOpen) {
+            dispatch(closeGradientEditor());
+          }
+          if (state.colorEditor.isOpen && state.colorEditor.prop !== 'shadow') {
+            dispatch(closeColorEditor());
+          }
+          break;
+        }
+        case SET_LAYERS_FILL_TYPE:
+          switch(layerState.edit.payload.fillType) {
+            case 'gradient': {
+              if (state.colorEditor.isOpen) {
+                dispatch(closeColorEditor());
+                if (state.colorEditor.prop === 'fill') {
+                  dispatch(openGradientEditor({x: state.colorEditor.x, y: state.colorEditor.y, prop: state.colorEditor.prop}));
+                }
+              }
+              break;
+            }
+            case 'color': {
+              if (state.gradientEditor.isOpen) {
+                dispatch(closeGradientEditor());
+                if (state.gradientEditor.prop === 'fill') {
+                  dispatch(openColorEditor({x: state.gradientEditor.x, y: state.gradientEditor.y, prop: state.gradientEditor.prop}));
+                }
+              }
+              break;
+            }
+          }
+          break;
+        case SET_LAYERS_STROKE_FILL_TYPE:
+          switch(layerState.edit.payload.fillType) {
+            case 'gradient': {
+              if (state.colorEditor.isOpen) {
+                dispatch(closeColorEditor());
+                if (state.colorEditor.prop === 'stroke') {
+                  dispatch(openGradientEditor({x: state.colorEditor.x, y: state.colorEditor.y, prop: state.colorEditor.prop}));
+                }
+              }
+              break;
+            }
+            case 'color': {
+              if (state.gradientEditor.isOpen) {
+                dispatch(closeGradientEditor());
+                if (state.colorEditor.prop === 'stroke') {
+                  dispatch(openColorEditor({x: state.gradientEditor.x, y: state.gradientEditor.y, prop: state.gradientEditor.prop}));
+                }
+              }
+              break;
+            }
+          }
+          break;
+      }
       // update frames
       if (!state.gradientEditor.isOpen) {
         updateSelectionFrame(getSelectedBounds(fullState));
@@ -3055,7 +3203,7 @@ export const updateGradientFrame = (origin: { position: paper.Point; color: any;
     strokeColor: new uiPaperScope.Color(0, 0, 0, 0.25),
     strokeWidth: 3 / uiPaperScope.view.zoom,
     data: {
-      id: 'GradientFrameLine',
+      id: 'gradientFrameLine',
       type: 'UIElementChild',
       interactive: false,
       interactiveType: null,
@@ -3067,7 +3215,7 @@ export const updateGradientFrame = (origin: { position: paper.Point; color: any;
     strokeColor: '#fff',
     strokeWidth: 1 / uiPaperScope.view.zoom,
     data: {
-      id: 'GradientFrameLine',
+      id: 'gradientFrameLine',
       type: 'UIElementChild',
       interactive: false,
       interactiveType: null,
@@ -3076,7 +3224,7 @@ export const updateGradientFrame = (origin: { position: paper.Point; color: any;
   });
   const gradientFrameOriginHandle = new uiPaperScope.Group({
     data: {
-      id: 'GradientFrameOriginHandle',
+      id: 'gradientFrameOriginHandle',
       type: 'UIElementChild',
       interactive: true,
       interactiveType: 'origin',
@@ -3088,7 +3236,7 @@ export const updateGradientFrame = (origin: { position: paper.Point; color: any;
   });
   const gradientFrameDestinationHandle = new uiPaperScope.Group({
     data: {
-      id: 'GradientFrameDestinationHandle',
+      id: 'gradientFrameDestinationHandle',
       type: 'UIElementChild',
       interactive: true,
       interactiveType: 'destination',
@@ -3100,7 +3248,7 @@ export const updateGradientFrame = (origin: { position: paper.Point; color: any;
   });
   const gradientFrameLines = new uiPaperScope.Group({
     data: {
-      id: 'GradientFrameLines',
+      id: 'gradientFrameLines',
       type: 'UIElementChild',
       interactive: false,
       interactiveType: null,

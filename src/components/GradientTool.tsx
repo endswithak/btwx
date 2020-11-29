@@ -1,15 +1,13 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-// import { remote } from 'electron';
 import React, { useContext, useEffect, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
 import { uiPaperScope } from '../canvas';
 import { RootState } from '../store/reducers';
-import Tooltip from '../canvas/tooltip';
 import { SetLayersGradientDestinationPayload, SetLayersGradientOriginPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayersGradientOrigin, setLayersGradientDestination, updateGradientFrame } from '../store/actions/layer';
+import { setLayersGradientOrigin, setLayersGradientDestination } from '../store/actions/layer';
 import { setCanvasResizing } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasResizingPayload } from '../store/actionTypes/canvasSettings';
-import { getPaperLayer, getGradientOriginPoint, getGradientDestinationPoint } from '../store/selectors/layer';
+import { getPaperLayer, getSelectedPaperScopes, getPaperProp } from '../store/selectors/layer';
 import { ThemeContext } from './ThemeProvider';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
@@ -18,8 +16,12 @@ interface GradientToolStateProps {
   isEnabled?: boolean;
   gradient?: Btwx.Gradient;
   selected?: string[];
+  selectedPaperScopes?: {
+    [id: string]: number;
+  };
   gradientHandle?: Btwx.GradientHandle;
-  gradientProp?: any;
+  gradientProp?: 'fill' | 'stroke';
+  resizing?: boolean;
 }
 
 interface GradientToolDispatchProps {
@@ -36,22 +38,19 @@ type GradientToolProps = (
 
 const GradientTool = (props: GradientToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isEnabled, setLayersGradientOrigin, setLayersGradientDestination, selected, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent, gradientHandle, gradientProp, setCanvasResizing } = props;
+  const { isEnabled, setLayersGradientOrigin, setLayersGradientDestination, selected, selectedPaperScopes, tool, downEvent, dragEvent, upEvent, gradientHandle, gradientProp, setCanvasResizing, resizing } = props;
   const [originHandlePosition, setOriginHandlePosition] = useState<paper.Point>(null);
   const [destinationHandlePosition, setDestinationHandlePosition] = useState<paper.Point>(null);
-  const [originHandleColor, setOriginHandleColor] = useState<paper.Point>(null);
-  const [destinationHandleColor, setDestinationHandleColor] = useState<paper.Point>(null);
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
   const [toBounds, setToBounds] = useState<paper.Rectangle>(null);
-  const [handle, setHandle] = useState<Btwx.GradientHandle>(gradientHandle);
+  const [handle, setHandle] = useState<Btwx.GradientHandle>(null);
 
   const resetState = () => {
     setOriginHandlePosition(null);
     setDestinationHandlePosition(null);
     setToBounds(null);
     setSnapBounds(null);
-    setOriginHandleColor(null);
-    setDestinationHandleColor(null);
+    setHandle(null);
   }
 
   const handleSnapToolUpdate = (snapToolBounds: paper.Rectangle, xSnapPoint: Btwx.SnapPoint, ySnapPoint: Btwx.SnapPoint): void => {
@@ -60,11 +59,11 @@ const GradientTool = (props: GradientToolProps): ReactElement => {
 
   useEffect(() => {
     if (downEvent && isEnabled) {
-      const originHandle = uiPaperScope.project.getItem({data: { interactiveType: 'origin' }});
-      const destinationHandle = uiPaperScope.project.getItem({data: { interactiveType: 'destination' }});
+      const originHandle = uiPaperScope.project.getItem({data: { id: 'gradientFrameOriginHandle' }});
+      const destinationHandle = uiPaperScope.project.getItem({data: { id: 'gradientFrameDestinationHandle' }});
       setOriginHandlePosition(originHandle.position);
       setDestinationHandlePosition(destinationHandle.position);
-      setCanvasResizing({resizing: true});
+      setHandle(gradientHandle);
     }
   }, [downEvent])
 
@@ -75,6 +74,9 @@ const GradientTool = (props: GradientToolProps): ReactElement => {
         to: new uiPaperScope.Point(dragEvent.point.x + 0.5, dragEvent.point.y + 0.5)
       });
       setSnapBounds(nextSnapBounds);
+      if (!resizing) {
+        setCanvasResizing({resizing: true});
+      }
     }
   }, [dragEvent]);
 
@@ -90,13 +92,46 @@ const GradientTool = (props: GradientToolProps): ReactElement => {
           break;
         }
       }
-      setCanvasResizing({resizing: false});
+      if (resizing) {
+        setCanvasResizing({resizing: false});
+      }
       resetState();
     }
   }, [upEvent]);
 
-  const updateGradients = () => {
-
+  const updateGradients = (): void => {
+    const originHandle = uiPaperScope.project.getItem({data: { id: 'gradientFrameOriginHandle' }});
+    const destinationHandle = uiPaperScope.project.getItem({data: { id: 'gradientFrameDestinationHandle' }});
+    const lines = uiPaperScope.project.getItems({data: { id: 'gradientFrameLine' }});
+    const paperProp = getPaperProp(gradientProp);
+    if (handle === 'origin') {
+      originHandle.position = toBounds.center;
+      lines.forEach((line: paper.Path) => {
+        line.firstSegment.point = toBounds.center;
+      });
+      selected.forEach((id) => {
+        const paperLayer = getPaperLayer(id, selectedPaperScopes[id]);
+        paperLayer[paperProp] = {
+          gradient: paperLayer[paperProp].gradient,
+          origin: toBounds.center,
+          destination: destinationHandlePosition
+        } as Btwx.PaperGradientFill
+      });
+    }
+    if (handle === 'destination') {
+      destinationHandle.position = toBounds.center;
+      lines.forEach((line: paper.Path) => {
+        line.lastSegment.point = toBounds.center;
+      });
+      selected.forEach((id) => {
+        const paperLayer = getPaperLayer(id, selectedPaperScopes[id]);
+        paperLayer[paperProp] = {
+          gradient: paperLayer[paperProp].gradient,
+          origin: originHandlePosition,
+          destination: toBounds.center
+        } as Btwx.PaperGradientFill
+      });
+    }
   }
 
   // handle preview on toBounds update
@@ -135,15 +170,19 @@ const GradientTool = (props: GradientToolProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): GradientToolStateProps => {
   const { gradientEditor, layer, canvasSettings } = state;
-  const isEnabled = gradientEditor.isOpen;
+  const isEnabled = gradientEditor.isOpen && canvasSettings.activeTool === 'Gradient';
   const selected = layer.present.selected;
+  const selectedPaperScopes = getSelectedPaperScopes(state);
   const gradientHandle = canvasSettings.gradientHandle;
   const gradientProp = gradientEditor.prop;
+  const resizing = canvasSettings.resizing;
   return {
     isEnabled,
     selected,
     gradientHandle,
-    gradientProp
+    gradientProp,
+    selectedPaperScopes,
+    resizing
   };
 };
 

@@ -5,6 +5,7 @@ import { RootState } from '../store/reducers';
 import { uiPaperScope } from '../canvas';
 import ActiveArtboardFrameWrap from './ActiveArtboardFrameWrap';
 import SelectionFrameWrap from './SelectionFrameWrap';
+import GradientFrameWrap from './GradientFrameWrap';
 import MeasureFrameWrap from './MeasureFrameWrap';
 import TweenEventsFrameWrap from './TweenEventsFrameWrap';
 import HoverFrameWrap from './HoverFrameWrap';
@@ -41,6 +42,7 @@ const CanvasUI = (props: CanvasUIProps): ReactElement => {
       <ActiveArtboardFrameWrap />
       <HoverFrameWrap />
       <SelectionFrameWrap />
+      <GradientFrameWrap />
       {/* <MeasureFrameWrap />
       <TweenEventsFrameWrap /> */}
     </>

@@ -11,7 +11,7 @@ import Icon from './Icon';
 interface GradientSliderProps {
   activeStopIndex: number;
   disabled: boolean;
-  layers?: string[];
+  selected?: string[];
   prop?: 'fill' | 'stroke';
   removeLayersGradientStop?(payload: RemoveLayersGradientStopPayload): LayerTypes;
 }
@@ -36,10 +36,10 @@ const Button = styled.button`
 
 const GradientSliderRemove = (props: GradientSliderProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layers, disabled, removeLayersGradientStop, activeStopIndex, prop } = props;
+  const { selected, disabled, removeLayersGradientStop, activeStopIndex, prop } = props;
 
   const removeStop = () => {
-    removeLayersGradientStop({layers, prop, stopIndex: activeStopIndex});
+    removeLayersGradientStop({layers: selected, prop, stopIndex: activeStopIndex});
   }
 
   return (
@@ -54,10 +54,10 @@ const GradientSliderRemove = (props: GradientSliderProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { gradientEditor } = state;
-  const layers = gradientEditor.layers;
+  const { gradientEditor, layer } = state;
+  const selected = layer.present.selected;
   const prop = gradientEditor.prop;
-  return { layers, prop };
+  return { selected, prop };
 };
 
 export default connect(

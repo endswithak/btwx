@@ -7,12 +7,7 @@ import { ThemeContext } from './ThemeProvider';
 import { getGradientOriginPoint, getGradientDestinationPoint } from '../store/selectors/layer';
 
 interface GradientFrameProps {
-  layer: string;
-  gradient: Btwx.Gradient;
-  prop: 'stroke' | 'fill';
-  onStopPress(index: number): void;
   zoom?: number;
-  layerItem?: Btwx.Layer;
   origin?: {
     position: paper.Point;
     color: Btwx.Color;
@@ -29,33 +24,23 @@ interface GradientFrameProps {
 
 const GradientFrame = (props: GradientFrameProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { layer, gradient, onStopPress, zoom, layerItem, origin, destination } = props;
-
-  const handleWheel = (e: WheelEvent): void => {
-    if (e.ctrlKey) {
-      const gradientFrame = uiPaperScope.project.getItem({ data: { id: 'gradientFrame' } });
-      gradientFrame.removeChildren();
-    }
-  }
+  const { zoom, origin, destination } = props;
 
   useEffect(() => {
     updateGradientFrame(origin, destination);
-    document.getElementById('canvas-container').addEventListener('wheel', handleWheel);
     return () => {
       const gradientFrame = uiPaperScope.project.getItem({ data: { id: 'gradientFrame' } });
       gradientFrame.removeChildren();
-      document.getElementById('canvas-container').removeEventListener('wheel', handleWheel);
     }
-  }, [gradient, layer, zoom]);
+  }, [origin, destination, zoom]);
 
   return (
     <></>
   );
 }
 
-const mapStateToProps = (state: RootState, ownProps: GradientFrameProps): {
+const mapStateToProps = (state: RootState): {
   zoom: number;
-  layerItem: Btwx.Layer;
   origin: {
     position: paper.Point;
     color: Btwx.Color;
@@ -67,22 +52,21 @@ const mapStateToProps = (state: RootState, ownProps: GradientFrameProps): {
     selected: boolean;
   };
 } => {
-  const { documentSettings, layer } = state;
-  const zoom = documentSettings.matrix[0];
-  const layerItem = layer.present.byId[ownProps.layer];
-  const stopsWithIndex = ownProps.gradient.stops.map((stop, index) => {
-    return {
-      ...stop,
-      index
-    }
-  });
-  const sortedStops = stopsWithIndex.sort((a,b) => { return a.position - b.position });
+  const { documentSettings, layer, gradientEditor } = state;
+  const zoom = documentSettings.zoom;
+  const selected = layer.present.selected;
+  const gradientValue = layer.present.byId[selected[0]].style[gradientEditor.prop].gradient;
+  const stopsWithIndex = gradientValue.stops.map((stop, index) => ({
+    ...stop,
+    index
+  }));
+  const sortedStops = stopsWithIndex.sort((a,b) => a.position - b.position);
   const originStop = sortedStops[0];
   const destStop = sortedStops[sortedStops.length - 1];
-  const originPosition = getGradientOriginPoint(state.layer.present, ownProps.layer, ownProps.prop);
-  const destinationPosition = getGradientDestinationPoint(state.layer.present, ownProps.layer, ownProps.prop);
-  const originSelected = originStop.index === ownProps.gradient.activeStopIndex;
-  const destinationSelected = destStop.index === ownProps.gradient.activeStopIndex;
+  const originPosition = getGradientOriginPoint(state.layer.present, selected[0], gradientEditor.prop);
+  const destinationPosition = getGradientDestinationPoint(state.layer.present, selected[0], gradientEditor.prop);
+  const originSelected = originStop.index === gradientValue.activeStopIndex;
+  const destinationSelected = destStop.index === gradientValue.activeStopIndex;
   const origin = {
     position: originPosition,
     color: originStop.color,
@@ -95,7 +79,7 @@ const mapStateToProps = (state: RootState, ownProps: GradientFrameProps): {
     selected: destinationSelected,
     index: destStop.index
   }
-  return { zoom, layerItem, origin, destination };
+  return { zoom, origin, destination };
 };
 
 export default connect(

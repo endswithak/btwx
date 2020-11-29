@@ -131,6 +131,201 @@ export const getSelectedById = createSelector(
   }
 );
 
+export const getSelectedFills = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result, current) => {
+      result = {
+        ...result,
+        [current]: selectedById[current].style.fill
+      }
+      return result;
+    }, {}) as { [id: string]: Btwx.Fill };
+  }
+);
+
+export const getSelectedFillsColor = createSelector(
+  [ getSelectedFills ],
+  (selectedFills) => {
+    const firstItem = selectedFills[Object.keys(selectedFills)[0]];
+    if (Object.keys(selectedFills).every((id) => colorsMatch(selectedFills[id].color, firstItem.color))) {
+      return firstItem.color;
+    } else {
+      return 'multi';
+    }
+  }
+);
+
+export const getSelectedFillsOpacity = createSelector(
+  [ getSelectedFills ],
+  (selectedFills) => {
+    const firstItem = selectedFills[Object.keys(selectedFills)[0]];
+    if (Object.keys(selectedFills).every((id) => selectedFills[id].color.a === firstItem.color.a)) {
+      return firstItem.color.a;
+    } else {
+      return 'multi';
+    }
+  }
+);
+
+export const getSelectedFillsEnabled = createSelector(
+  [ getSelectedFills ],
+  (selectedFills) => {
+    const firstItem = selectedFills[Object.keys(selectedFills)[0]];
+    if (Object.keys(selectedFills).every((id) => selectedFills[id].enabled === firstItem.enabled)) {
+      return firstItem.enabled;
+    } else {
+      return 'multi';
+    }
+  }
+);
+
+export const getSelectedFillsGradients = createSelector(
+  [ getSelectedFills ],
+  (selectedFills) => {
+    const firstItem = selectedFills[Object.keys(selectedFills)[0]];
+    if (Object.keys(selectedFills).every((id) => gradientsMatch(selectedFills[id].gradient, firstItem.gradient))) {
+      return firstItem.gradient;
+    } else {
+      return 'multi';
+    }
+  }
+);
+
+export const getSelectedFillsGradientType = createSelector(
+  [ getSelectedFills ],
+  (selectedFills) => {
+    const firstItem = selectedFills[Object.keys(selectedFills)[0]];
+    if (Object.keys(selectedFills).every((id) => selectedFills[id].gradient.gradientType === firstItem.gradient.gradientType)) {
+      return firstItem.gradient.gradientType;
+    } else {
+      return 'multi';
+    }
+  }
+);
+
+export const getSelectedStrokes = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result, current) => {
+      result = {
+        ...result,
+        [current]: selectedById[current].style.stroke
+      }
+      return result;
+    }, {}) as { [id: string]: Btwx.Stroke };
+  }
+);
+
+export const getSelectedStrokesColor = createSelector(
+  [ getSelectedStrokes ],
+  (selectedStrokes) => {
+    const firstItem = selectedStrokes[Object.keys(selectedStrokes)[0]];
+    if (Object.keys(selectedStrokes).every((id) => colorsMatch(selectedStrokes[id].color, firstItem.color))) {
+      return firstItem.color;
+    } else {
+      return 'multi';
+    }
+  }
+);
+
+export const getSelectedStrokesOpacity = createSelector(
+  [ getSelectedStrokes ],
+  (selectedStrokes) => {
+    const firstItem = selectedStrokes[Object.keys(selectedStrokes)[0]];
+    if (Object.keys(selectedStrokes).every((id) => selectedStrokes[id].color.a === firstItem.color.a)) {
+      return firstItem.color.a;
+    } else {
+      return 'multi';
+    }
+  }
+);
+
+export const getSelectedStrokesEnabled = createSelector(
+  [ getSelectedStrokes ],
+  (selectedStrokes) => {
+    const firstItem = selectedStrokes[Object.keys(selectedStrokes)[0]];
+    if (Object.keys(selectedStrokes).every((id) => selectedStrokes[id].enabled === firstItem.enabled)) {
+      return firstItem.enabled;
+    } else {
+      return 'multi';
+    }
+  }
+);
+
+export const getSelectedStrokesGradients = createSelector(
+  [ getSelectedStrokes ],
+  (selectedStrokes) => {
+    const firstItem = selectedStrokes[Object.keys(selectedStrokes)[0]];
+    if (Object.keys(selectedStrokes).every((id) => gradientsMatch(selectedStrokes[id].gradient, firstItem.gradient))) {
+      return firstItem.gradient;
+    } else {
+      return 'multi';
+    }
+  }
+);
+
+export const getSelectedStrokesGradientType = createSelector(
+  [ getSelectedStrokes ],
+  (selectedStrokes) => {
+    const firstItem = selectedStrokes[Object.keys(selectedStrokes)[0]];
+    if (Object.keys(selectedStrokes).every((id) => selectedStrokes[id].gradient.gradientType === firstItem.gradient.gradientType)) {
+      return firstItem.gradient.gradientType;
+    } else {
+      return 'multi';
+    }
+  }
+);
+
+export const getSelectedShadows = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result, current) => {
+      result = {
+        ...result,
+        [current]: selectedById[current].style.shadow
+      }
+      return result;
+    }, {}) as { [id: string]: Btwx.Shadow };
+  }
+);
+
+export const getSelectedShadowsColor = createSelector(
+  [ getSelectedShadows ],
+  (selectedShadows) => {
+    const firstItem = selectedShadows[Object.keys(selectedShadows)[0]];
+    if (Object.keys(selectedShadows).every((id) => colorsMatch(selectedShadows[id].color, firstItem.color))) {
+      return firstItem.color;
+    } else {
+      return 'multi';
+    }
+  }
+);
+
+export const getSelectedShadowsOpacity = createSelector(
+  [ getSelectedShadows ],
+  (selectedShadows) => {
+    const firstItem = selectedShadows[Object.keys(selectedShadows)[0]];
+    if (Object.keys(selectedShadows).every((id) => selectedShadows[id].color.a === firstItem.color.a)) {
+      return firstItem.color.a;
+    } else {
+      return 'multi';
+    }
+  }
+);
+
+export const getSelectedShadowsEnabled = createSelector(
+  [ getSelectedShadows ],
+  (selectedShadows) => {
+    const firstItem = selectedShadows[Object.keys(selectedShadows)[0]];
+    if (Object.keys(selectedShadows).every((id) => selectedShadows[id].enabled === firstItem.enabled)) {
+      return firstItem.enabled;
+    } else {
+      return 'multi';
+    }
+  }
+);
+
 export const getSelectedAbsPositions = createSelector(
   [ getSelected, getLayersById ],
   (selected, byId) => {
@@ -1489,15 +1684,26 @@ export const getAbsolutePosition = (store: LayerState, id: string): paper.Point 
   return layerPosition.add(artboardPosition);
 };
 
+export const getGradientOrigin = (store: LayerState, id: string, originPoint: Btwx.Point): paper.Point => {
+  const layerItem = store.byId[id];
+  const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
+  const layerPosition = getAbsolutePosition(store, id);
+  const originPaperPoint = new uiPaperScope.Point(originPoint.x, originPoint.y);
+  const rel = originPaperPoint.subtract(layerPosition);
+  // const originPoint = new uiPaperScope.Point(origin.x, origin.y);
+  // return layerPosition.add(originPoint);
+  return new uiPaperScope.Point((rel.x / (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)), (rel.y / (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)));
+};
+
 export const getGradientOriginPoint = (store: LayerState, id: string, prop: 'fill' | 'stroke'): paper.Point => {
   const layerItem = store.byId[id];
   const gradient = layerItem.style[prop].gradient;
   const origin = gradient.origin;
-  // const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
+  const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   const layerPosition = getAbsolutePosition(store, id);
-  const originPoint = new uiPaperScope.Point(origin.x, origin.y);
-  return layerPosition.add(originPoint);
-  // return new uiPaperScope.Point((origin.x * (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)) + layerPosition.x, (origin.y * (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)) + layerPosition.y);
+  // const originPoint = new uiPaperScope.Point(origin.x, origin.y);
+  // return layerPosition.add(originPoint);
+  return new uiPaperScope.Point((origin.x * (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)) + layerPosition.x, (origin.y * (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)) + layerPosition.y);
 };
 
 // export const getGradientDestinationPoint = (layerItem: Btwx.Layer, destination: Btwx.Point): paper.Point => {
@@ -1505,14 +1711,26 @@ export const getGradientOriginPoint = (store: LayerState, id: string, prop: 'fil
 //   return new uiPaperScope.Point((destination.x * (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)) + layerItem.frame.x, (destination.y * (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)) + layerItem.frame.y);
 // };
 
+export const getGradientDestination = (store: LayerState, id: string, destinationPoint: Btwx.Point): paper.Point => {
+  const layerItem = store.byId[id];
+  const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
+  const layerPosition = getAbsolutePosition(store, id);
+  const destinationPaperPoint = new uiPaperScope.Point(destinationPoint.x, destinationPoint.y);
+  const rel = destinationPaperPoint.subtract(layerPosition);
+  // const originPoint = new uiPaperScope.Point(origin.x, origin.y);
+  // return layerPosition.add(originPoint);
+  return new uiPaperScope.Point((rel.x / (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)), (rel.y / (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)));
+};
+
 export const getGradientDestinationPoint = (store: LayerState, id: string, prop: 'fill' | 'stroke'): paper.Point => {
   const layerItem = store.byId[id];
   const gradient = layerItem.style[prop].gradient;
   const destination = gradient.destination;
-  // const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
+  const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   const layerPosition = getAbsolutePosition(store, id);
-  const destinationPoint = new uiPaperScope.Point(destination.x, destination.y);
-  return layerPosition.add(destinationPoint);
+  // const destinationPoint = new uiPaperScope.Point(destination.x, destination.y);
+  // return layerPosition.add(destinationPoint);
+  return new uiPaperScope.Point((destination.x * (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)) + layerPosition.x, (destination.y * (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)) + layerPosition.y);
 };
 
 export const getLineFromPoint = (layerItem: Btwx.Line): paper.Point => {

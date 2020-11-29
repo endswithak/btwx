@@ -16,6 +16,7 @@ interface CanvasUIEventsProps {
     eventType: 'mouseMove' | 'mouseDown' | 'mouseUp' | 'doubleClick' | 'contextMenu';
     event: any;
   };
+  selected?: string[];
   hover?: string;
   resizing?: boolean;
   dragging?: boolean;
@@ -23,6 +24,7 @@ interface CanvasUIEventsProps {
   eventDrawerHover?: string;
   eventDrawerEvent?: string;
   activeTool?: Btwx.ToolType;
+  gradientEditorProp?: 'fill' | 'stroke';
   setLayerActiveGradientStop?(payload: SetLayerActiveGradientStopPayload): LayerTypes;
   setCanvasActiveTool?(payload: SetCanvasActiveToolPayload): CanvasSettingsTypes;
   setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
@@ -32,7 +34,7 @@ interface CanvasUIEventsProps {
 
 const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { uiEvent, activeTool, setCanvasActiveTool, resizing, dragging, selecting, setLayerHover, hover, eventDrawerHover, setTweenDrawerEventHoverThunk, eventDrawerEvent, setTweenDrawerEventThunk, setLayerActiveGradientStop } = props;
+  const { uiEvent, activeTool, setCanvasActiveTool, resizing, dragging, selecting, setLayerHover, hover, selected, eventDrawerHover, setTweenDrawerEventHoverThunk, eventDrawerEvent, setTweenDrawerEventThunk, setLayerActiveGradientStop, gradientEditorProp } = props;
 
   const handleMouseMove = (): void => {
     if (uiEvent.empty) {
@@ -98,7 +100,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           }
           break;
         }
-        case 'GradientFrame': {
+        case 'gradientFrame': {
           if (hover) {
             setLayerHover({id: null});
           }
@@ -126,13 +128,18 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
       return;
     } else {
       switch(uiEvent.hitResult.item.data.elementId) {
-        case 'SelectionFrame': {
+        case 'selectionFrame': {
           break;
         }
-        case 'GradientFrame': {
+        case 'gradientFrame': {
+          setLayerActiveGradientStop({
+            id: selected[0],
+            prop: gradientEditorProp,
+            stopIndex: uiEvent.hitResult.item.data.stopIndex
+          });
           break;
         }
-        case 'TweenEventsFrame': {
+        case 'tweenEventsFrame': {
           break;
         }
       }
@@ -149,13 +156,13 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
       return;
     } else {
       switch(uiEvent.hitResult.item.data.elementId) {
-        case 'SelectionFrame': {
+        case 'selectionFrame': {
           break;
         }
-        case 'GradientFrame': {
+        case 'gradientFrame': {
           break;
         }
-        case 'TweenEventsFrame': {
+        case 'tweenEventsFrame': {
           const interactiveType = uiEvent.hitResult.item.data.interactiveType;
           if (interactiveType && eventDrawerEvent !== interactiveType) {
             setTweenDrawerEventThunk({id: interactiveType});
@@ -198,6 +205,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState): {
+  selected: string[];
   hover: string;
   activeTool: Btwx.ToolType;
   resizing: boolean;
@@ -205,16 +213,19 @@ const mapStateToProps = (state: RootState): {
   selecting: boolean;
   eventDrawerHover: string;
   eventDrawerEvent: string;
+  gradientEditorProp: 'fill' | 'stroke';
 } => {
-  const { canvasSettings, layer, tweenDrawer } = state;
+  const { canvasSettings, layer, tweenDrawer, gradientEditor } = state;
   return {
+    selected: layer.present.selected,
     activeTool: canvasSettings.activeTool,
     resizing: canvasSettings.resizing,
     dragging: canvasSettings.dragging,
     selecting: canvasSettings.selecting,
     hover: layer.present.hover,
     eventDrawerHover: tweenDrawer.eventHover,
-    eventDrawerEvent: tweenDrawer.event
+    eventDrawerEvent: tweenDrawer.event,
+    gradientEditorProp: gradientEditor.prop
   };
 };
 

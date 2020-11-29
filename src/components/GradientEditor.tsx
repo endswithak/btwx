@@ -20,6 +20,7 @@ import FillTypeSelector from './FillTypeSelector';
 import GradientFrame from './GradientFrame';
 
 interface GradientEditorProps {
+  selected?: string[];
   gradientValue?: Btwx.Gradient;
   gradientEditor?: GradientEditorState;
   colorFormat?: Btwx.ColorFormat;
@@ -38,18 +39,18 @@ interface GradientEditorProps {
 const GradientEditor = (props: GradientEditorProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const editorRef = useRef<HTMLDivElement>(null);
-  const { gradientEditor, gradientValue, colorFormat, activeStopValue, setLayersGradientType, setLayersGradientStopColor, setLayerActiveGradientStop, setLayersGradientStopPosition, addLayersGradientStop, setLayersStrokeFillType, setLayersFillType, openColorEditor, closeGradientEditor } = props;
+  const { selected, gradientEditor, gradientValue, colorFormat, activeStopValue, setLayersGradientType, setLayersGradientStopColor, setLayerActiveGradientStop, setLayersGradientStopPosition, addLayersGradientStop, setLayersStrokeFillType, setLayersFillType, openColorEditor, closeGradientEditor } = props;
 
   const debounceStopColorChange = useCallback(
     debounce((stopIndex: number, color: Btwx.Color) => {
-      setLayersGradientStopColor({layers: gradientEditor.layers, prop: gradientEditor.prop as 'fill' | 'stroke', stopIndex, color});
+      setLayersGradientStopColor({layers: selected, prop: gradientEditor.prop as 'fill' | 'stroke', stopIndex, color});
     }, 150),
     []
   );
 
   const debounceStopPositionChange = useCallback(
     debounce((stopIndex: number, position: number) => {
-      setLayersGradientStopPosition({layers: gradientEditor.layers, prop: gradientEditor.prop as 'fill' | 'stroke', stopIndex, position});
+      setLayersGradientStopPosition({layers: selected, prop: gradientEditor.prop as 'fill' | 'stroke', stopIndex, position});
     }, 150),
     []
   );
@@ -66,10 +67,10 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
 
   const onMouseDown = (event: any): void => {
     if (editorRef.current && !editorRef.current.contains(event.target)) {
-      if (event.target.id === 'canvas') {
+      if ((event.target.id as string).startsWith('canvas')) {
         const eventPoint = uiPaperScope.view.getEventPoint(event);
         const hitResult = uiPaperScope.project.hitTest(eventPoint);
-        if (!hitResult || !(hitResult.item && hitResult.item.data && hitResult.item.data.interactive && hitResult.item.data.elementId === 'GradientFrame')) {
+        if (!hitResult || !(hitResult.item && hitResult.item.data && hitResult.item.data.interactive && hitResult.item.data.elementId === 'gradientFrame')) {
           closeGradientEditor();
         }
       } else {
@@ -118,7 +119,7 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
   }
 
   const handleStopPress = (stopIndex: number): void => {
-    setLayerActiveGradientStop({id: gradientEditor.layers[0], prop: gradientEditor.prop as 'fill' | 'stroke', stopIndex});
+    setLayerActiveGradientStop({id: selected[0], prop: gradientEditor.prop as 'fill' | 'stroke', stopIndex});
   }
 
   const handleStopDrag = (stopIndex: number, position: number): void => {
@@ -126,21 +127,20 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
   }
 
   const handleSliderClick = (newStop: Btwx.GradientStop): void => {
-    addLayersGradientStop({layers: gradientEditor.layers, prop: gradientEditor.prop as 'fill' | 'stroke', gradientStop: newStop});
+    addLayersGradientStop({layers: selected, prop: gradientEditor.prop as 'fill' | 'stroke', gradientStop: newStop});
   }
 
   const handleColorClick = (): void => {
     switch(gradientEditor.prop) {
       case 'fill':
-        setLayersFillType({layers: gradientEditor.layers, fillType: 'color'});
+        setLayersFillType({layers: selected, fillType: 'color'});
         break;
       case 'stroke':
-        setLayersStrokeFillType({layers: gradientEditor.layers, fillType: 'color'});
+        setLayersStrokeFillType({layers: selected, fillType: 'color'});
         break;
     }
     closeGradientEditor();
     openColorEditor({
-      layers: gradientEditor.layers,
       prop: gradientEditor.prop,
       x: gradientEditor.x,
       y: gradientEditor.y
@@ -149,13 +149,13 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
 
   const handleLinearGradientClick = (): void => {
     if (gradientValue.gradientType !== 'linear') {
-      setLayersGradientType({layers: gradientEditor.layers, prop: gradientEditor.prop as 'fill' | 'stroke', gradientType: 'linear'});
+      setLayersGradientType({layers: selected, prop: gradientEditor.prop as 'fill' | 'stroke', gradientType: 'linear'});
     }
   }
 
   const handleRadialGradientClick = (): void => {
     if (gradientValue.gradientType !== 'radial') {
-      setLayersGradientType({layers: gradientEditor.layers, prop: gradientEditor.prop as 'fill' | 'stroke', gradientType: 'radial'});
+      setLayersGradientType({layers: selected, prop: gradientEditor.prop as 'fill' | 'stroke', gradientType: 'radial'});
     }
   }
 
@@ -197,47 +197,24 @@ const GradientEditor = (props: GradientEditorProps): ReactElement => {
           colorValue={activeStopValue.color}
           colorType={colorFormat}
           onChange={handleActiveStopColorChange} />
-        <GradientFrame
-          layer={gradientEditor.layers[0]}
-          prop={gradientEditor.prop as 'fill' | 'stroke'}
-          gradient={gradientValue}
-          onStopPress={handleStopPress} />
       </div>
     </div>
   );
 }
 
 const mapStateToProps = (state: RootState): {
+  selected: string[];
   gradientValue: Btwx.Gradient;
   gradientEditor: GradientEditorState;
   activeStopValue: Btwx.GradientStop;
   colorFormat: Btwx.ColorFormat;
 } => {
   const { gradientEditor, layer, documentSettings } = state;
-  const layerItems: Btwx.Layer[] = gradientEditor.layers.reduce((result, current) => {
-    const layerItem = layer.present.byId[current];
-    return [...result, layerItem];
-  }, []);
-  const styles: (Btwx.Fill | Btwx.Stroke)[] = layerItems.reduce((result, current) => {
-    switch(gradientEditor.prop) {
-      case 'fill':
-        return [...result, current.style.fill];
-      case 'stroke':
-        return [...result, current.style.stroke];
-    }
-  }, []);
-  const gradientValues: Btwx.Gradient[] = styles.reduce((result, current) => {
-    switch(gradientEditor.prop) {
-      case 'fill':
-        return [...result, current.gradient];
-      case 'stroke':
-        return [...result, current.gradient];
-    }
-  }, []);
-  const gradientValue = gradientValues[0];
+  const selected = layer.present.selected;
+  const gradientValue = layer.present.byId[selected[0]].style[gradientEditor.prop].gradient;
   const activeStopValue = gradientValue.stops.find((stop, index) => index === gradientValue.activeStopIndex);
   const colorFormat = documentSettings.colorFormat;
-  return { gradientEditor, gradientValue, activeStopValue, colorFormat };
+  return { selected, gradientEditor, gradientValue, activeStopValue, colorFormat };
 };
 
 export default connect(

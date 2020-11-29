@@ -51,7 +51,7 @@ import {
   orderLayersByDepth, orderLayersByLeft, orderLayersByTop, savePaperProjectJSON, getEquivalentTweenProp, gradientsMatch,
   getPaperProp, getArtboardsTopTop, getLineFromPoint, getLineToPoint, getLineVector, getParentPaperLayer,
   getLayerUnderlyingSiblings, getMaskableUnderlyingSiblings, getSiblingLayersWithUnderlyingMask, getItemLayers,
-  getLayerProject, getLayerPaperScope, getAbsolutePosition
+  getLayerProject, getLayerPaperScope, getAbsolutePosition, getGradientDestination, getGradientOrigin
 } from '../selectors/layer';
 
 export const addArtboard = (state: LayerState, action: AddArtboard): LayerState => {
@@ -2700,6 +2700,7 @@ export const setLayerFillType = (state: LayerState, action: SetLayerFillType): L
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const fill = layerItem.style.fill;
+  const gradientType = action.payload.gradientType ? action.payload.gradientType : layerItem.style.fill.gradient.gradientType;
   switch(action.payload.fillType) {
     case 'color':
       paperLayer.fillColor = {hue: fill.color.h, saturation: fill.color.s, lightness: fill.color.l, alpha: fill.color.a} as paper.Color;
@@ -2708,7 +2709,7 @@ export const setLayerFillType = (state: LayerState, action: SetLayerFillType): L
       paperLayer.fillColor = {
         gradient: {
           stops: getGradientStops(fill.gradient.stops),
-          radial: layerItem.style.fill.gradient.gradientType === 'radial'
+          radial: gradientType === 'radial'
         },
         origin: getGradientOriginPoint(currentState, action.payload.id, 'fill'),
         destination: getGradientDestinationPoint(currentState, action.payload.id, 'fill')
@@ -2731,6 +2732,27 @@ export const setLayerFillType = (state: LayerState, action: SetLayerFillType): L
       }
     }
   }
+  if (action.payload.gradientType) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          style: {
+            ...currentState.byId[action.payload.id].style,
+            fill: {
+              ...currentState.byId[action.payload.id].style.fill,
+              gradient: {
+                ...currentState.byId[action.payload.id].style.fill.gradient,
+                gradientType: action.payload.gradientType
+              }
+            }
+          }
+        }
+      }
+    }
+  }
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fill', 'fillGradientOriginX', 'fillGradientOriginY', 'fillGradientDestinationX', 'fillGradientDestinationY']);
   return currentState;
 };
@@ -2743,7 +2765,7 @@ export const setLayersFillType = (state: LayerState, action: SetLayersFillType):
     if (!projects.includes(layerProject)) {
       projects.push(layerProject);
     }
-    return setLayerFillType(result, layerActions.setLayerFillType({id: current, fillType: action.payload.fillType}) as SetLayerFillType);
+    return setLayerFillType(result, layerActions.setLayerFillType({id: current, fillType: action.payload.fillType, gradientType: action.payload.gradientType}) as SetLayerFillType);
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
@@ -2812,13 +2834,15 @@ export const setLayerGradientType = (state: LayerState, action: SetLayerGradient
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const paperProp = getPaperProp(action.payload.prop);
-  switch(action.payload.gradientType) {
-    case 'linear':
-      paperLayer[paperProp].gradient.radial = false;
-      break;
-    case 'radial':
-      paperLayer[paperProp].gradient.radial = true;
-      break;
+  if (paperLayer[paperProp].gradient) {
+    switch(action.payload.gradientType) {
+      case 'linear':
+        paperLayer[paperProp].gradient.radial = false;
+        break;
+      case 'radial':
+        paperLayer[paperProp].gradient.radial = true;
+        break;
+    }
   }
   currentState = {
     ...currentState,
@@ -2867,9 +2891,7 @@ export const setLayersGradientType = (state: LayerState, action: SetLayersGradie
 export const setLayerGradientOrigin = (state: LayerState, action: SetLayerGradientOrigin): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
-  const layerPosition = getAbsolutePosition(currentState, action.payload.id);
-  const originPoint = new uiPaperScope.Point(action.payload.origin.x, action.payload.origin.y);
-  const origin = layerPosition.subtract(originPoint);
+  const origin = getGradientOrigin(currentState, action.payload.id, action.payload.origin);
   const gradient = layerItem.style[action.payload.prop].gradient;
   const paperProp = getPaperProp(action.payload.prop);
   currentState = {
@@ -2930,9 +2952,7 @@ export const setLayersGradientOrigin = (state: LayerState, action: SetLayersGrad
 export const setLayerGradientDestination = (state: LayerState, action: SetLayerGradientDestination): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
-  const layerPosition = getAbsolutePosition(currentState, action.payload.id);
-  const destinationPoint = new uiPaperScope.Point(action.payload.destination.x, action.payload.destination.y);
-  const destination = layerPosition.subtract(destinationPoint);
+  const destination = getGradientDestination(currentState, action.payload.id, action.payload.destination);
   const gradient = layerItem.style[action.payload.prop].gradient;
   const paperProp = getPaperProp(action.payload.prop);
   currentState = {
@@ -3448,6 +3468,7 @@ export const setLayerStrokeFillType = (state: LayerState, action: SetLayerStroke
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const stroke = layerItem.style.stroke;
+  const gradientType = action.payload.gradientType ? action.payload.gradientType : layerItem.style.stroke.gradient.gradientType;
   switch(action.payload.fillType) {
     case 'color':
       paperLayer.strokeColor = { hue: stroke.color.h, saturation: stroke.color.s, lightness: stroke.color.l, alpha: stroke.color.a } as paper.Color;
@@ -3456,7 +3477,7 @@ export const setLayerStrokeFillType = (state: LayerState, action: SetLayerStroke
       paperLayer.strokeColor = {
         gradient: {
           stops: getGradientStops(stroke.gradient.stops),
-          radial: stroke.gradient.gradientType === 'radial'
+          radial: gradientType === 'radial'
         },
         origin: getGradientOriginPoint(currentState, action.payload.id, 'stroke'),
         destination: getGradientDestinationPoint(currentState, action.payload.id, 'stroke')
@@ -3479,6 +3500,27 @@ export const setLayerStrokeFillType = (state: LayerState, action: SetLayerStroke
       }
     }
   }
+  if (action.payload.gradientType) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          style: {
+            ...currentState.byId[action.payload.id].style,
+            stroke: {
+              ...currentState.byId[action.payload.id].style.stroke,
+              gradient: {
+                ...currentState.byId[action.payload.id].style.stroke.gradient,
+                gradientType: action.payload.gradientType
+              }
+            }
+          }
+        }
+      }
+    }
+  }
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['stroke', 'strokeGradientOriginX', 'strokeGradientOriginY', 'strokeGradientDestinationX', 'strokeGradientDestinationY', 'strokeGradientOriginX', 'strokeGradientOriginY', 'strokeGradientDestinationX', 'strokeGradientDestinationY']);
   return currentState;
 };
@@ -3491,7 +3533,7 @@ export const setLayersStrokeFillType = (state: LayerState, action: SetLayersStro
     if (!projects.includes(layerProject)) {
       projects.push(layerProject);
     }
-    return setLayerStrokeFillType(result, layerActions.setLayerStrokeFillType({id: current, fillType: action.payload.fillType}) as SetLayerStrokeFillType);
+    return setLayerStrokeFillType(result, layerActions.setLayerStrokeFillType({id: current, fillType: action.payload.fillType, gradientType: action.payload.gradientType}) as SetLayerStrokeFillType);
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {

@@ -993,6 +993,7 @@ export default undoable(baseReducer, {
       SET_LAYER_FILL_COLOR,
       SET_LAYERS_FILL_COLOR,
       SET_LAYER_FILL_TYPE,
+      SET_LAYERS_FILL_TYPE,
       ENABLE_LAYER_STROKE,
       ENABLE_LAYERS_STROKE,
       DISABLE_LAYER_STROKE,

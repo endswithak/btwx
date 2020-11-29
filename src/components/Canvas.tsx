@@ -16,6 +16,7 @@ import ArtboardTool from './ArtboardTool';
 import AreaSelectTool from './AreaSelectTool';
 import LineTool from './LineTool';
 import TextTool from './TextTool';
+import GradientTool from './GradientTool';
 import CanvasPage from './CanvasPage';
 import CanvasUI from './CanvasUI';
 import CanvasArtboards from './CanvasArtboards';
@@ -148,6 +149,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
             <ResizeTool />
             <LineTool />
             <TextTool />
+            <GradientTool />
             <CanvasToast />
           </>
         : null

@@ -7,7 +7,7 @@ import { EnableLayersFillPayload, EnableLayersStrokePayload, SetLayersGradientPa
 import { enableLayersFill, enableLayersStroke, setLayersGradient } from '../store/actions/layer';
 import { OpenGradientEditorPayload, GradientEditorTypes } from '../store/actionTypes/gradientEditor';
 import { openGradientEditor } from '../store/actions/gradientEditor';
-import { gradientsMatch } from '../store/selectors/layer';
+import { getSelectedFillsEnabled, getSelectedStrokesEnabled, getSelectedFillsGradientType, getSelectedStrokesGradientType, getSelectedFillsGradients, getSelectedStrokesGradients } from '../store/selectors/layer';
 import SidebarInput from './SidebarInput';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
@@ -22,7 +22,8 @@ interface GradientInputProps {
   selected?: string[];
   gradientValue?: Btwx.Gradient;
   gradientOpacity?: number | 'multi';
-  isGradientEditorOpen?: boolean;
+  gradientEditorOpen?: boolean;
+  gradientEditorProp?: 'fill' | 'stroke';
   stopById?: {
     [id: string]: Btwx.GradientStop;
   };
@@ -34,7 +35,7 @@ interface GradientInputProps {
 }
 
 const GradientInput = (props: GradientInputProps): ReactElement => {
-  const { prop, enabledValue, displayGradient, gradientTypeValue, stopById, selected, gradientValue, gradientOpacity, isGradientEditorOpen, enableLayersFill, enableLayersStroke, setLayersGradient, cssGradient, openGradientEditor } = props;
+  const { prop, enabledValue, displayGradient, gradientTypeValue, stopById, selected, gradientValue, gradientOpacity, gradientEditorOpen, enableLayersFill, enableLayersStroke, setLayersGradient, cssGradient, openGradientEditor, gradientEditorProp } = props;
   const [enabled, setEnabled] = useState<boolean | 'multi'>(enabledValue);
   const [gradient, setGradient] = useState(gradientValue);
   const [opacity, setOpacity] = useState<number | string>(gradientOpacity !== 'multi' ? Math.round(gradientOpacity * 100) : gradientOpacity);
@@ -93,10 +94,9 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
           break;
       }
     }
-    if (!isGradientEditorOpen) {
+    if (!gradientEditorOpen) {
       openGradientEditor({
         prop: prop,
-        layers: selected,
         x: bounding.x,
         y: bounding.y - (bounding.height - 10) // 2 (swatch drop shadow) + 8 (top-padding)
       });
@@ -107,7 +107,7 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
     <SidebarSectionRow>
       <SidebarSectionColumn width={'33.33%'}>
         <SidebarSwatch
-          isActive={isGradientEditorOpen}
+          isActive={gradientEditorOpen && prop === gradientEditorProp}
           style={{
             background: displayGradient !== 'multi' ? cssGradient : 'none'
           }}
@@ -138,43 +138,35 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
 const mapStateToProps = (state: RootState, ownProps: GradientInputProps) => {
   const { layer, gradientEditor } = state;
   const selected = layer.present.selected;
-  const layerItems: Btwx.Layer[] = selected.reduce((result, current) => {
-    const layerItem = layer.present.byId[current];
-    return [...result, layerItem];
-  }, []);
-  const styleValues: (Btwx.Fill | Btwx.Stroke)[] = layerItems.reduce((result, current) => {
+  const gradientValue = layer.present.byId[selected[0]].style[ownProps.prop].gradient;
+  const enabledValue = (() => {
     switch(ownProps.prop) {
       case 'fill':
-        return [...result, current.style.fill];
+        return getSelectedFillsEnabled(state);
       case 'stroke':
-        return [...result, current.style.stroke];
+        return getSelectedStrokesEnabled(state);
     }
-  }, []);
-  const enabledValue = ((): boolean | 'multi' => {
-    if (styleValues.every((value: Btwx.Fill | Btwx.Stroke) => value.enabled === styleValues[0].enabled)) {
-      return styleValues[0].enabled;
-    } else {
-      return 'multi';
+  })() as boolean | 'multi';
+  const gradientTypeValue = (() => {
+    switch(ownProps.prop) {
+      case 'fill':
+        return getSelectedFillsGradientType(state);
+      case 'stroke':
+        return getSelectedStrokesGradientType(state);
     }
-  })();
-  const gradientTypeValue = ((): Btwx.GradientType | 'multi' => {
-    if (styleValues.every((value: Btwx.Fill | Btwx.Stroke) => value.gradient.gradientType === styleValues[0].gradient.gradientType)) {
-      return styleValues[0].gradient.gradientType;
-    } else {
-      return 'multi';
+  })() as Btwx.GradientType | 'multi';
+  const displayGradient = (() => {
+    switch(ownProps.prop) {
+      case 'fill':
+        return getSelectedFillsGradients(state);
+      case 'stroke':
+        return getSelectedStrokesGradients(state);
     }
-  })();
-  const displayGradient = ((): Btwx.Gradient | 'multi' => {
-    if (styleValues.every((value: Btwx.Fill | Btwx.Stroke) => gradientsMatch(value.gradient, styleValues[0].gradient))) {
-      return styleValues[0].gradient;
-    } else {
-      return 'multi';
-    }
-  })();
-  const gradientValue = styleValues[0].gradient;
+  })() as Btwx.Gradient | 'multi';
   const stops = gradientValue.stops;
   const gradientOpacity = stops.every((stop) => stop.color.a === stops[0].color.a) ? stops[0].color.a : 'multi';
-  const isGradientEditorOpen = gradientEditor.isOpen;
+  const gradientEditorOpen = gradientEditor.isOpen;
+  const gradientEditorProp = gradientEditor.prop;
   const sortedStops = [...stops].sort((a,b) => { return a.position - b.position });
   const cssGradient = sortedStops.reduce((result, current, index) => {
     const stopColor = tinyColor({h: current.color.h, s: current.color.s, l: current.color.l, a: current.color.a}).toHslString();
@@ -186,7 +178,7 @@ const mapStateToProps = (state: RootState, ownProps: GradientInputProps) => {
     }
     return result;
   }, `linear-gradient(to right,`);
-  return { enabledValue, selected, gradientValue, gradientTypeValue, gradientOpacity, isGradientEditorOpen, cssGradient, displayGradient };
+  return { enabledValue, selected, gradientValue, gradientTypeValue, gradientOpacity, gradientEditorOpen, cssGradient, displayGradient, gradientEditorProp };
 };
 
 export default connect(

@@ -1159,6 +1159,7 @@ export interface SetLayersStrokeColor {
 export interface SetLayerStrokeFillTypePayload {
   id: string;
   fillType: Btwx.FillType;
+  gradientType?: Btwx.GradientType;
 }
 
 export interface SetLayerStrokeFillType {
@@ -1169,6 +1170,7 @@ export interface SetLayerStrokeFillType {
 export interface SetLayersStrokeFillTypePayload {
   layers: string[];
   fillType: Btwx.FillType;
+  gradientType?: Btwx.GradientType;
 }
 
 export interface SetLayersStrokeFillType {
@@ -1780,6 +1782,7 @@ export interface SetLayerFill {
 export interface SetLayerFillTypePayload {
   id: string;
   fillType: Btwx.FillType;
+  gradientType?: Btwx.GradientType;
 }
 
 export interface SetLayerFillType {
@@ -1790,6 +1793,7 @@ export interface SetLayerFillType {
 export interface SetLayersFillTypePayload {
   layers: string[];
   fillType: Btwx.FillType;
+  gradientType?: Btwx.GradientType;
 }
 
 export interface SetLayersFillType {
