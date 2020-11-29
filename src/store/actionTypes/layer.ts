@@ -117,6 +117,7 @@ export const SET_LAYER_GRADIENT_ORIGIN = 'SET_LAYER_GRADIENT_ORIGIN';
 export const SET_LAYERS_GRADIENT_ORIGIN = 'SET_LAYERS_GRADIENT_ORIGIN';
 export const SET_LAYER_GRADIENT_DESTINATION = 'SET_LAYER_GRADIENT_DESTINATION';
 export const SET_LAYERS_GRADIENT_DESTINATION = 'SET_LAYERS_GRADIENT_DESTINATION';
+export const SET_LAYERS_GRADIENT_OD = 'SET_LAYERS_GRADIENT_OD';
 export const SET_LAYER_GRADIENT_STOP_COLOR = 'SET_LAYER_GRADIENT_STOP_COLOR';
 export const SET_LAYERS_GRADIENT_STOP_COLOR = 'SET_LAYERS_GRADIENT_STOP_COLOR';
 export const SET_LAYER_GRADIENT_STOP_POSITION = 'SET_LAYER_GRADIENT_STOP_POSITION';
@@ -1264,6 +1265,19 @@ export interface SetLayersGradientDestinationPayload {
 export interface SetLayersGradientDestination {
   type: typeof SET_LAYERS_GRADIENT_DESTINATION;
   payload: SetLayersGradientDestinationPayload;
+}
+
+export interface SetLayersGradientODPayload {
+  layers: string[];
+  prop: 'fill' | 'stroke';
+  origin: Btwx.Point;
+  destination: Btwx.Point;
+  handle: 'origin' | 'destination';
+}
+
+export interface SetLayersGradientOD {
+  type: typeof SET_LAYERS_GRADIENT_OD;
+  payload: SetLayersGradientODPayload;
 }
 
 export interface SetLayerGradientStopColorPayload {
@@ -2458,6 +2472,7 @@ export type LayerTypes = AddArtboard |
                          SetLayersGradientOrigin |
                          SetLayerGradientDestination |
                          SetLayersGradientDestination |
+                         SetLayersGradientOD |
                          SetLayerGradientStopColor |
                          SetLayersGradientStopColor |
                          SetLayerGradientStopPosition |

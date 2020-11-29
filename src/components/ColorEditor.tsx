@@ -102,10 +102,18 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
   const handleLinearGradientClick = (): void => {
     switch(colorEditor.prop) {
       case 'fill':
-        setLayersFillType({layers: selected, fillType: 'gradient', gradientType: 'linear'});
+        setLayersFillType({
+          layers: selected,
+          fillType: 'gradient',
+          gradientType: 'linear'
+        });
         break;
       case 'stroke':
-        setLayersStrokeFillType({layers: selected, fillType: 'gradient', gradientType: 'linear'});
+        setLayersStrokeFillType({
+          layers: selected,
+          fillType: 'gradient',
+          gradientType: 'linear'
+        });
         break;
     }
     closeColorEditor();
@@ -119,10 +127,18 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
   const handleRadialGradientClick = (): void => {
     switch(colorEditor.prop) {
       case 'fill':
-        setLayersFillType({layers: selected, fillType: 'gradient', gradientType: 'radial'});
+        setLayersFillType({
+          layers: selected,
+          fillType: 'gradient',
+          gradientType: 'radial'
+        });
         break;
       case 'stroke':
-        setLayersStrokeFillType({layers: selected, fillType: 'gradient', gradientType: 'radial'});
+        setLayersStrokeFillType({
+          layers: selected,
+          fillType: 'gradient',
+          gradientType: 'radial'
+        });
         break;
     }
     closeColorEditor();

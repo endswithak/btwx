@@ -3,8 +3,8 @@ import React, { useContext, useEffect, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
 import { uiPaperScope } from '../canvas';
 import { RootState } from '../store/reducers';
-import { SetLayersGradientDestinationPayload, SetLayersGradientOriginPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayersGradientOrigin, setLayersGradientDestination } from '../store/actions/layer';
+import { SetLayersGradientODPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLayersGradientOD } from '../store/actions/layer';
 import { setCanvasResizing } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasResizingPayload } from '../store/actionTypes/canvasSettings';
 import { getPaperLayer, getSelectedPaperScopes, getPaperProp } from '../store/selectors/layer';
@@ -25,9 +25,8 @@ interface GradientToolStateProps {
 }
 
 interface GradientToolDispatchProps {
-  setLayersGradientOrigin?(payload: SetLayersGradientOriginPayload): LayerTypes;
-  setLayersGradientDestination?(payload: SetLayersGradientDestinationPayload): LayerTypes;
   setCanvasResizing?(payload: SetCanvasResizingPayload): CanvasSettingsTypes;
+  setLayersGradientOD?(payload: SetLayersGradientODPayload): LayerTypes;
 }
 
 type GradientToolProps = (
@@ -38,7 +37,7 @@ type GradientToolProps = (
 
 const GradientTool = (props: GradientToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isEnabled, setLayersGradientOrigin, setLayersGradientDestination, selected, selectedPaperScopes, tool, downEvent, dragEvent, upEvent, gradientHandle, gradientProp, setCanvasResizing, resizing } = props;
+  const { isEnabled, setLayersGradientOD, selected, selectedPaperScopes, tool, downEvent, dragEvent, upEvent, gradientHandle, gradientProp, setCanvasResizing, resizing } = props;
   const [originHandlePosition, setOriginHandlePosition] = useState<paper.Point>(null);
   const [destinationHandlePosition, setDestinationHandlePosition] = useState<paper.Point>(null);
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
@@ -84,11 +83,35 @@ const GradientTool = (props: GradientToolProps): ReactElement => {
     if (upEvent && isEnabled && toBounds) {
       switch(handle) {
         case 'origin': {
-          setLayersGradientOrigin({layers: selected, origin: {x: toBounds.center.x, y: toBounds.center.y}, prop: gradientProp});
+          setLayersGradientOD({
+            layers: selected,
+            origin: {
+              x: toBounds.center.x,
+              y: toBounds.center.y
+            },
+            destination: {
+              x: destinationHandlePosition.x,
+              y: destinationHandlePosition.y
+            },
+            prop: gradientProp,
+            handle: handle
+          });
           break;
         }
         case 'destination': {
-          setLayersGradientDestination({layers: selected, destination: {x: toBounds.center.x, y: toBounds.center.y}, prop: gradientProp});
+          setLayersGradientOD({
+            layers: selected,
+            origin: {
+              x: originHandlePosition.x,
+              y: originHandlePosition.y
+            },
+            destination: {
+              x: toBounds.center.x,
+              y: toBounds.center.y
+            },
+            prop: gradientProp,
+            handle: handle
+          });
           break;
         }
       }
@@ -187,8 +210,7 @@ const mapStateToProps = (state: RootState): GradientToolStateProps => {
 };
 
 const mapDispatchToProps = {
-  setLayersGradientOrigin,
-  setLayersGradientDestination,
+  setLayersGradientOD,
   setCanvasResizing
 };
 
@@ -198,6 +220,8 @@ export default PaperTool(
     mapDispatchToProps
   )(GradientTool),
   {
-    all: true
+    mouseDown: true,
+    mouseDrag: true,
+    mouseUp: true
   }
 );

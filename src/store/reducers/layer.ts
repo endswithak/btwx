@@ -99,6 +99,7 @@ import {
   SET_LAYERS_GRADIENT_ORIGIN,
   SET_LAYER_GRADIENT_DESTINATION,
   SET_LAYERS_GRADIENT_DESTINATION,
+  SET_LAYERS_GRADIENT_OD,
   SET_LAYER_GRADIENT_STOP_COLOR,
   SET_LAYERS_GRADIENT_STOP_COLOR,
   SET_LAYER_GRADIENT_STOP_POSITION,
@@ -347,6 +348,7 @@ import {
   setLayersGradientOrigin,
   setLayerGradientDestination,
   setLayersGradientDestination,
+  setLayersGradientOD,
   setLayerGradientStopColor,
   setLayersGradientStopColor,
   setLayerGradientStopPosition,
@@ -792,6 +794,8 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return setLayerGradientDestination(state, action);
     case SET_LAYERS_GRADIENT_DESTINATION:
       return setLayersGradientDestination(state, action);
+    case SET_LAYERS_GRADIENT_OD:
+      return setLayersGradientOD(state, action);
     case SET_LAYER_GRADIENT_STOP_COLOR:
       return setLayerGradientStopColor(state, action);
     case SET_LAYERS_GRADIENT_STOP_COLOR:
@@ -1016,6 +1020,7 @@ export default undoable(baseReducer, {
       REMOVE_LAYERS_GRADIENT_STOP,
       SET_LAYER_GRADIENT_DESTINATION,
       SET_LAYERS_GRADIENT_DESTINATION,
+      SET_LAYERS_GRADIENT_OD,
       SET_LAYER_GRADIENT_ORIGIN,
       SET_LAYERS_GRADIENT_ORIGIN,
       SET_LAYER_STROKE_WIDTH,

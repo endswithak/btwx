@@ -59,13 +59,35 @@ const Canvas = (props: CanvasProps): ReactElement => {
     }, { layerHitResult: { hitResult: null, paperScope: null }, uiHitResult: null });
     const validHitResult = (hitResult: paper.HitResult): boolean => hitResult && hitResult.item && hitResult.item.data && hitResult.item.data.type;
     if (validHitResult(uiHitResult)) {
-      setUIEvent({hitResult: uiHitResult, eventType: eventType, event: e.nativeEvent, empty: false});
+      setUIEvent({
+        hitResult: uiHitResult,
+        eventType: eventType,
+        event: e.nativeEvent,
+        empty: false
+      });
     } else {
       if (validHitResult(layerHitResult.hitResult)) {
-        setLayerEvent({hitResult: layerHitResult.hitResult, paperScope: layerHitResult.paperScope, eventType: eventType, event: e.nativeEvent, empty: false});
+        setLayerEvent({
+          hitResult: layerHitResult.hitResult,
+          paperScope: layerHitResult.paperScope,
+          eventType: eventType,
+          event: e.nativeEvent,
+          empty: false
+        });
       } else {
-        setUIEvent({hitResult: uiHitResult, eventType: eventType, event: e.nativeEvent, empty: true});
-        setLayerEvent({hitResult: layerHitResult, paperScope: null, eventType: eventType, event: e.nativeEvent, empty: true});
+        setUIEvent({
+          hitResult: uiHitResult,
+          eventType: eventType,
+          event: e.nativeEvent,
+          empty: true
+        });
+        setLayerEvent({
+          hitResult: layerHitResult,
+          paperScope: null,
+          eventType: eventType,
+          event: e.nativeEvent,
+          empty: true
+        });
       }
     }
   }

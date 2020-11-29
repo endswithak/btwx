@@ -128,6 +128,7 @@ import {
   SET_LAYERS_GRADIENT_ORIGIN,
   SET_LAYER_GRADIENT_DESTINATION,
   SET_LAYERS_GRADIENT_DESTINATION,
+  SET_LAYERS_GRADIENT_OD,
   SET_LAYER_GRADIENT_STOP_COLOR,
   SET_LAYERS_GRADIENT_STOP_COLOR,
   SET_LAYER_GRADIENT_STOP_POSITION,
@@ -329,6 +330,7 @@ import {
   SetLayersGradientOriginPayload,
   SetLayerGradientDestinationPayload,
   SetLayersGradientDestinationPayload,
+  SetLayersGradientODPayload,
   SetLayerGradientStopColorPayload,
   SetLayersGradientStopColorPayload,
   SetLayerGradientStopPositionPayload,
@@ -1769,6 +1771,11 @@ export const setLayersGradientDestination = (payload: SetLayersGradientDestinati
   payload
 });
 
+export const setLayersGradientOD = (payload: SetLayersGradientODPayload): LayerTypes => ({
+  type: SET_LAYERS_GRADIENT_OD,
+  payload
+});
+
 export const setLayerGradientStopColor = (payload: SetLayerGradientStopColorPayload): LayerTypes => ({
   type: SET_LAYER_GRADIENT_STOP_COLOR,
   payload
@@ -2427,59 +2434,63 @@ export const applyBooleanOperationThunk = (booleanOperation: Btwx.BooleanOperati
       for (let i = 1; i < selected.length; i++) {
         booleanLayers = booleanLayers[booleanOperation](getPaperLayer(selected[i], selectedPaperScopes[selected[i]]) as paper.Path | paper.CompoundPath, { insert: false }) as paper.Path | paper.CompoundPath;
       }
-      dispatch(addShapeThunk({
-        layer: {
-          name: 'Combined Shape',
-          parent: layerItem.parent,
-          frame: {
-            x: booleanLayers.position.x,
-            y: booleanLayers.position.y,
-            width: booleanLayers.bounds.width,
-            height: booleanLayers.bounds.height,
-            innerWidth: booleanLayers.bounds.width,
-            innerHeight: booleanLayers.bounds.height
+      if (booleanLayers.pathData) {
+        dispatch(addShapeThunk({
+          layer: {
+            name: 'Combined Shape',
+            parent: layerItem.parent,
+            frame: {
+              x: booleanLayers.position.x,
+              y: booleanLayers.position.y,
+              width: booleanLayers.bounds.width,
+              height: booleanLayers.bounds.height,
+              innerWidth: booleanLayers.bounds.width,
+              innerHeight: booleanLayers.bounds.height
+            },
+            style: layerItem.style,
+            closed: true,
+            shapeType: 'Custom',
+            pathData: booleanLayers.pathData
           },
-          style: layerItem.style,
-          closed: true,
-          shapeType: 'Custom',
-          pathData: booleanLayers.pathData
-        },
-        batch: true
-      })).then((newShape: Btwx.Shape) => {
-        switch(booleanOperation) {
-          case 'divide':
-            dispatch(divideLayers({
-              layers: selected,
-              booleanLayer: newShape
-            }));
-            break;
-          case 'exclude':
-            dispatch(excludeLayers({
-              layers: selected,
-              booleanLayer: newShape
-            }));
-            break;
-          case 'intersect':
-            dispatch(intersectLayers({
-              layers: selected,
-              booleanLayer: newShape
-            }));
-            break;
-          case 'subtract':
-            dispatch(subtractLayers({
-              layers: selected,
-              booleanLayer: newShape
-            }));
-            break;
-          case 'unite':
-            dispatch(uniteLayers({
-              layers: selected,
-              booleanLayer: newShape
-            }));
-            break;
-        }
-        resolve(newShape);
-      });
+          batch: true
+        })).then((newShape: Btwx.Shape) => {
+          switch(booleanOperation) {
+            case 'divide':
+              dispatch(divideLayers({
+                layers: selected,
+                booleanLayer: newShape
+              }));
+              break;
+            case 'exclude':
+              dispatch(excludeLayers({
+                layers: selected,
+                booleanLayer: newShape
+              }));
+              break;
+            case 'intersect':
+              dispatch(intersectLayers({
+                layers: selected,
+                booleanLayer: newShape
+              }));
+              break;
+            case 'subtract':
+              dispatch(subtractLayers({
+                layers: selected,
+                booleanLayer: newShape
+              }));
+              break;
+            case 'unite':
+              dispatch(uniteLayers({
+                layers: selected,
+                booleanLayer: newShape
+              }));
+              break;
+          }
+          resolve(newShape);
+        });
+      } else {
+        dispatch(removeLayers({layers: selected}));
+      }
     });
   }
 };

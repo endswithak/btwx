@@ -98,7 +98,7 @@ export const getLayerPathData = (payload: any): string => {
   const shapeType = payload.layer.shapeType ? payload.layer.shapeType : 'Rectangle';
   const frame = getLayerFrame(payload);
   const shapeOpts = getLayerShapeOpts(payload);
-  const pathData = payload.layer.pathData && payload.layer.pathData ? payload.layer.pathData : getPaperShapePathData(shapeType, frame.innerWidth, frame.innerHeight, frame.x, frame.y, shapeOpts);
+  const pathData = payload.layer.pathData ? payload.layer.pathData : getPaperShapePathData(shapeType, frame.innerWidth, frame.innerHeight, frame.x, frame.y, shapeOpts);
   return pathData;
 }
 

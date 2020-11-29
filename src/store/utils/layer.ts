@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { v4 as uuidv4 } from 'uuid';
+import capitalize from 'lodash.capitalize';
 import tinyColor from 'tinycolor2';
 import layer, { LayerState } from '../reducers/layer';
 import * as layerActions from '../actions/layer';
@@ -41,7 +42,7 @@ import {
   SetLineFromY, SetLineFrom, SetLineToX, SetLineToY, SetLineTo, SetLinesFromX, SetLinesFromY, SetLinesToX, SetLinesToY, SelectAllLayers,
   SetLayerStyle, SetLayersStyle, EnableLayersHorizontalFlip, DisableLayersHorizontalFlip, DisableLayersVerticalFlip, EnableLayersVerticalFlip,
   SetLayerScope, SetLayersScope, SetGlobalScope, SetLayerUnderlyingMask, SetLayersUnderlyingMask, SetLayerMasked, SetLayersMasked, ToggleLayerMask,
-  ToggleLayersMask, ToggleLayersIgnoreUnderlyingMask, ToggleLayerIgnoreUnderlyingMask, AreaSelectLayers
+  ToggleLayersMask, ToggleLayersIgnoreUnderlyingMask, ToggleLayerIgnoreUnderlyingMask, AreaSelectLayers, SetLayersGradientOD
 } from '../actionTypes/layer';
 
 import {
@@ -3010,6 +3011,29 @@ export const setLayersGradientDestination = (state: LayerState, action: SetLayer
   return currentState;
 };
 
+export const setLayersGradientOD = (state: LayerState, action: SetLayersGradientOD): LayerState => {
+  let currentState = state;
+  const projects: string[] = [];
+  currentState = action.payload.layers.reduce((result, current) => {
+    const layerProject = getLayerProject(result, current);
+    if (!projects.includes(layerProject)) {
+      projects.push(layerProject);
+    }
+    result = setLayerGradientOrigin(result, layerActions.setLayerGradientOrigin({id: current, prop: action.payload.prop, origin: action.payload.origin}) as SetLayerGradientOrigin);
+    result = setLayerGradientDestination(result, layerActions.setLayerGradientDestination({id: current, prop: action.payload.prop, destination: action.payload.destination}) as SetLayerGradientDestination);
+    return result;
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: `Set Layers Gradient ${capitalize(action.payload.handle)}`,
+      projects
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
 export const setLayerGradientStopColor = (state: LayerState, action: SetLayerGradientStopColor): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
@@ -5487,7 +5511,7 @@ export const setLayersBlendMode = (state: LayerState, action: SetLayersBlendMode
 
 export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState => {
   let currentState = state;
-  currentState = addShape(currentState, layerActions.addShape({layer: action.payload.booleanLayer, batch: true}) as AddShape);
+  // currentState = addShape(currentState, layerActions.addShape({layer: action.payload.booleanLayer, batch: true}) as AddShape);
   currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: action.payload.booleanLayer.id, above: action.payload.layers[0]}) as InsertLayerAbove);
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: action.payload.layers}) as RemoveLayers);
   return currentState;
@@ -5495,7 +5519,7 @@ export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState 
 
 export const intersectLayers = (state: LayerState, action: IntersectLayers): LayerState => {
   let currentState = state;
-  currentState = addShape(currentState, layerActions.addShape({layer: action.payload.booleanLayer, batch: true}) as AddShape);
+  // currentState = addShape(currentState, layerActions.addShape({layer: action.payload.booleanLayer, batch: true}) as AddShape);
   currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: action.payload.booleanLayer.id, above: action.payload.layers[0]}) as InsertLayerAbove);
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: action.payload.layers}) as RemoveLayers);
   return currentState;
@@ -5503,7 +5527,7 @@ export const intersectLayers = (state: LayerState, action: IntersectLayers): Lay
 
 export const subtractLayers = (state: LayerState, action: SubtractLayers): LayerState => {
   let currentState = state;
-  currentState = addShape(currentState, layerActions.addShape({layer: action.payload.booleanLayer, batch: true}) as AddShape);
+  // currentState = addShape(currentState, layerActions.addShape({layer: action.payload.booleanLayer, batch: true}) as AddShape);
   currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: action.payload.booleanLayer.id, above: action.payload.layers[0]}) as InsertLayerAbove);
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: action.payload.layers}) as RemoveLayers);
   return currentState;
@@ -5511,7 +5535,7 @@ export const subtractLayers = (state: LayerState, action: SubtractLayers): Layer
 
 export const excludeLayers = (state: LayerState, action: ExcludeLayers): LayerState => {
   let currentState = state;
-  currentState = addShape(currentState, layerActions.addShape({layer: action.payload.booleanLayer, batch: true}) as AddShape);
+  // currentState = addShape(currentState, layerActions.addShape({layer: action.payload.booleanLayer, batch: true}) as AddShape);
   currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: action.payload.booleanLayer.id, above: action.payload.layers[0]}) as InsertLayerAbove);
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: action.payload.layers}) as RemoveLayers);
   return currentState;
@@ -5519,7 +5543,7 @@ export const excludeLayers = (state: LayerState, action: ExcludeLayers): LayerSt
 
 export const divideLayers = (state: LayerState, action: DivideLayers): LayerState => {
   let currentState = state;
-  currentState = addShape(currentState, layerActions.addShape({layer: action.payload.booleanLayer, batch: true}) as AddShape);
+  // currentState = addShape(currentState, layerActions.addShape({layer: action.payload.booleanLayer, batch: true}) as AddShape);
   currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({id: action.payload.booleanLayer.id, above: action.payload.layers[0]}) as InsertLayerAbove);
   currentState = removeLayers(currentState, layerActions.removeLayers({layers: action.payload.layers}) as RemoveLayers);
   return currentState;
