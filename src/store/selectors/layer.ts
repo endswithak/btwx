@@ -946,12 +946,12 @@ export const getItemLayers = (store: LayerState, id: string): {
   paperLayer: paper.Item;
 } => {
   const layerItem = store.byId[id];
-  const paperLayer = getPaperLayer(id, getLayerPaperScope(store, id));
+  const paperScope = getLayerPaperScope(store, id);
+  const paperLayer = getPaperLayer(id, paperScope);
   return { layerItem, paperLayer };
 };
 
 export const getParentPaperLayer = (id: string, paperScope: number, ignoreUnderlyingMask?: boolean): paper.Item => {
-  console.log(paper.PaperScope.get(paperScope));
   const paperLayer = getPaperLayer(id, paperScope);
   const isArtboard = paperLayer.data.layerType === 'Artboard';
   const nextPaperLayer = isArtboard ? paperLayer.getItem({ data: { id: 'artboardLayers' } }) : paperLayer;

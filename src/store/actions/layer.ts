@@ -444,6 +444,7 @@ import {
 } from '../actionTypes/layer';
 
 import { replaceAllStr } from '../utils/general';
+import gradientEditor from '../reducers/gradientEditor';
 
 // Artboard
 
@@ -2908,6 +2909,7 @@ export const undoThunk = () => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     if (state.layer.past.length > 0) {
+      let gradientEditorFlag = false;
       const layerState = state.layer.past[state.layer.past.length - 1];
       const fullState = {...state, layer: { ...state.layer, present: layerState }};
       //
@@ -2976,6 +2978,7 @@ export const undoThunk = () => {
                 dispatch(closeColorEditor());
                 if (state.colorEditor.prop === 'fill') {
                   dispatch(openGradientEditor({x: state.colorEditor.x, y: state.colorEditor.y, prop: state.colorEditor.prop}));
+                  gradientEditorFlag = true;
                 }
               }
               break;
@@ -2998,6 +3001,7 @@ export const undoThunk = () => {
                 dispatch(closeColorEditor());
                 if (state.colorEditor.prop === 'stroke') {
                   dispatch(openGradientEditor({x: state.colorEditor.x, y: state.colorEditor.y, prop: state.colorEditor.prop}));
+                  gradientEditorFlag = true;
                 }
               }
               break;
@@ -3006,7 +3010,7 @@ export const undoThunk = () => {
           break;
       }
       // update frames
-      if (!state.gradientEditor.isOpen) {
+      if (!state.gradientEditor.isOpen && !gradientEditorFlag) {
         updateSelectionFrame(getSelectedBounds(fullState));
       }
       // updateActiveArtboardFrame();
@@ -3021,6 +3025,7 @@ export const redoThunk = () => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     if (state.layer.future.length > 0) {
+      let gradientEditorFlag = false;
       const layerState = state.layer.future[0];
       const fullState = {...state, layer: { ...state.layer, present: layerState }};
       //
@@ -3080,6 +3085,7 @@ export const redoThunk = () => {
                 dispatch(closeColorEditor());
                 if (state.colorEditor.prop === 'fill') {
                   dispatch(openGradientEditor({x: state.colorEditor.x, y: state.colorEditor.y, prop: state.colorEditor.prop}));
+                  gradientEditorFlag = true;
                 }
               }
               break;
@@ -3102,6 +3108,7 @@ export const redoThunk = () => {
                 dispatch(closeColorEditor());
                 if (state.colorEditor.prop === 'stroke') {
                   dispatch(openGradientEditor({x: state.colorEditor.x, y: state.colorEditor.y, prop: state.colorEditor.prop}));
+                  gradientEditorFlag = true;
                 }
               }
               break;
@@ -3119,7 +3126,7 @@ export const redoThunk = () => {
           break;
       }
       // update frames
-      if (!state.gradientEditor.isOpen) {
+      if (!state.gradientEditor.isOpen && !gradientEditorFlag) {
         updateSelectionFrame(getSelectedBounds(fullState));
       }
       // updateActiveArtboardFrame();

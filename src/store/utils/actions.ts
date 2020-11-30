@@ -1,5 +1,7 @@
 import { uiPaperScope } from '../../canvas';
 import { getPaperShapePathData } from './paper';
+import { RootState } from '../reducers';
+import { LayerState } from '../reducers/layer';
 
 import {
   DEFAULT_TRANSFORM, DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DEFAULT_TEXT_STYLE,
@@ -7,8 +9,6 @@ import {
   DEFAULT_SHAPE_HEIGHT, DEFAULT_STAR_POINTS, DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS,
   DEFAULT_POLYGON_SIDES, DEFAULT_STROKE_OPTIONS_STYLE, DEFAULT_LINE_FROM, DEFAULT_LINE_TO
 } from '../../constants';
-import { RootState } from '../reducers';
-import { LayerState } from '../reducers/layer';
 
 export const getLayerFillStyle = (payload: any, overrides = {}): Btwx.Fill => {
   const fill = payload.layer.style && payload.layer.style.fill ? { ...DEFAULT_FILL_STYLE, ...payload.layer.style.fill } : DEFAULT_FILL_STYLE;

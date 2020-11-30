@@ -4,22 +4,25 @@ import mexp from 'math-expression-evaluator';
 import { RootState } from '../store/reducers';
 import { SetRoundedRadiiPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setRoundedRadii } from '../store/actions/layer';
-import { getPaperLayer } from '../store/selectors/layer';
+import { getPaperLayer, getSelectedPaperScopes } from '../store/selectors/layer';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarInput from './SidebarInput';
 import SidebarSlider from './SidebarSlider';
-import { paperMain } from '../canvas';
+import { uiPaperScope } from '../canvas';
 
 interface RoundedRadiusInputProps {
   selected?: string[];
   radiusValue?: number | 'multi';
   layerItems?: Btwx.Rounded[];
+  selectedPaperScopes?: {
+    [id: string]: number;
+  };
   setRoundedRadii?(payload: SetRoundedRadiiPayload): LayerTypes;
 }
 
 const RoundedRadiusInput = (props: RoundedRadiusInputProps): ReactElement => {
-  const { selected, setRoundedRadii, radiusValue, layerItems } = props;
+  const { selected, setRoundedRadii, radiusValue, layerItems, selectedPaperScopes } = props;
   const [radius, setRadius] = useState(radiusValue !== 'multi' ? Math.round(radiusValue * 100) : radiusValue);
 
   useEffect(() => {
@@ -34,12 +37,12 @@ const RoundedRadiusInput = (props: RoundedRadiusInputProps): ReactElement => {
   const handleSliderChange = (e: any) => {
     handleChange(e);
     layerItems.forEach((layerItem) => {
-      const paperLayerCompound = getPaperLayer(layerItem.id) as paper.CompoundPath;
+      const paperLayerCompound = getPaperLayer(layerItem.id, selectedPaperScopes[layerItem.id]) as paper.CompoundPath;
       const paperLayer = paperLayerCompound.children[0] as paper.Path;
       const nextRadius = e.target.value / 100;
       paperLayer.rotation = -layerItem.transform.rotation;
       const maxDim = Math.max(paperLayer.bounds.width, paperLayer.bounds.height);
-      const newShape = new paperMain.Path.Rectangle({
+      const newShape = new uiPaperScope.Path.Rectangle({
         from: paperLayer.bounds.topLeft,
         to: paperLayer.bounds.bottomRight,
         radius: (maxDim / 2) * nextRadius,
@@ -97,9 +100,13 @@ const mapStateToProps = (state: RootState): {
   selected: string[];
   radiusValue: number | 'multi';
   layerItems: Btwx.Rounded[];
+  selectedPaperScopes: {
+    [id: string]: number;
+  };
 } => {
   const { layer } = state;
   const selected = layer.present.selected;
+  const selectedPaperScopes = getSelectedPaperScopes(state);
   const layerItems: Btwx.Rounded[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
@@ -114,7 +121,7 @@ const mapStateToProps = (state: RootState): {
       return 'multi';
     }
   })();
-  return { selected, radiusValue, layerItems };
+  return { selected, radiusValue, layerItems, selectedPaperScopes };
 };
 
 export default connect(

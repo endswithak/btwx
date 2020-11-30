@@ -1,11 +1,11 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import mexp from 'math-expression-evaluator';
-import { paperMain } from '../canvas';
+import { uiPaperScope } from '../canvas';
 import { RootState } from '../store/reducers';
 import { SetPolygonsSidesPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setPolygonsSides } from '../store/actions/layer';
-import { getPaperLayer } from '../store/selectors/layer';
+import { getPaperLayer, getSelectedPaperScopes } from '../store/selectors/layer';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarInput from './SidebarInput';
@@ -15,11 +15,14 @@ interface PolygonSidesInputProps {
   selected?: string[];
   sidesValue?: number | 'multi';
   layerItems?: Btwx.Polygon[];
+  selectedPaperScopes?: {
+    [id: string]: number;
+  };
   setPolygonsSides?(payload: SetPolygonsSidesPayload): LayerTypes;
 }
 
 const PolygonSidesInput = (props: PolygonSidesInputProps): ReactElement => {
-  const { selected, setPolygonsSides, sidesValue, layerItems } = props;
+  const { selected, setPolygonsSides, sidesValue, layerItems, selectedPaperScopes } = props;
   const [sides, setSides] = useState(sidesValue !== 'multi' ? Math.round(sidesValue) : sidesValue);
 
   useEffect(() => {
@@ -34,11 +37,11 @@ const PolygonSidesInput = (props: PolygonSidesInputProps): ReactElement => {
   const handleSliderChange = (e: any): void => {
     handleChange(e);
     layerItems.forEach((layerItem) => {
-      const paperLayerCompound = getPaperLayer(layerItem.id) as paper.CompoundPath;
+      const paperLayerCompound = getPaperLayer(layerItem.id, selectedPaperScopes[layerItem.id]) as paper.CompoundPath;
       const paperLayer = paperLayerCompound.children[0] as paper.Path;
       const startPosition = paperLayer.position;
       paperLayer.rotation = -layerItem.transform.rotation;
-      const newShape = new paperMain.Path.RegularPolygon({
+      const newShape = new uiPaperScope.Path.RegularPolygon({
         center: paperLayer.bounds.center,
         radius: Math.max(paperLayer.bounds.width, paperLayer.bounds.height) / 2,
         sides: e.target.value,
@@ -99,9 +102,13 @@ const mapStateToProps = (state: RootState): {
   selected: string[];
   sidesValue: number | 'multi';
   layerItems: Btwx.Polygon[];
+  selectedPaperScopes: {
+    [id: string]: number;
+  };
 } => {
   const { layer } = state;
   const selected = layer.present.selected;
+  const selectedPaperScopes = getSelectedPaperScopes(state);
   const layerItems: Btwx.Polygon[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
@@ -116,7 +123,7 @@ const mapStateToProps = (state: RootState): {
       return 'multi';
     }
   })();
-  return { selected, sidesValue, layerItems };
+  return { selected, sidesValue, layerItems, selectedPaperScopes };
 };
 
 export default connect(

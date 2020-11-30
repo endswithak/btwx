@@ -720,6 +720,30 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
         [action.payload.id]: addItem(currentState.childrenById[action.payload.id], action.payload.child)
       }
     };
+    if (layerItem.type === 'Artboard') {
+      currentState = {
+        ...currentState,
+        byId: {
+          ...currentState.byId,
+          [action.payload.child]: {
+            ...currentState.byId[action.payload.child],
+            artboard: action.payload.id
+          } as Btwx.ArtboardLayer
+        }
+      };
+    }
+    if (layerItem.type === 'Page' && childItem.artboardLayer && (childItem as Btwx.ArtboardLayer).artboard) {
+      currentState = {
+        ...currentState,
+        byId: {
+          ...currentState.byId,
+          [action.payload.child]: {
+            ...currentState.byId[action.payload.child],
+            artboard: null
+          } as Btwx.ArtboardLayer
+        }
+      };
+    }
     currentState = setLayerScope(currentState, layerActions.setLayerScope({id: action.payload.child, scope: [...layerItem.scope, action.payload.id]}) as SetLayerScope);
     if (childItem.type === 'Group') {
       currentState = updateNestedScopes(currentState, action.payload.child);
@@ -815,7 +839,7 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
   const isLayerMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
   const isLayerIgnoringUnderlyingMask = layerItem.ignoreUnderlyingMask;
   const belowItem = belowItemLayers.layerItem;
-  const belowParent = currentState.byId[belowItem.parent] as Btwx.Group;
+  const belowParent = currentState.byId[belowItem.parent] as Btwx.Group | Btwx.Artboard | Btwx.Page;
   const belowIndex = getLayerIndex(currentState, action.payload.below);
   const isBelowMask = belowItem.type === 'Shape' && (belowItem as Btwx.Shape).mask;
   const isBelowIgnoringUnderlyingMask = belowItem.ignoreUnderlyingMask;
@@ -835,7 +859,14 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
   }
   const newLayerItem = currentState.byId[action.payload.id];
   const newBelowItem = currentState.byId[action.payload.below];
-  paperLayer.insertBelow(belowPaperLayer);
+  if (layerItem.type !== 'Artboard') {
+    if (belowItem.type === 'Artboard' && belowItem.parent === 'page') {
+      const pageItems = getItemLayers(currentState, 'page');
+      pageItems.paperLayer.insertChild(belowIndex, paperLayer);
+    } else {
+      paperLayer.insertBelow(belowPaperLayer);
+    }
+  }
   if (layerItem.parent !== belowItem.parent) {
     currentState = {
       ...currentState,
@@ -862,6 +893,30 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
         [belowItem.parent]: insertItem(currentState.childrenById[belowItem.parent], action.payload.id, belowIndex)
       }
     };
+    if (belowParent.type === 'Artboard') {
+      currentState = {
+        ...currentState,
+        byId: {
+          ...currentState.byId,
+          [action.payload.id]: {
+            ...currentState.byId[action.payload.id],
+            artboard: belowParent.id
+          } as Btwx.ArtboardLayer
+        }
+      };
+    }
+    if (belowParent.type === 'Page' && layerItem.artboardLayer && (layerItem as Btwx.ArtboardLayer).artboard) {
+      currentState = {
+        ...currentState,
+        byId: {
+          ...currentState.byId,
+          [action.payload.id]: {
+            ...currentState.byId[action.payload.id],
+            artboard: null
+          } as Btwx.ArtboardLayer
+        }
+      };
+    }
     currentState = setLayerScope(currentState, layerActions.setLayerScope({id: action.payload.id, scope: [...belowParent.scope, belowItem.parent]}) as SetLayerScope);
     if (layerItem.type === 'Group') {
       currentState = updateNestedScopes(currentState, action.payload.id);
@@ -964,7 +1019,14 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
   }
   const newLayerItem = currentState.byId[action.payload.id];
   const newAboveItem = currentState.byId[action.payload.above];
-  paperLayer.insertAbove(abovePaperLayer);
+  if (layerItem.type !== 'Artboard') {
+    if (aboveItem.type === 'Artboard' && aboveItem.parent === 'page') {
+      const pageItems = getItemLayers(currentState, 'page');
+      pageItems.paperLayer.insertChild(aboveIndex, paperLayer);
+    } else {
+      paperLayer.insertAbove(abovePaperLayer);
+    }
+  }
   if (layerItem.parent !== aboveItem.parent) {
     currentState = {
       ...currentState,
@@ -991,6 +1053,30 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
         [aboveItem.parent]: insertItem(currentState.childrenById[aboveItem.parent], action.payload.id, aboveIndex + 1)
       }
     };
+    if (aboveParentItem.type === 'Artboard') {
+      currentState = {
+        ...currentState,
+        byId: {
+          ...currentState.byId,
+          [action.payload.id]: {
+            ...currentState.byId[action.payload.id],
+            artboard: aboveParentItem.id
+          } as Btwx.ArtboardLayer
+        }
+      };
+    }
+    if (aboveParentItem.type === 'Page' && layerItem.artboardLayer && (layerItem as Btwx.ArtboardLayer).artboard) {
+      currentState = {
+        ...currentState,
+        byId: {
+          ...currentState.byId,
+          [action.payload.id]: {
+            ...currentState.byId[action.payload.id],
+            artboard: null
+          } as Btwx.ArtboardLayer
+        }
+      };
+    }
     currentState = setLayerScope(currentState, layerActions.setLayerScope({id: action.payload.id, scope: [...aboveParentItem.scope, aboveItem.parent]}) as SetLayerScope);
     if (layerItem.type === 'Group') {
       currentState = updateNestedScopes(currentState, action.payload.id);
@@ -1107,6 +1193,8 @@ export const escapeLayerScope = (state: LayerState, action: EscapeLayerScope): L
 export const setLayerScope = (state: LayerState, action: SetLayerScope): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
+  console.log(layerItem);
+  console.log(paperLayer);
   paperLayer.data.scope = action.payload.scope;
   currentState = {
     ...currentState,

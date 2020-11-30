@@ -4,22 +4,25 @@ import mexp from 'math-expression-evaluator';
 import { RootState } from '../store/reducers';
 import { SetStarsPointsPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setStarsPoints } from '../store/actions/layer';
-import { getPaperLayer } from '../store/selectors/layer';
+import { getPaperLayer, getSelectedPaperScopes } from '../store/selectors/layer';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarInput from './SidebarInput';
 import SidebarSlider from './SidebarSlider';
-import { paperMain } from '../canvas';
+import { uiPaperScope } from '../canvas';
 
 interface StarPointsInputProps {
   selected?: string[];
   pointsValue?: number | 'multi';
   layerItems?: Btwx.Star[];
+  selectedPaperScopes?: {
+    [id: string]: number;
+  };
   setStarsPoints?(payload: SetStarsPointsPayload): LayerTypes;
 }
 
 const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
-  const { selected, setStarsPoints, layerItems, pointsValue } = props;
+  const { selected, setStarsPoints, layerItems, pointsValue, selectedPaperScopes } = props;
   const [points, setPoints] = useState(pointsValue !== 'multi' ? Math.round(pointsValue) : pointsValue);
 
   useEffect(() => {
@@ -34,12 +37,12 @@ const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
   const handleSliderChange = (e: any): void => {
     handleChange(e);
     layerItems.forEach((layerItem) => {
-      const paperLayerCompound = getPaperLayer(layerItem.id) as paper.CompoundPath;
+      const paperLayerCompound = getPaperLayer(layerItem.id, selectedPaperScopes[layerItem.id]) as paper.CompoundPath;
       const paperLayer = paperLayerCompound.children[0] as paper.Path;
       const startPosition = paperLayer.position;
       paperLayer.rotation = -layerItem.transform.rotation;
       const maxDim = Math.max(paperLayer.bounds.width, paperLayer.bounds.height);
-      const newShape = new paperMain.Path.Star({
+      const newShape = new uiPaperScope.Path.Star({
         center: paperLayer.bounds.center,
         radius1: maxDim / 2,
         radius2: (maxDim / 2) * (layerItem as Btwx.Star).radius,
@@ -101,9 +104,13 @@ const mapStateToProps = (state: RootState): {
   selected: string[];
   pointsValue: number | 'multi';
   layerItems: Btwx.Star[];
+  selectedPaperScopes: {
+    [id: string]: number;
+  };
 } => {
   const { layer } = state;
   const selected = layer.present.selected;
+  const selectedPaperScopes = getSelectedPaperScopes(state);
   const layerItems: Btwx.Star[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];
@@ -118,7 +125,7 @@ const mapStateToProps = (state: RootState): {
       return 'multi';
     }
   })();
-  return { selected, pointsValue, layerItems };
+  return { selected, pointsValue, layerItems, selectedPaperScopes };
 };
 
 export default connect(
