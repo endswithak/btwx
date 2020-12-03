@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { updateMeasureGuides } from '../store/actions/layer';
-import { paperMain } from '../canvas';
+import { uiPaperScope } from '../canvas';
 
 interface MeasureFrameProps {
   selected?: string[];
@@ -16,7 +16,7 @@ const MeasureFrame = (props: MeasureFrameProps): ReactElement => {
   useEffect(() => {
     updateMeasureGuides();
     return () => {
-      const measureFrame = paperMain.project.getItem({ data: { id: 'measureGuides' } });
+      const measureFrame = uiPaperScope.project.getItem({ data: { id: 'measureGuides' } });
       measureFrame.removeChildren();
     }
   }, [selected, hover]);

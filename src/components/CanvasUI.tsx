@@ -43,8 +43,8 @@ const CanvasUI = (props: CanvasUIProps): ReactElement => {
       <HoverFrameWrap />
       <SelectionFrameWrap />
       <GradientFrameWrap />
-      {/* <MeasureFrameWrap />
-      <TweenEventsFrameWrap /> */}
+      <TweenEventsFrameWrap />
+      {/* <MeasureFrameWrap /> */}
     </>
   );
 }

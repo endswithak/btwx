@@ -36,8 +36,8 @@ const mapStateToProps = (state: RootState): {
   canInsert: boolean;
   isChecked: boolean;
 } => {
-  const { canvasSettings, shapeTool } = state;
-  const canInsert = canvasSettings.focusing;
+  const { canvasSettings, shapeTool, layer } = state;
+  const canInsert = canvasSettings.focusing && layer.present.activeArtboard !== null;
   const isChecked = canvasSettings.activeTool === 'Shape' && shapeTool.shapeType === 'Polygon';
   return { canInsert, isChecked };
 };

@@ -103,23 +103,23 @@ export const getLayerPathData = (payload: any): string => {
 }
 
 export const getLayerMasked = (state: LayerState, payload: any): boolean => {
-  const parent = payload.layer.parent ? payload.layer.parent : 'page';
+  const parent = payload.layer.parent ? payload.layer.parent : state.activeArtboard;
   const parentLayerItem = state.byId[parent];
   const parentChildren = parentLayerItem.children;
   const hasChildren = parentChildren.length > 0;
   const lastChildId = hasChildren ? parentChildren[parentChildren.length - 1] : null;
-  const lastChildItem = lastChildId ? state.byId[lastChildId] : null;
+  const lastChildItem = lastChildId ? state.byId[lastChildId] as Btwx.MaskableLayer : null;
   const lastChildItemIsMask = lastChildItem ? lastChildItem.type === 'Shape' && (lastChildItem as Btwx.Shape).mask : false;
   return lastChildItem ? (lastChildItem.masked || lastChildItemIsMask) : false;
 }
 
 export const getLayerUnderlyingMask = (state: LayerState, payload: any): string => {
-  const parent = payload.layer.parent ? payload.layer.parent : 'page';
+  const parent = payload.layer.parent ? payload.layer.parent : state.activeArtboard;
   const parentLayerItem = state.byId[parent];
   const parentChildren = parentLayerItem.children;
   const hasChildren = parentChildren.length > 0;
   const lastChildId = hasChildren ? parentChildren[parentChildren.length - 1] : null;
-  const lastChildItem = lastChildId ? state.byId[lastChildId] : null;
+  const lastChildItem = lastChildId ? state.byId[lastChildId] as Btwx.MaskableLayer : null;
   const lastChildItemIsMask = lastChildItem ? lastChildItem.type === 'Shape' && (lastChildItem as Btwx.Shape).mask : false;
   return lastChildItem ? lastChildItemIsMask ? lastChildId : lastChildItem.underlyingMask : null;
 }

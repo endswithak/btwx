@@ -6,12 +6,12 @@ import { ActionCreators } from 'redux-undo';
 import { clipboard } from 'electron';
 import { gsap } from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
-import { uiPaperScope, pagePaperScope } from '../../canvas';
+import { uiPaperScope } from '../../canvas';
 import paper from 'paper';
 import MeasureGuide from '../../canvas/measureGuide';
 import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_VALUE, THEME_PRIMARY_COLOR, DEFAULT_TWEEN_EVENTS, TWEEN_PROPS_MAP } from '../../constants';
 import { getPaperFillColor, getPaperStrokeColor, getPaperShadowColor } from '../utils/paper';
-import { getClipboardCenter, getLayerAndDescendants, getLayersBounds, importPaperProject, colorsMatch, gradientsMatch, getNearestScopeAncestor, getArtboardEventItems, orderLayersByDepth, canMaskLayers, canMaskSelection, canPasteSVG, getLineToPoint, getLineFromPoint, getArtboardsTopTop, getSelectedBounds, getParentPaperLayer, getGradientOriginPoint, getGradientDestinationPoint, getPaperLayer, getSelectedPaperLayers, getItemLayers, getLayerPaperScope, getSelectedPaperScopes } from '../selectors/layer';
+import { getClipboardCenter, getLayerAndDescendants, getLayersBounds, importPaperProject, colorsMatch, gradientsMatch, getNearestScopeAncestor, getArtboardEventItems, orderLayersByDepth, canMaskLayers, canMaskSelection, canPasteSVG, getLineToPoint, getLineFromPoint, getArtboardsTopTop, getSelectedBounds, getParentPaperLayer, getGradientOriginPoint, getGradientDestinationPoint, getPaperLayer, getSelectedPaperLayers, getItemLayers, getSelectedPaperScopes, getAbsolutePosition } from '../selectors/layer';
 import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle, getLayerMasked, getLayerUnderlyingMask } from '../utils/actions';
 
 import { bufferToBase64, scrollToLayer } from '../../utils';
@@ -20,7 +20,7 @@ import getTheme from '../theme';
 
 import { addDocumentImage } from './documentSettings';
 import { setTweenDrawerEventThunk } from './tweenDrawer';
-import { openColorEditor, closeColorEditor, setColorEditorColor } from './colorEditor';
+import { openColorEditor, closeColorEditor } from './colorEditor';
 import { openGradientEditor, closeGradientEditor } from './gradientEditor';
 import { RootState } from '../reducers';
 
@@ -458,11 +458,8 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
     const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const name = payload.layer.name ? payload.layer.name : 'Artboard';
-    const scope = ['page'];
-    const paperScope = state.layer.present.allArtboardIds.length + 2;
-    const masked = payload.layer.masked ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
-    const underlyingMask = payload.layer.underlyingMask ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
-    const ignoreUnderlyingMask = payload.layer.ignoreUnderlyingMask ? payload.layer.ignoreUnderlyingMask : false;
+    const paperScope = state.layer.present.allArtboardIds.length + 1;
+    const index = state.layer.present.allArtboardIds.length;
     const style = getLayerStyle(payload, {}, { fill: { color: DEFAULT_ARTBOARD_BACKGROUND_COLOR } as Btwx.Fill, stroke: { enabled: false } as Btwx.Stroke, shadow: { enabled: false } as Btwx.Shadow });
     const frame = getLayerFrame(payload);
     const showChildren = payload.layer.showChildren ? payload.layer.showChildren : false;
@@ -470,58 +467,57 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
     // create background
     const artboardBackground = new uiPaperScope.Path.Rectangle({
       name: 'Artboard Background',
-      point: new uiPaperScope.Point(0,0),
-      size: [payload.layer.frame.width, payload.layer.frame.height],
+      from: new uiPaperScope.Point(frame.x - (frame.width / 2), frame.y - (frame.height / 2)),
+      to: new uiPaperScope.Point(frame.x + (frame.width / 2), frame.y + (frame.height / 2)),
       data: { id: 'artboardBackground', type: 'LayerChild', layerType: 'Artboard' },
       fillColor: paperFillColor,
-      position: new uiPaperScope.Point(payload.layer.frame.x, payload.layer.frame.y),
       shadowColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.20 },
       shadowOffset: new uiPaperScope.Point(0, 2),
       shadowBlur: 10,
       insert: false
     });
-    // create mask
-    const artboardLayersMask = artboardBackground.clone();
-    artboardLayersMask.name = 'Artboard Layers Mask';
-    artboardLayersMask.data = { id: 'artboardLayersMask', type: 'LayerChild', layerType: 'Artboard' };
-    artboardLayersMask.clipMask = true;
+    // create layers mask
+    const artboardLayersMask = new uiPaperScope.Path.Rectangle({
+      name: 'Artboard Layers Mask',
+      from: new uiPaperScope.Point(frame.x - (frame.width / 2), frame.y - (frame.height / 2)),
+      to: new uiPaperScope.Point(frame.x + (frame.width / 2), frame.y + (frame.height / 2)),
+      data: { id: 'artboardLayersMask', type: 'LayerChild', layerType: 'Artboard' },
+      fillColor: paperFillColor,
+      clipMask: true
+    });
     //
     const artboardLayers = new uiPaperScope.Group({
       name: 'Artboard Layers',
-      data: { id: 'artboardLayers', type: 'LayerChild', layerType: 'Artboard' },
-      insert: false
+      data: { id: 'artboardLayers', type: 'LayerChild', layerType: 'Artboard' }
     });
     //
     const artboardMaskedLayers = new uiPaperScope.Group({
       name: 'Artboard Masked Layers',
       data: { id: 'artboardMaskedLayers', type: 'LayerChild', layerType: 'Artboard' },
-      children: [artboardLayersMask, artboardLayers],
-      insert: false
+      children: [artboardLayersMask, artboardLayers]
     });
     // create artboard group
     const artboard = new uiPaperScope.Layer({
       name: name,
-      data: { id: id, type: 'Layer', layerType: 'Artboard', scope: scope },
-      children: [artboardBackground, artboardMaskedLayers],
-      insert: false
-      // parent: project.activeLayer
+      data: { id: id, type: 'Layer', layerType: 'Artboard', scope: ['root'] },
+      insert: false,
+      children: [artboardBackground, artboardMaskedLayers]
     });
     // dispatch action
     const newLayer = {
       type: 'Artboard',
       id: id,
+      index: index,
       name: name,
-      parent: payload.layer.parent,
+      artboard: id,
+      parent: 'root',
       children: [],
-      scope: scope,
+      scope: ['root'],
+      paperScope: paperScope,
       frame: payload.layer.frame,
-      underlyingMask: underlyingMask,
-      ignoreUnderlyingMask: ignoreUnderlyingMask,
-      masked: masked,
       showChildren: showChildren,
       selected: false,
       hover: false,
-      artboardLayer: false,
       events: [],
       originArtboardForEvents: [],
       destinationArtboardForEvents: [],
@@ -533,8 +529,7 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
       },
       transform: DEFAULT_TRANSFORM,
       style: DEFAULT_STYLE,
-      paperScope: paperScope,
-      paperJSON: artboard.exportJSON()
+      json: artboard.exportJSON()
     } as Btwx.Artboard;
     dispatch(addArtboard({
       layer: newLayer,
@@ -557,17 +552,18 @@ export const addGroupThunk = (payload: AddGroupPayload, providedState?: RootStat
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const style = getLayerStyle(payload, {}, { fill: { enabled: false } as Btwx.Fill, stroke: { enabled: false } as Btwx.Stroke, shadow: { enabled: false } as Btwx.Shadow });
     const name = payload.layer.name ? payload.layer.name : 'Group';
-    const parent = payload.layer.parent ? payload.layer.parent : 'page';
+    const parent = payload.layer.parent ? payload.layer.parent : state.layer.present.activeArtboard;
     const parentItem = state.layer.present.byId[parent];
     const scope = [...parentItem.scope, parent];
-    const artboard = payload.layer.artboard ? payload.layer.artboard : scope.length > 1 && state.layer.present.byId[scope[1]].type === 'Artboard' ? scope[1] : null;
-    const artboardItem = artboard ? state.layer.present.byId[artboard] : null;
-    const paperScope = artboard ? (artboardItem as Btwx.Artboard).paperScope : 1;
+    const artboard = scope[1];
+    const artboardItem = state.layer.present.byId[artboard] as Btwx.Artboard;
+    const index = artboardItem.children.length;
+    const paperScope = artboardItem.paperScope;
     const paperScopeItem = paper.PaperScope.get(paperScope);
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
-    const parentPaperLayer = getParentPaperLayer(parent, paperScope, ignoreUnderlyingMask);
+    const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
     const frame = payload.layer.frame ? payload.layer.frame : { x: 0, y: 0, width: 0, height: 0, innerWidth: 0, innerHeight: 0 };
     let position = new paperScopeItem.Point(frame.x, frame.y);
     if (artboard) {
@@ -583,7 +579,9 @@ export const addGroupThunk = (payload: AddGroupPayload, providedState?: RootStat
     const newLayer = {
       type: 'Group',
       id: id,
+      index: index,
       name: name,
+      artboard: artboard,
       parent: parent,
       children: [],
       scope: scope,
@@ -594,8 +592,6 @@ export const addGroupThunk = (payload: AddGroupPayload, providedState?: RootStat
       showChildren: showChildren,
       selected: false,
       hover: false,
-      artboardLayer: true,
-      artboard: artboard,
       events: [],
       tweens: {
         allIds: [],
@@ -625,18 +621,19 @@ export const addShapeThunk = (payload: AddShapePayload, providedState?: RootStat
   return (dispatch: any, getState: any): Promise<Btwx.Shape> => {
     const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
-    const parent = payload.layer.parent ? payload.layer.parent : 'page';
+    const parent = payload.layer.parent ? payload.layer.parent : state.layer.present.activeArtboard;
     const parentItem = state.layer.present.byId[parent];
     const scope = [...parentItem.scope, parent];
-    const artboard = payload.layer.artboard ? payload.layer.artboard : scope.length > 1 && state.layer.present.byId[scope[1]].type === 'Artboard' ? scope[1] : null;
-    const artboardItem = artboard ? state.layer.present.byId[artboard] : null;
-    const paperScope = artboard ? (artboardItem as Btwx.Artboard).paperScope : 1;
+    const artboard = scope[1];
+    const artboardItem = state.layer.present.byId[artboard] as Btwx.Artboard;
+    const index = artboardItem.children.length;
+    const paperScope = artboardItem.paperScope;
     const paperScopeItem = paper.PaperScope.get(paperScope);
     const shapeType = payload.layer.shapeType ? payload.layer.shapeType : 'Rectangle';
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
-    const parentPaperLayer = getParentPaperLayer(parent, paperScope, ignoreUnderlyingMask);
+    const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
     const name = payload.layer.name ? payload.layer.name : shapeType;
     const frame = getLayerFrame(payload);
     let position = new paperScopeItem.Point(frame.x, frame.y);
@@ -686,7 +683,9 @@ export const addShapeThunk = (payload: AddShapePayload, providedState?: RootStat
     const newLayer = {
       type: 'Shape',
       id: id,
+      index: index,
       name: name,
+      artboard: artboard,
       parent: parent,
       children: null,
       scope: scope,
@@ -697,8 +696,6 @@ export const addShapeThunk = (payload: AddShapePayload, providedState?: RootStat
       showChildren: null,
       selected: false,
       hover: false,
-      artboardLayer: true,
-      artboard: artboard,
       events: [],
       tweens: {
         allIds: [],
@@ -726,17 +723,18 @@ export const addShapeGroupThunk = (payload: AddShapePayload, providedState?: Roo
   return (dispatch: any, getState: any): Promise<Btwx.Shape> => {
     const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
-    const parent = payload.layer.parent ? payload.layer.parent : 'page';
+    const parent = payload.layer.parent ? payload.layer.parent : state.layer.present.activeArtboard;
     const parentItem = state.layer.present.byId[parent];
     const scope = [...parentItem.scope, parent];
-    const artboard = payload.layer.artboard ? payload.layer.artboard : scope.length > 1 && state.layer.present.byId[scope[1]].type === 'Artboard' ? scope[1] : null;
-    const artboardItem = artboard ? state.layer.present.byId[artboard] : null;
-    const paperScope = artboard ? (artboardItem as Btwx.Artboard).paperScope : 1;
+    const artboard = scope[1];
+    const artboardItem = state.layer.present.byId[artboard] as Btwx.Artboard;
+    const index = artboardItem.children.length;
+    const paperScope = artboardItem.paperScope;
     const paperScopeItem = paper.PaperScope.get(paperScope);
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
-    const parentPaperLayer = getParentPaperLayer(parent, paperScope, ignoreUnderlyingMask);
+    const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
     const shapeType = payload.layer.shapeType ? payload.layer.shapeType : 'Rectangle';
     const name = payload.layer.name ? payload.layer.name : shapeType;
     const frame = getLayerFrame(payload);
@@ -794,7 +792,9 @@ export const addShapeGroupThunk = (payload: AddShapePayload, providedState?: Roo
     const newLayer = {
       type: 'Shape',
       id: id,
+      index: index,
       name: name,
+      artboard: artboard,
       parent: parent,
       children: null,
       scope: scope,
@@ -805,8 +805,6 @@ export const addShapeGroupThunk = (payload: AddShapePayload, providedState?: Roo
       showChildren: null,
       selected: false,
       hover: false,
-      artboardLayer: true,
-      artboard: artboard,
       events: [],
       tweens: {
         allIds: [],
@@ -846,14 +844,15 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
-    const parent = payload.layer.parent ? payload.layer.parent : 'page';
+    const parent = payload.layer.parent ? payload.layer.parent : state.layer.present.activeArtboard;
     const parentItem = state.layer.present.byId[parent];
     const scope = [...parentItem.scope, parent];
-    const artboard = payload.layer.artboard ? payload.layer.artboard : scope.length > 1 && state.layer.present.byId[scope[1]].type === 'Artboard' ? scope[1] : null;
-    const artboardItem = artboard ? state.layer.present.byId[artboard] : null;
-    const paperScope = artboard ? (artboardItem as Btwx.Artboard).paperScope : 1;
+    const artboard = scope[1];
+    const artboardItem = state.layer.present.byId[artboard] as Btwx.Artboard;
+    const index = artboardItem.children.length;
+    const paperScope = artboardItem.paperScope;
     const paperScopeItem = paper.PaperScope.get(paperScope);
-    const parentPaperLayer = getParentPaperLayer(parent, paperScope, ignoreUnderlyingMask);
+    const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
     const style = getLayerStyle(payload);
     const textStyle = getLayerTextStyle(payload);
     const transform = getLayerTransform(payload);
@@ -909,7 +908,9 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
     const newLayer = {
       type: 'Text',
       id: id,
+      index: index,
       name: name,
+      artboard: artboard,
       parent: parent,
       children: null,
       scope: scope,
@@ -920,8 +921,6 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
       showChildren: null,
       selected: false,
       hover: false,
-      artboardLayer: true,
-      artboard: artboard,
       events: [],
       tweens: {
         allIds: [],
@@ -954,15 +953,16 @@ export const addImageThunk = (payload: AddImagePayload, providedState?: RootStat
     return new Promise((resolve, reject) => {
       const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
       const buffer = Buffer.from(payload.buffer);
-      const parent = payload.layer.parent ? payload.layer.parent : 'page';
+      const parent = payload.layer.parent ? payload.layer.parent : state.layer.present.activeArtboard;
       const parentItem = state.layer.present.byId[parent];
       const scope = [...parentItem.scope, parent];
-      const artboard = payload.layer.artboard ? payload.layer.artboard : scope.length > 1 && state.layer.present.byId[scope[1]].type === 'Artboard' ? scope[1] : null;
-      const artboardItem = artboard ? state.layer.present.byId[artboard] : null;
-      const paperScope = artboard ? (artboardItem as Btwx.Artboard).paperScope : 1;
+      const artboard = scope[1];
+      const artboardItem = state.layer.present.byId[artboard] as Btwx.Artboard;
+      const index = artboardItem.children.length;
+      const paperScope = artboardItem.paperScope;
       const paperScopeItem = paper.PaperScope.get(paperScope);
       const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
-      const parentPaperLayer = getParentPaperLayer(parent, paperScope, ignoreUnderlyingMask);
+      const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
       sharp(buffer).metadata().then(({ width, height }) => {
         sharp(buffer).resize(Math.round(width * 0.5)).webp().toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
           const frame = getLayerFrame(payload);
@@ -1001,7 +1001,9 @@ export const addImageThunk = (payload: AddImagePayload, providedState?: RootStat
             const newLayer = {
               type: 'Image',
               id: id,
+              index: index,
               name: name,
+              artboard: artboard,
               parent: parent,
               children: null,
               scope: scope,
@@ -1012,8 +1014,6 @@ export const addImageThunk = (payload: AddImagePayload, providedState?: RootStat
               showChildren: null,
               selected: false,
               hover: false,
-              artboardLayer: true,
-              artboard: artboard,
               events: [],
               tweens: {
                 allIds: [],
@@ -1326,8 +1326,6 @@ export const groupSelectedThunk = () => {
       const state = getState() as RootState;
       // get bounds of layers to group
       const layersBounds = getSelectedBounds(state);
-      // const scope = state.layer.present.byId[state.layer.present.selected[0]].scope;
-      // const scopedPosition = getScopedPoint(layersBounds.center, scope);
       // add group
       dispatch(addGroupThunk({
         layer: {
@@ -1343,7 +1341,7 @@ export const groupSelectedThunk = () => {
         },
         batch: true
       })).then((newGroup: Btwx.Group) => {
-        dispatch(groupLayers({layers: state.layer.present.selected, group: newGroup}));
+        dispatch(groupLayers({layers: state.layer.present.selected.reverse(), group: newGroup}));
         resolve();
       });
     });
@@ -2078,9 +2076,9 @@ export const toggleLayersIgnoreUnderlyingMask = (payload: ToggleLayersIgnoreUnde
 export const toggleSelectionIgnoreUnderlyingMask = () => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
-    const mixed = !state.layer.present.selected.every((id) => state.layer.present.byId[id].ignoreUnderlyingMask);
+    const mixed = !state.layer.present.selected.every((id) => (state.layer.present.byId[id] as Btwx.MaskableLayer).ignoreUnderlyingMask);
     if (mixed) {
-      const disabled = state.layer.present.selected.filter((id) => !state.layer.present.byId[id].ignoreUnderlyingMask);
+      const disabled = state.layer.present.selected.filter((id) => !(state.layer.present.byId[id] as Btwx.MaskableLayer).ignoreUnderlyingMask);
       dispatch(toggleLayersIgnoreUnderlyingMask({layers: disabled}));
     } else {
       dispatch(toggleLayersIgnoreUnderlyingMask({layers: state.layer.present.selected}));
@@ -2436,13 +2434,18 @@ export const applyBooleanOperationThunk = (booleanOperation: Btwx.BooleanOperati
         booleanLayers = booleanLayers[booleanOperation](getPaperLayer(selected[i], selectedPaperScopes[selected[i]]) as paper.Path | paper.CompoundPath, { insert: false }) as paper.Path | paper.CompoundPath;
       }
       if (booleanLayers.pathData) {
+        let position = booleanLayers.position;
+        if (state.layer.present.byId[layerItem.parent].type === 'Artboard') {
+          const artboardPosition = getAbsolutePosition(state.layer.present, layerItem.parent);
+          position = position.subtract(artboardPosition);
+        }
         dispatch(addShapeThunk({
           layer: {
             name: 'Combined Shape',
             parent: layerItem.parent,
             frame: {
-              x: booleanLayers.position.x,
-              y: booleanLayers.position.y,
+              x: position.x,
+              y: position.y,
               width: booleanLayers.bounds.width,
               height: booleanLayers.bounds.height,
               innerWidth: booleanLayers.bounds.width,
@@ -2921,10 +2924,10 @@ export const undoThunk = () => {
       //
       if (state.layer.present.edit.projects) {
         state.layer.present.edit.projects.forEach((project: string) => {
-          const projectItem = layerState.byId[project] as Btwx.ProjectLayer;
+          const projectItem = layerState.byId[project] as Btwx.Artboard;
           if (projectItem) {
             const paperScope = projectItem.paperScope;
-            const paperJSON = projectItem.paperJSON;
+            const paperJSON = projectItem.json;
             importPaperProject({
               paperJSON,
               paperScope,
@@ -3010,9 +3013,9 @@ export const undoThunk = () => {
           break;
       }
       // update frames
-      if (!state.gradientEditor.isOpen && !gradientEditorFlag) {
-        updateSelectionFrame(getSelectedBounds(fullState));
-      }
+      // if (!state.gradientEditor.isOpen && !gradientEditorFlag) {
+      //   updateSelectionFrame(getSelectedBounds(fullState));
+      // }
       // updateActiveArtboardFrame();
       // if (state.viewSettings.tweenDrawer.isOpen && layerState.events.allIds.length > 0) {
       //   updateTweenEventsFrame(fullState);
@@ -3037,10 +3040,10 @@ export const redoThunk = () => {
       //
       if (layerState.edit.projects) {
         layerState.edit.projects.forEach((project: string) => {
-          const projectItem = layerState.byId[project] as Btwx.ProjectLayer;
+          const projectItem = layerState.byId[project] as Btwx.Artboard;
           if (projectItem) {
             const paperScope = projectItem.paperScope;
-            const paperJSON = projectItem.paperJSON;
+            const paperJSON = projectItem.json;
             importPaperProject({
               paperScope,
               paperJSON,
@@ -3126,9 +3129,9 @@ export const redoThunk = () => {
           break;
       }
       // update frames
-      if (!state.gradientEditor.isOpen && !gradientEditorFlag) {
-        updateSelectionFrame(getSelectedBounds(fullState));
-      }
+      // if (!state.gradientEditor.isOpen && !gradientEditorFlag) {
+      //   updateSelectionFrame(getSelectedBounds(fullState));
+      // }
       // updateActiveArtboardFrame();
       // if (state.viewSettings.tweenDrawer.isOpen && layerState.events.allIds.length > 0) {
       //   updateTweenEventsFrame(fullState);
@@ -3140,152 +3143,155 @@ export const redoThunk = () => {
 export const updateGradientFrame = (origin: { position: paper.Point; color: any; selected: boolean; index: number }, destination: { position: paper.Point; color: any; selected: boolean; index: number }): void => {
   const gradientFrame = uiPaperScope.project.getItem({ data: { id: 'gradientFrame' } });
   gradientFrame.removeChildren();
-  const gradientFrameHandleBgProps = {
-    radius: 8 / uiPaperScope.view.zoom,
-    fillColor: '#fff',
-    shadowColor: new uiPaperScope.Color(0, 0, 0, 0.5),
-    shadowBlur: 2,
-    insert: false,
-    strokeWidth: 1 / uiPaperScope.view.zoom
+  if (origin && destination) {
+    uiPaperScope.activate();
+    const gradientFrameHandleBgProps = {
+      radius: 8 / uiPaperScope.view.zoom,
+      fillColor: '#fff',
+      shadowColor: new uiPaperScope.Color(0, 0, 0, 0.5),
+      shadowBlur: 2,
+      insert: false,
+      strokeWidth: 1 / uiPaperScope.view.zoom
+    }
+    const gradientFrameHandleSwatchProps = {
+      radius: 6 / uiPaperScope.view.zoom,
+      fillColor: '#fff',
+      insert: false
+    }
+    const gradientFrameLineProps = {
+      from: origin.position,
+      to: destination.position,
+      insert: false
+    }
+    const gradientFrameOriginHandleBg = new uiPaperScope.Shape.Circle({
+      ...gradientFrameHandleBgProps,
+      center: origin.position,
+      data: {
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'origin',
+        elementId: 'gradientFrame',
+        stopIndex: origin.index
+      },
+      strokeColor: origin.selected ? THEME_PRIMARY_COLOR : null
+    });
+    const gradientFrameOriginHandleSwatch  = new uiPaperScope.Shape.Circle({
+      ...gradientFrameHandleSwatchProps,
+      fillColor: {
+        hue: origin.color.h,
+        saturation: origin.color.s,
+        lightness: origin.color.l,
+        alpha: origin.color.a
+      },
+      center: origin.position,
+      data: {
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'origin',
+        elementId: 'gradientFrame',
+        stopIndex: origin.index
+      }
+    });
+    const gradientFrameDestinationHandleBg = new uiPaperScope.Shape.Circle({
+      ...gradientFrameHandleBgProps,
+      center: destination.position,
+      data: {
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'destination',
+        elementId: 'gradientFrame',
+        stopIndex: destination.index
+      },
+      strokeColor: destination.selected ? THEME_PRIMARY_COLOR : null
+    });
+    const gradientFrameDestinationHandleSwatch = new uiPaperScope.Shape.Circle({
+      ...gradientFrameHandleSwatchProps,
+      fillColor: {
+        hue: destination.color.h,
+        saturation: destination.color.s,
+        lightness: destination.color.l,
+        alpha: destination.color.a
+      },
+      center: destination.position,
+      data: {
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'destination',
+        elementId: 'gradientFrame',
+        stopIndex: destination.index
+      }
+    });
+    const gradientFrameLineDark = new uiPaperScope.Path.Line({
+      ...gradientFrameLineProps,
+      strokeColor: new uiPaperScope.Color(0, 0, 0, 0.25),
+      strokeWidth: 3 / uiPaperScope.view.zoom,
+      data: {
+        id: 'gradientFrameLine',
+        type: 'UIElementChild',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'gradientFrame'
+      }
+    });
+    const gradientFrameLineLight = new uiPaperScope.Path.Line({
+      ...gradientFrameLineProps,
+      strokeColor: '#fff',
+      strokeWidth: 1 / uiPaperScope.view.zoom,
+      data: {
+        id: 'gradientFrameLine',
+        type: 'UIElementChild',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'gradientFrame'
+      }
+    });
+    const gradientFrameOriginHandle = new uiPaperScope.Group({
+      data: {
+        id: 'gradientFrameOriginHandle',
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'origin',
+        elementId: 'gradientFrame',
+        stopIndex: origin.index
+      },
+      insert: false,
+      children: [gradientFrameOriginHandleBg, gradientFrameOriginHandleSwatch]
+    });
+    const gradientFrameDestinationHandle = new uiPaperScope.Group({
+      data: {
+        id: 'gradientFrameDestinationHandle',
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'destination',
+        elementId: 'gradientFrame',
+        stopIndex: destination.index
+      },
+      insert: false,
+      children: [gradientFrameDestinationHandleBg, gradientFrameDestinationHandleSwatch]
+    });
+    const gradientFrameLines = new uiPaperScope.Group({
+      data: {
+        id: 'gradientFrameLines',
+        type: 'UIElementChild',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'gradientFrame'
+      },
+      insert: false,
+      children: [gradientFrameLineDark, gradientFrameLineLight]
+    });
+    new uiPaperScope.Group({
+      data: {
+        id: 'GradientFrame',
+        type: 'UIElement',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'gradientFrame'
+      },
+      children: [gradientFrameLines, gradientFrameOriginHandle, gradientFrameDestinationHandle],
+      parent: gradientFrame
+    });
   }
-  const gradientFrameHandleSwatchProps = {
-    radius: 6 / uiPaperScope.view.zoom,
-    fillColor: '#fff',
-    insert: false
-  }
-  const gradientFrameLineProps = {
-    from: origin.position,
-    to: destination.position,
-    insert: false
-  }
-  const gradientFrameOriginHandleBg = new uiPaperScope.Shape.Circle({
-    ...gradientFrameHandleBgProps,
-    center: origin.position,
-    data: {
-      type: 'UIElementChild',
-      interactive: true,
-      interactiveType: 'origin',
-      elementId: 'gradientFrame',
-      stopIndex: origin.index
-    },
-    strokeColor: origin.selected ? THEME_PRIMARY_COLOR : null
-  });
-  const gradientFrameOriginHandleSwatch  = new uiPaperScope.Shape.Circle({
-    ...gradientFrameHandleSwatchProps,
-    fillColor: {
-      hue: origin.color.h,
-      saturation: origin.color.s,
-      lightness: origin.color.l,
-      alpha: origin.color.a
-    },
-    center: origin.position,
-    data: {
-      type: 'UIElementChild',
-      interactive: true,
-      interactiveType: 'origin',
-      elementId: 'gradientFrame',
-      stopIndex: origin.index
-    }
-  });
-  const gradientFrameDestinationHandleBg = new uiPaperScope.Shape.Circle({
-    ...gradientFrameHandleBgProps,
-    center: destination.position,
-    data: {
-      type: 'UIElementChild',
-      interactive: true,
-      interactiveType: 'destination',
-      elementId: 'gradientFrame',
-      stopIndex: destination.index
-    },
-    strokeColor: destination.selected ? THEME_PRIMARY_COLOR : null
-  });
-  const gradientFrameDestinationHandleSwatch = new uiPaperScope.Shape.Circle({
-    ...gradientFrameHandleSwatchProps,
-    fillColor: {
-      hue: destination.color.h,
-      saturation: destination.color.s,
-      lightness: destination.color.l,
-      alpha: destination.color.a
-    },
-    center: destination.position,
-    data: {
-      type: 'UIElementChild',
-      interactive: true,
-      interactiveType: 'destination',
-      elementId: 'gradientFrame',
-      stopIndex: destination.index
-    }
-  });
-  const gradientFrameLineDark = new uiPaperScope.Path.Line({
-    ...gradientFrameLineProps,
-    strokeColor: new uiPaperScope.Color(0, 0, 0, 0.25),
-    strokeWidth: 3 / uiPaperScope.view.zoom,
-    data: {
-      id: 'gradientFrameLine',
-      type: 'UIElementChild',
-      interactive: false,
-      interactiveType: null,
-      elementId: 'gradientFrame'
-    }
-  });
-  const gradientFrameLineLight = new uiPaperScope.Path.Line({
-    ...gradientFrameLineProps,
-    strokeColor: '#fff',
-    strokeWidth: 1 / uiPaperScope.view.zoom,
-    data: {
-      id: 'gradientFrameLine',
-      type: 'UIElementChild',
-      interactive: false,
-      interactiveType: null,
-      elementId: 'gradientFrame'
-    }
-  });
-  const gradientFrameOriginHandle = new uiPaperScope.Group({
-    data: {
-      id: 'gradientFrameOriginHandle',
-      type: 'UIElementChild',
-      interactive: true,
-      interactiveType: 'origin',
-      elementId: 'gradientFrame',
-      stopIndex: origin.index
-    },
-    insert: false,
-    children: [gradientFrameOriginHandleBg, gradientFrameOriginHandleSwatch]
-  });
-  const gradientFrameDestinationHandle = new uiPaperScope.Group({
-    data: {
-      id: 'gradientFrameDestinationHandle',
-      type: 'UIElementChild',
-      interactive: true,
-      interactiveType: 'destination',
-      elementId: 'gradientFrame',
-      stopIndex: destination.index
-    },
-    insert: false,
-    children: [gradientFrameDestinationHandleBg, gradientFrameDestinationHandleSwatch]
-  });
-  const gradientFrameLines = new uiPaperScope.Group({
-    data: {
-      id: 'gradientFrameLines',
-      type: 'UIElementChild',
-      interactive: false,
-      interactiveType: null,
-      elementId: 'gradientFrame'
-    },
-    insert: false,
-    children: [gradientFrameLineDark, gradientFrameLineLight]
-  });
-  new uiPaperScope.Group({
-    data: {
-      id: 'GradientFrame',
-      type: 'UIElement',
-      interactive: false,
-      interactiveType: null,
-      elementId: 'gradientFrame'
-    },
-    children: [gradientFrameLines, gradientFrameOriginHandle, gradientFrameDestinationHandle],
-    parent: gradientFrame
-  });
 }
 
 // export const updateGradientFrame = (layerItem: Btwx.Layer, gradient: Btwx.Gradient) => {
@@ -3446,6 +3452,7 @@ export const updateActiveArtboardFrame = (bounds: paper.Rectangle): void => {
   const activeArtboardFrame = uiPaperScope.project.getItem({ data: { id: 'activeArtboardFrame' } });
   activeArtboardFrame.removeChildren();
   if (bounds) {
+    uiPaperScope.activate();
     const topLeft = bounds.topLeft;
     const bottomRight = bounds.bottomRight;
     new uiPaperScope.Path.Rectangle({
@@ -3473,6 +3480,7 @@ export const updateHoverFrame = (hoverItem: Btwx.Layer, artboardItem?: Btwx.Artb
   const hoverFrame = uiPaperScope.project.getItem({ data: { id: 'hoverFrame' } });
   hoverFrame.removeChildren();
   if (hoverItem) {
+    uiPaperScope.activate();
     const hoverFrameConstants = {
       strokeColor: THEME_PRIMARY_COLOR,
       strokeWidth: 2 / uiPaperScope.view.zoom,
@@ -3540,6 +3548,7 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
   const selectionFrame = uiPaperScope.project.getItem({ data: { id: 'selectionFrame' } });
   selectionFrame.removeChildren();
   if (bounds) {
+    uiPaperScope.activate();
     const resizeDisabled = false;
     const baseProps = {
       point: bounds.topLeft,
@@ -3756,6 +3765,7 @@ export const updateTweenEventsFrame = (state: RootState) => {
   }).tweenEventItems;
   tweenEventsFrame.removeChildren();
   if (events) {
+    uiPaperScope.activate();
     const theme = getTheme(state.viewSettings.theme);
     events.forEach((event, index) => {
       const eventLayerItem = state.layer.present.byId[event.layer];

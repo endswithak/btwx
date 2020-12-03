@@ -137,19 +137,14 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
         return [];
       }
     }
-    if (paperScope !== 1) {
-      const paperScopeItem = paper.PaperScope.get(paperScope);
-      return getProjectSnapLayers(paperScopeItem);
-    } else {
-      return Object.keys(layerPaperScopes).reduce((result, current, index) => {
-        const paperScope = layerPaperScopes[current];
-        const projectSnapLayers = getProjectSnapLayers(paperScope);
-        if (projectSnapLayers && projectSnapLayers.length > 0) {
-          result = [...result, ...projectSnapLayers];
-        }
-        return result;
-      }, []);
-    }
+    return Object.keys(layerPaperScopes).reduce((result, current, index) => {
+      const paperScope = layerPaperScopes[current];
+      const projectSnapLayers = getProjectSnapLayers(paperScope);
+      if (projectSnapLayers && projectSnapLayers.length > 0) {
+        result = [...result, ...projectSnapLayers];
+      }
+      return result;
+    }, []);
   }
 
   const getYSnapToLayer = (snapZones: Btwx.SnapZones): paper.Item => {
@@ -188,19 +183,14 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
         return null;
       }
     }
-    if (paperScope !== 1) {
-      const paperScopeItem = paper.PaperScope.get(paperScope);
-      return getProjectSnapLayer(paperScopeItem);
-    } else {
-      return Object.keys(layerPaperScopes).reduce((result: paper.Item, current, index) => {
-        const paperScope = layerPaperScopes[current];
-        const projectSnapLayer = getProjectSnapLayer(paperScope);
-        if (projectSnapLayer) {
-          result = projectSnapLayer;
-        }
-        return result;
-      }, null);
-    }
+    return Object.keys(layerPaperScopes).reduce((result: paper.Item, current, index) => {
+      const paperScope = layerPaperScopes[current];
+      const projectSnapLayer = getProjectSnapLayer(paperScope);
+      if (projectSnapLayer) {
+        result = projectSnapLayer;
+      }
+      return result;
+    }, null);
   }
 
   const getXSnapToLayer = (snapZones: Btwx.SnapZones): paper.Item => {
@@ -239,19 +229,14 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
         return null;
       }
     }
-    if (paperScope !== 1) {
-      const paperScopeItem = paper.PaperScope.get(paperScope);
-      return getProjectSnapLayer(paperScopeItem);
-    } else {
-      return Object.keys(layerPaperScopes).reduce((result: paper.Item, current, index) => {
-        const paperScope = layerPaperScopes[current];
-        const projectSnapLayer = getProjectSnapLayer(paperScope);
-        if (projectSnapLayer) {
-          result = projectSnapLayer;
-        }
-        return result;
-      }, null);
-    }
+    return Object.keys(layerPaperScopes).reduce((result: paper.Item, current, index) => {
+      const paperScope = layerPaperScopes[current];
+      const projectSnapLayer = getProjectSnapLayer(paperScope);
+      if (projectSnapLayer) {
+        result = projectSnapLayer;
+      }
+      return result;
+    }, null);
   }
 
   const getYSnapPoint = (snapZones: Btwx.SnapZones): Btwx.SnapPoint => {

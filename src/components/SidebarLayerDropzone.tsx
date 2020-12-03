@@ -58,14 +58,14 @@ const SidebarLayerDropzone = (props: SidebarLayerDropzoneProps): ReactElement =>
   }
 
   const canDropCenter = () => {
-    const something1 = selected.some((id) => document.getElementById(id).contains(ref.current));
-    const something2 = selected.some((id) => selectedById[id].type === 'Artboard') && (layerItem.type === 'Artboard' || layerItem.type === 'Group');
+    const something1 = selected.some(id => document.getElementById(id).contains(ref.current));
+    const something2 = selected.some(id => selectedById[id].type === 'Artboard') && (layerItem.type === 'Artboard' || layerItem.type === 'Group');
     return !something1 && !something2;
   }
 
   const canDropTopBottom = () => {
-    const something1 = selected.some((id) => document.getElementById(id).contains(ref.current));
-    const something2 = selected.some((id) => selectedById[id].type === 'Artboard') && layerItem.parent !== 'page';
+    const something1 = selected.some(id => document.getElementById(id).contains(ref.current));
+    const something2 = selected.some(id => selectedById[id].type === 'Artboard') && layerItem.parent !== 'page';
     return !something1 && !something2;
   }
 

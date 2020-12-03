@@ -3,16 +3,19 @@ import { connect } from 'react-redux';
 import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
 import styled from 'styled-components';
+import { getAllPaperScopes } from '../store/selectors/layer';
 import { setLeftSidebarWidth } from '../store/actions/viewSettings';
 import { SetLeftSidebarWidthPayload, ViewSettingsTypes } from '../store/actionTypes/viewSettings';
 import { RootState } from '../store/reducers';
-import { paperMain } from '../canvas';
 import { ThemeContext } from './ThemeProvider';
 
 gsap.registerPlugin(Draggable);
 
 interface SidebarLeftDragHandleProps {
   sidebarWidth?: number;
+  allPaperScopes?: {
+    [id: string]: paper.PaperScope;
+  };
   setLeftSidebarWidth?(payload: SetLeftSidebarWidthPayload): ViewSettingsTypes;
 }
 
@@ -32,7 +35,7 @@ const SidebarLeftDragHandle = (props: SidebarLeftDragHandleProps): ReactElement 
   const theme = useContext(ThemeContext);
   const ref = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
-  const { sidebarWidth, setLeftSidebarWidth } = props;
+  const { sidebarWidth, setLeftSidebarWidth, allPaperScopes } = props;
 
   useEffect(() => {
     gsap.set(ref.current, {x: sidebarWidth});
@@ -47,7 +50,10 @@ const SidebarLeftDragHandle = (props: SidebarLeftDragHandleProps): ReactElement 
       onDrag: function() {
         const canvasContainer = document.getElementById('canvas-container');
         gsap.set('#sidebar-left', {width: this.x});
-        paperMain.view.viewSize.width = canvasContainer.clientWidth;
+        Object.keys(allPaperScopes).forEach((id) => {
+          const paperScope = allPaperScopes[id];
+          paperScope.view.viewSize.width = canvasContainer.clientWidth;
+        });
       },
       onRelease: function() {
         setLeftSidebarWidth({width: this.x});
@@ -70,10 +76,16 @@ const SidebarLeftDragHandle = (props: SidebarLeftDragHandleProps): ReactElement 
   );
 }
 
-const mapStateToProps = (state: RootState) => {
+const mapStateToProps = (state: RootState): {
+  sidebarWidth: number;
+  allPaperScopes: {
+    [id: string]: paper.PaperScope;
+  };
+} => {
   const { viewSettings } = state;
   const sidebarWidth = viewSettings.leftSidebar.width;
-  return { sidebarWidth };
+  const allPaperScopes = getAllPaperScopes(state);
+  return { sidebarWidth, allPaperScopes };
 };
 
 export default connect(

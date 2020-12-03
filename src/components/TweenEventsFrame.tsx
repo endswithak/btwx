@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { updateTweenEventsFrameThunk } from '../store/actions/layer';
-import { paperMain } from '../canvas';
+import { uiPaperScope } from '../canvas';
 
 interface TweenEventsFrameProps {
   activeArtboard?: string;
@@ -37,7 +37,7 @@ const TweenEventsFrame = (props: TweenEventsFrameProps): ReactElement => {
     updateTweenEventsFrameThunk();
     // updateTweenEventsFrame({allArtboardIds, byId: {...artboardsById, ...tweenEventLayers.byId}, activeArtboard} as LayerState, tweenEventItems, eventHover, themeName);
     return () => {
-      const tweenEventsFrame = paperMain.project.getItem({ data: { id: 'artboardEvents' } });
+      const tweenEventsFrame = uiPaperScope.project.getItem({ data: { id: 'artboardEvents' } });
       tweenEventsFrame.removeChildren();
     }
   }, [activeArtboard, theme, tweenDrawerEventSort, tweenDrawerEventHover, tweenDrawerEvent, activeArtboardEvents]);

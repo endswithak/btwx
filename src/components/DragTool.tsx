@@ -235,7 +235,7 @@ const DragTool = (props: DragToolProps): ReactElement => {
     if (upEvent && isEnabled) {
       if (selected.length > 0 && minDistance > 3) {
         if (altModifier) {
-          const offset = toBounds.center.subtract(fromBounds.center);
+          const offset = toBounds.center.subtract(fromBounds.center).round();
           duplicateLayers({layers: selected, offset: {x: offset.x, y: offset.y}});
         } else {
           moveLayers({layers: selected});

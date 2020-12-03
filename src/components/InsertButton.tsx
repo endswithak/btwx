@@ -14,6 +14,7 @@ interface InsertButtonProps {
   activeTool?: Btwx.ToolType;
   shapeToolShapeType?: Btwx.ShapeType;
   insertKnobOpen?: boolean;
+  activeArtboard?: string;
   toggleShapeToolThunk?(shapeType: Btwx.ShapeType): void;
   toggleArtboardToolThunk?(): void;
   toggleTextToolThunk?(): void;
@@ -25,6 +26,7 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
     activeTool,
     shapeToolShapeType,
     insertKnobOpen,
+    activeArtboard,
     toggleShapeToolThunk,
     toggleArtboardToolThunk,
     toggleTextToolThunk,
@@ -90,41 +92,49 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
         label: 'Rectangle',
         onClick: () => toggleShapeToolThunk('Rectangle'),
         icon: 'rectangle',
-        isActive: activeTool === 'Shape' && shapeToolShapeType === 'Rectangle'
+        isActive: activeTool === 'Shape' && shapeToolShapeType === 'Rectangle',
+        disabled: activeArtboard === null
       },{
         label: 'Rounded',
         onClick: () => toggleShapeToolThunk('Rounded'),
         icon: 'rounded',
-        isActive: activeTool === 'Shape' && shapeToolShapeType === 'Rounded'
+        isActive: activeTool === 'Shape' && shapeToolShapeType === 'Rounded',
+        disabled: activeArtboard === null
       },{
         label: 'Ellipse',
         onClick: () => toggleShapeToolThunk('Ellipse'),
         icon: 'ellipse',
-        isActive: activeTool === 'Shape' && shapeToolShapeType === 'Ellipse'
+        isActive: activeTool === 'Shape' && shapeToolShapeType === 'Ellipse',
+        disabled: activeArtboard === null
       },{
         label: 'Star',
         onClick: () => toggleShapeToolThunk('Star'),
         icon: 'star',
-        isActive: activeTool === 'Shape' && shapeToolShapeType === 'Star'
+        isActive: activeTool === 'Shape' && shapeToolShapeType === 'Star',
+        disabled: activeArtboard === null
       },{
         label: 'Polygon',
         onClick: () => toggleShapeToolThunk('Polygon'),
         icon: 'polygon',
-        isActive: activeTool === 'Shape' && shapeToolShapeType === 'Polygon'
+        isActive: activeTool === 'Shape' && shapeToolShapeType === 'Polygon',
+        disabled: activeArtboard === null
       },{
         label: 'Line',
         onClick: () => toggleShapeToolThunk('Line'),
         icon: 'line',
-        isActive: activeTool === 'Shape' && shapeToolShapeType === 'Line'
+        isActive: activeTool === 'Shape' && shapeToolShapeType === 'Line',
+        disabled: activeArtboard === null
       },{
         label: 'Text',
         onClick: toggleTextToolThunk,
         icon: 'text',
-        isActive: activeTool === 'Text'
+        isActive: activeTool === 'Text',
+        disabled: activeArtboard === null
       },{
         label: 'Image',
         onClick: handleImageClick,
         icon: 'image',
+        disabled: activeArtboard === null
       }]} />
   );
 }
@@ -133,12 +143,14 @@ const mapStateToProps = (state: RootState): {
   activeTool: Btwx.ToolType;
   shapeToolShapeType: Btwx.ShapeType;
   insertKnobOpen: boolean;
+  activeArtboard: string;
 } => {
-  const { canvasSettings, insertKnob, shapeTool } = state;
+  const { canvasSettings, insertKnob, shapeTool, layer } = state;
   const activeTool = canvasSettings.activeTool;
   const shapeToolShapeType = shapeTool.shapeType;
   const insertKnobOpen = insertKnob.isActive;
-  return { activeTool, shapeToolShapeType, insertKnobOpen };
+  const activeArtboard = layer.present.activeArtboard;
+  return { activeTool, shapeToolShapeType, insertKnobOpen, activeArtboard };
 };
 
 export default connect(

@@ -57,8 +57,8 @@ const MenuInsertImage = (props: MenuInsertImageProps): ReactElement => {
 const mapStateToProps = (state: RootState): {
   canInsert: boolean;
 } => {
-  const { canvasSettings } = state;
-  const canInsert = canvasSettings.focusing;
+  const { canvasSettings, layer } = state;
+  const canInsert = canvasSettings.focusing && layer.present.activeArtboard !== null;
   return { canInsert };
 };
 

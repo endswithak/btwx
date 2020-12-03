@@ -93,7 +93,7 @@ const mapStateToProps = (state: RootState): {
   unsavedEdits: boolean;
 } => {
   const { documentSettings, viewSettings, preview, layer } = state;
-  const unsavedEdits = layer.present.edit.id !== documentSettings.edit;
+  const unsavedEdits = layer.present.edit && layer.present.edit.id !== documentSettings.edit;
   const documentName = documentSettings.name;
   const themeName = viewSettings.theme;
   const recording = preview.recording;

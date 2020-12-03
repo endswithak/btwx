@@ -36,8 +36,8 @@ const mapStateToProps = (state: RootState): {
   const { layer, documentSettings } = state;
   const hover = layer.present.hover;
   const hoverItem = hover ? layer.present.byId[hover] : null;
-  const artboardLayer = hoverItem ? hoverItem.artboardLayer : null;
-  const artboard = artboardLayer ? (hoverItem as Btwx.ArtboardLayer).artboard : null;
+  const artboardLayer = hoverItem ? hoverItem.type !== 'Artboard' : null;
+  const artboard = artboardLayer ? (hoverItem as Btwx.MaskableLayer).artboard : null;
   const artboardItem = artboard ? layer.present.byId[artboard] as Btwx.Artboard : null;
   const zoom = documentSettings.zoom;
   return { hover, hoverItem, artboardItem, zoom };

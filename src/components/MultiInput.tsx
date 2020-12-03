@@ -58,7 +58,6 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
     if (!colorEditorOpen) {
       openColorEditor({
         prop: prop,
-        layers: selected,
         x: bounding.x,
         y: bounding.y - (bounding.height - 10) // 2 (swatch drop shadow) + 8 (top-padding)
       });

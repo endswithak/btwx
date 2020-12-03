@@ -155,9 +155,9 @@ const ContextMenuWrap = (props: ContextMenuWrapProps): ReactElement => {
           onClick: (): void => {
             closeContextMenu();
             if (selected.length > 0) {
-              duplicateLayers({layers: selected, includeInHistory: true});
+              duplicateLayers({layers: selected});
             } else {
-              duplicateLayers({layers: [contextMenu.id], includeInHistory: true});
+              duplicateLayers({layers: [contextMenu.id]});
             }
           }
         },{

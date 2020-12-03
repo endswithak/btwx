@@ -164,23 +164,23 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
   }
 
   const handleContextMenu = (): void => {
-    // let contextMenuId = 'page';
-    // const paperPoint = paperMain.view.getEventPoint(layerEvent.event);
-    // if (!layerEvent.empty) {
-    //   if (nearestScopeAncestor.type === 'Artboard') {
-    //     contextMenuId = deepSelectItem.id;
-    //   } else {
-    //     contextMenuId = nearestScopeAncestor.id;
-    //   }
-    // }
-    // openContextMenu({
-    //   type: 'LayerEdit',
-    //   id: contextMenuId,
-    //   x: layerEvent.event.clientX,
-    //   y: layerEvent.event.clientY,
-    //   paperX: paperPoint.x,
-    //   paperY: paperPoint.y
-    // });
+    let contextMenuId = 'page';
+    const paperPoint = uiPaperScope.view.getEventPoint(layerEvent.event);
+    if (!layerEvent.empty) {
+      if (nearestScopeAncestor.type === 'Artboard') {
+        contextMenuId = deepSelectItem.id;
+      } else {
+        contextMenuId = nearestScopeAncestor.id;
+      }
+    }
+    openContextMenu({
+      type: 'LayerEdit',
+      id: contextMenuId,
+      x: layerEvent.event.clientX,
+      y: layerEvent.event.clientY,
+      paperX: paperPoint.x,
+      paperY: paperPoint.y
+    });
   }
 
   useEffect(() => {

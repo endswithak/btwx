@@ -20,6 +20,7 @@
     "src/**/*"
   ],
   "exclude": [
+    "react-vtree",
     "src/canvas/base",
     "src/canvas/layer",
     "src/canvas/layer/utils",

@@ -32,7 +32,11 @@ const CanvasArtboard = (props: CanvasArtboardProps): ReactElement => {
       paperScopeItem.view.viewSize = new paperScopeItem.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
       paperScopeItem.view.matrix.set(matrix);
     }
-  }, []);
+    return () => {
+      const paperScopeItem = paper.PaperScope.get(paperScope);
+      paperScopeItem.project.remove();
+    }
+  }, [id]);
 
   return (
     <canvas
@@ -55,7 +59,7 @@ const mapStateToProps = (state: RootState, ownProps: CanvasArtboardProps): {
   return {
     documentImages: documentSettings.images.byId,
     matrix: documentSettings.matrix,
-    paperJSON: artboard.paperJSON,
+    paperJSON: artboard.json,
     paperScope: artboard.paperScope
   };
 };

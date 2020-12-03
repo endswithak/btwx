@@ -5,14 +5,16 @@ import { connect } from 'react-redux';
 import { gsap } from 'gsap';
 import { RootState } from '../store/reducers';
 import { paperPreview } from '../canvas';
-import { getEventsByOriginArtboard, getAllArtboardEventsConnectedArtboards, getAllArtboardTweens, getAllArtboardTweenLayers, getAllArtboardTweenDestinationLayers, getAllArtboardEventLayers } from '../store/selectors/layer';
+import { getAllArtboardPaperProjects, getEventsByOriginArtboard, getAllArtboardEventsConnectedArtboards, getAllArtboardTweens, getAllArtboardTweenLayers, getAllArtboardTweenDestinationLayers, getAllArtboardEventLayers } from '../store/selectors/layer';
 import { bufferToBase64 } from '../utils';
 import * as previewUtils from '../previewUtils';
 import { ThemeContext } from './ThemeProvider';
 
 interface PreviewCanvasProps {
   layer?: any;
-  paperProject?: string;
+  paperProjects?: {
+    [id: string]: string;
+  };
   activeArtboard?: Btwx.Artboard;
   page?: string;
   documentWindowId?: number;
@@ -62,7 +64,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useContext(ThemeContext);
-  const { paperProject, activeArtboard, page, touchCursor, tweenEvents, tweenEventLayers, tweenEventDestinations, tweens, tweenLayers, tweenLayerDestinations, documentWindowId, documentImagesById } = props;
+  const { paperProjects, activeArtboard, page, touchCursor, tweenEvents, tweenEventLayers, tweenEventDestinations, tweens, tweenLayers, tweenLayerDestinations, documentWindowId, documentImagesById } = props;
 
   const handleResize = (): void => {
     paperPreview.view.viewSize = new paperPreview.Size(
@@ -87,7 +89,9 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
     // 1. clear current canvas
     paperPreview.project.clear();
     // 2. import updated paperProject
-    paperPreview.project.importJSON(paperProject);
+    Object.keys(paperProjects).forEach((key, index) => {
+      paperPreview.project.importJSON(paperProjects[key]);
+    });
     // 3. store relevant origin and destination layer vars
     const paperActiveArtboard = paperPreview.project.getItem({ data: { id: activeArtboard.id } }) as paper.Item;
     const paperTweenEventLayersById = tweenEventLayers.allIds.reduce((result: {[id: string]: paper.Item}, current) => {
@@ -109,10 +113,11 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
     // 4. clear project
     paperPreview.project.clear();
     // 5. add active artboard
-    paperPreview.project.addLayer(new paperPreview.Layer({
-      children: [paperActiveArtboard],
-      position: paperPreview.view.center
-    }));
+    paperPreview.project.importJSON(paperProjects[activeArtboard.id]);
+    // paperPreview.project.addLayer(new paperPreview.Layer({
+    //   children: [paperActiveArtboard],
+    //   position: paperPreview.view.center
+    // }));
     // 6. set timeline vars
     const timelines = {} as {
       [id: string]: gsap.core.Timeline;
@@ -179,7 +184,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
       // play timeline on event
       tweenEventPaperLayer.on(tweenEvent.event === 'rightclick' ? 'click' : tweenEvent.event, eventLayerFunctions[eventId]);
     });
-  }, [paperProject, activeArtboard]);
+  }, [paperProjects, activeArtboard]);
 
   return (
     <div
@@ -200,11 +205,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
 
 const mapStateToProps = (state: RootState) => {
   const { layer, documentSettings, preview } = state;
-  const paperProject = documentSettings.images.allIds.reduce((result, current) => {
-    const rasterBase64 = bufferToBase64(Buffer.from(documentSettings.images.byId[current].buffer));
-    const base64 = `data:image/webp;base64,${rasterBase64}`;
-    return result.replace(`"source":"${current}"`, `"source":"${base64}"`);
-  }, layer.present.paperProject);
+  const paperProjects = getAllArtboardPaperProjects(state);
   const tweenEvents = getEventsByOriginArtboard(state, layer.present.activeArtboard);
   const tweenEventDestinations = getAllArtboardEventsConnectedArtboards(state, layer.present.activeArtboard);
   const tweenEventLayers = getAllArtboardEventLayers(state, layer.present.activeArtboard);
@@ -217,7 +218,7 @@ const mapStateToProps = (state: RootState) => {
   return {
     activeArtboard: layer.present.byId[layer.present.activeArtboard],
     page: layer.present.page,
-    paperProject,
+    paperProjects,
     tweenEvents,
     tweenEventLayers,
     tweenEventDestinations,

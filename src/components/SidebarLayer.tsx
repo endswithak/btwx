@@ -164,7 +164,7 @@ const mapStateToProps = (state: RootState, ownProps: SidebarLayerProps): {
   const isSelected = layerItem.selected;
   const isHover = layerItem.hover;
   const hover = layer.present.hover;
-  const underlyingMask = layerItem.underlyingMask;
+  const underlyingMask = layerItem.type !== 'Artboard' ? (layerItem as Btwx.MaskableLayer).underlyingMask : null;
   const editing = ownProps.id === leftSidebar.editing;
   return { dragging, isSelected, isHover, underlyingMask, hover, editing };
 };

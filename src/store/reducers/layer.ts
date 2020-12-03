@@ -1,5 +1,4 @@
 import undoable from 'redux-undo';
-import { DEFAULT_STYLE, DEFAULT_TRANSFORM, TWEEN_PROPS_MAP } from '../../constants';
 
 import {
   ADD_ARTBOARD,
@@ -422,9 +421,6 @@ export interface LayerState {
     [id: string]: Btwx.Layer;
   };
   allIds: string[];
-  page: string;
-  activeArtboard: string;
-  selected: string[];
   allArtboardIds: string[];
   allShapeIds: string[];
   allGroupIds: string[];
@@ -432,6 +428,8 @@ export interface LayerState {
   allImageIds: string[];
   scope: string[];
   paperScope: number;
+  activeArtboard: string;
+  selected: string[];
   hover: string;
   events: {
     allIds: string[];
@@ -451,51 +449,40 @@ export interface LayerState {
   childrenById: {
     [id: string]: string[];
   };
+  artboardJSON: {
+    [id: string]: string;
+  };
   edit: Btwx.Edit;
 }
 
 export const initialState: LayerState = {
   byId: {
-    page: {
-      type: 'Page',
-      id: 'page',
-      name: 'Page',
+    root: {
+      type: 'Root',
+      id: 'root',
       parent: null,
+      children: [],
+      scope: [],
       frame: {
         x: 0,
         y: 0,
         width: 0,
         height: 0,
-        innerHeight: 0,
-        innerWidth: 0
-      },
-      children: [],
-      selected: false,
-      scope: [],
-      events: [],
-      tweens: {
-        allIds: [],
-        asOrigin: [],
-        asDestination: [],
-        byProp: TWEEN_PROPS_MAP
-      },
-      style: DEFAULT_STYLE,
-      transform: DEFAULT_TRANSFORM,
-      paperScope: 1,
-      paperJSON: '[["Layer",{"applyMatrix":true,"name":"Page","data":{"id":"page","type":"Layer","layerType":"Page","scope":[]}}]]'
-    } as Btwx.Page
+        innerWidth: 0,
+        innerHeight: 0
+      }
+    } as Btwx.Root
   },
-  allIds: ['page'],
-  page: 'page',
-  activeArtboard: null,
-  selected: [],
+  allIds: ['root'],
   allArtboardIds: [],
   allShapeIds: [],
   allGroupIds: [],
   allTextIds: [],
   allImageIds: [],
-  scope: ['page'],
-  paperScope: 1,
+  scope: ['root'],
+  paperScope: null,
+  activeArtboard: null,
+  selected: [],
   hover: null,
   events: {
     allIds: [],
@@ -507,15 +494,10 @@ export const initialState: LayerState = {
   },
   shapeIcons: {},
   childrenById: {
-    page: []
+    root: []
   },
-  edit: {
-    id: 'page',
-    actionType: null,
-    payload: null,
-    detail: '',
-    projects: ['page']
-  }
+  artboardJSON: {},
+  edit: null
 };
 
 export const baseReducer = (state = initialState, action: LayerTypes): LayerState => {

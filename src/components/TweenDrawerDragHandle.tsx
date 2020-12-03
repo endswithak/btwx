@@ -3,16 +3,19 @@ import { connect } from 'react-redux';
 import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
 import styled from 'styled-components';
+import { getAllPaperScopes } from '../store/selectors/layer';
 import { setTweenDrawerHeight } from '../store/actions/viewSettings';
 import { SetTweenDrawerHeightPayload, ViewSettingsTypes } from '../store/actionTypes/viewSettings';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
-import { paperMain } from '../canvas';
 
 gsap.registerPlugin(Draggable);
 
 interface TweenDrawerDragHandleProps {
   tweenDrawerHeight?: number;
+  allPaperScopes?: {
+    [id: string]: paper.PaperScope;
+  };
   setTweenDrawerHeight?(payload: SetTweenDrawerHeightPayload): ViewSettingsTypes;
 }
 
@@ -32,7 +35,7 @@ const TweenDrawerDragHandle = (props: TweenDrawerDragHandleProps): ReactElement 
   const theme = useContext(ThemeContext);
   const ref = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
-  const { tweenDrawerHeight, setTweenDrawerHeight } = props;
+  const { tweenDrawerHeight, setTweenDrawerHeight, allPaperScopes } = props;
 
   useEffect(() => {
     gsap.set(ref.current, {y: `-=${tweenDrawerHeight}`});
@@ -47,7 +50,10 @@ const TweenDrawerDragHandle = (props: TweenDrawerDragHandleProps): ReactElement 
       onDrag: function() {
         const canvasContainer = document.getElementById('canvas-container');
         gsap.set('#tween-drawer', {height: this.y * -1});
-        paperMain.view.viewSize.height = canvasContainer.clientHeight;
+        Object.keys(allPaperScopes).forEach((id) => {
+          const paperScope = allPaperScopes[id];
+          paperScope.view.viewSize.height = canvasContainer.clientHeight;
+        });
       },
       onRelease: function() {
         setTweenDrawerHeight({height: this.y * -1});
@@ -70,10 +76,16 @@ const TweenDrawerDragHandle = (props: TweenDrawerDragHandleProps): ReactElement 
   );
 }
 
-const mapStateToProps = (state: RootState) => {
+const mapStateToProps = (state: RootState): {
+  tweenDrawerHeight: number;
+  allPaperScopes: {
+    [id: string]: paper.PaperScope;
+  };
+} => {
   const { viewSettings } = state;
   const tweenDrawerHeight = viewSettings.tweenDrawer.height;
-  return { tweenDrawerHeight };
+  const allPaperScopes = getAllPaperScopes(state);
+  return { tweenDrawerHeight, allPaperScopes };
 };
 
 export default connect(

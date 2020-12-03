@@ -85,9 +85,9 @@ const mapStateToProps = (state: RootState, ownProps: SidebarLayerMaskedIconProps
 } => {
   const { leftSidebar, layer } = state;
   const layerItem = layer.present.byId[ownProps.id];
-  const isMasked = layerItem.masked;
+  const isMasked = layerItem.type === 'Artboard' ? null : (layerItem as Btwx.MaskableLayer).masked;
   const isSelected = layerItem.selected;
-  const underlyingMask = layerItem.underlyingMask;
+  const underlyingMask = layerItem.type === 'Artboard' ? null : (layerItem as Btwx.MaskableLayer).underlyingMask;
   const underlyingMaskItem = underlyingMask ? layer.present.byId[underlyingMask] : null;
   const editing = leftSidebar.editing === ownProps.id;
   const underlyingMaskHover = underlyingMaskItem ? underlyingMaskItem.hover : null;

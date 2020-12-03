@@ -37,7 +37,7 @@ declare namespace Btwx {
 
   type TweenPropMap = { [K in TweenProp]: boolean; }
 
-  type LayerType = 'Group' | 'Shape' | 'Page' | 'Artboard' | 'Text' | 'Image';
+  type LayerType = 'Root' | 'Group' | 'Shape' | 'Artboard' | 'Text' | 'Image';
 
   type BlendMode = 'normal' | 'darken' | 'multiply' | 'color-burn' | 'lighten' | 'screen' | 'color-dodge' | 'overlay' | 'soft-light' | 'hard-light' | 'difference' | 'exclusion' | 'hue' | 'saturation' | 'color' | 'luminosity' | 'add' | 'subtract' | 'average' | 'pin-light' | 'negation' | 'source-over' | 'source-in' | 'source-out' | 'source-atop' | 'destination-over' | 'destination-in' | 'destination-out' | 'destination-atop' | 'lighter' | 'darker' | 'copy' | 'xor';
 
@@ -162,7 +162,7 @@ declare namespace Btwx {
 
   interface LayerState {
     byId: {
-      [id: string]: Page | Artboard | Group | Shape | Text | Image;
+      [id: string]: Artboard | Group | Shape | Text | Image;
     };
     allIds: string[];
     page: string;
@@ -316,18 +316,16 @@ declare namespace Btwx {
   interface Layer {
     type: LayerType;
     id: string;
+    index: number;
     name: string;
+    artboard: string;
     parent: string;
     children: string[];
     scope: string[];
     frame: Frame;
-    underlyingMask: string;
-    ignoreUnderlyingMask: boolean;
-    masked: boolean;
     showChildren: boolean;
     selected: boolean;
     hover: boolean;
-    artboardLayer: boolean;
     events: string[];
     tweens: {
       allIds: string[];
@@ -341,41 +339,44 @@ declare namespace Btwx {
     style: Style;
   }
 
-  interface ProjectLayer extends Layer {
-    paperScope: number;
-    paperJSON: string;
+  interface Root extends Layer {
+    type: 'Root';
+    id: 'root';
+    parent: null;
+    children: string[];
+    scope: string[];
   }
 
-  interface ArtboardLayer extends Layer {
-    artboard: string;
-  }
-
-  interface Page extends ProjectLayer {
-    type: 'Page';
-  }
-
-  interface Artboard extends ProjectLayer {
+  interface Artboard extends Layer {
     type: 'Artboard';
     originArtboardForEvents: string[];
     destinationArtboardForEvents: string[];
+    paperScope: number;
+    json: string;
   }
 
-  interface Group extends ArtboardLayer {
+  interface MaskableLayer extends Layer {
+    underlyingMask: string;
+    ignoreUnderlyingMask: boolean;
+    masked: boolean;
+  }
+
+  interface Group extends MaskableLayer {
     type: 'Group';
   }
 
-  interface Text extends ArtboardLayer {
+  interface Text extends MaskableLayer {
     type: 'Text';
     text: string;
     textStyle: TextStyle;
   }
 
-  interface Image extends ArtboardLayer {
+  interface Image extends MaskableLayer {
     type: 'Image';
     imageId: string;
   }
 
-  interface Shape extends ArtboardLayer {
+  interface Shape extends MaskableLayer {
     type: 'Shape';
     shapeType: ShapeType;
     closed: boolean;

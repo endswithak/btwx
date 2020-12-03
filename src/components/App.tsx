@@ -24,11 +24,11 @@ const App = (): ReactElement => {
         {
           ready
           ? <>
+              <ContextMenuWrap />
               {/* Canvas UI */}
               {/* Modals */}
               {/* <EaseEditorWrap /> */}
-              {/* <ArtboardPresetEditorWrap />
-              <ContextMenuWrap /> */}
+              {/* <ArtboardPresetEditorWrap /> */}
             </>
           : null
         }

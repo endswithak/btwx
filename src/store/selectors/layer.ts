@@ -26,11 +26,26 @@ export const getEventDrawerEvent = (state: RootState): string => state.tweenDraw
 export const getEventDrawerSort = (state: RootState): string => state.tweenDrawer.eventSort;
 export const getEventDrawerHover = (state: RootState): string => state.tweenDrawer.eventHover;
 export const getActiveArtboard = (state: RootState): string => state.layer.present.activeArtboard;
+export const getDocumentImages = (state: RootState): { allIds: string[]; byId: { [id: string]: Btwx.DocumentImage } } => state.documentSettings.images;
+
+export const getAllArtboardPaperProjects = createSelector(
+  [ getAllArtboardIds, getLayersById, getDocumentImages ],
+  (allArtboardIds, byId, documentImages) => {
+    return allArtboardIds.reduce((result, current, index) => ({
+      ...result,
+      [current]: documentImages.allIds.reduce((dr, dc) => {
+        const rasterBase64 = bufferToBase64(Buffer.from(documentImages.byId[dc].buffer));
+        const base64 = `data:image/webp;base64,${rasterBase64}`;
+        return dr.replace(`"source":"${dc}"`, `"source":"${base64}"`);
+      }, (byId[current] as Btwx.Artboard).json)
+    }), {}) as { [id: string]: string };
+  }
+);
 
 export const getLayerPaperScopes = createSelector(
   [ getAllArtboardIds ],
   (allArtboardIds) => {
-    return ['page', ...allArtboardIds].reduce((result, current, index) => ({
+    return allArtboardIds.reduce((result, current, index) => ({
       ...result,
       [current]: paper.PaperScope.get(index + 1)
     }), {}) as { [id: string]: paper.PaperScope };
@@ -40,7 +55,7 @@ export const getLayerPaperScopes = createSelector(
 export const getAllPaperScopes = createSelector(
   [ getAllArtboardIds ],
   (allArtboardIds) => {
-    return ['ui', 'page', ...allArtboardIds].reduce((result, current, index) => ({
+    return ['ui', ...allArtboardIds].reduce((result, current, index) => ({
       ...result,
       [current]: paper.PaperScope.get(index)
     }), {}) as { [id: string]: paper.PaperScope };
@@ -48,26 +63,27 @@ export const getAllPaperScopes = createSelector(
 );
 
 export const getCanvasBounds = createSelector(
-  [ getLayerPaperScopes ],
-  (layerPaperScopes) => {
-    return Object.keys(layerPaperScopes).reduce((result: paper.Rectangle, current, index: number) => {
-      const paperScope = layerPaperScopes[current];
-      let nextTopLeft;
-      let nextBottomRight;
-      const topLeft = paperScope.project.activeLayer.bounds.topLeft;
-      const bottomRight = paperScope.project.activeLayer.bounds.bottomRight;
-      if (index === 0) {
-        nextTopLeft = topLeft;
-        nextBottomRight = bottomRight;
-      } else {
-        nextTopLeft = paper.Point.min(result.topLeft, topLeft);
-        nextBottomRight = paper.Point.max(result.bottomRight, bottomRight);
-      }
-      return new uiPaperScope.Rectangle({
-        from: nextTopLeft,
-        to: nextBottomRight
-      });
-    }, null);
+  [ getLayersById, getAllArtboardIds ],
+  (byId, allArtboardIds) => {
+    return getLayersBounds({byId} as LayerState, allArtboardIds);
+    // return Object.keys(layerPaperScopes).reduce((result: paper.Rectangle, current, index: number) => {
+    //   const paperScope = layerPaperScopes[current];
+    //   let nextTopLeft;
+    //   let nextBottomRight;
+    //   const topLeft = paperScope.project.activeLayer.bounds.topLeft;
+    //   const bottomRight = paperScope.project.activeLayer.bounds.bottomRight;
+    //   if (index === 0) {
+    //     nextTopLeft = topLeft;
+    //     nextBottomRight = bottomRight;
+    //   } else {
+    //     nextTopLeft = paper.Point.min(result.topLeft, topLeft);
+    //     nextBottomRight = paper.Point.max(result.bottomRight, bottomRight);
+    //   }
+    //   return new uiPaperScope.Rectangle({
+    //     from: nextTopLeft,
+    //     to: nextBottomRight
+    //   });
+    // }, new uiPaperScope.Rectangle(new uiPaperScope.Point(0,0), new uiPaperScope.Size(0,0)));
   }
 );
 
@@ -93,8 +109,8 @@ export const getTreeWalker = createSelector(
       node,
     });
     function* treeWalker(): any {
-      for (let i = childrenById['page'].length - 1; i >= 0; i--) {
-        const id = childrenById['page'][i];
+      for (let i = childrenById['root'].length - 1; i >= 0; i--) {
+        const id = childrenById['root'][i];
         yield getNodeData({
           id: id,
           children: childrenById[id]
@@ -409,8 +425,13 @@ export const getSelectedWithParentsById = createSelector(
       const parentItem = byId[layerItem.parent];
       result = {
         ...result,
-        [current]: layerItem,
-        [layerItem.parent]: parentItem
+        [current]: layerItem
+      }
+      if (parentItem) {
+        result = {
+          ...result,
+          [layerItem.parent]: parentItem
+        }
       }
       return result;
     }, {}) as { [id: string]: Btwx.Layer };
@@ -420,30 +441,29 @@ export const getSelectedWithParentsById = createSelector(
 export const getSelectedBounds = createSelector(
   [ getSelected, getLayersById ],
   (selected, byId) => {
-    return selected.reduce((result: paper.Rectangle, current: string, index: number) => {
-      let nextTopLeft;
-      let nextBottomRight;
-      const layerItem = byId[current];
-      const isArtboardLayer = layerItem.artboardLayer;
-      const hasArtboard = isArtboardLayer && (layerItem as Btwx.ArtboardLayer).artboard;
-      const artboardItem = hasArtboard ? byId[(layerItem as Btwx.ArtboardLayer).artboard] : null;
-      const layerPosition = new uiPaperScope.Point(layerItem.frame.x, layerItem.frame.y);
-      const artboardPosition = artboardItem ? new uiPaperScope.Point(artboardItem.frame.x, artboardItem.frame.y) : new uiPaperScope.Point(0, 0);
-      const absolutePosition = artboardPosition.add(layerPosition);
-      const topLeft = new uiPaperScope.Point(absolutePosition.x - (layerItem.frame.width / 2), absolutePosition.y - (layerItem.frame.height / 2));
-      const bottomRight = new uiPaperScope.Point(absolutePosition.x + (layerItem.frame.width / 2), absolutePosition.y + (layerItem.frame.height / 2));
-      if (index === 0) {
-        nextTopLeft = topLeft;
-        nextBottomRight = bottomRight;
-      } else {
-        nextTopLeft = paper.Point.min(result.topLeft, topLeft);
-        nextBottomRight = paper.Point.max(result.bottomRight, bottomRight);
-      }
-      return new uiPaperScope.Rectangle({
-        from: nextTopLeft,
-        to: nextBottomRight
-      });
-    }, null) as paper.Rectangle;
+    return getLayersBounds({byId} as LayerState, selected);
+    // return selected.reduce((result: paper.Rectangle, current: string, index: number) => {
+    //   let nextTopLeft;
+    //   let nextBottomRight;
+    //   const layerItem = byId[current];
+    //   const artboardItem = byId[layerItem.artboard];
+    //   const layerPosition = new uiPaperScope.Point(layerItem.frame.x, layerItem.frame.y);
+    //   const artboardPosition = layerItem.type !== 'Artboard' ? new uiPaperScope.Point(artboardItem.frame.x, artboardItem.frame.y) : new uiPaperScope.Point(0, 0);
+    //   const absolutePosition = artboardPosition.add(layerPosition);
+    //   const topLeft = new uiPaperScope.Point(absolutePosition.x - (layerItem.frame.width / 2), absolutePosition.y - (layerItem.frame.height / 2));
+    //   const bottomRight = new uiPaperScope.Point(absolutePosition.x + (layerItem.frame.width / 2), absolutePosition.y + (layerItem.frame.height / 2));
+    //   if (index === 0) {
+    //     nextTopLeft = topLeft;
+    //     nextBottomRight = bottomRight;
+    //   } else {
+    //     nextTopLeft = paper.Point.min(result.topLeft, topLeft);
+    //     nextBottomRight = paper.Point.max(result.bottomRight, bottomRight);
+    //   }
+    //   return new uiPaperScope.Rectangle({
+    //     from: nextTopLeft,
+    //     to: nextBottomRight
+    //   });
+    // }, null) as paper.Rectangle;
   }
 );
 
@@ -583,7 +603,7 @@ export const canToggleSelectedIgnoreUnderlyingMask = createSelector(
     const keys = Object.keys(selectedById);
     return keys.length > 0 && keys.some((id: string) => {
       const layerItem = selectedById[id];
-      return layerItem.underlyingMask;
+      return layerItem.type !== 'Artboard' && (layerItem as Btwx.MaskableLayer).underlyingMask;
     });
   }
 );
@@ -592,17 +612,17 @@ export const selectedIgnoreUnderlyingMaskEnabled = createSelector(
   [ getSelectedById ],
   (selectedById) => {
     const keys = Object.keys(selectedById);
-    return keys.every((id) => selectedById[id].ignoreUnderlyingMask);
+    return keys.every((id) => selectedById[id].type !== 'Artboard' && (selectedById[id] as Btwx.MaskableLayer).ignoreUnderlyingMask);
   }
 );
 
 export const canBringSelectedForward = createSelector(
-  [ getSelected, getSelectedWithParentsById ],
+  [ getSelected, getSelectedWithParentsById, getAllArtboardIds ],
   (selected, selectedWithParentsById) => {
     return selected.length > 0 && !selected.some((id: string) => {
       const layerItem = selectedWithParentsById[id];
       const parentItem = selectedWithParentsById[layerItem.parent];
-      return parentItem.children[parentItem.children.length - 1] === id;
+      return layerItem.index === parentItem.children.length - 1;
     });
   }
 );
@@ -612,8 +632,7 @@ export const canSendSelectedBackward = createSelector(
   (selected, selectedWithParentsById) => {
     return selected.length > 0 && !selected.some((id: string) => {
       const layerItem = selectedWithParentsById[id];
-      const parentItem = selectedWithParentsById[layerItem.parent];
-      return parentItem.children[0] === id;
+      return layerItem.index === 0;
     });
   }
 );
@@ -882,12 +901,8 @@ export const getParentLayer = (store: LayerState, id: string): Btwx.Group => {
 
 export const getLayerIndex = (store: LayerState, id: string): number => {
   const layerItem = store.byId[id];
-  if (layerItem.type === 'Page') {
-    return 0;
-  } else {
-    const parentItem = store.byId[layerItem.parent];
-    return parentItem.children.indexOf(id);
-  }
+  const parentItem = store.byId[layerItem.parent];
+  return layerItem.type === 'Artboard' ? store.allArtboardIds.indexOf(id) : parentItem.children.indexOf(id);
 };
 
 export const getLayerType = (store: LayerState, id: string): Btwx.LayerType => {
@@ -909,29 +924,6 @@ export const getSelectedPaperLayers = (): paper.Item[] => {
   }, []);
 };
 
-export const getLayerProject = (store: LayerState, id: string): string => {
-  const layerItem = store.byId[id];
-  if (layerItem.type === 'Artboard') {
-    return layerItem.id;
-  } else if (layerItem.artboardLayer && (layerItem as Btwx.ArtboardLayer).artboard) {
-    return (layerItem as Btwx.ArtboardLayer).artboard;
-  } else {
-    return 'page';
-  }
-};
-
-export const getLayerPaperScope = (store: LayerState, id: string): number => {
-  const layerItem = store.byId[id];
-  if (layerItem.type === 'Artboard') {
-    return (layerItem as Btwx.Artboard).paperScope;
-  } else if (layerItem.artboardLayer && (layerItem as Btwx.ArtboardLayer).artboard) {
-    const artboardItem = store.byId[(layerItem as Btwx.ArtboardLayer).artboard] as Btwx.Artboard;
-    return artboardItem.paperScope;
-  } else {
-    return 1;
-  }
-};
-
 export const getPaperLayer = (id: string, paperScope: number): paper.Item => {
   const paperScopeItem = paper.PaperScope.get(paperScope);
   if (paperScopeItem && paperScopeItem.project) {
@@ -939,6 +931,13 @@ export const getPaperLayer = (id: string, paperScope: number): paper.Item => {
   } else {
     return null;
   }
+};
+
+export const getLayerPaperScope = (store: LayerState, id: string): number => {
+  const layerItem = store.byId[id];
+  const artboard = layerItem.artboard;
+  const artboardItem = store.byId[artboard] as Btwx.Artboard;
+  return artboardItem.paperScope;
 };
 
 export const getItemLayers = (store: LayerState, id: string): {
@@ -951,8 +950,8 @@ export const getItemLayers = (store: LayerState, id: string): {
   return { layerItem, paperLayer };
 };
 
-export const getParentPaperLayer = (id: string, paperScope: number, ignoreUnderlyingMask?: boolean): paper.Item => {
-  const paperLayer = getPaperLayer(id, paperScope);
+export const getParentPaperLayer = (state: LayerState, id: string, ignoreUnderlyingMask?: boolean): paper.Item => {
+  const { layerItem, paperLayer } = getItemLayers(state, id);
   const isArtboard = paperLayer.data.layerType === 'Artboard';
   const nextPaperLayer = isArtboard ? paperLayer.getItem({ data: { id: 'artboardLayers' } }) : paperLayer;
   const parentChildren = nextPaperLayer.children;
@@ -992,11 +991,52 @@ export const getLayerAndDescendants = (state: LayerState, layer: string): string
   return [layer, ...children];
 };
 
-export const getLayerUnderlyingSiblings = (state: LayerState, id: string) => {
+export const getLayerSiblings = (state: LayerState, id: string): string[] => {
+  const layerItem = state.byId[id];
+  const parentLayerItem = state.byId[layerItem.parent];
+  return parentLayerItem.children.reduce((result, current, index) => {
+    // const childLayerItem = state.byId[current];
+    result = [...result, current];
+    return result;
+  }, []);
+};
+
+export const getLayerOlderSiblings = (state: LayerState, id: string): string[] => {
   const layerItem = state.byId[id];
   const parentLayerItem = state.byId[layerItem.parent];
   const layerIndex = parentLayerItem.children.indexOf(id);
   return parentLayerItem.children.reduce((result, current, index) => {
+    // const childLayerItem = state.byId[current];
+    if (index < layerIndex) {
+      result = [...result, current];
+    }
+    return result;
+  }, []);
+};
+
+export const getLayerOlderSibling = (state: LayerState, id: string): string => {
+  const olderSiblings = getLayerOlderSiblings(state, id);
+  return olderSiblings[olderSiblings.length - 1];
+};
+
+export const getLayerYoungestChild = (state: LayerState, id: string): string => {
+  const layerItem = state.byId[id];
+  let i = layerItem.children.length - 1;
+  let child = null;
+  while(i >= 0 && !child) {
+    const childItem = state.byId[layerItem.children[i]];
+    child = childItem.id;
+    i--;
+  }
+  return child;
+};
+
+export const getLayerYoungerSiblings = (state: LayerState, id: string): string[] => {
+  const layerItem = state.byId[id];
+  const parentLayerItem = state.byId[layerItem.parent];
+  const layerIndex = parentLayerItem.children.indexOf(id);
+  return parentLayerItem.children.reduce((result, current, index) => {
+    // const childLayerItem = state.byId[current];
     if (index > layerIndex) {
       result = [...result, current];
     }
@@ -1004,15 +1044,20 @@ export const getLayerUnderlyingSiblings = (state: LayerState, id: string) => {
   }, []);
 };
 
-export const getMaskableUnderlyingSiblings = (state: LayerState, id: string, suppliedUnderlyingSiblings?: string[]): string[] => {
+export const getLayerYoungerSibling = (state: LayerState, id: string): string => {
+  const youngerSiblings = getLayerYoungerSiblings(state, id);
+  return youngerSiblings[0];
+};
+
+export const getMaskableSiblings = (state: LayerState, id: string, suppliedUnderlyingSiblings?: string[]): string[] => {
   const maskableUnderlyingSiblings = [];
-  const underlyingSiblings = suppliedUnderlyingSiblings ? suppliedUnderlyingSiblings : getLayerUnderlyingSiblings(state, id);
+  const underlyingSiblings = suppliedUnderlyingSiblings ? suppliedUnderlyingSiblings : getLayerYoungerSiblings(state, id);
   let continueMaskChain = true;
   let i = 0;
   while(i < underlyingSiblings.length && continueMaskChain) {
     const child = underlyingSiblings[i];
     const childItem = state.byId[child];
-    if (childItem.ignoreUnderlyingMask) {
+    if ((childItem as Btwx.MaskableLayer).ignoreUnderlyingMask) {
       continueMaskChain = false;
     } else {
       if (childItem.type === 'Shape' && (childItem as Btwx.Shape).mask) {
@@ -1026,8 +1071,8 @@ export const getMaskableUnderlyingSiblings = (state: LayerState, id: string, sup
 };
 
 export const getSiblingLayersWithUnderlyingMask = (state: LayerState, id: string, suppliedUnderlyingSiblings?: string[]): string[] => {
-  const underlyingSiblings = suppliedUnderlyingSiblings ? suppliedUnderlyingSiblings : getLayerUnderlyingSiblings(state, id);
-  return underlyingSiblings.filter((sibling) => state.byId[sibling].underlyingMask === id);
+  const underlyingSiblings = suppliedUnderlyingSiblings ? suppliedUnderlyingSiblings : getLayerYoungerSiblings(state, id);
+  return underlyingSiblings.filter((sibling) => (state.byId[sibling] as Btwx.MaskableLayer).underlyingMask === id);
 };
 
 export const getLayerDepth = (store: LayerState, id: string): number => {
@@ -1134,25 +1179,28 @@ export const getClosestPaperLayer = (point: paper.Point, layers: paper.Item[]): 
   }, { paperLayer: null, distance: null }).paperLayer;
 };
 
+export const getLayerBounds = (store: LayerState, id: string): paper.Rectangle => {
+  const layerItem = store.byId[id] as Btwx.Layer;
+  const layerPosition = getAbsolutePosition(store, id);
+  const topLeft = new uiPaperScope.Point(layerPosition.x - (layerItem.frame.width / 2), layerPosition.y - (layerItem.frame.height / 2));
+  const bottomRight = new uiPaperScope.Point(layerPosition.x + (layerItem.frame.width / 2), layerPosition.y + (layerItem.frame.height / 2));
+  return new uiPaperScope.Rectangle({
+    from: topLeft,
+    to: bottomRight
+  });
+};
+
 export const getLayersBounds = (store: LayerState, layers: string[]): paper.Rectangle => {
   return layers.reduce((result: paper.Rectangle, current, index) => {
+    const layerBounds = getLayerBounds(store, current);
     let nextTopLeft;
     let nextBottomRight;
-    const layerItem = store.byId[current];
-    const isArtboardLayer = layerItem.artboardLayer;
-    const hasArtboard = isArtboardLayer && (layerItem as Btwx.ArtboardLayer).artboard;
-    const artboardItem = hasArtboard ? store.byId[(layerItem as Btwx.ArtboardLayer).artboard] : null;
-    const layerPosition = new uiPaperScope.Point(layerItem.frame.x, layerItem.frame.y);
-    const artboardPosition = artboardItem ? new uiPaperScope.Point(artboardItem.frame.x, artboardItem.frame.y) : new uiPaperScope.Point(0, 0);
-    const absolutePosition = artboardPosition.add(layerPosition);
-    const topLeft = new uiPaperScope.Point(absolutePosition.x - (layerItem.frame.width / 2), absolutePosition.y - (layerItem.frame.height / 2));
-    const bottomRight = new uiPaperScope.Point(absolutePosition.x + (layerItem.frame.width / 2), absolutePosition.y + (layerItem.frame.height / 2));
     if (index === 0) {
-      nextTopLeft = topLeft;
-      nextBottomRight = bottomRight;
+      nextTopLeft = layerBounds.topLeft;
+      nextBottomRight = layerBounds.bottomRight;
     } else {
-      nextTopLeft = paper.Point.min(result.topLeft, topLeft);
-      nextBottomRight = paper.Point.max(result.bottomRight, bottomRight);
+      nextTopLeft = paper.Point.min(result.topLeft, layerBounds.topLeft);
+      nextBottomRight = paper.Point.max(result.bottomRight, layerBounds.bottomRight);
     }
     return new uiPaperScope.Rectangle({
       from: nextTopLeft,
@@ -1677,11 +1725,13 @@ export const getTweenEventLayerTweens = (store: LayerState, eventId: string, lay
 export const getAbsolutePosition = (store: LayerState, id: string): paper.Point => {
   const layerItem = store.byId[id];
   const layerPosition = new uiPaperScope.Point(layerItem.frame.x, layerItem.frame.y);
-  const isArtboardLayer = layerItem.artboardLayer;
-  const isArtboardScoped = isArtboardLayer && (layerItem as Btwx.ArtboardLayer).artboard;
-  const artboardItem = isArtboardScoped ? store.byId[(layerItem as Btwx.ArtboardLayer).artboard] : null;
-  const artboardPosition = new uiPaperScope.Point(artboardItem ? artboardItem.frame.x : 0, artboardItem ? artboardItem.frame.y : 0);
-  return layerPosition.add(artboardPosition);
+  if (layerItem.type === 'Artboard') {
+    return layerPosition;
+  } else {
+    const artboardItem = store.byId[layerItem.artboard];
+    const artboardPosition = new uiPaperScope.Point(artboardItem.frame.x, artboardItem.frame.y);
+    return layerPosition.add(artboardPosition);
+  }
 };
 
 export const getGradientOrigin = (store: LayerState, id: string, originPoint: Btwx.Point): paper.Point => {
@@ -1812,14 +1862,16 @@ interface ImportPaperProject {
 
 export const importPaperProject = ({documentImages, paperJSON, paperScope}: ImportPaperProject): void => {
   const paperScopeItem = paper.PaperScope.get(paperScope);
-  paperScopeItem.activate();
-  paperScopeItem.project.clear();
-  const newPaperProject = Object.keys(documentImages).reduce((result, current) => {
-    const rasterBase64 = bufferToBase64(Buffer.from(documentImages[current].buffer));
-    const base64 = `data:image/webp;base64,${rasterBase64}`;
-    return result.replace(`"source":"${current}"`, `"source":"${base64}"`);
-  }, paperJSON);
-  paperScopeItem.project.importJSON(newPaperProject);
+  if (paperScopeItem.project) {
+    paperScopeItem.activate();
+    paperScopeItem.project.clear();
+    const newPaperProject = Object.keys(documentImages).reduce((result, current) => {
+      const rasterBase64 = bufferToBase64(Buffer.from(documentImages[current].buffer));
+      const base64 = `data:image/webp;base64,${rasterBase64}`;
+      return result.replace(`"source":"${current}"`, `"source":"${base64}"`);
+    }, paperJSON);
+    paperScopeItem.project.importJSON(newPaperProject);
+  }
 };
 
 export const colorsMatch = (color1: Btwx.Color, color2: Btwx.Color): boolean => {

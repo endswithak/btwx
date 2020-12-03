@@ -224,7 +224,6 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
     if (upEvent && isEnabled && drawing) {
       addArtboardThunk({
         layer: {
-          parent: 'page',
           frame: {
             x: toBounds.center.x,
             y: toBounds.center.y,

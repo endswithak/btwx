@@ -27,6 +27,8 @@ interface ShapeToolStateProps {
     [id: string]: paper.PaperScope;
   };
   drawing?: boolean;
+  activeArtboard?: string;
+  activeArtboardPaperScope?: number;
 }
 
 interface ShapeToolDispatchProps {
@@ -43,7 +45,7 @@ type ShapeToolProps = (
 
 const ShapeTool = (props: ShapeToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isEnabled, shapeType, addShapeThunk, scope, paperScope, layerPaperScopes, setCanvasDrawing, drawing, toggleShapeToolThunk, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent } = props;
+  const { isEnabled, shapeType, addShapeThunk, activeArtboard, activeArtboardPaperScope, scope, paperScope, layerPaperScopes, setCanvasDrawing, drawing, toggleShapeToolThunk, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent } = props;
   const [handle, setHandle] = useState<Btwx.ResizeHandle>(null);
   const [maxDim, setMaxDim] = useState<number>(null);
   const [vector, setVector] = useState<paper.Point>(null);
@@ -339,22 +341,22 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
             },
             overlapping: paperLayer.bounds
           });
-          return hitTest && scope[scope.length - 1] === 'page' ? { id: hitTest.parent.data.id, paperScope: index + 1, paperLayer: hitTest.parent } : result;
+          return hitTest ? { id: hitTest.parent.data.id, paperScope: index + 1, paperLayer: hitTest.parent } : result;
         } else {
           return result;
         }
       }, {
-        id: scope[scope.length - 1],
-        paperScope: paperScope,
-        paperLayer: paper.PaperScope.get(paperScope).project.getItem({ data: { id: scope[scope.length - 1] }})
+        id: activeArtboard,
+        paperScope: activeArtboardPaperScope,
+        paperLayer: layerPaperScopes[activeArtboard].project.activeLayer
       });
       addShapeThunk({
         layer: {
           parent: parentItem.id,
           name: shapeType,
           frame: {
-            x: parentItem.id === 'page' ? paperLayer.position.x : paperLayer.position.x - parentItem.paperLayer.position.x,
-            y: parentItem.id === 'page' ? paperLayer.position.y : paperLayer.position.y - parentItem.paperLayer.position.y,
+            x: paperLayer.position.x - parentItem.paperLayer.position.x,
+            y: paperLayer.position.y - parentItem.paperLayer.position.y,
             width: paperLayer.bounds.width,
             height: paperLayer.bounds.height,
             innerWidth: shapeType === 'Line' ? vector.length : paperLayer.bounds.width,
@@ -480,13 +482,17 @@ const mapStateToProps = (state: RootState): ShapeToolStateProps => {
   const paperScope = layer.present.paperScope;
   const drawing = canvasSettings.drawing;
   const layerPaperScopes = getLayerPaperScopes(state);
+  const activeArtboard = layer.present.activeArtboard;
+  const activeArtboardPaperScope = activeArtboard ? (layer.present.byId[activeArtboard] as Btwx.Artboard).paperScope : null;
   return {
     isEnabled,
     shapeType,
     scope,
     paperScope,
     drawing,
-    layerPaperScopes
+    layerPaperScopes,
+    activeArtboard,
+    activeArtboardPaperScope
   };
 };
 

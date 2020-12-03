@@ -1,6 +1,5 @@
 import React, { ReactElement, useContext } from 'react';
 import { connect } from 'react-redux';
-import { paperMain } from '../canvas';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 
