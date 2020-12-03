@@ -24,6 +24,8 @@ interface TextToolStateProps {
   layerPaperScopes?: {
     [id: string]: paper.PaperScope;
   };
+  activeArtboard?: string;
+  activeArtboardPaperScope?: number;
 }
 
 interface TextToolDispatchProps {
@@ -39,7 +41,7 @@ type TextToolProps = (
 );
 
 const TextTool = (props: TextToolProps): ReactElement => {
-  const { isEnabled, tool, moveEvent, downEvent, paperScope, layerPaperScopes, openTextEditor, textSettings, scope, addTextThunk, toggleTextToolThunk } = props;
+  const { isEnabled, tool, moveEvent, downEvent, paperScope, layerPaperScopes, openTextEditor, textSettings, scope, addTextThunk, toggleTextToolThunk, activeArtboard, activeArtboardPaperScope } = props;
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
   const [toBounds, setToBounds] = useState<paper.Rectangle>(null);
 
@@ -79,14 +81,14 @@ const TextTool = (props: TextToolProps): ReactElement => {
             },
             overlapping: paperLayer.bounds
           });
-          return hitTest && scope[scope.length - 1] === 'page' ? { id: hitTest.parent.data.id, paperScope: index + 1, paperLayer: hitTest.parent } : result;
+          return hitTest ? { id: hitTest.parent.data.id, paperScope: index + 1, paperLayer: hitTest.parent } : result;
         } else {
           return result;
         }
       }, {
-        id: scope[scope.length - 1],
-        paperScope: paperScope,
-        paperLayer: paper.PaperScope.get(paperScope).project.getItem({ data: { id: scope[scope.length - 1] }})
+        id: activeArtboard,
+        paperScope: activeArtboardPaperScope,
+        paperLayer: layerPaperScopes[activeArtboard].project.activeLayer
       });
       addTextThunk({
         layer: {
@@ -94,8 +96,8 @@ const TextTool = (props: TextToolProps): ReactElement => {
           name: DEFAULT_TEXT_VALUE,
           parent: parentItem.id,
           frame: {
-            x: parentItem.id === 'page' ? paperLayer.position.x : paperLayer.position.x - parentItem.paperLayer.position.x,
-            y: parentItem.id === 'page' ? paperLayer.position.y : paperLayer.position.y - parentItem.paperLayer.position.y,
+            x: paperLayer.position.x - parentItem.paperLayer.position.x,
+            y: paperLayer.position.y - parentItem.paperLayer.position.y,
             width: paperLayer.bounds.width,
             height: paperLayer.bounds.height,
             innerWidth: paperLayer.bounds.width,
@@ -188,12 +190,16 @@ const mapStateToProps = (state: RootState): TextToolStateProps => {
   const scope = layer.present.scope;
   const paperScope = layer.present.paperScope;
   const layerPaperScopes = getLayerPaperScopes(state);
+  const activeArtboard = layer.present.activeArtboard;
+  const activeArtboardPaperScope = activeArtboard ? (layer.present.byId[activeArtboard] as Btwx.Artboard).paperScope : null;
   return {
     isEnabled,
     textSettings,
     scope,
     paperScope,
-    layerPaperScopes
+    layerPaperScopes,
+    activeArtboard,
+    activeArtboardPaperScope
   };
 };
 

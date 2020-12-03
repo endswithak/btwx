@@ -53,7 +53,8 @@ import {
   orderLayersByDepth, orderLayersByLeft, orderLayersByTop, savePaperProjectJSON, getEquivalentTweenProp, gradientsMatch,
   getPaperProp, getArtboardsTopTop, getLineFromPoint, getLineToPoint, getLineVector, getParentPaperLayer,
   getLayerYoungerSiblings, getMaskableSiblings, getSiblingLayersWithUnderlyingMask, getItemLayers,
-  getAbsolutePosition, getGradientDestination, getGradientOrigin, getLayerOlderSibling, getLayerYoungestChild, getLayerYoungerSibling, getCanvasBounds, getLayerBounds, getRelativePosition
+  getAbsolutePosition, getGradientDestination, getGradientOrigin, getLayerOlderSibling, getLayerYoungestChild,
+  getLayerYoungerSibling, getCanvasBounds, getLayerBounds
 } from '../selectors/layer';
 import { RootState } from '../reducers';
 
@@ -675,18 +676,6 @@ export const updateLayerIndex = (state: LayerState, id: string): LayerState => {
       [id]: {
         ...currentState.byId[id],
         index: index
-      }
-    }
-  }
-  if (layerItem.type === 'Artboard') {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [id]: {
-          ...currentState.byId[id],
-          paperScope: index + 1
-        } as Btwx.Artboard
       }
     }
   }
@@ -1423,6 +1412,7 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
       }
     }
   } else {
+    const artboardBackground = paperLayer.getItem({data: {id: 'artboardBackground'}});
     currentState = {
       ...currentState,
       byId: {
@@ -1433,8 +1423,10 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
             ...currentState.byId[id].frame,
             x: paperLayer.position.x,
             y: paperLayer.position.y,
-            width: paperLayer.bounds.width,
-            height: paperLayer.bounds.height
+            width: artboardBackground.bounds.width,
+            height: artboardBackground.bounds.height,
+            innerWidth: artboardBackground.bounds.width,
+            innerHeight: artboardBackground.bounds.height
           }
         }
       }
@@ -2173,7 +2165,7 @@ export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   if (layerItem.type !== 'Artboard') {
     const artboardItem = state.byId[layerItem.artboard];
-    x += artboardItem.frame.y;
+    x += artboardItem.frame.x;
   }
   paperLayer.position.x = x;
   // currentState = {
@@ -2266,6 +2258,7 @@ export const setLayersY = (state: LayerState, action: SetLayersY): LayerState =>
 export const setLayerWidth = (state: LayerState, action: SetLayerWidth): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
+  const absPosition = getAbsolutePosition(currentState, action.payload.id);
   if (layerItem.type === 'Artboard') {
     const mask = paperLayer.getItem({data: { id: 'artboardLayersMask' }});
     const background = paperLayer.getItem({data: { id: 'artboardBackground' }});
@@ -2284,7 +2277,7 @@ export const setLayerWidth = (state: LayerState, action: SetLayerWidth): LayerSt
       paperLayer.rotation = layerItem.transform.rotation;
     }
   }
-  paperLayer.position.x = layerItem.frame.x;
+  paperLayer.position.x = absPosition.x;
   currentState = {
     ...currentState,
     byId: {
@@ -2327,6 +2320,7 @@ export const setLayersWidth = (state: LayerState, action: SetLayersWidth): Layer
 export const setLayerHeight = (state: LayerState, action: SetLayerHeight): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
+  const absPosition = getAbsolutePosition(currentState, action.payload.id);
   if (layerItem.type === 'Artboard') {
     const mask = paperLayer.getItem({data: { id: 'artboardLayersMask' }});
     const background = paperLayer.getItem({data: { id: 'artboardBackground' }});
@@ -2345,7 +2339,7 @@ export const setLayerHeight = (state: LayerState, action: SetLayerHeight): Layer
       paperLayer.rotation = layerItem.transform.rotation;
     }
   }
-  paperLayer.position.y = layerItem.frame.y;
+  paperLayer.position.y = absPosition.y;
   currentState = {
     ...currentState,
     byId: {
@@ -5416,7 +5410,7 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): {
         ...currentState.byId,
         [artboard]: {
           ...currentState.byId[artboard],
-          paperScope: currentState.allArtboardIds.length + 1,
+          paperScope: currentState.allArtboardIds.length,
           json: duplicatePaperLayer.exportJSON()
         } as Btwx.Artboard
       }

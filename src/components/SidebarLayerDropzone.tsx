@@ -65,7 +65,7 @@ const SidebarLayerDropzone = (props: SidebarLayerDropzoneProps): ReactElement =>
 
   const canDropTopBottom = () => {
     const something1 = selected.some(id => document.getElementById(id).contains(ref.current));
-    const something2 = selected.some(id => selectedById[id].type === 'Artboard') && layerItem.parent !== 'page';
+    const something2 = selected.some(id => selectedById[id].type === 'Artboard') && layerItem.parent !== 'root';
     return !something1 && !something2;
   }
 
