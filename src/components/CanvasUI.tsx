@@ -30,6 +30,7 @@ const CanvasUI = (props: CanvasUIProps): ReactElement => {
       uiPaperScope.project.importJSON(projectJSON);
       uiPaperScope.view.viewSize = new uiPaperScope.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
       uiPaperScope.view.matrix.set(matrix);
+      console.log(uiPaperScope);
     }
   }, []);
 

@@ -33,14 +33,14 @@ const TranslateTool = (props: TranslateToolProps): ReactElement => {
 
   useEffect(() => {
     if (translateEvent) {
+      uiPaperScope.view.translate(
+        new uiPaperScope.Point(
+          (translateEvent.deltaX * ( 1 / uiPaperScope.view.zoom)) * -1,
+          (translateEvent.deltaY * ( 1 / uiPaperScope.view.zoom)) * -1
+        )
+      )
       Object.keys(paperScopes).forEach((key, index) => {
-        const paperScope = paperScopes[key];
-        paperScope.view.translate(
-          new paperScope.Point(
-            (translateEvent.deltaX * ( 1 / paperScope.view.zoom)) * -1,
-            (translateEvent.deltaY * ( 1 / paperScope.view.zoom)) * -1
-          )
-        );
+        paperScopes[key].view.matrix.set(uiPaperScope.view.matrix.values);
       });
       debounceTranslate();
     }

@@ -66,7 +66,8 @@ const SidebarLayerDropzone = (props: SidebarLayerDropzoneProps): ReactElement =>
   const canDropTopBottom = () => {
     const something1 = selected.some(id => document.getElementById(id).contains(ref.current));
     const something2 = selected.some(id => selectedById[id].type === 'Artboard') && layerItem.parent !== 'root';
-    return !something1 && !something2;
+    const something3 = selected.some(id => selectedById[id].type !== 'Artboard') && layerItem.type === 'Artboard';
+    return !something1 && !something2 && !something3;
   }
 
   const getCanDrop = (dropzone: Btwx.Dropzone) => {
@@ -149,7 +150,7 @@ const SidebarLayerDropzone = (props: SidebarLayerDropzoneProps): ReactElement =>
         : 0
       }}>
         {
-          (dropzone === 'top' || dropzone === 'bottom') && !isParent
+          canDrop && (dropzone === 'top' || dropzone === 'bottom') && !isParent
           ? <div
               className={`c-sidebar-dropzone__tbi c-sidebar-dropzone__tbi--${dropzone}`}
               style={{

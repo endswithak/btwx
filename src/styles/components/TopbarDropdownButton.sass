@@ -8,21 +8,35 @@
 
 .c-topbar-dropdown-button__dropdown
   position: absolute
-  min-width: 164px
+  min-width: 172px
   top: $unit * 8
   left: 0
-  padding: $unit 0
+  padding: $unit
   z-index: 9999999
   border-radius: $unit
   backdrop-filter: blur(17px)
 
 .c-topbar-dropdown-button__option
+  position: relative
   display: flex
   align-items: center
   justify-content: center
   height: $unit * 8
   width: 100%
-  padding: 0 $unit * 4 0 $unit * 2
+  padding: 0 $unit
+  border-radius: $unit
+
+.c-topbar-dropdown-button__option--bottom-divider
+  margin-bottom: $unit * 3
+
+  &:after
+    +content-block
+    height: 1px
+    top: $unit * 9.5
+    opacity: 0.44
+
+.c-topbar-dropdown-button__option--text
+  padding-left: $unit * 3
 
 .c-topbar-dropdown-button__icon
   flex-grow: 0

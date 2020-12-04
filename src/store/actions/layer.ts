@@ -462,7 +462,7 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
     const index = state.layer.present.allArtboardIds.length;
     const style = getLayerStyle(payload, {}, { fill: { color: DEFAULT_ARTBOARD_BACKGROUND_COLOR } as Btwx.Fill, stroke: { enabled: false } as Btwx.Stroke, shadow: { enabled: false } as Btwx.Shadow });
     const frame = getLayerFrame(payload);
-    const showChildren = payload.layer.showChildren ? payload.layer.showChildren : false;
+    const showChildren = payload.layer.showChildren ? payload.layer.showChildren : true;
     const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as Btwx.PaperGradientFill : null;
     // create background
     const artboardBackground = new uiPaperScope.Path.Rectangle({
@@ -569,7 +569,7 @@ export const addGroupThunk = (payload: AddGroupPayload, providedState?: RootStat
     if (artboard) {
       position = position.add(new paperScopeItem.Point(artboardItem.frame.x, artboardItem.frame.y))
     }
-    const showChildren = payload.layer.showChildren ? payload.layer.showChildren : false;
+    const showChildren = payload.layer.showChildren ? payload.layer.showChildren : true;
     const group = new paperScopeItem.Group({
       name: name,
       data: { id: id, type: 'Layer', layerType: 'Group', scope: scope },
@@ -964,7 +964,7 @@ export const addImageThunk = (payload: AddImagePayload, providedState?: RootStat
       const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
       const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
       sharp(buffer).metadata().then(({ width, height }) => {
-        sharp(buffer).resize(Math.round(width * 0.5)).webp().toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
+        sharp(buffer).resize(Math.round(width * 0.5)).webp({quality: 75}).toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
           const frame = getLayerFrame(payload);
           let position = new paperScopeItem.Point(frame.x, frame.y);
           if (artboard) {
@@ -1023,7 +1023,8 @@ export const addImageThunk = (payload: AddImagePayload, providedState?: RootStat
               },
               transform: transform,
               style: style,
-              imageId: imageId
+              imageId: imageId,
+              originalDimensions: payload.layer.originalDimensions
             } as Btwx.Image;
             if (!exists) {
               dispatch(addDocumentImage({id: imageId, buffer: newBuffer}));

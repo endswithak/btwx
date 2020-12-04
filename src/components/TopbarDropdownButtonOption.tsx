@@ -4,11 +4,12 @@ import styled from 'styled-components';
 import { ThemeContext } from './ThemeProvider';
 import Icon from './Icon';
 
-interface TopbarDropdownButtonOptionProps {
+export interface TopbarDropdownButtonOptionProps {
   onClick(event: React.SyntheticEvent): void;
   isActive?: boolean;
   disabled?: boolean;
   icon?: string;
+  bottomDivider?: boolean;
   label: string;
 }
 
@@ -21,6 +22,9 @@ const Button = styled.button<TopbarDropdownButtonOptionProps>`
   }
   .c-topbar-dropdown-button__label {
     color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.light};
+  }
+  :after {
+    background: ${props => props.theme.text.lightest};
   }
   :disabled {
     background: none;
@@ -56,11 +60,11 @@ const Button = styled.button<TopbarDropdownButtonOptionProps>`
 
 const TopbarDropdownButtonOption = (props: TopbarDropdownButtonOptionProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { label, icon } = props;
+  const { label, icon, bottomDivider } = props;
 
   return (
     <Button
-      className='c-topbar-dropdown-button__option'
+      className={`c-topbar-dropdown-button__option ${!icon ? 'c-topbar-dropdown-button__option--text' : null} ${bottomDivider ? 'c-topbar-dropdown-button__option--bottom-divider' : null}`}
       {...props}
       theme={theme}>
       {

@@ -50,8 +50,7 @@ const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
             itemSize={32}
             height={height}
             width={width}
-            ref={handleRef}
-            async>
+            ref={handleRef}>
             {Node}
           </Tree>
         )}

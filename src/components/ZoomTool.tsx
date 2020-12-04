@@ -40,23 +40,23 @@ const ZoomTool = (props: ZoomToolProps): ReactElement => {
       const pointDiff = new uiPaperScope.Point(cursorPoint.x - uiPaperScope.view.center.x, cursorPoint.y - uiPaperScope.view.center.y);
       const prevZoom = uiPaperScope.view.zoom;
       const nextZoom = uiPaperScope.view.zoom - zoomEvent.deltaY * (0.01 * uiPaperScope.view.zoom);
+      if (zoomEvent.deltaY < 0 && nextZoom < 25) {
+        uiPaperScope.view.zoom = nextZoom;
+      } else if (zoomEvent.deltaY > 0 && nextZoom > 0) {
+        uiPaperScope.view.zoom = nextZoom;
+      } else if (zoomEvent.deltaY > 0 && nextZoom < 0) {
+        uiPaperScope.view.zoom = 0.01;
+      }
+      const zoomDiff = uiPaperScope.view.zoom - prevZoom;
+      uiPaperScope.view.translate(
+        new uiPaperScope.Point(
+          ((zoomDiff * pointDiff.x) * (1 / uiPaperScope.view.zoom)) * -1,
+          ((zoomDiff * pointDiff.y) * (1 / uiPaperScope.view.zoom)) * -1
+        )
+      );
       Object.keys(paperScopes).forEach((key, index) => {
-        const paperScope = paperScopes[key];
-        if (zoomEvent.deltaY < 0 && nextZoom < 25) {
-          paperScope.view.zoom = nextZoom;
-        } else if (zoomEvent.deltaY > 0 && nextZoom > 0) {
-          paperScope.view.zoom = nextZoom;
-        } else if (zoomEvent.deltaY > 0 && nextZoom < 0) {
-          paperScope.view.zoom = 0.01;
-        }
-        const zoomDiff = paperScope.view.zoom - prevZoom;
-        paperScope.view.translate(
-          new paperScope.Point(
-            ((zoomDiff * pointDiff.x) * (1 / paperScope.view.zoom)) * -1,
-            ((zoomDiff * pointDiff.y) * (1 / paperScope.view.zoom)) * -1
-          )
-        );
-      })
+        paperScopes[key].view.matrix.set(uiPaperScope.view.matrix.values);
+      });
       debounceZoomEnd();
     }
   }, [zoomEvent]);

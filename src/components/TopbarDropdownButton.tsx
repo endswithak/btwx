@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
 import { ThemeContext } from './ThemeProvider';
 import TopbarButton from './TopbarButton';
-import TopbarDropdownButtonOption from './TopbarDropdownButtonOption';
+import TopbarDropdownButtonOption, { TopbarDropdownButtonOptionProps } from './TopbarDropdownButtonOption';
 
 interface TopbarDropdownButtonProps {
   onClick?(event: React.SyntheticEvent): void;
@@ -13,13 +13,7 @@ interface TopbarDropdownButtonProps {
   text?: string;
   isActive?: boolean;
   label: string;
-  options: {
-    onClick: any;
-    isActive?: boolean;
-    disabled?: boolean;
-    icon?: string;
-    label: string;
-  }[];
+  options: TopbarDropdownButtonOptionProps[];
 }
 
 const ButtonDropdown = styled.div`

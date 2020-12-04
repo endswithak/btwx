@@ -1,6 +1,8 @@
 import React, { useContext, ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
+import { showLayerChildren, hideLayerChildren } from '../store/actions/layer';
+import { LayerTypes, ShowLayerChildrenPayload, HideLayerChildrenPayload } from '../store/actionTypes/layer';
 import { ThemeContext } from './ThemeProvider';
 import Icon from './Icon';
 
@@ -11,15 +13,22 @@ interface SidebarLayerChevronProps {
   isSelected?: boolean;
   canOpen?: boolean;
   setOpen?(isOpen: boolean): void;
+  showLayerChildren?(payload: ShowLayerChildrenPayload): LayerTypes;
+  hideLayerChildren?(payload: HideLayerChildrenPayload): LayerTypes;
 }
 
 const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { id, isSelected, canOpen, isDragGhost, isOpen, setOpen } = props;
+  const { id, isSelected, canOpen, isDragGhost, isOpen, setOpen, showLayerChildren, hideLayerChildren } = props;
 
   const handleMouseDown = (e: any) => {
     e.stopPropagation();
     setOpen(!isOpen);
+    if (isOpen) {
+      hideLayerChildren({id});
+    } else {
+      showLayerChildren({id});
+    }
   }
 
   useEffect(() => {
@@ -62,6 +71,7 @@ const mapStateToProps = (state: RootState, ownProps: SidebarLayerChevronProps): 
 };
 export default connect(
   mapStateToProps,
+  {showLayerChildren, hideLayerChildren}
 )(SidebarLayerChevron);
 
 // import React, { useContext, ReactElement } from 'react';

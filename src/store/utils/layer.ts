@@ -76,6 +76,14 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
       ...currentState.childrenById,
       [action.payload.layer.id]: action.payload.layer.children,
       [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
+    },
+    showChildrenById: {
+      ...currentState.showChildrenById,
+      [action.payload.layer.id]: action.payload.layer.showChildren,
+    },
+    scopeById: {
+      ...currentState.scopeById,
+      [action.payload.layer.id]: action.payload.layer.scope,
     }
   }
   currentState = updateParentBounds(currentState, action.payload.layer.id);
@@ -153,6 +161,14 @@ export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
       ...currentState.childrenById,
       [action.payload.layer.id]: action.payload.layer.children,
       [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
+    },
+    showChildrenById: {
+      ...currentState.showChildrenById,
+      [action.payload.layer.id]: action.payload.layer.showChildren,
+    },
+    scopeById: {
+      ...currentState.scopeById,
+      [action.payload.layer.id]: action.payload.layer.scope,
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.layer.id);
@@ -753,7 +769,7 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
       }
     };
     currentState = updateParentBounds(currentState, childItem.parent, true);
-    currentState = updateParentBounds(currentState, action.payload.id, true);
+    // currentState = updateParentBounds(currentState, action.payload.id, true);
     currentState = updateChildrenIndices(currentState, childItem.parent);
     currentState = updateChildrenIndices(currentState, action.payload.id);
     currentState = setLayerScope(currentState, layerActions.setLayerScope({id: action.payload.child, scope: [...layerItem.scope, action.payload.id]}) as SetLayerScope);
@@ -790,7 +806,7 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
       }
     };
   }
-  // currentState = updateLayerBounds(currentState, action.payload.child);
+  currentState = updateLayerBounds(currentState, action.payload.child);
   return currentState;
 };
 
@@ -825,6 +841,10 @@ export const showLayerChildren = (state: LayerState, action: ShowLayerChildren):
         ...state.byId[action.payload.id],
         showChildren: true
       } as Btwx.Group
+    },
+    showChildrenById: {
+      ...state.showChildrenById,
+      [action.payload.id]: true
     }
   }
 };
@@ -838,6 +858,10 @@ export const hideLayerChildren = (state: LayerState, action: HideLayerChildren):
         ...state.byId[action.payload.id],
         showChildren: false
       } as Btwx.Group
+    },
+    showChildrenById: {
+      ...state.showChildrenById,
+      [action.payload.id]: false
     }
   }
 };
@@ -900,7 +924,7 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
       }
     };
     currentState = updateParentBounds(currentState, layerItem.parent, true);
-    currentState = updateParentBounds(currentState, belowItem.parent, true);
+    // currentState = updateParentBounds(currentState, belowItem.parent, true);
     currentState = updateChildrenIndices(currentState, belowItem.parent);
     currentState = updateChildrenIndices(currentState, layerItem.parent);
     currentState = setLayerScope(currentState, layerActions.setLayerScope({id: action.payload.id, scope: [...belowParent.scope, belowItem.parent]}) as SetLayerScope);
@@ -949,7 +973,7 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
   if (isBelowMask) {
     currentState = toggleLayerMask(currentState, layerActions.toggleLayerMask({id: action.payload.below}) as ToggleLayerMask);
   }
-  // currentState = updateLayerBounds(currentState, action.payload.id);
+  currentState = updateLayerBounds(currentState, action.payload.id);
   return currentState;
 };
 
@@ -1033,7 +1057,7 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
       }
     };
     currentState = updateParentBounds(currentState, layerItem.parent, true);
-    currentState = updateParentBounds(currentState, aboveItem.parent, true);
+    // currentState = updateParentBounds(currentState, aboveItem.parent, true);
     currentState = updateChildrenIndices(currentState, aboveItem.parent);
     currentState = updateChildrenIndices(currentState, layerItem.parent);
     currentState = setLayerScope(currentState, layerActions.setLayerScope({id: action.payload.id, scope: [...aboveParentItem.scope, aboveItem.parent]}) as SetLayerScope);
@@ -1082,6 +1106,7 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
   if (isLayerMask) {
     currentState = toggleLayerMask(currentState, layerActions.toggleLayerMask({id: action.payload.id}) as ToggleLayerMask);
   }
+  currentState = updateLayerBounds(currentState, action.payload.id);
   return currentState;
 };
 
@@ -1151,6 +1176,19 @@ export const escapeLayerScope = (state: LayerState, action: EscapeLayerScope): L
 
 export const setLayerScope = (state: LayerState, action: SetLayerScope): LayerState => {
   let currentState = state;
+  const currentLayerItem = currentState.byId[action.payload.id];
+  if (currentLayerItem.type !== 'Artboard' && currentLayerItem.artboard !== action.payload.scope[1]) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          artboard: action.payload.scope[1]
+        }
+      }
+    }
+  }
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   paperLayer.data.scope = action.payload.scope;
   currentState = {
@@ -1161,18 +1199,10 @@ export const setLayerScope = (state: LayerState, action: SetLayerScope): LayerSt
         ...currentState.byId[action.payload.id],
         scope: [...action.payload.scope]
       }
-    }
-  }
-  if (layerItem.type !== 'Artboard' && layerItem.artboard !== action.payload.scope[1]) {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          artboard: action.payload.scope[1]
-        }
-      }
+    },
+    scopeById: {
+      ...currentState.scopeById,
+      [action.payload.id]: action.payload.scope
     }
   }
   return currentState;
@@ -1480,7 +1510,23 @@ export const updateParentBounds = (state: LayerState, id: string, idAsParent?: b
   const parent = idAsParent ? id : currentState.byId[id].parent;
   const parentItem = currentState.byId[parent] as Btwx.Root | Btwx.Artboard | Btwx.Group;
   if (parentItem.type !== 'Artboard') {
-    const layerBounds = getLayersBounds(currentState, parentItem.children);
+    let layerBounds;
+    let position;
+    if (parentItem.children.length > 0) {
+      layerBounds = getLayersBounds(currentState, parentItem.children);
+    } else {
+      layerBounds = new uiPaperScope.Rectangle({
+        from: new uiPaperScope.Point(0,0),
+        to: new uiPaperScope.Point(0,0)
+      });
+    }
+    if (parentItem.type === 'Group') {
+      const artboardItem = currentState.byId[parentItem.artboard];
+      const artboardPosition = new uiPaperScope.Point(artboardItem.frame.x, artboardItem.frame.y);
+      position = layerBounds.center.subtract(artboardPosition);
+    } else {
+      position = layerBounds.center;
+    }
     currentState = {
       ...currentState,
       byId: {
@@ -1489,8 +1535,8 @@ export const updateParentBounds = (state: LayerState, id: string, idAsParent?: b
           ...currentState.byId[parent],
           frame: {
             ...currentState.byId[parent].frame,
-            x: layerBounds.center.x,
-            y: layerBounds.center.y,
+            x: position.x,
+            y: position.y,
             width: layerBounds.width,
             height: layerBounds.height,
             innerWidth: layerBounds.width,
@@ -5280,6 +5326,7 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): {
     const itemToCopy = currentState.byId[key];
     const copyId = layerCloneMap[key];
     const copyParent = index === 0 ? itemToCopy.parent : layerCloneMap[itemToCopy.parent];
+    const copyShowChildren = itemToCopy.showChildren;
     const parentLayerItem = result.byId[copyParent];
     const copyScope = itemToCopy.type === 'Artboard' ? ['root'] : [...parentLayerItem.scope, copyParent];
     const copyArtboard = itemToCopy.type === 'Artboard' ? copyId : copyScope[1];
@@ -5362,7 +5409,15 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): {
       childrenById: {
         ...result.childrenById,
         [copyId]: copyChildren
-      }
+      },
+      showChildrenById: {
+        ...result.showChildrenById,
+        [copyId]: copyShowChildren
+      },
+      scopeById: {
+        ...result.scopeById,
+        [copyId]: copyScope
+      },
     };
     if (index === 0 && action.payload.offset) {
       if (itemToCopy.type !== 'Artboard') {

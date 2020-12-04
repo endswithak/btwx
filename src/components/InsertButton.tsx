@@ -43,7 +43,20 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
       if (result.filePaths.length > 0 && !result.canceled) {
         sharp(result.filePaths[0]).toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
           addImageThunk({
-            layer: {},
+            layer: {
+              frame: {
+                x: 0,
+                y: 0,
+                width: info.width,
+                height: info.height,
+                innerWidth: info.width,
+                innerHeight: info.height
+              },
+              originalDimensions: {
+                width: info.width,
+                height: info.height
+              }
+            },
             buffer: data
           });
         });
@@ -87,7 +100,8 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
         label: 'Artboard',
         onClick: toggleArtboardToolThunk,
         icon: 'artboard',
-        isActive: activeTool === 'Artboard'
+        isActive: activeTool === 'Artboard',
+        bottomDivider: true
       },{
         label: 'Rectangle',
         onClick: () => toggleShapeToolThunk('Rectangle'),

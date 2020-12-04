@@ -13,7 +13,9 @@ export const getArtboardEventOriginIds = (state: RootState, id: string): string[
 export const getSelected = (state: RootState): string[] => state.layer.present.selected;
 export const getAllArtboardIds = (state: RootState): string[] => state.layer.present.allArtboardIds;
 export const getLayersById = (state: RootState): { [id: string]: Btwx.Layer } => state.layer.present.byId;
+export const getScopesById = (state: RootState): { [id: string]: string[] } => state.layer.present.scopeById;
 export const getChildrenById = (state: RootState): { [id: string]: string[] } => state.layer.present.childrenById;
+export const getShowChildrenById = (state: RootState): { [id: string]: boolean } => state.layer.present.showChildrenById;
 export const getAllEventIds = (state: RootState): string[] => state.layer.present.events.allIds;
 export const getEventsById = (state: RootState): { [id: string]: Btwx.TweenEvent } => state.layer.present.events.byId;
 export const getTweensById = (state: RootState): { [id: string]: Btwx.Tween } => state.layer.present.tweens.byId;
@@ -95,15 +97,18 @@ export const getReverseSelected = createSelector(
 );
 
 export const getTreeWalker = createSelector(
-  [ getChildrenById ],
-  (childrenById) => {
+  [ getChildrenById, getShowChildrenById, getScopesById ],
+  (childrenById, showChildrenById, scopeById) => {
+    const allScopesOpen = (id: string) => {
+      return scopeById[id].every(scope => showChildrenById[scope]);
+    }
     const getNodeData = (node: any, nestingLevel: number): any => ({
       data: {
         id: node.id, // mandatory
         isLeaf: node.children && node.children.length === 0,
-        isOpenByDefault: true, // mandatory
-        // isOpen: node.children && node.showChildren,
-        nestingLevel,
+        isOpenByDefault: node.children && allScopesOpen(node.id) && showChildrenById[node.id], // mandatory
+        // isOpen: node.children && showChildrenById[node.id],
+        nestingLevel
       },
       nestingLevel,
       node,
@@ -1839,7 +1844,8 @@ export const savePaperProjectJSON = (state: LayerState, paperScope: number): str
     const projectJSON = paperScopeItem.project.exportJSON();
     const canvasImageBase64ById = state.allImageIds.reduce((result: { [id: string]: string }, current) => {
       const layer = state.byId[current] as Btwx.Image;
-      const paperLayer = getPaperLayer(current, paperScope).getItem({data: {id: 'raster'}}) as paper.Raster;
+      const imagePaperScope = getLayerPaperScope(state, current);
+      const paperLayer = getPaperLayer(current, imagePaperScope).getItem({data: {id: 'raster'}}) as paper.Raster;
       result[layer.imageId] = paperLayer.source as string;
       return result;
     }, {});

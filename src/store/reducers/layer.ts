@@ -449,6 +449,12 @@ export interface LayerState {
   childrenById: {
     [id: string]: string[];
   };
+  showChildrenById: {
+    [id: string]: boolean;
+  };
+  scopeById: {
+    [id: string]: string[];
+  };
   artboardJSON: {
     [id: string]: string;
   };
@@ -494,6 +500,12 @@ export const initialState: LayerState = {
   },
   shapeIcons: {},
   childrenById: {
+    root: []
+  },
+  showChildrenById: {
+    root: true
+  },
+  scopeById: {
     root: []
   },
   artboardJSON: {},

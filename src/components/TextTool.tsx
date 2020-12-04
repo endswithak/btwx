@@ -67,7 +67,7 @@ const TextTool = (props: TextToolProps): ReactElement => {
   useEffect(() => {
     if (downEvent && isEnabled) {
       const paperLayer = new uiPaperScope.PointText({
-        point: toBounds.center,
+        point: toBounds ? toBounds.center : downEvent.point,
         content: DEFAULT_TEXT_VALUE,
         ...textSettings,
         insert: false

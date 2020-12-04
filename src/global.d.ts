@@ -374,6 +374,10 @@ declare namespace Btwx {
   interface Image extends MaskableLayer {
     type: 'Image';
     imageId: string;
+    originalDimensions: {
+      width: number;
+      height: number;
+    };
   }
 
   interface Shape extends MaskableLayer {
