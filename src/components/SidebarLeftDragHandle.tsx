@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
 import styled from 'styled-components';
+import { uiPaperScope } from '../canvas';
 import { getAllPaperScopes } from '../store/selectors/layer';
 import { setLeftSidebarWidth } from '../store/actions/viewSettings';
 import { SetLeftSidebarWidthPayload, ViewSettingsTypes } from '../store/actionTypes/viewSettings';
@@ -13,9 +14,7 @@ gsap.registerPlugin(Draggable);
 
 interface SidebarLeftDragHandleProps {
   sidebarWidth?: number;
-  allPaperScopes?: {
-    [id: string]: paper.PaperScope;
-  };
+  allPaperScopes?: string[];
   setLeftSidebarWidth?(payload: SetLeftSidebarWidthPayload): ViewSettingsTypes;
 }
 
@@ -50,9 +49,8 @@ const SidebarLeftDragHandle = (props: SidebarLeftDragHandleProps): ReactElement 
       onDrag: function() {
         const canvasContainer = document.getElementById('canvas-container');
         gsap.set('#sidebar-left', {width: this.x});
-        Object.keys(allPaperScopes).forEach((id) => {
-          const paperScope = allPaperScopes[id];
-          paperScope.view.viewSize.width = canvasContainer.clientWidth;
+        allPaperScopes.forEach((key, index) => {
+          uiPaperScope.projects[index].view.viewSize.width = canvasContainer.clientWidth;
         });
       },
       onRelease: function() {
@@ -78,13 +76,11 @@ const SidebarLeftDragHandle = (props: SidebarLeftDragHandleProps): ReactElement 
 
 const mapStateToProps = (state: RootState): {
   sidebarWidth: number;
-  allPaperScopes: {
-    [id: string]: paper.PaperScope;
-  };
+  allPaperScopes: string[];
 } => {
-  const { viewSettings } = state;
+  const { viewSettings, layer } = state;
   const sidebarWidth = viewSettings.leftSidebar.width;
-  const allPaperScopes = getAllPaperScopes(state);
+  const allPaperScopes = ['ui', ...layer.present.childrenById.root];
   return { sidebarWidth, allPaperScopes };
 };
 

@@ -695,6 +695,18 @@ export const updateLayerIndex = (state: LayerState, id: string): LayerState => {
       }
     }
   }
+  if (layerItem.type === 'Artboard') {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [id]: {
+          ...currentState.byId[id],
+          paperScope: currentState.byId[id].index + 1
+        } as Btwx.Artboard
+      }
+    }
+  }
   return currentState;
 };
 
@@ -806,7 +818,9 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
       }
     };
   }
-  currentState = updateLayerBounds(currentState, action.payload.child);
+  if (childItem.type !== 'Artboard') {
+    currentState = updateLayerBounds(currentState, action.payload.child);
+  }
   return currentState;
 };
 
@@ -973,7 +987,9 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
   if (isBelowMask) {
     currentState = toggleLayerMask(currentState, layerActions.toggleLayerMask({id: action.payload.below}) as ToggleLayerMask);
   }
-  currentState = updateLayerBounds(currentState, action.payload.id);
+  if (layerItem.type !== 'Artboard') {
+    currentState = updateLayerBounds(currentState, action.payload.id);
+  }
   return currentState;
 };
 
@@ -1106,7 +1122,9 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
   if (isLayerMask) {
     currentState = toggleLayerMask(currentState, layerActions.toggleLayerMask({id: action.payload.id}) as ToggleLayerMask);
   }
-  currentState = updateLayerBounds(currentState, action.payload.id);
+  if (layerItem.type !== 'Artboard') {
+    currentState = updateLayerBounds(currentState, action.payload.id);
+  }
   return currentState;
 };
 
@@ -5457,20 +5475,6 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): {
     return result;
   }, currentState);
   // if artboard, update artboard json and paperscope after all children are duplicated
-  if (isArtboard) {
-    const artboard = currentState.allArtboardIds[currentState.allArtboardIds.length - 1];
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [artboard]: {
-          ...currentState.byId[artboard],
-          paperScope: currentState.allArtboardIds.length,
-          json: duplicatePaperLayer.exportJSON()
-        } as Btwx.Artboard
-      }
-    }
-  }
   currentState = {
     ...currentState,
     byId: {
@@ -5483,6 +5487,20 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): {
     childrenById: {
       ...currentState.childrenById,
       [layerItem.parent]: addItem(currentState.childrenById[layerItem.parent], layerCloneMap[action.payload.id])
+    }
+  }
+  if (isArtboard) {
+    const artboard = currentState.allArtboardIds[currentState.allArtboardIds.length - 1];
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [artboard]: {
+          ...currentState.byId[artboard],
+          paperScope: currentState.childrenById.root.length + 1,
+          json: duplicatePaperLayer.exportJSON()
+        } as Btwx.Artboard
+      }
     }
   }
   currentState = updateChildrenIndices(currentState, parentItem.id);
@@ -6176,7 +6194,7 @@ export const setLayerEdit = (state: LayerState, action: SetLayerEdit): LayerStat
     ...currentState,
     byId: action.payload.edit.projects.reduce((result, current) => {
       if (currentState.byId[current]) {
-        const projectJSON = savePaperProjectJSON(currentState, (currentState.byId[current] as Btwx.Artboard).paperScope);
+        const projectJSON = savePaperProjectJSON(currentState, current);
         result[current] = {
           ...result[current],
           json: projectJSON ? projectJSON : (currentState.byId[current] as Btwx.Artboard).json

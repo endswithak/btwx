@@ -28,7 +28,7 @@ const App = (): ReactElement => {
               {/* Canvas UI */}
               {/* Modals */}
               {/* <EaseEditorWrap /> */}
-              {/* <ArtboardPresetEditorWrap /> */}
+              <ArtboardPresetEditorWrap />
             </>
           : null
         }

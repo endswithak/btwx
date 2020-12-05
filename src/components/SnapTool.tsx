@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, useState, useEffect, ReactElement } from 'react';
 import { connect } from 'react-redux';
-import paper from 'paper';
 import { uiPaperScope } from '../canvas';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
@@ -28,7 +27,7 @@ interface SnapToolProps {
   scope?: string[];
   paperScope?: number;
   layerPaperScopes: {
-    [id: string]: paper.PaperScope;
+    [id: string]: paper.Project;
   };
   whiteListLayers?: string[];
   blackListLayers?: string[];
@@ -95,9 +94,9 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
   }
 
   const getGuideLayersBySnapZone = (snapZones: Btwx.SnapZones, snapZone: Btwx.SnapZoneType): paper.Item[] => {
-    const getProjectSnapLayers = (paperScope: paper.PaperScope): paper.Item[] => {
-      if (paperScope.project) {
-        return paperScope.project.getItems({
+    const getProjectSnapLayers = (paperScope: paper.Project): paper.Item[] => {
+      if (paperScope) {
+        return paperScope.getItems({
           data: (data: any) => {
             const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
             const isTopScopeGroup = data.id && data.layerType === 'Group' && data.id === scope[scope.length - 1];
@@ -148,9 +147,9 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
   }
 
   const getYSnapToLayer = (snapZones: Btwx.SnapZones): paper.Item => {
-    const getProjectSnapLayer = (paperScope: paper.PaperScope): paper.Item => {
-      if (paperScope.project) {
-        return paperScope.project.getItem({
+    const getProjectSnapLayer = (paperScope: paper.Project): paper.Item => {
+      if (paperScope) {
+        return paperScope.getItem({
           data: (data: any) => {
             const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
             const isTopScopeGroup = data.id && data.layerType === 'Group' && data.id === scope[scope.length - 1];
@@ -194,9 +193,9 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
   }
 
   const getXSnapToLayer = (snapZones: Btwx.SnapZones): paper.Item => {
-    const getProjectSnapLayer = (paperScope: paper.PaperScope): paper.Item => {
-      if (paperScope.project) {
-        return paperScope.project.getItem({
+    const getProjectSnapLayer = (paperScope: paper.Project): paper.Item => {
+      if (paperScope) {
+        return paperScope.getItem({
           data: (data: any) => {
             const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
             const isTopScopeGroup = data.id && data.layerType === 'Group' && data.id === scope[scope.length - 1];
@@ -409,12 +408,12 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
         if (breaksMinThreshold) {
           return {
             snapPoint: getYSnapPoint(snapZones),
-            breakThreshold: (ySnapPointBreakThreshold + toolEvent.delta.y) - snapBreakThreshholdMin
+            breakThreshold: 0 // (ySnapPointBreakThreshold + toolEvent.delta.y) - snapBreakThreshholdMin
           };
         } else if (breaksMaxThreshold) {
           return {
             snapPoint: getYSnapPoint(snapZones),
-            breakThreshold: (ySnapPointBreakThreshold + toolEvent.delta.y) - snapBreakThreshholdMax
+            breakThreshold: 0 // (ySnapPointBreakThreshold + toolEvent.delta.y) - snapBreakThreshholdMax
           };
         }
       } else {
@@ -439,12 +438,12 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
         if (breaksMinThreshold) {
           return {
             snapPoint: getXSnapPoint(snapZones),
-            breakThreshold: (xSnapPointBreakThreshold + toolEvent.delta.x) - snapBreakThreshholdMin
+            breakThreshold: 0 // (xSnapPointBreakThreshold + toolEvent.delta.x) - snapBreakThreshholdMin
           };
         } else if (breaksMaxThreshold) {
           return {
             snapPoint: getXSnapPoint(snapZones),
-            breakThreshold: (xSnapPointBreakThreshold + toolEvent.delta.x) - snapBreakThreshholdMax
+            breakThreshold: 0 // (xSnapPointBreakThreshold + toolEvent.delta.x) - snapBreakThreshholdMax
           };
         }
       } else {
@@ -665,8 +664,8 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
     setSnapBreakThreshholdMin(-4 / uiPaperScope.view.zoom);
     setSnapBreakThreshholdMax(4 / uiPaperScope.view.zoom);
     return () => {
-      const measureGuides = uiPaperScope.project.getItem({data: {id: 'measureGuides'}});
-      const snapGuides =  uiPaperScope.project.getItem({data: {id: 'snapGuides'}});
+      const measureGuides = uiPaperScope.projects[0].getItem({data: {id: 'measureGuides'}});
+      const snapGuides =  uiPaperScope.projects[0].getItem({data: {id: 'snapGuides'}});
       measureGuides.removeChildren();
       snapGuides.removeChildren();
     }
@@ -674,8 +673,8 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
 
   useEffect(() => {
     if (snapBounds) {
-      const measureGuides = uiPaperScope.project.getItem({data: {id: 'measureGuides'}});
-      const snapGuides =  uiPaperScope.project.getItem({data: {id: 'snapGuides'}});
+      const measureGuides = uiPaperScope.projects[0].getItem({data: {id: 'measureGuides'}});
+      const snapGuides =  uiPaperScope.projects[0].getItem({data: {id: 'snapGuides'}});
       measureGuides.removeChildren();
       snapGuides.removeChildren();
       const guideSnapZones = getSnapZones(snapBounds, 0.5);
@@ -893,7 +892,7 @@ const mapStateToProps = (state: RootState): {
   scope: string[];
   paperScope: number;
   layerPaperScopes: {
-    [id: string]: paper.PaperScope;
+    [id: string]: paper.Project;
   };
 } => {
   const { layer } = state;

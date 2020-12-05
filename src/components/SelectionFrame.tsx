@@ -22,7 +22,7 @@ const SelectionFrame = (props: SelectionFrameProps): ReactElement => {
     const linePaperLayer = isLine ? getPaperLayer(Object.keys(selectedPaperScopes)[0], selectedPaperScopes[Object.keys(selectedPaperScopes)[0]]) : null;
     updateSelectionFrame(selectedBounds, 'all', linePaperLayer);
     return () => {
-      const selectionFrame = uiPaperScope.project.getItem({ data: { id: 'selectionFrame' } });
+      const selectionFrame = uiPaperScope.projects[0].getItem({ data: { id: 'selectionFrame' } });
       selectionFrame.removeChildren();
     }
   }, [theme, selectedBounds, isLine, selectedPaperScopes, zoom]);

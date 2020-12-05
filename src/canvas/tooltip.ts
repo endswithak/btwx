@@ -5,6 +5,9 @@ class Tooltip {
   text: string;
   point: paper.Point;
   constructor(text: string, point: paper.Point, removeOpts?: any) {
+    if (uiPaperScope.project.activeLayer.data.id !== 'ui') {
+      uiPaperScope.projects[0].activate();
+    }
     this.point = point;
     this.text = text;
     const parent = uiPaperScope.project.getItem({data: { id: 'tooltips' }});

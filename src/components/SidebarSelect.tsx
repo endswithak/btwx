@@ -100,8 +100,13 @@ const SidebarSelect = (props: SidebarSelectProps): ReactElement => {
             const hoverBackground = isSelected ? theme.palette.primaryHover : theme.palette.primary;
             const color = isSelected ? theme.text.onPrimary : theme.text.base;
             const cursor = 'pointer';
+            const borderRadius = theme.unit;
+            const height = '24px';
+            const lineHeight = '8px';
+            const paddingLeft = 4;
+            const paddingRight = 4;
             return {
-              ...provided, fontFamily, fontSize, background, color, cursor, fontWeight, fontStyle,
+              ...provided, height, paddingLeft, paddingRight, lineHeight, fontFamily, fontSize, background, color, cursor, fontWeight, fontStyle, borderRadius,
               ':hover': {
                 background: hoverBackground,
                 color: theme.text.onPrimary
@@ -151,7 +156,8 @@ const SidebarSelect = (props: SidebarSelectProps): ReactElement => {
             const color = theme.text.base;
             const boxShadow = `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}, 0 4px 16px 0 rgba(0,0,0,0.16)`;
             const backdropFilter = 'blur(17px)';
-            return { ...provided, background, color, boxShadow, backdropFilter };
+            const padding = `0 ${theme.unit}px`;
+            return { ...provided, background, color, boxShadow, backdropFilter, padding };
           },
         }}
       />

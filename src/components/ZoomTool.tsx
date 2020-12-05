@@ -13,15 +13,13 @@ import { DocumentSettingsTypes, SetCanvasMatrixPayload } from '../store/actionTy
 interface ZoomToolProps {
   zoomEvent: WheelEvent;
   isEnabled?: boolean;
-  paperScopes?: {
-    [id: string]: paper.PaperScope;
-  };
+  artboards?: string[];
   setCanvasZooming?(payload: SetCanvasZoomingPayload): CanvasSettingsTypes;
   setCanvasMatrix?(payload: SetCanvasMatrixPayload): DocumentSettingsTypes;
 }
 
 const ZoomTool = (props: ZoomToolProps): ReactElement => {
-  const { zoomEvent, isEnabled, setCanvasZooming, setCanvasMatrix, paperScopes } = props;
+  const { zoomEvent, isEnabled, setCanvasZooming, setCanvasMatrix, artboards } = props;
 
   const debounceZoomEnd = useCallback(
     debounce(() => {
@@ -38,24 +36,23 @@ const ZoomTool = (props: ZoomToolProps): ReactElement => {
       }
       const cursorPoint = uiPaperScope.project.view.getEventPoint(zoomEvent as any);
       const pointDiff = new uiPaperScope.Point(cursorPoint.x - uiPaperScope.view.center.x, cursorPoint.y - uiPaperScope.view.center.y);
-      const prevZoom = uiPaperScope.view.zoom;
-      const nextZoom = uiPaperScope.view.zoom - zoomEvent.deltaY * (0.01 * uiPaperScope.view.zoom);
-      if (zoomEvent.deltaY < 0 && nextZoom < 25) {
-        uiPaperScope.view.zoom = nextZoom;
-      } else if (zoomEvent.deltaY > 0 && nextZoom > 0) {
-        uiPaperScope.view.zoom = nextZoom;
-      } else if (zoomEvent.deltaY > 0 && nextZoom < 0) {
-        uiPaperScope.view.zoom = 0.01;
-      }
-      const zoomDiff = uiPaperScope.view.zoom - prevZoom;
-      uiPaperScope.view.translate(
-        new uiPaperScope.Point(
-          ((zoomDiff * pointDiff.x) * (1 / uiPaperScope.view.zoom)) * -1,
-          ((zoomDiff * pointDiff.y) * (1 / uiPaperScope.view.zoom)) * -1
-        )
-      );
-      Object.keys(paperScopes).forEach((key, index) => {
-        paperScopes[key].view.matrix.set(uiPaperScope.view.matrix.values);
+      artboards.forEach((key, index) => {
+        const prevZoom = uiPaperScope.projects[index].view.zoom;
+        const nextZoom = uiPaperScope.projects[index].view.zoom - zoomEvent.deltaY * (0.01 * uiPaperScope.projects[index].view.zoom);
+        if (zoomEvent.deltaY < 0 && nextZoom < 25) {
+          uiPaperScope.projects[index].view.zoom = nextZoom;
+        } else if (zoomEvent.deltaY > 0 && nextZoom > 0) {
+          uiPaperScope.projects[index].view.zoom = nextZoom;
+        } else if (zoomEvent.deltaY > 0 && nextZoom < 0) {
+          uiPaperScope.projects[index].view.zoom = 0.01;
+        }
+        const zoomDiff = uiPaperScope.projects[index].view.zoom - prevZoom;
+        uiPaperScope.projects[index].view.translate(
+          new uiPaperScope.Point(
+            ((zoomDiff * pointDiff.x) * (1 / uiPaperScope.projects[index].view.zoom)) * -1,
+            ((zoomDiff * pointDiff.y) * (1 / uiPaperScope.projects[index].view.zoom)) * -1
+          )
+        );
       });
       debounceZoomEnd();
     }
@@ -68,15 +65,13 @@ const ZoomTool = (props: ZoomToolProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   isEnabled: boolean;
-  paperScopes: {
-    [id: string]: paper.PaperScope;
-  };
+  artboards: string[];
 } => {
-  const { canvasSettings } = state;
+  const { canvasSettings, layer } = state;
   const isEnabled = canvasSettings.zooming;
   return {
     isEnabled,
-    paperScopes: getAllPaperScopes(state)
+    artboards: ['ui', ...layer.present.childrenById.root]
   };
 };
 

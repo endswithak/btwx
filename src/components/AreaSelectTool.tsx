@@ -15,7 +15,7 @@ interface AreaSelectToolStateProps {
   isEnabled?: boolean;
   scope?: string[];
   layerPaperScopes?: {
-    [id: string]: paper.PaperScope;
+    [id: string]: paper.Project;
   };
 }
 
@@ -54,6 +54,9 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
 
   useEffect(() => {
     if (dragEvent && isEnabled) {
+      if (uiPaperScope.project.activeLayer.data.id !== 'ui') {
+        uiPaperScope.projects[0].activate();
+      }
       updateAreaSelectPreview(null);
       setCanvasSelecting({selecting: true});
     }
@@ -77,8 +80,8 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
         to: upEvent.point
       });
       if (areaSelectBounds && (areaSelectBounds.width > 0 || areaSelectBounds.height > 0)) {
-        const getProjectsLayers = (paperScope: paper.PaperScope): string[] => {
-          return paperScope.project.getItems({
+        const getProjectsLayers = (paperScope: paper.Project): string[] => {
+          return paperScope.getItems({
             data: (data: any) => {
               const notPage = data.type === 'Layer' && data.layerType !== 'Page';
               const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);

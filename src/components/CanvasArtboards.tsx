@@ -29,7 +29,7 @@ const mapStateToProps = (state: RootState): {
 } => {
   const { layer } = state;
   return {
-    artboards: layer.present.allArtboardIds
+    artboards: layer.present.childrenById['root']
   };
 };
 

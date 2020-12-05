@@ -16,7 +16,7 @@ const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
   useEffect(() => {
     updateActiveArtboardFrame(activeArtboardBounds);
     return () => {
-      const activeArtboardFrame = uiPaperScope.project.getItem({ data: { id: 'activeArtboardFrame' } });
+      const activeArtboardFrame = uiPaperScope.projects[0].getItem({ data: { id: 'activeArtboardFrame' } });
       activeArtboardFrame.removeChildren();
     }
   }, [activeArtboardBounds, zoom]);

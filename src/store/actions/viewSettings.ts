@@ -58,13 +58,13 @@ export const toggleRightSidebarThunk = () => {
     if (state.viewSettings.rightSidebar.isOpen) {
       Object.keys(allPaperScopes).forEach((key, index) => {
         const paperScope = allPaperScopes[key];
-        paperScope.view.viewSize = new paperScope.Size(paperScope.view.viewSize.width + state.viewSettings.rightSidebar.width, paperScope.view.viewSize.height);
+        paperScope.view.viewSize = new uiPaperScope.Size(paperScope.view.viewSize.width + state.viewSettings.rightSidebar.width, paperScope.view.viewSize.height);
       });
       dispatch(closeRightSidebar());
     } else {
       Object.keys(allPaperScopes).forEach((key, index) => {
         const paperScope = allPaperScopes[key];
-        paperScope.view.viewSize = new paperScope.Size(paperScope.view.viewSize.width - state.viewSettings.rightSidebar.width, paperScope.view.viewSize.height);
+        paperScope.view.viewSize = new uiPaperScope.Size(paperScope.view.viewSize.width - state.viewSettings.rightSidebar.width, paperScope.view.viewSize.height);
       });
       dispatch(openRightSidebar());
     }
@@ -87,13 +87,13 @@ export const toggleLeftSidebarThunk = () => {
     if (state.viewSettings.leftSidebar.isOpen) {
       Object.keys(allPaperScopes).forEach((key, index) => {
         const paperScope = allPaperScopes[key];
-        paperScope.view.viewSize = new paperScope.Size(paperScope.view.viewSize.width + state.viewSettings.leftSidebar.width, paperScope.view.viewSize.height);
+        paperScope.view.viewSize = new uiPaperScope.Size(paperScope.view.viewSize.width + state.viewSettings.leftSidebar.width, paperScope.view.viewSize.height);
       });
       dispatch(closeLeftSidebar());
     } else {
       Object.keys(allPaperScopes).forEach((key, index) => {
         const paperScope = allPaperScopes[key];
-        paperScope.view.viewSize = new paperScope.Size(paperScope.view.viewSize.width - state.viewSettings.leftSidebar.width, paperScope.view.viewSize.height);
+        paperScope.view.viewSize = new uiPaperScope.Size(paperScope.view.viewSize.width - state.viewSettings.leftSidebar.width, paperScope.view.viewSize.height);
       });
       dispatch(openLeftSidebar());
     }
@@ -116,13 +116,13 @@ export const toggleTweenDrawerThunk = () => {
     if (state.viewSettings.tweenDrawer.isOpen) {
       Object.keys(allPaperScopes).forEach((key, index) => {
         const paperScope = allPaperScopes[key];
-        paperScope.view.viewSize = new paperScope.Size(paperScope.view.viewSize.width, paperScope.view.viewSize.height + state.viewSettings.tweenDrawer.height);
+        paperScope.view.viewSize = new uiPaperScope.Size(paperScope.view.viewSize.width, paperScope.view.viewSize.height + state.viewSettings.tweenDrawer.height);
       });
       dispatch(closeTweenDrawer());
     } else {
       Object.keys(allPaperScopes).forEach((key, index) => {
         const paperScope = allPaperScopes[key];
-        paperScope.view.viewSize = new paperScope.Size(paperScope.view.viewSize.width, paperScope.view.viewSize.height - state.viewSettings.tweenDrawer.height);
+        paperScope.view.viewSize = new uiPaperScope.Size(paperScope.view.viewSize.width, paperScope.view.viewSize.height - state.viewSettings.tweenDrawer.height);
       });
       dispatch(openTweenDrawer());
     }

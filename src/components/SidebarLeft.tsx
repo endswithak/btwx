@@ -49,7 +49,7 @@ const mapStateToProps = (state: RootState) => {
   const { viewSettings, layer } = state;
   const isOpen = viewSettings.leftSidebar.isOpen;
   const sidebarWidth = viewSettings.leftSidebar.width;
-  const isEmpty = layer.present.allIds.length === 1;
+  const isEmpty = layer.present.childrenById.root.length === 0;
   return { isOpen, sidebarWidth, isEmpty };
 };
 

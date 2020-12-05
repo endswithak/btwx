@@ -47,7 +47,7 @@ const DragTool = (props: DragToolProps): ReactElement => {
   const [selectionOutlines, setSelectionOutlines] = useState<paper.Group>(null);
 
   const resetState = (): void => {
-    const drawingPreview = uiPaperScope.project.getItem({data: {id: 'drawingPreview'}});
+    const drawingPreview = uiPaperScope.projects[0].getItem({data: {id: 'drawingPreview'}});
     drawingPreview.removeChildren();
     setOriginalSelection(null);
     setFromBounds(null);
@@ -59,7 +59,7 @@ const DragTool = (props: DragToolProps): ReactElement => {
   }
 
   const updateDuplicatePreview = () => {
-    const drawingPreview = uiPaperScope.project.getItem({data: {id: 'drawingPreview'}});
+    const drawingPreview = uiPaperScope.projects[0].getItem({data: {id: 'drawingPreview'}});
     drawingPreview.removeChildren();
     if (altModifier && selectionOutlines) {
       const newPreview = selectionOutlines.clone({insert: false});
@@ -149,6 +149,9 @@ const DragTool = (props: DragToolProps): ReactElement => {
 
   useEffect(() => {
     if (downEvent && isEnabled) {
+      if (uiPaperScope.project.activeLayer.data.id !== 'ui') {
+        uiPaperScope.projects[0].activate();
+      }
       const dragLayers = getDragLayers(downEvent);
       const dragOutlines = new uiPaperScope.Group({insert: false});
       const dragPaperLayers: paper.Item[] = [];
@@ -263,7 +266,6 @@ const DragTool = (props: DragToolProps): ReactElement => {
     } else {
       if (tool && uiPaperScope.tool && (uiPaperScope.tool as any)._index === (tool as any)._index) {
         uiPaperScope.tool = null;
-        resetState();
       }
     }
   }, [isEnabled]);

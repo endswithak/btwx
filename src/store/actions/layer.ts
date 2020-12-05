@@ -458,12 +458,14 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
     const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const name = payload.layer.name ? payload.layer.name : 'Artboard';
-    const paperScope = state.layer.present.allArtboardIds.length + 1;
-    const index = state.layer.present.allArtboardIds.length;
+    const paperScope = state.layer.present.childrenById.root.length + 1;
+    const index = state.layer.present.childrenById.root.length;
     const style = getLayerStyle(payload, {}, { fill: { color: DEFAULT_ARTBOARD_BACKGROUND_COLOR } as Btwx.Fill, stroke: { enabled: false } as Btwx.Stroke, shadow: { enabled: false } as Btwx.Shadow });
     const frame = getLayerFrame(payload);
     const showChildren = payload.layer.showChildren ? payload.layer.showChildren : true;
     const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as Btwx.PaperGradientFill : null;
+    // const project = uiPaperScope.projects[paperScope];
+    // project.activate();
     // create background
     const artboardBackground = new uiPaperScope.Path.Rectangle({
       name: 'Artboard Background',
@@ -2927,7 +2929,7 @@ export const undoThunk = () => {
         state.layer.present.edit.projects.forEach((project: string) => {
           const projectItem = layerState.byId[project] as Btwx.Artboard;
           if (projectItem) {
-            const paperScope = projectItem.paperScope;
+            const paperScope = uiPaperScope.projects[projectItem.paperScope];
             const paperJSON = projectItem.json;
             importPaperProject({
               paperJSON,
@@ -3043,7 +3045,7 @@ export const redoThunk = () => {
         layerState.edit.projects.forEach((project: string) => {
           const projectItem = layerState.byId[project] as Btwx.Artboard;
           if (projectItem) {
-            const paperScope = projectItem.paperScope;
+            const paperScope = uiPaperScope.projects[projectItem.paperScope];
             const paperJSON = projectItem.json;
             importPaperProject({
               paperScope,
@@ -3450,10 +3452,12 @@ export const updateGradientFrame = (origin: { position: paper.Point; color: any;
 // }
 
 export const updateActiveArtboardFrame = (bounds: paper.Rectangle): void => {
+  if (uiPaperScope.project.activeLayer.data.id !== 'ui') {
+    uiPaperScope.projects[0].activate();
+  }
   const activeArtboardFrame = uiPaperScope.project.getItem({ data: { id: 'activeArtboardFrame' } });
   activeArtboardFrame.removeChildren();
   if (bounds) {
-    uiPaperScope.activate();
     const topLeft = bounds.topLeft;
     const bottomRight = bounds.bottomRight;
     new uiPaperScope.Path.Rectangle({
@@ -3478,10 +3482,12 @@ export const updateActiveArtboardFrameThunk = () => {
 };
 
 export const updateHoverFrame = (hoverItem: Btwx.Layer, artboardItem?: Btwx.Artboard): void => {
+  if (uiPaperScope.project.activeLayer.data.id !== 'ui') {
+    uiPaperScope.projects[0].activate();
+  }
   const hoverFrame = uiPaperScope.project.getItem({ data: { id: 'hoverFrame' } });
   hoverFrame.removeChildren();
   if (hoverItem) {
-    uiPaperScope.activate();
     const hoverFrameConstants = {
       strokeColor: THEME_PRIMARY_COLOR,
       strokeWidth: 2 / uiPaperScope.view.zoom,
@@ -3546,10 +3552,12 @@ export const updateHoverFrame = (hoverItem: Btwx.Layer, artboardItem?: Btwx.Artb
 };
 
 export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btwx.SelectionFrameHandle = 'all', linePaperLayer?: any): void => {
+  if (uiPaperScope.project.activeLayer.data.id !== 'ui') {
+    uiPaperScope.projects[0].activate();
+  }
   const selectionFrame = uiPaperScope.project.getItem({ data: { id: 'selectionFrame' } });
   selectionFrame.removeChildren();
   if (bounds) {
-    uiPaperScope.activate();
     const resizeDisabled = false;
     const baseProps = {
       point: bounds.topLeft,
@@ -3754,6 +3762,9 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
 };
 
 export const updateTweenEventsFrame = (state: RootState) => {
+  if (uiPaperScope.project.activeLayer.data.id !== 'ui') {
+    uiPaperScope.projects[0].activate();
+  }
   const tweenEventsFrame = uiPaperScope.project.getItem({ data: { id: 'artboardEvents' } });
   const events = (getArtboardEventItems(state) as {
     tweenEventItems: Btwx.TweenEvent[];
@@ -3766,7 +3777,6 @@ export const updateTweenEventsFrame = (state: RootState) => {
   }).tweenEventItems;
   tweenEventsFrame.removeChildren();
   if (events) {
-    uiPaperScope.activate();
     const theme = getTheme(state.viewSettings.theme);
     events.forEach((event, index) => {
       const eventLayerItem = state.layer.present.byId[event.layer];
@@ -3903,6 +3913,9 @@ export const updateTweenEventsFrameThunk = () => {
 };
 
 export const updateMeasureGuides = (bounds: paper.Rectangle, measureTo: { top?: paper.Rectangle; bottom?: paper.Rectangle; left?: paper.Rectangle; right?: paper.Rectangle; all?: paper.Rectangle }): void => {
+  if (uiPaperScope.project.activeLayer.data.id !== 'ui') {
+    uiPaperScope.projects[0].activate();
+  }
   const measureGuides = uiPaperScope.project.getItem({ data: { id: 'measureGuides' } });
   measureGuides.removeChildren();
   if (measureTo) {

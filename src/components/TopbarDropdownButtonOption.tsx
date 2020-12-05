@@ -30,6 +30,11 @@ const Button = styled.button<TopbarDropdownButtonOptionProps>`
     background: none;
     opacity: 0.5;
     cursor: default;
+    .c-topbar-dropdown-button__icon {
+      svg {
+        fill: ${props => props.theme.text.lighter};
+      }
+    }
     .c-topbar-dropdown-button__label {
       color: ${props => props.theme.text.lighter};
     }

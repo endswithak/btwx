@@ -22,7 +22,7 @@ interface TextToolStateProps {
   textSettings?: TextSettingsState;
   paperScope?: number;
   layerPaperScopes?: {
-    [id: string]: paper.PaperScope;
+    [id: string]: paper.Project;
   };
   activeArtboard?: string;
   activeArtboardPaperScope?: number;
@@ -74,8 +74,8 @@ const TextTool = (props: TextToolProps): ReactElement => {
       });
       const parentItem = Object.keys(layerPaperScopes).reduce((result, current, index) => {
         const paperScope = layerPaperScopes[current];
-        if (paperScope.project) {
-          const hitTest = paperScope.project.getItem({
+        if (paperScope) {
+          const hitTest = paperScope.getItem({
             data: (data: any) => {
               return data.id === 'artboardBackground';
             },
@@ -88,7 +88,7 @@ const TextTool = (props: TextToolProps): ReactElement => {
       }, {
         id: activeArtboard,
         paperScope: activeArtboardPaperScope,
-        paperLayer: layerPaperScopes[activeArtboard].project.activeLayer
+        paperLayer: layerPaperScopes[activeArtboard].activeLayer
       });
       addTextThunk({
         layer: {

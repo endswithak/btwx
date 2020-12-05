@@ -17,7 +17,7 @@ const HoverFrame = (props: HoverFrameProps): ReactElement => {
   useEffect(() => {
     updateHoverFrame(hoverItem, artboardItem);
     return () => {
-      const hoverFrame = uiPaperScope.project.getItem({ data: { id: 'hoverFrame' } });
+      const hoverFrame = uiPaperScope.projects[0].getItem({ data: { id: 'hoverFrame' } });
       hoverFrame.removeChildren();
     }
   }, [hover, zoom]);

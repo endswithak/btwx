@@ -8,6 +8,9 @@ class MeasureGuide {
   distance: number;
   paperLayer: paper.Group;
   constructor(from: paper.Point, to: paper.Point, guide: 'top' | 'bottom' | 'left' | 'right', removeOpts?: any) {
+    if (uiPaperScope.project.activeLayer.data.id !== 'ui') {
+      uiPaperScope.projects[0].activate();
+    }
     this.from = from;
     this.to = to;
     this.guide = guide;

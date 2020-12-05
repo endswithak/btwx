@@ -43,8 +43,8 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
   const [initialToBounds, setInitialToBounds] = useState<paper.Rectangle>(null);
 
   const resetState = () => {
-    const drawingPreview = uiPaperScope.project.getItem({ data: { id: 'drawingPreview' }});
-    const tooltips = uiPaperScope.project.getItem({ data: { id: 'tooltips' }});
+    const drawingPreview = uiPaperScope.projects[0].getItem({ data: { id: 'drawingPreview' }});
+    const tooltips = uiPaperScope.projects[0].getItem({ data: { id: 'tooltips' }});
     drawingPreview.removeChildren();
     tooltips.removeChildren();
     setFrom(null);
@@ -57,8 +57,8 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
   }
 
   const updatePreview = (): void => {
-    const drawingPreview = uiPaperScope.project.getItem({ data: { id: 'drawingPreview' }});
-    const tooltips = uiPaperScope.project.getItem({ data: { id: 'tooltips' }});
+    const drawingPreview = uiPaperScope.projects[0].getItem({ data: { id: 'drawingPreview' }});
+    const tooltips = uiPaperScope.projects[0].getItem({ data: { id: 'tooltips' }});
     drawingPreview.removeChildren();
     tooltips.removeChildren();
     new Tooltip(`${Math.round(toBounds.width)} x ${Math.round(toBounds.height)}`, dragEvent.point, {up: true});
@@ -183,6 +183,9 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
 
   useEffect(() => {
     if (downEvent && isEnabled) {
+      if (uiPaperScope.project.activeLayer.data.id !== 'ui') {
+        uiPaperScope.projects[0].activate();
+      }
       if (initialToBounds) {
         setFrom(initialToBounds.center);
       } else {
@@ -222,6 +225,7 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
 
   useEffect(() => {
     if (upEvent && isEnabled && drawing) {
+      resetState();
       addArtboardThunk({
         layer: {
           frame: {
@@ -235,7 +239,6 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
         }
       }) as any;
       toggleArtboardToolThunk();
-      resetState();
     }
   }, [upEvent]);
 

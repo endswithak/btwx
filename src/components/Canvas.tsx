@@ -18,14 +18,14 @@ import LineTool from './LineTool';
 import TextTool from './TextTool';
 import GradientTool from './GradientTool';
 import CanvasUI from './CanvasUI';
+import CanvasPage from './CanvasPage';
 import CanvasArtboards from './CanvasArtboards';
+import { uiPaperScope } from '../canvas';
 
 interface CanvasProps {
   ready: boolean;
   interactionEnabled?: boolean;
-  paperScopes?: {
-    [id: string]: paper.PaperScope;
-  };
+  paperScopes?: string[];
   setReady(ready: boolean): void;
 }
 
@@ -39,10 +39,10 @@ const Canvas = (props: CanvasProps): ReactElement => {
   const [zoomEvent, setZoomEvent] = useState(null);
 
   const handleHitResult = (e: any, eventType: 'mouseMove' | 'mouseDown' | 'mouseUp' | 'doubleClick' | 'contextMenu'): void => {
-    const { layerHitResult, uiHitResult } = Object.keys(paperScopes).reduce((result: { layerHitResult: { hitResult: paper.HitResult; paperScope: number }; uiHitResult: paper.HitResult }, current, index) => {
-      const paperScope = paperScopes[current];
-      if (paperScope.project) {
-        const hitResult = paperScope.project.hitTest(paperScope.view.getEventPoint(e));
+    const { layerHitResult, uiHitResult } = paperScopes.reduce((result: { layerHitResult: { hitResult: paper.HitResult; paperScope: number }; uiHitResult: paper.HitResult }, current, index) => {
+      const paperScope = uiPaperScope.projects[index];
+      if (paperScope) {
+        const hitResult = paperScope.hitTest(paperScope.view.getEventPoint(e));
         if (hitResult) {
           if (current === 'ui') {
             result.uiHitResult = hitResult;
@@ -120,9 +120,9 @@ const Canvas = (props: CanvasProps): ReactElement => {
   }
 
   const handleResize = (): void => {
-    Object.keys(paperScopes).forEach((key, index) => {
-      const paperScope = paperScopes[key];
-      paperScope.view.viewSize = new paperScope.Size(ref.current.clientWidth, ref.current.clientHeight);
+    paperScopes.forEach((key, index) => {
+      const paperScope = uiPaperScope.projects[index];
+      paperScope.view.viewSize = new uiPaperScope.Size(ref.current.clientWidth, ref.current.clientHeight);
     });
   }
 
@@ -150,11 +150,11 @@ const Canvas = (props: CanvasProps): ReactElement => {
         background: theme.background.z0
       }}>
       {/* <CanvasPage /> */}
-      <CanvasArtboards />
       <CanvasUI />
       {
         ready
         ? <>
+            <CanvasArtboards />
             <CanvasLayerEvents
               layerEvent={layerEvent} />
             <CanvasUIEvents
@@ -181,14 +181,12 @@ const Canvas = (props: CanvasProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   interactionEnabled: boolean;
-  paperScopes: {
-    [id: string]: paper.PaperScope;
-  };
+  paperScopes: string[];
 } => {
-  const { canvasSettings } = state;
+  const { canvasSettings, layer } = state;
   return {
     interactionEnabled: !canvasSettings.selecting && !canvasSettings.resizing && !canvasSettings.drawing && !canvasSettings.zooming && !canvasSettings.translating && !canvasSettings.dragging,
-    paperScopes: getAllPaperScopes(state)
+    paperScopes: ['ui', ...layer.present.childrenById.root]
   };
 };
 

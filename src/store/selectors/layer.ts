@@ -10,6 +10,7 @@ import { RootState } from '../reducers';
 
 export const getArtboardEventDestinationIds = (state: RootState, id: string): string[] => (state.layer.present.byId[id] as Btwx.Artboard).destinationArtboardForEvents;
 export const getArtboardEventOriginIds = (state: RootState, id: string): string[] => (state.layer.present.byId[id] as Btwx.Artboard).originArtboardForEvents;
+export const getRootChildren = (state: RootState): string[] => state.layer.present.childrenById.root;
 export const getSelected = (state: RootState): string[] => state.layer.present.selected;
 export const getAllArtboardIds = (state: RootState): string[] => state.layer.present.allArtboardIds;
 export const getLayersById = (state: RootState): { [id: string]: Btwx.Layer } => state.layer.present.byId;
@@ -45,22 +46,22 @@ export const getAllArtboardPaperProjects = createSelector(
 );
 
 export const getLayerPaperScopes = createSelector(
-  [ getAllArtboardIds ],
-  (allArtboardIds) => {
-    return allArtboardIds.reduce((result, current, index) => ({
+  [ getRootChildren ],
+  (rootChildren) => {
+    return rootChildren.reduce((result, current, index) => ({
       ...result,
-      [current]: paper.PaperScope.get(index + 1)
-    }), {}) as { [id: string]: paper.PaperScope };
+      [current]: uiPaperScope.projects[index + 1]
+    }), {}) as { [id: string]: paper.Project };
   }
 );
 
 export const getAllPaperScopes = createSelector(
-  [ getAllArtboardIds ],
-  (allArtboardIds) => {
-    return ['ui', ...allArtboardIds].reduce((result, current, index) => ({
+  [ getRootChildren ],
+  (rootChildren) => {
+    return ['ui', ...rootChildren].reduce((result, current, index) => ({
       ...result,
-      [current]: paper.PaperScope.get(index)
-    }), {}) as { [id: string]: paper.PaperScope };
+      [current]: index === 0 ? uiPaperScope.projects[0] : uiPaperScope.projects[index]
+    }), {}) as { [id: string]: paper.Project };
   }
 );
 
@@ -930,9 +931,10 @@ export const getSelectedPaperLayers = (): paper.Item[] => {
 };
 
 export const getPaperLayer = (id: string, paperScope: number): paper.Item => {
-  const paperScopeItem = paper.PaperScope.get(paperScope);
-  if (paperScopeItem && paperScopeItem.project) {
-    return paperScopeItem.project.getItem({ data: { id } });
+  // const paperScopeItem = paper.PaperScope.get(paperScope);
+  const project = uiPaperScope.projects[paperScope];
+  if (project) {
+    return project.getItem({ data: { id } });
   } else {
     return null;
   }
@@ -1838,10 +1840,10 @@ export const orderLayersByTop = (store: LayerState, layers: string[]): string[] 
   });
 };
 
-export const savePaperProjectJSON = (state: LayerState, paperScope: number): string => {
-  const paperScopeItem = paper.PaperScope.get(paperScope);
-  if (paperScopeItem.project) {
-    const projectJSON = paperScopeItem.project.exportJSON();
+export const savePaperProjectJSON = (state: LayerState, id: string): string => {
+  const paperScope = uiPaperScope.projects.find((project) => project.activeLayer.data.id && project.activeLayer.data.id === id);
+  if (paperScope) {
+    const projectJSON = paperScope.exportJSON();
     const canvasImageBase64ById = state.allImageIds.reduce((result: { [id: string]: string }, current) => {
       const layer = state.byId[current] as Btwx.Image;
       const imagePaperScope = getLayerPaperScope(state, current);
@@ -1863,21 +1865,18 @@ interface ImportPaperProject {
     [id: string]: Btwx.DocumentImage;
   };
   paperJSON: string;
-  paperScope: number;
+  paperScope: paper.Project;
 }
 
 export const importPaperProject = ({documentImages, paperJSON, paperScope}: ImportPaperProject): void => {
-  const paperScopeItem = paper.PaperScope.get(paperScope);
-  if (paperScopeItem.project) {
-    paperScopeItem.activate();
-    paperScopeItem.project.clear();
-    const newPaperProject = Object.keys(documentImages).reduce((result, current) => {
-      const rasterBase64 = bufferToBase64(Buffer.from(documentImages[current].buffer));
-      const base64 = `data:image/webp;base64,${rasterBase64}`;
-      return result.replace(`"source":"${current}"`, `"source":"${base64}"`);
-    }, paperJSON);
-    paperScopeItem.project.importJSON(newPaperProject);
-  }
+  paperScope.activate();
+  paperScope.clear();
+  const newPaperProject = Object.keys(documentImages).reduce((result, current) => {
+    const rasterBase64 = bufferToBase64(Buffer.from(documentImages[current].buffer));
+    const base64 = `data:image/webp;base64,${rasterBase64}`;
+    return result.replace(`"source":"${current}"`, `"source":"${base64}"`);
+  }, paperJSON);
+  paperScope.importJSON(newPaperProject);
 };
 
 export const colorsMatch = (color1: Btwx.Color, color2: Btwx.Color): boolean => {

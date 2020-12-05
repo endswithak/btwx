@@ -37,7 +37,7 @@ const TweenEventsFrame = (props: TweenEventsFrameProps): ReactElement => {
     updateTweenEventsFrameThunk();
     // updateTweenEventsFrame({allArtboardIds, byId: {...artboardsById, ...tweenEventLayers.byId}, activeArtboard} as LayerState, tweenEventItems, eventHover, themeName);
     return () => {
-      const tweenEventsFrame = uiPaperScope.project.getItem({ data: { id: 'artboardEvents' } });
+      const tweenEventsFrame = uiPaperScope.projects[0].getItem({ data: { id: 'artboardEvents' } });
       tweenEventsFrame.removeChildren();
     }
   }, [activeArtboard, theme, tweenDrawerEventSort, tweenDrawerEventHover, tweenDrawerEvent, activeArtboardEvents]);

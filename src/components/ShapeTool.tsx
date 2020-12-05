@@ -24,7 +24,7 @@ interface ShapeToolStateProps {
   scope?: string[];
   paperScope?: number;
   layerPaperScopes?: {
-    [id: string]: paper.PaperScope;
+    [id: string]: paper.Project;
   };
   drawing?: boolean;
   activeArtboard?: string;
@@ -58,8 +58,8 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
   const [initialToBounds, setInitialToBounds] = useState<paper.Rectangle>(null);
 
   const resetState = () => {
-    const drawingPreview = uiPaperScope.project.getItem({ data: { id: 'drawingPreview' }});
-    const tooltips = uiPaperScope.project.getItem({ data: { id: 'tooltips' }});
+    const drawingPreview = uiPaperScope.projects[0].getItem({ data: { id: 'drawingPreview' }});
+    const tooltips = uiPaperScope.projects[0].getItem({ data: { id: 'tooltips' }});
     drawingPreview.removeChildren();
     tooltips.removeChildren();
     setFrom(null);
@@ -160,8 +160,8 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
   }
 
   const updatePreview = (): void => {
-    const drawingPreview = uiPaperScope.project.getItem({ data: { id: 'drawingPreview' }});
-    const tooltips = uiPaperScope.project.getItem({ data: { id: 'tooltips' }});
+    const drawingPreview = uiPaperScope.projects[0].getItem({ data: { id: 'drawingPreview' }});
+    const tooltips = uiPaperScope.projects[0].getItem({ data: { id: 'tooltips' }});
     drawingPreview.removeChildren();
     tooltips.removeChildren();
     const nextTooltip = new Tooltip(`${Math.round(toBounds.width)} x ${Math.round(toBounds.height)}`, dragEvent.point, {up: true});
@@ -286,6 +286,9 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
 
   useEffect(() => {
     if (downEvent && isEnabled) {
+      if (uiPaperScope.project.activeLayer.data.id !== 'ui') {
+        uiPaperScope.projects[0].activate();
+      }
       if (initialToBounds) {
         setFrom(initialToBounds.center);
       } else {
@@ -334,8 +337,8 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
       const vector = toPoint.subtract(fromPoint);
       const parentItem = Object.keys(layerPaperScopes).reduce((result, current, index) => {
         const paperScope = layerPaperScopes[current];
-        if (paperScope.project) {
-          const hitTest = paperScope.project.getItem({
+        if (paperScope) {
+          const hitTest = paperScope.getItem({
             data: (data: any) => {
               return data.id === 'artboardBackground';
             },
@@ -348,7 +351,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
       }, {
         id: activeArtboard,
         paperScope: activeArtboardPaperScope,
-        paperLayer: layerPaperScopes[activeArtboard].project.activeLayer
+        paperLayer: layerPaperScopes[activeArtboard].activeLayer
       });
       addShapeThunk({
         layer: {

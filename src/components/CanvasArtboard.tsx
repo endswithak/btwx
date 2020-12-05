@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { ReactElement, useEffect, useRef } from 'react';
 import { connect } from 'react-redux';
-import paper from 'paper';
+import { uiPaperScope } from '../canvas';
 import { importPaperProject } from '../store/selectors/layer';
 import { RootState } from '../store/reducers';
 
@@ -12,37 +12,29 @@ interface CanvasArtboardProps {
   };
   matrix?: number[];
   paperJSON?: string;
-  paperScope?: number;
+  paperScopeIndex?: number;
 }
 
 const CanvasArtboard = (props: CanvasArtboardProps): ReactElement => {
-  const ref = useRef<HTMLCanvasElement>(null);
-  const { id, paperJSON, paperScope, documentImages, matrix } = props;
+  const { id, paperJSON, documentImages, matrix, paperScopeIndex } = props;
 
   useEffect(() => {
-    if (ref.current) {
-      const paperScopeItem = paper.PaperScope.get(paperScope);
-      const canvasWrap = document.getElementById('canvas-container');
-      paperScopeItem.setup(ref.current);
-      importPaperProject({
-        paperJSON,
-        paperScope,
-        documentImages
-      });
-      paperScopeItem.view.viewSize = new paperScopeItem.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
-      paperScopeItem.view.matrix.set(matrix);
-    }
+    const canvasWrap = document.getElementById('canvas-container');
+    const paperScope = uiPaperScope.projects[paperScopeIndex];
+    importPaperProject({
+      paperJSON,
+      paperScope,
+      documentImages
+    });
+    paperScope.view.viewSize = new uiPaperScope.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
+    paperScope.view.matrix.set(matrix);
     return () => {
-      const paperScopeItem = paper.PaperScope.get(paperScope);
-      paperScopeItem.project.remove();
+      uiPaperScope.projects[paperScopeIndex].clear();
     }
   }, [id]);
 
   return (
-    <canvas
-      id={`canvas-${id}`}
-      className='c-canvas__layer c-canvas__layer--artboard'
-      ref={ref} />
+    <></>
   );
 }
 
@@ -52,7 +44,7 @@ const mapStateToProps = (state: RootState, ownProps: CanvasArtboardProps): {
   };
   matrix: number[];
   paperJSON: string;
-  paperScope: number;
+  paperScopeIndex: number;
 } => {
   const { layer, documentSettings } = state;
   const artboard = layer.present.byId[ownProps.id] as Btwx.Artboard;
@@ -60,7 +52,7 @@ const mapStateToProps = (state: RootState, ownProps: CanvasArtboardProps): {
     documentImages: documentSettings.images.byId,
     matrix: documentSettings.matrix,
     paperJSON: artboard.json,
-    paperScope: artboard.paperScope
+    paperScopeIndex: artboard.paperScope
   };
 };
 
