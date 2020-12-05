@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
 import styled from 'styled-components';
-import { getAllPaperScopes } from '../store/selectors/layer';
+import { uiPaperScope } from '../canvas';
 import { setTweenDrawerHeight } from '../store/actions/viewSettings';
 import { SetTweenDrawerHeightPayload, ViewSettingsTypes } from '../store/actionTypes/viewSettings';
 import { RootState } from '../store/reducers';
@@ -13,9 +13,7 @@ gsap.registerPlugin(Draggable);
 
 interface TweenDrawerDragHandleProps {
   tweenDrawerHeight?: number;
-  allPaperScopes?: {
-    [id: string]: paper.PaperScope;
-  };
+  allPaperScopes?: string[];
   setTweenDrawerHeight?(payload: SetTweenDrawerHeightPayload): ViewSettingsTypes;
 }
 
@@ -50,9 +48,8 @@ const TweenDrawerDragHandle = (props: TweenDrawerDragHandleProps): ReactElement 
       onDrag: function() {
         const canvasContainer = document.getElementById('canvas-container');
         gsap.set('#tween-drawer', {height: this.y * -1});
-        Object.keys(allPaperScopes).forEach((id) => {
-          const paperScope = allPaperScopes[id];
-          paperScope.view.viewSize.height = canvasContainer.clientHeight;
+        allPaperScopes.forEach((key, index) => {
+          uiPaperScope.projects[index].view.viewSize.height = canvasContainer.clientHeight;
         });
       },
       onRelease: function() {
@@ -78,13 +75,11 @@ const TweenDrawerDragHandle = (props: TweenDrawerDragHandleProps): ReactElement 
 
 const mapStateToProps = (state: RootState): {
   tweenDrawerHeight: number;
-  allPaperScopes: {
-    [id: string]: paper.PaperScope;
-  };
+  allPaperScopes: string[];
 } => {
-  const { viewSettings } = state;
+  const { viewSettings, layer } = state;
   const tweenDrawerHeight = viewSettings.tweenDrawer.height;
-  const allPaperScopes = getAllPaperScopes(state);
+  const allPaperScopes = ['ui', ...layer.present.childrenById.root];
   return { tweenDrawerHeight, allPaperScopes };
 };
 

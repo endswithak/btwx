@@ -6190,24 +6190,29 @@ export const setLineTo = (state: LayerState, action: SetLineTo): LayerState => {
 
 export const setLayerEdit = (state: LayerState, action: SetLayerEdit): LayerState => {
   let currentState = state;
+  if (action.payload.edit.projects) {
+    currentState = {
+      ...currentState,
+      byId: action.payload.edit.projects.reduce((result, current) => {
+        if (currentState.byId[current]) {
+          const projectJSON = savePaperProjectJSON(currentState, current);
+          result[current] = {
+            ...result[current],
+            json: projectJSON ? projectJSON : (currentState.byId[current] as Btwx.Artboard).json
+          } as Btwx.Artboard
+        }
+        return result;
+      }, currentState.byId),
+      artboardJSON: action.payload.edit.projects.reduce((result, current) => {
+        if (currentState.byId[current]) {
+          result[current] = action.payload.edit.id;
+        }
+        return result;
+      }, currentState.artboardJSON)
+    }
+  }
   currentState = {
     ...currentState,
-    byId: action.payload.edit.projects.reduce((result, current) => {
-      if (currentState.byId[current]) {
-        const projectJSON = savePaperProjectJSON(currentState, current);
-        result[current] = {
-          ...result[current],
-          json: projectJSON ? projectJSON : (currentState.byId[current] as Btwx.Artboard).json
-        } as Btwx.Artboard
-      }
-      return result;
-    }, currentState.byId),
-    artboardJSON: action.payload.edit.projects.reduce((result, current) => {
-      if (currentState.byId[current]) {
-        result[current] = action.payload.edit.id;
-      }
-      return result;
-    }, currentState.artboardJSON),
     edit: action.payload.edit
   }
   return currentState;

@@ -124,6 +124,7 @@ const TextTool = (props: TextToolProps): ReactElement => {
           }
         }
       }).then((textLayer) => {
+        toggleTextToolThunk();
         // get new layer bounds
         const topLeft = uiPaperScope.view.projectToView(paperLayer.bounds.topLeft);
         const topCenter = uiPaperScope.view.projectToView(paperLayer.bounds.topCenter);
@@ -153,7 +154,6 @@ const TextTool = (props: TextToolProps): ReactElement => {
             }
           })()
         });
-        toggleTextToolThunk();
         resetState();
       });
     }

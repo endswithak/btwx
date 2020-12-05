@@ -1,10 +1,14 @@
 import React, { useContext, ReactElement, useState } from 'react';
 import Topbar from './Topbar';
 import EaseEditorWrap from './EaseEditorWrap';
-import Main from './Main';
 import { ThemeContext } from './ThemeProvider';
 import ArtboardPresetEditorWrap from './ArtboardPresetEditorWrap';
 import ContextMenuWrap from './ContextMenuWrap';
+import Canvas from './Canvas';
+import SidebarLeft from './SidebarLeft';
+import SidebarRight from './SidebarRight';
+import TweenDrawerWrap from './TweenDrawerWrap';
+import TextEditor from './TextEditor';
 
 const App = (): ReactElement => {
   const theme = useContext(ThemeContext);
@@ -19,15 +23,21 @@ const App = (): ReactElement => {
       }}>
         {/* flex items */}
         <Topbar />
-        <Main ready={ready} setReady={setReady} />
+        <div id='main' className='c-app__main'>
+          <SidebarLeft ready={ready} />
+          <main id='main-canvas' className='c-app__canvas'>
+            <Canvas setReady={setReady} ready={ready} />
+            <TextEditor ready={ready} />
+            <TweenDrawerWrap ready={ready} />
+          </main>
+          <SidebarRight ready={ready} />
+        </div>
         {/* abs elements */}
         {
           ready
           ? <>
               <ContextMenuWrap />
-              {/* Canvas UI */}
-              {/* Modals */}
-              {/* <EaseEditorWrap /> */}
+              <EaseEditorWrap />
               <ArtboardPresetEditorWrap />
             </>
           : null

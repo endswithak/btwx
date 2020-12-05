@@ -14,7 +14,7 @@ const Sidebar = (props: SidebarProps): ReactElement => {
   const { children, width, position, header, headerChildren } = props;
 
   return (
-    <div
+    <aside
       id={`sidebar-${props.position}`}
       className='c-sidebar'
       style={{
@@ -34,7 +34,7 @@ const Sidebar = (props: SidebarProps): ReactElement => {
         className='c-sidebar__scroll'>
         { children }
       </div>
-    </div>
+    </aside>
   );
 }
 

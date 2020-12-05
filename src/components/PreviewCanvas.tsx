@@ -16,7 +16,6 @@ interface PreviewCanvasProps {
     [id: string]: string;
   };
   activeArtboard?: Btwx.Artboard;
-  page?: string;
   documentWindowId?: number;
   tweenEvents: {
     allIds: string[];
@@ -64,7 +63,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useContext(ThemeContext);
-  const { paperProjects, activeArtboard, page, touchCursor, tweenEvents, tweenEventLayers, tweenEventDestinations, tweens, tweenLayers, tweenLayerDestinations, documentWindowId, documentImagesById } = props;
+  const { paperProjects, activeArtboard, touchCursor, tweenEvents, tweenEventLayers, tweenEventDestinations, tweens, tweenLayers, tweenLayerDestinations, documentWindowId, documentImagesById } = props;
 
   const handleResize = (): void => {
     paperPreview.view.viewSize = new paperPreview.Size(
@@ -217,7 +216,6 @@ const mapStateToProps = (state: RootState) => {
   const documentWindowId = preview.documentWindowId;
   return {
     activeArtboard: layer.present.byId[layer.present.activeArtboard],
-    page: layer.present.page,
     paperProjects,
     tweenEvents,
     tweenEventLayers,

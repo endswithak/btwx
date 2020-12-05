@@ -3,8 +3,7 @@ import React, { useEffect, ReactElement, useCallback } from 'react';
 import debounce from 'lodash.debounce';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { uiPaperScope, pagePaperScope } from '../canvas';
-import { getAllPaperScopes } from '../store/selectors/layer';
+import { uiPaperScope } from '../canvas';
 import { setCanvasTranslating } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasTranslatingPayload } from '../store/actionTypes/canvasSettings';
 import { setCanvasMatrix } from '../store/actions/documentSettings';
@@ -57,7 +56,6 @@ const mapStateToProps = (state: RootState): {
   return {
     isEnabled,
     artboards: ['ui', ...layer.present.childrenById.root]
-    // paperScopes: getAllPaperScopes(state)
   };
 };
 

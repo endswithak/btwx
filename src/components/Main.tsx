@@ -4,7 +4,6 @@ import SidebarLeft from './SidebarLeft';
 import SidebarRight from './SidebarRight';
 import TweenDrawerWrap from './TweenDrawerWrap';
 import TextEditor from './TextEditor';
-import InsertKnobWrap from './InsertKnobWrap';
 
 interface MainProps {
   ready: boolean;
@@ -28,8 +27,7 @@ const Main = (props: MainProps): ReactElement => {
         className='c-app__canvas'>
         <Canvas setReady={setReady} ready={ready} />
         <TextEditor ready={ready} />
-        {/* <TweenDrawerWrap ready={ready} />
-        <InsertKnobWrap /> */}
+        <TweenDrawerWrap ready={ready} />
       </div>
       <SidebarRight ready={ready} />
     </div>

@@ -2,7 +2,6 @@
 import React, { useContext, ReactElement, useEffect, useState, useRef } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getAllPaperScopes } from '../store/selectors/layer';
 import { ThemeContext } from './ThemeProvider';
 import CanvasLayerEvents from './CanvasLayerEvents';
 import CanvasUIEvents from './CanvasUIEvents';
@@ -18,7 +17,6 @@ import LineTool from './LineTool';
 import TextTool from './TextTool';
 import GradientTool from './GradientTool';
 import CanvasUI from './CanvasUI';
-import CanvasPage from './CanvasPage';
 import CanvasArtboards from './CanvasArtboards';
 import { uiPaperScope } from '../canvas';
 

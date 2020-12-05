@@ -60,7 +60,7 @@ export const getAllPaperScopes = createSelector(
   (rootChildren) => {
     return ['ui', ...rootChildren].reduce((result, current, index) => ({
       ...result,
-      [current]: index === 0 ? uiPaperScope.projects[0] : uiPaperScope.projects[index]
+      [current]: uiPaperScope.projects[index]
     }), {}) as { [id: string]: paper.Project };
   }
 );
@@ -69,24 +69,6 @@ export const getCanvasBounds = createSelector(
   [ getLayersById, getAllArtboardIds ],
   (byId, allArtboardIds) => {
     return getLayersBounds({byId} as LayerState, allArtboardIds);
-    // return Object.keys(layerPaperScopes).reduce((result: paper.Rectangle, current, index: number) => {
-    //   const paperScope = layerPaperScopes[current];
-    //   let nextTopLeft;
-    //   let nextBottomRight;
-    //   const topLeft = paperScope.project.activeLayer.bounds.topLeft;
-    //   const bottomRight = paperScope.project.activeLayer.bounds.bottomRight;
-    //   if (index === 0) {
-    //     nextTopLeft = topLeft;
-    //     nextBottomRight = bottomRight;
-    //   } else {
-    //     nextTopLeft = paper.Point.min(result.topLeft, topLeft);
-    //     nextBottomRight = paper.Point.max(result.bottomRight, bottomRight);
-    //   }
-    //   return new uiPaperScope.Rectangle({
-    //     from: nextTopLeft,
-    //     to: nextBottomRight
-    //   });
-    // }, new uiPaperScope.Rectangle(new uiPaperScope.Point(0,0), new uiPaperScope.Size(0,0)));
   }
 );
 
@@ -448,28 +430,6 @@ export const getSelectedBounds = createSelector(
   [ getSelected, getLayersById ],
   (selected, byId) => {
     return getLayersBounds({byId} as LayerState, selected);
-    // return selected.reduce((result: paper.Rectangle, current: string, index: number) => {
-    //   let nextTopLeft;
-    //   let nextBottomRight;
-    //   const layerItem = byId[current];
-    //   const artboardItem = byId[layerItem.artboard];
-    //   const layerPosition = new uiPaperScope.Point(layerItem.frame.x, layerItem.frame.y);
-    //   const artboardPosition = layerItem.type !== 'Artboard' ? new uiPaperScope.Point(artboardItem.frame.x, artboardItem.frame.y) : new uiPaperScope.Point(0, 0);
-    //   const absolutePosition = artboardPosition.add(layerPosition);
-    //   const topLeft = new uiPaperScope.Point(absolutePosition.x - (layerItem.frame.width / 2), absolutePosition.y - (layerItem.frame.height / 2));
-    //   const bottomRight = new uiPaperScope.Point(absolutePosition.x + (layerItem.frame.width / 2), absolutePosition.y + (layerItem.frame.height / 2));
-    //   if (index === 0) {
-    //     nextTopLeft = topLeft;
-    //     nextBottomRight = bottomRight;
-    //   } else {
-    //     nextTopLeft = paper.Point.min(result.topLeft, topLeft);
-    //     nextBottomRight = paper.Point.max(result.bottomRight, bottomRight);
-    //   }
-    //   return new uiPaperScope.Rectangle({
-    //     from: nextTopLeft,
-    //     to: nextBottomRight
-    //   });
-    // }, null) as paper.Rectangle;
   }
 );
 
@@ -931,7 +891,6 @@ export const getSelectedPaperLayers = (): paper.Item[] => {
 };
 
 export const getPaperLayer = (id: string, paperScope: number): paper.Item => {
-  // const paperScopeItem = paper.PaperScope.get(paperScope);
   const project = uiPaperScope.projects[paperScope];
   if (project) {
     return project.getItem({ data: { id } });
@@ -1002,7 +961,6 @@ export const getLayerSiblings = (state: LayerState, id: string): string[] => {
   const layerItem = state.byId[id];
   const parentLayerItem = state.byId[layerItem.parent];
   return parentLayerItem.children.reduce((result, current, index) => {
-    // const childLayerItem = state.byId[current];
     result = [...result, current];
     return result;
   }, []);
@@ -1013,7 +971,6 @@ export const getLayerOlderSiblings = (state: LayerState, id: string): string[] =
   const parentLayerItem = state.byId[layerItem.parent];
   const layerIndex = parentLayerItem.children.indexOf(id);
   return parentLayerItem.children.reduce((result, current, index) => {
-    // const childLayerItem = state.byId[current];
     if (index < layerIndex) {
       result = [...result, current];
     }
@@ -1043,7 +1000,6 @@ export const getLayerYoungerSiblings = (state: LayerState, id: string): string[]
   const parentLayerItem = state.byId[layerItem.parent];
   const layerIndex = parentLayerItem.children.indexOf(id);
   return parentLayerItem.children.reduce((result, current, index) => {
-    // const childLayerItem = state.byId[current];
     if (index > layerIndex) {
       result = [...result, current];
     }
@@ -1724,11 +1680,6 @@ export const getTweenEventLayerTweens = (store: LayerState, eventId: string, lay
   };
 };
 
-// export const getGradientOriginPoint = (layerItem: Btwx.Layer, origin: Btwx.Point): paper.Point => {
-//   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
-//   return new uiPaperScope.Point((origin.x * (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)) + layerItem.frame.x, (origin.y * (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)) + layerItem.frame.y);
-// };
-
 export const getAbsolutePosition = (store: LayerState, id: string): paper.Point => {
   const layerItem = store.byId[id];
   const layerPosition = new uiPaperScope.Point(layerItem.frame.x, layerItem.frame.y);
@@ -1747,8 +1698,6 @@ export const getGradientOrigin = (store: LayerState, id: string, originPoint: Bt
   const layerPosition = getAbsolutePosition(store, id);
   const originPaperPoint = new uiPaperScope.Point(originPoint.x, originPoint.y);
   const rel = originPaperPoint.subtract(layerPosition);
-  // const originPoint = new uiPaperScope.Point(origin.x, origin.y);
-  // return layerPosition.add(originPoint);
   return new uiPaperScope.Point((rel.x / (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)), (rel.y / (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)));
 };
 
@@ -1758,15 +1707,8 @@ export const getGradientOriginPoint = (store: LayerState, id: string, prop: 'fil
   const origin = gradient.origin;
   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   const layerPosition = getAbsolutePosition(store, id);
-  // const originPoint = new uiPaperScope.Point(origin.x, origin.y);
-  // return layerPosition.add(originPoint);
   return new uiPaperScope.Point((origin.x * (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)) + layerPosition.x, (origin.y * (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)) + layerPosition.y);
 };
-
-// export const getGradientDestinationPoint = (layerItem: Btwx.Layer, destination: Btwx.Point): paper.Point => {
-//   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
-//   return new uiPaperScope.Point((destination.x * (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)) + layerItem.frame.x, (destination.y * (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)) + layerItem.frame.y);
-// };
 
 export const getGradientDestination = (store: LayerState, id: string, destinationPoint: Btwx.Point): paper.Point => {
   const layerItem = store.byId[id];
@@ -1774,8 +1716,6 @@ export const getGradientDestination = (store: LayerState, id: string, destinatio
   const layerPosition = getAbsolutePosition(store, id);
   const destinationPaperPoint = new uiPaperScope.Point(destinationPoint.x, destinationPoint.y);
   const rel = destinationPaperPoint.subtract(layerPosition);
-  // const originPoint = new uiPaperScope.Point(origin.x, origin.y);
-  // return layerPosition.add(originPoint);
   return new uiPaperScope.Point((rel.x / (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)), (rel.y / (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)));
 };
 
@@ -1785,8 +1725,6 @@ export const getGradientDestinationPoint = (store: LayerState, id: string, prop:
   const destination = gradient.destination;
   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   const layerPosition = getAbsolutePosition(store, id);
-  // const destinationPoint = new uiPaperScope.Point(destination.x, destination.y);
-  // return layerPosition.add(destinationPoint);
   return new uiPaperScope.Point((destination.x * (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)) + layerPosition.x, (destination.y * (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)) + layerPosition.y);
 };
 
