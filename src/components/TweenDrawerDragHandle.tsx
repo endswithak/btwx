@@ -48,8 +48,10 @@ const TweenDrawerDragHandle = (props: TweenDrawerDragHandleProps): ReactElement 
       onDrag: function() {
         const canvasContainer = document.getElementById('canvas-container');
         gsap.set('#tween-drawer', {height: this.y * -1});
-        allPaperScopes.forEach((key, index) => {
-          uiPaperScope.projects[index].view.viewSize.height = canvasContainer.clientHeight;
+        uiPaperScope.projects.forEach((project) => {
+          if (project.activeLayer.data.id) {
+            project.view.viewSize.height = canvasContainer.clientHeight;
+          }
         });
       },
       onRelease: function() {
@@ -75,12 +77,10 @@ const TweenDrawerDragHandle = (props: TweenDrawerDragHandleProps): ReactElement 
 
 const mapStateToProps = (state: RootState): {
   tweenDrawerHeight: number;
-  allPaperScopes: string[];
 } => {
   const { viewSettings, layer } = state;
   const tweenDrawerHeight = viewSettings.tweenDrawer.height;
-  const allPaperScopes = ['ui', ...layer.present.childrenById.root];
-  return { tweenDrawerHeight, allPaperScopes };
+  return { tweenDrawerHeight };
 };
 
 export default connect(

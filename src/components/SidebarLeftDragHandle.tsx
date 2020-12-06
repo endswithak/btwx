@@ -4,7 +4,6 @@ import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
 import styled from 'styled-components';
 import { uiPaperScope } from '../canvas';
-import { getAllPaperScopes } from '../store/selectors/layer';
 import { setLeftSidebarWidth } from '../store/actions/viewSettings';
 import { SetLeftSidebarWidthPayload, ViewSettingsTypes } from '../store/actionTypes/viewSettings';
 import { RootState } from '../store/reducers';
@@ -14,7 +13,6 @@ gsap.registerPlugin(Draggable);
 
 interface SidebarLeftDragHandleProps {
   sidebarWidth?: number;
-  allPaperScopes?: string[];
   setLeftSidebarWidth?(payload: SetLeftSidebarWidthPayload): ViewSettingsTypes;
 }
 
@@ -34,7 +32,7 @@ const SidebarLeftDragHandle = (props: SidebarLeftDragHandleProps): ReactElement 
   const theme = useContext(ThemeContext);
   const ref = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
-  const { sidebarWidth, setLeftSidebarWidth, allPaperScopes } = props;
+  const { sidebarWidth, setLeftSidebarWidth } = props;
 
   useEffect(() => {
     gsap.set(ref.current, {x: sidebarWidth});
@@ -49,8 +47,10 @@ const SidebarLeftDragHandle = (props: SidebarLeftDragHandleProps): ReactElement 
       onDrag: function() {
         const canvasContainer = document.getElementById('canvas-container');
         gsap.set('#sidebar-left', {width: this.x});
-        allPaperScopes.forEach((key, index) => {
-          uiPaperScope.projects[index].view.viewSize.width = canvasContainer.clientWidth;
+        uiPaperScope.projects.forEach((project) => {
+          if (project.activeLayer.data.id) {
+            project.view.viewSize.width = canvasContainer.clientWidth;
+          }
         });
       },
       onRelease: function() {
@@ -76,12 +76,10 @@ const SidebarLeftDragHandle = (props: SidebarLeftDragHandleProps): ReactElement 
 
 const mapStateToProps = (state: RootState): {
   sidebarWidth: number;
-  allPaperScopes: string[];
 } => {
   const { viewSettings, layer } = state;
   const sidebarWidth = viewSettings.leftSidebar.width;
-  const allPaperScopes = ['ui', ...layer.present.childrenById.root];
-  return { sidebarWidth, allPaperScopes };
+  return { sidebarWidth };
 };
 
 export default connect(

@@ -24,7 +24,7 @@ interface ShapeToolStateProps {
   scope?: string[];
   paperScope?: number;
   layerPaperScopes?: {
-    [id: string]: paper.Project;
+    [id: string]: number;
   };
   drawing?: boolean;
   activeArtboard?: string;
@@ -336,7 +336,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
       const toPoint = (paperLayer as paper.Path).lastSegment.point;
       const vector = toPoint.subtract(fromPoint);
       const parentItem = Object.keys(layerPaperScopes).reduce((result, current, index) => {
-        const paperScope = layerPaperScopes[current];
+        const paperScope = uiPaperScope.projects[layerPaperScopes[current]];
         if (paperScope) {
           const hitTest = paperScope.getItem({
             data: (data: any) => {
@@ -351,7 +351,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
       }, {
         id: activeArtboard,
         paperScope: activeArtboardPaperScope,
-        paperLayer: layerPaperScopes[activeArtboard].activeLayer
+        paperLayer: uiPaperScope.projects[layerPaperScopes[activeArtboard]].activeLayer
       });
       addShapeThunk({
         layer: {

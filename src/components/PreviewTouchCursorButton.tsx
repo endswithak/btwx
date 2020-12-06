@@ -1,25 +1,16 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
-import { RootState } from '../store/reducers';
-import { enableTouchCursor, disableTouchCursor } from '../store/actions/preview';
-import { PreviewTypes } from '../store/actionTypes/preview';
 import TopbarButton from './TopbarButton';
 
 interface PreviewTouchCursorButtonProps {
   touchCursor: boolean;
-  enableTouchCursor(): PreviewTypes;
-  disableTouchCursor(): PreviewTypes;
+  setTouchCursor(touchCursor: boolean): void;
 }
 
 const PreviewTouchCursorButton = (props: PreviewTouchCursorButtonProps): ReactElement => {
-  const { touchCursor, enableTouchCursor, disableTouchCursor } = props;
+  const { touchCursor, setTouchCursor } = props;
 
   const handleClick = () => {
-    if (touchCursor) {
-      disableTouchCursor();
-    } else {
-      enableTouchCursor();
-    }
+    setTouchCursor(!touchCursor);
   }
 
   return (
@@ -30,15 +21,4 @@ const PreviewTouchCursorButton = (props: PreviewTouchCursorButtonProps): ReactEl
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  touchCursor: boolean;
-} => {
-  const { preview } = state;
-  const touchCursor = preview.touchCursor;
-  return { touchCursor };
-};
-
-export default connect(
-  mapStateToProps,
-  { enableTouchCursor, disableTouchCursor }
-)(PreviewTouchCursorButton);
+export default PreviewTouchCursorButton;

@@ -22,7 +22,7 @@ interface TextToolStateProps {
   textSettings?: TextSettingsState;
   paperScope?: number;
   layerPaperScopes?: {
-    [id: string]: paper.Project;
+    [id: string]: number;
   };
   activeArtboard?: string;
   activeArtboardPaperScope?: number;
@@ -73,7 +73,7 @@ const TextTool = (props: TextToolProps): ReactElement => {
         insert: false
       });
       const parentItem = Object.keys(layerPaperScopes).reduce((result, current, index) => {
-        const paperScope = layerPaperScopes[current];
+        const paperScope = uiPaperScope.projects[layerPaperScopes[current]];
         if (paperScope) {
           const hitTest = paperScope.getItem({
             data: (data: any) => {
@@ -88,7 +88,7 @@ const TextTool = (props: TextToolProps): ReactElement => {
       }, {
         id: activeArtboard,
         paperScope: activeArtboardPaperScope,
-        paperLayer: layerPaperScopes[activeArtboard].activeLayer
+        paperLayer: uiPaperScope.projects[layerPaperScopes[activeArtboard]].activeLayer
       });
       addTextThunk({
         layer: {

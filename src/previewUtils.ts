@@ -3,7 +3,6 @@ import tinyColor from 'tinycolor2';
 import { gsap } from 'gsap';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import { paperPreview } from './canvas';
-import { getPositionInArtboard } from './store/selectors/layer';
 
 gsap.registerPlugin(MorphSVGPlugin);
 
@@ -504,9 +503,9 @@ export const addStrokeWidthTween = (props: AddTweenProps): void => {
 
 export const addXTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
-  const originLayerRelArtboardPosition = getPositionInArtboard(originLayerItem, originArtboardLayerItem);
-  const destinationLayerRelArtboardPosition = getPositionInArtboard(destinationLayerItem, destinationArtboardLayerItem);
-  const originPaperLayerPositionDiffX = destinationLayerRelArtboardPosition.x - originLayerRelArtboardPosition.x;
+  // const originLayerRelArtboardPosition = getPositionInArtboard(originLayerItem, originArtboardLayerItem);
+  // const destinationLayerRelArtboardPosition = getPositionInArtboard(destinationLayerItem, destinationArtboardLayerItem);
+  const originPaperLayerPositionDiffX = destinationLayerItem.frame.x - originLayerItem.frame.x;
   timelineTweenProps[tween.prop] = originPaperLayer.position.x;
   timeline.to(timelineTweenProps, {
     duration: tween.duration,
@@ -520,9 +519,9 @@ export const addXTween = (props: AddTweenProps): void => {
 
 export const addYTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
-  const originLayerRelArtboardPosition = getPositionInArtboard(originLayerItem, originArtboardLayerItem);
-  const destinationLayerRelArtboardPosition = getPositionInArtboard(destinationLayerItem, destinationArtboardLayerItem);
-  const originPaperLayerPositionDiffY = destinationLayerRelArtboardPosition.y - originLayerRelArtboardPosition.y;
+  // const originLayerRelArtboardPosition = getPositionInArtboard(originLayerItem, originArtboardLayerItem);
+  // const destinationLayerRelArtboardPosition = getPositionInArtboard(destinationLayerItem, destinationArtboardLayerItem);
+  const originPaperLayerPositionDiffY = destinationLayerItem.frame.y - originLayerItem.frame.y;
   timelineTweenProps[tween.prop] = originPaperLayer.position.y;
   timeline.to(timelineTweenProps, {
     duration: tween.duration,

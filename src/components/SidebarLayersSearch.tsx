@@ -14,9 +14,9 @@ import IconButton from './IconButton';
 interface SidebarLayersSearchProps {
   searchActive?: boolean;
   search?: string;
-  setSearching(payload: SetSearchingPayload): LeftSidebarTypes;
-  setSearch(payload: SetSearchPayload): LeftSidebarTypes;
   selected?: string[];
+  setSearching?(payload: SetSearchingPayload): LeftSidebarTypes;
+  setSearch?(payload: SetSearchPayload): LeftSidebarTypes;
 }
 
 const SidebarLayersSearch = (props: SidebarLayersSearchProps): ReactElement => {
@@ -25,11 +25,11 @@ const SidebarLayersSearch = (props: SidebarLayersSearchProps): ReactElement => {
   const [focused, setFocused] = useState(false);
   const [inputValue, setInputValue] = useState(search);
 
-  useEffect(() => {
-    if (selected.length > 0) {
-      scrollToLayer(selected[0]);
-    }
-  }, [search])
+  // useEffect(() => {
+  //   if (selected.length > 0) {
+  //     scrollToLayer(selected[0]);
+  //   }
+  // }, [search])
 
   const debounceSearch = useCallback(
     debounce((value: string) => {

@@ -7,23 +7,32 @@ import { hydratePreview, closePreview, startPreviewRecording, stopPreviewRecordi
 import { enableLightTheme, enableDarkTheme } from './actions/viewSettings';
 import { setActiveArtboard } from './actions/layer';
 
+const getMinState = (state: RootState) => ({
+  layer: state.layer,
+  documentSettings: state.documentSettings,
+  preview: state.preview,
+  viewSettings: state.viewSettings,
+  tweenDrawer: state.tweenDrawer
+});
+
 const configureStore = ({ preloadedState, windowType }: { preloadedState: any; windowType: 'document' | 'preview' }): typeof store => {
   const store = createStore(rootReducer, preloadedState, applyMiddleware(logger, thunk));
   // hydrate preview on document edit change
   // update document active artboard on preview active artboard update
-  let currentEdit: string;
-  let currentActiveArtboard: string;
+  let currentEdit: string = null;
+  let currentActiveArtboard: string = null;
   const handleChange = () => {
     const currentState = store.getState() as RootState;
     const previousEdit: string = currentEdit;
     const previousActiveArtboard: string = currentActiveArtboard;
     const isMainWindow = currentState.preview.documentWindowId === remote.getCurrentWindow().id;
     currentEdit = currentState.layer.present.edit ? currentState.layer.present.edit.id : null;
-    currentActiveArtboard = currentState.layer.present.activeArtboard;
+    currentActiveArtboard = currentState.layer.present.activeArtboard ? currentState.layer.present.activeArtboard : null;
     if (isMainWindow && (previousEdit !== currentEdit || previousActiveArtboard !== currentActiveArtboard)) {
       const previewWindowId = currentState.preview.windowId;
       if (previewWindowId) {
-        remote.BrowserWindow.fromId(previewWindowId).webContents.executeJavaScript(`hydratePreview(${JSON.stringify(currentState)})`);
+        const minState = getMinState(currentState);
+        remote.BrowserWindow.fromId(previewWindowId).webContents.executeJavaScript(`hydratePreview(${JSON.stringify(minState)})`);
       }
     }
   }
@@ -40,7 +49,8 @@ const configureStore = ({ preloadedState, windowType }: { preloadedState: any; w
   if (windowType === 'document') {
     (window as any).getState = (): string => {
       const state = store.getState();
-      return JSON.stringify(state);
+      const minState = getMinState(state);
+      return JSON.stringify(minState);
     };
     (window as any).getCurrentEdit = (): string => {
       const state = store.getState();

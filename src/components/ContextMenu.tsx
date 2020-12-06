@@ -57,7 +57,7 @@ const ContextMenu = (props: ContextMenuProps): ReactElement => {
       id='context-menu'
       ref={ref}
       style={{
-        width: 224,
+        width: 232,
         background: tinyColor(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).setAlpha(0.77).toRgbString(),
         boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}, 0 4px 16px 0 rgba(0,0,0,0.16)`,
         left: x,

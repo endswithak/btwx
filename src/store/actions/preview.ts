@@ -4,8 +4,6 @@ import {
   CLOSE_PREVIEW,
   START_PREVIEW_RECORDING,
   STOP_PREVIEW_RECORDING,
-  ENABLE_TOUCH_CURSOR,
-  DISABLE_TOUCH_CURSOR,
   SET_PREVIEW_FOCUSING,
   SET_PREVIEW_WINDOW_ID,
   SET_PREVIEW_DOCUMENT_WINDOW_ID,
@@ -37,14 +35,6 @@ export const startPreviewRecording = (): PreviewTypes => ({
 
 export const stopPreviewRecording = (): PreviewTypes => ({
   type: STOP_PREVIEW_RECORDING
-});
-
-export const enableTouchCursor = (): PreviewTypes => ({
-  type: ENABLE_TOUCH_CURSOR
-});
-
-export const disableTouchCursor = (): PreviewTypes => ({
-  type: DISABLE_TOUCH_CURSOR
 });
 
 export const setPreviewFocusing = (payload: SetPreviewFocusingPayload): PreviewTypes => ({

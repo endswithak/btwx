@@ -51,7 +51,7 @@ const mapStateToProps = (state: RootState, ownProps: CanvasArtboardProps): {
   return {
     documentImages: documentSettings.images.byId,
     matrix: documentSettings.matrix,
-    paperJSON: artboard.json,
+    paperJSON: artboard.paperJSON,
     paperScopeIndex: artboard.paperScope
   };
 };

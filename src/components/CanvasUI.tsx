@@ -30,10 +30,6 @@ const CanvasUI = (props: CanvasUIProps): ReactElement => {
       uiPaperScope.project.importJSON(projectJSON);
       uiPaperScope.view.viewSize = new uiPaperScope.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
       uiPaperScope.view.matrix.set(matrix);
-      [...Array(33).keys()].forEach((scope, index) => {
-        new uiPaperScope.Project(document.getElementById(`canvas-artboard-${index}`) as HTMLCanvasElement);
-      });
-      uiPaperScope.projects[0].activate();
     }
   }, []);
 
@@ -43,14 +39,6 @@ const CanvasUI = (props: CanvasUIProps): ReactElement => {
         id='canvas-ui'
         className='c-canvas__layer c-canvas__layer--ui'
         ref={ref} />
-      {
-        [...Array(33).keys()].map((key, index) => (
-          <canvas
-            key={index}
-            id={`canvas-artboard-${index}`}
-            className='c-canvas__layer c-canvas__layer--artboard' />
-        ))
-      }
       <ActiveArtboardFrameWrap />
       <HoverFrameWrap />
       <SelectionFrameWrap />

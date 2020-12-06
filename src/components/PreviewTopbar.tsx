@@ -5,8 +5,14 @@ import PreviewRewindButton from './PreviewRewindButton';
 import PreviewTouchCursorButton from './PreviewTouchCursorButton';
 import PreviewRecordButton from './PreviewRecordButton';
 
-const PreviewTopbar = (): ReactElement => {
+interface PreviewTopbarProps {
+  touchCursor: boolean;
+  setTouchCursor(touchCursor: boolean): void;
+}
+
+const PreviewTopbar = (props: PreviewTopbarProps): ReactElement => {
   const theme = useContext(ThemeContext);
+  const { touchCursor, setTouchCursor } = props;
 
   return (
     <div
@@ -17,7 +23,9 @@ const PreviewTopbar = (): ReactElement => {
         boxShadow: `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
       }}>
       <PreviewRewindButton />
-      <PreviewTouchCursorButton />
+      <PreviewTouchCursorButton
+        touchCursor={touchCursor}
+        setTouchCursor={setTouchCursor} />
       <PreviewRecordButton />
     </div>
   );

@@ -8,15 +8,17 @@ import { setRef } from '../store/actions/leftSidebar';
 import { LeftSidebarTypes, SetRefPayload } from '../store/actionTypes/leftSidebar';
 import SidebarLayer from './SidebarLayer';
 import SidebarLayerDragGhosts from './SidebarLayerDragGhosts';
-import SidebarLeftSearchEmptyState from './SidebarLeftSearchEmptyState';
+import SidebarLeftEmptyState from './SidebarLeftEmptyState';
 
 interface SidebarLayerTreeProps {
-  treeWalker: any;
+  treeWalker?: any;
+  isEmpty?: boolean;
+  searchActive?: boolean;
   setRef?(payload: SetRefPayload): LeftSidebarTypes;
 }
 
 const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
-  const { setRef, treeWalker } = props;
+  const { setRef, treeWalker, isEmpty, searchActive } = props;
 
   useEffect(() => {
     console.log('LAYER TREEEEEE');
@@ -42,27 +44,34 @@ const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
   });
 
   return (
-    <>
-      <AutoSizer>
-        {({height, width}) => (
-          <Tree
-            treeWalker={treeWalker}
-            itemSize={32}
-            height={height}
-            width={width}
-            ref={handleRef}>
-            {Node}
-          </Tree>
-        )}
-      </AutoSizer>
-      <SidebarLayerDragGhosts />
-    </>
-    // <SidebarLeftSearchEmptyState />
+    isEmpty
+    ? <SidebarLeftEmptyState />
+    : <div
+        className='c-sidebar__vtree'
+        style={{
+          opacity: searchActive ? 0 : 1
+        }}>
+        <AutoSizer>
+          {({height, width}) => (
+            <Tree
+              treeWalker={treeWalker}
+              itemSize={32}
+              height={height}
+              width={width}
+              ref={handleRef}>
+              {Node}
+            </Tree>
+          )}
+        </AutoSizer>
+        <SidebarLayerDragGhosts />
+      </div>
   )
 }
 
 const mapStateToProps = (state: RootState) => ({
-  treeWalker: getTreeWalker(state)
+  treeWalker: getTreeWalker(state),
+  isEmpty: state.layer.present.childrenById.root.length === 0,
+  searchActive: state.leftSidebar.search.replace(/\s/g, '').length > 0
 });
 
 export default connect(

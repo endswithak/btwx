@@ -27,7 +27,7 @@ interface SnapToolProps {
   scope?: string[];
   paperScope?: number;
   layerPaperScopes: {
-    [id: string]: paper.Project;
+    [id: string]: number;
   };
   whiteListLayers?: string[];
   blackListLayers?: string[];
@@ -137,7 +137,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
       }
     }
     return Object.keys(layerPaperScopes).reduce((result, current, index) => {
-      const paperScope = layerPaperScopes[current];
+      const paperScope = uiPaperScope.projects[layerPaperScopes[current]];
       const projectSnapLayers = getProjectSnapLayers(paperScope);
       if (projectSnapLayers && projectSnapLayers.length > 0) {
         result = [...result, ...projectSnapLayers];
@@ -183,7 +183,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
       }
     }
     return Object.keys(layerPaperScopes).reduce((result: paper.Item, current, index) => {
-      const paperScope = layerPaperScopes[current];
+      const paperScope = uiPaperScope.projects[layerPaperScopes[current]];
       const projectSnapLayer = getProjectSnapLayer(paperScope);
       if (projectSnapLayer) {
         result = projectSnapLayer;
@@ -229,7 +229,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
       }
     }
     return Object.keys(layerPaperScopes).reduce((result: paper.Item, current, index) => {
-      const paperScope = layerPaperScopes[current];
+      const paperScope = uiPaperScope.projects[layerPaperScopes[current]];
       const projectSnapLayer = getProjectSnapLayer(paperScope);
       if (projectSnapLayer) {
         result = projectSnapLayer;
@@ -892,7 +892,7 @@ const mapStateToProps = (state: RootState): {
   scope: string[];
   paperScope: number;
   layerPaperScopes: {
-    [id: string]: paper.Project;
+    [id: string]: number;
   };
 } => {
   const { layer } = state;

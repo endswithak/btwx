@@ -9,7 +9,7 @@ export const zoomInThunk = () => {
     const state = getState() as RootState;
     const allPaperScopes = getAllPaperScopes(state);
     Object.keys(allPaperScopes).forEach((key, index) => {
-      const paperScope = allPaperScopes[key];
+      const paperScope = uiPaperScope.projects[index];
       paperScope.view.zoom *= 2;
     });
     dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values, zoom: uiPaperScope.view.zoom}));
@@ -21,7 +21,7 @@ export const zoomOutThunk = () => {
     const state = getState() as RootState;
     const allPaperScopes = getAllPaperScopes(state);
     Object.keys(allPaperScopes).forEach((key, index) => {
-      const paperScope = allPaperScopes[key];
+      const paperScope = uiPaperScope.projects[index];
       if (paperScope.view.zoom / 2 >= 0.01) {
         paperScope.view.zoom /= 2;
       } else {
@@ -37,7 +37,7 @@ export const zoomPercentThunk = (percent: number) => {
     const state = getState() as RootState;
     const allPaperScopes = getAllPaperScopes(state);
     Object.keys(allPaperScopes).forEach((key, index) => {
-      const paperScope = allPaperScopes[key];
+      const paperScope = uiPaperScope.projects[index];
       paperScope.view.zoom = percent;
     });
     dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values, zoom: uiPaperScope.view.zoom}));
@@ -67,7 +67,7 @@ export const zoomFitCanvasThunk = () => {
     })();
     const newZoom = (viewDim / constrainingDim.dim) * uiPaperScope.view.zoom;
     Object.keys(allPaperScopes).forEach((key, index) => {
-      const paperScope = allPaperScopes[key];
+      const paperScope = uiPaperScope.projects[index];
       paperScope.view.center = canvasCenter;
       paperScope.view.zoom = newZoom;
     });
@@ -98,7 +98,7 @@ export const zoomFitSelectedThunk = () => {
     })();
     const newZoom = (viewDim / constrainingDim.dim) * uiPaperScope.view.zoom;
     Object.keys(allPaperScopes).forEach((key, index) => {
-      const paperScope = allPaperScopes[key];
+      const paperScope = uiPaperScope.projects[index];
       paperScope.view.center = selectionCenter;
       paperScope.view.zoom = newZoom;
     });

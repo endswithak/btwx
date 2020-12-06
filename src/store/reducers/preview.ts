@@ -3,8 +3,6 @@ import {
   CLOSE_PREVIEW,
   START_PREVIEW_RECORDING,
   STOP_PREVIEW_RECORDING,
-  ENABLE_TOUCH_CURSOR,
-  DISABLE_TOUCH_CURSOR,
   SET_PREVIEW_FOCUSING,
   SET_PREVIEW_WINDOW_ID,
   SET_PREVIEW_DOCUMENT_WINDOW_ID,
@@ -14,7 +12,6 @@ import {
 export interface PreviewState {
   isOpen: boolean;
   recording: boolean;
-  touchCursor: boolean;
   focusing: boolean;
   windowId: number;
   documentWindowId: number;
@@ -23,7 +20,6 @@ export interface PreviewState {
 export const initialState: PreviewState = {
   isOpen: false,
   recording: false,
-  touchCursor: false,
   focusing: false,
   windowId: null,
   documentWindowId: null
@@ -58,18 +54,6 @@ export default (state = initialState, action: PreviewTypes): PreviewState => {
       return {
         ...state,
         recording: false
-      };
-    }
-    case ENABLE_TOUCH_CURSOR: {
-      return {
-        ...state,
-        touchCursor: true
-      };
-    }
-    case DISABLE_TOUCH_CURSOR: {
-      return {
-        ...state,
-        touchCursor: false
       };
     }
     case SET_PREVIEW_FOCUSING: {

@@ -458,6 +458,9 @@ export interface LayerState {
   artboardJSON: {
     [id: string]: string;
   };
+  nameById: {
+    [id: string]: string;
+  };
   edit: Btwx.Edit;
 }
 
@@ -466,6 +469,7 @@ export const initialState: LayerState = {
     root: {
       type: 'Root',
       id: 'root',
+      name: 'root',
       parent: null,
       children: [],
       scope: [],
@@ -507,6 +511,9 @@ export const initialState: LayerState = {
   },
   scopeById: {
     root: []
+  },
+  nameById: {
+    root: 'root'
   },
   artboardJSON: {},
   edit: null

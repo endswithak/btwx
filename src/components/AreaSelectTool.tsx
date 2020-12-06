@@ -15,7 +15,7 @@ interface AreaSelectToolStateProps {
   isEnabled?: boolean;
   scope?: string[];
   layerPaperScopes?: {
-    [id: string]: paper.Project;
+    [id: string]: number;
   };
 }
 
@@ -94,7 +94,7 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
           }, []);
         }
         const layers = Object.keys(layerPaperScopes).reduce((result, current, index) => {
-          const scope = layerPaperScopes[current];
+          const scope = uiPaperScope.projects[layerPaperScopes[current]];
           return [...result, ...getProjectsLayers(scope)]
         }, []);
         if (layers.length > 0) {

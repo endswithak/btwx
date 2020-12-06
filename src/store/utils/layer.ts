@@ -84,6 +84,10 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
     scopeById: {
       ...currentState.scopeById,
       [action.payload.layer.id]: action.payload.layer.scope,
+    },
+    nameById: {
+      ...currentState.nameById,
+      [action.payload.layer.id]: action.payload.layer.name,
     }
   }
   currentState = updateParentBounds(currentState, action.payload.layer.id);
@@ -121,6 +125,10 @@ export const addShape = (state: LayerState, action: AddShape): LayerState => {
       ...currentState.childrenById,
       [action.payload.layer.id]: action.payload.layer.children,
       [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
+    },
+    nameById: {
+      ...currentState.nameById,
+      [action.payload.layer.id]: action.payload.layer.name,
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.layer.id);
@@ -169,6 +177,10 @@ export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
     scopeById: {
       ...currentState.scopeById,
       [action.payload.layer.id]: action.payload.layer.scope,
+    },
+    nameById: {
+      ...currentState.nameById,
+      [action.payload.layer.id]: action.payload.layer.name,
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.layer.id);
@@ -209,6 +221,10 @@ export const addText = (state: LayerState, action: AddText): LayerState => {
       ...currentState.childrenById,
       [action.payload.layer.id]: action.payload.layer.children,
       [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
+    },
+    nameById: {
+      ...currentState.nameById,
+      [action.payload.layer.id]: action.payload.layer.name,
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.layer.id);
@@ -249,6 +265,10 @@ export const addImage = (state: LayerState, action: AddImage): LayerState => {
       ...currentState.childrenById,
       [action.payload.layer.id]: action.payload.layer.children,
       [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
+    },
+    nameById: {
+      ...currentState.nameById,
+      [action.payload.layer.id]: action.payload.layer.name,
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.layer.id);
@@ -415,6 +435,12 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
           }
         }
         return childrenResult;
+      }, {}),
+      nameById: Object.keys(result.nameById).reduce((nameResult: any, key) => {
+        if (key !== current) {
+          nameResult[key] = result.nameById[key];
+        }
+        return nameResult;
       }, {})
     }
     return result;
@@ -1713,7 +1739,13 @@ export const setLayerName = (state: LayerState, action: SetLayerName): LayerStat
         ...currentState.byId[action.payload.id],
         name: action.payload.name
       }
-    }
+    },
+    nameById: Object.keys(currentState.nameById).reduce((result: any, current) => {
+      if (current === action.payload.id) {
+        result[current] = action.payload.name;
+      }
+      return result;
+    }, currentState.nameById)
   }
   // add new tweens
   currentState = updateLayerTweensByProps(currentState, action.payload.id, 'all');
@@ -1806,9 +1838,7 @@ export const addTweenEventLayerTweens = (state: LayerState, eventId: string, lay
   if (destinationEquivalent) {
     const currentLayerItem = state.byId[layerId];
     const equivalentLayerItem = state.byId[destinationEquivalent.id];
-    const artboardLayerItem = state.byId[tweenEvent.artboard] as Btwx.Artboard;
-    const destinationArtboardLayerItem = state.byId[tweenEvent.destinationArtboard] as Btwx.Artboard;
-    const equivalentTweenProps = getEquivalentTweenProps(currentLayerItem, equivalentLayerItem, artboardLayerItem, destinationArtboardLayerItem);
+    const equivalentTweenProps = getEquivalentTweenProps(currentLayerItem, equivalentLayerItem);
     currentState = Object.keys(equivalentTweenProps).reduce((result, key: Btwx.TweenProp) => {
       if (equivalentTweenProps[key]) {
         result = addLayerTween(result, layerActions.addLayerTween({
@@ -2016,12 +2046,9 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
     if (tweensByProp.length > 0) {
       currentState = tweensByProp.reduce((result: LayerState, current: string) => {
         const tween = result.tweens.byId[current];
-        const tweenEvent = result.events.byId[tween.event];
         const layerItem = result.byId[tween.layer] as Btwx.Layer;
         const destinationLayerItem = result.byId[tween.destinationLayer] as Btwx.Layer;
-        const artboardItem = result.byId[tweenEvent.artboard] as Btwx.Artboard;
-        const destinationArtboardItem = result.byId[tweenEvent.destinationArtboard] as Btwx.Artboard;
-        const hasTween = getEquivalentTweenProp(layerItem, destinationLayerItem, artboardItem, destinationArtboardItem, prop);
+        const hasTween = getEquivalentTweenProp(layerItem, destinationLayerItem, prop);
         if (!hasTween) {
           result = removeLayerTween(result, layerActions.removeLayerTween({id: current}) as RemoveLayerTween);
         }
@@ -2037,9 +2064,7 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
       if (destinationEquivalent) {
         const layerItem = result.byId[layerId] as Btwx.Layer;
         const equivalentLayerItem = result.byId[destinationEquivalent.id] as Btwx.Layer;
-        const artboardItem = result.byId[tweenEvent.artboard] as Btwx.Artboard;
-        const destinationArtboardItem = result.byId[tweenEvent.destinationArtboard] as Btwx.Artboard;
-        const hasTween = getEquivalentTweenProp(layerItem, equivalentLayerItem, artboardItem, destinationArtboardItem, prop);
+        const hasTween = getEquivalentTweenProp(layerItem, equivalentLayerItem, prop);
         const tweenExists = tweenEvent.tweens.some((id: string) => {
           const tween = result.tweens.byId[id];
           return tween.layer === layerId && tween.prop === prop;
@@ -2069,9 +2094,7 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
       if (originEquivalent) {
         const layerItem = result.byId[layerId] as Btwx.Layer;
         const equivalentLayerItem = result.byId[originEquivalent.id] as Btwx.Layer;
-        const artboardItem = result.byId[tweenEvent.artboard] as Btwx.Artboard;
-        const destinationArtboardItem = result.byId[tweenEvent.destinationArtboard] as Btwx.Artboard;
-        const hasTween = getEquivalentTweenProp(layerItem, equivalentLayerItem, destinationArtboardItem, artboardItem, prop);
+        const hasTween = getEquivalentTweenProp(layerItem, equivalentLayerItem, prop);
         const tweenExists = tweenEvent.tweens.some((id: string) => {
           const tween = result.tweens.byId[id];
           return tween.layer === originEquivalent.id && tween.prop === prop;
@@ -4291,7 +4314,7 @@ export const setLayersShadowBlur = (state: LayerState, action: SetLayersShadowBl
 export const setLayerShadowXOffset = (state: LayerState, action: SetLayerShadowXOffset): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
-  paperLayer.shadowOffset.x = action.payload.shadowXOffset;
+  paperLayer.shadowOffset = new uiPaperScope.Point(action.payload.shadowXOffset, paperLayer.shadowOffset.y);
   currentState = {
     ...currentState,
     byId: {
@@ -4339,7 +4362,7 @@ export const setLayersShadowXOffset = (state: LayerState, action: SetLayersShado
 export const setLayerShadowYOffset = (state: LayerState, action: SetLayerShadowYOffset): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
-  paperLayer.shadowOffset.y = action.payload.shadowYOffset;
+  paperLayer.shadowOffset = new uiPaperScope.Point(paperLayer.shadowOffset.x, action.payload.shadowYOffset);
   currentState = {
     ...currentState,
     byId: {
@@ -5436,6 +5459,10 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): {
         ...result.scopeById,
         [copyId]: copyScope
       },
+      nameById: {
+        ...result.nameById,
+        [copyId]: itemToCopy.name
+      },
     };
     if (index === 0 && action.payload.offset) {
       if (itemToCopy.type !== 'Artboard') {
@@ -5498,7 +5525,7 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): {
         [artboard]: {
           ...currentState.byId[artboard],
           paperScope: currentState.childrenById.root.length + 1,
-          json: duplicatePaperLayer.exportJSON()
+          paperJSON: duplicatePaperLayer.exportJSON()
         } as Btwx.Artboard
       }
     }
@@ -6198,7 +6225,7 @@ export const setLayerEdit = (state: LayerState, action: SetLayerEdit): LayerStat
           const projectJSON = savePaperProjectJSON(currentState, current);
           result[current] = {
             ...result[current],
-            json: projectJSON ? projectJSON : (currentState.byId[current] as Btwx.Artboard).json
+            paperJSON: projectJSON ? projectJSON : (currentState.byId[current] as Btwx.Artboard).paperJSON
           } as Btwx.Artboard
         }
         return result;

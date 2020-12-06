@@ -1,6 +1,7 @@
 import { uiPaperScope } from '../../canvas';
 import { RootState } from '../reducers';
 import { setCanvasMatrix } from './documentSettings';
+import { getAllPaperScopes } from '../selectors/layer';
 
 import {
   SET_LEFT_SIDEBAR_WIDTH,
@@ -21,7 +22,6 @@ import {
   SetTweenDrawerLayersWidthPayload,
   ViewSettingsTypes
 } from '../actionTypes/viewSettings';
-import { getAllPaperScopes } from '../selectors/layer';
 
 export const setLeftSidebarWidth = (payload: SetLeftSidebarWidthPayload): ViewSettingsTypes => ({
   type: SET_LEFT_SIDEBAR_WIDTH,
@@ -57,13 +57,13 @@ export const toggleRightSidebarThunk = () => {
     const allPaperScopes = getAllPaperScopes(state);
     if (state.viewSettings.rightSidebar.isOpen) {
       Object.keys(allPaperScopes).forEach((key, index) => {
-        const paperScope = allPaperScopes[key];
+        const paperScope = uiPaperScope.projects[allPaperScopes[key]];
         paperScope.view.viewSize = new uiPaperScope.Size(paperScope.view.viewSize.width + state.viewSettings.rightSidebar.width, paperScope.view.viewSize.height);
       });
       dispatch(closeRightSidebar());
     } else {
       Object.keys(allPaperScopes).forEach((key, index) => {
-        const paperScope = allPaperScopes[key];
+        const paperScope = uiPaperScope.projects[allPaperScopes[key]];
         paperScope.view.viewSize = new uiPaperScope.Size(paperScope.view.viewSize.width - state.viewSettings.rightSidebar.width, paperScope.view.viewSize.height);
       });
       dispatch(openRightSidebar());
@@ -86,13 +86,13 @@ export const toggleLeftSidebarThunk = () => {
     const allPaperScopes = getAllPaperScopes(state);
     if (state.viewSettings.leftSidebar.isOpen) {
       Object.keys(allPaperScopes).forEach((key, index) => {
-        const paperScope = allPaperScopes[key];
+        const paperScope = uiPaperScope.projects[allPaperScopes[key]];
         paperScope.view.viewSize = new uiPaperScope.Size(paperScope.view.viewSize.width + state.viewSettings.leftSidebar.width, paperScope.view.viewSize.height);
       });
       dispatch(closeLeftSidebar());
     } else {
       Object.keys(allPaperScopes).forEach((key, index) => {
-        const paperScope = allPaperScopes[key];
+        const paperScope = uiPaperScope.projects[allPaperScopes[key]];
         paperScope.view.viewSize = new uiPaperScope.Size(paperScope.view.viewSize.width - state.viewSettings.leftSidebar.width, paperScope.view.viewSize.height);
       });
       dispatch(openLeftSidebar());
@@ -115,13 +115,13 @@ export const toggleTweenDrawerThunk = () => {
     const allPaperScopes = getAllPaperScopes(state);
     if (state.viewSettings.tweenDrawer.isOpen) {
       Object.keys(allPaperScopes).forEach((key, index) => {
-        const paperScope = allPaperScopes[key];
+        const paperScope = uiPaperScope.projects[allPaperScopes[key]];
         paperScope.view.viewSize = new uiPaperScope.Size(paperScope.view.viewSize.width, paperScope.view.viewSize.height + state.viewSettings.tweenDrawer.height);
       });
       dispatch(closeTweenDrawer());
     } else {
       Object.keys(allPaperScopes).forEach((key, index) => {
-        const paperScope = allPaperScopes[key];
+        const paperScope = uiPaperScope.projects[allPaperScopes[key]];
         paperScope.view.viewSize = new uiPaperScope.Size(paperScope.view.viewSize.width, paperScope.view.viewSize.height - state.viewSettings.tweenDrawer.height);
       });
       dispatch(openTweenDrawer());

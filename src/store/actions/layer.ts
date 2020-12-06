@@ -531,7 +531,7 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
       },
       transform: DEFAULT_TRANSFORM,
       style: DEFAULT_STYLE,
-      json: artboard.exportJSON()
+      paperJSON: artboard.exportJSON()
     } as Btwx.Artboard;
     dispatch(addArtboard({
       layer: newLayer,
@@ -2930,7 +2930,7 @@ export const undoThunk = () => {
           const projectItem = layerState.byId[project] as Btwx.Artboard;
           if (projectItem) {
             const paperScope = uiPaperScope.projects[projectItem.paperScope];
-            const paperJSON = projectItem.json;
+            const paperJSON = projectItem.paperJSON;
             importPaperProject({
               paperJSON,
               paperScope,
@@ -3046,7 +3046,7 @@ export const redoThunk = () => {
           const projectItem = layerState.byId[project] as Btwx.Artboard;
           if (projectItem) {
             const paperScope = uiPaperScope.projects[projectItem.paperScope];
-            const paperJSON = projectItem.json;
+            const paperJSON = projectItem.paperJSON;
             importPaperProject({
               paperScope,
               paperJSON,

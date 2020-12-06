@@ -1,11 +1,12 @@
-import React, { useContext, useEffect, ReactElement } from 'react';
+import React, { useContext, useEffect, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
 import { remote } from 'electron';
 import { RootState } from '../store/reducers';
 import { PREVIEW_TOPBAR_HEIGHT, MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT } from '../constants';
 import { ThemeContext } from './ThemeProvider';
-import PreviewMain from './PreviewMain';
 import EmptyState from './EmptyState';
+import PreviewCanvas from './PreviewCanvas';
+import PreviewTopbar from './PreviewTopbar';
 
 interface PreviewProps {
   activeArtboard: Btwx.Artboard;
@@ -29,6 +30,7 @@ interface PreviewProps {
 const Preview = (props: PreviewProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { activeArtboard, recording } = props;
+  const [touchCursor, setTouchCursor] = useState(false);
 
   useEffect(() => {
     if (activeArtboard) {
@@ -47,7 +49,21 @@ const Preview = (props: PreviewProps): ReactElement => {
       }}>
       {
         activeArtboard
-        ? <PreviewMain />
+        ? <>
+            <PreviewTopbar
+              touchCursor={touchCursor}
+              setTouchCursor={setTouchCursor} />
+            <div className='c-app__canvas'>
+              <PreviewCanvas
+                touchCursor={touchCursor} />
+            </div>
+            <video
+              id='preview-video'
+              style={{
+              position: 'absolute',
+              opacity: 0
+            }} />
+          </>
         : <EmptyState
             icon='preview'
             text='Preview'

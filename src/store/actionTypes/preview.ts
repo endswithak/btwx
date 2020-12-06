@@ -5,8 +5,6 @@ export const HYDRATE_PREVIEW = 'HYDRATE_PREVIEW';
 export const CLOSE_PREVIEW = 'CLOSE_PREVIEW';
 export const START_PREVIEW_RECORDING = 'START_PREVIEW_RECORDING';
 export const STOP_PREVIEW_RECORDING = 'STOP_PREVIEW_RECORDING';
-export const ENABLE_TOUCH_CURSOR = 'ENABLE_TOUCH_CURSOR';
-export const DISABLE_TOUCH_CURSOR = 'DISABLE_TOUCH_CURSOR';
 export const SET_PREVIEW_FOCUSING = 'SET_PREVIEW_FOCUSING';
 export const SET_PREVIEW_WINDOW_ID = 'SET_PREVIEW_WINDOW_ID';
 export const SET_PREVIEW_DOCUMENT_WINDOW_ID = 'SET_PREVIEW_DOCUMENT_WINDOW_ID';
@@ -42,14 +40,6 @@ export interface StopPreviewRecording {
   type: typeof STOP_PREVIEW_RECORDING;
 }
 
-export interface EnableTouchCursor {
-  type: typeof ENABLE_TOUCH_CURSOR;
-}
-
-export interface DisableTouchCursor {
-  type: typeof DISABLE_TOUCH_CURSOR;
-}
-
 export interface SetPreviewFocusingPayload {
   focusing: boolean;
 }
@@ -82,8 +72,6 @@ export type PreviewTypes = OpenPreview |
                            ClosePreview |
                            StartPreviewRecording |
                            StopPreviewRecording |
-                           EnableTouchCursor |
-                           DisableTouchCursor |
                            SetPreviewFocusing |
                            SetPreviewWindowId |
                            SetPreviewDocumentWindowId;

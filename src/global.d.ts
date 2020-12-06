@@ -352,7 +352,7 @@ declare namespace Btwx {
     originArtboardForEvents: string[];
     destinationArtboardForEvents: string[];
     paperScope: number;
-    json: string;
+    paperJSON: string;
   }
 
   interface MaskableLayer extends Layer {

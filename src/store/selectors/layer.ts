@@ -30,6 +30,9 @@ export const getEventDrawerSort = (state: RootState): string => state.tweenDrawe
 export const getEventDrawerHover = (state: RootState): string => state.tweenDrawer.eventHover;
 export const getActiveArtboard = (state: RootState): string => state.layer.present.activeArtboard;
 export const getDocumentImages = (state: RootState): { allIds: string[]; byId: { [id: string]: Btwx.DocumentImage } } => state.documentSettings.images;
+export const getLayerSearch = (state: RootState): string => state.leftSidebar.search;
+export const getLayerSearching = (state: RootState): boolean => state.leftSidebar.searching;
+export const getNamesById = (state: RootState): { [id: string]: string } => state.layer.present.nameById;
 
 export const getAllArtboardPaperProjects = createSelector(
   [ getAllArtboardIds, getLayersById, getDocumentImages ],
@@ -40,7 +43,7 @@ export const getAllArtboardPaperProjects = createSelector(
         const rasterBase64 = bufferToBase64(Buffer.from(documentImages.byId[dc].buffer));
         const base64 = `data:image/webp;base64,${rasterBase64}`;
         return dr.replace(`"source":"${dc}"`, `"source":"${base64}"`);
-      }, (byId[current] as Btwx.Artboard).json)
+      }, (byId[current] as Btwx.Artboard).paperJSON)
     }), {}) as { [id: string]: string };
   }
 );
@@ -50,8 +53,8 @@ export const getLayerPaperScopes = createSelector(
   (rootChildren) => {
     return rootChildren.reduce((result, current, index) => ({
       ...result,
-      [current]: uiPaperScope.projects[index + 1]
-    }), {}) as { [id: string]: paper.Project };
+      [current]: index + 1
+    }), {}) as { [id: string]: number };
   }
 );
 
@@ -60,8 +63,8 @@ export const getAllPaperScopes = createSelector(
   (rootChildren) => {
     return ['ui', ...rootChildren].reduce((result, current, index) => ({
       ...result,
-      [current]: uiPaperScope.projects[index]
-    }), {}) as { [id: string]: paper.Project };
+      [current]: index
+    }), {}) as { [id: string]: number };
   }
 );
 
@@ -76,6 +79,49 @@ export const getReverseSelected = createSelector(
   [ getSelected ],
   (selected) => {
     return selected.reverse();
+  }
+);
+
+export const getLayersWithSearch = createSelector(
+  [ getNamesById, getLayerSearch, getAllArtboardIds ],
+  (getNamesById, layerSearch, allArtboardIds) => {
+    return Object.keys(getNamesById).reduce((result, current) => {
+      const name = getNamesById[current];
+      if (name.toUpperCase().includes(layerSearch.replace(/\s/g, '').toUpperCase()) && name !== 'root') {
+        if (allArtboardIds.includes(current)) {
+          result = [...result, current];
+        } else {
+          result = [current, ...result];
+        }
+      }
+      return result;
+    }, []);
+  }
+);
+
+export const getSearchTreeWalker = createSelector(
+  [ getLayersWithSearch ],
+  (searchLayers) => {
+    const getNodeData = (node: any, nestingLevel: number): any => ({
+      data: {
+        id: node.id, // mandatory
+        isLeaf: true,
+        isOpenByDefault: false,
+        nestingLevel
+      },
+      nestingLevel,
+      node,
+    });
+    function* treeWalker(): any {
+      for (let i = searchLayers.length - 1; i >= 0; i--) {
+        const id = searchLayers[i];
+        yield getNodeData({
+          id: id,
+          children: null
+        }, 0);
+      }
+    }
+    return treeWalker;
   }
 );
 
@@ -1296,27 +1342,27 @@ export const hasFillGradientDestinationYTween = (layerItem: Btwx.Layer, equivale
   return hasFillGradientTween && !sameOriginY;
 };
 
-export const hasXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer, artboardLayerItem: Btwx.Artboard, destinationArtboardLayerItem: Btwx.Artboard): boolean => {
-  const layerArtboardPosition = getPositionInArtboard(layerItem, artboardLayerItem);
-  const equivalentArtboardPosition = getPositionInArtboard(equivalentLayerItem, destinationArtboardLayerItem);
+export const hasXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const layerArtboardPosition = layerItem.frame.x
+  const equivalentArtboardPosition = equivalentLayerItem.frame.x;
   const lineToLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
   const groupToGroup = layerItem.type === 'Group' && equivalentLayerItem.type === 'Group';
   const textToText = layerItem.type === 'Text' && equivalentLayerItem.type === 'Text';
   const fontSizeMatch = textToText && (layerItem as Btwx.Text).textStyle.fontSize === (equivalentLayerItem as Btwx.Text).textStyle.fontSize;
   const leadingsMatch = textToText && (layerItem as Btwx.Text).textStyle.leading === (equivalentLayerItem as Btwx.Text).textStyle.leading;
-  const positionsMatch = layerArtboardPosition.x === equivalentArtboardPosition.x;
+  const positionsMatch = layerArtboardPosition === equivalentArtboardPosition;
   return (!lineToLine && !groupToGroup && !positionsMatch) || (textToText && (!fontSizeMatch || !leadingsMatch));
 };
 
-export const hasYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer, artboardLayerItem: Btwx.Artboard, destinationArtboardLayerItem: Btwx.Artboard): boolean => {
-  const layerArtboardPosition = getPositionInArtboard(layerItem, artboardLayerItem);
-  const equivalentArtboardPosition = getPositionInArtboard(equivalentLayerItem, destinationArtboardLayerItem);
+export const hasYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const layerArtboardPosition = layerItem.frame.y;
+  const equivalentArtboardPosition = equivalentLayerItem.frame.y;
   const lineToLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
   const groupToGroup = layerItem.type === 'Group' && equivalentLayerItem.type === 'Group';
   const textToText = layerItem.type === 'Text' && equivalentLayerItem.type === 'Text';
   const fontSizeMatch = textToText && (layerItem as Btwx.Text).textStyle.fontSize === (equivalentLayerItem as Btwx.Text).textStyle.fontSize;
   const leadingsMatch = textToText && (layerItem as Btwx.Text).textStyle.leading === (equivalentLayerItem as Btwx.Text).textStyle.leading;
-  const positionsMatch = layerArtboardPosition.y === equivalentArtboardPosition.y;
+  const positionsMatch = layerArtboardPosition === equivalentArtboardPosition;
   return (!lineToLine && !groupToGroup && !positionsMatch) || (textToText && (!fontSizeMatch || !leadingsMatch));
 };
 
@@ -1521,7 +1567,7 @@ export const hasToYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Lay
   return lineToLine && (!toYMatch || !widthsMatch);
 };
 
-export const getEquivalentTweenProp = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer, artboardLayerItem: Btwx.Artboard, destinationArtboardLayerItem: Btwx.Artboard, prop: Btwx.TweenProp): boolean => {
+export const getEquivalentTweenProp = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer, prop: Btwx.TweenProp): boolean => {
   switch(prop) {
     case 'image':
       return hasImageTween(layerItem, equivalentLayerItem);
@@ -1538,9 +1584,9 @@ export const getEquivalentTweenProp = (layerItem: Btwx.Layer, equivalentLayerIte
     case 'fillGradientDestinationY':
       return hasFillGradientDestinationYTween(layerItem, equivalentLayerItem);
     case 'x':
-      return hasXTween(layerItem, equivalentLayerItem, artboardLayerItem, destinationArtboardLayerItem);
+      return hasXTween(layerItem, equivalentLayerItem);
     case 'y':
-      return hasYTween(layerItem, equivalentLayerItem, artboardLayerItem, destinationArtboardLayerItem);
+      return hasYTween(layerItem, equivalentLayerItem);
     case 'rotation':
       return hasRotationTween(layerItem, equivalentLayerItem);
     case 'width':
@@ -1590,7 +1636,7 @@ export const getEquivalentTweenProp = (layerItem: Btwx.Layer, equivalentLayerIte
   }
 };
 
-export const getEquivalentTweenProps = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer, artboardLayerItem: Btwx.Artboard, destinationArtboardLayerItem: Btwx.Artboard): Btwx.TweenPropMap => ({
+export const getEquivalentTweenProps = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): Btwx.TweenPropMap => ({
   image: hasImageTween(layerItem, equivalentLayerItem),
   shape: hasShapeTween(layerItem, equivalentLayerItem),
   fill: hasFillTween(layerItem, equivalentLayerItem),
@@ -1598,8 +1644,8 @@ export const getEquivalentTweenProps = (layerItem: Btwx.Layer, equivalentLayerIt
   fillGradientOriginY: hasFillGradientOriginYTween(layerItem, equivalentLayerItem),
   fillGradientDestinationX: hasFillGradientDestinationXTween(layerItem, equivalentLayerItem),
   fillGradientDestinationY: hasFillGradientDestinationYTween(layerItem, equivalentLayerItem),
-  x: hasXTween(layerItem, equivalentLayerItem, artboardLayerItem, destinationArtboardLayerItem),
-  y: hasYTween(layerItem, equivalentLayerItem, artboardLayerItem, destinationArtboardLayerItem),
+  x: hasXTween(layerItem, equivalentLayerItem),
+  y: hasYTween(layerItem, equivalentLayerItem),
   rotation: hasRotationTween(layerItem, equivalentLayerItem),
   radius: false,
   width: hasWidthTween(layerItem, equivalentLayerItem),
