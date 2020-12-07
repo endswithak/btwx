@@ -164,7 +164,8 @@ const PreviewRecordButton = (props: PreviewRecordButtonProps): ReactElement => {
   return (
     <TopbarButton
       onClick={handleRecord}
-      icon={recording ? 'stop-recording' : 'start-recording'} />
+      icon={recording ? 'stop-recording' : 'start-recording'}
+      isRecord />
   );
 }
 

@@ -25,21 +25,26 @@ interface SidebarInputProps {
   removedOnSubmit?: boolean;
   manualCanvasFocus?: boolean;
   placeholder?: string;
+  isSearch?: boolean;
   setCanvasFocusing?(payload: SetCanvasFocusingPayload): CanvasSettingsTypes;
 }
 
-const Input = styled.div`
+interface InputProps {
+  isSearch: boolean;
+}
+
+const Input = styled.div<InputProps>`
   .c-sidebar-input__field {
     background: ${props => props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
     color: ${props => props.theme.text.base};
     box-shadow: 0 0 0 1px ${props => props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5} inset;
     :focus {
-      box-shadow: 0 0 0 1px ${props => props.theme.palette.primary} inset;
+      box-shadow: ${props => props.isSearch ? `0 0 0 0` : `0 0 0 1px`} ${props => props.theme.palette.primary} inset;
     }
     :hover {
-      box-shadow: 0 0 0 1px ${props => props.theme.name === 'dark' ? props.theme.background.z5 : props.theme.background.z6} inset;
+      box-shadow:  ${props => props.isSearch ? `0 0 0 0` : `0 0 0 1px`} ${props => props.isSearch ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z5 : props.theme.background.z6} inset;
       :focus {
-        box-shadow: 0 0 0 1px ${props => props.theme.palette.primaryHover} inset;
+        box-shadow: ${props => props.isSearch ? `0 0 0 0` : `0 0 0 1px`} ${props => props.theme.palette.primary} inset;
       }
     }
   }
@@ -55,7 +60,7 @@ const Input = styled.div`
 const SidebarInput = (props: SidebarInputProps): ReactElement => {
   const inputRef = useRef<HTMLInputElement>(null);
   const theme = useContext(ThemeContext);
-  const { value, onChange, onSubmit, placeholder, onFocus, onBlur, manualCanvasFocus, removedOnSubmit, label, leftLabel, bottomLabel, disabled, selectOnMount, submitOnBlur, setCanvasFocusing, canvasFocusing } = props;
+  const { value, onChange, onSubmit, placeholder, isSearch, onFocus, onBlur, manualCanvasFocus, removedOnSubmit, label, leftLabel, bottomLabel, disabled, selectOnMount, submitOnBlur, setCanvasFocusing, canvasFocusing } = props;
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
@@ -146,6 +151,7 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
 
   return (
     <Input
+      isSearch={isSearch}
       className={`c-sidebar-input ${disabled ? 'c-sidebar-input--disabled' : null}`}
       theme={theme}>
       <div className='c-sidebar-input__inner'>

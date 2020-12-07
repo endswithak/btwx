@@ -12,18 +12,20 @@ interface TopbarButtonProps {
   label?: string;
   hideLabel?: boolean;
   recording?: boolean;
+  isRecord?: boolean;
 }
 
 interface ButtonWrapProps {
   isActive?: boolean;
   disabled?: boolean;
   recording?: boolean;
+  isRecord?: boolean;
 }
 
 const ButtonWrap = styled.div<ButtonWrapProps>`
   .c-topbar-button__button {
-    background: ${props => props.isActive ? props.recording ? props.theme.palette.recording : props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
-    box-shadow: 0 0 0 1px ${props => props.isActive ? props.recording ? props.theme.palette.recording : props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5} inset;
+    background: ${props => props.isActive ? props.recording ? props.theme.palette.recording : props.theme.palette.primary : 'none' };// props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
+    box-shadow: none; // 0 0 0 1px ${props => props.isActive ? props.recording ? props.theme.palette.recording : props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5} inset;
     color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.lighter};
     svg {
       fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.lighter};
@@ -34,14 +36,15 @@ const ButtonWrap = styled.div<ButtonWrapProps>`
       }
     }
     :hover {
-      background: ${props => props.isActive ? props.recording ? props.theme.palette.recordingHover : props.theme.palette.primaryHover : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
-      box-shadow: 0 0 0 1px ${props => props.isActive ? props.recording ? props.theme.palette.recordingHover : props.theme.palette.primaryHover : props.theme.name === 'dark' ? props.theme.background.z5 : props.theme.background.z6} inset;
+      // background: none; // ${props => props.isActive ? props.recording ? props.theme.palette.recordingHover : props.theme.palette.primaryHover : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
+      box-shadow: none;  // 0 0 0 1px ${props => props.recording ? props.theme.palette.recordingHover : props.isRecord ? props.theme.palette.recording : props.theme.palette.primary} inset;
       color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base};
       svg {
-        fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base};
+        fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base };
       }
       :disabled {
-        background: ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
+        background: ${props => props.isActive ? props.theme.palette.primary : 'none' }; // props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
+        box-shadow: none;
         color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.light};
         svg {
           fill: ${props => props.theme.text.lighter};
@@ -56,12 +59,13 @@ const ButtonWrap = styled.div<ButtonWrapProps>`
 
 const TopbarButton = (props: TopbarButtonProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { onClick, text, hideLabel, isActive, disabled, label, icon, recording } = props;
+  const { onClick, text, hideLabel, isActive, disabled, label, icon, recording, isRecord } = props;
 
   return (
     <ButtonWrap
       className={`c-topbar-button ${disabled ? 'c-topbar-button--disabled' : null}`}
       theme={theme}
+      isRecord={isRecord}
       isActive={isActive}
       recording={recording}>
       <button

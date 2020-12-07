@@ -14,7 +14,7 @@ import AlignMiddleToggle from './AlignMiddleToggle';
 
 const AlignDistribute = (): ReactElement => {
   return (
-    <SidebarSectionWrap bottomBorder bg>
+    <SidebarSectionWrap bottomBorder>
       <SidebarSection>
         <SidebarSectionRow>
           <SidebarSectionColumn>

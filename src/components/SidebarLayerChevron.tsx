@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement, useEffect } from 'react';
+import React, { useContext, ReactElement, useEffect, useState, useCallback } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { showLayerChildren, hideLayerChildren } from '../store/actions/layer';
@@ -20,6 +20,7 @@ interface SidebarLayerChevronProps {
 const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { id, isSelected, canOpen, isDragGhost, isOpen, setOpen, showLayerChildren, hideLayerChildren } = props;
+  const [hover, setHover] = useState(false);
 
   const handleMouseDown = (e: any) => {
     e.stopPropagation();
@@ -39,7 +40,10 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
     <div
       className='c-sidebar-layer__icon c-sidebar-layer__icon--chevron'
       id={`${id}-open-icon`}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
       onMouseDown={canOpen ? handleMouseDown : null}
+      onMouseUp={() => setHover(true)}
       style={{
         pointerEvents: canOpen ? 'auto' : 'none'
       }}>
@@ -51,7 +55,9 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
             style={{
               fill: isSelected
               ? theme.text.onPrimary
-              : theme.text.lighter
+              : hover
+                ? theme.text.base
+                : theme.text.lighter
             }} />
         : null
       }

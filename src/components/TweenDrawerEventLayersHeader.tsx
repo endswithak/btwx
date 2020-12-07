@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement } from 'react';
+import React, { useContext, ReactElement, useState } from 'react';
 import { ThemeContext } from './ThemeProvider';
 import Icon from './Icon';
 
@@ -22,6 +22,7 @@ interface TweenDrawerEventLayersProps {
 const TweenDrawerEventLayersHeader = (props: TweenDrawerEventLayersProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { text, icon, onMouseEnter, onMouseLeave, onClick, onIconClick, sticky, layerItem, maskItem } = props;
+  const [hover, setHover] = useState(false);
 
   return (
     <div
@@ -40,13 +41,19 @@ const TweenDrawerEventLayersHeader = (props: TweenDrawerEventLayersProps): React
         }}>
         <div
           className='c-tween-drawer-event-layer__icon'
-          onClick={onIconClick}>
+          onClick={onIconClick}
+          onMouseEnter={() => setHover(true)}
+          onMouseLeave={() => setHover(false)}>
           <Icon
             name={icon.name}
             shapeId={icon.shapeId}
             small={icon.small}
             style={{
-              fill: theme.text.lighter,
+              fill: hover
+              ? sticky
+                ? theme.text.lighter
+                : theme.text.base
+              : theme.text.lighter,
               stroke: layerItem && layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line'
               ? theme.text.lighter
               : 'none',

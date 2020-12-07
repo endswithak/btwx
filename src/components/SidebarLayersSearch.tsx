@@ -24,6 +24,7 @@ const SidebarLayersSearch = (props: SidebarLayersSearchProps): ReactElement => {
   const { searchActive, search, setSearching, setSearch, selected } = props;
   const [focused, setFocused] = useState(false);
   const [inputValue, setInputValue] = useState(search);
+  const [hover, setHover] = useState(false);
 
   // useEffect(() => {
   //   if (selected.length > 0) {
@@ -72,16 +73,22 @@ const SidebarLayersSearch = (props: SidebarLayersSearchProps): ReactElement => {
   return (
     <div
       className='c-sidebar__search'
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
       style={{
-        background: theme.name === 'dark' ? theme.background.z3 : theme.background.z0,
-        boxShadow: `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
+        // background: theme.name === 'dark' ? theme.background.z3 : theme.background.z0,
+        boxShadow: `0 1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
       }}>
       <div className='c-sidebar-search__icon'>
         <Icon
           name='search'
           small
           style={{
-            fill: focused ? theme.palette.primary : theme.text.lighter
+            fill: focused
+            ? theme.palette.primary
+            : hover
+              ? theme.text.base
+              : theme.text.lighter
           }} />
       </div>
       <div
@@ -93,6 +100,7 @@ const SidebarLayersSearch = (props: SidebarLayersSearchProps): ReactElement => {
           onChange={handleSearchChange}
           onSubmit={handleSearchSubmit}
           submitOnBlur
+          isSearch
           placeholder='Search' />
       </div>
       {

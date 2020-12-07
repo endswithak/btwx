@@ -20,7 +20,7 @@ const ZoomButton = (props: ZoomButtonProps): ReactElement => {
   const { zoom, zoomFitCanvasThunk, canArtboardZoom, zoomPercentThunk, zoomFitSelectedThunk, canSelectedZoom, canCanvasZoom } = props;
 
   return (
-    <div className='c-topbar-button c-topbar-button--split'>
+    <>
       <ZoomOutButton />
       <TopbarDropdownButton
         label='Zoom'
@@ -48,7 +48,7 @@ const ZoomButton = (props: ZoomButtonProps): ReactElement => {
           disabled: !canArtboardZoom
         }]} />
       <ZoomInButton />
-    </div>
+    </>
   );
 }
 

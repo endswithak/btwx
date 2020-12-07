@@ -28,17 +28,15 @@ const Background = styled.div<BackgroundProps>`
       ? props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0
       : 'none'
   };
-  box-shadow: 0 0 0 1px ${
-    props => props.isHovering
-    ? (props.isSelected || props.editing)
-      ? props.theme.palette.primaryHover
-      : props.theme.palette.primary
+  box-shadow: ${
+    props => props.isHovering || props.isSelected || props.editing
+    ? `0 0 0 1px ${props.theme.palette.primary} inset`
     : props.isArtboard
       ? props.theme.name === 'dark'
-        ? props.theme.background.z4
-        : props.theme.background.z5
+        ? `0 1px 0 0 ${props.theme.background.z4} inset, 0 1px 0 0 ${props.theme.background.z4}`
+        : `0 1px 0 0 ${props.theme.background.z5} inset, 0 1px 0 0 ${props.theme.background.z5}`
       : 'none'
-  } inset;
+  };
 `;
 
 const SidebarLayerBackground = (props: SidebarLayerBackgroundProps): ReactElement => {
