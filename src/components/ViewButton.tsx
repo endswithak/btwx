@@ -27,21 +27,25 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
     <TopbarDropdownButton
       label='View'
       icon='left-sidebar'
+      keepOpenOnSelect
       options={[{
-        label: `${leftSidebarOpen ? 'Hide' : 'Show'} Layers`,
+        label: 'Layers',
         onClick: toggleLeftSidebarThunk,
         icon: 'left-sidebar',
-        isActive: leftSidebarOpen
+        isActive: leftSidebarOpen,
+        checkbox: true
       },{
-        label: `${rightSidebarOpen ? 'Hide' : 'Show'} Styles`,
+        label: 'Styles',
         onClick: toggleRightSidebarThunk,
         icon: 'right-sidebar',
-        isActive: rightSidebarOpen
+        isActive: rightSidebarOpen,
+        checkbox: true
       },{
-        label: `${tweenDrawerOpen ? 'Hide' : 'Show'} Events`,
+        label: 'Events',
         onClick: toggleTweenDrawerThunk,
         icon: 'tweens',
-        isActive: tweenDrawerOpen
+        isActive: tweenDrawerOpen,
+        checkbox: true
       }]} />
   );
 }

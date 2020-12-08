@@ -609,6 +609,41 @@ export const selectedUseAsMaskEnabled = createSelector(
   }
 );
 
+export const canMaskSelected = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    const keys = Object.keys(selectedById);
+    const artboardsSelected = keys.length > 0 && keys.every((id: string) => {
+      const layerItem = selectedById[id];
+      return layerItem.type === 'Artboard';
+    });
+    const hasShapeFirstChild = keys.length > 0 && selectedById[keys[0]].type === 'Shape' && (selectedById[keys[0]] as Btwx.Shape).shapeType !== 'Line';
+    return !artboardsSelected && hasShapeFirstChild;
+  }
+);
+
+export const canResetSelectedImageDimensions = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    const keys = Object.keys(selectedById);
+    return keys.length > 0 && keys.every((id: string) => {
+      const layerItem = selectedById[id];
+      return layerItem.type === 'Image';
+    });
+  }
+);
+
+export const canReplaceSelectedImages = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    const keys = Object.keys(selectedById);
+    return keys.length > 0 && keys.every((id: string) => {
+      const layerItem = selectedById[id];
+      return layerItem.type === 'Image';
+    });
+  }
+);
+
 export const canToggleSelectedIgnoreUnderlyingMask = createSelector(
   [ getSelectedById ],
   (selectedById) => {
@@ -1301,8 +1336,8 @@ export const hasShapeTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.L
 
 export const hasFillTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   return (
-    (layerItem.type === 'Shape' || layerItem.type === 'Text') &&
-    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text') &&
+    (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Artboard') &&
+    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Artboard') &&
     (layerItem.style.fill.enabled || equivalentLayerItem.style.fill.enabled) &&
     (
       (layerItem.style.fill.enabled && !equivalentLayerItem.style.fill.enabled) ||
@@ -1343,6 +1378,7 @@ export const hasFillGradientDestinationYTween = (layerItem: Btwx.Layer, equivale
 };
 
 export const hasXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const noArtboards = layerItem.type !== 'Artboard' && equivalentLayerItem.type !== 'Artboard';
   const layerArtboardPosition = layerItem.frame.x
   const equivalentArtboardPosition = equivalentLayerItem.frame.x;
   const lineToLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
@@ -1351,10 +1387,11 @@ export const hasXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer
   const fontSizeMatch = textToText && (layerItem as Btwx.Text).textStyle.fontSize === (equivalentLayerItem as Btwx.Text).textStyle.fontSize;
   const leadingsMatch = textToText && (layerItem as Btwx.Text).textStyle.leading === (equivalentLayerItem as Btwx.Text).textStyle.leading;
   const positionsMatch = layerArtboardPosition === equivalentArtboardPosition;
-  return (!lineToLine && !groupToGroup && !positionsMatch) || (textToText && (!fontSizeMatch || !leadingsMatch));
+  return (noArtboards && !lineToLine && !groupToGroup && !positionsMatch) || (noArtboards && textToText && (!fontSizeMatch || !leadingsMatch));
 };
 
 export const hasYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const noArtboards = layerItem.type !== 'Artboard' && equivalentLayerItem.type !== 'Artboard';
   const layerArtboardPosition = layerItem.frame.y;
   const equivalentArtboardPosition = equivalentLayerItem.frame.y;
   const lineToLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
@@ -1363,26 +1400,29 @@ export const hasYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer
   const fontSizeMatch = textToText && (layerItem as Btwx.Text).textStyle.fontSize === (equivalentLayerItem as Btwx.Text).textStyle.fontSize;
   const leadingsMatch = textToText && (layerItem as Btwx.Text).textStyle.leading === (equivalentLayerItem as Btwx.Text).textStyle.leading;
   const positionsMatch = layerArtboardPosition === equivalentArtboardPosition;
-  return (!lineToLine && !groupToGroup && !positionsMatch) || (textToText && (!fontSizeMatch || !leadingsMatch));
+  return (noArtboards && !lineToLine && !groupToGroup && !positionsMatch) || (noArtboards && textToText && (!fontSizeMatch || !leadingsMatch));
 };
 
 export const hasRotationTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const noArtboards = layerItem.type !== 'Artboard' && equivalentLayerItem.type !== 'Artboard';
   const lineToLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
   const groupToGroup = layerItem.type === 'Group' && equivalentLayerItem.type === 'Group';
   const rotationsMatch = layerItem.transform.rotation.toFixed(2) === equivalentLayerItem.transform.rotation.toFixed(2);
-  return !lineToLine && !groupToGroup && !rotationsMatch;
+  return noArtboards && !lineToLine && !groupToGroup && !rotationsMatch;
 };
 
 export const hasWidthTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const noArtboards = layerItem.type !== 'Artboard' && equivalentLayerItem.type !== 'Artboard';
   const lineToLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
   const layerItemValid = ((layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image');
   const equivalentLayerItemValid = ((equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType !== 'Line') || equivalentLayerItem.type === 'Image');
   const widthsMatch = Math.round(layerItem.frame.innerWidth) === Math.round(equivalentLayerItem.frame.innerWidth);
-  return !lineToLine && (layerItemValid && equivalentLayerItemValid) && !widthsMatch;
+  return noArtboards && !lineToLine && (layerItemValid && equivalentLayerItemValid) && !widthsMatch;
 };
 
 export const hasHeightTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   return (
+    (layerItem.type !== 'Artboard' && equivalentLayerItem.type !== 'Artboard') &&
     ((layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image') &&
     ((equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType !== 'Line') || equivalentLayerItem.type === 'Image') &&
     Math.round(layerItem.frame.innerHeight) !== Math.round(equivalentLayerItem.frame.innerHeight)

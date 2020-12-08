@@ -547,6 +547,7 @@ declare namespace Btwx {
 
   interface Edit {
     id?: string;
+    selectedEdit?: string;
     actionType: string;
     payload: any;
     detail: string;

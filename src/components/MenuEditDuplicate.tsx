@@ -2,23 +2,21 @@ import React, { ReactElement, useEffect } from 'react';
 import { remote } from 'electron';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { DuplicateLayersPayload, LayerTypes } from '../store/actionTypes/layer';
-import { duplicateLayers } from '../store/actions/layer';
-import { getSelectedById, getSelected } from '../store/selectors/layer';
+import { duplicateSelectedThunk } from '../store/actions/layer';
+import { getSelectedById } from '../store/selectors/layer';
 
 export const MENU_ITEM_ID = 'editDuplicate';
 
 interface MenuEditDuplicateProps {
-  selected?: string[];
   selectedById?: {
     [id: string]: Btwx.Layer;
   };
   canDuplicate?: boolean;
-  duplicateLayers?(payload: DuplicateLayersPayload): LayerTypes;
+  duplicateSelectedThunk?(): void;
 }
 
 const MenuEditDuplicate = (props: MenuEditDuplicateProps): ReactElement => {
-  const { canDuplicate, duplicateLayers, selected, selectedById } = props;
+  const { canDuplicate, duplicateSelectedThunk, selectedById } = props;
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
@@ -27,7 +25,7 @@ const MenuEditDuplicate = (props: MenuEditDuplicateProps): ReactElement => {
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      duplicateLayers({layers: selected});
+      duplicateSelectedThunk();
     };
   }, [selectedById]);
 
@@ -37,7 +35,6 @@ const MenuEditDuplicate = (props: MenuEditDuplicateProps): ReactElement => {
 }
 
 const mapStateToProps = (state: RootState): {
-  selected: string[];
   selectedById: {
     [id: string]: Btwx.Layer;
   };
@@ -45,12 +42,12 @@ const mapStateToProps = (state: RootState): {
 } => {
   const { canvasSettings } = state;
   const selectedById = getSelectedById(state);
-  const selected = getSelected(state);
+  const selected = state.layer.present.selected;
   const canDuplicate = selected.length > 0 && canvasSettings.focusing;
-  return { canDuplicate, selectedById, selected };
+  return { canDuplicate, selectedById };
 };
 
 export default connect(
   mapStateToProps,
-  { duplicateLayers }
+  { duplicateSelectedThunk }
 )(MenuEditDuplicate);

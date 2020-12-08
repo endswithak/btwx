@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
+import { remote } from 'electron';
 import sharp from 'sharp';
 import tinycolor from 'tinycolor2';
 import { v4 as uuidv4 } from 'uuid';
@@ -237,6 +238,10 @@ import {
   SET_LAYER_EDIT,
   SET_LAYER_STYLE,
   SET_LAYERS_STYLE,
+  RESET_IMAGE_DIMENSIONS,
+  RESET_IMAGES_DIMENSIONS,
+  REPLACE_IMAGE,
+  REPLACE_IMAGES,
   AddArtboardPayload,
   AddGroupPayload,
   AddShapePayload,
@@ -440,6 +445,10 @@ import {
   SetLayerEditPayload,
   SetLayerStylePayload,
   SetLayersStylePayload,
+  ResetImageDimensionsPayload,
+  ResetImagesDimensionsPayload,
+  ReplaceImagePayload,
+  ReplaceImagesPayload,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -530,7 +539,7 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
         byProp: TWEEN_PROPS_MAP
       },
       transform: DEFAULT_TRANSFORM,
-      style: DEFAULT_STYLE,
+      style: style,
       paperJSON: artboard.exportJSON()
     } as Btwx.Artboard;
     dispatch(addArtboard({
@@ -1122,7 +1131,10 @@ export const removeLayersThunk = () => {
 
 export const selectLayer = (payload: SelectLayerPayload): LayerTypes => ({
   type: SELECT_LAYER,
-  payload
+  payload: {
+    ...payload,
+    selectedEdit: uuidv4()
+  }
 });
 
 export const deepSelectLayer = (payload: DeepSelectLayerPayload): LayerTypes => ({
@@ -1144,7 +1156,10 @@ export const selectLayers = (payload: SelectLayersPayload): LayerTypes => ({
 
 export const deselectLayer = (payload: DeselectLayerPayload): LayerTypes => ({
   type: DESELECT_LAYER,
-  payload
+  payload: {
+    ...payload,
+    selectedEdit: uuidv4()
+  }
 });
 
 export const deselectLayers = (payload: DeselectLayersPayload): LayerTypes => ({
@@ -2114,56 +2129,30 @@ export const addLayersMask = (payload: AddLayersMaskPayload): LayerTypes => ({
   payload
 });
 
-export const addLayersMaskThunk = (payload: AddLayersMaskPayload) => {
-  return (dispatch: any, getState: any): Promise<any> => {
-    return new Promise((resolve, reject) => {
-      const state = getState() as RootState;
-      if (canMaskLayers(state.layer.present, payload.layers)) {
-        if (payload.layers.length > 1) {
-          const maskLayerItem = state.layer.present.byId[payload.layers[0]];
-          dispatch(addGroupThunk({
-            layer: {
-              name: maskLayerItem.name
-            },
-            batch: true
-          })).then((newGroup: Btwx.Group) => {
-            dispatch(addLayersMask({...payload, group: newGroup}));
-            resolve();
-          });
-        } else {
-          dispatch(addLayersMask(payload));
-          resolve();
-        }
-      } else {
-        resolve();
-      }
-    });
-  }
-};
-
 export const addSelectionMaskThunk = () => {
   return (dispatch: any, getState: any): Promise<any> => {
     return new Promise((resolve, reject) => {
       const state = getState() as RootState;
-      if (canMaskSelection(state.layer.present)) {
-        if (state.layer.present.selected.length > 1) {
-          // const maskLayerItem = state.layer.present.byId[state.layer.present.selected[0]];
-          // dispatch(addGroupThunk({
-          //   layer: {
-          //     name: maskLayerItem.name
-          //   },
-          //   batch: true
-          // })).then((newGroup: Btwx.Group) => {
-          //   dispatch(addLayersMask({layers: state.layer.present.selected, group: newGroup}));
-          //   resolve();
-          // });
-          dispatch(addLayersMask({layers: state.layer.present.selected}));
+      if (state.layer.present.selected.length > 1) {
+        const maskLayerItem = state.layer.present.byId[state.layer.present.selected[0]];
+        dispatch(
+          addGroupThunk({
+            layer: {
+              name: maskLayerItem.name
+            },
+            batch: true
+          })
+        ).then((newGroup: Btwx.Group) => {
+          dispatch(
+            addLayersMask({
+              layers: state.layer.present.selected,
+              group: newGroup
+            })
+          );
           resolve();
-        } else {
-          dispatch(addLayersMask({layers: state.layer.present.selected}));
-          resolve();
-        }
+        });
       } else {
+        dispatch(toggleSelectedMaskThunk());
         resolve();
       }
     });
@@ -2301,6 +2290,15 @@ export const duplicateLayersThunk = (payload: DuplicateLayersPayload) => {
       dispatch(duplicateLayers(payload));
       const newState = getState() as RootState;
       resolve(newState.layer.present.selected);
+    });
+  }
+};
+
+export const duplicateSelectedThunk = () => {
+  return (dispatch: any, getState: any): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      const state = getState() as RootState;
+      dispatch(duplicateLayers({layers: state.layer.present.selected}));
     });
   }
 };
@@ -2612,6 +2610,78 @@ export const setLayersStyle = (payload: SetLayersStylePayload): LayerTypes => ({
   type: SET_LAYERS_STYLE,
   payload
 });
+
+export const resetImageDimensions = (payload: ResetImageDimensionsPayload): LayerTypes => ({
+  type: RESET_IMAGE_DIMENSIONS,
+  payload
+});
+
+export const resetImagesDimensions = (payload: ResetImagesDimensionsPayload): LayerTypes => ({
+  type: RESET_IMAGES_DIMENSIONS,
+  payload
+});
+
+export const resetSelectedImageDimensionsThunk = () => {
+  return (dispatch: any, getState: any): void => {
+    const state = getState() as RootState;
+    dispatch(resetImagesDimensions({layers: state.layer.present.selected}));
+  }
+};
+
+export const replaceImage = (payload: ReplaceImagePayload): LayerTypes => ({
+  type: REPLACE_IMAGE,
+  payload
+});
+
+export const replaceImages = (payload: ReplaceImagesPayload): LayerTypes => ({
+  type: REPLACE_IMAGES,
+  payload
+});
+
+export const replaceSelectedImagesThunk = () => {
+  return (dispatch: any, getState: any): Promise<Btwx.Image> => {
+    return new Promise((resolve, reject) => {
+      remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
+        filters: [
+          { name: 'Images', extensions: ['jpg', 'png'] }
+        ],
+        properties: ['openFile']
+      }).then(result => {
+        if (result.filePaths.length > 0 && !result.canceled) {
+          const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
+          sharp(result.filePaths[0]).metadata().then(({ width, height }) => {
+            const originalDimensions = {width, height};
+            sharp(result.filePaths[0]).resize(Math.round(width * 0.5)).webp({quality: 75}).toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
+              const newBuffer = Buffer.from(data);
+              const exists = state.documentSettings.images.allIds.length > 0 && state.documentSettings.images.allIds.find((id) => Buffer.from(state.documentSettings.images.byId[id].buffer).equals(newBuffer));
+              const base64 = bufferToBase64(newBuffer);
+              const imageId = exists ? exists : uuidv4();
+              const imageLoader = new uiPaperScope.Raster(`data:image/webp;base64,${base64}`);
+              imageLoader.onLoad = (): void => {
+                state.layer.present.selected.forEach((layer, index) => {
+                  const { layerItem, paperLayer } = getItemLayers(state.layer.present, layer);
+                  const raster = paperLayer.getItem({data: {id: 'raster'}}) as paper.Raster;
+                  paperLayer.data.imageId = imageId;
+                  raster.source = `data:image/webp;base64,${base64}`;
+                });
+                if (!exists) {
+                  dispatch(addDocumentImage({id: imageId, buffer: newBuffer}));
+                }
+                dispatch(replaceImages({
+                  layers: state.layer.present.selected,
+                  imageId,
+                  originalDimensions
+                }));
+                imageLoader.remove();
+                resolve();
+              }
+            });
+          });
+        }
+      });
+    });
+  }
+};
 
 export const copyLayersThunk = () => {
   return (dispatch: any, getState: any) => {

@@ -21,7 +21,7 @@ interface SidebarLayerTitleProps {
 
 const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { id, name, isArtboard, isSelected, setEditing, setLayerName, editing } = props;
+  const { id, name, isArtboard, isSelected, setEditing, setLayerName, editing, isDragGhost } = props;
   const [nameInput, setNameInput] = useState(name);
 
   useEffect(() => {
@@ -53,7 +53,7 @@ const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
         }`
       }
       style={{
-        color: isSelected
+        color: isSelected && !isDragGhost
         ? theme.text.onPrimary
         : theme.text.base
       }}>

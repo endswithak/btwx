@@ -205,6 +205,10 @@ import {
   SET_LAYER_EDIT,
   SET_LAYER_STYLE,
   SET_LAYERS_STYLE,
+  RESET_IMAGE_DIMENSIONS,
+  RESET_IMAGES_DIMENSIONS,
+  REPLACE_IMAGE,
+  REPLACE_IMAGES,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -413,7 +417,11 @@ import {
   setLineTo,
   setLayerEdit,
   setLayerStyle,
-  setLayersStyle
+  setLayersStyle,
+  resetImageDimensions,
+  resetImagesDimensions,
+  replaceImage,
+  replaceImages
 } from '../utils/layer';
 
 export interface LayerState {
@@ -461,6 +469,7 @@ export interface LayerState {
   nameById: {
     [id: string]: string;
   };
+  selectedEdit: string;
   edit: Btwx.Edit;
 }
 
@@ -516,6 +525,7 @@ export const initialState: LayerState = {
     root: 'root'
   },
   artboardJSON: {},
+  selectedEdit: null,
   edit: null
 };
 
@@ -927,6 +937,14 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return setLayerStyle(state, action);
     case SET_LAYERS_STYLE:
       return setLayersStyle(state, action);
+    case RESET_IMAGE_DIMENSIONS:
+      return resetImageDimensions(state, action);
+    case RESET_IMAGES_DIMENSIONS:
+      return resetImagesDimensions(state, action);
+    case REPLACE_IMAGE:
+      return replaceImage(state, action);
+    case REPLACE_IMAGES:
+      return replaceImages(state, action);
     default:
       return state;
   }
@@ -1101,7 +1119,11 @@ export default undoable(baseReducer, {
       SEND_LAYERS_TO_BACK,
       BRING_LAYERS_TO_FRONT,
       SET_LAYER_STYLE,
-      SET_LAYERS_STYLE
+      SET_LAYERS_STYLE,
+      RESET_IMAGE_DIMENSIONS,
+      RESET_IMAGES_DIMENSIONS,
+      REPLACE_IMAGE,
+      REPLACE_IMAGES
     ].includes(action.type) && !action.payload.batch;
   }
 });

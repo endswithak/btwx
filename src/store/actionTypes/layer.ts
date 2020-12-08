@@ -191,10 +191,6 @@ export const TOGGLE_LAYER_MASK = 'TOGGLE_LAYER_MASK';
 export const TOGGLE_LAYERS_MASK = 'TOGGLE_LAYERS_MASK';
 export const ADD_LAYERS_MASK = 'ADD_LAYERS_MASK';
 export const REMOVE_LAYERS_MASK = 'REMOVE_LAYERS_MASK';
-// export const MASK_LAYER = 'MASK_LAYER';
-// export const UNMASK_LAYER = 'UNMASK_LAYER';
-// export const MASK_LAYERS = 'MASK_LAYERS';
-// export const UNMASK_LAYERS = 'UNMASK_LAYERS';
 
 export const ALIGN_LAYERS_TO_LEFT = 'ALIGN_LAYERS_TO_LEFT';
 export const ALIGN_LAYERS_TO_RIGHT = 'ALIGN_LAYERS_TO_RIGHT';
@@ -246,6 +242,11 @@ export const SET_LINES_TO_X = 'SET_LINES_TO_X';
 export const SET_LINE_TO_Y = 'SET_LINE_TO_Y';
 export const SET_LINES_TO_Y = 'SET_LINES_TO_Y';
 export const SET_LINE_TO = 'SET_LINE_TO';
+
+export const RESET_IMAGE_DIMENSIONS = 'RESET_IMAGE_DIMENSIONS';
+export const RESET_IMAGES_DIMENSIONS = 'RESET_IMAGES_DIMENSIONS';
+export const REPLACE_IMAGE = 'REPLACE_IMAGE';
+export const REPLACE_IMAGES = 'REPLACE_IMAGES';
 
 export const SET_LAYER_EDIT = 'SET_LAYER_EDIT';
 
@@ -362,6 +363,7 @@ export interface RemoveLayers {
 
 export interface SelectLayerPayload {
   id: string;
+  selectedEdit?: string;
   newSelection?: boolean;
 }
 
@@ -391,6 +393,7 @@ export interface SelectLayers {
 
 export interface DeselectLayerPayload {
   id: string;
+  selectedEdit?: string;
 }
 
 export interface DeselectLayer {
@@ -2375,6 +2378,52 @@ export interface SetLayersStyle {
   payload: SetLayersStylePayload;
 }
 
+export interface ResetImageDimensionsPayload {
+  id: string;
+}
+
+export interface ResetImageDimensions {
+  type: typeof RESET_IMAGE_DIMENSIONS;
+  payload: ResetImageDimensionsPayload;
+}
+
+export interface ResetImagesDimensionsPayload {
+  layers: string[];
+}
+
+export interface ResetImagesDimensions {
+  type: typeof RESET_IMAGES_DIMENSIONS;
+  payload: ResetImagesDimensionsPayload;
+}
+
+export interface ReplaceImagePayload {
+  id: string;
+  imageId: string;
+  originalDimensions: {
+    width: number;
+    height: number;
+  };
+}
+
+export interface ReplaceImage {
+  type: typeof REPLACE_IMAGE;
+  payload: ReplaceImagePayload;
+}
+
+export interface ReplaceImagesPayload {
+  layers: string[];
+  imageId: string;
+  originalDimensions: {
+    width: number;
+    height: number;
+  };
+}
+
+export interface ReplaceImages {
+  type: typeof REPLACE_IMAGES;
+  payload: ReplaceImagesPayload;
+}
+
 export type LayerTypes = AddArtboard |
                          AddGroup |
                          AddShape |
@@ -2586,4 +2635,8 @@ export type LayerTypes = AddArtboard |
                          SetLineTo |
                          SetLayerEdit |
                          SetLayerStyle |
-                         SetLayersStyle;
+                         SetLayersStyle |
+                         ResetImageDimensions |
+                         ResetImagesDimensions |
+                         ReplaceImage |
+                         ReplaceImages;

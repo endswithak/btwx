@@ -17,9 +17,9 @@ interface SidebarLeftEmptyStateProps {
 const SidebarLeftEmptyState = (props: SidebarLeftEmptyStateProps): ReactElement => {
   const { isEmpty, activeTool, shapeToolShapeType, insertKnobOpen, activateInsertKnob } = props;
 
-  const handleEmptyStateActionClick = () => {
-    activateInsertKnob();
-  }
+  // const handleEmptyStateActionClick = () => {
+  //   activateInsertKnob();
+  // }
 
   const getEmptyStateIcon = () => {
     switch(activeTool) {
@@ -74,28 +74,28 @@ const SidebarLeftEmptyState = (props: SidebarLeftEmptyStateProps): ReactElement 
     }
   }
 
-  const getEmptyStateActionText = () => {
-    switch(activeTool) {
-      case 'Shape':
-        return `Adding ${shapeToolShapeType}...`;
-      case 'Text':
-      case 'Artboard':
-        return `Adding ${activeTool}...`;
-      default:
-        return 'Add Layer';
-    }
-  }
+  // const getEmptyStateActionText = () => {
+  //   switch(activeTool) {
+  //     case 'Shape':
+  //       return `Adding ${shapeToolShapeType}...`;
+  //     case 'Text':
+  //     case 'Artboard':
+  //       return `Adding ${activeTool}...`;
+  //     default:
+  //       return 'Add Layer';
+  //   }
+  // }
 
   return (
     <EmptyState
       icon={getEmptyStateIcon()}
       text={getEmptyStateText()}
       detail={getEmptyStateDetail()}
-      action
-      actionText={getEmptyStateActionText()}
-      actionActive={activeTool === 'Artboard' || activeTool === 'Shape' || activeTool === 'Text' || insertKnobOpen}
-      actionDisabled={insertKnobOpen}
-      actionClick={handleEmptyStateActionClick}
+      // action
+      // actionText={getEmptyStateActionText()}
+      // actionActive={activeTool === 'Artboard' || activeTool === 'Shape' || activeTool === 'Text' || insertKnobOpen}
+      // actionDisabled={insertKnobOpen}
+      // actionClick={handleEmptyStateActionClick}
       style={{width: 211}} />
   );
 }

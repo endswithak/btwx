@@ -9,19 +9,26 @@ export interface TopbarDropdownButtonOptionProps {
   isActive?: boolean;
   disabled?: boolean;
   icon?: string;
+  iconSmall?: boolean;
   bottomDivider?: boolean;
+  checkbox?: boolean;
   label: string;
 }
 
 const Button = styled.button<TopbarDropdownButtonOptionProps>`
-  background: ${props => props.isActive ? props.theme.palette.primary : 'none'};
+  background: ${props => !props.checkbox && props.isActive ? props.theme.palette.primary : 'none'};
   .c-topbar-dropdown-button__icon {
     svg {
-      fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.light};
+      fill: ${props => props.isActive && !props.checkbox ? props.theme.text.onPrimary : props.theme.text.lighter};
+    }
+  }
+  .c-topbar-dropdown-button__icon--checkbox {
+    svg {
+      fill: ${props => props.isActive ? props.theme.palette.primary : props.theme.text.lighter};
     }
   }
   .c-topbar-dropdown-button__label {
-    color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.light};
+    color: ${props => props.checkbox ? props.theme.text.base : props.isActive ? props.theme.text.onPrimary : props.theme.text.base};
   }
   :after {
     background: ${props => props.theme.text.lightest};
@@ -40,7 +47,7 @@ const Button = styled.button<TopbarDropdownButtonOptionProps>`
     }
   }
   :hover {
-    background: ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.palette.primary};
+    background: ${props => props.isActive && !props.checkbox ? props.theme.palette.primaryHover : props.theme.palette.primary};
     .c-topbar-dropdown-button__icon {
       svg {
         fill: ${props => props.theme.text.onPrimary};
@@ -65,23 +72,34 @@ const Button = styled.button<TopbarDropdownButtonOptionProps>`
 
 const TopbarDropdownButtonOption = (props: TopbarDropdownButtonOptionProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { label, icon, bottomDivider } = props;
+  const { label, icon, bottomDivider, checkbox, isActive, iconSmall } = props;
 
   return (
     <Button
-      className={`c-topbar-dropdown-button__option ${!icon ? 'c-topbar-dropdown-button__option--text' : null} ${bottomDivider ? 'c-topbar-dropdown-button__option--bottom-divider' : null}`}
+      className={`c-topbar-dropdown-button__option ${!icon && !checkbox ? 'c-topbar-dropdown-button__option--text' : null} ${bottomDivider ? 'c-topbar-dropdown-button__option--bottom-divider' : null}`}
       {...props}
       theme={theme}>
       {
         icon
         ? <span className='c-topbar-dropdown-button__icon'>
-            <Icon name={icon} />
+            <Icon
+              name={icon}
+              small={iconSmall} />
           </span>
         : null
       }
       <span className='c-topbar-dropdown-button__label'>
         {label}
       </span>
+      {
+        checkbox
+        ? <span className='c-topbar-dropdown-button__icon c-topbar-dropdown-button__icon--checkbox'>
+            <Icon
+              name={isActive ? 'checkbox-checked' : 'checkbox-unchecked'}
+              small />
+          </span>
+        : null
+      }
     </Button>
   );
 }

@@ -102,11 +102,15 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
       return result;
     }, {});
     const paperTweenLayersById = tweenLayers.allIds.reduce((result: {[id: string]: paper.Item}, current) => {
-      result[current] = paperPreview.project.getItem({ data: { id: current } });
+      const paperLayer = paperPreview.project.getItem({ data: { id: current } });
+      const isArtboard = tweenLayers.byId[current].type === 'Artboard';
+      result[current] = isArtboard ? paperLayer.getItem({data: {id: 'artboardBackground'}}) : paperLayer;
       return result;
     }, {});
     const paperTweenLayerDestinationsById = tweenLayerDestinations.allIds.reduce((result: {[id: string]: paper.Item}, current) => {
-      result[current] = paperPreview.project.getItem({ data: { id: current } });
+      const paperLayer = paperPreview.project.getItem({ data: { id: current } });
+      const isArtboard = tweenLayerDestinations.byId[current].type === 'Artboard';
+      result[current] = isArtboard ? paperLayer.getItem({data: {id: 'artboardBackground'}}) : paperLayer;
       return result;
     }, {});
     // 4. clear project

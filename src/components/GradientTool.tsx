@@ -7,7 +7,7 @@ import { SetLayersGradientODPayload, LayerTypes } from '../store/actionTypes/lay
 import { setLayersGradientOD } from '../store/actions/layer';
 import { setCanvasResizing } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasResizingPayload } from '../store/actionTypes/canvasSettings';
-import { getPaperLayer, getSelectedPaperScopes, getPaperProp } from '../store/selectors/layer';
+import { getPaperLayer, getSelectedPaperScopes, getPaperProp, getSelectedById } from '../store/selectors/layer';
 import { ThemeContext } from './ThemeProvider';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
@@ -16,6 +16,9 @@ interface GradientToolStateProps {
   isEnabled?: boolean;
   gradient?: Btwx.Gradient;
   selected?: string[];
+  selectedById?: {
+    [id: string]: Btwx.Layer;
+  };
   selectedPaperScopes?: {
     [id: string]: number;
   };
@@ -37,7 +40,7 @@ type GradientToolProps = (
 
 const GradientTool = (props: GradientToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isEnabled, setLayersGradientOD, selected, selectedPaperScopes, tool, downEvent, dragEvent, upEvent, gradientHandle, gradientProp, setCanvasResizing, resizing } = props;
+  const { isEnabled, selectedById, setLayersGradientOD, selected, selectedPaperScopes, tool, downEvent, dragEvent, upEvent, gradientHandle, gradientProp, setCanvasResizing, resizing } = props;
   const [originHandlePosition, setOriginHandlePosition] = useState<paper.Point>(null);
   const [destinationHandlePosition, setDestinationHandlePosition] = useState<paper.Point>(null);
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
@@ -133,7 +136,10 @@ const GradientTool = (props: GradientToolProps): ReactElement => {
         line.firstSegment.point = toBounds.center;
       });
       selected.forEach((id) => {
-        const paperLayer = getPaperLayer(id, selectedPaperScopes[id]);
+        let paperLayer = getPaperLayer(id, selectedPaperScopes[id]);
+        if (selectedById[id].type === 'Artboard') {
+          paperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
+        }
         paperLayer[paperProp] = {
           gradient: paperLayer[paperProp].gradient,
           origin: toBounds.center,
@@ -147,7 +153,10 @@ const GradientTool = (props: GradientToolProps): ReactElement => {
         line.lastSegment.point = toBounds.center;
       });
       selected.forEach((id) => {
-        const paperLayer = getPaperLayer(id, selectedPaperScopes[id]);
+        let paperLayer = getPaperLayer(id, selectedPaperScopes[id]);
+        if (selectedById[id].type === 'Artboard') {
+          paperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
+        }
         paperLayer[paperProp] = {
           gradient: paperLayer[paperProp].gradient,
           origin: originHandlePosition,
@@ -199,9 +208,11 @@ const mapStateToProps = (state: RootState): GradientToolStateProps => {
   const gradientHandle = canvasSettings.gradientHandle;
   const gradientProp = gradientEditor.prop;
   const resizing = canvasSettings.resizing;
+  const selectedById = getSelectedById(state);
   return {
     isEnabled,
     selected,
+    selectedById,
     gradientHandle,
     gradientProp,
     selectedPaperScopes,
