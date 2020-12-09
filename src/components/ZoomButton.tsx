@@ -23,6 +23,7 @@ const ZoomButton = (props: ZoomButtonProps): ReactElement => {
     <>
       <ZoomOutButton />
       <TopbarDropdownButton
+        dropdownPosition='left'
         label='Zoom'
         text={`${zoom}%`}
         options={[{

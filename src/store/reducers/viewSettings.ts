@@ -44,16 +44,16 @@ export interface ViewSettingsState {
 const initialState: ViewSettingsState = {
   leftSidebar: {
     isOpen: true,
-    width: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('leftSidebarWidth', 'integer') : DEFAULT_LEFT_SIDEBAR_WIDTH,
+    width: DEFAULT_LEFT_SIDEBAR_WIDTH // remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('leftSidebarWidth', 'integer') : DEFAULT_LEFT_SIDEBAR_WIDTH,
   },
   rightSidebar: {
     isOpen: true,
-    width: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('rightSidebarWidth', 'integer') : DEFAULT_RIGHT_SIDEBAR_WIDTH,
+    width: DEFAULT_RIGHT_SIDEBAR_WIDTH // remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('rightSidebarWidth', 'integer') : DEFAULT_RIGHT_SIDEBAR_WIDTH,
   },
   tweenDrawer: {
     isOpen: true,
-    height: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('tweenDrawerHeight', 'integer') : DEFAULT_TWEEN_DRAWER_HEIGHT,
-    layersWidth: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('tweenDrawerLayersWidth', 'integer') : DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH,
+    height: DEFAULT_TWEEN_DRAWER_HEIGHT, // remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('tweenDrawerHeight', 'integer') : DEFAULT_TWEEN_DRAWER_HEIGHT,
+    layersWidth: DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH // remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('tweenDrawerLayersWidth', 'integer') : DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH,
   },
   theme: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('theme', 'string') : DEFAULT_THEME
 };
@@ -79,9 +79,9 @@ export default (state = initialState, action: ViewSettingsTypes): ViewSettingsSt
       };
     }
     case SET_LEFT_SIDEBAR_WIDTH: {
-      if (remote.process.platform === 'darwin') {
-        remote.systemPreferences.setUserDefault('leftSidebarWidth', 'integer', parseInt(action.payload.width as any) as any);
-      }
+      // if (remote.process.platform === 'darwin') {
+      //   remote.systemPreferences.setUserDefault('leftSidebarWidth', 'integer', parseInt(action.payload.width as any) as any);
+      // }
       return {
         ...state,
         leftSidebar: {
@@ -109,9 +109,9 @@ export default (state = initialState, action: ViewSettingsTypes): ViewSettingsSt
       };
     }
     case SET_RIGHT_SIDEBAR_WIDTH: {
-      if (remote.process.platform === 'darwin') {
-        remote.systemPreferences.setUserDefault('rightSidebarWidth', 'integer', parseInt(action.payload.width as any) as any);
-      }
+      // if (remote.process.platform === 'darwin') {
+      //   remote.systemPreferences.setUserDefault('rightSidebarWidth', 'integer', parseInt(action.payload.width as any) as any);
+      // }
       return {
         ...state,
         rightSidebar: {
@@ -139,9 +139,9 @@ export default (state = initialState, action: ViewSettingsTypes): ViewSettingsSt
       };
     }
     case SET_TWEEN_DRAWER_HEIGHT: {
-      if (remote.process.platform === 'darwin') {
-        remote.systemPreferences.setUserDefault('tweenDrawerHeight', 'integer', parseInt(action.payload.height as any) as any);
-      }
+      // if (remote.process.platform === 'darwin') {
+      //   remote.systemPreferences.setUserDefault('tweenDrawerHeight', 'integer', parseInt(action.payload.height as any) as any);
+      // }
       return {
         ...state,
         tweenDrawer: {
@@ -151,9 +151,9 @@ export default (state = initialState, action: ViewSettingsTypes): ViewSettingsSt
       };
     }
     case SET_TWEEN_DRAWER_LAYERS_WIDTH: {
-      if (remote.process.platform === 'darwin') {
-        remote.systemPreferences.setUserDefault('tweenDrawerLayersWidth', 'integer', parseInt(action.payload.width as any) as any);
-      }
+      // if (remote.process.platform === 'darwin') {
+      //   remote.systemPreferences.setUserDefault('tweenDrawerLayersWidth', 'integer', parseInt(action.payload.width as any) as any);
+      // }
       return {
         ...state,
         tweenDrawer: {

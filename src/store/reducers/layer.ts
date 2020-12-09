@@ -526,7 +526,13 @@ export const initialState: LayerState = {
   },
   artboardJSON: {},
   selectedEdit: null,
-  edit: null
+  edit: {
+    id: null,
+    selectedEdit: null,
+    detail: null,
+    payload: null,
+    actionType: null
+  }
 };
 
 export const baseReducer = (state = initialState, action: LayerTypes): LayerState => {

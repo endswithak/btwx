@@ -93,6 +93,7 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
 
   return (
     <TopbarDropdownButton
+      dropdownPosition='left'
       label='Insert'
       icon={getInsertButtonIcon()}
       isActive={ activeTool === 'Artboard' || activeTool === 'Shape' || activeTool === 'Text' || insertKnobOpen }

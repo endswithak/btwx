@@ -139,7 +139,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
         })();
         const shape = new uiPaperScope.Path.Line({
           from: fromPoint,
-          to: lineTo,
+          to: lineTo.round(),
           ...shapeOpts
         });
         if (shiftModifier) {
@@ -290,24 +290,25 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
         uiPaperScope.projects[0].activate();
       }
       if (initialToBounds) {
-        setFrom(initialToBounds.center);
+        setFrom(initialToBounds.center.round());
       } else {
-        setFrom(downEvent.point);
+        setFrom(downEvent.point.round());
       }
     }
   }, [downEvent])
 
   useEffect(() => {
     if (dragEvent && isEnabled) {
-      const fromPoint = from ? from : dragEvent.downPoint;
-      const nextVector = dragEvent.point.subtract(fromPoint);
+      const fromPoint = from ? from : dragEvent.downPoint.round();
+      const dragPoint = dragEvent.point.round();
+      const nextVector = dragPoint.subtract(fromPoint);
       const nextHandle = `${nextVector.y > 0 ? 'bottom' : 'top'}${nextVector.x > 0 ? 'Right' : 'Left'}` as 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
-      const nextDims = new uiPaperScope.Rectangle({from: fromPoint, to: dragEvent.point}).size;
+      const nextDims = new uiPaperScope.Rectangle({from: fromPoint, to: dragPoint}).size;
       const nextMaxDim = Math.max(nextDims.width, nextDims.height);
-      const nextContrainedDims = new uiPaperScope.Point(nextVector.x < 0 ? fromPoint.x - nextMaxDim : fromPoint.x + nextMaxDim, nextVector.y < 0 ? fromPoint.y - nextMaxDim : fromPoint.y + nextMaxDim);
+      const nextContrainedDims = new uiPaperScope.Point(nextVector.x < 0 ? fromPoint.x - nextMaxDim : fromPoint.x + nextMaxDim, nextVector.y < 0 ? fromPoint.y - nextMaxDim : fromPoint.y + nextMaxDim).round();
       const nextSnapBounds = new uiPaperScope.Rectangle({
         from: fromPoint,
-        to: dragEvent.modifiers.shift ? nextContrainedDims : dragEvent.point
+        to: dragEvent.modifiers.shift ? nextContrainedDims : dragPoint
       });
       setHandle(nextHandle);
       setVector(nextVector);
@@ -332,9 +333,9 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
       const paperLayer = renderShape({
         insert: false
       });
-      const fromPoint = (paperLayer as paper.Path).firstSegment.point;
-      const toPoint = (paperLayer as paper.Path).lastSegment.point;
-      const vector = toPoint.subtract(fromPoint);
+      const lineFromPoint = (paperLayer as paper.Path).firstSegment.point;
+      const lineToPoint = (paperLayer as paper.Path).lastSegment.point;
+      const lineVector = lineToPoint.subtract(lineFromPoint);
       const parentItem = Object.keys(layerPaperScopes).reduce((result, current, index) => {
         const paperScope = uiPaperScope.projects[layerPaperScopes[current]];
         if (paperScope) {
@@ -362,7 +363,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
             y: paperLayer.position.y - parentItem.paperLayer.position.y,
             width: paperLayer.bounds.width,
             height: paperLayer.bounds.height,
-            innerWidth: shapeType === 'Line' ? vector.length : paperLayer.bounds.width,
+            innerWidth: shapeType === 'Line' ? Math.round(lineVector.length) : paperLayer.bounds.width,
             innerHeight: shapeType === 'Line' ? 0 : paperLayer.bounds.height
           },
           shapeType: shapeType,
@@ -375,7 +376,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
           },
           transform: {
             ...DEFAULT_TRANSFORM,
-            rotation: shapeType === 'Line' ? vector.angle : DEFAULT_TRANSFORM.rotation
+            rotation: shapeType === 'Line' ? lineVector.angle : DEFAULT_TRANSFORM.rotation
           },
           closed: shapeType !== 'Line',
           pathData: paperLayer.pathData,
@@ -397,17 +398,18 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
                 return {
                   sides: DEFAULT_STAR_POINTS
                 }
-              case 'Line':
+              case 'Line': {
                 return {
                   from: {
-                    x: (fromPoint.x - paperLayer.position.x) / vector.length,
-                    y: (fromPoint.y - paperLayer.position.y) / vector.length
+                    x: lineFromPoint.x - parentItem.paperLayer.position.x, // (fromPoint.x - paperLayer.position.x) / vector.length,
+                    y: lineFromPoint.y - parentItem.paperLayer.position.y // (fromPoint.y - paperLayer.position.y) / vector.length
                   },
                   to: {
-                    x: (toPoint.x - paperLayer.position.x) / vector.length,
-                    y: (toPoint.y - paperLayer.position.y) / vector.length
+                    x: lineToPoint.x - parentItem.paperLayer.position.x, // (toPoint.x - paperLayer.position.x) / vector.length,
+                    y: lineToPoint.y - parentItem.paperLayer.position.y // (toPoint.y - paperLayer.position.y) / vector.length
                   }
                 }
+              }
               default:
                 return {};
             }

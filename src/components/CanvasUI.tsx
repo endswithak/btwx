@@ -16,11 +16,12 @@ interface CanvasUIProps {
   };
   matrix?: number[];
   projectJSON?: string;
+  ready?: boolean;
 }
 
 const CanvasUI = (props: CanvasUIProps): ReactElement => {
   const ref = useRef<HTMLCanvasElement>(null);
-  const { projectJSON, matrix } = props;
+  const { projectJSON, matrix, ready } = props;
 
   useEffect(() => {
     if (ref.current) {
@@ -39,11 +40,17 @@ const CanvasUI = (props: CanvasUIProps): ReactElement => {
         id='canvas-ui'
         className='c-canvas__layer c-canvas__layer--ui'
         ref={ref} />
-      <ActiveArtboardFrameWrap />
-      <HoverFrameWrap />
-      <SelectionFrameWrap />
-      <GradientFrameWrap />
-      <TweenEventsFrameWrap />
+      {
+        ready
+        ? <>
+            <ActiveArtboardFrameWrap />
+            <HoverFrameWrap />
+            <SelectionFrameWrap />
+            <GradientFrameWrap />
+            <TweenEventsFrameWrap />
+          </>
+        : null
+      }
       {/* <MeasureFrameWrap /> */}
     </>
   );

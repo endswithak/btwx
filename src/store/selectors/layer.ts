@@ -1285,7 +1285,11 @@ export const getDestinationEquivalent = (store: LayerState, layer: string, desti
   const layerItem = store.byId[layer];
   const equivalent = destinationChildren.reduce((result: Btwx.Layer, current) => {
     const childLayer = store.byId[current];
-    if (childLayer.name === layerItem.name && childLayer.type === layerItem.type) {
+    const nameMatch = childLayer.name === layerItem.name;
+    const typeMatch = childLayer.type === layerItem.type;
+    const nonShapeTypeMatch = typeMatch && childLayer.type !== 'Shape';
+    const shapeTypeMatch = typeMatch && childLayer.type === 'Shape' && ((childLayer as Btwx.Shape).shapeType === 'Line' && (layerItem as Btwx.Shape).shapeType === 'Line') || ((childLayer as Btwx.Shape).shapeType !== 'Line' && (layerItem as Btwx.Shape).shapeType !== 'Line');
+    if (nameMatch && (nonShapeTypeMatch || shapeTypeMatch)) {
       if (result) {
         const layerScope = layerItem.scope;
         const layerArtboard = store.byId[layerScope[1]] as Btwx.Artboard;
@@ -1315,296 +1319,229 @@ export const getPositionInArtboard = (layer: Btwx.Layer, artboard: Btwx.Artboard
 };
 
 export const hasImageTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  return (
-    layerItem.type === 'Image' &&
-    equivalentLayerItem.type === 'Image' &&
-    (layerItem as Btwx.Image).imageId !== (equivalentLayerItem as Btwx.Image).imageId
-  );
+  return layerItem.type === 'Image' && (layerItem as Btwx.Image).imageId !== (equivalentLayerItem as Btwx.Image).imageId;
 };
 
 export const hasShapeTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  return (
-    layerItem.type === 'Shape' &&
-    equivalentLayerItem.type === 'Shape' &&
-    (
-      (layerItem as Btwx.Shape).shapeType !== (equivalentLayerItem as Btwx.Shape).shapeType ||
-      (layerItem as Btwx.Shape).shapeType === 'Polygon' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Polygon' && (layerItem as Btwx.Polygon).sides !== (equivalentLayerItem as Btwx.Polygon).sides ||
-      (layerItem as Btwx.Shape).shapeType === 'Star' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Star' && (layerItem as Btwx.Star).points !== (equivalentLayerItem as Btwx.Star).points
-    )
-  );
+  const validType = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line';
+  const shapeTypeMatch = validType && (layerItem as Btwx.Shape).shapeType === (equivalentLayerItem as Btwx.Shape).shapeType;
+  const polygonSideMatch = validType && shapeTypeMatch && (layerItem as Btwx.Shape).shapeType === 'Polygon' && (layerItem as Btwx.Polygon).sides === (equivalentLayerItem as Btwx.Polygon).sides;
+  const starPointsMatch = validType && shapeTypeMatch && (layerItem as Btwx.Shape).shapeType === 'Star' && (layerItem as Btwx.Star).points === (equivalentLayerItem as Btwx.Star).points;
+  return validType && (!shapeTypeMatch || !polygonSideMatch || !starPointsMatch);
 };
 
 export const hasFillTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  return (
-    (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Artboard') &&
-    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Artboard') &&
-    (layerItem.style.fill.enabled || equivalentLayerItem.style.fill.enabled) &&
-    (
-      (layerItem.style.fill.enabled && !equivalentLayerItem.style.fill.enabled) ||
-      (!layerItem.style.fill.enabled && equivalentLayerItem.style.fill.enabled) ||
-      layerItem.style.fill.fillType !== equivalentLayerItem.style.fill.fillType ||
-      layerItem.style.fill.fillType === 'color' && equivalentLayerItem.style.fill.fillType === 'color' && !colorsMatch(layerItem.style.fill.color, equivalentLayerItem.style.fill.color) ||
-      layerItem.style.fill.fillType === 'gradient' && equivalentLayerItem.style.fill.fillType === 'gradient' && !gradientsMatch(layerItem.style.fill.gradient, equivalentLayerItem.style.fill.gradient)
-    )
-  );
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Artboard';
+  const oneEnabled = layerItem.style.fill.enabled || equivalentLayerItem.style.fill.enabled;
+  const enabledMatch = layerItem.style.fill.enabled === equivalentLayerItem.style.fill.enabled;
+  const fillTypeMatch = layerItem.style.fill.fillType === equivalentLayerItem.style.fill.fillType;
+  const colorFillType = layerItem.style.fill.fillType === 'color';
+  const gradientFillType = layerItem.style.fill.fillType === 'gradient';
+  const colorMatch = colorsMatch(layerItem.style.fill.color, equivalentLayerItem.style.fill.color);
+  const gradientMatch = gradientsMatch(layerItem.style.fill.gradient, equivalentLayerItem.style.fill.gradient);
+  return validType && oneEnabled && (!enabledMatch || !fillTypeMatch || (fillTypeMatch && colorFillType && !colorMatch) || (fillTypeMatch && gradientFillType && !gradientMatch));
 };
 
 export const hasFillGradientOriginXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const fillTween = hasFillTween(layerItem, equivalentLayerItem);
   const hasFillGradientTween = fillTween && (layerItem.style.fill.fillType === 'gradient' && equivalentLayerItem.style.fill.fillType === 'gradient');
-  const sameOriginX =  layerItem.style.fill.gradient.origin.x.toFixed(2) === equivalentLayerItem.style.fill.gradient.origin.x.toFixed(2);
+  const sameOriginX = layerItem.style.fill.gradient.origin.x === equivalentLayerItem.style.fill.gradient.origin.x;
   return hasFillGradientTween && !sameOriginX;
 };
 
 export const hasFillGradientOriginYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const fillTween = hasFillTween(layerItem, equivalentLayerItem);
   const hasFillGradientTween = fillTween && (layerItem.style.fill.fillType === 'gradient' && equivalentLayerItem.style.fill.fillType === 'gradient');
-  const sameOriginY =  layerItem.style.fill.gradient.origin.y.toFixed(2) === equivalentLayerItem.style.fill.gradient.origin.y.toFixed(2);
+  const sameOriginY = layerItem.style.fill.gradient.origin.y === equivalentLayerItem.style.fill.gradient.origin.y;
   return hasFillGradientTween && !sameOriginY;
 };
 
 export const hasFillGradientDestinationXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const fillTween = hasFillTween(layerItem, equivalentLayerItem);
   const hasFillGradientTween = fillTween && (layerItem.style.fill.fillType === 'gradient' && equivalentLayerItem.style.fill.fillType === 'gradient');
-  const sameOriginX =  layerItem.style.fill.gradient.destination.x.toFixed(2) === equivalentLayerItem.style.fill.gradient.destination.x.toFixed(2);
+  const sameOriginX = layerItem.style.fill.gradient.destination.x === equivalentLayerItem.style.fill.gradient.destination.x;
   return hasFillGradientTween && !sameOriginX;
 };
 
 export const hasFillGradientDestinationYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const fillTween = hasFillTween(layerItem, equivalentLayerItem);
   const hasFillGradientTween = fillTween && (layerItem.style.fill.fillType === 'gradient' && equivalentLayerItem.style.fill.fillType === 'gradient');
-  const sameOriginY =  layerItem.style.fill.gradient.destination.y.toFixed(2) === equivalentLayerItem.style.fill.gradient.destination.y.toFixed(2);
+  const sameOriginY = layerItem.style.fill.gradient.destination.y === equivalentLayerItem.style.fill.gradient.destination.y;
   return hasFillGradientTween && !sameOriginY;
 };
 
 export const hasXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const noArtboards = layerItem.type !== 'Artboard' && equivalentLayerItem.type !== 'Artboard';
-  const layerArtboardPosition = layerItem.frame.x
-  const equivalentArtboardPosition = equivalentLayerItem.frame.x;
-  const lineToLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
-  const groupToGroup = layerItem.type === 'Group' && equivalentLayerItem.type === 'Group';
-  const textToText = layerItem.type === 'Text' && equivalentLayerItem.type === 'Text';
-  const fontSizeMatch = textToText && (layerItem as Btwx.Text).textStyle.fontSize === (equivalentLayerItem as Btwx.Text).textStyle.fontSize;
-  const leadingsMatch = textToText && (layerItem as Btwx.Text).textStyle.leading === (equivalentLayerItem as Btwx.Text).textStyle.leading;
-  const positionsMatch = layerArtboardPosition === equivalentArtboardPosition;
-  return (noArtboards && !lineToLine && !groupToGroup && !positionsMatch) || (noArtboards && textToText && (!fontSizeMatch || !leadingsMatch));
+  const validType = (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image' || layerItem.type === 'Group' || layerItem.type === 'Text';
+  const fontSizeMatch = layerItem.type === 'Text' && (layerItem as Btwx.Text).textStyle.fontSize === (equivalentLayerItem as Btwx.Text).textStyle.fontSize;
+  const leadingMatch = layerItem.type === 'Text' && (layerItem as Btwx.Text).textStyle.leading === (equivalentLayerItem as Btwx.Text).textStyle.leading;
+  const xMatch = layerItem.frame.x === equivalentLayerItem.frame.x;
+  return (validType && !xMatch) || (layerItem.type === 'Text' && (!fontSizeMatch || !leadingMatch));
 };
 
 export const hasYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const noArtboards = layerItem.type !== 'Artboard' && equivalentLayerItem.type !== 'Artboard';
-  const layerArtboardPosition = layerItem.frame.y;
-  const equivalentArtboardPosition = equivalentLayerItem.frame.y;
-  const lineToLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
-  const groupToGroup = layerItem.type === 'Group' && equivalentLayerItem.type === 'Group';
-  const textToText = layerItem.type === 'Text' && equivalentLayerItem.type === 'Text';
-  const fontSizeMatch = textToText && (layerItem as Btwx.Text).textStyle.fontSize === (equivalentLayerItem as Btwx.Text).textStyle.fontSize;
-  const leadingsMatch = textToText && (layerItem as Btwx.Text).textStyle.leading === (equivalentLayerItem as Btwx.Text).textStyle.leading;
-  const positionsMatch = layerArtboardPosition === equivalentArtboardPosition;
-  return (noArtboards && !lineToLine && !groupToGroup && !positionsMatch) || (noArtboards && textToText && (!fontSizeMatch || !leadingsMatch));
+  const validType = (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image' || layerItem.type === 'Group' || layerItem.type === 'Text';
+  const fontSizeMatch = layerItem.type === 'Text' && (layerItem as Btwx.Text).textStyle.fontSize === (equivalentLayerItem as Btwx.Text).textStyle.fontSize;
+  const leadingMatch = layerItem.type === 'Text' && (layerItem as Btwx.Text).textStyle.leading === (equivalentLayerItem as Btwx.Text).textStyle.leading;
+  const yMatch = layerItem.frame.y === equivalentLayerItem.frame.y;
+  return (validType && !yMatch) || (layerItem.type === 'Text' && (!fontSizeMatch || !leadingMatch));
 };
 
 export const hasRotationTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const noArtboards = layerItem.type !== 'Artboard' && equivalentLayerItem.type !== 'Artboard';
-  const lineToLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
-  const groupToGroup = layerItem.type === 'Group' && equivalentLayerItem.type === 'Group';
-  const rotationsMatch = layerItem.transform.rotation.toFixed(2) === equivalentLayerItem.transform.rotation.toFixed(2);
-  return noArtboards && !lineToLine && !groupToGroup && !rotationsMatch;
+  const validType = (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image' || layerItem.type === 'Group';
+  const rotationMatch = layerItem.transform.rotation === equivalentLayerItem.transform.rotation;
+  return validType && !rotationMatch;
 };
 
 export const hasWidthTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const noArtboards = layerItem.type !== 'Artboard' && equivalentLayerItem.type !== 'Artboard';
-  const lineToLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
-  const layerItemValid = ((layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image');
-  const equivalentLayerItemValid = ((equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType !== 'Line') || equivalentLayerItem.type === 'Image');
-  const widthsMatch = Math.round(layerItem.frame.innerWidth) === Math.round(equivalentLayerItem.frame.innerWidth);
-  return noArtboards && !lineToLine && (layerItemValid && equivalentLayerItemValid) && !widthsMatch;
+  const validType = (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image';
+  const innerWidthMatch = layerItem.frame.innerWidth === equivalentLayerItem.frame.innerWidth;
+  return validType && !innerWidthMatch;
 };
 
 export const hasHeightTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  return (
-    (layerItem.type !== 'Artboard' && equivalentLayerItem.type !== 'Artboard') &&
-    ((layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image') &&
-    ((equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType !== 'Line') || equivalentLayerItem.type === 'Image') &&
-    Math.round(layerItem.frame.innerHeight) !== Math.round(equivalentLayerItem.frame.innerHeight)
-  );
+  const validType = (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image';
+  const innerHeightMatch = layerItem.frame.innerHeight === equivalentLayerItem.frame.innerHeight;
+  return validType && !innerHeightMatch;
 };
 
 export const hasStrokeTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  return (
-    (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
-    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
-    (layerItem.style.stroke.enabled || equivalentLayerItem.style.stroke.enabled) &&
-    (
-      (layerItem.style.stroke.enabled && !equivalentLayerItem.style.stroke.enabled) ||
-      (!layerItem.style.stroke.enabled && equivalentLayerItem.style.stroke.enabled) ||
-      layerItem.style.stroke.fillType !== equivalentLayerItem.style.stroke.fillType ||
-      layerItem.style.stroke.fillType === 'color' && equivalentLayerItem.style.stroke.fillType === 'color' && !colorsMatch(layerItem.style.stroke.color, equivalentLayerItem.style.stroke.color) ||
-      layerItem.style.stroke.fillType === 'gradient' && equivalentLayerItem.style.stroke.fillType === 'gradient' && !gradientsMatch(layerItem.style.stroke.gradient, equivalentLayerItem.style.stroke.gradient)
-    )
-  );
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image';
+  const oneEnabled = layerItem.style.stroke.enabled || equivalentLayerItem.style.stroke.enabled;
+  const enabledMatch = layerItem.style.stroke.enabled === equivalentLayerItem.style.stroke.enabled;
+  const fillTypeMatch = layerItem.style.stroke.fillType === equivalentLayerItem.style.stroke.fillType;
+  const colorFillType = layerItem.style.stroke.fillType === 'color';
+  const gradientFillType = layerItem.style.stroke.fillType === 'gradient';
+  const colorMatch = colorsMatch(layerItem.style.stroke.color, equivalentLayerItem.style.stroke.color);
+  const gradientMatch = gradientsMatch(layerItem.style.stroke.gradient, equivalentLayerItem.style.stroke.gradient);
+  return validType && oneEnabled && (!enabledMatch || !fillTypeMatch || (fillTypeMatch && colorFillType && !colorMatch) || (fillTypeMatch && gradientFillType && !gradientMatch));
 };
 
 export const hasStrokeGradientOriginXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const strokeTween = hasStrokeTween(layerItem, equivalentLayerItem);
   const hasStrokeGradientTween = strokeTween && (layerItem.style.stroke.fillType === 'gradient' && equivalentLayerItem.style.stroke.fillType === 'gradient');
-  const sameOriginX = layerItem.style.stroke.gradient.origin.x.toFixed(2) === equivalentLayerItem.style.stroke.gradient.origin.x.toFixed(2);
+  const sameOriginX = layerItem.style.stroke.gradient.origin.x === equivalentLayerItem.style.stroke.gradient.origin.x;
   return hasStrokeGradientTween && !sameOriginX;
 };
 
 export const hasStrokeGradientOriginYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const strokeTween = hasStrokeTween(layerItem, equivalentLayerItem);
   const hasStrokeGradientTween = strokeTween && (layerItem.style.stroke.fillType === 'gradient' && equivalentLayerItem.style.stroke.fillType === 'gradient');
-  const sameOriginY =  layerItem.style.stroke.gradient.origin.y.toFixed(2) === equivalentLayerItem.style.stroke.gradient.origin.y.toFixed(2);
+  const sameOriginY =  layerItem.style.stroke.gradient.origin.y === equivalentLayerItem.style.stroke.gradient.origin.y;
   return hasStrokeGradientTween && !sameOriginY;
 };
 
 export const hasStrokeGradientDestinationXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const strokeTween = hasStrokeTween(layerItem, equivalentLayerItem);
   const hasStrokeGradientTween = strokeTween && (layerItem.style.stroke.fillType === 'gradient' && equivalentLayerItem.style.stroke.fillType === 'gradient');
-  const sameOriginX =  layerItem.style.stroke.gradient.destination.x.toFixed(2) === equivalentLayerItem.style.stroke.gradient.destination.x.toFixed(2);
+  const sameOriginX =  layerItem.style.stroke.gradient.destination.x === equivalentLayerItem.style.stroke.gradient.destination.x;
   return hasStrokeGradientTween && !sameOriginX;
 };
 
 export const hasStrokeGradientDestinationYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const strokeTween = hasStrokeTween(layerItem, equivalentLayerItem);
   const hasStrokeGradientTween = strokeTween && (layerItem.style.stroke.fillType === 'gradient' && equivalentLayerItem.style.stroke.fillType === 'gradient');
-  const sameOriginY =  layerItem.style.stroke.gradient.destination.y.toFixed(2) === equivalentLayerItem.style.stroke.gradient.destination.y.toFixed(2);
+  const sameOriginY =  layerItem.style.stroke.gradient.destination.y === equivalentLayerItem.style.stroke.gradient.destination.y;
   return hasStrokeGradientTween && !sameOriginY;
 };
 
 export const hasDashOffsetTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  return (
-    (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
-    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
-    (layerItem.style.stroke.enabled || equivalentLayerItem.style.stroke.enabled) &&
-    layerItem.style.strokeOptions.dashOffset.toFixed(2) !== equivalentLayerItem.style.strokeOptions.dashOffset.toFixed(2)
-  );
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image';
+  const enabledMatch = validType && (layerItem.style.stroke.enabled === equivalentLayerItem.style.stroke.enabled);
+  const dashOffsetMatch = validType && layerItem.style.strokeOptions.dashOffset === equivalentLayerItem.style.strokeOptions.dashOffset;
+  return validType && (!enabledMatch || !dashOffsetMatch);
 };
 
 export const hasDashArrayWidthTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  return (
-    (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
-    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
-    (layerItem.style.stroke.enabled || equivalentLayerItem.style.stroke.enabled) &&
-    layerItem.style.strokeOptions.dashArray[0].toFixed(2) !== equivalentLayerItem.style.strokeOptions.dashArray[0].toFixed(2)
-  );
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image';
+  const enabledMatch = validType && (layerItem.style.stroke.enabled === equivalentLayerItem.style.stroke.enabled);
+  const dashArrayWidthMatch = validType && layerItem.style.strokeOptions.dashArray[0] === equivalentLayerItem.style.strokeOptions.dashArray[0];
+  return validType && (!enabledMatch || !dashArrayWidthMatch);
 };
 
 export const hasDashArrayGapTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  return (
-    (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
-    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
-    (layerItem.style.stroke.enabled || equivalentLayerItem.style.stroke.enabled) &&
-    layerItem.style.strokeOptions.dashArray[1].toFixed(2) !== equivalentLayerItem.style.strokeOptions.dashArray[1].toFixed(2)
-  );
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image';
+  const enabledMatch = validType && (layerItem.style.stroke.enabled === equivalentLayerItem.style.stroke.enabled);
+  const dashArrayGapMatch = validType && layerItem.style.strokeOptions.dashArray[1] === equivalentLayerItem.style.strokeOptions.dashArray[1];
+  return validType && (!enabledMatch || !dashArrayGapMatch);
 };
 
 export const hasStrokeWidthTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  return (
-    (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
-    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
-    (
-      (layerItem.style.stroke.enabled && !equivalentLayerItem.style.stroke.enabled) ||
-      (!layerItem.style.stroke.enabled && equivalentLayerItem.style.stroke.enabled) ||
-      layerItem.style.stroke.width.toFixed(2) !== equivalentLayerItem.style.stroke.width.toFixed(2)
-    )
-  );
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image';
+  const enabledMatch = validType && (layerItem.style.stroke.enabled === equivalentLayerItem.style.stroke.enabled);
+  const strokeWidthMatch = validType && layerItem.style.stroke.width === equivalentLayerItem.style.stroke.width;
+  return validType && (!enabledMatch || !strokeWidthMatch);
 };
 
 export const hasShadowColorTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  return (
-    (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
-    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
-    (
-      (layerItem.style.shadow.enabled && !equivalentLayerItem.style.shadow.enabled) ||
-      (!layerItem.style.shadow.enabled && equivalentLayerItem.style.shadow.enabled) ||
-      !colorsMatch(layerItem.style.shadow.color, equivalentLayerItem.style.shadow.color)
-    )
-  );
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image';
+  const enabledMatch = validType && (layerItem.style.shadow.enabled === equivalentLayerItem.style.shadow.enabled);
+  const colorMatch = validType && colorsMatch(layerItem.style.shadow.color, equivalentLayerItem.style.shadow.color);
+  return validType && (!enabledMatch || !colorMatch);
 };
 
 export const hasShadowOffsetXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  return (
-    (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
-    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
-    (
-      (layerItem.style.shadow.enabled && !equivalentLayerItem.style.shadow.enabled) ||
-      (!layerItem.style.shadow.enabled && equivalentLayerItem.style.shadow.enabled) ||
-      layerItem.style.shadow.offset.x.toFixed(2) !== equivalentLayerItem.style.shadow.offset.x.toFixed(2)
-    )
-  );
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image';
+  const enabledMatch = validType && (layerItem.style.shadow.enabled === equivalentLayerItem.style.shadow.enabled);
+  const xOffsetMatch = validType && layerItem.style.shadow.offset.x === equivalentLayerItem.style.shadow.offset.x;
+  return validType && (!enabledMatch || !xOffsetMatch);
 };
 
 export const hasShadowOffsetYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  return (
-    (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
-    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
-    (
-      (layerItem.style.shadow.enabled && !equivalentLayerItem.style.shadow.enabled) ||
-      (!layerItem.style.shadow.enabled && equivalentLayerItem.style.shadow.enabled) ||
-      layerItem.style.shadow.offset.y.toFixed(2) !== equivalentLayerItem.style.shadow.offset.y.toFixed(2)
-    )
-  );
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image';
+  const enabledMatch = validType && (layerItem.style.shadow.enabled === equivalentLayerItem.style.shadow.enabled);
+  const yOffsetMatch = validType && layerItem.style.shadow.offset.y === equivalentLayerItem.style.shadow.offset.y;
+  return validType && (!enabledMatch || !yOffsetMatch);
 };
 
 export const hasShadowBlurTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  return (
-    (layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image') &&
-    (equivalentLayerItem.type === 'Shape' || equivalentLayerItem.type === 'Text' || equivalentLayerItem.type === 'Image') &&
-    (
-      (layerItem.style.shadow.enabled && !equivalentLayerItem.style.shadow.enabled) ||
-      (!layerItem.style.shadow.enabled && equivalentLayerItem.style.shadow.enabled) ||
-      layerItem.style.shadow.blur.toFixed(2) !== equivalentLayerItem.style.shadow.blur.toFixed(2)
-    )
-  );
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image';
+  const enabledMatch = validType && (layerItem.style.shadow.enabled === equivalentLayerItem.style.shadow.enabled);
+  const blurMatch = validType && layerItem.style.shadow.blur === equivalentLayerItem.style.shadow.blur;
+  return validType && (!enabledMatch || !blurMatch);
 };
 
 export const hasOpacityTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  return layerItem.style.opacity.toFixed(2) !== equivalentLayerItem.style.opacity.toFixed(2);
+  return layerItem.style.opacity !== equivalentLayerItem.style.opacity;
 };
 
 export const hasFontSizeTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  return (
-    layerItem.type === 'Text' &&
-    equivalentLayerItem.type === 'Text' &&
-    (layerItem as Btwx.Text).textStyle.fontSize.toFixed(2) !== (equivalentLayerItem as Btwx.Text).textStyle.fontSize.toFixed(2)
-  );
+  const validType = layerItem.type === 'Text';
+  const fontSizeMatch = validType && (layerItem as Btwx.Text).textStyle.fontSize === (equivalentLayerItem as Btwx.Text).textStyle.fontSize;
+  return validType && !fontSizeMatch;
 };
 
 export const hasLineHeightTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  return (
-    layerItem.type === 'Text' &&
-    equivalentLayerItem.type === 'Text' &&
-    (layerItem as Btwx.Text).textStyle.leading.toFixed(2) !== (equivalentLayerItem as Btwx.Text).textStyle.leading.toFixed(2)
-  );
+  const validType = layerItem.type === 'Text';
+  const leadingMatch = validType && (layerItem as Btwx.Text).textStyle.leading === (equivalentLayerItem as Btwx.Text).textStyle.leading;
+  return validType && !leadingMatch;
 };
 
 export const hasFromXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const lineToLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
-  const fromXMatch = lineToLine && (layerItem as Btwx.Line).from.x.toFixed(2) === (equivalentLayerItem as Btwx.Line).from.x.toFixed(2);
-  const widthsMatch = Math.round(layerItem.frame.innerWidth) === Math.round(equivalentLayerItem.frame.innerWidth);
-  return lineToLine && (!fromXMatch || !widthsMatch);
+  const validType = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
+  const fromXMatch = validType && (layerItem as Btwx.Line).from.x === (equivalentLayerItem as Btwx.Line).from.x;
+  const innerWidthMatch = validType && layerItem.frame.innerWidth === equivalentLayerItem.frame.innerWidth;
+  return validType && (!fromXMatch || !innerWidthMatch);
 };
 
 export const hasFromYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const lineToLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
-  const fromYMatch = lineToLine && (layerItem as Btwx.Line).from.y.toFixed(2) === (equivalentLayerItem as Btwx.Line).from.y.toFixed(2);
-  const widthsMatch = Math.round(layerItem.frame.innerWidth) === Math.round(equivalentLayerItem.frame.innerWidth);
-  return lineToLine && (!fromYMatch || !widthsMatch);
+  const validType = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
+  const fromYMatch = validType && (layerItem as Btwx.Line).from.y === (equivalentLayerItem as Btwx.Line).from.y;
+  const innerWidthMatch = validType && layerItem.frame.innerWidth === equivalentLayerItem.frame.innerWidth;
+  return validType && (!fromYMatch || !innerWidthMatch);
 };
 
 export const hasToXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const lineToLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
-  const toXMatch = lineToLine && (layerItem as Btwx.Line).to.x.toFixed(2) === (equivalentLayerItem as Btwx.Line).to.x.toFixed(2);
-  const widthsMatch = Math.round(layerItem.frame.innerWidth) === Math.round(equivalentLayerItem.frame.innerWidth);
-  return lineToLine && (!toXMatch || !widthsMatch);
+  const validType = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
+  const toXMatch = validType && (layerItem as Btwx.Line).to.x === (equivalentLayerItem as Btwx.Line).to.x;
+  const innerWidthMatch = validType && layerItem.frame.innerWidth === equivalentLayerItem.frame.innerWidth
+  return validType && (!toXMatch || !innerWidthMatch);
 };
 
 export const hasToYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const lineToLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' && equivalentLayerItem.type === 'Shape' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
-  const toYMatch = lineToLine && (layerItem as Btwx.Line).to.y.toFixed(2) === (equivalentLayerItem as Btwx.Line).to.y.toFixed(2);
-  const widthsMatch = Math.round(layerItem.frame.innerWidth) === Math.round(equivalentLayerItem.frame.innerWidth);
-  return lineToLine && (!toYMatch || !widthsMatch);
+  const validType = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
+  const toYMatch = validType && (layerItem as Btwx.Line).to.y === (equivalentLayerItem as Btwx.Line).to.y;
+  const innerWidthMatch = validType && layerItem.frame.innerWidth === equivalentLayerItem.frame.innerWidth;
+  return validType && (!toYMatch || !innerWidthMatch);
 };
 
 export const getEquivalentTweenProp = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer, prop: Btwx.TweenProp): boolean => {

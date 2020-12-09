@@ -12,7 +12,7 @@ export const zoomInThunk = () => {
       const paperScope = uiPaperScope.projects[index];
       paperScope.view.zoom *= 2;
     });
-    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values, zoom: uiPaperScope.view.zoom}));
+    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
   }
 };
 
@@ -28,7 +28,7 @@ export const zoomOutThunk = () => {
         paperScope.view.zoom = 0.01;
       }
     });
-    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values, zoom: uiPaperScope.view.zoom}));
+    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
   }
 };
 
@@ -40,7 +40,7 @@ export const zoomPercentThunk = (percent: number) => {
       const paperScope = uiPaperScope.projects[index];
       paperScope.view.zoom = percent;
     });
-    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values, zoom: uiPaperScope.view.zoom}));
+    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
   }
 };
 
@@ -71,7 +71,7 @@ export const zoomFitCanvasThunk = () => {
       paperScope.view.center = canvasCenter;
       paperScope.view.zoom = newZoom;
     });
-    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values, zoom: uiPaperScope.view.zoom}));
+    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
   }
 };
 
@@ -102,6 +102,6 @@ export const zoomFitSelectedThunk = () => {
       paperScope.view.center = selectionCenter;
       paperScope.view.zoom = newZoom;
     });
-    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values, zoom: uiPaperScope.view.zoom}));
+    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
   }
 };

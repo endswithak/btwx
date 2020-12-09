@@ -1,9 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import { ipcRenderer, remote } from 'electron';
+import { ActionCreators } from 'redux-undo';
 import fs from 'fs';
 import path from 'path';
 import { RootState } from '../reducers';
 import { APP_NAME } from '../../constants';
+import { uiPaperScope } from '../../canvas';
 
 import {
   OPEN_DOCUMENT,
@@ -17,6 +19,8 @@ import {
   UPDATE_ARTBOARD_PRESET,
   SET_ARTBOARD_PRESET_DEVICE_ORIENTATION,
   SET_ARTBOARD_PRESET_DEVICE_PLATFORM,
+  HYDRATE_DOCUMENT,
+  HydrateDocumentPayload,
   OpenDocumentPayload,
   SaveDocumentAsPayload,
   SaveDocumentPayload,
@@ -30,9 +34,15 @@ import {
   SetArtboardPresetDevicePlatformPayload,
   DocumentSettingsTypes
 } from '../actionTypes/documentSettings';
+import { updateFramesThunk } from './layer';
 
 export const openDocument = (payload: OpenDocumentPayload): DocumentSettingsTypes => ({
   type: OPEN_DOCUMENT,
+  payload
+});
+
+export const hydrateDocument = (payload: HydrateDocumentPayload): DocumentSettingsTypes => ({
+  type: HYDRATE_DOCUMENT,
   payload
 });
 
@@ -91,11 +101,19 @@ export const setArtboardPresetDevicePlatform = (payload: SetArtboardPresetDevice
 
 export const openDocumentThunk = (filePath: string) => {
   return (dispatch: any, getState: any): void => {
+    const state = getState() as RootState;
     fs.readFile(filePath, {encoding: 'utf-8'}, function(err, data) {
       if(err) {
         return console.log(err);
       } else {
-        ipcRenderer.send('createNewDocument', data);
+        if (!state.documentSettings.path && state.layer.present.edit.id === null) {
+          const documentJSON = JSON.parse(data);
+          dispatch(hydrateDocument({document: documentJSON}));
+          dispatch(ActionCreators.clearHistory());
+          dispatch(updateFramesThunk());
+        } else {
+          ipcRenderer.send('createNewDocument', data);
+        }
       }
     });
   }
@@ -104,8 +122,25 @@ export const openDocumentThunk = (filePath: string) => {
 export const writeFileThunk = () => {
   return (dispatch: any, getState: any): any => {
     const state = getState() as RootState;
-    const { documentSettings, layer } = state;
-    const saveState = JSON.stringify({ documentSettings, layer: layer.present });
+    const { documentSettings, layer, viewSettings } = state;
+    const saveState = JSON.stringify({
+      viewSettings,
+      documentSettings: {
+        ...documentSettings,
+        edit: null
+      },
+      layer: {
+        ...layer.present,
+        hover: null,
+        edit: {
+          id: null,
+          selectedEdit: null,
+          detail: null,
+          payload: null,
+          actionType: null
+        }
+      }
+    });
     fs.writeFile(`${documentSettings.path}.${APP_NAME}`, saveState, function(err) {
       if (err) {
         console.log(`could not save to ${documentSettings.path}.${APP_NAME}`);
@@ -118,6 +153,7 @@ export const saveDocumentThunk = () => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
     if (state.documentSettings.path) {
+      dispatch(saveDocument({edit: state.layer.present.edit.id}));
       dispatch(writeFileThunk());
     } else {
       remote.dialog.showSaveDialog({}).then((result) => {

@@ -14,6 +14,7 @@ interface TopbarDropdownButtonProps {
   isActive?: boolean;
   keepOpenOnSelect?: boolean;
   label: string;
+  dropdownPosition: 'left' | 'right';
   options: TopbarDropdownButtonOptionProps[];
 }
 
@@ -25,7 +26,7 @@ const ButtonDropdown = styled.div`
 const TopbarDropdownButton = (props: TopbarDropdownButtonProps): ReactElement => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
-  const { onClick, text, disabled, label, icon, options, isActive, keepOpenOnSelect } = props;
+  const { onClick, text, disabled, label, icon, options, isActive, keepOpenOnSelect, dropdownPosition } = props;
   const [showDropdown, setShowDropdown] = useState(false);
 
   const onMouseDown = (event: any) => {
@@ -72,7 +73,7 @@ const TopbarDropdownButton = (props: TopbarDropdownButtonProps): ReactElement =>
       {
         showDropdown
         ? <ButtonDropdown
-            className='c-topbar-dropdown-button__dropdown'
+            className={`c-topbar-dropdown-button__dropdown c-topbar-dropdown-button__dropdown--${dropdownPosition}`}
             theme={theme}>
             {
               options.map((option, index) => (

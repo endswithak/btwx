@@ -1,6 +1,8 @@
-import { app, Menu } from 'electron';
+import { app, Menu, dialog } from 'electron';
 import { createNewDocument } from './index';
 import { getFocusedDocument } from './utils';
+import fs from 'fs';
+import { APP_NAME } from './constants';
 
 const isMac = process.platform === 'darwin';
 
@@ -119,6 +121,23 @@ export default Menu.buildFromTemplate([
           if (browserWindow) {
             getFocusedDocument(browserWindow).then((focusedDocument) => {
               focusedDocument.webContents.executeJavaScript(`fileOpen()`);
+            });
+          } else {
+            dialog.showOpenDialog({
+              filters: [
+                { name: 'Custom File Type', extensions: [APP_NAME] }
+              ],
+              properties: ['openFile']
+            }).then((result) => {
+              if (result.filePaths.length > 0 && !result.canceled) {
+                fs.readFile(result.filePaths[0], {encoding: 'utf-8'}, function(err, data) {
+                  if(err) {
+                    return console.log(err);
+                  } else {
+                    createNewDocument({document: JSON.parse(data)});
+                  }
+                });
+              }
             });
           }
         }

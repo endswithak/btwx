@@ -43,7 +43,6 @@ const TweenDrawerLayersDragHandle = (props: TweenDrawerLayersDragHandleProps): R
   const { tweenDrawerHeight, tweenDrawerLayersWidth, setTweenDrawerLayersWidth } = props;
 
   useEffect(() => {
-    gsap.set(ref.current, {x: `+=${tweenDrawerLayersWidth}`});
     Draggable.create(ref.current, {
       type: 'x',
       zIndexBoost: false,
@@ -66,6 +65,10 @@ const TweenDrawerLayersDragHandle = (props: TweenDrawerLayersDragHandleProps): R
       }
     }
   }, []);
+
+  useEffect(() => {
+    gsap.set(ref.current, {x: tweenDrawerLayersWidth});
+  }, [tweenDrawerLayersWidth]);
 
   return (
     <DragHandle

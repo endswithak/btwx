@@ -35,7 +35,6 @@ const SidebarLeftDragHandle = (props: SidebarLeftDragHandleProps): ReactElement 
   const { sidebarWidth, setLeftSidebarWidth } = props;
 
   useEffect(() => {
-    gsap.set(ref.current, {x: sidebarWidth});
     Draggable.create(ref.current, {
       type: 'x',
       zIndexBoost: false,
@@ -64,6 +63,10 @@ const SidebarLeftDragHandle = (props: SidebarLeftDragHandleProps): ReactElement 
       }
     }
   }, []);
+
+  useEffect(() => {
+    gsap.set(ref.current, {x: sidebarWidth});
+  }, [sidebarWidth]);
 
   return (
     <DragHandle

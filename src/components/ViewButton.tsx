@@ -25,6 +25,7 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
 
   return (
     <TopbarDropdownButton
+      dropdownPosition='right'
       label='View'
       icon='left-sidebar'
       keepOpenOnSelect

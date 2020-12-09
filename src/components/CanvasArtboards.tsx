@@ -7,10 +7,11 @@ import CanvasArtboard from './CanvasArtboard';
 
 interface CanvasArtboardsProps {
   artboards?: string[];
+  ready?: boolean;
 }
 
 const CanvasArtboards = (props: CanvasArtboardsProps): ReactElement => {
-  const { artboards } = props;
+  const { artboards, ready } = props;
 
   useEffect(() => {
     [...Array(33).keys()].forEach((scope, index) => {
@@ -30,11 +31,13 @@ const CanvasArtboards = (props: CanvasArtboardsProps): ReactElement => {
         ))
       }
       {
-        artboards.map((id, index) => (
-          <CanvasArtboard
-            key={index}
-            id={id} />
-        ))
+        ready
+        ?  artboards.map((id, index) => (
+            <CanvasArtboard
+              key={index}
+              id={id} />
+          ))
+        : null
       }
     </>
   );

@@ -153,8 +153,8 @@ const Canvas = (props: CanvasProps): ReactElement => {
       style={{
         background: theme.background.z0
       }}>
-      <CanvasUI />
-      <CanvasArtboards />
+      <CanvasUI ready={ready} />
+      <CanvasArtboards ready={ready} />
       {
         ready
         ? <>

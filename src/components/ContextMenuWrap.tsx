@@ -6,7 +6,7 @@ import { ContextMenuState } from '../store/reducers/contextMenu';
 import { ContextMenuTypes, OpenContextMenuPayload } from '../store/actionTypes/contextMenu';
 import { closeContextMenu, openContextMenu } from '../store/actions/contextMenu';
 import { AddLayerTweenEventPayload, LayerTypes, RemoveLayersPayload, SelectLayersPayload, SendLayersBackwardPayload, BringLayersForwardPayload, GroupLayersPayload, UngroupLayersPayload, AddLayersMaskPayload, RemoveLayerTweenEventPayload, DuplicateLayersPayload, SetLayerHoverPayload } from '../store/actionTypes/layer';
-import { addLayerTweenEvent, removeLayers, selectLayers, selectAllLayers, copyLayersThunk, pasteLayersThunk, sendLayersBackward, bringLayersForward, groupLayersThunk, ungroupLayers, addLayersMaskThunk, removeLayerTweenEvent, duplicateLayers, setLayerHover, toggleSelectedMaskThunk, toggleSelectionIgnoreUnderlyingMask, replaceSelectedImagesThunk } from '../store/actions/layer';
+import { addLayerTweenEvent, removeLayers, selectLayers, selectAllLayers, copyLayersThunk, pasteLayersThunk, sendLayersBackward, bringLayersForward, groupLayersThunk, ungroupLayers, removeLayerTweenEvent, duplicateLayers, setLayerHover, toggleSelectedMaskThunk, toggleSelectionIgnoreUnderlyingMask, replaceSelectedImagesThunk } from '../store/actions/layer';
 import { RemoveArtboardPresetPayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
 import { removeArtboardPreset } from '../store/actions/documentSettings';
 import { ArtboardPresetEditorTypes } from '../store/actionTypes/artboardPresetEditor';

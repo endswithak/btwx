@@ -94,7 +94,7 @@ export default (state = initialState, action: DocumentSettingsTypes): DocumentSe
       return {
         ...state,
         matrix: action.payload.matrix,
-        zoom: Object.prototype.hasOwnProperty.call(action.payload, 'zoom') ? action.payload.zoom : state.zoom
+        zoom: action.payload.matrix[0]
       };
     }
     case SET_CANVAS_COLOR_FORMAT: {

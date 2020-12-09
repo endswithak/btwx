@@ -11,6 +11,7 @@ interface TweenEventsFrameProps {
   tweenDrawerEventHover?: string;
   tweenDrawerEvent?: string;
   activeArtboardEvents?: string[];
+  zoom?: number;
   updateTweenEventsFrameThunk?(): void;
   // tweenEventLayers?: {
   //   allIds: string[];
@@ -31,7 +32,7 @@ interface TweenEventsFrameProps {
 }
 
 const TweenEventsFrame = (props: TweenEventsFrameProps): ReactElement => {
-  const { activeArtboard, theme, tweenDrawerEventSort, tweenDrawerEventHover, tweenDrawerEvent, updateTweenEventsFrameThunk, activeArtboardEvents } = props;
+  const { zoom, activeArtboard, theme, tweenDrawerEventSort, tweenDrawerEventHover, tweenDrawerEvent, updateTweenEventsFrameThunk, activeArtboardEvents } = props;
 
   useEffect(() => {
     updateTweenEventsFrameThunk();
@@ -40,7 +41,7 @@ const TweenEventsFrame = (props: TweenEventsFrameProps): ReactElement => {
       const tweenEventsFrame = uiPaperScope.projects[0].getItem({ data: { id: 'artboardEvents' } });
       tweenEventsFrame.removeChildren();
     }
-  }, [activeArtboard, theme, tweenDrawerEventSort, tweenDrawerEventHover, tweenDrawerEvent, activeArtboardEvents]);
+  }, [activeArtboard, theme, tweenDrawerEventSort, tweenDrawerEventHover, tweenDrawerEvent, activeArtboardEvents, zoom]);
 
   return (
     <></>
@@ -54,15 +55,17 @@ const mapStateToProps = (state: RootState): {
   tweenDrawerEventHover: string;
   tweenDrawerEvent: string;
   activeArtboardEvents: string[];
+  zoom: number;
 } => {
-  const { layer, tweenDrawer, viewSettings } = state;
+  const { layer, tweenDrawer, viewSettings, documentSettings } = state;
   const activeArtboard = layer.present.activeArtboard;
   const activeArtboardEvents = (layer.present.byId[activeArtboard] as Btwx.Artboard).originArtboardForEvents;
   const theme = viewSettings.theme;
   const tweenDrawerEventSort = tweenDrawer.eventSort;
   const tweenDrawerEventHover = tweenDrawer.eventHover;
   const tweenDrawerEvent = tweenDrawer.event;
-  return { activeArtboard, theme, tweenDrawerEventSort, tweenDrawerEventHover, tweenDrawerEvent, activeArtboardEvents };
+  const zoom = documentSettings.zoom;
+  return { activeArtboard, theme, tweenDrawerEventSort, tweenDrawerEventHover, tweenDrawerEvent, activeArtboardEvents, zoom };
 };
 
 export default connect(

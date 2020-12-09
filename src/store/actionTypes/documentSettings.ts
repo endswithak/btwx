@@ -1,7 +1,9 @@
 import { LayerState } from '../reducers/layer';
 import { DocumentSettingsState } from '../reducers/documentSettings';
+import { ViewSettingsState } from '../reducers/viewSettings';
 
 export const OPEN_DOCUMENT = 'OPEN_DOCUMENT';
+export const HYDRATE_DOCUMENT = 'HYDRATE_DOCUMENT';
 
 export const SAVE_DOCUMENT_AS = 'SAVE_DOCUMENT_AS';
 export const SAVE_DOCUMENT = 'SAVE_DOCUMENT';
@@ -21,12 +23,26 @@ export interface OpenDocumentPayload {
   document: {
     layer: LayerState;
     documentSettings: DocumentSettingsState;
+    viewSettings: ViewSettingsState;
   };
 }
 
 export interface OpenDocument {
   type: typeof OPEN_DOCUMENT;
   payload: OpenDocumentPayload;
+}
+
+export interface HydrateDocumentPayload {
+  document: {
+    layer: LayerState;
+    documentSettings: DocumentSettingsState;
+    viewSettings: ViewSettingsState;
+  };
+}
+
+export interface HydrateDocument {
+  type: typeof HYDRATE_DOCUMENT;
+  payload: HydrateDocumentPayload;
 }
 
 export interface SaveDocumentAsPayload {
@@ -52,7 +68,6 @@ export interface SaveDocument {
 
 export interface SetCanvasMatrixPayload {
   matrix: number[];
-  zoom?: number;
 }
 
 export interface SetCanvasMatrix {
@@ -140,4 +155,5 @@ export type DocumentSettingsTypes = OpenDocument |
                                     RemoveArtboardPreset |
                                     UpdateArtboardPreset |
                                     SetArtboardPresetDeviceOrientation |
-                                    SetArtboardPresetDevicePlatform;
+                                    SetArtboardPresetDevicePlatform |
+                                    HydrateDocument;

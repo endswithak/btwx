@@ -126,6 +126,14 @@ export const addShape = (state: LayerState, action: AddShape): LayerState => {
       [action.payload.layer.id]: action.payload.layer.children,
       [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
     },
+    showChildrenById: {
+      ...currentState.showChildrenById,
+      [action.payload.layer.id]: action.payload.layer.showChildren,
+    },
+    scopeById: {
+      ...currentState.scopeById,
+      [action.payload.layer.id]: action.payload.layer.scope,
+    },
     nameById: {
       ...currentState.nameById,
       [action.payload.layer.id]: action.payload.layer.name,
@@ -222,6 +230,14 @@ export const addText = (state: LayerState, action: AddText): LayerState => {
       [action.payload.layer.id]: action.payload.layer.children,
       [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
     },
+    showChildrenById: {
+      ...currentState.showChildrenById,
+      [action.payload.layer.id]: action.payload.layer.showChildren,
+    },
+    scopeById: {
+      ...currentState.scopeById,
+      [action.payload.layer.id]: action.payload.layer.scope,
+    },
     nameById: {
       ...currentState.nameById,
       [action.payload.layer.id]: action.payload.layer.name,
@@ -265,6 +281,14 @@ export const addImage = (state: LayerState, action: AddImage): LayerState => {
       ...currentState.childrenById,
       [action.payload.layer.id]: action.payload.layer.children,
       [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
+    },
+    showChildrenById: {
+      ...currentState.showChildrenById,
+      [action.payload.layer.id]: action.payload.layer.showChildren,
+    },
+    scopeById: {
+      ...currentState.scopeById,
+      [action.payload.layer.id]: action.payload.layer.scope,
     },
     nameById: {
       ...currentState.nameById,
@@ -1380,7 +1404,14 @@ export const ungroupLayers = (state: LayerState, action: UngroupLayers): LayerSt
 export const updateLayerBounds = (state: LayerState, id: string): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, id);
-  if (layerItem.type === 'Shape') {
+  const artboardItems = getItemLayers(currentState, layerItem.artboard);
+  const isShape = layerItem.type === 'Shape';
+  const isLine = isShape && (layerItem as Btwx.Shape).shapeType === 'Line';
+  const hasRotation = layerItem.transform.rotation !== 0;
+  const isArtboard = layerItem.type === 'Artboard';
+  // const isText = layerItem.type === 'Text';
+  const isGroup = layerItem.type === 'Group';
+  if (isShape) {
     currentState = setShapeIcon(currentState, id, (paperLayer as paper.PathItem).pathData);
     currentState = {
       ...currentState,
@@ -1392,34 +1423,11 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
         } as Btwx.Shape
       }
     }
-    if ((layerItem as Btwx.Shape).shapeType === 'Line') {
-      const fromPoint = (paperLayer as paper.Path).firstSegment.point;
-      const toPoint = (paperLayer as paper.Path).lastSegment.point;
-      const vector = toPoint.subtract(fromPoint);
-      currentState = {
-        ...currentState,
-        byId: {
-          ...currentState.byId,
-          [id]: {
-            ...currentState.byId[id],
-            from: {
-              x: (fromPoint.x - paperLayer.position.x) / vector.length,
-              y: (fromPoint.y - paperLayer.position.y) / vector.length
-            },
-            to: {
-              x: (toPoint.x - paperLayer.position.x) / vector.length,
-              y: (toPoint.y - paperLayer.position.y) / vector.length
-            },
-            transform: {
-              ...currentState.byId[id].transform,
-              rotation: vector.angle
-            }
-          } as Btwx.Line
-        }
-      }
-    }
   }
-  if (layerItem.type === 'Text') {
+  if (isLine) {
+    const fromPoint = (paperLayer as paper.Path).firstSegment.point;
+    const toPoint = (paperLayer as paper.Path).lastSegment.point;
+    const vector = toPoint.subtract(fromPoint);
     currentState = {
       ...currentState,
       byId: {
@@ -1428,14 +1436,42 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
           ...currentState.byId[id],
           frame: {
             ...currentState.byId[id].frame,
-            innerWidth: paperLayer.bounds.width,
-            innerHeight: paperLayer.bounds.height
+            innerWidth: Math.round(vector.length),
+            innerHeight: 0
+          },
+          from: {
+            x: fromPoint.x - artboardItems.paperLayer.position.x,
+            y: fromPoint.y - artboardItems.paperLayer.position.y
+          },
+          to: {
+            x: toPoint.x - artboardItems.paperLayer.position.x,
+            y: toPoint.y - artboardItems.paperLayer.position.y
+          },
+          transform: {
+            ...currentState.byId[id].transform,
+            rotation: vector.angle
           }
-        }
+        } as Btwx.Line
       }
     }
   }
-  if (layerItem.transform.rotation !== 0) {
+  // if (isText) {
+  //   currentState = {
+  //     ...currentState,
+  //     byId: {
+  //       ...currentState.byId,
+  //       [id]: {
+  //         ...currentState.byId[id],
+  //         frame: {
+  //           ...currentState.byId[id].frame,
+  //           innerWidth: paperLayer.bounds.width,
+  //           innerHeight: paperLayer.bounds.height
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
+  if (hasRotation && !isLine) {
     const clone = paperLayer.clone({insert: false});
     clone.rotation = -layerItem.transform.rotation;
     currentState = {
@@ -1452,7 +1488,8 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
         }
       }
     }
-  } else {
+  }
+  if (!hasRotation && !isLine) {
     currentState = {
       ...currentState,
       byId: {
@@ -1468,26 +1505,7 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
       }
     }
   }
-  if (layerItem.type !== 'Artboard') {
-    const artboardItems = getItemLayers(currentState, layerItem.artboard);
-    const positionInArtboard = paperLayer.position.subtract(artboardItems.paperLayer.position);
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [id]: {
-          ...currentState.byId[id],
-          frame: {
-            ...currentState.byId[id].frame,
-            x: positionInArtboard.x,
-            y: positionInArtboard.y,
-            width: paperLayer.bounds.width,
-            height: paperLayer.bounds.height
-          }
-        }
-      }
-    }
-  } else {
+  if (isArtboard) {
     const artboardBackground = paperLayer.getItem({data: {id: 'artboardBackground'}});
     currentState = {
       ...currentState,
@@ -1508,13 +1526,32 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
       }
     }
   }
+  if (!isArtboard) {
+    const positionInArtboard = paperLayer.position.subtract(artboardItems.paperLayer.position);
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [id]: {
+          ...currentState.byId[id],
+          frame: {
+            ...currentState.byId[id].frame,
+            x: positionInArtboard.x,
+            y: positionInArtboard.y,
+            width: paperLayer.bounds.width,
+            height: paperLayer.bounds.height
+          }
+        }
+      }
+    }
+  }
   if (layerItem.parent !== layerItem.artboard) {
     currentState = updateParentBounds(currentState, id);
   }
-  if (layerItem.type === 'Group') {
+  if (isGroup) {
     currentState = updateChildrenPositions(currentState, id);
   }
-  if (layerItem.type === 'Artboard') {
+  if (isArtboard) {
     const prevBounds = layerItem.frame;
     const newBounds = currentState.byId[id].frame;
     if (prevBounds.width !== newBounds.width || prevBounds.height !== newBounds.height) {

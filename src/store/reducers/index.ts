@@ -1,6 +1,7 @@
 import { combineReducers } from 'redux';
 import { RootAction } from '../actionTypes';
 import { HYDRATE_PREVIEW } from '../actionTypes/preview';
+import { HYDRATE_DOCUMENT } from '../actionTypes/documentSettings';
 import layer from './layer';
 import contextMenu from './contextMenu';
 import tweenDrawer from './tweenDrawer';
@@ -49,6 +50,17 @@ export type RootState = ReturnType<typeof appReducer>;
 
 const rootReducer = (state: RootState, action: RootAction): RootState => {
   switch (action.type) {
+    case HYDRATE_DOCUMENT: {
+      return {
+        ...state,
+        documentSettings: action.payload.document.documentSettings,
+        viewSettings: action.payload.document.viewSettings,
+        layer: {
+          ...state.layer,
+          present: action.payload.document.layer
+        }
+      };
+    }
     case HYDRATE_PREVIEW: {
       return action.payload.state;
     }

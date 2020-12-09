@@ -752,12 +752,8 @@ export const addLineHeightTween = (props: AddTweenProps): void => {
 
 export const addFromXTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
-  const pla = ((originPaperLayer as paper.CompoundPath).children[0] as paper.Path).firstSegment.point.x;
-  const plb = ((destinationPaperLayer as paper.CompoundPath).children[0] as paper.Path).firstSegment.point.x;
-  const relativeA = pla - originArtboardPaperLayer.position.x;
-  const relativeB = plb - destinationArtboardPaperLayer.position.x;
-  const diff = relativeB - relativeA;
-  timelineTweenProps[tween.prop] = pla;
+  const diff = (destinationLayerItem as Btwx.Line).from.x - (originLayerItem as Btwx.Line).from.x;
+  timelineTweenProps[tween.prop] = ((originPaperLayer as paper.CompoundPath).children[0] as paper.Path).firstSegment.point.x;
   timeline.to(timelineTweenProps, {
     duration: tween.duration,
     [tween.prop]: `+=${diff}`,
@@ -773,12 +769,8 @@ export const addFromXTween = (props: AddTweenProps): void => {
 
 export const addFromYTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
-  const pla = ((originPaperLayer as paper.CompoundPath).children[0] as paper.Path).firstSegment.point.y;
-  const plb = ((destinationPaperLayer as paper.CompoundPath).children[0] as paper.Path).firstSegment.point.y;
-  const relativeA = pla - originArtboardPaperLayer.position.y;
-  const relativeB = plb - destinationArtboardPaperLayer.position.y;
-  const diff = relativeB - relativeA;
-  timelineTweenProps[tween.prop] = pla;
+  const diff = (destinationLayerItem as Btwx.Line).from.y - (originLayerItem as Btwx.Line).from.y;
+  timelineTweenProps[tween.prop] = ((originPaperLayer as paper.CompoundPath).children[0] as paper.Path).firstSegment.point.y;
   timeline.to(timelineTweenProps, {
     duration: tween.duration,
     [tween.prop]: `+=${diff}`,
@@ -794,12 +786,8 @@ export const addFromYTween = (props: AddTweenProps): void => {
 
 export const addToXTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
-  const pla = ((originPaperLayer as paper.CompoundPath).children[0] as paper.Path).lastSegment.point.x;
-  const plb = ((destinationPaperLayer as paper.CompoundPath).children[0] as paper.Path).lastSegment.point.x;
-  const relativeA = pla - originArtboardPaperLayer.position.x;
-  const relativeB = plb - destinationArtboardPaperLayer.position.x;
-  const diff = relativeB - relativeA;
-  timelineTweenProps[tween.prop] = pla;
+  const diff = (destinationLayerItem as Btwx.Line).to.x - (originLayerItem as Btwx.Line).to.x;
+  timelineTweenProps[tween.prop] = ((originPaperLayer as paper.CompoundPath).children[0] as paper.Path).lastSegment.point.x;
   timeline.to(timelineTweenProps, {
     duration: tween.duration,
     [tween.prop]: `+=${diff}`,
@@ -815,12 +803,8 @@ export const addToXTween = (props: AddTweenProps): void => {
 
 export const addToYTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
-  const pla = ((originPaperLayer as paper.CompoundPath).children[0] as paper.Path).lastSegment.point.y;
-  const plb = ((destinationPaperLayer as paper.CompoundPath).children[0] as paper.Path).lastSegment.point.y;
-  const relativeA = pla - originArtboardPaperLayer.position.y;
-  const relativeB = plb - destinationArtboardPaperLayer.position.y;
-  const diff = relativeB - relativeA;
-  timelineTweenProps[tween.prop] = pla;
+  const diff = (destinationLayerItem as Btwx.Line).to.y - (originLayerItem as Btwx.Line).to.y;
+  timelineTweenProps[tween.prop] = ((originPaperLayer as paper.CompoundPath).children[0] as paper.Path).lastSegment.point.y;
   timeline.to(timelineTweenProps, {
     duration: tween.duration,
     [tween.prop]: `+=${diff}`,

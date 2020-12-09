@@ -34,7 +34,7 @@ const mapStateToProps = (state: RootState): {
   canSave: boolean;
 } => {
   const { layer, documentSettings } = state;
-  const canSave = layer.present.edit && layer.present.edit.id !== documentSettings.edit || documentSettings.edit === null;
+  const canSave = layer.present.edit && layer.present.edit.id !== documentSettings.edit;
   return { canSave };
 };
 

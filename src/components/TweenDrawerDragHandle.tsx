@@ -33,10 +33,9 @@ const TweenDrawerDragHandle = (props: TweenDrawerDragHandleProps): ReactElement 
   const theme = useContext(ThemeContext);
   const ref = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
-  const { tweenDrawerHeight, setTweenDrawerHeight, allPaperScopes } = props;
+  const { tweenDrawerHeight, setTweenDrawerHeight } = props;
 
   useEffect(() => {
-    gsap.set(ref.current, {y: `-=${tweenDrawerHeight}`});
     Draggable.create(ref.current, {
       type: 'y',
       zIndexBoost: false,
@@ -65,6 +64,10 @@ const TweenDrawerDragHandle = (props: TweenDrawerDragHandleProps): ReactElement 
       }
     }
   }, []);
+
+  useEffect(() => {
+    gsap.set(ref.current, {y: -tweenDrawerHeight});
+  }, [tweenDrawerHeight]);
 
   return (
     <DragHandle

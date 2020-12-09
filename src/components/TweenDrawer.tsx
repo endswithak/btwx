@@ -19,9 +19,9 @@ const TweenDrawer = (props: TweenDrawerProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { ready, tweenEvent, tweenDrawerHeight, isEmpty, isOpen } = props;
 
-  useEffect(() => {
-    console.log('TWEEN DRAWER');
-  }, [isOpen, isEmpty, ready]);
+  // useEffect(() => {
+  //   console.log('TWEEN DRAWER');
+  // }, [isOpen, isEmpty, ready]);
 
   return (
     isOpen
