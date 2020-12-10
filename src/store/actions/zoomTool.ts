@@ -2,7 +2,7 @@ import { RootState } from '../reducers';
 import { setCanvasActiveTool } from './canvasSettings';
 import { setCanvasMatrix } from './documentSettings';
 import { uiPaperScope } from '../../canvas';
-import { getAllPaperScopes, getCanvasBounds, getSelectedBounds } from '../selectors/layer';
+import { getActiveArtboardBounds, getAllPaperScopes, getCanvasBounds, getSelectedBounds } from '../selectors/layer';
 
 export const zoomInThunk = () => {
   return (dispatch: any, getState: any): void => {
@@ -100,6 +100,37 @@ export const zoomFitSelectedThunk = () => {
     Object.keys(allPaperScopes).forEach((key, index) => {
       const paperScope = uiPaperScope.projects[index];
       paperScope.view.center = selectionCenter;
+      paperScope.view.zoom = newZoom;
+    });
+    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
+  }
+};
+
+export const zoomFitActiveArtboardThunk = () => {
+  return (dispatch: any, getState: any): void => {
+    const state = getState() as RootState;
+    const allPaperScopes = getAllPaperScopes(state);
+    const activeArtboardBounds = getActiveArtboardBounds(state);
+    const activeArtboardCenter = activeArtboardBounds.center;
+    const viewWidth: number = uiPaperScope.view.bounds.width;
+    const viewHeight: number = uiPaperScope.view.bounds.height;
+    const activeArtboardWidth: number = activeArtboardBounds.width;
+    const activeArtboardHeight: number = activeArtboardBounds.height;
+    const viewRatio: number = viewWidth / viewHeight;
+    const activeArtboardRatio: number = activeArtboardWidth / activeArtboardHeight;
+    const constrainingDim = viewRatio > activeArtboardRatio ? {dim: activeArtboardHeight, type: 'height'} : {dim: activeArtboardWidth, type: 'width'};
+    const viewDim = (() => {
+      switch(constrainingDim.type) {
+        case 'height':
+          return viewHeight;
+        case 'width':
+          return viewWidth;
+      }
+    })();
+    const newZoom = (viewDim / constrainingDim.dim) * uiPaperScope.view.zoom;
+    Object.keys(allPaperScopes).forEach((key, index) => {
+      const paperScope = uiPaperScope.projects[index];
+      paperScope.view.center = activeArtboardCenter;
       paperScope.view.zoom = newZoom;
     });
     dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));

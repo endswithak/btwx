@@ -78,7 +78,7 @@ const LineTool = (props: LineToolProps): ReactElement => {
   }, [downEvent])
 
   useEffect(() => {
-    if (dragEvent && isEnabled) {
+    if (downEvent && dragEvent && isEnabled) {
       let nextVector: paper.Point;
       switch(handle) {
         case 'lineFrom': {
@@ -134,7 +134,7 @@ const LineTool = (props: LineToolProps): ReactElement => {
   }, [dragEvent]);
 
   useEffect(() => {
-    if (upEvent && isEnabled && resizing) {
+    if (downEvent && upEvent && isEnabled && resizing) {
       const newX = (upEvent.point.x - originalPaperSelection.position.x) / vector.length;
       const newY = (upEvent.point.y - originalPaperSelection.position.y) / vector.length;
       switch(handle) {

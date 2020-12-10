@@ -209,6 +209,7 @@ import {
   RESET_IMAGES_DIMENSIONS,
   REPLACE_IMAGE,
   REPLACE_IMAGES,
+  PASTE_LAYERS_FROM_CLIPBOARD,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -421,7 +422,8 @@ import {
   resetImageDimensions,
   resetImagesDimensions,
   replaceImage,
-  replaceImages
+  replaceImages,
+  pasteLayersFromClipboard
 } from '../utils/layer';
 
 export interface LayerState {
@@ -462,9 +464,6 @@ export interface LayerState {
   };
   scopeById: {
     [id: string]: string[];
-  };
-  artboardJSON: {
-    [id: string]: string;
   };
   nameById: {
     [id: string]: string;
@@ -524,7 +523,6 @@ export const initialState: LayerState = {
   nameById: {
     root: 'root'
   },
-  artboardJSON: {},
   selectedEdit: null,
   edit: {
     id: null,
@@ -951,6 +949,8 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return replaceImage(state, action);
     case REPLACE_IMAGES:
       return replaceImages(state, action);
+    case PASTE_LAYERS_FROM_CLIPBOARD:
+      return pasteLayersFromClipboard(state, action);
     default:
       return state;
   }
@@ -1129,7 +1129,8 @@ export default undoable(baseReducer, {
       RESET_IMAGE_DIMENSIONS,
       RESET_IMAGES_DIMENSIONS,
       REPLACE_IMAGE,
-      REPLACE_IMAGES
+      REPLACE_IMAGES,
+      PASTE_LAYERS_FROM_CLIPBOARD
     ].includes(action.type) && !action.payload.batch;
   }
 });

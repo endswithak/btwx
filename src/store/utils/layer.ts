@@ -43,7 +43,7 @@ import {
   SetLineFromY, SetLineFrom, SetLineToX, SetLineToY, SetLineTo, SetLinesFromX, SetLinesFromY, SetLinesToX, SetLinesToY, SelectAllLayers,
   SetLayerStyle, SetLayersStyle, EnableLayersHorizontalFlip, DisableLayersHorizontalFlip, DisableLayersVerticalFlip, EnableLayersVerticalFlip,
   SetLayerScope, SetLayersScope, SetGlobalScope, SetLayerUnderlyingMask, SetLayersUnderlyingMask, SetLayerMasked, SetLayersMasked, ToggleLayerMask,
-  ToggleLayersMask, ToggleLayersIgnoreUnderlyingMask, ToggleLayerIgnoreUnderlyingMask, AreaSelectLayers, SetLayersGradientOD, ResetImagesDimensions, ResetImageDimensions, ReplaceImage, ReplaceImages
+  ToggleLayersMask, ToggleLayersIgnoreUnderlyingMask, ToggleLayerIgnoreUnderlyingMask, AreaSelectLayers, SetLayersGradientOD, ResetImagesDimensions, ResetImageDimensions, ReplaceImage, ReplaceImages, PasteLayersFromClipboard
 } from '../actionTypes/layer';
 
 import {
@@ -72,26 +72,46 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
         children: addItem((currentState.byId[action.payload.layer.parent] as Btwx.Root).children, action.payload.layer.id),
       } as Btwx.Root
     },
-    childrenById: {
-      ...currentState.childrenById,
-      [action.payload.layer.id]: action.payload.layer.children,
-      [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
-    },
-    showChildrenById: {
-      ...currentState.showChildrenById,
-      [action.payload.layer.id]: action.payload.layer.showChildren,
-    },
-    scopeById: {
-      ...currentState.scopeById,
-      [action.payload.layer.id]: action.payload.layer.scope,
-    },
-    nameById: {
-      ...currentState.nameById,
-      [action.payload.layer.id]: action.payload.layer.name,
-    }
+    // childrenById: {
+    //   ...currentState.childrenById,
+    //   [action.payload.layer.id]: action.payload.layer.children,
+    //   [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
+    // },
+    // showChildrenById: {
+    //   ...currentState.showChildrenById,
+    //   [action.payload.layer.id]: action.payload.layer.showChildren,
+    // },
+    // scopeById: {
+    //   ...currentState.scopeById,
+    //   [action.payload.layer.id]: action.payload.layer.scope,
+    // },
+    // nameById: {
+    //   ...currentState.nameById,
+    //   [action.payload.layer.id]: action.payload.layer.name,
+    // }
   }
   currentState = updateParentBounds(currentState, action.payload.layer.id);
   if (!action.payload.batch) {
+    currentState = {
+      ...currentState,
+      childrenById: {
+        ...currentState.childrenById,
+        [action.payload.layer.id]: action.payload.layer.children,
+        [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
+      },
+      showChildrenById: {
+        ...currentState.showChildrenById,
+        [action.payload.layer.id]: action.payload.layer.showChildren,
+      },
+      scopeById: {
+        ...currentState.scopeById,
+        [action.payload.layer.id]: action.payload.layer.scope,
+      },
+      nameById: {
+        ...currentState.nameById,
+        [action.payload.layer.id]: action.payload.layer.name,
+      }
+    }
     currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.layer.id], newSelection: true}) as SelectLayers);
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
       edit: {
@@ -121,27 +141,47 @@ export const addShape = (state: LayerState, action: AddShape): LayerState => {
       } as Btwx.Group
     },
     allShapeIds: addItem(state.allShapeIds, action.payload.layer.id),
-    childrenById: {
-      ...currentState.childrenById,
-      [action.payload.layer.id]: action.payload.layer.children,
-      [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
-    },
-    showChildrenById: {
-      ...currentState.showChildrenById,
-      [action.payload.layer.id]: action.payload.layer.showChildren,
-    },
-    scopeById: {
-      ...currentState.scopeById,
-      [action.payload.layer.id]: action.payload.layer.scope,
-    },
-    nameById: {
-      ...currentState.nameById,
-      [action.payload.layer.id]: action.payload.layer.name,
-    }
+    // childrenById: {
+    //   ...currentState.childrenById,
+    //   [action.payload.layer.id]: action.payload.layer.children,
+    //   [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
+    // },
+    // showChildrenById: {
+    //   ...currentState.showChildrenById,
+    //   [action.payload.layer.id]: action.payload.layer.showChildren,
+    // },
+    // scopeById: {
+    //   ...currentState.scopeById,
+    //   [action.payload.layer.id]: action.payload.layer.scope,
+    // },
+    // nameById: {
+    //   ...currentState.nameById,
+    //   [action.payload.layer.id]: action.payload.layer.name,
+    // }
   }
   currentState = updateLayerBounds(currentState, action.payload.layer.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.layer.id, 'all');
   if (!action.payload.batch) {
+    currentState = {
+      ...currentState,
+      childrenById: {
+        ...currentState.childrenById,
+        [action.payload.layer.id]: action.payload.layer.children,
+        [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
+      },
+      showChildrenById: {
+        ...currentState.showChildrenById,
+        [action.payload.layer.id]: action.payload.layer.showChildren,
+      },
+      scopeById: {
+        ...currentState.scopeById,
+        [action.payload.layer.id]: action.payload.layer.scope,
+      },
+      nameById: {
+        ...currentState.nameById,
+        [action.payload.layer.id]: action.payload.layer.name,
+      }
+    }
     if (!(parentItem as Btwx.Group | Btwx.Artboard).showChildren) {
       currentState = showLayerChildren(currentState, layerActions.showLayerChildren({id: action.payload.layer.parent}) as ShowLayerChildren);
     }
@@ -173,26 +213,46 @@ export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
       } as Btwx.Group
     },
     allGroupIds: addItem(state.allGroupIds, action.payload.layer.id),
-    childrenById: {
-      ...currentState.childrenById,
-      [action.payload.layer.id]: action.payload.layer.children,
-      [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
-    },
-    showChildrenById: {
-      ...currentState.showChildrenById,
-      [action.payload.layer.id]: action.payload.layer.showChildren,
-    },
-    scopeById: {
-      ...currentState.scopeById,
-      [action.payload.layer.id]: action.payload.layer.scope,
-    },
-    nameById: {
-      ...currentState.nameById,
-      [action.payload.layer.id]: action.payload.layer.name,
-    }
+    // childrenById: {
+    //   ...currentState.childrenById,
+    //   [action.payload.layer.id]: action.payload.layer.children,
+    //   [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
+    // },
+    // showChildrenById: {
+    //   ...currentState.showChildrenById,
+    //   [action.payload.layer.id]: action.payload.layer.showChildren,
+    // },
+    // scopeById: {
+    //   ...currentState.scopeById,
+    //   [action.payload.layer.id]: action.payload.layer.scope,
+    // },
+    // nameById: {
+    //   ...currentState.nameById,
+    //   [action.payload.layer.id]: action.payload.layer.name,
+    // }
   }
   currentState = updateLayerBounds(currentState, action.payload.layer.id);
   if (!action.payload.batch) {
+    currentState = {
+      ...currentState,
+      childrenById: {
+        ...currentState.childrenById,
+        [action.payload.layer.id]: action.payload.layer.children,
+        [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
+      },
+      showChildrenById: {
+        ...currentState.showChildrenById,
+        [action.payload.layer.id]: action.payload.layer.showChildren,
+      },
+      scopeById: {
+        ...currentState.scopeById,
+        [action.payload.layer.id]: action.payload.layer.scope,
+      },
+      nameById: {
+        ...currentState.nameById,
+        [action.payload.layer.id]: action.payload.layer.name,
+      }
+    }
     if (!(parentItem as Btwx.Group | Btwx.Artboard).showChildren) {
       currentState = showLayerChildren(currentState, layerActions.showLayerChildren({id: action.payload.layer.parent}) as ShowLayerChildren);
     }
@@ -225,27 +285,47 @@ export const addText = (state: LayerState, action: AddText): LayerState => {
       } as Btwx.Group
     },
     allTextIds: addItem(state.allTextIds, action.payload.layer.id),
-    childrenById: {
-      ...currentState.childrenById,
-      [action.payload.layer.id]: action.payload.layer.children,
-      [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
-    },
-    showChildrenById: {
-      ...currentState.showChildrenById,
-      [action.payload.layer.id]: action.payload.layer.showChildren,
-    },
-    scopeById: {
-      ...currentState.scopeById,
-      [action.payload.layer.id]: action.payload.layer.scope,
-    },
-    nameById: {
-      ...currentState.nameById,
-      [action.payload.layer.id]: action.payload.layer.name,
-    }
+    // childrenById: {
+    //   ...currentState.childrenById,
+    //   [action.payload.layer.id]: action.payload.layer.children,
+    //   [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
+    // },
+    // showChildrenById: {
+    //   ...currentState.showChildrenById,
+    //   [action.payload.layer.id]: action.payload.layer.showChildren,
+    // },
+    // scopeById: {
+    //   ...currentState.scopeById,
+    //   [action.payload.layer.id]: action.payload.layer.scope,
+    // },
+    // nameById: {
+    //   ...currentState.nameById,
+    //   [action.payload.layer.id]: action.payload.layer.name,
+    // }
   }
   currentState = updateLayerBounds(currentState, action.payload.layer.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.layer.id, 'all');
   if (!action.payload.batch) {
+    currentState = {
+      ...currentState,
+      childrenById: {
+        ...currentState.childrenById,
+        [action.payload.layer.id]: action.payload.layer.children,
+        [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
+      },
+      showChildrenById: {
+        ...currentState.showChildrenById,
+        [action.payload.layer.id]: action.payload.layer.showChildren,
+      },
+      scopeById: {
+        ...currentState.scopeById,
+        [action.payload.layer.id]: action.payload.layer.scope,
+      },
+      nameById: {
+        ...currentState.nameById,
+        [action.payload.layer.id]: action.payload.layer.name,
+      }
+    }
     if (!(parentItem as Btwx.Group | Btwx.Artboard).showChildren) {
       currentState = showLayerChildren(currentState, layerActions.showLayerChildren({id: action.payload.layer.parent}) as ShowLayerChildren);
     }
@@ -277,27 +357,47 @@ export const addImage = (state: LayerState, action: AddImage): LayerState => {
       } as Btwx.Group
     },
     allImageIds: addItem(state.allImageIds, action.payload.layer.id),
-    childrenById: {
-      ...currentState.childrenById,
-      [action.payload.layer.id]: action.payload.layer.children,
-      [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
-    },
-    showChildrenById: {
-      ...currentState.showChildrenById,
-      [action.payload.layer.id]: action.payload.layer.showChildren,
-    },
-    scopeById: {
-      ...currentState.scopeById,
-      [action.payload.layer.id]: action.payload.layer.scope,
-    },
-    nameById: {
-      ...currentState.nameById,
-      [action.payload.layer.id]: action.payload.layer.name,
-    }
+    // childrenById: {
+    //   ...currentState.childrenById,
+    //   [action.payload.layer.id]: action.payload.layer.children,
+    //   [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
+    // },
+    // showChildrenById: {
+    //   ...currentState.showChildrenById,
+    //   [action.payload.layer.id]: action.payload.layer.showChildren,
+    // },
+    // scopeById: {
+    //   ...currentState.scopeById,
+    //   [action.payload.layer.id]: action.payload.layer.scope,
+    // },
+    // nameById: {
+    //   ...currentState.nameById,
+    //   [action.payload.layer.id]: action.payload.layer.name,
+    // }
   }
   currentState = updateLayerBounds(currentState, action.payload.layer.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.layer.id, 'all');
   if (!action.payload.batch) {
+    currentState = {
+      ...currentState,
+      childrenById: {
+        ...currentState.childrenById,
+        [action.payload.layer.id]: action.payload.layer.children,
+        [action.payload.layer.parent]: addItem(currentState.childrenById[action.payload.layer.parent], action.payload.layer.id)
+      },
+      showChildrenById: {
+        ...currentState.showChildrenById,
+        [action.payload.layer.id]: action.payload.layer.showChildren,
+      },
+      scopeById: {
+        ...currentState.scopeById,
+        [action.payload.layer.id]: action.payload.layer.scope,
+      },
+      nameById: {
+        ...currentState.nameById,
+        [action.payload.layer.id]: action.payload.layer.name,
+      }
+    }
     if (!(parentItem as Btwx.Group | Btwx.Artboard).showChildren) {
       currentState = showLayerChildren(currentState, layerActions.showLayerChildren({id: action.payload.layer.parent}) as ShowLayerChildren);
     }
@@ -338,6 +438,29 @@ export const addLayers = (state: LayerState, action: AddLayers): LayerState => {
   //   }
   //   return result;
   // }, currentState);
+  currentState = action.payload.layers.reduce((result: LayerState, current) => {
+    result = {
+      ...result,
+      childrenById: {
+        ...result.childrenById,
+        [current.id]: current.children,
+        [current.parent]: addItem(result.childrenById[current.parent], current.id)
+      },
+      showChildrenById: {
+        ...result.showChildrenById,
+        [current.id]: current.showChildren,
+      },
+      scopeById: {
+        ...result.scopeById,
+        [current.id]: current.scope
+      },
+      nameById: {
+        ...result.nameById,
+        [current.id]: current.name
+      }
+    }
+    return result;
+  }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,
@@ -460,6 +583,18 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
         }
         return childrenResult;
       }, {}),
+      showChildrenById: Object.keys(result.showChildrenById).reduce((showChildrenResult: any, key) => {
+        if (key !== current) {
+          showChildrenResult[key] = result.showChildrenById[key];
+        }
+        return showChildrenResult;
+      }, {}),
+      scopeById: Object.keys(result.scopeById).reduce((scopeResult: any, key) => {
+        if (key !== current) {
+          scopeResult[key] = result.scopeById[key];
+        }
+        return scopeResult;
+      }, {}),
       nameById: Object.keys(result.nameById).reduce((nameResult: any, key) => {
         if (key !== current) {
           nameResult[key] = result.nameById[key];
@@ -518,7 +653,6 @@ export const removeLayers = (state: LayerState, action: RemoveLayers): LayerStat
 
 export const deselectLayer = (state: LayerState, action: DeselectLayer): LayerState => {
   let currentState = state;
-  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   currentState = {
     ...currentState,
     byId: {
@@ -5523,6 +5657,27 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): {
             }
           }
         }
+        if (itemToCopy.type === 'Shape' && (itemToCopy as Btwx.Shape).shapeType === 'Line') {
+          const fromPoint = (copyPaperLayer as paper.Path).firstSegment.point;
+          const toPoint = (copyPaperLayer as paper.Path).lastSegment.point;
+          result = {
+            ...result,
+            byId: {
+              ...result.byId,
+              [copyId]: {
+                ...result.byId[copyId],
+                from: {
+                  x: fromPoint.x - artboardItems.paperLayer.position.x,
+                  y: fromPoint.y - artboardItems.paperLayer.position.y
+                },
+                to: {
+                  x: toPoint.x - artboardItems.paperLayer.position.x,
+                  y: toPoint.y - artboardItems.paperLayer.position.y
+                },
+              } as Btwx.Line
+            }
+          }
+        }
       } else {
         result = {
           ...result,
@@ -6070,8 +6225,14 @@ export const setStarsRadius = (state: LayerState, action: SetStarsRadius): Layer
 export const setLineFromX = (state: LayerState, action: SetLineFromX): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
+  const artboardItem = state.byId[layerItem.artboard];
+  const x = action.payload.x + artboardItem.frame.x;
+  (paperLayer as paper.Path).firstSegment.point.x = x;
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fromX', 'fromY', 'toX', 'toY']);
+  if (layerItem.style.stroke.fillType === 'gradient') {
+    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
+  }
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fromX']);
   if (action.payload.setEdit) {
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
       edit: {
@@ -6109,8 +6270,14 @@ export const setLinesFromX = (state: LayerState, action: SetLinesFromX): LayerSt
 export const setLineFromY = (state: LayerState, action: SetLineFromY): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
+  const artboardItem = state.byId[layerItem.artboard];
+  const y = action.payload.y + artboardItem.frame.y;
+  (paperLayer as paper.Path).firstSegment.point.y = y;
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fromX', 'fromY', 'toX', 'toY']);
+  if (layerItem.style.stroke.fillType === 'gradient') {
+    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
+  }
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fromY']);
   if (action.payload.setEdit) {
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
       edit: {
@@ -6148,11 +6315,13 @@ export const setLinesFromY = (state: LayerState, action: SetLinesFromY): LayerSt
 export const setLineFrom = (state: LayerState, action: SetLineFrom): LayerState => {
   let currentState = state;
   const layerItem = state.byId[action.payload.id];
-  currentState = setLineFromX(currentState, layerActions.setLineFromX({id: action.payload.id, x: action.payload.x, setEdit: false}) as SetLineFromX);
-  currentState = setLineFromY(currentState, layerActions.setLineFromY({id: action.payload.id, y: action.payload.y, setEdit: false}) as SetLineFromY);
+  currentState = updateLayerBounds(currentState, action.payload.id);
   if (layerItem.style.stroke.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
   }
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fromX', 'fromY']);
+  // currentState = setLineFromX(currentState, layerActions.setLineFromX({id: action.payload.id, x: action.payload.x, setEdit: false}) as SetLineFromX);
+  // currentState = setLineFromY(currentState, layerActions.setLineFromY({id: action.payload.id, y: action.payload.y, setEdit: false}) as SetLineFromY);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,
@@ -6167,8 +6336,14 @@ export const setLineFrom = (state: LayerState, action: SetLineFrom): LayerState 
 export const setLineToX = (state: LayerState, action: SetLineToX): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
+  const artboardItem = state.byId[layerItem.artboard];
+  const x = action.payload.x + artboardItem.frame.x;
+  (paperLayer as paper.Path).lastSegment.point.x = x;
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fromX', 'fromY', 'toX', 'toY']);
+  if (layerItem.style.stroke.fillType === 'gradient') {
+    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
+  }
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['toX']);
   if (action.payload.setEdit) {
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
       edit: {
@@ -6206,8 +6381,14 @@ export const setLinesToX = (state: LayerState, action: SetLinesToX): LayerState 
 export const setLineToY = (state: LayerState, action: SetLineToY): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
+  const artboardItem = state.byId[layerItem.artboard];
+  const y = action.payload.y + artboardItem.frame.y;
+  (paperLayer as paper.Path).lastSegment.point.y = y;
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fromX', 'fromY', 'toX', 'toY']);
+  if (layerItem.style.stroke.fillType === 'gradient') {
+    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
+  }
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['toY']);
   if (action.payload.setEdit) {
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
       edit: {
@@ -6245,11 +6426,13 @@ export const setLinesToY = (state: LayerState, action: SetLinesToY): LayerState 
 export const setLineTo = (state: LayerState, action: SetLineTo): LayerState => {
   let currentState = state;
   const layerItem = state.byId[action.payload.id];
-  currentState = setLineToX(currentState, layerActions.setLineToX({id: action.payload.id, x: action.payload.x, setEdit: false}) as SetLineToX);
-  currentState = setLineToY(currentState, layerActions.setLineToY({id: action.payload.id, y: action.payload.y, setEdit: false}) as SetLineToY);
+  currentState = updateLayerBounds(currentState, action.payload.id);
   if (layerItem.style.stroke.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
   }
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['toX', 'toY']);
+  // currentState = setLineToX(currentState, layerActions.setLineToX({id: action.payload.id, x: action.payload.x, setEdit: false}) as SetLineToX);
+  // currentState = setLineToY(currentState, layerActions.setLineToY({id: action.payload.id, y: action.payload.y, setEdit: false}) as SetLineToY);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,
@@ -6276,12 +6459,12 @@ export const setLayerEdit = (state: LayerState, action: SetLayerEdit): LayerStat
         }
         return result;
       }, currentState.byId),
-      artboardJSON: action.payload.edit.projects.reduce((result, current) => {
-        if (currentState.byId[current]) {
-          result[current] = action.payload.edit.id;
-        }
-        return result;
-      }, currentState.artboardJSON)
+      // artboardJSON: action.payload.edit.projects.reduce((result, current) => {
+      //   if (currentState.byId[current]) {
+      //     result[current] = action.payload.edit.id;
+      //   }
+      //   return result;
+      // }, currentState.artboardJSON)
     }
   }
   currentState = {
@@ -6559,6 +6742,140 @@ export const replaceImages = (state: LayerState, action: ReplaceImages): LayerSt
       actionType: action.type,
       payload: action.payload,
       detail: 'Replace Images',
+      projects
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const pasteLayerFromClipboard = (state: LayerState, action: PasteLayersFromClipboard, id: string): LayerState => {
+  let currentState = state;
+  const layerItem = action.payload.clipboardLayers.byId[id];
+  const paperJSON = action.payload.clipboardLayers.paperJSON[id];
+  const layerAndDescendants = getLayerAndDescendants({byId: action.payload.clipboardLayers.byId} as LayerState, id);
+  if (layerItem.type === 'Artboard') {
+    const canvasWrap = document.getElementById('canvas-container');
+    const paperScope = currentState.childrenById.root.length + 1;
+    const project = uiPaperScope.projects[paperScope];
+    project.view.viewSize = new uiPaperScope.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
+    project.view.matrix.set(uiPaperScope.projects[0].view.matrix.values);
+    project.clear();
+    project.activate();
+    project.importJSON(paperJSON);
+    currentState = layerAndDescendants.reduce((result, current, index) => {
+      const clipboardLayerItem = action.payload.clipboardLayers.byId[current];
+      const paperLayer = index === 0 ? project.activeLayer : project.getItem({data: {id: current}});
+      switch(clipboardLayerItem.type) {
+        case 'Artboard':
+          result = {
+            ...result,
+            allArtboardIds: addItem(result.allArtboardIds, current)
+          }
+          break;
+        case 'Shape':
+          result = {
+            ...result,
+            allShapeIds: addItem(result.allShapeIds, current)
+          }
+          break;
+        case 'Group':
+          result = {
+            ...result,
+            allGroupIds: addItem(result.allGroupIds, current)
+          }
+          break;
+        case 'Text':
+          result = {
+            ...result,
+            allTextIds: addItem(result.allTextIds, current)
+          }
+          break;
+        case 'Image':
+          result = {
+            ...result,
+            allImageIds: addItem(result.allImageIds, current)
+          }
+          break;
+      }
+      result = {
+        ...result,
+        allIds: [...result.allIds, current],
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...clipboardLayerItem,
+            ...(() => {
+              switch(clipboardLayerItem.type) {
+                case 'Artboard':
+                  return {
+                    paperScope: paperScope,
+                    paperJSON: paperJSON
+                  };
+                default:
+                  return {};
+              }
+            })()
+          }
+        } as any,
+        childrenById: {
+          ...result.childrenById,
+          [current]: clipboardLayerItem.children
+        },
+        showChildrenById: {
+          ...result.showChildrenById,
+          [current]: clipboardLayerItem.showChildren
+        },
+        scopeById: {
+          ...result.scopeById,
+          [current]: clipboardLayerItem.scope
+        },
+        nameById: {
+          ...result.nameById,
+          [current]: clipboardLayerItem.name
+        },
+      };
+      if (clipboardLayerItem.type === 'Shape') {
+        result = setShapeIcon(result, clipboardLayerItem.id, (paperLayer as paper.Path).pathData);
+      }
+      return result;
+    }, currentState);
+  }
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [layerItem.parent]: {
+        ...currentState.byId[layerItem.parent],
+        children: addItem(currentState.byId[layerItem.parent].children, id)
+      } as Btwx.Group | Btwx.Artboard
+    },
+    childrenById: {
+      ...currentState.childrenById,
+      [layerItem.parent]: addItem(currentState.childrenById[layerItem.parent], id)
+    }
+  }
+  currentState = updateChildrenIndices(currentState, layerItem.parent);
+  currentState = updateParentBounds(currentState, layerItem.id);
+  return currentState;
+};
+
+export const pasteLayersFromClipboard = (state: LayerState, action: PasteLayersFromClipboard): LayerState => {
+  let currentState = state;
+  const projects: string[] = [];
+  currentState = action.payload.clipboardLayers.main.reduce((result, current) => {
+    const layerItem = action.payload.clipboardLayers.byId[current];
+    const layerProject = layerItem.type === 'Artboard' ? layerItem.artboard : currentState.activeArtboard;
+    if (!projects.includes(layerProject)) {
+      projects.push(layerProject);
+    }
+    return pasteLayerFromClipboard(result, action, current);
+  }, currentState);
+  currentState = selectLayers(currentState, layerActions.selectLayers({layers: action.payload.clipboardLayers.main, newSelection: true}) as SelectLayers);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Paste Layers From Clipboard',
       projects
     }
   }) as SetLayerEdit);

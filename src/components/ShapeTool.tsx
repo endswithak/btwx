@@ -298,16 +298,15 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
   }, [downEvent])
 
   useEffect(() => {
-    if (dragEvent && isEnabled) {
-      const fromPoint = from ? from : dragEvent.downPoint.round();
+    if (downEvent && dragEvent && isEnabled) {
       const dragPoint = dragEvent.point.round();
-      const nextVector = dragPoint.subtract(fromPoint);
+      const nextVector = dragPoint.subtract(from);
       const nextHandle = `${nextVector.y > 0 ? 'bottom' : 'top'}${nextVector.x > 0 ? 'Right' : 'Left'}` as 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
-      const nextDims = new uiPaperScope.Rectangle({from: fromPoint, to: dragPoint}).size;
+      const nextDims = new uiPaperScope.Rectangle({from: from, to: dragPoint}).size;
       const nextMaxDim = Math.max(nextDims.width, nextDims.height);
-      const nextContrainedDims = new uiPaperScope.Point(nextVector.x < 0 ? fromPoint.x - nextMaxDim : fromPoint.x + nextMaxDim, nextVector.y < 0 ? fromPoint.y - nextMaxDim : fromPoint.y + nextMaxDim).round();
+      const nextContrainedDims = new uiPaperScope.Point(nextVector.x < 0 ? from.x - nextMaxDim : from.x + nextMaxDim, nextVector.y < 0 ? from.y - nextMaxDim : from.y + nextMaxDim).round();
       const nextSnapBounds = new uiPaperScope.Rectangle({
-        from: fromPoint,
+        from: from,
         to: dragEvent.modifiers.shift ? nextContrainedDims : dragPoint
       });
       setHandle(nextHandle);
@@ -329,7 +328,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
   }, [dragEvent]);
 
   useEffect(() => {
-    if (upEvent && isEnabled && drawing) {
+    if (downEvent && upEvent && isEnabled && drawing) {
       const paperLayer = renderShape({
         insert: false
       });
@@ -401,12 +400,12 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
               case 'Line': {
                 return {
                   from: {
-                    x: lineFromPoint.x - parentItem.paperLayer.position.x, // (fromPoint.x - paperLayer.position.x) / vector.length,
-                    y: lineFromPoint.y - parentItem.paperLayer.position.y // (fromPoint.y - paperLayer.position.y) / vector.length
+                    x: lineFromPoint.x - parentItem.paperLayer.position.x,
+                    y: lineFromPoint.y - parentItem.paperLayer.position.y
                   },
                   to: {
-                    x: lineToPoint.x - parentItem.paperLayer.position.x, // (toPoint.x - paperLayer.position.x) / vector.length,
-                    y: lineToPoint.y - parentItem.paperLayer.position.y // (toPoint.y - paperLayer.position.y) / vector.length
+                    x: lineToPoint.x - parentItem.paperLayer.position.x,
+                    y: lineToPoint.y - parentItem.paperLayer.position.y
                   }
                 }
               }

@@ -3,18 +3,17 @@ import { connect } from 'react-redux';
 import mexp from 'math-expression-evaluator';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
-import { SetLayersXPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayersX } from '../store/actions/layer';
-import { getPositionInArtboard } from '../store/selectors/layer';
+import { SetLinesFromXPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLinesFromX } from '../store/actions/layer';
 
-interface XInputProps {
+interface FromXInputProps {
   selected?: string[];
   xValue?: number | 'multi';
-  setLayersX?(payload: SetLayersXPayload): LayerTypes;
+  setLinesFromX?(payload: SetLinesFromXPayload): LayerTypes;
 }
 
-const XInput = (props: XInputProps): ReactElement => {
-  const { selected, setLayersX, xValue } = props;
+const FromXInput = (props: FromXInputProps): ReactElement => {
+  const { selected, setLinesFromX, xValue } = props;
   const [x, setX] = useState(xValue !== 'multi' ? Math.round(xValue as number) : xValue);
 
   useEffect(() => {
@@ -30,7 +29,7 @@ const XInput = (props: XInputProps): ReactElement => {
     try {
       const nextX = mexp.eval(`${x}`) as any;
       if (nextX !== xValue) {
-        setLayersX({layers: selected, x: Math.round(nextX)});
+        setLinesFromX({layers: selected, x: Math.round(nextX)});
         setX(Math.round(nextX));
       } else {
         setX(xValue !== 'multi' ? Math.round(xValue as number) : xValue);
@@ -59,9 +58,9 @@ const mapStateToProps = (state: RootState): {
   const xValue = selected.reduce((result: number | 'multi', current: string) => {
     const layerItem = layer.present.byId[current] as Btwx.Line;
     if (!result) {
-      result = layerItem.frame.x;
+      result = layerItem.from.x;
     }
-    if (result && layerItem.frame.x !== result) {
+    if (result && layerItem.from.x !== result) {
       result = 'multi';
     }
     return result;
@@ -71,5 +70,5 @@ const mapStateToProps = (state: RootState): {
 
 export default connect(
   mapStateToProps,
-  { setLayersX }
-)(XInput);
+  { setLinesFromX }
+)(FromXInput);

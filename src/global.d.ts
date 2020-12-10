@@ -429,7 +429,10 @@ declare namespace Btwx {
     images: {
       [id: string]: DocumentImage;
     };
-    bounds: paper.Rectangle;
+    bounds: paper.Rectangle | number[];
+    paperJSON?: {
+      [id: string]: string;
+    };
   }
 
   interface ClipboardStyle {

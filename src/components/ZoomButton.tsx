@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import { RootState } from '../store/reducers';
 import { connect } from 'react-redux';
-import { zoomFitCanvasThunk, zoomPercentThunk, zoomFitSelectedThunk } from '../store/actions/zoomTool';
+import { zoomFitCanvasThunk, zoomPercentThunk, zoomFitSelectedThunk, zoomFitActiveArtboardThunk } from '../store/actions/zoomTool';
 import TopbarDropdownButton from './TopbarDropdownButton';
 import ZoomOutButton from './ZoomOutButton';
 import ZoomInButton from './ZoomInButton';
@@ -14,10 +14,11 @@ interface ZoomButtonProps {
   zoomFitCanvasThunk?(): void;
   zoomPercentThunk?(percent: number): void;
   zoomFitSelectedThunk?(): void;
+  zoomFitActiveArtboardThunk?(): void;
 }
 
 const ZoomButton = (props: ZoomButtonProps): ReactElement => {
-  const { zoom, zoomFitCanvasThunk, canArtboardZoom, zoomPercentThunk, zoomFitSelectedThunk, canSelectedZoom, canCanvasZoom } = props;
+  const { zoom, zoomFitCanvasThunk, canArtboardZoom, zoomPercentThunk, zoomFitSelectedThunk, zoomFitActiveArtboardThunk, canSelectedZoom, canCanvasZoom } = props;
 
   return (
     <>
@@ -34,9 +35,10 @@ const ZoomButton = (props: ZoomButtonProps): ReactElement => {
           onClick: () => zoomPercentThunk(1)
         },{
           label: '200%',
-          onClick: () => zoomPercentThunk(2)
+          onClick: () => zoomPercentThunk(2),
+          bottomDivider: true
         },{
-          label: 'Fit Canvas',
+          label: 'Canvas',
           onClick: zoomFitCanvasThunk,
           disabled: !canCanvasZoom
         },{
@@ -44,8 +46,8 @@ const ZoomButton = (props: ZoomButtonProps): ReactElement => {
           onClick: zoomFitSelectedThunk,
           disabled: !canSelectedZoom
         },{
-          label: 'Artboard',
-          onClick: zoomFitSelectedThunk,
+          label: 'Active Artboard',
+          onClick: zoomFitActiveArtboardThunk,
           disabled: !canArtboardZoom
         }]} />
       <ZoomInButton />
@@ -62,7 +64,7 @@ const mapStateToProps = (state: RootState): {
   const { layer, documentSettings } = state;
   const selected = layer.present.selected;
   const zoom = Math.round(documentSettings.matrix[0] * 100);
-  const canArtboardZoom = selected.length === 1 && layer.present.byId[selected[0]].type === 'Artboard';
+  const canArtboardZoom = layer.present.activeArtboard !== null;
   const canSelectedZoom = selected.length > 0;
   const canCanvasZoom = layer.present.allIds.length > 1;
   return { zoom, canArtboardZoom, canSelectedZoom, canCanvasZoom };
@@ -70,5 +72,5 @@ const mapStateToProps = (state: RootState): {
 
 export default connect(
   mapStateToProps,
-  { zoomFitCanvasThunk, zoomPercentThunk, zoomFitSelectedThunk }
+  { zoomFitCanvasThunk, zoomPercentThunk, zoomFitSelectedThunk, zoomFitActiveArtboardThunk }
 )(ZoomButton);

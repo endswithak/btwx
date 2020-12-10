@@ -12,7 +12,6 @@ const SidebarSectionLabel = (props: SidebarSectionLabelProps): ReactElement => {
     <div
       className='c-sidebar-section__label'
       style={{
-        background: theme.background.z1,
         color: theme.text.base
       }}>
       { props.text }

@@ -253,6 +253,8 @@ export const SET_LAYER_EDIT = 'SET_LAYER_EDIT';
 export const SET_LAYER_STYLE = 'SET_LAYER_STYLE';
 export const SET_LAYERS_STYLE = 'SET_LAYERS_STYLE';
 
+export const PASTE_LAYERS_FROM_CLIPBOARD = 'PASTE_LAYERS_FROM_CLIPBOARD';
+
 // Artboard
 
 export type AddArtboardPayload = {
@@ -2424,6 +2426,18 @@ export interface ReplaceImages {
   payload: ReplaceImagesPayload;
 }
 
+export interface PasteLayersFromClipboardPayload {
+  clipboardLayers: Btwx.ClipboardLayers;
+  overSelection?: boolean;
+  overPoint?: Btwx.Point;
+  overLayer?: string;
+}
+
+export interface PasteLayersFromClipboard {
+  type: typeof PASTE_LAYERS_FROM_CLIPBOARD;
+  payload: PasteLayersFromClipboardPayload;
+}
+
 export type LayerTypes = AddArtboard |
                          AddGroup |
                          AddShape |
@@ -2639,4 +2653,5 @@ export type LayerTypes = AddArtboard |
                          ResetImageDimensions |
                          ResetImagesDimensions |
                          ReplaceImage |
-                         ReplaceImages;
+                         ReplaceImages |
+                         PasteLayersFromClipboard;

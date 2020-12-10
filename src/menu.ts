@@ -957,7 +957,7 @@ export default Menu.buildFromTemplate([
             }
           },
           {
-            label: 'Fit Artboard',
+            label: 'Fit Active Artboard',
             id: 'viewZoomFitArtboard',
             enabled: false,
             accelerator: process.platform === 'darwin' ? 'Cmd+4' : 'Ctrl+4',

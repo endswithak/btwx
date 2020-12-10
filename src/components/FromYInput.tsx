@@ -1,20 +1,19 @@
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import mexp from 'math-expression-evaluator';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
-import { SetLayersYPayload, LayerTypes } from '../store/actionTypes/layer';
-import { setLayersY } from '../store/actions/layer';
-import { getPositionInArtboard } from '../store/selectors/layer';
+import { SetLinesFromYPayload, LayerTypes } from '../store/actionTypes/layer';
+import { setLinesFromY } from '../store/actions/layer';
 
-interface YInputProps {
+interface FromYInputProps {
   selected?: string[];
   yValue?: number | 'multi';
-  setLayersY?(payload: SetLayersYPayload): LayerTypes;
+  setLinesFromY?(payload: SetLinesFromYPayload): LayerTypes;
 }
 
-const YInput = (props: YInputProps): ReactElement => {
-  const { selected, setLayersY, yValue } = props;
+const FromYInput = (props: FromYInputProps): ReactElement => {
+  const { selected, setLinesFromY, yValue } = props;
   const [y, setY] = useState(yValue !== 'multi' ? Math.round(yValue as number) : yValue);
 
   useEffect(() => {
@@ -30,7 +29,7 @@ const YInput = (props: YInputProps): ReactElement => {
     try {
       const nextY = mexp.eval(`${y}`) as any;
       if (nextY !== yValue) {
-        setLayersY({layers: selected, y: Math.round(nextY)});
+        setLinesFromY({layers: selected, y: Math.round(nextY)});
         setY(Math.round(nextY));
       } else {
         setY(yValue !== 'multi' ? Math.round(yValue as number) : yValue);
@@ -59,9 +58,9 @@ const mapStateToProps = (state: RootState): {
   const yValue = selected.reduce((result: number | 'multi', current: string) => {
     const layerItem = layer.present.byId[current] as Btwx.Line;
     if (!result) {
-      result = layerItem.frame.y;
+      result = layerItem.from.y;
     }
-    if (result && layerItem.frame.y !== result) {
+    if (result && layerItem.from.y !== result) {
       result = 'multi';
     }
     return result;
@@ -71,5 +70,5 @@ const mapStateToProps = (state: RootState): {
 
 export default connect(
   mapStateToProps,
-  { setLayersY }
-)(YInput);
+  { setLinesFromY }
+)(FromYInput);

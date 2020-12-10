@@ -19,15 +19,17 @@ const CanvasArtboard = (props: CanvasArtboardProps): ReactElement => {
   const { id, paperJSON, documentImages, matrix, paperScopeIndex } = props;
 
   useEffect(() => {
-    const canvasWrap = document.getElementById('canvas-container');
     const paperScope = uiPaperScope.projects[paperScopeIndex];
-    importPaperProject({
-      paperJSON,
-      paperScope,
-      documentImages
-    });
-    paperScope.view.viewSize = new uiPaperScope.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
-    paperScope.view.matrix.set(matrix);
+    if (!paperScope.activeLayer || paperScope.activeLayer.data.id !== id) {
+      const canvasWrap = document.getElementById('canvas-container');
+      importPaperProject({
+        paperJSON,
+        paperScope,
+        documentImages
+      });
+      paperScope.view.viewSize = new uiPaperScope.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
+      paperScope.view.matrix.set(matrix);
+    }
     return () => {
       uiPaperScope.projects[paperScopeIndex].clear();
     }

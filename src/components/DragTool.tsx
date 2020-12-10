@@ -244,9 +244,7 @@ const DragTool = (props: DragToolProps): ReactElement => {
           moveLayers({layers: selected});
         }
       }
-      if (dragging) {
-        setCanvasDragging({dragging: false});
-      }
+      setCanvasDragging({dragging: false});
       resetState();
     }
   }, [upEvent]);

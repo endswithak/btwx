@@ -487,7 +487,7 @@ export const getActiveArtboardBounds = createSelector(
       return new uiPaperScope.Rectangle({
         from: new uiPaperScope.Point(artboardItem.frame.x - (artboardItem.frame.width / 2), artboardItem.frame.y - (artboardItem.frame.height / 2)),
         to: new uiPaperScope.Point(artboardItem.frame.x + (artboardItem.frame.width / 2), artboardItem.frame.y + (artboardItem.frame.height / 2))
-      })
+      });
     } else {
       return null;
     }
