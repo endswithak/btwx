@@ -54,7 +54,7 @@ import {
   getPaperProp, getArtboardsTopTop, getLineFromPoint, getLineToPoint, getLineVector, getParentPaperLayer,
   getLayerYoungerSiblings, getMaskableSiblings, getSiblingLayersWithUnderlyingMask, getItemLayers,
   getAbsolutePosition, getGradientDestination, getGradientOrigin, getLayerOlderSibling, getLayerYoungestChild,
-  getLayerYoungerSibling, getCanvasBounds, getLayerBounds, hasFillTween
+  getLayerYoungerSibling, getCanvasBounds, getLayerBounds, hasFillTween, getSelectedBounds
 } from '../selectors/layer';
 import { RootState } from '../reducers';
 
@@ -1459,9 +1459,9 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
     }
   }
   if (isLine) {
-    const fromPoint = (paperLayer as paper.Path).firstSegment.point;
-    const toPoint = (paperLayer as paper.Path).lastSegment.point;
-    const vector = toPoint.subtract(fromPoint);
+    const fromPoint = (paperLayer as paper.Path).firstSegment.point.round();
+    const toPoint = (paperLayer as paper.Path).lastSegment.point.round();
+    const vector = toPoint.subtract(fromPoint).round();
     currentState = {
       ...currentState,
       byId: {
@@ -1690,8 +1690,10 @@ export const updateParentBounds = (state: LayerState, id: string, idAsParent?: b
 
 export const moveLayer = (state: LayerState, action: MoveLayer): LayerState => {
   let currentState = state;
+  const layerItem = state.byId[action.payload.id];
+  const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, isLine ? ['x', 'y', 'fromX', 'fromY', 'toX', 'toY'] : ['x', 'y']);
   return currentState;
 };
 
@@ -2343,6 +2345,7 @@ export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
   let currentState = state;
   let x = action.payload.x;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
+  const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   if (layerItem.type !== 'Artboard') {
     const artboardItem = state.byId[layerItem.artboard];
     x += artboardItem.frame.x;
@@ -2362,7 +2365,7 @@ export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
   //   }
   // }
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, isLine ? ['x', 'fromX', 'toX'] : ['x']);
   return currentState;
 };
 
@@ -2391,6 +2394,7 @@ export const setLayerY = (state: LayerState, action: SetLayerY): LayerState => {
   let currentState = state;
   let y = action.payload.y;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
+  const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   if (layerItem.type !== 'Artboard') {
     const artboardItem = state.byId[layerItem.artboard];
     y += artboardItem.frame.y;
@@ -2410,7 +2414,7 @@ export const setLayerY = (state: LayerState, action: SetLayerY): LayerState => {
   //   }
   // }
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, isLine? ['y', 'fromY', 'toY'] : ['y']);
   return currentState;
 };
 
@@ -2605,10 +2609,12 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const startPosition = paperLayer.position;
+  const isShape = layerItem.type === 'Shape';
+  const isLine = isShape && (layerItem as Btwx.Shape).shapeType === 'Line';
   paperLayer.rotation = -layerItem.transform.rotation;
   paperLayer.rotation = action.payload.rotation;
   paperLayer.position = startPosition;
-  if (layerItem.type === 'Shape') {
+  if (isShape) {
     currentState = {
       ...currentState,
       byId: {
@@ -2633,8 +2639,8 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
       }
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['rotation']);
   currentState = updateLayerBounds(currentState, action.payload.id);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, isLine ? ['fromX', 'fromY', 'toX', 'toY'] : ['rotation']);
   if (layerItem.style.fill.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'fill', gradient: layerItem.style.fill.gradient}) as SetLayerGradient);
   }
@@ -6620,6 +6626,7 @@ export const replaceImage = (state: LayerState, action: ReplaceImage): LayerStat
       } as Btwx.Image
     }
   }
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['image']);
   return currentState;
 };
 
@@ -6657,11 +6664,13 @@ export const pasteLayerFromClipboard = (state: LayerState, action: PasteLayersFr
     const canvasWrap = document.getElementById('canvas-container');
     const paperScope = currentState.childrenById.root.length + 1;
     const project = uiPaperScope.projects[paperScope];
-    project.view.viewSize = new uiPaperScope.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
+    const viewSize = new uiPaperScope.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
+    project.view.viewSize = viewSize;
     project.view.matrix.set(uiPaperScope.projects[0].view.matrix.values);
     project.clear();
     project.activate();
     project.importJSON(paperJSON);
+    project.activeLayer.position = new uiPaperScope.Point(layerItem.frame.x, layerItem.frame.y);
     currentState = layerAndDescendants.reduce((result, current, index) => {
       const clipboardLayerItem = action.payload.clipboardLayers.byId[current];
       const paperLayer = index === 0 ? project.activeLayer : project.getItem({data: {id: current}});
@@ -6854,6 +6863,93 @@ export const pasteLayerFromClipboard = (state: LayerState, action: PasteLayersFr
 export const pasteLayersFromClipboard = (state: LayerState, action: PasteLayersFromClipboard): LayerState => {
   let currentState = state;
   const projects: string[] = [];
+  const clipboardBounds = new uiPaperScope.Rectangle(
+    new uiPaperScope.Point(
+      (action.payload.clipboardLayers.bounds as number[])[1],
+      (action.payload.clipboardLayers.bounds as number[])[2]
+    ),
+    new uiPaperScope.Size(
+      (action.payload.clipboardLayers.bounds as number[])[3],
+      (action.payload.clipboardLayers.bounds as number[])[4]
+    )
+  );
+  // handle if clipboard position is not within viewport
+  if (!clipboardBounds.center.isInside(uiPaperScope.view.bounds)) {
+    const pointDiff = uiPaperScope.view.center.subtract(clipboardBounds.center);
+    action.payload.clipboardLayers.main.forEach((id) => {
+      const clipboardLayerItem = action.payload.clipboardLayers.byId[id];
+      if (clipboardLayerItem.type === 'Artboard') {
+        clipboardLayerItem.frame.x += pointDiff.x;
+        clipboardLayerItem.frame.y += pointDiff.y;
+      }
+    });
+  }
+  // handle paste over selection
+  // if (action.payload.overSelection && currentState.selected.length > 0) {
+  //   const singleSelection = currentState.selected.length === 1;
+  //   const overSelectionItem = currentState.byId[currentState.selected[0]];
+  //   const selectedBounds = getSelectedBounds({layer: {present: currentState}} as RootState);
+  //   const selectionPosition = selectedBounds.center;
+  //   const pointDiff = selectionPosition.subtract(clipboardBounds.center);
+  //   action.payload.clipboardLayers.allIds.forEach((id) => {
+  //     const clipboardLayerItem = action.payload.clipboardLayers.byId[id];
+  //     if (singleSelection && action.payload.clipboardLayers.main.includes(id) && clipboardLayerItem.type !== 'Artboard') {
+  //       if (overSelectionItem.type === 'Group' || overSelectionItem.type === 'Artboard') {
+  //         clipboardLayerItem.parent = overSelectionItem.id;
+  //       } else {
+  //         clipboardLayerItem.parent = overSelectionItem.parent;
+  //       }
+  //     }
+  //     clipboardLayerItem.frame.x += pointDiff.x;
+  //     clipboardLayerItem.frame.y += pointDiff.y;
+  //   });
+  // }
+  // // handle paste at point
+  // if (action.payload.overPoint && !action.payload.overLayer) {
+  //   const paperPoint = new uiPaperScope.Point(action.payload.overPoint.x, action.payload.overPoint.y);
+  //   const pointDiff = paperPoint.subtract(clipboardBounds.center);
+  //   action.payload.clipboardLayers.allIds.forEach((id) => {
+  //     const clipboardLayerItem = action.payload.clipboardLayers.byId[id];
+  //     clipboardLayerItem.frame.x += pointDiff.x;
+  //     clipboardLayerItem.frame.y += pointDiff.y;
+  //   });
+  // }
+  // // handle paste over layer
+  // if (action.payload.overLayer && !action.payload.overPoint) {
+  //   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.overLayer);
+  //   const overLayerItem = currentState.byId[action.payload.overLayer];
+  //   const pointDiff = paperLayer.position.subtract(clipboardBounds.center);
+  //   action.payload.clipboardLayers.allIds.forEach((id) => {
+  //     const clipboardLayerItem = action.payload.clipboardLayers.byId[id];
+  //     if (action.payload.clipboardLayers.main.includes(id) && clipboardLayerItem.type !== 'Artboard') {
+  //       if (overLayerItem.type === 'Group' || overLayerItem.type === 'Artboard') {
+  //         clipboardLayerItem.parent = overLayerItem.id;
+  //       } else {
+  //         clipboardLayerItem.parent = overLayerItem.parent;
+  //       }
+  //     }
+  //     clipboardLayerItem.frame.x += pointDiff.x;
+  //     clipboardLayerItem.frame.y += pointDiff.y;
+  //   });
+  // }
+  // // handle paste over layer and over point
+  // if (action.payload.overPoint && action.payload.overLayer) {
+  //   const overLayerItem = currentState.byId[action.payload.overLayer];
+  //   const paperPoint = new uiPaperScope.Point(action.payload.overPoint.x, action.payload.overPoint.y);
+  //   const pointDiff = paperPoint.subtract(clipboardBounds.center);
+  //   action.payload.clipboardLayers.allIds.forEach((id) => {
+  //     const clipboardLayerItem = action.payload.clipboardLayers.byId[id];
+  //     if (action.payload.clipboardLayers.main.includes(id) && clipboardLayerItem.type !== 'Artboard') {
+  //       if (overLayerItem.type === 'Group' || overLayerItem.type === 'Artboard') {
+  //         clipboardLayerItem.parent = overLayerItem.id;
+  //       } else {
+  //         clipboardLayerItem.parent = overLayerItem.parent;
+  //       }
+  //     }
+  //     clipboardLayerItem.frame.x += pointDiff.x;
+  //     clipboardLayerItem.frame.y += pointDiff.y;
+  //   });
+  // }
   currentState = action.payload.clipboardLayers.main.reduce((result, current) => {
     const layerItem = action.payload.clipboardLayers.byId[current];
     const layerProject = layerItem.type === 'Artboard' ? layerItem.artboard : currentState.activeArtboard;
