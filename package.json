@@ -134,6 +134,7 @@
     "reselect": "^4.0.0",
     "sharp": "^0.25.4",
     "sketch-file": "^0.3.3",
+    "string.prototype.replaceall": "^1.0.4",
     "styled-components": "^5.0.1",
     "tinycolor2": "^1.4.1",
     "uuid": "^7.0.3"

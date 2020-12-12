@@ -1,31 +1,34 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { ReactElement, useEffect, useRef } from 'react';
-import { connect, useSelector } from 'react-redux';
+import React, { ReactElement, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { uiPaperScope } from '../canvas';
-import { getArtboardsByPaperScope, importPaperProject } from '../store/selectors/layer';
 import { RootState } from '../store/reducers';
-import { Layer } from 'paper';
+import { importPaperJSON } from '../store/selectors/layer';
 
 interface CanvasArtboardProps {
-  // artboards?: string[];
-  matrix?: number[];
-  paperJSON?: string;
-  paperScopeIndex?: number;
+  id: string;
 }
 
 const CanvasArtboard = (props: CanvasArtboardProps): ReactElement => {
-  const { matrix, paperJSON, paperScopeIndex } = props;
+  const { id } = props;
+  const paperScopeIndex = useSelector((state: RootState) => (state.layer.present.byId[id] as Btwx.Artboard).paperScope);
+  const paperJSON = useSelector((state: RootState) => (state.layer.present.byId[id] as Btwx.Artboard).paperJSON);
+  const documentImages = useSelector((state: RootState) => state.documentSettings.images.byId);
 
   useEffect(() => {
-    const canvasWrap = document.getElementById('canvas-container');
     const paperScope = uiPaperScope.projects[paperScopeIndex];
-    paperScope.importJSON(paperJSON);
-    paperScope.view.viewSize = new uiPaperScope.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
-    paperScope.view.matrix.set(matrix);
+    importPaperJSON({
+      documentImages,
+      paperJSON,
+      paperScope
+    });
     return () => {
-      paperScope.clear();
+      const item = uiPaperScope.projects[paperScopeIndex].getItem({data: {id}});
+      if (item) {
+        item.remove();
+      }
     }
-  }, [paperScopeIndex]);
+  }, [id]);
 
   return (
     <></>
@@ -38,23 +41,17 @@ export default CanvasArtboard;
 //   documentImages: {
 //     [id: string]: Btwx.DocumentImage;
 //   };
-//   matrix: number[];
+//   paperScope: number;
 //   paperJSON: string;
-//   // artboards: string[];
 // } => {
 //   const { layer, documentSettings } = state;
-//   // const artboardsByPaperScope = getArtboardsByPaperScope(state);
-//   // const artboards = artboardsByPaperScope[ownProps.id];
-//   const paperJSON = layer.present.paperJSON[ownProps.id - 1];
-//   // const paperJSON = artboards.reduce((result, current) => {
-//   //   const artboardItem = layer.present.byId[current] as Btwx.Artboard;
-//   //   return [...result, artboardItem.paperJSON];
-//   // }, []);
+//   const artboardItem = layer.present.byId[ownProps.id] as Btwx.Artboard;
+//   const paperScope = artboardItem.paperScope;
+//   const paperJSON = artboardItem.paperJSON;
 //   return {
 //     documentImages: documentSettings.images.byId,
-//     matrix: documentSettings.matrix,
-//     paperJSON: paperJSON,
-//     // artboards: artboards
+//     paperScope: paperScope,
+//     paperJSON: paperJSON
 //   };
 // };
 

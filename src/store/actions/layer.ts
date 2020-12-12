@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { remote } from 'electron';
+import replaceAll from 'string.prototype.replaceall';
 import sharp from 'sharp';
 import tinycolor from 'tinycolor2';
 import { v4 as uuidv4 } from 'uuid';
@@ -10,9 +11,9 @@ import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import { uiPaperScope } from '../../canvas';
 import paper from 'paper';
 import MeasureGuide from '../../canvas/measureGuide';
-import { DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_VALUE, THEME_PRIMARY_COLOR, DEFAULT_TWEEN_EVENTS, TWEEN_PROPS_MAP } from '../../constants';
+import { ARTBOARDS_PER_SCOPE, DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_VALUE, THEME_PRIMARY_COLOR, DEFAULT_TWEEN_EVENTS, TWEEN_PROPS_MAP } from '../../constants';
 import { getPaperFillColor, getPaperStrokeColor, getPaperShadowColor } from '../utils/paper';
-import { getClipboardCenter, getLayerAndDescendants, getLayersBounds, importPaperProject, colorsMatch, gradientsMatch, getNearestScopeAncestor, getArtboardEventItems, orderLayersByDepth, canMaskLayers, canMaskSelection, canPasteSVG, getLineToPoint, getLineFromPoint, getArtboardsTopTop, getSelectedBounds, getParentPaperLayer, getGradientOriginPoint, getGradientDestinationPoint, getPaperLayer, getSelectedPaperLayers, getItemLayers, getSelectedPaperScopes, getAbsolutePosition, getActiveArtboardBounds, getLayerBounds } from '../selectors/layer';
+import { getClipboardCenter, getLayerAndDescendants, getLayersBounds, colorsMatch, gradientsMatch, getNearestScopeAncestor, getArtboardEventItems, orderLayersByDepth, canMaskLayers, canMaskSelection, canPasteSVG, getLineToPoint, getLineFromPoint, getArtboardsTopTop, getSelectedBounds, getParentPaperLayer, getGradientOriginPoint, getGradientDestinationPoint, getPaperLayer, getSelectedPaperLayers, getItemLayers, getSelectedPaperScopes, getAbsolutePosition, getActiveArtboardBounds, getLayerBounds, importPaperJSON } from '../selectors/layer';
 import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle, getLayerMasked, getLayerUnderlyingMask } from '../utils/actions';
 
 import { bufferToBase64, scrollToLayer } from '../../utils';
@@ -454,7 +455,6 @@ import {
   LayerTypes
 } from '../actionTypes/layer';
 
-import { replaceAllStr } from '../utils/general';
 import gradientEditor from '../reducers/gradientEditor';
 
 // Artboard
@@ -469,7 +469,7 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
     const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const name = payload.layer.name ? payload.layer.name : 'Artboard';
-    const paperScope = Math.floor((state.layer.present.childrenById.root.length) / 3) + 1;
+    const paperScope = Math.floor((state.layer.present.childrenById.root.length) / ARTBOARDS_PER_SCOPE) + 1;
     const index = state.layer.present.childrenById.root.length;
     const style = getLayerStyle(payload, {}, { fill: { color: DEFAULT_ARTBOARD_BACKGROUND_COLOR } as Btwx.Fill, stroke: { enabled: false } as Btwx.Stroke, shadow: { enabled: false } as Btwx.Shadow });
     const frame = getLayerFrame(payload);
@@ -512,7 +512,8 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
       name: name,
       data: { id: id, type: 'Layer', layerType: 'Artboard', scope: ['root'] },
       children: [artboardBackground, artboardMaskedLayers],
-      parent: uiPaperScope.projects[paperScope].activeLayer
+      insert: false
+      // parent: uiPaperScope.projects[paperScope].activeLayer
     });
     // dispatch action
     const newLayer = {
@@ -540,7 +541,7 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
       },
       transform: DEFAULT_TRANSFORM,
       style: style,
-      // paperJSON: artboard.exportJSON()
+      paperJSON: artboard.exportJSON()
     } as Btwx.Artboard;
     dispatch(addArtboard({
       layer: newLayer,
@@ -2833,7 +2834,7 @@ export const pasteLayersThunk = (props?: { overSelection?: boolean; overPoint?: 
           if (parsedText.type && parsedText.type === 'layers') {
             const withNewIds: string = parsedText.allIds.reduce((result: string, current: string) => {
               const newId = uuidv4();
-              result = replaceAllStr(result, current, newId);
+              result = replaceAll(result, current, newId);
               return result;
             }, text);
             const clipboardLayers: Btwx.ClipboardLayers = JSON.parse(withNewIds);
@@ -3037,14 +3038,25 @@ export const undoThunk = () => {
       // undo
       dispatch(ActionCreators.undo());
       //
-      // if (state.layer.present.edit.projects && layerState.edit.projects) {
-      //   layerState.paperJSON.forEach((json, index) => {
-      //     const paperScope = uiPaperScope.projects[index + 1];
-      //     paperScope.activate();
-      //     paperScope.clear();
-      //     paperScope.importJSON(json);
-      //   });
-      // }
+      if (state.layer.present.edit.projects && layerState.edit.projects) {
+        const documentImages = state.documentSettings.images.byId;
+        state.layer.present.edit.projects.forEach((id) => {
+          const currentArtboardItem = state.layer.present.byId[id];
+          const pastArtboardItem = layerState.byId[id] as Btwx.Artboard;
+          if (currentArtboardItem && pastArtboardItem) {
+            const paperScopeIndex = pastArtboardItem.paperScope;
+            const paperScope = uiPaperScope.projects[paperScopeIndex];
+            const paperJSON = pastArtboardItem.paperJSON;
+            const paperLayer = paperScope.getItem({data: {id}});
+            const newPaperLayer = importPaperJSON({
+              paperScope,
+              paperJSON,
+              documentImages
+            });
+            paperLayer.replaceWith(newPaperLayer);
+          }
+        });
+      }
       // update editors
       switch(state.layer.present.edit.actionType) {
         case SET_LAYERS_FILL_COLOR: {
@@ -3147,14 +3159,26 @@ export const redoThunk = () => {
       // redo
       dispatch(ActionCreators.redo());
       //
-      // if (layerState.edit.projects) {
-      //   layerState.paperJSON.forEach((json, index) => {
-      //     const paperScope = uiPaperScope.projects[index + 1];
-      //     paperScope.activate();
-      //     paperScope.clear();
-      //     paperScope.importJSON(json);
-      //   });
-      // }
+
+      if (state.layer.present.edit.projects && layerState.edit.projects) {
+        const documentImages = state.documentSettings.images.byId;
+        layerState.edit.projects.forEach((id) => {
+          const currentArtboardItem = state.layer.present.byId[id];
+          const futureArtboardItem = layerState.byId[id] as Btwx.Artboard;
+          if (currentArtboardItem && futureArtboardItem) {
+            const paperScopeIndex = futureArtboardItem.paperScope;
+            const paperScope = uiPaperScope.projects[paperScopeIndex];
+            const paperJSON = futureArtboardItem.paperJSON;
+            const paperLayer = paperScope.getItem({data: {id}});
+            const newPaperLayer = importPaperJSON({
+              paperScope,
+              paperJSON,
+              documentImages
+            });
+            paperLayer.replaceWith(newPaperLayer);
+          }
+        });
+      }
       // update editors
       switch(layerState.edit.actionType) {
         case SET_LAYERS_FILL_COLOR: {

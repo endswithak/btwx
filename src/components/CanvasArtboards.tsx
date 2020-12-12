@@ -1,20 +1,18 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { ReactElement, useEffect, useRef } from 'react';
-import { connect, useSelector } from 'react-redux';
+import React, { ReactElement, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { uiPaperScope } from '../canvas';
 import { RootState } from '../store/reducers';
-import { getLayerPaperScopes } from '../store/selectors/layer';
+import { ARTBOARDS_PER_SCOPE } from '../constants';
 import CanvasArtboard from './CanvasArtboard';
 
 interface CanvasArtboardsProps {
   ready?: boolean;
-  layerPaperJSON?: string[];
-  matrix?: number[];
 }
 
 const CanvasArtboards = (props: CanvasArtboardsProps): ReactElement => {
-  const { ready, layerPaperJSON, matrix } = props;
-  const ref = useRef<HTMLCanvasElement>(null);
+  const { ready } = props;
+  const artboards = useSelector((state: RootState) => state.layer.present.byId.root.children);
 
   useEffect(() => {
     [...Array(11).keys()].forEach((scope, index) => {
@@ -23,21 +21,6 @@ const CanvasArtboards = (props: CanvasArtboardsProps): ReactElement => {
     });
     uiPaperScope.projects[0].activate();
   }, []);
-
-  // useEffect(() => {
-  //   const canvasWrap = document.getElementById('canvas-container');
-  //   [...Array(11).keys()].forEach((scope, index) => {
-  //     if (index !== 0) {
-  //       const paperScope = uiPaperScope.projects[index];
-  //       paperScope.clear();
-  //       if (layerPaperJSON.length > 0 && layerPaperJSON[index - 1]) {
-  //         paperScope.importJSON(layerPaperJSON[index - 1]);
-  //         paperScope.view.viewSize = new uiPaperScope.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
-  //         paperScope.view.matrix.set(matrix);
-  //       }
-  //     }
-  //   });
-  // }, [layerPaperJSON]);
 
   return (
     <>
@@ -51,29 +34,24 @@ const CanvasArtboards = (props: CanvasArtboardsProps): ReactElement => {
       }
       <>
         {
-          layerPaperJSON.map((paperJSON, index) => (
-            <CanvasArtboard
-              key={index}
-              paperJSON={paperJSON}
-              paperScopeIndex={index + 1} />
-          ))
+          ready
+          ? artboards.map((id, index) => {
+              if (index % ARTBOARDS_PER_SCOPE === 0) {
+                const project = uiPaperScope.projects[Math.floor(index / ARTBOARDS_PER_SCOPE) + 1];
+                project.view.viewSize = uiPaperScope.projects[0].view.viewSize;
+                project.view.matrix.set(uiPaperScope.projects[0].view.matrix.values);
+              }
+              return (
+                <CanvasArtboard
+                  key={index}
+                  id={id} />
+              )
+            })
+          : null
         }
       </>
     </>
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  layerPaperJSON: string[];
-  matrix: number[];
-} => {
-  const { layer, documentSettings } = state;
-  return {
-    layerPaperJSON: layer.present.paperJSON,
-    matrix: documentSettings.matrix
-  };
-};
-
-export default connect(
-  mapStateToProps
-)(CanvasArtboards);
+export default CanvasArtboards;
