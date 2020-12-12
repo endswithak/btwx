@@ -352,8 +352,8 @@ declare namespace Btwx {
     type: 'Artboard';
     originArtboardForEvents: string[];
     destinationArtboardForEvents: string[];
-    paperScope: number;
-    paperJSON: string;
+    projectIndex: number;
+    json: string;
   }
 
   interface MaskableLayer extends Layer {
@@ -431,7 +431,7 @@ declare namespace Btwx {
       [id: string]: DocumentImage;
     };
     bounds: paper.Rectangle | number[];
-    paperJSON?: {
+    json?: {
       [id: string]: string;
     };
   }

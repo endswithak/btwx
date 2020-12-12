@@ -2,7 +2,7 @@
 import React, { useEffect, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getLayerPaperScope, getPaperLayer, getPaperLayersBounds, getSelectedPaperScopes } from '../store/selectors/layer';
+import { getLayerProjectIndex, getPaperLayer, getPaperLayersBounds, getSelectedProjectIndices } from '../store/selectors/layer';
 import { uiPaperScope } from '../canvas';
 import { THEME_PRIMARY_COLOR } from '../constants';
 import { setCanvasDragging } from '../store/actions/canvasSettings';
@@ -38,7 +38,7 @@ type DragToolProps = (
 
 const DragTool = (props: DragToolProps): ReactElement => {
   const { isEnabled, hover, dragHandle, setCanvasDragging, dragging, selected, moveLayers, duplicateLayers, tool, altModifier, downEvent, dragEvent, upEvent, selectedPaperScopes, hoverPaperScope } = props;
-  const [originalSelection, setOriginalSelection] = useState<{id: string; paperScope: number}[]>(null);
+  const [originalSelection, setOriginalSelection] = useState<{id: string; projectIndex: number}[]>(null);
   const [fromBounds, setFromBounds] = useState<paper.Rectangle>(null);
   const [toBounds, setToBounds] = useState<paper.Rectangle>(null);
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
@@ -88,12 +88,12 @@ const DragTool = (props: DragToolProps): ReactElement => {
 
   // tool mousedown will fire before selected is updated...
   // so we need to determine next selection on mousedown
-  const getDragLayers = (e: paper.ToolEvent): {id: string; paperScope: number}[] => {
+  const getDragLayers = (e: paper.ToolEvent): {id: string; projectIndex: number}[] => {
     const isHoverSelected = hover && selected.includes(hover);
     const selectedWithPaperScopes = selected.reduce((result, current) => {
-      result = [...result, {id: current, paperScope: selectedPaperScopes[current]}];
+      result = [...result, {id: current, projectIndex: selectedPaperScopes[current]}];
       return result;
-    }, []) as {id: string; paperScope: number}[];
+    }, []) as {id: string; projectIndex: number}[];
     if (e.modifiers.shift) {
       if (isHoverSelected) {
         return selectedWithPaperScopes.reduce((result, current) => {
@@ -104,7 +104,7 @@ const DragTool = (props: DragToolProps): ReactElement => {
         }, []);
       } else {
         if (hover) {
-          return [...selectedWithPaperScopes, {id: hover, paperScope: hoverPaperScope}];
+          return [...selectedWithPaperScopes, {id: hover, projectIndex: hoverPaperScope}];
         } else {
           return selectedWithPaperScopes;
         }
@@ -114,7 +114,7 @@ const DragTool = (props: DragToolProps): ReactElement => {
         return selectedWithPaperScopes;
       } else {
         if (hover) {
-          return [{id: hover, paperScope: hoverPaperScope}];
+          return [{id: hover, projectIndex: hoverPaperScope}];
         } else {
           return selectedWithPaperScopes;
         }
@@ -133,7 +133,7 @@ const DragTool = (props: DragToolProps): ReactElement => {
         const selectionFrame = uiPaperScope.project.getItem({ data: { id: 'selectionFrame' } });
         selectionFrame.removeChildren();
         originalSelection.forEach((item, index) => {
-          const paperLayer = getPaperLayer(item.id, item.paperScope);
+          const paperLayer = getPaperLayer(item.id, item.projectIndex);
           const ogLayer = originalPaperSelection[index];
           if (paperLayer && ogLayer) {
             const absPosition = ogLayer.position;
@@ -156,7 +156,7 @@ const DragTool = (props: DragToolProps): ReactElement => {
       const dragOutlines = new uiPaperScope.Group({insert: false});
       const dragPaperLayers: paper.Item[] = [];
       dragLayers.forEach((layer, index) => {
-        const paperLayer = getPaperLayer(layer.id, layer.paperScope);
+        const paperLayer = getPaperLayer(layer.id, layer.projectIndex);
         dragPaperLayers.push(paperLayer.clone({ insert: false }));
         switch(paperLayer.data.layerType) {
           case 'Artboard': {
@@ -289,8 +289,8 @@ const mapStateToProps = (state: RootState): DragToolStateProps => {
   const isEnabled = canvasSettings.activeTool === 'Drag';
   const dragging = canvasSettings.dragging;
   const dragHandle = canvasSettings.dragHandle;
-  const selectedPaperScopes = getSelectedPaperScopes(state);
-  const hoverPaperScope = hover ? getLayerPaperScope(layer.present, hover) : null;
+  const selectedPaperScopes = getSelectedProjectIndices(state);
+  const hoverPaperScope = hover ? getLayerProjectIndex(layer.present, hover) : null;
   return {
     hover,
     selected,

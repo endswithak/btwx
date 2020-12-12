@@ -7,7 +7,7 @@ import {
 export interface TextEditorState {
   isOpen: boolean;
   layer: string;
-  paperScope: number;
+  projectIndex: number;
   x: number;
   y: number;
 }
@@ -15,7 +15,7 @@ export interface TextEditorState {
 const initialState: TextEditorState = {
   isOpen: false,
   layer: null,
-  paperScope: null,
+  projectIndex: null,
   x: null,
   y: null
 };
@@ -27,7 +27,7 @@ export default (state = initialState, action: TextEditorTypes): TextEditorState 
         ...state,
         isOpen: true,
         layer: action.payload.layer,
-        paperScope: action.payload.paperScope,
+        projectIndex: action.payload.projectIndex,
         x: action.payload.x,
         y: action.payload.y
       };

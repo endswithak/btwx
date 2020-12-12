@@ -5,7 +5,7 @@ import { uiPaperScope } from '../canvas';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 import { updateMeasureGuides } from '../store/actions/layer';
-import { getPaperLayersBounds, getClosestPaperLayer, getLayerPaperScopes } from '../store/selectors/layer';
+import { getPaperLayersBounds, getClosestPaperLayer, getLayerProjectIndices } from '../store/selectors/layer';
 import Guide from '../canvas/guide';
 
 interface SnapToolProps {
@@ -25,8 +25,8 @@ interface SnapToolProps {
   preserveAspectRatio?: boolean;
   aspectRatio?: number;
   scope?: string[];
-  paperScope?: number;
-  layerPaperScopes?: number[];
+  projectIndex?: number;
+  layerProjectIndices?: number[];
   whiteListLayers?: string[];
   blackListLayers?: string[];
   measure?: boolean;
@@ -37,7 +37,7 @@ const snapToolDebug = false;
 
 const SnapTool = (props: SnapToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { toolEvent, bounds, scope, paperScope, layerPaperScopes, onUpdate, hitTestZones, snapRule, whiteListLayers, blackListLayers, preserveAspectRatio, aspectRatio, resizeHandle, measure } = props;
+  const { toolEvent, bounds, scope, projectIndex, layerProjectIndices, onUpdate, hitTestZones, snapRule, whiteListLayers, blackListLayers, preserveAspectRatio, aspectRatio, resizeHandle, measure } = props;
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
   const [xSnapPoint, setXSnapPoint] = useState<Btwx.SnapPoint>(null);
   const [ySnapPoint, setYSnapPoint] = useState<Btwx.SnapPoint>(null);
@@ -92,9 +92,9 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
   }
 
   const getGuideLayersBySnapZone = (snapZones: Btwx.SnapZones, snapZone: Btwx.SnapZoneType): paper.Item[] => {
-    const getProjectSnapLayers = (paperScope: paper.Project): paper.Item[] => {
-      if (paperScope) {
-        return paperScope.getItems({
+    const getProjectSnapLayers = (project: paper.Project): paper.Item[] => {
+      if (project) {
+        return project.getItems({
           data: (data: any) => {
             const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
             const isTopScopeGroup = data.id && data.layerType === 'Group' && data.id === scope[scope.length - 1];
@@ -134,9 +134,9 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
         return [];
       }
     }
-    return layerPaperScopes.reduce((result, current, index) => {
-      const paperScope = uiPaperScope.projects[current];
-      const projectSnapLayers = getProjectSnapLayers(paperScope);
+    return layerProjectIndices.reduce((result, current, index) => {
+      const project = uiPaperScope.projects[current];
+      const projectSnapLayers = getProjectSnapLayers(project);
       if (projectSnapLayers && projectSnapLayers.length > 0) {
         result = [...result, ...projectSnapLayers];
       }
@@ -145,9 +145,9 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
   }
 
   const getYSnapToLayer = (snapZones: Btwx.SnapZones): paper.Item => {
-    const getProjectSnapLayer = (paperScope: paper.Project): paper.Item => {
-      if (paperScope) {
-        return paperScope.getItem({
+    const getProjectSnapLayer = (project: paper.Project): paper.Item => {
+      if (project) {
+        return project.getItem({
           data: (data: any) => {
             const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
             const isTopScopeGroup = data.id && data.layerType === 'Group' && data.id === scope[scope.length - 1];
@@ -180,9 +180,9 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
         return null;
       }
     }
-    return layerPaperScopes.reduce((result: paper.Item, current, index) => {
-      const paperScope = uiPaperScope.projects[current];
-      const projectSnapLayer = getProjectSnapLayer(paperScope);
+    return layerProjectIndices.reduce((result: paper.Item, current, index) => {
+      const project = uiPaperScope.projects[current];
+      const projectSnapLayer = getProjectSnapLayer(project);
       if (projectSnapLayer) {
         result = projectSnapLayer;
       }
@@ -191,9 +191,9 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
   }
 
   const getXSnapToLayer = (snapZones: Btwx.SnapZones): paper.Item => {
-    const getProjectSnapLayer = (paperScope: paper.Project): paper.Item => {
-      if (paperScope) {
-        return paperScope.getItem({
+    const getProjectSnapLayer = (project: paper.Project): paper.Item => {
+      if (project) {
+        return project.getItem({
           data: (data: any) => {
             const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
             const isTopScopeGroup = data.id && data.layerType === 'Group' && data.id === scope[scope.length - 1];
@@ -226,9 +226,9 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
         return null;
       }
     }
-    return layerPaperScopes.reduce((result: paper.Item, current, index) => {
-      const paperScope = uiPaperScope.projects[current];
-      const projectSnapLayer = getProjectSnapLayer(paperScope);
+    return layerProjectIndices.reduce((result: paper.Item, current, index) => {
+      const project = uiPaperScope.projects[current];
+      const projectSnapLayer = getProjectSnapLayer(project);
       if (projectSnapLayer) {
         result = projectSnapLayer;
       }
@@ -888,17 +888,17 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   scope: string[];
-  paperScope: number;
-  layerPaperScopes: number[];
+  projectIndex: number;
+  layerProjectIndices: number[];
 } => {
   const { layer } = state;
   const scope = layer.present.scope;
-  const paperScope = layer.present.paperScope;
-  const layerPaperScopes = getLayerPaperScopes(state);
+  const projectIndex = layer.present.projectIndex;
+  const layerProjectIndices = getLayerProjectIndices(state);
   return {
     scope,
-    paperScope,
-    layerPaperScopes
+    projectIndex,
+    layerProjectIndices
   };
 };
 

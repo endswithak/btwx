@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-export const ARTBOARDS_PER_SCOPE = 3;
+export const ARTBOARDS_PER_PROJECT = 3;
 export const APP_NAME = 'btwx';
 export const PREVIEW_PREFIX = '**preview**';
 export const THEME_PRIMARY_COLOR = '#3C88FD';

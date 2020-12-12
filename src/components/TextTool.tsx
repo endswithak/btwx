@@ -12,7 +12,7 @@ import { openTextEditor } from '../store/actions/textEditor';
 import { OpenTextEditorPayload, TextEditorTypes } from '../store/actionTypes/textEditor';
 import { TextSettingsState } from '../store/reducers/textSettings';
 import { DEFAULT_TEXT_VALUE, DEFAULT_TRANSFORM, DEFAULT_STYLE } from '../constants';
-import { getLayerPaperScopes } from '../store/selectors/layer';
+import { getLayerProjectIndices } from '../store/selectors/layer';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
 
@@ -20,11 +20,10 @@ interface TextToolStateProps {
   isEnabled?: boolean;
   scope?: string[];
   textSettings?: TextSettingsState;
-  paperScope?: number;
-  layerPaperScopes?: number[];
+  projectIndex?: number;
+  layerProjectIndices?: number[];
   activeArtboard?: string;
-  activeArtboardPaperScope?: number;
-  activeArtboardPaperLayerIndex?: number;
+  activeArtboardProjectIndex?: number;
 }
 
 interface TextToolDispatchProps {
@@ -40,7 +39,7 @@ type TextToolProps = (
 );
 
 const TextTool = (props: TextToolProps): ReactElement => {
-  const { isEnabled, tool, moveEvent, downEvent, paperScope, layerPaperScopes, openTextEditor, textSettings, scope, addTextThunk, toggleTextToolThunk, activeArtboard, activeArtboardPaperScope, activeArtboardPaperLayerIndex } = props;
+  const { isEnabled, tool, moveEvent, downEvent, projectIndex, layerProjectIndices, openTextEditor, textSettings, scope, addTextThunk, toggleTextToolThunk, activeArtboard, activeArtboardProjectIndex } = props;
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
   const [toBounds, setToBounds] = useState<paper.Rectangle>(null);
 
@@ -71,23 +70,23 @@ const TextTool = (props: TextToolProps): ReactElement => {
         ...textSettings,
         insert: false
       });
-      const parentItem = layerPaperScopes.reduce((result, current, index) => {
-        const paperScope = uiPaperScope.projects[current];
-        if (paperScope) {
-          const hitTest = paperScope.getItem({
+      const parentItem = layerProjectIndices.reduce((result, current, index) => {
+        const project = uiPaperScope.projects[current];
+        if (project) {
+          const hitTest = project.getItem({
             data: (data: any) => {
               return data.id === 'artboardBackground';
             },
             overlapping: paperLayer.bounds
           });
-          return hitTest ? { id: hitTest.parent.data.id, paperScope: index + 1, paperLayer: hitTest.parent } : result;
+          return hitTest ? { id: hitTest.parent.data.id, projectIndex: index + 1, paperLayer: hitTest.parent } : result;
         } else {
           return result;
         }
       }, {
         id: activeArtboard,
-        paperScope: activeArtboardPaperScope,
-        paperLayer: uiPaperScope.projects[activeArtboardPaperScope].layers[activeArtboardPaperLayerIndex]
+        projectIndex: activeArtboardProjectIndex,
+        paperLayer: uiPaperScope.projects[activeArtboardProjectIndex].getItem({data: {id: activeArtboard}})
       });
       addTextThunk({
         layer: {
@@ -131,7 +130,7 @@ const TextTool = (props: TextToolProps): ReactElement => {
         // open text editor with new text layer props
         openTextEditor({
           layer: textLayer.id,
-          paperScope: parentItem.paperScope,
+          projectIndex: parentItem.projectIndex,
           x: ((): number => {
             switch(textSettings.justification) {
               case 'left':
@@ -187,20 +186,18 @@ const mapStateToProps = (state: RootState): TextToolStateProps => {
   const { textTool, textSettings, layer } = state;
   const isEnabled = textTool.isEnabled;
   const scope = layer.present.scope;
-  const paperScope = layer.present.paperScope;
-  const layerPaperScopes = getLayerPaperScopes(state);
+  const projectIndex = layer.present.projectIndex;
+  const layerProjectIndices = getLayerProjectIndices(state);
   const activeArtboard = layer.present.activeArtboard;
-  const activeArtboardPaperScope = activeArtboard ? (layer.present.byId[activeArtboard] as Btwx.Artboard).paperScope : null;
-  const activeArtboardPaperLayerIndex = activeArtboard ? (layer.present.byId[activeArtboard] as Btwx.Artboard).paperLayerIndex : null;
+  const activeArtboardProjectIndex = activeArtboard ? (layer.present.byId[activeArtboard] as Btwx.Artboard).projectIndex : null;
   return {
     isEnabled,
     textSettings,
     scope,
-    paperScope,
-    layerPaperScopes,
+    projectIndex,
+    layerProjectIndices,
     activeArtboard,
-    activeArtboardPaperScope,
-    activeArtboardPaperLayerIndex
+    activeArtboardProjectIndex
   };
 };
 

@@ -7,7 +7,7 @@ import { setCanvasSelecting } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasSelectingPayload } from '../store/actionTypes/canvasSettings';
 import { areaSelectLayers } from '../store/actions/layer';
 import { LayerTypes, AreaSelectLayersPayload } from '../store/actionTypes/layer';
-import { getLayerPaperScopes } from '../store/selectors/layer';
+import { getLayerProjectIndices } from '../store/selectors/layer';
 import PaperTool, { PaperToolProps } from './PaperTool';
 import { ThemeContext } from './ThemeProvider';
 
@@ -78,8 +78,8 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
         to: upEvent.point
       });
       if (areaSelectBounds && (areaSelectBounds.width > 0 || areaSelectBounds.height > 0)) {
-        const getProjectsLayers = (paperScope: paper.Project): string[] => {
-          return paperScope.getItems({
+        const getProjectsLayers = (project: paper.Project): string[] => {
+          return project.getItems({
             data: (data: any) => {
               const notPage = data.type === 'Layer' && data.layerType !== 'Page';
               const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
@@ -129,7 +129,7 @@ const mapStateToProps = (state: RootState): AreaSelectToolStateProps => {
   const { canvasSettings, layer } = state;
   const isEnabled = canvasSettings.activeTool === 'AreaSelect';
   const scope = layer.present.scope;
-  const layerPaperScopes = getLayerPaperScopes(state);
+  const layerPaperScopes = getLayerProjectIndices(state);
   return {
     isEnabled,
     scope,

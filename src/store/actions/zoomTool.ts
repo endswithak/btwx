@@ -2,15 +2,15 @@ import { RootState } from '../reducers';
 import { setCanvasActiveTool } from './canvasSettings';
 import { setCanvasMatrix } from './documentSettings';
 import { uiPaperScope } from '../../canvas';
-import { getActiveArtboardBounds, getAllPaperScopes, getCanvasBounds, getSelectedBounds } from '../selectors/layer';
+import { getActiveArtboardBounds, getAllProjectIndices, getCanvasBounds, getSelectedBounds } from '../selectors/layer';
 
 export const zoomInThunk = () => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
-    const allPaperScopes = getAllPaperScopes(state);
-    allPaperScopes.forEach((current, index) => {
-      const paperScope = uiPaperScope.projects[current];
-      paperScope.view.zoom *= 2;
+    const allProjectIndices = getAllProjectIndices(state);
+    allProjectIndices.forEach((current, index) => {
+      const project = uiPaperScope.projects[current];
+      project.view.zoom *= 2;
     });
     dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
   }
@@ -19,13 +19,13 @@ export const zoomInThunk = () => {
 export const zoomOutThunk = () => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
-    const allPaperScopes = getAllPaperScopes(state);
-    allPaperScopes.forEach((current, index) => {
-      const paperScope = uiPaperScope.projects[current];
-      if (paperScope.view.zoom / 2 >= 0.01) {
-        paperScope.view.zoom /= 2;
+    const allProjectIndices = getAllProjectIndices(state);
+    allProjectIndices.forEach((current, index) => {
+      const project = uiPaperScope.projects[current];
+      if (project.view.zoom / 2 >= 0.01) {
+        project.view.zoom /= 2;
       } else {
-        paperScope.view.zoom = 0.01;
+        project.view.zoom = 0.01;
       }
     });
     dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
@@ -35,10 +35,10 @@ export const zoomOutThunk = () => {
 export const zoomPercentThunk = (percent: number) => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
-    const allPaperScopes = getAllPaperScopes(state);
-    allPaperScopes.forEach((current, index) => {
-      const paperScope = uiPaperScope.projects[current];
-      paperScope.view.zoom = percent;
+    const allProjectIndices = getAllProjectIndices(state);
+    allProjectIndices.forEach((current, index) => {
+      const project = uiPaperScope.projects[current];
+      project.view.zoom = percent;
     });
     dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
   }
@@ -47,7 +47,7 @@ export const zoomPercentThunk = (percent: number) => {
 export const zoomFitCanvasThunk = () => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
-    const allPaperScopes = getAllPaperScopes(state);
+    const allProjectIndices = getAllProjectIndices(state);
     const canvasBounds = getCanvasBounds(state);
     const canvasCenter = canvasBounds.center;
     const viewWidth: number = uiPaperScope.view.bounds.width;
@@ -66,10 +66,10 @@ export const zoomFitCanvasThunk = () => {
       }
     })();
     const newZoom = (viewDim / constrainingDim.dim) * uiPaperScope.view.zoom;
-    allPaperScopes.forEach((current, index) => {
-      const paperScope = uiPaperScope.projects[current];
-      paperScope.view.center = canvasCenter;
-      paperScope.view.zoom = newZoom;
+    allProjectIndices.forEach((current, index) => {
+      const project = uiPaperScope.projects[current];
+      project.view.center = canvasCenter;
+      project.view.zoom = newZoom;
     });
     dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
   }
@@ -78,7 +78,7 @@ export const zoomFitCanvasThunk = () => {
 export const zoomFitSelectedThunk = () => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
-    const allPaperScopes = getAllPaperScopes(state);
+    const allProjectIndices = getAllProjectIndices(state);
     const selectionBounds = getSelectedBounds(state);
     const selectionCenter = selectionBounds.center;
     const viewWidth: number = uiPaperScope.view.bounds.width;
@@ -97,10 +97,10 @@ export const zoomFitSelectedThunk = () => {
       }
     })();
     const newZoom = (viewDim / constrainingDim.dim) * uiPaperScope.view.zoom;
-    allPaperScopes.forEach((current, index) => {
-      const paperScope = uiPaperScope.projects[current];
-      paperScope.view.center = selectionCenter;
-      paperScope.view.zoom = newZoom;
+    allProjectIndices.forEach((current, index) => {
+      const project = uiPaperScope.projects[current];
+      project.view.center = selectionCenter;
+      project.view.zoom = newZoom;
     });
     dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
   }
@@ -109,7 +109,7 @@ export const zoomFitSelectedThunk = () => {
 export const zoomFitActiveArtboardThunk = () => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
-    const allPaperScopes = getAllPaperScopes(state);
+    const allProjectIndices = getAllProjectIndices(state);
     const activeArtboardBounds = getActiveArtboardBounds(state);
     const activeArtboardCenter = activeArtboardBounds.center;
     const viewWidth: number = uiPaperScope.view.bounds.width;
@@ -128,10 +128,10 @@ export const zoomFitActiveArtboardThunk = () => {
       }
     })();
     const newZoom = (viewDim / constrainingDim.dim) * uiPaperScope.view.zoom;
-    allPaperScopes.forEach((current, index) => {
-      const paperScope = uiPaperScope.projects[current];
-      paperScope.view.center = activeArtboardCenter;
-      paperScope.view.zoom = newZoom;
+    allProjectIndices.forEach((current, index) => {
+      const project = uiPaperScope.projects[current];
+      project.view.center = activeArtboardCenter;
+      project.view.zoom = newZoom;
     });
     dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
   }

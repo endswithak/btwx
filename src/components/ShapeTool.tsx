@@ -7,7 +7,7 @@ import { isBetween } from '../utils';
 import { RootState } from '../store/reducers';
 import { DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_POINTS, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../constants';
 import Tooltip from '../canvas/tooltip';
-import { getLayerPaperScopes } from '../store/selectors/layer';
+import { getLayerProjectIndices } from '../store/selectors/layer';
 import { uiPaperScope } from '../canvas';
 import { setCanvasDrawing } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasDrawingPayload } from '../store/actionTypes/canvasSettings';
@@ -22,7 +22,7 @@ interface ShapeToolStateProps {
   isEnabled?: boolean;
   shapeType?: Btwx.ShapeType;
   scope?: string[];
-  paperScope?: number;
+  projectIndex?: number;
   layerPaperScopes?: number[];
   drawing?: boolean;
   activeArtboard?: string;
@@ -44,7 +44,7 @@ type ShapeToolProps = (
 
 const ShapeTool = (props: ShapeToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isEnabled, shapeType, addShapeThunk, activeArtboard, activeArtboardPaperScope, activeArtboardPaperLayerIndex, scope, paperScope, layerPaperScopes, setCanvasDrawing, drawing, toggleShapeToolThunk, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent } = props;
+  const { isEnabled, shapeType, addShapeThunk, activeArtboard, activeArtboardPaperScope, activeArtboardPaperLayerIndex, scope, projectIndex, layerPaperScopes, setCanvasDrawing, drawing, toggleShapeToolThunk, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent } = props;
   const [handle, setHandle] = useState<Btwx.ResizeHandle>(null);
   const [maxDim, setMaxDim] = useState<number>(null);
   const [vector, setVector] = useState<paper.Point>(null);
@@ -335,21 +335,21 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
       const lineToPoint = (paperLayer as paper.Path).lastSegment.point;
       const lineVector = lineToPoint.subtract(lineFromPoint);
       const parentItem = layerPaperScopes.reduce((result, current, index) => {
-        const paperScope = uiPaperScope.projects[current];
-        if (paperScope) {
-          const hitTest = paperScope.getItem({
+        const projectIndex = uiPaperScope.projects[current];
+        if (projectIndex) {
+          const hitTest = projectIndex.getItem({
             data: (data: any) => {
               return data.id === 'artboardBackground';
             },
             overlapping: paperLayer.bounds
           });
-          return hitTest ? { id: hitTest.parent.data.id, paperScope: index + 1, paperLayer: hitTest.parent } : result;
+          return hitTest ? { id: hitTest.parent.data.id, projectIndex: index + 1, paperLayer: hitTest.parent } : result;
         } else {
           return result;
         }
       }, {
         id: activeArtboard,
-        paperScope: activeArtboardPaperScope,
+        projectIndex: activeArtboardPaperScope,
         paperLayer: uiPaperScope.projects[activeArtboardPaperScope].layers[activeArtboardPaperLayerIndex]
       });
       addShapeThunk({
@@ -482,17 +482,17 @@ const mapStateToProps = (state: RootState): ShapeToolStateProps => {
   const isEnabled = shapeTool.isEnabled;
   const shapeType = shapeTool.shapeType;
   const scope = layer.present.scope;
-  const paperScope = layer.present.paperScope;
+  const projectIndex = layer.present.projectIndex;
   const drawing = canvasSettings.drawing;
-  const layerPaperScopes = getLayerPaperScopes(state);
+  const layerPaperScopes = getLayerProjectIndices(state);
   const activeArtboard = layer.present.activeArtboard;
-  const activeArtboardPaperScope = activeArtboard ? (layer.present.byId[activeArtboard] as Btwx.Artboard).paperScope : null;
+  const activeArtboardPaperScope = activeArtboard ? (layer.present.byId[activeArtboard] as Btwx.Artboard).projectIndex : null;
   const activeArtboardPaperLayerIndex = activeArtboard ? (layer.present.byId[activeArtboard] as Btwx.Artboard).paperLayerIndex : null;
   return {
     isEnabled,
     shapeType,
     scope,
-    paperScope,
+    projectIndex,
     drawing,
     layerPaperScopes,
     activeArtboard,

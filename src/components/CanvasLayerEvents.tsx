@@ -17,7 +17,7 @@ import { ThemeContext } from './ThemeProvider';
 interface CanvasLayerEventsProps {
   layerEvent: {
     hitResult: paper.HitResult;
-    paperScope: number;
+    projectIndex: number;
     empty: boolean;
     eventType: 'mouseMove' | 'mouseDown' | 'mouseUp' | 'doubleClick' | 'contextMenu';
     event: any;
@@ -130,13 +130,13 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
         });
       } else {
         if (layerItem.type === 'Text') {
-          const paperLayer = getPaperLayer(layerItem.id, layerEvent.paperScope);
+          const paperLayer = getPaperLayer(layerItem.id, layerEvent.projectIndex);
           const topLeft = uiPaperScope.view.projectToView(paperLayer.bounds.topLeft);
           const topCenter = uiPaperScope.view.projectToView(paperLayer.bounds.topCenter);
           const topRight = uiPaperScope.view.projectToView(paperLayer.bounds.topRight);
           openTextEditor({
             layer: layerItem.id,
-            paperScope: layerEvent.paperScope,
+            projectIndex: layerEvent.projectIndex,
             x: ((): number => {
               switch(textSettings.justification) {
                 case 'left':

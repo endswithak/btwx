@@ -3,7 +3,7 @@ import React, { ReactElement, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { uiPaperScope } from '../canvas';
 import { RootState } from '../store/reducers';
-import { ARTBOARDS_PER_SCOPE } from '../constants';
+import { ARTBOARDS_PER_PROJECT } from '../constants';
 import CanvasArtboard from './CanvasArtboard';
 
 interface CanvasArtboardsProps {
@@ -36,8 +36,8 @@ const CanvasArtboards = (props: CanvasArtboardsProps): ReactElement => {
         {
           ready
           ? artboards.map((id, index) => {
-              if (index % ARTBOARDS_PER_SCOPE === 0) {
-                const project = uiPaperScope.projects[Math.floor(index / ARTBOARDS_PER_SCOPE) + 1];
+              if (index % ARTBOARDS_PER_PROJECT === 0) {
+                const project = uiPaperScope.projects[Math.floor(index / ARTBOARDS_PER_PROJECT) + 1];
                 project.view.viewSize = uiPaperScope.projects[0].view.viewSize;
                 project.view.matrix.set(uiPaperScope.projects[0].view.matrix.values);
               }

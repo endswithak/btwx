@@ -7,7 +7,7 @@ import layer, { LayerState } from '../reducers/layer';
 import * as layerActions from '../actions/layer';
 import { addItem, removeItem, insertItem, moveItemAbove, moveItemBelow } from './general';
 import { uiPaperScope } from '../../canvas';
-import { ARTBOARDS_PER_SCOPE, TWEEN_PROPS_MAP } from '../../constants';
+import { ARTBOARDS_PER_PROJECT, TWEEN_PROPS_MAP } from '../../constants';
 
 import {
   AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer,
@@ -54,7 +54,7 @@ import {
   getPaperProp, getArtboardsTopTop, getLineFromPoint, getLineToPoint, getLineVector, getParentPaperLayer,
   getLayerYoungerSiblings, getMaskableSiblings, getSiblingLayersWithUnderlyingMask, getItemLayers,
   getAbsolutePosition, getGradientDestination, getGradientOrigin, getLayerOlderSibling, getLayerYoungestChild,
-  getLayerYoungerSibling, getCanvasBounds, getLayerBounds, hasFillTween, getSelectedBounds, getLayerPaperScopes, getArtboardsByPaperScope, savePaperJSON
+  getLayerYoungerSibling, getCanvasBounds, getLayerBounds, hasFillTween, getSelectedBounds, getLayerProjectIndices, getArtboardsByPaperScope, savePaperJSON
 } from '../selectors/layer';
 import { RootState } from '../reducers';
 
@@ -789,7 +789,7 @@ export const updateLayerIndex = (state: LayerState, id: string): LayerState => {
         ...currentState.byId,
         [id]: {
           ...currentState.byId[id],
-          paperScope: Math.floor(index / ARTBOARDS_PER_SCOPE) + 1
+          projectIndex: Math.floor(index / ARTBOARDS_PER_PROJECT) + 1
         } as Btwx.Artboard
       }
     }
@@ -1257,7 +1257,7 @@ export const decreaseLayerScope = (state: LayerState, action: DecreaseLayerScope
 export const clearLayerScope = (state: LayerState, action: ClearLayerScope): LayerState => ({
   ...state,
   scope: ['root'],
-  paperScope: null
+  projectIndex: null
 });
 
 export const newLayerScope = (state: LayerState, action: NewLayerScope): LayerState => ({
@@ -1327,7 +1327,7 @@ export const setGlobalScope = (state: LayerState, action: SetGlobalScope): Layer
   currentState = {
     ...currentState,
     scope: [...action.payload.scope],
-    paperScope: hasArtboard ? (currentState.byId[action.payload.scope[1]] as Btwx.Artboard).paperScope : null
+    projectIndex: hasArtboard ? (currentState.byId[action.payload.scope[1]] as Btwx.Artboard).projectIndex : null
   }
   return currentState;
 };
@@ -4977,7 +4977,7 @@ export const toggleLayerMask = (state: LayerState, action: ToggleLayerMask): Lay
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id) as { layerItem: Btwx.MaskableLayer; paperLayer: paper.Item };
   const parentLayerItem = state.byId[layerItem.parent];
-  const paperScopeItem = paper.PaperScope.get(state.paperScope);
+  const project = uiPaperScope.projects[state.projectIndex];
   const isMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
   const underlyingSiblings = getLayerYoungerSiblings(currentState, action.payload.id);
   const maskableUnderlyingSiblings = getMaskableSiblings(currentState, action.payload.id, underlyingSiblings);
@@ -5015,7 +5015,7 @@ export const toggleLayerMask = (state: LayerState, action: ToggleLayerMask): Lay
   } else {
     const mask = paperLayer.clone();
     mask.clipMask = true;
-    const maskGroup = new paperScopeItem.Group({
+    const maskGroup = new uiPaperScope.Group({
       name: 'MaskGroup',
       data: { id: 'maskGroup', type: 'LayerContainer', layerType: 'Shape' },
       children: [mask]
@@ -5627,8 +5627,8 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): {
         ...currentState.byId,
         [artboard]: {
           ...currentState.byId[artboard],
-          paperScope: Math.floor(currentState.childrenById.root.length / ARTBOARDS_PER_SCOPE),
-          paperJSON: duplicatePaperLayer.exportJSON()
+          projectIndex: Math.floor(currentState.childrenById.root.length / ARTBOARDS_PER_PROJECT),
+          json: duplicatePaperLayer.exportJSON()
         } as Btwx.Artboard
       }
     }
@@ -6361,7 +6361,7 @@ export const setLayerEdit = (state: LayerState, action: SetLayerEdit): LayerStat
           const projectJSON = savePaperJSON(currentState, current);
           result[current] = {
             ...result[current],
-            paperJSON: projectJSON ? projectJSON : (currentState.byId[current] as Btwx.Artboard).paperJSON
+            json: projectJSON ? projectJSON : (currentState.byId[current] as Btwx.Artboard).json
           } as Btwx.Artboard
         }
         return result;
@@ -6653,18 +6653,18 @@ export const replaceImages = (state: LayerState, action: ReplaceImages): LayerSt
 export const pasteLayerFromClipboard = (state: LayerState, action: PasteLayersFromClipboard, id: string): LayerState => {
   let currentState = state;
   const layerItem = action.payload.clipboardLayers.byId[id];
-  const paperJSON = action.payload.clipboardLayers.paperJSON[id];
+  const json = action.payload.clipboardLayers.json[id];
   const layerAndDescendants = getLayerAndDescendants({byId: action.payload.clipboardLayers.byId} as LayerState, id);
   if (layerItem.type === 'Artboard') {
     const canvasWrap = document.getElementById('canvas-container');
-    const paperScope = currentState.childrenById.root.length + 1;
-    const project = uiPaperScope.projects[paperScope];
+    const projectIndex = currentState.childrenById.root.length + 1;
+    const project = uiPaperScope.projects[projectIndex];
     const viewSize = new uiPaperScope.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
     project.view.viewSize = viewSize;
     project.view.matrix.set(uiPaperScope.projects[0].view.matrix.values);
     project.clear();
     project.activate();
-    project.importJSON(paperJSON);
+    project.importJSON(json);
     project.activeLayer.position = new uiPaperScope.Point(layerItem.frame.x, layerItem.frame.y);
     currentState = layerAndDescendants.reduce((result, current, index) => {
       const clipboardLayerItem = action.payload.clipboardLayers.byId[current];
@@ -6712,7 +6712,7 @@ export const pasteLayerFromClipboard = (state: LayerState, action: PasteLayersFr
               switch(clipboardLayerItem.type) {
                 case 'Artboard':
                   return {
-                    paperScope: paperScope,
+                    projectIndex: projectIndex,
                     // paperJSON: paperJSON
                   };
                 default:
@@ -6761,7 +6761,7 @@ export const pasteLayerFromClipboard = (state: LayerState, action: PasteLayersFr
     currentState = updateParentBounds(currentState, layerItem.id);
   } else {
     if (currentState.activeArtboard) {
-      const paperLayer = uiPaperScope.project.importJSON(paperJSON);
+      const paperLayer = uiPaperScope.project.importJSON(json);
       const activeArtboardItem = currentState.byId[currentState.activeArtboard];
       paperLayer.parent = getParentPaperLayer(currentState, currentState.activeArtboard);
       paperLayer.position = new uiPaperScope.Point(

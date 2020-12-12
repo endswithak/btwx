@@ -8,7 +8,7 @@ import { setCanvasResizing } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasResizingPayload } from '../store/actionTypes/canvasSettings';
 import { setLineFrom, setLineTo, updateSelectionFrame } from '../store/actions/layer';
 import { SetLineFromPayload, SetLineToPayload, LayerTypes } from '../store/actionTypes/layer';
-import { getPaperLayer, getSelectedPaperScopes } from '../store/selectors/layer';
+import { getPaperLayer, getSelectedProjectIndices } from '../store/selectors/layer';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
 
@@ -250,7 +250,7 @@ const mapStateToProps = (state: RootState): LineToolStateProps => {
   const resizing = canvasSettings.resizing;
   const initialHandle = canvasSettings.lineHandle;
   const selected = layer.present.selected;
-  const selectedPaperScopes = getSelectedPaperScopes(state);
+  const selectedPaperScopes = getSelectedProjectIndices(state);
   return {
     isEnabled,
     resizing,

@@ -4,7 +4,7 @@ import mexp from 'math-expression-evaluator';
 import { RootState } from '../store/reducers';
 import { SetStarsPointsPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setStarsPoints } from '../store/actions/layer';
-import { getPaperLayer, getSelectedPaperScopes } from '../store/selectors/layer';
+import { getPaperLayer, getSelectedProjectIndices } from '../store/selectors/layer';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarInput from './SidebarInput';
@@ -110,7 +110,7 @@ const mapStateToProps = (state: RootState): {
 } => {
   const { layer } = state;
   const selected = layer.present.selected;
-  const selectedPaperScopes = getSelectedPaperScopes(state);
+  const selectedPaperScopes = getSelectedProjectIndices(state);
   const layerItems: Btwx.Star[] = selected.reduce((result, current) => {
     const layerItem = layer.present.byId[current];
     return [...result, layerItem];

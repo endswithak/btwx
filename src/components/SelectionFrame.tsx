@@ -1,7 +1,7 @@
 import React, { ReactElement, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getSelectedBounds, getSelectedPaperScopes, getPaperLayer } from '../store/selectors/layer';
+import { getSelectedBounds, getSelectedProjectIndices, getPaperLayer } from '../store/selectors/layer';
 import { updateSelectionFrame } from '../store/actions/layer';
 import { uiPaperScope } from '../canvas';
 
@@ -44,7 +44,7 @@ const mapStateToProps = (state: RootState): {
   const { viewSettings, layer, documentSettings } = state;
   const theme = viewSettings.theme;
   const selectedBounds = getSelectedBounds(state);
-  const selectedPaperScopes = getSelectedPaperScopes(state);
+  const selectedPaperScopes = getSelectedProjectIndices(state);
   const singleSelection = layer.present.selected.length === 1;
   const isLine = singleSelection && state.layer.present.byId[layer.present.selected[0]].type === 'Shape' && (state.layer.present.byId[layer.present.selected[0]] as Btwx.Shape).shapeType === 'Line';
   const zoom = documentSettings.zoom;

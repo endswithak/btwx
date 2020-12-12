@@ -8,18 +8,18 @@ import { setCanvasTranslating } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasTranslatingPayload } from '../store/actionTypes/canvasSettings';
 import { setCanvasMatrix } from '../store/actions/documentSettings';
 import { DocumentSettingsTypes, SetCanvasMatrixPayload } from '../store/actionTypes/documentSettings';
-import { getAllPaperScopes } from '../store/selectors/layer';
+import { getAllProjectIndices } from '../store/selectors/layer';
 
 interface TranslateToolProps {
   translateEvent: WheelEvent;
   isEnabled?: boolean;
-  allPaperScopes?: number[];
+  allProjectIndices?: number[];
   setCanvasTranslating?(payload: SetCanvasTranslatingPayload): CanvasSettingsTypes;
   setCanvasMatrix?(payload: SetCanvasMatrixPayload): DocumentSettingsTypes;
 }
 
 const TranslateTool = (props: TranslateToolProps): ReactElement => {
-  const { translateEvent, setCanvasTranslating, isEnabled, setCanvasMatrix, allPaperScopes } = props;
+  const { translateEvent, setCanvasTranslating, isEnabled, setCanvasMatrix, allProjectIndices } = props;
 
   const debounceTranslate = useCallback(
     debounce(() => {
@@ -31,12 +31,12 @@ const TranslateTool = (props: TranslateToolProps): ReactElement => {
 
   useEffect(() => {
     if (translateEvent) {
-      allPaperScopes.forEach((current, index) => {
-        const paperScope = uiPaperScope.projects[current];
-        paperScope.view.translate(
+      allProjectIndices.forEach((current, index) => {
+        const project = uiPaperScope.projects[current];
+        project.view.translate(
           new uiPaperScope.Point(
-            (translateEvent.deltaX * ( 1 / paperScope.view.zoom)) * -1,
-            (translateEvent.deltaY * ( 1 / paperScope.view.zoom)) * -1
+            (translateEvent.deltaX * ( 1 / project.view.zoom)) * -1,
+            (translateEvent.deltaY * ( 1 / project.view.zoom)) * -1
           )
         )
       });
@@ -51,13 +51,13 @@ const TranslateTool = (props: TranslateToolProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   isEnabled: boolean;
-  allPaperScopes: number[];
+  allProjectIndices: number[];
 } => {
   const { canvasSettings } = state;
   const isEnabled = canvasSettings.translating;
   return {
     isEnabled,
-    allPaperScopes: getAllPaperScopes(state)
+    allProjectIndices: getAllProjectIndices(state)
   };
 };
 

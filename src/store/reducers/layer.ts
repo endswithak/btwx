@@ -437,7 +437,7 @@ export interface LayerState {
   allTextIds: string[];
   allImageIds: string[];
   scope: string[];
-  paperScope: number;
+  projectIndex: number;
   activeArtboard: string;
   selected: string[];
   hover: string;
@@ -498,7 +498,7 @@ export const initialState: LayerState = {
   allTextIds: [],
   allImageIds: [],
   scope: ['root'],
-  paperScope: null,
+  projectIndex: null,
   activeArtboard: null,
   selected: [],
   hover: null,

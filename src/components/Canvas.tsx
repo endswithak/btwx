@@ -3,7 +3,7 @@ import React, { useContext, ReactElement, useEffect, useState, useRef } from 're
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { uiPaperScope } from '../canvas';
-import { getAllPaperScopes } from '../store/selectors/layer';
+import { getAllProjectIndices } from '../store/selectors/layer';
 import { ThemeContext } from './ThemeProvider';
 import CanvasLayerEvents from './CanvasLayerEvents';
 import CanvasUIEvents from './CanvasUIEvents';
@@ -24,37 +24,37 @@ import CanvasArtboards from './CanvasArtboards';
 interface CanvasProps {
   ready: boolean;
   interactionEnabled?: boolean;
-  allPaperScopes: number[];
+  allProjectIndices: number[];
   setReady(ready: boolean): void;
 }
 
 const Canvas = (props: CanvasProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const ref = useRef<HTMLDivElement>(null);
-  const { ready, setReady, interactionEnabled, allPaperScopes } = props;
+  const { ready, setReady, interactionEnabled, allProjectIndices } = props;
   const [layerEvent, setLayerEvent] = useState(null);
   const [uiEvent, setUIEvent] = useState(null);
   const [translateEvent, setTranslateEvent] = useState(null);
   const [zoomEvent, setZoomEvent] = useState(null);
 
   const handleHitResult = (e: any, eventType: 'mouseMove' | 'mouseDown' | 'mouseUp' | 'doubleClick' | 'contextMenu'): void => {
-    const { layerHitResult, uiHitResult } = allPaperScopes.reduce((result: { layerHitResult: { hitResult: paper.HitResult; paperScope: number }; uiHitResult: paper.HitResult }, current, index) => {
-      const paperScope = uiPaperScope.projects[current];
-      if (paperScope) {
-        const hitResult = paperScope.hitTest(paperScope.view.getEventPoint(e));
+    const { layerHitResult, uiHitResult } = allProjectIndices.reduce((result: { layerHitResult: { hitResult: paper.HitResult; projectIndex: number }; uiHitResult: paper.HitResult }, current, index) => {
+      const project = uiPaperScope.projects[current];
+      if (project) {
+        const hitResult = project.hitTest(project.view.getEventPoint(e));
         if (hitResult) {
           if (current === 0) {
             result.uiHitResult = hitResult;
           } else {
             result.layerHitResult = {
               hitResult,
-              paperScope: index
+              projectIndex: index
             };
           }
         }
       }
       return result;
-    }, { layerHitResult: { hitResult: null, paperScope: null }, uiHitResult: null });
+    }, { layerHitResult: { hitResult: null, projectIndex: null }, uiHitResult: null });
     const validHitResult = (hitResult: paper.HitResult): boolean => hitResult && hitResult.item && hitResult.item.data && hitResult.item.data.type;
     if (validHitResult(uiHitResult)) {
       setUIEvent({
@@ -67,7 +67,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
       if (validHitResult(layerHitResult.hitResult)) {
         setLayerEvent({
           hitResult: layerHitResult.hitResult,
-          paperScope: layerHitResult.paperScope,
+          projectIndex: layerHitResult.projectIndex,
           eventType: eventType,
           event: e.nativeEvent,
           empty: false
@@ -81,7 +81,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
         });
         setLayerEvent({
           hitResult: layerHitResult,
-          paperScope: null,
+          projectIndex: null,
           eventType: eventType,
           event: e.nativeEvent,
           empty: true
@@ -119,9 +119,9 @@ const Canvas = (props: CanvasProps): ReactElement => {
   }
 
   const handleResize = (): void => {
-    allPaperScopes.forEach((current, index) => {
-      const paperScope = uiPaperScope.projects[current];
-      paperScope.view.viewSize = new uiPaperScope.Size(ref.current.clientWidth, ref.current.clientHeight);
+    allProjectIndices.forEach((current, index) => {
+      const project = uiPaperScope.projects[current];
+      project.view.viewSize = new uiPaperScope.Size(ref.current.clientWidth, ref.current.clientHeight);
     });
   }
 
@@ -130,7 +130,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
     return () => {
       window.removeEventListener('resize', handleResize);
     }
-  }, [allPaperScopes]);
+  }, [allProjectIndices]);
 
   useEffect(() => {
     console.log('CANVAS');
@@ -182,12 +182,12 @@ const Canvas = (props: CanvasProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   interactionEnabled: boolean;
-  allPaperScopes: number[];
+  allProjectIndices: number[];
 } => {
   const { canvasSettings } = state;
   return {
     interactionEnabled: !canvasSettings.selecting && !canvasSettings.resizing && !canvasSettings.drawing && !canvasSettings.zooming && !canvasSettings.translating && !canvasSettings.dragging,
-    allPaperScopes: getAllPaperScopes(state)
+    allProjectIndices: getAllProjectIndices(state)
   };
 };
 

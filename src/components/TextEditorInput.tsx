@@ -65,7 +65,7 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
         setCanvasFocusing({focusing: false});
       }
       document.addEventListener('mousedown', onMouseDown);
-      const paperLayer = getPaperLayer(textEditor.layer, textEditor.paperScope) as paper.PointText;
+      const paperLayer = getPaperLayer(textEditor.layer, textEditor.projectIndex) as paper.PointText;
       textAreaRef.current.focus();
       textAreaRef.current.select();
       const topLeft = uiPaperScope.view.projectToView(paperLayer.bounds.topLeft);
@@ -96,7 +96,7 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
       updateTextAreaSize();
     }
     return () => {
-      const paperLayer = getPaperLayer(textEditor.layer, textEditor.paperScope) as paper.PointText;
+      const paperLayer = getPaperLayer(textEditor.layer, textEditor.projectIndex) as paper.PointText;
       setCanvasFocusing({focusing: true});
       paperLayer.visible = true;
       selectLayers({layers: [textEditor.layer], newSelection: true });
@@ -105,7 +105,7 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
   }, []);
 
   useEffect(() => {
-    const paperLayer = getPaperLayer(textEditor.layer, textEditor.paperScope) as paper.PointText;
+    const paperLayer = getPaperLayer(textEditor.layer, textEditor.projectIndex) as paper.PointText;
     paperLayer.visible = false;
   }, [layerItem.text]);
 

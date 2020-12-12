@@ -7,7 +7,7 @@ import { SetLayersGradientODPayload, LayerTypes } from '../store/actionTypes/lay
 import { setLayersGradientOD } from '../store/actions/layer';
 import { setCanvasResizing } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasResizingPayload } from '../store/actionTypes/canvasSettings';
-import { getPaperLayer, getSelectedPaperScopes, getPaperProp, getSelectedById } from '../store/selectors/layer';
+import { getPaperLayer, getSelectedProjectIndices, getPaperProp, getSelectedById } from '../store/selectors/layer';
 import { ThemeContext } from './ThemeProvider';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
@@ -204,7 +204,7 @@ const mapStateToProps = (state: RootState): GradientToolStateProps => {
   const { gradientEditor, layer, canvasSettings } = state;
   const isEnabled = gradientEditor.isOpen && canvasSettings.activeTool === 'Gradient';
   const selected = layer.present.selected;
-  const selectedPaperScopes = getSelectedPaperScopes(state);
+  const selectedPaperScopes = getSelectedProjectIndices(state);
   const gradientHandle = canvasSettings.gradientHandle;
   const gradientProp = gradientEditor.prop;
   const resizing = canvasSettings.resizing;

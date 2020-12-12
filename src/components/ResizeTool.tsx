@@ -2,7 +2,7 @@
 import React, { useContext, useEffect, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getPaperLayer, getSelectedPaperScopes, getSelectedById, getSelectedBounds } from '../store/selectors/layer';
+import { getPaperLayer, getSelectedProjectIndices, getSelectedById, getSelectedBounds } from '../store/selectors/layer';
 import { uiPaperScope } from '../canvas';
 import { setCanvasResizing } from '../store/actions/canvasSettings';
 import { CanvasSettingsTypes, SetCanvasResizingPayload } from '../store/actionTypes/canvasSettings';
@@ -694,7 +694,7 @@ const mapStateToProps = (state: RootState): ResizeToolStateProps => {
   const initialHandle = canvasSettings.resizeHandle as Btwx.ResizeHandle;
   const selectedById = getSelectedById(state);
   const selectedBounds = getSelectedBounds(state);
-  const selectedPaperScopes = getSelectedPaperScopes(state);
+  const selectedPaperScopes = getSelectedProjectIndices(state);
   return {
     selected,
     isEnabled,
