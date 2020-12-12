@@ -24,9 +24,7 @@ import CanvasArtboards from './CanvasArtboards';
 interface CanvasProps {
   ready: boolean;
   interactionEnabled?: boolean;
-  allPaperScopes?: {
-    [id: string]: number;
-  };
+  allPaperScopes: number[];
   setReady(ready: boolean): void;
 }
 
@@ -40,12 +38,12 @@ const Canvas = (props: CanvasProps): ReactElement => {
   const [zoomEvent, setZoomEvent] = useState(null);
 
   const handleHitResult = (e: any, eventType: 'mouseMove' | 'mouseDown' | 'mouseUp' | 'doubleClick' | 'contextMenu'): void => {
-    const { layerHitResult, uiHitResult } = Object.keys(allPaperScopes).reduce((result: { layerHitResult: { hitResult: paper.HitResult; paperScope: number }; uiHitResult: paper.HitResult }, current, index) => {
-      const paperScope = uiPaperScope.projects[allPaperScopes[current]];
+    const { layerHitResult, uiHitResult } = allPaperScopes.reduce((result: { layerHitResult: { hitResult: paper.HitResult; paperScope: number }; uiHitResult: paper.HitResult }, current, index) => {
+      const paperScope = uiPaperScope.projects[current];
       if (paperScope) {
         const hitResult = paperScope.hitTest(paperScope.view.getEventPoint(e));
         if (hitResult) {
-          if (current === 'ui') {
+          if (current === 0) {
             result.uiHitResult = hitResult;
           } else {
             result.layerHitResult = {
@@ -121,8 +119,8 @@ const Canvas = (props: CanvasProps): ReactElement => {
   }
 
   const handleResize = (): void => {
-    Object.keys(allPaperScopes).forEach((key, index) => {
-      const paperScope = uiPaperScope.projects[allPaperScopes[key]];
+    allPaperScopes.forEach((current, index) => {
+      const paperScope = uiPaperScope.projects[current];
       paperScope.view.viewSize = new uiPaperScope.Size(ref.current.clientWidth, ref.current.clientHeight);
     });
   }
@@ -184,9 +182,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   interactionEnabled: boolean;
-  allPaperScopes: {
-    [id: string]: number;
-  };
+  allPaperScopes: number[];
 } => {
   const { canvasSettings } = state;
   return {

@@ -470,6 +470,7 @@ export interface LayerState {
   };
   selectedEdit: string;
   edit: Btwx.Edit;
+  paperJSON: string[];
 }
 
 export const initialState: LayerState = {
@@ -530,7 +531,8 @@ export const initialState: LayerState = {
     detail: null,
     payload: null,
     actionType: null
-  }
+  },
+  paperJSON: []
 };
 
 export const baseReducer = (state = initialState, action: LayerTypes): LayerState => {

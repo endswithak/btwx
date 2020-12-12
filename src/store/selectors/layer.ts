@@ -51,20 +51,47 @@ export const getAllArtboardPaperProjects = createSelector(
 export const getLayerPaperScopes = createSelector(
   [ getRootChildren ],
   (rootChildren) => {
-    return rootChildren.reduce((result, current, index) => ({
-      ...result,
-      [current]: index + 1
-    }), {}) as { [id: string]: number };
+    return rootChildren.reduce((result, current, index) => {
+      const project = Math.floor(index / 3) + 1;
+      if (!result.includes(project)) {
+        result = [...result, project];
+      }
+      return result;
+    }, []);
+  }
+);
+
+export const getArtboardsByPaperScope = createSelector(
+  [ getRootChildren ],
+  (rootChildren) => {
+    let i = 0;
+    let paperScope = 1;
+    return rootChildren.reduce((result, current, index) => {
+      if (!result[paperScope]) {
+        result[paperScope] = [];
+      }
+      result[paperScope] = [...result[paperScope], current];
+      if (i === 2) {
+        i = 0;
+        paperScope++;
+      } else {
+        i++;
+      }
+      return result;
+    }, {} as { [id: number]: string[] });
   }
 );
 
 export const getAllPaperScopes = createSelector(
   [ getRootChildren ],
   (rootChildren) => {
-    return ['ui', ...rootChildren].reduce((result, current, index) => ({
-      ...result,
-      [current]: index
-    }), {}) as { [id: string]: number };
+    return rootChildren.reduce((result, current, index) => {
+      const project = Math.floor(index / 3) + 1;
+      if (!result.includes(project)) {
+        result = [...result, project];
+      }
+      return result;
+    }, [0]);
   }
 );
 
@@ -1801,24 +1828,20 @@ export const orderLayersByTop = (store: LayerState, layers: string[]): string[] 
   });
 };
 
-export const savePaperProjectJSON = (state: LayerState, id: string): string => {
-  const paperScope = uiPaperScope.projects.find((project) => project.activeLayer.data.id && project.activeLayer.data.id === id);
-  if (paperScope) {
-    const projectJSON = paperScope.exportJSON();
-    const canvasImageBase64ById = state.allImageIds.reduce((result: { [id: string]: string }, current) => {
-      const layer = state.byId[current] as Btwx.Image;
-      const imagePaperScope = getLayerPaperScope(state, current);
-      const paperLayer = getPaperLayer(current, imagePaperScope).getItem({data: {id: 'raster'}}) as paper.Raster;
-      result[layer.imageId] = paperLayer.source as string;
-      return result;
-    }, {});
-    return Object.keys(canvasImageBase64ById).reduce((result, current) => {
-      result = result.replace(canvasImageBase64ById[current], current);
-      return result;
-    }, projectJSON);
-  } else {
-    return null;
-  }
+export const savePaperProjectJSON = (state: LayerState, paperScopeIndex: number): string => {
+  const paperScope = uiPaperScope.projects[paperScopeIndex];
+  const projectJSON = paperScope.exportJSON();
+  const canvasImageBase64ById = state.allImageIds.reduce((result: { [id: string]: string }, current) => {
+    const layer = state.byId[current] as Btwx.Image;
+    const imagePaperScope = getLayerPaperScope(state, current);
+    const paperLayer = getPaperLayer(current, imagePaperScope).getItem({data: {id: 'raster'}}) as paper.Raster;
+    result[layer.imageId] = paperLayer.source as string;
+    return result;
+  }, {});
+  return Object.keys(canvasImageBase64ById).reduce((result, current) => {
+    result = result.replace(canvasImageBase64ById[current], current);
+    return result;
+  }, projectJSON);
 };
 
 interface ImportPaperProject {

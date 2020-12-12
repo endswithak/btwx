@@ -23,12 +23,11 @@ interface ShapeToolStateProps {
   shapeType?: Btwx.ShapeType;
   scope?: string[];
   paperScope?: number;
-  layerPaperScopes?: {
-    [id: string]: number;
-  };
+  layerPaperScopes?: number[];
   drawing?: boolean;
   activeArtboard?: string;
   activeArtboardPaperScope?: number;
+  activeArtboardPaperLayerIndex?: number;
 }
 
 interface ShapeToolDispatchProps {
@@ -45,7 +44,7 @@ type ShapeToolProps = (
 
 const ShapeTool = (props: ShapeToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isEnabled, shapeType, addShapeThunk, activeArtboard, activeArtboardPaperScope, scope, paperScope, layerPaperScopes, setCanvasDrawing, drawing, toggleShapeToolThunk, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent } = props;
+  const { isEnabled, shapeType, addShapeThunk, activeArtboard, activeArtboardPaperScope, activeArtboardPaperLayerIndex, scope, paperScope, layerPaperScopes, setCanvasDrawing, drawing, toggleShapeToolThunk, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent } = props;
   const [handle, setHandle] = useState<Btwx.ResizeHandle>(null);
   const [maxDim, setMaxDim] = useState<number>(null);
   const [vector, setVector] = useState<paper.Point>(null);
@@ -335,8 +334,8 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
       const lineFromPoint = (paperLayer as paper.Path).firstSegment.point;
       const lineToPoint = (paperLayer as paper.Path).lastSegment.point;
       const lineVector = lineToPoint.subtract(lineFromPoint);
-      const parentItem = Object.keys(layerPaperScopes).reduce((result, current, index) => {
-        const paperScope = uiPaperScope.projects[layerPaperScopes[current]];
+      const parentItem = layerPaperScopes.reduce((result, current, index) => {
+        const paperScope = uiPaperScope.projects[current];
         if (paperScope) {
           const hitTest = paperScope.getItem({
             data: (data: any) => {
@@ -351,7 +350,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
       }, {
         id: activeArtboard,
         paperScope: activeArtboardPaperScope,
-        paperLayer: uiPaperScope.projects[layerPaperScopes[activeArtboard]].activeLayer
+        paperLayer: uiPaperScope.projects[activeArtboardPaperScope].layers[activeArtboardPaperLayerIndex]
       });
       addShapeThunk({
         layer: {
@@ -488,6 +487,7 @@ const mapStateToProps = (state: RootState): ShapeToolStateProps => {
   const layerPaperScopes = getLayerPaperScopes(state);
   const activeArtboard = layer.present.activeArtboard;
   const activeArtboardPaperScope = activeArtboard ? (layer.present.byId[activeArtboard] as Btwx.Artboard).paperScope : null;
+  const activeArtboardPaperLayerIndex = activeArtboard ? (layer.present.byId[activeArtboard] as Btwx.Artboard).paperLayerIndex : null;
   return {
     isEnabled,
     shapeType,
@@ -496,7 +496,8 @@ const mapStateToProps = (state: RootState): ShapeToolStateProps => {
     drawing,
     layerPaperScopes,
     activeArtboard,
-    activeArtboardPaperScope
+    activeArtboardPaperScope,
+    activeArtboardPaperLayerIndex
   };
 };
 

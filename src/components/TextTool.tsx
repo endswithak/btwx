@@ -21,11 +21,10 @@ interface TextToolStateProps {
   scope?: string[];
   textSettings?: TextSettingsState;
   paperScope?: number;
-  layerPaperScopes?: {
-    [id: string]: number;
-  };
+  layerPaperScopes?: number[];
   activeArtboard?: string;
   activeArtboardPaperScope?: number;
+  activeArtboardPaperLayerIndex?: number;
 }
 
 interface TextToolDispatchProps {
@@ -41,7 +40,7 @@ type TextToolProps = (
 );
 
 const TextTool = (props: TextToolProps): ReactElement => {
-  const { isEnabled, tool, moveEvent, downEvent, paperScope, layerPaperScopes, openTextEditor, textSettings, scope, addTextThunk, toggleTextToolThunk, activeArtboard, activeArtboardPaperScope } = props;
+  const { isEnabled, tool, moveEvent, downEvent, paperScope, layerPaperScopes, openTextEditor, textSettings, scope, addTextThunk, toggleTextToolThunk, activeArtboard, activeArtboardPaperScope, activeArtboardPaperLayerIndex } = props;
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
   const [toBounds, setToBounds] = useState<paper.Rectangle>(null);
 
@@ -72,8 +71,8 @@ const TextTool = (props: TextToolProps): ReactElement => {
         ...textSettings,
         insert: false
       });
-      const parentItem = Object.keys(layerPaperScopes).reduce((result, current, index) => {
-        const paperScope = uiPaperScope.projects[layerPaperScopes[current]];
+      const parentItem = layerPaperScopes.reduce((result, current, index) => {
+        const paperScope = uiPaperScope.projects[current];
         if (paperScope) {
           const hitTest = paperScope.getItem({
             data: (data: any) => {
@@ -88,7 +87,7 @@ const TextTool = (props: TextToolProps): ReactElement => {
       }, {
         id: activeArtboard,
         paperScope: activeArtboardPaperScope,
-        paperLayer: uiPaperScope.projects[layerPaperScopes[activeArtboard]].activeLayer
+        paperLayer: uiPaperScope.projects[activeArtboardPaperScope].layers[activeArtboardPaperLayerIndex]
       });
       addTextThunk({
         layer: {
@@ -192,6 +191,7 @@ const mapStateToProps = (state: RootState): TextToolStateProps => {
   const layerPaperScopes = getLayerPaperScopes(state);
   const activeArtboard = layer.present.activeArtboard;
   const activeArtboardPaperScope = activeArtboard ? (layer.present.byId[activeArtboard] as Btwx.Artboard).paperScope : null;
+  const activeArtboardPaperLayerIndex = activeArtboard ? (layer.present.byId[activeArtboard] as Btwx.Artboard).paperLayerIndex : null;
   return {
     isEnabled,
     textSettings,
@@ -199,7 +199,8 @@ const mapStateToProps = (state: RootState): TextToolStateProps => {
     paperScope,
     layerPaperScopes,
     activeArtboard,
-    activeArtboardPaperScope
+    activeArtboardPaperScope,
+    activeArtboardPaperLayerIndex
   };
 };
 

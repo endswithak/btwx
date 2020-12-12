@@ -23,8 +23,8 @@ export const centerSelectedThunk = () => {
     if (state.layer.present.selected.length > 0) {
       const selectedBounds = getSelectedBounds(state);
       const allPaperScopes = getAllPaperScopes(state);
-      Object.keys(allPaperScopes).forEach((key, index) => {
-        const paperScope = uiPaperScope.projects[allPaperScopes[key]];
+      allPaperScopes.forEach((current, index) => {
+        const paperScope = uiPaperScope.projects[current];
         paperScope.view.center = selectedBounds.center;
       });
       dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));

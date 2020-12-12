@@ -13,9 +13,7 @@ import { getAllPaperScopes } from '../store/selectors/layer';
 interface TranslateToolProps {
   translateEvent: WheelEvent;
   isEnabled?: boolean;
-  allPaperScopes?: {
-    [id: string]: number;
-  };
+  allPaperScopes?: number[];
   setCanvasTranslating?(payload: SetCanvasTranslatingPayload): CanvasSettingsTypes;
   setCanvasMatrix?(payload: SetCanvasMatrixPayload): DocumentSettingsTypes;
 }
@@ -33,8 +31,8 @@ const TranslateTool = (props: TranslateToolProps): ReactElement => {
 
   useEffect(() => {
     if (translateEvent) {
-      Object.keys(allPaperScopes).forEach((key, index) => {
-        const paperScope = uiPaperScope.projects[allPaperScopes[key]];
+      allPaperScopes.forEach((current, index) => {
+        const paperScope = uiPaperScope.projects[current];
         paperScope.view.translate(
           new uiPaperScope.Point(
             (translateEvent.deltaX * ( 1 / paperScope.view.zoom)) * -1,
@@ -53,9 +51,7 @@ const TranslateTool = (props: TranslateToolProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   isEnabled: boolean;
-  allPaperScopes: {
-    [id: string]: number;
-  };
+  allPaperScopes: number[];
 } => {
   const { canvasSettings } = state;
   const isEnabled = canvasSettings.translating;

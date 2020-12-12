@@ -13,9 +13,7 @@ import { DocumentSettingsTypes, SetCanvasMatrixPayload } from '../store/actionTy
 interface ZoomToolProps {
   zoomEvent: WheelEvent;
   isEnabled?: boolean;
-  allPaperScopes?: {
-    [id: string]: number;
-  };
+  allPaperScopes?: number[];
   setCanvasZooming?(payload: SetCanvasZoomingPayload): CanvasSettingsTypes;
   setCanvasMatrix?(payload: SetCanvasMatrixPayload): DocumentSettingsTypes;
 }
@@ -38,8 +36,8 @@ const ZoomTool = (props: ZoomToolProps): ReactElement => {
       }
       const cursorPoint = uiPaperScope.project.view.getEventPoint(zoomEvent as any);
       const pointDiff = new uiPaperScope.Point(cursorPoint.x - uiPaperScope.view.center.x, cursorPoint.y - uiPaperScope.view.center.y);
-      Object.keys(allPaperScopes).forEach((key, index) => {
-        const paperScope = uiPaperScope.projects[allPaperScopes[key]];
+      allPaperScopes.forEach((current, index) => {
+        const paperScope = uiPaperScope.projects[current];
         const prevZoom = paperScope.view.zoom;
         const nextZoom = paperScope.view.zoom - zoomEvent.deltaY * (0.01 * paperScope.view.zoom);
         if (zoomEvent.deltaY < 0 && nextZoom < 25) {
@@ -68,9 +66,7 @@ const ZoomTool = (props: ZoomToolProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   isEnabled: boolean;
-  allPaperScopes: {
-    [id: string]: number;
-  };
+  allPaperScopes: number[];
 } => {
   const { canvasSettings } = state;
   const isEnabled = canvasSettings.zooming;

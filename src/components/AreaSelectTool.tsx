@@ -14,9 +14,7 @@ import { ThemeContext } from './ThemeProvider';
 interface AreaSelectToolStateProps {
   isEnabled?: boolean;
   scope?: string[];
-  layerPaperScopes?: {
-    [id: string]: number;
-  };
+  layerPaperScopes?: number[];
 }
 
 interface AreaSelectToolDispatchProps {
@@ -93,8 +91,8 @@ const AreaSelectTool = (props: AreaSelectToolProps): ReactElement => {
             return [...result, current.data.id];
           }, []);
         }
-        const layers = Object.keys(layerPaperScopes).reduce((result, current, index) => {
-          const scope = uiPaperScope.projects[layerPaperScopes[current]];
+        const layers = layerPaperScopes.reduce((result, current, index) => {
+          const scope = uiPaperScope.projects[current];
           return [...result, ...getProjectsLayers(scope)]
         }, []);
         if (layers.length > 0) {

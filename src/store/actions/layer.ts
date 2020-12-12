@@ -469,7 +469,7 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
     const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const name = payload.layer.name ? payload.layer.name : 'Artboard';
-    const paperScope = state.layer.present.childrenById.root.length + 1;
+    const paperScope = Math.floor((state.layer.present.childrenById.root.length) / 3) + 1;
     const index = state.layer.present.childrenById.root.length;
     const style = getLayerStyle(payload, {}, { fill: { color: DEFAULT_ARTBOARD_BACKGROUND_COLOR } as Btwx.Fill, stroke: { enabled: false } as Btwx.Stroke, shadow: { enabled: false } as Btwx.Shadow });
     const frame = getLayerFrame(payload);
@@ -508,20 +508,12 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
       children: [artboardLayersMask, artboardLayers]
     });
     // create artboard group
-    const artboard = new uiPaperScope.Layer({
+    const artboard = new uiPaperScope.Group({
       name: name,
       data: { id: id, type: 'Layer', layerType: 'Artboard', scope: ['root'] },
-      insert: false,
-      children: [artboardBackground, artboardMaskedLayers]
+      children: [artboardBackground, artboardMaskedLayers],
+      parent: uiPaperScope.projects[paperScope].activeLayer
     });
-    //
-    const canvasWrap = document.getElementById('canvas-container');
-    const project = uiPaperScope.projects[paperScope];
-    project.view.viewSize = new uiPaperScope.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
-    project.view.matrix.set(state.documentSettings.matrix);
-    project.clear();
-    project.addLayer(artboard);
-    project.activate();
     // dispatch action
     const newLayer = {
       type: 'Artboard',
@@ -548,7 +540,7 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
       },
       transform: DEFAULT_TRANSFORM,
       style: style,
-      paperJSON: artboard.exportJSON()
+      // paperJSON: artboard.exportJSON()
     } as Btwx.Artboard;
     dispatch(addArtboard({
       layer: newLayer,
@@ -3045,20 +3037,14 @@ export const undoThunk = () => {
       // undo
       dispatch(ActionCreators.undo());
       //
-      if (state.layer.present.edit.projects) {
-        state.layer.present.edit.projects.forEach((project: string) => {
-          const projectItem = layerState.byId[project] as Btwx.Artboard;
-          if (projectItem) {
-            const paperScope = uiPaperScope.projects[projectItem.paperScope];
-            const paperJSON = projectItem.paperJSON;
-            importPaperProject({
-              paperJSON,
-              paperScope,
-              documentImages: state.documentSettings.images.byId
-            });
-          }
-        });
-      }
+      // if (state.layer.present.edit.projects && layerState.edit.projects) {
+      //   layerState.paperJSON.forEach((json, index) => {
+      //     const paperScope = uiPaperScope.projects[index + 1];
+      //     paperScope.activate();
+      //     paperScope.clear();
+      //     paperScope.importJSON(json);
+      //   });
+      // }
       // update editors
       switch(state.layer.present.edit.actionType) {
         case SET_LAYERS_FILL_COLOR: {
@@ -3161,20 +3147,14 @@ export const redoThunk = () => {
       // redo
       dispatch(ActionCreators.redo());
       //
-      if (layerState.edit.projects) {
-        layerState.edit.projects.forEach((project: string) => {
-          const projectItem = layerState.byId[project] as Btwx.Artboard;
-          if (projectItem) {
-            const paperScope = uiPaperScope.projects[projectItem.paperScope];
-            const paperJSON = projectItem.paperJSON;
-            importPaperProject({
-              paperScope,
-              paperJSON,
-              documentImages: state.documentSettings.images.byId
-            });
-          }
-        });
-      }
+      // if (layerState.edit.projects) {
+      //   layerState.paperJSON.forEach((json, index) => {
+      //     const paperScope = uiPaperScope.projects[index + 1];
+      //     paperScope.activate();
+      //     paperScope.clear();
+      //     paperScope.importJSON(json);
+      //   });
+      // }
       // update editors
       switch(layerState.edit.actionType) {
         case SET_LAYERS_FILL_COLOR: {

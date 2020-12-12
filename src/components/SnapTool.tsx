@@ -26,9 +26,7 @@ interface SnapToolProps {
   aspectRatio?: number;
   scope?: string[];
   paperScope?: number;
-  layerPaperScopes: {
-    [id: string]: number;
-  };
+  layerPaperScopes?: number[];
   whiteListLayers?: string[];
   blackListLayers?: string[];
   measure?: boolean;
@@ -136,8 +134,8 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
         return [];
       }
     }
-    return Object.keys(layerPaperScopes).reduce((result, current, index) => {
-      const paperScope = uiPaperScope.projects[layerPaperScopes[current]];
+    return layerPaperScopes.reduce((result, current, index) => {
+      const paperScope = uiPaperScope.projects[current];
       const projectSnapLayers = getProjectSnapLayers(paperScope);
       if (projectSnapLayers && projectSnapLayers.length > 0) {
         result = [...result, ...projectSnapLayers];
@@ -182,8 +180,8 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
         return null;
       }
     }
-    return Object.keys(layerPaperScopes).reduce((result: paper.Item, current, index) => {
-      const paperScope = uiPaperScope.projects[layerPaperScopes[current]];
+    return layerPaperScopes.reduce((result: paper.Item, current, index) => {
+      const paperScope = uiPaperScope.projects[current];
       const projectSnapLayer = getProjectSnapLayer(paperScope);
       if (projectSnapLayer) {
         result = projectSnapLayer;
@@ -228,8 +226,8 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
         return null;
       }
     }
-    return Object.keys(layerPaperScopes).reduce((result: paper.Item, current, index) => {
-      const paperScope = uiPaperScope.projects[layerPaperScopes[current]];
+    return layerPaperScopes.reduce((result: paper.Item, current, index) => {
+      const paperScope = uiPaperScope.projects[current];
       const projectSnapLayer = getProjectSnapLayer(paperScope);
       if (projectSnapLayer) {
         result = projectSnapLayer;
@@ -891,9 +889,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
 const mapStateToProps = (state: RootState): {
   scope: string[];
   paperScope: number;
-  layerPaperScopes: {
-    [id: string]: number;
-  };
+  layerPaperScopes: number[];
 } => {
   const { layer } = state;
   const scope = layer.present.scope;
