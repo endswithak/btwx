@@ -1,16 +1,12 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import ColorEditor from './ColorEditor';
 import GradientEditor from './GradientEditor';
 
-interface SwatchEditorProps {
-  isColorEditorOpen?: boolean;
-  isGradientEditorOpen?: boolean;
-}
-
-const SwatchEditor = (props: SwatchEditorProps): ReactElement => {
-  const { isColorEditorOpen, isGradientEditorOpen } = props;
+const SwatchEditor = (): ReactElement => {
+  const isGradientEditorOpen = useSelector((state: RootState) => state.gradientEditor.isOpen);
+  const isColorEditorOpen = useSelector((state: RootState) => state.colorEditor.isOpen);
 
   return (
     <>
@@ -28,13 +24,4 @@ const SwatchEditor = (props: SwatchEditorProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { colorEditor, gradientEditor } = state;
-  const isGradientEditorOpen = gradientEditor.isOpen;
-  const isColorEditorOpen = colorEditor.isOpen;
-  return { isColorEditorOpen, isGradientEditorOpen };
-};
-
-export default connect(
-  mapStateToProps
-)(SwatchEditor);
+export default SwatchEditor;

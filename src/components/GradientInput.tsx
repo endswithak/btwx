@@ -7,7 +7,7 @@ import { EnableLayersFillPayload, EnableLayersStrokePayload, SetLayersGradientPa
 import { enableLayersFill, enableLayersStroke, setLayersGradient } from '../store/actions/layer';
 import { OpenGradientEditorPayload, GradientEditorTypes } from '../store/actionTypes/gradientEditor';
 import { openGradientEditor } from '../store/actions/gradientEditor';
-import { getSelectedFillsEnabled, getSelectedStrokesEnabled, getSelectedFillsGradientType, getSelectedStrokesGradientType, getSelectedFillsGradients, getSelectedStrokesGradients } from '../store/selectors/layer';
+import { getSelectedFillEnabled, getSelectedStrokeEnabled, getSelectedFillGradientType, getSelectedStrokeGradientType, getSelectedFillGradient, getSelectedStrokeGradient } from '../store/selectors/layer';
 import SidebarInput from './SidebarInput';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
@@ -142,25 +142,25 @@ const mapStateToProps = (state: RootState, ownProps: GradientInputProps) => {
   const enabledValue = (() => {
     switch(ownProps.prop) {
       case 'fill':
-        return getSelectedFillsEnabled(state);
+        return getSelectedFillEnabled(state);
       case 'stroke':
-        return getSelectedStrokesEnabled(state);
+        return getSelectedStrokeEnabled(state);
     }
   })() as boolean | 'multi';
   const gradientTypeValue = (() => {
     switch(ownProps.prop) {
       case 'fill':
-        return getSelectedFillsGradientType(state);
+        return getSelectedFillGradientType(state);
       case 'stroke':
-        return getSelectedStrokesGradientType(state);
+        return getSelectedStrokeGradientType(state);
     }
   })() as Btwx.GradientType | 'multi';
   const displayGradient = (() => {
     switch(ownProps.prop) {
       case 'fill':
-        return getSelectedFillsGradients(state);
+        return getSelectedFillGradient(state);
       case 'stroke':
-        return getSelectedStrokesGradients(state);
+        return getSelectedStrokeGradient(state);
     }
   })() as Btwx.Gradient | 'multi';
   const stops = gradientValue.stops;

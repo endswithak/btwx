@@ -1,63 +1,45 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement, useRef, useEffect, useCallback } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import debounce from 'lodash.debounce';
 import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
 import { closeColorEditor } from '../store/actions/colorEditor';
-import { ColorEditorTypes } from '../store/actionTypes/colorEditor';
 import { openGradientEditor } from '../store/actions/gradientEditor';
-import { colorsMatch, gradientsMatch, getPaperLayer, getSelectedById } from '../store/selectors/layer';
-import { GradientEditorTypes, OpenGradientEditorPayload } from '../store/actionTypes/gradientEditor';
-import { ColorEditorState } from '../store/reducers/colorEditor';
-import { SetLayersFillTypePayload, SetLayersFillColorPayload, SetLayersStrokeFillTypePayload, SetLayersStrokeColorPayload, SetLayersShadowColorPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setLayersFillType, setLayersFillColor, setLayersStrokeColor, setLayersStrokeFillType, setLayersShadowColor } from '../store/actions/layer';
-import { SetTextSettingsFillColorPayload, TextSettingsTypes } from '../store/actionTypes/textSettings';
 import { setTextSettingsFillColor } from '../store/actions/textSettings';
-import { setCanvasFocusing } from '../store/actions/canvasSettings';
-import { CanvasSettingsTypes, SetCanvasFocusingPayload } from '../store/actionTypes/canvasSettings';
+// import { setCanvasFocusing } from '../store/actions/canvasSettings';
 import { ThemeContext } from './ThemeProvider';
 import ColorPicker from './ColorPicker';
 import FillTypeSelector from './FillTypeSelector';
 
-interface ColorEditorProps {
-  selected: string[];
-  includesTextLayer?: boolean;
-  colorEditor?: ColorEditorState;
-  colorFormat?: Btwx.ColorFormat;
-  colorValue?: Btwx.Color;
-  canvasFocusing?: boolean;
-  closeColorEditor?(): ColorEditorTypes;
-  openGradientEditor?(payload: OpenGradientEditorPayload): GradientEditorTypes;
-  setLayersShadowColor?(payload: SetLayersShadowColorPayload): LayerTypes;
-  setLayersFillColor?(payload: SetLayersFillColorPayload): LayerTypes;
-  setLayersFillType?(payload: SetLayersFillTypePayload): LayerTypes;
-  setLayersStrokeColor?(payload: SetLayersStrokeColorPayload): LayerTypes;
-  setLayersStrokeFillType?(payload: SetLayersStrokeFillTypePayload): LayerTypes;
-  setTextSettingsFillColor?(payload: SetTextSettingsFillColorPayload): TextSettingsTypes;
-  setCanvasFocusing?(payload: SetCanvasFocusingPayload): CanvasSettingsTypes;
-}
-
-const ColorEditor = (props: ColorEditorProps): ReactElement => {
+const ColorEditor = (): ReactElement => {
   const theme = useContext(ThemeContext);
   const editorRef = useRef<HTMLDivElement>(null);
-  const { selected, includesTextLayer, colorEditor, colorFormat, colorValue, closeColorEditor, setLayersFillColor, setLayersStrokeFillType, setLayersFillType, setLayersStrokeColor, openGradientEditor, setLayersShadowColor, setTextSettingsFillColor, setCanvasFocusing, canvasFocusing } = props;
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const colorValue = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.selected[0]].style[state.colorEditor.prop].color);
+  // const colorValue = styleValue && styleValue.color;
+  const includesTextLayer = useSelector((state: RootState) => state.layer.present.selected.some((id: string) => state.layer.present.byId[id].type === 'Text'));
+  // const canvasFocusing = useSelector((state: RootState) => state.canvasSettings.focusing);
+  const colorFormat = useSelector((state: RootState) => state.documentSettings.colorFormat);
+  const colorEditor = useSelector((state: RootState) => state.colorEditor);
+  const dispatch = useDispatch();
 
   const debounceColor = useCallback(
     debounce((color: Btwx.Color) => {
       switch(colorEditor.prop) {
         case 'fill': {
-          setLayersFillColor({layers: selected, fillColor: color});
+          dispatch(setLayersFillColor({layers: selected, fillColor: color}));
           if (includesTextLayer) {
-            setTextSettingsFillColor({fillColor: color});
+            dispatch(setTextSettingsFillColor({fillColor: color}));
           }
           break;
         }
         case 'stroke':
-          setLayersStrokeColor({layers: selected, strokeColor: color});
+          dispatch(setLayersStrokeColor({layers: selected, strokeColor: color}));
           break;
         case 'shadow':
-          setLayersShadowColor({layers: selected, shadowColor: color});
+          dispatch(setLayersShadowColor({layers: selected, shadowColor: color}));
           break;
       }
     }, 150),
@@ -68,7 +50,7 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
     document.addEventListener('mousedown', onMouseDown, false);
     return (): void => {
       if (colorEditor.isOpen) {
-        closeColorEditor();
+        dispatch(closeColorEditor());
       }
       document.removeEventListener('mousedown', onMouseDown);
     }
@@ -76,7 +58,7 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
 
   const onMouseDown = (event: any): void => {
     if (editorRef.current && !editorRef.current.contains(event.target)) {
-      closeColorEditor();
+      dispatch(closeColorEditor());
     }
   }
 
@@ -102,51 +84,51 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
   const handleLinearGradientClick = (): void => {
     switch(colorEditor.prop) {
       case 'fill':
-        setLayersFillType({
+        dispatch(setLayersFillType({
           layers: selected,
           fillType: 'gradient',
           gradientType: 'linear'
-        });
+        }));
         break;
       case 'stroke':
-        setLayersStrokeFillType({
+        dispatch(setLayersStrokeFillType({
           layers: selected,
           fillType: 'gradient',
           gradientType: 'linear'
-        });
+        }));
         break;
     }
-    closeColorEditor();
-    openGradientEditor({
+    dispatch(closeColorEditor());
+    dispatch(openGradientEditor({
       prop: colorEditor.prop as 'fill' | 'stroke',
       x: colorEditor.x,
       y: colorEditor.y
-    });
+    }));
   }
 
   const handleRadialGradientClick = (): void => {
     switch(colorEditor.prop) {
       case 'fill':
-        setLayersFillType({
+        dispatch(setLayersFillType({
           layers: selected,
           fillType: 'gradient',
           gradientType: 'radial'
-        });
+        }));
         break;
       case 'stroke':
-        setLayersStrokeFillType({
+        dispatch(setLayersStrokeFillType({
           layers: selected,
           fillType: 'gradient',
           gradientType: 'radial'
-        });
+        }));
         break;
     }
-    closeColorEditor();
-    openGradientEditor({
+    dispatch(closeColorEditor());
+    dispatch(openGradientEditor({
       prop: colorEditor.prop as 'fill' | 'stroke',
       x: colorEditor.x,
       y: colorEditor.y
-    });
+    }));
   }
 
   return (
@@ -189,36 +171,4 @@ const ColorEditor = (props: ColorEditorProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  selected: string[];
-  colorEditor: ColorEditorState;
-  includesTextLayer: boolean;
-  canvasFocusing: boolean;
-  colorFormat: Btwx.ColorFormat;
-  colorValue: Btwx.Color;
-} => {
-  const { colorEditor, layer, canvasSettings, documentSettings } = state;
-  const selected = layer.present.selected;
-  const selectedById = getSelectedById(state);
-  const styleValue = selectedById[selected[0]].style[colorEditor.prop];
-  const colorValue = styleValue.color;
-  const includesTextLayer = selected.some((id: string) => selectedById[id].type === 'Text');
-  const canvasFocusing = canvasSettings.focusing;
-  const colorFormat = documentSettings.colorFormat;
-  return { selected, colorEditor, includesTextLayer, canvasFocusing, colorFormat, colorValue };
-};
-
-export default connect(
-  mapStateToProps,
-  {
-    closeColorEditor,
-    openGradientEditor,
-    setLayersFillColor,
-    setLayersStrokeColor,
-    setLayersShadowColor,
-    setLayersFillType,
-    setLayersStrokeFillType,
-    setTextSettingsFillColor,
-    setCanvasFocusing
-  }
-)(ColorEditor);
+export default ColorEditor;

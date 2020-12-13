@@ -1,21 +1,17 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { canSendSelectedBackward } from '../store/selectors/layer';
 import { sendSelectedBackwardThunk } from '../store/actions/layer';
 import TopbarButton from './TopbarButton';
 
-interface MoveBackwardButtonProps {
-  canMoveBackward: boolean;
-  sendSelectedBackwardThunk(): void;
-}
-
-const MoveBackwardButton = (props: MoveBackwardButtonProps): ReactElement => {
-  const { canMoveBackward, sendSelectedBackwardThunk } = props;
+const MoveBackwardButton = (): ReactElement => {
+  const canMoveBackward = useSelector((state: RootState) => canSendSelectedBackward(state));
+  const dispatch = useDispatch();
 
   const handleMoveBackwardClick = (): void => {
     if (canMoveBackward) {
-      sendSelectedBackwardThunk();
+      dispatch(sendSelectedBackwardThunk());
     }
   }
 
@@ -28,14 +24,4 @@ const MoveBackwardButton = (props: MoveBackwardButtonProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  canMoveBackward: boolean;
-} => {
-  const canMoveBackward = canSendSelectedBackward(state);
-  return { canMoveBackward };
-};
-
-export default connect(
-  mapStateToProps,
-  { sendSelectedBackwardThunk }
-)(MoveBackwardButton);
+export default MoveBackwardButton;

@@ -1,31 +1,33 @@
 import React, { useContext, ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { setTweenDrawerTweenHoverThunk } from '../store/actions/tweenDrawer';
-import { SetTweenDrawerTweenHoverPayload } from '../store/actionTypes/tweenDrawer';
 import TweenDrawerEditEase from './TweenDrawerEditEase';
 
 interface TweenDrawerEventLayerTweenProps {
   tweenId: string;
   index: number;
-  tweenHover?: string;
-  tweenEditing?: string;
-  tween?: Btwx.Tween;
-  titleCaseProp?: string;
-  setTweenDrawerTweenHoverThunk?(payload: SetTweenDrawerTweenHoverPayload): void;
 }
 
 const TweenDrawerEventLayerTween = (props: TweenDrawerEventLayerTweenProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { tweenId, index, tween, setTweenDrawerTweenHoverThunk, tweenEditing, tweenHover, titleCaseProp } = props;
+  const { tweenId, index } = props;
+  const tween = useSelector((state: RootState) => state.layer.present.tweens.byId[tweenId]);
+  const tweenHover = useSelector((state: RootState) => state.tweenDrawer.tweenHover);
+  const tweenEditing = useSelector((state: RootState) => state.tweenDrawer.tweenEditing);
+  const titleCaseProp = ((): string => {
+    const reg = tween.prop.replace( /([A-Z])/g, " $1" );
+    return reg.charAt(0).toUpperCase() + reg.slice(1);
+  })();
+  const dispatch = useDispatch();
 
   const handleMouseEnter = () => {
-    setTweenDrawerTweenHoverThunk({id: tweenId});
+    dispatch(setTweenDrawerTweenHoverThunk({id: tweenId}));
   }
 
   const handleMouseLeave = () => {
-    setTweenDrawerTweenHoverThunk({id: null});
+    dispatch(setTweenDrawerTweenHoverThunk({id: null}));
   }
 
   return (
@@ -54,20 +56,4 @@ const TweenDrawerEventLayerTween = (props: TweenDrawerEventLayerTweenProps): Rea
   );
 }
 
-const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventLayerTweenProps) => {
-  const { layer, tweenDrawer } = state;
-  const tween = layer.present.tweens.byId[ownProps.tweenId];
-  const tweenHover = tweenDrawer.tweenHover;
-  const tweenEditing = tweenDrawer.tweenEditing;
-  const titleCaseProp = ((): string => {
-    const reg = tween.prop.replace( /([A-Z])/g, " $1" );
-    return reg.charAt(0).toUpperCase() + reg.slice(1);
-  })();
-  const hover = layer.present.hover;
-  return { tween, tweenHover, tweenEditing, titleCaseProp, hover };
-};
-
-export default connect(
-  mapStateToProps,
-  { setTweenDrawerTweenHoverThunk }
-)(TweenDrawerEventLayerTween);
+export default TweenDrawerEventLayerTween;

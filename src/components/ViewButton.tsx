@@ -1,27 +1,14 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { toggleLeftSidebarThunk, toggleRightSidebarThunk, toggleTweenDrawerThunk } from '../store/actions/viewSettings';
 import TopbarDropdownButton from './TopbarDropdownButton';
 
-interface InsertButtonProps {
-  leftSidebarOpen: boolean;
-  rightSidebarOpen: boolean;
-  tweenDrawerOpen: boolean;
-  toggleLeftSidebarThunk?(): void;
-  toggleRightSidebarThunk?(): void;
-  toggleTweenDrawerThunk?(): void;
-}
-
-const InsertButton = (props: InsertButtonProps): ReactElement => {
-  const {
-    leftSidebarOpen,
-    rightSidebarOpen,
-    tweenDrawerOpen,
-    toggleLeftSidebarThunk,
-    toggleRightSidebarThunk,
-    toggleTweenDrawerThunk
-  } = props;
+const InsertButton = (): ReactElement => {
+  const leftSidebarOpen = useSelector((state: RootState) => state.viewSettings.leftSidebar.isOpen);
+  const rightSidebarOpen = useSelector((state: RootState) => state.viewSettings.rightSidebar.isOpen);
+  const tweenDrawerOpen = useSelector((state: RootState) => state.viewSettings.tweenDrawer.isOpen);
+  const dispatch = useDispatch();
 
   return (
     <TopbarDropdownButton
@@ -31,19 +18,19 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
       keepOpenOnSelect
       options={[{
         label: 'Layers',
-        onClick: toggleLeftSidebarThunk,
+        onClick: () => dispatch(toggleLeftSidebarThunk()),
         icon: 'left-sidebar',
         isActive: leftSidebarOpen,
         checkbox: true
       },{
         label: 'Styles',
-        onClick: toggleRightSidebarThunk,
+        onClick: () => dispatch(toggleRightSidebarThunk()),
         icon: 'right-sidebar',
         isActive: rightSidebarOpen,
         checkbox: true
       },{
         label: 'Events',
-        onClick: toggleTweenDrawerThunk,
+        onClick: () => dispatch(toggleTweenDrawerThunk()),
         icon: 'tweens',
         isActive: tweenDrawerOpen,
         checkbox: true
@@ -51,19 +38,4 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  leftSidebarOpen: boolean;
-  rightSidebarOpen: boolean;
-  tweenDrawerOpen: boolean;
-} => {
-  const { viewSettings } = state;
-  const leftSidebarOpen = viewSettings.leftSidebar.isOpen;
-  const rightSidebarOpen = viewSettings.rightSidebar.isOpen;
-  const tweenDrawerOpen = viewSettings.tweenDrawer.isOpen;
-  return { leftSidebarOpen, rightSidebarOpen, tweenDrawerOpen };
-};
-
-export default connect(
-  mapStateToProps,
-  { toggleLeftSidebarThunk, toggleRightSidebarThunk, toggleTweenDrawerThunk }
-)(InsertButton);
+export default InsertButton;

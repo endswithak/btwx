@@ -1,22 +1,17 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
-import { SetLayersStrokeWidthPayload, LayerTypes } from '../store/actionTypes/layer';
+import { getSelectedStrokeWidth, selectedStrokeEnabled } from '../store/selectors/layer';
 import { setLayersStrokeWidth } from '../store/actions/layer';
-import { getPaperLayer } from '../store/selectors/layer';
 
-interface StrokeWidthInputProps {
-  strokeWidthValue?: number | 'multi';
-  selected?: string[];
-  disabled?: boolean;
-  setLayersStrokeWidth?(payload: SetLayersStrokeWidthPayload): LayerTypes;
-}
-
-const StrokeWidthInput = (props: StrokeWidthInputProps): ReactElement => {
-  const { strokeWidthValue, selected, disabled, setLayersStrokeWidth } = props;
+const StrokeWidthInput = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const strokeWidthValue = useSelector((state: RootState) => getSelectedStrokeWidth(state));
+  const disabled = useSelector((state: RootState) => !selectedStrokeEnabled(state));
   const [strokeWidth, setStrokeWidth] = useState(strokeWidthValue !== 'multi' ? Math.round(strokeWidthValue) : strokeWidthValue);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setStrokeWidth(strokeWidthValue !== 'multi' ? Math.round(strokeWidthValue) : strokeWidthValue);
@@ -31,7 +26,7 @@ const StrokeWidthInput = (props: StrokeWidthInputProps): ReactElement => {
     try {
       const nextStrokeWidth = mexp.eval(`${strokeWidth}`) as any;
       if (nextStrokeWidth !== strokeWidthValue) {
-        setLayersStrokeWidth({layers: selected, strokeWidth: Math.round(nextStrokeWidth)});
+        dispatch(setLayersStrokeWidth({layers: selected, strokeWidth: Math.round(nextStrokeWidth)}));
         setStrokeWidth(Math.round(nextStrokeWidth));
       } else {
         setStrokeWidth(strokeWidthValue !== 'multi' ? Math.round(strokeWidthValue) : strokeWidthValue);
@@ -52,22 +47,4 @@ const StrokeWidthInput = (props: StrokeWidthInputProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  const layerItems: (Btwx.Shape | Btwx.Image | Btwx.Text)[] = selected.reduce((result, current) => {
-    const layerItem = layer.present.byId[current];
-    return [...result, layerItem];
-  }, []);
-  const strokeWidthValues = layerItems.reduce((result: number[], current: Btwx.Shape | Btwx.Image | Btwx.Text) => {
-    return [...result, current.style.stroke.width];
-  }, []);
-  const strokeWidthValue = strokeWidthValues.every((strokeWidth: number) => strokeWidth === strokeWidthValues[0]) ? strokeWidthValues[0] : 'multi';
-  const disabled = !layerItems.every((layerItem) => layerItem.style.stroke.enabled);
-  return { selected, strokeWidthValue, disabled };
-};
-
-export default connect(
-  mapStateToProps,
-  { setLayersStrokeWidth }
-)(StrokeWidthInput);
+export default StrokeWidthInput;

@@ -20,7 +20,7 @@ interface TextToolStateProps {
   isEnabled?: boolean;
   scope?: string[];
   textSettings?: TextSettingsState;
-  projectIndex?: number;
+  activeProjectIndex?: number;
   layerProjectIndices?: number[];
   activeArtboard?: string;
   activeArtboardProjectIndex?: number;
@@ -39,7 +39,7 @@ type TextToolProps = (
 );
 
 const TextTool = (props: TextToolProps): ReactElement => {
-  const { isEnabled, tool, moveEvent, downEvent, projectIndex, layerProjectIndices, openTextEditor, textSettings, scope, addTextThunk, toggleTextToolThunk, activeArtboard, activeArtboardProjectIndex } = props;
+  const { isEnabled, tool, moveEvent, downEvent, activeProjectIndex, layerProjectIndices, openTextEditor, textSettings, scope, addTextThunk, toggleTextToolThunk, activeArtboard, activeArtboardProjectIndex } = props;
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
   const [toBounds, setToBounds] = useState<paper.Rectangle>(null);
 
@@ -186,7 +186,7 @@ const mapStateToProps = (state: RootState): TextToolStateProps => {
   const { textTool, textSettings, layer } = state;
   const isEnabled = textTool.isEnabled;
   const scope = layer.present.scope;
-  const projectIndex = layer.present.projectIndex;
+  const activeProjectIndex = layer.present.activeProjectIndex;
   const layerProjectIndices = getLayerProjectIndices(state);
   const activeArtboard = layer.present.activeArtboard;
   const activeArtboardProjectIndex = activeArtboard ? (layer.present.byId[activeArtboard] as Btwx.Artboard).projectIndex : null;
@@ -194,7 +194,7 @@ const mapStateToProps = (state: RootState): TextToolStateProps => {
     isEnabled,
     textSettings,
     scope,
-    projectIndex,
+    activeProjectIndex,
     layerProjectIndices,
     activeArtboard,
     activeArtboardProjectIndex

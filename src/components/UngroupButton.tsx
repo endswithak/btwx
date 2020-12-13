@@ -1,21 +1,17 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { canUngroupSelected } from '../store/selectors/layer';
 import { ungroupSelectedThunk } from '../store/actions/layer';
 import TopbarButton from './TopbarButton';
 
-interface UngroupButtonProps {
-  canUngroup: boolean;
-  ungroupSelectedThunk(): void;
-}
-
-const UngroupButton = (props: UngroupButtonProps): ReactElement => {
-  const { canUngroup, ungroupSelectedThunk } = props;
+const UngroupButton = (): ReactElement => {
+  const canUngroup = useSelector((state: RootState) => canUngroupSelected(state));
+  const dispatch = useDispatch();
 
   const handleUngroupClick = (): void => {
     if (canUngroup) {
-      ungroupSelectedThunk();
+      dispatch(ungroupSelectedThunk());
     }
   }
 
@@ -28,14 +24,4 @@ const UngroupButton = (props: UngroupButtonProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  canUngroup: boolean;
-} => {
-  const canUngroup = canUngroupSelected(state);
-  return { canUngroup };
-};
-
-export default connect(
-  mapStateToProps,
-  { ungroupSelectedThunk }
-)(UngroupButton);
+export default UngroupButton;

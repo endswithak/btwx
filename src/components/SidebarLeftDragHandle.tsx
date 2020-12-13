@@ -1,20 +1,14 @@
 import React, { useContext, ReactElement, useState, useRef, useEffect } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
 import styled from 'styled-components';
 import { uiPaperScope } from '../canvas';
 import { setLeftSidebarWidth } from '../store/actions/viewSettings';
-import { SetLeftSidebarWidthPayload, ViewSettingsTypes } from '../store/actionTypes/viewSettings';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 
 gsap.registerPlugin(Draggable);
-
-interface SidebarLeftDragHandleProps {
-  sidebarWidth?: number;
-  setLeftSidebarWidth?(payload: SetLeftSidebarWidthPayload): ViewSettingsTypes;
-}
 
 interface DragHandleProps {
   dragging: boolean;
@@ -28,11 +22,12 @@ const DragHandle = styled.div<DragHandleProps>`
   }
 `;
 
-const SidebarLeftDragHandle = (props: SidebarLeftDragHandleProps): ReactElement => {
+const SidebarLeftDragHandle = (): ReactElement => {
   const theme = useContext(ThemeContext);
   const ref = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
-  const { sidebarWidth, setLeftSidebarWidth } = props;
+  const sidebarWidth = useSelector((state: RootState) => state.viewSettings.leftSidebar.width);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     Draggable.create(ref.current, {
@@ -47,13 +42,13 @@ const SidebarLeftDragHandle = (props: SidebarLeftDragHandleProps): ReactElement 
         const canvasContainer = document.getElementById('canvas-container');
         gsap.set('#sidebar-left', {width: this.x});
         uiPaperScope.projects.forEach((project) => {
-          if (project.activeLayer.data.id) {
+          if (project.activeLayer.children.length > 0) {
             project.view.viewSize.width = canvasContainer.clientWidth;
           }
         });
       },
       onRelease: function() {
-        setLeftSidebarWidth({width: this.x});
+        dispatch(setLeftSidebarWidth({width: this.x}));
         setDragging(false);
       }
     });
@@ -77,15 +72,4 @@ const SidebarLeftDragHandle = (props: SidebarLeftDragHandleProps): ReactElement 
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  sidebarWidth: number;
-} => {
-  const { viewSettings, layer } = state;
-  const sidebarWidth = viewSettings.leftSidebar.width;
-  return { sidebarWidth };
-};
-
-export default connect(
-  mapStateToProps,
-  { setLeftSidebarWidth }
-)(SidebarLeftDragHandle);
+export default SidebarLeftDragHandle;

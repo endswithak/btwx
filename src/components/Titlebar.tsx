@@ -2,17 +2,10 @@ import React, { ReactElement, useEffect, useState, useContext } from 'react';
 import { remote } from 'electron';
 import styled from 'styled-components';
 import { Titlebar as ElectronTitlebar, Color } from 'custom-electron-titlebar';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT, PREVIEW_PREFIX } from '../constants';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
-
-interface TitlebarStateProps {
-  documentName?: string;
-  themeName?: string;
-  recording?: boolean;
-  unsavedEdits?: boolean;
-}
 
 interface TitlebarProps {
   isPreview?: boolean;
@@ -33,9 +26,13 @@ const Title = styled.div<TitleProps>`
   }
 `;
 
-const Titlebar = (props: TitlebarProps & TitlebarStateProps): ReactElement => {
+const Titlebar = (props: TitlebarProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { documentName, themeName, recording, unsavedEdits, isPreview } = props;
+  const { isPreview } = props;
+  const unsavedEdits = useSelector((state: RootState) => state.layer.present.edit && state.layer.present.edit.id !== state.documentSettings.edit);
+  const documentName = useSelector((state: RootState) => state.documentSettings.name);
+  const themeName = useSelector((state: RootState) => state.viewSettings.theme);
+  const recording = useSelector((state: RootState) => state.preview.recording);
   const [titlebar, setTitlebar] = useState(null);
 
   const handleDoubleClick = () => {
@@ -75,10 +72,14 @@ const Titlebar = (props: TitlebarProps & TitlebarStateProps): ReactElement => {
         recording={recording}
         onDoubleClick={handleDoubleClick}>
         <span>
-          <span className='c-topbar-title__title'>{documentName}</span>
+          <span className='c-topbar-title__title'>
+            {documentName}
+          </span>
           {
             unsavedEdits
-            ? <span className='c-topbar-title__unsaved-indicator'>(unsaved changes)</span>
+            ? <span className='c-topbar-title__unsaved-indicator'>
+                (unsaved changes)
+              </span>
             : null
           }
         </span>
@@ -86,20 +87,4 @@ const Titlebar = (props: TitlebarProps & TitlebarStateProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  documentName: string;
-  themeName: string;
-  recording: boolean;
-  unsavedEdits: boolean;
-} => {
-  const { documentSettings, viewSettings, preview, layer } = state;
-  const unsavedEdits = layer.present.edit && layer.present.edit.id !== documentSettings.edit;
-  const documentName = documentSettings.name;
-  const themeName = viewSettings.theme;
-  const recording = preview.recording;
-  return { documentName, themeName, recording, unsavedEdits };
-};
-
-export default connect(
-  mapStateToProps
-)(Titlebar);
+export default Titlebar;

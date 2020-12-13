@@ -1,27 +1,22 @@
-import React, { useContext, ReactElement, useState } from 'react';
-import { connect } from 'react-redux';
-import { ThemeContext } from './ThemeProvider';
-import { RootState } from '../store/reducers';
+import React, { ReactElement } from 'react';
+import { useDispatch } from 'react-redux';
 import TweenDrawerEventLayerTweensTimeline from './TweenDrawerEventLayerTweensTimeline';
 import { setLayerHover } from '../store/actions/layer';
-import { SetLayerHoverPayload, LayerTypes } from '../store/actionTypes/layer';
 
 interface TweenDrawerEventLayerTimelineProps {
   id: string;
-  layer?: Btwx.Layer;
-  setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
 }
 
 const TweenDrawerEventLayerTimeline = (props: TweenDrawerEventLayerTimelineProps): ReactElement => {
-  const theme = useContext(ThemeContext);
-  const { id, layer, setLayerHover } = props;
+  const { id } = props;
+  const dispatch = useDispatch();
 
   const handleMouseEnter = () => {
-    setLayerHover({ id });
+    dispatch(setLayerHover({ id }));
   }
 
   const handleMouseLeave = () => {
-    setLayerHover({ id: null });
+    dispatch(setLayerHover({ id: null }));
   }
 
   return (
@@ -36,12 +31,4 @@ const TweenDrawerEventLayerTimeline = (props: TweenDrawerEventLayerTimelineProps
   );
 }
 
-const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventLayerTimelineProps) => {
-  const { layer } = state;
-  return { layer: layer.present.byId[ownProps.id] };
-};
-
-export default connect(
-  mapStateToProps,
-  { setLayerHover }
-)(TweenDrawerEventLayerTimeline);
+export default TweenDrawerEventLayerTimeline;

@@ -1,26 +1,19 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { zoomInThunk } from '../store/actions/zoomTool';
 import TopbarButton from './TopbarButton';
 
-interface ZoomInButtonProps {
-  zoomInThunk?(): void;
-}
-
-const ZoomInButton = (props: ZoomInButtonProps): ReactElement => {
-  const { zoomInThunk } = props;
+const ZoomInButton = (): ReactElement => {
+  const dispatch = useDispatch();
 
   return (
     <TopbarButton
       hideLabel
       label='Zoom In'
-      onClick={zoomInThunk}
+      onClick={() => dispatch(zoomInThunk())}
       icon='zoom-in'
       />
   );
 }
 
-export default connect(
-  null,
-  { zoomInThunk }
-)(ZoomInButton);
+export default ZoomInButton;

@@ -1,21 +1,17 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { canBooleanSelected } from '../store/selectors/layer';
 import { applyBooleanOperationThunk } from '../store/actions/layer';
 import TopbarButton from './TopbarButton';
 
-interface UniteButtonProps {
-  canUnite: boolean;
-  applyBooleanOperationThunk(booleanOperation: Btwx.BooleanOperation): void;
-}
-
-const UniteButton = (props: UniteButtonProps): ReactElement => {
-  const { canUnite, applyBooleanOperationThunk } = props;
+const UniteButton = (): ReactElement => {
+  const canUnite = useSelector((state: RootState) => canBooleanSelected(state));
+  const dispatch = useDispatch();
 
   const handleUniteClick = (): void => {
     if (canUnite) {
-      applyBooleanOperationThunk('unite');
+      dispatch(applyBooleanOperationThunk('unite'));
     }
   }
 
@@ -28,14 +24,4 @@ const UniteButton = (props: UniteButtonProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  canUnite: boolean;
-} => {
-  const canUnite = canBooleanSelected(state);
-  return { canUnite };
-};
-
-export default connect(
-  mapStateToProps,
-  { applyBooleanOperationThunk }
-)(UniteButton);
+export default UniteButton;

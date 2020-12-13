@@ -1,7 +1,7 @@
-import React, { useContext, ReactElement, useEffect } from 'react';
-import { connect } from 'react-redux';
-import { ThemeContext } from './ThemeProvider';
+import React, { useContext, ReactElement } from 'react';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
+import { ThemeContext } from './ThemeProvider';
 import TweenDrawerEvents from './TweenDrawerEvents';
 import TweenDrawerEvent from './TweenDrawerEvent';
 import TweenDrawerDragHandle from './TweenDrawerDragHandle';
@@ -9,19 +9,15 @@ import EmptyState from './EmptyState';
 
 interface TweenDrawerProps {
   ready?: boolean;
-  tweenDrawerHeight?: number;
-  isEmpty?: boolean;
-  tweenEvent?: Btwx.TweenEvent;
-  isOpen?: boolean;
 }
 
 const TweenDrawer = (props: TweenDrawerProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { ready, tweenEvent, tweenDrawerHeight, isEmpty, isOpen } = props;
-
-  // useEffect(() => {
-  //   console.log('TWEEN DRAWER');
-  // }, [isOpen, isEmpty, ready]);
+  const { ready } = props;
+  const tweenEvent = useSelector((state: RootState) => state.layer.present.events.byId[state.tweenDrawer.event]);
+  const tweenDrawerHeight = useSelector((state: RootState) => state.viewSettings.tweenDrawer.height);
+  const isEmpty = useSelector((state: RootState) => state.layer.present.events.allIds.length === 0);
+  const isOpen = useSelector((state: RootState) => state.viewSettings.tweenDrawer.isOpen);
 
   return (
     isOpen
@@ -57,20 +53,4 @@ const TweenDrawer = (props: TweenDrawerProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  tweenDrawerHeight: number;
-  tweenEvent: Btwx.TweenEvent;
-  isEmpty: boolean;
-  isOpen: boolean;
-} => {
-  const { layer, tweenDrawer, viewSettings } = state;
-  const tweenEvent = layer.present.events.byId[tweenDrawer.event];
-  const tweenDrawerHeight = viewSettings.tweenDrawer.height;
-  const isEmpty = layer.present.events.allIds.length === 0;
-  const isOpen = viewSettings.tweenDrawer.isOpen;
-  return { tweenEvent, tweenDrawerHeight, isEmpty, isOpen };
-};
-
-export default connect(
-  mapStateToProps
-)(TweenDrawer);
+export default TweenDrawer;

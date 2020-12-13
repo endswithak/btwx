@@ -1,7 +1,7 @@
 import React, { useContext, ReactElement, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { SetLayersStrokeCapPayload, LayerTypes } from '../store/actionTypes/layer';
+import { selectedStrokeEnabled, getSelectedStrokeCap } from '../store/selectors/layer';
 import { setLayersStrokeCap } from '../store/actions/layer';
 import { ThemeContext } from './ThemeProvider';
 import SidebarSectionRow from './SidebarSectionRow';
@@ -9,24 +9,20 @@ import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarToggleButton from './SidebarToggleButton';
 import Icon from './Icon';
 
-interface StrokeCapInputProps {
-  selected?: string[];
-  strokeCapValue?: Btwx.StrokeCap | 'multi';
-  disabled?: boolean;
-  setLayersStrokeCap?(payload: SetLayersStrokeCapPayload): LayerTypes;
-}
-
-const StrokeCapInput = (props: StrokeCapInputProps): ReactElement => {
+const StrokeCapInput = (): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { selected, strokeCapValue, setLayersStrokeCap, disabled } = props;
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const strokeCapValue = useSelector((state: RootState) => getSelectedStrokeCap(state));
+  const disabled = useSelector((state: RootState) => !selectedStrokeEnabled(state) || (state.layer.present.selected.every((id) => state.layer.present.byId[id].type === 'Shape' && (state.layer.present.byId[id] as Btwx.Shape).shapeType !== 'Line')));
   const [strokeCap, setStrokeCap] = useState<Btwx.StrokeCap | 'multi'>(strokeCapValue);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setStrokeCap(strokeCapValue);
   }, [strokeCapValue, disabled, selected]);
 
   const handleClick = (strokeCapType: Btwx.StrokeCap) => {
-    setLayersStrokeCap({layers: selected, strokeCap: strokeCapType})
+    dispatch(setLayersStrokeCap({layers: selected, strokeCap: strokeCapType}));
     setStrokeCap(strokeCapType);
   };
 
@@ -73,22 +69,4 @@ const StrokeCapInput = (props: StrokeCapInputProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  const layerItems: (Btwx.Shape | Btwx.Image | Btwx.Text)[] = selected.reduce((result, current) => {
-    const layerItem = layer.present.byId[current];
-    return [...result, layerItem];
-  }, []);
-  const strokeCapValues = layerItems.reduce((result: Btwx.StrokeCap[], current: Btwx.Shape | Btwx.Image | Btwx.Text) => {
-    return [...result, current.style.strokeOptions.cap];
-  }, []);
-  const strokeCapValue = strokeCapValues.every((cap: Btwx.StrokeCap) => cap === strokeCapValues[0]) ? strokeCapValues[0] : 'multi';
-  const disabled = !layerItems.every((layerItem) => layerItem.style.stroke.enabled) || layerItems.every((layerItem) => layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line');
-  return { selected, strokeCapValue, disabled };
-};
-
-export default connect(
-  mapStateToProps,
-  { setLayersStrokeCap }
-)(StrokeCapInput);
+export default StrokeCapInput;

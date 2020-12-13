@@ -1,17 +1,15 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
+import { getSelectedStrokeFillType } from '../store/selectors/layer';
 import GradientInput from './GradientInput';
 import ColorInput from './ColorInput';
 import MultiInput from './MultiInput';
 
-interface StrokeInputProps {
-  fillType: Btwx.FillType | 'multi';
-}
+const StrokeInput = (): ReactElement => {
+  const strokeFillType = useSelector((state: RootState) => getSelectedStrokeFillType(state));
 
-const StrokeInput = (props: StrokeInputProps): ReactElement => {
-  const { fillType } = props;
-  switch(fillType) {
+  switch(strokeFillType) {
     case 'color':
       return <ColorInput prop='stroke' />
     case 'gradient':
@@ -21,26 +19,4 @@ const StrokeInput = (props: StrokeInputProps): ReactElement => {
   }
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  const layerItems: Btwx.Layer[] = selected.reduce((result, current) => {
-    const layerItem = layer.present.byId[current];
-    return [...result, layerItem];
-  }, []);
-  const fillTypes: number[] = layerItems.reduce((result, current) => {
-    return [...result, current.style.stroke.fillType];
-  }, []);
-  const fillType = (() => {
-    if (fillTypes.every((value: number) => value === fillTypes[0])) {
-      return fillTypes[0];
-    } else {
-      return 'multi';
-    }
-  })();
-  return { fillType };
-};
-
-export default connect(
-  mapStateToProps
-)(StrokeInput);
+export default StrokeInput;

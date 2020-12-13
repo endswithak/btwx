@@ -1,21 +1,12 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector,  } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { activateInsertKnob } from '../store/actions/insertKnob';
-import { InsertKnobTypes } from '../store/actionTypes/insertKnob';
 import EmptyState from './EmptyState';
 
-interface SidebarLeftEmptyStateProps {
-  activeTool?: Btwx.ToolType;
-  shapeToolShapeType?: Btwx.ShapeType;
-  isEmpty?: boolean;
-  insertKnobOpen?: boolean;
-  emptyStateActionActive?: boolean;
-  activateInsertKnob?(): InsertKnobTypes;
-}
-
-const SidebarLeftEmptyState = (props: SidebarLeftEmptyStateProps): ReactElement => {
-  const { isEmpty, activeTool, shapeToolShapeType, insertKnobOpen, activateInsertKnob } = props;
+const SidebarLeftEmptyState = (): ReactElement => {
+  // const isEmpty = useSelector((state: RootState) => state.layer.present.allIds.length <= 1);
+  const activeTool = useSelector((state: RootState) => state.canvasSettings.activeTool);
+  const shapeToolShapeType = useSelector((state: RootState) => state.shapeTool.shapeType);
 
   // const handleEmptyStateActionClick = () => {
   //   activateInsertKnob();
@@ -100,16 +91,4 @@ const SidebarLeftEmptyState = (props: SidebarLeftEmptyStateProps): ReactElement 
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer, insertKnob, canvasSettings, shapeTool } = state;
-  const isEmpty = layer.present.allIds.length <= 1;
-  const insertKnobOpen = insertKnob.isActive;
-  const activeTool = canvasSettings.activeTool;
-  const shapeToolShapeType = shapeTool.shapeType;
-  return { isEmpty, insertKnobOpen, activeTool, shapeToolShapeType };
-};
-
-export default connect(
-  mapStateToProps,
-  { activateInsertKnob }
-)(SidebarLeftEmptyState);
+export default SidebarLeftEmptyState;

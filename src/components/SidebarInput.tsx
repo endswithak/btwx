@@ -2,10 +2,9 @@
 import React, { useContext, ReactElement, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { clipboard } from 'electron';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
-import { CanvasSettingsTypes, SetCanvasFocusingPayload } from '../store/actionTypes/canvasSettings';
 import { setCanvasFocusing } from '../store/actions/canvasSettings';
 
 interface SidebarInputProps {
@@ -21,12 +20,10 @@ interface SidebarInputProps {
   selectOnMount?: boolean;
   submitOnBlur?: boolean;
   disableSelectionToolToggle?: boolean;
-  canvasFocusing?: boolean;
   removedOnSubmit?: boolean;
   manualCanvasFocus?: boolean;
   placeholder?: string;
   isSearch?: boolean;
-  setCanvasFocusing?(payload: SetCanvasFocusingPayload): CanvasSettingsTypes;
 }
 
 interface InputProps {
@@ -60,7 +57,9 @@ const Input = styled.div<InputProps>`
 const SidebarInput = (props: SidebarInputProps): ReactElement => {
   const inputRef = useRef<HTMLInputElement>(null);
   const theme = useContext(ThemeContext);
-  const { value, onChange, onSubmit, placeholder, isSearch, onFocus, onBlur, manualCanvasFocus, removedOnSubmit, label, leftLabel, bottomLabel, disabled, selectOnMount, submitOnBlur, setCanvasFocusing, canvasFocusing } = props;
+  const { value, onChange, onSubmit, placeholder, isSearch, onFocus, onBlur, manualCanvasFocus, removedOnSubmit, label, leftLabel, bottomLabel, disabled, selectOnMount, submitOnBlur } = props;
+  const canvasFocusing = useSelector((state: RootState) => state.canvasSettings.focusing);
+  const dispatch = useDispatch();
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
@@ -77,7 +76,7 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
         inputRef.current.blur();
       }
       if (!manualCanvasFocus) {
-        setCanvasFocusing({focusing: true});
+        dispatch(setCanvasFocusing({focusing: true}));
         document.removeEventListener('mousedown', handleMouseDown);
         document.removeEventListener('keydown', handleKeyDown);
       }
@@ -90,7 +89,7 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
         inputRef.current.blur();
       }
       if (!manualCanvasFocus) {
-        setCanvasFocusing({focusing: true});
+        dispatch(setCanvasFocusing({focusing: true}));
         document.removeEventListener('mousedown', handleMouseDown);
         document.removeEventListener('keydown', handleKeyDown);
       }
@@ -98,7 +97,7 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
     if (event.key === 'Enter') {
       if (removedOnSubmit) {
         if (!manualCanvasFocus) {
-          setCanvasFocusing({focusing: true});
+          dispatch(setCanvasFocusing({focusing: true}));
           document.removeEventListener('mousedown', handleMouseDown);
           document.removeEventListener('keydown', handleKeyDown);
         }
@@ -125,7 +124,7 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
       onFocus(e);
     }
     if (canvasFocusing && !manualCanvasFocus) {
-      setCanvasFocusing({focusing: false});
+      dispatch(setCanvasFocusing({focusing: false}));
       document.addEventListener('mousedown', handleMouseDown);
       document.addEventListener('keydown', handleKeyDown);
     }
@@ -208,15 +207,4 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  canvasFocusing: boolean;
-} => {
-  const { canvasSettings } = state;
-  const canvasFocusing = canvasSettings.focusing;
-  return { canvasFocusing };
-};
-
-export default connect(
-  mapStateToProps,
-  { setCanvasFocusing }
-)(SidebarInput);
+export default SidebarInput;

@@ -1,21 +1,17 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
-import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
-import { SetLayersStrokeDashArrayGapPayload, LayerTypes } from '../store/actionTypes/layer';
+import { getSelectedStrokeDashArrayGap, selectedStrokeEnabled } from '../store/selectors/layer';
 import { setLayersStrokeDashArrayGap } from '../store/actions/layer';
+import SidebarInput from './SidebarInput';
 
-interface StrokeDashArrayGapInputProps {
-  selected?: string[];
-  strokeDashArrayGapValue?: number | 'multi';
-  disabled?: boolean;
-  setLayersStrokeDashArrayGap?(payload: SetLayersStrokeDashArrayGapPayload): LayerTypes;
-}
-
-const StrokeDashArrayGapInput = (props: StrokeDashArrayGapInputProps): ReactElement => {
-  const { selected, setLayersStrokeDashArrayGap, disabled, strokeDashArrayGapValue } = props;
+const StrokeDashArrayGapInput = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const strokeDashArrayGapValue = useSelector((state: RootState) => getSelectedStrokeDashArrayGap(state));
+  const disabled = useSelector((state: RootState) => !selectedStrokeEnabled(state));
   const [dashArrayGap, setDashArrayGap] = useState(strokeDashArrayGapValue !== 'multi' ? Math.round(strokeDashArrayGapValue) : strokeDashArrayGapValue);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setDashArrayGap(strokeDashArrayGapValue !== 'multi' ? Math.round(strokeDashArrayGapValue) : strokeDashArrayGapValue);
@@ -30,7 +26,7 @@ const StrokeDashArrayGapInput = (props: StrokeDashArrayGapInputProps): ReactElem
     try {
       const nextGap = mexp.eval(`${dashArrayGap}`) as any;
       if (nextGap !== strokeDashArrayGapValue) {
-        setLayersStrokeDashArrayGap({layers: selected, strokeDashArrayGap: Math.round(nextGap)});
+        dispatch(setLayersStrokeDashArrayGap({layers: selected, strokeDashArrayGap: Math.round(nextGap)}));
         setDashArrayGap(Math.round(nextGap));
       } else {
         setDashArrayGap(strokeDashArrayGapValue !== 'multi' ? Math.round(strokeDashArrayGapValue) : strokeDashArrayGapValue);
@@ -51,25 +47,4 @@ const StrokeDashArrayGapInput = (props: StrokeDashArrayGapInputProps): ReactElem
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  const layerItems: (Btwx.Shape | Btwx.Image | Btwx.Text)[] = selected.reduce((result, current) => {
-    const layerItem = layer.present.byId[current];
-    return [...result, layerItem];
-  }, []);
-  const strokeDashArrayValues = layerItems.reduce((result: (number[])[], current: Btwx.Shape | Btwx.Image | Btwx.Text) => {
-    return [...result, current.style.strokeOptions.dashArray];
-  }, []);
-  const strokeDashArrayGapValues = strokeDashArrayValues.reduce((result: number[], current: number[]) => {
-    return [...result, current[1]];
-  }, []);
-  const strokeDashArrayGapValue = strokeDashArrayGapValues.every((gap: number) => gap === strokeDashArrayGapValues[0]) ? strokeDashArrayGapValues[0] : 'multi';
-  const disabled = !layerItems.every((layerItem) => layerItem.style.stroke.enabled);
-  return { selected, strokeDashArrayGapValue, disabled };
-};
-
-export default connect(
-  mapStateToProps,
-  { setLayersStrokeDashArrayGap }
-)(StrokeDashArrayGapInput);
+export default StrokeDashArrayGapInput;

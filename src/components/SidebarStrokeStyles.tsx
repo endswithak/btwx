@@ -1,44 +1,33 @@
-import React, { useContext, ReactElement } from 'react';
-import { connect } from 'react-redux';
+import React, { ReactElement } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../store/reducers';
+import { expandStrokeStyles, collapseStrokeStyles, expandStrokeOptionsStyles, collapseStrokeOptionsStyles } from '../store/actions/rightSidebar';
 import SidebarCollapseSection from './SidebarCollapseSection';
 import StrokeInput from './StrokeInput';
 import SidebarStrokeOptionsStyle from './SidebarStrokeOptionsStyle';
 import StrokeOptionsToggle from './StrokeOptionsToggle';
 import StrokeToggle from './StrokeToggle';
 import StrokeParamsInput from './StrokeParamsInput';
-import { RootState } from '../store/reducers';
-import { ThemeContext } from './ThemeProvider';
-import { RightSidebarTypes } from '../store/actionTypes/rightSidebar';
-import { expandStrokeStyles, collapseStrokeStyles, expandStrokeOptionsStyles, collapseStrokeOptionsStyles } from '../store/actions/rightSidebar';
 
-interface SidebarStrokeStylesProps {
-  selected?: string[];
-  validFillSelection?: boolean;
-  strokeStylesCollapsed?: boolean;
-  strokeOptionsStylesCollapsed?: boolean;
-  expandStrokeStyles?(): RightSidebarTypes;
-  collapseStrokeStyles?(): RightSidebarTypes;
-  expandStrokeOptionsStyles?(): RightSidebarTypes;
-  collapseStrokeOptionsStyles?(): RightSidebarTypes;
-}
-
-const SidebarStrokeStyles = (props: SidebarStrokeStylesProps): ReactElement => {
-  const { selected, validFillSelection, strokeStylesCollapsed, expandStrokeStyles, collapseStrokeStyles, strokeOptionsStylesCollapsed, expandStrokeOptionsStyles, collapseStrokeOptionsStyles } = props;
-  const theme = useContext(ThemeContext);
+const SidebarStrokeStyles = (): ReactElement => {
+  const validFillSelection = useSelector((state: RootState) => state.layer.present.selected.every((id: string) => state.layer.present.byId[id].type !== 'Artboard' && state.layer.present.byId[id].type !== 'Group' && state.layer.present.byId[id].type !== 'Image'));
+  const strokeStylesCollapsed = useSelector((state: RootState) => state.rightSidebar.strokeStylesCollapsed);
+  const strokeOptionsStylesCollapsed = useSelector((state: RootState) => state.rightSidebar.strokeOptionsStylesCollapsed);
+  const dispatch = useDispatch();
 
   const handleClick = () => {
     if (strokeStylesCollapsed) {
-      expandStrokeStyles();
+      dispatch(expandStrokeStyles());
     } else {
-      collapseStrokeStyles();
+      dispatch(collapseStrokeStyles());
     }
   }
 
   const handleOptionsClick = () => {
     if (strokeOptionsStylesCollapsed) {
-      expandStrokeOptionsStyles();
+      dispatch(expandStrokeOptionsStyles());
     } else {
-      collapseStrokeOptionsStyles();
+      dispatch(collapseStrokeOptionsStyles());
     }
   }
 
@@ -67,16 +56,4 @@ const SidebarStrokeStyles = (props: SidebarStrokeStylesProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer, rightSidebar } = state;
-  const selected = layer.present.selected;
-  const validFillSelection = !selected.some((id: string) => layer.present.byId[id].type === 'Artboard' || layer.present.byId[id].type === 'Group' || layer.present.byId[id].type === 'Image');
-  const strokeStylesCollapsed = rightSidebar.strokeStylesCollapsed;
-  const strokeOptionsStylesCollapsed = rightSidebar.strokeOptionsStylesCollapsed;
-  return { selected, validFillSelection, strokeStylesCollapsed, strokeOptionsStylesCollapsed };
-};
-
-export default connect(
-  mapStateToProps,
-  { expandStrokeStyles, collapseStrokeStyles, expandStrokeOptionsStyles, collapseStrokeOptionsStyles }
-)(SidebarStrokeStyles);
+export default SidebarStrokeStyles;

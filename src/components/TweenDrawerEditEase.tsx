@@ -1,29 +1,28 @@
 import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
-import { connect } from 'react-redux';
-import { ThemeContext } from './ThemeProvider';
+import { useSelector, useDispatch } from 'react-redux';
+import gsap from 'gsap';
+import { CustomEase } from 'gsap/CustomEase';
 import { RootState } from '../store/reducers';
 import { openEaseEditor } from '../store/actions/easeEditor';
-import { EaseEditorTypes, OpenEaseEditorPayload } from '../store/actionTypes/easeEditor';
-import gsap from 'gsap';
-import CustomEase from 'gsap/CustomEase';
+import { ThemeContext } from './ThemeProvider';
 
 gsap.registerPlugin(CustomEase);
 
 interface TweenDrawerEditEaseProps {
   tweenId: string;
-  tween?: Btwx.Tween;
-  editingEase?: boolean;
-  openEaseEditor?(payload: OpenEaseEditorPayload): EaseEditorTypes;
 }
 
 const TweenDrawerEditEase = (props: TweenDrawerEditEaseProps): ReactElement => {
   const pathRef = useRef<SVGPathElement>(null);
   const theme = useContext(ThemeContext);
   const [hover, setHover] = useState(false);
-  const { tweenId, tween, editingEase, openEaseEditor } = props;
+  const { tweenId } = props;
+  const tween = useSelector((state: RootState) => state.layer.present.tweens.byId[tweenId]);
+  const editingEase = useSelector((state: RootState) => state.easeEditor.tween && state.easeEditor.tween === tweenId);
+  const dispatch = useDispatch();
 
   const handleClick = () => {
-    openEaseEditor({tween: tweenId});
+    dispatch(openEaseEditor({tween: tweenId}));
   }
 
   const handleMouseEnter = () => {
@@ -66,14 +65,4 @@ const TweenDrawerEditEase = (props: TweenDrawerEditEaseProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState, ownProps: TweenDrawerEditEaseProps) => {
-  const { layer, easeEditor } = state;
-  const tween = layer.present.tweens.byId[ownProps.tweenId];
-  const editingEase = easeEditor.tween && easeEditor.tween === ownProps.tweenId;
-  return { tween, editingEase };
-};
-
-export default connect(
-  mapStateToProps,
-  { openEaseEditor }
-)(TweenDrawerEditEase);
+export default TweenDrawerEditEase;

@@ -1,35 +1,30 @@
 import React, { ReactElement, useEffect, memo } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeTree as Tree } from '../../react-vtree';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getTreeWalker } from '../store/selectors/layer';
 import { setRef } from '../store/actions/leftSidebar';
-import { LeftSidebarTypes, SetRefPayload } from '../store/actionTypes/leftSidebar';
 import SidebarLayer from './SidebarLayer';
 import SidebarLayerDragGhosts from './SidebarLayerDragGhosts';
 import SidebarLeftEmptyState from './SidebarLeftEmptyState';
 
-interface SidebarLayerTreeProps {
-  treeWalker?: any;
-  isEmpty?: boolean;
-  searchActive?: boolean;
-  setRef?(payload: SetRefPayload): LeftSidebarTypes;
-}
+const SidebarLayerTree = (): ReactElement => {
+  const treeWalker = useSelector((state: RootState) => getTreeWalker(state));
+  const isEmpty = useSelector((state: RootState) => state.layer.present.childrenById.root.length === 0);
+  const searchActive = useSelector((state: RootState) => state.leftSidebar.search.replace(/\s/g, '').length > 0);
+  const dispatch = useDispatch();
 
-const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
-  const { setRef, treeWalker, isEmpty, searchActive } = props;
+  // useEffect(() => {
+  //   console.log('LAYER TREEEEEE');
+  // }, []);
 
-  useEffect(() => {
-    console.log('LAYER TREEEEEE');
-  }, []);
-
-  useEffect(() => {
-    console.log('TREEEEE WALKER');
-  }, [treeWalker]);
+  // useEffect(() => {
+  //   console.log('TREEEEE WALKER');
+  // }, [treeWalker]);
 
   const handleRef = (newRef: Tree): void => {
-    setRef({ref: newRef});
+    dispatch(setRef({ref: newRef}));
   }
 
   const Node = memo(function Node(props: any) {
@@ -52,7 +47,7 @@ const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
           opacity: searchActive ? 0 : 1
         }}>
         <AutoSizer>
-          {({height, width}) => (
+          {({height, width}): ReactElement => (
             <Tree
               treeWalker={treeWalker}
               itemSize={32}
@@ -68,13 +63,4 @@ const SidebarLayerTree = (props: SidebarLayerTreeProps): ReactElement => {
   )
 }
 
-const mapStateToProps = (state: RootState) => ({
-  treeWalker: getTreeWalker(state),
-  isEmpty: state.layer.present.childrenById.root.length === 0,
-  searchActive: state.leftSidebar.search.replace(/\s/g, '').length > 0
-});
-
-export default connect(
-  mapStateToProps,
-  { setRef }
-)(SidebarLayerTree);
+export default SidebarLayerTree;

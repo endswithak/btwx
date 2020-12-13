@@ -1,6 +1,7 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
+import { expandTextStyles, collapseTextStyles } from '../store/actions/rightSidebar';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import FontFamilySelector from './FontFamilySelector';
@@ -9,25 +10,17 @@ import FontSizeInput from './FontSizeInput';
 import LeadingInput from './LeadingInput';
 import JustificationInput from './JustificationInput';
 import SidebarCollapseSection from './SidebarCollapseSection';
-import { RightSidebarTypes } from '../store/actionTypes/rightSidebar';
-import { expandTextStyles, collapseTextStyles } from '../store/actions/rightSidebar';
 
-interface SidebarTextStylesProps {
-  selected?: string[];
-  validTextSelection?: boolean;
-  textStylesCollapsed?: boolean;
-  expandTextStyles?(): RightSidebarTypes;
-  collapseTextStyles?(): RightSidebarTypes;
-}
-
-const SidebarTextStyles = (props: SidebarTextStylesProps): ReactElement => {
-  const { selected, validTextSelection, textStylesCollapsed, expandTextStyles, collapseTextStyles } = props;
+const SidebarTextStyles = (): ReactElement => {
+  const validTextSelection = useSelector((state: RootState) => state.layer.present.selected.every((id: string) => state.layer.present.byId[id].type === 'Text'));
+  const textStylesCollapsed = useSelector((state: RootState) => state.rightSidebar.textStylesCollapsed);
+  const dispatch = useDispatch();
 
   const handleClick = () => {
     if (textStylesCollapsed) {
-      expandTextStyles();
+      dispatch(expandTextStyles());
     } else {
-      collapseTextStyles();
+      dispatch(collapseTextStyles());
     }
   }
 
@@ -61,15 +54,4 @@ const SidebarTextStyles = (props: SidebarTextStylesProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer, rightSidebar } = state;
-  const selected = layer.present.selected;
-  const validTextSelection = selected.every((id: string) => layer.present.byId[id].type === 'Text');
-  const textStylesCollapsed = rightSidebar.textStylesCollapsed;
-  return { selected, validTextSelection, textStylesCollapsed };
-};
-
-export default connect(
-  mapStateToProps,
-  { expandTextStyles, collapseTextStyles }
-)(SidebarTextStyles);
+export default SidebarTextStyles;

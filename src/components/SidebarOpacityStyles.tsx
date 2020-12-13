@@ -1,26 +1,20 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
+import { expandOpacityStyles, collapseOpacityStyles } from '../store/actions/rightSidebar';
 import SidebarCollapseSection from './SidebarCollapseSection';
 import OpacityInput from './OpacityInput';
-import { RightSidebarTypes } from '../store/actionTypes/rightSidebar';
-import { expandOpacityStyles, collapseOpacityStyles } from '../store/actions/rightSidebar';
 
-interface SidebarOpacityStylesProps {
-  isEnabled: boolean;
-  opacityStylesCollapsed?: boolean;
-  expandOpacityStyles?(): RightSidebarTypes;
-  collapseOpacityStyles?(): RightSidebarTypes;
-}
-
-const SidebarOpacityStyles = (props: SidebarOpacityStylesProps): ReactElement => {
-  const { isEnabled, opacityStylesCollapsed, expandOpacityStyles, collapseOpacityStyles } = props;
+const SidebarOpacityStyles = (): ReactElement => {
+  const opacityStylesCollapsed = useSelector((state: RootState) => state.rightSidebar.opacityStylesCollapsed);
+  const isEnabled = useSelector((state: RootState) => state.layer.present.selected.length > 0 && state.layer.present.selected.every((id: string) => state.layer.present.byId[id].type !== 'Artboard' && state.layer.present.byId[id].type !== 'Group'));
+  const dispatch = useDispatch();
 
   const handleClick = () => {
     if (opacityStylesCollapsed) {
-      expandOpacityStyles();
+      dispatch(expandOpacityStyles());
     } else {
-      collapseOpacityStyles();
+      dispatch(collapseOpacityStyles());
     }
   }
 
@@ -36,15 +30,4 @@ const SidebarOpacityStyles = (props: SidebarOpacityStylesProps): ReactElement =>
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer, rightSidebar } = state;
-  const selected = layer.present.selected;
-  const opacityStylesCollapsed = rightSidebar.opacityStylesCollapsed;
-  const isEnabled = selected.length > 0 && !selected.some((id: string) => layer.present.byId[id].type === 'Artboard' || layer.present.byId[id].type === 'Group');
-  return { opacityStylesCollapsed, isEnabled };
-};
-
-export default connect(
-  mapStateToProps,
-  { expandOpacityStyles, collapseOpacityStyles }
-)(SidebarOpacityStyles);
+export default SidebarOpacityStyles;

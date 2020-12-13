@@ -179,17 +179,14 @@ export const getTreeWalker = createSelector(
 export const getSelectedById = createSelector(
   [ getSelected, getLayersById ],
   (selected, byId) => {
-    return selected.reduce((result, current) => {
-      result = {
-        ...result,
-        [current]: byId[current]
-      }
-      return result;
-    }, {}) as { [id: string]: Btwx.Layer };
+    return selected.reduce((result, current) => ({
+      ...result,
+      [current]: byId[current]
+    }), {}) as { [id: string]: Btwx.Layer };
   }
 );
 
-export const getSelectedFills = createSelector(
+export const getSelectedFill = createSelector(
   [ getSelectedById ],
   (selectedById) => {
     return Object.keys(selectedById).reduce((result, current) => {
@@ -202,8 +199,8 @@ export const getSelectedFills = createSelector(
   }
 );
 
-export const getSelectedFillsColor = createSelector(
-  [ getSelectedFills ],
+export const getSelectedFillColor = createSelector(
+  [ getSelectedFill ],
   (selectedFills) => {
     const firstItem = selectedFills[Object.keys(selectedFills)[0]];
     if (Object.keys(selectedFills).every((id) => colorsMatch(selectedFills[id].color, firstItem.color))) {
@@ -214,8 +211,8 @@ export const getSelectedFillsColor = createSelector(
   }
 );
 
-export const getSelectedFillsOpacity = createSelector(
-  [ getSelectedFills ],
+export const getSelectedFillOpacity = createSelector(
+  [ getSelectedFill ],
   (selectedFills) => {
     const firstItem = selectedFills[Object.keys(selectedFills)[0]];
     if (Object.keys(selectedFills).every((id) => selectedFills[id].color.a === firstItem.color.a)) {
@@ -226,8 +223,8 @@ export const getSelectedFillsOpacity = createSelector(
   }
 );
 
-export const getSelectedFillsEnabled = createSelector(
-  [ getSelectedFills ],
+export const getSelectedFillEnabled = createSelector(
+  [ getSelectedFill ],
   (selectedFills) => {
     const firstItem = selectedFills[Object.keys(selectedFills)[0]];
     if (Object.keys(selectedFills).every((id) => selectedFills[id].enabled === firstItem.enabled)) {
@@ -238,8 +235,8 @@ export const getSelectedFillsEnabled = createSelector(
   }
 );
 
-export const getSelectedFillsGradients = createSelector(
-  [ getSelectedFills ],
+export const getSelectedFillGradient = createSelector(
+  [ getSelectedFill ],
   (selectedFills) => {
     const firstItem = selectedFills[Object.keys(selectedFills)[0]];
     if (Object.keys(selectedFills).every((id) => gradientsMatch(selectedFills[id].gradient, firstItem.gradient))) {
@@ -250,8 +247,8 @@ export const getSelectedFillsGradients = createSelector(
   }
 );
 
-export const getSelectedFillsGradientType = createSelector(
-  [ getSelectedFills ],
+export const getSelectedFillGradientType = createSelector(
+  [ getSelectedFill ],
   (selectedFills) => {
     const firstItem = selectedFills[Object.keys(selectedFills)[0]];
     if (Object.keys(selectedFills).every((id) => selectedFills[id].gradient.gradientType === firstItem.gradient.gradientType)) {
@@ -262,7 +259,7 @@ export const getSelectedFillsGradientType = createSelector(
   }
 );
 
-export const getSelectedStrokes = createSelector(
+export const getSelectedStroke = createSelector(
   [ getSelectedById ],
   (selectedById) => {
     return Object.keys(selectedById).reduce((result, current) => {
@@ -275,8 +272,8 @@ export const getSelectedStrokes = createSelector(
   }
 );
 
-export const getSelectedStrokesColor = createSelector(
-  [ getSelectedStrokes ],
+export const getSelectedStrokeColor = createSelector(
+  [ getSelectedStroke ],
   (selectedStrokes) => {
     const firstItem = selectedStrokes[Object.keys(selectedStrokes)[0]];
     if (Object.keys(selectedStrokes).every((id) => colorsMatch(selectedStrokes[id].color, firstItem.color))) {
@@ -287,8 +284,8 @@ export const getSelectedStrokesColor = createSelector(
   }
 );
 
-export const getSelectedStrokesOpacity = createSelector(
-  [ getSelectedStrokes ],
+export const getSelectedStrokeOpacity = createSelector(
+  [ getSelectedStroke ],
   (selectedStrokes) => {
     const firstItem = selectedStrokes[Object.keys(selectedStrokes)[0]];
     if (Object.keys(selectedStrokes).every((id) => selectedStrokes[id].color.a === firstItem.color.a)) {
@@ -299,8 +296,8 @@ export const getSelectedStrokesOpacity = createSelector(
   }
 );
 
-export const getSelectedStrokesEnabled = createSelector(
-  [ getSelectedStrokes ],
+export const getSelectedStrokeEnabled = createSelector(
+  [ getSelectedStroke ],
   (selectedStrokes) => {
     const firstItem = selectedStrokes[Object.keys(selectedStrokes)[0]];
     if (Object.keys(selectedStrokes).every((id) => selectedStrokes[id].enabled === firstItem.enabled)) {
@@ -311,8 +308,8 @@ export const getSelectedStrokesEnabled = createSelector(
   }
 );
 
-export const getSelectedStrokesGradients = createSelector(
-  [ getSelectedStrokes ],
+export const getSelectedStrokeGradient = createSelector(
+  [ getSelectedStroke ],
   (selectedStrokes) => {
     const firstItem = selectedStrokes[Object.keys(selectedStrokes)[0]];
     if (Object.keys(selectedStrokes).every((id) => gradientsMatch(selectedStrokes[id].gradient, firstItem.gradient))) {
@@ -323,8 +320,8 @@ export const getSelectedStrokesGradients = createSelector(
   }
 );
 
-export const getSelectedStrokesGradientType = createSelector(
-  [ getSelectedStrokes ],
+export const getSelectedStrokeGradientType = createSelector(
+  [ getSelectedStroke ],
   (selectedStrokes) => {
     const firstItem = selectedStrokes[Object.keys(selectedStrokes)[0]];
     if (Object.keys(selectedStrokes).every((id) => selectedStrokes[id].gradient.gradientType === firstItem.gradient.gradientType)) {
@@ -335,7 +332,7 @@ export const getSelectedStrokesGradientType = createSelector(
   }
 );
 
-export const getSelectedShadows = createSelector(
+export const getSelectedShadow = createSelector(
   [ getSelectedById ],
   (selectedById) => {
     return Object.keys(selectedById).reduce((result, current) => {
@@ -348,8 +345,8 @@ export const getSelectedShadows = createSelector(
   }
 );
 
-export const getSelectedShadowsColor = createSelector(
-  [ getSelectedShadows ],
+export const getSelectedShadowColor = createSelector(
+  [ getSelectedShadow ],
   (selectedShadows) => {
     const firstItem = selectedShadows[Object.keys(selectedShadows)[0]];
     if (Object.keys(selectedShadows).every((id) => colorsMatch(selectedShadows[id].color, firstItem.color))) {
@@ -360,8 +357,8 @@ export const getSelectedShadowsColor = createSelector(
   }
 );
 
-export const getSelectedShadowsOpacity = createSelector(
-  [ getSelectedShadows ],
+export const getSelectedShadowOpacity = createSelector(
+  [ getSelectedShadow ],
   (selectedShadows) => {
     const firstItem = selectedShadows[Object.keys(selectedShadows)[0]];
     if (Object.keys(selectedShadows).every((id) => selectedShadows[id].color.a === firstItem.color.a)) {
@@ -372,8 +369,8 @@ export const getSelectedShadowsOpacity = createSelector(
   }
 );
 
-export const getSelectedShadowsEnabled = createSelector(
-  [ getSelectedShadows ],
+export const getSelectedShadowEnabled = createSelector(
+  [ getSelectedShadow ],
   (selectedShadows) => {
     const firstItem = selectedShadows[Object.keys(selectedShadows)[0]];
     if (Object.keys(selectedShadows).every((id) => selectedShadows[id].enabled === firstItem.enabled)) {
@@ -525,7 +522,7 @@ export const canToggleSelectedFillOrStroke = createSelector(
   }
 );
 
-export const selectedFillsEnabled = createSelector(
+export const selectedFillEnabled = createSelector(
   [ canToggleSelectedFillOrStroke, getSelectedById ],
   (canToggle, selectedById) => {
     const keys = Object.keys(selectedById);
@@ -533,7 +530,7 @@ export const selectedFillsEnabled = createSelector(
   }
 );
 
-export const selectedStrokesEnabled = createSelector(
+export const selectedStrokeEnabled = createSelector(
   [ canToggleSelectedFillOrStroke, getSelectedById ],
   (canToggle, selectedById) => {
     const keys = Object.keys(selectedById);
@@ -552,7 +549,7 @@ export const canToggleSelectedShadow = createSelector(
   }
 );
 
-export const selectedShadowsEnabled = createSelector(
+export const selectedShadowEnabled = createSelector(
   [ canToggleSelectedShadow, getSelectedById ],
   (canToggle, selectedById) => {
     const keys = Object.keys(selectedById);
@@ -617,6 +614,7 @@ export const selectedUseAsMaskEnabled = createSelector(
   }
 );
 
+// this boy dumb
 export const canMaskSelected = createSelector(
   [ getSelectedById ],
   (selectedById) => {
@@ -942,6 +940,278 @@ export const getArtboardEventItems = createSelector(
       tweenEventItems: eventItems,
       tweenEventLayers: eventLayers
     }
+  }
+);
+
+export const getSelectedX = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      if (!result) {
+        result = layerItem.frame.x;
+      }
+      if (result && layerItem.frame.x !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null);
+  }
+);
+
+export const getSelectedY = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      if (!result) {
+        result = layerItem.frame.y;
+      }
+      if (result && layerItem.frame.y !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null);
+  }
+);
+
+export const getSelectedInnerWidth = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      if (!result) {
+        result = layerItem.frame.innerWidth;
+      }
+      if (result && layerItem.frame.innerWidth !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null);
+  }
+);
+
+export const getSelectedInnerHeight = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      if (!result) {
+        result = layerItem.frame.innerHeight;
+      }
+      if (result && layerItem.frame.innerHeight !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null);
+  }
+);
+
+export const getSelectedToX = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Line;
+      if (!result) {
+        result = layerItem.to.x;
+      }
+      if (result && layerItem.to.x !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null);
+  }
+);
+
+export const getSelectedToY = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Line;
+      if (!result) {
+        result = layerItem.to.y;
+      }
+      if (result && layerItem.to.y !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null);
+  }
+);
+
+export const getSelectedStrokeWidth = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      if (!result) {
+        result = layerItem.style.stroke.width;
+      }
+      if (result && layerItem.style.stroke.width !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null);
+  }
+);
+
+export const getSelectedStrokeJoin = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: Btwx.StrokeJoin | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      if (!result) {
+        result = layerItem.style.strokeOptions.join;
+      }
+      if (result && layerItem.style.strokeOptions.join !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as Btwx.StrokeJoin | 'multi';
+  }
+);
+
+export const getSelectedStrokeCap = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: Btwx.StrokeCap | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      if (!result) {
+        result = layerItem.style.strokeOptions.cap;
+      }
+      if (result && layerItem.style.strokeOptions.cap !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as Btwx.StrokeCap | 'multi';
+  }
+);
+
+export const getSelectedStrokeFillType = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: Btwx.FillType | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      if (!result) {
+        result = layerItem.style.stroke.fillType;
+      }
+      if (result && layerItem.style.stroke.fillType !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as Btwx.FillType | 'multi';
+  }
+);
+
+export const getSelectedStrokeDashOffset = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      if (!result) {
+        result = layerItem.style.strokeOptions.dashOffset;
+      }
+      if (result && layerItem.style.strokeOptions.dashOffset !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as number | 'multi';
+  }
+);
+
+export const getSelectedStrokeDashArrayWidth = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      if (!result) {
+        result = layerItem.style.strokeOptions.dashArray[0];
+      }
+      if (result && layerItem.style.strokeOptions.dashArray[0] !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as number | 'multi';
+  }
+);
+
+export const getSelectedStrokeDashArrayGap = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      if (!result) {
+        result = layerItem.style.strokeOptions.dashArray[1];
+      }
+      if (result && layerItem.style.strokeOptions.dashArray[1] !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as number | 'multi';
+  }
+);
+
+export const getSelectedStarRadius = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Star;
+      if (!result) {
+        result = layerItem.radius;
+      }
+      if (result && layerItem.radius !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as number | 'multi';
+  }
+);
+
+export const getSelectedStarPoints = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Star;
+      if (!result) {
+        result = layerItem.points;
+      }
+      if (result && layerItem.points !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as number | 'multi';
+  }
+);
+
+export const getSelectedRoundedRadius = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Rounded;
+      if (!result) {
+        result = layerItem.radius;
+      }
+      if (result && layerItem.radius !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as number | 'multi';
+  }
+);
+
+export const getSelectedPolygonSides = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Polygon;
+      if (!result) {
+        result = layerItem.sides;
+      }
+      if (result && layerItem.sides !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as number | 'multi';
   }
 );
 
@@ -1787,8 +2057,8 @@ export const orderLayersByDepth = (state: LayerState, layers: string[]): string[
   return layers.sort((a, b) => {
     const layerItemA = state.byId[a];
     const layerItemB = state.byId[b];
-    const layerItemAIndex = getLayerIndex(state, a);
-    const layerItemBIndex = getLayerIndex(state, b);
+    const layerItemAIndex = layerItemA.index;
+    const layerItemBIndex = layerItemB.index;
     return (layerItemA.scope.length + layerItemAIndex) - (layerItemB.scope.length + layerItemBIndex);
   });
 };

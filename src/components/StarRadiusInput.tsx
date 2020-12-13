@@ -1,29 +1,22 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
+import { uiPaperScope } from '../canvas';
 import { RootState } from '../store/reducers';
-import { SetStarsRadiusPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setStarsRadius } from '../store/actions/layer';
-import { getPaperLayer, getSelectedProjectIndices } from '../store/selectors/layer';
+import { getPaperLayer, getSelectedProjectIndices, getSelectedStarRadius, getSelectedById } from '../store/selectors/layer';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarInput from './SidebarInput';
 import SidebarSlider from './SidebarSlider';
-import { uiPaperScope } from '../canvas';
 
-interface StarRadiusInputProps {
-  selected?: string[];
-  radiusValue?: number | 'multi';
-  layerItems?: Btwx.Star[];
-  selectedPaperScopes?: {
-    [id: string]: number;
-  };
-  setStarsRadius?(payload: SetStarsRadiusPayload): LayerTypes;
-}
-
-const StarRadiusInput = (props: StarRadiusInputProps): ReactElement => {
-  const { selected, setStarsRadius, layerItems, radiusValue, selectedPaperScopes } = props;
+const StarRadiusInput = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const selectedPaperScopes = useSelector((state: RootState) => getSelectedProjectIndices(state));
+  const radiusValue = useSelector((state: RootState) => getSelectedStarRadius(state));
+  const selectedById = useSelector((state: RootState) => getSelectedById(state));
   const [radius, setRadius] = useState(radiusValue !== 'multi' ? Math.round(radiusValue * 100) : radiusValue);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setRadius(radiusValue !== 'multi' ? Math.round(radiusValue * 100) : radiusValue);
@@ -36,7 +29,8 @@ const StarRadiusInput = (props: StarRadiusInputProps): ReactElement => {
 
   const handleSliderChange = (e: any): void => {
     handleChange(e);
-    layerItems.forEach((layerItem) => {
+    Object.keys(selectedById).forEach((key) => {
+      const layerItem = selectedById[key];
       const paperLayerCompound = getPaperLayer(layerItem.id, selectedPaperScopes[layerItem.id]) as paper.CompoundPath;
       const paperLayer = paperLayerCompound.children[0] as paper.Path;
       const startPosition = paperLayer.position;
@@ -67,7 +61,7 @@ const StarRadiusInput = (props: StarRadiusInputProps): ReactElement => {
         nextRadius = 0;
       }
       if (nextRadius !== radiusValue) {
-        setStarsRadius({layers: selected, radius: Math.round(nextRadius) / 100});
+        dispatch(setStarsRadius({layers: selected, radius: Math.round(nextRadius) / 100}));
         setRadius(Math.round(nextRadius));
       }
     } catch(error) {
@@ -100,35 +94,4 @@ const StarRadiusInput = (props: StarRadiusInputProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  selected: string[];
-  radiusValue: number | 'multi';
-  layerItems: Btwx.Star[];
-  selectedPaperScopes: {
-    [id: string]: number;
-  };
-} => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  const selectedPaperScopes = getSelectedProjectIndices(state);
-  const layerItems: Btwx.Star[] = selected.reduce((result, current) => {
-    const layerItem = layer.present.byId[current];
-    return [...result, layerItem];
-  }, []);
-  const radiusValues: number[] = layerItems.reduce((result, current) => {
-    return [...result, current.radius];
-  }, []);
-  const radiusValue = (() => {
-    if (radiusValues.every((value: number) => value === radiusValues[0])) {
-      return radiusValues[0];
-    } else {
-      return 'multi';
-    }
-  })();
-  return { selected, radiusValue, layerItems, selectedPaperScopes };
-};
-
-export default connect(
-  mapStateToProps,
-  { setStarsRadius }
-)(StarRadiusInput);
+export default StarRadiusInput;

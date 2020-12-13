@@ -43,7 +43,8 @@ import {
   SetLineFromY, SetLineFrom, SetLineToX, SetLineToY, SetLineTo, SetLinesFromX, SetLinesFromY, SetLinesToX, SetLinesToY, SelectAllLayers,
   SetLayerStyle, SetLayersStyle, EnableLayersHorizontalFlip, DisableLayersHorizontalFlip, DisableLayersVerticalFlip, EnableLayersVerticalFlip,
   SetLayerScope, SetLayersScope, SetGlobalScope, SetLayerUnderlyingMask, SetLayersUnderlyingMask, SetLayerMasked, SetLayersMasked, ToggleLayerMask,
-  ToggleLayersMask, ToggleLayersIgnoreUnderlyingMask, ToggleLayerIgnoreUnderlyingMask, AreaSelectLayers, SetLayersGradientOD, ResetImagesDimensions, ResetImageDimensions, ReplaceImage, ReplaceImages, PasteLayersFromClipboard
+  ToggleLayersMask, ToggleLayersIgnoreUnderlyingMask, ToggleLayerIgnoreUnderlyingMask, AreaSelectLayers, SetLayersGradientOD, ResetImagesDimensions,
+  ResetImageDimensions, ReplaceImage, ReplaceImages, PasteLayersFromClipboard
 } from '../actionTypes/layer';
 
 import {
@@ -54,7 +55,8 @@ import {
   getPaperProp, getArtboardsTopTop, getLineFromPoint, getLineToPoint, getLineVector, getParentPaperLayer,
   getLayerYoungerSiblings, getMaskableSiblings, getSiblingLayersWithUnderlyingMask, getItemLayers,
   getAbsolutePosition, getGradientDestination, getGradientOrigin, getLayerOlderSibling, getLayerYoungestChild,
-  getLayerYoungerSibling, getCanvasBounds, getLayerBounds, hasFillTween, getSelectedBounds, getLayerProjectIndices, getArtboardsByPaperScope, savePaperJSON
+  getLayerYoungerSibling, getCanvasBounds, getLayerBounds, hasFillTween, getSelectedBounds, getLayerProjectIndices,
+  savePaperJSON
 } from '../selectors/layer';
 import { RootState } from '../reducers';
 
@@ -1257,7 +1259,7 @@ export const decreaseLayerScope = (state: LayerState, action: DecreaseLayerScope
 export const clearLayerScope = (state: LayerState, action: ClearLayerScope): LayerState => ({
   ...state,
   scope: ['root'],
-  projectIndex: null
+  activeProjectIndex: null
 });
 
 export const newLayerScope = (state: LayerState, action: NewLayerScope): LayerState => ({
@@ -1327,7 +1329,7 @@ export const setGlobalScope = (state: LayerState, action: SetGlobalScope): Layer
   currentState = {
     ...currentState,
     scope: [...action.payload.scope],
-    projectIndex: hasArtboard ? (currentState.byId[action.payload.scope[1]] as Btwx.Artboard).projectIndex : null
+    activeProjectIndex: hasArtboard ? (currentState.byId[action.payload.scope[1]] as Btwx.Artboard).projectIndex : null
   }
   return currentState;
 };
@@ -4977,7 +4979,7 @@ export const toggleLayerMask = (state: LayerState, action: ToggleLayerMask): Lay
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id) as { layerItem: Btwx.MaskableLayer; paperLayer: paper.Item };
   const parentLayerItem = state.byId[layerItem.parent];
-  const project = uiPaperScope.projects[state.projectIndex];
+  const project = uiPaperScope.projects[state.activeProjectIndex];
   const isMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
   const underlyingSiblings = getLayerYoungerSiblings(currentState, action.payload.id);
   const maskableUnderlyingSiblings = getMaskableSiblings(currentState, action.payload.id, underlyingSiblings);

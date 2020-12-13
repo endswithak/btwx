@@ -22,7 +22,7 @@ interface ShapeToolStateProps {
   isEnabled?: boolean;
   shapeType?: Btwx.ShapeType;
   scope?: string[];
-  projectIndex?: number;
+  activeProjectIndex?: number;
   layerPaperScopes?: number[];
   drawing?: boolean;
   activeArtboard?: string;
@@ -44,7 +44,7 @@ type ShapeToolProps = (
 
 const ShapeTool = (props: ShapeToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isEnabled, shapeType, addShapeThunk, activeArtboard, activeArtboardPaperScope, activeArtboardPaperLayerIndex, scope, projectIndex, layerPaperScopes, setCanvasDrawing, drawing, toggleShapeToolThunk, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent } = props;
+  const { isEnabled, shapeType, addShapeThunk, activeArtboard, activeArtboardPaperScope, scope, activeProjectIndex, layerPaperScopes, setCanvasDrawing, drawing, toggleShapeToolThunk, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent } = props;
   const [handle, setHandle] = useState<Btwx.ResizeHandle>(null);
   const [maxDim, setMaxDim] = useState<number>(null);
   const [vector, setVector] = useState<paper.Point>(null);
@@ -350,7 +350,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
       }, {
         id: activeArtboard,
         projectIndex: activeArtboardPaperScope,
-        paperLayer: uiPaperScope.projects[activeArtboardPaperScope].layers[activeArtboardPaperLayerIndex]
+        paperLayer: uiPaperScope.projects[activeArtboardPaperScope].getItem({data: {id: activeArtboard}})
       });
       addShapeThunk({
         layer: {
@@ -482,22 +482,20 @@ const mapStateToProps = (state: RootState): ShapeToolStateProps => {
   const isEnabled = shapeTool.isEnabled;
   const shapeType = shapeTool.shapeType;
   const scope = layer.present.scope;
-  const projectIndex = layer.present.projectIndex;
+  const activeProjectIndex = layer.present.activeProjectIndex;
   const drawing = canvasSettings.drawing;
   const layerPaperScopes = getLayerProjectIndices(state);
   const activeArtboard = layer.present.activeArtboard;
   const activeArtboardPaperScope = activeArtboard ? (layer.present.byId[activeArtboard] as Btwx.Artboard).projectIndex : null;
-  const activeArtboardPaperLayerIndex = activeArtboard ? (layer.present.byId[activeArtboard] as Btwx.Artboard).paperLayerIndex : null;
   return {
     isEnabled,
     shapeType,
     scope,
-    projectIndex,
+    activeProjectIndex,
     drawing,
     layerPaperScopes,
     activeArtboard,
-    activeArtboardPaperScope,
-    activeArtboardPaperLayerIndex
+    activeArtboardPaperScope
   };
 };
 

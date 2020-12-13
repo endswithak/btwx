@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import mexp from 'math-expression-evaluator';
 import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
-import { colorsMatch, getSelectedFills, getSelectedFillsColor, getSelectedFillsEnabled, getSelectedFillsOpacity, getSelectedShadows, getSelectedShadowsColor, getSelectedShadowsEnabled, getSelectedShadowsOpacity, getSelectedStrokes, getSelectedStrokesColor, getSelectedStrokesEnabled, getSelectedStrokesOpacity } from '../store/selectors/layer';
+import { colorsMatch, getSelectedFill, getSelectedFillColor, getSelectedFillEnabled, getSelectedFillOpacity, getSelectedShadow, getSelectedShadowColor, getSelectedShadowEnabled, getSelectedShadowOpacity, getSelectedStroke, getSelectedStrokeColor, getSelectedStrokeEnabled, getSelectedStrokeOpacity } from '../store/selectors/layer';
 import { EnableLayersFillPayload, SetLayersFillColorPayload, EnableLayersShadowPayload, SetLayersShadowColorPayload, EnableLayersStrokePayload, SetLayersStrokeColorPayload, LayerTypes } from '../store/actionTypes/layer';
 import { enableLayersFill, setLayersFillColor, enableLayersShadow, setLayersShadowColor, enableLayersStroke, setLayersStrokeColor } from '../store/actions/layer';
 import { OpenColorEditorPayload, ColorEditorTypes } from '../store/actionTypes/colorEditor';
@@ -188,31 +188,31 @@ const mapStateToProps = (state: RootState, ownProps: ColorInputProps): {
   const colorValue = (() => {
     switch(ownProps.prop) {
       case 'fill':
-        return getSelectedFillsColor(state);
+        return getSelectedFillColor(state);
       case 'stroke':
-        return getSelectedStrokesColor(state);
+        return getSelectedStrokeColor(state);
       case 'shadow':
-        return getSelectedShadowsColor(state);
+        return getSelectedShadowColor(state);
     }
   })() as Btwx.Color | 'multi';
   const opacityValue = (() => {
     switch(ownProps.prop) {
       case 'fill':
-        return getSelectedFillsOpacity(state);
+        return getSelectedFillOpacity(state);
       case 'stroke':
-        return getSelectedStrokesOpacity(state);
+        return getSelectedStrokeOpacity(state);
       case 'shadow':
-        return getSelectedShadowsOpacity(state);
+        return getSelectedShadowOpacity(state);
     }
   })() as number | 'multi';
   const enabledValue = (() => {
     switch(ownProps.prop) {
       case 'fill':
-        return getSelectedFillsEnabled(state);
+        return getSelectedFillEnabled(state);
       case 'stroke':
-        return getSelectedStrokesEnabled(state);
+        return getSelectedStrokeEnabled(state);
       case 'shadow':
-        return getSelectedShadowsEnabled(state);
+        return getSelectedShadowEnabled(state);
     }
   })() as boolean | 'multi';
   const colorEditorOpen = colorEditor.isOpen;

@@ -1,18 +1,18 @@
-import React, {createContext} from 'react';
-import getTheme, {lightTheme, darkTheme} from '../store/theme';
-import { connect } from 'react-redux';
+import React, { createContext, ReactElement } from 'react';
+import getTheme, { lightTheme, darkTheme } from '../store/theme';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 
 interface ThemeProviderProps {
   children: React.ReactNode;
-  theme: Btwx.ThemeName;
 }
 
 const ThemeContext = createContext(darkTheme);
 const { Provider } = ThemeContext;
 
-const ThemeProvider = (props: ThemeProviderProps) => {
-  const { children, theme } = props;
+const ThemeProvider = (props: ThemeProviderProps): ReactElement => {
+  const { children } = props;
+  const theme = useSelector((state: RootState) => state.viewSettings.theme);
   return (
     <Provider value={getTheme(theme)}>
       {children}
@@ -20,13 +20,6 @@ const ThemeProvider = (props: ThemeProviderProps) => {
   )
 };
 
-const mapStateToProps = (state: RootState) => {
-  const { viewSettings } = state;
-  return { theme: viewSettings.theme };
-};
-
-export default connect(
-  mapStateToProps
-)(ThemeProvider);
+export default ThemeProvider;
 
 export { ThemeContext };

@@ -1,30 +1,27 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useEffect, ReactElement, useCallback } from 'react';
 import debounce from 'lodash.debounce';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { uiPaperScope } from '../canvas';
 import { getAllProjectIndices } from '../store/selectors/layer';
 import { setCanvasZooming } from '../store/actions/canvasSettings';
-import { CanvasSettingsTypes, SetCanvasZoomingPayload } from '../store/actionTypes/canvasSettings';
 import { setCanvasMatrix } from '../store/actions/documentSettings';
-import { DocumentSettingsTypes, SetCanvasMatrixPayload } from '../store/actionTypes/documentSettings';
 
 interface ZoomToolProps {
   zoomEvent: WheelEvent;
-  isEnabled?: boolean;
-  allProjectIndices?: number[];
-  setCanvasZooming?(payload: SetCanvasZoomingPayload): CanvasSettingsTypes;
-  setCanvasMatrix?(payload: SetCanvasMatrixPayload): DocumentSettingsTypes;
 }
 
 const ZoomTool = (props: ZoomToolProps): ReactElement => {
-  const { zoomEvent, isEnabled, setCanvasZooming, setCanvasMatrix, allProjectIndices } = props;
+  const { zoomEvent } = props;
+  const isEnabled = useSelector((state: RootState) => state.canvasSettings.zooming);
+  const allProjectIndices = useSelector((state: RootState) => getAllProjectIndices(state));
+  const dispatch = useDispatch();
 
   const debounceZoomEnd = useCallback(
     debounce(() => {
-      setCanvasZooming({zooming: false});
-      setCanvasMatrix({matrix: uiPaperScope.view.matrix.values});
+      dispatch(setCanvasZooming({zooming: false}));
+      dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
     }, 50),
     []
   );
@@ -32,7 +29,7 @@ const ZoomTool = (props: ZoomToolProps): ReactElement => {
   useEffect(() => {
     if (zoomEvent) {
       if (!isEnabled) {
-        setCanvasZooming({zooming: true});
+        dispatch(setCanvasZooming({zooming: true}));
       }
       const cursorPoint = uiPaperScope.project.view.getEventPoint(zoomEvent as any);
       const pointDiff = new uiPaperScope.Point(cursorPoint.x - uiPaperScope.view.center.x, cursorPoint.y - uiPaperScope.view.center.y);
@@ -64,19 +61,4 @@ const ZoomTool = (props: ZoomToolProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  isEnabled: boolean;
-  allProjectIndices: number[];
-} => {
-  const { canvasSettings } = state;
-  const isEnabled = canvasSettings.zooming;
-  return {
-    isEnabled,
-    allProjectIndices: getAllProjectIndices(state)
-  };
-};
-
-export default connect(
-  mapStateToProps,
-  { setCanvasZooming, setCanvasMatrix }
-)(ZoomTool);
+export default ZoomTool;

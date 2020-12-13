@@ -1,21 +1,17 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { applyBooleanOperationThunk } from '../store/actions/layer';
 import { canBooleanSelected } from '../store/selectors/layer';
 import TopbarButton from './TopbarButton';
 
-interface IntersectButtonProps {
-  canIntersect: boolean;
-  applyBooleanOperationThunk(booleanOperation: Btwx.BooleanOperation): void;
-}
-
-const IntersectButton = (props: IntersectButtonProps): ReactElement => {
-  const { canIntersect, applyBooleanOperationThunk } = props;
+const IntersectButton = (): ReactElement => {
+  const canIntersect = useSelector((state: RootState) => canBooleanSelected(state));
+  const dispatch = useDispatch();
 
   const handleIntersectClick = (): void => {
     if (canIntersect) {
-      applyBooleanOperationThunk('intersect');
+      dispatch(applyBooleanOperationThunk('intersect'));
     }
   }
 
@@ -28,14 +24,4 @@ const IntersectButton = (props: IntersectButtonProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  canIntersect: boolean;
-} => {
-  const canIntersect = canBooleanSelected(state);
-  return { canIntersect };
-};
-
-export default connect(
-  mapStateToProps,
-  { applyBooleanOperationThunk }
-)(IntersectButton);
+export default IntersectButton;

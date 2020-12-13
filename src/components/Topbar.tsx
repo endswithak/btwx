@@ -5,7 +5,6 @@ import MaskButton from './MaskButton';
 import PreviewButton from './PreviewButton';
 import UngroupButton from './UngroupButton';
 import MoveBackwardButton from './MoveBackwardButton';
-// import TweensButton from './TweensButton';
 import GroupButton from './GroupButton';
 import MoveForwardButton from './MoveForwardButton';
 import ZoomButton from './ZoomButton';
@@ -13,7 +12,6 @@ import UniteButton from './UniteButton';
 import SubtractButton from './SubtractButton';
 import IntersectButton from './IntersectButton';
 import ExcludeButton from './ExcludeButton';
-// import SidebarRightButton from './SidebarRightButton';
 import ViewButton from './ViewButton';
 
 const Topbar = (): ReactElement => {
@@ -45,8 +43,6 @@ const Topbar = (): ReactElement => {
       <div className='c-topbar__button-group'>
         <ZoomButton />
         <ViewButton />
-        {/* <TweensButton />
-        <SidebarRightButton /> */}
       </div>
       <div className='c-topbar__button-group'>
         <PreviewButton />

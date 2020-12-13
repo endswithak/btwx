@@ -1,18 +1,10 @@
 import React, { useContext, ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 import { setTweenDrawerEventSort } from '../store/actions/tweenDrawer';
-import { SetTweenDrawerEventSortPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
 import Icon from './Icon';
-
-interface TweenDrawerEventsHeaderProps {
-  eventSort?: Btwx.TweenEventSort;
-  sortOrder?: 'asc' | 'dsc';
-  sortBy?: 'layer' | 'event' | 'artboard' | 'destinationArtboard';
-  setTweenDrawerEventSort?(payload: SetTweenDrawerEventSortPayload): TweenDrawerTypes;
-}
 
 interface HeaderItemProps {
   isActive?: boolean;
@@ -28,26 +20,32 @@ const HeaderItem = styled.button<HeaderItemProps>`
   }
 `;
 
-const TweenDrawerEventsHeader = (props: TweenDrawerEventsHeaderProps): ReactElement => {
+const TweenDrawerEventsHeader = (): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { eventSort, setTweenDrawerEventSort, sortOrder, sortBy } = props;
+  const eventSort = useSelector((state: RootState) => state.tweenDrawer.eventSort);
+  const sortOrder = eventSort !== 'none' ? eventSort.substring(eventSort.length, eventSort.length - 3) as 'asc' | 'dsc' : null;
+  const sortBy = eventSort !== 'none' ? ((): 'layer' | 'event' | 'artboard' | 'destinationArtboard' => {
+    const hyphenIndex = eventSort.indexOf('-');
+    return eventSort.substring(0, hyphenIndex) as 'layer' | 'event' | 'artboard' | 'destinationArtboard';
+  })() : null;
+  const dispatch = useDispatch();
 
   const handleSort = (by: 'layer' | 'event' | 'artboard' | 'destinationArtboard'): void => {
     if (sortOrder) {
       if (sortBy === by) {
         switch(sortOrder) {
           case 'asc':
-            setTweenDrawerEventSort({eventSort: `${by}-dsc` as Btwx.TweenEventSort});
+            dispatch(setTweenDrawerEventSort({eventSort: `${by}-dsc` as Btwx.TweenEventSort}));
             break;
           case 'dsc':
-            setTweenDrawerEventSort({eventSort: 'none'});
+            dispatch(setTweenDrawerEventSort({eventSort: 'none'}));
             break;
         }
       } else {
-        setTweenDrawerEventSort({eventSort: `${by}-asc` as Btwx.TweenEventSort});
+        dispatch(setTweenDrawerEventSort({eventSort: `${by}-asc` as Btwx.TweenEventSort}));
       }
     } else {
-      setTweenDrawerEventSort({eventSort: `${by}-asc` as Btwx.TweenEventSort});
+      dispatch(setTweenDrawerEventSort({eventSort: `${by}-asc` as Btwx.TweenEventSort}));
     }
   }
 
@@ -138,22 +136,4 @@ const TweenDrawerEventsHeader = (props: TweenDrawerEventsHeaderProps): ReactElem
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  eventSort: Btwx.TweenEventSort;
-  sortOrder: 'asc' | 'dsc';
-  sortBy: 'layer' | 'event' | 'artboard' | 'destinationArtboard';
-} => {
-  const { tweenDrawer } = state;
-  const eventSort = tweenDrawer.eventSort;
-  const sortOrder = eventSort !== 'none' ? eventSort.substring(eventSort.length, eventSort.length - 3) as 'asc' | 'dsc' : null;
-  const sortBy = eventSort !== 'none' ? ((): 'layer' | 'event' | 'artboard' | 'destinationArtboard' => {
-    const hyphenIndex = eventSort.indexOf('-');
-    return eventSort.substring(0, hyphenIndex) as 'layer' | 'event' | 'artboard' | 'destinationArtboard';
-  })() : null;
-  return { eventSort, sortOrder, sortBy };
-};
-
-export default connect(
-  mapStateToProps,
-  { setTweenDrawerEventSort }
-)(TweenDrawerEventsHeader);
+export default TweenDrawerEventsHeader;

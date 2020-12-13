@@ -1,18 +1,15 @@
 import React, { ReactElement, useContext } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getActiveArtboardSortedEvents } from '../store/selectors/layer';
 import TweenDrawerEventsItem from './TweenDrawerEventsItem';
 import { ThemeContext } from './ThemeProvider';
 
-interface TweenDrawerEventsItemsProps {
-  activeArtboardEvents?: string[];
-  otherEvents?: string[];
-}
-
-const TweenDrawerEventsItems = (props: TweenDrawerEventsItemsProps): ReactElement => {
+const TweenDrawerEventsItems = (): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { activeArtboardEvents, otherEvents } = props;
+  const sortedTweenEvents = useSelector((state: RootState) => getActiveArtboardSortedEvents(state));
+  const activeArtboardEvents = sortedTweenEvents.activeArtboardEvents;
+  const otherEvents = sortedTweenEvents.otherEventIds;
 
   return (
     <div className='c-tween-drawer-events__items'>
@@ -54,13 +51,4 @@ const TweenDrawerEventsItems = (props: TweenDrawerEventsItemsProps): ReactElemen
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const sortedTweenEvents = getActiveArtboardSortedEvents(state);
-  const activeArtboardEvents = sortedTweenEvents.activeArtboardEvents;
-  const otherEvents = sortedTweenEvents.otherEventIds;
-  return { activeArtboardEvents, otherEvents };
-};
-
-export default connect(
-  mapStateToProps,
-)(TweenDrawerEventsItems);
+export default TweenDrawerEventsItems;

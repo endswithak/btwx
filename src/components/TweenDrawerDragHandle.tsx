@@ -1,21 +1,14 @@
 import React, { useContext, ReactElement, useState, useRef, useEffect } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
 import styled from 'styled-components';
 import { uiPaperScope } from '../canvas';
 import { setTweenDrawerHeight } from '../store/actions/viewSettings';
-import { SetTweenDrawerHeightPayload, ViewSettingsTypes } from '../store/actionTypes/viewSettings';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 
 gsap.registerPlugin(Draggable);
-
-interface TweenDrawerDragHandleProps {
-  tweenDrawerHeight?: number;
-  allPaperScopes?: string[];
-  setTweenDrawerHeight?(payload: SetTweenDrawerHeightPayload): ViewSettingsTypes;
-}
 
 interface DragHandleProps {
   dragging: boolean;
@@ -29,11 +22,12 @@ const DragHandle = styled.div<DragHandleProps>`
   }
 `;
 
-const TweenDrawerDragHandle = (props: TweenDrawerDragHandleProps): ReactElement => {
+const TweenDrawerDragHandle = (): ReactElement => {
   const theme = useContext(ThemeContext);
   const ref = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
-  const { tweenDrawerHeight, setTweenDrawerHeight } = props;
+  const tweenDrawerHeight = useSelector((state: RootState) => state.viewSettings.tweenDrawer.height);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     Draggable.create(ref.current, {
@@ -48,13 +42,13 @@ const TweenDrawerDragHandle = (props: TweenDrawerDragHandleProps): ReactElement 
         const canvasContainer = document.getElementById('canvas-container');
         gsap.set('#tween-drawer', {height: this.y * -1});
         uiPaperScope.projects.forEach((project) => {
-          if (project.activeLayer.data.id) {
+          if (project.activeLayer.children.length > 0) {
             project.view.viewSize.height = canvasContainer.clientHeight;
           }
         });
       },
       onRelease: function() {
-        setTweenDrawerHeight({height: this.y * -1});
+        dispatch(setTweenDrawerHeight({height: this.y * -1}));
         setDragging(false);
       }
     });
@@ -78,15 +72,4 @@ const TweenDrawerDragHandle = (props: TweenDrawerDragHandleProps): ReactElement 
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  tweenDrawerHeight: number;
-} => {
-  const { viewSettings, layer } = state;
-  const tweenDrawerHeight = viewSettings.tweenDrawer.height;
-  return { tweenDrawerHeight };
-};
-
-export default connect(
-  mapStateToProps,
-  { setTweenDrawerHeight }
-)(TweenDrawerDragHandle);
+export default TweenDrawerDragHandle;

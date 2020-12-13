@@ -1,20 +1,13 @@
 import React, { useContext, ReactElement, useState, useRef, useEffect } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
 import styled from 'styled-components';
 import { setTweenDrawerLayersWidth } from '../store/actions/viewSettings';
-import { SetTweenDrawerLayersWidthPayload, ViewSettingsTypes } from '../store/actionTypes/viewSettings';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 
 gsap.registerPlugin(Draggable);
-
-interface TweenDrawerLayersDragHandleProps {
-  tweenDrawerLayersWidth?: number;
-  tweenDrawerHeight?: number;
-  setTweenDrawerLayersWidth?(payload: SetTweenDrawerLayersWidthPayload): ViewSettingsTypes;
-}
 
 interface DragHandleProps {
   dragging: boolean;
@@ -36,11 +29,13 @@ const DragHandle = styled.div<DragHandleProps>`
   }
 `;
 
-const TweenDrawerLayersDragHandle = (props: TweenDrawerLayersDragHandleProps): ReactElement => {
+const TweenDrawerLayersDragHandle = (): ReactElement => {
   const theme = useContext(ThemeContext);
   const ref = useRef<HTMLDivElement>(null);
+  const tweenDrawerLayersWidth = useSelector((state: RootState) => state.viewSettings.tweenDrawer.layersWidth);
+  const tweenDrawerHeight = useSelector((state: RootState) => state.viewSettings.tweenDrawer.height);
   const [dragging, setDragging] = useState(false);
-  const { tweenDrawerHeight, tweenDrawerLayersWidth, setTweenDrawerLayersWidth } = props;
+  const dispatch = useDispatch();
 
   useEffect(() => {
     Draggable.create(ref.current, {
@@ -55,7 +50,7 @@ const TweenDrawerLayersDragHandle = (props: TweenDrawerLayersDragHandleProps): R
         gsap.set('#tween-layers', {width: this.x});
       },
       onRelease: function() {
-        setTweenDrawerLayersWidth({width: this.x});
+        dispatch(setTweenDrawerLayersWidth({width: this.x}));
         setDragging(false);
       }
     });
@@ -80,14 +75,4 @@ const TweenDrawerLayersDragHandle = (props: TweenDrawerLayersDragHandleProps): R
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { viewSettings } = state;
-  const tweenDrawerLayersWidth = viewSettings.tweenDrawer.layersWidth;
-  const tweenDrawerHeight = viewSettings.tweenDrawer.height;
-  return { tweenDrawerLayersWidth, tweenDrawerHeight };
-};
-
-export default connect(
-  mapStateToProps,
-  { setTweenDrawerLayersWidth }
-)(TweenDrawerLayersDragHandle);
+export default TweenDrawerLayersDragHandle;

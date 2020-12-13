@@ -25,7 +25,6 @@ interface SnapToolProps {
   preserveAspectRatio?: boolean;
   aspectRatio?: number;
   scope?: string[];
-  projectIndex?: number;
   layerProjectIndices?: number[];
   whiteListLayers?: string[];
   blackListLayers?: string[];
@@ -37,7 +36,7 @@ const snapToolDebug = false;
 
 const SnapTool = (props: SnapToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { toolEvent, bounds, scope, projectIndex, layerProjectIndices, onUpdate, hitTestZones, snapRule, whiteListLayers, blackListLayers, preserveAspectRatio, aspectRatio, resizeHandle, measure } = props;
+  const { toolEvent, bounds, scope, layerProjectIndices, onUpdate, hitTestZones, snapRule, whiteListLayers, blackListLayers, preserveAspectRatio, aspectRatio, resizeHandle, measure } = props;
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
   const [xSnapPoint, setXSnapPoint] = useState<Btwx.SnapPoint>(null);
   const [ySnapPoint, setYSnapPoint] = useState<Btwx.SnapPoint>(null);
@@ -888,16 +887,13 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
 
 const mapStateToProps = (state: RootState): {
   scope: string[];
-  projectIndex: number;
   layerProjectIndices: number[];
 } => {
   const { layer } = state;
   const scope = layer.present.scope;
-  const projectIndex = layer.present.projectIndex;
   const layerProjectIndices = getLayerProjectIndices(state);
   return {
     scope,
-    projectIndex,
     layerProjectIndices
   };
 };

@@ -1,14 +1,20 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import TweenEventsFrame from './TweenEventsFrame';
 
-interface TweenEventsFrameWrapProps {
-  isEnabled?: boolean;
-}
-
-const TweenEventsFrameWrap = (props: TweenEventsFrameWrapProps): ReactElement => {
-  const { isEnabled } = props;
+const TweenEventsFrameWrap = (): ReactElement => {
+  const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
+  const artboardSelected = useSelector((state: RootState) => state.layer.present.selected.some(id => state.layer.present.allArtboardIds.includes(id)));
+  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
+  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
+  const isZooming = useSelector((state: RootState) => state.canvasSettings.zooming);
+  const isTweenDrawerOpen = useSelector((state: RootState) => state.viewSettings.tweenDrawer.isOpen);
+  const tweenDrawerEvent = useSelector((state: RootState) => state.tweenDrawer.event);
+  const isTextEditorOpen = useSelector((state: RootState) => state.textEditor.isOpen);
+  const events = useSelector((state: RootState) => state.layer.present.events.allIds.length > 0);
+  const hasTweenEvent = useSelector((state: RootState) => events && activeArtboard && state.layer.present.events.allIds.some((id) => state.layer.present.events.byId[id].artboard === activeArtboard));
+  const isEnabled = isTweenDrawerOpen && events && (tweenDrawerEvent || hasTweenEvent) && !isTextEditorOpen && !(isResizing && artboardSelected) && !(isDragging && artboardSelected) && !isZooming;
 
   return (
     isEnabled
@@ -17,21 +23,4 @@ const TweenEventsFrameWrap = (props: TweenEventsFrameWrapProps): ReactElement =>
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer, tweenDrawer, canvasSettings, textEditor, viewSettings } = state;
-  const activeArtboard = layer.present.activeArtboard;
-  const selected = layer.present.selected;
-  const artboardSelected = selected.some(id => layer.present.allArtboardIds.includes(id));
-  const isResizing = canvasSettings.resizing;
-  const isDragging = canvasSettings.dragging;
-  const isZooming = canvasSettings.zooming;
-  const isTextEditorOpen = textEditor.isOpen;
-  const events = layer.present.events.allIds.length > 0;
-  const hasTweenEvent = events && activeArtboard && layer.present.events.allIds.some((id) => layer.present.events.byId[id].artboard === activeArtboard);
-  const isEnabled = viewSettings.tweenDrawer.isOpen && events && (tweenDrawer.event || hasTweenEvent) && !isTextEditorOpen && !(isResizing && artboardSelected) && !(isDragging && artboardSelected) && !isZooming;
-  return { isEnabled };
-};
-
-export default connect(
-  mapStateToProps
-)(TweenEventsFrameWrap);
+export default TweenEventsFrameWrap;

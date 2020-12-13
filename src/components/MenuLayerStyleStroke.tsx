@@ -3,7 +3,7 @@ import { remote } from 'electron';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { toggleSelectedStrokeThunk } from '../store/actions/layer';
-import { canToggleSelectedFillOrStroke, selectedStrokesEnabled } from '../store/selectors/layer';
+import { canToggleSelectedFillOrStroke, selectedStrokeEnabled } from '../store/selectors/layer';
 
 export const MENU_ITEM_ID = 'layerStyleStroke';
 
@@ -38,7 +38,7 @@ const mapStateToProps = (state: RootState): {
   isChecked: boolean;
 } => {
   const isEnabled = canToggleSelectedFillOrStroke(state);
-  const isChecked = selectedStrokesEnabled(state);
+  const isChecked = selectedStrokeEnabled(state);
   return { isEnabled, isChecked };
 };
 

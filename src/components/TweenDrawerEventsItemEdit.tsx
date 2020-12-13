@@ -1,21 +1,20 @@
 import React, { useContext, ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { setTweenDrawerEventThunk } from '../store/actions/tweenDrawer';
-import { SetTweenDrawerEventPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
 import { ThemeContext } from './ThemeProvider';
 import IconButton from './IconButton';
 
 interface TweenDrawerEventsItemEditProps {
   id: string;
-  setTweenDrawerEventThunk?(payload: SetTweenDrawerEventPayload): void;
 }
 
 const TweenDrawerEventsItemEdit = (props: TweenDrawerEventsItemEditProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { id, setTweenDrawerEventThunk } = props;
+  const { id } = props;
+  const dispatch = useDispatch();
 
   const handleClick = () => {
-    setTweenDrawerEventThunk({id});
+    dispatch(setTweenDrawerEventThunk({id}));
   }
 
   return (
@@ -32,7 +31,4 @@ const TweenDrawerEventsItemEdit = (props: TweenDrawerEventsItemEditProps): React
   );
 }
 
-export default connect(
-  null,
-  { setTweenDrawerEventThunk }
-)(TweenDrawerEventsItemEdit);
+export default TweenDrawerEventsItemEdit;

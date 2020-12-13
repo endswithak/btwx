@@ -1,12 +1,9 @@
 import React, { useContext, ReactElement } from 'react';
 import styled from 'styled-components';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setTweenDrawerEventThunk, setTweenDrawerEventHoverThunk } from '../store/actions/tweenDrawer';
-import { SetTweenDrawerEventPayload, TweenDrawerTypes, SetTweenDrawerEventHoverPayload } from '../store/actionTypes/tweenDrawer';
 import { setLayerHover, setActiveArtboard } from '../store/actions/layer';
-import { SetLayerHoverPayload, LayerTypes, SetActiveArtboardPayload } from '../store/actionTypes/layer';
-import { ContextMenuTypes, OpenContextMenuPayload } from '../store/actionTypes/contextMenu';
 import { openContextMenu } from '../store/actions/contextMenu';
 import { DEFAULT_TWEEN_EVENTS } from '../constants';
 import { ThemeContext } from './ThemeProvider';
@@ -16,18 +13,6 @@ import SidebarLayerIcon from './SidebarLayerIcon';
 
 interface TweenDrawerEventItemProps {
   id: string;
-  activeArtboard?: string;
-  tweenEvent?: Btwx.TweenEvent;
-  layerItem?: Btwx.Layer;
-  artboardName?: string;
-  destinationName?: string;
-  tweenEventDisplayName?: string;
-  hovering?: boolean;
-  setTweenDrawerEventThunk?(payload: SetTweenDrawerEventPayload): void;
-  setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
-  setTweenDrawerEventHoverThunk?(payload: SetTweenDrawerEventHoverPayload): TweenDrawerTypes;
-  setActiveArtboard?(payload: SetActiveArtboardPayload): LayerTypes;
-  openContextMenu?(payload: OpenContextMenuPayload): ContextMenuTypes;
 }
 
 interface ItemProps {
@@ -42,36 +27,46 @@ const Item = styled.div<ItemProps>`
 
 const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { openContextMenu, activeArtboard, id, tweenEvent, layerItem, artboardName, destinationName, setTweenDrawerEventThunk, setLayerHover, tweenEventDisplayName, setTweenDrawerEventHoverThunk, hovering, setActiveArtboard } = props;
+  const { id } = props;
+  const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
+  const tweenEvent = useSelector((state: RootState) => state.layer.present.events.byId[id]);
+  const artboard = useSelector((state: RootState) => state.layer.present.byId[tweenEvent.artboard]);
+  const artboardName = artboard.name;
+  const layerItem = useSelector((state: RootState) => state.layer.present.byId[tweenEvent.layer]);
+  const destination = useSelector((state: RootState) => state.layer.present.byId[tweenEvent.destinationArtboard]);
+  const destinationName = destination.name;
+  const tweenEventDisplayName = DEFAULT_TWEEN_EVENTS.find((defaultEvent) => defaultEvent.event === tweenEvent.event).titleCase;
+  const hovering = useSelector((state: RootState) => state.tweenDrawer.eventHover === id);
+  const dispatch = useDispatch();
 
   const handleMouseEnter = (): void => {
     // if (activeArtboard !== tweenEvent.artboard) {
     //   setActiveArtboard({id: tweenEvent.artboard});
     // }
-    setTweenDrawerEventHoverThunk({id});
+    dispatch(setTweenDrawerEventHoverThunk({id}));
   }
 
   const handleMouseLeave = (): void => {
-    setTweenDrawerEventHoverThunk({id: null});
+    dispatch(setTweenDrawerEventHoverThunk({id: null}));
   }
 
   const handleDoubleClick = (e: any): void => {
     // ignore clicks on edit / remove buttons
     if (e.target.nodeName !== 'path' && e.target.nodeName !== 'svg') {
-      setTweenDrawerEventThunk({id});
-      setLayerHover({id: null});
+      dispatch(setTweenDrawerEventThunk({id}));
+      dispatch(setLayerHover({id: null}));
     }
   }
 
   const handleContextMenu = (e: any): void => {
-    openContextMenu({
+    dispatch(openContextMenu({
       type: 'TweenDrawerEvent',
       id: id,
       x: e.clientX,
       y: e.clientY,
       paperX: e.clientX,
       paperY: e.clientY
-    });
+    }));
   }
 
   return (
@@ -87,7 +82,9 @@ const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement =>
         <SidebarLayerIcon
           id={layerItem.id}
           isDragGhost />
-        <span style={{marginLeft: 8}}>{layerItem.name}</span>
+        <span style={{marginLeft: 8}}>
+          {layerItem.name}
+        </span>
       </div>
       <div className='c-tween-drawer-events-item__module'>
         <span>{tweenEventDisplayName}</span>
@@ -106,29 +103,4 @@ const TweenDrawerEventItem = (props: TweenDrawerEventItemProps): ReactElement =>
   );
 }
 
-const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventItemProps): {
-  activeArtboard: string;
-  tweenEvent: Btwx.TweenEvent;
-  layerItem: Btwx.Layer;
-  artboardName: string;
-  destinationName: string;
-  tweenEventDisplayName: string;
-  hovering: boolean;
-} => {
-  const { layer, tweenDrawer } = state;
-  const activeArtboard = layer.present.activeArtboard;
-  const tweenEvent = layer.present.events.byId[ownProps.id];
-  const artboard = layer.present.byId[tweenEvent.artboard];
-  const artboardName = artboard.name;
-  const layerItem = layer.present.byId[tweenEvent.layer];
-  const destination = layer.present.byId[tweenEvent.destinationArtboard];
-  const destinationName = destination.name;
-  const tweenEventDisplayName = DEFAULT_TWEEN_EVENTS.find((defaultEvent) => defaultEvent.event === tweenEvent.event).titleCase;
-  const hovering = tweenDrawer.eventHover === ownProps.id;
-  return { activeArtboard, artboardName, tweenEvent, layerItem, destinationName, tweenEventDisplayName, hovering };
-};
-
-export default connect(
-  mapStateToProps,
-  { openContextMenu, setTweenDrawerEventThunk, setLayerHover, setTweenDrawerEventHoverThunk, setActiveArtboard }
-)(TweenDrawerEventItem);
+export default TweenDrawerEventItem;

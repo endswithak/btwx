@@ -3,7 +3,7 @@ import { remote } from 'electron';
 import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { toggleSelectedShadowThunk } from '../store/actions/layer';
-import { canToggleSelectedShadow, selectedShadowsEnabled } from '../store/selectors/layer';
+import { canToggleSelectedShadow, selectedShadowEnabled } from '../store/selectors/layer';
 
 export const MENU_ITEM_ID = 'layerStyleShadow';
 
@@ -38,7 +38,7 @@ const mapStateToProps = (state: RootState): {
   isChecked: boolean;
 } => {
   const isEnabled = canToggleSelectedShadow(state);
-  const isChecked = selectedShadowsEnabled(state);
+  const isChecked = selectedShadowEnabled(state);
   return { isEnabled, isChecked };
 };
 

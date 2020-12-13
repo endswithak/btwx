@@ -1,47 +1,35 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { ReactElement, useCallback, useRef, useState, useEffect } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import debounce from 'lodash.debounce';
 import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
 import { closeTextEditor } from '../store/actions/textEditor';
-import { TextEditorTypes } from '../store/actionTypes/textEditor';
 import { setLayerText, selectLayers } from '../store/actions/layer';
 import { getPaperLayer } from '../store/selectors/layer';
-import { SetLayerTextPayload, SelectLayersPayload, LayerTypes } from '../store/actionTypes/layer';
 import { uiPaperScope } from '../canvas';
-import { TextEditorState } from '../store/reducers/textEditor';
-import { TextSettingsState } from '../store/reducers/textSettings';
 import { setCanvasFocusing } from '../store/actions/canvasSettings';
-import { SetCanvasFocusingPayload, CanvasSettingsTypes } from '../store/actionTypes/canvasSettings';
 
-interface TextEditorInputProps {
-  textEditor?: TextEditorState;
-  textSettings?: TextSettingsState;
-  layerItem?: Btwx.Text;
-  canvasFocusing?: boolean;
-  closeTextEditor?(): TextEditorTypes;
-  setLayerText?(payload: SetLayerTextPayload): LayerTypes;
-  selectLayers?(payload: SelectLayersPayload): LayerTypes;
-  setCanvasFocusing?(payload: SetCanvasFocusingPayload): CanvasSettingsTypes;
-}
-
-const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
+const TextEditorInput = (): ReactElement => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const textSpanRef = useRef<HTMLTextAreaElement>(null);
-  const { textEditor, textSettings, layerItem, closeTextEditor, setCanvasFocusing, canvasFocusing, setLayerText, selectLayers } = props;
+  const textEditor = useSelector((state: RootState) => state.textEditor);
+  const textSettings = useSelector((state: RootState) => state.textSettings);
+  const layerItem = useSelector((state: RootState) => (state.layer.present.byId[state.textEditor.layer] as Btwx.Text));
+  const canvasFocusing = useSelector((state: RootState) => state.canvasSettings.focusing);
   const [text, setText] = useState(layerItem.text);
   const [prevText, setPrevText] = useState(layerItem.text);
   const debounceText = useCallback(
-    debounce((dText: string) => setLayerText({id: textEditor.layer, text: dText }), 250),
+    debounce((dText: string) => dispatch(setLayerText({id: textEditor.layer, text: dText })), 250),
     []
   );
   const [pos, setPos] = useState({x: textEditor.x, y: textEditor.y});
+  const dispatch = useDispatch();
 
   const onMouseDown = (event: any) => {
     if (event.target !== textAreaRef.current) {
-      closeTextEditor();
+      dispatch(closeTextEditor());
     }
   }
 
@@ -62,7 +50,7 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
   useEffect(() => {
     if (textAreaRef.current) {
       if (canvasFocusing) {
-        setCanvasFocusing({focusing: false});
+        dispatch(setCanvasFocusing({focusing: false}));
       }
       document.addEventListener('mousedown', onMouseDown);
       const paperLayer = getPaperLayer(textEditor.layer, textEditor.projectIndex) as paper.PointText;
@@ -97,9 +85,9 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
     }
     return () => {
       const paperLayer = getPaperLayer(textEditor.layer, textEditor.projectIndex) as paper.PointText;
-      setCanvasFocusing({focusing: true});
+      dispatch(setCanvasFocusing({focusing: true}));
       paperLayer.visible = true;
-      selectLayers({layers: [textEditor.layer], newSelection: true });
+      dispatch(selectLayers({layers: [textEditor.layer], newSelection: true }));
       document.removeEventListener('mousedown', onMouseDown);
     }
   }, []);
@@ -227,14 +215,4 @@ const TextEditorInput = (props: TextEditorInputProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { textEditor, textSettings, layer, canvasSettings } = state;
-  const layerItem = (layer.present.byId[textEditor.layer] as Btwx.Text);
-  const canvasFocusing = canvasSettings.focusing;
-  return { textEditor, textSettings, layerItem, canvasFocusing };
-};
-
-export default connect(
-  mapStateToProps,
-  { closeTextEditor, setLayerText, selectLayers, setCanvasFocusing }
-)(TextEditorInput);
+export default TextEditorInput;

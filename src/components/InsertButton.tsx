@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import sharp from 'sharp';
 import { remote } from 'electron';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { toggleArtboardToolThunk} from '../store/actions/artboardTool';
 import { toggleTextToolThunk } from '../store/actions/textTool';
@@ -10,28 +10,11 @@ import { AddImagePayload } from '../store/actionTypes/layer';
 import { addImageThunk } from '../store/actions/layer';
 import TopbarDropdownButton from './TopbarDropdownButton';
 
-interface InsertButtonProps {
-  activeTool?: Btwx.ToolType;
-  shapeToolShapeType?: Btwx.ShapeType;
-  insertKnobOpen?: boolean;
-  activeArtboard?: string;
-  toggleShapeToolThunk?(shapeType: Btwx.ShapeType): void;
-  toggleArtboardToolThunk?(): void;
-  toggleTextToolThunk?(): void;
-  addImageThunk?(payload: AddImagePayload): void;
-}
-
-const InsertButton = (props: InsertButtonProps): ReactElement => {
-  const {
-    activeTool,
-    shapeToolShapeType,
-    insertKnobOpen,
-    activeArtboard,
-    toggleShapeToolThunk,
-    toggleArtboardToolThunk,
-    toggleTextToolThunk,
-    addImageThunk
-  } = props;
+const InsertButton = (): ReactElement => {
+  const activeTool = useSelector((state: RootState) => state.canvasSettings.activeTool);
+  const shapeToolShapeType = useSelector((state: RootState) => state.shapeTool.shapeType);
+  const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
+  const dispatch = useDispatch();
 
   const handleImageClick = (): void => {
     remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
@@ -42,7 +25,7 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
     }).then(result => {
       if (result.filePaths.length > 0 && !result.canceled) {
         sharp(result.filePaths[0]).toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
-          addImageThunk({
+          dispatch(addImageThunk({
             layer: {
               frame: {
                 x: 0,
@@ -58,7 +41,7 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
               }
             },
             buffer: data
-          });
+          }));
         });
       }
     });
@@ -96,84 +79,62 @@ const InsertButton = (props: InsertButtonProps): ReactElement => {
       dropdownPosition='left'
       label='Insert'
       icon={getInsertButtonIcon()}
-      isActive={ activeTool === 'Artboard' || activeTool === 'Shape' || activeTool === 'Text' || insertKnobOpen }
+      isActive={ activeTool === 'Artboard' || activeTool === 'Shape' || activeTool === 'Text' }
       options={[{
         label: 'Artboard',
-        onClick: toggleArtboardToolThunk,
+        onClick: () => dispatch(toggleArtboardToolThunk()),
         icon: 'artboard',
         isActive: activeTool === 'Artboard',
         bottomDivider: true
       },{
         label: 'Rectangle',
-        onClick: () => toggleShapeToolThunk('Rectangle'),
+        onClick: () => dispatch(toggleShapeToolThunk('Rectangle')),
         icon: 'rectangle',
         isActive: activeTool === 'Shape' && shapeToolShapeType === 'Rectangle',
         disabled: activeArtboard === null
       },{
         label: 'Rounded',
-        onClick: () => toggleShapeToolThunk('Rounded'),
+        onClick: () => dispatch(toggleShapeToolThunk('Rounded')),
         icon: 'rounded',
         isActive: activeTool === 'Shape' && shapeToolShapeType === 'Rounded',
         disabled: activeArtboard === null
       },{
         label: 'Ellipse',
-        onClick: () => toggleShapeToolThunk('Ellipse'),
+        onClick: () => dispatch(toggleShapeToolThunk('Ellipse')),
         icon: 'ellipse',
         isActive: activeTool === 'Shape' && shapeToolShapeType === 'Ellipse',
         disabled: activeArtboard === null
       },{
         label: 'Star',
-        onClick: () => toggleShapeToolThunk('Star'),
+        onClick: () => dispatch(toggleShapeToolThunk('Star')),
         icon: 'star',
         isActive: activeTool === 'Shape' && shapeToolShapeType === 'Star',
         disabled: activeArtboard === null
       },{
         label: 'Polygon',
-        onClick: () => toggleShapeToolThunk('Polygon'),
+        onClick: () => dispatch(toggleShapeToolThunk('Polygon')),
         icon: 'polygon',
         isActive: activeTool === 'Shape' && shapeToolShapeType === 'Polygon',
         disabled: activeArtboard === null
       },{
         label: 'Line',
-        onClick: () => toggleShapeToolThunk('Line'),
+        onClick: () => dispatch(toggleShapeToolThunk('Line')),
         icon: 'line',
         isActive: activeTool === 'Shape' && shapeToolShapeType === 'Line',
         disabled: activeArtboard === null
       },{
         label: 'Text',
-        onClick: toggleTextToolThunk,
+        onClick: () => dispatch(toggleTextToolThunk()),
         icon: 'text',
         isActive: activeTool === 'Text',
         disabled: activeArtboard === null
       },{
         label: 'Image',
-        onClick: handleImageClick,
+        onClick: () => dispatch(handleImageClick()),
         icon: 'image',
         disabled: activeArtboard === null
       }]} />
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  activeTool: Btwx.ToolType;
-  shapeToolShapeType: Btwx.ShapeType;
-  insertKnobOpen: boolean;
-  activeArtboard: string;
-} => {
-  const { canvasSettings, insertKnob, shapeTool, layer } = state;
-  const activeTool = canvasSettings.activeTool;
-  const shapeToolShapeType = shapeTool.shapeType;
-  const insertKnobOpen = insertKnob.isActive;
-  const activeArtboard = layer.present.activeArtboard;
-  return { activeTool, shapeToolShapeType, insertKnobOpen, activeArtboard };
-};
-
-export default connect(
-  mapStateToProps,
-  {
-    toggleShapeToolThunk,
-    toggleArtboardToolThunk,
-    toggleTextToolThunk,
-    addImageThunk
-  }
-)(InsertButton);
+export default InsertButton;

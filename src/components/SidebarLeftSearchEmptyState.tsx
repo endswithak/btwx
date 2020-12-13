@@ -1,14 +1,10 @@
 import React, { ReactElement } from 'react';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { connect } from 'react-redux';
 import EmptyState from './EmptyState';
 
-interface SidebarLeftSearchEmptyStateProps {
-  search?: string;
-}
-
-const SidebarLeftSearchEmptyState = (props: SidebarLeftSearchEmptyStateProps): ReactElement => {
-  const { search } = props;
+const SidebarLeftSearchEmptyState = (): ReactElement => {
+  const search = useSelector((state: RootState) => state.leftSidebar.search);
 
   return (
     <EmptyState
@@ -19,14 +15,4 @@ const SidebarLeftSearchEmptyState = (props: SidebarLeftSearchEmptyStateProps): R
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  search: string;
-} => {
-  const { leftSidebar } = state;
-  const search = leftSidebar.search;
-  return { search };
-};
-
-export default connect(
-  mapStateToProps
-)(SidebarLeftSearchEmptyState);
+export default SidebarLeftSearchEmptyState;

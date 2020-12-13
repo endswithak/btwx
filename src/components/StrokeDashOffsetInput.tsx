@@ -1,21 +1,17 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
-import SidebarInput from './SidebarInput';
+import { getSelectedStrokeDashOffset, selectedStrokeEnabled } from '../store/selectors/layer';
 import { RootState } from '../store/reducers';
-import { SetLayersStrokeDashOffsetPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setLayersStrokeDashOffset } from '../store/actions/layer';
+import SidebarInput from './SidebarInput';
 
-interface StrokeDashOffsetInputProps {
-  strokeDashOffsetValue?: number | 'multi';
-  selected?: string[];
-  disabled?: boolean;
-  setLayersStrokeDashOffset?(payload: SetLayersStrokeDashOffsetPayload): LayerTypes;
-}
-
-const StrokeDashOffsetInput = (props: StrokeDashOffsetInputProps): ReactElement => {
-  const { selected, disabled, strokeDashOffsetValue, setLayersStrokeDashOffset } = props;
+const StrokeDashOffsetInput = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const strokeDashOffsetValue = useSelector((state: RootState) => getSelectedStrokeDashOffset(state));
+  const disabled = useSelector((state: RootState) => !selectedStrokeEnabled(state));
   const [dashOffset, setDashOffset] = useState(strokeDashOffsetValue !== 'multi' ? Math.round(strokeDashOffsetValue) : strokeDashOffsetValue);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setDashOffset(strokeDashOffsetValue !== 'multi' ? Math.round(strokeDashOffsetValue) : strokeDashOffsetValue);
@@ -30,7 +26,7 @@ const StrokeDashOffsetInput = (props: StrokeDashOffsetInputProps): ReactElement 
     try {
       const nextDashOffset = mexp.eval(`${dashOffset}`) as any;
       if (nextDashOffset !== strokeDashOffsetValue) {
-        setLayersStrokeDashOffset({layers: selected, strokeDashOffset: Math.round(nextDashOffset)});
+        dispatch(setLayersStrokeDashOffset({layers: selected, strokeDashOffset: Math.round(nextDashOffset)}));
         setDashOffset(Math.round(nextDashOffset));
       } else {
         setDashOffset(strokeDashOffsetValue !== 'multi' ? Math.round(strokeDashOffsetValue) : strokeDashOffsetValue);
@@ -51,22 +47,4 @@ const StrokeDashOffsetInput = (props: StrokeDashOffsetInputProps): ReactElement 
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  const layerItems: (Btwx.Shape | Btwx.Image | Btwx.Text)[] = selected.reduce((result, current) => {
-    const layerItem = layer.present.byId[current];
-    return [...result, layerItem];
-  }, []);
-  const strokeDashOffsetValues = layerItems.reduce((result: number[], current: Btwx.Shape | Btwx.Image | Btwx.Text) => {
-    return [...result, current.style.strokeOptions.dashOffset];
-  }, []);
-  const strokeDashOffsetValue = strokeDashOffsetValues.every((dashOffset: number) => dashOffset === strokeDashOffsetValues[0]) ? strokeDashOffsetValues[0] : 'multi';
-  const disabled = !layerItems.every((layerItem) => layerItem.style.stroke.enabled);
-  return { selected, strokeDashOffsetValue, disabled };
-};
-
-export default connect(
-  mapStateToProps,
-  { setLayersStrokeDashOffset }
-)(StrokeDashOffsetInput);
+export default StrokeDashOffsetInput;

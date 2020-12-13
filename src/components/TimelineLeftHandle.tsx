@@ -1,29 +1,26 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { setTweenDrawerTweenEditing } from '../store/actions/tweenDrawer';
-import { SetTweenDrawerTweenEditingPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
-import { SetLayerTweenTimingPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setLayerTweenTiming } from '../store/actions/layer';
 
 gsap.registerPlugin(Draggable);
 
 interface TimelineLeftHandleProps {
   tweenId: string;
-  tween?: Btwx.Tween;
-  setLayerTweenTiming?(payload: SetLayerTweenTimingPayload): LayerTypes;
-  setTweenDrawerTweenEditing?(payload: SetTweenDrawerTweenEditingPayload): TweenDrawerTypes;
 }
 
 const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { tweenId, tween, setLayerTweenTiming, setTweenDrawerTweenEditing } = props;
+  const { tweenId } = props;
+  const tween = useSelector((state: RootState) => state.layer.present.tweens.byId[tweenId]);
   const [prevDelay, setPrevDelay] = useState(tween.delay);
   const [prevId, setPrevId] = useState(tweenId);
+  const dispatch = useDispatch();
 
   const setupHandle = () => {
     const rightHandleInitialPos = ((tween.delay * 100) * theme.unit) + ((tween.duration * 100) * theme.unit) - theme.unit * 4;
@@ -55,13 +52,13 @@ const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
         }
       },
       onPress: function() {
-        setTweenDrawerTweenEditing({id: tweenId});
+        dispatch(setTweenDrawerTweenEditing({id: tweenId}));
         gsap.set(leftTooltipElement, {display: 'inline'});
         leftTooltipElement.innerHTML = `${(this.x / 4) / 100}s`;
         document.body.style.cursor = 'ew-resize';
       },
       onRelease: function() {
-        setTweenDrawerTweenEditing({id: null});
+        dispatch(setTweenDrawerTweenEditing({id: null}));
         gsap.set(leftTooltipElement, {display: 'none'});
         document.body.style.cursor = 'auto';
       },
@@ -86,7 +83,7 @@ const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
         const duration = (((rightHandlePos + theme.unit * 4) - this.x) / 4) / 100;
         const delay = (this.x / 4) / 100;
         setPrevDelay(delay);
-        setLayerTweenTiming({id: tweenId, duration, delay});
+        dispatch(setLayerTweenTiming({id: tweenId, duration, delay}));
       }
     });
   }
@@ -150,15 +147,4 @@ const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState, ownProps: TimelineLeftHandleProps): {
-  tween: Btwx.Tween;
-} => {
-  const { layer } = state;
-  const tween = layer.present.tweens.byId[ownProps.tweenId];
-  return { tween };
-};
-
-export default connect(
-  mapStateToProps,
-  { setLayerTweenTiming, setTweenDrawerTweenEditing }
-)(TimelineLeftHandle);
+export default TimelineLeftHandle;

@@ -1,21 +1,17 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { bringSelectedForwardThunk } from '../store/actions/layer';
 import { canBringSelectedForward } from '../store/selectors/layer';
 import TopbarButton from './TopbarButton';
 
-interface MoveForwardButtonProps {
-  canMoveForward: boolean;
-  bringSelectedForwardThunk(): void;
-}
-
-const MoveForwardButton = (props: MoveForwardButtonProps): ReactElement => {
-  const { canMoveForward, bringSelectedForwardThunk } = props;
+const MoveForwardButton = (): ReactElement => {
+  const canMoveForward = useSelector((state: RootState) => canBringSelectedForward(state));
+  const dispatch = useDispatch();
 
   const handleMoveForwardClick = (): void => {
     if (canMoveForward) {
-      bringSelectedForwardThunk();
+      dispatch(bringSelectedForwardThunk());
     }
   }
 
@@ -28,14 +24,4 @@ const MoveForwardButton = (props: MoveForwardButtonProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  canMoveForward: boolean;
-} => {
-  const canMoveForward = canBringSelectedForward(state);
-  return { canMoveForward };
-};
-
-export default connect(
-  mapStateToProps,
-  { bringSelectedForwardThunk }
-)(MoveForwardButton);
+export default MoveForwardButton;

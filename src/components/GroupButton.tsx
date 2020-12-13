@@ -1,21 +1,17 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { groupSelectedThunk } from '../store/actions/layer';
 import { canGroupSelected } from '../store/selectors/layer';
 import TopbarButton from './TopbarButton';
 
-interface GroupButtonProps {
-  canGroup: boolean;
-  groupSelectedThunk(): void;
-}
-
-const GroupButton = (props: GroupButtonProps): ReactElement => {
-  const { canGroup, groupSelectedThunk } = props;
+const GroupButton = (): ReactElement => {
+  const canGroup = useSelector((state: RootState) => canGroupSelected(state));
+  const dispatch = useDispatch();
 
   const handleGroupClick = () => {
     if (canGroup) {
-      groupSelectedThunk();
+      dispatch(groupSelectedThunk());
     }
   }
 
@@ -28,14 +24,4 @@ const GroupButton = (props: GroupButtonProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  canGroup: boolean;
-} => {
-  const canGroup = canGroupSelected(state);
-  return { canGroup };
-};
-
-export default connect(
-  mapStateToProps,
-  { groupSelectedThunk }
-)(GroupButton);
+export default GroupButton;

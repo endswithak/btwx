@@ -1,21 +1,17 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { addSelectionMaskThunk } from '../store/actions/layer';
 import { canMaskSelected } from '../store/selectors/layer';
 import TopbarButton from './TopbarButton';
 
-interface MaskButtonProps {
-  canMask?: boolean;
-  addSelectionMaskThunk?(): void;
-}
-
-const MaskButton = (props: MaskButtonProps): ReactElement => {
-  const { canMask, addSelectionMaskThunk } = props;
+const MaskButton = (): ReactElement => {
+  const canMask = useSelector((state: RootState) => canMaskSelected(state));
+  const dispatch = useDispatch();
 
   const handleMaskClick = (): void => {
     if (canMask) {
-      addSelectionMaskThunk();
+      dispatch(addSelectionMaskThunk());
     }
   }
 
@@ -28,14 +24,4 @@ const MaskButton = (props: MaskButtonProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  canMask?: boolean;
-} => {
-  const canMask = canMaskSelected(state);
-  return { canMask };
-};
-
-export default connect(
-  mapStateToProps,
-  { addSelectionMaskThunk }
-)(MaskButton);
+export default MaskButton;

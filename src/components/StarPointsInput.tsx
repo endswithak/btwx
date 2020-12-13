@@ -1,29 +1,22 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
 import { RootState } from '../store/reducers';
-import { SetStarsPointsPayload, LayerTypes } from '../store/actionTypes/layer';
+import { uiPaperScope } from '../canvas';
 import { setStarsPoints } from '../store/actions/layer';
-import { getPaperLayer, getSelectedProjectIndices } from '../store/selectors/layer';
+import { getPaperLayer, getSelectedProjectIndices, getSelectedStarPoints, getSelectedById } from '../store/selectors/layer';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarInput from './SidebarInput';
 import SidebarSlider from './SidebarSlider';
-import { uiPaperScope } from '../canvas';
 
-interface StarPointsInputProps {
-  selected?: string[];
-  pointsValue?: number | 'multi';
-  layerItems?: Btwx.Star[];
-  selectedPaperScopes?: {
-    [id: string]: number;
-  };
-  setStarsPoints?(payload: SetStarsPointsPayload): LayerTypes;
-}
-
-const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
-  const { selected, setStarsPoints, layerItems, pointsValue, selectedPaperScopes } = props;
+const StarPointsInput = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const selectedPaperScopes = useSelector((state: RootState) => getSelectedProjectIndices(state));
+  const pointsValue = useSelector((state: RootState) => getSelectedStarPoints(state));
+  const selectedById = useSelector((state: RootState) => getSelectedById(state));
   const [points, setPoints] = useState(pointsValue !== 'multi' ? Math.round(pointsValue) : pointsValue);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setPoints(pointsValue !== 'multi' ? Math.round(pointsValue) : pointsValue);
@@ -36,7 +29,8 @@ const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
 
   const handleSliderChange = (e: any): void => {
     handleChange(e);
-    layerItems.forEach((layerItem) => {
+    Object.keys(selectedById).forEach((key) => {
+      const layerItem = selectedById[key];
       const paperLayerCompound = getPaperLayer(layerItem.id, selectedPaperScopes[layerItem.id]) as paper.CompoundPath;
       const paperLayer = paperLayerCompound.children[0] as paper.Path;
       const startPosition = paperLayer.position;
@@ -67,7 +61,7 @@ const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
         if (Math.round(nextPoints) < 3) {
           nextPoints = 3;
         }
-        setStarsPoints({layers: selected, points: Math.round(nextPoints)});
+        dispatch(setStarsPoints({layers: selected, points: Math.round(nextPoints)}));
         setPoints(Math.round(nextPoints));
       }
     } catch(error) {
@@ -100,35 +94,4 @@ const StarPointsInput = (props: StarPointsInputProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  selected: string[];
-  pointsValue: number | 'multi';
-  layerItems: Btwx.Star[];
-  selectedPaperScopes: {
-    [id: string]: number;
-  };
-} => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  const selectedPaperScopes = getSelectedProjectIndices(state);
-  const layerItems: Btwx.Star[] = selected.reduce((result, current) => {
-    const layerItem = layer.present.byId[current];
-    return [...result, layerItem];
-  }, []);
-  const pointsValues: number[] = layerItems.reduce((result, current) => {
-    return [...result, current.points];
-  }, []);
-  const pointsValue = (() => {
-    if (pointsValues.every((value: number) => value === pointsValues[0])) {
-      return pointsValues[0];
-    } else {
-      return 'multi';
-    }
-  })();
-  return { selected, pointsValue, layerItems, selectedPaperScopes };
-};
-
-export default connect(
-  mapStateToProps,
-  { setStarsPoints }
-)(StarPointsInput);
+export default StarPointsInput;

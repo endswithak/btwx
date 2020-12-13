@@ -1,48 +1,40 @@
 import React, { useContext, ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { ScrollSyncPane } from 'react-scroll-sync';
 import { RootState } from '../store/reducers';
 import { getTweenEventLayers } from '../store/selectors/layer';
 import { setTweenDrawerEventThunk } from '../store/actions/tweenDrawer';
-import { SetTweenDrawerEventPayload } from '../store/actionTypes/tweenDrawer';
 import { setLayerHover, selectLayers } from '../store/actions/layer';
-import { SetLayerHoverPayload, SelectLayersPayload, LayerTypes } from '../store/actionTypes/layer';
 import { ThemeContext } from './ThemeProvider';
 import TweenDrawerEventLayer from './TweenDrawerEventLayer';
 import TweenDrawerEventLayersHeader from './TweenDrawerEventLayersHeader';
 import EmptyState from './EmptyState';
 
 interface TweenDrawerEventLayersProps {
-  isEmpty?: boolean;
-  tweenDrawerLayersWidth?: number;
-  artboardItem?: Btwx.Artboard;
-  tweenEventLayers?: {
-    allIds: string[];
-    byId: {
-      [id: string]: Btwx.Layer;
-    };
-  };
-  scrollLayerItem?: Btwx.Layer;
   scrollLayer: string;
-  setTweenDrawerEventThunk?(payload: SetTweenDrawerEventPayload): void;
-  setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
-  selectLayers?(payload: SelectLayersPayload): LayerTypes;
 }
 
 const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isEmpty, scrollLayer, scrollLayerItem, tweenDrawerLayersWidth, tweenEventLayers, setTweenDrawerEventThunk, artboardItem, setLayerHover, selectLayers } = props;
+  const { scrollLayer } = props;
+  const tweenEventLayers = useSelector((state: RootState) => getTweenEventLayers(state.layer.present, state.tweenDrawer.event));
+  const isEmpty = tweenEventLayers.allIds.length === 0;
+  const eventItem = useSelector((state: RootState) => state.layer.present.events.byId[state.tweenDrawer.event]);
+  const artboardItem = useSelector((state: RootState) => state.layer.present.byId[eventItem.artboard]);
+  const tweenDrawerLayersWidth = useSelector((state: RootState) => state.viewSettings.tweenDrawer.layersWidth);
+  const scrollLayerItem = scrollLayer ? useSelector((state: RootState) => state.layer.present.byId[scrollLayer]) : null;
+  const dispatch = useDispatch();
 
   const handleMouseEnter = (id: string) => {
-    setLayerHover({id: id});
+    dispatch(setLayerHover({id}));
   }
 
   const handleMouseLeave = () => {
-    setLayerHover({id: null});
+    dispatch(setLayerHover({id: null}));
   }
 
   const handleClick = (id: string) => {
-    selectLayers({layers: [id], newSelection: true});
+    dispatch(selectLayers({layers: [id], newSelection: true}));
   }
 
   return (
@@ -62,7 +54,7 @@ const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElemen
         onClick={() => handleClick(artboardItem.id)}
         onMouseEnter={() => handleMouseEnter(artboardItem.id)}
         onMouseLeave={handleMouseLeave}
-        onIconClick={() => setTweenDrawerEventThunk({id: null})} />
+        onIconClick={() => dispatch(setTweenDrawerEventThunk({id: null}))} />
       {
         isEmpty
         ? <div style={{position: 'relative', display: 'flex', flexDirection: 'column', width: '100%', height: '100%', overflow: 'hidden'}}>
@@ -122,18 +114,4 @@ const TweenDrawerEventLayers = (props: TweenDrawerEventLayersProps): ReactElemen
   );
 }
 
-const mapStateToProps = (state: RootState, ownProps: TweenDrawerEventLayersProps) => {
-  const { layer, tweenDrawer, viewSettings } = state;
-  const tweenEventLayers = getTweenEventLayers(layer.present, tweenDrawer.event);
-  const isEmpty = tweenEventLayers.allIds.length === 0;
-  const eventItem = layer.present.events.byId[tweenDrawer.event];
-  const artboardItem = layer.present.byId[eventItem.artboard];
-  const tweenDrawerLayersWidth = viewSettings.tweenDrawer.layersWidth;
-  const scrollLayerItem = ownProps.scrollLayer ? layer.present.byId[ownProps.scrollLayer] : null;
-  return { tweenEventLayers, artboardItem, tweenDrawerLayersWidth, scrollLayerItem, isEmpty };
-};
-
-export default connect(
-  mapStateToProps,
-  { setTweenDrawerEventThunk, setLayerHover, selectLayers }
-)(TweenDrawerEventLayers);
+export default TweenDrawerEventLayers;

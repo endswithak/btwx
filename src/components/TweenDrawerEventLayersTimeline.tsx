@@ -1,5 +1,5 @@
 import React, { useContext, ReactElement, useRef } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { ScrollSyncPane } from 'react-scroll-sync';
 import { RootState } from '../store/reducers';
 import { getTweenEventLayers } from '../store/selectors/layer';
@@ -7,20 +7,11 @@ import { ThemeContext } from './ThemeProvider';
 import TweenDrawerEventLayerTimeline from './TweenDrawerEventLayerTimeline';
 import EmptyState from './EmptyState';
 
-interface TweenDrawerEventLayersTimelineProps {
-  isEmpty?: boolean;
-  tweenEventLayers?: {
-    allIds: string[];
-    byId: {
-      [id: string]: Btwx.Layer;
-    };
-  };
-}
-
-const TweenDrawerEventLayersTimeline = (props: TweenDrawerEventLayersTimelineProps): ReactElement => {
+const TweenDrawerEventLayersTimeline = (): ReactElement => {
   const timelineRef = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
-  const { tweenEventLayers, isEmpty } = props;
+  const tweenEventLayers = useSelector((state: RootState) => getTweenEventLayers(state.layer.present, state.tweenDrawer.event));
+  const isEmpty = tweenEventLayers.allIds.length === 0;
 
   return (
     <div className='c-tween-drawer-event__layers-timeline-wrap'>
@@ -119,13 +110,4 @@ const TweenDrawerEventLayersTimeline = (props: TweenDrawerEventLayersTimelinePro
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer, tweenDrawer } = state;
-  const tweenEventLayers = getTweenEventLayers(layer.present, tweenDrawer.event);
-  const isEmpty = tweenEventLayers.allIds.length === 0;
-  return { tweenEventLayers, isEmpty };
-};
-
-export default connect(
-  mapStateToProps
-)(TweenDrawerEventLayersTimeline);
+export default TweenDrawerEventLayersTimeline;

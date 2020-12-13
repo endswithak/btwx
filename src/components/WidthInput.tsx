@@ -1,21 +1,17 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
-import { SetLayersWidthPayload, LayerTypes } from '../store/actionTypes/layer';
+import { getSelectedInnerWidth } from '../store/selectors/layer';
 import { setLayersWidth } from '../store/actions/layer';
 
-interface WidthInputProps {
-  selected?: string[];
-  widthValue?: number | 'multi';
-  isDisabled?: boolean;
-  setLayersWidth?(payload: SetLayersWidthPayload): LayerTypes;
-}
-
-const WidthInput = (props: WidthInputProps): ReactElement => {
-  const { selected, setLayersWidth, widthValue, isDisabled } = props;
+const WidthInput = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const widthValue = useSelector((state: RootState) => getSelectedInnerWidth(state));
+  const isDisabled = useSelector((state: RootState) => state.layer.present.selected.some((id) => state.layer.present.byId[id].type === 'Text' || state.layer.present.byId[id].type === 'Group'));
   const [width, setWidth] = useState(widthValue !== 'multi' ? Math.round(widthValue) : widthValue);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setWidth(widthValue !== 'multi' ? Math.round(widthValue) : widthValue);
@@ -33,7 +29,7 @@ const WidthInput = (props: WidthInputProps): ReactElement => {
         if (nextWidth < 1) {
           nextWidth = 1;
         }
-        setLayersWidth({layers: selected, width: Math.round(nextWidth)});
+        dispatch(setLayersWidth({layers: selected, width: Math.round(nextWidth)}));
         setWidth(Math.round(nextWidth));
       } else {
         setWidth(widthValue !== 'multi' ? Math.round(widthValue) : widthValue);
@@ -54,28 +50,4 @@ const WidthInput = (props: WidthInputProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  const layerItems: Btwx.Layer[] = selected.reduce((result, current) => {
-    const layerItem = layer.present.byId[current];
-    return [...result, layerItem];
-  }, []);
-  const widthValues: number[] = layerItems.reduce((result, current) => {
-    return [...result, current.frame.innerWidth];
-  }, []);
-  const widthValue = (() => {
-    if (widthValues.every((value: number) => value === widthValues[0])) {
-      return widthValues[0];
-    } else {
-      return 'multi';
-    }
-  })();
-  const isDisabled = layerItems.some((layerItem) => layerItem.type === 'Text' || layerItem.type === 'Group');
-  return { selected, widthValue, isDisabled };
-};
-
-export default connect(
-  mapStateToProps,
-  { setLayersWidth }
-)(WidthInput);
+export default WidthInput;
