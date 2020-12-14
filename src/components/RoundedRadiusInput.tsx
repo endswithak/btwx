@@ -1,29 +1,22 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
+import { uiPaperScope } from '../canvas';
 import { RootState } from '../store/reducers';
-import { SetRoundedRadiiPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setRoundedRadii } from '../store/actions/layer';
-import { getPaperLayer, getSelectedProjectIndices } from '../store/selectors/layer';
+import { getPaperLayer, getSelectedProjectIndices, getSelectedRoundedRadius, getSelectedById } from '../store/selectors/layer';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarInput from './SidebarInput';
 import SidebarSlider from './SidebarSlider';
-import { uiPaperScope } from '../canvas';
 
-interface RoundedRadiusInputProps {
-  selected?: string[];
-  radiusValue?: number | 'multi';
-  layerItems?: Btwx.Rounded[];
-  selectedPaperScopes?: {
-    [id: string]: number;
-  };
-  setRoundedRadii?(payload: SetRoundedRadiiPayload): LayerTypes;
-}
-
-const RoundedRadiusInput = (props: RoundedRadiusInputProps): ReactElement => {
-  const { selected, setRoundedRadii, radiusValue, layerItems, selectedPaperScopes } = props;
+const RoundedRadiusInput = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const selectedProjectIndices = useSelector((state: RootState) => getSelectedProjectIndices(state));
+  const radiusValue = useSelector((state: RootState) => getSelectedRoundedRadius(state));
+  const selectedById = useSelector((state: RootState) => getSelectedById(state));
   const [radius, setRadius] = useState(radiusValue !== 'multi' ? Math.round(radiusValue * 100) : radiusValue);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setRadius(radiusValue !== 'multi' ? Math.round(radiusValue * 100) : radiusValue);
@@ -36,8 +29,9 @@ const RoundedRadiusInput = (props: RoundedRadiusInputProps): ReactElement => {
 
   const handleSliderChange = (e: any) => {
     handleChange(e);
-    layerItems.forEach((layerItem) => {
-      const paperLayerCompound = getPaperLayer(layerItem.id, selectedPaperScopes[layerItem.id]) as paper.CompoundPath;
+    Object.keys(selectedById).forEach((key) => {
+      const layerItem = selectedById[key];
+      const paperLayerCompound = getPaperLayer(layerItem.id, selectedProjectIndices[layerItem.id]) as paper.CompoundPath;
       const paperLayer = paperLayerCompound.children[0] as paper.Path;
       const nextRadius = e.target.value / 100;
       paperLayer.rotation = -layerItem.transform.rotation;
@@ -63,7 +57,7 @@ const RoundedRadiusInput = (props: RoundedRadiusInputProps): ReactElement => {
         nextRadius = 0;
       }
       if (nextRadius !== radiusValue) {
-        setRoundedRadii({layers: selected, radius: Math.round(nextRadius) / 100});
+        dispatch(setRoundedRadii({layers: selected, radius: Math.round(nextRadius) / 100}));
         setRadius(Math.round(nextRadius));
       }
     } catch(error) {
@@ -96,35 +90,4 @@ const RoundedRadiusInput = (props: RoundedRadiusInputProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  selected: string[];
-  radiusValue: number | 'multi';
-  layerItems: Btwx.Rounded[];
-  selectedPaperScopes: {
-    [id: string]: number;
-  };
-} => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  const selectedPaperScopes = getSelectedProjectIndices(state);
-  const layerItems: Btwx.Rounded[] = selected.reduce((result, current) => {
-    const layerItem = layer.present.byId[current];
-    return [...result, layerItem];
-  }, []);
-  const radiusValues: number[] = layerItems.reduce((result, current) => {
-    return [...result, current.radius];
-  }, []);
-  const radiusValue = (() => {
-    if (radiusValues.every((value: number) => value === radiusValues[0])) {
-      return radiusValues[0];
-    } else {
-      return 'multi';
-    }
-  })();
-  return { selected, radiusValue, layerItems, selectedPaperScopes };
-};
-
-export default connect(
-  mapStateToProps,
-  { setRoundedRadii }
-)(RoundedRadiusInput);
+export default RoundedRadiusInput;

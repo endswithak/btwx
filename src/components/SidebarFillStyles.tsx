@@ -1,28 +1,21 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
+import { expandFillStyles, collapseFillStyles } from '../store/actions/rightSidebar';
 import SidebarCollapseSection from './SidebarCollapseSection';
 import FillInput from './FillInput';
 import FillToggle from './FillToggle';
-import { RightSidebarTypes } from '../store/actionTypes/rightSidebar';
-import { expandFillStyles, collapseFillStyles } from '../store/actions/rightSidebar';
 
-interface SidebarFillStylesProps {
-  selected?: string[];
-  validFillSelection?: boolean;
-  fillStylesCollapsed?: boolean;
-  expandFillStyles?(): RightSidebarTypes;
-  collapseFillStyles?(): RightSidebarTypes;
-}
-
-const SidebarFillStyles = (props: SidebarFillStylesProps): ReactElement => {
-  const { selected, validFillSelection, fillStylesCollapsed, expandFillStyles, collapseFillStyles } = props;
+const SidebarFillStyles = (): ReactElement => {
+  const validFillSelection = useSelector((state: RootState) => state.layer.present.selected.every((id) => state.layer.present.byId[id].type !== 'Group' || state.layer.present.byId[id].type !== 'Image' || !(state.layer.present.byId[id].type === 'Shape' && (state.layer.present.byId[id] as Btwx.Shape).shapeType === 'Line')));
+  const fillStylesCollapsed = useSelector((state: RootState) => state.rightSidebar.fillStylesCollapsed);
+  const dispatch = useDispatch();
 
   const handleClick = () => {
     if (fillStylesCollapsed) {
-      expandFillStyles();
+      dispatch(expandFillStyles());
     } else {
-      collapseFillStyles();
+      dispatch(collapseFillStyles());
     }
   }
 
@@ -41,15 +34,4 @@ const SidebarFillStyles = (props: SidebarFillStylesProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer, rightSidebar } = state;
-  const selected = layer.present.selected;
-  const validFillSelection = !selected.some((id: string) => layer.present.byId[id].type === 'Group' || layer.present.byId[id].type === 'Image' || (layer.present.byId[id].type === 'Shape' && (layer.present.byId[id] as Btwx.Shape).shapeType === 'Line'));
-  const fillStylesCollapsed = rightSidebar.fillStylesCollapsed;
-  return { selected, validFillSelection, fillStylesCollapsed };
-};
-
-export default connect(
-  mapStateToProps,
-  { expandFillStyles, collapseFillStyles }
-)(SidebarFillStyles);
+export default SidebarFillStyles;

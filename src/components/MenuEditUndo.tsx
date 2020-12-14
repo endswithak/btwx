@@ -1,18 +1,14 @@
 import React, { ReactElement, useEffect } from 'react';
 import { remote } from 'electron';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { undoThunk } from '../store/actions/layer';
 
 export const MENU_ITEM_ID = 'editUndo';
 
-interface MenuEditUndoProps {
-  canUndo?: boolean;
-  undoThunk?(): void;
-}
-
-const MenuEditUndo = (props: MenuEditUndoProps): ReactElement => {
-  const { canUndo, undoThunk } = props;
+const MenuEditUndo = (): ReactElement => {
+  const canUndo = useSelector((state: RootState) => state.layer.past.length > 0 && state.canvasSettings.focusing);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
@@ -21,7 +17,7 @@ const MenuEditUndo = (props: MenuEditUndoProps): ReactElement => {
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      undoThunk();
+      dispatch(undoThunk());
     };
   }, []);
 
@@ -30,15 +26,4 @@ const MenuEditUndo = (props: MenuEditUndoProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  canUndo: boolean;
-} => {
-  const { canvasSettings, layer } = state;
-  const canUndo = layer.past.length > 0 && canvasSettings.focusing;
-  return { canUndo };
-};
-
-export default connect(
-  mapStateToProps,
-  { undoThunk }
-)(MenuEditUndo);
+export default MenuEditUndo;

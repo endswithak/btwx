@@ -1,18 +1,14 @@
 import React, { ReactElement, useEffect } from 'react';
 import { remote } from 'electron';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { centerSelectedThunk } from '../store/actions/translateTool';
 
 export const MENU_ITEM_ID = 'viewCenterSelected';
 
-interface MenuViewCenterSelectedProps {
-  isEnabled?: boolean;
-  centerSelectedThunk?(): void;
-}
-
-const MenuViewCenterSelected = (props: MenuViewCenterSelectedProps): ReactElement => {
-  const { isEnabled, centerSelectedThunk } = props;
+const MenuViewCenterSelected = (): ReactElement => {
+  const isEnabled = useSelector((state: RootState) => state.layer.present.selected.length > 0);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
@@ -21,7 +17,7 @@ const MenuViewCenterSelected = (props: MenuViewCenterSelectedProps): ReactElemen
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      centerSelectedThunk();
+      dispatch(centerSelectedThunk());
     };
   }, []);
 
@@ -30,15 +26,4 @@ const MenuViewCenterSelected = (props: MenuViewCenterSelectedProps): ReactElemen
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  isEnabled: boolean;
-} => {
-  const { layer } = state;
-  const isEnabled = layer.present.selected.length > 0;
-  return { isEnabled };
-};
-
-export default connect(
-  mapStateToProps,
-  { centerSelectedThunk }
-)(MenuViewCenterSelected);
+export default MenuViewCenterSelected;

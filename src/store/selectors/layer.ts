@@ -1215,6 +1215,182 @@ export const getSelectedPolygonSides = createSelector(
   }
 );
 
+export const getSelectedOpacity = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      if (!result) {
+        result = layerItem.style.opacity;
+      }
+      if (result && layerItem.style.opacity !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as number | 'multi';
+  }
+);
+
+export const getSelectedBlendMode = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: Btwx.BlendMode | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      if (!result) {
+        result = layerItem.style.blendMode;
+      }
+      if (result && layerItem.style.blendMode !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as Btwx.BlendMode | 'multi';
+  }
+);
+
+export const getSelectedShadowXOffset = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      if (!result) {
+        result = layerItem.style.shadow.offset.x;
+      }
+      if (result && layerItem.style.shadow.offset.x !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as number | 'multi';
+  }
+);
+
+export const getSelectedShadowYOffset = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      if (!result) {
+        result = layerItem.style.shadow.offset.y;
+      }
+      if (result && layerItem.style.shadow.offset.y !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as number | 'multi';
+  }
+);
+
+export const getSelectedShadowBlur = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      if (!result) {
+        result = layerItem.style.shadow.blur;
+      }
+      if (result && layerItem.style.shadow.blur !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as number | 'multi';
+  }
+);
+
+export const getSelectedRotation = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      if (!result) {
+        result = layerItem.transform.rotation;
+      }
+      if (result && layerItem.transform.rotation !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as number | 'multi';
+  }
+);
+
+export const getSelectedLeading = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Text;
+      if (!result) {
+        result = layerItem.textStyle.leading;
+      }
+      if (result && layerItem.textStyle.leading !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as number | 'multi';
+  }
+);
+
+export const getSelectedFontSize = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Text;
+      if (!result) {
+        result = layerItem.textStyle.fontSize;
+      }
+      if (result && layerItem.textStyle.fontSize !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as number | 'multi';
+  }
+);
+
+export const getSelectedFontFamily = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: string | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Text;
+      if (!result) {
+        result = layerItem.textStyle.fontFamily;
+      }
+      if (result && layerItem.textStyle.fontFamily !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as string | 'multi';
+  }
+);
+
+export const getSelectedFontWeight = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: Btwx.FontWeight | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Text;
+      if (!result) {
+        result = layerItem.textStyle.fontWeight;
+      }
+      if (result && layerItem.textStyle.fontWeight !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as Btwx.FontWeight | 'multi';
+  }
+);
+
+export const getSelectedJustification = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: Btwx.Jusftification | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Text;
+      if (!result) {
+        result = layerItem.textStyle.justification;
+      }
+      if (result && layerItem.textStyle.justification !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as Btwx.Jusftification | 'multi';
+  }
+);
+
 export const getLayer = (store: LayerState, id: string): Btwx.Layer => {
   return store.byId[id] as Btwx.Layer;
 };

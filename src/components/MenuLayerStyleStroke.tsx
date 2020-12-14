@@ -1,20 +1,16 @@
 import React, { ReactElement, useEffect } from 'react';
 import { remote } from 'electron';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { toggleSelectedStrokeThunk } from '../store/actions/layer';
 import { canToggleSelectedFillOrStroke, selectedStrokeEnabled } from '../store/selectors/layer';
 
 export const MENU_ITEM_ID = 'layerStyleStroke';
 
-interface MenuLayerStyleStrokeProps {
-  isEnabled?: boolean;
-  isChecked?: boolean;
-  toggleSelectedStrokeThunk?(): void;
-}
-
-const MenuLayerStyleStroke = (props: MenuLayerStyleStrokeProps): ReactElement => {
-  const { isEnabled, isChecked, toggleSelectedStrokeThunk } = props;
+const MenuLayerStyleStroke = (): ReactElement => {
+  const isEnabled = useSelector((state: RootState) => canToggleSelectedFillOrStroke(state));
+  const isChecked = useSelector((state: RootState) => selectedStrokeEnabled(state));
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
@@ -24,7 +20,7 @@ const MenuLayerStyleStroke = (props: MenuLayerStyleStrokeProps): ReactElement =>
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      toggleSelectedStrokeThunk();
+      dispatch(toggleSelectedStrokeThunk());
     };
   }, []);
 
@@ -33,16 +29,4 @@ const MenuLayerStyleStroke = (props: MenuLayerStyleStrokeProps): ReactElement =>
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  isEnabled: boolean;
-  isChecked: boolean;
-} => {
-  const isEnabled = canToggleSelectedFillOrStroke(state);
-  const isChecked = selectedStrokeEnabled(state);
-  return { isEnabled, isChecked };
-};
-
-export default connect(
-  mapStateToProps,
-  { toggleSelectedStrokeThunk }
-)(MenuLayerStyleStroke);
+export default MenuLayerStyleStroke;

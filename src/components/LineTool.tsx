@@ -1,41 +1,22 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useEffect, ReactElement, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { isBetween } from '../utils';
 import { RootState } from '../store/reducers';
 import { uiPaperScope } from '../canvas';
 import { setCanvasResizing } from '../store/actions/canvasSettings';
-import { CanvasSettingsTypes, SetCanvasResizingPayload } from '../store/actionTypes/canvasSettings';
 import { setLineFrom, setLineTo, updateSelectionFrame } from '../store/actions/layer';
-import { SetLineFromPayload, SetLineToPayload, LayerTypes } from '../store/actionTypes/layer';
 import { getPaperLayer, getSelectedProjectIndices } from '../store/selectors/layer';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
 
-interface LineToolStateProps {
-  isEnabled?: boolean;
-  resizing?: boolean;
-  initialHandle?: Btwx.LineHandle;
-  selected?: string[];
-  selectedPaperScopes?: {
-    [id: string]: number;
-  };
-}
-
-interface LineToolDispatchProps {
-  setLineFrom?(payload: SetLineFromPayload): LayerTypes;
-  setLineTo?(payload: SetLineToPayload): LayerTypes;
-  setCanvasResizing?(payload: SetCanvasResizingPayload): CanvasSettingsTypes;
-}
-
-type LineToolProps = (
-  LineToolStateProps &
-  LineToolDispatchProps &
-  PaperToolProps
-);
-
-const LineTool = (props: LineToolProps): ReactElement => {
-  const { isEnabled, resizing, initialHandle, setLineFrom, setLineTo, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent, setCanvasResizing, selected, selectedPaperScopes } = props;
+const LineTool = (props: PaperToolProps): ReactElement => {
+  const { tool, keyDownEvent, keyUpEvent, downEvent, dragEvent, upEvent } = props;
+  const isEnabled = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Line');
+  const resizing = useSelector((state: RootState) => state.canvasSettings.resizing);
+  const initialHandle = useSelector((state: RootState) => state.canvasSettings.lineHandle);
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const selectedProjectIndices = useSelector((state: RootState) => getSelectedProjectIndices(state));
   const [handle, setHandle] = useState<Btwx.LineHandle>(null);
   const [fromHandlePosition, setFromHandlePosition] = useState<paper.Point>(null);
   const [toHandlePosition, setToHandlePosition] = useState<paper.Point>(null);
@@ -46,8 +27,9 @@ const LineTool = (props: LineToolProps): ReactElement => {
   const [isHorizontal, setIsHorizontal] = useState<boolean>(false);
   const [isVertical, setIsVertical] = useState<boolean>(false);
   const [originalPaperSelection, setOriginalPaperSelection] = useState<paper.Path>(null);
+  const dispatch = useDispatch();
 
-  const resetState = () => {
+  const resetState = (): void => {
     setHandle(null);
     setVector(null);
     setToBounds(null);
@@ -66,7 +48,7 @@ const LineTool = (props: LineToolProps): ReactElement => {
 
   useEffect(() => {
     if (downEvent && isEnabled) {
-      const selectedPaperLayer = getPaperLayer(selected[0], selectedPaperScopes[selected[0]]);
+      const selectedPaperLayer = getPaperLayer(selected[0], selectedProjectIndices[selected[0]]);
       const fromHandle = uiPaperScope.project.getItem({data: { interactiveType: 'lineFrom' }});
       const toHandle = uiPaperScope.project.getItem({data: { interactiveType: 'lineTo' }});
       setFromHandlePosition(fromHandle.position);
@@ -99,7 +81,7 @@ const LineTool = (props: LineToolProps): ReactElement => {
         to: new uiPaperScope.Point(dragEvent.point.x + 0.5, dragEvent.point.y + 0.5)
       });
       if (!resizing) {
-        setCanvasResizing({resizing: true});
+        dispatch(setCanvasResizing({resizing: true}));
       }
       if (dragEvent.modifiers.shift) {
         if (isHorizontal) {
@@ -139,16 +121,16 @@ const LineTool = (props: LineToolProps): ReactElement => {
       const newY = (upEvent.point.y - originalPaperSelection.position.y) / vector.length;
       switch(handle) {
         case 'lineFrom': {
-          setLineFrom({id: selected[0], x: newX, y: newY});
+          dispatch(setLineFrom({id: selected[0], x: newX, y: newY}));
           break;
         }
         case 'lineTo': {
-          setLineTo({id: selected[0], x: newX, y: newY});
+          dispatch(setLineTo({id: selected[0], x: newX, y: newY}));
           break;
         }
       }
       if (resizing) {
-        setCanvasResizing({resizing: false});
+        dispatch(setCanvasResizing({resizing: false}));
       }
     }
   }, [upEvent]);
@@ -202,7 +184,7 @@ const LineTool = (props: LineToolProps): ReactElement => {
   useEffect(() => {
     if (toBounds && isEnabled) {
       const nextPosition = new uiPaperScope.Point(toBounds.center.x, toBounds.center.y);
-      const selectedPaperLayer = getPaperLayer(selected[0], selectedPaperScopes[selected[0]]);
+      const selectedPaperLayer = getPaperLayer(selected[0], selectedProjectIndices[selected[0]]);
       switch(handle) {
         case 'lineTo': {
           originalPaperSelection.lastSegment.point = nextPosition;
@@ -244,34 +226,7 @@ const LineTool = (props: LineToolProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): LineToolStateProps => {
-  const { layer, canvasSettings } = state;
-  const isEnabled = canvasSettings.activeTool === 'Line';
-  const resizing = canvasSettings.resizing;
-  const initialHandle = canvasSettings.lineHandle;
-  const selected = layer.present.selected;
-  const selectedPaperScopes = getSelectedProjectIndices(state);
-  return {
-    isEnabled,
-    resizing,
-    initialHandle,
-    selected,
-    selectedPaperScopes
-  };
-};
-
-const mapDispatchToProps = {
-  setLineFrom,
-  setLineTo,
-  setCanvasResizing
-};
-
 export default PaperTool(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )(LineTool),
-  {
-    all: true
-  }
+  LineTool,
+  { all: true }
 );

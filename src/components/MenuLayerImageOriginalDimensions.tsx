@@ -1,19 +1,15 @@
 import React, { ReactElement, useEffect } from 'react';
 import { remote } from 'electron';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { resetSelectedImageDimensionsThunk } from '../store/actions/layer';
 import { canResetSelectedImageDimensions } from '../store/selectors/layer';
 
 export const MENU_ITEM_ID = 'layerImageOriginalDimensions';
 
-interface MenuLayerImageOriginalDimensionsProps {
-  isEnabled?: boolean;
-  resetSelectedImageDimensionsThunk?(): void;
-}
-
-const MenuLayerImageOriginalDimensions = (props: MenuLayerImageOriginalDimensionsProps): ReactElement => {
-  const { isEnabled, resetSelectedImageDimensionsThunk } = props;
+const MenuLayerImageOriginalDimensions = (): ReactElement => {
+  const isEnabled = useSelector((state: RootState) => state.canvasSettings.focusing && canResetSelectedImageDimensions(state));
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
@@ -22,7 +18,7 @@ const MenuLayerImageOriginalDimensions = (props: MenuLayerImageOriginalDimension
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      resetSelectedImageDimensionsThunk();
+      dispatch(resetSelectedImageDimensionsThunk());
     };
   }, []);
 
@@ -31,15 +27,4 @@ const MenuLayerImageOriginalDimensions = (props: MenuLayerImageOriginalDimension
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  isEnabled: boolean;
-} => {
-  const { canvasSettings } = state;
-  const isEnabled = canvasSettings.focusing && canResetSelectedImageDimensions(state);
-  return { isEnabled };
-};
-
-export default connect(
-  mapStateToProps,
-  { resetSelectedImageDimensionsThunk }
-)(MenuLayerImageOriginalDimensions);
+export default MenuLayerImageOriginalDimensions;

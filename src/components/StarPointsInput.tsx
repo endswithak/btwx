@@ -12,7 +12,7 @@ import SidebarSlider from './SidebarSlider';
 
 const StarPointsInput = (): ReactElement => {
   const selected = useSelector((state: RootState) => state.layer.present.selected);
-  const selectedPaperScopes = useSelector((state: RootState) => getSelectedProjectIndices(state));
+  const selectedProjectIndices = useSelector((state: RootState) => getSelectedProjectIndices(state));
   const pointsValue = useSelector((state: RootState) => getSelectedStarPoints(state));
   const selectedById = useSelector((state: RootState) => getSelectedById(state));
   const [points, setPoints] = useState(pointsValue !== 'multi' ? Math.round(pointsValue) : pointsValue);
@@ -31,7 +31,7 @@ const StarPointsInput = (): ReactElement => {
     handleChange(e);
     Object.keys(selectedById).forEach((key) => {
       const layerItem = selectedById[key];
-      const paperLayerCompound = getPaperLayer(layerItem.id, selectedPaperScopes[layerItem.id]) as paper.CompoundPath;
+      const paperLayerCompound = getPaperLayer(layerItem.id, selectedProjectIndices[layerItem.id]) as paper.CompoundPath;
       const paperLayer = paperLayerCompound.children[0] as paper.Path;
       const startPosition = paperLayer.position;
       paperLayer.rotation = -layerItem.transform.rotation;

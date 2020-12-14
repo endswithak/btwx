@@ -186,7 +186,7 @@ export const saveDocumentAsThunk = () => {
             edit: state.layer.present.edit.id
           }));
           dispatch(writeFileThunk());
-          resolve();
+          resolve(null);
         } else {
           reject('canceled');
         }

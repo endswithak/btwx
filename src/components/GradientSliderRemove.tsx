@@ -1,19 +1,15 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement } from 'react';
 import styled from 'styled-components';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { removeLayersGradientStop } from '../store/actions/layer';
-import { RemoveLayersGradientStopPayload, LayerTypes } from '../store/actionTypes/layer';
 import { ThemeContext } from './ThemeProvider';
 import Icon from './Icon';
 
 interface GradientSliderProps {
   activeStopIndex: number;
   disabled: boolean;
-  selected?: string[];
-  prop?: 'fill' | 'stroke';
-  removeLayersGradientStop?(payload: RemoveLayersGradientStopPayload): LayerTypes;
 }
 
 const Button = styled.button`
@@ -36,10 +32,13 @@ const Button = styled.button`
 
 const GradientSliderRemove = (props: GradientSliderProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { selected, disabled, removeLayersGradientStop, activeStopIndex, prop } = props;
+  const { disabled, activeStopIndex } = props;
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const prop = useSelector((state: RootState) => state.gradientEditor.prop);
+  const dispatch = useDispatch();
 
   const removeStop = () => {
-    removeLayersGradientStop({layers: selected, prop, stopIndex: activeStopIndex});
+    dispatch(removeLayersGradientStop({layers: selected, prop, stopIndex: activeStopIndex}));
   }
 
   return (
@@ -53,14 +52,4 @@ const GradientSliderRemove = (props: GradientSliderProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { gradientEditor, layer } = state;
-  const selected = layer.present.selected;
-  const prop = gradientEditor.prop;
-  return { selected, prop };
-};
-
-export default connect(
-  mapStateToProps,
-  { removeLayersGradientStop }
-)(GradientSliderRemove);
+export default GradientSliderRemove;

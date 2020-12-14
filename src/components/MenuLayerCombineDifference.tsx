@@ -1,19 +1,15 @@
 import React, { ReactElement, useEffect } from 'react';
 import { remote } from 'electron';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { applyBooleanOperationThunk } from '../store/actions/layer';
 import { canBooleanSelected } from '../store/selectors/layer';
 
 export const MENU_ITEM_ID = 'layerCombineDifference';
 
-interface MenuLayerCombineDifferenceProps {
-  isEnabled?: boolean;
-  applyBooleanOperationThunk?(operation: Btwx.BooleanOperation): void;
-}
-
-const MenuLayerCombineDifference = (props: MenuLayerCombineDifferenceProps): ReactElement => {
-  const { isEnabled, applyBooleanOperationThunk } = props;
+const MenuLayerCombineDifference = (): ReactElement => {
+  const isEnabled = useSelector((state: RootState) => canBooleanSelected(state));
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
@@ -22,7 +18,7 @@ const MenuLayerCombineDifference = (props: MenuLayerCombineDifferenceProps): Rea
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      applyBooleanOperationThunk('exclude');
+      dispatch(applyBooleanOperationThunk('exclude'));
     };
   }, []);
 
@@ -31,15 +27,4 @@ const MenuLayerCombineDifference = (props: MenuLayerCombineDifferenceProps): Rea
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  isEnabled: boolean;
-} => {
-  const { canvasSettings } = state;
-  const isEnabled = canBooleanSelected(state) && canvasSettings.focusing;
-  return { isEnabled };
-};
-
-export default connect(
-  mapStateToProps,
-  { applyBooleanOperationThunk }
-)(MenuLayerCombineDifference);
+export default MenuLayerCombineDifference;

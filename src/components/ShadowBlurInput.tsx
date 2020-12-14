@@ -1,21 +1,17 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
-import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
-import { SetLayersShadowBlurPayload, LayerTypes } from '../store/actionTypes/layer';
+import { selectedShadowEnabled, getSelectedShadowBlur } from '../store/selectors/layer';
 import { setLayersShadowBlur } from '../store/actions/layer';
+import SidebarInput from './SidebarInput';
 
-interface ShadowBlurInputProps {
-  shadowBlurValue?: number | 'multi';
-  selected?: string[];
-  disabled: boolean;
-  setLayersShadowBlur?(payload: SetLayersShadowBlurPayload): LayerTypes;
-}
-
-const ShadowBlurInput = (props: ShadowBlurInputProps): ReactElement => {
-  const { selected, shadowBlurValue, disabled, setLayersShadowBlur } = props;
+const ShadowBlurInput = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const shadowBlurValue = useSelector((state: RootState) => getSelectedShadowBlur(state));
+  const disabled = useSelector((state: RootState) => !selectedShadowEnabled(state));
   const [shadowBlur, setShadowBlur] = useState(shadowBlurValue !== 'multi' ? Math.round(shadowBlurValue) : shadowBlurValue);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setShadowBlur(shadowBlurValue !== 'multi' ? Math.round(shadowBlurValue) : shadowBlurValue);
@@ -30,7 +26,7 @@ const ShadowBlurInput = (props: ShadowBlurInputProps): ReactElement => {
     try {
       const nextBlur = mexp.eval(`${shadowBlur}`) as any;
       if (nextBlur !== shadowBlurValue) {
-        setLayersShadowBlur({layers: selected, shadowBlur: Math.round(nextBlur)});
+        dispatch(setLayersShadowBlur({layers: selected, shadowBlur: Math.round(nextBlur)}));
         setShadowBlur(Math.round(nextBlur));
       } else {
         setShadowBlur(shadowBlurValue !== 'multi' ? Math.round(shadowBlurValue) : shadowBlurValue);
@@ -51,22 +47,4 @@ const ShadowBlurInput = (props: ShadowBlurInputProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  const layerItems: (Btwx.Shape | Btwx.Image | Btwx.Text)[] = selected.reduce((result, current) => {
-    const layerItem = layer.present.byId[current];
-    return [...result, layerItem];
-  }, []);
-  const shadowBlurValues = layerItems.reduce((result: number[], current: Btwx.Shape | Btwx.Image | Btwx.Text) => {
-    return [...result, current.style.shadow.blur];
-  }, []);
-  const shadowBlurValue = shadowBlurValues.every((shadowBlur: number) => shadowBlur === shadowBlurValues[0]) ? shadowBlurValues[0] : 'multi';
-  const disabled = !layerItems.every((layerItem) => layerItem.style.shadow.enabled);
-  return { selected, shadowBlurValue, disabled };
-};
-
-export default connect(
-  mapStateToProps,
-  { setLayersShadowBlur }
-)(ShadowBlurInput);
+export default ShadowBlurInput;

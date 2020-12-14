@@ -1,19 +1,15 @@
 import React, { ReactElement, useEffect } from 'react';
 import { remote } from 'electron';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { canUngroupSelected } from '../store/selectors/layer';
 import { ungroupSelectedThunk } from '../store/actions/layer';
 
 export const MENU_ITEM_ID = 'arrangeUngroup';
 
-interface MenuArrangeUngroupProps {
-  canUngroup?: boolean;
-  ungroupSelectedThunk?(): void;
-}
-
-const MenuArrangeUngroup = (props: MenuArrangeUngroupProps): ReactElement => {
-  const { canUngroup, ungroupSelectedThunk } = props;
+const MenuArrangeUngroup = (): ReactElement => {
+  const canUngroup = useSelector((state: RootState) => canUngroupSelected(state));
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
@@ -22,7 +18,7 @@ const MenuArrangeUngroup = (props: MenuArrangeUngroupProps): ReactElement => {
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      ungroupSelectedThunk();
+      dispatch(ungroupSelectedThunk());
     };
   }, []);
 
@@ -31,14 +27,4 @@ const MenuArrangeUngroup = (props: MenuArrangeUngroupProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  canUngroup: boolean;
-} => {
-  const canUngroup = canUngroupSelected(state);
-  return { canUngroup };
-};
-
-export default connect(
-  mapStateToProps,
-  { ungroupSelectedThunk }
-)(MenuArrangeUngroup);
+export default MenuArrangeUngroup;

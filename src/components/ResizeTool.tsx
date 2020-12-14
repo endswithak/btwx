@@ -1,46 +1,23 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, useEffect, ReactElement, useState } from 'react';
-import { connect } from 'react-redux';
+import React, { useEffect, ReactElement, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getPaperLayer, getSelectedProjectIndices, getSelectedById, getSelectedBounds } from '../store/selectors/layer';
 import { uiPaperScope } from '../canvas';
 import { setCanvasResizing } from '../store/actions/canvasSettings';
-import { CanvasSettingsTypes, SetCanvasResizingPayload } from '../store/actionTypes/canvasSettings';
 import { scaleLayers, updateSelectionFrame } from '../store/actions/layer';
-import { LayerTypes, ScaleLayersPayload } from '../store/actionTypes/layer';
-import { ThemeContext } from './ThemeProvider';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
 
-interface ResizeToolStateProps {
-  initialHandle?: Btwx.ResizeHandle;
-  hover?: string;
-  selected?: string[];
-  isEnabled?: boolean;
-  resizing?: boolean;
-  selectedById?: {
-    [id: string]: Btwx.Layer;
-  };
-  selectedPaperScopes?: {
-    [id: string]: number;
-  };
-  selectedBounds?: paper.Rectangle;
-}
-
-interface ResizeToolDispatchProps {
-  setCanvasResizing?(payload: SetCanvasResizingPayload): CanvasSettingsTypes;
-  scaleLayers?(payload: ScaleLayersPayload): LayerTypes;
-}
-
-type ResizeToolProps = (
-  ResizeToolStateProps &
-  ResizeToolDispatchProps &
-  PaperToolProps
-);
-
-const ResizeTool = (props: ResizeToolProps): ReactElement => {
-  const theme = useContext(ThemeContext);
-  const { initialHandle, isEnabled, setCanvasResizing, resizing, selected, scaleLayers, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent, selectedById, selectedBounds, selectedPaperScopes } = props;
+const ResizeTool = (props: PaperToolProps): ReactElement => {
+  const { tool, keyDownEvent, keyUpEvent, downEvent, dragEvent, upEvent } = props;
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const isEnabled = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Resize');
+  const resizing = useSelector((state: RootState) => state.canvasSettings.resizing);
+  const initialHandle = useSelector((state: RootState) => state.canvasSettings.resizeHandle as Btwx.ResizeHandle);
+  const selectedById = useSelector((state: RootState) => getSelectedById(state));
+  const selectedBounds = useSelector((state: RootState) => getSelectedBounds(state));
+  const selectedProjectIndices = useSelector((state: RootState) => getSelectedProjectIndices(state));
   const [originalSelection, setOriginalSelection] = useState<any>(null);
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
   const [horizontalFlip, setHorizontalFlip] = useState<boolean>(false);
@@ -51,6 +28,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
   const [fromBounds, setFromBounds] = useState<paper.Rectangle>(null);
   const [fromPivot, setFromPivot] = useState<paper.Point>(null);
   const [toBounds, setToBounds] = useState<paper.Rectangle>(null);
+  const dispatch = useDispatch();
 
   const resetState = () => {
     setOriginalSelection(null);
@@ -70,7 +48,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
   }
 
   const scaleLayer = (id: string, hor: number, ver: number): void => {
-    const paperLayer = getPaperLayer(id, selectedPaperScopes[id]);
+    const paperLayer = getPaperLayer(id, selectedProjectIndices[id]);
     const layerItem = selectedById[id];
     switch(paperLayer.data.layerType) {
       case 'Artboard': {
@@ -125,7 +103,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
     const scaleX = isFinite(totalWidthDiff) && totalWidthDiff > 0 ? totalWidthDiff : 0.01;
     const scaleY = isFinite(totalHeightDiff) && totalHeightDiff > 0 ? totalHeightDiff : 0.01;
     selected.forEach((layer: string) => {
-      const paperLayer = getPaperLayer(layer, selectedPaperScopes[layer]);
+      const paperLayer = getPaperLayer(layer, selectedProjectIndices[layer]);
       clearLayerScale(paperLayer);
       setLayerPivot(layer);
       scaleLayer(layer, horizontalFlip ? -1 : 1, verticalFlip ? -1 : 1);
@@ -134,7 +112,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
   }
 
   const setLayerPivot = (id: string): void => {
-    const paperLayer = getPaperLayer(id, selectedPaperScopes[id]);
+    const paperLayer = getPaperLayer(id, selectedProjectIndices[id]);
     switch(paperLayer.data.layerType) {
       case 'Artboard': {
         const background = paperLayer.getItem({data: { id: 'artboardBackground' }});
@@ -409,7 +387,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
       const nextFromBounds = selectedBounds;
       const nextOriginalSelection = selected.reduce((result, current) => ({
         ...result,
-        [current]: getPaperLayer(current, selectedPaperScopes[current]).clone({insert: false})
+        [current]: getPaperLayer(current, selectedProjectIndices[current]).clone({insert: false})
       }), {} as { [id: string]: paper.Item });
       const nextFromPivot = (() => {
         switch(initialHandle) {
@@ -602,7 +580,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
       setHorizontalFlip(nextHorizontalFlip);
       setVerticalFlip(nextVerticalFlip);
       if (!resizing) {
-        setCanvasResizing({resizing: true});
+        dispatch(setCanvasResizing({resizing: true}));
       }
       if (dragEvent.modifiers.shift && !shiftModifier) {
         setShiftModifier(true);
@@ -617,13 +595,13 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
     if (upEvent && isEnabled) {
       if (selected.length > 0) {
         selected.forEach((id) => {
-          const paperLayer = getPaperLayer(id, selectedPaperScopes[id]);
+          const paperLayer = getPaperLayer(id, selectedProjectIndices[id]);
           paperLayer.pivot = null;
         });
-        scaleLayers({layers: selected, scale: { x: 1, y: 1 }, horizontalFlip, verticalFlip});
+        dispatch(scaleLayers({layers: selected, scale: { x: 1, y: 1 }, horizontalFlip, verticalFlip}));
       }
       if (resizing) {
-        setCanvasResizing({resizing: false});
+        dispatch(setCanvasResizing({resizing: false}));
       }
       resetState();
     }
@@ -686,37 +664,7 @@ const ResizeTool = (props: ResizeToolProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): ResizeToolStateProps => {
-  const { layer, canvasSettings } = state;
-  const selected = layer.present.selected;
-  const isEnabled = canvasSettings.activeTool === 'Resize';
-  const resizing = canvasSettings.resizing;
-  const initialHandle = canvasSettings.resizeHandle as Btwx.ResizeHandle;
-  const selectedById = getSelectedById(state);
-  const selectedBounds = getSelectedBounds(state);
-  const selectedPaperScopes = getSelectedProjectIndices(state);
-  return {
-    selected,
-    isEnabled,
-    resizing,
-    initialHandle,
-    selectedById,
-    selectedBounds,
-    selectedPaperScopes
-  };
-};
-
-const mapDispatchToProps = {
-  scaleLayers,
-  setCanvasResizing
-};
-
 export default PaperTool(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )(ResizeTool),
-  {
-    all: true
-  }
+  ResizeTool,
+  { all: true }
 );

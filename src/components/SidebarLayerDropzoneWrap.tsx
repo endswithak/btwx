@@ -1,17 +1,17 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import SidebarLayerDropzone from './SidebarLayerDropzone';
 
 interface SidebarLayerDropzoneWrapProps {
   layer: string;
   isDragGhost?: boolean;
-  isEnabled?: boolean;
-  isParent?: boolean;
 }
 
 const SidebarLayerDropzoneWrap = (props: SidebarLayerDropzoneWrapProps): ReactElement => {
-  const { layer, isDragGhost, isEnabled, isParent } = props;
+  const { layer, isDragGhost } = props;
+  const isParent = useSelector((state: RootState) => state.leftSidebar.dragOver ? state.layer.present.byId[state.leftSidebar.dragOver] && layer === state.layer.present.byId[state.leftSidebar.dragOver].parent : null);
+  const isEnabled = useSelector((state: RootState) => (state.leftSidebar.dragOver === layer || isParent) && state.leftSidebar.dragOver !== state.leftSidebar.dragging && !isDragGhost);
 
   return (
     isEnabled
@@ -22,17 +22,4 @@ const SidebarLayerDropzoneWrap = (props: SidebarLayerDropzoneWrapProps): ReactEl
   );
 }
 
-const mapStateToProps = (state: RootState, ownProps: SidebarLayerDropzoneWrapProps): {
-  isEnabled: boolean;
-  isParent?: boolean;
-} => {
-  const { leftSidebar, layer } = state;
-  const dragOverItem = leftSidebar.dragOver ? layer.present.byId[leftSidebar.dragOver] : null;
-  const isParent = dragOverItem && ownProps.layer === dragOverItem.parent;
-  const isEnabled = (leftSidebar.dragOver === ownProps.layer || isParent) && leftSidebar.dragOver !== leftSidebar.dragging && !ownProps.isDragGhost;
-  return { isEnabled, isParent };
-};
-
-export default connect(
-  mapStateToProps
-)(SidebarLayerDropzoneWrap);
+export default SidebarLayerDropzoneWrap;

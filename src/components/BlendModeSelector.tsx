@@ -1,18 +1,14 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import SidebarSelect from './SidebarSelect';
 import { RootState } from '../store/reducers';
-import { SetLayersBlendModePayload, LayerTypes } from '../store/actionTypes/layer';
+import { getSelectedBlendMode } from '../store/selectors/layer';
 import { setLayersBlendMode } from '../store/actions/layer';
 
-interface BlendModeSelectorProps {
-  selected?: string[];
-  blendModeValue?: string;
-  setLayersBlendMode?(payload: SetLayersBlendModePayload): LayerTypes;
-}
-
-const BlendModeSelector = (props: BlendModeSelectorProps): ReactElement => {
-  const { selected, blendModeValue, setLayersBlendMode } = props;
+const BlendModeSelector = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const blendModeValue = useSelector((state: RootState) => getSelectedBlendMode(state));
+  const dispatch = useDispatch();
 
   const options: { value: Btwx.BlendMode; label: string }[] = [
     { value: 'normal', label: 'Normal' },
@@ -62,7 +58,7 @@ const BlendModeSelector = (props: BlendModeSelectorProps): ReactElement => {
 
   const handleChange = (selectedOption: { value: Btwx.BlendMode; label: string }): void => {
     setBlendMode(selectedOption);
-    setLayersBlendMode({layers: selected, blendMode: selectedOption.value});
+    dispatch(setLayersBlendMode({layers: selected, blendMode: selectedOption.value}));
   }
 
   return (
@@ -76,29 +72,4 @@ const BlendModeSelector = (props: BlendModeSelectorProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  selected: string[];
-  blendModeValue: string;
-} => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  const blendModeValue = (() => {
-    switch(layer.present.selected.length) {
-      case 1:
-        return layer.present.byId[selected[0]].style.blendMode;
-      default: {
-        if (selected.every((id: string) => layer.present.byId[id].style.blendMode === layer.present.byId[layer.present.selected[0]].style.blendMode)) {
-          return layer.present.byId[selected[0]].style.blendMode;
-        } else {
-          return 'multi';
-        }
-      }
-    }
-  })();
-  return { selected, blendModeValue };
-};
-
-export default connect(
-  mapStateToProps,
-  { setLayersBlendMode }
-)(BlendModeSelector);
+export default BlendModeSelector;

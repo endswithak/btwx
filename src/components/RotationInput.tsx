@@ -1,21 +1,17 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
-import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
-import { SetLayersRotationPayload, LayerTypes } from '../store/actionTypes/layer';
+import { getSelectedRotation } from '../store/selectors/layer';
 import { setLayersRotation } from '../store/actions/layer';
+import SidebarInput from './SidebarInput';
 
-interface RotationInputProps {
-  selected?: string[];
-  rotationValue?: number | 'multi';
-  disabled?: boolean;
-  setLayersRotation?(payload: SetLayersRotationPayload): LayerTypes;
-}
-
-const RotationInput = (props: RotationInputProps): ReactElement => {
-  const { selected, setLayersRotation, rotationValue, disabled } = props;
+const RotationInput = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const disabled = useSelector((state: RootState) => state.layer.present.selected.some((id) => state.layer.present.byId[id].type === 'Artboard' || state.layer.present.byId[id].type === 'Group'));
+  const rotationValue = useSelector((state: RootState) => getSelectedRotation(state));
   const [rotation, setRotation] = useState(rotationValue !== 'multi' ? Math.round(rotationValue) : rotationValue);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setRotation(rotationValue !== 'multi' ? Math.round(rotationValue) : rotationValue);
@@ -33,7 +29,7 @@ const RotationInput = (props: RotationInputProps): ReactElement => {
         if (nextRotation >= 360 || nextRotation <= -360) {
           nextRotation = 0;
         }
-        setLayersRotation({layers: selected, rotation: Math.round(nextRotation)});
+        dispatch(setLayersRotation({layers: selected, rotation: Math.round(nextRotation)}));
         setRotation(Math.round(nextRotation));
       } else {
         setRotation(rotationValue !== 'multi' ? Math.round(rotationValue) : rotationValue);
@@ -54,29 +50,4 @@ const RotationInput = (props: RotationInputProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  const layerItems: Btwx.Layer[] = selected.reduce((result, current) => {
-    const layerItem = layer.present.byId[current];
-    return [...result, layerItem];
-  }, []);
-  const rotationValues: number[] = layerItems.reduce((result, current) => {
-    const rotation = current.transform.rotation
-    return [...result, rotation];
-  }, []);
-  const rotationValue = (() => {
-    if (rotationValues.every((value: number) => value === rotationValues[0])) {
-      return rotationValues[0];
-    } else {
-      return 'multi';
-    }
-  })();
-  const disabled = selected.some((id) => layer.present.byId[id].type === 'Artboard' || layer.present.byId[id].type === 'Group');
-  return { selected, rotationValue, disabled };
-};
-
-export default connect(
-  mapStateToProps,
-  { setLayersRotation }
-)(RotationInput);
+export default RotationInput;

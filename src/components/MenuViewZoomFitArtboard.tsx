@@ -1,18 +1,14 @@
 import React, { ReactElement, useEffect } from 'react';
 import { remote } from 'electron';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { zoomFitActiveArtboardThunk } from '../store/actions/zoomTool';
 
 export const MENU_ITEM_ID = 'viewZoomFitArtboard';
 
-interface MenuViewZoomFitArtboardProps {
-  isEnabled?: boolean;
-  zoomFitActiveArtboardThunk?(): void;
-}
-
-const MenuViewZoomFitArtboard = (props: MenuViewZoomFitArtboardProps): ReactElement => {
-  const { isEnabled, zoomFitActiveArtboardThunk } = props;
+const MenuViewZoomFitArtboard = (): ReactElement => {
+  const isEnabled = useSelector((state: RootState) => state.layer.present.activeArtboard !== null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
@@ -21,7 +17,7 @@ const MenuViewZoomFitArtboard = (props: MenuViewZoomFitArtboardProps): ReactElem
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      zoomFitActiveArtboardThunk();
+      dispatch(zoomFitActiveArtboardThunk());
     };
   }, []);
 
@@ -30,15 +26,4 @@ const MenuViewZoomFitArtboard = (props: MenuViewZoomFitArtboardProps): ReactElem
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  isEnabled: boolean;
-} => {
-  const { layer } = state;
-  const isEnabled = layer.present.activeArtboard !== null;
-  return { isEnabled };
-};
-
-export default connect(
-  mapStateToProps,
-  { zoomFitActiveArtboardThunk }
-)(MenuViewZoomFitArtboard);
+export default MenuViewZoomFitArtboard;

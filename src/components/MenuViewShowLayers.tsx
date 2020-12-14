@@ -1,18 +1,14 @@
 import React, { ReactElement, useEffect } from 'react';
 import { remote } from 'electron';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { toggleLeftSidebarThunk } from '../store/actions/viewSettings';
 
 export const MENU_ITEM_ID = 'viewShowLayers';
 
-interface MenuViewShowLayersProps {
-  isChecked?: boolean;
-  toggleLeftSidebarThunk?(): void;
-}
-
-const MenuViewShowLayers = (props: MenuViewShowLayersProps): ReactElement => {
-  const { isChecked, toggleLeftSidebarThunk } = props;
+const MenuViewShowLayers = (): ReactElement => {
+  const isChecked = useSelector((state: RootState) => state.viewSettings.leftSidebar.isOpen);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
@@ -22,7 +18,7 @@ const MenuViewShowLayers = (props: MenuViewShowLayersProps): ReactElement => {
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      toggleLeftSidebarThunk();
+      dispatch(toggleLeftSidebarThunk());
     };
   }, []);
 
@@ -31,15 +27,4 @@ const MenuViewShowLayers = (props: MenuViewShowLayersProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  isChecked: boolean;
-} => {
-  const { viewSettings } = state;
-  const isChecked = viewSettings.leftSidebar.isOpen;
-  return { isChecked };
-};
-
-export default connect(
-  mapStateToProps,
-  { toggleLeftSidebarThunk }
-)(MenuViewShowLayers);
+export default MenuViewShowLayers;

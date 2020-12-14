@@ -1,21 +1,17 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
-import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
-import { SetLayersHeightPayload, LayerTypes } from '../store/actionTypes/layer';
+import { getSelectedInnerWidth } from '../store/selectors/layer';
 import { setLayersHeight } from '../store/actions/layer';
+import SidebarInput from './SidebarInput';
 
-interface HeightInputProps {
-  selected?: string[];
-  disabled?: boolean;
-  heightValue?: number | 'multi';
-  setLayersHeight?(payload: SetLayersHeightPayload): LayerTypes;
-}
-
-const HeightInput = (props: HeightInputProps): ReactElement => {
-  const { selected, setLayersHeight, disabled, heightValue } = props;
+const HeightInput = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const heightValue = useSelector((state: RootState) => getSelectedInnerWidth(state));
+  const disabled = useSelector((state: RootState) => state.layer.present.selected.some((id) => state.layer.present.byId[id].type === 'Shape' && (state.layer.present.byId[id] as Btwx.Shape).shapeType === 'Line' || state.layer.present.byId[id].type === 'Text' || state.layer.present.byId[id].type === 'Group'));
   const [height, setHeight] = useState(heightValue !== 'multi' ? Math.round(heightValue) : heightValue);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setHeight(heightValue !== 'multi' ? Math.round(heightValue) : heightValue);
@@ -33,7 +29,7 @@ const HeightInput = (props: HeightInputProps): ReactElement => {
         if (nextHeight < 1) {
           nextHeight = 1;
         }
-        setLayersHeight({layers: selected, height: Math.round(nextHeight)});
+        dispatch(setLayersHeight({layers: selected, height: Math.round(nextHeight)}));
         setHeight(Math.round(nextHeight));
       } else {
         setHeight(heightValue !== 'multi' ? Math.round(heightValue) : heightValue);
@@ -54,28 +50,4 @@ const HeightInput = (props: HeightInputProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  const layerItems: Btwx.Layer[] = selected.reduce((result, current) => {
-    const layerItem = layer.present.byId[current];
-    return [...result, layerItem];
-  }, []);
-  const heightValues: number[] = layerItems.reduce((result, current) => {
-    return [...result, current.frame.innerHeight];
-  }, []);
-  const heightValue = (() => {
-    if (heightValues.every((value: number) => value === heightValues[0])) {
-      return heightValues[0];
-    } else {
-      return 'multi';
-    }
-  })();
-  const disabled = layerItems.some((layerItem) => layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' || layerItem.type === 'Text' || layerItem.type === 'Group');
-  return { selected, heightValue, disabled };
-};
-
-export default connect(
-  mapStateToProps,
-  { setLayersHeight }
-)(HeightInput);
+export default HeightInput;

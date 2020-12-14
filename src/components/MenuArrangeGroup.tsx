@@ -1,19 +1,15 @@
 import React, { ReactElement, useEffect } from 'react';
 import { remote } from 'electron';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { canGroupSelected } from '../store/selectors/layer';
 import { groupSelectedThunk } from '../store/actions/layer';
 
 export const MENU_ITEM_ID = 'arrangeGroup';
 
-interface MenuArrangeGroupProps {
-  canGroup?: boolean;
-  groupSelectedThunk?(): void;
-}
-
-const MenuArrangeGroup = (props: MenuArrangeGroupProps): ReactElement => {
-  const { canGroup, groupSelectedThunk } = props;
+const MenuArrangeGroup = (): ReactElement => {
+  const canGroup = useSelector((state: RootState) => canGroupSelected(state) && state.canvasSettings.focusing);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
@@ -22,7 +18,7 @@ const MenuArrangeGroup = (props: MenuArrangeGroupProps): ReactElement => {
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      groupSelectedThunk();
+      dispatch(groupSelectedThunk());
     };
   }, []);
 
@@ -31,14 +27,4 @@ const MenuArrangeGroup = (props: MenuArrangeGroupProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  canGroup: boolean;
-} => {
-  const canGroup = canGroupSelected(state);
-  return { canGroup };
-};
-
-export default connect(
-  mapStateToProps,
-  { groupSelectedThunk }
-)(MenuArrangeGroup);
+export default MenuArrangeGroup;

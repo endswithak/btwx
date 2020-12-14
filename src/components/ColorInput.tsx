@@ -1,14 +1,11 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
 import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
-import { colorsMatch, getSelectedFill, getSelectedFillColor, getSelectedFillEnabled, getSelectedFillOpacity, getSelectedShadow, getSelectedShadowColor, getSelectedShadowEnabled, getSelectedShadowOpacity, getSelectedStroke, getSelectedStrokeColor, getSelectedStrokeEnabled, getSelectedStrokeOpacity } from '../store/selectors/layer';
-import { EnableLayersFillPayload, SetLayersFillColorPayload, EnableLayersShadowPayload, SetLayersShadowColorPayload, EnableLayersStrokePayload, SetLayersStrokeColorPayload, LayerTypes } from '../store/actionTypes/layer';
+import { getSelectedFillColor, getSelectedFillEnabled, getSelectedFillOpacity, getSelectedShadowColor, getSelectedShadowEnabled, getSelectedShadowOpacity, getSelectedStrokeColor, getSelectedStrokeEnabled, getSelectedStrokeOpacity } from '../store/selectors/layer';
 import { enableLayersFill, setLayersFillColor, enableLayersShadow, setLayersShadowColor, enableLayersStroke, setLayersStrokeColor } from '../store/actions/layer';
-import { OpenColorEditorPayload, ColorEditorTypes } from '../store/actionTypes/colorEditor';
 import { openColorEditor } from '../store/actions/colorEditor';
-import { SetTextSettingsFillColorPayload, TextSettingsTypes } from '../store/actionTypes/textSettings';
 import { setTextSettingsFillColor } from '../store/actions/textSettings';
 import SidebarInput from './SidebarInput';
 import SidebarSectionRow from './SidebarSectionRow';
@@ -17,29 +14,49 @@ import SidebarSwatch from './SidebarSwatch';
 
 interface ColorInputProps {
   prop: 'fill' | 'stroke' | 'shadow';
-  enabledValue?: boolean | 'multi';
-  selected?: string[];
-  colorValue?: Btwx.Color | 'multi';
-  opacityValue?: number | 'multi';
-  colorEditorOpen?: boolean;
-  textLayerSelected?: boolean;
-  colorEditorProp?: 'fill' | 'stroke' | 'shadow';
-  openColorEditor?(payload: OpenColorEditorPayload): ColorEditorTypes;
-  enableLayersFill?(payload: EnableLayersFillPayload): LayerTypes;
-  enableLayersStroke?(payload: EnableLayersStrokePayload): LayerTypes;
-  enableLayersShadow?(payload: EnableLayersShadowPayload): LayerTypes;
-  setLayersFillColor?(payload: SetLayersFillColorPayload): LayerTypes;
-  setLayersStrokeColor?(payload: SetLayersStrokeColorPayload): LayerTypes;
-  setLayersShadowColor?(payload: SetLayersShadowColorPayload): LayerTypes;
-  setTextSettingsFillColor?(payload: SetTextSettingsFillColorPayload): TextSettingsTypes;
 }
 
 const ColorInput = (props: ColorInputProps): ReactElement => {
-  const { prop, colorEditorProp, enabledValue, selected, textLayerSelected, colorValue, opacityValue, colorEditorOpen, enableLayersFill, enableLayersStroke, enableLayersShadow, openColorEditor, setTextSettingsFillColor, setLayersFillColor, setLayersStrokeColor, setLayersShadowColor } = props;
+  const { prop } = props;
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const textLayerSelected = useSelector((state: RootState) => state.layer.present.selected.some((id: string) => state.layer.present.byId[id].type === 'Text'));
+  const colorValue = (() => {
+    switch(prop) {
+      case 'fill':
+        return useSelector((state: RootState) => getSelectedFillColor(state));
+      case 'stroke':
+        return useSelector((state: RootState) => getSelectedStrokeColor(state));
+      case 'shadow':
+        return useSelector((state: RootState) => getSelectedShadowColor(state));
+    }
+  })() as Btwx.Color | 'multi';
+  const opacityValue = (() => {
+    switch(prop) {
+      case 'fill':
+        return useSelector((state: RootState) => getSelectedFillOpacity(state));
+      case 'stroke':
+        return useSelector((state: RootState) => getSelectedStrokeOpacity(state));
+      case 'shadow':
+        return useSelector((state: RootState) => getSelectedShadowOpacity(state));
+    }
+  })() as number | 'multi';
+  const enabledValue = (() => {
+    switch(prop) {
+      case 'fill':
+        return useSelector((state: RootState) => getSelectedFillEnabled(state));
+      case 'stroke':
+        return useSelector((state: RootState) => getSelectedStrokeEnabled(state));
+      case 'shadow':
+        return useSelector((state: RootState) => getSelectedShadowEnabled(state));
+    }
+  })() as boolean | 'multi';
+  const colorEditorOpen = useSelector((state: RootState) => state.colorEditor.isOpen);
+  const colorEditorProp = useSelector((state: RootState) => state.colorEditor.prop);
   const [enabled, setEnabled] = useState<boolean | 'multi'>(enabledValue);
   const [color, setColor] = useState<Btwx.Color | 'multi'>(colorValue);
   const [opacity, setOpacity] = useState(opacityValue !== 'multi' ? Math.round(opacityValue * 100) : opacityValue);
   const [hex, setHex] = useState(colorValue !== 'multi' ? tinyColor({h: colorValue.h, s: colorValue.s, l: colorValue.l}).toHex() : colorValue);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setEnabled(enabledValue);
@@ -71,13 +88,13 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
         const nextAlpha = { a: nextOpacity / 100 } as Btwx.Color;
         switch(prop) {
           case 'fill':
-            setLayersFillColor({layers: selected, fillColor: nextAlpha});
+            dispatch(setLayersFillColor({layers: selected, fillColor: nextAlpha}));
             break;
           case 'stroke':
-            setLayersStrokeColor({layers: selected, strokeColor: nextAlpha});
+            dispatch(setLayersStrokeColor({layers: selected, strokeColor: nextAlpha}));
             break;
           case 'shadow':
-            setLayersShadowColor({layers: selected, shadowColor: nextAlpha});
+            dispatch(setLayersShadowColor({layers: selected, shadowColor: nextAlpha}));
             break;
         }
       } else {
@@ -96,17 +113,17 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
       const nextColor = { h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v } as Btwx.Color;
       switch(prop) {
         case 'fill': {
-          setLayersFillColor({layers: selected, fillColor: nextColor});
+          dispatch(setLayersFillColor({layers: selected, fillColor: nextColor}));
           if (textLayerSelected) {
-            setTextSettingsFillColor({fillColor: nextColor});
+            dispatch(setTextSettingsFillColor({fillColor: nextColor}));
           }
           break;
         }
         case 'stroke':
-          setLayersStrokeColor({layers: selected, strokeColor: nextColor});
+          dispatch(setLayersStrokeColor({layers: selected, strokeColor: nextColor}));
           break;
         case 'shadow':
-          setLayersShadowColor({layers: selected, shadowColor: nextColor});
+          dispatch(setLayersShadowColor({layers: selected, shadowColor: nextColor}));
           break;
       }
     } else {
@@ -118,22 +135,22 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
     if (!enabled || enabled === 'multi') {
       switch(prop) {
         case 'fill':
-          enableLayersFill({layers: selected});
+          dispatch(enableLayersFill({layers: selected}));
           break;
         case 'stroke':
-          enableLayersStroke({layers: selected});
+          dispatch(enableLayersStroke({layers: selected}));
           break;
         case 'shadow':
-          enableLayersShadow({layers: selected});
+          dispatch(enableLayersShadow({layers: selected}));
           break;
       }
     }
     if (!colorEditorOpen) {
-      openColorEditor({
+      dispatch(openColorEditor({
         prop: prop,
         x: bounding.x,
         y: bounding.y - (bounding.height - 10) // 2 (swatch drop shadow) + 8 (top-padding)
-      });
+      }));
     }
   };
 
@@ -173,63 +190,4 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState, ownProps: ColorInputProps): {
-  enabledValue: boolean | 'multi';
-  selected: string[];
-  colorValue: Btwx.Color | 'multi';
-  opacityValue: number | 'multi';
-  colorEditorOpen: boolean;
-  textLayerSelected: boolean;
-  colorEditorProp: 'fill' | 'stroke' | 'shadow';
-} => {
-  const { layer, colorEditor } = state;
-  const selected = layer.present.selected;
-  const textLayerSelected = selected.some((id: string) => layer.present.byId[id].type === 'Text');
-  const colorValue = (() => {
-    switch(ownProps.prop) {
-      case 'fill':
-        return getSelectedFillColor(state);
-      case 'stroke':
-        return getSelectedStrokeColor(state);
-      case 'shadow':
-        return getSelectedShadowColor(state);
-    }
-  })() as Btwx.Color | 'multi';
-  const opacityValue = (() => {
-    switch(ownProps.prop) {
-      case 'fill':
-        return getSelectedFillOpacity(state);
-      case 'stroke':
-        return getSelectedStrokeOpacity(state);
-      case 'shadow':
-        return getSelectedShadowOpacity(state);
-    }
-  })() as number | 'multi';
-  const enabledValue = (() => {
-    switch(ownProps.prop) {
-      case 'fill':
-        return getSelectedFillEnabled(state);
-      case 'stroke':
-        return getSelectedStrokeEnabled(state);
-      case 'shadow':
-        return getSelectedShadowEnabled(state);
-    }
-  })() as boolean | 'multi';
-  const colorEditorOpen = colorEditor.isOpen;
-  const colorEditorProp = colorEditor.prop;
-  return { enabledValue, selected, colorValue, opacityValue, colorEditorOpen, textLayerSelected, colorEditorProp };
-};
-
-export default connect(
-  mapStateToProps,
-  {
-    setLayersFillColor,
-    setLayersStrokeColor,
-    setLayersShadowColor,
-    enableLayersFill,
-    enableLayersStroke,
-    enableLayersShadow,
-    openColorEditor,
-    setTextSettingsFillColor
-  }
-)(ColorInput);
+export default ColorInput;

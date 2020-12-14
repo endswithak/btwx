@@ -1,19 +1,15 @@
 import React, { ReactElement, useEffect } from 'react';
 import { remote } from 'electron';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { sendSelectedBackwardThunk } from '../store/actions/layer';
 import { canSendSelectedBackward } from '../store/selectors/layer';
 
 export const MENU_ITEM_ID = 'arrangeSendBackward';
 
-interface MenuArrangeSendBackwardProps {
-  isEnabled?: boolean;
-  sendSelectedBackwardThunk?(): void;
-}
-
-const MenuArrangeSendBackward = (props: MenuArrangeSendBackwardProps): ReactElement => {
-  const { isEnabled, sendSelectedBackwardThunk } = props;
+const MenuArrangeSendBackward = (): ReactElement => {
+  const isEnabled = useSelector((state: RootState) => canSendSelectedBackward(state) && state.canvasSettings.focusing);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
@@ -22,7 +18,7 @@ const MenuArrangeSendBackward = (props: MenuArrangeSendBackwardProps): ReactElem
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      sendSelectedBackwardThunk();
+      dispatch(sendSelectedBackwardThunk());
     };
   }, []);
 
@@ -31,15 +27,4 @@ const MenuArrangeSendBackward = (props: MenuArrangeSendBackwardProps): ReactElem
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  isEnabled: boolean;
-} => {
-  const { canvasSettings } = state;
-  const isEnabled = canSendSelectedBackward(state) && canvasSettings.focusing;
-  return { isEnabled };
-};
-
-export default connect(
-  mapStateToProps,
-  { sendSelectedBackwardThunk }
-)(MenuArrangeSendBackward);
+export default MenuArrangeSendBackward;

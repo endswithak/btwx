@@ -1,36 +1,28 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { memo, useRef, useContext, useState, useEffect, ReactElement } from 'react';
-import styled from 'styled-components';
-import { connect } from 'react-redux';
+import React, { useRef, useContext, useState, ReactElement } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { insertLayersAbove, insertLayersBelow, addLayerChildren } from '../store/actions/layer';
-import { InsertLayersAbovePayload, InsertLayersBelowPayload, AddLayerChildrenPayload, LayerTypes } from '../store/actionTypes/layer';
-import { SetDraggingPayload, SetDropzonePayload, LeftSidebarTypes } from '../store/actionTypes/leftSidebar';
-import { setDragging, setDropzone } from '../store/actions/leftSidebar';
-import { ThemeContext } from './ThemeProvider';
+import { getSelectedById } from '../store/selectors/layer';
+import { setDragging } from '../store/actions/leftSidebar';
 import { isBetween } from '../utils';
+import { ThemeContext } from './ThemeProvider';
 
 interface SidebarLayerDropzoneProps {
   layer: string;
   isParent: boolean;
-  layerItem?: Btwx.Layer;
-  selected?: string[];
-  selectedById?: {
-    [id: string]: Btwx.Layer;
-  };
-  setDragging?(payload: SetDraggingPayload): LeftSidebarTypes;
-  // setDropzone?(payload: SetDropzonePayload): LeftSidebarTypes;
-  insertLayersBelow?(payload: InsertLayersBelowPayload): LayerTypes;
-  insertLayersAbove?(payload: InsertLayersAbovePayload): LayerTypes;
-  addLayerChildren?(payload: AddLayerChildrenPayload): LayerTypes;
 }
 
 const SidebarLayerDropzone = (props: SidebarLayerDropzoneProps): ReactElement => {
-  const { layer, isParent, layerItem, insertLayersAbove, addLayerChildren, selected, selectedById, setDragging, insertLayersBelow } = props;
+  const { layer, isParent } = props;
   const theme = useContext(ThemeContext);
   const ref = useRef<HTMLDivElement>(null);
+  const layerItem = useSelector((state: RootState) => state.layer.present.byId[layer]);
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const selectedById = useSelector((state: RootState) => getSelectedById(state));
   const [dropzone, setDropzone] = useState(null);
   const [canDrop, setCanDrop] = useState(false);
+  const dispatch = useDispatch();
 
   const getDropzone = (e: any) => {
     const padding = 8;
@@ -97,26 +89,26 @@ const SidebarLayerDropzone = (props: SidebarLayerDropzoneProps): ReactElement =>
     if (canDrop) {
       switch(dropzone) {
         case 'top': {
-          insertLayersAbove({
+          dispatch(insertLayersAbove({
             layers: selected,
             above: layer
-          });
+          }));
           break;
         }
         case 'center':
-          addLayerChildren({
+          dispatch(addLayerChildren({
             id: layer,
             children: selected
-          });
+          }));
           break;
         case 'bottom':
-          insertLayersBelow({
+          dispatch(insertLayersBelow({
             layers: selected,
             below: layer
-          });
+          }));
           break;
       }
-      setDragging({dragging: null});
+      dispatch(setDragging({dragging: null}));
     }
   }
 
@@ -162,24 +154,4 @@ const SidebarLayerDropzone = (props: SidebarLayerDropzoneProps): ReactElement =>
   );
 }
 
-const mapStateToProps = (state: RootState, ownProps: SidebarLayerDropzoneProps): {
-  layerItem: Btwx.Layer;
-  selected: string[];
-  selectedById?: {
-    [id: string]: Btwx.Layer;
-  };
-} => {
-  const { layer } = state;
-  const layerItem = layer.present.byId[ownProps.layer];
-  const selected = layer.present.selected;
-  const selectedById = selected.reduce((result: {[id: string]: Btwx.Layer}, current) => {
-    result[current] = layer.present.byId[current];
-    return result;
-  }, {});
-  return { layerItem, selected, selectedById };
-};
-
-export default connect(
-  mapStateToProps,
-  { insertLayersAbove, insertLayersBelow, addLayerChildren, setDragging }
-)(SidebarLayerDropzone);
+export default SidebarLayerDropzone;

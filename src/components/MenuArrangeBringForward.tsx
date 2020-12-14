@@ -1,19 +1,15 @@
 import React, { ReactElement, useEffect } from 'react';
 import { remote } from 'electron';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { bringSelectedForwardThunk } from '../store/actions/layer';
 import { canBringSelectedForward } from '../store/selectors/layer';
 
 export const MENU_ITEM_ID = 'arrangeBringForward';
 
-interface MenuArrangeBringForwardProps {
-  isEnabled?: boolean;
-  bringSelectedForwardThunk?(): void;
-}
-
-const MenuArrangeBringForward = (props: MenuArrangeBringForwardProps): ReactElement => {
-  const { isEnabled, bringSelectedForwardThunk } = props;
+const MenuArrangeBringForward = (): ReactElement => {
+  const isEnabled = useSelector((state: RootState) => canBringSelectedForward(state) && state.canvasSettings.focusing);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
@@ -22,7 +18,7 @@ const MenuArrangeBringForward = (props: MenuArrangeBringForwardProps): ReactElem
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      bringSelectedForwardThunk();
+      dispatch(bringSelectedForwardThunk());
     };
   }, []);
 
@@ -31,15 +27,4 @@ const MenuArrangeBringForward = (props: MenuArrangeBringForwardProps): ReactElem
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  isEnabled: boolean;
-} => {
-  const { canvasSettings } = state;
-  const isEnabled = canBringSelectedForward(state) && canvasSettings.focusing;
-  return { isEnabled };
-};
-
-export default connect(
-  mapStateToProps,
-  { bringSelectedForwardThunk }
-)(MenuArrangeBringForward);
+export default MenuArrangeBringForward;

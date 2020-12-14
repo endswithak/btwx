@@ -1,14 +1,17 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import MeasureFrame from './MeasureFrame';
 
-interface MeasuringFrameWrapProps {
-  isEnabled: boolean;
-}
-
-const MeasuringFrameWrap = (props: MeasuringFrameWrapProps): ReactElement => {
-  const { isEnabled } = props;
+const MeasuringFrameWrap = (): ReactElement => {
+  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
+  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
+  const isMeasuring = useSelector((state: RootState) => state.canvasSettings.measuring);
+  const isGradientEditorOpen = useSelector((state: RootState) => state.gradientEditor.isOpen);
+  const isTextEditorOpen = useSelector((state: RootState) => state.textEditor.isOpen);
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const hover = useSelector((state: RootState) => state.layer.present.hover);
+  const isEnabled = selected.length > 0 && hover && !selected.includes(hover) && isMeasuring && !isGradientEditorOpen && !isTextEditorOpen && !isResizing && !isDragging;
 
   return (
     isEnabled
@@ -17,19 +20,4 @@ const MeasuringFrameWrap = (props: MeasuringFrameWrapProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer, gradientEditor, textEditor, canvasSettings } = state;
-  const isResizing = canvasSettings.resizing;
-  const isDragging = canvasSettings.dragging;
-  const isMeasuring = canvasSettings.measuring;
-  const isGradientEditorOpen = gradientEditor.isOpen;
-  const isTextEditorOpen = textEditor.isOpen;
-  const selected = layer.present.selected;
-  const hover = layer.present.hover;
-  const isEnabled = selected.length > 0 && hover && !selected.includes(hover) && isMeasuring && !isGradientEditorOpen && !isTextEditorOpen && !isResizing && !isDragging;
-  return { isEnabled };
-};
-
-export default connect(
-  mapStateToProps
-)(MeasuringFrameWrap);
+export default MeasuringFrameWrap;

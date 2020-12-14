@@ -1,17 +1,13 @@
 import React, { ReactElement, useEffect } from 'react';
 import { remote } from 'electron';
-import { connect } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { openDocumentThunk } from '../store/actions/documentSettings';
 import { APP_NAME } from '../constants';
 
 export const MENU_ITEM_ID = 'fileOpen';
 
-interface MenuFileOpenProps {
-  openDocumentThunk?(filePath: string): void;
-}
-
-const MenuFileOpen = (props: MenuFileOpenProps): ReactElement => {
-  const { openDocumentThunk } = props;
+const MenuFileOpen = (): ReactElement => {
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
@@ -24,7 +20,7 @@ const MenuFileOpen = (props: MenuFileOpenProps): ReactElement => {
         properties: ['openFile']
       }).then((result) => {
         if (result.filePaths.length > 0 && !result.canceled) {
-          openDocumentThunk(result.filePaths[0]);
+          dispatch(openDocumentThunk(result.filePaths[0]));
         }
       });
     };
@@ -35,7 +31,4 @@ const MenuFileOpen = (props: MenuFileOpenProps): ReactElement => {
   );
 }
 
-export default connect(
-  null,
-  { openDocumentThunk }
-)(MenuFileOpen);
+export default MenuFileOpen;

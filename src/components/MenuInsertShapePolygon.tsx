@@ -1,19 +1,15 @@
 import React, { ReactElement, useEffect } from 'react';
 import { remote } from 'electron';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { toggleShapeToolThunk } from '../store/actions/shapeTool';
 
 export const MENU_ITEM_ID = 'insertShapePolygon';
 
-interface MenuInsertShapePolygonProps {
-  canInsert?: boolean;
-  isChecked?: boolean;
-  toggleShapeToolThunk?(shapeType: Btwx.ShapeType): void;
-}
-
-const MenuInsertShapePolygon = (props: MenuInsertShapePolygonProps): ReactElement => {
-  const { canInsert, isChecked, toggleShapeToolThunk } = props;
+const MenuInsertShapePolygon = (): ReactElement => {
+  const canInsert = useSelector((state: RootState) => state.canvasSettings.focusing && state.layer.present.activeArtboard !== null);
+  const isChecked = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Shape' && state.shapeTool.shapeType === 'Polygon');
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
@@ -23,7 +19,7 @@ const MenuInsertShapePolygon = (props: MenuInsertShapePolygonProps): ReactElemen
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      toggleShapeToolThunk('Polygon');
+      dispatch(toggleShapeToolThunk('Polygon'));
     };
   }, []);
 
@@ -32,17 +28,4 @@ const MenuInsertShapePolygon = (props: MenuInsertShapePolygonProps): ReactElemen
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  canInsert: boolean;
-  isChecked: boolean;
-} => {
-  const { canvasSettings, shapeTool, layer } = state;
-  const canInsert = canvasSettings.focusing && layer.present.activeArtboard !== null;
-  const isChecked = canvasSettings.activeTool === 'Shape' && shapeTool.shapeType === 'Polygon';
-  return { canInsert, isChecked };
-};
-
-export default connect(
-  mapStateToProps,
-  { toggleShapeToolThunk }
-)(MenuInsertShapePolygon);
+export default MenuInsertShapePolygon;

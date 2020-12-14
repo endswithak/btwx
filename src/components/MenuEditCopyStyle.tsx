@@ -1,20 +1,14 @@
 import React, { ReactElement, useEffect } from 'react';
 import { remote } from 'electron';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { LayerTypes } from '../store/actionTypes/layer';
 import { copyStyleThunk } from '../store/actions/layer';
-import { getSelected } from '../store/selectors/layer';
 
 export const MENU_ITEM_ID = 'editCopyStyle';
 
-interface MenuEditCopyStyleProps {
-  canCopy?: boolean;
-  copyStyleThunk?(): void;
-}
-
-const MenuEditCopyStyle = (props: MenuEditCopyStyleProps): ReactElement => {
-  const { canCopy, copyStyleThunk } = props;
+const MenuEditCopyStyle = (): ReactElement => {
+  const canCopy = useSelector((state: RootState) => state.layer.present.selected.length === 1 && state.canvasSettings.focusing);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
@@ -23,7 +17,7 @@ const MenuEditCopyStyle = (props: MenuEditCopyStyleProps): ReactElement => {
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      copyStyleThunk();
+      dispatch(copyStyleThunk());
     };
   }, []);
 
@@ -32,16 +26,4 @@ const MenuEditCopyStyle = (props: MenuEditCopyStyleProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  canCopy: boolean;
-} => {
-  const { canvasSettings } = state;
-  const selected = getSelected(state);
-  const canCopy = selected.length === 1 && canvasSettings.focusing;
-  return { canCopy };
-};
-
-export default connect(
-  mapStateToProps,
-  { copyStyleThunk }
-)(MenuEditCopyStyle);
+export default MenuEditCopyStyle;

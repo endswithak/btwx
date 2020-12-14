@@ -1,18 +1,14 @@
 import React, { ReactElement, useEffect } from 'react';
 import { remote } from 'electron';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { saveDocumentThunk } from '../store/actions/documentSettings';
 
 export const MENU_ITEM_ID = 'fileSave';
 
-interface MenuFileSaveProps {
-  canSave?: boolean;
-  saveDocumentThunk?(): void;
-}
-
-const MenuFileSave = (props: MenuFileSaveProps): ReactElement => {
-  const { canSave, saveDocumentThunk } = props;
+const MenuFileSave = (): ReactElement => {
+  const canSave = useSelector((state: RootState) => state.layer.present.edit && state.layer.present.edit.id !== state.documentSettings.edit);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
@@ -21,7 +17,7 @@ const MenuFileSave = (props: MenuFileSaveProps): ReactElement => {
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      saveDocumentThunk();
+      dispatch(saveDocumentThunk());
     };
   }, []);
 
@@ -30,15 +26,4 @@ const MenuFileSave = (props: MenuFileSaveProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  canSave: boolean;
-} => {
-  const { layer, documentSettings } = state;
-  const canSave = layer.present.edit && layer.present.edit.id !== documentSettings.edit;
-  return { canSave };
-};
-
-export default connect(
-  mapStateToProps,
-  { saveDocumentThunk }
-)(MenuFileSave);
+export default MenuFileSave;

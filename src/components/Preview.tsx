@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, ReactElement, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { remote } from 'electron';
 import { RootState } from '../store/reducers';
 import { PREVIEW_TOPBAR_HEIGHT, MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT } from '../constants';
@@ -7,11 +7,6 @@ import { ThemeContext } from './ThemeProvider';
 import EmptyState from './EmptyState';
 import PreviewCanvas from './PreviewCanvas';
 import PreviewTopbar from './PreviewTopbar';
-
-interface PreviewProps {
-  activeArtboard: Btwx.Artboard;
-  recording: boolean;
-}
 
 // if (remote.process.platform === 'darwin') {
 //   remote.getCurrentWindow().addListener('swipe', (event: any, direction: any) => {
@@ -27,9 +22,10 @@ interface PreviewProps {
 //   });
 // }
 
-const Preview = (props: PreviewProps): ReactElement => {
+const Preview = (): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { activeArtboard, recording } = props;
+  const activeArtboard = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.activeArtboard]);
+  const recording = useSelector((state: RootState) => state.preview.recording);
   const [touchCursor, setTouchCursor] = useState(false);
 
   useEffect(() => {
@@ -74,16 +70,4 @@ const Preview = (props: PreviewProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer, preview } = state;
-  const activeArtboard = layer.present.byId[layer.present.activeArtboard];
-  const recording = preview.recording;
-  return {
-    activeArtboard,
-    recording
-  };
-};
-
-export default connect(
-  mapStateToProps
-)(Preview);
+export default Preview;

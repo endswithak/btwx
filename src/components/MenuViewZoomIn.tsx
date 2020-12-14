@@ -1,22 +1,18 @@
 import React, { ReactElement, useEffect } from 'react';
 import { remote } from 'electron';
-import { connect } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { zoomInThunk } from '../store/actions/zoomTool';
 
 export const MENU_ITEM_ID = 'viewZoomIn';
 
-interface MenuViewZoomInProps {
-  zoomInThunk?(): void;
-}
-
-const MenuViewZoomIn = (props: MenuViewZoomInProps): ReactElement => {
-  const { zoomInThunk } = props;
+const MenuViewZoomIn = (): ReactElement => {
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
     electronMenuItem.enabled = true;
     (window as any)[MENU_ITEM_ID] = (): void => {
-      zoomInThunk();
+      dispatch(zoomInThunk());
     };
   }, []);
 
@@ -25,7 +21,4 @@ const MenuViewZoomIn = (props: MenuViewZoomInProps): ReactElement => {
   );
 }
 
-export default connect(
-  null,
-  { zoomInThunk }
-)(MenuViewZoomIn);
+export default MenuViewZoomIn;

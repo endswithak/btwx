@@ -1,21 +1,17 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
-import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
-import { SetLayersShadowXOffsetPayload, LayerTypes } from '../store/actionTypes/layer';
+import { selectedShadowEnabled, getSelectedShadowXOffset } from '../store/selectors/layer';
 import { setLayersShadowXOffset } from '../store/actions/layer';
+import SidebarInput from './SidebarInput';
 
-interface ShadowXInputProps {
-  shadowXOffsetValue?: number | 'multi';
-  selected?: string[];
-  disabled: boolean;
-  setLayersShadowXOffset?(payload: SetLayersShadowXOffsetPayload): LayerTypes;
-}
-
-const ShadowXInput = (props: ShadowXInputProps): ReactElement => {
-  const { selected, shadowXOffsetValue, disabled, setLayersShadowXOffset } = props;
+const ShadowXInput = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const shadowXOffsetValue = useSelector((state: RootState) => getSelectedShadowXOffset(state));
+  const disabled = useSelector((state: RootState) => !selectedShadowEnabled(state));
   const [shadowXOffset, setShadowXOffset] = useState(shadowXOffsetValue !== 'multi' ? Math.round(shadowXOffsetValue) : shadowXOffsetValue);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setShadowXOffset(shadowXOffsetValue !== 'multi' ? Math.round(shadowXOffsetValue) : shadowXOffsetValue);
@@ -30,7 +26,7 @@ const ShadowXInput = (props: ShadowXInputProps): ReactElement => {
     try {
       const newXOffset = mexp.eval(`${shadowXOffset}`) as any;
       if (newXOffset !== shadowXOffsetValue) {
-        setLayersShadowXOffset({layers: selected, shadowXOffset: Math.round(newXOffset)});
+        dispatch(setLayersShadowXOffset({layers: selected, shadowXOffset: Math.round(newXOffset)}));
         setShadowXOffset(Math.round(newXOffset));
       } else {
         setShadowXOffset(shadowXOffsetValue !== 'multi' ? Math.round(shadowXOffsetValue) : shadowXOffsetValue);
@@ -51,22 +47,4 @@ const ShadowXInput = (props: ShadowXInputProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  const layerItems: (Btwx.Shape | Btwx.Image | Btwx.Text)[] = selected.reduce((result, current) => {
-    const layerItem = layer.present.byId[current];
-    return [...result, layerItem];
-  }, []);
-  const shadowXOffsetValues = layerItems.reduce((result: number[], current: Btwx.Shape | Btwx.Image | Btwx.Text) => {
-    return [...result, current.style.shadow.offset.x];
-  }, []);
-  const shadowXOffsetValue = shadowXOffsetValues.every((shadowXOffset: number) => shadowXOffset === shadowXOffsetValues[0]) ? shadowXOffsetValues[0] : 'multi';
-  const disabled = !layerItems.every((layerItem) => layerItem.style.shadow.enabled);
-  return { selected, shadowXOffsetValue, disabled };
-};
-
-export default connect(
-  mapStateToProps,
-  { setLayersShadowXOffset }
-)(ShadowXInput);
+export default ShadowXInput;

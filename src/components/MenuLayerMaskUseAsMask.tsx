@@ -1,20 +1,16 @@
 import React, { ReactElement, useEffect } from 'react';
 import { remote } from 'electron';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { toggleSelectedMaskThunk } from '../store/actions/layer';
 import { canToggleSelectedUseAsMask, selectedUseAsMaskEnabled } from '../store/selectors/layer';
 
 export const MENU_ITEM_ID = 'layerMaskUseAsMask';
 
-interface MenuLayerMaskUseAsMaskProps {
-  isEnabled?: boolean;
-  isChecked?: boolean;
-  toggleSelectedMaskThunk?(): void;
-}
-
-const MenuLayerMaskUseAsMask = (props: MenuLayerMaskUseAsMaskProps): ReactElement => {
-  const { isEnabled, isChecked, toggleSelectedMaskThunk } = props;
+const MenuLayerMaskUseAsMask = (): ReactElement => {
+  const isEnabled = useSelector((state: RootState) => canToggleSelectedUseAsMask(state));
+  const isChecked = useSelector((state: RootState) => selectedUseAsMaskEnabled(state));
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
@@ -24,7 +20,7 @@ const MenuLayerMaskUseAsMask = (props: MenuLayerMaskUseAsMaskProps): ReactElemen
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      toggleSelectedMaskThunk();
+      dispatch(toggleSelectedMaskThunk());
     };
   }, []);
 
@@ -33,16 +29,4 @@ const MenuLayerMaskUseAsMask = (props: MenuLayerMaskUseAsMaskProps): ReactElemen
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  isEnabled: boolean;
-  isChecked: boolean;
-} => {
-  const isEnabled = canToggleSelectedUseAsMask(state);
-  const isChecked = selectedUseAsMaskEnabled(state);
-  return { isEnabled, isChecked };
-};
-
-export default connect(
-  mapStateToProps,
-  { toggleSelectedMaskThunk }
-)(MenuLayerMaskUseAsMask);
+export default MenuLayerMaskUseAsMask;

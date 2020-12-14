@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 // import { remote } from 'electron';
 import React, { useContext, useEffect, ReactElement, useState } from 'react';
-import { connect } from 'react-redux';
-import paper from 'paper';
+import { useSelector, useDispatch } from 'react-redux';
 import { isBetween } from '../utils';
 import { RootState } from '../store/reducers';
 import { DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_POINTS, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../constants';
@@ -10,41 +9,23 @@ import Tooltip from '../canvas/tooltip';
 import { getLayerProjectIndices } from '../store/selectors/layer';
 import { uiPaperScope } from '../canvas';
 import { setCanvasDrawing } from '../store/actions/canvasSettings';
-import { CanvasSettingsTypes, SetCanvasDrawingPayload } from '../store/actionTypes/canvasSettings';
 import { addShapeThunk } from '../store/actions/layer';
-import { AddShapePayload } from '../store/actionTypes/layer';
 import { toggleShapeToolThunk } from '../store/actions/shapeTool';
 import { ThemeContext } from './ThemeProvider';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
 
-interface ShapeToolStateProps {
-  isEnabled?: boolean;
-  shapeType?: Btwx.ShapeType;
-  scope?: string[];
-  activeProjectIndex?: number;
-  layerPaperScopes?: number[];
-  drawing?: boolean;
-  activeArtboard?: string;
-  activeArtboardPaperScope?: number;
-  activeArtboardPaperLayerIndex?: number;
-}
-
-interface ShapeToolDispatchProps {
-  addShapeThunk?(payload: AddShapePayload): void;
-  setCanvasDrawing?(payload: SetCanvasDrawingPayload): CanvasSettingsTypes;
-  toggleShapeToolThunk?(shapeType: Btwx.ShapeType): void;
-}
-
-type ShapeToolProps = (
-  ShapeToolStateProps &
-  ShapeToolDispatchProps &
-  PaperToolProps
-);
-
-const ShapeTool = (props: ShapeToolProps): ReactElement => {
+const ShapeTool = (props: PaperToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isEnabled, shapeType, addShapeThunk, activeArtboard, activeArtboardPaperScope, scope, activeProjectIndex, layerPaperScopes, setCanvasDrawing, drawing, toggleShapeToolThunk, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent } = props;
+  const { tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent } = props;
+  const isEnabled = useSelector((state: RootState) => state.shapeTool.isEnabled);
+  const shapeType = useSelector((state: RootState) => state.shapeTool.shapeType);
+  const scope = useSelector((state: RootState) => state.layer.present.scope);
+  const activeProjectIndex = useSelector((state: RootState) => state.layer.present.activeProjectIndex);
+  const drawing = useSelector((state: RootState) => state.canvasSettings.drawing);
+  const layerPaperScopes = useSelector((state: RootState) => getLayerProjectIndices(state));
+  const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
+  const activeArtboardPaperScope = activeArtboard ? useSelector((state: RootState) => (state.layer.present.byId[state.layer.present.activeArtboard] as Btwx.Artboard).projectIndex) : null;
   const [handle, setHandle] = useState<Btwx.ResizeHandle>(null);
   const [maxDim, setMaxDim] = useState<number>(null);
   const [vector, setVector] = useState<paper.Point>(null);
@@ -55,6 +36,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
   const [from, setFrom] = useState<paper.Point>(null);
   const [toBounds, setToBounds] = useState<paper.Rectangle>(null);
   const [initialToBounds, setInitialToBounds] = useState<paper.Rectangle>(null);
+  const dispatch = useDispatch();
 
   const resetState = () => {
     const drawingPreview = uiPaperScope.projects[0].getItem({ data: { id: 'drawingPreview' }});
@@ -315,7 +297,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
       setConstrainedDims(nextContrainedDims);
       setSnapBounds(nextSnapBounds);
       if (!drawing) {
-        setCanvasDrawing({drawing: true});
+        dispatch(setCanvasDrawing({drawing: true}));
       }
       if (dragEvent.modifiers.shift && !shiftModifier) {
         setShiftModifier(true);
@@ -352,7 +334,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
         projectIndex: activeArtboardPaperScope,
         paperLayer: uiPaperScope.projects[activeArtboardPaperScope].getItem({data: {id: activeArtboard}})
       });
-      addShapeThunk({
+      dispatch(addShapeThunk({
         layer: {
           parent: parentItem.id,
           name: shapeType,
@@ -413,8 +395,8 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
             }
           })()
         }
-      }) as any;
-      toggleShapeToolThunk(shapeType);
+      })) as any;
+      dispatch(toggleShapeToolThunk(shapeType));
       resetState();
     }
   }, [upEvent]);
@@ -477,40 +459,7 @@ const ShapeTool = (props: ShapeToolProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): ShapeToolStateProps => {
-  const { layer, canvasSettings, shapeTool } = state;
-  const isEnabled = shapeTool.isEnabled;
-  const shapeType = shapeTool.shapeType;
-  const scope = layer.present.scope;
-  const activeProjectIndex = layer.present.activeProjectIndex;
-  const drawing = canvasSettings.drawing;
-  const layerPaperScopes = getLayerProjectIndices(state);
-  const activeArtboard = layer.present.activeArtboard;
-  const activeArtboardPaperScope = activeArtboard ? (layer.present.byId[activeArtboard] as Btwx.Artboard).projectIndex : null;
-  return {
-    isEnabled,
-    shapeType,
-    scope,
-    activeProjectIndex,
-    drawing,
-    layerPaperScopes,
-    activeArtboard,
-    activeArtboardPaperScope
-  };
-};
-
-const mapDispatchToProps = {
-  addShapeThunk,
-  setCanvasDrawing,
-  toggleShapeToolThunk
-};
-
 export default PaperTool(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )(ShapeTool),
-  {
-    all: true
-  }
+  ShapeTool,
+  { all: true }
 );

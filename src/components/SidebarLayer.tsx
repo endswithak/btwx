@@ -1,13 +1,11 @@
 import React, { ReactElement, useEffect, useCallback } from 'react';
-import { connect } from 'react-redux';
-import { RootState } from '../store/reducers';
+import { useSelector, useDispatch } from 'react-redux';
 import debounce from 'lodash.debounce';
-import { SetDraggingPayload, SetDragOverPayload, SetEditingPayload, LeftSidebarTypes } from '../store/actionTypes/leftSidebar';
+import { RootState } from '../store/reducers';
+import { SetDragOverPayload } from '../store/actionTypes/leftSidebar';
 import { setDragging, setEditing, setDragOver } from '../store/actions/leftSidebar';
 import { setLayerHover, selectLayers, deselectLayers } from '../store/actions/layer';
-import { SelectLayersPayload, DeselectLayersPayload, SetLayerHoverPayload, LayerTypes } from '../store/actionTypes/layer';
 import { openContextMenu } from '../store/actions/contextMenu';
-import { OpenContextMenuPayload, ContextMenuTypes } from '../store/actionTypes/contextMenu';
 import SidebarLayerDropzoneWrap from './SidebarLayerDropzoneWrap';
 import SidebarLayerTitle from './SidebarLayerTitle';
 import SidebarLayerChevron from './SidebarLayerChevron';
@@ -22,37 +20,32 @@ interface SidebarLayerProps {
   nestingLevel?: number;
   style?: any;
   isDragGhost?: boolean;
-  dragging?: string;
-  isSelected?: boolean;
-  isHover?: boolean;
-  underlyingMask?: string;
-  hover?: string;
-  setDragging?(payload: SetDraggingPayload): LeftSidebarTypes;
-  setDragOver?(payload: SetDragOverPayload): LeftSidebarTypes;
-  setEditing?(payload: SetEditingPayload): LeftSidebarTypes;
-  selectLayers?(payload: SelectLayersPayload): LayerTypes;
-  deselectLayers?(payload: DeselectLayersPayload): LayerTypes;
-  setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
-  openContextMenu?(payload: OpenContextMenuPayload): ContextMenuTypes;
 }
 
 const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
-  const { id, nestingLevel, setDragging, isDragGhost, dragging, hover, setDragOver, setOpen, isOpen, style, setLayerHover, openContextMenu, selectLayers, deselectLayers, setEditing, isSelected, isHover, underlyingMask } = props;
+  const { id, nestingLevel, isDragGhost, setOpen, isOpen, style } = props;
+  const dragging = useSelector((state: RootState) => state.leftSidebar.dragging);
+  const isSelected = useSelector((state: RootState) => state.layer.present.byId[id].selected);
+  // const isHover = useSelector((state: RootState) => state.layer.present.byId[id].hover);
+  // const hover = useSelector((state: RootState) => state.layer.present.hover);
+  // const underlyingMask = useSelector((state: RootState) => state.layer.present.byId[id].type !== 'Artboard' ? (state.layer.present.byId[id] as Btwx.MaskableLayer).underlyingMask : null);
+  // const editing = useSelector((state: RootState) => state.leftSidebar.editing === id);
+  const dispatch = useDispatch();
 
   const debounceDragOver = useCallback(
     debounce((payload: SetDragOverPayload) => {
-      setDragOver(payload);
+      dispatch(setDragOver(payload));
     }, 20),
     []
   );
 
   const handleDragStart = (e: any): void => {
-    setDragging({dragging: id});
+    dispatch(setDragging({dragging: id}));
     e.dataTransfer.setDragImage(document.getElementById('sidebarDragGhosts'), 0, 0);
   }
 
   const handleDragEnd = (e: any): void => {
-    setDragging({dragging: null});
+    dispatch(setDragging({dragging: null}));
   }
 
   const handleDragEnter = (e: any) => {
@@ -65,27 +58,27 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
   const handleMouseDown = (e: any): void => {
     if (e.metaKey) {
       if (isSelected) {
-        deselectLayers({layers: [id]});
+        dispatch(deselectLayers({layers: [id]}));
       } else {
-        selectLayers({layers: [id]});
+        dispatch(selectLayers({layers: [id]}));
       }
     } else {
       if (!isSelected) {
-        selectLayers({layers: [id], newSelection: true});
+        dispatch(selectLayers({layers: [id], newSelection: true}));
       }
     }
   }
 
   const handleMouseEnter = (e: any): void => {
-    setLayerHover({id: id});
+    dispatch(setLayerHover({id: id}));
   }
 
   const handleMouseLeave = (): void => {
-    setLayerHover({id: null});
+    dispatch(setLayerHover({id: null}));
   }
 
   const handleContextMenu = (e: any) => {
-    openContextMenu({
+    dispatch(openContextMenu({
       type: 'LayerEdit',
       id: id,
       x: e.clientX,
@@ -95,13 +88,13 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
       data: {
         origin: 'sidebar'
       }
-    });
+    }));
   }
 
   const handleDoubleClick = (e: any): void => {
     const openIcon = document.getElementById(`${id}-open-icon`);
     if (e.target !== openIcon && !openIcon.contains(e.target)) {
-      setEditing({editing: id, edit: name});
+      dispatch(setEditing({editing: id}));
     }
   }
 
@@ -150,26 +143,4 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState, ownProps: SidebarLayerProps): {
-  dragging: string;
-  isSelected: boolean;
-  isHover: boolean;
-  underlyingMask: string;
-  hover: string;
-  editing: boolean;
-} => {
-  const { leftSidebar, layer } = state;
-  const layerItem = layer.present.byId[ownProps.id];
-  const dragging = leftSidebar.dragging;
-  const isSelected = layerItem.selected;
-  const isHover = layerItem.hover;
-  const hover = layer.present.hover;
-  const underlyingMask = layerItem.type !== 'Artboard' ? (layerItem as Btwx.MaskableLayer).underlyingMask : null;
-  const editing = ownProps.id === leftSidebar.editing;
-  return { dragging, isSelected, isHover, underlyingMask, hover, editing };
-};
-
-export default connect(
-  mapStateToProps,
-  { setDragging, setDragOver, setLayerHover, openContextMenu, selectLayers, deselectLayers, setEditing }
-)(SidebarLayer);
+export default SidebarLayer;

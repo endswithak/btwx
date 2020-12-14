@@ -1,29 +1,22 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
 import { uiPaperScope } from '../canvas';
 import { RootState } from '../store/reducers';
-import { SetPolygonsSidesPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setPolygonsSides } from '../store/actions/layer';
-import { getPaperLayer, getSelectedProjectIndices } from '../store/selectors/layer';
+import { getPaperLayer, getSelectedProjectIndices, getSelectedPolygonSides, getSelectedById } from '../store/selectors/layer';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarInput from './SidebarInput';
 import SidebarSlider from './SidebarSlider';
 
-interface PolygonSidesInputProps {
-  selected?: string[];
-  sidesValue?: number | 'multi';
-  layerItems?: Btwx.Polygon[];
-  selectedPaperScopes?: {
-    [id: string]: number;
-  };
-  setPolygonsSides?(payload: SetPolygonsSidesPayload): LayerTypes;
-}
-
-const PolygonSidesInput = (props: PolygonSidesInputProps): ReactElement => {
-  const { selected, setPolygonsSides, sidesValue, layerItems, selectedPaperScopes } = props;
+const PolygonSidesInput = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const selectedProjectIndices = useSelector((state: RootState) => getSelectedProjectIndices(state));
+  const sidesValue = useSelector((state: RootState) => getSelectedPolygonSides(state));
+  const selectedById = useSelector((state: RootState) => getSelectedById(state));
   const [sides, setSides] = useState(sidesValue !== 'multi' ? Math.round(sidesValue) : sidesValue);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setSides(sidesValue !== 'multi' ? Math.round(sidesValue) : sidesValue);
@@ -36,8 +29,9 @@ const PolygonSidesInput = (props: PolygonSidesInputProps): ReactElement => {
 
   const handleSliderChange = (e: any): void => {
     handleChange(e);
-    layerItems.forEach((layerItem) => {
-      const paperLayerCompound = getPaperLayer(layerItem.id, selectedPaperScopes[layerItem.id]) as paper.CompoundPath;
+    Object.keys(selectedById).forEach((key) => {
+      const layerItem = selectedById[key];
+      const paperLayerCompound = getPaperLayer(layerItem.id, selectedProjectIndices[layerItem.id]) as paper.CompoundPath;
       const paperLayer = paperLayerCompound.children[0] as paper.Path;
       const startPosition = paperLayer.position;
       paperLayer.rotation = -layerItem.transform.rotation;
@@ -55,7 +49,7 @@ const PolygonSidesInput = (props: PolygonSidesInputProps): ReactElement => {
     });
   };
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>) => {
+  const handleSubmit = (e: any): void => {
     try {
       let nextSides = mexp.eval(`${sides}`) as any;
       if (nextSides !== sidesValue) {
@@ -65,7 +59,7 @@ const PolygonSidesInput = (props: PolygonSidesInputProps): ReactElement => {
         if (Math.round(nextSides) < 3) {
           nextSides = 3;
         }
-        setPolygonsSides({layers: selected, sides: Math.round(nextSides)});
+        dispatch(setPolygonsSides({layers: selected, sides: Math.round(nextSides)}));
         setSides(Math.round(nextSides));
       }
     } catch(error) {
@@ -98,35 +92,4 @@ const PolygonSidesInput = (props: PolygonSidesInputProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  selected: string[];
-  sidesValue: number | 'multi';
-  layerItems: Btwx.Polygon[];
-  selectedPaperScopes: {
-    [id: string]: number;
-  };
-} => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  const selectedPaperScopes = getSelectedProjectIndices(state);
-  const layerItems: Btwx.Polygon[] = selected.reduce((result, current) => {
-    const layerItem = layer.present.byId[current];
-    return [...result, layerItem];
-  }, []);
-  const sidesValues: number[] = layerItems.reduce((result, current) => {
-    return [...result, current.sides];
-  }, []);
-  const sidesValue = (() => {
-    if (sidesValues.every((value: number) => value === sidesValues[0])) {
-      return sidesValues[0];
-    } else {
-      return 'multi';
-    }
-  })();
-  return { selected, sidesValue, layerItems, selectedPaperScopes };
-};
-
-export default connect(
-  mapStateToProps,
-  { setPolygonsSides }
-)(PolygonSidesInput);
+export default PolygonSidesInput;

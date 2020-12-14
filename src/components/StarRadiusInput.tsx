@@ -12,7 +12,7 @@ import SidebarSlider from './SidebarSlider';
 
 const StarRadiusInput = (): ReactElement => {
   const selected = useSelector((state: RootState) => state.layer.present.selected);
-  const selectedPaperScopes = useSelector((state: RootState) => getSelectedProjectIndices(state));
+  const selectedProjectIndices = useSelector((state: RootState) => getSelectedProjectIndices(state));
   const radiusValue = useSelector((state: RootState) => getSelectedStarRadius(state));
   const selectedById = useSelector((state: RootState) => getSelectedById(state));
   const [radius, setRadius] = useState(radiusValue !== 'multi' ? Math.round(radiusValue * 100) : radiusValue);
@@ -31,7 +31,7 @@ const StarRadiusInput = (): ReactElement => {
     handleChange(e);
     Object.keys(selectedById).forEach((key) => {
       const layerItem = selectedById[key];
-      const paperLayerCompound = getPaperLayer(layerItem.id, selectedPaperScopes[layerItem.id]) as paper.CompoundPath;
+      const paperLayerCompound = getPaperLayer(layerItem.id, selectedProjectIndices[layerItem.id]) as paper.CompoundPath;
       const paperLayer = paperLayerCompound.children[0] as paper.Path;
       const startPosition = paperLayer.position;
       paperLayer.rotation = -layerItem.transform.rotation;

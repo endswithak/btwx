@@ -3,20 +3,11 @@ import { desktopCapturer, remote, ipcRenderer } from 'electron';
 import { gsap } from 'gsap';
 import { writeFile } from 'fs';
 import React, { ReactElement, useEffect } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { startPreviewRecording } from '../store/actions/preview';
-import { PreviewTypes } from '../store/actionTypes/preview';
 import { PREVIEW_TOPBAR_HEIGHT, MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT } from '../constants';
 import TopbarButton from './TopbarButton';
-
-interface PreviewRecordButtonProps {
-  recording?: boolean;
-  documentName?: string;
-  documentWindowId?: number;
-  previewWindowId?: number;
-  startPreviewRecording?(): PreviewTypes;
-}
 
 let previewMediaRecorder: MediaRecorder;
 let previewVideoChunks: any[] = [];
@@ -61,8 +52,11 @@ ipcRenderer.on('stopPreviewRecording', () => {
   });
 });
 
-const PreviewRecordButton = (props: PreviewRecordButtonProps): ReactElement => {
-  const { recording, startPreviewRecording, documentName, documentWindowId, previewWindowId } = props;
+const PreviewRecordButton = (): ReactElement => {
+  const recording = useSelector((state: RootState) => state.preview.recording);
+  const documentWindowId = useSelector((state: RootState) => state.preview.documentWindowId);
+  const previewWindowId = useSelector((state: RootState) => state.preview.windowId);
+  const dispatch = useDispatch();
 
   const handleVideoData = (e: any): void => {
     previewVideoChunks.push(e.data);
@@ -103,7 +97,7 @@ const PreviewRecordButton = (props: PreviewRecordButtonProps): ReactElement => {
       const timeline = gsap.timeline({
         onComplete: () => {
           setTimeout(() => {
-            startPreviewRecording();
+            dispatch(startPreviewRecording());
             remote.BrowserWindow.fromId(documentWindowId).webContents.executeJavaScript('startPreviewRecording()');
             previewMediaRecorder.start();
           }, 0.15);
@@ -169,19 +163,4 @@ const PreviewRecordButton = (props: PreviewRecordButtonProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  recording: boolean;
-  documentWindowId: number;
-  previewWindowId: number;
-} => {
-  const { preview } = state;
-  const recording = preview.recording;
-  const documentWindowId = preview.documentWindowId;
-  const previewWindowId = preview.windowId;
-  return { recording, documentWindowId, previewWindowId };
-};
-
-export default connect(
-  mapStateToProps,
-  { startPreviewRecording }
-)(PreviewRecordButton);
+export default PreviewRecordButton;

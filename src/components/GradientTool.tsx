@@ -1,53 +1,31 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, useEffect, ReactElement, useState } from 'react';
-import { connect } from 'react-redux';
+import React, { useEffect, ReactElement, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { uiPaperScope } from '../canvas';
 import { RootState } from '../store/reducers';
-import { SetLayersGradientODPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setLayersGradientOD } from '../store/actions/layer';
 import { setCanvasResizing } from '../store/actions/canvasSettings';
-import { CanvasSettingsTypes, SetCanvasResizingPayload } from '../store/actionTypes/canvasSettings';
 import { getPaperLayer, getSelectedProjectIndices, getPaperProp, getSelectedById } from '../store/selectors/layer';
-import { ThemeContext } from './ThemeProvider';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
 
-interface GradientToolStateProps {
-  isEnabled?: boolean;
-  gradient?: Btwx.Gradient;
-  selected?: string[];
-  selectedById?: {
-    [id: string]: Btwx.Layer;
-  };
-  selectedPaperScopes?: {
-    [id: string]: number;
-  };
-  gradientHandle?: Btwx.GradientHandle;
-  gradientProp?: 'fill' | 'stroke';
-  resizing?: boolean;
-}
-
-interface GradientToolDispatchProps {
-  setCanvasResizing?(payload: SetCanvasResizingPayload): CanvasSettingsTypes;
-  setLayersGradientOD?(payload: SetLayersGradientODPayload): LayerTypes;
-}
-
-type GradientToolProps = (
-  GradientToolStateProps &
-  GradientToolDispatchProps &
-  PaperToolProps
-);
-
-const GradientTool = (props: GradientToolProps): ReactElement => {
-  const theme = useContext(ThemeContext);
-  const { isEnabled, selectedById, setLayersGradientOD, selected, selectedPaperScopes, tool, downEvent, dragEvent, upEvent, gradientHandle, gradientProp, setCanvasResizing, resizing } = props;
+const GradientTool = (props: PaperToolProps): ReactElement => {
+  const { tool, downEvent, dragEvent, upEvent } = props;
+  const isEnabled = useSelector((state: RootState) => state.gradientEditor.isOpen && state.canvasSettings.activeTool === 'Gradient');
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const selectedProjectIndices = useSelector((state: RootState) => getSelectedProjectIndices(state));
+  const gradientHandle = useSelector((state: RootState) => state.canvasSettings.gradientHandle);
+  const gradientProp = useSelector((state: RootState) => state.gradientEditor.prop);
+  const resizing = useSelector((state: RootState) => state.canvasSettings.resizing);
+  const selectedById = useSelector((state: RootState) => getSelectedById(state));
   const [originHandlePosition, setOriginHandlePosition] = useState<paper.Point>(null);
   const [destinationHandlePosition, setDestinationHandlePosition] = useState<paper.Point>(null);
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
   const [toBounds, setToBounds] = useState<paper.Rectangle>(null);
   const [handle, setHandle] = useState<Btwx.GradientHandle>(null);
+  const dispatch = useDispatch();
 
-  const resetState = () => {
+  const resetState = (): void => {
     setOriginHandlePosition(null);
     setDestinationHandlePosition(null);
     setToBounds(null);
@@ -77,7 +55,7 @@ const GradientTool = (props: GradientToolProps): ReactElement => {
       });
       setSnapBounds(nextSnapBounds);
       if (!resizing) {
-        setCanvasResizing({resizing: true});
+        dispatch(setCanvasResizing({resizing: true}));
       }
     }
   }, [dragEvent]);
@@ -86,7 +64,7 @@ const GradientTool = (props: GradientToolProps): ReactElement => {
     if (upEvent && isEnabled && toBounds) {
       switch(handle) {
         case 'origin': {
-          setLayersGradientOD({
+          dispatch(setLayersGradientOD({
             layers: selected,
             origin: {
               x: toBounds.center.x,
@@ -98,11 +76,11 @@ const GradientTool = (props: GradientToolProps): ReactElement => {
             },
             prop: gradientProp,
             handle: handle
-          });
+          }));
           break;
         }
         case 'destination': {
-          setLayersGradientOD({
+          dispatch(setLayersGradientOD({
             layers: selected,
             origin: {
               x: originHandlePosition.x,
@@ -114,12 +92,12 @@ const GradientTool = (props: GradientToolProps): ReactElement => {
             },
             prop: gradientProp,
             handle: handle
-          });
+          }));
           break;
         }
       }
       if (resizing) {
-        setCanvasResizing({resizing: false});
+        dispatch(setCanvasResizing({resizing: false}));
       }
       resetState();
     }
@@ -136,7 +114,7 @@ const GradientTool = (props: GradientToolProps): ReactElement => {
         line.firstSegment.point = toBounds.center;
       });
       selected.forEach((id) => {
-        let paperLayer = getPaperLayer(id, selectedPaperScopes[id]);
+        let paperLayer = getPaperLayer(id, selectedProjectIndices[id]);
         if (selectedById[id].type === 'Artboard') {
           paperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
         }
@@ -153,7 +131,7 @@ const GradientTool = (props: GradientToolProps): ReactElement => {
         line.lastSegment.point = toBounds.center;
       });
       selected.forEach((id) => {
-        let paperLayer = getPaperLayer(id, selectedPaperScopes[id]);
+        let paperLayer = getPaperLayer(id, selectedProjectIndices[id]);
         if (selectedById[id].type === 'Artboard') {
           paperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
         }
@@ -200,36 +178,8 @@ const GradientTool = (props: GradientToolProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): GradientToolStateProps => {
-  const { gradientEditor, layer, canvasSettings } = state;
-  const isEnabled = gradientEditor.isOpen && canvasSettings.activeTool === 'Gradient';
-  const selected = layer.present.selected;
-  const selectedPaperScopes = getSelectedProjectIndices(state);
-  const gradientHandle = canvasSettings.gradientHandle;
-  const gradientProp = gradientEditor.prop;
-  const resizing = canvasSettings.resizing;
-  const selectedById = getSelectedById(state);
-  return {
-    isEnabled,
-    selected,
-    selectedById,
-    gradientHandle,
-    gradientProp,
-    selectedPaperScopes,
-    resizing
-  };
-};
-
-const mapDispatchToProps = {
-  setLayersGradientOD,
-  setCanvasResizing
-};
-
 export default PaperTool(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )(GradientTool),
+  GradientTool,
   {
     mouseDown: true,
     mouseDrag: true,

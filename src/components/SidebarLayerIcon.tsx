@@ -1,21 +1,22 @@
 import React, { useContext, ReactElement, useEffect } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 import Icon from './Icon';
 
 interface SidebarLayerIconProps {
   id: string;
-  type?: Btwx.LayerType;
-  isSelected?: boolean;
-  isMask?: boolean;
-  isOpenShape?: boolean;
   isDragGhost?: boolean;
 }
 
 const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { id, type, isMask, isSelected, isOpenShape, isDragGhost } = props;
+  const { id, isDragGhost } = props;
+  const type = useSelector((state: RootState) => state.layer.present.byId[id].type);
+  const isSelected = useSelector((state: RootState) => state.layer.present.byId[id].selected);
+  const isShape = useSelector((state: RootState) => state.layer.present.byId[id].type === 'Shape');
+  const isMask = isShape && useSelector((state: RootState) => (state.layer.present.byId[id] as Btwx.Shape).mask);
+  const isOpenShape = isShape && useSelector((state: RootState) => !(state.layer.present.byId[id] as Btwx.Shape).closed);
 
   useEffect(() => {
     console.log('LAYER ICON');
@@ -59,22 +60,4 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState, ownProps: SidebarLayerIconProps): {
-  type: Btwx.LayerType;
-  isSelected: boolean;
-  isMask: boolean;
-  isOpenShape: boolean;
-} => {
-  const { layer } = state;
-  const layerItem = layer.present.byId[ownProps.id];
-  const type = layerItem.type;
-  const isSelected = layerItem.selected;
-  const isShape = layerItem.type === 'Shape';
-  const isMask = isShape && (layerItem as Btwx.Shape).mask;
-  const isOpenShape = isShape && !(layerItem as Btwx.Shape).closed;
-  return { type, isMask, isSelected, isOpenShape };
-};
-
-export default connect(
-  mapStateToProps,
-)(SidebarLayerIcon);
+export default SidebarLayerIcon;

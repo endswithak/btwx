@@ -1,16 +1,12 @@
 import React, { ReactElement, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getReverseSelected } from '../store/selectors/layer';
-import { connect } from 'react-redux';
 import SidebarLayer from './SidebarLayer';
 
-interface SidebarLayerDragGhostsProps {
-  selected?: string[];
-  leftSidebarWidth?: number;
-}
-
-const SidebarLayerDragGhosts = (props: SidebarLayerDragGhostsProps): ReactElement => {
-  const { selected, leftSidebarWidth } = props;
+const SidebarLayerDragGhosts = (): ReactElement => {
+  const selected = useSelector((state: RootState) => getReverseSelected(state));
+  const leftSidebarWidth = useSelector((state: RootState) => state.viewSettings.leftSidebar.width);
 
   useEffect(() => {
     console.log('DRAG GHOSTS');
@@ -37,13 +33,4 @@ const SidebarLayerDragGhosts = (props: SidebarLayerDragGhostsProps): ReactElemen
   )
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { viewSettings } = state;
-  const selected = getReverseSelected(state);
-  const leftSidebarWidth = viewSettings.leftSidebar.width;
-  return { selected, leftSidebarWidth };
-};
-
-export default connect(
-  mapStateToProps
-)(SidebarLayerDragGhosts);
+export default SidebarLayerDragGhosts;

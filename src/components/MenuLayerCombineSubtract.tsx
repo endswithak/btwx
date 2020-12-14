@@ -1,19 +1,15 @@
 import React, { ReactElement, useEffect } from 'react';
 import { remote } from 'electron';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { applyBooleanOperationThunk } from '../store/actions/layer';
 import { canBooleanSelected } from '../store/selectors/layer';
 
 export const MENU_ITEM_ID = 'layerCombineSubtract';
 
-interface MenuLayerCombineSubtractProps {
-  isEnabled?: boolean;
-  applyBooleanOperationThunk?(operation: Btwx.BooleanOperation): void;
-}
-
-const MenuLayerCombineSubtract = (props: MenuLayerCombineSubtractProps): ReactElement => {
-  const { isEnabled, applyBooleanOperationThunk } = props;
+const MenuLayerCombineSubtract = (): ReactElement => {
+  const isEnabled = useSelector((state: RootState) => canBooleanSelected(state));
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
@@ -22,7 +18,7 @@ const MenuLayerCombineSubtract = (props: MenuLayerCombineSubtractProps): ReactEl
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      applyBooleanOperationThunk('subtract');
+      dispatch(applyBooleanOperationThunk('subtract'));
     };
   }, []);
 
@@ -31,14 +27,4 @@ const MenuLayerCombineSubtract = (props: MenuLayerCombineSubtractProps): ReactEl
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  isEnabled: boolean;
-} => {
-  const isEnabled = canBooleanSelected(state);
-  return { isEnabled };
-};
-
-export default connect(
-  mapStateToProps,
-  { applyBooleanOperationThunk }
-)(MenuLayerCombineSubtract);
+export default MenuLayerCombineSubtract;

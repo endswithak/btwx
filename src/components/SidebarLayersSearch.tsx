@@ -1,40 +1,26 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { ReactElement, useEffect, useContext, useState, useCallback } from 'react';
-import { connect } from 'react-redux';
-import { RootState } from '../store/reducers';
+import React, { ReactElement, useContext, useState, useCallback } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import debounce from 'lodash.debounce';
-import { scrollToLayer } from '../utils';
-import { SetSearchPayload, SetSearchingPayload, LeftSidebarTypes } from '../store/actionTypes/leftSidebar';
+import { RootState } from '../store/reducers';
 import { setSearch, setSearching } from '../store/actions/leftSidebar';
 import { ThemeContext } from './ThemeProvider';
 import SidebarInput from './SidebarInput';
 import Icon from './Icon';
 import IconButton from './IconButton';
 
-interface SidebarLayersSearchProps {
-  searchActive?: boolean;
-  search?: string;
-  selected?: string[];
-  setSearching?(payload: SetSearchingPayload): LeftSidebarTypes;
-  setSearch?(payload: SetSearchPayload): LeftSidebarTypes;
-}
-
-const SidebarLayersSearch = (props: SidebarLayersSearchProps): ReactElement => {
+const SidebarLayersSearch = (): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { searchActive, search, setSearching, setSearch, selected } = props;
+  const searchActive = useSelector((state: RootState) => state.leftSidebar.searching);
+  const search = useSelector((state: RootState) => state.leftSidebar.search);
   const [focused, setFocused] = useState(false);
   const [inputValue, setInputValue] = useState(search);
   const [hover, setHover] = useState(false);
-
-  // useEffect(() => {
-  //   if (selected.length > 0) {
-  //     scrollToLayer(selected[0]);
-  //   }
-  // }, [search])
+  const dispatch = useDispatch();
 
   const debounceSearch = useCallback(
     debounce((value: string) => {
-      setSearch({search: value});
+      dispatch(setSearch({search: value}));
     }, 100),
     []
   );
@@ -53,14 +39,14 @@ const SidebarLayersSearch = (props: SidebarLayersSearchProps): ReactElement => {
     if (inputValue.replace(/\s/g, '').length === 0) {
       setInputValue('');
       debounceSearch('');
-      setSearching({searching: false});
+      dispatch(setSearching({searching: false}));
     }
     setFocused(false);
   }
 
   const handleSearchFocus = () => {
     if (!searchActive) {
-      setSearching({searching: true});
+      dispatch(setSearching({searching: true}));
     }
     setFocused(true);
   }
@@ -73,10 +59,9 @@ const SidebarLayersSearch = (props: SidebarLayersSearchProps): ReactElement => {
   return (
     <div
       className='c-sidebar__search'
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
+      onMouseEnter={(): void => setHover(true)}
+      onMouseLeave={(): void => setHover(false)}
       style={{
-        // background: theme.name === 'dark' ? theme.background.z3 : theme.background.z0,
         boxShadow: `0 1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
       }}>
       <div className='c-sidebar-search__icon'>
@@ -117,19 +102,4 @@ const SidebarLayersSearch = (props: SidebarLayersSearchProps): ReactElement => {
   )
 }
 
-const mapStateToProps = (state: RootState): {
-  selected: string[];
-  searchActive: boolean;
-  search: string;
-} => {
-  const { layer, leftSidebar } = state;
-  const selected = layer.present.selected;
-  const searchActive = leftSidebar.searching;
-  const search = leftSidebar.search;
-  return { selected, searchActive, search };
-};
-
-export default connect(
-  mapStateToProps,
-  { setSearch, setSearching }
-)(SidebarLayersSearch);
+export default SidebarLayersSearch;

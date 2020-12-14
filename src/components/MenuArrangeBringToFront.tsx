@@ -1,19 +1,15 @@
 import React, { ReactElement, useEffect } from 'react';
 import { remote } from 'electron';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { bringSelectedToFrontThunk } from '../store/actions/layer';
 import { canBringSelectedForward } from '../store/selectors/layer';
 
 export const MENU_ITEM_ID = 'arrangeBringToFront';
 
-interface MenuArrangeBringToFrontProps {
-  isEnabled?: boolean;
-  bringSelectedToFrontThunk?(): void;
-}
-
-const MenuArrangeBringToFront = (props: MenuArrangeBringToFrontProps): ReactElement => {
-  const { isEnabled, bringSelectedToFrontThunk } = props;
+const MenuArrangeBringToFront = (): ReactElement => {
+  const isEnabled = useSelector((state: RootState) => canBringSelectedForward(state) && state.canvasSettings.focusing);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
@@ -22,7 +18,7 @@ const MenuArrangeBringToFront = (props: MenuArrangeBringToFrontProps): ReactElem
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      bringSelectedToFrontThunk();
+      dispatch(bringSelectedToFrontThunk());
     };
   }, []);
 
@@ -31,15 +27,4 @@ const MenuArrangeBringToFront = (props: MenuArrangeBringToFrontProps): ReactElem
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  isEnabled: boolean;
-} => {
-  const { canvasSettings } = state;
-  const isEnabled = canBringSelectedForward(state) && canvasSettings.focusing;
-  return { isEnabled };
-};
-
-export default connect(
-  mapStateToProps,
-  { bringSelectedToFrontThunk }
-)(MenuArrangeBringToFront);
+export default MenuArrangeBringToFront;

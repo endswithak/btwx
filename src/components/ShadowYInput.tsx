@@ -1,21 +1,17 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
-import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
-import { SetLayersShadowYOffsetPayload, LayerTypes } from '../store/actionTypes/layer';
+import { selectedShadowEnabled, getSelectedShadowYOffset } from '../store/selectors/layer';
 import { setLayersShadowYOffset } from '../store/actions/layer';
+import SidebarInput from './SidebarInput';
 
-interface ShadowYInputProps {
-  shadowYOffsetValue?: number | 'multi';
-  selected?: string[];
-  disabled: boolean;
-  setLayersShadowYOffset?(payload: SetLayersShadowYOffsetPayload): LayerTypes;
-}
-
-const ShadowYInput = (props: ShadowYInputProps): ReactElement => {
-  const { selected, shadowYOffsetValue, disabled, setLayersShadowYOffset } = props;
+const ShadowYInput = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const shadowYOffsetValue = useSelector((state: RootState) => getSelectedShadowYOffset(state));
+  const disabled = useSelector((state: RootState) => !selectedShadowEnabled(state));
   const [shadowYOffset, setShadowYOffset] = useState(shadowYOffsetValue !== 'multi' ? Math.round(shadowYOffsetValue) : shadowYOffsetValue);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setShadowYOffset(shadowYOffsetValue !== 'multi' ? Math.round(shadowYOffsetValue) : shadowYOffsetValue);
@@ -30,7 +26,7 @@ const ShadowYInput = (props: ShadowYInputProps): ReactElement => {
     try {
       const newYOffset = mexp.eval(`${shadowYOffset}`) as any;
       if (newYOffset !== shadowYOffsetValue) {
-        setLayersShadowYOffset({layers: selected, shadowYOffset: Math.round(newYOffset)});
+        dispatch(setLayersShadowYOffset({layers: selected, shadowYOffset: Math.round(newYOffset)}));
         setShadowYOffset(Math.round(newYOffset));
       } else {
         setShadowYOffset(shadowYOffsetValue !== 'multi' ? Math.round(shadowYOffsetValue) : shadowYOffsetValue);
@@ -51,22 +47,4 @@ const ShadowYInput = (props: ShadowYInputProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  const layerItems: (Btwx.Shape | Btwx.Image | Btwx.Text)[] = selected.reduce((result, current) => {
-    const layerItem = layer.present.byId[current];
-    return [...result, layerItem];
-  }, []);
-  const shadowYOffsetValues = layerItems.reduce((result: number[], current: Btwx.Shape | Btwx.Image | Btwx.Text) => {
-    return [...result, current.style.shadow.offset.y];
-  }, []);
-  const shadowYOffsetValue = shadowYOffsetValues.every((shadowYOffset: number) => shadowYOffset === shadowYOffsetValues[0]) ? shadowYOffsetValues[0] : 'multi';
-  const disabled = !layerItems.every((layerItem) => layerItem.style.shadow.enabled);
-  return { selected, shadowYOffsetValue, disabled };
-};
-
-export default connect(
-  mapStateToProps,
-  { setLayersShadowYOffset }
-)(ShadowYInput);
+export default ShadowYInput;

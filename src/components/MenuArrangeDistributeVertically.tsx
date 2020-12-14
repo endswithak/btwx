@@ -1,18 +1,14 @@
 import React, { ReactElement, useEffect } from 'react';
 import { remote } from 'electron';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { distributeSelectedVerticallyThunk } from '../store/actions/layer';
 
 export const MENU_ITEM_ID = 'arrangeDistributeVertically';
 
-interface MenuArrangeDistributeVerticallyProps {
-  isEnabled?: boolean;
-  distributeSelectedVerticallyThunk?(): void;
-}
-
-const MenuArrangeDistributeVertically = (props: MenuArrangeDistributeVerticallyProps): ReactElement => {
-  const { isEnabled, distributeSelectedVerticallyThunk } = props;
+const MenuArrangeDistributeVertically = (): ReactElement => {
+  const isEnabled = useSelector((state: RootState) => state.canvasSettings.focusing && state.layer.present.selected.length >= 3);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
@@ -21,7 +17,7 @@ const MenuArrangeDistributeVertically = (props: MenuArrangeDistributeVerticallyP
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      distributeSelectedVerticallyThunk();
+      dispatch(distributeSelectedVerticallyThunk());
     };
   }, []);
 
@@ -30,15 +26,4 @@ const MenuArrangeDistributeVertically = (props: MenuArrangeDistributeVerticallyP
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  isEnabled: boolean;
-} => {
-  const { layer, canvasSettings } = state;
-  const isEnabled = canvasSettings.focusing && layer.present.selected.length >= 3;
-  return { isEnabled };
-};
-
-export default connect(
-  mapStateToProps,
-  { distributeSelectedVerticallyThunk }
-)(MenuArrangeDistributeVertically);
+export default MenuArrangeDistributeVertically;

@@ -1,14 +1,16 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import HoverFrame from './HoverFrame';
 
-interface HoverFrameWrapProps {
-  isEnabled?: boolean;
-}
-
-const HoverFrameWrap = (props: HoverFrameWrapProps): ReactElement => {
-  const { isEnabled } = props;
+const HoverFrameWrap = (): ReactElement => {
+  const isZooming = useSelector((state: RootState) => state.canvasSettings.zooming);
+  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
+  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
+  const isGradientEditorOpen = useSelector((state: RootState) => state.gradientEditor.isOpen);
+  const isTextEditorOpen = useSelector((state: RootState) => state.textEditor.isOpen);
+  const hover = useSelector((state: RootState) => state.layer.present.hover);
+  const isEnabled = hover && !isGradientEditorOpen && !isTextEditorOpen && !isZooming && !isDragging && !isResizing;
 
   return (
     isEnabled
@@ -17,21 +19,4 @@ const HoverFrameWrap = (props: HoverFrameWrapProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  isEnabled: boolean;
-} => {
-  const { layer, gradientEditor, textEditor, canvasSettings } = state;
-  const isResizing = canvasSettings.resizing;
-  const isDragging = canvasSettings.dragging;
-  const isZooming = canvasSettings.zooming;
-  const isSelecting = canvasSettings.selecting;
-  const isGradientEditorOpen = gradientEditor.isOpen;
-  const isTextEditorOpen = textEditor.isOpen;
-  const hover = layer.present.hover;
-  const isEnabled = hover && !isGradientEditorOpen && !isSelecting && !isTextEditorOpen && !isResizing && !isDragging && !isZooming;
-  return { isEnabled };
-};
-
-export default connect(
-  mapStateToProps
-)(HoverFrameWrap);
+export default HoverFrameWrap;

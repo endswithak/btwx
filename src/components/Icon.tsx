@@ -1,5 +1,5 @@
 import React, { ReactElement, useContext } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 
@@ -8,12 +8,12 @@ interface IconProps {
   style?: any;
   small?: boolean;
   shapeId?: string;
-  pathData?: string;
 }
 
 const Icon = (props: IconProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { name, style, small, pathData } = props;
+  const { name, style, small, shapeId } = props;
+  const pathData = useSelector((state: RootState) => name === 'shape' && shapeId && state.layer.present.shapeIcons[shapeId] ? state.layer.present.shapeIcons[shapeId] : null);
   const iconData = (() => {
     switch(name) {
       case 'check':
@@ -501,23 +501,4 @@ const Icon = (props: IconProps): ReactElement => {
   )
 }
 
-const mapStateToProps = (state: RootState, ownProps: IconProps) => {
-  const { layer } = state;
-  const pathData = ownProps.name === 'shape' && ownProps.shapeId && layer.present.shapeIcons[ownProps.shapeId] ? layer.present.shapeIcons[ownProps.shapeId] : null;
-  // if (pathData) {
-  //   const layerIcon = new paperMain.CompoundPath({
-  //     pathData: pathData,
-  //     insert: false
-  //   });
-  //   layerIcon.fitBounds(new paperMain.Rectangle({
-  //     point: new paperMain.Point(0,0),
-  //     size: new paperMain.Size(24,24)
-  //   }));
-  //   pathData = layerIcon.pathData;
-  // }
-  return { pathData };
-};
-
-export default connect(
-  mapStateToProps
-)(Icon);
+export default Icon;

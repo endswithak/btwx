@@ -1,18 +1,16 @@
 import React, { ReactElement, useEffect } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { updateHoverFrame } from '../store/actions/layer';
 import { uiPaperScope } from '../canvas';
 
-interface HoverFrameProps {
-  hover?: string;
-  hoverItem?: Btwx.Layer;
-  artboardItem?: Btwx.Artboard;
-  zoom?: number;
-}
-
-const HoverFrame = (props: HoverFrameProps): ReactElement => {
-  const { hover, hoverItem, artboardItem, zoom } = props;
+const HoverFrame = (): ReactElement => {
+  const hover = useSelector((state: RootState) => state.layer.present.hover);
+  const hoverItem = hover ? useSelector((state: RootState) => state.layer.present.byId[state.layer.present.hover]) : null;
+  const artboardLayer = hoverItem ? hoverItem.type !== 'Artboard' : null;
+  const artboard = artboardLayer ? (hoverItem as Btwx.MaskableLayer).artboard : null;
+  const artboardItem = artboard ? useSelector((state: RootState) => state.layer.present.byId[artboard]) as Btwx.Artboard : null;
+  const zoom = useSelector((state: RootState) => state.documentSettings.zoom);
 
   useEffect(() => {
     updateHoverFrame(hoverItem, artboardItem);
@@ -27,22 +25,4 @@ const HoverFrame = (props: HoverFrameProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  hover: string;
-  hoverItem: Btwx.Layer;
-  artboardItem: Btwx.Artboard;
-  zoom: number;
-} => {
-  const { layer, documentSettings } = state;
-  const hover = layer.present.hover;
-  const hoverItem = hover ? layer.present.byId[hover] : null;
-  const artboardLayer = hoverItem ? hoverItem.type !== 'Artboard' : null;
-  const artboard = artboardLayer ? (hoverItem as Btwx.MaskableLayer).artboard : null;
-  const artboardItem = artboard ? layer.present.byId[artboard] as Btwx.Artboard : null;
-  const zoom = documentSettings.zoom;
-  return { hover, hoverItem, artboardItem, zoom };
-};
-
-export default connect(
-  mapStateToProps
-)(HoverFrame);
+export default HoverFrame;

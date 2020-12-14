@@ -1,19 +1,15 @@
 import React, { ReactElement, useEffect } from 'react';
 import sharp from 'sharp';
 import { remote } from 'electron';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { addImageThunk } from '../store/actions/layer';
 
 export const MENU_ITEM_ID = 'insertImage';
 
-interface MenuInsertImageProps {
-  canInsert?: boolean;
-  addImageThunk?(opts: any): void;
-}
-
-const MenuInsertImage = (props: MenuInsertImageProps): ReactElement => {
-  const { canInsert, addImageThunk } = props;
+const MenuInsertImage = (): ReactElement => {
+  const canInsert = useSelector((state: RootState) => state.canvasSettings.focusing && state.layer.present.activeArtboard !== null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
@@ -31,7 +27,7 @@ const MenuInsertImage = (props: MenuInsertImageProps): ReactElement => {
         if (result.filePaths.length > 0 && !result.canceled) {
           sharp(result.filePaths[0]).metadata().then(({ width, height }) => {
             sharp(result.filePaths[0]).resize(Math.round(width * 0.5)).webp({quality: 50}).toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
-              addImageThunk({
+              dispatch(addImageThunk({
                 layer: {
                   frame: {
                     width: info.width,
@@ -41,7 +37,7 @@ const MenuInsertImage = (props: MenuInsertImageProps): ReactElement => {
                   } as Btwx.Frame
                 },
                 buffer: data
-              }) as any
+              })) as any
             });
           });
         }
@@ -54,15 +50,4 @@ const MenuInsertImage = (props: MenuInsertImageProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  canInsert: boolean;
-} => {
-  const { canvasSettings, layer } = state;
-  const canInsert = canvasSettings.focusing && layer.present.activeArtboard !== null;
-  return { canInsert };
-};
-
-export default connect(
-  mapStateToProps,
-  { addImageThunk }
-)(MenuInsertImage);
+export default MenuInsertImage;

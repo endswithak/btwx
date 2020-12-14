@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement, useState, useEffect, useRef } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { RootState } from '../store/reducers';
-import { ContextMenuTypes, OpenContextMenuPayload } from '../store/actionTypes/contextMenu';
 import { openContextMenu } from '../store/actions/contextMenu';
 import SidebarSectionRow from './SidebarSectionRow';
 import { ThemeContext } from './ThemeProvider';
@@ -12,8 +11,6 @@ interface SidebarArtboardPlatformDeviceProps {
   device: Btwx.Device | Btwx.ArtboardPreset;
   orientation: Btwx.DeviceOrientationType;
   onClick(device: Btwx.Device): void;
-  isActive?: boolean;
-  openContextMenu?(payload: OpenContextMenuPayload): ContextMenuTypes;
 }
 
 interface DeviceProps {
@@ -40,10 +37,12 @@ const Device = styled.button<DeviceProps>`
 `;
 
 const SidebarArtboardPlatformDevice = (props: SidebarArtboardPlatformDeviceProps): ReactElement => {
-  const { device, orientation, onClick, openContextMenu, isActive } = props;
+  const { device, orientation, onClick } = props;
   const ref = useRef(null);
+  const isActive = useSelector((state: RootState) => device.category === 'Custom' && (device as Btwx.ArtboardPreset).id === state.artboardPresetEditor.id);
   const [active, setActive] = useState(isActive);
   const theme = useContext(ThemeContext);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setActive(isActive);
@@ -74,7 +73,7 @@ const SidebarArtboardPlatformDevice = (props: SidebarArtboardPlatformDeviceProps
 
   const handleContextMenu = (e: any) => {
     if (device.category === 'Custom') {
-      openContextMenu({
+      dispatch(openContextMenu({
         type: 'ArtboardCustomPreset',
         id: (device as Btwx.ArtboardPreset).id,
         x: e.clientX,
@@ -86,7 +85,7 @@ const SidebarArtboardPlatformDevice = (props: SidebarArtboardPlatformDeviceProps
           width: device.width,
           height: device.width
         }
-      });
+      }));
       if (!active) {
         setActive(true);
         document.addEventListener('mousedown', handleMouseDown);
@@ -117,13 +116,4 @@ const SidebarArtboardPlatformDevice = (props: SidebarArtboardPlatformDeviceProps
   );
 }
 
-const mapStateToProps = (state: RootState, ownProps: SidebarArtboardPlatformDeviceProps) => {
-  const { artboardPresetEditor } = state;
-  const isActive = ownProps.device.category === 'Custom' && (ownProps.device as Btwx.ArtboardPreset).id === artboardPresetEditor.id;
-  return { isActive };
-};
-
-export default connect(
-  mapStateToProps,
-  { openContextMenu }
-)(SidebarArtboardPlatformDevice);
+export default SidebarArtboardPlatformDevice;

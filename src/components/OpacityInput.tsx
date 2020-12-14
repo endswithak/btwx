@@ -1,8 +1,8 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
 import { RootState } from '../store/reducers';
-import { SetLayersOpacityPayload, LayerTypes } from '../store/actionTypes/layer';
+import { getSelectedOpacity } from '../store/selectors/layer';
 import { setLayersOpacity } from '../store/actions/layer';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
@@ -10,15 +10,11 @@ import SidebarInput from './SidebarInput';
 import SidebarSlider from './SidebarSlider';
 import BlendModeSelector from './BlendModeSelector';
 
-interface OpacityInputProps {
-  selected?: string[];
-  opacityValue?: number | 'multi';
-  setLayersOpacity?(payload: SetLayersOpacityPayload): LayerTypes;
-}
-
-const OpacityInput = (props: OpacityInputProps): ReactElement => {
-  const { selected, setLayersOpacity, opacityValue } = props;
+const OpacityInput = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const opacityValue = useSelector((state: RootState) => getSelectedOpacity(state));
   const [opacity, setOpacity] = useState(opacityValue !== 'multi' ? Math.round(opacityValue * 100) : opacityValue);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setOpacity(opacityValue !== 'multi' ? Math.round(opacityValue * 100) : opacityValue);
@@ -52,7 +48,7 @@ const OpacityInput = (props: OpacityInputProps): ReactElement => {
         if (nextOpacity < 0) {
           nextOpacity = 0;
         }
-        setLayersOpacity({layers: selected, opacity: Math.round(nextOpacity) / 100});
+        dispatch(setLayersOpacity({layers: selected, opacity: Math.round(nextOpacity) / 100}));
         setOpacity(Math.round(nextOpacity));
       }
     } catch(error) {
@@ -83,26 +79,4 @@ const OpacityInput = (props: OpacityInputProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  const opacityValue = (() => {
-    switch(layer.present.selected.length) {
-      case 1:
-        return layer.present.byId[layer.present.selected[0]].style.opacity;
-      default: {
-        if (selected.every((id: string) => layer.present.byId[id].style.opacity === layer.present.byId[layer.present.selected[0]].style.opacity)) {
-          return layer.present.byId[layer.present.selected[0]].style.opacity;
-        } else {
-          return 'multi';
-        }
-      }
-    }
-  })();
-  return { selected, opacityValue };
-};
-
-export default connect(
-  mapStateToProps,
-  { setLayersOpacity }
-)(OpacityInput);
+export default OpacityInput;

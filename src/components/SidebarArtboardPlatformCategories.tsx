@@ -1,17 +1,23 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { DEVICES } from '../constants';
 import SidebarArtboardPlatformCategory from './SidebarArtboardPlatformCategory';
 
 interface SidebarArtboardPlatformCategoriesProps {
-  categories?: Btwx.DeviceCategory[];
-  onDeviceClick(device: Btwx.Device): void;
   orientation: Btwx.DeviceOrientationType;
+  onDeviceClick(device: Btwx.Device): void;
 }
 
 const SidebarArtboardPlatformCategories = (props: SidebarArtboardPlatformCategoriesProps): ReactElement => {
-  const { categories, onDeviceClick, orientation } = props;
+  const { orientation, onDeviceClick } = props;
+  const categories = useSelector((state: RootState) => state.documentSettings.artboardPresets.platform === 'Custom' ? [{
+    type: 'Custom',
+    devices: state.documentSettings.artboardPresets.allIds.reduce((result: Btwx.ArtboardPreset[], current) => {
+      result = [...result, state.documentSettings.artboardPresets.byId[current]];
+      return result;
+    }, [])
+  }] : DEVICES.find((platform) => platform.type === state.documentSettings.artboardPresets.platform).categories) as Btwx.DeviceCategory[];
 
   return (
     <>
@@ -28,19 +34,4 @@ const SidebarArtboardPlatformCategories = (props: SidebarArtboardPlatformCategor
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { documentSettings } = state;
-  const platformValue = documentSettings.artboardPresets.platform;
-  const categories = platformValue === 'Custom' ? [{
-    type: 'Custom',
-    devices: documentSettings.artboardPresets.allIds.reduce((result: Btwx.ArtboardPreset[], current) => {
-      result = [...result, documentSettings.artboardPresets.byId[current]];
-      return result;
-    }, [])
-  }] : DEVICES.find((platform) => platform.type === platformValue).categories;
-  return { categories };
-};
-
-export default connect(
-  mapStateToProps
-)(SidebarArtboardPlatformCategories);
+export default SidebarArtboardPlatformCategories;

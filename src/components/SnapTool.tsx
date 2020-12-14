@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, useState, useEffect, ReactElement } from 'react';
-import { connect } from 'react-redux';
+import React, { useState, useEffect, ReactElement } from 'react';
+import { useSelector } from 'react-redux';
 import { uiPaperScope } from '../canvas';
 import { RootState } from '../store/reducers';
-import { ThemeContext } from './ThemeProvider';
 import { updateMeasureGuides } from '../store/actions/layer';
 import { getPaperLayersBounds, getClosestPaperLayer, getLayerProjectIndices } from '../store/selectors/layer';
 import Guide from '../canvas/guide';
@@ -24,8 +23,6 @@ interface SnapToolProps {
   resizeHandle?: Btwx.ResizeHandle;
   preserveAspectRatio?: boolean;
   aspectRatio?: number;
-  scope?: string[];
-  layerProjectIndices?: number[];
   whiteListLayers?: string[];
   blackListLayers?: string[];
   measure?: boolean;
@@ -35,8 +32,9 @@ interface SnapToolProps {
 const snapToolDebug = false;
 
 const SnapTool = (props: SnapToolProps): ReactElement => {
-  const theme = useContext(ThemeContext);
-  const { toolEvent, bounds, scope, layerProjectIndices, onUpdate, hitTestZones, snapRule, whiteListLayers, blackListLayers, preserveAspectRatio, aspectRatio, resizeHandle, measure } = props;
+  const { toolEvent, bounds, onUpdate, hitTestZones, snapRule, whiteListLayers, blackListLayers, preserveAspectRatio, aspectRatio, resizeHandle, measure } = props;
+  const scope = useSelector((state: RootState) => state.layer.present.scope);
+  const layerProjectIndices = useSelector((state: RootState) => getLayerProjectIndices(state));
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
   const [xSnapPoint, setXSnapPoint] = useState<Btwx.SnapPoint>(null);
   const [ySnapPoint, setYSnapPoint] = useState<Btwx.SnapPoint>(null);
@@ -885,19 +883,4 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  scope: string[];
-  layerProjectIndices: number[];
-} => {
-  const { layer } = state;
-  const scope = layer.present.scope;
-  const layerProjectIndices = getLayerProjectIndices(state);
-  return {
-    scope,
-    layerProjectIndices
-  };
-};
-
-export default connect(
-  mapStateToProps
-)(SnapTool);
+export default SnapTool;
