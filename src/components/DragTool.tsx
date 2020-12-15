@@ -1,43 +1,24 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useEffect, ReactElement, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getLayerProjectIndex, getPaperLayer, getPaperLayersBounds, getSelectedProjectIndices } from '../store/selectors/layer';
 import { uiPaperScope } from '../canvas';
 import { THEME_PRIMARY_COLOR } from '../constants';
 import { setCanvasDragging } from '../store/actions/canvasSettings';
-import { CanvasSettingsTypes, SetCanvasDraggingPayload } from '../store/actionTypes/canvasSettings';
 import { moveLayers, duplicateLayers, updateSelectionFrame } from '../store/actions/layer';
-import { LayerTypes, MoveLayersPayload, DuplicateLayersPayload } from '../store/actionTypes/layer';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
 
-interface DragToolStateProps {
-  hover?: string;
-  selected?: string[];
-  isEnabled?: boolean;
-  dragging?: boolean;
-  dragHandle?: boolean;
-  selectedPaperScopes?: {
-    [id: string]: number;
-  };
-  hoverPaperScope?: number;
-}
-
-interface DragToolDispatchProps {
-  setCanvasDragging?(payload: SetCanvasDraggingPayload): CanvasSettingsTypes;
-  moveLayers?(payload: MoveLayersPayload): LayerTypes;
-  duplicateLayers?(payload: DuplicateLayersPayload): LayerTypes;
-}
-
-type DragToolProps = (
-  DragToolStateProps &
-  DragToolDispatchProps &
-  PaperToolProps
-);
-
-const DragTool = (props: DragToolProps): ReactElement => {
-  const { isEnabled, hover, dragHandle, setCanvasDragging, dragging, selected, moveLayers, duplicateLayers, tool, altModifier, downEvent, dragEvent, upEvent, selectedPaperScopes, hoverPaperScope } = props;
+const DragTool = (props: PaperToolProps): ReactElement => {
+  const { tool, altModifier, downEvent, dragEvent, upEvent } = props;
+  const hover = useSelector((state: RootState) => state.layer.present.hover);
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const isEnabled = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Drag');
+  const dragging = useSelector((state: RootState) => state.canvasSettings.dragging);
+  const dragHandle = useSelector((state: RootState) => state.canvasSettings.dragHandle);
+  const selectedProjectIndices = getSelectedProjectIndices(state);
+  const hoverPaperScope = hover ? useSelector((state: RootState) => getLayerProjectIndex(state.layer.present, state.layer.present.hover)) : null;
   const [originalSelection, setOriginalSelection] = useState<{id: string; projectIndex: number}[]>(null);
   const [fromBounds, setFromBounds] = useState<paper.Rectangle>(null);
   const [toBounds, setToBounds] = useState<paper.Rectangle>(null);
@@ -45,6 +26,7 @@ const DragTool = (props: DragToolProps): ReactElement => {
   const [minDistance, setMinDistance] = useState<number>(0);
   const [originalPaperSelection, setOriginalPaperSelection] = useState<paper.Item[]>(null);
   const [selectionOutlines, setSelectionOutlines] = useState<paper.Group>(null);
+  const dispatch = useDispatch();
 
   const resetState = (): void => {
     const drawingPreview = uiPaperScope.projects[0].getItem({data: {id: 'drawingPreview'}});
@@ -74,7 +56,7 @@ const DragTool = (props: DragToolProps): ReactElement => {
       updateDuplicatePreview();
     } else {
       selected.forEach((id, index) => {
-        const paperLayer = getPaperLayer(id, selectedPaperScopes[id]);
+        const paperLayer = getPaperLayer(id, selectedProjectIndices[id]);
         const ogLayer = originalPaperSelection[index];
         if (paperLayer && ogLayer) {
           const absPosition = ogLayer.position;
@@ -91,7 +73,7 @@ const DragTool = (props: DragToolProps): ReactElement => {
   const getDragLayers = (e: paper.ToolEvent): {id: string; projectIndex: number}[] => {
     const isHoverSelected = hover && selected.includes(hover);
     const selectedWithPaperScopes = selected.reduce((result, current) => {
-      result = [...result, {id: current, projectIndex: selectedPaperScopes[current]}];
+      result = [...result, {id: current, projectIndex: selectedProjectIndices[current]}];
       return result;
     }, []) as {id: string; projectIndex: number}[];
     if (e.modifiers.shift) {
@@ -227,7 +209,7 @@ const DragTool = (props: DragToolProps): ReactElement => {
         setSnapBounds(nextSnapBounds);
       } else {
         if (!dragging) {
-          setCanvasDragging({dragging: true});
+          dispatch(setCanvasDragging({dragging: true}));
         }
         setMinDistance(minDistance + 1);
       }
@@ -239,12 +221,12 @@ const DragTool = (props: DragToolProps): ReactElement => {
       if (selected.length > 0 && minDistance > 3) {
         if (altModifier) {
           const offset = toBounds.center.subtract(fromBounds.center).round();
-          duplicateLayers({layers: selected, offset: {x: offset.x, y: offset.y}});
+          dispatch(duplicateLayers({layers: selected, offset: {x: offset.x, y: offset.y}}));
         } else {
-          moveLayers({layers: selected});
+          dispatch(moveLayers({layers: selected}));
         }
       }
-      setCanvasDragging({dragging: false});
+      dispatch(setCanvasDragging({dragging: false}));
       resetState();
     }
   }, [upEvent]);
@@ -282,37 +264,8 @@ const DragTool = (props: DragToolProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): DragToolStateProps => {
-  const { layer, canvasSettings } = state;
-  const hover = layer.present.hover;
-  const selected = layer.present.selected;
-  const isEnabled = canvasSettings.activeTool === 'Drag';
-  const dragging = canvasSettings.dragging;
-  const dragHandle = canvasSettings.dragHandle;
-  const selectedPaperScopes = getSelectedProjectIndices(state);
-  const hoverPaperScope = hover ? getLayerProjectIndex(layer.present, hover) : null;
-  return {
-    hover,
-    selected,
-    isEnabled,
-    dragging,
-    dragHandle,
-    selectedPaperScopes,
-    hoverPaperScope
-  };
-};
-
-const mapDispatchToProps = {
-  moveLayers,
-  duplicateLayers,
-  setCanvasDragging
-};
-
 export default PaperTool(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )(DragTool),
+  DragTool,
   {
     mouseDown: true,
     mouseDrag: true,

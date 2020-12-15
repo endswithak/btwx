@@ -1007,6 +1007,38 @@ export const getSelectedInnerHeight = createSelector(
   }
 );
 
+export const getSelectedFromX = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Line;
+      if (!result) {
+        result = layerItem.from.x;
+      }
+      if (result && layerItem.from.x !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null);
+  }
+);
+
+export const getSelectedFromY = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Line;
+      if (!result) {
+        result = layerItem.from.y;
+      }
+      if (result && layerItem.from.y !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null);
+  }
+);
+
 export const getSelectedToX = createSelector(
   [ getSelectedById ],
   (selectedById) => {

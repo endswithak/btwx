@@ -1,17 +1,27 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 
-interface CanvasToastProps {
-  isEnabled: boolean;
-  text: string;
-}
-
-const CanvasToast = (props: CanvasToastProps): ReactElement => {
+const CanvasToast = (): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isEnabled, text } = props;
+  const isEnabled = useSelector((state: RootState) => state.canvasSettings.drawing || state.canvasSettings.dragging || state.canvasSettings.selecting || state.canvasSettings.resizing || state.canvasSettings.translating || state.canvasSettings.zooming);
+  const text = useSelector((state: RootState) => (() => {
+    if (state.canvasSettings.drawing) {
+      return 'Drawing';
+    } else if (state.canvasSettings.dragging) {
+      return 'Dragging';
+    } else if (state.canvasSettings.selecting) {
+      return 'Selecting';
+    } else if (state.canvasSettings.resizing) {
+      return 'Resizing';
+    } else if (state.canvasSettings.zooming) {
+      return 'Zooming';
+    } else if (state.canvasSettings.translating) {
+      return 'Scrolling';
+    }
+  })());
 
   return (
     isEnabled
@@ -42,33 +52,4 @@ const CanvasToast = (props: CanvasToastProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  isEnabled: boolean;
-  text: string;
-} => {
-  const { canvasSettings } = state;
-  const isEnabled = canvasSettings.drawing || canvasSettings.dragging || canvasSettings.selecting || canvasSettings.resizing || canvasSettings.translating || canvasSettings.zooming;
-  const text = (() => {
-    if (canvasSettings.drawing) {
-      return 'Drawing';
-    } else if (canvasSettings.dragging) {
-      return 'Dragging';
-    } else if (canvasSettings.selecting) {
-      return 'Selecting';
-    } else if (canvasSettings.resizing) {
-      return 'Resizing';
-    } else if (canvasSettings.zooming) {
-      return 'Zooming';
-    } else if (canvasSettings.translating) {
-      return 'Scrolling';
-    }
-  })();
-  return {
-    isEnabled,
-    text
-  };
-};
-
-export default connect(
-  mapStateToProps
-)(CanvasToast);
+export default CanvasToast;

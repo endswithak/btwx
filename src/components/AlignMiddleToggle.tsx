@@ -1,34 +1,20 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { AlignLayersToMiddlePayload, LayerTypes } from '../store/actionTypes/layer';
 import { alignLayersToMiddle } from '../store/actions/layer';
 import IconButton from './IconButton';
 
-interface AlignMiddleToggleProps {
-  selected?: string[];
-  alignLayersToMiddle?(payload: AlignLayersToMiddlePayload): LayerTypes;
-}
-
-const AlignMiddleToggle = (props: AlignMiddleToggleProps): ReactElement => {
-  const { selected, alignLayersToMiddle } = props;
+const AlignMiddleToggle = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const dispatch = useDispatch();
 
   return (
     <IconButton
-      onClick={() => alignLayersToMiddle({layers: selected})}
+      onClick={() => dispatch(alignLayersToMiddle({layers: selected}))}
       icon='align-middle'
       disabled={selected.length <= 1}
       variant='medium' />
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  return { selected };
-};
-
-export default connect(
-  mapStateToProps,
-  { alignLayersToMiddle }
-)(AlignMiddleToggle);
+export default AlignMiddleToggle;

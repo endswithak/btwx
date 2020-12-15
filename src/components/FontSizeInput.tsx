@@ -1,23 +1,17 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
-import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
-import { SetLayersFontSizePayload, LayerTypes } from '../store/actionTypes/layer';
 import { setLayersFontSize } from '../store/actions/layer';
-import { TextSettingsTypes, SetTextSettingsFontSizePayload } from '../store/actionTypes/textSettings';
+import { getSelectedFontSize } from '../store/selectors/layer';
 import { setTextSettingsFontSize } from '../store/actions/textSettings';
+import SidebarInput from './SidebarInput';
 
-interface FontSizeInputProps {
-  selected?: string[];
-  fontSizeValue?: number | 'multi';
-  setLayersFontSize?(payload: SetLayersFontSizePayload): LayerTypes;
-  setTextSettingsFontSize?(payload: SetTextSettingsFontSizePayload): TextSettingsTypes;
-}
-
-const FontSizeInput = (props: FontSizeInputProps): ReactElement => {
-  const { selected, setLayersFontSize, fontSizeValue, setTextSettingsFontSize } = props;
+const FontSizeInput = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const fontSizeValue = useSelector((state: RootState) => getSelectedFontSize(state));
   const [fontSize, setFontSize] = useState(fontSizeValue);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setFontSize(fontSizeValue);
@@ -32,8 +26,8 @@ const FontSizeInput = (props: FontSizeInputProps): ReactElement => {
     try {
       const nextFontSize = mexp.eval(`${fontSize}`) as any;
       if (nextFontSize !== fontSizeValue) {
-        setLayersFontSize({layers: selected, fontSize: Math.round(nextFontSize)});
-        setTextSettingsFontSize({fontSize: Math.round(nextFontSize)});
+        dispatch(setLayersFontSize({layers: selected, fontSize: Math.round(nextFontSize)}));
+        dispatch(setTextSettingsFontSize({fontSize: Math.round(nextFontSize)}));
         setFontSize(Math.round(nextFontSize));
       } else {
         setFontSize(fontSizeValue);
@@ -53,21 +47,4 @@ const FontSizeInput = (props: FontSizeInputProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  const layerItems: Btwx.Text[] = selected.reduce((result, current) => {
-    const layerItem = layer.present.byId[current];
-    return [...result, layerItem];
-  }, []);
-  const fontSizeValues: number[] = layerItems.reduce((result, current) => {
-    return [...result, current.textStyle.fontSize];
-  }, []);
-  const fontSizeValue = fontSizeValues.every((fontSize: number) => fontSize === fontSizeValues[0]) ? fontSizeValues[0] : 'multi';
-  return { selected, fontSizeValue };
-};
-
-export default connect(
-  mapStateToProps,
-  { setLayersFontSize, setTextSettingsFontSize }
-)(FontSizeInput);
+export default FontSizeInput;

@@ -1,34 +1,20 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { AlignLayersToTopPayload, LayerTypes } from '../store/actionTypes/layer';
 import { alignLayersToTop } from '../store/actions/layer';
 import IconButton from './IconButton';
 
-interface AlignTopToggleProps {
-  selected?: string[];
-  alignLayersToTop?(payload: AlignLayersToTopPayload): LayerTypes;
-}
-
-const AlignTopToggle = (props: AlignTopToggleProps): ReactElement => {
-  const { selected, alignLayersToTop } = props;
+const AlignTopToggle = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const dispatch = useDispatch();
 
   return (
     <IconButton
-      onClick={() => alignLayersToTop({layers: selected})}
+      onClick={() => dispatch(alignLayersToTop({layers: selected}))}
       icon='align-top'
       disabled={selected.length <= 1}
       variant='medium' />
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  return { selected };
-};
-
-export default connect(
-  mapStateToProps,
-  { alignLayersToTop }
-)(AlignTopToggle);
+export default AlignTopToggle;

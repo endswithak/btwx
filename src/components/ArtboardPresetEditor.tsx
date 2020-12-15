@@ -1,30 +1,14 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement, useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
-import { connect } from 'react-redux';
-import { RootState } from '../store/reducers';
-import { ArtboardPresetEditorState } from '../store/reducers/artboardPresetEditor';
-import { ThemeContext } from './ThemeProvider';
+import { useSelector, useDispatch } from 'react-redux';
 import tinyColor from 'tinycolor2';
+import { RootState } from '../store/reducers';
 import { closeArtboardPresetEditor } from '../store/actions/artboardPresetEditor';
-import { ArtboardPresetEditorTypes } from '../store/actionTypes/artboardPresetEditor';
 import { addArtboardPreset, updateArtboardPreset, setArtboardPresetDevicePlatform } from '../store/actions/documentSettings';
-import { DocumentSettingsTypes, AddArtboardPresetPayload, UpdateArtboardPresetPayload, SetArtboardPresetDevicePlatformPayload } from '../store/actionTypes/documentSettings';
 import { setCanvasFocusing } from '../store/actions/canvasSettings';
-import { CanvasSettingsTypes, SetCanvasFocusingPayload } from '../store/actionTypes/canvasSettings';
+import { ThemeContext } from './ThemeProvider';
 import SidebarInput from './SidebarInput';
-
-interface ArtboardPresetEditorProps {
-  exists?: boolean;
-  artboardPresetEditor?: ArtboardPresetEditorState;
-  platformType?: Btwx.DevicePlatformType;
-  canvasFocusing?: boolean;
-  closeArtboardPresetEditor?(): ArtboardPresetEditorTypes;
-  setArtboardPresetDevicePlatform?(payload: SetArtboardPresetDevicePlatformPayload): DocumentSettingsTypes;
-  addArtboardPreset?(payload: AddArtboardPresetPayload): DocumentSettingsTypes;
-  updateArtboardPreset?(payload: UpdateArtboardPresetPayload): DocumentSettingsTypes;
-  setCanvasFocusing?(payload: SetCanvasFocusingPayload): CanvasSettingsTypes;
-}
 
 const CancelButton = styled.button`
   background: ${props => props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
@@ -48,13 +32,17 @@ const SaveButton = styled.button`
   }
 `;
 
-const ArtboardPresetEditor = (props: ArtboardPresetEditorProps): ReactElement => {
+const ArtboardPresetEditor = (): ReactElement => {
   const ref = useRef(null);
   const theme = useContext(ThemeContext);
-  const { exists, closeArtboardPresetEditor, canvasFocusing, platformType, artboardPresetEditor, addArtboardPreset, updateArtboardPreset, setArtboardPresetDevicePlatform, setCanvasFocusing } = props;
+  const artboardPresetEditor = useSelector((state: RootState) => state.artboardPresetEditor);
+  // const platformType = useSelector((state: RootState) => state.documentSettings.artboardPresets.platform);
+  const exists = useSelector((state: RootState) => state.documentSettings.artboardPresets.allIds.includes(state.artboardPresetEditor.id));
+  // const canvasFocusing = useSelector((state: RootState) => state.canvasSettings.focusing);
   const [name, setName] = useState(artboardPresetEditor.type);
   const [width, setWidth] = useState(artboardPresetEditor.width);
   const [height, setHeight] = useState(artboardPresetEditor.height);
+  const dispatch = useDispatch();
 
   const handleNameChange = (e: any): void => {
     const target = e.target;
@@ -77,44 +65,44 @@ const ArtboardPresetEditor = (props: ArtboardPresetEditorProps): ReactElement =>
 
   const handleKeyDown = (e: any): void => {
     if (e.key === 'Escape') {
-      closeArtboardPresetEditor();
+      dispatch(closeArtboardPresetEditor());
     }
   };
 
   const handleMouseDown = (e: any): void => {
     if (!ref.current.contains(e.target)) {
-      closeArtboardPresetEditor();
+      dispatch(closeArtboardPresetEditor());
     }
   };
 
   const handleSave = (): void => {
     if (exists) {
-      updateArtboardPreset({
+      dispatch(updateArtboardPreset({
         id: artboardPresetEditor.id,
         type: name.replace(/\s/g, '').length > 0 ? name : 'Custom',
         width: width,
         height: height
-      });
+      }));
     } else {
-      addArtboardPreset({
+      dispatch(addArtboardPreset({
         id: artboardPresetEditor.id,
         type: name.replace(/\s/g, '').length > 0 ? name : 'Custom',
         width: width,
         height: height
-      });
+      }));
     }
-    setArtboardPresetDevicePlatform({
+    dispatch(setArtboardPresetDevicePlatform({
       platform: 'Custom'
-    });
-    closeArtboardPresetEditor();
+    }));
+    dispatch(closeArtboardPresetEditor());
   }
 
   useEffect(() => {
-    setCanvasFocusing({focusing: false});
+    dispatch(setCanvasFocusing({focusing: false}));
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('mousedown', handleMouseDown);
     return () => {
-      setCanvasFocusing({focusing: true});
+      dispatch(setCanvasFocusing({focusing: true}));
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('mousedown', handleMouseDown);
     }
@@ -209,15 +197,4 @@ const ArtboardPresetEditor = (props: ArtboardPresetEditorProps): ReactElement =>
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { artboardPresetEditor, documentSettings, canvasSettings } = state;
-  const platformType = documentSettings.artboardPresets.platform;
-  const exists = documentSettings.artboardPresets.allIds.includes(artboardPresetEditor.id);
-  const canvasFocusing = canvasSettings.focusing;
-  return { artboardPresetEditor, platformType, exists, canvasFocusing };
-};
-
-export default connect(
-  mapStateToProps,
-  { closeArtboardPresetEditor, addArtboardPreset, updateArtboardPreset, setArtboardPresetDevicePlatform, setCanvasFocusing }
-)(ArtboardPresetEditor);
+export default ArtboardPresetEditor;

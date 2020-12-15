@@ -1,20 +1,16 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
-import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
-import { SetLinesFromXPayload, LayerTypes } from '../store/actionTypes/layer';
+import { getSelectedFromX } from '../store/selectors/layer';
 import { setLinesFromX } from '../store/actions/layer';
+import SidebarInput from './SidebarInput';
 
-interface FromXInputProps {
-  selected?: string[];
-  xValue?: number | 'multi';
-  setLinesFromX?(payload: SetLinesFromXPayload): LayerTypes;
-}
-
-const FromXInput = (props: FromXInputProps): ReactElement => {
-  const { selected, setLinesFromX, xValue } = props;
+const FromXInput = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const xValue = useSelector((state: RootState) => getSelectedFromX(state));
   const [x, setX] = useState(xValue !== 'multi' ? Math.round(xValue as number) : xValue);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setX(xValue !== 'multi' ? Math.round(xValue as number) : xValue);
@@ -29,7 +25,7 @@ const FromXInput = (props: FromXInputProps): ReactElement => {
     try {
       const nextX = mexp.eval(`${x}`) as any;
       if (nextX !== xValue) {
-        setLinesFromX({layers: selected, x: Math.round(nextX)});
+        dispatch(setLinesFromX({layers: selected, x: Math.round(nextX)}));
         setX(Math.round(nextX));
       } else {
         setX(xValue !== 'multi' ? Math.round(xValue as number) : xValue);
@@ -49,26 +45,4 @@ const FromXInput = (props: FromXInputProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  selected: string[];
-  xValue: number | 'multi';
-} => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  const xValue = selected.reduce((result: number | 'multi', current: string) => {
-    const layerItem = layer.present.byId[current] as Btwx.Line;
-    if (!result) {
-      result = layerItem.from.x;
-    }
-    if (result && layerItem.from.x !== result) {
-      result = 'multi';
-    }
-    return result;
-  }, null);
-  return { selected, xValue };
-};
-
-export default connect(
-  mapStateToProps,
-  { setLinesFromX }
-)(FromXInput);
+export default FromXInput;

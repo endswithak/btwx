@@ -1,20 +1,16 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
-import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
-import { SetLinesFromYPayload, LayerTypes } from '../store/actionTypes/layer';
+import { getSelectedFromY } from '../store/selectors/layer';
 import { setLinesFromY } from '../store/actions/layer';
+import SidebarInput from './SidebarInput';
 
-interface FromYInputProps {
-  selected?: string[];
-  yValue?: number | 'multi';
-  setLinesFromY?(payload: SetLinesFromYPayload): LayerTypes;
-}
-
-const FromYInput = (props: FromYInputProps): ReactElement => {
-  const { selected, setLinesFromY, yValue } = props;
+const FromYInput = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const yValue = useSelector((state: RootState) => getSelectedFromY(state));
   const [y, setY] = useState(yValue !== 'multi' ? Math.round(yValue as number) : yValue);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setY(yValue !== 'multi' ? Math.round(yValue as number) : yValue);
@@ -29,7 +25,7 @@ const FromYInput = (props: FromYInputProps): ReactElement => {
     try {
       const nextY = mexp.eval(`${y}`) as any;
       if (nextY !== yValue) {
-        setLinesFromY({layers: selected, y: Math.round(nextY)});
+        dispatch(setLinesFromY({layers: selected, y: Math.round(nextY)}));
         setY(Math.round(nextY));
       } else {
         setY(yValue !== 'multi' ? Math.round(yValue as number) : yValue);
@@ -49,26 +45,4 @@ const FromYInput = (props: FromYInputProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  selected: string[];
-  yValue: number | 'multi';
-} => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  const yValue = selected.reduce((result: number | 'multi', current: string) => {
-    const layerItem = layer.present.byId[current] as Btwx.Line;
-    if (!result) {
-      result = layerItem.from.y;
-    }
-    if (result && layerItem.from.y !== result) {
-      result = 'multi';
-    }
-    return result;
-  }, null);
-  return { selected, yValue };
-};
-
-export default connect(
-  mapStateToProps,
-  { setLinesFromY }
-)(FromYInput);
+export default FromYInput;

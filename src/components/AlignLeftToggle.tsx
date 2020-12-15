@@ -1,34 +1,20 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { AlignLayersToLeftPayload, LayerTypes } from '../store/actionTypes/layer';
 import { alignLayersToLeft } from '../store/actions/layer';
 import IconButton from './IconButton';
 
-interface AlignLeftToggleProps {
-  selected?: string[];
-  alignLayersToLeft?(payload: AlignLayersToLeftPayload): LayerTypes;
-}
-
-const AlignLeftToggle = (props: AlignLeftToggleProps): ReactElement => {
-  const { selected, alignLayersToLeft } = props;
+const AlignLeftToggle = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const dispatch = useDispatch();
 
   return (
     <IconButton
-      onClick={() => alignLayersToLeft({layers: selected})}
+      onClick={() => dispatch(alignLayersToLeft({layers: selected}))}
       icon='align-left'
       disabled={selected.length <= 1}
       variant='medium' />
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  return { selected };
-};
-
-export default connect(
-  mapStateToProps,
-  { alignLayersToLeft }
-)(AlignLeftToggle);
+export default AlignLeftToggle;

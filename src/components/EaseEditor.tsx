@@ -1,45 +1,25 @@
 import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
 import mexp from 'math-expression-evaluator';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import gsap from 'gsap';
-import CustomEase from 'gsap/CustomEase';
-import MotionPathPlugin from 'gsap/MotionPathPlugin';
-import MotionPathHelper from 'gsap/MotionPathHelper';
-import DrawSVGPlugin from 'gsap/DrawSVGPlugin';
+import { CustomEase } from 'gsap/CustomEase';
+import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
+import { MotionPathHelper } from 'gsap/MotionPathHelper';
+import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import tinyColor from 'tinycolor2';
-import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { closeEaseEditor } from '../store/actions/easeEditor';
-import { EaseEditorTypes } from '../store/actionTypes/easeEditor';
 import { setLayerTweenEase, setLayerTweenPower, setLayerTweenDuration, setLayerTweenDelay } from '../store/actions/layer';
-import { SetLayerTweenEasePayload, SetLayerTweenPowerPayload, SetLayerTweenDurationPayload, SetLayerTweenDelayPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setTweenDrawerTweenEditing } from '../store/actions/tweenDrawer';
-import { SetTweenDrawerTweenEditingPayload, TweenDrawerTypes } from '../store/actionTypes/tweenDrawer';
 import { setCanvasFocusing } from '../store/actions/canvasSettings';
-import { CanvasSettingsTypes, SetCanvasFocusingPayload } from '../store/actionTypes/canvasSettings';
+import { ThemeContext } from './ThemeProvider';
 import SidebarInput from './SidebarInput';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarSectionRow from './SidebarSectionRow';
 
 gsap.registerPlugin(CustomEase, MotionPathPlugin, MotionPathHelper, DrawSVGPlugin);
 
-interface EaseEditorProps {
-  tween?: Btwx.Tween;
-  easeEditor?: {
-    isOpen: boolean;
-    tween: string;
-  };
-  canvasFocusing?: boolean;
-  closeEaseEditor?(): EaseEditorTypes;
-  setLayerTweenEase?(payload: SetLayerTweenEasePayload): LayerTypes;
-  setLayerTweenPower?(payload: SetLayerTweenPowerPayload): LayerTypes;
-  setLayerTweenDuration?(payload: SetLayerTweenDurationPayload): LayerTypes;
-  setLayerTweenDelay?(payload: SetLayerTweenDelayPayload): LayerTypes;
-  setTweenDrawerTweenEditing?(payload: SetTweenDrawerTweenEditingPayload): TweenDrawerTypes;
-  setCanvasFocusing?(payload: SetCanvasFocusingPayload): CanvasSettingsTypes;
-}
-
-const EaseEditor = (props: EaseEditorProps): ReactElement => {
+const EaseEditor = (): ReactElement => {
   const editorRef = useRef<HTMLDivElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
   const pathRevealRef = useRef<SVGPathElement>(null);
@@ -47,22 +27,25 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
   const valueHeadRef = useRef<HTMLDivElement>(null);
   const visualizerRef = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
-  const { tween, easeEditor, closeEaseEditor, setLayerTweenEase, setLayerTweenPower, canvasFocusing, setCanvasFocusing, setLayerTweenDuration, setLayerTweenDelay, setTweenDrawerTweenEditing } = props;
+  const tween = useSelector((state: RootState) => state.layer.present.tweens.byId[state.easeEditor.tween]);
+  const canvasFocusing = useSelector((state: RootState) => state.canvasSettings.focusing);
+  const easeEditor = useSelector((state: RootState) => state.easeEditor);
   const [duration, setDuration] = useState(tween.duration);
   const [delay, setDelay] = useState(tween.delay);
+  const dispatch = useDispatch();
 
   const easeTypes = ['linear', 'power1', 'power2', 'power3', 'power4', 'back', 'bounce', 'circ', 'expo', 'sine'];
   const easePowerTypes = ['in', 'inOut', 'out'];
 
-  const handleTypePresetClick = (preset: Btwx.CubicBezier) => {
-    setLayerTweenEase({id: tween.id, ease: preset});
+  const handleTypePresetClick = (preset: Btwx.CubicBezier): void => {
+    dispatch(setLayerTweenEase({id: tween.id, ease: preset}));
   }
 
-  const handlePowerPresetClick = (preset: Btwx.CubicBezierType) => {
-    setLayerTweenPower({id: tween.id, power: preset});
+  const handlePowerPresetClick = (preset: Btwx.CubicBezierType): void => {
+    dispatch(setLayerTweenPower({id: tween.id, power: preset}));
   }
 
-  const setAndAnimate = () => {
+  const setAndAnimate = (): void => {
     gsap.killTweensOf([pathRevealRef.current, valueBarRef.current, valueHeadRef.current]);
     gsap.set(pathRevealRef.current, {clearProps: 'all'});
     gsap.set(valueBarRef.current, {clearProps: 'scale'});
@@ -80,17 +63,17 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
 
   const onMouseDown = (event: any): void => {
     if (editorRef.current && !editorRef.current.contains(event.target)) {
-      setTweenDrawerTweenEditing({id: null});
-      closeEaseEditor();
+      dispatch(setTweenDrawerTweenEditing({id: null}));
+      dispatch(closeEaseEditor());
     }
   }
 
-  const handleDurationChange = (e: any) => {
+  const handleDurationChange = (e: any): void => {
     const target = e.target;
     setDuration(target.value);
   };
 
-  const handleDurationSubmit = (e: any) => {
+  const handleDurationSubmit = (e: any): void => {
     try {
       const durationRounded = Math.round((mexp.eval(`${duration}`) as any + Number.EPSILON) * 100) / 100
       if (durationRounded !== tween.duration) {
@@ -102,7 +85,7 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
         if (durationRounded < 0.04) {
           newDuration = 0.04;
         }
-        setLayerTweenDuration({id: tween.id, duration: newDuration});
+        dispatch(setLayerTweenDuration({id: tween.id, duration: newDuration}));
         setDuration(newDuration);
       } else {
         setDuration(tween.duration);
@@ -114,12 +97,12 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
     }
   }
 
-  const handleDelayChange = (e: any) => {
+  const handleDelayChange = (e: any): void => {
     const target = e.target;
     setDelay(target.value);
   };
 
-  const handleDelaySubmit = (e: any) => {
+  const handleDelaySubmit = (e: any): void => {
     try {
       const delayRounded = Math.round((mexp.eval(`${delay}`) as any + Number.EPSILON) * 100) / 100
       if (delayRounded !== tween.delay) {
@@ -131,7 +114,7 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
         if (delayRounded < 0) {
           newDelay = 0;
         }
-        setLayerTweenDelay({id: tween.id, delay: newDelay});
+        dispatch(setLayerTweenDelay({id: tween.id, delay: newDelay}));
         setDelay(newDelay);
       } else {
         setDelay(tween.delay);
@@ -145,15 +128,15 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
 
   useEffect(() => {
     if (canvasFocusing) {
-      setCanvasFocusing({focusing: false});
+      dispatch(setCanvasFocusing({focusing: false}));
     }
     document.addEventListener('mousedown', onMouseDown, false);
-    setTweenDrawerTweenEditing({id: tween.id});
+    dispatch(setTweenDrawerTweenEditing({id: tween.id}));
     return (): void => {
       if (easeEditor.isOpen) {
-        closeEaseEditor();
+        dispatch(closeEaseEditor());
       }
-      setCanvasFocusing({focusing: true});
+      dispatch(setCanvasFocusing({focusing: true}));
       document.removeEventListener('mousedown', onMouseDown);
     }
   }, []);
@@ -329,14 +312,4 @@ const EaseEditor = (props: EaseEditorProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer, easeEditor, canvasSettings } = state;
-  const tween = layer.present.tweens.byId[easeEditor.tween];
-  const canvasFocusing = canvasSettings.focusing;
-  return { tween, easeEditor, canvasFocusing };
-};
-
-export default connect(
-  mapStateToProps,
-  { closeEaseEditor, setLayerTweenEase, setLayerTweenPower, setLayerTweenDuration, setLayerTweenDelay, setTweenDrawerTweenEditing, setCanvasFocusing }
-)(EaseEditor);
+export default EaseEditor;

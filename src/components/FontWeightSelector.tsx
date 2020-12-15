@@ -1,22 +1,16 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
-import SidebarSelect from './SidebarSelect';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { SetLayersFontWeightPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setLayersFontWeight } from '../store/actions/layer';
-import { TextSettingsTypes, SetTextSettingsFontWeightPayload } from '../store/actionTypes/textSettings';
+import { getSelectedFontWeight } from '../store/selectors/layer';
 import { setTextSettingsFontWeight } from '../store/actions/textSettings';
+import SidebarSelect from './SidebarSelect';
 
-interface FontWeightSelectorProps {
-  selected?: string[];
-  fontWeightValue?: Btwx.FontWeight | 'multi';
-  fontFamily?: string;
-  setLayersFontWeight?(payload: SetLayersFontWeightPayload): LayerTypes;
-  setTextSettingsFontWeight?(payload: SetTextSettingsFontWeightPayload): TextSettingsTypes;
-}
-
-const FontWeightSelector = (props: FontWeightSelectorProps): ReactElement => {
-  const { selected, fontWeightValue, fontFamily, setLayersFontWeight, setTextSettingsFontWeight } = props;
+const FontWeightSelector = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const fontWeightValue = useSelector((state: RootState) => getSelectedFontWeight(state));
+  const fontFamily = useSelector((state: RootState) => state.textSettings.fontFamily);
+  const dispatch = useDispatch();
 
   const options: { value: string; label: string }[] = [
     { value: 'normal', label: 'Regular' },
@@ -37,8 +31,8 @@ const FontWeightSelector = (props: FontWeightSelectorProps): ReactElement => {
 
   const handleChange = (selectedOption: { value: string; label: string }) => {
     setFontWeight(selectedOption);
-    setLayersFontWeight({layers: selected, fontWeight: selectedOption.value});
-    setTextSettingsFontWeight({fontWeight: selectedOption.value as Btwx.FontWeight});
+    dispatch(setLayersFontWeight({layers: selected, fontWeight: selectedOption.value}));
+    dispatch(setTextSettingsFontWeight({fontWeight: selectedOption.value as Btwx.FontWeight}));
   }
 
   return (
@@ -54,22 +48,4 @@ const FontWeightSelector = (props: FontWeightSelectorProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer, textSettings } = state;
-  const selected = layer.present.selected;
-  const layerItems: Btwx.Text[] = selected.reduce((result, current) => {
-    const layerItem = layer.present.byId[current];
-    return [...result, layerItem];
-  }, []);
-  const fontWeightValues: string[] = layerItems.reduce((result, current) => {
-    return [...result, current.textStyle.fontWeight];
-  }, []);
-  const fontWeightValue = fontWeightValues.every((fontWeight: string) => fontWeight === fontWeightValues[0]) ? fontWeightValues[0] : 'multi';
-  const fontFamily = textSettings.fontFamily;
-  return { selected, fontWeightValue, fontFamily };
-};
-
-export default connect(
-  mapStateToProps,
-  { setLayersFontWeight, setTextSettingsFontWeight }
-)(FontWeightSelector);
+export default FontWeightSelector;

@@ -1,39 +1,21 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-// import { remote } from 'electron';
 import React, { useContext, useEffect, ReactElement, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { uiPaperScope } from '../canvas';
 import { RootState } from '../store/reducers';
-import Tooltip from '../canvas/tooltip';
 import { setCanvasDrawing } from '../store/actions/canvasSettings';
-import { CanvasSettingsTypes, SetCanvasDrawingPayload } from '../store/actionTypes/canvasSettings';
 import { addArtboardThunk } from '../store/actions/layer';
-import { AddArtboardPayload } from '../store/actionTypes/layer';
 import { toggleArtboardToolThunk } from '../store/actions/artboardTool';
 import { ThemeContext } from './ThemeProvider';
+import Tooltip from '../canvas/tooltip';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
 
-interface ArtboardToolStateProps {
-  isEnabled?: boolean;
-  drawing?: boolean;
-}
-
-interface ArtboardToolDispatchProps {
-  addArtboardThunk?(payload: AddArtboardPayload): void;
-  setCanvasDrawing?(payload: SetCanvasDrawingPayload): CanvasSettingsTypes;
-  toggleArtboardToolThunk?(): void;
-}
-
-type ArtboardToolProps = (
-  ArtboardToolStateProps &
-  ArtboardToolDispatchProps &
-  PaperToolProps
-);
-
-const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
+const ArtboardTool = (props: PaperToolProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isEnabled, addArtboardThunk, setCanvasDrawing, drawing, toggleArtboardToolThunk, tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent } = props;
+  const { tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent } = props;
+  const isEnabled = useSelector((state: RootState) => state.artboardTool.isEnabled);
+  const drawing = useSelector((state: RootState) => state.canvasSettings.drawing);
   const [handle, setHandle] = useState<Btwx.ResizeHandle>(null);
   const [constrainedDims, setConstrainedDims] = useState<paper.Point>(null);
   const [shiftModifier, setShiftModifier] = useState<boolean>(false);
@@ -41,8 +23,9 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
   const [from, setFrom] = useState<paper.Point>(null);
   const [toBounds, setToBounds] = useState<paper.Rectangle>(null);
   const [initialToBounds, setInitialToBounds] = useState<paper.Rectangle>(null);
+  const dispatch = useDispatch();
 
-  const resetState = () => {
+  const resetState = (): void => {
     const drawingPreview = uiPaperScope.projects[0].getItem({ data: { id: 'drawingPreview' }});
     const tooltips = uiPaperScope.projects[0].getItem({ data: { id: 'tooltips' }});
     drawingPreview.removeChildren();
@@ -72,7 +55,14 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
     });
   }
 
-  const getSnapToolHitTestZones = () => {
+  const getSnapToolHitTestZones = (): {
+    top?: boolean;
+    bottom?: boolean;
+    left?: boolean;
+    right?: boolean;
+    center?: boolean;
+    middle?: boolean;
+  } => {
     if (drawing) {
       const x = dragEvent ? dragEvent.point.x - dragEvent.downPoint.x : 0;
       const y = dragEvent ? dragEvent.point.y - dragEvent.downPoint.y : 0;
@@ -212,7 +202,7 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
       setConstrainedDims(nextContrainedDims);
       setSnapBounds(nextSnapBounds);
       if (!drawing) {
-        setCanvasDrawing({drawing: true});
+        dispatch(setCanvasDrawing({drawing: true}));
       }
       if (dragEvent.modifiers.shift && !shiftModifier) {
         setShiftModifier(true);
@@ -226,7 +216,7 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
   useEffect(() => {
     if (upEvent && isEnabled && drawing) {
       resetState();
-      addArtboardThunk({
+      dispatch(addArtboardThunk({
         layer: {
           frame: {
             x: toBounds.center.x,
@@ -237,8 +227,8 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
             innerHeight: toBounds.height
           }
         }
-      }) as any;
-      toggleArtboardToolThunk();
+      })) as any;
+      dispatch(toggleArtboardToolThunk());
     }
   }, [upEvent]);
 
@@ -302,28 +292,7 @@ const ArtboardTool = (props: ArtboardToolProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): ArtboardToolStateProps => {
-  const { canvasSettings, artboardTool } = state;
-  const isEnabled = artboardTool.isEnabled;
-  const drawing = canvasSettings.drawing;
-  return {
-    isEnabled,
-    drawing
-  };
-};
-
-const mapDispatchToProps = {
-  addArtboardThunk,
-  setCanvasDrawing,
-  toggleArtboardToolThunk
-};
-
 export default PaperTool(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )(ArtboardTool),
-  {
-    all: true
-  }
+  ArtboardTool,
+  { all: true }
 );

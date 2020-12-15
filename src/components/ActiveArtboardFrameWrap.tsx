@@ -1,14 +1,14 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import ActiveArtboardFrame from './ActiveArtboardFrame';
 
-interface ActiveArtboardFrameWrapProps {
-  isEnabled?: boolean;
-}
-
-const ActiveArtboardFrameWrap = (props: ActiveArtboardFrameWrapProps): ReactElement => {
-  const { isEnabled } = props;
+const ActiveArtboardFrameWrap = (): ReactElement => {
+  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
+  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
+  const isZooming = useSelector((state: RootState) => state.canvasSettings.zooming);
+  const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
+  const isEnabled = activeArtboard && !isResizing && !isDragging && !isZooming;
 
   return (
     isEnabled
@@ -17,18 +17,4 @@ const ActiveArtboardFrameWrap = (props: ActiveArtboardFrameWrapProps): ReactElem
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  isEnabled: boolean;
-} => {
-  const { layer, canvasSettings } = state;
-  const isResizing = canvasSettings.resizing;
-  const isDragging = canvasSettings.dragging;
-  const isZooming = canvasSettings.zooming;
-  const activeArtboard = layer.present.activeArtboard;
-  const isEnabled = activeArtboard && !isResizing && !isDragging && !isZooming;
-  return { isEnabled };
-};
-
-export default connect(
-  mapStateToProps
-)(ActiveArtboardFrameWrap);
+export default ActiveArtboardFrameWrap;

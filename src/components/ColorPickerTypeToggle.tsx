@@ -1,29 +1,28 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { setCanvasColorFormat } from '../store/actions/documentSettings';
-import { SetCanvasColorFormatPayload, DocumentSettingsTypes } from '../store/actionTypes/documentSettings';
 import SidebarToggleButton from './SidebarToggleButton';
 import Icon from './Icon';
 
 interface ColorPickerTypeToggleProps {
   type: Btwx.ColorFormat;
   setType: any;
-  setCanvasColorFormat?(payload: SetCanvasColorFormatPayload): DocumentSettingsTypes;
 }
 
 const ColorPickerTypeToggle = (props: ColorPickerTypeToggleProps): ReactElement => {
-  const { type, setType, setCanvasColorFormat } = props;
+  const { type, setType } = props;
+  const dispatch = useDispatch();
 
   const handleClick = () => {
     switch(type) {
       case 'rgb':
         setType('hsl');
-        setCanvasColorFormat({colorFormat: 'hsl'});
+        dispatch(setCanvasColorFormat({colorFormat: 'hsl'}));
         break;
       case 'hsl':
         setType('rgb');
-        setCanvasColorFormat({colorFormat: 'rgb'});
+        dispatch(setCanvasColorFormat({colorFormat: 'rgb'}));
         break;
     }
   }
@@ -39,7 +38,4 @@ const ColorPickerTypeToggle = (props: ColorPickerTypeToggleProps): ReactElement 
   );
 }
 
-export default connect(
-  null,
-  { setCanvasColorFormat }
-)(ColorPickerTypeToggle);
+export default ColorPickerTypeToggle;

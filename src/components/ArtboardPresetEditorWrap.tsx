@@ -1,14 +1,10 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import ArtboardPresetEditor from './ArtboardPresetEditor';
 
-interface ArtboardPresetEditorWrapProps {
-  isOpen?: boolean;
-}
-
-const ArtboardPresetEditorWrap = (props: ArtboardPresetEditorWrapProps): ReactElement => {
-  const { isOpen } = props;
+const ArtboardPresetEditorWrap = (): ReactElement => {
+  const isOpen = useSelector((state: RootState) => state.artboardPresetEditor.isOpen);
 
   return (
     isOpen
@@ -17,12 +13,4 @@ const ArtboardPresetEditorWrap = (props: ArtboardPresetEditorWrapProps): ReactEl
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { artboardPresetEditor } = state;
-  const isOpen = artboardPresetEditor.isOpen;
-  return { isOpen };
-};
-
-export default connect(
-  mapStateToProps
-)(ArtboardPresetEditorWrap);
+export default ArtboardPresetEditorWrap;

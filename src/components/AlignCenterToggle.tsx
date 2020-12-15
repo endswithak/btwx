@@ -1,34 +1,21 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { AlignLayersToCenterPayload, LayerTypes } from '../store/actionTypes/layer';
 import { alignLayersToCenter } from '../store/actions/layer';
 import IconButton from './IconButton';
 
-interface AlignCenterToggleProps {
-  selected?: string[];
-  alignLayersToCenter?(payload: AlignLayersToCenterPayload): LayerTypes;
-}
-
-const AlignCenterToggle = (props: AlignCenterToggleProps): ReactElement => {
-  const { selected, alignLayersToCenter } = props;
+const AlignCenterToggle = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const dispatch = useDispatch();
 
   return (
     <IconButton
-      onClick={() => alignLayersToCenter({layers: selected})}
+      onClick={() => dispatch(alignLayersToCenter({layers: selected}))}
       icon='align-center'
       disabled={selected.length <= 1}
       variant='medium' />
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  return { selected };
-};
-
-export default connect(
-  mapStateToProps,
-  { alignLayersToCenter }
-)(AlignCenterToggle);
+export default AlignCenterToggle;

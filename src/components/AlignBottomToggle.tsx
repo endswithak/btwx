@@ -1,34 +1,20 @@
 import React, { ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { AlignLayersToBottomPayload, LayerTypes } from '../store/actionTypes/layer';
 import { alignLayersToBottom } from '../store/actions/layer';
 import IconButton from './IconButton';
 
-interface AlignBottomToggleProps {
-  selected?: string[];
-  alignLayersToBottom?(payload: AlignLayersToBottomPayload): LayerTypes;
-}
-
-const AlignBottomToggle = (props: AlignBottomToggleProps): ReactElement => {
-  const { selected, alignLayersToBottom } = props;
+const AlignBottomToggle = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const dispatch = useDispatch();
 
   return (
     <IconButton
-      onClick={() => alignLayersToBottom({layers: selected})}
+      onClick={() => dispatch(alignLayersToBottom({layers: selected}))}
       icon='align-bottom'
       disabled={selected.length <= 1}
       variant='medium' />
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  return { selected };
-};
-
-export default connect(
-  mapStateToProps,
-  { alignLayersToBottom }
-)(AlignBottomToggle);
+export default AlignBottomToggle;

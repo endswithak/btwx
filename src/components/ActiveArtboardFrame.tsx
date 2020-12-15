@@ -1,17 +1,13 @@
 import React, { ReactElement, useEffect } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { updateActiveArtboardFrame } from '../store/actions/layer';
 import { uiPaperScope } from '../canvas';
 import { getActiveArtboardBounds } from '../store/selectors/layer';
 
-interface ActiveArtboardFrameProps {
-  activeArtboardBounds?: paper.Rectangle;
-  zoom?: number;
-}
-
-const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
-  const { activeArtboardBounds, zoom } = props;
+const ActiveArtboardFrame = (): ReactElement => {
+  const activeArtboardBounds = useSelector((state: RootState) => getActiveArtboardBounds(state));
+  const zoom = useSelector((state: RootState) => state.documentSettings.zoom);
 
   useEffect(() => {
     updateActiveArtboardFrame(activeArtboardBounds);
@@ -26,15 +22,4 @@ const ActiveArtboardFrame = (props: ActiveArtboardFrameProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  activeArtboardBounds: paper.Rectangle;
-  zoom: number;
-} => {
-  const activeArtboardBounds = getActiveArtboardBounds(state);
-  const zoom = state.documentSettings.zoom;
-  return { activeArtboardBounds, zoom };
-};
-
-export default connect(
-  mapStateToProps,
-)(ActiveArtboardFrame);
+export default ActiveArtboardFrame;

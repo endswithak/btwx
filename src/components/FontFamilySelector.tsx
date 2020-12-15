@@ -1,21 +1,15 @@
-import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
-import SidebarSelect from './SidebarSelect';
+import React, { ReactElement, useEffect, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { SetLayersFontFamilyPayload, LayerTypes } from '../store/actionTypes/layer';
 import { setLayersFontFamily } from '../store/actions/layer';
-import { TextSettingsTypes, SetTextSettingsFontFamilyPayload } from '../store/actionTypes/textSettings';
+import { getSelectedFontFamily } from '../store/selectors/layer';
 import { setTextSettingsFontFamily } from '../store/actions/textSettings';
+import SidebarSelect from './SidebarSelect';
 
-interface FontFamilySelectorProps {
-  selected?: string[];
-  fontFamilyValue?: string | 'multi';
-  setLayersFontFamily?(payload: SetLayersFontFamilyPayload): LayerTypes;
-  setTextSettingsFontFamily?(payload: SetTextSettingsFontFamilyPayload): TextSettingsTypes;
-}
-
-const FontFamilySelector = (props: FontFamilySelectorProps): ReactElement => {
-  const { selected, fontFamilyValue, setLayersFontFamily, setTextSettingsFontFamily } = props;
+const FontFamilySelector = (): ReactElement => {
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const fontFamilyValue = useSelector((state: RootState) => getSelectedFontFamily(state));
+  const dispatch = useDispatch();
 
   const options: { value: string; label: string }[] = [
     { value: 'Georgia', label: 'Georgia' },
@@ -53,10 +47,10 @@ const FontFamilySelector = (props: FontFamilySelectorProps): ReactElement => {
     }
   }, [fontFamilyValue, selected]);
 
-  const handleChange = (selectedOption: { value: string; label: string }) => {
+  const handleChange = (selectedOption: { value: string; label: string }): void => {
     setFontFamily(selectedOption);
-    setLayersFontFamily({layers: selected, fontFamily: selectedOption.value});
-    setTextSettingsFontFamily({fontFamily: selectedOption.value});
+    dispatch(setLayersFontFamily({layers: selected, fontFamily: selectedOption.value}));
+    dispatch(setTextSettingsFontFamily({fontFamily: selectedOption.value}));
   }
 
   return (
@@ -71,21 +65,4 @@ const FontFamilySelector = (props: FontFamilySelectorProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { layer } = state;
-  const selected = layer.present.selected;
-  const layerItems: Btwx.Text[] = selected.reduce((result, current) => {
-    const layerItem = layer.present.byId[current];
-    return [...result, layerItem];
-  }, []);
-  const fontFamilyValues: string[] = layerItems.reduce((result, current) => {
-    return [...result, current.textStyle.fontFamily];
-  }, []);
-  const fontFamilyValue = fontFamilyValues.every((fontFamily: string) => fontFamily === fontFamilyValues[0]) ? fontFamilyValues[0] : 'multi';
-  return { selected, fontFamilyValue };
-};
-
-export default connect(
-  mapStateToProps,
-  { setLayersFontFamily, setTextSettingsFontFamily }
-)(FontFamilySelector);
+export default FontFamilySelector;

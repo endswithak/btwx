@@ -1,15 +1,13 @@
 import React, { useContext, useEffect, ReactElement, useRef } from 'react';
-import { connect } from 'react-redux';
-import { ThemeContext } from './ThemeProvider';
+import { useSelector, useDispatch } from 'react-redux';
+import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
-import { ContextMenuState } from '../store/reducers/contextMenu';
-import { ContextMenuTypes } from '../store/actionTypes/contextMenu';
 import { closeContextMenu } from '../store/actions/contextMenu';
+import { ThemeContext } from './ThemeProvider';
 import ContextMenuItem from './ContextMenuItem';
 import ContextMenuEmptyState from './ContextMenuEmptyState';
 import ContextMenuHead from './ContextMenuHead';
 import ContextMenuDivider from './ContextMenuDivider';
-import tinyColor from 'tinycolor2';
 
 interface ContextMenuProps {
   options: {
@@ -25,20 +23,50 @@ interface ContextMenuProps {
     onMouseLeave?(): void;
   }[];
   emptyState?: string;
-  contextMenu?: ContextMenuState;
-  x?: number;
-  y?: number;
-  closeContextMenu?(): ContextMenuTypes;
 }
 
 const ContextMenu = (props: ContextMenuProps): ReactElement => {
   const ref = useRef(null);
   const theme = useContext(ThemeContext);
-  const { options, contextMenu, emptyState, closeContextMenu, x, y } = props;
+  const { options, emptyState } = props;
+  const initialX = useSelector((state: RootState) => state.contextMenu.x);
+  const initialY = useSelector((state: RootState) => state.contextMenu.y);
+  const visibleOptions = options.filter(option => !option.hidden);
+  const menuHeight = visibleOptions.reduce((result, current) => {
+    switch(current.type) {
+      case 'MenuHead':
+      case 'MenuItem':
+        return result + 24;
+      case 'MenuDivider':
+        return result + 8;
+      default:
+        return result;
+    }
+  }, 0);
+  const menuWidth = 224;
+  const windowHeight = window.innerHeight;
+  const windowWidth = window.innerWidth;
+  let x;
+  let y;
+  if (initialX + menuWidth > windowWidth) {
+    x = initialX - menuWidth;
+  } else {
+    x = initialX;
+  }
+  if (initialY + menuHeight > windowHeight) {
+    if (initialY + (menuHeight / 2) > windowHeight) {
+      y = initialY - menuHeight;
+    } else {
+      y = initialY - (menuHeight / 2);
+    }
+  } else {
+    y = initialY;
+  }
+  const dispatch = useDispatch();
 
   const handleMouseDown = (e: any) => {
     if (e.buttons !== 2 && !ref.current.contains(e.target)) {
-      closeContextMenu();
+      dispatch(closeContextMenu());
     }
   }
 
@@ -108,45 +136,4 @@ const ContextMenu = (props: ContextMenuProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState, ownProps: ContextMenuProps) => {
-  const { contextMenu } = state;
-  const initialX = contextMenu.x;
-  const initialY = contextMenu.y;
-  const visibleOptions = ownProps.options.filter(option => !option.hidden);
-  const menuHeight = visibleOptions.reduce((result, current) => {
-    switch(current.type) {
-      case 'MenuHead':
-      case 'MenuItem':
-        return result + 24;
-      case 'MenuDivider':
-        return result + 8;
-      default:
-        return result;
-    }
-  }, 0);
-  const menuWidth = 224;
-  const windowHeight = window.innerHeight;
-  const windowWidth = window.innerWidth;
-  let x;
-  let y;
-  if (initialX + menuWidth > windowWidth) {
-    x = initialX - menuWidth;
-  } else {
-    x = initialX;
-  }
-  if (initialY + menuHeight > windowHeight) {
-    if (initialY + (menuHeight / 2) > windowHeight) {
-      y = initialY - menuHeight;
-    } else {
-      y = initialY - (menuHeight / 2);
-    }
-  } else {
-    y = initialY;
-  }
-  return { contextMenu, x, y };
-};
-
-export default connect(
-  mapStateToProps,
-  { closeContextMenu }
-)(ContextMenu);
+export default ContextMenu;

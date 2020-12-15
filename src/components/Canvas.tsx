@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement, useEffect, useState, useRef } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { uiPaperScope } from '../canvas';
 import { getAllProjectIndices } from '../store/selectors/layer';
@@ -23,15 +23,15 @@ import CanvasArtboards from './CanvasArtboards';
 
 interface CanvasProps {
   ready: boolean;
-  interactionEnabled?: boolean;
-  allProjectIndices: number[];
   setReady(ready: boolean): void;
 }
 
 const Canvas = (props: CanvasProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const ref = useRef<HTMLDivElement>(null);
-  const { ready, setReady, interactionEnabled, allProjectIndices } = props;
+  const { ready, setReady } = props;
+  const interactionEnabled = useSelector((state: RootState) => !state.canvasSettings.selecting && !state.canvasSettings.resizing && !state.canvasSettings.drawing && !state.canvasSettings.zooming && !state.canvasSettings.translating && !state.canvasSettings.dragging);
+  const allProjectIndices = useSelector((state: RootState) => getAllProjectIndices(state));
   const [layerEvent, setLayerEvent] = useState(null);
   const [uiEvent, setUIEvent] = useState(null);
   const [translateEvent, setTranslateEvent] = useState(null);
@@ -180,17 +180,4 @@ const Canvas = (props: CanvasProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  interactionEnabled: boolean;
-  allProjectIndices: number[];
-} => {
-  const { canvasSettings } = state;
-  return {
-    interactionEnabled: !canvasSettings.selecting && !canvasSettings.resizing && !canvasSettings.drawing && !canvasSettings.zooming && !canvasSettings.translating && !canvasSettings.dragging,
-    allProjectIndices: getAllProjectIndices(state)
-  };
-};
-
-export default connect(
-  mapStateToProps
-)(Canvas);
+export default Canvas;

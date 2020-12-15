@@ -1,16 +1,10 @@
-import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
-import { connect } from 'react-redux';
-import { ThemeContext } from './ThemeProvider';
+import React, { ReactElement } from 'react';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import EaseEditor from './EaseEditor';
 
-interface EaseEditorWrapProps {
-  isOpen: boolean;
-}
-
-const EaseEditorWrap = (props: EaseEditorWrapProps): ReactElement => {
-  const theme = useContext(ThemeContext);
-  const { isOpen } = props;
+const EaseEditorWrap = (): ReactElement => {
+  const isOpen = useSelector((state: RootState) => state.easeEditor.isOpen);
 
   return (
     isOpen
@@ -19,12 +13,4 @@ const EaseEditorWrap = (props: EaseEditorWrapProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { easeEditor } = state;
-  const isOpen = easeEditor.isOpen;
-  return { isOpen };
-};
-
-export default connect(
-  mapStateToProps,
-)(EaseEditorWrap);
+export default EaseEditorWrap;

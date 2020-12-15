@@ -1,13 +1,10 @@
 import React, { useContext, useEffect, ReactElement } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { setCanvasActiveTool } from '../store/actions/canvasSettings';
-import { CanvasSettingsTypes, SetCanvasActiveToolPayload } from '../store/actionTypes/canvasSettings';
-import { LayerTypes, SetLayerHoverPayload, SetLayerActiveGradientStopPayload } from '../store/actionTypes/layer';
 import { setLayerHover, setLayerActiveGradientStop } from '../store/actions/layer';
 import { setTweenDrawerEventThunk, setTweenDrawerEventHoverThunk } from '../store/actions/tweenDrawer';
-import { SetTweenDrawerEventPayload, TweenDrawerTypes, SetTweenDrawerEventHoverPayload } from '../store/actionTypes/tweenDrawer';
 
 interface CanvasUIEventsProps {
   uiEvent: {
@@ -16,36 +13,32 @@ interface CanvasUIEventsProps {
     eventType: 'mouseMove' | 'mouseDown' | 'mouseUp' | 'doubleClick' | 'contextMenu';
     event: any;
   };
-  selected?: string[];
-  hover?: string;
-  resizing?: boolean;
-  dragging?: boolean;
-  selecting?: boolean;
-  eventDrawerHover?: string;
-  eventDrawerEvent?: string;
-  activeTool?: Btwx.ToolType;
-  gradientEditorProp?: 'fill' | 'stroke';
-  setLayerActiveGradientStop?(payload: SetLayerActiveGradientStopPayload): LayerTypes;
-  setCanvasActiveTool?(payload: SetCanvasActiveToolPayload): CanvasSettingsTypes;
-  setLayerHover?(payload: SetLayerHoverPayload): LayerTypes;
-  setTweenDrawerEventHoverThunk?(payload: SetTweenDrawerEventHoverPayload): void;
-  setTweenDrawerEventThunk?(payload: SetTweenDrawerEventPayload): void;
 }
 
 const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { uiEvent, activeTool, setCanvasActiveTool, resizing, dragging, selecting, setLayerHover, hover, selected, eventDrawerHover, setTweenDrawerEventHoverThunk, eventDrawerEvent, setTweenDrawerEventThunk, setLayerActiveGradientStop, gradientEditorProp } = props;
+  const { uiEvent } = props;
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const activeTool = useSelector((state: RootState) => state.canvasSettings.activeTool);
+  const resizing = useSelector((state: RootState) => state.canvasSettings.resizing);
+  const dragging = useSelector((state: RootState) => state.canvasSettings.dragging);
+  const selecting = useSelector((state: RootState) => state.canvasSettings.selecting);
+  const hover = useSelector((state: RootState) => state.layer.present.hover);
+  const eventDrawerHover = useSelector((state: RootState) => state.tweenDrawer.eventHover);
+  const eventDrawerEvent = useSelector((state: RootState) => state.tweenDrawer.event);
+  const gradientEditorProp = useSelector((state: RootState) => state.gradientEditor.prop);
+  const dispatch = useDispatch();
 
   const handleMouseMove = (): void => {
     if (uiEvent.empty) {
       if (activeTool !== 'AreaSelect' && !hover) {
-        setCanvasActiveTool({
+        dispatch(setCanvasActiveTool({
           activeTool: 'AreaSelect',
           resizeHandle: null,
           dragHandle: null,
           lineHandle: null,
           gradientHandle: null
-        });
+        }));
       }
       if (eventDrawerHover !== null) {
         // setTweenDrawerEventHoverThunk({id: null});
@@ -54,18 +47,18 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
       switch(uiEvent.hitResult.item.data.elementId) {
         case 'selectionFrame': {
           if (hover) {
-            setLayerHover({id: null});
+            dispatch(setLayerHover({id: null}));
           }
           switch(uiEvent.hitResult.item.data.interactiveType) {
             case 'move':
             case 'lineMove':
               if (activeTool !== 'Drag') {
-                setCanvasActiveTool({
+                dispatch(setCanvasActiveTool({
                   activeTool: 'Drag',
                   dragHandle: true,
                   resizeHandle: null,
                   lineHandle: null
-                });
+                }));
               }
               break;
             case 'topLeft':
@@ -77,24 +70,24 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
             case 'leftCenter':
             case 'rightCenter': {
               if (activeTool !== 'Resize') {
-                setCanvasActiveTool({
+                dispatch(setCanvasActiveTool({
                   activeTool: 'Resize',
                   resizeHandle: uiEvent.hitResult.item.data.interactiveType,
                   dragHandle: false,
                   lineHandle: null
-                });
+                }));
               }
               break;
             }
             case 'lineFrom':
             case 'lineTo':
               if (activeTool !== 'Line') {
-                setCanvasActiveTool({
+                dispatch(setCanvasActiveTool({
                   activeTool: 'Line',
                   lineHandle: uiEvent.hitResult.item.data.interactiveType,
                   dragHandle: false,
                   resizeHandle: null
-                });
+                }));
               }
               break;
           }
@@ -102,20 +95,20 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
         }
         case 'gradientFrame': {
           if (hover) {
-            setLayerHover({id: null});
+            dispatch(setLayerHover({id: null}));
           }
           if (activeTool !== 'Gradient') {
-            setCanvasActiveTool({
+            dispatch(setCanvasActiveTool({
               activeTool: 'Gradient',
               gradientHandle: uiEvent.hitResult.item.data.interactiveType
-            });
+            }));
           }
           break;
         }
         case 'TweenEventsFrame': {
           const interactiveType = uiEvent.hitResult.item.data.interactiveType;
           if (interactiveType && eventDrawerHover !== interactiveType) {
-            setTweenDrawerEventHoverThunk({id: interactiveType});
+            dispatch(setTweenDrawerEventHoverThunk({id: interactiveType}));
           }
           break;
         }
@@ -132,11 +125,11 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           break;
         }
         case 'gradientFrame': {
-          setLayerActiveGradientStop({
+          dispatch(setLayerActiveGradientStop({
             id: selected[0],
             prop: gradientEditorProp,
             stopIndex: uiEvent.hitResult.item.data.stopIndex
-          });
+          }));
           break;
         }
         case 'tweenEventsFrame': {
@@ -165,7 +158,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
         case 'tweenEventsFrame': {
           const interactiveType = uiEvent.hitResult.item.data.interactiveType;
           if (interactiveType && eventDrawerEvent !== interactiveType) {
-            setTweenDrawerEventThunk({id: interactiveType});
+            dispatch(setTweenDrawerEventThunk({id: interactiveType}));
           }
           break;
         }
@@ -204,38 +197,4 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  selected: string[];
-  hover: string;
-  activeTool: Btwx.ToolType;
-  resizing: boolean;
-  dragging: boolean;
-  selecting: boolean;
-  eventDrawerHover: string;
-  eventDrawerEvent: string;
-  gradientEditorProp: 'fill' | 'stroke';
-} => {
-  const { canvasSettings, layer, tweenDrawer, gradientEditor } = state;
-  return {
-    selected: layer.present.selected,
-    activeTool: canvasSettings.activeTool,
-    resizing: canvasSettings.resizing,
-    dragging: canvasSettings.dragging,
-    selecting: canvasSettings.selecting,
-    hover: layer.present.hover,
-    eventDrawerHover: tweenDrawer.eventHover,
-    eventDrawerEvent: tweenDrawer.event,
-    gradientEditorProp: gradientEditor.prop
-  };
-};
-
-export default connect(
-  mapStateToProps,
-  {
-    setCanvasActiveTool,
-    setLayerHover,
-    setTweenDrawerEventHoverThunk,
-    setTweenDrawerEventThunk,
-    setLayerActiveGradientStop
-  }
-)(CanvasUIEvents);
+export default CanvasUIEvents;
