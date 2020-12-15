@@ -580,7 +580,7 @@ export const deselectLayers = (state: LayerState, action: DeselectLayers): Layer
 };
 
 export const selectAllLayers = (state: LayerState, action: SelectAllLayers): LayerState => {
-  const pageItem = state.byId['page'];
+  const pageItem = state.byId['root'];
   return selectLayers(state, layerActions.selectLayers({layers: pageItem.children, newSelection: true}) as SelectLayers);
 };
 

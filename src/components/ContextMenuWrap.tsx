@@ -22,17 +22,17 @@ const ContextMenuWrap = (): ReactElement => {
   })) as { allIds: string[]; byId: { [id: string]: Btwx.Artboard } };
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const canSetTweenDrawerEventHover = useSelector((state: RootState) => state.viewSettings.tweenDrawer.isOpen && !state.tweenDrawer.event);
-  const layerItem = useSelector((state: RootState) => Object.prototype.hasOwnProperty.call(state.layer.present.byId, state.contextMenu.id) && state.contextMenu.id !== 'page' ? state.layer.present.byId[state.contextMenu.id] : null);
+  const layerItem = useSelector((state: RootState) => Object.prototype.hasOwnProperty.call(state.layer.present.byId, state.contextMenu.id) && state.contextMenu.id !== 'root' ? state.layer.present.byId[state.contextMenu.id] : null);
   const tweenEventLayerScope = layerItem ? layerItem.scope : null;
   const hasArtboardParent = useSelector((state: RootState) => layerItem ? tweenEventLayerScope[1] && state.layer.present.byId[tweenEventLayerScope[1]].type === 'Artboard' : false);
   const isArtboard = layerItem ? layerItem.type === 'Artboard' : false;
   const artboardParent = isArtboard ? layerItem.id : hasArtboardParent ? tweenEventLayerScope[1] : null;
   const canAddTweenEvent = useSelector((state: RootState) => layerItem && (state.layer.present.selected.length === 0 || (state.layer.present.selected.length === 1 && state.layer.present.selected[0] === state.contextMenu.id)) && (tweenEventLayerScope.some(id => state.layer.present.allArtboardIds.includes(id)) || state.layer.present.allArtboardIds.includes(state.contextMenu.id)));
   const tweenEvents = useSelector((state: RootState) => layerItem && canAddTweenEvent ? state.layer.present.events.allIds.filter((id) => state.layer.present.events.byId[id].layer === state.contextMenu.id && state.layer.present.events.byId[id].artboard === artboardParent) : null);
-  const tweenEventItems = tweenEvents ? useSelector((state: RootState) => tweenEvents.reduce((result, current) => {
+  const tweenEventItems = useSelector((state: RootState) => tweenEvents ? tweenEvents.reduce((result, current) => {
     result = [...result, state.layer.present.events.byId[current]];
     return result;
-   }, [])) : null;
+   }, []) : null);
   const currentY = useSelector((state: RootState) => state.contextMenu.y && document.getElementById('context-menu') ? document.getElementById('context-menu').offsetTop : state.contextMenu.y);
   const currentX = useSelector((state: RootState) => state.contextMenu.x && document.getElementById('context-menu') ? document.getElementById('context-menu').offsetLeft : state.contextMenu.x);
   const canSelectAll = useSelector((state: RootState) => state.layer.present.allIds.length > 1);
@@ -63,7 +63,7 @@ const ContextMenuWrap = (): ReactElement => {
         return [{
           type: 'MenuItem',
           text: 'Add Event...',
-          hidden: contextMenu.id && contextMenu.id === 'page',
+          hidden: contextMenu.id && contextMenu.id === 'root',
           disabled: !canAddTweenEvent,
           onClick: (): void => {
             dispatch(closeContextMenu());
@@ -76,11 +76,11 @@ const ContextMenuWrap = (): ReactElement => {
           }
         },{
           type: 'MenuDivider',
-          hidden: contextMenu.id && contextMenu.id === 'page'
+          hidden: contextMenu.id && contextMenu.id === 'root'
         },{
           type: 'MenuItem',
           text: 'Select',
-          hidden: contextMenu.id && contextMenu.id === 'page',
+          hidden: contextMenu.id && contextMenu.id === 'root',
           onClick: (): void => {
             dispatch(closeContextMenu());
             dispatch(selectLayers({layers: [contextMenu.id], newSelection: true}));
@@ -89,7 +89,7 @@ const ContextMenuWrap = (): ReactElement => {
           type: 'MenuItem',
           text: 'Select All',
           disabled: !canSelectAll,
-          hidden: contextMenu.id && contextMenu.id !== 'page',
+          hidden: contextMenu.id && contextMenu.id !== 'root',
           onClick: (): void => {
             dispatch(closeContextMenu());
             dispatch(selectAllLayers());
@@ -97,7 +97,7 @@ const ContextMenuWrap = (): ReactElement => {
         },{
           type: 'MenuItem',
           text: 'Copy',
-          hidden: contextMenu.id && contextMenu.id === 'page',
+          hidden: contextMenu.id && contextMenu.id === 'root',
           onClick: (): void => {
             dispatch(closeContextMenu());
             dispatch(copyLayersThunk());
@@ -115,7 +115,7 @@ const ContextMenuWrap = (): ReactElement => {
         },{
           type: 'MenuItem',
           text: 'Paste Over',
-          hidden: contextMenu.id && contextMenu.id === 'page',
+          hidden: contextMenu.id && contextMenu.id === 'root',
           disabled: !clipboardType,
           onClick: (): void => {
             if (selected.length > 0) {
@@ -137,7 +137,7 @@ const ContextMenuWrap = (): ReactElement => {
         },{
           type: 'MenuItem',
           text: 'Duplicate',
-          hidden: contextMenu.id && contextMenu.id === 'page',
+          hidden: contextMenu.id && contextMenu.id === 'root',
           disabled: !canDuplicate,
           onClick: (): void => {
             dispatch(closeContextMenu());
@@ -149,11 +149,11 @@ const ContextMenuWrap = (): ReactElement => {
           }
         },{
           type: 'MenuDivider',
-          hidden: contextMenu.id && contextMenu.id === 'page'
+          hidden: contextMenu.id && contextMenu.id === 'root'
         },{
           type: 'MenuItem',
           text: 'Delete',
-          hidden: contextMenu.id && contextMenu.id === 'page',
+          hidden: contextMenu.id && contextMenu.id === 'root',
           onClick: (): void => {
             dispatch(closeContextMenu());
             if (selected.length > 0) {
@@ -164,11 +164,11 @@ const ContextMenuWrap = (): ReactElement => {
           }
         },{
           type: 'MenuDivider',
-          hidden: contextMenu.id && contextMenu.id === 'page'
+          hidden: contextMenu.id && contextMenu.id === 'root'
         },{
           type: 'MenuItem',
           text: 'Move Forward',
-          hidden: contextMenu.id && contextMenu.id === 'page',
+          hidden: contextMenu.id && contextMenu.id === 'root',
           disabled: !canMoveForward,
           onClick: (): void => {
             dispatch(closeContextMenu());
@@ -181,7 +181,7 @@ const ContextMenuWrap = (): ReactElement => {
         },{
           type: 'MenuItem',
           text: 'Move Backward',
-          hidden: contextMenu.id && contextMenu.id === 'page',
+          hidden: contextMenu.id && contextMenu.id === 'root',
           disabled: !canMoveBackward,
           onClick: (): void => {
             dispatch(closeContextMenu());
@@ -193,11 +193,11 @@ const ContextMenuWrap = (): ReactElement => {
           }
         },{
           type: 'MenuDivider',
-          hidden: contextMenu.id && contextMenu.id === 'page'
+          hidden: contextMenu.id && contextMenu.id === 'root'
         },{
           type: 'MenuItem',
           text: 'Group',
-          hidden: contextMenu.id && contextMenu.id === 'page',
+          hidden: contextMenu.id && contextMenu.id === 'root',
           disabled: !canGroup,
           onClick: (): void => {
             if (selected.length > 0) {
@@ -213,7 +213,7 @@ const ContextMenuWrap = (): ReactElement => {
         },{
           type: 'MenuItem',
           text: 'Ungroup',
-          hidden: contextMenu.id && contextMenu.id === 'page',
+          hidden: contextMenu.id && contextMenu.id === 'root',
           disabled: !canUngroup,
           onClick: (): void => {
             dispatch(closeContextMenu());
@@ -225,11 +225,11 @@ const ContextMenuWrap = (): ReactElement => {
           }
         },{
           type: 'MenuDivider',
-          hidden: contextMenu.id && contextMenu.id === 'page'
+          hidden: contextMenu.id && contextMenu.id === 'root'
         },{
           type: 'MenuItem',
           text: 'Mask',
-          hidden: contextMenu.id && contextMenu.id === 'page',
+          hidden: contextMenu.id && contextMenu.id === 'root',
           disabled: !canMask,
           checked: useAsMaskChecked,
           onClick: (): void => {
@@ -239,7 +239,7 @@ const ContextMenuWrap = (): ReactElement => {
         },{
           type: 'MenuItem',
           text: 'Ignore Underlying Mask',
-          hidden: contextMenu.id && contextMenu.id === 'page',
+          hidden: contextMenu.id && contextMenu.id === 'root',
           disabled: !canIgnoreUnderlyingMask,
           checked: ignoreUnderlyingMaskChecked,
           onClick: (): void => {

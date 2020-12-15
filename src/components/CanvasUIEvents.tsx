@@ -1,6 +1,5 @@
-import React, { useContext, useEffect, ReactElement } from 'react';
+import React, { useEffect, ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { setCanvasActiveTool } from '../store/actions/canvasSettings';
 import { setLayerHover, setLayerActiveGradientStop } from '../store/actions/layer';
@@ -16,7 +15,6 @@ interface CanvasUIEventsProps {
 }
 
 const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
-  const theme = useContext(ThemeContext);
   const { uiEvent } = props;
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const activeTool = useSelector((state: RootState) => state.canvasSettings.activeTool);

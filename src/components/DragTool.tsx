@@ -17,8 +17,8 @@ const DragTool = (props: PaperToolProps): ReactElement => {
   const isEnabled = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Drag');
   const dragging = useSelector((state: RootState) => state.canvasSettings.dragging);
   const dragHandle = useSelector((state: RootState) => state.canvasSettings.dragHandle);
-  const selectedProjectIndices = getSelectedProjectIndices(state);
-  const hoverPaperScope = hover ? useSelector((state: RootState) => getLayerProjectIndex(state.layer.present, state.layer.present.hover)) : null;
+  const selectedProjectIndices = useSelector((state: RootState) => getSelectedProjectIndices(state));
+  const hoverPaperScope = useSelector((state: RootState) => hover ? getLayerProjectIndex(state.layer.present, state.layer.present.hover) : null);
   const [originalSelection, setOriginalSelection] = useState<{id: string; projectIndex: number}[]>(null);
   const [fromBounds, setFromBounds] = useState<paper.Rectangle>(null);
   const [toBounds, setToBounds] = useState<paper.Rectangle>(null);

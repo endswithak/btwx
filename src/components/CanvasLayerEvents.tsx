@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, ReactElement } from 'react';
+import React, { useEffect, ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { uiPaperScope } from '../canvas';
 import { RootState } from '../store/reducers';
@@ -7,7 +7,6 @@ import { setCanvasActiveTool } from '../store/actions/canvasSettings';
 import { openContextMenu } from '../store/actions/contextMenu';
 import { setLayerHover, deepSelectLayer, deepSelectLayerThunk, selectLayers, deselectLayers, deselectAllLayers } from '../store/actions/layer';
 import { openTextEditor } from '../store/actions/textEditor';
-import { ThemeContext } from './ThemeProvider';
 
 interface CanvasLayerEventsProps {
   layerEvent: {
@@ -20,12 +19,10 @@ interface CanvasLayerEventsProps {
 }
 
 const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
-  const theme = useContext(ThemeContext);
   const { layerEvent } = props;
-  const hitResult = layerEvent ? layerEvent.hitResult : null;
-  const layerItem = hitResult && !layerEvent.empty ? useSelector((state: RootState) => state.layer.present.byId[hitResult.item.data.type === 'Layer' ? hitResult.item.data.id : hitResult.item.parent.data.id]) : null;
-  const nearestScopeAncestor = layerItem ? useSelector((state: RootState) => getNearestScopeAncestor(state.layer.present, layerItem.id)) : null;
-  const deepSelectItem = layerItem ? useSelector((state: RootState) => getDeepSelectItem(state.layer.present, layerItem.id)) : null;
+  const layerItem = useSelector((state: RootState) => layerEvent && layerEvent.hitResult ? state.layer.present.byId[layerEvent.hitResult.item.data.type === 'Layer' ? layerEvent.hitResult.item.data.id : layerEvent.hitResult.item.parent.data.id] : null);
+  const nearestScopeAncestor = useSelector((state: RootState) => layerItem ? getNearestScopeAncestor(state.layer.present, layerItem.id) : null);
+  const deepSelectItem = useSelector((state: RootState) => layerItem ? getDeepSelectItem(state.layer.present, layerItem.id) : null);
   const hover = useSelector((state: RootState) => state.layer.present.hover);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const activeTool = useSelector((state: RootState) => state.canvasSettings.activeTool);
@@ -152,7 +149,7 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
   }
 
   const handleContextMenu = (): void => {
-    let contextMenuId = 'page';
+    let contextMenuId = 'root';
     const paperPoint = uiPaperScope.view.getEventPoint(layerEvent.event);
     if (!layerEvent.empty) {
       if (nearestScopeAncestor.type === 'Artboard') {

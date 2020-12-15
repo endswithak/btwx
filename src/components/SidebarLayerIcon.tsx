@@ -14,9 +14,8 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
   const { id, isDragGhost } = props;
   const type = useSelector((state: RootState) => state.layer.present.byId[id].type);
   const isSelected = useSelector((state: RootState) => state.layer.present.byId[id].selected);
-  const isShape = useSelector((state: RootState) => state.layer.present.byId[id].type === 'Shape');
-  const isMask = isShape && useSelector((state: RootState) => (state.layer.present.byId[id] as Btwx.Shape).mask);
-  const isOpenShape = isShape && useSelector((state: RootState) => !(state.layer.present.byId[id] as Btwx.Shape).closed);
+  const isMask = useSelector((state: RootState) => state.layer.present.byId[id].type === 'Shape' && (state.layer.present.byId[id] as Btwx.Shape).mask);
+  const isOpenShape = useSelector((state: RootState) => state.layer.present.byId[id].type === 'Shape' && !(state.layer.present.byId[id] as Btwx.Shape).closed);
 
   useEffect(() => {
     console.log('LAYER ICON');

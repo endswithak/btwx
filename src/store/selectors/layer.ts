@@ -24,7 +24,6 @@ export const getEventsById = (state: RootState): { [id: string]: Btwx.TweenEvent
 export const getTweensById = (state: RootState): { [id: string]: Btwx.Tween } => state.layer.present.tweens.byId;
 export const getLayerById = (state: RootState, id: string): Btwx.Layer => state.layer.present.byId[id];
 export const getLayerChildren = (state: RootState, id: string): string[] => state.layer.present.byId[id].children;
-export const getPageChildren = (state: RootState): string[] => state.layer.present.byId['page'].children;
 export const getHover = (state: RootState): string => state.layer.present.hover;
 export const getHoverItem = (state: RootState): Btwx.Layer => state.layer.present.byId[state.layer.present.hover];
 export const getEventDrawerEvent = (state: RootState): string => state.tweenDrawer.event;
@@ -196,6 +195,22 @@ export const getSelectedFill = createSelector(
       }
       return result;
     }, {}) as { [id: string]: Btwx.Fill };
+  }
+);
+
+export const getSelectedFillType = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: Btwx.FillType | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      if (!result) {
+        result = layerItem.style.fill.fillType;
+      }
+      if (result && layerItem.style.fill.fillType !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as Btwx.FillType | 'multi';
   }
 );
 
@@ -517,7 +532,7 @@ export const canToggleSelectedFillOrStroke = createSelector(
     const keys = Object.keys(selectedById);
     return keys.length > 0 && keys.every((id: string) => {
       const layerItem = selectedById[id];
-      return layerItem.type === 'Shape' || layerItem.type === 'Text';
+      return layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Artboard';
     });
   }
 );
@@ -1616,7 +1631,7 @@ export const getLayerDepth = (store: LayerState, id: string): number => {
 };
 
 export const getScopeLayers = (store: LayerState): string[] => {
-  const rootItems = getLayer(store, 'page').children;
+  const rootItems = getLayer(store, 'root').children;
   const expandedItems = store.scope.reduce((result, current) => {
     const layer = getLayer(store, current);
     result = [...result, ...layer.children];

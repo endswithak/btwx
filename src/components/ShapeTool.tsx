@@ -20,12 +20,12 @@ const ShapeTool = (props: PaperToolProps): ReactElement => {
   const { tool, keyDownEvent, keyUpEvent, moveEvent, downEvent, dragEvent, upEvent } = props;
   const isEnabled = useSelector((state: RootState) => state.shapeTool.isEnabled);
   const shapeType = useSelector((state: RootState) => state.shapeTool.shapeType);
-  const scope = useSelector((state: RootState) => state.layer.present.scope);
-  const activeProjectIndex = useSelector((state: RootState) => state.layer.present.activeProjectIndex);
+  // const scope = useSelector((state: RootState) => state.layer.present.scope);
+  // const activeProjectIndex = useSelector((state: RootState) => state.layer.present.activeProjectIndex);
   const drawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const layerPaperScopes = useSelector((state: RootState) => getLayerProjectIndices(state));
+  const layerProjectIndices = useSelector((state: RootState) => getLayerProjectIndices(state));
   const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
-  const activeArtboardPaperScope = activeArtboard ? useSelector((state: RootState) => (state.layer.present.byId[state.layer.present.activeArtboard] as Btwx.Artboard).projectIndex) : null;
+  const activeArtboardPaperScope = useSelector((state: RootState) => activeArtboard ? (state.layer.present.byId[state.layer.present.activeArtboard] as Btwx.Artboard).projectIndex : null);
   const [handle, setHandle] = useState<Btwx.ResizeHandle>(null);
   const [maxDim, setMaxDim] = useState<number>(null);
   const [vector, setVector] = useState<paper.Point>(null);
@@ -279,7 +279,7 @@ const ShapeTool = (props: PaperToolProps): ReactElement => {
   }, [downEvent])
 
   useEffect(() => {
-    if (downEvent && dragEvent && isEnabled) {
+    if (from && dragEvent && isEnabled) {
       const dragPoint = dragEvent.point.round();
       const nextVector = dragPoint.subtract(from);
       const nextHandle = `${nextVector.y > 0 ? 'bottom' : 'top'}${nextVector.x > 0 ? 'Right' : 'Left'}` as 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
@@ -309,14 +309,14 @@ const ShapeTool = (props: PaperToolProps): ReactElement => {
   }, [dragEvent]);
 
   useEffect(() => {
-    if (downEvent && upEvent && isEnabled && drawing) {
+    if (from && upEvent && isEnabled && drawing) {
       const paperLayer = renderShape({
         insert: false
       });
       const lineFromPoint = (paperLayer as paper.Path).firstSegment.point;
       const lineToPoint = (paperLayer as paper.Path).lastSegment.point;
       const lineVector = lineToPoint.subtract(lineFromPoint);
-      const parentItem = layerPaperScopes.reduce((result, current, index) => {
+      const parentItem = layerProjectIndices.reduce((result, current, index) => {
         const projectIndex = uiPaperScope.projects[current];
         if (projectIndex) {
           const hitTest = projectIndex.getItem({

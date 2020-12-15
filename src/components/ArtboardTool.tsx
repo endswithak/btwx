@@ -185,17 +185,16 @@ const ArtboardTool = (props: PaperToolProps): ReactElement => {
   }, [downEvent])
 
   useEffect(() => {
-    if (dragEvent && isEnabled) {
-      const fromPoint = from ? from : dragEvent.downPoint;
-      const x = dragEvent.point.x - fromPoint.x;
-      const y = dragEvent.point.y - fromPoint.y;
+    if (from && dragEvent && isEnabled) {
+      const x = dragEvent.point.x - from.x;
+      const y = dragEvent.point.y - from.y;
       const nextHandle = `${y > 0 ? 'bottom' : 'top'}${x > 0 ? 'Right' : 'Left'}` as 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
-      const nextVector = dragEvent.point.subtract(fromPoint);
-      const nextDims = new uiPaperScope.Rectangle({from: fromPoint, to: dragEvent.point}).size;
+      const nextVector = dragEvent.point.subtract(from);
+      const nextDims = new uiPaperScope.Rectangle({from: from, to: dragEvent.point}).size;
       const nextMaxDim = Math.max(nextDims.width, nextDims.height);
-      const nextContrainedDims = new uiPaperScope.Point(nextVector.x < 0 ? fromPoint.x - nextMaxDim : fromPoint.x + nextMaxDim, nextVector.y < 0 ? fromPoint.y - nextMaxDim : fromPoint.y + nextMaxDim);
+      const nextContrainedDims = new uiPaperScope.Point(nextVector.x < 0 ? from.x - nextMaxDim : from.x + nextMaxDim, nextVector.y < 0 ? from.y - nextMaxDim : from.y + nextMaxDim);
       const nextSnapBounds = new uiPaperScope.Rectangle({
-        from: fromPoint,
+        from: from,
         to: dragEvent.modifiers.shift ? nextContrainedDims : dragEvent.point
       });
       setHandle(nextHandle);

@@ -16,7 +16,7 @@ const SidebarLayerMaskedIcon = (props: SidebarLayerMaskedIconProps): ReactElemen
   const isMasked = useSelector((state: RootState) => state.layer.present.byId[id].type === 'Artboard' ? null : (state.layer.present.byId[id] as Btwx.MaskableLayer).masked);
   const isSelected = useSelector((state: RootState) => state.layer.present.byId[id].selected);
   const underlyingMask = useSelector((state: RootState) => state.layer.present.byId[id].type === 'Artboard' ? null : (state.layer.present.byId[id] as Btwx.MaskableLayer).underlyingMask);
-  const underlyingMaskItem = underlyingMask ? useSelector((state: RootState) => state.layer.present.byId[underlyingMask]) : null;
+  const underlyingMaskItem = useSelector((state: RootState) => underlyingMask ? state.layer.present.byId[underlyingMask] : null);
   const editing = useSelector((state: RootState) => state.leftSidebar.editing === id);
   const underlyingMaskHover = underlyingMaskItem ? underlyingMaskItem.hover : null;
   const underlyingMaskSelected = underlyingMaskItem ? underlyingMaskItem.selected : null;

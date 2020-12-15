@@ -130,7 +130,7 @@ const InsertButton = (): ReactElement => {
         disabled: activeArtboard === null
       },{
         label: 'Image',
-        onClick: () => dispatch(handleImageClick()),
+        onClick: handleImageClick,
         icon: 'image',
         disabled: activeArtboard === null
       }]} />

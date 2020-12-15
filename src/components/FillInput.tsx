@@ -1,13 +1,13 @@
 import React, { ReactElement } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getSelectedStrokeFillType } from '../store/selectors/layer';
+import { getSelectedFillType } from '../store/selectors/layer';
 import GradientInput from './GradientInput';
 import ColorInput from './ColorInput';
 import MultiInput from './MultiInput';
 
 const FillInput = (): ReactElement => {
-  const fillType = useSelector((state: RootState) => getSelectedStrokeFillType(state));
+  const fillType = useSelector((state: RootState) => getSelectedFillType(state));
 
   switch(fillType) {
     case 'color':

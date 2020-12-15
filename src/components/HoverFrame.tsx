@@ -6,10 +6,10 @@ import { uiPaperScope } from '../canvas';
 
 const HoverFrame = (): ReactElement => {
   const hover = useSelector((state: RootState) => state.layer.present.hover);
-  const hoverItem = hover ? useSelector((state: RootState) => state.layer.present.byId[state.layer.present.hover]) : null;
+  const hoverItem = useSelector((state: RootState) => hover ? state.layer.present.byId[state.layer.present.hover] : null);
   const artboardLayer = hoverItem ? hoverItem.type !== 'Artboard' : null;
   const artboard = artboardLayer ? (hoverItem as Btwx.MaskableLayer).artboard : null;
-  const artboardItem = artboard ? useSelector((state: RootState) => state.layer.present.byId[artboard]) as Btwx.Artboard : null;
+  const artboardItem = useSelector((state: RootState) => artboard ? state.layer.present.byId[artboard] : null) as Btwx.Artboard;
   const zoom = useSelector((state: RootState) => state.documentSettings.zoom);
 
   useEffect(() => {

@@ -66,10 +66,10 @@ const AreaSelectTool = (props: PaperToolProps): ReactElement => {
         const getProjectsLayers = (project: paper.Project): string[] => {
           return project.getItems({
             data: (data: any) => {
-              const notPage = data.type === 'Layer' && data.layerType !== 'Page';
+              const notRoot = data.type === 'Layer' && data.layerType !== 'Root';
               const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
               const other = data.id && data.id !== scope[scope.length - 1];
-              return notPage && isScopeLayer && other;
+              return notRoot && isScopeLayer && other;
             },
             overlapping: areaSelectBounds
           }).reduce((result, current) => {

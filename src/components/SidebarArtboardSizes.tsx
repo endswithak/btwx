@@ -42,7 +42,7 @@ const SidebarArtboardSizes = (): ReactElement => {
     });
     dispatch(addArtboardThunk({
       layer: {
-        parent: 'page',
+        parent: 'root',
         name: device.type,
         frame: {
           x: newArtboard.position.x,

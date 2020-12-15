@@ -74,13 +74,13 @@ const Canvas = (props: CanvasProps): ReactElement => {
         });
       } else {
         setUIEvent({
-          hitResult: uiHitResult,
+          hitResult: null,
           eventType: eventType,
           event: e.nativeEvent,
           empty: true
         });
         setLayerEvent({
-          hitResult: layerHitResult,
+          hitResult: null,
           projectIndex: null,
           eventType: eventType,
           event: e.nativeEvent,
