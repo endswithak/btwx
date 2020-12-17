@@ -6,7 +6,6 @@ import { RootState } from '../store/reducers';
 import { toggleArtboardToolThunk} from '../store/actions/artboardTool';
 import { toggleTextToolThunk } from '../store/actions/textTool';
 import { toggleShapeToolThunk } from '../store/actions/shapeTool';
-import { AddImagePayload } from '../store/actionTypes/layer';
 import { addImageThunk } from '../store/actions/layer';
 import TopbarDropdownButton from './TopbarDropdownButton';
 

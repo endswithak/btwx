@@ -53,7 +53,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
     paperPreview.project.clear();
     // 2. import updated paperProjects
     Object.keys(paperProjects).forEach((key, index) => {
-      paperPreview.project.importJSON(paperProjects[key]);
+      paperPreview.project.activeLayer.importJSON(paperProjects[key]);
     });
     // 3. store relevant origin and destination layer vars
     const paperActiveArtboard = paperPreview.project.getItem({ data: { id: activeArtboard.id } }) as paper.Item;

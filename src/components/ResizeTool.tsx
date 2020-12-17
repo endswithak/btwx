@@ -598,7 +598,14 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
           const paperLayer = getPaperLayer(id, selectedProjectIndices[id]);
           paperLayer.pivot = null;
         });
-        dispatch(scaleLayers({layers: selected, scale: { x: 1, y: 1 }, horizontalFlip, verticalFlip}));
+        dispatch(
+          scaleLayers({
+            layers: selected,
+            scale: { x: 1, y: 1 },
+            horizontalFlip,
+            verticalFlip
+          })
+        );
       }
       if (resizing) {
         dispatch(setCanvasResizing({resizing: false}));
