@@ -42,7 +42,7 @@ const PreviewButton = (): ReactElement => {
     }
   }
 
-  const buttonIcon = () => {
+  const buttonIcon = (): string => {
     if (isOpen) {
       if (recording) {
         return 'stop-recording';

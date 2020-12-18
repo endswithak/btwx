@@ -1,7 +1,7 @@
 import React, { useEffect, ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { setCanvasActiveTool } from '../store/actions/canvasSettings';
+import { setCanvasActiveTool, setCanvasCursor } from '../store/actions/canvasSettings';
 import { setLayerHover, setLayerActiveGradientStop } from '../store/actions/layer';
 import { setTweenDrawerEventThunk, setTweenDrawerEventHoverThunk } from '../store/actions/tweenDrawer';
 
@@ -20,12 +20,37 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
   const activeTool = useSelector((state: RootState) => state.canvasSettings.activeTool);
   const resizing = useSelector((state: RootState) => state.canvasSettings.resizing);
   const dragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const selecting = useSelector((state: RootState) => state.canvasSettings.selecting);
+  const dragHandle = useSelector((state: RootState) => state.canvasSettings.dragHandle);
+  const cursor = useSelector((state: RootState) => state.canvasSettings.cursor);
+  // const selecting = useSelector((state: RootState) => state.canvasSettings.selecting);
   const hover = useSelector((state: RootState) => state.layer.present.hover);
   const eventDrawerHover = useSelector((state: RootState) => state.tweenDrawer.eventHover);
   const eventDrawerEvent = useSelector((state: RootState) => state.tweenDrawer.event);
   const gradientEditorProp = useSelector((state: RootState) => state.gradientEditor.prop);
   const dispatch = useDispatch();
+
+  const getSelectionFrameCursor = (): Btwx.CanvasCursor[] => {
+    switch(uiEvent.hitResult.item.data.interactiveType) {
+      case 'move':
+        return ['move', ...cursor];
+      case 'lineMove':
+        return ['move', ...cursor];
+      case 'topLeft':
+      case 'bottomRight':
+        return ['nwse-resize', ...cursor];
+      case 'topRight':
+      case 'bottomLeft':
+        return ['nesw-resize', ...cursor];
+      case 'topCenter':
+      case 'bottomCenter':
+        return ['ns-resize', ...cursor];
+      case 'leftCenter':
+      case 'rightCenter':
+      case 'lineFrom':
+      case 'lineTo':
+        return ['ew-resize', ...cursor];
+    }
+  }
 
   const handleMouseMove = (): void => {
     if (uiEvent.empty) {
@@ -35,11 +60,13 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           resizeHandle: null,
           dragHandle: null,
           lineHandle: null,
-          gradientHandle: null
+          gradientHandle: null,
+          cursor: ['auto']
         }));
       }
       if (eventDrawerHover !== null) {
-        // setTweenDrawerEventHoverThunk({id: null});
+        dispatch(setTweenDrawerEventHoverThunk({id: null}));
+        dispatch(setCanvasCursor({cursor: cursor.filter(c => c !== 'pointer')}));
       }
     } else {
       switch(uiEvent.hitResult.item.data.elementId) {
@@ -50,12 +77,13 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           switch(uiEvent.hitResult.item.data.interactiveType) {
             case 'move':
             case 'lineMove':
-              if (activeTool !== 'Drag') {
+              if (activeTool !== 'Drag' || (activeTool === 'Drag' && !dragHandle)) {
                 dispatch(setCanvasActiveTool({
                   activeTool: 'Drag',
                   dragHandle: true,
                   resizeHandle: null,
-                  lineHandle: null
+                  lineHandle: null,
+                  cursor: ['move', ...cursor]
                 }));
               }
               break;
@@ -72,7 +100,8 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
                   activeTool: 'Resize',
                   resizeHandle: uiEvent.hitResult.item.data.interactiveType,
                   dragHandle: false,
-                  lineHandle: null
+                  lineHandle: null,
+                  cursor: getSelectionFrameCursor()
                 }));
               }
               break;
@@ -84,7 +113,8 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
                   activeTool: 'Line',
                   lineHandle: uiEvent.hitResult.item.data.interactiveType,
                   dragHandle: false,
-                  resizeHandle: null
+                  resizeHandle: null,
+                  cursor: getSelectionFrameCursor()
                 }));
               }
               break;
@@ -98,15 +128,19 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           if (activeTool !== 'Gradient') {
             dispatch(setCanvasActiveTool({
               activeTool: 'Gradient',
-              gradientHandle: uiEvent.hitResult.item.data.interactiveType
+              gradientHandle: uiEvent.hitResult.item.data.interactiveType,
+              cursor: ['move', ...cursor]
             }));
           }
           break;
         }
-        case 'TweenEventsFrame': {
+        case 'tweenEventsFrame': {
           const interactiveType = uiEvent.hitResult.item.data.interactiveType;
           if (interactiveType && eventDrawerHover !== interactiveType) {
             dispatch(setTweenDrawerEventHoverThunk({id: interactiveType}));
+            if (cursor[0] !== 'pointer' && !eventDrawerEvent) {
+              dispatch(setCanvasCursor({cursor: ['pointer', ...cursor]}));
+            }
           }
           break;
         }
@@ -157,6 +191,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           const interactiveType = uiEvent.hitResult.item.data.interactiveType;
           if (interactiveType && eventDrawerEvent !== interactiveType) {
             dispatch(setTweenDrawerEventThunk({id: interactiveType}));
+            dispatch(setCanvasCursor({cursor: ['auto']}));
           }
           break;
         }

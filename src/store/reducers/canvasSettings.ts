@@ -12,6 +12,7 @@ import {
   SET_CANVAS_MOUSE_POSITION,
   SET_CANVAS_TRANSLATING,
   SET_CANVAS_ZOOM_TYPE,
+  SET_CANVAS_CURSOR,
   CanvasSettingsTypes,
 } from '../actionTypes/canvasSettings';
 
@@ -37,6 +38,7 @@ export interface CanvasSettingsState {
   dragHandle: boolean;
   lineHandle: Btwx.LineHandle;
   gradientHandle: Btwx.GradientHandle;
+  cursor: Btwx.CanvasCursor[];
 }
 
 const initialState: CanvasSettingsState = {
@@ -55,7 +57,8 @@ const initialState: CanvasSettingsState = {
   resizeHandle: null,
   dragHandle: false,
   lineHandle: null,
-  gradientHandle: null
+  gradientHandle: null,
+  cursor: ['auto']
 };
 
 export default (state = initialState, action: CanvasSettingsTypes): CanvasSettingsState => {
@@ -74,7 +77,8 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
         resizeHandle: Object.prototype.hasOwnProperty.call(action.payload, 'resizeHandle') ? action.payload.resizeHandle : state.resizeHandle,
         dragHandle: Object.prototype.hasOwnProperty.call(action.payload, 'dragHandle') ? action.payload.dragHandle : state.dragHandle,
         lineHandle: Object.prototype.hasOwnProperty.call(action.payload, 'lineHandle') ? action.payload.lineHandle : state.lineHandle,
-        gradientHandle: Object.prototype.hasOwnProperty.call(action.payload, 'gradientHandle') ? action.payload.gradientHandle : state.gradientHandle
+        gradientHandle: Object.prototype.hasOwnProperty.call(action.payload, 'gradientHandle') ? action.payload.gradientHandle : state.gradientHandle,
+        cursor: Object.prototype.hasOwnProperty.call(action.payload, 'cursor') ? action.payload.cursor : state.cursor
       };
     }
     case SET_CANVAS_DRAWING: {
@@ -148,6 +152,12 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
       return {
         ...state,
         zoomType: action.payload.zoomType
+      };
+    }
+    case SET_CANVAS_CURSOR: {
+      return {
+        ...state,
+        cursor: action.payload.cursor
       };
     }
     default:

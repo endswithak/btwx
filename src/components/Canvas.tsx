@@ -32,6 +32,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
   const { ready, setReady } = props;
   const interactionEnabled = useSelector((state: RootState) => !state.canvasSettings.selecting && !state.canvasSettings.resizing && !state.canvasSettings.drawing && !state.canvasSettings.zooming && !state.canvasSettings.translating && !state.canvasSettings.dragging);
   const allProjectIndices = useSelector((state: RootState) => getAllProjectIndices(state));
+  const cursor = useSelector((state: RootState) => state.canvasSettings.cursor);
   const [layerEvent, setLayerEvent] = useState(null);
   const [uiEvent, setUIEvent] = useState(null);
   const [translateEvent, setTranslateEvent] = useState(null);
@@ -149,7 +150,8 @@ const Canvas = (props: CanvasProps): ReactElement => {
       onContextMenu={ready ? handleContextMenu : null}
       onWheel={ready ? handleWheel : null}
       style={{
-        background: theme.background.z0
+        background: theme.background.z0,
+        cursor: cursor[0]
       }}>
       <CanvasUI ready={ready} />
       <CanvasArtboards ready={ready} />

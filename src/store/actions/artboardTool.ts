@@ -23,7 +23,11 @@ export const toggleArtboardToolThunk = () => {
     if (state.canvasSettings.focusing) {
       if (state.canvasSettings.activeTool === 'Artboard') {
         dispatch(disableArtboardTool());
-        dispatch(setCanvasActiveTool({activeTool: null, drawing: false}));
+        dispatch(setCanvasActiveTool({
+          activeTool: null,
+          drawing: false,
+          cursor: state.canvasSettings.cursor.filter(c => c !== 'crosshair')
+        }));
       } else {
         if (state.canvasSettings.activeTool === 'Shape') {
           dispatch(disableShapeTool() as any);
@@ -32,7 +36,10 @@ export const toggleArtboardToolThunk = () => {
           dispatch(disableTextTool() as any);
         }
         dispatch(enableArtboardTool());
-        dispatch(setCanvasActiveTool({activeTool: 'Artboard'}));
+        dispatch(setCanvasActiveTool({
+          activeTool: 'Artboard',
+          cursor: ['crosshair', ...state.canvasSettings.cursor]
+        }));
       }
     }
   }

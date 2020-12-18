@@ -11,6 +11,7 @@ export const SET_CANVAS_TRANSLATING = 'SET_CANVAS_TRANSLATING';
 export const RESET_CANVAS_SETTINGS = 'RESET_CANVAS_SETTINGS';
 export const SET_CANVAS_MOUSE_POSITION = 'SET_CANVAS_MOUSE_POSITION';
 export const SET_CANVAS_ZOOM_TYPE = 'SET_CANVAS_ZOOM_TYPE';
+export const SET_CANVAS_CURSOR = 'SET_CANVAS_CURSOR';
 
 export interface SetCanvasActiveToolPayload {
   activeTool: Btwx.ToolType;
@@ -25,6 +26,7 @@ export interface SetCanvasActiveToolPayload {
   dragHandle?: boolean;
   lineHandle?: Btwx.LineHandle;
   gradientHandle?: Btwx.GradientHandle;
+  cursor?: Btwx.CanvasCursor[];
 }
 
 export interface SetCanvasActiveTool {
@@ -141,6 +143,15 @@ export interface SetCanvasZoomType {
   payload: SetCanvasZoomTypePayload;
 }
 
+export interface SetCanvasCursorPayload {
+  cursor: Btwx.CanvasCursor[];
+}
+
+export interface SetCanvasCursor {
+  type: typeof SET_CANVAS_CURSOR;
+  payload: SetCanvasCursorPayload;
+}
+
 export type CanvasSettingsTypes = SetCanvasActiveTool |
                                   SetCanvasDrawing |
                                   SetCanvasTyping |
@@ -153,4 +164,5 @@ export type CanvasSettingsTypes = SetCanvasActiveTool |
                                   SetCanvasTranslating |
                                   ResetCanvasSettings |
                                   SetCanvasMousePosition |
-                                  SetCanvasZoomType;
+                                  SetCanvasZoomType |
+                                  SetCanvasCursor;

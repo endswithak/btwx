@@ -32,7 +32,11 @@ export const toggleShapeToolThunk = (shapeType: Btwx.ShapeType) => {
     if (state.canvasSettings.focusing) {
       if (state.canvasSettings.activeTool === 'Shape' && state.shapeTool.shapeType === shapeType) {
         dispatch(disableShapeTool());
-        dispatch(setCanvasActiveTool({activeTool: null, drawing: false}));
+        dispatch(setCanvasActiveTool({
+          activeTool: null,
+          drawing: false,
+          cursor: state.canvasSettings.cursor.filter(c => c !== 'crosshair')
+        }));
       } else {
         if (state.canvasSettings.activeTool === 'Artboard') {
           dispatch(disableArtboardTool() as any);
@@ -41,7 +45,10 @@ export const toggleShapeToolThunk = (shapeType: Btwx.ShapeType) => {
           dispatch(disableTextTool() as any);
         }
         dispatch(enableShapeTool({shapeType}));
-        dispatch(setCanvasActiveTool({activeTool: 'Shape'}));
+        dispatch(setCanvasActiveTool({
+          activeTool: 'Shape',
+          cursor: ['crosshair', ...state.canvasSettings.cursor]
+        }));
       }
     }
   }

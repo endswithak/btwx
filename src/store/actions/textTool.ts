@@ -23,7 +23,10 @@ export const toggleTextToolThunk = () => {
     if (state.canvasSettings.focusing) {
       if (state.canvasSettings.activeTool === 'Text') {
         dispatch(disableTextTool());
-        dispatch(setCanvasActiveTool({activeTool: null}));
+        dispatch(setCanvasActiveTool({
+          activeTool: null,
+          cursor: state.canvasSettings.cursor.filter(c => c !== 'text')
+        }));
       } else {
         if (state.canvasSettings.activeTool === 'Artboard') {
           dispatch(disableArtboardTool() as any);
@@ -32,7 +35,10 @@ export const toggleTextToolThunk = () => {
           dispatch(disableShapeTool() as any);
         }
         dispatch(enableTextTool());
-        dispatch(setCanvasActiveTool({activeTool: 'Text'}));
+        dispatch(setCanvasActiveTool({
+          activeTool: 'Text',
+          cursor: ['text', ...state.canvasSettings.cursor]
+        }));
       }
     }
   }

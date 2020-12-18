@@ -43,7 +43,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
     paperPreview.setup(canvasRef.current);
     paperPreview.view.center = new paperPreview.Point(activeArtboard.frame.x, activeArtboard.frame.y);
     window.addEventListener('resize', handleResize);
-    return () => {
+    return (): void => {
       window.removeEventListener('resize', handleResize);
     }
   }, []);
@@ -52,7 +52,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
     // 1. clear current canvas
     paperPreview.project.clear();
     // 2. import updated paperProjects
-    Object.keys(paperProjects).forEach((key, index) => {
+    Object.keys(paperProjects).forEach((key) => {
       paperPreview.project.activeLayer.importJSON(paperProjects[key]);
     });
     // 3. store relevant origin and destination layer vars
@@ -94,7 +94,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
       };
     };
     const eventLayerFunctions = {} as {
-      [id: string]: any;
+      [id: string]: (e: paper.MouseEvent | paper.KeyEvent) => void;
     };
     // 7. create timelines for each tween event
     tweenEvents.allIds.forEach((eventId) => {

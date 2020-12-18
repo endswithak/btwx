@@ -5,7 +5,7 @@ import { zoomOutThunk } from '../store/actions/zoomTool';
 import TopbarButton from './TopbarButton';
 
 const ZoomOutButton = (): ReactElement => {
-  const canZoomOut = useSelector((state: RootState) => state.documentSettings.matrix[0] === 0.01);
+  const canZoomOut = useSelector((state: RootState) => state.documentSettings.zoom !== 0.01);
   const dispatch = useDispatch();
 
   const handleZoomOutClick = (): void => {

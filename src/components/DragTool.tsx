@@ -11,7 +11,7 @@ import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
 
 const DragTool = (props: PaperToolProps): ReactElement => {
-  const { tool, altModifier, downEvent, dragEvent, upEvent } = props;
+  const { tool, downEvent, dragEvent, upEvent, keyDownEvent, keyUpEvent } = props;
   const hover = useSelector((state: RootState) => state.layer.present.hover);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const isEnabled = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Drag');
@@ -40,7 +40,7 @@ const DragTool = (props: PaperToolProps): ReactElement => {
     setSelectionOutlines(null);
   }
 
-  const updateDuplicatePreview = () => {
+  const updateDuplicatePreview = (altModifier: boolean): void => {
     const drawingPreview = uiPaperScope.projects[0].getItem({data: {id: 'drawingPreview'}});
     drawingPreview.removeChildren();
     if (altModifier && selectionOutlines) {
@@ -50,10 +50,10 @@ const DragTool = (props: PaperToolProps): ReactElement => {
     }
   }
 
-  const translateLayers = (): void => {
+  const translateLayers = (altModifier: boolean): void => {
     const vector = toBounds.center.subtract(fromBounds.center);
     if (altModifier) {
-      updateDuplicatePreview();
+      updateDuplicatePreview(altModifier);
     } else {
       selected.forEach((id, index) => {
         const paperLayer = getPaperLayer(id, selectedProjectIndices[id]);
@@ -109,9 +109,9 @@ const DragTool = (props: PaperToolProps): ReactElement => {
   }
 
   useEffect(() => {
-    if (isEnabled && originalSelection && dragging && toBounds) {
-      updateDuplicatePreview();
-      if (altModifier) {
+    if (keyDownEvent && isEnabled && originalSelection && dragging && toBounds) {
+      if (keyDownEvent.key === 'alt') {
+        updateDuplicatePreview(true);
         const selectionFrame = uiPaperScope.project.getItem({ data: { id: 'selectionFrame' } });
         selectionFrame.removeChildren();
         originalSelection.forEach((item, index) => {
@@ -123,11 +123,18 @@ const DragTool = (props: PaperToolProps): ReactElement => {
             paperLayer.position.y = absPosition.y;
           }
         });
-      } else {
-        translateLayers();
       }
     }
-  }, [altModifier]);
+  }, [keyDownEvent]);
+
+  useEffect(() => {
+    if (keyUpEvent && isEnabled && originalSelection && dragging && toBounds) {
+      if (keyUpEvent.key === 'alt') {
+        updateDuplicatePreview(false);
+        translateLayers(false);
+      }
+    }
+  }, [keyUpEvent]);
 
   useEffect(() => {
     if (downEvent && isEnabled) {
@@ -219,7 +226,7 @@ const DragTool = (props: PaperToolProps): ReactElement => {
   useEffect(() => {
     if (upEvent && isEnabled) {
       if (selected.length > 0 && minDistance > 3) {
-        if (altModifier) {
+        if (upEvent.modifiers.alt) {
           const offset = toBounds.center.subtract(fromBounds.center).round();
           dispatch(duplicateLayers({layers: selected, offset: {x: offset.x, y: offset.y}}));
         } else {
@@ -232,8 +239,8 @@ const DragTool = (props: PaperToolProps): ReactElement => {
   }, [upEvent]);
 
   useEffect(() => {
-    if (toBounds && isEnabled) {
-      translateLayers();
+    if (toBounds && isEnabled && dragEvent) {
+      translateLayers(dragEvent.modifiers.alt);
     }
   }, [toBounds]);
 
@@ -258,7 +265,7 @@ const DragTool = (props: PaperToolProps): ReactElement => {
         hitTestZones={{all: true}}
         onUpdate={handleSnapToolUpdate}
         toolEvent={dragEvent}
-        blackListLayers={altModifier ? null : selected}
+        blackListLayers={dragEvent.modifiers.alt ? null : selected}
         measure />
     : null
   );
@@ -269,6 +276,8 @@ export default PaperTool(
   {
     mouseDown: true,
     mouseDrag: true,
-    mouseUp: true
+    mouseUp: true,
+    keyDown: true,
+    keyUp: true
   }
 );

@@ -30,12 +30,16 @@ const TranslateTool = (props: TranslateToolProps): ReactElement => {
     if (translateEvent) {
       allProjectIndices.forEach((current, index) => {
         const project = uiPaperScope.projects[current];
-        project.view.translate(
-          new uiPaperScope.Point(
-            (translateEvent.deltaX * ( 1 / project.view.zoom)) * -1,
-            (translateEvent.deltaY * ( 1 / project.view.zoom)) * -1
+        if (index === 0) {
+          project.view.translate(
+            new uiPaperScope.Point(
+              (translateEvent.deltaX * ( 1 / project.view.zoom)) * -1,
+              (translateEvent.deltaY * ( 1 / project.view.zoom)) * -1
+            )
           )
-        )
+        } else {
+          project.view.matrix = uiPaperScope.projects[0].view.matrix;
+        }
       });
       debounceTranslate();
     }

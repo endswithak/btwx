@@ -24,7 +24,7 @@ interface EventProps {
   mouseUp?: boolean;
 }
 
-const PaperToolWrap = (Component: any, events: EventProps) => {
+const PaperToolWrap = (Component: any, events: EventProps): () => ReactElement => {
   const PaperTool = (): ReactElement => {
     const [tool, setTool] = useState<paper.Tool>(null);
     const [keyDownEvent, setKeyDownEvent] = useState<paper.KeyEvent>(null);
@@ -33,8 +33,6 @@ const PaperToolWrap = (Component: any, events: EventProps) => {
     const [downEvent, setDownEvent] = useState<paper.ToolEvent>(null);
     const [dragEvent, setDragEvent] = useState<paper.ToolEvent>(null);
     const [upEvent, setUpEvent] = useState<paper.ToolEvent>(null);
-    const [altModifier, setAltModifier] = useState<boolean>(false);
-    const [shiftModifier, setShiftModifier] = useState<boolean>(false);
 
     const handleKeyDown = (e: paper.KeyEvent): void => {
       setKeyDownEvent(e);
@@ -60,28 +58,6 @@ const PaperToolWrap = (Component: any, events: EventProps) => {
       setUpEvent(e);
     }
 
-    const handleKeyDownModifiers = (event: any) => {
-      switch(event.key) {
-        case 'Alt':
-          setAltModifier(true);
-          break;
-        case 'Shift':
-          setShiftModifier(true);
-          break;
-      }
-    }
-
-    const handleKeyUpModifiers = (event: any) => {
-      switch(event.key) {
-        case 'Alt':
-          setAltModifier(false);
-          break;
-        case 'Shift':
-          setShiftModifier(false);
-          break;
-      }
-    }
-
     useEffect(() => {
       const newTool = new uiPaperScope.Tool();
       newTool.minDistance = 1;
@@ -93,12 +69,6 @@ const PaperToolWrap = (Component: any, events: EventProps) => {
       newTool.onMouseUp = events.all || events.mouseUp ? handleUpEvent : null;
       setTool(newTool);
       uiPaperScope.tool = null;
-      document.addEventListener('keydown', handleKeyDownModifiers);
-      document.addEventListener('keyup', handleKeyUpModifiers);
-      return () => {
-        document.removeEventListener('keydown', handleKeyDownModifiers);
-        document.removeEventListener('keyup', handleKeyUpModifiers);
-      }
     }, []);
 
     return (
@@ -109,9 +79,7 @@ const PaperToolWrap = (Component: any, events: EventProps) => {
         moveEvent={moveEvent}
         downEvent={downEvent}
         dragEvent={dragEvent}
-        upEvent={upEvent}
-        altModifier={altModifier}
-        shiftModifier={shiftModifier} />
+        upEvent={upEvent} />
     );
   }
   return PaperTool;

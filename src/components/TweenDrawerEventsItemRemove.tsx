@@ -25,7 +25,8 @@ const TweenDrawerEventsItemRemove = (props: TweenDrawerEventsItemRemoveProps): R
       }}>
       <IconButton
         onClick={handleClick}
-        icon='trash-can' />
+        icon='trash-can'
+        remove />
       {/* Remove */}
     </div>
   );

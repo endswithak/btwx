@@ -16,6 +16,8 @@ declare namespace Btwx {
 
   type ResizeType = 'n' | 'e' | 's' | 'w' | 'ne' | 'nw' | 'se' | 'sw' | 'ew' | 'ns' | 'nesw' | 'nwses';
 
+  type CanvasCursor = 'n-resize' | 'e-resize' | 's-resize' | 'w-resize' | 'ne-resize' | 'nw-resize' | 'se-resize' | 'sw-resize' | 'ew-resize' | 'ns-resize' | 'nesw-resize' | 'nwses-resize' | 'nwse-resize' | 'move' | 'pointer' | 'zoom-in' | 'zoom-out' | 'crosshair' | 'text' | 'auto';
+
   type ZoomType = 'in' | 'out';
 
   type ToolType = 'Shape' | 'Selection' | 'Artboard' | 'Text' | 'Drag' | 'AreaSelect' | 'Resize' | 'Line' | 'Gradient' | 'Translate' | 'Zoom';

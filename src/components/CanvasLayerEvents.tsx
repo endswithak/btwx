@@ -55,8 +55,12 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
           dispatch(setLayerHover({id: nearestScopeAncestor.id}));
         }
       }
-      if (activeTool !== 'Drag') {
-        dispatch(setCanvasActiveTool({activeTool: 'Drag'}));
+      if (activeTool !== 'Drag' || (activeTool === 'Drag' && dragHandle)) {
+        dispatch(setCanvasActiveTool({
+          activeTool: 'Drag',
+          dragHandle: false,
+          cursor: ['auto']
+        }));
       }
     }
   }

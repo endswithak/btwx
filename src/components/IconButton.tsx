@@ -9,6 +9,7 @@ interface IconButtonProps {
   isActive?: boolean;
   icon: string;
   variant?: 'small' | 'medium' | 'large';
+  remove?: boolean;
   activeIcon?: string;
   theme?: Btwx.Theme;
 }
@@ -19,7 +20,7 @@ const Button = styled.button<IconButtonProps>`
   }
   :hover {
     svg {
-      fill: ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.text.base};
+      fill: ${props => props.remove ? props.theme.palette.recording : props.isActive ? props.theme.palette.primaryHover : props.theme.text.base};
     }
     :disabled {
       svg {
@@ -43,17 +44,6 @@ const IconButton = (props: IconButtonProps): ReactElement => {
       {...props}
       theme={theme}>
       <Icon name={activeIcon && isActive ? activeIcon : icon} />
-      {/* <svg
-        viewBox='0 0 24 24'
-        width='24px'
-        height='24px'>
-        <path d={activeIcon && isActive ? activeIcon.fill : icon.fill} />
-        {
-          icon.opacity
-          ? <path className='icon-opacity' d={activeIcon && isActive ? activeIcon.opacity : icon.opacity} />
-          : null
-        }
-      </svg> */}
     </Button>
   );
 }
