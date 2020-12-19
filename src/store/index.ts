@@ -12,7 +12,7 @@ const getMinState = (state: RootState) => ({
   documentSettings: state.documentSettings,
   preview: state.preview,
   viewSettings: state.viewSettings,
-  tweenDrawer: state.tweenDrawer
+  eventDrawer: state.eventDrawer
 });
 
 const configureStore = ({ preloadedState, windowType }: { preloadedState: any; windowType: 'document' | 'preview' }): typeof store => {

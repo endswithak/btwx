@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
 import styled from 'styled-components';
-import { setTweenDrawerLayersWidth } from '../store/actions/viewSettings';
+import { setEventDrawerLayersWidth } from '../store/actions/viewSettings';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 
@@ -11,7 +11,7 @@ gsap.registerPlugin(Draggable);
 
 interface DragHandleProps {
   dragging: boolean;
-  tweenDrawerHeight: number;
+  eventDrawerHeight: number;
 }
 
 const DragHandle = styled.div<DragHandleProps>`
@@ -19,7 +19,7 @@ const DragHandle = styled.div<DragHandleProps>`
   :before {
     display: ${props => props.dragging ? 'block' : 'none'};
     background: ${props => props.dragging ? props.theme.palette.primary : 'none'};
-    height: ${props => props.tweenDrawerHeight}px;
+    height: ${props => props.eventDrawerHeight}px;
   }
   :hover {
     :before {
@@ -29,11 +29,11 @@ const DragHandle = styled.div<DragHandleProps>`
   }
 `;
 
-const TweenDrawerLayersDragHandle = (): ReactElement => {
+const EventDrawerEventLayersDragHandle = (): ReactElement => {
   const theme = useContext(ThemeContext);
   const ref = useRef<HTMLDivElement>(null);
-  const tweenDrawerLayersWidth = useSelector((state: RootState) => state.viewSettings.tweenDrawer.layersWidth);
-  const tweenDrawerHeight = useSelector((state: RootState) => state.viewSettings.tweenDrawer.height);
+  const eventDrawerEventLayersWidth = useSelector((state: RootState) => state.viewSettings.eventDrawer.layersWidth);
+  const eventDrawerHeight = useSelector((state: RootState) => state.viewSettings.eventDrawer.height);
   const [dragging, setDragging] = useState(false);
   const dispatch = useDispatch();
 
@@ -47,14 +47,14 @@ const TweenDrawerLayersDragHandle = (): ReactElement => {
         setDragging(true);
       },
       onDrag: function() {
-        gsap.set('#tween-layers', {width: this.x});
+        gsap.set('#event-layers', {width: this.x});
       },
       onRelease: function() {
-        dispatch(setTweenDrawerLayersWidth({width: this.x}));
+        dispatch(setEventDrawerLayersWidth({width: this.x}));
         setDragging(false);
       }
     });
-    return () => {
+    return (): void => {
       if (Draggable.get(ref.current)) {
         Draggable.get(ref.current).kill();
       }
@@ -62,17 +62,17 @@ const TweenDrawerLayersDragHandle = (): ReactElement => {
   }, []);
 
   useEffect(() => {
-    gsap.set(ref.current, {x: tweenDrawerLayersWidth});
-  }, [tweenDrawerLayersWidth]);
+    gsap.set(ref.current, {x: eventDrawerEventLayersWidth});
+  }, [eventDrawerEventLayersWidth]);
 
   return (
     <DragHandle
       ref={ref}
-      className='c-tween-drawer__layers-drag-handle'
+      className='c-event-drawer__layers-drag-handle'
       theme={theme}
       dragging={dragging}
-      tweenDrawerHeight={tweenDrawerHeight} />
+      eventDrawerHeight={eventDrawerHeight} />
   );
 }
 
-export default TweenDrawerLayersDragHandle;
+export default EventDrawerEventLayersDragHandle;

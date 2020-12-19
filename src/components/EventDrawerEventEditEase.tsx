@@ -8,11 +8,11 @@ import { ThemeContext } from './ThemeProvider';
 
 gsap.registerPlugin(CustomEase);
 
-interface TweenDrawerEditEaseProps {
+interface EventDrawerEventEditEaseProps {
   tweenId: string;
 }
 
-const TweenDrawerEditEase = (props: TweenDrawerEditEaseProps): ReactElement => {
+const EventDrawerEventEditEase = (props: EventDrawerEventEditEaseProps): ReactElement => {
   const pathRef = useRef<SVGPathElement>(null);
   const theme = useContext(ThemeContext);
   const [hover, setHover] = useState(false);
@@ -21,15 +21,15 @@ const TweenDrawerEditEase = (props: TweenDrawerEditEaseProps): ReactElement => {
   const editingEase = useSelector((state: RootState) => state.easeEditor.tween && state.easeEditor.tween === tweenId);
   const dispatch = useDispatch();
 
-  const handleClick = () => {
+  const handleClick = (): void => {
     dispatch(openEaseEditor({tween: tweenId}));
   }
 
-  const handleMouseEnter = () => {
+  const handleMouseEnter = (): void => {
     setHover(true);
   }
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = (): void => {
     setHover(false);
   }
 
@@ -41,14 +41,14 @@ const TweenDrawerEditEase = (props: TweenDrawerEditEaseProps): ReactElement => {
 
   return (
     <div
-      className='c-tween-drawer__icon'
+      className='c-event-drawer__icon'
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}>
       <svg
-        width="18"
-        height="18"
-        viewBox="-1 -1 18 18"
+        width='18'
+        height='18'
+        viewBox='-1 -1 18 18'
         style={{
           strokeWidth: 2,
           stroke: editingEase
@@ -65,4 +65,4 @@ const TweenDrawerEditEase = (props: TweenDrawerEditEaseProps): ReactElement => {
   );
 }
 
-export default TweenDrawerEditEase;
+export default EventDrawerEventEditEase;

@@ -4,7 +4,7 @@ import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
 import styled from 'styled-components';
 import { uiPaperScope } from '../canvas';
-import { setTweenDrawerHeight } from '../store/actions/viewSettings';
+import { setEventDrawerHeight } from '../store/actions/viewSettings';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 
@@ -22,11 +22,11 @@ const DragHandle = styled.div<DragHandleProps>`
   }
 `;
 
-const TweenDrawerDragHandle = (): ReactElement => {
+const EventDrawerDragHandle = (): ReactElement => {
   const theme = useContext(ThemeContext);
   const ref = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
-  const tweenDrawerHeight = useSelector((state: RootState) => state.viewSettings.tweenDrawer.height);
+  const eventDrawerHeight = useSelector((state: RootState) => state.viewSettings.eventDrawer.height);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -40,7 +40,7 @@ const TweenDrawerDragHandle = (): ReactElement => {
       },
       onDrag: function() {
         const canvasContainer = document.getElementById('canvas-container');
-        gsap.set('#tween-drawer', {height: this.y * -1});
+        gsap.set('#event-drawer', {height: this.y * -1});
         uiPaperScope.projects.forEach((project) => {
           if (project.activeLayer.children.length > 0) {
             project.view.viewSize.height = canvasContainer.clientHeight;
@@ -48,7 +48,7 @@ const TweenDrawerDragHandle = (): ReactElement => {
         });
       },
       onRelease: function() {
-        dispatch(setTweenDrawerHeight({height: this.y * -1}));
+        dispatch(setEventDrawerHeight({height: this.y * -1}));
         setDragging(false);
       }
     });
@@ -60,16 +60,16 @@ const TweenDrawerDragHandle = (): ReactElement => {
   }, []);
 
   useEffect(() => {
-    gsap.set(ref.current, {y: -tweenDrawerHeight});
-  }, [tweenDrawerHeight]);
+    gsap.set(ref.current, {y: -eventDrawerHeight});
+  }, [eventDrawerHeight]);
 
   return (
     <DragHandle
       ref={ref}
-      className='c-tween-drawer__drag-handle'
+      className='c-event-drawer__drag-handle'
       theme={theme}
       dragging={dragging} />
   );
 }
 
-export default TweenDrawerDragHandle;
+export default EventDrawerDragHandle;

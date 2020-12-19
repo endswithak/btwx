@@ -5,7 +5,7 @@ import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
-import { setTweenDrawerTweenEditing } from '../store/actions/tweenDrawer';
+import { setEventDrawerTweenEditing } from '../store/actions/eventDrawer';
 import { setLayerTweenDuration } from '../store/actions/layer';
 
 gsap.registerPlugin(Draggable);
@@ -52,13 +52,13 @@ const TimelineRightHandle = (props: TimelineRightHandleProps): ReactElement => {
         }
       },
       onPress: function() {
-        dispatch(setTweenDrawerTweenEditing({id: tweenId}));
+        dispatch(setEventDrawerTweenEditing({id: tweenId}));
         gsap.set(rightTooltipElement, {display: 'inline'});
         rightTooltipElement.innerHTML = `${(tweenHandleElement.clientWidth / 4) / 100}s`;
         document.body.style.cursor = 'ew-resize';
       },
       onRelease: function() {
-        dispatch(setTweenDrawerTweenEditing({id: null}));
+        dispatch(setEventDrawerTweenEditing({id: null}));
         gsap.set(rightTooltipElement, {display: 'none'});
         document.body.style.cursor = 'auto';
       },
@@ -142,6 +142,12 @@ const TimelineRightHandle = (props: TimelineRightHandleProps): ReactElement => {
           background: theme.name === 'dark' ? theme.background.z6 : theme.background.z0,
           color: theme.text.base,
           boxShadow: `0 1px 4px 0 rgba(0,0,0,0.25)`
+        }} />
+      <div
+        className='c-timeline-handle__guide'
+        style={{
+          background: theme.palette.recording,
+          right: 0
         }} />
     </div>
   );

@@ -2,8 +2,8 @@ import React, { useContext, ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { RootState } from '../store/reducers';
+import { setEventDrawerEventSort } from '../store/actions/eventDrawer';
 import { ThemeContext } from './ThemeProvider';
-import { setTweenDrawerEventSort } from '../store/actions/tweenDrawer';
 import Icon from './Icon';
 
 interface HeaderItemProps {
@@ -20,9 +20,9 @@ const HeaderItem = styled.button<HeaderItemProps>`
   }
 `;
 
-const TweenDrawerEventsHeader = (): ReactElement => {
+const EventDrawerListHeader = (): ReactElement => {
   const theme = useContext(ThemeContext);
-  const eventSort = useSelector((state: RootState) => state.tweenDrawer.eventSort);
+  const eventSort = useSelector((state: RootState) => state.eventDrawer.eventSort);
   const sortOrder = eventSort !== 'none' ? eventSort.substring(eventSort.length, eventSort.length - 3) as 'asc' | 'dsc' : null;
   const sortBy = eventSort !== 'none' ? ((): 'layer' | 'event' | 'artboard' | 'destinationArtboard' => {
     const hyphenIndex = eventSort.indexOf('-');
@@ -35,31 +35,35 @@ const TweenDrawerEventsHeader = (): ReactElement => {
       if (sortBy === by) {
         switch(sortOrder) {
           case 'asc':
-            dispatch(setTweenDrawerEventSort({eventSort: `${by}-dsc` as Btwx.TweenEventSort}));
+            dispatch(setEventDrawerEventSort({eventSort: `${by}-dsc` as Btwx.TweenEventSort}));
             break;
           case 'dsc':
-            dispatch(setTweenDrawerEventSort({eventSort: 'none'}));
+            dispatch(setEventDrawerEventSort({eventSort: 'none'}));
             break;
         }
       } else {
-        dispatch(setTweenDrawerEventSort({eventSort: `${by}-asc` as Btwx.TweenEventSort}));
+        dispatch(setEventDrawerEventSort({eventSort: `${by}-asc` as Btwx.TweenEventSort}));
       }
     } else {
-      dispatch(setTweenDrawerEventSort({eventSort: `${by}-asc` as Btwx.TweenEventSort}));
+      dispatch(setEventDrawerEventSort({eventSort: `${by}-asc` as Btwx.TweenEventSort}));
     }
   }
 
   return (
     <div
-      className='c-tween-drawer-events__header'
+      className='c-event-drawer-list__header'
       style={{
-        background: theme.name === 'dark' ? theme.background.z3 : theme.background.z0,
-        boxShadow: `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
+        background: theme.name === 'dark'
+        ? theme.background.z3
+        : theme.background.z0,
+        boxShadow: `0 -1px 0 0 ${theme.name === 'dark'
+        ? theme.background.z4
+        : theme.background.z5} inset`
       }}>
-      <div className='c-tween-drawer-events__item c-tween-drawer-events__item--labels'>
+      <div className='c-event-drawer-list__item c-event-drawer-list__item--labels'>
         <HeaderItem
           theme={theme}
-          className='c-tween-drawer-events-item__module c-tween-drawer-events-item__module--label'
+          className='c-event-drawer-list-item__module c-event-drawer-list-item__module--label'
           onClick={(): void => handleSort('layer')}
           isActive={eventSort === 'layer-asc' || eventSort === 'layer-dsc'}>
           layer
@@ -76,7 +80,7 @@ const TweenDrawerEventsHeader = (): ReactElement => {
         </HeaderItem>
         <HeaderItem
           theme={theme}
-          className='c-tween-drawer-events-item__module c-tween-drawer-events-item__module--label'
+          className='c-event-drawer-list-item__module c-event-drawer-list-item__module--label'
           onClick={(): void => handleSort('event')}
           isActive={eventSort === 'event-asc' || eventSort === 'event-dsc'}>
           event
@@ -93,7 +97,7 @@ const TweenDrawerEventsHeader = (): ReactElement => {
         </HeaderItem>
         <HeaderItem
           theme={theme}
-          className='c-tween-drawer-events-item__module c-tween-drawer-events-item__module--label'
+          className='c-event-drawer-list-item__module c-event-drawer-list-item__module--label'
           onClick={(): void => handleSort('artboard')}
           isActive={eventSort === 'artboard-asc' || eventSort === 'artboard-dsc'}>
           artboard
@@ -110,7 +114,7 @@ const TweenDrawerEventsHeader = (): ReactElement => {
         </HeaderItem>
         <HeaderItem
           theme={theme}
-          className='c-tween-drawer-events-item__module c-tween-drawer-events-item__module--label'
+          className='c-event-drawer-list-item__module c-event-drawer-list-item__module--label'
           onClick={(): void => handleSort('destinationArtboard')}
           isActive={eventSort === 'destinationArtboard-asc' || eventSort === 'destinationArtboard-dsc'}>
           destination
@@ -127,7 +131,7 @@ const TweenDrawerEventsHeader = (): ReactElement => {
         </HeaderItem>
         <HeaderItem
           theme={theme}
-          className='c-tween-drawer-events-item__module c-tween-drawer-events-item__module--label'
+          className='c-event-drawer-list-item__module c-event-drawer-list-item__module--label'
           isDisabled>
           actions
         </HeaderItem>
@@ -136,4 +140,4 @@ const TweenDrawerEventsHeader = (): ReactElement => {
   );
 }
 
-export default TweenDrawerEventsHeader;
+export default EventDrawerListHeader;

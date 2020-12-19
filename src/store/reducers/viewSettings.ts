@@ -11,14 +11,14 @@ import {
 import {
   SET_LEFT_SIDEBAR_WIDTH,
   SET_RIGHT_SIDEBAR_WIDTH,
-  SET_TWEEN_DRAWER_HEIGHT,
-  SET_TWEEN_DRAWER_LAYERS_WIDTH,
+  SET_EVENT_DRAWER_HEIGHT,
+  SET_EVENT_DRAWER_LAYERS_WIDTH,
   OPEN_LEFT_SIDEBAR,
   CLOSE_LEFT_SIDEBAR,
   OPEN_RIGHT_SIDEBAR,
   CLOSE_RIGHT_SIDEBAR,
-  OPEN_TWEEN_DRAWER,
-  CLOSE_TWEEN_DRAWER,
+  OPEN_EVENT_DRAWER,
+  CLOSE_EVENT_DRAWER,
   ENABLE_DARK_THEME,
   ENABLE_LIGHT_THEME,
   ViewSettingsTypes,
@@ -33,7 +33,7 @@ export interface ViewSettingsState {
     isOpen: boolean;
     width: number;
   };
-  tweenDrawer: {
+  eventDrawer: {
     isOpen: boolean;
     height: number;
     layersWidth: number;
@@ -50,10 +50,10 @@ const initialState: ViewSettingsState = {
     isOpen: true,
     width: DEFAULT_RIGHT_SIDEBAR_WIDTH // remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('rightSidebarWidth', 'integer') : DEFAULT_RIGHT_SIDEBAR_WIDTH,
   },
-  tweenDrawer: {
+  eventDrawer: {
     isOpen: true,
-    height: DEFAULT_TWEEN_DRAWER_HEIGHT, // remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('tweenDrawerHeight', 'integer') : DEFAULT_TWEEN_DRAWER_HEIGHT,
-    layersWidth: DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH // remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('tweenDrawerLayersWidth', 'integer') : DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH,
+    height: DEFAULT_TWEEN_DRAWER_HEIGHT, // remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('eventDrawerHeight', 'integer') : DEFAULT_TWEEN_DRAWER_HEIGHT,
+    layersWidth: DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH // remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('eventDrawerEventLayersWidth', 'integer') : DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH,
   },
   theme: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('theme', 'string') : DEFAULT_THEME
 };
@@ -120,44 +120,44 @@ export default (state = initialState, action: ViewSettingsTypes): ViewSettingsSt
         }
       };
     }
-    case OPEN_TWEEN_DRAWER: {
+    case OPEN_EVENT_DRAWER: {
       return {
         ...state,
-        tweenDrawer: {
-          ...state.tweenDrawer,
+        eventDrawer: {
+          ...state.eventDrawer,
           isOpen: true
         }
       };
     }
-    case CLOSE_TWEEN_DRAWER: {
+    case CLOSE_EVENT_DRAWER: {
       return {
         ...state,
-        tweenDrawer: {
-          ...state.tweenDrawer,
+        eventDrawer: {
+          ...state.eventDrawer,
           isOpen: false
         }
       };
     }
-    case SET_TWEEN_DRAWER_HEIGHT: {
+    case SET_EVENT_DRAWER_HEIGHT: {
       // if (remote.process.platform === 'darwin') {
-      //   remote.systemPreferences.setUserDefault('tweenDrawerHeight', 'integer', parseInt(action.payload.height as any) as any);
+      //   remote.systemPreferences.setUserDefault('eventDrawerHeight', 'integer', parseInt(action.payload.height as any) as any);
       // }
       return {
         ...state,
-        tweenDrawer: {
-          ...state.tweenDrawer,
+        eventDrawer: {
+          ...state.eventDrawer,
           height: action.payload.height
         }
       };
     }
-    case SET_TWEEN_DRAWER_LAYERS_WIDTH: {
+    case SET_EVENT_DRAWER_LAYERS_WIDTH: {
       // if (remote.process.platform === 'darwin') {
-      //   remote.systemPreferences.setUserDefault('tweenDrawerLayersWidth', 'integer', parseInt(action.payload.width as any) as any);
+      //   remote.systemPreferences.setUserDefault('eventDrawerEventLayersWidth', 'integer', parseInt(action.payload.width as any) as any);
       // }
       return {
         ...state,
-        tweenDrawer: {
-          ...state.tweenDrawer,
+        eventDrawer: {
+          ...state.eventDrawer,
           layersWidth: action.payload.width
         }
       };

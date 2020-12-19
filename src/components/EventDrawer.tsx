@@ -2,32 +2,32 @@ import React, { useContext, ReactElement } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
-import TweenDrawerEvents from './TweenDrawerEvents';
-import TweenDrawerEvent from './TweenDrawerEvent';
-import TweenDrawerDragHandle from './TweenDrawerDragHandle';
+import EventDrawerList from './EventDrawerList';
+import EventDrawerEvent from './EventDrawerEvent';
+import EventDrawerDragHandle from './EventDrawerDragHandle';
 import EmptyState from './EmptyState';
 
-interface TweenDrawerProps {
+interface EventDrawerProps {
   ready?: boolean;
 }
 
-const TweenDrawer = (props: TweenDrawerProps): ReactElement => {
+const EventDrawer = (props: EventDrawerProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { ready } = props;
-  const tweenEvent = useSelector((state: RootState) => state.layer.present.events.byId[state.tweenDrawer.event]);
-  const tweenDrawerHeight = useSelector((state: RootState) => state.viewSettings.tweenDrawer.height);
+  const event = useSelector((state: RootState) => state.layer.present.events.byId[state.eventDrawer.event]);
+  const eventDrawerHeight = useSelector((state: RootState) => state.viewSettings.eventDrawer.height);
   const isEmpty = useSelector((state: RootState) => state.layer.present.events.allIds.length === 0);
-  const isOpen = useSelector((state: RootState) => state.viewSettings.tweenDrawer.isOpen);
+  const isOpen = useSelector((state: RootState) => state.viewSettings.eventDrawer.isOpen);
 
   return (
     isOpen
     ? <>
-        <TweenDrawerDragHandle />
+        <EventDrawerDragHandle />
         <div
-          id='tween-drawer'
-          className='c-tween-drawer'
+          id='event-drawer'
+          className='c-event-drawer'
           style={{
-            height: tweenDrawerHeight,
+            height: eventDrawerHeight,
             background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
             boxShadow: `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
           }}>
@@ -42,9 +42,9 @@ const TweenDrawer = (props: TweenDrawerProps): ReactElement => {
           }
           {
             ready
-            ? tweenEvent
-              ? <TweenDrawerEvent />
-              : <TweenDrawerEvents />
+            ? event
+              ? <EventDrawerEvent />
+              : <EventDrawerList />
             : null
           }
         </div>
@@ -53,4 +53,4 @@ const TweenDrawer = (props: TweenDrawerProps): ReactElement => {
   );
 }
 
-export default TweenDrawer;
+export default EventDrawer;

@@ -2,7 +2,7 @@ import React, { useContext, ReactElement, useState } from 'react';
 import { ThemeContext } from './ThemeProvider';
 import Icon from './Icon';
 
-interface TweenDrawerEventLayersProps {
+interface EventDrawerEventLayersHeaderProps {
   text?: string;
   icon?: {
     name?: string;
@@ -19,31 +19,40 @@ interface TweenDrawerEventLayersProps {
   onIconClick?(): void;
 }
 
-const TweenDrawerEventLayersHeader = (props: TweenDrawerEventLayersProps): ReactElement => {
+const EventDrawerEventLayersHeader = (props: EventDrawerEventLayersHeaderProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { text, icon, onMouseEnter, onMouseLeave, onClick, onIconClick, sticky, layerItem, maskItem } = props;
   const [hover, setHover] = useState(false);
 
   return (
     <div
-      className={`c-tween-drawer-event-layers__header ${sticky ? 'c-tween-drawer-event-layers__header--sticky' : null}`}
+      className={`c-event-drawer-event-layers__header ${sticky ? 'c-event-drawer-event-layers__header--sticky' : null}`}
       style={{
-        background: sticky ? (theme.name === 'dark' ? theme.background.z2 : theme.background.z1) : (theme.name === 'dark' ? theme.background.z3 : theme.background.z0),
-        boxShadow: `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
+        background: sticky
+        ? (theme.name === 'dark'
+          ? theme.background.z2 : theme.background.z1)
+          : (theme.name === 'dark'
+        ? theme.background.z3
+        : theme.background.z0),
+        boxShadow: `0 -1px 0 0 ${theme.name === 'dark'
+        ? theme.background.z4
+        : theme.background.z5} inset`
       }}>
       <button
-        className='c-tween-drawer-event-layer__tween'
+        className='c-event-drawer-event-layer__tween'
         onClick={onClick}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
         style={{
-          boxShadow: sticky ? `-1px 0 0 0 ${theme.background.z5} inset` : 'none'
+          boxShadow: sticky
+          ? `-1px 0 0 0 ${theme.background.z5} inset`
+          : 'none'
         }}>
         <div
-          className='c-tween-drawer-event-layer__icon'
+          className='c-event-drawer-event-layer__icon'
           onClick={onIconClick}
-          onMouseEnter={() => setHover(true)}
-          onMouseLeave={() => setHover(false)}>
+          onMouseEnter={(): void => setHover(true)}
+          onMouseLeave={(): void => setHover(false)}>
           <Icon
             name={icon.name}
             shapeId={icon.shapeId}
@@ -61,11 +70,17 @@ const TweenDrawerEventLayersHeader = (props: TweenDrawerEventLayersProps): React
             }} />
         </div>
         <div
-          className='c-tween-drawer-event-layer-tween__name'
+          className='c-event-drawer-event-layer-tween__name'
           style={{
-            color: sticky ? theme.text.base : theme.text.lighter,
-            textTransform: sticky ? 'none' : 'uppercase',
-            fontWeight: sticky ? 400 : 700
+            color: sticky
+            ? theme.text.base
+            : theme.text.lighter,
+            textTransform: sticky
+            ? 'none'
+            : 'uppercase',
+            fontWeight: sticky
+            ? 400
+            : 700
           }}>
           { text }
         </div>
@@ -74,4 +89,4 @@ const TweenDrawerEventLayersHeader = (props: TweenDrawerEventLayersProps): React
   );
 }
 
-export default TweenDrawerEventLayersHeader;
+export default EventDrawerEventLayersHeader;

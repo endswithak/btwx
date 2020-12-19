@@ -5,7 +5,7 @@ import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
 import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
-import { setTweenDrawerTweenEditing } from '../store/actions/tweenDrawer';
+import { setEventDrawerTweenEditing } from '../store/actions/eventDrawer';
 import { setLayerTweenTiming } from '../store/actions/layer';
 
 gsap.registerPlugin(Draggable);
@@ -52,13 +52,13 @@ const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
         }
       },
       onPress: function() {
-        dispatch(setTweenDrawerTweenEditing({id: tweenId}));
+        dispatch(setEventDrawerTweenEditing({id: tweenId}));
         gsap.set(leftTooltipElement, {display: 'inline'});
         leftTooltipElement.innerHTML = `${(this.x / 4) / 100}s`;
         document.body.style.cursor = 'ew-resize';
       },
       onRelease: function() {
-        dispatch(setTweenDrawerTweenEditing({id: null}));
+        dispatch(setEventDrawerTweenEditing({id: null}));
         gsap.set(leftTooltipElement, {display: 'none'});
         document.body.style.cursor = 'auto';
       },

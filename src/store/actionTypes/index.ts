@@ -15,7 +15,7 @@ import { ShapeToolTypes } from './shapeTool';
 import { TextEditorTypes } from './textEditor';
 import { TextSettingsTypes } from './textSettings';
 import { TextToolTypes } from './textTool';
-import { TweenDrawerTypes } from './tweenDrawer';
+import { EventDrawerTypes } from './eventDrawer';
 
 export type RootAction = ArtboardPresetEditorTypes |
                          ArtboardToolTypes |
@@ -33,5 +33,5 @@ export type RootAction = ArtboardPresetEditorTypes |
                          TextEditorTypes |
                          TextSettingsTypes |
                          TextToolTypes |
-                         TweenDrawerTypes |
+                         EventDrawerTypes |
                          ViewSettingsTypes;

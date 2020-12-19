@@ -8,10 +8,6 @@ import {
   PREVIEW_TOPBAR_HEIGHT,
   MAC_TITLEBAR_HEIGHT,
   WINDOWS_TITLEBAR_HEIGHT,
-  DEFAULT_LEFT_SIDEBAR_WIDTH,
-  DEFAULT_RIGHT_SIDEBAR_WIDTH,
-  DEFAULT_TWEEN_DRAWER_HEIGHT,
-  DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH,
   DEFAULT_COLOR_FORMAT,
   DEFAULT_DEVICE_ORIENTATION,
   APP_NAME
@@ -32,18 +28,6 @@ if (isMac) {
   if (!systemPreferences.getUserDefault('theme', 'string')) {
     systemPreferences.setUserDefault('theme', 'string', nativeTheme.shouldUseDarkColors ? 'dark' : 'light');
   }
-  // if (!systemPreferences.getUserDefault('leftSidebarWidth', 'integer')) {
-  //   systemPreferences.setUserDefault('leftSidebarWidth', 'integer', DEFAULT_LEFT_SIDEBAR_WIDTH as any);
-  // }
-  // if (!systemPreferences.getUserDefault('rightSidebarWidth', 'integer')) {
-  //   systemPreferences.setUserDefault('rightSidebarWidth', 'integer', DEFAULT_RIGHT_SIDEBAR_WIDTH as any);
-  // }
-  // if (!systemPreferences.getUserDefault('tweenDrawerHeight', 'integer')) {
-  //   systemPreferences.setUserDefault('tweenDrawerHeight', 'integer', DEFAULT_TWEEN_DRAWER_HEIGHT as any);
-  // }
-  // if (!systemPreferences.getUserDefault('tweenDrawerLayersWidth', 'integer')) {
-  //   systemPreferences.setUserDefault('tweenDrawerLayersWidth', 'integer', DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH as any);
-  // }
 }
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -323,11 +307,11 @@ export const handleSave = (document: BrowserWindow, path: string, onSave?: { rel
       document.webContents.executeJavaScript(`fileSave()`).then(() => {
         if (onSave && onSave.close) {
           handleDocumentClose(document.id);
-          resolve();
+          resolve(null);
         }
         if (onSave && onSave.reload) {
           document.reload();
-          resolve();
+          resolve(null);
         }
         if (onSave && onSave.quit) {
           app.exit();
@@ -346,11 +330,11 @@ export const handleSaveAs = (document: BrowserWindow, onSave?: { reload?: boolea
       document.webContents.executeJavaScript(`fileSaveAs()`).then(() => {
         if (onSave && onSave.close) {
           handleDocumentClose(document.id);
-          resolve();
+          resolve(null);
         }
         if (onSave && onSave.reload) {
           document.reload();
-          resolve();
+          resolve(null);
         }
         if (onSave && onSave.quit) {
           app.exit();

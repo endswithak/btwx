@@ -4,7 +4,7 @@ import { HYDRATE_PREVIEW } from '../actionTypes/preview';
 import { HYDRATE_DOCUMENT } from '../actionTypes/documentSettings';
 import layer from './layer';
 import contextMenu from './contextMenu';
-import tweenDrawer from './tweenDrawer';
+import eventDrawer from './eventDrawer';
 import easeEditor from './easeEditor';
 import colorEditor from './colorEditor';
 import gradientEditor from './gradientEditor';
@@ -28,7 +28,7 @@ export const reducers = {
   canvasSettings,
   viewSettings,
   contextMenu,
-  tweenDrawer,
+  eventDrawer,
   easeEditor,
   textEditor,
   textSettings,

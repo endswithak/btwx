@@ -2,12 +2,12 @@ import React, { ReactElement, useEffect } from 'react';
 import { remote } from 'electron';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { toggleTweenDrawerThunk } from '../store/actions/viewSettings';
+import { toggleEventDrawerThunk } from '../store/actions/viewSettings';
 
 export const MENU_ITEM_ID = 'viewShowEvents';
 
 const MenuViewShowEvents = (): ReactElement => {
-  const isChecked = useSelector((state: RootState) => state.viewSettings.tweenDrawer.isOpen);
+  const isChecked = useSelector((state: RootState) => state.viewSettings.eventDrawer.isOpen);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -18,7 +18,7 @@ const MenuViewShowEvents = (): ReactElement => {
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      dispatch(toggleTweenDrawerThunk());
+      dispatch(toggleEventDrawerThunk());
     };
   }, []);
 

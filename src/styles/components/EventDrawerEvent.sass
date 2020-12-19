@@ -1,19 +1,19 @@
-.c-tween-drawer-event
+.c-event-drawer-event
   position: relative
   height: 100%
   width: 100%
   max-width: 100%
   display: flex
 
-.c-tween-drawer-event__layers
+.c-event-drawer-event__layers
   height: 100%
   display: flex
   flex-direction: column
   flex-shrink: 0
   position: relative
 
-.c-tween-drawer-event-layers__header,
-.c-tween-drawer-event-layers-timeline__header
+.c-event-drawer-event-layers__header,
+.c-event-drawer-event-layers-timeline__header
   display: flex
   height: $unit * 8
   max-height: $unit * 8
@@ -21,13 +21,13 @@
   width: 100%
   position: relative
 
-.c-tween-drawer-event-layers__header--sticky
+.c-event-drawer-event-layers__header--sticky
   position: absolute
   top: $unit * 8
   z-index: 2
 
-.c-tween-drawer-event-layers__layers,
-.c-tween-drawer-event-layers-timeline__layers
+.c-event-drawer-event-layers__layers,
+.c-event-drawer-event-layers-timeline__layers
   height: 100%
   width: 100%
   display: flex
@@ -35,14 +35,14 @@
   flex-direction: column
   flex-grow: 2
 
-.c-tween-drawer-event__layers-timeline-wrap
+.c-event-drawer-event__layers-timeline-wrap
   height: 100%
   width: 80%
   display: flex
   flex-grow: 2
   overflow: scroll
 
-.c-tween-drawer-event__layers-timeline
+.c-event-drawer-event__layers-timeline
   height: 100%
   min-width: $unit * 1000
   width: $unit * 1000 // 4000 // 10 sec max
@@ -51,25 +51,25 @@
   flex-grow: 2
   position: relative
 
-.c-tween-drawer-event__layer,
-.c-tween-drawer-event__tweens
+.c-event-drawer-event__layer,
+.c-event-drawer-event__tweens
   display: flex
   flex-direction: column
   flex-shrink: 0
   width: 100%
 
-.c-tween-drawer-event__layer-timeline,
-.c-tween-drawer-event__tweens-timeline
+.c-event-drawer-event__layer-timeline,
+.c-event-drawer-event__tweens-timeline
   display: flex
   flex-direction: column
   flex-shrink: 0
   width: 100%
 
-.c-tween-drawer-event-layers__layers,
-.c-tween-drawer-event__layer-timeline:last-child
+.c-event-drawer-event-layers__layers,
+.c-event-drawer-event__layer-timeline:last-child
   padding-bottom: $unit * 6
 
-.c-tween-drawer-event-layer__tween
+.c-event-drawer-event-layer__tween
   display: flex
   height: $unit * 8
   max-height: $unit * 8
@@ -79,13 +79,13 @@
   align-items: center
   padding: 0 $unit * 2
 
-.c-tween-drawer-event-layer__icon
+.c-event-drawer-event-layer__icon
   margin-right: $unit * 2
   display: flex
   align-items: center
   justify-content: center
 
-.c-tween-drawer-event-layer-tween__name
+.c-event-drawer-event-layer-tween__name
   flex-grow: 2
   width: 100%
   line-height: $unit * 8
@@ -98,10 +98,10 @@
   &::selection
     background: none
 
-.c-tween-drawer-event-layer__tween--right
+.c-event-drawer-event-layer__tween--right
   justify-content: flex-end
 
-.c-tween-drawer-event-layer__tween-timeline
+.c-event-drawer-event-layer__tween-timeline
   position: relative
   display: flex
   height: $unit * 8
@@ -111,11 +111,11 @@
   font-size: $fontSizeSm
   align-items: center
 
-.c-tween-drawer-events-item__artboard
+.c-event-drawer-events-item__artboard
   display: flex
   align-items: center
 
-.c-tween-drawer-events-item__active-artboard
+.c-event-drawer-events-item__active-artboard
   display: inline-block
   border-radius: 50%
   height: $unit

@@ -2,40 +2,40 @@
 import React, { useContext, ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
+import { setEventDrawerTweenHoverThunk } from '../store/actions/eventDrawer';
 import { ThemeContext } from './ThemeProvider';
-import { setTweenDrawerTweenHoverThunk } from '../store/actions/tweenDrawer';
 import TimelineLeftHandle from './TimelineLeftHandle';
 import TimelineRightHandle from './TimelineRightHandle';
 import TimelineTweenHandle from './TimelineTweenHandle';
 
-interface TweenDrawerEventLayerTweenTimelineProps {
+interface EventDrawerEventTimelineTweenProps {
   tweenId: string;
 }
 
-const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTimelineProps): ReactElement => {
+const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { tweenId } = props;
-  // const tweenHover = useSelector((state: RootState) => state.tweenDrawer.tweenHover);
-  const tweenEditing = useSelector((state: RootState) => state.tweenDrawer.tweenEditing);
+  // const tweenHover = useSelector((state: RootState) => state.eventDrawer.tweenHover);
+  const editing = useSelector((state: RootState) => state.eventDrawer.tweenEditing === tweenId);
   const dispatch = useDispatch();
 
   const handleMouseEnter = (): void => {
-    dispatch(setTweenDrawerTweenHoverThunk({id: tweenId}));
+    dispatch(setEventDrawerTweenHoverThunk({id: tweenId}));
   }
 
   const handleMouseLeave = (): void => {
-    dispatch(setTweenDrawerTweenHoverThunk({id: null}));
+    dispatch(setEventDrawerTweenHoverThunk({id: null}));
   }
 
   return (
     <div
       id={`${tweenId}-timeline`}
-      className='c-tween-drawer-event-layer__tween-timeline'
+      className='c-event-drawer-event-layer__tween-timeline'
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{
         color: theme.text.lighter,
-        zIndex: tweenId === tweenEditing
+        zIndex: editing
         ? 3
         : 'inherit'
       }}>
@@ -49,4 +49,4 @@ const TweenDrawerEventLayerTweenTimeline = (props: TweenDrawerEventLayerTweenTim
   );
 }
 
-export default TweenDrawerEventLayerTweenTimeline;
+export default EventDrawerEventTimelineTween;

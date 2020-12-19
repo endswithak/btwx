@@ -6,20 +6,20 @@ import { getAllProjectIndices } from '../selectors/layer';
 import {
   SET_LEFT_SIDEBAR_WIDTH,
   SET_RIGHT_SIDEBAR_WIDTH,
-  SET_TWEEN_DRAWER_HEIGHT,
-  SET_TWEEN_DRAWER_LAYERS_WIDTH,
+  SET_EVENT_DRAWER_HEIGHT,
+  SET_EVENT_DRAWER_LAYERS_WIDTH,
   OPEN_RIGHT_SIDEBAR,
   CLOSE_RIGHT_SIDEBAR,
   OPEN_LEFT_SIDEBAR,
   CLOSE_LEFT_SIDEBAR,
-  OPEN_TWEEN_DRAWER,
-  CLOSE_TWEEN_DRAWER,
+  OPEN_EVENT_DRAWER,
+  CLOSE_EVENT_DRAWER,
   ENABLE_DARK_THEME,
   ENABLE_LIGHT_THEME,
   SetLeftSidebarWidthPayload,
   SetRightSidebarWidthPayload,
-  SetTweenDrawerHeightPayload,
-  SetTweenDrawerLayersWidthPayload,
+  SetEventDrawerHeightPayload,
+  SetEventDrawerLayersWidthPayload,
   ViewSettingsTypes
 } from '../actionTypes/viewSettings';
 
@@ -33,13 +33,13 @@ export const setRightSidebarWidth = (payload: SetRightSidebarWidthPayload): View
   payload
 });
 
-export const setTweenDrawerHeight = (payload: SetTweenDrawerHeightPayload): ViewSettingsTypes => ({
-  type: SET_TWEEN_DRAWER_HEIGHT,
+export const setEventDrawerHeight = (payload: SetEventDrawerHeightPayload): ViewSettingsTypes => ({
+  type: SET_EVENT_DRAWER_HEIGHT,
   payload
 });
 
-export const setTweenDrawerLayersWidth = (payload: SetTweenDrawerLayersWidthPayload): ViewSettingsTypes => ({
-  type: SET_TWEEN_DRAWER_LAYERS_WIDTH,
+export const setEventDrawerLayersWidth = (payload: SetEventDrawerLayersWidthPayload): ViewSettingsTypes => ({
+  type: SET_EVENT_DRAWER_LAYERS_WIDTH,
   payload
 });
 
@@ -101,30 +101,30 @@ export const toggleLeftSidebarThunk = () => {
   }
 };
 
-export const openTweenDrawer = (): ViewSettingsTypes => ({
-  type: OPEN_TWEEN_DRAWER
+export const openEventDrawer = (): ViewSettingsTypes => ({
+  type: OPEN_EVENT_DRAWER
 });
 
-export const closeTweenDrawer = (): ViewSettingsTypes => ({
-  type: CLOSE_TWEEN_DRAWER
+export const closeEventDrawer = (): ViewSettingsTypes => ({
+  type: CLOSE_EVENT_DRAWER
 });
 
-export const toggleTweenDrawerThunk = () => {
+export const toggleEventDrawerThunk = () => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
     const allProjectIndices = getAllProjectIndices(state);
-    if (state.viewSettings.tweenDrawer.isOpen) {
+    if (state.viewSettings.eventDrawer.isOpen) {
       allProjectIndices.forEach((current, index) => {
         const project = uiPaperScope.projects[current];
-        project.view.viewSize = new uiPaperScope.Size(project.view.viewSize.width, project.view.viewSize.height + state.viewSettings.tweenDrawer.height);
+        project.view.viewSize = new uiPaperScope.Size(project.view.viewSize.width, project.view.viewSize.height + state.viewSettings.eventDrawer.height);
       });
-      dispatch(closeTweenDrawer());
+      dispatch(closeEventDrawer());
     } else {
       allProjectIndices.forEach((current, index) => {
         const project = uiPaperScope.projects[current];
-        project.view.viewSize = new uiPaperScope.Size(project.view.viewSize.width, project.view.viewSize.height - state.viewSettings.tweenDrawer.height);
+        project.view.viewSize = new uiPaperScope.Size(project.view.viewSize.width, project.view.viewSize.height - state.viewSettings.eventDrawer.height);
       });
-      dispatch(openTweenDrawer());
+      dispatch(openEventDrawer());
     }
     dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
   }

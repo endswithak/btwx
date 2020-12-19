@@ -7,7 +7,7 @@ import { addLayerTweenEvent, removeLayers, selectLayers, selectAllLayers, copyLa
 import { removeArtboardPreset } from '../store/actions/documentSettings';
 import { openArtboardPresetEditor } from '../store/actions/artboardPresetEditor';
 import { canGroupSelected, canUngroupSelected, canToggleSelectedUseAsMask, canBringSelectedForward, canSendSelectedBackward, selectedIgnoreUnderlyingMaskEnabled, selectedUseAsMaskEnabled, canToggleSelectedIgnoreUnderlyingMask, canReplaceSelectedImages } from '../store/selectors/layer';
-import { setTweenDrawerEventHoverThunk, setTweenDrawerEventThunk } from '../store/actions/tweenDrawer';
+import { setEventDrawerEventHoverThunk, setEventDrawerEventThunk } from '../store/actions/eventDrawer';
 import { APP_NAME, DEFAULT_TWEEN_EVENTS } from '../constants';
 import ContextMenu from './ContextMenu';
 
@@ -21,7 +21,7 @@ const ContextMenuWrap = (): ReactElement => {
     }), {})
   })) as { allIds: string[]; byId: { [id: string]: Btwx.Artboard } };
   const selected = useSelector((state: RootState) => state.layer.present.selected);
-  const canSetTweenDrawerEventHover = useSelector((state: RootState) => state.viewSettings.tweenDrawer.isOpen && !state.tweenDrawer.event);
+  const canSetEventDrawerEventHover = useSelector((state: RootState) => state.viewSettings.eventDrawer.isOpen && !state.eventDrawer.event);
   const layerItem = useSelector((state: RootState) => Object.prototype.hasOwnProperty.call(state.layer.present.byId, state.contextMenu.id) && state.contextMenu.id !== 'root' ? state.layer.present.byId[state.contextMenu.id] : null);
   const tweenEventLayerScope = layerItem ? layerItem.scope : null;
   const hasArtboardParent = useSelector((state: RootState) => layerItem ? tweenEventLayerScope[1] && state.layer.present.byId[tweenEventLayerScope[1]].type === 'Artboard' : false);
@@ -264,7 +264,7 @@ const ContextMenuWrap = (): ReactElement => {
           type: 'MenuHead',
           text: 'On Event:',
           backButton: true,
-          backButtonClick: () => {
+          backButtonClick: (): void => {
             dispatch(closeContextMenu());
             dispatch(openContextMenu({
               ...contextMenu,
@@ -283,13 +283,13 @@ const ContextMenuWrap = (): ReactElement => {
               text: current.titleCase,
               disabled: isDisabled,
               onMouseEnter(): void {
-                if (eventItem && canSetTweenDrawerEventHover) {
-                  dispatch(setTweenDrawerEventHoverThunk({id: eventItem.id}));
+                if (eventItem && canSetEventDrawerEventHover) {
+                  dispatch(setEventDrawerEventHoverThunk({id: eventItem.id}));
                 }
               },
               onMouseLeave(): void {
-                if (eventItem && canSetTweenDrawerEventHover) {
-                  dispatch(setTweenDrawerEventHoverThunk({id: null}));
+                if (eventItem && canSetEventDrawerEventHover) {
+                  dispatch(setEventDrawerEventHoverThunk({id: null}));
                 }
               },
               onClick(): void {
@@ -346,7 +346,7 @@ const ContextMenuWrap = (): ReactElement => {
           type: 'MenuHead',
           text: `On ${DEFAULT_TWEEN_EVENTS.find((event) => event.event === contextMenu.data.tweenEvent).titleCase}, Go To:`,
           backButton: true,
-          backButtonClick: () => {
+          backButtonClick: (): void => {
             dispatch(closeContextMenu());
             dispatch(openContextMenu({
               ...contextMenu,
@@ -380,13 +380,13 @@ const ContextMenuWrap = (): ReactElement => {
           }
         }]
       }
-      case 'TweenDrawerEvent': {
+      case 'EventDrawerEvent': {
         return [{
           type: 'MenuItem',
           text: 'Edit',
           onClick: (): void => {
             dispatch(closeContextMenu());
-            dispatch(setTweenDrawerEventThunk({id: contextMenu.id}));
+            dispatch(setEventDrawerEventThunk({id: contextMenu.id}));
           }
         },{
           type: 'MenuItem',
@@ -400,7 +400,7 @@ const ContextMenuWrap = (): ReactElement => {
     }
   }
 
-  const getEmptyState = () => {
+  const getEmptyState = (): string => {
     switch(contextMenu.type) {
       case 'TweenEvent': {
         return null;

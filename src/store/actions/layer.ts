@@ -21,7 +21,7 @@ import { renderShapeGroup } from '../../canvas/sketch/utils/shapeGroup';
 import getTheme from '../theme';
 
 import { addDocumentImage } from './documentSettings';
-import { setTweenDrawerEventThunk } from './tweenDrawer';
+import { setEventDrawerEventThunk } from './eventDrawer';
 import { openColorEditor, closeColorEditor } from './colorEditor';
 import { openGradientEditor, closeGradientEditor } from './gradientEditor';
 import { RootState } from '../reducers';
@@ -1078,7 +1078,7 @@ export const addLayersThunk = (payload: AddLayersPayload) => {
       });
       Promise.all(promises).then((layers) => {
         dispatch(addLayers({layers: layers}));
-        resolve();
+        resolve(layers);
       });
     });
   }
@@ -1100,14 +1100,14 @@ export const removeLayersThunk = () => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     if (state.layer.present.selected.length > 0 && state.canvasSettings.focusing) {
-      if (state.viewSettings.tweenDrawer.isOpen && state.tweenDrawer.event) {
-        const tweenEvent = state.layer.present.events.byId[state.tweenDrawer.event];
+      if (state.viewSettings.eventDrawer.isOpen && state.eventDrawer.event) {
+        const tweenEvent = state.layer.present.events.byId[state.eventDrawer.event];
         let layersAndChildren: string[] = [];
         state.layer.present.selected.forEach((id) => {
           layersAndChildren = [...layersAndChildren, ...getLayerAndDescendants(state.layer.present, id)];
         });
         if (layersAndChildren.includes(tweenEvent.layer) || layersAndChildren.includes(tweenEvent.artboard) || layersAndChildren.includes(tweenEvent.destinationArtboard)) {
-          dispatch(setTweenDrawerEventThunk({id: null}));
+          dispatch(setEventDrawerEventThunk({id: null}));
         }
       }
       dispatch(removeLayers({layers: state.layer.present.selected}));
@@ -1266,7 +1266,7 @@ export const setGlobalScope = (payload: SetGlobalScopePayload): LayerTypes => ({
 });
 
 export const escapeLayerScopeThunk = () => {
-  return (dispatch: any, getState: any) => {
+  return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
     const nextScope = state.layer.present.scope.filter((id, index) => index !== state.layer.present.scope.length - 1);
     if (state.layer.present.scope.length > 0) {
@@ -1322,7 +1322,7 @@ export const groupLayersThunk = (payload: GroupLayersPayload) => {
         batch: true
       })).then((newGroup: Btwx.Group) => {
         dispatch(groupLayers({...payload, group: newGroup}));
-        resolve();
+        resolve(newGroup);
       });
     });
   }
@@ -1350,7 +1350,7 @@ export const groupSelectedThunk = () => {
         batch: true
       })).then((newGroup: Btwx.Group) => {
         dispatch(groupLayers({layers: state.layer.present.selected.reverse(), group: newGroup}));
-        resolve();
+        resolve(newGroup);
       });
     });
   }
@@ -2139,11 +2139,11 @@ export const addSelectionMaskThunk = () => {
               group: newGroup
             })
           );
-          resolve();
+          resolve(newGroup);
         });
       } else {
         dispatch(toggleSelectedMaskThunk());
-        resolve();
+        resolve(null);
       }
     });
   }
@@ -2663,7 +2663,7 @@ export const replaceSelectedImagesThunk = () => {
                   originalDimensions
                 }));
                 imageLoader.remove();
-                resolve();
+                resolve(null);
               }
             });
           });
@@ -2838,7 +2838,7 @@ export const pasteLayersThunk = (props?: { overSelection?: boolean; overPoint?: 
             }, text);
             const clipboardLayers: Btwx.ClipboardLayers = JSON.parse(withNewIds);
             dispatch(pasteLayersFromClipboard({clipboardLayers, overSelection, overPoint, overLayer}));
-            resolve();
+            resolve(null);
             // const clipboardBounds = new uiPaperScope.Rectangle(
             //   new uiPaperScope.Point((clipboardLayers.bounds as number[])[1], (clipboardLayers.bounds as number[])[2]),
             //   new uiPaperScope.Size((clipboardLayers.bounds as number[])[3], (clipboardLayers.bounds as number[])[4])
@@ -2941,10 +2941,10 @@ export const pasteLayersThunk = (props?: { overSelection?: boolean; overPoint?: 
             // });
           }
         } catch(error) {
-          resolve();
+          reject(error);
         }
       } else {
-        resolve();
+        resolve(null);
       }
     });
   }
@@ -3137,7 +3137,7 @@ export const undoThunk = () => {
       //   updateSelectionFrame(getSelectedBounds(fullState));
       // }
       // updateActiveArtboardFrame();
-      // if (state.viewSettings.tweenDrawer.isOpen && layerState.events.allIds.length > 0) {
+      // if (state.viewSettings.eventDrawer.isOpen && layerState.events.allIds.length > 0) {
       //   updateTweenEventsFrame(fullState);
       // }
     }
@@ -3259,14 +3259,14 @@ export const redoThunk = () => {
       //   updateSelectionFrame(getSelectedBounds(fullState));
       // }
       // updateActiveArtboardFrame();
-      // if (state.viewSettings.tweenDrawer.isOpen && layerState.events.allIds.length > 0) {
+      // if (state.viewSettings.eventDrawer.isOpen && layerState.events.allIds.length > 0) {
       //   updateTweenEventsFrame(fullState);
       // }
     }
   }
 };
 
-export const updateGradientFrame = (origin: { position: paper.Point; color: any; selected: boolean; index: number }, destination: { position: paper.Point; color: any; selected: boolean; index: number }): void => {
+export const updateGradientFrame = (origin: { position: paper.Point; color: Btwx.Color; selected: boolean; index: number }, destination: { position: paper.Point; color: Btwx.Color; selected: boolean; index: number }): void => {
   const gradientFrame = uiPaperScope.project.getItem({ data: { id: 'gradientFrame' } });
   gradientFrame.removeChildren();
   if (origin && destination) {
@@ -3598,7 +3598,7 @@ export const updateActiveArtboardFrameThunk = () => {
     const state = getState() as RootState;
     const activeArtboard = state.layer.present.activeArtboard;
     if (activeArtboard) {
-      const { layerItem, paperLayer } = getItemLayers(state.layer.present, activeArtboard);
+      const { paperLayer } = getItemLayers(state.layer.present, activeArtboard);
       updateActiveArtboardFrame(paperLayer.getItem({data: {id: 'artboardBackground'}}).bounds);
     }
   }
@@ -3884,11 +3884,11 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
   }
 };
 
-export const updateTweenEventsFrame = (state: RootState) => {
+export const updateEventsFrame = (state: RootState): void => {
   if (uiPaperScope.project.activeLayer.data.id !== 'ui') {
     uiPaperScope.projects[0].activate();
   }
-  const tweenEventsFrame = uiPaperScope.project.getItem({ data: { id: 'artboardEvents' } });
+  const eventsFrame = uiPaperScope.project.getItem({ data: { id: 'eventsFrame' } });
   const events = (getArtboardEventItems(state) as {
     tweenEventItems: Btwx.TweenEvent[];
     tweenEventLayers: {
@@ -3898,7 +3898,7 @@ export const updateTweenEventsFrame = (state: RootState) => {
       };
     };
   }).tweenEventItems;
-  tweenEventsFrame.removeChildren();
+  eventsFrame.removeChildren();
   if (events) {
     const theme = getTheme(state.viewSettings.theme);
     events.forEach((event, index) => {
@@ -3917,7 +3917,7 @@ export const updateTweenEventsFrame = (state: RootState) => {
           type: 'UIElementChild',
           interactive: false,
           interactiveType: null,
-          elementId: 'tweenEventsFrame'
+          elementId: 'eventsFrame'
         }
       });
       const tweenEventOriginIndicator = new uiPaperScope.Path.Ellipse({
@@ -3928,7 +3928,7 @@ export const updateTweenEventsFrame = (state: RootState) => {
           type: 'UIElementChild',
           interactive: false,
           interactiveType: null,
-          elementId: 'tweenEventsFrame'
+          elementId: 'eventsFrame'
         }
       });
       const tweenEventIconBackground = new uiPaperScope.Path.Ellipse({
@@ -3940,11 +3940,11 @@ export const updateTweenEventsFrame = (state: RootState) => {
           type: 'UIElementChild',
           interactive: false,
           interactiveType: null,
-          elementId: 'tweenEventsFrame'
+          elementId: 'eventsFrame'
         }
       });
       const tweenEventIcon = new uiPaperScope.CompoundPath({
-        pathData: (() => {
+        pathData: ((): string => {
           switch(eventLayerItem.type) {
             case 'Artboard':
               return 'M12.4743416,2.84188612 L12.859,3.99988612 L21,4 L21,15 L22,15 L22,16 L16.859,15.9998861 L18.4743416,20.8418861 L17.5256584,21.1581139 L16.805,18.9998861 L7.193,18.9998861 L6.47434165,21.1581139 L5.52565835,20.8418861 L7.139,15.9998861 L2,16 L2,15 L3,15 L3,4 L11.139,3.99988612 L11.5256584,2.84188612 L12.4743416,2.84188612 Z M15.805,15.9998861 L8.193,15.9998861 L7.526,17.9998861 L16.472,17.9998861 L15.805,15.9998861 Z M20,5 L4,5 L4,15 L20,15 L20,5 Z';
@@ -3966,7 +3966,7 @@ export const updateTweenEventsFrame = (state: RootState) => {
           type: 'UIElementChild',
           interactive: false,
           interactiveType: null,
-          elementId: 'tweenEventsFrame'
+          elementId: 'eventsFrame'
         }
       });
       tweenEventIcon.fitBounds(tweenEventOriginIndicator.bounds);
@@ -3980,7 +3980,7 @@ export const updateTweenEventsFrame = (state: RootState) => {
           type: 'UIElementChild',
           interactive: false,
           interactiveType: null,
-          elementId: 'tweenEventsFrame'
+          elementId: 'eventsFrame'
         }
       });
       const tweenEventText = new uiPaperScope.PointText({
@@ -3995,43 +3995,43 @@ export const updateTweenEventsFrame = (state: RootState) => {
           type: 'UIElementChild',
           interactive: false,
           interactiveType: null,
-          elementId: 'tweenEventsFrame'
+          elementId: 'eventsFrame'
         }
       });
-      const tweenEventFrame = new uiPaperScope.Group({
+      const eventFrame = new uiPaperScope.Group({
         children: [tweenEventConnector, tweenEventIconBackground, tweenEventIcon, tweenEventDestinationIndicator, tweenEventText],
         data: {
-          id: 'tweenEventFrame',
+          id: 'eventFrame',
           type: 'UIElementChild',
           interactive: true,
           interactiveType: event.id,
-          elementId: 'tweenEventsFrame'
+          elementId: 'eventsFrame'
         },
-        parent: tweenEventsFrame,
+        parent: eventsFrame,
         // opacity: groupOpacity
       });
-      const tweenEventFrameBackground = new uiPaperScope.Path.Rectangle({
-        from: tweenEventFrame.bounds.topLeft,
-        to: tweenEventFrame.bounds.bottomRight,
+      const eventFrameBackground = new uiPaperScope.Path.Rectangle({
+        from: eventFrame.bounds.topLeft,
+        to: eventFrame.bounds.bottomRight,
         fillColor: theme.background.z0,
         opacity: 0.01,
-        parent: tweenEventFrame,
+        parent: eventFrame,
         data: {
           type: 'UIElementChild',
           interactive: true,
           interactiveType: event.id,
-          elementId: 'tweenEventsFrame'
+          elementId: 'eventsFrame'
         }
       });
-      tweenEventFrame.position.y -= (tweenEventFrame.bounds.height + ((1 / uiPaperScope.view.zoom) * 12)) * index;
+      eventFrame.position.y -= (eventFrame.bounds.height + ((1 / uiPaperScope.view.zoom) * 12)) * index;
     });
   }
 };
 
-export const updateTweenEventsFrameThunk = () => {
-  return (dispatch: any, getState: any) => {
+export const updateEventsFrameThunk = () => {
+  return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
-    updateTweenEventsFrame(state);
+    updateEventsFrame(state);
   }
 };
 
@@ -4151,6 +4151,6 @@ export const updateFramesThunk = () => {
     });
     updateSelectionFrame(selectedBounds, 'all', linePaperLayer);
     updateActiveArtboardFrame(activeArtboardBounds);
-    updateTweenEventsFrame(state);
+    updateEventsFrame(state);
   }
 }

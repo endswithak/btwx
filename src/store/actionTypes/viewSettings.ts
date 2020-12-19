@@ -1,7 +1,7 @@
 export const SET_LEFT_SIDEBAR_WIDTH = 'SET_LEFT_SIDEBAR_WIDTH';
 export const SET_RIGHT_SIDEBAR_WIDTH = 'SET_RIGHT_SIDEBAR_WIDTH';
-export const SET_TWEEN_DRAWER_HEIGHT = 'SET_TWEEN_DRAWER_HEIGHT';
-export const SET_TWEEN_DRAWER_LAYERS_WIDTH = 'SET_TWEEN_DRAWER_LAYERS_WIDTH';
+export const SET_EVENT_DRAWER_HEIGHT = 'SET_EVENT_DRAWER_HEIGHT';
+export const SET_EVENT_DRAWER_LAYERS_WIDTH = 'SET_EVENT_DRAWER_LAYERS_WIDTH';
 
 export const OPEN_LEFT_SIDEBAR = 'OPEN_LEFT_SIDEBAR';
 export const CLOSE_LEFT_SIDEBAR = 'CLOSE_LEFT_SIDEBAR';
@@ -9,8 +9,8 @@ export const CLOSE_LEFT_SIDEBAR = 'CLOSE_LEFT_SIDEBAR';
 export const OPEN_RIGHT_SIDEBAR = 'OPEN_RIGHT_SIDEBAR';
 export const CLOSE_RIGHT_SIDEBAR = 'CLOSE_RIGHT_SIDEBAR';
 
-export const OPEN_TWEEN_DRAWER = 'OPEN_TWEEN_DRAWER';
-export const CLOSE_TWEEN_DRAWER = 'CLOSE_TWEEN_DRAWER';
+export const OPEN_EVENT_DRAWER = 'OPEN_EVENT_DRAWER';
+export const CLOSE_EVENT_DRAWER = 'CLOSE_EVENT_DRAWER';
 
 export const ENABLE_DARK_THEME = 'ENABLE_DARK_THEME';
 export const ENABLE_LIGHT_THEME = 'ENABLE_LIGHT_THEME';
@@ -33,22 +33,22 @@ export interface SetRightSidebarWidth {
   payload: SetRightSidebarWidthPayload;
 }
 
-export interface SetTweenDrawerHeightPayload {
+export interface SetEventDrawerHeightPayload {
   height: number;
 }
 
-export interface SetTweenDrawerHeight {
-  type: typeof SET_TWEEN_DRAWER_HEIGHT;
-  payload: SetTweenDrawerHeightPayload;
+export interface SetEventDrawerHeight {
+  type: typeof SET_EVENT_DRAWER_HEIGHT;
+  payload: SetEventDrawerHeightPayload;
 }
 
-export interface SetTweenDrawerLayersWidthPayload {
+export interface SetEventDrawerLayersWidthPayload {
   width: number;
 }
 
-export interface SetTweenDrawerLayersWidth {
-  type: typeof SET_TWEEN_DRAWER_LAYERS_WIDTH;
-  payload: SetTweenDrawerLayersWidthPayload;
+export interface SetEventDrawerLayersWidth {
+  type: typeof SET_EVENT_DRAWER_LAYERS_WIDTH;
+  payload: SetEventDrawerLayersWidthPayload;
 }
 
 export interface OpenRightSidebar {
@@ -67,12 +67,12 @@ export interface CloseLeftSidebar {
   type: typeof CLOSE_LEFT_SIDEBAR;
 }
 
-export interface OpenTweenDrawer {
-  type: typeof OPEN_TWEEN_DRAWER;
+export interface OpenEventDrawer {
+  type: typeof OPEN_EVENT_DRAWER;
 }
 
-export interface CloseTweenDrawer {
-  type: typeof CLOSE_TWEEN_DRAWER;
+export interface CloseEventDrawer {
+  type: typeof CLOSE_EVENT_DRAWER;
 }
 
 export interface EnableDarkTheme {
@@ -85,13 +85,13 @@ export interface EnableLightTheme {
 
 export type ViewSettingsTypes = SetLeftSidebarWidth |
                                 SetRightSidebarWidth |
-                                SetTweenDrawerHeight |
-                                SetTweenDrawerLayersWidth |
+                                SetEventDrawerHeight |
+                                SetEventDrawerLayersWidth |
                                 OpenLeftSidebar |
                                 CloseLeftSidebar |
                                 OpenRightSidebar |
                                 CloseRightSidebar |
-                                OpenTweenDrawer |
-                                CloseTweenDrawer |
+                                OpenEventDrawer |
+                                CloseEventDrawer |
                                 EnableDarkTheme |
                                 EnableLightTheme;

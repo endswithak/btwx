@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setCanvasActiveTool, setCanvasCursor } from '../store/actions/canvasSettings';
 import { setLayerHover, setLayerActiveGradientStop } from '../store/actions/layer';
-import { setTweenDrawerEventThunk, setTweenDrawerEventHoverThunk } from '../store/actions/tweenDrawer';
+import { setEventDrawerEventThunk, setEventDrawerEventHoverThunk } from '../store/actions/eventDrawer';
 
 interface CanvasUIEventsProps {
   uiEvent: {
@@ -24,8 +24,8 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
   const cursor = useSelector((state: RootState) => state.canvasSettings.cursor);
   // const selecting = useSelector((state: RootState) => state.canvasSettings.selecting);
   const hover = useSelector((state: RootState) => state.layer.present.hover);
-  const eventDrawerHover = useSelector((state: RootState) => state.tweenDrawer.eventHover);
-  const eventDrawerEvent = useSelector((state: RootState) => state.tweenDrawer.event);
+  const eventDrawerHover = useSelector((state: RootState) => state.eventDrawer.eventHover);
+  const eventDrawerEvent = useSelector((state: RootState) => state.eventDrawer.event);
   const gradientEditorProp = useSelector((state: RootState) => state.gradientEditor.prop);
   const dispatch = useDispatch();
 
@@ -65,7 +65,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
         }));
       }
       if (eventDrawerHover !== null) {
-        dispatch(setTweenDrawerEventHoverThunk({id: null}));
+        dispatch(setEventDrawerEventHoverThunk({id: null}));
         dispatch(setCanvasCursor({cursor: cursor.filter(c => c !== 'pointer')}));
       }
     } else {
@@ -137,7 +137,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
         case 'tweenEventsFrame': {
           const interactiveType = uiEvent.hitResult.item.data.interactiveType;
           if (interactiveType && eventDrawerHover !== interactiveType) {
-            dispatch(setTweenDrawerEventHoverThunk({id: interactiveType}));
+            dispatch(setEventDrawerEventHoverThunk({id: interactiveType}));
             if (cursor[0] !== 'pointer' && !eventDrawerEvent) {
               dispatch(setCanvasCursor({cursor: ['pointer', ...cursor]}));
             }
@@ -190,7 +190,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
         case 'tweenEventsFrame': {
           const interactiveType = uiEvent.hitResult.item.data.interactiveType;
           if (interactiveType && eventDrawerEvent !== interactiveType) {
-            dispatch(setTweenDrawerEventThunk({id: interactiveType}));
+            dispatch(setEventDrawerEventThunk({id: interactiveType}));
             dispatch(setCanvasCursor({cursor: ['auto']}));
           }
           break;

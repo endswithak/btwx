@@ -7,7 +7,7 @@ import ContextMenuWrap from './ContextMenuWrap';
 import Canvas from './Canvas';
 import SidebarLeft from './SidebarLeft';
 import SidebarRight from './SidebarRight';
-import TweenDrawer from './TweenDrawer';
+import EventDrawer from './EventDrawer';
 import TextEditor from './TextEditor';
 
 const App = (): ReactElement => {
@@ -28,7 +28,7 @@ const App = (): ReactElement => {
           <main id='main-canvas' className='c-app__canvas'>
             <Canvas setReady={setReady} ready={ready} />
             <TextEditor ready={ready} />
-            <TweenDrawer ready={ready} />
+            <EventDrawer ready={ready} />
           </main>
           <SidebarRight ready={ready} />
         </div>

@@ -1,4 +1,4 @@
-.c-tween-drawer-events
+.c-event-drawer-list
   position: relative
   height: 100%
   width: 100%
@@ -6,12 +6,12 @@
   display: flex
   flex-direction: column
 
-.c-tween-drawer-events__header
+.c-event-drawer-list__header
   width: 100%
   max-width: 100%
   flex-shrink: 0
 
-.c-tween-drawer-events__items
+.c-event-drawer-list__items
   display: flex
   flex-direction: column
   position: relative
@@ -21,7 +21,7 @@
   flex-grow: 2
   height: 100%
 
-.c-tween-drawer-events__item
+.c-event-drawer-list__item
   display: flex
   flex-grow: 2
   width: 100%
@@ -35,10 +35,10 @@
   &::selection
     background: none
 
-.c-tween-drawer-events__item--labels
+.c-event-drawer-list__item--labels
   cursor: default
 
-.c-tween-drawer-events-item__module
+.c-event-drawer-list-item__module
   display: flex
   flex-grow: 1
   flex-shrink: 1
@@ -55,14 +55,14 @@
   &::selection
     background: none
 
-.c-tween-drawer-events-item__module--label
+.c-event-drawer-list-item__module--label
   text-transform: uppercase
   font-size: $fontSizeSm
   font-family: $fontFamily
   line-height: $unit * 8
   font-weight: $fontWeightBold
 
-.c-tween-drawer-events-item__action
+.c-event-drawer-list-item__action
   width: 25%
   display: flex
   align-items: center

@@ -26,9 +26,9 @@ export const getLayerById = (state: RootState, id: string): Btwx.Layer => state.
 export const getLayerChildren = (state: RootState, id: string): string[] => state.layer.present.byId[id].children;
 export const getHover = (state: RootState): string => state.layer.present.hover;
 export const getHoverItem = (state: RootState): Btwx.Layer => state.layer.present.byId[state.layer.present.hover];
-export const getEventDrawerEvent = (state: RootState): string => state.tweenDrawer.event;
-export const getEventDrawerSort = (state: RootState): string => state.tweenDrawer.eventSort;
-export const getEventDrawerHover = (state: RootState): string => state.tweenDrawer.eventHover;
+export const getEventDrawerEvent = (state: RootState): string => state.eventDrawer.event;
+export const getEventDrawerSort = (state: RootState): string => state.eventDrawer.eventSort;
+export const getEventDrawerHover = (state: RootState): string => state.eventDrawer.eventHover;
 export const getActiveArtboard = (state: RootState): string => state.layer.present.activeArtboard;
 export const getDocumentImages = (state: RootState): { allIds: string[]; byId: { [id: string]: Btwx.DocumentImage } } => state.documentSettings.images;
 export const getLayerSearch = (state: RootState): string => state.leftSidebar.search;

@@ -32,7 +32,7 @@ declare namespace Btwx {
 
   type CubicBezierType = 'in' | 'inOut' | 'out';
 
-  type ContextMenu = 'LayerEdit' | 'TweenEvent' | 'TweenEventDestination' | 'ArtboardCustomPreset' | 'TweenDrawerEvent' | 'Input';
+  type ContextMenu = 'LayerEdit' | 'TweenEvent' | 'TweenEventDestination' | 'ArtboardCustomPreset' | 'EventDrawerEvent' | 'Input';
 
   type ColorFormat = 'rgb' | 'hsl';
 

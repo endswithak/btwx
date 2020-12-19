@@ -10,7 +10,7 @@ import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
 import { closeEaseEditor } from '../store/actions/easeEditor';
 import { setLayerTweenEase, setLayerTweenPower, setLayerTweenDuration, setLayerTweenDelay } from '../store/actions/layer';
-import { setTweenDrawerTweenEditing } from '../store/actions/tweenDrawer';
+import { setEventDrawerTweenEditing } from '../store/actions/eventDrawer';
 import { setCanvasFocusing } from '../store/actions/canvasSettings';
 import { ThemeContext } from './ThemeProvider';
 import SidebarInput from './SidebarInput';
@@ -63,7 +63,7 @@ const EaseEditor = (): ReactElement => {
 
   const onMouseDown = (event: any): void => {
     if (editorRef.current && !editorRef.current.contains(event.target)) {
-      dispatch(setTweenDrawerTweenEditing({id: null}));
+      dispatch(setEventDrawerTweenEditing({id: null}));
       dispatch(closeEaseEditor());
     }
   }
@@ -131,7 +131,7 @@ const EaseEditor = (): ReactElement => {
       dispatch(setCanvasFocusing({focusing: false}));
     }
     document.addEventListener('mousedown', onMouseDown, false);
-    dispatch(setTweenDrawerTweenEditing({id: tween.id}));
+    dispatch(setEventDrawerTweenEditing({id: tween.id}));
     return (): void => {
       if (easeEditor.isOpen) {
         dispatch(closeEaseEditor());
