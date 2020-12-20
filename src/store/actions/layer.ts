@@ -3024,12 +3024,10 @@ export const pasteLayersThunk = (props?: { overSelection?: boolean; overPoint?: 
 // };
 
 export const undoThunk = () => {
-  return (dispatch: any, getState: any) => {
+  return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
     if (state.layer.past.length > 0) {
-      let gradientEditorFlag = false;
       const layerState = state.layer.past[state.layer.past.length - 1];
-      const fullState = {...state, layer: { ...state.layer, present: layerState }};
       //
       if (state.layer.present.hover !== null) {
         dispatch(setLayerHover({id: null}));
@@ -3037,7 +3035,7 @@ export const undoThunk = () => {
       // undo
       dispatch(ActionCreators.undo());
       //
-      if (state.layer.present.edit.projects && layerState.edit.projects) {
+      if (state.layer.present.edit.projects) {
         const documentImages = state.documentSettings.images.byId;
         state.layer.present.edit.projects.forEach((id) => {
           const currentArtboardItem = state.layer.present.byId[id];
@@ -3101,7 +3099,6 @@ export const undoThunk = () => {
                 dispatch(closeColorEditor());
                 if (state.colorEditor.prop === 'fill') {
                   dispatch(openGradientEditor({x: state.colorEditor.x, y: state.colorEditor.y, prop: state.colorEditor.prop}));
-                  gradientEditorFlag = true;
                 }
               }
               break;
@@ -3124,7 +3121,6 @@ export const undoThunk = () => {
                 dispatch(closeColorEditor());
                 if (state.colorEditor.prop === 'stroke') {
                   dispatch(openGradientEditor({x: state.colorEditor.x, y: state.colorEditor.y, prop: state.colorEditor.prop}));
-                  gradientEditorFlag = true;
                 }
               }
               break;
@@ -3145,12 +3141,10 @@ export const undoThunk = () => {
 };
 
 export const redoThunk = () => {
-  return (dispatch: any, getState: any) => {
+  return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
     if (state.layer.future.length > 0) {
-      let gradientEditorFlag = false;
       const layerState = state.layer.future[0];
-      const fullState = {...state, layer: { ...state.layer, present: layerState }};
       //
       if (state.layer.present.hover !== null) {
         dispatch(setLayerHover({id: null}));
@@ -3158,7 +3152,6 @@ export const redoThunk = () => {
       // redo
       dispatch(ActionCreators.redo());
       //
-
       if (state.layer.present.edit.projects && layerState.edit.projects) {
         const documentImages = state.documentSettings.images.byId;
         layerState.edit.projects.forEach((id) => {
@@ -3214,7 +3207,6 @@ export const redoThunk = () => {
                 dispatch(closeColorEditor());
                 if (state.colorEditor.prop === 'fill') {
                   dispatch(openGradientEditor({x: state.colorEditor.x, y: state.colorEditor.y, prop: state.colorEditor.prop}));
-                  gradientEditorFlag = true;
                 }
               }
               break;
@@ -3237,7 +3229,6 @@ export const redoThunk = () => {
                 dispatch(closeColorEditor());
                 if (state.colorEditor.prop === 'stroke') {
                   dispatch(openGradientEditor({x: state.colorEditor.x, y: state.colorEditor.y, prop: state.colorEditor.prop}));
-                  gradientEditorFlag = true;
                 }
               }
               break;

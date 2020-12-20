@@ -134,7 +134,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           }
           break;
         }
-        case 'tweenEventsFrame': {
+        case 'eventsFrame': {
           const interactiveType = uiEvent.hitResult.item.data.interactiveType;
           if (interactiveType && eventDrawerHover !== interactiveType) {
             dispatch(setEventDrawerEventHoverThunk({id: interactiveType}));
@@ -164,7 +164,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           }));
           break;
         }
-        case 'tweenEventsFrame': {
+        case 'eventsFrame': {
           break;
         }
       }
@@ -187,7 +187,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
         case 'gradientFrame': {
           break;
         }
-        case 'tweenEventsFrame': {
+        case 'eventsFrame': {
           const interactiveType = uiEvent.hitResult.item.data.interactiveType;
           if (interactiveType && eventDrawerEvent !== interactiveType) {
             dispatch(setEventDrawerEventThunk({id: interactiveType}));

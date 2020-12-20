@@ -14,7 +14,8 @@ const EventDrawerEventTimelinesHeaders = (): ReactElement => {
           : theme.background.z0,
           boxShadow: `0 -1px 0 ${theme.name === 'dark'
           ? theme.background.z4
-          : theme.background.z5} inset`
+          : theme.background.z5} inset`,
+          zIndex: 4
         }} />
       <div
         className='c-event-drawer-event-layers-timeline__header'

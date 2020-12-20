@@ -22,7 +22,7 @@ const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
   const [prevId, setPrevId] = useState(tweenId);
   const dispatch = useDispatch();
 
-  const setupHandle = () => {
+  const setupHandle = (): void => {
     const rightHandleInitialPos = ((tween.delay * 100) * theme.unit) + ((tween.duration * 100) * theme.unit) - theme.unit * 4;
     const leftHandleInitialPos = ((tween.delay * 100) * theme.unit);
     const leftHandleElement = document.getElementById(`${tweenId}-handle-left`);
@@ -33,6 +33,7 @@ const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
     const tweenHandleElement = document.getElementById(`${tweenId}-handle-tween`);
     const timelineElement = document.getElementById(`${tweenId}-timeline`);
     const leftTooltipElement = document.getElementById(`${tweenId}-tooltip-left`);
+    const guide = document.getElementById('event-drawer-guide');
     gsap.set(leftHandleElement, {x: leftHandleInitialPos});
     Draggable.create(leftHandleElement, {
       type: 'x',
@@ -53,6 +54,7 @@ const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
       },
       onPress: function() {
         dispatch(setEventDrawerTweenEditing({id: tweenId}));
+        gsap.set(guide, {x: this.x});
         gsap.set(leftTooltipElement, {display: 'inline'});
         leftTooltipElement.innerHTML = `${(this.x / 4) / 100}s`;
         document.body.style.cursor = 'ew-resize';
@@ -63,6 +65,7 @@ const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
         document.body.style.cursor = 'auto';
       },
       onDrag: function() {
+        gsap.set(guide, {x: `+=${this.deltaX}`});
         gsap.set(tweenHandleElement, {x: `+=${this.deltaX}`, width: `-=${this.deltaX}`});
         leftTooltipElement.innerHTML = `${(this.x / 4) / 100}s`;
       },

@@ -34,7 +34,7 @@ const GradientFrame = (): ReactElement => {
 
   useEffect(() => {
     updateGradientFrame(origin, destination);
-    return () => {
+    return (): void => {
       const gradientFrame = uiPaperScope.projects[0].getItem({ data: { id: 'gradientFrame' } });
       gradientFrame.removeChildren();
     }

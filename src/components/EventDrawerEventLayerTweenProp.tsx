@@ -34,7 +34,11 @@ const EventDrawerEventLayerTweenProp = (props: EventDrawerEventLayerTweenPropPro
       className='c-event-drawer-event-layer__tween'
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}>
-      <div className='c-event-drawer__icon' />
+      {
+        tweenId === tweenHover && !tweenEditing || tweenId === tweenEditing
+        ? <EventDrawerEventEditEase tweenId={tweenId} />
+        : <div className='c-event-drawer__icon' />
+      }
       <div
         className='c-event-drawer-event-layer-tween__name'
         style={{
@@ -46,11 +50,6 @@ const EventDrawerEventLayerTweenProp = (props: EventDrawerEventLayerTweenPropPro
         }}>
         { titleCaseProp }
       </div>
-      {
-        tweenId === tweenHover && !tweenEditing || tweenId === tweenEditing
-        ? <EventDrawerEventEditEase tweenId={tweenId} />
-        : null
-      }
     </div>
   );
 }

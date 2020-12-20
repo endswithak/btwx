@@ -23,7 +23,7 @@ const TimelineTweenHandle = (props: TimelineTweenHandleProps): ReactElement => {
   const [prevId, setPrevId] = useState(tweenId);
   const dispatch = useDispatch();
 
-  const setupHandle = () => {
+  const setupHandle = (): void => {
     const tweenHandleElement = document.getElementById(`${tweenId}-handle-tween`);
     if (Draggable.get(tweenHandleElement)) {
       Draggable.get(tweenHandleElement).kill();
@@ -32,6 +32,7 @@ const TimelineTweenHandle = (props: TimelineTweenHandleProps): ReactElement => {
     const rightHandleElement = document.getElementById(`${tweenId}-handle-right`);
     const leftHandleTooltipElement = document.getElementById(`${tweenId}-tooltip-left`);
     const timelineElement = document.getElementById(`${tweenId}-timeline`);
+    const guide = document.getElementById('event-drawer-guide');
     gsap.set(tweenHandleElement, {x: (tween.delay * 100) * theme.unit, width: (tween.duration * 100) * theme.unit});
     Draggable.create(tweenHandleElement, {
       type: 'x',
@@ -50,6 +51,7 @@ const TimelineTweenHandle = (props: TimelineTweenHandleProps): ReactElement => {
       },
       onPress: function() {
         dispatch(setEventDrawerTweenEditing({id: tweenId}));
+        gsap.set(guide, {x: (gsap.getProperty(rightHandleElement, 'x') as number) + (theme.unit * 4)});
         gsap.set(leftHandleTooltipElement, {display: 'inline'});
         leftHandleTooltipElement.innerHTML = `${(gsap.getProperty(leftHandleElement, 'x') as number / 4) / 100}s`;
         document.body.style.cursor = 'grabbing';
@@ -60,6 +62,7 @@ const TimelineTweenHandle = (props: TimelineTweenHandleProps): ReactElement => {
         document.body.style.cursor = 'auto';
       },
       onDrag: function() {
+        gsap.set(guide, {x: (gsap.getProperty(rightHandleElement, 'x') as number) + (theme.unit * 4)});
         gsap.set([leftHandleElement, rightHandleElement], {x: `+=${this.deltaX}`});
         leftHandleTooltipElement.innerHTML = `${(gsap.getProperty(leftHandleElement, 'x') as number / 4) / 100}s`;
       },

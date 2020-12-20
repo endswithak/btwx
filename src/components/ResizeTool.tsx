@@ -389,7 +389,7 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
         ...result,
         [current]: getPaperLayer(current, selectedProjectIndices[current]).clone({insert: false})
       }), {} as { [id: string]: paper.Item });
-      const nextFromPivot = (() => {
+      const nextFromPivot = ((): paper.Point => {
         switch(initialHandle) {
           case 'topLeft':
             return nextFromBounds.bottomRight;

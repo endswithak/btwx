@@ -17,8 +17,8 @@ const EventsFrame = (): ReactElement => {
   useEffect(() => {
     dispatch(updateEventsFrameThunk());
     return (): void => {
-      const tweenEventsFrame = uiPaperScope.projects[0].getItem({ data: { id: 'eventsFrame' } });
-      tweenEventsFrame.removeChildren();
+      const eventsFrame = uiPaperScope.projects[0].getItem({ data: { id: 'eventsFrame' } });
+      eventsFrame.removeChildren();
     }
   }, [activeArtboard, theme, eventDrawerEventSort, eventDrawerEventHover, eventDrawerEvent, activeArtboardEvents, zoom]);
 

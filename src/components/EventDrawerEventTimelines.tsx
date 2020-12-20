@@ -6,6 +6,7 @@ import { getTweenEventLayers } from '../store/selectors/layer';
 import EventDrawerEventTimeline from './EventDrawerEventTimeline';
 import EventDrawerEventTimelinesEmptyState from './EventDrawerEventTimelinesEmptyState';
 import EventDrawerEventTimelinesHeader from './EventDrawerEventTimelinesHeader';
+import EventDrawerEventTimelineGuide from './EventDrawerEventTimelineGuide';
 
 const EventDrawerEventTimelines = (): ReactElement => {
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -33,6 +34,7 @@ const EventDrawerEventTimelines = (): ReactElement => {
                 }
               </div>
             </ScrollSyncPane>
+            <EventDrawerEventTimelineGuide />
           </div>
       }
     </div>
