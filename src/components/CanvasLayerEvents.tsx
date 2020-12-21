@@ -34,7 +34,7 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
   const layerTreeRef = useSelector((state: RootState) => state.leftSidebar.ref);
   const dispatch = useDispatch();
 
-  const scrollToLayer = (layerId: string) => {
+  const scrollToLayer = (layerId: string): void => {
     if (layerId && layerTreeRef) {
       layerTreeRef.scrollToItem(layerId);
     }

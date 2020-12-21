@@ -2,13 +2,13 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
 import { RootState } from '../store/reducers';
-import { getSelectedInnerWidth } from '../store/selectors/layer';
+import { getSelectedInnerHeight } from '../store/selectors/layer';
 import { setLayersHeight } from '../store/actions/layer';
 import SidebarInput from './SidebarInput';
 
 const HeightInput = (): ReactElement => {
   const selected = useSelector((state: RootState) => state.layer.present.selected);
-  const heightValue = useSelector((state: RootState) => getSelectedInnerWidth(state));
+  const heightValue = useSelector((state: RootState) => getSelectedInnerHeight(state));
   const disabled = useSelector((state: RootState) => state.layer.present.selected.some((id) => state.layer.present.byId[id].type === 'Shape' && (state.layer.present.byId[id] as Btwx.Shape).shapeType === 'Line' || state.layer.present.byId[id].type === 'Text' || state.layer.present.byId[id].type === 'Group'));
   const [height, setHeight] = useState(heightValue !== 'multi' ? Math.round(heightValue) : heightValue);
   const dispatch = useDispatch();

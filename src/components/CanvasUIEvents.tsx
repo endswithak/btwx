@@ -2,7 +2,8 @@ import React, { useEffect, ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setCanvasActiveTool, setCanvasCursor } from '../store/actions/canvasSettings';
-import { setLayerHover, setLayerActiveGradientStop } from '../store/actions/layer';
+import { setLayerHover, setLayerActiveGradientStop, selectLayers, deselectLayers } from '../store/actions/layer';
+import { getAllArtboardItems } from '../store/selectors/layer';
 import { setEventDrawerEventThunk, setEventDrawerEventHoverThunk } from '../store/actions/eventDrawer';
 
 interface CanvasUIEventsProps {
@@ -22,12 +23,20 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
   const dragging = useSelector((state: RootState) => state.canvasSettings.dragging);
   const dragHandle = useSelector((state: RootState) => state.canvasSettings.dragHandle);
   const cursor = useSelector((state: RootState) => state.canvasSettings.cursor);
+  const artboardItems = useSelector((state: RootState) => getAllArtboardItems(state));
+  const layerTreeRef = useSelector((state: RootState) => state.leftSidebar.ref);
   // const selecting = useSelector((state: RootState) => state.canvasSettings.selecting);
   const hover = useSelector((state: RootState) => state.layer.present.hover);
   const eventDrawerHover = useSelector((state: RootState) => state.eventDrawer.eventHover);
   const eventDrawerEvent = useSelector((state: RootState) => state.eventDrawer.event);
   const gradientEditorProp = useSelector((state: RootState) => state.gradientEditor.prop);
   const dispatch = useDispatch();
+
+  const scrollToLayer = (layerId: string): void => {
+    if (layerId && layerTreeRef) {
+      layerTreeRef.scrollToItem(layerId);
+    }
+  }
 
   const getSelectionFrameCursor = (): Btwx.CanvasCursor[] => {
     switch(uiEvent.hitResult.item.data.interactiveType) {
@@ -144,6 +153,13 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           }
           break;
         }
+        case 'nameFrame': {
+          const interactiveType = uiEvent.hitResult.item.data.interactiveType;
+          if (interactiveType && hover !== interactiveType) {
+            dispatch(setLayerHover({id: interactiveType}));
+          }
+          break;
+        }
       }
     }
   }
@@ -165,6 +181,24 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           break;
         }
         case 'eventsFrame': {
+          break;
+        }
+        case 'nameFrame': {
+          const interactiveType = uiEvent.hitResult.item.data.interactiveType;
+          if (interactiveType) {
+            const artboardItem = artboardItems[interactiveType];
+            if (uiEvent.event.shiftKey) {
+              if (artboardItem.selected) {
+                dispatch(deselectLayers({layers: [interactiveType]}));
+              } else {
+                scrollToLayer(interactiveType);
+                dispatch(selectLayers({layers: [interactiveType]}));
+              }
+            } else {
+              scrollToLayer(interactiveType);
+              dispatch(selectLayers({layers: [interactiveType], newSelection: true}));
+            }
+          }
           break;
         }
       }

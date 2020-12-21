@@ -13,7 +13,7 @@ import paper from 'paper';
 import MeasureGuide from '../../canvas/measureGuide';
 import { ARTBOARDS_PER_PROJECT, DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_VALUE, THEME_PRIMARY_COLOR, DEFAULT_TWEEN_EVENTS, TWEEN_PROPS_MAP } from '../../constants';
 import { getPaperFillColor, getPaperStrokeColor, getPaperShadowColor } from '../utils/paper';
-import { getClipboardCenter, getLayerAndDescendants, getLayersBounds, colorsMatch, gradientsMatch, getNearestScopeAncestor, getArtboardEventItems, orderLayersByDepth, canMaskLayers, canMaskSelection, canPasteSVG, getLineToPoint, getLineFromPoint, getArtboardsTopTop, getSelectedBounds, getParentPaperLayer, getGradientOriginPoint, getGradientDestinationPoint, getPaperLayer, getSelectedPaperLayers, getItemLayers, getSelectedProjectIndices, getAbsolutePosition, getActiveArtboardBounds, getLayerBounds, importProjectJSON } from '../selectors/layer';
+import { getClipboardCenter, getLayerAndDescendants, getLayersBounds, colorsMatch, gradientsMatch, getNearestScopeAncestor, getArtboardEventItems, orderLayersByDepth, canMaskLayers, canMaskSelection, canPasteSVG, getLineToPoint, getLineFromPoint, getArtboardsTopTop, getSelectedBounds, getParentPaperLayer, getGradientOriginPoint, getGradientDestinationPoint, getPaperLayer, getSelectedPaperLayers, getItemLayers, getSelectedProjectIndices, getAbsolutePosition, getActiveArtboardBounds, getLayerBounds, importProjectJSON, getAllArtboardItems } from '../selectors/layer';
 import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle, getLayerMasked, getLayerUnderlyingMask } from '../utils/actions';
 
 import { bufferToBase64, scrollToLayer } from '../../utils';
@@ -487,6 +487,14 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
       shadowBlur: 10,
       insert: false
     });
+    // create title
+    // const artboardTitle = new uiPaperScope.PointText({
+    //   point: artboardBackground.bounds.bottomLeft.add(new uiPaperScope.Point(0, 24 * (1 / uiPaperScope.view.zoom))),
+    //   content: name,
+    //   fillColor: '#999',
+    //   fontSize: 12 * (1 / uiPaperScope.view.zoom),
+    //   fontFamily: 'Space Mono'
+    // });
     // create layers mask
     const artboardLayersMask = new uiPaperScope.Path.Rectangle({
       name: 'Artboard Layers Mask',
@@ -3595,6 +3603,36 @@ export const updateActiveArtboardFrameThunk = () => {
   }
 };
 
+export const updateNameFrame = (artboards: { [id: string]: Btwx.Artboard }): void => {
+  if (uiPaperScope.project.activeLayer.data.id !== 'ui') {
+    uiPaperScope.projects[0].activate();
+  }
+  const nameFrame = uiPaperScope.project.getItem({ data: { id: 'nameFrame' } });
+  nameFrame.removeChildren();
+  if (artboards) {
+    Object.keys(artboards).forEach((id: string) => {
+      const artboardItem = artboards[id];
+      // const paperLayer = getPaperLayer(artboardItem.id, artboardItem.projectIndex);
+      // const artboardBackground = paperLayer.getItem({data: {id: 'artboardBackground'}});
+      const bottomLeft = new uiPaperScope.Point(artboardItem.frame.x - (artboardItem.frame.width / 2), artboardItem.frame.y + (artboardItem.frame.height / 2));
+      new uiPaperScope.PointText({
+        point: bottomLeft.add(new uiPaperScope.Point(0, 24 * (1 / uiPaperScope.view.zoom))),
+        content: artboardItem.name,
+        fillColor: '#999',
+        fontSize: 12 * (1 / uiPaperScope.view.zoom),
+        fontFamily: 'Space Mono',
+        parent: nameFrame,
+        data: {
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: artboardItem.id,
+          elementId: 'nameFrame'
+        }
+      });
+    });
+  }
+};
+
 export const updateHoverFrame = (hoverItem: Btwx.Layer, artboardItem?: Btwx.Artboard): void => {
   if (uiPaperScope.project.activeLayer.data.id !== 'ui') {
     uiPaperScope.projects[0].activate();
@@ -4129,6 +4167,7 @@ export const updateMeasureGuides = (bounds: paper.Rectangle, measureTo: { top?: 
 export const updateFramesThunk = () => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
+    const artboardItems = getAllArtboardItems(state);
     const activeArtboardBounds = getActiveArtboardBounds(state);
     const selectedBounds = getSelectedBounds(state);
     const selectedPaperScopes = getSelectedProjectIndices(state);
@@ -4143,5 +4182,6 @@ export const updateFramesThunk = () => {
     updateSelectionFrame(selectedBounds, 'all', linePaperLayer);
     updateActiveArtboardFrame(activeArtboardBounds);
     updateEventsFrame(state);
+    updateNameFrame(artboardItems);
   }
 }

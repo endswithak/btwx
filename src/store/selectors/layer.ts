@@ -49,6 +49,20 @@ export const getAllArtboardPaperProjects = createSelector(
   }
 );
 
+export const getAllArtboardItems = createSelector(
+  [ getAllArtboardIds, getLayersById ],
+  (allArtboardIds, byId) => {
+    if (allArtboardIds.length === 0) {
+      return null;
+    } else {
+      return allArtboardIds.reduce((result, current) => ({
+        ...result,
+        [current]: byId[current]
+      }), {}) as { [id: string]: Btwx.Artboard };
+    }
+  }
+);
+
 export const getLayerProjectIndices = createSelector(
   [ getRootChildren ],
   (rootChildren) => {

@@ -9,6 +9,7 @@ import GradientFrameWrap from './GradientFrameWrap';
 import MeasureFrameWrap from './MeasureFrameWrap';
 import TweenEventsFrameWrap from './EventsFrameWrap';
 import HoverFrameWrap from './HoverFrameWrap';
+import NameFrameWrap from './NameFrameWrap';
 
 interface CanvasUIProps {
   ready?: boolean;
@@ -18,7 +19,7 @@ const CanvasUI = (props: CanvasUIProps): ReactElement => {
   const ref = useRef<HTMLCanvasElement>(null);
   const { ready } = props;
   const matrix = useSelector((state: RootState) => state.documentSettings.matrix);
-  const projectJSON = '[["Layer",{"applyMatrix":true,"name":"UI","data":{"id":"ui","type":"UI"},"children":[["Group",{"applyMatrix":true,"name":"Artboard Events","data":{"id":"eventsFrame","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Active Artboard Frame","data":{"id":"activeArtboardFrame","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Gradient Frame","data":{"id":"gradientFrame","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Drawing Preview","data":{"id":"drawingPreview","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Hover Frame","data":{"id":"hoverFrame","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Selection Frame","data":{"id":"selectionFrame","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Static Guides","data":{"id":"staticGuides","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Snap Guides","data":{"id":"snapGuides","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Measure Guides","data":{"id":"measureGuides","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Tooltips","data":{"id":"tooltips","type":"UIElement"}}]]}]]';
+  const projectJSON = '[["Layer",{"applyMatrix":true,"name":"UI","data":{"id":"ui","type":"UI"},"children":[["Group",{"applyMatrix":true,"name":"Artboard Events","data":{"id":"eventsFrame","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Active Artboard Frame","data":{"id":"activeArtboardFrame","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Gradient Frame","data":{"id":"gradientFrame","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Drawing Preview","data":{"id":"drawingPreview","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Hover Frame","data":{"id":"hoverFrame","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Selection Frame","data":{"id":"selectionFrame","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Name Frame","data":{"id":"nameFrame","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Static Guides","data":{"id":"staticGuides","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Snap Guides","data":{"id":"snapGuides","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Measure Guides","data":{"id":"measureGuides","type":"UIElement"}}],["Group",{"applyMatrix":true,"name":"Tooltips","data":{"id":"tooltips","type":"UIElement"}}]]}]]';
 
   useEffect(() => {
     if (ref.current) {
@@ -45,6 +46,7 @@ const CanvasUI = (props: CanvasUIProps): ReactElement => {
             <SelectionFrameWrap />
             <GradientFrameWrap />
             <TweenEventsFrameWrap />
+            <NameFrameWrap />
           </>
         : null
       }
