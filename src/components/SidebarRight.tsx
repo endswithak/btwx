@@ -6,12 +6,8 @@ import SidebarLayerStyles from './SidebarLayerStyles';
 import SidebarArtboardSizes from './SidebarArtboardSizes';
 import EmptyState from './EmptyState';
 
-interface SidebarRightProps {
-  ready: boolean;
-}
-
-const SidebarRight = (props: SidebarRightProps): ReactElement => {
-  const { ready } = props;
+const SidebarRight = (): ReactElement => {
+  const ready = useSelector((state: RootState) => state.canvasSettings.ready);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const activeTool = useSelector((state: RootState) => state.canvasSettings.activeTool);
   const isOpen = useSelector((state: RootState) => state.viewSettings.rightSidebar.isOpen);

@@ -16,6 +16,7 @@ interface SidebarSelectProps {
   bottomLabel?: string;
   disabled?: boolean;
   isSearchable?: boolean;
+  truncateOptions?: boolean;
 }
 
 const DropdownIndicator = (
@@ -72,6 +73,13 @@ const SidebarSelect = (props: SidebarSelectProps): ReactElement => {
             const marginLeft = 0;
             return { ...provided, color, fontSize, marginLeft, lineHeight };
           },
+          input: (provided, state) => {
+            const color = theme.text.base;
+            const fontSize = 12;
+            const lineHeight = '24px';
+            const marginLeft = 0;
+            return { ...provided, color, fontSize, marginLeft, lineHeight };
+          },
           option: (provided, { data, isDisabled, isFocused, isSelected }) => {
             const fontFamily = props.type === 'fontFamily' ? data.value : props.type === 'fontWeight' ? props.data.fontFamily : 'inherit';
             const fontWeight = props.type === 'fontWeight' ? (() => {
@@ -96,21 +104,17 @@ const SidebarSelect = (props: SidebarSelectProps): ReactElement => {
               }
             })() : 'inherit';
             const fontSize = 12;
-            const background = isSelected ? theme.palette.primary : 'none';
-            const hoverBackground = isSelected ? theme.palette.primaryHover : theme.palette.primary;
-            const color = isSelected ? theme.text.onPrimary : theme.text.base;
+            const background = isFocused ? theme.palette.primary : isSelected ? tinyColor(theme.text.lightest).setAlpha(0.15).toHslString() : 'none';
+            const color = isFocused ? theme.text.onPrimary : theme.text.base;
             const cursor = 'pointer';
             const borderRadius = theme.unit;
-            const height = '24px';
-            const lineHeight = '8px';
             const paddingLeft = 4;
             const paddingRight = 4;
+            const overflow = props.truncateOptions ? 'hidden' : 'initial';
+            const whiteSpace = props.truncateOptions ?'nowrap' : 'initial';
+            const textOverflow = props.truncateOptions ? 'ellipsis' : 'initial';
             return {
-              ...provided, height, paddingLeft, paddingRight, lineHeight, fontFamily, fontSize, background, color, cursor, fontWeight, fontStyle, borderRadius,
-              ':hover': {
-                background: hoverBackground,
-                color: theme.text.onPrimary
-              },
+              ...provided, overflow, whiteSpace, textOverflow, paddingLeft, paddingRight, fontFamily, fontSize, background, color, cursor, fontWeight, fontStyle, borderRadius,
               ':active': {
                 background: theme.palette.primary
               }

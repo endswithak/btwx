@@ -12,6 +12,7 @@ import PaperTool, { PaperToolProps } from './PaperTool';
 
 const DragTool = (props: PaperToolProps): ReactElement => {
   const { tool, downEvent, dragEvent, upEvent, keyDownEvent, keyUpEvent } = props;
+  const blacklistedLayers = useSelector((state: RootState) => state.layer.present.selected.some(id => state.layer.present.allArtboardIds.includes(id)) ? state.layer.present.selected : [...state.layer.present.allArtboardIds.filter(id => id !== state.layer.present.activeArtboard), ...state.layer.present.selected]);
   const hover = useSelector((state: RootState) => state.layer.present.hover);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const isEnabled = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Drag');
@@ -265,7 +266,7 @@ const DragTool = (props: PaperToolProps): ReactElement => {
         hitTestZones={{all: true}}
         onUpdate={handleSnapToolUpdate}
         toolEvent={dragEvent}
-        blackListLayers={dragEvent.modifiers.alt ? null : selected}
+        blackListLayers={dragEvent.modifiers.alt ? null : blacklistedLayers}
         measure />
     : null
   );

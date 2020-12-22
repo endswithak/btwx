@@ -1,7 +1,7 @@
 import { app, Menu, dialog } from 'electron';
+import fs from 'fs';
 import { createNewDocument } from './index';
 import { getFocusedDocument } from './utils';
-import fs from 'fs';
 import { APP_NAME } from './constants';
 
 const isMac = process.platform === 'darwin';
@@ -353,6 +353,33 @@ export default Menu.buildFromTemplate([
             }
           }
         ]
+      },
+      { type: 'separator' },
+      {
+        label: 'Find Layer',
+        id: 'editFind',
+        enabled: false,
+        accelerator: process.platform === 'darwin' ? 'Cmd+F' : 'Ctrl+F',
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            getFocusedDocument(browserWindow).then((focusedDocument) => {
+              focusedDocument.webContents.executeJavaScript(`editFind()`);
+            });
+          }
+        }
+      },
+      {
+        label: 'Rename Layer',
+        id: 'editRename',
+        enabled: false,
+        accelerator: process.platform === 'darwin' ? 'Cmd+R' : 'Ctrl+R',
+        click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+          if (browserWindow) {
+            getFocusedDocument(browserWindow).then((focusedDocument) => {
+              focusedDocument.webContents.executeJavaScript(`editRename()`);
+            });
+          }
+        }
       }
     ]
   },

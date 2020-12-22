@@ -13,6 +13,7 @@ interface SidebarInputProps {
   onSubmit?(e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>): void;
   onFocus?(e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>): void;
   onBlur?(e: React.SyntheticEvent<HTMLFormElement> | React.SyntheticEvent<HTMLInputElement>): void;
+  id?: string;
   label?: string;
   leftLabel?: string;
   bottomLabel?: string;
@@ -57,7 +58,7 @@ const Input = styled.div<InputProps>`
 const SidebarInput = (props: SidebarInputProps): ReactElement => {
   const inputRef = useRef<HTMLInputElement>(null);
   const theme = useContext(ThemeContext);
-  const { value, onChange, onSubmit, placeholder, isSearch, onFocus, onBlur, manualCanvasFocus, removedOnSubmit, label, leftLabel, bottomLabel, disabled, selectOnMount, submitOnBlur } = props;
+  const { id, value, onChange, onSubmit, placeholder, isSearch, onFocus, onBlur, manualCanvasFocus, removedOnSubmit, label, leftLabel, bottomLabel, disabled, selectOnMount, submitOnBlur } = props;
   const canvasFocusing = useSelector((state: RootState) => state.canvasSettings.focusing);
   const dispatch = useDispatch();
 
@@ -158,6 +159,7 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
           className={`c-sidebar-input__form ${disabled ? 'c-sidebar-input__form--disabled' : null}`}
           onSubmit={handleSubmit}>
           <input
+            id={id}
             ref={inputRef}
             value={value}
             onFocus={handleFocus}

@@ -5,6 +5,7 @@ export const SET_TEXT_SETTINGS_FONT_WEIGHT = 'SET_TEXT_SETTINGS_FONT_WEIGHT';
 export const SET_TEXT_SETTINGS_FONT_FAMILY = 'SET_TEXT_SETTINGS_FONT_FAMILY';
 export const SET_TEXT_SETTINGS_LEADING = 'SET_TEXT_SETTINGS_LEADING';
 export const SET_TEXT_SETTINGS_JUSTIFICATION = 'SET_TEXT_SETTINGS_JUSTIFICATION';
+export const SET_TEXT_SETTINGS_SYSTEM_FONTS = 'SET_TEXT_SETTINGS_SYSTEM_FONTS';
 
 export type SetTextSettingsPayload = {
   [P in keyof Btwx.TextStyle]?: Btwx.TextStyle[P];
@@ -69,4 +70,20 @@ export interface SetTextSettingsJustification {
   payload: SetTextSettingsJustificationPayload;
 }
 
-export type TextSettingsTypes = SetTextSettings | SetTextSettingsFillColor | SetTextSettingsFontSize | SetTextSettingsFontWeight | SetTextSettingsFontFamily | SetTextSettingsLeading | SetTextSettingsJustification;
+export interface SetTextSettingsSystemFontsPayload {
+  systemFonts: string[];
+}
+
+export interface SetTextSettingsSystemFonts {
+  type: typeof SET_TEXT_SETTINGS_SYSTEM_FONTS;
+  payload: SetTextSettingsSystemFontsPayload;
+}
+
+export type TextSettingsTypes = SetTextSettings |
+                                SetTextSettingsFillColor |
+                                SetTextSettingsFontSize |
+                                SetTextSettingsFontWeight |
+                                SetTextSettingsFontFamily |
+                                SetTextSettingsLeading |
+                                SetTextSettingsJustification |
+                                SetTextSettingsSystemFonts;

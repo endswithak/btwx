@@ -6,12 +6,8 @@ import { RootState } from '../store/reducers';
 import { ARTBOARDS_PER_PROJECT } from '../constants';
 import CanvasArtboard from './CanvasArtboard';
 
-interface CanvasArtboardsProps {
-  ready?: boolean;
-}
-
-const CanvasArtboards = (props: CanvasArtboardsProps): ReactElement => {
-  const { ready } = props;
+const CanvasArtboards = (): ReactElement => {
+  const ready = useSelector((state: RootState) => state.canvasSettings.ready);
   const artboards = useSelector((state: RootState) => state.layer.present.byId.root.children);
 
   useEffect(() => {

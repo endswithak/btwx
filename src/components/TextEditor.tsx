@@ -3,12 +3,8 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import TextEditorInput from './TextEditorInput';
 
-interface TextEditorProps {
-  ready: boolean;
-}
-
-const TextEditor = (props: TextEditorProps): ReactElement => {
-  const { ready } = props;
+const TextEditor = (): ReactElement => {
+  const ready = useSelector((state: RootState) => state.canvasSettings.ready);
   const isOpen = useSelector((state: RootState) => state.textEditor.isOpen);
 
   return (

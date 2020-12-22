@@ -13,7 +13,7 @@ const SidebarLayersSearch = (): ReactElement => {
   const theme = useContext(ThemeContext);
   const searchActive = useSelector((state: RootState) => state.leftSidebar.searching);
   const search = useSelector((state: RootState) => state.leftSidebar.search);
-  const [focused, setFocused] = useState(false);
+  // const [focused, setFocused] = useState(false);
   const [inputValue, setInputValue] = useState(search);
   const [hover, setHover] = useState(false);
   const dispatch = useDispatch();
@@ -41,19 +41,20 @@ const SidebarLayersSearch = (): ReactElement => {
       debounceSearch('');
       dispatch(setSearching({searching: false}));
     }
-    setFocused(false);
+    // setFocused(false);
   }
 
   const handleSearchFocus = () => {
     if (!searchActive) {
       dispatch(setSearching({searching: true}));
     }
-    setFocused(true);
+    // setFocused(true);
   }
 
   const handleClearSearch = () => {
     setInputValue('');
     debounceSearch('');
+    dispatch(setSearching({searching: false}));
   }
 
   return (
@@ -69,7 +70,7 @@ const SidebarLayersSearch = (): ReactElement => {
           name='search'
           small
           style={{
-            fill: focused
+            fill: searchActive
             ? theme.palette.primary
             : hover
               ? theme.text.base
@@ -79,6 +80,7 @@ const SidebarLayersSearch = (): ReactElement => {
       <div
         className='c-sidebar-search__input'>
         <SidebarInput
+          id='layers-search-input'
           value={inputValue}
           onFocus={handleSearchFocus}
           onBlur={handleSearchBlur}

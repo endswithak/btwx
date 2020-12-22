@@ -2,7 +2,7 @@
 import { remote } from 'electron';
 import replaceAll from 'string.prototype.replaceall';
 import sharp from 'sharp';
-import tinycolor from 'tinycolor2';
+import tinyColor from 'tinycolor2';
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCreators } from 'redux-undo';
 import { clipboard } from 'electron';
@@ -3582,11 +3582,13 @@ export const updateActiveArtboardFrame = (bounds: paper.Rectangle): void => {
   if (bounds) {
     const topLeft = bounds.topLeft;
     const bottomRight = bounds.bottomRight;
+    const gap = 4 * (1 / uiPaperScope.view.zoom);
     new uiPaperScope.Path.Rectangle({
-      from: new uiPaperScope.Point(topLeft.x - (2 / uiPaperScope.view.zoom), topLeft.y - (2 / uiPaperScope.view.zoom)),
-      to: new uiPaperScope.Point(bottomRight.x + (2 / uiPaperScope.view.zoom), bottomRight.y + (2 / uiPaperScope.view.zoom)),
+      from: topLeft.subtract(new uiPaperScope.Point(gap, gap)),
+      to: bottomRight.add(new uiPaperScope.Point(gap, gap)),
+      radius: 2 * (1 / uiPaperScope.view.zoom),
       strokeColor: THEME_PRIMARY_COLOR,
-      strokeWidth: 4 / uiPaperScope.view.zoom,
+      strokeWidth: 4 * (1 / uiPaperScope.view.zoom),
       parent: activeArtboardFrame
     });
   }
@@ -3607,26 +3609,49 @@ export const updateNameFrame = (artboards: { [id: string]: Btwx.Artboard }): voi
   if (uiPaperScope.project.activeLayer.data.id !== 'ui') {
     uiPaperScope.projects[0].activate();
   }
-  const nameFrame = uiPaperScope.project.getItem({ data: { id: 'nameFrame' } });
-  nameFrame.removeChildren();
+  const namesFrame = uiPaperScope.project.getItem({ data: { id: 'namesFrame' } });
+  namesFrame.removeChildren();
   if (artboards) {
     Object.keys(artboards).forEach((id: string) => {
       const artboardItem = artboards[id];
       // const paperLayer = getPaperLayer(artboardItem.id, artboardItem.projectIndex);
       // const artboardBackground = paperLayer.getItem({data: {id: 'artboardBackground'}});
       const bottomLeft = new uiPaperScope.Point(artboardItem.frame.x - (artboardItem.frame.width / 2), artboardItem.frame.y + (artboardItem.frame.height / 2));
-      new uiPaperScope.PointText({
+      const text = new uiPaperScope.PointText({
         point: bottomLeft.add(new uiPaperScope.Point(0, 24 * (1 / uiPaperScope.view.zoom))),
         content: artboardItem.name,
         fillColor: '#999',
         fontSize: 12 * (1 / uiPaperScope.view.zoom),
         fontFamily: 'Space Mono',
-        parent: nameFrame,
+        insert: false,
         data: {
           type: 'UIElementChild',
           interactive: true,
           interactiveType: artboardItem.id,
-          elementId: 'nameFrame'
+          elementId: 'namesFrame'
+        }
+      });
+      const textBackground = new uiPaperScope.Path.Rectangle({
+        from: text.bounds.topLeft,
+        to: text.bounds.bottomRight,
+        fillColor: '#fff',
+        opacity: 0,
+        insert: false,
+        data: {
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: artboardItem.id,
+          elementId: 'namesFrame'
+        }
+      });
+      const textContainer = new uiPaperScope.Group({
+        parent: namesFrame,
+        children: [textBackground, text],
+        data: {
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: artboardItem.id,
+          elementId: 'namesFrame'
         }
       });
     });
@@ -3773,7 +3798,7 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
         elementId: 'selectionFrame'
       }
     });
-    moveHandle.position = new uiPaperScope.Point(baseFrame.bounds.topCenter.x, baseFrame.bounds.topCenter.y - ((1 / uiPaperScope.view.zoom) * 24));
+    moveHandle.position = new uiPaperScope.Point(baseFrame.bounds.topCenter.x, baseFrame.bounds.topCenter.y - ((1 / uiPaperScope.view.zoom) * 20));
     moveHandle.scaling.x = 1 / uiPaperScope.view.zoom;
     moveHandle.scaling.y = 1 / uiPaperScope.view.zoom;
     // Line selection frame
@@ -3938,8 +3963,8 @@ export const updateEventsFrame = (state: RootState): void => {
       const origin = state.layer.present.byId[event.artboard];
       const destination = state.layer.present.byId[event.destinationArtboard];
       const tweenEventDestinationIndicator = new uiPaperScope.Path.Ellipse({
-        center: new uiPaperScope.Point(destination.frame.x, artboardTopTop - ((1 / uiPaperScope.view.zoom) * 48)),
-        radius: ((1 / uiPaperScope.view.zoom) * 4),
+        center: new uiPaperScope.Point(destination.frame.x, artboardTopTop - (48 / uiPaperScope.view.zoom)),
+        radius: 4 / uiPaperScope.view.zoom,
         fillColor: elementColor,
         insert: false,
         data: {
@@ -3949,9 +3974,22 @@ export const updateEventsFrame = (state: RootState): void => {
           elementId: 'eventsFrame'
         }
       });
+      const tweenEventDestinationIndicatorBackground = new uiPaperScope.Path.Ellipse({
+        center: tweenEventDestinationIndicator.bounds.center,
+        radius: 12 / uiPaperScope.view.zoom,
+        fillColor: theme.background.z0,
+        opacity: 0,
+        insert: false,
+        data: {
+          type: 'UIElementChild',
+          interactive: false,
+          interactiveType: null,
+          elementId: 'eventsFrame'
+        }
+      });
       const tweenEventOriginIndicator = new uiPaperScope.Path.Ellipse({
-        center: new uiPaperScope.Point(origin.frame.x, artboardTopTop - ((1 / uiPaperScope.view.zoom) * 48)),
-        radius: ((1 / uiPaperScope.view.zoom) * 10),
+        center: new uiPaperScope.Point(origin.frame.x, artboardTopTop - (48 / uiPaperScope.view.zoom)),
+        radius: 10 / uiPaperScope.view.zoom,
         insert: false,
         data: {
           type: 'UIElementChild',
@@ -3962,7 +4000,7 @@ export const updateEventsFrame = (state: RootState): void => {
       });
       const tweenEventIconBackground = new uiPaperScope.Path.Ellipse({
         center: tweenEventOriginIndicator.bounds.center,
-        radius: ((1 / uiPaperScope.view.zoom) * 14),
+        radius: 16 / uiPaperScope.view.zoom,
         fillColor: theme.background.z0,
         insert: false,
         data: {
@@ -4016,7 +4054,7 @@ export const updateEventsFrame = (state: RootState): void => {
         content: DEFAULT_TWEEN_EVENTS.find((tweenEvent) => event.event === tweenEvent.event).titleCase,
         point: new uiPaperScope.Point(tweenEventConnector.bounds.center.x, tweenEventDestinationIndicator.bounds.top - ((1 / uiPaperScope.view.zoom) * 10)),
         justification: 'center',
-        fontSize: ((1 / uiPaperScope.view.zoom) * 10),
+        fontSize: 10 / uiPaperScope.view.zoom,
         fillColor: elementColor,
         insert: false,
         fontFamily: 'Space Mono',
@@ -4028,7 +4066,7 @@ export const updateEventsFrame = (state: RootState): void => {
         }
       });
       const eventFrame = new uiPaperScope.Group({
-        children: [tweenEventConnector, tweenEventIconBackground, tweenEventIcon, tweenEventDestinationIndicator, tweenEventText],
+        children: [tweenEventConnector, tweenEventIconBackground, tweenEventIcon, tweenEventDestinationIndicator, tweenEventDestinationIndicatorBackground, tweenEventText],
         data: {
           id: 'eventFrame',
           type: 'UIElementChild',
@@ -4039,11 +4077,14 @@ export const updateEventsFrame = (state: RootState): void => {
         parent: eventsFrame,
         // opacity: groupOpacity
       });
+      const margin = 8 / uiPaperScope.view.zoom;
       const eventFrameBackground = new uiPaperScope.Path.Rectangle({
-        from: eventFrame.bounds.topLeft,
-        to: eventFrame.bounds.bottomRight,
-        fillColor: theme.background.z0,
-        opacity: 0.01,
+        from: eventFrame.bounds.topLeft.subtract(new uiPaperScope.Point(0, margin)),
+        to: eventFrame.bounds.bottomRight.add(new uiPaperScope.Point(0, margin / 2)),
+        fillColor: tinyColor(theme.background.z0).setAlpha(0.01).toHslString(),
+        strokeColor: !state.eventDrawer.event && state.eventDrawer.eventHover === event.id ? THEME_PRIMARY_COLOR : null,
+        strokeWidth: 1 / uiPaperScope.view.zoom,
+        radius: 2 / uiPaperScope.view.zoom,
         parent: eventFrame,
         data: {
           type: 'UIElementChild',
@@ -4052,7 +4093,7 @@ export const updateEventsFrame = (state: RootState): void => {
           elementId: 'eventsFrame'
         }
       });
-      eventFrame.position.y -= (eventFrame.bounds.height + ((1 / uiPaperScope.view.zoom) * 12)) * index;
+      eventFrame.position.y -= eventFrame.bounds.height * index;
     });
   }
 };

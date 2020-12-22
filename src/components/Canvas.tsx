@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement, useEffect, useState, useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { uiPaperScope } from '../canvas';
+import { setCanvasReady } from '../store/actions/canvasSettings';
 import { getAllProjectIndices } from '../store/selectors/layer';
 import { ThemeContext } from './ThemeProvider';
 import CanvasLayerEvents from './CanvasLayerEvents';
@@ -21,15 +22,10 @@ import GradientTool from './GradientTool';
 import CanvasUI from './CanvasUI';
 import CanvasArtboards from './CanvasArtboards';
 
-interface CanvasProps {
-  ready: boolean;
-  setReady(ready: boolean): void;
-}
-
-const Canvas = (props: CanvasProps): ReactElement => {
+const Canvas = (): ReactElement => {
   const theme = useContext(ThemeContext);
   const ref = useRef<HTMLDivElement>(null);
-  const { ready, setReady } = props;
+  const ready = useSelector((state: RootState) => state.canvasSettings.ready);
   const interactionEnabled = useSelector((state: RootState) => !state.canvasSettings.selecting && !state.canvasSettings.resizing && !state.canvasSettings.drawing && !state.canvasSettings.zooming && !state.canvasSettings.translating && !state.canvasSettings.dragging);
   const allProjectIndices = useSelector((state: RootState) => getAllProjectIndices(state));
   const cursor = useSelector((state: RootState) => state.canvasSettings.cursor);
@@ -37,6 +33,7 @@ const Canvas = (props: CanvasProps): ReactElement => {
   const [uiEvent, setUIEvent] = useState(null);
   const [translateEvent, setTranslateEvent] = useState(null);
   const [zoomEvent, setZoomEvent] = useState(null);
+  const dispatch = useDispatch();
 
   const handleHitResult = (e: any, eventType: 'mouseMove' | 'mouseDown' | 'mouseUp' | 'doubleClick' | 'contextMenu'): void => {
     const { layerHitResult, uiHitResult } = allProjectIndices.reduce((result: { layerHitResult: { hitResult: paper.HitResult; projectIndex: number }; uiHitResult: paper.HitResult }, current, index) => {
@@ -128,14 +125,14 @@ const Canvas = (props: CanvasProps): ReactElement => {
 
   useEffect(() => {
     window.addEventListener('resize', handleResize);
-    return () => {
+    return (): void => {
       window.removeEventListener('resize', handleResize);
     }
   }, [allProjectIndices]);
 
   useEffect(() => {
     console.log('CANVAS');
-    setReady(true);
+    dispatch(setCanvasReady());
   }, []);
 
   return (
@@ -153,8 +150,8 @@ const Canvas = (props: CanvasProps): ReactElement => {
         background: theme.background.z0,
         cursor: cursor[0]
       }}>
-      <CanvasUI ready={ready} />
-      <CanvasArtboards ready={ready} />
+      <CanvasUI />
+      <CanvasArtboards />
       {
         ready
         ? <>

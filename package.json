@@ -111,6 +111,7 @@
     "chroma-js": "^2.1.0",
     "custom-electron-titlebar": "^3.2.2-hotfix62",
     "electron-squirrel-startup": "^1.0.0",
+    "font-finder": "^1.1.0",
     "gsap": "file:gsap-bonus.tgz",
     "is-svg": "^4.2.1",
     "lodash.capitalize": "^4.2.1",

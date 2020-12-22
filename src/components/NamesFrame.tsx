@@ -5,14 +5,14 @@ import { updateNameFrame } from '../store/actions/layer';
 import { getAllArtboardItems } from '../store/selectors/layer';
 import { uiPaperScope } from '../canvas';
 
-const NameFrame = (): ReactElement => {
+const NamesFrame = (): ReactElement => {
   const zoom = useSelector((state: RootState) => state.documentSettings.zoom);
   const artboards = useSelector((state: RootState) => getAllArtboardItems(state));
 
   useEffect(() => {
     updateNameFrame(artboards);
     return (): void => {
-      const activeArtboardFrame = uiPaperScope.projects[0].getItem({ data: { id: 'nameFrame' } });
+      const activeArtboardFrame = uiPaperScope.projects[0].getItem({ data: { id: 'namesFrame' } });
       activeArtboardFrame.removeChildren();
     }
   }, [zoom, artboards]);
@@ -22,4 +22,4 @@ const NameFrame = (): ReactElement => {
   );
 }
 
-export default NameFrame;
+export default NamesFrame;

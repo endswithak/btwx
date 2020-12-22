@@ -13,6 +13,8 @@ import MenuEditDelete from './MenuEditDelete';
 import MenuEditDuplicate from './MenuEditDuplicate';
 import MenuEditSelectAll from './MenuEditSelectAll';
 import MenuEditSelectAllArtboards from './MenuEditSelectAllArtboards';
+import MenuEditFind from './MenuEditFind';
+import MenuEditRename from './MenuEditRename';
 
 const MenuEdit = (): ReactElement => (
   <>
@@ -30,6 +32,8 @@ const MenuEdit = (): ReactElement => (
     <MenuEditDuplicate />
     <MenuEditSelectAll />
     <MenuEditSelectAllArtboards />
+    <MenuEditFind />
+    <MenuEditRename />
   </>
 );
 

@@ -8,6 +8,7 @@ import { removeArtboardPreset } from '../store/actions/documentSettings';
 import { openArtboardPresetEditor } from '../store/actions/artboardPresetEditor';
 import { canGroupSelected, canUngroupSelected, canToggleSelectedUseAsMask, canBringSelectedForward, canSendSelectedBackward, selectedIgnoreUnderlyingMaskEnabled, selectedUseAsMaskEnabled, canToggleSelectedIgnoreUnderlyingMask, canReplaceSelectedImages } from '../store/selectors/layer';
 import { setEventDrawerEventHoverThunk, setEventDrawerEventThunk } from '../store/actions/eventDrawer';
+import { setEditing } from '../store/actions/leftSidebar';
 import { APP_NAME, DEFAULT_TWEEN_EVENTS } from '../constants';
 import ContextMenu from './ContextMenu';
 
@@ -45,6 +46,7 @@ const ContextMenuWrap = (): ReactElement => {
   const canIgnoreUnderlyingMask = useSelector((state: RootState) => canToggleSelectedIgnoreUnderlyingMask(state));
   const ignoreUnderlyingMaskChecked = useSelector((state: RootState) => selectedIgnoreUnderlyingMaskEnabled(state));
   const canDuplicate = selected.length > 0 || layerItem !== null;
+  const canRename = selected.length === 1;
   const canReplaceImage = useSelector((state: RootState) => canReplaceSelectedImages(state));
   const clipboardType: Btwx.ClipboardType = ((): Btwx.ClipboardType => {
     try {
@@ -222,6 +224,15 @@ const ContextMenuWrap = (): ReactElement => {
             } else {
               dispatch(ungroupLayers({layers: [contextMenu.id]}));
             }
+          }
+        },{
+          type: 'MenuItem',
+          text: 'Rename Layer',
+          hidden: contextMenu.id && contextMenu.id === 'root',
+          disabled: !canRename,
+          onClick: (): void => {
+            dispatch(closeContextMenu());
+            dispatch(setEditing({id: selected[0]}));
           }
         },{
           type: 'MenuDivider',

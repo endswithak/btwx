@@ -13,6 +13,7 @@ import {
   SET_CANVAS_TRANSLATING,
   SET_CANVAS_ZOOM_TYPE,
   SET_CANVAS_CURSOR,
+  SET_CANVAS_READY,
   SetCanvasActiveToolPayload,
   SetCanvasDrawingPayload,
   SetCanvasTypingPayload,
@@ -96,4 +97,8 @@ export const setCanvasZoomType = (payload: SetCanvasZoomTypePayload): CanvasSett
 export const setCanvasCursor = (payload: SetCanvasCursorPayload): CanvasSettingsTypes => ({
   type: SET_CANVAS_CURSOR,
   payload
+});
+
+export const setCanvasReady = (): CanvasSettingsTypes => ({
+  type: SET_CANVAS_READY
 });

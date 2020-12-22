@@ -1,9 +1,11 @@
 import React, { useEffect, ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { uiPaperScope } from '../canvas';
 import { RootState } from '../store/reducers';
 import { setCanvasActiveTool, setCanvasCursor } from '../store/actions/canvasSettings';
 import { setLayerHover, setLayerActiveGradientStop, selectLayers, deselectLayers } from '../store/actions/layer';
 import { getAllArtboardItems } from '../store/selectors/layer';
+import { openContextMenu } from '../store/actions/contextMenu';
 import { setEventDrawerEventThunk, setEventDrawerEventHoverThunk } from '../store/actions/eventDrawer';
 
 interface CanvasUIEventsProps {
@@ -78,12 +80,13 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
         dispatch(setCanvasCursor({cursor: cursor.filter(c => c !== 'pointer')}));
       }
     } else {
+      const interactiveType = uiEvent.hitResult.item.data.interactiveType;
       switch(uiEvent.hitResult.item.data.elementId) {
         case 'selectionFrame': {
           if (hover) {
             dispatch(setLayerHover({id: null}));
           }
-          switch(uiEvent.hitResult.item.data.interactiveType) {
+          switch(interactiveType) {
             case 'move':
             case 'lineMove':
               if (activeTool !== 'Drag' || (activeTool === 'Drag' && !dragHandle)) {
@@ -144,7 +147,6 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           break;
         }
         case 'eventsFrame': {
-          const interactiveType = uiEvent.hitResult.item.data.interactiveType;
           if (interactiveType && eventDrawerHover !== interactiveType) {
             dispatch(setEventDrawerEventHoverThunk({id: interactiveType}));
             if (cursor[0] !== 'pointer' && !eventDrawerEvent) {
@@ -153,10 +155,18 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           }
           break;
         }
-        case 'nameFrame': {
-          const interactiveType = uiEvent.hitResult.item.data.interactiveType;
+        case 'namesFrame': {
           if (interactiveType && hover !== interactiveType) {
             dispatch(setLayerHover({id: interactiveType}));
+          }
+          if (activeTool !== 'Drag') {
+            dispatch(setCanvasActiveTool({
+              activeTool: 'Drag',
+              dragHandle: false,
+              resizeHandle: null,
+              lineHandle: null,
+              cursor: ['move', ...cursor]
+            }));
           }
           break;
         }
@@ -168,6 +178,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
     if (uiEvent.empty) {
       return;
     } else {
+      const interactiveType = uiEvent.hitResult.item.data.interactiveType;
       switch(uiEvent.hitResult.item.data.elementId) {
         case 'selectionFrame': {
           break;
@@ -183,8 +194,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
         case 'eventsFrame': {
           break;
         }
-        case 'nameFrame': {
-          const interactiveType = uiEvent.hitResult.item.data.interactiveType;
+        case 'namesFrame': {
           if (interactiveType) {
             const artboardItem = artboardItems[interactiveType];
             if (uiEvent.event.shiftKey) {
@@ -195,8 +205,10 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
                 dispatch(selectLayers({layers: [interactiveType]}));
               }
             } else {
-              scrollToLayer(interactiveType);
-              dispatch(selectLayers({layers: [interactiveType], newSelection: true}));
+              if (!selected.includes(interactiveType)) {
+                scrollToLayer(interactiveType);
+                dispatch(selectLayers({layers: [interactiveType], newSelection: true}));
+              }
             }
           }
           break;
@@ -214,6 +226,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
     if (uiEvent.empty) {
       return;
     } else {
+      const interactiveType = uiEvent.hitResult.item.data.interactiveType;
       switch(uiEvent.hitResult.item.data.elementId) {
         case 'selectionFrame': {
           break;
@@ -222,7 +235,6 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           break;
         }
         case 'eventsFrame': {
-          const interactiveType = uiEvent.hitResult.item.data.interactiveType;
           if (interactiveType && eventDrawerEvent !== interactiveType) {
             dispatch(setEventDrawerEventThunk({id: interactiveType}));
             dispatch(setCanvasCursor({cursor: ['auto']}));
@@ -234,7 +246,46 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
   }
 
   const handleContextMenu = (): void => {
-    return;
+    if (uiEvent.empty) {
+      return;
+    } else {
+      const interactiveType = uiEvent.hitResult.item.data.interactiveType;
+      const paperPoint = uiPaperScope.view.getEventPoint(uiEvent.event);
+      switch(uiEvent.hitResult.item.data.elementId) {
+        case 'selectionFrame': {
+          break;
+        }
+        case 'gradientFrame': {
+          break;
+        }
+        case 'eventsFrame': {
+          if (interactiveType) {
+            dispatch(openContextMenu({
+              type: 'EventDrawerEvent',
+              id: interactiveType,
+              x: uiEvent.event.clientX,
+              y: uiEvent.event.clientY,
+              paperX: paperPoint.x,
+              paperY: paperPoint.y
+            }));
+          }
+          break;
+        }
+        case 'namesFrame': {
+          if (interactiveType) {
+            dispatch(openContextMenu({
+              type: 'LayerEdit',
+              id: interactiveType,
+              x: uiEvent.event.clientX,
+              y: uiEvent.event.clientY,
+              paperX: paperPoint.x,
+              paperY: paperPoint.y
+            }));
+          }
+          break;
+        }
+      }
+    }
   }
 
   useEffect(() => {

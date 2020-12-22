@@ -13,10 +13,12 @@ import {
   SET_CANVAS_TRANSLATING,
   SET_CANVAS_ZOOM_TYPE,
   SET_CANVAS_CURSOR,
+  SET_CANVAS_READY,
   CanvasSettingsTypes,
 } from '../actionTypes/canvasSettings';
 
 export interface CanvasSettingsState {
+  ready: boolean;
   activeTool: Btwx.ToolType;
   mouse: {
     x: number;
@@ -42,6 +44,7 @@ export interface CanvasSettingsState {
 }
 
 const initialState: CanvasSettingsState = {
+  ready: false,
   activeTool: null,
   mouse: null,
   drawing: false,
@@ -158,6 +161,12 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
       return {
         ...state,
         cursor: action.payload.cursor
+      };
+    }
+    case SET_CANVAS_READY: {
+      return {
+        ...state,
+        ready: true
       };
     }
     default:

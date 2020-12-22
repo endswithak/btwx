@@ -1,3 +1,4 @@
+export const SET_CANVAS_READY = 'SET_CANVAS_READY';
 export const SET_CANVAS_ACTIVE_TOOL = 'SET_CANVAS_ACTIVE_TOOL';
 export const SET_CANVAS_DRAWING = 'SET_CANVAS_DRAWING';
 export const SET_CANVAS_TYPING = 'SET_CANVAS_TYPING';
@@ -152,6 +153,10 @@ export interface SetCanvasCursor {
   payload: SetCanvasCursorPayload;
 }
 
+export interface SetCanvasReady {
+  type: typeof SET_CANVAS_READY;
+}
+
 export type CanvasSettingsTypes = SetCanvasActiveTool |
                                   SetCanvasDrawing |
                                   SetCanvasTyping |
@@ -165,4 +170,5 @@ export type CanvasSettingsTypes = SetCanvasActiveTool |
                                   ResetCanvasSettings |
                                   SetCanvasMousePosition |
                                   SetCanvasZoomType |
-                                  SetCanvasCursor;
+                                  SetCanvasCursor |
+                                  SetCanvasReady;

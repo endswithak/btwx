@@ -7,13 +7,9 @@ import EventDrawerEvent from './EventDrawerEvent';
 import EventDrawerDragHandle from './EventDrawerDragHandle';
 import EmptyState from './EmptyState';
 
-interface EventDrawerProps {
-  ready?: boolean;
-}
-
-const EventDrawer = (props: EventDrawerProps): ReactElement => {
+const EventDrawer = (): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { ready } = props;
+  const ready = useSelector((state: RootState) => state.canvasSettings.ready);
   const event = useSelector((state: RootState) => state.layer.present.events.byId[state.eventDrawer.event]);
   const eventDrawerHeight = useSelector((state: RootState) => state.viewSettings.eventDrawer.height);
   const isEmpty = useSelector((state: RootState) => state.layer.present.events.allIds.length === 0);

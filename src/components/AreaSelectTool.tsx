@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, useEffect, ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
 import { uiPaperScope } from '../canvas';
 import { setCanvasSelecting } from '../store/actions/canvasSettings';
@@ -14,6 +15,7 @@ const AreaSelectTool = (props: PaperToolProps): ReactElement => {
   const { tool, downEvent, dragEvent, upEvent } = props;
   const isEnabled = useSelector((state: RootState) => state.canvasSettings.activeTool === 'AreaSelect');
   const scope = useSelector((state: RootState) => state.layer.present.scope);
+  const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
   const layerProjectIndices = useSelector((state: RootState) => getLayerProjectIndices(state));
   const dispatch = useDispatch();
 
@@ -23,9 +25,9 @@ const AreaSelectTool = (props: PaperToolProps): ReactElement => {
     if (areaSelectBounds) {
       const areaSelectPreview = new uiPaperScope.Path.Rectangle({
         rectangle: areaSelectBounds,
-        fillColor: theme.name === 'light' ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.5)',
+        fillColor: 'rgba(204,204,204,0.75)',
         strokeWidth: 1 / uiPaperScope.view.zoom,
-        strokeColor: theme.name === 'light' ? '#000' : '#fff',
+        strokeColor: '#999',
         opacity: 0.2,
         parent: drawingPreview
       });
@@ -67,13 +69,23 @@ const AreaSelectTool = (props: PaperToolProps): ReactElement => {
           return project.getItems({
             data: (data: any) => {
               const notRoot = data.type === 'Layer' && data.layerType !== 'Root';
-              const isScopeLayer = data.scope && scope.includes(data.scope[data.scope.length - 1]);
+              const isScopeLayer = data.scope && (scope.includes(data.scope[data.scope.length - 1]) || data.scope[data.scope.length - 1] === activeArtboard);
               const other = data.id && data.id !== scope[scope.length - 1];
               return notRoot && isScopeLayer && other;
             },
             overlapping: areaSelectBounds
-          }).reduce((result, current) => {
-            return [...result, current.data.id];
+          }).reverse().reduce((result, current) => {
+            if (current.data.layerType === 'Artboard') {
+              if (areaSelectBounds.contains(current.bounds)) {
+                return [...result, current.data.id];
+              } else {
+                return result;
+              }
+            } else {
+              if (!result.includes(current.data.scope[0])) {
+                return [...result, current.data.id];
+              }
+            }
           }, []);
         }
         const layers = layerProjectIndices.reduce((result, current, index) => {

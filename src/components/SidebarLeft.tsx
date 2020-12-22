@@ -7,20 +7,12 @@ import SidebarLayerSearchTree from './SidebarLayerSearchTree';
 import SidebarLeftDragHandle from './SidebarLeftDragHandle';
 import SidebarLayersSearch from './SidebarLayersSearch';
 
-interface SidebarLeftProps {
-  ready: boolean;
-}
-
-const SidebarLeft = (props: SidebarLeftProps): ReactElement => {
-  const { ready } = props;
+const SidebarLeft = (): ReactElement => {
+  const ready = useSelector((state: RootState) => state.canvasSettings.ready);
   const isOpen = useSelector((state: RootState) => state.viewSettings.leftSidebar.isOpen);
   const sidebarWidth = useSelector((state: RootState) => state.viewSettings.leftSidebar.width);
   const isEmpty = useSelector((state: RootState) => state.layer.present.childrenById.root.length === 0);
   const searchActive = useSelector((state: RootState) => state.leftSidebar.search.replace(/\s/g, '').length > 0);
-
-  // useEffect(() => {
-  //   console.log('LEFT SIDEBAR');
-  // }, [isOpen, isEmpty, ready]);
 
   return (
     isOpen
