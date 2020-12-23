@@ -9,7 +9,7 @@ import SidebarInput from './SidebarInput';
 const HeightInput = (): ReactElement => {
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const heightValue = useSelector((state: RootState) => getSelectedInnerHeight(state));
-  const disabled = useSelector((state: RootState) => state.layer.present.selected.some((id) => state.layer.present.byId[id].type === 'Shape' && (state.layer.present.byId[id] as Btwx.Shape).shapeType === 'Line' || state.layer.present.byId[id].type === 'Text' || state.layer.present.byId[id].type === 'Group'));
+  const disabled = useSelector((state: RootState) => state.layer.present.selected.some((id) => state.layer.present.byId[id].type === 'Shape' && (state.layer.present.byId[id] as Btwx.Shape).shapeType === 'Line' || state.layer.present.byId[id].type === 'Text'));
   const [height, setHeight] = useState(heightValue !== 'multi' ? Math.round(heightValue) : heightValue);
   const dispatch = useDispatch();
 

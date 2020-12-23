@@ -9,7 +9,7 @@ import { setLayersWidth } from '../store/actions/layer';
 const WidthInput = (): ReactElement => {
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const widthValue = useSelector((state: RootState) => getSelectedInnerWidth(state));
-  const isDisabled = useSelector((state: RootState) => state.layer.present.selected.some((id) => state.layer.present.byId[id].type === 'Text' || state.layer.present.byId[id].type === 'Group'));
+  const isDisabled = useSelector((state: RootState) => state.layer.present.selected.some((id) => state.layer.present.byId[id].type === 'Text'));
   const [width, setWidth] = useState(widthValue !== 'multi' ? Math.round(widthValue) : widthValue);
   const dispatch = useDispatch();
 

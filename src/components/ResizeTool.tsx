@@ -137,7 +137,7 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
 
   const getNextSnapBounds = (nextToEvent: paper.ToolEvent, nextHandle: Btwx.ResizeHandle, nextHorizontalFlip: boolean, nextVerticalFlip: boolean, shiftOverride?: boolean) => {
     let nextSnapBounds;
-    if (nextToEvent.modifiers.shift || shiftOverride) {
+    if (nextToEvent.modifiers.shift || shiftOverride || preserveAspectRatio) {
       const aspect = fromBounds.width / fromBounds.height;
       const fb = fromBounds;
       switch(nextHandle) {
@@ -304,7 +304,7 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
       case 'rightCenter':
         return { right: true };
       case 'topLeft':
-        if (dragEvent && dragEvent.modifiers.shift) {
+        if (dragEvent && (dragEvent.modifiers.shift || preserveAspectRatio)) {
           if (snapBounds.width > snapBounds.height) {
             return { left: true };
           } else if (snapBounds.width < snapBounds.height) {
@@ -322,7 +322,7 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
           return { top: true, left: true };
         }
       case 'topRight':
-        if (dragEvent && dragEvent.modifiers.shift) {
+        if (dragEvent && (dragEvent.modifiers.shift || preserveAspectRatio)) {
           if (snapBounds.width > snapBounds.height) {
             return { right: true };
           } else if (snapBounds.width < snapBounds.height) {
@@ -340,7 +340,7 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
           return { top: true, right: true };
         }
       case 'bottomLeft':
-        if (dragEvent && dragEvent.modifiers.shift) {
+        if (dragEvent && (dragEvent.modifiers.shift || preserveAspectRatio)) {
           if (snapBounds.width > snapBounds.height) {
             return { left: true };
           } else if (snapBounds.width < snapBounds.height) {
@@ -358,7 +358,7 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
           return { bottom: true, left: true };
         }
       case 'bottomRight':
-        if (dragEvent && dragEvent.modifiers.shift) {
+        if (dragEvent && (dragEvent.modifiers.shift || preserveAspectRatio)) {
           if (snapBounds.width > snapBounds.height) {
             return { right: true };
           } else if (snapBounds.width < snapBounds.height) {
@@ -413,6 +413,9 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
       setFromBounds(nextFromBounds);
       setOriginalSelection(nextOriginalSelection);
       setHandle(initialHandle);
+      if (Object.keys(selectedById).some((id) => selectedById[id].transform.rotation !== 0 || selectedById[id].type === 'Group')) {
+        setPreserveAspectRatio(true);
+      }
       updateSelectionFrame(nextFromBounds, initialHandle);
       selected.forEach((layer) => {
         setLayerPivot(layer);
@@ -662,7 +665,7 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
         hitTestZones={getSnapToolHitTestZones()}
         onUpdate={handleSnapToolUpdate}
         toolEvent={dragEvent}
-        preserveAspectRatio={shiftModifier}
+        preserveAspectRatio={shiftModifier || preserveAspectRatio}
         aspectRatio={fromBounds ? fromBounds.width / fromBounds.height : 1}
         resizeHandle={handle}
         blackListLayers={selected}

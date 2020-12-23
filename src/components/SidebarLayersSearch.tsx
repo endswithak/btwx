@@ -13,7 +13,6 @@ const SidebarLayersSearch = (): ReactElement => {
   const theme = useContext(ThemeContext);
   const searchActive = useSelector((state: RootState) => state.leftSidebar.searching);
   const search = useSelector((state: RootState) => state.leftSidebar.search);
-  // const [focused, setFocused] = useState(false);
   const [inputValue, setInputValue] = useState(search);
   const [hover, setHover] = useState(false);
   const dispatch = useDispatch();
@@ -25,33 +24,31 @@ const SidebarLayersSearch = (): ReactElement => {
     []
   );
 
-  const handleSearchChange = (e: any) => {
+  const handleSearchChange = (e: any): void => {
     const target = e.target;
     setInputValue(target.value);
     debounceSearch(target.value);
   };
 
-  const handleSearchSubmit = (e: any) => {
+  const handleSearchSubmit = (e: any): void => {
     return;
   }
 
-  const handleSearchBlur = () => {
+  const handleSearchBlur = (): void => {
     if (inputValue.replace(/\s/g, '').length === 0) {
       setInputValue('');
       debounceSearch('');
       dispatch(setSearching({searching: false}));
     }
-    // setFocused(false);
   }
 
-  const handleSearchFocus = () => {
+  const handleSearchFocus = (): void => {
     if (!searchActive) {
       dispatch(setSearching({searching: true}));
     }
-    // setFocused(true);
   }
 
-  const handleClearSearch = () => {
+  const handleClearSearch = (): void => {
     setInputValue('');
     debounceSearch('');
     dispatch(setSearching({searching: false}));

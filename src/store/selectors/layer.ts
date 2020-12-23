@@ -1528,7 +1528,7 @@ export const getParentPaperLayer = (state: LayerState, id: string, ignoreUnderly
   }
 };
 
-export const getLayerDescendants = (state: LayerState, layer: string): string[] => {
+export const getLayerDescendants = (state: LayerState, layer: string, includeGroups = true): string[] => {
   const groups: string[] = [layer];
   const layers: string[] = [];
   let i = 0;
@@ -1540,7 +1540,13 @@ export const getLayerDescendants = (state: LayerState, layer: string): string[] 
         if (childLayer.children && childLayer.children.length > 0) {
           groups.push(child);
         }
-        layers.push(child);
+        if (includeGroups) {
+          layers.push(child);
+        } else {
+          if (childLayer.type !== 'Group') {
+            layers.push(child);
+          }
+        }
       });
     }
     i++;
@@ -1548,8 +1554,8 @@ export const getLayerDescendants = (state: LayerState, layer: string): string[] 
   return layers;
 };
 
-export const getLayerAndDescendants = (state: LayerState, layer: string): string[] => {
-  const children = getLayerDescendants(state, layer);
+export const getLayerAndDescendants = (state: LayerState, layer: string, includeGroups = true): string[] => {
+  const children = getLayerDescendants(state, layer, includeGroups);
   return [layer, ...children];
 };
 
@@ -1839,13 +1845,20 @@ export const hasImageTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.L
 
 export const hasShapeTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const validType = layerItem.type === 'Shape';
-  const notLines = validType && (layerItem as Btwx.Shape).shapeType !== 'Line' && (equivalentLayerItem as Btwx.Shape).shapeType !== 'Line';
-  const shapeTypeMatch = validType && (layerItem as Btwx.Shape).shapeType === (equivalentLayerItem as Btwx.Shape).shapeType;
+  const bothLines = validType && (layerItem as Btwx.Shape).shapeType === 'Line' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
   const bothPolygons = validType && (layerItem as Btwx.Shape).shapeType === 'Polygon' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Polygon';
   const bothStars = validType && (layerItem as Btwx.Shape).shapeType === 'Star' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Star';
-  const polygonSideMatch = bothPolygons && (layerItem as Btwx.Polygon).sides === (equivalentLayerItem as Btwx.Polygon).sides;
-  const starPointsMatch = bothStars && (layerItem as Btwx.Star).points === (equivalentLayerItem as Btwx.Star).points;
-  return validType && !notLines && (!shapeTypeMatch || !polygonSideMatch || !starPointsMatch);
+  if (bothLines) {
+    return false;
+  } else if (validType && (layerItem as Btwx.Shape).shapeType !== (equivalentLayerItem as Btwx.Shape).shapeType) {
+    return true;
+  } else if (bothStars && (((layerItem as Btwx.Star).points !== (equivalentLayerItem as Btwx.Star).points) || ((layerItem as Btwx.Star).radius !== (equivalentLayerItem as Btwx.Star).radius))) {
+    return true;
+  } else if (bothPolygons && (layerItem as Btwx.Polygon).sides !== (equivalentLayerItem as Btwx.Polygon).sides) {
+    return true;
+  } else {
+    return false;
+  }
 };
 
 export const hasFillTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
@@ -1889,7 +1902,7 @@ export const hasFillGradientDestinationYTween = (layerItem: Btwx.Layer, equivale
 };
 
 export const hasXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image' || layerItem.type === 'Group' || layerItem.type === 'Text';
+  const validType = (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image' || layerItem.type === 'Text'; // || layerItem.type === 'Group';
   const fontSizeMatch = layerItem.type === 'Text' && (layerItem as Btwx.Text).textStyle.fontSize === (equivalentLayerItem as Btwx.Text).textStyle.fontSize;
   const leadingMatch = layerItem.type === 'Text' && (layerItem as Btwx.Text).textStyle.leading === (equivalentLayerItem as Btwx.Text).textStyle.leading;
   const xMatch = layerItem.frame.x.toFixed(2) === equivalentLayerItem.frame.x.toFixed(2);
@@ -1897,7 +1910,7 @@ export const hasXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer
 };
 
 export const hasYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image' || layerItem.type === 'Group' || layerItem.type === 'Text';
+  const validType = (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image' || layerItem.type === 'Text'; // || layerItem.type === 'Group';
   const fontSizeMatch = layerItem.type === 'Text' && (layerItem as Btwx.Text).textStyle.fontSize === (equivalentLayerItem as Btwx.Text).textStyle.fontSize;
   const leadingMatch = layerItem.type === 'Text' && (layerItem as Btwx.Text).textStyle.leading === (equivalentLayerItem as Btwx.Text).textStyle.leading;
   const yMatch = layerItem.frame.y.toFixed(2) === equivalentLayerItem.frame.y.toFixed(2);
@@ -1905,7 +1918,7 @@ export const hasYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer
 };
 
 export const hasRotationTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image' || layerItem.type === 'Group';
+  const validType = (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image'; // || layerItem.type === 'Group';
   const rotationMatch = layerItem.transform.rotation.toFixed(2) === equivalentLayerItem.transform.rotation.toFixed(2);
   return validType && !rotationMatch;
 };

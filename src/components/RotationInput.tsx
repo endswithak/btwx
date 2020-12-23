@@ -8,7 +8,7 @@ import SidebarInput from './SidebarInput';
 
 const RotationInput = (): ReactElement => {
   const selected = useSelector((state: RootState) => state.layer.present.selected);
-  const disabled = useSelector((state: RootState) => state.layer.present.selected.some((id) => state.layer.present.byId[id].type === 'Artboard' || state.layer.present.byId[id].type === 'Group'));
+  const disabled = useSelector((state: RootState) => state.layer.present.selected.some((id) => state.layer.present.byId[id].type === 'Artboard'));
   const rotationValue = useSelector((state: RootState) => getSelectedRotation(state));
   const [rotation, setRotation] = useState(rotationValue !== 'multi' ? Math.round(rotationValue) : rotationValue);
   const dispatch = useDispatch();

@@ -20,10 +20,11 @@ interface SidebarLayerProps {
   nestingLevel?: number;
   style?: any;
   isDragGhost?: boolean;
+  draggable?: boolean;
 }
 
 const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
-  const { id, nestingLevel, isDragGhost, setOpen, isOpen, style } = props;
+  const { id, nestingLevel, isDragGhost, setOpen, isOpen, style, draggable } = props;
   const dragging = useSelector((state: RootState) => state.leftSidebar.dragging);
   const isSelected = useSelector((state: RootState) => state.layer.present.byId[id].selected);
   // const isHover = useSelector((state: RootState) => state.layer.present.byId[id].hover);
@@ -77,7 +78,7 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
     dispatch(setLayerHover({id: null}));
   }
 
-  const handleContextMenu = (e: any) => {
+  const handleContextMenu = (e: any): void => {
     dispatch(openContextMenu({
       type: 'LayerEdit',
       id: id,
@@ -105,7 +106,7 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
   return (
     <div
       id={isDragGhost ? `dragGhost-${id}` : id}
-      draggable={!isDragGhost}
+      draggable={!isDragGhost && draggable}
       className='c-sidebar-layer'
       style={{
         ...style,
@@ -136,9 +137,13 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
       <SidebarLayerTitle
         id={id}
         isDragGhost={isDragGhost} />
-      <SidebarLayerDropzoneWrap
-        layer={id}
-        isDragGhost={isDragGhost} />
+      {
+        draggable
+        ? <SidebarLayerDropzoneWrap
+            layer={id}
+            isDragGhost={isDragGhost} />
+        : null
+      }
     </div>
   );
 }

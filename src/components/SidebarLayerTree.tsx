@@ -34,7 +34,8 @@ const SidebarLayerTree = (): ReactElement => {
         {...data}
         isOpen={isOpen}
         setOpen={setOpen}
-        style={style} />
+        style={style}
+        draggable={true} />
     )
   });
 
