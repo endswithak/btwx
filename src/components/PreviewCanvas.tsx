@@ -48,6 +48,10 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
     }
   }, []);
 
+  ////////////
+  // NEED TO LOAD ALL DESTINATION IMAGES BEFORE ADDING TWEENS
+  ///////////
+
   useEffect(() => {
     // 1. clear current canvas
     paperPreview.project.clear();

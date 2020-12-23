@@ -694,7 +694,7 @@ export const selectedIgnoreUnderlyingMaskEnabled = createSelector(
   [ getSelectedById ],
   (selectedById) => {
     const keys = Object.keys(selectedById);
-    return keys.every((id) => selectedById[id].type !== 'Artboard' && (selectedById[id] as Btwx.MaskableLayer).ignoreUnderlyingMask);
+    return keys.length > 0 && keys.every((id) => selectedById[id].type !== 'Artboard' && (selectedById[id] as Btwx.MaskableLayer).ignoreUnderlyingMask);
   }
 );
 

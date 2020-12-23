@@ -26,12 +26,12 @@ export const addImageTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
   const beforeRaster = originPaperLayer.getItem({data: {id: 'raster'}}) as paper.Raster;
   const destinationRaster = destinationPaperLayer.getItem({data: {id: 'raster'}}) as paper.Raster;
-  const afterRaster = beforeRaster.clone({insert: false}) as paper.Raster;
+  const afterRaster = beforeRaster.clone() as paper.Raster;
   afterRaster.source = destinationRaster.source;
-  afterRaster.bounds = beforeRaster.bounds;
-  afterRaster.position = beforeRaster.position;
+  // afterRaster.bounds = beforeRaster.bounds;
+  // afterRaster.position = beforeRaster.position;
   afterRaster.opacity = 0;
-  afterRaster.parent = beforeRaster.parent;
+  // afterRaster.parent = beforeRaster.parent;
   timelineTweenProps[`${tween.prop}-before`] = 1;
   timelineTweenProps[`${tween.prop}-after`] = 0;
   timeline.to(timelineTweenProps, {
@@ -506,7 +506,7 @@ export const addXTween = (props: AddTweenProps): void => {
   // const originLayerRelArtboardPosition = getPositionInArtboard(originLayerItem, originArtboardLayerItem);
   // const destinationLayerRelArtboardPosition = getPositionInArtboard(destinationLayerItem, destinationArtboardLayerItem);
   const originPaperLayerPositionDiffX = destinationLayerItem.frame.x - originLayerItem.frame.x;
-  timelineTweenProps[tween.prop] = originPaperLayer.position.x;
+  timelineTweenProps[tween.prop] = originLayerItem.type === 'Image' ? originPaperLayer.getItem({data: {id: 'raster'}}).position.x : originPaperLayer.position.x;
   timeline.to(timelineTweenProps, {
     duration: tween.duration,
     [tween.prop]: `+=${originPaperLayerPositionDiffX}`,
@@ -522,7 +522,7 @@ export const addYTween = (props: AddTweenProps): void => {
   // const originLayerRelArtboardPosition = getPositionInArtboard(originLayerItem, originArtboardLayerItem);
   // const destinationLayerRelArtboardPosition = getPositionInArtboard(destinationLayerItem, destinationArtboardLayerItem);
   const originPaperLayerPositionDiffY = destinationLayerItem.frame.y - originLayerItem.frame.y;
-  timelineTweenProps[tween.prop] = originPaperLayer.position.y;
+  timelineTweenProps[tween.prop] = originLayerItem.type === 'Image' ? originPaperLayer.getItem({data: {id: 'raster'}}).position.y : originPaperLayer.position.y;
   timeline.to(timelineTweenProps, {
     duration: tween.duration,
     [tween.prop]: `+=${originPaperLayerPositionDiffY}`,
