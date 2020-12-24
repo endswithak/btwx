@@ -30,7 +30,7 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
   const [toBounds, setToBounds] = useState<paper.Rectangle>(null);
   const dispatch = useDispatch();
 
-  const resetState = () => {
+  const resetState = (): void => {
     setOriginalSelection(null);
     setFromBounds(null);
     setToBounds(null);
@@ -383,7 +383,7 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
   }
 
   useEffect(() => {
-    if (downEvent && isEnabled) {
+    if (downEvent && isEnabled && selectedBounds && initialHandle) {
       const nextFromBounds = selectedBounds;
       const nextOriginalSelection = selected.reduce((result, current) => ({
         ...result,

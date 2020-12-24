@@ -5,18 +5,19 @@ import { RootState } from '../store/reducers';
 import { enableDarkTheme } from '../store/actions/viewSettings';
 import { THEME_DARK_BACKGROUND_MIN } from '../constants';
 import { getAllDocumentWindows } from '../utils';
+import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'appThemeDark';
 
-const MenuAppThemeDark = (): ReactElement => {
+const MenuAppThemeDark = (props: MenuItemProps): ReactElement => {
+  const { menuItem } = props;
   const checked = useSelector((state: RootState) => state.viewSettings.theme === 'dark');
   const previewWindowId = useSelector((state: RootState) => state.preview.windowId);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    electronMenuItem.enabled = true;
-    electronMenuItem.checked = checked;
+    menuItem.enabled = true;
+    menuItem.checked = checked;
   }, [checked]);
 
   useEffect(() => {
@@ -46,4 +47,7 @@ const MenuAppThemeDark = (): ReactElement => {
   );
 }
 
-export default MenuAppThemeDark;
+export default MenuItem(
+  MenuAppThemeDark,
+  MENU_ITEM_ID
+);

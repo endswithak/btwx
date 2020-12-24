@@ -1,18 +1,18 @@
 import React, { ReactElement, useEffect } from 'react';
-import { remote } from 'electron';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { copySVGThunk } from '../store/actions/layer';
+import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'editCopySVG';
 
-const MenuEditCopySVG = (): ReactElement => {
+const MenuEditCopySVG = (props: MenuItemProps): ReactElement => {
+  const { menuItem } = props;
   const canCopy = useSelector((state: RootState) => state.layer.present.selected.length > 0 && state.canvasSettings.focusing);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    electronMenuItem.enabled = canCopy;
+    menuItem.enabled = canCopy;
   }, [canCopy]);
 
   useEffect(() => {
@@ -26,4 +26,7 @@ const MenuEditCopySVG = (): ReactElement => {
   );
 }
 
-export default MenuEditCopySVG;
+export default MenuItem(
+  MenuEditCopySVG,
+  MENU_ITEM_ID
+);

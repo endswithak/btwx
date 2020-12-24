@@ -1,18 +1,18 @@
 import React, { ReactElement, useEffect } from 'react';
-import { remote } from 'electron';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { alignSelectedToCenterThunk } from '../store/actions/layer';
+import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'arrangeAlignHorizontally';
 
-const MenuArrangeAlignHorizontally = (): ReactElement => {
+const MenuArrangeAlignHorizontally = (props: MenuItemProps): ReactElement => {
+  const { menuItem } = props;
   const isEnabled = useSelector((state: RootState) => state.canvasSettings.focusing && state.layer.present.selected.length >= 2);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    electronMenuItem.enabled = isEnabled;
+    menuItem.enabled = isEnabled;
   }, [isEnabled]);
 
   useEffect(() => {
@@ -26,4 +26,7 @@ const MenuArrangeAlignHorizontally = (): ReactElement => {
   );
 }
 
-export default MenuArrangeAlignHorizontally;
+export default MenuItem(
+  MenuArrangeAlignHorizontally,
+  MENU_ITEM_ID
+);

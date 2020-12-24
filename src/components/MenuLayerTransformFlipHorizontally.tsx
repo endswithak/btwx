@@ -1,22 +1,25 @@
 import React, { ReactElement, useEffect } from 'react';
-import { remote } from 'electron';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { toggleSelectedHorizontalFlipThunk } from '../store/actions/layer';
 import { canFlipSeleted, selectedHorizontalFlipEnabled } from '../store/selectors/layer';
+import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'layerTransformFlipHorizontally';
 
-const MenuLayerTransformFlipHorizontally = (): ReactElement => {
+const MenuLayerTransformFlipHorizontally = (props: MenuItemProps): ReactElement => {
+  const { menuItem } = props;
   const isEnabled = useSelector((state: RootState) => canFlipSeleted(state));
   const isChecked = useSelector((state: RootState) => selectedHorizontalFlipEnabled(state));
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    electronMenuItem.enabled = isEnabled;
-    electronMenuItem.checked = isChecked;
-  }, [isEnabled, isChecked]);
+    menuItem.enabled = isEnabled;
+  }, [isEnabled]);
+
+  useEffect(() => {
+    menuItem.checked = isChecked;
+  }, [isChecked]);
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
@@ -29,4 +32,7 @@ const MenuLayerTransformFlipHorizontally = (): ReactElement => {
   );
 }
 
-export default MenuLayerTransformFlipHorizontally;
+export default MenuItem(
+  MenuLayerTransformFlipHorizontally,
+  MENU_ITEM_ID
+);

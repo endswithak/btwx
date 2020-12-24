@@ -1,21 +1,27 @@
 import React, { ReactElement, useEffect } from 'react';
-import { remote } from 'electron';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { toggleShapeToolThunk } from '../store/actions/shapeTool';
+import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'insertShapeRounded';
 
-const MenuInsertShapeRounded = (): ReactElement => {
+const MenuInsertShapeRounded = (props: MenuItemProps): ReactElement => {
+  const { menuItem } = props;
+  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
+  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
+  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
   const canInsert = useSelector((state: RootState) => state.canvasSettings.focusing && state.layer.present.activeArtboard !== null);
-  const isChecked = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Shape' && state.shapeTool.shapeType === 'Rounded');
+  const insertingRounded = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Shape' && state.shapeTool.shapeType === 'Rounded');
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    electronMenuItem.enabled = canInsert;
-    electronMenuItem.checked = isChecked;
-  }, [canInsert, isChecked]);
+    menuItem.enabled = canInsert && !isResizing && !isDragging && !isDrawing;
+  }, [canInsert, isDragging, isResizing, isDrawing]);
+
+  useEffect(() => {
+    menuItem.checked = insertingRounded;
+  }, [insertingRounded]);
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
@@ -28,4 +34,7 @@ const MenuInsertShapeRounded = (): ReactElement => {
   );
 }
 
-export default MenuInsertShapeRounded;
+export default MenuItem(
+  MenuInsertShapeRounded,
+  MENU_ITEM_ID
+);

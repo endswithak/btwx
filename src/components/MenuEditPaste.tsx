@@ -1,27 +1,26 @@
 import React, { ReactElement, useEffect } from 'react';
-import { remote } from 'electron';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { pasteLayersThunk } from '../store/actions/layer';
+import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'editPaste';
 
-interface MenuEditPasteProps {
-  canPaste?: boolean;
-  pasteLayersThunk?(props?: { overSelection?: boolean; overPoint?: Btwx.Point; overLayer?: string }): any;
-}
-
-const MenuEditPaste = (props: MenuEditPasteProps): ReactElement => {
-  const { canPaste, pasteLayersThunk } = props;
+const MenuEditPaste = (props: MenuItemProps): ReactElement => {
+  const { menuItem } = props;
+  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
+  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
+  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
+  const canPaste = useSelector((state: RootState) => state.canvasSettings.focusing);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    electronMenuItem.enabled = canPaste;
-  }, [canPaste]);
+    menuItem.enabled = canPaste && !isResizing && !isDragging && !isDrawing;
+  }, [canPaste, isDragging, isResizing, isDrawing]);
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      pasteLayersThunk({});
+      dispatch(pasteLayersThunk({}));
     };
   }, []);
 
@@ -30,15 +29,7 @@ const MenuEditPaste = (props: MenuEditPasteProps): ReactElement => {
   );
 }
 
-const mapStateToProps = (state: RootState): {
-  canPaste: boolean;
-} => {
-  const { canvasSettings } = state;
-  const canPaste = canvasSettings.focusing;
-  return { canPaste };
-};
-
-export default connect(
-  mapStateToProps,
-  { pasteLayersThunk }
-)(MenuEditPaste);
+export default MenuItem(
+  MenuEditPaste,
+  MENU_ITEM_ID
+);

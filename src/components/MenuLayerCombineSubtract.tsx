@@ -1,20 +1,23 @@
 import React, { ReactElement, useEffect } from 'react';
-import { remote } from 'electron';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { applyBooleanOperationThunk } from '../store/actions/layer';
 import { canBooleanSelected } from '../store/selectors/layer';
+import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'layerCombineSubtract';
 
-const MenuLayerCombineSubtract = (): ReactElement => {
-  const isEnabled = useSelector((state: RootState) => canBooleanSelected(state));
+const MenuLayerCombineSubtract = (props: MenuItemProps): ReactElement => {
+  const { menuItem } = props;
+  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
+  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
+  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
+  const canBool = useSelector((state: RootState) => canBooleanSelected(state));
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    electronMenuItem.enabled = isEnabled;
-  }, [isEnabled]);
+    menuItem.enabled = canBool && !isResizing && !isDragging && !isDrawing;
+  }, [canBool, isDragging, isResizing, isDrawing]);
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
@@ -27,4 +30,7 @@ const MenuLayerCombineSubtract = (): ReactElement => {
   );
 }
 
-export default MenuLayerCombineSubtract;
+export default MenuItem(
+  MenuLayerCombineSubtract,
+  MENU_ITEM_ID
+);

@@ -4,16 +4,17 @@ import { remote } from 'electron';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { addImageThunk } from '../store/actions/layer';
+import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'insertImage';
 
-const MenuInsertImage = (): ReactElement => {
+const MenuInsertImage = (props: MenuItemProps): ReactElement => {
+  const { menuItem } = props;
   const canInsert = useSelector((state: RootState) => state.canvasSettings.focusing && state.layer.present.activeArtboard !== null);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    electronMenuItem.enabled = canInsert;
+    menuItem.enabled = canInsert;
   }, [canInsert]);
 
   useEffect(() => {
@@ -50,4 +51,7 @@ const MenuInsertImage = (): ReactElement => {
   );
 }
 
-export default MenuInsertImage;
+export default MenuItem(
+  MenuInsertImage,
+  MENU_ITEM_ID
+);

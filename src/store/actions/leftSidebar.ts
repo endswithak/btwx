@@ -1,3 +1,5 @@
+import { RootState } from '../reducers';
+
 import {
   SET_REF,
   SET_EDITING,
@@ -64,3 +66,10 @@ export const setEdit = (payload: SetEditPayload): LeftSidebarTypes => ({
   type: SET_EDIT,
   payload
 });
+
+export const setEditingThunk = () => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    dispatch(setEditing({editing: state.layer.present.selected[0]}));
+  }
+};

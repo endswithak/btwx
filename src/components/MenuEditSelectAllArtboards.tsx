@@ -1,30 +1,35 @@
 import React, { ReactElement, useEffect } from 'react';
-import { remote } from 'electron';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { selectLayers } from '../store/actions/layer';
+import { selectAllArtboardsThunk } from '../store/actions/layer';
+import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'editSelectAllArtboards';
 
-const MenuEditSelectAllArtboards = (): ReactElement => {
-  const allArtboardIds = useSelector((state: RootState) => state.layer.present.allArtboardIds);
+const MenuEditSelectAllArtboards = (props: MenuItemProps): ReactElement => {
+  const { menuItem } = props;
+  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
+  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
+  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
   const canSelectAllArtboards = useSelector((state: RootState) => state.layer.present.allArtboardIds.length > 0 && state.canvasSettings.focusing);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    electronMenuItem.enabled = canSelectAllArtboards;
-  }, [canSelectAllArtboards]);
+    menuItem.enabled = canSelectAllArtboards && !isResizing && !isDragging && !isDrawing;
+  }, [canSelectAllArtboards, isDragging, isResizing, isDrawing]);
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      dispatch(selectLayers({layers: allArtboardIds, newSelection: true}));
+      dispatch(selectAllArtboardsThunk());
     };
-  }, [allArtboardIds]);
+  }, []);
 
   return (
     <></>
   );
 }
 
-export default MenuEditSelectAllArtboards;
+export default MenuItem(
+  MenuEditSelectAllArtboards,
+  MENU_ITEM_ID
+);

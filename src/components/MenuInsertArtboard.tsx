@@ -1,21 +1,27 @@
 import React, { ReactElement, useEffect } from 'react';
-import { remote } from 'electron';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { toggleArtboardToolThunk } from '../store/actions/artboardTool';
+import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'insertArtboard';
 
-const MenuInsertArtboard = (): ReactElement => {
-  const canInsert = useSelector((state: RootState) => state.canvasSettings.focusing);
+const MenuInsertArtboard = (props: MenuItemProps): ReactElement => {
+  const { menuItem } = props;
+  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
+  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
+  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
+  const isFocusing = useSelector((state: RootState) => state.canvasSettings.focusing);
   const isChecked = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Artboard');
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    electronMenuItem.enabled = canInsert;
-    electronMenuItem.checked = isChecked;
-  }, [canInsert, isChecked]);
+    menuItem.enabled = isFocusing && !isResizing && !isDragging && !isDrawing;
+  }, [isFocusing, isDragging, isResizing, isDrawing]);
+
+  useEffect(() => {
+    menuItem.checked = isChecked;
+  }, [isChecked]);
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
@@ -28,4 +34,7 @@ const MenuInsertArtboard = (): ReactElement => {
   );
 }
 
-export default MenuInsertArtboard;
+export default MenuItem(
+  MenuInsertArtboard,
+  MENU_ITEM_ID
+);

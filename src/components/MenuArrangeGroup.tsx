@@ -1,20 +1,23 @@
 import React, { ReactElement, useEffect } from 'react';
-import { remote } from 'electron';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { canGroupSelected } from '../store/selectors/layer';
 import { groupSelectedThunk } from '../store/actions/layer';
+import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'arrangeGroup';
 
-const MenuArrangeGroup = (): ReactElement => {
+const MenuArrangeGroup = (props: MenuItemProps): ReactElement => {
+  const { menuItem } = props;
+  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
+  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
+  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
   const canGroup = useSelector((state: RootState) => canGroupSelected(state) && state.canvasSettings.focusing);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    electronMenuItem.enabled = canGroup;
-  }, [canGroup]);
+    menuItem.enabled = canGroup && !isResizing && !isDragging && !isDrawing;
+  }, [canGroup, isDragging, isResizing, isDrawing]);
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
@@ -27,4 +30,7 @@ const MenuArrangeGroup = (): ReactElement => {
   );
 }
 
-export default MenuArrangeGroup;
+export default MenuItem(
+  MenuArrangeGroup,
+  MENU_ITEM_ID
+);

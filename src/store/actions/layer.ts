@@ -1152,6 +1152,13 @@ export const selectLayers = (payload: SelectLayersPayload): LayerTypes => ({
   payload
 });
 
+export const selectAllArtboardsThunk = () => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    dispatch(selectLayers({layers: state.layer.present.allArtboardIds, newSelection: true}));
+  }
+};
+
 export const deselectLayer = (payload: DeselectLayerPayload): LayerTypes => ({
   type: DESELECT_LAYER,
   payload: {
@@ -3036,6 +3043,13 @@ export const undoThunk = () => {
     const state = getState() as RootState;
     if (state.layer.past.length > 0) {
       const layerState = state.layer.past[state.layer.past.length - 1];
+      const fullState = {
+        ...state,
+        layer: {
+          ...state.layer,
+          present: layerState
+        }
+      }
       //
       if (state.layer.present.hover !== null) {
         dispatch(setLayerHover({id: null}));
@@ -3141,9 +3155,9 @@ export const undoThunk = () => {
       //   updateSelectionFrame(getSelectedBounds(fullState));
       // }
       // updateActiveArtboardFrame();
-      // if (state.viewSettings.eventDrawer.isOpen && layerState.events.allIds.length > 0) {
-      //   updateTweenEventsFrame(fullState);
-      // }
+      if (state.viewSettings.eventDrawer.isOpen && layerState.events.allIds.length > 0) {
+        updateEventsFrame(fullState);
+      }
     }
   }
 };
@@ -3153,6 +3167,13 @@ export const redoThunk = () => {
     const state = getState() as RootState;
     if (state.layer.future.length > 0) {
       const layerState = state.layer.future[0];
+      const fullState = {
+        ...state,
+        layer: {
+          ...state.layer,
+          present: layerState
+        }
+      }
       //
       if (state.layer.present.hover !== null) {
         dispatch(setLayerHover({id: null}));
@@ -3258,9 +3279,9 @@ export const redoThunk = () => {
       //   updateSelectionFrame(getSelectedBounds(fullState));
       // }
       // updateActiveArtboardFrame();
-      // if (state.viewSettings.eventDrawer.isOpen && layerState.events.allIds.length > 0) {
-      //   updateTweenEventsFrame(fullState);
-      // }
+      if (state.viewSettings.eventDrawer.isOpen && layerState.events.allIds.length > 0) {
+        updateEventsFrame(fullState);
+      }
     }
   }
 };

@@ -1,19 +1,19 @@
 import React, { ReactElement, useEffect } from 'react';
-import { remote } from 'electron';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { replaceSelectedImagesThunk } from '../store/actions/layer';
 import { canReplaceSelectedImages } from '../store/selectors/layer';
+import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'layerImageReplace';
 
-const MenuLayerImageReplace = (): ReactElement => {
+const MenuLayerImageReplace = (props: MenuItemProps): ReactElement => {
+  const { menuItem } = props;
   const isEnabled = useSelector((state: RootState) => state.canvasSettings.focusing && canReplaceSelectedImages(state));
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    electronMenuItem.enabled = isEnabled;
+    menuItem.enabled = isEnabled;
   }, [isEnabled]);
 
   useEffect(() => {
@@ -27,4 +27,7 @@ const MenuLayerImageReplace = (): ReactElement => {
   );
 }
 
-export default MenuLayerImageReplace;
+export default MenuItem(
+  MenuLayerImageReplace,
+  MENU_ITEM_ID
+);

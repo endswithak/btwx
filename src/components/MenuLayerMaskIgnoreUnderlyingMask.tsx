@@ -1,21 +1,27 @@
 import React, { ReactElement, useEffect } from 'react';
-import { remote } from 'electron';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { toggleSelectionIgnoreUnderlyingMask } from '../store/actions/layer';
 import { selectedIgnoreUnderlyingMaskEnabled } from '../store/selectors/layer';
+import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'layerMaskIgnoreUnderlyingMask';
 
-const MenuLayerMaskToggleUnderlyingMask = (): ReactElement => {
-  const isChecked = useSelector((state: RootState) => selectedIgnoreUnderlyingMaskEnabled(state));
+const MenuLayerMaskToggleUnderlyingMask = (props: MenuItemProps): ReactElement => {
+  const { menuItem } = props;
+  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
+  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
+  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
+  const ignoringUnderlyingMask = useSelector((state: RootState) => selectedIgnoreUnderlyingMaskEnabled(state));
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    electronMenuItem.enabled = true;
-    electronMenuItem.checked = isChecked;
-  }, [isChecked]);
+    menuItem.enabled = !isResizing && !isDragging && !isDrawing;
+  }, [isDragging, isResizing, isDrawing]);
+
+  useEffect(() => {
+    menuItem.checked = ignoringUnderlyingMask;
+  }, [ignoringUnderlyingMask]);
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
@@ -28,4 +34,7 @@ const MenuLayerMaskToggleUnderlyingMask = (): ReactElement => {
   );
 }
 
-export default MenuLayerMaskToggleUnderlyingMask;
+export default MenuItem(
+  MenuLayerMaskToggleUnderlyingMask,
+  MENU_ITEM_ID
+);

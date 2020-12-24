@@ -24,9 +24,6 @@ $layersSidebarCellHeight: $unit * 8 // 32
   white-space: nowrap
   text-overflow: ellipsis
 
-  &:before
-    +content-block
-
 .c-sidebar-layer__name--editing
   padding-left: 0
 
@@ -44,6 +41,14 @@ $layersSidebarCellHeight: $unit * 8 // 32
   flex-grow: 0
   flex-shrink: 0
   z-index: 1
+
+.c-sidebar-layer__icon--aa
+  position: absolute
+  top: $unit + 2
+  left: 0
+  border-radius: 50%
+  width: $unit * 2
+  height: $unit * 2
 
 .c-sidebar-layer__icon--empty
   width: 0

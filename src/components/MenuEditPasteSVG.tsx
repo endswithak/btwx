@@ -1,19 +1,19 @@
 import React, { ReactElement, useEffect } from 'react';
-import { remote } from 'electron';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { pasteSVGThunk } from '../store/actions/layer';
 import { canPasteSVG } from '../store/selectors/layer';
+import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'editPasteSVG';
 
-const MenuEditPasteSVG = (): ReactElement => {
+const MenuEditPasteSVG = (props: MenuItemProps): ReactElement => {
+  const { menuItem } = props;
   const canPaste = useSelector((state: RootState) => canPasteSVG() && state.canvasSettings.focusing);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    electronMenuItem.enabled = canPaste;
+    menuItem.enabled = canPaste;
   }, [canPaste]);
 
   useEffect(() => {
@@ -27,4 +27,7 @@ const MenuEditPasteSVG = (): ReactElement => {
   );
 }
 
-export default MenuEditPasteSVG;
+export default MenuItem(
+  MenuEditPasteSVG,
+  MENU_ITEM_ID
+);

@@ -1,30 +1,35 @@
 import React, { ReactElement, useEffect } from 'react';
-import { remote } from 'electron';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { setEditing } from '../store/actions/leftSidebar';
+import { setEditingThunk } from '../store/actions/leftSidebar';
+import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'editRename';
 
-const MenuEditRename = (): ReactElement => {
-  const selected = useSelector((state: RootState) => state.layer.present.selected);
+const MenuEditRename = (props: MenuItemProps): ReactElement => {
+  const { menuItem } = props;
+  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
+  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
+  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
   const canRename = useSelector((state: RootState) => state.layer.present.selected.length === 1 && state.leftSidebar.editing !== state.layer.present.selected[0]);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    electronMenuItem.enabled = canRename;
-  }, [canRename]);
+    menuItem.enabled = canRename && !isResizing && !isDragging && !isDrawing;
+  }, [canRename, isDragging, isResizing, isDrawing]);
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (): void => {
-      dispatch(setEditing({editing: selected[0]}));
+      dispatch(setEditingThunk());
     };
-  }, [selected]);
+  }, []);
 
   return (
     <></>
   );
 }
 
-export default MenuEditRename;
+export default MenuItem(
+  MenuEditRename,
+  MENU_ITEM_ID
+);

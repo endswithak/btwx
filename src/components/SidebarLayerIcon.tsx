@@ -13,6 +13,7 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const { id, isDragGhost } = props;
   const type = useSelector((state: RootState) => state.layer.present.byId[id].type);
+  const isActiveArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard === id);
   const isSelected = useSelector((state: RootState) => state.layer.present.byId[id].selected);
   const isMask = useSelector((state: RootState) => state.layer.present.byId[id].type === 'Shape' && (state.layer.present.byId[id] as Btwx.Shape).mask);
   const isOpenShape = useSelector((state: RootState) => state.layer.present.byId[id].type === 'Shape' && !(state.layer.present.byId[id] as Btwx.Shape).closed);
@@ -25,6 +26,24 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
     <div
       className='c-sidebar-layer__icon'
       id={`${id}-icon`}>
+      {
+        isActiveArtboard && !isDragGhost
+        ? <div
+          className='c-sidebar-layer__icon--aa'
+          style={{
+            background: isSelected
+            ? theme.text.onPrimary
+            : theme.palette.primary,
+            boxShadow: `0 0 0 2px ${
+            isSelected
+            ? theme.palette.primary
+            : theme.name === 'dark'
+              ? theme.background.z3
+              : theme.background.z0
+            }`
+          }} />
+        : null
+      }
       <Icon
         name={(() => {
           switch(type) {

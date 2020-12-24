@@ -1,18 +1,18 @@
 import React, { ReactElement, useEffect } from 'react';
-import { remote } from 'electron';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { alignSelectedToBottomThunk } from '../store/actions/layer';
+import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'arrangeAlignBottom';
 
-const MenuArrangeAlignBottom = (): ReactElement => {
+const MenuArrangeAlignBottom = (props: MenuItemProps): ReactElement => {
+  const { menuItem } = props;
   const isEnabled = useSelector((state: RootState) => state.canvasSettings.focusing && state.layer.present.selected.length >= 2);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    electronMenuItem.enabled = isEnabled;
+    menuItem.enabled = isEnabled;
   }, [isEnabled]);
 
   useEffect(() => {
@@ -26,4 +26,7 @@ const MenuArrangeAlignBottom = (): ReactElement => {
   );
 }
 
-export default MenuArrangeAlignBottom;
+export default MenuItem(
+  MenuArrangeAlignBottom,
+  MENU_ITEM_ID
+);

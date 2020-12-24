@@ -5,18 +5,19 @@ import { RootState } from '../store/reducers';
 import { enableLightTheme } from '../store/actions/viewSettings';
 import { THEME_LIGHT_BACKGROUND_MIN } from '../constants';
 import { getAllDocumentWindows } from '../utils';
+import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'appThemeLight';
 
-const MenuAppThemeLight = (): ReactElement => {
+const MenuAppThemeLight = (props: MenuItemProps): ReactElement => {
+  const { menuItem } = props;
   const checked = useSelector((state: RootState) => state.viewSettings.theme === 'light');
   const previewWindowId = useSelector((state: RootState) => state.preview.windowId);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const electronMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    electronMenuItem.enabled = true;
-    electronMenuItem.checked = checked;
+    menuItem.enabled = true;
+    menuItem.checked = checked;
   }, [checked]);
 
   useEffect(() => {
@@ -46,4 +47,7 @@ const MenuAppThemeLight = (): ReactElement => {
   );
 }
 
-export default MenuAppThemeLight;
+export default MenuItem(
+  MenuAppThemeLight,
+  MENU_ITEM_ID
+);
