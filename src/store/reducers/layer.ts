@@ -147,6 +147,8 @@ import {
   SET_LAYERS_FONT_FAMILY,
   SET_LAYER_JUSTIFICATION,
   SET_LAYERS_JUSTIFICATION,
+  SET_LAYER_OBLIQUE,
+  SET_LAYERS_OBLIQUE,
   SET_LAYER_FILL_TYPE,
   SET_LAYERS_FILL_TYPE,
   ADD_LAYERS_MASK,
@@ -344,6 +346,8 @@ import {
   setLayersFontFamily,
   setLayerJustification,
   setLayersJustification,
+  setLayerOblique,
+  setLayersOblique,
   setLayerText,
   setLayerFill,
   setLayerFillType,
@@ -795,6 +799,10 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return setLayerJustification(state, action);
     case SET_LAYERS_JUSTIFICATION:
       return setLayersJustification(state, action);
+    case SET_LAYER_OBLIQUE:
+      return setLayerOblique(state, action);
+    case SET_LAYERS_OBLIQUE:
+      return setLayersOblique(state, action);
     case SET_LAYER_FILL:
       return setLayerFill(state, action);
     case SET_LAYER_FILL_TYPE:

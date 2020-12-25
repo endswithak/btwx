@@ -40,6 +40,8 @@ export const TWEEN_PROPS_MAP: { [id: string]: string[] } = {
   opacity: [],
   fontSize: [],
   lineHeight: [],
+  fontWeight: [],
+  oblique: [],
   fromX: [],
   fromY: [],
   toX: [],
@@ -189,7 +191,8 @@ export const DEFAULT_TRANSFORM: Btwx.Transform = {
 export const DEFAULT_TEXT_VALUE = 'Type Something';
 export const DEFAULT_FONT_SIZE = 12;
 export const DEFAULT_FONT_FAMILY = 'Helvetica';
-export const DEFAULT_FONT_WEIGHT = 'normal';
+export const DEFAULT_FONT_WEIGHT = 400;
+export const DEFAULT_OBLIQUE = 0;
 export const DEFAULT_JUSTIFICATION = 'left';
 export const DEFAULT_LEADING = 16;
 export const DEFAULT_TEXT_FILL_COLOR = { h: 0, s: 0, l: 0, v: 0, a: 1 };
@@ -199,6 +202,7 @@ export const DEFAULT_TEXT_STYLE: Btwx.TextStyle = {
   leading: DEFAULT_LEADING,
   fontWeight: DEFAULT_FONT_WEIGHT,
   fontFamily: DEFAULT_FONT_FAMILY,
+  oblique: DEFAULT_OBLIQUE,
   justification: DEFAULT_JUSTIFICATION
 }
 

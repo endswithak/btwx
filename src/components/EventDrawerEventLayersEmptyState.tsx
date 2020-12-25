@@ -13,7 +13,7 @@ const EventDrawerEventLayersEmptyState = (): ReactElement => (
     <EmptyState
       icon='ease-curve'
       text='Event Layers'
-      detail='View and edit event layer ease curves here.'
+      // detail='View and edit event layer ease curves here.'
       style={{width: 211}} />
   </div>
 );

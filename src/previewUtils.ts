@@ -721,6 +721,8 @@ export const addOpacityTween = (props: AddTweenProps): void => {
 
 export const addFontSizeTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
+  // const originTextContent = originPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
+  // const destinationTextContent = destinationPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
   timelineTweenProps[tween.prop] = (originPaperLayer as paper.PointText).fontSize;
   timeline.to(timelineTweenProps, {
     duration: tween.duration,
@@ -735,8 +737,53 @@ export const addFontSizeTween = (props: AddTweenProps): void => {
   }, tween.delay);
 };
 
+export const addFontWeightTween = (props: AddTweenProps): void => {
+  const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
+  // const originTextContent = originPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
+  // const destinationTextContent = destinationPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
+  timelineTweenProps[tween.prop] = (originPaperLayer as paper.PointText).fontWeight;
+  timeline.to(timelineTweenProps, {
+    duration: tween.duration,
+    [tween.prop]: (destinationPaperLayer as paper.PointText).fontWeight,
+    onUpdate: () => {
+      (originPaperLayer as paper.PointText).fontWeight = Math.ceil(timelineTweenProps[tween.prop] / 100) * 100;
+      originPaperLayer.data.innerWidth = originPaperLayer.bounds.width;
+      originPaperLayer.data.innerHeight = originPaperLayer.bounds.height;
+      updateGradients(props);
+    },
+    ease: tween.ease,
+  }, tween.delay);
+};
+
+export const addObliqueTween = (props: AddTweenProps): void => {
+  const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
+  const originTextContent = originPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
+  timelineTweenProps[tween.prop] = (originLayerItem as Btwx.Text).textStyle.oblique;
+  timeline.to(timelineTweenProps, {
+    duration: tween.duration,
+    [tween.prop]: (destinationLayerItem as Btwx.Text).textStyle.oblique,
+    onUpdate: () => {
+      const startPosition = originPaperLayer.position;
+      const startRotation = originPaperLayer.data.rotation || originPaperLayer.data.rotation === 0 ? originPaperLayer.data.rotation : originLayerItem.transform.rotation;
+      const currentSkew = originPaperLayer.data.skew ? originPaperLayer.data.skew : (originLayerItem as Btwx.Text).textStyle.oblique;
+      const nextSkew = timelineTweenProps[tween.prop] - currentSkew;
+      originPaperLayer.rotation = -startRotation;
+      originPaperLayer.skew(new paperPreview.Point(-nextSkew, 0));
+      originPaperLayer.data.innerWidth = originPaperLayer.bounds.width;
+      originPaperLayer.data.innerHeight = originPaperLayer.bounds.height;
+      originPaperLayer.data.skew = timelineTweenProps[tween.prop];
+      originPaperLayer.rotation = startRotation;
+      originPaperLayer.position = startPosition;
+      updateGradients(props);
+    },
+    ease: tween.ease,
+  }, tween.delay);
+};
+
 export const addLineHeightTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
+  // const originTextContent = originPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
+  // const destinationTextContent = destinationPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
   timelineTweenProps[tween.prop] = (originPaperLayer as paper.PointText).leading;
   timeline.to(timelineTweenProps, {
     duration: tween.duration,
@@ -900,6 +947,12 @@ export const addTweens = (tweenProps: AddTweenProps): void => {
       break;
     case 'fontSize':
       addFontSizeTween(tweenProps);
+      break;
+    case 'fontWeight':
+      addFontWeightTween(tweenProps);
+      break;
+    case 'oblique':
+      addObliqueTween(tweenProps);
       break;
     case 'lineHeight':
       addLineHeightTween(tweenProps);

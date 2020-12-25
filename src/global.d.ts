@@ -36,7 +36,7 @@ declare namespace Btwx {
 
   type ColorFormat = 'rgb' | 'hsl';
 
-  type TweenProp = 'image' | 'shape' | 'fill' | 'fillGradientOriginX' | 'fillGradientOriginY' | 'fillGradientDestinationX' | 'fillGradientDestinationY' | 'x' | 'y' | 'radius' | 'rotation' | 'width' | 'height' | 'stroke' | 'strokeGradientOriginX' | 'strokeGradientOriginY' | 'strokeGradientDestinationX' | 'strokeGradientDestinationY' | 'dashOffset' | 'dashArrayWidth' | 'dashArrayGap' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity' | 'fontSize' | 'lineHeight' | 'fromX' | 'fromY' | 'toX' | 'toY';
+  type TweenProp = 'image' | 'shape' | 'fill' | 'fillGradientOriginX' | 'fillGradientOriginY' | 'fillGradientDestinationX' | 'fillGradientDestinationY' | 'x' | 'y' | 'radius' | 'rotation' | 'width' | 'height' | 'stroke' | 'strokeGradientOriginX' | 'strokeGradientOriginY' | 'strokeGradientDestinationX' | 'strokeGradientDestinationY' | 'dashOffset' | 'dashArrayWidth' | 'dashArrayGap' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity' | 'fontSize' | 'lineHeight' | 'fontWeight' | 'oblique' | 'fromX' | 'fromY' | 'toX' | 'toY';
 
   type TweenPropMap = { [K in TweenProp]: boolean; }
 
@@ -52,7 +52,7 @@ declare namespace Btwx {
 
   type Jusftification = 'left' | 'center' | 'right';
 
-  type FontWeight = 'normal' | 'italic' | 'bold' | 'bold italic';
+  type FontWeight = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900; // 'normal' | 'italic' | 'bold' | 'bold italic';
 
   type AppleiPhoneDevice = 'iPhone 8' | 'iPhone 8 Plus' | 'iPhone SE' | 'iPhone 11 Pro' | 'iPhone 11' | 'iPhone 11 Pro Max';
 
@@ -266,6 +266,7 @@ declare namespace Btwx {
     leading: number;
     fontWeight: FontWeight;
     fontFamily: string;
+    oblique: number;
     justification: Jusftification;
   }
 

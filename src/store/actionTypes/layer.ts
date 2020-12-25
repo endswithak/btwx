@@ -180,6 +180,8 @@ export const SET_LAYER_FONT_FAMILY = 'SET_LAYER_FONT_FAMILY';
 export const SET_LAYERS_FONT_FAMILY = 'SET_LAYERS_FONT_FAMILY';
 export const SET_LAYER_JUSTIFICATION = 'SET_LAYER_JUSTIFICATION';
 export const SET_LAYERS_JUSTIFICATION = 'SET_LAYERS_JUSTIFICATION';
+export const SET_LAYER_OBLIQUE = 'SET_LAYER_OBLIQUE';
+export const SET_LAYERS_OBLIQUE = 'SET_LAYERS_OBLIQUE';
 
 export const SET_LAYER_UNDERLYING_MASK = 'SET_LAYER_UNDERLYING_MASK';
 export const SET_LAYERS_UNDERLYING_MASK = 'SET_LAYERS_UNDERLYING_MASK';
@@ -1788,6 +1790,26 @@ export interface SetLayersJustification {
   payload: SetLayersJustificationPayload;
 }
 
+export interface SetLayerObliquePayload {
+  id: string;
+  oblique: number;
+}
+
+export interface SetLayerOblique {
+  type: typeof SET_LAYER_OBLIQUE;
+  payload: SetLayerObliquePayload;
+}
+
+export interface SetLayersObliquePayload {
+  layers: string[];
+  oblique: number;
+}
+
+export interface SetLayersOblique {
+  type: typeof SET_LAYERS_OBLIQUE;
+  payload: SetLayersObliquePayload;
+}
+
 export interface SetLayerFillPayload {
   id: string;
   fill: Btwx.Fill;
@@ -2593,6 +2615,8 @@ export type LayerTypes = AddArtboard |
                          SetLayersFontFamily |
                          SetLayerJustification |
                          SetLayersJustification |
+                         SetLayerOblique |
+                         SetLayersOblique |
                          SetLayerUnderlyingMask |
                          SetLayersUnderlyingMask |
                          ToggleLayerIgnoreUnderlyingMask |

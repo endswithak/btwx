@@ -887,21 +887,21 @@ export const getSortedEvents = createSelector(
     if (eventSort !== 'none') {
       switch(eventSort) {
         case 'layer-asc':
-          return getSort('layer');
-        case 'layer-dsc':
           return getSort('layer').reverse();
+        case 'layer-dsc':
+          return getSort('layer');
         case 'event-asc':
-          return getSort('event');
-        case 'event-dsc':
           return getSort('event').reverse();
+        case 'event-dsc':
+          return getSort('event');
         case 'artboard-asc':
-          return getSort('artboard');
-        case 'artboard-dsc':
           return getSort('artboard').reverse();
+        case 'artboard-dsc':
+          return getSort('artboard');
         case 'destinationArtboard-asc':
-          return getSort('destinationArtboard');
-        case 'destinationArtboard-dsc':
           return getSort('destinationArtboard').reverse();
+        case 'destinationArtboard-dsc':
+          return getSort('destinationArtboard');
       }
     } else {
       return allEventIds;
@@ -1436,6 +1436,22 @@ export const getSelectedFontWeight = createSelector(
   }
 );
 
+export const getSelectedOblique = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Text;
+      if (!result) {
+        result = layerItem.textStyle.oblique;
+      }
+      if (result && layerItem.textStyle.oblique !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as number | 'multi';
+  }
+);
+
 export const getSelectedJustification = createSelector(
   [ getSelectedById ],
   (selectedById) => {
@@ -1918,7 +1934,7 @@ export const hasYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer
 };
 
 export const hasRotationTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image'; // || layerItem.type === 'Group';
+  const validType = (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image' || layerItem.type === 'Text'; // || layerItem.type === 'Group';
   const rotationMatch = layerItem.transform.rotation.toFixed(2) === equivalentLayerItem.transform.rotation.toFixed(2);
   return validType && !rotationMatch;
 };
@@ -2041,6 +2057,18 @@ export const hasFontSizeTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btw
   return validType && !fontSizeMatch;
 };
 
+export const hasFontWeightTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const validType = layerItem.type === 'Text';
+  const fontWeightMatch = validType && (layerItem as Btwx.Text).textStyle.fontWeight === (equivalentLayerItem as Btwx.Text).textStyle.fontWeight;
+  return validType && !fontWeightMatch;
+};
+
+export const hasObliqueTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const validType = layerItem.type === 'Text';
+  const obliqueMatch = validType && (layerItem as Btwx.Text).textStyle.oblique === (equivalentLayerItem as Btwx.Text).textStyle.oblique;
+  return validType && !obliqueMatch;
+};
+
 export const hasLineHeightTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const validType = layerItem.type === 'Text';
   const leadingMatch = validType && (layerItem as Btwx.Text).textStyle.leading === (equivalentLayerItem as Btwx.Text).textStyle.leading;
@@ -2131,6 +2159,10 @@ export const getEquivalentTweenProp = (layerItem: Btwx.Layer, equivalentLayerIte
       return hasOpacityTween(layerItem, equivalentLayerItem);
     case 'fontSize':
       return hasFontSizeTween(layerItem, equivalentLayerItem);
+    case 'fontWeight':
+      return hasFontWeightTween(layerItem, equivalentLayerItem);
+    case 'oblique':
+      return hasObliqueTween(layerItem, equivalentLayerItem);
     case 'lineHeight':
       return hasLineHeightTween(layerItem, equivalentLayerItem);
     case 'fromX':
@@ -2173,6 +2205,8 @@ export const getEquivalentTweenProps = (layerItem: Btwx.Layer, equivalentLayerIt
   shadowBlur: hasShadowBlurTween(layerItem, equivalentLayerItem),
   opacity: hasOpacityTween(layerItem, equivalentLayerItem),
   fontSize: hasFontSizeTween(layerItem, equivalentLayerItem),
+  fontWeight: hasFontWeightTween(layerItem, equivalentLayerItem),
+  oblique: hasObliqueTween(layerItem, equivalentLayerItem),
   lineHeight: hasLineHeightTween(layerItem, equivalentLayerItem),
   fromX: hasFromXTween(layerItem, equivalentLayerItem),
   fromY: hasFromYTween(layerItem, equivalentLayerItem),

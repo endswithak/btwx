@@ -32,7 +32,7 @@ const EventDrawer = (): ReactElement => {
             ? <EmptyState
                 icon='tweens'
                 text='Events'
-                detail='Events can be added when the document has two or more artboards.'
+                // detail='Events can be added when the document has two or more artboards.'
                 style={{paddingLeft: 24, paddingRight: 24}} />
             : null
           }

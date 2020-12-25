@@ -5,7 +5,8 @@ import { expandTextStyles, collapseTextStyles } from '../store/actions/rightSide
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import FontFamilySelector from './FontFamilySelector';
-import FontWeightSelector from './FontWeightSelector';
+import FontWeightInput from './FontWeightInput';
+import ObliqueInput from './ObliqueInput';
 import FontSizeInput from './FontSizeInput';
 import LeadingInput from './LeadingInput';
 import JustificationInput from './JustificationInput';
@@ -31,12 +32,12 @@ const SidebarTextStyles = (): ReactElement => {
         collapsed={textStylesCollapsed}
         header='text'>
         <SidebarSectionRow>
-          <SidebarSectionColumn width='66.66%'>
+          <SidebarSectionColumn width='100%'>
             <FontFamilySelector />
           </SidebarSectionColumn>
-          <SidebarSectionColumn width='33.33%'>
+          {/* <SidebarSectionColumn width='33.33%'>
             <FontWeightSelector />
-          </SidebarSectionColumn>
+          </SidebarSectionColumn> */}
         </SidebarSectionRow>
         <SidebarSectionRow>
           <SidebarSectionColumn width='33.33%'>
@@ -49,6 +50,8 @@ const SidebarTextStyles = (): ReactElement => {
             <JustificationInput />
           </SidebarSectionColumn>
         </SidebarSectionRow>
+        <FontWeightInput />
+        <ObliqueInput />
       </SidebarCollapseSection>
     : null
   );

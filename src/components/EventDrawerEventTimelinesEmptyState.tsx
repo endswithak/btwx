@@ -21,7 +21,7 @@ const EventDrawerEventTimelinesEmptyState = (): ReactElement => {
         <EmptyState
           icon='tweens'
           text='Event Timelines'
-          detail='Timelines are added when the event origin and destination have corresponding layers (same name and type) with mismatched style props.'
+          // detail='Timelines are added when the event origin and destination have corresponding layers (same name and type) with mismatched style props.'
           style={{width: 550}} />
       </div>
     </div>

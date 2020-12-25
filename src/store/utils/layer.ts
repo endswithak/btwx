@@ -44,7 +44,7 @@ import {
   SetLayerStyle, SetLayersStyle, EnableLayersHorizontalFlip, DisableLayersHorizontalFlip, DisableLayersVerticalFlip, EnableLayersVerticalFlip,
   SetLayerScope, SetLayersScope, SetGlobalScope, SetLayerUnderlyingMask, SetLayersUnderlyingMask, SetLayerMasked, SetLayersMasked, ToggleLayerMask,
   ToggleLayersMask, ToggleLayersIgnoreUnderlyingMask, ToggleLayerIgnoreUnderlyingMask, AreaSelectLayers, SetLayersGradientOD, ResetImagesDimensions,
-  ResetImageDimensions, ReplaceImage, ReplaceImages, PasteLayersFromClipboard
+  ResetImageDimensions, ReplaceImage, ReplaceImages, PasteLayersFromClipboard, SetLayerOblique, SetLayersOblique
 } from '../actionTypes/layer';
 
 import {
@@ -4927,7 +4927,7 @@ export const setLayerFontWeight = (state: LayerState, action: SetLayerFontWeight
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y', 'fontWeight']);
   // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
   if (layerItem.style.fill.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'fill', gradient: layerItem.style.fill.gradient}) as SetLayerGradient);
@@ -5151,6 +5151,75 @@ export const setLayersJustification = (state: LayerState, action: SetLayersJusti
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Justification',
+      projects
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerOblique = (state: LayerState, action: SetLayerOblique): LayerState => {
+  let currentState = state;
+  const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id) as { layerItem: Btwx.Text; paperLayer: paper.Group };
+  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
+  const textContent = paperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
+  const startPosition = textContent.position;
+  textContent.rotation = -layerItem.transform.rotation;
+  const newPointText = new uiPaperScope.PointText({
+    content: textContent.content,
+    point: textContent.point,
+    style: textContent.style,
+    insert: false,
+    data: textContent.data
+  });
+  newPointText.skew(new uiPaperScope.Point(-action.payload.oblique, 0));
+  textContent.replaceWith(newPointText);
+  newPointText.rotation = layerItem.transform.rotation;
+  newPointText.position = startPosition;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        textStyle: {
+          ...(currentState.byId[action.payload.id] as Btwx.Text).textStyle,
+          oblique: action.payload.oblique
+        }
+      } as Btwx.Text
+    }
+  }
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y', 'oblique']);
+  currentState = updateLayerBounds(currentState, action.payload.id);
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      result = updateLayerBounds(result, current);
+      return result;
+    }, currentState);
+  }
+  if (layerItem.style.fill.fillType === 'gradient') {
+    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'fill', gradient: layerItem.style.fill.gradient}) as SetLayerGradient);
+  }
+  if (layerItem.style.stroke.fillType === 'gradient') {
+    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
+  }
+  return currentState;
+};
+
+export const setLayersOblique = (state: LayerState, action: SetLayersOblique): LayerState => {
+  let currentState = state;
+  const projects: string[] = [];
+  currentState = action.payload.layers.reduce((result, current) => {
+    const layerProject = currentState.byId[current].artboard;
+    if (!projects.includes(layerProject)) {
+      projects.push(layerProject);
+    }
+    return setLayerOblique(result, layerActions.setLayerOblique({id: current, oblique: action.payload.oblique}) as SetLayerOblique);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layers Oblique',
       projects
     }
   }) as SetLayerEdit);

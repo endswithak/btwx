@@ -180,6 +180,8 @@ import {
   SET_LAYERS_FONT_FAMILY,
   SET_LAYER_JUSTIFICATION,
   SET_LAYERS_JUSTIFICATION,
+  SET_LAYER_OBLIQUE,
+  SET_LAYERS_OBLIQUE,
   SET_LAYER_FILL_TYPE,
   SET_LAYERS_FILL_TYPE,
   ADD_LAYERS_MASK,
@@ -387,6 +389,8 @@ import {
   SetLayersFontFamilyPayload,
   SetLayerJustificationPayload,
   SetLayersJustificationPayload,
+  SetLayerObliquePayload,
+  SetLayersObliquePayload,
   SetLayerFillPayload,
   SetLayerFillTypePayload,
   SetLayersFillTypePayload,
@@ -2058,6 +2062,16 @@ export const setLayerJustification = (payload: SetLayerJustificationPayload): La
 
 export const setLayersJustification = (payload: SetLayersJustificationPayload): LayerTypes => ({
   type: SET_LAYERS_JUSTIFICATION,
+  payload
+});
+
+export const setLayerOblique = (payload: SetLayerObliquePayload): LayerTypes => ({
+  type: SET_LAYER_OBLIQUE,
+  payload
+});
+
+export const setLayersOblique = (payload: SetLayersObliquePayload): LayerTypes => ({
+  type: SET_LAYERS_OBLIQUE,
   payload
 });
 
