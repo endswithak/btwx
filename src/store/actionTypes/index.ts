@@ -16,6 +16,7 @@ import { TextEditorTypes } from './textEditor';
 import { TextSettingsTypes } from './textSettings';
 import { TextToolTypes } from './textTool';
 import { EventDrawerTypes } from './eventDrawer';
+import { FontFamilySelectorTypes } from './fontFamilySelector';
 
 export type RootAction = ArtboardPresetEditorTypes |
                          ArtboardToolTypes |
@@ -34,4 +35,5 @@ export type RootAction = ArtboardPresetEditorTypes |
                          TextSettingsTypes |
                          TextToolTypes |
                          EventDrawerTypes |
-                         ViewSettingsTypes;
+                         ViewSettingsTypes |
+                         FontFamilySelectorTypes;

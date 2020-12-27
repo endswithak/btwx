@@ -169,20 +169,32 @@ const DragTool = (props: PaperToolProps): ReactElement => {
             });
             break;
           case 'Text': {
-            const textLayer = paperLayer.getItem({data: { id: 'textContent' }});
-            const initialPoint = (textLayer as paper.PointText).point;
-            (textLayer as any)._lines.forEach((line: any, index: number) => {
+            const textLayer = paperLayer.getItem({data: { id: 'textContent' }}) as paper.PointText;
+            const textLines = paperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
+            textLines.forEach((line, index: number) => {
               new uiPaperScope.Path.Line({
-                from: new uiPaperScope.Point(initialPoint.x, initialPoint.y + (((textLayer as paper.PointText).leading as number) * index)),
-                to: new uiPaperScope.Point(initialPoint.x + textLayer.bounds.width, initialPoint.y + (((textLayer as paper.PointText).leading as number) * index)),
+                from: (() => {
+                  switch(textLayer.justification) {
+                    case 'left':
+                      return line.point;
+                    case 'center':
+                      return new uiPaperScope.Point(line.point.x - line.bounds.width / 2, line.point.y);
+                    case 'right':
+                      return new uiPaperScope.Point(line.point.x - line.bounds.width, line.point.y);
+                  }
+                })(),
+                to: (() => {
+                  switch(textLayer.justification) {
+                    case 'left':
+                      return new uiPaperScope.Point(line.point.x + line.bounds.width, line.point.y);
+                    case 'center':
+                      return new uiPaperScope.Point(line.point.x + line.bounds.width / 2, line.point.y);
+                    case 'right':
+                      return line.point;
+                  }
+                })(),
                 strokeColor: THEME_PRIMARY_COLOR,
                 strokeWidth: 2 / uiPaperScope.view.zoom,
-                data: {
-                  type: 'UIElementChild',
-                  interactive: false,
-                  interactiveType: null,
-                  elementId: 'hoverFrame'
-                },
                 parent: dragOutlines
               });
             });

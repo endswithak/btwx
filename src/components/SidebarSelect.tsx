@@ -5,10 +5,10 @@ import { ThemeContext } from './ThemeProvider';
 import Icon from './Icon';
 
 interface SidebarSelectProps {
-  value: { value: string; label: string };
+  value: { value: string | number; label: string | number };
   placeholder: string;
-  options: { value: string; label: string }[];
-  onChange(selectedOption: { value: string; label: string }): void;
+  options: { value: string | number; label: string | number }[];
+  onChange(selectedOption: { value: string | number; label: string | number }): void;
   type?: 'fontFamily' | 'fontWeight';
   data?: {
     fontFamily: string;
@@ -17,6 +17,10 @@ interface SidebarSelectProps {
   disabled?: boolean;
   isSearchable?: boolean;
   truncateOptions?: boolean;
+  menuIsOpen?: boolean;
+  fontFamilySelector?: boolean;
+  isClearable?: boolean;
+  backspaceRemovesValue?: boolean;
 }
 
 const DropdownIndicator = (
@@ -31,6 +35,18 @@ const DropdownIndicator = (
   );
 };
 
+const SearchDropdownIndicator = (
+  props: any
+): any => {
+  return (
+    <components.DropdownIndicator {...props}>
+      <Icon
+        name='search'
+        small />
+    </components.DropdownIndicator>
+  );
+};
+
 const SidebarSelect = (props: SidebarSelectProps): ReactElement => {
   const theme = useContext(ThemeContext);
 
@@ -39,10 +55,13 @@ const SidebarSelect = (props: SidebarSelectProps): ReactElement => {
       <Select
         value={props.value}
         onChange={props.onChange}
-        components={{ DropdownIndicator }}
+        components={{ DropdownIndicator, IndicatorSeparator: null }}
         options={props.options}
         placeholder={props.placeholder}
         isDisabled={props.disabled}
+        menuIsOpen={props.menuIsOpen}
+        isClearable={props.isClearable}
+        backspaceRemovesValue={props.backspaceRemovesValue}
         isSearchable={props.isSearchable ? props.isSearchable : false}
         styles={{
           container: (provided, state) => {
@@ -55,14 +74,15 @@ const SidebarSelect = (props: SidebarSelectProps): ReactElement => {
             const background = theme.name === 'dark' ? theme.background.z3 : theme.background.z0;
             const color = theme.text.base;
             const border = 'none';
-            const boxShadow = `0 0 0 1px ${state.isFocused ? theme.palette.primary : theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`;
+            const boxShadow = `0 0 0 1px ${state.isFocused ? theme.palette.primary : theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`;
             const minHeight = 24;
             const padding = 0;
             const cursor = 'pointer';
+            const transition = 'none';
             return {
-              ...provided, background, color, border, boxShadow, minHeight, padding, cursor,
+              ...provided, background, color, border, boxShadow, minHeight, padding, cursor, transition,
               ':hover': {
-                boxShadow: `0 0 0 1px ${state.isFocused ? theme.palette.primaryHover : theme.name === 'dark' ? theme.background.z5 : theme.background.z6}`
+                boxShadow: `0 0 0 1px ${state.isFocused ? theme.palette.primary : theme.name === 'dark' ? theme.background.z5 : theme.background.z6} inset`
               },
             };
           },
@@ -141,7 +161,7 @@ const SidebarSelect = (props: SidebarSelectProps): ReactElement => {
             return {
               ...provided, padding, paddingLeft, paddingRight, fill,
               ':hover': {
-                fill: state.isFocused ? theme.palette.primaryHover : theme.text.light
+                fill: state.isFocused ? theme.palette.primary : theme.text.light
               }
             };
           },
@@ -150,10 +170,6 @@ const SidebarSelect = (props: SidebarSelectProps): ReactElement => {
             const fontSize = 12;
             const marginLeft = 0;
             return { ...provided, color, fontSize, marginLeft };
-          },
-          indicatorSeparator: (provided, state) => {
-            const display = 'none';
-            return { ...provided, display };
           },
           menu: (provided, state) => {
             const background = tinyColor(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).setAlpha(0.77).toRgbString();

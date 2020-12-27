@@ -874,7 +874,7 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
     const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as Btwx.Shadow) : null;
     const paperShadowOffset = style.shadow.enabled ? new uiPaperScope.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
     const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
-    const paperLayer = new uiPaperScope.PointText({
+    const baseText = new uiPaperScope.PointText({
       point: new uiPaperScope.Point(0, 0),
       content: textContent,
       data: { id: 'textContent', type: 'LayerChild', layerType: 'Text' },
@@ -893,7 +893,8 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
       leading: textStyle.leading,
       fontWeight: textStyle.fontWeight,
       fontFamily: textStyle.fontFamily,
-      justification: textStyle.justification
+      justification: textStyle.justification,
+      visible: false
     });
     const frame = getLayerFrame(payload);
     let position = new uiPaperScope.Point(frame.x, frame.y);
@@ -902,9 +903,9 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
     }
     const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as Btwx.PaperGradientFill : null;
     const paperStrokeColor = style.stroke.enabled ? getPaperStrokeColor(style.stroke, frame) as Btwx.PaperGradientFill : null;
-    paperLayer.position = new uiPaperScope.Point(frame.x, frame.y);
-    paperLayer.fillColor = paperFillColor;
-    paperLayer.strokeColor = paperStrokeColor;
+    baseText.position = new uiPaperScope.Point(frame.x, frame.y);
+    baseText.fillColor = paperFillColor;
+    baseText.strokeColor = paperStrokeColor;
     const textBackground = new uiPaperScope.Path.Rectangle({
       from: new uiPaperScope.Point(frame.x - frame.width / 2, frame.y - frame.height / 2),
       to: new uiPaperScope.Point(frame.x + frame.width / 2, frame.y + frame.height / 2),
@@ -913,11 +914,33 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
       insert: false,
       data: { id: 'textBackground', type: 'LayerChild', layerType: 'Text' },
     });
+    // const textLines = new uiPaperScope.Group({
+    //   data: { id: 'textLines', type: 'LayerChild', layerType: 'Text' },
+    //   children: (baseText as any)._lines.reduce((result: paper.PointText[], current: string, index: number) => {
+    //     const line = new uiPaperScope.PointText({
+    //       point: new uiPaperScope.Point(baseText.point.x, baseText.point.y + (index * baseText.leading)),
+    //       content: current,
+    //       style: baseText.style,
+    //       visible: true,
+    //       data: { id: 'textLine', type: 'LayerChild', layerType: 'Text' }
+    //     });
+    //     return [...result, line];
+    //   }, [])
+    // });
     const textContainer = new uiPaperScope.Group({
       name: name,
       parent: parentPaperLayer,
       data: { id, type: 'Layer', layerType: 'Text', scope: scope },
-      children: [textBackground, paperLayer],
+      children: [textBackground, baseText, ...(baseText as any)._lines.reduce((result: paper.PointText[], current: string, index: number) => {
+        const line = new uiPaperScope.PointText({
+          point: new uiPaperScope.Point(baseText.point.x, baseText.point.y + (index * baseText.leading)),
+          content: current,
+          style: baseText.style,
+          visible: true,
+          data: { id: 'textLine', type: 'LayerChild', layerType: 'Text' }
+        });
+        return [...result, line];
+      }, [])],
       position: position
     });
     const newLayer = {
@@ -2054,6 +2077,16 @@ export const setLayersFontFamily = (payload: SetLayersFontFamilyPayload): LayerT
   type: SET_LAYERS_FONT_FAMILY,
   payload
 });
+
+// export const setLayersFontFamilyThunk = (family: string) => {
+//   return (dispatch: any, getState: any): void => {
+//     const state = getState() as RootState;
+//     const selected = state.layer.present.selected;
+//     if (selected.length > 0) {
+//       dispatch(setLayersFontFamily({layers: selected, fontFamily: family}));
+//     }
+//   }
+// };
 
 export const setLayerJustification = (payload: SetLayerJustificationPayload): LayerTypes => ({
   type: SET_LAYER_JUSTIFICATION,
@@ -3732,26 +3765,38 @@ export const updateHoverFrame = (hoverItem: Btwx.Layer, artboardItem?: Btwx.Artb
         hoverItemPath.position = hoverItemBounds.center;
         break;
       }
-      // case 'Text': {
-      //   const textLayer = hoverPaperLayer.getItem({data: { id: 'textContent' }});
-      //   const initialPoint = (textLayer as paper.PointText).point;
-      //   (textLayer as any)._lines.forEach((line: any, index: number) => {
-      //     new paperMain.Path.Line({
-      //       from: new paperMain.Point(initialPoint.x, initialPoint.y + (((textLayer as paper.PointText).leading as number) * index)),
-      //       to: new paperMain.Point(initialPoint.x + textLayer.bounds.width, initialPoint.y + (((textLayer as paper.PointText).leading as number) * index)),
-      //       strokeColor: THEME_PRIMARY_COLOR,
-      //       strokeWidth: 2 / uiPaperScope.view.zoom,
-      //       data: {
-      //         type: 'UIElementChild',
-      //         interactive: false,
-      //         interactiveType: null,
-      //         elementId: 'hoverFrame'
-      //       },
-      //       parent: hoverFrame
-      //     });
-      //   });
-      //   break;
-      // }
+      case 'Text': {
+        const textLayer = getPaperLayer(hoverItem.id, artboardItem.projectIndex);
+        const textLines = textLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
+        textLines.forEach((line, index: number) => {
+          new uiPaperScope.Path.Line({
+            from: (() => {
+              switch((hoverItem as Btwx.Text).textStyle.justification) {
+                case 'left':
+                  return line.point;
+                case 'center':
+                  return new uiPaperScope.Point(line.point.x - line.bounds.width / 2, line.point.y);
+                case 'right':
+                  return new uiPaperScope.Point(line.point.x - line.bounds.width, line.point.y);
+              }
+            })(),
+            to: (() => {
+              switch((hoverItem as Btwx.Text).textStyle.justification) {
+                case 'left':
+                  return new uiPaperScope.Point(line.point.x + line.bounds.width, line.point.y);
+                case 'center':
+                  return new uiPaperScope.Point(line.point.x + line.bounds.width / 2, line.point.y);
+                case 'right':
+                  return line.point;
+              }
+            })(),
+            strokeColor: THEME_PRIMARY_COLOR,
+            strokeWidth: 2 / uiPaperScope.view.zoom,
+            parent: hoverFrame
+          });
+        });
+        break;
+      }
       default:
         new uiPaperScope.Path.Rectangle({
           ...hoverFrameConstants,

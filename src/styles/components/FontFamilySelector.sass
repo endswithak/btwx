@@ -1,0 +1,90 @@
+.c-font-family-selector
+  transform-origin: left top
+  position: absolute
+  width: 248px
+  display: flex
+  flex-direction: column
+  border-radius: $unit
+  backdrop-filter: blur(17px)
+  z-index: 99999999999
+  left: $unit * 2
+
+.c-font-family-selector__search
+  position: relative
+  width: 100%
+  height: $unit * 8
+  display: flex
+  align-items: center
+
+.c-font-family-selector__icon,
+.c-font-family-selector__clear
+  position: absolute
+  width: $unit * 6
+  height: $unit * 8
+  display: flex
+  align-items: center
+  justify-content: center
+  z-index: 3
+
+.c-font-family-selector__clear
+  right: 0
+  transform: translateX(2px)
+
+.c-font-family-selector__input
+  flex-grow: 2
+
+  .c-sidebar-input
+    padding: 0
+
+    input
+      height: $unit * 8
+      line-height: $unit * 8
+      padding-left: $unit * 6
+      padding-right: $unit * 6
+      border-radius: 0
+      box-shadow: none
+      background: none
+
+.c-font-family-selector__items
+  height: 264px
+  width: 100%
+  padding: $unit
+
+.c-font-family-selector__item
+  position: relative
+  display: flex
+  align-items: center
+  justify-content: center
+  height: $unit * 8
+  width: 100%
+  padding: 0 $unit
+  border-radius: $unit
+
+.c-font-family-selector__item--bottom-divider
+  margin-bottom: $unit * 3
+
+  &:after
+    +content-block
+    height: 1px
+    top: $unit * 9.5
+    opacity: 0.44
+
+// .c-font-family-selector__item--text
+//   padding-left: $unit *
+
+.c-font-family-selector-item__icon
+  flex-grow: 0
+  flex-shrink: 0
+  width: $unit * 10
+  height $unit * 10
+  display: flex
+  align-items: center
+  justify-content: center
+
+.c-font-family-selector-item__label
+  flex-grow: 2
+  // font-family: $fontFamily
+  font-size: $fontSizeSm
+  line-height: $unit * 8
+  padding: 0
+  text-align: left

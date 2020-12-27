@@ -7,6 +7,7 @@ import {
   SET_TEXT_SETTINGS_LEADING,
   SET_TEXT_SETTINGS_JUSTIFICATION,
   SET_TEXT_SETTINGS_SYSTEM_FONTS,
+  SET_TEXT_SETTINGS_READY,
   SetTextSettingsPayload,
   SetTextSettingsFillColorPayload,
   SetTextSettingsFontSizePayload,
@@ -56,4 +57,8 @@ export const setTextSettingsJustification = (payload: SetTextSettingsJustificati
 export const setTextSettingsSystemFonts = (payload: SetTextSettingsSystemFontsPayload): TextSettingsTypes => ({
   type: SET_TEXT_SETTINGS_SYSTEM_FONTS,
   payload
+});
+
+export const setTextSettingsReady = (): TextSettingsTypes => ({
+  type: SET_TEXT_SETTINGS_READY
 });

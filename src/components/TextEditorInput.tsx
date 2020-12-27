@@ -5,29 +5,31 @@ import debounce from 'lodash.debounce';
 import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
 import { closeTextEditor } from '../store/actions/textEditor';
-import { setLayerText, selectLayers } from '../store/actions/layer';
+import { setLayerText } from '../store/actions/layer';
 import { getPaperLayer } from '../store/selectors/layer';
 import { uiPaperScope } from '../canvas';
-import { setCanvasFocusing } from '../store/actions/canvasSettings';
 
 const TextEditorInput = (): ReactElement => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const textSpanRef = useRef<HTMLTextAreaElement>(null);
   const textEditor = useSelector((state: RootState) => state.textEditor);
-  const textSettings = useSelector((state: RootState) => state.textSettings);
-  const layerItem = useSelector((state: RootState) => (state.layer.present.byId[state.textEditor.layer] as Btwx.Text));
-  const canvasFocusing = useSelector((state: RootState) => state.canvasSettings.focusing);
-  const [text, setText] = useState(layerItem.text);
-  const [prevText, setPrevText] = useState(layerItem.text);
+  const justification = useSelector((state: RootState) => state.textSettings.justification);
+  const fontWeight = useSelector((state: RootState) => state.textSettings.fontWeight);
+  const fontSize = useSelector((state: RootState) => state.textSettings.fontSize);
+  const leading = useSelector((state: RootState) => state.textSettings.leading);
+  const fontFamily = useSelector((state: RootState) => state.textSettings.fontFamily);
+  const fillColor = useSelector((state: RootState) => state.textSettings.fillColor);
+  const textValue = useSelector((state: RootState) => (state.layer.present.byId[state.textEditor.layer] as Btwx.Text).text);
+  const [text, setText] = useState(textValue);
   const debounceText = useCallback(
-    debounce((dText: string) => dispatch(setLayerText({id: textEditor.layer, text: dText })), 250),
+    debounce((dText: string) => dispatch(setLayerText({id: textEditor.layer, text: dText })), 150),
     []
   );
   const [pos, setPos] = useState({x: textEditor.x, y: textEditor.y});
   const dispatch = useDispatch();
 
-  const onMouseDown = (event: any) => {
+  const onMouseDown = (event: any): void => {
     if (event.target !== textAreaRef.current) {
       dispatch(closeTextEditor());
     }
@@ -49,11 +51,9 @@ const TextEditorInput = (): ReactElement => {
 
   useEffect(() => {
     if (textAreaRef.current) {
-      if (canvasFocusing) {
-        dispatch(setCanvasFocusing({focusing: false}));
-      }
       document.addEventListener('mousedown', onMouseDown);
       const paperLayer = getPaperLayer(textEditor.layer, textEditor.projectIndex) as paper.PointText;
+      paperLayer.visible = false;
       textAreaRef.current.focus();
       textAreaRef.current.select();
       const topLeft = uiPaperScope.view.projectToView(paperLayer.bounds.topLeft);
@@ -61,7 +61,7 @@ const TextEditorInput = (): ReactElement => {
       const topRight = uiPaperScope.view.projectToView(paperLayer.bounds.topRight);
       setPos({
         x: (() => {
-          switch(textSettings.justification) {
+          switch(justification) {
             case 'left':
               return topLeft.x;
             case 'center':
@@ -71,7 +71,7 @@ const TextEditorInput = (): ReactElement => {
           }
         })(),
         y: (() => {
-          switch(textSettings.justification) {
+          switch(justification) {
             case 'left':
               return topLeft.y;
             case 'center':
@@ -84,47 +84,21 @@ const TextEditorInput = (): ReactElement => {
       updateTextAreaSize();
     }
     return () => {
-      const paperLayer = getPaperLayer(textEditor.layer, textEditor.projectIndex) as paper.PointText;
-      dispatch(setCanvasFocusing({focusing: true}));
-      paperLayer.visible = true;
-      dispatch(selectLayers({layers: [textEditor.layer], newSelection: true }));
       document.removeEventListener('mousedown', onMouseDown);
+      const paperLayer = getPaperLayer(textEditor.layer, textEditor.projectIndex) as paper.PointText;
+      paperLayer.visible = true;
+      debounceText(textAreaRef.current.value);
     }
   }, []);
 
   useEffect(() => {
-    const paperLayer = getPaperLayer(textEditor.layer, textEditor.projectIndex) as paper.PointText;
-    paperLayer.visible = false;
-  }, [layerItem.text]);
-
-  useEffect(() => {
     updateTextAreaSize();
-    if (text !== prevText) {
-      debounceText(text);
-      setPrevText(text);
-    }
   }, [text]);
 
   return (
     <div
       className='c-text-editor'
       ref={containerRef}>
-      {/* <div style={{
-        position: 'absolute',
-        top: 0,
-        left: pos.x,
-        height: '100%',
-        width: 1,
-        background: 'red'
-      }} />
-      <div style={{
-        position: 'absolute',
-        top: pos.y,
-        left: 0,
-        height: 1,
-        width: '100%',
-        background: 'red'
-      }} /> */}
       <textarea
         className='c-text-editor__textarea'
         ref={textAreaRef}
@@ -135,41 +109,21 @@ const TextEditorInput = (): ReactElement => {
           left: pos.x,
           top: pos.y,
           position: 'absolute',
-          fontFamily: textSettings.fontFamily,
-          fontSize: textSettings.fontSize,
-          minHeight: textSettings.leading,
-          fontWeight: (() => {
-            switch(textSettings.fontWeight) {
-              case 'normal':
-                return textSettings.fontWeight;
-              case 'bold':
-              case 'bold italic':
-                return 'bold';
-              case 'italic':
-                return 'normal';
-            }
-          })(),
-          fontStyle: (() => {
-            switch(textSettings.fontWeight) {
-              case 'normal':
-              case 'bold':
-                return textSettings.fontWeight;
-              case 'bold italic':
-              case 'italic':
-                return 'italic';
-            }
-          })(),
-          lineHeight: `${textSettings.leading}px`,
+          fontFamily: fontFamily,
+          fontSize: fontSize,
+          minHeight: leading,
+          fontWeight: fontWeight,
+          lineHeight: `${leading}px`,
           color: tinyColor({
-            h: textSettings.fillColor.h,
-            s: textSettings.fillColor.s,
-            l: textSettings.fillColor.l,
-            a: textSettings.fillColor.a
+            h: fillColor.h,
+            s: fillColor.s,
+            l: fillColor.l,
+            a: fillColor.a
           }).toHslString(),
-          textAlign: textSettings.justification,
+          textAlign: justification,
           transformOrigin: 'left top',
           transform: (() => {
-            switch(textSettings.justification) {
+            switch(justification) {
               case 'left':
                 return `scale(${uiPaperScope.view.zoom})`;
               case 'center':
@@ -183,31 +137,11 @@ const TextEditorInput = (): ReactElement => {
         className='c-text-editor__span'
         ref={textSpanRef}
         style={{
-          fontFamily: textSettings.fontFamily,
-          fontSize: textSettings.fontSize,
-          fontWeight: (() => {
-            switch(textSettings.fontWeight) {
-              case 'normal':
-                return textSettings.fontWeight;
-              case 'bold':
-              case 'bold italic':
-                return 'bold';
-              case 'italic':
-                return 'normal';
-            }
-          })(),
-          fontStyle: (() => {
-            switch(textSettings.fontWeight) {
-              case 'normal':
-              case 'bold':
-                return textSettings.fontWeight;
-              case 'bold italic':
-              case 'italic':
-                return 'italic';
-            }
-          })(),
-          lineHeight: `${textSettings.leading}px`,
-          textAlign: textSettings.justification
+          fontFamily: fontFamily,
+          fontSize: fontSize,
+          fontWeight: fontWeight,
+          lineHeight: `${leading}px`,
+          textAlign: justification
         }}>
         {text}
       </span>

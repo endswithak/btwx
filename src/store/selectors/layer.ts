@@ -513,6 +513,13 @@ export const getSelectedBounds = createSelector(
   }
 );
 
+export const getHoverBounds = createSelector(
+  [ getHover, getLayersById ],
+  (hover, byId) => {
+    return getLayersBounds({byId} as LayerState, [hover]);
+  }
+);
+
 export const getActiveArtboardBounds = createSelector(
   [ getActiveArtboard, getLayersById ],
   (activeArtboard, byId) => {

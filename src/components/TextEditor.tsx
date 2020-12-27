@@ -8,10 +8,8 @@ const TextEditor = (): ReactElement => {
   const isOpen = useSelector((state: RootState) => state.textEditor.isOpen);
 
   return (
-    isOpen
-    ? ready
-      ? <TextEditorInput />
-      : null
+    isOpen && ready
+    ? <TextEditorInput />
     : null
   );
 }

@@ -118,6 +118,7 @@ const TextTool = (props: TextToolProps): ReactElement => {
             leading: textSettings.leading,
             fontWeight: textSettings.fontWeight,
             fontFamily: textSettings.fontFamily,
+            oblique: 0,
             justification: textSettings.justification
           }
         }

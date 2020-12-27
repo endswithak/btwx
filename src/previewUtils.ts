@@ -770,7 +770,6 @@ export const addObliqueTween = (props: AddTweenProps): void => {
       originPaperLayer.rotation = -startRotation;
       originPaperLayer.skew(new paperPreview.Point(-nextSkew, 0));
       originPaperLayer.data.innerWidth = originPaperLayer.bounds.width;
-      originPaperLayer.data.innerHeight = originPaperLayer.bounds.height;
       originPaperLayer.data.skew = timelineTweenProps[tween.prop];
       originPaperLayer.rotation = startRotation;
       originPaperLayer.position = startPosition;

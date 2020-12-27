@@ -7,6 +7,7 @@ import { setCanvasActiveTool } from '../store/actions/canvasSettings';
 import { openContextMenu } from '../store/actions/contextMenu';
 import { setLayerHover, deepSelectLayerThunk, selectLayers, deselectLayers, deselectAllLayers, setActiveArtboard } from '../store/actions/layer';
 import { openTextEditor } from '../store/actions/textEditor';
+import { setTextSettings } from '../store/actions/textSettings';
 
 interface CanvasLayerEventsProps {
   layerEvent: {
@@ -20,7 +21,14 @@ interface CanvasLayerEventsProps {
 
 const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
   const { layerEvent } = props;
-  const layerItem = useSelector((state: RootState) => layerEvent && layerEvent.hitResult ? state.layer.present.byId[layerEvent.hitResult.item.data.type === 'Layer' ? layerEvent.hitResult.item.data.id : layerEvent.hitResult.item.parent.data.id] : null);
+  const layerItem = useSelector((state: RootState) =>
+    layerEvent && layerEvent.hitResult
+    ? state.layer.present.byId[layerEvent.hitResult.item.data.type === 'Layer'
+        ? layerEvent.hitResult.item.data.id
+        : layerEvent.hitResult.item.parent.data.id
+      ]
+    : null
+  );
   const nearestScopeAncestor = useSelector((state: RootState) => layerItem ? getNearestScopeAncestor(state.layer.present, layerItem.id) : null);
   const deepSelectItem = useSelector((state: RootState) => layerItem ? getDeepSelectItem(state.layer.present, layerItem.id) : null);
   const hover = useSelector((state: RootState) => state.layer.present.hover);
@@ -103,6 +111,9 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
             scrollToLayer(deepSelectItem.id);
             dispatch(selectLayers({layers: [deepSelectItem.id]}));
           }
+          if (deepSelectItem.type === 'Text') {
+            dispatch(setTextSettings({...(deepSelectItem as Btwx.Text).textStyle}));
+          }
         }
         if (nearestScopeAncestor.type !== 'Artboard') {
           if (nearestScopeAncestor.selected) {
@@ -110,6 +121,9 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
           } else {
             scrollToLayer(nearestScopeAncestor.id);
             dispatch(selectLayers({layers: [nearestScopeAncestor.id]}));
+          }
+          if (nearestScopeAncestor.type === 'Text') {
+            dispatch(setTextSettings({...(nearestScopeAncestor as Btwx.Text).textStyle}));
           }
         }
       } else {
@@ -122,16 +136,21 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
               dispatch(setActiveArtboard({id: deepSelectItem.id}));
             }
           } else {
+            if (deepSelectItem.type === 'Text') {
+              dispatch(setTextSettings({...(deepSelectItem as Btwx.Text).textStyle}));
+            }
             if (!deepSelectItem.selected) {
               scrollToLayer(deepSelectItem.id);
               dispatch(selectLayers({layers: [deepSelectItem.id], newSelection: true}));
             }
           }
-        }
-        if (nearestScopeAncestor.type !== 'Artboard') {
+        } else {
           if (!nearestScopeAncestor.selected) {
             scrollToLayer(nearestScopeAncestor.id);
             dispatch(selectLayers({layers: [nearestScopeAncestor.id], newSelection: true}));
+          }
+          if (nearestScopeAncestor.type === 'Text') {
+            dispatch(setTextSettings({...(nearestScopeAncestor as Btwx.Text).textStyle}));
           }
         }
       }

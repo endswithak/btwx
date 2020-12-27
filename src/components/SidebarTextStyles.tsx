@@ -4,7 +4,7 @@ import { RootState } from '../store/reducers';
 import { expandTextStyles, collapseTextStyles } from '../store/actions/rightSidebar';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
-import FontFamilySelector from './FontFamilySelector';
+import FontFamilyInput from './FontFamilyInput';
 import FontWeightInput from './FontWeightInput';
 import ObliqueInput from './ObliqueInput';
 import FontSizeInput from './FontSizeInput';
@@ -33,11 +33,8 @@ const SidebarTextStyles = (): ReactElement => {
         header='text'>
         <SidebarSectionRow>
           <SidebarSectionColumn width='100%'>
-            <FontFamilySelector />
+            <FontFamilyInput />
           </SidebarSectionColumn>
-          {/* <SidebarSectionColumn width='33.33%'>
-            <FontWeightSelector />
-          </SidebarSectionColumn> */}
         </SidebarSectionRow>
         <SidebarSectionRow>
           <SidebarSectionColumn width='33.33%'>

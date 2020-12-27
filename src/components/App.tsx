@@ -1,7 +1,8 @@
 import React, { ReactElement, useEffect } from 'react';
 import * as fontFinder from 'font-finder';
 import { useSelector, useDispatch } from 'react-redux';
-import { setTextSettingsSystemFonts } from '../store/actions/textSettings';
+import { setTextSettingsSystemFonts, setTextSettingsReady } from '../store/actions/textSettings';
+import { WEB_SAFE_FONTS } from '../constants';
 import { RootState } from '../store/reducers';
 import Topbar from './Topbar';
 import EaseEditorWrap from './EaseEditorWrap';
@@ -18,38 +19,16 @@ const App = (): ReactElement => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const browserFonts: {[id: string]: { value: string; label: string }} = {
-      'Georgia': { value: 'Georgia', label: 'Georgia' },
-      'Palatino Linotype': { value: 'Palatino Linotype', label: 'Palatino Linotype' },
-      'Book Antiqua': { value: 'Book Antiqua', label: 'Book Antiqua' },
-      'Palatino': { value: 'Palatino', label: 'Palatino' },
-      'Times New Roman': { value: 'Times New Roman', label: 'Times New Roman' },
-      'Times': { value: 'Times', label: 'Times' },
-      'Arial': { value: 'Arial', label: 'Arial' },
-      'Helvetica': { value: 'Helvetica', label: 'Helvetica' },
-      'Arial Black': { value: 'Arial Black', label: 'Arial Black' },
-      'Gadget': { value: 'Gadget', label: 'Gadget' },
-      'Comic Sans MS': { value: 'Comic Sans MS', label: 'Comic Sans MS' },
-      'Impact': { value: 'Impact', label: 'Impact' },
-      'Charcoal': { value: 'Charcoal', label: 'Charcoal' },
-      'Lucida Sans Unicode': { value: 'Lucida Sans Unicode', label: 'Lucida Sans Unicode' },
-      'Lucida Grande': { value: 'Lucida Grande', label: 'Lucida Grande' },
-      'Tahoma': { value: 'Tahoma', label: 'Tahoma' },
-      'Geneva': { value: 'Geneva', label: 'Geneva' },
-      'Trebuchet MS': { value: 'Trebuchet MS', label: 'Trebuchet MS' },
-      'Verdana': { value: 'Verdana', label: 'Verdana' },
-      'Courier New': { value: 'Courier New', label: 'Courier New' },
-      'Courier': { value: 'Courier', label: 'Courier' },
-      'Lucida Console': { value: 'Lucida Console', label: 'Lucida Console' },
-      'Monaco': { value: 'Monaco', label: 'Monaco' }
-    };
     (async () => {
       const fontList = await fontFinder.list();
-      const compiledFontList = Object.keys({
-        ...fontList,
-        ...browserFonts
-      }).sort().filter(font => !font.startsWith('.'));
+      const compiledFontList = [...WEB_SAFE_FONTS, ...Object.keys(fontList)].reduce((result: string[], current) => {
+        if (!result.includes(current) && !current.startsWith('.')) {
+          result = [...result, current];
+        }
+        return result;
+      }, []).sort();
       dispatch(setTextSettingsSystemFonts({systemFonts: compiledFontList}));
+      dispatch(setTextSettingsReady());
     })();
   }, []);
 

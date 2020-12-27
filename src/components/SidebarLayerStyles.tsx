@@ -8,6 +8,7 @@ import SidebarTextStyles from './SidebarTextStyles';
 import AlignDistribute from './AlignDistribute';
 import SwatchEditor from './SwatchEditor';
 import SidebarShapeStyles from './SidebarShapeStyles';
+import FontFamilySelectorWrap from './FontFamilySelectorWrap';
 
 const SidebarLayerStyles = (): ReactElement => {
   return (
@@ -21,6 +22,7 @@ const SidebarLayerStyles = (): ReactElement => {
       <SidebarStrokeStyles />
       <SidebarShadowStyles />
       <SwatchEditor />
+      <FontFamilySelectorWrap />
     </>
   );
 }

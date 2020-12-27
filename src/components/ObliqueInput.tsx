@@ -33,19 +33,51 @@ const ObliqueInput = (): ReactElement => {
       const layerItem = selectedById[key] as Btwx.Text;
       const paperLayer = getPaperLayer(layerItem.id, selectedProjectIndices[layerItem.id]);
       const textContent = paperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
-      const startPosition = textContent.position;
-      textContent.rotation = -layerItem.transform.rotation;
+      const textLines = paperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
+      const startPosition = paperLayer.position;
+      paperLayer.rotation = -layerItem.transform.rotation;
       const newPointText = new uiPaperScope.PointText({
         content: textContent.content,
         point: textContent.point,
         style: textContent.style,
-        insert: false,
-        data: textContent.data
+        data: textContent.data,
+        visible: false,
+        position: startPosition,
+        parent: paperLayer
       });
-      newPointText.skew(new uiPaperScope.Point(-e.target.value, 0));
-      textContent.replaceWith(newPointText);
-      newPointText.rotation = layerItem.transform.rotation;
-      newPointText.position = startPosition;
+      const maxCount = Math.max(newPointText._lines.length, textLines.length);
+      for(let i = 0; i < maxCount; i++) {
+        if (textLines[i]) {
+          textLines[i].remove();
+        }
+        if (textContent._lines[i]) {
+          const newLine = new uiPaperScope.PointText({
+            point: new uiPaperScope.Point(textContent.point.x, textContent.point.y + (i * textContent.leading)),
+            content: textContent._lines[i],
+            style: textContent.style,
+            parent: paperLayer,
+            data: { id: 'textLine', type: 'LayerChild', layerType: 'Text' }
+          });
+          newLine.skew(new uiPaperScope.Point(-e.target.value, 0));
+        }
+      }
+      // newPointText.skew(new uiPaperScope.Point(-e.target.value, 0));
+      // textLines.removeChildren();
+      // (newPointText as any)._lines.reduce((result: paper.PointText[], current: string, index: number) => {
+      //   const line = new uiPaperScope.PointText({
+      //     point: new uiPaperScope.Point(newPointText.point.x, newPointText.point.y + (index * newPointText.leading)),
+      //     content: current,
+      //     style: newPointText.style,
+      //     visible: true,
+      //     parent: textLines,
+      //     data: { id: 'textLine', type: 'LayerChild', layerType: 'Text' }
+      //   });
+      //   line.skew(new uiPaperScope.Point(-e.target.value, 0));
+      //   return [...result, line];
+      // }, []);
+      textContent.remove();
+      paperLayer.rotation = layerItem.transform.rotation;
+      paperLayer.position = startPosition;
     });
   };
 

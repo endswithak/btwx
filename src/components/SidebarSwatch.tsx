@@ -22,9 +22,9 @@ const Swatch = styled.div<SidebarSwatchProps>`
       opacity: 0.5;
     }
     :hover {
-      box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.name === 'dark' ? props.theme.background.z5 : props.theme.background.z6} inset;
+      box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z5 : props.theme.background.z6} inset;
       svg {
-        fill: ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.text.base};
+        fill: ${props => props.isActive ? props.theme.palette.primary : props.theme.text.base};
       }
     }
   }

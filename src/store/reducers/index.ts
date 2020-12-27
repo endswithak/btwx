@@ -21,6 +21,7 @@ import insertKnob from './insertKnob';
 import shapeTool from './shapeTool';
 import artboardTool from './artboardTool';
 import textTool from './textTool';
+import fontFamilySelector from './fontFamilySelector';
 
 export const reducers = {
   layer,
@@ -41,7 +42,8 @@ export const reducers = {
   insertKnob,
   shapeTool,
   artboardTool,
-  textTool
+  textTool,
+  fontFamilySelector
 };
 
 const appReducer = combineReducers(reducers);

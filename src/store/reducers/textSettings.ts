@@ -7,20 +7,23 @@ import {
   SET_TEXT_SETTINGS_LEADING,
   SET_TEXT_SETTINGS_JUSTIFICATION,
   SET_TEXT_SETTINGS_SYSTEM_FONTS,
+  SET_TEXT_SETTINGS_READY,
   TextSettingsTypes,
 } from '../actionTypes/textSettings';
 
-import { DEFAULT_TEXT_STYLE, DEFAULT_TEXT_FILL_COLOR } from '../../constants';
+import { DEFAULT_TEXT_STYLE, DEFAULT_TEXT_FILL_COLOR, WEB_SAFE_FONTS } from '../../constants';
 
 export interface TextSettingsState extends Btwx.TextStyle {
   fillColor: Btwx.Color;
   systemFonts: string[];
+  ready: boolean;
 }
 
 const initialState: TextSettingsState = {
   ...DEFAULT_TEXT_STYLE,
   fillColor: DEFAULT_TEXT_FILL_COLOR,
-  systemFonts: []
+  systemFonts: WEB_SAFE_FONTS,
+  ready: false
 };
 
 export default (state = initialState, action: TextSettingsTypes): TextSettingsState => {
@@ -74,6 +77,12 @@ export default (state = initialState, action: TextSettingsTypes): TextSettingsSt
       return {
         ...state,
         systemFonts: action.payload.systemFonts
+      };
+    }
+    case SET_TEXT_SETTINGS_READY: {
+      return {
+        ...state,
+        ready: true
       };
     }
     default:

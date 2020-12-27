@@ -26,7 +26,7 @@ const Canvas = (): ReactElement => {
   const theme = useContext(ThemeContext);
   const ref = useRef<HTMLDivElement>(null);
   const ready = useSelector((state: RootState) => state.canvasSettings.ready);
-  const interactionEnabled = useSelector((state: RootState) => !state.canvasSettings.selecting && !state.canvasSettings.resizing && !state.canvasSettings.drawing && !state.canvasSettings.zooming && !state.canvasSettings.translating && !state.canvasSettings.dragging);
+  const interactionEnabled = useSelector((state: RootState) => state.canvasSettings.focusing && !state.canvasSettings.selecting && !state.canvasSettings.resizing && !state.canvasSettings.drawing && !state.canvasSettings.zooming && !state.canvasSettings.translating && !state.canvasSettings.dragging);
   const allProjectIndices = useSelector((state: RootState) => getAllProjectIndices(state));
   const cursor = useSelector((state: RootState) => state.canvasSettings.cursor);
   const [layerEvent, setLayerEvent] = useState(null);
