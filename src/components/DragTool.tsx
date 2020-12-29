@@ -2,7 +2,7 @@
 import React, { useEffect, ReactElement, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getLayerProjectIndex, getPaperLayer, getPaperLayersBounds, getSelectedProjectIndices } from '../store/selectors/layer';
+import { getLayerProjectIndex, getPaperLayer, getPaperLayersBounds, getSelectedById, getSelectedProjectIndices } from '../store/selectors/layer';
 import { uiPaperScope } from '../canvas';
 import { THEME_PRIMARY_COLOR } from '../constants';
 import { setCanvasDragging } from '../store/actions/canvasSettings';
@@ -15,6 +15,11 @@ const DragTool = (props: PaperToolProps): ReactElement => {
   const blacklistedLayers = useSelector((state: RootState) => state.layer.present.selected.some(id => state.layer.present.allArtboardIds.includes(id)) ? state.layer.present.selected : [...state.layer.present.allArtboardIds.filter(id => id !== state.layer.present.activeArtboard), ...state.layer.present.selected]);
   const hover = useSelector((state: RootState) => state.layer.present.hover);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const layerItems = useSelector((state: RootState) => {
+    const selectedById = getSelectedById(state);
+    const hover = state.layer.present.hover ? { [state.layer.present.hover]: state.layer.present.byId[state.layer.present.hover] } : {};
+    return { ...selectedById, ...hover };
+  });
   const isEnabled = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Drag');
   const dragging = useSelector((state: RootState) => state.canvasSettings.dragging);
   const dragHandle = useSelector((state: RootState) => state.canvasSettings.dragHandle);
@@ -169,8 +174,13 @@ const DragTool = (props: PaperToolProps): ReactElement => {
             });
             break;
           case 'Text': {
-            const textLayer = paperLayer.getItem({data: { id: 'textContent' }}) as paper.PointText;
-            const textLines = paperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
+            const clone = paperLayer.clone({insert: false});
+            clone.rotation = -layerItems[paperLayer.data.id].transform.rotation;
+            const textLayer = clone.getItem({data: { id: 'textContent' }}) as paper.PointText;
+            const textLines = clone.getItems({data: {id: 'textLine'}}) as paper.PointText[];
+            const linesGroup = new uiPaperScope.Group({
+              parent: dragOutlines
+            })
             textLines.forEach((line, index: number) => {
               new uiPaperScope.Path.Line({
                 from: (() => {
@@ -195,9 +205,10 @@ const DragTool = (props: PaperToolProps): ReactElement => {
                 })(),
                 strokeColor: THEME_PRIMARY_COLOR,
                 strokeWidth: 2 / uiPaperScope.view.zoom,
-                parent: dragOutlines
+                parent: linesGroup
               });
             });
+            linesGroup.rotation = layerItems[paperLayer.data.id].transform.rotation;
             break;
           }
           default:

@@ -182,6 +182,10 @@ export const SET_LAYER_JUSTIFICATION = 'SET_LAYER_JUSTIFICATION';
 export const SET_LAYERS_JUSTIFICATION = 'SET_LAYERS_JUSTIFICATION';
 export const SET_LAYER_OBLIQUE = 'SET_LAYER_OBLIQUE';
 export const SET_LAYERS_OBLIQUE = 'SET_LAYERS_OBLIQUE';
+export const SET_LAYER_POINT_X = 'SET_LAYER_POINT_X';
+export const SET_LAYERS_POINT_X = 'SET_LAYERS_POINT_X';
+export const SET_LAYER_POINT_Y = 'SET_LAYER_POINT_Y';
+export const SET_LAYERS_POINT_Y = 'SET_LAYERS_POINT_Y';
 
 export const SET_LAYER_UNDERLYING_MASK = 'SET_LAYER_UNDERLYING_MASK';
 export const SET_LAYERS_UNDERLYING_MASK = 'SET_LAYERS_UNDERLYING_MASK';
@@ -1810,6 +1814,46 @@ export interface SetLayersOblique {
   payload: SetLayersObliquePayload;
 }
 
+export interface SetLayerPointXPayload {
+  id: string;
+  x: number;
+}
+
+export interface SetLayerPointX {
+  type: typeof SET_LAYER_POINT_X;
+  payload: SetLayerPointXPayload;
+}
+
+export interface SetLayersPointXPayload {
+  layers: string[];
+  x: number;
+}
+
+export interface SetLayersPointX {
+  type: typeof SET_LAYERS_POINT_X;
+  payload: SetLayersPointXPayload;
+}
+
+export interface SetLayerPointYPayload {
+  id: string;
+  y: number;
+}
+
+export interface SetLayerPointY {
+  type: typeof SET_LAYER_POINT_Y;
+  payload: SetLayerPointYPayload;
+}
+
+export interface SetLayersPointYPayload {
+  layers: string[];
+  y: number;
+}
+
+export interface SetLayersPointY {
+  type: typeof SET_LAYERS_POINT_Y;
+  payload: SetLayersPointYPayload;
+}
+
 export interface SetLayerFillPayload {
   id: string;
   fill: Btwx.Fill;
@@ -2617,6 +2661,10 @@ export type LayerTypes = AddArtboard |
                          SetLayersJustification |
                          SetLayerOblique |
                          SetLayersOblique |
+                         SetLayerPointX |
+                         SetLayersPointX |
+                         SetLayerPointY |
+                         SetLayersPointY |
                          SetLayerUnderlyingMask |
                          SetLayersUnderlyingMask |
                          ToggleLayerIgnoreUnderlyingMask |

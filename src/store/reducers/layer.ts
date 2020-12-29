@@ -149,6 +149,10 @@ import {
   SET_LAYERS_JUSTIFICATION,
   SET_LAYER_OBLIQUE,
   SET_LAYERS_OBLIQUE,
+  SET_LAYER_POINT_X,
+  SET_LAYERS_POINT_X,
+  SET_LAYER_POINT_Y,
+  SET_LAYERS_POINT_Y,
   SET_LAYER_FILL_TYPE,
   SET_LAYERS_FILL_TYPE,
   ADD_LAYERS_MASK,
@@ -348,6 +352,10 @@ import {
   setLayersJustification,
   setLayerOblique,
   setLayersOblique,
+  setLayerPointX,
+  setLayersPointX,
+  setLayerPointY,
+  setLayersPointY,
   setLayerText,
   setLayerFill,
   setLayerFillType,
@@ -803,6 +811,14 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return setLayerOblique(state, action);
     case SET_LAYERS_OBLIQUE:
       return setLayersOblique(state, action);
+    case SET_LAYER_POINT_X:
+      return setLayerPointX(state, action);
+    case SET_LAYERS_POINT_X:
+      return setLayersPointX(state, action);
+    case SET_LAYER_POINT_Y:
+      return setLayerPointY(state, action);
+    case SET_LAYERS_POINT_Y:
+      return setLayersPointY(state, action);
     case SET_LAYER_FILL:
       return setLayerFill(state, action);
     case SET_LAYER_FILL_TYPE:
@@ -1091,6 +1107,12 @@ export default undoable(baseReducer, {
       SET_LAYERS_FONT_FAMILY,
       SET_LAYER_JUSTIFICATION,
       SET_LAYERS_JUSTIFICATION,
+      SET_LAYER_OBLIQUE,
+      SET_LAYERS_OBLIQUE,
+      SET_LAYER_POINT_X,
+      SET_LAYERS_POINT_X,
+      SET_LAYER_POINT_Y,
+      SET_LAYERS_POINT_Y,
       ADD_LAYERS_MASK,
       TOGGLE_LAYER_IGNORE_UNDERLYING_MASK,
       TOGGLE_LAYERS_IGNORE_UNDERLYING_MASK,

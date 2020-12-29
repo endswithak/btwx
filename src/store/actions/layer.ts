@@ -182,6 +182,10 @@ import {
   SET_LAYERS_JUSTIFICATION,
   SET_LAYER_OBLIQUE,
   SET_LAYERS_OBLIQUE,
+  SET_LAYER_POINT_X,
+  SET_LAYERS_POINT_X,
+  SET_LAYER_POINT_Y,
+  SET_LAYERS_POINT_Y,
   SET_LAYER_FILL_TYPE,
   SET_LAYERS_FILL_TYPE,
   ADD_LAYERS_MASK,
@@ -391,6 +395,10 @@ import {
   SetLayersJustificationPayload,
   SetLayerObliquePayload,
   SetLayersObliquePayload,
+  SetLayerPointXPayload,
+  SetLayersPointXPayload,
+  SetLayerPointYPayload,
+  SetLayersPointYPayload,
   SetLayerFillPayload,
   SetLayerFillTypePayload,
   SetLayersFillTypePayload,
@@ -2078,16 +2086,6 @@ export const setLayersFontFamily = (payload: SetLayersFontFamilyPayload): LayerT
   payload
 });
 
-// export const setLayersFontFamilyThunk = (family: string) => {
-//   return (dispatch: any, getState: any): void => {
-//     const state = getState() as RootState;
-//     const selected = state.layer.present.selected;
-//     if (selected.length > 0) {
-//       dispatch(setLayersFontFamily({layers: selected, fontFamily: family}));
-//     }
-//   }
-// };
-
 export const setLayerJustification = (payload: SetLayerJustificationPayload): LayerTypes => ({
   type: SET_LAYER_JUSTIFICATION,
   payload
@@ -2105,6 +2103,26 @@ export const setLayerOblique = (payload: SetLayerObliquePayload): LayerTypes => 
 
 export const setLayersOblique = (payload: SetLayersObliquePayload): LayerTypes => ({
   type: SET_LAYERS_OBLIQUE,
+  payload
+});
+
+export const setLayerPointX = (payload: SetLayerPointXPayload): LayerTypes => ({
+  type: SET_LAYER_POINT_X,
+  payload
+});
+
+export const setLayersPointX = (payload: SetLayersPointXPayload): LayerTypes => ({
+  type: SET_LAYERS_POINT_X,
+  payload
+});
+
+export const setLayerPointY = (payload: SetLayerPointYPayload): LayerTypes => ({
+  type: SET_LAYER_POINT_Y,
+  payload
+});
+
+export const setLayersPointY = (payload: SetLayersPointYPayload): LayerTypes => ({
+  type: SET_LAYERS_POINT_Y,
   payload
 });
 
@@ -3767,7 +3785,12 @@ export const updateHoverFrame = (hoverItem: Btwx.Layer, artboardItem?: Btwx.Artb
       }
       case 'Text': {
         const textLayer = getPaperLayer(hoverItem.id, artboardItem.projectIndex);
-        const textLines = textLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
+        const clone = textLayer.clone({insert: false});
+        clone.rotation = -hoverItem.transform.rotation;
+        const textLines = clone.getItems({data: {id: 'textLine'}}) as paper.PointText[];
+        const textLinesGroup = new uiPaperScope.Group({
+          parent: hoverFrame
+        });
         textLines.forEach((line, index: number) => {
           new uiPaperScope.Path.Line({
             from: (() => {
@@ -3792,9 +3815,10 @@ export const updateHoverFrame = (hoverItem: Btwx.Layer, artboardItem?: Btwx.Artb
             })(),
             strokeColor: THEME_PRIMARY_COLOR,
             strokeWidth: 2 / uiPaperScope.view.zoom,
-            parent: hoverFrame
-          });
+            parent: textLinesGroup
+          })
         });
+        textLinesGroup.rotation = hoverItem.transform.rotation;
         break;
       }
       default:

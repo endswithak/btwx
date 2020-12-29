@@ -11,6 +11,7 @@ const EventsFrame = (): ReactElement => {
   const eventDrawerEventSort = useSelector((state: RootState) => state.eventDrawer.eventSort);
   const eventDrawerEventHover = useSelector((state: RootState) => state.eventDrawer.eventHover);
   const eventDrawerEvent = useSelector((state: RootState) => state.eventDrawer.event);
+  const allEventIds = useSelector((state: RootState) => state.layer.present.events.allIds);
   const zoom = useSelector((state: RootState) => state.documentSettings.zoom);
   const dispatch = useDispatch();
 
@@ -20,7 +21,7 @@ const EventsFrame = (): ReactElement => {
       const eventsFrame = uiPaperScope.projects[0].getItem({ data: { id: 'eventsFrame' } });
       eventsFrame.removeChildren();
     }
-  }, [activeArtboard, theme, eventDrawerEventSort, eventDrawerEventHover, eventDrawerEvent, activeArtboardEvents, zoom]);
+  }, [activeArtboard, theme, eventDrawerEventSort, eventDrawerEventHover, eventDrawerEvent, activeArtboardEvents, zoom, allEventIds]);
 
   return (
     <></>

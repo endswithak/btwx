@@ -1475,6 +1475,38 @@ export const getSelectedJustification = createSelector(
   }
 );
 
+export const getSelectedPointX = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Text;
+      if (!result) {
+        result = layerItem.point.x;
+      }
+      if (result && layerItem.point.x !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as number | 'multi';
+  }
+);
+
+export const getSelectedPointY = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Text;
+      if (!result) {
+        result = layerItem.point.y;
+      }
+      if (result && layerItem.point.y !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as number | 'multi';
+  }
+);
+
 export const getLayer = (store: LayerState, id: string): Btwx.Layer => {
   return store.byId[id] as Btwx.Layer;
 };
@@ -1925,19 +1957,31 @@ export const hasFillGradientDestinationYTween = (layerItem: Btwx.Layer, equivale
 };
 
 export const hasXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image' || layerItem.type === 'Text'; // || layerItem.type === 'Group';
-  const fontSizeMatch = layerItem.type === 'Text' && (layerItem as Btwx.Text).textStyle.fontSize === (equivalentLayerItem as Btwx.Text).textStyle.fontSize;
-  const leadingMatch = layerItem.type === 'Text' && (layerItem as Btwx.Text).textStyle.leading === (equivalentLayerItem as Btwx.Text).textStyle.leading;
+  const validType = (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image';
   const xMatch = layerItem.frame.x.toFixed(2) === equivalentLayerItem.frame.x.toFixed(2);
-  return (validType && !xMatch) || (layerItem.type === 'Text' && (!fontSizeMatch || !leadingMatch));
+  if (validType) {
+    return !xMatch;
+  } else {
+    if (layerItem.type === 'Text') {
+      return (layerItem as Btwx.Text).point.x.toFixed(2) !== (equivalentLayerItem as Btwx.Text).point.x.toFixed(2);
+    } else {
+      return false;
+    }
+  }
 };
 
 export const hasYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image' || layerItem.type === 'Text'; // || layerItem.type === 'Group';
-  const fontSizeMatch = layerItem.type === 'Text' && (layerItem as Btwx.Text).textStyle.fontSize === (equivalentLayerItem as Btwx.Text).textStyle.fontSize;
-  const leadingMatch = layerItem.type === 'Text' && (layerItem as Btwx.Text).textStyle.leading === (equivalentLayerItem as Btwx.Text).textStyle.leading;
+  const validType = (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image';
   const yMatch = layerItem.frame.y.toFixed(2) === equivalentLayerItem.frame.y.toFixed(2);
-  return (validType && !yMatch) || (layerItem.type === 'Text' && (!fontSizeMatch || !leadingMatch));
+  if (validType) {
+    return !yMatch;
+  } else {
+    if (layerItem.type === 'Text') {
+      return (layerItem as Btwx.Text).point.y.toFixed(2) !== (equivalentLayerItem as Btwx.Text).point.y.toFixed(2);
+    } else {
+      return false;
+    }
+  }
 };
 
 export const hasRotationTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
@@ -2082,6 +2126,12 @@ export const hasLineHeightTween = (layerItem: Btwx.Layer, equivalentLayerItem: B
   return validType && !leadingMatch;
 };
 
+export const hasJustificationTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const validType = layerItem.type === 'Text';
+  const justificationMatch = validType && (layerItem as Btwx.Text).textStyle.justification === (equivalentLayerItem as Btwx.Text).textStyle.justification;
+  return validType && !justificationMatch;
+};
+
 export const hasFromXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const validType = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   const fromXMatch = validType && (layerItem as Btwx.Line).from.x === (equivalentLayerItem as Btwx.Line).from.x;
@@ -2172,6 +2222,8 @@ export const getEquivalentTweenProp = (layerItem: Btwx.Layer, equivalentLayerIte
       return hasObliqueTween(layerItem, equivalentLayerItem);
     case 'lineHeight':
       return hasLineHeightTween(layerItem, equivalentLayerItem);
+    case 'justification':
+      return hasJustificationTween(layerItem, equivalentLayerItem);
     case 'fromX':
       return hasFromXTween(layerItem, equivalentLayerItem);
     case 'fromY':
@@ -2215,6 +2267,7 @@ export const getEquivalentTweenProps = (layerItem: Btwx.Layer, equivalentLayerIt
   fontWeight: hasFontWeightTween(layerItem, equivalentLayerItem),
   oblique: hasObliqueTween(layerItem, equivalentLayerItem),
   lineHeight: hasLineHeightTween(layerItem, equivalentLayerItem),
+  justification: hasJustificationTween(layerItem, equivalentLayerItem),
   fromX: hasFromXTween(layerItem, equivalentLayerItem),
   fromY: hasFromYTween(layerItem, equivalentLayerItem),
   toX: hasToXTween(layerItem, equivalentLayerItem),

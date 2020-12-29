@@ -10,6 +10,8 @@ import ObliqueInput from './ObliqueInput';
 import FontSizeInput from './FontSizeInput';
 import LeadingInput from './LeadingInput';
 import JustificationInput from './JustificationInput';
+import PointXInput from './PointXInput';
+import PointYInput from './PointYInput';
 import SidebarCollapseSection from './SidebarCollapseSection';
 
 const SidebarTextStyles = (): ReactElement => {
@@ -32,8 +34,11 @@ const SidebarTextStyles = (): ReactElement => {
         collapsed={textStylesCollapsed}
         header='text'>
         <SidebarSectionRow>
-          <SidebarSectionColumn width='100%'>
+          <SidebarSectionColumn width='66.66%'>
             <FontFamilyInput />
+          </SidebarSectionColumn>
+          <SidebarSectionColumn width='33.33%'>
+            <FontWeightInput />
           </SidebarSectionColumn>
         </SidebarSectionRow>
         <SidebarSectionRow>
@@ -44,11 +49,20 @@ const SidebarTextStyles = (): ReactElement => {
             <LeadingInput />
           </SidebarSectionColumn>
           <SidebarSectionColumn width='33.33%'>
+            <ObliqueInput />
+          </SidebarSectionColumn>
+        </SidebarSectionRow>
+        <SidebarSectionRow>
+          <SidebarSectionColumn width='33.33%'>
+            <PointXInput />
+          </SidebarSectionColumn>
+          <SidebarSectionColumn width='33.33%'>
+            <PointYInput />
+          </SidebarSectionColumn>
+          <SidebarSectionColumn width='33.33%'>
             <JustificationInput />
           </SidebarSectionColumn>
         </SidebarSectionRow>
-        <FontWeightInput />
-        <ObliqueInput />
       </SidebarCollapseSection>
     : null
   );

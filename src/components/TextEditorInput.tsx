@@ -5,6 +5,7 @@ import debounce from 'lodash.debounce';
 import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
 import { closeTextEditor } from '../store/actions/textEditor';
+import { setCanvasFocusing } from '../store/actions/canvasSettings';
 import { setLayerText } from '../store/actions/layer';
 import { getPaperLayer } from '../store/selectors/layer';
 import { uiPaperScope } from '../canvas';
@@ -50,6 +51,7 @@ const TextEditorInput = (): ReactElement => {
   }
 
   useEffect(() => {
+    dispatch(setCanvasFocusing({focusing: false}));
     if (textAreaRef.current) {
       document.addEventListener('mousedown', onMouseDown);
       const paperLayer = getPaperLayer(textEditor.layer, textEditor.projectIndex) as paper.PointText;
@@ -88,6 +90,7 @@ const TextEditorInput = (): ReactElement => {
       const paperLayer = getPaperLayer(textEditor.layer, textEditor.projectIndex) as paper.PointText;
       paperLayer.visible = true;
       debounceText(textAreaRef.current.value);
+      dispatch(setCanvasFocusing({focusing: true}));
     }
   }, []);
 
