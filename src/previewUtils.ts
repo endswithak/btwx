@@ -699,91 +699,190 @@ export const addStrokeWidthTween = (props: AddTweenProps): void => {
 
 export const addXTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
-  // const originLayerRelArtboardPosition = getPositionInArtboard(originLayerItem, originArtboardLayerItem);
-  // const destinationLayerRelArtboardPosition = getPositionInArtboard(destinationLayerItem, destinationArtboardLayerItem);
   const isText = originLayerItem.type === 'Text';
-  const textContent = isText ? originPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText : null;
-  const textBackground = isText ? originPaperLayer.getItem({data: {id: 'textBackground'}}) : null;
-  const textLines = isText ? originPaperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[] : null;
-  const xPointDiff = isText ? (() => {
+  if (isText) {
+    const originTextContent = originPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
+    const destinationTextContent = originPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
+    const textBackground = originPaperLayer.getItem({data: {id: 'textBackground'}});
+    const textLinesGroup = originPaperLayer.getItem({data: {id: 'textLines'}});
+    const textLines = originPaperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
     const originJustification = (originLayerItem as Btwx.Text).textStyle.justification;
     const destinationJustification = (destinationLayerItem as Btwx.Text).textStyle.justification;
-    let atDestinationX;
-    switch(originJustification) {
-      case 'left':
-        switch(destinationJustification) {
-          case 'left':
-            atDestinationX = (originLayerItem as Btwx.Text).point.x;
-            break;
-          case 'center':
-            atDestinationX = (originLayerItem as Btwx.Text).point.x + (originLayerItem.frame.innerWidth / 2);
-            break;
-          case 'right':
-            atDestinationX = (originLayerItem as Btwx.Text).point.x + originLayerItem.frame.innerWidth;
-            break;
-        }
-        break;
-      case 'center':
-        switch(destinationJustification) {
-          case 'left':
-            atDestinationX = (originLayerItem as Btwx.Text).point.x - (originLayerItem.frame.innerWidth / 2);
-            break;
-          case 'center':
-            atDestinationX = (originLayerItem as Btwx.Text).point.x;
-            break;
-          case 'right':
-            atDestinationX = (originLayerItem as Btwx.Text).point.x + (originLayerItem.frame.innerWidth / 2);
-            break;
-        }
-        break;
-      case 'right':
-        switch(destinationJustification) {
-          case 'left':
-            atDestinationX = (originLayerItem as Btwx.Text).point.x - originLayerItem.frame.innerWidth;
-            break;
-          case 'center':
-            atDestinationX = (originLayerItem as Btwx.Text).point.x - (originLayerItem.frame.innerWidth / 2);
-            break;
-          case 'right':
-            atDestinationX = (originLayerItem as Btwx.Text).point.x;
-            break;
-        }
-        break;
-    }
-    return (destinationLayerItem as Btwx.Text).point.x - atDestinationX;
-  })() : null;
-  const frameDiff = destinationLayerItem.frame.x - originLayerItem.frame.x;
-  const originPaperLayerPositionDiffX = isText ? xPointDiff : frameDiff;
-  const originX = (() => {
-    const clone = originPaperLayer.clone({insert: false});
-    clone.rotation = -originLayerItem.transform.rotation;
-    const tc = clone.getItem({data: {id: 'textContent'}}) as paper.PointText;
-    return tc.point.x;
-  })();
-  timelineTweenProps[tween.prop] = originLayerItem.type === 'Image' ? originPaperLayer.getItem({data: {id: 'raster'}}).position.x : isText ? originX : originPaperLayer.position.x;
-  timeline.to(timelineTweenProps, {
-    duration: tween.duration,
-    [tween.prop]: `+=${originPaperLayerPositionDiffX}`,
-    onUpdate: () => {
-      if (isText) {
-        const startRotation = originPaperLayer.data.rotation || originPaperLayer.data.rotation === 0 ? originPaperLayer.data.rotation : originLayerItem.transform.rotation;
-        const currentSkew = originPaperLayer.data.skew || originPaperLayer.data.skew === 0 ? originPaperLayer.data.skew : (originLayerItem as Btwx.Text).textStyle.oblique;
-        originPaperLayer.rotation = -startRotation;
-        const diff = timelineTweenProps[tween.prop] - textContent.point.x;
-        textContent.point.x = timelineTweenProps[tween.prop];
-        textBackground.bounds = textContent.bounds;
-        textLines.forEach((line) => {
-          line.skew(currentSkew, 0);
-          line.point.x += diff;
-          line.skew(-currentSkew, 0);
-        });
-        originPaperLayer.rotation = startRotation;
-      } else {
-        originPaperLayer.position.x = timelineTweenProps[tween.prop];
+    const originClone = originPaperLayer.clone({insert: false});
+    const destinationClone = destinationPaperLayer.clone({insert: false});
+    const originCloneLines = originClone.getItems({data: {id: 'textLine'}}) as paper.PointText[];
+    const originCloneContent = originClone.getItem({data: {id: 'textContent'}}) as paper.PointText;
+    const destinationCloneContent = destinationClone.getItem({data: {id: 'textContent'}}) as paper.PointText;
+    originClone.rotation = -originLayerItem.transform.rotation;
+    destinationClone.rotation = -destinationLayerItem.transform.rotation;
+    // textLines.forEach((line, index) => {
+    //   const originLine = originCloneLines[index];
+    //   originLine.skew(new paperPreview.Point((originLayerItem as Btwx.Text).textStyle.oblique, 0));
+    //   let bounds: 'left' | 'right' | 'center';
+    //   let start;
+    //   let absStart;
+    //   let end;
+    //   let diff;
+    //   switch(destinationJustification) {
+    //     case 'left':
+    //       bounds = 'left';
+    //       absStart = originLine.bounds.left;
+    //       start = originLine.bounds.left - originArtboardPaperLayer.bounds.left;
+    //       end = destinationCloneContent.bounds.left - destinationArtboardPaperLayer.bounds.left;
+    //       diff = end - start;
+    //       break;
+    //     case 'center':
+    //       bounds = 'center';
+    //       absStart = originLine.bounds.center.x;
+    //       start = originLine.bounds.center.x - originArtboardPaperLayer.bounds.center.x;
+    //       end = destinationCloneContent.bounds.center.x - destinationArtboardPaperLayer.bounds.center.x;
+    //       diff = end - start;
+    //       break;
+    //     case 'right':
+    //       bounds = 'right';
+    //       absStart = originLine.bounds.right;
+    //       start = originLine.bounds.right - originArtboardPaperLayer.bounds.right;
+    //       end = destinationCloneContent.bounds.right - destinationArtboardPaperLayer.bounds.right;
+    //       diff = end - start;
+    //       break;
+    //   }
+    //   const lineProp = `${tween.prop}-line-${index}`;
+    //   timelineTweenProps[lineProp] = absStart;
+    //   timeline.to(timelineTweenProps, {
+    //     duration: tween.duration,
+    //     [lineProp]: `+=${diff}`,
+    //     onUpdate: () => {
+    //       const startRotation = originPaperLayer.data.rotation || originPaperLayer.data.rotation === 0 ? originPaperLayer.data.rotation : originLayerItem.transform.rotation;
+    //       const startSkew = originPaperLayer.data.skew || originPaperLayer.data.skew === 0 ? originPaperLayer.data.skew : (originLayerItem as Btwx.Text).textStyle.oblique;
+    //       // leading affects horizontal skew
+    //       const startLeading = line.leading;
+    //       originPaperLayer.rotation = -startRotation;
+    //       line.leading = line.fontSize;
+    //       line.skew(new paperPreview.Point(startSkew, 0));
+    //       if (bounds === 'center') {
+    //         line.bounds[bounds].x = timelineTweenProps[lineProp];
+    //       } else {
+    //         line.bounds[bounds] = timelineTweenProps[lineProp];
+    //       }
+    //       line.skew(new paperPreview.Point(-startSkew, 0));
+    //       line.leading = startLeading;
+    //       originPaperLayer.rotation = startRotation;
+    //     },
+    //     ease: tween.ease,
+    //   }, tween.delay);
+    // });
+    const linesData = textLines.reduce((result, current, index) => {
+      const originLine = originCloneLines[index];
+      originLine.leading = originLine.fontSize;
+      originLine.skew(new paperPreview.Point((originLayerItem as Btwx.Text).textStyle.oblique, 0));
+      let bounds: 'left' | 'right' | 'center';
+      let start;
+      let absStart;
+      let end;
+      let diff;
+      let contentStart;
+      let contentAbsStart;
+      switch(destinationJustification) {
+        case 'left':
+          bounds = 'left';
+          absStart = originLine.bounds.left;
+          contentStart = originCloneContent.bounds.left - originArtboardPaperLayer.bounds.left;
+          contentAbsStart = originCloneContent.bounds.left;
+          start = originLine.bounds.left - originArtboardPaperLayer.bounds.left;
+          end = destinationCloneContent.bounds.left - destinationArtboardPaperLayer.bounds.left;
+          diff = end - start;
+          break;
+        case 'center':
+          bounds = 'center';
+          absStart = originLine.bounds.center.x;
+          contentStart = originCloneContent.bounds.center.x - originArtboardPaperLayer.bounds.center.x;
+          contentAbsStart = originCloneContent.bounds.center.x;
+          start = originLine.bounds.center.x - originArtboardPaperLayer.bounds.center.x;
+          end = destinationCloneContent.bounds.center.x - destinationArtboardPaperLayer.bounds.center.x;
+          diff = end - start;
+          break;
+        case 'right':
+          bounds = 'right';
+          absStart = originLine.bounds.right;
+          contentStart = originCloneContent.bounds.right - originArtboardPaperLayer.bounds.right;
+          contentAbsStart = originCloneContent.bounds.right;
+          start = originLine.bounds.right - originArtboardPaperLayer.bounds.right;
+          end = destinationCloneContent.bounds.right - destinationArtboardPaperLayer.bounds.right;
+          diff = end - start;
+          break;
       }
-    },
-    ease: tween.ease,
-  }, tween.delay);
+      return {
+        ...result,
+        [index]: { bounds, absStart, start, end, diff },
+        ...(() => {
+          if (index === 0) {
+            return {
+              [textLines.length]: {
+                bounds,
+                absStart: contentAbsStart,
+                start: contentStart,
+                end,
+                diff: end - contentStart
+              }
+            }
+          } else {
+            return {};
+          }
+        })()
+      }
+    }, {} as { [id: number]: { bounds: 'left' | 'center' | 'right'; absStart: number; start: number; end: number; diff: number } });
+    timelineTweenProps[tween.prop] = 0;
+    timeline.to(timelineTweenProps, {
+      duration: tween.duration,
+      [tween.prop]: 1,
+      onUpdate: () => {
+        const startRotation = originPaperLayer.data.rotation || originPaperLayer.data.rotation === 0 ? originPaperLayer.data.rotation : originLayerItem.transform.rotation;
+        const startSkew = originPaperLayer.data.skew || originPaperLayer.data.skew === 0 ? originPaperLayer.data.skew : (originLayerItem as Btwx.Text).textStyle.oblique;
+        const contentData = linesData[textLines.length];
+        const nextContentPosition = contentData.absStart + (contentData.diff * timelineTweenProps[tween.prop]);
+        // remove rotation
+        originPaperLayer.rotation = -startRotation;
+        // update text content
+        if (contentData.bounds === 'center') {
+          originTextContent.bounds[contentData.bounds].x = nextContentPosition;
+        } else {
+          originTextContent.bounds[contentData.bounds] = nextContentPosition;
+        }
+        // update text lines
+        textLines.forEach((line, index) => {
+          const lineData = linesData[index];
+          // leading affects horizontal skew
+          // const startLeading = line.leading;
+          const nextPosition = lineData.absStart + (lineData.diff * timelineTweenProps[tween.prop]);
+          line.leading = line.fontSize;
+          line.skew(new paperPreview.Point(startSkew, 0));
+          if (lineData.bounds === 'center') {
+            line.bounds[lineData.bounds].x = nextPosition;
+          } else {
+            line.bounds[lineData.bounds] = nextPosition;
+          }
+          line.skew(new paperPreview.Point(-startSkew, 0));
+          // line.leading = startLeading;
+        });
+        // update text background
+        textBackground.bounds = originTextContent.bounds;
+        // apply rotation
+        originPaperLayer.rotation = startRotation;
+      },
+      ease: tween.ease,
+    }, tween.delay);
+  } else {
+    const originPaperLayerPositionDiffX = destinationLayerItem.frame.x - originLayerItem.frame.x;
+    timelineTweenProps[tween.prop] = originLayerItem.type === 'Image' ? originPaperLayer.getItem({data: {id: 'raster'}}).position.x : originPaperLayer.position.x;
+    timeline.to(timelineTweenProps, {
+      duration: tween.duration,
+      [tween.prop]: `+=${originPaperLayerPositionDiffX}`,
+      onUpdate: () => {
+        originPaperLayer.position.x = timelineTweenProps[tween.prop];
+      },
+      ease: tween.ease,
+    }, tween.delay);
+  }
 };
 
 export const addYTween = (props: AddTweenProps): void => {
@@ -793,6 +892,7 @@ export const addYTween = (props: AddTweenProps): void => {
   const isText = originLayerItem.type === 'Text';
   const textContent = isText ? originPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText : null;
   const textBackground = isText ? originPaperLayer.getItem({data: {id: 'textBackground'}}) : null;
+  const textLinesGroup = isText ? originPaperLayer.getItem({data: {id: 'textLines'}}) : null;
   const textLines = isText ? originPaperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[] : null;
   const yPointDiff = isText ? (destinationLayerItem as Btwx.Text).point.y - (originLayerItem as Btwx.Text).point.y : null;
   const frameDiff = destinationLayerItem.frame.y - originLayerItem.frame.y;
@@ -811,10 +911,12 @@ export const addYTween = (props: AddTweenProps): void => {
       if (isText) {
         const startRotation = originPaperLayer.data.rotation || originPaperLayer.data.rotation === 0 ? originPaperLayer.data.rotation : originLayerItem.transform.rotation;
         originPaperLayer.rotation = -startRotation;
+        const diff = timelineTweenProps[tween.prop] - textContent.point.y;
         textContent.point.y = timelineTweenProps[tween.prop];
         textBackground.bounds = textContent.bounds;
+        // textLinesGroup.position.y += diff;
         textLines.forEach((line, index) => {
-          line.point.y = timelineTweenProps[tween.prop] + (index * textContent.leading as number);
+          line.point.y += diff;
         });
         originPaperLayer.rotation = startRotation;
       } else {
@@ -1033,7 +1135,7 @@ export const addFontSizeTween = (props: AddTweenProps): void => {
       originPaperLayer.data.innerWidth = originPaperLayer.bounds.width;
       originPaperLayer.data.innerHeight = originPaperLayer.bounds.height;
       originPaperLayer.rotation = startRotation;
-      // originPaperLayer.position = startPosition.add(new paperPreview.Point(diffX, diffY));
+      // originPaperLayer.position = startPosition;
       updateGradients(props);
     },
     ease: tween.ease,
@@ -1062,7 +1164,7 @@ export const addFontWeightTween = (props: AddTweenProps): void => {
       originPaperLayer.data.innerWidth = originPaperLayer.bounds.width;
       originPaperLayer.data.innerHeight = originPaperLayer.bounds.height;
       originPaperLayer.rotation = startRotation;
-      // originPaperLayer.position = startPosition.add(new paperPreview.Point(diffX, diffY));
+      // originPaperLayer.position = startPosition;
       updateGradients(props);
     },
     ease: tween.ease,
@@ -1078,17 +1180,21 @@ export const addObliqueTween = (props: AddTweenProps): void => {
     duration: tween.duration,
     [tween.prop]: (destinationLayerItem as Btwx.Text).textStyle.oblique,
     onUpdate: () => {
-      const startPosition = originPaperLayer.position;
+      // const startPosition = originPaperLayer.position;
       const startRotation = originPaperLayer.data.rotation || originPaperLayer.data.rotation === 0 ? originPaperLayer.data.rotation : originLayerItem.transform.rotation;
       const startSkew = originPaperLayer.data.skew || originPaperLayer.data.skew === 0 ? originPaperLayer.data.skew : (originLayerItem as Btwx.Text).textStyle.oblique;
       originPaperLayer.rotation = -startRotation;
       originTextLines.forEach((line) => {
+        // leading affects horizontal skew
+        // const startLeading = line.leading;
+        line.leading = line.fontSize;
         line.skew(new paperPreview.Point(startSkew, 0));
         line.skew(new paperPreview.Point(-timelineTweenProps[tween.prop], 0));
+        // line.leading = startLeading;
       });
       originPaperLayer.data.skew = timelineTweenProps[tween.prop];
       originPaperLayer.rotation = startRotation;
-      originPaperLayer.position = startPosition;
+      // originPaperLayer.position = startPosition;
       updateGradients(props);
     },
     ease: tween.ease,
@@ -1109,11 +1215,13 @@ export const addLineHeightTween = (props: AddTweenProps): void => {
       // const startPosition = originPaperLayer.position;
       const startRotation = originPaperLayer.data.rotation || originPaperLayer.data.rotation === 0 ? originPaperLayer.data.rotation : originLayerItem.transform.rotation;
       originPaperLayer.rotation = -startRotation;
+      const diff = timelineTweenProps[tween.prop] - originTextContent.leading;
       originTextContent.leading = timelineTweenProps[tween.prop];
       originTextBackground.bounds = originTextContent.bounds;
       originTextLines.forEach((line: paper.PointText, index: number) => {
-        line.leading = timelineTweenProps[tween.prop];
-        line.point.y = originTextContent.point.y + (index * timelineTweenProps[tween.prop]);
+        // line.leading = timelineTweenProps[tween.prop];
+        // line.point.y = originTextContent.point.y + (index * timelineTweenProps[tween.prop]);
+        line.point.y += (diff * index);
       });
       originPaperLayer.data.innerHeight = originPaperLayer.bounds.height;
       originPaperLayer.rotation = startRotation;
@@ -1124,90 +1232,178 @@ export const addLineHeightTween = (props: AddTweenProps): void => {
   }, tween.delay);
 };
 
-export const addJustificationTween = (props: AddTweenProps): void => {
-  const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
-  const originTextContent = originPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
-  const destinationTextContent = destinationPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
-  const originTextLines = originPaperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
-  const destinationTextLines = destinationPaperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
-  const originJustification = (originLayerItem as Btwx.Text).textStyle.justification;
-  const destinationJustification = (destinationLayerItem as Btwx.Text).textStyle.justification;
-  const widthDiff = destinationLayerItem.frame.innerWidth - originLayerItem.frame.innerWidth;
-  timelineTweenProps[tween.prop] = 0;
-  timeline.to(timelineTweenProps, {
-    duration: tween.duration,
-    [tween.prop]: 1, // `+=${pointDiff}`,
-    onUpdate: () => {
-      const startRotation = originPaperLayer.data.rotation || originPaperLayer.data.rotation === 0 ? originPaperLayer.data.rotation : originLayerItem.transform.rotation;
-      const startSkew = originPaperLayer.data.skew || originPaperLayer.data.skew === 0 ? originPaperLayer.data.skew : (originLayerItem as Btwx.Text).textStyle.oblique;
-      originPaperLayer.rotation = -startRotation;
-      originTextLines.forEach((line: paper.PointText, index: number) => {
-        line.skew(new paperPreview.Point(startSkew, 0));
-        switch(originJustification) {
-          case 'left':
-            switch(destinationJustification) {
-              case 'center': {
-                const lineWidthDiff = (originTextContent.bounds.width - line.bounds.width) - widthDiff;
-                const nextMove = (lineWidthDiff / 2) * timelineTweenProps[tween.prop];
-                const nextX = originTextContent.point.x + nextMove;
-                line.point.x = nextX;
-                break;
-              }
-              case 'right': {
-                const lineWidthDiff = (originTextContent.bounds.width - line.bounds.width) - widthDiff; // (destinationTextContent.bounds.width - destinationTextLines[index].bounds.width) - widthDiff;
-                const nextMove = lineWidthDiff * timelineTweenProps[tween.prop];
-                const nextX = originTextContent.point.x + nextMove;
-                line.point.x = nextX;
-                break;
-              }
-            }
-            break;
-          case 'center':
-            switch(destinationJustification) {
-              case 'left': {
-                const lineWidthDiff = (originTextContent.bounds.width - line.bounds.width) - widthDiff;
-                const nextMove = (lineWidthDiff / 2) * timelineTweenProps[tween.prop];
-                const nextX = originTextContent.point.x - nextMove;
-                line.point.x = nextX;
-                break;
-              }
-              case 'right': {
-                const lineWidthDiff = (originTextContent.bounds.width - line.bounds.width) - widthDiff;
-                const nextMove = (lineWidthDiff / 2) * timelineTweenProps[tween.prop];
-                const nextX = originTextContent.point.x + nextMove;
-                line.point.x = nextX;
-                break;
-              }
-            }
-            break;
-          case 'right':
-            switch(destinationJustification) {
-              case 'left': {
-                const lineWidthDiff = (originTextContent.bounds.width - line.bounds.width) - widthDiff; // (destinationTextContent.bounds.width - destinationTextLines[index].bounds.width) - widthDiff;
-                const nextMove = lineWidthDiff * timelineTweenProps[tween.prop];
-                const nextX = originTextContent.point.x - nextMove;
-                line.point.x = nextX;
-                break;
-              }
-              case 'center': {
-                const lineWidthDiff = (originTextContent.bounds.width - line.bounds.width) - widthDiff;
-                const nextMove = (lineWidthDiff / 2) * timelineTweenProps[tween.prop];
-                const nextX = originTextContent.point.x - nextMove;
-                line.point.x = nextX;
-                break;
-              }
-            }
-            break;
-        }
-        line.skew(new paperPreview.Point(-startSkew, 0));
-      });
-      originPaperLayer.rotation = startRotation;
-      // originPaperLayer.position = startPosition;
-      updateGradients(props);
-    },
-    ease: tween.ease,
-  }, tween.delay);
-};
+// export const addJustificationTween = (props: AddTweenProps): void => {
+//   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
+//   const originTextContent = originPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
+//   const destinationTextContent = destinationPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
+//   const originTextLines = originPaperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
+//   const originTextLinesGroup = originPaperLayer.getItem({data: {id: 'textLines'}});
+//   const destinationTextLines = destinationPaperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
+//   const originJustification = (originLayerItem as Btwx.Text).textStyle.justification;
+//   const destinationJustification = (destinationLayerItem as Btwx.Text).textStyle.justification;
+  // const originClone = originPaperLayer.clone({insert: false});
+  // const originCloneLines = originClone.getItems({data: {id: 'textLine'}}) as paper.PointText[];
+  // const originCloneContent = originClone.getItem({data: {id: 'textContent'}}) as paper.PointText;
+  // const groupWidthDiff = destinationLayerItem.frame.innerWidth - originLayerItem.frame.innerWidth;
+  // originClone.rotation = -originLayerItem.transform.rotation;
+  // // originCloneLines.forEach((ocl) => {
+  // //   ocl.skew(new paperPreview.Point((originLayerItem as Btwx.Text).textStyle.oblique, 0));
+  // // });
+  // const lineWidthDiff = originCloneLines.reduce((result, current, index) => {
+  //   current.skew(new paperPreview.Point((originLayerItem as Btwx.Text).textStyle.oblique, 0));
+  //   // const originLine = originCloneLines[index];
+  //   // let start;
+  //   // let end;
+  //   // switch(originJustification) {
+  //   //   case 'left':
+  //   //     start = originLine.bounds.right - originArtboardPaperLayer.position.x;
+  //   //     end = destinationTextContent.bounds.right - destinationArtboardPaperLayer.position.x;
+  //   //     break;
+  //   //   case 'center':
+  //   //     switch(destinationJustification) {
+  //   //       case 'left':
+  //   //         start = originLine.bounds.left - originArtboardPaperLayer.position.x;
+  //   //         end = destinationTextContent.bounds.left - destinationArtboardPaperLayer.position.x;
+  //   //         break;
+  //   //       case 'right':
+  //   //         start = originLine.bounds.right - originArtboardPaperLayer.position.x;
+  //   //         end = destinationTextContent.bounds.right - destinationArtboardPaperLayer.position.x;
+  //   //         break;
+  //   //     }
+  //   //     break;
+  //   //   case 'right':
+  //   //     start = originLine.bounds.left - originArtboardPaperLayer.position.x;
+  //   //     end = destinationTextContent.bounds.left - destinationArtboardPaperLayer.position.x;
+  //   //     break;
+  //   // }
+  //   // result = [...result, end - start];
+  //   result = [...result, originCloneContent.bounds.width - current.bounds.width];
+  //   return result;
+  // }, []);
+//   timelineTweenProps[tween.prop] = 0;
+//   timeline.to(timelineTweenProps, {
+//     duration: tween.duration,
+//     [tween.prop]: 1,
+//     onUpdate: () => {
+//       const startRotation = originPaperLayer.data.rotation || originPaperLayer.data.rotation === 0 ? originPaperLayer.data.rotation : originLayerItem.transform.rotation;
+//       const startSkew = originPaperLayer.data.skew || originPaperLayer.data.skew === 0 ? originPaperLayer.data.skew : (originLayerItem as Btwx.Text).textStyle.oblique;
+//       const startJustification = originPaperLayer.data.justification || originPaperLayer.data.justification === 0 ? originPaperLayer.data.justification : 0;
+//       //const startPosition = originPaperLayer.position;
+//       originPaperLayer.rotation = -startRotation;
+//       // const startLeft = originTextContent.bounds.left;
+//       // const startRight = originTextContent.bounds.right;
+//       originTextLines.forEach((line, index) => {
+//         const diff = timelineTweenProps[tween.prop] - startJustification;
+//         const widthDiff = lineWidthDiff[index] * diff;
+//         // const move = lineWidthDiff[index] * timelineTweenProps[tween.prop];
+//         line.skew(new paperPreview.Point(startSkew, 0));
+//         switch(originJustification) {
+//           case 'left':
+//             // line.position.x += widthDiff;
+//             switch(destinationJustification) {
+//               case 'center':
+//                 break;
+//               case 'right': {
+//                 // line.point.x = originTextContent.point.x;
+//                 line.point.x += widthDiff;
+//                 // line.point.x = originTextContent.point.x;
+//                 // const distance = originTextContent.bounds.right - line.bounds.right;
+//                 // const newX = distance * timelineTweenProps[tween.prop];
+//                 // line.bounds.right += newX;
+//                 break;
+//               }
+//             }
+//             break;
+//           case 'center':
+//             switch(destinationJustification) {
+//               case 'left':
+//                 // line.bounds.left = timelineTweenProps[`${tween.prop}-line-${index}`];
+//                 break;
+//               case 'right':
+//                 // line.bounds.right = timelineTweenProps[`${tween.prop}-line-${index}`];
+//                 break;
+//             }
+//             break;
+//           case 'right':
+//             // line.point.x = originTextContent.point.x;
+//             line.position.x -= widthDiff;
+//             // switch(destinationJustification) {
+//             //   case 'left': {
+//             //     line.point.x = originTextContent.point.x;
+//             //     const distance = originTextContent.bounds.left - line.bounds.left;
+//             //     const newX = distance * timelineTweenProps[tween.prop];
+//             //     line.bounds.left += newX;
+//             //     break;
+//             //   }
+//             //   case 'center': {
+//             //     break;
+//             //   }
+//             // }
+//             break;
+//         }
+//         line.skew(new paperPreview.Point(-startSkew, 0));
+//       });
+//       originPaperLayer.data.justification = timelineTweenProps[tween.prop];
+//       originPaperLayer.rotation = startRotation;
+//       // originTextLinesGroup.position = startPosition;
+//       updateGradients(props);
+//     },
+//     ease: tween.ease,
+//   }, tween.delay);
+//   // originTextLines.forEach((line, index) => {
+//   //   timelineTweenProps[`${tween.prop}-line-${index}`] = (() => {
+//   //     switch(originJustification) {
+//   //       case 'left':
+//   //         return originCloneLines[index].bounds.right;
+//   //       case 'center':
+//   //         switch(destinationJustification) {
+//   //           case 'left':
+//   //             return originCloneLines[index].bounds.left;
+//   //           case 'right':
+//   //             return originCloneLines[index].bounds.right;
+//   //         }
+//   //         break;
+//   //       case 'right':
+//   //         return originCloneLines[index].bounds.left;
+//   //     }
+//   //   })();
+//   //   timeline.to(timelineTweenProps, {
+//   //     duration: tween.duration,
+//   //     [`${tween.prop}-line-${index}`]: `+=${lineWidthDiff[index]}`,
+//   //     onUpdate: () => {
+//   //       const startRotation = originPaperLayer.data.rotation || originPaperLayer.data.rotation === 0 ? originPaperLayer.data.rotation : originLayerItem.transform.rotation;
+//   //       const startSkew = originPaperLayer.data.skew || originPaperLayer.data.skew === 0 ? originPaperLayer.data.skew : (originLayerItem as Btwx.Text).textStyle.oblique;
+//   //       originPaperLayer.rotation = -startRotation;
+//   //       line.skew(new paperPreview.Point(startSkew, 0));
+//   //       switch(originJustification) {
+//   //         case 'left':
+//   //           line.bounds.right = timelineTweenProps[`${tween.prop}-line-${index}`];
+//   //           originTextLinesGroup.position = originTextContent.position;
+//   //           break;
+//   //         case 'center':
+//   //           switch(destinationJustification) {
+//   //             case 'left':
+//   //               line.bounds.left = timelineTweenProps[`${tween.prop}-line-${index}`];
+//   //               break;
+//   //             case 'right':
+//   //               line.bounds.right = timelineTweenProps[`${tween.prop}-line-${index}`];
+//   //               break;
+//   //           }
+//   //           break;
+//   //         case 'right':
+//   //           line.bounds.left = timelineTweenProps[`${tween.prop}-line-${index}`];
+//   //           originTextLinesGroup.position = originTextContent.position;
+//   //           break;
+//   //       }
+//   //       line.skew(new paperPreview.Point(-startSkew, 0));
+//   //       originPaperLayer.rotation = startRotation;
+//   //       // originTextLinesGroup.position = startPosition;
+//   //       updateGradients(props);
+//   //     },
+//   //     ease: tween.ease,
+//   //   }, tween.delay);
+//   // });
+// };
 
 export const addFromXTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;

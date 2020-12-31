@@ -1565,7 +1565,16 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
     const clone = paperLayer.clone({insert: false});
     clone.rotation = -layerItem.transform.rotation;
     const textContent = clone.getItem({data: {id: 'textContent'}}) as paper.PointText;
-    const pointInArtboard = textContent.point.subtract(artboardItems.paperLayer.position);
+    const pointInArtboard = (() => {
+      switch((layerItem as Btwx.Text).textStyle.justification) {
+        case 'left':
+          return textContent.point.subtract(artboardItems.paperLayer.position);
+        case 'center':
+          return new uiPaperScope.Point(textContent.point.x - (textContent.bounds.width / 2), textContent.point.y).subtract(artboardItems.paperLayer.position);
+        case 'right':
+          return new uiPaperScope.Point(textContent.point.x - textContent.bounds.width, textContent.point.y).subtract(artboardItems.paperLayer.position);
+      }
+    })();
     const positionInArtboard = textContent.position.subtract(artboardItems.paperLayer.position);
     currentState = {
       ...currentState,
@@ -2797,13 +2806,13 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
-  const startPosition = layerItem.type === 'Text' ? paperLayer.getItem({data: { id: 'textContent' }}).position : paperLayer.position;
+  // const startPosition = layerItem.type === 'Text' ? paperLayer.getItem({data: { id: 'textContent' }}).position : paperLayer.position;
   const isShape = layerItem.type === 'Shape';
   const isLine = isShape && (layerItem as Btwx.Shape).shapeType === 'Line';
   if (layerItem.type !== 'Group') {
     paperLayer.rotation = -layerItem.transform.rotation;
     paperLayer.rotation = action.payload.rotation;
-    paperLayer.position = startPosition;
+    // paperLayer.position = startPosition;
   }
   currentState = {
     ...currentState,
@@ -4819,6 +4828,7 @@ export const setLayerText = (state: LayerState, action: SetLayerText): LayerStat
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const textContent = paperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
   const textBackground = paperLayer.getItem({data: {id: 'textBackground'}}) as paper.PointText;
+  const textLinesGroup = paperLayer.getItem({data: {id: 'textLines'}});
   const textLines = paperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
   paperLayer.rotation = -layerItem.transform.rotation;
   const originalPoint = textContent.point;
@@ -4835,10 +4845,12 @@ export const setLayerText = (state: LayerState, action: SetLayerText): LayerStat
         point: new uiPaperScope.Point(originalPoint.x, originalPoint.y + (i * (layerItem as Btwx.Text).textStyle.leading)),
         content: (textContent as any)._lines[i],
         style: textContent.style,
-        parent: paperLayer,
+        parent: textLinesGroup,
         data: { id: 'textLine', type: 'LayerChild', layerType: 'Text' }
       });
+      newLine.leading = newLine.fontSize;
       newLine.skew(new uiPaperScope.Point(-(layerItem as Btwx.Text).textStyle.oblique, 0));
+      newLine.leading = textContent.leading;
     }
   }
   paperLayer.rotation = layerItem.transform.rotation;
@@ -4906,7 +4918,7 @@ export const setLayerFontSize = (state: LayerState, action: SetLayerFontSize): L
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fontSize', 'justification']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fontSize', 'x']);
   // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fontSize', 'x', 'y']);
   // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x']);
   // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
@@ -4967,7 +4979,7 @@ export const setLayerFontWeight = (state: LayerState, action: SetLayerFontWeight
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fontWeight', 'x', 'justification']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fontWeight', 'x']);
   // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y', 'fontWeight']);
   // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
   if (layerItem.style.fill.fillType === 'gradient') {
@@ -5027,7 +5039,7 @@ export const setLayerFontFamily = (state: LayerState, action: SetLayerFontFamily
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y', 'justification']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y']);
   // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
   if (layerItem.style.fill.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'fill', gradient: layerItem.style.fill.gradient}) as SetLayerGradient);
@@ -5069,7 +5081,6 @@ export const setLayerLeading = (state: LayerState, action: SetLayerLeading): Lay
   textContent.leading = action.payload.leading;
   textBackground.bounds = textContent.bounds;
   textLines.forEach((line: paper.PointText, index: number) => {
-    line.leading = action.payload.leading;
     line.point.y = textContent.point.y + (index * action.payload.leading);
   });
   paperLayer.rotation = layerItem.transform.rotation;
@@ -5124,13 +5135,11 @@ export const setLayerJustification = (state: LayerState, action: SetLayerJustifi
   const textContent = paperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
   const textBackground = paperLayer.getItem({data: {id: 'textBackground'}}) as paper.PointText;
   const textLines = paperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
+  // const textLinesGroup = paperLayer.getItem({data: {id: 'textLines'}});
   const prevJustification = textContent.justification;
   const originalPosition = paperLayer.position;
   paperLayer.rotation = -layerItem.transform.rotation;
   textContent.justification = action.payload.justification;
-  textLines.forEach((line: paper.PointText) => {
-    line.justification = action.payload.justification;
-  });
   switch(prevJustification) {
     case 'left':
       switch(action.payload.justification) {
@@ -5138,15 +5147,9 @@ export const setLayerJustification = (state: LayerState, action: SetLayerJustifi
           break;
         case 'center':
           textContent.position.x += textContent.bounds.width / 2;
-          textLines.forEach((line: paper.PointText) => {
-            line.position.x += textContent.bounds.width / 2;
-          });
           break;
         case 'right':
           textContent.position.x += textContent.bounds.width;
-          textLines.forEach((line: paper.PointText) => {
-            line.position.x += textContent.bounds.width;
-          });
           break;
       }
       break;
@@ -5154,17 +5157,11 @@ export const setLayerJustification = (state: LayerState, action: SetLayerJustifi
       switch(action.payload.justification) {
         case 'left':
           textContent.position.x -= textContent.bounds.width / 2;
-          textLines.forEach((line: paper.PointText) => {
-            line.position.x -= textContent.bounds.width / 2;
-          });
           break;
         case 'center':
           break;
         case 'right':
           textContent.position.x += textContent.bounds.width / 2;
-          textLines.forEach((line: paper.PointText) => {
-            line.position.x += textContent.bounds.width / 2;
-          });
           break;
       }
       break;
@@ -5172,21 +5169,23 @@ export const setLayerJustification = (state: LayerState, action: SetLayerJustifi
       switch(action.payload.justification) {
         case 'left':
           textContent.position.x -= textContent.bounds.width;
-          textLines.forEach((line: paper.PointText) => {
-            line.position.x -= textContent.bounds.width;
-          });
           break;
         case 'center':
           textContent.position.x -= textContent.bounds.width / 2;
-          textLines.forEach((line: paper.PointText) => {
-            line.position.x -= textContent.bounds.width / 2;
-          });
           break;
         case 'right':
           break;
       }
       break;
   }
+  textLines.forEach((line: paper.PointText) => {
+    // leading affects skew
+    line.leading = (layerItem as Btwx.Text).textStyle.fontSize;
+    line.skew(new uiPaperScope.Point((layerItem as Btwx.Text).textStyle.oblique, 0));
+    line.justification = action.payload.justification;
+    line.point.x = textContent.point.x;
+    line.skew(new uiPaperScope.Point(-(layerItem as Btwx.Text).textStyle.oblique, 0));
+  });
   textBackground.bounds = textContent.bounds;
   paperLayer.rotation = layerItem.transform.rotation;
   paperLayer.position = originalPosition;
@@ -5204,7 +5203,7 @@ export const setLayerJustification = (state: LayerState, action: SetLayerJustifi
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['justification', 'x']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x']);
   // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
   if (layerItem.style.fill.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'fill', gradient: layerItem.style.fill.gradient}) as SetLayerGradient);
@@ -5243,14 +5242,16 @@ export const setLayerOblique = (state: LayerState, action: SetLayerOblique): Lay
   const textContent = paperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
   const textLines = paperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
   const startSkew = layerItem.textStyle.oblique;
-  const startPosition = paperLayer.position;
+  // const startPosition = paperLayer.position;
   paperLayer.rotation = -layerItem.transform.rotation;
   textLines.forEach((line) => {
+    // leading affects horizontal skew
+    line.leading = line.fontSize;
     line.skew(new uiPaperScope.Point(startSkew, 0));
     line.skew(new uiPaperScope.Point(-action.payload.oblique, 0));
   });
   paperLayer.rotation = layerItem.transform.rotation;
-  paperLayer.position = startPosition;
+  // paperLayer.position = startPosition;
   currentState = {
     ...currentState,
     byId: {
@@ -5310,11 +5311,23 @@ export const setLayerPointX = (state: LayerState, action: SetLayerPointX): Layer
   const textLines = paperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
   const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const artboardItem = state.byId[layerItem.artboard];
-  const x = action.payload.x + artboardItem.frame.x;
+  let x = action.payload.x + artboardItem.frame.x;
+  if ((layerItem as Btwx.Text).textStyle.justification !== 'left') {
+    switch((layerItem as Btwx.Text).textStyle.justification) {
+      case 'center':
+        x += textContent.bounds.width / 2;
+        break;
+      case 'right':
+        x += textContent.bounds.width;
+        break;
+    }
+  }
   paperLayer.rotation = -layerItem.transform.rotation;
   textContent.point.x = x;
   textBackground.bounds = textContent.bounds;
   textLines.forEach((line) => {
+    // leading affects skew
+    line.leading = (layerItem as Btwx.Text).textStyle.fontSize;
     if ((layerItem as Btwx.Text).textStyle.oblique) {
       line.skew(new uiPaperScope.Point((layerItem as Btwx.Text).textStyle.oblique, 0));
     }
@@ -5325,7 +5338,7 @@ export const setLayerPointX = (state: LayerState, action: SetLayerPointX): Layer
   });
   paperLayer.rotation = layerItem.transform.rotation;
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'justification']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x']);
   if (groupParents.length > 0) {
     currentState = groupParents.reduce((result, current) => {
       result = updateLayerBounds(result, current);

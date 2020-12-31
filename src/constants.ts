@@ -44,7 +44,7 @@ export const TWEEN_PROPS_MAP: { [id: string]: string[] } = {
   lineHeight: [],
   fontWeight: [],
   oblique: [],
-  justification: [],
+  // justification: [],
   fromX: [],
   fromY: [],
   toX: [],

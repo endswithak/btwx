@@ -25,7 +25,9 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
     layerEvent && layerEvent.hitResult
     ? state.layer.present.byId[layerEvent.hitResult.item.data.type === 'Layer'
         ? layerEvent.hitResult.item.data.id
-        : layerEvent.hitResult.item.parent.data.id
+        : layerEvent.hitResult.item.parent.data.id === 'textLines'
+          ? layerEvent.hitResult.item.parent.parent.data.id
+          : layerEvent.hitResult.item.parent.data.id
       ]
     : null
   );

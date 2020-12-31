@@ -922,33 +922,36 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
       insert: false,
       data: { id: 'textBackground', type: 'LayerChild', layerType: 'Text' },
     });
-    // const textLines = new uiPaperScope.Group({
-    //   data: { id: 'textLines', type: 'LayerChild', layerType: 'Text' },
-    //   children: (baseText as any)._lines.reduce((result: paper.PointText[], current: string, index: number) => {
-    //     const line = new uiPaperScope.PointText({
-    //       point: new uiPaperScope.Point(baseText.point.x, baseText.point.y + (index * baseText.leading)),
-    //       content: current,
-    //       style: baseText.style,
-    //       visible: true,
-    //       data: { id: 'textLine', type: 'LayerChild', layerType: 'Text' }
-    //     });
-    //     return [...result, line];
-    //   }, [])
-    // });
-    const textContainer = new uiPaperScope.Group({
-      name: name,
-      parent: parentPaperLayer,
-      data: { id, type: 'Layer', layerType: 'Text', scope: scope },
-      children: [textBackground, baseText, ...(baseText as any)._lines.reduce((result: paper.PointText[], current: string, index: number) => {
+    const textLines = new uiPaperScope.Group({
+      data: { id: 'textLines', type: 'LayerChild', layerType: 'Text' },
+      insert: false,
+      children: (baseText as any)._lines.reduce((result: paper.PointText[], current: string, index: number) => {
         const line = new uiPaperScope.PointText({
           point: new uiPaperScope.Point(baseText.point.x, baseText.point.y + (index * baseText.leading)),
           content: current,
           style: baseText.style,
+          leading: baseText.fontSize,
           visible: true,
           data: { id: 'textLine', type: 'LayerChild', layerType: 'Text' }
         });
         return [...result, line];
-      }, [])],
+      }, [])
+    });
+    const textContainer = new uiPaperScope.Group({
+      name: name,
+      parent: parentPaperLayer,
+      data: { id, type: 'Layer', layerType: 'Text', scope: scope },
+      children: [textBackground, baseText, textLines],
+      // children: [textBackground, baseText, ...(baseText as any)._lines.reduce((result: paper.PointText[], current: string, index: number) => {
+      //   const line = new uiPaperScope.PointText({
+      //     point: new uiPaperScope.Point(baseText.point.x, baseText.point.y + (index * baseText.leading)),
+      //     content: current,
+      //     style: baseText.style,
+      //     visible: true,
+      //     data: { id: 'textLine', type: 'LayerChild', layerType: 'Text' }
+      //   });
+      //   return [...result, line];
+      // }, [])],
       position: position
     });
     const newLayer = {

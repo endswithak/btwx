@@ -1963,7 +1963,9 @@ export const hasXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer
     return !xMatch;
   } else {
     if (layerItem.type === 'Text') {
-      return (layerItem as Btwx.Text).point.x.toFixed(2) !== (equivalentLayerItem as Btwx.Text).point.x.toFixed(2);
+      const pointMatch = (layerItem as Btwx.Text).point.x.toFixed(2) === (equivalentLayerItem as Btwx.Text).point.x.toFixed(2);
+      const justificationMatch = (layerItem as Btwx.Text).textStyle.justification === (equivalentLayerItem as Btwx.Text).textStyle.justification;
+      return !pointMatch || !justificationMatch;
     } else {
       return false;
     }
@@ -2126,11 +2128,11 @@ export const hasLineHeightTween = (layerItem: Btwx.Layer, equivalentLayerItem: B
   return validType && !leadingMatch;
 };
 
-export const hasJustificationTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = layerItem.type === 'Text';
-  const justificationMatch = validType && (layerItem as Btwx.Text).textStyle.justification === (equivalentLayerItem as Btwx.Text).textStyle.justification;
-  return validType && !justificationMatch;
-};
+// export const hasJustificationTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+//   const validType = layerItem.type === 'Text';
+//   const justificationMatch = validType && (layerItem as Btwx.Text).textStyle.justification === (equivalentLayerItem as Btwx.Text).textStyle.justification;
+//   return validType && !justificationMatch;
+// };
 
 export const hasFromXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const validType = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
@@ -2222,8 +2224,8 @@ export const getEquivalentTweenProp = (layerItem: Btwx.Layer, equivalentLayerIte
       return hasObliqueTween(layerItem, equivalentLayerItem);
     case 'lineHeight':
       return hasLineHeightTween(layerItem, equivalentLayerItem);
-    case 'justification':
-      return hasJustificationTween(layerItem, equivalentLayerItem);
+    // case 'justification':
+    //   return hasJustificationTween(layerItem, equivalentLayerItem);
     case 'fromX':
       return hasFromXTween(layerItem, equivalentLayerItem);
     case 'fromY':
@@ -2267,7 +2269,7 @@ export const getEquivalentTweenProps = (layerItem: Btwx.Layer, equivalentLayerIt
   fontWeight: hasFontWeightTween(layerItem, equivalentLayerItem),
   oblique: hasObliqueTween(layerItem, equivalentLayerItem),
   lineHeight: hasLineHeightTween(layerItem, equivalentLayerItem),
-  justification: hasJustificationTween(layerItem, equivalentLayerItem),
+  // justification: hasJustificationTween(layerItem, equivalentLayerItem),
   fromX: hasFromXTween(layerItem, equivalentLayerItem),
   fromY: hasFromYTween(layerItem, equivalentLayerItem),
   toX: hasToXTween(layerItem, equivalentLayerItem),
