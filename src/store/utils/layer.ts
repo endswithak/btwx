@@ -4830,27 +4830,31 @@ export const setLayerText = (state: LayerState, action: SetLayerText): LayerStat
   const textBackground = paperLayer.getItem({data: {id: 'textBackground'}}) as paper.PointText;
   const textLinesGroup = paperLayer.getItem({data: {id: 'textLines'}});
   const textLines = paperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
+  const newLines = action.payload.text.split(/\r\n|\r|\n/).reduce((result, current) => {
+    return [...result, {
+      text: current
+    }];
+  }, []);
+  const maxLines = Math.max(newLines.length, (layerItem as Btwx.Text).lines.length);
   paperLayer.rotation = -layerItem.transform.rotation;
   const originalPoint = textContent.point;
   textContent.content = action.payload.text;
   textContent.point = originalPoint;
   textBackground.bounds = textContent.bounds;
-  const maxCount = Math.max((textContent as any)._lines.length, textLines.length);
-  for(let i = 0; i < maxCount; i++) {
+  for(let i = 0; i < maxLines; i++) {
     if (textLines[i]) {
       textLines[i].remove();
     }
-    if ((textContent as any)._lines[i]) {
+    if (newLines[i]) {
       const newLine = new uiPaperScope.PointText({
         point: new uiPaperScope.Point(originalPoint.x, originalPoint.y + (i * (layerItem as Btwx.Text).textStyle.leading)),
-        content: (textContent as any)._lines[i],
+        content: newLines[i].text,
         style: textContent.style,
         parent: textLinesGroup,
         data: { id: 'textLine', type: 'LayerChild', layerType: 'Text' }
       });
       newLine.leading = newLine.fontSize;
       newLine.skew(new uiPaperScope.Point(-(layerItem as Btwx.Text).textStyle.oblique, 0));
-      newLine.leading = textContent.leading;
     }
   }
   paperLayer.rotation = layerItem.transform.rotation;
@@ -4860,12 +4864,13 @@ export const setLayerText = (state: LayerState, action: SetLayerText): LayerStat
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
-        text: action.payload.text
+        text: action.payload.text,
+        lines: newLines
       } as Btwx.Text
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y', 'text']);
   if (layerItem.style.fill.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({
       id: action.payload.id,
@@ -4919,9 +4924,6 @@ export const setLayerFontSize = (state: LayerState, action: SetLayerFontSize): L
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fontSize', 'x']);
-  // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fontSize', 'x', 'y']);
-  // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x']);
-  // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
   if (layerItem.style.fill.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'fill', gradient: layerItem.style.fill.gradient}) as SetLayerGradient);
   }
@@ -4980,8 +4982,6 @@ export const setLayerFontWeight = (state: LayerState, action: SetLayerFontWeight
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fontWeight', 'x']);
-  // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y', 'fontWeight']);
-  // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
   if (layerItem.style.fill.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'fill', gradient: layerItem.style.fill.gradient}) as SetLayerGradient);
   }
@@ -5040,7 +5040,6 @@ export const setLayerFontFamily = (state: LayerState, action: SetLayerFontFamily
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y']);
-  // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
   if (layerItem.style.fill.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'fill', gradient: layerItem.style.fill.gradient}) as SetLayerGradient);
   }
@@ -5203,7 +5202,7 @@ export const setLayerJustification = (state: LayerState, action: SetLayerJustifi
     }
   }
   currentState = updateLayerBounds(currentState, action.payload.id);
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'justification']);
   // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
   if (layerItem.style.fill.fillType === 'gradient') {
     currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'fill', gradient: layerItem.style.fill.gradient}) as SetLayerGradient);

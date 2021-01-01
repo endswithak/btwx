@@ -15,6 +15,7 @@ export const getArtboardEventOriginIds = (state: RootState, id: string): string[
 export const getRootChildren = (state: RootState): string[] => state.layer.present.childrenById.root;
 export const getSelected = (state: RootState): string[] => state.layer.present.selected;
 export const getAllArtboardIds = (state: RootState): string[] => state.layer.present.allArtboardIds;
+export const getAllTextIds = (state: RootState): string[] => state.layer.present.allTextIds;
 export const getLayersById = (state: RootState): { [id: string]: Btwx.Layer } => state.layer.present.byId;
 export const getScopesById = (state: RootState): { [id: string]: string[] } => state.layer.present.scopeById;
 export const getChildrenById = (state: RootState): { [id: string]: string[] } => state.layer.present.childrenById;
@@ -34,6 +35,31 @@ export const getDocumentImages = (state: RootState): { allIds: string[]; byId: {
 export const getLayerSearch = (state: RootState): string => state.leftSidebar.search;
 export const getLayerSearching = (state: RootState): boolean => state.leftSidebar.searching;
 export const getNamesById = (state: RootState): { [id: string]: string } => state.layer.present.nameById;
+
+export const getActiveArtboardTextLayers = createSelector(
+  [ getActiveArtboard, getChildrenById, getAllTextIds ],
+  (activeArtboard, childrenById, textIds) => {
+    const groups: string[] = [activeArtboard];
+    const textLayers: string[] = [];
+    let i = 0;
+    while(i < groups.length) {
+      const layerChildren = childrenById[groups[i]];
+      if (layerChildren && layerChildren.length > 0) {
+        layerChildren.forEach((child) => {
+          const childChildren = childrenById[child];
+          if (childChildren && childChildren.length > 0) {
+            groups.push(child);
+          }
+          if (textIds.includes(child)) {
+            textLayers.push(child);
+          }
+        });
+      }
+      i++;
+    }
+    return textLayers;
+  }
+);
 
 export const getAllArtboardPaperProjects = createSelector(
   [ getAllArtboardIds, getLayersById, getDocumentImages ],
@@ -1964,8 +1990,8 @@ export const hasXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer
   } else {
     if (layerItem.type === 'Text') {
       const pointMatch = (layerItem as Btwx.Text).point.x.toFixed(2) === (equivalentLayerItem as Btwx.Text).point.x.toFixed(2);
-      const justificationMatch = (layerItem as Btwx.Text).textStyle.justification === (equivalentLayerItem as Btwx.Text).textStyle.justification;
-      return !pointMatch || !justificationMatch;
+      // const justificationMatch = (layerItem as Btwx.Text).textStyle.justification === (equivalentLayerItem as Btwx.Text).textStyle.justification;
+      return !pointMatch; // || !justificationMatch;
     } else {
       return false;
     }
@@ -2128,11 +2154,20 @@ export const hasLineHeightTween = (layerItem: Btwx.Layer, equivalentLayerItem: B
   return validType && !leadingMatch;
 };
 
-// export const hasJustificationTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-//   const validType = layerItem.type === 'Text';
-//   const justificationMatch = validType && (layerItem as Btwx.Text).textStyle.justification === (equivalentLayerItem as Btwx.Text).textStyle.justification;
-//   return validType && !justificationMatch;
-// };
+export const hasJustificationTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const validType = layerItem.type === 'Text';
+  const justificationMatch = validType && (layerItem as Btwx.Text).textStyle.justification === (equivalentLayerItem as Btwx.Text).textStyle.justification;
+  return validType && !justificationMatch;
+};
+
+export const hasTextTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const validType = layerItem.type === 'Text';
+  const originLines = validType ? (layerItem as Btwx.Text).lines : null;
+  const destinationLines = validType ? (equivalentLayerItem as Btwx.Text).lines : null;
+  const lengthMatch = originLines.length === destinationLines.length;
+  const contentMatch = validType && originLines.every((line, index) => line.text === destinationLines[index].text);
+  return validType && (!lengthMatch || !contentMatch);
+};
 
 export const hasFromXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const validType = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
@@ -2224,8 +2259,10 @@ export const getEquivalentTweenProp = (layerItem: Btwx.Layer, equivalentLayerIte
       return hasObliqueTween(layerItem, equivalentLayerItem);
     case 'lineHeight':
       return hasLineHeightTween(layerItem, equivalentLayerItem);
-    // case 'justification':
-    //   return hasJustificationTween(layerItem, equivalentLayerItem);
+    case 'justification':
+      return hasJustificationTween(layerItem, equivalentLayerItem);
+    case 'text':
+      return hasTextTween(layerItem, equivalentLayerItem);
     case 'fromX':
       return hasFromXTween(layerItem, equivalentLayerItem);
     case 'fromY':
@@ -2269,7 +2306,8 @@ export const getEquivalentTweenProps = (layerItem: Btwx.Layer, equivalentLayerIt
   fontWeight: hasFontWeightTween(layerItem, equivalentLayerItem),
   oblique: hasObliqueTween(layerItem, equivalentLayerItem),
   lineHeight: hasLineHeightTween(layerItem, equivalentLayerItem),
-  // justification: hasJustificationTween(layerItem, equivalentLayerItem),
+  justification: hasJustificationTween(layerItem, equivalentLayerItem),
+  text: hasTextTween(layerItem, equivalentLayerItem),
   fromX: hasFromXTween(layerItem, equivalentLayerItem),
   fromY: hasFromYTween(layerItem, equivalentLayerItem),
   toX: hasToXTween(layerItem, equivalentLayerItem),

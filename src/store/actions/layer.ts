@@ -865,6 +865,11 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
     const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const textContent = payload.layer.text ? payload.layer.text : DEFAULT_TEXT_VALUE;
+    const lines = textContent.split(/\r\n|\r|\n/).reduce((result, current) => {
+      return [...result, {
+        text: current
+      }];
+    }, []);
     const name = payload.layer.name ? payload.layer.name : textContent;
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
@@ -917,18 +922,17 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
     const textBackground = new uiPaperScope.Path.Rectangle({
       from: new uiPaperScope.Point(frame.x - frame.width / 2, frame.y - frame.height / 2),
       to: new uiPaperScope.Point(frame.x + frame.width / 2, frame.y + frame.height / 2),
-      fillColor: '#fff',
-      opacity: 0,
+      fillColor: tinyColor('#fff').setAlpha(0).toHslString(),
       insert: false,
       data: { id: 'textBackground', type: 'LayerChild', layerType: 'Text' },
     });
     const textLines = new uiPaperScope.Group({
       data: { id: 'textLines', type: 'LayerChild', layerType: 'Text' },
       insert: false,
-      children: (baseText as any)._lines.reduce((result: paper.PointText[], current: string, index: number) => {
+      children: lines.reduce((result: paper.PointText[], current: Btwx.TextLine, index: number) => {
         const line = new uiPaperScope.PointText({
-          point: new uiPaperScope.Point(baseText.point.x, baseText.point.y + (index * baseText.leading)),
-          content: current,
+          point: new uiPaperScope.Point(baseText.point.x, baseText.point.y + (index * textStyle.leading)),
+          content: current.text,
           style: baseText.style,
           leading: baseText.fontSize,
           visible: true,
@@ -942,16 +946,6 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
       parent: parentPaperLayer,
       data: { id, type: 'Layer', layerType: 'Text', scope: scope },
       children: [textBackground, baseText, textLines],
-      // children: [textBackground, baseText, ...(baseText as any)._lines.reduce((result: paper.PointText[], current: string, index: number) => {
-      //   const line = new uiPaperScope.PointText({
-      //     point: new uiPaperScope.Point(baseText.point.x, baseText.point.y + (index * baseText.leading)),
-      //     content: current,
-      //     style: baseText.style,
-      //     visible: true,
-      //     data: { id: 'textLine', type: 'LayerChild', layerType: 'Text' }
-      //   });
-      //   return [...result, line];
-      // }, [])],
       position: position
     });
     const newLayer = {
@@ -980,7 +974,8 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
       transform: transform,
       style: style,
       textStyle: textStyle,
-      text: textContent
+      text: textContent,
+      lines: lines
     } as Btwx.Text;
     dispatch(addText({
       layer: newLayer,
