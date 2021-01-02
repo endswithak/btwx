@@ -922,7 +922,8 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
     const textBackground = new uiPaperScope.Path.Rectangle({
       from: new uiPaperScope.Point(frame.x - frame.width / 2, frame.y - frame.height / 2),
       to: new uiPaperScope.Point(frame.x + frame.width / 2, frame.y + frame.height / 2),
-      fillColor: tinyColor('#fff').setAlpha(0).toHslString(),
+      fillColor: tinyColor('red').setAlpha(0).toHslString(),
+      // opacity: 0,
       insert: false,
       data: { id: 'textBackground', type: 'LayerChild', layerType: 'Text' },
     });
@@ -934,7 +935,6 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
           point: new uiPaperScope.Point(baseText.point.x, baseText.point.y + (index * textStyle.leading)),
           content: current.text,
           style: baseText.style,
-          leading: baseText.fontSize,
           visible: true,
           data: { id: 'textLine', type: 'LayerChild', layerType: 'Text' }
         });

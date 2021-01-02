@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { paperPreview } from '../canvas';
 import { RootState } from '../store/reducers';
-import { getActiveArtboardTextLayers } from '../store/selectors/layer';
+import { getActiveArtboardTextLayers, getPaperLayer } from '../store/selectors/layer';
 
 interface PreviewTextLayerProps {
   id: string;
@@ -28,7 +29,7 @@ const PreviewTextLayerLines = (props: PreviewTextLayerProps): ReactElement => {
           <div
             id={`${id}-${index}`}
             key={index}>
-            { textLines[index] ? textLines[index].text : '' }
+            { textLines[index] ? textLines[index].text : ' ' }
           </div>
         ))
       }

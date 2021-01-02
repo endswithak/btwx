@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import { gsap } from 'gsap';
 import { RootState } from '../store/reducers';
 import { paperPreview } from '../canvas';
-import { getAllArtboardPaperProjects, getEventsByOriginArtboard, getAllArtboardEventsConnectedArtboards, getAllArtboardTweens, getAllArtboardTweenLayers, getAllArtboardTweenDestinationLayers, getAllArtboardEventLayers } from '../store/selectors/layer';
+import { getAllArtboardPaperProjects, getEventsByOriginArtboard, getAllArtboardEventsConnectedArtboards, getAllArtboardTweens, getAllArtboardTweenLayers, getAllArtboardTweenDestinationLayers, getAllArtboardEventLayers, getActiveArtboardTextLayers } from '../store/selectors/layer';
 import * as previewUtils from '../previewUtils';
 import { ThemeContext } from './ThemeProvider';
 import PreviewTextLayers from './PreviewTextLayers';
@@ -21,12 +21,13 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const activeArtboard = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.activeArtboard]);
   const paperProjects = useSelector((state: RootState) => getAllArtboardPaperProjects(state));
-  const tweenEvents = useSelector((state: RootState) => getEventsByOriginArtboard(state, state.layer.present.activeArtboard));
-  const tweenEventDestinations = useSelector((state: RootState) => getAllArtboardEventsConnectedArtboards(state, state.layer.present.activeArtboard));
-  const tweenEventLayers = useSelector((state: RootState) => getAllArtboardEventLayers(state, state.layer.present.activeArtboard));
+  const events = useSelector((state: RootState) => getEventsByOriginArtboard(state, state.layer.present.activeArtboard));
+  const eventDestinations = useSelector((state: RootState) => getAllArtboardEventsConnectedArtboards(state, state.layer.present.activeArtboard));
+  const eventLayers = useSelector((state: RootState) => getAllArtboardEventLayers(state, state.layer.present.activeArtboard));
   const tweens = useSelector((state: RootState) => getAllArtboardTweens(state, state.layer.present.activeArtboard));
   const tweenLayers = useSelector((state: RootState) => getAllArtboardTweenLayers(state, state.layer.present.activeArtboard));
   const tweenLayerDestinations = useSelector((state: RootState) => getAllArtboardTweenDestinationLayers(state, state.layer.present.activeArtboard));
+  // const activeArtboardTextLayers = useSelector((state: RootState) => getActiveArtboardTextLayers(state));
   // const documentImagesById = useSelector((state: RootState) => state.documentSettings.images.byId);
   const documentWindowId = useSelector((state: RootState) => state.preview.documentWindowId);
 
@@ -58,11 +59,11 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
     });
     // 3. store relevant origin and destination layer vars
     const paperActiveArtboard = paperPreview.project.getItem({ data: { id: activeArtboard.id } }) as paper.Item;
-    const paperTweenEventLayersById = tweenEventLayers.allIds.reduce((result: {[id: string]: paper.Item}, current) => {
+    const paperEventLayersById = eventLayers.allIds.reduce((result: {[id: string]: paper.Item}, current) => {
       result[current] = paperPreview.project.getItem({ data: { id: current } });
       return result;
     }, {});
-    const paperTweenEventDestinationsById = tweenEventDestinations.allIds.reduce((result: {[id: string]: paper.Item}, current) => {
+    const paperTweenEventDestinationsById = eventDestinations.allIds.reduce((result: {[id: string]: paper.Item}, current) => {
       result[current] = paperPreview.project.getItem({ data: { id: current } });
       return result;
     }, {});
@@ -98,10 +99,10 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
       [id: string]: (e: paper.MouseEvent | paper.KeyEvent) => void;
     };
     // 7. create timelines for each tween event
-    tweenEvents.allIds.forEach((eventId) => {
-      const tweenEvent = tweenEvents.byId[eventId];
-      const tweenEventPaperLayer = paperTweenEventLayersById[tweenEvent.layer];
-      const tweenEventTweensById = tweenEvent.tweens.reduce((result: { [id: string]: Btwx.Tween }, current): {[id: string]: Btwx.Tween} => {
+    events.allIds.forEach((eventId) => {
+      const event = events.byId[eventId];
+      const paperLayer = paperEventLayersById[event.layer];
+      const tweensById = event.tweens.reduce((result: { [id: string]: Btwx.Tween }, current): {[id: string]: Btwx.Tween} => {
         result[current] = tweens.byId[current];
         return result;
       }, {});
@@ -109,19 +110,116 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
       timelines[eventId] = gsap.timeline({
         paused: true,
         onStart: () => {
-          tweenEvents.allIds.forEach((id) => {
-            const tweenEvent = tweenEvents.byId[id];
-            paperTweenEventLayersById[tweenEvent.layer].off(tweenEvent.event, eventLayerFunctions[id]);
+          // if (timelines[eventId].data.justification) {
+          //   (timelines[eventId].data.justification as string[]).forEach((id, index) => {
+          //     const tween = tweensById[id];
+          //     const data = {
+          //       tween: tween,
+          //       timelineTweenProps: timelineProps[id],
+          //       originLayerItem: tweenLayers.byId[tween.layer],
+          //       destinationLayerItem: tweenLayerDestinations.byId[tween.destinationLayer],
+          //       originPaperLayer: paperTweenLayersById[tween.layer],
+          //       destinationPaperLayer: paperTweenLayerDestinationsById[tween.destinationLayer],
+          //       originArtboardLayerItem: eventDestinations.byId[event.artboard] as Btwx.Artboard,
+          //       destinationArtboardLayerItem: eventDestinations.byId[event.destinationArtboard] as Btwx.Artboard,
+          //       originArtboardPaperLayer: paperTweenEventDestinationsById[event.artboard],
+          //       destinationArtboardPaperLayer: paperTweenEventDestinationsById[event.destinationArtboard]
+          //     };
+          //     const { timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = data;
+          //     const originTextItem = originLayerItem as Btwx.Text;
+          //     const destinationTextItem = destinationLayerItem as Btwx.Text;
+          //     const originTextContent = originPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
+          //     const originTextLines = originPaperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
+          //     const originTextLinesGroup = originPaperLayer.getItem({data: {id: 'textLines'}});
+          //     const maxLines = Math.max(originTextItem.lines.length, destinationTextItem.lines.length);
+          //     const newLines = maxLines - originTextItem.lines.length;
+          //     const startRotation = originPaperLayer.data.rotation || originPaperLayer.data.rotation === 0 ? originPaperLayer.data.rotation : originLayerItem.transform.rotation;
+          //     const startSkew = originPaperLayer.data.skew || originPaperLayer.data.skew === 0 ? originPaperLayer.data.skew : (originLayerItem as Btwx.Text).textStyle.oblique;
+          //     const originJustification = (originLayerItem as Btwx.Text).textStyle.justification;
+          //     const destinationJustification = (destinationLayerItem as Btwx.Text).textStyle.justification;
+          //     originPaperLayer.rotation = -startRotation;
+          //     // handle lines
+          //     [...Array(maxLines).keys()].forEach((key, index) => {
+          //       const lines = originTextLinesGroup.children;
+          //       let line = originTextLinesGroup.children[index] as paper.PointText;
+          //       if (line) {
+          //         line.skew(new paperPreview.Point(startSkew, 0));
+          //         line.leading = line.fontSize;
+          //       } else {
+          //         line = new paperPreview.PointText({
+          //           point: new paperPreview.Point(originTextContent.point.x, originTextContent.point.y + (index * (originTextContent.style.leading as number))),
+          //           content: ' ',
+          //           style: lines[0].style,
+          //           data: lines[0].data,
+          //           parent: originTextLinesGroup
+          //         });
+          //       }
+          //       let startBounds;
+          //       let start;
+          //       let end;
+          //       switch(originJustification) {
+          //         case 'left':
+          //           startBounds = line.bounds.left;
+          //           break;
+          //         case 'center':
+          //           startBounds = line.bounds.center.x;
+          //           break;
+          //         case 'right':
+          //           startBounds = line.bounds.right;
+          //           break;
+          //       }
+          //       line.justification = destinationJustification;
+          //       if (originJustification === 'center') {
+          //         line.bounds[originJustification].x = startBounds;
+          //       } else {
+          //         line.bounds[originJustification] = startBounds;
+          //       }
+          //       if (destinationJustification === 'center') {
+          //         start = line.bounds[destinationJustification].x - originArtboardPaperLayer.bounds.center.x;
+          //         end = originTextContent.bounds[destinationJustification].x - originArtboardPaperLayer.bounds.center.x;
+          //       } else {
+          //         start = line.bounds[destinationJustification] - originArtboardPaperLayer.bounds[destinationJustification];
+          //         end = originTextContent.bounds[destinationJustification] - originArtboardPaperLayer.bounds[destinationJustification];
+          //       }
+          //       line.skew(new paperPreview.Point(-startSkew, 0));
+          //       originPaperLayer.data[`${tween.prop}-${index}-diff`] = end - start;
+          //       originPaperLayer.data[`${tween.prop}-${index}-id`] = line.id;
+          //     });
+          //     // handle content
+          //     let contentStart;
+          //     switch(originJustification) {
+          //       case 'left':
+          //         contentStart = originTextContent.bounds.left;
+          //         break;
+          //       case 'center':
+          //         contentStart = originTextContent.bounds.center.x;
+          //         break;
+          //       case 'right':
+          //         contentStart = originTextContent.bounds.right;
+          //         break;
+          //     }
+          //     originTextContent.justification = destinationJustification;
+          //     if (originJustification === 'center') {
+          //       originTextContent.bounds[originJustification].x = contentStart;
+          //     } else {
+          //       originTextContent.bounds[originJustification] = contentStart;
+          //     }
+          //     originPaperLayer.rotation = startRotation;
+          //   });
+          // }
+          events.allIds.forEach((id) => {
+            const event = events.byId[id];
+            paperEventLayersById[event.layer].off(event.event, eventLayerFunctions[id]);
           });
         },
         onComplete: () => {
-          remote.BrowserWindow.fromId(documentWindowId).webContents.executeJavaScript(`setActiveArtboard(${JSON.stringify(tweenEvent.destinationArtboard)})`);
+          remote.BrowserWindow.fromId(documentWindowId).webContents.executeJavaScript(`setActiveArtboard(${JSON.stringify(event.destinationArtboard)})`);
         }
       });
       // add tween timelines to event timeline
-      Object.keys(tweenEventTweensById).forEach((tweenId) => {
+      Object.keys(tweensById).forEach((tweenId) => {
         const tweenTimeline = gsap.timeline();
-        const tween = tweenEventTweensById[tweenId];
+        const tween = tweensById[tweenId];
         timelineProps[tweenId] = {};
         previewUtils.addTweens({
           tween: tween,
@@ -131,16 +229,16 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
           destinationLayerItem: tweenLayerDestinations.byId[tween.destinationLayer],
           originPaperLayer: paperTweenLayersById[tween.layer],
           destinationPaperLayer: paperTweenLayerDestinationsById[tween.destinationLayer],
-          originArtboardLayerItem: tweenEventDestinations.byId[tweenEvent.artboard] as Btwx.Artboard,
-          destinationArtboardLayerItem: tweenEventDestinations.byId[tweenEvent.destinationArtboard] as Btwx.Artboard,
-          originArtboardPaperLayer: paperTweenEventDestinationsById[tweenEvent.artboard],
-          destinationArtboardPaperLayer: paperTweenEventDestinationsById[tweenEvent.destinationArtboard]
+          originArtboardLayerItem: eventDestinations.byId[event.artboard] as Btwx.Artboard,
+          destinationArtboardLayerItem: eventDestinations.byId[event.destinationArtboard] as Btwx.Artboard,
+          originArtboardPaperLayer: paperTweenEventDestinationsById[event.artboard],
+          destinationArtboardPaperLayer: paperTweenEventDestinationsById[event.destinationArtboard]
         });
         timelines[eventId].add(tweenTimeline, 0);
       });
       // set event layer function
       eventLayerFunctions[eventId] = (e: paper.MouseEvent | paper.KeyEvent): void => {
-        if (tweenEvent.event === 'rightclick') {
+        if (event.event === 'rightclick') {
           if ((e as any).event.which === 3) {
             timelines[eventId].play();
           }
@@ -149,7 +247,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
         }
       };
       // play timeline on event
-      tweenEventPaperLayer.on(tweenEvent.event === 'rightclick' ? 'click' : tweenEvent.event, eventLayerFunctions[eventId]);
+      paperLayer.on(event.event === 'rightclick' ? 'click' : event.event, eventLayerFunctions[eventId]);
     });
   }, [paperProjects, activeArtboard]);
 

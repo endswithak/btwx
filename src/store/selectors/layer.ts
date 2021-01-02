@@ -1990,8 +1990,9 @@ export const hasXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer
   } else {
     if (layerItem.type === 'Text') {
       const pointMatch = (layerItem as Btwx.Text).point.x.toFixed(2) === (equivalentLayerItem as Btwx.Text).point.x.toFixed(2);
-      // const justificationMatch = (layerItem as Btwx.Text).textStyle.justification === (equivalentLayerItem as Btwx.Text).textStyle.justification;
-      return !pointMatch; // || !justificationMatch;
+      const justificationMatch = (layerItem as Btwx.Text).textStyle.justification === (equivalentLayerItem as Btwx.Text).textStyle.justification;
+      const widthMatch = layerItem.frame.innerWidth.toFixed(2) === equivalentLayerItem.frame.innerWidth.toFixed(2);
+      return !pointMatch || (!justificationMatch && !widthMatch);
     } else {
       return false;
     }
@@ -2165,7 +2166,7 @@ export const hasTextTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.La
   const originLines = validType ? (layerItem as Btwx.Text).lines : null;
   const destinationLines = validType ? (equivalentLayerItem as Btwx.Text).lines : null;
   const lengthMatch = originLines.length === destinationLines.length;
-  const contentMatch = validType && originLines.every((line, index) => line.text === destinationLines[index].text);
+  const contentMatch = validType && lengthMatch && originLines.every((line, index) => line.text === destinationLines[index].text);
   return validType && (!lengthMatch || !contentMatch);
 };
 
