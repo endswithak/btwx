@@ -55,6 +55,26 @@ import {
   SET_LAYER_TWEEN_DELAY,
   SET_LAYER_TWEEN_EASE,
   SET_LAYER_TWEEN_POWER,
+  SET_LAYER_STEPS_TWEEN_STEPS,
+  SET_LAYER_ROUGH_TWEEN_CLAMP,
+  SET_LAYER_ROUGH_TWEEN_POINTS,
+  SET_LAYER_ROUGH_TWEEN_RANDOMIZE,
+  SET_LAYER_ROUGH_TWEEN_STRENGTH,
+  SET_LAYER_ROUGH_TWEEN_TAPER,
+  SET_LAYER_ROUGH_TWEEN_TEMPLATE,
+  SET_LAYER_SLOW_TWEEN_LINEAR_RATIO,
+  SET_LAYER_SLOW_TWEEN_POWER,
+  SET_LAYER_SLOW_TWEEN_YOYO_MODE,
+  SET_LAYER_TEXT_TWEEN_CHARACTERS,
+  SET_LAYER_TEXT_TWEEN_REVEAL_DELAY,
+  SET_LAYER_TEXT_TWEEN_SPEED,
+  SET_LAYER_TEXT_TWEEN_DELIMITER,
+  SET_LAYER_TEXT_TWEEN_RIGHT_TO_LEFT,
+  SET_LAYER_CUSTOM_BOUNCE_TWEEN_STRENGTH,
+  SET_LAYER_CUSTOM_BOUNCE_TWEEN_END_AT_START,
+  SET_LAYER_CUSTOM_BOUNCE_TWEEN_SQUASH,
+  SET_LAYER_CUSTOM_WIGGLE_TWEEN_WIGGLES,
+  SET_LAYER_CUSTOM_WIGGLE_TWEEN_TYPE,
   SET_LAYER_X,
   SET_LAYERS_X,
   SET_LAYER_Y,
@@ -274,6 +294,26 @@ import {
   setLayerTweenDelay,
   setLayerTweenEase,
   setLayerTweenPower,
+  setLayerStepsTweenSteps,
+  setLayerRoughTweenClamp,
+  setLayerRoughTweenPoints,
+  setLayerRoughTweenRandomize,
+  setLayerRoughTweenStrength,
+  setLayerRoughTweenTaper,
+  setLayerRoughTweenTemplate,
+  setLayerSlowTweenLinearRatio,
+  setLayerSlowTweenPower,
+  setLayerSlowTweenYoYoMode,
+  setLayerTextTweenCharacters,
+  setLayerTextTweenRevealDelay,
+  setLayerTextTweenSpeed,
+  setLayerTextTweenDelimiter,
+  setLayerTextTweenRightToLeft,
+  setLayerCustomBounceTweenStrength,
+  setLayerCustomBounceTweenEndAtStart,
+  setLayerCustomBounceTweenSquash,
+  setLayerCustomWiggleTweenWiggles,
+  setLayerCustomWiggleTweenType,
   setLayerX,
   setLayersX,
   setLayerY,
@@ -653,6 +693,46 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return setLayerTweenEase(state, action);
     case SET_LAYER_TWEEN_POWER:
       return setLayerTweenPower(state, action);
+    case SET_LAYER_STEPS_TWEEN_STEPS:
+      return setLayerStepsTweenSteps(state, action);
+    case SET_LAYER_ROUGH_TWEEN_CLAMP:
+      return setLayerRoughTweenClamp(state, action);
+    case SET_LAYER_ROUGH_TWEEN_POINTS:
+      return setLayerRoughTweenPoints(state, action);
+    case SET_LAYER_ROUGH_TWEEN_RANDOMIZE:
+      return setLayerRoughTweenRandomize(state, action);
+    case SET_LAYER_ROUGH_TWEEN_STRENGTH:
+      return setLayerRoughTweenStrength(state, action);
+    case SET_LAYER_ROUGH_TWEEN_TAPER:
+      return setLayerRoughTweenTaper(state, action);
+    case SET_LAYER_ROUGH_TWEEN_TEMPLATE:
+      return setLayerRoughTweenTemplate(state, action);
+    case SET_LAYER_SLOW_TWEEN_LINEAR_RATIO:
+      return setLayerSlowTweenLinearRatio(state, action);
+    case SET_LAYER_SLOW_TWEEN_POWER:
+      return setLayerSlowTweenPower(state, action);
+    case SET_LAYER_SLOW_TWEEN_YOYO_MODE:
+      return setLayerSlowTweenYoYoMode(state, action);
+    case SET_LAYER_TEXT_TWEEN_CHARACTERS:
+      return setLayerTextTweenCharacters(state, action);
+    case SET_LAYER_TEXT_TWEEN_REVEAL_DELAY:
+      return setLayerTextTweenRevealDelay(state, action);
+    case SET_LAYER_TEXT_TWEEN_SPEED:
+      return setLayerTextTweenSpeed(state, action);
+    case SET_LAYER_TEXT_TWEEN_DELIMITER:
+      return setLayerTextTweenDelimiter(state, action);
+    case SET_LAYER_TEXT_TWEEN_RIGHT_TO_LEFT:
+      return setLayerTextTweenRightToLeft(state, action);
+    case SET_LAYER_CUSTOM_BOUNCE_TWEEN_STRENGTH:
+      return setLayerCustomBounceTweenStrength(state, action);
+    case SET_LAYER_CUSTOM_BOUNCE_TWEEN_END_AT_START:
+      return setLayerCustomBounceTweenEndAtStart(state, action);
+    case SET_LAYER_CUSTOM_BOUNCE_TWEEN_SQUASH:
+      return setLayerCustomBounceTweenSquash(state, action);
+    case SET_LAYER_CUSTOM_WIGGLE_TWEEN_WIGGLES:
+      return setLayerCustomWiggleTweenWiggles(state, action);
+    case SET_LAYER_CUSTOM_WIGGLE_TWEEN_TYPE:
+      return setLayerCustomWiggleTweenType(state, action);
     case SET_LAYER_X:
       return setLayerX(state, action);
     case SET_LAYERS_X:
@@ -1018,6 +1098,26 @@ export default undoable(baseReducer, {
       SET_LAYER_TWEEN_TIMING,
       SET_LAYER_TWEEN_EASE,
       SET_LAYER_TWEEN_POWER,
+      SET_LAYER_STEPS_TWEEN_STEPS,
+      SET_LAYER_ROUGH_TWEEN_CLAMP,
+      SET_LAYER_ROUGH_TWEEN_POINTS,
+      SET_LAYER_ROUGH_TWEEN_RANDOMIZE,
+      SET_LAYER_ROUGH_TWEEN_STRENGTH,
+      SET_LAYER_ROUGH_TWEEN_TAPER,
+      SET_LAYER_ROUGH_TWEEN_TEMPLATE,
+      SET_LAYER_SLOW_TWEEN_LINEAR_RATIO,
+      SET_LAYER_SLOW_TWEEN_POWER,
+      SET_LAYER_SLOW_TWEEN_YOYO_MODE,
+      SET_LAYER_TEXT_TWEEN_CHARACTERS,
+      SET_LAYER_TEXT_TWEEN_REVEAL_DELAY,
+      SET_LAYER_TEXT_TWEEN_SPEED,
+      SET_LAYER_TEXT_TWEEN_DELIMITER,
+      SET_LAYER_TEXT_TWEEN_RIGHT_TO_LEFT,
+      SET_LAYER_CUSTOM_BOUNCE_TWEEN_STRENGTH,
+      SET_LAYER_CUSTOM_BOUNCE_TWEEN_END_AT_START,
+      SET_LAYER_CUSTOM_BOUNCE_TWEEN_SQUASH,
+      SET_LAYER_CUSTOM_WIGGLE_TWEEN_WIGGLES,
+      SET_LAYER_CUSTOM_WIGGLE_TWEEN_TYPE,
       SET_LAYER_X,
       SET_LAYERS_X,
       SET_LAYER_Y,

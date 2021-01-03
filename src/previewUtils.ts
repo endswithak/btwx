@@ -1,11 +1,32 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import tinyColor from 'tinycolor2';
 import { gsap } from 'gsap';
+import { CustomEase } from 'gsap/CustomEase';
+import { RoughEase, SlowMo } from 'gsap/EasePack';
+import { CustomBounce } from 'gsap/CustomBounce';
+import { CustomWiggle } from 'gsap/CustomWiggle';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
 import { paperPreview } from './canvas';
 
-gsap.registerPlugin(MorphSVGPlugin, ScrambleTextPlugin);
+gsap.registerPlugin(MorphSVGPlugin, RoughEase, SlowMo, CustomBounce, CustomWiggle, ScrambleTextPlugin);
+
+export const getEaseString = (tween: Btwx.Tween): string => {
+  switch(tween.ease) {
+    case 'customBounce':
+      return `bounce({strength: ${tween.customBounce.strength}, endAtStart: ${tween.customBounce.endAtStart}, squash: ${tween.customBounce.squash}})`;
+    case 'customWiggle':
+      return `wiggle({type: ${tween.customWiggle.type}, wiggles: ${tween.customWiggle.wiggles}})`;
+    case 'slow':
+      return `slow(${tween.slow.linearRatio}, ${tween.slow.power}, ${tween.slow.yoyoMode})`;
+    case 'rough':
+      return `rough({clamp: ${tween.rough.clamp}, points: ${tween.rough.points}, randomize: ${tween.rough.randomize}, strength: ${tween.rough.strength}, taper: ${tween.rough.taper}, template: ${tween.rough.template}})`;
+    case 'steps':
+      return `steps(${tween.steps.steps})`;
+    default:
+      return `${tween.ease}.${tween.power}`;
+  }
+}
 
 export interface AddTweenProps {
   tween: Btwx.Tween;
@@ -43,7 +64,7 @@ export const addImageTween = (props: AddTweenProps): void => {
       beforeRaster.opacity = timelineTweenProps[`${tween.prop}-before`];
       afterRaster.opacity = timelineTweenProps[`${tween.prop}-after`];
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -80,7 +101,7 @@ export const addShapeTween = (props: AddTweenProps): void => {
       // update fill gradient origin/destination if needed
       updateGradients(props);
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -228,7 +249,7 @@ export const addColorToColorFSTween = (props: AddTweenProps, style: 'fill' | 'st
         originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] = timelineTweenProps[tween.prop];
       }
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -250,7 +271,7 @@ export const addNullToColorFSTween = (props: AddTweenProps, style: 'fill' | 'str
         originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] = timelineTweenProps[tween.prop];
       }
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -272,7 +293,7 @@ export const addColorToNullFSTween = (props: AddTweenProps, style: 'fill' | 'str
         originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].alpha = timelineTweenProps[tween.prop];
       }
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -299,7 +320,7 @@ export const addGradientOriginXFSTween = (props: AddTweenProps, style: 'fill' | 
       }
       originPaperLayer.data[tween.prop] = originX;
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -326,7 +347,7 @@ export const addGradientOriginYFSTween = (props: AddTweenProps, style: 'fill' | 
       }
       originPaperLayer.data[tween.prop] = originY;
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -353,7 +374,7 @@ export const addGradientDestinationXFSTween = (props: AddTweenProps, style: 'fil
       }
       originPaperLayer.data[tween.prop] = destinationX;
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -380,7 +401,7 @@ export const addGradientDestinationYFSTween = (props: AddTweenProps, style: 'fil
       }
       originPaperLayer.data[tween.prop] = destinationY;
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -429,7 +450,7 @@ export const addGradientToGradientFSTween = (props: AddTweenProps, style: 'fill'
             line[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].offset = timelineTweenProps[`${tween.prop}-stop-${index}-offset`];
           });
         },
-        ease: tween.ease,
+        ease: getEaseString(tween),
       }, tween.delay);
     });
   } else {
@@ -450,7 +471,7 @@ export const addGradientToGradientFSTween = (props: AddTweenProps, style: 'fill'
           originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha = timelineTweenProps[`${tween.prop}-stop-${index}-alpha`];
           originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].offset = timelineTweenProps[`${tween.prop}-stop-${index}-offset`];
         },
-        ease: tween.ease,
+        ease: getEaseString(tween),
       }, tween.delay);
     });
   }
@@ -538,7 +559,7 @@ export const addColorToGradientFSTween = (props: AddTweenProps, style: 'fill' | 
             line[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha = timelineTweenProps[`${tween.prop}-stop-${index}-alpha`];
           });
         },
-        ease: tween.ease,
+        ease: getEaseString(tween),
       }, tween.delay);
     });
   } else {
@@ -553,7 +574,7 @@ export const addColorToGradientFSTween = (props: AddTweenProps, style: 'fill' | 
           originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color = timelineTweenProps[`${tween.prop}-stop-${index}-color`];
           originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha = timelineTweenProps[`${tween.prop}-stop-${index}-alpha`];
         },
-        ease: tween.ease,
+        ease: getEaseString(tween),
       }, tween.delay);
     });
   }
@@ -575,7 +596,7 @@ export const addGradientToNullFSTween = (props: AddTweenProps, style: 'fill' | '
             line[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha = timelineTweenProps[`${tween.prop}-stop-${index}-color`];
           });
         },
-        ease: tween.ease,
+        ease: getEaseString(tween),
       }, tween.delay);
     });
   } else {
@@ -587,7 +608,7 @@ export const addGradientToNullFSTween = (props: AddTweenProps, style: 'fill' | '
         onUpdate: () => {
           originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha = timelineTweenProps[`${tween.prop}-stop-${index}-color`];
         },
-        ease: tween.ease,
+        ease: getEaseString(tween),
       }, tween.delay);
     });
   }
@@ -628,7 +649,7 @@ export const addNullToGradientFSTween = (props: AddTweenProps, style: 'fill' | '
             line[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha = timelineTweenProps[`${tween.prop}-stop-${index}-color`];
           });
         },
-        ease: tween.ease,
+        ease: getEaseString(tween),
       }, tween.delay);
     });
   } else {
@@ -640,7 +661,7 @@ export const addNullToGradientFSTween = (props: AddTweenProps, style: 'fill' | '
         onUpdate: () => {
           originPaperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha = timelineTweenProps[`${tween.prop}-stop-${index}-color`];
         },
-        ease: tween.ease,
+        ease: getEaseString(tween),
       }, tween.delay);
     });
   }
@@ -655,7 +676,7 @@ export const addDashOffsetTween = (props: AddTweenProps): void => {
     onUpdate: () => {
       originPaperLayer.dashOffset = timelineTweenProps[tween.prop];
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -668,7 +689,7 @@ export const addDashArrayWidthTween = (props: AddTweenProps): void => {
     onUpdate: () => {
       originPaperLayer.dashArray = [timelineTweenProps[tween.prop], originPaperLayer.dashArray[1]];
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -681,7 +702,7 @@ export const addDashArrayGapTween = (props: AddTweenProps): void => {
     onUpdate: () => {
       originPaperLayer.dashArray = [originPaperLayer.dashArray[0], timelineTweenProps[tween.prop]];
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -694,7 +715,7 @@ export const addStrokeWidthTween = (props: AddTweenProps): void => {
     onUpdate: () => {
       originPaperLayer.strokeWidth = timelineTweenProps[tween.prop];
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -753,7 +774,7 @@ export const addXTween = (props: AddTweenProps): void => {
         //
         originPaperLayer.data.x = timelineTweenProps[tween.prop];
       },
-      ease: tween.ease,
+      ease: getEaseString(tween),
     }, tween.delay);
   } else {
     const originPaperLayerPositionDiffX = destinationLayerItem.frame.x - originLayerItem.frame.x;
@@ -764,7 +785,7 @@ export const addXTween = (props: AddTweenProps): void => {
       onUpdate: () => {
         originPaperLayer.position.x = timelineTweenProps[tween.prop];
       },
-      ease: tween.ease,
+      ease: getEaseString(tween),
     }, tween.delay);
   }
 };
@@ -802,7 +823,7 @@ export const addYTween = (props: AddTweenProps): void => {
         originPaperLayer.position.y = timelineTweenProps[tween.prop];
       }
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -832,7 +853,7 @@ export const addWidthTween = (props: AddTweenProps): void => {
         originPaperLayer.rotation = startRotation;
       }
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -862,7 +883,7 @@ export const addHeightTween = (props: AddTweenProps): void => {
         originPaperLayer.rotation = startRotation;
       }
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -882,7 +903,7 @@ export const addRotationTween = (props: AddTweenProps): void => {
       // originPaperLayer.position = startPosition;
       updateGradients(props);
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -905,7 +926,7 @@ export const addShadowColorTween = (props: AddTweenProps): void => {
     onUpdate: () => {
       originPaperLayer.shadowColor = timelineTweenProps[tween.prop];
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -929,7 +950,7 @@ export const addShadowXOffsetTween = (props: AddTweenProps): void => {
       const y = originPaperLayer.shadowOffset ? originPaperLayer.shadowOffset.y : originShadow.offset.y;
       originPaperLayer.shadowOffset = new paperPreview.Point(timelineTweenProps[tween.prop], y);
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -953,7 +974,7 @@ export const addShadowYOffsetTween = (props: AddTweenProps): void => {
       const x = originPaperLayer.shadowOffset ? originPaperLayer.shadowOffset.x : originShadow.offset.x;
       originPaperLayer.shadowOffset = new paperPreview.Point(x, timelineTweenProps[tween.prop]);
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -976,7 +997,7 @@ export const addShadowBlurTween = (props: AddTweenProps): void => {
     onUpdate: () => {
       originPaperLayer.shadowBlur = timelineTweenProps[tween.prop];
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -989,7 +1010,7 @@ export const addOpacityTween = (props: AddTweenProps): void => {
     onUpdate: () => {
       originPaperLayer.opacity = timelineTweenProps[tween.prop];
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -1026,7 +1047,7 @@ export const addFontSizeTween = (props: AddTweenProps): void => {
       // originPaperLayer.position = startPosition;
       updateGradients(props);
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -1059,7 +1080,7 @@ export const addFontWeightTween = (props: AddTweenProps): void => {
       originPaperLayer.rotation = startRotation;
       updateGradients(props);
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -1096,7 +1117,7 @@ export const addObliqueTween = (props: AddTweenProps): void => {
       originPaperLayer.rotation = startRotation;
       updateGradients(props);
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -1132,7 +1153,7 @@ export const addLineHeightTween = (props: AddTweenProps): void => {
       originPaperLayer.rotation = startRotation;
       updateGradients(props);
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -1264,7 +1285,7 @@ export const addJustificationTween = (props: AddTweenProps): void => {
       originPaperLayer.rotation = startRotation;
       originPaperLayer.data.justification = timelineTweenProps[tween.prop];
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -1313,7 +1334,7 @@ export const addTextTween = (props: AddTweenProps): void => {
         originPaperLayer.rotation = startRotation;
         updateGradients(props);
       },
-      ease: tween.ease,
+      ease: getEaseString(tween),
     }, tween.delay);
   });
 };
@@ -1331,7 +1352,7 @@ export const addFromXTween = (props: AddTweenProps): void => {
       originPaperLayer.data.innerHeight = originPaperLayer.bounds.height;
       updateGradients(props);
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -1348,7 +1369,7 @@ export const addFromYTween = (props: AddTweenProps): void => {
       originPaperLayer.data.innerHeight = originPaperLayer.bounds.height;
       updateGradients(props);
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -1365,7 +1386,7 @@ export const addToXTween = (props: AddTweenProps): void => {
       originPaperLayer.data.innerHeight = originPaperLayer.bounds.height;
       updateGradients(props);
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 
@@ -1382,7 +1403,7 @@ export const addToYTween = (props: AddTweenProps): void => {
       originPaperLayer.data.innerHeight = originPaperLayer.bounds.height;
       updateGradients(props);
     },
-    ease: tween.ease,
+    ease: getEaseString(tween),
   }, tween.delay);
 };
 

@@ -11,6 +11,42 @@ export const DEFAULT_THEME = 'dark';
 export const WEB_SAFE_FONTS = ['Arial', 'Verdana', 'Helvetica', 'Tahoma', 'Trebuchet MS', 'Times New Roman', 'Georgia', 'Garamond', 'Courier New', 'Brush Script MT'];
 export const WEB_SAFE_FONT_WEIGHTS = [400, 700];
 
+// Tween
+export const DEFAULT_TWEEN_EASE_OPTIONS: Btwx.CubicBezier[] = ['linear', 'power1', 'power2', 'power3', 'power4', 'back', 'elastic', 'bounce', 'rough', 'slow', 'steps', 'circ', 'expo', 'sine', 'customBounce', 'customWiggle'];
+export const DEFAULT_TWEEN_POWER_OPTIONS: Btwx.CubicBezierType[] = ['in', 'inOut', 'out'];
+export const DEFAULT_TWEEN_DURATION = 0.5;
+export const DEFAULT_TWEEN_DELAY = 0;
+export const DEFAULT_TWEEN_EASE = 'power1';
+export const DEFAULT_TWEEN_POWER = 'out';
+// Text Tween
+export const DEFAULT_TEXT_TWEEN_CHARACTERS = 'upperCase';
+export const DEFAULT_TEXT_TWEEN_REVEAL_DELAY = 0;
+export const DEFAULT_TEXT_TWEEN_SPEED = 1;
+export const DEFAULT_TEXT_TWEEN_DELIMITER = '';
+export const DEFAULT_TEXT_TWEEN_RIGHT_TO_LEFT = false;
+// Step Tween
+export const DEFAULT_STEPS_TWEEN_STEPS = 5;
+// Rough Tween
+export const DEFAULT_ROUGH_TWEEN_CLAMP = false;
+export const DEFAULT_ROUGH_TWEEN_POINTS = 20;
+export const DEFAULT_ROUGH_TWEEN_RANDOMIZE = true;
+export const DEFAULT_ROUGH_TWEEN_STRENGTH = 1;
+export const DEFAULT_ROUGH_TWEEN_TAPER = 'none';
+export const DEFAULT_ROUGH_TWEEN_TAPER_TYPES: Btwx.RoughTweenTaper[] = ['in', 'out', 'both', 'none'];
+export const DEFAULT_ROUGH_TWEEN_TEMPLATE = 'none';
+// Slow Tween
+export const DEFAULT_SLOW_TWEEN_LINEAR_RATIO = 0.7;
+export const DEFAULT_SLOW_TWEEN_LINEAR_POWER = 0.7;
+export const DEFAULT_SLOW_TWEEN_LINEAR_YOYO_MODE = false;
+// Custom Bounce Tween
+export const DEFAULT_CUSTOM_BOUNCE_TWEEN_STRENGTH = 0.7;
+export const DEFAULT_CUSTOM_BOUNCE_TWEEN_END_AT_START = false;
+export const DEFAULT_CUSTOM_BOUNCE_TWEEN_SQUASH = 0;
+// Custom Wiggle Tween
+export const DEFAULT_CUSTOM_WIGGLE_TWEEN_WIGGLES = 10;
+export const DEFAULT_CUSTOM_WIGGLE_TWEEN_TYPE = 'easeOut';
+export const DEFAULT_CUSTOM_WIGGLE_TWEEN_TYPES: Btwx.CustomWiggleTweenType[] = ['easeOut', 'easeInOut', 'anticipate', 'uniform', 'random'];
+
 // export const TWEEN_PROPS = ['image', 'shape', 'fill', 'fillGradientOriginX', 'fillGradientOriginY', 'fillGradientDestinationX', 'fillGradientDestinationY', 'x', 'y', 'radius', 'rotation', 'width', 'height', 'stroke', 'strokeGradientOriginX', 'strokeGradientOriginY', 'strokeGradientDestinationX', 'strokeGradientDestinationY', 'dashOffset', 'dashArrayWidth', 'dashArrayGap', 'strokeWidth', 'shadowColor', 'shadowOffsetX', 'shadowOffsetY', 'shadowBlur', 'opacity', 'fontSize', 'lineHeight', 'fromX', 'fromY', 'toX', 'toY'];
 export const TWEEN_PROPS_MAP: { [id: string]: string[] } = {
   image: [],

@@ -87,6 +87,26 @@ import {
   SET_LAYER_TWEEN_POWER,
   FREEZE_LAYER_TWEEN,
   UNFREEZE_LAYER_TWEEN,
+  SET_LAYER_STEPS_TWEEN_STEPS,
+  SET_LAYER_ROUGH_TWEEN_CLAMP,
+  SET_LAYER_ROUGH_TWEEN_POINTS,
+  SET_LAYER_ROUGH_TWEEN_RANDOMIZE,
+  SET_LAYER_ROUGH_TWEEN_STRENGTH,
+  SET_LAYER_ROUGH_TWEEN_TAPER,
+  SET_LAYER_ROUGH_TWEEN_TEMPLATE,
+  SET_LAYER_SLOW_TWEEN_LINEAR_RATIO,
+  SET_LAYER_SLOW_TWEEN_POWER,
+  SET_LAYER_SLOW_TWEEN_YOYO_MODE,
+  SET_LAYER_TEXT_TWEEN_CHARACTERS,
+  SET_LAYER_TEXT_TWEEN_REVEAL_DELAY,
+  SET_LAYER_TEXT_TWEEN_SPEED,
+  SET_LAYER_TEXT_TWEEN_DELIMITER,
+  SET_LAYER_TEXT_TWEEN_RIGHT_TO_LEFT,
+  SET_LAYER_CUSTOM_BOUNCE_TWEEN_STRENGTH,
+  SET_LAYER_CUSTOM_BOUNCE_TWEEN_END_AT_START,
+  SET_LAYER_CUSTOM_BOUNCE_TWEEN_SQUASH,
+  SET_LAYER_CUSTOM_WIGGLE_TWEEN_WIGGLES,
+  SET_LAYER_CUSTOM_WIGGLE_TWEEN_TYPE,
   SET_LAYER_X,
   SET_LAYERS_X,
   SET_LAYER_Y,
@@ -301,6 +321,26 @@ import {
   SetLayerTweenPowerPayload,
   FreezeLayerTweenPayload,
   UnFreezeLayerTweenPayload,
+  SetLayerStepsTweenStepsPayload,
+  SetLayerRoughTweenClampPayload,
+  SetLayerRoughTweenPointsPayload,
+  SetLayerRoughTweenRandomizePayload,
+  SetLayerRoughTweenStrengthPayload,
+  SetLayerRoughTweenTaperPayload,
+  SetLayerRoughTweenTemplatePayload,
+  SetLayerSlowTweenLinearRatioPayload,
+  SetLayerSlowTweenPowerPayload,
+  SetLayerSlowTweenYoYoModePayload,
+  SetLayerTextTweenCharactersPayload,
+  SetLayerTextTweenRevealDelayPayload,
+  SetLayerTextTweenSpeedPayload,
+  SetLayerTextTweenDelimiterPayload,
+  SetLayerTextTweenRightToLeftPayload,
+  SetLayerCustomBounceTweenStrengthPayload,
+  SetLayerCustomBounceTweenEndAtStartPayload,
+  SetLayerCustomBounceTweenSquashPayload,
+  SetLayerCustomWiggleTweenWigglesPayload,
+  SetLayerCustomWiggleTweenTypePayload,
   SetLayerXPayload,
   SetLayersXPayload,
   SetLayerYPayload,
@@ -1541,6 +1581,106 @@ export const freezeLayerTween = (payload: FreezeLayerTweenPayload): LayerTypes =
 
 export const unFreezeLayerTween = (payload: UnFreezeLayerTweenPayload): LayerTypes => ({
   type: UNFREEZE_LAYER_TWEEN,
+  payload
+});
+
+export const setLayerStepsTweenSteps = (payload: SetLayerStepsTweenStepsPayload): LayerTypes => ({
+  type: SET_LAYER_STEPS_TWEEN_STEPS,
+  payload
+});
+
+export const setLayerRoughTweenClamp = (payload: SetLayerRoughTweenClampPayload): LayerTypes => ({
+  type: SET_LAYER_ROUGH_TWEEN_CLAMP,
+  payload
+});
+
+export const setLayerRoughTweenPoints = (payload: SetLayerRoughTweenPointsPayload): LayerTypes => ({
+  type: SET_LAYER_ROUGH_TWEEN_POINTS,
+  payload
+});
+
+export const setLayerRoughTweenRandomize = (payload: SetLayerRoughTweenRandomizePayload): LayerTypes => ({
+  type: SET_LAYER_ROUGH_TWEEN_RANDOMIZE,
+  payload
+});
+
+export const setLayerRoughTweenStrength = (payload: SetLayerRoughTweenStrengthPayload): LayerTypes => ({
+  type: SET_LAYER_ROUGH_TWEEN_STRENGTH,
+  payload
+});
+
+export const setLayerRoughTweenTaper = (payload: SetLayerRoughTweenTaperPayload): LayerTypes => ({
+  type: SET_LAYER_ROUGH_TWEEN_TAPER,
+  payload
+});
+
+export const setLayerRoughTweenTemplate = (payload: SetLayerRoughTweenTemplatePayload): LayerTypes => ({
+  type: SET_LAYER_ROUGH_TWEEN_TEMPLATE,
+  payload
+});
+
+export const setLayerSlowTweenLinearRatio = (payload: SetLayerSlowTweenLinearRatioPayload): LayerTypes => ({
+  type: SET_LAYER_SLOW_TWEEN_LINEAR_RATIO,
+  payload
+});
+
+export const setLayerSlowTweenPower = (payload: SetLayerSlowTweenPowerPayload): LayerTypes => ({
+  type: SET_LAYER_SLOW_TWEEN_POWER,
+  payload
+});
+
+export const setLayerSlowTweenYoYoMode = (payload: SetLayerSlowTweenYoYoModePayload): LayerTypes => ({
+  type: SET_LAYER_SLOW_TWEEN_YOYO_MODE,
+  payload
+});
+
+export const setLayerTextTweenCharacters = (payload: SetLayerTextTweenCharactersPayload): LayerTypes => ({
+  type: SET_LAYER_TEXT_TWEEN_CHARACTERS,
+  payload
+});
+
+export const setLayerTextTweenRevealDelay = (payload: SetLayerTextTweenRevealDelayPayload): LayerTypes => ({
+  type: SET_LAYER_TEXT_TWEEN_REVEAL_DELAY,
+  payload
+});
+
+export const setLayerTextTweenSpeed = (payload: SetLayerTextTweenSpeedPayload): LayerTypes => ({
+  type: SET_LAYER_TEXT_TWEEN_SPEED,
+  payload
+});
+
+export const setLayerTextTweenDelimiter = (payload: SetLayerTextTweenDelimiterPayload): LayerTypes => ({
+  type: SET_LAYER_TEXT_TWEEN_DELIMITER,
+  payload
+});
+
+export const setLayerTextTweenRightToLeft = (payload: SetLayerTextTweenRightToLeftPayload): LayerTypes => ({
+  type: SET_LAYER_TEXT_TWEEN_RIGHT_TO_LEFT,
+  payload
+});
+
+export const setLayerCustomBounceTweenStrength = (payload: SetLayerCustomBounceTweenStrengthPayload): LayerTypes => ({
+  type: SET_LAYER_CUSTOM_BOUNCE_TWEEN_STRENGTH,
+  payload
+});
+
+export const setLayerCustomBounceTweenEndAtStart = (payload: SetLayerCustomBounceTweenEndAtStartPayload): LayerTypes => ({
+  type: SET_LAYER_CUSTOM_BOUNCE_TWEEN_END_AT_START,
+  payload
+});
+
+export const setLayerCustomBounceTweenSquash = (payload: SetLayerCustomBounceTweenSquashPayload): LayerTypes => ({
+  type: SET_LAYER_CUSTOM_BOUNCE_TWEEN_SQUASH,
+  payload
+});
+
+export const setLayerCustomWiggleTweenWiggles = (payload: SetLayerCustomWiggleTweenWigglesPayload): LayerTypes => ({
+  type: SET_LAYER_CUSTOM_WIGGLE_TWEEN_WIGGLES,
+  payload
+});
+
+export const setLayerCustomWiggleTweenType = (payload: SetLayerCustomWiggleTweenTypePayload): LayerTypes => ({
+  type: SET_LAYER_CUSTOM_WIGGLE_TWEEN_TYPE,
   payload
 });
 

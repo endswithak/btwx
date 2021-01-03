@@ -28,7 +28,7 @@ declare namespace Btwx {
 
   type UIElement = 'SelectionFrame' | 'HoverFrame' | 'DragFrame' | 'GradientFrame' | 'ActiveArtboardFrame' | 'TweenEventsFrame';
 
-  type CubicBezier = 'linear' | 'power1' | 'power2' | 'power3' | 'power4' | 'back' | 'elastic' | 'bounce' | 'rough' | 'slow' | 'steps' | 'circ' | 'expo' | 'sine' | 'custom';
+  type CubicBezier = 'linear' | 'power1' | 'power2' | 'power3' | 'power4' | 'back' | 'elastic' | 'bounce' | 'circ' | 'expo' | 'sine' | 'rough' | 'slow' | 'steps' | 'customBounce' | 'customWiggle';
 
   type CubicBezierType = 'in' | 'inOut' | 'out';
 
@@ -472,6 +472,57 @@ declare namespace Btwx {
     duration: number;
     delay: number;
     frozen: boolean;
+    scrambleText: ScrambleTextTween;
+    customBounce: CustomBounceTween;
+    customWiggle: CustomWiggleTween;
+    steps: StepsTween;
+    rough: RoughTween;
+    slow: SlowTween;
+  }
+
+  type ScrambleTextTweenCharacters = 'upperCase' | 'lowerCase' | 'upperAndLowerCase' | 'custom';
+
+  interface ScrambleTextTween {
+    characters: TextTweenCharacters;
+    customCharacters: string;
+    revealDelay: number;
+    speed: number;
+    delimiter: string;
+    rightToLeft: boolean;
+  }
+
+  interface StepsTween {
+    steps: number;
+  }
+
+  type RoughTweenTaper = 'in' | 'out' | 'both' | 'none';
+
+  interface RoughTween {
+    clamp: boolean;
+    points: number;
+    randomize: boolean;
+    strength: number;
+    taper: RoughTweenTaper;
+    template: string;
+  }
+
+  interface SlowTween {
+    linearRatio: number;
+    power: number;
+    yoyoMode: boolean;
+  }
+
+  interface CustomBounceTween {
+    strength: number;
+    endAtStart: boolean;
+    squash: number;
+  }
+
+  type CustomWiggleTweenType = 'easeOut' | 'easeInOut' | 'anticipate' | 'uniform' | 'random';
+
+  interface CustomWiggleTween {
+    wiggles: number;
+    type: CustomWiggleTweenType;
   }
 
   type Dropzone = 'top' | 'center' | 'bottom';

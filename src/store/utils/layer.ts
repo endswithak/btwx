@@ -7,7 +7,16 @@ import layer, { LayerState } from '../reducers/layer';
 import * as layerActions from '../actions/layer';
 import { addItem, removeItem, insertItem, moveItemAbove, moveItemBelow } from './general';
 import { uiPaperScope } from '../../canvas';
-import { ARTBOARDS_PER_PROJECT, TWEEN_PROPS_MAP } from '../../constants';
+import {
+  ARTBOARDS_PER_PROJECT, TWEEN_PROPS_MAP, DEFAULT_TWEEN_DURATION, DEFAULT_TWEEN_DELAY,
+  DEFAULT_TWEEN_EASE, DEFAULT_TWEEN_POWER, DEFAULT_TEXT_TWEEN_CHARACTERS, DEFAULT_TEXT_TWEEN_DELIMITER,
+  DEFAULT_TEXT_TWEEN_REVEAL_DELAY, DEFAULT_TEXT_TWEEN_SPEED, DEFAULT_TEXT_TWEEN_RIGHT_TO_LEFT,
+  DEFAULT_CUSTOM_BOUNCE_TWEEN_END_AT_START, DEFAULT_CUSTOM_BOUNCE_TWEEN_SQUASH, DEFAULT_CUSTOM_BOUNCE_TWEEN_STRENGTH,
+  DEFAULT_CUSTOM_WIGGLE_TWEEN_TYPE, DEFAULT_CUSTOM_WIGGLE_TWEEN_WIGGLES, DEFAULT_STEPS_TWEEN_STEPS, DEFAULT_ROUGH_TWEEN_CLAMP,
+  DEFAULT_ROUGH_TWEEN_POINTS, DEFAULT_ROUGH_TWEEN_RANDOMIZE, DEFAULT_ROUGH_TWEEN_STRENGTH, DEFAULT_ROUGH_TWEEN_TAPER,
+  DEFAULT_ROUGH_TWEEN_TEMPLATE, DEFAULT_SLOW_TWEEN_LINEAR_POWER, DEFAULT_SLOW_TWEEN_LINEAR_RATIO,
+  DEFAULT_SLOW_TWEEN_LINEAR_YOYO_MODE
+} from '../../constants';
 
 import {
   AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer,
@@ -44,7 +53,7 @@ import {
   SetLayerStyle, SetLayersStyle, EnableLayersHorizontalFlip, DisableLayersHorizontalFlip, DisableLayersVerticalFlip, EnableLayersVerticalFlip,
   SetLayerScope, SetLayersScope, SetGlobalScope, SetLayerUnderlyingMask, SetLayersUnderlyingMask, SetLayerMasked, SetLayersMasked, ToggleLayerMask,
   ToggleLayersMask, ToggleLayersIgnoreUnderlyingMask, ToggleLayerIgnoreUnderlyingMask, AreaSelectLayers, SetLayersGradientOD, ResetImagesDimensions,
-  ResetImageDimensions, ReplaceImage, ReplaceImages, PasteLayersFromClipboard, SetLayerOblique, SetLayersOblique, SetLayerPointX, SetLayersPointX, SetLayerPointY, SetLayersPointY
+  ResetImageDimensions, ReplaceImage, ReplaceImages, PasteLayersFromClipboard, SetLayerOblique, SetLayersOblique, SetLayerPointX, SetLayersPointX, SetLayerPointY, SetLayersPointY, SetLayerTextTweenCharacters, SetLayerTextTweenRevealDelay, SetLayerTextTweenSpeed, SetLayerTextTweenDelimiter, SetLayerTextTweenRightToLeft, SetLayerCustomBounceTweenStrength, SetLayerCustomBounceTweenEndAtStart, SetLayerCustomBounceTweenSquash, SetLayerCustomWiggleTweenWiggles, SetLayerCustomWiggleTweenType, SetLayerStepsTweenSteps, SetLayerRoughTweenClamp, SetLayerRoughTweenPoints, SetLayerRoughTweenRandomize, SetLayerRoughTweenStrength, SetLayerRoughTweenTaper, SetLayerRoughTweenTemplate, SetLayerSlowTweenLinearRatio, SetLayerSlowTweenPower, SetLayerSlowTweenYoYoMode
 } from '../actionTypes/layer';
 
 import {
@@ -2010,11 +2019,44 @@ export const addLayerTweenEvent = (state: LayerState, action: AddLayerTweenEvent
             destinationLayer: action.payload.destinationArtboard,
             prop: key,
             event: action.payload.id,
-            ease: 'power1',
-            power: 'out',
-            duration: 0.5,
-            delay: 0,
-            frozen: false
+            ease: DEFAULT_TWEEN_EASE,
+            power: DEFAULT_TWEEN_POWER,
+            duration: DEFAULT_TWEEN_DURATION,
+            delay: DEFAULT_TWEEN_DELAY,
+            frozen: false,
+            scrambleText: {
+              characters: DEFAULT_TEXT_TWEEN_CHARACTERS,
+              customCharacters: null,
+              revealDelay: DEFAULT_TEXT_TWEEN_REVEAL_DELAY,
+              speed: DEFAULT_TEXT_TWEEN_SPEED,
+              delimiter: DEFAULT_TEXT_TWEEN_DELIMITER,
+              rightToLeft: DEFAULT_TEXT_TWEEN_RIGHT_TO_LEFT
+            },
+            customBounce: {
+              strength: DEFAULT_CUSTOM_BOUNCE_TWEEN_STRENGTH,
+              endAtStart: DEFAULT_CUSTOM_BOUNCE_TWEEN_END_AT_START,
+              squash: DEFAULT_CUSTOM_BOUNCE_TWEEN_SQUASH
+            },
+            customWiggle: {
+              wiggles: DEFAULT_CUSTOM_WIGGLE_TWEEN_WIGGLES,
+              type: DEFAULT_CUSTOM_WIGGLE_TWEEN_TYPE
+            },
+            steps: {
+              steps: DEFAULT_STEPS_TWEEN_STEPS
+            },
+            rough: {
+              clamp: DEFAULT_ROUGH_TWEEN_CLAMP,
+              points: DEFAULT_ROUGH_TWEEN_POINTS,
+              randomize: DEFAULT_ROUGH_TWEEN_RANDOMIZE,
+              strength: DEFAULT_ROUGH_TWEEN_STRENGTH,
+              taper: DEFAULT_ROUGH_TWEEN_TAPER,
+              template: DEFAULT_ROUGH_TWEEN_TEMPLATE
+            },
+            slow: {
+              linearRatio: DEFAULT_SLOW_TWEEN_LINEAR_RATIO,
+              power: DEFAULT_SLOW_TWEEN_LINEAR_POWER,
+              yoyoMode: DEFAULT_SLOW_TWEEN_LINEAR_YOYO_MODE
+            }
           }) as AddLayerTween);
         }
         return result;
@@ -2056,11 +2098,44 @@ export const addTweenEventLayerTweens = (state: LayerState, eventId: string, lay
           destinationLayer: destinationEquivalent.id,
           prop: key,
           event: eventId,
-          ease: 'power1',
-          power: 'out',
-          duration: 0.5,
-          delay: 0,
-          frozen: false
+          ease: DEFAULT_TWEEN_EASE,
+          power: DEFAULT_TWEEN_POWER,
+          duration: DEFAULT_TWEEN_DURATION,
+          delay: DEFAULT_TWEEN_DELAY,
+          frozen: false,
+          scrambleText: {
+            characters: DEFAULT_TEXT_TWEEN_CHARACTERS,
+            customCharacters: null,
+            revealDelay: DEFAULT_TEXT_TWEEN_REVEAL_DELAY,
+            speed: DEFAULT_TEXT_TWEEN_SPEED,
+            delimiter: DEFAULT_TEXT_TWEEN_DELIMITER,
+            rightToLeft: DEFAULT_TEXT_TWEEN_RIGHT_TO_LEFT
+          },
+          customBounce: {
+            strength: DEFAULT_CUSTOM_BOUNCE_TWEEN_STRENGTH,
+            endAtStart: DEFAULT_CUSTOM_BOUNCE_TWEEN_END_AT_START,
+            squash: DEFAULT_CUSTOM_BOUNCE_TWEEN_SQUASH
+          },
+          customWiggle: {
+            wiggles: DEFAULT_CUSTOM_WIGGLE_TWEEN_WIGGLES,
+            type: DEFAULT_CUSTOM_WIGGLE_TWEEN_TYPE
+          },
+          steps: {
+            steps: DEFAULT_STEPS_TWEEN_STEPS
+          },
+          rough: {
+            clamp: DEFAULT_ROUGH_TWEEN_CLAMP,
+            points: DEFAULT_ROUGH_TWEEN_POINTS,
+            randomize: DEFAULT_ROUGH_TWEEN_RANDOMIZE,
+            strength: DEFAULT_ROUGH_TWEEN_STRENGTH,
+            taper: DEFAULT_ROUGH_TWEEN_TAPER,
+            template: DEFAULT_ROUGH_TWEEN_TEMPLATE
+          },
+          slow: {
+            linearRatio: DEFAULT_SLOW_TWEEN_LINEAR_RATIO,
+            power: DEFAULT_SLOW_TWEEN_LINEAR_POWER,
+            yoyoMode: DEFAULT_SLOW_TWEEN_LINEAR_YOYO_MODE
+          }
         }) as AddLayerTween);
       }
       return result;
@@ -2285,11 +2360,44 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
             destinationLayer: destinationEquivalent.id,
             prop: prop,
             event: current,
-            ease: 'power1',
-            power: 'out',
-            duration: 0.5,
-            delay: 0,
-            frozen: false
+            ease: DEFAULT_TWEEN_EASE,
+            power: DEFAULT_TWEEN_POWER,
+            duration: DEFAULT_TWEEN_DURATION,
+            delay: DEFAULT_TWEEN_DELAY,
+            frozen: false,
+            scrambleText: {
+              characters: DEFAULT_TEXT_TWEEN_CHARACTERS,
+              customCharacters: null,
+              revealDelay: DEFAULT_TEXT_TWEEN_REVEAL_DELAY,
+              speed: DEFAULT_TEXT_TWEEN_SPEED,
+              delimiter: DEFAULT_TEXT_TWEEN_DELIMITER,
+              rightToLeft: DEFAULT_TEXT_TWEEN_RIGHT_TO_LEFT
+            },
+            customBounce: {
+              strength: DEFAULT_CUSTOM_BOUNCE_TWEEN_STRENGTH,
+              endAtStart: DEFAULT_CUSTOM_BOUNCE_TWEEN_END_AT_START,
+              squash: DEFAULT_CUSTOM_BOUNCE_TWEEN_SQUASH
+            },
+            customWiggle: {
+              wiggles: DEFAULT_CUSTOM_WIGGLE_TWEEN_WIGGLES,
+              type: DEFAULT_CUSTOM_WIGGLE_TWEEN_TYPE
+            },
+            steps: {
+              steps: DEFAULT_STEPS_TWEEN_STEPS
+            },
+            rough: {
+              clamp: DEFAULT_ROUGH_TWEEN_CLAMP,
+              points: DEFAULT_ROUGH_TWEEN_POINTS,
+              randomize: DEFAULT_ROUGH_TWEEN_RANDOMIZE,
+              strength: DEFAULT_ROUGH_TWEEN_STRENGTH,
+              taper: DEFAULT_ROUGH_TWEEN_TAPER,
+              template: DEFAULT_ROUGH_TWEEN_TEMPLATE
+            },
+            slow: {
+              linearRatio: DEFAULT_SLOW_TWEEN_LINEAR_RATIO,
+              power: DEFAULT_SLOW_TWEEN_LINEAR_POWER,
+              yoyoMode: DEFAULT_SLOW_TWEEN_LINEAR_YOYO_MODE
+            }
           }) as AddLayerTween);
         }
       }
@@ -2315,11 +2423,44 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
             destinationLayer: layerId,
             prop: prop,
             event: current,
-            ease: 'power1',
-            power: 'out',
-            duration: 0.5,
-            delay: 0,
-            frozen: false
+            ease: DEFAULT_TWEEN_EASE,
+            power: DEFAULT_TWEEN_POWER,
+            duration: DEFAULT_TWEEN_DURATION,
+            delay: DEFAULT_TWEEN_DELAY,
+            frozen: false,
+            scrambleText: {
+              characters: DEFAULT_TEXT_TWEEN_CHARACTERS,
+              customCharacters: null,
+              revealDelay: DEFAULT_TEXT_TWEEN_REVEAL_DELAY,
+              speed: DEFAULT_TEXT_TWEEN_SPEED,
+              delimiter: DEFAULT_TEXT_TWEEN_DELIMITER,
+              rightToLeft: DEFAULT_TEXT_TWEEN_RIGHT_TO_LEFT
+            },
+            customBounce: {
+              strength: DEFAULT_CUSTOM_BOUNCE_TWEEN_STRENGTH,
+              endAtStart: DEFAULT_CUSTOM_BOUNCE_TWEEN_END_AT_START,
+              squash: DEFAULT_CUSTOM_BOUNCE_TWEEN_SQUASH
+            },
+            customWiggle: {
+              wiggles: DEFAULT_CUSTOM_WIGGLE_TWEEN_WIGGLES,
+              type: DEFAULT_CUSTOM_WIGGLE_TWEEN_TYPE
+            },
+            steps: {
+              steps: DEFAULT_STEPS_TWEEN_STEPS
+            },
+            rough: {
+              clamp: DEFAULT_ROUGH_TWEEN_CLAMP,
+              points: DEFAULT_ROUGH_TWEEN_POINTS,
+              randomize: DEFAULT_ROUGH_TWEEN_RANDOMIZE,
+              strength: DEFAULT_ROUGH_TWEEN_STRENGTH,
+              taper: DEFAULT_ROUGH_TWEEN_TAPER,
+              template: DEFAULT_ROUGH_TWEEN_TEMPLATE
+            },
+            slow: {
+              linearRatio: DEFAULT_SLOW_TWEEN_LINEAR_RATIO,
+              power: DEFAULT_SLOW_TWEEN_LINEAR_POWER,
+              yoyoMode: DEFAULT_SLOW_TWEEN_LINEAR_YOYO_MODE
+            }
           }) as AddLayerTween);
         }
       }
@@ -2406,6 +2547,7 @@ export const setLayerTweenTiming = (state: LayerState, action: SetLayerTweenTimi
 
 export const setLayerTweenEase = (state: LayerState, action: SetLayerTweenEase): LayerState => {
   let currentState = state;
+  const prevEase = currentState.tweens.byId[action.payload.id].ease;
   currentState = {
     ...currentState,
     tweens: {
@@ -2450,6 +2592,587 @@ export const setLayerTweenPower = (state: LayerState, action: SetLayerTweenPower
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Tween Power',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerStepsTweenSteps = (state: LayerState, action: SetLayerStepsTweenSteps): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          steps: {
+            ...currentState.tweens.byId[action.payload.id].steps,
+            steps: action.payload.steps,
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Step Tween Steps',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerRoughTweenClamp = (state: LayerState, action: SetLayerRoughTweenClamp): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          rough: {
+            ...currentState.tweens.byId[action.payload.id].rough,
+            clamp: action.payload.clamp,
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Rough Tween Clamp',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerRoughTweenPoints = (state: LayerState, action: SetLayerRoughTweenPoints): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          rough: {
+            ...currentState.tweens.byId[action.payload.id].rough,
+            points: action.payload.points,
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Rough Tween Points',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerRoughTweenRandomize = (state: LayerState, action: SetLayerRoughTweenRandomize): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          rough: {
+            ...currentState.tweens.byId[action.payload.id].rough,
+            randomize: action.payload.randomize,
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Rough Tween Randomize',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerRoughTweenStrength = (state: LayerState, action: SetLayerRoughTweenStrength): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          rough: {
+            ...currentState.tweens.byId[action.payload.id].rough,
+            strength: action.payload.strength,
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Rough Tween Strength',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerRoughTweenTaper = (state: LayerState, action: SetLayerRoughTweenTaper): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          rough: {
+            ...currentState.tweens.byId[action.payload.id].rough,
+            taper: action.payload.taper,
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Rough Tween Taper',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerRoughTweenTemplate = (state: LayerState, action: SetLayerRoughTweenTemplate): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          rough: {
+            ...currentState.tweens.byId[action.payload.id].rough,
+            template: action.payload.template,
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Rough Tween Template',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerSlowTweenLinearRatio = (state: LayerState, action: SetLayerSlowTweenLinearRatio): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          slow: {
+            ...currentState.tweens.byId[action.payload.id].slow,
+            linearRatio: action.payload.linearRatio,
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Slow Tween Linear Ratio',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerSlowTweenPower = (state: LayerState, action: SetLayerSlowTweenPower): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          slow: {
+            ...currentState.tweens.byId[action.payload.id].slow,
+            power: action.payload.power,
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Slow Tween Power',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerSlowTweenYoYoMode = (state: LayerState, action: SetLayerSlowTweenYoYoMode): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          slow: {
+            ...currentState.tweens.byId[action.payload.id].slow,
+            yoyoMode: action.payload.yoyoMode,
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Slow Tween YoYo Mode',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerTextTweenCharacters = (state: LayerState, action: SetLayerTextTweenCharacters): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          scrambleText: {
+            ...currentState.tweens.byId[action.payload.id].scrambleText,
+            characters: action.payload.characters,
+            customCharacters: action.payload.customCharacters ? action.payload.customCharacters : currentState.tweens.byId[action.payload.id].scrambleText.customCharacters
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Text Tween Characters',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerTextTweenRevealDelay = (state: LayerState, action: SetLayerTextTweenRevealDelay): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          scrambleText: {
+            ...currentState.tweens.byId[action.payload.id].scrambleText,
+            revealDelay: Math.round((action.payload.revealDelay + Number.EPSILON) * 100) / 100,
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Text Tween Reveal Delay',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerTextTweenSpeed = (state: LayerState, action: SetLayerTextTweenSpeed): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          scrambleText: {
+            ...currentState.tweens.byId[action.payload.id].scrambleText,
+            speed: Math.round((action.payload.speed + Number.EPSILON) * 100) / 100
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Text Tween Speed',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerTextTweenDelimiter = (state: LayerState, action: SetLayerTextTweenDelimiter): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          scrambleText: {
+            ...currentState.tweens.byId[action.payload.id].scrambleText,
+            delimiter: action.payload.delimiter
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Text Tween Delimiter',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerTextTweenRightToLeft = (state: LayerState, action: SetLayerTextTweenRightToLeft): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          scrambleText: {
+            ...currentState.tweens.byId[action.payload.id].scrambleText,
+            rightToLeft: action.payload.rightToLeft,
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Text Tween Right To Left',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerCustomBounceTweenStrength = (state: LayerState, action: SetLayerCustomBounceTweenStrength): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          customBounce: {
+            ...currentState.tweens.byId[action.payload.id].customBounce,
+            strength: action.payload.strength,
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Custom Bounce Tween Strength',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerCustomBounceTweenEndAtStart = (state: LayerState, action: SetLayerCustomBounceTweenEndAtStart): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          customBounce: {
+            ...currentState.tweens.byId[action.payload.id].customBounce,
+            endAtStart: action.payload.endAtStart,
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Custom Bounce Tween End At Start',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerCustomBounceTweenSquash = (state: LayerState, action: SetLayerCustomBounceTweenSquash): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          customBounce: {
+            ...currentState.tweens.byId[action.payload.id].customBounce,
+            squash: action.payload.squash,
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Custom Bounce Tween Squash',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerCustomWiggleTweenWiggles = (state: LayerState, action: SetLayerCustomWiggleTweenWiggles): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          customWiggle: {
+            ...currentState.tweens.byId[action.payload.id].customWiggle,
+            wiggles: action.payload.wiggles,
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Custom Wiggle Tween Wiggles',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerCustomWiggleTweenType = (state: LayerState, action: SetLayerCustomWiggleTweenType): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          customWiggle: {
+            ...currentState.tweens.byId[action.payload.id].customWiggle,
+            type: action.payload.type,
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Custom Wiggle Tween Type',
       projects: null
     }
   }) as SetLayerEdit);

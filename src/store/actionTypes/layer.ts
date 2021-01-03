@@ -71,6 +71,32 @@ export const SET_LAYER_TWEEN_EASE = 'SET_LAYER_TWEEN_EASE';
 export const SET_LAYER_TWEEN_POWER = 'SET_LAYER_TWEEN_POWER';
 export const SET_LAYER_TWEEN_TIMING = 'SET_LAYER_TWEEN_TIMING';
 
+export const SET_LAYER_STEPS_TWEEN_STEPS = 'SET_LAYER_STEPS_TWEEN_STEPS';
+
+export const SET_LAYER_ROUGH_TWEEN_CLAMP = 'SET_LAYER_ROUGH_TWEEN_CLAMP';
+export const SET_LAYER_ROUGH_TWEEN_POINTS = 'SET_LAYER_ROUGH_TWEEN_POINTS';
+export const SET_LAYER_ROUGH_TWEEN_RANDOMIZE = 'SET_LAYER_ROUGH_TWEEN_RANDOMIZE';
+export const SET_LAYER_ROUGH_TWEEN_STRENGTH = 'SET_LAYER_ROUGH_TWEEN_STRENGTH';
+export const SET_LAYER_ROUGH_TWEEN_TAPER = 'SET_LAYER_ROUGH_TWEEN_STRENGTH';
+export const SET_LAYER_ROUGH_TWEEN_TEMPLATE = 'SET_LAYER_ROUGH_TWEEN_TEMPLATE';
+
+export const SET_LAYER_SLOW_TWEEN_LINEAR_RATIO = 'SET_LAYER_SLOW_TWEEN_LINEAR_RATIO';
+export const SET_LAYER_SLOW_TWEEN_POWER = 'SET_LAYER_SLOW_TWEEN_POWER';
+export const SET_LAYER_SLOW_TWEEN_YOYO_MODE = 'SET_LAYER_SLOW_TWEEN_YOYO_MODE';
+
+export const SET_LAYER_TEXT_TWEEN_CHARACTERS = 'SET_LAYER_TEXT_TWEEN_CHARACTERS';
+export const SET_LAYER_TEXT_TWEEN_REVEAL_DELAY = 'SET_LAYER_TEXT_TWEEN_REVEAL_DELAY';
+export const SET_LAYER_TEXT_TWEEN_SPEED = 'SET_LAYER_TEXT_TWEEN_SPEED';
+export const SET_LAYER_TEXT_TWEEN_DELIMITER = 'SET_LAYER_TEXT_TWEEN_DELIMITER';
+export const SET_LAYER_TEXT_TWEEN_RIGHT_TO_LEFT = 'SET_LAYER_TEXT_TWEEN_RIGHT_TO_LEFT';
+
+export const SET_LAYER_CUSTOM_BOUNCE_TWEEN_STRENGTH = 'SET_LAYER_CUSTOM_BOUNCE_TWEEN_STRENGTH';
+export const SET_LAYER_CUSTOM_BOUNCE_TWEEN_END_AT_START = 'SET_LAYER_CUSTOM_BOUNCE_TWEEN_END_AT_START';
+export const SET_LAYER_CUSTOM_BOUNCE_TWEEN_SQUASH = 'SET_LAYER_CUSTOM_BOUNCE_TWEEN_SQUASH';
+
+export const SET_LAYER_CUSTOM_WIGGLE_TWEEN_WIGGLES = 'SET_LAYER_CUSTOM_BOUNCE_TWEEN_WIGGLES';
+export const SET_LAYER_CUSTOM_WIGGLE_TWEEN_TYPE = 'SET_LAYER_CUSTOM_WIGGLE_TWEEN_TYPE';
+
 export const FREEZE_LAYER_TWEEN = 'FREEZE_LAYER_TWEEN';
 export const UNFREEZE_LAYER_TWEEN = 'UNFREEZE_LAYER_TWEEN';
 export const FREEZE_LAYER_TWEENS = 'FREEZE_LAYER_TWEENS';
@@ -862,6 +888,207 @@ export interface UnFreezeLayerTweenPayload {
 export interface UnFreezeLayerTween {
   type: typeof UNFREEZE_LAYER_TWEEN;
   payload: UnFreezeLayerTweenPayload;
+}
+
+export interface SetLayerStepsTweenStepsPayload {
+  id: string;
+  steps: number;
+}
+
+export interface SetLayerStepsTweenSteps {
+  type: typeof SET_LAYER_STEPS_TWEEN_STEPS;
+  payload: SetLayerStepsTweenStepsPayload;
+}
+
+export interface SetLayerRoughTweenClampPayload {
+  id: string;
+  clamp: boolean;
+}
+
+export interface SetLayerRoughTweenClamp {
+  type: typeof SET_LAYER_ROUGH_TWEEN_CLAMP;
+  payload: SetLayerRoughTweenClampPayload;
+}
+
+export interface SetLayerRoughTweenPointsPayload {
+  id: string;
+  points: number;
+}
+
+export interface SetLayerRoughTweenPoints {
+  type: typeof SET_LAYER_ROUGH_TWEEN_POINTS;
+  payload: SetLayerRoughTweenPointsPayload;
+}
+
+export interface SetLayerRoughTweenRandomizePayload {
+  id: string;
+  randomize: boolean;
+}
+
+export interface SetLayerRoughTweenRandomize {
+  type: typeof SET_LAYER_ROUGH_TWEEN_RANDOMIZE;
+  payload: SetLayerRoughTweenRandomizePayload;
+}
+
+export interface SetLayerRoughTweenStrengthPayload {
+  id: string;
+  strength: number;
+}
+
+export interface SetLayerRoughTweenStrength {
+  type: typeof SET_LAYER_ROUGH_TWEEN_STRENGTH;
+  payload: SetLayerRoughTweenStrengthPayload;
+}
+
+export interface SetLayerRoughTweenTaperPayload {
+  id: string;
+  taper: Btwx.RoughTweenTaper;
+}
+
+export interface SetLayerRoughTweenTaper {
+  type: typeof SET_LAYER_ROUGH_TWEEN_TAPER;
+  payload: SetLayerRoughTweenTaperPayload;
+}
+
+export interface SetLayerRoughTweenTemplatePayload {
+  id: string;
+  template: string;
+}
+
+export interface SetLayerRoughTweenTemplate {
+  type: typeof SET_LAYER_ROUGH_TWEEN_TEMPLATE;
+  payload: SetLayerRoughTweenTemplatePayload;
+}
+
+export interface SetLayerSlowTweenLinearRatioPayload {
+  id: string;
+  linearRatio: number;
+}
+
+export interface SetLayerSlowTweenLinearRatio {
+  type: typeof SET_LAYER_SLOW_TWEEN_LINEAR_RATIO;
+  payload: SetLayerSlowTweenLinearRatioPayload;
+}
+
+export interface SetLayerSlowTweenPowerPayload {
+  id: string;
+  power: number;
+}
+
+export interface SetLayerSlowTweenPower {
+  type: typeof SET_LAYER_SLOW_TWEEN_POWER;
+  payload: SetLayerSlowTweenPowerPayload;
+}
+
+export interface SetLayerSlowTweenYoYoModePayload {
+  id: string;
+  yoyoMode: boolean;
+}
+
+export interface SetLayerSlowTweenYoYoMode {
+  type: typeof SET_LAYER_SLOW_TWEEN_YOYO_MODE;
+  payload: SetLayerSlowTweenYoYoModePayload;
+}
+
+export interface SetLayerTextTweenCharactersPayload {
+  id: string;
+  characters: Btwx.ScrambleTextTweenCharacters;
+  customCharacters?: string;
+}
+
+export interface SetLayerTextTweenCharacters {
+  type: typeof SET_LAYER_TEXT_TWEEN_CHARACTERS;
+  payload: SetLayerTextTweenCharactersPayload;
+}
+
+export interface SetLayerTextTweenRevealDelayPayload {
+  id: string;
+  revealDelay: number;
+}
+
+export interface SetLayerTextTweenRevealDelay {
+  type: typeof SET_LAYER_TEXT_TWEEN_REVEAL_DELAY;
+  payload: SetLayerTextTweenRevealDelayPayload;
+}
+
+export interface SetLayerTextTweenSpeedPayload {
+  id: string;
+  speed: number;
+}
+
+export interface SetLayerTextTweenSpeed {
+  type: typeof SET_LAYER_TEXT_TWEEN_SPEED;
+  payload: SetLayerTextTweenSpeedPayload;
+}
+
+export interface SetLayerTextTweenDelimiterPayload {
+  id: string;
+  delimiter: string;
+}
+
+export interface SetLayerTextTweenDelimiter {
+  type: typeof SET_LAYER_TEXT_TWEEN_DELIMITER;
+  payload: SetLayerTextTweenDelimiterPayload;
+}
+
+export interface SetLayerTextTweenRightToLeftPayload {
+  id: string;
+  rightToLeft: boolean;
+}
+
+export interface SetLayerTextTweenRightToLeft {
+  type: typeof SET_LAYER_TEXT_TWEEN_RIGHT_TO_LEFT;
+  payload: SetLayerTextTweenRightToLeftPayload;
+}
+
+export interface SetLayerCustomBounceTweenStrengthPayload {
+  id: string;
+  strength: number;
+}
+
+export interface SetLayerCustomBounceTweenStrength {
+  type: typeof SET_LAYER_CUSTOM_BOUNCE_TWEEN_STRENGTH;
+  payload: SetLayerCustomBounceTweenStrengthPayload;
+}
+
+export interface SetLayerCustomBounceTweenEndAtStartPayload {
+  id: string;
+  endAtStart: boolean;
+}
+
+export interface SetLayerCustomBounceTweenEndAtStart {
+  type: typeof SET_LAYER_CUSTOM_BOUNCE_TWEEN_END_AT_START;
+  payload: SetLayerCustomBounceTweenEndAtStartPayload;
+}
+
+export interface SetLayerCustomBounceTweenSquashPayload {
+  id: string;
+  squash: number;
+}
+
+export interface SetLayerCustomBounceTweenSquash {
+  type: typeof SET_LAYER_CUSTOM_BOUNCE_TWEEN_SQUASH;
+  payload: SetLayerCustomBounceTweenSquashPayload;
+}
+
+export interface SetLayerCustomWiggleTweenWigglesPayload {
+  id: string;
+  wiggles: number;
+}
+
+export interface SetLayerCustomWiggleTweenWiggles {
+  type: typeof SET_LAYER_CUSTOM_WIGGLE_TWEEN_WIGGLES;
+  payload: SetLayerCustomWiggleTweenWigglesPayload;
+}
+
+export interface SetLayerCustomWiggleTweenTypePayload {
+  id: string;
+  type: Btwx.CustomWiggleTweenType;
+}
+
+export interface SetLayerCustomWiggleTweenType {
+  type: typeof SET_LAYER_CUSTOM_WIGGLE_TWEEN_TYPE;
+  payload: SetLayerCustomWiggleTweenTypePayload;
 }
 
 export interface SetLayerXPayload {
@@ -2726,4 +2953,24 @@ export type LayerTypes = AddArtboard |
                          ResetImagesDimensions |
                          ReplaceImage |
                          ReplaceImages |
-                         PasteLayersFromClipboard;
+                         PasteLayersFromClipboard |
+                         SetLayerTextTweenCharacters |
+                         SetLayerTextTweenRevealDelay |
+                         SetLayerTextTweenSpeed |
+                         SetLayerTextTweenDelimiter |
+                         SetLayerTextTweenRightToLeft |
+                         SetLayerCustomBounceTweenStrength |
+                         SetLayerCustomBounceTweenEndAtStart |
+                         SetLayerCustomBounceTweenSquash |
+                         SetLayerCustomWiggleTweenWiggles |
+                         SetLayerCustomWiggleTweenType |
+                         SetLayerStepsTweenSteps |
+                         SetLayerRoughTweenClamp |
+                         SetLayerRoughTweenPoints |
+                         SetLayerRoughTweenRandomize |
+                         SetLayerRoughTweenStrength |
+                         SetLayerRoughTweenTaper |
+                         SetLayerRoughTweenTemplate |
+                         SetLayerSlowTweenLinearRatio |
+                         SetLayerSlowTweenPower |
+                         SetLayerSlowTweenYoYoMode;
