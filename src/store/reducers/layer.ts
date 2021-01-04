@@ -65,11 +65,15 @@ import {
   SET_LAYER_SLOW_TWEEN_LINEAR_RATIO,
   SET_LAYER_SLOW_TWEEN_POWER,
   SET_LAYER_SLOW_TWEEN_YOYO_MODE,
-  SET_LAYER_TEXT_TWEEN_CHARACTERS,
-  SET_LAYER_TEXT_TWEEN_REVEAL_DELAY,
-  SET_LAYER_TEXT_TWEEN_SPEED,
   SET_LAYER_TEXT_TWEEN_DELIMITER,
-  SET_LAYER_TEXT_TWEEN_RIGHT_TO_LEFT,
+  SET_LAYER_TEXT_TWEEN_SPEED,
+  SET_LAYER_TEXT_TWEEN_DIFF,
+  SET_LAYER_TEXT_TWEEN_SCRAMBLE,
+  SET_LAYER_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
+  SET_LAYER_SCRAMBLE_TEXT_TWEEN_REVEAL_DELAY,
+  SET_LAYER_SCRAMBLE_TEXT_TWEEN_SPEED,
+  SET_LAYER_SCRAMBLE_TEXT_TWEEN_DELIMITER,
+  SET_LAYER_SCRAMBLE_TEXT_TWEEN_RIGHT_TO_LEFT,
   SET_LAYER_CUSTOM_BOUNCE_TWEEN_STRENGTH,
   SET_LAYER_CUSTOM_BOUNCE_TWEEN_END_AT_START,
   SET_LAYER_CUSTOM_BOUNCE_TWEEN_SQUASH,
@@ -304,11 +308,15 @@ import {
   setLayerSlowTweenLinearRatio,
   setLayerSlowTweenPower,
   setLayerSlowTweenYoYoMode,
-  setLayerTextTweenCharacters,
-  setLayerTextTweenRevealDelay,
-  setLayerTextTweenSpeed,
   setLayerTextTweenDelimiter,
-  setLayerTextTweenRightToLeft,
+  setLayerTextTweenSpeed,
+  setLayerTextTweenDiff,
+  setLayerTextTweenScramble,
+  setLayerScrambleTextTweenCharacters,
+  setLayerScrambleTextTweenRevealDelay,
+  setLayerScrambleTextTweenSpeed,
+  setLayerScrambleTextTweenDelimiter,
+  setLayerScrambleTextTweenRightToLeft,
   setLayerCustomBounceTweenStrength,
   setLayerCustomBounceTweenEndAtStart,
   setLayerCustomBounceTweenSquash,
@@ -713,16 +721,24 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return setLayerSlowTweenPower(state, action);
     case SET_LAYER_SLOW_TWEEN_YOYO_MODE:
       return setLayerSlowTweenYoYoMode(state, action);
-    case SET_LAYER_TEXT_TWEEN_CHARACTERS:
-      return setLayerTextTweenCharacters(state, action);
-    case SET_LAYER_TEXT_TWEEN_REVEAL_DELAY:
-      return setLayerTextTweenRevealDelay(state, action);
-    case SET_LAYER_TEXT_TWEEN_SPEED:
-      return setLayerTextTweenSpeed(state, action);
     case SET_LAYER_TEXT_TWEEN_DELIMITER:
       return setLayerTextTweenDelimiter(state, action);
-    case SET_LAYER_TEXT_TWEEN_RIGHT_TO_LEFT:
-      return setLayerTextTweenRightToLeft(state, action);
+    case SET_LAYER_TEXT_TWEEN_SPEED:
+      return setLayerTextTweenSpeed(state, action);
+    case SET_LAYER_TEXT_TWEEN_DIFF:
+      return setLayerTextTweenDiff(state, action);
+    case SET_LAYER_TEXT_TWEEN_SCRAMBLE:
+      return setLayerTextTweenScramble(state, action);
+    case SET_LAYER_SCRAMBLE_TEXT_TWEEN_CHARACTERS:
+      return setLayerScrambleTextTweenCharacters(state, action);
+    case SET_LAYER_SCRAMBLE_TEXT_TWEEN_REVEAL_DELAY:
+      return setLayerScrambleTextTweenRevealDelay(state, action);
+    case SET_LAYER_SCRAMBLE_TEXT_TWEEN_SPEED:
+      return setLayerScrambleTextTweenSpeed(state, action);
+    case SET_LAYER_SCRAMBLE_TEXT_TWEEN_DELIMITER:
+      return setLayerScrambleTextTweenDelimiter(state, action);
+    case SET_LAYER_SCRAMBLE_TEXT_TWEEN_RIGHT_TO_LEFT:
+      return setLayerScrambleTextTweenRightToLeft(state, action);
     case SET_LAYER_CUSTOM_BOUNCE_TWEEN_STRENGTH:
       return setLayerCustomBounceTweenStrength(state, action);
     case SET_LAYER_CUSTOM_BOUNCE_TWEEN_END_AT_START:
@@ -1108,11 +1124,15 @@ export default undoable(baseReducer, {
       SET_LAYER_SLOW_TWEEN_LINEAR_RATIO,
       SET_LAYER_SLOW_TWEEN_POWER,
       SET_LAYER_SLOW_TWEEN_YOYO_MODE,
-      SET_LAYER_TEXT_TWEEN_CHARACTERS,
-      SET_LAYER_TEXT_TWEEN_REVEAL_DELAY,
-      SET_LAYER_TEXT_TWEEN_SPEED,
       SET_LAYER_TEXT_TWEEN_DELIMITER,
-      SET_LAYER_TEXT_TWEEN_RIGHT_TO_LEFT,
+      SET_LAYER_TEXT_TWEEN_SPEED,
+      SET_LAYER_TEXT_TWEEN_DIFF,
+      SET_LAYER_TEXT_TWEEN_SCRAMBLE,
+      SET_LAYER_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
+      SET_LAYER_SCRAMBLE_TEXT_TWEEN_REVEAL_DELAY,
+      SET_LAYER_SCRAMBLE_TEXT_TWEEN_SPEED,
+      SET_LAYER_SCRAMBLE_TEXT_TWEEN_DELIMITER,
+      SET_LAYER_SCRAMBLE_TEXT_TWEEN_RIGHT_TO_LEFT,
       SET_LAYER_CUSTOM_BOUNCE_TWEEN_STRENGTH,
       SET_LAYER_CUSTOM_BOUNCE_TWEEN_END_AT_START,
       SET_LAYER_CUSTOM_BOUNCE_TWEEN_SQUASH,

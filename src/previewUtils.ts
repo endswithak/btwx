@@ -2,6 +2,7 @@
 import tinyColor from 'tinycolor2';
 import { gsap } from 'gsap';
 import { CustomEase } from 'gsap/CustomEase';
+import { TextPlugin } from 'gsap/TextPlugin';
 import { RoughEase, SlowMo } from 'gsap/EasePack';
 import { CustomBounce } from 'gsap/CustomBounce';
 import { CustomWiggle } from 'gsap/CustomWiggle';
@@ -9,7 +10,7 @@ import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
 import { paperPreview } from './canvas';
 
-gsap.registerPlugin(MorphSVGPlugin, RoughEase, SlowMo, CustomBounce, CustomWiggle, ScrambleTextPlugin);
+gsap.registerPlugin(MorphSVGPlugin, RoughEase, SlowMo, CustomBounce, CustomWiggle, ScrambleTextPlugin, TextPlugin);
 
 export const getEaseString = (tween: Btwx.Tween): string => {
   switch(tween.ease) {
@@ -657,12 +658,14 @@ export const addNullToGradientFSTween = (props: AddTweenProps, style: 'fill' | '
 
 export const addDashOffsetTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
-  timelineTweenProps[tween.prop] = originPaperLayer.dashOffset;
+  const isText = originLayerItem.type === 'Text';
+  const paperLayerRef = isText ? originPaperLayer.getItem({data: {id: 'textLines'}}) : originPaperLayer;
+  timelineTweenProps[tween.prop] = originLayerItem.style.strokeOptions.dashOffset;
   timeline.to(timelineTweenProps, {
     duration: tween.duration,
-    [tween.prop]: destinationPaperLayer.dashOffset,
+    [tween.prop]: destinationLayerItem.style.strokeOptions.dashOffset,
     onUpdate: () => {
-      originPaperLayer.dashOffset = timelineTweenProps[tween.prop];
+      paperLayerRef.dashOffset = timelineTweenProps[tween.prop];
     },
     ease: getEaseString(tween),
   }, tween.delay);
@@ -670,12 +673,14 @@ export const addDashOffsetTween = (props: AddTweenProps): void => {
 
 export const addDashArrayWidthTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
-  timelineTweenProps[tween.prop] = originPaperLayer.dashArray[0];
+  const isText = originLayerItem.type === 'Text';
+  const paperLayerRef = isText ? originPaperLayer.getItem({data: {id: 'textLines'}}) : originPaperLayer;
+  timelineTweenProps[tween.prop] = originLayerItem.style.strokeOptions.dashArray[0];
   timeline.to(timelineTweenProps, {
     duration: tween.duration,
-    [tween.prop]: destinationPaperLayer.dashArray[0],
+    [tween.prop]: destinationLayerItem.style.strokeOptions.dashArray[0],
     onUpdate: () => {
-      originPaperLayer.dashArray = [timelineTweenProps[tween.prop], originPaperLayer.dashArray[1]];
+      paperLayerRef.dashArray = [timelineTweenProps[tween.prop], paperLayerRef.dashArray[1]];
     },
     ease: getEaseString(tween),
   }, tween.delay);
@@ -683,12 +688,14 @@ export const addDashArrayWidthTween = (props: AddTweenProps): void => {
 
 export const addDashArrayGapTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
-  timelineTweenProps[tween.prop] = originPaperLayer.dashArray[1];
+  const isText = originLayerItem.type === 'Text';
+  const paperLayerRef = isText ? originPaperLayer.getItem({data: {id: 'textLines'}}) : originPaperLayer;
+  timelineTweenProps[tween.prop] = originLayerItem.style.strokeOptions.dashArray[1];
   timeline.to(timelineTweenProps, {
     duration: tween.duration,
-    [tween.prop]: destinationPaperLayer.dashArray[1],
+    [tween.prop]: destinationLayerItem.style.strokeOptions.dashArray[1],
     onUpdate: () => {
-      originPaperLayer.dashArray = [originPaperLayer.dashArray[0], timelineTweenProps[tween.prop]];
+      paperLayerRef.dashArray = [paperLayerRef.dashArray[0], timelineTweenProps[tween.prop]];
     },
     ease: getEaseString(tween),
   }, tween.delay);
@@ -696,12 +703,14 @@ export const addDashArrayGapTween = (props: AddTweenProps): void => {
 
 export const addStrokeWidthTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
-  timelineTweenProps[tween.prop] = originPaperLayer.strokeWidth;
+  const isText = originLayerItem.type === 'Text';
+  const paperLayerRef = isText ? originPaperLayer.getItem({data: {id: 'textLines'}}) : originPaperLayer;
+  timelineTweenProps[tween.prop] = originLayerItem.style.stroke.width;
   timeline.to(timelineTweenProps, {
     duration: tween.duration,
-    [tween.prop]: destinationPaperLayer.strokeWidth,
+    [tween.prop]: destinationLayerItem.style.stroke.width,
     onUpdate: () => {
-      originPaperLayer.strokeWidth = timelineTweenProps[tween.prop];
+      paperLayerRef.strokeWidth = timelineTweenProps[tween.prop];
     },
     ease: getEaseString(tween),
   }, tween.delay);
@@ -885,6 +894,8 @@ export const addRotationTween = (props: AddTweenProps): void => {
 
 export const addShadowColorTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
+  const isText = originLayerItem.type === 'Text';
+  const paperLayerRef = isText ? originPaperLayer.getItem({data: {id: 'textLines'}}) : originPaperLayer;
   const originShadow = originLayerItem.style.shadow;
   const destinationShadow = destinationLayerItem.style.shadow;
   let osc = originLayerItem.style.shadow.color;
@@ -900,7 +911,7 @@ export const addShadowColorTween = (props: AddTweenProps): void => {
     duration: tween.duration,
     [tween.prop]: tinyColor({h: dsc.h, s: dsc.s, l: dsc.l, a: dsc.a}).toHslString(),
     onUpdate: () => {
-      originPaperLayer.shadowColor = timelineTweenProps[tween.prop];
+      paperLayerRef.shadowColor = timelineTweenProps[tween.prop];
     },
     ease: getEaseString(tween),
   }, tween.delay);
@@ -908,6 +919,8 @@ export const addShadowColorTween = (props: AddTweenProps): void => {
 
 export const addShadowXOffsetTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
+  const isText = originLayerItem.type === 'Text';
+  const paperLayerRef = isText ? originPaperLayer.getItem({data: {id: 'textLines'}}) : originPaperLayer;
   const originShadow = originLayerItem.style.shadow;
   const destinationShadow = destinationLayerItem.style.shadow;
   let osx = originLayerItem.style.shadow.offset.x;
@@ -923,8 +936,8 @@ export const addShadowXOffsetTween = (props: AddTweenProps): void => {
     duration: tween.duration,
     [tween.prop]: dsx,
     onUpdate: () => {
-      const y = originPaperLayer.shadowOffset ? originPaperLayer.shadowOffset.y : originShadow.offset.y;
-      originPaperLayer.shadowOffset = new paperPreview.Point(timelineTweenProps[tween.prop], y);
+      const y = paperLayerRef.shadowOffset ? paperLayerRef.shadowOffset.y : originShadow.offset.y;
+      paperLayerRef.shadowOffset = new paperPreview.Point(timelineTweenProps[tween.prop], y);
     },
     ease: getEaseString(tween),
   }, tween.delay);
@@ -932,6 +945,8 @@ export const addShadowXOffsetTween = (props: AddTweenProps): void => {
 
 export const addShadowYOffsetTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
+  const isText = originLayerItem.type === 'Text';
+  const paperLayerRef = isText ? originPaperLayer.getItem({data: {id: 'textLines'}}) : originPaperLayer;
   const originShadow = originLayerItem.style.shadow;
   const destinationShadow = destinationLayerItem.style.shadow;
   let osy = originLayerItem.style.shadow.offset.y;
@@ -947,8 +962,8 @@ export const addShadowYOffsetTween = (props: AddTweenProps): void => {
     duration: tween.duration,
     [tween.prop]: dsy,
     onUpdate: () => {
-      const x = originPaperLayer.shadowOffset ? originPaperLayer.shadowOffset.x : originShadow.offset.x;
-      originPaperLayer.shadowOffset = new paperPreview.Point(x, timelineTweenProps[tween.prop]);
+      const x = paperLayerRef.shadowOffset ? paperLayerRef.shadowOffset.x : originShadow.offset.x;
+      paperLayerRef.shadowOffset = new paperPreview.Point(x, timelineTweenProps[tween.prop]);
     },
     ease: getEaseString(tween),
   }, tween.delay);
@@ -956,6 +971,8 @@ export const addShadowYOffsetTween = (props: AddTweenProps): void => {
 
 export const addShadowBlurTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
+  const isText = originLayerItem.type === 'Text';
+  const paperLayerRef = isText ? originPaperLayer.getItem({data: {id: 'textLines'}}) : originPaperLayer;
   const originShadow = originLayerItem.style.shadow;
   const destinationShadow = destinationLayerItem.style.shadow;
   let osb = originLayerItem.style.shadow.blur;
@@ -971,7 +988,7 @@ export const addShadowBlurTween = (props: AddTweenProps): void => {
     duration: tween.duration,
     [tween.prop]: dsb,
     onUpdate: () => {
-      originPaperLayer.shadowBlur = timelineTweenProps[tween.prop];
+      paperLayerRef.shadowBlur = timelineTweenProps[tween.prop];
     },
     ease: getEaseString(tween),
   }, tween.delay);
@@ -994,33 +1011,22 @@ export const addFontSizeTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
   const originTextItem = originLayerItem as Btwx.Text;
   const destinationTextItem = destinationLayerItem as Btwx.Text;
-  const maxLines = Math.max(originTextItem.lines.length, destinationTextItem.lines.length);
-  const originTextLinesGroup = originPaperLayer.getItem({data: {id: 'textLines'}});
-  const originTextContent = originPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
-  const originTextBackground = originPaperLayer.getItem({data: {id: 'textBackground'}}) as paper.PointText;
-  const destinationTextContent = destinationPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
-  const originTextLines = originPaperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
-  timelineTweenProps[tween.prop] = originTextContent.fontSize;
+  const textLinesGroup = originPaperLayer.getItem({data: {id: 'textLines'}});
+  const textBackground = originPaperLayer.getItem({data: {id: 'textBackground'}}) as paper.PointText;
+  timelineTweenProps[tween.prop] = originTextItem.textStyle.fontSize;
   timeline.to(timelineTweenProps, {
     duration: tween.duration,
-    [tween.prop]: destinationTextContent.fontSize,
+    [tween.prop]: destinationTextItem.textStyle.fontSize,
     onUpdate: () => {
-      // const startPosition = originPaperLayer.position;
       const startRotation = originPaperLayer.data.rotation || originPaperLayer.data.rotation === 0 ? originPaperLayer.data.rotation : originLayerItem.transform.rotation;
       originPaperLayer.rotation = -startRotation;
-      // originTextContent.fontSize = timelineTweenProps[tween.prop];
-      // originTextBackground.bounds = originTextContent.bounds;
-      [...Array(maxLines).keys()].forEach((key, index) => {
-        const line = originTextLinesGroup.children[index] as paper.PointText;
-        if (line) {
-          line.fontSize = timelineTweenProps[tween.prop];
-        }
+      textLinesGroup.children.forEach((line: paper.PointText) => {
+        line.fontSize = timelineTweenProps[tween.prop];
       });
-      originTextBackground.bounds = originTextLinesGroup.bounds;
+      textBackground.bounds = textLinesGroup.bounds;
       originPaperLayer.data.innerWidth = originPaperLayer.bounds.width;
       originPaperLayer.data.innerHeight = originPaperLayer.bounds.height;
       originPaperLayer.rotation = startRotation;
-      // originPaperLayer.position = startPosition;
       updateGradients(props);
     },
     ease: getEaseString(tween),
@@ -1031,26 +1037,19 @@ export const addFontWeightTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
   const originTextItem = originLayerItem as Btwx.Text;
   const destinationTextItem = destinationLayerItem as Btwx.Text;
-  const maxLines = Math.max(originTextItem.lines.length, destinationTextItem.lines.length);
-  const originTextLinesGroup = originPaperLayer.getItem({data: {id: 'textLines'}});
-  const originTextContent = originPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
-  const originTextBackground = originPaperLayer.getItem({data: {id: 'textBackground'}}) as paper.PointText;
-  const destinationTextContent = destinationPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
-  const originTextLines = originPaperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
-  timelineTweenProps[tween.prop] = originTextContent.fontWeight;
+  const textLinesGroup = originPaperLayer.getItem({data: {id: 'textLines'}});
+  const textBackground = originPaperLayer.getItem({data: {id: 'textBackground'}}) as paper.PointText;
+  timelineTweenProps[tween.prop] = originTextItem.textStyle.fontWeight;
   timeline.to(timelineTweenProps, {
     duration: tween.duration,
-    [tween.prop]: destinationTextContent.fontWeight,
+    [tween.prop]: destinationTextItem.textStyle.fontWeight,
     onUpdate: () => {
       const startRotation = originPaperLayer.data.rotation || originPaperLayer.data.rotation === 0 ? originPaperLayer.data.rotation : originLayerItem.transform.rotation;
       originPaperLayer.rotation = -startRotation;
-      [...Array(maxLines).keys()].forEach((key, index) => {
-        const line = originTextLinesGroup.children[index] as paper.PointText;
-        if (line) {
-          line.fontWeight = timelineTweenProps[tween.prop];
-        }
+      textLinesGroup.children.forEach((line: paper.PointText) => {
+        line.fontWeight = timelineTweenProps[tween.prop];
       });
-      originTextBackground.bounds = originTextLinesGroup.bounds;
+      textBackground.bounds = textLinesGroup.bounds;
       originPaperLayer.data.innerWidth = originPaperLayer.bounds.width;
       originPaperLayer.data.innerHeight = originPaperLayer.bounds.height;
       originPaperLayer.rotation = startRotation;
@@ -1064,31 +1063,25 @@ export const addObliqueTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
   const originTextItem = originLayerItem as Btwx.Text;
   const destinationTextItem = destinationLayerItem as Btwx.Text;
-  const maxLines = Math.max(originTextItem.lines.length, destinationTextItem.lines.length);
-  const originTextLinesGroup = originPaperLayer.getItem({data: {id: 'textLines'}});
-  const originTextBackground = originPaperLayer.getItem({data: {id: 'textBackground'}}) as paper.PointText;
-  const originTextContent = originPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
-  const originTextLines = originPaperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
-  timelineTweenProps[tween.prop] = (originLayerItem as Btwx.Text).textStyle.oblique;
+  const textLinesGroup = originPaperLayer.getItem({data: {id: 'textLines'}});
+  const textBackground = originPaperLayer.getItem({data: {id: 'textBackground'}}) as paper.PointText;
+  timelineTweenProps[tween.prop] = originTextItem.textStyle.oblique;
   timeline.to(timelineTweenProps, {
     duration: tween.duration,
-    [tween.prop]: (destinationLayerItem as Btwx.Text).textStyle.oblique,
+    [tween.prop]: destinationTextItem.textStyle.oblique,
     onUpdate: () => {
       const startRotation = originPaperLayer.data.rotation || originPaperLayer.data.rotation === 0 ? originPaperLayer.data.rotation : originLayerItem.transform.rotation;
       const startSkew = originPaperLayer.data.skew || originPaperLayer.data.skew === 0 ? originPaperLayer.data.skew : (originLayerItem as Btwx.Text).textStyle.oblique;
       const startLeading = originPaperLayer.data.leading || originPaperLayer.data.leading === 0 ? originPaperLayer.data.leading : originTextItem.textStyle.leading;
       originPaperLayer.rotation = -startRotation;
-      [...Array(maxLines).keys()].forEach((key, index) => {
-        const line = originTextLinesGroup.children[index] as paper.PointText;
+      textLinesGroup.children.forEach((line: paper.PointText) => {
         // leading affects horizontal skew
-        if (line) {
-          line.leading = line.fontSize;
-          line.skew(new paperPreview.Point(startSkew, 0));
-          line.skew(new paperPreview.Point(-timelineTweenProps[tween.prop], 0));
-          line.leading = startLeading;
-        }
+        line.leading = line.fontSize;
+        line.skew(new paperPreview.Point(startSkew, 0));
+        line.skew(new paperPreview.Point(-timelineTweenProps[tween.prop], 0));
+        line.leading = startLeading;
       });
-      originTextBackground.bounds = originTextLinesGroup.bounds;
+      textBackground.bounds = textLinesGroup.bounds;
       originPaperLayer.data.skew = timelineTweenProps[tween.prop];
       originPaperLayer.rotation = startRotation;
       updateGradients(props);
@@ -1101,29 +1094,22 @@ export const addLineHeightTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
   const originTextItem = originLayerItem as Btwx.Text;
   const destinationTextItem = destinationLayerItem as Btwx.Text;
-  const maxLines = Math.max(originTextItem.lines.length, destinationTextItem.lines.length);
-  const originTextLinesGroup = originPaperLayer.getItem({data: {id: 'textLines'}});
-  const originTextContent = originPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
-  const originTextBackground = originPaperLayer.getItem({data: {id: 'textBackground'}}) as paper.PointText;
-  const destinationTextContent = destinationPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
-  const originTextLines = originPaperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
-  timelineTweenProps[tween.prop] = originTextContent.leading;
+  const textLinesGroup = originPaperLayer.getItem({data: {id: 'textLines'}});
+  const textBackground = originPaperLayer.getItem({data: {id: 'textBackground'}}) as paper.PointText;
+  timelineTweenProps[tween.prop] = originTextItem.textStyle.leading;
   timeline.to(timelineTweenProps, {
     duration: tween.duration,
-    [tween.prop]: destinationTextContent.leading,
+    [tween.prop]: destinationTextItem.textStyle.leading,
     onUpdate: () => {
       const startRotation = originPaperLayer.data.rotation || originPaperLayer.data.rotation === 0 ? originPaperLayer.data.rotation : originLayerItem.transform.rotation;
       const startLeading = originPaperLayer.data.leading || originPaperLayer.data.leading === 0 ? originPaperLayer.data.leading : originTextItem.textStyle.leading;
       originPaperLayer.rotation = -startRotation;
       const diff = timelineTweenProps[tween.prop] - startLeading;
-      [...Array(maxLines).keys()].forEach((key, index: number) => {
-        const line = originTextLinesGroup.children[index] as paper.PointText;
-        if (line) {
-          line.leading = timelineTweenProps[tween.prop];
-          line.point.y += (diff * index);
-        }
+      textLinesGroup.children.forEach((line: paper.PointText, index) => {
+        line.leading = timelineTweenProps[tween.prop];
+        line.point.y += (diff * index);
       });
-      originTextBackground.bounds = originTextLinesGroup.bounds;
+      textBackground.bounds = textLinesGroup.bounds;
       originPaperLayer.data.innerHeight = originPaperLayer.bounds.height;
       originPaperLayer.data.leading = timelineTweenProps[tween.prop];
       originPaperLayer.rotation = startRotation;
@@ -1138,10 +1124,8 @@ export const addJustificationTween = (props: AddTweenProps): void => {
   const originTextItem = originLayerItem as Btwx.Text;
   const destinationTextItem = destinationLayerItem as Btwx.Text;
   const originTextContent = originPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
-  const destinationTextContent = originPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
   const textBackground = originPaperLayer.getItem({data: {id: 'textBackground'}});
   const textLinesGroup = originPaperLayer.getItem({data: {id: 'textLines'}});
-  const textLines = originPaperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
   const originJustification = (originLayerItem as Btwx.Text).textStyle.justification;
   const destinationJustification = (destinationLayerItem as Btwx.Text).textStyle.justification;
   const maxLines = Math.max(originTextItem.lines.length, destinationTextItem.lines.length);
@@ -1153,23 +1137,20 @@ export const addJustificationTween = (props: AddTweenProps): void => {
       const startRotation = originPaperLayer.data.rotation || originPaperLayer.data.rotation === 0 ? originPaperLayer.data.rotation : originLayerItem.transform.rotation;
       const startSkew = originPaperLayer.data.skew || originPaperLayer.data.skew === 0 ? originPaperLayer.data.skew : (originLayerItem as Btwx.Text).textStyle.oblique;
       const startLeading = originPaperLayer.data.leading || originPaperLayer.data.leading === 0 ? originPaperLayer.data.leading : (originLayerItem as Btwx.Text).textStyle.leading;
-      const startJustification = originPaperLayer.data.justification; // originPaperLayer.data.justification || originPaperLayer.data.justification === 0 ? originPaperLayer.data.justification : 0;
+      const startJustification = originPaperLayer.data.justification;
       // remove rotation
       originPaperLayer.rotation = -startRotation;
       // update text lines
       if (startJustification) {
-        [...Array(maxLines).keys()].forEach((key, index) => {
-          const line = textLinesGroup.children[index] as paper.PointText; // originPaperLayer.getItem({id: originPaperLayer.data[`${tween.prop}-${index}-id`]}) as paper.PointText;
+        textLinesGroup.children.forEach((line: paper.PointText, index) => {
           const lineGapDiff = originPaperLayer.data[`${tween.prop}-${index}-diff`];
-          if (line) {
-            const diff = lineGapDiff * (timelineTweenProps[tween.prop] - startJustification);
-            // leading affects horizontal skew
-            line.leading = line.fontSize;
-            line.skew(new paperPreview.Point(startSkew, 0));
-            line.position.x += diff;
-            line.skew(new paperPreview.Point(-startSkew, 0));
-            line.leading = startLeading;
-          }
+          const diff = lineGapDiff * (timelineTweenProps[tween.prop] - startJustification);
+          // leading affects horizontal skew
+          line.leading = line.fontSize;
+          line.skew(new paperPreview.Point(startSkew, 0));
+          line.position.x += diff;
+          line.skew(new paperPreview.Point(-startSkew, 0));
+          line.leading = startLeading;
         });
       } else {
         // on start...
@@ -1269,44 +1250,59 @@ export const addTextTween = (props: AddTweenProps): void => {
   const { tween, timeline, timelineTweenProps, originLayerItem, destinationLayerItem, originPaperLayer, destinationPaperLayer, originArtboardLayerItem, destinationArtboardLayerItem, originArtboardPaperLayer, destinationArtboardPaperLayer } = props;
   const originTextItem = originLayerItem as Btwx.Text;
   const destinationTextItem = destinationLayerItem as Btwx.Text;
-  const originTextContent = originPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
-  const originTextBackground = originPaperLayer.getItem({data: {id: 'textBackground'}});
-  const destinationTextContent = destinationPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
-  const originTextLines = originPaperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
-  const originTextLinesGroup = originPaperLayer.getItem({data: {id: 'textLines'}});
-  const destinationTextLines = destinationPaperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
+  const textContent = originPaperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
+  const textBackground = originPaperLayer.getItem({data: {id: 'textBackground'}});
+  const textLinesGroup = originPaperLayer.getItem({data: {id: 'textLines'}});
   const maxLines = Math.max(originTextItem.lines.length, destinationTextItem.lines.length);
   [...Array(maxLines).keys()].forEach((line, index) => {
-    // timelineTweenProps[tween.prop] = 0;
     const textDOM = document.getElementById(`${originTextItem.id}-${index}`);
     timeline.to(textDOM, {
       duration: tween.duration,
-      scrambleText: destinationTextItem.lines[index] ? destinationTextItem.lines[index].text : ' ',
+      ...(() => {
+        return tween.text.scramble
+        ? {
+            scrambleText: {
+              text: destinationTextItem.lines[index] ? destinationTextItem.lines[index].text : ' ',
+              chars: tween.scrambleText.characters === 'custom' ? tween.scrambleText.customCharacters : tween.scrambleText.characters,
+              revealDelay: tween.scrambleText.revealDelay,
+              speed: tween.scrambleText.speed,
+              delimiter: tween.scrambleText.delimiter,
+              rightToLeft: tween.scrambleText.rightToLeft
+            }
+          }
+        : {
+            text: {
+              value: destinationTextItem.lines[index] ? destinationTextItem.lines[index].text : ' ',
+              delimiter: tween.text.delimiter,
+              speed: tween.text.speed,
+              type: tween.text.diff ? 'diff' : null
+            }
+          }
+      })(),
       onUpdate: () => {
         const startRotation = originPaperLayer.data.rotation || originPaperLayer.data.rotation === 0 ? originPaperLayer.data.rotation : originLayerItem.transform.rotation;
         const startLeading = originPaperLayer.data.leading || originPaperLayer.data.leading === 0 ? originPaperLayer.data.leading : (originLayerItem as Btwx.Text).textStyle.leading;
-        const line = originTextLinesGroup.children[index] as paper.PointText;
-        const firstLine = originTextLinesGroup.children[0] as paper.PointText;
+        const line = textLinesGroup.children[index] as paper.PointText;
+        const firstLine = textLinesGroup.children[0] as paper.PointText;
         const startSkew = originPaperLayer.data.skew || originPaperLayer.data.skew === 0 ? originPaperLayer.data.skew : (originLayerItem as Btwx.Text).textStyle.oblique;
-        // const startJustification = originPaperLayer.data.justification || originPaperLayer.data.justification === 0 ? originPaperLayer.data.justification : 0;
         originPaperLayer.rotation = -startRotation;
         if (line) {
           line.content = textDOM.innerHTML;
         } else {
-          originTextContent.content = `${originTextContent.content}\n`;
+          textContent.content = `${textContent.content}\n`;
           const point = new paperPreview.Point(firstLine.point.x, firstLine.point.y + (index * startLeading));
           const newLine = new paperPreview.PointText({
             point: point,
             content: textDOM.innerHTML,
-            style: originTextLines[0].style,
-            data: originTextLines[0].data,
-            parent: originTextLinesGroup
+            style: textLinesGroup.children[0].style,
+            data: textLinesGroup.children[0].data,
+            parent: textLinesGroup
           });
           newLine.leading = newLine.fontSize;
           newLine.skew(new paperPreview.Point(-startSkew, 0));
           newLine.leading = startLeading;
         }
-        originTextBackground.bounds = originTextLinesGroup.bounds;
+        textBackground.bounds = textLinesGroup.bounds;
         originPaperLayer.rotation = startRotation;
         updateGradients(props);
       },

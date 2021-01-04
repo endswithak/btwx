@@ -472,6 +472,7 @@ declare namespace Btwx {
     duration: number;
     delay: number;
     frozen: boolean;
+    text: TextTween;
     scrambleText: ScrambleTextTween;
     customBounce: CustomBounceTween;
     customWiggle: CustomWiggleTween;
@@ -480,10 +481,17 @@ declare namespace Btwx {
     slow: SlowTween;
   }
 
+  interface TextTween {
+    delimiter: string;
+    speed: number;
+    diff: boolean;
+    scramble: boolean;
+  }
+
   type ScrambleTextTweenCharacters = 'upperCase' | 'lowerCase' | 'upperAndLowerCase' | 'custom';
 
   interface ScrambleTextTween {
-    characters: TextTweenCharacters;
+    characters: ScrambleTextTweenCharacters;
     customCharacters: string;
     revealDelay: number;
     speed: number;

@@ -97,11 +97,15 @@ import {
   SET_LAYER_SLOW_TWEEN_LINEAR_RATIO,
   SET_LAYER_SLOW_TWEEN_POWER,
   SET_LAYER_SLOW_TWEEN_YOYO_MODE,
-  SET_LAYER_TEXT_TWEEN_CHARACTERS,
-  SET_LAYER_TEXT_TWEEN_REVEAL_DELAY,
-  SET_LAYER_TEXT_TWEEN_SPEED,
   SET_LAYER_TEXT_TWEEN_DELIMITER,
-  SET_LAYER_TEXT_TWEEN_RIGHT_TO_LEFT,
+  SET_LAYER_TEXT_TWEEN_SPEED,
+  SET_LAYER_TEXT_TWEEN_DIFF,
+  SET_LAYER_TEXT_TWEEN_SCRAMBLE,
+  SET_LAYER_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
+  SET_LAYER_SCRAMBLE_TEXT_TWEEN_REVEAL_DELAY,
+  SET_LAYER_SCRAMBLE_TEXT_TWEEN_SPEED,
+  SET_LAYER_SCRAMBLE_TEXT_TWEEN_DELIMITER,
+  SET_LAYER_SCRAMBLE_TEXT_TWEEN_RIGHT_TO_LEFT,
   SET_LAYER_CUSTOM_BOUNCE_TWEEN_STRENGTH,
   SET_LAYER_CUSTOM_BOUNCE_TWEEN_END_AT_START,
   SET_LAYER_CUSTOM_BOUNCE_TWEEN_SQUASH,
@@ -331,11 +335,15 @@ import {
   SetLayerSlowTweenLinearRatioPayload,
   SetLayerSlowTweenPowerPayload,
   SetLayerSlowTweenYoYoModePayload,
-  SetLayerTextTweenCharactersPayload,
-  SetLayerTextTweenRevealDelayPayload,
-  SetLayerTextTweenSpeedPayload,
   SetLayerTextTweenDelimiterPayload,
-  SetLayerTextTweenRightToLeftPayload,
+  SetLayerTextTweenSpeedPayload,
+  SetLayerTextTweenDiffPayload,
+  SetLayerTextTweenScramblePayload,
+  SetLayerScrambleTextTweenCharactersPayload,
+  SetLayerScrambleTextTweenRevealDelayPayload,
+  SetLayerScrambleTextTweenSpeedPayload,
+  SetLayerScrambleTextTweenDelimiterPayload,
+  SetLayerScrambleTextTweenRightToLeftPayload,
   SetLayerCustomBounceTweenStrengthPayload,
   SetLayerCustomBounceTweenEndAtStartPayload,
   SetLayerCustomBounceTweenSquashPayload,
@@ -1634,13 +1642,8 @@ export const setLayerSlowTweenYoYoMode = (payload: SetLayerSlowTweenYoYoModePayl
   payload
 });
 
-export const setLayerTextTweenCharacters = (payload: SetLayerTextTweenCharactersPayload): LayerTypes => ({
-  type: SET_LAYER_TEXT_TWEEN_CHARACTERS,
-  payload
-});
-
-export const setLayerTextTweenRevealDelay = (payload: SetLayerTextTweenRevealDelayPayload): LayerTypes => ({
-  type: SET_LAYER_TEXT_TWEEN_REVEAL_DELAY,
+export const setLayerTextTweenDelimiter = (payload: SetLayerTextTweenDelimiterPayload): LayerTypes => ({
+  type: SET_LAYER_TEXT_TWEEN_DELIMITER,
   payload
 });
 
@@ -1649,13 +1652,38 @@ export const setLayerTextTweenSpeed = (payload: SetLayerTextTweenSpeedPayload): 
   payload
 });
 
-export const setLayerTextTweenDelimiter = (payload: SetLayerTextTweenDelimiterPayload): LayerTypes => ({
-  type: SET_LAYER_TEXT_TWEEN_DELIMITER,
+export const setLayerTextTweenDiff = (payload: SetLayerTextTweenDiffPayload): LayerTypes => ({
+  type: SET_LAYER_TEXT_TWEEN_DIFF,
   payload
 });
 
-export const setLayerTextTweenRightToLeft = (payload: SetLayerTextTweenRightToLeftPayload): LayerTypes => ({
-  type: SET_LAYER_TEXT_TWEEN_RIGHT_TO_LEFT,
+export const setLayerTextTweenScramble = (payload: SetLayerTextTweenScramblePayload): LayerTypes => ({
+  type: SET_LAYER_TEXT_TWEEN_SCRAMBLE,
+  payload
+});
+
+export const setLayerScrambleTextTweenCharacters = (payload: SetLayerScrambleTextTweenCharactersPayload): LayerTypes => ({
+  type: SET_LAYER_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
+  payload
+});
+
+export const setLayerScrambleTextTweenRevealDelay = (payload: SetLayerScrambleTextTweenRevealDelayPayload): LayerTypes => ({
+  type: SET_LAYER_SCRAMBLE_TEXT_TWEEN_REVEAL_DELAY,
+  payload
+});
+
+export const setLayerScrambleTextTweenSpeed = (payload: SetLayerScrambleTextTweenSpeedPayload): LayerTypes => ({
+  type: SET_LAYER_SCRAMBLE_TEXT_TWEEN_SPEED,
+  payload
+});
+
+export const setLayerScrambleTextTweenDelimiter = (payload: SetLayerScrambleTextTweenDelimiterPayload): LayerTypes => ({
+  type: SET_LAYER_SCRAMBLE_TEXT_TWEEN_DELIMITER,
+  payload
+});
+
+export const setLayerScrambleTextTweenRightToLeft = (payload: SetLayerScrambleTextTweenRightToLeftPayload): LayerTypes => ({
+  type: SET_LAYER_SCRAMBLE_TEXT_TWEEN_RIGHT_TO_LEFT,
   payload
 });
 

@@ -19,11 +19,16 @@ export const DEFAULT_TWEEN_DELAY = 0;
 export const DEFAULT_TWEEN_EASE = 'power1';
 export const DEFAULT_TWEEN_POWER = 'out';
 // Text Tween
-export const DEFAULT_TEXT_TWEEN_CHARACTERS = 'upperCase';
-export const DEFAULT_TEXT_TWEEN_REVEAL_DELAY = 0;
-export const DEFAULT_TEXT_TWEEN_SPEED = 1;
 export const DEFAULT_TEXT_TWEEN_DELIMITER = '';
-export const DEFAULT_TEXT_TWEEN_RIGHT_TO_LEFT = false;
+export const DEFAULT_TEXT_TWEEN_DIFF = false;
+export const DEFAULT_TEXT_TWEEN_SPEED: number = null;
+export const DEFAULT_TEXT_TWEEN_SCRAMBLE = false;
+// Scramble Text Tween
+export const DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS: Btwx.ScrambleTextTweenCharacters = 'upperCase';
+export const DEFAULT_SCRAMBLE_TEXT_TWEEN_REVEAL_DELAY = 0;
+export const DEFAULT_SCRAMBLE_TEXT_TWEEN_SPEED = 1;
+export const DEFAULT_SCRAMBLE_TEXT_TWEEN_DELIMITER = '';
+export const DEFAULT_SCRAMBLE_TEXT_TWEEN_RIGHT_TO_LEFT = false;
 // Step Tween
 export const DEFAULT_STEPS_TWEEN_STEPS = 5;
 // Rough Tween

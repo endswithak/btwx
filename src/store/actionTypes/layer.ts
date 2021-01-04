@@ -77,18 +77,23 @@ export const SET_LAYER_ROUGH_TWEEN_CLAMP = 'SET_LAYER_ROUGH_TWEEN_CLAMP';
 export const SET_LAYER_ROUGH_TWEEN_POINTS = 'SET_LAYER_ROUGH_TWEEN_POINTS';
 export const SET_LAYER_ROUGH_TWEEN_RANDOMIZE = 'SET_LAYER_ROUGH_TWEEN_RANDOMIZE';
 export const SET_LAYER_ROUGH_TWEEN_STRENGTH = 'SET_LAYER_ROUGH_TWEEN_STRENGTH';
-export const SET_LAYER_ROUGH_TWEEN_TAPER = 'SET_LAYER_ROUGH_TWEEN_STRENGTH';
+export const SET_LAYER_ROUGH_TWEEN_TAPER = 'SET_LAYER_ROUGH_TWEEN_TAPER';
 export const SET_LAYER_ROUGH_TWEEN_TEMPLATE = 'SET_LAYER_ROUGH_TWEEN_TEMPLATE';
 
 export const SET_LAYER_SLOW_TWEEN_LINEAR_RATIO = 'SET_LAYER_SLOW_TWEEN_LINEAR_RATIO';
 export const SET_LAYER_SLOW_TWEEN_POWER = 'SET_LAYER_SLOW_TWEEN_POWER';
 export const SET_LAYER_SLOW_TWEEN_YOYO_MODE = 'SET_LAYER_SLOW_TWEEN_YOYO_MODE';
 
-export const SET_LAYER_TEXT_TWEEN_CHARACTERS = 'SET_LAYER_TEXT_TWEEN_CHARACTERS';
-export const SET_LAYER_TEXT_TWEEN_REVEAL_DELAY = 'SET_LAYER_TEXT_TWEEN_REVEAL_DELAY';
-export const SET_LAYER_TEXT_TWEEN_SPEED = 'SET_LAYER_TEXT_TWEEN_SPEED';
 export const SET_LAYER_TEXT_TWEEN_DELIMITER = 'SET_LAYER_TEXT_TWEEN_DELIMITER';
-export const SET_LAYER_TEXT_TWEEN_RIGHT_TO_LEFT = 'SET_LAYER_TEXT_TWEEN_RIGHT_TO_LEFT';
+export const SET_LAYER_TEXT_TWEEN_SPEED = 'SET_LAYER_TEXT_TWEEN_SPEED';
+export const SET_LAYER_TEXT_TWEEN_DIFF = 'SET_LAYER_TEXT_TWEEN_DIFF';
+export const SET_LAYER_TEXT_TWEEN_SCRAMBLE = 'SET_LAYER_TEXT_TWEEN_SCRAMBLE';
+
+export const SET_LAYER_SCRAMBLE_TEXT_TWEEN_CHARACTERS = 'SET_LAYER_SCRAMBLE_TEXT_TWEEN_CHARACTERS';
+export const SET_LAYER_SCRAMBLE_TEXT_TWEEN_REVEAL_DELAY = 'SET_LAYER_SCRAMBLE_TEXT_TWEEN_REVEAL_DELAY';
+export const SET_LAYER_SCRAMBLE_TEXT_TWEEN_SPEED = 'SET_LAYER_SCRAMBLE_TEXT_TWEEN_SPEED';
+export const SET_LAYER_SCRAMBLE_TEXT_TWEEN_DELIMITER = 'SET_LAYER_SCRAMBLE_TEXT_TWEEN_DELIMITER';
+export const SET_LAYER_SCRAMBLE_TEXT_TWEEN_RIGHT_TO_LEFT = 'SET_LAYER_SCRAMBLE_TEXT_TWEEN_RIGHT_TO_LEFT';
 
 export const SET_LAYER_CUSTOM_BOUNCE_TWEEN_STRENGTH = 'SET_LAYER_CUSTOM_BOUNCE_TWEEN_STRENGTH';
 export const SET_LAYER_CUSTOM_BOUNCE_TWEEN_END_AT_START = 'SET_LAYER_CUSTOM_BOUNCE_TWEEN_END_AT_START';
@@ -990,25 +995,14 @@ export interface SetLayerSlowTweenYoYoMode {
   payload: SetLayerSlowTweenYoYoModePayload;
 }
 
-export interface SetLayerTextTweenCharactersPayload {
+export interface SetLayerTextTweenDelimiterPayload {
   id: string;
-  characters: Btwx.ScrambleTextTweenCharacters;
-  customCharacters?: string;
+  delimiter: string;
 }
 
-export interface SetLayerTextTweenCharacters {
-  type: typeof SET_LAYER_TEXT_TWEEN_CHARACTERS;
-  payload: SetLayerTextTweenCharactersPayload;
-}
-
-export interface SetLayerTextTweenRevealDelayPayload {
-  id: string;
-  revealDelay: number;
-}
-
-export interface SetLayerTextTweenRevealDelay {
-  type: typeof SET_LAYER_TEXT_TWEEN_REVEAL_DELAY;
-  payload: SetLayerTextTweenRevealDelayPayload;
+export interface SetLayerTextTweenDelimiter {
+  type: typeof SET_LAYER_TEXT_TWEEN_DELIMITER;
+  payload: SetLayerTextTweenDelimiterPayload;
 }
 
 export interface SetLayerTextTweenSpeedPayload {
@@ -1021,24 +1015,75 @@ export interface SetLayerTextTweenSpeed {
   payload: SetLayerTextTweenSpeedPayload;
 }
 
-export interface SetLayerTextTweenDelimiterPayload {
+export interface SetLayerTextTweenDiffPayload {
+  id: string;
+  diff: boolean;
+}
+
+export interface SetLayerTextTweenDiff {
+  type: typeof SET_LAYER_TEXT_TWEEN_DIFF;
+  payload: SetLayerTextTweenDiffPayload;
+}
+
+export interface SetLayerTextTweenScramblePayload {
+  id: string;
+  scramble: boolean;
+}
+
+export interface SetLayerTextTweenScramble {
+  type: typeof SET_LAYER_TEXT_TWEEN_SCRAMBLE;
+  payload: SetLayerTextTweenScramblePayload;
+}
+
+export interface SetLayerScrambleTextTweenCharactersPayload {
+  id: string;
+  characters: Btwx.ScrambleTextTweenCharacters;
+  customCharacters?: string;
+}
+
+export interface SetLayerScrambleTextTweenCharacters {
+  type: typeof SET_LAYER_SCRAMBLE_TEXT_TWEEN_CHARACTERS;
+  payload: SetLayerScrambleTextTweenCharactersPayload;
+}
+
+export interface SetLayerScrambleTextTweenRevealDelayPayload {
+  id: string;
+  revealDelay: number;
+}
+
+export interface SetLayerScrambleTextTweenRevealDelay {
+  type: typeof SET_LAYER_SCRAMBLE_TEXT_TWEEN_REVEAL_DELAY;
+  payload: SetLayerScrambleTextTweenRevealDelayPayload;
+}
+
+export interface SetLayerScrambleTextTweenSpeedPayload {
+  id: string;
+  speed: number;
+}
+
+export interface SetLayerScrambleTextTweenSpeed {
+  type: typeof SET_LAYER_SCRAMBLE_TEXT_TWEEN_SPEED;
+  payload: SetLayerScrambleTextTweenSpeedPayload;
+}
+
+export interface SetLayerScrambleTextTweenDelimiterPayload {
   id: string;
   delimiter: string;
 }
 
-export interface SetLayerTextTweenDelimiter {
-  type: typeof SET_LAYER_TEXT_TWEEN_DELIMITER;
-  payload: SetLayerTextTweenDelimiterPayload;
+export interface SetLayerScrambleTextTweenDelimiter {
+  type: typeof SET_LAYER_SCRAMBLE_TEXT_TWEEN_DELIMITER;
+  payload: SetLayerScrambleTextTweenDelimiterPayload;
 }
 
-export interface SetLayerTextTweenRightToLeftPayload {
+export interface SetLayerScrambleTextTweenRightToLeftPayload {
   id: string;
   rightToLeft: boolean;
 }
 
-export interface SetLayerTextTweenRightToLeft {
-  type: typeof SET_LAYER_TEXT_TWEEN_RIGHT_TO_LEFT;
-  payload: SetLayerTextTweenRightToLeftPayload;
+export interface SetLayerScrambleTextTweenRightToLeft {
+  type: typeof SET_LAYER_SCRAMBLE_TEXT_TWEEN_RIGHT_TO_LEFT;
+  payload: SetLayerScrambleTextTweenRightToLeftPayload;
 }
 
 export interface SetLayerCustomBounceTweenStrengthPayload {
@@ -2954,11 +2999,11 @@ export type LayerTypes = AddArtboard |
                          ReplaceImage |
                          ReplaceImages |
                          PasteLayersFromClipboard |
-                         SetLayerTextTweenCharacters |
-                         SetLayerTextTweenRevealDelay |
-                         SetLayerTextTweenSpeed |
-                         SetLayerTextTweenDelimiter |
-                         SetLayerTextTweenRightToLeft |
+                         SetLayerScrambleTextTweenCharacters |
+                         SetLayerScrambleTextTweenRevealDelay |
+                         SetLayerScrambleTextTweenSpeed |
+                         SetLayerScrambleTextTweenDelimiter |
+                         SetLayerScrambleTextTweenRightToLeft |
                          SetLayerCustomBounceTweenStrength |
                          SetLayerCustomBounceTweenEndAtStart |
                          SetLayerCustomBounceTweenSquash |
@@ -2973,4 +3018,8 @@ export type LayerTypes = AddArtboard |
                          SetLayerRoughTweenTemplate |
                          SetLayerSlowTweenLinearRatio |
                          SetLayerSlowTweenPower |
-                         SetLayerSlowTweenYoYoMode;
+                         SetLayerSlowTweenYoYoMode |
+                         SetLayerTextTweenDelimiter |
+                         SetLayerTextTweenSpeed |
+                         SetLayerTextTweenDiff |
+                         SetLayerTextTweenScramble;

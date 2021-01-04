@@ -9,13 +9,17 @@ import { addItem, removeItem, insertItem, moveItemAbove, moveItemBelow } from '.
 import { uiPaperScope } from '../../canvas';
 import {
   ARTBOARDS_PER_PROJECT, TWEEN_PROPS_MAP, DEFAULT_TWEEN_DURATION, DEFAULT_TWEEN_DELAY,
-  DEFAULT_TWEEN_EASE, DEFAULT_TWEEN_POWER, DEFAULT_TEXT_TWEEN_CHARACTERS, DEFAULT_TEXT_TWEEN_DELIMITER,
-  DEFAULT_TEXT_TWEEN_REVEAL_DELAY, DEFAULT_TEXT_TWEEN_SPEED, DEFAULT_TEXT_TWEEN_RIGHT_TO_LEFT,
+  DEFAULT_TWEEN_EASE, DEFAULT_TWEEN_POWER, DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS, DEFAULT_SCRAMBLE_TEXT_TWEEN_DELIMITER,
+  DEFAULT_SCRAMBLE_TEXT_TWEEN_REVEAL_DELAY, DEFAULT_SCRAMBLE_TEXT_TWEEN_SPEED, DEFAULT_SCRAMBLE_TEXT_TWEEN_RIGHT_TO_LEFT,
   DEFAULT_CUSTOM_BOUNCE_TWEEN_END_AT_START, DEFAULT_CUSTOM_BOUNCE_TWEEN_SQUASH, DEFAULT_CUSTOM_BOUNCE_TWEEN_STRENGTH,
   DEFAULT_CUSTOM_WIGGLE_TWEEN_TYPE, DEFAULT_CUSTOM_WIGGLE_TWEEN_WIGGLES, DEFAULT_STEPS_TWEEN_STEPS, DEFAULT_ROUGH_TWEEN_CLAMP,
   DEFAULT_ROUGH_TWEEN_POINTS, DEFAULT_ROUGH_TWEEN_RANDOMIZE, DEFAULT_ROUGH_TWEEN_STRENGTH, DEFAULT_ROUGH_TWEEN_TAPER,
   DEFAULT_ROUGH_TWEEN_TEMPLATE, DEFAULT_SLOW_TWEEN_LINEAR_POWER, DEFAULT_SLOW_TWEEN_LINEAR_RATIO,
-  DEFAULT_SLOW_TWEEN_LINEAR_YOYO_MODE
+  DEFAULT_SLOW_TWEEN_LINEAR_YOYO_MODE,
+  DEFAULT_TEXT_TWEEN_DELIMITER,
+  DEFAULT_TEXT_TWEEN_SPEED,
+  DEFAULT_TEXT_TWEEN_DIFF,
+  DEFAULT_TEXT_TWEEN_SCRAMBLE
 } from '../../constants';
 
 import {
@@ -53,7 +57,7 @@ import {
   SetLayerStyle, SetLayersStyle, EnableLayersHorizontalFlip, DisableLayersHorizontalFlip, DisableLayersVerticalFlip, EnableLayersVerticalFlip,
   SetLayerScope, SetLayersScope, SetGlobalScope, SetLayerUnderlyingMask, SetLayersUnderlyingMask, SetLayerMasked, SetLayersMasked, ToggleLayerMask,
   ToggleLayersMask, ToggleLayersIgnoreUnderlyingMask, ToggleLayerIgnoreUnderlyingMask, AreaSelectLayers, SetLayersGradientOD, ResetImagesDimensions,
-  ResetImageDimensions, ReplaceImage, ReplaceImages, PasteLayersFromClipboard, SetLayerOblique, SetLayersOblique, SetLayerPointX, SetLayersPointX, SetLayerPointY, SetLayersPointY, SetLayerTextTweenCharacters, SetLayerTextTweenRevealDelay, SetLayerTextTweenSpeed, SetLayerTextTweenDelimiter, SetLayerTextTweenRightToLeft, SetLayerCustomBounceTweenStrength, SetLayerCustomBounceTweenEndAtStart, SetLayerCustomBounceTweenSquash, SetLayerCustomWiggleTweenWiggles, SetLayerCustomWiggleTweenType, SetLayerStepsTweenSteps, SetLayerRoughTweenClamp, SetLayerRoughTweenPoints, SetLayerRoughTweenRandomize, SetLayerRoughTweenStrength, SetLayerRoughTweenTaper, SetLayerRoughTweenTemplate, SetLayerSlowTweenLinearRatio, SetLayerSlowTweenPower, SetLayerSlowTweenYoYoMode
+  ResetImageDimensions, ReplaceImage, ReplaceImages, PasteLayersFromClipboard, SetLayerOblique, SetLayersOblique, SetLayerPointX, SetLayersPointX, SetLayerPointY, SetLayersPointY, SetLayerScrambleTextTweenCharacters, SetLayerScrambleTextTweenRevealDelay, SetLayerScrambleTextTweenSpeed, SetLayerScrambleTextTweenDelimiter, SetLayerScrambleTextTweenRightToLeft, SetLayerCustomBounceTweenStrength, SetLayerCustomBounceTweenEndAtStart, SetLayerCustomBounceTweenSquash, SetLayerCustomWiggleTweenWiggles, SetLayerCustomWiggleTweenType, SetLayerStepsTweenSteps, SetLayerRoughTweenClamp, SetLayerRoughTweenPoints, SetLayerRoughTweenRandomize, SetLayerRoughTweenStrength, SetLayerRoughTweenTaper, SetLayerRoughTweenTemplate, SetLayerSlowTweenLinearRatio, SetLayerSlowTweenPower, SetLayerSlowTweenYoYoMode, SetLayerTextTweenDelimiter, SetLayerTextTweenSpeed, SetLayerTextTweenDiff, SetLayerTextTweenScramble
 } from '../actionTypes/layer';
 
 import {
@@ -2024,13 +2028,19 @@ export const addLayerTweenEvent = (state: LayerState, action: AddLayerTweenEvent
             duration: DEFAULT_TWEEN_DURATION,
             delay: DEFAULT_TWEEN_DELAY,
             frozen: false,
-            scrambleText: {
-              characters: DEFAULT_TEXT_TWEEN_CHARACTERS,
-              customCharacters: null,
-              revealDelay: DEFAULT_TEXT_TWEEN_REVEAL_DELAY,
-              speed: DEFAULT_TEXT_TWEEN_SPEED,
+            text: {
               delimiter: DEFAULT_TEXT_TWEEN_DELIMITER,
-              rightToLeft: DEFAULT_TEXT_TWEEN_RIGHT_TO_LEFT
+              speed: DEFAULT_TEXT_TWEEN_SPEED,
+              diff: DEFAULT_TEXT_TWEEN_DIFF,
+              scramble: DEFAULT_TEXT_TWEEN_SCRAMBLE
+            },
+            scrambleText: {
+              characters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
+              customCharacters: null,
+              revealDelay: DEFAULT_SCRAMBLE_TEXT_TWEEN_REVEAL_DELAY,
+              speed: DEFAULT_SCRAMBLE_TEXT_TWEEN_SPEED,
+              delimiter: DEFAULT_SCRAMBLE_TEXT_TWEEN_DELIMITER,
+              rightToLeft: DEFAULT_SCRAMBLE_TEXT_TWEEN_RIGHT_TO_LEFT
             },
             customBounce: {
               strength: DEFAULT_CUSTOM_BOUNCE_TWEEN_STRENGTH,
@@ -2103,13 +2113,19 @@ export const addTweenEventLayerTweens = (state: LayerState, eventId: string, lay
           duration: DEFAULT_TWEEN_DURATION,
           delay: DEFAULT_TWEEN_DELAY,
           frozen: false,
-          scrambleText: {
-            characters: DEFAULT_TEXT_TWEEN_CHARACTERS,
-            customCharacters: null,
-            revealDelay: DEFAULT_TEXT_TWEEN_REVEAL_DELAY,
-            speed: DEFAULT_TEXT_TWEEN_SPEED,
+          text: {
             delimiter: DEFAULT_TEXT_TWEEN_DELIMITER,
-            rightToLeft: DEFAULT_TEXT_TWEEN_RIGHT_TO_LEFT
+            speed: DEFAULT_TEXT_TWEEN_SPEED,
+            diff: DEFAULT_TEXT_TWEEN_DIFF,
+            scramble: DEFAULT_TEXT_TWEEN_SCRAMBLE
+          },
+          scrambleText: {
+            characters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
+            customCharacters: null,
+            revealDelay: DEFAULT_SCRAMBLE_TEXT_TWEEN_REVEAL_DELAY,
+            speed: DEFAULT_SCRAMBLE_TEXT_TWEEN_SPEED,
+            delimiter: DEFAULT_SCRAMBLE_TEXT_TWEEN_DELIMITER,
+            rightToLeft: DEFAULT_SCRAMBLE_TEXT_TWEEN_RIGHT_TO_LEFT
           },
           customBounce: {
             strength: DEFAULT_CUSTOM_BOUNCE_TWEEN_STRENGTH,
@@ -2365,13 +2381,19 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
             duration: DEFAULT_TWEEN_DURATION,
             delay: DEFAULT_TWEEN_DELAY,
             frozen: false,
-            scrambleText: {
-              characters: DEFAULT_TEXT_TWEEN_CHARACTERS,
-              customCharacters: null,
-              revealDelay: DEFAULT_TEXT_TWEEN_REVEAL_DELAY,
-              speed: DEFAULT_TEXT_TWEEN_SPEED,
+            text: {
               delimiter: DEFAULT_TEXT_TWEEN_DELIMITER,
-              rightToLeft: DEFAULT_TEXT_TWEEN_RIGHT_TO_LEFT
+              speed: DEFAULT_TEXT_TWEEN_SPEED,
+              diff: DEFAULT_TEXT_TWEEN_DIFF,
+              scramble: DEFAULT_TEXT_TWEEN_SCRAMBLE
+            },
+            scrambleText: {
+              characters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
+              customCharacters: null,
+              revealDelay: DEFAULT_SCRAMBLE_TEXT_TWEEN_REVEAL_DELAY,
+              speed: DEFAULT_SCRAMBLE_TEXT_TWEEN_SPEED,
+              delimiter: DEFAULT_SCRAMBLE_TEXT_TWEEN_DELIMITER,
+              rightToLeft: DEFAULT_SCRAMBLE_TEXT_TWEEN_RIGHT_TO_LEFT
             },
             customBounce: {
               strength: DEFAULT_CUSTOM_BOUNCE_TWEEN_STRENGTH,
@@ -2428,13 +2450,19 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
             duration: DEFAULT_TWEEN_DURATION,
             delay: DEFAULT_TWEEN_DELAY,
             frozen: false,
-            scrambleText: {
-              characters: DEFAULT_TEXT_TWEEN_CHARACTERS,
-              customCharacters: null,
-              revealDelay: DEFAULT_TEXT_TWEEN_REVEAL_DELAY,
-              speed: DEFAULT_TEXT_TWEEN_SPEED,
+            text: {
               delimiter: DEFAULT_TEXT_TWEEN_DELIMITER,
-              rightToLeft: DEFAULT_TEXT_TWEEN_RIGHT_TO_LEFT
+              speed: DEFAULT_TEXT_TWEEN_SPEED,
+              diff: DEFAULT_TEXT_TWEEN_DIFF,
+              scramble: DEFAULT_TEXT_TWEEN_SCRAMBLE
+            },
+            scrambleText: {
+              characters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
+              customCharacters: null,
+              revealDelay: DEFAULT_SCRAMBLE_TEXT_TWEEN_REVEAL_DELAY,
+              speed: DEFAULT_SCRAMBLE_TEXT_TWEEN_SPEED,
+              delimiter: DEFAULT_SCRAMBLE_TEXT_TWEEN_DELIMITER,
+              rightToLeft: DEFAULT_SCRAMBLE_TEXT_TWEEN_RIGHT_TO_LEFT
             },
             customBounce: {
               strength: DEFAULT_CUSTOM_BOUNCE_TWEEN_STRENGTH,
@@ -2888,7 +2916,123 @@ export const setLayerSlowTweenYoYoMode = (state: LayerState, action: SetLayerSlo
   return currentState;
 };
 
-export const setLayerTextTweenCharacters = (state: LayerState, action: SetLayerTextTweenCharacters): LayerState => {
+export const setLayerTextTweenDelimiter = (state: LayerState, action: SetLayerTextTweenDelimiter): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          text: {
+            ...currentState.tweens.byId[action.payload.id].text,
+            delimiter: action.payload.delimiter,
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Text Tween Delimiter',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerTextTweenSpeed = (state: LayerState, action: SetLayerTextTweenSpeed): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          text: {
+            ...currentState.tweens.byId[action.payload.id].text,
+            speed: action.payload.speed,
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Text Tween Speed',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerTextTweenDiff = (state: LayerState, action: SetLayerTextTweenDiff): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          text: {
+            ...currentState.tweens.byId[action.payload.id].text,
+            diff: action.payload.diff,
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Text Tween Diff',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerTextTweenScramble = (state: LayerState, action: SetLayerTextTweenScramble): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          text: {
+            ...currentState.tweens.byId[action.payload.id].text,
+            scramble: action.payload.scramble,
+          }
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Text Tween Scramble',
+      projects: null
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerScrambleTextTweenCharacters = (state: LayerState, action: SetLayerScrambleTextTweenCharacters): LayerState => {
   let currentState = state;
   currentState = {
     ...currentState,
@@ -2918,7 +3062,7 @@ export const setLayerTextTweenCharacters = (state: LayerState, action: SetLayerT
   return currentState;
 };
 
-export const setLayerTextTweenRevealDelay = (state: LayerState, action: SetLayerTextTweenRevealDelay): LayerState => {
+export const setLayerScrambleTextTweenRevealDelay = (state: LayerState, action: SetLayerScrambleTextTweenRevealDelay): LayerState => {
   let currentState = state;
   currentState = {
     ...currentState,
@@ -2947,7 +3091,7 @@ export const setLayerTextTweenRevealDelay = (state: LayerState, action: SetLayer
   return currentState;
 };
 
-export const setLayerTextTweenSpeed = (state: LayerState, action: SetLayerTextTweenSpeed): LayerState => {
+export const setLayerScrambleTextTweenSpeed = (state: LayerState, action: SetLayerScrambleTextTweenSpeed): LayerState => {
   let currentState = state;
   currentState = {
     ...currentState,
@@ -2976,7 +3120,7 @@ export const setLayerTextTweenSpeed = (state: LayerState, action: SetLayerTextTw
   return currentState;
 };
 
-export const setLayerTextTweenDelimiter = (state: LayerState, action: SetLayerTextTweenDelimiter): LayerState => {
+export const setLayerScrambleTextTweenDelimiter = (state: LayerState, action: SetLayerScrambleTextTweenDelimiter): LayerState => {
   let currentState = state;
   currentState = {
     ...currentState,
@@ -3005,7 +3149,7 @@ export const setLayerTextTweenDelimiter = (state: LayerState, action: SetLayerTe
   return currentState;
 };
 
-export const setLayerTextTweenRightToLeft = (state: LayerState, action: SetLayerTextTweenRightToLeft): LayerState => {
+export const setLayerScrambleTextTweenRightToLeft = (state: LayerState, action: SetLayerScrambleTextTweenRightToLeft): LayerState => {
   let currentState = state;
   currentState = {
     ...currentState,
@@ -4946,7 +5090,11 @@ export const setLayersStrokeFillType = (state: LayerState, action: SetLayersStro
 export const setLayerStrokeWidth = (state: LayerState, action: SetLayerStrokeWidth): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
-  paperLayer.strokeWidth = action.payload.strokeWidth;
+  let strokeLayer = paperLayer;
+  if (layerItem.type === 'Text') {
+    strokeLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
+  strokeLayer.strokeWidth = action.payload.strokeWidth;
   currentState = {
     ...currentState,
     byId: {
@@ -4991,7 +5139,11 @@ export const setLayersStrokeWidth = (state: LayerState, action: SetLayersStrokeW
 export const setLayerStrokeCap = (state: LayerState, action: SetLayerStrokeCap): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
-  paperLayer.strokeCap = action.payload.strokeCap;
+  let strokeLayer = paperLayer;
+  if (layerItem.type === 'Text') {
+    strokeLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
+  strokeLayer.strokeCap = action.payload.strokeCap;
   currentState = {
     ...currentState,
     byId: {
@@ -5035,7 +5187,11 @@ export const setLayersStrokeCap = (state: LayerState, action: SetLayersStrokeCap
 export const setLayerStrokeJoin = (state: LayerState, action: SetLayerStrokeJoin): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
-  paperLayer.strokeJoin = action.payload.strokeJoin;
+  let strokeLayer = paperLayer;
+  if (layerItem.type === 'Text') {
+    strokeLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
+  strokeLayer.strokeJoin = action.payload.strokeJoin;
   currentState = {
     ...currentState,
     byId: {
@@ -5079,7 +5235,11 @@ export const setLayersStrokeJoin = (state: LayerState, action: SetLayersStrokeJo
 export const setLayerStrokeDashOffset = (state: LayerState, action: SetLayerStrokeDashOffset): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
-  paperLayer.dashOffset = action.payload.strokeDashOffset;
+  let strokeLayer = paperLayer;
+  if (layerItem.type === 'Text') {
+    strokeLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
+  strokeLayer.dashOffset = action.payload.strokeDashOffset;
   currentState = {
     ...currentState,
     byId: {
@@ -5124,7 +5284,11 @@ export const setLayersStrokeDashOffset = (state: LayerState, action: SetLayersSt
 export const setLayerStrokeDashArray = (state: LayerState, action: SetLayerStrokeDashArray): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
-  paperLayer.dashArray = action.payload.strokeDashArray;
+  let strokeLayer = paperLayer;
+  if (layerItem.type === 'Text') {
+    strokeLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
+  strokeLayer.dashArray = action.payload.strokeDashArray;
   currentState = {
     ...currentState,
     byId: {
@@ -5169,9 +5333,13 @@ export const setLayersStrokeDashArray = (state: LayerState, action: SetLayersStr
 export const setLayerStrokeDashArrayWidth = (state: LayerState, action: SetLayerStrokeDashArrayWidth): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
+  let strokeLayer = paperLayer;
+  if (layerItem.type === 'Text') {
+    strokeLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
   const dashArray = layerItem.style.strokeOptions.dashArray;
   const newDashArray = [action.payload.strokeDashArrayWidth, dashArray[1]];
-  paperLayer.dashArray = newDashArray;
+  strokeLayer.dashArray = newDashArray;
   currentState = {
     ...currentState,
     byId: {
@@ -5216,9 +5384,13 @@ export const setLayersStrokeDashArrayWidth = (state: LayerState, action: SetLaye
 export const setLayerStrokeDashArrayGap = (state: LayerState, action: SetLayerStrokeDashArrayGap): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
+  let strokeLayer = paperLayer;
+  if (layerItem.type === 'Text') {
+    strokeLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
   const dashArray = layerItem.style.strokeOptions.dashArray;
   const newDashArray = [dashArray[0], action.payload.strokeDashArrayGap];
-  paperLayer.dashArray = newDashArray;
+  strokeLayer.dashArray = newDashArray;
   currentState = {
     ...currentState,
     byId: {
@@ -5263,10 +5435,14 @@ export const setLayersStrokeDashArrayGap = (state: LayerState, action: SetLayers
 export const enableLayerShadow = (state: LayerState, action: EnableLayerShadow): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
+  let shadowLayer = paperLayer;
+  if (layerItem.type === 'Text') {
+    shadowLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
   const shadow = layerItem.style.shadow;
-  paperLayer.shadowColor = { hue: shadow.color.h, saturation: shadow.color.s, lightness: shadow.color.l, alpha: shadow.color.a } as paper.Color;
-  paperLayer.shadowBlur = shadow.blur;
-  paperLayer.shadowOffset = new uiPaperScope.Point(shadow.offset.x, shadow.offset.y);
+  shadowLayer.shadowColor = { hue: shadow.color.h, saturation: shadow.color.s, lightness: shadow.color.l, alpha: shadow.color.a } as paper.Color;
+  shadowLayer.shadowBlur = shadow.blur;
+  shadowLayer.shadowOffset = new uiPaperScope.Point(shadow.offset.x, shadow.offset.y);
   currentState = {
     ...currentState,
     byId: {
@@ -5311,7 +5487,11 @@ export const enableLayersShadow = (state: LayerState, action: EnableLayersShadow
 export const disableLayerShadow = (state: LayerState, action: DisableLayerShadow): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
-  paperLayer.shadowColor = null;
+  let shadowLayer = paperLayer;
+  if (layerItem.type === 'Text') {
+    shadowLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
+  shadowLayer.shadowColor = null;
   currentState = {
     ...currentState,
     byId: {
@@ -5356,9 +5536,13 @@ export const disableLayersShadow = (state: LayerState, action: DisableLayersShad
 export const setLayerShadowColor = (state: LayerState, action: SetLayerShadowColor): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
+  let shadowLayer = paperLayer;
+  if (layerItem.type === 'Text') {
+    shadowLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
   const shadowColor = action.payload.shadowColor;
   const newShadow = { ...layerItem.style.shadow.color, ...shadowColor };
-  paperLayer.shadowColor = { hue: newShadow.h, saturation: newShadow.s, lightness: newShadow.l, alpha: newShadow.a } as paper.Color;
+  shadowLayer.shadowColor = { hue: newShadow.h, saturation: newShadow.s, lightness: newShadow.l, alpha: newShadow.a } as paper.Color;
   currentState = {
     ...currentState,
     byId: {
@@ -5403,7 +5587,11 @@ export const setLayersShadowColor = (state: LayerState, action: SetLayersShadowC
 export const setLayerShadowBlur = (state: LayerState, action: SetLayerShadowBlur): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
-  paperLayer.shadowBlur = action.payload.shadowBlur;
+  let shadowLayer = paperLayer;
+  if (layerItem.type === 'Text') {
+    shadowLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
+  shadowLayer.shadowBlur = action.payload.shadowBlur;
   currentState = {
     ...currentState,
     byId: {
@@ -5448,7 +5636,11 @@ export const setLayersShadowBlur = (state: LayerState, action: SetLayersShadowBl
 export const setLayerShadowXOffset = (state: LayerState, action: SetLayerShadowXOffset): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
-  paperLayer.shadowOffset = new uiPaperScope.Point(action.payload.shadowXOffset, paperLayer.shadowOffset.y);
+  let shadowLayer = paperLayer;
+  if (layerItem.type === 'Text') {
+    shadowLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
+  shadowLayer.shadowOffset = new uiPaperScope.Point(action.payload.shadowXOffset, layerItem.style.shadow.offset.y);
   currentState = {
     ...currentState,
     byId: {
@@ -5496,7 +5688,11 @@ export const setLayersShadowXOffset = (state: LayerState, action: SetLayersShado
 export const setLayerShadowYOffset = (state: LayerState, action: SetLayerShadowYOffset): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
-  paperLayer.shadowOffset = new uiPaperScope.Point(paperLayer.shadowOffset.x, action.payload.shadowYOffset);
+  let shadowLayer = paperLayer;
+  if (layerItem.type === 'Text') {
+    shadowLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
+  paperLayer.shadowOffset = new uiPaperScope.Point(layerItem.style.shadow.offset.x, action.payload.shadowYOffset);
   currentState = {
     ...currentState,
     byId: {
