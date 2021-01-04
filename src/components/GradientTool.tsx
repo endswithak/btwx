@@ -118,6 +118,9 @@ const GradientTool = (props: PaperToolProps): ReactElement => {
         if (selectedById[id].type === 'Artboard') {
           paperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
         }
+        if (selectedById[id].type === 'Text') {
+          paperLayer = paperLayer.getItem({data: {id: 'textLines'}});
+        }
         paperLayer[paperProp] = {
           gradient: paperLayer[paperProp].gradient,
           origin: toBounds.center,
@@ -134,6 +137,9 @@ const GradientTool = (props: PaperToolProps): ReactElement => {
         let paperLayer = getPaperLayer(id, selectedProjectIndices[id]);
         if (selectedById[id].type === 'Artboard') {
           paperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
+        }
+        if (selectedById[id].type === 'Text') {
+          paperLayer = paperLayer.getItem({data: {id: 'textLines'}});
         }
         paperLayer[paperProp] = {
           gradient: paperLayer[paperProp].gradient,

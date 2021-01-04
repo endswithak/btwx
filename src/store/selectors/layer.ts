@@ -2163,11 +2163,15 @@ export const hasJustificationTween = (layerItem: Btwx.Layer, equivalentLayerItem
 
 export const hasTextTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const validType = layerItem.type === 'Text';
-  const originLines = validType ? (layerItem as Btwx.Text).lines : null;
-  const destinationLines = validType ? (equivalentLayerItem as Btwx.Text).lines : null;
-  const lengthMatch = originLines.length === destinationLines.length;
-  const contentMatch = validType && lengthMatch && originLines.every((line, index) => line.text === destinationLines[index].text);
-  return validType && (!lengthMatch || !contentMatch);
+  if (validType) {
+    const originLines = (layerItem as Btwx.Text).lines;
+    const destinationLines = (equivalentLayerItem as Btwx.Text).lines;
+    const lengthMatch = originLines.length === destinationLines.length;
+    const contentMatch = lengthMatch && originLines.every((line, index) => line.text === destinationLines[index].text);
+    return !lengthMatch || !contentMatch;
+  } else {
+    return false;
+  }
 };
 
 export const hasFromXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {

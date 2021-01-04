@@ -3773,6 +3773,9 @@ export const enableLayerFill = (state: LayerState, action: EnableLayerFill): Lay
   if (layerItem.type === 'Artboard') {
     fillPaperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
   }
+  if (layerItem.type === 'Text') {
+    fillPaperLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
   const fill = currentState.byId[action.payload.id].style.fill;
   switch(fill.fillType) {
     case 'color':
@@ -3833,12 +3836,14 @@ export const enableLayersFill = (state: LayerState, action: EnableLayersFill): L
 export const disableLayerFill = (state: LayerState, action: DisableLayerFill): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
+  let fillPaperLayer = paperLayer;
   if (layerItem.type === 'Artboard') {
-    const background = paperLayer.getItem({data: {id: 'artboardBackground'}});
-    background.fillColor = null;
-  } else {
-    paperLayer.fillColor = null;
+    fillPaperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
   }
+  if (layerItem.type === 'Text') {
+    fillPaperLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
+  fillPaperLayer.fillColor = null;
   currentState = {
     ...currentState,
     byId: {
@@ -3886,12 +3891,14 @@ export const setLayerFillColor = (state: LayerState, action: SetLayerFillColor):
   const fillColor = action.payload.fillColor;
   const newFill = { ...layerItem.style.fill.color, ...fillColor } as Btwx.Color;
   const paperFill = { hue: newFill.h, saturation: newFill.s, lightness: newFill.l, alpha: newFill.a } as paper.Color;
+  let fillPaperLayer = paperLayer;
   if (layerItem.type === 'Artboard') {
-    const background = paperLayer.getItem({data: {id: 'artboardBackground'}});
-    background.fillColor = paperFill;
-  } else {
-    paperLayer.fillColor = paperFill;
+    fillPaperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
   }
+  if (layerItem.type === 'Text') {
+    fillPaperLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
+  fillPaperLayer.fillColor = paperFill;
   currentState = {
     ...currentState,
     byId: {
@@ -3940,6 +3947,9 @@ export const setLayerFill = (state: LayerState, action: SetLayerFill): LayerStat
   if (layerItem.type === 'Artboard') {
     fillPaperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
   }
+  if (layerItem.type === 'Text') {
+    fillPaperLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
   const fill = action.payload.fill;
   switch(fill.fillType) {
     case 'color':
@@ -3987,6 +3997,9 @@ export const setLayerFillType = (state: LayerState, action: SetLayerFillType): L
   let fillPaperLayer = paperLayer;
   if (layerItem.type === 'Artboard') {
     fillPaperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
+  }
+  if (layerItem.type === 'Text') {
+    fillPaperLayer = paperLayer.getItem({data: {id: 'textLines'}});
   }
   const fill = layerItem.style.fill;
   const gradientType = action.payload.gradientType ? action.payload.gradientType : layerItem.style.fill.gradient.gradientType;
@@ -4090,6 +4103,9 @@ export const setLayerGradient = (state: LayerState, action: SetLayerGradient): L
   if (layerItem.type === 'Artboard') {
     fillPaperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
   }
+  if (layerItem.type === 'Text') {
+    fillPaperLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
   fillPaperLayer[action.payload.prop === 'fill' ? 'fillColor' : 'strokeColor'] = {
     gradient: {
       stops: getGradientStops(action.payload.gradient.stops),
@@ -4129,6 +4145,9 @@ export const setLayerGradientType = (state: LayerState, action: SetLayerGradient
   let fillPaperLayer = paperLayer;
   if (layerItem.type === 'Artboard') {
     fillPaperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
+  }
+  if (layerItem.type === 'Text') {
+    fillPaperLayer = paperLayer.getItem({data: {id: 'textLines'}});
   }
   const paperProp = getPaperProp(action.payload.prop);
   if (fillPaperLayer[paperProp].gradient) {
@@ -4217,6 +4236,9 @@ export const setLayerGradientOrigin = (state: LayerState, action: SetLayerGradie
   if (layerItem.type === 'Artboard') {
     fillPaperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
   }
+  if (layerItem.type === 'Text') {
+    fillPaperLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
   fillPaperLayer[paperProp] = {
     gradient: {
       stops: getGradientStops(gradient.stops),
@@ -4281,6 +4303,9 @@ export const setLayerGradientDestination = (state: LayerState, action: SetLayerG
   let fillPaperLayer = paperLayer;
   if (layerItem.type === 'Artboard') {
     fillPaperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
+  }
+  if (layerItem.type === 'Text') {
+    fillPaperLayer = paperLayer.getItem({data: {id: 'textLines'}});
   }
   fillPaperLayer[paperProp] = {
     gradient: {
@@ -4380,6 +4405,9 @@ export const setLayerGradientStopColor = (state: LayerState, action: SetLayerGra
   if (layerItem.type === 'Artboard') {
     fillPaperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
   }
+  if (layerItem.type === 'Text') {
+    fillPaperLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
   fillPaperLayer[paperProp] = {
     gradient: {
       stops: getGradientStops(newStops),
@@ -4469,6 +4497,9 @@ export const setLayerGradientStopPosition = (state: LayerState, action: SetLayer
   if (layerItem.type === 'Artboard') {
     fillPaperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
   }
+  if (layerItem.type === 'Text') {
+    fillPaperLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
   fillPaperLayer[paperProp] = {
     gradient: {
       stops: getGradientStops(newStops),
@@ -4530,6 +4561,9 @@ export const addLayerGradientStop = (state: LayerState, action: AddLayerGradient
   let fillPaperLayer = paperLayer;
   if (layerItem.type === 'Artboard') {
     fillPaperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
+  }
+  if (layerItem.type === 'Text') {
+    fillPaperLayer = paperLayer.getItem({data: {id: 'textLines'}});
   }
   fillPaperLayer[paperProp] = {
     gradient: {
@@ -4598,6 +4632,9 @@ export const removeLayerGradientStop = (state: LayerState, action: RemoveLayerGr
   if (layerItem.type === 'Artboard') {
     fillPaperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
   }
+  if (layerItem.type === 'Text') {
+    fillPaperLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
   fillPaperLayer[paperProp] = {
     gradient: {
       stops: getGradientStops(newStops),
@@ -4660,12 +4697,16 @@ export const enableLayerStroke = (state: LayerState, action: EnableLayerStroke):
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const stroke = currentState.byId[action.payload.id].style.stroke;
+  let fillPaperLayer = paperLayer;
+  if (layerItem.type === 'Text') {
+    fillPaperLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
   switch(stroke.fillType) {
     case 'color':
-      paperLayer.strokeColor = { hue: stroke.color.h, saturation: stroke.color.s, lightness: stroke.color.l, alpha: stroke.color.a } as paper.Color;
+      fillPaperLayer.strokeColor = { hue: stroke.color.h, saturation: stroke.color.s, lightness: stroke.color.l, alpha: stroke.color.a } as paper.Color;
       break;
     case 'gradient':
-      paperLayer.strokeColor = {
+      fillPaperLayer.strokeColor = {
         gradient: {
           stops: getGradientStops(stroke.gradient.stops),
           radial: stroke.gradient.gradientType === 'radial'
@@ -4719,7 +4760,11 @@ export const enableLayersStroke = (state: LayerState, action: EnableLayersStroke
 export const disableLayerStroke = (state: LayerState, action: DisableLayerStroke): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
-  paperLayer.strokeColor = null;
+  let fillPaperLayer = paperLayer;
+  if (layerItem.type === 'Text') {
+    fillPaperLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
+  fillPaperLayer.strokeColor = null;
   currentState = {
     ...currentState,
     byId: {
@@ -4766,7 +4811,11 @@ export const setLayerStrokeColor = (state: LayerState, action: SetLayerStrokeCol
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const strokeColor = action.payload.strokeColor;
   const newStroke = { ...layerItem.style.stroke.color, ...strokeColor } as Btwx.Color;
-  paperLayer.strokeColor = { hue: newStroke.h, saturation: newStroke.s, lightness: newStroke.l, alpha: newStroke.a } as paper.Color;
+  let fillPaperLayer = paperLayer;
+  if (layerItem.type === 'Text') {
+    fillPaperLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
+  fillPaperLayer.strokeColor = { hue: newStroke.h, saturation: newStroke.s, lightness: newStroke.l, alpha: newStroke.a } as paper.Color;
   currentState = {
     ...currentState,
     byId: {
@@ -4813,12 +4862,16 @@ export const setLayerStrokeFillType = (state: LayerState, action: SetLayerStroke
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const stroke = layerItem.style.stroke;
   const gradientType = action.payload.gradientType ? action.payload.gradientType : layerItem.style.stroke.gradient.gradientType;
+  let fillPaperLayer = paperLayer;
+  if (layerItem.type === 'Text') {
+    fillPaperLayer = paperLayer.getItem({data: {id: 'textLines'}});
+  }
   switch(action.payload.fillType) {
     case 'color':
-      paperLayer.strokeColor = { hue: stroke.color.h, saturation: stroke.color.s, lightness: stroke.color.l, alpha: stroke.color.a } as paper.Color;
+      fillPaperLayer.strokeColor = { hue: stroke.color.h, saturation: stroke.color.s, lightness: stroke.color.l, alpha: stroke.color.a } as paper.Color;
       break;
     case 'gradient':
-      paperLayer.strokeColor = {
+      fillPaperLayer.strokeColor = {
         gradient: {
           stops: getGradientStops(stroke.gradient.stops),
           radial: gradientType === 'radial'
