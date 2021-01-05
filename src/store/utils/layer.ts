@@ -1578,6 +1578,16 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
     const clone = paperLayer.clone({insert: false});
     clone.rotation = -layerItem.transform.rotation;
     const textContent = clone.getItem({data: {id: 'textContent'}}) as paper.PointText;
+    const textLines = clone.getItem({data: {id: 'textLines'}});
+    const textBackground = clone.getItem({data: {id: 'textBackground'}});
+    // get lines width
+    const lines = (layerItem as Btwx.Text).lines.reduce((result, current, index) => {
+      const paperLine = textLines.children[index] as paper.PointText;
+      paperLine.leading = (layerItem as Btwx.Text).textStyle.fontSize;
+      paperLine.skew(new uiPaperScope.Point((layerItem as Btwx.Text).textStyle.oblique, 0));
+      return [...result, {...current, width: paperLine.bounds.width}];
+    }, (layerItem as Btwx.Text).lines);
+    // get point
     const pointInArtboard = (() => {
       switch((layerItem as Btwx.Text).textStyle.justification) {
         case 'left':
@@ -1588,6 +1598,7 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
           return new uiPaperScope.Point(textContent.point.x - textContent.bounds.width, textContent.point.y).subtract(artboardItems.paperLayer.position);
       }
     })();
+    // get x and y
     const positionInArtboard = textContent.position.subtract(artboardItems.paperLayer.position);
     currentState = {
       ...currentState,
@@ -1601,13 +1612,14 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
             y: positionInArtboard.y,
             width: ogTextContent.bounds.width,
             height: ogTextContent.bounds.height,
-            innerWidth: textContent.bounds.width,
-            innerHeight: textContent.bounds.height
+            innerWidth: textBackground.bounds.width, // textContent.bounds.width,
+            innerHeight: textBackground.bounds.height // textContent.bounds.height
           },
           point: {
             x: pointInArtboard.x,
             y: pointInArtboard.y
-          }
+          },
+          lines: lines
         } as Btwx.Text
       }
     }
@@ -6115,7 +6127,7 @@ export const setLayerJustification = (state: LayerState, action: SetLayerJustifi
   const textLines = paperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
   const textLinesGroup = paperLayer.getItem({data: {id: 'textLines'}});
   const prevJustification = textContent.justification;
-  const originalPosition = paperLayer.position;
+  // const originalPosition = paperLayer.position;
   paperLayer.rotation = -layerItem.transform.rotation;
   textContent.justification = action.payload.justification;
   switch(prevJustification) {
@@ -6167,7 +6179,7 @@ export const setLayerJustification = (state: LayerState, action: SetLayerJustifi
   });
   textBackground.bounds = textLinesGroup.bounds;
   paperLayer.rotation = layerItem.transform.rotation;
-  paperLayer.position = originalPosition;
+  // paperLayer.position = originalPosition;
   currentState = {
     ...currentState,
     byId: {
@@ -7236,6 +7248,21 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): {
             }
           }
         }
+        if (itemToCopy.type === 'Text') {
+          result = {
+            ...result,
+            byId: {
+              ...result.byId,
+              [copyId]: {
+                ...result.byId[copyId],
+                point: {
+                  x: (result.byId[copyId] as Btwx.Text).point.x + action.payload.offset.x,
+                  y: (result.byId[copyId] as Btwx.Text).point.y + action.payload.offset.y
+                }
+              } as Btwx.Text
+            }
+          }
+        }
         if (itemToCopy.type === 'Shape' && (itemToCopy as Btwx.Shape).shapeType === 'Line') {
           const fromPoint = (copyPaperLayer as paper.Path).firstSegment.point;
           const toPoint = (copyPaperLayer as paper.Path).lastSegment.point;
@@ -8154,6 +8181,15 @@ export const setLayerEdit = (state: LayerState, action: SetLayerEdit): LayerStat
 export const setLayerStyle = (state: LayerState, action: SetLayerStyle): LayerState => {
   let currentState = state;
   const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
+  let styleLayer = paperLayer;
+  switch(layerItem.type) {
+    case 'Artboard':
+      styleLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
+      break;
+    case 'Text':
+      styleLayer = paperLayer.getItem({data: {id: 'textLines'}});
+      break;
+  }
   currentState = {
     ...currentState,
     byId: {
@@ -8172,12 +8208,12 @@ export const setLayerStyle = (state: LayerState, action: SetLayerStyle): LayerSt
       switch(action.payload.style.fill.fillType) {
         case 'color': {
           const fillColor = action.payload.style.fill.color;
-          paperLayer.fillColor = { hue: fillColor.h, saturation: fillColor.s, lightness: fillColor.l, alpha: fillColor.a } as paper.Color;
+          styleLayer.fillColor = { hue: fillColor.h, saturation: fillColor.s, lightness: fillColor.l, alpha: fillColor.a } as paper.Color;
           break;
         }
         case 'gradient': {
           const fillGradient = action.payload.style.fill.gradient;
-          paperLayer.fillColor = {
+          styleLayer.fillColor = {
             gradient: {
               stops: getGradientStops(fillGradient.stops),
               radial: fillGradient.gradientType === 'radial'
@@ -8189,7 +8225,7 @@ export const setLayerStyle = (state: LayerState, action: SetLayerStyle): LayerSt
         }
       }
     } else {
-      paperLayer.fillColor = null;
+      styleLayer.fillColor = null;
     }
   }
   if (action.payload.style && action.payload.style.stroke) {
@@ -8198,12 +8234,12 @@ export const setLayerStyle = (state: LayerState, action: SetLayerStyle): LayerSt
       switch(action.payload.style.stroke.fillType) {
         case 'color': {
           const strokeColor = action.payload.style.stroke.color;
-          paperLayer.strokeColor = { hue: strokeColor.h, saturation: strokeColor.s, lightness: strokeColor.l, alpha: strokeColor.a } as paper.Color;
+          styleLayer.strokeColor = { hue: strokeColor.h, saturation: strokeColor.s, lightness: strokeColor.l, alpha: strokeColor.a } as paper.Color;
           break;
         }
         case 'gradient': {
           const strokeGradient = action.payload.style.stroke.gradient;
-          paperLayer.strokeColor = {
+          styleLayer.strokeColor = {
             gradient: {
               stops: getGradientStops(strokeGradient.stops),
               radial: strokeGradient.gradientType === 'radial'
@@ -8215,98 +8251,88 @@ export const setLayerStyle = (state: LayerState, action: SetLayerStyle): LayerSt
         }
       }
     } else {
-      paperLayer.strokeColor = null;
+      styleLayer.strokeColor = null;
     }
     // stroke width
     if (action.payload.style.stroke.width) {
-      paperLayer.strokeWidth = action.payload.style.stroke.width;
+      styleLayer.strokeWidth = action.payload.style.stroke.width;
     }
   }
   if (action.payload.style && action.payload.style.strokeOptions) {
     if (action.payload.style.strokeOptions.cap) {
-      paperLayer.strokeCap = action.payload.style.strokeOptions.cap;
+      styleLayer.strokeCap = action.payload.style.strokeOptions.cap;
     }
     if (action.payload.style.strokeOptions.join) {
-      paperLayer.strokeJoin = action.payload.style.strokeOptions.join;
+      styleLayer.strokeJoin = action.payload.style.strokeOptions.join;
     }
     if (action.payload.style.strokeOptions.dashOffset) {
-      paperLayer.dashOffset = action.payload.style.strokeOptions.dashOffset;
+      styleLayer.dashOffset = action.payload.style.strokeOptions.dashOffset;
     }
     if (action.payload.style.strokeOptions.dashArray) {
-      paperLayer.dashArray = action.payload.style.strokeOptions.dashArray;
+      styleLayer.dashArray = action.payload.style.strokeOptions.dashArray;
     }
   }
   if (action.payload.style && action.payload.style.shadow) {
     // shadow color
     if (action.payload.style.shadow.enabled) {
       const shadowColor = action.payload.style.shadow.color;
-      paperLayer.shadowColor = { hue: shadowColor.h, saturation: shadowColor.s, lightness: shadowColor.l, alpha: shadowColor.a } as paper.Color;
+      styleLayer.shadowColor = { hue: shadowColor.h, saturation: shadowColor.s, lightness: shadowColor.l, alpha: shadowColor.a } as paper.Color;
     } else {
-      paperLayer.shadowColor = null;
+      styleLayer.shadowColor = null;
     }
     if (action.payload.style.shadow.offset) {
       const offset = action.payload.style.shadow.offset;
-      paperLayer.shadowOffset = new uiPaperScope.Point(offset.x ? offset.x : layerItem.style.shadow.offset.x, offset.y ? offset.y : layerItem.style.shadow.offset.y);
+      styleLayer.shadowOffset = new uiPaperScope.Point(offset.x ? offset.x : layerItem.style.shadow.offset.x, offset.y ? offset.y : layerItem.style.shadow.offset.y);
     }
     if (action.payload.style.shadow.blur) {
-      paperLayer.shadowBlur = action.payload.style.shadow.blur;
+      styleLayer.shadowBlur = action.payload.style.shadow.blur;
     }
   }
   if (action.payload.style && action.payload.style.opacity) {
-    paperLayer.opacity = action.payload.style.opacity;
+    styleLayer.opacity = action.payload.style.opacity;
   }
   if (action.payload.style && action.payload.style.blendMode) {
-    paperLayer.blendMode = action.payload.style.blendMode;
+    styleLayer.blendMode = action.payload.style.blendMode;
   }
   if (layerItem.type === 'Text') {
-    if (action.payload.textStyle && action.payload.textStyle.fontSize) {
-      (paperLayer as paper.PointText).fontSize = action.payload.textStyle.fontSize;
-    }
-    if (action.payload.textStyle && action.payload.textStyle.leading) {
-      (paperLayer as paper.PointText).leading = action.payload.textStyle.leading;
-    }
-    if (action.payload.textStyle && action.payload.textStyle.fontWeight) {
-      (paperLayer as paper.PointText).fontWeight = action.payload.textStyle.fontWeight;
-    }
-    if (action.payload.textStyle && action.payload.textStyle.fontFamily) {
-      (paperLayer as paper.PointText).fontFamily = action.payload.textStyle.fontFamily;
-    }
+    paperLayer.rotation = -layerItem.transform.rotation;
+    const textContent = paperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
+    const textBackground = paperLayer.getItem({data: {id: 'textBackground'}});
     if (action.payload.textStyle && action.payload.textStyle.justification) {
       const prevJustification = (layerItem as Btwx.Text).textStyle.justification;
-      const newJustification = action.payload.textStyle.justification;
-      (paperLayer as paper.PointText).justification = newJustification;
+      textContent.justification = action.payload.textStyle.justification;
       switch(prevJustification) {
         case 'left':
-          switch(newJustification) {
+          switch(action.payload.textStyle.justification) {
             case 'left':
               break;
             case 'center':
-              paperLayer.position.x += paperLayer.bounds.width / 2
+              textContent.position.x += textContent.bounds.width / 2;
               break;
             case 'right':
-              paperLayer.position.x += paperLayer.bounds.width
+              textContent.position.x += textContent.bounds.width;
               break;
           }
           break;
         case 'center':
-          switch(newJustification) {
+          switch(action.payload.textStyle.justification) {
             case 'left':
-              paperLayer.position.x -= paperLayer.bounds.width / 2
+              textContent.position.x -= textContent.bounds.width / 2;
               break;
             case 'center':
               break;
             case 'right':
-              paperLayer.position.x += paperLayer.bounds.width / 2
+              textContent.position.x += textContent.bounds.width / 2;
               break;
           }
           break;
         case 'right':
-          switch(newJustification) {
+          switch(action.payload.textStyle.justification) {
             case 'left':
-              paperLayer.position.x -= paperLayer.bounds.width;
+              textContent.position.x -= textContent.bounds.width;
               break;
             case 'center':
-              paperLayer.position.x -= paperLayer.bounds.width / 2;
+              textContent.position.x -= textContent.bounds.width / 2;
               break;
             case 'right':
               break;
@@ -8314,6 +8340,36 @@ export const setLayerStyle = (state: LayerState, action: SetLayerStyle): LayerSt
           break;
       }
     }
+    styleLayer.children.forEach((line: paper.PointText, index: number) => {
+      line.leading = line.fontSize;
+      line.skew(new uiPaperScope.Point((layerItem as Btwx.Text).textStyle.oblique, 0));
+      if (action.payload.textStyle && action.payload.textStyle.justification) {
+        line.justification = action.payload.textStyle.justification;
+        line.point.x = textContent.point.x;
+      }
+      if (action.payload.textStyle && action.payload.textStyle.fontSize) {
+        line.fontSize = action.payload.textStyle.fontSize;
+      }
+      if (action.payload.textStyle && action.payload.textStyle.fontWeight) {
+        line.fontWeight = action.payload.textStyle.fontWeight;
+      }
+      if (action.payload.textStyle && action.payload.textStyle.fontFamily) {
+        line.fontFamily = action.payload.textStyle.fontFamily;
+      }
+      if (action.payload.textStyle && action.payload.textStyle.oblique) {
+        line.skew(new uiPaperScope.Point(-action.payload.textStyle.oblique, 0));
+      } else {
+        line.skew(new uiPaperScope.Point(-(layerItem as Btwx.Text).textStyle.oblique, 0));
+      }
+      if (action.payload.textStyle && action.payload.textStyle.leading) {
+        line.leading = action.payload.textStyle.leading;
+        line.point.y = textContent.point.y + (action.payload.textStyle.leading * index);
+      } else {
+        line.leading = (layerItem as Btwx.Text).textStyle.leading;
+      }
+    });
+    textBackground.bounds = styleLayer.bounds;
+    paperLayer.rotation = layerItem.transform.rotation;
     currentState = {
       ...currentState,
       byId: {
@@ -8328,6 +8384,8 @@ export const setLayerStyle = (state: LayerState, action: SetLayerStyle): LayerSt
       }
     }
   }
+  currentState = updateLayerBounds(currentState, action.payload.id);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, 'all');
   return currentState;
 };
 

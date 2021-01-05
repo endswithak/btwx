@@ -379,6 +379,7 @@ declare namespace Btwx {
 
   interface TextLine {
     text: string;
+    width: number;
   }
 
   interface Image extends MaskableLayer {

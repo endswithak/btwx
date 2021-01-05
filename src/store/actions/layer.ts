@@ -3923,13 +3923,18 @@ export const updateHoverFrame = (hoverItem: Btwx.Layer, artboardItem?: Btwx.Artb
       parent: hoverFrame
     }
     let hoverPosition = new uiPaperScope.Point(hoverItem.frame.x, hoverItem.frame.y);
+    let artboardPosition: paper.Point;
     if (artboardItem) {
-      const artboardPosition = new uiPaperScope.Point(artboardItem.frame.x, artboardItem.frame.y);
+      artboardPosition = new uiPaperScope.Point(artboardItem.frame.x, artboardItem.frame.y);
       hoverPosition = hoverPosition.add(artboardPosition);
     }
     const hoverItemBounds = new uiPaperScope.Rectangle({
       from: new uiPaperScope.Point(hoverPosition.x - (hoverItem.frame.width / 2), hoverPosition.y - (hoverItem.frame.height / 2)),
       to: new uiPaperScope.Point(hoverPosition.x + (hoverItem.frame.width / 2), hoverPosition.y + (hoverItem.frame.height / 2))
+    });
+    const hoverItemInnerBounds = new uiPaperScope.Rectangle({
+      from: new uiPaperScope.Point(hoverPosition.x - (hoverItem.frame.innerWidth / 2), hoverPosition.y - (hoverItem.frame.innerHeight / 2)),
+      to: new uiPaperScope.Point(hoverPosition.x + (hoverItem.frame.innerWidth / 2), hoverPosition.y + (hoverItem.frame.innerHeight / 2))
     });
     switch(hoverItem.type) {
       // case 'Artboard': {
@@ -3950,35 +3955,46 @@ export const updateHoverFrame = (hoverItem: Btwx.Layer, artboardItem?: Btwx.Artb
         break;
       }
       case 'Text': {
-        const textLayer = getPaperLayer(hoverItem.id, artboardItem.projectIndex);
-        const clone = textLayer.clone({insert: false});
-        clone.rotation = -hoverItem.transform.rotation;
-        const textLines = clone.getItems({data: {id: 'textLine'}}) as paper.PointText[];
+        const lines = (hoverItem as Btwx.Text).lines;
+        const point = new uiPaperScope.Point((hoverItem as Btwx.Text).point.x, (hoverItem as Btwx.Text).point.y);
+        const leading = (hoverItem as Btwx.Text).textStyle.leading;
         const textLinesGroup = new uiPaperScope.Group({
-          parent: hoverFrame
+          parent: hoverFrame,
+          children: [
+            new uiPaperScope.Path.Rectangle({
+              rectangle: hoverItemInnerBounds,
+              fillColor: tinyColor('#fff').setAlpha(0).toHslString()
+            })
+          ]
         });
-        textLines.forEach((line, index: number) => {
+        const longestLine = lines.reduce((result, current) => current.width > result.width ? current : result);
+        const pointInArtboard = point.add(artboardPosition);
+        lines.forEach((line, index: number) => {
+          const x = pointInArtboard.x;
+          const y = pointInArtboard.y;
+          const from = (() => {
+            switch((hoverItem as Btwx.Text).textStyle.justification) {
+              case 'left':
+                return new uiPaperScope.Point(x, y + (index * leading));
+              case 'center':
+                return new uiPaperScope.Point(x + (longestLine.width / 2) + (line.width / 2), y + (index * leading));
+              case 'right':
+                return new uiPaperScope.Point(x + longestLine.width, y + (index * leading));
+            }
+          })();
+          const to = (() => {
+            switch((hoverItem as Btwx.Text).textStyle.justification) {
+              case 'left':
+                return new uiPaperScope.Point(from.x + line.width, from.y);
+              case 'center':
+                return new uiPaperScope.Point(from.x - line.width, from.y);
+              case 'right':
+                return new uiPaperScope.Point(from.x - line.width, from.y);
+            }
+          })();
           new uiPaperScope.Path.Line({
-            from: (() => {
-              switch((hoverItem as Btwx.Text).textStyle.justification) {
-                case 'left':
-                  return line.point;
-                case 'center':
-                  return new uiPaperScope.Point(line.point.x - line.bounds.width / 2, line.point.y);
-                case 'right':
-                  return new uiPaperScope.Point(line.point.x - line.bounds.width, line.point.y);
-              }
-            })(),
-            to: (() => {
-              switch((hoverItem as Btwx.Text).textStyle.justification) {
-                case 'left':
-                  return new uiPaperScope.Point(line.point.x + line.bounds.width, line.point.y);
-                case 'center':
-                  return new uiPaperScope.Point(line.point.x + line.bounds.width / 2, line.point.y);
-                case 'right':
-                  return line.point;
-              }
-            })(),
+            from: from,
+            to: to,
             strokeColor: THEME_PRIMARY_COLOR,
             strokeWidth: 2 / uiPaperScope.view.zoom,
             parent: textLinesGroup

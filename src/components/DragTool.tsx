@@ -178,10 +178,14 @@ const DragTool = (props: PaperToolProps): ReactElement => {
             clone.rotation = -layerItems[paperLayer.data.id].transform.rotation;
             const textLayer = clone.getItem({data: { id: 'textContent' }}) as paper.PointText;
             const textLines = clone.getItems({data: {id: 'textLine'}}) as paper.PointText[];
+            const textBackgroundClone = clone.getItem({data: {id: 'textBackground'}});
             const linesGroup = new uiPaperScope.Group({
-              parent: dragOutlines
-            })
+              parent: dragOutlines,
+              children: [textBackgroundClone]
+            });
             textLines.forEach((line, index: number) => {
+              line.leading = line.fontSize;
+              line.skew(new uiPaperScope.Point((layerItems[paperLayer.data.id] as Btwx.Text).textStyle.oblique, 0));
               new uiPaperScope.Path.Line({
                 from: (() => {
                   switch(textLayer.justification) {
