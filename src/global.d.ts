@@ -356,7 +356,7 @@ declare namespace Btwx {
     originArtboardForEvents: string[];
     destinationArtboardForEvents: string[];
     projectIndex: number;
-    json: string;
+    // json: string;
   }
 
   interface MaskableLayer extends Layer {

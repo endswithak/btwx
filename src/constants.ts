@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
+export const MAX_PROJECT_COUNT = 11;
 export const ARTBOARDS_PER_PROJECT = 3;
 export const APP_NAME = 'btwx';
 export const PREVIEW_PREFIX = '**preview**';

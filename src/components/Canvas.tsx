@@ -20,6 +20,7 @@ import LineTool from './LineTool';
 import TextTool from './TextTool';
 import GradientTool from './GradientTool';
 import CanvasUI from './CanvasUI';
+import CanvasProjects from './CanvasProjects';
 import CanvasArtboards from './CanvasArtboards';
 
 const Canvas = (): ReactElement => {
@@ -151,7 +152,8 @@ const Canvas = (): ReactElement => {
         cursor: cursor[0]
       }}>
       <CanvasUI />
-      <CanvasArtboards />
+      <CanvasProjects />
+      {/* <CanvasArtboards /> */}
       {
         ready
         ? <>

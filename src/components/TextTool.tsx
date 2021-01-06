@@ -120,6 +120,10 @@ const TextTool = (props: TextToolProps): ReactElement => {
             fontFamily: textSettings.fontFamily,
             oblique: 0,
             justification: textSettings.justification
+          },
+          point: {
+            x: paperLayer.point.x,
+            y: paperLayer.point.y
           }
         }
       }).then((textLayer) => {

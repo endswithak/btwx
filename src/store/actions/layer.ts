@@ -534,19 +534,19 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
     const style = getLayerStyle(payload, {}, { fill: { color: DEFAULT_ARTBOARD_BACKGROUND_COLOR } as Btwx.Fill, stroke: { enabled: false } as Btwx.Stroke, shadow: { enabled: false } as Btwx.Shadow });
     const frame = getLayerFrame(payload);
     const showChildren = payload.layer.showChildren ? payload.layer.showChildren : true;
-    const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as Btwx.PaperGradientFill : null;
+    // const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as Btwx.PaperGradientFill : null;
     // create background
-    const artboardBackground = new uiPaperScope.Path.Rectangle({
-      name: 'Artboard Background',
-      from: new uiPaperScope.Point(frame.x - (frame.width / 2), frame.y - (frame.height / 2)),
-      to: new uiPaperScope.Point(frame.x + (frame.width / 2), frame.y + (frame.height / 2)),
-      data: { id: 'artboardBackground', type: 'LayerChild', layerType: 'Artboard' },
-      fillColor: paperFillColor,
-      shadowColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.20 },
-      shadowOffset: new uiPaperScope.Point(0, 2),
-      shadowBlur: 10,
-      insert: false
-    });
+    // const artboardBackground = new uiPaperScope.Path.Rectangle({
+    //   name: 'Artboard Background',
+    //   from: new uiPaperScope.Point(frame.x - (frame.width / 2), frame.y - (frame.height / 2)),
+    //   to: new uiPaperScope.Point(frame.x + (frame.width / 2), frame.y + (frame.height / 2)),
+    //   data: { id: 'artboardBackground', type: 'LayerChild', layerType: 'Artboard' },
+    //   fillColor: paperFillColor,
+    //   shadowColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.20 },
+    //   shadowOffset: new uiPaperScope.Point(0, 2),
+    //   shadowBlur: 10,
+    //   insert: false
+    // });
     // create title
     // const artboardTitle = new uiPaperScope.PointText({
     //   point: artboardBackground.bounds.bottomLeft.add(new uiPaperScope.Point(0, 24 * (1 / uiPaperScope.view.zoom))),
@@ -556,32 +556,32 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
     //   fontFamily: 'Space Mono'
     // });
     // create layers mask
-    const artboardLayersMask = new uiPaperScope.Path.Rectangle({
-      name: 'Artboard Layers Mask',
-      from: new uiPaperScope.Point(frame.x - (frame.width / 2), frame.y - (frame.height / 2)),
-      to: new uiPaperScope.Point(frame.x + (frame.width / 2), frame.y + (frame.height / 2)),
-      data: { id: 'artboardLayersMask', type: 'LayerChild', layerType: 'Artboard' },
-      fillColor: paperFillColor,
-      clipMask: true
-    });
+    // const artboardLayersMask = new uiPaperScope.Path.Rectangle({
+    //   name: 'Artboard Layers Mask',
+    //   from: new uiPaperScope.Point(frame.x - (frame.width / 2), frame.y - (frame.height / 2)),
+    //   to: new uiPaperScope.Point(frame.x + (frame.width / 2), frame.y + (frame.height / 2)),
+    //   data: { id: 'artboardLayersMask', type: 'LayerChild', layerType: 'Artboard' },
+    //   fillColor: paperFillColor,
+    //   clipMask: true
+    // });
     //
-    const artboardLayers = new uiPaperScope.Group({
-      name: 'Artboard Layers',
-      data: { id: 'artboardLayers', type: 'LayerChild', layerType: 'Artboard' }
-    });
+    // const artboardLayers = new uiPaperScope.Group({
+    //   name: 'Artboard Layers',
+    //   data: { id: 'artboardLayers', type: 'LayerChild', layerType: 'Artboard' }
+    // });
     //
-    const artboardMaskedLayers = new uiPaperScope.Group({
-      name: 'Artboard Masked Layers',
-      data: { id: 'artboardMaskedLayers', type: 'LayerChild', layerType: 'Artboard' },
-      children: [artboardLayersMask, artboardLayers]
-    });
+    // const artboardMaskedLayers = new uiPaperScope.Group({
+    //   name: 'Artboard Masked Layers',
+    //   data: { id: 'artboardMaskedLayers', type: 'LayerChild', layerType: 'Artboard' },
+    //   children: [artboardLayersMask, artboardLayers]
+    // });
     // create artboard group
-    const artboard = new uiPaperScope.Group({
-      name: name,
-      data: { id: id, type: 'Layer', layerType: 'Artboard', scope: ['root'] },
-      children: [artboardBackground, artboardMaskedLayers],
-      insert: false
-    });
+    // const artboard = new uiPaperScope.Group({
+    //   name: name,
+    //   data: { id: id, type: 'Layer', layerType: 'Artboard', scope: ['root'] },
+    //   children: [artboardBackground, artboardMaskedLayers],
+    //   insert: false
+    // });
     // dispatch action
     const newLayer = {
       type: 'Artboard',
@@ -593,7 +593,7 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
       children: [],
       scope: ['root'],
       projectIndex: projectIndex,
-      frame: payload.layer.frame,
+      frame: frame, // payload.layer.frame,
       showChildren: showChildren,
       selected: false,
       hover: false,
@@ -608,7 +608,7 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
       },
       transform: DEFAULT_TRANSFORM,
       style: style,
-      json: artboard.exportJSON()
+      // json: artboard.exportJSON()
     } as Btwx.Artboard;
     dispatch(addArtboard({
       layer: newLayer,
@@ -640,19 +640,19 @@ export const addGroupThunk = (payload: AddGroupPayload, providedState?: RootStat
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
-    const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
+    // const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
     const frame = payload.layer.frame ? payload.layer.frame : { x: 0, y: 0, width: 0, height: 0, innerWidth: 0, innerHeight: 0 };
-    let position = new uiPaperScope.Point(frame.x, frame.y);
-    if (artboard) {
-      position = position.add(new uiPaperScope.Point(artboardItem.frame.x, artboardItem.frame.y))
-    }
+    // let position = new uiPaperScope.Point(frame.x, frame.y);
+    // if (artboard) {
+    //   position = position.add(new uiPaperScope.Point(artboardItem.frame.x, artboardItem.frame.y))
+    // }
     const showChildren = payload.layer.showChildren ? payload.layer.showChildren : true;
-    const group = new uiPaperScope.Group({
-      name: name,
-      data: { id: id, type: 'Layer', layerType: 'Group', scope: scope },
-      parent: parentPaperLayer,
-      position: position
-    });
+    // const group = new uiPaperScope.Group({
+    //   name: name,
+    //   data: { id: id, type: 'Layer', layerType: 'Group', scope: scope },
+    //   parent: parentPaperLayer,
+    //   position: position
+    // });
     const newLayer = {
       type: 'Group',
       id: id,
@@ -708,53 +708,53 @@ export const addShapeThunk = (payload: AddShapePayload, providedState?: RootStat
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
-    const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
+    // const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
     const name = payload.layer.name ? payload.layer.name : shapeType;
     const frame = getLayerFrame(payload);
-    let position = new uiPaperScope.Point(frame.x, frame.y);
-    if (artboard) {
-      position = position.add(new uiPaperScope.Point(artboardItem.frame.x, artboardItem.frame.y))
-    }
+    // let position = new uiPaperScope.Point(frame.x, frame.y);
+    // if (artboard) {
+    //   position = position.add(new uiPaperScope.Point(artboardItem.frame.x, artboardItem.frame.y))
+    // }
     const shapeOpts = getLayerShapeOpts(payload);
     const pathData = getLayerPathData(payload);
     const style = getLayerStyle(payload);
     const transform = getLayerTransform(payload);
-    const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as Btwx.Shadow) : null;
-    const paperShadowOffset = style.shadow.enabled ? new uiPaperScope.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
-    const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
-    const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as Btwx.PaperGradientFill : null;
-    const paperStrokeColor = style.stroke.enabled ? getPaperStrokeColor(style.stroke, frame) as Btwx.PaperGradientFill : null;
+    // const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as Btwx.Shadow) : null;
+    // const paperShadowOffset = style.shadow.enabled ? new uiPaperScope.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
+    // const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
+    // const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as Btwx.PaperGradientFill : null;
+    // const paperStrokeColor = style.stroke.enabled ? getPaperStrokeColor(style.stroke, frame) as Btwx.PaperGradientFill : null;
     const mask = payload.layer.mask ? payload.layer.mask : false;
-    const paperLayer = new uiPaperScope.CompoundPath({
-      name: name,
-      pathData: pathData,
-      closed: payload.layer.closed,
-      strokeWidth: style.stroke.width,
-      shadowColor: paperShadowColor,
-      shadowOffset: paperShadowOffset,
-      shadowBlur: paperShadowBlur,
-      blendMode: style.blendMode,
-      opacity: style.opacity,
-      dashArray: style.strokeOptions.dashArray,
-      dashOffset: style.strokeOptions.dashOffset,
-      strokeCap: style.strokeOptions.cap,
-      clipMask: mask,
-      strokeJoin: style.strokeOptions.join,
-      data: { id, type: 'Layer', layerType: 'Shape', shapeType: shapeType, scope: scope },
-      parent: parentPaperLayer
-    });
-    paperLayer.children.forEach((item) => item.data = { id: 'shapePartial', type: 'LayerChild', layerType: 'Shape' });
-    paperLayer.position = position;
-    paperLayer.fillColor = paperFillColor;
-    paperLayer.strokeColor = paperStrokeColor;
-    if (mask) {
-      const maskGroup = new uiPaperScope.Group({
-        name: 'MaskGroup',
-        data: { id: 'maskGroup', type: 'LayerContainer', layerType: 'Shape' },
-        children: [paperLayer.clone()]
-      });
-      paperLayer.replaceWith(maskGroup);
-    }
+    // const paperLayer = new uiPaperScope.CompoundPath({
+    //   name: name,
+    //   pathData: pathData,
+    //   closed: payload.layer.closed,
+    //   strokeWidth: style.stroke.width,
+    //   shadowColor: paperShadowColor,
+    //   shadowOffset: paperShadowOffset,
+    //   shadowBlur: paperShadowBlur,
+    //   blendMode: style.blendMode,
+    //   opacity: style.opacity,
+    //   dashArray: style.strokeOptions.dashArray,
+    //   dashOffset: style.strokeOptions.dashOffset,
+    //   strokeCap: style.strokeOptions.cap,
+    //   clipMask: mask,
+    //   strokeJoin: style.strokeOptions.join,
+    //   data: { id, type: 'Layer', layerType: 'Shape', shapeType: shapeType, scope: scope },
+    //   parent: parentPaperLayer
+    // });
+    // paperLayer.children.forEach((item) => item.data = { id: 'shapePartial', type: 'LayerChild', layerType: 'Shape' });
+    // paperLayer.position = position;
+    // paperLayer.fillColor = paperFillColor;
+    // paperLayer.strokeColor = paperStrokeColor;
+    // if (mask) {
+    //   const maskGroup = new uiPaperScope.Group({
+    //     name: 'MaskGroup',
+    //     data: { id: 'maskGroup', type: 'LayerContainer', layerType: 'Shape' },
+    //     children: [paperLayer.clone()]
+    //   });
+    //   paperLayer.replaceWith(maskGroup);
+    // }
     const newLayer = {
       type: 'Shape',
       id: id,
@@ -928,74 +928,74 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
     const artboard = scope[1];
     const artboardItem = state.layer.present.byId[artboard] as Btwx.Artboard;
     const index = artboardItem.children.length;
-    const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
+    // const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
     const style = getLayerStyle(payload);
     const textStyle = getLayerTextStyle(payload);
     const transform = getLayerTransform(payload);
-    const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as Btwx.Shadow) : null;
-    const paperShadowOffset = style.shadow.enabled ? new uiPaperScope.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
-    const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
-    const baseText = new uiPaperScope.PointText({
-      point: new uiPaperScope.Point(0, 0),
-      content: textContent,
-      data: { id: 'textContent', type: 'LayerChild', layerType: 'Text' },
-      parent: parentPaperLayer,
-      strokeWidth: style.stroke.width,
-      shadowColor: paperShadowColor,
-      shadowOffset: paperShadowOffset,
-      shadowBlur: paperShadowBlur,
-      blendMode: style.blendMode,
-      opacity: style.opacity,
-      dashArray: style.strokeOptions.dashArray,
-      dashOffset: style.strokeOptions.dashOffset,
-      strokeCap: style.strokeOptions.cap,
-      strokeJoin: style.strokeOptions.join,
-      fontSize: textStyle.fontSize,
-      leading: textStyle.leading,
-      fontWeight: textStyle.fontWeight,
-      fontFamily: textStyle.fontFamily,
-      justification: textStyle.justification,
-      visible: false
-    });
     const frame = getLayerFrame(payload);
-    let position = new uiPaperScope.Point(frame.x, frame.y);
-    if (artboard) {
-      position = position.add(new uiPaperScope.Point(artboardItem.frame.x, artboardItem.frame.y))
-    }
-    const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as Btwx.PaperGradientFill : null;
-    const paperStrokeColor = style.stroke.enabled ? getPaperStrokeColor(style.stroke, frame) as Btwx.PaperGradientFill : null;
-    baseText.position = new uiPaperScope.Point(frame.x, frame.y);
-    baseText.fillColor = paperFillColor;
-    baseText.strokeColor = paperStrokeColor;
-    const textBackground = new uiPaperScope.Path.Rectangle({
-      from: new uiPaperScope.Point(frame.x - frame.width / 2, frame.y - frame.height / 2),
-      to: new uiPaperScope.Point(frame.x + frame.width / 2, frame.y + frame.height / 2),
-      fillColor: tinyColor('red').setAlpha(0).toHslString(),
-      // opacity: 0,
-      insert: false,
-      data: { id: 'textBackground', type: 'LayerChild', layerType: 'Text' },
-    });
-    const textLines = new uiPaperScope.Group({
-      data: { id: 'textLines', type: 'LayerChild', layerType: 'Text' },
-      insert: false,
-      children: lines.reduce((result: paper.PointText[], current: Btwx.TextLine, index: number) => {
-        const line = new uiPaperScope.PointText({
-          point: new uiPaperScope.Point(baseText.point.x, baseText.point.y + (index * textStyle.leading)),
-          content: current.text,
-          style: baseText.style,
-          visible: true,
-          data: { id: 'textLine', type: 'LayerChild', layerType: 'Text' }
-        });
-        return [...result, line];
-      }, [])
-    });
-    const textContainer = new uiPaperScope.Group({
-      name: name,
-      parent: parentPaperLayer,
-      data: { id, type: 'Layer', layerType: 'Text', scope: scope },
-      children: [textBackground, baseText, textLines],
-      position: position
-    });
+    // const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as Btwx.Shadow) : null;
+    // const paperShadowOffset = style.shadow.enabled ? new uiPaperScope.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
+    // const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
+    // const baseText = new uiPaperScope.PointText({
+    //   point: new uiPaperScope.Point(0, 0),
+    //   content: textContent,
+    //   data: { id: 'textContent', type: 'LayerChild', layerType: 'Text' },
+    //   parent: parentPaperLayer,
+    //   strokeWidth: style.stroke.width,
+    //   shadowColor: paperShadowColor,
+    //   shadowOffset: paperShadowOffset,
+    //   shadowBlur: paperShadowBlur,
+    //   blendMode: style.blendMode,
+    //   opacity: style.opacity,
+    //   dashArray: style.strokeOptions.dashArray,
+    //   dashOffset: style.strokeOptions.dashOffset,
+    //   strokeCap: style.strokeOptions.cap,
+    //   strokeJoin: style.strokeOptions.join,
+    //   fontSize: textStyle.fontSize,
+    //   leading: textStyle.leading,
+    //   fontWeight: textStyle.fontWeight,
+    //   fontFamily: textStyle.fontFamily,
+    //   justification: textStyle.justification,
+    //   visible: false
+    // });
+    // let position = new uiPaperScope.Point(frame.x, frame.y);
+    // if (artboard) {
+    //   position = position.add(new uiPaperScope.Point(artboardItem.frame.x, artboardItem.frame.y))
+    // }
+    // const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as Btwx.PaperGradientFill : null;
+    // const paperStrokeColor = style.stroke.enabled ? getPaperStrokeColor(style.stroke, frame) as Btwx.PaperGradientFill : null;
+    // baseText.position = new uiPaperScope.Point(frame.x, frame.y);
+    // baseText.fillColor = paperFillColor;
+    // baseText.strokeColor = paperStrokeColor;
+    // const textBackground = new uiPaperScope.Path.Rectangle({
+    //   from: new uiPaperScope.Point(frame.x - frame.width / 2, frame.y - frame.height / 2),
+    //   to: new uiPaperScope.Point(frame.x + frame.width / 2, frame.y + frame.height / 2),
+    //   fillColor: tinyColor('red').setAlpha(0).toHslString(),
+    //   // opacity: 0,
+    //   insert: false,
+    //   data: { id: 'textBackground', type: 'LayerChild', layerType: 'Text' },
+    // });
+    // const textLines = new uiPaperScope.Group({
+    //   data: { id: 'textLines', type: 'LayerChild', layerType: 'Text' },
+    //   insert: false,
+    //   children: lines.reduce((result: paper.PointText[], current: Btwx.TextLine, index: number) => {
+    //     const line = new uiPaperScope.PointText({
+    //       point: new uiPaperScope.Point(baseText.point.x, baseText.point.y + (index * textStyle.leading)),
+    //       content: current.text,
+    //       style: baseText.style,
+    //       visible: true,
+    //       data: { id: 'textLine', type: 'LayerChild', layerType: 'Text' }
+    //     });
+    //     return [...result, line];
+    //   }, [])
+    // });
+    // const textContainer = new uiPaperScope.Group({
+    //   name: name,
+    //   parent: parentPaperLayer,
+    //   data: { id, type: 'Layer', layerType: 'Text', scope: scope },
+    //   children: [textBackground, baseText, textLines],
+    //   position: position
+    // });
     const newLayer = {
       type: 'Text',
       id: id,
@@ -1052,79 +1052,115 @@ export const addImageThunk = (payload: AddImagePayload, providedState?: RootStat
       const artboardItem = state.layer.present.byId[artboard] as Btwx.Artboard;
       const index = artboardItem.children.length;
       const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
-      const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
+      // const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
       sharp(buffer).metadata().then(({ width, height }) => {
         sharp(buffer).resize(Math.round(width * 0.5)).webp({quality: 75}).toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
           const frame = getLayerFrame(payload);
-          let position = new uiPaperScope.Point(frame.x, frame.y);
-          if (artboard) {
-            position = position.add(new uiPaperScope.Point(artboardItem.frame.x, artboardItem.frame.y))
-          }
+          // let position = new uiPaperScope.Point(frame.x, frame.y);
+          // if (artboard) {
+          //   position = position.add(new uiPaperScope.Point(artboardItem.frame.x, artboardItem.frame.y))
+          // }
           const name = payload.layer.name ? payload.layer.name : 'Image';
           const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
           const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
           const newBuffer = Buffer.from(data);
           const exists = state.documentSettings.images.allIds.length > 0 && state.documentSettings.images.allIds.find((id) => Buffer.from(state.documentSettings.images.byId[id].buffer).equals(newBuffer));
-          const base64 = bufferToBase64(newBuffer);
+          // const base64 = bufferToBase64(newBuffer);
           const id = payload.layer.id ? payload.layer.id : uuidv4();
           const imageId = exists ? exists : payload.layer.imageId ? payload.layer.imageId : uuidv4();
           const style = getLayerStyle(payload, {}, { fill: { enabled: false } as Btwx.Fill, stroke: { enabled: false } as Btwx.Stroke });
           const transform = getLayerTransform(payload);
-          const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as Btwx.Shadow) : null;
-          const paperShadowOffset = style.shadow.enabled ? new uiPaperScope.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
-          const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
-          const paperLayer = new uiPaperScope.Raster(`data:image/webp;base64,${base64}`);
-          const imageContainer = new uiPaperScope.Group({
+          // const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as Btwx.Shadow) : null;
+          // const paperShadowOffset = style.shadow.enabled ? new uiPaperScope.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
+          // const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
+          const newLayer = {
+            type: 'Image',
+            id: id,
+            index: index,
             name: name,
-            parent: parentPaperLayer,
-            data: { id, imageId, type: 'Layer', layerType: 'Image', scope: scope },
-            children: [paperLayer]
-          });
-          paperLayer.onLoad = (): void => {
-            paperLayer.data = { id: 'raster', type: 'LayerChild', layerType: 'Image' };
-            imageContainer.bounds.width = frame.innerWidth;
-            imageContainer.bounds.height = frame.innerHeight;
-            imageContainer.position = position;
-            imageContainer.shadowColor = paperShadowColor;
-            imageContainer.shadowOffset = paperShadowOffset;
-            imageContainer.shadowBlur = paperShadowBlur;
-            const newLayer = {
-              type: 'Image',
-              id: id,
-              index: index,
-              name: name,
-              artboard: artboard,
-              parent: parent,
-              children: null,
-              scope: scope,
-              frame: frame,
-              underlyingMask: underlyingMask,
-              ignoreUnderlyingMask: ignoreUnderlyingMask,
-              masked: masked,
-              showChildren: null,
-              selected: false,
-              hover: false,
-              events: [],
-              tweens: {
-                allIds: [],
-                asOrigin: [],
-                asDestination: [],
-                byProp: TWEEN_PROPS_MAP
-              },
-              transform: transform,
-              style: style,
-              imageId: imageId,
-              originalDimensions: payload.layer.originalDimensions
-            } as Btwx.Image;
-            if (!exists) {
-              dispatch(addDocumentImage({id: imageId, buffer: newBuffer}));
-            }
-            dispatch(addImage({
-              layer: newLayer,
-              batch: payload.batch
-            }));
-            resolve(newLayer);
+            artboard: artboard,
+            parent: parent,
+            children: null,
+            scope: scope,
+            frame: frame,
+            underlyingMask: underlyingMask,
+            ignoreUnderlyingMask: ignoreUnderlyingMask,
+            masked: masked,
+            showChildren: null,
+            selected: false,
+            hover: false,
+            events: [],
+            tweens: {
+              allIds: [],
+              asOrigin: [],
+              asDestination: [],
+              byProp: TWEEN_PROPS_MAP
+            },
+            transform: transform,
+            style: style,
+            imageId: imageId,
+            originalDimensions: payload.layer.originalDimensions
+          } as Btwx.Image;
+          if (!exists) {
+            dispatch(addDocumentImage({id: imageId, buffer: newBuffer}));
           }
+          dispatch(addImage({
+            layer: newLayer,
+            batch: payload.batch
+          }));
+          resolve(newLayer);
+          // const paperLayer = new uiPaperScope.Raster(`data:image/webp;base64,${base64}`);
+          // const imageContainer = new uiPaperScope.Group({
+          //   name: name,
+          //   parent: parentPaperLayer,
+          //   data: { id, imageId, type: 'Layer', layerType: 'Image', scope: scope },
+          //   children: [paperLayer]
+          // });
+          // paperLayer.onLoad = (): void => {
+          //   paperLayer.data = { id: 'raster', type: 'LayerChild', layerType: 'Image' };
+          //   imageContainer.bounds.width = frame.innerWidth;
+          //   imageContainer.bounds.height = frame.innerHeight;
+          //   imageContainer.position = position;
+          //   imageContainer.shadowColor = paperShadowColor;
+          //   imageContainer.shadowOffset = paperShadowOffset;
+          //   imageContainer.shadowBlur = paperShadowBlur;
+          //   const newLayer = {
+          //     type: 'Image',
+          //     id: id,
+          //     index: index,
+          //     name: name,
+          //     artboard: artboard,
+          //     parent: parent,
+          //     children: null,
+          //     scope: scope,
+          //     frame: frame,
+          //     underlyingMask: underlyingMask,
+          //     ignoreUnderlyingMask: ignoreUnderlyingMask,
+          //     masked: masked,
+          //     showChildren: null,
+          //     selected: false,
+          //     hover: false,
+          //     events: [],
+          //     tweens: {
+          //       allIds: [],
+          //       asOrigin: [],
+          //       asDestination: [],
+          //       byProp: TWEEN_PROPS_MAP
+          //     },
+          //     transform: transform,
+          //     style: style,
+          //     imageId: imageId,
+          //     originalDimensions: payload.layer.originalDimensions
+          //   } as Btwx.Image;
+          //   if (!exists) {
+          //     dispatch(addDocumentImage({id: imageId, buffer: newBuffer}));
+          //   }
+          //   dispatch(addImage({
+          //     layer: newLayer,
+          //     batch: payload.batch
+          //   }));
+          //   resolve(newLayer);
+          // }
         });
       });
     });
@@ -3288,25 +3324,25 @@ export const undoThunk = () => {
       // undo
       dispatch(ActionCreators.undo());
       //
-      if (state.layer.present.edit.projects) {
-        const documentImages = state.documentSettings.images.byId;
-        state.layer.present.edit.projects.forEach((id) => {
-          const currentArtboardItem = state.layer.present.byId[id];
-          const pastArtboardItem = layerState.byId[id] as Btwx.Artboard;
-          if (currentArtboardItem && pastArtboardItem) {
-            const projectIndex = pastArtboardItem.projectIndex;
-            const project = uiPaperScope.projects[projectIndex];
-            const json = pastArtboardItem.json;
-            const paperLayer = project.getItem({data: {id}});
-            const newPaperLayer = importProjectJSON({
-              project,
-              json,
-              documentImages
-            });
-            paperLayer.replaceWith(newPaperLayer);
-          }
-        });
-      }
+      // if (state.layer.present.edit.projects) {
+      //   const documentImages = state.documentSettings.images.byId;
+      //   state.layer.present.edit.projects.forEach((id) => {
+      //     const currentArtboardItem = state.layer.present.byId[id];
+      //     const pastArtboardItem = layerState.byId[id] as Btwx.Artboard;
+      //     if (currentArtboardItem && pastArtboardItem) {
+      //       const projectIndex = pastArtboardItem.projectIndex;
+      //       const project = uiPaperScope.projects[projectIndex];
+      //       const json = pastArtboardItem.json;
+      //       const paperLayer = project.getItem({data: {id}});
+      //       const newPaperLayer = importProjectJSON({
+      //         project,
+      //         json,
+      //         documentImages
+      //       });
+      //       paperLayer.replaceWith(newPaperLayer);
+      //     }
+      //   });
+      // }
       // update editors
       switch(state.layer.present.edit.actionType) {
         case SET_LAYERS_FILL_COLOR: {
@@ -3412,25 +3448,25 @@ export const redoThunk = () => {
       // redo
       dispatch(ActionCreators.redo());
       //
-      if (state.layer.present.edit.projects && layerState.edit.projects) {
-        const documentImages = state.documentSettings.images.byId;
-        layerState.edit.projects.forEach((id) => {
-          const currentArtboardItem = state.layer.present.byId[id];
-          const futureArtboardItem = layerState.byId[id] as Btwx.Artboard;
-          if (currentArtboardItem && futureArtboardItem) {
-            const projectIndex = futureArtboardItem.projectIndex;
-            const project = uiPaperScope.projects[projectIndex];
-            const json = futureArtboardItem.json;
-            const paperLayer = project.getItem({data: {id}});
-            const newPaperLayer = importProjectJSON({
-              project,
-              json,
-              documentImages
-            });
-            paperLayer.replaceWith(newPaperLayer);
-          }
-        });
-      }
+      // if (state.layer.present.edit.projects && layerState.edit.projects) {
+      //   const documentImages = state.documentSettings.images.byId;
+      //   layerState.edit.projects.forEach((id) => {
+      //     const currentArtboardItem = state.layer.present.byId[id];
+      //     const futureArtboardItem = layerState.byId[id] as Btwx.Artboard;
+      //     if (currentArtboardItem && futureArtboardItem) {
+      //       const projectIndex = futureArtboardItem.projectIndex;
+      //       const project = uiPaperScope.projects[projectIndex];
+      //       const json = futureArtboardItem.json;
+      //       const paperLayer = project.getItem({data: {id}});
+      //       const newPaperLayer = importProjectJSON({
+      //         project,
+      //         json,
+      //         documentImages
+      //       });
+      //       paperLayer.replaceWith(newPaperLayer);
+      //     }
+      //   });
+      // }
       // update editors
       switch(layerState.edit.actionType) {
         case SET_LAYERS_FILL_COLOR: {

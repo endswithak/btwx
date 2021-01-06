@@ -1,5 +1,29 @@
 import paper from 'paper';
 import { DEFAULT_ROUNDED_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_RADIUS, DEFAULT_STAR_POINTS, DEFAULT_LINE_FROM, DEFAULT_LINE_TO } from '../../constants';
+import { uiPaperScope } from '../../canvas';
+
+export const getLayerPaperParent = (paperLayer: paper.Item, layerItem: Btwx.Layer): paper.Item => {
+  const isArtboard = paperLayer.data.layerType === 'Artboard';
+  const nextPaperLayer = isArtboard ? paperLayer.getItem({ data: { id: 'artboardLayers' } }) : paperLayer;
+  const parentChildren = nextPaperLayer.children;
+  const hasChildren = parentChildren.length > 0;
+  const lastChildPaperLayer = hasChildren ? nextPaperLayer.lastChild : null;
+  const isLastChildMask = lastChildPaperLayer && (lastChildPaperLayer.data.id as string).endsWith('maskGroup');
+  const underlyingMask = lastChildPaperLayer ? isLastChildMask ? lastChildPaperLayer : lastChildPaperLayer.parent : null;
+  if (underlyingMask && !(layerItem as Btwx.MaskableLayer).ignoreUnderlyingMask) {
+    return underlyingMask;
+  } else {
+    return nextPaperLayer;
+  }
+}
+
+export const getLayerAbsPosition = (layerFrame: Btwx.Frame, artboardFrame: Btwx.Frame): paper.Point => {
+  let position = new uiPaperScope.Point(layerFrame.x, layerFrame.y);
+  if (artboardFrame) {
+    position = position.add(new uiPaperScope.Point(artboardFrame.x, artboardFrame.y))
+  }
+  return position;
+}
 
 export const getPaperFillColor = (fill: Btwx.Fill, frame: Btwx.Frame): any => {
   return fill.fillType === 'color' ? { hue: fill.color.h, saturation: fill.color.s, lightness: fill.color.l, alpha: fill.color.a } : {
