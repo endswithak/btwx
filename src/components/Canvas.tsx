@@ -21,7 +21,6 @@ import TextTool from './TextTool';
 import GradientTool from './GradientTool';
 import CanvasUI from './CanvasUI';
 import CanvasProjects from './CanvasProjects';
-import CanvasArtboards from './CanvasArtboards';
 
 const Canvas = (): ReactElement => {
   const theme = useContext(ThemeContext);
@@ -153,7 +152,6 @@ const Canvas = (): ReactElement => {
       }}>
       <CanvasUI />
       <CanvasProjects />
-      {/* <CanvasArtboards /> */}
       {
         ready
         ? <>

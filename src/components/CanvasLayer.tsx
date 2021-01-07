@@ -16,7 +16,9 @@ interface CanvasLayerProps {
 const CanvasLayer = (props: CanvasLayerProps): ReactElement => {
   const { id } = props;
   const [rendered, setRendered] = useState(false);
-  const layerType = useSelector((state: RootState) => state.layer.present.byId[id].type);
+  const layerType = useSelector((state: RootState) =>
+    state.layer.present.byId[id] && state.layer.present.byId[id].type
+  );
 
   return (
     <>
@@ -61,12 +63,16 @@ const CanvasLayer = (props: CanvasLayerProps): ReactElement => {
           }
         })()
       }
-      {/* <CanvasLayerFrame
-        id={id}
-        rendered={rendered} /> */}
-      <CanvasLayerStyle
-        id={id}
-        rendered={rendered} />
+      {
+        rendered
+        ? <>
+            <CanvasLayerFrame
+              id={id} />
+            <CanvasLayerStyle
+              id={id} />
+          </>
+        : null
+      }
     </>
   );
 }

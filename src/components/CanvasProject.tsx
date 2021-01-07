@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { ReactElement, useEffect, useRef, useState } from 'react';
+import React, { ReactElement, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import { ARTBOARDS_PER_PROJECT } from '../constants';
@@ -22,26 +22,15 @@ const CanvasProject = (props: CanvasProjectProps): ReactElement => {
   const { index, isLast } = props;
   const ref = useRef<HTMLCanvasElement>(null);
   const projectArtboards = useSelector((state: RootState) => ARTBOARDS_PER_PROJECT * index < state.layer.present.byId.root.children.length ? getProjectArtboards(state, index) : null);
-  const [prevArtboards, setPrevArtboards] = useState(null);
 
   useEffect(() => {
     if (ref.current) {
       uiPaperScope.setup(ref.current);
-      uiPaperScope.projects[index + 1].view.viewSize = uiPaperScope.projects[0].view.viewSize;
-      uiPaperScope.projects[index + 1].view.matrix.set(uiPaperScope.projects[0].view.matrix.values);
     }
     if (isLast) {
       uiPaperScope.projects[0].activate();
     }
   }, []);
-
-  // useEffect(() => {
-  //   if (!prevArtboards) {
-  //     uiPaperScope.projects[index + 1].view.viewSize = uiPaperScope.projects[0].view.viewSize;
-  //     uiPaperScope.projects[index + 1].view.matrix.set(uiPaperScope.projects[0].view.matrix.values);
-  //   }
-  //   setPrevArtboards(projectArtboards);
-  // }, [projectArtboards]);
 
   return (
     <>
@@ -51,11 +40,18 @@ const CanvasProject = (props: CanvasProjectProps): ReactElement => {
         className='c-canvas__layer c-canvas__layer--project' />
       {
         projectArtboards
-        ? projectArtboards.map((id, index) => (
-            <CanvasLayer
-              key={index}
-              id={id} />
-          ))
+        ? projectArtboards.map((id, i) => {
+            if (i % ARTBOARDS_PER_PROJECT === 0) {
+              const project = uiPaperScope.projects[index + 1];
+              project.view.viewSize = uiPaperScope.projects[0].view.viewSize;
+              project.view.matrix.set(uiPaperScope.projects[0].view.matrix.values);
+            }
+            return (
+              <CanvasLayer
+                key={id}
+                id={id} />
+            );
+          })
         : null
       }
     </>

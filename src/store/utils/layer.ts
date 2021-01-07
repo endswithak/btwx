@@ -1904,12 +1904,71 @@ export const moveLayersTo = (state: LayerState, action: MoveLayersTo): LayerStat
 
 export const moveLayerBy = (state: LayerState, action: MoveLayerBy): LayerState => {
   let currentState = state;
-  currentState = updateLayerBounds(currentState, action.payload.id);
-  if (action.payload.x) {
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x']);
+  const layerItem = currentState.byId[action.payload.id];
+  const ml = (cs: LayerState, id: string): LayerState => {
+    const li = cs.byId[id];
+    const isLine = li.type === 'Shape' && (li as Btwx.Shape).shapeType === 'Line';
+    const isText = li.type === 'Text';
+    if (isLine) {
+      cs = {
+        ...cs,
+        byId: {
+          ...cs.byId,
+          [id]: {
+            ...cs.byId[id],
+            from: {
+              x: (cs.byId[id] as Btwx.Line).from.x + action.payload.x,
+              y: (cs.byId[id] as Btwx.Line).from.y + action.payload.y
+            },
+            to: {
+              x: (cs.byId[id] as Btwx.Line).to.x + action.payload.x,
+              y: (cs.byId[id] as Btwx.Line).to.y + action.payload.y
+            }
+          } as Btwx.Line
+        }
+      }
+    }
+    if (isText) {
+      cs = {
+        ...cs,
+        byId: {
+          ...cs.byId,
+          [id]: {
+            ...cs.byId[id],
+            point: {
+              x: (cs.byId[id] as Btwx.Text).point.x + action.payload.x,
+              y: (cs.byId[id] as Btwx.Text).point.y + action.payload.y
+            }
+          } as Btwx.Text
+        }
+      }
+    }
+    cs = {
+      ...cs,
+      byId: {
+        ...cs.byId,
+        [id]: {
+          ...cs.byId[id],
+          frame: {
+            ...cs.byId[id].frame,
+            x: cs.byId[id].frame.x + action.payload.x,
+            y: cs.byId[id].frame.y + action.payload.y
+          }
+        } as Btwx.Text
+      }
+    }
+    if (li.type !== 'Group' && li.type !== 'Artboard') {
+      cs = updateLayerTweensByProps(cs, id, isLine ? ['fromX', 'fromY', 'toX', 'toY'] : ['x', 'y']);
+    }
+    return cs;
   }
-  if (action.payload.y) {
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
+  if (layerItem.type === 'Group') {
+    const layerAndDescendants = getLayerAndDescendants(currentState, action.payload.id);
+    currentState = layerAndDescendants.reduce((result, current) => {
+      return ml(result, current);
+    }, currentState);
+  } else {
+    currentState = ml(currentState, action.payload.id);
   }
   return currentState;
 };

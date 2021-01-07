@@ -1,36 +1,44 @@
 import React, { ReactElement, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { uiPaperScope } from '../canvas';
 import { getLayerAbsPosition } from '../store/utils/paper';
 
-interface CanvasLayerProps {
+interface CanvasLayerFrameProps {
   id: string;
-  rendered: boolean;
 }
 
-const CanvasLayerFrame = (props: CanvasLayerProps): ReactElement => {
-  const { id, rendered } = props;
-  const layerType = useSelector((state: RootState) => state.layer.present.byId[id].type);
-  const projectIndex = useSelector((state: RootState) => (state.layer.present.byId[state.layer.present.byId[id].artboard] as Btwx.Artboard).projectIndex);
-  const rotation = useSelector((state: RootState) => state.layer.present.byId[id].transform.rotation);
-  const layerFrame = useSelector((state: RootState) => state.layer.present.byId[id].frame);
-  const artboardFrame = useSelector((state: RootState) => (state.layer.present.byId[state.layer.present.byId[id].artboard] as Btwx.Artboard).frame);
+interface CanvasLayerFrameStateProps {
+  layerType: Btwx.LayerType;
+  projectIndex: number;
+  rotation: number;
+  layerFrame: Btwx.Frame;
+  artboardFrame: Btwx.Frame;
+}
+
+const CanvasLayerFrame = (props: CanvasLayerFrameProps & CanvasLayerFrameStateProps): ReactElement => {
+  const { id, layerType, projectIndex, rotation, layerFrame, artboardFrame } = props;
+  // const layerItem = useSelector((state: RootState) => state.layer.present.byId[id]);
+  // const layerType = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[id].type);
+  // const projectIndex = useSelector((state: RootState) => state.layer.present.byId[id] && (state.layer.present.byId[state.layer.present.byId[id].artboard] as Btwx.Artboard).projectIndex);
+  // const rotation = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[id].transform.rotation);
+  // const layerFrame = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[id].frame);
+  // const artboardFrame = useSelector((state: RootState) => state.layer.present.byId[id] && (state.layer.present.byId[state.layer.present.byId[id].artboard] as Btwx.Artboard).frame);
 
   const getPaperLayer = (): paper.Item => {
     return uiPaperScope.projects[projectIndex].getItem({data: {id}});
   }
 
   useEffect(() => {
-    if (rendered) {
-      const paperLayer = getPaperLayer();
+    const paperLayer = getPaperLayer();
+    if (paperLayer) {
       paperLayer.position = getLayerAbsPosition(layerFrame, layerType === 'Artboard' ? null : artboardFrame);
     }
   }, [layerFrame.x, layerFrame.y]);
 
   useEffect(() => {
-    if (rendered) {
-      const paperLayer = getPaperLayer();
+    const paperLayer = getPaperLayer();
+    if (paperLayer) {
       const startPosition = paperLayer.position;
       switch(layerType) {
         case 'Shape':
@@ -66,4 +74,23 @@ const CanvasLayerFrame = (props: CanvasLayerProps): ReactElement => {
   );
 }
 
-export default CanvasLayerFrame;
+const mapStateToProps = (state: RootState, ownProps: CanvasLayerFrameProps): CanvasLayerFrameStateProps => {
+  const layerItem = state.layer.present.byId[ownProps.id];
+  const artboardItem = layerItem ? state.layer.present.byId[layerItem.artboard] as Btwx.Artboard : null;
+  const layerType = layerItem ? layerItem.type : null;
+  const projectIndex = layerItem ? artboardItem.projectIndex : null;
+  const rotation = layerItem ? layerItem.transform.rotation : null;
+  const layerFrame = layerItem ? layerItem.frame : null;
+  const artboardFrame = layerItem ? artboardItem.frame : null;
+  return {
+    layerType,
+    projectIndex,
+    rotation,
+    layerFrame,
+    artboardFrame
+  }
+};
+
+export default connect(
+  mapStateToProps
+)(CanvasLayerFrame);

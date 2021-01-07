@@ -6,7 +6,7 @@ import { getLayerProjectIndex, getPaperLayer, getPaperLayersBounds, getSelectedB
 import { uiPaperScope } from '../canvas';
 import { THEME_PRIMARY_COLOR } from '../constants';
 import { setCanvasDragging } from '../store/actions/canvasSettings';
-import { moveLayers, duplicateLayers, updateSelectionFrame } from '../store/actions/layer';
+import { moveLayersBy, duplicateLayers, updateSelectionFrame } from '../store/actions/layer';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
 
@@ -254,11 +254,11 @@ const DragTool = (props: PaperToolProps): ReactElement => {
   useEffect(() => {
     if (upEvent && isEnabled) {
       if (selected.length > 0 && minDistance > 3) {
+        const offset = toBounds.center.subtract(fromBounds.center).round();
         if (upEvent.modifiers.alt) {
-          const offset = toBounds.center.subtract(fromBounds.center).round();
           dispatch(duplicateLayers({layers: selected, offset: {x: offset.x, y: offset.y}}));
         } else {
-          dispatch(moveLayers({layers: selected}));
+          dispatch(moveLayersBy({layers: selected, x: offset.x, y: offset.y}));
         }
       }
       dispatch(setCanvasDragging({dragging: false}));

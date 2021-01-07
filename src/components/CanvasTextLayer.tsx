@@ -27,7 +27,7 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
       point: point,
       content: textItem.text,
       data: { id: 'textContent', type: 'LayerChild', layerType: 'Text' },
-      parent: getLayerPaperParent(uiPaperScope.projects[projectIndex].getItem({data: {id}}), textItem),
+      parent: getLayerPaperParent(uiPaperScope.projects[projectIndex].getItem({data: {id: textItem.parent}}), textItem),
       strokeWidth: textItem.style.stroke.width,
       shadowColor: paperShadowColor,
       shadowOffset: paperShadowOffset,
@@ -49,7 +49,7 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
     baseText.strokeColor = textItem.style.stroke.enabled ? getPaperStrokeColor(textItem.style.stroke, textItem.frame) as Btwx.PaperGradientFill : null;
     const textContainer = new uiPaperScope.Group({
       name: textItem.name,
-      parent: getLayerPaperParent(uiPaperScope.projects[projectIndex].getItem({data: {id}}), textItem),
+      parent: getLayerPaperParent(uiPaperScope.projects[projectIndex].getItem({data: {id: textItem.parent}}), textItem),
       data: { id, type: 'Layer', layerType: 'Text', scope: textItem.scope },
       children: [
         baseText,
@@ -90,7 +90,7 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
         paperLayer.remove();
       }
     }
-  }, []);
+  }, [id]);
 
   return (
     <></>

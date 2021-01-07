@@ -22,7 +22,7 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
     new uiPaperScope.Group({
       name: groupItem.name,
       data: { id: id, type: 'Layer', layerType: 'Group', scope: groupItem.scope },
-      parent: getLayerPaperParent(uiPaperScope.projects[projectIndex].getItem({data: {id}}), groupItem),
+      parent: getLayerPaperParent(uiPaperScope.projects[projectIndex].getItem({data: {id: groupItem.parent}}), groupItem),
       position: getLayerAbsPosition(groupItem.frame, artboardItem.frame)
     });
   }
@@ -38,7 +38,7 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
         paperLayer.remove();
       }
     }
-  }, []);
+  }, [id]);
 
   return (
     <>

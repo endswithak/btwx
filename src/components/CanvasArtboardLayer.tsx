@@ -14,9 +14,9 @@ interface CanvasArtboardLayerProps {
 const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
   const { id, rendered, setRendered } = props;
   const layerItem = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Artboard);
-  const projectIndex = useSelector((state: RootState) => (state.layer.present.byId[state.layer.present.byId[id].artboard] as Btwx.Artboard).projectIndex);
+  const projectIndex = useSelector((state: RootState) => (state.layer.present.byId[id] as Btwx.Artboard).projectIndex);
 
-  const createArtboard = (): void => {
+  const createArtboard = () => {
     new uiPaperScope.Group({
       name: layerItem.name,
       data: { id: id, type: 'Layer', layerType: 'Artboard', scope: ['root'] },

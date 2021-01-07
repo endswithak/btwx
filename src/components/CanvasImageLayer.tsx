@@ -53,7 +53,7 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
         paperLayer.remove();
       }
     }
-  }, []);
+  }, [id]);
 
   return (
     <></>

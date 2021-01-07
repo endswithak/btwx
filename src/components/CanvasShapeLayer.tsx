@@ -38,8 +38,8 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
       strokeCap: shapeItem.style.strokeOptions.cap,
       clipMask: shapeItem.mask,
       strokeJoin: shapeItem.style.strokeOptions.join,
-      data: { id, type: 'Layer', layerType: 'Shape', shapeType: shapeItem.shapeType, scope: shapeItem.scope },
-      parent: getLayerPaperParent(uiPaperScope.projects[projectIndex].getItem({data: {id}}), shapeItem)
+      data: { id: id, type: 'Layer', layerType: 'Shape', shapeType: shapeItem.shapeType, scope: shapeItem.scope },
+      parent: getLayerPaperParent(uiPaperScope.projects[projectIndex].getItem({data: {id: shapeItem.parent}}), shapeItem)
     });
     paperLayer.children.forEach((item) => item.data = { id: 'shapePartial', type: 'LayerChild', layerType: 'Shape' });
     paperLayer.position = getLayerAbsPosition(shapeItem.frame, artboardItem.frame);

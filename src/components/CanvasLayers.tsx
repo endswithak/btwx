@@ -12,9 +12,9 @@ const CanvasLayers = (props: CanvasLayersProps): ReactElement => {
   return (
     <>
       {
-        layers.map((id, index) => (
+        layers.map((id) => (
           <CanvasLayer
-            key={index}
+            key={id}
             id={id} />
         ))
       }
@@ -23,21 +23,3 @@ const CanvasLayers = (props: CanvasLayersProps): ReactElement => {
 };
 
 export default CanvasLayers;
-// import React, { ReactElement } from 'react';
-// import CanvasArtboardLayers from './CanvasArtboardLayers';
-// import CanvasGroupLayers from './CanvasGroupLayers';
-// import CanvasTextLayers from './CanvasTextLayers';
-// import CanvasImageLayers from './CanvasImageLayers';
-// import CanvasShapeLayers from './CanvasShapeLayers';
-
-// const CanvasLayers = (): ReactElement => (
-//   <>
-//     <CanvasArtboardLayers />
-//     <CanvasGroupLayers />
-//     <CanvasTextLayers />
-//     <CanvasImageLayers />
-//     <CanvasShapeLayers />
-//   </>
-// );
-
-// export default CanvasLayers;
