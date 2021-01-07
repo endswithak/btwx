@@ -7,14 +7,15 @@ import  CanvasLayers from './CanvasLayers';
 
 interface CanvasArtboardLayerProps {
   id: string;
+  layerItem: Btwx.Artboard;
   rendered: boolean;
   setRendered(rendered: boolean): void;
 }
 
 const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
-  const { id, rendered, setRendered } = props;
-  const layerItem = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Artboard);
-  const projectIndex = useSelector((state: RootState) => (state.layer.present.byId[id] as Btwx.Artboard).projectIndex);
+  const { id, layerItem, rendered, setRendered } = props;
+  // const layerItem = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Artboard);
+  // const projectIndex = useSelector((state: RootState) => (state.layer.present.byId[id] as Btwx.Artboard).projectIndex);
 
   const createArtboard = () => {
     new uiPaperScope.Group({
@@ -50,7 +51,7 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
           ]
         })
       ],
-      parent: uiPaperScope.projects[projectIndex].activeLayer
+      parent: uiPaperScope.projects[layerItem.projectIndex].activeLayer
     });
   }
 
@@ -60,7 +61,7 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
     setRendered(true);
     return (): void => {
       // remove layer
-      const paperLayer = uiPaperScope.projects[projectIndex].getItem({data: {id}});
+      const paperLayer = uiPaperScope.projects[layerItem.projectIndex].getItem({data: {id}});
       if (paperLayer) {
         paperLayer.remove();
       }
@@ -68,14 +69,7 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
   }, []);
 
   return (
-    <>
-      {
-        rendered && layerItem.children.length > 0
-        ? <CanvasLayers
-            layers={layerItem.children} />
-        : null
-      }
-    </>
+    <></>
   );
 }
 

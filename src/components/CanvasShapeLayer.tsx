@@ -6,15 +6,17 @@ import { uiPaperScope } from '../canvas';
 
 interface CanvasShapeLayerProps {
   id: string;
+  layerItem: Btwx.Shape;
+  artboardItem: Btwx.Artboard;
   rendered: boolean;
   setRendered(rendered: boolean): void;
 }
 
 const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
-  const { id, rendered, setRendered } = props;
-  const layerItem = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[id]);
-  const artboardItem = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[state.layer.present.byId[id].artboard] as Btwx.Artboard);
-  const projectIndex = useSelector((state: RootState) => state.layer.present.byId[id] && (state.layer.present.byId[state.layer.present.byId[id].artboard] as Btwx.Artboard).projectIndex);
+  const { id, layerItem, artboardItem, rendered, setRendered } = props;
+  // const layerItem = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[id]);
+  // const artboardItem = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[state.layer.present.byId[id].artboard] as Btwx.Artboard);
+  // const projectIndex = useSelector((state: RootState) => state.layer.present.byId[id] && (state.layer.present.byId[state.layer.present.byId[id].artboard] as Btwx.Artboard).projectIndex);
 
   const createShape = (): void => {
     const shapeItem = layerItem as Btwx.Shape;
@@ -39,7 +41,7 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
       clipMask: shapeItem.mask,
       strokeJoin: shapeItem.style.strokeOptions.join,
       data: { id: id, type: 'Layer', layerType: 'Shape', shapeType: shapeItem.shapeType, scope: shapeItem.scope },
-      parent: getLayerPaperParent(uiPaperScope.projects[projectIndex].getItem({data: {id: shapeItem.parent}}), shapeItem)
+      parent: getLayerPaperParent(uiPaperScope.projects[artboardItem.projectIndex].getItem({data: {id: shapeItem.parent}}), shapeItem)
     });
     paperLayer.children.forEach((item) => item.data = { id: 'shapePartial', type: 'LayerChild', layerType: 'Shape' });
     paperLayer.position = getLayerAbsPosition(shapeItem.frame, artboardItem.frame);
@@ -63,7 +65,7 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
     setRendered(true);
     return (): void => {
       // remove layer
-      const paperLayer = uiPaperScope.projects[projectIndex].getItem({data: {id}});
+      const paperLayer = uiPaperScope.projects[artboardItem.projectIndex].getItem({data: {id}});
       if (paperLayer) {
         paperLayer.remove();
       }
