@@ -16,24 +16,24 @@ interface BackgroundProps {
   editing: boolean;
 }
 
-const Background = styled.div<BackgroundProps>`
-  background: ${
-    props => (props.isSelected || props.editing)
-    ? props.theme.palette.primary
-    : props.isArtboard
-      ? props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0
-      : 'none'
-  };
-  box-shadow: ${
-    props => props.isHovering || props.isSelected || props.editing
-    ? `0 0 0 1px ${props.theme.palette.primary} inset`
-    : props.isArtboard
-      ? props.theme.name === 'dark'
-        ? `0 1px 0 0 ${props.theme.background.z4} inset, 0 1px 0 0 ${props.theme.background.z4}`
-        : `0 1px 0 0 ${props.theme.background.z5} inset, 0 1px 0 0 ${props.theme.background.z5}`
-      : 'none'
-  };
-`;
+// const Background = styled.div<BackgroundProps>`
+//   background: ${
+//     props => (props.isSelected || props.editing)
+//     ? props.theme.palette.primary
+//     : props.isArtboard
+//       ? props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0
+//       : 'none'
+//   };
+//   box-shadow: ${
+//     props => props.isHovering || props.isSelected || props.editing
+//     ? `0 0 0 1px ${props.theme.palette.primary} inset`
+//     : props.isArtboard
+//       ? props.theme.name === 'dark'
+//         ? `0 1px 0 0 ${props.theme.background.z4} inset, 0 1px 0 0 ${props.theme.background.z4}`
+//         : `0 1px 0 0 ${props.theme.background.z5} inset, 0 1px 0 0 ${props.theme.background.z5}`
+//       : 'none'
+//   };
+// `;
 
 const SidebarLayerBackground = (props: SidebarLayerBackgroundProps): ReactElement => {
   const theme = useContext(ThemeContext);
@@ -48,13 +48,29 @@ const SidebarLayerBackground = (props: SidebarLayerBackgroundProps): ReactElemen
   }, []);
 
   return (
-    <Background
+    <div
       className='c-sidebar-layer__background'
-      isSelected={isSelected}
-      isArtboard={isArtboard}
-      isHovering={isHovering}
-      editing={editing}
-      theme={theme} />
+      style={{
+        background: isSelected || editing
+        ? theme.palette.primary
+        : isArtboard
+          ? theme.name === 'dark' ? theme.background.z3 : theme.background.z0
+          : 'none',
+        boxShadow: isHovering || isSelected || editing
+        ? `0 0 0 1px ${theme.palette.primary} inset`
+        : isArtboard
+          ? theme.name === 'dark'
+            ? `0 1px 0 0 ${theme.background.z4} inset, 0 1px 0 0 ${theme.background.z4}`
+            : `0 1px 0 0 ${theme.background.z5} inset, 0 1px 0 0 ${theme.background.z5}`
+          : 'none'
+      }} />
+    // <Background
+    //   className='c-sidebar-layer__background'
+    //   isSelected={isSelected}
+    //   isArtboard={isArtboard}
+    //   isHovering={isHovering}
+    //   editing={editing}
+    //   theme={theme} />
   );
 }
 

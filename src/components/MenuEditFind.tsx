@@ -11,7 +11,7 @@ const MenuEditFind = (props: MenuItemProps): ReactElement => {
   const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
   const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
   const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const canFind = useSelector((state: RootState) => state.layer.present.childrenById.root.length !== 0);
+  const canFind = useSelector((state: RootState) => state.layer.present.byId.root.children.length !== 0);
   const dispatch = useDispatch();
 
   useEffect(() => {

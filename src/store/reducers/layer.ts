@@ -516,18 +516,7 @@ export interface LayerState {
   shapeIcons: {
     [id: string]: string;
   };
-  childrenById: {
-    [id: string]: string[];
-  };
-  showChildrenById: {
-    [id: string]: boolean;
-  };
-  scopeById: {
-    [id: string]: string[];
-  };
-  nameById: {
-    [id: string]: string;
-  };
+  tree: Btwx.Tree;
   selectedEdit: string;
   edit: Btwx.Edit;
 }
@@ -540,6 +529,7 @@ export const initialState: LayerState = {
       name: 'root',
       parent: null,
       children: [],
+      showChildren: true,
       scope: [],
       frame: {
         x: 0,
@@ -571,25 +561,18 @@ export const initialState: LayerState = {
     byId: {}
   },
   shapeIcons: {},
-  childrenById: {
-    root: []
-  },
-  showChildrenById: {
-    root: true
-  },
-  scopeById: {
-    root: []
-  },
-  nameById: {
-    root: 'root'
-  },
   selectedEdit: null,
+  tree: {
+    tree: null,
+    scroll: null
+  },
   edit: {
     id: null,
     selectedEdit: null,
     detail: null,
     payload: null,
-    actionType: null
+    actionType: null,
+    treeEdit: false
   }
 };
 

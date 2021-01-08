@@ -100,7 +100,7 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
   }
 
   useEffect(() => {
-    console.log('LAYER');
+    console.log(isDragGhost ? 'GHOST LAYER' : 'LAYER');
   }, []);
 
   return (

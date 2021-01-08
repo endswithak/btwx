@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement, useState, memo } from 'react';
 import { useSelector, connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import  CanvasTextLayer from './CanvasTextLayer';
@@ -108,4 +108,4 @@ const mapStateToProps = (state: RootState, ownProps: CanvasLayerProps): CanvasLa
 
 export default connect(
   mapStateToProps
-)(CanvasLayer);
+)(memo(CanvasLayer));

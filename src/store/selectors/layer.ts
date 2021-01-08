@@ -12,14 +12,11 @@ import { ARTBOARDS_PER_PROJECT } from '../../constants';
 
 export const getArtboardEventDestinationIds = (state: RootState, id: string): string[] => (state.layer.present.byId[id] as Btwx.Artboard).destinationArtboardForEvents;
 export const getArtboardEventOriginIds = (state: RootState, id: string): string[] => (state.layer.present.byId[id] as Btwx.Artboard).originArtboardForEvents;
-export const getRootChildren = (state: RootState): string[] => state.layer.present.childrenById.root;
+export const getRootChildren = (state: RootState): string[] => state.layer.present.byId.root.children;
 export const getSelected = (state: RootState): string[] => state.layer.present.selected;
 export const getAllArtboardIds = (state: RootState): string[] => state.layer.present.allArtboardIds;
 export const getAllTextIds = (state: RootState): string[] => state.layer.present.allTextIds;
 export const getLayersById = (state: RootState): { [id: string]: Btwx.Layer } => state.layer.present.byId;
-export const getScopesById = (state: RootState): { [id: string]: string[] } => state.layer.present.scopeById;
-export const getChildrenById = (state: RootState): { [id: string]: string[] } => state.layer.present.childrenById;
-export const getShowChildrenById = (state: RootState): { [id: string]: boolean } => state.layer.present.showChildrenById;
 export const getAllEventIds = (state: RootState): string[] => state.layer.present.events.allIds;
 export const getEventsById = (state: RootState): { [id: string]: Btwx.TweenEvent } => state.layer.present.events.byId;
 export const getTweensById = (state: RootState): { [id: string]: Btwx.Tween } => state.layer.present.tweens.byId;
@@ -34,19 +31,19 @@ export const getActiveArtboard = (state: RootState): string => state.layer.prese
 export const getDocumentImages = (state: RootState): { allIds: string[]; byId: { [id: string]: Btwx.DocumentImage } } => state.documentSettings.images;
 export const getLayerSearch = (state: RootState): string => state.leftSidebar.search;
 export const getLayerSearching = (state: RootState): boolean => state.leftSidebar.searching;
-export const getNamesById = (state: RootState): { [id: string]: string } => state.layer.present.nameById;
+export const getTree = (state: RootState): any => state.layer.present.tree;
 
 export const getActiveArtboardTextLayers = createSelector(
-  [ getActiveArtboard, getChildrenById, getAllTextIds ],
-  (activeArtboard, childrenById, textIds) => {
+  [ getActiveArtboard, getLayersById, getAllTextIds ],
+  (activeArtboard, layersById, textIds) => {
     const groups: string[] = [activeArtboard];
     const textLayers: string[] = [];
     let i = 0;
     while(i < groups.length) {
-      const layerChildren = childrenById[groups[i]];
+      const layerChildren = layersById[groups[i]].children;
       if (layerChildren && layerChildren.length > 0) {
         layerChildren.forEach((child) => {
-          const childChildren = childrenById[child];
+          const childChildren = layersById[child].children;
           if (childChildren && childChildren.length > 0) {
             groups.push(child);
           }
@@ -58,20 +55,6 @@ export const getActiveArtboardTextLayers = createSelector(
       i++;
     }
     return textLayers;
-  }
-);
-
-export const getAllArtboardPaperProjects = createSelector(
-  [ getAllArtboardIds, getLayersById, getDocumentImages ],
-  (allArtboardIds, byId, documentImages) => {
-    return allArtboardIds.reduce((result, current, index) => ({
-      ...result,
-      [current]: documentImages.allIds.reduce((dr, dc) => {
-        const rasterBase64 = bufferToBase64(Buffer.from(documentImages.byId[dc].buffer));
-        const base64 = `data:image/webp;base64,${rasterBase64}`;
-        return dr.replace(`"source":"${dc}"`, `"source":"${base64}"`);
-      }, (byId[current] as Btwx.Artboard).json)
-    }), {}) as { [id: string]: string };
   }
 );
 
@@ -129,11 +112,18 @@ export const getReverseSelected = createSelector(
   }
 );
 
+export const getLimitedReverseSelected = createSelector(
+  [ getSelected ],
+  (selected) => {
+    return selected.reverse().slice(0, 10);
+  }
+);
+
 export const getLayersWithSearch = createSelector(
-  [ getNamesById, getLayerSearch, getAllArtboardIds ],
-  (getNamesById, layerSearch, allArtboardIds) => {
-    return Object.keys(getNamesById).reduce((result, current) => {
-      const name = getNamesById[current];
+  [ getLayersById, getLayerSearch, getAllArtboardIds ],
+  (layersById, layerSearch, allArtboardIds) => {
+    return Object.keys(layersById).reduce((result, current) => {
+      const name = layersById[current].name;
       if (name.toUpperCase().includes(layerSearch.replace(/\s/g, '').toUpperCase()) && name !== 'root') {
         if (allArtboardIds.includes(current)) {
           result = [...result, current];
@@ -173,28 +163,30 @@ export const getSearchTreeWalker = createSelector(
 );
 
 export const getTreeWalker = createSelector(
-  [ getChildrenById, getShowChildrenById, getScopesById ],
-  (childrenById, showChildrenById, scopeById) => {
+  [ getTree ],
+  (tree) => {
     const allScopesOpen = (id: string) => {
-      return scopeById[id].every(scope => showChildrenById[scope]);
+      return tree[id].scope.every(scope => tree[scope].showChildren);
     }
-    const getNodeData = (node: any, nestingLevel: number): any => ({
-      data: {
-        id: node.id, // mandatory
-        isLeaf: node.children && node.children.length === 0,
-        isOpenByDefault: node.children && allScopesOpen(node.id) && showChildrenById[node.id], // mandatory
-        // isOpen: node.children && showChildrenById[node.id],
-        nestingLevel
-      },
-      nestingLevel,
-      node,
-    });
+    const getNodeData = (node: any, nestingLevel: number): any => {
+      return {
+        data: {
+          id: node.id, // mandatory
+          isLeaf: node.children && node.children.length === 0,
+          isOpenByDefault: node.children && allScopesOpen(node.id) && tree[node.id].showChildren, // mandatory
+          // isOpen: node.children && tree[node.id].showChildren,
+          nestingLevel
+        },
+        nestingLevel,
+        node,
+      }
+    };
     function* treeWalker(): any {
-      for (let i = childrenById['root'].length - 1; i >= 0; i--) {
-        const id = childrenById['root'][i];
+      for (let i = tree.root.children.length - 1; i >= 0; i--) {
+        const id = tree.root.children[i];
         yield getNodeData({
           id: id,
-          children: childrenById[id]
+          children: tree[id].children
         }, 0);
       }
       while (true) {
@@ -205,7 +197,7 @@ export const getTreeWalker = createSelector(
             const id = parent.node.children[i];
             yield getNodeData({
               id: id,
-              children: childrenById[id]
+              children: tree[id].children
             }, parent.nestingLevel + 1);
           }
         }

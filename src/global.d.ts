@@ -320,7 +320,7 @@ declare namespace Btwx {
   interface Layer {
     type: LayerType;
     id: string;
-    index: number;
+    // index: number;
     name: string;
     artboard: string;
     parent: string;
@@ -619,6 +619,11 @@ declare namespace Btwx {
     preview: number;
   }
 
+  interface Tree {
+    tree: any;
+    scroll: string;
+  }
+
   interface Edit {
     id?: string;
     selectedEdit?: string;
@@ -626,5 +631,6 @@ declare namespace Btwx {
     payload: any;
     detail: string;
     projects?: string[];
+    treeEdit?: boolean;
   }
 }

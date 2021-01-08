@@ -11,7 +11,7 @@ import SidebarLeftEmptyState from './SidebarLeftEmptyState';
 
 const SidebarLayerTree = (): ReactElement => {
   const treeWalker = useSelector((state: RootState) => getTreeWalker(state));
-  const isEmpty = useSelector((state: RootState) => state.layer.present.childrenById.root.length === 0);
+  const isEmpty = useSelector((state: RootState) => state.layer.present.byId.root.children.length === 0);
   const searchActive = useSelector((state: RootState) => state.leftSidebar.search.replace(/\s/g, '').length > 0);
   const dispatch = useDispatch();
 
@@ -23,9 +23,9 @@ const SidebarLayerTree = (): ReactElement => {
   //   console.log('TREEEEE WALKER');
   // }, [treeWalker]);
 
-  const handleRef = (newRef: Tree): void => {
-    dispatch(setRef({ref: newRef}));
-  }
+  // const handleRef = (newRef: Tree): void => {
+  //   dispatch(setRef({ref: newRef}));
+  // }
 
   const Node = memo(function Node(props: any) {
     const {data, style, isOpen, setOpen} = props;
@@ -53,8 +53,7 @@ const SidebarLayerTree = (): ReactElement => {
               treeWalker={treeWalker}
               itemSize={32}
               height={height}
-              width={width}
-              ref={handleRef}>
+              width={width}>
               {Node}
             </Tree>
           )}

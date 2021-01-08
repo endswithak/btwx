@@ -22,7 +22,7 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
 
   const handleMouseDown = (e: any) => {
     e.stopPropagation();
-    setOpen(!isOpen);
+    // setOpen(!isOpen);
     if (isOpen) {
       dispatch(hideLayerChildren({id}));
     } else {

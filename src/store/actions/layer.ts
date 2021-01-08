@@ -529,8 +529,8 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
     const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const name = payload.layer.name ? payload.layer.name : 'Artboard';
-    const projectIndex = Math.floor((state.layer.present.childrenById.root.length) / ARTBOARDS_PER_PROJECT) + 1;
-    const index = state.layer.present.childrenById.root.length;
+    const projectIndex = Math.floor((state.layer.present.byId.root.children.length) / ARTBOARDS_PER_PROJECT) + 1;
+    const index = state.layer.present.byId.root.children.length;
     const style = getLayerStyle(payload, {}, { fill: { color: DEFAULT_ARTBOARD_BACKGROUND_COLOR } as Btwx.Fill, stroke: { enabled: false } as Btwx.Stroke, shadow: { enabled: false } as Btwx.Shadow });
     const frame = getLayerFrame(payload);
     const showChildren = payload.layer.showChildren ? payload.layer.showChildren : true;
@@ -586,7 +586,6 @@ export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: Ro
     const newLayer = {
       type: 'Artboard',
       id: id,
-      index: index,
       name: name,
       artboard: id,
       parent: 'root',
@@ -656,7 +655,6 @@ export const addGroupThunk = (payload: AddGroupPayload, providedState?: RootStat
     const newLayer = {
       type: 'Group',
       id: id,
-      index: index,
       name: name,
       artboard: artboard,
       parent: parent,
@@ -758,7 +756,6 @@ export const addShapeThunk = (payload: AddShapePayload, providedState?: RootStat
     const newLayer = {
       type: 'Shape',
       id: id,
-      index: index,
       name: name,
       artboard: artboard,
       parent: parent,
@@ -865,7 +862,6 @@ export const addShapeGroupThunk = (payload: AddShapePayload, providedState?: Roo
     const newLayer = {
       type: 'Shape',
       id: id,
-      index: index,
       name: name,
       artboard: artboard,
       parent: parent,
@@ -999,7 +995,6 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
     const newLayer = {
       type: 'Text',
       id: id,
-      index: index,
       name: name,
       artboard: artboard,
       parent: parent,
@@ -1076,7 +1071,6 @@ export const addImageThunk = (payload: AddImagePayload, providedState?: RootStat
           const newLayer = {
             type: 'Image',
             id: id,
-            index: index,
             name: name,
             artboard: artboard,
             parent: parent,
@@ -4538,7 +4532,7 @@ export const updateFramesThunk = () => {
     const isLine = singleSelection && state.layer.present.byId[state.layer.present.selected[0]].type === 'Shape' && (state.layer.present.byId[state.layer.present.selected[0]] as Btwx.Shape).shapeType === 'Line';
     const linePaperLayer = isLine ? getPaperLayer(Object.keys(selectedPaperScopes)[0], selectedPaperScopes[Object.keys(selectedPaperScopes)[0]]) : null;
     const canvasWrap = document.getElementById('canvas-container');
-    ['ui', ...state.layer.present.childrenById.root].forEach((scope, index) => {
+    ['ui', ...state.layer.present.byId.root.children].forEach((scope, index) => {
       uiPaperScope.projects[index].view.viewSize = new uiPaperScope.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
       uiPaperScope.projects[index].view.matrix.set(state.documentSettings.matrix);
     });

@@ -11,7 +11,7 @@ const SidebarLeft = (): ReactElement => {
   const ready = useSelector((state: RootState) => state.canvasSettings.ready);
   const isOpen = useSelector((state: RootState) => state.viewSettings.leftSidebar.isOpen);
   const sidebarWidth = useSelector((state: RootState) => state.viewSettings.leftSidebar.width);
-  const isEmpty = useSelector((state: RootState) => state.layer.present.childrenById.root.length === 0);
+  const isEmpty = useSelector((state: RootState) => state.layer.present.byId.root.children.length === 0);
   const searchActive = useSelector((state: RootState) => state.leftSidebar.search.replace(/\s/g, '').length > 0);
 
   return (
