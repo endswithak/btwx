@@ -1,33 +1,30 @@
-import React, { ReactElement, useEffect } from 'react';
-import { useSelector, connect } from 'react-redux';
-import { RootState } from '../store/reducers';
+import React, { ReactElement, useEffect, useState } from 'react';
+import { colorsMatch } from '../utils';
 import { uiPaperScope } from '../canvas';
 
 interface CanvasLayerShadowStyleProps {
   id: string;
+  layerItem: Btwx.Layer;
+  artboardItem: Btwx.Artboard;
+  rendered: boolean;
 }
 
-interface CanvasLayerShadowStyleStateProps {
-  layerType: Btwx.LayerType;
-  projectIndex: number;
-  shadowEnabled: boolean;
-  shadowFillType: Btwx.FillType;
-  shadowColor: Btwx.Color;
-  shadowBlur: number;
-  shadowOffset: Btwx.Point;
-}
-
-const CanvasLayerShadowStyle = (props: CanvasLayerShadowStyleProps & CanvasLayerShadowStyleStateProps): ReactElement => {
-  const { id, layerType, projectIndex, shadowEnabled, shadowFillType, shadowColor, shadowBlur, shadowOffset } = props;
-  // const layerItem = useSelector((state: RootState) => state.layer.present.byId[id]);
-  // const layerType = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[id].type);
-  // const projectIndex = useSelector((state: RootState) => state.layer.present.byId[id] && (state.layer.present.byId[state.layer.present.byId[id].artboard] as Btwx.Artboard).projectIndex);
-  // // shadow
-  // const shadowEnabled = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[id].style.shadow.enabled);
-  // const shadowFillType = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[id].style.shadow.fillType);
-  // const shadowColor = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[id].style.shadow.color);
-  // const shadowBlur = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[id].style.shadow.blur);
-  // const shadowOffset = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[id].style.shadow.offset);
+const CanvasLayerShadowStyle = (props: CanvasLayerShadowStyleProps): ReactElement => {
+  const { id, layerItem, artboardItem, rendered } = props;
+  const projectIndex = layerItem ? layerItem.type === 'Artboard' ? (layerItem as Btwx.Artboard).projectIndex : artboardItem.projectIndex : null;
+  const layerType = layerItem ? layerItem.type : null;
+  const shadowEnabled = layerItem ? layerItem.style.shadow.enabled : null;
+  const shadowFillType = layerItem ? layerItem.style.shadow.fillType : null;
+  const shadowColor = layerItem ? layerItem.style.shadow.color : null;
+  const shadowBlur = layerItem ? layerItem.style.shadow.blur : null;
+  const shadowOffsetX = layerItem ? layerItem.style.shadow.offset.x : null;
+  const shadowOffsetY = layerItem ? layerItem.style.shadow.offset.y : null;
+  const [prevShadowEnabled, setPrevShadowEnabled] = useState(shadowEnabled);
+  const [prevShadowFillType, setPrevShadowFillType] = useState(shadowFillType);
+  const [prevShadowColor, setPrevShadowColor] = useState(shadowColor);
+  const [prevShadowBlur, setPrevShadowBlur] = useState(shadowBlur);
+  const [prevShadowOffsetX, setPrevShadowOffsetX] = useState(shadowOffsetX);
+  const [prevShadowOffsetY, setPrevShadowOffsetY] = useState(shadowOffsetY);
 
   const getStyleLayer = (): paper.Item => {
     let paperLayer = uiPaperScope.projects[projectIndex].getItem({data: {id}});
@@ -42,50 +39,67 @@ const CanvasLayerShadowStyle = (props: CanvasLayerShadowStyleProps & CanvasLayer
     return paperLayer;
   }
 
-  useEffect(() => {
+  const applyShadow = () => {
     const paperLayer = getStyleLayer();
-    if (paperLayer) {
-      if (shadowEnabled) {
-        paperLayer.shadowColor = {
-          hue: shadowColor.h,
-          saturation: shadowColor.s,
-          lightness: shadowColor.l,
-          alpha: shadowColor.a
-        } as paper.Color;
-        paperLayer.shadowBlur = shadowBlur;
-        paperLayer.shadowOffset = new uiPaperScope.Point(shadowOffset.x, shadowOffset.y);
-      } else {
-        paperLayer.shadowColor = null;
-      }
+    if (shadowEnabled) {
+      paperLayer.shadowColor = {
+        hue: shadowColor.h,
+        saturation: shadowColor.s,
+        lightness: shadowColor.l,
+        alpha: shadowColor.a
+      } as paper.Color;
+      paperLayer.shadowBlur = shadowBlur;
+      paperLayer.shadowOffset = new uiPaperScope.Point(shadowOffsetX, shadowOffsetY);
+    } else {
+      paperLayer.shadowColor = null;
     }
-  }, [shadowEnabled, shadowFillType, shadowColor, shadowBlur, shadowOffset]);
+  }
+
+  useEffect(() => {
+    if (rendered && prevShadowEnabled !== shadowEnabled) {
+      applyShadow();
+      setPrevShadowEnabled(shadowEnabled);
+    }
+  }, [shadowEnabled]);
+
+  useEffect(() => {
+    if (rendered && prevShadowFillType !== shadowFillType) {
+      applyShadow();
+      setPrevShadowFillType(shadowFillType);
+    }
+  }, [shadowFillType]);
+
+  useEffect(() => {
+    if (rendered && !colorsMatch(prevShadowColor, shadowColor)) {
+      applyShadow();
+      setPrevShadowColor(shadowColor);
+    }
+  }, [shadowColor]);
+
+  useEffect(() => {
+    if (rendered && prevShadowBlur !== shadowBlur) {
+      applyShadow();
+      setPrevShadowBlur(shadowBlur);
+    }
+  }, [shadowBlur]);
+
+  useEffect(() => {
+    if (rendered && prevShadowOffsetX !== shadowOffsetX) {
+      applyShadow();
+      setPrevShadowOffsetX(shadowOffsetX);
+    }
+  }, [shadowOffsetX]);
+
+  useEffect(() => {
+    if (rendered && prevShadowOffsetY !== shadowOffsetY) {
+      applyShadow();
+      setPrevShadowOffsetY(shadowOffsetY);
+    }
+  }, [shadowOffsetY]);
 
   return (
     <></>
   );
 }
 
-const mapStateToProps = (state: RootState, ownProps: CanvasLayerShadowStyleProps): CanvasLayerShadowStyleStateProps => {
-  const layerItem = state.layer.present.byId[ownProps.id];
-  const artboardItem = layerItem ? state.layer.present.byId[layerItem.artboard] as Btwx.Artboard : null;
-  const projectIndex = layerItem ? artboardItem.projectIndex : null;
-  const layerType = layerItem ? layerItem.type : null;
-  const shadowEnabled = layerItem ? layerItem.style.shadow.enabled : null;
-  const shadowFillType = layerItem ? layerItem.style.shadow.fillType : null;
-  const shadowColor = layerItem ? layerItem.style.shadow.color : null;
-  const shadowBlur = layerItem ? layerItem.style.shadow.blur : null;
-  const shadowOffset = layerItem ? layerItem.style.shadow.offset : null;
-  return {
-    layerType,
-    projectIndex,
-    shadowEnabled,
-    shadowFillType,
-    shadowColor,
-    shadowBlur,
-    shadowOffset
-  }
-}
-
-export default connect(
-  mapStateToProps
-)(CanvasLayerShadowStyle);
+export default CanvasLayerShadowStyle;

@@ -115,6 +115,18 @@ import {
   SET_LAYERS_X,
   SET_LAYER_Y,
   SET_LAYERS_Y,
+  SET_LAYER_LEFT,
+  SET_LAYERS_LEFT,
+  SET_LAYER_CENTER,
+  SET_LAYERS_CENTER,
+  SET_LAYER_RIGHT,
+  SET_LAYERS_RIGHT,
+  SET_LAYER_TOP,
+  SET_LAYERS_TOP,
+  SET_LAYER_MIDDLE,
+  SET_LAYERS_MIDDLE,
+  SET_LAYER_BOTTOM,
+  SET_LAYERS_BOTTOM,
   SET_LAYER_WIDTH,
   SET_LAYERS_WIDTH,
   SET_LAYER_HEIGHT,
@@ -353,6 +365,18 @@ import {
   SetLayersXPayload,
   SetLayerYPayload,
   SetLayersYPayload,
+  SetLayerLeftPayload,
+  SetLayersLeftPayload,
+  SetLayerCenterPayload,
+  SetLayersCenterPayload,
+  SetLayerRightPayload,
+  SetLayersRightPayload,
+  SetLayerTopPayload,
+  SetLayersTopPayload,
+  SetLayerMiddlePayload,
+  SetLayersMiddlePayload,
+  SetLayerBottomPayload,
+  SetLayersBottomPayload,
   SetLayerWidthPayload,
   SetLayersWidthPayload,
   SetLayerHeightPayload,
@@ -1759,6 +1783,66 @@ export const setLayerY = (payload: SetLayerYPayload): LayerTypes => ({
 
 export const setLayersY = (payload: SetLayersYPayload): LayerTypes => ({
   type: SET_LAYERS_Y,
+  payload
+});
+
+export const setLayerLeft = (payload: SetLayerLeftPayload): LayerTypes => ({
+  type: SET_LAYER_LEFT,
+  payload
+});
+
+export const setLayersLeft = (payload: SetLayersLeftPayload): LayerTypes => ({
+  type: SET_LAYERS_LEFT,
+  payload
+});
+
+export const setLayerCenter = (payload: SetLayerCenterPayload): LayerTypes => ({
+  type: SET_LAYER_CENTER,
+  payload
+});
+
+export const setLayersCenter = (payload: SetLayersCenterPayload): LayerTypes => ({
+  type: SET_LAYERS_CENTER,
+  payload
+});
+
+export const setLayerRight = (payload: SetLayerRightPayload): LayerTypes => ({
+  type: SET_LAYER_RIGHT,
+  payload
+});
+
+export const setLayersRight = (payload: SetLayersRightPayload): LayerTypes => ({
+  type: SET_LAYERS_RIGHT,
+  payload
+});
+
+export const setLayerTop = (payload: SetLayerTopPayload): LayerTypes => ({
+  type: SET_LAYER_TOP,
+  payload
+});
+
+export const setLayersTop = (payload: SetLayersTopPayload): LayerTypes => ({
+  type: SET_LAYERS_TOP,
+  payload
+});
+
+export const setLayerMiddle = (payload: SetLayerMiddlePayload): LayerTypes => ({
+  type: SET_LAYER_MIDDLE,
+  payload
+});
+
+export const setLayersMiddle = (payload: SetLayersMiddlePayload): LayerTypes => ({
+  type: SET_LAYERS_MIDDLE,
+  payload
+});
+
+export const setLayerBottom = (payload: SetLayerBottomPayload): LayerTypes => ({
+  type: SET_LAYER_BOTTOM,
+  payload
+});
+
+export const setLayersBottom = (payload: SetLayersBottomPayload): LayerTypes => ({
+  type: SET_LAYERS_BOTTOM,
   payload
 });
 

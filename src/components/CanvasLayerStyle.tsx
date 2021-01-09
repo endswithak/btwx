@@ -1,7 +1,9 @@
-import React, { ReactElement, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store/reducers';
-import { uiPaperScope } from '../canvas';
+import React, { ReactElement } from 'react';
+import  CanvasLayerFillStyle from './CanvasLayerFillStyle';
+import  CanvasLayerStrokeStyle from './CanvasLayerStrokeStyle';
+import  CanvasLayerStrokeOptionsStyle from './CanvasLayerStrokeOptionsStyle';
+import  CanvasLayerShadowStyle from './CanvasLayerShadowStyle';
+import  CanvasLayerContextStyle from './CanvasLayerContextStyle';
 
 interface CanvasLayerStyleProps {
   id: string;
@@ -10,270 +12,267 @@ interface CanvasLayerStyleProps {
   rendered: boolean;
 }
 
-const CanvasLayerStyle = (props: CanvasLayerStyleProps): ReactElement => {
-  const { id, rendered, layerItem, artboardItem } = props;
-  // const layerItem = useSelector((state: RootState) => state.layer.present.byId[id]);
-  // const artboardItem = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[state.layer.present.byId[id].artboard] as Btwx.Artboard);
-  const isLine = layerItem ? layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' : null;
-  const layerType = layerItem ? layerItem.type : null;
-  const projectIndex = layerItem ? layerItem.type === 'Artboard' ? (layerItem as Btwx.Artboard).projectIndex : artboardItem.projectIndex : null;
-  // frame
-  const layerFrame = layerItem ? layerItem.frame : null;
-  const artboardFrame = artboardItem ? artboardItem.frame : null;
-  // fill
-  const fillEnabled = layerItem ? layerItem.style.fill.enabled : null;
-  const fillType = layerItem ? layerItem.style.fill.fillType : null;
-  const fillColor = layerItem ? layerItem.style.fill.color : null;
-  const fillGradientType = layerItem ? layerItem.style.fill.gradient.gradientType : null;
-  const fillGradientOrigin = layerItem ? layerItem.style.fill.gradient.origin : null;
-  const fillGradientDestination = layerItem ? layerItem.style.fill.gradient.destination : null;
-  const fillGradientStops = layerItem ? layerItem.style.fill.gradient.stops : null;
-  // stroke
-  const strokeEnabled = layerItem ? layerItem.style.stroke.enabled : null;
-  const strokeFillType = layerItem ? layerItem.style.stroke.fillType : null;
-  const strokeColor = layerItem ? layerItem.style.stroke.color : null;
-  const strokeGradientType = layerItem ? layerItem.style.stroke.gradient.gradientType : null;
-  const strokeGradientOrigin = layerItem ? layerItem.style.stroke.gradient.origin : null;
-  const strokeGradientDestination = layerItem ? layerItem.style.stroke.gradient.destination : null;
-  const strokeGradientStops = layerItem ? layerItem.style.stroke.gradient.stops : null;
-  const strokeWidth = layerItem ? layerItem.style.stroke.width : null;
-  const strokeCap = layerItem ? layerItem.style.strokeOptions.cap : null;
-  const strokeJoin = layerItem ? layerItem.style.strokeOptions.join : null;
-  const strokeDashArray = layerItem ? layerItem.style.strokeOptions.dashArray : null;
-  const strokeDashOffset = layerItem ? layerItem.style.strokeOptions.dashOffset : null;
-  // context
-  const opacity = layerItem ? layerItem.style.opacity : null;
-  const blendMode = layerItem ? layerItem.style.blendMode : null;
-  // shadow
-  const shadowEnabled = layerItem ? layerItem.style.shadow.enabled : null;
-  const shadowFillType = layerItem ? layerItem.style.shadow.fillType : null;
-  const shadowColor = layerItem ? layerItem.style.shadow.color : null;
-  const shadowBlur = layerItem ? layerItem.style.shadow.blur : null;
-  const shadowOffset = layerItem ? layerItem.style.shadow.offset : null;
-
-  const getStyleLayer = (): paper.Item => {
-    let paperLayer = uiPaperScope.projects[projectIndex].getItem({data: {id}});
-    if (paperLayer) {
-      if (layerType === 'Text') {
-        paperLayer = paperLayer.getItem({data: {id: 'textLines'}});
-      }
-      if (layerType === 'Artboard') {
-        paperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
-      }
-    }
-    return paperLayer;
-  }
-
-  useEffect(() => {
-    if (rendered) {
-      const paperLayer = getStyleLayer();
-      if (fillType) {
-        const layerPosition = new uiPaperScope.Point(layerFrame.x, layerFrame.y);
-        const artboardPosition = new uiPaperScope.Point(artboardFrame.x, artboardFrame.y);
-        const layerAbsPosition = layerPosition.add(artboardPosition);
-        switch(fillType) {
-          case 'color':
-            paperLayer.fillColor = {
-              hue: fillColor.h,
-              saturation: fillColor.s,
-              lightness: fillColor.l,
-              alpha: fillColor.a
-            } as paper.Color;
-            break;
-          case 'gradient':
-            paperLayer.fillColor  = {
-              gradient: {
-                stops: fillGradientStops.reduce((result, current) => {
-                  result = [
-                    ...result,
-                    new uiPaperScope.GradientStop({
-                      hue: current.color.h,
-                      saturation: current.color.s,
-                      lightness: current.color.l,
-                      alpha: current.color.a
-                    } as paper.Color, current.position)
-                  ];
-                  return result;
-                }, []) as paper.GradientStop[],
-                radial: fillGradientType === 'radial'
-              },
-              origin: new uiPaperScope.Point(
-                (fillGradientOrigin.x * (isLine ? layerFrame.width : layerFrame.innerWidth)) + layerAbsPosition.x,
-                (fillGradientOrigin.y * (isLine ? layerFrame.height : layerFrame.innerHeight)) + layerAbsPosition.y
-              ),
-              destination: new uiPaperScope.Point(
-                (fillGradientDestination.x * (isLine ? layerFrame.width : layerFrame.innerWidth)) + layerAbsPosition.x,
-                (fillGradientDestination.y * (isLine ? layerFrame.height : layerFrame.innerHeight)) + layerAbsPosition.y
-              )
-            } as Btwx.PaperGradientFill;
-            break;
-        }
-      } else {
-        paperLayer.fillColor = null;
-      }
-    }
-  }, [
-      fillEnabled, fillType, fillColor, fillGradientType, fillGradientOrigin,
-      fillGradientDestination, fillGradientStops, layerFrame.innerWidth, layerFrame.innerHeight
-     ]
-  );
-
-  useEffect(() => {
-    if (rendered) {
-      const paperLayer = getStyleLayer();
-      if (strokeEnabled) {
-        const layerPosition = new uiPaperScope.Point(layerFrame.x, layerFrame.y);
-        const artboardPosition = new uiPaperScope.Point(artboardFrame.x, artboardFrame.y);
-        const layerAbsPosition = layerPosition.add(artboardPosition);
-        switch(strokeFillType) {
-          case 'color':
-            paperLayer.strokeColor = {
-              hue: strokeColor.h,
-              saturation: strokeColor.s,
-              lightness: strokeColor.l,
-              alpha: strokeColor.a
-            } as paper.Color;
-            break;
-          case 'gradient':
-            paperLayer.strokeColor  = {
-              gradient: {
-                stops: strokeGradientStops.reduce((result, current) => {
-                  result = [
-                    ...result,
-                    new uiPaperScope.GradientStop({
-                      hue: current.color.h,
-                      saturation: current.color.s,
-                      lightness: current.color.l,
-                      alpha: current.color.a
-                    } as paper.Color, current.position)
-                  ];
-                  return result;
-                }, []) as paper.GradientStop[],
-                radial: strokeGradientType === 'radial'
-              },
-              origin: new uiPaperScope.Point(
-                (strokeGradientOrigin.x * (isLine ? layerFrame.width : layerFrame.innerWidth)) + layerAbsPosition.x,
-                (strokeGradientOrigin.y * (isLine ? layerFrame.height : layerFrame.innerHeight)) + layerAbsPosition.y
-              ),
-              destination: new uiPaperScope.Point(
-                (strokeGradientDestination.x * (isLine ? layerFrame.width : layerFrame.innerWidth)) + layerAbsPosition.x,
-                (strokeGradientDestination.y * (isLine ? layerFrame.height : layerFrame.innerHeight)) + layerAbsPosition.y
-              )
-            } as Btwx.PaperGradientFill;
-            break;
-        }
-      } else {
-        paperLayer.strokeColor = null;
-      }
-    }
-  }, [
-      strokeEnabled, strokeFillType, strokeColor, strokeGradientType,
-      strokeGradientOrigin, strokeGradientDestination, strokeGradientStops,
-      layerFrame.innerWidth, layerFrame.innerHeight
-     ]
-  );
-
-  useEffect(() => {
-    if (rendered) {
-      const paperLayer = getStyleLayer();
-      paperLayer.strokeWidth = strokeWidth;
-    }
-  }, [strokeWidth]);
-
-  useEffect(() => {
-    if (rendered) {
-      const paperLayer = getStyleLayer();
-      if (shadowEnabled) {
-        paperLayer.shadowColor = {
-          hue: shadowColor.h,
-          saturation: shadowColor.s,
-          lightness: shadowColor.l,
-          alpha: shadowColor.a
-        } as paper.Color;
-        paperLayer.shadowBlur = shadowBlur;
-        paperLayer.shadowOffset = new uiPaperScope.Point(shadowOffset.x, shadowOffset.y);
-      } else {
-        paperLayer.shadowColor = null;
-      }
-    }
-  }, [shadowEnabled, shadowFillType, shadowColor, shadowBlur, shadowOffset]);
-
-  useEffect(() => {
-    if (rendered) {
-      const paperLayer = getStyleLayer();
-      paperLayer.strokeCap = strokeCap;
-    }
-  }, [strokeCap]);
-
-  useEffect(() => {
-    if (rendered) {
-      const paperLayer = getStyleLayer();
-      paperLayer.strokeJoin = strokeJoin;
-    }
-  }, [strokeJoin]);
-
-  useEffect(() => {
-    if (rendered) {
-      const paperLayer = getStyleLayer();
-      paperLayer.dashArray = strokeDashArray;
-    }
-  }, [strokeDashArray]);
-
-  useEffect(() => {
-    if (rendered) {
-      const paperLayer = getStyleLayer();
-      paperLayer.dashOffset = strokeDashOffset;
-    }
-  }, [strokeDashOffset]);
-
-  useEffect(() => {
-    if (rendered) {
-      const paperLayer = getStyleLayer();
-      paperLayer.opacity = opacity;
-    }
-  }, [opacity]);
-
-  useEffect(() => {
-    if (rendered) {
-      const paperLayer = getStyleLayer();
-      paperLayer.blendMode = blendMode;
-    }
-  }, [blendMode]);
-
-  return (
-    <></>
-  );
-}
+const CanvasLayerStyle = (props: CanvasLayerStyleProps): ReactElement => (
+  <>
+    <CanvasLayerContextStyle
+      {...props} />
+    <CanvasLayerFillStyle
+      {...props} />
+    <CanvasLayerStrokeStyle
+      {...props} />
+    <CanvasLayerStrokeOptionsStyle
+      {...props} />
+    <CanvasLayerShadowStyle
+      {...props} />
+  </>
+)
 
 export default CanvasLayerStyle;
 
-// import React, { ReactElement } from 'react';
-// import  CanvasLayerFillStyle from './CanvasLayerFillStyle';
-// import  CanvasLayerStrokeStyle from './CanvasLayerStrokeStyle';
-// import  CanvasLayerStrokeOptionsStyle from './CanvasLayerStrokeOptionsStyle';
-// import  CanvasLayerShadowStyle from './CanvasLayerShadowStyle';
-// import  CanvasLayerContextStyle from './CanvasLayerContextStyle';
+// import React, { ReactElement, useEffect } from 'react';
+// import { useSelector } from 'react-redux';
+// import { RootState } from '../store/reducers';
+// import { uiPaperScope } from '../canvas';
 
 // interface CanvasLayerStyleProps {
 //   id: string;
+//   layerItem: Btwx.Layer;
+//   artboardItem: Btwx.Artboard;
+//   rendered: boolean;
 // }
 
 // const CanvasLayerStyle = (props: CanvasLayerStyleProps): ReactElement => {
-//   const { id } = props;
+//   const { id, rendered, layerItem, artboardItem } = props;
+//   // const layerItem = useSelector((state: RootState) => state.layer.present.byId[id]);
+//   // const artboardItem = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[state.layer.present.byId[id].artboard] as Btwx.Artboard);
+//   const isLine = layerItem ? layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' : null;
+//   const layerType = layerItem ? layerItem.type : null;
+//   const projectIndex = layerItem ? layerItem.type === 'Artboard' ? (layerItem as Btwx.Artboard).projectIndex : artboardItem.projectIndex : null;
+//   // frame
+//   const layerFrame = layerItem ? layerItem.frame : null;
+//   const artboardFrame = artboardItem ? artboardItem.frame : null;
+//   // fill
+//   const fillEnabled = layerItem ? layerItem.style.fill.enabled : null;
+//   const fillType = layerItem ? layerItem.style.fill.fillType : null;
+//   const fillColor = layerItem ? layerItem.style.fill.color : null;
+//   const fillGradientType = layerItem ? layerItem.style.fill.gradient.gradientType : null;
+//   const fillGradientOrigin = layerItem ? layerItem.style.fill.gradient.origin : null;
+//   const fillGradientDestination = layerItem ? layerItem.style.fill.gradient.destination : null;
+//   const fillGradientStops = layerItem ? layerItem.style.fill.gradient.stops : null;
+//   // stroke
+//   const strokeEnabled = layerItem ? layerItem.style.stroke.enabled : null;
+//   const strokeFillType = layerItem ? layerItem.style.stroke.fillType : null;
+//   const strokeColor = layerItem ? layerItem.style.stroke.color : null;
+//   const strokeGradientType = layerItem ? layerItem.style.stroke.gradient.gradientType : null;
+//   const strokeGradientOrigin = layerItem ? layerItem.style.stroke.gradient.origin : null;
+//   const strokeGradientDestination = layerItem ? layerItem.style.stroke.gradient.destination : null;
+//   const strokeGradientStops = layerItem ? layerItem.style.stroke.gradient.stops : null;
+//   const strokeWidth = layerItem ? layerItem.style.stroke.width : null;
+//   const strokeCap = layerItem ? layerItem.style.strokeOptions.cap : null;
+//   const strokeJoin = layerItem ? layerItem.style.strokeOptions.join : null;
+//   const strokeDashArray = layerItem ? layerItem.style.strokeOptions.dashArray : null;
+//   const strokeDashOffset = layerItem ? layerItem.style.strokeOptions.dashOffset : null;
+//   // context
+//   const opacity = layerItem ? layerItem.style.opacity : null;
+//   const blendMode = layerItem ? layerItem.style.blendMode : null;
+//   // shadow
+//   const shadowEnabled = layerItem ? layerItem.style.shadow.enabled : null;
+//   const shadowFillType = layerItem ? layerItem.style.shadow.fillType : null;
+//   const shadowColor = layerItem ? layerItem.style.shadow.color : null;
+//   const shadowBlur = layerItem ? layerItem.style.shadow.blur : null;
+//   const shadowOffset = layerItem ? layerItem.style.shadow.offset : null;
+
+//   const getStyleLayer = (): paper.Item => {
+//     let paperLayer = uiPaperScope.projects[projectIndex].getItem({data: {id}});
+//     if (paperLayer) {
+//       if (layerType === 'Text') {
+//         paperLayer = paperLayer.getItem({data: {id: 'textLines'}});
+//       }
+//       if (layerType === 'Artboard') {
+//         paperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
+//       }
+//     }
+//     return paperLayer;
+//   }
+
+//   useEffect(() => {
+//     if (rendered) {
+//       const paperLayer = getStyleLayer();
+//       if (fillType) {
+//         const layerPosition = new uiPaperScope.Point(layerFrame.x, layerFrame.y);
+//         const artboardPosition = new uiPaperScope.Point(artboardFrame.x, artboardFrame.y);
+//         const layerAbsPosition = layerPosition.add(artboardPosition);
+//         switch(fillType) {
+//           case 'color':
+//             paperLayer.fillColor = {
+//               hue: fillColor.h,
+//               saturation: fillColor.s,
+//               lightness: fillColor.l,
+//               alpha: fillColor.a
+//             } as paper.Color;
+//             break;
+//           case 'gradient':
+//             paperLayer.fillColor  = {
+//               gradient: {
+//                 stops: fillGradientStops.reduce((result, current) => {
+//                   result = [
+//                     ...result,
+//                     new uiPaperScope.GradientStop({
+//                       hue: current.color.h,
+//                       saturation: current.color.s,
+//                       lightness: current.color.l,
+//                       alpha: current.color.a
+//                     } as paper.Color, current.position)
+//                   ];
+//                   return result;
+//                 }, []) as paper.GradientStop[],
+//                 radial: fillGradientType === 'radial'
+//               },
+//               origin: new uiPaperScope.Point(
+//                 (fillGradientOrigin.x * (isLine ? layerFrame.width : layerFrame.innerWidth)) + layerAbsPosition.x,
+//                 (fillGradientOrigin.y * (isLine ? layerFrame.height : layerFrame.innerHeight)) + layerAbsPosition.y
+//               ),
+//               destination: new uiPaperScope.Point(
+//                 (fillGradientDestination.x * (isLine ? layerFrame.width : layerFrame.innerWidth)) + layerAbsPosition.x,
+//                 (fillGradientDestination.y * (isLine ? layerFrame.height : layerFrame.innerHeight)) + layerAbsPosition.y
+//               )
+//             } as Btwx.PaperGradientFill;
+//             break;
+//         }
+//       } else {
+//         paperLayer.fillColor = null;
+//       }
+//     }
+//   }, [
+//       fillEnabled, fillType, fillColor, fillGradientType, fillGradientOrigin,
+//       fillGradientDestination, fillGradientStops, layerFrame.innerWidth, layerFrame.innerHeight
+//      ]
+//   );
+
+//   useEffect(() => {
+//     if (rendered) {
+//       const paperLayer = getStyleLayer();
+//       if (strokeEnabled) {
+//         const layerPosition = new uiPaperScope.Point(layerFrame.x, layerFrame.y);
+//         const artboardPosition = new uiPaperScope.Point(artboardFrame.x, artboardFrame.y);
+//         const layerAbsPosition = layerPosition.add(artboardPosition);
+//         switch(strokeFillType) {
+//           case 'color':
+//             paperLayer.strokeColor = {
+//               hue: strokeColor.h,
+//               saturation: strokeColor.s,
+//               lightness: strokeColor.l,
+//               alpha: strokeColor.a
+//             } as paper.Color;
+//             break;
+//           case 'gradient':
+//             paperLayer.strokeColor  = {
+//               gradient: {
+//                 stops: strokeGradientStops.reduce((result, current) => {
+//                   result = [
+//                     ...result,
+//                     new uiPaperScope.GradientStop({
+//                       hue: current.color.h,
+//                       saturation: current.color.s,
+//                       lightness: current.color.l,
+//                       alpha: current.color.a
+//                     } as paper.Color, current.position)
+//                   ];
+//                   return result;
+//                 }, []) as paper.GradientStop[],
+//                 radial: strokeGradientType === 'radial'
+//               },
+//               origin: new uiPaperScope.Point(
+//                 (strokeGradientOrigin.x * (isLine ? layerFrame.width : layerFrame.innerWidth)) + layerAbsPosition.x,
+//                 (strokeGradientOrigin.y * (isLine ? layerFrame.height : layerFrame.innerHeight)) + layerAbsPosition.y
+//               ),
+//               destination: new uiPaperScope.Point(
+//                 (strokeGradientDestination.x * (isLine ? layerFrame.width : layerFrame.innerWidth)) + layerAbsPosition.x,
+//                 (strokeGradientDestination.y * (isLine ? layerFrame.height : layerFrame.innerHeight)) + layerAbsPosition.y
+//               )
+//             } as Btwx.PaperGradientFill;
+//             break;
+//         }
+//       } else {
+//         paperLayer.strokeColor = null;
+//       }
+//     }
+//   }, [
+//       strokeEnabled, strokeFillType, strokeColor, strokeGradientType,
+//       strokeGradientOrigin, strokeGradientDestination, strokeGradientStops,
+//       layerFrame.innerWidth, layerFrame.innerHeight
+//      ]
+//   );
+
+//   useEffect(() => {
+//     if (rendered) {
+//       const paperLayer = getStyleLayer();
+//       paperLayer.strokeWidth = strokeWidth;
+//     }
+//   }, [strokeWidth]);
+
+//   useEffect(() => {
+//     if (rendered) {
+//       const paperLayer = getStyleLayer();
+//       if (shadowEnabled) {
+//         paperLayer.shadowColor = {
+//           hue: shadowColor.h,
+//           saturation: shadowColor.s,
+//           lightness: shadowColor.l,
+//           alpha: shadowColor.a
+//         } as paper.Color;
+//         paperLayer.shadowBlur = shadowBlur;
+//         paperLayer.shadowOffset = new uiPaperScope.Point(shadowOffset.x, shadowOffset.y);
+//       } else {
+//         paperLayer.shadowColor = null;
+//       }
+//     }
+//   }, [shadowEnabled, shadowFillType, shadowColor, shadowBlur, shadowOffset]);
+
+//   useEffect(() => {
+//     if (rendered) {
+//       const paperLayer = getStyleLayer();
+//       paperLayer.strokeCap = strokeCap;
+//     }
+//   }, [strokeCap]);
+
+//   useEffect(() => {
+//     if (rendered) {
+//       const paperLayer = getStyleLayer();
+//       paperLayer.strokeJoin = strokeJoin;
+//     }
+//   }, [strokeJoin]);
+
+//   useEffect(() => {
+//     if (rendered) {
+//       const paperLayer = getStyleLayer();
+//       paperLayer.dashArray = strokeDashArray;
+//     }
+//   }, [strokeDashArray]);
+
+//   useEffect(() => {
+//     if (rendered) {
+//       const paperLayer = getStyleLayer();
+//       paperLayer.dashOffset = strokeDashOffset;
+//     }
+//   }, [strokeDashOffset]);
+
+//   useEffect(() => {
+//     if (rendered) {
+//       const paperLayer = getStyleLayer();
+//       paperLayer.opacity = opacity;
+//     }
+//   }, [opacity]);
+
+//   useEffect(() => {
+//     if (rendered) {
+//       const paperLayer = getStyleLayer();
+//       paperLayer.blendMode = blendMode;
+//     }
+//   }, [blendMode]);
 
 //   return (
-//     <>
-//       <CanvasLayerContextStyle
-//         id={id} />
-//       <CanvasLayerFillStyle
-//         id={id} />
-//       <CanvasLayerStrokeStyle
-//         id={id} />
-//       <CanvasLayerStrokeOptionsStyle
-//         id={id} />
-//       <CanvasLayerShadowStyle
-//         id={id} />
-//     </>
+//     <></>
 //   );
 // }
 

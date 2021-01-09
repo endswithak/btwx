@@ -111,6 +111,18 @@ export const SET_LAYER_X = 'SET_LAYER_X';
 export const SET_LAYERS_X = 'SET_LAYERS_X';
 export const SET_LAYER_Y = 'SET_LAYER_Y';
 export const SET_LAYERS_Y = 'SET_LAYERS_Y';
+export const SET_LAYER_LEFT = 'SET_LAYER_LEFT';
+export const SET_LAYERS_LEFT = 'SET_LAYERS_LEFT';
+export const SET_LAYER_CENTER = 'SET_LAYER_CENTER';
+export const SET_LAYERS_CENTER = 'SET_LAYERS_CENTER';
+export const SET_LAYER_RIGHT = 'SET_LAYER_RIGHT';
+export const SET_LAYERS_RIGHT = 'SET_LAYERS_RIGHT';
+export const SET_LAYER_TOP = 'SET_LAYER_TOP';
+export const SET_LAYERS_TOP = 'SET_LAYERS_TOP';
+export const SET_LAYER_MIDDLE = 'SET_LAYER_MIDDLE';
+export const SET_LAYERS_MIDDLE = 'SET_LAYERS_MIDDLE';
+export const SET_LAYER_BOTTOM = 'SET_LAYER_BOTTOM';
+export const SET_LAYERS_BOTTOM = 'SET_LAYERS_BOTTOM';
 export const SET_LAYER_WIDTH = 'SET_LAYER_WIDTH';
 export const SET_LAYERS_WIDTH = 'SET_LAYERS_WIDTH';
 export const SET_LAYER_HEIGHT = 'SET_LAYER_HEIGHT';
@@ -1174,6 +1186,126 @@ export interface SetLayersYPayload {
 export interface SetLayersY {
   type: typeof SET_LAYERS_Y;
   payload: SetLayersYPayload;
+}
+
+export interface SetLayerLeftPayload {
+  id: string;
+  left: number;
+}
+
+export interface SetLayerLeft {
+  type: typeof SET_LAYER_LEFT;
+  payload: SetLayerLeftPayload;
+}
+
+export interface SetLayersLeftPayload {
+  layers: string[];
+  left: number;
+}
+
+export interface SetLayersLeft {
+  type: typeof SET_LAYERS_LEFT;
+  payload: SetLayersLeftPayload;
+}
+
+export interface SetLayerCenterPayload {
+  id: string;
+  center: number;
+}
+
+export interface SetLayerCenter {
+  type: typeof SET_LAYER_CENTER;
+  payload: SetLayerCenterPayload;
+}
+
+export interface SetLayersCenterPayload {
+  layers: string[];
+  center: number;
+}
+
+export interface SetLayersCenter {
+  type: typeof SET_LAYERS_CENTER;
+  payload: SetLayersCenterPayload;
+}
+
+export interface SetLayerRightPayload {
+  id: string;
+  right: number;
+}
+
+export interface SetLayerRight {
+  type: typeof SET_LAYER_RIGHT;
+  payload: SetLayerRightPayload;
+}
+
+export interface SetLayersRightPayload {
+  layers: string[];
+  right: number;
+}
+
+export interface SetLayersRight {
+  type: typeof SET_LAYERS_RIGHT;
+  payload: SetLayersRightPayload;
+}
+
+export interface SetLayerTopPayload {
+  id: string;
+  top: number;
+}
+
+export interface SetLayerTop {
+  type: typeof SET_LAYER_TOP;
+  payload: SetLayerTopPayload;
+}
+
+export interface SetLayersTopPayload {
+  layers: string[];
+  top: number;
+}
+
+export interface SetLayersTop {
+  type: typeof SET_LAYERS_TOP;
+  payload: SetLayersTopPayload;
+}
+
+export interface SetLayerMiddlePayload {
+  id: string;
+  middle: number;
+}
+
+export interface SetLayerMiddle {
+  type: typeof SET_LAYER_MIDDLE;
+  payload: SetLayerMiddlePayload;
+}
+
+export interface SetLayersMiddlePayload {
+  layers: string[];
+  middle: number;
+}
+
+export interface SetLayersMiddle {
+  type: typeof SET_LAYERS_MIDDLE;
+  payload: SetLayersMiddlePayload;
+}
+
+export interface SetLayerBottomPayload {
+  id: string;
+  bottom: number;
+}
+
+export interface SetLayerBottom {
+  type: typeof SET_LAYER_BOTTOM;
+  payload: SetLayerBottomPayload;
+}
+
+export interface SetLayersBottomPayload {
+  layers: string[];
+  bottom: number;
+}
+
+export interface SetLayersBottom {
+  type: typeof SET_LAYERS_BOTTOM;
+  payload: SetLayersBottomPayload;
 }
 
 export interface SetLayerWidthPayload {
@@ -2840,6 +2972,18 @@ export type LayerTypes = AddArtboard |
                          SetLayersX |
                          SetLayerY |
                          SetLayersY |
+                         SetLayerLeft |
+                         SetLayersLeft |
+                         SetLayerCenter |
+                         SetLayersCenter |
+                         SetLayerRight |
+                         SetLayersRight |
+                         SetLayerTop |
+                         SetLayersTop |
+                         SetLayerMiddle |
+                         SetLayersMiddle |
+                         SetLayerBottom |
+                         SetLayersBottom |
                          SetLayerWidth |
                          SetLayersWidth |
                          SetLayerHeight |

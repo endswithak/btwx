@@ -83,6 +83,18 @@ import {
   SET_LAYERS_X,
   SET_LAYER_Y,
   SET_LAYERS_Y,
+  SET_LAYER_LEFT,
+  SET_LAYERS_LEFT,
+  SET_LAYER_CENTER,
+  SET_LAYERS_CENTER,
+  SET_LAYER_RIGHT,
+  SET_LAYERS_RIGHT,
+  SET_LAYER_TOP,
+  SET_LAYERS_TOP,
+  SET_LAYER_MIDDLE,
+  SET_LAYERS_MIDDLE,
+  SET_LAYER_BOTTOM,
+  SET_LAYERS_BOTTOM,
   SET_LAYER_WIDTH,
   SET_LAYERS_WIDTH,
   SET_LAYER_HEIGHT,
@@ -326,6 +338,18 @@ import {
   setLayersX,
   setLayerY,
   setLayersY,
+  setLayerLeft,
+  setLayersLeft,
+  setLayerCenter,
+  setLayersCenter,
+  setLayerRight,
+  setLayersRight,
+  setLayerTop,
+  setLayersTop,
+  setLayerMiddle,
+  setLayersMiddle,
+  setLayerBottom,
+  setLayersBottom,
   setLayerWidth,
   setLayersWidth,
   setLayerHeight,
@@ -740,6 +764,30 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return setLayerY(state, action);
     case SET_LAYERS_Y:
       return setLayersY(state, action);
+    case SET_LAYER_LEFT:
+      return setLayerLeft(state, action);
+    case SET_LAYERS_LEFT:
+      return setLayersLeft(state, action);
+    case SET_LAYER_CENTER:
+      return setLayerCenter(state, action);
+    case SET_LAYERS_CENTER:
+      return setLayersCenter(state, action);
+    case SET_LAYER_RIGHT:
+      return setLayerRight(state, action);
+    case SET_LAYERS_RIGHT:
+      return setLayersRight(state, action);
+    case SET_LAYER_TOP:
+      return setLayerTop(state, action);
+    case SET_LAYERS_TOP:
+      return setLayersTop(state, action);
+    case SET_LAYER_MIDDLE:
+      return setLayerMiddle(state, action);
+    case SET_LAYERS_MIDDLE:
+      return setLayersMiddle(state, action);
+    case SET_LAYER_BOTTOM:
+      return setLayerBottom(state, action);
+    case SET_LAYERS_BOTTOM:
+      return setLayersBottom(state, action);
     case SET_LAYER_WIDTH:
       return setLayerWidth(state, action);
     case SET_LAYERS_WIDTH:
@@ -1125,6 +1173,18 @@ export default undoable(baseReducer, {
       SET_LAYERS_X,
       SET_LAYER_Y,
       SET_LAYERS_Y,
+      SET_LAYER_LEFT,
+      SET_LAYERS_LEFT,
+      SET_LAYER_CENTER,
+      SET_LAYERS_CENTER,
+      SET_LAYER_RIGHT,
+      SET_LAYERS_RIGHT,
+      SET_LAYER_TOP,
+      SET_LAYERS_TOP,
+      SET_LAYER_MIDDLE,
+      SET_LAYERS_MIDDLE,
+      SET_LAYER_BOTTOM,
+      SET_LAYERS_BOTTOM,
       SET_LAYER_WIDTH,
       SET_LAYERS_WIDTH,
       SET_LAYER_HEIGHT,

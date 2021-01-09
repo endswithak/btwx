@@ -6,7 +6,7 @@ import isSVG from 'is-svg';
 import { clipboard } from 'electron';
 import { LayerState } from '../reducers/layer';
 import { uiPaperScope } from '../../canvas';
-import { bufferToBase64 } from '../../utils';
+import { bufferToBase64, colorsMatch, gradientsMatch } from '../../utils';
 import { RootState } from '../reducers';
 import { ARTBOARDS_PER_PROJECT } from '../../constants';
 
@@ -1029,6 +1029,108 @@ export const getSelectedY = createSelector(
   }
 );
 
+export const getSelectedLeft = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      const left = layerItem.frame.x - (layerItem.frame.width / 2);
+      if (!result) {
+        result = left;
+      }
+      if (result && left !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null);
+  }
+);
+
+export const getSelectedCenter = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      const center = layerItem.frame.x;
+      if (!result) {
+        result = center;
+      }
+      if (result && center !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null);
+  }
+);
+
+export const getSelectedRight = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      const right = layerItem.frame.x + (layerItem.frame.width / 2);
+      if (!result) {
+        result = right;
+      }
+      if (result && right !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null);
+  }
+);
+
+export const getSelectedTop = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      const top = layerItem.frame.y - (layerItem.frame.height / 2);
+      if (!result) {
+        result = top;
+      }
+      if (result && top !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null);
+  }
+);
+
+export const getSelectedMiddle = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      const middle = layerItem.frame.y;
+      if (!result) {
+        result = middle;
+      }
+      if (result && middle !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null);
+  }
+);
+
+export const getSelectedBottom = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current];
+      const bottom = layerItem.frame.y + (layerItem.frame.height / 2);
+      if (!result) {
+        result = bottom;
+      }
+      if (result && bottom !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null);
+  }
+);
+
 export const getSelectedInnerWidth = createSelector(
   [ getSelectedById ],
   (selectedById) => {
@@ -1847,6 +1949,35 @@ export const getLayersBounds = (store: LayerState, layers: string[]): paper.Rect
   }, null);
 };
 
+export const getLayerRelativeBounds = (store: LayerState, id: string): paper.Rectangle => {
+  const layerItem = store.byId[id] as Btwx.Layer;
+  const topLeft = new uiPaperScope.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
+  const bottomRight = new uiPaperScope.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
+  return new uiPaperScope.Rectangle({
+    from: topLeft,
+    to: bottomRight
+  });
+};
+
+export const getLayersRelativeBounds = (store: LayerState, layers: string[]): paper.Rectangle => {
+  return layers.reduce((result: paper.Rectangle, current, index) => {
+    const layerBounds = getLayerRelativeBounds(store, current);
+    let nextTopLeft;
+    let nextBottomRight;
+    if (index === 0) {
+      nextTopLeft = layerBounds.topLeft;
+      nextBottomRight = layerBounds.bottomRight;
+    } else {
+      nextTopLeft = paper.Point.min(result.topLeft, layerBounds.topLeft);
+      nextBottomRight = paper.Point.max(result.bottomRight, layerBounds.bottomRight);
+    }
+    return new uiPaperScope.Rectangle({
+      from: nextTopLeft,
+      to: nextBottomRight
+    });
+  }, null);
+};
+
 export const getClipboardTopLeft = (layerItems: Btwx.Layer[]): paper.Point => {
   const paperLayerPoints = layerItems.reduce((result, current) => {
     const layerItem = current;
@@ -2440,27 +2571,71 @@ export const getGradientStops = (stops: Btwx.GradientStop[]): paper.GradientStop
 export const orderLayersByDepth = (state: LayerState, layers: string[]): string[] => {
   return layers.sort((a, b) => {
     const layerItemA = state.byId[a];
+    const layerAParent = state.byId[layerItemA.parent];
     const layerItemB = state.byId[b];
-    const layerItemAIndex = layerItemA.index;
-    const layerItemBIndex = layerItemB.index;
+    const layerBParent = state.byId[layerItemB.parent];
+    const layerItemAIndex = layerAParent.children.indexOf(a);
+    const layerItemBIndex = layerBParent.children.indexOf(b);
     return (layerItemA.scope.length + layerItemAIndex) - (layerItemB.scope.length + layerItemBIndex);
   });
 };
 
 export const orderLayersByLeft = (store: LayerState, layers: string[]): string[] => {
   return [...layers].sort((a, b) => {
-    const aLayerItems = getItemLayers(store, a);
-    const bLayerItems = getItemLayers(store, b);
-    return aLayerItems.paperLayer.bounds.left - bLayerItems.paperLayer.bounds.left;
+    const aLayerItem = store.byId[a];
+    const aLeft = getAbsolutePosition(store, a).x - (aLayerItem.frame.width / 2);
+    const bLayerItem = store.byId[b];
+    const bLeft = getAbsolutePosition(store, b).x - (bLayerItem.frame.width / 2);
+    return aLeft - bLeft;
   });
+};
+
+export const orderLayersByCenter = (store: LayerState, layers: string[]): string[] => {
+  const layerBounds = getLayersBounds(store, layers);
+  return [...layers].sort((a, b) => {
+    const aCenter = getAbsolutePosition(store, a).x;
+    const bCenter = getAbsolutePosition(store, b).x;
+    return Math.abs(aCenter - layerBounds.center.x) - Math.abs(bCenter - layerBounds.center.x);
+  });
+};
+
+export const orderLayersByRight = (store: LayerState, layers: string[]): string[] => {
+  return [...layers].sort((a, b) => {
+    const aLayerItem = store.byId[a];
+    const aRight = getAbsolutePosition(store, a).x + (aLayerItem.frame.width / 2);
+    const bLayerItem = store.byId[b];
+    const bRight = getAbsolutePosition(store, b).x + (bLayerItem.frame.width / 2);
+    return aRight - bRight;
+  }).reverse();
 };
 
 export const orderLayersByTop = (store: LayerState, layers: string[]): string[] => {
   return [...layers].sort((a, b) => {
-    const aLayerItems = getItemLayers(store, a);
-    const bLayerItems = getItemLayers(store, b);
-    return aLayerItems.paperLayer.bounds.top - bLayerItems.paperLayer.bounds.top;
+    const aLayerItem = store.byId[a];
+    const aTop = getAbsolutePosition(store, a).y - (aLayerItem.frame.height / 2);
+    const bLayerItem = store.byId[b];
+    const bTop = getAbsolutePosition(store, b).y - (bLayerItem.frame.height / 2);
+    return aTop - bTop;
   });
+};
+
+export const orderLayersByMiddle = (store: LayerState, layers: string[]): string[] => {
+  const layerBounds = getLayersBounds(store, layers);
+  return [...layers].sort((a, b) => {
+    const aMiddle = getAbsolutePosition(store, a).y;
+    const bMiddle = getAbsolutePosition(store, b).y;
+    return Math.abs(aMiddle - layerBounds.center.y) - Math.abs(bMiddle - layerBounds.center.y);
+  });
+};
+
+export const orderLayersByBottom = (store: LayerState, layers: string[]): string[] => {
+  return [...layers].sort((a, b) => {
+    const aLayerItem = store.byId[a];
+    const aBottom = getAbsolutePosition(store, a).y + (aLayerItem.frame.height / 2);
+    const bLayerItem = store.byId[b];
+    const bBottom = getAbsolutePosition(store, b).y + (bLayerItem.frame.height / 2);
+    return aBottom - bBottom;
+  }).reverse();
 };
 
 export const savePaperJSON = (state: LayerState, id: string): string => {
@@ -2504,30 +2679,6 @@ export const importProjectJSON = ({documentImages, json, project}: ImportPaperJS
   }, json);
   const newLayer = project.activeLayer.importJSON(newPaperProject);
   return newLayer;
-};
-
-export const colorsMatch = (color1: Btwx.Color, color2: Btwx.Color): boolean => {
-  return Object.keys(color1).every((prop: 'h' | 's' | 'l' | 'v' | 'a') => color1[prop] === color2[prop]);
-};
-
-export const gradientsMatch = (gradient1: Btwx.Gradient, gradient2: Btwx.Gradient): boolean => {
-  const gradientTypesMatch = gradient1.gradientType === gradient2.gradientType;
-  const originsMatch = gradient1.origin.x === gradient2.origin.x && gradient1.origin.y === gradient2.origin.y;
-  const destinationsMatch = gradient1.destination.x === gradient2.destination.x && gradient1.destination.y === gradient2.destination.y;
-  const g1SortedStops = [...gradient1.stops].sort((a,b) => { return a.position - b.position });
-  const g2SortedStops = [...gradient2.stops].sort((a,b) => { return a.position - b.position });
-  const stopsLengthMatch = g1SortedStops.length === g2SortedStops.length;
-  let stopsMatch = false;
-  if (stopsLengthMatch) {
-    stopsMatch = g1SortedStops.every((id, index) => {
-      const g1Stop = g1SortedStops[index];
-      const g2Stop = g2SortedStops[index];
-      const stopColorsMatch = colorsMatch(g1Stop.color, g2Stop.color);
-      const stopPositionsMatch = g1Stop.position === g2Stop.position;
-      return stopColorsMatch && stopPositionsMatch;
-    });
-  }
-  return gradientTypesMatch && originsMatch && destinationsMatch && stopsMatch;
 };
 
 export const getPaperProp = (prop: 'fill' | 'stroke'): 'fillColor' | 'strokeColor' => {

@@ -1,31 +1,21 @@
-import React, { ReactElement, useEffect } from 'react';
-import { connect } from 'react-redux';
-import { RootState } from '../store/reducers';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { uiPaperScope } from '../canvas';
 
 interface CanvasLayerContextStyleProps {
   id: string;
-  layerType?: Btwx.LayerType;
-  projectIndex?: number;
-  opacity?: number;
-  blendMode?: Btwx.BlendMode;
+  layerItem: Btwx.Layer;
+  artboardItem: Btwx.Artboard;
+  rendered: boolean;
 }
 
-interface CanvasLayerContextStyleStateProps {
-  layerType: Btwx.LayerType;
-  projectIndex: number;
-  opacity: number;
-  blendMode: Btwx.BlendMode;
-}
-
-const CanvasLayerContextStyle = (props: CanvasLayerContextStyleProps & CanvasLayerContextStyleStateProps): ReactElement => {
-  const { id, layerType, projectIndex, opacity, blendMode } = props;
-  // const layerItem = useSelector((state: RootState) => state.layer.present.byId[id]);
-  // const layerType = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[id].type);
-  // const projectIndex = useSelector((state: RootState) => state.layer.present.byId[id] && (state.layer.present.byId[state.layer.present.byId[id].artboard] as Btwx.Artboard).projectIndex);
-  // context style
-  // const opacity = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[id].style.opacity);
-  // const blendMode = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[id].style.blendMode);
+const CanvasLayerContextStyle = (props: CanvasLayerContextStyleProps): ReactElement => {
+  const { id, layerItem, artboardItem, rendered } = props;
+  const layerType = layerItem ? layerItem.type : null;
+  const projectIndex = layerItem ? layerItem.type === 'Artboard' ? (layerItem as Btwx.Artboard).projectIndex : artboardItem.projectIndex : null;
+  const opacity = layerItem ? layerItem.style.opacity : null;
+  const blendMode = layerItem ? layerItem.style.blendMode : null;
+  const [prevOpacity, setPrevOpacity] = useState(opacity);
+  const [prevBlendMode, setPrevBlendMode] = useState(blendMode);
 
   const getStyleLayer = (): paper.Item => {
     let paperLayer = uiPaperScope.projects[projectIndex].getItem({data: {id}});
@@ -41,16 +31,18 @@ const CanvasLayerContextStyle = (props: CanvasLayerContextStyleProps & CanvasLay
   }
 
   useEffect(() => {
-    const paperLayer = getStyleLayer();
-    if (paperLayer) {
+    if (rendered && prevOpacity !== opacity) {
+      const paperLayer = getStyleLayer();
       paperLayer.opacity = opacity;
+      setPrevOpacity(opacity);
     }
   }, [opacity]);
 
   useEffect(() => {
-    const paperLayer = getStyleLayer();
-    if (paperLayer) {
+    if (rendered && prevBlendMode !== blendMode) {
+      const paperLayer = getStyleLayer();
       paperLayer.blendMode = blendMode;
+      setPrevBlendMode(blendMode);
     }
   }, [blendMode]);
 
@@ -59,24 +51,7 @@ const CanvasLayerContextStyle = (props: CanvasLayerContextStyleProps & CanvasLay
   );
 }
 
-const mapStateToProps = (state: RootState, ownProps: CanvasLayerContextStyleProps): CanvasLayerContextStyleStateProps => {
-  const layerItem = state.layer.present.byId[ownProps.id];
-  const artboardItem = layerItem ? state.layer.present.byId[layerItem.artboard] as Btwx.Artboard : null;
-  const layerType = layerItem ? layerItem.type : null;
-  const projectIndex = layerItem ? artboardItem.projectIndex : null;
-  const opacity = layerItem ? layerItem.style.opacity : null;
-  const blendMode = layerItem ? layerItem.style.blendMode : null;
-  return {
-    layerType,
-    projectIndex,
-    opacity,
-    blendMode
-  }
-};
-
-export default connect(
-  mapStateToProps
-)(CanvasLayerContextStyle);
+export default CanvasLayerContextStyle;
 
 // import React, { ReactElement, useEffect } from 'react';
 // import { useSelector } from 'react-redux';

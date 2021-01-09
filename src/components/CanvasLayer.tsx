@@ -1,5 +1,5 @@
 import React, { ReactElement, useState, memo } from 'react';
-import { useSelector, connect } from 'react-redux';
+import { connect } from 'react-redux';
 import { RootState } from '../store/reducers';
 import  CanvasTextLayer from './CanvasTextLayer';
 import  CanvasShapeLayer from './CanvasShapeLayer';
@@ -7,6 +7,7 @@ import  CanvasImageLayer from './CanvasImageLayer';
 import  CanvasArtboardLayer from './CanvasArtboardLayer';
 import  CanvasGroupLayer from './CanvasGroupLayer';
 import  CanvasLayerFrame from './CanvasLayerFrame';
+import  CanvasLayerTransform from './CanvasLayerTransform';
 import  CanvasLayers from './CanvasLayers';
 import  CanvasLayerStyle from './CanvasLayerStyle';
 
@@ -22,8 +23,6 @@ interface CanvasLayerStateProps {
 const CanvasLayer = (props: CanvasLayerProps & CanvasLayerStateProps): ReactElement => {
   const { id, layerItem, artboardItem } = props;
   const [rendered, setRendered] = useState(false);
-  // const layerItem = useSelector((state: RootState) => state.layer.present.byId[id]);
-  // const artboardItem = useSelector((state: RootState) => state.layer.present.byId[id].type !== 'Artboard' ? state.layer.present.byId[state.layer.present.byId[id].artboard] : null);
 
   return (
     <>
@@ -83,20 +82,20 @@ const CanvasLayer = (props: CanvasLayerProps & CanvasLayerStateProps): ReactElem
             layers={layerItem.children} />
         : null
       }
+      <CanvasLayerTransform
+        {...props}
+        rendered={rendered} />
       <CanvasLayerFrame
-        id={id}
-        rendered={rendered}
-        layerItem={layerItem as Btwx.Shape}
-        artboardItem={artboardItem as Btwx.Artboard} />
+        {...props}
+        rendered={rendered} />
       <CanvasLayerStyle
-        id={id}
-        rendered={rendered}
-        layerItem={layerItem as Btwx.Shape}
-        artboardItem={artboardItem as Btwx.Artboard} />
+        {...props}
+        rendered={rendered} />
     </>
   );
 }
 
+// useSelector makes this super laggy
 const mapStateToProps = (state: RootState, ownProps: CanvasLayerProps): CanvasLayerStateProps => {
   const layerItem = state.layer.present.byId[ownProps.id];
   const artboardItem = layerItem && layerItem.type !== 'Artboard' ? state.layer.present.byId[layerItem.artboard] as Btwx.Artboard : null;

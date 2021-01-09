@@ -1,7 +1,5 @@
 import React, { ReactElement, useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import tinyColor from 'tinycolor2';
-import { RootState } from '../store/reducers';
 import { getPaperFillColor, getPaperShadowColor, getPaperStrokeColor, getLayerAbsPosition, getLayerPaperParent } from '../store/utils/paper';
 import { uiPaperScope } from '../canvas';
 
@@ -15,9 +13,6 @@ interface CanvasTextLayerProps {
 
 const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   const { id, layerItem, artboardItem, rendered, setRendered } = props;
-  // const layerItem = useSelector((state: RootState) => state.layer.present.byId[id]);
-  // const artboardItem = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.byId[id].artboard] as Btwx.Artboard);
-  // const projectIndex = useSelector((state: RootState) => (state.layer.present.byId[state.layer.present.byId[id].artboard] as Btwx.Artboard).projectIndex);
 
   const createText = (): void => {
     const paperShadowColor = layerItem.style.shadow.enabled ? getPaperShadowColor(layerItem.style.shadow as Btwx.Shadow) : null;

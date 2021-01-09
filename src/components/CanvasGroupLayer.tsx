@@ -1,9 +1,6 @@
 import React, { ReactElement, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store/reducers';
 import { getLayerAbsPosition, getLayerPaperParent } from '../store/utils/paper';
 import { uiPaperScope } from '../canvas';
-import  CanvasLayers from './CanvasLayers';
 
 interface CanvasGroupLayerProps {
   id: string;
@@ -15,9 +12,6 @@ interface CanvasGroupLayerProps {
 
 const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
   const { id, layerItem, artboardItem, rendered, setRendered } = props;
-  // const layerItem = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Group);
-  // const artboardItem = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.byId[id].artboard] as Btwx.Artboard);
-  // const projectIndex = useSelector((state: RootState) => (state.layer.present.byId[state.layer.present.byId[id].artboard] as Btwx.Artboard).projectIndex);
 
   const createGroup = (): void => {
     new uiPaperScope.Group({

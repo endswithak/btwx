@@ -8,6 +8,35 @@ import getTheme from './store/theme';
 
 gsap.registerPlugin(ScrollToPlugin);
 
+export const gradientStopsMatch = (gradient1Stops: Btwx.GradientStop[], gradient2Stops: Btwx.GradientStop[]): boolean => {
+  const g1SortedStops = [...gradient1Stops].sort((a,b) => { return a.position - b.position });
+  const g2SortedStops = [...gradient2Stops].sort((a,b) => { return a.position - b.position });
+  const stopsLengthMatch = g1SortedStops.length === g2SortedStops.length;
+  let stopsMatch = false;
+  if (stopsLengthMatch) {
+    stopsMatch = g1SortedStops.every((id, index) => {
+      const g1Stop = g1SortedStops[index];
+      const g2Stop = g2SortedStops[index];
+      const stopColorsMatch = colorsMatch(g1Stop.color, g2Stop.color);
+      const stopPositionsMatch = g1Stop.position === g2Stop.position;
+      return stopColorsMatch && stopPositionsMatch;
+    });
+  }
+  return stopsMatch;
+};
+
+export const gradientsMatch = (gradient1: Btwx.Gradient, gradient2: Btwx.Gradient): boolean => {
+  const gradientTypesMatch = gradient1.gradientType === gradient2.gradientType;
+  const originsMatch = gradient1.origin.x === gradient2.origin.x && gradient1.origin.y === gradient2.origin.y;
+  const destinationsMatch = gradient1.destination.x === gradient2.destination.x && gradient1.destination.y === gradient2.destination.y;
+  const stopsMatch = gradientStopsMatch(gradient1.stops, gradient2.stops);
+  return gradientTypesMatch && originsMatch && destinationsMatch && stopsMatch;
+};
+
+export const colorsMatch = (color1: Btwx.Color, color2: Btwx.Color): boolean => {
+  return Object.keys(color1).every((prop: 'h' | 's' | 'l' | 'v' | 'a') => color1[prop] === color2[prop]);
+};
+
 export const bufferToBase64 = (buffer: Buffer) => {
   return btoa(
     new Uint8Array(buffer)

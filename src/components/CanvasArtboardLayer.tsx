@@ -1,9 +1,6 @@
 import React, { ReactElement, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store/reducers';
 import { getPaperFillColor } from '../store/utils/paper';
 import { uiPaperScope } from '../canvas';
-import  CanvasLayers from './CanvasLayers';
 
 interface CanvasArtboardLayerProps {
   id: string;
@@ -14,8 +11,6 @@ interface CanvasArtboardLayerProps {
 
 const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
   const { id, layerItem, rendered, setRendered } = props;
-  // const layerItem = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Artboard);
-  // const projectIndex = useSelector((state: RootState) => (state.layer.present.byId[id] as Btwx.Artboard).projectIndex);
 
   const createArtboard = () => {
     new uiPaperScope.Group({

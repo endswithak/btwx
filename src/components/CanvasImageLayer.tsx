@@ -15,9 +15,6 @@ interface CanvasImageLayerProps {
 
 const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
   const { id, layerItem, artboardItem, rendered, setRendered } = props;
-  // const layerItem = useSelector((state: RootState) => state.layer.present.byId[id]);
-  // const artboardItem = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.byId[id].artboard] as Btwx.Artboard);
-  // const projectIndex = useSelector((state: RootState) => (state.layer.present.byId[state.layer.present.byId[id].artboard] as Btwx.Artboard).projectIndex);
   const documentImages = useSelector((state: RootState) => state.documentSettings.images.byId);
 
   const createImage = (): void => {
