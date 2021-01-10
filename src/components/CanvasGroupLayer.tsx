@@ -5,21 +5,24 @@ import { uiPaperScope } from '../canvas';
 interface CanvasGroupLayerProps {
   id: string;
   layerItem: Btwx.Group;
+  layerIndex: number;
   artboardItem: Btwx.Artboard;
   rendered: boolean;
   setRendered(rendered: boolean): void;
 }
 
 const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
-  const { id, layerItem, artboardItem, rendered, setRendered } = props;
+  const { id, layerItem, layerIndex, artboardItem, rendered, setRendered } = props;
 
   const createGroup = (): void => {
-    new uiPaperScope.Group({
+    const paperParent = getLayerPaperParent(uiPaperScope.projects[artboardItem.projectIndex].getItem({data: {id: layerItem.parent}}), layerItem);
+    const group = new uiPaperScope.Group({
       name: layerItem.name,
       data: { id: id, type: 'Layer', layerType: 'Group', scope: layerItem.scope },
-      parent: getLayerPaperParent(uiPaperScope.projects[artboardItem.projectIndex].getItem({data: {id: layerItem.parent}}), layerItem),
-      position: getLayerAbsPosition(layerItem.frame, artboardItem.frame)
+      position: getLayerAbsPosition(layerItem.frame, artboardItem.frame),
+      insert: false
     });
+    paperParent.insertChild(layerIndex, group);
   }
 
   useEffect(() => {

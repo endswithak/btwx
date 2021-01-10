@@ -2091,6 +2091,8 @@ export interface ScaleLayers {
 export interface SetLayerTextPayload {
   id: string;
   text: string;
+  lines?: Btwx.TextLine[];
+  bounds?: Btwx.Frame;
 }
 
 export interface SetLayerText {
@@ -2101,6 +2103,8 @@ export interface SetLayerText {
 export interface SetLayerFontSizePayload {
   id: string;
   fontSize: number;
+  lines?: Btwx.TextLine[];
+  bounds?: Btwx.Frame;
 }
 
 export interface SetLayerFontSize {
@@ -2111,6 +2115,8 @@ export interface SetLayerFontSize {
 export interface SetLayersFontSizePayload {
   layers: string[];
   fontSize: number;
+  lines?: Btwx.TextLine[][];
+  bounds?: Btwx.Frame[];
 }
 
 export interface SetLayersFontSize {
@@ -2121,6 +2127,7 @@ export interface SetLayersFontSize {
 export interface SetLayerLeadingPayload {
   id: string;
   leading: number;
+  bounds?: Btwx.Frame;
 }
 
 export interface SetLayerLeading {
@@ -2131,6 +2138,7 @@ export interface SetLayerLeading {
 export interface SetLayersLeadingPayload {
   layers: string[];
   leading: number;
+  bounds?: Btwx.Frame[];
 }
 
 export interface SetLayersLeading {
@@ -2141,6 +2149,8 @@ export interface SetLayersLeading {
 export interface SetLayerFontWeightPayload {
   id: string;
   fontWeight: string | number;
+  lines?: Btwx.TextLine[];
+  bounds?: Btwx.Frame;
 }
 
 export interface SetLayerFontWeight {
@@ -2151,6 +2161,8 @@ export interface SetLayerFontWeight {
 export interface SetLayersFontWeightPayload {
   layers: string[];
   fontWeight: string | number;
+  lines?: Btwx.TextLine[][];
+  bounds?: Btwx.Frame[];
 }
 
 export interface SetLayersFontWeight {
@@ -2161,6 +2173,8 @@ export interface SetLayersFontWeight {
 export interface SetLayerFontFamilyPayload {
   id: string;
   fontFamily: string;
+  lines?: Btwx.TextLine[];
+  bounds?: Btwx.Frame;
 }
 
 export interface SetLayerFontFamily {
@@ -2171,6 +2185,8 @@ export interface SetLayerFontFamily {
 export interface SetLayersFontFamilyPayload {
   layers: string[];
   fontFamily: string;
+  lines?: Btwx.TextLine[][];
+  bounds?: Btwx.Frame[];
 }
 
 export interface SetLayersFontFamily {
@@ -2181,6 +2197,7 @@ export interface SetLayersFontFamily {
 export interface SetLayerJustificationPayload {
   id: string;
   justification: Btwx.Jusftification;
+  point?: Btwx.Point;
 }
 
 export interface SetLayerJustification {
@@ -2191,6 +2208,7 @@ export interface SetLayerJustification {
 export interface SetLayersJustificationPayload {
   layers: string[];
   justification: Btwx.Jusftification;
+  points?: Btwx.Point[];
 }
 
 export interface SetLayersJustification {
@@ -2201,6 +2219,8 @@ export interface SetLayersJustification {
 export interface SetLayerObliquePayload {
   id: string;
   oblique: number;
+  lines?: Btwx.TextLine[];
+  bounds?: Btwx.Frame;
 }
 
 export interface SetLayerOblique {
@@ -2211,6 +2231,8 @@ export interface SetLayerOblique {
 export interface SetLayersObliquePayload {
   layers: string[];
   oblique: number;
+  lines?: Btwx.TextLine[][];
+  bounds?: Btwx.Frame[];
 }
 
 export interface SetLayersOblique {

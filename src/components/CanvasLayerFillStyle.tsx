@@ -1,6 +1,7 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { colorsMatch, gradientStopsMatch } from '../utils';
 import { uiPaperScope } from '../canvas';
+import CanvasTextLayerFillStyle from './CanvasTextLayerFillStyle';
 
 interface CanvasLayerFillStyleProps {
   id: string;
@@ -15,7 +16,10 @@ const CanvasLayerFillStyle = (props: CanvasLayerFillStyleProps): ReactElement =>
   const layerType = layerItem ? layerItem.type : null;
   const projectIndex = layerItem ? layerItem.type === 'Artboard' ? (layerItem as Btwx.Artboard).projectIndex : artboardItem.projectIndex : null;
   const layerFrame = layerItem ? layerItem.frame : null;
+  const innerWidth = layerItem ? layerItem.frame.innerWidth : null;
+  const innerHeight = layerItem ? layerItem.frame.innerHeight : null;
   const artboardFrame = artboardItem ? artboardItem.frame : null;
+  const rotation = layerItem ? layerItem.transform.rotation : null;
   const fillEnabled = layerItem ? layerItem.style.fill.enabled : null;
   const fillType = layerItem ? layerItem.style.fill.fillType : null;
   const fillColor = layerItem ? layerItem.style.fill.color : null;
@@ -25,6 +29,9 @@ const CanvasLayerFillStyle = (props: CanvasLayerFillStyleProps): ReactElement =>
   const fillGradientDestinationX = layerItem ? layerItem.style.fill.gradient.destination.x : null;
   const fillGradientDestinationY = layerItem ? layerItem.style.fill.gradient.destination.y : null;
   const fillGradientStops = layerItem ? layerItem.style.fill.gradient.stops : null;
+  const [prevInnerWidth, setPrevInnerWidth] = useState(innerWidth);
+  const [prevInnerHeight, setPrevInnerHeight] = useState(innerHeight);
+  const [prevRotation, setPrevRotation] = useState(rotation);
   const [prevFillEnabled, setPrevFillEnabled] = useState(fillEnabled);
   const [prevFillType, setPrevFillType] = useState(fillType);
   const [prevFillColor, setPrevFillColor] = useState(fillColor);
@@ -48,7 +55,7 @@ const CanvasLayerFillStyle = (props: CanvasLayerFillStyleProps): ReactElement =>
     return paperLayer;
   }
 
-  const applyFill = () => {
+  const applyFill = (): void => {
     const paperLayer = getStyleLayer();
     if (fillEnabled) {
       const layerPosition = new uiPaperScope.Point(layerFrame.x, layerFrame.y);
@@ -95,6 +102,27 @@ const CanvasLayerFillStyle = (props: CanvasLayerFillStyleProps): ReactElement =>
       paperLayer.fillColor = null;
     }
   }
+
+  useEffect(() => {
+    if (rendered && prevRotation !== rotation) {
+      applyFill();
+      setPrevRotation(rotation);
+    }
+  }, [rotation]);
+
+  useEffect(() => {
+    if (rendered && prevInnerWidth !== innerWidth) {
+      applyFill();
+      setPrevInnerWidth(innerWidth);
+    }
+  }, [innerWidth]);
+
+  useEffect(() => {
+    if (rendered && prevInnerHeight !== innerHeight) {
+      applyFill();
+      setPrevInnerHeight(innerHeight);
+    }
+  }, [innerHeight]);
 
   useEffect(() => {
     if (rendered && prevFillEnabled !== fillEnabled) {
@@ -160,7 +188,16 @@ const CanvasLayerFillStyle = (props: CanvasLayerFillStyleProps): ReactElement =>
   }, [fillGradientStops]);
 
   return (
-    <></>
+    <>
+      {
+        layerType === 'Text'
+        ? <CanvasTextLayerFillStyle
+            {...props}
+            layerItem={layerItem as Btwx.Text}
+            applyFill={applyFill} />
+        : null
+      }
+    </>
   );
 }
 

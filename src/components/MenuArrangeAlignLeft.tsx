@@ -1,6 +1,7 @@
 import React, { ReactElement, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
+import { getSelectedLeft } from '../store/selectors/layer';
 import { alignSelectedToLeftThunk } from '../store/actions/layer';
 import MenuItem, { MenuItemProps } from './MenuItem';
 
@@ -8,7 +9,7 @@ export const MENU_ITEM_ID = 'arrangeAlignLeft';
 
 const MenuArrangeAlignLeft = (props: MenuItemProps): ReactElement => {
   const { menuItem } = props;
-  const isEnabled = useSelector((state: RootState) => state.canvasSettings.focusing && state.layer.present.selected.length >= 2);
+  const isEnabled = useSelector((state: RootState) => state.canvasSettings.focusing && (state.layer.present.selected.length >= 2 && getSelectedLeft(state) === 'multi'));
   const dispatch = useDispatch();
 
   useEffect(() => {

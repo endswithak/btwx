@@ -65,7 +65,7 @@ import {
   getLayerYoungerSiblings, getMaskableSiblings, getSiblingLayersWithUnderlyingMask, getItemLayers,
   getAbsolutePosition, getGradientDestination, getGradientOrigin, getLayerOlderSibling, getLayerYoungestChild,
   getLayerYoungerSibling, getCanvasBounds, getLayerBounds, hasFillTween, getSelectedBounds, getLayerProjectIndices,
-  savePaperJSON, orderLayersByCenter, orderLayersByRight, orderLayersByMiddle, orderLayersByBottom
+  savePaperJSON, orderLayersByCenter, orderLayersByRight, orderLayersByMiddle, orderLayersByBottom, getLayerRelativeBounds
 } from '../selectors/layer';
 import { RootState } from '../reducers';
 
@@ -1266,8 +1266,6 @@ export const updateNestedScopes = (state: LayerState, id: string): LayerState =>
 
 export const groupLayers = (state: LayerState, action: GroupLayers): LayerState => {
   let currentState = state;
-  // add group
-  // currentState = addGroup(currentState, layerActions.addGroup({layer: action.payload.group, batch: true}) as AddGroup);
   // move group above top layer
   currentState = insertLayerBelow(currentState, layerActions.insertLayerBelow({id: action.payload.group.id, below: action.payload.layers[0]}) as InsertLayerBelow);
   // add layers to group
@@ -1283,7 +1281,25 @@ export const groupLayers = (state: LayerState, action: GroupLayers): LayerState 
   // select final group
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.group.id], newSelection: true}) as SelectLayers);
   //
-  currentState = updateLayerBounds(currentState, action.payload.group.id);
+  const groupBounds = getLayersRelativeBounds(currentState, action.payload.layers);
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.group.id]: {
+        ...currentState.byId[action.payload.group.id],
+        frame: {
+          ...currentState.byId[action.payload.group.id].frame,
+          x: groupBounds.center.x,
+          y: groupBounds.center.y,
+          innerWidth: groupBounds.width,
+          innerHeight: groupBounds.height,
+          width: groupBounds.width,
+          height: groupBounds.height,
+        }
+      }
+    }
+  }
   // set layer edit
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
@@ -1729,6 +1745,7 @@ export const moveLayersTo = (state: LayerState, action: MoveLayersTo): LayerStat
 export const moveLayerBy = (state: LayerState, action: MoveLayerBy): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
+  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const ml = (cs: LayerState, id: string): LayerState => {
     const li = cs.byId[id];
     const isLine = li.type === 'Shape' && (li as Btwx.Shape).shapeType === 'Line';
@@ -1786,6 +1803,7 @@ export const moveLayerBy = (state: LayerState, action: MoveLayerBy): LayerState 
     }
     return cs;
   }
+  // update layer bounds
   if (layerItem.type === 'Group') {
     const layerAndDescendants = getLayerAndDescendants(currentState, action.payload.id);
     currentState = layerAndDescendants.reduce((result, current) => {
@@ -1793,6 +1811,32 @@ export const moveLayerBy = (state: LayerState, action: MoveLayerBy): LayerState 
     }, currentState);
   } else {
     currentState = ml(currentState, action.payload.id);
+  }
+  // update parent layer bounds
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: layersBounds.center.x,
+              y: layersBounds.center.y,
+              innerWidth: layersBounds.width,
+              innerHeight: layersBounds.height,
+              width: layersBounds.width,
+              height: layersBounds.height
+            }
+          }
+        }
+      }
+      return result;
+    }, currentState);
   }
   return currentState;
 };
@@ -1807,7 +1851,6 @@ export const moveLayersBy = (state: LayerState, action: MoveLayersBy): LayerStat
     }
     return moveLayerBy(result, layerActions.moveLayerBy({id: current, x: action.payload.x, y: action.payload.y}) as MoveLayerBy);
   }, currentState);
-  // currentState = updateSelectedBounds(currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,
@@ -3218,16 +3261,11 @@ export const setLayerCustomWiggleTweenType = (state: LayerState, action: SetLaye
 
 export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
   let currentState = state;
-  // let x = action.payload.x;
-  // const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const layerItem = currentState.byId[action.payload.id];
-  // const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
+  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
-  // if (layerItem.type !== 'Artboard') {
-  //   const artboardItem = state.byId[layerItem.artboard];
-  //   x += artboardItem.frame.x;
-  // }
-  // paperLayer.position.x = x;
+  const isText = layerItem.type === 'Text';
+  const diff = action.payload.x - layerItem.frame.x;
   currentState = {
     ...currentState,
     byId: {
@@ -3241,19 +3279,115 @@ export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
       }
     }
   }
-  // currentState = updateLayerBounds(currentState, action.payload.id);
-  // if (groupParents.length > 0) {
-  //   currentState = groupParents.reduce((result, current) => {
-  //     result = updateLayerBounds(result, current);
-  //     return result;
-  //   }, currentState);
-  // }
+  if (isLine) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          from: {
+            ...(currentState.byId[action.payload.id] as Btwx.Line).from,
+            x: (currentState.byId[action.payload.id] as Btwx.Line).from.x + diff
+          },
+          to: {
+            ...(currentState.byId[action.payload.id] as Btwx.Line).to,
+            x: (currentState.byId[action.payload.id] as Btwx.Line).to.x + diff
+          }
+        } as Btwx.Line
+      }
+    }
+  }
+  if (isText) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          point: {
+            ...(currentState.byId[action.payload.id] as Btwx.Text).point,
+            x: (currentState.byId[action.payload.id] as Btwx.Text).point.x + diff
+          }
+        } as Btwx.Text
+      }
+    }
+  }
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: layersBounds.center.x,
+              innerWidth: layersBounds.width,
+              width: layersBounds.width
+            }
+          }
+        }
+      }
+      return result;
+    }, currentState);
+  }
   if (layerItem.type === 'Group') {
     const layerAndDescendants = getLayerDescendants(currentState, action.payload.id);
     currentState = layerAndDescendants.reduce((result, current) => {
       const descendantItem = result.byId[current];
       const isLine = descendantItem.type === 'Shape' && (descendantItem as Btwx.Shape).shapeType === 'Line';
-      // result = updateLayerBounds(result, current);
+      const isText = descendantItem.type === 'Text';
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: result.byId[current].frame.x + diff
+            }
+          }
+        }
+      }
+      if (isLine) {
+        result = {
+          ...result,
+          byId: {
+            ...result.byId,
+            [current]: {
+              ...result.byId[current],
+              from: {
+                ...(result.byId[current] as Btwx.Line).from,
+                x: (result.byId[current] as Btwx.Line).from.x + diff
+              },
+              to: {
+                ...(result.byId[current] as Btwx.Line).to,
+                x: (result.byId[current] as Btwx.Line).to.x + diff
+              }
+            } as Btwx.Line
+          }
+        }
+      }
+      if (isText) {
+        result = {
+          ...result,
+          byId: {
+            ...result.byId,
+            [current]: {
+              ...result.byId[current],
+              point: {
+                ...(result.byId[current] as Btwx.Text).point,
+                x: (result.byId[current] as Btwx.Text).point.x + diff
+              }
+            } as Btwx.Text
+          }
+        }
+      }
       if (descendantItem.type !== 'Group') {
         result = updateLayerTweensByProps(result, current, isLine ? ['x', 'fromX', 'toX'] : ['x']);
       }
@@ -3289,16 +3423,11 @@ export const setLayersX = (state: LayerState, action: SetLayersX): LayerState =>
 
 export const setLayerY = (state: LayerState, action: SetLayerY): LayerState => {
   let currentState = state;
-  // let y = action.payload.y;
-  // const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const layerItem = currentState.byId[action.payload.id];
-  // const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
+  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
-  // if (layerItem.type !== 'Artboard') {
-  //   const artboardItem = state.byId[layerItem.artboard];
-  //   y += artboardItem.frame.y;
-  // }
-  // paperLayer.position.y = y;
+  const isText = layerItem.type === 'Text';
+  const diff = action.payload.y - layerItem.frame.y;
   currentState = {
     ...currentState,
     byId: {
@@ -3312,19 +3441,115 @@ export const setLayerY = (state: LayerState, action: SetLayerY): LayerState => {
       }
     }
   }
-  // currentState = updateLayerBounds(currentState, action.payload.id);
-  // if (groupParents.length > 0) {
-  //   currentState = groupParents.reduce((result, current) => {
-  //     result = updateLayerBounds(result, current);
-  //     return result;
-  //   }, currentState);
-  // }
+  if (isLine) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          from: {
+            ...(currentState.byId[action.payload.id] as Btwx.Line).from,
+            y: (currentState.byId[action.payload.id] as Btwx.Line).from.y + diff
+          },
+          to: {
+            ...(currentState.byId[action.payload.id] as Btwx.Line).to,
+            y: (currentState.byId[action.payload.id] as Btwx.Line).to.y + diff
+          }
+        } as Btwx.Line
+      }
+    }
+  }
+  if (isText) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          point: {
+            ...(currentState.byId[action.payload.id] as Btwx.Text).point,
+            y: (currentState.byId[action.payload.id] as Btwx.Text).point.y + diff
+          }
+        } as Btwx.Text
+      }
+    }
+  }
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              y: layersBounds.center.y,
+              innerHeight: layersBounds.height,
+              height: layersBounds.height
+            }
+          }
+        }
+      }
+      return result;
+    }, currentState);
+  }
   if (layerItem.type === 'Group') {
     const layerAndDescendants = getLayerDescendants(currentState, action.payload.id);
     currentState = layerAndDescendants.reduce((result, current) => {
       const descendantItem = result.byId[current];
       const isLine = descendantItem.type === 'Shape' && (descendantItem as Btwx.Shape).shapeType === 'Line';
-      // result = updateLayerBounds(result, current);
+      const isText = descendantItem.type === 'Text';
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              y: result.byId[current].frame.y + diff
+            }
+          }
+        }
+      }
+      if (isLine) {
+        result = {
+          ...result,
+          byId: {
+            ...result.byId,
+            [current]: {
+              ...result.byId[current],
+              from: {
+                ...(result.byId[current] as Btwx.Line).from,
+                y: (result.byId[current] as Btwx.Line).from.y + diff
+              },
+              to: {
+                ...(result.byId[current] as Btwx.Line).to,
+                y: (result.byId[current] as Btwx.Line).to.y + diff
+              }
+            } as Btwx.Line
+          }
+        }
+      }
+      if (isText) {
+        result = {
+          ...result,
+          byId: {
+            ...result.byId,
+            [current]: {
+              ...result.byId[current],
+              point: {
+                ...(result.byId[current] as Btwx.Text).point,
+                y: (result.byId[current] as Btwx.Text).point.y + diff
+              }
+            } as Btwx.Text
+          }
+        }
+      }
       if (descendantItem.type !== 'Group') {
         result = updateLayerTweensByProps(result, current, isLine ? ['y', 'fromY', 'toY'] : ['y']);
       }
@@ -3361,7 +3586,9 @@ export const setLayersY = (state: LayerState, action: SetLayersY): LayerState =>
 export const setLayerLeft = (state: LayerState, action: SetLayerLeft): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
+  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
+  const isText = layerItem.type === 'Text';
   const x = action.payload.left + (layerItem.frame.width / 2);
   const diff = x - layerItem.frame.x;
   currentState = {
@@ -3377,7 +3604,7 @@ export const setLayerLeft = (state: LayerState, action: SetLayerLeft): LayerStat
       }
     }
   }
-  if (layerItem.type === 'Text') {
+  if (isText) {
     currentState = {
       ...currentState,
       byId: {
@@ -3411,11 +3638,81 @@ export const setLayerLeft = (state: LayerState, action: SetLayerLeft): LayerStat
       }
     }
   }
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: layersBounds.center.x,
+              innerWidth: layersBounds.width,
+              width: layersBounds.width
+            }
+          }
+        }
+      }
+      return result;
+    }, currentState);
+  }
   if (layerItem.type === 'Group') {
-    const layerAndDescendants = getLayerDescendants(currentState, action.payload.id);
-    currentState = layerAndDescendants.reduce((result, current) => {
+    const layerDescendants = getLayerDescendants(currentState, action.payload.id);
+    currentState = layerDescendants.reduce((result, current) => {
       const descendantItem = result.byId[current];
       const isLine = descendantItem.type === 'Shape' && (descendantItem as Btwx.Shape).shapeType === 'Line';
+      const isText = descendantItem.type === 'Text';
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: result.byId[current].frame.x + diff
+            }
+          }
+        }
+      }
+      if (isText) {
+        result = {
+          ...result,
+          byId: {
+            ...result.byId,
+            [current]: {
+              ...result.byId[current],
+              point: {
+                ...(result.byId[current] as Btwx.Text).point,
+                x: (result.byId[current] as Btwx.Text).point.x + diff
+              }
+            } as Btwx.Text
+          }
+        }
+      }
+      if (isLine) {
+        result = {
+          ...result,
+          byId: {
+            ...result.byId,
+            [current]: {
+              ...result.byId[current],
+              from: {
+                ...(result.byId[current] as Btwx.Line).from,
+                x: (result.byId[current] as Btwx.Line).from.x + diff
+              },
+              to: {
+                ...(result.byId[current] as Btwx.Line).to,
+                x: (result.byId[current] as Btwx.Line).to.x + diff
+              }
+            } as Btwx.Line
+          }
+        }
+      }
       if (descendantItem.type !== 'Group') {
         result = updateLayerTweensByProps(result, current, isLine ? ['x', 'fromX', 'toX'] : ['x']);
       }
@@ -3452,6 +3749,7 @@ export const setLayersLeft = (state: LayerState, action: SetLayersLeft): LayerSt
 export const setLayerCenter = (state: LayerState, action: SetLayerCenter): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
+  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   const diff = action.payload.center - layerItem.frame.x;
   currentState = {
@@ -3501,11 +3799,81 @@ export const setLayerCenter = (state: LayerState, action: SetLayerCenter): Layer
       }
     }
   }
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: layersBounds.center.x,
+              innerWidth: layersBounds.width,
+              width: layersBounds.width
+            }
+          }
+        }
+      }
+      return result;
+    }, currentState);
+  }
   if (layerItem.type === 'Group') {
-    const layerAndDescendants = getLayerDescendants(currentState, action.payload.id);
-    currentState = layerAndDescendants.reduce((result, current) => {
+    const layerDescendants = getLayerDescendants(currentState, action.payload.id);
+    currentState = layerDescendants.reduce((result, current) => {
       const descendantItem = result.byId[current];
       const isLine = descendantItem.type === 'Shape' && (descendantItem as Btwx.Shape).shapeType === 'Line';
+      const isText = descendantItem.type === 'Text';
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: result.byId[current].frame.x + diff
+            }
+          }
+        }
+      }
+      if (isText) {
+        result = {
+          ...result,
+          byId: {
+            ...result.byId,
+            [current]: {
+              ...result.byId[current],
+              point: {
+                ...(result.byId[current] as Btwx.Text).point,
+                x: (result.byId[current] as Btwx.Text).point.x + diff
+              }
+            } as Btwx.Text
+          }
+        }
+      }
+      if (isLine) {
+        result = {
+          ...result,
+          byId: {
+            ...result.byId,
+            [current]: {
+              ...result.byId[current],
+              from: {
+                ...(result.byId[current] as Btwx.Line).from,
+                x: (result.byId[current] as Btwx.Line).from.x + diff
+              },
+              to: {
+                ...(result.byId[current] as Btwx.Line).to,
+                x: (result.byId[current] as Btwx.Line).to.x + diff
+              }
+            } as Btwx.Line
+          }
+        }
+      }
       if (descendantItem.type !== 'Group') {
         result = updateLayerTweensByProps(result, current, isLine ? ['x', 'fromX', 'toX'] : ['x']);
       }
@@ -3542,6 +3910,7 @@ export const setLayersCenter = (state: LayerState, action: SetLayersCenter): Lay
 export const setLayerRight = (state: LayerState, action: SetLayerRight): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
+  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   const x = action.payload.right - (layerItem.frame.width / 2);
   const diff = x - layerItem.frame.x;
@@ -3592,11 +3961,81 @@ export const setLayerRight = (state: LayerState, action: SetLayerRight): LayerSt
       }
     }
   }
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: layersBounds.center.x,
+              innerWidth: layersBounds.width,
+              width: layersBounds.width
+            }
+          }
+        }
+      }
+      return result;
+    }, currentState);
+  }
   if (layerItem.type === 'Group') {
-    const layerAndDescendants = getLayerDescendants(currentState, action.payload.id);
-    currentState = layerAndDescendants.reduce((result, current) => {
+    const layerDescendants = getLayerDescendants(currentState, action.payload.id);
+    currentState = layerDescendants.reduce((result, current) => {
       const descendantItem = result.byId[current];
       const isLine = descendantItem.type === 'Shape' && (descendantItem as Btwx.Shape).shapeType === 'Line';
+      const isText = descendantItem.type === 'Text';
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: result.byId[current].frame.x + diff
+            }
+          }
+        }
+      }
+      if (isText) {
+        result = {
+          ...result,
+          byId: {
+            ...result.byId,
+            [current]: {
+              ...result.byId[current],
+              point: {
+                ...(result.byId[current] as Btwx.Text).point,
+                x: (result.byId[current] as Btwx.Text).point.x + diff
+              }
+            } as Btwx.Text
+          }
+        }
+      }
+      if (isLine) {
+        result = {
+          ...result,
+          byId: {
+            ...result.byId,
+            [current]: {
+              ...result.byId[current],
+              from: {
+                ...(result.byId[current] as Btwx.Line).from,
+                x: (result.byId[current] as Btwx.Line).from.x + diff
+              },
+              to: {
+                ...(result.byId[current] as Btwx.Line).to,
+                x: (result.byId[current] as Btwx.Line).to.x + diff
+              }
+            } as Btwx.Line
+          }
+        }
+      }
       if (descendantItem.type !== 'Group') {
         result = updateLayerTweensByProps(result, current, isLine ? ['x', 'fromX', 'toX'] : ['x']);
       }
@@ -3633,6 +4072,7 @@ export const setLayersRight = (state: LayerState, action: SetLayersRight): Layer
 export const setLayerTop = (state: LayerState, action: SetLayerTop): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
+  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   const y = action.payload.top + (layerItem.frame.height / 2);
   const diff = y - layerItem.frame.y;
@@ -3683,11 +4123,81 @@ export const setLayerTop = (state: LayerState, action: SetLayerTop): LayerState 
       }
     }
   }
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              y: layersBounds.center.y,
+              innerHeight: layersBounds.height,
+              height: layersBounds.height
+            }
+          }
+        }
+      }
+      return result;
+    }, currentState);
+  }
   if (layerItem.type === 'Group') {
-    const layerAndDescendants = getLayerDescendants(currentState, action.payload.id);
-    currentState = layerAndDescendants.reduce((result, current) => {
+    const layerDescendants = getLayerDescendants(currentState, action.payload.id);
+    currentState = layerDescendants.reduce((result, current) => {
       const descendantItem = result.byId[current];
       const isLine = descendantItem.type === 'Shape' && (descendantItem as Btwx.Shape).shapeType === 'Line';
+      const isText = descendantItem.type === 'Text';
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              y: result.byId[current].frame.y + diff
+            }
+          }
+        }
+      }
+      if (isText) {
+        result = {
+          ...result,
+          byId: {
+            ...result.byId,
+            [current]: {
+              ...result.byId[current],
+              point: {
+                ...(result.byId[current] as Btwx.Text).point,
+                y: (result.byId[current] as Btwx.Text).point.y + diff
+              }
+            } as Btwx.Text
+          }
+        }
+      }
+      if (isLine) {
+        result = {
+          ...result,
+          byId: {
+            ...result.byId,
+            [current]: {
+              ...result.byId[current],
+              from: {
+                ...(result.byId[current] as Btwx.Line).from,
+                y: (result.byId[current] as Btwx.Line).from.y + diff
+              },
+              to: {
+                ...(result.byId[current] as Btwx.Line).to,
+                y: (result.byId[current] as Btwx.Line).to.y + diff
+              }
+            } as Btwx.Line
+          }
+        }
+      }
       if (descendantItem.type !== 'Group') {
         result = updateLayerTweensByProps(result, current, isLine ? ['y', 'fromY', 'toY'] : ['y']);
       }
@@ -3724,6 +4234,7 @@ export const setLayersTop = (state: LayerState, action: SetLayersTop): LayerStat
 export const setLayerMiddle = (state: LayerState, action: SetLayerMiddle): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
+  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   const diff = action.payload.middle - layerItem.frame.y;
   currentState = {
@@ -3773,11 +4284,81 @@ export const setLayerMiddle = (state: LayerState, action: SetLayerMiddle): Layer
       }
     }
   }
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              y: layersBounds.center.y,
+              innerHeight: layersBounds.height,
+              height: layersBounds.height
+            }
+          }
+        }
+      }
+      return result;
+    }, currentState);
+  }
   if (layerItem.type === 'Group') {
-    const layerAndDescendants = getLayerDescendants(currentState, action.payload.id);
-    currentState = layerAndDescendants.reduce((result, current) => {
+    const layerDescendants = getLayerDescendants(currentState, action.payload.id);
+    currentState = layerDescendants.reduce((result, current) => {
       const descendantItem = result.byId[current];
       const isLine = descendantItem.type === 'Shape' && (descendantItem as Btwx.Shape).shapeType === 'Line';
+      const isText = descendantItem.type === 'Text';
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              y: result.byId[current].frame.y + diff
+            }
+          }
+        }
+      }
+      if (isText) {
+        result = {
+          ...result,
+          byId: {
+            ...result.byId,
+            [current]: {
+              ...result.byId[current],
+              point: {
+                ...(result.byId[current] as Btwx.Text).point,
+                y: (result.byId[current] as Btwx.Text).point.y + diff
+              }
+            } as Btwx.Text
+          }
+        }
+      }
+      if (isLine) {
+        result = {
+          ...result,
+          byId: {
+            ...result.byId,
+            [current]: {
+              ...result.byId[current],
+              from: {
+                ...(result.byId[current] as Btwx.Line).from,
+                y: (result.byId[current] as Btwx.Line).from.y + diff
+              },
+              to: {
+                ...(result.byId[current] as Btwx.Line).to,
+                y: (result.byId[current] as Btwx.Line).to.y + diff
+              }
+            } as Btwx.Line
+          }
+        }
+      }
       if (descendantItem.type !== 'Group') {
         result = updateLayerTweensByProps(result, current, isLine ? ['y', 'fromY', 'toY'] : ['y']);
       }
@@ -3814,6 +4395,7 @@ export const setLayersMiddle = (state: LayerState, action: SetLayersMiddle): Lay
 export const setLayerBottom = (state: LayerState, action: SetLayerBottom): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
+  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   const y = action.payload.bottom - (layerItem.frame.height / 2);
   const diff = y - layerItem.frame.y;
@@ -3864,11 +4446,81 @@ export const setLayerBottom = (state: LayerState, action: SetLayerBottom): Layer
       }
     }
   }
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              y: layersBounds.center.y,
+              innerHeight: layersBounds.height,
+              height: layersBounds.height
+            }
+          }
+        }
+      }
+      return result;
+    }, currentState);
+  }
   if (layerItem.type === 'Group') {
-    const layerAndDescendants = getLayerDescendants(currentState, action.payload.id);
-    currentState = layerAndDescendants.reduce((result, current) => {
+    const layerDescendants = getLayerDescendants(currentState, action.payload.id);
+    currentState = layerDescendants.reduce((result, current) => {
       const descendantItem = result.byId[current];
       const isLine = descendantItem.type === 'Shape' && (descendantItem as Btwx.Shape).shapeType === 'Line';
+      const isText = descendantItem.type === 'Text';
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              y: result.byId[current].frame.y + diff
+            }
+          }
+        }
+      }
+      if (isText) {
+        result = {
+          ...result,
+          byId: {
+            ...result.byId,
+            [current]: {
+              ...result.byId[current],
+              point: {
+                ...(result.byId[current] as Btwx.Text).point,
+                y: (result.byId[current] as Btwx.Text).point.y + diff
+              }
+            } as Btwx.Text
+          }
+        }
+      }
+      if (isLine) {
+        result = {
+          ...result,
+          byId: {
+            ...result.byId,
+            [current]: {
+              ...result.byId[current],
+              from: {
+                ...(result.byId[current] as Btwx.Line).from,
+                y: (result.byId[current] as Btwx.Line).from.y + diff
+              },
+              to: {
+                ...(result.byId[current] as Btwx.Line).to,
+                y: (result.byId[current] as Btwx.Line).to.y + diff
+              }
+            } as Btwx.Line
+          }
+        }
+      }
       if (descendantItem.type !== 'Group') {
         result = updateLayerTweensByProps(result, current, isLine ? ['y', 'fromY', 'toY'] : ['y']);
       }
@@ -6247,48 +6899,16 @@ export const scaleLayers = (state: LayerState, action: ScaleLayers): LayerState 
 export const setLayerText = (state: LayerState, action: SetLayerText): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
-  // const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
-  // const textContent = paperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
-  // const textBackground = paperLayer.getItem({data: {id: 'textBackground'}}) as paper.PointText;
-  // const textLinesGroup = paperLayer.getItem({data: {id: 'textLines'}});
-  // const textLines = paperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
-  // const newLines = action.payload.text.split(/\r\n|\r|\n/).reduce((result, current) => {
-  //   return [...result, {
-  //     text: current
-  //   }];
-  // }, []);
-  // const maxLines = Math.max(newLines.length, (layerItem as Btwx.Text).lines.length);
-  // paperLayer.rotation = -layerItem.transform.rotation;
-  // const originalPoint = textContent.point;
-  // textContent.content = action.payload.text;
-  // textContent.point = originalPoint;
-  // for(let i = 0; i < maxLines; i++) {
-  //   if (textLines[i]) {
-  //     textLines[i].remove();
-  //   }
-  //   if (newLines[i]) {
-  //     const newLine = new uiPaperScope.PointText({
-  //       point: new uiPaperScope.Point(originalPoint.x, originalPoint.y + (i * (layerItem as Btwx.Text).textStyle.leading)),
-  //       content: newLines[i].text,
-  //       style: textContent.style,
-  //       parent: textLinesGroup,
-  //       data: { id: 'textLine', type: 'LayerChild', layerType: 'Text' }
-  //     });
-  //     newLine.leading = newLine.fontSize;
-  //     newLine.skew(new uiPaperScope.Point(-(layerItem as Btwx.Text).textStyle.oblique, 0));
-  //     newLine.leading = textContent.leading;
-  //   }
-  // }
-  // textBackground.bounds = textLinesGroup.bounds;
-  // paperLayer.rotation = layerItem.transform.rotation;
+  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   currentState = {
     ...currentState,
     byId: {
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
+        frame: action.payload.bounds ? action.payload.bounds : currentState.byId[action.payload.id].frame,
         text: action.payload.text,
-        lines: action.payload.text.split(/\r\n|\r|\n/).reduce((result, current) => {
+        lines: action.payload.lines ? action.payload.lines : action.payload.text.split(/\r\n|\r|\n/).reduce((result, current) => {
           return [...result, {
             text: current
           }];
@@ -6296,22 +6916,32 @@ export const setLayerText = (state: LayerState, action: SetLayerText): LayerStat
       } as Btwx.Text
     }
   }
-  // currentState = updateLayerBounds(currentState, action.payload.id);
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: layersBounds.center.x,
+              y: layersBounds.center.y,
+              width: layersBounds.width,
+              height: layersBounds.height,
+              innerWidth: layersBounds.width,
+              innerHeight: layersBounds.height
+            }
+          }
+        }
+      }
+      return result;
+    }, currentState);
+  }
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y', 'text']);
-  // if (layerItem.style.fill.fillType === 'gradient') {
-  //   currentState = setLayerGradient(currentState, layerActions.setLayerGradient({
-  //     id: action.payload.id,
-  //     prop: 'fill',
-  //     gradient: layerItem.style.fill.gradient
-  //   }) as SetLayerGradient);
-  // }
-  // if (layerItem.style.stroke.fillType === 'gradient') {
-  //   currentState = setLayerGradient(currentState, layerActions.setLayerGradient({
-  //     id: action.payload.id,
-  //     prop: 'stroke',
-  //     gradient: layerItem.style.stroke.gradient
-  //   }) as SetLayerGradient);
-  // }
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,
@@ -6325,51 +6955,63 @@ export const setLayerText = (state: LayerState, action: SetLayerText): LayerStat
 
 export const setLayerFontSize = (state: LayerState, action: SetLayerFontSize): LayerState => {
   let currentState = state;
-  // const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
-  // const textContent = paperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
-  // const textBackground = paperLayer.getItem({data: {id: 'textBackground'}}) as paper.PointText;
-  // const textLinesGroup = paperLayer.getItem({data: {id: 'textLines'}}) as paper.PointText;
-  // const textLines = paperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
-  // paperLayer.rotation = -layerItem.transform.rotation;
-  // textContent.fontSize = action.payload.fontSize;
-  // textLines.forEach((line: paper.PointText) => {
-  //   line.fontSize = action.payload.fontSize;
-  // });
-  // textBackground.bounds = textLinesGroup.bounds;
-  // paperLayer.rotation = layerItem.transform.rotation;
+  const layerItem = currentState.byId[action.payload.id];
+  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   currentState = {
     ...currentState,
     byId: {
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
+        frame: action.payload.bounds ? action.payload.bounds : currentState.byId[action.payload.id].frame,
         textStyle: {
           ...(currentState.byId[action.payload.id] as Btwx.Text).textStyle,
           fontSize: action.payload.fontSize
-        }
+        },
+        lines: action.payload.lines ? action.payload.lines : (currentState.byId[action.payload.id] as Btwx.Text).lines
       } as Btwx.Text
     }
   }
-  // currentState = updateLayerBounds(currentState, action.payload.id);
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: layersBounds.center.x,
+              y: layersBounds.center.y,
+              width: layersBounds.width,
+              height: layersBounds.height,
+              innerWidth: layersBounds.width,
+              innerHeight: layersBounds.height
+            }
+          }
+        }
+      }
+      return result;
+    }, currentState);
+  }
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fontSize', 'x']);
-  // if (layerItem.style.fill.fillType === 'gradient') {
-  //   currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'fill', gradient: layerItem.style.fill.gradient}) as SetLayerGradient);
-  // }
-  // if (layerItem.style.stroke.fillType === 'gradient') {
-  //   currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
-  // }
   return currentState;
 };
 
 export const setLayersFontSize = (state: LayerState, action: SetLayersFontSize): LayerState => {
   let currentState = state;
   const projects: string[] = [];
-  currentState = action.payload.layers.reduce((result, current) => {
+  currentState = action.payload.layers.reduce((result, current, index) => {
     const layerProject = currentState.byId[current].artboard;
+    const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
+    const lines = action.payload.lines ? action.payload.lines[index] : null;
     if (!projects.includes(layerProject)) {
       projects.push(layerProject);
     }
-    return setLayerFontSize(result, layerActions.setLayerFontSize({id: current, fontSize: action.payload.fontSize}) as SetLayerFontSize);
+    return setLayerFontSize(result, layerActions.setLayerFontSize({id: current, fontSize: action.payload.fontSize, bounds: bounds, lines: lines}) as SetLayerFontSize);
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
@@ -6384,52 +7026,63 @@ export const setLayersFontSize = (state: LayerState, action: SetLayersFontSize):
 
 export const setLayerFontWeight = (state: LayerState, action: SetLayerFontWeight): LayerState => {
   let currentState = state;
-  // const layerItem = currentState.byId[action.payload.id];
-  // const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
-  // const textContent = paperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
-  // const textBackground = paperLayer.getItem({data: {id: 'textBackground'}}) as paper.PointText;
-  // const textLinesGroup = paperLayer.getItem({data: {id: 'textLines'}});
-  // const textLines = paperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
-  // paperLayer.rotation = -layerItem.transform.rotation;
-  // textContent.fontWeight = action.payload.fontWeight;
-  // textLines.forEach((line: paper.PointText) => {
-  //   line.fontWeight = action.payload.fontWeight;
-  // });
-  // textBackground.bounds = textLinesGroup.bounds;
-  // paperLayer.rotation = layerItem.transform.rotation;
+  const layerItem = currentState.byId[action.payload.id];
+  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   currentState = {
     ...currentState,
     byId: {
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
+        frame: action.payload.bounds ? action.payload.bounds : currentState.byId[action.payload.id].frame,
         textStyle: {
           ...(currentState.byId[action.payload.id] as Btwx.Text).textStyle,
           fontWeight: action.payload.fontWeight
-        }
+        },
+        lines: action.payload.lines ? action.payload.lines : (currentState.byId[action.payload.id] as Btwx.Text).lines
       } as Btwx.Text
     }
   }
-  // currentState = updateLayerBounds(currentState, action.payload.id);
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: layersBounds.center.x,
+              y: layersBounds.center.y,
+              width: layersBounds.width,
+              height: layersBounds.height,
+              innerWidth: layersBounds.width,
+              innerHeight: layersBounds.height
+            }
+          }
+        }
+      }
+      return result;
+    }, currentState);
+  }
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fontWeight', 'x']);
-  // if (layerItem.style.fill.fillType === 'gradient') {
-  //   currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'fill', gradient: layerItem.style.fill.gradient}) as SetLayerGradient);
-  // }
-  // if (layerItem.style.stroke.fillType === 'gradient') {
-  //   currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
-  // }
   return currentState;
 };
 
 export const setLayersFontWeight = (state: LayerState, action: SetLayersFontWeight): LayerState => {
   let currentState = state;
   const projects: string[] = [];
-  currentState = action.payload.layers.reduce((result, current) => {
+  currentState = action.payload.layers.reduce((result, current, index) => {
     const layerProject = currentState.byId[current].artboard;
+    const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
+    const lines = action.payload.lines ? action.payload.lines[index] : null;
     if (!projects.includes(layerProject)) {
       projects.push(layerProject);
     }
-    return setLayerFontWeight(result, layerActions.setLayerFontWeight({id: current, fontWeight: action.payload.fontWeight}) as SetLayerFontWeight);
+    return setLayerFontWeight(result, layerActions.setLayerFontWeight({id: current, fontWeight: action.payload.fontWeight, bounds, lines}) as SetLayerFontWeight);
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
@@ -6444,51 +7097,63 @@ export const setLayersFontWeight = (state: LayerState, action: SetLayersFontWeig
 
 export const setLayerFontFamily = (state: LayerState, action: SetLayerFontFamily): LayerState => {
   let currentState = state;
-  // const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
-  // const textContent = paperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
-  // const textBackground = paperLayer.getItem({data: {id: 'textBackground'}}) as paper.PointText;
-  // const textLines = paperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
-  // const textLinesGroup = paperLayer.getItem({data: {id: 'textLines'}});
-  // paperLayer.rotation = -layerItem.transform.rotation;
-  // textContent.fontFamily = action.payload.fontFamily;
-  // textLines.forEach((line: paper.PointText) => {
-  //   line.fontFamily = action.payload.fontFamily;
-  // });
-  // textBackground.bounds = textLinesGroup.bounds;
-  // paperLayer.rotation = layerItem.transform.rotation;
+  const layerItem = currentState.byId[action.payload.id];
+  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   currentState = {
     ...currentState,
     byId: {
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
+        frame: action.payload.bounds ? action.payload.bounds : currentState.byId[action.payload.id].frame,
         textStyle: {
           ...(currentState.byId[action.payload.id] as Btwx.Text).textStyle,
           fontFamily: action.payload.fontFamily
-        }
+        },
+        lines: action.payload.lines ? action.payload.lines : (currentState.byId[action.payload.id] as Btwx.Text).lines
       } as Btwx.Text
     }
   }
-  // currentState = updateLayerBounds(currentState, action.payload.id);
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: layersBounds.center.x,
+              y: layersBounds.center.y,
+              width: layersBounds.width,
+              height: layersBounds.height,
+              innerWidth: layersBounds.width,
+              innerHeight: layersBounds.height
+            }
+          }
+        }
+      }
+      return result;
+    }, currentState);
+  }
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y']);
-  // if (layerItem.style.fill.fillType === 'gradient') {
-  //   currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'fill', gradient: layerItem.style.fill.gradient}) as SetLayerGradient);
-  // }
-  // if (layerItem.style.stroke.fillType === 'gradient') {
-  //   currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
-  // }
   return currentState;
 };
 
 export const setLayersFontFamily = (state: LayerState, action: SetLayersFontFamily): LayerState => {
   let currentState = state;
   const projects: string[] = [];
-  currentState = action.payload.layers.reduce((result, current) => {
+  currentState = action.payload.layers.reduce((result, current, index) => {
     const layerProject = currentState.byId[current].artboard;
+    const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
+    const lines = action.payload.lines ? action.payload.lines[index] : null;
     if (!projects.includes(layerProject)) {
       projects.push(layerProject);
     }
-    return setLayerFontFamily(result, layerActions.setLayerFontFamily({id: current, fontFamily: action.payload.fontFamily}) as SetLayerFontFamily);
+    return setLayerFontFamily(result, layerActions.setLayerFontFamily({id: current, fontFamily: action.payload.fontFamily, bounds, lines}) as SetLayerFontFamily);
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
@@ -6503,26 +7168,15 @@ export const setLayersFontFamily = (state: LayerState, action: SetLayersFontFami
 
 export const setLayerLeading = (state: LayerState, action: SetLayerLeading): LayerState => {
   let currentState = state;
-  // const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
-  // const textContent = paperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
-  // const textBackground = paperLayer.getItem({data: {id: 'textBackground'}}) as paper.PointText;
-  // const textLines = paperLayer.getItems({data: {id: 'textLine'}}) as paper.PointText[];
-  // const textLinesGroup = paperLayer.getItem({data: {id: 'textLines'}});
-  // // const oblique = (layerItem as Btwx.Text).textStyle.oblique;
-  // paperLayer.rotation = -layerItem.transform.rotation;
-  // textContent.leading = action.payload.leading;
-  // textLines.forEach((line: paper.PointText, index: number) => {
-  //   line.leading = action.payload.leading;
-  //   line.point.y = textContent.point.y + (index * action.payload.leading);
-  // });
-  // textBackground.bounds = textLinesGroup.bounds;
-  // paperLayer.rotation = layerItem.transform.rotation;
+  const layerItem = currentState.byId[action.payload.id];
+  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   currentState = {
     ...currentState,
     byId: {
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
+        frame: action.payload.bounds ? action.payload.bounds : currentState.byId[action.payload.id].frame,
         textStyle: {
           ...(currentState.byId[action.payload.id] as Btwx.Text).textStyle,
           leading: action.payload.leading
@@ -6530,26 +7184,45 @@ export const setLayerLeading = (state: LayerState, action: SetLayerLeading): Lay
       } as Btwx.Text
     }
   }
-  // currentState = updateLayerBounds(currentState, action.payload.id);
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: layersBounds.center.x,
+              y: layersBounds.center.y,
+              width: layersBounds.width,
+              height: layersBounds.height,
+              innerWidth: layersBounds.width,
+              innerHeight: layersBounds.height
+            }
+          }
+        }
+      }
+      return result;
+    }, currentState);
+  }
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['lineHeight']);
-  // if (layerItem.style.fill.fillType === 'gradient') {
-  //   currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'fill', gradient: layerItem.style.fill.gradient}) as SetLayerGradient);
-  // }
-  // if (layerItem.style.stroke.fillType === 'gradient') {
-  //   currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'stroke', gradient: layerItem.style.stroke.gradient}) as SetLayerGradient);
-  // }
   return currentState;
 };
 
 export const setLayersLeading = (state: LayerState, action: SetLayersLeading): LayerState => {
   let currentState = state;
   const projects: string[] = [];
-  currentState = action.payload.layers.reduce((result, current) => {
+  currentState = action.payload.layers.reduce((result, current, index) => {
     const layerProject = currentState.byId[current].artboard;
+    const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
     if (!projects.includes(layerProject)) {
       projects.push(layerProject);
     }
-    return setLayerLeading(result, layerActions.setLayerLeading({id: current, leading: action.payload.leading}) as SetLayerLeading);
+    return setLayerLeading(result, layerActions.setLayerLeading({id: current, leading: action.payload.leading, bounds}) as SetLayerLeading);
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
@@ -6632,7 +7305,8 @@ export const setLayerJustification = (state: LayerState, action: SetLayerJustifi
         textStyle: {
           ...(currentState.byId[action.payload.id] as Btwx.Text).textStyle,
           justification: action.payload.justification
-        }
+        },
+        point: action.payload.point ? action.payload.point : (currentState.byId[action.payload.id] as Btwx.Text).point
       } as Btwx.Text
     }
   }
@@ -6651,12 +7325,13 @@ export const setLayerJustification = (state: LayerState, action: SetLayerJustifi
 export const setLayersJustification = (state: LayerState, action: SetLayersJustification): LayerState => {
   let currentState = state;
   const projects: string[] = [];
-  currentState = action.payload.layers.reduce((result, current) => {
+  currentState = action.payload.layers.reduce((result, current, index) => {
     const layerProject = currentState.byId[current].artboard;
+    const point = action.payload.points ? action.payload.points[index] : null;
     if (!projects.includes(layerProject)) {
       projects.push(layerProject);
     }
-    return setLayerJustification(result, layerActions.setLayerJustification({id: current, justification: action.payload.justification}) as SetLayerJustification);
+    return setLayerJustification(result, layerActions.setLayerJustification({id: current, justification: action.payload.justification, point}) as SetLayerJustification);
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
@@ -7461,90 +8136,85 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): {
   };
 } => {
   let currentState = state;
-  // const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const layerItem = currentState.byId[action.payload.id];
-  // const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
-  // const parentItem = currentState.byId[layerItem.parent];
+  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const isArtboard = layerItem.type === 'Artboard';
   const layerCloneMap = getLayerAndDescendants(currentState, action.payload.id).reduce((result: { [id: string]: string }, current) => ({
     ...result,
     [current]: uuidv4()
   }), {} as { [id: string]: string });
-  currentState = Object.keys(layerCloneMap).reduce((result: LayerState, key: string, index: number) => {
-    const itemToCopy = currentState.byId[key];
-    const copyId = layerCloneMap[key];
-    const copyParent = index === 0 ? itemToCopy.parent : layerCloneMap[itemToCopy.parent];
-    const copyShowChildren = itemToCopy.showChildren;
-    const parentLayerItem = result.byId[copyParent];
-    const copyScope = itemToCopy.type === 'Artboard' ? ['root'] : [...parentLayerItem.scope, copyParent];
-    const copyArtboard = itemToCopy.type === 'Artboard' ? copyId : copyScope[1];
-    const copyUnderlyingMask = index === 0
+  const dl = (cs: LayerState, id: string, index: number, offset: Btwx.Point): LayerState => {
+    const itemToDuplicate = cs.byId[id];
+    const duplicateId = layerCloneMap[id];
+    const parent = index === 0 ? itemToDuplicate.parent : layerCloneMap[itemToDuplicate.parent];
+    const showChildren = itemToDuplicate.showChildren;
+    const parentLayerItem = cs.byId[parent];
+    const scope = itemToDuplicate.type === 'Artboard' ? ['root'] : [...parentLayerItem.scope, parent];
+    const artboard = itemToDuplicate.type === 'Artboard' ? duplicateId : scope[1];
+    const underlyingMask = index === 0
                                 ? !isArtboard
-                                  ? (itemToCopy as Btwx.MaskableLayer).underlyingMask
+                                  ? (itemToDuplicate as Btwx.MaskableLayer).underlyingMask
                                   : null
-                                : Object.prototype.hasOwnProperty.call(layerCloneMap, (itemToCopy as Btwx.MaskableLayer).underlyingMask)
-                                  ? layerCloneMap[(itemToCopy as Btwx.MaskableLayer).underlyingMask]
-                                  : (itemToCopy as Btwx.MaskableLayer).underlyingMask;
-    const copyChildren = itemToCopy.children ? itemToCopy.children.reduce((result, current) => {
+                                : Object.prototype.hasOwnProperty.call(layerCloneMap, (itemToDuplicate as Btwx.MaskableLayer).underlyingMask)
+                                  ? layerCloneMap[(itemToDuplicate as Btwx.MaskableLayer).underlyingMask]
+                                  : (itemToDuplicate as Btwx.MaskableLayer).underlyingMask;
+    const children = itemToDuplicate.children ? itemToDuplicate.children.reduce((cs, current) => {
         if (Object.prototype.hasOwnProperty.call(layerCloneMap, current)) {
-          return [...result, layerCloneMap[current]];
+          return [...cs, layerCloneMap[current]];
         } else {
-          return [...result, current];
+          return [...cs, current];
         }
       }, [])
     : null;
-    // const copyPaperLayer = index === 0 ? duplicatePaperLayer : duplicatePaperLayer.getItem({ data: { id: key } });
-    // copyPaperLayer.data.id = copyId;
-    // copyPaperLayer.data.scope = copyScope;
-    switch(itemToCopy.type) {
+    switch(itemToDuplicate.type) {
       case 'Artboard':
-        result = {
-          ...result,
-          allArtboardIds: addItem(result.allArtboardIds, copyId)
+        cs = {
+          ...cs,
+          allArtboardIds: addItem(cs.allArtboardIds, duplicateId)
         }
         break;
       case 'Shape':
-        result = {
-          ...result,
-          allShapeIds: addItem(result.allShapeIds, copyId),
+        cs = {
+          ...cs,
+          allShapeIds: addItem(cs.allShapeIds, duplicateId),
           shapeIcons: {
-            ...result.shapeIcons,
-            [copyId]: result.shapeIcons[key]
+            ...cs.shapeIcons,
+            [duplicateId]: cs.shapeIcons[id]
           }
         }
         break;
       case 'Group':
-        result = {
-          ...result,
-          allGroupIds: addItem(result.allGroupIds, copyId)
+        cs = {
+          ...cs,
+          allGroupIds: addItem(cs.allGroupIds, duplicateId)
         }
         break;
       case 'Text':
-        result = {
-          ...result,
-          allTextIds: addItem(result.allTextIds, copyId)
+        cs = {
+          ...cs,
+          allTextIds: addItem(cs.allTextIds, duplicateId)
         }
         break;
       case 'Image':
-        result = {
-          ...result,
-          allImageIds: addItem(result.allImageIds, copyId)
+        cs = {
+          ...cs,
+          allImageIds: addItem(cs.allImageIds, duplicateId)
         }
         break;
     }
-    result = {
-      ...result,
-      allIds: [...result.allIds, copyId],
+    cs = {
+      ...cs,
+      allIds: [...cs.allIds, duplicateId],
       byId: {
-        ...result.byId,
-        [copyId]: {
-          ...itemToCopy,
-          id: copyId,
-          parent: copyParent,
-          artboard: copyArtboard,
-          children: copyChildren,
-          scope: copyScope,
-          underlyingMask: copyUnderlyingMask,
+        ...cs.byId,
+        [duplicateId]: {
+          ...itemToDuplicate,
+          id: duplicateId,
+          parent: parent,
+          artboard: artboard,
+          children: children,
+          scope: scope,
+          underlyingMask: underlyingMask,
           events: [],
           tweens: {
             allIds: [],
@@ -7555,79 +8225,79 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): {
         }
       } as any
     };
-    if (index === 0 && action.payload.offset) {
-      if (itemToCopy.type !== 'Artboard') {
-        // const artboardItems = getItemLayers(result, itemToCopy.artboard);
-        // const positionInArtboard = copyPaperLayer.position.subtract(artboardItems.paperLayer.position);
-        result = {
-          ...result,
-          byId: {
-            ...result.byId,
-            [copyId]: {
-              ...result.byId[copyId],
-              frame: {
-                ...result.byId[copyId].frame,
-                x: result.byId[copyId].frame.x + action.payload.offset.x,
-                y: result.byId[copyId].frame.y + action.payload.offset.y
-              }
-            }
-          }
+    if (isArtboard) {
+      cs = {
+        ...cs,
+        byId: {
+          ...cs.byId,
+          [duplicateId]: {
+            ...cs.byId[duplicateId],
+            projectIndex: Math.floor(cs.byId.root.children.length / ARTBOARDS_PER_PROJECT) + 1,
+          } as Btwx.Artboard
         }
-        if (itemToCopy.type === 'Text') {
-          result = {
-            ...result,
-            byId: {
-              ...result.byId,
-              [copyId]: {
-                ...result.byId[copyId],
-                point: {
-                  x: (result.byId[copyId] as Btwx.Text).point.x + action.payload.offset.x,
-                  y: (result.byId[copyId] as Btwx.Text).point.y + action.payload.offset.y
-                }
-              } as Btwx.Text
-            }
-          }
-        }
-        if (itemToCopy.type === 'Shape' && (itemToCopy as Btwx.Shape).shapeType === 'Line') {
-          // const fromPoint = (copyPaperLayer as paper.Path).firstSegment.point;
-          // const toPoint = (copyPaperLayer as paper.Path).lastSegment.point;
-          result = {
-            ...result,
-            byId: {
-              ...result.byId,
-              [copyId]: {
-                ...result.byId[copyId],
-                from: {
-                  x: (result.byId[copyId] as Btwx.Line).from.x + action.payload.offset.x,
-                  y: (result.byId[copyId] as Btwx.Line).from.y + action.payload.offset.y
-                },
-                to: {
-                  x: (result.byId[copyId] as Btwx.Line).to.x + action.payload.offset.x,
-                  y: (result.byId[copyId] as Btwx.Line).to.y + action.payload.offset.y
-                },
-              } as Btwx.Line
-            }
-          }
-        }
-      } else {
-        result = {
-          ...result,
-          byId: {
-            ...result.byId,
-            [copyId]: {
-              ...result.byId[copyId],
-              frame: {
-                ...result.byId[copyId].frame,
-                x: result.byId[copyId].frame.x + action.payload.offset.x,
-                y: result.byId[copyId].frame.y + action.payload.offset.y
-              }
+      }
+    }
+    if (offset) {
+      cs = {
+        ...cs,
+        byId: {
+          ...cs.byId,
+          [duplicateId]: {
+            ...cs.byId[duplicateId],
+            frame: {
+              ...cs.byId[duplicateId].frame,
+              x: cs.byId[duplicateId].frame.x + offset.x,
+              y: cs.byId[duplicateId].frame.y + offset.y
             }
           }
         }
       }
+      if (itemToDuplicate.type === 'Text') {
+        cs = {
+          ...cs,
+          byId: {
+            ...cs.byId,
+            [duplicateId]: {
+              ...cs.byId[duplicateId],
+              point: {
+                x: (cs.byId[duplicateId] as Btwx.Text).point.x + offset.x,
+                y: (cs.byId[duplicateId] as Btwx.Text).point.y + offset.y
+              }
+            } as Btwx.Text
+          }
+        }
+      }
+      if (itemToDuplicate.type === 'Shape' && (itemToDuplicate as Btwx.Shape).shapeType === 'Line') {
+        cs = {
+          ...cs,
+          byId: {
+            ...cs.byId,
+            [duplicateId]: {
+              ...cs.byId[duplicateId],
+              from: {
+                x: (cs.byId[duplicateId] as Btwx.Line).from.x + offset.x,
+                y: (cs.byId[duplicateId] as Btwx.Line).from.y + offset.y
+              },
+              to: {
+                x: (cs.byId[duplicateId] as Btwx.Line).to.x + offset.x,
+                y: (cs.byId[duplicateId] as Btwx.Line).to.y + offset.y
+              },
+            } as Btwx.Line
+          }
+        }
+      }
     }
-    return result;
+    return cs;
+  }
+  // duplicate layer and descendents
+  currentState = Object.keys(layerCloneMap).reduce((result: LayerState, key: string, index: number) => {
+    if (isArtboard) {
+      return dl(result, key, index, index === 0 ? action.payload.offset : null);
+    } else {
+      return dl(result, key, index, action.payload.offset);
+    }
   }, currentState);
+  // update duplicate parent children
   currentState = {
     ...currentState,
     byId: {
@@ -7638,27 +8308,29 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): {
       } as Btwx.Group | Btwx.Artboard
     }
   }
-  if (isArtboard) {
-    const artboard = currentState.allArtboardIds[currentState.allArtboardIds.length - 1];
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [artboard]: {
-          ...currentState.byId[artboard],
-          projectIndex: Math.floor(currentState.byId.root.children.length / ARTBOARDS_PER_PROJECT),
-          // json: duplicatePaperLayer.exportJSON()
-        } as Btwx.Artboard
+  // update group parent bounds
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: layersBounds.center.x,
+              innerWidth: layersBounds.width,
+              width: layersBounds.width
+            }
+          }
+        }
       }
-    }
+      return result;
+    }, currentState);
   }
-  // currentState = updateChildrenIndices(currentState, parentItem.id);
-  // if (groupParents.length > 0) {
-  //   currentState = groupParents.reduce((result, current) => {
-  //     result = updateLayerBounds(result, current);
-  //     return result;
-  //   }, currentState);
-  // }
   // if (layerItem.id === currentState.hover) {
   //   currentState = setLayerHover(currentState, layerActions.setLayerHover({id: layerCloneMap[action.payload.id]}) as SetLayerHover);
   // }

@@ -2,7 +2,7 @@ import React, { ReactElement, useContext } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { RootState } from '../store/reducers';
-import { setLayersFontFamily } from '../store/actions/layer';
+import { setLayersFontFamilyThunk } from '../store/actions/layer';
 import Icon from './Icon';
 import { ThemeContext } from './ThemeProvider';
 
@@ -87,7 +87,7 @@ const FontFamilySelectorItem = (props: FontFamilySelectorItemProps): ReactElemen
 
   const handleClick = () => {
     if (validSelection) {
-      dispatch(setLayersFontFamily({layers: selected, fontFamily}));
+      dispatch(setLayersFontFamilyThunk({layers: selected, fontFamily}));
     }
   }
 

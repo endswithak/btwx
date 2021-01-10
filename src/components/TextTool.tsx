@@ -88,14 +88,16 @@ const TextTool = (props: TextToolProps): ReactElement => {
         projectIndex: activeArtboardProjectIndex,
         paperLayer: uiPaperScope.projects[activeArtboardProjectIndex].getItem({data: {id: activeArtboard}})
       });
+      const point = paperLayer.point.subtract(parentItem.paperLayer.position).round();
+      const position = paperLayer.position.subtract(parentItem.paperLayer.position).round();
       addTextThunk({
         layer: {
           text: DEFAULT_TEXT_VALUE,
           name: DEFAULT_TEXT_VALUE,
           parent: parentItem.id,
           frame: {
-            x: paperLayer.position.x - parentItem.paperLayer.position.x,
-            y: paperLayer.position.y - parentItem.paperLayer.position.y,
+            x: position.x,
+            y: position.y,
             width: paperLayer.bounds.width,
             height: paperLayer.bounds.height,
             innerWidth: paperLayer.bounds.width,
@@ -122,8 +124,8 @@ const TextTool = (props: TextToolProps): ReactElement => {
             justification: textSettings.justification
           },
           point: {
-            x: paperLayer.point.x,
-            y: paperLayer.point.y
+            x: point.x,
+            y: point.y
           }
         }
       }).then((textLayer) => {

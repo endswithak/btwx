@@ -1,6 +1,7 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { colorsMatch, gradientStopsMatch } from '../utils';
 import { uiPaperScope } from '../canvas';
+import CanvasTextLayerStrokeStyle from './CanvasTextLayerStrokeStyle';
 
 interface CanvasLayerStrokeStyleProps {
   id: string;
@@ -50,7 +51,7 @@ const CanvasLayerStrokeStyle = (props: CanvasLayerStrokeStyleProps): ReactElemen
     return paperLayer;
   }
 
-  const applyStroke = () => {
+  const applyStroke = (): void => {
     const paperLayer = getStyleLayer();
     if (strokeEnabled) {
       const layerPosition = new uiPaperScope.Point(layerFrame.x, layerFrame.y);
@@ -170,7 +171,16 @@ const CanvasLayerStrokeStyle = (props: CanvasLayerStrokeStyleProps): ReactElemen
   }, [strokeWidth]);
 
   return (
-    <></>
+    <>
+      {
+        layerType === 'Text'
+        ? <CanvasTextLayerStrokeStyle
+            {...props}
+            layerItem={layerItem as Btwx.Text}
+            applyStroke={applyStroke} />
+        : null
+      }
+    </>
   );
 }
 

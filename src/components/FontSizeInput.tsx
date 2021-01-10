@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
 import { RootState } from '../store/reducers';
-import { setLayersFontSize } from '../store/actions/layer';
+import { setLayersFontSizeThunk } from '../store/actions/layer';
 import { getSelectedFontSize } from '../store/selectors/layer';
 import { setTextSettingsFontSize } from '../store/actions/textSettings';
 import SidebarInput from './SidebarInput';
@@ -26,7 +26,7 @@ const FontSizeInput = (): ReactElement => {
     try {
       const nextFontSize = mexp.eval(`${fontSize}`) as any;
       if (nextFontSize !== fontSizeValue) {
-        dispatch(setLayersFontSize({layers: selected, fontSize: Math.round(nextFontSize)}));
+        dispatch(setLayersFontSizeThunk({layers: selected, fontSize: Math.round(nextFontSize)}));
         dispatch(setTextSettingsFontSize({fontSize: Math.round(nextFontSize)}));
         setFontSize(Math.round(nextFontSize));
       } else {

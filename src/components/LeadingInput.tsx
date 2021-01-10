@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
 import { RootState } from '../store/reducers';
-import { setLayersLeading } from '../store/actions/layer';
+import { setLayersLeadingThunk } from '../store/actions/layer';
 import { getSelectedLeading } from '../store/selectors/layer';
 import { setTextSettingsLeading } from '../store/actions/textSettings';
 import SidebarInput from './SidebarInput';
@@ -29,7 +29,7 @@ const LeadingInput = (): ReactElement => {
         if (nextLeading < 1) {
           nextLeading = 1;
         }
-        dispatch(setLayersLeading({layers: selected, leading: Math.round(nextLeading)}));
+        dispatch(setLayersLeadingThunk({layers: selected, leading: Math.round(nextLeading)}));
         dispatch(setTextSettingsLeading({leading: Math.round(nextLeading)}));
         setLeading(Math.round(nextLeading));
       } else {

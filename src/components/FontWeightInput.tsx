@@ -2,7 +2,7 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { setLayersFontWeight } from '../store/actions/layer';
+import { setLayersFontWeightThunk } from '../store/actions/layer';
 import { getSelectedFontWeight } from '../store/selectors/layer';
 import SidebarSelect from './SidebarSelect';
 
@@ -31,7 +31,7 @@ const FontWeightInput = (): ReactElement => {
 
   const handleSelectorChange = (selectedOption: { value: number; label: number }): void => {
     setFontWeight(selectedOption);
-    dispatch(setLayersFontWeight({layers: selected, fontWeight: selectedOption.value}));
+    dispatch(setLayersFontWeightThunk({layers: selected, fontWeight: selectedOption.value}));
   }
 
   return (

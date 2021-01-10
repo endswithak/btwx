@@ -6,7 +6,7 @@ import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
 import { closeTextEditor } from '../store/actions/textEditor';
 import { setCanvasFocusing } from '../store/actions/canvasSettings';
-import { setLayerText } from '../store/actions/layer';
+import { setLayerTextThunk } from '../store/actions/layer';
 import { getPaperLayer } from '../store/selectors/layer';
 import { uiPaperScope } from '../canvas';
 
@@ -24,7 +24,7 @@ const TextEditorInput = (): ReactElement => {
   const textValue = useSelector((state: RootState) => (state.layer.present.byId[state.textEditor.layer] as Btwx.Text).text);
   const [text, setText] = useState(textValue);
   const debounceText = useCallback(
-    debounce((dText: string) => dispatch(setLayerText({id: textEditor.layer, text: dText })), 150),
+    debounce((dText: string) => dispatch(setLayerTextThunk({id: textEditor.layer, text: dText })), 150),
     []
   );
   const [pos, setPos] = useState({x: textEditor.x, y: textEditor.y});
